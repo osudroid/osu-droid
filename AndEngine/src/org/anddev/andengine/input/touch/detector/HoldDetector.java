@@ -64,12 +64,7 @@ public class HoldDetector extends BaseDetector implements IUpdateHandler {
 		this.mTriggerHoldMaximumDistance = pTriggerHoldMaximumDistance;
 		this.mHoldDetectorListener = pClickDetectorListener;
 
-		this.mTimerHandler = new TimerHandler(pTimeBetweenUpdates, true, new ITimerCallback() {
-			@Override
-			public void onTimePassed(final TimerHandler pTimerHandler) {
-				HoldDetector.this.fireListener();
-			}
-		});
+		this.mTimerHandler = new TimerHandler(pTimeBetweenUpdates, true, pTimerHandler -> HoldDetector.this.fireListener());
 	}
 
 	// ===========================================================

@@ -55,18 +55,15 @@ public class ScoreMenuFragment extends BaseFragment {
                     }
                     OsuDroidReplayPack.packTo(file, replay);
 
-                    Snackbar.make(v, String.format(getResources().getString(R.string.frg_score_menu_export_succeed), file.getAbsolutePath()), 2750).setAction("Share", new View.OnClickListener() {
-                        @Override
-                        public void onClick(View v) {
-                            Intent intent = new Intent();
-                            intent.setAction(Intent.ACTION_VIEW);
-                            intent.setDataAndType(FileProvider.getUriForFile(
-                                    GlobalManager.getInstance().getMainActivity(),
-                                    BuildConfig.APPLICATION_ID + ".fileProvider",
-                                    file), "*/*");
-                            intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
-                            GlobalManager.getInstance().getMainActivity().startActivityForResult(intent, 0);
-                        }
+                    Snackbar.make(v, String.format(getResources().getString(R.string.frg_score_menu_export_succeed), file.getAbsolutePath()), 2750).setAction("Share", v1 -> {
+                        Intent intent = new Intent();
+                        intent.setAction(Intent.ACTION_VIEW);
+                        intent.setDataAndType(FileProvider.getUriForFile(
+                                GlobalManager.getInstance().getMainActivity(),
+                                BuildConfig.APPLICATION_ID + ".fileProvider",
+                                file), "*/*");
+                        intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
+                        GlobalManager.getInstance().getMainActivity().startActivityForResult(intent, 0);
                     }).show();
                 } catch (Exception e) {
                     e.printStackTrace();

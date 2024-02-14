@@ -16,12 +16,7 @@ public class ZIndexSorter extends InsertionSorter<IEntity> {
 	// Fields
 	// ===========================================================
 
-	private final Comparator<IEntity> mZIndexComparator = new Comparator<IEntity>() {
-		@Override
-		public int compare(final IEntity pEntityA, final IEntity pEntityB) {
-			return pEntityA.getZIndex() - pEntityB.getZIndex();
-		}
-	};
+	private final Comparator<IEntity> mZIndexComparator = (pEntityA, pEntityB) -> pEntityA.getZIndex() - pEntityB.getZIndex();
 
 	// ===========================================================
 	// Constructors

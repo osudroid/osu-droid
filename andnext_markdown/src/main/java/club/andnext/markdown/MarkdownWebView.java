@@ -104,12 +104,9 @@ public class MarkdownWebView extends WebView {
 
         String javascriptCommand = "javascript:setText(\'" + escapeText + "\')";
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
-            this.evaluateJavascript(javascriptCommand, new ValueCallback<String>() {
-                @Override
-                public void onReceiveValue(String value) {
-                    if (BuildConfig.DEBUG) {
-                        Log.v("WebView", "Load md: " + value);
-                    }
+            this.evaluateJavascript(javascriptCommand, value -> {
+                if (BuildConfig.DEBUG) {
+                    Log.v("WebView", "Load md: " + value);
                 }
             });
         } else {

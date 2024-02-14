@@ -106,13 +106,10 @@ public class ActivityUtils {
 			public void onPreExecute() {
 				this.mPD = ProgressDialog.show(pContext, pTitle, pMessage, true, pCancelable);
 				if(pCancelable) {
-					this.mPD.setOnCancelListener(new OnCancelListener() {
-						@Override
-						public void onCancel(final DialogInterface pDialogInterface) {
-							pExceptionCallback.onCallback(new CancelledException());
-							pDialogInterface.dismiss();
-						}
-					});
+					this.mPD.setOnCancelListener(pDialogInterface -> {
+                        pExceptionCallback.onCallback(new CancelledException());
+                        pDialogInterface.dismiss();
+                    });
 				}
 				super.onPreExecute();
 			}
@@ -177,12 +174,7 @@ public class ActivityUtils {
 			@Override
 			public T doInBackground(final Void... params) {
 				try {
-					return pCallable.call(new IProgressListener() {
-						@Override
-						public void onProgressChanged(final int pProgress) {
-							onProgressUpdate(pProgress);
-						}
-					});
+					return pCallable.call(this::onProgressUpdate);
 				} catch (final Exception e) {
 					this.mException = e;
 				}
@@ -224,19 +216,16 @@ public class ActivityUtils {
 
 	public static <T> void doAsync(final Context pContext, final int pTitleResID, final int pMessageResID, final AsyncCallable<T> pAsyncCallable, final Callback<T> pCallback, final Callback<Exception> pExceptionCallback) {
 		final ProgressDialog pd = ProgressDialog.show(pContext, pContext.getString(pTitleResID), pContext.getString(pMessageResID));
-		pAsyncCallable.call(new Callback<T>() {
-			@Override
-			public void onCallback(final T result) {
-				try {
-					pd.dismiss();
-				} catch (final Exception e) {
-					Debug.e("Error", e);
-					/* Nothing. */
-				}
+		pAsyncCallable.call(result -> {
+            try {
+                pd.dismiss();
+            } catch (final Exception e) {
+                Debug.e("Error", e);
+                /* Nothing. */
+            }
 
-				pCallback.onCallback(result);
-			}
-		}, pExceptionCallback);
+            pCallback.onCallback(result);
+        }, pExceptionCallback);
 	}
 
 	// ===========================================================

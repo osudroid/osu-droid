@@ -36,13 +36,10 @@ public class Entity implements IEntity {
 	private static final float[] VERTICES_SCENE_TO_LOCAL_TMP = new float[2];
 	private static final float[] VERTICES_LOCAL_TO_SCENE_TMP = new float[2];
 
-	private static final ParameterCallable<IEntity> PARAMETERCALLABLE_DETACHCHILD = new ParameterCallable<IEntity>() {
-		@Override
-		public void call(final IEntity pEntity) {
-			if (pEntity != null) {
-				pEntity.setParent(null);
-				pEntity.onDetached();
-			}
+	private static final ParameterCallable<IEntity> PARAMETERCALLABLE_DETACHCHILD = pEntity -> {
+		if (pEntity != null) {
+			pEntity.setParent(null);
+			pEntity.onDetached();
 		}
 	};
 

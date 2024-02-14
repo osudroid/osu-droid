@@ -67,12 +67,7 @@ public abstract class BaseOnScreenControl extends HUD implements IOnSceneTouchLi
 		/* Register listeners and add objects to this HUD. */
 		this.setOnSceneTouchListener(this);
 		this.registerTouchArea(this.mControlBase);
-		this.registerUpdateHandler(new TimerHandler(pTimeBetweenUpdates, true, new ITimerCallback() {
-			@Override
-			public void onTimePassed(final TimerHandler pTimerHandler) {
-				BaseOnScreenControl.this.mOnScreenControlListener.onControlChange(BaseOnScreenControl.this, BaseOnScreenControl.this.mControlValueX, BaseOnScreenControl.this.mControlValueY);
-			}
-		}));
+		this.registerUpdateHandler(new TimerHandler(pTimeBetweenUpdates, true, pTimerHandler -> BaseOnScreenControl.this.mOnScreenControlListener.onControlChange(BaseOnScreenControl.this, BaseOnScreenControl.this.mControlValueX, BaseOnScreenControl.this.mControlValueY)));
 
 		this.attachChild(this.mControlBase);
 		this.attachChild(this.mControlKnob);

@@ -15,19 +15,16 @@ public interface IModifier<T> {
 	// Final Fields
 	// ===========================================================
 
-	public static final Comparator<IModifier<?>> MODIFIER_COMPARATOR_DURATION_DESCENDING = new Comparator<IModifier<?>>() {
-		@Override
-		public int compare(final IModifier<?> pModifierA, final IModifier<?> pModifierB) {
-			final float durationA = pModifierA.getDuration();
-			final float durationB = pModifierB.getDuration();
+	public static final Comparator<IModifier<?>> MODIFIER_COMPARATOR_DURATION_DESCENDING = (pModifierA, pModifierB) -> {
+		final float durationA = pModifierA.getDuration();
+		final float durationB = pModifierB.getDuration();
 
-			if (durationA < durationB) {
-				return 1;
-			} else if (durationA > durationB) {
-				return -1;
-			} else {
-				return 0;
-			}
+		if (durationA < durationB) {
+			return 1;
+		} else if (durationA > durationB) {
+			return -1;
+		} else {
+			return 0;
 		}
 	};
 

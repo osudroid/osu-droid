@@ -22,17 +22,14 @@ public class BlackPawnTextureBuilder<T extends ITextureAtlasSource, A extends IT
 	// Constants
 	// ===========================================================
 
-	private static final Comparator<TextureAtlasSourceWithWithLocationCallback<?>> TEXTURESOURCE_COMPARATOR = new Comparator<TextureAtlasSourceWithWithLocationCallback<?>>() {
-		@Override
-		public int compare(final TextureAtlasSourceWithWithLocationCallback<?> pTextureAtlasSourceWithWithLocationCallbackA, final TextureAtlasSourceWithWithLocationCallback<?> pTextureAtlasSourceWithWithLocationCallbackB) {
-			final int deltaWidth = pTextureAtlasSourceWithWithLocationCallbackB.getTextureAtlasSource().getWidth() - pTextureAtlasSourceWithWithLocationCallbackA.getTextureAtlasSource().getWidth();
-			if(deltaWidth != 0) {
-				return deltaWidth;
-			} else {
-				return pTextureAtlasSourceWithWithLocationCallbackB.getTextureAtlasSource().getHeight() - pTextureAtlasSourceWithWithLocationCallbackA.getTextureAtlasSource().getHeight();
-			}
-		}
-	};
+	private static final Comparator<TextureAtlasSourceWithWithLocationCallback<?>> TEXTURESOURCE_COMPARATOR = (pTextureAtlasSourceWithWithLocationCallbackA, pTextureAtlasSourceWithWithLocationCallbackB) -> {
+        final int deltaWidth = pTextureAtlasSourceWithWithLocationCallbackB.getTextureAtlasSource().getWidth() - pTextureAtlasSourceWithWithLocationCallbackA.getTextureAtlasSource().getWidth();
+        if(deltaWidth != 0) {
+            return deltaWidth;
+        } else {
+            return pTextureAtlasSourceWithWithLocationCallbackB.getTextureAtlasSource().getHeight() - pTextureAtlasSourceWithWithLocationCallbackA.getTextureAtlasSource().getHeight();
+        }
+    };
 
 	// ===========================================================
 	// Fields
