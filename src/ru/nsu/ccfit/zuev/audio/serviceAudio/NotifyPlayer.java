@@ -122,7 +122,9 @@ public class NotifyPlayer {
         int drawable = isPlaying ? R.drawable.v_pause : R.drawable.v_play;
 
         builder.mActions.set(1, new NotificationCompat.Action(drawable, actionPlay, play));
-        manager.notify(NOTIFICATION_ID, builder.build());
+        try {
+            manager.notify(NOTIFICATION_ID, builder.build());
+        } catch (SecurityException ignored) {}
     }
 
     public void updateSong(BeatmapInfo beatmap) {
@@ -154,7 +156,9 @@ public class NotifyPlayer {
         builder.setLargeIcon(bitmap != null ? bitmap : defaultIcon);
 
         notification = builder.build();
-        manager.notify(NOTIFICATION_ID, notification);
+        try {
+            manager.notify(NOTIFICATION_ID, notification);
+        } catch (SecurityException ignored) {}
     }
 
     public void show() {
@@ -163,7 +167,9 @@ public class NotifyPlayer {
         if (notification == null)
             create();
 
-        manager.notify(NOTIFICATION_ID, notification);
+        try {
+            manager.notify(NOTIFICATION_ID, notification);
+        } catch (SecurityException ignored) {}
         isShowing = true;
     }
 
