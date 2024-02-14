@@ -343,13 +343,11 @@ public abstract class PVRTexture extends Texture {
 
 		public static PVRTextureFormat fromID(final int pID) {
 			final PVRTextureFormat[] pvrTextureFormats = PVRTextureFormat.values();
-			final int pvrTextureFormatCount = pvrTextureFormats.length;
-			for(int i = 0; i < pvrTextureFormatCount; i++) {
-				final PVRTextureFormat pvrTextureFormat = pvrTextureFormats[i];
-				if(pvrTextureFormat.mID == pID) {
-					return pvrTextureFormat;
-				}
-			}
+			for (final PVRTextureFormat pvrTextureFormat : pvrTextureFormats) {
+                if (pvrTextureFormat.mID == pID) {
+                    return pvrTextureFormat;
+                }
+            }
 			throw new IllegalArgumentException("Unexpected " + PVRTextureFormat.class.getSimpleName() + "-ID: '" + pID + "'.");
 		}
 

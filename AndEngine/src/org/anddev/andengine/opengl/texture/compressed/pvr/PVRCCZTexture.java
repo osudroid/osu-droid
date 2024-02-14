@@ -207,13 +207,11 @@ public abstract class PVRCCZTexture extends PVRTexture {
 
 		public static CCZCompressionFormat fromID(final short pID) {
 			final CCZCompressionFormat[] cczCompressionFormats = CCZCompressionFormat.values();
-			final int cczCompressionFormatCount = cczCompressionFormats.length;
-			for(int i = 0; i < cczCompressionFormatCount; i++) {
-				final CCZCompressionFormat cczCompressionFormat = cczCompressionFormats[i];
-				if(cczCompressionFormat.mID == pID) {
-					return cczCompressionFormat;
-				}
-			}
+			for (final CCZCompressionFormat cczCompressionFormat : cczCompressionFormats) {
+                if (cczCompressionFormat.mID == pID) {
+                    return cczCompressionFormat;
+                }
+            }
 			throw new IllegalArgumentException("Unexpected " + CCZCompressionFormat.class.getSimpleName() + "-ID: '" + pID + "'.");
 		}
 

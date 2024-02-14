@@ -138,10 +138,9 @@ public class MathUtils implements MathConstants {
 
 	public static final float arraySum(final float[] pValues) {
 		float sum = 0;
-		final int valueCount = pValues.length;
-		for(int i = 0; i < valueCount; i++) {
-			sum += pValues[i];
-		}
+		for (float pValue : pValues) {
+            sum += pValue;
+        }
 		return sum;
 	}
 
