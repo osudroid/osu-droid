@@ -128,12 +128,8 @@ public class AStarPathFinder<T> implements IPathFinder<T> {
 						/* Re-evaluate if there is a better path. */
 						if(neighborCost < neighbor.mCost) {
 							// TODO Is this ever possible with AStar ??
-							if(openNodes.contains(neighbor)) {
-								openNodes.remove(neighbor);
-							}
-							if(visitedNodes.contains(neighbor)) {
-								visitedNodes.remove(neighbor);
-							}
+							openNodes.remove(neighbor);
+							visitedNodes.remove(neighbor);
 						}
 
 						if(!openNodes.contains(neighbor) && !(visitedNodes.contains(neighbor))) {

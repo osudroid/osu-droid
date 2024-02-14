@@ -9,12 +9,10 @@ import androidx.annotation.NonNull;
 import org.anddev.andengine.opengl.texture.atlas.bitmap.source.IBitmapTextureAtlasSource;
 import org.anddev.andengine.opengl.texture.source.BaseTextureAtlasSource;
 import org.anddev.andengine.util.Debug;
-import org.anddev.andengine.util.StreamUtils;
 
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
-import java.io.InputStream;
 
 public class ScaledBitmapSource extends BaseTextureAtlasSource implements
         IBitmapTextureAtlasSource {

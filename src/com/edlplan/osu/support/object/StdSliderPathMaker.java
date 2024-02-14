@@ -30,8 +30,7 @@ public class StdSliderPathMaker {
                 return subPoints;
             }
             case Perfect -> {
-                if (getControlPoint().size() != 3 || subPoints.size() != 3) {
-                } else {
+                if (getControlPoint().size() == 3 && subPoints.size() == 3) {
                     List<Vec2> sub = (new CircleApproximator(subPoints.get(0), subPoints.get(1), subPoints.get(2))).createArc();
                     if (sub.size() != 0) return sub;
                 }

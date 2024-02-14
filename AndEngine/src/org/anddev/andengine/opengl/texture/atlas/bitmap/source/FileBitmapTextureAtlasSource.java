@@ -1,17 +1,15 @@
 package org.anddev.andengine.opengl.texture.atlas.bitmap.source;
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.IOException;
-import java.io.InputStream;
-
-import org.anddev.andengine.opengl.texture.source.BaseTextureAtlasSource;
-import org.anddev.andengine.util.Debug;
-import org.anddev.andengine.util.StreamUtils;
-
 import android.graphics.Bitmap;
 import android.graphics.Bitmap.Config;
 import android.graphics.BitmapFactory;
+
+import org.anddev.andengine.opengl.texture.source.BaseTextureAtlasSource;
+import org.anddev.andengine.util.Debug;
+
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
 
 /**
  * 

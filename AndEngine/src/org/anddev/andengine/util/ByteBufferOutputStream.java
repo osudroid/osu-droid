@@ -1,10 +1,7 @@
 package org.anddev.andengine.util;
 
-import java.io.IOException;
 import java.io.OutputStream;
 import java.nio.ByteBuffer;
-
-import org.anddev.andengine.util.Debug;
 
 /**
  * (c) Zynga 2011

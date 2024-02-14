@@ -1,13 +1,14 @@
 package ru.nsu.ccfit.zuev.osu.scoring;
 
+import java.io.Serial;
 import java.io.Serializable;
 import java.util.EnumSet;
-import java.util.Objects;
 
 import ru.nsu.ccfit.zuev.osu.game.GameHelper;
 import ru.nsu.ccfit.zuev.osu.game.mods.GameMod;
 
 public class Statistic implements Serializable {
+    @Serial
     private static final long serialVersionUID = 8339570462000129479L;
 
     int notes = 0;

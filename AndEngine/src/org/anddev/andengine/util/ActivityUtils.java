@@ -1,19 +1,16 @@
 package org.anddev.andengine.util;
 
-import java.util.concurrent.Callable;
-
-import org.anddev.andengine.ui.activity.BaseActivity.CancelledException;
-import org.anddev.andengine.util.progress.IProgressListener;
-import org.anddev.andengine.util.progress.ProgressCallable;
-
 import android.app.Activity;
 import android.app.ProgressDialog;
 import android.content.Context;
-import android.content.DialogInterface;
-import android.content.DialogInterface.OnCancelListener;
 import android.os.AsyncTask;
 import android.view.Window;
 import android.view.WindowManager;
+
+import org.anddev.andengine.ui.activity.BaseActivity.CancelledException;
+import org.anddev.andengine.util.progress.ProgressCallable;
+
+import java.util.concurrent.Callable;
 
 /**
  * (c) 2010 Nicolas Gramlich 

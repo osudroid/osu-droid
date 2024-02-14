@@ -1,5 +1,14 @@
 package org.anddev.andengine.level;
 
+import android.content.Context;
+
+import org.anddev.andengine.level.util.constants.LevelConstants;
+import org.anddev.andengine.util.Debug;
+import org.xml.sax.Attributes;
+import org.xml.sax.InputSource;
+import org.xml.sax.SAXException;
+import org.xml.sax.XMLReader;
+
 import java.io.BufferedInputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -8,16 +17,6 @@ import java.util.HashMap;
 import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.parsers.SAXParser;
 import javax.xml.parsers.SAXParserFactory;
-
-import org.anddev.andengine.level.util.constants.LevelConstants;
-import org.anddev.andengine.util.Debug;
-import org.anddev.andengine.util.StreamUtils;
-import org.xml.sax.Attributes;
-import org.xml.sax.InputSource;
-import org.xml.sax.SAXException;
-import org.xml.sax.XMLReader;
-
-import android.content.Context;
 
 /**
  * (c) 2010 Nicolas Gramlich 

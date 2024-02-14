@@ -1,20 +1,19 @@
 package org.anddev.andengine.opengl.texture.bitmap;
 
-import java.io.IOException;
-import java.io.InputStream;
-
-import javax.microedition.khronos.opengles.GL10;
+import android.graphics.Bitmap;
+import android.graphics.Bitmap.Config;
+import android.graphics.BitmapFactory;
+import android.opengl.GLUtils;
 
 import org.anddev.andengine.opengl.texture.Texture;
 import org.anddev.andengine.opengl.texture.TextureOptions;
 import org.anddev.andengine.opengl.util.GLHelper;
 import org.anddev.andengine.util.MathUtils;
-import org.anddev.andengine.util.StreamUtils;
 
-import android.graphics.Bitmap;
-import android.graphics.Bitmap.Config;
-import android.graphics.BitmapFactory;
-import android.opengl.GLUtils;
+import java.io.IOException;
+import java.io.InputStream;
+
+import javax.microedition.khronos.opengles.GL10;
 
 /**
  * (c) Zynga 2011
