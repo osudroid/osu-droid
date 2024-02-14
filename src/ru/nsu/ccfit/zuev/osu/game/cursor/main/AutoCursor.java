@@ -5,7 +5,6 @@ import org.anddev.andengine.util.modifier.ease.EaseQuadOut;
 import org.anddev.andengine.util.modifier.ease.IEaseFunction;
 
 import ru.nsu.ccfit.zuev.osu.Config;
-import ru.nsu.ccfit.zuev.osu.game.GameHelper;
 import ru.nsu.ccfit.zuev.osu.game.GameObject;
 import ru.nsu.ccfit.zuev.osu.game.GameObjectListener;
 import ru.nsu.ccfit.zuev.osu.game.ISliderListener;
@@ -62,10 +61,9 @@ public class AutoCursor extends CursorEntity implements ISliderListener {
      *
      * @param object       The object to move the cursor to.
      * @param secPassed    The amount of seconds that have passed since the game has started.
-     * @param approachRate The approach rate of the beatmap.
      * @param listener     The listener that listens to when this cursor is moved.
      */
-    public void moveToObject(GameObject object, float secPassed, float approachRate, GameObjectListener listener) {
+    public void moveToObject(GameObject object, float secPassed, GameObjectListener listener) {
         if (object == null || currentObjectId == object.getId()) {
             return;
         }
@@ -80,13 +78,12 @@ public class AutoCursor extends CursorEntity implements ISliderListener {
         }
 
         currentObjectId = object.getId();
-        if (GameHelper.ms2ar(approachRate * 1000f) > 12f) {
-            approachRate *= 500f;
-        } else if (GameHelper.ms2ar(approachRate * 1000f) > 10f) {
-            approachRate *= 2f;
+
+        if (deltaT < 0.085f && !(object instanceof Spinner)) {
+            deltaT = 0.085f;
         }
-        float moveDelay = (deltaT / (approachRate * 2f)) + 0.1f;
-        doAutoMove(movePositionX, movePositionY, moveDelay, listener);
+
+        doAutoMove(movePositionX, movePositionY, deltaT, listener);
     }
 
     @Override

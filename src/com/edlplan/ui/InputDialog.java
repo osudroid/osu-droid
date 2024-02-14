@@ -10,7 +10,7 @@ import ru.nsu.ccfit.zuev.osuplus.R;
 public class InputDialog extends Dialog {
 
     public InputDialog(@NonNull Context context) {
-        super(context, R.style.Theme_Design_BottomSheetDialog);
+        super(context, com.google.android.material.R.style.Theme_Design_BottomSheetDialog);
         setContentView(R.layout.dialog_for_input);
     }
 

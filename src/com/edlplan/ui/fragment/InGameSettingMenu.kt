@@ -204,7 +204,7 @@ class InGameSettingMenu : BaseFragment() {
         }
 
         val backgroundBrightness = findViewById<SeekBar>(R.id.backgroundBrightnessBar)!!
-        backgroundBrightness.progress = PreferenceManager.getDefaultSharedPreferences(context)
+        backgroundBrightness.progress = PreferenceManager.getDefaultSharedPreferences(requireContext())
             .getInt("bgbrightness", 25)
         backgroundBrightness.setOnSeekBarChangeListener(
             object : OnSeekBarChangeListener {
@@ -239,14 +239,14 @@ class InGameSettingMenu : BaseFragment() {
                     val progress = seekBar!!.progress
                     findViewById<TextView>(R.id.bgBrightnessText)!!.text = "$progress%"
                     Config.setBackgroundBrightness(seekBar.progress / 100f)
-                    PreferenceManager.getDefaultSharedPreferences(context).edit()
+                    PreferenceManager.getDefaultSharedPreferences(context!!).edit()
                         .putInt("bgbrightness", progress).commit()
                 }
             }
         )
 
         findViewById<TextView>(R.id.bgBrightnessText)!!.text = "${
-            PreferenceManager.getDefaultSharedPreferences(context).getInt("bgbrightness", 25)
+            PreferenceManager.getDefaultSharedPreferences(requireContext()).getInt("bgbrightness", 25)
         }%"
 
         speedModifyBar = findViewById(R.id.changeSpeedBar)!!
@@ -533,7 +533,7 @@ class InGameSettingMenu : BaseFragment() {
             ?.setInterpolator(EasingHelper.asInterpolator(Easing.InOutQuad))
             ?.setListener(
                 object : BaseAnimationListener() {
-                    override fun onAnimationEnd(animation: Animator?) {
+                    override fun onAnimationEnd(animation: Animator) {
                         super.onAnimationEnd(animation)
                         val background = findViewById<RelativeLayout>(R.id.frg_background)!!
                         background.isClickable = true
@@ -555,7 +555,7 @@ class InGameSettingMenu : BaseFragment() {
             ?.setInterpolator(EasingHelper.asInterpolator(Easing.InOutQuad))
             ?.setListener(
                 object : BaseAnimationListener() {
-                    override fun onAnimationEnd(animation: Animator?) {
+                    override fun onAnimationEnd(animation: Animator) {
                         super.onAnimationEnd(animation)
                         findViewById<RelativeLayout>(R.id.frg_background)!!.isClickable = false
                     }
