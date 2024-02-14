@@ -1,11 +1,19 @@
 package org.anddev.andengine.engine;
 
-import javax.microedition.khronos.opengles.GL10;
-import javax.microedition.khronos.opengles.GL11;
+import android.annotation.SuppressLint;
+import android.hardware.Sensor;
+import android.hardware.SensorEvent;
+import android.hardware.SensorEventListener;
+import android.location.Location;
+import android.location.LocationListener;
+import android.location.LocationProvider;
+import android.os.Bundle;
+import android.os.Vibrator;
+import android.view.MotionEvent;
+import android.view.View;
+import android.view.View.OnTouchListener;
 
-import org.anddev.andengine.audio.music.MusicFactory;
 import org.anddev.andengine.audio.music.MusicManager;
-import org.anddev.andengine.audio.sound.SoundFactory;
 import org.anddev.andengine.audio.sound.SoundManager;
 import org.anddev.andengine.engine.camera.Camera;
 import org.anddev.andengine.engine.handler.IUpdateHandler;
@@ -33,18 +41,8 @@ import org.anddev.andengine.sensor.orientation.OrientationData;
 import org.anddev.andengine.util.Debug;
 import org.anddev.andengine.util.constants.TimeConstants;
 
-import android.annotation.SuppressLint;
-import android.hardware.Sensor;
-import android.hardware.SensorEvent;
-import android.hardware.SensorEventListener;
-import android.location.Location;
-import android.location.LocationListener;
-import android.location.LocationProvider;
-import android.os.Bundle;
-import android.os.Vibrator;
-import android.view.MotionEvent;
-import android.view.View;
-import android.view.View.OnTouchListener;
+import javax.microedition.khronos.opengles.GL10;
+import javax.microedition.khronos.opengles.GL11;
 
 /**
  * (c) 2010 Nicolas Gramlich 
@@ -115,8 +113,6 @@ public class Engine implements SensorEventListener, OnTouchListener, ITouchEvent
 
 	public Engine(final EngineOptions pEngineOptions) {
 		BitmapTextureAtlasTextureRegionFactory.reset();
-		SoundFactory.reset();
-		MusicFactory.reset();
 		FontFactory.reset();
 
 		BufferObjectManager.setActiveInstance(this.mBufferObjectManager);
