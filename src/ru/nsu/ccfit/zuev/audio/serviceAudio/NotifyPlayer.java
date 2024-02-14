@@ -86,28 +86,28 @@ public class NotifyPlayer {
                     return;
 
                 switch (intent.getAction()) {
-                    case actionPlay:
+                    case actionPlay -> {
                         if (service.getStatus() == Status.PLAYING) service.pause();
                         else service.play();
-                        break;
-                    case actionPrev:
+                    }
+                    case actionPrev -> {
                         service.stop();
                         BeatmapInfo prevBeatmap = LibraryManager.INSTANCE.getPrevBeatmap();
                         service.preLoad(prevBeatmap.getMusic());
                         updateSong(prevBeatmap);
                         service.play();
-                        break;
-                    case actionNext:
+                    }
+                    case actionNext -> {
                         service.stop();
                         BeatmapInfo nextBeatmap = LibraryManager.INSTANCE.getNextBeatmap();
                         service.preLoad(nextBeatmap.getMusic());
                         updateSong(nextBeatmap);
                         service.play();
-                        break;
-                    case actionClose:
+                    }
+                    case actionClose -> {
                         service.stop();
                         GlobalManager.getInstance().getMainScene().exit();
-                        break;
+                    }
                 }
             }
         };

@@ -28,16 +28,12 @@ public enum BeatmapCountdown {
      * @return The enum representing the data.
      */
     public static BeatmapCountdown parse(final String data) {
-        switch (data) {
-            case "0":
-                return noCountdown;
-            case "2":
-                return half;
-            case "3":
-                return twice;
-            default:
-                return normal;
-        }
+        return switch (data) {
+            case "0" -> noCountdown;
+            case "2" -> half;
+            case "3" -> twice;
+            default -> normal;
+        };
     }
 }
 

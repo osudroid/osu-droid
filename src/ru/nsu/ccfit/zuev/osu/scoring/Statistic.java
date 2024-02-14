@@ -135,7 +135,7 @@ public class Statistic implements Serializable {
         possibleScore += 300;
 
         switch (score) {
-            case 300:
+            case 300 -> {
                 changeHp(k ? 0.10f : 0.05f);
                 if (g) {
                     hit300k++;
@@ -144,33 +144,32 @@ public class Statistic implements Serializable {
                 addScore(300);
                 realScore += 300;
                 currentCombo++;
-                break;
-            case 100:
+            }
+            case 100 -> {
                 changeHp(k ? 0.15f : 0.05f);
                 if (k) {
                     hit100k++;
                 }
-
                 hit100++;
                 addScore(100);
                 realScore += 100;
                 currentCombo++;
-                break;
-            case 50:
+            }
+            case 50 -> {
                 changeHp(0.05f);
                 hit50++;
                 addScore(50);
                 realScore += 50;
                 currentCombo++;
-                break;
-            default:
+            }
+            default -> {
                 changeHp(-(5 + GameHelper.getDrain()) / 100f);
                 misses++;
                 if (currentCombo > maxCombo) {
                     maxCombo = currentCombo;
                 }
                 currentCombo = 0;
-                break;
+            }
         }
     }
 

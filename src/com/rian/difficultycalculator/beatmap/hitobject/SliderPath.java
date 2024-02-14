@@ -184,23 +184,24 @@ public class SliderPath {
 
     private List<Vector2> calculateSubPath(List<Vector2> subControlPoints) {
         switch (pathType) {
-            case Linear:
+            case Linear -> {
                 return PathApproximator.approximateLinear(subControlPoints);
-            case PerfectCurve:
+            }
+            case PerfectCurve -> {
                 if (subControlPoints.size() != 3) {
                     break;
                 }
-
                 List<Vector2> subPath = PathApproximator.approximateCircularArc(subControlPoints);
 
                 // If for some reason a circular arc could not be fit to the 3 given points, fall back to a numerically stable Bézier approximation.
                 if (subPath.isEmpty()) {
                     break;
                 }
-
                 return subPath;
-            case Catmull:
+            }
+            case Catmull -> {
                 return PathApproximator.approximateCatmull(subControlPoints);
+            }
         }
 
         return PathApproximator.approximateBezier(subControlPoints);

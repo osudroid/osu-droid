@@ -20,25 +20,16 @@ public enum BeatmapSection {
      * @return The enum representing the value.
      */
     public static BeatmapSection parse(final String value) {
-        switch (value) {
-            case "General":
-                return general;
-            case "Editor":
-                return editor;
-            case "Metadata":
-                return metadata;
-            case "Difficulty":
-                return difficulty;
-            case "Events":
-                return events;
-            case "TimingPoints":
-                return timingPoints;
-            case "Colours":
-                return colors;
-            case "HitObjects":
-                return hitObjects;
-            default:
-                return null;
-        }
+        return switch (value) {
+            case "General" -> general;
+            case "Editor" -> editor;
+            case "Metadata" -> metadata;
+            case "Difficulty" -> difficulty;
+            case "Events" -> events;
+            case "TimingPoints" -> timingPoints;
+            case "Colours" -> colors;
+            case "HitObjects" -> hitObjects;
+            default -> null;
+        };
     }
 }

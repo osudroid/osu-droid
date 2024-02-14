@@ -22,14 +22,10 @@ public class UniversalModifier extends SingleValueSpanEntityModifier {
     @Override
     protected void onSetInitialValue(final IEntity pItem, final float pValue) {
         switch (type) {
-            case ALPHA:
-                pItem.setAlpha(pValue);
-                break;
-            case SCALE:
-                pItem.setScale(pValue);
-                break;
-            default:
-                break;
+            case ALPHA -> pItem.setAlpha(pValue);
+            case SCALE -> pItem.setScale(pValue);
+            default -> {
+            }
         }
     }
 
@@ -37,14 +33,10 @@ public class UniversalModifier extends SingleValueSpanEntityModifier {
     protected void onSetValue(final IEntity pItem, final float pPercentageDone,
                               final float pValue) {
         switch (type) {
-            case ALPHA:
-                pItem.setAlpha(pValue);
-                break;
-            case SCALE:
-                pItem.setScale(pValue);
-                break;
-            default:
-                break;
+            case ALPHA -> pItem.setAlpha(pValue);
+            case SCALE -> pItem.setScale(pValue);
+            default -> {
+            }
         }
     }
 

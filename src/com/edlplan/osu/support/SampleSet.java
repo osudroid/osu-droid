@@ -9,37 +9,23 @@ public enum SampleSet {
     }
 
     public static SampleSet parse(String s) {
-        switch (s) {
-            case "0":
-            case "None":
-                return None;
-            case "1":
-            case "Normal":
-                return Normal;
-            case "2":
-            case "Soft":
-                return Soft;
-            case "3":
-            case "Drum":
-                return Drum;
-            default:
-                return null;
-        }
+        return switch (s) {
+            case "0", "None" -> None;
+            case "1", "Normal" -> Normal;
+            case "2", "Soft" -> Soft;
+            case "3", "Drum" -> Drum;
+            default -> null;
+        };
     }
 
     public static SampleSet fromName(String s) {
-        switch (s) {
-            case "None":
-                return None;
-            case "Normal":
-                return Normal;
-            case "Soft":
-                return Soft;
-            case "Drum":
-                return Drum;
-            default:
-                return null;
-        }
+        return switch (s) {
+            case "None" -> None;
+            case "Normal" -> Normal;
+            case "Soft" -> Soft;
+            case "Drum" -> Drum;
+            default -> null;
+        };
     }
 
     public String value() {

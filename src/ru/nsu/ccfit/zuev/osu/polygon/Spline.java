@@ -184,16 +184,12 @@ public class Spline {
     }
 
     public static CurveTypes getCurveType(char c) {
-        switch (c) {
-            case 'L':
-                return CurveTypes.Linear;
-            case 'C':
-                return CurveTypes.Catmull;
-            case 'P':
-                return CurveTypes.PerfectCurve;
-            default:
-                return CurveTypes.Bezier;
-        }
+        return switch (c) {
+            case 'L' -> CurveTypes.Linear;
+            case 'C' -> CurveTypes.Catmull;
+            case 'P' -> CurveTypes.PerfectCurve;
+            default -> CurveTypes.Bezier;
+        };
     }
 
     public ArrayList<PointF> getControlPoints() {
@@ -285,7 +281,7 @@ public class Spline {
 
     private void sliderthing(CurveTypes CurveType, ArrayList<PointF> sliderCurvePoints, ArrayList<Line> path, ArrayList<PointF> points) {
         switch (CurveType) {
-            case Catmull:
+            case Catmull -> {
                 for (int j = 0; j < sliderCurvePoints.size() - 1; j++) {
                     PointF v1 = (j - 1 >= 0 ? sliderCurvePoints.get(j - 1) : sliderCurvePoints.get(j));
                     PointF v2 = sliderCurvePoints.get(j);
@@ -304,9 +300,8 @@ public class Spline {
                         points.add(CatmullRom(v1, v2, v3, v4, (float) k / DetailLevel));
                     }
                 }
-                break;
-
-            case Bezier:
+            }
+            case Bezier -> {
                 int lastIndex = 0;
                 for (int i = 0; i < sliderCurvePoints.size(); i++)
                     if ((i > 0 && sliderCurvePoints.get(i) == sliderCurvePoints.get(i - 1)) || i == sliderCurvePoints.size() - 1) {
@@ -319,9 +314,8 @@ public class Spline {
 //                        }
                         lastIndex = i;
                     }
-                break;
-
-            case Linear:
+            }
+            case Linear -> {
                 for (int i = 1; i < sliderCurvePoints.size(); i++) {
                     Line l = new Line(sliderCurvePoints.get(i - 1), sliderCurvePoints.get(i));
                     int segments = (int) (Rho(l) / 10);
@@ -335,9 +329,8 @@ public class Spline {
                         points.add(Add(l.p1, MultiplyPt(Subtract(l.p2, l.p1), ((float) j / segments))));
                     }
                 }
-                break;
-
-            case PerfectCurve:
+            }
+            case PerfectCurve -> {
                 if (sliderCurvePoints.size() < 3 ||
                         (sliderCurvePoints.size() == 3 && ((sliderCurvePoints.get(0).x - sliderCurvePoints.get(2).x) * (sliderCurvePoints.get(1).y - sliderCurvePoints.get(2).y)
                                 == (sliderCurvePoints.get(1).x - sliderCurvePoints.get(2).x) * (sliderCurvePoints.get(0).y - sliderCurvePoints.get(2).y)))) {
@@ -372,8 +365,8 @@ public class Spline {
 //                            CircularArc(startAng, endAng, circleCenter, radius, (float) (k + 1) / DetailLevel)));
                     points.add(CircularArc(startAng, endAng, circleCenter, radius, (float) k / DetailLevel));
                 }
+            }
 //                points.add(point3);
-                break;
         }
     }
 

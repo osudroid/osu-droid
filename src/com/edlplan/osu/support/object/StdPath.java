@@ -47,18 +47,13 @@ public class StdPath {
         }
 
         public static Type forName(String n) {
-            switch (n) {
-                case "L":
-                    return Linear;
-                case "P":
-                    return Perfect;
-                case "B":
-                    return Bezier;
-                case "C":
-                    return Catmull;
-                default:
-                    return null;
-            }
+            return switch (n) {
+                case "L" -> Linear;
+                case "P" -> Perfect;
+                case "B" -> Bezier;
+                case "C" -> Catmull;
+                default -> null;
+            };
         }
 
         public String getTag() {

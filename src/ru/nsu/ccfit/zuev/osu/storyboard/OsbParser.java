@@ -90,21 +90,13 @@ public class OsbParser {
                     }
                 }
                 info = line.split(",");
-                int layer = 0;
-                switch (info[1]) {
-                    case "Background":
-                        layer = 0;
-                        break;
-                    case "Fail":
-                        layer = 1;
-                        break;
-                    case "Pass":
-                        layer = 2;
-                        break;
-                    case "Foreground":
-                        layer = 3;
-                        break;
-                }
+                int layer = switch (info[1]) {
+                    case "Background" -> 0;
+                    case "Fail" -> 1;
+                    case "Pass" -> 2;
+                    case "Foreground" -> 3;
+                    default -> 0;
+                };
                 OsuSprite.Origin origin = OsuSprite.Origin.valueOf(info[2]);
                 String filePath = info[3];
                 filePath = filePath.replaceAll("\"", "");
@@ -121,21 +113,13 @@ public class OsbParser {
                     }
                 }
                 info = line.split(",");
-                int layer = 0;
-                switch (info[1]) {
-                    case "Background":
-                        layer = 0;
-                        break;
-                    case "Fail":
-                        layer = 1;
-                        break;
-                    case "Pass":
-                        layer = 2;
-                        break;
-                    case "Foreground":
-                        layer = 3;
-                        break;
-                }
+                int layer = switch (info[1]) {
+                    case "Background" -> 0;
+                    case "Fail" -> 1;
+                    case "Pass" -> 2;
+                    case "Foreground" -> 3;
+                    default -> 0;
+                };
                 OsuSprite.Origin origin = OsuSprite.Origin.valueOf(info[2]);
                 String filePath = info[3];
                 filePath = filePath.replaceAll("\"", "");
@@ -190,18 +174,12 @@ public class OsbParser {
                     currentOsuEvent.endTime = 999999999;
                 }
                 currentOsuEvent.triggerType = info[1];
-                int soundType = -1;
-                switch (currentOsuEvent.triggerType) {
-                    case "HitSoundWhistle":
-                        soundType = 2;
-                        break;
-                    case "HitSoundFinish":
-                        soundType = 4;
-                        break;
-                    case "HitSoundClap":
-                        soundType = 8;
-                        break;
-                }
+                int soundType = switch (currentOsuEvent.triggerType) {
+                    case "HitSoundWhistle" -> 2;
+                    case "HitSoundFinish" -> 4;
+                    case "HitSoundClap" -> 8;
+                    default -> -1;
+                };
                 currentOsuEvent.subEvents = parseSubEvents(source);
                 for (HitSound hitSound : hitSounds) {//real start time
                     if (hitSound.time >= currentOsuEvent.startTime && (hitSound.soundType & soundType) == soundType) {
@@ -215,11 +193,7 @@ public class OsbParser {
                 currentOsuEvent.endTime = info[3].isEmpty() ? currentOsuEvent.startTime + 1 : Long.parseLong(info[3]);
                 float[] params = null;
                 switch (command) {
-                    case F:
-                    case MX:
-                    case MY:
-                    case S:
-                    case R:
+                    case F, MX, MY, S, R -> {
                         params = new float[2];
                         params[0] = Float.parseFloat(info[4]);
                         if (info.length == 5) {
@@ -227,10 +201,8 @@ public class OsbParser {
                         } else {//TODO more than two params
                             params[1] = Float.parseFloat(info[5]);
                         }
-                        break;
-
-                    case M:
-                    case V:
+                    }
+                    case M, V -> {
                         params = new float[4];
                         params[0] = Float.parseFloat(info[4]);
                         params[1] = Float.parseFloat(info[5]);
@@ -241,8 +213,8 @@ public class OsbParser {
                             params[2] = Float.parseFloat(info[6]);
                             params[3] = Float.parseFloat(info[7]);
                         }
-                        break;
-                    case C:
+                    }
+                    case C -> {
                         params = new float[6];
                         params[0] = Float.parseFloat(info[4]);
                         params[1] = Float.parseFloat(info[5]);
@@ -256,10 +228,8 @@ public class OsbParser {
                             params[4] = Float.parseFloat(info[8]);
                             params[5] = Float.parseFloat(info[9]);
                         }
-                        break;
-                    case P:
-                        currentOsuEvent.P = info[4];
-                        break;
+                    }
+                    case P -> currentOsuEvent.P = info[4];
                 }
                 currentOsuEvent.params = params;
                 line = source.readUtf8Line();
@@ -297,11 +267,7 @@ public class OsbParser {
             subEvent.endTime = info[3].isEmpty() ? subEvent.startTime + 1 : Long.parseLong(info[3]);
             float[] params = null;
             switch (subCommand) {
-                case F:
-                case MX:
-                case MY:
-                case S:
-                case R:
+                case F, MX, MY, S, R -> {
                     params = new float[2];
                     params[0] = Float.parseFloat(info[4]);
                     if (info.length == 5) {
@@ -309,10 +275,8 @@ public class OsbParser {
                     } else {//TODO more than two params
                         params[1] = Float.parseFloat(info[5]);
                     }
-                    break;
-
-                case M:
-                case V:
+                }
+                case M, V -> {
                     params = new float[4];
                     params[0] = Float.parseFloat(info[4]);
                     params[1] = Float.parseFloat(info[5]);
@@ -323,8 +287,8 @@ public class OsbParser {
                         params[2] = Float.parseFloat(info[6]);
                         params[3] = Float.parseFloat(info[7]);
                     }
-                    break;
-                case C:
+                }
+                case C -> {
                     params = new float[6];
                     params[0] = Float.parseFloat(info[4]);
                     params[1] = Float.parseFloat(info[5]);
@@ -338,14 +302,9 @@ public class OsbParser {
                         params[4] = Float.parseFloat(info[8]);
                         params[5] = Float.parseFloat(info[9]);
                     }
-                    break;
-                case P:
-                    subEvent.P = info[4];
-                    break;
-                case T:
-                case L:
-                    parseSubEvents(source);
-                    break;
+                }
+                case P -> subEvent.P = info[4];
+                case T, L -> parseSubEvents(source);
             }
             subEvent.params = params;
             subOsuEventList.add(subEvent);
@@ -376,21 +335,11 @@ public class OsbParser {
             if (matcher.find()) {
                 String title = matcher.group(1);
                 switch (title) {
-                    case "General":
-                        parseGeneral(source);
-                        break;
-                    case "Difficulty":
-                        parseDifficulty(source);
-                        break;
-                    case "Events":
-                        parseEvent(source);
-                        break;
-                    case "TimingPoints":
-                        parseTimingPoints(source);
-                        break;
-                    case "HitObjects":
-                        parseHitObject(source);
-                        break;
+                    case "General" -> parseGeneral(source);
+                    case "Difficulty" -> parseDifficulty(source);
+                    case "Events" -> parseEvent(source);
+                    case "TimingPoints" -> parseTimingPoints(source);
+                    case "HitObjects" -> parseHitObject(source);
                 }
             }
         }

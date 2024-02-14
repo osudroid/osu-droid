@@ -26,18 +26,19 @@ public class StdSliderPathMaker {
 
     public List<Vec2> calculateSubPath(List<Vec2> subPoints) {
         switch (slider.getType()) {
-            case Linear:
+            case Linear -> {
                 return subPoints;
-            case Perfect:
+            }
+            case Perfect -> {
                 if (getControlPoint().size() != 3 || subPoints.size() != 3) {
-                    break;
                 } else {
                     List<Vec2> sub = (new CircleApproximator(subPoints.get(0), subPoints.get(1), subPoints.get(2))).createArc();
                     if (sub.size() != 0) return sub;
                 }
-                break;
-            case Catmull:
+            }
+            case Catmull -> {
                 return (new CatmullApproximator(subPoints)).createCatmull();
+            }
         }
         return (new BezierApproximator(subPoints)).createBezier();
     }

@@ -526,7 +526,7 @@ public class MainScene implements IUpdateHandler {
             return;
         }
         switch (option) {
-            case PREV: {
+            case PREV -> {
                 if (GlobalManager.getInstance().getSongService().getStatus() == Status.PLAYING || GlobalManager.getInstance().getSongService().getStatus() == Status.PAUSED) {
                     GlobalManager.getInstance().getSongService().stop();
                 }
@@ -537,8 +537,7 @@ public class MainScene implements IUpdateHandler {
                 doChange = false;
                 doStop = false;
             }
-            break;
-            case PLAY: {
+            case PLAY -> {
                 if (GlobalManager.getInstance().getSongService().getStatus() == Status.PAUSED || GlobalManager.getInstance().getSongService().getStatus() == Status.STOPPED) {
                     if (GlobalManager.getInstance().getSongService().getStatus() == Status.STOPPED) {
                         loadTimingPoints(false);
@@ -565,24 +564,21 @@ public class MainScene implements IUpdateHandler {
                     doStop = false;
                 }
             }
-            break;
-            case PAUSE: {
+            case PAUSE -> {
                 if (GlobalManager.getInstance().getSongService().getStatus() == Status.PLAYING) {
                     GlobalManager.getInstance().getSongService().pause();
                     lastBpmLength = bpmLength;
                     bpmLength = 1000;
                 }
             }
-            break;
-            case STOP: {
+            case STOP -> {
                 if (GlobalManager.getInstance().getSongService().getStatus() == Status.PLAYING || GlobalManager.getInstance().getSongService().getStatus() == Status.PAUSED) {
                     GlobalManager.getInstance().getSongService().stop();
                     lastBpmLength = bpmLength;
                     bpmLength = 1000;
                 }
             }
-            break;
-            case NEXT: {
+            case NEXT -> {
                 if (GlobalManager.getInstance().getSongService().getStatus() == Status.PLAYING || GlobalManager.getInstance().getSongService().getStatus() == Status.PAUSED) {
                     GlobalManager.getInstance().getSongService().stop();
                 }
@@ -593,8 +589,7 @@ public class MainScene implements IUpdateHandler {
                 doChange = false;
                 doStop = false;
             }
-            break;
-            case SYNC: {
+            case SYNC -> {
                 if (GlobalManager.getInstance().getSongService().getStatus() == Status.PLAYING) {
                     if (lastTimingPoint != null) {
                         int position = GlobalManager.getInstance().getSongService().getPosition();

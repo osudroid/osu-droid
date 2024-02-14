@@ -209,7 +209,7 @@ public class StatisticV2 implements Serializable {
         possibleScore += 300;
 
         switch (score) {
-            case 300:
+            case 300 -> {
                 changeHp(k ? 0.10f : 0.05f);
                 if (g) {
                     hit300k++;
@@ -218,8 +218,8 @@ public class StatisticV2 implements Serializable {
                 addScore(300, true);
                 realScore += 300;
                 currentCombo++;
-                break;
-            case 100:
+            }
+            case 100 -> {
                 changeHp(k ? 0.15f : 0.05f);
                 if (k) {
                     hit100k++;
@@ -228,15 +228,15 @@ public class StatisticV2 implements Serializable {
                 addScore(100, true);
                 realScore += 100;
                 currentCombo++;
-                break;
-            case 50:
+            }
+            case 50 -> {
                 changeHp(0.05f);
                 hit50++;
                 addScore(50, true);
                 realScore += 50;
                 currentCombo++;
-                break;
-            default:
+            }
+            default -> {
                 changeHp(-(5 + GameHelper.getDrain()) / 100f);
                 misses++;
                 perfect = false;
@@ -244,7 +244,7 @@ public class StatisticV2 implements Serializable {
                     maxCombo = currentCombo;
                 }
                 currentCombo = 0;
-                break;
+            }
         }
     }
 
@@ -288,20 +288,12 @@ public class StatisticV2 implements Serializable {
             //get real acc
             float acc = 0;
             if (possibleScore > 0){
-                switch (amount) {
-                    case 300:
-                        acc = (realScore + 300) / (float) possibleScore;
-                        break;
-                    case 100:
-                        acc = (realScore + 100) / (float) possibleScore;
-                        break;
-                    case 50:
-                        acc = (realScore + 50) / (float) possibleScore;
-                        break;
-                    default:
-                        acc = realScore / (float) possibleScore;
-                        break;
-                }
+                acc = switch (amount) {
+                    case 300 -> (realScore + 300) / (float) possibleScore;
+                    case 100 -> (realScore + 100) / (float) possibleScore;
+                    case 50 -> (realScore + 50) / (float) possibleScore;
+                    default -> realScore / (float) possibleScore;
+                };
             }
             totalScore = (int)(MAX_SCORE * (ACC_PORTION * Math.pow(acc , 10) * percentage
                     + COMBO_PORTION * maxcb / maxHighestCombo) + bonusScore);
@@ -554,59 +546,28 @@ public class StatisticV2 implements Serializable {
         mod = EnumSet.noneOf(GameMod.class);
         for (int i = 0; i < strMod[0].length(); i++) {
             switch (strMod[0].charAt(i)) {
-                case 'a':
-                    mod.add(GameMod.MOD_AUTO);
-                    break;
-                case 'x':
-                    mod.add(GameMod.MOD_RELAX);
-                    break;
-                case 'p':
-                    mod.add(GameMod.MOD_AUTOPILOT);
-                    break;
-                case 'e':
+                case 'a' -> mod.add(GameMod.MOD_AUTO);
+                case 'x' -> mod.add(GameMod.MOD_RELAX);
+                case 'p' -> mod.add(GameMod.MOD_AUTOPILOT);
+                case 'e' -> {
                     mod.add(GameMod.MOD_EASY);
                     life = 3;
-                    break;
-                case 'n':
-                    mod.add(GameMod.MOD_NOFAIL);
-                    break;
-                case 'r':
-                    mod.add(GameMod.MOD_HARDROCK);
-                    break;
-                case 'h':
-                    mod.add(GameMod.MOD_HIDDEN);
-                    break;
-                case 'i':
-                    mod.add(GameMod.MOD_FLASHLIGHT);
-                    break;
-                case 'd':
-                    mod.add(GameMod.MOD_DOUBLETIME);
-                    break;
-                case 'c':
-                    mod.add(GameMod.MOD_NIGHTCORE);
-                    break;
-                case 't':
-                    mod.add(GameMod.MOD_HALFTIME);
-                    break;
-                case 's':
-                    mod.add(GameMod.MOD_PRECISE);
-                    break;
+                }
+                case 'n' -> mod.add(GameMod.MOD_NOFAIL);
+                case 'r' -> mod.add(GameMod.MOD_HARDROCK);
+                case 'h' -> mod.add(GameMod.MOD_HIDDEN);
+                case 'i' -> mod.add(GameMod.MOD_FLASHLIGHT);
+                case 'd' -> mod.add(GameMod.MOD_DOUBLETIME);
+                case 'c' -> mod.add(GameMod.MOD_NIGHTCORE);
+                case 't' -> mod.add(GameMod.MOD_HALFTIME);
+                case 's' -> mod.add(GameMod.MOD_PRECISE);
+
                 // Special handle for old removed SmallCircles mod.
-                case 'm':
-                    isLegacySC = true;
-                    break;
-                case 'l':
-                    mod.add(GameMod.MOD_REALLYEASY);
-                    break;    
-                case 'u':
-                    mod.add(GameMod.MOD_SUDDENDEATH);
-                    break;    
-                case 'f':
-                    mod.add(GameMod.MOD_PERFECT);
-                    break;
-                case 'v':
-                    mod.add(GameMod.MOD_SCOREV2);
-                    break;   
+                case 'm' -> isLegacySC = true;
+                case 'l' -> mod.add(GameMod.MOD_REALLYEASY);
+                case 'u' -> mod.add(GameMod.MOD_SUDDENDEATH);
+                case 'f' -> mod.add(GameMod.MOD_PERFECT);
+                case 'v' -> mod.add(GameMod.MOD_SCOREV2);
             }
         }
         if (strMod.length > 1)
@@ -970,16 +931,14 @@ public class StatisticV2 implements Serializable {
 
         var cs = track.getCircleSize();
 
-        for (GameMod m : mod) switch (m) {
-
-            case MOD_HARDROCK:
-                ++cs;
-                continue;
-
-            case MOD_EASY:
-            case MOD_REALLYEASY:
-                --cs;
-        }
+        for (GameMod m : mod)
+            switch (m) {
+                case MOD_HARDROCK -> {
+                    ++cs;
+                    continue;
+                }
+                case MOD_EASY, MOD_REALLYEASY -> --cs;
+            }
 
         customCS = cs + 4;
     }

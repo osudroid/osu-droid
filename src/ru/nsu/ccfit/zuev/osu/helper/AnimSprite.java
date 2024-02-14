@@ -94,17 +94,11 @@ public class AnimSprite extends Sprite {
         }
         int frameByTime = (int) (this.animTime * fps);
         switch (loopType) {
-            case LOOP:
-                frame = frameByTime % count;
-                break;
-            case STOP:
-                frame = Math.min(frameByTime, count - 1);
-                break;
-            case DISAPPEAR:
-                frame = Math.min(frameByTime, count);
-                break;
-            default:
-                break;
+            case LOOP -> frame = frameByTime % count;
+            case STOP -> frame = Math.min(frameByTime, count - 1);
+            case DISAPPEAR -> frame = Math.min(frameByTime, count);
+            default -> {
+            }
         }
     }
 

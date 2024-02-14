@@ -18,20 +18,14 @@ public enum HitObjectType {
     }
 
     public static HitObjectType valueOf(int value) {
-        switch (value) {
-            case 1:
-                return Normal;
-            case 2:
-                return Slider;
-            case 4:
-                return NewCombo;
-            case 5:
-                return NormalNewCombo;
-            case 6:
-                return SliderNewCombo;
-            default:
-                return Spinner;
-        }
+        return switch (value) {
+            case 1 -> Normal;
+            case 2 -> Slider;
+            case 4 -> NewCombo;
+            case 5 -> NormalNewCombo;
+            case 6 -> SliderNewCombo;
+            default -> Spinner;
+        };
     }
 
     public int value() {

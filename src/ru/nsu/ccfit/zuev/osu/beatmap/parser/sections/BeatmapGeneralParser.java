@@ -13,33 +13,15 @@ public class BeatmapGeneralParser extends BeatmapKeyValueSectionParser {
         String[] p = splitProperty(line);
 
         switch (p[0]) {
-            case "AudioFilename":
-                data.general.audioFilename = p[1];
-                break;
-            case "AudioLeadIn":
-                data.general.audioLeadIn = parseInt(p[1]);
-                break;
-            case "PreviewTime":
-                data.general.previewTime = data.getOffsetTime(parseInt(p[1]));
-                break;
-            case "Countdown":
-                data.general.countdown = BeatmapCountdown.parse(p[1]);
-                break;
-            case "SampleSet":
-                data.general.sampleBank = SampleBank.parse(p[1]);
-                break;
-            case "SampleVolume":
-                data.general.sampleVolume = parseInt(p[1]);
-                break;
-            case "StackLeniency":
-                data.general.stackLeniency = parseFloat(p[1]);
-                break;
-            case "LetterboxInBreaks":
-                data.general.letterboxInBreaks = p[1].equals("1");
-                break;
-            case "Mode":
-                data.general.mode = parseInt(p[1]);
-                break;
+            case "AudioFilename" -> data.general.audioFilename = p[1];
+            case "AudioLeadIn" -> data.general.audioLeadIn = parseInt(p[1]);
+            case "PreviewTime" -> data.general.previewTime = data.getOffsetTime(parseInt(p[1]));
+            case "Countdown" -> data.general.countdown = BeatmapCountdown.parse(p[1]);
+            case "SampleSet" -> data.general.sampleBank = SampleBank.parse(p[1]);
+            case "SampleVolume" -> data.general.sampleVolume = parseInt(p[1]);
+            case "StackLeniency" -> data.general.stackLeniency = parseFloat(p[1]);
+            case "LetterboxInBreaks" -> data.general.letterboxInBreaks = p[1].equals("1");
+            case "Mode" -> data.general.mode = parseInt(p[1]);
         }
     }
 }

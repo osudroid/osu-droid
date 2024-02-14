@@ -459,51 +459,35 @@ public class ColorPickerView extends View {
         if (event.getAction() == MotionEvent.ACTION_MOVE) {
 
             switch (mLastTouchedPanel) {
-
-                case PANEL_SAT_VAL:
-
+                case PANEL_SAT_VAL -> {
                     float sat, val;
-
                     sat = mSat + x / 50f;
                     val = mVal - y / 50f;
-
                     if (sat < 0f) {
                         sat = 0f;
                     } else if (sat > 1f) {
                         sat = 1f;
                     }
-
                     if (val < 0f) {
                         val = 0f;
                     } else if (val > 1f) {
                         val = 1f;
                     }
-
                     mSat = sat;
                     mVal = val;
-
                     update = true;
-
-                    break;
-
-                case PANEL_HUE:
-
+                }
+                case PANEL_HUE -> {
                     float hue = mHue - y * 10f;
-
                     if (hue < 0f) {
                         hue = 0f;
                     } else if (hue > 360f) {
                         hue = 360f;
                     }
-
                     mHue = hue;
-
                     update = true;
-
-                    break;
-
-                case PANEL_ALPHA:
-
+                }
+                case PANEL_ALPHA -> {
                     if (!mShowAlphaPanel || mAlphaRect == null) {
                         update = false;
                     } else {
@@ -521,8 +505,7 @@ public class ColorPickerView extends View {
 
                         update = true;
                     }
-
-                    break;
+                }
             }
 
 
@@ -549,29 +532,15 @@ public class ColorPickerView extends View {
         boolean update = false;
 
         switch (event.getAction()) {
-
-            case MotionEvent.ACTION_DOWN:
-
+            case MotionEvent.ACTION_DOWN -> {
                 mStartTouchPoint = new Point((int) event.getX(), (int) event.getY());
-
                 update = moveTrackersIfNeeded(event);
-
-                break;
-
-            case MotionEvent.ACTION_MOVE:
-
-                update = moveTrackersIfNeeded(event);
-
-                break;
-
-            case MotionEvent.ACTION_UP:
-
+            }
+            case MotionEvent.ACTION_MOVE -> update = moveTrackersIfNeeded(event);
+            case MotionEvent.ACTION_UP -> {
                 mStartTouchPoint = null;
-
                 update = moveTrackersIfNeeded(event);
-
-                break;
-
+            }
         }
 
         if (update) {

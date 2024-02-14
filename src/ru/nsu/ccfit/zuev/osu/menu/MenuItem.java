@@ -274,37 +274,25 @@ public class MenuItem {
     }
 
     private boolean visibleTrack(TrackInfo track, String key, String opt, String value) {
-        switch (key) {
-            case "ar":
-                return calOpt(track.getApproachRate(), Float.parseFloat(value), opt);
-            case "od":
-                return calOpt(track.getOverallDifficulty(), Float.parseFloat(value), opt);
-            case "cs":
-                return calOpt(track.getCircleSize(), Float.parseFloat(value), opt);
-            case "hp":
-                return calOpt(track.getHpDrain(), Float.parseFloat(value), opt);
-            case "star":
-                return calOpt(track.getDifficulty(), Float.parseFloat(value), opt);
-            default:
-                return false;
-        }
+        return switch (key) {
+            case "ar" -> calOpt(track.getApproachRate(), Float.parseFloat(value), opt);
+            case "od" -> calOpt(track.getOverallDifficulty(), Float.parseFloat(value), opt);
+            case "cs" -> calOpt(track.getCircleSize(), Float.parseFloat(value), opt);
+            case "hp" -> calOpt(track.getHpDrain(), Float.parseFloat(value), opt);
+            case "star" -> calOpt(track.getDifficulty(), Float.parseFloat(value), opt);
+            default -> false;
+        };
     }
 
     private boolean calOpt(float val1, float val2, String opt) {
-        switch (opt) {
-            case "=":
-                return val1 == val2;
-            case "<":
-                return val1 < val2;
-            case ">":
-                return val1 > val2;
-            case "<=":
-                return val1 <= val2;
-            case ">=":
-                return val1 >= val2;
-            default:
-                return false;
-        }
+        return switch (opt) {
+            case "=" -> val1 == val2;
+            case "<" -> val1 < val2;
+            case ">" -> val1 > val2;
+            case "<=" -> val1 <= val2;
+            case ">=" -> val1 >= val2;
+            default -> false;
+        };
     }
 
     public void delete() {

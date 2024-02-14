@@ -2317,25 +2317,23 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
 
         String scoreName = "hit0";
         switch (score) {
-            case 300:
-                scoreName = registerHit(id, 300, endCombo);
-                break;
-            case 100:
+            case 300 -> scoreName = registerHit(id, 300, endCombo);
+            case 100 -> {
                 scoreName = registerHit(id, 100, endCombo);
                 stat.setPerfect(false);
-                break;
-            case 50:
+            }
+            case 50 -> {
                 scoreName = registerHit(id, 50, endCombo);
                 stat.setPerfect(false);
-                break;
-            case 30:
+            }
+            case 30 -> {
                 scoreName = "sliderpoint30";
                 stat.registerHit(30, false, false);
-                break;
-            case 10:
+            }
+            case 10 -> {
                 scoreName = "sliderpoint10";
                 stat.registerHit(10, false, false);
-                break;
+            }
         }
 
         if (score > 10) {
@@ -2366,15 +2364,9 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
         if (replay != null && !replaying) {
             short acc = (short) (totalScore * 4);
             switch (score) {
-                case 300:
-                    acc += 3;
-                    break;
-                case 100:
-                    acc += 2;
-                    break;
-                case 50:
-                    acc += 1;
-                    break;
+                case 300 -> acc += 3;
+                case 100 -> acc += 2;
+                case 50 -> acc += 1;
             }
             replay.addObjectResult(id, acc, null);
         }
@@ -2396,18 +2388,12 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
             return;
         }
 
-        String scoreName = "hit0";
-        switch (score) {
-            case 300:
-                scoreName = registerHit(id, 300, endCombo);
-                break;
-            case 100:
-                scoreName = registerHit(id, 100, endCombo);
-                break;
-            case 50:
-                scoreName = registerHit(id, 50, endCombo);
-                break;
-        }
+        String scoreName = switch (score) {
+            case 300 -> registerHit(id, 300, endCombo);
+            case 100 -> registerHit(id, 100, endCombo);
+            case 50 -> registerHit(id, 50, endCombo);
+            default -> "hit0";
+        };
 
         if (Config.isHitLighting() &&
                 ResourceManager.getInstance().getTexture("lighting") != null) {

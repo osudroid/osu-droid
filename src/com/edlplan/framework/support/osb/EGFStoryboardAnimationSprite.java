@@ -21,12 +21,8 @@ public class EGFStoryboardAnimationSprite extends EGFStoryboardSprite {
         int idx = (int) (Math.max(0, time - sprite.startTime()) / sprite.frameDelay);
         if (idx >= sprite.frameCount) {
             switch (sprite.loopType) {
-                case LoopOnce:
-                    idx = sprite.frameCount - 1;
-                    break;
-                case LoopForever:
-                default:
-                    idx %= sprite.frameCount;
+                case LoopOnce -> idx = sprite.frameCount - 1;
+                default -> idx %= sprite.frameCount;
             }
         }
         ((MultipleFlippableTextureQuad) textureQuad).switchTexture(idx);

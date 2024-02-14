@@ -220,14 +220,14 @@ public class SongMenu implements IUpdateHandler, MenuItemListener,
                 return false;
             }
             switch (evt.getAction()) {
-                case (TouchEvent.ACTION_DOWN):
+                case (TouchEvent.ACTION_DOWN) -> {
                     velocityY = 0;
                     touchY = evt.getY();
                     pointerId = evt.getPointerID();
                     tapTime = secPassed;
                     initalY = touchY;
-                    break;
-                case (TouchEvent.ACTION_MOVE):
+                }
+                case (TouchEvent.ACTION_MOVE) -> {
                     if (pointerId != -1 && pointerId != evt.getPointerID()) {
                         break;
                     }
@@ -239,7 +239,6 @@ public class SongMenu implements IUpdateHandler, MenuItemListener,
                         pointerId = evt.getPointerID();
                     }
                     final float dy = evt.getY() - touchY;
-
                     camY -= dy;
                     touchY = evt.getY();
                     if (camY <= -Config.getRES_HEIGHT() / 2f) {
@@ -249,10 +248,10 @@ public class SongMenu implements IUpdateHandler, MenuItemListener,
                         camY = maxY;
                         velocityY = 0;
                     }
+                }
 
-                    // velocityY = -3f * dy;
-                    break;
-                default: {
+                // velocityY = -3f * dy;
+                default -> {
                     if (pointerId != -1 && pointerId != evt.getPointerID()) {
                         break;
                     }
@@ -267,7 +266,6 @@ public class SongMenu implements IUpdateHandler, MenuItemListener,
                     initalY = -1;
 
                 }
-                break;
             }
             return true;
         });
@@ -777,33 +775,38 @@ public class SongMenu implements IUpdateHandler, MenuItemListener,
             String s1;
             String s2;
             switch (sortOrder) {
-                case Artist:
+                case Artist -> {
                     s1 = i1.getBeatmap().getArtist();
                     s2 = i2.getBeatmap().getArtist();
-                    break;
-                case Creator:
+                }
+                case Creator -> {
                     s1 = i1.getBeatmap().getCreator();
                     s2 = i2.getBeatmap().getCreator();
-                    break;
-                case Date:
+                }
+                case Date -> {
                     final Long int1 = i1.getBeatmap().getDate();
                     final Long int2 = i2.getBeatmap().getDate();
                     return int2.compareTo(int1);
-                case Bpm:
+                }
+                case Bpm -> {
                     final float bpm1 = i1.getFirstTrack().getBpmMax();
                     final float bpm2 = i2.getFirstTrack().getBpmMax();
                     return Float.compare(bpm2, bpm1);
-                case Stars:
+                }
+                case Stars -> {
                     final float float1 = i1.getFirstTrack().getDifficulty();
                     final float float2 = i2.getFirstTrack().getDifficulty();
                     return Float.compare(float2, float1);
-                case Length:
+                }
+                case Length -> {
                     final Long length1 = i1.getFirstTrack().getMusicLength();
                     final Long length2 = i2.getFirstTrack().getMusicLength();
                     return length2.compareTo(length1);
-                default:
+                }
+                default -> {
                     s1 = i1.getBeatmap().getTitle();
                     s2 = i2.getBeatmap().getTitle();
+                }
             }
 
             return s1.compareToIgnoreCase(s2);
@@ -1444,17 +1447,8 @@ public class SongMenu implements IUpdateHandler, MenuItemListener,
 
     private void tryReloadMenuItems(SortOrder order) {
         switch (order) {
-            case Title:
-            case Artist:
-            case Creator:
-            case Date:
-            case Bpm:
-                reloadMenuItems(GroupType.MapSet);
-                break;
-            case Stars:
-            case Length:
-                reloadMenuItems(GroupType.SingleDiff);
-                break;
+            case Title, Artist, Creator, Date, Bpm -> reloadMenuItems(GroupType.MapSet);
+            case Stars, Length -> reloadMenuItems(GroupType.SingleDiff);
         }
     }
 
@@ -1467,15 +1461,15 @@ public class SongMenu implements IUpdateHandler, MenuItemListener,
             }
             items.clear();
             switch (type) {
-                case MapSet:
+                case MapSet -> {
                     for (final BeatmapInfo i : LibraryManager.INSTANCE.getLibrary()) {
                         final MenuItem item = new MenuItem(this, i);
                         items.add(item);
                         item.attachToScene(scene, backLayer);
 //                        oy += item.getHeight();
                     }
-                    break;
-                case SingleDiff:
+                }
+                case SingleDiff -> {
                     for (final BeatmapInfo i : LibraryManager.INSTANCE.getLibrary()) {
                         for (int j = 0; j < i.getCount(); j++) {
                             final MenuItem item = new MenuItem(this, i, j);
@@ -1484,7 +1478,7 @@ public class SongMenu implements IUpdateHandler, MenuItemListener,
 //                            oy += item.getHeight();
                         }
                     }
-                    break;
+                }
             }
             final String lowerFilter = filterMenu.getFilter().toLowerCase();
             final boolean favsOnly = filterMenu.isFavoritesOnly();

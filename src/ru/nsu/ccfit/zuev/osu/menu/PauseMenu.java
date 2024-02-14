@@ -85,14 +85,14 @@ public class PauseMenu implements IOnMenuItemClickListener {
         }
         BassSoundProvider playSnd;
         switch (pMenuItem.getID()) {
-            case ITEM_SAVE_REPLAY:
-                if(fail && !replaySaved && !game.getReplaying() && game.saveFailedReplay()){
+            case ITEM_SAVE_REPLAY -> {
+                if (fail && !replaySaved && !game.getReplaying() && game.saveFailedReplay()) {
                     ToastLogger.showTextId(R.string.message_save_replay_successful, true);
                     replaySaved = true;
                 }
                 return true;
-
-            case ITEM_CONTINUE:
+            }
+            case ITEM_CONTINUE -> {
                 if (fail) {
                     return false;
                 }
@@ -102,8 +102,8 @@ public class PauseMenu implements IOnMenuItemClickListener {
                 }
                 game.resume();
                 return true;
-
-            case ITEM_BACK:
+            }
+            case ITEM_BACK -> {
                 GlobalManager.getInstance().getScoring().setReplayID(-1);
                 playSnd = ResourceManager.getInstance().getSound("menuback");
                 if (playSnd != null) {
@@ -111,8 +111,8 @@ public class PauseMenu implements IOnMenuItemClickListener {
                 }
                 game.quit();
                 return true;
-
-            case ITEM_RETRY:
+            }
+            case ITEM_RETRY -> {
                 ResourceManager.getInstance().getSound("failsound").stop();
                 playSnd = ResourceManager.getInstance().getSound("menuhit");
                 if (playSnd != null) {
@@ -120,6 +120,7 @@ public class PauseMenu implements IOnMenuItemClickListener {
                 }
                 game.restartGame();
                 return true;
+            }
         }
         return false;
     }

@@ -41,36 +41,25 @@ public class EGFStoryboardSprite extends PlayingSprite {
 
     @Override
     public CommandHandleTimeline createByTarget(Target target) {
-        switch (target) {
-            case X:
-                return new CommandFloatHandleTimeline(textureQuad.position.x);
-            case Y:
-                return new CommandFloatHandleTimeline(textureQuad.position.y);
-            case ScaleX:
-                return new CommandFloatHandleTimeline(textureQuad.enableScale().scale.x);
-            case ScaleY:
-                return new CommandFloatHandleTimeline(textureQuad.enableScale().scale.y);
-            case Alpha:
-                return new CommandFloatHandleTimeline(textureQuad.alpha);
-            case Rotation:
-                return new CommandFloatHandleTimeline(textureQuad.enableRotation().rotation);
-            case Color:
-                return new CommandColor4HandleTimeline() {{
-                    value = textureQuad.enableColor().accentColor;
-                }};
-            case FlipH:
-                return new CommandBooleanHandleTimeline() {{
-                    value = textureQuad.flipH;
-                }};
-            case FlipV:
-                return new CommandBooleanHandleTimeline() {{
-                    value = textureQuad.flipV;
-                }};
-            case BlendingMode:
-                return new CommandBooleanHandleTimeline() {{
-                    value = blendMode;
-                }};
-        }
-        return null;
+        return switch (target) {
+            case X -> new CommandFloatHandleTimeline(textureQuad.position.x);
+            case Y -> new CommandFloatHandleTimeline(textureQuad.position.y);
+            case ScaleX -> new CommandFloatHandleTimeline(textureQuad.enableScale().scale.x);
+            case ScaleY -> new CommandFloatHandleTimeline(textureQuad.enableScale().scale.y);
+            case Alpha -> new CommandFloatHandleTimeline(textureQuad.alpha);
+            case Rotation -> new CommandFloatHandleTimeline(textureQuad.enableRotation().rotation);
+            case Color -> new CommandColor4HandleTimeline() {{
+                value = textureQuad.enableColor().accentColor;
+            }};
+            case FlipH -> new CommandBooleanHandleTimeline() {{
+                value = textureQuad.flipH;
+            }};
+            case FlipV -> new CommandBooleanHandleTimeline() {{
+                value = textureQuad.flipV;
+            }};
+            case BlendingMode -> new CommandBooleanHandleTimeline() {{
+                value = blendMode;
+            }};
+        };
     }
 }

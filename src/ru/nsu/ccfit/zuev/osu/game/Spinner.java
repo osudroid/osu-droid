@@ -209,20 +209,13 @@ public class Spinner extends GameObject {
             score = 300;
         }
         if (replayObjectData != null) {
-            switch (replayObjectData.accuracy % 4) {
-                case 0:
-                    score = 0;
-                    break;
-                case 1:
-                    score = 50;
-                    break;
-                case 2:
-                    score = 100;
-                    break;
-                case 3:
-                    score = 300;
-                    break;
-            }
+            score = switch (replayObjectData.accuracy % 4) {
+                case 0 -> 0;
+                case 1 -> 50;
+                case 2 -> 100;
+                case 3 -> 300;
+                default -> score;
+            };
         }
         listener.onSpinnerHit(id, score, endsCombo, this.score + fullrotations - 1);
         if (score > 0) {

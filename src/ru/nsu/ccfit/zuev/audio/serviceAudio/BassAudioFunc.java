@@ -96,23 +96,23 @@ public class BassAudioFunc {
         doClear();
         this.mode = mode;
         switch (mode) {
-            case MODE_NONE: //None
-                channel = BASS.BASS_StreamCreateFile(filePath, 0, 0, playflag);
-                // BASS.BASS_ChannelSetAttribute(channel, BASS.BASS_ATTRIB_NOBUFFER, 1);
-                break;
-            case MODE_HT: //HT
+            case MODE_NONE -> //None
+                    channel = BASS.BASS_StreamCreateFile(filePath, 0, 0, playflag);
+
+            // BASS.BASS_ChannelSetAttribute(channel, BASS.BASS_ATTRIB_NOBUFFER, 1);
+            case MODE_HT -> { //HT
                 channel = BASS.BASS_StreamCreateFile(filePath, 0, 0, BASS.BASS_STREAM_DECODE | BASS.BASS_STREAM_PRESCAN);
                 channel = BASS_FX.BASS_FX_TempoCreate(channel, BASS.BASS_STREAM_AUTOFREE);
                 // BASS.BASS_ChannelSetAttribute(channel, BASS.BASS_ATTRIB_NOBUFFER, 1);
                 BASS.BASS_ChannelSetAttribute(channel, BASS_FX.BASS_ATTRIB_TEMPO, -25.0f);
-                break;
-            case MODE_DT: //DT
+            }
+            case MODE_DT -> { //DT
                 channel = BASS.BASS_StreamCreateFile(filePath, 0, 0, BASS.BASS_STREAM_DECODE | BASS.BASS_STREAM_PRESCAN);
                 channel = BASS_FX.BASS_FX_TempoCreate(channel, BASS.BASS_STREAM_AUTOFREE);
                 // BASS.BASS_ChannelSetAttribute(channel, BASS.BASS_ATTRIB_NOBUFFER, 1);
                 BASS.BASS_ChannelSetAttribute(channel, BASS_FX.BASS_ATTRIB_TEMPO, 50.0f);
-                break;
-            case MODE_NC: //NC
+            }
+            case MODE_NC -> { //NC
                 channel = BASS.BASS_StreamCreateFile(filePath, 0, 0, BASS.BASS_STREAM_DECODE | BASS.BASS_STREAM_PRESCAN);
                 channel = BASS_FX.BASS_FX_TempoCreate(channel, BASS.BASS_STREAM_AUTOFREE);
                 // BASS.BASS_ChannelSetAttribute(channel, BASS.BASS_ATTRIB_NOBUFFER, 1);
@@ -120,13 +120,13 @@ public class BassAudioFunc {
                 BASS.BASS_ChannelGetInfo(channel, fx);
                 BASS.BASS_ChannelSetAttribute(channel, BASS.BASS_ATTRIB_FREQ, (int) (fx.freq * 1.5));
                 BASS.BASS_ChannelSetAttribute(channel, BASS_FX.BASS_ATTRIB_TEMPO, 0.0f);
-                break;
-            case MODE_SU: //SU
+            }
+            case MODE_SU -> { //SU
                 channel = BASS.BASS_StreamCreateFile(filePath, 0, 0, BASS.BASS_STREAM_DECODE | BASS.BASS_STREAM_PRESCAN);
                 channel = BASS_FX.BASS_FX_TempoCreate(channel, BASS.BASS_STREAM_AUTOFREE);
                 // BASS.BASS_ChannelSetAttribute(channel, BASS.BASS_ATTRIB_NOBUFFER, 1);
                 BASS.BASS_ChannelSetAttribute(channel, BASS_FX.BASS_ATTRIB_TEMPO, 25.0f);
-                break;
+            }
         }
 
         if (channel != 0) {
@@ -218,16 +218,13 @@ public class BassAudioFunc {
     public Status getStatus() {
         if (channel == 0) return Status.STOPPED;
 
-        switch (BASS.BASS_ChannelIsActive(channel)) {
-            case BASS.BASS_ACTIVE_STOPPED:
-                return Status.STOPPED;
-            case BASS.BASS_ACTIVE_PAUSED:
-                return Status.PAUSED;
-            case BASS.BASS_ACTIVE_PLAYING:
-                return Status.PLAYING;
-        }
+        return switch (BASS.BASS_ChannelIsActive(channel)) {
+            case BASS.BASS_ACTIVE_STOPPED -> Status.STOPPED;
+            case BASS.BASS_ACTIVE_PAUSED -> Status.PAUSED;
+            case BASS.BASS_ACTIVE_PLAYING -> Status.PLAYING;
+            default -> Status.STALLED;
+        };
 
-        return Status.STALLED;
     }
 
     public int getPosition() {

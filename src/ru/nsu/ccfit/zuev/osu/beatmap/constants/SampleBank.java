@@ -25,16 +25,12 @@ public enum SampleBank {
      * @return The sample bank counterpart of the given value.
      */
     public static SampleBank parse(int value) {
-        switch (value) {
-            case 1:
-                return normal;
-            case 2:
-                return soft;
-            case 3:
-                return drum;
-            default:
-                return none;
-        }
+        return switch (value) {
+            case 1 -> normal;
+            case 2 -> soft;
+            case 3 -> drum;
+            default -> none;
+        };
     }
 
     /**
@@ -44,15 +40,11 @@ public enum SampleBank {
      * @return The sample bank counterpart of the given value.
      */
     public static SampleBank parse(String value) {
-        switch (value) {
-            case "Normal":
-                return normal;
-            case "Soft":
-                return soft;
-            case "Drum":
-                return drum;
-            default:
-                return none;
-        }
+        return switch (value) {
+            case "Normal" -> normal;
+            case "Soft" -> soft;
+            case "Drum" -> drum;
+            default -> none;
+        };
     }
 }

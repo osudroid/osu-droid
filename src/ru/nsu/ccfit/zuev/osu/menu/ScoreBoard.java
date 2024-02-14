@@ -84,65 +84,37 @@ public class ScoreBoard extends Entity implements ScrollDetector.IScrollDetector
         String[] mods = s.split("\\|", 2);
         for (int i = 0; i < mods[0].length(); i++) {
             switch (mods[0].charAt(i)) {
-                case 'a':
-                    sb.append("Auto,");
-                    break;
-                case 'x':
-                    sb.append("Relax,");
-                    break;
-                case 'p':
-                    sb.append("AP,");
-                    break;
-                case 'e':
+                case 'a' -> sb.append("Auto,");
+                case 'x' -> sb.append("Relax,");
+                case 'p' -> sb.append("AP,");
+                case 'e' -> {
                     sb.append("EZ,");
                     --cs;
-                    break;
-                case 'n':
-                    sb.append("NF,");
-                    break;
-                case 'r':
+                }
+                case 'n' -> sb.append("NF,");
+                case 'r' -> {
                     sb.append("HR,");
                     ++cs;
-                    break;
-                case 'h':
-                    sb.append("HD,");
-                    break;
-                case 'i':
-                    sb.append("FL,");
-                    break;
-                case 'd':
-                    sb.append("DT,");
-                    break;
-                case 'c':
-                    sb.append("NC,");
-                    break;
-                case 't':
-                    sb.append("HT,");
-                    break;
-                case 's':
-                    sb.append("PR,");
-                    break;
-                case 'l':
+                }
+                case 'h' -> sb.append("HD,");
+                case 'i' -> sb.append("FL,");
+                case 'd' -> sb.append("DT,");
+                case 'c' -> sb.append("NC,");
+                case 't' -> sb.append("HT,");
+                case 's' -> sb.append("PR,");
+                case 'l' -> {
                     sb.append("REZ,");
                     --cs;
-                    break;
+                }
                 // Note: This is SmallCircles which is not available anymore, replaced with custom CS.
-                case 'm':
+                case 'm' -> {
                     hasLegacySC = true;
                     cs += 4;
-                    break;
-                case 'u':
-                    sb.append("SD,");
-                    break;
-                case 'f':
-                    sb.append("PF,");
-                    break;
-                case 'b':
-                    sb.append("SU,");
-                    break;
-                case 'v':
-                    sb.append("ScoreV2,");
-                    break;
+                }
+                case 'u' -> sb.append("SD,");
+                case 'f' -> sb.append("PF,");
+                case 'b' -> sb.append("SU,");
+                case 'v' -> sb.append("ScoreV2,");
             }
         }
 
@@ -463,15 +435,15 @@ public class ScoreBoard extends Entity implements ScrollDetector.IScrollDetector
     @Override
     public void onScroll(ScrollDetector pScrollDetector, TouchEvent pTouchEvent, float pDistanceX, float pDistanceY) {
         switch (pTouchEvent.getAction()) {
-            case TouchEvent.ACTION_DOWN:
+            case TouchEvent.ACTION_DOWN -> {
                 velocityY = 0;
                 touchY = pTouchEvent.getY();
                 pointerId = pTouchEvent.getPointerID();
                 tapTime = secPassed;
                 initialY = touchY;
                 isScroll = true;
-                break;
-            case TouchEvent.ACTION_MOVE:
+            }
+            case TouchEvent.ACTION_MOVE -> {
                 if (pointerId == -1 || pointerId == pTouchEvent.getPointerID()) {
                     isScroll = true;
                     if (initialY == -1) {
@@ -489,13 +461,13 @@ public class ScoreBoard extends Entity implements ScrollDetector.IScrollDetector
                     if (camY <= -146) {
                         camY = -146;
                         velocityY = 0;
-                    } else if (camY >= maxY){
+                    } else if (camY >= maxY) {
                         camY = maxY;
                         velocityY = 0;
                     }
                 }
-                break;
-            default:
+            }
+            default -> {
                 if (pointerId == -1 || pointerId == pTouchEvent.getPointerID()) {
                     touchY = null;
 
@@ -510,7 +482,7 @@ public class ScoreBoard extends Entity implements ScrollDetector.IScrollDetector
                     pointerId = -1;
                     initialY = -1;
                 }
-                break;
+            }
         }
     }
 

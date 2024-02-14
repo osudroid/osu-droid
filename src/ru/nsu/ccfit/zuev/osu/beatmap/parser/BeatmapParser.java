@@ -166,29 +166,17 @@ public class BeatmapParser {
 
                 try {
                     switch (currentSection) {
-                        case general:
-                            generalParser.parse(data, s);
-                            break;
-                        case metadata:
-                            metadataParser.parse(data, s);
-                            break;
-                        case difficulty:
-                            difficultyParser.parse(data, s);
-                            break;
-                        case events:
-                            eventsParser.parse(data, s);
-                            break;
-                        case timingPoints:
-                            controlPointsParser.parse(data, s);
-                            break;
-                        case colors:
-                            colorParser.parse(data, s);
-                            break;
-                        case hitObjects:
+                        case general -> generalParser.parse(data, s);
+                        case metadata -> metadataParser.parse(data, s);
+                        case difficulty -> difficultyParser.parse(data, s);
+                        case events -> eventsParser.parse(data, s);
+                        case timingPoints -> controlPointsParser.parse(data, s);
+                        case colors -> colorParser.parse(data, s);
+                        case hitObjects -> {
                             if (withHitObjects) {
                                 hitObjectsParser.parse(data, s);
                             }
-                            break;
+                        }
                     }
                 } catch (Exception e) {
                     Log.e("BeatmapParser.parse", "Unable to parse line " + s, e);
