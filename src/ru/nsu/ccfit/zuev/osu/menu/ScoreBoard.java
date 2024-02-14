@@ -372,10 +372,9 @@ public class ScoreBoard extends Entity implements ScrollDetector.IScrollDetector
             {
                 var child = getChild(i);
 
-                if (!(child instanceof Sprite))
+                if (!(child instanceof Sprite sprite))
                     continue;
 
-                var sprite = (Sprite) child;
                 sprite.setPosition(sprite.getX(), y);
                 y += 0.8f * (sprite.getHeight() - 32);
             }
@@ -407,10 +406,9 @@ public class ScoreBoard extends Entity implements ScrollDetector.IScrollDetector
             {
                 var child = getChild(i);
 
-                if (!(child instanceof Sprite))
+                if (!(child instanceof Sprite sprite))
                     continue;
 
-                var sprite = (Sprite) child;
                 sprite.setPosition(-160, 146 + 0.8f * percentShow * i * (sprite.getHeight() - 32));
             }
 

@@ -54,8 +54,7 @@ public class BlendProperty implements Copyable<BlendProperty> {
 
     @Override
     public boolean equals(Object obj) {
-        if (obj instanceof BlendProperty) {
-            BlendProperty b = (BlendProperty) obj;
+        if (obj instanceof BlendProperty b) {
             return (enable == b.enable) && (blendType == b.blendType) && (isPreM == b.isPreM);
         } else return false;
     }

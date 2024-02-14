@@ -291,13 +291,12 @@ public class ColorPickerPreference
 
     @Override
     protected void onRestoreInstanceState(Parcelable state) {
-        if (!(state instanceof SavedState)) {
+        if (!(state instanceof SavedState myState)) {
             // Didn't save state for us in onSaveInstanceState
             super.onRestoreInstanceState(state);
             return;
         }
 
-        SavedState myState = (SavedState) state;
         super.onRestoreInstanceState(myState.getSuperState());
         showDialog(myState.dialogBundle);
     }

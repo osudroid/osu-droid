@@ -102,10 +102,8 @@ public class ScoreBoardItem implements Cloneable {
         if (o == this)
             return true;
 
-        if (!(o instanceof ScoreBoardItem))
+        if (!(o instanceof ScoreBoardItem other))
             return false;
-
-        var other = (ScoreBoardItem) o;
 
         return Objects.equals(other.userName, userName)
                 && other.playScore == playScore

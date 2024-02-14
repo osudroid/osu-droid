@@ -226,8 +226,7 @@ public class TrackInfo implements Serializable {
         if (o == this)
             return true;
 
-        if (o instanceof TrackInfo) {
-            var track = (TrackInfo) o;
+        if (o instanceof TrackInfo track) {
 
             return md5 != null
                     && track.md5 != null

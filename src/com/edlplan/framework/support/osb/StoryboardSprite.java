@@ -43,8 +43,7 @@ public class StoryboardSprite extends SupportSprite {
         for (OsuStoryboardLayer layer : storyboard.layers) {
             if (layer != null) {
                 for (IStoryboardElement element : layer.elements) {
-                    if (element instanceof StoryboardAnimationSprite) {
-                        StoryboardAnimationSprite as = (StoryboardAnimationSprite) element;
+                    if (element instanceof StoryboardAnimationSprite as) {
                         for (int i = 0; i < as.frameCount; i++) {
                             if ((tmp = textures.get(tmps = as.buildPath(i))) == null) {
                                 textures.put(tmps, 1);
