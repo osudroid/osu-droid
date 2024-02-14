@@ -70,7 +70,7 @@ abstract class BaseFragment : Fragment(), BackPressListener {
 
     open fun dismiss() {
         ActivityOverlay.dismissOverlay(this)
-        onDismissListener?.OnDismiss()
+        onDismissListener?.onDismiss()
     }
 
     fun save() {
@@ -100,6 +100,6 @@ abstract class BaseFragment : Fragment(), BackPressListener {
     }
 
     fun interface OnDismissListener {
-        fun OnDismiss()
+        fun onDismiss()
     }
 }

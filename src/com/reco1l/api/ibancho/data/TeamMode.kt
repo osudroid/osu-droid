@@ -7,6 +7,6 @@ enum class TeamMode
 
     companion object
     {
-        fun from(ordinal: Int) = values()[ordinal]
+        fun from(ordinal: Int) = entries[ordinal]
     }
 }

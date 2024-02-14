@@ -9,6 +9,6 @@ enum class WinCondition
 
     companion object
     {
-        fun from(ordinal: Int) = values()[ordinal]
+        fun from(ordinal: Int) = entries[ordinal]
     }
 }
