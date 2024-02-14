@@ -1,11 +1,14 @@
 package ru.nsu.ccfit.zuev.osu.online;
 
+import android.os.Build;
+
 import com.dgsrz.bancho.security.SecurityUtils;
 
 import org.anddev.andengine.util.Debug;
 
 import java.io.BufferedReader;
 import java.io.StringReader;
+import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 import java.net.UnknownHostException;
 import java.nio.charset.StandardCharsets;
@@ -24,8 +27,15 @@ public class PostBuilder {
             values.append("_");
         }
         formBodyBuilder.add(key, value);
-        values.append(URLEncoder.encode(value, StandardCharsets.UTF_8));
-
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            values.append(URLEncoder.encode(value, StandardCharsets.UTF_8));
+        } else {
+            try {
+                values.append(URLEncoder.encode(value, "UTF-8"));
+            } catch (UnsupportedEncodingException e) {
+                Debug.e(e);
+            }
+        }
     }
 
     public ArrayList<String> requestWithAttempts(final String scriptUrl, int attempts) throws RequestException {

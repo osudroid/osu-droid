@@ -1,5 +1,7 @@
 package ru.nsu.ccfit.zuev.osu.online;
 
+import android.os.Build;
+
 import com.dgsrz.bancho.security.SecurityUtils;
 
 import org.anddev.andengine.util.Debug;
@@ -33,9 +35,16 @@ public class OnlineFileOperator {
             }
 
             String checksum = FileUtils.getSHA256Checksum(file);
-            String sb = URLEncoder.encode(checksum, StandardCharsets.UTF_8) +
-                    "_" +
-                    URLEncoder.encode(replayID, StandardCharsets.UTF_8);
+            String sb;
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+                sb = URLEncoder.encode(checksum, StandardCharsets.UTF_8) +
+                        "_" +
+                        URLEncoder.encode(replayID, StandardCharsets.UTF_8);
+            } else {
+                sb = URLEncoder.encode(checksum, "UTF-8") +
+                        "_" +
+                        URLEncoder.encode(replayID, "UTF-8");
+            }
             String signature = SecurityUtils.signRequest(sb);
 
             MediaType mime = MediaType.parse("application/octet-stream");
