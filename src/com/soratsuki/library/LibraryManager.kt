@@ -44,24 +44,8 @@ object LibraryManager {
 
     private var fileCached = AtomicInteger(0)
 
-    private inline fun <R> libraryRun(crossinline block: MutableList<BeatmapInfo>.() -> R): R {
-        return runBlocking {
-            mutex.withLock {
-                library.block()
-            }
-        }
-    }
-
-    private inline fun <R> libraryLet(crossinline block: (MutableList<BeatmapInfo>) -> R): R {
-        return runBlocking {
-            mutex.withLock {
-                block(library)
-            }
-        }
-    }
-
     fun loadLibraryCache(forceUpdate: Boolean): Boolean = runBlocking {
-        libraryRun { clear() }
+        library.clear()
 
         if (!FileUtils.canUseSD()) {
             return@runBlocking true
@@ -117,10 +101,7 @@ object LibraryManager {
 
                             obj = ois.readObject()
                             if (obj is Collection<*>) {
-                                mutex.withLock {
-                                    obj.filterIsInstance(BeatmapInfo::class.java)
-                                        .let { library.addAll(it) }
-                                }
+                                obj.filterIsInstance(BeatmapInfo::class.java).let { library.addAll(it) }
 
                                 if (forceUpdate) {
                                     scanLibrary(true)
@@ -139,7 +120,7 @@ object LibraryManager {
 
     @JvmOverloads
     fun scanLibrary(addUncachedBeatmaps: Boolean = false) {
-        if (!addUncachedBeatmaps) libraryRun { clear() }
+        if (!addUncachedBeatmaps) library.clear()
 
         val files = FileUtils.listFiles(File(Config.getBeatmapPath())).also { if (it.size == fileCount) return@scanLibrary }
 
@@ -179,10 +160,10 @@ object LibraryManager {
             lib.createNewFile()
             oos.writeObject(VERSION)
             oos.writeObject(fileCount)
-            libraryLet { oos.writeObject(it) }
+            oos.writeObject(library)
         }
 
-        libraryRun { shuffle() }
+        shuffleLibrary()
         currentIndex = 0
     }
 
@@ -195,7 +176,9 @@ object LibraryManager {
 
             if (!file.isDirectory) continue
 
-            if (addUncachedBeatmaps && libraryRun { any { it.path == file.path } }) continue
+            if (addUncachedBeatmaps) {
+                mutex.withLock { if (library.any { it.path == file.path }) return@cacheBeatmap }
+            }
 
             GlobalManager.getInstance().info = "Loading ${file.name}..."
             val info = BeatmapInfo().apply {
@@ -206,14 +189,14 @@ object LibraryManager {
 
             if (info.count < 1) continue
 
-            mutex.withLock { library.add(info) }
+            library.add(info)
         }
     }
 
     fun deleteMap(info: BeatmapInfo) {
         val dir = File(info.path)
         deleteDir(dir)
-        libraryRun { remove(info) }
+        library.remove(info)
     }
 
     fun clearCache() {
@@ -226,46 +209,51 @@ object LibraryManager {
         fileCached.set(0)
     }
 
-    fun shuffleLibrary() = libraryRun { shuffle() }
+    fun shuffleLibrary() = runBlocking { mutex.withLock { library.shuffle() } }
 
     fun getBeatmap(): BeatmapInfo? = getBeatmapByIndex(currentIndex)
     fun getNextBeatmap(): BeatmapInfo? = getBeatmapByIndex(++currentIndex)
     fun getPrevBeatmap(): BeatmapInfo? = getBeatmapByIndex(--currentIndex)
 
-    private fun getBeatmapByIndex(index: Int): BeatmapInfo? = libraryRun {
+    private fun getBeatmapByIndex(index: Int): BeatmapInfo? {
         Debug.i("Music Changing Info: Require index: $index/$fileCount")
-        if (isEmpty()) return@libraryRun null
+        if (library.isEmpty()) return null
         currentIndex = if (index < 0 || index >= fileCount) {
-            shuffle()
+            shuffleLibrary()
             0
         } else {
             index
         }
-        get(currentIndex)
+        return library[currentIndex]
     }
 
-    fun findBeatmap(info: BeatmapInfo): Int = libraryRun {
-        forEach { if (it == info) return@libraryRun indexOf(it).also { idx -> currentIndex = idx } }
+    fun findBeatmap(info: BeatmapInfo): Int {
+        library.forEach { if (it == info) return library.indexOf(it).also { idx -> currentIndex = idx } }
+
         currentIndex = 0
-        0
+        return 0
     }
 
-    fun findTrackByMD5(md5: String?): TrackInfo? = libraryRun {
-        forEach {
-            it.tracks.forEach { track ->
-                if (track.mD5 == md5) return@libraryRun track
+    fun findTrackByMD5(md5: String?): TrackInfo? = runBlocking {
+        mutex.withLock {
+            library.forEach {
+                it.tracks.forEach { track ->
+                    if (track.mD5 == md5) return@runBlocking track
+                }
             }
+            return@runBlocking null
         }
-        null
     }
 
-    fun findTrackByFileNameAndMD5(filename: String, md5: String): TrackInfo? = libraryRun {
-        forEach {
-            it.tracks.forEach { track ->
-                if (track.filename == filename && track.mD5 == md5) return@libraryRun track
+    fun findTrackByFileNameAndMD5(filename: String, md5: String): TrackInfo? = runBlocking {
+        mutex.withLock {
+            library.forEach {
+                it.tracks.forEach { track ->
+                    if (track.filename == filename && track.mD5 == md5) return@runBlocking track
+                }
             }
+            return@runBlocking null
         }
-        null
     }
 
     fun updateLibrary(forceUpdate: Boolean) {
