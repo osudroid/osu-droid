@@ -40,7 +40,7 @@ public class EGFStoryboardSprite extends PlayingSprite {
     }
 
     @Override
-    public CommandHandleTimeline createByTarget(Target target) {
+    public CommandHandleTimeline<? extends SpriteCommand> createByTarget(Target target) {
         return switch (target) {
             case X -> new CommandFloatHandleTimeline(textureQuad.position.x);
             case Y -> new CommandFloatHandleTimeline(textureQuad.position.y);
