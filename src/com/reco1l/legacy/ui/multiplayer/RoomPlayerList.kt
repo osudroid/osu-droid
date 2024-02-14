@@ -51,7 +51,7 @@ class RoomPlayerList(val room: Room) : ScrollableList(), IScrollDetectorListener
     }
 
 
-    override fun onManagedUpdate(pSecondsElapsed: Float)
+    override fun onManagedUpdate(secondsElapsed: Float)
     {
         if (!isValid)
         {
@@ -68,7 +68,7 @@ class RoomPlayerList(val room: Room) : ScrollableList(), IScrollDetectorListener
             }
         }
 
-        super.onManagedUpdate(pSecondsElapsed)
+        super.onManagedUpdate(secondsElapsed)
     }
 
 

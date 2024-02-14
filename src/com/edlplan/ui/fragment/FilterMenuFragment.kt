@@ -65,9 +65,9 @@ class FilterMenuFragment : BaseFragment(), IUpdateHandler, IFilterMenu {
 
     override fun getOrder(): SongMenu.SortOrder {
         val prefs =
-            PreferenceManager.getDefaultSharedPreferences(configContext)
+            PreferenceManager.getDefaultSharedPreferences(configContext!!)
         val order = prefs.getInt("sortorder", 0)
-        return SongMenu.SortOrder.values()[order % SongMenu.SortOrder.values().size]
+        return SongMenu.SortOrder.entries[order % SongMenu.SortOrder.entries.size]
     }
 
     override fun isFavoritesOnly(): Boolean = favoritesOnly.isChecked
@@ -253,13 +253,13 @@ class FilterMenuFragment : BaseFragment(), IUpdateHandler, IFilterMenu {
 
     private fun nextOrder() {
         var order = order
-        order = SongMenu.SortOrder.values()[(order.ordinal + 1) % SongMenu.SortOrder.values().size]
+        order = SongMenu.SortOrder.entries.toTypedArray()[(order.ordinal + 1) % SongMenu.SortOrder.entries.size]
         saveOrder(order)
     }
 
     private fun saveOrder(order: SongMenu.SortOrder) {
         PreferenceManager
-            .getDefaultSharedPreferences(configContext)
+            .getDefaultSharedPreferences(configContext!!)
             .edit()
             .putInt("sortorder", order.ordinal)
             .commit()
