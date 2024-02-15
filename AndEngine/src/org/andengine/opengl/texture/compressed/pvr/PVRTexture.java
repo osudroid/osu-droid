@@ -19,6 +19,7 @@ import org.andengine.opengl.util.GLState;
 import org.andengine.util.StreamUtils;
 import org.andengine.util.adt.DataConstants;
 import org.andengine.util.adt.array.ArrayUtils;
+import org.andengine.util.adt.io.out.ByteBufferOutputStream;
 import org.andengine.util.debug.Debug;
 import org.andengine.util.math.MathUtils;
 
@@ -200,9 +201,9 @@ public abstract class PVRTexture extends Texture {
 	public ByteBuffer getPVRTextureBuffer() throws IOException {
 		final InputStream inputStream = this.getInputStream();
 		try {
-			final ByteArrayOutputStream os = new ByteArrayOutputStream();
+			final ByteBufferOutputStream os = new ByteBufferOutputStream(DataConstants.BYTES_PER_KILOBYTE, DataConstants.BYTES_PER_MEGABYTE / 2);
 			StreamUtils.copy(inputStream, os);
-			return ByteBuffer.wrap(os.toByteArray());
+			return os.toByteBuffer();
 		} finally {
 			StreamUtils.close(inputStream);
 		}
