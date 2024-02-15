@@ -1,7 +1,7 @@
 apply plugin: 'com.android.library'
 
 android {
-    namespace 'org.anddev.andengine'
+    namespace 'org.andengine'
     compileSdk 34
 
     defaultConfig {
