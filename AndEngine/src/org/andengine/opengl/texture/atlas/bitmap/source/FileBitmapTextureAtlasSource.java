@@ -34,6 +34,10 @@ public class FileBitmapTextureAtlasSource extends BaseTextureAtlasSource impleme
 
 	private final File mFile;
 
+	// osu!droid modification - The game can load textures that are stored in several sample sizes
+	// and we need this to take in consideration when decoding Bitmaps.
+	private int mSampleSize = 1;
+
 	// ===========================================================
 	// Constructors
 	// ===========================================================
@@ -82,6 +86,10 @@ public class FileBitmapTextureAtlasSource extends BaseTextureAtlasSource impleme
 	// Getter & Setter
 	// ===========================================================
 
+	public void setSampleSize(int pSampleSize) {
+		this.mSampleSize = pSampleSize;
+	}
+
 	// ===========================================================
 	// Methods for/from SuperClass/Interfaces
 	// ===========================================================
@@ -90,6 +98,7 @@ public class FileBitmapTextureAtlasSource extends BaseTextureAtlasSource impleme
 	public Bitmap onLoadBitmap(final Config pBitmapConfig) {
 		final BitmapFactory.Options decodeOptions = new BitmapFactory.Options();
 		decodeOptions.inPreferredConfig = pBitmapConfig;
+		decodeOptions.inSampleSize = mSampleSize;
 
 		InputStream in = null;
 		try {
