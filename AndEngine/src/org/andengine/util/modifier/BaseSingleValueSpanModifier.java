@@ -19,8 +19,8 @@ public abstract class BaseSingleValueSpanModifier<T> extends BaseDurationModifie
 	// Fields
 	// ===========================================================
 
-	private float mFromValue;
-	private float mValueSpan;
+	protected float mFromValue;
+	protected float mValueSpan;
 
 	protected final IEaseFunction mEaseFunction;
 
