@@ -408,12 +408,14 @@ public class Engine implements SensorEventListener, OnTouchListener, ITouchEvent
 	public boolean onTouch(final View pView, final MotionEvent pSurfaceMotionEvent) {
 		if(this.mRunning) {
 			this.mTouchController.onHandleMotionEvent(pSurfaceMotionEvent);
-			try {
-				/* Because a human cannot interact 1000x per second, we pause the UI-Thread for a little. */
+			// BEGIN osu!droid modification - Just no.
+			/*try {
+				*//* Because a human cannot interact 1000x per second, we pause the UI-Thread for a little. *//*
 				Thread.sleep(this.mEngineOptions.getTouchOptions().getTouchEventIntervalMilliseconds());
 			} catch (final InterruptedException e) {
 				Debug.e(e);
-			}
+			}*/
+			// END osu!droid modification.
 			return true;
 		} else {
 			return false;
