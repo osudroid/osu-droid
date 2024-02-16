@@ -19,11 +19,11 @@ public class ConfigChooser implements GLSurfaceView.EGLConfigChooser {
 
 	private static final int[] BUFFER = new int[1];
 
-	private static final int RED_SIZE = 5;
-	private static final int GREEN_SIZE = 6;
-	private static final int BLUE_SIZE = 5;
-	private static final int DEPTH_SIZE = 0;
-	private static final int ALPHA_SIZE = 0;
+	private static final int RED_SIZE = 8;
+	private static final int GREEN_SIZE = 8;
+	private static final int BLUE_SIZE = 8;
+	private static final int DEPTH_SIZE = 24;
+	private static final int ALPHA_SIZE = 8;
 	private static final int STENCIL_SIZE = 0;
 
 	private static final int MULTISAMPLE_COUNT = 2; // TODO Could be made variable?
