@@ -3,10 +3,11 @@ package ru.nsu.ccfit.zuev.osu.game;
 import android.graphics.PointF;
 
 import androidx.core.util.Supplier;
-import org.anddev.andengine.entity.Entity;
-import org.anddev.andengine.entity.modifier.IEntityModifier;
-import org.anddev.andengine.entity.sprite.Sprite;
+import org.andengine.entity.Entity;
+import org.andengine.entity.modifier.IEntityModifier;
+import org.andengine.entity.sprite.Sprite;
 
+import ru.nsu.ccfit.zuev.osu.GlobalManager;
 import ru.nsu.ccfit.zuev.osu.ResourceManager;
 import ru.nsu.ccfit.zuev.skins.OsuSkin;
 
@@ -23,7 +24,7 @@ public class CircleNumber extends Entity
         for (int i = 0; i < snum.length(); i++) {
             var tex = ResourceManager.getInstance().getTextureWithPrefix(OsuSkin.get().getHitCirclePrefix(), String.valueOf(snum.charAt(i)));
 
-            attachChild(new Sprite(0, 0, tex));
+            attachChild(new Sprite(0, 0, tex, GlobalManager.getInstance().getEngine().getVertexBufferObjectManager()));
         }
     }
 
@@ -37,7 +38,7 @@ public class CircleNumber extends Entity
         for (int i = 0; i < getChildCount(); i++)
         {
             // We assume all attached child are Sprite
-            var sprite = (Sprite) getChild(i);
+            var sprite = (Sprite) getChildByIndex(i);
 
             sprite.setScale(scale);
             sprite.setPosition(maxWidthScaled, 0f);
@@ -63,7 +64,7 @@ public class CircleNumber extends Entity
 
         if (count > 0)
             for (int i = 0; i < count; i++)
-                getChild(i).setAlpha(pAlpha);
+                getChildByIndex(i).setAlpha(pAlpha);
 
         super.setAlpha(pAlpha);
     }
@@ -81,6 +82,6 @@ public class CircleNumber extends Entity
     // Modifiers cannot be shared between multiple Entities, and using deepCopy() can be expensive, so we use a supplier instead.
     public void registerEntityModifiers(Supplier<IEntityModifier> modifier) {
         for (int i = 0; i < getChildCount(); i++)
-            getChild(i).registerEntityModifier(modifier.get());
+            getChildByIndex(i).registerEntityModifier(modifier.get());
     }
 }

@@ -1,10 +1,11 @@
 package ru.nsu.ccfit.zuev.osu.menu;
 
-import org.anddev.andengine.entity.sprite.Sprite;
-import org.anddev.andengine.entity.text.ChangeableText;
-import org.anddev.andengine.input.touch.TouchEvent;
-import org.anddev.andengine.util.MathUtils;
+import org.andengine.entity.sprite.Sprite;
+import org.andengine.entity.text.Text;
+import org.andengine.input.touch.TouchEvent;
+import org.andengine.util.math.MathUtils;
 
+import ru.nsu.ccfit.zuev.osu.GlobalManager;
 import ru.nsu.ccfit.zuev.osu.RGBColor;
 import ru.nsu.ccfit.zuev.osu.ResourceManager;
 import ru.nsu.ccfit.zuev.skins.OsuSkin;
@@ -14,7 +15,7 @@ public class MenuItemBackground extends Sprite {
 
     private static final RGBColor DEFAULT_COLOR = new RGBColor(240 / 255f, 150 / 255f, 0 / 255f);
     private static final RGBColor ON_TOUCH_COLOR = new RGBColor(1, 1, 1);
-    private final ChangeableText title, author;
+    private final Text title, author;
     private final RGBColor defColor = OsuSkin.get().getColor("MenuItemDefaultColor", DEFAULT_COLOR);
     private final RGBColor onTouchColor = OsuSkin.get().getColor("MenuItemOnTouchColor", ON_TOUCH_COLOR);
     private boolean moved = false;
@@ -23,13 +24,13 @@ public class MenuItemBackground extends Sprite {
 
     public MenuItemBackground() {
         super(0, 0, ResourceManager.getInstance().getTexture(
-                "menu-button-background"));
+                "menu-button-background"), GlobalManager.getInstance().getEngine().getVertexBufferObjectManager());
 
         setAlpha(0.8f);
-        title = new ChangeableText(Utils.toRes(32), Utils.toRes(25),
-                ResourceManager.getInstance().getFont("font"), "", 255);
-        author = new ChangeableText(0, 0, ResourceManager.getInstance()
-                .getFont("font"), "", 100);
+        title = new Text(Utils.toRes(32), Utils.toRes(25),
+                ResourceManager.getInstance().getFont("font"), "", 255, GlobalManager.getInstance().getEngine().getVertexBufferObjectManager());
+        author = new Text(0, 0, ResourceManager.getInstance()
+                .getFont("font"), "", 100, GlobalManager.getInstance().getEngine().getVertexBufferObjectManager());
         author.setPosition(Utils.toRes(150), Utils.toRes(60));
 
         defColor.apply(this);

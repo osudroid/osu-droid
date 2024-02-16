@@ -1,6 +1,6 @@
 package ru.nsu.ccfit.zuev.osu.async;
 
-import org.anddev.andengine.ui.activity.BaseGameActivity;
+import org.andengine.ui.activity.BaseGameActivity;
 
 public class SyncTaskManager {
     private static SyncTaskManager mgr = new SyncTaskManager();

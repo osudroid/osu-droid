@@ -14,17 +14,16 @@ import com.edlplan.framework.math.Vec2Int;
 import com.edlplan.framework.support.graphics.BitmapUtil;
 import com.edlplan.framework.utils.interfaces.Consumer;
 
-import org.anddev.andengine.BuildConfig;
-import org.anddev.andengine.opengl.texture.ITexture;
-import org.anddev.andengine.opengl.texture.TextureOptions;
-import org.anddev.andengine.opengl.texture.atlas.bitmap.BitmapTextureAtlas;
-import org.anddev.andengine.opengl.texture.region.TextureRegion;
-import org.anddev.andengine.opengl.util.GLHelper;
+import org.andengine.BuildConfig;
+import org.andengine.opengl.texture.ITexture;
+import org.andengine.opengl.texture.TextureOptions;
+import org.andengine.opengl.texture.atlas.bitmap.BitmapTextureAtlas;
+import org.andengine.opengl.texture.atlas.bitmap.source.FileBitmapTextureAtlasSource;
+import org.andengine.opengl.texture.region.TextureRegion;
 
 import java.io.File;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -33,7 +32,6 @@ import java.util.ListIterator;
 import java.util.Set;
 
 import ru.nsu.ccfit.zuev.osu.GlobalManager;
-import ru.nsu.ccfit.zuev.osu.helper.QualityFileBitmapSource;
 
 public class TexturePool {
 
@@ -55,7 +53,7 @@ public class TexturePool {
 
     public TexturePool(File dir) {
         this.dir = dir;
-        glMaxWidth = GLHelper.GlMaxTextureWidth;
+        glMaxWidth = 0; // Original constant GLHelper.GlMaxTextureWidth had this value.
         if (BuildConfig.DEBUG) System.out.println("GL_MAX_TEXTURE_SIZE = " + glMaxWidth);
         if (glMaxWidth == 0) {
             throw new RuntimeException("glMaxWidth not found");
@@ -153,15 +151,14 @@ public class TexturePool {
             if (onPackDrawDone != null) {
                 onPackDrawDone.consume(pack);
             }
-            final QualityFileBitmapSource source = new QualityFileBitmapSource(
+            final var source = FileBitmapTextureAtlasSource.create(
                     TextureHelper.createFactoryFromBitmap(pack));
-            final BitmapTextureAtlas tex = new BitmapTextureAtlas(glMaxWidth, glMaxWidth, TextureOptions.BILINEAR);
+            final BitmapTextureAtlas tex = new BitmapTextureAtlas(GlobalManager.getInstance().getEngine().getTextureManager(), glMaxWidth, glMaxWidth, TextureOptions.BILINEAR);
             tex.addTextureAtlasSource(source, 0, 0);
             GlobalManager.getInstance().getEngine().getTextureManager().loadTexture(tex);
             createdTextures.add(tex);
             for (TextureInfo info : toLoad) {
                 info.texture = new TextureRegion(tex, info.pos.x, info.pos.y, info.size.x, info.size.y);
-                info.texture.setTextureRegionBufferManaged(false);
             }
         }
         pack.recycle();

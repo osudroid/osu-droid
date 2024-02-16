@@ -2,16 +2,16 @@ package ru.nsu.ccfit.zuev.osu.menu;
 
 import android.annotation.SuppressLint;
 
-import org.anddev.andengine.engine.handler.IUpdateHandler;
-import org.anddev.andengine.entity.modifier.FadeOutModifier;
-import org.anddev.andengine.entity.modifier.LoopEntityModifier;
-import org.anddev.andengine.entity.modifier.RotationByModifier;
-import org.anddev.andengine.entity.scene.Scene;
-import org.anddev.andengine.entity.scene.background.ColorBackground;
-import org.anddev.andengine.entity.scene.background.SpriteBackground;
-import org.anddev.andengine.entity.sprite.Sprite;
-import org.anddev.andengine.entity.text.ChangeableText;
-import org.anddev.andengine.opengl.texture.region.TextureRegion;
+import org.andengine.engine.handler.IUpdateHandler;
+import org.andengine.entity.modifier.FadeOutModifier;
+import org.andengine.entity.modifier.LoopEntityModifier;
+import org.andengine.entity.modifier.RotationByModifier;
+import org.andengine.entity.scene.Scene;
+import org.andengine.entity.scene.background.Background;
+import org.andengine.entity.scene.background.SpriteBackground;
+import org.andengine.entity.sprite.Sprite;
+import org.andengine.entity.text.Text;
+import org.andengine.opengl.texture.region.TextureRegion;
 
 import java.util.ArrayList;
 
@@ -20,7 +20,7 @@ import ru.nsu.ccfit.zuev.osu.helper.CentredSprite;
 
 public class LoadingScreen implements IUpdateHandler {
     private final LoadingScene scene;
-    private final ChangeableText logText;
+    private final Text logText;
     private float percentage;
 
     public LoadingScreen() {
@@ -42,21 +42,21 @@ public class LoadingScreen implements IUpdateHandler {
                     0,
                     (Config.getRES_HEIGHT() - height) / 2,
                     Config.getRES_WIDTH(),
-                    height, tex);
+                    height, tex, GlobalManager.getInstance().getEngine().getVertexBufferObjectManager());
             scene.setBackground(new SpriteBackground(menuBg));
         } else {
-            scene.setBackground(new ColorBackground(70 / 255f, 129 / 255f,
+            scene.setBackground(new Background(70 / 255f, 129 / 255f,
                     252 / 255f));
         }
 
         final TextureRegion loadingTexture = ResourceManager.getInstance()
                 .getTexture("loading-title");
         final Sprite loadingTitle = new Sprite(0, 0,
-                Config.getRES_WIDTH(), loadingTexture.getHeight(), loadingTexture);
+                Config.getRES_WIDTH(), loadingTexture.getHeight(), loadingTexture, GlobalManager.getInstance().getEngine().getVertexBufferObjectManager());
         scene.attachChild(loadingTitle);
 
-        logText = new ChangeableText(0, 0, ResourceManager.getInstance()
-                .getFont("logFont"), "", 5);
+        logText = new Text(0, 0, ResourceManager.getInstance()
+                .getFont("logFont"), "", 5, GlobalManager.getInstance().getEngine().getVertexBufferObjectManager());
         scene.attachChild(logText);
         ToastLogger.setPercentage(-1);
         percentage = -1;

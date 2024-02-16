@@ -4,13 +4,18 @@ import android.graphics.PointF;
 
 import com.reco1l.legacy.Multiplayer;
 import com.reco1l.legacy.ui.multiplayer.RoomScene;
-import org.anddev.andengine.entity.modifier.*;
-import org.anddev.andengine.entity.primitive.Rectangle;
-import org.anddev.andengine.entity.scene.Scene;
-import org.anddev.andengine.entity.sprite.Sprite;
-import org.anddev.andengine.opengl.texture.region.TextureRegion;
+import org.andengine.entity.modifier.DelayModifier;
+import org.andengine.entity.modifier.FadeInModifier;
+import org.andengine.entity.modifier.FadeOutModifier;
+import org.andengine.entity.modifier.LoopEntityModifier;
+import org.andengine.entity.modifier.SequenceEntityModifier;
+import org.andengine.entity.primitive.Rectangle;
+import org.andengine.entity.scene.Scene;
+import org.andengine.entity.sprite.Sprite;
+import org.andengine.opengl.texture.region.TextureRegion;
 
 import ru.nsu.ccfit.zuev.osu.Config;
+import ru.nsu.ccfit.zuev.osu.GlobalManager;
 import ru.nsu.ccfit.zuev.osu.ResourceManager;
 import ru.nsu.ccfit.zuev.osu.Utils;
 import ru.nsu.ccfit.zuev.osu.scoring.StatisticV2;
@@ -41,7 +46,7 @@ public class BreakAnimator extends GameObject {
 
         for (int i = 0; i < 4; i++) {
             arrows[i] = new Sprite(0, 0, ResourceManager.getInstance()
-                    .getTexture("play-warningarrow").deepCopy());
+                    .getTexture("play-warningarrow").deepCopy(), GlobalManager.getInstance().getEngine().getVertexBufferObjectManager());
             arrows[i]
                     .registerEntityModifier(new LoopEntityModifier(
                             new SequenceEntityModifier(
@@ -99,7 +104,7 @@ public class BreakAnimator extends GameObject {
                     .getTextureWithPrefix(OsuSkin.get().getScorePrefix(), "0");
             mark = new Sprite(Config.getRES_WIDTH() - zeroRect.getWidth() * 11,
                     Utils.toRes(5), ResourceManager.getInstance().getTexture(
-                    "ranking-" + stat.getMark() + "-small"));
+                    "ranking-" + stat.getMark() + "-small"), GlobalManager.getInstance().getEngine().getVertexBufferObjectManager());
             mark.setScale(1.2f);
             scene.attachChild(mark, 0);
         }

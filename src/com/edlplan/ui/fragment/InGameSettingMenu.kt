@@ -16,7 +16,7 @@ import com.edlplan.ui.BaseAnimationListener
 import com.edlplan.ui.EasingHelper
 import com.reco1l.framework.lang.uiThread
 import com.reco1l.legacy.Multiplayer
-import org.anddev.andengine.input.touch.TouchEvent
+import org.andengine.input.touch.TouchEvent
 import ru.nsu.ccfit.zuev.osu.Config
 import ru.nsu.ccfit.zuev.osu.GlobalManager
 import ru.nsu.ccfit.zuev.osu.game.cursor.flashlight.FlashLightEntity

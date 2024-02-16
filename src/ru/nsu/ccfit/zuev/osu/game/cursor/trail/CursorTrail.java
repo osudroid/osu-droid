@@ -1,34 +1,31 @@
 package ru.nsu.ccfit.zuev.osu.game.cursor.trail;
 
-import org.anddev.andengine.entity.particle.ParticleSystem;
-import org.anddev.andengine.entity.particle.emitter.PointParticleEmitter;
-import org.anddev.andengine.entity.particle.initializer.ScaleInitializer;
-import org.anddev.andengine.entity.particle.modifier.AlphaModifier;
-import org.anddev.andengine.entity.particle.modifier.ExpireModifier;
-import org.anddev.andengine.opengl.texture.region.TextureRegion;
+import org.andengine.engine.camera.Camera;
+import org.andengine.entity.particle.SpriteParticleSystem;
+import org.andengine.entity.particle.emitter.PointParticleEmitter;
+import org.andengine.entity.particle.initializer.ScaleParticleInitializer;
+import org.andengine.entity.particle.modifier.AlphaParticleModifier;
+import org.andengine.entity.particle.modifier.ExpireParticleInitializer;
+import org.andengine.opengl.texture.region.TextureRegion;
 
-import javax.microedition.khronos.opengles.GL10;
+import ru.nsu.ccfit.zuev.osu.GlobalManager;
 
-import ru.nsu.ccfit.zuev.osu.Config;
-import ru.nsu.ccfit.zuev.osu.game.cursor.main.CursorSprite;
-
-public class CursorTrail extends ParticleSystem {
+public class CursorTrail extends SpriteParticleSystem {
     public CursorTrail(
             PointParticleEmitter emitter,
             int spawnRate,
             float trailSize,
             TextureRegion pTextureRegion
     ) {
-        super(emitter, spawnRate, spawnRate, spawnRate, pTextureRegion);
+        super(emitter, spawnRate, spawnRate, spawnRate, pTextureRegion, GlobalManager.getInstance().getEngine().getVertexBufferObjectManager());
 
         fadeOut();
-        setBlendFunction(GL10.GL_SRC_ALPHA, GL10.GL_ONE_MINUS_SRC_ALPHA);
-        addParticleInitializer(new ScaleInitializer(trailSize));
+        addParticleInitializer(new ScaleParticleInitializer<>(trailSize));
         setParticlesSpawnEnabled(false);
     }
 
     private void fadeOut() {
-        addParticleModifier(new ExpireModifier(0.10f));
-        addParticleModifier(new AlphaModifier(1.0f, 0.0f, 0f, 0.10f));
+        addParticleInitializer(new ExpireParticleInitializer<>(0.10f));
+        addParticleModifier(new AlphaParticleModifier<>(1.0f, 0.0f, 0f, 0.10f));
     }
 }

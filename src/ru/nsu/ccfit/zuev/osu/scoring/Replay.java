@@ -4,7 +4,7 @@ import android.graphics.PointF;
 
 import androidx.annotation.NonNull;
 
-import org.anddev.andengine.util.Debug;
+import org.andengine.util.debug.Debug;
 
 import java.io.EOFException;
 import java.io.FileInputStream;

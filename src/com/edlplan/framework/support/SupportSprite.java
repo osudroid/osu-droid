@@ -1,14 +1,16 @@
 package com.edlplan.framework.support;
 
+import android.opengl.GLES20;
+
 import com.edlplan.framework.support.batch.BatchEngine;
 import com.edlplan.framework.support.graphics.BaseCanvas;
 import com.edlplan.framework.support.graphics.BlendType;
 import com.edlplan.framework.support.graphics.GLWrapped;
 import com.edlplan.framework.support.graphics.SupportCanvas;
 
-import org.anddev.andengine.engine.camera.Camera;
-import org.anddev.andengine.entity.Entity;
-import org.anddev.andengine.opengl.util.GLHelper;
+import org.andengine.engine.camera.Camera;
+import org.andengine.entity.Entity;
+import org.andengine.opengl.util.GLState;
 
 import javax.microedition.khronos.opengles.GL10;
 
@@ -40,7 +42,7 @@ public class SupportSprite extends Entity {
     }
 
     @Override
-    protected void doDraw(GL10 pGL, Camera pCamera) {
+    protected void draw(GLState pGL, Camera pCamera) {
         SupportState.setUsingSupportCamera(true);
         BatchEngine.pGL = pGL;
 
@@ -67,7 +69,7 @@ public class SupportSprite extends Entity {
         canvas.unprepare();
 
         SupportState.setUsingSupportCamera(false);
-        GLHelper.blendFunction(pGL, BlendType.Normal.srcTypePreM, BlendType.Normal.dstTypePreM);
+        pGL.blendFunction(BlendType.Normal.srcTypePreM, BlendType.Normal.dstTypePreM);
     }
 
     public interface OnSupportDraw {

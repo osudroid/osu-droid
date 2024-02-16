@@ -3,16 +3,20 @@ package ru.nsu.ccfit.zuev.osu.game;
 import android.graphics.PointF;
 import com.edlplan.framework.math.Vec2;
 import com.edlplan.framework.math.line.LinePath;
-import com.edlplan.osu.support.slider.SliderBody2D;
 import com.edlplan.osu.support.timing.controlpoint.TimingControlPoint;
-import org.anddev.andengine.entity.IEntity;
-import org.anddev.andengine.entity.modifier.*;
-import org.anddev.andengine.entity.scene.Scene;
-import org.anddev.andengine.entity.sprite.Sprite;
-import org.anddev.andengine.util.MathUtils;
-import org.anddev.andengine.util.modifier.IModifier;
-import org.anddev.andengine.util.modifier.ease.EaseQuadIn;
-import org.anddev.andengine.util.modifier.ease.EaseQuadOut;
+import org.andengine.entity.IEntity;
+import org.andengine.entity.modifier.AlphaModifier;
+import org.andengine.entity.modifier.FadeInModifier;
+import org.andengine.entity.modifier.FadeOutModifier;
+import org.andengine.entity.modifier.ParallelEntityModifier;
+import org.andengine.entity.modifier.ScaleModifier;
+import org.andengine.entity.modifier.SequenceEntityModifier;
+import org.andengine.entity.scene.Scene;
+import org.andengine.entity.sprite.Sprite;
+import org.andengine.util.math.MathUtils;
+import org.andengine.util.modifier.IModifier;
+import org.andengine.util.modifier.ease.EaseQuadIn;
+import org.andengine.util.modifier.ease.EaseQuadOut;
 import ru.nsu.ccfit.zuev.osu.Config;
 import ru.nsu.ccfit.zuev.osu.RGBColor;
 import ru.nsu.ccfit.zuev.osu.Utils;
@@ -75,7 +79,7 @@ public class Slider extends GameObject {
     private LinePath superPath = null;
     private boolean preStageFinish = false;
 
-    private SliderBody2D abstractSliderBody = null;
+    //private SliderBody2D abstractSliderBody = null;
 
     private boolean
             mIsOver,
@@ -341,27 +345,27 @@ public class Slider extends GameObject {
             superPath.measure();
 
             var bodyWidth = (OsuSkin.get().getSliderBodyWidth() - OsuSkin.get().getSliderBorderWidth()) * scale;
-            abstractSliderBody = new SliderBody2D(superPath);
-            abstractSliderBody.setBodyWidth(bodyWidth);
-            abstractSliderBody.setBorderWidth(OsuSkin.get().getSliderBodyWidth() * scale);
-            abstractSliderBody.setSliderBodyBaseAlpha(OsuSkin.get().getSliderBodyBaseAlpha());
+            //abstractSliderBody = new SliderBody2D(superPath);
+            //abstractSliderBody.setBodyWidth(bodyWidth);
+            //abstractSliderBody.setBorderWidth(OsuSkin.get().getSliderBodyWidth() * scale);
+            //abstractSliderBody.setSliderBodyBaseAlpha(OsuSkin.get().getSliderBodyBaseAlpha());
 
             if (OsuSkin.get().isSliderHintEnable() && length > OsuSkin.get().getSliderHintShowMinLength()) {
-                abstractSliderBody.setEnableHint(true);
-                abstractSliderBody.setHintAlpha(OsuSkin.get().getSliderHintAlpha());
-                abstractSliderBody.setHintWidth(Math.min(OsuSkin.get().getSliderHintWidth() * scale, bodyWidth));
+                // abstractSliderBody.setEnableHint(true);
+                // abstractSliderBody.setHintAlpha(OsuSkin.get().getSliderHintAlpha());
+                // abstractSliderBody.setHintWidth(Math.min(OsuSkin.get().getSliderHintWidth() * scale, bodyWidth));
                 RGBColor hintColor = OsuSkin.get().getSliderHintColor();
                 if (hintColor != null) {
-                    abstractSliderBody.setHintColor(hintColor.r(), hintColor.g(), hintColor.b());
+                    //abstractSliderBody.setHintColor(hintColor.r(), hintColor.g(), hintColor.b());
                 } else {
-                    abstractSliderBody.setHintColor(color.r(), color.g(), color.b());
+                    //abstractSliderBody.setHintColor(color.r(), color.g(), color.b());
                 }
             }
 
-            abstractSliderBody.applyToScene(scene, Config.isSnakingInSliders());
-            abstractSliderBody.setBodyColor(color.r(), color.g(), color.b());
+            //abstractSliderBody.applyToScene(scene, Config.isSnakingInSliders());
+            //abstractSliderBody.setBodyColor(color.r(), color.g(), color.b());
             RGBColor scolor = GameHelper.getSliderColor();
-            abstractSliderBody.setBorderColor(scolor.r(), scolor.g(), scolor.b());
+            //abstractSliderBody.setBorderColor(scolor.r(), scolor.g(), scolor.b());
         }
 
         applyBodyFadeAdjustments(fadeInDuration);
@@ -428,13 +432,13 @@ public class Slider extends GameObject {
             return;
         }
         // Detach all objects
-        if (abstractSliderBody != null) {
+        /*if (abstractSliderBody != null) {
             if (GameHelper.isHidden()) {
                 abstractSliderBody.removeFromScene(scene);
             } else {
                 abstractSliderBody.removeFromScene(scene, 0.24f * GameHelper.getTimeMultiplier());
             }
-        }
+        }*/
 
         ball.registerEntityModifier(new FadeOutModifier(0.1f * GameHelper.getTimeMultiplier(), new ModifierListener() {
             @Override
@@ -683,12 +687,12 @@ public class Slider extends GameObject {
                 }
 
                 if (Config.isSnakingInSliders()) {
-                    if (superPath != null && abstractSliderBody != null) {
+                    /*if (superPath != null && abstractSliderBody != null) {
                         float l = superPath.getMeasurer().maxLength() * percentage;
 
                         abstractSliderBody.setEndLength(l);
                         abstractSliderBody.onUpdate();
-                    }
+                    }*/
 
                     tmpPoint = getPercentPosition(percentage, null);
 
@@ -705,11 +709,11 @@ public class Slider extends GameObject {
                     endArrow.setAlpha(1);
                 }
                 if (Config.isSnakingInSliders()) {
-                    if (!preStageFinish && superPath != null && abstractSliderBody != null) {
+                    /*if (!preStageFinish && superPath != null && abstractSliderBody != null) {
                         abstractSliderBody.setEndLength(superPath.getMeasurer().maxLength());
                         abstractSliderBody.onUpdate();
                         preStageFinish = true;
-                    }
+                    }*/
 
                     tmpPoint = endPosition;
 
@@ -860,7 +864,7 @@ public class Slider extends GameObject {
     }
 
     private void applyBodyFadeAdjustments(float fadeInDuration) {
-        if (abstractSliderBody == null) {
+        /*if (abstractSliderBody == null) {
             return;
         }
 
@@ -872,7 +876,7 @@ public class Slider extends GameObject {
             abstractSliderBody.applyFadeAdjustments(fadeInDuration, fadeOutDuration);
         } else {
             abstractSliderBody.applyFadeAdjustments(fadeInDuration);
-        }
+        }*/
     }
 
     @Override

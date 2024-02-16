@@ -49,7 +49,7 @@ import ru.nsu.ccfit.zuev.osuplus.R;
 
 import static android.content.Intent.ACTION_VIEW;
 
-import org.anddev.andengine.util.Debug;
+import org.andengine.util.debug.Debug;
 
 public class SettingsMenu extends SettingsFragment {
 
@@ -84,7 +84,7 @@ public class SettingsMenu extends SettingsFragment {
                     GlobalManager.getInstance().setSkinNow(Config.getSkinPath());
                     SkinManager.getInstance().clearSkin();
                     ResourceManager.getInstance().loadSkin(newValue.toString());
-                    GlobalManager.getInstance().getEngine().getTextureManager().reloadTextures();
+                    GlobalManager.getInstance().getEngine().getTextureManager().onReload();
 
                     mActivity.runOnUiThread(() -> {
                         loading.dismiss();

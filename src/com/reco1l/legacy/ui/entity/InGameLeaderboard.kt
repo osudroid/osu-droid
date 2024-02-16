@@ -2,10 +2,11 @@ package com.reco1l.legacy.ui.entity
 
 import android.opengl.GLES20
 import com.reco1l.legacy.Multiplayer.isMultiplayer
-import org.anddev.andengine.entity.Entity
-import org.anddev.andengine.entity.sprite.Sprite
-import org.anddev.andengine.entity.text.ChangeableText
+import org.andengine.entity.Entity
+import org.andengine.entity.sprite.Sprite
+import org.andengine.entity.text.Text
 import ru.nsu.ccfit.zuev.osu.Config
+import ru.nsu.ccfit.zuev.osu.GlobalManager
 import ru.nsu.ccfit.zuev.osu.menu.ScoreBoardItem
 import ru.nsu.ccfit.zuev.osu.scoring.StatisticV2
 import ru.nsu.ccfit.zuev.osu.GlobalManager.getInstance as getGlobal
@@ -106,7 +107,7 @@ class InGameLeaderboard(var playerName: String, private val stats: StatisticV2) 
             var i = lastPlayerPosition - 1
             while (i >= 0)
             {
-                val sprite = getChild(i) as BoardItem
+                val sprite = getChildByIndex(i) as BoardItem
 
                 if (player.data.playScore >= sprite.data.playScore)
                 {
@@ -137,7 +138,7 @@ class InGameLeaderboard(var playerName: String, private val stats: StatisticV2) 
                 var i = 0
                 while (i < spriteCount)
                 {
-                    val sprite = getChild(i)
+                    val sprite = getChildByIndex(i)
 
                     sprite.setPosition(0f, if (i >= maxAllowed) maxY else VERTICAL_PADDING + SPRITE_HEIGHT * i)
                     sprite.isVisible = i < maxAllowed
@@ -152,7 +153,7 @@ class InGameLeaderboard(var playerName: String, private val stats: StatisticV2) 
                 var i = 0
                 while (i < spriteCount)
                 {
-                    val sprite = getChild(i)
+                    val sprite = getChildByIndex(i)
 
                     // Showing only sprites that are between the bound index exclusive up to player position inclusive, the
                     // first sprite will always be shown so that's why the bound index is exclusive.
@@ -259,12 +260,12 @@ class InGameLeaderboard(var playerName: String, private val stats: StatisticV2) 
 
 
     private inner class BoardItem(val data: ScoreBoardItem) :
-        Sprite(0f, 0f, getResources().getTexture("menu-button-background"))
+        Sprite(0f, 0f, getResources().getTexture("menu-button-background"), GlobalManager.getInstance().engine.vertexBufferObjectManager)
     {
 
-        val info: ChangeableText
+        val info: Text
 
-        val rank: ChangeableText
+        val rank: Text
 
         // Storing target values, this is used when animating color changes.
         var r = 0.5f
@@ -278,12 +279,12 @@ class InGameLeaderboard(var playerName: String, private val stats: StatisticV2) 
             height = 90f
             width = 130f
 
-            info = ChangeableText(10f, 15f, getResources().getFont("font"), "", 100)
+            info = Text(10f, 15f, getResources().getFont("font"), "", 100, GlobalManager.getInstance().engine.vertexBufferObjectManager)
             info.setBlendFunction(GLES20.GL_SRC_ALPHA, GLES20.GL_ONE_MINUS_SRC_ALPHA)
             info.setScaleCenter(0f, 0f)
             info.setScale(0.65f)
 
-            rank = ChangeableText(10f, 15f, getResources().getFont("CaptionFont"), "", 5)
+            rank = Text(10f, 15f, getResources().getFont("CaptionFont"), "", 5, GlobalManager.getInstance().engine.vertexBufferObjectManager)
             rank.setBlendFunction(GLES20.GL_SRC_ALPHA, GLES20.GL_ONE_MINUS_SRC_ALPHA)
             rank.setPosition(100 - rank.width, 30f)
             rank.setScaleCenter(0f, 0f)

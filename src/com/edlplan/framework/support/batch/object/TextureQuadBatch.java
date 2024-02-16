@@ -1,12 +1,10 @@
 package com.edlplan.framework.support.batch.object;
 
 import com.edlplan.framework.support.batch.AbstractBatch;
-import com.edlplan.framework.support.batch.BatchEngine;
 import com.edlplan.framework.support.graphics.GLWrapped;
 import com.edlplan.framework.support.util.BufferUtil;
 
-import org.anddev.andengine.opengl.texture.ITexture;
-import org.anddev.andengine.opengl.util.GLHelper;
+import org.andengine.opengl.texture.ITexture;
 
 import java.nio.FloatBuffer;
 import java.nio.ShortBuffer;
@@ -104,10 +102,11 @@ public class TextureQuadBatch extends AbstractBatch<ATextureQuad> {
     protected boolean applyToGL() {
         if (offset != 0) {
 
-            GLWrapped.blend.setIsPreM(bindTexture.getTextureOptions().mPreMultipyAlpha);
+            GLWrapped.blend.setIsPreM(bindTexture.getTextureOptions().mPreMultiplyAlpha);
 
-            //handle render operation
-            GL10 pGL = BatchEngine.pGL;
+            // TODO: Translate this to GLES2, would require a buffer being loaded and a shader program
+            //  for position, color and texture coordinates. Still not sure what this is used for.
+            /*GL10 pGL = BatchEngine.pGL;
             bindTexture.bind(pGL);
             GLHelper.enableTextures(pGL);
             GLHelper.enableTexCoordArray(pGL);
@@ -133,7 +132,7 @@ public class TextureQuadBatch extends AbstractBatch<ATextureQuad> {
                     GL10.GL_UNSIGNED_SHORT,
                     indicesBuffer);
 
-            pGL.glDisableClientState(GL10.GL_COLOR_ARRAY);
+            pGL.glDisableClientState(GL10.GL_COLOR_ARRAY);*/
 
 
             /*shader.useThis();

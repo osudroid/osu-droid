@@ -3,7 +3,7 @@ package ru.nsu.ccfit.zuev.osu.online;
 import com.reco1l.framework.lang.execution.Async;
 import com.reco1l.legacy.ui.multiplayer.LobbyScene;
 import com.reco1l.legacy.ui.multiplayer.RoomScene;
-import org.anddev.andengine.util.Debug;
+import org.andengine.util.debug.Debug;
 
 import java.io.File;
 import java.util.ArrayList;

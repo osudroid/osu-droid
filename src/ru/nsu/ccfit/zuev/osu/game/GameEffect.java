@@ -2,20 +2,21 @@ package ru.nsu.ccfit.zuev.osu.game;
 
 import android.graphics.PointF;
 
-import org.anddev.andengine.entity.IEntity;
-import org.anddev.andengine.entity.modifier.IEntityModifier;
-import org.anddev.andengine.entity.modifier.IEntityModifier.IEntityModifierListener;
-import org.anddev.andengine.entity.modifier.ParallelEntityModifier;
-import org.anddev.andengine.entity.scene.Scene;
-import org.anddev.andengine.entity.shape.Shape;
-import org.anddev.andengine.entity.sprite.Sprite;
-import org.anddev.andengine.util.modifier.IModifier;
+import org.andengine.entity.IEntity;
+import org.andengine.entity.modifier.IEntityModifier;
+import org.andengine.entity.modifier.IEntityModifier.IEntityModifierListener;
+import org.andengine.entity.modifier.ParallelEntityModifier;
+import org.andengine.entity.scene.Scene;
+import org.andengine.entity.shape.Shape;
+import org.andengine.entity.sprite.Sprite;
+import org.andengine.util.modifier.IModifier;
 
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
 
+import ru.nsu.ccfit.zuev.osu.GlobalManager;
 import ru.nsu.ccfit.zuev.osu.RGBColor;
 import ru.nsu.ccfit.zuev.osu.ResourceManager;
 import ru.nsu.ccfit.zuev.osu.async.SyncTaskManager;
@@ -43,7 +44,7 @@ public class GameEffect extends GameObject implements IEntityModifierListener {
             hit.setLoopType(AnimSprite.LoopType.STOP);
             this.hit = hit;
         } else {
-            hit = new Sprite(0, 0, ResourceManager.getInstance().getTexture(texname));
+            hit = new Sprite(0, 0, ResourceManager.getInstance().getTexture(texname), GlobalManager.getInstance().getEngine().getVertexBufferObjectManager());
         }
     }
 

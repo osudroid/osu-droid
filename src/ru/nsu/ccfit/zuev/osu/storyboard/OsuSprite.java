@@ -5,40 +5,38 @@ import android.util.Log;
 
 import com.dgsrz.bancho.ui.StoryBoardTestActivity;
 
-import org.anddev.andengine.entity.IEntity;
-import org.anddev.andengine.entity.modifier.AlphaModifier;
-import org.anddev.andengine.entity.modifier.ColorModifier;
-import org.anddev.andengine.entity.modifier.DelayModifier;
-import org.anddev.andengine.entity.modifier.IEntityModifier;
-import org.anddev.andengine.entity.modifier.LoopEntityModifier;
-import org.anddev.andengine.entity.modifier.MoveModifier;
-import org.anddev.andengine.entity.modifier.MoveXModifier;
-import org.anddev.andengine.entity.modifier.MoveYModifier;
-import org.anddev.andengine.entity.modifier.ParallelEntityModifier;
-import org.anddev.andengine.entity.modifier.RotationModifier;
-import org.anddev.andengine.entity.modifier.ScaleModifier;
-import org.anddev.andengine.entity.modifier.SequenceEntityModifier;
-import org.anddev.andengine.entity.sprite.AnimatedSprite;
-import org.anddev.andengine.entity.sprite.BaseSprite;
-import org.anddev.andengine.entity.sprite.Sprite;
-import org.anddev.andengine.opengl.texture.TextureOptions;
-import org.anddev.andengine.opengl.texture.atlas.bitmap.BitmapTextureAtlas;
-import org.anddev.andengine.opengl.texture.atlas.bitmap.BitmapTextureAtlasTextureRegionFactory;
-import org.anddev.andengine.opengl.texture.atlas.bitmap.BuildableBitmapTextureAtlas;
-import org.anddev.andengine.opengl.texture.atlas.bitmap.source.FileBitmapTextureAtlasSource;
-import org.anddev.andengine.opengl.texture.atlas.bitmap.source.IBitmapTextureAtlasSource;
-import org.anddev.andengine.opengl.texture.atlas.buildable.builder.BlackPawnTextureBuilder;
-import org.anddev.andengine.opengl.texture.atlas.buildable.builder.ITextureBuilder;
-import org.anddev.andengine.opengl.texture.region.TextureRegion;
-import org.anddev.andengine.opengl.texture.region.TiledTextureRegion;
-import org.anddev.andengine.util.modifier.IModifier;
-import org.anddev.andengine.util.modifier.ease.EaseQuadIn;
-import org.anddev.andengine.util.modifier.ease.EaseQuadOut;
-import org.anddev.andengine.util.modifier.ease.IEaseFunction;
+import org.andengine.entity.IEntity;
+import org.andengine.entity.modifier.AlphaModifier;
+import org.andengine.entity.modifier.ColorModifier;
+import org.andengine.entity.modifier.DelayModifier;
+import org.andengine.entity.modifier.IEntityModifier;
+import org.andengine.entity.modifier.LoopEntityModifier;
+import org.andengine.entity.modifier.MoveModifier;
+import org.andengine.entity.modifier.MoveXModifier;
+import org.andengine.entity.modifier.MoveYModifier;
+import org.andengine.entity.modifier.ParallelEntityModifier;
+import org.andengine.entity.modifier.RotationModifier;
+import org.andengine.entity.modifier.ScaleModifier;
+import org.andengine.entity.modifier.SequenceEntityModifier;
+import org.andengine.entity.sprite.AnimatedSprite;
+import org.andengine.entity.sprite.Sprite;
+import org.andengine.opengl.texture.TextureOptions;
+import org.andengine.opengl.texture.atlas.bitmap.BitmapTextureAtlasTextureRegionFactory;
+import org.andengine.opengl.texture.atlas.bitmap.BuildableBitmapTextureAtlas;
+import org.andengine.opengl.texture.atlas.bitmap.source.FileBitmapTextureAtlasSource;
+import org.andengine.opengl.texture.atlas.buildable.builder.BlackPawnTextureAtlasBuilder;
+import org.andengine.opengl.texture.atlas.buildable.builder.ITextureAtlasBuilder;
+import org.andengine.opengl.texture.region.TextureRegion;
+import org.andengine.opengl.texture.region.TiledTextureRegion;
+import org.andengine.util.modifier.IModifier;
+import org.andengine.util.modifier.ease.EaseQuadIn;
+import org.andengine.util.modifier.ease.EaseQuadOut;
+import org.andengine.util.modifier.ease.IEaseFunction;
 
 import java.io.File;
 import java.util.ArrayList;
 
+import ru.nsu.ccfit.zuev.osu.GlobalManager;
 import ru.nsu.ccfit.zuev.osu.ResourceManager;
 
 /**
@@ -57,7 +55,7 @@ public class OsuSprite {
     private String debugLine;
     private int layer, ZIndex;
     private Origin origin;
-    private BaseSprite sprite;
+    private Sprite sprite;
     private ArrayList<OsuEvent> eventList;
     private TextureRegion textureRegion;
     private StoryBoardTestActivity activity = StoryBoardTestActivity.activity;
@@ -74,7 +72,7 @@ public class OsuSprite {
             isValid = false;
         } else {
             isValid = true;
-            sprite = new Sprite(x, y, textureRegion);
+            sprite = new Sprite(x, y, textureRegion, GlobalManager.getInstance().getEngine().getVertexBufferObjectManager());
             this.layer = layer;
             this.origin = origin;
             this.eventList = eventList;
@@ -95,22 +93,22 @@ public class OsuSprite {
         filePath = filePath.replaceAll("\"", "").replaceAll("\\\\", "/");
         this.fileName = filePath.substring(filePath.lastIndexOf("/") + 1, filePath.lastIndexOf("."));
         String fileExt = filePath.substring(filePath.lastIndexOf("."));
-        FileBitmapTextureAtlasSource cSource = new FileBitmapTextureAtlasSource(new File(StoryBoardTestActivity.FOLDER, filePath.substring(0, filePath.lastIndexOf(".")) + "0" + fileExt));
+        FileBitmapTextureAtlasSource cSource = FileBitmapTextureAtlasSource.create(new File(StoryBoardTestActivity.FOLDER, filePath.substring(0, filePath.lastIndexOf(".")) + "0" + fileExt));
         int tw = 16, th = 16;
-        int width = cSource.getWidth() * count;
-        int height = cSource.getHeight();
+        int width = cSource.getTextureWidth() * count;
+        int height = cSource.getTextureHeight();
         while (tw < width) {
             tw *= 2;
         }
         while (th < height) {
             th *= 2;
         }
-        BuildableBitmapTextureAtlas mBitmapTextureAtlas = new BuildableBitmapTextureAtlas(tw, th, TextureOptions.BILINEAR);
+        BuildableBitmapTextureAtlas mBitmapTextureAtlas = new BuildableBitmapTextureAtlas(GlobalManager.getInstance().getEngine().getTextureManager(), tw, th, TextureOptions.BILINEAR);
         ArrayList<TextureRegion> textureRegions = new ArrayList<>();
         for (int i = 0; i < count; i++) {
             File temp = new File(StoryBoardTestActivity.FOLDER, filePath.substring(0, filePath.lastIndexOf(".")) + i + fileExt);
             if (temp.exists()) {
-                FileBitmapTextureAtlasSource cSource2 = new FileBitmapTextureAtlasSource(temp);
+                FileBitmapTextureAtlasSource cSource2 = FileBitmapTextureAtlasSource.create(temp);
                 TextureRegion iTextureRegion = BitmapTextureAtlasTextureRegionFactory.createFromSource(mBitmapTextureAtlas, cSource2);
                 textureRegions.add(iTextureRegion);
             } else {
@@ -124,16 +122,16 @@ public class OsuSprite {
             return;
         }
         try {
-            mBitmapTextureAtlas.build(new BlackPawnTextureBuilder<>(0));
-        } catch (ITextureBuilder.TextureAtlasSourcePackingException e) {
+            mBitmapTextureAtlas.build(new BlackPawnTextureAtlasBuilder<>(0, 0, 0));
+        } catch (ITextureAtlasBuilder.TextureAtlasBuilderException e) {
             e.printStackTrace();
         }
         ResourceManager.getInstance().getEngine().getTextureManager().loadTexture(mBitmapTextureAtlas);
 
         isValid = true;
-        TiledTextureRegion tiledTextureRegion = new TiledTextureRegion(mBitmapTextureAtlas,
+        TiledTextureRegion tiledTextureRegion = TiledTextureRegion.create(mBitmapTextureAtlas,
                 0, 0, width, height, count, 1);
-        AnimatedSprite sprite = new AnimatedSprite(x, y, tiledTextureRegion);
+        AnimatedSprite sprite = new AnimatedSprite(x, y, tiledTextureRegion, GlobalManager.getInstance().getEngine().getVertexBufferObjectManager());
         sprite.animate(delay, loopType.equals("LoopForever"));
         this.sprite = sprite;
         this.layer = layer;

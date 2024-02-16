@@ -2,7 +2,8 @@ package com.edlplan.framework.support.batch;
 
 import com.edlplan.framework.support.SupportState;
 
-import org.anddev.andengine.opengl.util.GLHelper;
+import org.andengine.opengl.util.GLHelper;
+import org.andengine.opengl.util.GLState;
 
 import javax.microedition.khronos.opengles.GL10;
 
@@ -43,8 +44,9 @@ public abstract class AbstractBatch<T> {
         return BatchEngine.currentBatch() == this;
     }
 
+    // TODO What is this suposed to do ?
     public final void flush() {
-        GL10 pGL = BatchEngine.pGL;
+        /*GL10 pGL = BatchEngine.pGL;
         int type = GLHelper.getCurrentMatrixType();
         if (SupportState.isUsingSupportCamera()) {
             pGL.glMatrixMode(GL10.GL_PROJECTION);
@@ -54,16 +56,16 @@ public abstract class AbstractBatch<T> {
             pGL.glMatrixMode(GL10.GL_MODELVIEW);
             pGL.glPushMatrix();
             pGL.glMultMatrixf(BatchEngine.shaderGlobals.camera.getMaskMatrix().data, 0);
-        }
+        }*/
         if (applyToGL()) {
             clearData();
         }
-        if (SupportState.isUsingSupportCamera()) {
+        /*if (SupportState.isUsingSupportCamera()) {
             pGL.glMatrixMode(GL10.GL_PROJECTION);
             pGL.glPopMatrix();
             pGL.glMatrixMode(GL10.GL_MODELVIEW);
             pGL.glPopMatrix();
             pGL.glMatrixMode(type);
-        }
+        }*/
     }
 }

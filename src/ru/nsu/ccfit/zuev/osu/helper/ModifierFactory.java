@@ -1,6 +1,6 @@
 package ru.nsu.ccfit.zuev.osu.helper;
 
-import org.anddev.andengine.entity.modifier.IEntityModifier;
+import org.andengine.entity.modifier.IEntityModifier;
 
 import java.util.LinkedList;
 import java.util.Queue;

@@ -2,7 +2,7 @@ package ru.nsu.ccfit.zuev.osu;
 
 import androidx.annotation.NonNull;
 
-import org.anddev.andengine.entity.Entity;
+import org.andengine.entity.Entity;
 
 public class RGBColor {
     private float cr;

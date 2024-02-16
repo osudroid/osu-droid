@@ -1,11 +1,13 @@
 package ru.nsu.ccfit.zuev.osu.helper;
 
-import org.anddev.andengine.engine.camera.Camera;
-import org.anddev.andengine.entity.sprite.Sprite;
-import org.anddev.andengine.opengl.texture.region.TextureRegion;
+import org.andengine.engine.camera.Camera;
+import org.andengine.entity.sprite.Sprite;
+import org.andengine.opengl.texture.region.TextureRegion;
+import org.andengine.opengl.util.GLState;
 
 import javax.microedition.khronos.opengles.GL10;
 
+import ru.nsu.ccfit.zuev.osu.GlobalManager;
 import ru.nsu.ccfit.zuev.osu.ResourceManager;
 import ru.nsu.ccfit.zuev.skins.StringSkinData;
 
@@ -27,7 +29,7 @@ public class AnimSprite extends Sprite {
 
     public AnimSprite(float px, float py, StringSkinData prefix, String name, int count, float fps)
     {
-        super(px, py, ResourceManager.getInstance().getTextureWithPrefix(prefix, (name != null ? name : "") + (count == 1 ? "" : "0")));
+        super(px, py, ResourceManager.getInstance().getTextureWithPrefix(prefix, (name != null ? name : "") + (count == 1 ? "" : "0")), GlobalManager.getInstance().getEngine().getVertexBufferObjectManager());
         if (count == 0) {
             count = 1;
         }
@@ -46,7 +48,7 @@ public class AnimSprite extends Sprite {
 
     public AnimSprite(final float px, final float py, final String texname,
                       int count, final float fps) {
-        super(px, py, ResourceManager.getInstance().getTexture(texname + "0"));
+        super(px, py, ResourceManager.getInstance().getTexture(texname + "0"), GlobalManager.getInstance().getEngine().getVertexBufferObjectManager());
         if (count == 0) {
             count = 1;
         }
@@ -63,7 +65,7 @@ public class AnimSprite extends Sprite {
 
     public AnimSprite(final float px, final float py, final float fps,
                       final String... textures) {
-        super(px, py, ResourceManager.getInstance().getTextureIfLoaded(textures[0]));
+        super(px, py, ResourceManager.getInstance().getTextureIfLoaded(textures[0]), GlobalManager.getInstance().getEngine().getVertexBufferObjectManager());
         this.count = textures.length;
         this.fps = fps;
         regions = new TextureRegion[count];
@@ -148,16 +150,13 @@ public class AnimSprite extends Sprite {
 
 
     @Override
-    protected void doDraw(final GL10 pGL, final Camera pCamera) {
+    protected void draw(GLState pGLState, Camera pCamera) {
         if (regions.length == 0 || frame < 0 || frame >= regions.length) {
             return;
         }
-        regions[frame].onApply(pGL);
-        onInitDraw(pGL);
-        onApplyVertices(pGL);
-        drawVertices(pGL, pCamera);
+        regions[frame].getTexture().bind(pGLState);
+        super.draw(pGLState, pCamera);
     }
-
 
     @Override
     public void setFlippedHorizontal(final boolean pFlippedHorizontal) {

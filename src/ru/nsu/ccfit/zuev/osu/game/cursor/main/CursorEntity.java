@@ -1,10 +1,10 @@
 package ru.nsu.ccfit.zuev.osu.game.cursor.main;
 
-import org.anddev.andengine.entity.Entity;
-import org.anddev.andengine.entity.particle.ParticleSystem;
-import org.anddev.andengine.entity.particle.emitter.PointParticleEmitter;
-import org.anddev.andengine.entity.scene.Scene;
-import org.anddev.andengine.opengl.texture.region.TextureRegion;
+import org.andengine.entity.Entity;
+import org.andengine.entity.particle.ParticleSystem;
+import org.andengine.entity.particle.emitter.PointParticleEmitter;
+import org.andengine.entity.scene.Scene;
+import org.andengine.opengl.texture.region.TextureRegion;
 
 import ru.nsu.ccfit.zuev.osu.Config;
 import ru.nsu.ccfit.zuev.osu.GlobalManager;

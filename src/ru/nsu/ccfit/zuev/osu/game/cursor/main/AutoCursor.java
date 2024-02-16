@@ -1,8 +1,8 @@
 package ru.nsu.ccfit.zuev.osu.game.cursor.main;
 
-import org.anddev.andengine.entity.modifier.MoveModifier;
-import org.anddev.andengine.util.modifier.ease.EaseQuadOut;
-import org.anddev.andengine.util.modifier.ease.IEaseFunction;
+import org.andengine.entity.modifier.MoveModifier;
+import org.andengine.util.modifier.ease.EaseQuadOut;
+import org.andengine.util.modifier.ease.IEaseFunction;
 
 import ru.nsu.ccfit.zuev.osu.Config;
 import ru.nsu.ccfit.zuev.osu.game.GameObject;

@@ -2,17 +2,20 @@ package ru.nsu.ccfit.zuev.osu.menu;
 
 import android.database.Cursor;
 import com.reco1l.legacy.Multiplayer;
-import org.anddev.andengine.entity.Entity;
-import org.anddev.andengine.entity.scene.Scene;
-import org.anddev.andengine.entity.sprite.Sprite;
-import org.anddev.andengine.entity.text.ChangeableText;
-import org.anddev.andengine.entity.text.Text;
-import org.anddev.andengine.input.touch.TouchEvent;
-import org.anddev.andengine.input.touch.detector.ScrollDetector;
-import org.anddev.andengine.input.touch.detector.SurfaceScrollDetector;
-import org.anddev.andengine.opengl.texture.region.TextureRegion;
-import org.anddev.andengine.util.Debug;
-import org.anddev.andengine.util.MathUtils;
+import com.reco1l.legacy.engine.BlankTexture;
+import com.reco1l.legacy.engine.BlankTextureRegion;
+
+import org.andengine.entity.Entity;
+import org.andengine.entity.scene.Scene;
+import org.andengine.entity.sprite.Sprite;
+import org.andengine.entity.text.Text;
+import org.andengine.entity.text.Text;
+import org.andengine.input.touch.TouchEvent;
+import org.andengine.input.touch.detector.ScrollDetector;
+import org.andengine.input.touch.detector.SurfaceScrollDetector;
+import org.andengine.opengl.texture.region.TextureRegion;
+import org.andengine.util.debug.Debug;
+import org.andengine.util.math.MathUtils;
 import org.jetbrains.annotations.Nullable;
 import ru.nsu.ccfit.zuev.osu.*;
 import ru.nsu.ccfit.zuev.osu.async.SyncTaskManager;
@@ -31,7 +34,7 @@ import java.util.concurrent.RejectedExecutionException;
 public class ScoreBoard extends Entity implements ScrollDetector.IScrollDetectorListener {
     private final Scene mainScene;
     private final MenuItemListener listener;
-    private final ChangeableText loadingText;
+    private final Text loadingText;
     private float percentShow = -1;
     private boolean showOnlineScores = false;
     private TrackInfo lastTrack;
@@ -66,7 +69,7 @@ public class ScoreBoard extends Entity implements ScrollDetector.IScrollDetector
         this.mainScene = scene;
         layer.attachChild(this);
 
-        this.loadingText = new ChangeableText(5, 230, ResourceManager.getInstance().getFont("strokeFont"), "", 50);
+        this.loadingText = new Text(5, 230, ResourceManager.getInstance().getFont("strokeFont"), "", 50, GlobalManager.getInstance().getEngine().getVertexBufferObjectManager());
         this.attachChild(this.loadingText);
 
         this.listener = listener;
@@ -398,7 +401,7 @@ public class ScoreBoard extends Entity implements ScrollDetector.IScrollDetector
             var count = getChildCount();
             for (int i = 0; i < count; i++)
             {
-                var child = getChild(i);
+                var child = getChildByIndex(i);
 
                 if (!(child instanceof Sprite))
                     continue;
@@ -433,7 +436,7 @@ public class ScoreBoard extends Entity implements ScrollDetector.IScrollDetector
             var count = getChildCount();
             for (int i = 0; i < count; i++)
             {
-                var child = getChild(i);
+                var child = getChildByIndex(i);
 
                 if (!(child instanceof Sprite))
                     continue;
@@ -461,56 +464,52 @@ public class ScoreBoard extends Entity implements ScrollDetector.IScrollDetector
     }
 
     @Override
-    public void onScroll(ScrollDetector pScrollDetector, TouchEvent pTouchEvent, float pDistanceX, float pDistanceY) {
-        switch (pTouchEvent.getAction()) {
-            case TouchEvent.ACTION_DOWN:
+    public void onScrollStarted(ScrollDetector pScollDetector, int pPointerID, float pDistanceX, float pDistanceY) {
+        velocityY = 0;
+        touchY = pDistanceY;
+        pointerId = pPointerID;
+        tapTime = secPassed;
+        initialY = touchY;
+        isScroll = true;
+    }
+
+    @Override
+    public void onScroll(ScrollDetector pScollDetector, int pPointerID, float pDistanceX, float pDistanceY) {
+        if (pointerId == -1 || pointerId == pPointerID) {
+            isScroll = true;
+            if (initialY == -1) {
+                onScrollStarted(pScollDetector, pPointerID, pDistanceX, pDistanceY);
+            }
+
+            final float dy = pDistanceY - touchY;
+
+            camY -= dy;
+            touchY = pDistanceY;
+            if (camY <= -146) {
+                camY = -146;
                 velocityY = 0;
-                touchY = pTouchEvent.getY();
-                pointerId = pTouchEvent.getPointerID();
-                tapTime = secPassed;
-                initialY = touchY;
+            } else if (camY >= maxY){
+                camY = maxY;
+                velocityY = 0;
+            }
+        }
+    }
+
+    @Override
+    public void onScrollFinished(ScrollDetector pScollDetector, int pPointerID, float pDistanceX, float pDistanceY) {
+        if (pointerId == -1 || pointerId == pPointerID) {
+            touchY = null;
+
+            if (secPassed - tapTime < 0.001f || initialY == -1) {
+                velocityY = 0;
+                isScroll = false;
+            } else {
+                velocityY = (initialY - pDistanceY) / (secPassed - tapTime);
                 isScroll = true;
-                break;
-            case TouchEvent.ACTION_MOVE:
-                if (pointerId == -1 || pointerId == pTouchEvent.getPointerID()) {
-                    isScroll = true;
-                    if (initialY == -1) {
-                        velocityY = 0;
-                        touchY = pTouchEvent.getY();
-                        pointerId = pTouchEvent.getPointerID();
-                        tapTime = secPassed;
-                        initialY = touchY;
-                    }
+            }
 
-                    final float dy = pTouchEvent.getY() - touchY;
-
-                    camY -= dy;
-                    touchY = pTouchEvent.getY();
-                    if (camY <= -146) {
-                        camY = -146;
-                        velocityY = 0;
-                    } else if (camY >= maxY){
-                        camY = maxY;
-                        velocityY = 0;
-                    }
-                }
-                break;
-            default:
-                if (pointerId == -1 || pointerId == pTouchEvent.getPointerID()) {
-                    touchY = null;
-
-                    if (secPassed - tapTime < 0.001f || initialY == -1) {
-                        velocityY = 0;
-                        isScroll = false;
-                    } else {
-                        velocityY = (initialY - pTouchEvent.getY()) / (secPassed - tapTime);
-                        isScroll = true;
-                    }
-
-                    pointerId = -1;
-                    initialY = -1;
-                }
-                break;
+            pointerId = -1;
+            initialY = -1;
         }
     }
 
@@ -573,7 +572,7 @@ public class ScoreBoard extends Entity implements ScrollDetector.IScrollDetector
                 String avaURL,
                 String username,
                 boolean isPersonalBest) {
-            super(-150, 40,  ResourceManager.getInstance().getTexture("menu-button-background").deepCopy());
+            super(-150, 40,  ResourceManager.getInstance().getTexture("menu-button-background").deepCopy(), GlobalManager.getInstance().getEngine().getVertexBufferObjectManager());
 
             this.avatarExecutor = avatarExecutor;
             this.showOnline = showOnline;
@@ -594,7 +593,7 @@ public class ScoreBoard extends Entity implements ScrollDetector.IScrollDetector
                         getWidth() / 2f,
                         0f,
                         ResourceManager.getInstance().getFont("strokeFont"),
-                        "Personal Best");
+                        "Personal Best", GlobalManager.getInstance().getEngine().getVertexBufferObjectManager());
 
                 attachChild(topText);
                 baseY = topText.getHeight() + 5;
@@ -620,7 +619,7 @@ public class ScoreBoard extends Entity implements ScrollDetector.IScrollDetector
 
                 @Override
                 public void run() {
-                    var texture = ResourceManager.getInstance().getTexture("emptyavatar");
+                    TextureRegion texture = new BlankTextureRegion();
 
                     if (!avatarExecutor.isShutdown() && OnlineManager.getInstance().loadAvatarToTextureManager(avaURL)) {
                         avatarTexture = ResourceManager.getInstance().getAvatarTextureIfLoaded(avaURL);
@@ -633,7 +632,7 @@ public class ScoreBoard extends Entity implements ScrollDetector.IScrollDetector
                         onDetached();
                         return;
                     }
-                    attachChild(new Sprite(55, finalBaseY + 12, 90, 90, texture));
+                    attachChild(new Sprite(55, finalBaseY + 12, 90, 90, texture, GlobalManager.getInstance().getEngine().getVertexBufferObjectManager()));
 
                     if (currentAvatarTask == this)
                         currentAvatarTask = null;
@@ -641,9 +640,9 @@ public class ScoreBoard extends Entity implements ScrollDetector.IScrollDetector
             } : null;
 
 
-            var text = new Text(baseX + 160, baseY + 20, ResourceManager.getInstance().getFont("font"), title);
-            var accText = new Text(670, baseY + 12, ResourceManager.getInstance().getFont("smallFont"), acc);
-            var mark = new Sprite(baseX + 80, baseY + 35, ResourceManager.getInstance().getTexture("ranking-" + markStr + "-small"));
+            var text = new Text(baseX + 160, baseY + 20, ResourceManager.getInstance().getFont("font"), title, GlobalManager.getInstance().getEngine().getVertexBufferObjectManager());
+            var accText = new Text(670, baseY + 12, ResourceManager.getInstance().getFont("smallFont"), acc, GlobalManager.getInstance().getEngine().getVertexBufferObjectManager());
+            var mark = new Sprite(baseX + 80, baseY + 35, ResourceManager.getInstance().getTexture("ranking-" + markStr + "-small"), GlobalManager.getInstance().getEngine().getVertexBufferObjectManager());
 
             text.setScale(1.2f);
             mark.setScale(1.5f);

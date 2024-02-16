@@ -1,8 +1,8 @@
 package ru.nsu.ccfit.zuev.osu.menu;
 
-import org.anddev.andengine.entity.Entity;
-import org.anddev.andengine.entity.scene.Scene;
-import org.anddev.andengine.entity.sprite.Sprite;
+import org.andengine.entity.Entity;
+import org.andengine.entity.scene.Scene;
+import org.andengine.entity.sprite.Sprite;
 
 import java.lang.ref.WeakReference;
 import java.util.Set;
@@ -25,7 +25,7 @@ public class MenuItem {
     private final MenuItemTrack[] trackSprites;
     private final BeatmapInfo beatmap;
     private final String trackDir;
-    private final int bgHeight;
+    private final float bgHeight;
     private final String titleStr;
     private final String creatorStr;
     public float percentAppeared = 0;

@@ -10,7 +10,6 @@ import com.edlplan.framework.support.osb.StoryboardSprite;
 import com.edlplan.framework.utils.functionality.SmartIterator;
 import com.edlplan.osu.support.timing.TimingPoints;
 import com.edlplan.osu.support.timing.controlpoint.ControlPoints;
-import com.edlplan.ui.fragment.InGameSettingMenu;
 import com.reco1l.api.ibancho.RoomAPI;
 import com.reco1l.framework.lang.Execution;
 import com.reco1l.framework.lang.execution.Async;
@@ -24,27 +23,27 @@ import com.rian.difficultycalculator.beatmap.hitobject.HitObject;
 import com.rian.difficultycalculator.beatmap.hitobject.HitObjectWithDuration;
 import com.rian.difficultycalculator.calculator.DifficultyCalculationParameters;
 
-import org.anddev.andengine.engine.Engine;
-import org.anddev.andengine.engine.camera.SmoothCamera;
-import org.anddev.andengine.engine.handler.IUpdateHandler;
-import org.anddev.andengine.engine.options.TouchOptions;
-import org.anddev.andengine.entity.modifier.FadeOutModifier;
-import org.anddev.andengine.entity.modifier.LoopEntityModifier;
-import org.anddev.andengine.entity.modifier.MoveXModifier;
-import org.anddev.andengine.entity.modifier.ParallelEntityModifier;
-import org.anddev.andengine.entity.modifier.SequenceEntityModifier;
-import org.anddev.andengine.entity.primitive.Rectangle;
-import org.anddev.andengine.entity.scene.Scene;
-import org.anddev.andengine.entity.scene.Scene.IOnSceneTouchListener;
-import org.anddev.andengine.entity.scene.background.ColorBackground;
-import org.anddev.andengine.entity.scene.background.SpriteBackground;
-import org.anddev.andengine.entity.sprite.Sprite;
-import org.anddev.andengine.entity.text.ChangeableText;
-import org.anddev.andengine.entity.util.FPSCounter;
-import org.anddev.andengine.input.touch.TouchEvent;
-import org.anddev.andengine.opengl.font.Font;
-import org.anddev.andengine.opengl.texture.region.TextureRegion;
-import org.anddev.andengine.util.Debug;
+import org.andengine.engine.Engine;
+import org.andengine.engine.camera.SmoothCamera;
+import org.andengine.engine.handler.IUpdateHandler;
+import org.andengine.engine.options.TouchOptions;
+import org.andengine.entity.modifier.FadeOutModifier;
+import org.andengine.entity.modifier.LoopEntityModifier;
+import org.andengine.entity.modifier.MoveXModifier;
+import org.andengine.entity.modifier.ParallelEntityModifier;
+import org.andengine.entity.modifier.SequenceEntityModifier;
+import org.andengine.entity.primitive.Rectangle;
+import org.andengine.entity.scene.IOnSceneTouchListener;
+import org.andengine.entity.scene.Scene;
+import org.andengine.entity.scene.background.Background;
+import org.andengine.entity.scene.background.SpriteBackground;
+import org.andengine.entity.sprite.Sprite;
+import org.andengine.entity.text.Text;
+import org.andengine.entity.util.FPSCounter;
+import org.andengine.input.touch.TouchEvent;
+import org.andengine.opengl.font.Font;
+import org.andengine.opengl.texture.region.TextureRegion;
+import org.andengine.util.debug.Debug;
 
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -173,7 +172,7 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
     private Rectangle kiaiRect = null;
     private Rectangle dimRectangle = null;
     private Sprite unranked;
-    private ChangeableText replayText;
+    private Text replayText;
     private String title, artist, version;
     private ComboBurst comboBurst;
     private int failcount = 0;
@@ -186,7 +185,7 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
     private DifficultyHelper difficultyHelper = DifficultyHelper.StdDifficulty;
 
     private List<TimedDifficultyAttributes> timedDifficultyAttributes = new ArrayList<>();
-    private ChangeableText ppText;
+    private Text ppText;
 
     private long previousFrameTime;
 
@@ -277,11 +276,11 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
                     ResourceManager.getInstance().getTextureIfLoaded("::background");
 
             if (tex != null)
-                bgSprite = new Sprite(0, 0, tex);
+                bgSprite = new Sprite(0, 0, tex, GlobalManager.getInstance().getEngine().getVertexBufferObjectManager());
         }
 
         if (bgSprite == null) {
-            bgSprite = new Sprite(0, 0, Config.getRES_WIDTH(), Config.getRES_HEIGHT(), new BlankTextureRegion());
+            bgSprite = new Sprite(0, 0, Config.getRES_WIDTH(), Config.getRES_HEIGHT(), new BlankTextureRegion(), GlobalManager.getInstance().getEngine().getVertexBufferObjectManager());
 
             if (beatmapData.events.backgroundColor != null)
                 beatmapData.events.backgroundColor.apply(bgSprite);
@@ -306,7 +305,7 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
             storyboardSprite = null;
         }
 
-        dimRectangle = new Rectangle(0f, 0f, bgSprite.getWidth(), bgSprite.getHeight());
+        dimRectangle = new Rectangle(0f, 0f, bgSprite.getWidth(), bgSprite.getHeight(), GlobalManager.getInstance().getEngine().getVertexBufferObjectManager());
         dimRectangle.setColor(0f, 0f, 0f, 1.0f - Config.getBackgroundBrightness());
         bgSprite.attachChild(dimRectangle);
 
@@ -693,7 +692,7 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
         scene.attachChild(bgScene);
         scene.attachChild(mgScene);
         scene.attachChild(fgScene);
-        scene.setBackground(new ColorBackground(0, 0, 0));
+        scene.setBackground(new Background(0, 0, 0));
         bgScene.setBackgroundEnabled(false);
         mgScene.setBackgroundEnabled(false);
         fgScene.setBackgroundEnabled(false);
@@ -740,12 +739,12 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
         if (Config.isShowFPS() || Config.isDisplayRealTimePPCounter()) {
             final Font font = ResourceManager.getInstance().getFont(
                     "smallFont");
-            final ChangeableText fpsText = new ChangeableText(Utils.toRes(790),
-                    Utils.toRes(520), font, "00.00 FPS");
-            final ChangeableText urText = new ChangeableText(Utils.toRes(720),
-                    Utils.toRes(480), font, "00.00 UR    ");
-            final ChangeableText accText = new ChangeableText(Utils.toRes(720),
-                    Utils.toRes(440), font, "Avg offset: 0ms     ");
+            final Text fpsText = new Text(Utils.toRes(790),
+                    Utils.toRes(520), font, "00.00 FPS", GlobalManager.getInstance().getEngine().getVertexBufferObjectManager());
+            final Text urText = new Text(Utils.toRes(720),
+                    Utils.toRes(480), font, "00.00 UR    ", GlobalManager.getInstance().getEngine().getVertexBufferObjectManager());
+            final Text accText = new Text(Utils.toRes(720),
+                    Utils.toRes(440), font, "Avg offset: 0ms     ", GlobalManager.getInstance().getEngine().getVertexBufferObjectManager());
             fpsText.setPosition(Config.getRES_WIDTH() - fpsText.getWidth() - 5, Config.getRES_HEIGHT() - fpsText.getHeight() - 10);
             accText.setPosition(Config.getRES_WIDTH() - accText.getWidth() - 5, fpsText.getY() - accText.getHeight());
             urText.setPosition(Config.getRES_WIDTH() - urText.getWidth() - 5, accText.getY() - urText.getHeight());
@@ -754,19 +753,19 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
             fgScene.attachChild(urText);
 
             if (Config.isDisplayRealTimePPCounter()) {
-                ppText = new ChangeableText(Utils.toRes(720),
-                        Utils.toRes(440), font, "0.00pp", 100);
+                ppText = new Text(Utils.toRes(720),
+                        Utils.toRes(440), font, "0.00pp", 100, GlobalManager.getInstance().getEngine().getVertexBufferObjectManager());
                 fgScene.attachChild(ppText);
             }
 
-            ChangeableText memText = null;
+            Text memText = null;
             if (BuildConfig.DEBUG) {
-                memText = new ChangeableText(Utils.toRes(780),
-                        Utils.toRes(520), font, "0 MB/0 MB    ");
+                memText = new Text(Utils.toRes(780),
+                        Utils.toRes(520), font, "0 MB/0 MB    ", GlobalManager.getInstance().getEngine().getVertexBufferObjectManager());
                 fgScene.attachChild(memText);
             }
 
-            final ChangeableText fmemText = memText;
+            final Text fmemText = memText;
             fgScene.registerUpdateHandler(new FPSCounter() {
                 int elapsedInt = 0;
                 @Override
@@ -950,7 +949,7 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
             } else {
                 tex = ResourceManager.getInstance().getTexture("play-skip");
                 skipBtn = new Sprite(Config.getRES_WIDTH() - tex.getWidth(),
-                        Config.getRES_HEIGHT() - tex.getHeight(), tex);
+                        Config.getRES_HEIGHT() - tex.getHeight(), tex, GlobalManager.getInstance().getEngine().getVertexBufferObjectManager());
             }
             skipBtn.setAlpha(0.7f);
             fgScene.attachChild(skipBtn);
@@ -984,19 +983,19 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
             if (stat.getMod().contains(GameMod.MOD_AUTO)) {
                 final Sprite autoIcon = new Sprite(Utils.toRes(Config.getRES_WIDTH() - 140),
                         Utils.toRes(100), ResourceManager.getInstance().getTexture(
-                        "selection-mod-autoplay"));
+                        "selection-mod-autoplay"), GlobalManager.getInstance().getEngine().getVertexBufferObjectManager());
                 bgScene.attachChild(autoIcon);
                 effectOffset += 25;
             } else if (stat.getMod().contains(GameMod.MOD_RELAX)) {
                 final Sprite autoIcon = new Sprite(Utils.toRes(Config.getRES_WIDTH() - 140),
                         Utils.toRes(98), ResourceManager.getInstance().getTexture(
-                        "selection-mod-relax"));
+                        "selection-mod-relax"), GlobalManager.getInstance().getEngine().getVertexBufferObjectManager());
                 bgScene.attachChild(autoIcon);
                 effectOffset += 25;
             } else if (stat.getMod().contains(GameMod.MOD_AUTOPILOT)) {
                 final Sprite autoIcon = new Sprite(Utils.toRes(Config.getRES_WIDTH() - 140),
                         Utils.toRes(98), ResourceManager.getInstance().getTexture(
-                        "selection-mod-relax2"));
+                        "selection-mod-relax2"), GlobalManager.getInstance().getEngine().getVertexBufferObjectManager());
                 bgScene.attachChild(autoIcon);
                 effectOffset += 25;
             }
@@ -1228,12 +1227,12 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
         }
 
         kiaiRect = new Rectangle(0, 0, Config.getRES_WIDTH(),
-                Config.getRES_HEIGHT());
+                Config.getRES_HEIGHT(), GlobalManager.getInstance().getEngine().getVertexBufferObjectManager());
         kiaiRect.setVisible(false);
         kiaiRect.setColor(1, 1, 1);
         bgScene.attachChild(kiaiRect, 0);
 
-        unranked = new Sprite(0, 0, ResourceManager.getInstance().getTexture("play-unranked"));
+        unranked = new Sprite(0, 0, ResourceManager.getInstance().getTexture("play-unranked"), GlobalManager.getInstance().getEngine().getVertexBufferObjectManager());
         unranked.setPosition((float) Config.getRES_WIDTH() / 2 - unranked.getWidth() / 2, 80);
         unranked.setVisible(false);
         fgScene.attachChild(unranked);
@@ -1252,7 +1251,7 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
 
         String playname = Config.getLocalUsername();
 
-        replayText = new ChangeableText(0, 0, ResourceManager.getInstance().getFont("font"), "", 1000);
+        replayText = new Text(0, 0, ResourceManager.getInstance().getFont("font"), "", 1000, GlobalManager.getInstance().getEngine().getVertexBufferObjectManager());
         replayText.setVisible(false);
         replayText.setPosition(0, 140);
         replayText.setAlpha(0.7f);

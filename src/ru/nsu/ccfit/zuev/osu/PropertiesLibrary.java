@@ -3,7 +3,7 @@ package ru.nsu.ccfit.zuev.osu;
 import android.app.Activity;
 import android.content.Context;
 
-import org.anddev.andengine.util.Debug;
+import org.andengine.util.debug.Debug;
 
 import java.io.File;
 import java.io.FileInputStream;

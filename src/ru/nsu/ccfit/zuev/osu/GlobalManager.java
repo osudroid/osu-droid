@@ -2,8 +2,8 @@ package ru.nsu.ccfit.zuev.osu;
 
 import android.util.DisplayMetrics;
 
-import org.anddev.andengine.engine.Engine;
-import org.anddev.andengine.engine.camera.Camera;
+import org.andengine.engine.Engine;
+import org.andengine.engine.camera.Camera;
 
 import ru.nsu.ccfit.zuev.audio.serviceAudio.SaveServiceObject;
 import ru.nsu.ccfit.zuev.audio.serviceAudio.SongService;

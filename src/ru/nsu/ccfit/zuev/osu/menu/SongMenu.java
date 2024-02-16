@@ -16,21 +16,22 @@ import com.reco1l.framework.lang.execution.Async;
 import com.rian.difficultycalculator.attributes.DifficultyAttributes;
 import com.rian.difficultycalculator.calculator.DifficultyCalculationParameters;
 
-import org.anddev.andengine.engine.Engine;
-import org.anddev.andengine.engine.handler.IUpdateHandler;
-import org.anddev.andengine.entity.Entity;
-import org.anddev.andengine.entity.primitive.Rectangle;
-import org.anddev.andengine.entity.scene.Scene;
-import org.anddev.andengine.entity.scene.background.ColorBackground;
-import org.anddev.andengine.entity.scene.background.SpriteBackground;
-import org.anddev.andengine.entity.sprite.Sprite;
-import org.anddev.andengine.entity.text.ChangeableText;
-import org.anddev.andengine.entity.text.Text;
-import org.anddev.andengine.input.touch.TouchEvent;
-import org.anddev.andengine.opengl.texture.region.TextureRegion;
-import org.anddev.andengine.util.Debug;
-import org.anddev.andengine.util.HorizontalAlign;
-import org.anddev.andengine.util.MathUtils;
+import org.andengine.engine.Engine;
+import org.andengine.engine.handler.IUpdateHandler;
+import org.andengine.entity.Entity;
+import org.andengine.entity.primitive.Rectangle;
+import org.andengine.entity.scene.Scene;
+import org.andengine.entity.scene.background.Background;
+import org.andengine.entity.scene.background.SpriteBackground;
+import org.andengine.entity.sprite.Sprite;
+import org.andengine.entity.text.Text;
+import org.andengine.entity.text.Text;
+import org.andengine.entity.text.TextOptions;
+import org.andengine.input.touch.TouchEvent;
+import org.andengine.opengl.texture.region.TextureRegion;
+import org.andengine.util.debug.Debug;
+import org.andengine.util.HorizontalAlign;
+import org.andengine.util.math.MathUtils;
 
 import java.text.SimpleDateFormat;
 import java.util.*;
@@ -100,7 +101,7 @@ public class SongMenu implements IUpdateHandler, MenuItemListener,
     private float secPassed = 0, tapTime;
     private Sprite backButton = null;
     private ScrollBar scrollbar;
-    private ChangeableText trackInfo, mapper, beatmapInfo, beatmapInfo2, dimensionInfo;
+    private Text trackInfo, mapper, beatmapInfo, beatmapInfo2, dimensionInfo;
     private boolean isSelectComplete = true;
     private AnimSprite scoringSwitcher = null;
     private FilterMenuFragment filterMenu = null;
@@ -155,7 +156,8 @@ public class SongMenu implements IUpdateHandler, MenuItemListener,
         frontLayer = new Entity();
         backLayer = new Entity();
         scene.unregisterUpdateHandler(this);
-        scene.setTouchAreaBindingEnabled(false);
+        scene.setTouchAreaBindingOnActionDownEnabled(false);
+        scene.setTouchAreaBindingOnActionMoveEnabled(false);
         load();
         GlobalManager.getInstance().getGameScene().setOldScene(scene);
     }
@@ -184,10 +186,10 @@ public class SongMenu implements IUpdateHandler, MenuItemListener,
         float height = tex.getHeight();
         height *= Config.getRES_WIDTH() / (float) tex.getWidth();
         final Sprite bg = new Sprite(0, (Config.getRES_HEIGHT() - height) / 2,
-                Config.getRES_WIDTH(), height, tex);
+                Config.getRES_WIDTH(), height, tex, GlobalManager.getInstance().getEngine().getVertexBufferObjectManager());
         scene.setBackground(new SpriteBackground(bg));
 
-        final Rectangle bgDimRect = new Rectangle(0, 0, Config.getRES_WIDTH(), Config.getRES_HEIGHT());
+        final Rectangle bgDimRect = new Rectangle(0, 0, Config.getRES_WIDTH(), Config.getRES_HEIGHT(), GlobalManager.getInstance().getEngine().getVertexBufferObjectManager());
         bgDimRect.setColor(0, 0, 0, 0.2f);
         backLayer.attachChild(bgDimRect);
 
@@ -206,7 +208,7 @@ public class SongMenu implements IUpdateHandler, MenuItemListener,
         if (items.size() == 0) {
             final Text text = new Text(0, 0, ResourceManager.getInstance()
                     .getFont("CaptionFont"), "There are no songs in library, try using chimu.moe",
-                    HorizontalAlign.CENTER);
+                    new TextOptions(HorizontalAlign.CENTER), GlobalManager.getInstance().getEngine().getVertexBufferObjectManager());
             text.setPosition(Config.getRES_WIDTH() / 2f - text.getWidth() / 2,
                     Config.getRES_HEIGHT() / 2f - text.getHeight() / 2);
             text.setScale(1.5f);
@@ -273,35 +275,36 @@ public class SongMenu implements IUpdateHandler, MenuItemListener,
         });
 
         scene.registerUpdateHandler(this);
-        scene.setTouchAreaBindingEnabled(true);
+        scene.setTouchAreaBindingOnActionMoveEnabled(true);
+        scene.setTouchAreaBindingOnActionDownEnabled(true);
 
         scrollbar = new ScrollBar(scene);
 
         final TextureRegion songSelectTopTexture = ResourceManager.getInstance().getTexture("songselect-top");
-        final Sprite songSelectTop = new Sprite(0, 0, songSelectTopTexture);
+        final Sprite songSelectTop = new Sprite(0, 0, songSelectTopTexture, GlobalManager.getInstance().getEngine().getVertexBufferObjectManager());
         songSelectTop.setSize(songSelectTopTexture.getWidth() * songSelectTopTexture.getHeight() / 184f, 184);
         songSelectTop.setPosition(-1640, songSelectTop.getY());
         songSelectTop.setAlpha(0.6f);
         frontLayer.attachChild(songSelectTop);
 
-        trackInfo = new ChangeableText(Utils.toRes(70), Utils.toRes(2),
-                ResourceManager.getInstance().getFont("font"), "title", 1024);
+        trackInfo = new Text(Utils.toRes(70), Utils.toRes(2),
+                ResourceManager.getInstance().getFont("font"), "title", 1024, GlobalManager.getInstance().getEngine().getVertexBufferObjectManager());
         frontLayer.attachChild(trackInfo);
 
-        mapper = new ChangeableText(Utils.toRes(70), trackInfo.getY() + trackInfo.getHeight() + Utils.toRes(2),
-                ResourceManager.getInstance().getFont("middleFont"), "mapper", 1024);
+        mapper = new Text(Utils.toRes(70), trackInfo.getY() + trackInfo.getHeight() + Utils.toRes(2),
+                ResourceManager.getInstance().getFont("middleFont"), "mapper", 1024, GlobalManager.getInstance().getEngine().getVertexBufferObjectManager());
         frontLayer.attachChild(mapper);
 
-        beatmapInfo = new ChangeableText(Utils.toRes(4), mapper.getY() + mapper.getHeight() + Utils.toRes(2),
-                ResourceManager.getInstance().getFont("middleFont"), "beatmapInfo", 1024);
+        beatmapInfo = new Text(Utils.toRes(4), mapper.getY() + mapper.getHeight() + Utils.toRes(2),
+                ResourceManager.getInstance().getFont("middleFont"), "beatmapInfo", 1024, GlobalManager.getInstance().getEngine().getVertexBufferObjectManager());
         frontLayer.attachChild(beatmapInfo);
 
-        beatmapInfo2 = new ChangeableText(Utils.toRes(4), beatmapInfo.getY() + beatmapInfo.getHeight() + Utils.toRes(2),
-                ResourceManager.getInstance().getFont("middleFont"), "beatmapInfo2", 1024);
+        beatmapInfo2 = new Text(Utils.toRes(4), beatmapInfo.getY() + beatmapInfo.getHeight() + Utils.toRes(2),
+                ResourceManager.getInstance().getFont("middleFont"), "beatmapInfo2", 1024, GlobalManager.getInstance().getEngine().getVertexBufferObjectManager());
         frontLayer.attachChild(beatmapInfo2);
 
-        dimensionInfo = new ChangeableText(Utils.toRes(4), beatmapInfo2.getY() + beatmapInfo2.getHeight() + Utils.toRes(2),
-                ResourceManager.getInstance().getFont("smallFont"), "dimensionInfo", 1024);
+        dimensionInfo = new Text(Utils.toRes(4), beatmapInfo2.getY() + beatmapInfo2.getHeight() + Utils.toRes(2),
+                ResourceManager.getInstance().getFont("smallFont"), "dimensionInfo", 1024, GlobalManager.getInstance().getEngine().getVertexBufferObjectManager());
         frontLayer.attachChild(dimensionInfo);
 
 
@@ -367,7 +370,7 @@ public class SongMenu implements IUpdateHandler, MenuItemListener,
                 }
             };
         } else {
-            backButton = new Sprite(0, 0, ResourceManager.getInstance().getTexture("menu-back")) {
+            backButton = new Sprite(0, 0, ResourceManager.getInstance().getTexture("menu-back"), GlobalManager.getInstance().getEngine().getVertexBufferObjectManager()) {
                 boolean moved = false;
                 float dx = 0, dy = 0;
                 boolean scaleWhenHold = true;
@@ -1167,7 +1170,7 @@ public class SongMenu implements IUpdateHandler, MenuItemListener,
             bgName = track.getBackground();
             bg = null;
             bgLoaded = false;
-            scene.setBackground(new ColorBackground(0, 0, 0));
+            scene.setBackground(new Background(0, 0, 0));
             if (quality == 0) {
                 Config.setBackgroundQuality(4);
             }
@@ -1184,7 +1187,7 @@ public class SongMenu implements IUpdateHandler, MenuItemListener,
                             / (float) tex.getWidth();
                     bg = new Sprite(0,
                             (Config.getRES_HEIGHT() - height) / 2, Config
-                            .getRES_WIDTH(), height, tex);
+                            .getRES_WIDTH(), height, tex, GlobalManager.getInstance().getEngine().getVertexBufferObjectManager());
                     bg.setColor(0, 0, 0);
                 }
 
@@ -1199,7 +1202,7 @@ public class SongMenu implements IUpdateHandler, MenuItemListener,
                             bg = new Sprite(
                                     0,
                                     (Config.getRES_HEIGHT() - height) / 2,
-                                    Config.getRES_WIDTH(), height, tex1);
+                                    Config.getRES_WIDTH(), height, tex1, GlobalManager.getInstance().getEngine().getVertexBufferObjectManager());
                             bgName = "";
                         }
                         scene.setBackground(new SpriteBackground(bg));
@@ -1496,7 +1499,7 @@ public class SongMenu implements IUpdateHandler, MenuItemListener,
     }
 
     public void setStarsDisplay(float star) {
-        String str = dimensionInfo.getText();
+        String str = dimensionInfo.getText().toString();
         String[] strs = str.split("Stars: ");
         if (strs.length == 2) {
             dimensionInfo.setText(strs[0] + "Stars: " + star);

@@ -2,24 +2,25 @@ package ru.nsu.ccfit.zuev.osu.game;
 
 import android.graphics.PointF;
 
-import org.anddev.andengine.entity.IEntity;
-import org.anddev.andengine.entity.modifier.AlphaModifier;
-import org.anddev.andengine.entity.modifier.DelayModifier;
-import org.anddev.andengine.entity.modifier.FadeInModifier;
-import org.anddev.andengine.entity.modifier.FadeOutModifier;
-import org.anddev.andengine.entity.modifier.IEntityModifier;
-import org.anddev.andengine.entity.modifier.IEntityModifier.IEntityModifierListener;
-import org.anddev.andengine.entity.modifier.ParallelEntityModifier;
-import org.anddev.andengine.entity.modifier.ScaleModifier;
-import org.anddev.andengine.entity.modifier.SequenceEntityModifier;
-import org.anddev.andengine.entity.scene.Scene;
-import org.anddev.andengine.entity.sprite.Sprite;
-import org.anddev.andengine.opengl.texture.region.TextureRegion;
-import org.anddev.andengine.util.MathUtils;
-import org.anddev.andengine.util.modifier.IModifier;
+import org.andengine.entity.IEntity;
+import org.andengine.entity.modifier.AlphaModifier;
+import org.andengine.entity.modifier.DelayModifier;
+import org.andengine.entity.modifier.FadeInModifier;
+import org.andengine.entity.modifier.FadeOutModifier;
+import org.andengine.entity.modifier.IEntityModifier;
+import org.andengine.entity.modifier.IEntityModifier.IEntityModifierListener;
+import org.andengine.entity.modifier.ParallelEntityModifier;
+import org.andengine.entity.modifier.ScaleModifier;
+import org.andengine.entity.modifier.SequenceEntityModifier;
+import org.andengine.entity.scene.Scene;
+import org.andengine.entity.sprite.Sprite;
+import org.andengine.opengl.texture.region.TextureRegion;
+import org.andengine.util.math.MathUtils;
+import org.andengine.util.modifier.IModifier;
 
 import ru.nsu.ccfit.zuev.osu.Config;
 import ru.nsu.ccfit.zuev.osu.Constants;
+import ru.nsu.ccfit.zuev.osu.GlobalManager;
 import ru.nsu.ccfit.zuev.osu.ResourceManager;
 import ru.nsu.ccfit.zuev.osu.Utils;
 import ru.nsu.ccfit.zuev.osu.async.SyncTaskManager;
@@ -70,7 +71,7 @@ public class Spinner extends GameObject {
         mregion = ResourceManager.getInstance().getTexture("spinner-metre")
                 .deepCopy();
         metre = new Sprite(center.x - (float) Config.getRES_WIDTH() / 2,
-                Config.getRES_HEIGHT(), mregion);
+                Config.getRES_HEIGHT(), mregion, GlobalManager.getInstance().getEngine().getVertexBufferObjectManager());
         metre.setWidth(Config.getRES_WIDTH());
         metre.setHeight(background.getHeightScaled());
         approachCircle = SpritePool.getInstance().getCenteredSprite(
@@ -328,7 +329,7 @@ public class Spinner extends GameObject {
         metre.setPosition(metre.getX(),
                 metreY + metre.getHeight() * (1 - Math.abs(percentfill)));
         mregion.setTexturePosition(0,
-                (int) (metre.getBaseHeight() * (1 - Math.abs(percentfill))));
+                (int) (metre.getHeight() * (1 - Math.abs(percentfill))));
 
         oldMouse.set(currMouse);
     }

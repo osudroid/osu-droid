@@ -1,11 +1,12 @@
 package ru.nsu.ccfit.zuev.osu.scoring;
 
-import org.anddev.andengine.entity.Entity;
-import org.anddev.andengine.entity.modifier.ScaleModifier;
-import org.anddev.andengine.entity.modifier.SequenceEntityModifier;
-import org.anddev.andengine.entity.scene.Scene;
-import org.anddev.andengine.entity.sprite.Sprite;
+import org.andengine.entity.Entity;
+import org.andengine.entity.modifier.ScaleModifier;
+import org.andengine.entity.modifier.SequenceEntityModifier;
+import org.andengine.entity.scene.Scene;
+import org.andengine.entity.sprite.Sprite;
 
+import ru.nsu.ccfit.zuev.osu.GlobalManager;
 import ru.nsu.ccfit.zuev.osu.ResourceManager;
 import ru.nsu.ccfit.zuev.skins.OsuSkin;
 
@@ -31,7 +32,7 @@ public class ScoreNumber extends Entity {
                 textureName = "x";
             }
 
-            letter = new Sprite(totalWidth * scale, 0, ResourceManager.getInstance().getTextureWithPrefix(OsuSkin.get().getScorePrefix(), textureName));
+            letter = new Sprite(totalWidth * scale, 0, ResourceManager.getInstance().getTextureWithPrefix(OsuSkin.get().getScorePrefix(), textureName), GlobalManager.getInstance().getEngine().getVertexBufferObjectManager());
             letter.setSize(letter.getWidth() * scale, letter.getHeight() * scale);
 
             totalWidth += letter.getWidth() * scale;
@@ -43,7 +44,7 @@ public class ScoreNumber extends Entity {
         if (center) {
             totalWidth /= 2 * scale;
             for (int i = 0, count = getChildCount(); i < count; i++) {
-                var sp = getChild(i);
+                var sp = getChildByIndex(i);
                 sp.setPosition(sp.getX() - totalWidth, sp.getY());
                 sp.registerEntityModifier(new SequenceEntityModifier(
                         new ScaleModifier(0.2f, scale, scale * 1.5f),

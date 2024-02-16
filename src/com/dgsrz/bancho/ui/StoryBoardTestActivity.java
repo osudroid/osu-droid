@@ -1,16 +1,17 @@
 package com.dgsrz.bancho.ui;
 
-import org.anddev.andengine.engine.Engine;
-import org.anddev.andengine.engine.camera.Camera;
-import org.anddev.andengine.engine.handler.IUpdateHandler;
-import org.anddev.andengine.engine.options.EngineOptions;
-import org.anddev.andengine.engine.options.resolutionpolicy.RatioResolutionPolicy;
-import org.anddev.andengine.entity.Entity;
-import org.anddev.andengine.entity.scene.Scene;
-import org.anddev.andengine.entity.scene.background.ColorBackground;
-import org.anddev.andengine.entity.sprite.BaseSprite;
-import org.anddev.andengine.entity.util.FPSLogger;
-import org.anddev.andengine.ui.activity.BaseGameActivity;
+import org.andengine.engine.Engine;
+import org.andengine.engine.camera.Camera;
+import org.andengine.engine.handler.IUpdateHandler;
+import org.andengine.engine.options.EngineOptions;
+import org.andengine.engine.options.ScreenOrientation;
+import org.andengine.engine.options.resolutionpolicy.RatioResolutionPolicy;
+import org.andengine.entity.Entity;
+import org.andengine.entity.scene.Scene;
+import org.andengine.entity.scene.background.Background;
+import org.andengine.entity.sprite.Sprite;
+import org.andengine.entity.util.FPSLogger;
+import org.andengine.ui.activity.LegacyBaseGameActivity;
 
 import java.io.File;
 import java.io.IOException;
@@ -27,7 +28,7 @@ import ru.nsu.ccfit.zuev.osu.storyboard.OsuSprite;
  * <p>
  * Created by dgsrz on 15/10/11.
  */
-public class StoryBoardTestActivity extends BaseGameActivity implements IUpdateHandler {
+public class StoryBoardTestActivity extends LegacyBaseGameActivity implements IUpdateHandler {
 
     // public static final String FOLDER = "/sdcard/osu!player/51142 Suzuta Miyako - one's future (Full Ver.)";
     // public static final String PATH = "/Suzuta Miyako - one's future (Full Ver.) (DJPop) [Insane].osu";
@@ -58,7 +59,7 @@ public class StoryBoardTestActivity extends BaseGameActivity implements IUpdateH
     public Engine onLoadEngine() {
         Camera camera = new Camera(0, 0, CAMERA_WIDTH, CAMERA_HEIGHT);
         return new Engine(new EngineOptions(true,
-                EngineOptions.ScreenOrientation.LANDSCAPE, new RatioResolutionPolicy(CAMERA_WIDTH, CAMERA_HEIGHT),
+                ScreenOrientation.LANDSCAPE_FIXED, new RatioResolutionPolicy(CAMERA_WIDTH, CAMERA_HEIGHT),
                 camera));
     }
 
@@ -67,10 +68,14 @@ public class StoryBoardTestActivity extends BaseGameActivity implements IUpdateH
     }
 
     @Override
+    protected void onUnloadResources() {
+    }
+
+    @Override
     public Scene onLoadScene() {
         this.mEngine.registerUpdateHandler(new FPSLogger(1f));
         scene = new Scene();
-        scene.setBackground(new ColorBackground(0, 0, 0));
+        scene.setBackground(new Background(0, 0, 0));
         scene.registerUpdateHandler(this);
 
         ResourceManager.getInstance().Init(this.mEngine, this);
@@ -104,8 +109,8 @@ public class StoryBoardTestActivity extends BaseGameActivity implements IUpdateH
     }
 
     @Override
-    public void onLoadComplete() {
-
+    public Scene onLoadComplete() {
+        return scene;
     }
 
     @Override
@@ -134,7 +139,7 @@ public class StoryBoardTestActivity extends BaseGameActivity implements IUpdateH
 
     }
 
-    public void attachBackground(BaseSprite sprite) {
+    public void attachBackground(Sprite sprite) {
         background.attachChild(sprite);
         background.sortChildren();
     }
@@ -145,12 +150,12 @@ public class StoryBoardTestActivity extends BaseGameActivity implements IUpdateH
 //        fail.sortChildren();
 //    }
 
-    public void attachPass(BaseSprite sprite) {
+    public void attachPass(Sprite sprite) {
         pass.attachChild(sprite);
         pass.sortChildren();
     }
 
-    public void attachForeground(BaseSprite sprite) {
+    public void attachForeground(Sprite sprite) {
         foreground.attachChild(sprite);
         foreground.sortChildren();
     }

@@ -2,9 +2,10 @@ package ru.nsu.ccfit.zuev.osu.game;
 
 import android.graphics.PointF;
 
-import org.anddev.andengine.entity.primitive.Rectangle;
-import org.anddev.andengine.entity.scene.Scene;
+import org.andengine.entity.primitive.Rectangle;
+import org.andengine.entity.scene.Scene;
 
+import ru.nsu.ccfit.zuev.osu.GlobalManager;
 import ru.nsu.ccfit.zuev.osu.RGBAColor;
 import ru.nsu.ccfit.zuev.osu.Utils;
 
@@ -27,12 +28,12 @@ public class SongProgressBar extends GameObject {
         if (listener != null)
             listener.addPassiveObject(this);
 
-        bgRect = new Rectangle(pos.x, pos.y, width, height);
+        bgRect = new Rectangle(pos.x, pos.y, width, height, GlobalManager.getInstance().getEngine().getVertexBufferObjectManager());
         bgRect.setColor(0, 0, 0, 0.3f);
         scene.attachChild(bgRect);
 
         progressRect = new Rectangle(bgRect.getX(), bgRect.getY(), 0,
-                bgRect.getHeight());
+                bgRect.getHeight(), GlobalManager.getInstance().getEngine().getVertexBufferObjectManager());
         progressRect.setColor(153f / 255f, 204f / 255f, 51f / 255f);
         scene.attachChild(progressRect);
     }

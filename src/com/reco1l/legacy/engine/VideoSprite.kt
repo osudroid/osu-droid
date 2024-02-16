@@ -1,12 +1,19 @@
 package com.reco1l.legacy.engine
 
 import android.opengl.GLES11Ext.GL_TEXTURE_EXTERNAL_OES
-import org.anddev.andengine.engine.Engine
-import org.anddev.andengine.engine.camera.Camera
-import org.anddev.andengine.entity.sprite.Sprite
-import javax.microedition.khronos.opengles.GL10
+import android.opengl.GLES20
+import org.andengine.engine.Engine
+import org.andengine.engine.camera.Camera
+import org.andengine.entity.sprite.Sprite
+import org.andengine.opengl.util.GLState
+import ru.nsu.ccfit.zuev.osu.GlobalManager
 
-class VideoSprite(source: String, private val engine: Engine) : Sprite(0f, 0f, VideoTexture(source).toRegion())
+class VideoSprite(source: String, private val engine: Engine) : Sprite(
+    0f,
+    0f,
+    VideoTexture(source).toRegion(),
+    GlobalManager.getInstance().engine.vertexBufferObjectManager
+)
 {
 
     val texture = textureRegion.texture as VideoTexture
@@ -22,17 +29,14 @@ class VideoSprite(source: String, private val engine: Engine) : Sprite(0f, 0f, V
         engine.textureManager.unloadTexture(texture)
     }
 
-    override fun doDraw(pGL: GL10, pCamera: Camera?)
+    override fun draw(pGLState: GLState, pCamera: Camera?)
     {
-        onInitDraw(pGL)
-        pGL.glEnable(GL_TEXTURE_EXTERNAL_OES)
+        GLES20.glEnable(GL_TEXTURE_EXTERNAL_OES)
 
-        textureRegion.onApply(pGL)
+        // TODO: Fix video texture.
+        textureRegion.texture.bind(pGLState)
 
-        onApplyVertices(pGL)
-        drawVertices(pGL, pCamera)
-
-        pGL.glDisable(GL_TEXTURE_EXTERNAL_OES)
+        GLES20.glDisable(GL_TEXTURE_EXTERNAL_OES)
     }
 
     override fun finalize()

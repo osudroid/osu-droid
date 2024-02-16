@@ -3,7 +3,7 @@ package ru.nsu.ccfit.zuev.osu.game.cursor.flashlight;
 import android.graphics.Color;
 import com.edlplan.andengine.TextureHelper;
 
-import org.anddev.andengine.entity.modifier.AlphaModifier;
+import org.andengine.entity.modifier.AlphaModifier;
 
 
 public class FlashLightDimLayerSprite extends FlashlightAreaSizedSprite {

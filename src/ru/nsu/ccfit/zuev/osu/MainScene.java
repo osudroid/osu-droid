@@ -8,40 +8,43 @@ import android.os.PowerManager;
 import android.util.Log;
 
 import com.edlplan.ui.fragment.ConfirmDialogFragment;
+import com.reco1l.legacy.engine.BlankTextureRegion;
 import com.reco1l.legacy.ui.ChimuWebView;
 import com.reco1l.legacy.ui.MainMenu;
 
-import org.anddev.andengine.engine.handler.IUpdateHandler;
-import org.anddev.andengine.entity.IEntity;
-import org.anddev.andengine.entity.modifier.IEntityModifier;
-import org.anddev.andengine.entity.modifier.MoveXModifier;
-import org.anddev.andengine.entity.modifier.ParallelEntityModifier;
-import org.anddev.andengine.entity.modifier.RotationModifier;
-import org.anddev.andengine.entity.modifier.SequenceEntityModifier;
-import org.anddev.andengine.entity.particle.ParticleSystem;
-import org.anddev.andengine.entity.particle.emitter.PointParticleEmitter;
-import org.anddev.andengine.entity.particle.initializer.AccelerationInitializer;
-import org.anddev.andengine.entity.particle.initializer.RotationInitializer;
-import org.anddev.andengine.entity.particle.initializer.VelocityInitializer;
-import org.anddev.andengine.entity.particle.modifier.AlphaModifier;
-import org.anddev.andengine.entity.particle.modifier.ExpireModifier;
-import org.anddev.andengine.entity.particle.modifier.ScaleModifier;
-import org.anddev.andengine.entity.primitive.Rectangle;
-import org.anddev.andengine.entity.scene.Scene;
-import org.anddev.andengine.entity.scene.background.ColorBackground;
-import org.anddev.andengine.entity.scene.background.SpriteBackground;
-import org.anddev.andengine.entity.sprite.Sprite;
-import org.anddev.andengine.entity.text.ChangeableText;
-import org.anddev.andengine.entity.text.Text;
-import org.anddev.andengine.input.touch.TouchEvent;
-import org.anddev.andengine.opengl.texture.region.TextureRegion;
-import org.anddev.andengine.util.Debug;
-import org.anddev.andengine.util.HorizontalAlign;
-import org.anddev.andengine.util.modifier.IModifier;
-import org.anddev.andengine.util.modifier.ease.EaseBounceOut;
-import org.anddev.andengine.util.modifier.ease.EaseCubicOut;
-import org.anddev.andengine.util.modifier.ease.EaseElasticOut;
-import org.anddev.andengine.util.modifier.ease.EaseExponentialOut;
+import org.andengine.engine.handler.IUpdateHandler;
+import org.andengine.entity.IEntity;
+import org.andengine.entity.modifier.IEntityModifier;
+import org.andengine.entity.modifier.MoveXModifier;
+import org.andengine.entity.modifier.ParallelEntityModifier;
+import org.andengine.entity.modifier.RotationModifier;
+import org.andengine.entity.modifier.SequenceEntityModifier;
+import org.andengine.entity.particle.ParticleSystem;
+import org.andengine.entity.particle.SpriteParticleSystem;
+import org.andengine.entity.particle.emitter.PointParticleEmitter;
+import org.andengine.entity.particle.initializer.AccelerationParticleInitializer;
+import org.andengine.entity.particle.initializer.RotationParticleInitializer;
+import org.andengine.entity.particle.initializer.VelocityParticleInitializer;
+import org.andengine.entity.particle.modifier.AlphaParticleModifier;
+import org.andengine.entity.particle.modifier.ExpireParticleInitializer;
+import org.andengine.entity.particle.modifier.ScaleParticleModifier;
+import org.andengine.entity.primitive.Rectangle;
+import org.andengine.entity.scene.Scene;
+import org.andengine.entity.scene.background.Background;
+import org.andengine.entity.scene.background.SpriteBackground;
+import org.andengine.entity.sprite.Sprite;
+import org.andengine.entity.text.Text;
+import org.andengine.entity.text.Text;
+import org.andengine.entity.text.TextOptions;
+import org.andengine.input.touch.TouchEvent;
+import org.andengine.opengl.texture.region.TextureRegion;
+import org.andengine.util.debug.Debug;
+import org.andengine.util.HorizontalAlign;
+import org.andengine.util.modifier.IModifier;
+import org.andengine.util.modifier.ease.EaseBounceOut;
+import org.andengine.util.modifier.ease.EaseCubicOut;
+import org.andengine.util.modifier.ease.EaseElasticOut;
+import org.andengine.util.modifier.ease.EaseExponentialOut;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -83,7 +86,7 @@ public class MainScene implements IUpdateHandler {
     private Sprite logo, logoOverlay, background, lastBackground;
     private Sprite music_nowplay;
     private Scene scene;
-    private ChangeableText musicInfoText;
+    private Text musicInfoText;
     private final Random random = new Random();
     private final Rectangle[] spectrum = new Rectangle[120];
     private final float[] peakLevel = new float[120];
@@ -96,7 +99,7 @@ public class MainScene implements IUpdateHandler {
     private boolean particleEnabled = false;
     private boolean isContinuousKiai = false;
 
-    private final ParticleSystem[] particleSystem = new ParticleSystem[2];
+    private final SpriteParticleSystem[] particleSystem = new SpriteParticleSystem[2];
 
     //private BassAudioPlayer music;
 
@@ -136,15 +139,15 @@ public class MainScene implements IUpdateHandler {
                     0,
                     (Config.getRES_HEIGHT() - height) / 2,
                     Config.getRES_WIDTH(),
-                    height, tex);
+                    height, tex, GlobalManager.getInstance().getEngine().getVertexBufferObjectManager());
             scene.setBackground(new SpriteBackground(menuBg));
         } else {
-            scene.setBackground(new ColorBackground(70 / 255f, 129 / 255f,
+            scene.setBackground(new Background(70 / 255f, 129 / 255f,
                     252 / 255f));
         }
-        lastBackground = new Sprite(0, 0, Config.getRES_WIDTH(), Config.getRES_HEIGHT(), ResourceManager.getInstance().getTexture("emptyavatar"));
+        lastBackground = new Sprite(0, 0, Config.getRES_WIDTH(), Config.getRES_HEIGHT(), new BlankTextureRegion(), GlobalManager.getInstance().getEngine().getVertexBufferObjectManager());
         final TextureRegion logotex = ResourceManager.getInstance().getTexture("logo");
-        logo = new Sprite((float) Config.getRES_WIDTH() / 2 - (float) logotex.getWidth() / 2, (float) Config.getRES_HEIGHT() / 2 - (float) logotex.getHeight() / 2, logotex) {
+        logo = new Sprite((float) Config.getRES_WIDTH() / 2 - (float) logotex.getWidth() / 2, (float) Config.getRES_HEIGHT() / 2 - (float) logotex.getHeight() / 2, logotex, GlobalManager.getInstance().getEngine().getVertexBufferObjectManager()) {
             @Override
             public boolean onAreaTouched(final TouchEvent pSceneTouchEvent,
                                          final float pTouchAreaLocalX, final float pTouchAreaLocalY) {
@@ -173,7 +176,7 @@ public class MainScene implements IUpdateHandler {
             }
         };
 
-        logoOverlay = new Sprite((float) Config.getRES_WIDTH() / 2 - (float) logotex.getWidth() / 2, (float) Config.getRES_HEIGHT() / 2 - (float) logotex.getHeight() / 2, logotex);
+        logoOverlay = new Sprite((float) Config.getRES_WIDTH() / 2 - (float) logotex.getWidth() / 2, (float) Config.getRES_HEIGHT() / 2 - (float) logotex.getHeight() / 2, logotex, GlobalManager.getInstance().getEngine().getVertexBufferObjectManager());
         logoOverlay.setScale(1.07f);
         logoOverlay.setAlpha(0.2f);
 
@@ -185,7 +188,7 @@ public class MainScene implements IUpdateHandler {
                         Locale.getDefault(),
                         "osu!droid %s\nby osu!droid Team\nosu! is © peppy 2007-2023",
                         BuildConfig.VERSION_NAME + " (" + BuildConfig.BUILD_TYPE + ")"
-                )) {
+                ), GlobalManager.getInstance().getEngine().getVertexBufferObjectManager()) {
 
 
             @Override
@@ -209,7 +212,7 @@ public class MainScene implements IUpdateHandler {
 
         final Text yasonline = new Text(720, 530, ResourceManager
                 .getInstance().getFont("font"),
-                "            Global Ranking\n   Provided by iBancho") {
+                "            Global Ranking\n   Provided by iBancho", GlobalManager.getInstance().getEngine().getVertexBufferObjectManager()) {
 
             @Override
             public boolean onAreaTouched(final TouchEvent pSceneTouchEvent,
@@ -232,7 +235,7 @@ public class MainScene implements IUpdateHandler {
 
         final Sprite music_prev = new Sprite(Config.getRES_WIDTH() - 50 * 6 + 35,
                 47, 40, 40, ResourceManager.getInstance().getTexture(
-                "music_prev")) {
+                "music_prev"), GlobalManager.getInstance().getEngine().getVertexBufferObjectManager()) {
 
             @Override
             public boolean onAreaTouched(final TouchEvent pSceneTouchEvent,
@@ -262,7 +265,7 @@ public class MainScene implements IUpdateHandler {
 
         final Sprite music_play = new Sprite(Config.getRES_WIDTH() - 50 * 5 + 35,
                 47, 40, 40, ResourceManager.getInstance().getTexture(
-                "music_play")) {
+                "music_play"), GlobalManager.getInstance().getEngine().getVertexBufferObjectManager()) {
 
             @Override
             public boolean onAreaTouched(final TouchEvent pSceneTouchEvent,
@@ -283,7 +286,7 @@ public class MainScene implements IUpdateHandler {
 
         final Sprite music_pause = new Sprite(Config.getRES_WIDTH() - 50 * 4 + 35,
                 47, 40, 40, ResourceManager.getInstance().getTexture(
-                "music_pause")) {
+                "music_pause"), GlobalManager.getInstance().getEngine().getVertexBufferObjectManager()) {
 
             @Override
             public boolean onAreaTouched(final TouchEvent pSceneTouchEvent,
@@ -304,7 +307,7 @@ public class MainScene implements IUpdateHandler {
 
         final Sprite music_stop = new Sprite(Config.getRES_WIDTH() - 50 * 3 + 35,
                 47, 40, 40, ResourceManager.getInstance().getTexture(
-                "music_stop")) {
+                "music_stop"), GlobalManager.getInstance().getEngine().getVertexBufferObjectManager()) {
 
             @Override
             public boolean onAreaTouched(final TouchEvent pSceneTouchEvent,
@@ -326,7 +329,7 @@ public class MainScene implements IUpdateHandler {
 
         final Sprite music_next = new Sprite(Config.getRES_WIDTH() - 50 * 2 + 35,
                 47, 40, 40, ResourceManager.getInstance().getTexture(
-                "music_next")) {
+                "music_next"), GlobalManager.getInstance().getEngine().getVertexBufferObjectManager()) {
 
             @Override
             public boolean onAreaTouched(final TouchEvent pSceneTouchEvent,
@@ -354,16 +357,16 @@ public class MainScene implements IUpdateHandler {
             }
         };
 
-        musicInfoText = new ChangeableText(0, 0, ResourceManager.getInstance().getFont("font"), "", HorizontalAlign.RIGHT, 35);
+        musicInfoText = new Text(0, 0, ResourceManager.getInstance().getFont("font"), "", 35, new TextOptions(HorizontalAlign.RIGHT), GlobalManager.getInstance().getEngine().getVertexBufferObjectManager());
 
         final TextureRegion nptex = ResourceManager.getInstance().getTexture("music_np");
-        music_nowplay = new Sprite(Utils.toRes(Config.getRES_WIDTH() - 500), 0, (float) (40 * nptex.getWidth()) / nptex.getHeight(), 40, nptex);
+        music_nowplay = new Sprite(Utils.toRes(Config.getRES_WIDTH() - 500), 0, (float) (40 * nptex.getWidth()) / nptex.getHeight(), 40, nptex, GlobalManager.getInstance().getEngine().getVertexBufferObjectManager());
 
-        final Rectangle bgTopRect = new Rectangle(0, 0, Config.getRES_WIDTH(), Utils.toRes(120));
+        final Rectangle bgTopRect = new Rectangle(0, 0, Config.getRES_WIDTH(), Utils.toRes(120), GlobalManager.getInstance().getEngine().getVertexBufferObjectManager());
         bgTopRect.setColor(0, 0, 0, 0.3f);
 
         final Rectangle bgbottomRect = new Rectangle(0, 0, Config.getRES_WIDTH(),
-                Math.max(author.getHeight(), yasonline.getHeight()) + Utils.toRes(15));
+                Math.max(author.getHeight(), yasonline.getHeight()) + Utils.toRes(15), GlobalManager.getInstance().getEngine().getVertexBufferObjectManager());
         bgbottomRect.setPosition(0, Config.getRES_HEIGHT() - bgbottomRect.getHeight());
         bgbottomRect.setColor(0, 0, 0, 0.3f);
 
@@ -371,7 +374,7 @@ public class MainScene implements IUpdateHandler {
             final float pX = (float) Config.getRES_WIDTH() / 2;
             final float pY = (float) Config.getRES_HEIGHT() / 2;
 
-            spectrum[i] = new Rectangle(pX, pY, 260, 10);
+            spectrum[i] = new Rectangle(pX, pY, 260, 10, GlobalManager.getInstance().getEngine().getVertexBufferObjectManager());
             spectrum[i].setRotationCenter(0, 5);
             spectrum[i].setScaleCenter(0, 5);
             spectrum[i].setRotation(-220 + i * 3f);
@@ -385,16 +388,18 @@ public class MainScene implements IUpdateHandler {
         TextureRegion starRegion = ResourceManager.getInstance().getTexture("star");
 
         {
-            particleSystem[0] = new ParticleSystem(new PointParticleEmitter(-40, (float) (Config.getRES_HEIGHT() * 3) / 4), 32, 48, 128, starRegion);
-            particleSystem[0].setBlendFunction(GL10.GL_SRC_ALPHA, GL10.GL_ONE_MINUS_SRC_ALPHA);
+            particleSystem[0] = new SpriteParticleSystem(new PointParticleEmitter(-40, (float) (Config.getRES_HEIGHT() * 3) / 4), 32, 48, 128, starRegion, GlobalManager.getInstance().getEngine().getVertexBufferObjectManager());
 
-            particleSystem[0].addParticleInitializer(new VelocityInitializer(150, 430, -480, -520));
-            particleSystem[0].addParticleInitializer(new AccelerationInitializer(10, 30));
-            particleSystem[0].addParticleInitializer(new RotationInitializer(0.0f, 360.0f));
+            // TODO Is this necessary for stars ?
+            //particleSystem[0].setBlendFunction(GL10.GL_SRC_ALPHA, GL10.GL_ONE_MINUS_SRC_ALPHA);
 
-            particleSystem[0].addParticleModifier(new ScaleModifier(0.5f, 2.0f, 0.0f, 1.0f));
-            particleSystem[0].addParticleModifier(new AlphaModifier(1.0f, 0.0f, 0.0f, 1.0f));
-            particleSystem[0].addParticleModifier(new ExpireModifier(1.0f));
+            particleSystem[0].addParticleInitializer(new VelocityParticleInitializer<>(150, 430, -480, -520));
+            particleSystem[0].addParticleInitializer(new AccelerationParticleInitializer<>(10, 30));
+            particleSystem[0].addParticleInitializer(new RotationParticleInitializer<>(0.0f, 360.0f));
+            particleSystem[0].addParticleInitializer(new ExpireParticleInitializer<>(1.0f));
+
+            particleSystem[0].addParticleModifier(new ScaleParticleModifier<>(0.5f, 2.0f, 0.0f, 1.0f));
+            particleSystem[0].addParticleModifier(new AlphaParticleModifier<>(1.0f, 0.0f, 0.0f, 1.0f));
 
             particleSystem[0].setParticlesSpawnEnabled(false);
 
@@ -402,16 +407,19 @@ public class MainScene implements IUpdateHandler {
         }
 
         {
-            particleSystem[1] = new ParticleSystem(new PointParticleEmitter(Config.getRES_WIDTH(), (float) (Config.getRES_HEIGHT() * 3) / 4), 32, 48, 128, starRegion);
-            particleSystem[1].setBlendFunction(GL10.GL_SRC_ALPHA, GL10.GL_ONE_MINUS_SRC_ALPHA);
 
-            particleSystem[1].addParticleInitializer(new VelocityInitializer(-150, -430, -480, -520));
-            particleSystem[1].addParticleInitializer(new AccelerationInitializer(-10, 30));
-            particleSystem[1].addParticleInitializer(new RotationInitializer(0.0f, 360.0f));
+            particleSystem[1] = new SpriteParticleSystem(new PointParticleEmitter(Config.getRES_WIDTH(), (float) (Config.getRES_HEIGHT() * 3) / 4), 32, 48, 128, starRegion, GlobalManager.getInstance().getEngine().getVertexBufferObjectManager());
 
-            particleSystem[1].addParticleModifier(new ScaleModifier(0.5f, 2.0f, 0.0f, 1.0f));
-            particleSystem[1].addParticleModifier(new AlphaModifier(1.0f, 0.0f, 0.0f, 1.0f));
-            particleSystem[1].addParticleModifier(new ExpireModifier(1.0f));
+            // TODO Is this necessary for stars ?
+            //particleSystem[1].setBlendFunction(GL10.GL_SRC_ALPHA, GL10.GL_ONE_MINUS_SRC_ALPHA);
+
+            particleSystem[1].addParticleInitializer(new VelocityParticleInitializer<>(-150, -430, -480, -520));
+            particleSystem[1].addParticleInitializer(new AccelerationParticleInitializer<>(-10, 30));
+            particleSystem[1].addParticleInitializer(new RotationParticleInitializer<>(0.0f, 360.0f));
+            particleSystem[1].addParticleInitializer(new ExpireParticleInitializer<>(1.0f));
+
+            particleSystem[1].addParticleModifier(new ScaleParticleModifier<>(0.5f, 2.0f, 0.0f, 1.0f));
+            particleSystem[1].addParticleModifier(new AlphaParticleModifier<>(1.0f, 0.0f, 0.0f, 1.0f));
 
             particleSystem[1].setParticlesSpawnEnabled(false);
 
@@ -419,7 +427,7 @@ public class MainScene implements IUpdateHandler {
         }
 
         TextureRegion chimuTex = ResourceManager.getInstance().getTexture("chimu");
-        Sprite chimu = new Sprite(Config.getRES_WIDTH() - chimuTex.getWidth(), (Config.getRES_HEIGHT() - chimuTex.getHeight()) / 2f, chimuTex) {
+        Sprite chimu = new Sprite(Config.getRES_WIDTH() - chimuTex.getWidth(), (Config.getRES_HEIGHT() - chimuTex.getHeight()) / 2f, chimuTex, GlobalManager.getInstance().getEngine().getVertexBufferObjectManager()) {
             public boolean onAreaTouched(TouchEvent pSceneTouchEvent, float pTouchAreaLocalX, float pTouchAreaLocalY) {
                 if (pSceneTouchEvent.isActionDown()) {
                     setColor(0.7f, 0.7f, 0.7f);
@@ -485,7 +493,8 @@ public class MainScene implements IUpdateHandler {
         scene.registerTouchArea(music_pause);
         scene.registerTouchArea(music_stop);
         scene.registerTouchArea(music_next);
-        scene.setTouchAreaBindingEnabled(true);
+        scene.setTouchAreaBindingOnActionDownEnabled(true);
+        scene.setTouchAreaBindingOnActionMoveEnabled(true);
 
         progressBar = new SongProgressBar(null, scene, 0, 0, new PointF(Utils.toRes(Config.getRES_WIDTH() - 320), Utils.toRes(100)));
         progressBar.setProgressRectColor(new RGBAColor(0.9f, 0.9f, 0.9f, 0.8f));
@@ -629,13 +638,13 @@ public class MainScene implements IUpdateHandler {
             }
             menu.getFirst().registerEntityModifier(new ParallelEntityModifier(
                     new MoveXModifier(0.5f, menuBarX - 100, menuBarX, EaseElasticOut.getInstance()),
-                    new org.anddev.andengine.entity.modifier.AlphaModifier(0.5f, 0, 0.9f, EaseCubicOut.getInstance())));
+                    new org.andengine.entity.modifier.AlphaModifier(0.5f, 0, 0.9f, EaseCubicOut.getInstance())));
             menu.getSecond().registerEntityModifier(new ParallelEntityModifier(
                     new MoveXModifier(0.5f, menuBarX - 100, menuBarX, EaseElasticOut.getInstance()),
-                    new org.anddev.andengine.entity.modifier.AlphaModifier(0.5f, 0, 0.9f, EaseCubicOut.getInstance())));
+                    new org.andengine.entity.modifier.AlphaModifier(0.5f, 0, 0.9f, EaseCubicOut.getInstance())));
             menu.getThird().registerEntityModifier(new ParallelEntityModifier(
                     new MoveXModifier(0.5f, menuBarX - 100, menuBarX, EaseElasticOut.getInstance()),
-                    new org.anddev.andengine.entity.modifier.AlphaModifier(0.5f, 0, 0.9f, EaseCubicOut.getInstance())));
+                    new org.andengine.entity.modifier.AlphaModifier(0.5f, 0, 0.9f, EaseCubicOut.getInstance())));
             scene.registerTouchArea(menu.getFirst());
             scene.registerTouchArea(menu.getSecond());
             scene.registerTouchArea(menu.getThird());
@@ -652,13 +661,13 @@ public class MainScene implements IUpdateHandler {
 
                 menu.getFirst().registerEntityModifier(new ParallelEntityModifier(
                         new MoveXModifier(1f, menuBarX, menuBarX - 50, EaseExponentialOut.getInstance()),
-                        new org.anddev.andengine.entity.modifier.AlphaModifier(1f, 0.9f, 0, EaseExponentialOut.getInstance())));
+                        new org.andengine.entity.modifier.AlphaModifier(1f, 0.9f, 0, EaseExponentialOut.getInstance())));
                 menu.getSecond().registerEntityModifier(new ParallelEntityModifier(
                         new MoveXModifier(1f, menuBarX, menuBarX - 50, EaseExponentialOut.getInstance()),
-                        new org.anddev.andengine.entity.modifier.AlphaModifier(1f, 0.9f, 0, EaseExponentialOut.getInstance())));
+                        new org.andengine.entity.modifier.AlphaModifier(1f, 0.9f, 0, EaseExponentialOut.getInstance())));
                 menu.getThird().registerEntityModifier(new ParallelEntityModifier(
                         new MoveXModifier(1f, menuBarX, menuBarX - 50, EaseExponentialOut.getInstance()),
-                        new org.anddev.andengine.entity.modifier.AlphaModifier(1f, 0.9f, 0, EaseExponentialOut.getInstance())));
+                        new org.andengine.entity.modifier.AlphaModifier(1f, 0.9f, 0, EaseExponentialOut.getInstance())));
 
                 logo.registerEntityModifier(new MoveXModifier(1f, (float) Config.getRES_WIDTH() / 3 - logo.getWidth() / 2, (float) Config.getRES_WIDTH() / 2 - logo.getWidth() / 2,
                         EaseBounceOut.getInstance()));
@@ -679,8 +688,8 @@ public class MainScene implements IUpdateHandler {
             lastBeatPassTime = beatPassTime;
             offset = 0;
             if (logo != null) {
-                logo.registerEntityModifier(new SequenceEntityModifier(new org.anddev.andengine.entity.modifier.ScaleModifier((float) (bpmLength / 1000 * 0.9f), 1f, 1.07f),
-                        new org.anddev.andengine.entity.modifier.ScaleModifier((float) (bpmLength / 1000 * 0.07f), 1.07f, 1f)));
+                logo.registerEntityModifier(new SequenceEntityModifier(new org.andengine.entity.modifier.ScaleModifier((float) (bpmLength / 1000 * 0.9f), 1f, 1.07f),
+                        new org.andengine.entity.modifier.ScaleModifier((float) (bpmLength / 1000 * 0.07f), 1.07f, 1f)));
             }
         }
 
@@ -806,15 +815,15 @@ public class MainScene implements IUpdateHandler {
             Log.w("MainMenuActivity", "Next song: " + beatmapInfo.getMusic() + ", Start at: " + beatmapInfo.getPreviewTime());
 
             if (musicInfoText == null) {
-                musicInfoText = new ChangeableText(Utils.toRes(Config.getRES_WIDTH() - 500), Utils.toRes(3),
-                        ResourceManager.getInstance().getFont("font"), "None...", HorizontalAlign.RIGHT, 35);
+                musicInfoText = new Text(Utils.toRes(Config.getRES_WIDTH() - 500), Utils.toRes(3),
+                        ResourceManager.getInstance().getFont("font"), "None...", 35, new TextOptions(HorizontalAlign.RIGHT), GlobalManager.getInstance().getEngine().getVertexBufferObjectManager());
             }
             if (beatmapInfo.getArtistUnicode() != null && beatmapInfo.getTitleUnicode() != null && !Config.isForceRomanized()) {
-                musicInfoText.setText(beatmapInfo.getArtistUnicode() + " - " + beatmapInfo.getTitleUnicode(), true);
+                musicInfoText.setText(beatmapInfo.getArtistUnicode() + " - " + beatmapInfo.getTitleUnicode());
             } else if (beatmapInfo.getArtist() != null && beatmapInfo.getTitle() != null) {
-                musicInfoText.setText(beatmapInfo.getArtist() + " - " + beatmapInfo.getTitle(), true);
+                musicInfoText.setText(beatmapInfo.getArtist() + " - " + beatmapInfo.getTitle());
             } else {
-                musicInfoText.setText("Failure to load QAQ", true);
+                musicInfoText.setText("Failure to load QAQ");
             }
             try {
                 musicInfoText.setPosition(Utils.toRes(Config.getRES_WIDTH() - 500 + 470 - musicInfoText.getWidth()), musicInfoText.getY());
@@ -854,8 +863,8 @@ public class MainScene implements IUpdateHandler {
                                 / (float) tex.getWidth();
                         background = new Sprite(0,
                                 (Config.getRES_HEIGHT() - height) / 2, Config
-                                .getRES_WIDTH(), height, tex);
-                        lastBackground.registerEntityModifier(new org.anddev.andengine.entity.modifier.AlphaModifier(1.5f, 1, 0, new IEntityModifier.IEntityModifierListener() {
+                                .getRES_WIDTH(), height, tex, GlobalManager.getInstance().getEngine().getVertexBufferObjectManager());
+                        lastBackground.registerEntityModifier(new org.andengine.entity.modifier.AlphaModifier(1.5f, 1, 0, new IEntityModifier.IEntityModifierListener() {
                             @Override
                             public void onModifierStarted(IModifier<IEntity> pModifier, IEntity pItem) {
                                 scene.attachChild(background, 0);
@@ -945,7 +954,7 @@ public class MainScene implements IUpdateHandler {
         }
 
         Rectangle bg = new Rectangle(0, 0, Config.getRES_WIDTH(),
-                Config.getRES_HEIGHT());
+                Config.getRES_HEIGHT(), GlobalManager.getInstance().getEngine().getVertexBufferObjectManager());
         bg.setColor(0, 0, 0, 1.0f);
         bg.registerEntityModifier(ModifierFactory.newAlphaModifier(3.0f, 0, 1));
         scene.attachChild(bg);

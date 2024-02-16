@@ -22,16 +22,17 @@ import com.reco1l.legacy.Multiplayer.isConnected
 import com.reco1l.legacy.Multiplayer.isRoomHost
 import com.reco1l.legacy.Multiplayer.player
 import com.reco1l.legacy.Multiplayer.room
-import org.anddev.andengine.engine.camera.SmoothCamera
-import org.anddev.andengine.entity.primitive.Rectangle
-import org.anddev.andengine.entity.scene.Scene
-import org.anddev.andengine.entity.scene.background.SpriteBackground
-import org.anddev.andengine.entity.sprite.Sprite
-import org.anddev.andengine.entity.text.ChangeableText
-import org.anddev.andengine.input.touch.TouchEvent
-import org.anddev.andengine.util.MathUtils
+import org.andengine.engine.camera.SmoothCamera
+import org.andengine.entity.primitive.Rectangle
+import org.andengine.entity.scene.Scene
+import org.andengine.entity.scene.background.SpriteBackground
+import org.andengine.entity.sprite.Sprite
+import org.andengine.entity.text.Text
+import org.andengine.input.touch.TouchEvent
+import org.andengine.util.math.MathUtils
 import org.json.JSONArray
 import ru.nsu.ccfit.zuev.osu.Config
+import ru.nsu.ccfit.zuev.osu.GlobalManager
 import ru.nsu.ccfit.zuev.osu.ToastLogger
 import ru.nsu.ccfit.zuev.osu.game.mods.GameMod.MOD_SCOREV2
 import ru.nsu.ccfit.zuev.osu.helper.AnimSprite
@@ -107,14 +108,14 @@ object RoomScene : Scene(), IRoomEventListener, IPlayerEventListener
 
     private val onlinePanel = OnlinePanel()
 
-    private val titleText = ChangeableText(20f, 20f, getResources().getFont("bigFont"), "", 100)
+    private val titleText = Text(20f, 20f, getResources().getFont("bigFont"), "", 100, GlobalManager.getInstance().engine.vertexBufferObjectManager)
 
-    private val stateText = ChangeableText(0f, 0f, getResources().getFont("smallFont"), "", 250)
+    private val stateText = Text(0f, 0f, getResources().getFont("smallFont"), "", 250, GlobalManager.getInstance().engine.vertexBufferObjectManager)
 
-    private val infoText = ChangeableText(0f, 0f, getResources().getFont("smallFont"), "", 200)
+    private val infoText = Text(0f, 0f, getResources().getFont("smallFont"), "", 200, GlobalManager.getInstance().engine.vertexBufferObjectManager)
 
 
-    private val beatmapInfoText = ChangeableText(10f, 10f, getResources().getFont("smallFont"), "", 150)
+    private val beatmapInfoText = Text(10f, 10f, getResources().getFont("smallFont"), "", 150, GlobalManager.getInstance().engine.vertexBufferObjectManager)
 
     private var beatmapInfoRectangle: Rectangle? = null
 
@@ -134,12 +135,12 @@ object RoomScene : Scene(), IRoomEventListener, IPlayerEventListener
         isBackgroundEnabled = true
 
         // Background dim
-        val dim = Rectangle(0f, 0f, Config.getRES_WIDTH().toFloat(), Config.getRES_HEIGHT().toFloat())
+        val dim = Rectangle(0f, 0f, Config.getRES_WIDTH().toFloat(), Config.getRES_HEIGHT().toFloat(), GlobalManager.getInstance().engine.vertexBufferObjectManager)
         dim.setColor(0f, 0f, 0f, 0.5f)
         attachChild(dim, 0)
 
         // Top bar
-        val top = Rectangle(0f, 0f, Config.getRES_WIDTH().toFloat(), 120f)
+        val top = Rectangle(0f, 0f, Config.getRES_WIDTH().toFloat(), 120f, GlobalManager.getInstance().engine.vertexBufferObjectManager)
         top.setColor(0f, 0f, 0f, 0.3f)
         attachChild(top)
 
@@ -169,7 +170,7 @@ object RoomScene : Scene(), IRoomEventListener, IPlayerEventListener
         attachChild(infoText)
 
         // Beatmap info
-        beatmapInfoRectangle = Rectangle(0f, 0f, trackButton!!.width * 0.75f, 0f).also {
+        beatmapInfoRectangle = Rectangle(0f, 0f, trackButton!!.width * 0.75f, 0f, GlobalManager.getInstance().engine.vertexBufferObjectManager).also {
             it.setColor(0f, 0f, 0f, 0.9f)
             it.isVisible = false
 
@@ -447,7 +448,7 @@ object RoomScene : Scene(), IRoomEventListener, IPlayerEventListener
         val height = texture.height * (Config.getRES_WIDTH() / texture.width.toFloat())
         val width = Config.getRES_WIDTH().toFloat()
 
-        background = SpriteBackground(Sprite(0f, (Config.getRES_HEIGHT() - height) / 2f, width, height, texture))
+        background = SpriteBackground(Sprite(0f, (Config.getRES_HEIGHT() - height) / 2f, width, height, texture, GlobalManager.getInstance().engine.vertexBufferObjectManager))
     }
 
     private fun updateInformation()

@@ -1,7 +1,7 @@
 package ru.nsu.ccfit.zuev.osu.game;
 
-import org.anddev.andengine.entity.scene.Scene;
-import org.anddev.andengine.entity.sprite.Sprite;
+import org.andengine.entity.scene.Scene;
+import org.andengine.entity.sprite.Sprite;
 
 import java.util.ArrayList;
 import java.util.HashMap;

@@ -5,13 +5,15 @@ import com.reco1l.api.ibancho.data.PlayerStatus.*
 import com.reco1l.api.ibancho.data.RoomTeam.*
 import com.reco1l.legacy.Multiplayer
 import com.reco1l.legacy.ui.entity.ScrollableList
-import org.anddev.andengine.entity.primitive.Rectangle
-import org.anddev.andengine.entity.sprite.Sprite
-import org.anddev.andengine.entity.text.ChangeableText
-import org.anddev.andengine.input.touch.TouchEvent
-import org.anddev.andengine.input.touch.detector.ScrollDetector.IScrollDetectorListener
-import org.anddev.andengine.util.MathUtils
+import org.andengine.entity.primitive.Rectangle
+import org.andengine.entity.scene.ITouchArea
+import org.andengine.entity.sprite.Sprite
+import org.andengine.entity.text.Text
+import org.andengine.input.touch.TouchEvent
+import org.andengine.input.touch.detector.ScrollDetector.IScrollDetectorListener
+import org.andengine.util.math.MathUtils
 import ru.nsu.ccfit.zuev.osu.Config
+import ru.nsu.ccfit.zuev.osu.GlobalManager
 import ru.nsu.ccfit.zuev.osu.ResourceManager.getInstance as getResources
 
 class RoomPlayerList(val room: Room) : ScrollableList(), IScrollDetectorListener
@@ -45,7 +47,7 @@ class RoomPlayerList(val room: Room) : ScrollableList(), IScrollDetectorListener
     override fun detachSelf(): Boolean
     {
         for (i in 0 until childCount)
-            RoomScene.unregisterTouchArea(getChild(i) as ITouchArea)
+            RoomScene.unregisterTouchArea(getChildByIndex(i) as ITouchArea)
 
         return RoomScene.detachChild(this)
     }
@@ -58,7 +60,7 @@ class RoomPlayerList(val room: Room) : ScrollableList(), IScrollDetectorListener
             isValid = true
             room.players.forEachIndexed { i, player ->
 
-                val item = getChild(i) as PlayerItem
+                val item = getChildByIndex(i) as PlayerItem
 
                 item.room = room
                 item.player = player
@@ -72,7 +74,7 @@ class RoomPlayerList(val room: Room) : ScrollableList(), IScrollDetectorListener
     }
 
 
-    inner class PlayerItem : Rectangle(40f, 0f, Config.getRES_WIDTH() * 0.4f, 80f)
+    inner class PlayerItem : Rectangle(40f, 0f, Config.getRES_WIDTH() * 0.4f, 80f, GlobalManager.getInstance().engine.vertexBufferObjectManager)
     {
 
         var room: Room? = null
@@ -82,9 +84,9 @@ class RoomPlayerList(val room: Room) : ScrollableList(), IScrollDetectorListener
         var isHost: Boolean = false
 
 
-        private val state = Rectangle(0f, 0f, 5f, height)
+        private val state = Rectangle(0f, 0f, 5f, height, GlobalManager.getInstance().engine.vertexBufferObjectManager)
 
-        private val text = ChangeableText(20f, 16f, getResources().getFont("smallFont"), "", 64)
+        private val text = Text(20f, 16f, getResources().getFont("smallFont"), "", 64, GlobalManager.getInstance().engine.vertexBufferObjectManager)
 
         private var hostIcon: Sprite? = null
 
@@ -138,7 +140,7 @@ class RoomPlayerList(val room: Room) : ScrollableList(), IScrollDetectorListener
             {
                 val icon = getResources().getTexture("crown")
 
-                hostIcon = Sprite(width - icon.width - 15f, (height - icon.height) / 2f, icon)
+                hostIcon = Sprite(width - icon.width - 15f, (height - icon.height) / 2f, icon, GlobalManager.getInstance().engine.vertexBufferObjectManager)
                 attachChild(hostIcon)
             }
 
@@ -148,7 +150,7 @@ class RoomPlayerList(val room: Room) : ScrollableList(), IScrollDetectorListener
                 {
                     val icon = getResources().getTexture("missing")
 
-                    missingIcon = Sprite(width - icon.width - 15f - (hostIcon?.let { it.width + 10f } ?: 0f), (height - icon.height) / 2f, icon)
+                    missingIcon = Sprite(width - icon.width - 15f - (hostIcon?.let { it.width + 10f } ?: 0f), (height - icon.height) / 2f, icon, GlobalManager.getInstance().engine.vertexBufferObjectManager)
                     attachChild(missingIcon)
 
                     state.setColor(1f, 0.1f, 0.1f)

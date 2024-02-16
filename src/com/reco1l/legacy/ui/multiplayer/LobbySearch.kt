@@ -16,7 +16,7 @@ import com.edlplan.framework.easing.Easing
 import com.edlplan.ui.BaseAnimationListener
 import com.edlplan.ui.EasingHelper
 import com.edlplan.ui.fragment.BaseFragment
-import org.anddev.andengine.input.touch.TouchEvent
+import org.andengine.input.touch.TouchEvent
 import ru.nsu.ccfit.zuev.osuplus.R
 import kotlin.math.abs
 

@@ -2,12 +2,13 @@ package ru.nsu.ccfit.zuev.osu.game;
 
 import android.graphics.PointF;
 
-import org.anddev.andengine.entity.sprite.Sprite;
+import org.andengine.entity.sprite.Sprite;
 
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.Map;
 
+import ru.nsu.ccfit.zuev.osu.GlobalManager;
 import ru.nsu.ccfit.zuev.osu.ResourceManager;
 import ru.nsu.ccfit.zuev.osu.helper.AnimSprite;
 import ru.nsu.ccfit.zuev.osu.helper.CentredSprite;
@@ -66,7 +67,7 @@ public class SpritePool {
         }
 
         spritesCreated++;
-        return new Sprite(0, 0, ResourceManager.getInstance().getTexture(name));
+        return new Sprite(0, 0, ResourceManager.getInstance().getTexture(name), GlobalManager.getInstance().getEngine().getVertexBufferObjectManager());
     }
 
     synchronized public Sprite getCenteredSprite(final String name,
