@@ -10,7 +10,7 @@ import kotlin.math.pow
 /**
  * Represents the skill required to press keys or tap with regards to keeping up with the speed at which objects need to be hit.
  */
-class Speed(
+class OsuSpeed(
     /**
      * The [Mod]s that this skill processes.
      */
@@ -20,7 +20,7 @@ class Speed(
      * The 300 hit window.
      */
     private val greatWindow: Double
-) : StrainSkill(mods) {
+) : OsuStrainSkill(mods) {
     override val difficultyMultiplier = 1.04
     override val reducedSectionCount = 5
 

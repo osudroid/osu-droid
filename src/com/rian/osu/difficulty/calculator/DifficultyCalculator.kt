@@ -6,10 +6,10 @@ import com.rian.osu.beatmap.BeatmapProcessor
 import com.rian.osu.difficulty.DifficultyHitObject
 import com.rian.osu.difficulty.attributes.DifficultyAttributes
 import com.rian.osu.difficulty.attributes.TimedDifficultyAttributes
-import com.rian.osu.difficulty.skills.Aim
-import com.rian.osu.difficulty.skills.Flashlight
+import com.rian.osu.difficulty.skills.OsuAim
+import com.rian.osu.difficulty.skills.OsuFlashlight
 import com.rian.osu.difficulty.skills.Skill
-import com.rian.osu.difficulty.skills.Speed
+import com.rian.osu.difficulty.skills.OsuSpeed
 import com.rian.osu.mods.*
 import com.rian.osu.utils.HitWindowConverter.hitWindow300ToOD
 import com.rian.osu.utils.HitWindowConverter.odToHitWindow300
@@ -142,7 +142,7 @@ object DifficultyCalculator {
 
             aimDifficulty = calculateRating(skills[0])
             speedDifficulty = calculateRating(skills[2])
-            speedNoteCount = (skills[2] as Speed).relevantNoteCount()
+            speedNoteCount = (skills[2] as OsuSpeed).relevantNoteCount()
             flashlightDifficulty = calculateRating(skills[3])
 
             aimSliderFactor = if (aimDifficulty > 0) calculateRating(skills[1]) / aimDifficulty else 1.0
@@ -246,10 +246,10 @@ object DifficultyCalculator {
             (parameters?.totalSpeedMultiplier?.toDouble() ?: 1.0)
 
         return arrayOf(
-            Aim(mods, true),
-            Aim(mods, false),
-            Speed(mods, greatWindow),
-            Flashlight(mods)
+            OsuAim(mods, true),
+            OsuAim(mods, false),
+            OsuSpeed(mods, greatWindow),
+            OsuFlashlight(mods)
         )
     }
 

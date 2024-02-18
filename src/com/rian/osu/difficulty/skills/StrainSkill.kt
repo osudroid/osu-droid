@@ -1,12 +1,9 @@
 package com.rian.osu.difficulty.skills
 
 import com.rian.osu.difficulty.DifficultyHitObject
-import com.rian.osu.math.Interpolation
 import com.rian.osu.mods.Mod
 import kotlin.math.ceil
-import kotlin.math.log10
 import kotlin.math.max
-import kotlin.math.min
 
 /**
  * Used to processes strain values of [DifficultyHitObject]s, keep track of strain levels caused by
@@ -19,16 +16,6 @@ abstract class StrainSkill(
      */
     mods: List<Mod>
 ) : Skill(mods) {
-    /**
-     * The final multiplier to be applied to the final difficulty value after all other calculations.
-     */
-    protected open val difficultyMultiplier = 1.06
-
-    /**
-     * The weight by which each strain value decays.
-     */
-    protected open val decayWeight = 0.9
-
     /**
      * The number of sections with the highest strains, which the peak strain reductions will apply to.
      *
@@ -60,41 +47,6 @@ abstract class StrainSkill(
 
         currentSectionPeak = max(strainValueAt(current), currentSectionPeak)
         saveToHitObject(current)
-    }
-
-    override fun difficultyValue(): Double {
-        val strains = currentStrainPeaks
-
-        // Difficulty is the weighted sum of the highest strains from every section.
-        // We're sorting from highest to lowest strain.
-        strains.sortDescending()
-
-        if (reducedSectionCount > 0) {
-            // We are reducing the highest strains first to account for extreme difficulty spikes.
-            for (i in 0 until min(strains.size.toDouble(), reducedSectionCount.toDouble()).toInt()) {
-                val scale = log10(
-                    Interpolation.linear(
-                        1.0,
-                        10.0,
-                        (i.toFloat() / reducedSectionCount).toDouble().coerceIn(0.0, 1.0)
-                    )
-                )
-
-                strains[i] = strains[i] * Interpolation.linear(reducedSectionBaseline, 1.0, scale)
-            }
-
-            strains.sortDescending()
-        }
-
-        var difficulty = 0.0
-        var weight = 1.0
-
-        for (strain in strains) {
-            difficulty += strain * weight
-            weight *= decayWeight
-        }
-
-        return difficulty * difficultyMultiplier
     }
 
     val currentStrainPeaks: MutableList<Double>

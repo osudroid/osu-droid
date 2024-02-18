@@ -9,12 +9,12 @@ import kotlin.math.pow
 /**
  * Represents the skill required to memorize and hit every object in a beatmap with the Flashlight mod enabled.
  */
-class Flashlight(
+class OsuFlashlight(
     /**
      * The [Mod]s that this skill processes.
      */
     mods: List<Mod>
-) : StrainSkill(mods) {
+) : OsuStrainSkill(mods) {
     override val reducedSectionCount = 0
     override val reducedSectionBaseline = 1.0
     override val decayWeight = 1.0

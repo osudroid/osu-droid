@@ -8,7 +8,7 @@ import kotlin.math.pow
 /**
  * Represents the skill required to correctly aim at every object in the map with a uniform circle size and normalized distances.
  */
-class Aim(
+class OsuAim(
     /**
      * The [Mod]s that this skill processes.
      */
@@ -18,7 +18,7 @@ class Aim(
      * Whether to consider sliders in the calculation.
      */
     private val withSliders: Boolean
-) : StrainSkill(mods) {
+) : OsuStrainSkill(mods) {
     private var currentStrain = 0.0
     private val skillMultiplier = 23.55
     private val strainDecayBase = 0.15
