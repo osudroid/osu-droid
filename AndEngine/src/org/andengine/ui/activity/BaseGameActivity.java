@@ -277,7 +277,10 @@ public abstract class BaseGameActivity extends BaseActivity implements IGameInte
 
 		super.onDestroy();
 
-		this.mEngine.onDestroy();
+		// BEGIN osu!droid modified - This shouldn't be here since this method can be called when
+		// unfocusing the activity.
+
+		/*this.mEngine.onDestroy();
 
 		try {
 			this.onDestroyResources();
@@ -287,7 +290,9 @@ public abstract class BaseGameActivity extends BaseActivity implements IGameInte
 
 		this.onGameDestroyed();
 
-		this.mEngine = null;
+		this.mEngine = null;*/
+
+		// END osu!droid modified.
 	}
 
 	@Override
