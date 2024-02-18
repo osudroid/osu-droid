@@ -1,4 +1,4 @@
-package com.rian.osu.difficultycalculator.calculator
+package com.rian.osu.difficulty.calculator
 
 import com.rian.osu.mods.Mod
 import com.rian.osu.mods.ModDoubleTime

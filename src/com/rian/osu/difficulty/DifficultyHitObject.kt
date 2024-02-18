@@ -1,4 +1,4 @@
-package com.rian.osu.difficultycalculator
+package com.rian.osu.difficulty
 
 import com.rian.osu.beatmap.hitobject.HitObject
 import com.rian.osu.beatmap.hitobject.Slider

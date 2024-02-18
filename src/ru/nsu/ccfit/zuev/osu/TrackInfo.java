@@ -1,7 +1,7 @@
 package ru.nsu.ccfit.zuev.osu;
 
 import com.rian.osu.beatmap.Beatmap;
-import com.rian.osu.difficultycalculator.BeatmapDifficultyCalculator;
+import com.rian.osu.difficulty.BeatmapDifficultyCalculator;
 import ru.nsu.ccfit.zuev.osu.game.GameHelper;
 import ru.nsu.ccfit.zuev.osu.helper.StringTable;
 import ru.nsu.ccfit.zuev.osuplus.R;

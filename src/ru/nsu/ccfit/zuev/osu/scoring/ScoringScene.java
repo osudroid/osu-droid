@@ -8,7 +8,7 @@ import com.reco1l.legacy.ui.entity.StatisticSelector;
 
 import com.rian.osu.beatmap.Beatmap;
 import com.rian.osu.beatmap.parser.BeatmapParser;
-import com.rian.osu.difficultycalculator.BeatmapDifficultyCalculator;
+import com.rian.osu.difficulty.BeatmapDifficultyCalculator;
 import org.anddev.andengine.engine.Engine;
 import org.anddev.andengine.entity.modifier.FadeInModifier;
 import org.anddev.andengine.entity.modifier.ParallelEntityModifier;

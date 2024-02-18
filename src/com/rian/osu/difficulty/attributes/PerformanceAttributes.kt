@@ -1,4 +1,4 @@
-package com.rian.osu.difficultycalculator.attributes
+package com.rian.osu.difficulty.attributes
 
 /**
  * A structure containing the performance values of a score.

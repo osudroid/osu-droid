@@ -1,4 +1,4 @@
-package com.rian.osu.difficultycalculator.attributes
+package com.rian.osu.difficulty.attributes
 
 import com.rian.osu.mods.Mod
 

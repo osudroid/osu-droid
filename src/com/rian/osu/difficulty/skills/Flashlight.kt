@@ -1,7 +1,7 @@
-package com.rian.osu.difficultycalculator.skills
+package com.rian.osu.difficulty.skills
 
-import com.rian.osu.difficultycalculator.DifficultyHitObject
-import com.rian.osu.difficultycalculator.evaluators.FlashlightEvaluator.evaluateDifficultyOf
+import com.rian.osu.difficulty.DifficultyHitObject
+import com.rian.osu.difficulty.evaluators.FlashlightEvaluator.evaluateDifficultyOf
 import com.rian.osu.mods.Mod
 import com.rian.osu.mods.ModHidden
 import kotlin.math.pow

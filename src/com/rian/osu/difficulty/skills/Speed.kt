@@ -1,8 +1,8 @@
-package com.rian.osu.difficultycalculator.skills
+package com.rian.osu.difficulty.skills
 
-import com.rian.osu.difficultycalculator.DifficultyHitObject
-import com.rian.osu.difficultycalculator.evaluators.RhythmEvaluator
-import com.rian.osu.difficultycalculator.evaluators.SpeedEvaluator
+import com.rian.osu.difficulty.DifficultyHitObject
+import com.rian.osu.difficulty.evaluators.RhythmEvaluator
+import com.rian.osu.difficulty.evaluators.SpeedEvaluator
 import com.rian.osu.mods.Mod
 import kotlin.math.exp
 import kotlin.math.pow

@@ -1,12 +1,12 @@
-package com.rian.osu.difficultycalculator
+package com.rian.osu.difficulty
 
 import com.rian.osu.beatmap.Beatmap
-import com.rian.osu.difficultycalculator.attributes.DifficultyAttributes
-import com.rian.osu.difficultycalculator.attributes.TimedDifficultyAttributes
-import com.rian.osu.difficultycalculator.calculator.DifficultyCalculationParameters
-import com.rian.osu.difficultycalculator.calculator.DifficultyCalculator
-import com.rian.osu.difficultycalculator.calculator.PerformanceCalculationParameters
-import com.rian.osu.difficultycalculator.calculator.PerformanceCalculator
+import com.rian.osu.difficulty.attributes.DifficultyAttributes
+import com.rian.osu.difficulty.attributes.TimedDifficultyAttributes
+import com.rian.osu.difficulty.calculator.DifficultyCalculationParameters
+import com.rian.osu.difficulty.calculator.DifficultyCalculator
+import com.rian.osu.difficulty.calculator.PerformanceCalculationParameters
+import com.rian.osu.difficulty.calculator.PerformanceCalculator
 import com.rian.osu.utils.convertLegacyMods
 import ru.nsu.ccfit.zuev.osu.scoring.StatisticV2
 import kotlin.collections.Map.Entry

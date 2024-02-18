@@ -1,6 +1,6 @@
-package com.rian.osu.difficultycalculator.attributes
+package com.rian.osu.difficulty.attributes
 
-import com.rian.osu.difficultycalculator.calculator.DifficultyCalculator
+import com.rian.osu.difficulty.calculator.DifficultyCalculator
 
 /**
  * Wraps a [DifficultyAttributes] object and adds a time value for which the attribute is valid.

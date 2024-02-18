@@ -1,8 +1,8 @@
-package com.rian.osu.difficultycalculator.evaluators
+package com.rian.osu.difficulty.evaluators
 
 import com.rian.osu.beatmap.hitobject.Slider
 import com.rian.osu.beatmap.hitobject.Spinner
-import com.rian.osu.difficultycalculator.DifficultyHitObject
+import com.rian.osu.difficulty.DifficultyHitObject
 import kotlin.math.*
 
 /**

@@ -1,15 +1,15 @@
-package com.rian.osu.difficultycalculator.calculator
+package com.rian.osu.difficulty.calculator
 
 import com.rian.osu.beatmap.Beatmap
 import com.rian.osu.beatmap.BeatmapConverter
 import com.rian.osu.beatmap.BeatmapProcessor
-import com.rian.osu.difficultycalculator.DifficultyHitObject
-import com.rian.osu.difficultycalculator.attributes.DifficultyAttributes
-import com.rian.osu.difficultycalculator.attributes.TimedDifficultyAttributes
-import com.rian.osu.difficultycalculator.skills.Aim
-import com.rian.osu.difficultycalculator.skills.Flashlight
-import com.rian.osu.difficultycalculator.skills.Skill
-import com.rian.osu.difficultycalculator.skills.Speed
+import com.rian.osu.difficulty.DifficultyHitObject
+import com.rian.osu.difficulty.attributes.DifficultyAttributes
+import com.rian.osu.difficulty.attributes.TimedDifficultyAttributes
+import com.rian.osu.difficulty.skills.Aim
+import com.rian.osu.difficulty.skills.Flashlight
+import com.rian.osu.difficulty.skills.Skill
+import com.rian.osu.difficulty.skills.Speed
 import com.rian.osu.mods.*
 import com.rian.osu.utils.HitWindowConverter.hitWindow300ToOD
 import com.rian.osu.utils.HitWindowConverter.odToHitWindow300

@@ -15,8 +15,8 @@ import com.reco1l.legacy.ui.multiplayer.RoomScene;
 import com.reco1l.framework.lang.execution.Async;
 
 import com.rian.osu.beatmap.parser.BeatmapParser;
-import com.rian.osu.difficultycalculator.BeatmapDifficultyCalculator;
-import com.rian.osu.difficultycalculator.calculator.DifficultyCalculationParameters;
+import com.rian.osu.difficulty.BeatmapDifficultyCalculator;
+import com.rian.osu.difficulty.calculator.DifficultyCalculationParameters;
 import org.anddev.andengine.engine.Engine;
 import org.anddev.andengine.engine.handler.IUpdateHandler;
 import org.anddev.andengine.entity.Entity;

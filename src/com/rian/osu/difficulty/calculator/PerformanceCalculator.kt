@@ -1,8 +1,8 @@
-package com.rian.osu.difficultycalculator.calculator
+package com.rian.osu.difficulty.calculator
 
 import com.rian.osu.beatmap.Beatmap
-import com.rian.osu.difficultycalculator.attributes.DifficultyAttributes
-import com.rian.osu.difficultycalculator.attributes.PerformanceAttributes
+import com.rian.osu.difficulty.attributes.DifficultyAttributes
+import com.rian.osu.difficulty.attributes.PerformanceAttributes
 import com.rian.osu.mods.ModFlashlight
 import com.rian.osu.mods.ModHidden
 import com.rian.osu.mods.ModNoFail
