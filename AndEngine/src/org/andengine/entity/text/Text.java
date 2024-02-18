@@ -182,7 +182,15 @@ public class Text extends RectangularShape {
 	 * @param pText
 	 * @throws OutOfCharactersException leaves this {@link Text} object in an undefined state, until {@link Text#setText(CharSequence)} is called again and no {@link OutOfCharactersException} is thrown.
 	 */
-	public void setText(final CharSequence pText) throws OutOfCharactersException {
+	public void setText(/*final*/ CharSequence pText) throws OutOfCharactersException {
+
+		// BEGIN osu!droid modified - Fixes issues with the VBO throwing an IOOBE when the text is
+		// too long.
+		if (pText.length() > mCharactersMaximum) {
+			pText = pText.subSequence(0, mCharactersMaximum);
+		}
+		// END osu!droid modified.
+
 		this.mText = pText;
 		final IFont font = this.mFont;
 
