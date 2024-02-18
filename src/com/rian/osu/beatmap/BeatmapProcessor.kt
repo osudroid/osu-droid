@@ -31,20 +31,18 @@ class BeatmapProcessor(
      *
      * This should be used to add alterations to [HitObject]s while they are in their most playable state.
      */
-    fun postProcess() {
-        beatmap.hitObjects.objects.run {
-            if (isEmpty()) {
-                return@run
-            }
+    fun postProcess() = beatmap.hitObjects.objects.run {
+        if (isEmpty()) {
+            return@run
+        }
 
-            // Reset stacking
-            forEach { it.stackHeight = 0 }
+        // Reset stacking
+        forEach { it.stackHeight = 0 }
 
-            if (beatmap.formatVersion >= 6) {
-                applyStacking()
-            } else {
-                applyStackingOld()
-            }
+        if (beatmap.formatVersion >= 6) {
+            applyStacking()
+        } else {
+            applyStackingOld()
         }
     }
 

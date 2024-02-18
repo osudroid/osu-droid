@@ -3,9 +3,9 @@ package com.rian.osu.beatmap.parser
 import android.util.Log
 import com.reco1l.framework.extensions.ignoreException
 import com.rian.osu.beatmap.Beatmap
+import com.rian.osu.beatmap.BeatmapProcessor
 import com.rian.osu.beatmap.constants.BeatmapSection
 import com.rian.osu.beatmap.parser.sections.*
-import com.rian.osu.utils.HitObjectStackEvaluator.applyStacking
 import okio.BufferedSource
 import okio.buffer
 import okio.source
@@ -106,7 +106,7 @@ class BeatmapParser : Closeable {
         var currentSection: BeatmapSection? = null
         val beatmap = Beatmap().apply {
             md5 = FileUtils.getMD5Checksum(file)
-            folder = file.getParent()
+            folder = file.parent
             filename = file.path
             formatVersion = beatmapFormatVersion
         }
@@ -186,7 +186,7 @@ class BeatmapParser : Closeable {
                 it.applySamples(controlPoints)
             }
 
-            applyStacking(formatVersion, hitObjects.objects, difficulty.ar, general.stackLeniency)
+            BeatmapProcessor(this).postProcess()
         }
     }
 
