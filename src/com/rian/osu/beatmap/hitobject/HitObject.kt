@@ -1,9 +1,11 @@
 package com.rian.osu.beatmap.hitobject
 
+import com.rian.osu.GameMode
 import com.rian.osu.beatmap.constants.SampleBank
 import com.rian.osu.beatmap.sections.BeatmapControlPoints
 import com.rian.osu.beatmap.sections.BeatmapDifficulty
 import com.rian.osu.math.Vector2
+import com.rian.osu.utils.CircleSizeCalculator
 import kotlin.math.min
 
 /**
@@ -83,24 +85,20 @@ abstract class HitObject(
         get() = (OBJECT_RADIUS * scale).toDouble()
 
     /**
-     * The stack offset vector of this [HitObject].
+     * Gets the stacked position of this [HitObject].
+     *
+     * @param mode The [GameMode] to calculate for.
      */
-    private val stackOffset
-        get() = Vector2(stackHeight * scale * -6.4f)
-
-    /**
-     * The stacked position of this [HitObject].
-     */
-    val stackedPosition
-        get() = evaluateStackedPosition(position)
+    open fun getStackedPosition(mode: GameMode) = evaluateStackedPosition(position, mode)
 
     /**
      * Applies defaults to this [HitObject].
      *
      * @param controlPoints The control points.
      * @param difficulty The difficulty settings to use.
+     * @param mode The [GameMode] to use.
      */
-    open fun applyDefaults(controlPoints: BeatmapControlPoints, difficulty: BeatmapDifficulty) {
+    open fun applyDefaults(controlPoints: BeatmapControlPoints, difficulty: BeatmapDifficulty, mode: GameMode) {
         kiai = controlPoints.effect.controlPointAt(startTime + CONTROL_POINT_LENIENCY).isKiai
 
         timePreempt = BeatmapDifficulty.difficultyRange(difficulty.ar.toDouble(), 1800.0, 1200.0, PREEMPT_MIN)
@@ -111,17 +109,10 @@ abstract class HitObject(
         // This adjustment is necessary for AR>10, otherwise timePreempt can become smaller leading to hit circles not fully fading in.
         timeFadeIn = 400 * min(1.0, timePreempt / PREEMPT_MIN)
 
-        // The following comment is copied verbatim from osu!lazer and osu!stable:
-        //
-        //   Builds of osu! up to 2013-05-04 had the gamefield being rounded down, which caused incorrect radius calculations
-        //   in widescreen cases. This ratio adjusts to allow for old replays to work post-fix, which in turn increases the lenience
-        //   for all plays, but by an amount so small it should only be effective in replays.
-        //
-        // To match expectations of gameplay we need to apply this multiplier to circle scale. It's weird but is what it is.
-        // It works out to under 1 game pixel and is generally not meaningful to gameplay, but is to replay playback accuracy.
-        //
-        // This scale affects difficulty calculation by a bit, hence it is also put here despite not being relevant to replays.
-        scale = (1 - 0.7f * (difficulty.cs - 5) / 5) / 2 * 1.00041f
+        scale = when (mode) {
+            GameMode.Droid -> CircleSizeCalculator.standardCSToDroidScale(difficulty.cs)
+            GameMode.Standard -> CircleSizeCalculator.standardCSToStandardScale(difficulty.cs)
+        }
     }
 
     /**
@@ -138,9 +129,10 @@ abstract class HitObject(
     /**
      * Evaluates a stacked position relative to this [HitObject].
      *
+     * @param mode The [GameMode] to evaluate for.
      * @return The evaluated stacked position.
      */
-    protected fun evaluateStackedPosition(position: Vector2) = position + stackOffset
+    protected fun evaluateStackedPosition(position: Vector2, mode: GameMode) = position + getStackOffset(mode)
 
     /**
      * Creates a [BankHitSampleInfo] based on the sample settings of the first [BankHitSampleInfo.HIT_NORMAL] sample in [samples].
@@ -154,6 +146,11 @@ abstract class HitObject(
     protected fun createHitSampleInfo(sampleName: String) =
         samples.filterIsInstance<BankHitSampleInfo>().find { it.name == BankHitSampleInfo.HIT_NORMAL }?.copy(name = sampleName) ?:
         BankHitSampleInfo(sampleName, SampleBank.None)
+
+    private fun getStackOffset(mode: GameMode) = when (mode) {
+        GameMode.Droid -> Vector2(stackHeight * scale * 4f)
+        GameMode.Standard -> Vector2(stackHeight * scale * -6.4f)
+    }
 
     companion object {
         /**

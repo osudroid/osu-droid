@@ -2,6 +2,8 @@
 
 package com.rian.osu.beatmap.hitobject
 
+import com.rian.osu.GameMode
+
 /**
  * The end time of this hit object.
  */
@@ -13,6 +15,10 @@ fun HitObject.getEndTime() = if (this is IHasDuration) this.endTime else this.st
 fun HitObject.getEndPosition() = if (this is Slider) this.endPosition else this.position
 
 /**
- * The stacked end position of this hit object.
+ * Gets the stacked end position of this hit object.
+ *
+ * @param mode The [GameMode] to get.
  */
-fun HitObject.getStackedEndPosition() = if (this is Slider) this.stackedEndPosition else this.stackedPosition
+fun HitObject.getStackedEndPosition(mode: GameMode) =
+    if (this is Slider) this.getStackedEndPosition(mode)
+    else this.getStackedPosition(mode)

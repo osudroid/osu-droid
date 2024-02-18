@@ -6,7 +6,7 @@ import com.rian.osu.mods.Mod
 /**
  * A bare minimal abstract skill for fully custom skill implementations.
  */
-abstract class Skill(
+abstract class Skill<in TObject : DifficultyHitObject>(
     /**
      * The [Mod]s that this skill processes.
      */
@@ -18,7 +18,7 @@ abstract class Skill(
      *
      * @param current The hit object to process.
      */
-    abstract fun process(current: DifficultyHitObject)
+    abstract fun process(current: TObject)
 
     /**
      * Returns the calculated difficulty value representing all hit objects

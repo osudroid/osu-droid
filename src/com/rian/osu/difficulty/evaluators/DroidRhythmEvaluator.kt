@@ -1,17 +1,16 @@
 package com.rian.osu.difficulty.evaluators
 
-import com.rian.osu.difficulty.DifficultyHitObject
 import com.rian.osu.beatmap.hitobject.Slider
 import com.rian.osu.beatmap.hitobject.Spinner
+import com.rian.osu.difficulty.DroidDifficultyHitObject
 import kotlin.math.*
 
 /**
- * An evaluator for calculating osu!standard rhythm skill.
- *
- * This class should be considered an "evaluating" class and not persisted.
+ * An evaluator for calculating osu!droid rhythm difficulty.
  */
-object RhythmEvaluator {
+object DroidRhythmEvaluator {
     private const val RHYTHM_MULTIPLIER = 0.75
+    private const val HISTORY_TIME_MAX = 5000 // 5 seconds of calculateRhythmBonus max.
 
     /**
      * Calculates a rhythm multiplier for the difficulty of the tap associated
@@ -20,9 +19,14 @@ object RhythmEvaluator {
      * @param current The current object.
      * @param greatWindow The great hit window of the current object.
      */
-    fun evaluateDifficultyOf(current: DifficultyHitObject, greatWindow: Double): Double {
-        if (current.obj is Spinner) {
-            return 0.0
+    @JvmStatic
+    fun evaluateDifficultyOf(current: DroidDifficultyHitObject, greatWindow: Double): Double {
+        if (
+            current.obj is Spinner ||
+            // Exclude overlapping objects that can be tapped at once.
+            current.isOverlapping(false)
+        ) {
+            return 1.0
         }
 
         var previousIslandSize = 0
@@ -33,12 +37,23 @@ object RhythmEvaluator {
         var startRatio = 0.0
         var firstDeltaSwitch = false
         var rhythmStart = 0
+
         val historicalNoteCount = min(current.index, 32)
 
-        // 5 seconds of calculateRhythmBonus max.
-        val historyTimeMax = 5000
-        while (rhythmStart < historicalNoteCount - 2 &&
-            current.startTime - current.previous(rhythmStart)!!.startTime < historyTimeMax
+        // Exclude overlapping objects that can be tapped at once.
+        val validPrevious = mutableListOf<DroidDifficultyHitObject>()
+
+        for (i in 0 until historicalNoteCount) {
+            (current.previous(i) as DroidDifficultyHitObject?)?.apply {
+                if (!isOverlapping(false)) {
+                    validPrevious.add(this)
+                }
+            } ?: break
+        }
+
+        while (
+            rhythmStart < validPrevious.size - 2 &&
+            current.startTime - validPrevious[rhythmStart].startTime < HISTORY_TIME_MAX
         ) {
             ++rhythmStart
         }
@@ -50,7 +65,7 @@ object RhythmEvaluator {
 
             // Scale note 0 to 1 from history to now.
             var currentHistoricalDecay =
-                (historyTimeMax - (current.startTime - currentObject.startTime)) / historyTimeMax
+                (HISTORY_TIME_MAX - (current.startTime - currentObject.startTime)) / HISTORY_TIME_MAX
 
             // Either we're limited by time or limited by object count.
             currentHistoricalDecay =
@@ -104,8 +119,8 @@ object RhythmEvaluator {
 
                     rhythmComplexitySum +=
                         sqrt(effectiveRatio * startRatio) * currentHistoricalDecay *
-                        sqrt((4 + islandSize).toDouble()) / 2 *
-                        sqrt((4 + previousIslandSize).toDouble()) / 2
+                                sqrt((4 + islandSize).toDouble()) / 2 *
+                                sqrt((4 + previousIslandSize).toDouble()) / 2
 
                     startRatio = effectiveRatio
                     previousIslandSize = islandSize
@@ -127,6 +142,21 @@ object RhythmEvaluator {
             }
         }
 
-        return sqrt(4 + rhythmComplexitySum * RHYTHM_MULTIPLIER) / 2
+        // Nerf doubles that can be tapped at the same time to get Great hit results.
+        val next = current.next(0)
+        var doubletapness = 1.0
+
+        if (next != null) {
+            val greatWindowFull = greatWindow * 2
+            val currentDeltaTime = max(1.0, current.deltaTime)
+            val nextDeltaTime = max(1.0, next.deltaTime)
+            val deltaDifference = abs(nextDeltaTime - currentDeltaTime)
+
+            val speedRatio = currentDeltaTime / max(currentDeltaTime, deltaDifference)
+            val windowRatio = min(1.0, currentDeltaTime / greatWindowFull).pow(2)
+            doubletapness = speedRatio.pow(1 - windowRatio)
+        }
+
+        return sqrt(4 + rhythmComplexitySum * RHYTHM_MULTIPLIER * doubletapness) / 2
     }
 }

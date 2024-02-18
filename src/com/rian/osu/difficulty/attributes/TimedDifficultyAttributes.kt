@@ -7,7 +7,7 @@ import com.rian.osu.difficulty.calculator.DifficultyCalculator
  *
  * Output by [DifficultyCalculator.calculateTimed] methods.
  */
-class TimedDifficultyAttributes(
+class TimedDifficultyAttributes<TAttributes : DifficultyAttributes>(
     /**
      * The non-clock-adjusted time value at which the attributes take effect.
      */
@@ -18,7 +18,7 @@ class TimedDifficultyAttributes(
      * The attributes.
      */
     @JvmField
-    val attributes: DifficultyAttributes
+    val attributes: TAttributes
 ) {
-    operator fun compareTo(other: TimedDifficultyAttributes) = time.compareTo(other.time)
+    operator fun compareTo(other: TimedDifficultyAttributes<TAttributes>) = time.compareTo(other.time)
 }

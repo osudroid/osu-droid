@@ -1,7 +1,9 @@
 package com.rian.osu.beatmap
 
+import com.rian.osu.GameMode
 import com.rian.osu.beatmap.hitobject.*
 import com.rian.osu.mods.Mod
+import kotlin.math.sqrt
 
 /**
  * Provides functionality to alter a [Beatmap] after it has been converted.
@@ -30,8 +32,10 @@ class BeatmapProcessor(
      * and [Mod]s will have been applied to all [HitObject]s.
      *
      * This should be used to add alterations to [HitObject]s while they are in their most playable state.
+     *
+     * @param mode The [GameMode] to add alterations for.
      */
-    fun postProcess() = beatmap.hitObjects.objects.run {
+    fun postProcess(mode: GameMode) = beatmap.hitObjects.objects.run {
         if (isEmpty()) {
             return@run
         }
@@ -39,14 +43,26 @@ class BeatmapProcessor(
         // Reset stacking
         forEach { it.stackHeight = 0 }
 
-        if (beatmap.formatVersion >= 6) {
-            applyStacking()
-        } else {
-            applyStackingOld()
+        when (mode) {
+            GameMode.Droid -> applyDroidStacking()
+            GameMode.Standard -> if (beatmap.formatVersion >= 6) applyStandardStacking() else applyStandardStackingOld()
         }
     }
 
-    private fun applyStacking() {
+    private fun applyDroidStacking() = beatmap.hitObjects.objects.run {
+        for (i in 0 until size - 1) {
+            val current = this[i]
+            val next = this[i + 1]
+
+            if (next.startTime - current.startTime < 2000 * beatmap.general.stackLeniency &&
+                next.position.getDistance(current.position) < sqrt(current.scale)
+            ) {
+                next.stackHeight = current.stackHeight + 1
+            }
+        }
+    }
+
+    private fun applyStandardStacking() {
         val objects = beatmap.hitObjects.objects
         val startIndex = 0
         val endIndex = objects.size - 1
@@ -185,7 +201,7 @@ class BeatmapProcessor(
         }
     }
 
-    private fun applyStackingOld() {
+    private fun applyStandardStackingOld() {
         val objects = beatmap.hitObjects.objects
 
         for (i in objects.indices) {

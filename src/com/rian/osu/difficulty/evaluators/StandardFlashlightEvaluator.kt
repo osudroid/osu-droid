@@ -1,20 +1,19 @@
 package com.rian.osu.difficulty.evaluators
 
-import com.rian.osu.difficulty.DifficultyHitObject
+import com.rian.osu.GameMode
 import com.rian.osu.beatmap.hitobject.Slider
 import com.rian.osu.beatmap.hitobject.Spinner
-import com.rian.osu.beatmap.hitobject.getStackedEndPosition
+import com.rian.osu.beatmap.hitobject.getEndPosition
+import com.rian.osu.difficulty.StandardDifficultyHitObject
 import kotlin.math.abs
 import kotlin.math.max
 import kotlin.math.min
 import kotlin.math.pow
 
 /**
- * An evaluator for calculating osu!standard flashlight skill.
- * <br></br><br></br>
- * This class should be considered an "evaluating" class and not persisted.
+ * An evaluator for calculating osu!standard flashlight difficulty.
  */
-object FlashlightEvaluator {
+object StandardFlashlightEvaluator {
     /**
      * Evaluates the difficulty of memorizing and hitting the current object, based on:
      *
@@ -24,12 +23,11 @@ object FlashlightEvaluator {
      *  * length and speed of the current object (for sliders),
      *  * and whether Hidden mod is enabled.
      *
-     *
      * @param current The current object.
      * @param isHiddenMod Whether the Hidden mod is enabled.
      */
     @JvmStatic
-    fun evaluateDifficultyOf(current: DifficultyHitObject, isHiddenMod: Boolean): Double {
+    fun evaluateDifficultyOf(current: StandardDifficultyHitObject, isHiddenMod: Boolean): Double {
         // Exclude overlapping objects that can be tapped at once.
         if (current.obj is Spinner) {
             return 0.0
@@ -47,7 +45,9 @@ object FlashlightEvaluator {
 
             // Exclude overlapping objects that can be tapped at once.
             if (currentObject.obj !is Spinner) {
-                val jumpDistance = (current.obj.stackedPosition - currentObject.obj.getStackedEndPosition()).length
+                val jumpDistance = current.obj.getStackedPosition(GameMode.Standard)
+                    .getDistance(currentObject.obj.getEndPosition())
+
                 cumulativeStrainTime += last.strainTime
 
                 // We want to nerf objects that can be easily seen within the Flashlight circle radius.
@@ -70,7 +70,7 @@ object FlashlightEvaluator {
                 }
             }
 
-            last = currentObject
+            last = currentObject as StandardDifficultyHitObject
         }
 
         result = (smallDistNerf * result).pow(2.0)

@@ -1,5 +1,6 @@
 package com.rian.osu.mods
 
+import com.rian.osu.GameMode
 import com.rian.osu.beatmap.sections.BeatmapDifficulty
 
 /**
@@ -32,7 +33,7 @@ class ModDifficultyAdjust(
 ) : Mod(), IApplicableToDifficulty {
     override val droidString = ""
 
-    override fun applyToDifficulty(difficulty: BeatmapDifficulty) = difficulty.let { d ->
+    override fun applyToDifficulty(mode: GameMode, difficulty: BeatmapDifficulty) = difficulty.let { d ->
         fun get(value: Float?, fallback: Float) = value.takeUnless { it == null } ?: fallback
 
         d.cs = get(cs, d.cs)

@@ -1,8 +1,8 @@
 package com.rian.osu.difficulty.skills
 
-import com.rian.osu.difficulty.DifficultyHitObject
-import com.rian.osu.difficulty.evaluators.RhythmEvaluator
-import com.rian.osu.difficulty.evaluators.SpeedEvaluator
+import com.rian.osu.difficulty.StandardDifficultyHitObject
+import com.rian.osu.difficulty.evaluators.StandardRhythmEvaluator
+import com.rian.osu.difficulty.evaluators.StandardSpeedEvaluator
 import com.rian.osu.mods.Mod
 import kotlin.math.exp
 import kotlin.math.pow
@@ -10,7 +10,7 @@ import kotlin.math.pow
 /**
  * Represents the skill required to press keys or tap with regards to keeping up with the speed at which objects need to be hit.
  */
-class OsuSpeed(
+class StandardSpeed(
     /**
      * The [Mod]s that this skill processes.
      */
@@ -20,7 +20,7 @@ class OsuSpeed(
      * The 300 hit window.
      */
     private val greatWindow: Double
-) : OsuStrainSkill(mods) {
+) : StandardStrainSkill(mods) {
     override val difficultyMultiplier = 1.04
     override val reducedSectionCount = 5
 
@@ -47,24 +47,19 @@ class OsuSpeed(
         return reduce { acc, d -> acc + 1 / (1 + exp(-(d / maxStrain * 12 - 6))) }
     }
 
-    override fun strainValueAt(current: DifficultyHitObject): Double {
+    override fun strainValueAt(current: StandardDifficultyHitObject): Double {
         currentStrain *= strainDecay(current.strainTime)
-        currentStrain += SpeedEvaluator.evaluateDifficultyOf(current, greatWindow) * skillMultiplier
+        currentStrain += StandardSpeedEvaluator.evaluateDifficultyOf(current, greatWindow) * skillMultiplier
 
-        currentRhythm = RhythmEvaluator.evaluateDifficultyOf(current, greatWindow)
+        currentRhythm = StandardRhythmEvaluator.evaluateDifficultyOf(current, greatWindow)
         val totalStrain = currentStrain * currentRhythm
 
         objectStrains.add(totalStrain)
         return totalStrain
     }
 
-    override fun calculateInitialStrain(time: Double, current: DifficultyHitObject) =
+    override fun calculateInitialStrain(time: Double, current: StandardDifficultyHitObject) =
         currentStrain * currentRhythm * strainDecay(time - current.previous(0)!!.startTime)
-
-    override fun saveToHitObject(current: DifficultyHitObject) {
-        current.speedStrain = currentStrain
-        current.rhythmMultiplier = currentRhythm
-    }
 
     private fun strainDecay(ms: Double) = strainDecayBase.pow(ms / 1000)
 }

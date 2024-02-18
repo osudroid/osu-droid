@@ -3,7 +3,7 @@ package com.rian.osu.difficulty.attributes
 /**
  * A structure containing the performance values of a score.
  */
-class PerformanceAttributes {
+abstract class PerformanceAttributes {
     /**
      * Calculated score performance points.
      */
@@ -15,12 +15,6 @@ class PerformanceAttributes {
      */
     @JvmField
     var aim = 0.0
-
-    /**
-     * The speed performance value.
-     */
-    @JvmField
-    var speed = 0.0
 
     /**
      * The accuracy performance value.

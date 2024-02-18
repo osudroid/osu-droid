@@ -10,12 +10,12 @@ import kotlin.math.max
  * the processed objects and to calculate a final difficulty value representing the difficulty of
  * hitting all the processed objects.
  */
-abstract class StrainSkill(
+abstract class StrainSkill<in TObject : DifficultyHitObject>(
     /**
      * The [Mod]s that this skill processes.
      */
     mods: List<Mod>
-) : Skill(mods) {
+) : Skill<TObject>(mods) {
     /**
      * The number of sections with the highest strains, which the peak strain reductions will apply to.
      *
@@ -33,7 +33,7 @@ abstract class StrainSkill(
     private var currentSectionEnd = 0.0
     private val sectionLength = 400
 
-    override fun process(current: DifficultyHitObject) {
+    override fun process(current: TObject) {
         // The first object doesn't generate a strain, so we begin with an incremented section end
         if (current.index == 0) {
             currentSectionEnd = ceil(current.startTime / sectionLength) * sectionLength
@@ -46,7 +46,6 @@ abstract class StrainSkill(
         }
 
         currentSectionPeak = max(strainValueAt(current), currentSectionPeak)
-        saveToHitObject(current)
     }
 
     val currentStrainPeaks: MutableList<Double>
@@ -63,7 +62,7 @@ abstract class StrainSkill(
      * @param current The hit object to calculate.
      * @return The strain value at the hit object.
      */
-    protected abstract fun strainValueAt(current: DifficultyHitObject): Double
+    protected abstract fun strainValueAt(current: TObject): Double
 
     /**
      * Retrieves the peak strain at a point in time.
@@ -72,14 +71,7 @@ abstract class StrainSkill(
      * @param current The current hit object.
      * @return The peak strain.
      */
-    protected abstract fun calculateInitialStrain(time: Double, current: DifficultyHitObject): Double
-
-    /**
-     * Saves the current strain to a hit object.
-     *
-     * @param current The hit object to save to.
-     */
-    protected abstract fun saveToHitObject(current: DifficultyHitObject)
+    protected abstract fun calculateInitialStrain(time: Double, current: TObject): Double
 
     /**
      * Saves the current peak strain level to the list of strain peaks,
@@ -93,7 +85,7 @@ abstract class StrainSkill(
      * @param time The beginning of the new section, in milliseconds.
      * @param current The current hit object.
      */
-    private fun startNewSectionFrom(time: Double, current: DifficultyHitObject) {
+    private fun startNewSectionFrom(time: Double, current: TObject) {
         // The maximum strain of the new section is not zero by default.
         // This means we need to capture the strain level at the beginning of the new section, and use that as the initial peak level.
         currentSectionPeak = calculateInitialStrain(time, current)

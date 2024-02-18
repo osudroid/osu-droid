@@ -3,7 +3,7 @@ package com.rian.osu.difficulty.calculator
 /**
  * A class for specifying parameters for performance calculation.
  */
-data class PerformanceCalculationParameters(
+open class PerformanceCalculationParameters(
     /**
      * The maximum combo achieved.
      */
@@ -33,6 +33,4 @@ data class PerformanceCalculationParameters(
      */
     @JvmField
     var countMiss: Int = 0,
-) {
-
-}
+)

@@ -2,15 +2,13 @@ package com.rian.osu.difficulty.evaluators
 
 import com.rian.osu.beatmap.hitobject.Slider
 import com.rian.osu.beatmap.hitobject.Spinner
-import com.rian.osu.difficulty.DifficultyHitObject
+import com.rian.osu.difficulty.StandardDifficultyHitObject
 import kotlin.math.*
 
 /**
  * An evaluator for calculating osu!standard aim skill.
- *
- * This class should be considered an "evaluating" class and not persisted.
  */
-object AimEvaluator {
+object StandardAimEvaluator {
     private const val WIDE_ANGLE_MULTIPLIER = 1.5
     private const val ACUTE_ANGLE_MULTIPLIER = 1.95
     private const val SLIDER_MULTIPLIER = 1.35
@@ -28,7 +26,7 @@ object AimEvaluator {
      * @param withSliders Whether to take slider difficulty into account.
      */
     @JvmStatic
-    fun evaluateDifficultyOf(current: DifficultyHitObject, withSliders: Boolean): Double {
+    fun evaluateDifficultyOf(current: StandardDifficultyHitObject, withSliders: Boolean): Double {
         if (current.obj is Spinner || current.index <= 1 || current.previous(0)!!.obj is Spinner) {
             return 0.0
         }

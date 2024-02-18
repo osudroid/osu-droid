@@ -1,38 +1,22 @@
 package com.rian.osu.difficulty.calculator
 
+import com.rian.osu.GameMode
 import com.rian.osu.beatmap.Beatmap
 import com.rian.osu.beatmap.BeatmapConverter
 import com.rian.osu.beatmap.BeatmapProcessor
 import com.rian.osu.difficulty.DifficultyHitObject
 import com.rian.osu.difficulty.attributes.DifficultyAttributes
 import com.rian.osu.difficulty.attributes.TimedDifficultyAttributes
-import com.rian.osu.difficulty.skills.OsuAim
-import com.rian.osu.difficulty.skills.OsuFlashlight
 import com.rian.osu.difficulty.skills.Skill
-import com.rian.osu.difficulty.skills.OsuSpeed
 import com.rian.osu.mods.*
-import com.rian.osu.utils.HitWindowConverter.hitWindow300ToOD
-import com.rian.osu.utils.HitWindowConverter.odToHitWindow300
-import kotlin.math.cbrt
-import kotlin.math.max
-import kotlin.math.pow
 import kotlin.math.sqrt
 
 /**
  * A difficulty calculator for calculating star rating.
  */
-object DifficultyCalculator {
-    /**
-     * [Mod]s that can alter the star rating when they are used in calculation with one or more [Mod]s.
-     */
-    private val difficultyAdjustmentMods = setOf(
-        ModDoubleTime(), ModHalfTime(), ModNightCore(),
-        ModRelax(), ModEasy(), ModReallyEasy(),
-        ModHardRock(), ModHidden(), ModFlashlight(),
-        ModDifficultyAdjust()
-    )
-
-    private const val DIFFICULTY_MULTIPLIER = 0.0675
+abstract class DifficultyCalculator<TObject : DifficultyHitObject, TAttributes : DifficultyAttributes> {
+    protected abstract val mode: GameMode
+    protected abstract val difficultyMultiplier: Double
 
     /**
      * Calculates the difficulty of a [Beatmap] with specific parameters.
@@ -45,7 +29,7 @@ object DifficultyCalculator {
     fun calculate(
         beatmap: Beatmap,
         parameters: DifficultyCalculationParameters? = null
-    ): DifficultyAttributes {
+    ): TAttributes {
         // Always operate on a clone of the original beatmap when needed, to not modify it game-wide
         val beatmapToCalculate = convertBeatmap(beatmap, parameters)
         val skills = createSkills(beatmapToCalculate, parameters)
@@ -72,11 +56,11 @@ object DifficultyCalculator {
     fun calculateTimed(
         beatmap: Beatmap,
         parameters: DifficultyCalculationParameters? = null
-    ): List<TimedDifficultyAttributes> {
+    ): List<TimedDifficultyAttributes<TAttributes>> {
         // Always operate on a clone of the original beatmap when needed, to not modify it game-wide
         val beatmapToCalculate = convertBeatmap(beatmap, parameters)
         val skills = createSkills(beatmapToCalculate, parameters)
-        val attributes = ArrayList<TimedDifficultyAttributes>()
+        val attributes = mutableListOf<TimedDifficultyAttributes<TAttributes>>()
 
         if (beatmapToCalculate.hitObjects.objects.isEmpty()) {
             return attributes
@@ -108,92 +92,41 @@ object DifficultyCalculator {
     }
 
     /**
-     * Retains [Mod]s based on [difficultyAdjustmentMods].
+     * Creates the [Skill]s to calculate the difficulty of a beatmap.
      *
-     * This is used rather than [MutableCollection.retainAll] as some [Mod]s need a special treatment.
+     * @param beatmap The beatmap whose difficulty will be calculated.
+     * @param parameters The difficulty calculation parameter being used.
+     * @return The [Skill]s.
      */
-    fun retainDifficultyAdjustmentMods(parameters: DifficultyCalculationParameters) =
-        parameters.mods.iterator().run {
-            for (mod in this) {
-                // ModDifficultyAdjust always changes difficulty.
-                if (mod is ModDifficultyAdjust) {
-                    continue
-                }
-
-                if (!difficultyAdjustmentMods.contains(mod)) {
-                    remove()
-                }
-            }
-        }
+    protected abstract fun createSkills(beatmap: Beatmap, parameters: DifficultyCalculationParameters?): Array<Skill<TObject>>
 
     /**
-     * Creates difficulty attributes to describe a beatmap's difficulty.
+     * Retrieves the [DifficultyHitObject]s to calculate against.
+     *
+     * @param beatmap The [Beatmap] providing the hit objects to generate from.
+     * @param parameters The difficulty calculation parameter being used.
+     * @return The generated [DifficultyHitObject]s.
+     */
+    protected abstract fun createDifficultyHitObjects(
+        beatmap: Beatmap,
+        parameters: DifficultyCalculationParameters?
+    ): List<TObject>
+
+    protected fun calculateRating(skill: Skill<TObject>) = sqrt(skill.difficultyValue()) * difficultyMultiplier
+
+    /**
+     * Creates a [DifficultyAttributes] to describe a beatmap's difficulty.
      *
      * @param beatmap The beatmap whose difficulty was calculated.
      * @param skills The skills which processed the beatmap.
      * @param parameters The difficulty calculation parameters used.
-     * @return Difficulty attributes describing the beatmap's difficulty.
+     * @return [DifficultyAttributes] describing the beatmap's difficulty.
      */
-    private fun createDifficultyAttributes(
-        beatmap: Beatmap, skills: Array<Skill>,
+    protected abstract fun createDifficultyAttributes(
+        beatmap: Beatmap,
+        skills: Array<Skill<TObject>>,
         parameters: DifficultyCalculationParameters?
-    ) = DifficultyAttributes().apply {
-            mods = parameters?.mods?.slice(parameters.mods.indices) ?: mods
-
-            aimDifficulty = calculateRating(skills[0])
-            speedDifficulty = calculateRating(skills[2])
-            speedNoteCount = (skills[2] as OsuSpeed).relevantNoteCount()
-            flashlightDifficulty = calculateRating(skills[3])
-
-            aimSliderFactor = if (aimDifficulty > 0) calculateRating(skills[1]) / aimDifficulty else 1.0
-
-            if (parameters?.mods?.any { it is ModRelax } == true) {
-                aimDifficulty *= 0.9
-                speedDifficulty = 0.0
-                flashlightDifficulty *= 0.7
-            }
-
-            val baseAimPerformance = (5 * max(1.0, aimDifficulty / 0.0675) - 4).pow(3.0) / 100000
-            val baseSpeedPerformance = (5 * max(1.0, speedDifficulty / 0.0675) - 4).pow(3.0) / 100000
-            var baseFlashlightPerformance = 0.0
-            if (parameters?.mods?.any { it is ModFlashlight } == true) {
-                baseFlashlightPerformance = flashlightDifficulty.pow(2.0) * 25.0
-            }
-
-            val basePerformance = (
-                baseAimPerformance.pow(1.1) +
-                baseSpeedPerformance.pow(1.1) +
-                baseFlashlightPerformance.pow(1.1)
-            ).pow(1 / 1.1)
-
-            // Document for formula derivation:
-            // https://docs.google.com/document/d/10DZGYYSsT_yjz2Mtp6yIJld0Rqx4E-vVHupCqiM4TNI/edit
-            starRating =
-                if (basePerformance > 1e-5)
-                    cbrt(PerformanceCalculator.FINAL_MULTIPLIER) * 0.027 *
-                    (cbrt(100000 / 2.0.pow(1 / 1.1) * basePerformance) + 4)
-                else 0.0
-
-            val difficultyAdjustMod = mods.find { it is ModDifficultyAdjust } as ModDifficultyAdjust?
-            val ar = difficultyAdjustMod?.ar?.takeUnless { it.isNaN() } ?: beatmap.difficulty.ar
-            var preempt = if (ar <= 5) 1800.0 - 120 * ar else 1950.0 - 150 * ar
-
-            if (difficultyAdjustMod?.ar != null) {
-                preempt /= parameters?.totalSpeedMultiplier?.toDouble() ?: 1.0
-            }
-
-            approachRate = if (preempt > 1200) (1800 - preempt) / 120 else (1200 - preempt) / 150 + 5
-
-            val greatWindow =
-                odToHitWindow300(beatmap.difficulty.od) /
-                (parameters?.totalSpeedMultiplier?.toDouble() ?: 1.0)
-
-            overallDifficulty = hitWindow300ToOD(greatWindow).toDouble()
-            maxCombo = beatmap.maxCombo
-            hitCircleCount = beatmap.hitObjects.circleCount
-            sliderCount = beatmap.hitObjects.sliderCount
-            spinnerCount = beatmap.hitObjects.spinnerCount
-        }
+    ): TAttributes
 
     private fun convertBeatmap(beatmap: Beatmap, parameters: DifficultyCalculationParameters?): Beatmap {
         if (!needToConvertBeatmap(beatmap, parameters)) {
@@ -207,11 +140,11 @@ object DifficultyCalculator {
 
         // Apply difficulty mods
         parameters?.mods?.filterIsInstance<IApplicableToDifficulty>()?.forEach {
-            it.applyToDifficulty(converted.difficulty)
+            it.applyToDifficulty(mode, converted.difficulty)
         }
 
         parameters?.mods?.filterIsInstance<IApplicableToDifficultyWithSettings>()?.forEach {
-            it.applyToDifficulty(converted.difficulty, parameters.mods, parameters.customSpeedMultiplier)
+            it.applyToDifficulty(mode, converted.difficulty, parameters.mods, parameters.customSpeedMultiplier)
         }
 
         val processor = BeatmapProcessor(converted)
@@ -220,65 +153,16 @@ object DifficultyCalculator {
 
         // Compute default values for hit objects, including creating nested hit objects in-case they're needed
         converted.hitObjects.objects.forEach {
-            it.applyDefaults(converted.controlPoints, converted.difficulty)
+            it.applyDefaults(converted.controlPoints, converted.difficulty, mode)
         }
 
-        processor.postProcess()
+        processor.postProcess(mode)
 
         parameters?.mods?.filterIsInstance<IApplicableToBeatmap>()?.forEach {
             it.applyToBeatmap(converted)
         }
 
         return converted
-    }
-
-    /**
-     * Creates the skills to calculate the difficulty of a beatmap.
-     *
-     * @param beatmap The beatmap whose difficulty will be calculated.
-     * @param parameters The difficulty calculation parameter being used.
-     * @return The skills.
-     */
-    private fun createSkills(beatmap: Beatmap, parameters: DifficultyCalculationParameters?): Array<Skill> {
-        val mods = parameters?.mods ?: mutableListOf()
-        val greatWindow =
-            odToHitWindow300(beatmap.difficulty.od) /
-            (parameters?.totalSpeedMultiplier?.toDouble() ?: 1.0)
-
-        return arrayOf(
-            OsuAim(mods, true),
-            OsuAim(mods, false),
-            OsuSpeed(mods, greatWindow),
-            OsuFlashlight(mods)
-        )
-    }
-
-    private fun calculateRating(skill: Skill) = sqrt(skill.difficultyValue()) * DIFFICULTY_MULTIPLIER
-
-    /**
-     * Retrieves the difficulty hit objects to calculate against.
-     *
-     * @param beatmap The beatmap providing the hit objects to generate from.
-     * @param parameters The difficulty calculation parameter being used.
-     * @return The generated difficulty hit objects.
-     */
-    private fun createDifficultyHitObjects(
-        beatmap: Beatmap, parameters: DifficultyCalculationParameters?
-    ) = mutableListOf<DifficultyHitObject>().apply {
-        beatmap.hitObjects.objects.let {
-            for (i in 1 until it.size) {
-                add(
-                    DifficultyHitObject(
-                        it[i],
-                        it[i - 1],
-                        it.getOrNull(i - 2),
-                        parameters?.totalSpeedMultiplier?.toDouble() ?: 1.0,
-                        this,
-                        size
-                    )
-                )
-            }
-        }
     }
 
     /**
@@ -299,4 +183,36 @@ object DifficultyCalculator {
             (it.od != null && it.od != beatmap.difficulty.od)
         } ?: false)
     } ?: false
+
+    companion object {
+        /**
+         * Retains [Mod]s based on [difficultyAdjustmentMods].
+         *
+         * This is used rather than [MutableCollection.retainAll] as some [Mod]s need a special treatment.
+         */
+        @JvmStatic
+        fun retainDifficultyAdjustmentMods(parameters: DifficultyCalculationParameters) =
+            parameters.mods.iterator().run {
+                for (mod in this) {
+                    // ModDifficultyAdjust always changes difficulty.
+                    if (mod is ModDifficultyAdjust) {
+                        continue
+                    }
+
+                    if (!difficultyAdjustmentMods.contains(mod)) {
+                        remove()
+                    }
+                }
+            }
+
+        /**
+         * [Mod]s that can alter the star rating when they are used in calculation with one or more [Mod]s.
+         */
+        private val difficultyAdjustmentMods = setOf(
+            ModDoubleTime(), ModHalfTime(), ModNightCore(),
+            ModRelax(), ModEasy(), ModReallyEasy(),
+            ModHardRock(), ModHidden(), ModFlashlight(),
+            ModDifficultyAdjust()
+        )
+    }
 }

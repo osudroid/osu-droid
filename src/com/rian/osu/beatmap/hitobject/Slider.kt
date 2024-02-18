@@ -1,5 +1,6 @@
 package com.rian.osu.beatmap.hitobject
 
+import com.rian.osu.GameMode
 import com.rian.osu.beatmap.hitobject.sliderobject.*
 import com.rian.osu.beatmap.sections.BeatmapControlPoints
 import com.rian.osu.beatmap.sections.BeatmapDifficulty
@@ -62,7 +63,7 @@ class Slider(
     override val duration: Double
         get() = endTime - startTime
 
-    private var endPositionCache = Cached(position)
+    private val endPositionCache = Cached(position)
 
     /**
      * The end position of this [Slider].
@@ -77,10 +78,12 @@ class Slider(
         }
 
     /**
-     * The stacked end position of this [Slider].
+     * Gets the stacked end position of this [Slider].
+     *
+     * @param mode The [GameMode] to calculate for.
+     * @return The stacked end position.
      */
-    val stackedEndPosition: Vector2
-        get() = evaluateStackedPosition(endPosition)
+    fun getStackedEndPosition(mode: GameMode) = evaluateStackedPosition(endPosition, mode)
 
     /**
      * The distance of this [Slider].
@@ -196,8 +199,8 @@ class Slider(
         }
     }
 
-    override fun applyDefaults(controlPoints: BeatmapControlPoints, difficulty: BeatmapDifficulty) {
-        super.applyDefaults(controlPoints, difficulty)
+    override fun applyDefaults(controlPoints: BeatmapControlPoints, difficulty: BeatmapDifficulty, mode: GameMode) {
+        super.applyDefaults(controlPoints, difficulty, mode)
 
         val timingPoint = controlPoints.timing.controlPointAt(startTime)
         val difficultyPoint = controlPoints.difficulty.controlPointAt(startTime)
@@ -224,7 +227,7 @@ class Slider(
 
         createNestedHitObjects()
 
-        nestedHitObjects.onEach { it.applyDefaults(controlPoints, difficulty) }
+        nestedHitObjects.forEach { it.applyDefaults(controlPoints, difficulty, mode) }
     }
 
     override fun applySamples(controlPoints: BeatmapControlPoints) {

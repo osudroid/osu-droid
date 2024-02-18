@@ -1,5 +1,6 @@
 package com.rian.osu.mods
 
+import com.rian.osu.GameMode
 import com.rian.osu.beatmap.sections.BeatmapDifficulty
 
 /**
@@ -11,7 +12,8 @@ interface IApplicableToDifficulty {
      *
      * This is typically called post beatmap conversion.
      *
+     * @param mode The [GameMode] to apply for.
      * @param difficulty The [BeatmapDifficulty] to mutate.
      */
-    fun applyToDifficulty(difficulty: BeatmapDifficulty)
+    fun applyToDifficulty(mode: GameMode, difficulty: BeatmapDifficulty)
 }

@@ -1,18 +1,16 @@
 package com.rian.osu.difficulty.evaluators
 
-import com.rian.osu.difficulty.DifficultyHitObject
 import com.rian.osu.beatmap.hitobject.Spinner
+import com.rian.osu.difficulty.StandardDifficultyHitObject
 import kotlin.math.abs
 import kotlin.math.max
 import kotlin.math.min
 import kotlin.math.pow
 
 /**
- * An evaluator for calculating osu!standard speed skill.
- *
- * This class should be considered an "evaluating" class and not persisted.
+ * An evaluator for calculating osu!standard speed difficulty.
  */
-object SpeedEvaluator {
+object StandardSpeedEvaluator {
     private const val SINGLE_SPACING_THRESHOLD = 125.0
     private const val MIN_SPEED_BONUS = 75.0
 
@@ -26,7 +24,7 @@ object SpeedEvaluator {
      * @param current The current object.
      * @param greatWindow The great hit window of the current object.
      */
-    fun evaluateDifficultyOf(current: DifficultyHitObject, greatWindow: Double): Double {
+    fun evaluateDifficultyOf(current: StandardDifficultyHitObject, greatWindow: Double): Double {
         if (current.obj is Spinner) {
             return 0.0
         }

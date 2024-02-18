@@ -1,5 +1,6 @@
 package com.rian.osu.mods
 
+import com.rian.osu.GameMode
 import com.rian.osu.beatmap.sections.BeatmapDifficulty
 
 /**
@@ -8,8 +9,12 @@ import com.rian.osu.beatmap.sections.BeatmapDifficulty
 class ModEasy : Mod(), IApplicableToDifficulty {
     override val droidString = "e"
 
-    override fun applyToDifficulty(difficulty: BeatmapDifficulty) = difficulty.run {
-        cs *= ADJUST_RATIO
+    override fun applyToDifficulty(mode: GameMode, difficulty: BeatmapDifficulty) = difficulty.run {
+        cs = when (mode) {
+            GameMode.Droid -> --cs
+            GameMode.Standard -> cs * ADJUST_RATIO
+        }
+
         ar *= ADJUST_RATIO
         od *= ADJUST_RATIO
         hp *= ADJUST_RATIO

@@ -2,6 +2,7 @@ package com.rian.osu.beatmap.parser
 
 import android.util.Log
 import com.reco1l.framework.extensions.ignoreException
+import com.rian.osu.GameMode
 import com.rian.osu.beatmap.Beatmap
 import com.rian.osu.beatmap.BeatmapProcessor
 import com.rian.osu.beatmap.constants.BeatmapSection
@@ -88,11 +89,12 @@ class BeatmapParser : Closeable {
     /**
      * Parses the `.osu` file.
      *
-     * @param withHitObjects Whether to parse hit objects. This will improve parsing time significantly.
-     * @return A `Beatmap` containing relevant information of the beatmap file,
+     * @param mode The [GameMode] to parse for.
+     * @param withHitObjects Whether to parse hit objects. Setting this to `false` will improve parsing time significantly.
+     * @return A [Beatmap] containing relevant information of the beatmap file,
      * `null` if the beatmap file cannot be opened or a line could not be parsed.
      */
-    fun parse(withHitObjects: Boolean): Beatmap? {
+    fun parse(mode: GameMode, withHitObjects: Boolean): Beatmap? {
         if (source == null && !openFile()) {
             ToastLogger.showText(
                 StringTable.format(R.string.beatmap_parser_cannot_open_file, file.nameWithoutExtension),
@@ -182,11 +184,11 @@ class BeatmapParser : Closeable {
 
         return beatmap.apply {
             hitObjects.objects.forEach {
-                it.applyDefaults(controlPoints, difficulty)
+                it.applyDefaults(controlPoints, difficulty, mode)
                 it.applySamples(controlPoints)
             }
 
-            BeatmapProcessor(this).postProcess()
+            BeatmapProcessor(this).postProcess(mode)
         }
     }
 

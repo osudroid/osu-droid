@@ -1,0 +1,204 @@
+package com.rian.osu.difficulty
+
+import com.rian.osu.GameMode
+import com.rian.osu.beatmap.hitobject.*
+import kotlin.math.exp
+import kotlin.math.max
+import kotlin.math.min
+import kotlin.math.pow
+
+/**
+ * Represents a [HitObject] with additional information for osu!droid difficulty calculation.
+ */
+class DroidDifficultyHitObject(
+    /**
+     * The [HitObject] that this [DroidDifficultyHitObject] wraps.
+     */
+    obj: HitObject,
+
+    /**
+     * The [HitObject] that occurs before [obj].
+     */
+    lastObj: HitObject,
+
+    /**
+     * The [HitObject] that occurs before [lastObj].
+     */
+    lastLastObj: HitObject?,
+
+    /**
+     * The clock rate being calculated.
+     */
+    clockRate: Double,
+
+    /**
+     * Other hit objects in the beatmap, including this hit object.
+     */
+    difficultyHitObjects: MutableList<DroidDifficultyHitObject>,
+
+    /**
+     * The index of this hit object in the list of all hit objects.
+     *
+     * This is one less than the actual index of the hit object in the beatmap.
+     */
+    index: Int,
+
+    /**
+     * Whether force AR was enabled.
+     */
+    forceAR: Boolean
+) : DifficultyHitObject(obj, lastObj, lastLastObj, clockRate, difficultyHitObjects, index) {
+    override val mode = GameMode.Droid
+
+    override val scalingFactor: Float
+        get() {
+            val radius = obj.radius.toFloat()
+
+            // We will scale distances by this factor, so we can assume a uniform CircleSize among beatmaps.
+            var scalingFactor = NORMALIZED_RADIUS / radius
+
+            // High circle size (small CS) bonus
+            if (radius < 70) {
+                scalingFactor *= 1 + ((70 - radius) / 50).pow(2)
+            }
+
+            return scalingFactor
+        }
+
+    /**
+     * The note density of the [HitObject].
+     */
+    @JvmField
+    var noteDensity = 1.0
+
+    /**
+     * The overlapping factor of the [HitObject].
+     *
+     * This is used to scale visual skill.
+     */
+    @JvmField
+    var overlappingFactor = 0.0
+
+    /**
+     * Adjusted preempt time of the [HitObject], taking speed multiplier into account.
+     */
+    @JvmField
+    val timePreempt = if (forceAR) obj.timePreempt else obj.timePreempt / clockRate
+
+    /**
+     * Adjusted velocity of the [HitObject], taking speed multiplier into account.
+     */
+    @JvmField
+    val velocity = if (obj is Slider) obj.velocity * clockRate else 0.0
+
+    override fun computeProperties(clockRate: Double, objects: List<HitObject>) {
+        super.computeProperties(clockRate, objects)
+
+        setVisuals(clockRate, objects)
+    }
+
+    /**
+     * Determines whether this [DroidDifficultyHitObject] is considered overlapping with the [DroidDifficultyHitObject]
+     * before it.
+     *
+     * Keep in mind that "overlapping" in this case is overlapping to the point where both hitobjects
+     * can be hit with just a single tap in osu!droid.
+     *
+     * @param considerDistance Whether to consider the distance between both hitobjects.
+     * @returns Whether the hitobject is considered overlapping.
+     */
+    fun isOverlapping(considerDistance: Boolean): Boolean {
+        if (obj is Spinner) {
+            return false
+        }
+
+        val previous = previous(0)
+
+        if (previous == null || previous.obj is Spinner) {
+            return false
+        }
+
+        if (deltaTime >= 5) {
+            return false
+        }
+
+        if (considerDistance) {
+            val position = obj.getStackedPosition(mode)
+            var distance = previous.obj.getStackedEndPosition(mode).getDistance(position)
+
+            if (previous.obj is Slider && previous.obj.lazyEndPosition != null) {
+                distance = min(
+                    distance,
+                    previous.obj.lazyEndPosition!!.getDistance(position)
+                )
+            }
+
+            return distance <= 2 * obj.radius
+        }
+
+        return true
+    }
+
+    private fun setVisuals(clockRate: Double, objects: List<HitObject>) {
+        // We'll have two visible object lists. The first list contains objects before the current object starts in a
+        // reversed order, while the second list contains objects after the current object ends.
+        // For overlapping factor, we also need to consider objects that are prior to the current object.
+        val prevVisibleObjects = mutableListOf<HitObject>()
+        val nextVisibleObjects = mutableListOf<HitObject>()
+
+        for (i in index + 2 until objects.size) {
+            val o = objects[i]
+
+            if (o is Spinner) {
+                continue
+            }
+
+            if (o.startTime > o.getEndTime() + obj.timePreempt) {
+                break
+            }
+
+            nextVisibleObjects.add(o)
+        }
+
+        for (i in 0 until index) {
+            val prev = previous(i) ?: continue
+
+            if (prev.startTime >= startTime) {
+                continue
+            }
+
+            if (prev.startTime < startTime - timePreempt) {
+                break
+            }
+
+            prevVisibleObjects.add(prev.obj)
+        }
+
+        for (hitObject in prevVisibleObjects) {
+            val distance = obj.getStackedPosition(mode).getDistance(hitObject.getStackedEndPosition(mode))
+            val deltaTime = startTime - hitObject.getEndTime() / clockRate
+
+            applyToOverlappingFactor(distance.toDouble(), deltaTime)
+        }
+
+        for (hitObject in nextVisibleObjects) {
+            val distance = hitObject.getStackedPosition(mode).getDistance(obj.getStackedEndPosition(mode))
+            val deltaTime = hitObject.startTime / clockRate - endTime
+
+            if (deltaTime >= 0) {
+                noteDensity += 1 - deltaTime / timePreempt
+            }
+
+            applyToOverlappingFactor(distance.toDouble(), deltaTime)
+        }
+    }
+
+    private fun applyToOverlappingFactor(distance: Double, deltaTime: Double) {
+        // Penalize objects that are too close to the object in both distance
+        // and delta time to prevent stream maps from being overweighted.
+        overlappingFactor += max(
+            0.0,
+            1 - distance / (3 * obj.radius)
+        ) * 7.5 / (1 + exp(0.15 * (max(deltaTime, MIN_DELTA_TIME) - 75)))
+    }
+}
