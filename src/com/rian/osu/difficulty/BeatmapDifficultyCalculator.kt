@@ -115,6 +115,7 @@ object BeatmapDifficultyCalculator {
      * @return A set of [TimedDifficultyAttributes] describing the difficulty of
      * the [Beatmap] at any relevant time relating to the calculation parameters.
      */
+    @JvmStatic
     fun calculateDroidTimedDifficulty(beatmap: Beatmap, parameters: DifficultyCalculationParameters? = null) =
         difficultyCacheManager[beatmap.md5]?.getDroidTimedDifficultyCache(parameters) ?:
         droidDifficultyCalculator.calculateTimed(beatmap, parameters).also { addCache(beatmap, parameters, it) }
