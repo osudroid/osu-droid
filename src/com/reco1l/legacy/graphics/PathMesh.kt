@@ -18,6 +18,12 @@ class PathMesh : Mesh(0f, 0f, 0, DrawMode.TRIANGLES, PathMeshVBO())
     var clearDepth = false
 
 
+    init
+    {
+        isCullingEnabled = false
+    }
+
+
     fun setVertices(vertices: FloatArray) {
         // Since sprites are cached and recycled, we need to copy the array to avoid rewrite of the
         // buffer with wrong vertices.
@@ -41,11 +47,12 @@ class PathMesh : Mesh(0f, 0f, 0, DrawMode.TRIANGLES, PathMeshVBO())
         if (clearDepth)
             GLES20.glClear(GL10.GL_DEPTH_BUFFER_BIT)
 
-        gl.enableDepthTest()
+        val previous = gl.enableDepthTest()
 
         super.draw(gl, pCamera)
 
-        gl.disableDepthTest()
+        if (!previous)
+            gl.disableDepthTest()
     }
 
     companion object

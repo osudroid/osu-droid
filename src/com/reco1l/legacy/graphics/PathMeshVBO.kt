@@ -6,7 +6,6 @@ import org.andengine.entity.primitive.Mesh
 import org.andengine.entity.primitive.vbo.IMeshVertexBufferObject
 import org.andengine.opengl.vbo.DrawType.STATIC
 import org.andengine.opengl.vbo.VertexBufferObject
-import org.andengine.util.color.ColorUtils
 import java.nio.ByteBuffer
 import java.nio.ByteOrder
 
@@ -42,17 +41,19 @@ class PathMeshVBO :
     {
         // This will only update the alpha since is expected to the color be specified at every
         // vertex due to the attributes.
+        val alpha = (255 * mesh.alpha).toInt()
+
         for (i in 0 until bufferData.size / 4)
         {
-            val index = i * 4 /*Vertex count*/ + 3 /*Color index*/
-            val color = bufferData[index].toRawBits()
+            val color = bufferData[i * 4 + 3].toRawBits()
 
-            bufferData[index] = ColorUtils.convertRGBAToABGRPackedFloat(
-                (color shr 0 and 0xFF) / 255.0f,
-                (color shr 8 and 0xFF) / 255.0f,
-                (color shr 16 and 0xFF) / 255.0f,
-                mesh.alpha
-            )
+            // Source color with alpha applied.
+            val newColor = (alpha shl 24)
+                .or(color shr 16 and 0xFF shl 16)
+                .or(color shr 8 and 0xFF shl 8)
+                .or(color shr 0 and 0xFF shl 0)
+
+            bufferData[i * 4 + 3] = Float.fromBits(newColor and -0x1)
         }
 
         setDirtyOnHardware()
