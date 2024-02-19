@@ -79,7 +79,7 @@ object CircleSizeCalculator {
      * @return The osu!droid scale of the given osu!standard scale.
      */
     @JvmStatic
-    fun standardScaleToDroidScale(scale: Float) = standardRadiusToDroidScale(HitObject.OBJECT_RADIUS * scale.toDouble())
+    fun standardScaleToDroidScale(scale: Float) = standardRadiusToDroidScale(HitObject.OBJECT_RADIUS * scale / 1.0041)
 
     /**
      * Converts osu!standard circle size to osu!droid scale.
