@@ -68,9 +68,8 @@ class PathMeshVBO :
             floatBuffer = mByteBuffer.asFloatBuffer()
         }
 
-        floatBuffer.position(0).limit(floatBuffer.capacity())
-        floatBuffer.put(bufferData, 0, capacity)
-        floatBuffer.position(0).limit(capacity)
+        floatBuffer.position(0)
+        floatBuffer.put(bufferData)
 
         GLES20.glBufferData(GLES20.GL_ARRAY_BUFFER, mByteBuffer.capacity(), mByteBuffer, mUsage)
     }
