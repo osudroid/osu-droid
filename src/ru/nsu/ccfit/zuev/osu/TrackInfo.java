@@ -307,7 +307,7 @@ public class TrackInfo implements Serializable {
         setMusicLength(beatmap.getDuration());
         setMaxCombo(beatmap.getMaxCombo());
 
-        var attributes = BeatmapDifficultyCalculator.calculateDifficulty(beatmap);
+        var attributes = BeatmapDifficultyCalculator.calculateStandardDifficulty(beatmap);
 
         setDifficulty(GameHelper.Round(attributes.starRating, 2));
 

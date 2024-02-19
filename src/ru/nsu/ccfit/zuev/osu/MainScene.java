@@ -11,6 +11,7 @@ import com.edlplan.ui.fragment.ConfirmDialogFragment;
 import com.reco1l.legacy.ui.ChimuWebView;
 import com.reco1l.legacy.ui.MainMenu;
 
+import com.rian.osu.GameMode;
 import com.rian.osu.beatmap.parser.BeatmapParser;
 import org.anddev.andengine.engine.handler.IUpdateHandler;
 import org.anddev.andengine.entity.IEntity;
@@ -889,7 +890,7 @@ public class MainScene implements IUpdateHandler {
             Arrays.fill(peakAlpha, 0f);
 
             try (var parser = new BeatmapParser(selectedTrack.getFilename())) {
-                var beatmap = parser.parse(false);
+                var beatmap = parser.parse(GameMode.Standard, false);
 
                 if (beatmap != null) {
                     timingPoints = new LinkedList<>();

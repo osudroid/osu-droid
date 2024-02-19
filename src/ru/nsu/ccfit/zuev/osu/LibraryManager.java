@@ -2,6 +2,7 @@ package ru.nsu.ccfit.zuev.osu;
 
 import android.os.Build;
 import com.reco1l.legacy.engine.VideoTexture;
+import com.rian.osu.GameMode;
 import com.rian.osu.beatmap.parser.BeatmapParser;
 import org.anddev.andengine.util.Debug;
 import org.jetbrains.annotations.Nullable;
@@ -271,7 +272,7 @@ public enum LibraryManager {
                 track.setFilename(file.getPath());
                 track.setCreator("unknown");
 
-                var beatmap = parser.parse(true);
+                var beatmap = parser.parse(GameMode.Standard, true);
                 if (beatmap == null || !info.populate(beatmap) || !track.populate(beatmap)) {
                     if (Config.isDeleteUnimportedBeatmaps()) {
                         file.delete();

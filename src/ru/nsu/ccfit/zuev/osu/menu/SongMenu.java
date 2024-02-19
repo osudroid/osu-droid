@@ -14,6 +14,7 @@ import com.reco1l.legacy.Multiplayer;
 import com.reco1l.legacy.ui.multiplayer.RoomScene;
 import com.reco1l.framework.lang.execution.Async;
 
+import com.rian.osu.GameMode;
 import com.rian.osu.beatmap.parser.BeatmapParser;
 import com.rian.osu.difficulty.BeatmapDifficultyCalculator;
 import com.rian.osu.difficulty.calculator.DifficultyCalculationParameters;
@@ -1073,7 +1074,7 @@ public class SongMenu implements IUpdateHandler, MenuItemListener,
         changeDimensionInfo(track);
         Async.run(() -> {
             try (var parser = new BeatmapParser(track.getFilename())) {
-                var beatmap = parser.parse(true);
+                var beatmap = parser.parse(GameMode.Standard, true);
 
                 if (beatmap == null) {
                     setStarsDisplay(0);
@@ -1094,7 +1095,7 @@ public class SongMenu implements IUpdateHandler, MenuItemListener,
                 ));
                 parameters.setCustomSpeedMultiplier(modMenu.getChangeSpeed());
 
-                var attributes = BeatmapDifficultyCalculator.calculateDifficulty(
+                var attributes = BeatmapDifficultyCalculator.calculateStandardDifficulty(
                         beatmap,
                         parameters
                 );

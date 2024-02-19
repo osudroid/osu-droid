@@ -9,6 +9,7 @@ import com.reco1l.legacy.Multiplayer;
 import com.reco1l.api.ibancho.data.RoomMods;
 import com.reco1l.legacy.ui.multiplayer.RoomScene;
 
+import com.rian.osu.GameMode;
 import com.rian.osu.beatmap.parser.BeatmapParser;
 import com.rian.osu.difficulty.BeatmapDifficultyCalculator;
 import com.rian.osu.difficulty.calculator.DifficultyCalculationParameters;
@@ -323,7 +324,7 @@ public class ModMenu implements IModSwitcher {
                             try (var parser = new BeatmapParser(
                                     GlobalManager.getInstance().getSongMenu().getSelectedTrack().getFilename()
                             )) {
-                                var beatmap = parser.parse(true);
+                                var beatmap = parser.parse(GameMode.Standard, true);
                                 if (beatmap == null) {
                                     GlobalManager.getInstance().getSongMenu().setStarsDisplay(0);
                                     return;
@@ -338,7 +339,7 @@ public class ModMenu implements IModSwitcher {
                                 ));
                                 parameters.setCustomSpeedMultiplier(changeSpeed);
 
-                                var attributes = BeatmapDifficultyCalculator.calculateDifficulty(
+                                var attributes = BeatmapDifficultyCalculator.calculateStandardDifficulty(
                                         beatmap,
                                         parameters
                                 );

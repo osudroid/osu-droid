@@ -2,11 +2,10 @@ package com.rian.osu.difficulty
 
 import com.rian.osu.beatmap.Beatmap
 import com.rian.osu.difficulty.attributes.DifficultyAttributes
+import com.rian.osu.difficulty.attributes.DroidDifficultyAttributes
+import com.rian.osu.difficulty.attributes.StandardDifficultyAttributes
 import com.rian.osu.difficulty.attributes.TimedDifficultyAttributes
-import com.rian.osu.difficulty.calculator.DifficultyCalculationParameters
-import com.rian.osu.difficulty.calculator.DifficultyCalculator
-import com.rian.osu.difficulty.calculator.PerformanceCalculationParameters
-import com.rian.osu.difficulty.calculator.PerformanceCalculator
+import com.rian.osu.difficulty.calculator.*
 import com.rian.osu.utils.convertLegacyMods
 import ru.nsu.ccfit.zuev.osu.scoring.StatisticV2
 import kotlin.collections.Map.Entry
@@ -21,6 +20,9 @@ object BeatmapDifficultyCalculator {
      * Cache of difficulty calculations, mapped by MD5 hash of a beatmap.
      */
     private val difficultyCacheManager = LRUCache<String, BeatmapDifficultyCacheManager>(10)
+
+    private val droidDifficultyCalculator = DroidDifficultyCalculator()
+    private val standardDifficultyCalculator = StandardDifficultyCalculator()
 
     /**
      * Constructs a [DifficultyCalculationParameters] from a [StatisticV2].
@@ -45,6 +47,24 @@ object BeatmapDifficultyCalculator {
     }
 
     /**
+     * Constructs a [DroidPerformanceCalculationParameters] from a [StatisticV2].
+     *
+     * @param stat The [StatisticV2] to construct the [DroidPerformanceCalculationParameters] from.
+     * @return The [DroidPerformanceCalculationParameters] representing the [StatisticV2],
+     * `null` if the [StatisticV2] instance is `null`.
+     */
+    @JvmStatic
+    fun constructDroidPerformanceParameters(stat: StatisticV2?) = stat?.run {
+        DroidPerformanceCalculationParameters().also {
+            it.maxCombo = getMaxCombo()
+            it.countGreat = hit300
+            it.countOk = hit100
+            it.countMeh = hit50
+            it.countMiss = misses
+        }
+    }
+
+    /**
      * Constructs a [PerformanceCalculationParameters] from a [StatisticV2].
      *
      * @param stat The [StatisticV2] to construct the [PerformanceCalculationParameters] from.
@@ -52,7 +72,7 @@ object BeatmapDifficultyCalculator {
      * `null` if the [StatisticV2] instance is `null`.
      */
     @JvmStatic
-    fun constructPerformanceParameters(stat: StatisticV2?) = stat?.run {
+    fun constructStandardPerformanceParameters(stat: StatisticV2?) = stat?.run {
         PerformanceCalculationParameters().also {
             it.maxCombo = getMaxCombo()
             it.countGreat = hit300
@@ -63,32 +83,65 @@ object BeatmapDifficultyCalculator {
     }
 
     /**
-     * Calculates the difficulty of a [Beatmap].
+     * Calculates the osu!droid difficulty of a [Beatmap].
      *
      * @param beatmap The [Beatmap] to calculate.
-     * @param stat The [StatisticV2] to calculate for.
-     * @return A structure describing the difficulty of the [Beatmap]
-     * relating to the [StatisticV2].
+     * @param stat The [StatisticV2] to calculate.
+     * @return A structure describing the osu!droid difficulty of the [Beatmap] relating to the [StatisticV2].
      */
     @JvmStatic
-    fun calculateDifficulty(beatmap: Beatmap, stat: StatisticV2) =
-        calculateDifficulty(beatmap, constructDifficultyParameters(stat))
+    fun calculateDroidDifficulty(beatmap: Beatmap, stat: StatisticV2) =
+        calculateDroidDifficulty(beatmap, constructDifficultyParameters(stat))
 
     /**
      * Calculates the difficulty of a [Beatmap].
      *
      * @param beatmap The [Beatmap] to calculate.
      * @param parameters The parameters of the calculation. Can be `null`.
-     * @return A structure describing the difficulty of the [Beatmap]
-     * relating to the calculation parameters.
+     * @return A structure describing the osu!droid difficulty of the [Beatmap] relating to the calculation parameters.
      */
     @JvmStatic
     @JvmOverloads
-    fun calculateDifficulty(
-        beatmap: Beatmap, parameters: DifficultyCalculationParameters? = null
-    ) = difficultyCacheManager[beatmap.md5]?.getDifficultyCache(parameters)
-        ?:
-        DifficultyCalculator.calculate(beatmap, parameters).also { addCache(beatmap, parameters, it) }
+    fun calculateDroidDifficulty(beatmap: Beatmap, parameters: DifficultyCalculationParameters? = null) =
+        difficultyCacheManager[beatmap.md5]?.getDroidDifficultyCache(parameters) ?:
+        droidDifficultyCalculator.calculate(beatmap, parameters).also { addCache(beatmap, parameters, it) }
+
+    /**
+     * Calculates the difficulty of a [Beatmap], returning a set of [TimedDifficultyAttributes]
+     * representing the difficulty of the [Beatmap] at any relevant time.
+     *
+     * @param beatmap The [Beatmap] to calculate.
+     * @param parameters The parameters of the calculation. Can be `null`.
+     * @return A set of [TimedDifficultyAttributes] describing the difficulty of
+     * the [Beatmap] at any relevant time relating to the calculation parameters.
+     */
+    fun calculateDroidTimedDifficulty(beatmap: Beatmap, parameters: DifficultyCalculationParameters? = null) =
+        difficultyCacheManager[beatmap.md5]?.getDroidTimedDifficultyCache(parameters) ?:
+        droidDifficultyCalculator.calculateTimed(beatmap, parameters).also { addCache(beatmap, parameters, it) }
+
+    /**
+     * Calculates the osu!standard difficulty of a [Beatmap].
+     *
+     * @param beatmap The [Beatmap] to calculate.
+     * @param stat The [StatisticV2] to calculate for.
+     * @return A structure describing the osu!standard difficulty of the [Beatmap] relating to the [StatisticV2].
+     */
+    @JvmStatic
+    fun calculateStandardDifficulty(beatmap: Beatmap, stat: StatisticV2) =
+        calculateStandardDifficulty(beatmap, constructDifficultyParameters(stat))
+
+    /**
+     * Calculates the difficulty of a [Beatmap].
+     *
+     * @param beatmap The [Beatmap] to calculate.
+     * @param parameters The parameters of the calculation. Can be `null`.
+     * @return A structure describing the osu!standard difficulty of the [Beatmap] relating to the calculation parameters.
+     */
+    @JvmStatic
+    @JvmOverloads
+    fun calculateStandardDifficulty(beatmap: Beatmap, parameters: DifficultyCalculationParameters? = null) =
+        difficultyCacheManager[beatmap.md5]?.getStandardDifficultyCache(parameters) ?:
+        standardDifficultyCalculator.calculate(beatmap, parameters).also { addCache(beatmap, parameters, it) }
 
     /**
      * Calculates the difficulty of a [Beatmap], returning a set of [TimedDifficultyAttributes]
@@ -101,38 +154,59 @@ object BeatmapDifficultyCalculator {
      */
     @JvmStatic
     @JvmOverloads
-    fun calculateTimedDifficulty(
-        beatmap: Beatmap, parameters: DifficultyCalculationParameters? = null
-    ) = difficultyCacheManager[beatmap.md5]?.getTimedDifficultyCache(parameters)
-        ?:
-        DifficultyCalculator.calculateTimed(beatmap, parameters).also { addCache(beatmap, parameters, it) }
+    fun calculateStandardTimedDifficulty(beatmap: Beatmap, parameters: DifficultyCalculationParameters? = null) =
+        difficultyCacheManager[beatmap.md5]?.getStandardTimedDifficultyCache(parameters) ?:
+        standardDifficultyCalculator.calculateTimed(beatmap, parameters).also { addCache(beatmap, parameters, it) }
 
     /**
-     * Calculates the performance of a [DifficultyAttributes].
+     * Calculates the performance of a [DroidDifficultyAttributes].
      *
-     * @param attributes The [DifficultyAttributes] to calculate.
+     * @param attributes The [DroidDifficultyAttributes] to calculate.
      * @param stat The [StatisticV2] to calculate for.
-     * @return A structure describing the performance of the [DifficultyAttributes]
-     * relating to the [StatisticV2].
+     * @return A structure describing the performance of the [DroidDifficultyAttributes] relating to the [StatisticV2].
      */
     @JvmStatic
-    fun calculatePerformance(attributes: DifficultyAttributes, stat: StatisticV2) =
-        calculatePerformance(attributes, constructPerformanceParameters(stat))
+    fun calculateDroidPerformance(attributes: DroidDifficultyAttributes, stat: StatisticV2) =
+        calculateDroidPerformance(attributes, constructDroidPerformanceParameters(stat))
 
     /**
-     * Calculates the performance of a [DifficultyAttributes].
+     * Calculates the performance of a [DroidDifficultyAttributes].
      *
-     * @param attributes The [DifficultyAttributes] to calculate.
+     * @param attributes The [DroidDifficultyAttributes] to calculate.
      * @param parameters The parameters of the calculation. Can be `null`.
-     * @return A structure describing the performance of the [DifficultyAttributes]
-     * relating to the calculation parameters.
+     * @return A structure describing the performance of the [DroidDifficultyAttributes] relating to the calculation parameters.
      */
     @JvmStatic
     @JvmOverloads
-    fun calculatePerformance(
-        attributes: DifficultyAttributes,
+    fun calculateDroidPerformance(
+        attributes: DroidDifficultyAttributes,
+        parameters: DroidPerformanceCalculationParameters? = null
+    ) = DroidPerformanceCalculator(attributes).calculate(parameters)
+
+    /**
+     * Calculates the performance of a [StandardDifficultyAttributes].
+     *
+     * @param attributes The [StandardDifficultyAttributes] to calculate.
+     * @param stat The [StatisticV2] to calculate for.
+     * @return A structure describing the performance of the [StandardDifficultyAttributes] relating to the [StatisticV2].
+     */
+    @JvmStatic
+    fun calculateStandardPerformance(attributes: StandardDifficultyAttributes, stat: StatisticV2) =
+        calculateStandardPerformance(attributes, constructStandardPerformanceParameters(stat))
+
+    /**
+     * Calculates the performance of a [StandardDifficultyAttributes].
+     *
+     * @param attributes The [StandardDifficultyAttributes] to calculate.
+     * @param parameters The parameters of the calculation. Can be `null`.
+     * @return A structure describing the performance of the [StandardDifficultyAttributes] relating to the calculation parameters.
+     */
+    @JvmStatic
+    @JvmOverloads
+    fun calculateStandardPerformance(
+        attributes: StandardDifficultyAttributes,
         parameters: PerformanceCalculationParameters? = null
-    ) = PerformanceCalculator(attributes).calculate(parameters)
+    ) = StandardPerformanceCalculator(attributes).calculate(parameters)
 
     /**
      * Invalidates expired cache.
@@ -161,7 +235,19 @@ object BeatmapDifficultyCalculator {
      */
     private fun addCache(
         beatmap: Beatmap, parameters: DifficultyCalculationParameters?,
-        attributes: DifficultyAttributes
+        attributes: DroidDifficultyAttributes
+    ) = difficultyCacheManager[beatmap.md5, { BeatmapDifficultyCacheManager() }].run { addCache(parameters, attributes, 60 * 1000) }
+
+    /**
+     * Adds a cache to the difficulty cache.
+     *
+     * @param beatmap The [Beatmap] to cache.
+     * @param parameters The [DifficultyCalculationParameters] to cache.
+     * @param attributes The [DifficultyAttributes] to cache.
+     */
+    private fun addCache(
+        beatmap: Beatmap, parameters: DifficultyCalculationParameters?,
+        attributes: StandardDifficultyAttributes
     ) = difficultyCacheManager[beatmap.md5, { BeatmapDifficultyCacheManager() }].run { addCache(parameters, attributes, 60 * 1000) }
 
     /**
@@ -171,9 +257,28 @@ object BeatmapDifficultyCalculator {
      * @param parameters The [DifficultyCalculationParameters] to cache.
      * @param attributes The [TimedDifficultyAttributes] to cache.
      */
+    @JvmName("addDroidTimedCache")
     private fun addCache(
         beatmap: Beatmap, parameters: DifficultyCalculationParameters?,
-        attributes: List<TimedDifficultyAttributes>
+        attributes: List<TimedDifficultyAttributes<DroidDifficultyAttributes>>
+    ) =
+        // Allow a maximum of 5 minutes of living cache.
+        difficultyCacheManager[beatmap.md5, { BeatmapDifficultyCacheManager() }].run { addCache(parameters, attributes, min(
+            beatmap.duration.toLong(),
+            5 * 60 * 1000
+        )) }
+
+    /**
+     * Adds a cache to the difficulty cache.
+     *
+     * @param beatmap The [Beatmap] to cache.
+     * @param parameters The [DifficultyCalculationParameters] to cache.
+     * @param attributes The [TimedDifficultyAttributes] to cache.
+     */
+    @JvmName("addStandardTimedCache")
+    private fun addCache(
+        beatmap: Beatmap, parameters: DifficultyCalculationParameters?,
+        attributes: List<TimedDifficultyAttributes<StandardDifficultyAttributes>>
     ) =
         // Allow a maximum of 5 minutes of living cache.
         difficultyCacheManager[beatmap.md5, { BeatmapDifficultyCacheManager() }].run { addCache(parameters, attributes, min(
@@ -198,22 +303,38 @@ object BeatmapDifficultyCalculator {
      * A cache holder for a [Beatmap].
      */
     private class BeatmapDifficultyCacheManager {
-        private val attributeCache =
-            LRUCache<DifficultyCalculationParameters, BeatmapDifficultyCache<DifficultyAttributes>>(5)
-        private val timedAttributeCache =
-            LRUCache<DifficultyCalculationParameters, BeatmapDifficultyCache<List<TimedDifficultyAttributes>>>(3)
+        private val droidAttributeCache =
+            LRUCache<DifficultyCalculationParameters, BeatmapDifficultyCache<DroidDifficultyAttributes>>(5)
+        private val droidTimedAttributeCache =
+            LRUCache<DifficultyCalculationParameters, BeatmapDifficultyCache<List<TimedDifficultyAttributes<DroidDifficultyAttributes>>>>(3)
+        private val standardAttributeCache =
+            LRUCache<DifficultyCalculationParameters, BeatmapDifficultyCache<StandardDifficultyAttributes>>(5)
+        private val standardTimedAttributeCache =
+            LRUCache<DifficultyCalculationParameters, BeatmapDifficultyCache<List<TimedDifficultyAttributes<StandardDifficultyAttributes>>>>(3)
 
         /**
-         * Adds a [DifficultyAttributes] cache to this [BeatmapDifficultyCacheManager].
+         * Adds a [DroidDifficultyAttributes] cache to this [BeatmapDifficultyCacheManager].
          *
-         * @param parameters The [DifficultyCalculationParameters] of the [DifficultyAttributes].
-         * @param attributes The [DifficultyAttributes] to cache.
+         * @param parameters The [DifficultyCalculationParameters] of the [DroidDifficultyAttributes].
+         * @param attributes The [DroidDifficultyAttributes] to cache.
          * @param timeToLive The duration at which this cache is allowed to live, in milliseconds.
          */
         fun addCache(
-            parameters: DifficultyCalculationParameters?, attributes: DifficultyAttributes,
+            parameters: DifficultyCalculationParameters?, attributes: DroidDifficultyAttributes,
             timeToLive: Long
-        ) = addCache(parameters, attributes, attributeCache, timeToLive)
+        ) = addCache(parameters, attributes, droidAttributeCache, timeToLive)
+
+        /**
+         * Adds a [StandardDifficultyAttributes] cache to this [BeatmapDifficultyCacheManager].
+         *
+         * @param parameters The [DifficultyCalculationParameters] of the [StandardDifficultyAttributes].
+         * @param attributes The [StandardDifficultyAttributes] to cache.
+         * @param timeToLive The duration at which this cache is allowed to live, in milliseconds.
+         */
+        fun addCache(
+            parameters: DifficultyCalculationParameters?, attributes: StandardDifficultyAttributes,
+            timeToLive: Long
+        ) = addCache(parameters, attributes, standardAttributeCache, timeToLive)
 
         /**
          * Adds a [TimedDifficultyAttributes] cache to this [BeatmapDifficultyCacheManager].
@@ -222,19 +343,35 @@ object BeatmapDifficultyCalculator {
          * @param attributes The [TimedDifficultyAttributes] to cache.
          * @param timeToLive The duration at which this cache is allowed to live, in milliseconds.
          */
+        @JvmName("addDroidTimedCache")
         fun addCache(
-            parameters: DifficultyCalculationParameters?, attributes: List<TimedDifficultyAttributes>,
+            parameters: DifficultyCalculationParameters?,
+            attributes: List<TimedDifficultyAttributes<DroidDifficultyAttributes>>,
             timeToLive: Long
-        ) = addCache(parameters, attributes, timedAttributeCache, timeToLive)
+        ) = addCache(parameters, attributes, droidTimedAttributeCache, timeToLive)
 
         /**
-         * Retrieves the [DifficultyAttributes] cache of a [DifficultyCalculationParameters].
+         * Adds a [TimedDifficultyAttributes] cache to this [BeatmapDifficultyCacheManager].
+         *
+         * @param parameters The [DifficultyCalculationParameters] of the difficulty attributes.
+         * @param attributes The [TimedDifficultyAttributes] to cache.
+         * @param timeToLive The duration at which this cache is allowed to live, in milliseconds.
+         */
+        @JvmName("addStandardTimedCache")
+        fun addCache(
+            parameters: DifficultyCalculationParameters?,
+            attributes: List<TimedDifficultyAttributes<StandardDifficultyAttributes>>,
+            timeToLive: Long
+        ) = addCache(parameters, attributes, standardTimedAttributeCache, timeToLive)
+
+        /**
+         * Retrieves the [DroidDifficultyAttributes] cache of a [DifficultyCalculationParameters].
          *
          * @param parameters The [DifficultyCalculationParameters] to retrieve.
-         * @return The [DifficultyAttributes], `null` if not found.
+         * @return The [DroidDifficultyAttributes], `null` if not found.
          */
-        fun getDifficultyCache(parameters: DifficultyCalculationParameters?) =
-            getCache(parameters, attributeCache)
+        fun getDroidDifficultyCache(parameters: DifficultyCalculationParameters?) =
+            getCache(parameters, droidAttributeCache)
 
         /**
          * Retrieves the [TimedDifficultyAttributes] cache of a [DifficultyCalculationParameters].
@@ -242,14 +379,33 @@ object BeatmapDifficultyCalculator {
          * @param parameters The [DifficultyCalculationParameters] to retrieve.
          * @return The [TimedDifficultyAttributes], `null` if not found.
          */
-        fun getTimedDifficultyCache(parameters: DifficultyCalculationParameters?) =
-            getCache(parameters, timedAttributeCache)
+        fun getDroidTimedDifficultyCache(parameters: DifficultyCalculationParameters?) =
+            getCache(parameters, droidTimedAttributeCache)
+
+        /**
+         * Retrieves the [StandardDifficultyAttributes] cache of a [DifficultyCalculationParameters].
+         *
+         * @param parameters The [DifficultyCalculationParameters] to retrieve.
+         * @return The [StandardDifficultyAttributes], `null` if not found.
+         */
+        fun getStandardDifficultyCache(parameters: DifficultyCalculationParameters?) =
+            getCache(parameters, standardAttributeCache)
+
+        /**
+         * Retrieves the [TimedDifficultyAttributes] cache of a [DifficultyCalculationParameters].
+         *
+         * @param parameters The [DifficultyCalculationParameters] to retrieve.
+         * @return The [TimedDifficultyAttributes], `null` if not found.
+         */
+        fun getStandardTimedDifficultyCache(parameters: DifficultyCalculationParameters?) =
+            getCache(parameters, standardTimedAttributeCache)
 
         /**
          * Whether this [BeatmapDifficultyCacheManager] does not hold any cache.
          */
         val isEmpty: Boolean
-            get() = attributeCache.isEmpty() && timedAttributeCache.isEmpty()
+            get() = droidAttributeCache.isEmpty() && droidTimedAttributeCache.isEmpty() &&
+                    standardAttributeCache.isEmpty() && standardTimedAttributeCache.isEmpty()
 
         /**
          * Invalidates all expired cache in this manager.
@@ -257,8 +413,10 @@ object BeatmapDifficultyCalculator {
          * @param currentTime The time to invalidate the cache against, in milliseconds.
          */
         fun invalidateExpiredCache(currentTime: Long) {
-            invalidateExpiredCache(currentTime, attributeCache)
-            invalidateExpiredCache(currentTime, timedAttributeCache)
+            invalidateExpiredCache(currentTime, droidAttributeCache)
+            invalidateExpiredCache(currentTime, droidTimedAttributeCache)
+            invalidateExpiredCache(currentTime, standardAttributeCache)
+            invalidateExpiredCache(currentTime, standardTimedAttributeCache)
         }
 
         /**

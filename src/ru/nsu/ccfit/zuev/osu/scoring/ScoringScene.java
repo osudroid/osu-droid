@@ -6,6 +6,7 @@ import com.reco1l.legacy.Multiplayer;
 import com.reco1l.legacy.ui.multiplayer.RoomScene;
 import com.reco1l.legacy.ui.entity.StatisticSelector;
 
+import com.rian.osu.GameMode;
 import com.rian.osu.beatmap.Beatmap;
 import com.rian.osu.beatmap.parser.BeatmapParser;
 import com.rian.osu.difficulty.BeatmapDifficultyCalculator;
@@ -473,17 +474,17 @@ public class ScoringScene {
             Beatmap beatmap = null;
 
             try (var parser = new BeatmapParser(this.track.getFilename())) {
-                beatmap = parser.parse(true);
+                beatmap = parser.parse(GameMode.Standard, true);
             }
 
             if (beatmap != null) {
-                var difficultyAttributes = BeatmapDifficultyCalculator.calculateDifficulty(
+                var difficultyAttributes = BeatmapDifficultyCalculator.calculateStandardDifficulty(
                         beatmap, stat
                 );
-                var performanceAttributes = BeatmapDifficultyCalculator.calculatePerformance(
+                var performanceAttributes = BeatmapDifficultyCalculator.calculateStandardPerformance(
                         difficultyAttributes, stat
                 );
-                var maxPerformanceAttributes = BeatmapDifficultyCalculator.calculatePerformance(
+                var maxPerformanceAttributes = BeatmapDifficultyCalculator.calculateStandardPerformance(
                         difficultyAttributes
                 );
                 ppinfo.append(String.format(Locale.ENGLISH, "%.2f★ | %.2f/%.2fpp", difficultyAttributes.starRating, performanceAttributes.total, maxPerformanceAttributes.total));

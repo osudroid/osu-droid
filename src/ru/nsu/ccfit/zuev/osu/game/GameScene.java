@@ -19,11 +19,13 @@ import com.reco1l.legacy.ui.entity.InGameLeaderboard;
 import com.reco1l.legacy.Multiplayer;
 import com.reco1l.legacy.ui.multiplayer.RoomScene;
 
+import com.rian.osu.GameMode;
 import com.rian.osu.beatmap.Beatmap;
 import com.rian.osu.beatmap.constants.BeatmapCountdown;
 import com.rian.osu.beatmap.constants.SampleBank;
 import com.rian.osu.beatmap.parser.BeatmapParser;
 import com.rian.osu.difficulty.BeatmapDifficultyCalculator;
+import com.rian.osu.difficulty.attributes.StandardDifficultyAttributes;
 import com.rian.osu.difficulty.attributes.TimedDifficultyAttributes;
 import com.rian.osu.difficulty.calculator.DifficultyCalculationParameters;
 import com.rian.osu.beatmap.hitobject.HitObjectUtils;
@@ -185,7 +187,7 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
 
     private DifficultyHelper difficultyHelper = DifficultyHelper.StdDifficulty;
 
-    private List<TimedDifficultyAttributes> timedDifficultyAttributes = new ArrayList<>();
+    private List<TimedDifficultyAttributes<StandardDifficultyAttributes>> timedDifficultyAttributes = new ArrayList<>();
     private ChangeableText ppText;
 
     private long previousFrameTime;
@@ -334,7 +336,7 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
 
         try (var parser = new BeatmapParser(track.getFilename())) {
             if (parser.openFile()) {
-                beatmap = parser.parse(true);
+                beatmap = parser.parse(GameMode.Standard, true);
             } else {
                 Debug.e("startGame: cannot open file");
                 ToastLogger.showText(
@@ -637,7 +639,7 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
             ));
             parameters.setCustomSpeedMultiplier(modMenu.getChangeSpeed());
 
-            timedDifficultyAttributes = BeatmapDifficultyCalculator.calculateTimedDifficulty(
+            timedDifficultyAttributes = BeatmapDifficultyCalculator.calculateStandardTimedDifficulty(
                     beatmap,
                     parameters
             );
@@ -3053,19 +3055,19 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
     }
 
     private double getPPAtTime(double time) {
-        TimedDifficultyAttributes timedAttributes = getAttributeAtTime(time);
+        var timedAttributes = getAttributeAtTime(time);
 
         if (timedAttributes == null) {
             return 0;
         }
 
-        return BeatmapDifficultyCalculator.calculatePerformance(
+        return BeatmapDifficultyCalculator.calculateStandardPerformance(
                 timedAttributes.attributes,
                 stat
         ).total;
     }
 
-    private TimedDifficultyAttributes getAttributeAtTime(double time) {
+    private TimedDifficultyAttributes<StandardDifficultyAttributes> getAttributeAtTime(double time) {
         if (timedDifficultyAttributes.isEmpty()) {
             return null;
         }
@@ -3083,7 +3085,7 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
 
         while (l <= r) {
             int pivot = l + ((r - l) >> 1);
-            TimedDifficultyAttributes attributes = timedDifficultyAttributes.get(pivot);
+            var attributes = timedDifficultyAttributes.get(pivot);
 
             if (attributes.time < time) {
                 l = pivot + 1;
