@@ -693,12 +693,12 @@ public class Slider extends GameObject {
                 }
 
                 if (Config.isSnakingInSliders()) {
-                    /*if (superPath != null && abstractSliderBody != null) {
+                    if (superPath != null && abstractSliderBody != null) {
                         float l = superPath.getMeasurer().maxLength() * percentage;
 
                         abstractSliderBody.setEndLength(l);
                         abstractSliderBody.onUpdate();
-                    }*/
+                    }
 
                     tmpPoint = getPercentPosition(percentage, null);
 
