@@ -4,7 +4,9 @@ import com.rian.osu.GameMode
 import com.rian.osu.beatmap.Beatmap
 import com.rian.osu.beatmap.DroidHitWindow
 import com.rian.osu.beatmap.PreciseDroidHitWindow
+import com.rian.osu.beatmap.hitobject.HitObject
 import com.rian.osu.beatmap.hitobject.getEndTime
+import com.rian.osu.beatmap.sections.BeatmapDifficulty
 import com.rian.osu.difficulty.DroidDifficultyHitObject
 import com.rian.osu.difficulty.attributes.DroidDifficultyAttributes
 import com.rian.osu.difficulty.attributes.HighStrainSection
@@ -186,13 +188,13 @@ class DroidDifficultyCalculator : DifficultyCalculator<DroidDifficultyHitObject,
 
         val difficultyAdjustMod = mods.find { it is ModDifficultyAdjust } as ModDifficultyAdjust?
         val ar = difficultyAdjustMod?.ar?.takeUnless { it.isNaN() } ?: beatmap.difficulty.ar
-        var preempt = if (ar <= 5) 1800.0 - 120 * ar else 1950.0 - 150 * ar
+        var preempt = BeatmapDifficulty.difficultyRange(ar.toDouble(), HitObject.PREEMPT_MAX, HitObject.PREEMPT_MID, HitObject.PREEMPT_MIN)
 
         if (difficultyAdjustMod?.ar != null) {
             preempt /= parameters?.totalSpeedMultiplier?.toDouble() ?: 1.0
         }
 
-        approachRate = if (preempt > 1200) (1800 - preempt) / 120 else (1200 - preempt) / 150 + 5
+        approachRate = if (preempt > HitObject.PREEMPT_MID) (HitObject.PREEMPT_MAX - preempt) / 120 else (HitObject.PREEMPT_MID - preempt) / 150 + 5
 
         val isPrecise = mods.any { it is ModPrecise }
         val greatWindow = (
