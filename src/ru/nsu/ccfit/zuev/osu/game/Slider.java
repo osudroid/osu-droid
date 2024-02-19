@@ -1,8 +1,11 @@
 package ru.nsu.ccfit.zuev.osu.game;
 
 import android.graphics.PointF;
+
+import com.edlplan.framework.math.FMath;
 import com.edlplan.framework.math.Vec2;
 import com.edlplan.framework.math.line.LinePath;
+import com.reco1l.legacy.graphics.SliderBody;
 import com.edlplan.osu.support.timing.controlpoint.TimingControlPoint;
 import org.andengine.entity.IEntity;
 import org.andengine.entity.modifier.AlphaModifier;
@@ -79,7 +82,7 @@ public class Slider extends GameObject {
     private LinePath superPath = null;
     private boolean preStageFinish = false;
 
-    //private SliderBody2D abstractSliderBody = null;
+    private SliderBody abstractSliderBody = null;
 
     private boolean
             mIsOver,
@@ -345,27 +348,30 @@ public class Slider extends GameObject {
             superPath.measure();
 
             var bodyWidth = (OsuSkin.get().getSliderBodyWidth() - OsuSkin.get().getSliderBorderWidth()) * scale;
-            //abstractSliderBody = new SliderBody2D(superPath);
-            //abstractSliderBody.setBodyWidth(bodyWidth);
-            //abstractSliderBody.setBorderWidth(OsuSkin.get().getSliderBodyWidth() * scale);
-            //abstractSliderBody.setSliderBodyBaseAlpha(OsuSkin.get().getSliderBodyBaseAlpha());
+            abstractSliderBody = new SliderBody(superPath);
+            abstractSliderBody.setBodyWidth(bodyWidth);
+            abstractSliderBody.setBorderWidth(OsuSkin.get().getSliderBodyWidth() * scale);
 
-            if (OsuSkin.get().isSliderHintEnable() && length > OsuSkin.get().getSliderHintShowMinLength()) {
-                // abstractSliderBody.setEnableHint(true);
-                // abstractSliderBody.setHintAlpha(OsuSkin.get().getSliderHintAlpha());
-                // abstractSliderBody.setHintWidth(Math.min(OsuSkin.get().getSliderHintWidth() * scale, bodyWidth));
-                RGBColor hintColor = OsuSkin.get().getSliderHintColor();
-                if (hintColor != null) {
-                    //abstractSliderBody.setHintColor(hintColor.r(), hintColor.g(), hintColor.b());
-                } else {
-                    //abstractSliderBody.setHintColor(color.r(), color.g(), color.b());
-                }
-            }
+            // Simulating osu!stable gradient, body color uses 'darken' operation, center color uses
+            // 'lighten' operation. See osu!lazer source code for more details.
 
-            //abstractSliderBody.applyToScene(scene, Config.isSnakingInSliders());
-            //abstractSliderBody.setBodyColor(color.r(), color.g(), color.b());
-            RGBColor scolor = GameHelper.getSliderColor();
-            //abstractSliderBody.setBorderColor(scolor.r(), scolor.g(), scolor.b());
+            abstractSliderBody.setBodyColor(new RGBColor(
+                    FMath.clamp(color.r() / 1.1f, 0f, 1f),
+                    FMath.clamp(color.g() / 1.1f, 0f, 1f),
+                    FMath.clamp(color.b() / 1.1f, 0f, 1f)
+            ));
+
+            abstractSliderBody.setCenterColor(new RGBColor(
+                    Math.min(1f, color.r() * (1f + 0.5f * 0.25f) + 0.25f),
+                    Math.min(1f, color.g() * (1f + 0.5f * 0.25f) + 0.25f),
+                    Math.min(1f, color.b() * (1f + 0.5f * 0.25f) + 0.25f)
+            ));
+
+            RGBColor bColor = OsuSkin.get().getSliderBorderColor();
+            abstractSliderBody.setBorderColor(new RGBColor(bColor.r(), bColor.g(), bColor.b()));
+
+
+            abstractSliderBody.applyToScene(scene, Config.isSnakingInSliders());
         }
 
         applyBodyFadeAdjustments(fadeInDuration);
@@ -432,13 +438,13 @@ public class Slider extends GameObject {
             return;
         }
         // Detach all objects
-        /*if (abstractSliderBody != null) {
+        if (abstractSliderBody != null) {
             if (GameHelper.isHidden()) {
-                abstractSliderBody.removeFromScene(scene);
+                abstractSliderBody.removeFromScene();
             } else {
-                abstractSliderBody.removeFromScene(scene, 0.24f * GameHelper.getTimeMultiplier());
+                abstractSliderBody.removeFromScene(0.24f * GameHelper.getTimeMultiplier());
             }
-        }*/
+        }
 
         ball.registerEntityModifier(new FadeOutModifier(0.1f * GameHelper.getTimeMultiplier(), new ModifierListener() {
             @Override
@@ -709,11 +715,11 @@ public class Slider extends GameObject {
                     endArrow.setAlpha(1);
                 }
                 if (Config.isSnakingInSliders()) {
-                    /*if (!preStageFinish && superPath != null && abstractSliderBody != null) {
+                    if (!preStageFinish && superPath != null && abstractSliderBody != null) {
                         abstractSliderBody.setEndLength(superPath.getMeasurer().maxLength());
                         abstractSliderBody.onUpdate();
                         preStageFinish = true;
-                    }*/
+                    }
 
                     tmpPoint = endPosition;
 
@@ -864,7 +870,7 @@ public class Slider extends GameObject {
     }
 
     private void applyBodyFadeAdjustments(float fadeInDuration) {
-        /*if (abstractSliderBody == null) {
+        if (abstractSliderBody == null) {
             return;
         }
 
@@ -876,7 +882,7 @@ public class Slider extends GameObject {
             abstractSliderBody.applyFadeAdjustments(fadeInDuration, fadeOutDuration);
         } else {
             abstractSliderBody.applyFadeAdjustments(fadeInDuration);
-        }*/
+        }
     }
 
     @Override

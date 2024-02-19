@@ -98,15 +98,9 @@ public class SkinJsonReader extends SkinReader {
         JSONObject data = currentSliderData;
         skin.sliderBodyWidth.setFromJson(data);
         skin.sliderBorderWidth.setFromJson(data);
-        skin.sliderBodyBaseAlpha.setFromJson(data);
-        skin.sliderHintWidth.setFromJson(data);
-        skin.sliderHintShowMinLength.setFromJson(data);
-        skin.sliderHintAlpha.setFromJson(data);
         skin.sliderFollowComboColor.setFromJson(data);
-        skin.sliderHintEnable.setFromJson(data);
         skin.sliderBodyColor.setFromJson(data);
         skin.sliderBorderColor.setFromJson(data);
-        skin.sliderHintColor.setFromJson(data);
     }
 
     @Override

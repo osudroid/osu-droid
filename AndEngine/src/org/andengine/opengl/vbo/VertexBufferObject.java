@@ -30,10 +30,10 @@ public abstract class VertexBufferObject implements IVertexBufferObject {
 	// Fields
 	// ===========================================================
 
-	protected final int mCapacity;
+	protected /*final*/ int mCapacity;
 	protected final boolean mAutoDispose;
 	protected final int mUsage;
-	protected final ByteBuffer mByteBuffer;
+	protected /*final*/ ByteBuffer mByteBuffer;
 
 	protected int mHardwareBufferID = IVertexBufferObject.HARDWARE_BUFFER_ID_INVALID;
 	protected boolean mDirtyOnHardware = true;
