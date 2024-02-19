@@ -10,7 +10,17 @@ import kotlin.math.max
 object CircleSizeCalculator {
     // This is not the real height that is used in the game, but rather an assumption so that we can treat
     // circle sizes similarly across all devices.
-    private const val ASSUMED_DROID_HEIGHT = 681
+    private const val ASSUMED_DROID_HEIGHT = 681f
+
+    // The following comment is copied verbatim from osu!lazer and osu!stable:
+    //
+    //   Builds of osu! up to 2013-05-04 had the gamefield being rounded down, which caused incorrect radius calculations
+    //   in widescreen cases. This ratio adjusts to allow for old replays to work post-fix, which in turn increases the lenience
+    //   for all plays, but by an amount so small it should only be effective in replays.
+    //
+    // To match expectations of gameplay we need to apply this multiplier to circle scale. It's weird but is what it is.
+    // It works out to under 1 game pixel and is generally not meaningful to gameplay, but is to replay playback accuracy.
+    private const val BROKEN_GAMEFIELD_ROUNDING_ALLOWANCE = 1.00041f
 
     /**
      * Converts osu!droid circle size to osu!droid scale.
@@ -59,18 +69,7 @@ object CircleSizeCalculator {
      * @return The osu!standard scale of the given circle size.
      */
     @JvmStatic
-    fun standardCSToStandardScale(cs: Float) =
-        // The following comment is copied verbatim from osu!lazer and osu!stable:
-        //
-        //   Builds of osu! up to 2013-05-04 had the gamefield being rounded down, which caused incorrect radius calculations
-        //   in widescreen cases. This ratio adjusts to allow for old replays to work post-fix, which in turn increases the lenience
-        //   for all plays, but by an amount so small it should only be effective in replays.
-        //
-        // To match expectations of gameplay we need to apply this multiplier to circle scale. It's weird but is what it is.
-        // It works out to under 1 game pixel and is generally not meaningful to gameplay, but is to replay playback accuracy.
-        //
-        // This scale affects difficulty calculation by a bit, hence it is also put here despite not being relevant to replays.
-        (1 - 0.7f * (cs - 5) / 5) / 2 * 1.00041f
+    fun standardCSToStandardScale(cs: Float) = (1 - 0.7f * (cs - 5) / 5) / 2 * BROKEN_GAMEFIELD_ROUNDING_ALLOWANCE
 
     /**
      * Converts osu!standard scale to osu!droid scale.
@@ -79,7 +78,8 @@ object CircleSizeCalculator {
      * @return The osu!droid scale of the given osu!standard scale.
      */
     @JvmStatic
-    fun standardScaleToDroidScale(scale: Float) = standardRadiusToDroidScale(HitObject.OBJECT_RADIUS * scale / 1.0041)
+    fun standardScaleToDroidScale(scale: Float) =
+        standardRadiusToDroidScale(HitObject.OBJECT_RADIUS.toDouble() * scale / BROKEN_GAMEFIELD_ROUNDING_ALLOWANCE)
 
     /**
      * Converts osu!standard circle size to osu!droid scale.
