@@ -34,7 +34,7 @@ abstract class StandardStrainSkill(
 
         if (reducedSectionCount > 0) {
             // We are reducing the highest strains first to account for extreme difficulty spikes.
-            for (i in 0 until min(size.toDouble(), reducedSectionCount.toDouble()).toInt()) {
+            for (i in 0 until min(size, reducedSectionCount)) {
                 val scale = log10(
                     Interpolation.linear(
                         1.0,
@@ -43,7 +43,7 @@ abstract class StandardStrainSkill(
                     )
                 )
 
-                this[i] = this[i] * Interpolation.linear(reducedSectionBaseline, 1.0, scale)
+                this[i] *= Interpolation.linear(reducedSectionBaseline, 1.0, scale)
             }
 
             sortDescending()

@@ -5,6 +5,7 @@ import com.rian.osu.math.Interpolation
 import com.rian.osu.mods.Mod
 import kotlin.math.log10
 import kotlin.math.log2
+import kotlin.math.min
 import kotlin.math.pow
 
 /**
@@ -51,7 +52,7 @@ abstract class DroidStrainSkill(
             sortDescending()
 
             // We are reducing the highest strains first to account for extreme difficulty spikes.
-            for (i in 0 until kotlin.math.min(size.toDouble(), reducedSectionCount.toDouble()).toInt()) {
+            for (i in 0 until min(size, reducedSectionCount)) {
                 val scale = log10(
                     Interpolation.linear(
                         1.0,
@@ -60,7 +61,7 @@ abstract class DroidStrainSkill(
                     )
                 )
 
-                this[i] = this[i] * Interpolation.linear(reducedSectionBaseline, 1.0, scale)
+                this[i] *= Interpolation.linear(reducedSectionBaseline, 1.0, scale)
             }
         }
 

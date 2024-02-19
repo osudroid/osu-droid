@@ -42,7 +42,7 @@ abstract class StrainSkill<in TObject : DifficultyHitObject>(
         while (current.startTime > currentSectionEnd) {
             saveCurrentPeak()
             startNewSectionFrom(currentSectionEnd, current)
-            currentSectionEnd += sectionLength.toDouble()
+            currentSectionEnd += sectionLength
         }
 
         currentSectionPeak = max(strainValueAt(current), currentSectionPeak)
