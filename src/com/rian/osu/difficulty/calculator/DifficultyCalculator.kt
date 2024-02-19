@@ -45,8 +45,7 @@ abstract class DifficultyCalculator<TObject : DifficultyHitObject, TAttributes :
 
     /**
      * Calculates the difficulty of a [Beatmap] with specific parameters and returns a set of
-     * [TimedDifficultyAttributes] representing the difficulty at every relevant time
-     * value in the [Beatmap].
+     * [TimedDifficultyAttributes] representing the difficulty at every relevant time value in the [Beatmap].
      *
      * @param beatmap The [Beatmap] whose difficulty is to be calculated.
      * @param parameters The calculation parameters that should be applied to the [Beatmap].
@@ -92,9 +91,9 @@ abstract class DifficultyCalculator<TObject : DifficultyHitObject, TAttributes :
     }
 
     /**
-     * Creates the [Skill]s to calculate the difficulty of a beatmap.
+     * Creates the [Skill]s to calculate the difficulty of a [Beatmap].
      *
-     * @param beatmap The beatmap whose difficulty will be calculated.
+     * @param beatmap The [Beatmap] whose difficulty will be calculated.
      * @param parameters The difficulty calculation parameter being used.
      * @return The [Skill]s.
      */
@@ -115,12 +114,12 @@ abstract class DifficultyCalculator<TObject : DifficultyHitObject, TAttributes :
     protected fun calculateRating(skill: Skill<TObject>) = sqrt(skill.difficultyValue()) * difficultyMultiplier
 
     /**
-     * Creates a [DifficultyAttributes] to describe a beatmap's difficulty.
+     * Creates a [TAttributes] to describe a beatmap's difficulty.
      *
-     * @param beatmap The beatmap whose difficulty was calculated.
-     * @param skills The skills which processed the beatmap.
+     * @param beatmap The [Beatmap] whose difficulty was calculated.
+     * @param skills The [Skill]s which processed the beatmap.
      * @param parameters The difficulty calculation parameters used.
-     * @return [DifficultyAttributes] describing the beatmap's difficulty.
+     * @return [TAttributes] describing the beatmap's difficulty.
      */
     protected abstract fun createDifficultyAttributes(
         beatmap: Beatmap,
