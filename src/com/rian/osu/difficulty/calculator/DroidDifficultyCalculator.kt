@@ -80,7 +80,7 @@ class DroidDifficultyCalculator : DifficultyCalculator<DroidDifficultyHitObject,
         val objects = beatmap.hitObjects.objects
         val sectionBoundaries = mutableListOf<Pair<Int, Int>>()
 
-        for (i in 0 until objects.size - 1) {
+        for (i in 1 until objects.size - 1) {
             val current = objects[i]
             val next = objects[i + 1]
             val deltaTime = next.startTime - current.getEndTime()
@@ -106,8 +106,8 @@ class DroidDifficultyCalculator : DifficultyCalculator<DroidDifficultyHitObject,
                 var inSpeedSection = false
                 var newFirstObjectIndex = section.first
 
-                for (i in section.first..section.second) {
-                    val strain = it[i - 1]
+                for (i in section.first until section.second) {
+                    val strain = it[i]
 
                     if (!inSpeedSection && strain >= threeFingerStrainThreshold) {
                         inSpeedSection = true
