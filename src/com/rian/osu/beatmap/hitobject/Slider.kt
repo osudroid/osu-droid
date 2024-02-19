@@ -71,7 +71,7 @@ class Slider(
     val endPosition: Vector2
         get() {
             if (!endPositionCache.isValid) {
-                endPositionCache.value = position + path.positionAt(1.0)
+                endPositionCache.value = position + curvePositionAt(1.0)
             }
 
             return endPositionCache.value
@@ -240,6 +240,38 @@ class Slider(
             nodeSamples[i] = sampleList.map { nodeSamplePoint.applyTo(it) }.toMutableList()
         }
     }
+
+    /**
+     * Computes the position on this [Slider] relative to how much of this [Slider] has been completed.
+     *
+     * @param progress `[0. 1]` where 0 is the start time of this [Slider] and 1 is the end time of this [Slider].
+     * @return The position on the [Slider].
+     */
+    fun curvePositionAt(progress: Double) = path.positionAt(progressAt(progress))
+
+    /**
+     * Computes the progress along this [Slider] relative to how much of this [Slider] has been completed.
+     *
+     * @param progress `[0. 1]` where 0 is the start time of this [Slider] and 1 is the end time of this [Slider].
+     * @return `[0, 1]` where 0 is the beginning of this [Slider] and 1 is the end of this [Slider].
+     */
+    fun progressAt(progress: Double): Double {
+        var p = progress * spanCount % 1
+
+        if (spanAt(progress) % 2 == 1) {
+            p = 1 - p
+        }
+
+        return p
+    }
+
+    /**
+     * Determines which span of this [Slider] the progress point is on.
+     *
+     * @param progress `[0. 1]` where 0 is the start time of this [Slider] and 1 is the end time of this [Slider].
+     * @return `[0, [spanCount])` where 0 is the first run.
+     */
+    fun spanAt(progress: Double) = (progress * spanCount).toInt()
 
     private fun createNestedHitObjects(mode: GameMode) {
         nestedHitObjects.clear()
