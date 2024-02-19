@@ -63,8 +63,8 @@ class BeatmapDifficulty : Cloneable {
         @JvmStatic
         fun difficultyRange(difficulty: Double, min: Double, mid: Double, max: Double) =
             when {
-                difficulty < 5 -> mid + (max - mid) * (difficulty - 5) / 5
-                difficulty > 5 -> mid - (mid - min) * (5 - difficulty) / 5
+                difficulty > 5 -> mid + (max - mid) * (difficulty - 5) / 5
+                difficulty < 5 -> mid + (mid - min) * (difficulty - 5) / 5
                 else -> mid
             }
     }

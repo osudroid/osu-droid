@@ -101,7 +101,7 @@ abstract class HitObject(
     open fun applyDefaults(controlPoints: BeatmapControlPoints, difficulty: BeatmapDifficulty, mode: GameMode) {
         kiai = controlPoints.effect.controlPointAt(startTime + CONTROL_POINT_LENIENCY).isKiai
 
-        timePreempt = BeatmapDifficulty.difficultyRange(difficulty.ar.toDouble(), 1800.0, 1200.0, PREEMPT_MIN)
+        timePreempt = BeatmapDifficulty.difficultyRange(difficulty.ar.toDouble(), PREEMPT_MAX, PREEMPT_MID, PREEMPT_MIN)
 
         // Preempt time can go below 450ms. Normally, this is achieved via the DT mod which uniformly speeds up all animations game wide regardless of AR.
         // This uniform speedup is hard to match 1:1, however we can at least make AR>10 (via mods) feel good by extending the upper linear function above.
@@ -162,6 +162,16 @@ abstract class HitObject(
          * A small adjustment to the start time of control points to account for rounding/precision errors.
          */
         internal const val CONTROL_POINT_LENIENCY = 5
+
+        /**
+         * Maximum preempt time at AR=0.
+         */
+        const val PREEMPT_MAX = 1800.0
+
+        /**
+         * Median preempt time at AR=5.
+         */
+        const val PREEMPT_MID = 1200.0
 
         /**
          * Minimum preempt time at AR=10.
