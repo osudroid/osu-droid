@@ -153,7 +153,7 @@ class DroidDifficultyHitObject(
                 continue
             }
 
-            if (o.startTime > o.getEndTime() + obj.timePreempt) {
+            if (o.startTime > obj.getEndTime() + obj.timePreempt) {
                 break
             }
 
