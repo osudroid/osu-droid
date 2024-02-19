@@ -225,7 +225,7 @@ class Slider(
         // Invalidate the end position in case there are timing changes.
         endPositionCache.invalidate()
 
-        createNestedHitObjects()
+        createNestedHitObjects(mode)
 
         nestedHitObjects.forEach { it.applyDefaults(controlPoints, difficulty, mode) }
     }
@@ -241,7 +241,7 @@ class Slider(
         }
     }
 
-    private fun createNestedHitObjects() {
+    private fun createNestedHitObjects(mode: GameMode) {
         nestedHitObjects.clear()
 
         head = SliderHead(startTime, position)
@@ -307,22 +307,27 @@ class Slider(
             }
         }
 
-        // Okay, I'll level with you. I made a mistake. It was 2007.
-        // Times were simpler. osu! was but in its infancy and sliders were a new concept.
-        // A hack was made, which has unfortunately lived through until this day.
-        //
-        // This legacy tick is used for some calculations and judgements where audio output is not required.
-        // Generally we are keeping this around just for difficulty compatibility.
-        // Optimistically we do not want to ever use this for anything user-facing going forwards.
-        // Temporarily set end time to start time. It will be evaluated later.
-        val finalSpanIndex = repeatCount
-        val finalSpanStartTime = startTime + finalSpanIndex * spanDuration
-        val finalSpanEndTime = max(
-            startTime + duration / 2,
-            finalSpanStartTime + spanDuration - LEGACY_LAST_TICK_OFFSET
-        )
+        tail = when (mode) {
+            GameMode.Droid -> SliderTail(endTime, endPosition, repeatCount, startTime + repeatCount * spanDuration)
 
-        tail = SliderTail(finalSpanEndTime, endPosition, finalSpanIndex, finalSpanStartTime)
+            GameMode.Standard -> run {
+                // Okay, I'll level with you. I made a mistake. It was 2007.
+                // Times were simpler. osu! was but in its infancy and sliders were a new concept.
+                // A hack was made, which has unfortunately lived through until this day.
+                //
+                // This legacy tick is used for some calculations and judgements where audio output is not required.
+                // Generally we are keeping this around just for difficulty compatibility.
+                // Optimistically we do not want to ever use this for anything user-facing going forwards.
+                val finalSpanIndex = repeatCount
+                val finalSpanStartTime = startTime + finalSpanIndex * spanDuration
+                val finalSpanEndTime = max(
+                    startTime + duration / 2,
+                    finalSpanStartTime + spanDuration - LEGACY_LAST_TICK_OFFSET
+                )
+
+                SliderTail(finalSpanEndTime, endPosition, finalSpanIndex, finalSpanStartTime)
+            }
+        }
 
         nestedHitObjects.apply {
             add(tail)
