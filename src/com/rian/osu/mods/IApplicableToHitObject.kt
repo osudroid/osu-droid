@@ -1,5 +1,6 @@
 package com.rian.osu.mods
 
+import com.rian.osu.GameMode
 import com.rian.osu.beatmap.hitobject.HitObject
 
 /**
@@ -9,7 +10,8 @@ interface IApplicableToHitObject {
     /**
      * Applies this [IApplicableToHitObject] to a [HitObject].
      *
+     * @param mode The [GameMode] to apply for.
      * @param hitObject The [HitObject] to apply to.
      */
-    fun applyToHitObject(hitObject: HitObject)
+    fun applyToHitObject(mode: GameMode, hitObject: HitObject)
 }

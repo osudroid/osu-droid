@@ -2,6 +2,7 @@ package com.rian.osu.mods
 
 import com.rian.osu.GameMode
 import com.rian.osu.beatmap.sections.BeatmapDifficulty
+import com.rian.osu.utils.CircleSizeCalculator
 
 /**
  * Represents the Easy mod.
@@ -11,7 +12,12 @@ class ModEasy : Mod(), IApplicableToDifficulty {
 
     override fun applyToDifficulty(mode: GameMode, difficulty: BeatmapDifficulty) = difficulty.run {
         cs = when (mode) {
-            GameMode.Droid -> --cs
+            GameMode.Droid -> {
+                val scale = CircleSizeCalculator.droidCSToDroidScale(cs)
+
+                CircleSizeCalculator.droidScaleToDroidCS(scale + 0.125f)
+            }
+
             GameMode.Standard -> cs * ADJUST_RATIO
         }
 

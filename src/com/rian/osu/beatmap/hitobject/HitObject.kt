@@ -110,7 +110,7 @@ abstract class HitObject(
         timeFadeIn = 400 * min(1.0, timePreempt / PREEMPT_MIN)
 
         scale = when (mode) {
-            GameMode.Droid -> CircleSizeCalculator.standardCSToDroidScale(difficulty.cs)
+            GameMode.Droid -> CircleSizeCalculator.droidCSToDroidScale(difficulty.cs)
             GameMode.Standard -> CircleSizeCalculator.standardCSToStandardScale(difficulty.cs)
         }
     }

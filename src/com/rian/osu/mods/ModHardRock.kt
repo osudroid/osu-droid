@@ -2,6 +2,7 @@ package com.rian.osu.mods
 
 import com.rian.osu.GameMode
 import com.rian.osu.beatmap.sections.BeatmapDifficulty
+import com.rian.osu.utils.CircleSizeCalculator
 import kotlin.math.min
 
 /**
@@ -12,16 +13,22 @@ class ModHardRock : Mod(), IApplicableToDifficulty {
 
     override fun applyToDifficulty(mode: GameMode, difficulty: BeatmapDifficulty) = difficulty.run {
         cs = when (mode) {
-            GameMode.Droid -> ++cs
+            GameMode.Droid -> {
+                val scale = CircleSizeCalculator.droidCSToDroidScale(cs)
+
+                CircleSizeCalculator.droidScaleToDroidCS(scale - 0.125f)
+            }
 
             // CS uses a custom 1.3 ratio.
-            GameMode.Standard -> min(cs * 1.3f, 10f)
+            GameMode.Standard -> applySetting(cs, 1.3f)
         }
 
-        ar = min(ar * ADJUST_RATIO, 10f)
-        od = min(od * ADJUST_RATIO, 10f)
-        hp = min(hp * ADJUST_RATIO, 10f)
+        ar = applySetting(ar)
+        od = applySetting(od)
+        hp = applySetting(hp)
     }
+
+    private fun applySetting(value: Float, ratio: Float = ADJUST_RATIO) = min(value * ratio, 10f)
 
     companion object {
         private const val ADJUST_RATIO = 1.4f

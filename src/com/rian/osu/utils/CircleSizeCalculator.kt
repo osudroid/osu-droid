@@ -30,7 +30,17 @@ object CircleSizeCalculator {
      */
     @JvmStatic
     fun droidCSToDroidScale(cs: Float) =
-        max(1e-3f, ASSUMED_DROID_HEIGHT / 480 * (54.42f - cs * 4.48f) * 2 / 128 + ((0.5 * (11 - 5.2450170716245195)) / 5).toFloat())
+        max(1e-3f, ASSUMED_DROID_HEIGHT / 480 * (54.42f - cs * 4.48f) * 2 / 128 + 0.5f * ((11 - 5.2450170716245195) / 5).toFloat())
+
+    /**
+     * Converts osu!droid scale to osu!droid circle size.
+     *
+     * @param scale The osu!droid scale to convert.
+     * @return The calculated osu!droid circle size.
+     */
+    @JvmStatic
+    fun droidScaleToDroidCS(scale: Float) =
+        (54.42f - (max(1e-3f, scale) - 0.5f * ((11 - 5.2450170716245195) / 5).toFloat()) * 128 / 2 * 480 / ASSUMED_DROID_HEIGHT) / 4.48f
 
     /**
      * Converts osu!droid scale to osu!standard radius.
