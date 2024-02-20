@@ -19,6 +19,7 @@ class DroidRhythm(
      */
     private val greatWindow: Double
 ) : DroidStrainSkill(mods) {
+    override val reducedSectionCount = 5
     override val starsPerDouble = 1.75
 
     private var currentStrain = 0.0
@@ -26,7 +27,7 @@ class DroidRhythm(
 
     override fun strainValueAt(current: DroidDifficultyHitObject): Double {
         currentStrain *= strainDecay(current.deltaTime)
-        currentStrain += DroidRhythmEvaluator.evaluateDifficultyOf(current, greatWindow)
+        currentStrain += DroidRhythmEvaluator.evaluateDifficultyOf(current, greatWindow) - 1
 
         objectStrains.add(currentStrain)
 
