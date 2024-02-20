@@ -36,7 +36,7 @@ abstract class StrainSkill<in TObject : DifficultyHitObject>(
     override fun process(current: TObject) {
         // The first object doesn't generate a strain, so we begin with an incremented section end
         if (current.index == 0) {
-            currentSectionEnd = ceil(current.startTime / sectionLength) * sectionLength
+            currentSectionEnd = calculateCurrentSectionStart(current)
         }
 
         while (current.startTime > currentSectionEnd) {
@@ -54,6 +54,15 @@ abstract class StrainSkill<in TObject : DifficultyHitObject>(
          * including the peak of the current section.
          */
         get() = strainPeaks.toMutableList().apply { add(currentSectionPeak) }
+
+    /**
+     * Calculates the starting time of a strain section at an object.
+     *
+     * @param current The object at which the strain section starts.
+     * @returns The start time of the strain section.
+     */
+    protected open fun calculateCurrentSectionStart(current: TObject) =
+        ceil(current.startTime / sectionLength) * sectionLength
 
     /**
      * Calculates the strain value at the hit object.

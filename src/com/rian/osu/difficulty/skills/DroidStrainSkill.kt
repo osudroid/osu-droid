@@ -70,4 +70,6 @@ abstract class DroidStrainSkill(
         val starsPerDoubleLog2 = log2(starsPerDouble)
         reduce { acc, d -> acc + d.pow(1 / starsPerDoubleLog2) }.pow(starsPerDoubleLog2)
     }
+
+    override fun calculateCurrentSectionStart(current: DroidDifficultyHitObject) = current.startTime
 }
