@@ -25,10 +25,10 @@ import kotlin.math.pow
  */
 class DroidDifficultyCalculator : DifficultyCalculator<DroidDifficultyHitObject, DroidDifficultyAttributes>() {
     override val mode = GameMode.Droid
-    override val difficultyMultiplier = 1.08
+    override val difficultyMultiplier = 0.18
 
     private val maximumSectionDeltaTime = 2000
-    private val mininumSectionObjectCount = 5
+    private val minimumSectionObjectCount = 5
     private val threeFingerStrainThreshold = 175.0
 
     override fun createDifficultyAttributes(
@@ -87,7 +87,7 @@ class DroidDifficultyCalculator : DifficultyCalculator<DroidDifficultyHitObject,
 
             if (deltaTime >= maximumSectionDeltaTime) {
                 // Ignore sections that do not meet object count requirement.
-                if (i - firstObjectIndex >= mininumSectionObjectCount) {
+                if (i - firstObjectIndex >= minimumSectionObjectCount) {
                     sectionBoundaries.add(Pair(firstObjectIndex, i))
                 }
 
@@ -96,7 +96,7 @@ class DroidDifficultyCalculator : DifficultyCalculator<DroidDifficultyHitObject,
         }
 
         // Do not forget to manually add the last beatmap section, which would otherwise be ignored.
-        if (objects.size - firstObjectIndex >= mininumSectionObjectCount) {
+        if (objects.size - firstObjectIndex >= minimumSectionObjectCount) {
             sectionBoundaries.add(Pair(firstObjectIndex, objects.size - 1))
         }
 
@@ -119,7 +119,7 @@ class DroidDifficultyCalculator : DifficultyCalculator<DroidDifficultyHitObject,
                         inSpeedSection = false
 
                         // Ignore sections that do not meet object count requirement.
-                        if (i - newFirstObjectIndex < mininumSectionObjectCount) {
+                        if (i - newFirstObjectIndex < minimumSectionObjectCount) {
                             continue
                         }
 
@@ -133,7 +133,7 @@ class DroidDifficultyCalculator : DifficultyCalculator<DroidDifficultyHitObject,
 
                 // Do not forget to manually add the last beatmap section, which would otherwise be ignored.
                 // Ignore sections that don't meet object count requirement.
-                if (inSpeedSection && section.second - newFirstObjectIndex >= mininumSectionObjectCount) {
+                if (inSpeedSection && section.second - newFirstObjectIndex >= minimumSectionObjectCount) {
                     possibleThreeFingeredSections.add(HighStrainSection(
                         newFirstObjectIndex,
                         section.second,
