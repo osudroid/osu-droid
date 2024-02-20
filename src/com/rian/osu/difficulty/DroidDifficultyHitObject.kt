@@ -85,12 +85,6 @@ class DroidDifficultyHitObject(
     @JvmField
     val timePreempt = if (forceAR) obj.timePreempt else obj.timePreempt / clockRate
 
-    /**
-     * Adjusted velocity of the [HitObject], taking speed multiplier into account.
-     */
-    @JvmField
-    val velocity = if (obj is Slider) obj.velocity * clockRate else 0.0
-
     override fun computeProperties(clockRate: Double, objects: List<HitObject>) {
         super.computeProperties(clockRate, objects)
 
