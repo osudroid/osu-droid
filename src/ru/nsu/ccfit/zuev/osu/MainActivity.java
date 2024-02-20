@@ -149,6 +149,8 @@ public class MainActivity extends LegacyBaseGameActivity implements IAcceleratio
                 mCamera);
         opt.getAudioOptions().setNeedsMusic(true);
         opt.getAudioOptions().setNeedsSound(true);
+        opt.getRenderOptions().setDithering(Config.isUseDither());
+        opt.getRenderOptions().setMultiSampling(true);
         final Engine engine = new Engine(opt);
 
         if (MultiTouch.isSupported(this)) {
@@ -388,12 +390,6 @@ public class MainActivity extends LegacyBaseGameActivity implements IAcceleratio
     @Override
     protected void onSetContentView() {
         this.mRenderSurfaceView = new RenderSurfaceView(this);
-        if (Config.isUseDither()) {
-            this.mRenderSurfaceView.setEGLConfigChooser(8, 8, 8, 8, 24, 0);
-            this.mRenderSurfaceView.getHolder().setFormat(PixelFormat.RGBA_8888);
-        } else {
-            this.mRenderSurfaceView.setEGLConfigChooser(true);
-        }
         this.mRenderSurfaceView.setRenderer(this.mEngine, this);
 
         RelativeLayout layout = new RelativeLayout(this);
