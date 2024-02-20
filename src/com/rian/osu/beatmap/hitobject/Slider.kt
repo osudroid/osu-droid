@@ -342,7 +342,7 @@ class Slider(
         tail = when (mode) {
             GameMode.Droid -> SliderTail(endTime, endPosition, repeatCount, startTime + repeatCount * spanDuration)
 
-            GameMode.Standard -> run {
+            GameMode.Standard -> {
                 // Okay, I'll level with you. I made a mistake. It was 2007.
                 // Times were simpler. osu! was but in its infancy and sliders were a new concept.
                 // A hack was made, which has unfortunately lived through until this day.
