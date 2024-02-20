@@ -187,7 +187,7 @@ class DroidDifficultyCalculator : DifficultyCalculator<DroidDifficultyHitObject,
             else 0.0
 
         val difficultyAdjustMod = mods.find { it is ModDifficultyAdjust } as ModDifficultyAdjust?
-        val ar = difficultyAdjustMod?.ar?.takeUnless { it.isNaN() } ?: beatmap.difficulty.ar
+        val ar = difficultyAdjustMod?.ar ?: beatmap.difficulty.ar
         var preempt = BeatmapDifficulty.difficultyRange(ar.toDouble(), HitObject.PREEMPT_MAX, HitObject.PREEMPT_MID, HitObject.PREEMPT_MIN)
 
         if (difficultyAdjustMod?.ar != null) {
