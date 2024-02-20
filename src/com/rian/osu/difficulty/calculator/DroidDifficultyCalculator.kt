@@ -55,7 +55,7 @@ class DroidDifficultyCalculator : DifficultyCalculator<DroidDifficultyHitObject,
 
                 // Only consider sliders that are fast enough.
                 if (difficultyRating > 0.02) {
-                    difficultSliders.add(slider)
+                    difficultSliders.add(slider.copy(difficultyRating = difficultyRating))
                 }
             }
 
