@@ -123,6 +123,7 @@ abstract class DifficultyHitObject(
 
     protected abstract val mode: GameMode
 
+    protected open val maximumSliderRadius = NORMALIZED_RADIUS * 2.4f
     private val assumedSliderRadius = NORMALIZED_RADIUS * 1.8f
 
     /**
@@ -206,9 +207,8 @@ abstract class DifficultyHitObject(
         }
 
         val lastCursorPosition = getEndCursorPosition(lastObj)
-        val lazyJumpVector = obj.getStackedPosition(mode) * scalingFactor - lastCursorPosition * scalingFactor
 
-        lazyJumpDistance = lazyJumpVector.length.toDouble()
+        lazyJumpDistance = (obj.getStackedPosition(mode) * scalingFactor - lastCursorPosition * scalingFactor).length.toDouble()
         minimumJumpTime = strainTime
         minimumJumpDistance = lazyJumpDistance
 
@@ -235,7 +235,6 @@ abstract class DifficultyHitObject(
             //
             // Thus, the player is assumed to jump the minimum of these two distances in all cases.
             val tailJumpDistance = (lastObj.tail.getStackedPosition(mode) - obj.getStackedPosition(mode)).length * scalingFactor
-            val maximumSliderRadius = NORMALIZED_RADIUS * 2.4f
 
             minimumJumpDistance = max(
                 0.0,

@@ -49,6 +49,7 @@ class DroidDifficultyHitObject(
     forceAR: Boolean
 ) : DifficultyHitObject(obj, lastObj, lastLastObj, clockRate, difficultyHitObjects, index) {
     override val mode = GameMode.Droid
+    override val maximumSliderRadius = NORMALIZED_RADIUS * 2
 
     override val scalingFactor: Float
         get() {
@@ -157,11 +158,11 @@ class DroidDifficultyHitObject(
         for (i in 0 until index) {
             val prev = previous(i) ?: continue
 
-            if (prev.startTime >= startTime) {
+            if (prev.obj.startTime >= obj.startTime) {
                 continue
             }
 
-            if (prev.startTime < startTime - timePreempt) {
+            if (prev.obj.startTime < obj.startTime - obj.timePreempt) {
                 break
             }
 
@@ -172,22 +173,22 @@ class DroidDifficultyHitObject(
             val distance = obj.getStackedPosition(mode).getDistance(hitObject.getStackedEndPosition(mode))
             val deltaTime = startTime - hitObject.getEndTime() / clockRate
 
-            applyToOverlappingFactor(distance.toDouble(), deltaTime)
+            applyToOverlappingFactor(distance, deltaTime)
         }
 
         for (hitObject in nextVisibleObjects) {
             val distance = hitObject.getStackedPosition(mode).getDistance(obj.getStackedEndPosition(mode))
-            val deltaTime = hitObject.startTime / clockRate - endTime
+            val deltaTime = hitObject.startTime - obj.getEndTime()
 
             if (deltaTime >= 0) {
-                noteDensity += 1 - deltaTime / timePreempt
+                noteDensity += 1 - deltaTime / obj.timePreempt
             }
 
-            applyToOverlappingFactor(distance.toDouble(), deltaTime)
+            applyToOverlappingFactor(distance, deltaTime)
         }
     }
 
-    private fun applyToOverlappingFactor(distance: Double, deltaTime: Double) {
+    private fun applyToOverlappingFactor(distance: Float, deltaTime: Double) {
         // Penalize objects that are too close to the object in both distance
         // and delta time to prevent stream maps from being overweighted.
         overlappingFactor += max(
