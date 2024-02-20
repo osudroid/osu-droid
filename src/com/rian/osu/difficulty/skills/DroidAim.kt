@@ -25,7 +25,7 @@ class DroidAim(
     val sliderVelocities = mutableListOf<DifficultSlider>()
 
     private var currentStrain = 0.0
-    private val skillMultiplier = 23.55
+    private val skillMultiplier = 24.55
     private val strainDecayBase = 0.15
 
     override fun strainValueAt(current: DroidDifficultyHitObject): Double {
