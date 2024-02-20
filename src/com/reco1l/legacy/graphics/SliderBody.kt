@@ -19,11 +19,6 @@ class SliderBody(val path: LinePath)
     var bodyWidth = 0f
     var borderWidth = 0f
 
-    var bodyColor: RGBColor = RGBColor()
-    var centerColor: RGBColor = RGBColor()
-    var borderColor: RGBColor = RGBColor()
-
-
     var endLength = 0f
         set(value)
         {
@@ -46,6 +41,10 @@ class SliderBody(val path: LinePath)
 
 
     private var shouldRedrawTriangles = true
+
+    private var bodyColor: Float = 0f
+    private var centerColor: Float = 1f
+    private var borderColor: Float = 1f
 
     private var body: PathMesh? = null
     private var border: PathMesh? = null
@@ -78,25 +77,48 @@ class SliderBody(val path: LinePath)
     }
 
 
+    fun setBodyColor(color: RGBColor)
+    {
+        bodyColor = Float.fromBits((0 shl 24)
+            .or((255f * color.b()).toInt() shl 16)
+            .or((255f * color.g()).toInt() shl 8)
+            .or((255f * color.r()).toInt() shl 0) and -0x1)
+    }
+
+    fun setCenterColor(color: RGBColor)
+    {
+        centerColor = Float.fromBits((0 shl 24)
+            .or((255f * color.b()).toInt() shl 16)
+            .or((255f * color.g()).toInt() shl 8)
+            .or((255f * color.r()).toInt() shl 0) and -0x1)
+    }
+
+    fun setBorderColor(color: RGBColor)
+    {
+        borderColor = Float.fromBits((0 shl 24)
+            .or((255f * color.b()).toInt() shl 16)
+            .or((255f * color.g()).toInt() shl 8)
+            .or((255f * color.r()).toInt() shl 0) and -0x1)
+    }
+
+
     private fun updateVertices(path: LinePath)
     {
-        drawer.drawToBuffer(
-            path = path,
-            width = bodyWidth,
-            inColor = centerColor,
-            outColor = bodyColor,
-            calculateSegments = true
-        )
-        body!!.setVertices(drawer.triangles)
-
-        drawer.drawToBuffer(
+        border!!.setVertices(drawer.drawToBuffer(
             path = path,
             width = borderWidth,
             inColor = borderColor,
             outColor = borderColor,
+            calculateSegments = true
+        ))
+
+        body!!.setVertices(drawer.drawToBuffer(
+            path = path,
+            width = bodyWidth,
+            inColor = centerColor,
+            outColor = bodyColor,
             calculateSegments = false
-        )
-        border!!.setVertices(drawer.triangles)
+        ))
     }
 
 
@@ -113,14 +135,12 @@ class SliderBody(val path: LinePath)
 
     fun applyToScene(scene: Scene, emptyOnStart: Boolean)
     {
-        body = SpriteCache.trianglePackCache.get()
         border = SpriteCache.trianglePackCache.get()
+        border!!.alpha = 0f
 
-        body!!.setAlpha(0f)
+        body = SpriteCache.trianglePackCache.get()
         body!!.clearDepth = true
-
-        border!!.setAlpha(0f)
-        border!!.clearDepth = false
+        body!!.alpha = 0f
 
         if (!emptyOnStart)
         {

@@ -10,7 +10,6 @@ import org.andengine.opengl.shader.constants.ShaderProgramConstants.ATTRIBUTE_PO
 import org.andengine.opengl.shader.constants.ShaderProgramConstants.ATTRIBUTE_POSITION_LOCATION
 import org.andengine.opengl.util.GLState
 import org.andengine.opengl.vbo.attribute.VertexBufferObjectAttributesBuilder
-import javax.microedition.khronos.opengles.GL10
 
 class PathMesh : Mesh(0f, 0f, 0, DrawMode.TRIANGLES, PathMeshVBO())
 {
@@ -24,10 +23,11 @@ class PathMesh : Mesh(0f, 0f, 0, DrawMode.TRIANGLES, PathMeshVBO())
     }
 
 
-    fun setVertices(vertices: FloatArray) {
+    fun setVertices(vertices: FloatArray)
+    {
         // Since sprites are cached and recycled, we need to copy the array to avoid rewrite of the
         // buffer with wrong vertices.
-        (mMeshVertexBufferObject as PathMeshVBO).bufferData = vertices.copyOf()
+        (mMeshVertexBufferObject as PathMeshVBO).bufferData = vertices
 
         setVertexCountToDraw(vertices.size / 4)
     }
@@ -45,14 +45,11 @@ class PathMesh : Mesh(0f, 0f, 0, DrawMode.TRIANGLES, PathMeshVBO())
     override fun draw(gl: GLState, pCamera: Camera)
     {
         if (clearDepth)
-            GLES20.glClear(GL10.GL_DEPTH_BUFFER_BIT)
+            GLES20.glClear(GLES20.GL_DEPTH_BUFFER_BIT)
 
-        val previous = gl.enableDepthTest()
-
+        gl.enableDepthTest()
         super.draw(gl, pCamera)
-
-        if (!previous)
-            gl.disableDepthTest()
+        gl.disableDepthTest()
     }
 
     companion object

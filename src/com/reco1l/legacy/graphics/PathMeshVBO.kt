@@ -18,6 +18,10 @@ class PathMeshVBO :
 
     private var floatBuffer = mByteBuffer.asFloatBuffer()
 
+    private var alpha = 0f
+
+    private var isAlphaChanged = false
+
 
     override fun getHeapMemoryByteSize() = byteCapacity
 
@@ -30,7 +34,6 @@ class PathMeshVBO :
     fun setBufferData(data: FloatArray)
     {
         bufferData = data
-        mCapacity = bufferData.size
         setDirtyOnHardware()
     }
 
@@ -39,28 +42,43 @@ class PathMeshVBO :
 
     override fun onUpdateColor(mesh: Mesh)
     {
-        // This will only update the alpha since is expected to the color be specified at every
-        // vertex due to the attributes.
-        val alpha = (255 * mesh.alpha).toInt()
-
-        for (i in 0 until bufferData.size / 4)
+        // We update the alpha when the data is binded to the hardware buffer so we ensure it is done
+        // after the data is updated.
+        if (alpha != mesh.alpha)
         {
-            val color = bufferData[i * 4 + 3].toRawBits()
-
-            // Source color with alpha applied.
-            val newColor = (alpha shl 24)
-                .or(color shr 16 and 0xFF shl 16)
-                .or(color shr 8 and 0xFF shl 8)
-                .or(color shr 0 and 0xFF shl 0)
-
-            bufferData[i * 4 + 3] = Float.fromBits(newColor and -0x1)
+            alpha = mesh.alpha
+            isAlphaChanged = true
+            setDirtyOnHardware()
         }
-
-        setDirtyOnHardware()
     }
 
     override fun onBufferData()
     {
+        val bufferData = bufferData
+        mCapacity = bufferData.size
+
+        if (isAlphaChanged)
+        {
+            isAlphaChanged = false
+            // This will only update the alpha since is expected to the color be specified at every
+            // vertex due to the attributes.
+            val alpha = (255f * alpha).toInt()
+
+            for (i in 0 until bufferData.size / 4)
+            {
+                val color = bufferData[i * 4 + 3].toRawBits()
+
+                // Source color with alpha applied.
+                val newColor = (alpha shl 24)
+                    .or(color shr 16 and 0xFF shl 16)
+                    .or(color shr 8 and 0xFF shl 8)
+                    .or(color shr 0 and 0xFF shl 0)
+
+                bufferData[i * 4 + 3] = Float.fromBits(newColor and -0x1)
+            }
+        }
+
+
         if (floatBuffer.capacity() < capacity)
         {
             mByteBuffer = ByteBuffer.allocateDirect((capacity + 24) * Float.SIZE_BYTES)

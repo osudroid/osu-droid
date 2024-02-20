@@ -2,7 +2,6 @@ package com.reco1l.legacy.graphics
 
 import com.edlplan.framework.math.FMath
 import com.edlplan.framework.math.line.LinePath
-import org.andengine.util.color.ColorUtils
 import ru.nsu.ccfit.zuev.osu.RGBColor
 import kotlin.math.abs
 import kotlin.math.ceil
@@ -13,9 +12,7 @@ import kotlin.math.sin
 class PathMeshDrawer
 {
 
-    var triangles = FloatArray(4)
-        private set
-
+    private var triangles = FloatArray(4)
 
     private var innerColor = 0f
 
@@ -26,7 +23,7 @@ class PathMeshDrawer
     private var index = 0
 
 
-    private lateinit var segments: MutableList<Line>
+    private var segments = mutableListOf<Line>()
 
 
     private fun addVertex(position: Vector3, color: Float)
@@ -174,38 +171,30 @@ class PathMeshDrawer
 
 
     fun drawToBuffer(
+
         path: LinePath,
         width: Float,
-        inColor: RGBColor,
-        outColor: RGBColor,
+        inColor: Float,
+        outColor: Float,
         calculateSegments: Boolean = true
-    )
+
+    ): FloatArray
     {
         index = 0
         radius = width * 2f
+        innerColor = inColor
+        outerColor = outColor
 
-        innerColor = ColorUtils.convertRGBAToABGRPackedFloat(
-            inColor.r(),
-            inColor.g(),
-            inColor.b(),
-            1f
-        )
-
-        outerColor = ColorUtils.convertRGBAToABGRPackedFloat(
-            outColor.r(),
-            outColor.g(),
-            outColor.b(),
-            1f
-        )
-
-        if (calculateSegments || !::segments.isInitialized)
+        if (calculateSegments)
         {
-            segments = MutableList(path.size() - 1) {
+            segments.clear()
 
-                val start = path.get(it).toVector3()
-                val end = path.get(it + 1).toVector3()
+            for (i in 0 until path.size() - 1)
+            {
+                val start = path.get(i).toVector3()
+                val end = path.get(i + 1).toVector3()
 
-                Line(start, end)
+                segments.add(Line(start, end))
             }
         }
 
@@ -281,9 +270,7 @@ class PathMeshDrawer
             previousSegmentRight = segmentRight
         }
 
-        // Trimming array, this can be possible if the array was resized more than it should be.
-        if (index + 1 < triangles.size)
-            triangles = triangles.copyOf(index + 1)
+        return triangles.copyOf(index + 1)
     }
 
 
