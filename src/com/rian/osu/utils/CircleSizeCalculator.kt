@@ -12,15 +12,17 @@ object CircleSizeCalculator {
     // circle sizes similarly across all devices.
     private const val ASSUMED_DROID_HEIGHT = 681f
 
-    // The following comment is copied verbatim from osu!lazer and osu!stable:
-    //
-    //   Builds of osu! up to 2013-05-04 had the gamefield being rounded down, which caused incorrect radius calculations
-    //   in widescreen cases. This ratio adjusts to allow for old replays to work post-fix, which in turn increases the lenience
-    //   for all plays, but by an amount so small it should only be effective in replays.
-    //
-    // To match expectations of gameplay we need to apply this multiplier to circle scale. It's weird but is what it is.
-    // It works out to under 1 game pixel and is generally not meaningful to gameplay, but is to replay playback accuracy.
-    private const val BROKEN_GAMEFIELD_ROUNDING_ALLOWANCE = 1.00041f
+    /**
+     * The following comment is copied verbatim from osu!lazer and osu!stable:
+     *
+     *  Builds of osu! up to 2013-05-04 had the gamefield being rounded down, which caused incorrect radius calculations
+     *  in widescreen cases. This ratio adjusts to allow for old replays to work post-fix, which in turn increases the lenience
+     *  for all plays, but by an amount so small it should only be effective in replays.
+     *
+     * To match expectations of gameplay we need to apply this multiplier to circle scale. It's weird but is what it is.
+     * It works out to under 1 game pixel and is generally not meaningful to gameplay, but is to replay playback accuracy.
+     */
+    const val BROKEN_GAMEFIELD_ROUNDING_ALLOWANCE = 1.00041f
 
     /**
      * Converts osu!droid circle size to osu!droid scale.
@@ -30,7 +32,7 @@ object CircleSizeCalculator {
      */
     @JvmStatic
     fun droidCSToDroidScale(cs: Float) =
-        max(1e-3f, ASSUMED_DROID_HEIGHT / 480 * (54.42f - cs * 4.48f) * 2 / 128 + 0.5f * ((11 - 5.2450170716245195) / 5).toFloat())
+        max(1e-3f, ASSUMED_DROID_HEIGHT / 480 * (54.42f - cs * 4.48f) * 2 / 128 + (0.5 * (11 - 5.2450170716245195) / 5).toFloat())
 
     /**
      * Converts osu!droid scale to osu!droid circle size.
@@ -40,7 +42,7 @@ object CircleSizeCalculator {
      */
     @JvmStatic
     fun droidScaleToDroidCS(scale: Float) =
-        (54.42f - (max(1e-3f, scale) - 0.5f * ((11 - 5.2450170716245195) / 5).toFloat()) * 128 / 2 * 480 / ASSUMED_DROID_HEIGHT) / 4.48f
+        (54.42f - (max(1e-3f, scale) - (0.5 * (11 - 5.2450170716245195) / 5).toFloat()) * 128 / 2 * 480 / ASSUMED_DROID_HEIGHT) / 4.48f
 
     /**
      * Converts osu!droid scale to osu!standard radius.
@@ -49,8 +51,8 @@ object CircleSizeCalculator {
      * @return The osu!standard scale of the given radius.
      */
     @JvmStatic
-    fun droidScaleToStandardRadius(scale: Float) =
-        HitObject.OBJECT_RADIUS * max(1e-3f, scale) / (ASSUMED_DROID_HEIGHT * 0.85f / 384)
+    fun droidScaleToStandardRadius(scale: Double) =
+        HitObject.OBJECT_RADIUS * max(1e-3, scale) / (ASSUMED_DROID_HEIGHT * 0.85 / 384)
 
     /**
      * Converts osu!standard radius to osu!droid scale.
@@ -59,8 +61,8 @@ object CircleSizeCalculator {
      * @return The osu!droid scale of the given osu!standard radius.
      */
     @JvmStatic
-    fun standardRadiusToDroidScale(radius: Double) = max(1e-3f,
-        radius.toFloat() * ASSUMED_DROID_HEIGHT * 0.85f / 384 / HitObject.OBJECT_RADIUS)
+    fun standardRadiusToDroidScale(radius: Double) = max(1e-3,
+        radius * ASSUMED_DROID_HEIGHT * 0.85 / 384 / HitObject.OBJECT_RADIUS).toFloat()
 
     /**
      * Converts osu!standard radius to osu!standard circle size.

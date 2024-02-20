@@ -110,7 +110,15 @@ abstract class HitObject(
         timeFadeIn = 400 * min(1.0, timePreempt / PREEMPT_MIN)
 
         scale = when (mode) {
-            GameMode.Droid -> CircleSizeCalculator.droidCSToDroidScale(difficulty.cs)
+            GameMode.Droid -> {
+                val droidScale = CircleSizeCalculator.droidCSToDroidScale(difficulty.cs)
+                val radius = CircleSizeCalculator.droidScaleToStandardRadius(droidScale.toDouble())
+                val standardCS = CircleSizeCalculator.standardRadiusToStandardCS(radius)
+
+                // TODO: we exclude gamefield rounding here to match what dpp is currently using.
+                CircleSizeCalculator.standardCSToStandardScale(standardCS) / CircleSizeCalculator.BROKEN_GAMEFIELD_ROUNDING_ALLOWANCE
+            }
+
             GameMode.Standard -> CircleSizeCalculator.standardCSToStandardScale(difficulty.cs)
         }
     }
