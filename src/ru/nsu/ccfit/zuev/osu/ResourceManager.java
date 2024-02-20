@@ -434,8 +434,7 @@ public class ResourceManager {
                 if (!isHDTexture)
                     return new BlankTextureRegion();
             }
-            final var source = FileBitmapTextureAtlasSource.create(texFile);
-            source.setSampleSize(isHDTexture ? 2 : 1);
+            final var source = FileBitmapTextureAtlasSource.create(texFile, isHDTexture ? 2 : 1);
             if (source.getTextureWidth() == 0 || source.getTextureHeight() == 0) {
                 return null;
             }

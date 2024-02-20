@@ -36,19 +36,28 @@ public class FileBitmapTextureAtlasSource extends BaseTextureAtlasSource impleme
 
 	// osu!droid modification - The game can load textures that are stored in several sample sizes
 	// and we need this to take in consideration when decoding Bitmaps.
-	private int mSampleSize = 1;
+	private final int mSampleSize;
 
 	// ===========================================================
 	// Constructors
 	// ===========================================================
-	
+
 	public static FileBitmapTextureAtlasSource create(final File pFile) {
-		return FileBitmapTextureAtlasSource.create(pFile, 0, 0);
+		return FileBitmapTextureAtlasSource.create(pFile, 0, 0, 1);
+	}
+
+	public static FileBitmapTextureAtlasSource create(final File pFile, int pSampleSize) {
+		return FileBitmapTextureAtlasSource.create(pFile, 0, 0, pSampleSize);
 	}
 
 	public static FileBitmapTextureAtlasSource create(final File pFile, final int pTextureX, final int pTextureY) {
+		return FileBitmapTextureAtlasSource.create(pFile, pTextureX, pTextureY, 1);
+	}
+
+	public static FileBitmapTextureAtlasSource create(final File pFile, final int pTextureX, final int pTextureY, int pSampleSize) {
 		final BitmapFactory.Options decodeOptions = new BitmapFactory.Options();
 		decodeOptions.inJustDecodeBounds = true;
+		decodeOptions.inSampleSize = pSampleSize;
 
 		InputStream in = null;
 		try {
@@ -60,35 +69,32 @@ public class FileBitmapTextureAtlasSource extends BaseTextureAtlasSource impleme
 			StreamUtils.close(in);
 		}
 
-		return new FileBitmapTextureAtlasSource(pFile, pTextureX, pTextureY, decodeOptions.outWidth, decodeOptions.outHeight);
+		return new FileBitmapTextureAtlasSource(pFile, pTextureX, pTextureY, decodeOptions.outWidth, decodeOptions.outHeight, pSampleSize);
 	}
 
-	public static FileBitmapTextureAtlasSource createFromInternalStorage(final Context pContext, final String pFilePath, final int pTextureX, final int pTextureY) {
-		return FileBitmapTextureAtlasSource.create(new File(FileUtils.getAbsolutePathOnInternalStorage(pContext, pFilePath)), pTextureX, pTextureY);
+	public static FileBitmapTextureAtlasSource createFromInternalStorage(final Context pContext, final String pFilePath, final int pTextureX, final int pTextureY, int pSampleSize) {
+		return FileBitmapTextureAtlasSource.create(new File(FileUtils.getAbsolutePathOnInternalStorage(pContext, pFilePath)), pTextureX, pTextureY, pSampleSize);
 	}
 
-	public static FileBitmapTextureAtlasSource createFromExternalStorage(final Context pContext, final String pFilePath, final int pTextureX, final int pTextureY) {
-		return FileBitmapTextureAtlasSource.create(new File(FileUtils.getAbsolutePathOnExternalStorage(pContext, pFilePath)), pTextureX, pTextureY);
+	public static FileBitmapTextureAtlasSource createFromExternalStorage(final Context pContext, final String pFilePath, final int pTextureX, final int pTextureY, int pSampleSize) {
+		return FileBitmapTextureAtlasSource.create(new File(FileUtils.getAbsolutePathOnExternalStorage(pContext, pFilePath)), pTextureX, pTextureY, pSampleSize);
 	}
 
-	FileBitmapTextureAtlasSource(final File pFile, final int pTextureX, final int pTextureY, final int pTextureWidth, final int pTextureHeight) {
+	FileBitmapTextureAtlasSource(final File pFile, final int pTextureX, final int pTextureY, final int pTextureWidth, final int pTextureHeight, int pSampleSize) {
 		super(pTextureX, pTextureY, pTextureWidth, pTextureHeight);
 
+		this.mSampleSize = pSampleSize;
 		this.mFile = pFile;
 	}
 
 	@Override
 	public FileBitmapTextureAtlasSource deepCopy() {
-		return new FileBitmapTextureAtlasSource(this.mFile, this.mTextureX, this.mTextureY, this.mTextureWidth, this.mTextureHeight);
+		return new FileBitmapTextureAtlasSource(this.mFile, this.mTextureX, this.mTextureY, this.mTextureWidth, this.mTextureHeight, this.mSampleSize);
 	}
 
 	// ===========================================================
 	// Getter & Setter
 	// ===========================================================
-
-	public void setSampleSize(int pSampleSize) {
-		this.mSampleSize = pSampleSize;
-	}
 
 	// ===========================================================
 	// Methods for/from SuperClass/Interfaces
