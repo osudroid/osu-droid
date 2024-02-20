@@ -168,7 +168,7 @@ class DroidDifficultyCalculator : DifficultyCalculator<DroidDifficultyHitObject,
         }
 
         val baseAimPerformance = (5 * max(1.0, aimDifficulty.pow(0.8) / 0.0675) - 4).pow(3.0) / 100000
-        val baseTapPerformance = (5 * max(1.0, tapDifficulty.pow(0.8) / 0.0675) - 4).pow(3.0) / 100000
+        val baseTapPerformance = (5 * max(1.0, tapDifficulty / 0.0675) - 4).pow(3.0) / 100000
         val baseFlashlightPerformance =
             if (mods.any { it is ModFlashlight }) flashlightDifficulty.pow(1.6) * 25 else 0.0
         val baseVisualPerformance = visualDifficulty.pow(1.6) * 22.5
