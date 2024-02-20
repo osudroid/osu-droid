@@ -158,13 +158,6 @@ public class AnimSprite extends Sprite {
         super.draw(pGLState, pCamera);
     }
 
-    @Override
-    public void setFlippedHorizontal(final boolean pFlippedHorizontal) {
-        for (final TextureRegion reg : regions) {
-            reg.setFlippedHorizontal(pFlippedHorizontal);
-        }
-    }
-
     public float getFrameWidth() {
         if (frame < regions.length && frame >= 0) {
             return regions[frame].getWidth();

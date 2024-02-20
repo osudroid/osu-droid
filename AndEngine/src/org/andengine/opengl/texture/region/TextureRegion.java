@@ -33,15 +33,6 @@ public class TextureRegion extends BaseTextureRegion {
 	protected final float mScale;
 	protected final boolean mRotated;
 
-	// BEGIN osu!droid modification - This was removed in the original GLES2 implementation so we're
-	// readding it.
-
-	protected boolean mIsFlippedHorizontal;
-	protected boolean mIsFlippedVertical;
-
-	// END osu!droid modification.
-
-
 	// ===========================================================
 	// Constructors
 	// ===========================================================
@@ -93,30 +84,6 @@ public class TextureRegion extends BaseTextureRegion {
 	// ===========================================================
 	// Getter & Setter
 	// ===========================================================
-
-
-	// BEGIN osu!droid modification.
-
-	public boolean isFlippedHorizontal() {
-		return this.mIsFlippedHorizontal;
-	}
-
-	public void setFlippedHorizontal(final boolean pFlippedHorizontal) {
-		this.mIsFlippedHorizontal = pFlippedHorizontal;
-		updateUV();
-	}
-
-	public boolean isFlippedVertical() {
-		return this.mIsFlippedVertical;
-	}
-
-	public void setFlippedVertical(final boolean pFlippedVertical) {
-		this.mIsFlippedVertical = pFlippedVertical;
-		updateUV();
-	}
-
-	// END osu!droid modification.
-
 
 	@Override
 	public float getTextureX() {
@@ -256,20 +223,6 @@ public class TextureRegion extends BaseTextureRegion {
 
 		this.mV = y / textureHeight;
 		this.mV2 = (y + this.mTextureHeight) / textureHeight;
-
-		// BEGIN osu!droid modification.
-
-		if (isFlippedHorizontal()) {
-			this.mU = 1f - this.mU;
-			this.mU2 = 1f - this.mU2;
-		}
-
-		if (isFlippedVertical()) {
-			this.mV = 1f - this.mV;
-			this.mV2 = 1f - this.mV;
-		}
-
-		// END osu!droid modification.
 
 //		this.mU = (x + 0.5f) / textureWidth;
 //		this.mU2 = (x + this.mTextureWidth - 0.5f) / textureWidth;
