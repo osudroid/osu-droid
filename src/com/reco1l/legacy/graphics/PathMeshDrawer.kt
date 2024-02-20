@@ -1,8 +1,8 @@
 package com.reco1l.legacy.graphics
 
 import com.edlplan.framework.math.FMath
+import com.edlplan.framework.math.Vec2
 import com.edlplan.framework.math.line.LinePath
-import ru.nsu.ccfit.zuev.osu.RGBColor
 import kotlin.math.abs
 import kotlin.math.ceil
 import kotlin.math.cos
@@ -22,96 +22,105 @@ class PathMeshDrawer
 
     private var index = 0
 
+    private var flat = false
 
-    private var segments = mutableListOf<Line>()
 
-
-    private fun addVertex(position: Vector3, color: Float)
+    private fun addVertex(
+        position: Vec2,
+        depth: Float,
+        color: Float
+    )
     {
-        if (index + 4 >= triangles.size)
-            triangles = triangles.copyOf(triangles.size * 3 / 2 + 4)
+        if (index + (if (flat) 3 else 4) >= triangles.size)
+            triangles = triangles.copyOf(triangles.size * 3 / 2 + (if (flat) 3 else 4))
 
         triangles[index++] = position.x
         triangles[index++] = position.y
-        triangles[index++] = position.z
+
+        if (!flat)
+            triangles[index++] = depth
+
         triangles[index++] = color
     }
 
-    private fun addSegmentQuads(segment: Line, segmentLeft: Line, segmentRight: Line)
+    private fun addSegmentQuads(
+        start: Vec2,
+        end: Vec2,
+        segmentLeftStart: Vec2,
+        segmentLeftEnd: Vec2,
+        segmentRightStart: Vec2,
+        segmentRightEnd: Vec2
+    )
     {
         // Each segment of the path is actually rendered as 2 quads, being split in half along the
-        // approximating line.
+        // approximating line. Each of the quads is rendered as 2 triangles.
 
-        // On this line the depth is 1 instead of 0, which is done in order to properly handle
+        // Some vertices have a depth of 1 instead of 0, which is done in order to properly handle
         // self-overlap using the depth buffer.
-        val firstMiddlePoint = Vector3(segment.startPoint.x, segment.startPoint.y, 1f)
-        val secondMiddlePoint = Vector3(segment.endPoint.x, segment.endPoint.y, 1f)
-
-        // Each of the quads (mentioned above) is rendered as 2 triangles:
 
         // Outer quad, triangle 1
         addVertex(
-            position = Vector3(segmentRight.endPoint.x, segmentRight.endPoint.y, 0f),
+            position = segmentRightEnd, depth = 0f,
             color = outerColor
         )
         addVertex(
-            position = Vector3(segmentRight.startPoint.x, segmentRight.startPoint.y, 0f),
+            position = segmentRightStart, depth = 0f,
             color = outerColor
         )
         addVertex(
-            position = firstMiddlePoint,
+            position = start, depth = 1f,
             color = innerColor
         )
 
         // Outer quad, triangle 2
         addVertex(
-            position = firstMiddlePoint,
+            position = start, depth = 1f,
             color = innerColor
         )
         addVertex(
-            position = secondMiddlePoint,
+            position = end, depth = 1f,
             color = innerColor
         )
         addVertex(
-            position = Vector3(segmentRight.endPoint.x, segmentRight.endPoint.y, 0f),
+            position = segmentRightEnd, depth = 0f,
             color = outerColor
         )
 
         // Inner quad, triangle 1
         addVertex(
-            position = firstMiddlePoint,
+            position = start, depth = 1f,
             color = innerColor
         )
         addVertex(
-            position = secondMiddlePoint,
+            position = end, depth = 1f,
             color = innerColor
         )
         addVertex(
-            position = Vector3(segmentLeft.endPoint.x, segmentLeft.endPoint.y, 0f),
+            position = segmentLeftEnd, depth = 0f,
             color = outerColor
         )
 
         // Inner quad, triangle 2
         addVertex(
-            position = Vector3(segmentLeft.endPoint.x, segmentLeft.endPoint.y, 0f),
+            position = segmentLeftEnd, depth = 0f,
             color = outerColor
         )
         addVertex(
-            position = Vector3(segmentLeft.startPoint.x, segmentLeft.startPoint.y, 0f),
+            position = segmentLeftStart, depth = 0f,
             color = outerColor
         )
         addVertex(
-            position = firstMiddlePoint,
+            position = start, depth = 1f,
             color = innerColor
         )
     }
 
     private fun addSegmentCaps(
         rawThetaDifference: Float,
-        segmentLeft: Line,
-        segmentRight: Line,
-        previousSegmentLeft: Line,
-        previousSegmentRight: Line
+        segmentLeftStart: Vec2,
+        segmentRightStart: Vec2,
+        previousSegmentLeftEnd: Vec2,
+        previousSegmentRightEnd: Vec2,
     )
     {
         val thetaDifference = if (abs(rawThetaDifference) > FMath.Pi)
@@ -122,48 +131,64 @@ class PathMeshDrawer
         if (thetaDifference == 0f)
             return
 
-        val origin = (segmentLeft.startPoint + segmentRight.startPoint) / 2f
+        val origin = Vec2(
+            (segmentLeftStart.x + segmentRightStart.x) / 2f,
+            (segmentLeftStart.y + segmentRightStart.y) / 2f
+        )
 
         // Use segment end points instead of calculating start/end via theta to guarantee that the
-        // vertices have the exact same position as the quads, which prevents possible pixel gaps
-        // during rasterization.
-        var current = if (thetaDifference > 0f) previousSegmentRight.endPoint else previousSegmentLeft.endPoint
-        val end = if (thetaDifference > 0f) segmentRight.startPoint else segmentLeft.startPoint
-
-        val start = if (thetaDifference > 0f)
-            Line(previousSegmentLeft.endPoint, previousSegmentRight.endPoint)
+        // vertices have the exact same position as the quads, which prevents possible pixel gaps.
+        var current = if (thetaDifference > 0f)
+            previousSegmentRightEnd
         else
-            Line(previousSegmentRight.endPoint, previousSegmentLeft.endPoint)
+            previousSegmentLeftEnd
 
-        val initialTheta = start.theta
-        val thetaStep = sign(thetaDifference) * FMath.Pi / MAXRES
+
+        val end = if (thetaDifference > 0f)
+            segmentRightStart
+        else
+            segmentLeftStart
+
+
+        val initialTheta = if (thetaDifference > 0f)
+            Vectors.getTheta(previousSegmentLeftEnd, previousSegmentRightEnd)
+        else
+            Vectors.getTheta(previousSegmentRightEnd, previousSegmentLeftEnd)
+
+
+        val thetaStep = sign(thetaDifference) * FMath.Pi / 24f // MAX_RES
         val stepCount = ceil(thetaDifference / thetaStep).toInt()
 
-
-        fun pointOnCircle(angle: Float) = Vector3(cos(angle), sin(angle), 0f)
 
         for (i in 1 .. stepCount)
         {
             // Center point
             addVertex(
-                position = Vector3(origin.x, origin.y, 1f),
+                position = origin, depth = 1f,
                 color = innerColor
             )
 
             // First outer point
             addVertex(
-                position = Vector3(current.x, current.y, 0f),
+                position = current, depth = 0f,
                 color = outerColor
             )
 
             current = if (i < stepCount)
-                origin + pointOnCircle(initialTheta + i * thetaStep) * (radius / 2f)
-            else
-                end
+            {
+                // Point on circle: cos(x) and sin(x).
+                val angle = initialTheta + i * thetaStep
+
+                Vec2(
+                    origin.x + cos(angle) * radius,
+                    origin.y + sin(angle) * radius
+                )
+            }
+            else end
 
             // Second outer point
             addVertex(
-                position = Vector3(current.x, current.y, 0f),
+                position = current, depth = 0f,
                 color = outerColor
             )
         }
@@ -176,66 +201,78 @@ class PathMeshDrawer
         width: Float,
         inColor: Float,
         outColor: Float,
-        calculateSegments: Boolean = true
+        asFlat: Boolean,
 
     ): FloatArray
     {
         index = 0
-        radius = width * 2f
+        flat = asFlat
+        radius = width
         innerColor = inColor
         outerColor = outColor
-
-        if (calculateSegments)
-        {
-            segments.clear()
-
-            for (i in 0 until path.size() - 1)
-            {
-                val start = path.get(i).toVector3()
-                val end = path.get(i + 1).toVector3()
-
-                segments.add(Line(start, end))
-            }
-        }
 
         // The coordinate system here is flipped, "left" corresponds to positive angles (anti-clockwise)
         // and "right" corresponds to negative angles (clockwise).
 
-        var previousSegmentLeft: Line? = null
-        var previousSegmentRight: Line? = null
+        var previousSegmentLeftEnd: Vec2? = null
+        var previousSegmentRightEnd: Vec2? = null
 
-        for (i in 0 until segments.size)
+        for (i in 0 until path.size() - 1)
         {
-            val segment: Line = segments[i]
+            val segmentStart = path.get(i)
+            val segmentEnd = path.get(i + 1)
 
-            var orthogonalDirection = segment.orthogonalDirection
+            val orthogonal = Vectors.getOrthogonalDirection(segmentStart, segmentEnd)
 
-            if (orthogonalDirection.x.isNaN() || orthogonalDirection.y.isNaN())
-                orthogonalDirection = Vector3(0f, 1f, 0f)
-
-            val segmentLeft = Line(
-                segment.startPoint + orthogonalDirection * (radius / 2f),
-                segment.endPoint + orthogonalDirection * (radius / 2f)
-            )
-
-            val segmentRight = Line(
-                segment.startPoint - orthogonalDirection * (radius / 2f),
-                segment.endPoint - orthogonalDirection * (radius / 2f)
-            )
-
-            addSegmentQuads(segment, segmentLeft, segmentRight)
-
-            if (previousSegmentLeft != null && previousSegmentRight != null)
+            if (orthogonal.x.isNaN() || orthogonal.y.isNaN())
             {
+                orthogonal.x = 0f
+                orthogonal.y = 1f
+            }
+
+            val segmentLeftStart = Vec2(
+                segmentStart.x + orthogonal.x * radius,
+                segmentStart.y + orthogonal.y * radius
+            )
+
+            val segmentLeftEnd = Vec2(
+                segmentEnd.x + orthogonal.x * radius,
+                segmentEnd.y + orthogonal.y * radius
+            )
+
+            val segmentRightStart = Vec2(
+                segmentStart.x - orthogonal.x * radius,
+                segmentStart.y - orthogonal.y * radius
+            )
+
+            val segmentRightEnd = Vec2(
+                segmentEnd.x - orthogonal.x * radius,
+                segmentEnd.y - orthogonal.y * radius
+            )
+
+            addSegmentQuads(
+                segmentStart,
+                segmentEnd,
+                segmentLeftStart,
+                segmentLeftEnd,
+                segmentRightStart,
+                segmentRightEnd
+            )
+
+            if (previousSegmentLeftEnd != null && previousSegmentRightEnd != null)
+            {
+                val previousStart = path.get(i - 1)
+                val previousEnd = path.get(i)
+
                 // Connection/filler caps between segment quads
-                val thetaDifference = segment.theta - segments[i - 1].theta
+                val thetaDifference = Vectors.getTheta(segmentStart, segmentEnd) - Vectors.getTheta(previousStart, previousEnd)
 
                 addSegmentCaps(
                     thetaDifference,
-                    segmentLeft,
-                    segmentRight,
-                    previousSegmentLeft,
-                    previousSegmentRight
+                    segmentLeftStart,
+                    segmentRightStart,
+                    previousSegmentLeftEnd,
+                    previousSegmentRightEnd
                 )
             }
 
@@ -244,38 +281,38 @@ class PathMeshDrawer
             // of the fact that a path which makes a 180 degree bend would have a semi-circle cap.
             if (i == 0)
             {
-                // Path start cap (semi-circle);
-                val flippedLeft = Line(segmentRight.endPoint, segmentRight.startPoint)
-                val flippedRight = Line(segmentLeft.endPoint, segmentLeft.startPoint)
-
                 addSegmentCaps(
                     FMath.Pi,
-                    segmentLeft,
-                    segmentRight,
-                    flippedLeft,
-                    flippedRight
+
+                    segmentLeftStart,
+                    segmentRightStart,
+
+                    // Path start cap (semi-circle), flipped segment.
+                    segmentRightStart,
+                    segmentLeftStart,
                 )
             }
 
-            if (i == segments.lastIndex)
+            // When is the last segment.
+            if (i == path.size() - 2)
             {
-                // Path end cap (semi-circle)
-                val flippedLeft = Line(segmentRight.endPoint, segmentRight.startPoint)
-                val flippedRight = Line(segmentLeft.endPoint, segmentLeft.startPoint)
+                addSegmentCaps(
+                    FMath.Pi,
 
-                addSegmentCaps(FMath.Pi, flippedLeft, flippedRight, segmentLeft, segmentRight)
+                    // Path end cap (semi-circle), flipped segment.
+                    segmentRightEnd,
+                    segmentLeftEnd,
+
+                    segmentLeftEnd,
+                    segmentRightEnd
+                )
             }
 
-            previousSegmentLeft = segmentLeft
-            previousSegmentRight = segmentRight
+            previousSegmentLeftEnd = segmentLeftEnd
+            previousSegmentRightEnd = segmentRightEnd
         }
 
         return triangles.copyOf(index + 1)
     }
 
-
-    companion object
-    {
-        private const val MAXRES = 24
-    }
 }

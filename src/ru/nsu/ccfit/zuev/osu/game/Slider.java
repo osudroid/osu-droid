@@ -697,7 +697,6 @@ public class Slider extends GameObject {
                         float l = superPath.getMeasurer().maxLength() * percentage;
 
                         abstractSliderBody.setEndLength(l);
-                        abstractSliderBody.onUpdate();
                     }
 
                     tmpPoint = getPercentPosition(percentage, null);
@@ -717,7 +716,6 @@ public class Slider extends GameObject {
                 if (Config.isSnakingInSliders()) {
                     if (!preStageFinish && superPath != null && abstractSliderBody != null) {
                         abstractSliderBody.setEndLength(superPath.getMeasurer().maxLength());
-                        abstractSliderBody.onUpdate();
                         preStageFinish = true;
                     }
 

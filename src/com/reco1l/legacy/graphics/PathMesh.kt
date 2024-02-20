@@ -11,7 +11,7 @@ import org.andengine.opengl.shader.constants.ShaderProgramConstants.ATTRIBUTE_PO
 import org.andengine.opengl.util.GLState
 import org.andengine.opengl.vbo.attribute.VertexBufferObjectAttributesBuilder
 
-class PathMesh : Mesh(0f, 0f, 0, DrawMode.TRIANGLES, PathMeshVBO())
+class PathMesh(private val flat: Boolean) : Mesh(0f, 0f, 0, DrawMode.TRIANGLES, PathMeshVBO(flat))
 {
 
     var clearDepth = false
@@ -27,9 +27,9 @@ class PathMesh : Mesh(0f, 0f, 0, DrawMode.TRIANGLES, PathMeshVBO())
     {
         // Since sprites are cached and recycled, we need to copy the array to avoid rewrite of the
         // buffer with wrong vertices.
-        (mMeshVertexBufferObject as PathMeshVBO).bufferData = vertices
+        (mMeshVertexBufferObject as PathMeshVBO).buffer = vertices
 
-        setVertexCountToDraw(vertices.size / 4)
+        setVertexCountToDraw(vertices.size / if (flat) 3 else 4)
     }
 
 
@@ -42,14 +42,24 @@ class PathMesh : Mesh(0f, 0f, 0, DrawMode.TRIANGLES, PathMeshVBO())
         return super.detachSelf()
     }
 
+    override fun preDraw(gl: GLState, pCamera: Camera)
+    {
+        gl.disableCulling()
+
+        super.preDraw(gl, pCamera)
+    }
+
     override fun draw(gl: GLState, pCamera: Camera)
     {
         if (clearDepth)
             GLES20.glClear(GLES20.GL_DEPTH_BUFFER_BIT)
 
-        gl.enableDepthTest()
+        val hadDepthTest = gl.enableDepthTest()
+
         super.draw(gl, pCamera)
-        gl.disableDepthTest()
+
+        if (!hadDepthTest)
+            gl.disableDepthTest()
     }
 
     companion object
