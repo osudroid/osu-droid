@@ -22,7 +22,7 @@ object CircleSizeCalculator {
      * To match expectations of gameplay we need to apply this multiplier to circle scale. It's weird but is what it is.
      * It works out to under 1 game pixel and is generally not meaningful to gameplay, but is to replay playback accuracy.
      */
-    const val BROKEN_GAMEFIELD_ROUNDING_ALLOWANCE = 1.00041f
+    private const val BROKEN_GAMEFIELD_ROUNDING_ALLOWANCE = 1.00041f
 
     /**
      * Converts osu!droid circle size to osu!droid scale.
@@ -78,27 +78,36 @@ object CircleSizeCalculator {
      * Converts osu!standard circle size to osu!standard scale.
      *
      * @param cs The osu!standard circle size to convert.
+     * @param applyFudge Whether to apply a fudge that was historically applied to osu!standard.
      * @return The osu!standard scale of the given circle size.
      */
     @JvmStatic
-    fun standardCSToStandardScale(cs: Float) = (1 - 0.7f * (cs - 5) / 5) / 2 * BROKEN_GAMEFIELD_ROUNDING_ALLOWANCE
+    @JvmOverloads
+    fun standardCSToStandardScale(cs: Float, applyFudge: Boolean = false) =
+        (1 - 0.7f * (cs - 5) / 5) / 2 * (if (applyFudge) BROKEN_GAMEFIELD_ROUNDING_ALLOWANCE else 1f)
 
     /**
      * Converts osu!standard scale to osu!droid scale.
      *
      * @param scale The osu!standard scale to convert.
+     * @param applyFudge Whether to apply a fudge that was historically applied to osu!standard.
      * @return The osu!droid scale of the given osu!standard scale.
      */
     @JvmStatic
-    fun standardScaleToDroidScale(scale: Float) =
-        standardRadiusToDroidScale(HitObject.OBJECT_RADIUS.toDouble() * scale / BROKEN_GAMEFIELD_ROUNDING_ALLOWANCE)
+    @JvmOverloads
+    fun standardScaleToDroidScale(scale: Float, applyFudge: Boolean = false) =
+        standardRadiusToDroidScale(HitObject.OBJECT_RADIUS.toDouble() * scale /
+                (if (applyFudge) BROKEN_GAMEFIELD_ROUNDING_ALLOWANCE else 1f))
 
     /**
      * Converts osu!standard circle size to osu!droid scale.
      *
      * @param cs The osu!standard circle size to convert.
+     * @param applyFudge Whether to apply a fudge that was historically applied to osu!standard.
      * @return The osu!droid scale of the given osu!standard circle size.
      */
     @JvmStatic
-    fun standardCSToDroidScale(cs: Float) = standardScaleToDroidScale(standardCSToStandardScale(cs))
+    @JvmOverloads
+    fun standardCSToDroidScale(cs: Float, applyFudge: Boolean = false) =
+        standardScaleToDroidScale(standardCSToStandardScale(cs, applyFudge))
 }

@@ -115,11 +115,10 @@ abstract class HitObject(
                 val radius = CircleSizeCalculator.droidScaleToStandardRadius(droidScale.toDouble())
                 val standardCS = CircleSizeCalculator.standardRadiusToStandardCS(radius)
 
-                // TODO: we exclude gamefield rounding here to match what dpp is currently using.
-                CircleSizeCalculator.standardCSToStandardScale(standardCS) / CircleSizeCalculator.BROKEN_GAMEFIELD_ROUNDING_ALLOWANCE
+                CircleSizeCalculator.standardCSToStandardScale(standardCS)
             }
 
-            GameMode.Standard -> CircleSizeCalculator.standardCSToStandardScale(difficulty.cs)
+            GameMode.Standard -> CircleSizeCalculator.standardCSToStandardScale(difficulty.cs, true)
         }
     }
 
