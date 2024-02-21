@@ -102,23 +102,28 @@ class PathMeshVBO(private val flat: Boolean) :
 
             val packedColor = buffer[index]
 
-
-            if (packedColor != secondColor && firstColor.isNaN())
+            if (packedColor != firstColor && packedColor != secondColor)
             {
-                firstColor = packedColor
-                firstColorComputed = repackColor(packedColor, alpha)
+                if (firstColor.isNaN())
+                {
+                    firstColor = packedColor
+                    firstColorComputed = repackColor(packedColor, alpha)
+                }
+                else if (secondColor.isNaN())
+                {
+                    secondColor = packedColor
+                    secondColorComputed = repackColor(packedColor, alpha)
+                }
+                // Should not be reached since this is intended to be used with two colors only.
+                else continue
             }
-            else if (packedColor != firstColor && secondColor.isNaN())
+
+            buffer[index] = when (packedColor)
             {
-                secondColor = packedColor
-                secondColorComputed = repackColor(packedColor, alpha)
+                firstColor -> firstColorComputed
+                secondColor -> secondColorComputed
+                else -> continue
             }
-
-
-            buffer[index] = if (packedColor == firstColor)
-                firstColorComputed
-            else
-                secondColorComputed
         }
     }
 

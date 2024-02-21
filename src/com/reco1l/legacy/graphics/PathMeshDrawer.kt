@@ -229,25 +229,27 @@ class PathMeshDrawer
                 orthogonal.x = 0f
                 orthogonal.y = 1f
             }
+            orthogonal.x *= radius
+            orthogonal.y *= radius
 
             val segmentLeftStart = Vec2(
-                segmentStart.x + orthogonal.x * radius,
-                segmentStart.y + orthogonal.y * radius
+                segmentStart.x + orthogonal.x,
+                segmentStart.y + orthogonal.y
             )
 
             val segmentLeftEnd = Vec2(
-                segmentEnd.x + orthogonal.x * radius,
-                segmentEnd.y + orthogonal.y * radius
+                segmentEnd.x + orthogonal.x,
+                segmentEnd.y + orthogonal.y
             )
 
             val segmentRightStart = Vec2(
-                segmentStart.x - orthogonal.x * radius,
-                segmentStart.y - orthogonal.y * radius
+                segmentStart.x - orthogonal.x,
+                segmentStart.y - orthogonal.y
             )
 
             val segmentRightEnd = Vec2(
-                segmentEnd.x - orthogonal.x * radius,
-                segmentEnd.y - orthogonal.y * radius
+                segmentEnd.x - orthogonal.x,
+                segmentEnd.y - orthogonal.y
             )
 
             addSegmentQuads(
