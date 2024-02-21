@@ -73,7 +73,11 @@ class DroidPerformanceCalculator(
         it.visual = calculateVisualValue()
 
         it.total = (
-            it.aim.pow(1.1) + it.tap.pow(1.1) + it.accuracy.pow(1.1) + it.flashlight.pow(1.1) + it.visual.pow(1.1)
+            it.aim.pow(1.1) +
+            it.tap.pow(1.1) +
+            it.accuracy.pow(1.1) +
+            it.flashlight.pow(1.1) +
+            it.visual.pow(1.1)
         ).pow(1 / 1.1) * multiplier
     }
 
@@ -99,7 +103,7 @@ class DroidPerformanceCalculator(
     private fun calculateAimValue() = difficultyAttributes.run {
         var aimValue = (5 * max(1.0, difficultyAttributes.aimDifficulty.pow(0.8) / 0.0675) - 4).pow(3.0) / 100000
 
-        aimValue *= proportionalMissPenalty
+        aimValue *= min(calculateStrainBasedMissPenalty(aimDifficultStrainCount), proportionalMissPenalty)
 
         // Scale the aim value with estimated full combo deviation.
         aimValue *= calculateDeviationBasedLengthScaling()
@@ -189,13 +193,13 @@ class DroidPerformanceCalculator(
     }
 
     private fun calculateFlashlightValue() = difficultyAttributes.run {
-        if (mods.any { it is ModFlashlight }) {
+        if (mods.none { it is ModFlashlight }) {
             return@run 0.0
         }
 
         var flashlightValue = flashlightDifficulty.pow(1.6) * 25
 
-        flashlightValue *= proportionalMissPenalty
+        flashlightValue *= min(calculateStrainBasedMissPenalty(flashlightDifficultStrainCount), proportionalMissPenalty)
 
         // Account for shorter maps having a higher ratio of 0 combo/100 combo flashlight radius.
         flashlightValue *= 0.7 + 0.1 * min(1.0, totalHits / 200.0) +
@@ -212,7 +216,7 @@ class DroidPerformanceCalculator(
     private fun calculateVisualValue() = difficultyAttributes.run {
         var visualValue = visualDifficulty.pow(1.6) * 22.5
 
-        visualValue *= proportionalMissPenalty
+        visualValue *= min(calculateStrainBasedMissPenalty(visualDifficultStrainCount), proportionalMissPenalty)
 
         // Scale the visual value with estimated full combo deviation.
         // As visual is easily "bypassable" with memorization, punish for memorization.
@@ -233,21 +237,20 @@ class DroidPerformanceCalculator(
         if (effectiveMissCount == 0.0) 1.0
         else 0.94 / (effectiveMissCount / (2 * sqrt(difficultStrainCount)) + 1)
 
-    private val proportionalMissPenalty: Double
-        get() {
-            if (effectiveMissCount == 0.0) {
-                return 1.0
-            }
-
-            val missProportion = (totalHits - effectiveMissCount) / (totalHits + 1)
-            val noMissProportion = totalHits / (totalHits + 1.0)
-
-            // Aim deviation-based scale.
-            return ErrorFunction.erfInv(missProportion) / ErrorFunction.erfInv(noMissProportion) *
-                // Cheesing-based scale (i.e. 50% misses is deliberately only hitting each other
-                // note, 90% misses is deliberately only hitting 1 note every 10 notes).
-                missProportion.pow(8)
+    private val proportionalMissPenalty by lazy {
+        if (effectiveMissCount == 0.0) {
+            return@lazy 1.0
         }
+
+        val missProportion = (totalHits - effectiveMissCount) / (totalHits + 1)
+        val noMissProportion = totalHits / (totalHits + 1.0)
+
+        // Aim deviation-based scale.
+        ErrorFunction.erfInv(missProportion) / ErrorFunction.erfInv(noMissProportion) *
+            // Cheesing-based scale (i.e. 50% misses is deliberately only hitting each other
+            // note, 90% misses is deliberately only hitting 1 note every 10 notes).
+            missProportion.pow(8)
+    }
 
     /**
      * Calculates the object-based length scaling based on the deviation of a player for a full
@@ -256,7 +259,8 @@ class DroidPerformanceCalculator(
      * @param objectCount The amount of objects to be considered. Defaults to the amount of objects in this beatmap.
      * @param punishForMemorization Whether to punish the deviation for memorization. Defaults to `false`.
      */
-    private fun calculateDeviationBasedLengthScaling(objectCount: Double = totalHits.toDouble(), punishForMemorization: Boolean = false): Double {
+    private fun calculateDeviationBasedLengthScaling(objectCount: Double = totalHits.toDouble(),
+                                                     punishForMemorization: Boolean = false): Double {
         // Assume a sample proportion of hits for a full combo to be `(n - 0.5) / n` due to
         // continuity correction, where `n` is the object count.
         fun calculateProportion(notes: Double) = (notes - 0.5) / notes
@@ -282,7 +286,7 @@ class DroidPerformanceCalculator(
 
         // Punish for memorization if needed.
         if (punishForMemorization) {
-            multiplier *= min(1.0, sqrt(objectCount.toDouble() / benchmarkNotes))
+            multiplier *= min(1.0, sqrt(objectCount / benchmarkNotes))
         }
 
         return multiplier
