@@ -3,6 +3,7 @@ package org.andengine.entity.particle;
 import java.util.ArrayList;
 
 import org.andengine.engine.camera.Camera;
+import org.andengine.engine.handler.physics.PhysicsHandler;
 import org.andengine.entity.Entity;
 import org.andengine.entity.IEntity;
 import org.andengine.entity.IEntityFactory;
@@ -140,16 +141,16 @@ public class ParticleSystem<T extends IEntity> extends Entity {
 	protected void moveParticleToEnd(final int pIndex) {
 		final Particle<T> particle = this.mParticles[pIndex];
 
-		final int particlesToCopy = this.mParticlesAlive - pIndex;
+		/*final int particlesToCopy = this.mParticlesAlive - pIndex;
 		if(particlesToCopy > 0) {
 			System.arraycopy(this.mParticles, pIndex + 1, this.mParticles, pIndex, particlesToCopy);
 		}
-		this.mParticles[this.mParticlesAlive] = particle;
+		this.mParticles[this.mParticlesAlive] = particle;*/
 
-		/* This mode of swapping particles is faster than copying tons of array elements, 
-		 * but it doesn't respect the 'lifetime' of the particles. */
-//		particles[i] = particles[this.mParticlesAlive];
-//		particles[this.mParticlesAlive] = particle;
+		// BEGIN osu!droid modified - Reverted change from 'GLES1' branch.
+		mParticles[pIndex] = mParticles[this.mParticlesAlive];
+		mParticles[this.mParticlesAlive] = particle;
+		// END osu!droid modified.
 	}
 
 	// ===========================================================
