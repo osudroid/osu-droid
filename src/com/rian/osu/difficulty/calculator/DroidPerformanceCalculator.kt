@@ -156,10 +156,17 @@ class DroidPerformanceCalculator(
         // Scale the tap value with tap deviation.
         tapValue *= 1.1 * ErrorFunction.erf(20 / (sqrt(2.0) * adjustedDeviation)).pow(0.625)
 
+        // Additional scaling for tap value based on average BPM and how "vibroable" the beatmap is.
+        // Higher BPMs require more precise tapping. When the deviation is too high,
+        // it can be assumed that the player taps invariant to rhythm.
+        // We make the punishment harsher punishment for such scenario.
+        tapValue *= vibroFactor.pow(6) +
+            (1 - vibroFactor.pow(6)) / (1 + exp((tapDeviation - 7500 / averageBPM) / (2 * 300 / averageBPM)))
+
         // Scale the tap value with three-fingered penalty.
         tapValue /= tapPenalty
 
-        // OD 8 stays the same.
+        // OD 8 SS stays the same.
         tapValue *= 0.95 * 8.0.pow(2) / 750
 
         tapValue

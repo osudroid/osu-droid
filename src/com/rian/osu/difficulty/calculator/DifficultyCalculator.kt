@@ -62,14 +62,15 @@ abstract class DifficultyCalculator<TObject : DifficultyHitObject, TAttributes :
         // Always operate on a clone of the original beatmap when needed, to not modify it game-wide
         val beatmapToCalculate = convertBeatmap(beatmap, parameters)
         val skills = createSkills(beatmapToCalculate, parameters)
+        val objects = createDifficultyHitObjects(beatmapToCalculate, parameters)
 
-        for (obj in createDifficultyHitObjects(beatmapToCalculate, parameters)) {
+        for (obj in objects) {
             for (skill in skills) {
                 skill.process(obj)
             }
         }
 
-        return createDifficultyAttributes(beatmapToCalculate, skills, parameters)
+        return createDifficultyAttributes(beatmapToCalculate, skills, objects, parameters)
     }
 
     /**
@@ -101,7 +102,11 @@ abstract class DifficultyCalculator<TObject : DifficultyHitObject, TAttributes :
         // Add the first object in the beatmap, otherwise it will be ignored.
         progressiveBeatmap.hitObjects.add(beatmapToCalculate.hitObjects.objects.first())
 
-        for (obj in createDifficultyHitObjects(beatmapToCalculate, parameters)) {
+        val objects = createDifficultyHitObjects(beatmapToCalculate, parameters)
+
+        for (i in objects.indices) {
+            val obj = objects[i]
+
             progressiveBeatmap.hitObjects.add(obj.obj)
 
             for (skill in skills) {
@@ -111,7 +116,7 @@ abstract class DifficultyCalculator<TObject : DifficultyHitObject, TAttributes :
             attributes.add(
                 TimedDifficultyAttributes(
                     obj.endTime * (parameters?.totalSpeedMultiplier?.toDouble() ?: 1.0),
-                    createDifficultyAttributes(progressiveBeatmap, skills, parameters)
+                    createDifficultyAttributes(progressiveBeatmap, skills, objects.subList(0, i + 1), parameters)
                 )
             )
         }
@@ -147,12 +152,14 @@ abstract class DifficultyCalculator<TObject : DifficultyHitObject, TAttributes :
      *
      * @param beatmap The [Beatmap] whose difficulty was calculated.
      * @param skills The [Skill]s which processed the beatmap.
+     * @param objects The [TObject]s that were generated.
      * @param parameters The difficulty calculation parameters used.
      * @return [TAttributes] describing the beatmap's difficulty.
      */
     protected abstract fun createDifficultyAttributes(
         beatmap: Beatmap,
         skills: Array<Skill<TObject>>,
+        objects: List<TObject>,
         parameters: DifficultyCalculationParameters?
     ): TAttributes
 

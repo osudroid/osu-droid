@@ -28,6 +28,7 @@ class StandardDifficultyCalculator : DifficultyCalculator<StandardDifficultyHitO
     override fun createDifficultyAttributes(
         beatmap: Beatmap,
         skills: Array<Skill<StandardDifficultyHitObject>>,
+        objects: List<StandardDifficultyHitObject>,
         parameters: DifficultyCalculationParameters?
     ) = StandardDifficultyAttributes().apply {
         mods = parameters?.mods?.slice(parameters.mods.indices) ?: mods

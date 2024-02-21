@@ -36,6 +36,7 @@ class DroidDifficultyCalculator : DifficultyCalculator<DroidDifficultyHitObject,
     override fun createDifficultyAttributes(
         beatmap: Beatmap,
         skills: Array<Skill<DroidDifficultyHitObject>>,
+        objects: List<DroidDifficultyHitObject>,
         parameters: DifficultyCalculationParameters?
     ) = DroidDifficultyAttributes().apply {
         mods = parameters?.mods?.slice(parameters.mods.indices) ?: mods
@@ -71,20 +72,33 @@ class DroidDifficultyCalculator : DifficultyCalculator<DroidDifficultyHitObject,
 
         aimSliderFactor = if (aimDifficulty > 0) calculateRating(skills[1]) / aimDifficulty else 1.0
 
+        val isPrecise = mods.any { it is ModPrecise }
+        val greatWindow = (
+            if (isPrecise) PreciseDroidHitWindow(beatmap.difficulty.od)
+            else DroidHitWindow(beatmap.difficulty.od)
+        ).greatWindow / (parameters?.totalSpeedMultiplier?.toDouble() ?: 1.0)
+
         (skills[2] as DroidTap).let {
             tapDifficulty = calculateRating(it)
             tapDifficultStrainCount = it.countDifficultStrains()
             speedNoteCount = it.relevantNoteCount()
             averageSpeedDeltaTime = it.relevantDeltaTime()
+
+            if (tapDifficulty > 0) {
+                val tapSkillVibro = DroidTap(mods, greatWindow, true, averageSpeedDeltaTime)
+
+                objects.forEach { o -> tapSkillVibro.process(o) }
+
+                vibroFactor = calculateRating(tapSkillVibro) / tapDifficulty
+            }
         }
 
         var firstObjectIndex = 0
-        val objects = beatmap.hitObjects.objects
         val sectionBoundaries = mutableListOf<Pair<Int, Int>>()
 
-        for (i in 1 until objects.size - 1) {
-            val current = objects[i]
-            val next = objects[i + 1]
+        for (i in 0 until objects.size - 1) {
+            val current = objects[i].obj
+            val next = objects[i + 1].obj
             val deltaTime = next.startTime - current.getEndTime()
 
             if (deltaTime >= maximumSectionDeltaTime) {
@@ -197,13 +211,6 @@ class DroidDifficultyCalculator : DifficultyCalculator<DroidDifficultyHitObject,
         }
 
         approachRate = if (preempt > HitObject.PREEMPT_MID) (HitObject.PREEMPT_MAX - preempt) / 120 else (HitObject.PREEMPT_MID - preempt) / 150 + 5
-
-        val isPrecise = mods.any { it is ModPrecise }
-        val greatWindow = (
-                if (isPrecise) PreciseDroidHitWindow(beatmap.difficulty.od)
-                else DroidHitWindow(beatmap.difficulty.od)
-        ).greatWindow / (parameters?.totalSpeedMultiplier?.toDouble() ?: 1.0)
-
         overallDifficulty =
             if (isPrecise) PreciseDroidHitWindow.hitWindow300ToOverallDifficulty(greatWindow.toFloat()).toDouble()
             else DroidHitWindow.hitWindow300ToOverallDifficulty(greatWindow.toFloat()).toDouble()

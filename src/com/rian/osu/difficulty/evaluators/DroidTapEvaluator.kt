@@ -25,9 +25,16 @@ object DroidTapEvaluator {
      * @param current The current object.
      * @param greatWindow The great hit window of the current object.
      * @param considerCheesability Whether to consider cheesability.
+     * @param strainTimeCap The strain time to cap to.
      */
     @JvmStatic
-    fun evaluateDifficultyOf(current: DroidDifficultyHitObject, greatWindow: Double, considerCheesability: Boolean): Double {
+    @JvmOverloads
+    fun evaluateDifficultyOf(
+        current: DroidDifficultyHitObject,
+        greatWindow: Double,
+        considerCheesability: Boolean,
+        strainTimeCap: Double? = null
+    ): Double {
         if (
             current.obj is Spinner ||
             // Exclude overlapping objects that can be tapped at once.
@@ -54,12 +61,16 @@ object DroidTapEvaluator {
             }
         }
 
+        val strainTime =
+            if (strainTimeCap != null) max(50.0, max(strainTimeCap, current.strainTime))
+            else current.strainTime
+
         var speedBonus = 1.0
 
         if (current.strainTime < MIN_SPEED_BONUS) {
-            speedBonus += 0.75 * ErrorFunction.erf((MIN_SPEED_BONUS - current.strainTime) / 40).pow(2)
+            speedBonus += 0.75 * ErrorFunction.erf((MIN_SPEED_BONUS - strainTime) / 40).pow(2)
         }
 
-        return (speedBonus * doubletapness.pow(1.5)) / current.strainTime
+        return (speedBonus * doubletapness.pow(1.5)) / strainTime
     }
 }

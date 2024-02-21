@@ -24,7 +24,12 @@ class DroidTap(
     /**
      * Whether to consider cheesability.
      */
-    private val considerCheesability: Boolean
+    private val considerCheesability: Boolean,
+
+    /**
+     * The strain time to cap to.
+     */
+    private val strainTimeCap: Double? = null
 ) : DroidStrainSkill(mods) {
     override val starsPerDouble = 1.1
 
@@ -77,7 +82,9 @@ class DroidTap(
 
     override fun strainValueAt(current: DroidDifficultyHitObject): Double {
         currentStrain *= strainDecay(current.strainTime)
-        currentStrain += DroidTapEvaluator.evaluateDifficultyOf(current, greatWindow, considerCheesability) * skillMultiplier
+        currentStrain += DroidTapEvaluator.evaluateDifficultyOf(
+            current, greatWindow, considerCheesability, strainTimeCap
+        ) * skillMultiplier
 
         currentRhythm = DroidRhythmEvaluator.evaluateDifficultyOf(current, greatWindow)
 

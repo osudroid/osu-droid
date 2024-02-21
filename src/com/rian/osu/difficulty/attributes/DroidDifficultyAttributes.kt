@@ -92,4 +92,14 @@ class DroidDifficultyAttributes : DifficultyAttributes() {
      */
     @JvmField
     var visualSliderFactor = 1.0
+
+    /**
+     * Describes how much of tap difficulty is contributed by notes that are "vibroable".
+     *
+     * A value closer to 1 indicates most tap difficulty is contributed by notes that are not "vibroable".
+     *
+     * A value closer to 0 indicates most tap difficulty is contributed by notes that are "vibroable".
+     */
+    @JvmField
+    var vibroFactor = 1.0
 }
