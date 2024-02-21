@@ -145,7 +145,6 @@ class PathMeshVBO(private val flat: Boolean) :
 
         floatBuffer.position(0)
         floatBuffer.put(buffer)
-        floatBuffer.limit(mCapacity)
 
         GLES20.glBufferData(GLES20.GL_ARRAY_BUFFER, mByteBuffer.capacity(), mByteBuffer, mUsage)
     }
