@@ -28,6 +28,9 @@ class DroidVisual(
 ) : DroidStrainSkill(mods) {
     override val starsPerDouble = 1.025
 
+    override val objectStrain: Double
+        get() = currentStrain * currentRhythm
+
     private var currentStrain = 0.0
     private var currentRhythm = 0.0
     private val skillMultiplier = 10
@@ -40,11 +43,7 @@ class DroidVisual(
 
         currentRhythm = DroidRhythmEvaluator.evaluateDifficultyOf(current, greatWindow)
 
-        val totalStrain = currentStrain * currentRhythm
-
-        objectStrains.add(totalStrain)
-
-        return totalStrain
+        return currentStrain * currentRhythm
     }
 
     override fun calculateInitialStrain(time: Double, current: DroidDifficultyHitObject) =

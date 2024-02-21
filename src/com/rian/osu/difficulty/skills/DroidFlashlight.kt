@@ -22,6 +22,9 @@ class DroidFlashlight(
 ) : DroidStrainSkill(mods) {
     override val starsPerDouble = 1.06
 
+    override val objectStrain: Double
+        get() = currentStrain
+
     override val reducedSectionCount = 0
     override val reducedSectionBaseline = 1.0
 
@@ -36,8 +39,6 @@ class DroidFlashlight(
     override fun strainValueAt(current: DroidDifficultyHitObject): Double {
         currentStrain *= strainDecay(current.deltaTime)
         currentStrain += DroidFlashlightEvaluator.evaluateDifficultyOf(current, isHidden, withSliders) * skillMultiplier
-
-        objectStrains.add(currentStrain)
 
         return currentStrain
     }

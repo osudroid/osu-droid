@@ -25,6 +25,11 @@ abstract class DroidStrainSkill(
     protected abstract val starsPerDouble: Double
 
     /**
+     * The strain of the currently calculated [DroidDifficultyHitObject].
+     */
+    protected abstract val objectStrain: Double
+
+    /**
      * All [DroidDifficultyHitObject]s strains.
      */
     val objectStrains = mutableListOf<Double>()
@@ -45,6 +50,12 @@ abstract class DroidStrainSkill(
         }
 
         reduce { acc, d -> acc + (d / maxStrain).pow(4) }
+    }
+
+    override fun process(current: DroidDifficultyHitObject) {
+        super.process(current)
+
+        objectStrains.add(objectStrain)
     }
 
     override fun difficultyValue() = currentStrainPeaks.run {

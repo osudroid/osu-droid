@@ -22,14 +22,15 @@ class DroidRhythm(
     override val reducedSectionCount = 5
     override val starsPerDouble = 1.75
 
+    override val objectStrain: Double
+        get() = currentStrain
+
     private var currentStrain = 0.0
     private val strainDecayBase = 0.3
 
     override fun strainValueAt(current: DroidDifficultyHitObject): Double {
         currentStrain *= strainDecay(current.deltaTime)
         currentStrain += DroidRhythmEvaluator.evaluateDifficultyOf(current, greatWindow) - 1
-
-        objectStrains.add(currentStrain)
 
         return currentStrain
     }
