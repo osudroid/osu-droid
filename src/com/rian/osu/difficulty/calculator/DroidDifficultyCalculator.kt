@@ -11,10 +11,7 @@ import com.rian.osu.difficulty.DroidDifficultyHitObject
 import com.rian.osu.difficulty.attributes.DroidDifficultyAttributes
 import com.rian.osu.difficulty.attributes.HighStrainSection
 import com.rian.osu.difficulty.skills.*
-import com.rian.osu.mods.ModDifficultyAdjust
-import com.rian.osu.mods.ModFlashlight
-import com.rian.osu.mods.ModPrecise
-import com.rian.osu.mods.ModRelax
+import com.rian.osu.mods.*
 import kotlin.math.cbrt
 import kotlin.math.ceil
 import kotlin.math.max
@@ -26,6 +23,11 @@ import kotlin.math.pow
 class DroidDifficultyCalculator : DifficultyCalculator<DroidDifficultyHitObject, DroidDifficultyAttributes>() {
     override val mode = GameMode.Droid
     override val difficultyMultiplier = 0.18
+
+    override val difficultyAdjustmentMods = mutableSetOf<Mod>().also {
+        it.addAll(super.difficultyAdjustmentMods)
+        it.add(ModPrecise())
+    }.toSet()
 
     private val maximumSectionDeltaTime = 2000
     private val minimumSectionObjectCount = 5

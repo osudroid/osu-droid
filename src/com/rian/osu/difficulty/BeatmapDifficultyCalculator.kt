@@ -1,5 +1,6 @@
 package com.rian.osu.difficulty
 
+import com.rian.osu.GameMode
 import com.rian.osu.beatmap.Beatmap
 import com.rian.osu.difficulty.attributes.DifficultyAttributes
 import com.rian.osu.difficulty.attributes.DroidDifficultyAttributes
@@ -323,7 +324,7 @@ object BeatmapDifficultyCalculator {
         fun addCache(
             parameters: DifficultyCalculationParameters?, attributes: DroidDifficultyAttributes,
             timeToLive: Long
-        ) = addCache(parameters, attributes, droidAttributeCache, timeToLive)
+        ) = addCache(parameters, GameMode.Droid, attributes, droidAttributeCache, timeToLive)
 
         /**
          * Adds a [StandardDifficultyAttributes] cache to this [BeatmapDifficultyCacheManager].
@@ -335,7 +336,7 @@ object BeatmapDifficultyCalculator {
         fun addCache(
             parameters: DifficultyCalculationParameters?, attributes: StandardDifficultyAttributes,
             timeToLive: Long
-        ) = addCache(parameters, attributes, standardAttributeCache, timeToLive)
+        ) = addCache(parameters, GameMode.Standard, attributes, standardAttributeCache, timeToLive)
 
         /**
          * Adds a [TimedDifficultyAttributes] cache to this [BeatmapDifficultyCacheManager].
@@ -349,7 +350,7 @@ object BeatmapDifficultyCalculator {
             parameters: DifficultyCalculationParameters?,
             attributes: List<TimedDifficultyAttributes<DroidDifficultyAttributes>>,
             timeToLive: Long
-        ) = addCache(parameters, attributes, droidTimedAttributeCache, timeToLive)
+        ) = addCache(parameters, GameMode.Droid, attributes, droidTimedAttributeCache, timeToLive)
 
         /**
          * Adds a [TimedDifficultyAttributes] cache to this [BeatmapDifficultyCacheManager].
@@ -363,7 +364,7 @@ object BeatmapDifficultyCalculator {
             parameters: DifficultyCalculationParameters?,
             attributes: List<TimedDifficultyAttributes<StandardDifficultyAttributes>>,
             timeToLive: Long
-        ) = addCache(parameters, attributes, standardTimedAttributeCache, timeToLive)
+        ) = addCache(parameters, GameMode.Standard, attributes, standardTimedAttributeCache, timeToLive)
 
         /**
          * Retrieves the [DroidDifficultyAttributes] cache of a [DifficultyCalculationParameters].
@@ -372,7 +373,7 @@ object BeatmapDifficultyCalculator {
          * @return The [DroidDifficultyAttributes], `null` if not found.
          */
         fun getDroidDifficultyCache(parameters: DifficultyCalculationParameters?) =
-            getCache(parameters, droidAttributeCache)
+            getCache(parameters, GameMode.Droid, droidAttributeCache)
 
         /**
          * Retrieves the [TimedDifficultyAttributes] cache of a [DifficultyCalculationParameters].
@@ -381,7 +382,7 @@ object BeatmapDifficultyCalculator {
          * @return The [TimedDifficultyAttributes], `null` if not found.
          */
         fun getDroidTimedDifficultyCache(parameters: DifficultyCalculationParameters?) =
-            getCache(parameters, droidTimedAttributeCache)
+            getCache(parameters, GameMode.Droid, droidTimedAttributeCache)
 
         /**
          * Retrieves the [StandardDifficultyAttributes] cache of a [DifficultyCalculationParameters].
@@ -390,7 +391,7 @@ object BeatmapDifficultyCalculator {
          * @return The [StandardDifficultyAttributes], `null` if not found.
          */
         fun getStandardDifficultyCache(parameters: DifficultyCalculationParameters?) =
-            getCache(parameters, standardAttributeCache)
+            getCache(parameters, GameMode.Standard, standardAttributeCache)
 
         /**
          * Retrieves the [TimedDifficultyAttributes] cache of a [DifficultyCalculationParameters].
@@ -399,7 +400,7 @@ object BeatmapDifficultyCalculator {
          * @return The [TimedDifficultyAttributes], `null` if not found.
          */
         fun getStandardTimedDifficultyCache(parameters: DifficultyCalculationParameters?) =
-            getCache(parameters, standardTimedAttributeCache)
+            getCache(parameters, GameMode.Standard, standardTimedAttributeCache)
 
         /**
          * Whether this [BeatmapDifficultyCacheManager] does not hold any cache.
@@ -441,42 +442,48 @@ object BeatmapDifficultyCalculator {
          * Adds a difficulty attributes cache to a cache map.
          *
          * @param parameters The difficulty calculation parameter to cache.
+         * @param mode The [GameMode] to get for.
          * @param cache The difficulty attributes cache to add.
          * @param cacheMap The map to add the cache to.
          * @param timeToLive The duration at which this cache is allowed to live, in milliseconds.
          * @param <T> The difficulty attributes cache type.
         </T> */
         private fun <T> addCache(
-            parameters: DifficultyCalculationParameters?, cache: T,
+            parameters: DifficultyCalculationParameters?, mode: GameMode, cache: T,
             cacheMap: HashMap<DifficultyCalculationParameters, BeatmapDifficultyCache<T>>,
             timeToLive: Long
         ) {
-            cacheMap[processParameters(parameters)] = BeatmapDifficultyCache(cache, timeToLive)
+            cacheMap[processParameters(parameters, mode)] = BeatmapDifficultyCache(cache, timeToLive)
         }
 
         /**
          * Gets the cache of difficulty attributes of a calculation parameter.
          *
          * @param parameters The difficulty calculation parameter to retrieve.
+         * @param mode The [GameMode] to get for.
          * @param cacheMap The map containing the cache to lookup for.
          * @return The difficulty attributes, `null` if not found.
          * @param <T> The difficulty attributes cache type.
         </T> */
         private fun <T> getCache(
-            parameters: DifficultyCalculationParameters?,
+            parameters: DifficultyCalculationParameters?, mode: GameMode,
             cacheMap: HashMap<DifficultyCalculationParameters, BeatmapDifficultyCache<T>>
-        ) = cacheMap[processParameters(parameters)]?.cache
+        ) = cacheMap[processParameters(parameters, mode)]?.cache
 
         /**
          * Processes and copies a [DifficultyCalculationParameters] for caching.
          *
          * @param parameters The [DifficultyCalculationParameters] to process.
+         * @param mode The [GameMode] to process for.
          * @return A new [DifficultyCalculationParameters] that can be used as a cache.
          */
-        private fun processParameters(parameters: DifficultyCalculationParameters?) =
+        private fun processParameters(parameters: DifficultyCalculationParameters?, mode: GameMode) =
             parameters?.copy()?.also {
                 // Copy the parameter for caching.
-                DifficultyCalculator.retainDifficultyAdjustmentMods(it)
+                when (mode) {
+                    GameMode.Droid -> droidDifficultyCalculator.retainDifficultyAdjustmentMods(it)
+                    GameMode.Standard -> standardDifficultyCalculator.retainDifficultyAdjustmentMods(it)
+                }
             } ?: DifficultyCalculationParameters()
     }
 

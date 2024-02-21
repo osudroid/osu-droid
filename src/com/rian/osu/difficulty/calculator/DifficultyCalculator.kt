@@ -19,6 +19,35 @@ abstract class DifficultyCalculator<TObject : DifficultyHitObject, TAttributes :
     protected abstract val difficultyMultiplier: Double
 
     /**
+     * [Mod]s that can alter the star rating when they are used in calculation with one or more [Mod]s.
+     */
+    protected open val difficultyAdjustmentMods = setOf(
+        ModDoubleTime(), ModHalfTime(), ModNightCore(),
+        ModRelax(), ModEasy(), ModReallyEasy(),
+        ModHardRock(), ModHidden(), ModFlashlight(),
+        ModDifficultyAdjust()
+    )
+
+    /**
+     * Retains [Mod]s that change star rating.
+     *
+     * This is used rather than [MutableCollection.retainAll] as some [Mod]s need a special treatment.
+     */
+    fun retainDifficultyAdjustmentMods(parameters: DifficultyCalculationParameters) =
+        parameters.mods.iterator().run {
+            for (mod in this) {
+                // ModDifficultyAdjust always changes difficulty.
+                if (mod is ModDifficultyAdjust) {
+                    continue
+                }
+
+                if (!difficultyAdjustmentMods.contains(mod)) {
+                    remove()
+                }
+            }
+        }
+
+    /**
      * Calculates the difficulty of a [Beatmap] with specific parameters.
      *
      * @param beatmap The [Beatmap] whose difficulty is to be calculated.
@@ -155,6 +184,12 @@ abstract class DifficultyCalculator<TObject : DifficultyHitObject, TAttributes :
             it.applyDefaults(converted.controlPoints, converted.difficulty, mode)
         }
 
+        parameters?.mods?.filterIsInstance<IApplicableToHitObject>()?.forEach {
+            for (obj in converted.hitObjects.objects) {
+                it.applyToHitObject(mode, obj)
+            }
+        }
+
         processor.postProcess(mode)
 
         parameters?.mods?.filterIsInstance<IApplicableToBeatmap>()?.forEach {
@@ -182,36 +217,4 @@ abstract class DifficultyCalculator<TObject : DifficultyHitObject, TAttributes :
             (it.od != null && it.od != beatmap.difficulty.od)
         } ?: false)
     } ?: false
-
-    companion object {
-        /**
-         * Retains [Mod]s based on [difficultyAdjustmentMods].
-         *
-         * This is used rather than [MutableCollection.retainAll] as some [Mod]s need a special treatment.
-         */
-        @JvmStatic
-        fun retainDifficultyAdjustmentMods(parameters: DifficultyCalculationParameters) =
-            parameters.mods.iterator().run {
-                for (mod in this) {
-                    // ModDifficultyAdjust always changes difficulty.
-                    if (mod is ModDifficultyAdjust) {
-                        continue
-                    }
-
-                    if (!difficultyAdjustmentMods.contains(mod)) {
-                        remove()
-                    }
-                }
-            }
-
-        /**
-         * [Mod]s that can alter the star rating when they are used in calculation with one or more [Mod]s.
-         */
-        private val difficultyAdjustmentMods = setOf(
-            ModDoubleTime(), ModHalfTime(), ModNightCore(),
-            ModRelax(), ModEasy(), ModReallyEasy(),
-            ModHardRock(), ModHidden(), ModFlashlight(),
-            ModDifficultyAdjust()
-        )
-    }
 }
