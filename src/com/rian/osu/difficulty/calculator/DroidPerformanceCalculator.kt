@@ -53,7 +53,7 @@ class DroidPerformanceCalculator(
                 )
 
                 // As we're adding 100s and 50s to an approximated number of combo breaks, the result can be higher
-                // than total hits in specific scenarios (which breaks some calculations),  so we need to clamp it.
+                // than total hits in specific scenarios (which breaks some calculations), so we need to clamp it.
                 effectiveMissCount =
                     min(effectiveMissCount + countOk * okMultiplier + countMeh * mehMultiplier, totalHits.toDouble())
             }
@@ -101,7 +101,7 @@ class DroidPerformanceCalculator(
     }
 
     private fun calculateAimValue() = difficultyAttributes.run {
-        var aimValue = (5 * max(1.0, difficultyAttributes.aimDifficulty.pow(0.8) / 0.0675) - 4).pow(3.0) / 100000
+        var aimValue = (5 * max(1.0, aimDifficulty.pow(0.8) / 0.0675) - 4).pow(3.0) / 100000
 
         aimValue *= min(calculateStrainBasedMissPenalty(aimDifficultStrainCount), proportionalMissPenalty)
 
@@ -113,8 +113,8 @@ class DroidPerformanceCalculator(
         if (estimateDifficultSliders > 0) {
             val estimateSliderEndsDropped =
                 min(
-                    (countOk + countMeh + countMiss),
-                    (maxCombo - scoreMaxCombo)
+                    countOk + countMeh + countMiss,
+                    maxCombo - scoreMaxCombo
                 ).toDouble().coerceIn(0.0, estimateDifficultSliders)
 
             val sliderNerfFactor = (1 - aimSliderFactor) *
