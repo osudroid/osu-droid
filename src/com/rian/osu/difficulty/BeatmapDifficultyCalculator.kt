@@ -296,8 +296,7 @@ object BeatmapDifficultyCalculator {
      */
     private class LRUCache<K, V>(
         private val maxSize: Int
-    ) : LinkedHashMap<K, V>(ceil((maxSize / 0.75f).toDouble()).toInt(), 0.75f, true) {
-
+    ) : LinkedHashMap<K, V>(ceil(maxSize / 0.75f).toInt(), 0.75f, true) {
         override fun removeEldestEntry(eldest: Entry<K, V>) = size > maxSize
     }
 
