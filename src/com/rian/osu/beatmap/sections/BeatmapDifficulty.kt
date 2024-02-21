@@ -8,7 +8,7 @@ class BeatmapDifficulty : Cloneable {
      * The circle size of this beatmap.
      */
     @JvmField
-    var cs: Float = 5f
+    var cs = 5f
 
     /**
      * The approach rate of this beatmap.
@@ -20,25 +20,25 @@ class BeatmapDifficulty : Cloneable {
      * The overall difficulty of this beatmap.
      */
     @JvmField
-    var od: Float = 5f
+    var od = 5f
 
     /**
      * The health drain rate of this beatmap.
      */
     @JvmField
-    var hp: Float = 5f
+    var hp = 5f
 
     /**
      * The base slider velocity in hundreds of osu! pixels per beat.
      */
     @JvmField
-    var sliderMultiplier: Double = 1.0
+    var sliderMultiplier = 1.0
 
     /**
      * The amount of slider ticks per beat.
      */
     @JvmField
-    var sliderTickRate: Double = 1.0
+    var sliderTickRate = 1.0
 
     fun apply(other: BeatmapDifficulty) = run {
         cs = other.cs
