@@ -3,7 +3,6 @@ package org.andengine.entity.particle;
 import java.util.ArrayList;
 
 import org.andengine.engine.camera.Camera;
-import org.andengine.engine.handler.physics.PhysicsHandler;
 import org.andengine.entity.Entity;
 import org.andengine.entity.IEntity;
 import org.andengine.entity.IEntityFactory;
@@ -13,8 +12,6 @@ import org.andengine.entity.particle.modifier.IParticleModifier;
 import org.andengine.opengl.util.GLState;
 import org.andengine.util.Constants;
 import org.andengine.util.math.MathUtils;
-
-import android.util.FloatMath;
 
 /**
  * (c) 2010 Nicolas Gramlich
@@ -141,13 +138,14 @@ public class ParticleSystem<T extends IEntity> extends Entity {
 	protected void moveParticleToEnd(final int pIndex) {
 		final Particle<T> particle = this.mParticles[pIndex];
 
+		// BEGIN osu!droid modified - Reverted changes from 'GLES1' branch.
+
 		/*final int particlesToCopy = this.mParticlesAlive - pIndex;
 		if(particlesToCopy > 0) {
 			System.arraycopy(this.mParticles, pIndex + 1, this.mParticles, pIndex, particlesToCopy);
 		}
 		this.mParticles[this.mParticlesAlive] = particle;*/
 
-		// BEGIN osu!droid modified - Reverted change from 'GLES1' branch.
 		mParticles[pIndex] = mParticles[this.mParticlesAlive];
 		mParticles[this.mParticlesAlive] = particle;
 		// END osu!droid modified.
