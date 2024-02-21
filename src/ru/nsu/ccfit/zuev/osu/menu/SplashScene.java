@@ -29,7 +29,6 @@ public class SplashScene implements IUpdateHandler {
     private Text infoText;
     private Text progressText;
     private Sprite mLoading;
-    private boolean mStarting = true;
 
     public SplashScene() {
         scene = new Scene();
@@ -48,6 +47,7 @@ public class SplashScene implements IUpdateHandler {
         mLoading.setScale(0.4f);
         mLoading.setAlpha(0);
 
+        mLoading.registerEntityModifier(new FadeInModifier(0.2f));
         mLoading.registerEntityModifier(new LoopEntityModifier(new RotationByModifier(2f, 360)));
         scene.attachChild(mLoading);
     }
@@ -64,8 +64,7 @@ public class SplashScene implements IUpdateHandler {
 
     public void playWelcomeAnimation()
     {
-        mStarting = false;
-
+        mLoading.clearEntityModifiers();
         mLoading.registerEntityModifier(new FadeOutModifier(0.2f));
 
         // Text isn't compatible with animations unfortunately
@@ -115,10 +114,6 @@ public class SplashScene implements IUpdateHandler {
     @Override
     public void onUpdate(float pSecondsElapsed) {
         float progress = GlobalManager.getInstance().getLoadingProgress();
-        if (mStarting)
-        {
-            mLoading.setAlpha(mLoading.getAlpha() + 0.1f);
-        }
 
         progressText.setText(String.format("%.0f %%", progress));
         progressText.setPosition((Config.getRES_WIDTH() - progressText.getWidth()) / 2f, (Config.getRES_HEIGHT() + mLoading.getHeight()) / 2f - mLoading.getHeight() / 4f);
