@@ -117,13 +117,13 @@ class Slider(
     /**
      * The computed velocity of this [Slider]. This is the amount of path distance travelled in 1 ms.
      */
-    var velocity: Double = 0.0
+    var velocity = 0.0
         private set
 
     /**
      * Spacing between [SliderTick]s of this [Slider].
      */
-    var tickDistance: Double = 0.0
+    var tickDistance = 0.0
         private set
 
     /**
@@ -177,13 +177,18 @@ class Slider(
     val spanDuration: Double
         get() = duration / spanCount
 
-    override var scale: Float = super.scale
+    override var stackHeight = super.stackHeight
         set(value) {
             field = value
 
-            for (o in nestedHitObjects) {
-                o.scale = value
-            }
+            nestedHitObjects.forEach { it.stackHeight = value }
+        }
+
+    override var scale = super.scale
+        set(value) {
+            field = value
+
+            nestedHitObjects.forEach { it.scale = value }
         }
 
     init {

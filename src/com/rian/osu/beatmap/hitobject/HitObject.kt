@@ -39,8 +39,7 @@ abstract class HitObject(
     /**
      * The stack height of this [HitObject].
      */
-    @JvmField
-    var stackHeight = 0
+    open var stackHeight = 0
 
     /**
      * The osu!standard scale of this [HitObject].
