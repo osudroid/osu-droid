@@ -59,7 +59,7 @@ class DroidTap(
      * Gets the delta time relevant to the difficulty.
      */
     fun relevantDeltaTime() = objectStrains.run {
-        if (isEmpty()) {0
+        if (isEmpty()) {
             return 0.0
         }
 
