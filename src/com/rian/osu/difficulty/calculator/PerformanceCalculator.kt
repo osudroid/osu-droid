@@ -48,7 +48,7 @@ abstract class PerformanceCalculator<
      * The total hits that can be done in the beatmap.
      */
     protected val totalHits: Int
-        get() = difficultyAttributes.hitCircleCount + difficultyAttributes.sliderCount + difficultyAttributes.spinnerCount
+        get() = difficultyAttributes.let { it.hitCircleCount + it.sliderCount + it.spinnerCount }
 
     /**
      * The total hits that were successfully done.
