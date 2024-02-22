@@ -2,6 +2,8 @@ package ru.nsu.ccfit.zuev.osu.game;
 
 import android.graphics.PointF;
 
+import com.reco1l.legacy.graphics.ClipSprite;
+
 import org.andengine.entity.IEntity;
 import org.andengine.entity.modifier.AlphaModifier;
 import org.andengine.entity.modifier.DelayModifier;
@@ -33,7 +35,7 @@ public class Spinner extends GameObject {
     public final PointF center;
     private final Sprite circle;
     private final Sprite approachCircle;
-    private final Sprite metre;
+    private final ClipSprite metre;
     private final Sprite spinText;
     private final TextureRegion mregion;
     private Sprite clearText = null;
@@ -49,7 +51,6 @@ public class Spinner extends GameObject {
     private int addition;
     private ScoreNumber bonusScore = null;
     private int score = 1;
-    private float metreY;
     private StatisticV2 stat;
     private float totalTime;
     private boolean did = false;
@@ -70,8 +71,11 @@ public class Spinner extends GameObject {
                 center);
         mregion = ResourceManager.getInstance().getTexture("spinner-metre")
                 .deepCopy();
-        metre = new Sprite(center.x - (float) Config.getRES_WIDTH() / 2,
-                Config.getRES_HEIGHT(), mregion, GlobalManager.getInstance().getEngine().getVertexBufferObjectManager());
+        metre = new ClipSprite(
+                center.x - (float) Config.getRES_WIDTH() / 2,
+                center.y - Config.getRES_HEIGHT() / 2f,
+                mregion,
+                GlobalManager.getInstance().getEngine().getVertexBufferObjectManager());
         metre.setWidth(Config.getRES_WIDTH());
         metre.setHeight(background.getHeightScaled());
         approachCircle = SpritePool.getInstance().getCenteredSprite(
@@ -118,10 +122,8 @@ public class Spinner extends GameObject {
         circle.setAlpha(0);
         circle.registerEntityModifier(appearMoifier.deepCopy());
 
-        metreY = (Config.getRES_HEIGHT() - background.getHeightScaled()) / 2;
         metre.setAlpha(0);
         metre.registerEntityModifier(appearMoifier.deepCopy());
-        mregion.setTexturePosition(0, (int) metre.getHeightScaled());
 
         approachCircle.setAlpha(0);
         if (GameHelper.isHidden()) {
@@ -326,10 +328,7 @@ public class Spinner extends GameObject {
                 stat.changeHp(rate * 0.01f * totalTime / needRotations);
             }
         }
-        metre.setPosition(metre.getX(),
-                metreY + metre.getHeight() * (1 - Math.abs(percentfill)));
-        mregion.setTexturePosition(0,
-                (int) (metre.getHeight() * (1 - Math.abs(percentfill))));
+        metre.setClipY(1 - Math.abs(percentfill));
 
         oldMouse.set(currMouse);
     }
