@@ -71,7 +71,7 @@ class StandardDifficultyCalculator : DifficultyCalculator<StandardDifficultyHitO
         val ar = difficultyAdjustMod?.ar?.takeUnless { it.isNaN() } ?: beatmap.difficulty.ar
         var preempt = BeatmapDifficulty.difficultyRange(ar.toDouble(), HitObject.PREEMPT_MAX, HitObject.PREEMPT_MID, HitObject.PREEMPT_MIN)
 
-        if (difficultyAdjustMod?.ar != null) {
+        if (difficultyAdjustMod?.ar == null) {
             preempt /= parameters?.totalSpeedMultiplier?.toDouble() ?: 1.0
         }
 
@@ -80,7 +80,7 @@ class StandardDifficultyCalculator : DifficultyCalculator<StandardDifficultyHitO
         val od = difficultyAdjustMod?.od ?: beatmap.difficulty.od
         var greatWindow = StandardHitWindow(od).greatWindow.toDouble()
 
-        if (difficultyAdjustMod?.od != null) {
+        if (difficultyAdjustMod?.od == null) {
             greatWindow /= (parameters?.totalSpeedMultiplier?.toDouble() ?: 1.0)
         }
 
@@ -101,7 +101,7 @@ class StandardDifficultyCalculator : DifficultyCalculator<StandardDifficultyHitO
         val od = difficultyAdjustMod?.od ?: beatmap.difficulty.od
         var greatWindow = StandardHitWindow(od).greatWindow.toDouble()
 
-        if (difficultyAdjustMod?.od != null) {
+        if (difficultyAdjustMod?.od == null) {
             greatWindow /= (parameters?.totalSpeedMultiplier?.toDouble() ?: 1.0)
         }
 

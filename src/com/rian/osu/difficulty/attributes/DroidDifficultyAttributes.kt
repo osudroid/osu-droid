@@ -14,6 +14,12 @@ class DroidDifficultyAttributes : DifficultyAttributes() {
     var clockRate = 1.0
 
     /**
+     * Whether force OD was used.
+     */
+    @JvmField
+    var forceOD = false
+
+    /**
      * The difficulty corresponding to the tap skill.
      */
     @JvmField
