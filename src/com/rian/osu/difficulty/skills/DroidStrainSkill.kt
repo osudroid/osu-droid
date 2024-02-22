@@ -65,11 +65,7 @@ abstract class DroidStrainSkill(
             // We are reducing the highest strains first to account for extreme difficulty spikes.
             for (i in 0 until min(size, reducedSectionCount)) {
                 val scale = log10(
-                    Interpolation.linear(
-                        1.0,
-                        10.0,
-                        (i.toFloat() / reducedSectionCount).toDouble().coerceIn(0.0, 1.0)
-                    )
+                    Interpolation.linear(1.0, 10.0, i.toDouble() / reducedSectionCount)
                 )
 
                 this[i] *= Interpolation.linear(reducedSectionBaseline, 1.0, scale)
