@@ -164,10 +164,6 @@ abstract class DifficultyCalculator<TObject : DifficultyHitObject, TAttributes :
     ): TAttributes
 
     private fun convertBeatmap(beatmap: Beatmap, parameters: DifficultyCalculationParameters?): Beatmap {
-        if (!needToConvertBeatmap(beatmap, parameters)) {
-            return beatmap
-        }
-
         val converter = BeatmapConverter(beatmap)
 
         // Convert
@@ -205,23 +201,4 @@ abstract class DifficultyCalculator<TObject : DifficultyHitObject, TAttributes :
 
         return converted
     }
-
-    /**
-     * Checks whether a [Beatmap] must be copied with respect to a [DifficultyCalculationParameters].
-     *
-     * @param beatmap The [Beatmap].
-     * @param parameters The [DifficultyCalculationParameters].
-     * @return Whether the [Beatmap] should be copied.
-     */
-    private fun needToConvertBeatmap(beatmap: Beatmap, parameters: DifficultyCalculationParameters?) = parameters?.run {
-        val difficultyAdjustMod = mods.find { it is ModDifficultyAdjust } as ModDifficultyAdjust?
-
-        customSpeedMultiplier != 1.0f ||
-        mods.any { difficultyAdjustmentMods.contains(it) } ||
-        (difficultyAdjustMod?.let {
-            (it.cs != null && it.cs != beatmap.difficulty.cs) ||
-            (it.ar != null && it.ar != beatmap.difficulty.ar) ||
-            (it.od != null && it.od != beatmap.difficulty.od)
-        } ?: false)
-    } ?: false
 }
