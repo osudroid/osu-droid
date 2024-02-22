@@ -144,7 +144,7 @@ class BeatmapButton : Sprite(0f, 0f, getResources().getTexture("menu-button-back
             return
         }
 
-        val difficulty = getGlobal().selectedTrack.difficulty
+        val difficulty = getGlobal().selectedTrack.standardDifficulty
 
         stars.forEachIndexed { i, it ->
             it.isVisible = difficulty >= i

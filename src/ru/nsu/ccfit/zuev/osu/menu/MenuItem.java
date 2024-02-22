@@ -283,7 +283,7 @@ public class MenuItem {
             case "hp":
                 return calOpt(track.getHpDrain(), Float.parseFloat(value), opt);
             case "star":
-                return calOpt(track.getDifficulty(), Float.parseFloat(value), opt);
+                return calOpt(track.getStandardDifficulty(), Float.parseFloat(value), opt);
             default:
                 return false;
         }

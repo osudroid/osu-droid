@@ -299,7 +299,7 @@ public enum LibraryManager {
             deleteDir(dir);
         }
 
-        Collections.sort(info.getTracks(), (object1, object2) -> Float.compare(object1.getDifficulty(), object2.getDifficulty()));
+        Collections.sort(info.getTracks(), (object1, object2) -> Float.compare(object1.getStandardDifficulty(), object2.getStandardDifficulty()));
     }
 
     public List<BeatmapInfo> getLibrary() {

@@ -543,7 +543,7 @@ object RoomScene : Scene(), IRoomEventListener, IPlayerEventListener
                     else 
                         "%.1f-%.1f".format(track.bpmMin, track.bpmMax)
                 } 
-                CS: ${track.circleSize} AR: ${track.approachRate} OD: ${track.overallDifficulty} HP: ${track.hpDrain} Star Rating: ${track.difficulty}
+                CS: ${track.circleSize} AR: ${track.approachRate} OD: ${track.overallDifficulty} HP: ${track.hpDrain} Star Rating: ${track.standardDifficulty}
             """.trimIndent()
 
             true

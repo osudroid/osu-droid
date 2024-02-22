@@ -76,7 +76,7 @@ public class MenuItemTrack extends Sprite {
         }
         halfStar.setVisible(false);
 
-        final float diff = Math.min(track.getDifficulty(), 10);
+        final float diff = Math.min(track.getStandardDifficulty(), 10);
         int fInt = (int) (diff);
         BigDecimal b1 = new BigDecimal(Float.toString(diff));
         BigDecimal b2 = new BigDecimal(Integer.toString(fInt));

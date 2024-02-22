@@ -21,7 +21,8 @@ public class TrackInfo implements Serializable {
     private String background = null;
     private int beatmapID = 0;
     private int beatmapSetID = 0;
-    private float difficulty;
+    private float droidDifficulty;
+    private float standardDifficulty;
     private float hpDrain;
     private float overallDifficulty;
     private float approachRate;
@@ -73,12 +74,20 @@ public class TrackInfo implements Serializable {
         this.creator = creator;
     }
 
-    public float getDifficulty() {
-        return difficulty;
+    public float getStandardDifficulty() {
+        return standardDifficulty;
     }
 
-    public void setDifficulty(final float difficulty) {
-        this.difficulty = difficulty;
+    public void setStandardDifficulty(final float standardDifficulty) {
+        this.standardDifficulty = standardDifficulty;
+    }
+
+    public float getDroidDifficulty() {
+        return droidDifficulty;
+    }
+
+    public void setDroidDifficulty(float droidDifficulty) {
+        this.droidDifficulty = droidDifficulty;
     }
 
     public String getBackground() {
@@ -307,9 +316,11 @@ public class TrackInfo implements Serializable {
         setMusicLength(beatmap.getDuration());
         setMaxCombo(beatmap.getMaxCombo());
 
-        var attributes = BeatmapDifficultyCalculator.calculateStandardDifficulty(beatmap);
+        var droidAttributes = BeatmapDifficultyCalculator.calculateDroidDifficulty(beatmap);
+        var standardAttributes = BeatmapDifficultyCalculator.calculateStandardDifficulty(beatmap);
 
-        setDifficulty(GameHelper.Round(attributes.starRating, 2));
+        setDroidDifficulty(GameHelper.Round(droidAttributes.starRating, 2));
+        setStandardDifficulty(GameHelper.Round(standardAttributes.starRating, 2));
 
         return true;
     }

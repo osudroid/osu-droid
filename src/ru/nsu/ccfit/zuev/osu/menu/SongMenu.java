@@ -794,8 +794,8 @@ public class SongMenu implements IUpdateHandler, MenuItemListener,
                     final float bpm2 = i2.getFirstTrack().getBpmMax();
                     return Float.compare(bpm2, bpm1);
                 case Stars:
-                    final float float1 = i1.getFirstTrack().getDifficulty();
-                    final float float2 = i2.getFirstTrack().getDifficulty();
+                    final float float1 = i1.getFirstTrack().getStandardDifficulty();
+                    final float float2 = i2.getFirstTrack().getStandardDifficulty();
                     return Float.compare(float2, float1);
                 case Length:
                     final Long length1 = i1.getFirstTrack().getMusicLength();
@@ -1052,7 +1052,7 @@ public class SongMenu implements IUpdateHandler, MenuItemListener,
                 .append("OD: ").append(GameHelper.Round(od, 2)).append(" ")
                 .append("CS: ").append(GameHelper.Round(cs, 2)).append(" ")
                 .append("HP: ").append(GameHelper.Round(hp, 2)).append(" ")
-                .append("Stars: ").append(GameHelper.Round(track.getDifficulty(), 2));
+                .append("Stars: ").append(GameHelper.Round(track.getStandardDifficulty(), 2));
 
         dimensionInfo.setText(dimensionStringBuilder.toString());
     }
