@@ -57,7 +57,7 @@ class DroidTap(
             return 0.0
         }
 
-        reduce { acc, d -> acc + 1 / (1 + exp(-(d / maxStrain * 12 - 6))) }
+        fold(0.0) { acc, d -> acc + 1 / (1 + exp(-(d / maxStrain * 12 - 6))) }
     }
 
     /**
@@ -73,9 +73,9 @@ class DroidTap(
             return 0.0
         }
 
-        objectDeltaTimes.reduceIndexed { i, acc, d ->
+        objectDeltaTimes.foldIndexed(0.0) { i, acc, d ->
             acc + d / (1 + exp(-(this[i] / maxStrain * 25 - 20)))
-        } / reduce { acc, d ->
+        } / fold(0.0) { acc, d ->
             acc + 1 / (1 + exp(-(d / maxStrain * 25 - 20)))
         }
     }

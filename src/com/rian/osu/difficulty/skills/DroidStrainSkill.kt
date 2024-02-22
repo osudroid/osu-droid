@@ -49,7 +49,7 @@ abstract class DroidStrainSkill(
             return@run 0.0
         }
 
-        reduce { acc, d -> acc + (d / maxStrain).pow(4) }
+        fold(0.0) { acc, d -> acc + (d / maxStrain).pow(4) }
     }
 
     override fun process(current: DroidDifficultyHitObject) {
@@ -75,7 +75,7 @@ abstract class DroidStrainSkill(
         // Math here preserves the property that two notes of equal difficulty x, we have their summed difficulty = x * starsPerDouble.
         // This also applies to two sets of notes with equal difficulty.
         val starsPerDoubleLog2 = log2(starsPerDouble)
-        reduce { acc, d -> acc + d.pow(1 / starsPerDoubleLog2) }.pow(starsPerDoubleLog2)
+        fold(0.0) { acc, d -> acc + d.pow(1 / starsPerDoubleLog2) }.pow(starsPerDoubleLog2)
     }
 
     override fun calculateCurrentSectionStart(current: DroidDifficultyHitObject) = current.startTime

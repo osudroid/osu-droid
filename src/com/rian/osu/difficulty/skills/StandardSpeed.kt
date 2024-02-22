@@ -44,7 +44,7 @@ class StandardSpeed(
             return 0.0
         }
 
-        return reduce { acc, d -> acc + 1 / (1 + exp(-(d / maxStrain * 12 - 6))) }
+        fold(0.0) { acc, d -> acc + 1 / (1 + exp(-(d / maxStrain * 12 - 6))) }
     }
 
     override fun strainValueAt(current: StandardDifficultyHitObject): Double {

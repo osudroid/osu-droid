@@ -264,5 +264,5 @@ class DroidDifficultyCalculator : DifficultyCalculator<DroidDifficultyHitObject,
     }
 
     private fun calculateThreeFingerSummedStrain(strains: List<Double>) =
-        strains.reduce { acc, d -> acc + d / threeFingerStrainThreshold }.pow(0.75)
+        strains.fold(0.0) { acc, d -> acc + d / threeFingerStrainThreshold }.pow(0.75)
 }
