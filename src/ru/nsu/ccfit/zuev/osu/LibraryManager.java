@@ -2,7 +2,6 @@ package ru.nsu.ccfit.zuev.osu;
 
 import android.os.Build;
 import com.reco1l.legacy.engine.VideoTexture;
-import com.rian.osu.GameMode;
 import com.rian.osu.beatmap.parser.BeatmapParser;
 import org.anddev.andengine.util.Debug;
 import org.jetbrains.annotations.Nullable;

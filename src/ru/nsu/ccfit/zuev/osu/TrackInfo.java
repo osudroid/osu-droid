@@ -288,7 +288,7 @@ public class TrackInfo implements Serializable {
         background = beatmap.folder + "/" + beatmap.events.backgroundFilename;
 
         // Timing points
-        for (var point : beatmap.controlPoints.getTiming().getControlPoints()) {
+        for (var point : beatmap.controlPoints.timing.getControlPoints()) {
             float bpm = (float) point.getBpm();
 
             bpmMin = bpmMin != Float.MAX_VALUE ? Math.min(bpmMin, bpm) : bpm;
@@ -296,11 +296,11 @@ public class TrackInfo implements Serializable {
         }
 
         // Hit objects
-        if (beatmap.hitObjects.getObjects().isEmpty()) {
+        if (beatmap.hitObjects.objects.isEmpty()) {
             return false;
         }
 
-        setTotalHitObjectCount(beatmap.hitObjects.getObjects().size());
+        setTotalHitObjectCount(beatmap.hitObjects.objects.size());
         setHitCircleCount(beatmap.hitObjects.getCircleCount());
         setSliderCount(beatmap.hitObjects.getSliderCount());
         setSpinnerCount(beatmap.hitObjects.getSpinnerCount());

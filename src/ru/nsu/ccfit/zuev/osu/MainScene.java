@@ -11,7 +11,6 @@ import com.edlplan.ui.fragment.ConfirmDialogFragment;
 import com.reco1l.legacy.ui.ChimuWebView;
 import com.reco1l.legacy.ui.MainMenu;
 
-import com.rian.osu.GameMode;
 import com.rian.osu.beatmap.parser.BeatmapParser;
 import org.anddev.andengine.engine.handler.IUpdateHandler;
 import org.anddev.andengine.entity.IEntity;

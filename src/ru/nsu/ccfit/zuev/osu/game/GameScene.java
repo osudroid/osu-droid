@@ -19,7 +19,6 @@ import com.reco1l.legacy.ui.entity.InGameLeaderboard;
 import com.reco1l.legacy.Multiplayer;
 import com.reco1l.legacy.ui.multiplayer.RoomScene;
 
-import com.rian.osu.GameMode;
 import com.rian.osu.beatmap.Beatmap;
 import com.rian.osu.beatmap.constants.BeatmapCountdown;
 import com.rian.osu.beatmap.constants.SampleBank;
@@ -3048,7 +3047,7 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
             return;
         }
 
-        var object = beatmap.hitObjects.getObjects().get(objectId);
+        var object = beatmap.hitObjects.objects.get(objectId);
         double time = HitObjectUtils.getEndTime(object);
 
         ppText.setText(String.format(Locale.ENGLISH, "%.2fpp", getPPAtTime(time)));
