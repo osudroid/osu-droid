@@ -170,7 +170,7 @@ class DroidPerformanceCalculator(
         tapValue /= tapPenalty
 
         // OD 8 SS stays the same.
-        tapValue *= 0.95 * 8.0.pow(2) / 750
+        tapValue *= 0.95 + 8.0.pow(2) / 750
 
         tapValue
     }
