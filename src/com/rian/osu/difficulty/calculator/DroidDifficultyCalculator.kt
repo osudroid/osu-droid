@@ -72,11 +72,14 @@ class DroidDifficultyCalculator : DifficultyCalculator<DroidDifficultyHitObject,
 
         aimSliderFactor = if (aimDifficulty > 0) calculateRating(skills[1]) / aimDifficulty else 1.0
 
+        val difficultyAdjustMod = mods.find { it is ModDifficultyAdjust } as ModDifficultyAdjust?
+        val od = difficultyAdjustMod?.od ?: beatmap.difficulty.od
         val isPrecise = mods.any { it is ModPrecise }
-        val greatWindow = (
-            if (isPrecise) PreciseDroidHitWindow(beatmap.difficulty.od)
-            else DroidHitWindow(beatmap.difficulty.od)
-        ).greatWindow / (parameters?.totalSpeedMultiplier?.toDouble() ?: 1.0)
+        var greatWindow = (if (isPrecise) PreciseDroidHitWindow(od) else DroidHitWindow(od)).greatWindow.toDouble()
+
+        if (difficultyAdjustMod?.od != null) {
+            greatWindow /= parameters?.totalSpeedMultiplier?.toDouble() ?: 1.0
+        }
 
         (skills[2] as DroidTap).let {
             tapDifficulty = calculateRating(it)
@@ -202,7 +205,6 @@ class DroidDifficultyCalculator : DifficultyCalculator<DroidDifficultyHitObject,
             if (basePerformance > 1e-5) 0.027 * (cbrt(100000 / 2.0.pow(1 / 1.1) * basePerformance) + 4)
             else 0.0
 
-        val difficultyAdjustMod = mods.find { it is ModDifficultyAdjust } as ModDifficultyAdjust?
         val ar = difficultyAdjustMod?.ar ?: beatmap.difficulty.ar
         var preempt = BeatmapDifficulty.difficultyRange(ar.toDouble(), HitObject.PREEMPT_MAX, HitObject.PREEMPT_MID, HitObject.PREEMPT_MIN)
 
@@ -210,10 +212,14 @@ class DroidDifficultyCalculator : DifficultyCalculator<DroidDifficultyHitObject,
             preempt /= parameters?.totalSpeedMultiplier?.toDouble() ?: 1.0
         }
 
-        approachRate = if (preempt > HitObject.PREEMPT_MID) (HitObject.PREEMPT_MAX - preempt) / 120 else (HitObject.PREEMPT_MID - preempt) / 150 + 5
-        overallDifficulty =
-            if (isPrecise) PreciseDroidHitWindow.hitWindow300ToOverallDifficulty(greatWindow.toFloat()).toDouble()
-            else DroidHitWindow.hitWindow300ToOverallDifficulty(greatWindow.toFloat()).toDouble()
+        approachRate =
+            if (preempt > HitObject.PREEMPT_MID) (HitObject.PREEMPT_MAX - preempt) / 120
+            else (HitObject.PREEMPT_MID - preempt) / 150 + 5
+
+        overallDifficulty = (
+            if (isPrecise) PreciseDroidHitWindow.hitWindow300ToOverallDifficulty(greatWindow.toFloat())
+            else DroidHitWindow.hitWindow300ToOverallDifficulty(greatWindow.toFloat())
+        ).toDouble()
     }
 
     override fun createSkills(
@@ -221,10 +227,17 @@ class DroidDifficultyCalculator : DifficultyCalculator<DroidDifficultyHitObject,
         parameters: DifficultyCalculationParameters?
     ): Array<Skill<DroidDifficultyHitObject>> {
         val mods = parameters?.mods ?: mutableListOf()
-        val greatWindow = (
-            if (mods.any { it is ModPrecise }) PreciseDroidHitWindow(beatmap.difficulty.od)
-            else DroidHitWindow(beatmap.difficulty.od)
-        ).greatWindow / (parameters?.totalSpeedMultiplier?.toDouble() ?: 1.0)
+        val difficultyAdjustMod = mods.find { it is ModDifficultyAdjust } as ModDifficultyAdjust?
+
+        val od = difficultyAdjustMod?.od ?: beatmap.difficulty.od
+        var greatWindow = (
+            if (mods.any { it is ModPrecise }) PreciseDroidHitWindow(od)
+            else DroidHitWindow(od)
+        ).greatWindow.toDouble()
+
+        if (difficultyAdjustMod?.od != null) {
+            greatWindow /= (parameters?.totalSpeedMultiplier?.toDouble() ?: 1.0)
+        }
 
         return arrayOf(
             DroidAim(mods, true),

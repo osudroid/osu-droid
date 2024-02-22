@@ -77,8 +77,12 @@ class StandardDifficultyCalculator : DifficultyCalculator<StandardDifficultyHitO
 
         approachRate = if (preempt > HitObject.PREEMPT_MID) (HitObject.PREEMPT_MAX - preempt) / 120 else (HitObject.PREEMPT_MID - preempt) / 150 + 5
 
-        val greatWindow = StandardHitWindow(beatmap.difficulty.od).greatWindow /
-            (parameters?.totalSpeedMultiplier?.toDouble() ?: 1.0)
+        val od = difficultyAdjustMod?.od ?: beatmap.difficulty.od
+        var greatWindow = StandardHitWindow(od).greatWindow.toDouble()
+
+        if (difficultyAdjustMod?.od != null) {
+            greatWindow /= (parameters?.totalSpeedMultiplier?.toDouble() ?: 1.0)
+        }
 
         overallDifficulty = StandardHitWindow.hitWindow300ToOverallDifficulty(greatWindow.toFloat()).toDouble()
         maxCombo = beatmap.maxCombo
@@ -92,8 +96,14 @@ class StandardDifficultyCalculator : DifficultyCalculator<StandardDifficultyHitO
         parameters: DifficultyCalculationParameters?
     ): Array<Skill<StandardDifficultyHitObject>> {
         val mods = parameters?.mods ?: mutableListOf()
-        val greatWindow = StandardHitWindow(beatmap.difficulty.od).greatWindow /
-            (parameters?.totalSpeedMultiplier?.toDouble() ?: 1.0)
+        val difficultyAdjustMod = mods.find { it is ModDifficultyAdjust } as ModDifficultyAdjust?
+
+        val od = difficultyAdjustMod?.od ?: beatmap.difficulty.od
+        var greatWindow = StandardHitWindow(od).greatWindow.toDouble()
+
+        if (difficultyAdjustMod?.od != null) {
+            greatWindow /= (parameters?.totalSpeedMultiplier?.toDouble() ?: 1.0)
+        }
 
         return arrayOf(
             StandardAim(mods, true),
