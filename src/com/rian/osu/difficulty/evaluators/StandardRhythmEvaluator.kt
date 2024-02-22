@@ -61,6 +61,7 @@ object StandardRhythmEvaluator {
                 0.5,
                 sin(Math.PI / (min(prevDelta, currentDelta) / max(prevDelta, currentDelta))).pow(2.0)
             )
+
             val windowPenalty =
                 ((abs(prevDelta - currentDelta) - greatWindow * 0.6) / (greatWindow * 0.6)).coerceIn(0.0, 1.0)
 
@@ -101,8 +102,8 @@ object StandardRhythmEvaluator {
 
                     rhythmComplexitySum +=
                         sqrt(effectiveRatio * startRatio) * currentHistoricalDecay *
-                        sqrt((4 + islandSize).toDouble()) / 2 *
-                        sqrt((4 + previousIslandSize).toDouble()) / 2
+                        sqrt((4.0 + islandSize)) / 2 *
+                        sqrt((4.0 + previousIslandSize)) / 2
 
                     startRatio = effectiveRatio
                     previousIslandSize = islandSize
