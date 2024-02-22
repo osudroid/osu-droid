@@ -84,14 +84,13 @@ class PathMeshVBO(private val flat: Boolean) :
         val alpha = (255f * alpha).toInt()
 
         var firstColor = Float.NaN
-        var firstColorComputed = 0f
-
         var secondColor = Float.NaN
+
+        var firstColorComputed = 0f
         var secondColorComputed = 0f
 
         // Bits operations punish performance specially fromBits() and toRawBits() functions.
-        // Here we try to do these operations once, and then reuse the results using the original
-        // values as reference.
+        // Here we try to do these operations once, and then reuse the results.
 
         for (i in 0 until buffer.size / if (flat) 3 else 4)
         {
@@ -114,15 +113,15 @@ class PathMeshVBO(private val flat: Boolean) :
                     secondColor = packedColor
                     secondColorComputed = repackColor(packedColor, alpha)
                 }
-                // Should not be reached since this is intended to be used with two colors only.
-                else continue
             }
 
             buffer[index] = when (packedColor)
             {
                 firstColor -> firstColorComputed
                 secondColor -> secondColorComputed
-                else -> continue
+
+                // Should not be reached since this is intended to be used with two colors only.
+                else -> repackColor(packedColor, alpha)
             }
         }
     }
