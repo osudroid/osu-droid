@@ -89,12 +89,13 @@ class BeatmapParser : Closeable {
     /**
      * Parses the `.osu` file.
      *
-     * @param mode The [GameMode] to parse for.
      * @param withHitObjects Whether to parse hit objects. Setting this to `false` will improve parsing time significantly.
+     * @param mode The [GameMode] to parse for. Defaults to [GameMode.Standard].
      * @return A [Beatmap] containing relevant information of the beatmap file,
      * `null` if the beatmap file cannot be opened or a line could not be parsed.
      */
-    fun parse(mode: GameMode, withHitObjects: Boolean): Beatmap? {
+    @JvmOverloads
+    fun parse(withHitObjects: Boolean, mode: GameMode = GameMode.Standard): Beatmap? {
         if (source == null && !openFile()) {
             ToastLogger.showText(
                 StringTable.format(R.string.beatmap_parser_cannot_open_file, file.nameWithoutExtension),
