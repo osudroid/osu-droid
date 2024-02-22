@@ -11,7 +11,7 @@ class BeatmapColor {
      * The combo colors of this beatmap.
      */
     @JvmField
-    var comboColors = mutableListOf<ComboColor>()
+    val comboColors = mutableListOf<ComboColor>()
 
     /**
      * The color of the slider border.

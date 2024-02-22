@@ -1,7 +1,7 @@
 package com.rian.osu.beatmap.sections
 
-import ru.nsu.ccfit.zuev.osu.RGBColor
 import com.rian.osu.beatmap.timings.BreakPeriod
+import ru.nsu.ccfit.zuev.osu.RGBColor
 
 /**
  * Contains beatmap events.
@@ -29,7 +29,7 @@ class BeatmapEvents {
      * The breaks this beatmap has.
      */
     @JvmField
-    var breaks = mutableListOf<BreakPeriod>()
+    val breaks = mutableListOf<BreakPeriod>()
 
     /**
      * The background color of this beatmap.

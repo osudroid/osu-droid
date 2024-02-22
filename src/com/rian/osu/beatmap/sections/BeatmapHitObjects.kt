@@ -11,8 +11,8 @@ class BeatmapHitObjects {
     /**
      * All objects in this beatmap.
      */
-    var objects = mutableListOf<HitObject>()
-        private set
+    @JvmField
+    val objects = mutableListOf<HitObject>()
 
     /**
      * The amount of circles in this beatmap.

@@ -12,24 +12,24 @@ class BeatmapControlPoints {
     /**
      * The manager for timing control points of this beatmap.
      */
-    var timing = TimingControlPointManager()
-        private set
+    @JvmField
+    val timing = TimingControlPointManager()
 
     /**
      * The manager for difficulty control points of this beatmap.
      */
-    var difficulty = DifficultyControlPointManager()
-        private set
+    @JvmField
+    val difficulty = DifficultyControlPointManager()
 
     /**
      * The manager for effect control points of this beatmap.
      */
-    var effect = EffectControlPointManager()
-        private set
+    @JvmField
+    val effect = EffectControlPointManager()
 
     /**
      * The manager for sample control points of this beatmap.
      */
-    var sample = SampleControlPointManager()
-        private set
+    @JvmField
+    val sample = SampleControlPointManager()
 }
