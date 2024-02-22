@@ -1,5 +1,7 @@
 package org.andengine.util.color;
 
+import kotlin.ranges.RangesKt;
+
 /**
  * (c) Zynga 2011
  *
@@ -168,14 +170,16 @@ public class Color {
 	}
 
 	public final void setAlpha(final float pAlpha) {
-		this.mAlpha = pAlpha;
+		// osu!droid modification - Values beyond 0-1 range can break the packing of the color.
+		this.mAlpha = RangesKt.coerceIn(pAlpha, 0f, 1f);
 
 		this.packABGRAlpha();
 	}
 
 	public final boolean setAlphaChecking(final float pAlpha) {
 		if(this.mAlpha != pAlpha) {
-			this.mAlpha = pAlpha;
+			// osu!droid modification - Values beyond 0-1 range can break the packing of the color.
+			this.mAlpha = RangesKt.coerceIn(pAlpha, 0f, 1f);
 
 			this.packABGRAlpha();
 			return true;
