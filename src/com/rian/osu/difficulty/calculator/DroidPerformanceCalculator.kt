@@ -2,7 +2,6 @@ package com.rian.osu.difficulty.calculator
 
 import com.rian.osu.beatmap.DroidHitWindow
 import com.rian.osu.beatmap.PreciseDroidHitWindow
-import com.rian.osu.beatmap.StandardHitWindow
 import com.rian.osu.difficulty.attributes.DroidDifficultyAttributes
 import com.rian.osu.difficulty.attributes.DroidPerformanceAttributes
 import com.rian.osu.math.ErrorFunction
@@ -30,6 +29,10 @@ class DroidPerformanceCalculator(
     private var deviation = 0.0
     private var tapDeviation = 0.0
 
+    private val isPrecise by lazy {
+        difficultyAttributes.mods.any { it is ModPrecise }
+    }
+
     override fun createPerformanceAttributes() = DroidPerformanceAttributes().also {
         var multiplier = FINAL_MULTIPLIER
 
@@ -48,7 +51,7 @@ class DroidPerformanceCalculator(
                 )
                 val mehMultiplier = max(
                     0.0,
-                    if (overallDifficulty > 0) 1 - (overallDifficulty / 13.33).pow(5.0)
+                    if (overallDifficulty > 0) 1 - (overallDifficulty / 13.33).pow(5)
                     else 1.0
                 )
 
@@ -101,7 +104,7 @@ class DroidPerformanceCalculator(
     }
 
     private fun calculateAimValue() = difficultyAttributes.run {
-        var aimValue = (5 * max(1.0, aimDifficulty.pow(0.8) / 0.0675) - 4).pow(3.0) / 100000
+        var aimValue = (5 * max(1.0, aimDifficulty.pow(0.8) / 0.0675) - 4).pow(3) / 100000
 
         aimValue *= min(calculateStrainBasedMissPenalty(aimDifficultStrainCount), proportionalMissPenalty)
 
@@ -118,7 +121,7 @@ class DroidPerformanceCalculator(
                 ).toDouble().coerceIn(0.0, estimateDifficultSliders)
 
             val sliderNerfFactor = (1 - aimSliderFactor) *
-                    (1 - estimateSliderEndsDropped / estimateDifficultSliders).pow(3.0) + aimSliderFactor
+                    (1 - estimateSliderEndsDropped / estimateDifficultSliders).pow(3) + aimSliderFactor
 
             aimValue *= sliderNerfFactor
         }
@@ -126,7 +129,7 @@ class DroidPerformanceCalculator(
         aimValue *= aimSliderCheesePenalty
 
         // Scale the aim value with deviation.
-        aimValue *= 1.05 * ErrorFunction.erf(25 / (sqrt(2.0) * deviation))
+        aimValue *= 1.05 * sqrt(ErrorFunction.erf(25 / (sqrt(2.0) * deviation)))
 
         // OD 7 SS stays the same.
         aimValue *= 0.98 + 7.0.pow(2) / 2500
@@ -135,7 +138,7 @@ class DroidPerformanceCalculator(
     }
 
     private fun calculateTapValue() = difficultyAttributes.run {
-        var tapValue = (5 * max(1.0, tapDifficulty / 0.0675) - 4).pow(3.0) / 100000
+        var tapValue = (5 * max(1.0, tapDifficulty / 0.0675) - 4).pow(3) / 100000
 
         tapValue *= calculateStrainBasedMissPenalty(tapDifficultStrainCount)
 
@@ -318,19 +321,23 @@ class DroidPerformanceCalculator(
             return@run Double.POSITIVE_INFINITY
         }
 
-        val greatWindow = StandardHitWindow(overallDifficulty.toFloat()).greatWindow
+        var od = overallDifficulty.toFloat()
+        var hitWindow = if (isPrecise) PreciseDroidHitWindow(od) else DroidHitWindow(od)
+        var greatWindow = hitWindow.greatWindow
+
+        if (!forceOD) {
+            greatWindow *= clockRate.toFloat()
+        }
 
         // Obtain the good and meh hit window for osu!droid.
-        val isPrecise = mods.any { it is ModPrecise }
-        val droidOD = (
+        od =
             if (isPrecise) PreciseDroidHitWindow.hitWindow300ToOverallDifficulty(greatWindow)
             else DroidHitWindow.hitWindow300ToOverallDifficulty(greatWindow)
-        ) * clockRate.toFloat()
 
-        val droidHitWindow = if (isPrecise) PreciseDroidHitWindow(droidOD) else DroidHitWindow(droidOD)
+        hitWindow = if (isPrecise) PreciseDroidHitWindow(od) else DroidHitWindow(od)
 
-        val okWindow = droidHitWindow.okWindow / clockRate
-        val mehWindow = droidHitWindow.mehWindow / clockRate
+        val okWindow = hitWindow.okWindow / clockRate
+        val mehWindow = hitWindow.mehWindow / clockRate
 
         val missCountCircles = min(countMiss, hitCircleCount)
         val mehCountCircles = min(countMeh, hitCircleCount - missCountCircles)
@@ -343,23 +350,23 @@ class DroidPerformanceCalculator(
             // The probability that a player hits a circle is unknown, but we can estimate it to be
             // the number of greats on circles divided by the number of circles, and then add one
             // to the number of circles as a bias correction / bayesian prior.
-            val greatProbabilityCircle = max(0.0, greatCountCircles / (greatCountCircles + okCountCircles + 1.0))
+            val greatProbabilityCircle =
+                greatCountCircles / (hitCircleCount - missCountCircles - mehCountCircles + 1.0)
 
             // Compute the deviation assuming 300s and 100s are normally distributed, and 50s are uniformly distributed.
             // Begin with the normal distribution first.
-            val deviationOnCircles = greatWindow / (sqrt(2.0) * ErrorFunction.erfInv(greatProbabilityCircle))
+            var deviationOnCircles = greatWindow / (sqrt(2.0) * ErrorFunction.erfInv(greatProbabilityCircle))
 
-            // Get the variance of the truncated variable.
-            val truncatedVariance = deviationOnCircles.pow(2) -
-                sqrt(2 / PI) * okWindow * deviationOnCircles * exp(-0.5 * (okWindow / deviationOnCircles).pow(2)) /
-                ErrorFunction.erf(okWindow / (sqrt(2.0) * deviationOnCircles))
+            deviationOnCircles *=
+                sqrt(1 - sqrt(2 / PI) * okWindow * exp(-0.5 * (okWindow / deviationOnCircles).pow(2)) /
+                    (deviationOnCircles * ErrorFunction.erf(okWindow / (sqrt(2.0) * deviationOnCircles))))
 
             // Then compute the variance for 50s.
             val mehVariance = (mehWindow.pow(2) + mehWindow * okWindow + okWindow.pow(2)) / 3
 
             // Find the total deviation.
             return@run sqrt(
-                ((greatCountCircles + okCountCircles) * truncatedVariance + mehCountCircles * mehVariance) /
+                ((greatCountCircles + okCountCircles) * deviationOnCircles.pow(2) + mehCountCircles * mehVariance) /
                     (greatCountCircles + okCountCircles + mehCountCircles)
             )
         }
@@ -392,7 +399,23 @@ class DroidPerformanceCalculator(
             return@run Double.POSITIVE_INFINITY
         }
 
-        val greatWindow = StandardHitWindow(overallDifficulty.toFloat()).greatWindow
+        var od = overallDifficulty.toFloat()
+        var hitWindow = if (isPrecise) PreciseDroidHitWindow(od) else DroidHitWindow(od)
+        var greatWindow = hitWindow.greatWindow
+
+        if (!forceOD) {
+            greatWindow *= clockRate.toFloat()
+        }
+
+        // Obtain the good and meh hit window for osu!droid.
+        od =
+            if (isPrecise) PreciseDroidHitWindow.hitWindow300ToOverallDifficulty(greatWindow)
+            else DroidHitWindow.hitWindow300ToOverallDifficulty(greatWindow)
+
+        hitWindow = if (isPrecise) PreciseDroidHitWindow(od) else DroidHitWindow(od)
+
+        val okWindow = hitWindow.okWindow / clockRate
+        val mehWindow = hitWindow.mehWindow / clockRate
 
         // Assume a fixed ratio of non-300s hit in speed notes based on speed note count ratio and OD.
         // Graph: https://www.desmos.com/calculator/31argjcxqc
@@ -400,15 +423,40 @@ class DroidPerformanceCalculator(
 
         val nonGreatCount = countOk + countMeh + countMiss
         val nonGreatRatio = 1 - (exp(sqrt(greatWindow)) + 1.0).pow(1 - speedNoteRatio) / exp(sqrt(greatWindow))
-        val relevantCountGreat = max(0.0, speedNoteRatio - nonGreatCount * nonGreatRatio)
 
-        if (relevantCountGreat == 0.0) {
-            return@run Double.POSITIVE_INFINITY
+        val relevantCountGreat = max(0.0, speedNoteCount - nonGreatCount * nonGreatRatio)
+        val relevantCountOk = countOk * nonGreatRatio
+        val relevantCountMeh = countMeh * nonGreatRatio
+        val relevantCountMiss = countMiss * nonGreatRatio
+
+        // Assume 100s, 50s, and misses happen on circles. If there are less non-300s on circles than 300s,
+        // compute the deviation on circles.
+        if (relevantCountGreat > 0) {
+            // The probability that a player hits a circle is unknown, but we can estimate it to be
+            // the number of greats on circles divided by the number of circles, and then add one
+            // to the number of circles as a bias correction.
+            val greatProbabilityCircle =
+                relevantCountGreat / (speedNoteCount - relevantCountMiss - relevantCountMeh + 1)
+
+            // Compute the deviation assuming 300s and 100s are normally distributed, and 50s are uniformly distributed.
+            // Begin with the normal distribution first.
+            var deviationOnCircles = greatWindow / (sqrt(2.0) * ErrorFunction.erfInv(greatProbabilityCircle))
+
+            deviationOnCircles *=
+                sqrt(1 - sqrt(2 / PI) * okWindow * exp(-0.5 * (okWindow / deviationOnCircles).pow(2)) /
+                        (deviationOnCircles * ErrorFunction.erf(okWindow / (sqrt(2.0) * deviationOnCircles))))
+
+            // Then compute the variance for 50s.
+            val mehVariance = (mehWindow.pow(2) + mehWindow * okWindow + okWindow.pow(2)) / 3
+
+            // Find the total deviation.
+            return@run sqrt(
+                ((relevantCountGreat + relevantCountOk) * deviationOnCircles.pow(2) + relevantCountMeh * mehVariance) /
+                    (relevantCountGreat + relevantCountOk + relevantCountMeh)
+            )
         }
 
-        val greatProbability = relevantCountGreat / (speedNoteCount + 1)
-
-        greatWindow / (sqrt(2.0) * ErrorFunction.erfInv(greatProbability))
+        Double.POSITIVE_INFINITY
     }
 
     companion object {
