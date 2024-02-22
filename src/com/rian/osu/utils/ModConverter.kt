@@ -3,7 +3,6 @@
 package com.rian.osu.utils
 
 import com.rian.osu.mods.*
-import okhttp3.internal.toImmutableMap
 import ru.nsu.ccfit.zuev.osu.game.mods.GameMod
 import java.util.*
 
@@ -24,7 +23,7 @@ val modMap = mutableMapOf<GameMod, Mod>().apply {
     put(GameMod.MOD_RELAX, ModRelax())
     put(GameMod.MOD_SCOREV2, ModScoreV2())
     put(GameMod.MOD_SUDDENDEATH, ModSuddenDeath())
-}.toImmutableMap()
+}.toMap()
 
 /**
  * Converts "legacy" [GameMod]s to new [Mod]s.
