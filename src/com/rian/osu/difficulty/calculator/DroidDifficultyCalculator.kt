@@ -4,9 +4,7 @@ import com.rian.osu.GameMode
 import com.rian.osu.beatmap.Beatmap
 import com.rian.osu.beatmap.DroidHitWindow
 import com.rian.osu.beatmap.PreciseDroidHitWindow
-import com.rian.osu.beatmap.hitobject.HitObject
 import com.rian.osu.beatmap.hitobject.getEndTime
-import com.rian.osu.beatmap.sections.BeatmapDifficulty
 import com.rian.osu.difficulty.DroidDifficultyHitObject
 import com.rian.osu.difficulty.attributes.DroidDifficultyAttributes
 import com.rian.osu.difficulty.attributes.HighStrainSection
@@ -77,7 +75,9 @@ class DroidDifficultyCalculator : DifficultyCalculator<DroidDifficultyHitObject,
         val isPrecise = mods.any { it is ModPrecise }
         var greatWindow = (if (isPrecise) PreciseDroidHitWindow(od) else DroidHitWindow(od)).greatWindow.toDouble()
 
-        if (difficultyAdjustMod?.od != null) {
+        forceOD = difficultyAdjustMod?.od != null
+
+        if (!forceOD) {
             greatWindow /= parameters?.totalSpeedMultiplier?.toDouble() ?: 1.0
         }
 
@@ -205,17 +205,6 @@ class DroidDifficultyCalculator : DifficultyCalculator<DroidDifficultyHitObject,
             if (basePerformance > 1e-5) 0.027 * (cbrt(100000 / 2.0.pow(1 / 1.1) * basePerformance) + 4)
             else 0.0
 
-        val ar = difficultyAdjustMod?.ar ?: beatmap.difficulty.ar
-        var preempt = BeatmapDifficulty.difficultyRange(ar.toDouble(), HitObject.PREEMPT_MAX, HitObject.PREEMPT_MID, HitObject.PREEMPT_MIN)
-
-        if (difficultyAdjustMod?.ar != null) {
-            preempt /= parameters?.totalSpeedMultiplier?.toDouble() ?: 1.0
-        }
-
-        approachRate =
-            if (preempt > HitObject.PREEMPT_MID) (HitObject.PREEMPT_MAX - preempt) / 120
-            else (HitObject.PREEMPT_MID - preempt) / 150 + 5
-
         overallDifficulty = (
             if (isPrecise) PreciseDroidHitWindow.hitWindow300ToOverallDifficulty(greatWindow.toFloat())
             else DroidHitWindow.hitWindow300ToOverallDifficulty(greatWindow.toFloat())
@@ -235,7 +224,7 @@ class DroidDifficultyCalculator : DifficultyCalculator<DroidDifficultyHitObject,
             else DroidHitWindow(od)
         ).greatWindow.toDouble()
 
-        if (difficultyAdjustMod?.od != null) {
+        if (difficultyAdjustMod?.od == null) {
             greatWindow /= (parameters?.totalSpeedMultiplier?.toDouble() ?: 1.0)
         }
 
