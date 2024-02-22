@@ -272,7 +272,7 @@ public enum LibraryManager {
                 track.setFilename(file.getPath());
                 track.setCreator("unknown");
 
-                var beatmap = parser.parse(GameMode.Standard, true);
+                var beatmap = parser.parse(true);
                 if (beatmap == null || !info.populate(beatmap) || !track.populate(beatmap)) {
                     if (Config.isDeleteUnimportedBeatmaps()) {
                         file.delete();

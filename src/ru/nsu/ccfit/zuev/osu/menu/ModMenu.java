@@ -324,7 +324,7 @@ public class ModMenu implements IModSwitcher {
                             try (var parser = new BeatmapParser(
                                     GlobalManager.getInstance().getSongMenu().getSelectedTrack().getFilename()
                             )) {
-                                var beatmap = parser.parse(GameMode.Standard, true);
+                                var beatmap = parser.parse(true);
                                 if (beatmap == null) {
                                     GlobalManager.getInstance().getSongMenu().setStarsDisplay(0);
                                     return;
@@ -332,10 +332,10 @@ public class ModMenu implements IModSwitcher {
 
                                 var parameters = new DifficultyCalculationParameters();
                                 parameters.setMods(convertLegacyMods(
-                                        mod,
-                                        isCustomCS() ? customCS : null,
-                                        isCustomAR() ? customAR : null,
-                                        isCustomOD() ? customOD : null
+                                    mod,
+                                    isCustomCS() ? customCS : null,
+                                    isCustomAR() ? customAR : null,
+                                    isCustomOD() ? customOD : null
                                 ));
                                 parameters.setCustomSpeedMultiplier(changeSpeed);
 

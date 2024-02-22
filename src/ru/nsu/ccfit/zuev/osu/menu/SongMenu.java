@@ -1074,7 +1074,7 @@ public class SongMenu implements IUpdateHandler, MenuItemListener,
         changeDimensionInfo(track);
         Async.run(() -> {
             try (var parser = new BeatmapParser(track.getFilename())) {
-                var beatmap = parser.parse(GameMode.Standard, true);
+                var beatmap = parser.parse(true);
 
                 if (beatmap == null) {
                     setStarsDisplay(0);
@@ -1096,8 +1096,8 @@ public class SongMenu implements IUpdateHandler, MenuItemListener,
                 parameters.setCustomSpeedMultiplier(modMenu.getChangeSpeed());
 
                 var attributes = BeatmapDifficultyCalculator.calculateStandardDifficulty(
-                        beatmap,
-                        parameters
+                    beatmap,
+                    parameters
                 );
 
                 setStarsDisplay(GameHelper.Round(attributes.starRating, 2));

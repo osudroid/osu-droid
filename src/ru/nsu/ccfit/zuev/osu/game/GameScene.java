@@ -336,7 +336,7 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
 
         try (var parser = new BeatmapParser(track.getFilename())) {
             if (parser.openFile()) {
-                beatmap = parser.parse(GameMode.Standard, true);
+                beatmap = parser.parse(true);
             } else {
                 Debug.e("startGame: cannot open file");
                 ToastLogger.showText(

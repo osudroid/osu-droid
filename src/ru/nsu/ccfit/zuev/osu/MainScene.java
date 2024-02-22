@@ -890,7 +890,7 @@ public class MainScene implements IUpdateHandler {
             Arrays.fill(peakAlpha, 0f);
 
             try (var parser = new BeatmapParser(selectedTrack.getFilename())) {
-                var beatmap = parser.parse(GameMode.Standard, false);
+                var beatmap = parser.parse(false);
 
                 if (beatmap != null) {
                     timingPoints = new LinkedList<>();

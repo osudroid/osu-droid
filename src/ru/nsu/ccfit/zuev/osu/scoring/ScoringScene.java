@@ -474,18 +474,18 @@ public class ScoringScene {
             Beatmap beatmap = null;
 
             try (var parser = new BeatmapParser(this.track.getFilename())) {
-                beatmap = parser.parse(GameMode.Standard, true);
+                beatmap = parser.parse(true);
             }
 
             if (beatmap != null) {
                 var difficultyAttributes = BeatmapDifficultyCalculator.calculateStandardDifficulty(
-                        beatmap, stat
+                    beatmap, stat
                 );
                 var performanceAttributes = BeatmapDifficultyCalculator.calculateStandardPerformance(
-                        difficultyAttributes, stat
+                    difficultyAttributes, stat
                 );
                 var maxPerformanceAttributes = BeatmapDifficultyCalculator.calculateStandardPerformance(
-                        difficultyAttributes
+                    difficultyAttributes
                 );
                 ppinfo.append(String.format(Locale.ENGLISH, "%.2f★ | %.2f/%.2fpp", difficultyAttributes.starRating, performanceAttributes.total, maxPerformanceAttributes.total));
             }
