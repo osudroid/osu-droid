@@ -28,6 +28,7 @@ import android.opengl.Matrix;
  * @author Nicolas Gramlich
  * @since 18:00:43 - 08.03.2010
  */
+// osu!droid modified - Added scissor stack feature from AndEngine 'GLES2-AnchorCenter' branch.
 public class GLState {
 	// ===========================================================
 	// Constants
@@ -70,6 +71,7 @@ public class GLState {
 
 	private float mLineWidth = 1;
 
+	private final GLScissorStack mScissorStack = new GLScissorStack();
 	private final GLMatrixStack mModelViewGLMatrixStack = new GLMatrixStack();
 	private final GLMatrixStack mProjectionGLMatrixStack = new GLMatrixStack();
 
@@ -140,6 +142,7 @@ public class GLState {
 			Debug.d("MAX_TEXTURE_SIZE: " + this.mMaximumTextureSize);
 		}
 
+		this.mScissorStack.reset();
 		this.mModelViewGLMatrixStack.reset();
 		this.mProjectionGLMatrixStack.reset();
 
@@ -624,6 +627,14 @@ public class GLState {
 	public void resetGLMatrixStacks() {
 		this.mModelViewGLMatrixStack.reset();
 		this.mProjectionGLMatrixStack.reset();
+	}
+
+	public void glPushScissor(final int pX, final int pY, final int pWidth, final int pHeight) {
+		this.mScissorStack.glPushScissor(pX, pY, pWidth, pHeight);
+	}
+
+	public void glPopScissor() {
+		this.mScissorStack.glPopScissor();
 	}
 
 	/**
