@@ -514,6 +514,15 @@ public class GLState {
 		}
 	}
 
+	// BEGIN osu!droid modified - Added target parameter.
+	public void bindTexture(final int pTarget, final int pHardwareTextureID) {
+		if(this.mCurrentBoundTextureIDs[this.mCurrentActiveTextureIndex] != pHardwareTextureID) {
+			this.mCurrentBoundTextureIDs[this.mCurrentActiveTextureIndex] = pHardwareTextureID;
+			GLES20.glBindTexture(pTarget, pHardwareTextureID);
+		}
+	}
+	// END osu!droid modified.
+
 	public void deleteTexture(final int pHardwareTextureID) {
 		if(this.mCurrentBoundTextureIDs[this.mCurrentActiveTextureIndex] == pHardwareTextureID) {
 			this.mCurrentBoundTextureIDs[this.mCurrentActiveTextureIndex] = -1;

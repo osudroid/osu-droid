@@ -1,5 +1,7 @@
 package org.andengine.opengl.texture;
 
+import android.opengl.GLES20;
+
 import java.io.IOException;
 
 import org.andengine.opengl.texture.atlas.source.ITextureAtlasSource;
@@ -29,6 +31,9 @@ public abstract class Texture implements ITexture {
 
 	protected int mHardwareTextureID = Texture.HARDWARE_TEXTURE_ID_INVALID;
 	protected boolean mUpdateOnHardwareNeeded = false;
+
+	// osu!droid modified - Added target specification when binding the texture.
+	protected int mTarget = GLES20.GL_TEXTURE_2D;
 
 	protected ITextureStateListener mTextureStateListener;
 
@@ -132,7 +137,7 @@ public abstract class Texture implements ITexture {
 	public void loadToHardware(final GLState pGLState) throws IOException {
 		this.mHardwareTextureID = pGLState.generateTexture();
 
-		pGLState.bindTexture(this.mHardwareTextureID);
+		pGLState.bindTexture(this.mTarget, this.mHardwareTextureID);
 
 		this.writeTextureToHardware(pGLState);
 
@@ -164,13 +169,13 @@ public abstract class Texture implements ITexture {
 
 	@Override
 	public void bind(final GLState pGLState) {
-		pGLState.bindTexture(this.mHardwareTextureID);
+		pGLState.bindTexture(this.mTarget, this.mHardwareTextureID);
 	}
 
 	@Override
 	public void bind(final GLState pGLState, final int pGLActiveTexture) {
 		pGLState.activeTexture(pGLActiveTexture);
-		pGLState.bindTexture(this.mHardwareTextureID);
+		pGLState.bindTexture(this.mTarget, this.mHardwareTextureID);
 	}
 
 	// ===========================================================
