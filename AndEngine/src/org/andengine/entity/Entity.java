@@ -1236,7 +1236,8 @@ public class Entity implements IEntity {
 		if(!this.mDisposed) {
 			this.mDisposed = true;
 		} else {
-			throw new AlreadyDisposedException();
+			// osu-droid modified - Not needed to throw an exception when you have isDisposed().
+			//throw new AlreadyDisposedException();
 		}
 	}
 

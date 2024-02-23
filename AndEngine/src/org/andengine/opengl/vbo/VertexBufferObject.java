@@ -198,7 +198,8 @@ public abstract class VertexBufferObject implements IVertexBufferObject {
 
 			BufferUtils.freeDirectByteBuffer(this.mByteBuffer);
 		} else {
-			throw new AlreadyDisposedException();
+			// osu-droid modified - Not needed to throw an exception when you have isDisposed().
+			//throw new AlreadyDisposedException();
 		}
 	}
 

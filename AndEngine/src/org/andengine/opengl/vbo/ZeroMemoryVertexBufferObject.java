@@ -206,7 +206,8 @@ public abstract class ZeroMemoryVertexBufferObject implements IVertexBufferObjec
 
 			this.mVertexBufferObjectManager.onUnloadVertexBufferObject(this);
 		} else {
-			throw new AlreadyDisposedException();
+			// osu-droid modified - Not needed to throw an exception when you have isDisposed().
+			//throw new AlreadyDisposedException();
 		}
 	}
 
