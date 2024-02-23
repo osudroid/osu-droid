@@ -17,15 +17,15 @@ public class GLWrapped {
     BooleanSetting depthTest = new BooleanSetting(t -> {
         BatchEngine.flush();
         if (t) {
-            GLES10.glEnable(GLES10.GL_DEPTH_TEST);
+            GLES20.glEnable(GLES20.GL_DEPTH_TEST);
         } else {
-            GLES10.glDisable(GLES10.GL_DEPTH_TEST);
+            GLES20.glDisable(GLES20.GL_DEPTH_TEST);
         }
     },
             false).initial();
-    public static int GL_SHORT = GLES10.GL_SHORT;
-    public static int GL_UNSIGNED_SHORT = GLES10.GL_UNSIGNED_SHORT;
-    public static int GL_TRIANGLES = GLES10.GL_TRIANGLES;
+    public static int GL_SHORT = GLES20.GL_SHORT;
+    public static int GL_UNSIGNED_SHORT = GLES20.GL_UNSIGNED_SHORT;
+    public static int GL_TRIANGLES = GLES20.GL_TRIANGLES;
     public static int GL_MAX_TEXTURE_SIZE;
     public static BlendSetting blend = new BlendSetting().setUp();
     private static boolean enable = true;
@@ -74,15 +74,15 @@ public class GLWrapped {
     }
 
     public static void clearColorBuffer() {
-        if (enable) GLES20.glClear(GLES10.GL_COLOR_BUFFER_BIT);
+        if (enable) GLES20.glClear(GLES20.GL_COLOR_BUFFER_BIT);
     }
 
     public static void clearDepthBuffer() {
-        if (enable) GLES20.glClear(GLES10.GL_DEPTH_BUFFER_BIT);
+        if (enable) GLES20.glClear(GLES20.GL_DEPTH_BUFFER_BIT);
     }
 
     public static void clearDepthAndColorBuffer() {
-        if (enable) GLES20.glClear(GLES10.GL_COLOR_BUFFER_BIT | GLES10.GL_DEPTH_BUFFER_BIT);
+        if (enable) GLES20.glClear(GLES20.GL_COLOR_BUFFER_BIT | GLES20.GL_DEPTH_BUFFER_BIT);
     }
 
     public static void setClearColor(Color4 c) {
@@ -95,13 +95,13 @@ public class GLWrapped {
 
     public static int getIntegerValue(int key) {
         int[] b = new int[1];
-        GLES10.glGetIntegerv(key, b, 0);
+        GLES20.glGetIntegerv(key, b, 0);
         return b[0];
     }
 
     public static void checkGlError(String op) {
         int error;
-        while ((error = GLES10.glGetError()) != GLES10.GL_NO_ERROR) {
+        while ((error = GLES20.glGetError()) != GLES20.GL_NO_ERROR) {
             Log.e("ES20_ERROR", op + ": glError " + error);
             throw new GLException(op + ": glError " + error);
         }

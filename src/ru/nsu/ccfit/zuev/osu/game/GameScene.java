@@ -1,6 +1,7 @@
 package ru.nsu.ccfit.zuev.osu.game;
 
 import android.graphics.PointF;
+import android.opengl.GLES20;
 import android.os.Build;
 import android.os.SystemClock;
 
@@ -2796,7 +2797,7 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
                                     scale * 1.5f, 1.9f * scale),
                             ModifierFactory.newScaleModifier(0.3f, scale * 1.9f, scale * 2f)
                     ));
-            light.setBlendFunction(GL10.GL_SRC_ALPHA, GL10.GL_DST_ALPHA);
+            light.setBlendFunction(GLES20.GL_SRC_ALPHA, GLES20.GL_DST_ALPHA);
         }
 
         effect.init(

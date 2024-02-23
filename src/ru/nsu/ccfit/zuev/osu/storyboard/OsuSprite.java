@@ -1,6 +1,6 @@
 package ru.nsu.ccfit.zuev.osu.storyboard;
 
-import android.opengl.GLES10;
+import android.opengl.GLES20;
 import android.util.Log;
 
 import com.dgsrz.bancho.ui.StoryBoardTestActivity;
@@ -404,7 +404,7 @@ public class OsuSprite {
                         sprite.setFlippedVertical(true);
                         break;
                     case "A":
-                        sprite.setBlendFunction(GLES10.GL_SRC_ALPHA, GLES10.GL_ONE);
+                        sprite.setBlendFunction(GLES20.GL_SRC_ALPHA, GLES20.GL_ONE);
                         break;
                 }
                 break;
