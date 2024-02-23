@@ -41,7 +41,7 @@ public class EngineRenderer implements GLSurfaceView.Renderer {
 		this.mEngine = pEngine;
 		this.mConfigChooser = pConfigChooser;
 		this.mRendererListener = pRendererListener;
-		this.mGLState = new GLState();
+		this.mGLState = GLState.INSTANCE;
 		this.mMultiSampling = this.mEngine.getEngineOptions().getRenderOptions().isMultiSampling();
 	}
 

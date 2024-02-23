@@ -28,11 +28,15 @@ import android.opengl.Matrix;
  * @author Nicolas Gramlich
  * @since 18:00:43 - 08.03.2010
  */
-// osu!droid modified - Added scissor stack feature from AndEngine 'GLES2-AnchorCenter' branch.
+// osu!droid modified:
+// - Scissor stack feature from AndEngine 'GLES2-AnchorCenter' branch was implemented.
+// - Singleton pattern was adopted.
 public class GLState {
 	// ===========================================================
 	// Constants
 	// ===========================================================
+
+	public static final GLState INSTANCE = new GLState();
 
 	public static final int GL_UNPACK_ALIGNMENT_DEFAULT = 4;
 
@@ -118,6 +122,8 @@ public class GLState {
 	// ===========================================================
 	// Methods
 	// ===========================================================
+
+	private GLState() {}
 
 	public void reset(final RenderOptions pRenderOptions, final ConfigChooser pConfigChooser, final EGLConfig pEGLConfig) {
 		this.mVersion = GLES20.glGetString(GLES20.GL_VERSION);
