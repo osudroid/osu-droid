@@ -20,6 +20,7 @@ import org.andengine.opengl.texture.TextureOptions;
 import org.andengine.opengl.texture.atlas.bitmap.BitmapTextureAtlas;
 import org.andengine.opengl.texture.atlas.bitmap.source.FileBitmapTextureAtlasSource;
 import org.andengine.opengl.texture.region.TextureRegion;
+import org.andengine.opengl.util.GLState;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -53,7 +54,7 @@ public class TexturePool {
 
     public TexturePool(File dir) {
         this.dir = dir;
-        glMaxWidth = 0; // Original constant GLHelper.GlMaxTextureWidth had this value.
+        glMaxWidth = GLState.INSTANCE.getMaximumTextureSize();
         if (BuildConfig.DEBUG) System.out.println("GL_MAX_TEXTURE_SIZE = " + glMaxWidth);
         if (glMaxWidth == 0) {
             throw new RuntimeException("glMaxWidth not found");
