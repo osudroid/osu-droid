@@ -245,7 +245,7 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
         dimRectangle = null;
 
         if (video != null) {
-            video.release();
+            video.dispose();;
             video = null;
         }
 
@@ -1955,7 +1955,7 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
             }
 
             if (video != null) {
-                video.release();
+                video.dispose();
                 video = null;
                 videoStarted = false;
             }
@@ -2119,7 +2119,7 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
         }
 
         if (video != null) {
-            video.release();
+            video.dispose();
             video = null;
             videoStarted = false;
         }

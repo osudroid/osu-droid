@@ -7,6 +7,7 @@ import android.opengl.GLES20
 import android.os.Build
 import android.view.Surface
 import com.reco1l.framework.extensions.orCatch
+import org.andengine.engine.Engine
 import org.andengine.opengl.texture.PixelFormat
 import org.andengine.opengl.texture.Texture
 import org.andengine.opengl.texture.TextureOptions
@@ -16,18 +17,8 @@ import ru.nsu.ccfit.zuev.osu.GlobalManager
 import java.io.File
 import javax.microedition.khronos.opengles.GL10
 
-class VideoTexture(val source: String)
-
-    : Texture(
-        GlobalManager.getInstance().engine.textureManager,
-        PixelFormat.RGBA_8888,
-        TextureOptions(
-            GL10.GL_NEAREST,
-            GL10.GL_LINEAR,
-            GL10.GL_CLAMP_TO_EDGE,
-            GL10.GL_CLAMP_TO_EDGE,
-            false
-        ), null)
+class VideoTexture(val source: String, engine: Engine)
+    : Texture(engine.textureManager, PixelFormat.RGBA_8888, TextureOptions.BILINEAR, null)
 {
 
     private val player = MediaPlayer().apply {
@@ -42,23 +33,24 @@ class VideoTexture(val source: String)
     private var surfaceTexture: SurfaceTexture? = null
 
 
-    override fun getWidth() = player.videoWidth
+    init
+    {
+        mTarget = GL_TEXTURE_EXTERNAL_OES
+    }
 
+
+    override fun getWidth() = player.videoWidth
     override fun getHeight() = player.videoHeight
 
 
-    override fun writeTextureToHardware(pGLState: GLState) = Unit
-
-    override fun loadToHardware(pGLState: GLState)
+    override fun writeTextureToHardware(pGLState: GLState)
     {
-        mHardwareTextureID = pGLState.generateTexture()
+        surfaceTexture?.release()
+        surfaceTexture = SurfaceTexture(mHardwareTextureID)
 
-        GLES20.glBindTexture(GL_TEXTURE_EXTERNAL_OES, mHardwareTextureID)
-
-        mTextureOptions.apply()
-        mUpdateOnHardwareNeeded = false
-
-        mTextureStateListener?.onLoadedToHardware(this)
+        val surface = Surface(surfaceTexture)
+        player.setSurface(surface)
+        surface.release()
     }
 
     override fun unloadFromHardware(pGLState: GLState?)
@@ -74,23 +66,21 @@ class VideoTexture(val source: String)
         if (!isLoadedToHardware)
             return
 
-        if (surfaceTexture == null)
+        try
         {
-            surfaceTexture = SurfaceTexture(mHardwareTextureID)
-
-            val surface = Surface(surfaceTexture)
-            player.setSurface(surface)
-            surface.release()
+            surfaceTexture?.updateTexImage()
         }
-
-        { surfaceTexture?.updateTexImage() }.orCatch { isUpdateOnHardwareNeeded = true }
+        catch (e: Exception)
+        {
+            isUpdateOnHardwareNeeded = true
+        }
     }
 
+
     fun play() = player.start()
-
     fun pause() = player.pause()
-
     fun release() = player.release()
+
 
     fun seekTo(ms: Int)
     {
@@ -111,13 +101,7 @@ class VideoTexture(val source: String)
     }
 
 
-    fun toRegion() = TextureRegion(
-        this,
-        0f,
-        0f,
-        width.toFloat(),
-        height.toFloat()
-    )
+    fun toRegion() = TextureRegion(this, 0f, 0f, width.toFloat(), height.toFloat())
 
 
     companion object
