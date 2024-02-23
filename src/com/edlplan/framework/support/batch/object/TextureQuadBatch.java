@@ -1,10 +1,17 @@
 package com.edlplan.framework.support.batch.object;
 
+import android.opengl.GLES20;
+
 import com.edlplan.framework.support.batch.AbstractBatch;
+import com.edlplan.framework.support.batch.BatchEngine;
 import com.edlplan.framework.support.graphics.GLWrapped;
 import com.edlplan.framework.support.util.BufferUtil;
 
+import org.andengine.entity.sprite.Sprite;
+import org.andengine.opengl.shader.PositionColorTextureCoordinatesShaderProgram;
+import org.andengine.opengl.shader.ShaderProgram;
 import org.andengine.opengl.texture.ITexture;
+import org.andengine.opengl.util.GLState;
 
 import java.nio.FloatBuffer;
 import java.nio.ShortBuffer;
@@ -104,52 +111,20 @@ public class TextureQuadBatch extends AbstractBatch<ATextureQuad> {
 
             GLWrapped.blend.setIsPreM(bindTexture.getTextureOptions().mPreMultiplyAlpha);
 
-            // TODO: Translate this to GLES2, would require a buffer being loaded and a shader program
-            //  for position, color and texture coordinates. Still not sure what this is used for.
-            /*GL10 pGL = BatchEngine.pGL;
+            GLState pGL = BatchEngine.pGL;
+            pGL.disableCulling();
+
+            // Compiling and linking the shader in case it wasn't yet and apply all attribute pointers.
+            ShaderProgram shader = PositionColorTextureCoordinatesShaderProgram.getInstance();
+            shader.bind(pGL, Sprite.VERTEXBUFFEROBJECTATTRIBUTES_DEFAULT);
+
+            buffer.position(0);
+            buffer.put(ary, 0, offset);
+            buffer.position(0).limit(offset);
+
             bindTexture.bind(pGL);
-            GLHelper.enableTextures(pGL);
-            GLHelper.enableTexCoordArray(pGL);
-            pGL.glEnableClientState(GL10.GL_COLOR_ARRAY);
-            pGL.glShadeModel(GL10.GL_SMOOTH);
-            GLHelper.enableVertexArray(pGL);
-            GLHelper.disableCulling(pGL);
 
-            buffer.position(0);
-            buffer.put(ary, 0, offset);
-            buffer.position(0).limit(offset);
-
-            pGL.glVertexPointer(2, GL10.GL_FLOAT, STEP, buffer);
-            buffer.position(OFFSET_COORD);
-            pGL.glTexCoordPointer(2, GL10.GL_FLOAT, STEP, buffer);
-            buffer.position(OFFSET_COLOR);
-            pGL.glColorPointer(4, GL10.GL_FLOAT, STEP, buffer);
-
-
-            pGL.glDrawElements(
-                    GL10.GL_TRIANGLES,
-                    offset / SIZE_PER_QUAD * 6,
-                    GL10.GL_UNSIGNED_SHORT,
-                    indicesBuffer);
-
-            pGL.glDisableClientState(GL10.GL_COLOR_ARRAY);*/
-
-
-            /*shader.useThis();
-            shader.loadShaderGlobals(BatchEngine.getShaderGlobals());
-            shader.loadTexture(bindTexture);
-
-            buffer.position(0);
-            buffer.put(ary, 0, offset);
-            buffer.position(0).limit(offset);
-
-            shader.loadBuffer(buffer);
-
-            BatchEngine.pGL.glDrawElements(
-                    GL10.GL_TRIANGLES,
-                    offset / SIZE_PER_QUAD * 6,
-                    GL10.GL_UNSIGNED_SHORT,
-                    indicesBuffer);*/
+            GLES20.glDrawElements(GLES20.GL_TRIANGLES, offset / SIZE_PER_QUAD * 6, GLES20.GL_UNSIGNED_SHORT, indicesBuffer);
             return true;
         } else {
             return false;

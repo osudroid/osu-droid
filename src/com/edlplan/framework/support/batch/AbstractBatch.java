@@ -44,7 +44,8 @@ public abstract class AbstractBatch<T> {
         return BatchEngine.currentBatch() == this;
     }
 
-    // TODO What is this suposed to do ?
+    // TODO Im not sure how we can convert this to OpenGL ES 2.0 implementation of AndEngine, or either
+    //  if it's necessary - Reco1l.
     public final void flush() {
         /*GL10 pGL = BatchEngine.pGL;
         int type = GLHelper.getCurrentMatrixType();

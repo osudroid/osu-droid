@@ -1,6 +1,7 @@
 package com.edlplan.framework.support.graphics;
 
 import android.opengl.GLES10;
+import android.opengl.GLES20;
 import android.util.Log;
 
 import com.edlplan.framework.math.Color4;
@@ -47,12 +48,12 @@ public class GLWrapped {
     }
 
     public static void drawArrays(int mode, int offset, int count) {
-        if (enable) GLES10.glDrawArrays(mode, offset, count);
+        if (enable) GLES20.glDrawArrays(mode, offset, count);
         drawCalls++;
     }
 
     public static void drawElements(int mode, int count, int type, Buffer b) {
-        if (enable) GLES10.glDrawElements(mode, count, type, b);
+        if (enable) GLES20.glDrawElements(mode, count, type, b);
         drawCalls++;
     }
 
@@ -61,7 +62,7 @@ public class GLWrapped {
     }
 
     public static void setViewport(int x1, int y1, int w, int h) {
-        GLES10.glViewport(x1, y1, w, h);
+        GLES20.glViewport(x1, y1, w, h);
         px1 = x1;
         pw = w;
         py1 = y1;
@@ -69,19 +70,19 @@ public class GLWrapped {
     }
 
     public static void setClearColor(float r, float g, float b, float a) {
-        GLES10.glClearColor(r, g, b, a);
+        GLES20.glClearColor(r, g, b, a);
     }
 
     public static void clearColorBuffer() {
-        if (enable) GLES10.glClear(GLES10.GL_COLOR_BUFFER_BIT);
+        if (enable) GLES20.glClear(GLES10.GL_COLOR_BUFFER_BIT);
     }
 
     public static void clearDepthBuffer() {
-        if (enable) GLES10.glClear(GLES10.GL_DEPTH_BUFFER_BIT);
+        if (enable) GLES20.glClear(GLES10.GL_DEPTH_BUFFER_BIT);
     }
 
     public static void clearDepthAndColorBuffer() {
-        if (enable) GLES10.glClear(GLES10.GL_COLOR_BUFFER_BIT | GLES10.GL_DEPTH_BUFFER_BIT);
+        if (enable) GLES20.glClear(GLES10.GL_COLOR_BUFFER_BIT | GLES10.GL_DEPTH_BUFFER_BIT);
     }
 
     public static void setClearColor(Color4 c) {

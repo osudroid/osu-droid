@@ -1,7 +1,5 @@
 package com.edlplan.framework.support;
 
-import android.opengl.GLES20;
-
 import com.edlplan.framework.support.batch.BatchEngine;
 import com.edlplan.framework.support.graphics.BaseCanvas;
 import com.edlplan.framework.support.graphics.BlendType;
@@ -11,8 +9,6 @@ import com.edlplan.framework.support.graphics.SupportCanvas;
 import org.andengine.engine.camera.Camera;
 import org.andengine.entity.Entity;
 import org.andengine.opengl.util.GLState;
-
-import javax.microedition.khronos.opengles.GL10;
 
 public class SupportSprite extends Entity {
 
