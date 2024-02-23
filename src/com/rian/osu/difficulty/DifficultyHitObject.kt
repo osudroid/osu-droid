@@ -122,6 +122,7 @@ abstract class DifficultyHitObject(
     val endTime = obj.getEndTime() / clockRate
 
     protected abstract val mode: GameMode
+    protected abstract val scalingFactor: Float
 
     protected open val maximumSliderRadius = NORMALIZED_RADIUS * 2.4f
     private val assumedSliderRadius = NORMALIZED_RADIUS * 1.8f
@@ -213,7 +214,9 @@ abstract class DifficultyHitObject(
         minimumJumpDistance = lazyJumpDistance
 
         if (lastObj is Slider) {
-            minimumJumpTime = max(strainTime - lastObj.lazyTravelTime / clockRate, MIN_DELTA_TIME)
+            val lastTravelTime = max(lastObj.lazyTravelTime / clockRate, MIN_DELTA_TIME)
+
+            minimumJumpTime = max(strainTime - lastTravelTime, MIN_DELTA_TIME)
 
             // There are two types of slider-to-object patterns to consider in order to better approximate the real movement a player will take to jump between the hit objects.
             //
@@ -320,8 +323,6 @@ abstract class DifficultyHitObject(
             }
         }
     }
-
-    protected abstract val scalingFactor: Float
 
     private fun getEndCursorPosition(obj: HitObject): Vector2 {
         var pos = obj.getStackedPosition(mode)
