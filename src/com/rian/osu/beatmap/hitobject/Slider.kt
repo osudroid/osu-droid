@@ -288,7 +288,7 @@ class Slider(
         // This exists for edge cases such as /b/1573664 where the beatmap has been edited by the user, and should never be reached in normal usage.
         val maxLength = 100000.0
         val length = min(maxLength, path.expectedDistance)
-        tickDistance = tickDistance.coerceIn(0.0, length)
+        val tickDistance = tickDistance.coerceIn(0.0, length)
 
         if (tickDistance != 0.0 && generateTicks) {
             val minDistanceFromEnd = velocity * 10
