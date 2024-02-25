@@ -3,6 +3,7 @@ package com.rian.osu.beatmap
 import com.rian.osu.GameMode
 import com.rian.osu.beatmap.hitobject.*
 import com.rian.osu.mods.Mod
+import com.rian.osu.utils.CircleSizeCalculator
 import kotlin.math.sqrt
 
 /**
@@ -50,12 +51,18 @@ class BeatmapProcessor(
     }
 
     private fun applyDroidStacking() = beatmap.hitObjects.objects.run {
+        if (isEmpty()) {
+            return@run
+        }
+
+        val droidScale = CircleSizeCalculator.standardScaleToDroidScale(this[0].scale)
+
         for (i in 0 until size - 1) {
             val current = this[i]
             val next = this[i + 1]
 
             if (next.startTime - current.startTime < 2000 * beatmap.general.stackLeniency &&
-                next.position.getDistance(current.position) < sqrt(current.scale)
+                next.position.getDistance(current.position) < sqrt(droidScale)
             ) {
                 next.stackHeight = current.stackHeight + 1
             }
