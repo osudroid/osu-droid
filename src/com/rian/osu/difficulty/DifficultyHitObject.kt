@@ -179,7 +179,7 @@ abstract class DifficultyHitObject(
 
         if (isHidden) {
             val fadeOutStartTime = fadeInStartTime + fadeInDuration
-            val fadeOutDuration = obj.timePreempt * ModHidden.FADE_IN_DURATION_MULTIPLIER
+            val fadeOutDuration = obj.timePreempt * ModHidden.FADE_OUT_DURATION_MULTIPLIER
 
             return min(nonHiddenOpacity, 1 - ((time - fadeOutStartTime) / fadeOutDuration).coerceIn(0.0, 1.0))
         }

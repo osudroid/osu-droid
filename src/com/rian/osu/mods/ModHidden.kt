@@ -23,6 +23,7 @@ class ModHidden : Mod(), IApplicableToBeatmap {
     }
 
     companion object {
-        const val FADE_IN_DURATION_MULTIPLIER = 0.3
+        const val FADE_IN_DURATION_MULTIPLIER = 0.4
+        const val FADE_OUT_DURATION_MULTIPLIER = 0.3
     }
 }
