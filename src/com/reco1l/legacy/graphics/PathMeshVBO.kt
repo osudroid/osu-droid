@@ -7,6 +7,7 @@ import org.andengine.opengl.shader.ShaderProgram
 import org.andengine.opengl.util.GLState
 import org.andengine.opengl.vbo.DrawType
 import org.andengine.opengl.vbo.VertexBufferObject
+import ru.nsu.ccfit.zuev.osu.GlobalManager
 import java.nio.ByteBuffer
 import java.nio.ByteOrder
 
