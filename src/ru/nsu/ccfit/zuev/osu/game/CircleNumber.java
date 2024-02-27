@@ -6,7 +6,6 @@ import androidx.core.util.Supplier;
 import org.andengine.entity.Entity;
 import org.andengine.entity.modifier.IEntityModifier;
 import org.andengine.entity.sprite.Sprite;
-import org.andengine.opengl.vbo.VertexBufferObjectManager;
 
 import ru.nsu.ccfit.zuev.osu.GlobalManager;
 import ru.nsu.ccfit.zuev.osu.ResourceManager;
@@ -25,7 +24,7 @@ public class CircleNumber extends Entity
         for (int i = 0; i < snum.length(); i++) {
             var tex = ResourceManager.getInstance().getTextureWithPrefix(OsuSkin.get().getHitCirclePrefix(), String.valueOf(snum.charAt(i)));
 
-            attachChild(new Sprite(0, 0, tex, (VertexBufferObjectManager) null));
+            attachChild(new Sprite(0, 0, tex, GlobalManager.getInstance().getEngine().getVertexBufferObjectManager()));
         }
     }
 

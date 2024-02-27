@@ -11,7 +11,6 @@ import org.andengine.entity.modifier.SequenceEntityModifier;
 import org.andengine.entity.scene.Scene;
 import org.andengine.entity.sprite.Sprite;
 import org.andengine.opengl.texture.region.TextureRegion;
-import org.andengine.opengl.vbo.VertexBufferObjectManager;
 import org.andengine.util.modifier.IModifier;
 import org.andengine.util.modifier.ease.EaseSineOut;
 
@@ -46,7 +45,7 @@ public class ComboBurst {
 
         TextureRegion globalTex = ResourceManager.getInstance().getTexture("comboburst");
         if (globalTex != null) {
-            Sprite sprite = new Sprite(0, 0, globalTex, (VertexBufferObjectManager) null);
+            Sprite sprite = new Sprite(0, 0, globalTex, GlobalManager.getInstance().getEngine().getVertexBufferObjectManager());
             sprite.setAlpha(0f);
             sprite.setIgnoreUpdate(true);
             comboBursts.add(sprite);
@@ -58,7 +57,7 @@ public class ComboBurst {
         for (int i = 0; i < 10; i++) {
             TextureRegion tex = ResourceManager.getInstance().getTexture("comboburst-" + i);
             if (tex != null) {
-                Sprite sprite = new Sprite(0, 0, tex, (VertexBufferObjectManager) null);
+                Sprite sprite = new Sprite(0, 0, tex, GlobalManager.getInstance().getEngine().getVertexBufferObjectManager());
                 sprite.setAlpha(0f);
                 sprite.setIgnoreUpdate(true);
                 comboBursts.add(sprite);

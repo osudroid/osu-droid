@@ -7,7 +7,6 @@ import org.andengine.entity.scene.ITouchArea
 import org.andengine.entity.sprite.Sprite
 import org.andengine.entity.text.Text
 import org.andengine.input.touch.TouchEvent
-import org.andengine.opengl.vbo.VertexBufferObjectManager
 import org.andengine.util.math.MathUtils
 import ru.nsu.ccfit.zuev.osu.GlobalManager
 import ru.nsu.ccfit.zuev.osu.scoring.StatisticV2
@@ -76,7 +75,7 @@ class StatisticSelector(stats: Array<StatisticV2>?) : ScrollableList(), ITouchAr
 
 
     inner class BoardItem(val index: Int, private val stats: StatisticV2) :
-        Sprite(570f, 0f, getResources().getTexture("menu-button-background"), null as? VertexBufferObjectManager)
+        Sprite(570f, 0f, getResources().getTexture("menu-button-background"), GlobalManager.getInstance().engine.vertexBufferObjectManager)
     {
 
         private var moved = false
@@ -84,9 +83,9 @@ class StatisticSelector(stats: Array<StatisticV2>?) : ScrollableList(), ITouchAr
         private var dy = 0f
 
 
-        val text = Text(10f, 15f, getResources().getFont("font"), "", 100, null)
+        val text = Text(10f, 15f, getResources().getFont("font"), "", 100, GlobalManager.getInstance().engine.vertexBufferObjectManager)
 
-        val rank = Text(10f, 15f, getResources().getFont("CaptionFont"), "", 5, null)
+        val rank = Text(10f, 15f, getResources().getFont("CaptionFont"), "", 5, GlobalManager.getInstance().engine.vertexBufferObjectManager)
 
 
         init

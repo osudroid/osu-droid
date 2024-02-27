@@ -29,7 +29,6 @@ import org.andengine.entity.scene.background.SpriteBackground
 import org.andengine.entity.sprite.Sprite
 import org.andengine.entity.text.Text
 import org.andengine.input.touch.TouchEvent
-import org.andengine.opengl.vbo.VertexBufferObjectManager
 import org.andengine.util.math.MathUtils
 import org.json.JSONArray
 import ru.nsu.ccfit.zuev.osu.Config
@@ -109,14 +108,14 @@ object RoomScene : Scene(), IRoomEventListener, IPlayerEventListener
 
     private val onlinePanel = OnlinePanel()
 
-    private val titleText = Text(20f, 20f, getResources().getFont("bigFont"), "", 100, null)
+    private val titleText = Text(20f, 20f, getResources().getFont("bigFont"), "", 100, GlobalManager.getInstance().engine.vertexBufferObjectManager)
 
-    private val stateText = Text(0f, 0f, getResources().getFont("smallFont"), "", 250, null)
+    private val stateText = Text(0f, 0f, getResources().getFont("smallFont"), "", 250, GlobalManager.getInstance().engine.vertexBufferObjectManager)
 
-    private val infoText = Text(0f, 0f, getResources().getFont("smallFont"), "", 200, null)
+    private val infoText = Text(0f, 0f, getResources().getFont("smallFont"), "", 200, GlobalManager.getInstance().engine.vertexBufferObjectManager)
 
 
-    private val beatmapInfoText = Text(10f, 10f, getResources().getFont("smallFont"), "", 150, null)
+    private val beatmapInfoText = Text(10f, 10f, getResources().getFont("smallFont"), "", 150, GlobalManager.getInstance().engine.vertexBufferObjectManager)
 
     private var beatmapInfoRectangle: Rectangle? = null
 
@@ -136,12 +135,12 @@ object RoomScene : Scene(), IRoomEventListener, IPlayerEventListener
         isBackgroundEnabled = true
 
         // Background dim
-        val dim = Rectangle(0f, 0f, Config.getRES_WIDTH().toFloat(), Config.getRES_HEIGHT().toFloat(), null as? VertexBufferObjectManager)
+        val dim = Rectangle(0f, 0f, Config.getRES_WIDTH().toFloat(), Config.getRES_HEIGHT().toFloat(), GlobalManager.getInstance().engine.vertexBufferObjectManager)
         dim.setColor(0f, 0f, 0f, 0.5f)
         attachChild(dim, 0)
 
         // Top bar
-        val top = Rectangle(0f, 0f, Config.getRES_WIDTH().toFloat(), 120f, null as? VertexBufferObjectManager)
+        val top = Rectangle(0f, 0f, Config.getRES_WIDTH().toFloat(), 120f, GlobalManager.getInstance().engine.vertexBufferObjectManager)
         top.setColor(0f, 0f, 0f, 0.3f)
         attachChild(top)
 
@@ -171,7 +170,7 @@ object RoomScene : Scene(), IRoomEventListener, IPlayerEventListener
         attachChild(infoText)
 
         // Beatmap info
-        beatmapInfoRectangle = Rectangle(0f, 0f, trackButton!!.width * 0.75f, 0f, null as? VertexBufferObjectManager).also {
+        beatmapInfoRectangle = Rectangle(0f, 0f, trackButton!!.width * 0.75f, 0f, GlobalManager.getInstance().engine.vertexBufferObjectManager).also {
             it.setColor(0f, 0f, 0f, 0.9f)
             it.isVisible = false
 
@@ -449,7 +448,7 @@ object RoomScene : Scene(), IRoomEventListener, IPlayerEventListener
         val height = texture.height * (Config.getRES_WIDTH() / texture.width.toFloat())
         val width = Config.getRES_WIDTH().toFloat()
 
-        background = SpriteBackground(Sprite(0f, (Config.getRES_HEIGHT() - height) / 2f, width, height, texture, null as? VertexBufferObjectManager))
+        background = SpriteBackground(Sprite(0f, (Config.getRES_HEIGHT() - height) / 2f, width, height, texture, GlobalManager.getInstance().engine.vertexBufferObjectManager))
     }
 
     private fun updateInformation()

@@ -13,7 +13,6 @@ import org.andengine.entity.primitive.Rectangle;
 import org.andengine.entity.scene.Scene;
 import org.andengine.entity.sprite.Sprite;
 import org.andengine.opengl.texture.region.TextureRegion;
-import org.andengine.opengl.vbo.VertexBufferObjectManager;
 
 import ru.nsu.ccfit.zuev.osu.Config;
 import ru.nsu.ccfit.zuev.osu.GlobalManager;
@@ -47,7 +46,7 @@ public class BreakAnimator extends GameObject {
 
         for (int i = 0; i < 4; i++) {
             arrows[i] = new Sprite(0, 0, ResourceManager.getInstance()
-                    .getTexture("play-warningarrow").deepCopy(), (VertexBufferObjectManager) null);
+                    .getTexture("play-warningarrow").deepCopy(), GlobalManager.getInstance().getEngine().getVertexBufferObjectManager());
             arrows[i]
                     .registerEntityModifier(new LoopEntityModifier(
                             new SequenceEntityModifier(
@@ -105,7 +104,7 @@ public class BreakAnimator extends GameObject {
                     .getTextureWithPrefix(OsuSkin.get().getScorePrefix(), "0");
             mark = new Sprite(Config.getRES_WIDTH() - zeroRect.getWidth() * 11,
                     Utils.toRes(5), ResourceManager.getInstance().getTexture(
-                    "ranking-" + stat.getMark() + "-small"), (VertexBufferObjectManager) null);
+                    "ranking-" + stat.getMark() + "-small"), GlobalManager.getInstance().getEngine().getVertexBufferObjectManager());
             mark.setScale(1.2f);
             scene.attachChild(mark, 0);
         }

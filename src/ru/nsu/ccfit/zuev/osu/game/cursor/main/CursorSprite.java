@@ -6,7 +6,6 @@ import org.andengine.entity.modifier.ScaleModifier;
 import org.andengine.entity.modifier.SequenceEntityModifier;
 import org.andengine.entity.sprite.Sprite;
 import org.andengine.opengl.texture.region.TextureRegion;
-import org.andengine.opengl.vbo.VertexBufferObjectManager;
 
 import ru.nsu.ccfit.zuev.osu.Config;
 import ru.nsu.ccfit.zuev.osu.GlobalManager;
@@ -21,7 +20,7 @@ public class CursorSprite extends Sprite implements ISliderListener {
     private final boolean rotate = OsuSkin.get().isRotateCursor();
 
     public CursorSprite(float pX, float pY, TextureRegion pTextureRegion) {
-        super(pX, pY, pTextureRegion, (VertexBufferObjectManager) null);
+        super(pX, pY, pTextureRegion, GlobalManager.getInstance().getEngine().getVertexBufferObjectManager());
         setScale(baseSize);
     }
 

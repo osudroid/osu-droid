@@ -7,7 +7,6 @@ import org.andengine.entity.scene.menu.item.IMenuItem;
 import org.andengine.entity.scene.menu.item.SpriteMenuItem;
 import org.andengine.entity.sprite.Sprite;
 import org.andengine.opengl.texture.region.TextureRegion;
-import org.andengine.opengl.vbo.VertexBufferObjectManager;
 
 import ru.nsu.ccfit.zuev.audio.BassSoundProvider;
 import ru.nsu.ccfit.zuev.osu.Config;
@@ -35,16 +34,16 @@ public class PauseMenu implements IOnMenuItemClickListener {
         scene = new MenuScene(engine.getCamera());
 
         final SpriteMenuItem saveFailedReplay = new SpriteMenuItem(ITEM_SAVE_REPLAY,
-                ResourceManager.getInstance().getTexture("pause-save-replay"), (VertexBufferObjectManager) null);
+                ResourceManager.getInstance().getTexture("pause-save-replay"), GlobalManager.getInstance().getEngine().getVertexBufferObjectManager());
         scene.addMenuItem(saveFailedReplay);
         final SpriteMenuItem itemContinue = new SpriteMenuItem(ITEM_CONTINUE,
-                ResourceManager.getInstance().getTexture("pause-continue"), (VertexBufferObjectManager) null);
+                ResourceManager.getInstance().getTexture("pause-continue"), GlobalManager.getInstance().getEngine().getVertexBufferObjectManager());
         scene.addMenuItem(itemContinue);
         final SpriteMenuItem itemRetry = new SpriteMenuItem(ITEM_RETRY,
-                ResourceManager.getInstance().getTexture("pause-retry"), (VertexBufferObjectManager) null);
+                ResourceManager.getInstance().getTexture("pause-retry"), GlobalManager.getInstance().getEngine().getVertexBufferObjectManager());
         scene.addMenuItem(itemRetry);
         final SpriteMenuItem itemBack = new SpriteMenuItem(ITEM_BACK,
-                ResourceManager.getInstance().getTexture("pause-back"), (VertexBufferObjectManager) null);
+                ResourceManager.getInstance().getTexture("pause-back"), GlobalManager.getInstance().getEngine().getVertexBufferObjectManager());
         scene.addMenuItem(itemBack);
         scene.setBackgroundEnabled(false);
         TextureRegion tex;
@@ -64,7 +63,7 @@ public class PauseMenu implements IOnMenuItemClickListener {
             height *= Config.getRES_WIDTH() / (float) (tex.getWidth());
             final Sprite bg = new Sprite(0,
                     (Config.getRES_HEIGHT() - height) / 2,
-                    Config.getRES_WIDTH(), height, tex, (VertexBufferObjectManager) null);
+                    Config.getRES_WIDTH(), height, tex, GlobalManager.getInstance().getEngine().getVertexBufferObjectManager());
             scene.attachChild(bg, 0);
         }
 

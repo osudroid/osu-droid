@@ -4,7 +4,6 @@ import android.graphics.PointF;
 
 import org.andengine.entity.primitive.Rectangle;
 import org.andengine.entity.scene.Scene;
-import org.andengine.opengl.vbo.VertexBufferObjectManager;
 
 import java.util.LinkedList;
 import java.util.List;
@@ -38,26 +37,26 @@ public class HitErrorMeter extends GameObject {
         boundary = difficultyHelper.hitWindowFor50(difficulty);
 
         float totalLen = boundary * 1500;
-        Rectangle hitMeter = new Rectangle(anchor.x - totalLen / 2, anchor.y - height, totalLen, height * 2, (VertexBufferObjectManager) null);
+        Rectangle hitMeter = new Rectangle(anchor.x - totalLen / 2, anchor.y - height, totalLen, height * 2, GlobalManager.getInstance().getEngine().getVertexBufferObjectManager());
         hitMeter.setColor(0f, 0f, 0f, 0.8f);
         scene.attachChild(hitMeter);
 
         float hit50Len = totalLen;
-        Rectangle hit50 = new Rectangle(anchor.x - hit50Len / 2, anchor.y - height / 2, hit50Len, height, (VertexBufferObjectManager) null);
+        Rectangle hit50 = new Rectangle(anchor.x - hit50Len / 2, anchor.y - height / 2, hit50Len, height, GlobalManager.getInstance().getEngine().getVertexBufferObjectManager());
         hit50.setColor(200f / 255f, 180f / 255f, 110f / 255f, 0.8f);
         scene.attachChild(hit50);
 
         float hit100Len = difficultyHelper.hitWindowFor100(difficulty) * 1500;
-        Rectangle hit100 = new Rectangle(anchor.x - hit100Len / 2, anchor.y - height / 2, hit100Len, height, (VertexBufferObjectManager) null);
+        Rectangle hit100 = new Rectangle(anchor.x - hit100Len / 2, anchor.y - height / 2, hit100Len, height, GlobalManager.getInstance().getEngine().getVertexBufferObjectManager());
         hit100.setColor(100f / 255f, 220f / 255f, 40f / 255f, 0.8f);
         scene.attachChild(hit100);
 
         float hit300Len = difficultyHelper.hitWindowFor300(difficulty) * 1500;
-        Rectangle hit300 = new Rectangle(anchor.x - hit300Len / 2, anchor.y - height / 2, hit300Len, height, (VertexBufferObjectManager) null);
+        Rectangle hit300 = new Rectangle(anchor.x - hit300Len / 2, anchor.y - height / 2, hit300Len, height, GlobalManager.getInstance().getEngine().getVertexBufferObjectManager());
         hit300.setColor(70f / 255f, 180f / 255f, 220f / 255f, 0.8f);
         scene.attachChild(hit300);
 
-        Rectangle hitIndicator = new Rectangle(anchor.x - 2, anchor.y - height, 4, height * 2, (VertexBufferObjectManager) null);
+        Rectangle hitIndicator = new Rectangle(anchor.x - 2, anchor.y - height, 4, height * 2, GlobalManager.getInstance().getEngine().getVertexBufferObjectManager());
         hitIndicator.setColor(1f, 1f, 1f, 0.8f);
         hitIndicator.setZIndex(15);
         scene.attachChild(hitIndicator);
@@ -89,7 +88,7 @@ public class HitErrorMeter extends GameObject {
         }
         errorResult = errorResult * 750;
         if (recycledIndicators.isEmpty()) {
-            Rectangle indicator = new Rectangle(barAnchor.x - 2, barAnchor.y - barHeight, 4, barHeight * 2, (VertexBufferObjectManager) null);
+            Rectangle indicator = new Rectangle(barAnchor.x - 2, barAnchor.y - barHeight, 4, barHeight * 2, GlobalManager.getInstance().getEngine().getVertexBufferObjectManager());
             float posX = indicator.getX() + errorResult;
             float posY = indicator.getY();
             indicator.setPosition(posX, posY);

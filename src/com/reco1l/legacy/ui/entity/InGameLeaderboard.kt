@@ -5,8 +5,8 @@ import com.reco1l.legacy.Multiplayer.isMultiplayer
 import org.andengine.entity.Entity
 import org.andengine.entity.sprite.Sprite
 import org.andengine.entity.text.Text
-import org.andengine.opengl.vbo.VertexBufferObjectManager
 import ru.nsu.ccfit.zuev.osu.Config
+import ru.nsu.ccfit.zuev.osu.GlobalManager
 import ru.nsu.ccfit.zuev.osu.menu.ScoreBoardItem
 import ru.nsu.ccfit.zuev.osu.scoring.StatisticV2
 import ru.nsu.ccfit.zuev.osu.GlobalManager.getInstance as getGlobal
@@ -260,7 +260,7 @@ class InGameLeaderboard(var playerName: String, private val stats: StatisticV2) 
 
 
     private inner class BoardItem(val data: ScoreBoardItem) :
-        Sprite(0f, 0f, getResources().getTexture("menu-button-background"), null as? VertexBufferObjectManager)
+        Sprite(0f, 0f, getResources().getTexture("menu-button-background"), GlobalManager.getInstance().engine.vertexBufferObjectManager)
     {
 
         val info: Text
@@ -279,12 +279,12 @@ class InGameLeaderboard(var playerName: String, private val stats: StatisticV2) 
             height = 90f
             width = 130f
 
-            info = Text(10f, 15f, getResources().getFont("font"), "", 100, null)
+            info = Text(10f, 15f, getResources().getFont("font"), "", 100, GlobalManager.getInstance().engine.vertexBufferObjectManager)
             info.setBlendFunction(GLES20.GL_SRC_ALPHA, GLES20.GL_ONE_MINUS_SRC_ALPHA)
             info.setScaleCenter(0f, 0f)
             info.setScale(0.65f)
 
-            rank = Text(10f, 15f, getResources().getFont("CaptionFont"), "", 5, null)
+            rank = Text(10f, 15f, getResources().getFont("CaptionFont"), "", 5, GlobalManager.getInstance().engine.vertexBufferObjectManager)
             rank.setBlendFunction(GLES20.GL_SRC_ALPHA, GLES20.GL_ONE_MINUS_SRC_ALPHA)
             rank.setPosition(100 - rank.width, 30f)
             rank.setScaleCenter(0f, 0f)

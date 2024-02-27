@@ -20,7 +20,6 @@ import java.util.EnumSet;
 import java.util.Map;
 import java.util.TreeMap;
 
-import org.andengine.opengl.vbo.VertexBufferObjectManager;
 import org.jetbrains.annotations.Nullable;
 import ru.nsu.ccfit.zuev.osu.*;
 import ru.nsu.ccfit.zuev.osu.beatmap.BeatmapData;
@@ -224,13 +223,13 @@ public class ModMenu implements IModSwitcher {
         scene = new Scene();
         scene.setBackgroundEnabled(false);
         final Rectangle bg = new Rectangle(0, 0, Config.getRES_WIDTH(),
-                Config.getRES_HEIGHT(), (VertexBufferObjectManager) null);
+                Config.getRES_HEIGHT(), GlobalManager.getInstance().getEngine().getVertexBufferObjectManager());
         bg.setColor(0, 0, 0, 0.7f);
         scene.attachChild(bg);
 
         multiplierText = new Text(0, Utils.toRes(50),
                 ResourceManager.getInstance().getFont("CaptionFont"),
-                StringTable.format(R.string.menu_mod_multiplier, 1f), null);
+                StringTable.format(R.string.menu_mod_multiplier, 1f), GlobalManager.getInstance().getEngine().getVertexBufferObjectManager());
         multiplierText.setScale(1.2f);
         scene.attachChild(multiplierText);
 

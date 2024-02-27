@@ -3,7 +3,6 @@ package ru.nsu.ccfit.zuev.osu.menu;
 import org.andengine.entity.IEntity;
 import org.andengine.entity.primitive.Rectangle;
 import org.andengine.entity.scene.Scene;
-import org.andengine.opengl.vbo.VertexBufferObjectManager;
 
 import ru.nsu.ccfit.zuev.osu.Config;
 import ru.nsu.ccfit.zuev.osu.GlobalManager;
@@ -17,7 +16,7 @@ public class ScrollBar {
         visible = false;
 
         barRectangle = new Rectangle(Config.getRES_WIDTH() - Utils.toRes(20),
-                0, Utils.toRes(20), Utils.toRes(50), (VertexBufferObjectManager) null);
+                0, Utils.toRes(20), Utils.toRes(50), GlobalManager.getInstance().getEngine().getVertexBufferObjectManager());
         barRectangle.setAlpha(0.8f);
         barRectangle.setColor(1, 1, 1);
 

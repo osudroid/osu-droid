@@ -28,7 +28,6 @@ import org.andengine.opengl.texture.atlas.buildable.builder.BlackPawnTextureAtla
 import org.andengine.opengl.texture.atlas.buildable.builder.ITextureAtlasBuilder;
 import org.andengine.opengl.texture.region.TextureRegion;
 import org.andengine.opengl.texture.region.TiledTextureRegion;
-import org.andengine.opengl.vbo.VertexBufferObjectManager;
 import org.andengine.util.modifier.IModifier;
 import org.andengine.util.modifier.ease.EaseQuadIn;
 import org.andengine.util.modifier.ease.EaseQuadOut;
@@ -73,7 +72,7 @@ public class OsuSprite {
             isValid = false;
         } else {
             isValid = true;
-            sprite = new Sprite(x, y, textureRegion, (VertexBufferObjectManager) null);
+            sprite = new Sprite(x, y, textureRegion, GlobalManager.getInstance().getEngine().getVertexBufferObjectManager());
             this.layer = layer;
             this.origin = origin;
             this.eventList = eventList;
@@ -132,7 +131,7 @@ public class OsuSprite {
         isValid = true;
         TiledTextureRegion tiledTextureRegion = TiledTextureRegion.create(mBitmapTextureAtlas,
                 0, 0, width, height, count, 1);
-        AnimatedSprite sprite = new AnimatedSprite(x, y, tiledTextureRegion, (VertexBufferObjectManager) null);
+        AnimatedSprite sprite = new AnimatedSprite(x, y, tiledTextureRegion, GlobalManager.getInstance().getEngine().getVertexBufferObjectManager());
         sprite.animate(delay, loopType.equals("LoopForever"));
         this.sprite = sprite;
         this.layer = layer;

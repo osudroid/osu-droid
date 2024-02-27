@@ -10,7 +10,6 @@ import org.andengine.entity.text.TextOptions;
 import org.andengine.input.touch.TouchEvent;
 import org.andengine.opengl.font.Font;
 import org.andengine.opengl.texture.region.TextureRegion;
-import org.andengine.opengl.vbo.VertexBufferObjectManager;
 import org.andengine.util.HorizontalAlign;
 
 import ru.nsu.ccfit.zuev.osu.GlobalManager;
@@ -28,7 +27,7 @@ public class SendingPanel extends Rectangle {
     private boolean canBeDismissed = false;
 
     public SendingPanel(long rank, long score, float accuracy) {
-        super(0, Utils.toRes(-300), Utils.toRes(800), Utils.toRes(300), (VertexBufferObjectManager) null);
+        super(0, Utils.toRes(-300), Utils.toRes(800), Utils.toRes(300), GlobalManager.getInstance().getEngine().getVertexBufferObjectManager());
         TextureRegion btnTex = ResourceManager.getInstance().
                 getTexture("ranking_button");
 
@@ -37,7 +36,7 @@ public class SendingPanel extends Rectangle {
         this.accuracy = accuracy;
         setColor(0, 0, 0, 0.7f);
 
-        button = new Sprite(Utils.toRes(272), Utils.toRes(300), btnTex, (VertexBufferObjectManager) null) {
+        button = new Sprite(Utils.toRes(272), Utils.toRes(300), btnTex, GlobalManager.getInstance().getEngine().getVertexBufferObjectManager()) {
 
 
             @Override
@@ -56,50 +55,50 @@ public class SendingPanel extends Rectangle {
 
         buttonText = new Text(Utils.toRes(340), Utils.toRes(305),
                 ResourceManager.getInstance().getFont("font"),
-                "Sending...", 10, new TextOptions(HorizontalAlign.CENTER), (VertexBufferObjectManager) null);
+                "Sending...", 10, new TextOptions(HorizontalAlign.CENTER), GlobalManager.getInstance().getEngine().getVertexBufferObjectManager());
         attachChild(buttonText);
 
         Text topScoreText = new Text(0, 0,
-                ResourceManager.getInstance().getFont("CaptionFonrt"), "Overall Ranking", null);
+                ResourceManager.getInstance().getFont("CaptionFonrt"), "Overall Ranking", GlobalManager.getInstance().getEngine().getVertexBufferObjectManager());
         topScoreText.setPosition(Utils.toRes(400) - topScoreText.getWidth() / 2, Utils.toRes(60));
         attachChild(topScoreText);
 
         Text tableCaption = new Text(Utils.toRes(60), Utils.toRes(120),
                 ResourceManager.getInstance().getFont("font"),
-                "Map rank     Overall      Accuracy       Ranked score", null);
+                "Map rank     Overall      Accuracy       Ranked score", GlobalManager.getInstance().getEngine().getVertexBufferObjectManager());
         attachChild(tableCaption);
 
         mapRect = new Rectangle(Utils.toRes(50), Utils.toRes(160),
-                Utils.toRes(140), Utils.toRes(80), (VertexBufferObjectManager) null);
+                Utils.toRes(140), Utils.toRes(80), GlobalManager.getInstance().getEngine().getVertexBufferObjectManager());
         mapRect.setColor(1, 1, 0, 0.8f);
         attachChild(mapRect);
 
         rankRect = new Rectangle(Utils.toRes(195), Utils.toRes(160),
-                Utils.toRes(150), Utils.toRes(80), (VertexBufferObjectManager) null);
+                Utils.toRes(150), Utils.toRes(80), GlobalManager.getInstance().getEngine().getVertexBufferObjectManager());
         attachChild(rankRect);
 
         accRect = new Rectangle(Utils.toRes(350), Utils.toRes(160),
-                Utils.toRes(150), Utils.toRes(80), (VertexBufferObjectManager) null);
+                Utils.toRes(150), Utils.toRes(80), GlobalManager.getInstance().getEngine().getVertexBufferObjectManager());
         attachChild(accRect);
 
         scoreRect = new Rectangle(Utils.toRes(505), Utils.toRes(160),
-                Utils.toRes(250), Utils.toRes(80), (VertexBufferObjectManager) null);
+                Utils.toRes(250), Utils.toRes(80), GlobalManager.getInstance().getEngine().getVertexBufferObjectManager());
         attachChild(scoreRect);
 
         Font font = ResourceManager.getInstance().getFont("font");
-        mapText = new Text(0, 0, font, "#9999999", 8, new TextOptions(HorizontalAlign.CENTER), (VertexBufferObjectManager) null);
+        mapText = new Text(0, 0, font, "#9999999", 8, new TextOptions(HorizontalAlign.CENTER), GlobalManager.getInstance().getEngine().getVertexBufferObjectManager());
         placeText(mapRect, mapText);
         attachChild(mapText);
 
-        rankText = new Text(0, 0, font, "#9999999\n(+100)", 19, new TextOptions(HorizontalAlign.CENTER), (VertexBufferObjectManager) null);
+        rankText = new Text(0, 0, font, "#9999999\n(+100)", 19, new TextOptions(HorizontalAlign.CENTER), GlobalManager.getInstance().getEngine().getVertexBufferObjectManager());
         placeText(rankRect, rankText);
         attachChild(rankText);
 
-        accText = new Text(0, 0, font, "100.00%\n(+21.90%)", 16, new TextOptions(HorizontalAlign.CENTER), (VertexBufferObjectManager) null);
+        accText = new Text(0, 0, font, "100.00%\n(+21.90%)", 16, new TextOptions(HorizontalAlign.CENTER), GlobalManager.getInstance().getEngine().getVertexBufferObjectManager());
         placeText(accRect, accText);
         attachChild(accText);
 
-        scoreText = new Text(0, 0, font, "99 123 456 789\n(+99 999 999)", 100, new TextOptions(HorizontalAlign.CENTER), (VertexBufferObjectManager) null);
+        scoreText = new Text(0, 0, font, "99 123 456 789\n(+99 999 999)", 100, new TextOptions(HorizontalAlign.CENTER), GlobalManager.getInstance().getEngine().getVertexBufferObjectManager());
         placeText(scoreRect, scoreText);
         attachChild(scoreText);
     }

@@ -2,7 +2,6 @@ package ru.nsu.ccfit.zuev.osu.game;
 
 import org.andengine.entity.scene.Scene;
 import org.andengine.entity.sprite.Sprite;
-import org.andengine.opengl.vbo.VertexBufferObjectManager;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -26,7 +25,7 @@ public class ScoreBar extends GameObject {
                     final StatisticV2 stat) {
         this.stat = stat;
         bg = new Sprite(0, 0, ResourceManager.getInstance().getTexture(
-                "scorebar-bg"), (VertexBufferObjectManager) null);
+                "scorebar-bg"), GlobalManager.getInstance().getEngine().getVertexBufferObjectManager());
         bg.setScaleCenter(0, 0);
 		/*final int colourFrames = SkinManager.getFrames("scorebar-colour");
 		colour = new AnimSprite(Utils.toRes(5), Utils.toRes(16),
@@ -41,7 +40,7 @@ public class ScoreBar extends GameObject {
                     loadedScoreBarTextures.toArray(new String[0]));
         } else {
             colour = new Sprite(Utils.toRes(5), Utils.toRes(16),
-                    ResourceManager.getInstance().getTexture("scorebar-colour"), (VertexBufferObjectManager) null);
+                    ResourceManager.getInstance().getTexture("scorebar-colour"), GlobalManager.getInstance().getEngine().getVertexBufferObjectManager());
         }
         width = colour.getWidth();
 		/*for (int i = 0; i < colour.getTextureRegionCount(); i++) {

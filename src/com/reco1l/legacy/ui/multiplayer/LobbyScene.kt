@@ -16,7 +16,6 @@ import org.andengine.entity.scene.background.SpriteBackground
 import org.andengine.entity.sprite.Sprite
 import org.andengine.entity.text.Text
 import org.andengine.input.touch.TouchEvent
-import org.andengine.opengl.vbo.VertexBufferObjectManager
 import org.andengine.util.math.MathUtils
 import ru.nsu.ccfit.zuev.osu.*
 import ru.nsu.ccfit.zuev.osu.helper.AnimSprite
@@ -56,11 +55,11 @@ object LobbyScene : Scene()
 
     private val onlinePanel = OnlinePanel()
 
-    private val titleText = Text(20f, 20f, getResources().getFont("bigFont"), "", 100, null)
+    private val titleText = Text(20f, 20f, getResources().getFont("bigFont"), "", 100, GlobalManager.getInstance().engine.vertexBufferObjectManager)
 
-    private val infoText = Text(20f, 0f, getResources().getFont("smallFont"), "", 100, null)
+    private val infoText = Text(20f, 0f, getResources().getFont("smallFont"), "", 100, GlobalManager.getInstance().engine.vertexBufferObjectManager)
 
-    private val loading = Sprite(0f, 0f, getResources().getTexture("loading_start"), null as? VertexBufferObjectManager)
+    private val loading = Sprite(0f, 0f, getResources().getTexture("loading_start"), GlobalManager.getInstance().engine.vertexBufferObjectManager)
 
 
     /**Await lock for the list refresh*/
@@ -76,12 +75,12 @@ object LobbyScene : Scene()
         updateBackground()
 
         // Background dim
-        val dim = Rectangle(0f, 0f, Config.getRES_WIDTH().toFloat(), Config.getRES_HEIGHT().toFloat(), null as? VertexBufferObjectManager)
+        val dim = Rectangle(0f, 0f, Config.getRES_WIDTH().toFloat(), Config.getRES_HEIGHT().toFloat(), GlobalManager.getInstance().engine.vertexBufferObjectManager)
         dim.setColor(0f, 0f, 0f, 0.5f)
         attachChild(dim)
 
         // Top bar
-        val top = Rectangle(0f, 0f, Config.getRES_WIDTH().toFloat(), 120f, null as? VertexBufferObjectManager)
+        val top = Rectangle(0f, 0f, Config.getRES_WIDTH().toFloat(), 120f, GlobalManager.getInstance().engine.vertexBufferObjectManager)
         top.setColor(0f, 0f, 0f, 0.3f)
         attachChild(top)
 
@@ -315,7 +314,7 @@ object LobbyScene : Scene()
             val height = it.height * (Config.getRES_WIDTH() / it.width.toFloat())
             val width = Config.getRES_WIDTH().toFloat()
 
-            background = SpriteBackground(Sprite(0f, (Config.getRES_HEIGHT() - height) / 2f, width, height, it, null as? VertexBufferObjectManager))
+            background = SpriteBackground(Sprite(0f, (Config.getRES_HEIGHT() - height) / 2f, width, height, it, GlobalManager.getInstance().engine.vertexBufferObjectManager))
         }
     }
 

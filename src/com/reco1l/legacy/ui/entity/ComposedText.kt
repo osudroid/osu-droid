@@ -8,9 +8,9 @@ import ru.nsu.ccfit.zuev.osu.GlobalManager
 class ComposedText(x: Float, y: Float, font: Font, max: Int) : Entity(x, y)
 {
 
-    val tag = Text(x, y, font, "", 16, null)
+    val tag = Text(x, y, font, "", 16, GlobalManager.getInstance().engine.vertexBufferObjectManager)
 
-    val content = Text(x, y, font, "", max, null)
+    val content = Text(x, y, font, "", max, GlobalManager.getInstance().engine.vertexBufferObjectManager)
 
     init
     {
