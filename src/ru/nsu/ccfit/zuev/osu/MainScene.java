@@ -40,6 +40,7 @@ import org.andengine.entity.text.Text;
 import org.andengine.entity.text.TextOptions;
 import org.andengine.input.touch.TouchEvent;
 import org.andengine.opengl.texture.region.TextureRegion;
+import org.andengine.opengl.vbo.VertexBufferObjectManager;
 import org.andengine.util.debug.Debug;
 import org.andengine.util.HorizontalAlign;
 import org.andengine.util.modifier.IModifier;
@@ -141,15 +142,15 @@ public class MainScene implements IUpdateHandler {
                     0,
                     (Config.getRES_HEIGHT() - height) / 2,
                     Config.getRES_WIDTH(),
-                    height, tex, GlobalManager.getInstance().getEngine().getVertexBufferObjectManager());
+                    height, tex, (VertexBufferObjectManager) null);
             scene.setBackground(new SpriteBackground(menuBg));
         } else {
             scene.setBackground(new Background(70 / 255f, 129 / 255f,
                     252 / 255f));
         }
-        lastBackground = new Sprite(0, 0, Config.getRES_WIDTH(), Config.getRES_HEIGHT(), new BlankTextureRegion(), GlobalManager.getInstance().getEngine().getVertexBufferObjectManager());
+        lastBackground = new Sprite(0, 0, Config.getRES_WIDTH(), Config.getRES_HEIGHT(), new BlankTextureRegion(), (VertexBufferObjectManager) null);
         final TextureRegion logotex = ResourceManager.getInstance().getTexture("logo");
-        logo = new Sprite((float) Config.getRES_WIDTH() / 2 - (float) logotex.getWidth() / 2, (float) Config.getRES_HEIGHT() / 2 - (float) logotex.getHeight() / 2, logotex, GlobalManager.getInstance().getEngine().getVertexBufferObjectManager()) {
+        logo = new Sprite((float) Config.getRES_WIDTH() / 2 - (float) logotex.getWidth() / 2, (float) Config.getRES_HEIGHT() / 2 - (float) logotex.getHeight() / 2, logotex, (VertexBufferObjectManager) null) {
             @Override
             public boolean onAreaTouched(final TouchEvent pSceneTouchEvent,
                                          final float pTouchAreaLocalX, final float pTouchAreaLocalY) {
@@ -178,7 +179,7 @@ public class MainScene implements IUpdateHandler {
             }
         };
 
-        logoOverlay = new Sprite((float) Config.getRES_WIDTH() / 2 - (float) logotex.getWidth() / 2, (float) Config.getRES_HEIGHT() / 2 - (float) logotex.getHeight() / 2, logotex, GlobalManager.getInstance().getEngine().getVertexBufferObjectManager());
+        logoOverlay = new Sprite((float) Config.getRES_WIDTH() / 2 - (float) logotex.getWidth() / 2, (float) Config.getRES_HEIGHT() / 2 - (float) logotex.getHeight() / 2, logotex, (VertexBufferObjectManager) null);
         logoOverlay.setScale(1.07f);
         logoOverlay.setAlpha(0.2f);
 
@@ -190,7 +191,7 @@ public class MainScene implements IUpdateHandler {
                         Locale.getDefault(),
                         "osu!droid %s\nby osu!droid Team\nosu! is © peppy 2007-2023",
                         BuildConfig.VERSION_NAME + " (" + BuildConfig.BUILD_TYPE + ")"
-                ), GlobalManager.getInstance().getEngine().getVertexBufferObjectManager()) {
+                ), null) {
 
 
             @Override
@@ -214,7 +215,7 @@ public class MainScene implements IUpdateHandler {
 
         final Text yasonline = new Text(720, 530, ResourceManager
                 .getInstance().getFont("font"),
-                "            Global Ranking\n   Provided by iBancho", GlobalManager.getInstance().getEngine().getVertexBufferObjectManager()) {
+                "            Global Ranking\n   Provided by iBancho", null) {
 
             @Override
             public boolean onAreaTouched(final TouchEvent pSceneTouchEvent,
@@ -237,7 +238,7 @@ public class MainScene implements IUpdateHandler {
 
         final Sprite music_prev = new Sprite(Config.getRES_WIDTH() - 50 * 6 + 35,
                 47, 40, 40, ResourceManager.getInstance().getTexture(
-                "music_prev"), GlobalManager.getInstance().getEngine().getVertexBufferObjectManager()) {
+                "music_prev"), (VertexBufferObjectManager) null) {
 
             @Override
             public boolean onAreaTouched(final TouchEvent pSceneTouchEvent,
@@ -267,7 +268,7 @@ public class MainScene implements IUpdateHandler {
 
         final Sprite music_play = new Sprite(Config.getRES_WIDTH() - 50 * 5 + 35,
                 47, 40, 40, ResourceManager.getInstance().getTexture(
-                "music_play"), GlobalManager.getInstance().getEngine().getVertexBufferObjectManager()) {
+                "music_play"), (VertexBufferObjectManager) null) {
 
             @Override
             public boolean onAreaTouched(final TouchEvent pSceneTouchEvent,
@@ -288,7 +289,7 @@ public class MainScene implements IUpdateHandler {
 
         final Sprite music_pause = new Sprite(Config.getRES_WIDTH() - 50 * 4 + 35,
                 47, 40, 40, ResourceManager.getInstance().getTexture(
-                "music_pause"), GlobalManager.getInstance().getEngine().getVertexBufferObjectManager()) {
+                "music_pause"), (VertexBufferObjectManager) null) {
 
             @Override
             public boolean onAreaTouched(final TouchEvent pSceneTouchEvent,
@@ -309,7 +310,7 @@ public class MainScene implements IUpdateHandler {
 
         final Sprite music_stop = new Sprite(Config.getRES_WIDTH() - 50 * 3 + 35,
                 47, 40, 40, ResourceManager.getInstance().getTexture(
-                "music_stop"), GlobalManager.getInstance().getEngine().getVertexBufferObjectManager()) {
+                "music_stop"), (VertexBufferObjectManager) null) {
 
             @Override
             public boolean onAreaTouched(final TouchEvent pSceneTouchEvent,
@@ -331,7 +332,7 @@ public class MainScene implements IUpdateHandler {
 
         final Sprite music_next = new Sprite(Config.getRES_WIDTH() - 50 * 2 + 35,
                 47, 40, 40, ResourceManager.getInstance().getTexture(
-                "music_next"), GlobalManager.getInstance().getEngine().getVertexBufferObjectManager()) {
+                "music_next"), (VertexBufferObjectManager) null) {
 
             @Override
             public boolean onAreaTouched(final TouchEvent pSceneTouchEvent,
@@ -359,16 +360,16 @@ public class MainScene implements IUpdateHandler {
             }
         };
 
-        musicInfoText = new Text(0, 0, ResourceManager.getInstance().getFont("font"), "", 35, new TextOptions(HorizontalAlign.RIGHT), GlobalManager.getInstance().getEngine().getVertexBufferObjectManager());
+        musicInfoText = new Text(0, 0, ResourceManager.getInstance().getFont("font"), "", 35, new TextOptions(HorizontalAlign.RIGHT), (VertexBufferObjectManager) null);
 
         final TextureRegion nptex = ResourceManager.getInstance().getTexture("music_np");
-        music_nowplay = new Sprite(Utils.toRes(Config.getRES_WIDTH() - 500), 0, (float) (40 * nptex.getWidth()) / nptex.getHeight(), 40, nptex, GlobalManager.getInstance().getEngine().getVertexBufferObjectManager());
+        music_nowplay = new Sprite(Utils.toRes(Config.getRES_WIDTH() - 500), 0, (float) (40 * nptex.getWidth()) / nptex.getHeight(), 40, nptex, (VertexBufferObjectManager) null);
 
-        final Rectangle bgTopRect = new Rectangle(0, 0, Config.getRES_WIDTH(), Utils.toRes(120), GlobalManager.getInstance().getEngine().getVertexBufferObjectManager());
+        final Rectangle bgTopRect = new Rectangle(0, 0, Config.getRES_WIDTH(), Utils.toRes(120), (VertexBufferObjectManager) null);
         bgTopRect.setColor(0, 0, 0, 0.3f);
 
         final Rectangle bgbottomRect = new Rectangle(0, 0, Config.getRES_WIDTH(),
-                Math.max(author.getHeight(), yasonline.getHeight()) + Utils.toRes(15), GlobalManager.getInstance().getEngine().getVertexBufferObjectManager());
+                Math.max(author.getHeight(), yasonline.getHeight()) + Utils.toRes(15), (VertexBufferObjectManager) null);
         bgbottomRect.setPosition(0, Config.getRES_HEIGHT() - bgbottomRect.getHeight());
         bgbottomRect.setColor(0, 0, 0, 0.3f);
 
@@ -376,7 +377,7 @@ public class MainScene implements IUpdateHandler {
             final float pX = (float) Config.getRES_WIDTH() / 2;
             final float pY = (float) Config.getRES_HEIGHT() / 2;
 
-            spectrum[i] = new Rectangle(pX, pY, 260, 10, GlobalManager.getInstance().getEngine().getVertexBufferObjectManager());
+            spectrum[i] = new Rectangle(pX, pY, 260, 10, (VertexBufferObjectManager) null);
             spectrum[i].setRotationCenter(0, 5);
             spectrum[i].setScaleCenter(0, 5);
             spectrum[i].setRotation(-220 + i * 3f);
@@ -390,7 +391,7 @@ public class MainScene implements IUpdateHandler {
         TextureRegion starRegion = ResourceManager.getInstance().getTexture("star");
 
         {
-            particleSystem[0] = new SpriteParticleSystem(new PointParticleEmitter(-40, (float) (Config.getRES_HEIGHT() * 3) / 4), 32, 48, 128, starRegion, GlobalManager.getInstance().getEngine().getVertexBufferObjectManager());
+            particleSystem[0] = new SpriteParticleSystem(new PointParticleEmitter(-40, (float) (Config.getRES_HEIGHT() * 3) / 4), 32, 48, 128, starRegion, null);
 
             particleSystem[0].addParticleInitializer(new BlendFunctionParticleInitializer<>(GLES20.GL_SRC_ALPHA, GLES20.GL_ONE_MINUS_SRC_ALPHA));
             particleSystem[0].addParticleInitializer(new VelocityParticleInitializer<>(150, 430, -480, -520));
@@ -408,7 +409,7 @@ public class MainScene implements IUpdateHandler {
 
         {
 
-            particleSystem[1] = new SpriteParticleSystem(new PointParticleEmitter(Config.getRES_WIDTH(), (float) (Config.getRES_HEIGHT() * 3) / 4), 32, 48, 128, starRegion, GlobalManager.getInstance().getEngine().getVertexBufferObjectManager());
+            particleSystem[1] = new SpriteParticleSystem(new PointParticleEmitter(Config.getRES_WIDTH(), (float) (Config.getRES_HEIGHT() * 3) / 4), 32, 48, 128, starRegion, null);
 
             particleSystem[1].addParticleInitializer(new BlendFunctionParticleInitializer<>(GLES20.GL_SRC_ALPHA, GLES20.GL_ONE_MINUS_SRC_ALPHA));
             particleSystem[1].addParticleInitializer(new VelocityParticleInitializer<>(-150, -430, -480, -520));
@@ -425,7 +426,7 @@ public class MainScene implements IUpdateHandler {
         }
 
         TextureRegion chimuTex = ResourceManager.getInstance().getTexture("chimu");
-        Sprite chimu = new Sprite(Config.getRES_WIDTH() - chimuTex.getWidth(), (Config.getRES_HEIGHT() - chimuTex.getHeight()) / 2f, chimuTex, GlobalManager.getInstance().getEngine().getVertexBufferObjectManager()) {
+        Sprite chimu = new Sprite(Config.getRES_WIDTH() - chimuTex.getWidth(), (Config.getRES_HEIGHT() - chimuTex.getHeight()) / 2f, chimuTex, (VertexBufferObjectManager) null) {
             public boolean onAreaTouched(TouchEvent pSceneTouchEvent, float pTouchAreaLocalX, float pTouchAreaLocalY) {
                 if (pSceneTouchEvent.isActionDown()) {
                     setColor(0.7f, 0.7f, 0.7f);
@@ -814,7 +815,7 @@ public class MainScene implements IUpdateHandler {
 
             if (musicInfoText == null) {
                 musicInfoText = new Text(Utils.toRes(Config.getRES_WIDTH() - 500), Utils.toRes(3),
-                        ResourceManager.getInstance().getFont("font"), "None...", 35, new TextOptions(HorizontalAlign.RIGHT), GlobalManager.getInstance().getEngine().getVertexBufferObjectManager());
+                        ResourceManager.getInstance().getFont("font"), "None...", 35, new TextOptions(HorizontalAlign.RIGHT), (VertexBufferObjectManager) null);
             }
             if (beatmapInfo.getArtistUnicode() != null && beatmapInfo.getTitleUnicode() != null && !Config.isForceRomanized()) {
                 musicInfoText.setText(beatmapInfo.getArtistUnicode() + " - " + beatmapInfo.getTitleUnicode());
@@ -861,7 +862,7 @@ public class MainScene implements IUpdateHandler {
                                 / (float) tex.getWidth();
                         background = new Sprite(0,
                                 (Config.getRES_HEIGHT() - height) / 2, Config
-                                .getRES_WIDTH(), height, tex, GlobalManager.getInstance().getEngine().getVertexBufferObjectManager());
+                                .getRES_WIDTH(), height, tex, (VertexBufferObjectManager) null);
                         lastBackground.registerEntityModifier(new org.andengine.entity.modifier.AlphaModifier(1.5f, 1, 0, new IEntityModifier.IEntityModifierListener() {
                             @Override
                             public void onModifierStarted(IModifier<IEntity> pModifier, IEntity pItem) {
@@ -952,7 +953,7 @@ public class MainScene implements IUpdateHandler {
         }
 
         Rectangle bg = new Rectangle(0, 0, Config.getRES_WIDTH(),
-                Config.getRES_HEIGHT(), GlobalManager.getInstance().getEngine().getVertexBufferObjectManager());
+                Config.getRES_HEIGHT(), (VertexBufferObjectManager) null);
         bg.setColor(0, 0, 0, 1.0f);
         bg.registerEntityModifier(ModifierFactory.newAlphaModifier(3.0f, 0, 1));
         scene.attachChild(bg);

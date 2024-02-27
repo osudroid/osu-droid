@@ -12,7 +12,7 @@ import java.nio.ByteOrder
 class PathMeshVBO(private val flat: Boolean) :
 
     VertexBufferObject(
-        GlobalManager.getInstance().engine.vertexBufferObjectManager, 0, DrawType.STATIC, true,
+        null, 0, DrawType.STATIC, true,
 
         if (flat)
             Mesh.VERTEXBUFFEROBJECTATTRIBUTES_DEFAULT

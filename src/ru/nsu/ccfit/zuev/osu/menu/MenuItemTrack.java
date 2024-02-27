@@ -4,6 +4,7 @@ import org.andengine.entity.sprite.Sprite;
 import org.andengine.entity.text.Text;
 import org.andengine.input.touch.TouchEvent;
 import org.andengine.opengl.texture.region.TextureRegion;
+import org.andengine.opengl.vbo.VertexBufferObjectManager;
 import org.andengine.util.math.MathUtils;
 
 import java.lang.ref.WeakReference;
@@ -38,12 +39,12 @@ public class MenuItemTrack extends Sprite {
 
     public MenuItemTrack() {
         super(0, 0, ResourceManager.getInstance().getTexture(
-                "menu-button-background"), GlobalManager.getInstance().getEngine().getVertexBufferObjectManager());
+                "menu-button-background"), (VertexBufferObjectManager) null);
 
         trackTitle = new Text(Utils.toRes(32), Utils.toRes(22),
-                ResourceManager.getInstance().getFont("font"), "", 200, GlobalManager.getInstance().getEngine().getVertexBufferObjectManager());
+                ResourceManager.getInstance().getFont("font"), "", 200, null);
         trackLeftText = new Text(Utils.toRes(350), Utils.toRes(22),
-                ResourceManager.getInstance().getFont("font"), "", 30, GlobalManager.getInstance().getEngine().getVertexBufferObjectManager());
+                ResourceManager.getInstance().getFont("font"), "", 30, null);
         OsuSkin.get().getColor("MenuItemVersionsDefaultColor", DEFAULT_COLOR).apply(this);
         OsuSkin.get().getColor("MenuItemDefaultTextColor", DEFAULT_TEXT_COLOR).applyAll(trackTitle, trackLeftText);
         setAlpha(0.8f);
@@ -53,13 +54,13 @@ public class MenuItemTrack extends Sprite {
         stars = new Sprite[10];
         for (int i = 0; i < 10; i++) {
             stars[i] = new Sprite(Utils.toRes(60 + 52 * i), Utils.toRes(50),
-                    ResourceManager.getInstance().getTexture("star"), GlobalManager.getInstance().getEngine().getVertexBufferObjectManager());
+                    ResourceManager.getInstance().getTexture("star"), (VertexBufferObjectManager) null);
             attachChild(stars[i]);
         }
         final TextureRegion starTex = ResourceManager.getInstance()
                 .getTexture("star").deepCopy();
 //		starTex.setWidth((starTex.getWidth() / 2));
-        halfStar = new Sprite(0, 0, starTex, GlobalManager.getInstance().getEngine().getVertexBufferObjectManager());
+        halfStar = new Sprite(0, 0, starTex, (VertexBufferObjectManager) null);
         attachChild(halfStar);
     }
 
@@ -113,7 +114,7 @@ public class MenuItemTrack extends Sprite {
         }
         if (newmark != null) {
             mark = new Sprite(Utils.toRes(25), Utils.toRes(55), ResourceManager
-                    .getInstance().getTexture("ranking-" + newmark + "-small"), GlobalManager.getInstance().getEngine().getVertexBufferObjectManager());
+                    .getInstance().getTexture("ranking-" + newmark + "-small"), (VertexBufferObjectManager) null);
             attachChild(mark);
         } else {
             mark = null;

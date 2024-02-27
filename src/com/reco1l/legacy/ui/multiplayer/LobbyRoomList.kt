@@ -17,6 +17,7 @@ import com.reco1l.legacy.ui.entity.ScrollableList
 import org.andengine.entity.sprite.Sprite
 import org.andengine.entity.text.Text
 import org.andengine.input.touch.TouchEvent
+import org.andengine.opengl.vbo.VertexBufferObjectManager
 import org.andengine.util.math.MathUtils
 import ru.nsu.ccfit.zuev.osu.Config
 import ru.nsu.ccfit.zuev.osu.GlobalManager
@@ -83,7 +84,7 @@ class LobbyRoomList : ScrollableList()
 
         camY = -146f
 
-        val sprite = object : Sprite(Config.getRES_WIDTH() - texture.width - 20f, 0f, texture, GlobalManager.getInstance().engine.vertexBufferObjectManager)
+        val sprite = object : Sprite(Config.getRES_WIDTH() - texture.width - 20f, 0f, texture, null as? VertexBufferObjectManager)
         {
             private var moved = false
             private var dx = 0f
@@ -139,7 +140,7 @@ class LobbyRoomList : ScrollableList()
             TEAM_VS_TEAM -> "team_vs"
         }
 
-        val icon = Sprite(10f, 0f, getResources().getTexture(texName), GlobalManager.getInstance().engine.vertexBufferObjectManager).also {
+        val icon = Sprite(10f, 0f, getResources().getTexture(texName), null as? VertexBufferObjectManager).also {
 
             it.setScale(0.5f)
             it.setPosition(10f, (sprite.height - it.height) / 2f)
@@ -147,7 +148,7 @@ class LobbyRoomList : ScrollableList()
         }
 
         // Title
-        val name = Text(0f, 0f, getResources().getFont("smallFont"), room.name, GlobalManager.getInstance().engine.vertexBufferObjectManager).also {
+        val name = Text(0f, 0f, getResources().getFont("smallFont"), room.name, null).also {
 
             it.setPosition(icon.x + icon.width, 24f)
             sprite.attachChild(it)
@@ -175,7 +176,7 @@ class LobbyRoomList : ScrollableList()
             $status - $winCondition - ${room.modsToReadableString()}
         """.trimIndent()
 
-        Text(0f, 0f, getResources().getFont("smallFont"), infoText, GlobalManager.getInstance().engine.vertexBufferObjectManager).also {
+        Text(0f, 0f, getResources().getFont("smallFont"), infoText, null).also {
 
             it.setPosition(icon.x + icon.width, name.y + name.height)
             it.setColor(0.8f, 0.8f, 0.8f)
@@ -185,7 +186,7 @@ class LobbyRoomList : ScrollableList()
         // Lock indicator
         if (room.isLocked)
         {
-            Sprite(0f, 0f, getResources().getTexture("lock"), GlobalManager.getInstance().engine.vertexBufferObjectManager).also {
+            Sprite(0f, 0f, getResources().getTexture("lock"), null as? VertexBufferObjectManager).also {
 
                 it.setPosition(sprite.width - it.width - 5f, sprite.height - it.height - 5f)
                 sprite.attachChild(it)

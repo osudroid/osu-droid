@@ -3,6 +3,7 @@ package ru.nsu.ccfit.zuev.osu.helper;
 import org.andengine.entity.sprite.Sprite;
 import org.andengine.entity.text.Text;
 import org.andengine.opengl.font.Font;
+import org.andengine.opengl.vbo.VertexBufferObjectManager;
 
 import ru.nsu.ccfit.zuev.osu.GlobalManager;
 import ru.nsu.ccfit.zuev.osu.ResourceManager;
@@ -20,8 +21,8 @@ public class TextButton extends Sprite {
 
     public TextButton(Font font, String text, float scale) {
         super(0, 0, ResourceManager.getInstance().getTexture(
-                "button"), GlobalManager.getInstance().getEngine().getVertexBufferObjectManager());
-        buttonText = new Text(0, 0, font, text, 50, GlobalManager.getInstance().getEngine().getVertexBufferObjectManager());
+                "button"), (VertexBufferObjectManager) null);
+        buttonText = new Text(0, 0, font, text, 50, null);
         buttonText.setScale(scale);
         setColor(201 / 255f, 31 / 255f, 55 / 255f);
         this.setWidth(buttonText.getWidthScaled() + 80);

@@ -15,7 +15,7 @@ import ru.nsu.ccfit.zuev.osu.GlobalManager;
 public class CursorTrail extends SpriteParticleSystem {
 
     public CursorTrail(PointParticleEmitter emitter, int spawnRate, float trailSize, TextureRegion pTextureRegion) {
-        super(emitter, spawnRate, spawnRate, spawnRate, pTextureRegion, GlobalManager.getInstance().getEngine().getVertexBufferObjectManager());
+        super(emitter, spawnRate, spawnRate, spawnRate, pTextureRegion, null);
 
         addParticleInitializer(new BlendFunctionParticleInitializer<>(GLES20.GL_SRC_ALPHA, GLES20.GL_ONE_MINUS_SRC_ALPHA));
         addParticleInitializer(new ScaleParticleInitializer<>(trailSize));

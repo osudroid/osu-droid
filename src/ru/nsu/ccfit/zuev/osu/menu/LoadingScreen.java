@@ -12,6 +12,7 @@ import org.andengine.entity.scene.background.SpriteBackground;
 import org.andengine.entity.sprite.Sprite;
 import org.andengine.entity.text.Text;
 import org.andengine.opengl.texture.region.TextureRegion;
+import org.andengine.opengl.vbo.VertexBufferObjectManager;
 
 import java.util.ArrayList;
 
@@ -42,7 +43,7 @@ public class LoadingScreen implements IUpdateHandler {
                     0,
                     (Config.getRES_HEIGHT() - height) / 2,
                     Config.getRES_WIDTH(),
-                    height, tex, GlobalManager.getInstance().getEngine().getVertexBufferObjectManager());
+                    height, tex, (VertexBufferObjectManager) null);
             scene.setBackground(new SpriteBackground(menuBg));
         } else {
             scene.setBackground(new Background(70 / 255f, 129 / 255f,
@@ -52,11 +53,11 @@ public class LoadingScreen implements IUpdateHandler {
         final TextureRegion loadingTexture = ResourceManager.getInstance()
                 .getTexture("loading-title");
         final Sprite loadingTitle = new Sprite(0, 0,
-                Config.getRES_WIDTH(), loadingTexture.getHeight(), loadingTexture, GlobalManager.getInstance().getEngine().getVertexBufferObjectManager());
+                Config.getRES_WIDTH(), loadingTexture.getHeight(), loadingTexture, (VertexBufferObjectManager) null);
         scene.attachChild(loadingTitle);
 
         logText = new Text(0, 0, ResourceManager.getInstance()
-                .getFont("logFont"), "", 5, GlobalManager.getInstance().getEngine().getVertexBufferObjectManager());
+                .getFont("logFont"), "", 5, null);
         scene.attachChild(logText);
         ToastLogger.setPercentage(-1);
         percentage = -1;

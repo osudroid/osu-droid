@@ -75,7 +75,7 @@ public class Spinner extends GameObject {
                 center.x - (float) Config.getRES_WIDTH() / 2,
                 center.y - Config.getRES_HEIGHT() / 2f,
                 mregion,
-                GlobalManager.getInstance().getEngine().getVertexBufferObjectManager());
+                null);
         metre.setWidth(Config.getRES_WIDTH());
         metre.setHeight(background.getHeightScaled());
         approachCircle = SpritePool.getInstance().getCenteredSprite(

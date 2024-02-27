@@ -14,7 +14,7 @@ class ClipSprite(
     pX: Float,
     pY: Float,
     pTextureRegion: ITextureRegion,
-    pSpriteVertexBufferObjectManager: VertexBufferObjectManager
+    pSpriteVertexBufferObjectManager: VertexBufferObjectManager?
 
 ) : Sprite(pX, pY, pTextureRegion, pSpriteVertexBufferObjectManager)
 {

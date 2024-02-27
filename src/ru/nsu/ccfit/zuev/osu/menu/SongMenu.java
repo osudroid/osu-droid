@@ -29,6 +29,7 @@ import org.andengine.entity.text.Text;
 import org.andengine.entity.text.TextOptions;
 import org.andengine.input.touch.TouchEvent;
 import org.andengine.opengl.texture.region.TextureRegion;
+import org.andengine.opengl.vbo.VertexBufferObjectManager;
 import org.andengine.util.debug.Debug;
 import org.andengine.util.HorizontalAlign;
 import org.andengine.util.math.MathUtils;
@@ -186,10 +187,10 @@ public class SongMenu implements IUpdateHandler, MenuItemListener,
         float height = tex.getHeight();
         height *= Config.getRES_WIDTH() / (float) tex.getWidth();
         final Sprite bg = new Sprite(0, (Config.getRES_HEIGHT() - height) / 2,
-                Config.getRES_WIDTH(), height, tex, GlobalManager.getInstance().getEngine().getVertexBufferObjectManager());
+                Config.getRES_WIDTH(), height, tex, (VertexBufferObjectManager) null);
         scene.setBackground(new SpriteBackground(bg));
 
-        final Rectangle bgDimRect = new Rectangle(0, 0, Config.getRES_WIDTH(), Config.getRES_HEIGHT(), GlobalManager.getInstance().getEngine().getVertexBufferObjectManager());
+        final Rectangle bgDimRect = new Rectangle(0, 0, Config.getRES_WIDTH(), Config.getRES_HEIGHT(), (VertexBufferObjectManager) null);
         bgDimRect.setColor(0, 0, 0, 0.2f);
         backLayer.attachChild(bgDimRect);
 
@@ -208,7 +209,7 @@ public class SongMenu implements IUpdateHandler, MenuItemListener,
         if (items.size() == 0) {
             final Text text = new Text(0, 0, ResourceManager.getInstance()
                     .getFont("CaptionFont"), "There are no songs in library, try using chimu.moe",
-                    new TextOptions(HorizontalAlign.CENTER), GlobalManager.getInstance().getEngine().getVertexBufferObjectManager());
+                    new TextOptions(HorizontalAlign.CENTER), null);
             text.setPosition(Config.getRES_WIDTH() / 2f - text.getWidth() / 2,
                     Config.getRES_HEIGHT() / 2f - text.getHeight() / 2);
             text.setScale(1.5f);
@@ -281,30 +282,30 @@ public class SongMenu implements IUpdateHandler, MenuItemListener,
         scrollbar = new ScrollBar(scene);
 
         final TextureRegion songSelectTopTexture = ResourceManager.getInstance().getTexture("songselect-top");
-        final Sprite songSelectTop = new Sprite(0, 0, songSelectTopTexture, GlobalManager.getInstance().getEngine().getVertexBufferObjectManager());
+        final Sprite songSelectTop = new Sprite(0, 0, songSelectTopTexture, (VertexBufferObjectManager) null);
         songSelectTop.setSize(songSelectTopTexture.getWidth() * songSelectTopTexture.getHeight() / 184f, 184);
         songSelectTop.setPosition(-1640, songSelectTop.getY());
         songSelectTop.setAlpha(0.6f);
         frontLayer.attachChild(songSelectTop);
 
         trackInfo = new Text(Utils.toRes(70), Utils.toRes(2),
-                ResourceManager.getInstance().getFont("font"), "title", 1024, GlobalManager.getInstance().getEngine().getVertexBufferObjectManager());
+                ResourceManager.getInstance().getFont("font"), "title", 1024, null);
         frontLayer.attachChild(trackInfo);
 
         mapper = new Text(Utils.toRes(70), trackInfo.getY() + trackInfo.getHeight() + Utils.toRes(2),
-                ResourceManager.getInstance().getFont("middleFont"), "mapper", 1024, GlobalManager.getInstance().getEngine().getVertexBufferObjectManager());
+                ResourceManager.getInstance().getFont("middleFont"), "mapper", 1024, null);
         frontLayer.attachChild(mapper);
 
         beatmapInfo = new Text(Utils.toRes(4), mapper.getY() + mapper.getHeight() + Utils.toRes(2),
-                ResourceManager.getInstance().getFont("middleFont"), "beatmapInfo", 1024, GlobalManager.getInstance().getEngine().getVertexBufferObjectManager());
+                ResourceManager.getInstance().getFont("middleFont"), "beatmapInfo", 1024, null);
         frontLayer.attachChild(beatmapInfo);
 
         beatmapInfo2 = new Text(Utils.toRes(4), beatmapInfo.getY() + beatmapInfo.getHeight() + Utils.toRes(2),
-                ResourceManager.getInstance().getFont("middleFont"), "beatmapInfo2", 1024, GlobalManager.getInstance().getEngine().getVertexBufferObjectManager());
+                ResourceManager.getInstance().getFont("middleFont"), "beatmapInfo2", 1024, null);
         frontLayer.attachChild(beatmapInfo2);
 
         dimensionInfo = new Text(Utils.toRes(4), beatmapInfo2.getY() + beatmapInfo2.getHeight() + Utils.toRes(2),
-                ResourceManager.getInstance().getFont("smallFont"), "dimensionInfo", 1024, GlobalManager.getInstance().getEngine().getVertexBufferObjectManager());
+                ResourceManager.getInstance().getFont("smallFont"), "dimensionInfo", 1024, null);
         frontLayer.attachChild(dimensionInfo);
 
 
@@ -370,7 +371,7 @@ public class SongMenu implements IUpdateHandler, MenuItemListener,
                 }
             };
         } else {
-            backButton = new Sprite(0, 0, ResourceManager.getInstance().getTexture("menu-back"), GlobalManager.getInstance().getEngine().getVertexBufferObjectManager()) {
+            backButton = new Sprite(0, 0, ResourceManager.getInstance().getTexture("menu-back"), (VertexBufferObjectManager) null) {
                 boolean moved = false;
                 float dx = 0, dy = 0;
                 boolean scaleWhenHold = true;
@@ -1187,7 +1188,7 @@ public class SongMenu implements IUpdateHandler, MenuItemListener,
                             / (float) tex.getWidth();
                     bg = new Sprite(0,
                             (Config.getRES_HEIGHT() - height) / 2, Config
-                            .getRES_WIDTH(), height, tex, GlobalManager.getInstance().getEngine().getVertexBufferObjectManager());
+                            .getRES_WIDTH(), height, tex, (VertexBufferObjectManager) null);
                     bg.setColor(0, 0, 0);
                 }
 
@@ -1202,7 +1203,7 @@ public class SongMenu implements IUpdateHandler, MenuItemListener,
                             bg = new Sprite(
                                     0,
                                     (Config.getRES_HEIGHT() - height) / 2,
-                                    Config.getRES_WIDTH(), height, tex1, GlobalManager.getInstance().getEngine().getVertexBufferObjectManager());
+                                    Config.getRES_WIDTH(), height, tex1, (VertexBufferObjectManager) null);
                             bgName = "";
                         }
                         scene.setBackground(new SpriteBackground(bg));

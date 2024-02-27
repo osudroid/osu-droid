@@ -5,6 +5,7 @@ import org.andengine.entity.modifier.ScaleModifier;
 import org.andengine.entity.modifier.SequenceEntityModifier;
 import org.andengine.entity.scene.Scene;
 import org.andengine.entity.sprite.Sprite;
+import org.andengine.opengl.vbo.VertexBufferObjectManager;
 
 import ru.nsu.ccfit.zuev.osu.GlobalManager;
 import ru.nsu.ccfit.zuev.osu.ResourceManager;
@@ -32,7 +33,7 @@ public class ScoreNumber extends Entity {
                 textureName = "x";
             }
 
-            letter = new Sprite(totalWidth * scale, 0, ResourceManager.getInstance().getTextureWithPrefix(OsuSkin.get().getScorePrefix(), textureName), GlobalManager.getInstance().getEngine().getVertexBufferObjectManager());
+            letter = new Sprite(totalWidth * scale, 0, ResourceManager.getInstance().getTextureWithPrefix(OsuSkin.get().getScorePrefix(), textureName), (VertexBufferObjectManager) null);
             letter.setSize(letter.getWidth() * scale, letter.getHeight() * scale);
 
             totalWidth += letter.getWidth() * scale;

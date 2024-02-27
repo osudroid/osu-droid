@@ -9,6 +9,7 @@ import org.andengine.entity.modifier.ParallelEntityModifier;
 import org.andengine.entity.scene.Scene;
 import org.andengine.entity.shape.Shape;
 import org.andengine.entity.sprite.Sprite;
+import org.andengine.opengl.vbo.VertexBufferObjectManager;
 import org.andengine.util.modifier.IModifier;
 
 import java.util.ArrayList;
@@ -44,7 +45,7 @@ public class GameEffect extends GameObject implements IEntityModifierListener {
             hit.setLoopType(AnimSprite.LoopType.STOP);
             this.hit = hit;
         } else {
-            hit = new Sprite(0, 0, ResourceManager.getInstance().getTexture(texname), GlobalManager.getInstance().getEngine().getVertexBufferObjectManager());
+            hit = new Sprite(0, 0, ResourceManager.getInstance().getTexture(texname), (VertexBufferObjectManager) null);
         }
     }
 

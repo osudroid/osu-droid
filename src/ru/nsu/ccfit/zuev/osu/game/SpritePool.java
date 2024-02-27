@@ -3,6 +3,7 @@ package ru.nsu.ccfit.zuev.osu.game;
 import android.graphics.PointF;
 
 import org.andengine.entity.sprite.Sprite;
+import org.andengine.opengl.vbo.VertexBufferObjectManager;
 
 import java.util.HashMap;
 import java.util.LinkedList;
@@ -67,7 +68,7 @@ public class SpritePool {
         }
 
         spritesCreated++;
-        return new Sprite(0, 0, ResourceManager.getInstance().getTexture(name), GlobalManager.getInstance().getEngine().getVertexBufferObjectManager());
+        return new Sprite(0, 0, ResourceManager.getInstance().getTexture(name), (VertexBufferObjectManager) null);
     }
 
     synchronized public Sprite getCenteredSprite(final String name,

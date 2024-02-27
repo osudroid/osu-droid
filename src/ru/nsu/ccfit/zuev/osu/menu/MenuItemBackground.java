@@ -3,6 +3,7 @@ package ru.nsu.ccfit.zuev.osu.menu;
 import org.andengine.entity.sprite.Sprite;
 import org.andengine.entity.text.Text;
 import org.andengine.input.touch.TouchEvent;
+import org.andengine.opengl.vbo.VertexBufferObjectManager;
 import org.andengine.util.math.MathUtils;
 
 import ru.nsu.ccfit.zuev.osu.GlobalManager;
@@ -24,13 +25,13 @@ public class MenuItemBackground extends Sprite {
 
     public MenuItemBackground() {
         super(0, 0, ResourceManager.getInstance().getTexture(
-                "menu-button-background"), GlobalManager.getInstance().getEngine().getVertexBufferObjectManager());
+                "menu-button-background"), (VertexBufferObjectManager) null);
 
         setAlpha(0.8f);
         title = new Text(Utils.toRes(32), Utils.toRes(25),
-                ResourceManager.getInstance().getFont("font"), "", 255, GlobalManager.getInstance().getEngine().getVertexBufferObjectManager());
+                ResourceManager.getInstance().getFont("font"), "", 255, null);
         author = new Text(0, 0, ResourceManager.getInstance()
-                .getFont("font"), "", 100, GlobalManager.getInstance().getEngine().getVertexBufferObjectManager());
+                .getFont("font"), "", 100, null);
         author.setPosition(Utils.toRes(150), Utils.toRes(60));
 
         defColor.apply(this);
