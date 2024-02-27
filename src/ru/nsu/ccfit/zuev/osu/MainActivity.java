@@ -150,7 +150,6 @@ public class MainActivity extends LegacyBaseGameActivity implements IAcceleratio
         opt.getAudioOptions().setNeedsMusic(true);
         opt.getAudioOptions().setNeedsSound(true);
         opt.getRenderOptions().setDithering(Config.isUseDither());
-        opt.getRenderOptions().setMultiSampling(true);
         final Engine engine = new Engine(opt);
 
         if (MultiTouch.isSupported(this)) {
