@@ -17,12 +17,6 @@ class PathMesh(private val flat: Boolean) : Mesh(0f, 0f, 0, DrawMode.TRIANGLES, 
     var clearDepth = false
 
 
-    init
-    {
-        isCullingEnabled = false
-    }
-
-
     fun setVertices(vertices: FloatArray)
     {
         // Since sprites are cached and recycled, we need to copy the array to avoid rewrite of the
