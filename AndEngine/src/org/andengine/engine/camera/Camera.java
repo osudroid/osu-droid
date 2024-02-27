@@ -534,6 +534,43 @@ public class Camera implements IUpdateHandler {
 		}
 	}
 
+	// BEGIN osu!droid modified: Added scene to surface coordinates convertions.
+
+	public float[] getSurfaceCoordinatesFromSceneCoordinates(final float[] pSceneCoordinates) {
+		return this.getSurfaceCoordinatesFromSceneCoordinates(pSceneCoordinates, this.mSurfaceWidth, this.mSurfaceHeight);
+	}
+
+	public float[] getSurfaceCoordinatesFromSceneCoordinates(final float[] pSceneCoordinates, final int pSurfaceWidth, final int pSurfaceHeight) {
+		this.convertAxisAlignedSceneCoordinatesToSurfaceCoordinates(pSceneCoordinates, pSurfaceWidth, pSurfaceHeight);
+
+		final float rotation = this.mRotation;
+		if (rotation == 0) {
+			/* Nothing. */
+		} else if (rotation == 180) {
+			pSceneCoordinates[Constants.VERTEX_INDEX_Y] = pSurfaceHeight - pSceneCoordinates[Constants.VERTEX_INDEX_Y];
+			pSceneCoordinates[Constants.VERTEX_INDEX_X] = pSurfaceWidth - pSceneCoordinates[Constants.VERTEX_INDEX_X];
+		} else {
+			MathUtils.revertRotateAroundCenter(pSceneCoordinates, -rotation, pSurfaceWidth >> 1, pSurfaceHeight >> 1); // TODO Use a Transformation object instead!?!
+		}
+
+		return pSceneCoordinates;
+	}
+
+	private void convertAxisAlignedSceneCoordinatesToSurfaceCoordinates(final float[] pSceneCoordinates, final int pSurfaceWidth, final int pSurfaceHeight) {
+		final float xMin = this.getXMin();
+		final float xMax = this.getXMax();
+		final float yMin = this.getYMin();
+		final float yMax = this.getYMax();
+
+		final float relativeX = (pSceneCoordinates[Constants.VERTEX_INDEX_X] - xMin) / (xMax - xMin);
+		final float relativeY = 1 - (pSceneCoordinates[Constants.VERTEX_INDEX_Y] - yMin) / (yMax - yMin);
+
+		pSceneCoordinates[Constants.VERTEX_INDEX_X] = relativeX * pSurfaceWidth;
+		pSceneCoordinates[Constants.VERTEX_INDEX_Y] = relativeY * pSurfaceHeight;
+	}
+
+	// END osu!droid modified.
+
 	private void convertAxisAlignedSceneToSurfaceTouchEvent(final TouchEvent pSceneTouchEvent, final int pSurfaceWidth, final int pSurfaceHeight) {
 		final float xMin = this.getXMin();
 		final float xMax = this.getXMax();
