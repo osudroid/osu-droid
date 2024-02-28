@@ -50,7 +50,7 @@ class PathMeshVBO(private val flat: Boolean) :
     {
         super.bind(gl, AlphaOverrideShaderProgram)
 
-        AlphaOverrideShaderProgram.setAlphaUniform(alpha)
+        AlphaOverrideShaderProgram.setAlphaUniform(alpha.coerceIn(0f, 1f))
     }
 
     override fun unbind(gl: GLState, shader: ShaderProgram) = super.unbind(gl, AlphaOverrideShaderProgram)

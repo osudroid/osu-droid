@@ -8,6 +8,7 @@ import kotlin.ranges.RangesKt;
  * @author Nicolas Gramlich <ngramlich@zynga.com>
  * @since 02:23:08 - 12.08.2011
  */
+// osu!droid modification - Coercing values in range of 0 to 1.
 public class Color {
 	// ===========================================================
 	// Constants
@@ -170,16 +171,14 @@ public class Color {
 	}
 
 	public final void setAlpha(final float pAlpha) {
-		// osu!droid modification - Values beyond 0-1 range can break the packing of the color.
-		this.mAlpha = RangesKt.coerceIn(pAlpha, 0f, 1f);
+		this.mAlpha = pAlpha;
 
 		this.packABGRAlpha();
 	}
 
 	public final boolean setAlphaChecking(final float pAlpha) {
 		if(this.mAlpha != pAlpha) {
-			// osu!droid modification - Values beyond 0-1 range can break the packing of the color.
-			this.mAlpha = RangesKt.coerceIn(pAlpha, 0f, 1f);
+			this.mAlpha = pAlpha;
 
 			this.packABGRAlpha();
 			return true;
@@ -265,7 +264,12 @@ public class Color {
 	 * @return the same format as {@link android.graphics.Color}.
 	 */
 	public final int getARGBPackedInt() {
-		return ColorUtils.convertRGBAToARGBPackedInt(this.mRed, this.mGreen, this.mBlue, this.mAlpha);
+		return ColorUtils.convertRGBAToARGBPackedInt(
+				RangesKt.coerceIn(this.mRed, 0f, 1f),
+				RangesKt.coerceIn(this.mGreen, 0f, 1f),
+				RangesKt.coerceIn(this.mBlue, 0f, 1f),
+				RangesKt.coerceIn(this.mAlpha, 0f, 1f)
+		);
 	}
 
 	public final void reset() {
@@ -318,27 +322,32 @@ public class Color {
 	}
 
 	private final void packABGRRed() {
-		this.mABGRPackedInt = (this.mABGRPackedInt & Color.ABGR_PACKED_RED_CLEAR) | ((int)(255 * this.mRed) << Color.ABGR_PACKED_RED_CLEAR);
+		this.mABGRPackedInt = (this.mABGRPackedInt & Color.ABGR_PACKED_RED_CLEAR) | ((int)(255 * RangesKt.coerceIn(this.mRed, 0f, 1f)) << Color.ABGR_PACKED_RED_CLEAR);
 		this.mABGRPackedFloat = ColorUtils.convertPackedIntToPackedFloat(this.mABGRPackedInt);
 	}
 
 	private final void packABGRGreen() {
-		this.mABGRPackedInt = (this.mABGRPackedInt & Color.ABGR_PACKED_GREEN_CLEAR) | ((int)(255 * this.mGreen) << Color.ABGR_PACKED_GREEN_CLEAR);
+		this.mABGRPackedInt = (this.mABGRPackedInt & Color.ABGR_PACKED_GREEN_CLEAR) | ((int)(255 * RangesKt.coerceIn(this.mGreen, 0f, 1f)) << Color.ABGR_PACKED_GREEN_CLEAR);
 		this.mABGRPackedFloat = ColorUtils.convertPackedIntToPackedFloat(this.mABGRPackedInt);
 	}
 
 	private final void packABGRBlue() {
-		this.mABGRPackedInt = (this.mABGRPackedInt & Color.ABGR_PACKED_BLUE_CLEAR) | ((int)(255 * this.mBlue) << Color.ABGR_PACKED_BLUE_CLEAR);
+		this.mABGRPackedInt = (this.mABGRPackedInt & Color.ABGR_PACKED_BLUE_CLEAR) | ((int)(255 * RangesKt.coerceIn(this.mBlue, 0f, 1f)) << Color.ABGR_PACKED_BLUE_CLEAR);
 		this.mABGRPackedFloat = ColorUtils.convertPackedIntToPackedFloat(this.mABGRPackedInt);
 	}
 
 	private final void packABGRAlpha() {
-		this.mABGRPackedInt = (this.mABGRPackedInt & Color.ABGR_PACKED_ALPHA_CLEAR) | ((int)(255 * this.mAlpha) << Color.ABGR_PACKED_ALPHA_SHIFT);
+		this.mABGRPackedInt = (this.mABGRPackedInt & Color.ABGR_PACKED_ALPHA_CLEAR) | ((int)(255 * RangesKt.coerceIn(this.mAlpha, 0f, 1f)) << Color.ABGR_PACKED_ALPHA_SHIFT);
 		this.mABGRPackedFloat = ColorUtils.convertPackedIntToPackedFloat(this.mABGRPackedInt);
 	}
 
 	private final void packABGR() {
-		this.mABGRPackedInt = ColorUtils.convertRGBAToABGRPackedInt(this.mRed, this.mGreen, this.mBlue, this.mAlpha);
+		this.mABGRPackedInt = ColorUtils.convertRGBAToABGRPackedInt(
+				RangesKt.coerceIn(this.mRed, 0f, 1f),
+				RangesKt.coerceIn(this.mGreen, 0f, 1f),
+				RangesKt.coerceIn(this.mBlue, 0f, 1f),
+				RangesKt.coerceIn(this.mAlpha, 0f, 1f)
+		);
 		this.mABGRPackedFloat = ColorUtils.convertPackedIntToPackedFloat(this.mABGRPackedInt);
 	}
 
