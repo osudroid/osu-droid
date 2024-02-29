@@ -17,7 +17,7 @@ public class CursorTrail extends SpriteParticleSystem {
     public CursorTrail(PointParticleEmitter emitter, int spawnRate, float trailSize, TextureRegion pTextureRegion) {
         super(emitter, spawnRate, spawnRate, spawnRate, pTextureRegion, GlobalManager.getInstance().getEngine().getVertexBufferObjectManager());
 
-        addParticleInitializer(new BlendFunctionParticleInitializer<>(GLES20.GL_SRC_ALPHA, GLES20.GL_ONE_MINUS_SRC_ALPHA));
+        addParticleInitializer(new BlendFunctionParticleInitializer<>(GLES20.GL_SRC_COLOR, GLES20.GL_ONE_MINUS_SRC_ALPHA));
         addParticleInitializer(new ScaleParticleInitializer<>(trailSize));
         addParticleInitializer(new ExpireParticleInitializer<>(0.10f));
 
