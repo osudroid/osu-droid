@@ -78,6 +78,13 @@ public abstract class BaseGameActivity extends BaseActivity implements IGameInte
 		this.mGamePaused = true;
 
 		this.mEngine = this.onCreateEngine(this.onCreateEngineOptions());
+
+		// BEGIN osu!droid modification - Prevent crashing while the All Files Access permission is being granted
+		if (this.mEngine == null) {
+			return;
+		}
+		// END osu!droid modification.
+
 		this.mEngine.startUpdateThread();
 
 		this.applyEngineOptions();
