@@ -47,6 +47,8 @@ import com.reco1l.framework.lang.execution.Async;
 import com.reco1l.legacy.AccessibilityDetector;
 import com.reco1l.legacy.Multiplayer;
 import com.reco1l.legacy.UpdateManager;
+import com.reco1l.legacy.graphics.AlphaOverrideShaderProgram;
+import com.reco1l.legacy.graphics.ExternalTextureShaderProgram;
 import com.reco1l.legacy.ui.multiplayer.LobbyScene;
 import com.reco1l.legacy.ui.multiplayer.RoomScene;
 
@@ -151,6 +153,12 @@ public class MainActivity extends LegacyBaseGameActivity implements IAcceleratio
         opt.getAudioOptions().setNeedsSound(true);
         opt.getRenderOptions().setDithering(Config.isUseDither());
         final Engine engine = new Engine(opt);
+
+        // Loading shaders
+        engine.getShaderProgramManager().loadShaderPrograms(
+            AlphaOverrideShaderProgram.INSTANCE,
+            ExternalTextureShaderProgram.INSTANCE
+        );
 
         if (MultiTouch.isSupported(this)) {
             engine.setTouchController(new MultiTouchController());
