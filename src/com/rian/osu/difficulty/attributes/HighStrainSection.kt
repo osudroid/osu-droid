@@ -6,7 +6,7 @@ import com.rian.osu.beatmap.hitobject.HitObject
 /**
  * Represents a [Beatmap]'s section at which the strains of [HitObject]s are considerably high.
  */
-data class HighStrainSection(
+open class HighStrainSection(
     /**
      * The index of the first [HitObject] in this [HighStrainSection] with respect to the full [Beatmap].
      */
