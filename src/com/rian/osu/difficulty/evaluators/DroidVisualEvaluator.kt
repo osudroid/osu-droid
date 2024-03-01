@@ -65,13 +65,13 @@ object DroidVisualEvaluator {
             strain += (1 - current.opacityAt(previous.obj.startTime, isHiddenMod)) / 4
         }
 
-        // Scale the value with overlapping factor.
-        strain /= 10 * (1 + current.overlappingFactor)
-
         if (current.timePreempt < 400) {
             // Give bonus for AR higher than 10.33.
-            strain += (400 - current.timePreempt).pow(1.3) / 100
+            strain += (400 - current.timePreempt).pow(1.35) / 100
         }
+
+        // Scale the value with overlapping factor.
+        strain /= 10 * (1 + current.overlappingFactor)
 
         if (current.obj is Slider && withSliders) {
             val scalingFactor = 50 / current.obj.radius

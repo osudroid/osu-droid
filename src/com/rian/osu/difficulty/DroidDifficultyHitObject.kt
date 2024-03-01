@@ -193,7 +193,7 @@ class DroidDifficultyHitObject(
         // and delta time to prevent stream maps from being overweighted.
         overlappingFactor += max(
             0.0,
-            1 - distance / (3 * obj.radius)
+            1 - distance / (2.5 * obj.radius)
         ) * 7.5 / (1 + exp(0.15 * (max(deltaTime, MIN_DELTA_TIME) - 75)))
     }
 }
