@@ -33,11 +33,11 @@ class ModDifficultyAdjust(
 ) : Mod(), IApplicableToDifficulty {
     override val droidString = ""
 
-    override fun applyToDifficulty(mode: GameMode, difficulty: BeatmapDifficulty) = difficulty.let { d ->
-        d.cs = getValue(cs, d.cs)
-        d.ar = getValue(ar, d.ar)
-        d.od = getValue(od, d.od)
-        d.hp = getValue(hp, d.hp)
+    override fun applyToDifficulty(mode: GameMode, difficulty: BeatmapDifficulty) = difficulty.let {
+        it.cs = getValue(cs, it.cs)
+        it.ar = getValue(ar, it.ar)
+        it.od = getValue(od, it.od)
+        it.hp = getValue(hp, it.hp)
     }
 
     private fun getValue(value: Float?, fallback: Float) = value ?: fallback
