@@ -1394,12 +1394,18 @@ public class Entity implements IEntity {
 					this.mChildrenSortPending = false;
 				}
 
-				final int childCount = children.size();
 				int i = 0;
 
 				{ /* Draw children behind this Entity. */
-					for(; i < childCount; i++) {
+					for(; i < children.size(); i++) {
 						final IEntity child = children.get(i);
+
+						// BEGIN osu!droid modified - Skip drawing entities that might be removed during
+						// iteration.
+						if (child == null)
+							continue;
+						// END osu!droid modified.
+
 						if(child.getZIndex() < 0) {
 							child.onDraw(pGLState, pCamera);
 						} else {
@@ -1414,8 +1420,13 @@ public class Entity implements IEntity {
 				this.postDraw(pGLState, pCamera);
 
 				{ /* Draw children in front of this Entity. */
-					for(; i < childCount; i++) {
-						children.get(i).onDraw(pGLState, pCamera);
+					for(; i < children.size(); i++) {
+						// BEGIN osu!droid modified - Skip drawing entities that might be removed during
+						// iteration.
+						IEntity child = children.get(i);
+						if (child != null)
+							child.onDraw(pGLState, pCamera);
+						// END osu!droid modified.
 					}
 				}
 			}
@@ -1433,9 +1444,13 @@ public class Entity implements IEntity {
 
 		if((this.mChildren != null) && !this.mChildrenIgnoreUpdate) {
 			final SmartList<IEntity> entities = this.mChildren;
-			final int entityCount = entities.size();
-			for(int i = 0; i < entityCount; i++) {
-				entities.get(i).onUpdate(pSecondsElapsed);
+			for(int i = 0; i < entities.size(); i++) {
+				// BEGIN osu!droid modified - Skip update entities that might be removed during
+				// iteration.
+				IEntity entity = entities.get(i);
+				if (entity != null)
+					entity.onUpdate(pSecondsElapsed);
+				// END osu!droid modified.
 			}
 		}
 	}
