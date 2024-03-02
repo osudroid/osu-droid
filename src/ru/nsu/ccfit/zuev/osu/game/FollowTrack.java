@@ -9,9 +9,10 @@ import org.andengine.opengl.texture.region.TextureRegion;
 import java.util.ArrayList;
 
 import ru.nsu.ccfit.zuev.osu.ResourceManager;
+import ru.nsu.ccfit.zuev.osu.helper.AnimSprite;
+import ru.nsu.ccfit.zuev.osu.helper.CentredSprite;
 import ru.nsu.ccfit.zuev.skins.SkinManager;
 import ru.nsu.ccfit.zuev.osu.Utils;
-import ru.nsu.ccfit.zuev.osu.helper.AnimSprite;
 
 public class FollowTrack extends GameObject {
     private final ArrayList<Sprite> points = new ArrayList<>();
@@ -49,7 +50,6 @@ public class FollowTrack extends GameObject {
         count = Math.min(count, 30);
         if (count <= 0) {
             empty = true;
-            GameObjectPool.getInstance().putTrac(this);
             return;
         }
         empty = false;
@@ -63,13 +63,9 @@ public class FollowTrack extends GameObject {
             pos.y = start.y * percent + end.y * (1 - percent);
             final Sprite point;
             if (frameCount == 1) {
-                point = SpritePool.getInstance().getCenteredSprite(
-                        "followpoint", pos);
+                point = new CentredSprite(pos.x, pos.y, ResourceManager.getInstance().getTexture("followpoint"));
             } else {
-                point = SpritePool.getInstance().getAnimSprite("followpoint-",
-                        frameCount);
-                point.setPosition(pos.x - pointSize * 0.5f, pos.y - pointSize
-                        * 0.5f);
+                point = new AnimSprite(pos.x - pointSize * 0.5f, pos.y - pointSize * 0.5f, "followpoint-", frameCount, frameCount);
             }
             point.setScale(scale);
             point.setAlpha(0);
@@ -129,14 +125,8 @@ public class FollowTrack extends GameObject {
             for (int i = 0, pointsSize = points.size(); i < pointsSize; i++) {
                 Sprite sp = points.get(i);
                 sp.detachSelf();
-                if (sp instanceof AnimSprite) {
-                    SpritePool.getInstance().putAnimSprite("followpoint-", (AnimSprite) sp);
-                } else {
-                    SpritePool.getInstance().putSprite("followpoint", sp);
-                }
             }
             listener.removePassiveObject(FollowTrack.this);
-            GameObjectPool.getInstance().putTrac(FollowTrack.this);
         }
     }
 }

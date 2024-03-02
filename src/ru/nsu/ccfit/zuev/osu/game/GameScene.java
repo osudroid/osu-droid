@@ -1,7 +1,6 @@
 package ru.nsu.ccfit.zuev.osu.game;
 
 import android.graphics.PointF;
-import android.opengl.GLES20;
 import android.os.Build;
 import android.os.SystemClock;
 
@@ -49,8 +48,6 @@ import org.andengine.util.debug.Debug;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.util.*;
-
-import javax.microedition.khronos.opengles.GL10;
 
 import ru.nsu.ccfit.zuev.audio.BassSoundProvider;
 import ru.nsu.ccfit.zuev.audio.Status;
@@ -590,8 +587,6 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
         }
         GameHelper.setInitalBeatLength(GameHelper.getBeatLength());
 
-        GameObjectPool.getInstance().purge();
-        SpritePool.getInstance().purge();
         ModifierFactory.clear();
 
         // TODO replay
@@ -619,8 +614,6 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
         //TODO online
         if (!replaying)
             OnlineScoring.getInstance().startPlay(track, trackMD5);
-
-        GameObjectPool.getInstance().preload();
 
         ppText = null;
         if (Config.isDisplayRealTimePPCounter()) {
@@ -1009,8 +1002,7 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
 
         float timeOffset = 0;
         if (stat.getMod().contains(GameMod.MOD_SCOREV2)) {
-            final GameEffect effect = GameObjectPool.getInstance().getEffect(
-                    "selection-mod-scorev2");
+            final GameEffect effect = new GameEffect("selection-mod-scorev2");
             effect.init(
                     fgScene,
                     new PointF(Utils.toRes(Config.getRES_WIDTH() - effectOffset), Utils
@@ -1025,8 +1017,7 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
             timeOffset += 0.25f;
         }
         if (stat.getMod().contains(GameMod.MOD_EASY)) {
-            final GameEffect effect = GameObjectPool.getInstance().getEffect(
-                    "selection-mod-easy");
+            final GameEffect effect = new GameEffect("selection-mod-easy");
             effect.init(
                     fgScene,
                     new PointF(Utils.toRes(Config.getRES_WIDTH() - effectOffset), Utils
@@ -1040,8 +1031,7 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
             effectOffset += 25;
             timeOffset += 0.25f;
         } else if (stat.getMod().contains(GameMod.MOD_HARDROCK)) {
-            final GameEffect effect = GameObjectPool.getInstance().getEffect(
-                    "selection-mod-hardrock");
+            final GameEffect effect = new GameEffect("selection-mod-hardrock");
             effect.init(
                     fgScene,
                     new PointF(Utils.toRes(Config.getRES_WIDTH() - effectOffset), Utils
@@ -1056,8 +1046,7 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
             timeOffset += 0.25f;
         }
         if (stat.getMod().contains(GameMod.MOD_NOFAIL)) {
-            final GameEffect effect = GameObjectPool.getInstance().getEffect(
-                    "selection-mod-nofail");
+            final GameEffect effect = new GameEffect("selection-mod-nofail");
             effect.init(
                     fgScene,
                     new PointF(Utils.toRes(Config.getRES_WIDTH() - effectOffset), Utils
@@ -1073,8 +1062,7 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
             timeOffset += 0.25f;
         }
         if (stat.getMod().contains(GameMod.MOD_HIDDEN)) {
-            final GameEffect effect = GameObjectPool.getInstance().getEffect(
-                    "selection-mod-hidden");
+            final GameEffect effect = new GameEffect("selection-mod-hidden");
             effect.init(
                     fgScene,
                     new PointF(Utils.toRes(Config.getRES_WIDTH() - effectOffset), Utils
@@ -1091,8 +1079,7 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
         }
 
         if (stat.getMod().contains(GameMod.MOD_DOUBLETIME)) {
-            final GameEffect effect = GameObjectPool.getInstance().getEffect(
-                    "selection-mod-doubletime");
+            final GameEffect effect = new GameEffect("selection-mod-doubletime");
             effect.init(
                     fgScene,
                     new PointF(Utils.toRes(Config.getRES_WIDTH() - effectOffset), Utils
@@ -1108,8 +1095,7 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
             timeOffset += 0.25f;
         }
         if (stat.getMod().contains(GameMod.MOD_NIGHTCORE)) {
-            final GameEffect effect = GameObjectPool.getInstance().getEffect(
-                    "selection-mod-nightcore");
+            final GameEffect effect = new GameEffect("selection-mod-nightcore");
             effect.init(
                     fgScene,
                     new PointF(Utils.toRes(Config.getRES_WIDTH() - effectOffset), Utils
@@ -1125,8 +1111,7 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
             timeOffset += 0.25f;
         }
         if (stat.getMod().contains(GameMod.MOD_HALFTIME)) {
-            final GameEffect effect = GameObjectPool.getInstance().getEffect(
-                    "selection-mod-halftime");
+            final GameEffect effect = new GameEffect("selection-mod-halftime");
             effect.init(
                     fgScene,
                     new PointF(Utils.toRes(Config.getRES_WIDTH() - effectOffset), Utils
@@ -1142,8 +1127,7 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
             timeOffset += 0.25f;
         }
         if (stat.getMod().contains(GameMod.MOD_PRECISE)) {
-            final GameEffect effect = GameObjectPool.getInstance().getEffect(
-                    "selection-mod-precise");
+            final GameEffect effect = new GameEffect("selection-mod-precise");
             effect.init(
                     fgScene,
                     new PointF(Utils.toRes(Config.getRES_WIDTH() - effectOffset), Utils
@@ -1159,8 +1143,7 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
             timeOffset += 0.25f;
         }
         if (stat.getMod().contains(GameMod.MOD_SUDDENDEATH)) {
-            final GameEffect effect = GameObjectPool.getInstance().getEffect(
-                    "selection-mod-suddendeath");
+            final GameEffect effect = new GameEffect("selection-mod-suddendeath");
             effect.init(
                     fgScene,
                     new PointF(Utils.toRes(Config.getRES_WIDTH() - effectOffset), Utils
@@ -1176,8 +1159,7 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
             timeOffset += 0.25f;
         }
         else if (stat.getMod().contains(GameMod.MOD_PERFECT)) {
-            final GameEffect effect = GameObjectPool.getInstance().getEffect(
-                    "selection-mod-perfect");
+            final GameEffect effect = new GameEffect("selection-mod-perfect");
             effect.init(
                     fgScene,
                     new PointF(Utils.toRes(Config.getRES_WIDTH() - effectOffset), Utils
@@ -1193,8 +1175,7 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
             timeOffset += 0.25f;
         }
         if (stat.getMod().contains(GameMod.MOD_FLASHLIGHT)) {
-            final GameEffect effect = GameObjectPool.getInstance().getEffect(
-                    "selection-mod-flashlight");
+            final GameEffect effect = new GameEffect("selection-mod-flashlight");
             effect.init(
                     fgScene,
                     new PointF(Utils.toRes(Config.getRES_WIDTH() - effectOffset), Utils
@@ -1210,8 +1191,7 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
             timeOffset += 0.25f;
         }
         if (stat.getMod().contains(GameMod.MOD_REALLYEASY)) {
-            final GameEffect effect = GameObjectPool.getInstance().getEffect(
-                    "selection-mod-reallyeasy");
+            final GameEffect effect = new GameEffect("selection-mod-reallyeasy");
             effect.init(
                     fgScene,
                     new PointF(Utils.toRes(Config.getRES_WIDTH() - effectOffset), Utils
@@ -1735,7 +1715,7 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
 
             if ((objDefine & 1) > 0) {
                 final RGBColor col = getComboColor(comboNum);
-                final HitCircle circle = GameObjectPool.getInstance().getCircle();
+                final HitCircle circle = new HitCircle();
                 String tempSound = null;
                 if (params.length > 5) {
                     tempSound = params[5];
@@ -1750,8 +1730,7 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
                 isFirst = false;
                 if (objects.isEmpty() == false
                         && nextObj.isNewCombo() == false) {
-                    final FollowTrack track = GameObjectPool.getInstance()
-                            .getTrack();
+                    final FollowTrack track = new FollowTrack();
                     PointF end;
                     if (nextObj.getTime() > data.getTime()) {
                         end = data.getEnd();
@@ -1781,7 +1760,7 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
             } else if ((objDefine & 8) > 0) {
                 final float endTime = Integer.parseInt(params[5]) / 1000.0f;
                 final float rps = 2 + 2 * overallDifficulty / 10f;
-                final Spinner spinner = GameObjectPool.getInstance().getSpinner();
+                Spinner spinner = Config.getSpinnerStyle() == 1 ? new ModernSpinner() : new Spinner();
                 String tempSound = null;
                 if (params.length > 6) {
                     tempSound = params[6];
@@ -1806,7 +1785,7 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
             } else if ((objDefine & 2) > 0) {
                 final RGBColor col = getComboColor(comboNum);
                 final String soundspec = params.length > 8 ? params[8] : null;
-                final Slider slider = GameObjectPool.getInstance().getSlider();
+                final Slider slider = new Slider();
                 String tempSound = null;
                 if (params.length > 9) {
                     tempSound = params[9];
@@ -1837,8 +1816,7 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
 
                 if (objects.isEmpty() == false
                         && nextObj.isNewCombo() == false) {
-                    final FollowTrack track = GameObjectPool.getInstance()
-                            .getTrack();
+                    final FollowTrack track = new FollowTrack();
                     PointF end;
                     if (nextObj.getTime() > data.getTime()) {
                         end = data.getEnd();
@@ -1885,8 +1863,6 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
         if (shouldBePunished || (objects.isEmpty() && activeObjects.isEmpty() && leadOut > 2)) {
             scene = new Scene();
             SkinManager.setSkinEnabled(false);
-            GameObjectPool.getInstance().purge();
-            SpritePool.getInstance().purge();
             passiveObjects.clear();
             breakPeriods.clear();
             cursorSprites = null;
@@ -2074,8 +2050,6 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
         }
 
         SkinManager.setSkinEnabled(false);
-        GameObjectPool.getInstance().purge();
-        SpritePool.getInstance().purge();
         if (passiveObjects != null) {
             passiveObjects.clear();
         }
@@ -2382,8 +2356,7 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
         final PointF pos = new PointF((float) Config.getRES_WIDTH() / 2,
                 (float) Config.getRES_HEIGHT() / 2);
         if (score == 0) {
-            final GameEffect effect = GameObjectPool.getInstance().getEffect(
-                    "hit0");
+            final GameEffect effect = new GameEffect("hit0");
             effect.init(
                     scene,
                     pos,
@@ -2411,8 +2384,7 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
 
         if (Config.isHitLighting() &&
                 ResourceManager.getInstance().getTexture("lighting") != null) {
-            final GameEffect light = GameObjectPool.getInstance().getEffect(
-                    "lighting");
+            final GameEffect light = new GameEffect("lighting");
             light.init(
                     mgScene,
                     pos,
@@ -2424,7 +2396,7 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
                                     scale * 1.5f, 2f * scale)));
         }
 
-        GameEffect effect = GameObjectPool.getInstance().getEffect(scoreName);
+        GameEffect effect = new GameEffect(scoreName);
         effect.init(
                 mgScene,
                 pos,
@@ -2435,7 +2407,7 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
                         ModifierFactory.newAlphaModifier(1f, 1, 0)));
 
         pos.y /= 2f;
-        effect = GameObjectPool.getInstance().getEffect("spinner-osu");
+        effect = new GameEffect("spinner-osu");
         effect.init(mgScene, pos, 1, ModifierFactory.newFadeOutModifier(1.5f));
     }
 
@@ -2756,7 +2728,7 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
     }
 
     private void createHitEffect(final PointF pos, final String name, RGBColor color) {
-        final GameEffect effect = GameObjectPool.getInstance().getEffect(name);
+        final GameEffect effect = new GameEffect(name);
         if (name.equals("hit0")) {
             if(GameHelper.isSuddenDeath()){
                 effect.init(
@@ -2784,7 +2756,7 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
                 && name.equals("sliderpoint10") == false
                 && name.equals("sliderpoint30") == false
                 && ResourceManager.getInstance().getTexture("lighting") != null) {
-            final GameEffect light = GameObjectPool.getInstance().getEffect("lighting");
+            final GameEffect light = new GameEffect("lighting");
             light.setColor(color);
             light.init(
                     bgScene,
@@ -2812,14 +2784,14 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
     private void createBurstEffect(final PointF pos, final RGBColor color) {
         if (!Config.isComplexAnimations() || !Config.isBurstEffects() || stat.getMod().contains(GameMod.MOD_HIDDEN))
             return;
-        final GameEffect burst1 = GameObjectPool.getInstance().getEffect("hitcircle");
+        final GameEffect burst1 = new GameEffect("hitcircle");
         burst1.init(mgScene, pos, scale,
                 ModifierFactory.newScaleModifier(0.25f, scale, 1.5f * scale),
                 ModifierFactory.newAlphaModifier(0.25f, 0.8f, 0)
         );
         burst1.setColor(color);
 
-        final GameEffect burst2 = GameObjectPool.getInstance().getEffect("hitcircleoverlay");
+        final GameEffect burst2 = new GameEffect("hitcircleoverlay");
         burst2.init(mgScene, pos, scale,
                 ModifierFactory.newScaleModifier(0.25f, scale, 1.5f * scale),
                 ModifierFactory.newAlphaModifier(0.25f, 0.8f, 0)
@@ -2830,14 +2802,14 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
     private void createBurstEffectSliderStart(final PointF pos, final RGBColor color) {
         if (!Config.isComplexAnimations() || !Config.isBurstEffects() || stat.getMod().contains(GameMod.MOD_HIDDEN))
             return;
-        final GameEffect burst1 = GameObjectPool.getInstance().getEffect("sliderstartcircle");
+        final GameEffect burst1 = new GameEffect("sliderstartcircle");
         burst1.init(mgScene, pos, scale,
                 ModifierFactory.newScaleModifier(0.25f, scale, 1.5f * scale),
                 ModifierFactory.newAlphaModifier(0.25f, 0.8f, 0)
         );
         burst1.setColor(color);
 
-        final GameEffect burst2 = GameObjectPool.getInstance().getEffect("sliderstartcircleoverlay");
+        final GameEffect burst2 = new GameEffect("sliderstartcircleoverlay");
         burst2.init(mgScene, pos, scale,
                 ModifierFactory.newScaleModifier(0.25f, scale, 1.5f * scale),
                 ModifierFactory.newAlphaModifier(0.25f, 0.8f, 0)
@@ -2848,14 +2820,14 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
     private void createBurstEffectSliderEnd(final PointF pos, final RGBColor color) {
         if (!Config.isComplexAnimations() || !Config.isBurstEffects() || stat.getMod().contains(GameMod.MOD_HIDDEN))
             return;
-        final GameEffect burst1 = GameObjectPool.getInstance().getEffect("sliderendcircle");
+        final GameEffect burst1 = new GameEffect("sliderendcircle");
         burst1.init(mgScene, pos, scale,
                 ModifierFactory.newScaleModifier(0.25f, scale, 1.5f * scale),
                 ModifierFactory.newAlphaModifier(0.25f, 0.8f, 0)
         );
         burst1.setColor(color);
 
-        final GameEffect burst2 = GameObjectPool.getInstance().getEffect("sliderendcircleoverlay");
+        final GameEffect burst2 = new GameEffect("sliderendcircleoverlay");
         burst2.init(mgScene, pos, scale,
                 ModifierFactory.newScaleModifier(0.25f, scale, 1.5f * scale),
                 ModifierFactory.newAlphaModifier(0.25f, 0.8f, 0)
@@ -2866,7 +2838,7 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
     private void createBurstEffectSliderReverse(final PointF pos, float ang, final RGBColor color) {
         if (!Config.isComplexAnimations() || !Config.isBurstEffects() || stat.getMod().contains(GameMod.MOD_HIDDEN))
             return;
-        final GameEffect burst1 = GameObjectPool.getInstance().getEffect("reversearrow");
+        final GameEffect burst1 = new GameEffect("reversearrow");
         burst1.hit.setRotation(ang);
         burst1.init(mgScene, pos, scale,
                 ModifierFactory.newScaleModifier(0.25f, scale, 1.5f * scale),

@@ -94,7 +94,6 @@ public class GameEffect extends GameObject implements IEntityModifierListener {
         SyncTaskManager.getInstance().run(() -> {
             hit.detachSelf();
             hit.clearEntityModifiers();
-            GameObjectPool.getInstance().putEffect(GameEffect.this);
         });
     }
 }

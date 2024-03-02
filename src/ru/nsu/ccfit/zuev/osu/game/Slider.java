@@ -21,11 +21,14 @@ import org.andengine.util.modifier.IModifier;
 import org.andengine.util.modifier.ease.EaseQuadIn;
 import org.andengine.util.modifier.ease.EaseQuadOut;
 import ru.nsu.ccfit.zuev.osu.Config;
+import ru.nsu.ccfit.zuev.osu.GlobalManager;
 import ru.nsu.ccfit.zuev.osu.RGBColor;
+import ru.nsu.ccfit.zuev.osu.ResourceManager;
 import ru.nsu.ccfit.zuev.osu.Utils;
 import ru.nsu.ccfit.zuev.osu.async.SyncTaskManager;
 import ru.nsu.ccfit.zuev.osu.game.GameHelper.SliderPath;
 import ru.nsu.ccfit.zuev.osu.helper.AnimSprite;
+import ru.nsu.ccfit.zuev.osu.helper.CentredSprite;
 import ru.nsu.ccfit.zuev.osu.helper.DifficultyHelper;
 import ru.nsu.ccfit.zuev.osu.helper.ModifierListener;
 import ru.nsu.ccfit.zuev.skins.OsuSkin;
@@ -90,13 +93,13 @@ public class Slider extends GameObject {
             mWasInRadius;
 
     public Slider() {
-        startCircle = SpritePool.getInstance().getSprite("sliderstartcircle");
-        endCircle = SpritePool.getInstance().getSprite("sliderendcircle");
-        startOverlay = SpritePool.getInstance().getSprite("sliderstartcircleoverlay");
-        endOverlay = SpritePool.getInstance().getSprite("sliderendcircleoverlay");
-        approachCircle = SpritePool.getInstance().getSprite("approachcircle");
-        startArrow = SpritePool.getInstance().getSprite("reversearrow");
-        endArrow = SpritePool.getInstance().getSprite("reversearrow");
+        startCircle = new Sprite(0, 0, ResourceManager.getInstance().getTexture("sliderstartcircle"), GlobalManager.getInstance().getEngine().getVertexBufferObjectManager());
+        endCircle = new Sprite(0, 0, ResourceManager.getInstance().getTexture("sliderendcircle"), GlobalManager.getInstance().getEngine().getVertexBufferObjectManager());
+        startOverlay = new Sprite(0, 0, ResourceManager.getInstance().getTexture("sliderstartcircleoverlay"), GlobalManager.getInstance().getEngine().getVertexBufferObjectManager());
+        endOverlay = new Sprite(0, 0, ResourceManager.getInstance().getTexture("sliderendcircleoverlay"), GlobalManager.getInstance().getEngine().getVertexBufferObjectManager());
+        approachCircle = new Sprite(0, 0, ResourceManager.getInstance().getTexture("approachcircle"), GlobalManager.getInstance().getEngine().getVertexBufferObjectManager());
+        startArrow = new Sprite(0, 0, ResourceManager.getInstance().getTexture("reversearrow"), GlobalManager.getInstance().getEngine().getVertexBufferObjectManager());
+        endArrow = new Sprite(0, 0, ResourceManager.getInstance().getTexture("reversearrow"), GlobalManager.getInstance().getEngine().getVertexBufferObjectManager());
     }
 
     public void init(final GameObjectListener listener, final Scene scene,
@@ -129,7 +132,7 @@ public class Slider extends GameObject {
         if (OsuSkin.get().isLimitComboTextLength()) {
             num %= 10;
         }
-        number = GameObjectPool.getInstance().getNumber(num);
+        number = new CircleNumber(num);
         number.init(pos, scale);
 
         TimingControlPoint timingPoint = GameHelper.controlPoints.getTimingPointAt(realTime);
@@ -326,10 +329,8 @@ public class Slider extends GameObject {
         }
         ticks.clear();
         for (int i = 1; i <= tickCount; i++) {
-            final Sprite tick = SpritePool.getInstance().getCenteredSprite(
-                    "sliderscorepoint",
-                    getPercentPosition((float) (i * tickInterval
-                            / (maxTime * GameHelper.getTickRate())), null));
+            final PointF pos1 = getPercentPosition((float) (i * tickInterval / (maxTime * GameHelper.getTickRate())), null);
+            final Sprite tick = new CentredSprite(pos1.x, pos1.y, ResourceManager.getInstance().getTexture("sliderscorepoint"));
             tick.setScale(scale);
             tick.setAlpha(0);
             ticks.add(tick);
@@ -463,18 +464,13 @@ public class Slider extends GameObject {
         approachCircle.detachSelf();
         startArrow.detachSelf();
         endArrow.detachSelf();
-        SpritePool.getInstance().putAnimSprite("sliderb", ball);
-        SpritePool.getInstance().putSprite("sliderfollowcircle", followCircle);
         for (int i = 0, ticksSize = ticks.size(); i < ticksSize; i++) {
             Sprite sp = ticks.get(i);
             sp.detachSelf();
-            SpritePool.getInstance().putSprite("sliderscorepoint", sp);
         }
         listener.removeObject(this);
         // Put this and number into pool
         GameHelper.putPath(path);
-        GameObjectPool.getInstance().putSlider(this);
-        GameObjectPool.getInstance().putNumber(number);
         scene = null;
     }
 
@@ -739,15 +735,15 @@ public class Slider extends GameObject {
             approachCircle.clearEntityModifiers();
             approachCircle.setAlpha(0);
 
-            ball = SpritePool.getInstance().getAnimSprite("sliderb",
-                    SkinManager.getFrames("sliderb"));
+            int count = SkinManager.getFrames("sliderb");
+            ball = new AnimSprite(0, 0, "sliderb", count, count);
             ball.setFps((float) (0.1f * GameHelper.getSpeed() * scale / timing.getBeatLength()));
             ball.setScale(scale);
             ball.setFlippedHorizontal(false);
 
             ball.registerEntityModifier(new FadeInModifier(0.1f * GameHelper.getTimeMultiplier()));
 
-            followCircle = SpritePool.getInstance().getSprite("sliderfollowcircle");
+            followCircle = new Sprite(0, 0, ResourceManager.getInstance().getTexture("sliderfollowcircle"), GlobalManager.getInstance().getEngine().getVertexBufferObjectManager());
             followCircle.setAlpha(0);
             if (!Config.isComplexAnimations()) {
                 followCircle.setScale(scale);

@@ -18,6 +18,7 @@ import ru.nsu.ccfit.zuev.osu.Config;
 import ru.nsu.ccfit.zuev.osu.GlobalManager;
 import ru.nsu.ccfit.zuev.osu.ResourceManager;
 import ru.nsu.ccfit.zuev.osu.Utils;
+import ru.nsu.ccfit.zuev.osu.helper.CentredSprite;
 import ru.nsu.ccfit.zuev.osu.scoring.StatisticV2;
 import ru.nsu.ccfit.zuev.skins.OsuSkin;
 
@@ -89,8 +90,7 @@ public class BreakAnimator extends GameObject {
         ending = stat.getHp() > 0.5f ? "pass" : "fail";
         final PointF center = new PointF((float) Config.getRES_WIDTH() / 2,
                 (float) Config.getRES_HEIGHT() / 2);
-        passfail = SpritePool.getInstance().getCenteredSprite(
-                "section-" + ending, center);
+        passfail = new CentredSprite(center.x, center.y, ResourceManager.getInstance().getTexture("section-" + ending));
         scene.attachChild(passfail, 0);
         passfail.setVisible(false);
 
@@ -171,8 +171,6 @@ public class BreakAnimator extends GameObject {
                 sp.detachSelf();
             }
             passfail.detachSelf();
-            SpritePool.getInstance().putSprite("section-" + ending,
-                    passfail);
         }
     }
 

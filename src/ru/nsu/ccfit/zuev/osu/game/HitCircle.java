@@ -11,7 +11,9 @@ import org.andengine.entity.scene.Scene;
 import org.andengine.entity.sprite.Sprite;
 
 import ru.nsu.ccfit.zuev.osu.Config;
+import ru.nsu.ccfit.zuev.osu.GlobalManager;
 import ru.nsu.ccfit.zuev.osu.RGBColor;
+import ru.nsu.ccfit.zuev.osu.ResourceManager;
 import ru.nsu.ccfit.zuev.osu.Utils;
 import ru.nsu.ccfit.zuev.osu.scoring.ResultType;
 import ru.nsu.ccfit.zuev.skins.OsuSkin;
@@ -37,11 +39,11 @@ public class HitCircle extends GameObject {
 
     public HitCircle() {
         // Getting sprites from sprite pool
-        circle = SpritePool.getInstance().getSprite("hitcircle");
+        circle = new Sprite(0, 0, ResourceManager.getInstance().getTexture("hitcircle"), GlobalManager.getInstance().getEngine().getVertexBufferObjectManager());
         circle.setAlpha(0);
-        overlay = SpritePool.getInstance().getSprite("hitcircleoverlay");
+        overlay = new Sprite(0, 0, ResourceManager.getInstance().getTexture("hitcircleoverlay"), GlobalManager.getInstance().getEngine().getVertexBufferObjectManager());
         overlay.setAlpha(0);
-        approachCircle = SpritePool.getInstance().getSprite("approachcircle");
+        approachCircle = new Sprite(0, 0, ResourceManager.getInstance().getTexture("approachcircle"), GlobalManager.getInstance().getEngine().getVertexBufferObjectManager());
     }
 
     public void init(final GameObjectListener listener, final Scene pScene,
@@ -101,7 +103,7 @@ public class HitCircle extends GameObject {
         if (OsuSkin.get().isLimitComboTextLength()) {
             num %= 10;
         }
-        number = GameObjectPool.getInstance().getNumber(num);
+        number = new CircleNumber(num);
         number.init(pos, GameHelper.getScale());
         number.setAlpha(0);
 
@@ -167,9 +169,6 @@ public class HitCircle extends GameObject {
         number.detachSelf();
         approachCircle.detachSelf();
         listener.removeObject(this);
-        // Put circle and number into pool
-        GameObjectPool.getInstance().putCircle(this);
-        GameObjectPool.getInstance().putNumber(number);
         scene = null;
     }
 
