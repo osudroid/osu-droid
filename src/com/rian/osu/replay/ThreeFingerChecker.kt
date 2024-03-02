@@ -62,7 +62,7 @@ class ThreeFingerChecker(
      * Cursors that are grouped together, representing a cursor instance's movement when the player places
      * their finger on the screen.
      */
-    private val cursorGroups = mutableListOf<MutableList<CursorGroup>>()
+    private val cursorGroups = createCursorGroups(cursorMoves)
 
     /**
      * The [HitWindow] of the [Beatmap].
@@ -79,14 +79,18 @@ class ThreeFingerChecker(
      * This is used to increase detection accuracy since [BreakPeriod]s do not start right at the
      * start of the [HitObject] before it and do not end right at the first [HitObject] after it.
      */
-    private val accurateBreakPeriods = mutableListOf<BreakPeriod>()
+    private val accurateBreakPeriods = createAccurateBreakPeriods()
 
     /**
      * A cursor occurrence nested array that only contains press actions.
      *
      * Each index represents a cursor index.
      */
-    private val downCursorMoves = mutableListOf<MutableList<ReplayMovement>>()
+    private val downCursorMoves = filterDownMoves()
+
+    init {
+        createBeatmapSections()
+    }
 
     /**
      * Calculates the three-finger penalty of the replay.
@@ -101,22 +105,75 @@ class ThreeFingerChecker(
             return 1.0
         }
 
-        createAccurateBreakPeriods()
-
-        createCursorGroups()
-        filterCursorInstances()
-
         if (downCursorMoves.filter { it.isNotEmpty() }.size <= 3) {
             return 1.0
         }
 
-        createBeatmapSections()
-        return calculateFinalPenalty()
+        val strainFactors = mutableListOf<Double>()
+        val fingerFactors = mutableListOf<Double>()
+        val lengthFactors = mutableListOf<Double>()
+
+        for (section in beatmapSections) {
+            val cursorCounts = mutableListOf<Int>()
+
+            for (i in downCursorMoves.indices) {
+                var count = 0
+
+                for (obj in section.objects) {
+                    if (obj.pressingCursorInstanceIndex == section.dragFingerIndex || obj.pressingCursorIndex == -1) {
+                        continue
+                    }
+
+                    ++count
+                }
+
+                cursorCounts.add(count)
+            }
+
+            if (section.dragFingerIndex != -1) {
+                // Remove the drag index to prevent it from being picked up into the detection.
+                cursorCounts.removeAt(section.dragFingerIndex)
+            }
+
+            // This index will be used to detect if a section is 3-fingered.
+            // If the section is dragged, the dragged instance will be ignored,
+            // hence why the index is 1 less than non-dragged section.
+            val fingerSplitIndex = if (section.dragFingerIndex != -1) 2 else 3
+
+            // Divide >=4th (3rd for drag) cursor instances with 1st + 2nd (+ 3rd for non-drag)
+            // to check if the section is 3-fingered.
+            val threeFingeredObjectCount = cursorCounts.subList(fingerSplitIndex, cursorCounts.size).sum()
+            val threeFingerRatio = threeFingeredObjectCount /
+                    cursorCounts.subList(0, fingerSplitIndex).sum().coerceAtLeast(1).toDouble()
+
+            if (threeFingerRatio > threeFingerRatioThreshold) {
+                val sectionObjectCount = section.lastObjectIndex - section.firstObjectIndex + 1
+                val threeFingeredObjectRatio = threeFingeredObjectCount / sectionObjectCount.toDouble()
+
+                // We can ignore the first 3 (2 for drag) filled cursor instances
+                // since they are guaranteed not 3 finger.
+                val threeFingerCursorCounts = cursorCounts.subList(fingerSplitIndex, cursorCounts.size)
+                    .filter { it > 0 }
+
+                // Finger factor applies more penalty if more fingers were used.
+                fingerFactors.add(threeFingerCursorCounts.foldIndexed(1.0) { index, acc, count ->
+                    acc + ((index + 1) * count * threeFingeredObjectRatio).pow(0.9)
+                })
+
+                // Length factor applies more penalty if there are more 3-fingered object.
+                lengthFactors.add(1 + threeFingeredObjectRatio.pow(1.2))
+
+                // Strain factor applies more penalty if the section is more difficult.
+                strainFactors.add(section.sumStrain * threeFingeredObjectRatio)
+            }
+        }
+
+        return strainFactors.foldIndexed(1.0) { index, acc, strainFactor ->
+            acc + 0.015 * (strainFactor * fingerFactors[index] * lengthFactors[index]).pow(1.05)
+        }
     }
 
-    private fun createAccurateBreakPeriods() {
-        accurateBreakPeriods.clear()
-
+    private fun createAccurateBreakPeriods() = mutableListOf<BreakPeriod>().apply {
         val objects = beatmap.hitObjects.objects
 
         for (breakPeriod in beatmap.events.breaks) {
@@ -142,44 +199,11 @@ class ThreeFingerChecker(
                 timeAfter += objectAfterData.accuracy
             }
 
-            accurateBreakPeriods.add(BreakPeriod(timeBefore.toFloat(), timeAfter.toFloat()))
+            add(BreakPeriod(timeBefore.toFloat(), timeAfter.toFloat()))
         }
     }
 
-    private fun createCursorGroups() {
-        cursorGroups.clear()
-
-        for (move in cursorMoves) {
-            val groups = mutableListOf<CursorGroup>()
-            var downMovement: ReplayMovement? = null
-            var moveMovements = mutableListOf<ReplayMovement>()
-
-            move.movements.forEach {
-                when (it.touchType) {
-                    TouchType.DOWN -> downMovement = it
-                    TouchType.MOVE -> moveMovements.add(it)
-                    TouchType.UP -> {
-                        if (downMovement != null) {
-                            groups.add(CursorGroup(downMovement!!, moveMovements, it))
-                        }
-
-                        downMovement = null
-                        moveMovements = mutableListOf()
-                    }
-                    else -> return@forEach
-                }
-            }
-
-            // Add the final group as the loop may not catch it for special cases.
-            if (downMovement != null && moveMovements.isNotEmpty()) {
-                groups.add(CursorGroup(downMovement!!, moveMovements))
-            }
-
-            cursorGroups.add(groups)
-        }
-    }
-
-    private fun filterCursorInstances() {
+    private fun filterDownMoves() = mutableListOf<MutableList<ReplayMovement>>().apply {
         val firstObject = beatmap.hitObjects.objects.first()
         val firstObjectResult = objectData.first()
 
@@ -233,6 +257,8 @@ class ThreeFingerChecker(
 
                 downMoves.add(group.down)
             }
+
+            add(downMoves)
         }
     }
 
@@ -470,70 +496,5 @@ class ThreeFingerChecker(
         }
 
         return (nearestCursorInstanceIndex ?: -1) to (nearestCursorIndex ?: -1)
-    }
-
-    private fun calculateFinalPenalty(): Double {
-        val strainFactors = mutableListOf<Double>()
-        val fingerFactors = mutableListOf<Double>()
-        val lengthFactors = mutableListOf<Double>()
-
-        for (section in beatmapSections) {
-            val cursorCounts = mutableListOf<Int>()
-
-            for (i in downCursorMoves.indices) {
-                var count = 0
-
-                for (obj in section.objects) {
-                    if (obj.pressingCursorInstanceIndex == section.dragFingerIndex || obj.pressingCursorIndex == -1) {
-                        continue
-                    }
-
-                    ++count
-                }
-
-                cursorCounts.add(count)
-            }
-
-            if (section.dragFingerIndex != -1) {
-                // Remove the drag index to prevent it from being picked up into the detection.
-                cursorCounts.removeAt(section.dragFingerIndex)
-            }
-
-            // This index will be used to detect if a section is 3-fingered.
-            // If the section is dragged, the dragged instance will be ignored,
-            // hence why the index is 1 less than non-dragged section.
-            val fingerSplitIndex = if (section.dragFingerIndex != -1) 2 else 3
-
-            // Divide >=4th (3rd for drag) cursor instances with 1st + 2nd (+ 3rd for non-drag)
-            // to check if the section is 3-fingered.
-            val threeFingeredObjectCount = cursorCounts.subList(fingerSplitIndex, cursorCounts.size).sum()
-            val threeFingerRatio = threeFingeredObjectCount /
-                cursorCounts.subList(0, fingerSplitIndex).sum().coerceAtLeast(1).toDouble()
-
-            if (threeFingerRatio > threeFingerRatioThreshold) {
-                val sectionObjectCount = section.lastObjectIndex - section.firstObjectIndex + 1
-                val threeFingeredObjectRatio = threeFingeredObjectCount / sectionObjectCount.toDouble()
-
-                // We can ignore the first 3 (2 for drag) filled cursor instances
-                // since they are guaranteed not 3 finger.
-                val threeFingerCursorCounts = cursorCounts.subList(fingerSplitIndex, cursorCounts.size)
-                    .filter { it > 0 }
-
-                // Finger factor applies more penalty if more fingers were used.
-                fingerFactors.add(threeFingerCursorCounts.foldIndexed(1.0) { index, acc, count ->
-                    acc + ((index + 1) * count * threeFingeredObjectRatio).pow(0.9)
-                })
-
-                // Length factor applies more penalty if there are more 3-fingered object.
-                lengthFactors.add(1 + threeFingeredObjectRatio.pow(1.2))
-
-                // Strain factor applies more penalty if the section is more difficult.
-                strainFactors.add(section.sumStrain * threeFingeredObjectRatio)
-            }
-        }
-
-        return strainFactors.foldIndexed(1.0) { index, acc, strainFactor ->
-            acc + 0.015 * (strainFactor * fingerFactors[index] * lengthFactors[index]).pow(1.05)
-        }
     }
 }
