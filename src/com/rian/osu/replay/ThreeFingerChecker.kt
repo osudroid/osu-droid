@@ -13,7 +13,8 @@ import com.rian.osu.math.Interpolation
 import com.rian.osu.math.Vector2
 import com.rian.osu.mods.Mod
 import com.rian.osu.mods.ModPrecise
-import ru.nsu.ccfit.zuev.osu.scoring.Replay.*
+import ru.nsu.ccfit.zuev.osu.scoring.Replay.ReplayMovement
+import ru.nsu.ccfit.zuev.osu.scoring.Replay.ReplayObjectData
 import ru.nsu.ccfit.zuev.osu.scoring.ResultType
 import ru.nsu.ccfit.zuev.osu.scoring.TouchType
 import kotlin.math.abs
@@ -36,9 +37,11 @@ class ThreeFingerChecker(
     val difficultyAttributes: DroidDifficultyAttributes,
 
     /**
-     * The cursor moves that were done.
+     * Cursors that are grouped together in the form of [CursorGroup]s.
+     *
+     * Each index represents a cursor index.
      */
-    private val cursorMoves: List<MoveArray>,
+    private val cursorGroups: List<List<CursorGroup>>,
 
     /**
      * Data regarding [HitObject] information.
@@ -59,12 +62,6 @@ class ThreeFingerChecker(
     private val beatmapSections = mutableListOf<ThreeFingerBeatmapSection>()
 
     /**
-     * Cursors that are grouped together, representing a cursor instance's movement when the player places
-     * their finger on the screen.
-     */
-    private val cursorGroups = createCursorGroups(cursorMoves)
-
-    /**
      * The [HitWindow] of the [Beatmap].
      *
      * Keep in mind that speed-changing [Mod]s do not change hit window length in game logic.
@@ -80,13 +77,6 @@ class ThreeFingerChecker(
      * start of the [HitObject] before it and do not end right at the first [HitObject] after it.
      */
     private val accurateBreakPeriods = createAccurateBreakPeriods()
-
-    /**
-     * A cursor occurrence nested array that only contains press actions.
-     *
-     * Each index represents a cursor index.
-     */
-    private val downCursorMoves = filterDownMoves()
 
     init {
         createBeatmapSections()
@@ -105,7 +95,7 @@ class ThreeFingerChecker(
             return 1.0
         }
 
-        if (downCursorMoves.filter { it.isNotEmpty() }.size <= 3) {
+        if (cursorGroups.filter { it.isNotEmpty() }.size <= 3) {
             return 1.0
         }
 
@@ -116,7 +106,7 @@ class ThreeFingerChecker(
         for (section in beatmapSections) {
             val cursorCounts = mutableListOf<Int>()
 
-            for (i in downCursorMoves.indices) {
+            for (i in cursorGroups.indices) {
                 var count = 0
 
                 for (obj in section.objects) {
@@ -239,7 +229,7 @@ class ThreeFingerChecker(
         val firstObjectHitTime = firstObject.startTime - firstObjectHitWindow
         val lastObjectHitTime = lastObject.startTime + lastObjectHitWindow
 
-        for (i in cursorMoves.indices) {
+        for (i in cursorGroups.indices) {
             val downMoves = mutableListOf<ReplayMovement>()
 
             for (group in cursorGroups[i]) {
@@ -264,7 +254,7 @@ class ThreeFingerChecker(
 
     private fun createBeatmapSections() {
         val cursorLookupIndices = mutableListOf<Int>()
-        for (i in cursorMoves.indices) {
+        for (i in cursorGroups.indices) {
             cursorLookupIndices.add(0)
         }
 
@@ -462,16 +452,16 @@ class ThreeFingerChecker(
         var nearestCursorIndex: Int? = null
         var nearestTime = Double.POSITIVE_INFINITY
 
-        for (i in downCursorMoves.indices) {
+        for (i in cursorGroups.indices) {
             if (excludedCursorIndices.contains(i)) {
                 continue
             }
 
-            val cursors = downCursorMoves[i]
+            val groups = cursorGroups[i]
             var j = cursorLookupIndices[i]
 
-            while (j < cursors.size) {
-                val cursor = cursors[j]
+            while (j < groups.size) {
+                val cursor = groups[j].down
 
                 if (cursor.time < minHitTime) {
                     cursorLookupIndices[i] = ++j
