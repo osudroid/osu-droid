@@ -1,5 +1,7 @@
 package com.rian.osu.difficulty.calculator
 
+import com.rian.osu.replay.SliderCheesePenalty
+
 /**
  * A class for specifying parameters for osu!droid performance calculation.
  */
@@ -11,20 +13,8 @@ class DroidPerformanceCalculationParameters : PerformanceCalculationParameters()
     var tapPenalty = 1.0
 
     /**
-     * The aim slider cheese penalty to apply for penalized scores.
+     * The slider cheese penalties to apply for penalized scores.
      */
     @JvmField
-    var aimSliderCheesePenalty = 1.0
-
-    /**
-     * The flashlight slider cheese penalty to apply for penalized scores.
-     */
-    @JvmField
-    var flashlightSliderCheesePenalty = 1.0
-
-    /**
-     * The visual slider cheese penalty to apply for penalized scores.
-     */
-    @JvmField
-    var visualSliderCheesePenalty = 1.0
+    var sliderCheesePenalty = SliderCheesePenalty()
 }

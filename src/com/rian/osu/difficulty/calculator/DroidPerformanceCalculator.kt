@@ -6,6 +6,7 @@ import com.rian.osu.difficulty.attributes.DroidDifficultyAttributes
 import com.rian.osu.difficulty.attributes.DroidPerformanceAttributes
 import com.rian.osu.math.ErrorFunction
 import com.rian.osu.mods.*
+import com.rian.osu.replay.SliderCheesePenalty
 import kotlin.math.*
 
 /**
@@ -21,9 +22,7 @@ class DroidPerformanceCalculator(
     DroidPerformanceAttributes,
     DroidPerformanceCalculationParameters
 >(difficultyAttributes) {
-    private var aimSliderCheesePenalty = 1.0
-    private var flashlightSliderCheesePenalty = 1.0
-    private var visualSliderCheesePenalty = 1.0
+    private var sliderCheesePenalty = SliderCheesePenalty()
     private var tapPenalty = 1.0
 
     private var deviation = 0.0
@@ -87,18 +86,14 @@ class DroidPerformanceCalculator(
     override fun processParameters(parameters: DroidPerformanceCalculationParameters?) = parameters?.let {
         super.processParameters(it)
 
-        aimSliderCheesePenalty = it.aimSliderCheesePenalty
-        flashlightSliderCheesePenalty = it.flashlightSliderCheesePenalty
-        visualSliderCheesePenalty = it.visualSliderCheesePenalty
+        sliderCheesePenalty = it.sliderCheesePenalty.copy()
         tapPenalty = it.tapPenalty
     } ?: resetDefaults()
 
     override fun resetDefaults() {
         super.resetDefaults()
 
-        aimSliderCheesePenalty = 1.0
-        flashlightSliderCheesePenalty = 1.0
-        visualSliderCheesePenalty = 1.0
+        sliderCheesePenalty = SliderCheesePenalty()
 
         tapPenalty = 1.0
     }
@@ -126,7 +121,7 @@ class DroidPerformanceCalculator(
             aimValue *= sliderNerfFactor
         }
 
-        aimValue *= aimSliderCheesePenalty
+        aimValue *= sliderCheesePenalty.aim
 
         // Scale the aim value with deviation.
         aimValue *= 1.05 * sqrt(ErrorFunction.erf(25 / (sqrt(2.0) * deviation)))
@@ -215,7 +210,7 @@ class DroidPerformanceCalculator(
         flashlightValue *= 0.7 + 0.1 * min(1.0, totalHits / 200.0) +
             (if (totalHits > 200) 0.2 * min(1.0, (totalHits - 200) / 200.0) else 0.0)
 
-        flashlightValue *= flashlightSliderCheesePenalty
+        flashlightValue *= sliderCheesePenalty.flashlight
 
         // Scale the flashlight value with deviation.
         flashlightValue *= ErrorFunction.erf(50 / (sqrt(2.0) * deviation))
@@ -232,7 +227,7 @@ class DroidPerformanceCalculator(
         // As visual is easily "bypassable" with memorization, punish for memorization.
         visualValue *= calculateDeviationBasedLengthScaling(punishForMemorization = true)
 
-        visualValue *= visualSliderCheesePenalty
+        visualValue *= sliderCheesePenalty.visual
 
         // Scale the visual value with deviation.
         visualValue *= 1.065 * ErrorFunction.erf(25 / (sqrt(2.0) * deviation)).pow(0.8)
