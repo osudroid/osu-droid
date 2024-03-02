@@ -65,8 +65,7 @@ class SliderCheeseChecker(
             return SliderCheesePenalty()
         }
 
-        val cheesedDifficultyRatings = getCheesedDifficultyRatings()
-        val summedDifficultyRating = min(1.0, cheesedDifficultyRatings.sum())
+        val summedDifficultyRating = min(1.0, getCheesedDifficultyRatings().sum())
 
         return SliderCheesePenalty(
             computePenalty(difficultyAttributes.aimSliderFactor, summedDifficultyRating),
