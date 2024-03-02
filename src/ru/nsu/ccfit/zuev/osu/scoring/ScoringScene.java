@@ -470,7 +470,7 @@ public class ScoringScene {
         if (Config.isDisplayScoreStatistics()){
             StringBuilder ppinfo = new StringBuilder();
 
-            Beatmap beatmap = null;
+            Beatmap beatmap;
 
             try (var parser = new BeatmapParser(this.track.getFilename())) {
                 beatmap = parser.parse(true);
