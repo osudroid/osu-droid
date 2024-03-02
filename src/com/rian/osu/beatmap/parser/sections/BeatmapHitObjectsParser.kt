@@ -29,10 +29,10 @@ class BeatmapHitObjectsParser : BeatmapSectionParser() {
 
             var tempType = type
 
-            val comboColorOffset = (tempType and HitObjectType.ComboColorOffset.value) shr 4
+            val comboColorOffset = tempType and HitObjectType.ComboColorOffset.value shr 4
             tempType = tempType and HitObjectType.ComboColorOffset.value.inv()
 
-            val isNewCombo = (tempType and HitObjectType.NewCombo.value) != 0
+            val isNewCombo = tempType and HitObjectType.NewCombo.value != 0
 
             val position = Vector2(
                 parseInt(it[0]).toFloat(),
@@ -228,7 +228,7 @@ class BeatmapHitObjectsParser : BeatmapSectionParser() {
                 BankHitSampleInfo(BankHitSampleInfo.HIT_NORMAL, bankInfo.normal, bankInfo.customSampleBank, bankInfo.volume,
                     // If the sound type doesn't have the Normal flag set, attach it anyway as a layered sample.
                     // None also counts as a normal non-layered sample: https://osu.ppy.sh/help/wiki/osu!_File_Formats/Osu_(file_format)#hitsounds
-                    type != HitSoundType.None && (type.bit and HitSoundType.Normal.bit) == 0
+                    type != HitSoundType.None && type.bit and HitSoundType.Normal.bit == 0
                 )
             )
         }

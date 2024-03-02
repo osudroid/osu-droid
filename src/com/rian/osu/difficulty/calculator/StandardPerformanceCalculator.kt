@@ -106,8 +106,8 @@ class StandardPerformanceCalculator(
             if (estimateDifficultSliders > 0) {
                 val estimateSliderEndsDropped =
                     min(
-                        (countOk + countMeh + countMiss),
-                        (maxCombo - scoreMaxCombo)
+                        countOk + countMeh + countMiss,
+                        maxCombo - scoreMaxCombo
                     ).toDouble().coerceIn(0.0, estimateDifficultSliders)
 
                 val sliderNerfFactor =

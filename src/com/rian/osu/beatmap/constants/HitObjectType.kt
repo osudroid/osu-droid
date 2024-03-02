@@ -16,7 +16,7 @@ enum class HitObjectType(
     NormalNewCombo(5),
     SliderNewCombo(6),
     Spinner(8),
-    ComboColorOffset((1 shl 4) or (1 shl 5) or (1 shl 6));
+    ComboColorOffset(1 shl 4 or (1 shl 5) or (1 shl 6));
 
     companion object {
         @JvmStatic

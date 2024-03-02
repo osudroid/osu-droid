@@ -50,7 +50,7 @@ class StandardDifficultyHitObject(
 
             // High circle size (small CS) bonus
             if (radius < 30) {
-                scalingFactor *= 1 + min((30 - radius), 5.0f) / 50
+                scalingFactor *= 1 + min(30 - radius, 5.0f) / 50
             }
 
             return scalingFactor

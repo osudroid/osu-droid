@@ -81,7 +81,7 @@ class StandardDifficultyCalculator : DifficultyCalculator<StandardDifficultyHitO
         var greatWindow = StandardHitWindow(od).greatWindow.toDouble()
 
         if (difficultyAdjustMod?.od == null) {
-            greatWindow /= (parameters?.totalSpeedMultiplier?.toDouble() ?: 1.0)
+            greatWindow /= parameters?.totalSpeedMultiplier?.toDouble() ?: 1.0
         }
 
         overallDifficulty = StandardHitWindow.hitWindow300ToOverallDifficulty(greatWindow.toFloat()).toDouble()
@@ -102,7 +102,7 @@ class StandardDifficultyCalculator : DifficultyCalculator<StandardDifficultyHitO
         var greatWindow = StandardHitWindow(od).greatWindow.toDouble()
 
         if (difficultyAdjustMod?.od == null) {
-            greatWindow /= (parameters?.totalSpeedMultiplier?.toDouble() ?: 1.0)
+            greatWindow /= parameters?.totalSpeedMultiplier?.toDouble() ?: 1.0
         }
 
         return arrayOf(

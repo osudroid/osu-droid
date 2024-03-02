@@ -120,8 +120,8 @@ object DroidRhythmEvaluator {
 
                     rhythmComplexitySum +=
                         sqrt(effectiveRatio * startRatio) * currentHistoricalDecay *
-                        sqrt((4.0 + islandSize)) / 2 *
-                        sqrt((4.0 + previousIslandSize)) / 2
+                        sqrt(4.0 + islandSize) / 2 *
+                        sqrt(4.0 + previousIslandSize) / 2
 
                     startRatio = effectiveRatio
                     previousIslandSize = islandSize

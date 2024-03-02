@@ -208,7 +208,7 @@ class DroidPerformanceCalculator(
 
         // Account for shorter maps having a higher ratio of 0 combo/100 combo flashlight radius.
         flashlightValue *= 0.7 + 0.1 * min(1.0, totalHits / 200.0) +
-            (if (totalHits > 200) 0.2 * min(1.0, (totalHits - 200) / 200.0) else 0.0)
+            if (totalHits > 200) 0.2 * min(1.0, (totalHits - 200) / 200.0) else 0.0
 
         flashlightValue *= sliderCheesePenalty.flashlight
 

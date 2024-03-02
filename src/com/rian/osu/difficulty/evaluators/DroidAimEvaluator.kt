@@ -171,7 +171,7 @@ object DroidAimEvaluator {
             travelDistance + current.minimumJumpDistance
         ) / SINGLE_SPACING_THRESHOLD).pow(3.5)
 
-        return (200 * speedBonus * shortDistancePenalty) / current.strainTime
+        return 200 * speedBonus * shortDistancePenalty / current.strainTime
     }
 
     /**

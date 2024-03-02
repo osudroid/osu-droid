@@ -35,7 +35,7 @@ object BeatmapControlPointsParser : BeatmapSectionParser() {
             val sampleVolume = it.getOrNull(5)?.let { s -> parseInt(s) } ?: beatmap.general.sampleVolume
 
             val timingChange = it.getOrNull(6)?.let { s -> s == "1" } ?: true
-            val isKiai = it.getOrNull(7)?.let { s -> (parseInt(s) and 1) != 0 } ?: false
+            val isKiai = it.getOrNull(7)?.let { s -> parseInt(s) and 1 != 0 } ?: false
 
             if (sampleSet == SampleBank.None) {
                 sampleSet = SampleBank.Normal

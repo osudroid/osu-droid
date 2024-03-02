@@ -225,7 +225,7 @@ class DroidDifficultyCalculator : DifficultyCalculator<DroidDifficultyHitObject,
         ).greatWindow.toDouble()
 
         if (difficultyAdjustMod?.od == null) {
-            greatWindow /= (parameters?.totalSpeedMultiplier?.toDouble() ?: 1.0)
+            greatWindow /= parameters?.totalSpeedMultiplier?.toDouble() ?: 1.0
         }
 
         return arrayOf(

@@ -72,7 +72,7 @@ object CircleSizeCalculator {
      */
     @JvmStatic
     fun standardRadiusToStandardCS(radius: Double) =
-        5 + ((1 - radius.toFloat() / (HitObject.OBJECT_RADIUS / 2)) * 5) / 0.7f
+        5 + (1 - radius.toFloat() / (HitObject.OBJECT_RADIUS / 2)) * 5 / 0.7f
 
     /**
      * Converts osu!standard circle size to osu!standard scale.
@@ -84,7 +84,7 @@ object CircleSizeCalculator {
     @JvmStatic
     @JvmOverloads
     fun standardCSToStandardScale(cs: Float, applyFudge: Boolean = false) =
-        (1 - 0.7f * (cs - 5) / 5) / 2 * (if (applyFudge) BROKEN_GAMEFIELD_ROUNDING_ALLOWANCE else 1f)
+        (1 - 0.7f * (cs - 5) / 5) / 2 * if (applyFudge) BROKEN_GAMEFIELD_ROUNDING_ALLOWANCE else 1f
 
     /**
      * Converts osu!standard scale to osu!droid scale.
@@ -97,7 +97,7 @@ object CircleSizeCalculator {
     @JvmOverloads
     fun standardScaleToDroidScale(scale: Float, applyFudge: Boolean = false) =
         standardRadiusToDroidScale(HitObject.OBJECT_RADIUS.toDouble() * scale /
-                (if (applyFudge) BROKEN_GAMEFIELD_ROUNDING_ALLOWANCE else 1f))
+                if (applyFudge) BROKEN_GAMEFIELD_ROUNDING_ALLOWANCE else 1f)
 
     /**
      * Converts osu!standard circle size to osu!droid scale.
