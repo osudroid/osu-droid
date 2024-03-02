@@ -8,6 +8,7 @@ import org.anddev.andengine.util.MathUtils;
 
 import java.lang.ref.WeakReference;
 import java.math.BigDecimal;
+import java.util.Arrays;
 
 import ru.nsu.ccfit.zuev.osu.*;
 import ru.nsu.ccfit.zuev.osu.DifficultyAlgorithm;
@@ -23,7 +24,7 @@ public class MenuItemTrack extends Sprite {
     private static final RGBColor SELECTED_TEXT_COLOR = new RGBColor(0, 0, 0);
     private final ChangeableText trackTitle, trackLeftText;
     private final Sprite[] stars;
-    private final Sprite halfStar;
+    private final Sprite[] halfStars;
     private boolean moved = false;
     private float dx = 0, dy = 0;
     private WeakReference<MenuItem> item;
@@ -46,17 +47,22 @@ public class MenuItemTrack extends Sprite {
         attachChild(trackTitle);
 //		attachChild(trackLeftText);
 
-        stars = new Sprite[10];
-        for (int i = 0; i < 10; i++) {
+        stars = new Sprite[20];
+        for (int i = 0; i < 20; i++) {
             stars[i] = new Sprite(Utils.toRes(60 + 52 * i), Utils.toRes(50),
                     ResourceManager.getInstance().getTexture("star"));
+            stars[i].setVisible(false);
             attachChild(stars[i]);
         }
         final TextureRegion starTex = ResourceManager.getInstance()
                 .getTexture("star").deepCopy();
 //		starTex.setWidth((starTex.getWidth() / 2));
-        halfStar = new Sprite(0, 0, starTex);
-        attachChild(halfStar);
+        halfStars = new Sprite[2];
+        for (int i = 0; i < 2; i++) {
+            halfStars[i] = new Sprite(0, 0, starTex);
+            halfStars[i].setVisible(false);
+            attachChild(halfStars[i]);
+        }
     }
 
     public void setItem(final MenuItem it) {
@@ -68,35 +74,47 @@ public class MenuItemTrack extends Sprite {
         trackTitle.setText(track.getMode() + " (" + track.getCreator() + ")");
         trackLeftText.setText("\n" + info.getTitle());
 
-        for (final Sprite s : stars) {
+        for (var s : stars) {
             s.setVisible(false);
         }
-        halfStar.setVisible(false);
 
-        final float diff = Math.min(
-            Config.getDifficultyAlgorithm() == DifficultyAlgorithm.standard
-                ? track.getStandardDifficulty()
-                : track.getDroidDifficulty(),
-            10
-        );
-
-        int fInt = (int) (diff);
-        BigDecimal b1 = new BigDecimal(Float.toString(diff));
-        BigDecimal b2 = new BigDecimal(Integer.toString(fInt));
-        float fPoint = b1.subtract(b2).floatValue();
-
-        for (int j = 0; j < fInt; j++) {
-            if (j < stars.length) {
-                stars[j].setVisible(true);
-            }
+        for (var s : halfStars) {
+            s.setVisible(false);
         }
 
-        if (fPoint > 0 && fInt != 10) {
-            halfStar.setVisible(true);
-            halfStar.setPosition(Utils.toRes(60 + 52 * fInt),
-                    Utils.toRes(50));
-            halfStar.setScale(fPoint);
+        if (Config.getDifficultyAlgorithm() == DifficultyAlgorithm.both) {
+            float baseX = 30;
+            float baseY = 45;
+
+            constructStars(
+                track.getDroidDifficulty(),
+                Arrays.copyOfRange(stars, 0, 10),
+                halfStars[0],
+                baseX,
+                baseY,
+                0.5f
+            );
+
+            constructStars(
+                track.getStandardDifficulty(),
+                Arrays.copyOfRange(stars, 11, 20),
+                halfStars[1],
+                baseX,
+                baseY + 25,
+                0.5f
+            );
+        } else {
+            constructStars(
+                Config.getDifficultyAlgorithm() == DifficultyAlgorithm.standard ?
+                    track.getStandardDifficulty() : track.getDroidDifficulty(),
+                Arrays.copyOfRange(stars, 0, 10),
+                halfStars[0],
+                60,
+                50,
+                1
+            );
         }
+
         updateMark();
     }
 
@@ -189,5 +207,26 @@ public class MenuItemTrack extends Sprite {
         }
     }
 
+    private void constructStars(float difficulty, Sprite[] stars, Sprite halfStar, float baseX, float y, float scale) {
+        final float diff = Math.min(difficulty, 10);
 
+        int fInt = (int) (diff);
+        BigDecimal b1 = new BigDecimal(Float.toString(difficulty));
+        BigDecimal b2 = new BigDecimal(Integer.toString(fInt));
+        float fPoint = b1.subtract(b2).floatValue();
+
+        for (int i = 0; i < fInt; i++) {
+            if (i < stars.length) {
+                stars[i].setPosition(baseX + 52 * i * scale, y);
+                stars[i].setScale(scale);
+                stars[i].setVisible(true);
+            }
+        }
+
+        if (fPoint > 0 && fInt != 10) {
+            halfStar.setPosition(baseX + 52 * fInt * scale, y);
+            halfStar.setScale(fPoint * scale);
+            halfStar.setVisible(true);
+        }
+    }
 }
