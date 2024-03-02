@@ -9,6 +9,7 @@ import com.reco1l.legacy.ui.entity.StatisticSelector;
 import com.rian.osu.beatmap.Beatmap;
 import com.rian.osu.beatmap.parser.BeatmapParser;
 import com.rian.osu.difficulty.BeatmapDifficultyCalculator;
+import com.rian.osu.difficulty.attributes.DroidPerformanceAttributes;
 import org.anddev.andengine.engine.Engine;
 import org.anddev.andengine.entity.modifier.FadeInModifier;
 import org.anddev.andengine.entity.modifier.ParallelEntityModifier;
@@ -22,6 +23,7 @@ import org.anddev.andengine.input.touch.TouchEvent;
 import org.anddev.andengine.opengl.texture.region.TextureRegion;
 import org.anddev.andengine.util.Debug;
 
+import java.io.File;
 import java.util.Locale;
 
 import ru.nsu.ccfit.zuev.audio.serviceAudio.SongService;
@@ -477,16 +479,15 @@ public class ScoringScene {
             }
 
             if (beatmap != null) {
-                var difficultyAttributes = BeatmapDifficultyCalculator.calculateStandardDifficulty(
-                    beatmap, stat
-                );
-                var performanceAttributes = BeatmapDifficultyCalculator.calculateStandardPerformance(
-                    difficultyAttributes, stat
-                );
-                var maxPerformanceAttributes = BeatmapDifficultyCalculator.calculateStandardPerformance(
-                    difficultyAttributes
-                );
-                ppinfo.append(String.format(Locale.ENGLISH, "%.2f★ | %.2f/%.2fpp", difficultyAttributes.starRating, performanceAttributes.total, maxPerformanceAttributes.total));
+                switch (Config.getDifficultyAlgorithm()) {
+                    case droid -> fillDroidPPInfo(ppinfo, beatmap, stat, replay, trackToReplay, mapMD5);
+                    case standard -> fillStandardPPInfo(ppinfo, beatmap, stat);
+                    case both -> {
+                        fillDroidPPInfo(ppinfo, beatmap, stat, replay, trackToReplay, mapMD5);
+                        ppinfo.append("\n");
+                        fillStandardPPInfo(ppinfo, beatmap, stat);
+                    }
+                }
             }
 
             if (stat.getUnstableRate() > 0) {
@@ -593,6 +594,42 @@ public class ScoringScene {
         GlobalManager.getInstance().getEngine().setScene(GlobalManager.getInstance().getSongMenu().getScene());
         GlobalManager.getInstance().getSongMenu().updateScore();
         setReplayID(-1);
+    }
+
+    private void fillDroidPPInfo(StringBuilder builder, Beatmap beatmap, StatisticV2 stat, String replayPath, TrackInfo replayTrack, String mapMD5) {
+        var difficultyAttributes = BeatmapDifficultyCalculator.calculateDroidDifficulty(beatmap, stat);
+
+        DroidPerformanceAttributes performanceAttributes;
+
+        // Don't try to load online replay
+        if (replayPath != null && replayTrack != null && !replayPath.startsWith("https://")) {
+            var trackFile = new File(replayTrack.getFilename());
+            var replay = new Replay();
+            replay.setObjectCount(replayTrack.getTotalHitObjectCount());
+            replay.setMap(trackFile.getParentFile().getName(), trackFile.getName(), mapMD5);
+
+            if (replay.load(replayPath)) {
+                performanceAttributes = BeatmapDifficultyCalculator.calculateDroidPerformance(
+                    beatmap, difficultyAttributes, replay.cursorMoves, replay.objectData, stat
+                );
+            } else {
+                performanceAttributes = BeatmapDifficultyCalculator.calculateDroidPerformance(difficultyAttributes, stat);
+            }
+        } else {
+            performanceAttributes = BeatmapDifficultyCalculator.calculateDroidPerformance(difficultyAttributes, stat);
+        }
+
+        var maxPerformanceAttributes = BeatmapDifficultyCalculator.calculateDroidPerformance(difficultyAttributes);
+
+        builder.append(String.format(Locale.ENGLISH, "%.2f★ | %.2f/%.2fdpp", difficultyAttributes.starRating, performanceAttributes.total, maxPerformanceAttributes.total));
+    }
+
+    private void fillStandardPPInfo(StringBuilder builder, Beatmap beatmap, StatisticV2 stat) {
+        var difficultyAttributes = BeatmapDifficultyCalculator.calculateStandardDifficulty(beatmap, stat);
+        var performanceAttributes = BeatmapDifficultyCalculator.calculateStandardPerformance(difficultyAttributes, stat);
+        var maxPerformanceAttributes = BeatmapDifficultyCalculator.calculateStandardPerformance(difficultyAttributes);
+
+        builder.append(String.format(Locale.ENGLISH, "%.2f★ | %.2f/%.2fpp", difficultyAttributes.starRating, performanceAttributes.total, maxPerformanceAttributes.total));
     }
 
     public Scene getScene() {

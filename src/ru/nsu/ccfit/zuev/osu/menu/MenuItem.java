@@ -5,6 +5,7 @@ import org.anddev.andengine.entity.scene.Scene;
 import org.anddev.andengine.entity.sprite.Sprite;
 
 import java.lang.ref.WeakReference;
+import java.util.Collections;
 import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -17,6 +18,7 @@ import ru.nsu.ccfit.zuev.osu.PropertiesLibrary;
 import ru.nsu.ccfit.zuev.osu.ResourceManager;
 import ru.nsu.ccfit.zuev.osu.TrackInfo;
 import ru.nsu.ccfit.zuev.osu.Utils;
+import ru.nsu.ccfit.zuev.osu.DifficultyAlgorithm;
 import ru.nsu.ccfit.zuev.osu.helper.StringTable;
 import ru.nsu.ccfit.zuev.osu.scoring.ScoreLibrary;
 import ru.nsu.ccfit.zuev.osuplus.R;
@@ -282,6 +284,9 @@ public class MenuItem {
                 return calOpt(track.getCircleSize(), Float.parseFloat(value), opt);
             case "hp":
                 return calOpt(track.getHpDrain(), Float.parseFloat(value), opt);
+            case "droidstar":
+                return calOpt(track.getDroidDifficulty(), Float.parseFloat(value), opt);
+            case "standardstar":
             case "star":
                 return calOpt(track.getStandardDifficulty(), Float.parseFloat(value), opt);
             default:
@@ -376,7 +381,12 @@ public class MenuItem {
     }
 
     private void initTracks() {
-        if (trackId == -1){
+        if (trackId == -1) {
+            // Tracks are originally sorted by osu!droid difficulty, so for osu!standard difficulty they need to be sorted again.
+            if (Config.getDifficultyAlgorithm() == DifficultyAlgorithm.standard) {
+                Collections.sort(beatmap.getTracks(), (o1, o2) -> Float.compare(o1.getStandardDifficulty(), o2.getStandardDifficulty()));
+            }
+
             for (int i = 0; i < trackSprites.length; i++) {
                 trackSprites[i] = SongMenuPool.getInstance().newTrack();
                 trackSprites[i].setItem(this);
@@ -388,8 +398,7 @@ public class MenuItem {
                 scene.registerTouchArea(trackSprites[i]);
                 trackSprites[i].setVisible(true);
             }
-        }
-        else{
+        } else {
             trackSprites[0] = SongMenuPool.getInstance().newTrack();
             trackSprites[0].setItem(this);
             trackSprites[0].setTrack(beatmap.getTrack(trackId), beatmap);

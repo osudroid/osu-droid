@@ -206,7 +206,9 @@
                             android:title="@string/opt_enable_pp_title" android:defaultValue="true"/>
         <Preference android:key="clearPP" android:title="@string/opt_clear_pp_title"
                     android:summary="@string/opt_clear_pp_summary"/-->
-
+        <ListPreference android:entries="@array/difficulty_algorithm_names" android:title="@string/opt_difficulty_algorithm_title"
+            android:key="difficultyAlgorithm" android:summary="@string/opt_difficulty_algorithm_summary"
+            android:defaultValue="0" android:entryValues="@array/difficulty_algorithm_values"/>
         <SeekBarPreference android:summary="@string/opt_setplayfield_summary" android:title="@string/opt_setplayfield_title"
             android:key="playfieldSize" app:min="50" android:max="100" app:showSeekBarValue="true" android:defaultValue="100"/>
 

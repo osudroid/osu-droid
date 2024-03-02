@@ -93,6 +93,16 @@
         <item>1</item>
         <item>2</item>
     </string-array>
+    <string-array name="difficulty_algorithm_names">
+        <item>osu!droid</item>
+        <item>osu!standard</item>
+        <item>Both</item>
+    </string-array>
+    <string-array name="difficulty_algorithm_values">
+        <item>0</item>
+        <item>1</item>
+        <item>2</item>
+    </string-array>
     <string-array name="placeholder_array">
         <item>placeholder</item>
     </string-array>
@@ -363,6 +373,9 @@
 
     <string name="opt_display_realtime_pp_counter_title">Display real-time PP counter</string>
     <string name="opt_display_realtime_pp_counter_summary">Displays a real-time PP counter during gameplay. May increase loading time significantly, especially in long beatmaps</string>
+
+    <string name="opt_difficulty_algorithm_title">Difficulty algorithm</string>
+    <string name="opt_difficulty_algorithm_summary">Choose the algorithm to calculate the difficulty of beatmaps</string>
 
     <!--Video support-->
     <string name="opt_delete_unsupported_videos_title">Delete unsupported videos</string>

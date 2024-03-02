@@ -23,8 +23,8 @@ import ru.nsu.ccfit.zuev.osu.helper.InputManager
 import ru.nsu.ccfit.zuev.osu.helper.StringTable
 import ru.nsu.ccfit.zuev.osu.menu.IFilterMenu
 import ru.nsu.ccfit.zuev.osu.menu.SongMenu
-import ru.nsu.ccfit.zuev.osu.GlobalManager.getInstance as getGlobal
 import ru.nsu.ccfit.zuev.osuplus.R
+import ru.nsu.ccfit.zuev.osu.GlobalManager.getInstance as getGlobal
 
 class FilterMenuFragment : BaseFragment(), IUpdateHandler, IFilterMenu {
     private var configContext: Context? = null
@@ -239,7 +239,8 @@ class FilterMenuFragment : BaseFragment(), IUpdateHandler, IFilterMenu {
             SongMenu.SortOrder.Creator -> StringTable.get(R.string.menu_search_sort_creator)
             SongMenu.SortOrder.Date -> StringTable.get(R.string.menu_search_sort_date)
             SongMenu.SortOrder.Bpm -> StringTable.get(R.string.menu_search_sort_bpm)
-            SongMenu.SortOrder.Stars -> StringTable.get(R.string.menu_search_sort_stars)
+            SongMenu.SortOrder.DroidStars -> StringTable.get(R.string.menu_search_sort_droid_stars)
+            SongMenu.SortOrder.StandardStars -> StringTable.get(R.string.menu_search_sort_standard_stars)
             SongMenu.SortOrder.Length -> StringTable.get(R.string.menu_search_sort_length)
         }
 
