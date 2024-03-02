@@ -379,9 +379,8 @@ class ThreeFingerChecker(
 
                     // Only consider cursor at interval prev.time <= hitTime <= current.time.
                     if (prevMovement.time <= hitTime && hitTime <= movement.time) {
-                        when (movement.touchType) {
-                            TouchType.UP ->
-                                isInObject = movementPosition.getDistance(prevMovementPosition) <= obj.radius
+                        isInObject = when (movement.touchType) {
+                            TouchType.UP -> movementPosition.getDistance(prevMovementPosition) <= obj.radius
 
                             TouchType.MOVE -> {
                                 // Interpolate movement.
@@ -400,7 +399,7 @@ class ThreeFingerChecker(
                                     )
                                 )
 
-                                isInObject = cursorPosition.getDistance(objPosition) <= obj.radius
+                                cursorPosition.getDistance(objPosition) <= obj.radius
                             }
 
                             else -> break
