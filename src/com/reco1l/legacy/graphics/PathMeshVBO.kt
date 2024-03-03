@@ -32,6 +32,12 @@ class PathMeshVBO(private val flat: Boolean) :
             setDirtyOnHardware()
         }
 
+    var baseAlpha = 1f
+        set(value)
+        {
+            field = value.coerceIn(0f, 1f)
+        }
+
 
     private var alpha = 0f
 
@@ -50,7 +56,7 @@ class PathMeshVBO(private val flat: Boolean) :
     {
         super.bind(gl, AlphaOverrideShaderProgram)
 
-        AlphaOverrideShaderProgram.setAlphaUniform(alpha.coerceIn(0f, 1f))
+        AlphaOverrideShaderProgram.setAlphaUniform(baseAlpha * alpha)
     }
 
     override fun unbind(gl: GLState, shader: ShaderProgram) = super.unbind(gl, AlphaOverrideShaderProgram)
@@ -62,7 +68,7 @@ class PathMeshVBO(private val flat: Boolean) :
     {
         // We update the alpha when the data is bound to the hardware buffer so we ensure it is done
         // after the data is updated.
-        alpha = mesh.alpha
+        alpha = mesh.alpha.coerceIn(0f, 1f)
     }
 
     override fun onBufferData()

@@ -26,6 +26,11 @@ class PathMesh(private val flat: Boolean) : Mesh(0f, 0f, 0, DrawMode.TRIANGLES, 
         setVertexCountToDraw(vertices.size / if (flat) 3 else 4)
     }
 
+    fun setBaseAlpha(value: Float)
+    {
+        (mMeshVertexBufferObject as PathMeshVBO).baseAlpha = value
+    }
+
 
     override fun detachSelf(): Boolean
     {

@@ -116,6 +116,7 @@ class SliderBody(val path: LinePath)
     {
         border.alpha = 0f
 
+        body.setBaseAlpha(0.7f)
         body.clearDepth = true
         body.alpha = 0f
 
