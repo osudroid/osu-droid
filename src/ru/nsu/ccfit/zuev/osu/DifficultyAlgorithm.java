@@ -12,12 +12,7 @@ public enum DifficultyAlgorithm {
     /**
      * osu!standard algorithm.
      */
-    standard,
-
-    /**
-     * Both osu!droid and osu!standard algorithms.
-     */
-    both;
+    standard;
 
     /**
      * Parses an integer value to a {@link DifficultyAlgorithm}.
@@ -26,10 +21,6 @@ public enum DifficultyAlgorithm {
      * @return The parsed {@link DifficultyAlgorithm}.
      */
     public static DifficultyAlgorithm parse(int value) {
-        return switch (value) {
-            case 1 -> standard;
-            case 2 -> both;
-            default -> droid;
-        };
+        return value == 1 ? standard : droid;
     }
 }

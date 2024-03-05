@@ -223,7 +223,7 @@ public class Config {
         receiveAnnouncements = prefs.getBoolean("receiveAnnouncements", true);
         safeBeatmapBg = prefs.getBoolean("safebeatmapbg", false);
         displayRealTimePPCounter = prefs.getBoolean("displayRealTimePPCounter", false);
-        difficultyAlgorithm = DifficultyAlgorithm.parse(Integer.parseInt(prefs.getString("difficultyAlgorithm", "0")));
+        difficultyAlgorithm = DifficultyAlgorithm.droid;
 
         // Multiplayer
         useNightcoreOnMultiplayer = prefs.getBoolean("player_nightcore", false);

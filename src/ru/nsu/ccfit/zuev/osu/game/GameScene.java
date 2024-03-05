@@ -652,17 +652,6 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
                         beatmap,
                         parameters
                     );
-                case both -> {
-                    droidTimedDifficultyAttributes = BeatmapDifficultyCalculator.calculateDroidTimedDifficulty(
-                        beatmap,
-                        parameters
-                    );
-
-                    standardTimedDifficultyAttributes = BeatmapDifficultyCalculator.calculateStandardTimedDifficulty(
-                        beatmap,
-                        parameters
-                    );
-                }
             }
         }
 
@@ -3075,8 +3064,6 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
         switch (Config.getDifficultyAlgorithm()) {
             case droid -> ppText.setText(String.format(Locale.ENGLISH, "%.2fdpp", getDroidPPAtTime(time)));
             case standard -> ppText.setText(String.format(Locale.ENGLISH, "%.2fpp", getStandardPPAtTime(time)));
-            case both -> ppText.setText(String.format(Locale.ENGLISH, "%.2fdpp | %.2fpp",
-                    getDroidPPAtTime(time), getStandardPPAtTime(time)));
         }
     }
 

@@ -48,7 +48,6 @@ import ru.nsu.ccfit.zuev.osu.ToastLogger;
 import ru.nsu.ccfit.zuev.osu.TrackInfo;
 import ru.nsu.ccfit.zuev.osu.Utils;
 import ru.nsu.ccfit.zuev.osu.async.SyncTaskManager;
-import ru.nsu.ccfit.zuev.osu.DifficultyAlgorithm;
 import ru.nsu.ccfit.zuev.osu.game.GameHelper;
 import ru.nsu.ccfit.zuev.osu.game.GameScene;
 import ru.nsu.ccfit.zuev.osu.game.mods.GameMod;
@@ -1066,11 +1065,6 @@ public class SongMenu implements IUpdateHandler, MenuItemListener,
             case standard:
                 dimensionStringBuilder.append(GameHelper.Round(track.getStandardDifficulty(), 2));
                 break;
-            case both:
-                dimensionStringBuilder
-                    .append(GameHelper.Round(track.getDroidDifficulty(), 2))
-                    .append(" | ")
-                    .append(GameHelper.Round(track.getStandardDifficulty(), 2));
         }
 
         dimensionInfo.setText(dimensionStringBuilder.toString());
@@ -1095,12 +1089,7 @@ public class SongMenu implements IUpdateHandler, MenuItemListener,
                 var beatmap = parser.parse(true);
 
                 if (beatmap == null) {
-                    if (Config.getDifficultyAlgorithm() == DifficultyAlgorithm.both) {
-                        setStarsDisplay(0, 0);
-                    } else {
-                        setStarsDisplay(0);
-                    }
-
+                    setStarsDisplay(0);
                     return;
                 }
 
@@ -1135,22 +1124,6 @@ public class SongMenu implements IUpdateHandler, MenuItemListener,
                         );
 
                         setStarsDisplay(GameHelper.Round(attributes.starRating, 2));
-                    }
-
-                    case both -> {
-                        var droidAttributes = BeatmapDifficultyCalculator.calculateDroidDifficulty(
-                            beatmap,
-                            parameters
-                        );
-                        var standardAttributes = BeatmapDifficultyCalculator.calculateStandardDifficulty(
-                            beatmap,
-                            parameters
-                        );
-
-                        setStarsDisplay(
-                            GameHelper.Round(droidAttributes.starRating, 2),
-                            GameHelper.Round(standardAttributes.starRating, 2)
-                        );
                     }
                 }
             }
@@ -1551,14 +1524,6 @@ public class SongMenu implements IUpdateHandler, MenuItemListener,
         String[] strs = str.split("Stars: ");
         if (strs.length == 2) {
             dimensionInfo.setText(strs[0] + "Stars: " + star);
-        }
-    }
-
-    public void setStarsDisplay(float firstStar, float secondStar) {
-        String str = dimensionInfo.getText();
-        String[] strs = str.split("Stars: ");
-        if (strs.length == 2) {
-            dimensionInfo.setText(strs[0] + "Stars: " + firstStar + " | " + secondStar);
         }
     }
 

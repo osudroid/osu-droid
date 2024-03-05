@@ -24,7 +24,6 @@ import java.util.TreeMap;
 
 import org.jetbrains.annotations.Nullable;
 import ru.nsu.ccfit.zuev.osu.*;
-import ru.nsu.ccfit.zuev.osu.DifficultyAlgorithm;
 import ru.nsu.ccfit.zuev.osu.game.GameHelper;
 import ru.nsu.ccfit.zuev.osu.game.mods.GameMod;
 import ru.nsu.ccfit.zuev.osu.game.mods.IModSwitcher;
@@ -326,12 +325,7 @@ public class ModMenu implements IModSwitcher {
                             )) {
                                 var beatmap = parser.parse(true);
                                 if (beatmap == null) {
-                                    if (Config.getDifficultyAlgorithm() == DifficultyAlgorithm.both) {
-                                        GlobalManager.getInstance().getSongMenu().setStarsDisplay(0, 0);
-                                    } else {
-                                        GlobalManager.getInstance().getSongMenu().setStarsDisplay(0);
-                                    }
-
+                                    GlobalManager.getInstance().getSongMenu().setStarsDisplay(0);
                                     return;
                                 }
 
@@ -364,23 +358,6 @@ public class ModMenu implements IModSwitcher {
 
                                         GlobalManager.getInstance().getSongMenu().setStarsDisplay(
                                             GameHelper.Round(attributes.starRating, 2)
-                                        );
-                                    }
-
-                                    case both -> {
-                                        var droidAttributes = BeatmapDifficultyCalculator.calculateDroidDifficulty(
-                                            beatmap,
-                                            parameters
-                                        );
-
-                                        var standardAttributes = BeatmapDifficultyCalculator.calculateStandardDifficulty(
-                                            beatmap,
-                                            parameters
-                                        );
-
-                                        GlobalManager.getInstance().getSongMenu().setStarsDisplay(
-                                            GameHelper.Round(droidAttributes.starRating, 2),
-                                            GameHelper.Round(standardAttributes.starRating, 2)
                                         );
                                     }
                                 }
