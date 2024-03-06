@@ -380,6 +380,23 @@ public class MenuItem {
 
     }
 
+    public void reloadTracks() {
+        if (trackId == -1) {
+            // Tracks are originally sorted by osu!droid difficulty, so for osu!standard difficulty they need to be sorted again.
+            if (Config.getDifficultyAlgorithm() == DifficultyAlgorithm.standard) {
+                Collections.sort(beatmap.getTracks(), (o1, o2) -> Float.compare(o1.getStandardDifficulty(), o2.getStandardDifficulty()));
+            } else {
+                Collections.sort(beatmap.getTracks(), (o1, o2) -> Float.compare(o1.getDroidDifficulty(), o2.getDroidDifficulty()));
+            }
+
+            for (int i = 0; i < trackSprites.length; i++) {
+                trackSprites[i].setTrack(beatmap.getTrack(i), beatmap);
+            }
+        } else {
+            trackSprites[0].setTrack(beatmap.getTrack(trackId), beatmap);
+        }
+    }
+
     private void initTracks() {
         if (trackId == -1) {
             // Tracks are originally sorted by osu!droid difficulty, so for osu!standard difficulty they need to be sorted again.

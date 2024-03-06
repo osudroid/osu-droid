@@ -17,6 +17,7 @@ import com.reco1l.framework.lang.execution.Async;
 import com.rian.osu.beatmap.parser.BeatmapParser;
 import com.rian.osu.difficulty.BeatmapDifficultyCalculator;
 import com.rian.osu.difficulty.calculator.DifficultyCalculationParameters;
+import com.rian.osu.ui.DifficultyAlgorithmSwitcher;
 import org.anddev.andengine.engine.Engine;
 import org.anddev.andengine.engine.handler.IUpdateHandler;
 import org.anddev.andengine.entity.Entity;
@@ -601,6 +602,8 @@ public class SongMenu implements IUpdateHandler, MenuItemListener,
             }
         };
 
+        final var difficultySwitcher = new DifficultyAlgorithmSwitcher();
+
         if (modSelection != null)
             modSelection.setScale(1.5f);
 
@@ -652,6 +655,7 @@ public class SongMenu implements IUpdateHandler, MenuItemListener,
                     Config.getRES_HEIGHT() - Utils.toRes(90));
         }
 
+        difficultySwitcher.setPosition(randomMap.getX() + randomMap.getWidthScaled(), Config.getRES_HEIGHT() - difficultySwitcher.getHeightScaled());
 
         frontLayer.attachChild(backButton);
         scene.registerTouchArea(backButton);
@@ -665,6 +669,8 @@ public class SongMenu implements IUpdateHandler, MenuItemListener,
         scene.registerTouchArea(optionSelection);
         frontLayer.attachChild(randomMap);
         scene.registerTouchArea(randomMap);
+        frontLayer.attachChild(difficultySwitcher);
+        scene.registerTouchArea(difficultySwitcher);
 
         if (OnlineScoring.getInstance().createSecondPanel() != null) {
             OnlinePanel panel = OnlineScoring.getInstance().getSecondPanel();
@@ -1068,6 +1074,14 @@ public class SongMenu implements IUpdateHandler, MenuItemListener,
         }
 
         dimensionInfo.setText(dimensionStringBuilder.toString());
+    }
+
+    public void switchDifficultyAlgorithm() {
+        updateInfo(selectedTrack);
+
+        if (selectedItem != null) {
+            selectedItem.reloadTracks();
+        }
     }
 
     public void updateInfo(TrackInfo track) {

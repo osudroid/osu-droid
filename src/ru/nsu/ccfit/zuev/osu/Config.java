@@ -310,6 +310,10 @@ public class Config {
         return difficultyAlgorithm;
     }
 
+    public static void setDifficultyAlgorithm(DifficultyAlgorithm algorithm) {
+        Config.difficultyAlgorithm = algorithm;
+    }
+
     public static boolean isEnableExtension() {
         return enableExtension;
     }

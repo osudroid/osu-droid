@@ -5,7 +5,6 @@ import com.reco1l.api.ibancho.RoomAPI
 import com.reco1l.api.ibancho.data.PlayerStatus.READY
 import com.reco1l.api.ibancho.data.RoomBeatmap
 import com.reco1l.framework.extensions.orAsyncCatch
-import com.reco1l.legacy.ui.ChimuWebView as chimuFragment
 import com.reco1l.legacy.Multiplayer
 import com.reco1l.legacy.ui.ChimuWebView.FILE_EXTENSION
 import com.reco1l.legacy.ui.multiplayer.RoomScene
@@ -13,10 +12,13 @@ import org.anddev.andengine.entity.sprite.Sprite
 import org.anddev.andengine.entity.text.ChangeableText
 import org.anddev.andengine.input.touch.TouchEvent
 import org.anddev.andengine.util.MathUtils
+import ru.nsu.ccfit.zuev.osu.Config
+import ru.nsu.ccfit.zuev.osu.DifficultyAlgorithm
 import ru.nsu.ccfit.zuev.osu.RGBColor
 import ru.nsu.ccfit.zuev.osu.ToastLogger
 import ru.nsu.ccfit.zuev.osu.menu.MenuItemTrack
 import ru.nsu.ccfit.zuev.skins.OsuSkin
+import com.reco1l.legacy.ui.ChimuWebView as chimuFragment
 import ru.nsu.ccfit.zuev.osu.GlobalManager.getInstance as getGlobal
 import ru.nsu.ccfit.zuev.osu.LibraryManager.INSTANCE as libraryManager
 import ru.nsu.ccfit.zuev.osu.ResourceManager.getInstance as getResources
@@ -55,7 +57,7 @@ class BeatmapButton : Sprite(0f, 0f, getResources().getTexture("menu-button-back
 
         this.attachChild(trackTitle)
         this.attachChild(creatorInfo)
-        stars.iterator().forEach { attachChild(it) }
+        stars.forEach { attachChild(it) }
     }
 
 
@@ -120,7 +122,7 @@ class BeatmapButton : Sprite(0f, 0f, getResources().getTexture("menu-button-back
 
     fun updateBeatmap(beatmap: RoomBeatmap?)
     {
-        stars.iterator().forEach { it.isVisible = false }
+        stars.forEach { it.isVisible = false }
 
         if (beatmap == null)
         {
@@ -144,7 +146,9 @@ class BeatmapButton : Sprite(0f, 0f, getResources().getTexture("menu-button-back
             return
         }
 
-        val difficulty = getGlobal().selectedTrack.standardDifficulty
+        val difficulty =
+            if (Config.getDifficultyAlgorithm() == DifficultyAlgorithm.standard) getGlobal().selectedTrack.standardDifficulty
+            else getGlobal().selectedTrack.droidDifficulty
 
         stars.forEachIndexed { i, it ->
             it.isVisible = difficulty >= i
