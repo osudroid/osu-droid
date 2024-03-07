@@ -389,8 +389,18 @@ public class MenuItem {
                 Collections.sort(beatmap.getTracks(), (o1, o2) -> Float.compare(o1.getDroidDifficulty(), o2.getDroidDifficulty()));
             }
 
+            var selectedTrack = selTrack != null ? selTrack.getTrack() : null;
+
             for (int i = 0; i < trackSprites.length; i++) {
                 trackSprites[i].setTrack(beatmap.getTrack(i), beatmap);
+
+                // Ensure the selected track is still selected after reloading.
+                if (selectedTrack != null && selectedTrack == beatmap.getTrack(i)) {
+                    trackSprites[i].setSelectedColor();
+                    selTrack = trackSprites[i];
+                } else {
+                    trackSprites[i].setDeselectColor();
+                }
             }
         } else {
             trackSprites[0].setTrack(beatmap.getTrack(trackId), beatmap);
