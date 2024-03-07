@@ -1,7 +1,7 @@
 package ru.nsu.ccfit.zuev.osu.game;
 
-import org.anddev.andengine.entity.modifier.IEntityModifier;
-import org.anddev.andengine.entity.scene.Scene;
+import org.andengine.entity.modifier.IEntityModifier;
+import org.andengine.entity.scene.Scene;
 
 import java.util.ArrayList;
 

@@ -4,7 +4,7 @@ import com.reco1l.framework.lang.async
 import com.reco1l.legacy.ui.multiplayer.LobbyScene
 import com.reco1l.legacy.Multiplayer
 import com.reco1l.legacy.ui.multiplayer.RoomScene
-import org.anddev.andengine.input.touch.TouchEvent
+import org.andengine.input.touch.TouchEvent
 import ru.nsu.ccfit.zuev.osu.LibraryManager
 import ru.nsu.ccfit.zuev.osu.MainScene
 import ru.nsu.ccfit.zuev.osu.MainScene.MusicOption
@@ -62,13 +62,23 @@ class MainMenu(val main: MainScene)
                 if (main.isOnExitAnim)
                     return true
 
+                main.musicControl(MusicOption.PLAY)
+
                 getGlobal().songService.isGaming = true
+                getGlobal().songMenu.reload()
+                getGlobal().songMenu.select()
 
-                async {
-                    LoadingScreen().show()
+                MainOverlay.startTransition(0.15f, 0f, 1f) {
 
-                    getGlobal().mainActivity.checkNewSkins()
-                    getGlobal().mainActivity.checkNewBeatmaps()
+                    getGlobal().songMenu.show()
+                }
+
+                // TODO: Reimplement Chimu redirection.
+                /*async {
+                    //LoadingScreen().show()
+
+                    //getGlobal().mainActivity.checkNewSkins()
+                    //getGlobal().mainActivity.checkNewBeatmaps()
                     LibraryManager.INSTANCE.updateLibrary(true)
 
                     if (LibraryManager.INSTANCE.library.isEmpty())
@@ -86,7 +96,7 @@ class MainMenu(val main: MainScene)
                         getGlobal().songMenu.show()
                         getGlobal().songMenu.select()
                     }
-                }
+                }*/
                 return true
             }
             return false

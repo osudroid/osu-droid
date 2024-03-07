@@ -3,7 +3,7 @@ package com.edlplan.framework.support.osb;
 import com.edlplan.edlosbsupport.elements.StoryboardAnimationSprite;
 import com.edlplan.framework.support.batch.object.MultipleFlippableTextureQuad;
 
-import org.anddev.andengine.opengl.texture.region.TextureRegion;
+import org.andengine.opengl.texture.region.TextureRegion;
 
 import java.util.ArrayList;
 import java.util.List;

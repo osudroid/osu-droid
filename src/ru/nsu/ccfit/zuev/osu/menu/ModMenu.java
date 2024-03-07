@@ -10,11 +10,11 @@ import com.reco1l.legacy.ui.multiplayer.RoomScene;
 import com.rian.difficultycalculator.attributes.DifficultyAttributes;
 import com.rian.difficultycalculator.calculator.DifficultyCalculationParameters;
 
-import org.anddev.andengine.entity.primitive.Rectangle;
-import org.anddev.andengine.entity.scene.Scene;
-import org.anddev.andengine.entity.text.ChangeableText;
-import org.anddev.andengine.input.touch.TouchEvent;
-import org.anddev.andengine.opengl.texture.region.TextureRegion;
+import org.andengine.entity.primitive.Rectangle;
+import org.andengine.entity.scene.Scene;
+import org.andengine.entity.text.Text;
+import org.andengine.input.touch.TouchEvent;
+import org.andengine.opengl.texture.region.TextureRegion;
 
 import java.util.EnumSet;
 import java.util.Map;
@@ -42,7 +42,7 @@ public class ModMenu implements IModSwitcher {
     private static final ModMenu instance = new ModMenu();
     private Scene scene = null, parent;
     private EnumSet<GameMod> mod;
-    private ChangeableText multiplierText;
+    private Text multiplierText;
     private TrackInfo selectedTrack;
     private final Map<GameMod, ModButton> modButtons = new TreeMap<>();
     private float changeSpeed = 1.0f;
@@ -206,7 +206,7 @@ public class ModMenu implements IModSwitcher {
         menu = null;
     }
 
-    private void addButton(int x, int y, String texture, GameMod mod) {
+    private void addButton(float x, float y, String texture, GameMod mod) {
         ModButton mButton;
 
         mButton = new ModButton(x, y, texture, mod);
@@ -223,13 +223,13 @@ public class ModMenu implements IModSwitcher {
         scene = new Scene();
         scene.setBackgroundEnabled(false);
         final Rectangle bg = new Rectangle(0, 0, Config.getRES_WIDTH(),
-                Config.getRES_HEIGHT());
+                Config.getRES_HEIGHT(), GlobalManager.getInstance().getEngine().getVertexBufferObjectManager());
         bg.setColor(0, 0, 0, 0.7f);
         scene.attachChild(bg);
 
-        multiplierText = new ChangeableText(0, Utils.toRes(50),
+        multiplierText = new Text(0, Utils.toRes(50),
                 ResourceManager.getInstance().getFont("CaptionFont"),
-                StringTable.format(R.string.menu_mod_multiplier, 1f));
+                StringTable.format(R.string.menu_mod_multiplier, 1f), GlobalManager.getInstance().getEngine().getVertexBufferObjectManager());
         multiplierText.setScale(1.2f);
         scene.attachChild(multiplierText);
 
@@ -372,7 +372,8 @@ public class ModMenu implements IModSwitcher {
         scene.attachChild(back);
         scene.registerTouchArea(back);
 
-        scene.setTouchAreaBindingEnabled(true);
+        scene.setTouchAreaBindingOnActionMoveEnabled(true);
+        scene.setTouchAreaBindingOnActionDownEnabled(true);
     }
 
     public Scene getScene() {

@@ -1,15 +1,16 @@
 package com.reco1l.legacy.ui.entity
 
-import org.anddev.andengine.entity.Entity
-import org.anddev.andengine.entity.text.ChangeableText
-import org.anddev.andengine.opengl.font.Font
+import org.andengine.entity.Entity
+import org.andengine.entity.text.Text
+import org.andengine.opengl.font.Font
+import ru.nsu.ccfit.zuev.osu.GlobalManager
 
 class ComposedText(x: Float, y: Float, font: Font, max: Int) : Entity(x, y)
 {
 
-    val tag = ChangeableText(x, y, font, "", 16)
+    val tag = Text(x, y, font, "", 16, GlobalManager.getInstance().engine.vertexBufferObjectManager)
 
-    val content = ChangeableText(x, y, font, "", max)
+    val content = Text(x, y, font, "", max, GlobalManager.getInstance().engine.vertexBufferObjectManager)
 
     init
     {

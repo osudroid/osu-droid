@@ -2,15 +2,16 @@ package ru.nsu.ccfit.zuev.osu.online;
 
 import com.edlplan.ui.fragment.ConfirmDialogFragment;
 import com.edlplan.ui.fragment.WebViewFragment;
-import org.anddev.andengine.entity.Entity;
-import org.anddev.andengine.entity.primitive.Rectangle;
-import org.anddev.andengine.entity.sprite.Sprite;
-import org.anddev.andengine.entity.text.ChangeableText;
-import org.anddev.andengine.input.touch.TouchEvent;
-import org.anddev.andengine.opengl.texture.region.TextureRegion;
-import org.anddev.andengine.util.Debug;
-import org.anddev.andengine.util.HorizontalAlign;
-import org.anddev.andengine.util.MathUtils;
+import org.andengine.entity.Entity;
+import org.andengine.entity.primitive.Rectangle;
+import org.andengine.entity.sprite.Sprite;
+import org.andengine.entity.text.Text;
+import org.andengine.entity.text.TextOptions;
+import org.andengine.input.touch.TouchEvent;
+import org.andengine.opengl.texture.region.TextureRegion;
+import org.andengine.util.debug.Debug;
+import org.andengine.util.HorizontalAlign;
+import org.andengine.util.math.MathUtils;
 import ru.nsu.ccfit.zuev.osu.GlobalManager;
 import ru.nsu.ccfit.zuev.osu.ResourceManager;
 import ru.nsu.ccfit.zuev.osu.Utils;
@@ -23,12 +24,12 @@ public class OnlinePanel extends Entity {
 
     public Rectangle rect;
 
-    private ChangeableText rankText, nameText, scoreText, accText;
-    private ChangeableText messageText, submessageText;
+    private Text rankText, nameText, scoreText, accText;
+    private Text messageText, submessageText;
     private Sprite avatar = null;
 
     public OnlinePanel() {
-        rect = new Rectangle(0, 0, Utils.toRes(410), Utils.toRes(110)) {
+        rect = new Rectangle(0, 0, Utils.toRes(410), Utils.toRes(110), GlobalManager.getInstance().getEngine().getVertexBufferObjectManager()) {
             boolean moved = false;
             float dx = 0, dy = 0;
 
@@ -67,7 +68,7 @@ public class OnlinePanel extends Entity {
         rect.setColor(0.2f, 0.2f, 0.2f, 0.5f);
         attachChild(rect);
 
-        Rectangle avatarFooter = new Rectangle(0, 0, Utils.toRes(110), Utils.toRes(110));
+        Rectangle avatarFooter = new Rectangle(0, 0, Utils.toRes(110), Utils.toRes(110), GlobalManager.getInstance().getEngine().getVertexBufferObjectManager());
         avatarFooter.setColor(0.2f, 0.2f, 0.2f, 0.8f);
         attachChild(avatarFooter);
 		
@@ -75,36 +76,36 @@ public class OnlinePanel extends Entity {
 		rightFooter.setColor(0.3f, 0.3f, 0.3f, 0.35f);
 		attachChild(rightFooter);*/
 
-        rankText = new ChangeableText(0, 0,
-                ResourceManager.getInstance().getFont("CaptionFont"), "#1",
-                HorizontalAlign.RIGHT, 12);
+        rankText = new Text(0, 0,
+                ResourceManager.getInstance().getFont("CaptionFont"), "#1", 12,
+                new TextOptions(HorizontalAlign.RIGHT), GlobalManager.getInstance().getEngine().getVertexBufferObjectManager());
         rankText.setColor(0.6f, 0.6f, 0.6f, 0.9f);
         rankText.setScaleCenterX(0);
         rankText.setScale(1.7f);
         rankText.setPosition(Utils.toRes(390 + 10) - rankText.getWidthScaled(), Utils.toRes(55));
         onlineLayer.attachChild(rankText);
 
-        nameText = new ChangeableText(Utils.toRes(120), Utils.toRes(5),
-                ResourceManager.getInstance().getFont("CaptionFont"), "Guest", 16);
+        nameText = new Text(Utils.toRes(120), Utils.toRes(5),
+                ResourceManager.getInstance().getFont("CaptionFont"), "Guest", 16, GlobalManager.getInstance().getEngine().getVertexBufferObjectManager());
         onlineLayer.attachChild(nameText);
-        scoreText = new ChangeableText(Utils.toRes(120), Utils.toRes(50),
+        scoreText = new Text(Utils.toRes(120), Utils.toRes(50),
                 ResourceManager.getInstance().getFont("smallFont"), "Score: 0",
-                HorizontalAlign.LEFT, 22);
+                22, GlobalManager.getInstance().getEngine().getVertexBufferObjectManager());
         scoreText.setColor(0.85f, 0.85f, 0.9f);
         onlineLayer.attachChild(scoreText);
 
-        accText = new ChangeableText(Utils.toRes(120), Utils.toRes(75),
+        accText = new Text(Utils.toRes(120), Utils.toRes(75),
                 ResourceManager.getInstance().getFont("smallFont"), "Accuracy: 0.00%",
-                HorizontalAlign.LEFT, 17);
+                17, GlobalManager.getInstance().getEngine().getVertexBufferObjectManager());
         accText.setColor(0.85f, 0.85f, 0.9f);
         onlineLayer.attachChild(accText);
 
-        messageText = new ChangeableText(Utils.toRes(110), Utils.toRes(5),
-                ResourceManager.getInstance().getFont("CaptionFont"), "Logging in...", 16);
+        messageText = new Text(Utils.toRes(110), Utils.toRes(5),
+                ResourceManager.getInstance().getFont("CaptionFont"), "Logging in...", 16, GlobalManager.getInstance().getEngine().getVertexBufferObjectManager());
         messageLayer.attachChild(messageText);
 
-        submessageText = new ChangeableText(Utils.toRes(110), Utils.toRes(60),
-                ResourceManager.getInstance().getFont("smallFont"), "Connecting to server...", 40);
+        submessageText = new Text(Utils.toRes(110), Utils.toRes(60),
+                ResourceManager.getInstance().getFont("smallFont"), "Connecting to server...", 40, GlobalManager.getInstance().getEngine().getVertexBufferObjectManager());
         messageLayer.attachChild(submessageText);
 
         attachChild(messageLayer);
@@ -160,7 +161,7 @@ public class OnlinePanel extends Entity {
         if (tex == null) return;
 
         Debug.i("Avatar is set!");
-        avatar = new Sprite(0, 0, Utils.toRes(110), Utils.toRes(110), tex);
+        avatar = new Sprite(0, 0, Utils.toRes(110), Utils.toRes(110), tex, GlobalManager.getInstance().getEngine().getVertexBufferObjectManager());
         frontLayer.attachChild(avatar);
     }
 }

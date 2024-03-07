@@ -1,15 +1,16 @@
 package ru.nsu.ccfit.zuev.osu.menu;
 
-import org.anddev.andengine.entity.sprite.Sprite;
-import org.anddev.andengine.entity.text.ChangeableText;
-import org.anddev.andengine.input.touch.TouchEvent;
-import org.anddev.andengine.opengl.texture.region.TextureRegion;
-import org.anddev.andengine.util.MathUtils;
+import org.andengine.entity.sprite.Sprite;
+import org.andengine.entity.text.Text;
+import org.andengine.input.touch.TouchEvent;
+import org.andengine.opengl.texture.region.TextureRegion;
+import org.andengine.util.math.MathUtils;
 
 import java.lang.ref.WeakReference;
 import java.math.BigDecimal;
 
 import ru.nsu.ccfit.zuev.osu.BeatmapInfo;
+import ru.nsu.ccfit.zuev.osu.GlobalManager;
 import ru.nsu.ccfit.zuev.osu.RGBColor;
 import ru.nsu.ccfit.zuev.osu.ResourceManager;
 import ru.nsu.ccfit.zuev.skins.OsuSkin;
@@ -24,7 +25,7 @@ public class MenuItemTrack extends Sprite {
 
     private static final RGBColor DEFAULT_TEXT_COLOR = new RGBColor(1, 1, 1);
     private static final RGBColor SELECTED_TEXT_COLOR = new RGBColor(0, 0, 0);
-    private final ChangeableText trackTitle, trackLeftText;
+    private final Text trackTitle, trackLeftText;
     private final Sprite[] stars;
     private final Sprite halfStar;
     private boolean moved = false;
@@ -37,12 +38,12 @@ public class MenuItemTrack extends Sprite {
 
     public MenuItemTrack() {
         super(0, 0, ResourceManager.getInstance().getTexture(
-                "menu-button-background"));
+                "menu-button-background"), GlobalManager.getInstance().getEngine().getVertexBufferObjectManager());
 
-        trackTitle = new ChangeableText(Utils.toRes(32), Utils.toRes(22),
-                ResourceManager.getInstance().getFont("font"), "", 200);
-        trackLeftText = new ChangeableText(Utils.toRes(350), Utils.toRes(22),
-                ResourceManager.getInstance().getFont("font"), "", 30);
+        trackTitle = new Text(Utils.toRes(32), Utils.toRes(22),
+                ResourceManager.getInstance().getFont("font"), "", 200, GlobalManager.getInstance().getEngine().getVertexBufferObjectManager());
+        trackLeftText = new Text(Utils.toRes(350), Utils.toRes(22),
+                ResourceManager.getInstance().getFont("font"), "", 30, GlobalManager.getInstance().getEngine().getVertexBufferObjectManager());
         OsuSkin.get().getColor("MenuItemVersionsDefaultColor", DEFAULT_COLOR).apply(this);
         OsuSkin.get().getColor("MenuItemDefaultTextColor", DEFAULT_TEXT_COLOR).applyAll(trackTitle, trackLeftText);
         setAlpha(0.8f);
@@ -52,13 +53,13 @@ public class MenuItemTrack extends Sprite {
         stars = new Sprite[10];
         for (int i = 0; i < 10; i++) {
             stars[i] = new Sprite(Utils.toRes(60 + 52 * i), Utils.toRes(50),
-                    ResourceManager.getInstance().getTexture("star"));
+                    ResourceManager.getInstance().getTexture("star"), GlobalManager.getInstance().getEngine().getVertexBufferObjectManager());
             attachChild(stars[i]);
         }
         final TextureRegion starTex = ResourceManager.getInstance()
                 .getTexture("star").deepCopy();
 //		starTex.setWidth((starTex.getWidth() / 2));
-        halfStar = new Sprite(0, 0, starTex);
+        halfStar = new Sprite(0, 0, starTex, GlobalManager.getInstance().getEngine().getVertexBufferObjectManager());
         attachChild(halfStar);
     }
 
@@ -112,7 +113,7 @@ public class MenuItemTrack extends Sprite {
         }
         if (newmark != null) {
             mark = new Sprite(Utils.toRes(25), Utils.toRes(55), ResourceManager
-                    .getInstance().getTexture("ranking-" + newmark + "-small"));
+                    .getInstance().getTexture("ranking-" + newmark + "-small"), GlobalManager.getInstance().getEngine().getVertexBufferObjectManager());
             attachChild(mark);
         } else {
             mark = null;

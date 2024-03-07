@@ -1,12 +1,19 @@
 package ru.nsu.ccfit.zuev.osu.menu;
 
-import org.anddev.andengine.engine.handler.IUpdateHandler;
-import org.anddev.andengine.entity.modifier.*;
-import org.anddev.andengine.entity.scene.Scene;
-import org.anddev.andengine.entity.sprite.Sprite;
-import org.anddev.andengine.entity.text.ChangeableText;
+import org.andengine.engine.handler.IUpdateHandler;
+import org.andengine.entity.modifier.FadeInModifier;
+import org.andengine.entity.modifier.FadeOutModifier;
+import org.andengine.entity.modifier.LoopEntityModifier;
+import org.andengine.entity.modifier.ParallelEntityModifier;
+import org.andengine.entity.modifier.RotationByModifier;
+import org.andengine.entity.modifier.ScaleModifier;
+import org.andengine.entity.modifier.SequenceEntityModifier;
+import org.andengine.entity.scene.Scene;
+import org.andengine.entity.sprite.Sprite;
+import org.andengine.entity.text.Text;
 
-import org.anddev.andengine.util.HorizontalAlign;
+import org.andengine.entity.text.TextOptions;
+import org.andengine.util.HorizontalAlign;
 import ru.nsu.ccfit.zuev.osu.Config;
 import ru.nsu.ccfit.zuev.osu.GlobalManager;
 import ru.nsu.ccfit.zuev.osu.ResourceManager;
@@ -19,10 +26,9 @@ public class SplashScene implements IUpdateHandler {
 
     public static final SplashScene INSTANCE = new SplashScene();
     private final Scene scene;
-    private ChangeableText infoText;
-    private ChangeableText progressText;
+    private Text infoText;
+    private Text progressText;
     private Sprite mLoading;
-    private boolean mStarting = true;
 
     public SplashScene() {
         scene = new Scene();
@@ -35,18 +41,19 @@ public class SplashScene implements IUpdateHandler {
     private void initializeLoading() {
         var loadTex = ResourceManager.getInstance().getTexture("loading_start");
 
-        mLoading = new Sprite(0, 0, loadTex);
+        mLoading = new Sprite(0, 0, loadTex, GlobalManager.getInstance().getEngine().getVertexBufferObjectManager());
         mLoading.setPosition((Config.getRES_WIDTH() - mLoading.getWidth()) / 2f, (Config.getRES_HEIGHT() - mLoading.getHeight()) / 2f);
         mLoading.setRotationCenter(mLoading.getWidth() / 2f, mLoading.getHeight() / 2f);
         mLoading.setScale(0.4f);
         mLoading.setAlpha(0);
 
+        mLoading.registerEntityModifier(new FadeInModifier(0.2f));
         mLoading.registerEntityModifier(new LoopEntityModifier(new RotationByModifier(2f, 360)));
         scene.attachChild(mLoading);
     }
 
     private void initializeInfo() {
-        infoText = new ChangeableText(0, 0, ResourceManager.getInstance().getFont("font"), "", HorizontalAlign.CENTER, 1024);
+        infoText = new Text(0, 0, ResourceManager.getInstance().getFont("font"), "", 1024, new TextOptions(HorizontalAlign.CENTER), GlobalManager.getInstance().getEngine().getVertexBufferObjectManager());
         infoText.setPosition((Config.getRES_WIDTH() - infoText.getWidth()) / 2, Config.getRES_HEIGHT() - infoText.getHeight() - 20);
         infoText.setAlpha(0);
         infoText.setScale(0.6f);
@@ -57,11 +64,10 @@ public class SplashScene implements IUpdateHandler {
 
     public void playWelcomeAnimation()
     {
-        mStarting = false;
-
+        mLoading.clearEntityModifiers();
         mLoading.registerEntityModifier(new FadeOutModifier(0.2f));
 
-        // ChangeableText isn't compatible with animations unfortunately
+        // Text isn't compatible with animations unfortunately
         SyncTaskManager.getInstance().run(() -> {
             infoText.detachSelf();
             progressText.detachSelf();
@@ -76,7 +82,7 @@ public class SplashScene implements IUpdateHandler {
         }
 
         var welcomeTex = ResourceManager.getInstance().getTexture("welcome");
-        var welcomeSprite = new Sprite(0, 0, ResourceManager.getInstance().getTexture("welcome"));
+        var welcomeSprite = new Sprite(0, 0, ResourceManager.getInstance().getTexture("welcome"), GlobalManager.getInstance().getEngine().getVertexBufferObjectManager());
 
         var welcomeSound = ResourceManager.getInstance().getSound("welcome");
         var welcomePiano = ResourceManager.getInstance().getSound("welcome_piano");
@@ -98,7 +104,7 @@ public class SplashScene implements IUpdateHandler {
     }
 
     private void initializeProgress() {
-        progressText = new ChangeableText(0, 0, ResourceManager.getInstance().getFont("font"), "0 %", HorizontalAlign.CENTER, 10);
+        progressText = new Text(0, 0, ResourceManager.getInstance().getFont("font"), "0 %", 10, new TextOptions(HorizontalAlign.CENTER), GlobalManager.getInstance().getEngine().getVertexBufferObjectManager());
         progressText.setPosition((Config.getRES_WIDTH() - progressText.getWidth()) / 2f, (Config.getRES_HEIGHT() + mLoading.getHeight()) / 2f - mLoading.getHeight() / 4f);
         progressText.setAlpha(0);
         progressText.setScale(0.5f);
@@ -108,10 +114,6 @@ public class SplashScene implements IUpdateHandler {
     @Override
     public void onUpdate(float pSecondsElapsed) {
         float progress = GlobalManager.getInstance().getLoadingProgress();
-        if (mStarting)
-        {
-            mLoading.setAlpha(mLoading.getAlpha() + 0.1f);
-        }
 
         progressText.setText(String.format("%.0f %%", progress));
         progressText.setPosition((Config.getRES_WIDTH() - progressText.getWidth()) / 2f, (Config.getRES_HEIGHT() + mLoading.getHeight()) / 2f - mLoading.getHeight() / 4f);

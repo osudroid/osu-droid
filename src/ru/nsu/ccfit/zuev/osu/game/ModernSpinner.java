@@ -2,21 +2,22 @@ package ru.nsu.ccfit.zuev.osu.game;
 
 import android.graphics.PointF;
 
-import org.anddev.andengine.entity.IEntity;
-import org.anddev.andengine.entity.modifier.AlphaModifier;
-import org.anddev.andengine.entity.modifier.ColorModifier;
-import org.anddev.andengine.entity.modifier.DelayModifier;
-import org.anddev.andengine.entity.modifier.IEntityModifier;
-import org.anddev.andengine.entity.modifier.SequenceEntityModifier;
-import org.anddev.andengine.entity.scene.Scene;
-import org.anddev.andengine.entity.sprite.Sprite;
-import org.anddev.andengine.util.MathUtils;
-import org.anddev.andengine.util.modifier.IModifier;
+import org.andengine.entity.IEntity;
+import org.andengine.entity.modifier.AlphaModifier;
+import org.andengine.entity.modifier.ColorModifier;
+import org.andengine.entity.modifier.DelayModifier;
+import org.andengine.entity.modifier.IEntityModifier;
+import org.andengine.entity.modifier.SequenceEntityModifier;
+import org.andengine.entity.scene.Scene;
+import org.andengine.entity.sprite.Sprite;
+import org.andengine.util.math.MathUtils;
+import org.andengine.util.modifier.IModifier;
 
 import ru.nsu.ccfit.zuev.osu.Constants;
 import ru.nsu.ccfit.zuev.osu.ResourceManager;
 import ru.nsu.ccfit.zuev.osu.Utils;
 import ru.nsu.ccfit.zuev.osu.async.SyncTaskManager;
+import ru.nsu.ccfit.zuev.osu.helper.CentredSprite;
 import ru.nsu.ccfit.zuev.osu.scoring.ScoreNumber;
 import ru.nsu.ccfit.zuev.osu.scoring.StatisticV2;
 
@@ -54,16 +55,11 @@ public class ModernSpinner extends Spinner {
         ResourceManager.getInstance().checkEvoSpinnerTextures();
         center = Utils.trackToRealCoords(new PointF((float) Constants.MAP_WIDTH / 2,
                 (float) Constants.MAP_HEIGHT / 2));
-        middle = SpritePool.getInstance().getCenteredSprite(
-                "spinner-middle", center);
-        middle2 = SpritePool.getInstance().getCenteredSprite(
-                "spinner-middle2", center);
-        bottom = SpritePool.getInstance().getCenteredSprite(
-                "spinner-bottom", center);
-        top = SpritePool.getInstance().getCenteredSprite(
-                "spinner-top", center);
-        glow = SpritePool.getInstance().getCenteredSprite(
-                "spinner-glow", center);
+        middle = new CentredSprite(center.x, center.y, ResourceManager.getInstance().getTexture("spinner-middle"));
+        middle2 = new CentredSprite(center.x, center.y, ResourceManager.getInstance().getTexture("spinner-middle2"));
+        bottom = new CentredSprite(center.x, center.y, ResourceManager.getInstance().getTexture("spinner-bottom"));
+        top = new CentredSprite(center.x, center.y, ResourceManager.getInstance().getTexture("spinner-top"));
+        glow = new CentredSprite(center.x, center.y, ResourceManager.getInstance().getTexture("spinner-glow"));
     }
 
     public void init(GameObjectListener listener, Scene scene,

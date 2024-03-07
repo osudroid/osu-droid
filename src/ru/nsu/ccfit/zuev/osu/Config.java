@@ -21,7 +21,7 @@ import java.util.UUID;
 import com.reco1l.legacy.Multiplayer;
 import net.margaritov.preference.colorpicker.ColorPickerPreference;
 
-import org.anddev.andengine.util.Debug;
+import org.andengine.util.debug.Debug;
 
 import ru.nsu.ccfit.zuev.osu.helper.FileUtils;
 

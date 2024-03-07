@@ -1,24 +1,25 @@
 package ru.nsu.ccfit.zuev.osu.game;
 
-import org.anddev.andengine.entity.IEntity;
-import org.anddev.andengine.entity.modifier.DelayModifier;
-import org.anddev.andengine.entity.modifier.FadeInModifier;
-import org.anddev.andengine.entity.modifier.FadeOutModifier;
-import org.anddev.andengine.entity.modifier.IEntityModifier;
-import org.anddev.andengine.entity.modifier.MoveXModifier;
-import org.anddev.andengine.entity.modifier.ParallelEntityModifier;
-import org.anddev.andengine.entity.modifier.SequenceEntityModifier;
-import org.anddev.andengine.entity.scene.Scene;
-import org.anddev.andengine.entity.sprite.Sprite;
-import org.anddev.andengine.opengl.texture.region.TextureRegion;
-import org.anddev.andengine.util.modifier.IModifier;
-import org.anddev.andengine.util.modifier.ease.EaseSineOut;
+import org.andengine.entity.IEntity;
+import org.andengine.entity.modifier.DelayModifier;
+import org.andengine.entity.modifier.FadeInModifier;
+import org.andengine.entity.modifier.FadeOutModifier;
+import org.andengine.entity.modifier.IEntityModifier;
+import org.andengine.entity.modifier.MoveXModifier;
+import org.andengine.entity.modifier.ParallelEntityModifier;
+import org.andengine.entity.modifier.SequenceEntityModifier;
+import org.andengine.entity.scene.Scene;
+import org.andengine.entity.sprite.Sprite;
+import org.andengine.opengl.texture.region.TextureRegion;
+import org.andengine.util.modifier.IModifier;
+import org.andengine.util.modifier.ease.EaseSineOut;
 
 import java.util.ArrayList;
 import java.util.List;
 
 import ru.nsu.ccfit.zuev.audio.BassSoundProvider;
 import ru.nsu.ccfit.zuev.osu.Config;
+import ru.nsu.ccfit.zuev.osu.GlobalManager;
 import ru.nsu.ccfit.zuev.osu.ResourceManager;
 
 /**
@@ -44,7 +45,7 @@ public class ComboBurst {
 
         TextureRegion globalTex = ResourceManager.getInstance().getTexture("comboburst");
         if (globalTex != null) {
-            Sprite sprite = new Sprite(0, 0, globalTex);
+            Sprite sprite = new Sprite(0, 0, globalTex, GlobalManager.getInstance().getEngine().getVertexBufferObjectManager());
             sprite.setAlpha(0f);
             sprite.setIgnoreUpdate(true);
             comboBursts.add(sprite);
@@ -56,7 +57,7 @@ public class ComboBurst {
         for (int i = 0; i < 10; i++) {
             TextureRegion tex = ResourceManager.getInstance().getTexture("comboburst-" + i);
             if (tex != null) {
-                Sprite sprite = new Sprite(0, 0, tex);
+                Sprite sprite = new Sprite(0, 0, tex, GlobalManager.getInstance().getEngine().getVertexBufferObjectManager());
                 sprite.setAlpha(0f);
                 sprite.setIgnoreUpdate(true);
                 comboBursts.add(sprite);

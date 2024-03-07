@@ -2,10 +2,10 @@ package ru.nsu.ccfit.zuev.osu.game.cursor.flashlight;
 
 import com.edlplan.framework.math.FMath;
 
-import org.anddev.andengine.entity.Entity;
-import org.anddev.andengine.entity.modifier.IEntityModifier;
-import org.anddev.andengine.entity.modifier.MoveModifier;
-import org.anddev.andengine.util.modifier.ease.EaseExponentialOut;
+import org.andengine.entity.Entity;
+import org.andengine.entity.modifier.IEntityModifier;
+import org.andengine.entity.modifier.MoveModifier;
+import org.andengine.util.modifier.ease.EaseExponentialOut;
 
 import ru.nsu.ccfit.zuev.osu.Config;
 import ru.nsu.ccfit.zuev.osu.menu.ModMenu;
