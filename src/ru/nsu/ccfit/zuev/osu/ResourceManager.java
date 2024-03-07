@@ -3,7 +3,6 @@ package ru.nsu.ccfit.zuev.osu;
 import static android.graphics.Bitmap.Config.ARGB_8888;
 
 import android.content.Context;
-import android.graphics.Bitmap;
 import android.graphics.Color;
 import android.graphics.Typeface;
 import android.util.Log;
@@ -13,6 +12,8 @@ import com.dgsrz.bancho.security.SecurityUtils;
 import com.reco1l.framework.data.IniReader;
 import com.reco1l.legacy.data.SkinConverter;
 import com.reco1l.legacy.engine.BlankTextureRegion;
+import com.reco1l.legacy.ui.MainOverlay;
+
 import org.andengine.engine.Engine;
 import org.andengine.opengl.font.Font;
 import org.andengine.opengl.font.FontFactory;
@@ -110,6 +111,8 @@ public class ResourceManager {
             textures.put("lighting", null);
 //		textures.put("fail-background", null);
 //		textures.put("pause-overlay", null);
+
+        MainOverlay.INSTANCE.onSkinChanged();
     }
 
     public void loadCustomSkin(String folder) {

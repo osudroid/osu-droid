@@ -16,7 +16,7 @@ import ru.nsu.ccfit.zuev.osu.game.cursor.main.CursorEntity
 object MainOverlay : HUD()
 {
 
-    private val cursorSprites = Array(10) { CursorEntity().also { it.attachToScene(this) } }
+    private var cursorSprites = arrayOf<CursorEntity>()
 
 
     override fun onManagedUpdate(pSecondsElapsed: Float)
@@ -27,21 +27,37 @@ object MainOverlay : HUD()
     }
 
 
+    fun onSkinChanged()
+    {
+        cursorSprites.forEach(CursorEntity::detachSelf)
+
+        // This will load possible new textures from the skin.
+        cursorSprites = Array(10) {
+
+            CursorEntity().also { it.attachToScene(this) }
+        }
+    }
+
+
     override fun onSceneTouchEvent(event: TouchEvent): Boolean
     {
-        val id = event.pointerID
+        if (GlobalManager.getInstance().engine.scene != GlobalManager.getInstance().gameScene.scene)
+        {
+            val id = event.pointerID
 
-        if (id < 0 || id > cursorSprites.size)
-            return false
+            if (id < 0 || id > cursorSprites.size)
+                return false
 
-        val sprite = cursorSprites[id]
-        sprite.setPosition(event.x, event.y)
+            cursorSprites[id].apply {
 
-        if (event.isActionDown)
-            sprite.setShowing(true)
-        else if (event.isActionUp)
-            sprite.setShowing(false)
+                x = event.x
+                y = event.y
 
+                setShowing(event.isActionDown || event.isActionMove)
+            }
+        }
+
+        // Do not intercept touch events.
         return super.onSceneTouchEvent(event)
     }
 
