@@ -48,6 +48,7 @@ import com.reco1l.legacy.Multiplayer;
 import com.reco1l.legacy.UpdateManager;
 import com.reco1l.legacy.graphics.AlphaOverrideShaderProgram;
 import com.reco1l.legacy.graphics.ExternalTextureShaderProgram;
+import com.reco1l.legacy.ui.MainOverlay;
 import com.reco1l.legacy.ui.multiplayer.LobbyScene;
 import com.reco1l.legacy.ui.multiplayer.RoomScene;
 
@@ -141,8 +142,7 @@ public class MainActivity extends LegacyBaseGameActivity implements IAcceleratio
         wakeLock = manager.newWakeLock(PowerManager.SCREEN_DIM_WAKE_LOCK,
                 "osudroid:osu");
 
-        Camera mCamera = new SmoothCamera(0, 0, Config.getRES_WIDTH(),
-                Config.getRES_HEIGHT(), 0, 1800, 1);
+        Camera mCamera = new SmoothCamera(0, 0, Config.getRES_WIDTH(), Config.getRES_HEIGHT(), 0, 1800, 1);
         final EngineOptions opt = new EngineOptions(true,
                 ScreenOrientation.LANDSCAPE_SENSOR, new RatioResolutionPolicy(
                 Config.getRES_WIDTH(), Config.getRES_HEIGHT()),
@@ -316,6 +316,8 @@ public class MainActivity extends LegacyBaseGameActivity implements IAcceleratio
 
     @Override
     public Scene onLoadComplete() {
+
+        GlobalManager.getInstance().getCamera().setHUD(MainOverlay.INSTANCE);
 
         // Initializing this class because they contain fragments in its constructors that should be initialized in
         // main thread because of the Looper.

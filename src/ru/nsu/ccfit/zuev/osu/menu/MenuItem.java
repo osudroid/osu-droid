@@ -12,6 +12,7 @@ import java.util.regex.Pattern;
 import ru.nsu.ccfit.zuev.osu.BeatmapInfo;
 import ru.nsu.ccfit.zuev.osu.BeatmapProperties;
 import ru.nsu.ccfit.zuev.osu.Config;
+import ru.nsu.ccfit.zuev.osu.GlobalManager;
 import ru.nsu.ccfit.zuev.osu.LibraryManager;
 import ru.nsu.ccfit.zuev.osu.PropertiesLibrary;
 import ru.nsu.ccfit.zuev.osu.ResourceManager;
@@ -157,7 +158,10 @@ public class MenuItem {
         selected = true;
         listener.get().select(this);
         initTracks();
-        percentAppeared = 0;
+
+        // Conditional: Because we want to skip the animation if the scene is transitioning.
+        percentAppeared = GlobalManager.getInstance().getEngine().getScene() == scene ? 0 : 1;
+
         final String musicFileName = beatmap.getMusic();
         if (reloadMusic) {
             listener.get().playMusic(musicFileName, beatmap.getPreviewTime());

@@ -62,13 +62,23 @@ class MainMenu(val main: MainScene)
                 if (main.isOnExitAnim)
                     return true
 
+                main.musicControl(MusicOption.PLAY)
+
                 getGlobal().songService.isGaming = true
+                getGlobal().songMenu.reload()
+                getGlobal().songMenu.select()
 
-                async {
-                    LoadingScreen().show()
+                MainOverlay.startTransition(0.15f, 0f, 1f) {
 
-                    getGlobal().mainActivity.checkNewSkins()
-                    getGlobal().mainActivity.checkNewBeatmaps()
+                    getGlobal().songMenu.show()
+                }
+
+                // TODO: Reimplement Chimu redirection.
+                /*async {
+                    //LoadingScreen().show()
+
+                    //getGlobal().mainActivity.checkNewSkins()
+                    //getGlobal().mainActivity.checkNewBeatmaps()
                     LibraryManager.INSTANCE.updateLibrary(true)
 
                     if (LibraryManager.INSTANCE.library.isEmpty())
@@ -86,7 +96,7 @@ class MainMenu(val main: MainScene)
                         getGlobal().songMenu.show()
                         getGlobal().songMenu.select()
                     }
-                }
+                }*/
                 return true
             }
             return false

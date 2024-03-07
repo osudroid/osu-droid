@@ -11,6 +11,7 @@ import com.edlplan.ui.fragment.PropsMenuFragment;
 import com.edlplan.ui.fragment.ScoreMenuFragment;
 import com.reco1l.api.ibancho.RoomAPI;
 import com.reco1l.legacy.Multiplayer;
+import com.reco1l.legacy.ui.MainOverlay;
 import com.reco1l.legacy.ui.multiplayer.RoomScene;
 import com.reco1l.framework.lang.execution.Async;
 import com.rian.difficultycalculator.attributes.DifficultyAttributes;
@@ -19,12 +20,12 @@ import com.rian.difficultycalculator.calculator.DifficultyCalculationParameters;
 import org.andengine.engine.Engine;
 import org.andengine.engine.handler.IUpdateHandler;
 import org.andengine.entity.Entity;
+import org.andengine.entity.modifier.MoveXModifier;
 import org.andengine.entity.primitive.Rectangle;
 import org.andengine.entity.scene.Scene;
 import org.andengine.entity.scene.background.Background;
 import org.andengine.entity.scene.background.SpriteBackground;
 import org.andengine.entity.sprite.Sprite;
-import org.andengine.entity.text.Text;
 import org.andengine.entity.text.Text;
 import org.andengine.entity.text.TextOptions;
 import org.andengine.input.touch.TouchEvent;
@@ -36,6 +37,7 @@ import org.andengine.util.math.MathUtils;
 import java.text.SimpleDateFormat;
 import java.util.*;
 
+import org.andengine.util.modifier.ease.EaseExponentialOut;
 import org.jetbrains.annotations.Nullable;
 import ru.nsu.ccfit.zuev.audio.BassSoundProvider;
 import ru.nsu.ccfit.zuev.audio.Status;
@@ -191,7 +193,7 @@ public class SongMenu implements IUpdateHandler, MenuItemListener,
 
         final Rectangle bgDimRect = new Rectangle(0, 0, Config.getRES_WIDTH(), Config.getRES_HEIGHT(), GlobalManager.getInstance().getEngine().getVertexBufferObjectManager());
         bgDimRect.setColor(0, 0, 0, 0.2f);
-        backLayer.attachChild(bgDimRect);
+        scene.attachChild(bgDimRect);
 
         board = new ScoreBoard(scene, backLayer, this);
 
@@ -734,6 +736,13 @@ public class SongMenu implements IUpdateHandler, MenuItemListener,
 
     public void show() {
         engine.setScene(scene);
+        MainOverlay.startTransition(0.25f, 1f, 0f);
+
+        // Animation: Song list translation animation.
+        var itemTexture = ResourceManager.getInstance().getTexture("menu-button-background");
+        if (itemTexture != null) {
+            backLayer.registerEntityModifier(new MoveXModifier(1f, itemTexture.getWidth(), 0f, EaseExponentialOut.getInstance()));
+        }
     }
 
     public void setFilter(final String filter, final SortOrder order,
@@ -863,6 +872,13 @@ public class SongMenu implements IUpdateHandler, MenuItemListener,
     public void increaseBackgroundLuminance(final float pSecondsElapsed) {
         if (bg != null) {
             synchronized (backgroundMutex) {
+
+                // Conditional: We avoid the animation if the scene isn't showing.
+                if (GlobalManager.getInstance().getEngine().getScene() != scene) {
+                    bg.setColor(1f, 1f, 1f);
+                    return;
+                }
+
                 if (bg != null && bg.getRed() < 1) {
                     final float col = Math.min(1, bg.getRed() + pSecondsElapsed);
                     bg.setColor(col, col, col);
@@ -1285,16 +1301,19 @@ public class SongMenu implements IUpdateHandler, MenuItemListener,
     private void back(boolean resetMultiplayerBeatmap) {
         unbindDataBaseChangedListener();
 
-        if (Multiplayer.isMultiplayer) {
-            if (resetMultiplayerBeatmap) {
-                resetMultiplayerRoomBeatmap();
+        MainOverlay.startTransition(0.15f, 0f, 1f, null, () -> {
+
+            if (Multiplayer.isMultiplayer) {
+                if (resetMultiplayerBeatmap) {
+                    resetMultiplayerRoomBeatmap();
+                }
+
+                RoomScene.INSTANCE.show();
+                return;
             }
 
-            RoomScene.INSTANCE.show();
-            return;
-        }
-
-        GlobalManager.getInstance().getMainScene().show();
+            GlobalManager.getInstance().getMainScene().show();
+        });
     }
 
     private void resetMultiplayerRoomBeatmap() {

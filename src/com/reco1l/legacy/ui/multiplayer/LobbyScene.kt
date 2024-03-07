@@ -8,6 +8,7 @@ import com.reco1l.framework.extensions.className
 import com.reco1l.framework.extensions.orAsyncCatch
 import com.reco1l.framework.lang.glThread
 import com.reco1l.legacy.Multiplayer
+import com.reco1l.legacy.ui.MainOverlay
 import org.andengine.entity.modifier.LoopEntityModifier
 import org.andengine.entity.modifier.RotationByModifier
 import org.andengine.entity.primitive.Rectangle
@@ -338,6 +339,8 @@ object LobbyScene : Scene()
     {
         updateBackground()
         getGlobal().engine.scene = this
+        MainOverlay.startTransition(0.15f, 1f, 0f)
+
         updateList()
 
         search.show()

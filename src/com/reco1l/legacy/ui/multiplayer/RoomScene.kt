@@ -22,6 +22,7 @@ import com.reco1l.legacy.Multiplayer.isConnected
 import com.reco1l.legacy.Multiplayer.isRoomHost
 import com.reco1l.legacy.Multiplayer.player
 import com.reco1l.legacy.Multiplayer.room
+import com.reco1l.legacy.ui.MainOverlay
 import org.andengine.engine.camera.SmoothCamera
 import org.andengine.entity.primitive.Rectangle
 import org.andengine.entity.scene.Scene
@@ -633,6 +634,7 @@ object RoomScene : Scene(), IRoomEventListener, IPlayerEventListener
         }
 
         getGlobal().engine.scene = this
+        MainOverlay.startTransition(0.25f, 1f, 0f)
 
         // Updating beatmap just in case only if there's no await lock.
         if (!awaitBeatmapChange)

@@ -11,10 +11,12 @@ import android.util.Log;
 import com.edlplan.ui.fragment.ConfirmDialogFragment;
 import com.reco1l.legacy.engine.BlankTextureRegion;
 import com.reco1l.legacy.ui.ChimuWebView;
+import com.reco1l.legacy.ui.MainOverlay;
 import com.reco1l.legacy.ui.MainMenu;
 
 import org.andengine.engine.handler.IUpdateHandler;
 import org.andengine.entity.IEntity;
+import org.andengine.entity.modifier.AlphaModifier;
 import org.andengine.entity.modifier.IEntityModifier;
 import org.andengine.entity.modifier.MoveXModifier;
 import org.andengine.entity.modifier.ParallelEntityModifier;
@@ -35,7 +37,6 @@ import org.andengine.entity.scene.Scene;
 import org.andengine.entity.scene.background.Background;
 import org.andengine.entity.scene.background.SpriteBackground;
 import org.andengine.entity.sprite.Sprite;
-import org.andengine.entity.text.Text;
 import org.andengine.entity.text.Text;
 import org.andengine.entity.text.TextOptions;
 import org.andengine.input.touch.TouchEvent;
@@ -58,8 +59,6 @@ import java.util.TimerTask;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
-
-import javax.microedition.khronos.opengles.GL10;
 
 import ru.nsu.ccfit.zuev.audio.BassSoundProvider;
 import ru.nsu.ccfit.zuev.audio.Status;
@@ -636,13 +635,13 @@ public class MainScene implements IUpdateHandler {
             }
             menu.getFirst().registerEntityModifier(new ParallelEntityModifier(
                     new MoveXModifier(0.5f, menuBarX - 100, menuBarX, EaseElasticOut.getInstance()),
-                    new org.andengine.entity.modifier.AlphaModifier(0.5f, 0, 0.9f, EaseCubicOut.getInstance())));
+                    new AlphaModifier(0.5f, 0, 0.9f, EaseCubicOut.getInstance())));
             menu.getSecond().registerEntityModifier(new ParallelEntityModifier(
                     new MoveXModifier(0.5f, menuBarX - 100, menuBarX, EaseElasticOut.getInstance()),
-                    new org.andengine.entity.modifier.AlphaModifier(0.5f, 0, 0.9f, EaseCubicOut.getInstance())));
+                    new AlphaModifier(0.5f, 0, 0.9f, EaseCubicOut.getInstance())));
             menu.getThird().registerEntityModifier(new ParallelEntityModifier(
                     new MoveXModifier(0.5f, menuBarX - 100, menuBarX, EaseElasticOut.getInstance()),
-                    new org.andengine.entity.modifier.AlphaModifier(0.5f, 0, 0.9f, EaseCubicOut.getInstance())));
+                    new AlphaModifier(0.5f, 0, 0.9f, EaseCubicOut.getInstance())));
             scene.registerTouchArea(menu.getFirst());
             scene.registerTouchArea(menu.getSecond());
             scene.registerTouchArea(menu.getThird());
@@ -659,13 +658,13 @@ public class MainScene implements IUpdateHandler {
 
                 menu.getFirst().registerEntityModifier(new ParallelEntityModifier(
                         new MoveXModifier(1f, menuBarX, menuBarX - 50, EaseExponentialOut.getInstance()),
-                        new org.andengine.entity.modifier.AlphaModifier(1f, 0.9f, 0, EaseExponentialOut.getInstance())));
+                        new AlphaModifier(1f, 0.9f, 0, EaseExponentialOut.getInstance())));
                 menu.getSecond().registerEntityModifier(new ParallelEntityModifier(
                         new MoveXModifier(1f, menuBarX, menuBarX - 50, EaseExponentialOut.getInstance()),
-                        new org.andengine.entity.modifier.AlphaModifier(1f, 0.9f, 0, EaseExponentialOut.getInstance())));
+                        new AlphaModifier(1f, 0.9f, 0, EaseExponentialOut.getInstance())));
                 menu.getThird().registerEntityModifier(new ParallelEntityModifier(
                         new MoveXModifier(1f, menuBarX, menuBarX - 50, EaseExponentialOut.getInstance()),
-                        new org.andengine.entity.modifier.AlphaModifier(1f, 0.9f, 0, EaseExponentialOut.getInstance())));
+                        new AlphaModifier(1f, 0.9f, 0, EaseExponentialOut.getInstance())));
 
                 logo.registerEntityModifier(new MoveXModifier(1f, (float) Config.getRES_WIDTH() / 3 - logo.getWidth() / 2, (float) Config.getRES_WIDTH() / 2 - logo.getWidth() / 2,
                         EaseBounceOut.getInstance()));
@@ -862,17 +861,25 @@ public class MainScene implements IUpdateHandler {
                         background = new Sprite(0,
                                 (Config.getRES_HEIGHT() - height) / 2, Config
                                 .getRES_WIDTH(), height, tex, GlobalManager.getInstance().getEngine().getVertexBufferObjectManager());
-                        lastBackground.registerEntityModifier(new org.andengine.entity.modifier.AlphaModifier(1.5f, 1, 0, new IEntityModifier.IEntityModifierListener() {
-                            @Override
-                            public void onModifierStarted(IModifier<IEntity> pModifier, IEntity pItem) {
-                                scene.attachChild(background, 0);
-                            }
 
-                            @Override
-                            public void onModifierFinished(IModifier<IEntity> pModifier, final IEntity pItem) {
-                                GlobalManager.getInstance().getMainActivity().runOnUpdateThread(pItem::detachSelf);
-                            }
-                        }));
+                        // Conditional: We avoid the animation if the scene isn't showing yet.
+                        if (GlobalManager.getInstance().getEngine().getScene() == scene) {
+                            lastBackground.registerEntityModifier(new AlphaModifier(1.5f, 1, 0, new IEntityModifier.IEntityModifierListener() {
+                                @Override
+                                public void onModifierStarted(IModifier<IEntity> pModifier, IEntity pItem) {
+                                    scene.attachChild(background, 0);
+                                }
+
+                                @Override
+                                public void onModifierFinished(IModifier<IEntity> pModifier, final IEntity pItem) {
+                                    scene.postRunnable(pItem::detachSelf);
+                                }
+                            }));
+                        } else {
+                            scene.attachChild(background, 0);
+                            lastBackground.setAlpha(0f);
+                            scene.postRunnable(lastBackground::detachSelf);
+                        }
                         lastBackground = background;
                     }
                 } catch (Exception e) {
@@ -1031,10 +1038,11 @@ public class MainScene implements IUpdateHandler {
 
     public void show() {
         GlobalManager.getInstance().getSongService().setGaming(false);
-        GlobalManager.getInstance().getEngine().setScene(getScene());
         if (GlobalManager.getInstance().getSelectedTrack() != null) {
             setBeatmap(GlobalManager.getInstance().getSelectedTrack().getBeatmap());
         }
+        GlobalManager.getInstance().getEngine().setScene(getScene());
+        MainOverlay.startTransition(0.15f, 1f, 0f);
     }
 
     public enum MusicOption {PREV, PLAY, PAUSE, STOP, NEXT, SYNC}
