@@ -296,8 +296,10 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
             storyboardSprite.detachSelf();
             storyboardSprite.loadStoryboard(beatmapData.getFilename());
 
-            if (storyboardSprite.isStoryboardAvailable())
+            if (storyboardSprite.isStoryboardAvailable()) {
+                storyboardSprite.setBrightness(Config.getBackgroundBrightness());
                 bgSprite.attachChild(storyboardSprite);
+            }
         }
 
         // Cleaning these properties, they might be not null if game was restarted.
