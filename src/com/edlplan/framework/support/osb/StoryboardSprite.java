@@ -77,6 +77,10 @@ public class StoryboardSprite extends SupportSprite {
         return context.texturePool;
     }
 
+    public OsuStoryboard getStoryboard() {
+        return storyboard;
+    }
+
     public void setBrightness(float brightness) {
         TextureRegion region = TextureHelper.create1xRegion(Color.argb(255, 0, 0, 0));
         backgroundQuad = new TextureQuad();
@@ -343,6 +347,7 @@ public class StoryboardSprite extends SupportSprite {
         }
         if (storyboard != null) {
             storyboard.clear();
+            storyboard = null;
         }
         if (osbPlayer != null) {
             osbPlayer = null;
