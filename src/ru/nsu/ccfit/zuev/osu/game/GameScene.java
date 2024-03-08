@@ -6,6 +6,7 @@ import android.os.SystemClock;
 
 import com.edlplan.ext.EdExtensionHelper;
 import com.edlplan.framework.math.FMath;
+import com.edlplan.framework.support.ProxySprite;
 import com.edlplan.framework.support.osb.StoryboardSprite;
 import com.edlplan.framework.utils.functionality.SmartIterator;
 import com.edlplan.osu.support.timing.TimingPoints;
@@ -183,6 +184,8 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
 
     private StoryboardSprite storyboardSprite;
 
+    private ProxySprite storyboardOverlayProxy;
+
     private DifficultyHelper difficultyHelper = DifficultyHelper.StdDifficulty;
 
     private List<TimedDifficultyAttributes> timedDifficultyAttributes = new ArrayList<>();
@@ -252,6 +255,16 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
 
         Sprite bgSprite = null;
 
+        if (storyboardSprite != null) {
+            if (storyboardSprite.isStoryboardAvailable()) {
+                storyboardSprite.setBrightness(Config.getBackgroundBrightness());
+                // storyboard sprite will draw background if needed, so skip here
+                if (storyboardSprite.getStoryboard().needReplaceBackground()) {
+                    return;
+                }
+            }
+        }
+
         if (Config.isVideoEnabled() && beatmapData.events.videoFilename != null
                 // Unfortunately MediaPlayer API doesn't allow to change playback speed on APIs < 23, so in that case
                 // the video will not be shown.
@@ -289,24 +302,7 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
                 bgSprite.setColor(0f, 0f, 0f);
         }
 
-        if (Config.isEnableStoryboard()) {
 
-            if (storyboardSprite == null)
-                storyboardSprite = new StoryboardSprite(bgSprite.getWidth(), bgSprite.getHeight());
-
-            storyboardSprite.detachSelf();
-            storyboardSprite.loadStoryboard(beatmapData.getFilename());
-
-            if (storyboardSprite.isStoryboardAvailable()) {
-                storyboardSprite.setBrightness(Config.getBackgroundBrightness());
-                bgSprite.attachChild(storyboardSprite);
-            }
-        }
-
-        // Cleaning these properties, they might be not null if game was restarted.
-        if (!Config.isEnableStoryboard() || !storyboardSprite.isStoryboardAvailable()) {
-            storyboardSprite = null;
-        }
 
         dimRectangle = new Rectangle(0f, 0f, bgSprite.getWidth(), bgSprite.getHeight());
         dimRectangle.setColor(0f, 0f, 0f, 1.0f - Config.getBackgroundBrightness());
@@ -622,6 +618,10 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
         if (!replaying)
             OnlineScoring.getInstance().startPlay(track, trackMD5);
 
+        if (Config.isEnableStoryboard()) {
+            storyboardSprite.loadStoryboard(track.getFilename());
+        }
+
         GameObjectPool.getInstance().preload();
 
         ppText = null;
@@ -689,11 +689,25 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
         }
 
         scene = new Scene();
+        if (Config.isEnableStoryboard()) {
+            if (storyboardSprite == null || storyboardOverlayProxy == null) {
+                storyboardSprite = new StoryboardSprite(Config.getRES_WIDTH(), Config.getRES_HEIGHT());
+                storyboardOverlayProxy = new ProxySprite(Config.getRES_WIDTH(), Config.getRES_HEIGHT());
+                storyboardSprite.setOverlayDrawProxy(storyboardOverlayProxy);
+                scene.attachChild(storyboardSprite);
+            }
+            storyboardSprite.detachSelf();
+            scene.attachChild(storyboardSprite);
+        }
         bgScene = new Scene();
         mgScene = new Scene();
         fgScene = new Scene();
         scene.attachChild(bgScene);
         scene.attachChild(mgScene);
+        if (storyboardOverlayProxy != null) {
+            storyboardOverlayProxy.detachSelf();
+            scene.attachChild(storyboardOverlayProxy);
+        }
         scene.attachChild(fgScene);
         scene.setBackground(new ColorBackground(0, 0, 0));
         bgScene.setBackgroundEnabled(false);
@@ -1952,11 +1966,6 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
             touchOptions.setRunOnUpdateThread(true);
             engine.getTouchController().applyTouchOptions(touchOptions);
 
-            if (storyboardSprite != null) {
-                storyboardSprite.releaseStoryboard();
-                storyboardSprite = null;
-            }
-
             if (video != null) {
                 video.release();
                 video = null;
@@ -2118,6 +2127,7 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
 
         if (storyboardSprite != null) {
             storyboardSprite.releaseStoryboard();
+            storyboardOverlayProxy.setDrawProxy(null);
             storyboardSprite = null;
         }
 
