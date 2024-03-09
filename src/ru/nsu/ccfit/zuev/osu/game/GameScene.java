@@ -6,6 +6,7 @@ import android.os.SystemClock;
 
 import com.edlplan.ext.EdExtensionHelper;
 import com.edlplan.framework.math.FMath;
+import com.edlplan.framework.support.ProxySprite;
 import com.edlplan.framework.support.osb.StoryboardSprite;
 import com.edlplan.framework.utils.functionality.SmartIterator;
 import com.edlplan.osu.support.timing.TimingPoints;
@@ -183,6 +184,8 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
 
     private StoryboardSprite storyboardSprite;
 
+    private ProxySprite storyboardOverlayProxy;
+
     private DifficultyHelper difficultyHelper = DifficultyHelper.StdDifficulty;
 
     private List<TimedDifficultyAttributes> timedDifficultyAttributes = new ArrayList<>();
@@ -264,60 +267,55 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
                 video.setAlpha(0f);
 
                 bgSprite = video;
+
+                if (storyboardSprite != null) {
+                    storyboardSprite.setTransparentBackground(true);
+                }
             } catch (Exception e) {
                 e.printStackTrace();
                 video = null;
             }
         }
 
-        if (bgSprite == null && beatmapData.events.backgroundFilename != null) {
-            var tex = Config.isSafeBeatmapBg() ?
-                    ResourceManager.getInstance().getTexture("menu-background")
+        // storyboard sprite will draw background and dimRectangle if needed, so skip here
+        if (storyboardSprite == null || !storyboardSprite.isStoryboardAvailable()) {
+            if (bgSprite == null && beatmapData.events.backgroundFilename != null) {
+                var tex = Config.isSafeBeatmapBg() ?
+                        ResourceManager.getInstance().getTexture("menu-background")
+                        :
+                        ResourceManager.getInstance().getTextureIfLoaded("::background");
+
+                if (tex != null)
+                    bgSprite = new Sprite(0, 0, tex);
+            }
+
+            if (bgSprite == null) {
+                bgSprite = new Sprite(0, 0, Config.getRES_WIDTH(), Config.getRES_HEIGHT(), new BlankTextureRegion());
+
+                if (beatmapData.events.backgroundColor != null)
+                    beatmapData.events.backgroundColor.apply(bgSprite);
+                else
+                    bgSprite.setColor(0f, 0f, 0f);
+            }
+
+
+            dimRectangle = new Rectangle(0f, 0f, bgSprite.getWidth(), bgSprite.getHeight());
+            dimRectangle.setColor(0f, 0f, 0f, 1.0f - Config.getBackgroundBrightness());
+            bgSprite.attachChild(dimRectangle);
+        } else {
+            storyboardSprite.setBrightness(Config.getBackgroundBrightness());
+        }
+
+        if (bgSprite != null) {
+            var factor = Config.isKeepBackgroundAspectRatio() ?
+                    Config.getRES_HEIGHT() / bgSprite.getHeight()
                     :
-                    ResourceManager.getInstance().getTextureIfLoaded("::background");
+                    Config.getRES_WIDTH() / bgSprite.getWidth();
 
-            if (tex != null)
-                bgSprite = new Sprite(0, 0, tex);
+            bgSprite.setScale(factor);
+            bgSprite.setPosition((Config.getRES_WIDTH() - bgSprite.getWidth()) / 2f, (Config.getRES_HEIGHT() - bgSprite.getHeight()) / 2f);
+            scene.setBackground(new SpriteBackground(bgSprite));
         }
-
-        if (bgSprite == null) {
-            bgSprite = new Sprite(0, 0, Config.getRES_WIDTH(), Config.getRES_HEIGHT(), new BlankTextureRegion());
-
-            if (beatmapData.events.backgroundColor != null)
-                beatmapData.events.backgroundColor.apply(bgSprite);
-            else
-                bgSprite.setColor(0f, 0f, 0f);
-        }
-
-        if (Config.isEnableStoryboard()) {
-
-            if (storyboardSprite == null)
-                storyboardSprite = new StoryboardSprite(bgSprite.getWidth(), bgSprite.getHeight());
-
-            storyboardSprite.detachSelf();
-            storyboardSprite.loadStoryboard(beatmapData.getFilename());
-
-            if (storyboardSprite.isStoryboardAvailable())
-                bgSprite.attachChild(storyboardSprite);
-        }
-
-        // Cleaning these properties, they might be not null if game was restarted.
-        if (!Config.isEnableStoryboard() || !storyboardSprite.isStoryboardAvailable()) {
-            storyboardSprite = null;
-        }
-
-        dimRectangle = new Rectangle(0f, 0f, bgSprite.getWidth(), bgSprite.getHeight());
-        dimRectangle.setColor(0f, 0f, 0f, 1.0f - Config.getBackgroundBrightness());
-        bgSprite.attachChild(dimRectangle);
-
-        var factor = Config.isKeepBackgroundAspectRatio() ?
-                Config.getRES_HEIGHT() / bgSprite.getHeight()
-                :
-                Config.getRES_WIDTH() / bgSprite.getWidth();
-
-        bgSprite.setScale(factor);
-        bgSprite.setPosition((Config.getRES_WIDTH() - bgSprite.getWidth()) / 2f, (Config.getRES_HEIGHT() - bgSprite.getHeight()) / 2f);
-        scene.setBackground(new SpriteBackground(bgSprite));
     }
 
     private boolean loadGame(final TrackInfo track, final String rFile) {
@@ -620,6 +618,10 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
         if (!replaying)
             OnlineScoring.getInstance().startPlay(track, trackMD5);
 
+        if (Config.isEnableStoryboard()) {
+            storyboardSprite.loadStoryboard(track.getFilename());
+        }
+
         GameObjectPool.getInstance().preload();
 
         ppText = null;
@@ -687,11 +689,25 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
         }
 
         scene = new Scene();
+        if (Config.isEnableStoryboard()) {
+            if (storyboardSprite == null || storyboardOverlayProxy == null) {
+                storyboardSprite = new StoryboardSprite(Config.getRES_WIDTH(), Config.getRES_HEIGHT());
+                storyboardOverlayProxy = new ProxySprite(Config.getRES_WIDTH(), Config.getRES_HEIGHT());
+                storyboardSprite.setOverlayDrawProxy(storyboardOverlayProxy);
+                scene.attachChild(storyboardSprite);
+            }
+            storyboardSprite.detachSelf();
+            scene.attachChild(storyboardSprite);
+        }
         bgScene = new Scene();
         mgScene = new Scene();
         fgScene = new Scene();
         scene.attachChild(bgScene);
         scene.attachChild(mgScene);
+        if (storyboardOverlayProxy != null) {
+            storyboardOverlayProxy.detachSelf();
+            scene.attachChild(storyboardOverlayProxy);
+        }
         scene.attachChild(fgScene);
         scene.setBackground(new ColorBackground(0, 0, 0));
         bgScene.setBackgroundEnabled(false);
@@ -1950,11 +1966,6 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
             touchOptions.setRunOnUpdateThread(true);
             engine.getTouchController().applyTouchOptions(touchOptions);
 
-            if (storyboardSprite != null) {
-                storyboardSprite.releaseStoryboard();
-                storyboardSprite = null;
-            }
-
             if (video != null) {
                 video.release();
                 video = null;
@@ -2115,7 +2126,10 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
         }
 
         if (storyboardSprite != null) {
+            storyboardSprite.detachSelf();
+            storyboardOverlayProxy.detachSelf();
             storyboardSprite.releaseStoryboard();
+            storyboardOverlayProxy.setDrawProxy(null);
             storyboardSprite = null;
         }
 
