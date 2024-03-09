@@ -36,6 +36,12 @@ public class StoryboardSprite extends SupportSprite {
     TextureQuad backgroundQuad;
     TextureQuad forgroundQuad;
     boolean replaceBackground;
+
+    /**
+     * do not draw backgroundQuad.
+     * useful when video is on
+     */
+    boolean transparentBackground;
     String loadedOsu;
     private double time;
     private boolean needUpdate = false;
@@ -79,6 +85,10 @@ public class StoryboardSprite extends SupportSprite {
 
     public OsuStoryboard getStoryboard() {
         return storyboard;
+    }
+
+    public void setTransparentBackground(boolean transparentBackground) {
+        this.transparentBackground = transparentBackground;
     }
 
     public void setBrightness(float brightness) {
@@ -142,25 +152,7 @@ public class StoryboardSprite extends SupportSprite {
             return;
         }
 
-        if (replaceBackground) {
-            if (backgroundQuad != null) {
-                backgroundQuad.size.set(canvas.getWidth(), canvas.getHeight());
-                TextureQuadBatch.getDefaultBatch().add(backgroundQuad);
-                BatchEngine.flush();
-            }
-        } else {
-            if (backgroundQuad == null) {
-                backgroundQuad = new TextureQuad();
-            }
-            backgroundQuad.anchor = Anchor.Center;
-            backgroundQuad.setTextureAndSize(context.texturePool.get(storyboard.backgroundFile));
-            backgroundQuad.position.set(canvas.getWidth() / 2, canvas.getHeight() / 2);
-            backgroundQuad.enableScale().scale.set(
-                    Math.min(
-                            canvas.getWidth() / backgroundQuad.size.x,
-                            canvas.getHeight() / backgroundQuad.size.y));
-            TextureQuadBatch.getDefaultBatch().add(backgroundQuad);
-        }
+        drawBackground(canvas);
 
         canvas.getBlendSetting().save();
         canvas.save();
@@ -185,6 +177,32 @@ public class StoryboardSprite extends SupportSprite {
             forgroundQuad.size.set(canvas.getWidth(), canvas.getHeight());
             TextureQuadBatch.getDefaultBatch().add(forgroundQuad);
             BatchEngine.flush();
+        }
+    }
+
+    private void drawBackground(BaseCanvas canvas) {
+        if (transparentBackground) {
+            return;
+        }
+
+        if (replaceBackground) {
+            if (backgroundQuad != null) {
+                backgroundQuad.size.set(canvas.getWidth(), canvas.getHeight());
+                TextureQuadBatch.getDefaultBatch().add(backgroundQuad);
+                BatchEngine.flush();
+            }
+        } else {
+            if (backgroundQuad == null) {
+                backgroundQuad = new TextureQuad();
+            }
+            backgroundQuad.anchor = Anchor.Center;
+            backgroundQuad.setTextureAndSize(context.texturePool.get(storyboard.backgroundFile));
+            backgroundQuad.position.set(canvas.getWidth() / 2, canvas.getHeight() / 2);
+            backgroundQuad.enableScale().scale.set(
+                    Math.min(
+                            canvas.getWidth() / backgroundQuad.size.x,
+                            canvas.getHeight() / backgroundQuad.size.y));
+            TextureQuadBatch.getDefaultBatch().add(backgroundQuad);
         }
     }
 
