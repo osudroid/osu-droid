@@ -7,12 +7,12 @@ import kotlin.math.abs
  */
 object Precision {
     /**
-     * The default epsilon for all `float` values.
+     * The default epsilon for all [Float] values.
      */
     private const val FLOAT_EPSILON = 1e-3f
 
     /**
-     * The default epsilon for all `double` values.
+     * The default epsilon for all [Double] values.
      */
     private const val DOUBLE_EPSILON = 1e-7
 
