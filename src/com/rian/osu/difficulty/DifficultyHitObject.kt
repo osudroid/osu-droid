@@ -6,6 +6,7 @@ import com.rian.osu.beatmap.hitobject.Slider
 import com.rian.osu.beatmap.hitobject.Spinner
 import com.rian.osu.beatmap.hitobject.getEndTime
 import com.rian.osu.beatmap.hitobject.sliderobject.SliderRepeat
+import com.rian.osu.math.Precision
 import com.rian.osu.math.Vector2
 import com.rian.osu.mods.ModHidden
 import kotlin.math.*
@@ -263,6 +264,17 @@ abstract class DifficultyHitObject(
     private fun computeSliderCursorPosition(slider: Slider) {
         if (slider.lazyEndPosition != null) {
             return
+        }
+
+        if (mode == GameMode.Droid) {
+            // Temporary lazy end position until a real result can be derived.
+            slider.lazyEndPosition = slider.getStackedPosition(this.mode)
+
+            // Stop here if the slider has very short duration, allowing the player to essentially
+            // complete the slider without movement, making travel distance and time irrelevant.
+            if (Precision.almostEqualsNumber(slider.startTime, slider.endTime)) {
+                return
+            }
         }
 
         slider.lazyTravelTime = slider.nestedHitObjects.last().startTime - slider.startTime
