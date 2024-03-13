@@ -25,7 +25,7 @@ object Precision {
      */
     @JvmStatic
     @JvmOverloads
-    fun almostEqualsNumber(value1: Float, value2: Float, acceptableDifference: Float = FLOAT_EPSILON) =
+    fun almostEquals(value1: Float, value2: Float, acceptableDifference: Float = FLOAT_EPSILON) =
         abs(value1 - value2) <= acceptableDifference
 
     /**
@@ -37,6 +37,6 @@ object Precision {
      */
     @JvmStatic
     @JvmOverloads
-    fun almostEqualsNumber(value1: Double, value2: Double, acceptableDifference: Double = DOUBLE_EPSILON) =
+    fun almostEquals(value1: Double, value2: Double, acceptableDifference: Double = DOUBLE_EPSILON) =
         abs(value1 - value2) <= acceptableDifference
 }

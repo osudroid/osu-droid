@@ -4,7 +4,7 @@ import com.rian.osu.beatmap.Beatmap
 import com.rian.osu.beatmap.constants.HitObjectType
 import com.rian.osu.beatmap.constants.SampleBank
 import com.rian.osu.beatmap.hitobject.*
-import com.rian.osu.math.Precision.almostEqualsNumber
+import com.rian.osu.math.Precision.almostEquals
 import com.rian.osu.math.Vector2
 import kotlin.math.max
 import kotlin.math.min
@@ -121,7 +121,7 @@ class BeatmapHitObjectsParser : BeatmapSectionParser() {
             if (sliderType === SliderPathType.PerfectCurve) {
                 if (it.size != 3) {
                     sliderType = SliderPathType.Bezier
-                } else if (almostEqualsNumber(
+                } else if (almostEquals(
                         0f,
                         (it[1].y - it[0].y) * (it[2].x - it[0].x) -
                                 (it[1].x - it[0].x) * (it[2].y - it[0].y)

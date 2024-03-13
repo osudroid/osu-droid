@@ -1,6 +1,6 @@
 package com.rian.osu.beatmap.hitobject
 
-import com.rian.osu.math.Precision.almostEqualsNumber
+import com.rian.osu.math.Precision.almostEquals
 import com.rian.osu.math.Vector2
 import com.rian.osu.utils.PathApproximation
 
@@ -183,7 +183,7 @@ class SliderPath(
         val d1 = cumulativeLength[i]
 
         // Avoid division by and almost-zero number in case two points are extremely close to each other.
-        if (almostEqualsNumber(d0, d1)) {
+        if (almostEquals(d0, d1)) {
             return p0
         }
 

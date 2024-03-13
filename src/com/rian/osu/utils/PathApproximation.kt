@@ -1,6 +1,6 @@
 package com.rian.osu.utils
 
-import com.rian.osu.math.Precision.almostEqualsNumber
+import com.rian.osu.math.Precision.almostEquals
 import com.rian.osu.math.Vector2
 import com.rian.osu.math.times
 import java.util.*
@@ -112,7 +112,7 @@ object PathApproximation {
 
         // If we have a degenerate triangle where a side-length is almost zero, then give up and fall
         // back to a more numerically stable method.
-        if (almostEqualsNumber(0f, (b.y - a.y) * (c.x - a.x) - (b.x - a.x) * (c.y - a.y))) {
+        if (almostEquals(0f, (b.y - a.y) * (c.x - a.x) - (b.x - a.x) * (c.y - a.y))) {
             return approximateBezier(controlPoints)
         }
 
