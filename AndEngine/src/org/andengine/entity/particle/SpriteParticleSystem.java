@@ -3,7 +3,10 @@ package org.andengine.entity.particle;
 import org.andengine.entity.IEntityFactory;
 import org.andengine.entity.particle.emitter.IParticleEmitter;
 import org.andengine.entity.sprite.Sprite;
+import org.andengine.entity.sprite.vbo.HighPerformanceSpriteVertexBufferObject;
+import org.andengine.entity.sprite.vbo.ISpriteVertexBufferObject;
 import org.andengine.opengl.texture.region.ITextureRegion;
+import org.andengine.opengl.vbo.DrawType;
 import org.andengine.opengl.vbo.VertexBufferObjectManager;
 
 /**
@@ -31,10 +34,14 @@ public class SpriteParticleSystem extends ParticleSystem<Sprite> {
 
 	public SpriteParticleSystem(final float pX, final float pY, final IParticleEmitter pParticleEmitter, final float pRateMinimum, final float pRateMaximum, final int pParticlesMaximum, final ITextureRegion pTextureRegion, final VertexBufferObjectManager pVertexBufferObjectManager) {
 		super(pX, pY, new IEntityFactory<Sprite>() {
+
+			private final ISpriteVertexBufferObject mVertexBufferObject = new HighPerformanceSpriteVertexBufferObject(pVertexBufferObjectManager, Sprite.SPRITE_SIZE, DrawType.STATIC, true, Sprite.VERTEXBUFFEROBJECTATTRIBUTES_DEFAULT);
+
 			@Override
 			public Sprite create(final float pX, final float pY) {
-				return new Sprite(pX, pY, pTextureRegion, pVertexBufferObjectManager);
+				return new Sprite(pX, pY, pTextureRegion, mVertexBufferObject);
 			}
+
 		}, pParticleEmitter, pRateMinimum, pRateMaximum, pParticlesMaximum);
 	}
 
