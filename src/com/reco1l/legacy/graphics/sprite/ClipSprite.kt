@@ -1,4 +1,4 @@
-package com.reco1l.legacy.graphics
+package com.reco1l.legacy.graphics.sprite
 
 import org.andengine.engine.camera.Camera
 import org.andengine.entity.sprite.Sprite

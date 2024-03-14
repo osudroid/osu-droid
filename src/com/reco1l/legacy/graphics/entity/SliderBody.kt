@@ -1,6 +1,8 @@
-package com.reco1l.legacy.graphics
+package com.reco1l.legacy.graphics.entity
 
 import com.edlplan.framework.math.line.LinePath
+import com.reco1l.legacy.graphics.mesh.PathMesh
+import com.reco1l.legacy.graphics.mesh.PathMeshDrawer
 import org.andengine.entity.IEntity
 import org.andengine.entity.modifier.FadeInModifier
 import org.andengine.entity.modifier.FadeOutModifier

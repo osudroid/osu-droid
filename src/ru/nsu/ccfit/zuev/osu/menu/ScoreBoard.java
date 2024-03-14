@@ -2,13 +2,11 @@ package ru.nsu.ccfit.zuev.osu.menu;
 
 import android.database.Cursor;
 import com.reco1l.legacy.Multiplayer;
-import com.reco1l.legacy.engine.BlankTexture;
-import com.reco1l.legacy.engine.BlankTextureRegion;
+import com.reco1l.legacy.graphics.texture.BlankTextureRegion;
 
 import org.andengine.entity.Entity;
 import org.andengine.entity.scene.Scene;
 import org.andengine.entity.sprite.Sprite;
-import org.andengine.entity.text.Text;
 import org.andengine.entity.text.Text;
 import org.andengine.input.touch.TouchEvent;
 import org.andengine.input.touch.detector.ScrollDetector;

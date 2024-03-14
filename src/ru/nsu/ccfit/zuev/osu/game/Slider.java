@@ -5,7 +5,7 @@ import android.graphics.PointF;
 import com.edlplan.framework.math.FMath;
 import com.edlplan.framework.math.Vec2;
 import com.edlplan.framework.math.line.LinePath;
-import com.reco1l.legacy.graphics.SliderBody;
+import com.reco1l.legacy.graphics.entity.SliderBody;
 import com.edlplan.osu.support.timing.controlpoint.TimingControlPoint;
 import org.andengine.entity.IEntity;
 import org.andengine.entity.modifier.AlphaModifier;

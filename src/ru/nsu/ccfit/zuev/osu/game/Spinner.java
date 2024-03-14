@@ -2,7 +2,7 @@ package ru.nsu.ccfit.zuev.osu.game;
 
 import android.graphics.PointF;
 
-import com.reco1l.legacy.graphics.ClipSprite;
+import com.reco1l.legacy.graphics.sprite.ClipSprite;
 
 import org.andengine.entity.IEntity;
 import org.andengine.entity.modifier.AlphaModifier;

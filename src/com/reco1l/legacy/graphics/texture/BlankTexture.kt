@@ -1,4 +1,4 @@
-package com.reco1l.legacy.engine
+package com.reco1l.legacy.graphics.texture
 
 import org.andengine.opengl.texture.PixelFormat
 import org.andengine.opengl.texture.Texture
@@ -6,7 +6,6 @@ import org.andengine.opengl.texture.TextureOptions
 import org.andengine.opengl.texture.region.TextureRegion
 import org.andengine.opengl.util.GLState
 import ru.nsu.ccfit.zuev.osu.GlobalManager
-import javax.microedition.khronos.opengles.GL10
 
 class BlankTextureRegion : TextureRegion(BlankTexture(), 0f, 0f, 1f, 1f)
 

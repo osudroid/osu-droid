@@ -1,7 +1,7 @@
 package ru.nsu.ccfit.zuev.osu;
 
 import android.os.Build;
-import com.reco1l.legacy.engine.VideoTexture;
+import com.reco1l.legacy.graphics.texture.VideoTexture;
 import org.andengine.util.debug.Debug;
 import org.jetbrains.annotations.Nullable;
 import ru.nsu.ccfit.zuev.osu.beatmap.BeatmapData;

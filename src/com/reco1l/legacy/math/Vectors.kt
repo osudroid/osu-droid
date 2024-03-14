@@ -1,4 +1,4 @@
-package com.reco1l.legacy.graphics
+package com.reco1l.legacy.math
 
 import com.edlplan.framework.math.Vec2
 import kotlin.math.atan2

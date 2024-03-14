@@ -1,21 +1,17 @@
-package com.reco1l.legacy.engine
+package com.reco1l.legacy.graphics.texture
 
 import android.graphics.SurfaceTexture
 import android.media.MediaPlayer
 import android.opengl.GLES11Ext.GL_TEXTURE_EXTERNAL_OES
-import android.opengl.GLES20
 import android.os.Build
 import android.view.Surface
-import com.reco1l.framework.extensions.orCatch
 import org.andengine.engine.Engine
 import org.andengine.opengl.texture.PixelFormat
 import org.andengine.opengl.texture.Texture
 import org.andengine.opengl.texture.TextureOptions
 import org.andengine.opengl.texture.region.TextureRegion
 import org.andengine.opengl.util.GLState
-import ru.nsu.ccfit.zuev.osu.GlobalManager
 import java.io.File
-import javax.microedition.khronos.opengles.GL10
 
 class VideoTexture(val source: String, engine: Engine)
     : Texture(engine.textureManager, PixelFormat.RGBA_8888, TextureOptions.BILINEAR, null)

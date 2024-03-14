@@ -1,8 +1,9 @@
-package com.reco1l.legacy.engine
+package com.reco1l.legacy.graphics.sprite
 
 import android.opengl.GLES11Ext.GL_TEXTURE_EXTERNAL_OES
 import android.opengl.GLES20
 import com.reco1l.legacy.graphics.ExternalTextureShaderProgram
+import com.reco1l.legacy.graphics.texture.VideoTexture
 import org.andengine.engine.Engine
 import org.andengine.engine.camera.Camera
 import org.andengine.entity.sprite.Sprite

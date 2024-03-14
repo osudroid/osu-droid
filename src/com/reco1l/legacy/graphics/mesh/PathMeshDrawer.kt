@@ -1,8 +1,9 @@
-package com.reco1l.legacy.graphics
+package com.reco1l.legacy.graphics.mesh
 
 import com.edlplan.framework.math.FMath
 import com.edlplan.framework.math.Vec2
 import com.edlplan.framework.math.line.LinePath
+import com.reco1l.legacy.math.Vectors
 import kotlin.math.abs
 import kotlin.math.ceil
 import kotlin.math.cos
