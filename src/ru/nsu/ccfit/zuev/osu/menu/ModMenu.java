@@ -86,7 +86,7 @@ public class ModMenu implements IModSwitcher {
             menu = new InGameSettingMenu();
         }
 
-        Execution.uiThread(menu::show);
+        Execution.mainThread(menu::show);
         update();
     }
 

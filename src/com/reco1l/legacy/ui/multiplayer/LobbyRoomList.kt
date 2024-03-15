@@ -11,7 +11,7 @@ import com.reco1l.api.ibancho.data.TeamMode.TEAM_VS_TEAM
 import com.reco1l.api.ibancho.data.WinCondition.*
 import com.reco1l.framework.extensions.className
 import com.reco1l.framework.extensions.orAsyncCatch
-import com.reco1l.framework.lang.uiThread
+import com.reco1l.framework.lang.mainThread
 import com.reco1l.legacy.Multiplayer
 import com.reco1l.legacy.ui.entity.ScrollableList
 import org.anddev.andengine.entity.sprite.Sprite
@@ -39,7 +39,7 @@ class LobbyRoomList : ScrollableList()
         rooms.iterator().forEach { addItem(it) }
     }
 
-    private fun showPasswordPrompt(room: Room) = uiThread {
+    private fun showPasswordPrompt(room: Room) = mainThread {
 
         val input = EditText(getGlobal().mainActivity)
         input.inputType = EditorInfo.TYPE_TEXT_VARIATION_PASSWORD

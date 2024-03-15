@@ -11,10 +11,8 @@ import com.edlplan.framework.support.osb.StoryboardSprite;
 import com.edlplan.framework.utils.functionality.SmartIterator;
 import com.edlplan.osu.support.timing.TimingPoints;
 import com.edlplan.osu.support.timing.controlpoint.ControlPoints;
-import com.edlplan.ui.fragment.InGameSettingMenu;
 import com.reco1l.api.ibancho.RoomAPI;
 import com.reco1l.framework.lang.Execution;
-import com.reco1l.framework.lang.execution.Async;
 import com.reco1l.legacy.engine.BlankTextureRegion;
 import com.reco1l.legacy.engine.VideoSprite;
 import com.reco1l.legacy.ui.entity.InGameLeaderboard;
@@ -721,7 +719,7 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
 
         final String rfile = track != null ? replayFile : this.replayFile;
 
-        Async.run(() -> {
+        Execution.async(() -> {
 
             if (loadGame(track != null ? track : lastTrack, rfile)) {
                 prepareScene();
@@ -1996,7 +1994,7 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
                             ResourceManager.getInstance().getSound("menuhit").play();
                             skipBtn.setVisible(false);
 
-                            Async.run(RoomAPI.INSTANCE::requestSkip);
+                            Execution.async(RoomAPI.INSTANCE::requestSkip);
                             ToastLogger.showText("Skip requested", false);
                         }
                         return;
@@ -2060,7 +2058,7 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
         int seekTime = (int) Math.ceil(secPassed * 1000);
         int videoSeekTime = seekTime - (int) (videoOffset * 1000);
 
-        Execution.glThread(() -> {
+        Execution.updateThread(() -> {
 
             updatePassiveObjects(difference);
 
