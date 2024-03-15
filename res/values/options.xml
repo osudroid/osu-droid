@@ -224,7 +224,7 @@
     <string name="opt_register_summary">Register a new account</string>
 
     <string name="opt_loadavatar_title">Load Avatar</string>
-    <string name="opt_loadavatar_summary">Load without WiFi connection.</string>
+    <string name="opt_loadavatar_summary">Load avatar in online leaderboard</string>
 
 
     <string name="opt_error_meter_display_title">Hit error meter</string>
