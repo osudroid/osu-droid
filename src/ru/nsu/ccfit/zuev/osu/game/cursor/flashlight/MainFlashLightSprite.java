@@ -48,6 +48,10 @@ public class MainFlashLightSprite extends FlashlightAreaSizedSprite {
     }
 
     public void updateBreak(boolean isBreak) {
+        if (this.isBreak == isBreak) {
+            return;
+        }
+
         this.isBreak = isBreak;
 
         float fromScale = isBreak ? currentSize : 1.5f * BASE_SIZE;
