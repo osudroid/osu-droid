@@ -9,7 +9,7 @@ import com.google.android.material.snackbar.BaseTransientBottomBar.LENGTH_INDEFI
 import com.google.android.material.snackbar.BaseTransientBottomBar.LENGTH_SHORT
 import com.google.android.material.snackbar.Snackbar
 import com.reco1l.framework.lang.async
-import com.reco1l.framework.lang.uiThread
+import com.reco1l.framework.lang.mainThread
 import com.reco1l.framework.net.Downloader
 import com.reco1l.framework.net.IDownloaderObserver
 import okhttp3.Request
@@ -52,7 +52,7 @@ object UpdateManager: IDownloaderObserver
     private var newVersionCode: Long = mainActivity.versionCode
     
 
-    fun onActivityStart() = uiThread {
+    fun onActivityStart() = mainThread {
         // Finding if there's a "pending changelog". This means the game was previously updated, we're
         // showing the changelog after update with a prompt asking user to show.
         preferences.apply {
@@ -204,11 +204,11 @@ object UpdateManager: IDownloaderObserver
     }
     
     
-    private fun onFoundNewUpdate(silently: Boolean) = uiThread {
+    private fun onFoundNewUpdate(silently: Boolean) = mainThread {
 
         if (newVersionCode <= mainActivity.versionCode) {
             onAlreadyLatestVersion(silently)
-            return@uiThread
+            return@mainThread
         }
 
         preferences.apply {
@@ -237,10 +237,10 @@ object UpdateManager: IDownloaderObserver
         }
     }
 
-    private fun onUpdateCheckFailed(silently: Boolean) = uiThread {
+    private fun onUpdateCheckFailed(silently: Boolean) = mainThread {
         if (silently) {
             snackBar.dismiss()
-            return@uiThread
+            return@mainThread
         }
 
         snackBar.apply {
@@ -253,11 +253,11 @@ object UpdateManager: IDownloaderObserver
         }
     }
 
-    private fun onAlreadyLatestVersion(silently: Boolean) = uiThread {
+    private fun onAlreadyLatestVersion(silently: Boolean) = mainThread {
 
         if (silently) {
             snackBar.dismiss()
-            return@uiThread
+            return@mainThread
         }
 
         snackBar.apply {
@@ -271,7 +271,7 @@ object UpdateManager: IDownloaderObserver
     }
 
     
-    override fun onDownloadStart(downloader: Downloader) = uiThread {
+    override fun onDownloadStart(downloader: Downloader) = mainThread {
 
         snackBar.apply {
 
@@ -283,13 +283,13 @@ object UpdateManager: IDownloaderObserver
         }
     }
 
-    override fun onDownloadUpdate(downloader: Downloader) = uiThread {
+    override fun onDownloadUpdate(downloader: Downloader) = mainThread {
 
         snackBar.setText(StringTable.format(update_info_downloading, downloader.progress.toInt()))
     }
 
     override fun onDownloadEnd(downloader: Downloader) {
-        uiThread(snackBar::dismiss)
+        mainThread(snackBar::dismiss)
         onInstallNewUpdate(downloader.file)
     }
 
@@ -297,7 +297,7 @@ object UpdateManager: IDownloaderObserver
 
         downloader.exception?.printStackTrace()
 
-        uiThread {
+        mainThread {
             snackBar.apply {
 
                 duration = LENGTH_SHORT
@@ -311,7 +311,7 @@ object UpdateManager: IDownloaderObserver
     }
 
     override fun onDownloadCancel(downloader: Downloader) {
-        uiThread {
+        mainThread {
             snackBar.apply {
 
                 duration = LENGTH_SHORT

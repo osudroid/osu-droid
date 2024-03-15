@@ -512,7 +512,7 @@ public class MainScene implements IUpdateHandler {
 
     public void reloadOnlinePanel() {
         // IndexOutOfBoundsException 141 fix
-        Execution.glThread(() -> {
+        Execution.updateThread(() -> {
             scene.detachChild(OnlineScoring.getInstance().getPanel());
             createOnlinePanel(scene);
         });
@@ -892,7 +892,7 @@ public class MainScene implements IUpdateHandler {
             if (beatmapData != null) {
                 timingPoints = new LinkedList<>();
                 for (final String s : beatmapData.rawTimingPoints) {
-                    final TimingPoint tp = new TimingPoint(s.split("[,]"), currentTimingPoint);
+                    final TimingPoint tp = new TimingPoint(s.split(","), currentTimingPoint);
                     timingPoints.add(tp);
                     if (!tp.wasInderited() || currentTimingPoint == null) {
                         currentTimingPoint = tp;

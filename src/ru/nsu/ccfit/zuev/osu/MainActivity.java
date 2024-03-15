@@ -6,7 +6,6 @@ import android.app.AlertDialog;
 import android.content.ComponentName;
 import android.content.ContentResolver;
 import android.content.Context;
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.ServiceConnection;
 import android.content.SharedPreferences;
@@ -45,11 +44,12 @@ import com.google.firebase.crashlytics.FirebaseCrashlytics;
 
 import com.reco1l.api.ibancho.LobbyAPI;
 import com.reco1l.framework.lang.Execution;
+import com.reco1l.legacy.AccessibilityDetector;
+import com.reco1l.legacy.Multiplayer;
 import com.reco1l.legacy.UpdateManager;
 import com.reco1l.legacy.ui.multiplayer.LobbyScene;
-import com.reco1l.legacy.Multiplayer;
 import com.reco1l.legacy.ui.multiplayer.RoomScene;
-import com.reco1l.legacy.AccessibilityDetector;
+
 import net.lingala.zip4j.ZipFile;
 
 import org.anddev.andengine.engine.Engine;
@@ -73,6 +73,7 @@ import java.io.IOException;
 import java.math.RoundingMode;
 import java.text.DecimalFormat;
 import java.util.ArrayList;
+import java.util.Objects;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
@@ -80,8 +81,6 @@ import java.util.concurrent.TimeUnit;
 import ru.nsu.ccfit.zuev.audio.BassAudioPlayer;
 import ru.nsu.ccfit.zuev.audio.serviceAudio.SaveServiceObject;
 import ru.nsu.ccfit.zuev.audio.serviceAudio.SongService;
-import ru.nsu.ccfit.zuev.osu.async.AsyncTask;
-import ru.nsu.ccfit.zuev.osu.async.SyncTaskManager;
 import ru.nsu.ccfit.zuev.osu.game.SpritePool;
 import ru.nsu.ccfit.zuev.osu.helper.BeatmapDifficultyCalculator;
 import ru.nsu.ccfit.zuev.osu.helper.FileUtils;
@@ -127,7 +126,6 @@ public class MainActivity extends BaseGameActivity implements
         //Debug.setDebugLevel(Debug.DebugLevel.NONE);
         StringTable.setContext(this);
         ToastLogger.init(this);
-        SyncTaskManager.getInstance().init(this);
         InputManager.setContext(this);
         OnlineManager.getInstance().Init(getApplicationContext());
         crashlytics.setUserId(Config.getOnlineDeviceID());
@@ -229,20 +227,16 @@ public class MainActivity extends BaseGameActivity implements
             alert.setView(input);
 
             alert.setPositiveButton(StringTable.get(R.string.dialog_ok),
-                    new DialogInterface.OnClickListener() {
-
-                        public void onClick(final DialogInterface dialog,
-                                            final int whichButton) {
-                            final String value = input.getText().toString();
-                            editor.putString("playername", value);
-                            editor.commit();
-                        }
+                    (dialog, whichButton) -> {
+                        final String value = input.getText().toString();
+                        editor.putString("playername", value);
+                        editor.commit();
                     });
 
             alert.show();
         }
 
-        if (prefs.getBoolean("qualitySet", false) == false) {
+        if (!prefs.getBoolean("qualitySet", false)) {
             final SharedPreferences.Editor editor = prefs.edit();
             editor.putBoolean("qualitySet", true);
             final DisplayMetrics dm = new DisplayMetrics();
@@ -256,7 +250,7 @@ public class MainActivity extends BaseGameActivity implements
             editor.commit();
         }
 
-        if (prefs.getBoolean("onlineSet", false) == false) {
+        if (!prefs.getBoolean("onlineSet", false)) {
 
             Editor editor = prefs.edit();
             editor.putBoolean("onlineSet", true);
@@ -325,31 +319,23 @@ public class MainActivity extends BaseGameActivity implements
         LobbyScene.INSTANCE.init();
         RoomScene.INSTANCE.init();
 
-        new AsyncTask() {
-            @Override
-            public void run() {
-                BassAudioPlayer.initDevice();
-                GlobalManager.getInstance().init();
-                analytics.logEvent(FirebaseAnalytics.Event.APP_OPEN, null);
-                GlobalManager.getInstance().setLoadingProgress(50);
-                checkNewSkins();
-                Config.loadSkins();
-                checkNewBeatmaps();
-                if (!LibraryManager.INSTANCE.loadLibraryCache(true)) {
-                    LibraryManager.INSTANCE.scanLibrary();
-                    System.gc();
-                }
-                SplashScene.INSTANCE.playWelcomeAnimation();
-                try {
-                    // Allow the welcome animation to progress before entering onComplete state.
-                    Thread.sleep(2500);
-                }
-                catch (InterruptedException ignored) {}
-                UpdateManager.INSTANCE.onActivityStart();
+        Execution.async(() -> {
+            BassAudioPlayer.initDevice();
+            GlobalManager.getInstance().init();
+            analytics.logEvent(FirebaseAnalytics.Event.APP_OPEN, null);
+            GlobalManager.getInstance().setLoadingProgress(50);
+            checkNewSkins();
+            Config.loadSkins();
+            checkNewBeatmaps();
+
+            if (!LibraryManager.INSTANCE.loadLibraryCache(true)) {
+                LibraryManager.INSTANCE.scanLibrary();
             }
 
-            @Override
-            public void onComplete() {
+            SplashScene.INSTANCE.playWelcomeAnimation();
+
+            Execution.delayed(2500, () -> {
+                UpdateManager.INSTANCE.onActivityStart();
                 GlobalManager.getInstance().setInfo("");
                 GlobalManager.getInstance().setLoadingProgress(100);
                 ResourceManager.getInstance().loadFont("font", null, 28, Color.WHITE);
@@ -372,9 +358,10 @@ public class MainActivity extends BaseGameActivity implements
                     GlobalManager.getInstance().getMainScene().watchReplay(beatmapToAdd);
                     willReplay = false;
                 }
-            }
-        }.execute();
+            });
+        });
     }
+
     /*
     Accuracy isn't the best, but it's sufficient enough
     to determine whether storage is low or not
@@ -389,7 +376,7 @@ public class MainActivity extends BaseGameActivity implements
         StatFs stat = new StatFs(internal.getPath());
         availableMemory = (double) stat.getAvailableBytes();
         String toastMessage = String.format(StringTable.get(R.string.message_low_storage_space), df.format(availableMemory / minMem));
-        if(availableMemory < 0.5 * minMem) { //I set 512MiB as a minimum
+        if (availableMemory < 0.5 * minMem) { //I set 512MiB as a minimum
             Toast.makeText(this, toastMessage, Toast.LENGTH_SHORT).show();
         }
         Debug.i("Free Space: " + df.format(availableMemory / minMem));
@@ -399,8 +386,8 @@ public class MainActivity extends BaseGameActivity implements
     @Override
     protected void onSetContentView() {
         this.mRenderSurfaceView = new RenderSurfaceView(this);
-        if(Config.isUseDither()) {
-            this.mRenderSurfaceView.setEGLConfigChooser(8,8,8,8,24,0);
+        if (Config.isUseDither()) {
+            this.mRenderSurfaceView.setEGLConfigChooser(8, 8, 8, 8, 24, 0);
             this.mRenderSurfaceView.getHolder().setFormat(PixelFormat.RGBA_8888);
         } else {
             this.mRenderSurfaceView.setEGLConfigChooser(true);
@@ -413,7 +400,7 @@ public class MainActivity extends BaseGameActivity implements
                 mRenderSurfaceView,
                 new RelativeLayout.LayoutParams(
                         ViewGroup.LayoutParams.MATCH_PARENT,
-                        ViewGroup.LayoutParams.MATCH_PARENT){{
+                        ViewGroup.LayoutParams.MATCH_PARENT) {{
                     addRule(RelativeLayout.CENTER_IN_PARENT);
                 }});
 
@@ -597,7 +584,7 @@ public class MainActivity extends BaseGameActivity implements
                 File f = new File(d, "rawlog.txt");
                 if (!f.exists()) f.createNewFile();
                 Runtime.getRuntime().exec("logcat -f " + (f.getAbsolutePath()));
-            } catch (IOException e) {
+            } catch (IOException ignored) {
             }
         }
         onBeginBindService();
@@ -669,7 +656,7 @@ public class MainActivity extends BaseGameActivity implements
             }
         }
     }
-    
+
     @Override
     public void onPause() {
         super.onPause();
@@ -681,13 +668,11 @@ public class MainActivity extends BaseGameActivity implements
                 && GlobalManager.getInstance().getEngine().getScene() == GlobalManager.getInstance().getGameScene().getScene()) {
             SpritePool.getInstance().purge();
 
-            if (Multiplayer.isMultiplayer)
-            {
+            if (Multiplayer.isMultiplayer) {
                 ToastLogger.showText("You've left the match.", true);
                 GlobalManager.getInstance().getGameScene().quit();
                 Multiplayer.log("Player left the match.");
-            }
-            else GlobalManager.getInstance().getGameScene().pause();
+            } else GlobalManager.getInstance().getGameScene().pause();
         }
         if (GlobalManager.getInstance().getMainScene() != null) {
             BeatmapInfo beatmapInfo = GlobalManager.getInstance().getMainScene().beatmapInfo;
@@ -732,20 +717,19 @@ public class MainActivity extends BaseGameActivity implements
 
             if (Multiplayer.isConnected()
                     && (getEngine().getScene() == RoomScene.INSTANCE
-                    || getEngine().getScene() == GlobalManager.getInstance().getSongMenu().getScene()))
-            {
-                Execution.asyncIgnoreExceptions(() -> RoomScene.INSTANCE.invalidateStatus());
+                    || getEngine().getScene() == GlobalManager.getInstance().getSongMenu().getScene())) {
+                Execution.asyncIgnoreExceptions(RoomScene.INSTANCE::invalidateStatus);
             }
         }
 
         if (hasFocus && Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT && Config.isHideNaviBar()) {
             getWindow().getDecorView().setSystemUiVisibility(
-                View.SYSTEM_UI_FLAG_LAYOUT_STABLE
-                | View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION
-                | View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN
-                | View.SYSTEM_UI_FLAG_HIDE_NAVIGATION
-                | View.SYSTEM_UI_FLAG_FULLSCREEN
-                | View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY);
+                    View.SYSTEM_UI_FLAG_LAYOUT_STABLE
+                            | View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION
+                            | View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN
+                            | View.SYSTEM_UI_FLAG_HIDE_NAVIGATION
+                            | View.SYSTEM_UI_FLAG_FULLSCREEN
+                            | View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY);
         }
     }
 
@@ -801,14 +785,12 @@ public class MainActivity extends BaseGameActivity implements
                 && GlobalManager.getInstance().getSongMenu() != null
                 && GlobalManager.getInstance().getEngine().getScene() == GlobalManager.getInstance().getSongMenu().getScene()
                 && GlobalManager.getInstance().getSongMenu().getScene().hasChildScene()) {
-            if (FilterMenu.getInstance().getClass() == FilterMenu.class) {
-                if (GlobalManager.getInstance().getSongMenu().getScene().getChildScene() == FilterMenu.getInstance()
-                        .getScene()) {
-                    if (keyCode == KeyEvent.KEYCODE_ENTER) {
-                        InputManager.getInstance().toggleKeyboard();
-                    }
-                    FilterMenu.getInstance().hideMenu();
+            if (GlobalManager.getInstance().getSongMenu().getScene().getChildScene() ==
+                    GlobalManager.getInstance().getSongMenu().getFilterMenu().getScene()) {
+                if (keyCode == KeyEvent.KEYCODE_ENTER) {
+                    InputManager.getInstance().toggleKeyboard();
                 }
+                GlobalManager.getInstance().getSongMenu().getFilterMenu().hideMenu();
             }
 
             if (GlobalManager.getInstance().getSongMenu().getScene().getChildScene() == ModMenu.getInstance().getScene()) {
@@ -820,7 +802,7 @@ public class MainActivity extends BaseGameActivity implements
         if (GlobalManager.getInstance().getSongMenu() != null && GlobalManager.getInstance().getEngine() != null
                 && keyCode == KeyEvent.KEYCODE_MENU
                 && GlobalManager.getInstance().getEngine().getScene() == GlobalManager.getInstance().getSongMenu().getScene()
-                && GlobalManager.getInstance().getSongMenu().getScene().hasChildScene() == false) {
+                && !GlobalManager.getInstance().getSongMenu().getScene().hasChildScene()) {
             GlobalManager.getInstance().getSongMenu().stopScroll(0);
             GlobalManager.getInstance().getSongMenu().showPropertiesMenu(null);
             return true;
@@ -845,8 +827,7 @@ public class MainActivity extends BaseGameActivity implements
 
                     if (GlobalManager.getInstance().getEngine().getScene() == RoomScene.INSTANCE) {
 
-                        if (RoomScene.INSTANCE.hasChildScene() && RoomScene.INSTANCE.getChildScene() == ModMenu.getInstance().getScene())
-                        {
+                        if (RoomScene.INSTANCE.hasChildScene() && RoomScene.INSTANCE.getChildScene() == ModMenu.getInstance().getScene()) {
                             ModMenu.getInstance().hide();
                             return true;
                         }
@@ -874,7 +855,7 @@ public class MainActivity extends BaseGameActivity implements
     }
 
     public void forcedExit() {
-        if(GlobalManager.getInstance().getEngine().getScene() == GlobalManager.getInstance().getGameScene().getScene()) {
+        if (GlobalManager.getInstance().getEngine().getScene() == GlobalManager.getInstance().getGameScene().getScene()) {
             GlobalManager.getInstance().getGameScene().quit();
         }
         GlobalManager.getInstance().getEngine().setScene(GlobalManager.getInstance().getMainScene().getScene());
@@ -885,10 +866,10 @@ public class MainActivity extends BaseGameActivity implements
         long versionCode = 0;
         try {
             PackageInfo packageInfo = getPackageManager().getPackageInfo(
-                getPackageName(), 0);
-            if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
+                    getPackageName(), 0);
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
                 versionCode = packageInfo.getLongVersionCode();
-            }else {
+            } else {
                 versionCode = packageInfo.versionCode;
             }
         } catch (PackageManager.NameNotFoundException e) {
@@ -899,17 +880,17 @@ public class MainActivity extends BaseGameActivity implements
 
     public float getRefreshRate() {
         return ((WindowManager) getSystemService(Context.WINDOW_SERVICE))
-            .getDefaultDisplay()
-            .getRefreshRate();
+                .getDefaultDisplay()
+                .getRefreshRate();
     }
 
     private boolean checkPermissions() {
-        if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.R &&
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R &&
                 Environment.isExternalStorageManager()) {
             return true;
-        }else if (Build.VERSION.SDK_INT < Build.VERSION_CODES.R &&
+        } else if (Build.VERSION.SDK_INT < Build.VERSION_CODES.R &&
                 PermissionChecker.checkCallingOrSelfPermission(this, Manifest.permission.WRITE_EXTERNAL_STORAGE)
-                == PermissionChecker.PERMISSION_GRANTED) {
+                        == PermissionChecker.PERMISSION_GRANTED) {
             return true;
         } else {
             Intent grantPermission = new Intent(this, PermissionActivity.class);

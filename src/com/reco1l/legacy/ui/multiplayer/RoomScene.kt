@@ -12,8 +12,8 @@ import com.reco1l.api.ibancho.data.TeamMode.HEAD_TO_HEAD
 import com.reco1l.api.ibancho.data.TeamMode.TEAM_VS_TEAM
 import com.reco1l.api.ibancho.data.WinCondition.*
 import com.reco1l.framework.extensions.ignoreException
-import com.reco1l.framework.lang.glThread
-import com.reco1l.framework.lang.uiThread
+import com.reco1l.framework.lang.updateThread
+import com.reco1l.framework.lang.mainThread
 import com.reco1l.legacy.Multiplayer
 import com.reco1l.legacy.data.modsToString
 import com.reco1l.legacy.ui.entity.BeatmapButton
@@ -281,7 +281,7 @@ object RoomScene : Scene(), IRoomEventListener, IPlayerEventListener
                     RoomAPI.notifyMatchPlay()
                     return true
                 }
-                else uiThread {
+                else mainThread {
                     options = RoomOptions()
                     options!!.show()
                 }
@@ -336,7 +336,7 @@ object RoomScene : Scene(), IRoomEventListener, IPlayerEventListener
                     this.setScale(1f)
 
                     if (!moved)
-                        uiThread { leaveDialog.show() }
+                        mainThread { leaveDialog.show() }
                     return true
                 }
                 if (event.isActionOutside || event.isActionMove && MathUtils.distance(dx, dy, localX, localY) > 50)
@@ -432,7 +432,7 @@ object RoomScene : Scene(), IRoomEventListener, IPlayerEventListener
     // Update events
 
     @JvmStatic
-    fun updateOnlinePanel() = glThread {
+    fun updateOnlinePanel() = updateThread {
 
         onlinePanel.setInfo()
         onlinePanel.setAvatar()
@@ -588,11 +588,11 @@ object RoomScene : Scene(), IRoomEventListener, IPlayerEventListener
         chat.log.clear()
         chat.dismiss()
 
-        uiThread {
+        mainThread {
             playerList?.menu?.dismiss()
             options?.dismiss()
 
-            glThread {
+            updateThread {
                 getModMenu().hide()
 
                 playerList?.detachSelf()
@@ -822,7 +822,7 @@ object RoomScene : Scene(), IRoomEventListener, IPlayerEventListener
         chat.onSystemChatMessage("Player ${room!!.playersMap[uid]?.name} is now the room host.", "#007BFF")
 
         // Reloading mod menu
-        glThread {
+        updateThread {
             getModMenu().hide(false)
 
             // Reloading buttons sprites
@@ -982,7 +982,7 @@ object RoomScene : Scene(), IRoomEventListener, IPlayerEventListener
             getGlobal().gameScene.startGame(getGlobal().selectedTrack, null)
 
             // Hiding any player menu if its shown
-            uiThread { playerList!!.menu.dismiss() }
+            mainThread { playerList!!.menu.dismiss() }
         }
 
         // Updating player list
@@ -1056,7 +1056,7 @@ object RoomScene : Scene(), IRoomEventListener, IPlayerEventListener
             }
 
             back()
-            uiThread {
+            mainThread {
                 AlertDialog.Builder(getGlobal().mainActivity).apply {
 
                     setTitle("Message")
