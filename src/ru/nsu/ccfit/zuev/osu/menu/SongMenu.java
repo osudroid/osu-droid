@@ -10,9 +10,9 @@ import com.edlplan.ui.fragment.FilterMenuFragment;
 import com.edlplan.ui.fragment.PropsMenuFragment;
 import com.edlplan.ui.fragment.ScoreMenuFragment;
 import com.reco1l.api.ibancho.RoomAPI;
+import com.reco1l.framework.lang.Execution;
 import com.reco1l.legacy.Multiplayer;
 import com.reco1l.legacy.ui.multiplayer.RoomScene;
-import com.reco1l.framework.lang.execution.Async;
 import com.rian.difficultycalculator.attributes.DifficultyAttributes;
 import com.rian.difficultycalculator.calculator.DifficultyCalculationParameters;
 
@@ -46,7 +46,6 @@ import ru.nsu.ccfit.zuev.osu.ResourceManager;
 import ru.nsu.ccfit.zuev.osu.ToastLogger;
 import ru.nsu.ccfit.zuev.osu.TrackInfo;
 import ru.nsu.ccfit.zuev.osu.Utils;
-import ru.nsu.ccfit.zuev.osu.async.SyncTaskManager;
 import ru.nsu.ccfit.zuev.osu.beatmap.BeatmapData;
 import ru.nsu.ccfit.zuev.osu.beatmap.parser.BeatmapParser;
 import ru.nsu.ccfit.zuev.osu.game.GameHelper;
@@ -1071,7 +1070,7 @@ public class SongMenu implements IUpdateHandler, MenuItemListener,
         mapper.setText(mapperStr);
         beatmapInfo2.setText(binfoStr2);
         changeDimensionInfo(track);
-        Async.run(() -> {
+        Execution.async(() -> {
             BeatmapData beatmapData = new BeatmapParser(track.getFilename()).parse(true);
 
             if (beatmapData == null) {
@@ -1117,7 +1116,7 @@ public class SongMenu implements IUpdateHandler, MenuItemListener,
         }
 
         if (board.isShowOnlineScores()) {
-            Async.run(this::setRank);
+            Execution.async(this::setRank);
         }
 
         if (selectedTrack == track) {
@@ -1173,7 +1172,7 @@ public class SongMenu implements IUpdateHandler, MenuItemListener,
             }
         }
 
-        Async.run(() -> {
+        Execution.async(() -> {
             synchronized (backgroundMutex) {
                 final TextureRegion tex = Config.isSafeBeatmapBg() || track.getBackground() == null?
                         ResourceManager.getInstance().getTexture("menu-background") :
@@ -1188,7 +1187,7 @@ public class SongMenu implements IUpdateHandler, MenuItemListener,
                     bg.setColor(0, 0, 0);
                 }
 
-                SyncTaskManager.getInstance().run(() -> {
+                Execution.updateThread(() -> {
                     synchronized (backgroundMutex) {
                         if (bg == null) {
                             final TextureRegion tex1 = ResourceManager
@@ -1233,7 +1232,7 @@ public class SongMenu implements IUpdateHandler, MenuItemListener,
             engine.setScene(new LoadingScreen().getScene());
             ToastLogger.showTextId(com.edlplan.osudroidresource.R.string.online_loadrecord, false);
 
-            Async.run(() -> {
+            Execution.async(() -> {
                 try {
                     String scorePack = OnlineManager.getInstance().getScorePack(id);
                     String[] params = scorePack.split("\\s+");
@@ -1374,7 +1373,7 @@ public class SongMenu implements IUpdateHandler, MenuItemListener,
             return;
         }
 
-        Async.run(() -> {
+        Execution.async(() -> {
             synchronized (musicMutex) {
                 if (GlobalManager.getInstance().getSongService() != null) {
                     GlobalManager.getInstance().getSongService().stop();
