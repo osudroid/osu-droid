@@ -1,7 +1,6 @@
 package ru.nsu.ccfit.zuev.osu.scoring;
 
 import com.edlplan.framework.utils.functionality.SmartIterator;
-import com.edlplan.ui.fragment.InGameSettingMenu;
 import com.reco1l.framework.lang.Execution;
 import com.reco1l.legacy.Multiplayer;
 import com.reco1l.legacy.ui.multiplayer.RoomScene;
