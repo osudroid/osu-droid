@@ -1,6 +1,8 @@
 package ru.nsu.ccfit.zuev.osu.menu;
 
 import android.database.Cursor;
+
+import com.reco1l.framework.lang.Execution;
 import com.reco1l.legacy.Multiplayer;
 import org.anddev.andengine.entity.Entity;
 import org.anddev.andengine.entity.scene.Scene;
@@ -15,7 +17,6 @@ import org.anddev.andengine.util.Debug;
 import org.anddev.andengine.util.MathUtils;
 import org.jetbrains.annotations.Nullable;
 import ru.nsu.ccfit.zuev.osu.*;
-import ru.nsu.ccfit.zuev.osu.async.SyncTaskManager;
 import ru.nsu.ccfit.zuev.osu.game.GameHelper;
 import ru.nsu.ccfit.zuev.osu.helper.StringTable;
 import ru.nsu.ccfit.zuev.osu.online.OnlineManager;
@@ -363,7 +364,7 @@ public class ScoreBoard extends Entity implements ScrollDetector.IScrollDetector
         wasOnline = showOnlineScores;
         scoreItems = null;
 
-        SyncTaskManager.getInstance().run(() -> {
+        Execution.updateThread(() -> {
 
             detachChildren();
             currentAvatarTask = null;

@@ -3,7 +3,6 @@ package ru.nsu.ccfit.zuev.osu.menu;
 import com.edlplan.ui.fragment.InGameSettingMenu;
 import com.reco1l.api.ibancho.RoomAPI;
 import com.reco1l.framework.lang.Execution;
-import com.reco1l.framework.lang.execution.Async;
 import com.reco1l.legacy.data.MultiplayerConverter;
 import com.reco1l.legacy.Multiplayer;
 import com.reco1l.api.ibancho.data.RoomMods;
@@ -87,7 +86,7 @@ public class ModMenu implements IModSwitcher {
             menu = new InGameSettingMenu();
         }
 
-        Execution.uiThread(menu::show);
+        Execution.mainThread(menu::show);
         update();
     }
 
@@ -318,7 +317,7 @@ public class ModMenu implements IModSwitcher {
             public boolean onAreaTouched(final TouchEvent pSceneTouchEvent,
                                          final float pTouchAreaLocalX, final float pTouchAreaLocalY) {
                 if (pSceneTouchEvent.isActionUp()) {
-                    Async.run(() -> {
+                    Execution.async(() -> {
                         if (GlobalManager.getInstance().getSongMenu().getSelectedTrack() != null) {
                             try (var parser = new BeatmapParser(
                                     GlobalManager.getInstance().getSongMenu().getSelectedTrack().getFilename()

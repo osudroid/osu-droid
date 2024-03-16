@@ -8,6 +8,7 @@ import android.os.PowerManager;
 import android.util.Log;
 
 import com.edlplan.ui.fragment.ConfirmDialogFragment;
+import com.reco1l.framework.lang.Execution;
 import com.reco1l.legacy.ui.ChimuWebView;
 import com.reco1l.legacy.ui.MainMenu;
 
@@ -59,7 +60,6 @@ import javax.microedition.khronos.opengles.GL10;
 
 import ru.nsu.ccfit.zuev.audio.BassSoundProvider;
 import ru.nsu.ccfit.zuev.audio.Status;
-import ru.nsu.ccfit.zuev.osu.async.SyncTaskManager;
 import ru.nsu.ccfit.zuev.osu.game.SongProgressBar;
 import ru.nsu.ccfit.zuev.osu.game.TimingPoint;
 import ru.nsu.ccfit.zuev.osu.helper.ModifierFactory;
@@ -513,7 +513,7 @@ public class MainScene implements IUpdateHandler {
 
     public void reloadOnlinePanel() {
         // IndexOutOfBoundsException 141 fix
-        SyncTaskManager.getInstance().run(() -> {
+        Execution.updateThread(() -> {
             scene.detachChild(OnlineScoring.getInstance().getPanel());
             createOnlinePanel(scene);
         });

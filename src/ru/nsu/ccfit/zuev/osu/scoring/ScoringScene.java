@@ -585,7 +585,7 @@ public class ScoringScene {
 
             if (selector != null) {
                 var oldSelector = selector;
-                Execution.glThread(() -> {
+                Execution.updateThread(() -> {
                     oldSelector.detachSelf();
                     oldSelector.detachChildren();
 

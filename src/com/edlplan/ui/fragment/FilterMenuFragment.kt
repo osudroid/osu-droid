@@ -16,7 +16,7 @@ import com.edlplan.framework.easing.Easing
 import com.edlplan.framework.support.util.Updater
 import com.edlplan.ui.BaseAnimationListener
 import com.edlplan.ui.EasingHelper
-import com.reco1l.framework.lang.uiThread
+import com.reco1l.framework.lang.mainThread
 import org.anddev.andengine.engine.handler.IUpdateHandler
 import org.anddev.andengine.entity.scene.Scene
 import ru.nsu.ccfit.zuev.osu.helper.InputManager
@@ -77,7 +77,7 @@ class FilterMenuFragment : BaseFragment(), IUpdateHandler, IFilterMenu {
 
     override fun loadConfig(context: Context?) {
         configContext = context
-        uiThread(this::reloadViewData)
+        mainThread(this::reloadViewData)
     }
 
     override fun getScene(): Scene = scene!!
