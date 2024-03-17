@@ -248,14 +248,15 @@ class DroidDifficultyCalculator : DifficultyCalculator<DroidDifficultyHitObject,
         val clockRate = parameters?.totalSpeedMultiplier?.toDouble() ?: 1.0
 
         beatmap.hitObjects.objects.let {
-            for (i in 1 until it.size) {
+            for (i in 0 until it.size) {
                 add(
-                    DroidDifficultyHitObject(it[i],
-                        it[i - 1],
+                    DroidDifficultyHitObject(
+                        it[i],
+                        it.getOrNull(i - 1),
                         it.getOrNull(i - 2),
                         clockRate,
                         this,
-                        size,
+                        size - 1,
                         (parameters?.mods?.find { m -> m is ModDifficultyAdjust } as ModDifficultyAdjust?)?.ar != null
                     ).also { d -> d.computeProperties(clockRate, it) }
                 )

@@ -19,7 +19,7 @@ class DroidDifficultyHitObject(
     /**
      * The [HitObject] that occurs before [obj].
      */
-    lastObj: HitObject,
+    lastObj: HitObject?,
 
     /**
      * The [HitObject] that occurs before [lastObj].
@@ -92,15 +92,19 @@ class DroidDifficultyHitObject(
         setVisuals(clockRate, objects)
     }
 
+    override fun previous(backwardsIndex: Int) = difficultyHitObjects.getOrNull(index - backwardsIndex)
+
+    override fun next(forwardsIndex: Int) = difficultyHitObjects.getOrNull(index + forwardsIndex + 2)
+
     /**
      * Determines whether this [DroidDifficultyHitObject] is considered overlapping with the [DroidDifficultyHitObject]
      * before it.
      *
-     * Keep in mind that "overlapping" in this case is overlapping to the point where both hitobjects
+     * Keep in mind that "overlapping" in this case is overlapping to the point where both [DroidDifficultyHitObject]s
      * can be hit with just a single tap in osu!droid.
      *
-     * @param considerDistance Whether to consider the distance between both hitobjects.
-     * @returns Whether the hitobject is considered overlapping.
+     * @param considerDistance Whether to consider the distance between both [DroidDifficultyHitObject]s.
+     * @returns Whether the [DroidDifficultyHitObject] is considered overlapping.
      */
     fun isOverlapping(considerDistance: Boolean): Boolean {
         if (obj is Spinner) {
@@ -158,6 +162,10 @@ class DroidDifficultyHitObject(
         for (i in 0 until index) {
             val prev = previous(i) ?: continue
 
+            if (prev.obj is Spinner) {
+                continue
+            }
+
             if (prev.obj.startTime >= obj.startTime) {
                 continue
             }
@@ -178,13 +186,16 @@ class DroidDifficultyHitObject(
 
         for (hitObject in nextVisibleObjects) {
             val distance = hitObject.getStackedPosition(mode).getDistance(obj.getStackedEndPosition(mode))
+
+            // We are not using clock rate adjusted delta time here for note density calculation.
             val deltaTime = hitObject.startTime - obj.getEndTime()
 
             if (deltaTime >= 0) {
                 noteDensity += 1 - deltaTime / obj.timePreempt
             }
 
-            applyToOverlappingFactor(distance, deltaTime)
+            // But for overlapping factor, we need to use clock rate adjusted delta time.
+            applyToOverlappingFactor(distance, deltaTime / clockRate)
         }
     }
 

@@ -24,7 +24,7 @@ abstract class DifficultyHitObject(
     /**
      * The [HitObject] that occurs before [obj].
      */
-    private val lastObj: HitObject,
+    private val lastObj: HitObject?,
 
     /**
      * The [HitObject] that occurs before [lastObj].
@@ -39,7 +39,7 @@ abstract class DifficultyHitObject(
     /**
      * Other hit objects in the beatmap, including this hit object.
      */
-    private val difficultyHitObjects: MutableList<out DifficultyHitObject>,
+    protected val difficultyHitObjects: MutableList<out DifficultyHitObject>,
 
     /**
      * The index of this hit object in the list of all hit objects.
@@ -101,14 +101,14 @@ abstract class DifficultyHitObject(
      * The amount of milliseconds elapsed between this hit object and the last hit object.
      */
     @JvmField
-    val deltaTime = (obj.startTime - lastObj.startTime) / clockRate
+    val deltaTime = if (lastObj != null) (obj.startTime - lastObj.startTime) / clockRate else 0.0
 
     /**
      * The amount of milliseconds elapsed since the start time of the previous hit object, with a minimum of 25ms.
      */
     // Capped to 25ms to prevent difficulty calculation breaking from simultaneous objects.
     @JvmField
-    val strainTime = max(deltaTime, MIN_DELTA_TIME)
+    val strainTime = if (lastObj != null) max(deltaTime, MIN_DELTA_TIME) else 0.0
 
     /**
      * Adjusted start time of the hit object, taking speed multiplier into account.
@@ -145,7 +145,7 @@ abstract class DifficultyHitObject(
      * @return The [DifficultyHitObject] at the index with respect to the current
      * [DifficultyHitObject]'s index, or `null` if the index is out of range.
      */
-    fun previous(backwardsIndex: Int) = difficultyHitObjects.getOrNull(index - (backwardsIndex + 1))
+    open fun previous(backwardsIndex: Int) = difficultyHitObjects.getOrNull(index - (backwardsIndex + 1))
 
     /**
      * Gets the [DifficultyHitObject] at a specific index with respect to the current
@@ -157,7 +157,7 @@ abstract class DifficultyHitObject(
      * @return The [DifficultyHitObject] at the index with respect to the current
      * [DifficultyHitObject]'s index, or `null` if the index is out of range.
      */
-    fun next(forwardsIndex: Int) = difficultyHitObjects.getOrNull(index + forwardsIndex + 1)
+    open fun next(forwardsIndex: Int) = difficultyHitObjects.getOrNull(index + forwardsIndex + 1)
 
     /**
      * Calculates the opacity of the hit object at a given time.
@@ -204,7 +204,7 @@ abstract class DifficultyHitObject(
 
         // We don't need to calculate either angle or distance when one of the last->curr objects
         // is a spinner or there is no object before the current object.
-        if (obj is Spinner || lastObj is Spinner) {
+        if (lastObj == null || obj is Spinner || lastObj is Spinner) {
             return
         }
 
@@ -268,7 +268,7 @@ abstract class DifficultyHitObject(
 
         if (mode == GameMode.Droid) {
             // Temporary lazy end position until a real result can be derived.
-            slider.lazyEndPosition = slider.getStackedPosition(this.mode)
+            slider.lazyEndPosition = slider.getStackedPosition(mode)
 
             // Stop here if the slider has very short duration, allowing the player to essentially
             // complete the slider without movement, making travel distance and time irrelevant.

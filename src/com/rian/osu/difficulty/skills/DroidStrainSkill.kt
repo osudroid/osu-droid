@@ -53,6 +53,10 @@ abstract class DroidStrainSkill(
     }
 
     override fun process(current: DroidDifficultyHitObject) {
+        if (current.index < 0) {
+            return
+        }
+
         super.process(current)
 
         objectStrains.add(objectStrain)

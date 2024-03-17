@@ -122,7 +122,8 @@ class StandardDifficultyCalculator : DifficultyCalculator<StandardDifficultyHitO
         beatmap.hitObjects.objects.let {
             for (i in 1 until it.size) {
                 add(
-                    StandardDifficultyHitObject(it[i],
+                    StandardDifficultyHitObject(
+                        it[i],
                         it[i - 1],
                         it.getOrNull(i - 2),
                         clockRate,
