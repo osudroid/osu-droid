@@ -318,19 +318,20 @@ class DroidPerformanceCalculator(
 
         var od = overallDifficulty.toFloat()
         var hitWindow = if (isPrecise) PreciseDroidHitWindow(od) else DroidHitWindow(od)
-        var greatWindow = hitWindow.greatWindow
+        var realGreatWindow = hitWindow.greatWindow
 
         if (!forceOD) {
-            greatWindow *= clockRate.toFloat()
+            realGreatWindow *= clockRate.toFloat()
         }
 
         // Obtain the good and meh hit window for osu!droid.
         od =
-            if (isPrecise) PreciseDroidHitWindow.hitWindow300ToOverallDifficulty(greatWindow)
-            else DroidHitWindow.hitWindow300ToOverallDifficulty(greatWindow)
+            if (isPrecise) PreciseDroidHitWindow.hitWindow300ToOverallDifficulty(realGreatWindow)
+            else DroidHitWindow.hitWindow300ToOverallDifficulty(realGreatWindow)
 
         hitWindow = if (isPrecise) PreciseDroidHitWindow(od) else DroidHitWindow(od)
 
+        val greatWindow = hitWindow.greatWindow / clockRate
         val okWindow = hitWindow.okWindow / clockRate
         val mehWindow = hitWindow.mehWindow / clockRate
 
@@ -396,19 +397,20 @@ class DroidPerformanceCalculator(
 
         var od = overallDifficulty.toFloat()
         var hitWindow = if (isPrecise) PreciseDroidHitWindow(od) else DroidHitWindow(od)
-        var greatWindow = hitWindow.greatWindow
+        var realGreatWindow = hitWindow.greatWindow
 
         if (!forceOD) {
-            greatWindow *= clockRate.toFloat()
+            realGreatWindow *= clockRate.toFloat()
         }
 
         // Obtain the good and meh hit window for osu!droid.
         od =
-            if (isPrecise) PreciseDroidHitWindow.hitWindow300ToOverallDifficulty(greatWindow)
-            else DroidHitWindow.hitWindow300ToOverallDifficulty(greatWindow)
+            if (isPrecise) PreciseDroidHitWindow.hitWindow300ToOverallDifficulty(realGreatWindow)
+            else DroidHitWindow.hitWindow300ToOverallDifficulty(realGreatWindow)
 
         hitWindow = if (isPrecise) PreciseDroidHitWindow(od) else DroidHitWindow(od)
 
+        val greatWindow = hitWindow.greatWindow / clockRate
         val okWindow = hitWindow.okWindow / clockRate
         val mehWindow = hitWindow.mehWindow / clockRate
 
