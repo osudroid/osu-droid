@@ -523,7 +523,8 @@ object ErrorFunction {
     private fun erfImp(z: Double, invert: Boolean): Double {
         if (z < 0) {
             if (!invert) {
-                return -erfImp(-z, false)            }
+                return -erfImp(-z, false)
+            }
 
             if (z < -0.5) {
                 return 2 - erfImp(-z, true)
