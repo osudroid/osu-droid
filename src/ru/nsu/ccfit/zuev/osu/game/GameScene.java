@@ -30,6 +30,7 @@ import org.andengine.engine.camera.SmoothCamera;
 import org.andengine.engine.handler.IUpdateHandler;
 import org.andengine.engine.options.TouchOptions;
 import org.andengine.entity.IEntity;
+import org.andengine.entity.modifier.AlphaModifier;
 import org.andengine.entity.modifier.FadeOutModifier;
 import org.andengine.entity.modifier.LoopEntityModifier;
 import org.andengine.entity.modifier.MoveXModifier;
@@ -205,6 +206,9 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
 
     /**The combo indicator text shadow*/
     private SpriteText comboTextShadow;
+
+    /**The combo indicator text shadow modifier*/
+    private ParallelEntityModifier comboTextShadowModifier;
 
     /**The accuracy indicator text*/
     private SpriteText accuracyText;
@@ -1012,6 +1016,15 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
             comboTextShadow.setCharacterScale(1.5f);
             comboTextShadow.setAlpha(0f);
 
+            comboTextShadowModifier = new ParallelEntityModifier(
+                new AlphaModifier(0.2f, 0.25f, 0f),
+                new ScaleModifier(0.2f, 1.5f, 1f, new ModifierListener() {
+                    public void onModifierFinished(IModifier<IEntity> pModifier, IEntity pItem) {
+                        comboText.setText(stat.getCombo() + "x");
+                    }
+                })
+            );
+
             fgScene.attachChild(comboText);
             fgScene.attachChild(comboTextShadow);
             fgScene.attachChild(accuracyText);
@@ -1588,18 +1601,9 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
                     comboText.setText(comboTextShadow.getText());
 
                     comboTextShadow.setText(newText);
-                    comboTextShadow.clearEntityModifiers();
+                    comboTextShadowModifier.reset();
 
-                    comboTextShadow.setAlpha(0.25f);
-                    comboTextShadow.setScale(1.5f);
-
-                    comboTextShadow.registerEntityModifier(new FadeOutModifier(0.2f));
-                    comboTextShadow.registerEntityModifier(new ScaleModifier(0.2f, 1.5f, 1f, new ModifierListener() {
-
-                        public void onModifierFinished(IModifier<IEntity> pModifier, IEntity pItem) {
-                            comboText.setText(newText);
-                        }
-                    }));
+                    comboTextShadow.registerEntityModifier(comboTextShadowModifier);
                 }
             } else {
                 comboText.setText(stat.getCombo() + "x");
