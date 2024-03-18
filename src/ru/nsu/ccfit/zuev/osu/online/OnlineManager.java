@@ -119,7 +119,7 @@ public class OnlineManager {
         this.username = username;
         this.password = password;
 
-        PostBuilder post = new PostBuilder();
+        PostBuilder post = new URLEncodedPostBuilder();
         post.addParam("username", username);
         post.addParam(
                 "password",
@@ -186,7 +186,7 @@ public class OnlineManager {
         else
             osuID = null;
 
-        PostBuilder post = new PostBuilder();
+        PostBuilder post = new URLEncodedPostBuilder();
         post.addParam("userID", String.valueOf(userId));
         post.addParam("ssid", ssid);
         post.addParam("filename", trackfile.getName());
@@ -235,7 +235,7 @@ public class OnlineManager {
 
         Debug.i("Sending record...");
 
-        PostBuilder post = new PostBuilder();
+        PostBuilder post = new URLEncodedPostBuilder();
         post.addParam("userID", String.valueOf(userId));
         post.addParam("playID", playID);
         post.addParam("data", data);
@@ -275,7 +275,7 @@ public class OnlineManager {
     }
 
     public ArrayList<String> getTop(final File trackFile, final String hash) throws OnlineManagerException {
-        PostBuilder post = new PostBuilder();
+        PostBuilder post = new URLEncodedPostBuilder();
         post.addParam("filename", trackFile.getName());
         post.addParam("hash", hash);
         post.addParam("uid", String.valueOf(userId));
@@ -363,7 +363,7 @@ public class OnlineManager {
     }
 
     public String getScorePack(int playid) throws OnlineManagerException {
-        PostBuilder post = new PostBuilder();
+        PostBuilder post = new URLEncodedPostBuilder();
         post.addParam("playID", String.valueOf(playid));
 
         ArrayList<String> response = sendRequest(post, endpoint + "gettop.php");
