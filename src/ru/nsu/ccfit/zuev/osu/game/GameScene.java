@@ -1,5 +1,6 @@
 package ru.nsu.ccfit.zuev.osu.game;
 
+import android.graphics.Point;
 import android.graphics.PointF;
 import android.os.Build;
 import android.os.SystemClock;
@@ -973,7 +974,6 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
         }
         GameHelper.setGlobalTime(0);
 
-        float effectOffset = 155 - 25;
         breakAnimator = new BreakAnimator(this, fgScene, stat, beatmapData.general.letterboxInBreaks, dimRectangle);
         if(!Config.isHideInGameUI()){
             scorebar = new ScoreBar(this, fgScene, stat);
@@ -997,250 +997,33 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
                 scoreShadow.attachToScene(bgScene);
                 passiveObjects.add(scoreShadow);
             }
-            if (stat.getMod().contains(GameMod.MOD_AUTO)) {
-                final Sprite autoIcon = new Sprite(Utils.toRes(Config.getRES_WIDTH() - 140),
-                        Utils.toRes(100), ResourceManager.getInstance().getTexture(
-                        "selection-mod-autoplay"));
-                bgScene.attachChild(autoIcon);
-                effectOffset += 25;
-            } else if (stat.getMod().contains(GameMod.MOD_RELAX)) {
-                final Sprite autoIcon = new Sprite(Utils.toRes(Config.getRES_WIDTH() - 140),
-                        Utils.toRes(98), ResourceManager.getInstance().getTexture(
-                        "selection-mod-relax"));
-                bgScene.attachChild(autoIcon);
-                effectOffset += 25;
-            } else if (stat.getMod().contains(GameMod.MOD_AUTOPILOT)) {
-                final Sprite autoIcon = new Sprite(Utils.toRes(Config.getRES_WIDTH() - 140),
-                        Utils.toRes(98), ResourceManager.getInstance().getTexture(
-                        "selection-mod-relax2"));
-                bgScene.attachChild(autoIcon);
-                effectOffset += 25;
-            }
-    
+
             if (Config.isComboburst()) {
                 comboBurst = new ComboBurst(Config.getRES_WIDTH(), Config.getRES_HEIGHT());
                 comboBurst.attachAll(bgScene);
             }
-        }
 
-        float timeOffset = 0;
-        if (stat.getMod().contains(GameMod.MOD_SCOREV2)) {
-            final GameEffect effect = GameObjectPool.getInstance().getEffect(
-                    "selection-mod-scorev2");
-            effect.init(
-                    fgScene,
-                    new PointF(Utils.toRes(Config.getRES_WIDTH() - effectOffset), Utils
-                            .toRes(130)),
-                    scale,
-                    new SequenceEntityModifier(ModifierFactory
-                            .newScaleModifier(0.25f, 1.2f, 1), ModifierFactory
-                            .newDelayModifier(2), new ParallelEntityModifier(
-                            ModifierFactory.newFadeOutModifier(0.5f),
-                            ModifierFactory.newScaleModifier(0.5f, 1, 1.5f))));
-            effectOffset += 25;
-            timeOffset += 0.25f;
-        }
-        if (stat.getMod().contains(GameMod.MOD_EASY)) {
-            final GameEffect effect = GameObjectPool.getInstance().getEffect(
-                    "selection-mod-easy");
-            effect.init(
-                    fgScene,
-                    new PointF(Utils.toRes(Config.getRES_WIDTH() - effectOffset), Utils
-                            .toRes(130)),
-                    scale,
-                    new SequenceEntityModifier(ModifierFactory
-                            .newScaleModifier(0.25f, 1.2f, 1), ModifierFactory
-                            .newDelayModifier(2), new ParallelEntityModifier(
-                            ModifierFactory.newFadeOutModifier(0.5f),
-                            ModifierFactory.newScaleModifier(0.5f, 1, 1.5f))));
-            effectOffset += 25;
-            timeOffset += 0.25f;
-        } else if (stat.getMod().contains(GameMod.MOD_HARDROCK)) {
-            final GameEffect effect = GameObjectPool.getInstance().getEffect(
-                    "selection-mod-hardrock");
-            effect.init(
-                    fgScene,
-                    new PointF(Utils.toRes(Config.getRES_WIDTH() - effectOffset), Utils
-                            .toRes(130)),
-                    scale,
-                    new SequenceEntityModifier(ModifierFactory
-                            .newScaleModifier(0.25f, 1.2f, 1), ModifierFactory
-                            .newDelayModifier(2), new ParallelEntityModifier(
-                            ModifierFactory.newFadeOutModifier(0.5f),
-                            ModifierFactory.newScaleModifier(0.5f, 1, 1.5f))));
-            effectOffset += 25;
-            timeOffset += 0.25f;
-        }
-        if (stat.getMod().contains(GameMod.MOD_NOFAIL)) {
-            final GameEffect effect = GameObjectPool.getInstance().getEffect(
-                    "selection-mod-nofail");
-            effect.init(
-                    fgScene,
-                    new PointF(Utils.toRes(Config.getRES_WIDTH() - effectOffset), Utils
-                            .toRes(130)),
-                    scale,
-                    new SequenceEntityModifier(ModifierFactory
-                            .newScaleModifier(0.25f, 1.2f, 1), ModifierFactory
-                            .newDelayModifier(2 - timeOffset),
-                            new ParallelEntityModifier(ModifierFactory
-                                    .newFadeOutModifier(0.5f), ModifierFactory
-                                    .newScaleModifier(0.5f, 1, 1.5f))));
-            effectOffset += 25;
-            timeOffset += 0.25f;
-        }
-        if (stat.getMod().contains(GameMod.MOD_HIDDEN)) {
-            final GameEffect effect = GameObjectPool.getInstance().getEffect(
-                    "selection-mod-hidden");
-            effect.init(
-                    fgScene,
-                    new PointF(Utils.toRes(Config.getRES_WIDTH() - effectOffset), Utils
-                            .toRes(130)),
-                    scale,
-                    new SequenceEntityModifier(ModifierFactory
-                            .newScaleModifier(0.25f, 1.2f, 1), ModifierFactory
-                            .newDelayModifier(2 - timeOffset),
-                            new ParallelEntityModifier(ModifierFactory
-                                    .newFadeOutModifier(0.5f), ModifierFactory
-                                    .newScaleModifier(0.5f, 1, 1.5f))));
-            effectOffset += 25;
-            timeOffset += 0.25f;
-        }
+            var mods = stat.getMod();
+            var position = new PointF(Config.getRES_WIDTH() - 130, 130);
+            float timeOffset = 0;
 
-        if (stat.getMod().contains(GameMod.MOD_DOUBLETIME)) {
-            final GameEffect effect = GameObjectPool.getInstance().getEffect(
-                    "selection-mod-doubletime");
-            effect.init(
-                    fgScene,
-                    new PointF(Utils.toRes(Config.getRES_WIDTH() - effectOffset), Utils
-                            .toRes(130)),
-                    scale,
-                    new SequenceEntityModifier(ModifierFactory
-                            .newScaleModifier(0.25f, 1.2f, 1), ModifierFactory
-                            .newDelayModifier(2 - timeOffset),
-                            new ParallelEntityModifier(ModifierFactory
-                                    .newFadeOutModifier(0.5f), ModifierFactory
-                                    .newScaleModifier(0.5f, 1, 1.5f))));
-            effectOffset += 25;
-            timeOffset += 0.25f;
-        }
-        if (stat.getMod().contains(GameMod.MOD_NIGHTCORE)) {
-            final GameEffect effect = GameObjectPool.getInstance().getEffect(
-                    "selection-mod-nightcore");
-            effect.init(
-                    fgScene,
-                    new PointF(Utils.toRes(Config.getRES_WIDTH() - effectOffset), Utils
-                            .toRes(130)),
-                    scale,
-                    new SequenceEntityModifier(ModifierFactory
-                            .newScaleModifier(0.25f, 1.2f, 1), ModifierFactory
-                            .newDelayModifier(2 - timeOffset),
-                            new ParallelEntityModifier(ModifierFactory
-                                    .newFadeOutModifier(0.5f), ModifierFactory
-                                    .newScaleModifier(0.5f, 1, 1.5f))));
-            effectOffset += 25;
-            timeOffset += 0.25f;
-        }
-        if (stat.getMod().contains(GameMod.MOD_HALFTIME)) {
-            final GameEffect effect = GameObjectPool.getInstance().getEffect(
-                    "selection-mod-halftime");
-            effect.init(
-                    fgScene,
-                    new PointF(Utils.toRes(Config.getRES_WIDTH() - effectOffset), Utils
-                            .toRes(130)),
-                    scale,
-                    new SequenceEntityModifier(ModifierFactory
-                            .newScaleModifier(0.25f, 1.2f, 1), ModifierFactory
-                            .newDelayModifier(2 - timeOffset),
-                            new ParallelEntityModifier(ModifierFactory
-                                    .newFadeOutModifier(0.5f), ModifierFactory
-                                    .newScaleModifier(0.5f, 1, 1.5f))));
-            effectOffset += 25;
-            timeOffset += 0.25f;
-        }
-        if (stat.getMod().contains(GameMod.MOD_PRECISE)) {
-            final GameEffect effect = GameObjectPool.getInstance().getEffect(
-                    "selection-mod-precise");
-            effect.init(
-                    fgScene,
-                    new PointF(Utils.toRes(Config.getRES_WIDTH() - effectOffset), Utils
-                            .toRes(130)),
-                    scale,
-                    new SequenceEntityModifier(ModifierFactory
-                            .newScaleModifier(0.25f, 1.2f, 1), ModifierFactory
-                            .newDelayModifier(2 - timeOffset),
-                            new ParallelEntityModifier(ModifierFactory
-                                    .newFadeOutModifier(0.5f), ModifierFactory
-                                    .newScaleModifier(0.5f, 1, 1.5f))));
-            effectOffset += 25;
-            timeOffset += 0.25f;
-        }
-        if (stat.getMod().contains(GameMod.MOD_SUDDENDEATH)) {
-            final GameEffect effect = GameObjectPool.getInstance().getEffect(
-                    "selection-mod-suddendeath");
-            effect.init(
-                    fgScene,
-                    new PointF(Utils.toRes(Config.getRES_WIDTH() - effectOffset), Utils
-                            .toRes(130)),
-                    scale,
-                    new SequenceEntityModifier(ModifierFactory
-                            .newScaleModifier(0.25f, 1.2f, 1), ModifierFactory
-                            .newDelayModifier(2 - timeOffset),
-                            new ParallelEntityModifier(ModifierFactory
-                                    .newFadeOutModifier(0.5f), ModifierFactory
-                                    .newScaleModifier(0.5f, 1, 1.5f))));
-            effectOffset += 25;
-            timeOffset += 0.25f;
-        }
-        else if (stat.getMod().contains(GameMod.MOD_PERFECT)) {
-            final GameEffect effect = GameObjectPool.getInstance().getEffect(
-                    "selection-mod-perfect");
-            effect.init(
-                    fgScene,
-                    new PointF(Utils.toRes(Config.getRES_WIDTH() - effectOffset), Utils
-                            .toRes(130)),
-                    scale,
-                    new SequenceEntityModifier(ModifierFactory
-                            .newScaleModifier(0.25f, 1.2f, 1), ModifierFactory
-                            .newDelayModifier(2 - timeOffset),
-                            new ParallelEntityModifier(ModifierFactory
-                                    .newFadeOutModifier(0.5f), ModifierFactory
-                                    .newScaleModifier(0.5f, 1, 1.5f))));
-            effectOffset += 25;
-            timeOffset += 0.25f;
-        }
-        if (stat.getMod().contains(GameMod.MOD_FLASHLIGHT)) {
-            final GameEffect effect = GameObjectPool.getInstance().getEffect(
-                    "selection-mod-flashlight");
-            effect.init(
-                    fgScene,
-                    new PointF(Utils.toRes(Config.getRES_WIDTH() - effectOffset), Utils
-                            .toRes(130)),
-                    scale,
-                    new SequenceEntityModifier(ModifierFactory
-                            .newScaleModifier(0.25f, 1.2f, 1), ModifierFactory
-                            .newDelayModifier(2 - timeOffset),
-                            new ParallelEntityModifier(ModifierFactory
-                                    .newFadeOutModifier(0.5f), ModifierFactory
-                                    .newScaleModifier(0.5f, 1, 1.5f))));
-            effectOffset += 25;
-            timeOffset += 0.25f;
-        }
-        if (stat.getMod().contains(GameMod.MOD_REALLYEASY)) {
-            final GameEffect effect = GameObjectPool.getInstance().getEffect(
-                    "selection-mod-reallyeasy");
-            effect.init(
-                    fgScene,
-                    new PointF(Utils.toRes(Config.getRES_WIDTH() - effectOffset), Utils
-                            .toRes(130)),
-                    scale,
-                    new SequenceEntityModifier(ModifierFactory
-                            .newScaleModifier(0.25f, 1.2f, 1), ModifierFactory
-                            .newDelayModifier(2 - timeOffset),
-                            new ParallelEntityModifier(ModifierFactory
-                                    .newFadeOutModifier(0.5f), ModifierFactory
-                                    .newScaleModifier(0.5f, 1, 1.5f))));
-            effectOffset += 25;
-            timeOffset += 0.25f;
+            for (var mod : mods) {
+
+                var effect = GameObjectPool.getInstance().getEffect(GameMod.getTextureName(mod));
+
+                effect.init(fgScene, position, scale, new SequenceEntityModifier(
+                    ModifierFactory.newScaleModifier(0.25f, 1.2f, 1f),
+                    ModifierFactory.newDelayModifier(2f - timeOffset),
+                    new ParallelEntityModifier(
+                        ModifierFactory.newFadeOutModifier(0.5f),
+                        ModifierFactory.newScaleModifier(0.5f, 1f, 1.5f)
+                    )
+                ));
+
+                position.x -= 25f;
+                timeOffset += 0.25f;
+            }
+
         }
 
         kiaiRect = new Rectangle(0, 0, Config.getRES_WIDTH(),

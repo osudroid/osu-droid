@@ -35,4 +35,26 @@ public enum GameMod {
         this.scoreMultiplier = scoreMultiplier;
         this.unranked = unranked;
     }
+
+
+    public static String getTextureName(GameMod mod) {
+        return "selection-mod-" + switch (mod) {
+            case MOD_NOFAIL -> "nofail";
+            case MOD_AUTO -> "autoplay";
+            case MOD_EASY -> "easy";
+            case MOD_HARDROCK -> "hardrock";
+            case MOD_HIDDEN -> "hidden";
+            case MOD_RELAX -> "relax";
+            case MOD_AUTOPILOT -> "relax2";
+            case MOD_DOUBLETIME -> "doubletime";
+            case MOD_NIGHTCORE -> "nightcore";
+            case MOD_HALFTIME -> "halftime";
+            case MOD_SUDDENDEATH -> "suddendeath";
+            case MOD_PERFECT -> "perfect";
+            case MOD_FLASHLIGHT -> "flashlight";
+            case MOD_PRECISE -> "precise";
+            case MOD_REALLYEASY -> "reallyeasy";
+            case MOD_SCOREV2 -> "scorev2";
+        };
+    }
 }
