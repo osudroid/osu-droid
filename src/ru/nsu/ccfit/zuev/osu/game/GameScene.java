@@ -636,8 +636,6 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
             storyboardSprite.loadStoryboard(track.getFilename());
         }
 
-        GameObjectPool.getInstance().preload();
-
         ppText = null;
         if (Config.isDisplayRealTimePPCounter()) {
             // Calculate timed difficulty attributes
