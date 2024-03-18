@@ -7,8 +7,10 @@ import android.os.Bundle;
 
 import com.google.firebase.analytics.FirebaseAnalytics;
 
+import okhttp3.MediaType;
 import okhttp3.OkHttpClient;
 
+import okhttp3.RequestBody;
 import org.anddev.andengine.util.Debug;
 
 import java.io.File;
@@ -19,6 +21,7 @@ import ru.nsu.ccfit.zuev.osu.Config;
 import ru.nsu.ccfit.zuev.osu.GlobalManager;
 import ru.nsu.ccfit.zuev.osu.ResourceManager;
 import ru.nsu.ccfit.zuev.osu.TrackInfo;
+import ru.nsu.ccfit.zuev.osu.helper.FileUtils;
 import ru.nsu.ccfit.zuev.osu.helper.MD5Calculator;
 import ru.nsu.ccfit.zuev.osu.online.PostBuilder.RequestException;
 
@@ -48,7 +51,6 @@ public class OnlineManager {
     private float accuracy = 0;
     private String avatarURL = "";
     private int mapRank;
-    private int replayID = 0;
 
     public static OnlineManager getInstance() {
         if (instance == null) {
@@ -227,18 +229,31 @@ public class OnlineManager {
         Debug.i("Getting play ID = " + playID);
     }
 
-    public boolean sendRecord(String data) throws OnlineManagerException {
-        if (playID == null || playID.length() == 0) {
+    public boolean sendRecord(String data, String replayFilename) throws OnlineManagerException {
+        if (playID == null || playID.isEmpty()) {
             failMessage = "I don't have play ID";
             return false;
         }
 
         Debug.i("Sending record...");
 
-        PostBuilder post = new URLEncodedPostBuilder();
+        File replayFile = new File(replayFilename);
+        if (!replayFile.exists()) {
+            failMessage = "Replay file not found";
+            Debug.e("Replay file not found");
+            return false;
+        }
+
+        var post = new FormDataPostBuilder();
         post.addParam("userID", String.valueOf(userId));
         post.addParam("playID", playID);
         post.addParam("data", data);
+
+        MediaType replayMime = MediaType.parse("application/octet-stream");
+        RequestBody replayFileBody = RequestBody.create(replayFile, replayMime);
+
+        post.addParam("replayFile", replayFile.getName(), replayFileBody);
+        post.addParam("replayFileChecksum", FileUtils.getSHA256Checksum(replayFile));
 
         ArrayList<String> response = sendRequest(post, endpoint + "submit.php");
 
@@ -265,11 +280,6 @@ public class OnlineManager {
         score = Long.parseLong(resp[1]);
         accuracy = Integer.parseInt(resp[2]) / 100000f;
         mapRank = Integer.parseInt(resp[3]);
-
-        if (resp.length >= 5) {
-            replayID = Integer.parseInt(resp[4]);
-        } else
-            replayID = 0;
 
         return true;
     }
@@ -355,11 +365,6 @@ public class OnlineManager {
         } catch (NullPointerException e) {
             return null;
         }
-    }
-
-    public void sendReplay(String filename) {
-        Debug.i("Sending replay '" + filename + "' for id = " + replayID);
-        OnlineFileOperator.sendFile(endpoint + "upload.php", filename, String.valueOf(replayID));
     }
 
     public String getScorePack(int playid) throws OnlineManagerException {
