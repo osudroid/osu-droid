@@ -4,7 +4,7 @@ import okhttp3.MultipartBody;
 import okhttp3.RequestBody;
 
 public class FormDataPostBuilder extends PostBuilder {
-    private final MultipartBody.Builder multipartBodyBuilder = new MultipartBody.Builder();
+    private final MultipartBody.Builder multipartBodyBuilder = new MultipartBody.Builder().setType(MultipartBody.FORM);
 
     public void addRequestBody(final String key, final String filename, final RequestBody value) {
         multipartBodyBuilder.addFormDataPart(key, filename, value);
