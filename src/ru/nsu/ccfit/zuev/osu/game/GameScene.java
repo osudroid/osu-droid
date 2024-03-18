@@ -1016,14 +1016,16 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
             comboTextShadow.setCharacterScale(1.5f);
             comboTextShadow.setAlpha(0f);
 
-            comboTextShadowModifier = new ParallelEntityModifier(
-                new AlphaModifier(0.2f, 0.25f, 0f),
-                new ScaleModifier(0.2f, 1.5f, 1f, new ModifierListener() {
-                    public void onModifierFinished(IModifier<IEntity> pModifier, IEntity pItem) {
-                        comboText.setText(stat.getCombo() + "x");
-                    }
-                })
-            );
+            if (Config.isComplexAnimations()) {
+                comboTextShadowModifier = new ParallelEntityModifier(
+                        new AlphaModifier(0.2f, 0.25f, 0f),
+                        new ScaleModifier(0.2f, 1.5f, 1f, new ModifierListener() {
+                            public void onModifierFinished(IModifier<IEntity> pModifier, IEntity pItem) {
+                                comboText.setText(stat.getCombo() + "x");
+                            }
+                        })
+                );
+            }
 
             fgScene.attachChild(comboText);
             fgScene.attachChild(comboTextShadow);
