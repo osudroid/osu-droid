@@ -49,6 +49,7 @@ import com.reco1l.legacy.UpdateManager;
 import com.reco1l.legacy.ui.multiplayer.LobbyScene;
 import com.reco1l.legacy.ui.multiplayer.RoomScene;
 
+import com.rian.osu.difficulty.BeatmapDifficultyCalculator;
 import net.lingala.zip4j.ZipFile;
 
 import org.anddev.andengine.engine.Engine;
@@ -81,7 +82,6 @@ import ru.nsu.ccfit.zuev.audio.BassAudioPlayer;
 import ru.nsu.ccfit.zuev.audio.serviceAudio.SaveServiceObject;
 import ru.nsu.ccfit.zuev.audio.serviceAudio.SongService;
 import ru.nsu.ccfit.zuev.osu.game.SpritePool;
-import ru.nsu.ccfit.zuev.osu.helper.BeatmapDifficultyCalculator;
 import ru.nsu.ccfit.zuev.osu.helper.FileUtils;
 import ru.nsu.ccfit.zuev.osu.helper.InputManager;
 import ru.nsu.ccfit.zuev.osu.helper.StringTable;
