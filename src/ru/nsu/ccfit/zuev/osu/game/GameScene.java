@@ -13,6 +13,7 @@ import com.edlplan.osu.support.timing.controlpoint.ControlPoints;
 import com.reco1l.api.ibancho.RoomAPI;
 import com.reco1l.framework.lang.Execution;
 import com.reco1l.framework.lang.execution.Async;
+import com.reco1l.legacy.graphics.sprite.SpriteText;
 import com.reco1l.legacy.graphics.texture.BlankTextureRegion;
 import com.reco1l.legacy.graphics.sprite.VideoSprite;
 import com.reco1l.legacy.ui.entity.InGameLeaderboard;
@@ -27,10 +28,12 @@ import org.andengine.engine.Engine;
 import org.andengine.engine.camera.SmoothCamera;
 import org.andengine.engine.handler.IUpdateHandler;
 import org.andengine.engine.options.TouchOptions;
+import org.andengine.entity.IEntity;
 import org.andengine.entity.modifier.FadeOutModifier;
 import org.andengine.entity.modifier.LoopEntityModifier;
 import org.andengine.entity.modifier.MoveXModifier;
 import org.andengine.entity.modifier.ParallelEntityModifier;
+import org.andengine.entity.modifier.ScaleModifier;
 import org.andengine.entity.modifier.SequenceEntityModifier;
 import org.andengine.entity.primitive.Rectangle;
 import org.andengine.entity.scene.IOnSceneTouchListener;
@@ -44,6 +47,7 @@ import org.andengine.input.touch.TouchEvent;
 import org.andengine.opengl.font.Font;
 import org.andengine.opengl.texture.region.TextureRegion;
 import org.andengine.util.debug.Debug;
+import org.andengine.util.modifier.IModifier;
 
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -79,6 +83,7 @@ import ru.nsu.ccfit.zuev.osu.helper.BeatmapDifficultyCalculator;
 import ru.nsu.ccfit.zuev.osu.helper.DifficultyHelper;
 import ru.nsu.ccfit.zuev.osu.helper.MD5Calculator;
 import ru.nsu.ccfit.zuev.osu.helper.ModifierFactory;
+import ru.nsu.ccfit.zuev.osu.helper.ModifierListener;
 import ru.nsu.ccfit.zuev.osu.helper.StringTable;
 import ru.nsu.ccfit.zuev.osu.menu.LoadingScreen;
 import ru.nsu.ccfit.zuev.osu.menu.ModMenu;
@@ -130,8 +135,6 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
     private LinkedList<GameObject> activeObjects;
     private LinkedList<GameObject> passiveObjects;
     private LinkedList<GameObject> expiredObjects;
-    private GameScoreText comboText, accText, scoreText;  //显示的文字  连击数  ACC  分数
-    private GameScoreTextShadow scoreShadow;
     private Queue<BreakPeriod> breakPeriods = new LinkedList<>();
     private BreakAnimator breakAnimator;
     private ScoreBar scorebar;
@@ -183,9 +186,25 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
     private DifficultyHelper difficultyHelper = DifficultyHelper.StdDifficulty;
 
     private List<TimedDifficultyAttributes> timedDifficultyAttributes = new ArrayList<>();
+
     private Text ppText;
 
+
     private long previousFrameTime;
+
+    // HUD
+
+    /**The score indicator text*/
+    private SpriteText scoreText;
+
+    /**The combo indicator text*/
+    private SpriteText comboText;
+
+    /**The combo indicator text shadow*/
+    private SpriteText comboTextShadow;
+
+    /**The accuracy indicator text*/
+    private SpriteText accuracyText;
 
 
     // Video support
@@ -955,25 +974,33 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
         if(!Config.isHideInGameUI()){
             scorebar = new ScoreBar(this, fgScene, stat);
             addPassiveObject(scorebar);
-            final TextureRegion scoreDigitTex = ResourceManager.getInstance()
-                    .getTexture("score-0");
-            accText = new GameScoreText(OsuSkin.get().getScorePrefix(), Config.getRES_WIDTH()
-                    - scoreDigitTex.getWidth() * 4.75f, 50,
-                    "000.00%", 0.6f);
-            comboText = new GameScoreText(OsuSkin.get().getComboPrefix(), Utils.toRes(2), Config.getRES_HEIGHT()
-                    - Utils.toRes(95), "0000x", 1.5f);
-            comboText.changeText("0****");
-            scoreText = new GameScoreText(OsuSkin.get().getScorePrefix(), Config.getRES_WIDTH()
-                    - scoreDigitTex.getWidth() * 7.25f, 0, "0000000000", 0.9f);
-            comboText.attachToScene(fgScene);
-            accText.attachToScene(fgScene);
-            scoreText.attachToScene(fgScene);
-            if (Config.isComplexAnimations()) {
-                scoreShadow = new GameScoreTextShadow(0, Config.getRES_HEIGHT()
-                        - Utils.toRes(90), "0000x", 1.5f, comboText);
-                scoreShadow.attachToScene(bgScene);
-                passiveObjects.add(scoreShadow);
-            }
+
+            scoreText = new SpriteText(Config.getRES_WIDTH(), 0f, SpriteText.createOsuTextureProvider(OsuSkin.get().getScorePrefix()));
+            scoreText.setOriginX(1f);
+            scoreText.setText("0000000000");
+            scoreText.setCharacterScale(0.9f);
+
+            accuracyText = new SpriteText(Config.getRES_WIDTH(), 0f, SpriteText.createOsuTextureProvider(OsuSkin.get().getScorePrefix()));
+            accuracyText.setOriginX(1f);
+            accuracyText.setText("000.00%", true);
+            accuracyText.setCharacterScale(0.6f);
+
+            comboText = new SpriteText(2f, Config.getRES_HEIGHT(), SpriteText.createOsuTextureProvider(OsuSkin.get().getComboPrefix()));
+            comboText.setOriginY(1f);
+            comboText.setText("0x");
+            comboText.setCharacterScale(1.5f);
+
+            comboTextShadow = new SpriteText(2f, Config.getRES_HEIGHT(), SpriteText.createOsuTextureProvider(OsuSkin.get().getComboPrefix()));
+            comboTextShadow.setOriginY(1f);
+            comboTextShadow.setText("0x");
+            comboTextShadow.setCharacterScale(1.5f);
+            comboTextShadow.setAlpha(0f);
+
+            fgScene.attachChild(comboText);
+            fgScene.attachChild(comboTextShadow);
+            fgScene.attachChild(accuracyText);
+            fgScene.attachChild(scoreText);
+
             if (stat.getMod().contains(GameMod.MOD_AUTO)) {
                 final Sprite autoIcon = new Sprite(Utils.toRes(Config.getRES_WIDTH() - 140),
                         Utils.toRes(100), ResourceManager.getInstance().getTexture(
@@ -1536,49 +1563,37 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
         }
 
         if(!Config.isHideInGameUI()) {
-            strBuilder.setLength(0);
-            strBuilder.append(stat.getCombo());
-            while (strBuilder.length() < 5) {
-                strBuilder.append('*');
-            }
-            var comboStr = strBuilder.toString();
+
             if (Config.isComplexAnimations()) {
-                scoreShadow.changeText(comboStr);
+                var newText = stat.getCombo() + "x";
+
+                if (!comboTextShadow.getText().equals(newText)) {
+
+                    comboText.setText(comboTextShadow.getText());
+
+                    comboTextShadow.setText(newText);
+                    comboTextShadow.clearEntityModifiers();
+
+                    comboTextShadow.setAlpha(0.25f);
+                    comboTextShadow.setScale(1.5f);
+
+                    comboTextShadow.registerEntityModifier(new FadeOutModifier(0.2f));
+                    comboTextShadow.registerEntityModifier(new ScaleModifier(0.2f, 1.5f, 1f, new ModifierListener() {
+
+                        public void onModifierFinished(IModifier<IEntity> pModifier, IEntity pItem) {
+                            comboText.setText(newText);
+                        }
+                    }));
+                }
             } else {
-                comboText.changeText(comboStr);
+                comboText.setText(stat.getCombo() + "x");
             }
 
-            strBuilder.setLength(0);
-            float rawAccuracy = stat.getAccuracy() * 100f;
-            strBuilder.append((int) rawAccuracy);
-            if ((int) rawAccuracy < 10) {
-                strBuilder.insert(0, '0');
-            }
-            strBuilder.append('.');
-            rawAccuracy -= (int) rawAccuracy;
-            rawAccuracy *= 100;
-            if ((int) rawAccuracy < 10) {
-                strBuilder.append('0');
-            }
-            strBuilder.append((int) rawAccuracy);
-            if (strBuilder.length() < 6) {
-                strBuilder.insert(0, '*');
-            }
-            accText.changeText(strBuilder.toString());
-            strBuilder.setLength(0);
-            strBuilder.append(stat.getTotalScoreWithMultiplier());
-            while (strBuilder.length() < 8) {
-                strBuilder.insert(0, '0');
-            }
+            scoreText.setText(String.valueOf(stat.getTotalScoreWithMultiplier()));
 
-            int scoreTextOffset = 0;
-            while (strBuilder.length() < 10) {
-                strBuilder.insert(0, '*');
-                scoreTextOffset++;
-            }
-
-            scoreText.setPosition(Config.getRES_WIDTH() - scoreText.getDigitWidth() * (9.25f - scoreTextOffset), 0);
-            scoreText.changeText(strBuilder.toString());
+            var accuracyRounded = ((int) (stat.getAccuracy() * 10000f)) / 100f;
+            accuracyText.setText(accuracyRounded + "%");
+            accuracyText.setY(scoreText.getHeight());
         }
 
         if (comboBurst != null) {
