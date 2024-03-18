@@ -23,7 +23,7 @@ import android.opengl.GLES20;
  * @author Nicolas Gramlich
  * @since 19:22:38 - 09.03.2010
  */
-public class Sprite extends RectangularShape {
+public class Sprite extends RectangularShape implements ISprite {
 	// ===========================================================
 	// Constants
 	// ===========================================================
@@ -120,10 +120,12 @@ public class Sprite extends RectangularShape {
 	// Getter & Setter
 	// ===========================================================
 
+	@Override
 	public ITextureRegion getTextureRegion() {
 		return this.mTextureRegion;
 	}
 
+	@Override
 	public boolean isFlippedHorizontal() {
 		return this.mFlippedHorizontal;
 	}
@@ -136,6 +138,7 @@ public class Sprite extends RectangularShape {
 		}
 	}
 
+	@Override
 	public boolean isFlippedVertical() {
 		return this.mFlippedVertical;
 	}

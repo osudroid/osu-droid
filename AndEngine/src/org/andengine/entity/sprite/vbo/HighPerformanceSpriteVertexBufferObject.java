@@ -1,5 +1,6 @@
 package org.andengine.entity.sprite.vbo;
 
+import org.andengine.entity.sprite.ISprite;
 import org.andengine.entity.sprite.Sprite;
 import org.andengine.opengl.texture.region.ITextureRegion;
 import org.andengine.opengl.vbo.DrawType;
@@ -39,7 +40,7 @@ public class HighPerformanceSpriteVertexBufferObject extends HighPerformanceVert
 	// ===========================================================
 
 	@Override
-	public void onUpdateColor(final Sprite pSprite) {
+	public void onUpdateColor(final ISprite pSprite) {
 		final float[] bufferData = this.mBufferData;
 
 		final float packedColor = pSprite.getColor().getABGRPackedFloat();
@@ -53,7 +54,7 @@ public class HighPerformanceSpriteVertexBufferObject extends HighPerformanceVert
 	}
 
 	@Override
-	public void onUpdateVertices(final Sprite pSprite) {
+	public void onUpdateVertices(final ISprite pSprite) {
 		final float[] bufferData = this.mBufferData;
 
 		final float x = 0;
@@ -77,7 +78,7 @@ public class HighPerformanceSpriteVertexBufferObject extends HighPerformanceVert
 	}
 
 	@Override
-	public void onUpdateTextureCoordinates(final Sprite pSprite) {
+	public void onUpdateTextureCoordinates(final ISprite pSprite) {
 		final float[] bufferData = this.mBufferData;
 
 		final ITextureRegion textureRegion = pSprite.getTextureRegion(); // TODO Optimize with field access?
