@@ -101,7 +101,7 @@ class ThreeFingerChecker(
             return 1.0
         }
 
-        if (validCursorGroups.filter { it.isNotEmpty() }.size <= 3) {
+        if (validCursorGroups.count { it.isNotEmpty() } <= 3) {
             return 1.0
         }
 
