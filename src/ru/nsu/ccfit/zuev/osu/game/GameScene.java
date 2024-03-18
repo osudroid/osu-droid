@@ -188,6 +188,7 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
     private long previousFrameTime;
 
 
+
     // Video support
 
     /**The video sprite*/
@@ -199,7 +200,9 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
     /**Whether the video has started*/
     private boolean videoStarted;
 
+
     // Multiplayer
+
     /**Indicates the last time that the user pressed the back button, used to reset {@code backPressCount}*/
     private float lastBackPressTime = -1f;
 
@@ -218,7 +221,7 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
     /**Last score data chunk sent to server, used to determine if the data was changed.*/
     private ScoreBoardItem lastScoreSent = null;
 
-    // End multiplayer
+
 
     public GameScene(final Engine engine) {
         this.engine = engine;
