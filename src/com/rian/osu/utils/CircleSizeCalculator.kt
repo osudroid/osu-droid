@@ -72,7 +72,7 @@ object CircleSizeCalculator {
      */
     @JvmStatic
     fun standardRadiusToStandardCS(radius: Double, applyFudge: Boolean = false) =
-        5 + (1 - radius.toFloat() / (HitObject.OBJECT_RADIUS / 2) / (if (applyFudge) BROKEN_GAMEFIELD_ROUNDING_ALLOWANCE else 1f)) * 5 / 0.7f
+        5 + (1 - radius.toFloat() / (HitObject.OBJECT_RADIUS / 2) / if (applyFudge) BROKEN_GAMEFIELD_ROUNDING_ALLOWANCE else 1f) * 5 / 0.7f
 
     /**
      * Converts osu!standard circle size to osu!standard scale.
