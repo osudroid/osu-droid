@@ -39,7 +39,9 @@ class SpriteText(
             }
         }
 
-
+    /**
+     * Set the character scale.
+     */
     var characterScale: Float = 1f
         set(value)
         {
@@ -49,11 +51,6 @@ class SpriteText(
                 shouldInvalidate = true
             }
         }
-
-
-    override var _width = 0f
-
-    override var _height = 0f
 
 
     private var shouldInvalidate = true
@@ -86,13 +83,14 @@ class SpriteText(
     private fun invalidate()
     {
         val text = text
+        shouldInvalidate = false
 
         if (text.length != childCount) when
         {
             text.length > childCount ->
             {
                 for (i in childCount until text.length)
-                    attachChild(MutableSprite(0f, 0f))
+                    attachChild(ExtendedSprite(0f, 0f))
             }
 
             text.length < childCount ->
@@ -102,25 +100,23 @@ class SpriteText(
             }
         }
 
-        _width = 0f
-        _height = 0f
+        mWidth = 0f
+        mHeight = 0f
 
         for (i in text.indices)
         {
             val character = text[i]
 
-            val sprite = getChildByIndex(i) as MutableSprite
+            val sprite = getChildByIndex(i) as ExtendedSprite
 
             sprite.textureRegion = characterMap.getOrPut(character) { textureProvider(character) ?: BlankTextureRegion() }
-            sprite.x = _width
+            sprite.x = mWidth
             sprite.color = color
             sprite.setScale(characterScale)
 
-            _width += sprite.widthScaled
-            _height = max(_height, sprite.heightScaled)
+            mWidth += sprite.widthScaled
+            mHeight = max(mHeight, sprite.heightScaled)
         }
-
-        shouldInvalidate = false
     }
 
 

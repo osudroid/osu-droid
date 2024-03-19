@@ -2,7 +2,8 @@ package ru.nsu.ccfit.zuev.osu.game;
 
 import android.graphics.PointF;
 
-import com.reco1l.legacy.graphics.sprite.ClipSprite;
+import com.reco1l.legacy.graphics.Entities;
+import com.reco1l.legacy.graphics.sprite.ExtendedSprite;
 
 import org.andengine.entity.IEntity;
 import org.andengine.entity.modifier.AlphaModifier;
@@ -22,7 +23,6 @@ import org.andengine.util.modifier.IModifier;
 
 import ru.nsu.ccfit.zuev.osu.Config;
 import ru.nsu.ccfit.zuev.osu.Constants;
-import ru.nsu.ccfit.zuev.osu.GlobalManager;
 import ru.nsu.ccfit.zuev.osu.ResourceManager;
 import ru.nsu.ccfit.zuev.osu.Utils;
 import ru.nsu.ccfit.zuev.osu.async.SyncTaskManager;
@@ -31,11 +31,15 @@ import ru.nsu.ccfit.zuev.osu.scoring.ScoreNumber;
 import ru.nsu.ccfit.zuev.osu.scoring.StatisticV2;
 
 public class Spinner extends GameObject {
-    private final Sprite background;
+
+    private final ExtendedSprite background;
+
+    private final ExtendedSprite circle;
+
+    private final ExtendedSprite metre;
+
     public final PointF center;
-    private final Sprite circle;
     private final Sprite approachCircle;
-    private final ClipSprite metre;
     private final Sprite spinText;
     private final TextureRegion mregion;
     private Sprite clearText = null;
@@ -62,14 +66,24 @@ public class Spinner extends GameObject {
         ResourceManager.getInstance().checkSpinnerTextures();
         this.pos = new PointF((float) Constants.MAP_WIDTH / 2, (float) Constants.MAP_HEIGHT / 2);
         center = Utils.trackToRealCoords(pos);
-        background = new CentredSprite(center.x, center.y, ResourceManager.getInstance().getTexture("spinner-background"));
-        final float scaleX = Config.getRES_WIDTH() / background.getWidth();
-        background.setScale(scaleX);
 
-        circle = new CentredSprite(center.x, center.y, ResourceManager.getInstance().getTexture("spinner-circle"));
+        background = new ExtendedSprite(center.x, center.y);
+        background.setTextureRegion(ResourceManager.getInstance().getTexture("spinner-background"));
+        background.setOrigin(0.5f);
+        Entities.scaleCropCenter(background, Config.getRES_WIDTH(), Config.getRES_HEIGHT());
+
+        circle = new ExtendedSprite(center.x, center.y);
+        circle.setTextureRegion(ResourceManager.getInstance().getTexture("spinner-circle"));
+        circle.setRotationCenter(0.5f, 0.5f);
+        circle.setOrigin(0.5f);
+
         mregion = ResourceManager.getInstance().getTexture("spinner-metre").deepCopy();
-        metre = new ClipSprite(background.getX(), background.getY(), mregion, GlobalManager.getInstance().getEngine().getVertexBufferObjectManager());
-        metre.setScale(scaleX);
+
+        metre = new ExtendedSprite(center.x, center.y);
+        metre.setTextureRegion(mregion);
+        metre.setOrigin(0.5f);
+        Entities.scaleCropCenter(metre, Config.getRES_WIDTH(), Config.getRES_HEIGHT());
+
         approachCircle = new CentredSprite(center.x, center.y, ResourceManager.getInstance().getTexture("spinner-approachcircle"));
         spinText = new CentredSprite(center.x, center.y * 1.5f, ResourceManager.getInstance().getTexture("spinner-spin"));
     }
