@@ -5,13 +5,19 @@ import com.reco1l.legacy.graphics.entity.ExtendedEntity
 import org.andengine.engine.camera.Camera
 import org.andengine.entity.sprite.ISprite
 import org.andengine.entity.sprite.Sprite
+import org.andengine.entity.sprite.Sprite.SPRITE_SIZE
+import org.andengine.entity.sprite.Sprite.VERTEXBUFFEROBJECTATTRIBUTES_DEFAULT
 import org.andengine.entity.sprite.vbo.HighPerformanceSpriteVertexBufferObject
 import org.andengine.opengl.shader.PositionColorTextureCoordinatesShaderProgram
 import org.andengine.opengl.shader.ShaderProgram
+import org.andengine.opengl.texture.ITexture
 import org.andengine.opengl.texture.region.ITextureRegion
+import org.andengine.opengl.texture.region.TextureRegion
 import org.andengine.opengl.util.GLState
 import org.andengine.opengl.vbo.DrawType
+import org.andengine.opengl.vbo.DrawType.STATIC
 import org.andengine.opengl.vbo.VertexBufferObjectManager
+import org.andengine.opengl.vbo.VertexBufferObjectManager.GLOBAL
 
 /**
  * Sprite that allows to change texture once created.
@@ -72,7 +78,8 @@ open class ExtendedSprite @JvmOverloads constructor(
 
     private var _textureRegion: ITextureRegion? = null
 
-    private val vbo = HighPerformanceSpriteVertexBufferObject(VertexBufferObjectManager.GLOBAL, Sprite.SPRITE_SIZE, DrawType.STATIC, true, Sprite.VERTEXBUFFEROBJECTATTRIBUTES_DEFAULT)
+    private val vbo = HighPerformanceSpriteVertexBufferObject(GLOBAL, SPRITE_SIZE, STATIC, true, VERTEXBUFFEROBJECTATTRIBUTES_DEFAULT)
+
 
 
     init
@@ -84,6 +91,24 @@ open class ExtendedSprite @JvmOverloads constructor(
     }
 
 
+
+    // Texture
+
+    /**
+     * Set the current texture region from a [ITexture] object, this may reset blending in order to
+     * adapt to the new texture.
+     *
+     * A new [TextureRegion] will be created by using this.
+     */
+    fun setTexture(texture: ITexture)
+    {
+        val region = TextureRegion(texture, 0f, 0f, texture.width.toFloat(), texture.height.toFloat())
+        setTextureRegion(region)
+    }
+
+    /**
+     * Set the current texture region, this may reset blending in order to adapt to the new texture.
+     */
     fun setTextureRegion(textureRegion: ITextureRegion?)
     {
         if (_textureRegion == textureRegion)
@@ -102,25 +127,33 @@ open class ExtendedSprite @JvmOverloads constructor(
     }
 
 
+    // Buffer update
+
+    override fun reset()
+    {
+        super.reset()
+
+        if (textureRegion != null)
+            initBlendFunction(textureRegion!!.texture)
+    }
+
+    private fun onUpdateTextureCoordinates()
+    {
+        if (textureRegion != null)
+            vbo.onUpdateTextureCoordinates(this)
+    }
+
     override fun onUpdateColor() = vbo.onUpdateColor(this)
 
     override fun onUpdateVertices() = vbo.onUpdateVertices(this)
 
-    protected fun onUpdateTextureCoordinates()
-    {
-        if (textureRegion == null)
-            return
 
-        vbo.onUpdateTextureCoordinates(this)
-    }
-
+    // Draw
 
     override fun preDraw(gl: GLState, camera: Camera)
     {
         super.preDraw(gl, camera)
-
         textureRegion?.texture?.bind(gl)
-
         vbo.bind(gl, shaderProgram)
     }
 
@@ -132,26 +165,18 @@ open class ExtendedSprite @JvmOverloads constructor(
     override fun postDraw(gl: GLState, camera: Camera)
     {
         vbo.unbind(gl, shaderProgram)
-
         super.postDraw(gl, camera)
     }
 
 
-    override fun getTextureRegion() = _textureRegion
-
-    override fun isFlippedVertical() = flippedVertical
-
-    override fun isFlippedHorizontal() = flippedHorizontal
+    // Inherited
 
     override fun getVertexBufferObject() = vbo
 
+    override fun isFlippedHorizontal() = flippedHorizontal
 
-    override fun reset()
-    {
-        super.reset()
+    override fun isFlippedVertical() = flippedVertical
 
-        if (textureRegion != null)
-            initBlendFunction(textureRegion!!.texture)
-    }
+    override fun getTextureRegion() = _textureRegion
 
 }

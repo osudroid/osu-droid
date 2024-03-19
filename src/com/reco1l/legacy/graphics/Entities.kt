@@ -10,5 +10,5 @@ import org.andengine.entity.shape.IAreaShape
  */
 fun <T> T.scaleCropCenter(targetWidth: Float, targetHeight: Float) where T : IAreaShape, T : IEntity
 {
-    setScale(if (targetWidth > width) targetWidth / width else targetHeight / height)
+    setScale(if (targetWidth > targetHeight) targetWidth / width else targetHeight / height)
 }
