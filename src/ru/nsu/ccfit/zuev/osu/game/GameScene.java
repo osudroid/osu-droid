@@ -1258,9 +1258,9 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
                         }
                         ++i;
                     }
-                } else if(!cursors[mainCursorId].mouseDown){
+                } else if (!cursors[mainCursorId].mouseDown) {
                     mainCursorId = -1;
-                } else if(cursors[mainCursorId].mouseDown){
+                } else {
                     flashlightSprite.onMouseMove(
                             cursors[mainCursorId].mousePos.x, cursors[mainCursorId].mousePos.y
                     );
