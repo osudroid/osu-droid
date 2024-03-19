@@ -1,4 +1,4 @@
-package com.reco1l.legacy.graphics.sprite
+package com.reco1l.legacy.graphics.entity
 
 import org.andengine.entity.Entity
 import org.andengine.opengl.util.GLState

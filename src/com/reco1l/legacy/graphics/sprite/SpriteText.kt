@@ -1,7 +1,7 @@
 package com.reco1l.legacy.graphics.sprite
 
+import com.reco1l.legacy.graphics.entity.ExtendedEntity
 import com.reco1l.legacy.graphics.texture.BlankTextureRegion
-import org.andengine.entity.modifier.ParallelEntityModifier
 import org.andengine.opengl.texture.region.ITextureRegion
 import org.andengine.opengl.texture.region.TextureRegion
 import ru.nsu.ccfit.zuev.osu.ResourceManager
