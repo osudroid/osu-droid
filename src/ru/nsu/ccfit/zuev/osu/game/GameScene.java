@@ -1018,7 +1018,7 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
 
             if (Config.isComplexAnimations()) {
                 comboTextShadowModifier = new ParallelEntityModifier(
-                        new AlphaModifier(0.2f, 0.25f, 0f),
+                        new AlphaModifier(0.2f, 0.5f, 0f),
                         new ScaleModifier(0.2f, 1.5f, 1f, new ModifierListener() {
                             public void onModifierFinished(IModifier<IEntity> pModifier, IEntity pItem) {
                                 comboText.setText(stat.getCombo() + "x");
@@ -1603,8 +1603,11 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
                     comboText.setText(comboTextShadow.getText());
 
                     comboTextShadow.setText(newText);
-                    comboTextShadowModifier.reset();
+                    comboTextShadow.clearEntityModifiers();
+                    comboTextShadow.setScale(1.5f);
+                    comboTextShadow.setAlpha(0.5f);
 
+                    comboTextShadowModifier.reset();
                     comboTextShadow.registerEntityModifier(comboTextShadowModifier);
                 }
             } else {
