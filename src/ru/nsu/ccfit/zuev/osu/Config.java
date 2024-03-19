@@ -98,6 +98,8 @@ public class Config {
         playfieldSize,
         cursorSize;
 
+    private static DifficultyAlgorithm difficultyAlgorithm;
+
     private static Map<String, String> skins;
 
     private static RGBColor[] comboColors;
@@ -221,6 +223,7 @@ public class Config {
         receiveAnnouncements = prefs.getBoolean("receiveAnnouncements", true);
         safeBeatmapBg = prefs.getBoolean("safebeatmapbg", false);
         displayRealTimePPCounter = prefs.getBoolean("displayRealTimePPCounter", false);
+        difficultyAlgorithm = DifficultyAlgorithm.droid;
 
         // Multiplayer
         useNightcoreOnMultiplayer = prefs.getBoolean("player_nightcore", false);
@@ -301,6 +304,14 @@ public class Config {
 
     public static boolean isDisplayRealTimePPCounter() {
         return displayRealTimePPCounter;
+    }
+
+    public static DifficultyAlgorithm getDifficultyAlgorithm() {
+        return difficultyAlgorithm;
+    }
+
+    public static void setDifficultyAlgorithm(DifficultyAlgorithm algorithm) {
+        Config.difficultyAlgorithm = algorithm;
     }
 
     public static boolean isEnableExtension() {

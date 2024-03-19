@@ -43,13 +43,13 @@ import com.google.firebase.analytics.FirebaseAnalytics;
 import com.google.firebase.crashlytics.FirebaseCrashlytics;
 import com.reco1l.api.ibancho.LobbyAPI;
 import com.reco1l.framework.lang.Execution;
-import com.reco1l.framework.lang.execution.Async;
 import com.reco1l.legacy.AccessibilityDetector;
 import com.reco1l.legacy.Multiplayer;
 import com.reco1l.legacy.UpdateManager;
 import com.reco1l.legacy.ui.multiplayer.LobbyScene;
 import com.reco1l.legacy.ui.multiplayer.RoomScene;
 
+import com.rian.osu.difficulty.BeatmapDifficultyCalculator;
 import net.lingala.zip4j.ZipFile;
 
 import org.anddev.andengine.engine.Engine;
@@ -81,9 +81,7 @@ import java.util.concurrent.TimeUnit;
 import ru.nsu.ccfit.zuev.audio.BassAudioPlayer;
 import ru.nsu.ccfit.zuev.audio.serviceAudio.SaveServiceObject;
 import ru.nsu.ccfit.zuev.audio.serviceAudio.SongService;
-import ru.nsu.ccfit.zuev.osu.async.SyncTaskManager;
 import ru.nsu.ccfit.zuev.osu.game.SpritePool;
-import ru.nsu.ccfit.zuev.osu.helper.BeatmapDifficultyCalculator;
 import ru.nsu.ccfit.zuev.osu.helper.FileUtils;
 import ru.nsu.ccfit.zuev.osu.helper.InputManager;
 import ru.nsu.ccfit.zuev.osu.helper.StringTable;
@@ -125,7 +123,6 @@ public class MainActivity extends BaseGameActivity implements
         //Debug.setDebugLevel(Debug.DebugLevel.NONE);
         StringTable.setContext(this);
         ToastLogger.init(this);
-        SyncTaskManager.getInstance().init(this);
         InputManager.setContext(this);
         OnlineManager.getInstance().Init(getApplicationContext());
         crashlytics.setUserId(Config.getOnlineDeviceID());
@@ -319,7 +316,7 @@ public class MainActivity extends BaseGameActivity implements
         LobbyScene.INSTANCE.init();
         RoomScene.INSTANCE.init();
 
-        Async.run(() -> {
+        Execution.async(() -> {
             BassAudioPlayer.initDevice();
             GlobalManager.getInstance().init();
             analytics.logEvent(FirebaseAnalytics.Event.APP_OPEN, null);
@@ -334,34 +331,32 @@ public class MainActivity extends BaseGameActivity implements
 
             SplashScene.INSTANCE.playWelcomeAnimation();
 
-            try {
-                Thread.sleep(2500);
-            } catch (InterruptedException ignored) {
-            }
+            Execution.delayed(2500, () -> {
 
-            UpdateManager.INSTANCE.onActivityStart();
-            GlobalManager.getInstance().setInfo("");
-            GlobalManager.getInstance().setLoadingProgress(100);
-            ResourceManager.getInstance().loadFont("font", null, 28, Color.WHITE);
-            GlobalManager.getInstance().getEngine().setScene(GlobalManager.getInstance().getMainScene().getScene());
-            GlobalManager.getInstance().getMainScene().loadBeatmap();
-            initPreferences();
-            availableInternalMemory();
+                UpdateManager.INSTANCE.onActivityStart();
+                GlobalManager.getInstance().setInfo("");
+                GlobalManager.getInstance().setLoadingProgress(100);
+                ResourceManager.getInstance().loadFont("font", null, 28, Color.WHITE);
+                GlobalManager.getInstance().getEngine().setScene(GlobalManager.getInstance().getMainScene().getScene());
+                GlobalManager.getInstance().getMainScene().loadBeatmap();
+                initPreferences();
+                availableInternalMemory();
 
-            scheduledExecutor.scheduleAtFixedRate(() -> {
-                AccessibilityDetector.check(MainActivity.this);
-                BeatmapDifficultyCalculator.invalidateExpiredCache();
-            }, 0, 100, TimeUnit.MILLISECONDS);
+                scheduledExecutor.scheduleAtFixedRate(() -> {
+                    AccessibilityDetector.check(MainActivity.this);
+                    BeatmapDifficultyCalculator.invalidateExpiredCache();
+                }, 0, 100, TimeUnit.MILLISECONDS);
 
-            if (roomInviteLink != null) {
-                LobbyScene.INSTANCE.connectFromLink(roomInviteLink);
-                return;
-            }
+                if (roomInviteLink != null) {
+                    LobbyScene.INSTANCE.connectFromLink(roomInviteLink);
+                    return;
+                }
 
-            if (willReplay) {
-                GlobalManager.getInstance().getMainScene().watchReplay(beatmapToAdd);
-                willReplay = false;
-            }
+                if (willReplay) {
+                    GlobalManager.getInstance().getMainScene().watchReplay(beatmapToAdd);
+                    willReplay = false;
+                }
+            });
         });
     }
 

@@ -206,7 +206,6 @@
                             android:title="@string/opt_enable_pp_title" android:defaultValue="true"/>
         <Preference android:key="clearPP" android:title="@string/opt_clear_pp_title"
                     android:summary="@string/opt_clear_pp_summary"/-->
-
         <SeekBarPreference android:summary="@string/opt_setplayfield_summary" android:title="@string/opt_setplayfield_title"
             android:key="playfieldSize" app:min="50" android:max="100" app:showSeekBarValue="true" android:defaultValue="100"/>
 
