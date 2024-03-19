@@ -87,6 +87,7 @@ open class ExtendedSprite @JvmOverloads constructor(
         isBlendingEnabled = true
 
         onUpdateColor()
+        onUpdateVertices()
         onUpdateTextureCoordinates()
     }
 
