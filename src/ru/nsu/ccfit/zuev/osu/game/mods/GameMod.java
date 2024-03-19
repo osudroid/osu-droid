@@ -37,6 +37,9 @@ public enum GameMod {
     }
 
 
+    /**
+     * Provides the texture name corresponding to the mod entry.
+     */
     public static String getTextureName(GameMod mod) {
         return "selection-mod-" + switch (mod) {
             case MOD_NOFAIL -> "nofail";
