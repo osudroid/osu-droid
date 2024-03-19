@@ -16,6 +16,9 @@ public class VertexBufferObjectManager {
 	// Constants
 	// ===========================================================
 
+	// osu!droid modified - Making the global VBO manager accessible from everywhere.
+	public static final VertexBufferObjectManager GLOBAL = new VertexBufferObjectManager();
+
 	// ===========================================================
 	// Fields
 	// ===========================================================

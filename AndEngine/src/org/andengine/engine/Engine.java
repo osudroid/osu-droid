@@ -43,7 +43,6 @@ import org.andengine.util.debug.Debug;
 import org.andengine.util.time.TimeConstants;
 
 import android.Manifest;
-import android.annotation.SuppressLint;
 import android.content.Context;
 import android.content.pm.PackageManager;
 import android.hardware.Sensor;
@@ -100,7 +99,9 @@ public class Engine implements SensorEventListener, OnTouchListener, ITouchEvent
 
 	private ITouchController mTouchController;
 
-	private final VertexBufferObjectManager mVertexBufferObjectManager = new VertexBufferObjectManager();
+	// osu!droid modified - Reference VBO manager singleton.
+	private final VertexBufferObjectManager mVertexBufferObjectManager = VertexBufferObjectManager.GLOBAL;
+
 	private final TextureManager mTextureManager = new TextureManager();
 	private final FontManager mFontManager = new FontManager();
 	private final ShaderProgramManager mShaderProgramManager = new ShaderProgramManager();
