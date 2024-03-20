@@ -52,6 +52,17 @@ open class ExtendedEntity @JvmOverloads constructor(
     var clipY = 0f
 
 
+    init
+    {
+        mRotationCenterX = 0.5f
+        mRotationCenterY = 0.5f
+        mScaleCenterX = 0.5f
+        mScaleCenterY = 0.5f
+        mSkewCenterX = 0.5f
+        mSkewCenterY = 0.5f
+    }
+
+
 
     @JvmOverloads
     fun setClip(x: Float, y: Float = x)

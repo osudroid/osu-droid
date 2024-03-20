@@ -70,12 +70,10 @@ public class Spinner extends GameObject {
         background = new ExtendedSprite(center.x, center.y);
         background.setTextureRegion(ResourceManager.getInstance().getTexture("spinner-background"));
         background.setOrigin(0.5f);
-        background.setScaleCenter(0.5f, 0.5f);
         Entities.scaleCropCenter(background, Config.getRES_WIDTH(), Config.getRES_HEIGHT());
 
         circle = new ExtendedSprite(center.x, center.y);
         circle.setTextureRegion(ResourceManager.getInstance().getTexture("spinner-circle"));
-        circle.setRotationCenter(0.5f, 0.5f);
         circle.setOrigin(0.5f);
 
         mregion = ResourceManager.getInstance().getTexture("spinner-metre").deepCopy();
@@ -83,7 +81,6 @@ public class Spinner extends GameObject {
         metre = new ExtendedSprite(center.x, center.y);
         metre.setTextureRegion(mregion);
         metre.setOrigin(0.5f);
-        metre.setScaleCenter(0.5f, 0.5f);
         Entities.scaleCropCenter(metre, Config.getRES_WIDTH(), Config.getRES_HEIGHT());
 
         approachCircle = new CentredSprite(center.x, center.y, ResourceManager.getInstance().getTexture("spinner-approachcircle"));
