@@ -59,9 +59,6 @@ class VideoTexture(val source: String)
         if (!isLoadedToHardware)
             return
 
-        bindTextureOnHardware(pGL)
-        applyTextureOptions(pGL)
-
         if (surfaceTexture == null)
         {
             surfaceTexture = SurfaceTexture(mHardwareTextureID)
@@ -107,7 +104,7 @@ class VideoTexture(val source: String)
         /**
          * See [MediaPlayer documentation](https://developer.android.com/guide/topics/media/platform/supported-formats)
          */
-        val SUPPORTED_VIDEO_FORMATS = arrayOf("3gp", "mp4", "mkv", "webm")
+        private val SUPPORTED_VIDEO_FORMATS = arrayOf("3gp", "mp4", "mkv", "webm")
 
         fun isSupportedVideo(file: File): Boolean = file.extension.lowercase() in SUPPORTED_VIDEO_FORMATS
     }

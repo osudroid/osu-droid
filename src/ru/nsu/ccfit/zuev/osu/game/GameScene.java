@@ -2435,7 +2435,7 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
             EdExtensionHelper.onPauseGame(lastTrack);
         }
 
-        if (video != null) {
+        if (video != null && videoStarted) {
             video.getTexture().pause();
         }
 
