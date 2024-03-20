@@ -1,5 +1,7 @@
 package ru.nsu.ccfit.zuev.osu.menu;
 
+import com.reco1l.framework.lang.Execution;
+
 import org.andengine.engine.handler.IUpdateHandler;
 import org.andengine.entity.modifier.FadeInModifier;
 import org.andengine.entity.modifier.FadeOutModifier;
@@ -17,7 +19,6 @@ import org.andengine.util.HorizontalAlign;
 import ru.nsu.ccfit.zuev.osu.Config;
 import ru.nsu.ccfit.zuev.osu.GlobalManager;
 import ru.nsu.ccfit.zuev.osu.ResourceManager;
-import ru.nsu.ccfit.zuev.osu.async.SyncTaskManager;
 
 /**
  * Created by Fuuko on 2015/4/25.
@@ -68,7 +69,7 @@ public class SplashScene implements IUpdateHandler {
         mLoading.registerEntityModifier(new FadeOutModifier(0.2f));
 
         // Text isn't compatible with animations unfortunately
-        SyncTaskManager.getInstance().run(() -> {
+        Execution.updateThread(() -> {
             infoText.detachSelf();
             progressText.detachSelf();
         });

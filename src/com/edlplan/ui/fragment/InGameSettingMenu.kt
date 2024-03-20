@@ -14,7 +14,7 @@ import com.edlplan.framework.easing.Easing
 import com.edlplan.framework.math.FMath
 import com.edlplan.ui.BaseAnimationListener
 import com.edlplan.ui.EasingHelper
-import com.reco1l.framework.lang.uiThread
+import com.reco1l.framework.lang.mainThread
 import com.reco1l.legacy.Multiplayer
 import org.andengine.input.touch.TouchEvent
 import ru.nsu.ccfit.zuev.osu.Config
@@ -482,7 +482,7 @@ class InGameSettingMenu : BaseFragment() {
 
     override fun dismiss() {
         super.dismiss()
-        uiThread { super.save() }
+        mainThread { super.save() }
         ModMenu.getInstance().hideByFrag()
     }
 

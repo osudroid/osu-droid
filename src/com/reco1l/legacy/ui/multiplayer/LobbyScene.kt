@@ -6,7 +6,7 @@ import com.reco1l.api.ibancho.LobbyAPI
 import com.reco1l.api.ibancho.RoomAPI
 import com.reco1l.framework.extensions.className
 import com.reco1l.framework.extensions.orAsyncCatch
-import com.reco1l.framework.lang.glThread
+import com.reco1l.framework.lang.updateThread
 import com.reco1l.legacy.Multiplayer
 import org.andengine.entity.modifier.LoopEntityModifier
 import org.andengine.entity.modifier.RotationByModifier
@@ -244,7 +244,7 @@ object LobbyScene : Scene()
     // Update events
 
     @JvmStatic
-    fun updateOnlinePanel() = glThread {
+    fun updateOnlinePanel() = updateThread {
 
         onlinePanel.setInfo()
         onlinePanel.setAvatar()
@@ -271,7 +271,7 @@ object LobbyScene : Scene()
             val list = LobbyAPI.getRooms(searchQuery, SecurityUtils.signRequest(searchQuery ?: ""))
 
             // Updating list
-            glThread {
+            updateThread {
                 roomList.setList(list)
                 awaitList = false
                 val roomCount = roomList.childCount

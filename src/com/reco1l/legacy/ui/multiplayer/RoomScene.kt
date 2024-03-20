@@ -12,16 +12,17 @@ import com.reco1l.api.ibancho.data.TeamMode.HEAD_TO_HEAD
 import com.reco1l.api.ibancho.data.TeamMode.TEAM_VS_TEAM
 import com.reco1l.api.ibancho.data.WinCondition.*
 import com.reco1l.framework.extensions.ignoreException
-import com.reco1l.framework.lang.glThread
-import com.reco1l.framework.lang.uiThread
+import com.reco1l.framework.lang.updateThread
+import com.reco1l.framework.lang.mainThread
 import com.reco1l.legacy.Multiplayer
-import com.reco1l.legacy.data.modsToString
-import com.reco1l.legacy.ui.entity.BeatmapButton
-import com.reco1l.legacy.ui.entity.ComposedText
 import com.reco1l.legacy.Multiplayer.isConnected
 import com.reco1l.legacy.Multiplayer.isRoomHost
 import com.reco1l.legacy.Multiplayer.player
 import com.reco1l.legacy.Multiplayer.room
+import com.reco1l.legacy.data.modsToString
+import com.reco1l.legacy.ui.entity.BeatmapButton
+import com.reco1l.legacy.ui.entity.ComposedText
+import com.rian.osu.ui.DifficultyAlgorithmSwitcher
 import org.andengine.engine.camera.SmoothCamera
 import org.andengine.entity.primitive.Rectangle
 import org.andengine.entity.scene.Scene
@@ -32,7 +33,7 @@ import org.andengine.input.touch.TouchEvent
 import org.andengine.util.math.MathUtils
 import org.json.JSONArray
 import ru.nsu.ccfit.zuev.osu.Config
-import ru.nsu.ccfit.zuev.osu.GlobalManager
+import ru.nsu.ccfit.zuev.osu.DifficultyAlgorithm
 import ru.nsu.ccfit.zuev.osu.ToastLogger
 import ru.nsu.ccfit.zuev.osu.game.mods.GameMod.MOD_SCOREV2
 import ru.nsu.ccfit.zuev.osu.helper.AnimSprite
@@ -101,21 +102,22 @@ object RoomScene : Scene(), IRoomEventListener, IPlayerEventListener
 
     private var modsButton: AnimSprite? = null
 
+    private var difficultySwitcher: DifficultyAlgorithmSwitcher? = null
+
     private var playerList: RoomPlayerList? = null
 
     private var options: RoomOptions? = null
 
-
     private val onlinePanel = OnlinePanel()
 
-    private val titleText = Text(20f, 20f, getResources().getFont("bigFont"), "", 100, GlobalManager.getInstance().engine.vertexBufferObjectManager)
+    private val titleText = Text(20f, 20f, getResources().getFont("bigFont"), "", 100, getGlobal().engine.vertexBufferObjectManager)
 
-    private val stateText = Text(0f, 0f, getResources().getFont("smallFont"), "", 250, GlobalManager.getInstance().engine.vertexBufferObjectManager)
+    private val stateText = Text(0f, 0f, getResources().getFont("smallFont"), "", 250, getGlobal().engine.vertexBufferObjectManager)
 
-    private val infoText = Text(0f, 0f, getResources().getFont("smallFont"), "", 200, GlobalManager.getInstance().engine.vertexBufferObjectManager)
+    private val infoText = Text(0f, 0f, getResources().getFont("smallFont"), "", 200, getGlobal().engine.vertexBufferObjectManager)
 
 
-    private val beatmapInfoText = Text(10f, 10f, getResources().getFont("smallFont"), "", 150, GlobalManager.getInstance().engine.vertexBufferObjectManager)
+    private val beatmapInfoText = Text(10f, 10f, getResources().getFont("smallFont"), "", 150, getGlobal().engine.vertexBufferObjectManager)
 
     private var beatmapInfoRectangle: Rectangle? = null
 
@@ -135,12 +137,12 @@ object RoomScene : Scene(), IRoomEventListener, IPlayerEventListener
         isBackgroundEnabled = true
 
         // Background dim
-        val dim = Rectangle(0f, 0f, Config.getRES_WIDTH().toFloat(), Config.getRES_HEIGHT().toFloat(), GlobalManager.getInstance().engine.vertexBufferObjectManager)
+        val dim = Rectangle(0f, 0f, Config.getRES_WIDTH().toFloat(), Config.getRES_HEIGHT().toFloat(), getGlobal().engine.vertexBufferObjectManager)
         dim.setColor(0f, 0f, 0f, 0.5f)
         attachChild(dim, 0)
 
         // Top bar
-        val top = Rectangle(0f, 0f, Config.getRES_WIDTH().toFloat(), 120f, GlobalManager.getInstance().engine.vertexBufferObjectManager)
+        val top = Rectangle(0f, 0f, Config.getRES_WIDTH().toFloat(), 120f, getGlobal().engine.vertexBufferObjectManager)
         top.setColor(0f, 0f, 0f, 0.3f)
         attachChild(top)
 
@@ -170,7 +172,7 @@ object RoomScene : Scene(), IRoomEventListener, IPlayerEventListener
         attachChild(infoText)
 
         // Beatmap info
-        beatmapInfoRectangle = Rectangle(0f, 0f, trackButton!!.width * 0.75f, 0f, GlobalManager.getInstance().engine.vertexBufferObjectManager).also {
+        beatmapInfoRectangle = Rectangle(0f, 0f, trackButton!!.width * 0.75f, 0f, getGlobal().engine.vertexBufferObjectManager).also {
             it.setColor(0f, 0f, 0f, 0.9f)
             it.isVisible = false
 
@@ -283,7 +285,7 @@ object RoomScene : Scene(), IRoomEventListener, IPlayerEventListener
                     RoomAPI.notifyMatchPlay()
                     return true
                 }
-                else uiThread {
+                else mainThread {
                     options = RoomOptions()
                     options!!.show()
                 }
@@ -338,7 +340,7 @@ object RoomScene : Scene(), IRoomEventListener, IPlayerEventListener
                     this.setScale(1f)
 
                     if (!moved)
-                        uiThread { leaveDialog.show() }
+                        mainThread { leaveDialog.show() }
                     return true
                 }
                 if (event.isActionOutside || event.isActionMove && MathUtils.distance(dx, dy, localX, localY) > 50)
@@ -412,6 +414,15 @@ object RoomScene : Scene(), IRoomEventListener, IPlayerEventListener
             else it.setPosition(backButton!!.x + backButton!!.width, (Config.getRES_HEIGHT() - 90f))
         }
 
+        // Difficulty switcher
+        difficultySwitcher = DifficultyAlgorithmSwitcher().also {
+
+            it.setPosition(modsButton!!.x + modsButton!!.widthScaled, Config.getRES_HEIGHT() - it.heightScaled)
+
+            registerTouchArea(it)
+            attachChild(it)
+        }
+
         // Online panel
         onlinePanel.setPosition(Config.getRES_WIDTH() - 410f - 6f, 6f)
         attachChild(onlinePanel)
@@ -434,7 +445,7 @@ object RoomScene : Scene(), IRoomEventListener, IPlayerEventListener
     // Update events
 
     @JvmStatic
-    fun updateOnlinePanel() = glThread {
+    fun updateOnlinePanel() = updateThread {
 
         onlinePanel.setInfo()
         onlinePanel.setAvatar()
@@ -448,7 +459,7 @@ object RoomScene : Scene(), IRoomEventListener, IPlayerEventListener
         val height = texture.height * (Config.getRES_WIDTH() / texture.width.toFloat())
         val width = Config.getRES_WIDTH().toFloat()
 
-        background = SpriteBackground(Sprite(0f, (Config.getRES_HEIGHT() - height) / 2f, width, height, texture, GlobalManager.getInstance().engine.vertexBufferObjectManager))
+        background = SpriteBackground(Sprite(0f, (Config.getRES_HEIGHT() - height) / 2f, width, height, texture, getGlobal().engine.vertexBufferObjectManager))
     }
 
     private fun updateInformation()
@@ -500,6 +511,8 @@ object RoomScene : Scene(), IRoomEventListener, IPlayerEventListener
             readyButton!!.setColor(0.9f, 0.2f, 0.2f)
 
             modsButton!!.isVisible = false
+            difficultySwitcher!!.setPosition(modsButton!!.x, difficultySwitcher!!.y)
+
             secondaryButton!!.isVisible = isRoomHost
 
             if (isRoomHost)
@@ -526,6 +539,10 @@ object RoomScene : Scene(), IRoomEventListener, IPlayerEventListener
         secondaryButton!!.setColor(0.2f, 0.2f, 0.2f)
 
         modsButton!!.isVisible = isRoomHost || room!!.gameplaySettings.isFreeMod
+
+        if (modsButton!!.isVisible) {
+            difficultySwitcher!!.setPosition(modsButton!!.x, difficultySwitcher!!.y)
+        }
     }
 
     private fun updateBeatmapInfo()
@@ -544,7 +561,10 @@ object RoomScene : Scene(), IRoomEventListener, IPlayerEventListener
                     else 
                         "%.1f-%.1f".format(track.bpmMin, track.bpmMax)
                 } 
-                CS: ${track.circleSize} AR: ${track.approachRate} OD: ${track.overallDifficulty} HP: ${track.hpDrain} Star Rating: ${track.difficulty}
+                CS: ${track.circleSize} AR: ${track.approachRate} OD: ${track.overallDifficulty} HP: ${track.hpDrain} Star Rating: ${
+                    if (Config.getDifficultyAlgorithm() == DifficultyAlgorithm.standard) track.standardDifficulty
+                    else track.droidDifficulty
+                }
             """.trimIndent()
 
             true
@@ -557,6 +577,11 @@ object RoomScene : Scene(), IRoomEventListener, IPlayerEventListener
 
             trackButton!!.let { rect.setPosition(it.x + it.width - rect.width - 20, it.y + it.height) }
         }
+    }
+
+    fun switchDifficultyAlgorithm() {
+        trackButton!!.updateBeatmap(room!!.beatmap)
+        updateBeatmapInfo()
     }
 
     // Actions
@@ -590,11 +615,11 @@ object RoomScene : Scene(), IRoomEventListener, IPlayerEventListener
         chat.log.clear()
         chat.dismiss()
 
-        uiThread {
+        mainThread {
             playerList?.menu?.dismiss()
             options?.dismiss()
 
-            glThread {
+            updateThread {
                 getModMenu().hide()
 
                 playerList?.detachSelf()
@@ -824,7 +849,7 @@ object RoomScene : Scene(), IRoomEventListener, IPlayerEventListener
         chat.onSystemChatMessage("Player ${room!!.playersMap[uid]?.name} is now the room host.", "#007BFF")
 
         // Reloading mod menu
-        glThread {
+        updateThread {
             getModMenu().hide(false)
 
             // Reloading buttons sprites
@@ -879,6 +904,12 @@ object RoomScene : Scene(), IRoomEventListener, IPlayerEventListener
 
         // Hiding mod button in case isn't the host when free mods is disabled
         modsButton!!.isVisible = isRoomHost || settings.isFreeMod
+
+        // Moving difficulty switcher with respect to mods button
+        difficultySwitcher!!.setPosition(
+            modsButton!!.x + if (modsButton!!.isVisible) modsButton!!.widthScaled else 0f,
+            difficultySwitcher!!.y
+        )
 
         // Closing mod menu, to enforce mod menu scene update
         getModMenu().hide(false)
@@ -984,7 +1015,7 @@ object RoomScene : Scene(), IRoomEventListener, IPlayerEventListener
             getGlobal().gameScene.startGame(getGlobal().selectedTrack, null)
 
             // Hiding any player menu if its shown
-            uiThread { playerList!!.menu.dismiss() }
+            mainThread { playerList!!.menu.dismiss() }
         }
 
         // Updating player list
@@ -1058,7 +1089,7 @@ object RoomScene : Scene(), IRoomEventListener, IPlayerEventListener
             }
 
             back()
-            uiThread {
+            mainThread {
                 AlertDialog.Builder(getGlobal().mainActivity).apply {
 
                     setTitle("Message")

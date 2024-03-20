@@ -16,18 +16,17 @@ import com.edlplan.framework.easing.Easing
 import com.edlplan.framework.support.util.Updater
 import com.edlplan.ui.BaseAnimationListener
 import com.edlplan.ui.EasingHelper
-import com.reco1l.framework.lang.uiThread
+import com.reco1l.framework.lang.mainThread
 import org.andengine.engine.handler.IUpdateHandler
 import org.andengine.entity.scene.Scene
 import ru.nsu.ccfit.zuev.osu.helper.InputManager
 import ru.nsu.ccfit.zuev.osu.helper.StringTable
 import ru.nsu.ccfit.zuev.osu.menu.IFilterMenu
 import ru.nsu.ccfit.zuev.osu.menu.SongMenu
-import ru.nsu.ccfit.zuev.osu.GlobalManager.getInstance as getGlobal
 import ru.nsu.ccfit.zuev.osuplus.R
+import ru.nsu.ccfit.zuev.osu.GlobalManager.getInstance as getGlobal
 
-class FilterMenuFragment : BaseFragment(),
-    IUpdateHandler, IFilterMenu {
+class FilterMenuFragment : BaseFragment(), IUpdateHandler, IFilterMenu {
     private var configContext: Context? = null
     private var savedFolder: String? = null
     private var savedFavOnly = false
@@ -78,7 +77,7 @@ class FilterMenuFragment : BaseFragment(),
 
     override fun loadConfig(context: Context?) {
         configContext = context
-        uiThread(this::reloadViewData)
+        mainThread(this::reloadViewData)
     }
 
     override fun getScene(): Scene = scene!!
@@ -240,7 +239,8 @@ class FilterMenuFragment : BaseFragment(),
             SongMenu.SortOrder.Creator -> StringTable.get(R.string.menu_search_sort_creator)
             SongMenu.SortOrder.Date -> StringTable.get(R.string.menu_search_sort_date)
             SongMenu.SortOrder.Bpm -> StringTable.get(R.string.menu_search_sort_bpm)
-            SongMenu.SortOrder.Stars -> StringTable.get(R.string.menu_search_sort_stars)
+            SongMenu.SortOrder.DroidStars -> StringTable.get(R.string.menu_search_sort_droid_stars)
+            SongMenu.SortOrder.StandardStars -> StringTable.get(R.string.menu_search_sort_standard_stars)
             SongMenu.SortOrder.Length -> StringTable.get(R.string.menu_search_sort_length)
         }
 

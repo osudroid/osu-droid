@@ -14,8 +14,8 @@ import ru.nsu.ccfit.zuev.osu.GlobalManager.getInstance as getGlobal
 /**
  * Run a task on asynchronous using Kotlin Coroutines API.
  */
-fun async(block: () -> Unit) = GlobalScope.launch {
-    block()
+fun async(block: Runnable) = GlobalScope.launch {
+    block.run()
 }
 
 /**
@@ -28,14 +28,15 @@ fun asyncIgnoreExceptions(block: Runnable) = GlobalScope.launch {
 /**
  * Run a delayed task on asynchronous using Kotlin Coroutines API.
  */
-fun delayed(time: Long, block: () -> Unit) = GlobalScope.launch {
+fun delayed(time: Long, block: Runnable) = GlobalScope.launch {
     delay(time)
-    block()
+    block.run()
 }
+
 
 // Exclusive osu!droid
 
-fun uiThread(block: Runnable) = getGlobal().mainActivity.runOnUiThread(block)
+fun mainThread(block: Runnable) = getGlobal().mainActivity.runOnUiThread(block)
 
-fun glThread(block: Runnable) = getGlobal().engine.runOnUpdateThread(block)
+fun updateThread(block: Runnable) = getGlobal().engine.runOnUpdateThread(block)
 

@@ -41,14 +41,20 @@ public class FlashLightEntity extends Entity  {
         float flFollowDelay = ModMenu.getInstance().getFLfollowDelay();
 
         if (nextPX != 0 && nextPY != 0 && currentModifier != null && this.getX() != nextPX && this.getY() != nextPY) {
-            this.unregisterEntityModifier(currentModifier);
+            unregisterEntityModifier(currentModifier);
         }
 
         nextPX = FMath.clamp(pX, 0, Config.getRES_WIDTH());
         nextPY = FMath.clamp(pY, 0, Config.getRES_HEIGHT());
+
+        if (flFollowDelay == 0) {
+            setPosition(nextPX, nextPY);
+            return;
+        }
+
         currentModifier = new MoveModifier(flFollowDelay, this.getX(), nextPX, this.getY(), nextPY, EaseExponentialOut.getInstance());
 
-        this.registerEntityModifier(currentModifier);
+        registerEntityModifier(currentModifier);
     }
 
     public void onTrackingSliders(boolean isTrackingSliders) {

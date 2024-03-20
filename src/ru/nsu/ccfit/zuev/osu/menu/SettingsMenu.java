@@ -31,7 +31,7 @@ import com.google.android.material.snackbar.Snackbar;
 import java.io.File;
 import java.util.Objects;
 
-import com.reco1l.framework.lang.execution.Async;
+import com.reco1l.framework.lang.Execution;
 import com.reco1l.legacy.UpdateManager;
 
 import ru.nsu.ccfit.zuev.osu.Config;
@@ -80,7 +80,7 @@ public class SettingsMenu extends SettingsFragment {
                 var loading = new LoadingFragment();
                 loading.show();
 
-                Async.run(() -> {
+                Execution.async(() -> {
                     GlobalManager.getInstance().setSkinNow(Config.getSkinPath());
                     SkinManager.getInstance().clearSkin();
                     ResourceManager.getInstance().loadSkin(newValue.toString());

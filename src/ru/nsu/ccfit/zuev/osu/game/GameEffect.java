@@ -2,6 +2,8 @@ package ru.nsu.ccfit.zuev.osu.game;
 
 import android.graphics.PointF;
 
+import com.reco1l.framework.lang.Execution;
+
 import org.andengine.entity.IEntity;
 import org.andengine.entity.modifier.IEntityModifier;
 import org.andengine.entity.modifier.IEntityModifier.IEntityModifierListener;
@@ -19,7 +21,6 @@ import java.util.List;
 import ru.nsu.ccfit.zuev.osu.GlobalManager;
 import ru.nsu.ccfit.zuev.osu.RGBColor;
 import ru.nsu.ccfit.zuev.osu.ResourceManager;
-import ru.nsu.ccfit.zuev.osu.async.SyncTaskManager;
 import ru.nsu.ccfit.zuev.osu.helper.AnimSprite;
 
 public class GameEffect extends GameObject implements IEntityModifierListener {
@@ -91,7 +92,7 @@ public class GameEffect extends GameObject implements IEntityModifierListener {
 
     @Override
     public void onModifierFinished(final IModifier<IEntity> pModifier, final IEntity pItem) {
-        SyncTaskManager.getInstance().run(() -> {
+        Execution.updateThread(() -> {
             hit.detachSelf();
             hit.clearEntityModifiers();
         });

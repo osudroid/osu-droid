@@ -1,6 +1,6 @@
 package ru.nsu.ccfit.zuev.osu.online;
 
-import com.reco1l.framework.lang.execution.Async;
+import com.reco1l.framework.lang.Execution;
 import com.reco1l.legacy.ui.multiplayer.LobbyScene;
 import com.reco1l.legacy.ui.multiplayer.RoomScene;
 import org.andengine.util.debug.Debug;
@@ -79,7 +79,7 @@ public class OnlineScoring {
             return;
         avatarLoaded = false;
 
-        Async.run(() -> {
+        Execution.async(() -> {
             synchronized (onlineMutex) {
                 boolean success = false;
 
@@ -117,7 +117,7 @@ public class OnlineScoring {
         if (!OnlineManager.getInstance().isStayOnline())
             return;
 
-        Async.run(() -> {
+        Execution.async(() -> {
             synchronized (onlineMutex) {
                 for (int i = 0; i < attemptCount; i++) {
                     try {
@@ -144,7 +144,7 @@ public class OnlineScoring {
 
         final String recordData = record.compile();
 
-        Async.run(() -> {
+        Execution.async(() -> {
             boolean success = false;
             synchronized (onlineMutex) {
                 for (int i = 0; i < attemptCount; i++) {
@@ -202,7 +202,7 @@ public class OnlineScoring {
         if (avatarUrl == null || avatarUrl.length() == 0)
             return;
 
-        Async.run(() -> {
+        Execution.async(() -> {
             synchronized (onlineMutex) {
                 avatarLoaded = OnlineManager.getInstance().loadAvatarToTextureManager();
                 if (both)

@@ -7,6 +7,8 @@ import com.edlplan.framework.math.Vec2;
 import com.edlplan.framework.math.line.LinePath;
 import com.reco1l.legacy.graphics.entity.SliderBody;
 import com.edlplan.osu.support.timing.controlpoint.TimingControlPoint;
+import com.reco1l.framework.lang.Execution;
+
 import org.andengine.entity.IEntity;
 import org.andengine.entity.modifier.AlphaModifier;
 import org.andengine.entity.modifier.FadeInModifier;
@@ -25,7 +27,6 @@ import ru.nsu.ccfit.zuev.osu.GlobalManager;
 import ru.nsu.ccfit.zuev.osu.RGBColor;
 import ru.nsu.ccfit.zuev.osu.ResourceManager;
 import ru.nsu.ccfit.zuev.osu.Utils;
-import ru.nsu.ccfit.zuev.osu.async.SyncTaskManager;
 import ru.nsu.ccfit.zuev.osu.game.GameHelper.SliderPath;
 import ru.nsu.ccfit.zuev.osu.helper.AnimSprite;
 import ru.nsu.ccfit.zuev.osu.helper.CentredSprite;
@@ -450,7 +451,7 @@ public class Slider extends GameObject {
         ball.registerEntityModifier(new FadeOutModifier(0.1f * GameHelper.getTimeMultiplier(), new ModifierListener() {
             @Override
             public void onModifierFinished(IModifier<IEntity> pModifier, IEntity pItem) {
-                SyncTaskManager.getInstance().run(pItem::detachSelf);
+                Execution.updateThread(pItem::detachSelf);
             }
         }));
 
@@ -584,7 +585,7 @@ public class Slider extends GameObject {
                     new AlphaModifier(0.2f * GameHelper.getTimeMultiplier(), followCircle.getAlpha(), 0f, new ModifierListener() {
                         @Override
                         public void onModifierFinished(IModifier<IEntity> pModifier, IEntity pItem) {
-                            SyncTaskManager.getInstance().run(pItem::detachSelf);
+                            Execution.updateThread(pItem::detachSelf);
                         }
                     }, EaseQuadIn.getInstance())
             ));
@@ -805,7 +806,7 @@ public class Slider extends GameObject {
                         new AlphaModifier(0.1f * GameHelper.getTimeMultiplier(), followCircle.getAlpha(), 0f, new ModifierListener() {
                             public void onModifierFinished(IModifier<IEntity> pModifier, IEntity pItem) {
                                 if (mIsOver) {
-                                    SyncTaskManager.getInstance().run(pItem::detachSelf);
+                                    Execution.updateThread(pItem::detachSelf);
                                 }
                             }
                         })

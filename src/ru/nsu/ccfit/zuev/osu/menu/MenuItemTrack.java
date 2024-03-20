@@ -9,13 +9,8 @@ import org.andengine.util.math.MathUtils;
 import java.lang.ref.WeakReference;
 import java.math.BigDecimal;
 
-import ru.nsu.ccfit.zuev.osu.BeatmapInfo;
-import ru.nsu.ccfit.zuev.osu.GlobalManager;
-import ru.nsu.ccfit.zuev.osu.RGBColor;
-import ru.nsu.ccfit.zuev.osu.ResourceManager;
+import ru.nsu.ccfit.zuev.osu.*;
 import ru.nsu.ccfit.zuev.skins.OsuSkin;
-import ru.nsu.ccfit.zuev.osu.TrackInfo;
-import ru.nsu.ccfit.zuev.osu.Utils;
 import ru.nsu.ccfit.zuev.osu.scoring.ScoreLibrary;
 
 public class MenuItemTrack extends Sprite {
@@ -77,7 +72,12 @@ public class MenuItemTrack extends Sprite {
         }
         halfStar.setVisible(false);
 
-        final float diff = Math.min(track.getDifficulty(), 10);
+        final float diff = Math.min(
+            Config.getDifficultyAlgorithm() == DifficultyAlgorithm.standard ?
+                track.getStandardDifficulty() : track.getDroidDifficulty(),
+            10
+        );
+
         int fInt = (int) (diff);
         BigDecimal b1 = new BigDecimal(Float.toString(diff));
         BigDecimal b2 = new BigDecimal(Integer.toString(fInt));

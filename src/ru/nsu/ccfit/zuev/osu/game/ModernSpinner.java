@@ -2,6 +2,8 @@ package ru.nsu.ccfit.zuev.osu.game;
 
 import android.graphics.PointF;
 
+import com.reco1l.framework.lang.Execution;
+
 import org.andengine.entity.IEntity;
 import org.andengine.entity.modifier.AlphaModifier;
 import org.andengine.entity.modifier.ColorModifier;
@@ -16,7 +18,6 @@ import org.andengine.util.modifier.IModifier;
 import ru.nsu.ccfit.zuev.osu.Constants;
 import ru.nsu.ccfit.zuev.osu.ResourceManager;
 import ru.nsu.ccfit.zuev.osu.Utils;
-import ru.nsu.ccfit.zuev.osu.async.SyncTaskManager;
 import ru.nsu.ccfit.zuev.osu.helper.CentredSprite;
 import ru.nsu.ccfit.zuev.osu.scoring.ScoreNumber;
 import ru.nsu.ccfit.zuev.osu.scoring.StatisticV2;
@@ -106,7 +107,7 @@ public class ModernSpinner extends Spinner {
 
                             @Override
                             public void onModifierFinished(final IModifier<IEntity> pModifier, final IEntity pItem) {
-                                SyncTaskManager.getInstance().run(ModernSpinner.this::removeFromScene);
+                                Execution.updateThread(ModernSpinner.this::removeFromScene);
                             }
                         },
                         new SequenceEntityModifier(

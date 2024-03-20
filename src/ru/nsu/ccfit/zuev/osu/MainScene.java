@@ -9,10 +9,12 @@ import android.os.PowerManager;
 import android.util.Log;
 
 import com.edlplan.ui.fragment.ConfirmDialogFragment;
+import com.reco1l.framework.lang.Execution;
 import com.reco1l.legacy.graphics.texture.BlankTextureRegion;
 import com.reco1l.legacy.ui.ChimuWebView;
 import com.reco1l.legacy.ui.MainMenu;
 
+import com.rian.osu.beatmap.parser.BeatmapParser;
 import org.andengine.engine.handler.IUpdateHandler;
 import org.andengine.entity.IEntity;
 import org.andengine.entity.modifier.IEntityModifier;
@@ -60,9 +62,6 @@ import java.util.concurrent.TimeUnit;
 
 import ru.nsu.ccfit.zuev.audio.BassSoundProvider;
 import ru.nsu.ccfit.zuev.audio.Status;
-import ru.nsu.ccfit.zuev.osu.async.SyncTaskManager;
-import ru.nsu.ccfit.zuev.osu.beatmap.BeatmapData;
-import ru.nsu.ccfit.zuev.osu.beatmap.parser.BeatmapParser;
 import ru.nsu.ccfit.zuev.osu.game.SongProgressBar;
 import ru.nsu.ccfit.zuev.osu.game.TimingPoint;
 import ru.nsu.ccfit.zuev.osu.helper.ModifierFactory;
@@ -518,7 +517,7 @@ public class MainScene implements IUpdateHandler {
 
     public void reloadOnlinePanel() {
         // IndexOutOfBoundsException 141 fix
-        SyncTaskManager.getInstance().run(() -> {
+        Execution.updateThread(() -> {
             scene.detachChild(OnlineScoring.getInstance().getPanel());
             createOnlinePanel(scene);
         });
@@ -893,21 +892,25 @@ public class MainScene implements IUpdateHandler {
             Arrays.fill(peakDownRate, 1f);
             Arrays.fill(peakAlpha, 0f);
 
-            BeatmapParser parser = new BeatmapParser(selectedTrack.getFilename());
-            BeatmapData beatmapData = parser.parse(false);
-            if (beatmapData != null) {
-                timingPoints = new LinkedList<>();
-                for (final String s : beatmapData.rawTimingPoints) {
-                    final TimingPoint tp = new TimingPoint(s.split(","), currentTimingPoint);
-                    timingPoints.add(tp);
-                    if (!tp.wasInderited() || currentTimingPoint == null) {
-                        currentTimingPoint = tp;
+            try (var parser = new BeatmapParser(selectedTrack.getFilename())) {
+                var beatmap = parser.parse(false);
+
+                if (beatmap != null) {
+                    timingPoints = new LinkedList<>();
+
+                    for (final String s : beatmap.rawTimingPoints) {
+                        final TimingPoint tp = new TimingPoint(s.split(","), currentTimingPoint);
+                        timingPoints.add(tp);
+                        if (!tp.wasInderited() || currentTimingPoint == null) {
+                            currentTimingPoint = tp;
+                        }
                     }
+
+                    firstTimingPoint = timingPoints.remove(0);
+                    currentTimingPoint = firstTimingPoint;
+                    lastTimingPoint = currentTimingPoint;
+                    bpmLength = firstTimingPoint.getBeatLength() * 1000f;
                 }
-                firstTimingPoint = timingPoints.remove(0);
-                currentTimingPoint = firstTimingPoint;
-                lastTimingPoint = currentTimingPoint;
-                bpmLength = firstTimingPoint.getBeatLength() * 1000f;
             }
         }
     }

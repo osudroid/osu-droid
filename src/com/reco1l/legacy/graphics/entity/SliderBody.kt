@@ -1,6 +1,7 @@
 package com.reco1l.legacy.graphics.entity
 
 import com.edlplan.framework.math.line.LinePath
+import com.reco1l.framework.lang.updateThread
 import com.reco1l.legacy.graphics.mesh.PathMesh
 import com.reco1l.legacy.graphics.mesh.PathMeshDrawer
 import org.andengine.entity.IEntity
@@ -12,7 +13,6 @@ import org.andengine.util.color.ColorUtils
 import org.andengine.util.modifier.IModifier
 import org.andengine.util.modifier.ease.EaseQuadOut
 import ru.nsu.ccfit.zuev.osu.RGBColor
-import ru.nsu.ccfit.zuev.osu.async.SyncTaskManager
 import ru.nsu.ccfit.zuev.osu.helper.ModifierListener
 
 class SliderBody(val path: LinePath)
@@ -142,7 +142,7 @@ class SliderBody(val path: LinePath)
         {
             override fun onModifierFinished(m: IModifier<IEntity>, i: IEntity)
             {
-                SyncTaskManager.getInstance().run { removeFromScene() }
+                updateThread { removeFromScene() }
             }
         }))
     }
