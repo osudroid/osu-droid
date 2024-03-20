@@ -14,8 +14,8 @@ import org.andengine.opengl.shader.constants.ShaderProgramConstants.ATTRIBUTE_PO
 import org.andengine.opengl.util.GLState
 import org.andengine.opengl.vbo.DrawType
 import org.andengine.opengl.vbo.VertexBufferObject
+import org.andengine.opengl.vbo.VertexBufferObjectManager
 import org.andengine.opengl.vbo.attribute.VertexBufferObjectAttributesBuilder
-import ru.nsu.ccfit.zuev.osu.GlobalManager
 import java.nio.ByteBuffer
 import java.nio.ByteOrder
 
@@ -85,7 +85,7 @@ class PathMesh(private val flat: Boolean) : Mesh(0f, 0f, 0, DrawMode.TRIANGLES, 
 class PathMeshVBO(private val flat: Boolean) :
 
     VertexBufferObject(
-        GlobalManager.getInstance().engine.vertexBufferObjectManager, 0, DrawType.STATIC, true,
+        VertexBufferObjectManager.GLOBAL, 0, DrawType.STATIC, true,
 
         if (flat)
             Mesh.VERTEXBUFFEROBJECTATTRIBUTES_DEFAULT
