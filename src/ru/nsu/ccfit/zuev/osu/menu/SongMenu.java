@@ -678,7 +678,7 @@ public class SongMenu implements IUpdateHandler, MenuItemListener,
             OnlineScoring.getInstance().loadAvatar(false);
             frontLayer.attachChild(panel);
 
-
+            // TODO: add ranked status textures
             scoringSwitcher = new AnimSprite(Utils.toRes(5), Utils.toRes(10), 0, "ranking_enabled", "ranking_disabled") {
                 @Override
                 public boolean onAreaTouched(TouchEvent pSceneTouchEvent,
@@ -709,24 +709,13 @@ public class SongMenu implements IUpdateHandler, MenuItemListener,
         if (board.isShowOnlineScores()) {
             board.setShowOnlineScores(false);
             board.init(selectedTrack);
-            scoringSwitcher.setFrame(1);
             updateInfo(selectedTrack);
         } else if (OnlineManager.getInstance().isStayOnline()) {
             board.setShowOnlineScores(true);
             board.init(selectedTrack);
-            setRank();
         }
-    }
 
-    public void setRank() {
-        if (!board.isShowOnlineScores()) {
-            if (scoringSwitcher != null) {
-                scoringSwitcher.setFrame(1);
-            }
-            updateInfo(selectedTrack);
-            return;
-        }
-        scoringSwitcher.setFrame(0);
+        updateScoringSwitcherStatus();
     }
 
     public Scene getScene() {
@@ -1152,10 +1141,6 @@ public class SongMenu implements IUpdateHandler, MenuItemListener,
             playMusic(track.getAudioFilename(), track.getPreviewTime());
         }
 
-        if (board.isShowOnlineScores()) {
-            Execution.async(this::setRank);
-        }
-
         if (selectedTrack == track) {
             synchronized (bgMutex) {
                 if (!bgLoaded) {
@@ -1191,6 +1176,7 @@ public class SongMenu implements IUpdateHandler, MenuItemListener,
         EdExtensionHelper.onSelectTrack(track);
         GlobalManager.getInstance().setSelectedTrack(track);
         updateInfo(track);
+        updateScoringSwitcherStatus();
         board.init(track);
 
         final int quality = Config.getBackgroundQuality();
@@ -1567,6 +1553,45 @@ public class SongMenu implements IUpdateHandler, MenuItemListener,
                 }
             }
         }
+    }
+
+    private void updateScoringSwitcherStatus() {
+        if (scoringSwitcher == null) {
+            return;
+        }
+
+        if (selectedTrack == null || !board.isShowOnlineScores()) {
+            scoringSwitcher.setFrame(1);
+            return;
+        }
+
+        var hash = selectedTrack.getMD5();
+
+        Execution.async(() -> {
+            try {
+                var status = OnlineManager.getInstance().getBeatmapStatus(hash);
+
+                if (!board.isShowOnlineScores() || scoringSwitcher == null || selectedTrack == null || !selectedTrack.getMD5().equals(hash)) {
+                    return;
+                }
+
+                scoringSwitcher.setFrame(switch (status) {
+                    case loved -> 2;
+                    case qualified -> 3;
+                    case ranked -> 4;
+                    case pending -> 5;
+                    case workInProgress -> 6;
+                    case graveyard -> 7;
+                    default -> 0;
+                });
+            } catch (OnlineManagerException e) {
+                Debug.e("Cannot get beatmap status: " + e.getMessage(), e);
+
+                if (scoringSwitcher != null) {
+                    scoringSwitcher.setFrame(0);
+                }
+            }
+        });
     }
 
     public enum SortOrder {

@@ -14,11 +14,7 @@ import org.anddev.andengine.util.Debug;
 import java.io.File;
 import java.util.ArrayList;
 
-import ru.nsu.ccfit.zuev.osu.BeatmapInfo;
-import ru.nsu.ccfit.zuev.osu.Config;
-import ru.nsu.ccfit.zuev.osu.GlobalManager;
-import ru.nsu.ccfit.zuev.osu.ResourceManager;
-import ru.nsu.ccfit.zuev.osu.TrackInfo;
+import ru.nsu.ccfit.zuev.osu.*;
 import ru.nsu.ccfit.zuev.osu.helper.MD5Calculator;
 import ru.nsu.ccfit.zuev.osu.online.PostBuilder.RequestException;
 
@@ -289,6 +285,11 @@ public class OnlineManager {
         response.remove(0);
 
         return response;
+    }
+
+    public RankedStatus getBeatmapStatus(String hash) throws OnlineManagerException {
+        // TODO: ranking status retrieval
+        return null;
     }
 
     public boolean loadAvatarToTextureManager() {
