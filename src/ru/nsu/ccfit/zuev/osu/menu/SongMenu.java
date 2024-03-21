@@ -1528,6 +1528,7 @@ public class SongMenu implements IUpdateHandler, MenuItemListener,
         }
 
         var hash = selectedTrack.getMD5();
+        scoringSwitcher.setFrame(0);
 
         Execution.async(() -> {
             try {
