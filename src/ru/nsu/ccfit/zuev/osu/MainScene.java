@@ -388,14 +388,13 @@ public class MainScene implements IUpdateHandler {
         {
             particleSystem[0] = new SpriteParticleSystem(new PointParticleEmitter(-40, (float) (Config.getRES_HEIGHT() * 3) / 4), 32, 48, 128, starRegion, GlobalManager.getInstance().getEngine().getVertexBufferObjectManager());
 
-            particleSystem[0].addParticleInitializer(new BlendFunctionParticleInitializer<>(GLES20.GL_SRC_COLOR, GLES20.GL_ONE_MINUS_SRC_ALPHA));
             particleSystem[0].addParticleInitializer(new VelocityParticleInitializer<>(150, 430, -480, -520));
             particleSystem[0].addParticleInitializer(new AccelerationParticleInitializer<>(10, 30));
             particleSystem[0].addParticleInitializer(new RotationParticleInitializer<>(0.0f, 360.0f));
             particleSystem[0].addParticleInitializer(new ExpireParticleInitializer<>(1.0f));
 
-            particleSystem[0].addParticleModifier(new ScaleParticleModifier<>(0.5f, 2.0f, 0.0f, 1.0f));
-            particleSystem[0].addParticleModifier(new AlphaParticleModifier<>(1.0f, 0.0f, 0.0f, 1.0f));
+            particleSystem[0].addParticleModifier(new ScaleParticleModifier<>(0.0f, 1.0f, 0.5f, 2.0f));
+            particleSystem[0].addParticleModifier(new AlphaParticleModifier<>(0.0f, 1.0f, 1.0f, 0.0f));
 
             particleSystem[0].setParticlesSpawnEnabled(false);
 
@@ -406,14 +405,13 @@ public class MainScene implements IUpdateHandler {
 
             particleSystem[1] = new SpriteParticleSystem(new PointParticleEmitter(Config.getRES_WIDTH(), (float) (Config.getRES_HEIGHT() * 3) / 4), 32, 48, 128, starRegion, GlobalManager.getInstance().getEngine().getVertexBufferObjectManager());
 
-            particleSystem[1].addParticleInitializer(new BlendFunctionParticleInitializer<>(GLES20.GL_SRC_COLOR, GLES20.GL_ONE_MINUS_SRC_ALPHA));
             particleSystem[1].addParticleInitializer(new VelocityParticleInitializer<>(-150, -430, -480, -520));
             particleSystem[1].addParticleInitializer(new AccelerationParticleInitializer<>(-10, 30));
             particleSystem[1].addParticleInitializer(new RotationParticleInitializer<>(0.0f, 360.0f));
             particleSystem[1].addParticleInitializer(new ExpireParticleInitializer<>(1.0f));
 
-            particleSystem[1].addParticleModifier(new ScaleParticleModifier<>(0.5f, 2.0f, 0.0f, 1.0f));
-            particleSystem[1].addParticleModifier(new AlphaParticleModifier<>(1.0f, 0.0f, 0.0f, 1.0f));
+            particleSystem[1].addParticleModifier(new ScaleParticleModifier<>(0.0f, 1.0f, 0.5f, 2.0f));
+            particleSystem[1].addParticleModifier(new AlphaParticleModifier<>(0.0f, 1.0f, 1.0f, 0.0f));
 
             particleSystem[1].setParticlesSpawnEnabled(false);
 
