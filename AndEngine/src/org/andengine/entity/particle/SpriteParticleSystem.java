@@ -35,6 +35,7 @@ public class SpriteParticleSystem extends ParticleSystem<Sprite> {
 	public SpriteParticleSystem(final float pX, final float pY, final IParticleEmitter pParticleEmitter, final float pRateMinimum, final float pRateMaximum, final int pParticlesMaximum, final ITextureRegion pTextureRegion, final VertexBufferObjectManager pVertexBufferObjectManager) {
 		super(pX, pY, new IEntityFactory<Sprite>() {
 
+			// osu!droid modified - Sharing VBO between all sprites.
 			private final ISpriteVertexBufferObject mVertexBufferObject = new HighPerformanceSpriteVertexBufferObject(pVertexBufferObjectManager, Sprite.SPRITE_SIZE, DrawType.STATIC, true, Sprite.VERTEXBUFFEROBJECTATTRIBUTES_DEFAULT);
 
 			@Override
