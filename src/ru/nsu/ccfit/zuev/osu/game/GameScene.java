@@ -1006,6 +1006,7 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
 
             comboText = new SpriteText(2f, Config.getRES_HEIGHT(), SpriteText.createOsuTextureProvider(OsuSkin.get().getComboPrefix()));
             comboText.setOriginY(1f);
+            comboText.setScaleCenter(0f, 1f);
             comboText.setText("0x");
             comboText.setCharacterScale(1.5f);
             fgScene.attachChild(comboText);
