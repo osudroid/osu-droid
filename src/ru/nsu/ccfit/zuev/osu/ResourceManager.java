@@ -289,6 +289,10 @@ public class ResourceManager {
         loadTexture("ranking_button", "ranking_button.png", false);
         loadTexture("ranking_enabled", "ranking_enabled.png", false);
         loadTexture("ranking_disabled", "ranking_disabled.png", false);
+        loadTexture("selection-approved", "selection-approved.png", false);
+        loadTexture("selection-loved", "selection-loved.png", false);
+        loadTexture("selection-question", "selection-question.png", false);
+        loadTexture("selection-ranked", "selection-ranked.png", false);
         if (!textures.containsKey("lighting"))
             textures.put("lighting", null);
 //		textures.put("fail-background", null);
