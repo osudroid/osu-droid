@@ -678,8 +678,9 @@ public class SongMenu implements IUpdateHandler, MenuItemListener,
             OnlineScoring.getInstance().loadAvatar(false);
             frontLayer.attachChild(panel);
 
-            // TODO: add ranked status textures
-            scoringSwitcher = new AnimSprite(Utils.toRes(5), Utils.toRes(10), 0, "ranking_enabled", "ranking_disabled") {
+            scoringSwitcher = new AnimSprite(Utils.toRes(5), Utils.toRes(10), 0,
+                    "ranking_disabled", "ranking_enabled", "selection-ranked", "selection-approved",
+                    "selection-loved", "selection-question") {
                 @Override
                 public boolean onAreaTouched(TouchEvent pSceneTouchEvent,
                                              float pTouchAreaLocalX, float pTouchAreaLocalY) {
@@ -688,7 +689,8 @@ public class SongMenu implements IUpdateHandler, MenuItemListener,
                     return true;
                 }
             };
-            scoringSwitcher.setFrame(1);
+
+            scoringSwitcher.setFrame(0);
             scoringSwitcher.setPosition(10, 10);
             scene.registerTouchArea(scoringSwitcher);
             frontLayer.attachChild(scoringSwitcher);
@@ -1561,35 +1563,32 @@ public class SongMenu implements IUpdateHandler, MenuItemListener,
         }
 
         if (selectedTrack == null || !board.isShowOnlineScores()) {
-            scoringSwitcher.setFrame(1);
+            scoringSwitcher.setFrame(0);
             return;
         }
 
         var hash = selectedTrack.getMD5();
-        scoringSwitcher.setFrame(0);
+        scoringSwitcher.setFrame(1);
 
         Execution.async(() -> {
             try {
                 var status = OnlineManager.getInstance().getBeatmapStatus(hash);
 
-                if (!board.isShowOnlineScores() || scoringSwitcher == null || selectedTrack == null || !selectedTrack.getMD5().equals(hash)) {
+                if (!board.isShowOnlineScores() || status == null || scoringSwitcher == null || selectedTrack == null || !selectedTrack.getMD5().equals(hash)) {
                     return;
                 }
 
                 scoringSwitcher.setFrame(switch (status) {
-                    case loved -> 2;
-                    case qualified -> 3;
-                    case ranked -> 4;
-                    case pending -> 5;
-                    case workInProgress -> 6;
-                    case graveyard -> 7;
-                    default -> 0;
+                    case ranked -> 2;
+                    case approved -> 3;
+                    case loved -> 4;
+                    default -> 5;
                 });
             } catch (OnlineManagerException e) {
                 Debug.e("Cannot get beatmap status: " + e.getMessage(), e);
 
                 if (scoringSwitcher != null) {
-                    scoringSwitcher.setFrame(0);
+                    scoringSwitcher.setFrame(1);
                 }
             }
         });
