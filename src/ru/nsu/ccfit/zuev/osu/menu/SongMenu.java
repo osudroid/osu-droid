@@ -1567,14 +1567,18 @@ public class SongMenu implements IUpdateHandler, MenuItemListener,
             return;
         }
 
-        var hash = selectedTrack.getMD5();
+        var beatmapSetId = selectedTrack.getBeatmapSetID();
         scoringSwitcher.setFrame(1);
+
+        if (beatmapSetId == -1) {
+            return;
+        }
 
         Execution.async(() -> {
             try {
-                var status = OnlineManager.getInstance().getBeatmapStatus(hash);
+                var status = OnlineManager.getInstance().getBeatmapStatus(beatmapSetId);
 
-                if (!board.isShowOnlineScores() || status == null || scoringSwitcher == null || selectedTrack == null || !selectedTrack.getMD5().equals(hash)) {
+                if (!board.isShowOnlineScores() || status == null || scoringSwitcher == null || selectedTrack == null || selectedTrack.getBeatmapSetID() != beatmapSetId) {
                     return;
                 }
 

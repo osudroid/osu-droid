@@ -9,11 +9,15 @@ import com.google.firebase.analytics.FirebaseAnalytics;
 
 import okhttp3.OkHttpClient;
 
+import okhttp3.Request;
 import org.anddev.andengine.util.Debug;
 
 import java.io.File;
+import java.io.IOException;
 import java.util.ArrayList;
 
+import org.json.JSONException;
+import org.json.JSONObject;
 import ru.nsu.ccfit.zuev.osu.*;
 import ru.nsu.ccfit.zuev.osu.helper.MD5Calculator;
 import ru.nsu.ccfit.zuev.osu.online.PostBuilder.RequestException;
@@ -287,8 +291,27 @@ public class OnlineManager {
         return response;
     }
 
-    public RankedStatus getBeatmapStatus(String hash) throws OnlineManagerException {
-        // TODO: ranking status retrieval
+    public RankedStatus getBeatmapStatus(int beatmapSetId) throws OnlineManagerException {
+        // TODO: replace with chimu map status API that is hash-based
+        var builder = new Request.Builder().url("https://api.chimu.moe/v1/set/" + beatmapSetId);
+        var request = builder.build();
+
+        try (var response = client.newCall(request).execute()) {
+            if (response.isSuccessful() && response.body() != null) {
+                var json = new JSONObject(response.body().string());
+                return RankedStatus.valueOf(json.optInt("RankedStatus"));
+            }
+        } catch (final IOException e) {
+            Debug.e("getBeatmapStatus IOException " + e.getMessage(), e);
+            return null;
+        } catch (final JSONException e) {
+            Debug.e("getBeatmapStatus JSONException " + e.getMessage(), e);
+            return null;
+        } catch (final IllegalArgumentException e) {
+            Debug.e("getBeatmapStatus IllegalArgumentException " + e.getMessage(), e);
+            return null;
+        }
+
         return null;
     }
 
