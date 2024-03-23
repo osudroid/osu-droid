@@ -22,7 +22,7 @@ public class OnlinePanel extends Entity {
 
     public Rectangle rect;
 
-    private final ChangeableText rankText, nameText, scoreText, accText;
+    private final ChangeableText rankText, nameText, ppText, accText;
     private final ChangeableText messageText, submessageText;
     private Sprite avatar = null;
 
@@ -86,11 +86,11 @@ public class OnlinePanel extends Entity {
         nameText = new ChangeableText(120, 5,
                 ResourceManager.getInstance().getFont("CaptionFont"), "Guest", 16);
         onlineLayer.attachChild(nameText);
-        scoreText = new ChangeableText(120, 50,
-                ResourceManager.getInstance().getFont("smallFont"), "Score: 0",
-                HorizontalAlign.LEFT, 22);
-        scoreText.setColor(0.85f, 0.85f, 0.9f);
-        onlineLayer.attachChild(scoreText);
+        ppText = new ChangeableText(120, 50,
+                ResourceManager.getInstance().getFont("smallFont"), "Performance: 0pp",
+                HorizontalAlign.LEFT, 25);
+        ppText.setColor(0.85f, 0.85f, 0.9f);
+        onlineLayer.attachChild(ppText);
 
         accText = new ChangeableText(120, 75,
                 ResourceManager.getInstance().getFont("smallFont"), "Accuracy: 0.00%",
@@ -122,13 +122,8 @@ public class OnlinePanel extends Entity {
 
     public void setInfo() {
         nameText.setText(OnlineManager.getInstance().getUsername());
-        StringBuilder scoreBuilder = new StringBuilder("Score: ");
-        scoreBuilder.append(OnlineManager.getInstance().getScore());
-        for (int i = scoreBuilder.length() - 3; i > 7; i -= 3) {
-            scoreBuilder.insert(i, ' ');
-        }
 
-        scoreText.setText(scoreBuilder.toString());
+        ppText.setText(String.format("Performance: %dpp", Math.round(OnlineManager.getInstance().getPP())));
 
         accText.setText(String.format("Accuracy: %.2f%%",
                 OnlineManager.getInstance().getAccuracy() * 100f));
