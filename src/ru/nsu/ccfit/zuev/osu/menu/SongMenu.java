@@ -678,8 +678,9 @@ public class SongMenu implements IUpdateHandler, MenuItemListener,
             OnlineScoring.getInstance().loadAvatar(false);
             frontLayer.attachChild(panel);
 
-
-            scoringSwitcher = new AnimSprite(Utils.toRes(5), Utils.toRes(10), 0, "ranking_enabled", "ranking_disabled") {
+            scoringSwitcher = new AnimSprite(Utils.toRes(5), Utils.toRes(10), 0,
+                    "ranking_disabled", "ranking_enabled", "selection-ranked", "selection-approved",
+                    "selection-loved", "selection-question") {
                 @Override
                 public boolean onAreaTouched(TouchEvent pSceneTouchEvent,
                                              float pTouchAreaLocalX, float pTouchAreaLocalY) {
@@ -688,7 +689,8 @@ public class SongMenu implements IUpdateHandler, MenuItemListener,
                     return true;
                 }
             };
-            scoringSwitcher.setFrame(1);
+
+            scoringSwitcher.setFrame(0);
             scoringSwitcher.setPosition(10, 10);
             scene.registerTouchArea(scoringSwitcher);
             frontLayer.attachChild(scoringSwitcher);
@@ -709,24 +711,13 @@ public class SongMenu implements IUpdateHandler, MenuItemListener,
         if (board.isShowOnlineScores()) {
             board.setShowOnlineScores(false);
             board.init(selectedTrack);
-            scoringSwitcher.setFrame(1);
             updateInfo(selectedTrack);
         } else if (OnlineManager.getInstance().isStayOnline()) {
             board.setShowOnlineScores(true);
             board.init(selectedTrack);
-            setRank();
         }
-    }
 
-    public void setRank() {
-        if (!board.isShowOnlineScores()) {
-            if (scoringSwitcher != null) {
-                scoringSwitcher.setFrame(1);
-            }
-            updateInfo(selectedTrack);
-            return;
-        }
-        scoringSwitcher.setFrame(0);
+        updateScoringSwitcherStatus();
     }
 
     public Scene getScene() {
@@ -1152,10 +1143,6 @@ public class SongMenu implements IUpdateHandler, MenuItemListener,
             playMusic(track.getAudioFilename(), track.getPreviewTime());
         }
 
-        if (board.isShowOnlineScores()) {
-            Execution.async(this::setRank);
-        }
-
         if (selectedTrack == track) {
             synchronized (bgMutex) {
                 if (!bgLoaded) {
@@ -1191,6 +1178,7 @@ public class SongMenu implements IUpdateHandler, MenuItemListener,
         EdExtensionHelper.onSelectTrack(track);
         GlobalManager.getInstance().setSelectedTrack(track);
         updateInfo(track);
+        updateScoringSwitcherStatus();
         board.init(track);
 
         final int quality = Config.getBackgroundQuality();
@@ -1567,6 +1555,47 @@ public class SongMenu implements IUpdateHandler, MenuItemListener,
                 }
             }
         }
+    }
+
+    private void updateScoringSwitcherStatus() {
+        if (scoringSwitcher == null) {
+            return;
+        }
+
+        if (selectedTrack == null || !board.isShowOnlineScores()) {
+            scoringSwitcher.setFrame(0);
+            return;
+        }
+
+        var beatmapSetId = selectedTrack.getBeatmapSetID();
+        scoringSwitcher.setFrame(1);
+
+        if (beatmapSetId == -1) {
+            return;
+        }
+
+        Execution.async(() -> {
+            try {
+                var status = OnlineManager.getInstance().getBeatmapStatus(beatmapSetId);
+
+                if (!board.isShowOnlineScores() || status == null || scoringSwitcher == null || selectedTrack == null || selectedTrack.getBeatmapSetID() != beatmapSetId) {
+                    return;
+                }
+
+                scoringSwitcher.setFrame(switch (status) {
+                    case ranked -> 2;
+                    case approved -> 3;
+                    case loved -> 4;
+                    default -> 5;
+                });
+            } catch (OnlineManagerException e) {
+                Debug.e("Cannot get beatmap status: " + e.getMessage(), e);
+
+                if (scoringSwitcher != null) {
+                    scoringSwitcher.setFrame(1);
+                }
+            }
+        });
     }
 
     public enum SortOrder {
