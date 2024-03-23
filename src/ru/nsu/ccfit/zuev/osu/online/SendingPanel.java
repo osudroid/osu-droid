@@ -14,23 +14,23 @@ import org.anddev.andengine.util.HorizontalAlign;
 import ru.nsu.ccfit.zuev.osu.ResourceManager;
 
 public class SendingPanel extends Rectangle {
-    private final ChangeableText mapText, rankText, accText, scoreText;
+    private final ChangeableText mapText, rankText, accText, scoreText, ppText;
     private final ChangeableText buttonText;
-    private final Rectangle mapRect, rankRect, accRect, scoreRect;
+    private final Rectangle mapRect, rankRect, accRect, scoreRect, ppRect;
     private final Sprite button;
 
     private final long rank, score;
-    private final float accuracy;
+    private final float accuracy, pp;
     private boolean canBeDismissed = false;
 
-    public SendingPanel(long rank, long score, float accuracy) {
+    public SendingPanel(long rank, long score, float accuracy, float pp) {
         super(0, -300, 800, 300);
-        TextureRegion btnTex = ResourceManager.getInstance().
-                getTexture("ranking_button");
+        TextureRegion btnTex = ResourceManager.getInstance().getTexture("ranking_button");
 
         this.rank = rank;
         this.score = score;
         this.accuracy = accuracy;
+        this.pp = pp;
         setColor(0, 0, 0, 0.7f);
 
         button = new Sprite(272, 300, btnTex) {
@@ -78,6 +78,9 @@ public class SendingPanel extends Rectangle {
         scoreRect = new Rectangle(505, 160, 250, 80);
         attachChild(scoreRect);
 
+        ppRect = new Rectangle(760, 160, 150, 80);
+        attachChild(ppRect);
+
         Font font = ResourceManager.getInstance().getFont("font");
         mapText = new ChangeableText(0, 0, font, "#9999999", HorizontalAlign.CENTER, 8);
         placeText(mapRect, mapText);
@@ -94,6 +97,10 @@ public class SendingPanel extends Rectangle {
         scoreText = new ChangeableText(0, 0, font, "99 123 456 789\n(+99 999 999)", HorizontalAlign.CENTER, 100);
         placeText(scoreRect, scoreText);
         attachChild(scoreText);
+
+        ppText = new ChangeableText(0, 0, font, "999pp\n(+999)", HorizontalAlign.CENTER, 25);
+        placeText(ppRect, ppText);
+        attachChild(ppText);
     }
 
     private void placeText(Rectangle rect, ChangeableText text) {
@@ -122,7 +129,7 @@ public class SendingPanel extends Rectangle {
         return scoreBuilder.toString();
     }
 
-    public void show(long mapRank, long newScore, long newRank, float newAcc) {
+    public void show(long mapRank, long newScore, long newRank, float newAcc, float newPP) {
         canBeDismissed = true;
         mapText.setText(String.format("#%d", mapRank));
         placeText(mapRect, mapText);
@@ -157,6 +164,15 @@ public class SendingPanel extends Rectangle {
             scoreText.setText(String.format("%s\n(+%s)", formatScore(newScore), formatScore(newScore - score)));
         placeText(scoreRect, scoreText);
         setRectColor(scoreRect, newScore - score);
+
+        if (Math.abs(newPP - pp) < 0.0001f)
+            ppText.setText(String.format("%dpp", Math.round(pp)));
+        else if (newPP < pp)
+            ppText.setText(String.format("%dpp\n(%d)", Math.round(newPP), Math.round(newPP - pp)));
+        else
+            ppText.setText(String.format("%dpp\n(+%d)", Math.round(newPP), Math.round(newPP - pp)));
+        placeText(ppRect, ppText);
+        setRectColor(ppRect, Math.round(newPP - pp));
 
         buttonText.setText(" Dismiss");
 

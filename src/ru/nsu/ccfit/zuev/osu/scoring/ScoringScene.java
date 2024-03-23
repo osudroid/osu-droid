@@ -570,7 +570,8 @@ public class ScoringScene {
                 }
 
                 SendingPanel sendingPanel = new SendingPanel(OnlineManager.getInstance().getRank(),
-                        OnlineManager.getInstance().getScore(), OnlineManager.getInstance().getAccuracy());
+                        OnlineManager.getInstance().getScore(), OnlineManager.getInstance().getAccuracy(),
+                        OnlineManager.getInstance().getPP());
                 sendingPanel.setPosition((float) Config.getRES_WIDTH() / 2 - 400, Utils.toRes(-300));
                 scene.registerTouchArea(sendingPanel.getDismissTouchArea());
                 scene.attachChild(sendingPanel);
