@@ -213,24 +213,26 @@ public class MainActivity extends BaseGameActivity implements
             editor.putString("playername", "Guest");
             editor.commit();
 
-            final AlertDialog.Builder alert = new AlertDialog.Builder(this);
+            Execution.mainThread(() -> {
+                final AlertDialog.Builder alert = new AlertDialog.Builder(this);
 
-            alert.setTitle(StringTable.get(R.string.dialog_playername_title));
-            alert.setMessage(StringTable
-                    .get(R.string.dialog_playername_message));
+                alert.setTitle(StringTable.get(R.string.dialog_playername_title));
+                alert.setMessage(StringTable
+                        .get(R.string.dialog_playername_message));
 
-            final EditText input = new EditText(this);
-            input.setText("Guest");
-            alert.setView(input);
+                final EditText input = new EditText(this);
+                input.setText("Guest");
+                alert.setView(input);
 
-            alert.setPositiveButton(StringTable.get(R.string.dialog_ok),
-                    (dialog, whichButton) -> {
-                        final String value = input.getText().toString();
-                        editor.putString("playername", value);
-                        editor.commit();
-                    });
+                alert.setPositiveButton(StringTable.get(R.string.dialog_ok),
+                        (dialog, whichButton) -> {
+                            final String value = input.getText().toString();
+                            editor.putString("playername", value);
+                            editor.commit();
+                        });
 
-            alert.show();
+                alert.show();
+            });
         }
 
         if (!prefs.getBoolean("qualitySet", false)) {
