@@ -2,8 +2,8 @@ package com.rian.osu.ui
 
 import com.reco1l.legacy.Multiplayer
 import com.reco1l.legacy.ui.multiplayer.RoomScene
-import org.anddev.andengine.input.touch.TouchEvent
-import org.anddev.andengine.util.MathUtils
+import org.andengine.input.touch.TouchEvent
+import org.andengine.util.math.MathUtils
 import ru.nsu.ccfit.zuev.osu.Config
 import ru.nsu.ccfit.zuev.osu.DifficultyAlgorithm
 import ru.nsu.ccfit.zuev.osu.helper.AnimSprite

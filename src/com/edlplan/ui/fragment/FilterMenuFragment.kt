@@ -17,8 +17,8 @@ import com.edlplan.framework.support.util.Updater
 import com.edlplan.ui.BaseAnimationListener
 import com.edlplan.ui.EasingHelper
 import com.reco1l.framework.lang.mainThread
-import org.anddev.andengine.engine.handler.IUpdateHandler
-import org.anddev.andengine.entity.scene.Scene
+import org.andengine.engine.handler.IUpdateHandler
+import org.andengine.entity.scene.Scene
 import ru.nsu.ccfit.zuev.osu.helper.InputManager
 import ru.nsu.ccfit.zuev.osu.helper.StringTable
 import ru.nsu.ccfit.zuev.osu.menu.IFilterMenu

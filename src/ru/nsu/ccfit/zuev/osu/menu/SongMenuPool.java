@@ -1,6 +1,6 @@
 package ru.nsu.ccfit.zuev.osu.menu;
 
-import org.anddev.andengine.util.Debug;
+import org.andengine.util.debug.Debug;
 
 import java.util.LinkedList;
 import java.util.Queue;

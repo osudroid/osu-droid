@@ -18,7 +18,7 @@ import okhttp3.RequestBody;
 import okio.BufferedSink;
 import okio.Okio;
 
-import org.anddev.andengine.util.Debug;
+import org.andengine.util.debug.Debug;
 import ru.nsu.ccfit.zuev.osu.helper.FileUtils;
 
 public class OnlineFileOperator {

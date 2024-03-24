@@ -1,25 +1,35 @@
 package ru.nsu.ccfit.zuev.osu.game;
 
 import android.graphics.PointF;
+
+import com.edlplan.framework.math.FMath;
 import com.edlplan.framework.math.Vec2;
 import com.edlplan.framework.math.line.LinePath;
-import com.edlplan.osu.support.slider.SliderBody2D;
+import com.reco1l.legacy.graphics.entity.SliderBody;
 import com.edlplan.osu.support.timing.controlpoint.TimingControlPoint;
 import com.reco1l.framework.lang.Execution;
 
-import org.anddev.andengine.entity.IEntity;
-import org.anddev.andengine.entity.modifier.*;
-import org.anddev.andengine.entity.scene.Scene;
-import org.anddev.andengine.entity.sprite.Sprite;
-import org.anddev.andengine.util.MathUtils;
-import org.anddev.andengine.util.modifier.IModifier;
-import org.anddev.andengine.util.modifier.ease.EaseQuadIn;
-import org.anddev.andengine.util.modifier.ease.EaseQuadOut;
+import org.andengine.entity.IEntity;
+import org.andengine.entity.modifier.AlphaModifier;
+import org.andengine.entity.modifier.FadeInModifier;
+import org.andengine.entity.modifier.FadeOutModifier;
+import org.andengine.entity.modifier.ParallelEntityModifier;
+import org.andengine.entity.modifier.ScaleModifier;
+import org.andengine.entity.modifier.SequenceEntityModifier;
+import org.andengine.entity.scene.Scene;
+import org.andengine.entity.sprite.Sprite;
+import org.andengine.util.math.MathUtils;
+import org.andengine.util.modifier.IModifier;
+import org.andengine.util.modifier.ease.EaseQuadIn;
+import org.andengine.util.modifier.ease.EaseQuadOut;
 import ru.nsu.ccfit.zuev.osu.Config;
+import ru.nsu.ccfit.zuev.osu.GlobalManager;
 import ru.nsu.ccfit.zuev.osu.RGBColor;
+import ru.nsu.ccfit.zuev.osu.ResourceManager;
 import ru.nsu.ccfit.zuev.osu.Utils;
 import ru.nsu.ccfit.zuev.osu.game.GameHelper.SliderPath;
 import ru.nsu.ccfit.zuev.osu.helper.AnimSprite;
+import ru.nsu.ccfit.zuev.osu.helper.CentredSprite;
 import ru.nsu.ccfit.zuev.osu.helper.DifficultyHelper;
 import ru.nsu.ccfit.zuev.osu.helper.ModifierListener;
 import ru.nsu.ccfit.zuev.skins.OsuSkin;
@@ -76,7 +86,7 @@ public class Slider extends GameObject {
     private LinePath superPath = null;
     private boolean preStageFinish = false;
 
-    private SliderBody2D abstractSliderBody = null;
+    private SliderBody abstractSliderBody = null;
 
     private boolean
             mIsOver,
@@ -84,13 +94,13 @@ public class Slider extends GameObject {
             mWasInRadius;
 
     public Slider() {
-        startCircle = SpritePool.getInstance().getSprite("sliderstartcircle");
-        endCircle = SpritePool.getInstance().getSprite("sliderendcircle");
-        startOverlay = SpritePool.getInstance().getSprite("sliderstartcircleoverlay");
-        endOverlay = SpritePool.getInstance().getSprite("sliderendcircleoverlay");
-        approachCircle = SpritePool.getInstance().getSprite("approachcircle");
-        startArrow = SpritePool.getInstance().getSprite("reversearrow");
-        endArrow = SpritePool.getInstance().getSprite("reversearrow");
+        startCircle = new Sprite(0, 0, ResourceManager.getInstance().getTexture("sliderstartcircle"), GlobalManager.getInstance().getEngine().getVertexBufferObjectManager());
+        endCircle = new Sprite(0, 0, ResourceManager.getInstance().getTexture("sliderendcircle"), GlobalManager.getInstance().getEngine().getVertexBufferObjectManager());
+        startOverlay = new Sprite(0, 0, ResourceManager.getInstance().getTexture("sliderstartcircleoverlay"), GlobalManager.getInstance().getEngine().getVertexBufferObjectManager());
+        endOverlay = new Sprite(0, 0, ResourceManager.getInstance().getTexture("sliderendcircleoverlay"), GlobalManager.getInstance().getEngine().getVertexBufferObjectManager());
+        approachCircle = new Sprite(0, 0, ResourceManager.getInstance().getTexture("approachcircle"), GlobalManager.getInstance().getEngine().getVertexBufferObjectManager());
+        startArrow = new Sprite(0, 0, ResourceManager.getInstance().getTexture("reversearrow"), GlobalManager.getInstance().getEngine().getVertexBufferObjectManager());
+        endArrow = new Sprite(0, 0, ResourceManager.getInstance().getTexture("reversearrow"), GlobalManager.getInstance().getEngine().getVertexBufferObjectManager());
     }
 
     public void init(final GameObjectListener listener, final Scene scene,
@@ -123,7 +133,7 @@ public class Slider extends GameObject {
         if (OsuSkin.get().isLimitComboTextLength()) {
             num %= 10;
         }
-        number = GameObjectPool.getInstance().getNumber(num);
+        number = new CircleNumber(num);
         number.init(pos, scale);
 
         TimingControlPoint timingPoint = GameHelper.controlPoints.getTimingPointAt(realTime);
@@ -320,10 +330,8 @@ public class Slider extends GameObject {
         }
         ticks.clear();
         for (int i = 1; i <= tickCount; i++) {
-            final Sprite tick = SpritePool.getInstance().getCenteredSprite(
-                    "sliderscorepoint",
-                    getPercentPosition((float) (i * tickInterval
-                            / (maxTime * GameHelper.getTickRate())), null));
+            final PointF pos1 = getPercentPosition((float) (i * tickInterval / (maxTime * GameHelper.getTickRate())), null);
+            final Sprite tick = new CentredSprite(pos1.x, pos1.y, ResourceManager.getInstance().getTexture("sliderscorepoint"));
             tick.setScale(scale);
             tick.setAlpha(0);
             ticks.add(tick);
@@ -342,27 +350,30 @@ public class Slider extends GameObject {
             superPath.measure();
 
             var bodyWidth = (OsuSkin.get().getSliderBodyWidth() - OsuSkin.get().getSliderBorderWidth()) * scale;
-            abstractSliderBody = new SliderBody2D(superPath);
+            abstractSliderBody = new SliderBody(superPath);
             abstractSliderBody.setBodyWidth(bodyWidth);
             abstractSliderBody.setBorderWidth(OsuSkin.get().getSliderBodyWidth() * scale);
-            abstractSliderBody.setSliderBodyBaseAlpha(OsuSkin.get().getSliderBodyBaseAlpha());
 
-            if (OsuSkin.get().isSliderHintEnable() && length > OsuSkin.get().getSliderHintShowMinLength()) {
-                abstractSliderBody.setEnableHint(true);
-                abstractSliderBody.setHintAlpha(OsuSkin.get().getSliderHintAlpha());
-                abstractSliderBody.setHintWidth(Math.min(OsuSkin.get().getSliderHintWidth() * scale, bodyWidth));
-                RGBColor hintColor = OsuSkin.get().getSliderHintColor();
-                if (hintColor != null) {
-                    abstractSliderBody.setHintColor(hintColor.r(), hintColor.g(), hintColor.b());
-                } else {
-                    abstractSliderBody.setHintColor(color.r(), color.g(), color.b());
-                }
-            }
+            // Simulating osu!stable gradient, body color uses 'darken' operation, center color uses
+            // 'lighten' operation. See osu!lazer source code for more details.
+
+            abstractSliderBody.setBodyColor(new RGBColor(
+                    FMath.clamp(color.r() / 1.1f, 0f, 1f),
+                    FMath.clamp(color.g() / 1.1f, 0f, 1f),
+                    FMath.clamp(color.b() / 1.1f, 0f, 1f)
+            ));
+
+            abstractSliderBody.setCenterColor(new RGBColor(
+                    Math.min(1f, color.r() * (1f + 0.5f * 0.25f) + 0.25f),
+                    Math.min(1f, color.g() * (1f + 0.5f * 0.25f) + 0.25f),
+                    Math.min(1f, color.b() * (1f + 0.5f * 0.25f) + 0.25f)
+            ));
+
+            RGBColor bColor = OsuSkin.get().getSliderBorderColor();
+            abstractSliderBody.setBorderColor(new RGBColor(bColor.r(), bColor.g(), bColor.b()));
+
 
             abstractSliderBody.applyToScene(scene, Config.isSnakingInSliders());
-            abstractSliderBody.setBodyColor(color.r(), color.g(), color.b());
-            RGBColor scolor = GameHelper.getSliderColor();
-            abstractSliderBody.setBorderColor(scolor.r(), scolor.g(), scolor.b());
         }
 
         applyBodyFadeAdjustments(fadeInDuration);
@@ -431,9 +442,9 @@ public class Slider extends GameObject {
         // Detach all objects
         if (abstractSliderBody != null) {
             if (GameHelper.isHidden()) {
-                abstractSliderBody.removeFromScene(scene);
+                abstractSliderBody.removeFromScene();
             } else {
-                abstractSliderBody.removeFromScene(scene, 0.24f * GameHelper.getTimeMultiplier());
+                abstractSliderBody.removeFromScene(0.24f * GameHelper.getTimeMultiplier());
             }
         }
 
@@ -454,18 +465,13 @@ public class Slider extends GameObject {
         approachCircle.detachSelf();
         startArrow.detachSelf();
         endArrow.detachSelf();
-        SpritePool.getInstance().putAnimSprite("sliderb", ball);
-        SpritePool.getInstance().putSprite("sliderfollowcircle", followCircle);
         for (int i = 0, ticksSize = ticks.size(); i < ticksSize; i++) {
             Sprite sp = ticks.get(i);
             sp.detachSelf();
-            SpritePool.getInstance().putSprite("sliderscorepoint", sp);
         }
         listener.removeObject(this);
         // Put this and number into pool
         GameHelper.putPath(path);
-        GameObjectPool.getInstance().putSlider(this);
-        GameObjectPool.getInstance().putNumber(number);
         scene = null;
     }
 
@@ -688,7 +694,6 @@ public class Slider extends GameObject {
                         float l = superPath.getMeasurer().maxLength() * percentage;
 
                         abstractSliderBody.setEndLength(l);
-                        abstractSliderBody.onUpdate();
                     }
 
                     tmpPoint = getPercentPosition(percentage, null);
@@ -708,7 +713,6 @@ public class Slider extends GameObject {
                 if (Config.isSnakingInSliders()) {
                     if (!preStageFinish && superPath != null && abstractSliderBody != null) {
                         abstractSliderBody.setEndLength(superPath.getMeasurer().maxLength());
-                        abstractSliderBody.onUpdate();
                         preStageFinish = true;
                     }
 
@@ -732,15 +736,15 @@ public class Slider extends GameObject {
             approachCircle.clearEntityModifiers();
             approachCircle.setAlpha(0);
 
-            ball = SpritePool.getInstance().getAnimSprite("sliderb",
-                    SkinManager.getFrames("sliderb"));
+            int count = SkinManager.getFrames("sliderb");
+            ball = new AnimSprite(0, 0, "sliderb", count, count);
             ball.setFps((float) (0.1f * GameHelper.getSpeed() * scale / timing.getBeatLength()));
             ball.setScale(scale);
             ball.setFlippedHorizontal(false);
 
             ball.registerEntityModifier(new FadeInModifier(0.1f * GameHelper.getTimeMultiplier()));
 
-            followCircle = SpritePool.getInstance().getSprite("sliderfollowcircle");
+            followCircle = new Sprite(0, 0, ResourceManager.getInstance().getTexture("sliderfollowcircle"), GlobalManager.getInstance().getEngine().getVertexBufferObjectManager());
             followCircle.setAlpha(0);
             if (!Config.isComplexAnimations()) {
                 followCircle.setScale(scale);

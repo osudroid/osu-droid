@@ -1,13 +1,14 @@
 package ru.nsu.ccfit.zuev.osu.game.cursor.main;
 
-import org.anddev.andengine.entity.modifier.ParallelEntityModifier;
-import org.anddev.andengine.entity.modifier.RotationByModifier;
-import org.anddev.andengine.entity.modifier.ScaleModifier;
-import org.anddev.andengine.entity.modifier.SequenceEntityModifier;
-import org.anddev.andengine.entity.sprite.Sprite;
-import org.anddev.andengine.opengl.texture.region.TextureRegion;
+import org.andengine.entity.modifier.ParallelEntityModifier;
+import org.andengine.entity.modifier.RotationByModifier;
+import org.andengine.entity.modifier.ScaleModifier;
+import org.andengine.entity.modifier.SequenceEntityModifier;
+import org.andengine.entity.sprite.Sprite;
+import org.andengine.opengl.texture.region.TextureRegion;
 
 import ru.nsu.ccfit.zuev.osu.Config;
+import ru.nsu.ccfit.zuev.osu.GlobalManager;
 import ru.nsu.ccfit.zuev.osu.game.ISliderListener;
 import ru.nsu.ccfit.zuev.skins.OsuSkin;
 
@@ -19,7 +20,7 @@ public class CursorSprite extends Sprite implements ISliderListener {
     private final boolean rotate = OsuSkin.get().isRotateCursor();
 
     public CursorSprite(float pX, float pY, TextureRegion pTextureRegion) {
-        super(pX, pY, pTextureRegion);
+        super(pX, pY, pTextureRegion, GlobalManager.getInstance().getEngine().getVertexBufferObjectManager());
         setScale(baseSize);
     }
 

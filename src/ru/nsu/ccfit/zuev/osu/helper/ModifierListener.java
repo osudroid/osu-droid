@@ -1,8 +1,8 @@
 package ru.nsu.ccfit.zuev.osu.helper;
 
-import org.anddev.andengine.entity.IEntity;
-import org.anddev.andengine.entity.modifier.IEntityModifier;
-import org.anddev.andengine.util.modifier.IModifier;
+import org.andengine.entity.IEntity;
+import org.andengine.entity.modifier.IEntityModifier;
+import org.andengine.util.modifier.IModifier;
 
 public class ModifierListener implements IEntityModifier.IEntityModifierListener
 {

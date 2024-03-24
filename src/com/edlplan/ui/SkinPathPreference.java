@@ -10,7 +10,7 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.anddev.andengine.util.Debug;
+import org.andengine.util.debug.Debug;
 
 import ru.nsu.ccfit.zuev.osu.Config;
 

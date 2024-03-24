@@ -1,10 +1,10 @@
 package ru.nsu.ccfit.zuev.osu.helper;
 
-import org.anddev.andengine.entity.sprite.Sprite;
-import org.anddev.andengine.entity.text.ChangeableText;
-import org.anddev.andengine.entity.text.Text;
-import org.anddev.andengine.opengl.font.Font;
+import org.andengine.entity.sprite.Sprite;
+import org.andengine.entity.text.Text;
+import org.andengine.opengl.font.Font;
 
+import ru.nsu.ccfit.zuev.osu.GlobalManager;
 import ru.nsu.ccfit.zuev.osu.ResourceManager;
 
 /**
@@ -12,7 +12,7 @@ import ru.nsu.ccfit.zuev.osu.ResourceManager;
  */
 public class TextButton extends Sprite {
 
-    private final ChangeableText buttonText;
+    private final Text buttonText;
 
     public TextButton(Font font, String text) {
         this(font, text, 1.0f);
@@ -20,8 +20,8 @@ public class TextButton extends Sprite {
 
     public TextButton(Font font, String text, float scale) {
         super(0, 0, ResourceManager.getInstance().getTexture(
-                "button"));
-        buttonText = new ChangeableText(0, 0, font, text, 50);
+                "button"), GlobalManager.getInstance().getEngine().getVertexBufferObjectManager());
+        buttonText = new Text(0, 0, font, text, 50, GlobalManager.getInstance().getEngine().getVertexBufferObjectManager());
         buttonText.setScale(scale);
         setColor(201 / 255f, 31 / 255f, 55 / 255f);
         this.setWidth(buttonText.getWidthScaled() + 80);
@@ -40,7 +40,7 @@ public class TextButton extends Sprite {
         float textX = (this.getWidth() - buttonText.getWidth()) / 2;
         float textY = (this.getHeight() - buttonText.getHeight()) / 2;
         buttonText.setPosition(textX, textY);
-        this.updateVertexBuffer();
+        onUpdateVertices();
     }
 
     @Override
@@ -49,7 +49,7 @@ public class TextButton extends Sprite {
         float textX = (this.getWidth() - buttonText.getWidth()) / 2;
         float textY = (this.getHeight() - buttonText.getHeight()) / 2;
         buttonText.setPosition(textX, textY);
-        this.updateVertexBuffer();
+        onUpdateVertices();
     }
 
     public void setTextColor(float pRed, float pGreen, float pBlue) {

@@ -2,23 +2,25 @@ package ru.nsu.ccfit.zuev.osu.game;
 
 import android.graphics.PointF;
 
+import com.reco1l.legacy.graphics.Entities;
+import com.reco1l.legacy.graphics.sprite.ExtendedSprite;
 import com.reco1l.framework.lang.Execution;
 
-import org.anddev.andengine.entity.IEntity;
-import org.anddev.andengine.entity.modifier.AlphaModifier;
-import org.anddev.andengine.entity.modifier.DelayModifier;
-import org.anddev.andengine.entity.modifier.FadeInModifier;
-import org.anddev.andengine.entity.modifier.FadeOutModifier;
-import org.anddev.andengine.entity.modifier.IEntityModifier;
-import org.anddev.andengine.entity.modifier.IEntityModifier.IEntityModifierListener;
-import org.anddev.andengine.entity.modifier.ParallelEntityModifier;
-import org.anddev.andengine.entity.modifier.ScaleModifier;
-import org.anddev.andengine.entity.modifier.SequenceEntityModifier;
-import org.anddev.andengine.entity.scene.Scene;
-import org.anddev.andengine.entity.sprite.Sprite;
-import org.anddev.andengine.opengl.texture.region.TextureRegion;
-import org.anddev.andengine.util.MathUtils;
-import org.anddev.andengine.util.modifier.IModifier;
+import org.andengine.entity.IEntity;
+import org.andengine.entity.modifier.AlphaModifier;
+import org.andengine.entity.modifier.DelayModifier;
+import org.andengine.entity.modifier.FadeInModifier;
+import org.andengine.entity.modifier.FadeOutModifier;
+import org.andengine.entity.modifier.IEntityModifier;
+import org.andengine.entity.modifier.IEntityModifier.IEntityModifierListener;
+import org.andengine.entity.modifier.ParallelEntityModifier;
+import org.andengine.entity.modifier.ScaleModifier;
+import org.andengine.entity.modifier.SequenceEntityModifier;
+import org.andengine.entity.scene.Scene;
+import org.andengine.entity.sprite.Sprite;
+import org.andengine.opengl.texture.region.TextureRegion;
+import org.andengine.util.math.MathUtils;
+import org.andengine.util.modifier.IModifier;
 
 import ru.nsu.ccfit.zuev.osu.Config;
 import ru.nsu.ccfit.zuev.osu.Constants;
@@ -29,11 +31,15 @@ import ru.nsu.ccfit.zuev.osu.scoring.ScoreNumber;
 import ru.nsu.ccfit.zuev.osu.scoring.StatisticV2;
 
 public class Spinner extends GameObject {
-    private final Sprite background;
+
+    private final ExtendedSprite background;
+
+    private final ExtendedSprite circle;
+
+    private final ExtendedSprite metre;
+
     public final PointF center;
-    private final Sprite circle;
     private final Sprite approachCircle;
-    private final Sprite metre;
     private final Sprite spinText;
     private final TextureRegion mregion;
     private Sprite clearText = null;
@@ -49,7 +55,6 @@ public class Spinner extends GameObject {
     private int addition;
     private ScoreNumber bonusScore = null;
     private int score = 1;
-    private float metreY;
     private StatisticV2 stat;
     private float totalTime;
     private boolean did = false;
@@ -61,23 +66,25 @@ public class Spinner extends GameObject {
         ResourceManager.getInstance().checkSpinnerTextures();
         this.pos = new PointF((float) Constants.MAP_WIDTH / 2, (float) Constants.MAP_HEIGHT / 2);
         center = Utils.trackToRealCoords(pos);
-        background = SpritePool.getInstance().getCenteredSprite(
-                "spinner-background", center);
-        final float scaleX = Config.getRES_WIDTH() / background.getWidth();
-        background.setScale(scaleX);
 
-        circle = SpritePool.getInstance().getCenteredSprite("spinner-circle",
-                center);
-        mregion = ResourceManager.getInstance().getTexture("spinner-metre")
-                .deepCopy();
-        metre = new Sprite(center.x - (float) Config.getRES_WIDTH() / 2,
-                Config.getRES_HEIGHT(), mregion);
-        metre.setWidth(Config.getRES_WIDTH());
-        metre.setHeight(background.getHeightScaled());
-        approachCircle = SpritePool.getInstance().getCenteredSprite(
-                "spinner-approachcircle", center);
-        spinText = new CentredSprite(center.x, center.y * 1.5f, ResourceManager
-                .getInstance().getTexture("spinner-spin"));
+        background = new ExtendedSprite(center.x, center.y);
+        background.setTextureRegion(ResourceManager.getInstance().getTexture("spinner-background"));
+        background.setOrigin(0.5f);
+        Entities.scaleCropCenter(background, Config.getRES_WIDTH(), Config.getRES_HEIGHT());
+
+        circle = new ExtendedSprite(center.x, center.y);
+        circle.setTextureRegion(ResourceManager.getInstance().getTexture("spinner-circle"));
+        circle.setOrigin(0.5f);
+
+        mregion = ResourceManager.getInstance().getTexture("spinner-metre").deepCopy();
+
+        metre = new ExtendedSprite(center.x, center.y);
+        metre.setTextureRegion(mregion);
+        metre.setOrigin(0.5f);
+        Entities.scaleCropCenter(metre, Config.getRES_WIDTH(), Config.getRES_HEIGHT());
+
+        approachCircle = new CentredSprite(center.x, center.y, ResourceManager.getInstance().getTexture("spinner-approachcircle"));
+        spinText = new CentredSprite(center.x, center.y * 1.5f, ResourceManager.getInstance().getTexture("spinner-spin"));
     }
 
     public void init(final GameObjectListener listener, final Scene scene,
@@ -118,10 +125,8 @@ public class Spinner extends GameObject {
         circle.setAlpha(0);
         circle.registerEntityModifier(appearMoifier.deepCopy());
 
-        metreY = (Config.getRES_HEIGHT() - background.getHeightScaled()) / 2;
         metre.setAlpha(0);
         metre.registerEntityModifier(appearMoifier.deepCopy());
-        mregion.setTexturePosition(0, (int) metre.getHeightScaled());
 
         approachCircle.setAlpha(0);
         if (GameHelper.isHidden()) {
@@ -165,7 +170,6 @@ public class Spinner extends GameObject {
     void removeFromScene() {
         if (clearText != null) {
             scene.detachChild(clearText);
-            SpritePool.getInstance().putSprite("spinner-clear", clearText);
         }
         scene.detachChild(spinText);
         scene.detachChild(background);
@@ -290,8 +294,7 @@ public class Spinner extends GameObject {
         if (percentfill > 1 || clear) {
             percentfill = 1;
             if (!clear) {
-                clearText = SpritePool.getInstance().getCenteredSprite(
-                        "spinner-clear", new PointF(center.x, center.y * 0.5f));
+                clearText = new CentredSprite(center.x * 0.5f, center.y * 0.5f, ResourceManager.getInstance().getTexture("spinner-clear"));
                 clearText.registerEntityModifier(new ParallelEntityModifier(
                         new FadeInModifier(0.25f), new ScaleModifier(0.25f,
                         1.5f, 1)));
@@ -326,10 +329,7 @@ public class Spinner extends GameObject {
                 stat.changeHp(rate * 0.01f * totalTime / needRotations);
             }
         }
-        metre.setPosition(metre.getX(),
-                metreY + metre.getHeight() * (1 - Math.abs(percentfill)));
-        mregion.setTexturePosition(0,
-                (int) (metre.getBaseHeight() * (1 - Math.abs(percentfill))));
+        metre.setClipY(1 - Math.abs(percentfill));
 
         oldMouse.set(currMouse);
     }

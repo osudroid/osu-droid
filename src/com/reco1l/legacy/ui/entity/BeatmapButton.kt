@@ -8,10 +8,10 @@ import com.reco1l.framework.extensions.orAsyncCatch
 import com.reco1l.legacy.Multiplayer
 import com.reco1l.legacy.ui.ChimuWebView.FILE_EXTENSION
 import com.reco1l.legacy.ui.multiplayer.RoomScene
-import org.anddev.andengine.entity.sprite.Sprite
-import org.anddev.andengine.entity.text.ChangeableText
-import org.anddev.andengine.input.touch.TouchEvent
-import org.anddev.andengine.util.MathUtils
+import org.andengine.entity.sprite.Sprite
+import org.andengine.entity.text.Text
+import org.andengine.input.touch.TouchEvent
+import org.andengine.util.math.MathUtils
 import ru.nsu.ccfit.zuev.osu.Config
 import ru.nsu.ccfit.zuev.osu.DifficultyAlgorithm
 import ru.nsu.ccfit.zuev.osu.RGBColor
@@ -26,16 +26,16 @@ import ru.nsu.ccfit.zuev.osu.ResourceManager.getInstance as getResources
 /**
  * Simplified version of [MenuItemTrack]
  */
-class BeatmapButton : Sprite(0f, 0f, getResources().getTexture("menu-button-background"))
+class BeatmapButton : Sprite(0f, 0f, getResources().getTexture("menu-button-background"), getGlobal().engine.vertexBufferObjectManager)
 {
 
-    private val trackTitle = ChangeableText(32f, 20f, getResources().getFont("smallFont"), "", 100)
+    private val trackTitle = Text(32f, 20f, getResources().getFont("smallFont"), "", 100, getGlobal().engine.vertexBufferObjectManager)
 
-    private val creatorInfo = ChangeableText(32f, trackTitle.height + 20, getResources().getFont("smallFont"), "", 200)
+    private val creatorInfo = Text(32f, trackTitle.height + 20, getResources().getFont("smallFont"), "", 200, getGlobal().engine.vertexBufferObjectManager)
 
     private val stars = Array(10) { i ->
 
-        Sprite(0f, 0f, getResources().getTexture("star")).also {
+        Sprite(0f, 0f, getResources().getTexture("star"), getGlobal().engine.vertexBufferObjectManager).also {
 
             it.setScale(0.5f)
             it.setPosition(20f + it.widthScaled * i, creatorInfo.y + 20f)
@@ -136,7 +136,7 @@ class BeatmapButton : Sprite(0f, 0f, getResources().getTexture("menu-button-back
 
         if (getGlobal().selectedTrack == null)
         {
-            creatorInfo.text += "\n${
+            creatorInfo.text = creatorInfo.text.toString() + "\n${
 
                 if (beatmap.parentSetID == null)
                     "Beatmap not found on Chimu."

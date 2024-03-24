@@ -1,68 +1,62 @@
 package com.edlplan.andengine;
 
+import static android.graphics.Bitmap.Config.ARGB_8888;
+
 import android.graphics.Bitmap;
 
-import org.anddev.andengine.opengl.texture.TextureOptions;
-import org.anddev.andengine.opengl.texture.atlas.bitmap.BitmapTextureAtlas;
-import org.anddev.andengine.opengl.texture.region.TextureRegion;
-import org.anddev.andengine.opengl.texture.region.TextureRegionFactory;
+import org.andengine.opengl.texture.TextureOptions;
+import org.andengine.opengl.texture.atlas.bitmap.BitmapTextureAtlas;
+import org.andengine.opengl.texture.atlas.bitmap.source.EmptyBitmapTextureAtlasSource;
+import org.andengine.opengl.texture.atlas.bitmap.source.FileBitmapTextureAtlasSource;
+import org.andengine.opengl.texture.region.TextureRegion;
+import org.andengine.opengl.texture.region.TextureRegionFactory;
 
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 
 import ru.nsu.ccfit.zuev.osu.GlobalManager;
-import ru.nsu.ccfit.zuev.osu.helper.QualityFileBitmapSource;
 
 public class TextureHelper {
 
     private static int tmpFileId = 0;
 
-    public static QualityFileBitmapSource.InputFactory createFactoryFromBitmap(Bitmap bitmap) {
+    public static File createFactoryFromBitmap(Bitmap bitmap) {
         tmpFileId++;
         try {
             File tmp = File.createTempFile("bmp_cache" + tmpFileId, ".png");
             tmp.deleteOnExit();
             bitmap.compress(Bitmap.CompressFormat.PNG, 100, new FileOutputStream(tmp));
-            return () -> new FileInputStream(tmp);
+            return tmp;
         } catch (IOException e) {
             e.printStackTrace();
         }
         return null;
     }
 
-    public static QualityFileBitmapSource.InputFactory createMemoryFactoryFromBitmap(Bitmap bitmap) {
-        ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
-        bitmap.compress(Bitmap.CompressFormat.PNG, 100, byteArrayOutputStream);
-        byte[] bytes = byteArrayOutputStream.toByteArray();
-        return () -> new ByteArrayInputStream(bytes);
-    }
 
     public static TextureRegion createRegion(Bitmap bitmap) {
         int tw = 4, th = 4;
-        final QualityFileBitmapSource source = new QualityFileBitmapSource(
+        final var source = FileBitmapTextureAtlasSource.create(
                 createFactoryFromBitmap(bitmap));
-        if (source.getWidth() == 0 || source.getHeight() == 0) {
+        if (source.getTextureWidth() == 0 || source.getTextureHeight() == 0) {
             return null;
         }
-        while (tw < source.getWidth()) {
+        while (tw < source.getTextureWidth()) {
             tw *= 2;
         }
-        while (th < source.getHeight()) {
+        while (th < source.getTextureHeight()) {
             th *= 2;
         }
 
         int errorCount = 0;
-        while (source.preload() == false && errorCount < 3) {
+        while (source.onLoadBitmap(ARGB_8888) == null && errorCount < 3) {
             errorCount++;
         }
         if (errorCount >= 3) {
             return null;
         }
-        final BitmapTextureAtlas tex = new BitmapTextureAtlas(tw, th, TextureOptions.BILINEAR);
+        final BitmapTextureAtlas tex = new BitmapTextureAtlas(GlobalManager.getInstance().getEngine().getTextureManager(), tw, th, TextureOptions.BILINEAR);
 
         TextureRegion region = TextureRegionFactory.createFromSource(tex, source, 0, 0,
                 false);
@@ -71,29 +65,28 @@ public class TextureHelper {
     }
 
     public static TextureRegion create1xRegion(int color) {
-        Bitmap bmp = Bitmap.createBitmap(8, 8, Bitmap.Config.ARGB_8888);
+        Bitmap bmp = Bitmap.createBitmap(8, 8, ARGB_8888);
         bmp.eraseColor(color);
         int tw = 4, th = 4;
-        final QualityFileBitmapSource source = new QualityFileBitmapSource(
-                createMemoryFactoryFromBitmap(bmp));
-        if (source.getWidth() == 0 || source.getHeight() == 0) {
+        final var source = new EmptyBitmapTextureAtlasSource(1, 1);
+        if (source.getTextureWidth() == 0 || source.getTextureHeight() == 0) {
             return null;
         }
-        while (tw < source.getWidth()) {
+        while (tw < source.getTextureWidth()) {
             tw *= 2;
         }
-        while (th < source.getHeight()) {
+        while (th < source.getTextureHeight()) {
             th *= 2;
         }
 
         int errorCount = 0;
-        while (source.preload() == false && errorCount < 3) {
+        while (source.onLoadBitmap(ARGB_8888) == null && errorCount < 3) {
             errorCount++;
         }
         if (errorCount >= 3) {
             return null;
         }
-        final BitmapTextureAtlas tex = new BitmapTextureAtlas(tw, th, TextureOptions.BILINEAR);
+        final BitmapTextureAtlas tex = new BitmapTextureAtlas(GlobalManager.getInstance().getEngine().getTextureManager(), tw, th, TextureOptions.BILINEAR);
 
         TextureRegion region = TextureRegionFactory.createFromSource(tex, source, 0, 0,
                 false);

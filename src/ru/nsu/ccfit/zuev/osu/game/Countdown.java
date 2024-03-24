@@ -2,18 +2,19 @@ package ru.nsu.ccfit.zuev.osu.game;
 
 import android.graphics.PointF;
 
-import org.anddev.andengine.entity.modifier.DelayModifier;
-import org.anddev.andengine.entity.modifier.FadeInModifier;
-import org.anddev.andengine.entity.modifier.FadeOutModifier;
-import org.anddev.andengine.entity.modifier.ParallelEntityModifier;
-import org.anddev.andengine.entity.modifier.RotationModifier;
-import org.anddev.andengine.entity.modifier.ScaleModifier;
-import org.anddev.andengine.entity.modifier.SequenceEntityModifier;
-import org.anddev.andengine.entity.scene.Scene;
-import org.anddev.andengine.entity.sprite.Sprite;
+import org.andengine.entity.modifier.DelayModifier;
+import org.andengine.entity.modifier.FadeInModifier;
+import org.andengine.entity.modifier.FadeOutModifier;
+import org.andengine.entity.modifier.ParallelEntityModifier;
+import org.andengine.entity.modifier.RotationModifier;
+import org.andengine.entity.modifier.ScaleModifier;
+import org.andengine.entity.modifier.SequenceEntityModifier;
+import org.andengine.entity.scene.Scene;
+import org.andengine.entity.sprite.Sprite;
 
 import ru.nsu.ccfit.zuev.osu.Config;
 import ru.nsu.ccfit.zuev.osu.Constants;
+import ru.nsu.ccfit.zuev.osu.GlobalManager;
 import ru.nsu.ccfit.zuev.osu.ResourceManager;
 import ru.nsu.ccfit.zuev.osu.Utils;
 import ru.nsu.ccfit.zuev.osu.helper.CentredSprite;
@@ -51,7 +52,7 @@ public class Countdown extends GameObject {
         ready.setIgnoreUpdate(true);
 
         count3 = new Sprite(0, 0, ResourceManager.getInstance().getTexture(
-                "count3"));
+                "count3"), GlobalManager.getInstance().getEngine().getVertexBufferObjectManager());
         count3.setPosition(0, center.y - count3.getHeight() / 2);
         count3.setVisible(false);
         count3.setIgnoreUpdate(true);
@@ -61,7 +62,7 @@ public class Countdown extends GameObject {
                 new FadeOutModifier(COUNTDOWN_LENGTH * speed / 18)));
 
         count2 = new Sprite(0, 0, ResourceManager.getInstance().getTexture(
-                "count2"));
+                "count2"), GlobalManager.getInstance().getEngine().getVertexBufferObjectManager());
         count2.setPosition(Config.getRES_WIDTH() - count2.getWidth(), center.y
                 - count2.getHeight() / 2);
         count2.setVisible(false);
@@ -72,7 +73,7 @@ public class Countdown extends GameObject {
                 new FadeOutModifier(COUNTDOWN_LENGTH * speed / 18)));
 
         count1 = new Sprite(0, 0, ResourceManager.getInstance().getTexture(
-                "count1"));
+                "count1"), GlobalManager.getInstance().getEngine().getVertexBufferObjectManager());
         count1.setPosition(center.x - count1.getWidth() / 2,
                 center.y - count1.getHeight() / 2);
         count1.setVisible(false);

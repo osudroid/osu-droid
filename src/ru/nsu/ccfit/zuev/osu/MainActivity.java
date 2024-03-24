@@ -13,7 +13,6 @@ import android.content.SharedPreferences.Editor;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.graphics.Color;
-import android.graphics.PixelFormat;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
@@ -46,27 +45,29 @@ import com.reco1l.framework.lang.Execution;
 import com.reco1l.legacy.AccessibilityDetector;
 import com.reco1l.legacy.Multiplayer;
 import com.reco1l.legacy.UpdateManager;
+import com.reco1l.legacy.graphics.AlphaOverrideShaderProgram;
+import com.reco1l.legacy.graphics.ExternalTextureShaderProgram;
 import com.reco1l.legacy.ui.multiplayer.LobbyScene;
 import com.reco1l.legacy.ui.multiplayer.RoomScene;
 
 import com.rian.osu.difficulty.BeatmapDifficultyCalculator;
 import net.lingala.zip4j.ZipFile;
 
-import org.anddev.andengine.engine.Engine;
-import org.anddev.andengine.engine.camera.Camera;
-import org.anddev.andengine.engine.camera.SmoothCamera;
-import org.anddev.andengine.engine.options.EngineOptions;
-import org.anddev.andengine.engine.options.resolutionpolicy.RatioResolutionPolicy;
-import org.anddev.andengine.entity.scene.Scene;
-import org.anddev.andengine.extension.input.touch.controller.MultiTouch;
-import org.anddev.andengine.extension.input.touch.controller.MultiTouchController;
-import org.anddev.andengine.extension.input.touch.exception.MultiTouchException;
-import org.anddev.andengine.input.touch.TouchEvent;
-import org.anddev.andengine.opengl.view.RenderSurfaceView;
-import org.anddev.andengine.sensor.accelerometer.AccelerometerData;
-import org.anddev.andengine.sensor.accelerometer.IAccelerometerListener;
-import org.anddev.andengine.ui.activity.BaseGameActivity;
-import org.anddev.andengine.util.Debug;
+import org.andengine.engine.Engine;
+import org.andengine.engine.camera.Camera;
+import org.andengine.engine.camera.SmoothCamera;
+import org.andengine.engine.options.EngineOptions;
+import org.andengine.engine.options.ScreenOrientation;
+import org.andengine.engine.options.resolutionpolicy.RatioResolutionPolicy;
+import org.andengine.entity.scene.Scene;
+import org.andengine.input.touch.controller.MultiTouchController;
+import org.andengine.input.touch.TouchEvent;
+import org.andengine.input.touch.controller.MultiTouch;
+import org.andengine.opengl.view.RenderSurfaceView;
+import org.andengine.input.sensor.acceleration.AccelerationData;
+import org.andengine.input.sensor.acceleration.IAccelerationListener;
+import org.andengine.ui.activity.LegacyBaseGameActivity;
+import org.andengine.util.debug.Debug;
 
 import java.io.File;
 import java.io.IOException;
@@ -81,7 +82,6 @@ import java.util.concurrent.TimeUnit;
 import ru.nsu.ccfit.zuev.audio.BassAudioPlayer;
 import ru.nsu.ccfit.zuev.audio.serviceAudio.SaveServiceObject;
 import ru.nsu.ccfit.zuev.audio.serviceAudio.SongService;
-import ru.nsu.ccfit.zuev.osu.game.SpritePool;
 import ru.nsu.ccfit.zuev.osu.helper.FileUtils;
 import ru.nsu.ccfit.zuev.osu.helper.InputManager;
 import ru.nsu.ccfit.zuev.osu.helper.StringTable;
@@ -92,8 +92,7 @@ import ru.nsu.ccfit.zuev.osu.online.OnlineManager;
 import ru.nsu.ccfit.zuev.osuplus.BuildConfig;
 import ru.nsu.ccfit.zuev.osuplus.R;
 
-public class MainActivity extends BaseGameActivity implements
-        IAccelerometerListener {
+public class MainActivity extends LegacyBaseGameActivity implements IAccelerationListener {
 
     public static String versionName;
     public static SongService songService;
@@ -142,23 +141,23 @@ public class MainActivity extends BaseGameActivity implements
         Camera mCamera = new SmoothCamera(0, 0, Config.getRES_WIDTH(),
                 Config.getRES_HEIGHT(), 0, 1800, 1);
         final EngineOptions opt = new EngineOptions(true,
-                null, new RatioResolutionPolicy(
+                ScreenOrientation.LANDSCAPE_SENSOR, new RatioResolutionPolicy(
                 Config.getRES_WIDTH(), Config.getRES_HEIGHT()),
                 mCamera);
-        opt.setNeedsMusic(true);
-        opt.setNeedsSound(true);
-        opt.getRenderOptions().disableExtensionVertexBufferObjects();
-        opt.getTouchOptions().enableRunOnUpdateThread();
+        opt.getAudioOptions().setNeedsMusic(true);
+        opt.getAudioOptions().setNeedsSound(true);
+        opt.getRenderOptions().setDithering(Config.isUseDither());
         final Engine engine = new Engine(opt);
-        try {
-            if (MultiTouch.isSupported(this)) {
-                engine.setTouchController(new MultiTouchController());
-            } else {
-                ToastLogger.showText(
-                        StringTable.get(R.string.message_error_multitouch),
-                        false);
-            }
-        } catch (final MultiTouchException e) {
+
+        // Loading shaders
+        engine.getShaderProgramManager().loadShaderPrograms(
+            AlphaOverrideShaderProgram.INSTANCE,
+            ExternalTextureShaderProgram.INSTANCE
+        );
+
+        if (MultiTouch.isSupported(this)) {
+            engine.setTouchController(new MultiTouchController());
+        } else {
             ToastLogger.showText(
                     StringTable.get(R.string.message_error_multitouch),
                     false);
@@ -306,12 +305,16 @@ public class MainActivity extends BaseGameActivity implements
     }
 
     @Override
+    protected void onUnloadResources() {
+    }
+
+    @Override
     public Scene onLoadScene() {
         return SplashScene.INSTANCE.getScene();
     }
 
     @Override
-    public void onLoadComplete() {
+    public Scene onLoadComplete() {
 
         // Initializing this class because they contain fragments in its constructors that should be initialized in
         // main thread because of the Looper.
@@ -360,6 +363,9 @@ public class MainActivity extends BaseGameActivity implements
                 }
             });
         });
+
+        // This will do nothing but since is required we add it.
+        return GlobalManager.getInstance().getEngine().getScene();
     }
 
     /*
@@ -386,13 +392,7 @@ public class MainActivity extends BaseGameActivity implements
     @Override
     protected void onSetContentView() {
         this.mRenderSurfaceView = new RenderSurfaceView(this);
-        if (Config.isUseDither()) {
-            this.mRenderSurfaceView.setEGLConfigChooser(8, 8, 8, 8, 24, 0);
-            this.mRenderSurfaceView.getHolder().setFormat(PixelFormat.RGBA_8888);
-        } else {
-            this.mRenderSurfaceView.setEGLConfigChooser(true);
-        }
-        this.mRenderSurfaceView.setRenderer(this.mEngine);
+        this.mRenderSurfaceView.setRenderer(this.mEngine, this);
 
         RelativeLayout layout = new RelativeLayout(this);
         layout.setBackgroundColor(Color.argb(255, 0, 0, 0));
@@ -646,7 +646,7 @@ public class MainActivity extends BaseGameActivity implements
         activityVisible = true;
         if (GlobalManager.getInstance().getEngine() != null && GlobalManager.getInstance().getGameScene() != null
                 && GlobalManager.getInstance().getEngine().getScene() == GlobalManager.getInstance().getGameScene().getScene()) {
-            GlobalManager.getInstance().getEngine().getTextureManager().reloadTextures();
+            GlobalManager.getInstance().getEngine().getTextureManager().onReload();
         }
         if (GlobalManager.getInstance().getMainScene() != null) {
             if (songService != null && Build.VERSION.SDK_INT > 10) {
@@ -671,7 +671,6 @@ public class MainActivity extends BaseGameActivity implements
         }
         if (GlobalManager.getInstance().getEngine() != null && GlobalManager.getInstance().getGameScene() != null
                 && GlobalManager.getInstance().getEngine().getScene() == GlobalManager.getInstance().getGameScene().getScene()) {
-            SpritePool.getInstance().purge();
 
             if (Multiplayer.isMultiplayer) {
                 ToastLogger.showText("You've left the match.", true);
@@ -739,7 +738,12 @@ public class MainActivity extends BaseGameActivity implements
     }
 
     @Override
-    public void onAccelerometerChanged(final AccelerometerData arg0) {
+    public void onAccelerationAccuracyChanged(AccelerationData pAccelerationData) {
+
+    }
+
+    @Override
+    public void onAccelerationChanged(AccelerationData arg0) {
         if (this.mEngine == null) {
             return;
         }

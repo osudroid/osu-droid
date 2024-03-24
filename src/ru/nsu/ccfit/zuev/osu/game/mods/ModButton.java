@@ -1,8 +1,9 @@
 package ru.nsu.ccfit.zuev.osu.game.mods;
 
-import org.anddev.andengine.entity.sprite.Sprite;
-import org.anddev.andengine.input.touch.TouchEvent;
+import org.andengine.entity.sprite.Sprite;
+import org.andengine.input.touch.TouchEvent;
 
+import ru.nsu.ccfit.zuev.osu.GlobalManager;
 import ru.nsu.ccfit.zuev.osu.ResourceManager;
 import ru.nsu.ccfit.zuev.osu.Utils;
 
@@ -16,7 +17,7 @@ public class ModButton extends Sprite {
     private IModSwitcher switcher = null;
 
     public ModButton(float pX, float pY, String texture, GameMod mod) {
-        super(Utils.toRes(pX), Utils.toRes(pY), ResourceManager.getInstance().getTexture(texture));
+        super(Utils.toRes(pX), Utils.toRes(pY), ResourceManager.getInstance().getTexture(texture), GlobalManager.getInstance().getEngine().getVertexBufferObjectManager());
         this.mod = mod;
         setScale(initalScale);
     }

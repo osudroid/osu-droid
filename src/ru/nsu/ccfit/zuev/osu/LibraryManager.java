@@ -1,9 +1,9 @@
 package ru.nsu.ccfit.zuev.osu;
 
 import android.os.Build;
-import com.reco1l.legacy.engine.VideoTexture;
+import com.reco1l.legacy.graphics.texture.VideoTexture;
 import com.rian.osu.beatmap.parser.BeatmapParser;
-import org.anddev.andengine.util.Debug;
+import org.andengine.util.debug.Debug;
 import org.jetbrains.annotations.Nullable;
 import ru.nsu.ccfit.zuev.osu.helper.FileUtils;
 import ru.nsu.ccfit.zuev.osu.helper.StringTable;
