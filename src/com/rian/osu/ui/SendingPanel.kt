@@ -92,7 +92,7 @@ class SendingPanel(
                 newOverallRank < overallRank -> "#$newOverallRank\n(+${overallRank - newOverallRank})"
                 else -> "#$newOverallRank\n(-${newOverallRank - overallRank})"
             },
-            (newOverallRank - overallRank).toFloat(),
+            (overallRank - newOverallRank).toFloat(),
             mapRankColumn
         )
 
