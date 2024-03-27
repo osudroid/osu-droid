@@ -205,7 +205,7 @@ class SendingPanel(
     private open class DismissButton : Sprite(0f, 0f, getResources().getTexture("ranking_button")) {
         var canBeDismissed = false
 
-        private val text = ChangeableText(0f, 0f, getResources().getFont("font"), "").also {
+        private val text = ChangeableText(0f, 0f, getResources().getFont("font"), "", 10).also {
             attachChild(it)
         }
 
