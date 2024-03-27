@@ -55,7 +55,7 @@ class SendingPanel(
         }
     }.also {
         attachChild(it)
-        it.setPosition((width - it.width) / 2, (height - it.height) / 2)
+        it.setPosition((width - it.width) / 2, height)
         it.setText("Sending...")
     }
 
@@ -164,7 +164,7 @@ class SendingPanel(
 
         dismissButton.let {
             it.setText("Dismiss")
-            it.setPosition((width - it.width) / 2, (height - it.height) / 2)
+            it.setPosition((width - it.width) / 2, height)
         }
 
         moveModifier = MoveYModifier(0.5f, -height, 0f)
