@@ -12,7 +12,6 @@ import ru.nsu.ccfit.zuev.osu.Config
 import kotlin.math.abs
 import kotlin.math.max
 import kotlin.math.round
-import kotlin.math.roundToLong
 import ru.nsu.ccfit.zuev.osu.ResourceManager.getInstance as getResources
 
 class SendingPanel(
@@ -121,10 +120,11 @@ class SendingPanel(
 
         updateColumn(
             ppColumn,
+            // For PP, we only want to show significant changes.
             when {
-                abs(newPP - pp) < 0.0001f -> String.format("%dpp", newPP.roundToLong())
-                newPP < pp -> String.format("%dpp\n(%dpp)", newPP.roundToLong(), (newPP - pp).roundToLong())
-                else -> String.format("%dpp\n(+%dpp)", newPP.roundToLong(), (newPP - pp).roundToLong())
+                round(newPP) - round(pp) < 1 -> String.format("%dpp", round(newPP))
+                round(newPP) - round(pp) < 0 -> String.format("%dpp\n(%dpp)", round(newPP), round(newPP) - round(pp))
+                else -> String.format("%dpp\n(+%dpp)", round(newPP), round(newPP) - round(pp))
             },
             round(newPP - pp),
             scoreColumn
