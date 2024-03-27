@@ -122,9 +122,9 @@ class SendingPanel(
             ppColumn,
             // For PP, we only want to show significant changes.
             when {
-                round(newPP) - round(pp) < 1 -> String.format("%dpp", round(newPP))
-                round(newPP) - round(pp) < 0 -> String.format("%dpp\n(%dpp)", round(newPP), round(newPP) - round(pp))
-                else -> String.format("%dpp\n(+%dpp)", round(newPP), round(newPP) - round(pp))
+                round(newPP) - round(pp) < 1 -> String.format("%.0fpp", round(newPP))
+                round(newPP) - round(pp) < 0 -> String.format("%.0fpp\n(%.0fpp)", round(newPP), round(newPP) - round(pp))
+                else -> String.format("%.0fpp\n(+%.0fpp)", round(newPP), round(newPP) - round(pp))
             },
             round(newPP - pp),
             scoreColumn
