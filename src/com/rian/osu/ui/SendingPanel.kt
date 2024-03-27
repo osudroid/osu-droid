@@ -30,6 +30,7 @@ class SendingPanel(
 
     private val minWidth = width
     private val minHeight = height
+    private val columnGap = 10
 
     private var moveModifier: MoveYModifier? = null
 
@@ -145,9 +146,9 @@ class SendingPanel(
         scoreColumn.height = columnMaxHeight
         ppColumn.height = columnMaxHeight
 
-        val rowContainerWidth = max(minWidth, ppColumn.x + ppColumn.width - mapRankColumn.x + 20)
+        val rowContainerWidth = ppColumn.x + ppColumn.width - mapRankColumn.x
 
-        width = max(minWidth, max(overallCaptionText.width + 10, rowContainerWidth))
+        width = max(minWidth, max(overallCaptionText.width, rowContainerWidth))
         height = max(minHeight, minHeight / 5 + overallCaptionText.height + columnMaxHeight + 10)
 
         rowContainer.let {
@@ -186,7 +187,7 @@ class SendingPanel(
             else -> setValueRectColor(0.4f, 0.4f, 0.4f, 0.8f)
         }
 
-        setPosition(10f + if (prevColumn != null) prevColumn.x + prevColumn.width else 0f, 0f)
+        setPosition(if (prevColumn != null) prevColumn.x + prevColumn.width + columnGap else 0f, 0f)
     }
 
     private fun formatScore(score: Long) = score
