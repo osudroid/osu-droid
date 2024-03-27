@@ -186,7 +186,7 @@ class SendingPanel(
             else -> setValueRectColor(0.4f, 0.4f, 0.4f, 0.8f)
         }
 
-        setPosition(10f + (if (prevRow != null) prevRow.x + prevRow.width else 0f), 0f)
+        setPosition(10f + if (prevRow != null) prevRow.x + prevRow.width else 0f, 0f)
     }
 
     private fun formatScore(score: Long) = score
