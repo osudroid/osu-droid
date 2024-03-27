@@ -286,7 +286,7 @@ class SendingPanel(
         }
 
         private fun updateSizes() {
-            width = max(minWidth, max(captionText.width + 10, valueText.width + 10))
+            width = max(minWidth, max(captionText.width + 10, valueText.width + 20))
             height = max(minHeight, captionText.height + valueText.height)
         }
     }
