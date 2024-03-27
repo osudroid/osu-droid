@@ -78,11 +78,9 @@ class SendingPanel(
         dismissButton.canBeDismissed = true
 
         // Map rank row is special, as its color is different when ranking up
+        updateColumn(mapRankColumn, "#$newMapRank", 0f)
         if (newScore > score) {
-            mapRankColumn.updateValue("#$newMapRank")
             mapRankColumn.setValueRectColor(1f, 1f, 0f, 0.8f)
-        } else {
-            updateColumn(mapRankColumn, "#$newMapRank", 0f)
         }
 
         updateColumn(
