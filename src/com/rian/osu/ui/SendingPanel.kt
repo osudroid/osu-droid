@@ -90,8 +90,8 @@ class SendingPanel(
             overallRankColumn,
             when {
                 newOverallRank == overallRank -> "#$newOverallRank"
-                newOverallRank < overallRank -> "#$newOverallRank (+${overallRank - newOverallRank})"
-                else -> "#$newOverallRank (-${newOverallRank - overallRank})"
+                newOverallRank < overallRank -> "#$newOverallRank\n(+${overallRank - newOverallRank})"
+                else -> "#$newOverallRank\n(-${newOverallRank - overallRank})"
             },
             (newOverallRank - overallRank).toFloat(),
             mapRankColumn
@@ -113,7 +113,7 @@ class SendingPanel(
             when {
                 newScore == score -> formatScore(newScore)
                 newScore < score -> "${formatScore(newScore)}\n(${formatScore(newScore - score)})"
-                else -> "${formatScore(newScore)} (+${formatScore(newScore - score)})"
+                else -> "${formatScore(newScore)}\n(+${formatScore(newScore - score)})"
             },
             (newScore - score).toFloat(),
             accuracyColumn
