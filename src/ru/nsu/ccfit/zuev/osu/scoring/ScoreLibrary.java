@@ -6,6 +6,8 @@ import android.database.Cursor;
 import android.database.sqlite.SQLiteCantOpenDatabaseException;
 import android.database.sqlite.SQLiteDatabase;
 
+import com.rian.osu.ui.SendingPanel;
+
 import org.anddev.andengine.util.Debug;
 
 import java.io.File;
@@ -23,7 +25,6 @@ import ru.nsu.ccfit.zuev.osu.game.mods.GameMod;
 import ru.nsu.ccfit.zuev.osu.helper.StringTable;
 import ru.nsu.ccfit.zuev.osu.helper.sql.DBOpenHelper;
 import ru.nsu.ccfit.zuev.osu.online.OnlineScoring;
-import ru.nsu.ccfit.zuev.osu.online.SendingPanel;
 import ru.nsu.ccfit.zuev.osuplus.R;
 
 public class ScoreLibrary {

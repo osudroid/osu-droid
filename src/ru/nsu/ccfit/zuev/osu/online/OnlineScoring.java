@@ -3,6 +3,8 @@ package ru.nsu.ccfit.zuev.osu.online;
 import com.reco1l.framework.lang.Execution;
 import com.reco1l.legacy.ui.multiplayer.LobbyScene;
 import com.reco1l.legacy.ui.multiplayer.RoomScene;
+import com.rian.osu.ui.SendingPanel;
+
 import org.anddev.andengine.util.Debug;
 
 import java.io.File;
@@ -167,7 +169,7 @@ public class OnlineScoring {
                     } else if (success) {
                         updatePanels();
                         OnlineManager mgr = OnlineManager.getInstance();
-                        panel.show(mgr.getMapRank(), mgr.getScore(), mgr.getRank(), mgr.getAccuracy(), mgr.getPP());
+                        panel.show(mgr.getMapRank(), mgr.getRank(), mgr.getScore(), mgr.getAccuracy(), mgr.getPP());
                         break;
                     }
 

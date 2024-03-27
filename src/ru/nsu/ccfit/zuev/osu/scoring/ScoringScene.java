@@ -10,6 +10,7 @@ import com.rian.osu.beatmap.Beatmap;
 import com.rian.osu.beatmap.parser.BeatmapParser;
 import com.rian.osu.difficulty.BeatmapDifficultyCalculator;
 import com.rian.osu.difficulty.attributes.DroidPerformanceAttributes;
+import com.rian.osu.ui.SendingPanel;
 import org.anddev.andengine.engine.Engine;
 import org.anddev.andengine.entity.modifier.FadeInModifier;
 import org.anddev.andengine.entity.modifier.ParallelEntityModifier;
@@ -38,7 +39,6 @@ import ru.nsu.ccfit.zuev.osu.game.mods.GameMod;
 import ru.nsu.ccfit.zuev.osu.menu.ModMenu;
 import ru.nsu.ccfit.zuev.osu.menu.SongMenu;
 import ru.nsu.ccfit.zuev.osu.online.OnlineManager;
-import ru.nsu.ccfit.zuev.osu.online.SendingPanel;
 import ru.nsu.ccfit.zuev.osuplus.BuildConfig;
 
 public class ScoringScene {
@@ -572,7 +572,6 @@ public class ScoringScene {
                 SendingPanel sendingPanel = new SendingPanel(OnlineManager.getInstance().getRank(),
                         OnlineManager.getInstance().getScore(), OnlineManager.getInstance().getAccuracy(),
                         OnlineManager.getInstance().getPP());
-                sendingPanel.setPosition((float) Config.getRES_WIDTH() / 2 - 400, Utils.toRes(-300));
                 scene.registerTouchArea(sendingPanel.getDismissTouchArea());
                 scene.attachChild(sendingPanel);
                 ScoreLibrary.getInstance().sendScoreOnline(stat, replay, sendingPanel);
