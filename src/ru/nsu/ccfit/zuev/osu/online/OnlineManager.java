@@ -151,7 +151,7 @@ public class OnlineManager {
         rank = Integer.parseInt(params[2]);
         score = Long.parseLong(params[3]);
         pp = Math.round(Float.parseFloat(params[4]));
-        accuracy = Integer.parseInt(params[5]) / 100000f;
+        accuracy = Float.parseFloat(params[5]);
         this.username = params[6];
         if (params.length >= 8) {
             avatarURL = params[7];
@@ -276,10 +276,9 @@ public class OnlineManager {
             return false;
         }
 
-
         rank = Integer.parseInt(resp[0]);
         score = Long.parseLong(resp[1]);
-        accuracy = Integer.parseInt(resp[2]) / 100000f;
+        accuracy = Float.parseFloat(resp[2]);
         mapRank = Integer.parseInt(resp[3]);
         pp = Math.round(Float.parseFloat(resp[4]));
 
