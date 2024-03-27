@@ -77,7 +77,7 @@ class SendingPanel(
     fun show(newMapRank: Long, newOverallRank: Long, newScore: Long, newAccuracy: Float, newPP: Float) {
         dismissButton.canBeDismissed = true
 
-        // Map rank row is special, as its color is different when ranking up
+        // Map rank column is special, as its color is different when ranking up
         updateColumn(mapRankColumn, "#$newMapRank", 0f)
         if (newScore > score) {
             mapRankColumn.setValueRectColor(1f, 1f, 0f, 0.8f)
@@ -177,7 +177,7 @@ class SendingPanel(
         setPosition((Config.getRES_WIDTH() - width) / 2f, -height)
     }
 
-    private fun updateColumn(row: Column, value: String, difference: Float, prevRow: Column? = null) = row.apply {
+    private fun updateColumn(column: Column, value: String, difference: Float, prevColumn: Column? = null) = column.apply {
         updateValue(value)
 
         when {
@@ -186,7 +186,7 @@ class SendingPanel(
             else -> setValueRectColor(0.4f, 0.4f, 0.4f, 0.8f)
         }
 
-        setPosition(10f + if (prevRow != null) prevRow.x + prevRow.width else 0f, 0f)
+        setPosition(10f + if (prevColumn != null) prevColumn.x + prevColumn.width else 0f, 0f)
     }
 
     private fun formatScore(score: Long) = score
