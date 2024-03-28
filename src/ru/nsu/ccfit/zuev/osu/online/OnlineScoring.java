@@ -154,7 +154,7 @@ public class OnlineScoring {
                     }
 
                     try {
-                        success = OnlineManager.getInstance().sendRecord(recordData);
+                        success = OnlineManager.getInstance().sendRecord(recordData, replay);
                     } catch (OnlineManager.OnlineManagerException e) {
                         Debug.e("Login error: " + e.getMessage());
                         success = false;
@@ -165,7 +165,6 @@ public class OnlineScoring {
                         if (OnlineManager.getInstance().getFailMessage().equals("Invalid record data"))
                             i = attemptCount;
                     } else if (success) {
-                        OnlineManager.getInstance().sendReplay(replay);
                         updatePanels();
                         OnlineManager mgr = OnlineManager.getInstance();
                         panel.show(mgr.getMapRank(), mgr.getScore(), mgr.getRank(), mgr.getAccuracy());
