@@ -665,7 +665,7 @@ public class StatisticV2 implements Serializable {
         builder.append(' ');
         builder.append(getMisses());
         builder.append(' ');
-        builder.append((int) (getAccuracy() * 100000f));
+        builder.append(getAccuracy());
         builder.append(' ');
         builder.append(getTime());
         builder.append(' ');
