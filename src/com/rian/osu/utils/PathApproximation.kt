@@ -231,8 +231,8 @@ object PathApproximation {
     ) {
         bezierSubdivide(controlPoints, subdivisionBuffer2, subdivisionBuffer1, subdivisionBuffer1, count)
 
-        if (count - 1 >= 0) {
-            subdivisionBuffer1.copyInto(subdivisionBuffer2, count, 1, count - 1)
+        for (i in 0 until count - 1) {
+            subdivisionBuffer2[count + i] = subdivisionBuffer1[i + 1]
         }
 
         output.add(controlPoints[0]!!)
@@ -261,8 +261,8 @@ object PathApproximation {
         controlPoints: Array<Vector2?>, l: Array<Vector2?>, r: Array<Vector2?>,
         subdivisionBuffer: Array<Vector2?>, count: Int
     ) {
-        if (count >= 0) {
-            controlPoints.copyInto(subdivisionBuffer, 0, 0, count)
+        for (i in 0 until count) {
+            subdivisionBuffer[i] = controlPoints[i]
         }
 
         for (i in 0 until count) {
