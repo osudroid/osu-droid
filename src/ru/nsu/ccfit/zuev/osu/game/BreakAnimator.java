@@ -82,8 +82,8 @@ public class BreakAnimator extends GameObject {
         this.length = length;
         time = 0;
         ending = stat.getHp() > 0.5f ? "pass" : "fail";
-        final PointF center = new PointF(Config.getRES_WIDTH() / 2,
-                Config.getRES_HEIGHT() / 2);
+        final PointF center = new PointF((float) Config.getRES_WIDTH() / 2,
+                (float) Config.getRES_HEIGHT() / 2);
         passfail = SpritePool.getInstance().getCenteredSprite(
                 "section-" + ending, center);
         scene.attachChild(passfail, 0);
@@ -103,8 +103,6 @@ public class BreakAnimator extends GameObject {
             mark.setScale(1.2f);
             scene.attachChild(mark, 0);
         }
-
-        System.gc();
     }
 
     private void setBgFade(float percent) {

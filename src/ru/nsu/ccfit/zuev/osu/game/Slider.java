@@ -5,6 +5,8 @@ import com.edlplan.framework.math.Vec2;
 import com.edlplan.framework.math.line.LinePath;
 import com.edlplan.osu.support.slider.SliderBody2D;
 import com.edlplan.osu.support.timing.controlpoint.TimingControlPoint;
+import com.reco1l.framework.lang.Execution;
+
 import org.anddev.andengine.entity.IEntity;
 import org.anddev.andengine.entity.modifier.*;
 import org.anddev.andengine.entity.scene.Scene;
@@ -16,7 +18,6 @@ import org.anddev.andengine.util.modifier.ease.EaseQuadOut;
 import ru.nsu.ccfit.zuev.osu.Config;
 import ru.nsu.ccfit.zuev.osu.RGBColor;
 import ru.nsu.ccfit.zuev.osu.Utils;
-import ru.nsu.ccfit.zuev.osu.async.SyncTaskManager;
 import ru.nsu.ccfit.zuev.osu.game.GameHelper.SliderPath;
 import ru.nsu.ccfit.zuev.osu.helper.AnimSprite;
 import ru.nsu.ccfit.zuev.osu.helper.DifficultyHelper;
@@ -204,7 +205,7 @@ public class Slider extends GameObject {
         Utils.putSpriteAnchorCenter(pos, startOverlay);
 
         approachCircle.setColor(r, g, b);
-        approachCircle.setScale(scale * 2);
+        approachCircle.setScale(scale * 3);
         approachCircle.setAlpha(0);
         Utils.putSpriteAnchorCenter(pos, approachCircle);
         if (GameHelper.isHidden()) {
@@ -267,7 +268,6 @@ public class Slider extends GameObject {
                     new FadeInModifier(fadeInDuration),
                     new FadeOutModifier(fadeOutDuration)
             ));
-
         } else {
             // Preempt time can go below 450ms. Normally, this is achieved via the DT mod which uniformly speeds up all animations game wide regardless of AR.
             // This uniform speedup is hard to match 1:1, however we can at least make AR>10 (via mods) feel good by extending the upper linear function above.
@@ -281,6 +281,16 @@ public class Slider extends GameObject {
             endCircle.registerEntityModifier(new FadeInModifier(fadeInDuration));
             endOverlay.registerEntityModifier(new FadeInModifier(fadeInDuration));
         }
+
+        if (approachCircle.isVisible()) {
+            approachCircle.registerEntityModifier(new AlphaModifier(
+                    Math.min(fadeInDuration * 2, time * GameHelper.getTimeMultiplier()), 0, 0.9f
+            ));
+            approachCircle.registerEntityModifier(new ScaleModifier(
+                    time * GameHelper.getTimeMultiplier(), scale * 3, scale
+            ));
+        }
+
         scene.attachChild(number, 0);
         scene.attachChild(startCircle, 0);
         scene.attachChild(approachCircle);
@@ -430,7 +440,7 @@ public class Slider extends GameObject {
         ball.registerEntityModifier(new FadeOutModifier(0.1f * GameHelper.getTimeMultiplier(), new ModifierListener() {
             @Override
             public void onModifierFinished(IModifier<IEntity> pModifier, IEntity pItem) {
-                SyncTaskManager.getInstance().run(pItem::detachSelf);
+                Execution.updateThread(pItem::detachSelf);
             }
         }));
 
@@ -569,7 +579,7 @@ public class Slider extends GameObject {
                     new AlphaModifier(0.2f * GameHelper.getTimeMultiplier(), followCircle.getAlpha(), 0f, new ModifierListener() {
                         @Override
                         public void onModifierFinished(IModifier<IEntity> pModifier, IEntity pItem) {
-                            SyncTaskManager.getInstance().run(pItem::detachSelf);
+                            Execution.updateThread(pItem::detachSelf);
                         }
                     }, EaseQuadIn.getInstance())
             ));
@@ -653,18 +663,16 @@ public class Slider extends GameObject {
 
         if (passedTime < 0) // we at approach time
         {
-            float percentage = (float) (1 + passedTime / preTime);
-            // calculating size of approach circle
-            approachCircle.setScale(scale * (1 + 2f * (1 - percentage)));
             if (startHit) {
+                // Hide the approach circle if the slider is already hit.
+                approachCircle.clearEntityModifiers();
                 approachCircle.setAlpha(0);
             }
+
+            float percentage = (float) (1 + passedTime / preTime);
             if (percentage <= 0.5f) {
                 // Following core doing a very cute show animation ^_^"
                 percentage = Math.min(1, percentage * 2);
-                if (!startHit) {
-                    approachCircle.setAlpha(percentage);
-                }
 
                 for (int i = 0; i < ticks.size(); i++) {
                     if (percentage > (float) (i + 1) / ticks.size()) {
@@ -691,7 +699,6 @@ public class Slider extends GameObject {
                 }
             } else if (percentage - dt / preTime <= 0.5f) {
                 // Setting up positions of slider parts
-                approachCircle.setAlpha(1);
                 for (int i = 0, ticksSize = ticks.size(); i < ticksSize; i++) {
                     ticks.get(i).setAlpha(1);
                 }
@@ -721,6 +728,8 @@ public class Slider extends GameObject {
         if (ball == null) // if ball still don't exist
         {
             number.detachSelf();
+
+            approachCircle.clearEntityModifiers();
             approachCircle.setAlpha(0);
 
             ball = SpritePool.getInstance().getAnimSprite("sliderb",
@@ -793,7 +802,7 @@ public class Slider extends GameObject {
                         new AlphaModifier(0.1f * GameHelper.getTimeMultiplier(), followCircle.getAlpha(), 0f, new ModifierListener() {
                             public void onModifierFinished(IModifier<IEntity> pModifier, IEntity pItem) {
                                 if (mIsOver) {
-                                    SyncTaskManager.getInstance().run(pItem::detachSelf);
+                                    Execution.updateThread(pItem::detachSelf);
                                 }
                             }
                         })
@@ -884,6 +893,7 @@ public class Slider extends GameObject {
             if (passedTime < 0) // we at approach time
             {
                 if (startHit) {
+                    approachCircle.clearEntityModifiers();
                     approachCircle.setAlpha(0);
                 }
             }

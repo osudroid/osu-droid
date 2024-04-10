@@ -78,7 +78,7 @@ public final class SecurityUtils {
             return;
         }
         PackageManager pkgMgr = context.getPackageManager();
-        PackageInfo info = null;
+        PackageInfo info;
         Signature[] signatures;
 
         try {
@@ -90,13 +90,12 @@ public final class SecurityUtils {
                 info = pkgMgr.getPackageInfo(packageName, PackageManager.GET_SIGNING_CERTIFICATES);
                 SigningInfo signInfo = info.signingInfo;
 
-                if(signInfo.hasMultipleSigners()) {
+                if (signInfo.hasMultipleSigners()) {
                     signatures = signInfo.getApkContentsSigners();
-                    appSignature = getHashCode(signatures[0].toByteArray());
                 }else {
                     signatures = signInfo.getSigningCertificateHistory();
-                    appSignature = getHashCode(signatures[0].toByteArray());
                 }
+                appSignature = getHashCode(signatures[0].toByteArray());
             }else {
                 info = pkgMgr.getPackageInfo(packageName, PackageManager.GET_SIGNATURES);
                 if(info != null && info.signatures != null && info.signatures.length > 0) {
@@ -104,8 +103,7 @@ public final class SecurityUtils {
                     appSignature = getHashCode(sign.toByteArray());
                 }
             }
-        } catch (PackageManager.NameNotFoundException e) {
-            return;
+        } catch (PackageManager.NameNotFoundException ignored) {
         }
     }
 

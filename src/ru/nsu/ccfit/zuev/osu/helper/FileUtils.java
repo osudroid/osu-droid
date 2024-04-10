@@ -3,34 +3,27 @@ package ru.nsu.ccfit.zuev.osu.helper;
 import android.os.Build;
 import android.os.Environment;
 
+import net.lingala.zip4j.ZipFile;
+
+import org.anddev.andengine.util.Debug;
+
 import java.io.BufferedInputStream;
-import java.io.FileInputStream;
 import java.io.File;
 import java.io.FileFilter;
-import java.io.FileNotFoundException;
+import java.io.FileInputStream;
 import java.io.IOException;
-
-// TODO: Implement zhanghai/AndroidRetroFile
 import java.nio.file.DirectoryStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
-
 import java.util.Arrays;
 import java.util.LinkedList;
-
-import net.lingala.zip4j.ZipFile;
-import net.lingala.zip4j.exception.ZipException;
 
 import okio.BufferedSink;
 import okio.Okio;
 import okio.Source;
-
-import org.anddev.andengine.util.Debug;
-
 import ru.nsu.ccfit.zuev.osu.Config;
 import ru.nsu.ccfit.zuev.osu.LibraryManager;
 import ru.nsu.ccfit.zuev.osu.ToastLogger;
@@ -40,14 +33,14 @@ public class FileUtils {
 
     private FileUtils() {}
 
-    public static void copy(File from, File to) throws FileNotFoundException, IOException {
+    public static void copy(File from, File to) throws IOException {
         try (Source source = Okio.source(from);
             BufferedSink bufferedSink = Okio.buffer(Okio.sink(to))) {
             bufferedSink.writeAll(source);
         }
     }
 
-    public static void move(File from, File to) throws FileNotFoundException, IOException {
+    public static void move(File from, File to) throws IOException {
         copy(from, to);
         from.delete();
     }
@@ -60,8 +53,6 @@ public class FileUtils {
             return false;
         }
 
-        ToastLogger.addToLog("Importing " + sourcePath);
-
         String sourceFileName = file.getName();
         final String folderName = sourceFileName.substring(0, sourceFileName.length() - 4);
 
@@ -70,8 +61,7 @@ public class FileUtils {
             folderFile.mkdirs();
         }
 
-        try {
-            ZipFile zip = new ZipFile(file);
+        try (ZipFile zip = new ZipFile(file)) {
             if(!zip.isValidZipFile()) {
                 ToastLogger.showText(
                         StringTable.format(R.string.message_error, "Invalid file"),
@@ -87,7 +77,7 @@ public class FileUtils {
                 || sourceFileName.toLowerCase().endsWith(".osk")) {
                 file.delete();
             }
-        } catch (final ZipException e) {
+        } catch (final IOException e) {
             Debug.e("FileUtils.extractZip: " + e.getMessage(), e);
 
             int extensionIndex = sourceFileName.lastIndexOf('.');
@@ -119,8 +109,8 @@ public class FileUtils {
             in.close();
 
             byte[] bytes = digest.digest();
-            for(int i = 0; i < bytes.length; i++) {
-                sb.append(Integer.toString((bytes[i] & 0xff) + 0x100, 16).substring(1));
+            for (byte aByte : bytes) {
+                sb.append(Integer.toString((aByte & 0xff) + 0x100, 16).substring(1));
             }
         }catch(IOException e) {
             Debug.e("getFileChecksum " + e.getMessage(), e);
@@ -177,25 +167,19 @@ public class FileUtils {
                 }
                 return false;
             });
-        }else if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+        }else {
             return listFiles(directory, file -> {
                 String filename = file.getName().toLowerCase();
                 return Arrays.stream(endsWithExtensions).anyMatch(filename::endsWith);
             });
         }
-        return null;
     }
 
     public static File[] listFiles(File directory, FileFilter filter) {
-        File[] filelist = null;
+        File[] filelist;
         if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            LinkedList<File> cachedFiles = new LinkedList<File>();
-            DirectoryStream.Filter<Path> directoryFilter = new DirectoryStream.Filter<Path>() {
-                @Override
-                public boolean accept(Path entry) {
-                    return filter.accept(entry.toFile());
-                }
-            };
+            LinkedList<File> cachedFiles = new LinkedList<>();
+            DirectoryStream.Filter<Path> directoryFilter = entry -> filter.accept(entry.toFile());
             try(DirectoryStream<Path> stream = Files.newDirectoryStream(Paths.get(directory.getAbsolutePath()), directoryFilter)) {
                 for(Path path : stream) {
                     cachedFiles.add(path.toFile());
@@ -203,7 +187,7 @@ public class FileUtils {
             }catch(Exception err) {
                 Debug.e("FileUtils.listFiles: " + err.getMessage(), err);
             }
-            filelist = cachedFiles.toArray(new File[cachedFiles.size()]);
+            filelist = cachedFiles.toArray(new File[0]);
         }else {
             filelist = directory.listFiles(filter);
         }

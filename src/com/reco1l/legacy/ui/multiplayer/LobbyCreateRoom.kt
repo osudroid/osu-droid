@@ -15,7 +15,7 @@ import com.reco1l.api.ibancho.LobbyAPI
 import com.reco1l.api.ibancho.RoomAPI
 import com.reco1l.api.ibancho.data.RoomBeatmap
 import com.reco1l.framework.lang.async
-import com.reco1l.framework.lang.uiThread
+import com.reco1l.framework.lang.mainThread
 import ru.nsu.ccfit.zuev.osu.ToastLogger
 import ru.nsu.ccfit.zuev.osu.menu.LoadingScreen
 import ru.nsu.ccfit.zuev.osuplus.R
@@ -63,7 +63,7 @@ class LobbyCreateRoom : BaseFragment()
             }
             else errorText.visibility = View.GONE
 
-            uiThread {
+            mainThread {
                 dismiss()
                 LobbyScene.search.dismiss()
             }

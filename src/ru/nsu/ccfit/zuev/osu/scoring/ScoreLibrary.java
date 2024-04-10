@@ -6,6 +6,8 @@ import android.database.Cursor;
 import android.database.sqlite.SQLiteCantOpenDatabaseException;
 import android.database.sqlite.SQLiteDatabase;
 
+import com.rian.osu.ui.SendingPanel;
+
 import org.anddev.andengine.util.Debug;
 
 import java.io.File;
@@ -23,7 +25,6 @@ import ru.nsu.ccfit.zuev.osu.game.mods.GameMod;
 import ru.nsu.ccfit.zuev.osu.helper.StringTable;
 import ru.nsu.ccfit.zuev.osu.helper.sql.DBOpenHelper;
 import ru.nsu.ccfit.zuev.osu.online.OnlineScoring;
-import ru.nsu.ccfit.zuev.osu.online.SendingPanel;
 import ru.nsu.ccfit.zuev.osuplus.R;
 
 public class ScoreLibrary {
@@ -51,7 +52,7 @@ public class ScoreLibrary {
         if (s.endsWith(".osu")) {
             return s.substring(0, s.indexOf('/'));
         } else {
-            return s.substring(s.indexOf('/') + 1, s.length());
+            return s.substring(s.indexOf('/') + 1);
         }
     }
 
@@ -105,9 +106,9 @@ public class ScoreLibrary {
             if (obj instanceof Map<?, ?>) {
                 if (versionStr.equals("scores1")) {
                     final Map<String, ArrayList<Statistic>> oldStat = (Map<String, ArrayList<Statistic>>) obj;
-                    scores = new HashMap<String, ArrayList<StatisticV2>>();
+                    scores = new HashMap<>();
                     for (final String str : oldStat.keySet()) {
-                        final ArrayList<StatisticV2> newStat = new ArrayList<StatisticV2>();
+                        final ArrayList<StatisticV2> newStat = new ArrayList<>();
                         for (final Statistic s : oldStat.get(str)) {
                             newStat.add(new StatisticV2(s));
                         }
@@ -119,7 +120,7 @@ public class ScoreLibrary {
                             scores.put(str, newStat);
                         }
                     }
-                } else if (versionStr.equals("scores2")) {
+                } else {
                     scores = (Map<String, ArrayList<StatisticV2>>) obj;
                 }
             }

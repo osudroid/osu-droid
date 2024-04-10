@@ -80,7 +80,6 @@ public class StoryBoardTestActivity extends BaseGameActivity implements IUpdateH
         BassAudioPlayer.initDevice();
 
         try {
-            System.gc();
             OsbParser.instance.parse(FOLDER + PATH);
         } catch (IOException e) {
             e.printStackTrace();

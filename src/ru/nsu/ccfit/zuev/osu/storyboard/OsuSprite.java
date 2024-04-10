@@ -106,7 +106,7 @@ public class OsuSprite {
             th *= 2;
         }
         BuildableBitmapTextureAtlas mBitmapTextureAtlas = new BuildableBitmapTextureAtlas(tw, th, TextureOptions.BILINEAR);
-        ArrayList<TextureRegion> textureRegions = new ArrayList<TextureRegion>();
+        ArrayList<TextureRegion> textureRegions = new ArrayList<>();
         for (int i = 0; i < count; i++) {
             File temp = new File(StoryBoardTestActivity.FOLDER, filePath.substring(0, filePath.lastIndexOf(".")) + i + fileExt);
             if (temp.exists()) {
@@ -124,7 +124,7 @@ public class OsuSprite {
             return;
         }
         try {
-            mBitmapTextureAtlas.build(new BlackPawnTextureBuilder<IBitmapTextureAtlasSource, BitmapTextureAtlas>(0));
+            mBitmapTextureAtlas.build(new BlackPawnTextureBuilder<>(0));
         } catch (ITextureBuilder.TextureAtlasSourcePackingException e) {
             e.printStackTrace();
         }
@@ -268,7 +268,7 @@ public class OsuSprite {
             }
         }
         parallelEntityModifier = new ParallelEntityModifier(entityModifiers);
-        parallelEntityModifier.addModifierListener(new IModifier.IModifierListener<IEntity>() {
+        parallelEntityModifier.addModifierListener(new IModifier.IModifierListener<>() {
 
             @Override
             public void onModifierStarted(IModifier<IEntity> pModifier, IEntity pItem) {
@@ -336,6 +336,7 @@ public class OsuSprite {
                 break;
         }
         float duration = (osuEvent.endTime - osuEvent.startTime) / 1000f;
+        label:
         switch (osuEvent.command) {
             case F://Fade
                 if (iEaseFunction != null) {
@@ -397,12 +398,16 @@ public class OsuSprite {
                 break;
             case P://Parameter
                 iEntityModifier = new DelayModifier(0f);//fake modifier
-                if (osuEvent.P.equals("H")) {
-                    sprite.setFlippedHorizontal(true);
-                } else if (osuEvent.P.equals("V")) {
-                    sprite.setFlippedVertical(true);
-                } else if (osuEvent.P.equals("A")) {
-                    sprite.setBlendFunction(GLES10.GL_SRC_ALPHA, GLES10.GL_ONE);
+                switch (osuEvent.P) {
+                    case "H":
+                        sprite.setFlippedHorizontal(true);
+                        break;
+                    case "V":
+                        sprite.setFlippedVertical(true);
+                        break;
+                    case "A":
+                        sprite.setBlendFunction(GLES10.GL_SRC_ALPHA, GLES10.GL_ONE);
+                        break;
                 }
                 break;
             case L: {
@@ -432,16 +437,20 @@ public class OsuSprite {
             case T: {
                 ArrayList<OsuEvent> subEventList = osuEvent.subEvents;
                 ArrayList<HitSound> hitSounds = OsbParser.instance.getHitSounds();
-                ArrayList<IEntityModifier> entityModifierList = new ArrayList<IEntityModifier>();
+                ArrayList<IEntityModifier> entityModifierList = new ArrayList<>();
                 int soundType;
-                if (osuEvent.triggerType.equals("HitSoundWhistle")) {
-                    soundType = 2;
-                } else if (osuEvent.triggerType.equals("HitSoundFinish")) {
-                    soundType = 4;
-                } else if (osuEvent.triggerType.equals("HitSoundClap")) {
-                    soundType = 8;
-                } else {
-                    break;
+                switch (osuEvent.triggerType) {
+                    case "HitSoundWhistle":
+                        soundType = 2;
+                        break;
+                    case "HitSoundFinish":
+                        soundType = 4;
+                        break;
+                    case "HitSoundClap":
+                        soundType = 8;
+                        break;
+                    default:
+                        break label;
                 }
                 long firstSoundTime = -1;
                 for (HitSound hitSound : hitSounds) {
@@ -478,7 +487,7 @@ public class OsuSprite {
                     }
                 }
                 if (entityModifierList.size() > 0) {
-                    iEntityModifier = new ParallelEntityModifier(entityModifierList.toArray(new IEntityModifier[entityModifierList.size()]));
+                    iEntityModifier = new ParallelEntityModifier(entityModifierList.toArray(new IEntityModifier[0]));
                 }
             }
             break;

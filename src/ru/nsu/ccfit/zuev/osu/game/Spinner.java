@@ -2,6 +2,8 @@ package ru.nsu.ccfit.zuev.osu.game;
 
 import android.graphics.PointF;
 
+import com.reco1l.framework.lang.Execution;
+
 import org.anddev.andengine.entity.IEntity;
 import org.anddev.andengine.entity.modifier.AlphaModifier;
 import org.anddev.andengine.entity.modifier.DelayModifier;
@@ -22,7 +24,6 @@ import ru.nsu.ccfit.zuev.osu.Config;
 import ru.nsu.ccfit.zuev.osu.Constants;
 import ru.nsu.ccfit.zuev.osu.ResourceManager;
 import ru.nsu.ccfit.zuev.osu.Utils;
-import ru.nsu.ccfit.zuev.osu.async.SyncTaskManager;
 import ru.nsu.ccfit.zuev.osu.helper.CentredSprite;
 import ru.nsu.ccfit.zuev.osu.scoring.ScoreNumber;
 import ru.nsu.ccfit.zuev.osu.scoring.StatisticV2;
@@ -58,7 +59,7 @@ public class Spinner extends GameObject {
 
     public Spinner() {
         ResourceManager.getInstance().checkSpinnerTextures();
-        this.pos = new PointF(Constants.MAP_WIDTH / 2,Constants.MAP_HEIGHT / 2);
+        this.pos = new PointF((float) Constants.MAP_WIDTH / 2, (float) Constants.MAP_HEIGHT / 2);
         center = Utils.trackToRealCoords(pos);
         background = SpritePool.getInstance().getCenteredSprite(
                 "spinner-background", center);
@@ -69,7 +70,7 @@ public class Spinner extends GameObject {
                 center);
         mregion = ResourceManager.getInstance().getTexture("spinner-metre")
                 .deepCopy();
-        metre = new Sprite(center.x - Config.getRES_WIDTH() / 2,
+        metre = new Sprite(center.x - (float) Config.getRES_WIDTH() / 2,
                 Config.getRES_HEIGHT(), mregion);
         metre.setWidth(Config.getRES_WIDTH());
         metre.setHeight(background.getHeightScaled());
@@ -133,7 +134,7 @@ public class Spinner extends GameObject {
                     }
 
                     public void onModifierFinished(IModifier<IEntity> pModifier, IEntity pItem) {
-                        SyncTaskManager.getInstance().run(Spinner.this::removeFromScene);
+                        Execution.updateThread(Spinner.this::removeFromScene);
                     }
                 },
                 new SequenceEntityModifier(

@@ -11,11 +11,10 @@ import java.util.ArrayList;
 import ru.nsu.ccfit.zuev.osu.ResourceManager;
 import ru.nsu.ccfit.zuev.skins.SkinManager;
 import ru.nsu.ccfit.zuev.osu.Utils;
-import ru.nsu.ccfit.zuev.osu.async.SyncTaskManager;
 import ru.nsu.ccfit.zuev.osu.helper.AnimSprite;
 
 public class FollowTrack extends GameObject {
-    private final ArrayList<Sprite> points = new ArrayList<Sprite>();
+    private final ArrayList<Sprite> points = new ArrayList<>();
     private final int frameCount;
     private GameObjectListener listener;
     private float timeLeft;
@@ -120,7 +119,7 @@ public class FollowTrack extends GameObject {
             }
             if (percent >= 0 && percent < 1) {
                 points.get((int) (percent * points.size())).setAlpha(
-                        1 - percent + (int) percent);
+                        1 - percent);
             }
         }
 

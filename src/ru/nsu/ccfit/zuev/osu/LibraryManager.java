@@ -2,10 +2,9 @@ package ru.nsu.ccfit.zuev.osu;
 
 import android.os.Build;
 import com.reco1l.legacy.engine.VideoTexture;
+import com.rian.osu.beatmap.parser.BeatmapParser;
 import org.anddev.andengine.util.Debug;
 import org.jetbrains.annotations.Nullable;
-import ru.nsu.ccfit.zuev.osu.beatmap.BeatmapData;
-import ru.nsu.ccfit.zuev.osu.beatmap.parser.BeatmapParser;
 import ru.nsu.ccfit.zuev.osu.helper.FileUtils;
 import ru.nsu.ccfit.zuev.osu.helper.StringTable;
 import ru.nsu.ccfit.zuev.osuplus.R;
@@ -19,7 +18,7 @@ import java.util.stream.Collectors;
 
 public enum LibraryManager {
     INSTANCE;
-    private static final String VERSION = "library4.2";
+    private static final String VERSION = "library4.3";
     private static final List<BeatmapInfo> library = Collections.synchronizedList(new ArrayList<>());
     private Integer fileCount = 0;
     private int currentIndex = 0;
@@ -36,9 +35,7 @@ public enum LibraryManager {
             library.clear();
         }
 
-        ToastLogger.addToLog("Loading library...");
         if (!FileUtils.canUseSD()) {
-            ToastLogger.addToLog("Can't use SD card!");
             return true;
         }
 
@@ -84,7 +81,6 @@ public enum LibraryManager {
                             library.addAll((Collection<? extends BeatmapInfo>) obj);
                         }
 
-                        ToastLogger.addToLog("Library loaded");
                         if (forceUpdate) {
                             checkLibrary();
                         }
@@ -95,7 +91,6 @@ public enum LibraryManager {
         } catch (final IOException | ClassNotFoundException | ClassCastException e) {
             Debug.e("LibraryManager: " + e.getMessage(), e);
         }
-        ToastLogger.addToLog("Cannot load library!");
         return false;
     }
 
@@ -127,7 +122,6 @@ public enum LibraryManager {
     }
 
     public synchronized void scanLibrary() {
-        ToastLogger.addToLog("Caching library...");
         library.clear();
 
         final File dir = new File(Config.getBeatmapPath());
@@ -245,13 +239,13 @@ public enum LibraryManager {
 
     private static void fillEmptyFields(BeatmapInfo info) {
         info.setCreator(info.getTrack(0).getCreator());
-        if (info.getTitle().equals("")) {
+        if (info.getTitle().isEmpty()) {
             info.setTitle("unknown");
         }
-        if (info.getArtist().equals("")) {
+        if (info.getArtist().isEmpty()) {
             info.setArtist("unknown");
         }
-        if (info.getCreator().equals("")) {
+        if (info.getCreator().isEmpty()) {
             info.setCreator("unknown");
         }
     }
@@ -265,46 +259,47 @@ public enum LibraryManager {
             return;
         }
         for (final File file : filelist) {
-            final BeatmapParser parser = new BeatmapParser(file);
-            if (!parser.openFile()) {
-                if (Config.isDeleteUnimportedBeatmaps()) {
-                    file.delete();
-                }
-                continue;
-            }
-
-            final TrackInfo track = new TrackInfo(info);
-            track.setFilename(file.getPath());
-            track.setCreator("unknown");
-
-            final BeatmapData data = parser.parse(true);
-            if (data == null || !data.populateMetadata(info) || !data.populateMetadata(track)) {
-                if (Config.isDeleteUnimportedBeatmaps()) {
-                    file.delete();
-                }
-                continue;
-            }
-
-            if (data.events.videoFilename != null && Config.isDeleteUnsupportedVideos()) {
-                try {
-                    var videoFile = new File(info.getPath(), data.events.videoFilename);
-
-                    if (!VideoTexture.Companion.isSupportedVideo(videoFile)) {
-                        //noinspection ResultOfMethodCallIgnored
-                        videoFile.delete();
+            try (var parser = new BeatmapParser(file)) {
+                if (!parser.openFile()) {
+                    if (Config.isDeleteUnimportedBeatmaps()) {
+                        file.delete();
                     }
-                } catch (Exception e) {
-                    e.printStackTrace();
+                    continue;
                 }
+
+                final TrackInfo track = new TrackInfo(info);
+                track.setFilename(file.getPath());
+                track.setCreator("unknown");
+
+                var beatmap = parser.parse(true);
+                if (beatmap == null || !info.populate(beatmap) || !track.populate(beatmap)) {
+                    if (Config.isDeleteUnimportedBeatmaps()) {
+                        file.delete();
+                    }
+                    continue;
+                }
+
+                if (beatmap.events.videoFilename != null && Config.isDeleteUnsupportedVideos()) {
+                    try {
+                        var videoFile = new File(info.getPath(), beatmap.events.videoFilename);
+
+                        if (!VideoTexture.Companion.isSupportedVideo(videoFile)) {
+                            //noinspection ResultOfMethodCallIgnored
+                            videoFile.delete();
+                        }
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    }
+                }
+                info.addTrack(track);
             }
-            info.addTrack(track);
         }
 
         if (Config.isDeleteUnimportedBeatmaps() && info.getCount() == 0) {
             deleteDir(dir);
         }
 
-        Collections.sort(info.getTracks(), (object1, object2) -> Float.compare(object1.getDifficulty(), object2.getDifficulty()));
+        Collections.sort(info.getTracks(), (object1, object2) -> Float.compare(object1.getDroidDifficulty(), object2.getDroidDifficulty()));
     }
 
     public List<BeatmapInfo> getLibrary() {

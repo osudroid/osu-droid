@@ -1,6 +1,8 @@
 package ru.nsu.ccfit.zuev.osu.menu;
 
 import android.database.Cursor;
+
+import com.reco1l.framework.lang.Execution;
 import com.reco1l.legacy.Multiplayer;
 import org.anddev.andengine.entity.Entity;
 import org.anddev.andengine.entity.scene.Scene;
@@ -15,7 +17,6 @@ import org.anddev.andengine.util.Debug;
 import org.anddev.andengine.util.MathUtils;
 import org.jetbrains.annotations.Nullable;
 import ru.nsu.ccfit.zuev.osu.*;
-import ru.nsu.ccfit.zuev.osu.async.SyncTaskManager;
 import ru.nsu.ccfit.zuev.osu.game.GameHelper;
 import ru.nsu.ccfit.zuev.osu.helper.StringTable;
 import ru.nsu.ccfit.zuev.osu.online.OnlineManager;
@@ -235,7 +236,7 @@ public class ScoreBoard extends Entity implements ScrollDetector.IScrollDetector
                     var combo = Integer.parseInt(data[3]);
                     var mark = data[4];
                     var modString = data[5];
-                    var accuracy = GameHelper.Round(Integer.parseInt(data[6]) / 1000f, 2);
+                    var accuracy = GameHelper.Round(Float.parseFloat(data[6]) * 100, 2);
                     var avatarURL = data[7];
                     var beatmapRank = isPersonalBest && !isInLeaderboard ? Integer.parseInt(data[8]) : (i + 1);
 
@@ -360,7 +361,7 @@ public class ScoreBoard extends Entity implements ScrollDetector.IScrollDetector
         wasOnline = showOnlineScores;
         scoreItems = null;
 
-        SyncTaskManager.getInstance().run(() -> {
+        Execution.updateThread(() -> {
 
             detachChildren();
             currentAvatarTask = null;

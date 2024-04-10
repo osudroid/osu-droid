@@ -28,8 +28,8 @@ public class HitErrorMeter extends GameObject {
         barHeight = height;
         bgScene = scene;
 
-        onDisplayIndicators = new LinkedList<Rectangle>();
-        recycledIndicators = new LinkedList<Rectangle>();
+        onDisplayIndicators = new LinkedList<>();
+        recycledIndicators = new LinkedList<>();
 
         this.difficultyHelper = difficultyHelper;
 

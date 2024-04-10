@@ -1,8 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
-    package="ru.nsu.ccfit.zuev.osuplus"
-      android:installLocation="auto">
+    android:installLocation="auto">
 
     <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE"/>
@@ -26,7 +25,7 @@
         android:resizeableActivity="false"
         android:name="ru.nsu.ccfit.zuev.audio.serviceAudio.SaveServiceObject"
         tools:ignore="UnusedAttribute">
-        <service android:name="ru.nsu.ccfit.zuev.audio.serviceAudio.SongService"/>
+        <service android:name="ru.nsu.ccfit.zuev.audio.serviceAudio.SongService" android:exported="false"/>
 
         <meta-data
             android:name="com.google.firebase.messaging.default_notification_icon"
@@ -47,7 +46,8 @@
 
         <activity
             android:name="com.edlplan.ui.ImportReplayActivity"
-            android:label="@string/act_import_replay">
+            android:label="@string/act_import_replay"
+            android:exported="true">
 
             <!-- firefox and file explorer -->
             <intent-filter>
@@ -87,6 +87,7 @@
             android:launchMode="singleInstance"
             android:screenOrientation="sensorLandscape"
             android:label="@string/app_name"
+            android:exported="false"
             tools:ignore="LockedOrientationActivity"/>
 
         <activity
@@ -96,6 +97,7 @@
             android:launchMode="singleInstance"
             android:screenOrientation="sensorLandscape"
             android:label="@string/app_name"
+            android:exported="true"
             tools:ignore="LockedOrientationActivity">
 
             <!--Multiplayer invite link-->
@@ -124,6 +126,7 @@
                 <data android:scheme="file" android:host="*"
                       android:mimeType="application/octet-stream" android:pathPattern=".*\\.odr"/>
             </intent-filter>
+
             <!-- firefox and file explorer -->
             <intent-filter>
                 <action

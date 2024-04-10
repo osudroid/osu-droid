@@ -9,24 +9,22 @@ import java.util.*
 
 object ActivityOverlay {
     private var fragmentManager: FragmentManager? = null
-    private val displayingOverlay: MutableList<Fragment> = ArrayList()
+    private val displayingOverlay = mutableListOf<Fragment>()
     private var context: Activity? = null
     private var containerId = 0
+    private val stateMap = mutableMapOf<String, Fragment.SavedState?>()
     @JvmStatic
     fun initial(activity: AppCompatActivity, id: Int) {
         context = activity
         containerId = id
         fragmentManager = activity.supportFragmentManager
-        if (fragmentManager == null) {
-            throw RuntimeException("FragmentManager not found!")
-        }
     }
 
     @JvmStatic
     @Synchronized
     fun onBackPress(): Boolean {
         if (fragmentManager != null && displayingOverlay.size > 0) {
-            val overlay: Fragment? = displayingOverlay[displayingOverlay.size - 1]
+            val overlay: Fragment = displayingOverlay[displayingOverlay.size - 1]
             if(overlay is BackPressListener) {
                 overlay.callDismissOnBackPress()
             }
@@ -48,7 +46,7 @@ object ActivityOverlay {
     @Synchronized
     fun addOverlay(fragment: Fragment, tag: String?) {
         if (fragmentManager != null) {
-            if (fragment.isAdded()) {
+            if (fragment.isAdded) {
                 return
             }
             if (displayingOverlay.contains(fragment) || fragmentManager!!.findFragmentByTag(tag) != null) {
@@ -64,6 +62,24 @@ object ActivityOverlay {
                     .add(containerId, fragment, tag)
                     .commitAllowingStateLoss()
         }
+    }
+
+    @Synchronized
+    fun saveState(tag: String?) {
+        val fragment = fragmentManager!!.findFragmentByTag(tag)
+        if (fragmentManager != null && fragment?.isAdded == true) {
+            stateMap[tag!!] = fragmentManager!!.saveFragmentInstanceState(fragment)
+        }
+    }
+
+    @Synchronized
+    fun loadState(tag: String?): Fragment.SavedState? {
+        val fragment = fragmentManager!!.findFragmentByTag(tag)
+        if (fragmentManager != null && fragment?.isAdded == true) {
+            return stateMap.remove(tag!!)
+        }
+
+        return null
     }
 
     fun runOnUiThread(runnable: Runnable?) {

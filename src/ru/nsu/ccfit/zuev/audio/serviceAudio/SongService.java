@@ -77,7 +77,7 @@ public class SongService extends Service {
         if (checkFileExist(filePath)) {
             if (audioFunc == null) return false;
             if (isLoop) {
-                audioFunc.setLoop(isLoop);
+                audioFunc.setLoop(true);
             }
             return audioFunc.preLoad(filePath, mode);
         }
@@ -245,7 +245,7 @@ public class SongService extends Service {
 
     public boolean checkFileExist(String path) {
         if (path == null) return false;
-        if (path.trim().equals("")) return false;
+        if (path.trim().isEmpty()) return false;
         else {
             File songFile = new File(path);
             if (!songFile.exists()) return false;

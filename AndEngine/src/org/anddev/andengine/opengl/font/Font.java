@@ -222,7 +222,6 @@ public class Font {
 				bitmap.recycle();
 			}
 			lettersPendingToBeDrawnToTexture.clear();
-			System.gc();
 		}
 	}
 

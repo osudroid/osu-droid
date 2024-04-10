@@ -4,8 +4,11 @@ import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 
+import com.dgsrz.bancho.security.SecurityUtils;
+import okhttp3.MediaType;
 import okhttp3.OkHttpClient;
 
+import okhttp3.RequestBody;
 import org.anddev.andengine.util.Debug;
 
 import java.io.File;
@@ -16,7 +19,7 @@ import java.util.ArrayList;
 import ru.nsu.ccfit.zuev.osu.Config;
 import ru.nsu.ccfit.zuev.osu.ResourceManager;
 import ru.nsu.ccfit.zuev.osu.game.mods.GameMod;
-import ru.nsu.ccfit.zuev.osu.helper.MD5Calcuator;
+import ru.nsu.ccfit.zuev.osu.helper.MD5Calculator;
 import ru.nsu.ccfit.zuev.osu.online.PostBuilder.RequestException;
 import ru.nsu.ccfit.zuev.osu.scoring.StatisticV2;
 
@@ -43,6 +46,7 @@ public class OnlineManager {
     private long rank = 0;
     private long score = 0;
     private float accuracy = 0;
+    private float pp = 0;
     private String avatarURL = "";
     private int mapRank;
 
@@ -105,7 +109,7 @@ public class OnlineManager {
 
     public boolean register(final String username, final String password, final String email)
             throws OnlineManagerException {
-        PostBuilder post = new PostBuilder();
+        PostBuilder post = new URLEncodedPostBuilder();
         post.addParam("username", username);
         post.addParam("password", sha256(password + "taikotaiko"));
         post.addParam("email", email);
@@ -128,7 +132,7 @@ public class OnlineManager {
         this.username = username;
         this.password = password;
 
-        PostBuilder post = new PostBuilder();
+        PostBuilder post = new URLEncodedPostBuilder();
         post.addParam("username", username);
         post.addParam(
                 "password",
@@ -156,10 +160,11 @@ public class OnlineManager {
         sessionId = params[1];
         rank = Integer.parseInt(params[2]);
         score = Long.parseLong(params[3]);
-        accuracy = Integer.parseInt(params[4]) / 100000f;
-        this.username = params[5];
-        if (params.length >= 7) {
-            avatarURL = params[6];
+        pp = Math.round(Float.parseFloat(params[4]));
+        accuracy = Float.parseFloat(params[5]);
+        this.username = params[6];
+        if (params.length >= 8) {
+            avatarURL = params[7];
         } else {
             avatarURL = "";
         }
@@ -175,11 +180,41 @@ public class OnlineManager {
         return true;
     }
 
-    public boolean sendRecord(String data, String mapMD5, String replay) throws OnlineManagerException {
+    public boolean sendRecord(String data, String mapMD5, String replayFilename) throws OnlineManagerException {
 
         Debug.i("Sending record...");
 
-        ArrayList<String> response = OnlineFileOperator.sendScore(endpoint + "submit", data, replay, mapMD5);
+        File replayFile = new File(replayFilename);
+        if (!replayFile.exists()) {
+            failMessage = "Replay file not found";
+            Debug.e("Replay file not found");
+            return false;
+        }
+
+        var sb = new StringBuilder();
+        sb.append(userId);
+        sb.append('_');
+        sb.append(data);
+        sb.append('_');
+        sb.append(mapMD5);
+        sb.append('_');
+        sb.append(sessionId);
+
+        var signature = SecurityUtils.signRequest(sb.toString());
+
+        var post = new FormDataPostBuilder();
+        post.addParam("userID", String.valueOf(userId));
+        post.addParam("data", data);
+        post.addParam("hash", mapMD5);
+        post.addParam("sessionId", sessionId);
+        post.addParam("sign", signature);
+
+        MediaType replayMime = MediaType.parse("application/octet-stream");
+        RequestBody replayFileBody = RequestBody.create(replayFile, replayMime);
+
+        post.addParam("uploadedFile", replayFile.getName(), replayFileBody);
+
+        ArrayList<String> response = sendRequest(post, endpoint + "submit.php");
 
         if (response == null) {
             return false;
@@ -199,17 +234,17 @@ public class OnlineManager {
             return false;
         }
 
-
         rank = Integer.parseInt(resp[0]);
         score = Long.parseLong(resp[1]);
-        accuracy = Integer.parseInt(resp[2]) / 100000f;
+        accuracy = Float.parseFloat(resp[2]);
         mapRank = Integer.parseInt(resp[3]);
+        pp = Math.round(Float.parseFloat(resp[4]));
 
         return true;
     }
 
     public ArrayList<String> sendPlaySettings(StatisticV2 stat, final String hash) throws OnlineManagerException {
-        PostBuilder post = new PostBuilder();
+        PostBuilder post = new URLEncodedPostBuilder();
         post.addParam("userID", String.valueOf(userId));
         post.addParam("sessionId", sessionId);
         post.addParam("modstring", stat.getModString());
@@ -221,7 +256,7 @@ public class OnlineManager {
     }
 
     public ArrayList<String> getTop(final String hash) throws OnlineManagerException {
-        PostBuilder post = new PostBuilder();
+        PostBuilder post = new URLEncodedPostBuilder();
         post.addParam("hash", hash);
 
         ArrayList<String> response = sendRequest(post, endpoint + "getLeaderboard");
@@ -242,7 +277,7 @@ public class OnlineManager {
     public boolean loadAvatarToTextureManager(String avatarURL) {
         if (avatarURL == null || avatarURL.length() == 0) return false;
 
-        String filename = MD5Calcuator.getStringMD5(avatarURL);
+        String filename = MD5Calculator.getStringMD5(avatarURL);
         Debug.i("Loading avatar from " + avatarURL);
         Debug.i("filename = " + filename);
         File picfile = new File(Config.getCachePath(), filename);
@@ -264,7 +299,7 @@ public class OnlineManager {
             }
         } else {
             // Avatar not found, download the default avatar
-            String defaultAvatarFilename = MD5Calcuator.getStringMD5(defaultAvatarURL);
+            String defaultAvatarFilename = MD5Calculator.getStringMD5(defaultAvatarURL);
             File avatarFile = new File(Config.getCachePath(), defaultAvatarFilename);
             OnlineFileOperator.downloadFile(defaultAvatarURL, avatarFile.getAbsolutePath());
 
@@ -302,7 +337,7 @@ public class OnlineManager {
     }
 
     public String getScorePack(int userId, String hash) throws OnlineManagerException {
-        PostBuilder post = new PostBuilder();
+        PostBuilder post = new URLEncodedPostBuilder();
         post.addParam("userID", String.valueOf(userId));
         post.addParam("hash", hash);
 
@@ -325,6 +360,10 @@ public class OnlineManager {
 
     public long getScore() {
         return score;
+    }
+
+    public float getPP() {
+        return pp;
     }
 
     public float getAccuracy() {

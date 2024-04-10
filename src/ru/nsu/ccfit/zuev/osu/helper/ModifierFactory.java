@@ -9,7 +9,7 @@ import ru.nsu.ccfit.zuev.osu.helper.UniversalModifier.ValueType;
 
 public class ModifierFactory {
     private static ModifierFactory instance = new ModifierFactory();
-    private final Queue<UniversalModifier> pool = new LinkedList<UniversalModifier>();
+    private final Queue<UniversalModifier> pool = new LinkedList<>();
 
     private ModifierFactory() {
     }

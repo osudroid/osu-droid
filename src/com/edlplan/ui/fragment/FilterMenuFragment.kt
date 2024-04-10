@@ -1,329 +1,297 @@
-package com.edlplan.ui.fragment;
+package com.edlplan.ui.fragment
 
-import android.animation.Animator;
-import android.annotation.SuppressLint;
-import android.content.Context;
-import android.content.SharedPreferences;
-import androidx.preference.PreferenceManager;
-import androidx.annotation.StringRes;
-import android.text.Editable;
-import android.text.TextWatcher;
-import android.view.KeyEvent;
-import android.view.View;
-import android.widget.Button;
-import android.widget.CheckBox;
-import android.widget.EditText;
-import android.widget.TextView;
+import android.animation.Animator
+import android.content.Context
+import android.os.Bundle
+import android.text.Editable
+import android.text.TextWatcher
+import android.view.KeyEvent
+import android.view.View
+import android.widget.Button
+import android.widget.CheckBox
+import android.widget.EditText
+import android.widget.TextView
+import androidx.preference.PreferenceManager
+import com.edlplan.framework.easing.Easing
+import com.edlplan.framework.support.util.Updater
+import com.edlplan.ui.BaseAnimationListener
+import com.edlplan.ui.EasingHelper
+import com.reco1l.framework.lang.mainThread
+import org.anddev.andengine.engine.handler.IUpdateHandler
+import org.anddev.andengine.entity.scene.Scene
+import ru.nsu.ccfit.zuev.osu.helper.InputManager
+import ru.nsu.ccfit.zuev.osu.helper.StringTable
+import ru.nsu.ccfit.zuev.osu.menu.IFilterMenu
+import ru.nsu.ccfit.zuev.osu.menu.SongMenu
+import ru.nsu.ccfit.zuev.osuplus.R
+import ru.nsu.ccfit.zuev.osu.GlobalManager.getInstance as getGlobal
 
-import com.edlplan.framework.easing.Easing;
-import com.edlplan.framework.support.util.Updater;
-import com.edlplan.ui.BaseAnimationListener;
-import com.edlplan.ui.EasingHelper;
+class FilterMenuFragment : BaseFragment(), IUpdateHandler, IFilterMenu {
+    private var configContext: Context? = null
+    private var savedFolder: String? = null
+    private var savedFavOnly = false
+    private var savedFilter: String? = null
+    private var scene: Scene? = null
+    private lateinit var filter: EditText
+    private var menu: SongMenu? = null
+    private lateinit var favoritesOnly: CheckBox
+    private lateinit var favoriteFolder: TextView
+    private lateinit var sortButton: Button
+    private var updater: Updater? = null
 
-import com.reco1l.framework.lang.Execution;
-import org.anddev.andengine.entity.scene.Scene;
-
-import ru.nsu.ccfit.zuev.osu.helper.StringTable;
-import ru.nsu.ccfit.zuev.osu.menu.IFilterMenu;
-import ru.nsu.ccfit.zuev.osu.menu.SongMenu;
-import ru.nsu.ccfit.zuev.osuplus.R;
-
-public class FilterMenuFragment extends BaseFragment implements IFilterMenu {
-
-    private static Context configContext = null;
-    private static String savedFolder;
-    private static boolean savedFavOnly = false;
-    private static String savedFilter = null;
-    private Scene scene = null;
-    private EditText filter;
-    private SongMenu menu;
-    private CheckBox favoritesOnly;
-    private TextView favoriteFolder;
-    private Button orderButton;
-    //private TextView openMapInfo;
-
-    private Updater updater;
-
-    public FilterMenuFragment() {
-        setDismissOnBackgroundClick(true);
+    init {
+        isDismissOnBackgroundClick = true
     }
 
+    override val layoutID: Int
+        get() = R.layout.fragment_filtermenu
 
-    @Override
-    protected int getLayoutID() {
-        return R.layout.fragment_filtermenu;
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        val (folder, favOnly, filter) = restoreState()
+        savedFolder = folder
+        savedFavOnly = favOnly
+        savedFilter = filter
     }
 
-    @Override
-    protected void onLoadView() {
-        reloadViewData();
-        playOnLoadAnim();
+    override fun onLoadView() {
+        reloadViewData()
+        playOnLoadAnim()
     }
 
-    private void playOnLoadAnim() {
-        View body = findViewById(R.id.frg_body);
-        body.setAlpha(0);
-        body.setTranslationX(400);
-        body.animate().cancel();
-        body.animate()
-                .translationX(0)
-                .alpha(1)
-                .setInterpolator(EasingHelper.asInterpolator(Easing.InOutQuad))
-                .setDuration(150)
-                .start();
-        playBackgroundHideInAnim(150);
+    override fun getFilter(): String {
+        return filter.text.toString()
     }
 
-    private void playEndAnim(Runnable action) {
-        View body = findViewById(R.id.frg_body);
-        body.animate().cancel();
-        body.animate()
-                .translationXBy(400)
-                .alpha(0)
-                .setDuration(200)
-                .setInterpolator(EasingHelper.asInterpolator(Easing.InOutQuad))
-                .setListener(new BaseAnimationListener() {
-                    @Override
-                    public void onAnimationEnd(Animator animation) {
-                        if (action != null) {
-                            action.run();
-                        }
+    override fun getOrder(): SongMenu.SortOrder {
+        val prefs =
+            PreferenceManager.getDefaultSharedPreferences(configContext!!)
+        val order = prefs.getInt("sortorder", 0)
+        return SongMenu.SortOrder.entries[order % SongMenu.SortOrder.entries.size]
+    }
+
+    override fun isFavoritesOnly(): Boolean = favoritesOnly.isChecked
+
+    override fun getFavoriteFolder(): String =
+        if (StringTable.get(R.string.favorite_default) == favoriteFolder.text) "" else favoriteFolder.text.toString()
+
+    override fun loadConfig(context: Context?) {
+        configContext = context
+        mainThread(this::reloadViewData)
+    }
+
+    override fun getScene(): Scene = scene!!
+
+    override fun hideMenu() {
+        updateUpdater()
+        scene = null
+        dismiss()
+    }
+
+    override fun showMenu(parent: SongMenu?) {
+        this.menu = parent!!
+        scene = Scene()
+        scene!!.isBackgroundEnabled = false
+        updater = object : Updater() {
+            override fun createEventRunnable(): Runnable =
+                Runnable { parent.loadFilter(this@FilterMenuFragment) }
+
+            override fun postEvent(r: Runnable?) = parent.scene.postRunnable(r)
+        }
+        show()
+    }
+
+    override fun onDetach() {
+        super.onDetach()
+        menu?.scene?.postRunnable { menu?.loadFilter(this) }
+        menu = null
+        scene = null
+    }
+
+    override fun onAttach(context: Context) {
+        super.onAttach(context)
+        reloadViewData()
+    }
+
+    override fun dismiss() {
+        playEndAnim { super.dismiss() }
+        getGlobal().songMenu.unloadFilterFragment()
+        saveState(savedFolder, savedFavOnly, savedFilter)
+    }
+
+    private fun reloadViewData() {
+        if (isCreated) {
+            filter = findViewById(R.id.searchEditText)!!
+            favoritesOnly = findViewById(R.id.showFav)!!
+            sortButton = findViewById(R.id.sortButton)!!
+            favoriteFolder = findViewById(R.id.favFolder)!!
+
+            favoritesOnly.setOnCheckedChangeListener { _, isChecked ->
+                updateFavChecked()
+                updateUpdater()
+                savedFavOnly = isChecked
+            }
+
+            sortButton.setOnClickListener {
+                nextOrder()
+                updateOrderButton()
+                updateUpdater()
+            }
+
+            findViewById<View>(R.id.favFolderLayout)!!.setOnClickListener {
+                val favoriteManagerFragment = FavoriteManagerFragment()
+                favoriteManagerFragment.showToSelectFolder {
+                    savedFolder = it
+                    favoriteFolder.text = it ?: StringTable.get(R.string.favorite_default)
+                    updateUpdater()
+                }
+            }
+
+            filter.setOnEditorActionListener { _, _, event ->
+                if (event != null && event.keyCode == KeyEvent.KEYCODE_ENTER) {
+                    hideMenu()
+                    return@setOnEditorActionListener true
+                }
+                false
+            }
+
+            filter.addTextChangedListener(
+                object : TextWatcher {
+                    override fun beforeTextChanged(
+                        s: CharSequence,
+                        start: Int,
+                        count: Int,
+                        after: Int
+                    ) {
                     }
-                })
-                .start();
-        playBackgroundHideOutAnim(200);
-    }
 
-    private void updateFavChecked() {
-        favoritesOnly.setText(favoritesOnly.isChecked() ?
-                R.string.menu_search_favsenabled : R.string.menu_search_favsdisabled);
-    }
+                    override fun onTextChanged(
+                        s: CharSequence,
+                        start: Int,
+                        before: Int,
+                        count: Int
+                    ) {
+                    }
 
-    private void updateOrderButton() {
-        SongMenu.SortOrder order = getOrder();
-        @StringRes int s;
-        switch (order) {
-            case Title:
-                s = R.string.menu_search_sort_title;
-                break;
-            case Artist:
-                s = R.string.menu_search_sort_artist;
-                break;
-            case Date:
-                s = R.string.menu_search_sort_date;
-                break;
-            case Bpm:
-                s = R.string.menu_search_sort_bpm;
-                break;
-            case Stars:
-                s = R.string.menu_search_sort_stars;
-                break;
-            case Length:
-                s = R.string.menu_search_sort_length;
-                break;
-            default:
-                s = R.string.menu_search_sort_creator;
-                break;
-        }
-        orderButton.setText(s);
-    }
+                    override fun afterTextChanged(s: Editable) {
+                        savedFilter = s.toString()
+                        updateUpdater()
+                    }
+                }
+            )
 
-    private void updateFavFolderText() {
-        if (savedFolder != null) {
-            favoriteFolder.setText(savedFolder);
-        }
-        if (favoriteFolder.getText().length() == 0) {
-            favoriteFolder.setText(StringTable.get(R.string.favorite_default));
+            favoritesOnly.isChecked = savedFavOnly
+
+            if (savedFilter?.isNotEmpty() == true) {
+                filter.setText(savedFilter)
+            }
+
+            updateOrderButton()
+            updateFavChecked()
+            updateFavFolderText()
         }
     }
 
-    @Override
-    public void dismiss() {
-        playEndAnim(super::dismiss);
+    private fun playOnLoadAnim() {
+        val body = findViewById<View>(R.id.frg_body)!!
+        body.alpha = 0f
+        body.translationX = 400f
+        body.animate().cancel()
+        body.animate()
+            .alpha(1f)
+            .translationX(0f)
+            .setInterpolator(EasingHelper.asInterpolator(Easing.InOutQuad))
+            .setDuration(300)
+            .start()
+        playBackgroundHideInAnim(150)
     }
 
-    @Override
-    public String getFilter() {
-        return filter == null ? "" : (filter.getText() == null ? "" : filter.getText().toString());
+    private fun playEndAnim(action: () -> Unit) {
+        val body = findViewById<View>(R.id.frg_body)!!
+        body.animate().cancel()
+        body.animate()
+            .alpha(0f)
+            .translationX(400f)
+            .setInterpolator(EasingHelper.asInterpolator(Easing.InOutQuad))
+            .setDuration(300)
+            .setListener(
+                object : BaseAnimationListener() {
+                    override fun onAnimationEnd(animation: Animator) {
+                        action()
+                    }
+                }
+            )
+            .start()
+        playBackgroundHideOutAnim(150)
     }
 
-    @Override
-    public SongMenu.SortOrder getOrder() {
-        final SharedPreferences prefs = PreferenceManager
-                .getDefaultSharedPreferences(configContext);
-        final int sortOrder = prefs.getInt("sortorder", 0);
-        return SongMenu.SortOrder.values()[sortOrder % SongMenu.SortOrder.values().length];
+    private fun updateFavChecked() {
+        favoritesOnly.text =
+            if (favoritesOnly.isChecked) getString(R.string.menu_search_favsenabled) else getString(
+                R.string.menu_search_favsdisabled
+            )
     }
 
-    @SuppressLint("ApplySharedPref")
-    private void saveOrder(SongMenu.SortOrder order) {
+    private fun updateOrderButton() {
+        val s = when (order) {
+            SongMenu.SortOrder.Title -> StringTable.get(R.string.menu_search_sort_title)
+            SongMenu.SortOrder.Artist -> StringTable.get(R.string.menu_search_sort_artist)
+            SongMenu.SortOrder.Creator -> StringTable.get(R.string.menu_search_sort_creator)
+            SongMenu.SortOrder.Date -> StringTable.get(R.string.menu_search_sort_date)
+            SongMenu.SortOrder.Bpm -> StringTable.get(R.string.menu_search_sort_bpm)
+            SongMenu.SortOrder.DroidStars -> StringTable.get(R.string.menu_search_sort_droid_stars)
+            SongMenu.SortOrder.StandardStars -> StringTable.get(R.string.menu_search_sort_standard_stars)
+            SongMenu.SortOrder.Length -> StringTable.get(R.string.menu_search_sort_length)
+        }
+
+        sortButton.text = s
+    }
+
+    private fun updateFavFolderText() {
+        favoriteFolder.text =
+            savedFolder.orEmpty().ifEmpty { StringTable.get(R.string.favorite_default) }
+    }
+
+    private fun nextOrder() {
+        var order = order
+        order = SongMenu.SortOrder.entries.toTypedArray()[(order.ordinal + 1) % SongMenu.SortOrder.entries.size]
+        saveOrder(order)
+    }
+
+    private fun saveOrder(order: SongMenu.SortOrder) {
         PreferenceManager
-                .getDefaultSharedPreferences(configContext)
-                .edit()
-                .putInt("sortorder", order.ordinal())
-                .commit();
+            .getDefaultSharedPreferences(configContext!!)
+            .edit()
+            .putInt("sortorder", order.ordinal)
+            .commit()
     }
 
-    private void nextOrder() {
-        SongMenu.SortOrder order = getOrder();
-        order = SongMenu.SortOrder.values()[(order.ordinal() + 1) % SongMenu.SortOrder.values().length];
-        saveOrder(order);
+    private fun updateUpdater() {
+        updater?.update()
     }
 
-    @Override
-    public boolean isFavoritesOnly() {
-        return favoritesOnly.isChecked();
-    }
-
-    @Override
-    public String getFavoriteFolder() {
-        return favoriteFolder == null ?
-                null : StringTable.get(R.string.favorite_default).equals(favoriteFolder.getText().toString()) ?
-                null : favoriteFolder.getText().toString();
-    }
-
-    @Override
-    public void loadConfig(Context context) {
-        configContext = context;
-        Execution.uiThread(this::reloadViewData);
-    }
-
-    @Override
-    public Scene getScene() {
-        return scene;
-    }
-
-    @Override
-    public void hideMenu() {
-        updateUpdater();
-        scene = null;
-        dismiss();
-    }
-
-    @Override
-    public void showMenu(SongMenu parent) {
-        this.menu = parent;
-        scene = new Scene();
-        scene.setBackgroundEnabled(false);
-        if (parent != null) {
-            //parent.scene.setChildScene(
-            //        scene, false,
-            //        true, true);
-        }
-        updater = new Updater() {
-            @Override
-            public Runnable createEventRunnable() {
-                return () -> parent.loadFilter(FilterMenuFragment.this);
-            }
-
-            @Override
-            public void postEvent(Runnable r) {
-                parent.getScene().postRunnable(r);
-            }
-        };
-        show();
-    }
-
-    @Override
-    public void onDetach() {
-        super.onDetach();
-        if (menu != null) {
-            final SongMenu menu = this.menu;
-            menu.getScene().postRunnable(() -> {
-                //menu.getScene().clearChildScene();
-                menu.loadFilter(this);
-            });
-            this.menu = null;
-        }
-        scene = null;
-    }
-
-    @Override
-    public void onAttach(Context context) {
-        super.onAttach(context);
-        reloadViewData();
-    }
-
-    private void updateUpdater() {
-        if (updater != null) {
-            updater.update();
+    override fun onUpdate(pSecondsElapsed: Float) {
+        if (InputManager.getInstance().isChanged) {
+            filter.setText(InputManager.getInstance().text)
         }
     }
 
-    //private void openMapinfoDialog() {
-    //    MapInfoFragment dialog = new MapInfoFragment();
-    //    TrackInfo selectedTrack = GlobalManager.getInstance().getSongMenu().getSelectedTrack();
-    //    DifficultyReCalculator diffReCalculator = new DifficultyReCalculator();
-    //    if (selectedTrack != null)
-    //        dialog.showWithMap(selectedTrack, ModMenu.getInstance().getSpeed(), diffReCalculator.getCS(selectedTrack));
-    //    diffReCalculator = null;
-    //}
+    override fun reset() {
+        TODO("Not yet implemented")
+    }
 
-    public void reloadViewData() {
-        if (isCreated()) {
-            filter = findViewById(R.id.searchEditText);
-            favoritesOnly = findViewById(R.id.showFav);
-            orderButton = findViewById(R.id.sortButton);
-            favoriteFolder = findViewById(R.id.favFolder);
-            //openMapInfo = findViewById(R.id.openMapInfo);
+    // Due to how the fragment lifecycle works in this context, the state needs to be saved manually
+    private companion object {
+        var folder: String? = null
+        var favOnly = false
+        var filter: String? = null
 
-            favoritesOnly.setOnCheckedChangeListener((buttonView, isChecked) -> {
-                updateFavChecked();
-                updateUpdater();
-                savedFavOnly = isChecked;
-            });
-            orderButton.setOnClickListener(v -> {
-                nextOrder();
-                updateOrderButton();
-                updateUpdater();
-            });
-            findViewById(R.id.favFolderLayout).setOnClickListener(v -> {
-                FavoriteManagerFragment favoriteManagerFragment = new FavoriteManagerFragment();
-                favoriteManagerFragment.showToSelectFloder(t -> {
-                    savedFolder = t;
-                    favoriteFolder.setText(t == null ? StringTable.get(R.string.favorite_default) : t);
-                    updateUpdater();
-                });
-            });
-            filter.setOnEditorActionListener((v, actionId, event) -> {
-                if (event == null) {
-                    return false;
-                }
-
-                if (event.getKeyCode() == KeyEvent.KEYCODE_ENTER) {
-                    hideMenu();
-                    return true;
-                }
-                return false;
-            });
-            filter.addTextChangedListener(new TextWatcher() {
-                @Override
-                public void beforeTextChanged(CharSequence s, int start, int count, int after) {
-                }
-
-                @Override
-                public void onTextChanged(CharSequence s, int start, int before, int count) {
-                }
-
-                @Override
-                public void afterTextChanged(Editable s) {
-                    savedFilter = s.toString();
-                    updateUpdater();
-                }
-            });
-
-            //openMapInfo.setOnClickListener(v -> {
-            //    openMapinfoDialog();
-            //});
-            //openMapInfo.setText("MapInfo");
-            
-            favoritesOnly.setChecked(savedFavOnly);
-            if (savedFilter != null && savedFilter.length() > 0) {
-                filter.setText(savedFilter);
-            }
-            updateOrderButton();
-            updateFavChecked();
-            updateFavFolderText();
+        fun saveState(savedFolder: String?, savedFavOnly: Boolean, savedFilter: String?) {
+            folder = savedFolder
+            favOnly = savedFavOnly
+            filter = savedFilter
         }
+
+        fun restoreState() = Triple(folder, favOnly, filter)
     }
 }

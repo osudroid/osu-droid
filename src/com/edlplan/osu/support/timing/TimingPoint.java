@@ -42,7 +42,7 @@ public class TimingPoint extends ControlPoint {
         return beatLength;
     }
 
-    public strictfp void setBeatLength(double beatLength) {
+    public void setBeatLength(double beatLength) {
         this.beatLength = beatLength;
         speedMultiplier = (beatLength < 0 ? (100.0 / -beatLength) : 1);
     }
@@ -106,14 +106,13 @@ public class TimingPoint extends ControlPoint {
     @Override
     public String toString() {
 
-        StringBuilder sb = new StringBuilder();
-        sb.append(getTime()).append(",");
-        sb.append(getBeatLength()).append(",");
-        sb.append(getMeter()).append(",");
-        sb.append(getSampleType()).append(",");
-        sb.append(getSampleSet()).append(",");
-        sb.append(U.toVString(isInherited())).append(",");
-        sb.append(((isKiaiMode()) ? 1 : 0) + ((isOmitFirstBarSignature()) ? 8 : 0));
-        return sb.toString();
+        String sb = getTime() + "," +
+                getBeatLength() + "," +
+                getMeter() + "," +
+                getSampleType() + "," +
+                getSampleSet() + "," +
+                U.toVString(isInherited()) + "," +
+                (((isKiaiMode()) ? 1 : 0) + ((isOmitFirstBarSignature()) ? 8 : 0));
+        return sb;
     }
 }

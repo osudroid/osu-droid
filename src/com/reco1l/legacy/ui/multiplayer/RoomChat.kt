@@ -24,7 +24,7 @@ import com.edlplan.ui.fragment.BaseFragment
 import com.reco1l.api.ibancho.RoomAPI
 import com.reco1l.api.ibancho.data.RoomPlayer
 import com.reco1l.framework.extensions.orAsyncCatch
-import com.reco1l.framework.lang.uiThread
+import com.reco1l.framework.lang.mainThread
 import com.reco1l.legacy.Multiplayer
 import org.anddev.andengine.input.touch.TouchEvent
 import ru.nsu.ccfit.zuev.osu.RGBColor
@@ -93,7 +93,7 @@ class RoomChat : BaseFragment(), OnEditorActionListener, OnKeyListener
         text?.text = log
     }
 
-    fun onRoomChatMessage(player: RoomPlayer, message: String) = uiThread {
+    fun onRoomChatMessage(player: RoomPlayer, message: String) = mainThread {
 
         val color = when(player.id)
         {
@@ -109,7 +109,7 @@ class RoomChat : BaseFragment(), OnEditorActionListener, OnKeyListener
         showPreview(" $message", tag = "${player.name}:", tagColor = color)
     }
 
-    fun onSystemChatMessage(message: String, color: String) = uiThread {
+    fun onSystemChatMessage(message: String, color: String) = mainThread {
 
         Multiplayer.log("System message: $message")
 
@@ -272,7 +272,7 @@ class RoomChat : BaseFragment(), OnEditorActionListener, OnKeyListener
     {
         if (isExtended)
         {
-            uiThread { toggleVisibility() }
+            mainThread { toggleVisibility() }
             return
         }
 
@@ -281,7 +281,7 @@ class RoomChat : BaseFragment(), OnEditorActionListener, OnKeyListener
             getGlobal().gameScene.pause()
             return
         }
-        uiThread { RoomScene.leaveDialog.show() }
+        mainThread { RoomScene.leaveDialog.show() }
     }
 
     companion object

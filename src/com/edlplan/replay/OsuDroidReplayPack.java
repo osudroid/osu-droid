@@ -27,31 +27,32 @@ public class OsuDroidReplayPack {
     }
 
     public static byte[] pack(OsuDroidReplay replay) throws Exception {
-        ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
-        ZipOutputStream outputStream = new ZipOutputStream(byteArrayOutputStream);
-        //try {
-        outputStream.putNextEntry(new ZipEntry("entry.json"));
+        try (ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
+             ZipOutputStream outputStream = new ZipOutputStream(byteArrayOutputStream)){
+            outputStream.putNextEntry(new ZipEntry("entry.json"));
 
-        JSONObject entryJson = new JSONObject();
-        entryJson.put("version", 1);
-        entryJson.put("replaydata", replay.toJSON());
+            JSONObject entryJson = new JSONObject();
+            entryJson.put("version", 1);
+            entryJson.put("replaydata", replay.toJSON());
 
-        outputStream.write(entryJson.toString(2).getBytes());
+            outputStream.write(entryJson.toString(2).getBytes());
 
-        outputStream.putNextEntry(new ZipEntry(replay.getReplayFileName()));
+            outputStream.putNextEntry(new ZipEntry(replay.getReplayFileName()));
 
-        File file = replay.isAbsoluteReplay() ?
-                new File(replay.getReplayFile()) : new File(OdrConfig.getScoreDir(), replay.getReplayFileName());
-        FileInputStream inputStream = new FileInputStream(file);
+            File file = replay.isAbsoluteReplay() ?
+                    new File(replay.getReplayFile()) : new File(OdrConfig.getScoreDir(), replay.getReplayFileName());
 
-        byte[] buffer = new byte[1024];
-        int l;
-        while ((l = inputStream.read(buffer)) != -1) {
-            outputStream.write(buffer, 0, l);
+            try (FileInputStream inputStream = new FileInputStream(file)) {
+                byte[] buffer = new byte[1024];
+                int l;
+                while ((l = inputStream.read(buffer)) != -1) {
+                    outputStream.write(buffer, 0, l);
+                }
+            }
+
+            outputStream.finish();
+            return byteArrayOutputStream.toByteArray();
         }
-
-        outputStream.finish();
-        return byteArrayOutputStream.toByteArray();
     }
 
     public static ReplayEntry unpack(InputStream raw) throws IOException, JSONException {

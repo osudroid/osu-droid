@@ -10,7 +10,7 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
-import com.reco1l.framework.lang.execution.Async;
+import com.reco1l.framework.lang.Execution;
 import ru.nsu.ccfit.zuev.osu.ToastLogger;
 import ru.nsu.ccfit.zuev.osu.helper.StringTable;
 import ru.nsu.ccfit.zuev.osu.online.OnlineManager.OnlineManagerException;
@@ -72,7 +72,7 @@ public class OnlineInitializer implements View.OnClickListener {
                 StringTable.get(R.string.online_registration),
                 StringTable.get(R.string.online_registration_process));
 
-        Async.run(new Runnable() {
+        Execution.async(new Runnable() {
             private boolean success = false;
             private String resultMessage = "";
 

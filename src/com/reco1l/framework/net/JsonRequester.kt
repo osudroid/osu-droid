@@ -5,7 +5,6 @@ import com.reco1l.framework.extensions.logIfDebug
 import okhttp3.MediaType.Companion.toMediaTypeOrNull
 import okhttp3.RequestBody.Companion.toRequestBody
 import okhttp3.Response
-import org.json.JSONException
 import org.json.JSONObject
 
 class JsonRequester(url: String) : Requester(url)

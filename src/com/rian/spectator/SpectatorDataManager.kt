@@ -2,9 +2,8 @@ package com.rian.spectator
 
 import android.util.Log
 import com.reco1l.api.ibancho.RoomAPI
-import com.rian.difficultycalculator.beatmap.hitobject.HitCircle
-import com.rian.difficultycalculator.beatmap.hitobject.HitObject
-import com.rian.difficultycalculator.beatmap.hitobject.HitObjectWithDuration
+import com.rian.osu.beatmap.hitobject.HitCircle
+import com.rian.osu.beatmap.hitobject.getEndTime
 import ru.nsu.ccfit.zuev.osu.Config
 import ru.nsu.ccfit.zuev.osu.game.GameScene
 import ru.nsu.ccfit.zuev.osu.online.OnlineManager.OnlineManagerException
@@ -170,10 +169,10 @@ class SpectatorDataManager(
      * @param objectId The ID of the object.
      */
     fun addObjectData(objectId: Int) {
-        val obj = gameScene.beatmapData.hitObjects.objects[objectId]
+        val obj = gameScene.beatmap.hitObjects.objects[objectId]
         val replayData = replay.objectData[objectId]
 
-        var time = obj.endTime
+        var time = obj.getEndTime()
         if (obj is HitCircle) {
             // Special handling for circles that are not tapped.
             time += (
@@ -225,6 +224,3 @@ class SpectatorDataManager(
     @Throws(Throwable::class)
     protected fun finalize() = pauseTimer()
 }
-
-val HitObject.endTime: Double
-    get() = if (this is HitObjectWithDuration) this.endTime else this.startTime

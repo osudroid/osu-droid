@@ -70,7 +70,7 @@ public class MultipleFlippableTextureQuad extends FlippableTextureQuad {
         switchTexture(0);
     }
 
-    public class TextureEntry {
+    public static class TextureEntry {
 
         public Vec2 size = new Vec2();
 

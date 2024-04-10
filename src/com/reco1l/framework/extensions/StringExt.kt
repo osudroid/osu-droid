@@ -21,7 +21,7 @@ fun String.toDate() = DateFormat.format(this, Date()).toString()
  *
  * @see [URLDecoder.decode]
  */
-fun String.decodeUtf8() = URLDecoder.decode(this, StandardCharsets.UTF_8.name())
+fun String.decodeUtf8(): String = URLDecoder.decode(this, StandardCharsets.UTF_8.name())
 
 /**
  * Remove all characters in a filename that are invalid in the filesystem.

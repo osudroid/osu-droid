@@ -5,6 +5,7 @@ import com.edlplan.andengine.TriangleBuilder;
 import com.edlplan.andengine.TrianglePack;
 import com.edlplan.framework.math.Color4;
 import com.edlplan.framework.math.line.LinePath;
+import com.reco1l.framework.lang.Execution;
 
 import org.anddev.andengine.entity.IEntity;
 import org.anddev.andengine.entity.modifier.*;
@@ -13,11 +14,10 @@ import org.anddev.andengine.util.modifier.IModifier;
 import org.anddev.andengine.util.modifier.ease.EaseQuadOut;
 
 import ru.nsu.ccfit.zuev.osu.RGBColor;
-import ru.nsu.ccfit.zuev.osu.async.SyncTaskManager;
 
 public class SliderBody2D extends AbstractSliderBody {
 
-    private static final ThreadLocal<BuildCache> localCache = new ThreadLocal<BuildCache>() {
+    private static final ThreadLocal<BuildCache> localCache = new ThreadLocal<>() {
         @Override
         public BuildCache get() {
             BuildCache cache = super.get();
@@ -251,7 +251,7 @@ public class SliderBody2D extends AbstractSliderBody {
 
                 @Override public void onModifierFinished(IModifier<IEntity> pModifier, IEntity pItem)
                 {
-                    SyncTaskManager.getInstance().run(() -> removeFromScene(scene));
+                    Execution.updateThread(() -> removeFromScene(scene));
                 }
             }));
         }

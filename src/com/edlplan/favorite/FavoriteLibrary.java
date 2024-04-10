@@ -143,9 +143,7 @@ public class FavoriteLibrary {
                 object.put(entry.getKey(), array);
             }
             cover(object.toString(2), json);
-        } catch (IOException e) {
-            e.printStackTrace();
-        } catch (JSONException e) {
+        } catch (IOException | JSONException e) {
             e.printStackTrace();
         }
     }

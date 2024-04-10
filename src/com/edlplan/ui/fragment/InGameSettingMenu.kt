@@ -1,556 +1,566 @@
-package com.edlplan.ui.fragment;
+package com.edlplan.ui.fragment
 
-import android.animation.Animator;
-import android.annotation.SuppressLint;
-import android.graphics.Color;
-import android.view.View;
-import android.widget.CheckBox;
-import android.widget.RelativeLayout;
-import android.widget.SeekBar;
-import android.widget.SeekBar.OnSeekBarChangeListener;
-import android.widget.TextView;
+import android.animation.Animator
+import android.os.Bundle
+import android.view.View
+import android.widget.CheckBox
+import android.widget.LinearLayout
+import android.widget.RelativeLayout
+import android.widget.SeekBar
+import android.widget.SeekBar.OnSeekBarChangeListener
+import android.widget.TextView
+import androidx.preference.PreferenceManager
+import com.edlplan.framework.easing.Easing
+import com.edlplan.framework.math.FMath
+import com.edlplan.ui.BaseAnimationListener
+import com.edlplan.ui.EasingHelper
+import com.reco1l.framework.lang.mainThread
+import com.reco1l.legacy.Multiplayer
+import org.anddev.andengine.input.touch.TouchEvent
+import ru.nsu.ccfit.zuev.osu.Config
+import ru.nsu.ccfit.zuev.osu.GlobalManager
+import ru.nsu.ccfit.zuev.osu.game.cursor.flashlight.FlashLightEntity
+import ru.nsu.ccfit.zuev.osu.game.mods.GameMod
+import ru.nsu.ccfit.zuev.osu.menu.ModMenu
+import ru.nsu.ccfit.zuev.osuplus.R
+import java.util.Locale
+import kotlin.math.abs
+import kotlin.math.roundToInt
 
-import androidx.preference.PreferenceManager;
+class InGameSettingMenu : BaseFragment() {
+    private lateinit var speedModifyRow: View
+    private lateinit var speedModifyBar: SeekBar
+    private lateinit var speedModifyText: TextView
+    private lateinit var speedModifyToggle: CheckBox
 
-import com.edlplan.framework.easing.Easing;
-import com.edlplan.framework.math.FMath;
-import com.edlplan.ui.BaseAnimationListener;
-import com.edlplan.ui.EasingHelper;
+    private lateinit var followDelayRow: View
+    private lateinit var followDelayBar: SeekBar
+    private lateinit var followDelayText: TextView
 
-import java.util.Locale;
+    private lateinit var forceDifficultyStatisticsSplitter: View
 
-import com.reco1l.legacy.Multiplayer;
-import org.anddev.andengine.input.touch.TouchEvent;
+    private lateinit var customARLayout: RelativeLayout
+    private lateinit var customARToggle: CheckBox
+    private lateinit var customARText: TextView
+    private lateinit var customARBar: SeekBar
 
-import ru.nsu.ccfit.zuev.osu.Config;
-import ru.nsu.ccfit.zuev.osu.GlobalManager;
-import ru.nsu.ccfit.zuev.osu.game.cursor.flashlight.FlashLightEntity;
-import ru.nsu.ccfit.zuev.osu.game.mods.GameMod;
-import ru.nsu.ccfit.zuev.osu.menu.ModMenu;
-import ru.nsu.ccfit.zuev.osuplus.R;
+    private lateinit var customODLayout: RelativeLayout
+    private lateinit var customODToggle: CheckBox
+    private lateinit var customODText: TextView
+    private lateinit var customODBar: SeekBar
 
-public class InGameSettingMenu extends BaseFragment {
+    private lateinit var customCSLayout: RelativeLayout
+    private lateinit var customCSToggle: CheckBox
+    private lateinit var customCSText: TextView
+    private lateinit var customCSBar: SeekBar
 
-    private static InGameSettingMenu menu;
+    private lateinit var customHPLayout: RelativeLayout
+    private lateinit var customHPToggle: CheckBox
+    private lateinit var customHPText: TextView
+    private lateinit var customHPBar: SeekBar
 
-    private View speedModifyRow;
-    private SeekBar speedModifyBar;
-    private TextView speedModifyText;
-    private CheckBox speedModifyToggle;
+    override val layoutID: Int
+        get() = R.layout.fragment_in_game_option
 
-    private View followDelayRow;
-    private SeekBar followDelayBar;
-    private TextView followDelayText;
+    override fun onLoadView() {
+        reload(load())
+    }
 
-    private View forceDifficultyStatisticsSplitter;
+    override fun onSaveInstanceState(outState: Bundle) = outState.run {
+        super.onSaveInstanceState(this)
 
-    private RelativeLayout customARLayout;
-    private CheckBox customARToggle;
-    private TextView customARText;
-    private SeekBar customARBar;
+        putInt("speedModifyRow", speedModifyRow.visibility)
+        putInt("speedModifyBar", speedModifyBar.progress)
+        putString("speedModifyText", speedModifyText.text.toString())
+        putBoolean("speedModifyToggle", speedModifyToggle.isChecked)
 
-    private RelativeLayout customODLayout;
-    private CheckBox customODToggle;
-    private TextView customODText;
-    private SeekBar customODBar;
+        putInt("followDelayRow", followDelayRow.visibility)
+        putInt("followDelayBar", followDelayBar.progress)
+        putString("followDelayText", followDelayText.text.toString())
 
-    private RelativeLayout customCSLayout;
-    private CheckBox customCSToggle;
-    private TextView customCSText;
-    private SeekBar customCSBar;
+        putInt("forceDifficultyStatisticsSplitter", forceDifficultyStatisticsSplitter.visibility)
 
-    private RelativeLayout customHPLayout;
-    private CheckBox customHPToggle;
-    private TextView customHPText;
-    private SeekBar customHPBar;
+        putInt("customARLayout", customARLayout.visibility)
+        putBoolean("customARToggle", customARToggle.isChecked)
+        putString("customARText", customARText.text.toString())
+        putInt("customARBar", customARBar.progress)
 
+        putInt("customODLayout", customODLayout.visibility)
+        putBoolean("customODToggle", customODToggle.isChecked)
+        putString("customODText", customODText.text.toString())
+        putInt("customODBar", customODBar.progress)
 
-    private final int greenColor = Color.parseColor("#62c700");
+        putInt("customCSLayout", customCSLayout.visibility)
+        putBoolean("customCSToggle", customCSToggle.isChecked)
+        putString("customCSText", customCSText.text.toString())
+        putInt("customCSBar", customCSBar.progress)
 
-    public static InGameSettingMenu getInstance() {
-        if (menu == null) {
-            menu = new InGameSettingMenu();
+        putInt("customHPLayout", customHPLayout.visibility)
+        putBoolean("customHPToggle", customHPToggle.isChecked)
+        putString("customHPText", customHPText.text.toString())
+        putInt("customHPBar", customHPBar.progress)
+
+        putBoolean("enableStoryboard", findViewById<CheckBox>(R.id.enableStoryboard)!!.isChecked)
+        putBoolean("showScoreboard", findViewById<CheckBox>(R.id.showScoreboard)!!.isChecked)
+        putBoolean("enableVideo", findViewById<CheckBox>(R.id.enableVideo)!!.isChecked)
+        putBoolean("enableNCwhenSpeedChange", findViewById<CheckBox>(R.id.enableNCwhenSpeedChange)!!.isChecked)
+        putInt("backgroundBrightness", findViewById<SeekBar>(R.id.backgroundBrightnessBar)!!.progress)
+    }
+
+    private fun reload(state: SavedState?) {
+        if (state != null) {
+            this.setInitialSavedState(state)
         }
-        return menu;
-    }
 
-    @Override
-    protected int getLayoutID() {
-        return R.layout.fragment_in_game_option;
-    }
-
-    @Override
-    protected void onLoadView() {
-        reload();
-        findViewById(R.id.frg_header).animate().cancel();
-        findViewById(R.id.frg_header).setAlpha(0);
-        findViewById(R.id.frg_header).setTranslationY(100);
-        findViewById(R.id.frg_header).animate()
-                .alpha(1)
-                .translationY(0)
-                .setDuration(200)
-                .setInterpolator(EasingHelper.asInterpolator(Easing.InOutQuad))
-                .start();
-    }
-
-    @SuppressLint({"ClickableViewAccessibility", "ApplySharedPref"})
-    private void reload() {
-        View showMoreButton = findViewById(R.id.showMoreButton);
-        if (showMoreButton == null) {
-            return;
-        }
-        showMoreButton.setOnTouchListener((v, event) -> {
-            if (event.getAction() == TouchEvent.ACTION_DOWN) {
-                v.animate().cancel();
-                v.animate().scaleY(0.9f).scaleX(0.9f).translationY(v.getHeight() * 0.1f).setDuration(100).start();
-                toggleSettingPanel();
-                return true;
-            } else if (event.getAction() == TouchEvent.ACTION_UP) {
-                v.animate().cancel();
-                v.animate().scaleY(1).scaleX(1).setDuration(100).translationY(0).start();
-                return true;
+        val showMore = findViewById<View>(R.id.showMoreButton) ?: return
+        showMore.setOnTouchListener { v, event ->
+            if (event.action == TouchEvent.ACTION_DOWN) {
+                v.animate().cancel()
+                v.animate().scaleX(0.9f).scaleY(0.9f).translationY(v.height * 0.1f).setDuration(100)
+                    .start()
+                toggleSettingPanel()
+                return@setOnTouchListener true
+            } else if (event.action == TouchEvent.ACTION_UP) {
+                v.animate().cancel()
+                v.animate().scaleX(1f).scaleY(1f).translationY(0f).setDuration(100).start()
+                return@setOnTouchListener true
             }
-            return false;
-        });
+            false
+        }
 
-        speedModifyRow = findViewById(R.id.speed_modify);
-        followDelayRow = findViewById(R.id.follow_delay_row);
+        speedModifyRow = findViewById(R.id.speed_modify)!!
+        followDelayRow = findViewById(R.id.follow_delay_row)!!
 
-        forceDifficultyStatisticsSplitter = findViewById(R.id.force_diffstat_split_view);
+        forceDifficultyStatisticsSplitter = findViewById(R.id.force_diffstat_split_view)!!
 
-        customARLayout = findViewById(R.id.custom_ar_layout);
-        customARBar = findViewById(R.id.custom_ar_bar);
-        customARText = findViewById(R.id.custom_ar_text);
-        customARToggle = findViewById(R.id.custom_ar_toggle);
+        customARLayout = findViewById(R.id.custom_ar_layout)!!
+        customARBar = findViewById(R.id.custom_ar_bar)!!
+        customARText = findViewById(R.id.custom_ar_text)!!
+        customARToggle = findViewById(R.id.custom_ar_toggle)!!
 
-        customODLayout = findViewById(R.id.custom_od_layout);
-        customODBar = findViewById(R.id.custom_od_bar);
-        customODText = findViewById(R.id.custom_od_text);
-        customODToggle = findViewById(R.id.custom_od_toggle);
+        customODLayout = findViewById(R.id.custom_od_layout)!!
+        customODBar = findViewById(R.id.custom_od_bar)!!
+        customODText = findViewById(R.id.custom_od_text)!!
+        customODToggle = findViewById(R.id.custom_od_toggle)!!
 
-        customCSLayout = findViewById(R.id.custom_cs_layout);
-        customCSBar = findViewById(R.id.custom_cs_bar);
-        customCSText = findViewById(R.id.custom_cs_text);
-        customCSToggle = findViewById(R.id.custom_cs_toggle);
+        customCSLayout = findViewById(R.id.custom_cs_layout)!!
+        customCSBar = findViewById(R.id.custom_cs_bar)!!
+        customCSText = findViewById(R.id.custom_cs_text)!!
+        customCSToggle = findViewById(R.id.custom_cs_toggle)!!
 
-        customHPLayout = findViewById(R.id.custom_hp_layout);
-        customHPBar = findViewById(R.id.custom_hp_bar);
-        customHPText = findViewById(R.id.custom_hp_text);
-        customHPToggle = findViewById(R.id.custom_hp_toggle);
+        customHPLayout = findViewById(R.id.custom_hp_layout)!!
+        customHPBar = findViewById(R.id.custom_hp_bar)!!
+        customHPText = findViewById(R.id.custom_hp_text)!!
+        customHPToggle = findViewById(R.id.custom_hp_toggle)!!
 
-        findViewById(R.id.frg_background).setClickable(false);
+        findViewById<RelativeLayout>(R.id.frg_background)!!.isClickable = false
 
-        CheckBox enableStoryboard = findViewById(R.id.enableStoryboard);
-        enableStoryboard.setChecked(Config.isEnableStoryboard());
-        enableStoryboard.setOnCheckedChangeListener((buttonView, isChecked) -> {
-            Config.setEnableStoryboard(isChecked);
-            PreferenceManager.getDefaultSharedPreferences(getContext()).edit()
-                    .putBoolean("enableStoryboard", isChecked)
-                    .commit();
-        });
+        findViewById<CheckBox>(R.id.enableStoryboard)!!.apply {
+            isChecked = Config.isEnableStoryboard()
+            setOnCheckedChangeListener { _, isChecked ->
+                Config.setEnableStoryboard(isChecked)
+                PreferenceManager.getDefaultSharedPreferences(context).edit()
+                    .putBoolean("enableStoryboard", isChecked).commit()
+            }
+        }
 
-        CheckBox showScoreboard = findViewById(R.id.showScoreboard);
-        showScoreboard.setChecked(Config.isShowScoreboard());
-        showScoreboard.setOnCheckedChangeListener((buttonView, isChecked) -> {
-            Config.setShowScoreboard(isChecked);
-            PreferenceManager.getDefaultSharedPreferences(getContext()).edit()
-                    .putBoolean("showscoreboard", isChecked)
-                    .commit();
-        });
+        findViewById<CheckBox>(R.id.showScoreboard)!!.apply {
+            isChecked = Config.isShowScoreboard()
+            setOnCheckedChangeListener { _, isChecked ->
+                Config.setShowScoreboard(isChecked)
+                PreferenceManager.getDefaultSharedPreferences(context).edit()
+                    .putBoolean("showscoreboard", isChecked).commit()
+            }
+        }
 
-        CheckBox enableVideo = findViewById(R.id.enableVideo);
-        enableVideo.setChecked(Config.isVideoEnabled());
-        enableVideo.setOnCheckedChangeListener((buttonView, isChecked) -> {
-            Config.setVideoEnabled(isChecked);
-            PreferenceManager.getDefaultSharedPreferences(getContext()).edit()
-                    .putBoolean("enableVideo", isChecked)
-                    .commit();
-        });
+        findViewById<CheckBox>(R.id.enableVideo)!!.apply {
+            isChecked = Config.isVideoEnabled()
+            setOnCheckedChangeListener { _, isChecked ->
+                Config.setVideoEnabled(isChecked)
+                PreferenceManager.getDefaultSharedPreferences(context).edit()
+                    .putBoolean("enableVideo", isChecked).commit()
+            }
+        }
 
-        CheckBox enableNCWhenSpeedChange = findViewById(R.id.enableNCwhenSpeedChange);
-        enableNCWhenSpeedChange.setChecked(ModMenu.getInstance().isEnableNCWhenSpeedChange());
-        enableNCWhenSpeedChange.setOnCheckedChangeListener((buttonView, isChecked) -> {
-            ModMenu.getInstance().setEnableNCWhenSpeedChange(isChecked);
-        });
+        findViewById<CheckBox>(R.id.enableNCwhenSpeedChange)!!.apply {
+            isChecked = ModMenu.getInstance().isEnableNCWhenSpeedChange
+            setOnCheckedChangeListener { _, isChecked ->
+                ModMenu.getInstance().isEnableNCWhenSpeedChange = isChecked
+            }
+        }
 
-        speedModifyText = findViewById(R.id.changeSpeedText);
+        speedModifyText = findViewById(R.id.changeSpeedText)!!
 
-        speedModifyToggle = findViewById(R.id.enableSpeedChange);
-        speedModifyToggle.setChecked(ModMenu.getInstance().getChangeSpeed() != 1.0f);
-        speedModifyToggle.setOnCheckedChangeListener((buttonView, isChecked) -> {
+        speedModifyToggle = findViewById(R.id.enableSpeedChange)!!
+        speedModifyToggle.isChecked = ModMenu.getInstance().changeSpeed != 1f
+        speedModifyToggle.setOnCheckedChangeListener { _, isChecked ->
+            speedModifyBar.isEnabled = isChecked
             if (!isChecked) {
-                ModMenu.getInstance().setChangeSpeed(1.0f);
-                speedModifyText.setText(String.format(Locale.getDefault(), "%.2fx", ModMenu.getInstance().getChangeSpeed()));
-                speedModifyBar.setProgress(10);
-                ModMenu.getInstance().updateMultiplierText();
-            }
-            else if(ModMenu.getInstance().getChangeSpeed() == 1.0f){
-                speedModifyToggle.setChecked(false);
-            }
-        });
-
-        SeekBar backgroundBrightness = findViewById(R.id.backgroundBrightnessBar);
-        backgroundBrightness.setProgress(
-                PreferenceManager.getDefaultSharedPreferences(getContext()).getInt("bgbrightness", 25));
-        backgroundBrightness.setOnSeekBarChangeListener(new OnSeekBarChangeListener() {
-            @Override
-            public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
-                ((TextView) findViewById(R.id.brightPreviewText)).setText(String.valueOf(progress));
-                ((TextView) findViewById(R.id.bgBrightnessText)).setText(progress + "%");
-                int p = Math.round(FMath.clamp(255 * (progress / 100f), 0, 255));
-                findViewById(R.id.brightnessPreview).setBackgroundColor(Color.argb(255, p, p, p));
-            }
-
-            @Override
-            public void onStartTrackingTouch(SeekBar seekBar) {
-                findViewById(R.id.brightnessPreviewLayout).setVisibility(View.VISIBLE);
-                int progress = seekBar.getProgress();
-                ((TextView) findViewById(R.id.brightPreviewText)).setText(String.valueOf(progress));
-                ((TextView) findViewById(R.id.bgBrightnessText)).setText(progress + "%");
-                int p = Math.round(FMath.clamp(255 * (progress / 100f), 0, 255));
-                findViewById(R.id.brightnessPreview).setBackgroundColor(Color.argb(255, p, p, p));
-            }
-
-            @Override
-            public void onStopTrackingTouch(SeekBar seekBar) {
-                findViewById(R.id.brightnessPreviewLayout).setVisibility(View.GONE);
-                int progress = seekBar.getProgress();
-                ((TextView) findViewById(R.id.bgBrightnessText)).setText(progress + "%");
-                Config.setBackgroundBrightness(seekBar.getProgress() / 100f);
-                PreferenceManager.getDefaultSharedPreferences(getContext())
-                        .edit()
-                        .putInt("bgbrightness", progress)
-                        .commit();
-            }
-        });
-        ((TextView) findViewById(R.id.bgBrightnessText)).setText(
-            PreferenceManager.getDefaultSharedPreferences(getContext()).getInt("bgbrightness", 25) + "%");
-
-        speedModifyBar = findViewById(R.id.changeSpeedBar);
-        speedModifyBar.setProgress((int)(ModMenu.getInstance().getChangeSpeed() * 20 - 10));
-        speedModifyBar.setOnSeekBarChangeListener(new OnSeekBarChangeListener() {
-            @Override
-            public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
-                float p = 0.5f + 0.05f * progress;
-                speedModifyText.setText(String.format(Locale.getDefault(), "%.2fx", p));
-                if (p == 1.0f){
-                    speedModifyToggle.setChecked(false);
-                }
-                else {
-                    speedModifyToggle.setChecked(true);
-                    ModMenu.getInstance().updateMultiplierText();
-                }
-            }
-
-            @Override
-            public void onStartTrackingTouch(SeekBar seekBar) {
-                int progress = seekBar.getProgress();
-                float p = 0.5f + 0.05f * progress;
-                speedModifyText.setText(String.format(Locale.getDefault(), "%.2fx", p));
-                if (p == 1.0f){
-                    speedModifyToggle.setChecked(false);
-                }
-                else {
-                    speedModifyToggle.setChecked(true);
-                    ModMenu.getInstance().updateMultiplierText();
-                }
-            }
-
-            @Override
-            public void onStopTrackingTouch(SeekBar seekBar) {
-                int progress = seekBar.getProgress();
-                float p = 0.5f + 0.05f * progress;
-                speedModifyText.setText(String.format(Locale.getDefault(), "%.2fx", p));
-                ModMenu.getInstance().setChangeSpeed(p);
-                if (p == 1.0f){
-                    speedModifyToggle.setChecked(false);
-                }
-                else {
-                    speedModifyToggle.setChecked(true);
-                    ModMenu.getInstance().updateMultiplierText();
-                }
-            }
-        });
-        speedModifyText.setText(String.format(Locale.getDefault(), "%.2fx", ModMenu.getInstance().getChangeSpeed()));
-
-        followDelayText = findViewById(R.id.flashlightFollowDelayText);
-        followDelayBar = findViewById(R.id.flashlightFollowDelayBar);
-        followDelayBar.setOnSeekBarChangeListener(new OnSeekBarChangeListener() {
-
-            boolean containsFlashlight = false;
-
-            @Override
-            public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
-
-                if (!containsFlashlight)
-                    return;
-
-                ModMenu.getInstance().setFLfollowDelay((float) Math.round(progress * 1200f) / (10f * 1000f));
-                followDelayText.setText(progress * FlashLightEntity.defaultMoveDelayMS + "ms");
-            }
-
-            @Override
-            public void onStartTrackingTouch(SeekBar seekBar) {
-                containsFlashlight = ModMenu.getInstance().getMod().contains(GameMod.MOD_FLASHLIGHT);
-            }
-
-            @Override
-            public void onStopTrackingTouch(SeekBar seekBar) {
-                if (containsFlashlight)
-                    return;
-
-                seekBar.setProgress(0);
-                ModMenu.getInstance().resetFLFollowDelay();
-                followDelayText.setText((int) (ModMenu.getInstance().getFLfollowDelay() * 1000) + "ms");
-            }
-        });
-
-        initializeDifficultyAdjustViews();
-        updateVisibility();
-    }
-
-
-    private void initializeDifficultyAdjustViews() {
-
-        customARBar.setMax(125);
-        customODBar.setMax(110);
-        customCSBar.setMax(150);
-        customHPBar.setMax(110);
-
-        customARToggle.setOnCheckedChangeListener(null);
-        customODToggle.setOnCheckedChangeListener(null);
-        customCSToggle.setOnCheckedChangeListener(null);
-        customHPToggle.setOnCheckedChangeListener(null);
-
-        updateDifficultyAdjustValues();
-
-        customARToggle.setOnCheckedChangeListener((view, isChecked) -> {
-
-            ModMenu.getInstance().setCustomAR(isChecked ? customARBar.getProgress() / 10f : null);
-            customARBar.setEnabled(isChecked);
-
-            updateDifficultyAdjustValues();
-        });
-
-        customODToggle.setOnCheckedChangeListener((view, isChecked) -> {
-
-            ModMenu.getInstance().setCustomOD(isChecked ? customODBar.getProgress() / 10f : null);
-            customODBar.setEnabled(isChecked);
-
-            updateDifficultyAdjustValues();
-        });
-
-        customCSToggle.setOnCheckedChangeListener((view, isChecked) -> {
-
-            ModMenu.getInstance().setCustomCS(isChecked ? customCSBar.getProgress() / 10f : null);
-            customCSBar.setEnabled(isChecked);
-
-            updateDifficultyAdjustValues();
-        });
-
-        customHPToggle.setOnCheckedChangeListener((view, isChecked) -> {
-
-            ModMenu.getInstance().setCustomHP(isChecked ? customHPBar.getProgress() / 10f : null);
-            customHPBar.setEnabled(isChecked);
-
-            updateDifficultyAdjustValues();
-        });
-
-
-        customARBar.setOnSeekBarChangeListener(new OnSeekBarChangeListener() {
-
-            public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
-                if (fromUser) {
-                    ModMenu.getInstance().setCustomAR(progress / 10f);
-                }
-                customARText.setText(String.valueOf(progress / 10f));
-            }
-
-            public void onStopTrackingTouch(SeekBar seekBar) {
-                ModMenu.getInstance().updateMultiplierText();
-            }
-
-            public void onStartTrackingTouch(SeekBar seekBar) {}
-        });
-
-        customODBar.setOnSeekBarChangeListener(new OnSeekBarChangeListener() {
-
-            public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
-                if (fromUser) {
-                    ModMenu.getInstance().setCustomOD(progress / 10f);
-                }
-                customODText.setText(String.valueOf(progress / 10f));
-            }
-
-            public void onStopTrackingTouch(SeekBar seekBar) {
-                ModMenu.getInstance().updateMultiplierText();
-            }
-
-            public void onStartTrackingTouch(SeekBar seekBar) {}
-        });
-
-        customCSBar.setOnSeekBarChangeListener(new OnSeekBarChangeListener() {
-
-            public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
-                if (fromUser) {
-                    ModMenu.getInstance().setCustomCS(progress / 10f);
-                }
-                customCSText.setText(String.valueOf(progress / 10f));
-            }
-
-            public void onStopTrackingTouch(SeekBar seekBar) {
-                ModMenu.getInstance().updateMultiplierText();
-            }
-
-            public void onStartTrackingTouch(SeekBar seekBar) {}
-        });
-
-        customHPBar.setOnSeekBarChangeListener(new OnSeekBarChangeListener() {
-
-            public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
-                if (fromUser) {
-                    ModMenu.getInstance().setCustomHP(progress / 10f);
-                }
-                customHPText.setText(String.valueOf(progress / 10f));
-            }
-
-            public void onStopTrackingTouch(SeekBar seekBar) {
-                ModMenu.getInstance().updateMultiplierText();
-            }
-
-            public void onStartTrackingTouch(SeekBar seekBar) {}
-        });
-    }
-
-    private void updateDifficultyAdjustValues() {
-
-        var track = GlobalManager.getInstance().getSelectedTrack();
-        var visibility = View.VISIBLE;
-
-        if (Multiplayer.room != null) {
-            var settings = Multiplayer.room.getGameplaySettings();
-
-            if (!Multiplayer.isRoomHost() &&
-                    (!settings.isFreeMod() || !settings.getAllowForceDifficultyStatistics())) {
-                visibility = View.GONE;
+                ModMenu.getInstance().changeSpeed = 1f
+                speedModifyBar.progress = 10
+                speedModifyText.text = String.format(Locale.getDefault(), "%.2fx", ModMenu.getInstance().changeSpeed)
+                ModMenu.getInstance().updateMultiplierText()
             }
         }
 
-        forceDifficultyStatisticsSplitter.setVisibility(visibility);
+        val backgroundBrightness = findViewById<SeekBar>(R.id.backgroundBrightnessBar)!!
+        backgroundBrightness.progress = PreferenceManager.getDefaultSharedPreferences(requireContext())
+            .getInt("bgbrightness", 25)
+        backgroundBrightness.setOnSeekBarChangeListener(
+            object : OnSeekBarChangeListener {
+                override fun onProgressChanged(
+                    seekBar: SeekBar?,
+                    progress: Int,
+                    fromUser: Boolean
+                ) {
+                    findViewById<TextView>(R.id.brightPreviewText)!!.text = progress.toString()
+                    findViewById<TextView>(R.id.bgBrightnessText)!!.text = "$progress%"
+                    val clamped = FMath.clamp(255 * (progress / 100f), 0f, 255f).roundToInt()
+                    findViewById<View>(R.id.brightnessPreview)!!.setBackgroundColor(
+                        0xFF shl 24 or (clamped shl 16) or (clamped shl 8) or clamped
+                    )
+                }
 
-        var customAR = ModMenu.getInstance().getCustomAR();
-        customARLayout.setVisibility(visibility);
-        customARToggle.setChecked(customAR != null);
-        customARBar.setEnabled(customAR != null);
-        customARBar.setProgress((int) ((customAR != null ? customAR : track != null ? track.getApproachRate() : 10) * 10));
-        customARText.setText(String.valueOf(customARBar.getProgress() / 10f));
+                override fun onStartTrackingTouch(seekBar: SeekBar?) {
+                    findViewById<RelativeLayout>(R.id.brightnessPreviewLayout)!!.visibility =
+                        View.VISIBLE
+                    val progress = seekBar!!.progress
+                    findViewById<TextView>(R.id.brightPreviewText)!!.text = progress.toString()
+                    findViewById<TextView>(R.id.bgBrightnessText)!!.text = "$progress%"
+                    val clamped = FMath.clamp(255 * (progress / 100f), 0f, 255f).roundToInt()
+                    findViewById<View>(R.id.brightnessPreview)!!.setBackgroundColor(
+                        0xFF shl 24 or (clamped shl 16) or (clamped shl 8) or clamped
+                    )
+                }
 
-        var customOD = ModMenu.getInstance().getCustomOD();
-        customODLayout.setVisibility(visibility);
-        customODToggle.setChecked(customOD != null);
-        customODBar.setEnabled(customOD != null);
-        customODBar.setProgress((int) ((customOD != null ? customOD : track != null ? track.getOverallDifficulty() : 10) * 10));
-        customODText.setText(String.valueOf(customODBar.getProgress() / 10f));
+                override fun onStopTrackingTouch(seekBar: SeekBar?) {
+                    findViewById<RelativeLayout>(R.id.brightnessPreviewLayout)!!.visibility =
+                        View.GONE
+                    val progress = seekBar!!.progress
+                    findViewById<TextView>(R.id.bgBrightnessText)!!.text = "$progress%"
+                    Config.setBackgroundBrightness(seekBar.progress / 100f)
+                    PreferenceManager.getDefaultSharedPreferences(context!!).edit()
+                        .putInt("bgbrightness", progress).commit()
+                }
+            }
+        )
 
-        var customCS = ModMenu.getInstance().getCustomCS();
-        customCSLayout.setVisibility(visibility);
-        customCSToggle.setChecked(customCS != null);
-        customCSBar.setEnabled(customCS != null);
-        customCSBar.setProgress((int) ((customCS != null ? customCS : track != null ? track.getCircleSize() : 10) * 10));
-        customCSText.setText(String.valueOf(customCSBar.getProgress() / 10f));
+        findViewById<TextView>(R.id.bgBrightnessText)!!.text = "${
+            PreferenceManager.getDefaultSharedPreferences(requireContext()).getInt("bgbrightness", 25)
+        }%"
 
-        var customHP = ModMenu.getInstance().getCustomHP();
-        customHPLayout.setVisibility(visibility);
-        customHPToggle.setChecked(customHP != null);
-        customHPBar.setEnabled(customHP != null);
-        customHPBar.setProgress((int) ((customHP != null ? customHP : track != null ? track.getHpDrain() : 10) * 10));
-        customHPText.setText(String.valueOf(customHPBar.getProgress() / 10f));
+        speedModifyBar = findViewById(R.id.changeSpeedBar)!!
+        speedModifyBar.apply {
+            progress = (ModMenu.getInstance().changeSpeed * 20 - 10).toInt()
+            isEnabled = speedModifyToggle.isChecked
 
-        ModMenu.getInstance().updateMultiplierText();
-    }
+            setOnSeekBarChangeListener(
+                object : OnSeekBarChangeListener {
+                    override fun onProgressChanged(
+                        seekBar: SeekBar?,
+                        progress: Int,
+                        fromUser: Boolean
+                    ) = update(progress)
 
+                    override fun onStartTrackingTouch(seekBar: SeekBar?) = update(seekBar!!.progress)
 
-    @Override
-    public void dismiss() {
-        super.dismiss();
-        ModMenu.getInstance().hideByFrag();
-    }
+                    override fun onStopTrackingTouch(seekBar: SeekBar?) = update(seekBar!!.progress)
 
-    public boolean isSettingPanelShow() {
-        return findViewById(R.id.fullLayout) != null && Math.abs(findViewById(R.id.fullLayout).getTranslationY()) < 10;
-    }
-
-    private void updateVisibility() {
-        // Updating FL follow delay text value
-        var flFollowDelay = ModMenu.getInstance().getFLfollowDelay();
-        followDelayRow.setVisibility(ModMenu.getInstance().getMod().contains(GameMod.MOD_FLASHLIGHT) ? View.VISIBLE : View.GONE);
-        followDelayBar.setProgress((int) (flFollowDelay * 1000 / FlashLightEntity.defaultMoveDelayMS));
-        followDelayText.setText((int) (flFollowDelay * 1000) + "ms");
-
-        // Updating speed multiplier seekbar visibility
-        if (Multiplayer.isMultiplayer)
-            speedModifyRow.setVisibility(Multiplayer.isRoomHost() ? View.VISIBLE : View.GONE);
-    }
-
-    @SuppressLint("ClickableViewAccessibility")
-    protected void toggleSettingPanel() {
-        updateVisibility();
-
-        if (isSettingPanelShow()) {
-            playHidePanelAnim();
-            findViewById(R.id.frg_background).setOnTouchListener(null);
-            findViewById(R.id.frg_background).setClickable(false);
-        } else {
-            playShowPanelAnim();
-            findViewById(R.id.frg_background).setOnTouchListener((v, event) -> {
-                if (event.getAction() == TouchEvent.ACTION_DOWN) {
-                    if (isSettingPanelShow()) {
-                        toggleSettingPanel();
-                        return true;
+                    private fun update(progress: Int) {
+                        val p = 0.5f + 0.05f * progress
+                        speedModifyText.text = String.format(Locale.getDefault(), "%.2fx", p)
+                        ModMenu.getInstance().changeSpeed = p
+                        ModMenu.getInstance().updateMultiplierText()
                     }
                 }
-                return false;
-            });
-            findViewById(R.id.frg_background).setClickable(true);
+            )
+        }
+
+        speedModifyText.text =
+            String.format(Locale.getDefault(), "%.2fx", ModMenu.getInstance().changeSpeed)
+
+        followDelayText = findViewById(R.id.flashlightFollowDelayText)!!
+        followDelayBar = findViewById(R.id.flashlightFollowDelayBar)!!
+        followDelayBar.setOnSeekBarChangeListener(
+            object : OnSeekBarChangeListener {
+
+                var containsFlashlight = false
+
+                override fun onProgressChanged(
+                    seekBar: SeekBar?,
+                    progress: Int,
+                    fromUser: Boolean
+                ) {
+                    if (!containsFlashlight) return
+
+                    ModMenu.getInstance().fLfollowDelay =
+                        ((progress * ModMenu.DEFAULT_FL_FOLLOW_DELAY).roundToInt()).toFloat() // (progress * 1200f / (10f * 1000f)).roundToInt().toFloat()
+                    followDelayText.text = "${progress * FlashLightEntity.defaultMoveDelayMS}ms"
+                }
+
+                override fun onStartTrackingTouch(seekBar: SeekBar?) {
+                    containsFlashlight = ModMenu.getInstance().mod.contains(GameMod.MOD_FLASHLIGHT)
+                }
+
+                override fun onStopTrackingTouch(seekBar: SeekBar?) {
+                    if (containsFlashlight) return
+
+                    seekBar!!.progress = 0
+                    ModMenu.getInstance().resetFLFollowDelay()
+                    followDelayText.text =
+                        "${(ModMenu.getInstance().fLfollowDelay * 1000f).toInt()}ms"
+                }
+            }
+        )
+
+        initializeDifficultyAdjustViews()
+        updateVisibility()
+    }
+
+    private fun initializeDifficultyAdjustViews() {
+        customARBar.max = 125
+        customODBar.max = 110
+        customCSBar.max = 150
+        customHPBar.max = 110
+
+        customARToggle.setOnCheckedChangeListener(null)
+        customODToggle.setOnCheckedChangeListener(null)
+        customCSToggle.setOnCheckedChangeListener(null)
+        customHPToggle.setOnCheckedChangeListener(null)
+
+        updateDifficultyAdjustValues()
+
+        customARToggle.setOnCheckedChangeListener { _, isChecked ->
+            ModMenu.getInstance().customAR = if (isChecked) customARBar.progress / 10f else null
+            customARBar.isEnabled = isChecked
+
+            updateDifficultyAdjustValues()
+        }
+
+        customODToggle.setOnCheckedChangeListener { _, isChecked ->
+            ModMenu.getInstance().customOD = if (isChecked) customODBar.progress / 10f else null
+            customODBar.isEnabled = isChecked
+
+            updateDifficultyAdjustValues()
+        }
+
+        customCSToggle.setOnCheckedChangeListener { _, isChecked ->
+            ModMenu.getInstance().customCS = if (isChecked) customCSBar.progress / 10f else null
+            customCSBar.isEnabled = isChecked
+
+            updateDifficultyAdjustValues()
+        }
+
+        customHPToggle.setOnCheckedChangeListener { _, isChecked ->
+            ModMenu.getInstance().customHP = if (isChecked) customHPBar.progress / 10f else null
+            customHPBar.isEnabled = isChecked
+
+            updateDifficultyAdjustValues()
+        }
+
+        customARBar.setOnSeekBarChangeListener(
+            object : OnSeekBarChangeListener {
+                override fun onProgressChanged(
+                    seekBar: SeekBar?,
+                    progress: Int,
+                    fromUser: Boolean
+                ) {
+                    if (fromUser) ModMenu.getInstance().customAR = progress / 10f
+                    customARText.text = "${progress / 10f}"
+                }
+
+                override fun onStartTrackingTouch(seekBar: SeekBar?) {}
+
+                override fun onStopTrackingTouch(seekBar: SeekBar?) {
+                    ModMenu.getInstance().updateMultiplierText()
+                }
+            }
+        )
+
+        customODBar.setOnSeekBarChangeListener(
+            object : OnSeekBarChangeListener {
+                override fun onProgressChanged(
+                    seekBar: SeekBar?,
+                    progress: Int,
+                    fromUser: Boolean
+                ) {
+                    if (fromUser) ModMenu.getInstance().customOD = progress / 10f
+                    customODText.text = "${progress / 10f}"
+                }
+
+                override fun onStartTrackingTouch(seekBar: SeekBar?) {}
+
+                override fun onStopTrackingTouch(seekBar: SeekBar?) {
+                    ModMenu.getInstance().updateMultiplierText()
+                }
+            }
+        )
+
+        customCSBar.setOnSeekBarChangeListener(
+            object : OnSeekBarChangeListener {
+                override fun onProgressChanged(
+                    seekBar: SeekBar?,
+                    progress: Int,
+                    fromUser: Boolean
+                ) {
+                    if (fromUser) ModMenu.getInstance().customCS = progress / 10f
+                    customCSText.text = "${progress / 10f}"
+                }
+
+                override fun onStartTrackingTouch(seekBar: SeekBar?) {}
+
+                override fun onStopTrackingTouch(seekBar: SeekBar?) {
+                    ModMenu.getInstance().updateMultiplierText()
+                }
+            }
+        )
+
+        customHPBar.setOnSeekBarChangeListener(
+            object : OnSeekBarChangeListener {
+                override fun onProgressChanged(
+                    seekBar: SeekBar?,
+                    progress: Int,
+                    fromUser: Boolean
+                ) {
+                    if (fromUser) ModMenu.getInstance().customHP = progress / 10f
+                    customHPText.text = "${progress / 10f}"
+                }
+
+                override fun onStartTrackingTouch(seekBar: SeekBar?) {}
+
+                override fun onStopTrackingTouch(seekBar: SeekBar?) {
+                    ModMenu.getInstance().updateMultiplierText()
+                }
+            }
+        )
+    }
+
+    private fun updateDifficultyAdjustValues() {
+        val track = GlobalManager.getInstance().selectedTrack
+        var visibility = View.VISIBLE
+
+        if (Multiplayer.room != null) {
+            val settings = Multiplayer.room!!.gameplaySettings
+
+            if (!Multiplayer.isRoomHost && (!settings.isFreeMod || !settings.allowForceDifficultyStatistics)) {
+                visibility = View.GONE
+            }
+        }
+
+        forceDifficultyStatisticsSplitter.visibility = visibility
+
+        val customAR = ModMenu.getInstance().customAR
+        customARLayout.visibility = visibility
+        customARToggle.isChecked = customAR != null
+        customARBar.isEnabled = customAR != null
+        customARBar.progress = (((customAR ?: track?.approachRate) ?: 10f) * 10).toInt()
+        customARText.text = "${customARBar.progress / 10f}"
+
+        val customOD = ModMenu.getInstance().customOD
+        customODLayout.visibility = visibility
+        customODToggle.isChecked = customOD != null
+        customODBar.isEnabled = customOD != null
+        customODBar.progress = (((customOD ?: track?.overallDifficulty) ?: 10f) * 10).toInt()
+        customODText.text = "${customODBar.progress / 10f}"
+
+        val customCS = ModMenu.getInstance().customCS
+        customCSLayout.visibility = visibility
+        customCSToggle.isChecked = customCS != null
+        customCSBar.isEnabled = customCS != null
+        customCSBar.progress = (((customCS ?: track?.circleSize) ?: 10f) * 10).toInt()
+        customCSText.text = "${customCSBar.progress / 10f}"
+
+        val customHP = ModMenu.getInstance().customHP
+        customHPLayout.visibility = visibility
+        customHPToggle.isChecked = customHP != null
+        customHPBar.isEnabled = customHP != null
+        customHPBar.progress = (((customHP ?: track?.hpDrain) ?: 10f) * 10).toInt()
+        customHPText.text = "${customHPBar.progress / 10f}"
+
+        ModMenu.getInstance().updateMultiplierText()
+    }
+
+    override fun dismiss() {
+        super.dismiss()
+        mainThread { super.save() }
+        ModMenu.getInstance().hideByFrag()
+    }
+
+    private fun isSettingPanelShow(): Boolean {
+        return abs(findViewById<LinearLayout>(R.id.fullLayout)?.translationY ?: 11f) < 10
+    }
+
+    private fun updateVisibility() {
+        val flFollowDelay = ModMenu.getInstance().fLfollowDelay
+        followDelayRow.visibility =
+            if (ModMenu.getInstance().mod.contains(GameMod.MOD_FLASHLIGHT)) View.VISIBLE else View.GONE
+        followDelayBar.progress =
+            (flFollowDelay * 1000f / FlashLightEntity.defaultMoveDelayMS).toInt()
+        followDelayText.text = "${(flFollowDelay * 1000f).toInt()}ms"
+
+        if (Multiplayer.isMultiplayer) {
+            speedModifyRow.visibility = if (Multiplayer.isRoomHost) View.VISIBLE else View.GONE
         }
     }
 
-    protected void playShowPanelAnim() {
-        View fullLayout = findViewById(R.id.fullLayout);
-        if (fullLayout != null) {
-            fullLayout.animate().cancel();
-            fullLayout.animate()
-                    .translationY(0)
-                    .setDuration(200)
-                    .setInterpolator(EasingHelper.asInterpolator(Easing.InOutQuad))
-                    .setListener(new BaseAnimationListener() {
-                        @Override
-                        public void onAnimationEnd(Animator animation) {
-                            super.onAnimationEnd(animation);
-                            findViewById(R.id.frg_background).setClickable(true);
-                            findViewById(R.id.frg_background).setOnClickListener(v -> playHidePanelAnim());
-                        }
-                    })
-                    .start();
+    private fun toggleSettingPanel() {
+        updateVisibility()
+
+        val background = findViewById<RelativeLayout>(R.id.frg_background)!!
+        if (isSettingPanelShow()) {
+            playHidePanelAnim()
+            background.setOnTouchListener(null)
+            background.isClickable = false
+        } else {
+            playShowPanelAnim()
+            background.setOnTouchListener { _, event ->
+                if (event.action == TouchEvent.ACTION_DOWN && isSettingPanelShow()) {
+                    toggleSettingPanel()
+                    return@setOnTouchListener true
+                }
+                false
+            }
+            background.isClickable = true
         }
     }
 
-    protected void playHidePanelAnim() {
-        View fullLayout = findViewById(R.id.fullLayout);
-        if (fullLayout != null) {
-            fullLayout.animate().cancel();
-            fullLayout.animate()
-                    .translationY(findViewById(R.id.optionBody).getHeight())
-                    .setDuration(200)
-                    .setInterpolator(EasingHelper.asInterpolator(Easing.InOutQuad))
-                    .setListener(new BaseAnimationListener() {
-                        @Override
-                        public void onAnimationEnd(Animator animation) {
-                            super.onAnimationEnd(animation);
-                            findViewById(R.id.frg_background).setClickable(false);
+    private fun playShowPanelAnim() {
+        val layout = findViewById<View>(R.id.fullLayout)
+        layout?.animate()?.cancel()
+        layout?.animate()
+            ?.translationY(0f)
+            ?.setDuration(200)
+            ?.setInterpolator(EasingHelper.asInterpolator(Easing.InOutQuad))
+            ?.setListener(
+                object : BaseAnimationListener() {
+                    override fun onAnimationEnd(animation: Animator) {
+                        super.onAnimationEnd(animation)
+                        val background = findViewById<RelativeLayout>(R.id.frg_background)!!
+                        background.isClickable = true
+                        background.setOnClickListener {
+                            playShowPanelAnim()
                         }
-                    })
-                    .start();
-        }
+                    }
+                }
+            )
+            ?.start()
+    }
+
+    private fun playHidePanelAnim() {
+        val layout = findViewById<View>(R.id.fullLayout)
+        layout?.animate()?.cancel()
+        layout?.animate()
+            ?.translationY(findViewById<LinearLayout>(R.id.optionBody)!!.height.toFloat())
+            ?.setDuration(200)
+            ?.setInterpolator(EasingHelper.asInterpolator(Easing.InOutQuad))
+            ?.setListener(
+                object : BaseAnimationListener() {
+                    override fun onAnimationEnd(animation: Animator) {
+                        super.onAnimationEnd(animation)
+                        findViewById<RelativeLayout>(R.id.frg_background)!!.isClickable = false
+                    }
+                }
+            )
+            ?.start()
     }
 }
