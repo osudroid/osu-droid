@@ -31,7 +31,6 @@ import java.io.File;
 import java.util.Objects;
 
 import com.reco1l.framework.lang.Execution;
-import com.reco1l.legacy.UpdateManager;
 
 import ru.nsu.ccfit.zuev.osu.Config;
 import ru.nsu.ccfit.zuev.osu.GlobalManager;
@@ -43,16 +42,12 @@ import ru.nsu.ccfit.zuev.osu.online.OnlineInitializer;
 import ru.nsu.ccfit.zuev.osu.online.OnlineManager;
 import ru.nsu.ccfit.zuev.skins.SkinManager;
 import ru.nsu.ccfit.zuev.osu.ToastLogger;
-// import ru.nsu.ccfit.zuev.osu.game.SpritePool;
 import ru.nsu.ccfit.zuev.osu.helper.StringTable;
 import ru.nsu.ccfit.zuev.osuplus.R;
 
 import org.anddev.andengine.util.Debug;
 
 public class SettingsMenu extends SettingsFragment {
-
-    public static final String REGISTER_URL = "https://" + OnlineManager.hostname + "/user/?action=register";
-
     private PreferenceScreen mParentScreen, parentScreen;
     private boolean isOnNestedScreen = false;
     private Activity mActivity;
@@ -175,7 +170,7 @@ public class SettingsMenu extends SettingsFragment {
 
         final Preference update = findPreference("update");
         Objects.requireNonNull(update).setOnPreferenceClickListener(preference -> {
-            UpdateManager.INSTANCE.checkNewUpdates(false);
+            ToastLogger.showText("You cannot check for updates in the tournament client.", true);
             return true;
         });
 

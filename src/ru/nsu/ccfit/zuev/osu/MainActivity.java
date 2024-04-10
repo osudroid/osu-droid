@@ -44,7 +44,6 @@ import com.reco1l.api.ibancho.LobbyAPI;
 import com.reco1l.framework.lang.Execution;
 import com.reco1l.legacy.AccessibilityDetector;
 import com.reco1l.legacy.Multiplayer;
-import com.reco1l.legacy.UpdateManager;
 import com.reco1l.legacy.ui.multiplayer.LobbyScene;
 import com.reco1l.legacy.ui.multiplayer.RoomScene;
 
@@ -328,7 +327,6 @@ public class MainActivity extends BaseGameActivity implements
 
             Execution.delayed(2500, () -> {
 
-                UpdateManager.INSTANCE.onActivityStart();
                 GlobalManager.getInstance().setInfo("");
                 GlobalManager.getInstance().setLoadingProgress(100);
                 ResourceManager.getInstance().loadFont("font", null, 28, Color.WHITE);
