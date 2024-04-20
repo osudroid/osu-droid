@@ -18,6 +18,7 @@ import com.rian.osu.beatmap.parser.BeatmapParser;
 import com.rian.osu.difficulty.BeatmapDifficultyCalculator;
 import com.rian.osu.difficulty.calculator.DifficultyCalculationParameters;
 import com.rian.osu.ui.DifficultyAlgorithmSwitcher;
+import com.rian.osu.utils.LRUCache;
 import org.anddev.andengine.engine.Engine;
 import org.anddev.andengine.engine.handler.IUpdateHandler;
 import org.anddev.andengine.entity.Entity;
@@ -44,6 +45,7 @@ import ru.nsu.ccfit.zuev.osu.BeatmapInfo;
 import ru.nsu.ccfit.zuev.osu.Config;
 import ru.nsu.ccfit.zuev.osu.GlobalManager;
 import ru.nsu.ccfit.zuev.osu.LibraryManager;
+import ru.nsu.ccfit.zuev.osu.RankedStatus;
 import ru.nsu.ccfit.zuev.osu.ResourceManager;
 import ru.nsu.ccfit.zuev.osu.ToastLogger;
 import ru.nsu.ccfit.zuev.osu.TrackInfo;
@@ -110,6 +112,7 @@ public class SongMenu implements IUpdateHandler, MenuItemListener,
     private final long previousSelectionInterval = 1000;
     private boolean previousSelectionPerformed;
     private final LinkedList<MenuItem> previousSelectedItems = new LinkedList<>();
+    private final LRUCache<String, RankedStatus> mapStatuses = new LRUCache<>(50);
 
     public SongMenu() {
     }
@@ -678,8 +681,9 @@ public class SongMenu implements IUpdateHandler, MenuItemListener,
             OnlineScoring.getInstance().loadAvatar(false);
             frontLayer.attachChild(panel);
 
-
-            scoringSwitcher = new AnimSprite(Utils.toRes(5), Utils.toRes(10), 0, "ranking_enabled", "ranking_disabled") {
+            scoringSwitcher = new AnimSprite(Utils.toRes(5), Utils.toRes(10), 0,
+                    "ranking_disabled", "ranking_enabled", "selection-ranked", "selection-approved",
+                    "selection-loved", "selection-question") {
                 @Override
                 public boolean onAreaTouched(TouchEvent pSceneTouchEvent,
                                              float pTouchAreaLocalX, float pTouchAreaLocalY) {
@@ -688,7 +692,8 @@ public class SongMenu implements IUpdateHandler, MenuItemListener,
                     return true;
                 }
             };
-            scoringSwitcher.setFrame(1);
+
+            scoringSwitcher.setFrame(0);
             scoringSwitcher.setPosition(10, 10);
             scene.registerTouchArea(scoringSwitcher);
             frontLayer.attachChild(scoringSwitcher);
@@ -709,24 +714,13 @@ public class SongMenu implements IUpdateHandler, MenuItemListener,
         if (board.isShowOnlineScores()) {
             board.setShowOnlineScores(false);
             board.init(selectedTrack);
-            scoringSwitcher.setFrame(1);
             updateInfo(selectedTrack);
         } else if (OnlineManager.getInstance().isStayOnline()) {
             board.setShowOnlineScores(true);
             board.init(selectedTrack);
-            setRank();
         }
-    }
 
-    public void setRank() {
-        if (!board.isShowOnlineScores()) {
-            if (scoringSwitcher != null) {
-                scoringSwitcher.setFrame(1);
-            }
-            updateInfo(selectedTrack);
-            return;
-        }
-        scoringSwitcher.setFrame(0);
+        updateScoringSwitcherStatus(true);
     }
 
     public Scene getScene() {
@@ -1152,10 +1146,6 @@ public class SongMenu implements IUpdateHandler, MenuItemListener,
             playMusic(track.getAudioFilename(), track.getPreviewTime());
         }
 
-        if (board.isShowOnlineScores()) {
-            Execution.async(this::setRank);
-        }
-
         if (selectedTrack == track) {
             synchronized (bgMutex) {
                 if (!bgLoaded) {
@@ -1191,6 +1181,7 @@ public class SongMenu implements IUpdateHandler, MenuItemListener,
         EdExtensionHelper.onSelectTrack(track);
         GlobalManager.getInstance().setSelectedTrack(track);
         updateInfo(track);
+        updateScoringSwitcherStatus(false);
         board.init(track);
 
         final int quality = Config.getBackgroundQuality();
@@ -1567,6 +1558,57 @@ public class SongMenu implements IUpdateHandler, MenuItemListener,
                 }
             }
         }
+    }
+
+    private void updateScoringSwitcherStatus(boolean forceUpdate) {
+        if (scoringSwitcher == null) {
+            return;
+        }
+
+        if (selectedTrack == null || !board.isShowOnlineScores()) {
+            scoringSwitcher.setFrame(0);
+            return;
+        }
+
+        var md5 = selectedTrack.getMD5();
+
+        if (!forceUpdate && mapStatuses.containsKey(md5)) {
+            scoringSwitcher.setFrame(switch (Objects.requireNonNull(mapStatuses.get(md5))) {
+                case ranked -> 2;
+                case approved -> 3;
+                case loved -> 4;
+                default -> 5;
+            });
+
+            return;
+        }
+
+        scoringSwitcher.setFrame(1);
+
+        Execution.async(() -> {
+            try {
+                var status = OnlineManager.getInstance().getBeatmapStatus(md5);
+
+                if (!board.isShowOnlineScores() || status == null || scoringSwitcher == null || selectedTrack == null || !selectedTrack.getMD5().equals(md5)) {
+                    return;
+                }
+
+                mapStatuses.put(md5, status);
+
+                scoringSwitcher.setFrame(switch (status) {
+                    case ranked -> 2;
+                    case approved -> 3;
+                    case loved -> 4;
+                    default -> 5;
+                });
+            } catch (OnlineManagerException e) {
+                Debug.e("Cannot get beatmap status: " + e.getMessage(), e);
+
+                if (scoringSwitcher != null) {
+                    scoringSwitcher.setFrame(1);
+                }
+            }
+        });
     }
 
     public enum SortOrder {

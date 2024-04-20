@@ -10,10 +10,12 @@ import com.google.firebase.analytics.FirebaseAnalytics;
 import okhttp3.MediaType;
 import okhttp3.OkHttpClient;
 
+import okhttp3.Request;
 import okhttp3.RequestBody;
 import org.anddev.andengine.util.Debug;
 
 import java.io.File;
+import java.io.IOException;
 import java.util.ArrayList;
 
 import ru.nsu.ccfit.zuev.osu.BeatmapInfo;
@@ -22,6 +24,9 @@ import ru.nsu.ccfit.zuev.osu.GlobalManager;
 import ru.nsu.ccfit.zuev.osu.ResourceManager;
 import ru.nsu.ccfit.zuev.osu.TrackInfo;
 import ru.nsu.ccfit.zuev.osu.helper.FileUtils;
+import org.json.JSONException;
+import org.json.JSONObject;
+import ru.nsu.ccfit.zuev.osu.*;
 import ru.nsu.ccfit.zuev.osu.helper.MD5Calculator;
 import ru.nsu.ccfit.zuev.osu.online.PostBuilder.RequestException;
 
@@ -300,6 +305,26 @@ public class OnlineManager {
         response.remove(0);
 
         return response;
+    }
+
+    public RankedStatus getBeatmapStatus(String md5) throws OnlineManagerException {
+        var builder = new Request.Builder().url("https://osu.direct/api/v2/md5/" + md5);
+        var request = builder.build();
+
+        try (var response = client.newCall(request).execute()) {
+            if (response.isSuccessful() && response.body() != null) {
+                var json = new JSONObject(response.body().string());
+                return RankedStatus.valueOf(json.optInt("ranked"));
+            }
+        } catch (final IOException e) {
+            Debug.e("getBeatmapStatus IOException " + e.getMessage(), e);
+        } catch (final JSONException e) {
+            Debug.e("getBeatmapStatus JSONException " + e.getMessage(), e);
+        } catch (final IllegalArgumentException e) {
+            Debug.e("getBeatmapStatus IllegalArgumentException " + e.getMessage(), e);
+        }
+
+        return null;
     }
 
     public boolean loadAvatarToTextureManager() {
