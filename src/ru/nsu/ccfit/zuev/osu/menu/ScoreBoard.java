@@ -239,7 +239,7 @@ public class ScoreBoard extends Entity implements ScrollDetector.IScrollDetector
                     var combo = Integer.parseInt(data[3]);
                     var mark = data[4];
                     var modString = data[5];
-                    var accuracy = GameHelper.Round(Integer.parseInt(data[6]) / 1000f, 2);
+                    var accuracy = GameHelper.Round(Float.parseFloat(data[6]) * 100, 2);
                     var avatarURL = data[7];
                     var beatmapRank = isPersonalBest && !isInLeaderboard ? Integer.parseInt(data[8]) : (i + 1);
 

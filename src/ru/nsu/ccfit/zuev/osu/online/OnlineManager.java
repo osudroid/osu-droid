@@ -7,15 +7,23 @@ import android.os.Bundle;
 
 import com.google.firebase.analytics.FirebaseAnalytics;
 
+import okhttp3.MediaType;
 import okhttp3.OkHttpClient;
 
 import okhttp3.Request;
+import okhttp3.RequestBody;
 import org.anddev.andengine.util.Debug;
 
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 
+import ru.nsu.ccfit.zuev.osu.BeatmapInfo;
+import ru.nsu.ccfit.zuev.osu.Config;
+import ru.nsu.ccfit.zuev.osu.GlobalManager;
+import ru.nsu.ccfit.zuev.osu.ResourceManager;
+import ru.nsu.ccfit.zuev.osu.TrackInfo;
+import ru.nsu.ccfit.zuev.osu.helper.FileUtils;
 import org.json.JSONException;
 import org.json.JSONObject;
 import ru.nsu.ccfit.zuev.osu.*;
@@ -46,9 +54,9 @@ public class OnlineManager {
     private long rank = 0;
     private long score = 0;
     private float accuracy = 0;
+    private float pp = 0;
     private String avatarURL = "";
     private int mapRank;
-    private int replayID = 0;
 
     public static OnlineManager getInstance() {
         if (instance == null) {
@@ -119,7 +127,7 @@ public class OnlineManager {
         this.username = username;
         this.password = password;
 
-        PostBuilder post = new PostBuilder();
+        PostBuilder post = new URLEncodedPostBuilder();
         post.addParam("username", username);
         post.addParam(
                 "password",
@@ -147,18 +155,18 @@ public class OnlineManager {
         ssid = params[1];
         rank = Integer.parseInt(params[2]);
         score = Long.parseLong(params[3]);
-        accuracy = Integer.parseInt(params[4]) / 100000f;
-        this.username = params[5];
-        if (params.length >= 7) {
-            avatarURL = params[6];
+        pp = Math.round(Float.parseFloat(params[4]));
+        accuracy = Float.parseFloat(params[5]);
+        this.username = params[6];
+        if (params.length >= 8) {
+            avatarURL = params[7];
         } else {
             avatarURL = "";
         }
 
         Bundle bParams = new Bundle();
         bParams.putString(FirebaseAnalytics.Param.METHOD, "ingame");
-        GlobalManager.getInstance().getMainActivity().getAnalytics().logEvent(FirebaseAnalytics.Event.LOGIN,
-            bParams);
+        GlobalManager.getInstance().getMainActivity().getAnalytics().logEvent(FirebaseAnalytics.Event.LOGIN, bParams);
 
         return true;
     }
@@ -186,7 +194,7 @@ public class OnlineManager {
         else
             osuID = null;
 
-        PostBuilder post = new PostBuilder();
+        PostBuilder post = new URLEncodedPostBuilder();
         post.addParam("userID", String.valueOf(userId));
         post.addParam("ssid", ssid);
         post.addParam("filename", trackfile.getName());
@@ -227,18 +235,31 @@ public class OnlineManager {
         Debug.i("Getting play ID = " + playID);
     }
 
-    public boolean sendRecord(String data) throws OnlineManagerException {
-        if (playID == null || playID.length() == 0) {
+    public boolean sendRecord(String data, String replayFilename) throws OnlineManagerException {
+        if (playID == null || playID.isEmpty()) {
             failMessage = "I don't have play ID";
             return false;
         }
 
         Debug.i("Sending record...");
 
-        PostBuilder post = new PostBuilder();
+        File replayFile = new File(replayFilename);
+        if (!replayFile.exists()) {
+            failMessage = "Replay file not found";
+            Debug.e("Replay file not found");
+            return false;
+        }
+
+        var post = new FormDataPostBuilder();
         post.addParam("userID", String.valueOf(userId));
         post.addParam("playID", playID);
         post.addParam("data", data);
+
+        MediaType replayMime = MediaType.parse("application/octet-stream");
+        RequestBody replayFileBody = RequestBody.create(replayFile, replayMime);
+
+        post.addParam("replayFile", replayFile.getName(), replayFileBody);
+        post.addParam("replayFileChecksum", FileUtils.getSHA256Checksum(replayFile));
 
         ArrayList<String> response = sendRequest(post, endpoint + "submit.php");
 
@@ -260,22 +281,17 @@ public class OnlineManager {
             return false;
         }
 
-
         rank = Integer.parseInt(resp[0]);
         score = Long.parseLong(resp[1]);
-        accuracy = Integer.parseInt(resp[2]) / 100000f;
+        accuracy = Float.parseFloat(resp[2]);
         mapRank = Integer.parseInt(resp[3]);
-
-        if (resp.length >= 5) {
-            replayID = Integer.parseInt(resp[4]);
-        } else
-            replayID = 0;
+        pp = Math.round(Float.parseFloat(resp[4]));
 
         return true;
     }
 
     public ArrayList<String> getTop(final File trackFile, final String hash) throws OnlineManagerException {
-        PostBuilder post = new PostBuilder();
+        PostBuilder post = new URLEncodedPostBuilder();
         post.addParam("filename", trackFile.getName());
         post.addParam("hash", hash);
         post.addParam("uid", String.valueOf(userId));
@@ -381,13 +397,8 @@ public class OnlineManager {
         }
     }
 
-    public void sendReplay(String filename) {
-        Debug.i("Sending replay '" + filename + "' for id = " + replayID);
-        OnlineFileOperator.sendFile(endpoint + "upload.php", filename, String.valueOf(replayID));
-    }
-
     public String getScorePack(int playid) throws OnlineManagerException {
-        PostBuilder post = new PostBuilder();
+        PostBuilder post = new URLEncodedPostBuilder();
         post.addParam("playID", String.valueOf(playid));
 
         ArrayList<String> response = sendRequest(post, endpoint + "gettop.php");
@@ -409,6 +420,10 @@ public class OnlineManager {
 
     public long getScore() {
         return score;
+    }
+
+    public float getPP() {
+        return pp;
     }
 
     public float getAccuracy() {
