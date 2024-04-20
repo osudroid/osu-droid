@@ -307,25 +307,21 @@ public class OnlineManager {
         return response;
     }
 
-    public RankedStatus getBeatmapStatus(int beatmapSetId) throws OnlineManagerException {
-        // TODO: replace with chimu map status API that is hash-based
-        var builder = new Request.Builder().url("https://api.chimu.moe/v1/set/" + beatmapSetId);
+    public RankedStatus getBeatmapStatus(String md5) throws OnlineManagerException {
+        var builder = new Request.Builder().url("https://osu.direct/api/v2/md5/" + md5);
         var request = builder.build();
 
         try (var response = client.newCall(request).execute()) {
             if (response.isSuccessful() && response.body() != null) {
                 var json = new JSONObject(response.body().string());
-                return RankedStatus.valueOf(json.optInt("RankedStatus"));
+                return RankedStatus.valueOf(json.optInt("ranked"));
             }
         } catch (final IOException e) {
             Debug.e("getBeatmapStatus IOException " + e.getMessage(), e);
-            return null;
         } catch (final JSONException e) {
             Debug.e("getBeatmapStatus JSONException " + e.getMessage(), e);
-            return null;
         } catch (final IllegalArgumentException e) {
             Debug.e("getBeatmapStatus IllegalArgumentException " + e.getMessage(), e);
-            return null;
         }
 
         return null;
