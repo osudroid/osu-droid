@@ -18,6 +18,7 @@ import com.rian.osu.beatmap.parser.BeatmapParser;
 import com.rian.osu.difficulty.BeatmapDifficultyCalculator;
 import com.rian.osu.difficulty.calculator.DifficultyCalculationParameters;
 import com.rian.osu.ui.DifficultyAlgorithmSwitcher;
+import com.rian.osu.utils.LRUCache;
 import org.anddev.andengine.engine.Engine;
 import org.anddev.andengine.engine.handler.IUpdateHandler;
 import org.anddev.andengine.entity.Entity;
@@ -44,6 +45,7 @@ import ru.nsu.ccfit.zuev.osu.BeatmapInfo;
 import ru.nsu.ccfit.zuev.osu.Config;
 import ru.nsu.ccfit.zuev.osu.GlobalManager;
 import ru.nsu.ccfit.zuev.osu.LibraryManager;
+import ru.nsu.ccfit.zuev.osu.RankedStatus;
 import ru.nsu.ccfit.zuev.osu.ResourceManager;
 import ru.nsu.ccfit.zuev.osu.ToastLogger;
 import ru.nsu.ccfit.zuev.osu.TrackInfo;
@@ -110,6 +112,7 @@ public class SongMenu implements IUpdateHandler, MenuItemListener,
     private final long previousSelectionInterval = 1000;
     private boolean previousSelectionPerformed;
     private final LinkedList<MenuItem> previousSelectedItems = new LinkedList<>();
+    private final LRUCache<String, RankedStatus> mapStatuses = new LRUCache<>(50);
 
     public SongMenu() {
     }
@@ -717,7 +720,7 @@ public class SongMenu implements IUpdateHandler, MenuItemListener,
             board.init(selectedTrack);
         }
 
-        updateScoringSwitcherStatus();
+        updateScoringSwitcherStatus(true);
     }
 
     public Scene getScene() {
@@ -1178,7 +1181,7 @@ public class SongMenu implements IUpdateHandler, MenuItemListener,
         EdExtensionHelper.onSelectTrack(track);
         GlobalManager.getInstance().setSelectedTrack(track);
         updateInfo(track);
-        updateScoringSwitcherStatus();
+        updateScoringSwitcherStatus(false);
         board.init(track);
 
         final int quality = Config.getBackgroundQuality();
@@ -1557,7 +1560,7 @@ public class SongMenu implements IUpdateHandler, MenuItemListener,
         }
     }
 
-    private void updateScoringSwitcherStatus() {
+    private void updateScoringSwitcherStatus(boolean forceUpdate) {
         if (scoringSwitcher == null) {
             return;
         }
@@ -1567,20 +1570,30 @@ public class SongMenu implements IUpdateHandler, MenuItemListener,
             return;
         }
 
-        var beatmapSetId = selectedTrack.getBeatmapSetID();
-        scoringSwitcher.setFrame(1);
+        var md5 = selectedTrack.getMD5();
 
-        if (beatmapSetId == -1) {
+        if (!forceUpdate && mapStatuses.containsKey(md5)) {
+            scoringSwitcher.setFrame(switch (Objects.requireNonNull(mapStatuses.get(md5))) {
+                case ranked -> 2;
+                case approved -> 3;
+                case loved -> 4;
+                default -> 5;
+            });
+
             return;
         }
 
+        scoringSwitcher.setFrame(1);
+
         Execution.async(() -> {
             try {
-                var status = OnlineManager.getInstance().getBeatmapStatus(beatmapSetId);
+                var status = OnlineManager.getInstance().getBeatmapStatus(md5);
 
-                if (!board.isShowOnlineScores() || status == null || scoringSwitcher == null || selectedTrack == null || selectedTrack.getBeatmapSetID() != beatmapSetId) {
+                if (!board.isShowOnlineScores() || status == null || scoringSwitcher == null || selectedTrack == null || !selectedTrack.getMD5().equals(md5)) {
                     return;
                 }
+
+                mapStatuses.put(md5, status);
 
                 scoringSwitcher.setFrame(switch (status) {
                     case ranked -> 2;
