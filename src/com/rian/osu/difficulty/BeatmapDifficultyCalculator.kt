@@ -7,12 +7,11 @@ import com.rian.osu.difficulty.calculator.*
 import com.rian.osu.replay.SliderCheeseChecker
 import com.rian.osu.replay.ThreeFingerChecker
 import com.rian.osu.replay.createCursorGroups
+import com.rian.osu.utils.LRUCache
 import com.rian.osu.utils.convertLegacyMods
 import ru.nsu.ccfit.zuev.osu.scoring.Replay.MoveArray
 import ru.nsu.ccfit.zuev.osu.scoring.Replay.ReplayObjectData
 import ru.nsu.ccfit.zuev.osu.scoring.StatisticV2
-import kotlin.collections.Map.Entry
-import kotlin.math.ceil
 import kotlin.math.min
 
 /**
@@ -344,18 +343,6 @@ object BeatmapDifficultyCalculator {
             beatmap.duration.toLong(),
             5 * 60 * 1000
         )) }
-
-    /**
-     * An implementation of least-recently-used cache using [LinkedHashMap]s.
-     *
-     * @param <K> The key of the cache.
-     * @param <V> The value to cache.
-     */
-    private class LRUCache<K, V>(
-        private val maxSize: Int
-    ) : LinkedHashMap<K, V>(ceil(maxSize / 0.75f).toInt(), 0.75f, true) {
-        override fun removeEldestEntry(eldest: Entry<K, V>) = size > maxSize
-    }
 
     /**
      * A cache holder for a [Beatmap].
