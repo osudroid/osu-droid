@@ -9,9 +9,9 @@ import android.util.Log;
 
 import com.edlplan.ui.fragment.ConfirmDialogFragment;
 import com.reco1l.framework.lang.Execution;
-import com.reco1l.legacy.ui.ChimuWebView;
 import com.reco1l.legacy.ui.MainMenu;
 
+import com.reco1l.legacy.ui.beatmapdownloader.BeatmapListing;
 import com.rian.osu.beatmap.parser.BeatmapParser;
 import org.anddev.andengine.engine.handler.IUpdateHandler;
 import org.anddev.andengine.entity.IEntity;
@@ -429,7 +429,7 @@ public class MainScene implements IUpdateHandler {
                 if (pSceneTouchEvent.isActionUp()) {
                     setColor(1, 1, 1);
                     musicControl(MusicOption.STOP);
-                    ChimuWebView.INSTANCE.show();
+                    BeatmapListing.INSTANCE.show();
                     return true;
                 }
 

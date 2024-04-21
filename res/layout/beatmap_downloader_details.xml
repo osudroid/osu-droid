@@ -1,0 +1,116 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:gravity="center"
+    android:background="#BE13131A">
+
+    <LinearLayout
+        android:layout_width="500dp"
+        android:layout_height="wrap_content"
+        android:layout_margin="8dp"
+        android:background="@drawable/rounded_rect"
+        android:backgroundTint="#161622"
+        android:clipToOutline="true"
+        android:gravity="center"
+        android:orientation="vertical"
+        android:outlineProvider="background"
+        android:clickable="true">
+
+        <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="100dp">
+
+            <ImageView
+                android:id="@+id/cover"
+                android:layout_width="match_parent"
+                android:layout_height="100dp"
+                android:alpha="0.2"
+                android:background="#4B4B80"
+                android:scaleType="centerCrop" />
+
+            <TextView
+                android:id="@+id/status"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignTop="@+id/linearLayout"
+                android:layout_alignEnd="@+id/linearLayout"
+                android:background="@drawable/rounded_rect"
+                android:backgroundTint="#161622"
+                android:paddingHorizontal="12dp"
+                android:paddingVertical="2dp"
+                android:text="Ranked"
+                android:textColor="#FFF"
+                android:textSize="10dp" />
+
+            <LinearLayout
+                android:id="@+id/linearLayout"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginHorizontal="16dp"
+                android:layout_marginTop="16dp"
+                android:orientation="vertical">
+
+                <TextView
+                    android:id="@+id/metadata"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Title\nArtist"
+                    android:textColor="#FFF" />
+
+                <TextView
+                    android:id="@+id/creator"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Mapped by Acivev"
+                    android:textColor="#8282A8" />
+
+            </LinearLayout>
+
+
+
+        </RelativeLayout>
+
+        <LinearLayout
+            android:id="@+id/difficulty"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:paddingHorizontal="12dp"
+            android:paddingVertical="8dp"
+            android:orientation="horizontal">
+
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:background="#1E1E2E"
+            android:gravity="center|right"
+            android:orientation="vertical"
+            android:paddingVertical="14dp"
+            android:paddingHorizontal="16dp">
+
+            <TextView
+                android:id="@+id/details"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:textColor="#FFF"
+                android:text="Diffname\nStar rating: 0.00\nAR: 0.00 - OD: 0.00 - CS: 0.00 - HP drain: 0.00\nLength: 00:00 - BPM: 0.00 / 0.00">
+
+            </TextView>
+
+            <Button
+                android:id="@+id/download_button"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:background="@drawable/rounded_rect"
+                android:backgroundTint="#363653"
+                android:text="Download"
+                android:textAllCaps="false"
+                android:textColor="#FFF" />
+
+        </LinearLayout>
+
+    </LinearLayout>
+
+</LinearLayout>
