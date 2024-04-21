@@ -8,9 +8,10 @@ import android.os.PowerManager;
 import android.util.Log;
 
 import com.edlplan.ui.fragment.ConfirmDialogFragment;
-
-import com.reco1l.legacy.ui.ChimuWebView;
+import com.reco1l.framework.lang.Execution;
 import com.reco1l.legacy.ui.MainMenu;
+
+import com.reco1l.legacy.ui.beatmapdownloader.BeatmapListing;
 import org.anddev.andengine.engine.handler.IUpdateHandler;
 import org.anddev.andengine.entity.IEntity;
 import org.anddev.andengine.entity.modifier.IEntityModifier;
@@ -58,8 +59,6 @@ import javax.microedition.khronos.opengles.GL10;
 
 import ru.nsu.ccfit.zuev.audio.BassSoundProvider;
 import ru.nsu.ccfit.zuev.audio.Status;
-import ru.nsu.ccfit.zuev.osu.async.SyncTaskManager;
-import ru.nsu.ccfit.zuev.osu.beatmap.BeatmapData;
 import ru.nsu.ccfit.zuev.osu.beatmap.parser.BeatmapParser;
 import ru.nsu.ccfit.zuev.osu.game.SongProgressBar;
 import ru.nsu.ccfit.zuev.osu.game.TimingPoint;
@@ -84,14 +83,11 @@ public class MainScene implements IUpdateHandler {
     private Sprite music_nowplay;
     private Scene scene;
     private ChangeableText musicInfoText;
-    private Random random = new Random();
-    private Rectangle[] spectrum = new Rectangle[120];
-    private float[] peakLevel = new float[120];
-    private float[] peakDownRate = new float[120];
-    private float[] peakAlpha = new float[120];
-    private Replay replay = null;
-    private TrackInfo selectedTrack;
-    private BeatmapData beatmapData;
+    private final Random random = new Random();
+    private final Rectangle[] spectrum = new Rectangle[120];
+    private final float[] peakLevel = new float[120];
+    private final float[] peakDownRate = new float[120];
+    private final float[] peakAlpha = new float[120];
     private List<TimingPoint> timingPoints;
     private TimingPoint currentTimingPoint, lastTimingPoint, firstTimingPoint;
 
@@ -99,7 +95,7 @@ public class MainScene implements IUpdateHandler {
     private boolean particleEnabled = false;
     private boolean isContinuousKiai = false;
 
-    private ParticleSystem[] particleSystem = new ParticleSystem[2];
+    private final ParticleSystem[] particleSystem = new ParticleSystem[2];
 
     //private BassAudioPlayer music;
 
@@ -113,15 +109,13 @@ public class MainScene implements IUpdateHandler {
     private float lastBeatPassTime = 0;
     private boolean doChange = false;
     private boolean doStop = false;
-    //    private int playIndex = 0;
-//    private int lastPlayIndex = -1;
     private long lastHit = 0;
     public boolean isOnExitAnim = false;
 
     private boolean isMenuShowed = false;
     private boolean doMenuShow = false;
     private float showPassTime = 0, syncPassedTime = 0;
-    private float menuBarX = 0, playY, optionsY, exitY;
+    private float menuBarX = 0, playY, exitY;
 
     private MainMenu menu;
 
@@ -132,7 +126,7 @@ public class MainScene implements IUpdateHandler {
         scene = new Scene();
 
         final TextureRegion tex = ResourceManager.getInstance().getTexture("menu-background");
-        
+
         if (tex != null) {
             float height = tex.getHeight();
             height *= Config.getRES_WIDTH()
@@ -149,7 +143,7 @@ public class MainScene implements IUpdateHandler {
         }
         lastBackground = new Sprite(0, 0, Config.getRES_WIDTH(), Config.getRES_HEIGHT(), ResourceManager.getInstance().getTexture("emptyavatar"));
         final TextureRegion logotex = ResourceManager.getInstance().getTexture("logo");
-        logo = new Sprite(Config.getRES_WIDTH() / 2 - logotex.getWidth() / 2, Config.getRES_HEIGHT() / 2 - logotex.getHeight() / 2, logotex) {
+        logo = new Sprite((float) Config.getRES_WIDTH() / 2 - (float) logotex.getWidth() / 2, (float) Config.getRES_HEIGHT() / 2 - (float) logotex.getHeight() / 2, logotex) {
             @Override
             public boolean onAreaTouched(final TouchEvent pSceneTouchEvent,
                                          final float pTouchAreaLocalX, final float pTouchAreaLocalY) {
@@ -163,10 +157,10 @@ public class MainScene implements IUpdateHandler {
                 if (pSceneTouchEvent.isActionUp()) {
                     Debug.i("logo up");
                     Debug.i("doMenuShow " + doMenuShow + " isMenuShowed " + isMenuShowed + " showPassTime " + showPassTime);
-                    if (doMenuShow == true && isMenuShowed == true) {
+                    if (doMenuShow && isMenuShowed) {
                         showPassTime = 20000;
                     }
-                    if (doMenuShow == false && isMenuShowed == false && logo.getX() == (Config.getRES_WIDTH() - logo.getWidth()) / 2) {
+                    if (!doMenuShow && !isMenuShowed && logo.getX() == (Config.getRES_WIDTH() - logo.getWidth()) / 2) {
                         doMenuShow = true;
                         showPassTime = 0;
                     }
@@ -178,7 +172,7 @@ public class MainScene implements IUpdateHandler {
             }
         };
 
-        logoOverlay = new Sprite(Config.getRES_WIDTH() / 2 - logotex.getWidth() / 2, Config.getRES_HEIGHT() / 2 - logotex.getHeight() / 2, logotex);
+        logoOverlay = new Sprite((float) Config.getRES_WIDTH() / 2 - (float) logotex.getWidth() / 2, (float) Config.getRES_HEIGHT() / 2 - (float) logotex.getHeight() / 2, logotex);
         logoOverlay.setScale(1.07f);
         logoOverlay.setAlpha(0.2f);
 
@@ -188,9 +182,9 @@ public class MainScene implements IUpdateHandler {
                 .getInstance().getFont("font"),
                 String.format(
                         Locale.getDefault(),
-                        "osu!droid %s\nby osu!droid Team\nosu! is \u00a9 peppy 2007-2023",
+                        "osu!droid %s\nby osu!droid Team\nosu! is © peppy 2007-2023",
                         BuildConfig.VERSION_NAME + " (" + BuildConfig.BUILD_TYPE + ")"
-                        )) {
+                )) {
 
 
             @Override
@@ -198,12 +192,12 @@ public class MainScene implements IUpdateHandler {
                                          final float pTouchAreaLocalX, final float pTouchAreaLocalY) {
                 if (pSceneTouchEvent.isActionDown()) {
                     new ConfirmDialogFragment().setMessage(R.string.dialog_visit_osu_website_message).showForResult(
-                        isAccepted -> {
-                            if(isAccepted) {
-                                Intent browserIntent = new Intent(Intent.ACTION_VIEW, Uri.parse("https://osu.ppy.sh"));
-                                GlobalManager.getInstance().getMainActivity().startActivity(browserIntent);
+                            isAccepted -> {
+                                if (isAccepted) {
+                                    Intent browserIntent = new Intent(Intent.ACTION_VIEW, Uri.parse("https://osu.ppy.sh"));
+                                    GlobalManager.getInstance().getMainActivity().startActivity(browserIntent);
+                                }
                             }
-                        }
                     );
                     return true;
                 }
@@ -221,12 +215,12 @@ public class MainScene implements IUpdateHandler {
                                          final float pTouchAreaLocalX, final float pTouchAreaLocalY) {
                 if (pSceneTouchEvent.isActionDown()) {
                     new ConfirmDialogFragment().setMessage(R.string.dialog_visit_osudroid_website_message).showForResult(
-                        isAccepted -> {
-                            if(isAccepted) {
-                                Intent browserIntent = new Intent(Intent.ACTION_VIEW, Uri.parse("https://" + OnlineManager.hostname));
-                                GlobalManager.getInstance().getMainActivity().startActivity(browserIntent);
+                            isAccepted -> {
+                                if (isAccepted) {
+                                    Intent browserIntent = new Intent(Intent.ACTION_VIEW, Uri.parse("https://" + OnlineManager.hostname));
+                                    GlobalManager.getInstance().getMainActivity().startActivity(browserIntent);
+                                }
                             }
-                        }
                     );
                     return true;
                 }
@@ -362,7 +356,7 @@ public class MainScene implements IUpdateHandler {
         musicInfoText = new ChangeableText(0, 0, ResourceManager.getInstance().getFont("font"), "", HorizontalAlign.RIGHT, 35);
 
         final TextureRegion nptex = ResourceManager.getInstance().getTexture("music_np");
-        music_nowplay = new Sprite(Utils.toRes(Config.getRES_WIDTH() - 500), 0, 40 * nptex.getWidth() / nptex.getHeight(), 40, nptex);
+        music_nowplay = new Sprite(Utils.toRes(Config.getRES_WIDTH() - 500), 0, (float) (40 * nptex.getWidth()) / nptex.getHeight(), 40, nptex);
 
         final Rectangle bgTopRect = new Rectangle(0, 0, Config.getRES_WIDTH(), Utils.toRes(120));
         bgTopRect.setColor(0, 0, 0, 0.3f);
@@ -373,8 +367,8 @@ public class MainScene implements IUpdateHandler {
         bgbottomRect.setColor(0, 0, 0, 0.3f);
 
         for (int i = 0; i < 120; i++) {
-            final float pX = Config.getRES_WIDTH() / 2;
-            final float pY = Config.getRES_HEIGHT() / 2;
+            final float pX = (float) Config.getRES_WIDTH() / 2;
+            final float pY = (float) Config.getRES_HEIGHT() / 2;
 
             spectrum[i] = new Rectangle(pX, pY, 260, 10);
             spectrum[i].setRotationCenter(0, 5);
@@ -390,7 +384,7 @@ public class MainScene implements IUpdateHandler {
         TextureRegion starRegion = ResourceManager.getInstance().getTexture("star");
 
         {
-            particleSystem[0] = new ParticleSystem(new PointParticleEmitter(-40, Config.getRES_HEIGHT() * 3 / 4), 32, 48, 128, starRegion);
+            particleSystem[0] = new ParticleSystem(new PointParticleEmitter(-40, (float) (Config.getRES_HEIGHT() * 3) / 4), 32, 48, 128, starRegion);
             particleSystem[0].setBlendFunction(GL10.GL_SRC_ALPHA, GL10.GL_ONE_MINUS_SRC_ALPHA);
 
             particleSystem[0].addParticleInitializer(new VelocityInitializer(150, 430, -480, -520));
@@ -407,7 +401,7 @@ public class MainScene implements IUpdateHandler {
         }
 
         {
-            particleSystem[1] = new ParticleSystem(new PointParticleEmitter(Config.getRES_WIDTH(), Config.getRES_HEIGHT() * 3 / 4), 32, 48, 128, starRegion);
+            particleSystem[1] = new ParticleSystem(new PointParticleEmitter(Config.getRES_WIDTH(), (float) (Config.getRES_HEIGHT() * 3) / 4), 32, 48, 128, starRegion);
             particleSystem[1].setBlendFunction(GL10.GL_SRC_ALPHA, GL10.GL_ONE_MINUS_SRC_ALPHA);
 
             particleSystem[1].addParticleInitializer(new VelocityInitializer(-150, -430, -480, -520));
@@ -424,22 +418,18 @@ public class MainScene implements IUpdateHandler {
         }
 
         TextureRegion chimuTex = ResourceManager.getInstance().getTexture("chimu");
-        Sprite chimu = new Sprite(Config.getRES_WIDTH() - chimuTex.getWidth(), (Config.getRES_HEIGHT() - chimuTex.getHeight()) / 2f, chimuTex)
-        {
-            public boolean onAreaTouched(TouchEvent pSceneTouchEvent, float pTouchAreaLocalX, float pTouchAreaLocalY)
-            {
-                if (pSceneTouchEvent.isActionDown())
-                {
+        Sprite chimu = new Sprite(Config.getRES_WIDTH() - chimuTex.getWidth(), (Config.getRES_HEIGHT() - chimuTex.getHeight()) / 2f, chimuTex) {
+            public boolean onAreaTouched(TouchEvent pSceneTouchEvent, float pTouchAreaLocalX, float pTouchAreaLocalY) {
+                if (pSceneTouchEvent.isActionDown()) {
                     setColor(0.7f, 0.7f, 0.7f);
                     doStop = true;
                     return true;
                 }
 
-                if (pSceneTouchEvent.isActionUp())
-                {
+                if (pSceneTouchEvent.isActionUp()) {
                     setColor(1, 1, 1);
                     musicControl(MusicOption.STOP);
-                    ChimuWebView.INSTANCE.show();
+                    BeatmapListing.INSTANCE.show();
                     return true;
                 }
 
@@ -523,7 +513,7 @@ public class MainScene implements IUpdateHandler {
 
     public void reloadOnlinePanel() {
         // IndexOutOfBoundsException 141 fix
-        SyncTaskManager.getInstance().run(() -> {
+        Execution.glThread(() -> {
             scene.detachChild(OnlineScoring.getInstance().getPanel());
             createOnlinePanel(scene);
         });
@@ -541,7 +531,7 @@ public class MainScene implements IUpdateHandler {
                 firstTimingPoint = null;
                 LibraryManager.INSTANCE.getPrevBeatmap();
                 loadBeatmapInfo();
-                loadTimeingPoints(true);
+                loadTimingPoints(true);
                 doChange = false;
                 doStop = false;
             }
@@ -549,7 +539,7 @@ public class MainScene implements IUpdateHandler {
             case PLAY: {
                 if (GlobalManager.getInstance().getSongService().getStatus() == Status.PAUSED || GlobalManager.getInstance().getSongService().getStatus() == Status.STOPPED) {
                     if (GlobalManager.getInstance().getSongService().getStatus() == Status.STOPPED) {
-                        loadTimeingPoints(false);
+                        loadTimingPoints(false);
                         GlobalManager.getInstance().getSongService().preLoad(beatmapInfo.getMusic());
                         if (firstTimingPoint != null) {
                             bpmLength = firstTimingPoint.getBeatLength() * 1000f;
@@ -597,7 +587,7 @@ public class MainScene implements IUpdateHandler {
                 LibraryManager.INSTANCE.getNextBeatmap();
                 firstTimingPoint = null;
                 loadBeatmapInfo();
-                loadTimeingPoints(true);
+                loadTimingPoints(true);
                 doChange = false;
                 doStop = false;
             }
@@ -630,11 +620,11 @@ public class MainScene implements IUpdateHandler {
             offset = 0;
         }
 
-        if (doMenuShow == true && isMenuShowed == false) {
-            logo.registerEntityModifier(new MoveXModifier(0.3f, Config.getRES_WIDTH() / 2 - logo.getWidth() / 2, Config.getRES_WIDTH() / 3 - logo.getWidth() / 2, EaseExponentialOut.getInstance()));
-            logoOverlay.registerEntityModifier(new MoveXModifier(0.3f, Config.getRES_WIDTH() / 2 - logo.getWidth() / 2, Config.getRES_WIDTH() / 3 - logo.getWidth() / 2, EaseExponentialOut.getInstance()));
-            for (int i = 0; i < spectrum.length; i++) {
-                spectrum[i].registerEntityModifier(new MoveXModifier(0.3f, Config.getRES_WIDTH() / 2, Config.getRES_WIDTH() / 3, EaseExponentialOut.getInstance()));
+        if (doMenuShow && !isMenuShowed) {
+            logo.registerEntityModifier(new MoveXModifier(0.3f, (float) Config.getRES_WIDTH() / 2 - logo.getWidth() / 2, (float) Config.getRES_WIDTH() / 3 - logo.getWidth() / 2, EaseExponentialOut.getInstance()));
+            logoOverlay.registerEntityModifier(new MoveXModifier(0.3f, (float) Config.getRES_WIDTH() / 2 - logo.getWidth() / 2, (float) Config.getRES_WIDTH() / 3 - logo.getWidth() / 2, EaseExponentialOut.getInstance()));
+            for (Rectangle rectangle : spectrum) {
+                rectangle.registerEntityModifier(new MoveXModifier(0.3f, (float) Config.getRES_WIDTH() / 2, (float) Config.getRES_WIDTH() / 3, EaseExponentialOut.getInstance()));
             }
             menu.getFirst().registerEntityModifier(new ParallelEntityModifier(
                     new MoveXModifier(0.5f, menuBarX - 100, menuBarX, EaseElasticOut.getInstance()),
@@ -651,7 +641,7 @@ public class MainScene implements IUpdateHandler {
             isMenuShowed = true;
         }
 
-        if (doMenuShow == true && isMenuShowed == true) {
+        if (doMenuShow) {
             if (showPassTime > 10000f) {
 
                 menu.showFirstMenu();
@@ -669,12 +659,12 @@ public class MainScene implements IUpdateHandler {
                         new MoveXModifier(1f, menuBarX, menuBarX - 50, EaseExponentialOut.getInstance()),
                         new org.anddev.andengine.entity.modifier.AlphaModifier(1f, 0.9f, 0, EaseExponentialOut.getInstance())));
 
-                logo.registerEntityModifier(new MoveXModifier(1f, Config.getRES_WIDTH() / 3 - logo.getWidth() / 2, Config.getRES_WIDTH() / 2 - logo.getWidth() / 2,
+                logo.registerEntityModifier(new MoveXModifier(1f, (float) Config.getRES_WIDTH() / 3 - logo.getWidth() / 2, (float) Config.getRES_WIDTH() / 2 - logo.getWidth() / 2,
                         EaseBounceOut.getInstance()));
-                logoOverlay.registerEntityModifier(new MoveXModifier(1f, Config.getRES_WIDTH() / 3 - logo.getWidth() / 2, Config.getRES_WIDTH() / 2 - logo.getWidth() / 2, EaseBounceOut.getInstance()));
+                logoOverlay.registerEntityModifier(new MoveXModifier(1f, (float) Config.getRES_WIDTH() / 3 - logo.getWidth() / 2, (float) Config.getRES_WIDTH() / 2 - logo.getWidth() / 2, EaseBounceOut.getInstance()));
 
-                for (int i = 0; i < spectrum.length; i++) {
-                    spectrum[i].registerEntityModifier(new MoveXModifier(1f, Config.getRES_WIDTH() / 3, Config.getRES_WIDTH() / 2, EaseBounceOut.getInstance()));
+                for (Rectangle rectangle : spectrum) {
+                    rectangle.registerEntityModifier(new MoveXModifier(1f, (float) Config.getRES_WIDTH() / 3, (float) Config.getRES_WIDTH() / 2, EaseBounceOut.getInstance()));
                 }
                 isMenuShowed = false;
                 doMenuShow = false;
@@ -806,7 +796,7 @@ public class MainScene implements IUpdateHandler {
     public void loadBeatmap() {
         LibraryManager.INSTANCE.shuffleLibrary();
         loadBeatmapInfo();
-        loadTimeingPoints(true);
+        loadTimingPoints(true);
     }
 
     public void loadBeatmapInfo() {
@@ -818,7 +808,7 @@ public class MainScene implements IUpdateHandler {
                 musicInfoText = new ChangeableText(Utils.toRes(Config.getRES_WIDTH() - 500), Utils.toRes(3),
                         ResourceManager.getInstance().getFont("font"), "None...", HorizontalAlign.RIGHT, 35);
             }
-            if (beatmapInfo.getArtistUnicode() != null && beatmapInfo.getTitleUnicode() != null && Config.isForceRomanized() == false) {
+            if (beatmapInfo.getArtistUnicode() != null && beatmapInfo.getTitleUnicode() != null && !Config.isForceRomanized()) {
                 musicInfoText.setText(beatmapInfo.getArtistUnicode() + " - " + beatmapInfo.getTitleUnicode(), true);
             } else if (beatmapInfo.getArtist() != null && beatmapInfo.getTitle() != null) {
                 musicInfoText.setText(beatmapInfo.getArtist() + " - " + beatmapInfo.getTitle(), true);
@@ -835,7 +825,7 @@ public class MainScene implements IUpdateHandler {
         }
     }
 
-    public void loadTimeingPoints(boolean reloadMusic) {
+    public void loadTimingPoints(boolean reloadMusic) {
         if (beatmapInfo == null) {
             return;
         }
@@ -848,14 +838,14 @@ public class MainScene implements IUpdateHandler {
         ArrayList<TrackInfo> trackInfos = beatmapInfo.getTracks();
         if (trackInfos != null && trackInfos.size() > 0) {
             int trackIndex = random.nextInt(trackInfos.size());
-            selectedTrack = trackInfos.get(trackIndex);
+            TrackInfo selectedTrack = trackInfos.get(trackIndex);
             GlobalManager.getInstance().setSelectedTrack(selectedTrack);
 
             if (selectedTrack.getBackground() != null) {
                 try {
                     final TextureRegion tex = Config.isSafeBeatmapBg() ?
-                        ResourceManager.getInstance().getTexture("menu-background") :
-                        ResourceManager.getInstance().loadBackground(selectedTrack.getBackground());
+                            ResourceManager.getInstance().getTexture("menu-background") :
+                            ResourceManager.getInstance().loadBackground(selectedTrack.getBackground());
 
                     if (tex != null) {
                         float height = tex.getHeight();
@@ -872,13 +862,7 @@ public class MainScene implements IUpdateHandler {
 
                             @Override
                             public void onModifierFinished(IModifier<IEntity> pModifier, final IEntity pItem) {
-                                GlobalManager.getInstance().getMainActivity().runOnUpdateThread(new Runnable() {
-                                    @Override
-                                    public void run() {
-                                        // TODO Auto-generated method stub
-                                        pItem.detachSelf();
-                                    }
-                                });
+                                GlobalManager.getInstance().getMainActivity().runOnUpdateThread(pItem::detachSelf);
                             }
                         }));
                         lastBackground = background;
@@ -905,7 +889,7 @@ public class MainScene implements IUpdateHandler {
             Arrays.fill(peakAlpha, 0f);
 
             BeatmapParser parser = new BeatmapParser(selectedTrack.getFilename());
-            beatmapData = parser.parse(false);
+            var beatmapData = parser.parse(false);
             if (beatmapData != null) {
                 timingPoints = new LinkedList<>();
                 for (final String s : beatmapData.rawTimingPoints) {
@@ -924,17 +908,13 @@ public class MainScene implements IUpdateHandler {
     }
 
     public void showExitDialog() {
-        GlobalManager.getInstance().getMainActivity().runOnUiThread(new Runnable() {
-            public void run() {
-                new ConfirmDialogFragment().setMessage(R.string.dialog_exit_message).showForResult(
-                    isAccepted -> {
-                        if (isAccepted) {
-                            exit();
-                        }
+        GlobalManager.getInstance().getMainActivity().runOnUiThread(() -> new ConfirmDialogFragment().setMessage(R.string.dialog_exit_message).showForResult(
+                isAccepted -> {
+                    if (isAccepted) {
+                        exit();
                     }
-                );
-            }
-        });
+                }
+        ));
     }
 
     public void exit() {
@@ -962,7 +942,7 @@ public class MainScene implements IUpdateHandler {
         if (exitsound != null) {
             exitsound.play();
         }
-        
+
         Rectangle bg = new Rectangle(0, 0, Config.getRES_WIDTH(),
                 Config.getRES_HEIGHT());
         bg.setColor(0, 0, 0, 1.0f);
@@ -1016,12 +996,12 @@ public class MainScene implements IUpdateHandler {
         int playIndex = LibraryManager.INSTANCE.findBeatmap(info);
         Debug.i("index " + playIndex);
         loadBeatmapInfo();
-        loadTimeingPoints(false);
+        loadTimingPoints(false);
         musicControl(MusicOption.SYNC);
     }
 
     public void watchReplay(String replayFile) {
-        replay = new Replay();
+        Replay replay = new Replay();
         if (replay.loadInfo(replayFile)) {
             if (replay.replayVersion >= 3) {
                 //replay

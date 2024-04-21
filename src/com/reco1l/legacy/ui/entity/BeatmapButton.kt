@@ -1,12 +1,12 @@
 package com.reco1l.legacy.ui.entity
 
-import com.reco1l.api.chimu.CheesegullAPI
 import com.reco1l.api.ibancho.RoomAPI
 import com.reco1l.api.ibancho.data.PlayerStatus.READY
 import com.reco1l.api.ibancho.data.RoomBeatmap
-import com.reco1l.framework.extensions.orAsyncCatch
-import com.reco1l.legacy.ui.ChimuWebView.FILE_EXTENSION
+import com.reco1l.framework.lang.async
 import com.reco1l.legacy.Multiplayer
+import com.reco1l.legacy.ui.beatmapdownloader.BeatmapDownloader
+import com.reco1l.legacy.ui.beatmapdownloader.BeatmapListing
 import com.reco1l.legacy.ui.multiplayer.RoomScene
 import org.anddev.andengine.entity.sprite.Sprite
 import org.anddev.andengine.entity.text.ChangeableText
@@ -16,7 +16,6 @@ import ru.nsu.ccfit.zuev.osu.RGBColor
 import ru.nsu.ccfit.zuev.osu.ToastLogger
 import ru.nsu.ccfit.zuev.osu.menu.MenuItemTrack
 import ru.nsu.ccfit.zuev.skins.OsuSkin
-import com.reco1l.legacy.ui.ChimuWebView.INSTANCE as chimuFragment
 import ru.nsu.ccfit.zuev.osu.GlobalManager.getInstance as getGlobal
 import ru.nsu.ccfit.zuev.osu.LibraryManager.INSTANCE as libraryManager
 import ru.nsu.ccfit.zuev.osu.ResourceManager.getInstance as getResources
@@ -24,7 +23,7 @@ import ru.nsu.ccfit.zuev.osu.ResourceManager.getInstance as getResources
 /**
  * Simplified version of [MenuItemTrack]
  */
-open class BeatmapButton : Sprite(0f, 0f, getResources().getTexture("menu-button-background"))
+class BeatmapButton : Sprite(0f, 0f, getResources().getTexture("menu-button-background"))
 {
 
     private val trackTitle = ChangeableText(32f, 20f, getResources().getFont("smallFont"), "", 100)
@@ -55,7 +54,7 @@ open class BeatmapButton : Sprite(0f, 0f, getResources().getTexture("menu-button
 
         this.attachChild(trackTitle)
         this.attachChild(creatorInfo)
-        stars.iterator().forEach { attachChild(it) }
+        stars.forEach { attachChild(it) }
     }
 
 
@@ -85,7 +84,7 @@ open class BeatmapButton : Sprite(0f, 0f, getResources().getTexture("menu-button
             if (libraryManager.library.isEmpty())
             {
                 getGlobal().songService.pause()
-                chimuFragment.show()
+                BeatmapListing.show()
                 return true
             }
 
@@ -106,12 +105,15 @@ open class BeatmapButton : Sprite(0f, 0f, getResources().getTexture("menu-button
             if (parentSetID == null)
                 return true
 
-            val url = "${CheesegullAPI.DOWNLOAD}/$parentSetID"
+            val url = BeatmapListing.mirror.downloadEndpoint(parentSetID!!)
 
-            { chimuFragment.startDownload(url, "$parentSetID $artist - $title$FILE_EXTENSION") }.orAsyncCatch {
-
-                ToastLogger.showText("Unable to download beatmap: ${it.message}", true)
-                it.printStackTrace()
+            async {
+                try {
+                    BeatmapDownloader.download(url, "$parentSetID $artist - $title.osz")
+                } catch (e: Exception) {
+                    ToastLogger.showText("Unable to download beatmap: ${e.message}", true)
+                    e.printStackTrace()
+                }
             }
         }
         return true
@@ -120,7 +122,7 @@ open class BeatmapButton : Sprite(0f, 0f, getResources().getTexture("menu-button
 
     fun updateBeatmap(beatmap: RoomBeatmap?)
     {
-        stars.iterator().forEach { it.isVisible = false }
+        stars.forEach { it.isVisible = false }
 
         if (beatmap == null)
         {
