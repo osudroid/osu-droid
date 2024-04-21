@@ -30,6 +30,8 @@ data class BeatmapSetModel(
  */
 data class BeatmapModel(
 
+    val id: Long,
+
     val version: String,
 
     val starRating: Double,

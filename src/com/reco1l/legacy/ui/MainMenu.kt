@@ -74,8 +74,6 @@ class MainMenu(val main: MainScene)
 
                     if (LibraryManager.INSTANCE.library.isEmpty())
                     {
-                        main.musicControl(MusicOption.STOP)
-
                         getGlobal().songService.isGaming = false
                         getGlobal().engine.scene = main.scene
 

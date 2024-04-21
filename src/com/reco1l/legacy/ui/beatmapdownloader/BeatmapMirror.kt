@@ -31,7 +31,9 @@ enum class BeatmapMirror(
      */
     val search: MirrorAction<JSONObject, BeatmapSetModel>,
 
-    val downloadEndpoint: (Long) -> String
+    val downloadEndpoint: (Long) -> String,
+
+    val previewEndpoint: (Long) -> String,
 
 ) {
 
@@ -65,6 +67,7 @@ enum class BeatmapMirror(
                             beatmaps.add(
                                 BeatmapModel(
 
+                                    id = obj.getLong("id"),
                                     version = obj.getString("version"),
                                     starRating = obj.getDouble("difficulty_rating"),
                                     ar = obj.getDouble("ar"),
@@ -84,7 +87,8 @@ enum class BeatmapMirror(
                 )
             }
         ),
-        downloadEndpoint = { "https://api.osu.direct/d/$it" }
+        downloadEndpoint = { "https://api.osu.direct/d/$it" },
+        previewEndpoint = { "https://api.osu.direct/media/preview/$it" },
     );
 
 }

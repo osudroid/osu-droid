@@ -3,13 +3,13 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="300dp"
     android:layout_height="wrap_content"
+    android:layout_margin="8dp"
     android:background="@drawable/rounded_rect"
     android:backgroundTint="#161622"
     android:clipToOutline="true"
-    android:orientation="vertical"
     android:gravity="center"
-    android:outlineProvider="background"
-    android:layout_margin="8dp">
+    android:orientation="vertical"
+    android:outlineProvider="background">
 
     <RelativeLayout
         android:layout_width="match_parent"
@@ -19,9 +19,9 @@
             android:id="@+id/cover"
             android:layout_width="match_parent"
             android:layout_height="100dp"
+            android:alpha="0.2"
             android:background="#4B4B80"
-            android:scaleType="centerCrop"
-            android:alpha="0.2"/>
+            android:scaleType="centerCrop" />
 
         <TextView
             android:id="@+id/status"
@@ -30,23 +30,21 @@
             android:layout_marginLeft="12dp"
             android:layout_marginTop="12dp"
             android:background="@drawable/rounded_rect"
-            android:text="Ranked"
-            android:textSize="10dp"
+            android:backgroundTint="#161622"
             android:paddingHorizontal="12dp"
             android:paddingVertical="2dp"
-            android:backgroundTint="#161622"
+            android:text="Ranked"
             android:textColor="#FFF"
-            />
+            android:textSize="10dp" />
 
         <TextView
             android:id="@+id/metadata"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Title\nArtist"
-            android:gravity="center"
-            android:textColor="#FFF"
             android:layout_centerInParent="true"
-            />
+            android:gravity="center"
+            android:text="Title\nArtist"
+            android:textColor="#FFF" />
 
     </RelativeLayout>
 
@@ -54,11 +52,11 @@
         android:id="@+id/difficulty"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:paddingHorizontal="8dp"
+        android:paddingVertical="4dp"
         android:textAlignment="center"
         android:textColor="#FFF"
-        android:textSize="24dp"
-        android:paddingHorizontal="8dp"
-        android:paddingVertical="4dp" />
+        android:textSize="24dp" />
 
     <LinearLayout
         android:layout_width="match_parent"
@@ -68,26 +66,50 @@
         android:orientation="vertical"
         android:paddingBottom="12dp">
 
-        <Button
-            android:id="@+id/download_button"
+        <LinearLayout
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Download"
-            android:textAllCaps="false"
-            android:background="@drawable/rounded_rect"
             android:layout_marginVertical="12dp"
-            android:backgroundTint="#363653"
-            android:textColor="#FFF" />
+            android:orientation="horizontal">
+
+            <Button
+                android:id="@+id/preview_button"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginRight="8dp"
+                android:background="@drawable/rounded_rect"
+                android:backgroundTint="#363653"
+                android:drawableLeft="@drawable/play_arrow_24px"
+                android:drawableTint="#FFF"
+                android:minWidth="0dp"
+                android:paddingHorizontal="12dp"
+                android:textAllCaps="false"
+                android:textColor="#FFF" />
+
+            <Button
+                android:id="@+id/download_button"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:background="@drawable/rounded_rect"
+                android:backgroundTint="#363653"
+                android:drawableLeft="@drawable/download_24px"
+                android:drawablePadding="6dp"
+                android:drawableTint="#FFF"
+                android:paddingHorizontal="12dp"
+                android:text="Download"
+                android:textAllCaps="false"
+                android:textColor="#FFF" />
+
+        </LinearLayout>
 
 
         <TextView
             android:id="@+id/creator"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Mapped by Acivev"
-            android:textColor="#8282A8"
             android:gravity="center"
-            />
+            android:text="Mapped by Acivev"
+            android:textColor="#8282A8" />
 
     </LinearLayout>
 
