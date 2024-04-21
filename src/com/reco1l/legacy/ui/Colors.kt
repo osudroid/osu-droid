@@ -34,7 +34,7 @@ object Colors {
     }
 
     fun interpolateAt(
-        time: Float,
+        time: Double,
         startColour: Int,
         endColour: Int,
         startTime: Float,
@@ -49,11 +49,11 @@ object Colors {
         val current = time - startTime
         val duration = endTime - startTime
 
-        if (duration == 0f || current == 0f) {
+        if (duration == 0f || current == 0.0) {
             return startColour
         }
 
-        val t = easing.getPercentage(current, duration).coerceIn(0.0f, 1.0f)
+        val t = easing.getPercentage(current.toFloat(), duration).coerceIn(0.0f, 1.0f)
 
         val startRed = toLinear(Color.red(startColour) / 255f)
         val startGreen = toLinear(Color.green(startColour) / 255f)
@@ -106,7 +106,7 @@ object OsuColors {
         9.0f to Color.BLACK
     )
 
-    fun getStarRatingColor(point: Float): Int {
+    fun getStarRatingColor(point: Double): Int {
 
         if (point < 0.1f) {
             return 0xAAAAAA

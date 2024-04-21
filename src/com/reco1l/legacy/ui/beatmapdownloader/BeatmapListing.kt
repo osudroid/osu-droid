@@ -1,7 +1,6 @@
 package com.reco1l.legacy.ui.beatmapdownloader
 
 import android.graphics.BitmapFactory
-import android.graphics.drawable.Drawable
 import android.util.Log
 import android.view.*
 import android.view.View.*
@@ -17,6 +16,7 @@ import androidx.recyclerview.widget.RecyclerView
 import androidx.recyclerview.widget.RecyclerView.OnScrollListener
 import com.edlplan.ui.fragment.BaseFragment
 import com.google.android.material.progressindicator.CircularProgressIndicator
+import com.reco1l.framework.bass.URLBassStream
 import com.reco1l.framework.extensions.forEach
 import com.reco1l.framework.lang.uiThread
 import com.reco1l.framework.net.IDownloaderObserver
@@ -27,7 +27,10 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
+import ru.nsu.ccfit.zuev.audio.Status
 import ru.nsu.ccfit.zuev.osu.Config
+import ru.nsu.ccfit.zuev.osu.GlobalManager
+import ru.nsu.ccfit.zuev.osu.MainScene.MusicOption
 import ru.nsu.ccfit.zuev.osuplus.R
 import java.net.URL
 
@@ -38,10 +41,10 @@ object BeatmapListing : BaseFragment(),
     OnKeyListener {
 
 
-    /**
-     * The mirror to use.
-     */
     var mirror = BeatmapMirror.OSU_DIRECT
+
+    var isPlayingMusic = false
+        private set
 
 
     override val layoutID = R.layout.beatmap_downloader_fragment
@@ -142,6 +145,18 @@ object BeatmapListing : BaseFragment(),
         }
     }
 
+    fun stopPreviews(shouldResumeMusic: Boolean) {
+        if (!::recyclerView.isInitialized) {
+            return
+        }
+
+        recyclerView.forEach { view ->
+
+            val holder = recyclerView.getChildViewHolder(view) as BeatmapSetViewHolder
+            holder.stopPreview(shouldResumeMusic)
+        }
+    }
+
 
     override fun onEditorAction(v: TextView?, actionId: Int, event: KeyEvent?): Boolean {
 
@@ -164,9 +179,18 @@ object BeatmapListing : BaseFragment(),
     }
 
 
+    override fun show() {
+        isPlayingMusic = GlobalManager.getInstance().songService.status == Status.PLAYING
+        super.show()
+    }
+
     override fun dismiss() {
 
+        stopPreviews(true)
+
         pendingRequest?.cancel()
+        pendingRequest = null
+
         offset = 0
         adapter.data.clear()
 
@@ -182,24 +206,34 @@ object BeatmapListing : BaseFragment(),
 
 // Information
 
-class BeatmapInformationDetails(
-
-    val beatmapSet: BeatmapSetModel,
-
-    val coverDrawable: Drawable
-
-) : BaseFragment() {
+class BeatmapSetDetails(val beatmapSet: BeatmapSetModel, val holder: BeatmapSetViewHolder) :
+    BaseFragment() {
 
 
     override val layoutID = R.layout.beatmap_downloader_details
 
+
+    lateinit var previewButton: Button
+
+
     private lateinit var cover: ImageView
+
     private lateinit var status: TextView
+
     private lateinit var metadata: TextView
+
     private lateinit var details: TextView
-    private lateinit var button: Button
+
+    private lateinit var downloadButton: Button
+
     private lateinit var creator: TextView
+
     private lateinit var difficulty: LinearLayout
+
+
+    init {
+        holder.detailsFragment = this
+    }
 
 
     override fun onLoadView() {
@@ -211,25 +245,16 @@ class BeatmapInformationDetails(
 
         cover = findViewById(R.id.cover)!!
         status = findViewById(R.id.status)!!
-        metadata = findViewById(R.id.metadata)!!
         details = findViewById(R.id.details)!!
-        button = findViewById(R.id.download_button)!!
         creator = findViewById(R.id.creator)!!
+        metadata = findViewById(R.id.metadata)!!
         difficulty = findViewById(R.id.difficulty)!!
+        previewButton = findViewById(R.id.preview_button)!!
+        downloadButton = findViewById(R.id.download_button)!!
 
-        status.text = beatmapSet.status.capitalize()
-        creator.text = "Mapped by ${beatmapSet.creator}"
-
-
-        metadata.setText(buildSpannedString {
-
-            append(if (Config.isForceRomanized()) beatmapSet.title else beatmapSet.titleUnicode)
-            appendLine()
-            color(0xFFB2B2CC.toInt()) {
-                append(if (Config.isForceRomanized()) beatmapSet.artist else beatmapSet.artistUnicode)
-            }
-
-        }, TextView.BufferType.SPANNABLE)
+        status.text = holder.status.text
+        creator.text = holder.creator.text
+        metadata.setText(holder.metadata.text, TextView.BufferType.SPANNABLE)
 
 
         val beatmaps = beatmapSet.beatmaps
@@ -239,18 +264,34 @@ class BeatmapInformationDetails(
             val button = TextView(ContextThemeWrapper(context, R.style.beatmap_difficulty_icon))
             difficulty.addView(button)
 
-            button.setTextColor(OsuColors.getStarRatingColor(beatmap.starRating.toFloat()))
+            button.setTextColor(OsuColors.getStarRatingColor(beatmap.starRating))
             button.setOnClickListener { selectDifficulty(button, beatmap) }
 
         }
         selectDifficulty(difficulty[0] as TextView, beatmaps[0])
 
-        button.setOnClickListener {
+
+        // If it's already playing when shown.
+        if (holder.previewStream != null) {
+            previewButton.setCompoundDrawablesWithIntrinsicBounds(R.drawable.pause_24px, 0, 0, 0)
+        }
+
+        previewButton.setOnClickListener {
+
+            if (holder.previewStream == null) {
+                BeatmapListing.stopPreviews(false)
+                holder.playPreview(beatmapSet)
+            } else {
+                holder.stopPreview(true)
+            }
+        }
+
+        downloadButton.setOnClickListener {
             val url = BeatmapListing.mirror.downloadEndpoint(beatmapSet.id)
             BeatmapDownloader.download(url, "${beatmapSet.id} ${beatmapSet.artist} - ${beatmapSet.title}.osz")
         }
 
-        cover.setImageDrawable(coverDrawable)
+        cover.setImageDrawable(holder.cover.drawable)
         root!!.setOnClickListener { dismiss() }
     }
 
@@ -275,6 +316,12 @@ class BeatmapInformationDetails(
         """.trimIndent()
     }
 
+
+    override fun dismiss() {
+        holder.detailsFragment = null
+        super.dismiss()
+    }
+
 }
 
 
@@ -287,7 +334,7 @@ class BeatmapSetAdapter : RecyclerView.Adapter<BeatmapSetViewHolder>() {
     var data = mutableListOf<BeatmapSetModel>()
 
 
-    private val coversScope = CoroutineScope(Dispatchers.IO)
+    private val mediaScope = CoroutineScope(Dispatchers.IO)
 
 
     init {
@@ -296,8 +343,13 @@ class BeatmapSetAdapter : RecyclerView.Adapter<BeatmapSetViewHolder>() {
 
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): BeatmapSetViewHolder {
-        val inf = LayoutInflater.from(parent.context)
-        return BeatmapSetViewHolder(inf.inflate(R.layout.beatmap_downloader_set_item, parent, false))
+
+        val inflater = LayoutInflater.from(parent.context)
+
+        return BeatmapSetViewHolder(
+            inflater.inflate(R.layout.beatmap_downloader_set_item, parent, false),
+            mediaScope
+        )
     }
 
     override fun getItemId(position: Int): Long {
@@ -309,27 +361,38 @@ class BeatmapSetAdapter : RecyclerView.Adapter<BeatmapSetViewHolder>() {
     }
 
     override fun onBindViewHolder(holder: BeatmapSetViewHolder, position: Int) {
-        holder.bind(data[position], coversScope)
+        holder.bind(data[position])
     }
 
 }
 
-class BeatmapSetViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
-
-    private val cover: ImageView = itemView.findViewById(R.id.cover)
-
-    private val status: TextView = itemView.findViewById(R.id.status)
-
-    private val metadata: TextView = itemView.findViewById(R.id.metadata)
-
-    private val button: Button = itemView.findViewById(R.id.download_button)
-
-    private val creator: TextView = itemView.findViewById(R.id.creator)
-
-    private val difficulty: TextView = itemView.findViewById(R.id.difficulty)
+class BeatmapSetViewHolder(itemView: View, private val mediaScope: CoroutineScope)
+    : RecyclerView.ViewHolder(itemView) {
 
 
-    private var coverRequest: Job? = null
+    var detailsFragment: BeatmapSetDetails? = null
+
+    var previewStream: URLBassStream? = null
+
+
+    val cover: ImageView = itemView.findViewById(R.id.cover)
+
+    val status: TextView = itemView.findViewById(R.id.status)
+
+    val creator: TextView = itemView.findViewById(R.id.creator)
+
+    val metadata: TextView = itemView.findViewById(R.id.metadata)
+
+    val difficulty: TextView = itemView.findViewById(R.id.difficulty)
+
+    val previewButton: Button = itemView.findViewById(R.id.preview_button)
+
+    val downloadButton: Button = itemView.findViewById(R.id.download_button)
+
+
+    private var coverJob: Job? = null
+
+    private var previewJob: Job? = null
 
 
     init {
@@ -338,7 +401,7 @@ class BeatmapSetViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
     }
 
 
-    fun bind(beatmapSet: BeatmapSetModel, coversScope: CoroutineScope) {
+    fun bind(beatmapSet: BeatmapSetModel) {
 
         status.text = beatmapSet.status.capitalize()
         creator.text = "Mapped by ${beatmapSet.creator}"
@@ -361,7 +424,7 @@ class BeatmapSetViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
             for (i in beatmaps.indices) {
                 val beatmap = beatmaps[i]
 
-                color(OsuColors.getStarRatingColor(beatmap.starRating.toFloat())) {
+                color(OsuColors.getStarRatingColor(beatmap.starRating)) {
                     append("⦿")
                 }
 
@@ -372,10 +435,10 @@ class BeatmapSetViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
 
         }, TextView.BufferType.SPANNABLE)
 
-        coverRequest?.cancel()
+        coverJob?.cancel()
 
         if (beatmapSet.thumbnail != null) {
-            coverRequest = coversScope.launch {
+            coverJob = mediaScope.launch {
 
                 try {
                     URL(beatmapSet.thumbnail).openStream().use {
@@ -390,22 +453,87 @@ class BeatmapSetViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
                     uiThread { cover.setImageDrawable(null) }
                 }
 
-                coverRequest = null
+                coverJob = null
             }
         } else {
             cover.setImageDrawable(null)
         }
 
-        button.setOnClickListener {
+        previewButton.setOnClickListener {
+
+            if (previewStream == null) {
+                BeatmapListing.stopPreviews(false)
+                playPreview(beatmapSet)
+            } else {
+                stopPreview(true)
+            }
+        }
+
+        downloadButton.setOnClickListener {
             val url = BeatmapListing.mirror.downloadEndpoint(beatmapSet.id)
             BeatmapDownloader.download(url, "${beatmapSet.id} ${beatmapSet.artist} - ${beatmapSet.title}.osz")
         }
 
 
         itemView.setOnClickListener {
-            BeatmapInformationDetails(beatmapSet, cover.drawable).show()
+            BeatmapSetDetails(beatmapSet, this).show()
         }
     }
 
+
+    fun playPreview(beatmapSet: BeatmapSetModel) {
+        previewJob = mediaScope.launch {
+
+            BeatmapListing.stopPreviews(true)
+
+            try {
+                previewStream = URLBassStream(BeatmapListing.mirror.previewEndpoint(beatmapSet.beatmaps[0].id)) {
+                    stopPreview(true)
+
+                    if (BeatmapListing.isPlayingMusic) {
+                        GlobalManager.getInstance().mainScene.musicControl(MusicOption.PLAY)
+                    }
+                }
+
+                GlobalManager.getInstance().mainScene.musicControl(MusicOption.PAUSE)
+
+                previewStream!!.setVolume(Config.getBgmVolume())
+                previewStream!!.play()
+
+                uiThread {
+                    previewButton.setCompoundDrawablesWithIntrinsicBounds(R.drawable.pause_24px, 0, 0, 0)
+                    detailsFragment?.previewButton?.setCompoundDrawablesWithIntrinsicBounds(R.drawable.pause_24px, 0, 0, 0)
+                }
+
+            } catch (e: Exception) {
+                Log.e("BeatmapListing", "Failed to load preview", e)
+            }
+
+            previewJob = null
+        }
+    }
+
+
+    fun stopPreview(shouldResumeMusic: Boolean) {
+
+        try {
+            previewJob?.cancel()
+            previewJob = null
+            previewStream?.free()
+            previewStream = null
+
+        } catch (e: Exception) {
+            Log.e("BeatmapListing", "Failed to stop preview", e)
+        }
+
+        uiThread {
+            previewButton.setCompoundDrawablesWithIntrinsicBounds(R.drawable.play_arrow_24px, 0, 0, 0)
+            detailsFragment?.previewButton?.setCompoundDrawablesWithIntrinsicBounds(R.drawable.play_arrow_24px, 0, 0, 0)
+        }
+
+        if (shouldResumeMusic && BeatmapListing.isPlayingMusic) {
+            GlobalManager.getInstance().mainScene.musicControl(MusicOption.PLAY)
+        }
+    }
 
 }

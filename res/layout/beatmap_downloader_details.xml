@@ -2,8 +2,8 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:gravity="center"
-    android:background="#BE13131A">
+    android:background="#BE13131A"
+    android:gravity="center">
 
     <LinearLayout
         android:layout_width="500dp"
@@ -11,11 +11,11 @@
         android:layout_margin="8dp"
         android:background="@drawable/rounded_rect"
         android:backgroundTint="#161622"
+        android:clickable="true"
         android:clipToOutline="true"
         android:gravity="center"
         android:orientation="vertical"
-        android:outlineProvider="background"
-        android:clickable="true">
+        android:outlineProvider="background">
 
         <RelativeLayout
             android:layout_width="match_parent"
@@ -68,16 +68,15 @@
             </LinearLayout>
 
 
-
         </RelativeLayout>
 
         <LinearLayout
             android:id="@+id/difficulty"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:orientation="horizontal"
             android:paddingHorizontal="12dp"
-            android:paddingVertical="8dp"
-            android:orientation="horizontal">
+            android:paddingVertical="8dp">
 
         </LinearLayout>
 
@@ -87,27 +86,53 @@
             android:background="#1E1E2E"
             android:gravity="center|right"
             android:orientation="vertical"
-            android:paddingVertical="14dp"
-            android:paddingHorizontal="16dp">
+            android:paddingHorizontal="16dp"
+            android:paddingVertical="14dp">
 
             <TextView
                 android:id="@+id/details"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:textColor="#FFF"
-                android:text="Diffname\nStar rating: 0.00\nAR: 0.00 - OD: 0.00 - CS: 0.00 - HP drain: 0.00\nLength: 00:00 - BPM: 0.00 / 0.00">
+                android:text="Diffname\nStar rating: 0.00\nAR: 0.00 - OD: 0.00 - CS: 0.00 - HP drain: 0.00\nLength: 00:00 - BPM: 0.00 / 0.00"
+                android:textColor="#FFF">
 
             </TextView>
 
-            <Button
-                android:id="@+id/download_button"
+            <LinearLayout
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:background="@drawable/rounded_rect"
-                android:backgroundTint="#363653"
-                android:text="Download"
-                android:textAllCaps="false"
-                android:textColor="#FFF" />
+                android:orientation="horizontal">
+
+                <Button
+                    android:id="@+id/preview_button"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginRight="8dp"
+                    android:background="@drawable/rounded_rect"
+                    android:backgroundTint="#363653"
+                    android:drawableLeft="@drawable/play_arrow_24px"
+                    android:drawableTint="#FFF"
+                    android:minWidth="0dp"
+                    android:paddingHorizontal="12dp"
+                    android:textAllCaps="false"
+                    android:textColor="#FFF" />
+
+                <Button
+                    android:id="@+id/download_button"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:background="@drawable/rounded_rect"
+                    android:backgroundTint="#363653"
+                    android:drawableLeft="@drawable/download_24px"
+                    android:drawablePadding="6dp"
+                    android:drawableTint="#FFF"
+                    android:paddingHorizontal="12dp"
+                    android:text="Download"
+                    android:textAllCaps="false"
+                    android:textColor="#FFF" />
+
+            </LinearLayout>
+
 
         </LinearLayout>
 
