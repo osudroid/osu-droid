@@ -2,22 +2,10 @@ package com.reco1l.legacy.ui.beatmapdownloader
 
 import android.graphics.BitmapFactory
 import android.util.Log
-import android.view.ContextThemeWrapper
-import android.view.KeyEvent
-import android.view.LayoutInflater
-import android.view.View
-import android.view.View.GONE
-import android.view.View.OnKeyListener
-import android.view.View.VISIBLE
-import android.view.ViewGroup
-import android.view.ViewOutlineProvider
+import android.view.*
+import android.view.View.*
 import android.view.inputmethod.EditorInfo
-import android.widget.Button
-import android.widget.EditText
-import android.widget.ImageButton
-import android.widget.ImageView
-import android.widget.LinearLayout
-import android.widget.TextView
+import android.widget.*
 import android.widget.TextView.OnEditorActionListener
 import androidx.core.text.buildSpannedString
 import androidx.core.text.color
@@ -29,12 +17,9 @@ import androidx.recyclerview.widget.RecyclerView.OnScrollListener
 import com.edlplan.ui.fragment.BaseFragment
 import com.google.android.material.progressindicator.CircularProgressIndicator
 import com.reco1l.framework.bass.URLBassStream
-import com.reco1l.framework.net.IDownloaderObserver
-import ru.nsu.ccfit.zuev.osuplus.R
-
 import com.reco1l.framework.extensions.forEach
-import com.reco1l.framework.extensions.ignoreException
 import com.reco1l.framework.lang.mainThread
+import com.reco1l.framework.net.IDownloaderObserver
 import com.reco1l.framework.net.JsonRequester
 import com.reco1l.framework.net.QueryContent
 import com.reco1l.legacy.ui.OsuColors
@@ -46,6 +31,7 @@ import ru.nsu.ccfit.zuev.audio.Status
 import ru.nsu.ccfit.zuev.osu.Config
 import ru.nsu.ccfit.zuev.osu.GlobalManager
 import ru.nsu.ccfit.zuev.osu.MainScene.MusicOption
+import ru.nsu.ccfit.zuev.osuplus.R
 import java.net.URL
 
 
@@ -324,7 +310,7 @@ class BeatmapSetDetails(val beatmapSet: BeatmapSetModel, val holder: BeatmapSetV
         details.text = """
             ${beatmap.version}
             Star rating: ${beatmap.starRating}
-            AR: ${beatmap.ar} - OD: ${beatmap.od} - CS: ${beatmap.cs} - HP drain: ${beatmap.hp}
+            AR: ${beatmap.ar} - OD: ${beatmap.od} - CS: ${beatmap.cs} - HP: ${beatmap.hp}
             Circles: ${beatmap.circleCount} - Sliders: ${beatmap.sliderCount} - Spinners: ${beatmap.spinnerCount}
             Length: ${beatmap.lengthSec} - BPM: ${beatmap.bpm}
         """.trimIndent()
