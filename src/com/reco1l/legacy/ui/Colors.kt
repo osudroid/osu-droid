@@ -78,9 +78,9 @@ object Colors {
         val scalar = max(1f, 1f + amount)
 
         return packARGB(
-            (Color.red(color) / 255f) * scalar,
-            (Color.green(color) / 255f) * scalar,
-            (Color.blue(color) / 255f) * scalar,
+            Color.red(color) / 255f * scalar,
+            Color.green(color) / 255f * scalar,
+            Color.blue(color) / 255f * scalar,
             Color.alpha(color) / 255f
         )
     }
