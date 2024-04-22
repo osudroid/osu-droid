@@ -417,8 +417,8 @@ public class MainScene implements IUpdateHandler {
             scene.attachChild(particleSystem[1]);
         }
 
-        TextureRegion chimuTex = ResourceManager.getInstance().getTexture("chimu");
-        Sprite chimu = new Sprite(Config.getRES_WIDTH() - chimuTex.getWidth(), (Config.getRES_HEIGHT() - chimuTex.getHeight()) / 2f, chimuTex) {
+        TextureRegion beatmapDownloaderTex = ResourceManager.getInstance().getTexture("beatmap_downloader");
+        Sprite beatmapDownloader = new Sprite(Config.getRES_WIDTH() - beatmapDownloaderTex.getWidth(), (Config.getRES_HEIGHT() - beatmapDownloaderTex.getHeight()) / 2f, beatmapDownloaderTex) {
             public boolean onAreaTouched(TouchEvent pSceneTouchEvent, float pTouchAreaLocalX, float pTouchAreaLocalY) {
                 if (pSceneTouchEvent.isActionDown()) {
                     setColor(0.7f, 0.7f, 0.7f);
@@ -472,11 +472,11 @@ public class MainScene implements IUpdateHandler {
         scene.attachChild(music_pause);
         scene.attachChild(music_stop);
         scene.attachChild(music_next);
-        scene.attachChild(chimu);
+        scene.attachChild(beatmapDownloader);
 
         scene.registerTouchArea(logo);
         scene.registerTouchArea(author);
-        scene.registerTouchArea(chimu);
+        scene.registerTouchArea(beatmapDownloader);
         scene.registerTouchArea(yasonline);
         scene.registerTouchArea(music_prev);
         scene.registerTouchArea(music_play);

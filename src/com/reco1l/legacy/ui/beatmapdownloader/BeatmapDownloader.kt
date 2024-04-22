@@ -2,13 +2,10 @@ package com.reco1l.legacy.ui.beatmapdownloader
 
 import android.os.Environment.DIRECTORY_DOWNLOADS
 import android.view.View
-import com.reco1l.framework.net.IDownloaderObserver
-import ru.nsu.ccfit.zuev.osu.GlobalManager
-import ru.nsu.ccfit.zuev.osuplus.R
-
 import com.reco1l.framework.extensions.decodeUtf8
 import com.reco1l.framework.extensions.forFilesystem
 import com.reco1l.framework.net.Downloader
+import com.reco1l.framework.net.IDownloaderObserver
 import com.reco1l.framework.net.SizeMeasure
 import com.reco1l.legacy.Multiplayer
 import com.reco1l.legacy.ui.DownloadFragment
@@ -16,10 +13,12 @@ import com.reco1l.legacy.ui.multiplayer.RoomScene
 import net.lingala.zip4j.ZipFile
 import org.apache.commons.io.FilenameUtils
 import ru.nsu.ccfit.zuev.osu.Config
+import ru.nsu.ccfit.zuev.osu.GlobalManager
 import ru.nsu.ccfit.zuev.osu.LibraryManager
 import ru.nsu.ccfit.zuev.osu.ToastLogger
 import ru.nsu.ccfit.zuev.osu.helper.FileUtils
 import ru.nsu.ccfit.zuev.osu.helper.StringTable
+import ru.nsu.ccfit.zuev.osuplus.R
 import java.io.IOException
 
 object BeatmapDownloader : IDownloaderObserver {
@@ -61,10 +60,10 @@ object BeatmapDownloader : IDownloaderObserver {
         fragment.setDownloader(downloader) {
 
             fragment.text.visibility = View.VISIBLE
-            fragment.text.text = context.getString(R.string.chimu_connecting)
+            fragment.text.text = context.getString(R.string.beatmap_downloader_connecting)
 
             fragment.button.visibility = View.VISIBLE
-            fragment.button.text = context.getString(R.string.chimu_cancel)
+            fragment.button.text = context.getString(R.string.beatmap_downloader_cancel)
 
             downloader.observer = this@BeatmapDownloader
             downloader.download()
@@ -79,7 +78,7 @@ object BeatmapDownloader : IDownloaderObserver {
 
     override fun onDownloadStart(downloader: Downloader) {
         context.runOnUiThread {
-            fragment.text.text = StringTable.format(R.string.chimu_downloading, currentFilename)
+            fragment.text.text = StringTable.format(R.string.beatmap_downloader_downloading, currentFilename)
         }
     }
 
@@ -89,7 +88,7 @@ object BeatmapDownloader : IDownloaderObserver {
             fragment.progressBar.isIndeterminate = true
             fragment.progressBar.visibility = View.VISIBLE
 
-            fragment.text.text = StringTable.format(R.string.chimu_importing, currentFilename)
+            fragment.text.text = StringTable.format(R.string.beatmap_downloader_importing, currentFilename)
             fragment.button.visibility = View.GONE
         }
 
@@ -135,7 +134,7 @@ object BeatmapDownloader : IDownloaderObserver {
         val info = "\n%.3f kb/s (%d%%)".format(downloader.getSpeed(SizeMeasure.MBPS), downloader.progress.toInt())
 
         context.runOnUiThread {
-            fragment.text.text = context.getString(R.string.chimu_downloading).format(
+            fragment.text.text = context.getString(R.string.beatmap_downloader_downloading).format(
                 currentFilename
             ) + info
             fragment.progressBar.isIndeterminate = false
