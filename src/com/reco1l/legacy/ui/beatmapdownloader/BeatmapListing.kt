@@ -33,6 +33,8 @@ import ru.nsu.ccfit.zuev.osu.GlobalManager
 import ru.nsu.ccfit.zuev.osu.MainScene.MusicOption
 import ru.nsu.ccfit.zuev.osuplus.R
 import java.net.URL
+import java.text.SimpleDateFormat
+import java.util.*
 
 
 object BeatmapListing : BaseFragment(),
@@ -307,12 +309,17 @@ class BeatmapSetDetails(val beatmapSet: BeatmapSetModel, val holder: BeatmapSetV
             }
         }
 
+        val sdf = SimpleDateFormat(
+            if (beatmap.lengthSec >= 3600) "HH:mm:ss"
+            else "mm:ss"
+        ).also { it.timeZone = TimeZone.getTimeZone("GMT+0") }
+
         details.text = """
             ${beatmap.version}
             Star rating: ${beatmap.starRating}
             AR: ${beatmap.ar} - OD: ${beatmap.od} - CS: ${beatmap.cs} - HP: ${beatmap.hp}
             Circles: ${beatmap.circleCount} - Sliders: ${beatmap.sliderCount} - Spinners: ${beatmap.spinnerCount}
-            Length: ${beatmap.lengthSec} - BPM: ${beatmap.bpm}
+            Length: ${sdf.format(beatmap.lengthSec * 1000)} - BPM: ${beatmap.bpm}
         """.trimIndent()
     }
 
