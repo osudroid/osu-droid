@@ -6,10 +6,21 @@
 	<string name="accessibility_detector_settings">Go to accessibility settings</string>
 	<string name="accessibility_detector_exit">Exit game</string>
 
+	<!--Beatmap downloader-->
 	<string name="beatmap_downloader_cancel">Cancel</string>
 	<string name="beatmap_downloader_connecting">Connecting to server...</string>
 	<string name="beatmap_downloader_downloading">Downloading beatmap %s...</string>
 	<string name="beatmap_downloader_importing">Importing beatmap %s...</string>
+
+	<!--Ranked status-->
+	<string name="ranked_status_ranked"><font color="#41FF64">Ranked</font></string>
+	<string name="ranked_status_approved"><font color="#41FF64">Approved</font></string>
+	<string name="ranked_status_qualified"><font color="#64F2FF">Qualified</font></string>
+	<string name="ranked_status_loved"><font color="#FA64FF">Loved</font></string>
+	<string name="ranked_status_pending"><font color="#FFAC64">Pending</font></string>
+	<string name="ranked_status_wip"><font color="#FFAC64">Work in Progress</font></string>
+	<string name="ranked_status_graveyard"><font color="#FFF">Graveyard</font></string>
+
 
 	<string name="message_error">Error: %s</string>
 	<string name="message_error_createdir">Cannot create %s</string>

@@ -410,7 +410,7 @@ class BeatmapSetViewHolder(itemView: View, private val mediaScope: CoroutineScop
 
     fun bind(beatmapSet: BeatmapSetModel) {
 
-        status.text = beatmapSet.status.capitalize()
+        status.text = itemView.context.getText(beatmapSet.status.stringId)
         creator.text = "Mapped by ${beatmapSet.creator}"
 
 
