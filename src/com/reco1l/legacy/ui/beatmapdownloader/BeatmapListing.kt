@@ -115,8 +115,11 @@ object BeatmapListing : BaseFragment(),
 
             if (!keepData) {
                 offset = 0
+
+                val itemCount = adapter.data.size
                 adapter.data.clear()
-                uiThread { adapter.notifyDataSetChanged() }
+
+                uiThread { adapter.notifyItemRangeRemoved(0, itemCount) }
             }
 
             JsonRequester(mirror.search.endpoint).use { request ->
