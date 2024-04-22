@@ -1,5 +1,7 @@
 package com.reco1l.legacy.ui.beatmapdownloader
 
+import ru.nsu.ccfit.zuev.osu.RankedStatus
+
 /**
  * Beatmap set response model for beatmaps mirrors.
  */
@@ -15,7 +17,7 @@ data class BeatmapSetModel(
 
     val artistUnicode: String,
 
-    val status: String,
+    val status: RankedStatus,
 
     val creator: String,
 

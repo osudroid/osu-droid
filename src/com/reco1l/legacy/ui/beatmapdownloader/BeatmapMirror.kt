@@ -1,6 +1,7 @@
 package com.reco1l.legacy.ui.beatmapdownloader
 
 import org.json.JSONObject
+import ru.nsu.ccfit.zuev.osu.RankedStatus
 
 
 /**
@@ -53,7 +54,7 @@ enum class BeatmapMirror(
                     titleUnicode = it.getString("title_unicode"),
                     artist = it.getString("artist"),
                     artistUnicode = it.getString("artist_unicode"),
-                    status = it.getString("status"),
+                    status = RankedStatus.valueOf(it.getInt("ranked")),
                     creator = it.getString("creator"),
                     thumbnail = it.optJSONObject("covers")?.optString("card"),
                     beatmaps = run {

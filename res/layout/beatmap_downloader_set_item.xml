@@ -55,6 +55,7 @@
         android:paddingHorizontal="8dp"
         android:paddingVertical="4dp"
         android:textAlignment="center"
+        android:gravity="center"
         android:textColor="#FFF"
         android:textSize="24dp" />
 
