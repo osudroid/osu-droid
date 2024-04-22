@@ -131,14 +131,8 @@ object BeatmapListing : BaseFragment(),
                     put("offset", offset)
                 }
 
-                val beatmapSets = request.executeAndGetJson().toArray()!!
-                beatmapSets.forEach { beatmapSet ->
-                    adapter.data.add(
-                        mirror.search.mapResponse(
-                            beatmapSet
-                        )
-                    )
-                }
+                val beatmapSets = mirror.search.mapResponse(request.executeAndGetJson().toArray()!!)
+                adapter.data.addAll(beatmapSets)
 
                 uiThread {
                     adapter.notifyItemRangeChanged(offset, 50)
@@ -312,10 +306,10 @@ class BeatmapSetDetails(val beatmapSet: BeatmapSetModel, val holder: BeatmapSetV
             }
         }
 
-        val sdf = SimpleDateFormat(
-            if (beatmap.lengthSec >= 3600) "HH:mm:ss"
-            else "mm:ss"
-        ).also { it.timeZone = TimeZone.getTimeZone("GMT+0") }
+        val sdf = SimpleDateFormat(if (beatmap.lengthSec >= 3600) "HH:mm:ss" else "mm:ss").also {
+
+            it.timeZone = TimeZone.getTimeZone("GMT+0")
+        }
 
         details.text = """
             ${beatmap.version}
@@ -362,13 +356,11 @@ class BeatmapSetAdapter : RecyclerView.Adapter<BeatmapSetViewHolder>() {
         )
     }
 
-    override fun getItemId(position: Int): Long {
-        return position.toLong()
-    }
 
-    override fun getItemCount(): Int {
-        return data.size
-    }
+    override fun getItemCount() = data.size
+
+    override fun getItemId(position: Int) = position.toLong()
+
 
     override fun onBindViewHolder(holder: BeatmapSetViewHolder, position: Int) {
         holder.bind(data[position])
