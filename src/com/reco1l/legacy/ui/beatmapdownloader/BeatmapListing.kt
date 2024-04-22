@@ -1,6 +1,8 @@
 package com.reco1l.legacy.ui.beatmapdownloader
 
 import android.graphics.BitmapFactory
+import android.graphics.Color
+import android.graphics.Color.WHITE
 import android.util.Log
 import android.view.*
 import android.view.View.*
@@ -17,7 +19,6 @@ import androidx.recyclerview.widget.RecyclerView.OnScrollListener
 import com.edlplan.ui.fragment.BaseFragment
 import com.google.android.material.progressindicator.CircularProgressIndicator
 import com.reco1l.framework.bass.URLBassStream
-import com.reco1l.framework.extensions.forEach
 import com.reco1l.framework.lang.mainThread
 import com.reco1l.framework.net.IDownloaderObserver
 import com.reco1l.framework.net.JsonRequester
@@ -311,13 +312,26 @@ class BeatmapSetDetails(val beatmapSet: BeatmapSetModel, val holder: BeatmapSetV
             it.timeZone = TimeZone.getTimeZone("GMT+0")
         }
 
-        details.text = """
-            ${beatmap.version}
-            Star rating: ${beatmap.starRating}
-            AR: ${beatmap.ar} - OD: ${beatmap.od} - CS: ${beatmap.cs} - HP: ${beatmap.hp}
-            Circles: ${beatmap.circleCount} - Sliders: ${beatmap.sliderCount} - Spinners: ${beatmap.spinnerCount}
-            Length: ${sdf.format(beatmap.lengthSec * 1000)} - BPM: ${beatmap.bpm}
-        """.trimIndent()
+        details.setText(buildSpannedString {
+
+            append(beatmap.version)
+            appendLine()
+
+            color(0xFFB2B2CC.toInt()) {
+
+                append("Star rating: ${beatmap.starRating}")
+                appendLine()
+
+                append("AR: ${beatmap.ar} - OD: ${beatmap.od} - CS: ${beatmap.cs} - HP: ${beatmap.hp}\n")
+                appendLine()
+
+                append("Circles: ${beatmap.circleCount} - Sliders: ${beatmap.sliderCount} - Spinners: ${beatmap.spinnerCount}")
+                appendLine()
+
+                append("Length: ${sdf.format(beatmap.lengthSec * 1000)} - BPM: ${beatmap.bpm}")
+            }
+
+        }, TextView.BufferType.SPANNABLE)
     }
 
 
