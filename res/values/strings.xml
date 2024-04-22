@@ -19,7 +19,7 @@
 	<string name="ranked_status_loved"><font color="#FA64FF">Loved</font></string>
 	<string name="ranked_status_pending"><font color="#FFAC64">Pending</font></string>
 	<string name="ranked_status_wip"><font color="#FFAC64">Work in Progress</font></string>
-	<string name="ranked_status_graveyard"><font color="#FFF">Graveyard</font></string>
+	<string name="ranked_status_graveyard"><font color="#FFFFFF">Graveyard</font></string>
 
 
 	<string name="message_error">Error: %s</string>
