@@ -310,7 +310,7 @@ class BeatmapSetDetails(val beatmapSet: BeatmapSetModel, val holder: BeatmapSetV
         details.text = """
             ${beatmap.version}
             Star rating: ${beatmap.starRating}
-            AR: ${beatmap.ar} - OD: ${beatmap.od} - CS: ${beatmap.cs} - HP drain: ${beatmap.hp}
+            AR: ${beatmap.ar} - OD: ${beatmap.od} - CS: ${beatmap.cs} - HP: ${beatmap.hp}
             Circles: ${beatmap.circleCount} - Sliders: ${beatmap.sliderCount} - Spinners: ${beatmap.spinnerCount}
             Length: ${beatmap.lengthSec} - BPM: ${beatmap.bpm}
         """.trimIndent()

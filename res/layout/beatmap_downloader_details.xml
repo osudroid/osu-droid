@@ -93,7 +93,7 @@
                 android:id="@+id/details"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="Diffname\nStar rating: 0.00\nAR: 0.00 - OD: 0.00 - CS: 0.00 - HP drain: 0.00\nLength: 00:00 - BPM: 0.00 / 0.00"
+                android:text="Diffname\nStar rating: 0.00\nAR: 0.00 - OD: 0.00 - CS: 0.00 - HP: 0.00\nLength: 00:00 - BPM: 0.00 / 0.00"
                 android:textColor="#FFF">
 
             </TextView>
