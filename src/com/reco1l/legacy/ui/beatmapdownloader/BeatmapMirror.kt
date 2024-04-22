@@ -1,5 +1,6 @@
 package com.reco1l.legacy.ui.beatmapdownloader
 
+import org.json.JSONArray
 import org.json.JSONObject
 import ru.nsu.ccfit.zuev.osu.RankedStatus
 
@@ -30,7 +31,7 @@ enum class BeatmapMirror(
     /**
      * The search query action.
      */
-    val search: MirrorAction<JSONObject, BeatmapSetModel>,
+    val search: MirrorAction<JSONArray, MutableList<BeatmapSetModel>>,
 
     val downloadEndpoint: (Long) -> String,
 
@@ -46,46 +47,52 @@ enum class BeatmapMirror(
     OSU_DIRECT(
         search = MirrorAction(
             endpoint = "https://api.osu.direct/v2/search",
-            mapResponse = {
+            mapResponse = { array ->
 
-                BeatmapSetModel(
-                    id = it.getLong("id"),
-                    title = it.getString("title"),
-                    titleUnicode = it.getString("title_unicode"),
-                    artist = it.getString("artist"),
-                    artistUnicode = it.getString("artist_unicode"),
-                    status = RankedStatus.valueOf(it.getInt("ranked")),
-                    creator = it.getString("creator"),
-                    thumbnail = it.optJSONObject("covers")?.optString("card"),
-                    beatmaps = run {
+                MutableList(array.length()) { i ->
 
-                        val beatmaps = mutableListOf<BeatmapModel>()
-                        val array = it.getJSONArray("beatmaps")
+                    val it = array.getJSONObject(i)
 
-                        for (i in 0 until array.length()) {
-                            val obj = array.getJSONObject(i)
+                    BeatmapSetModel(
+                        id = it.getLong("id"),
+                        title = it.getString("title"),
+                        titleUnicode = it.getString("title_unicode"),
+                        artist = it.getString("artist"),
+                        artistUnicode = it.getString("artist_unicode"),
+                        status = RankedStatus.valueOf(it.getInt("ranked")),
+                        creator = it.getString("creator"),
+                        thumbnail = it.optJSONObject("covers")?.optString("card"),
+                        beatmaps = run {
 
-                            beatmaps.add(
-                                BeatmapModel(
+                            val beatmaps = mutableListOf<BeatmapModel>()
+                            val array = it.getJSONArray("beatmaps")
 
-                                    id = obj.getLong("id"),
-                                    version = obj.getString("version"),
-                                    starRating = obj.getDouble("difficulty_rating"),
-                                    ar = obj.getDouble("ar"),
-                                    cs = obj.getDouble("cs"),
-                                    hp = obj.getDouble("drain"),
-                                    od = obj.getDouble("accuracy"),
-                                    bpm = obj.getDouble("bpm"),
-                                    lengthSec = obj.getLong("hit_length"),
-                                    circleCount = obj.getInt("count_circles"),
-                                    sliderCount = obj.getInt("count_sliders"),
-                                    spinnerCount = obj.getInt("count_spinners")
+                            for (i in 0 until array.length()) {
+                                val obj = array.getJSONObject(i)
+
+                                beatmaps.add(
+                                    BeatmapModel(
+
+                                        id = obj.getLong("id"),
+                                        version = obj.getString("version"),
+                                        starRating = obj.getDouble("difficulty_rating"),
+                                        ar = obj.getDouble("ar"),
+                                        cs = obj.getDouble("cs"),
+                                        hp = obj.getDouble("drain"),
+                                        od = obj.getDouble("accuracy"),
+                                        bpm = obj.getDouble("bpm"),
+                                        lengthSec = obj.getLong("hit_length"),
+                                        circleCount = obj.getInt("count_circles"),
+                                        sliderCount = obj.getInt("count_sliders"),
+                                        spinnerCount = obj.getInt("count_spinners")
+                                    )
                                 )
-                            )
+                            }
+                            beatmaps
                         }
-                        beatmaps
-                    }
-                )
+                    )
+                }
+
             }
         ),
         downloadEndpoint = { "https://api.osu.direct/d/$it" },
