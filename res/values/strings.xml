@@ -6,10 +6,10 @@
 	<string name="accessibility_detector_settings">Go to accessibility settings</string>
 	<string name="accessibility_detector_exit">Exit game</string>
 
-	<string name="chimu_cancel">Cancel</string>
-	<string name="chimu_connecting">Connecting to server...</string>
-	<string name="chimu_downloading">Downloading beatmap %s...</string>
-	<string name="chimu_importing">Importing beatmap %s...</string>
+	<string name="beatmap_downloader_cancel">Cancel</string>
+	<string name="beatmap_downloader_connecting">Connecting to server...</string>
+	<string name="beatmap_downloader_downloading">Downloading beatmap %s...</string>
+	<string name="beatmap_downloader_importing">Importing beatmap %s...</string>
 
 	<string name="message_error">Error: %s</string>
 	<string name="message_error_createdir">Cannot create %s</string>
