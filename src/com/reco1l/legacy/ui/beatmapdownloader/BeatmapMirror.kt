@@ -1,7 +1,6 @@
 package com.reco1l.legacy.ui.beatmapdownloader
 
 import org.json.JSONArray
-import org.json.JSONObject
 import ru.nsu.ccfit.zuev.osu.RankedStatus
 
 
@@ -88,6 +87,9 @@ enum class BeatmapMirror(
                                     )
                                 )
                             }
+
+                            beatmaps.sortBy { it.starRating }
+
                             beatmaps
                         }
                     )
