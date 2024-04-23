@@ -86,9 +86,13 @@ object BeatmapListing : BaseFragment(),
 
     override fun onLoadView() {
 
+        val itemWidth = resources.getDimension(R.dimen.beatmap_downloader_item_width)
+        val itemMargin = resources.getDimension(R.dimen.beatmap_downloader_item_margin) * 2
+
+        val spanCount = resources.displayMetrics.widthPixels / (itemWidth + itemMargin)
 
         recyclerView = findViewById(R.id.beatmap_list)!!
-        recyclerView.layoutManager = GridLayoutManager(context, 2)
+        recyclerView.layoutManager = GridLayoutManager(context, spanCount.toInt())
         recyclerView.addOnScrollListener(scrollListener)
         recyclerView.adapter = adapter
 
