@@ -1,8 +1,6 @@
 package com.reco1l.legacy.ui.beatmapdownloader
 
 import android.graphics.BitmapFactory
-import android.graphics.Color
-import android.graphics.Color.WHITE
 import android.util.Log
 import android.view.*
 import android.view.View.*
