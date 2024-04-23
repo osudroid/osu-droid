@@ -15,6 +15,8 @@ import ru.nsu.ccfit.zuev.osu.GlobalManager;
 import ru.nsu.ccfit.zuev.osu.ResourceManager;
 import ru.nsu.ccfit.zuev.osuplus.R;
 
+import java.util.Locale;
+
 public class OnlinePanel extends Entity {
     private final Entity onlineLayer = new Entity();
     private final Entity messageLayer = new Entity();
@@ -123,7 +125,7 @@ public class OnlinePanel extends Entity {
     public void setInfo() {
         nameText.setText(OnlineManager.getInstance().getUsername());
 
-        ppText.setText(String.format("Performance: %dpp", Math.round(OnlineManager.getInstance().getPP())));
+        ppText.setText(String.format(Locale.US, "Performance: %,dpp", Math.round(OnlineManager.getInstance().getPP())));
 
         accText.setText(String.format("Accuracy: %.2f%%",
                 OnlineManager.getInstance().getAccuracy() * 100f));
