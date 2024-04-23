@@ -22,6 +22,7 @@ import com.reco1l.framework.net.IDownloaderObserver
 import com.reco1l.framework.net.JsonRequester
 import com.reco1l.framework.net.QueryContent
 import com.reco1l.legacy.ui.OsuColors
+import kotlinx.coroutines.CoroutineExceptionHandler
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
@@ -30,6 +31,7 @@ import ru.nsu.ccfit.zuev.audio.Status
 import ru.nsu.ccfit.zuev.osu.Config
 import ru.nsu.ccfit.zuev.osu.GlobalManager
 import ru.nsu.ccfit.zuev.osu.MainScene.MusicOption
+import ru.nsu.ccfit.zuev.osu.ToastLogger
 import ru.nsu.ccfit.zuev.osuplus.R
 import java.net.URL
 import java.text.SimpleDateFormat
@@ -110,7 +112,14 @@ object BeatmapListing : BaseFragment(),
         uiThread { indicator.visibility = VISIBLE }
 
         pendingRequest?.cancel()
-        pendingRequest = searchScope.launch {
+        pendingRequest = searchScope.launch(CoroutineExceptionHandler { _, throwable ->
+
+            ToastLogger.showText("Failed to connect to server, please check your internet connection.", false)
+
+            Log.e("BeatmapListing", "Failed to connect to beatmap mirror.", throwable)
+            indicator.visibility = GONE
+
+        }) {
 
             if (!keepData) {
                 offset = 0
