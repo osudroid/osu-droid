@@ -48,49 +48,41 @@ enum class BeatmapMirror(
             endpoint = "https://api.osu.direct/v2/search",
             mapResponse = { array ->
 
-                MutableList(array.length()) { i ->
+                MutableList(array.length()) { index ->
 
-                    val it = array.getJSONObject(i)
+                    val json = array.getJSONObject(index)
 
                     BeatmapSetModel(
-                        id = it.getLong("id"),
-                        title = it.getString("title"),
-                        titleUnicode = it.getString("title_unicode"),
-                        artist = it.getString("artist"),
-                        artistUnicode = it.getString("artist_unicode"),
-                        status = RankedStatus.valueOf(it.getInt("ranked")),
-                        creator = it.getString("creator"),
-                        thumbnail = it.optJSONObject("covers")?.optString("card"),
-                        beatmaps = run {
+                        id = json.getLong("id"),
+                        title = json.getString("title"),
+                        titleUnicode = json.getString("title_unicode"),
+                        artist = json.getString("artist"),
+                        artistUnicode = json.getString("artist_unicode"),
+                        status = RankedStatus.valueOf(json.getInt("ranked")),
+                        creator = json.getString("creator"),
+                        thumbnail = json.optJSONObject("covers")?.optString("card"),
+                        beatmaps = json.getJSONArray("beatmaps").let {
 
-                            val beatmaps = mutableListOf<BeatmapModel>()
-                            val array = it.getJSONArray("beatmaps")
+                            MutableList(it.length()) { i ->
 
-                            for (i in 0 until array.length()) {
-                                val obj = array.getJSONObject(i)
+                                val obj = it.getJSONObject(i)
 
-                                beatmaps.add(
-                                    BeatmapModel(
-
-                                        id = obj.getLong("id"),
-                                        version = obj.getString("version"),
-                                        starRating = obj.getDouble("difficulty_rating"),
-                                        ar = obj.getDouble("ar"),
-                                        cs = obj.getDouble("cs"),
-                                        hp = obj.getDouble("drain"),
-                                        od = obj.getDouble("accuracy"),
-                                        bpm = obj.getDouble("bpm"),
-                                        lengthSec = obj.getLong("hit_length"),
-                                        circleCount = obj.getInt("count_circles"),
-                                        sliderCount = obj.getInt("count_sliders"),
-                                        spinnerCount = obj.getInt("count_spinners")
-                                    )
+                                BeatmapModel(
+                                    id = obj.getLong("id"),
+                                    version = obj.getString("version"),
+                                    starRating = obj.getDouble("difficulty_rating"),
+                                    ar = obj.getDouble("ar"),
+                                    cs = obj.getDouble("cs"),
+                                    hp = obj.getDouble("drain"),
+                                    od = obj.getDouble("accuracy"),
+                                    bpm = obj.getDouble("bpm"),
+                                    lengthSec = obj.getLong("hit_length"),
+                                    circleCount = obj.getInt("count_circles"),
+                                    sliderCount = obj.getInt("count_sliders"),
+                                    spinnerCount = obj.getInt("count_spinners")
                                 )
-                            }
 
-                            beatmaps.sortBy { it.starRating }
-
-                            beatmaps
+                            }.sortedBy(BeatmapModel::starRating)
                         }
                     )
                 }
