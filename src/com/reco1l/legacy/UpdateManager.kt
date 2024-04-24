@@ -20,7 +20,7 @@ import ru.nsu.ccfit.zuev.osu.online.OnlineManager
 import ru.nsu.ccfit.zuev.osu.online.OnlineManager.updateEndpoint
 import ru.nsu.ccfit.zuev.osuplus.BuildConfig.APPLICATION_ID
 import ru.nsu.ccfit.zuev.osuplus.R.string.changelog_title
-import ru.nsu.ccfit.zuev.osuplus.R.string.chimu_cancel
+import ru.nsu.ccfit.zuev.osuplus.R.string.beatmap_downloader_cancel
 import ru.nsu.ccfit.zuev.osuplus.R.string.update_dialog_button_changelog
 import ru.nsu.ccfit.zuev.osuplus.R.string.update_dialog_button_update
 import ru.nsu.ccfit.zuev.osuplus.R.string.update_dialog_message
@@ -278,7 +278,7 @@ object UpdateManager: IDownloaderObserver
             duration = LENGTH_INDEFINITE
 
             setText(StringTable.format(update_info_downloading, 0))
-            setAction(chimu_cancel) { downloader.cancel() }
+            setAction(beatmap_downloader_cancel) { downloader.cancel() }
             show()
         }
     }

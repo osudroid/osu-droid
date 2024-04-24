@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <!--Beatmap downloader -->
+    <dimen name="beatmap_downloader_item_width">280dp</dimen>
+    <dimen name="beatmap_downloader_item_margin">8dp</dimen>
+
+</resources>

@@ -1,0 +1,81 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="#13131A"
+    android:clickable="true"
+    android:gravity="center"
+    android:orientation="vertical">
+
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="#1E1E2E">
+
+        <ImageButton
+            android:id="@+id/close"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_centerVertical="true"
+            android:background="?attr/selectableItemBackground"
+            android:padding="16dp"
+            android:src="@drawable/arrow_back_24px"
+            app:tint="#FFF" />
+
+        <EditText
+            android:id="@+id/search"
+            android:layout_width="300dp"
+            android:layout_height="wrap_content"
+            android:layout_centerHorizontal="true"
+            android:layout_centerVertical="true"
+            android:background="@drawable/rounded_rect"
+            android:backgroundTint="#363653"
+            android:drawableRight="@drawable/search_24px"
+            android:drawableTint="#8C8CB4"
+            android:hint="Search for..."
+            android:imeOptions="actionSend|flagNoFullscreen"
+            android:paddingHorizontal="14dp"
+            android:paddingVertical="10dp"
+            android:singleLine="true"
+            android:textColor="#FFF"
+            android:textColorHint="#8C8CB4"
+            android:textSize="14dp" />
+
+        <ImageView
+            android:id="@+id/logo"
+            android:layout_width="100dp"
+            android:layout_height="36dp"
+            android:layout_marginRight="12dp"
+            android:src="@drawable/powered_by_osudirect"
+            android:layout_centerVertical="true"
+            android:layout_alignParentRight="true"/>
+
+        <com.google.android.material.progressindicator.CircularProgressIndicator
+            android:id="@+id/indicator"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_toLeftOf="@id/logo"
+            android:layout_centerVertical="true"
+            android:layout_marginRight="12dp"
+            android:indeterminate="true"
+            app:trackThickness="3dp"
+            app:trackCornerRadius="2dp"
+            app:indicatorColor="#FFF"
+            app:indicatorSize="20dp" />
+
+    </RelativeLayout>
+
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/beatmap_list"
+        android:layout_width="wrap_content"
+        android:layout_height="match_parent"
+        app:layoutManager="androidx.recyclerview.widget.GridLayoutManager"
+        app:spanCount="2"
+        tools:listitem="@layout/beatmap_downloader_set_item">
+
+    </androidx.recyclerview.widget.RecyclerView>
+
+
+</LinearLayout>

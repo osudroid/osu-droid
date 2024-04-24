@@ -3,6 +3,7 @@ package com.reco1l.legacy.ui
 import com.reco1l.framework.lang.async
 import com.reco1l.legacy.ui.multiplayer.LobbyScene
 import com.reco1l.legacy.Multiplayer
+import com.reco1l.legacy.ui.beatmapdownloader.BeatmapListing
 import com.reco1l.legacy.ui.multiplayer.RoomScene
 import org.anddev.andengine.input.touch.TouchEvent
 import ru.nsu.ccfit.zuev.osu.LibraryManager
@@ -73,12 +74,10 @@ class MainMenu(val main: MainScene)
 
                     if (LibraryManager.INSTANCE.library.isEmpty())
                     {
-                        main.musicControl(MusicOption.STOP)
-
                         getGlobal().songService.isGaming = false
                         getGlobal().engine.scene = main.scene
 
-                        ChimuWebView.show()
+                        BeatmapListing.show()
                     } else {
                         main.musicControl(MusicOption.PLAY)
 

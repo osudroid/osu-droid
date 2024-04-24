@@ -11,6 +11,11 @@ class JsonRequester(url: String) : Requester(url)
 {
 
     /**
+     * Whether response JSON should be logged.
+     */
+    var logResponse = false
+
+    /**
      * Validate the received Json from the server, this validator will only be used if the response was successful.
      */
     var jsonValidator: ((JsonContent) -> Unit)? = null
@@ -46,7 +51,7 @@ class JsonRequester(url: String) : Requester(url)
     {
         json = JsonContent(responseBody.string())
 
-        if (log)
+        if (logResponse)
             "Received JSON: ${json.toString(4)}".logIfDebug(className)
     }
 
