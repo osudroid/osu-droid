@@ -1,19 +1,21 @@
 package com.reco1l.framework.net
 
 import android.util.Log
-import com.reco1l.toolkt.data.asJSONObject
 import com.reco1l.toolkt.kotlin.isBetween
+import okhttp3.HttpUrl
+import okhttp3.HttpUrl.Companion.toHttpUrl
 import okhttp3.MediaType.Companion.toMediaTypeOrNull
 import okhttp3.RequestBody.Companion.toRequestBody
 import okhttp3.Response
-import okio.IOException
 import org.json.JSONArray
 import org.json.JSONException
 import org.json.JSONObject
 import ru.nsu.ccfit.zuev.osuplus.BuildConfig
 
-sealed class JsonRequest<T : Any>(url: String) : WebRequest(url)
-{
+sealed class JsonRequest<T : Any>(url: HttpUrl) : WebRequest(url) {
+
+    constructor(url: String): this(url.toHttpUrl())
+
 
     /**
      * Whether response should be logged.
@@ -62,7 +64,10 @@ sealed class JsonRequest<T : Any>(url: String) : WebRequest(url)
 }
 
 
-class JsonObjectRequest(url: String) : JsonRequest<JSONObject>(url) {
+class JsonObjectRequest(url: HttpUrl) : JsonRequest<JSONObject>(url) {
+
+    constructor(url: String): this(url.toHttpUrl())
+
 
     override fun onCreateResponseJson(responseBody: String): JSONObject {
 
@@ -81,7 +86,10 @@ class JsonObjectRequest(url: String) : JsonRequest<JSONObject>(url) {
 
 }
 
-class JsonArrayRequest(url: String) : JsonRequest<JSONArray>(url) {
+class JsonArrayRequest(url: HttpUrl) : JsonRequest<JSONArray>(url) {
+
+    constructor(url: String): this(url.toHttpUrl())
+
 
     override fun onCreateResponseJson(responseBody: String): JSONArray {
 

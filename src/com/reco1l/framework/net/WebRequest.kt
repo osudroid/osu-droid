@@ -8,10 +8,9 @@ import java.io.IOException
 import java.util.*
 import java.util.concurrent.TimeUnit
 
-/**
- * @author Reco1l
- */
-open class WebRequest(link: String) : AutoCloseable {
+open class WebRequest(private var url: HttpUrl) : AutoCloseable {
+
+    constructor(url: String): this(url.toHttpUrl())
 
 
     /**
@@ -26,8 +25,6 @@ open class WebRequest(link: String) : AutoCloseable {
      */
     lateinit var responseBody: ResponseBody
 
-
-    private var url = link.toHttpUrl()
 
     private var client = DEFAULT_CLIENT
 

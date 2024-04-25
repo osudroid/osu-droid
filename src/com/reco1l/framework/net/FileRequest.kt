@@ -1,9 +1,14 @@
 package com.reco1l.framework.net
 
+import okhttp3.HttpUrl
+import okhttp3.HttpUrl.Companion.toHttpUrl
 import okhttp3.Response
 import java.io.File
 
-class FileRequest(val file: File, url: String): WebRequest(url) {
+class FileRequest(val file: File, url: HttpUrl): WebRequest(url) {
+
+    constructor(file: File, url: String): this(file, url.toHttpUrl())
+
 
     /**
      * The download observer.
