@@ -6,7 +6,6 @@ import com.dgsrz.bancho.security.SecurityUtils
 import com.reco1l.api.ibancho.LobbyAPI
 import com.reco1l.api.ibancho.RoomAPI
 import com.reco1l.osu.updateThread
-import com.reco1l.osu.Multiplayer
 import com.reco1l.toolkt.kotlin.async
 import org.anddev.andengine.entity.modifier.LoopEntityModifier
 import org.anddev.andengine.entity.modifier.RotationByModifier

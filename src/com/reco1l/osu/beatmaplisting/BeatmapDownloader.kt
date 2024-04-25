@@ -5,7 +5,7 @@ import android.view.View
 import com.reco1l.osu.mainThread
 import com.reco1l.framework.net.FileRequest
 import com.reco1l.framework.net.IDownloaderObserver
-import com.reco1l.osu.Multiplayer
+import com.reco1l.osu.multiplayer.Multiplayer
 import com.reco1l.osu.ui.DownloadFragment
 import com.reco1l.osu.multiplayer.RoomScene
 import com.reco1l.toolkt.kotlin.async

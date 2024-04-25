@@ -3,7 +3,6 @@ package com.reco1l.osu.multiplayer
 import com.reco1l.api.ibancho.data.*
 import com.reco1l.api.ibancho.data.PlayerStatus.*
 import com.reco1l.api.ibancho.data.RoomTeam.*
-import com.reco1l.osu.Multiplayer
 import com.reco1l.osu.ui.ScrollableList
 import org.anddev.andengine.entity.primitive.Rectangle
 import org.anddev.andengine.entity.sprite.Sprite

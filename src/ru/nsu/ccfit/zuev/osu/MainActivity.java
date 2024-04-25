@@ -44,7 +44,7 @@ import com.google.firebase.crashlytics.FirebaseCrashlytics;
 import com.reco1l.api.ibancho.LobbyAPI;
 import com.reco1l.osu.AccessibilityDetector;
 import com.reco1l.osu.Execution;
-import com.reco1l.osu.Multiplayer;
+import com.reco1l.osu.multiplayer.Multiplayer;
 import com.reco1l.osu.UpdateManager;
 import com.reco1l.osu.multiplayer.LobbyScene;
 import com.reco1l.osu.multiplayer.RoomScene;

@@ -1,7 +1,7 @@
 package com.reco1l.osu.ui
 
 import android.opengl.GLES20
-import com.reco1l.osu.Multiplayer.isMultiplayer
+import com.reco1l.osu.multiplayer.Multiplayer.isMultiplayer
 import org.anddev.andengine.entity.Entity
 import org.anddev.andengine.entity.sprite.Sprite
 import org.anddev.andengine.entity.text.ChangeableText

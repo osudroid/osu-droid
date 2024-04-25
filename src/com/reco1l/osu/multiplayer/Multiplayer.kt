@@ -1,4 +1,4 @@
-package com.reco1l.osu
+package com.reco1l.osu.multiplayer
 
 import android.text.format.DateFormat
 import android.util.Log
@@ -7,7 +7,6 @@ import com.reco1l.api.ibancho.data.Room
 import com.reco1l.api.ibancho.data.RoomPlayer
 import com.reco1l.osu.conversion.jsonToScoreboardItem
 import com.reco1l.osu.conversion.jsonToStatistic
-import com.reco1l.osu.multiplayer.RoomScene
 import com.reco1l.toolkt.kotlin.formatTimeMilliseconds
 import com.reco1l.toolkt.kotlin.fromDate
 import kotlinx.coroutines.CoroutineScope

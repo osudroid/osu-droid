@@ -2,7 +2,7 @@ package com.reco1l.osu.ui
 
 import com.reco1l.osu.async
 import com.reco1l.osu.multiplayer.LobbyScene
-import com.reco1l.osu.Multiplayer
+import com.reco1l.osu.multiplayer.Multiplayer
 import com.reco1l.osu.beatmaplisting.BeatmapListing
 import com.reco1l.osu.multiplayer.RoomScene
 import org.anddev.andengine.input.touch.TouchEvent

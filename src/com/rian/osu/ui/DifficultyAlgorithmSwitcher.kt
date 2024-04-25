@@ -1,6 +1,6 @@
 package com.rian.osu.ui
 
-import com.reco1l.osu.Multiplayer
+import com.reco1l.osu.multiplayer.Multiplayer
 import com.reco1l.osu.multiplayer.RoomScene
 import org.anddev.andengine.input.touch.TouchEvent
 import org.anddev.andengine.util.MathUtils
