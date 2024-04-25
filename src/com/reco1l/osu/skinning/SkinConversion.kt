@@ -1,22 +1,22 @@
 @file:JvmName("SkinConverter")
 
-package com.reco1l.osu.conversion
+package com.reco1l.osu.skinning
 
 import android.graphics.Bitmap
 import android.graphics.Bitmap.CompressFormat
 import android.graphics.Bitmap.Config
 import android.graphics.BitmapFactory
 import android.graphics.Color
-import com.reco1l.osu.IniReader
-import com.reco1l.framework.net.JsonContent
+import com.reco1l.toolkt.data.putObject
 import org.json.JSONArray
+import org.json.JSONObject
 import java.io.File
 import java.io.FileOutputStream
 import java.io.IOException
 import kotlin.math.min
 
 
-fun convertToJson(ini: IniReader) = JsonContent().apply {
+fun convertToJson(ini: IniReader) = JSONObject().apply {
 
     fun convertToHex(ints: IntArray?): String?
     {
@@ -46,12 +46,12 @@ fun convertToJson(ini: IniReader) = JsonContent().apply {
     }.takeUnless { it.isEmpty() }?.toTypedArray()
 
 
-    putGroup("Cursor").apply {
+    putObject("Cursor") {
 
         put("rotateCursor", ini["General", "CursorRotate"] ?: true)
     }
 
-    putGroup("ComboColor").apply {
+    putObject("ComboColor") {
 
         parseComboColors(ini)?.also {
 
@@ -62,7 +62,7 @@ fun convertToJson(ini: IniReader) = JsonContent().apply {
         }
     }
 
-    putGroup("Slider").apply {
+    putObject("Slider") {
 
         ini.get<IntArray?>("Colours", "SliderTrackOverride")?.also { trackColor ->
 
@@ -88,14 +88,14 @@ fun convertToJson(ini: IniReader) = JsonContent().apply {
         put("sliderBorderColor", convertToHex(ini["Colours", "SliderBorder"]) ?: "#FFFFFF")
     }
 
-    putGroup("Color").apply {
+    putObject("Color") {
 
         put("MenuItemSelectedTextColor", convertToHex(ini["Colours", "SongSelectActiveText"]) ?: "#FFFFFF")
         put("MenuItemDefaultTextColor", convertToHex(ini["Colours", "SongSelectInactiveText"]) ?: "#000000")
         put("MenuItemDefaultColor", "#EB4999") // Matching osu! stable inactive color.
     }
 
-    putGroup("Fonts").apply {
+    putObject("Fonts") {
 
         put("hitCirclePrefix", ini["Fonts", "HitCirclePrefix"] ?: "default")
         put("hitCircleOverlap", ini["Fonts", "HitCircleOverlap"] ?: -2)
@@ -103,13 +103,15 @@ fun convertToJson(ini: IniReader) = JsonContent().apply {
         put("comboPrefix", ini["Fonts", "ComboPrefix"] ?: "score")
     }
 
-    putGroup("Utils").apply {
+    putObject("Utils") {
         put("comboTextScale", 0.8f)
     }
 
-    putGroup("Layout").apply {
+    putObject("Layout") {
 
-        putGroup("BackButton").put("scaleWhenHold", false)
+        putObject("BackButton") {
+            put("scaleWhenHold", false)
+        }
     }
 }
 

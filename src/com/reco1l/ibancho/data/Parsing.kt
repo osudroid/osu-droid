@@ -1,6 +1,6 @@
 package com.reco1l.ibancho.data
 
-import com.reco1l.osu.conversion.stringToMods
+import com.reco1l.osu.multiplayer.stringToMods
 import org.json.JSONArray
 import org.json.JSONObject
 

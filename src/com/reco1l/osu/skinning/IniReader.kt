@@ -1,4 +1,4 @@
-package com.reco1l.osu
+package com.reco1l.osu.skinning
 
 import android.util.Log
 import okhttp3.internal.toImmutableMap
@@ -24,7 +24,7 @@ class IniReader(file: File) : Closeable {
 
 
     init {
-        if (file.extension.lowercase() != EXTENSION)
+        if (file.extension.lowercase() != "ini")
             throw IniException("Not an INI file.")
 
         read()
@@ -132,13 +132,6 @@ class IniReader(file: File) : Closeable {
         return value as? T
     }
 
-
-    companion object {
-        /**
-         * `.ini` extension constant.
-         */
-        const val EXTENSION = "ini"
-    }
 }
 
 

@@ -5,8 +5,6 @@ import android.util.Log
 import com.reco1l.ibancho.RoomAPI
 import com.reco1l.ibancho.data.Room
 import com.reco1l.ibancho.data.RoomPlayer
-import com.reco1l.osu.conversion.jsonToScoreboardItem
-import com.reco1l.osu.conversion.jsonToStatistic
 import com.reco1l.toolkt.kotlin.formatTimeMilliseconds
 import com.reco1l.toolkt.kotlin.fromDate
 import kotlinx.coroutines.CoroutineScope
