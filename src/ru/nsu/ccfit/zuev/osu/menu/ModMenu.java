@@ -3,7 +3,7 @@ package ru.nsu.ccfit.zuev.osu.menu;
 import com.edlplan.ui.fragment.InGameSettingMenu;
 import com.reco1l.api.ibancho.RoomAPI;
 import com.reco1l.osu.Execution;
-import com.reco1l.osu.data.MultiplayerConverter;
+import com.reco1l.osu.conversion.MultiplayerConverter;
 import com.reco1l.osu.Multiplayer;
 import com.reco1l.api.ibancho.data.RoomMods;
 import com.reco1l.osu.ui.multiplayer.RoomScene;

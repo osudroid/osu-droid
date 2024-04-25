@@ -8,7 +8,7 @@ import android.util.Log;
 import com.dgsrz.bancho.security.SecurityUtils;
 
 import com.reco1l.framework.IniReader;
-import com.reco1l.osu.data.SkinConverter;
+import com.reco1l.osu.conversion.SkinConverter;
 import com.reco1l.osu.engine.BlankTextureRegion;
 import org.anddev.andengine.engine.Engine;
 import org.anddev.andengine.opengl.font.Font;

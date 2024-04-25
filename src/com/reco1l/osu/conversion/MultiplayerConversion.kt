@@ -1,6 +1,6 @@
 @file:JvmName("MultiplayerConverter")
 
-package com.reco1l.osu.data
+package com.reco1l.osu.conversion
 
 import org.json.JSONObject
 import ru.nsu.ccfit.zuev.osu.game.mods.GameMod

@@ -1,6 +1,6 @@
 package com.reco1l.api.ibancho.data
 
-import com.reco1l.osu.data.modsToReadable
+import com.reco1l.osu.conversion.modsToReadable
 import com.reco1l.osu.Multiplayer
 import ru.nsu.ccfit.zuev.osu.game.mods.GameMod
 import ru.nsu.ccfit.zuev.osu.game.mods.GameMod.*

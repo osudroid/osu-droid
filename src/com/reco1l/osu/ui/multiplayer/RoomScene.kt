@@ -19,7 +19,7 @@ import com.reco1l.osu.Multiplayer.isConnected
 import com.reco1l.osu.Multiplayer.isRoomHost
 import com.reco1l.osu.Multiplayer.player
 import com.reco1l.osu.Multiplayer.room
-import com.reco1l.osu.data.modsToString
+import com.reco1l.osu.conversion.modsToString
 import com.reco1l.osu.ui.entity.BeatmapButton
 import com.reco1l.osu.ui.entity.ComposedText
 import com.rian.osu.ui.DifficultyAlgorithmSwitcher

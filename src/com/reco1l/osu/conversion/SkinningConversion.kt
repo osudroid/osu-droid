@@ -1,6 +1,6 @@
 @file:JvmName("SkinConverter")
 
-package com.reco1l.osu.data
+package com.reco1l.osu.conversion
 
 import android.graphics.Bitmap
 import android.graphics.Bitmap.CompressFormat
