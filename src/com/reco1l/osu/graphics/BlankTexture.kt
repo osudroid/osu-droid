@@ -1,4 +1,4 @@
-package com.reco1l.osu.engine
+package com.reco1l.osu.graphics
 
 import org.anddev.andengine.opengl.texture.Texture
 import org.anddev.andengine.opengl.texture.TextureOptions

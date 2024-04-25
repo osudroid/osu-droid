@@ -1,4 +1,4 @@
-package com.reco1l.osu.engine
+package com.reco1l.osu.graphics
 
 import android.graphics.SurfaceTexture
 import android.media.MediaPlayer
