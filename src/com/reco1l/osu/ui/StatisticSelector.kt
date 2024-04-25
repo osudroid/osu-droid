@@ -1,4 +1,4 @@
-package com.reco1l.osu.ui.entity
+package com.reco1l.osu.ui
 
 import android.opengl.GLES20
 import com.reco1l.api.ibancho.data.WinCondition.ACCURACY

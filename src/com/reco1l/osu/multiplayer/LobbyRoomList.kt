@@ -11,7 +11,7 @@ import com.reco1l.api.ibancho.data.TeamMode.TEAM_VS_TEAM
 import com.reco1l.api.ibancho.data.WinCondition.*
 import com.reco1l.osu.mainThread
 import com.reco1l.osu.Multiplayer
-import com.reco1l.osu.ui.entity.ScrollableList
+import com.reco1l.osu.ui.ScrollableList
 import com.reco1l.toolkt.kotlin.async
 import org.anddev.andengine.entity.sprite.Sprite
 import org.anddev.andengine.entity.text.Text

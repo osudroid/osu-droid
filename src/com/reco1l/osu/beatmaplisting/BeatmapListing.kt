@@ -20,7 +20,7 @@ import com.reco1l.framework.bass.URLBassStream
 import com.reco1l.osu.mainThread
 import com.reco1l.framework.net.IDownloaderObserver
 import com.reco1l.framework.net.JsonArrayRequest
-import com.reco1l.osu.ui.OsuColors
+import com.reco1l.osu.OsuColors
 import kotlinx.coroutines.CoroutineExceptionHandler
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers

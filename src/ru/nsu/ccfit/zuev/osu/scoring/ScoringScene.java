@@ -4,7 +4,7 @@ import com.edlplan.framework.utils.functionality.SmartIterator;
 import com.reco1l.osu.Execution;
 import com.reco1l.osu.Multiplayer;
 import com.reco1l.osu.multiplayer.RoomScene;
-import com.reco1l.osu.ui.entity.StatisticSelector;
+import com.reco1l.osu.ui.StatisticSelector;
 
 import com.rian.osu.beatmap.Beatmap;
 import com.rian.osu.beatmap.parser.BeatmapParser;

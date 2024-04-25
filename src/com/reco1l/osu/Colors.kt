@@ -1,4 +1,4 @@
-package com.reco1l.osu.ui
+package com.reco1l.osu
 
 import android.graphics.Color
 import org.anddev.andengine.util.modifier.ease.EaseLinear
