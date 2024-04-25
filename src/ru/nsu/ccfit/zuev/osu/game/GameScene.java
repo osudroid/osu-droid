@@ -17,7 +17,7 @@ import com.reco1l.osu.graphics.BlankTextureRegion;
 import com.reco1l.osu.graphics.VideoSprite;
 import com.reco1l.osu.ui.entity.InGameLeaderboard;
 import com.reco1l.osu.Multiplayer;
-import com.reco1l.osu.ui.multiplayer.RoomScene;
+import com.reco1l.osu.multiplayer.RoomScene;
 
 import com.rian.osu.beatmap.Beatmap;
 import com.rian.osu.beatmap.constants.BeatmapCountdown;

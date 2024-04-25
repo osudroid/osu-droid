@@ -1,7 +1,7 @@
 package com.rian.osu.ui
 
 import com.reco1l.osu.Multiplayer
-import com.reco1l.osu.ui.multiplayer.RoomScene
+import com.reco1l.osu.multiplayer.RoomScene
 import org.anddev.andengine.input.touch.TouchEvent
 import org.anddev.andengine.util.MathUtils
 import ru.nsu.ccfit.zuev.osu.Config

@@ -3,7 +3,7 @@ package ru.nsu.ccfit.zuev.osu.game;
 import android.graphics.PointF;
 
 import com.reco1l.osu.Multiplayer;
-import com.reco1l.osu.ui.multiplayer.RoomScene;
+import com.reco1l.osu.multiplayer.RoomScene;
 import org.anddev.andengine.entity.modifier.*;
 import org.anddev.andengine.entity.primitive.Rectangle;
 import org.anddev.andengine.entity.scene.Scene;

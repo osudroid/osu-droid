@@ -1,4 +1,4 @@
-package com.reco1l.osu.ui.multiplayer
+package com.reco1l.osu.multiplayer
 
 import android.app.AlertDialog
 import android.view.inputmethod.EditorInfo

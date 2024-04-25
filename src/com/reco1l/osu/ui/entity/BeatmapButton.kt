@@ -7,7 +7,7 @@ import com.reco1l.osu.async
 import com.reco1l.osu.Multiplayer
 import com.reco1l.osu.beatmaplisting.BeatmapDownloader
 import com.reco1l.osu.beatmaplisting.BeatmapListing
-import com.reco1l.osu.ui.multiplayer.RoomScene
+import com.reco1l.osu.multiplayer.RoomScene
 import org.anddev.andengine.entity.sprite.Sprite
 import org.anddev.andengine.entity.text.ChangeableText
 import org.anddev.andengine.input.touch.TouchEvent

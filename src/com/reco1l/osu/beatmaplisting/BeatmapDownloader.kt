@@ -7,7 +7,7 @@ import com.reco1l.framework.net.FileRequest
 import com.reco1l.framework.net.IDownloaderObserver
 import com.reco1l.osu.Multiplayer
 import com.reco1l.osu.ui.DownloadFragment
-import com.reco1l.osu.ui.multiplayer.RoomScene
+import com.reco1l.osu.multiplayer.RoomScene
 import com.reco1l.toolkt.kotlin.async
 import com.reco1l.toolkt.kotlin.decodeAsURL
 import com.reco1l.toolkt.kotlin.replaceAlphanumeric

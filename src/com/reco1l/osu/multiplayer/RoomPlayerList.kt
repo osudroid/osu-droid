@@ -1,4 +1,4 @@
-package com.reco1l.osu.ui.multiplayer
+package com.reco1l.osu.multiplayer
 
 import com.reco1l.api.ibancho.data.*
 import com.reco1l.api.ibancho.data.PlayerStatus.*

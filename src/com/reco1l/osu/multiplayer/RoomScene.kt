@@ -1,4 +1,4 @@
-package com.reco1l.osu.ui.multiplayer
+package com.reco1l.osu.multiplayer
 
 import android.app.AlertDialog
 import com.reco1l.api.ibancho.IPlayerEventListener
@@ -182,7 +182,9 @@ object RoomScene : Scene(), IRoomEventListener, IPlayerEventListener
             attachChild(it)
         }
 
-        OsuSkin.get().getColor("MenuItemDefaultTextColor", BeatmapButton.DEFAULT_TEXT_COLOR).apply(beatmapInfoText)
+        OsuSkin.get().getColor("MenuItemDefaultTextColor", BeatmapButton.DEFAULT_TEXT_COLOR).apply(
+            beatmapInfoText
+        )
 
         // Ready button, this button will switch player status
         readyButton = object : TextButton(getResources().getFont("CaptionFont"), "Ready")

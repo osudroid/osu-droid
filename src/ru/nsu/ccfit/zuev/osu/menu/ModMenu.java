@@ -6,7 +6,7 @@ import com.reco1l.osu.Execution;
 import com.reco1l.osu.conversion.MultiplayerConverter;
 import com.reco1l.osu.Multiplayer;
 import com.reco1l.api.ibancho.data.RoomMods;
-import com.reco1l.osu.ui.multiplayer.RoomScene;
+import com.reco1l.osu.multiplayer.RoomScene;
 
 import com.rian.osu.beatmap.parser.BeatmapParser;
 import com.rian.osu.difficulty.BeatmapDifficultyCalculator;

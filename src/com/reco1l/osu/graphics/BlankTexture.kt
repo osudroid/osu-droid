@@ -10,10 +10,6 @@ class BlankTextureRegion : TextureRegion(BlankTexture(), 0, 0, 1, 1)
 class BlankTexture : Texture(PixelFormat.RGBA_8888, TextureOptions.DEFAULT, null)
 {
     override fun getWidth() = 1
-
     override fun getHeight() = 1
-
-    override fun writeTextureToHardware(pGL: GL10?)
-    {
-    }
+    override fun writeTextureToHardware(gl: GL10) = Unit
 }
