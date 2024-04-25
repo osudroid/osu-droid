@@ -30,6 +30,7 @@ import com.rian.osu.difficulty.attributes.StandardDifficultyAttributes;
 import com.rian.osu.difficulty.attributes.TimedDifficultyAttributes;
 import com.rian.osu.difficulty.calculator.DifficultyCalculationParameters;
 import com.rian.osu.beatmap.hitobject.HitObjectUtils;
+import com.deltaflyer.osu.BlockAreaManager;
 import org.anddev.andengine.engine.Engine;
 import org.anddev.andengine.engine.camera.SmoothCamera;
 import org.anddev.andengine.engine.handler.IUpdateHandler;
@@ -2356,6 +2357,10 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
         }
 
         if (event.isActionDown()) {
+            if (BlockAreaManager.INSTANCE.needBlock(event.getX(), event.getY())) {
+                // Block Input if in any of the areas
+                return true;
+            }
 
             if (sprite != null) {
                 sprite.setShowing(true);

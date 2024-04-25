@@ -9,6 +9,7 @@ import android.util.DisplayMetrics;
 
 import androidx.preference.PreferenceManager;
 
+import com.deltaflyer.osu.BlockAreaManager;
 import com.edlplan.favorite.FavoriteLibrary;
 import com.edlplan.framework.math.FMath;
 import com.google.firebase.messaging.FirebaseMessaging;
@@ -224,6 +225,7 @@ public class Config {
         safeBeatmapBg = prefs.getBoolean("safebeatmapbg", false);
         displayRealTimePPCounter = prefs.getBoolean("displayRealTimePPCounter", false);
         difficultyAlgorithm = DifficultyAlgorithm.droid;
+        BlockAreaManager.INSTANCE.reload(prefs.getString("blockArea", "null"));
 
         // Multiplayer
         useNightcoreOnMultiplayer = prefs.getBoolean("player_nightcore", false);

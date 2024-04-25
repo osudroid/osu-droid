@@ -1,25 +1,19 @@
 package com.deltaflyer.osu
 
-import android.content.Context
 import ru.nsu.ccfit.zuev.osu.Config
 
 object BlockAreaManager {
-    private const val PREFS_NAME = "blockAreaPreferences"
-    private const val KEY_BLOCK_AREA_CONFIG = "blockAreaConfig"
+    private const val TAG = "BlockAreaManager"
 
     private lateinit var config: BlockAreaConfig
-
-    fun init(context: Context) {
-        val sharedPreferences = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
-        val configString = sharedPreferences.getString(KEY_BLOCK_AREA_CONFIG, "null")
-        config = BlockAreaConfig.fromJson(configString)
-    }
+    private lateinit var configString: String
 
     fun reload(newConfig: String) {
+        configString = newConfig
         config = BlockAreaConfig.fromJson(newConfig)
     }
 
-    fun needBlock(x: Int, y: Int): Boolean {
+    fun needBlock(x: Float, y: Float): Boolean {
         if (!config.activated) {
             return false
         }

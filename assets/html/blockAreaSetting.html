@@ -99,7 +99,7 @@
         <button id="addButton">Add Area</button>
         <button id="deleteButton">Delete Area</button>
         <button id="resetButton">Reset Default</button>
-        <button id="saveButton">Save & Exit</button>
+        <button id="saveButton">Save Changes</button>
     </div>
 </div>
 <script>
@@ -258,14 +258,19 @@
         resetButton.addEventListener(eventMap.click, function () {
             status.rectElems.forEach(x => x.remove())
             status.rectElems = []
-            defaultConfig.rects.forEach(createRectangle);
-            Android.postMessage("null")
+            config.rects = defaultConfig.rects
+            config.rects.forEach(createRectangle);
         })
 
 
         let saveButton = document.getElementById('saveButton')
         saveButton.addEventListener(eventMap.click, function () {
             saveConfig()
+            if (saveButton.innerText === 'Save Changes') {
+                saveButton.innerText = "Change Saved!"
+            } else {
+                saveButton.innerText = 'Save Changes'
+            }
         })
     }
 
