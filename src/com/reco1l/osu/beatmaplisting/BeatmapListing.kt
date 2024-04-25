@@ -1,4 +1,4 @@
-package com.reco1l.osu.ui.beatmapdownloader
+package com.reco1l.osu.beatmaplisting
 
 import android.graphics.BitmapFactory
 import android.util.Log
@@ -156,7 +156,7 @@ object BeatmapListing : BaseFragment(),
     }
 
     fun stopPreviews(shouldResumeMusic: Boolean) {
-        if (!::recyclerView.isInitialized) {
+        if (!BeatmapListing::recyclerView.isInitialized) {
             return
         }
 
@@ -298,7 +298,10 @@ class BeatmapSetDetails(val beatmapSet: BeatmapSetModel, val holder: BeatmapSetV
 
         downloadButton.setOnClickListener {
             val url = BeatmapListing.mirror.downloadEndpoint(beatmapSet.id)
-            BeatmapDownloader.download(url, "${beatmapSet.id} ${beatmapSet.artist} - ${beatmapSet.title}.osz")
+            BeatmapDownloader.download(
+                url,
+                "${beatmapSet.id} ${beatmapSet.artist} - ${beatmapSet.title}.osz"
+            )
         }
 
         cover.setImageDrawable(holder.cover.drawable)
@@ -497,7 +500,10 @@ class BeatmapSetViewHolder(itemView: View, private val mediaScope: CoroutineScop
 
         downloadButton.setOnClickListener {
             val url = BeatmapListing.mirror.downloadEndpoint(beatmapSet.id)
-            BeatmapDownloader.download(url, "${beatmapSet.id} ${beatmapSet.artist} - ${beatmapSet.title}.osz")
+            BeatmapDownloader.download(
+                url,
+                "${beatmapSet.id} ${beatmapSet.artist} - ${beatmapSet.title}.osz"
+            )
         }
 
 

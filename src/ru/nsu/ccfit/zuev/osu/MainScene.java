@@ -11,7 +11,7 @@ import com.edlplan.ui.fragment.ConfirmDialogFragment;
 import com.reco1l.osu.Execution;
 import com.reco1l.osu.ui.MainMenu;
 
-import com.reco1l.osu.ui.beatmapdownloader.BeatmapListing;
+import com.reco1l.osu.beatmaplisting.BeatmapListing;
 import com.rian.osu.beatmap.parser.BeatmapParser;
 import org.anddev.andengine.engine.handler.IUpdateHandler;
 import org.anddev.andengine.entity.IEntity;

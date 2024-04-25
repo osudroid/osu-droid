@@ -1,4 +1,4 @@
-package com.reco1l.osu.ui.beatmapdownloader
+package com.reco1l.osu.beatmaplisting
 
 import org.json.JSONArray
 import ru.nsu.ccfit.zuev.osu.RankedStatus
@@ -36,7 +36,7 @@ enum class BeatmapMirror(
 
     val previewEndpoint: (Long) -> String,
 
-) {
+    ) {
 
     /**
      * osu.direct beatmap mirror.

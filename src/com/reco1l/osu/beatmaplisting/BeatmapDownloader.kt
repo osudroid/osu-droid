@@ -1,4 +1,4 @@
-package com.reco1l.osu.ui.beatmapdownloader
+package com.reco1l.osu.beatmaplisting
 
 import android.os.Environment.DIRECTORY_DOWNLOADS
 import android.view.View
@@ -137,7 +137,9 @@ object BeatmapDownloader : IDownloaderObserver {
         val info = "\n%.3f kb/s (%d%%)".format(downloader.speedKbps / 1024, downloader.progress.toInt())
 
         mainThread {
-            fragment.text.text = context.getString(R.string.beatmap_downloader_downloading).format(currentFilename) + info
+            fragment.text.text = context.getString(R.string.beatmap_downloader_downloading).format(
+                currentFilename
+            ) + info
             fragment.progressBar.isIndeterminate = false
             fragment.progressBar.progress = downloader.progress.toInt()
         }

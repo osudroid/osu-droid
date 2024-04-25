@@ -5,8 +5,8 @@ import com.reco1l.api.ibancho.data.PlayerStatus.READY
 import com.reco1l.api.ibancho.data.RoomBeatmap
 import com.reco1l.osu.async
 import com.reco1l.osu.Multiplayer
-import com.reco1l.osu.ui.beatmapdownloader.BeatmapDownloader
-import com.reco1l.osu.ui.beatmapdownloader.BeatmapListing
+import com.reco1l.osu.beatmaplisting.BeatmapDownloader
+import com.reco1l.osu.beatmaplisting.BeatmapListing
 import com.reco1l.osu.ui.multiplayer.RoomScene
 import org.anddev.andengine.entity.sprite.Sprite
 import org.anddev.andengine.entity.text.ChangeableText
