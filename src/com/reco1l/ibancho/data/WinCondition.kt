@@ -1,4 +1,4 @@
-package com.reco1l.api.ibancho.data
+package com.reco1l.ibancho.data
 
 enum class WinCondition
 {

@@ -1,7 +1,7 @@
 package com.reco1l.osu.ui
 
 import android.opengl.GLES20
-import com.reco1l.api.ibancho.data.WinCondition.ACCURACY
+import com.reco1l.ibancho.data.WinCondition.ACCURACY
 import com.reco1l.osu.multiplayer.Multiplayer
 import org.anddev.andengine.entity.scene.Scene.ITouchArea
 import org.anddev.andengine.entity.sprite.Sprite

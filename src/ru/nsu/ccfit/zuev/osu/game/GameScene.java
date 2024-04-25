@@ -11,7 +11,7 @@ import com.edlplan.framework.support.osb.StoryboardSprite;
 import com.edlplan.framework.utils.functionality.SmartIterator;
 import com.edlplan.osu.support.timing.TimingPoints;
 import com.edlplan.osu.support.timing.controlpoint.ControlPoints;
-import com.reco1l.api.ibancho.RoomAPI;
+import com.reco1l.ibancho.RoomAPI;
 import com.reco1l.osu.Execution;
 import com.reco1l.osu.graphics.BlankTextureRegion;
 import com.reco1l.osu.graphics.VideoSprite;

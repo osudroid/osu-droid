@@ -1,6 +1,11 @@
-package com.reco1l.api.ibancho
+package com.reco1l.ibancho
 
-import com.reco1l.api.ibancho.data.*
+import com.reco1l.ibancho.data.Room
+import com.reco1l.ibancho.data.RoomBeatmap
+import com.reco1l.ibancho.data.RoomGameplaySettings
+import com.reco1l.ibancho.data.RoomMods
+import com.reco1l.ibancho.data.TeamMode
+import com.reco1l.ibancho.data.WinCondition
 import org.json.JSONArray
 
 interface IRoomEventListener

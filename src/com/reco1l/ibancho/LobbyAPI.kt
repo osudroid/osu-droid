@@ -1,8 +1,14 @@
-package com.reco1l.api.ibancho
+package com.reco1l.ibancho
 
-import com.reco1l.api.ibancho.data.*
 import com.reco1l.framework.net.JsonArrayRequest
 import com.reco1l.framework.net.JsonObjectRequest
+import com.reco1l.ibancho.data.Room
+import com.reco1l.ibancho.data.RoomBeatmap
+import com.reco1l.ibancho.data.RoomStatus
+import com.reco1l.ibancho.data.TeamMode
+import com.reco1l.ibancho.data.WinCondition
+import com.reco1l.ibancho.data.parseGameplaySettings
+import com.reco1l.ibancho.data.parseMods
 import com.reco1l.toolkt.data.putObject
 
 object LobbyAPI

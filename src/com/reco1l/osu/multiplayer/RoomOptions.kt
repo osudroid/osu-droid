@@ -22,11 +22,11 @@ import com.edlplan.ui.EasingHelper
 import com.edlplan.ui.SkinPathPreference
 import com.edlplan.ui.fragment.LoadingFragment
 import com.edlplan.ui.fragment.SettingsFragment
-import com.reco1l.api.ibancho.LobbyAPI
-import com.reco1l.api.ibancho.RoomAPI
-import com.reco1l.api.ibancho.data.RoomTeam
-import com.reco1l.api.ibancho.data.TeamMode
-import com.reco1l.api.ibancho.data.WinCondition
+import com.reco1l.ibancho.LobbyAPI
+import com.reco1l.ibancho.RoomAPI
+import com.reco1l.ibancho.data.RoomTeam
+import com.reco1l.ibancho.data.TeamMode
+import com.reco1l.ibancho.data.WinCondition
 import com.reco1l.osu.async
 import com.reco1l.osu.mainThread
 import ru.nsu.ccfit.zuev.osu.Config

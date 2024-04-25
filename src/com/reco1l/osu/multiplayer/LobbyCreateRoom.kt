@@ -11,9 +11,9 @@ import com.edlplan.framework.easing.Easing
 import com.edlplan.ui.BaseAnimationListener
 import com.edlplan.ui.EasingHelper
 import com.edlplan.ui.fragment.BaseFragment
-import com.reco1l.api.ibancho.LobbyAPI
-import com.reco1l.api.ibancho.RoomAPI
-import com.reco1l.api.ibancho.data.RoomBeatmap
+import com.reco1l.ibancho.LobbyAPI
+import com.reco1l.ibancho.RoomAPI
+import com.reco1l.ibancho.data.RoomBeatmap
 import com.reco1l.osu.async
 import com.reco1l.osu.mainThread
 import ru.nsu.ccfit.zuev.osu.ToastLogger

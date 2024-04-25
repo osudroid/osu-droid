@@ -1,9 +1,9 @@
-package com.reco1l.api.ibancho
+package com.reco1l.ibancho
 
-import com.reco1l.api.ibancho.data.PlayerStatus
-import com.reco1l.api.ibancho.data.RoomPlayer
-import com.reco1l.api.ibancho.data.RoomTeam
-import com.reco1l.api.ibancho.data.RoomMods
+import com.reco1l.ibancho.data.PlayerStatus
+import com.reco1l.ibancho.data.RoomPlayer
+import com.reco1l.ibancho.data.RoomTeam
+import com.reco1l.ibancho.data.RoomMods
 
 interface IPlayerEventListener
 {

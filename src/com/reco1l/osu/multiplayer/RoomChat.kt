@@ -21,8 +21,8 @@ import com.edlplan.framework.easing.Easing
 import com.edlplan.ui.BaseAnimationListener
 import com.edlplan.ui.EasingHelper
 import com.edlplan.ui.fragment.BaseFragment
-import com.reco1l.api.ibancho.RoomAPI
-import com.reco1l.api.ibancho.data.RoomPlayer
+import com.reco1l.ibancho.RoomAPI
+import com.reco1l.ibancho.data.RoomPlayer
 import com.reco1l.osu.mainThread
 import com.reco1l.toolkt.kotlin.async
 import org.anddev.andengine.input.touch.TouchEvent
