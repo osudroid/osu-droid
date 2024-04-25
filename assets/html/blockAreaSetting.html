@@ -1,1 +1,386 @@
-E:/DF_File/Programmes/JavaScript/TemperMonkey/blockAreaSetting.html
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Draggable Rectangles</title>
+    <style>
+        body {
+            display: flex;
+            justify-content: center; /* Center horizontally */
+            align-items: center; /* Center vertically */
+            min-height: 100vh; /* Full viewport height */
+            margin: 0; /* Remove default margin */
+            background-color: #f0f0f0;
+        }
+
+
+        #canvas {
+            position: relative;
+            background-color: #e0e0e0;
+            overflow: hidden;
+            width: 80%;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        .draggable {
+            position: absolute;
+            background-color: rgba(0, 0, 255, 0.5);
+            cursor: move;
+            display: flex;
+            justify-content: center; /* Center horizontally */
+            align-items: center; /* Center vertically */
+        }
+
+        .resizer {
+            width: 20px;
+            height: 20px;
+            background: red;
+            position: absolute;
+            cursor: pointer;
+        }
+
+        .resizer.tl {
+            left: -10px;
+            top: -10px;
+            cursor: nwse-resize;
+        }
+
+        .resizer.tr {
+            right: -10px;
+            top: -10px;
+            cursor: nesw-resize;
+        }
+
+        .resizer.bl {
+            left: -10px;
+            bottom: -10px;
+            cursor: nesw-resize;
+        }
+
+        .resizer.br {
+            right: -10px;
+            bottom: -10px;
+            cursor: nwse-resize;
+        }
+
+        .floating-button {
+            position: absolute;
+            padding: 5px 10px;
+            background-color: rgba(255, 0, 0, 0.97);
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            user-select: none; /* prevent text selection */
+        }
+
+        #buttonContainer {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        button {
+            cursor: pointer;
+            user-select: none; /* prevent text selection */
+            margin: 5px;
+        }
+    </style>
+</head>
+<body>
+<div id="canvas">
+    <div id="buttonContainer">
+        <button id="activeButton">Current: Disabled</button>
+        <button id="addButton">Add Area</button>
+        <button id="deleteButton">Delete Area</button>
+        <button id="resetButton">Reset Default</button>
+        <button id="saveButton">Save & Exit</button>
+    </div>
+</div>
+<script>
+
+
+    let config = {
+        activated: false,
+        screen: {
+            height: 1080,
+            width: 2200
+        },
+        rects: [
+            {top: 0, bottom: 0.1, left: 0.2, right: 0.8},
+            {top: 0.9, bottom: 1, left: 0.2, right: 0.8},
+            {top: 0.2, bottom: 0.8, left: 0, right: 0.1},
+            {top: 0.2, bottom: 0.8, left: 0.9, right: 1}
+        ]
+    }
+
+    let defaultConfig = {
+        rects: [
+            {top: 0, bottom: 0.1, left: 0.2, right: 0.8},
+            {top: 0.9, bottom: 1, left: 0.2, right: 0.8},
+            {top: 0.2, bottom: 0.8, left: 0, right: 0.1},
+            {top: 0.2, bottom: 0.8, left: 0.9, right: 1}
+        ]
+    }
+
+    let isBrowser = navigator.userAgent.includes('Chrome/')
+
+    const eventMap = isBrowser ?
+        {
+            start: "mousedown",
+            move: 'mousemove',
+            end: 'mouseup',
+            click: 'click'
+        } : {
+            start: "touchstart",
+            move: 'touchmove',
+            end: 'touchend',
+            click: 'touchend',
+        }
+    const canvas = document.getElementById('canvas');
+
+    let height = null
+    let width = null
+    let status = {
+        deleteMode: false,
+        rectElems: []
+    }
+    document.addEventListener("DOMContentLoaded", function () {
+        Android.postMessage(`{"message":'ok'}`);
+    });
+
+    function getClientPosition(event) {
+        if (!event.touches) {
+            return [event.clientX, event.clientY]
+        } else {
+            return [
+                (event.touches[0].clientX),
+                (event.touches[0].clientY)
+            ]
+
+        }
+    }
+
+
+    function loadConfig(importConfig) {
+        if (importConfig === null) {
+            config = importConfig
+        } else if (!importConfig.rects) {
+            importConfig.rects = defaultConfig.rects
+        }
+
+        canvas.style.aspectRatio = config.screen.width / config.screen.height
+        height = canvas.clientHeight
+        width = canvas.clientWidth
+
+        config.rects.forEach(createRectangle);
+        registerButton()
+    }
+
+    function saveConfig() {
+        config.rects = []
+        for (let rectElem of status.rectElems) {
+            if (!rectElem.isConnected) continue
+            const top = parseInt(rectElem.style.top, 10) / height;
+            const left = parseInt(rectElem.style.left, 10) / width;
+            const elemWidth = parseInt(rectElem.style.width, 10) / width;
+            const elemHeight = parseInt(rectElem.style.height, 10) / height;
+            const bottom = top + elemHeight;
+            const right = left + elemWidth;
+            config.rects.push({top: top, bottom: bottom, left: left, right: right})
+        }
+        console.log(config)
+        Android.postMessage(JSON.stringify(config))
+        return config
+    }
+
+
+    function createFloatingButton(target, text, callback) {
+        const buttonDiv = document.createElement('div');
+        buttonDiv.className = 'floating-button';
+        buttonDiv.textContent = text;
+        target.appendChild(buttonDiv);
+
+        buttonDiv.addEventListener(eventMap.end, handleInteraction);
+
+        function handleInteraction(event) {
+            event.stopPropagation();
+            callback();
+            buttonDiv.remove();
+            cleanUp();
+        }
+
+        function cleanUp() {
+            document.removeEventListener(eventMap.end, handleOutsideClick);
+        }
+
+        document.addEventListener(eventMap.end, handleOutsideClick);
+        let isFirst = true
+
+        function handleOutsideClick(event) {
+            if (isFirst) {
+                isFirst = false
+                return
+            }
+            if (event.target !== buttonDiv && event.target !== target) {
+                buttonDiv.remove();
+                cleanUp();
+            }
+        }
+    }
+
+
+    function registerButton() {
+        let activeButton = document.getElementById('activeButton')
+        activeButton.innerText = config.activated ? "Current: Enabled" : "Current: Disabled"
+        activeButton.addEventListener(eventMap.click, function () {
+            config.activated = !config.activated
+            activeButton.innerText = config.activated ? "Current: Enabled" : "Current: Disabled"
+        })
+
+        let addButton = document.getElementById("addButton")
+        addButton.addEventListener(eventMap.click, function () {
+            createRectangle({top: 0.2, bottom: 0.8, left: 0.25, right: 0.4},)
+        })
+
+        let deleteButton = document.getElementById("deleteButton")
+        deleteButton.addEventListener(eventMap.click, function () {
+            status.deleteMode = !status.deleteMode
+            deleteButton.innerText = status.deleteMode ? "Delete: On" : "Delete Area"
+        })
+
+        let resetButton = document.getElementById('resetButton')
+        resetButton.addEventListener(eventMap.click, function () {
+            status.rectElems.forEach(x => x.remove())
+            status.rectElems = []
+            defaultConfig.rects.forEach(createRectangle);
+            Android.postMessage("null")
+        })
+
+
+        let saveButton = document.getElementById('saveButton')
+        saveButton.addEventListener(eventMap.click, function () {
+            saveConfig()
+        })
+    }
+
+
+    function createRectangle(rect) {
+        function addResizers(div) {
+            const positions = ['tl', 'tr', 'bl', 'br'];
+            positions.forEach(pos => {
+                const resizer = document.createElement('div');
+                resizer.className = 'resizer ' + pos;
+                div.appendChild(resizer);
+                setupResize(div, resizer, pos);
+            });
+        }
+
+        function setupResize(div, resizer, pos) {
+            resizer.addEventListener(eventMap.start, function (event) {
+                event.stopPropagation();
+                let [initialX, initialY] = getClientPosition(event);
+                const initialWidth = parseInt(getComputedStyle(div, null).getPropertyValue('width'), 10);
+                const initialHeight = parseInt(getComputedStyle(div, null).getPropertyValue('height'), 10);
+                const initialTop = div.offsetTop;
+                const initialLeft = div.offsetLeft;
+
+                document.addEventListener(eventMap.move, onMouseMove);
+                document.addEventListener(eventMap.end, onMouseUp);
+
+                function onMouseMove(event) {
+                    const [x, y] = getClientPosition(event)
+                    const dx = x - initialX;
+                    const dy = y - initialY;
+
+                    switch (pos) {
+                        case 'tl':
+                            div.style.width = (initialWidth - dx) + 'px';
+                            div.style.height = (initialHeight - dy) + 'px';
+                            div.style.top = (initialTop + dy) + 'px';
+                            div.style.left = (initialLeft + dx) + 'px';
+                            break;
+                        case 'tr':
+                            div.style.width = (initialWidth + dx) + 'px';
+                            div.style.height = (initialHeight - dy) + 'px';
+                            div.style.top = (initialTop + dy) + 'px';
+                            break;
+                        case 'bl':
+                            div.style.width = (initialWidth - dx) + 'px';
+                            div.style.height = (initialHeight + dy) + 'px';
+                            div.style.left = (initialLeft + dx) + 'px';
+                            break;
+                        case 'br':
+                            div.style.width = (initialWidth + dx) + 'px';
+                            div.style.height = (initialHeight + dy) + 'px';
+                            break;
+                    }
+                }
+
+                function onMouseUp(event) {
+
+                    document.removeEventListener(eventMap.move, onMouseMove);
+                    document.removeEventListener(eventMap.end, onMouseUp);
+                }
+            });
+        }
+
+        function registerClickListener(el) {
+
+            el.addEventListener(eventMap.end, function (event) {
+                if (status.deleteMode) {
+                    createFloatingButton(el, "Delete this area?", function () {
+                        el.remove()
+                    })
+                }
+            })
+            el.addEventListener(eventMap.start, function (event) {
+                if (status.deleteMode) {
+
+                } else {
+                    const [startX, startY] = getClientPosition(event);
+                    const startPosTop = el.offsetTop;
+                    const startPosLeft = el.offsetLeft;
+
+                    const onMouseMove = function (event) {
+                        const [x, y] = getClientPosition(event)
+                        const dx = x - startX;
+                        const dy = y - startY;
+
+                        el.style.top = (startPosTop + dy) + 'px';
+                        el.style.left = (startPosLeft + dx) + 'px';
+                    };
+
+                    const onMouseUp = function () {
+                        document.removeEventListener(eventMap.move, onMouseMove);
+                        document.removeEventListener(eventMap.end, onMouseUp);
+                    };
+
+                    document.addEventListener(eventMap.move, onMouseMove);
+                    document.addEventListener(eventMap.end, onMouseUp);
+                }
+
+            });
+        }
+
+        const div = document.createElement('div');
+        div.className = 'draggable';
+        div.style.top = (rect.top * height) + 'px';
+        div.style.left = (rect.left * width) + 'px';
+        div.style.width = ((rect.right - rect.left) * width) + 'px';
+        div.style.height = ((rect.bottom - rect.top) * height) + 'px';
+        canvas.appendChild(div);
+        status.rectElems.push(div)
+        registerClickListener(div);
+        addResizers(div);
+    }
+
+
+</script>
+</body>
+</html>

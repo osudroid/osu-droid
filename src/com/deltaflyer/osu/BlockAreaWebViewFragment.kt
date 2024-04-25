@@ -1,5 +1,6 @@
 package com.deltaflyer.osu
 
+import android.util.Log
 import android.webkit.JavascriptInterface
 import android.webkit.WebView
 import com.edlplan.ui.fragment.WebViewFragment
@@ -17,8 +18,8 @@ class BlockAreaWebViewFragment : WebViewFragment() {
         myWebView = findViewById<WebView>(R.id.web)!!;
         myWebView.addJavascriptInterface(object : Any() {
             @JavascriptInterface
-            fun postMessage(json: String?) {
-                callback.onJsonReceived(json)
+            fun postMessage(message: String?) {
+                callback.onMessageReceived(message)
             }
         }, "Android")
     }
@@ -34,9 +35,17 @@ class BlockAreaWebViewFragment : WebViewFragment() {
         return this
     }
 
+    fun execute(js: String) {
+        Log.d("WebViewFruit", "Exec: $js")
+
+        this.myWebView.evaluateJavascript(js) { value ->
+            Log.d("WebViewFruit", value)
+        }
+    }
+
 
     interface Callback {
-        fun onJsonReceived(json: String?)
+        fun onMessageReceived(message: String?)
     }
 }
 
