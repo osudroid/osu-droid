@@ -12,12 +12,12 @@ import com.edlplan.framework.utils.functionality.SmartIterator;
 import com.edlplan.osu.support.timing.TimingPoints;
 import com.edlplan.osu.support.timing.controlpoint.ControlPoints;
 import com.reco1l.api.ibancho.RoomAPI;
-import com.reco1l.framework.lang.Execution;
-import com.reco1l.legacy.engine.BlankTextureRegion;
-import com.reco1l.legacy.engine.VideoSprite;
-import com.reco1l.legacy.ui.entity.InGameLeaderboard;
-import com.reco1l.legacy.Multiplayer;
-import com.reco1l.legacy.ui.multiplayer.RoomScene;
+import com.reco1l.osu.Execution;
+import com.reco1l.osu.engine.BlankTextureRegion;
+import com.reco1l.osu.engine.VideoSprite;
+import com.reco1l.osu.ui.entity.InGameLeaderboard;
+import com.reco1l.osu.Multiplayer;
+import com.reco1l.osu.ui.multiplayer.RoomScene;
 
 import com.rian.osu.beatmap.Beatmap;
 import com.rian.osu.beatmap.constants.BeatmapCountdown;

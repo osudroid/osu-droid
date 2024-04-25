@@ -5,7 +5,7 @@ import com.edlplan.framework.math.Vec2;
 import com.edlplan.framework.math.line.LinePath;
 import com.edlplan.osu.support.slider.SliderBody2D;
 import com.edlplan.osu.support.timing.controlpoint.TimingControlPoint;
-import com.reco1l.framework.lang.Execution;
+import com.reco1l.osu.Execution;
 
 import org.anddev.andengine.entity.IEntity;
 import org.anddev.andengine.entity.modifier.*;

@@ -1,7 +1,7 @@
 package com.reco1l.api.ibancho
 
 import com.reco1l.api.ibancho.data.*
-import com.reco1l.legacy.data.stringToMods
+import com.reco1l.osu.data.stringToMods
 import org.json.JSONArray
 import org.json.JSONObject
 

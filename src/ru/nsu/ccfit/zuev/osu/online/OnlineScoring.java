@@ -1,8 +1,8 @@
 package ru.nsu.ccfit.zuev.osu.online;
 
-import com.reco1l.framework.lang.Execution;
-import com.reco1l.legacy.ui.multiplayer.LobbyScene;
-import com.reco1l.legacy.ui.multiplayer.RoomScene;
+import com.reco1l.osu.Execution;
+import com.reco1l.osu.ui.multiplayer.LobbyScene;
+import com.reco1l.osu.ui.multiplayer.RoomScene;
 import com.rian.osu.ui.SendingPanel;
 
 import org.anddev.andengine.util.Debug;

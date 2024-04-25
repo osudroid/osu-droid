@@ -31,8 +31,8 @@ import com.google.android.material.snackbar.Snackbar;
 import java.io.File;
 import java.util.Objects;
 
-import com.reco1l.framework.lang.Execution;
-import com.reco1l.legacy.UpdateManager;
+import com.reco1l.osu.Execution;
+import com.reco1l.osu.UpdateManager;
 
 import ru.nsu.ccfit.zuev.osu.Config;
 import ru.nsu.ccfit.zuev.osu.GlobalManager;

@@ -2,11 +2,11 @@ package ru.nsu.ccfit.zuev.osu.menu;
 
 import com.edlplan.ui.fragment.InGameSettingMenu;
 import com.reco1l.api.ibancho.RoomAPI;
-import com.reco1l.framework.lang.Execution;
-import com.reco1l.legacy.data.MultiplayerConverter;
-import com.reco1l.legacy.Multiplayer;
+import com.reco1l.osu.Execution;
+import com.reco1l.osu.data.MultiplayerConverter;
+import com.reco1l.osu.Multiplayer;
 import com.reco1l.api.ibancho.data.RoomMods;
-import com.reco1l.legacy.ui.multiplayer.RoomScene;
+import com.reco1l.osu.ui.multiplayer.RoomScene;
 
 import com.rian.osu.beatmap.parser.BeatmapParser;
 import com.rian.osu.difficulty.BeatmapDifficultyCalculator;

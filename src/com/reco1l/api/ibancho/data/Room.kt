@@ -1,6 +1,6 @@
 package com.reco1l.api.ibancho.data
 
-import com.reco1l.legacy.Multiplayer
+import com.reco1l.osu.Multiplayer
 
 data class Room(
     /**

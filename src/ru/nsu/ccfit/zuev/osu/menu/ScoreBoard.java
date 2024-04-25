@@ -2,8 +2,9 @@ package ru.nsu.ccfit.zuev.osu.menu;
 
 import android.database.Cursor;
 
-import com.reco1l.framework.lang.Execution;
-import com.reco1l.legacy.Multiplayer;
+import com.reco1l.osu.Execution;
+import com.reco1l.osu.Multiplayer;
+
 import org.anddev.andengine.entity.Entity;
 import org.anddev.andengine.entity.scene.Scene;
 import org.anddev.andengine.entity.sprite.Sprite;
