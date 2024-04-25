@@ -7,7 +7,7 @@ import android.util.Log;
 
 import com.dgsrz.bancho.security.SecurityUtils;
 
-import com.reco1l.framework.IniReader;
+import com.reco1l.osu.IniReader;
 import com.reco1l.osu.conversion.SkinConverter;
 import com.reco1l.osu.graphics.BlankTextureRegion;
 import org.anddev.andengine.engine.Engine;

@@ -1,4 +1,4 @@
-package com.reco1l.framework
+package com.reco1l.osu
 
 import android.util.Log
 import okhttp3.internal.toImmutableMap

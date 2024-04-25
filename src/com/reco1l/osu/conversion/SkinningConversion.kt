@@ -7,7 +7,7 @@ import android.graphics.Bitmap.CompressFormat
 import android.graphics.Bitmap.Config
 import android.graphics.BitmapFactory
 import android.graphics.Color
-import com.reco1l.framework.IniReader
+import com.reco1l.osu.IniReader
 import com.reco1l.framework.net.JsonContent
 import org.json.JSONArray
 import java.io.File
