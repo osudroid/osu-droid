@@ -18,12 +18,14 @@ open class WebRequest(private var url: HttpUrl) : AutoCloseable {
      * successfully called.
      */
     lateinit var response: Response
+        protected set
 
     /**
      * The response body got upon request, this will not be initialized until [execute] has been
      * successfully called.
      */
     lateinit var responseBody: ResponseBody
+        protected set
 
 
     private var client = DEFAULT_CLIENT
