@@ -1153,7 +1153,7 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
                     if (!Objects.equals(liveScore, lastScoreSent))
                     {
                         lastScoreSent = liveScore;
-                        Execution.asyncIgnoreExceptions(() -> RoomAPI.submitLiveScore(lastScoreSent.toJson()));
+                        Execution.async(() -> Execution.runSafe(() -> RoomAPI.submitLiveScore(lastScoreSent.toJson())));
                     }
                 }
             }
@@ -1724,7 +1724,7 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
                         Multiplayer.log("Match ended, moving to results scene.");
                         RoomScene.INSTANCE.getChat().show();
 
-                        Execution.asyncIgnoreExceptions(() -> RoomAPI.submitFinalScore(stat.toJson()));
+                        Execution.async(() -> Execution.runSafe(() -> RoomAPI.submitFinalScore(stat.toJson())));
 
                         ToastLogger.showText("Loading room statistics...", false);
                     }
@@ -2419,7 +2419,7 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
             {
                 // Room being null can happen when the player disconnects from socket while playing
                 if (Multiplayer.isConnected())
-                    Execution.asyncIgnoreExceptions(() -> RoomAPI.submitFinalScore(stat.toJson()));
+                    Execution.async(() -> Execution.runSafe(() -> RoomAPI.submitFinalScore(stat.toJson())));
 
                 Multiplayer.log("Player left the match.");
                 quit();
@@ -2471,7 +2471,7 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
             if (Multiplayer.isConnected())
             {
                 Multiplayer.log("Player has lost, moving to room scene.");
-                Execution.asyncIgnoreExceptions(() -> RoomAPI.submitFinalScore(stat.toJson()));
+                Execution.async(() -> Execution.runSafe(() -> RoomAPI.submitFinalScore(stat.toJson())));
             }
             quit();
             return;
