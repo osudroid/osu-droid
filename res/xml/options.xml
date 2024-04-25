@@ -193,8 +193,8 @@
             android:summary="@string/opt_remove_sliderlock_spinnerlock_summary" android:defaultValue="false"/>
         <com.deltaflyer.osu.BlockAreaPreference
             android:key="blockArea"
-            android:title="Set Input Block Area"
-            android:summary="Configure the input block area settings for the application."/>
+            android:title="@string/opt_block_area_title"
+            android:summary="@string/opt_block_area_summary"/>
 
         <CheckBoxPreference android:key="calculateSliderPathInGameStart" android:title="@string/opt_calculate_slider_path_in_game_start_title"
             android:summary="@string/opt_calculate_slider_path_in_game_start_summary" android:defaultValue="false"/>
