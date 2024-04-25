@@ -9,11 +9,10 @@ import com.reco1l.api.ibancho.data.RoomStatus.*
 import com.reco1l.api.ibancho.data.TeamMode.HEAD_TO_HEAD
 import com.reco1l.api.ibancho.data.TeamMode.TEAM_VS_TEAM
 import com.reco1l.api.ibancho.data.WinCondition.*
-import com.reco1l.framework.extensions.className
-import com.reco1l.framework.extensions.orAsyncCatch
 import com.reco1l.framework.lang.mainThread
 import com.reco1l.legacy.Multiplayer
 import com.reco1l.legacy.ui.entity.ScrollableList
+import com.reco1l.toolkt.kotlin.async
 import org.anddev.andengine.entity.sprite.Sprite
 import org.anddev.andengine.entity.text.Text
 import org.anddev.andengine.input.touch.TouchEvent
@@ -66,13 +65,19 @@ class LobbyRoomList : ScrollableList()
         Multiplayer.log("Trying to connect socket...")
 
         LobbyScene.search.dismiss()
-        LoadingScreen().show();
+        LoadingScreen().show()
 
-        { RoomAPI.connectToRoom(room.id, getOnline().userId, getOnline().username, password) }.orAsyncCatch {
+        async {
 
-            ToastLogger.showText("Failed to connect to the room: ${it.className} - ${it.message}", true)
-            Multiplayer.log(it)
-            LobbyScene.show()
+            try {
+                RoomAPI.connectToRoom(room.id, getOnline().userId, getOnline().username, password)
+            } catch (e: Exception) {
+
+                ToastLogger.showText("Failed to connect to the room: ${e.javaClass} - ${e.message}", true)
+                Multiplayer.log(e)
+
+                LobbyScene.show()
+            }
         }
     }
 

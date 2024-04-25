@@ -11,7 +11,7 @@ import com.reco1l.api.ibancho.data.RoomTeam.RED
 import com.reco1l.api.ibancho.data.TeamMode.HEAD_TO_HEAD
 import com.reco1l.api.ibancho.data.TeamMode.TEAM_VS_TEAM
 import com.reco1l.api.ibancho.data.WinCondition.*
-import com.reco1l.framework.extensions.ignoreException
+import com.reco1l.toolkt.kotlin.runSafe
 import com.reco1l.framework.lang.updateThread
 import com.reco1l.framework.lang.mainThread
 import com.reco1l.legacy.Multiplayer
@@ -636,7 +636,7 @@ object RoomScene : Scene(), IRoomEventListener, IPlayerEventListener
         // Stopping the attempt loop if user cancels reconnection.
         Multiplayer.isReconnecting = false
 
-        ignoreException { RoomAPI.disconnect() }
+        runSafe { RoomAPI.disconnect() }
         clear()
         LobbyScene.show()
     }

@@ -71,7 +71,11 @@ class VideoTexture(val source: String)
             surface.release()
         }
 
-        { surfaceTexture?.updateTexImage() }.orCatch { isUpdateOnHardwareNeeded = true }
+        try {
+            surfaceTexture?.updateTexImage()
+        } catch (_: Exception) {
+            isUpdateOnHardwareNeeded = true
+        }
     }
 
     fun play() = player.start()

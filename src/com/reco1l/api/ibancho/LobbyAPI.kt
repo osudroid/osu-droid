@@ -1,10 +1,9 @@
 package com.reco1l.api.ibancho
 
 import com.reco1l.api.ibancho.data.*
-import com.reco1l.framework.extensions.orCatch
-import com.reco1l.framework.net.JsonContent
-import com.reco1l.framework.net.JsonRequester
-import com.reco1l.framework.net.QueryContent
+import com.reco1l.framework.net.JsonArrayRequest
+import com.reco1l.framework.net.JsonObjectRequest
+import com.reco1l.toolkt.data.putObject
 
 object LobbyAPI
 {
@@ -34,39 +33,38 @@ object LobbyAPI
      */
     fun getRooms(query: String?, sign: String?): List<Room>
     {
-        JsonRequester("$HOST$GET_ROOMS").use {
+        JsonArrayRequest("$HOST$GET_ROOMS").use {
 
-            it.log = false
-
-            if (sign != null || query != null)
-                it.query = QueryContent().apply {
-                    put("sign", sign)
-                    put("query", query)
+            if (sign != null || query != null) {
+                it.buildUrl {
+                    addQueryParameter("sign", sign)
+                    addQueryParameter("query", query)
                 }
+            }
 
-            val array = it.executeAndGetJson().toArray() ?: return emptyList()
+            return List(it.json.length()) { i ->
 
-            return List(array.length()) { i ->
+                val json = it.json.optJSONObject(i)
 
-                val json = array.optJSONObject(i)
-
-                return@List {
+                return@List try {
 
                     Room(
-                            id = json.getLong("id"),
-                            name = json.getString("name"),
-                            isLocked = json.getBoolean("isLocked"),
-                            maxPlayers = json.getInt("maxPlayers"),
-                            mods = parseMods(json.getJSONObject("mods")),
-                            gameplaySettings = parseGameplaySettings(json.getJSONObject("gameplaySettings")),
-                            teamMode = TeamMode.from(json.getInt("teamMode")),
-                            winCondition = WinCondition.from(json.getInt("winCondition")),
-                            playerCount = json.getInt("playerCount"),
-                            playerNames = json.getString("playerNames"),
-                            status = RoomStatus.from(json.getInt("status"))
+                        id = json.getLong("id"),
+                        name = json.getString("name"),
+                        isLocked = json.getBoolean("isLocked"),
+                        maxPlayers = json.getInt("maxPlayers"),
+                        mods = parseMods(json.getJSONObject("mods")),
+                        gameplaySettings = parseGameplaySettings(json.getJSONObject("gameplaySettings")),
+                        teamMode = TeamMode.from(json.getInt("teamMode")),
+                        winCondition = WinCondition.from(json.getInt("winCondition")),
+                        playerCount = json.getInt("playerCount"),
+                        playerNames = json.getString("playerNames"),
+                        status = RoomStatus.from(json.getInt("status"))
                     )
 
-                }.orCatch { null }
+                } catch (e: Exception) {
+                    null
+                }
 
             }.filterNotNull()
         }
@@ -77,34 +75,37 @@ object LobbyAPI
      */
     fun createRoom(name: String, beatmap: RoomBeatmap?, hostUID: Long, hostUsername: String, sign: String?, password: String? = null, maxPlayers: Int = 8): Long
     {
-        JsonRequester("$HOST$CREATE_ROOM").use { request ->
+        JsonObjectRequest("$HOST$CREATE_ROOM").use { request ->
 
-            request.jsonInsertion = JsonContent().apply {
+            request.buildRequestBody {
 
                 put("name", name)
                 put("maxPlayers", maxPlayers)
 
-                putGroup("host")
-                        .put("uid", hostUID.toString())
-                        .put("username", hostUsername)
-
-                if (beatmap != null)
-                {
-                    putGroup("beatmap")
-                            .put("md5", beatmap.md5)
-                            .put("title", beatmap.title)
-                            .put("artist", beatmap.artist)
-                            .put("creator", beatmap.creator)
-                            .put("version", beatmap.version)
+                putObject("host") {
+                    put("uid", hostUID.toString())
+                    put("username", hostUsername)
                 }
 
-                if (!password.isNullOrBlank())
+                if (beatmap != null) {
+                    putObject("beatmap") {
+                        put("md5", beatmap.md5)
+                        put("title", beatmap.title)
+                        put("artist", beatmap.artist)
+                        put("creator", beatmap.creator)
+                        put("version", beatmap.version)
+                    }
+                }
+
+                if (!password.isNullOrBlank()) {
                     put("password", password)
+                }
 
                 put("sign", sign)
+
             }
 
-            return request.executeAndGetJson().getString("id").toLong()
+            return request.execute().json.getString("id").toLong()
         }
     }
 }

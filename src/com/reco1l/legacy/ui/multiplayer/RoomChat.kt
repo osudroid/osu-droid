@@ -26,6 +26,7 @@ import com.reco1l.api.ibancho.data.RoomPlayer
 import com.reco1l.framework.extensions.orAsyncCatch
 import com.reco1l.framework.lang.mainThread
 import com.reco1l.legacy.Multiplayer
+import com.reco1l.toolkt.kotlin.async
 import org.anddev.andengine.input.touch.TouchEvent
 import ru.nsu.ccfit.zuev.osu.RGBColor
 import ru.nsu.ccfit.zuev.osu.ResourceManager
@@ -144,12 +145,17 @@ class RoomChat : BaseFragment(), OnEditorActionListener, OnKeyListener
         val message = field?.text.takeUnless { it.isNullOrEmpty() } ?: return
         field?.text = null
 
-        { RoomAPI.sendMessage(message.toString()) }.orAsyncCatch {
 
-            onSystemChatMessage("Error to send message: ${it.message}", "#FF0000")
-            it.printStackTrace()
+        async {
+            try {
+                RoomAPI.sendMessage(message.toString())
+            } catch (e: Exception) {
+                onSystemChatMessage("Error to send message: ${e.message}", "#FF0000")
+                e.printStackTrace()
+            }
 
         }
+
     }
 
     override fun onEditorAction(v: TextView?, actionId: Int, event: KeyEvent?): Boolean

@@ -1,13 +1,13 @@
 package com.reco1l.legacy.ui.multiplayer
 
 import android.net.Uri
+import android.util.Log
 import com.dgsrz.bancho.security.SecurityUtils
 import com.reco1l.api.ibancho.LobbyAPI
 import com.reco1l.api.ibancho.RoomAPI
-import com.reco1l.framework.extensions.className
-import com.reco1l.framework.extensions.orAsyncCatch
 import com.reco1l.framework.lang.updateThread
 import com.reco1l.legacy.Multiplayer
+import com.reco1l.toolkt.kotlin.async
 import org.anddev.andengine.entity.modifier.LoopEntityModifier
 import org.anddev.andengine.entity.modifier.RotationByModifier
 import org.anddev.andengine.entity.primitive.Rectangle
@@ -218,27 +218,33 @@ object LobbyScene : Scene()
         getGlobal().songService.isGaming = true
         Multiplayer.isMultiplayer = true
 
-        {
-            LoadingScreen().show()
+        async {
 
-            getGlobal().mainActivity.checkNewSkins()
-            getGlobal().mainActivity.checkNewBeatmaps()
-            LibraryManager.INSTANCE.updateLibrary(true)
+            try {
+                LoadingScreen().show()
 
-            RoomScene.load()
-            load()
+                getGlobal().mainActivity.checkNewSkins()
+                getGlobal().mainActivity.checkNewBeatmaps()
+                LibraryManager.INSTANCE.updateLibrary(true)
 
-            val roomID = link.pathSegments[0].toLong()
-            val password = if (link.pathSegments.size > 1) link.pathSegments[1] else null
+                RoomScene.load()
+                load()
 
-            RoomAPI.connectToRoom(roomID, getOnline().userId, getOnline().username, password)
+                val roomID = link.pathSegments[0].toLong()
+                val password = if (link.pathSegments.size > 1) link.pathSegments[1] else null
 
-        }.orAsyncCatch {
+                RoomAPI.connectToRoom(roomID, getOnline().userId, getOnline().username, password)
 
-            ToastLogger.showText("Failed to connect to the room: ${it.className} - ${it.message}", true)
-            it.printStackTrace()
-            back()
+            } catch (e: Exception) {
+                ToastLogger.showText("Failed to connect to the room: ${e.javaClass} - ${e.message}", true)
+                Log.e("LobbyScene", "Failed to connect to room.", e)
+
+                back()
+            }
+
+
         }
+
     }
 
     // Update events
@@ -267,39 +273,45 @@ object LobbyScene : Scene()
         loading.registerEntityModifier(LoopEntityModifier(RotationByModifier(2f, 360f)))
 
         awaitList = true
-        {
-            val list = LobbyAPI.getRooms(searchQuery, SecurityUtils.signRequest(searchQuery ?: ""))
+        async {
 
-            // Updating list
-            updateThread {
-                roomList.setList(list)
-                awaitList = false
-                val roomCount = roomList.childCount
+            try {
+                val list = LobbyAPI.getRooms(searchQuery, SecurityUtils.signRequest(searchQuery ?: ""))
 
-                // Updating info text
-                infoText.text = if (searchQuery.isNullOrEmpty())
-                {
-                    "Showing $roomCount ${if (roomCount == 1) "match" else "matches"}."
+                // Updating list
+                updateThread {
+                    roomList.setList(list)
+                    awaitList = false
+                    val roomCount = roomList.childCount
+
+                    // Updating info text
+                    infoText.text = if (searchQuery.isNullOrEmpty())
+                    {
+                        "Showing $roomCount ${if (roomCount == 1) "match" else "matches"}."
+                    }
+                    else "Searching for \"$searchQuery\", showing $roomCount ${if (roomCount == 1) "result" else "results"}."
                 }
-                else "Searching for \"$searchQuery\", showing $roomCount ${if (roomCount == 1) "result" else "results"}."
+
+                // Hiding loading icon
+                loading.isVisible = false
+                loading.clearEntityModifiers()
+
+                // Showing buttons
+                createButton?.isVisible = true
+                refreshButton?.isVisible = true
+
+
+            } catch (e: Exception) {
+                awaitList = false
+
+                ToastLogger.showText("Multiplayer server is unavailable, try again later.", true)
+                Log.e("LobbyScene", "Failed to get room list", e)
+
+                back()
             }
 
-            // Hiding loading icon
-            loading.isVisible = false
-            loading.clearEntityModifiers()
-
-            // Showing buttons
-            createButton?.isVisible = true
-            refreshButton?.isVisible = true
-
-        }.orAsyncCatch {
-
-            awaitList = false
-            it.printStackTrace()
-
-            back()
-            ToastLogger.showText("Multiplayer server is unavailable, try again later.", true)
         }
+
     }
 
     private fun updateBackground()

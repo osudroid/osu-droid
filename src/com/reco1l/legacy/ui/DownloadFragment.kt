@@ -6,7 +6,7 @@ import android.widget.Button
 import android.widget.TextView
 import com.edlplan.ui.fragment.LoadingFragment
 import com.google.android.material.progressindicator.CircularProgressIndicator
-import com.reco1l.framework.net.Downloader
+import com.reco1l.framework.net.FileRequest
 import ru.nsu.ccfit.zuev.osuplus.R
 
 class DownloadFragment : LoadingFragment() {
@@ -14,7 +14,7 @@ class DownloadFragment : LoadingFragment() {
     override val layoutID = R.layout.fragment_downloading
 
 
-    private lateinit var downloader: Downloader
+    private lateinit var downloader: FileRequest
 
     private lateinit var onLoad: Runnable
 
@@ -40,7 +40,7 @@ class DownloadFragment : LoadingFragment() {
     }
 
 
-    fun setDownloader(downloader: Downloader, onLoad: Runnable) {
+    fun setDownloader(downloader: FileRequest, onLoad: Runnable) {
         this.onLoad = onLoad
         this.downloader = downloader
     }

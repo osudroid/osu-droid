@@ -5,11 +5,12 @@ import android.util.Log
 import com.reco1l.api.ibancho.RoomAPI
 import com.reco1l.api.ibancho.data.Room
 import com.reco1l.api.ibancho.data.RoomPlayer
-import com.reco1l.framework.extensions.className
 import com.reco1l.framework.extensions.toDate
 import com.reco1l.legacy.data.jsonToScoreboardItem
 import com.reco1l.legacy.data.jsonToStatistic
 import com.reco1l.legacy.ui.multiplayer.RoomScene
+import com.reco1l.toolkt.kotlin.formatTimeMilliseconds
+import com.reco1l.toolkt.kotlin.fromDate
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -96,7 +97,8 @@ object Multiplayer
 
     init
     {
-        LOG_FILE.writeText("[${"yyyy/MM/dd hh:mm:ss".toDate()}] Client ${MainActivity.versionName} started.")
+        val time = "yyyy/MM/dd hh:mm:ss".fromDate()
+        LOG_FILE.writeText("[$time] Client ${MainActivity.versionName} started.")
     }
 
 
@@ -257,9 +259,11 @@ object Multiplayer
     @JvmStatic
     fun log(e: Throwable)
     {
-        val timestamp = DateFormat.format("hh:mm:ss", System.currentTimeMillis())
+        val time = "hh:mm:ss".formatTimeMilliseconds(System.currentTimeMillis())
+        val stacktrace = Log.getStackTraceString(e)
 
-        LOG_FILE.appendText("\n[$timestamp] EXCEPTION: ${e.className}\n${Log.getStackTraceString(e)}")
+        LOG_FILE.appendText("\n[$time] EXCEPTION: ${e.javaClass.simpleName}\n$stacktrace")
+
         Log.e("Multiplayer", "An exception has been thrown.", e)
     }
 }

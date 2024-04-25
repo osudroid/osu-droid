@@ -10,7 +10,7 @@ import com.google.android.material.snackbar.BaseTransientBottomBar.LENGTH_SHORT
 import com.google.android.material.snackbar.Snackbar
 import com.reco1l.framework.lang.async
 import com.reco1l.framework.lang.mainThread
-import com.reco1l.framework.net.Downloader
+import com.reco1l.framework.net.FileRequest
 import com.reco1l.framework.net.IDownloaderObserver
 import okhttp3.Request
 import org.json.JSONObject
@@ -198,9 +198,24 @@ object UpdateManager: IDownloaderObserver
         // empty string so the downloader invokes onDownloadFail() and a prompt is shown to user rather than nothing.
         val url = downloadURL ?: ""
         
-        val downloader = Downloader(file, url)
+        val downloader = FileRequest(file, url)
         downloader.observer = this
-        downloader.download()
+
+        async {
+            downloader.execute()
+
+            mainThread {
+                snackBar.apply {
+
+                    duration = LENGTH_INDEFINITE
+
+                    setText(StringTable.format(update_info_downloading, 0))
+                    setAction(beatmap_downloader_cancel) { downloader.cancel() }
+                    show()
+                }
+            }
+        }
+
     }
     
     
@@ -270,32 +285,20 @@ object UpdateManager: IDownloaderObserver
         }
     }
 
-    
-    override fun onDownloadStart(downloader: Downloader) = mainThread {
 
-        snackBar.apply {
-
-            duration = LENGTH_INDEFINITE
-
-            setText(StringTable.format(update_info_downloading, 0))
-            setAction(beatmap_downloader_cancel) { downloader.cancel() }
-            show()
-        }
-    }
-
-    override fun onDownloadUpdate(downloader: Downloader) = mainThread {
+    override fun onDownloadUpdate(downloader: FileRequest) = mainThread {
 
         snackBar.setText(StringTable.format(update_info_downloading, downloader.progress.toInt()))
     }
 
-    override fun onDownloadEnd(downloader: Downloader) {
+    override fun onDownloadEnd(downloader: FileRequest) {
         mainThread(snackBar::dismiss)
         onInstallNewUpdate(downloader.file)
     }
 
-    override fun onDownloadFail(downloader: Downloader) {
+    override fun onDownloadFail(downloader: FileRequest, exception: Exception) {
 
-        downloader.exception?.printStackTrace()
+        exception.printStackTrace()
 
         mainThread {
             snackBar.apply {
@@ -310,7 +313,7 @@ object UpdateManager: IDownloaderObserver
         downloader.file.delete()
     }
 
-    override fun onDownloadCancel(downloader: Downloader) {
+    override fun onDownloadCancel(downloader: FileRequest) {
         mainThread {
             snackBar.apply {
 

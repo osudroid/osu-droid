@@ -1,7 +1,7 @@
 package com.rian.osu.beatmap.parser
 
 import android.util.Log
-import com.reco1l.framework.extensions.ignoreException
+import com.reco1l.toolkt.kotlin.runSafe
 import com.rian.osu.GameMode
 import com.rian.osu.beatmap.Beatmap
 import com.rian.osu.beatmap.BeatmapProcessor
@@ -194,7 +194,7 @@ class BeatmapParser : Closeable {
     }
 
     override fun close() {
-        ignoreException { source?.close() }
+        runSafe { source?.close() }
 
         source = null
     }

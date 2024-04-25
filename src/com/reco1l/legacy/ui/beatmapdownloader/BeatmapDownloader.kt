@@ -2,14 +2,15 @@ package com.reco1l.legacy.ui.beatmapdownloader
 
 import android.os.Environment.DIRECTORY_DOWNLOADS
 import android.view.View
-import com.reco1l.framework.extensions.decodeUtf8
-import com.reco1l.framework.extensions.forFilesystem
-import com.reco1l.framework.net.Downloader
+import com.reco1l.framework.lang.mainThread
+import com.reco1l.framework.net.FileRequest
 import com.reco1l.framework.net.IDownloaderObserver
-import com.reco1l.framework.net.SizeMeasure
 import com.reco1l.legacy.Multiplayer
 import com.reco1l.legacy.ui.DownloadFragment
 import com.reco1l.legacy.ui.multiplayer.RoomScene
+import com.reco1l.toolkt.kotlin.async
+import com.reco1l.toolkt.kotlin.decodeAsURL
+import com.reco1l.toolkt.kotlin.replaceAlphanumeric
 import net.lingala.zip4j.ZipFile
 import org.apache.commons.io.FilenameUtils
 import ru.nsu.ccfit.zuev.osu.Config
@@ -20,6 +21,7 @@ import ru.nsu.ccfit.zuev.osu.helper.FileUtils
 import ru.nsu.ccfit.zuev.osu.helper.StringTable
 import ru.nsu.ccfit.zuev.osuplus.R
 import java.io.IOException
+import java.lang.Exception
 
 object BeatmapDownloader : IDownloaderObserver {
 
@@ -41,8 +43,8 @@ object BeatmapDownloader : IDownloaderObserver {
         }
         isDownloading = true
 
-        val name = suggestedFilename.decodeUtf8()
-        val filename = name.forFilesystem()
+        val name = suggestedFilename.decodeAsURL()
+        val filename = name.replaceAlphanumeric(with = "_")
 
         if (!filename.endsWith(".osz")) {
             ToastLogger.showText("Failed to start download. Invalid file extension", true)
@@ -54,7 +56,7 @@ object BeatmapDownloader : IDownloaderObserver {
         val directory = context.getExternalFilesDir(DIRECTORY_DOWNLOADS)
         val file = directory?.resolve("$filename.osz")!!
 
-        val downloader = Downloader(file, url)
+        val downloader = FileRequest(file, url)
 
         fragment = DownloadFragment()
         fragment.setDownloader(downloader) {
@@ -66,7 +68,14 @@ object BeatmapDownloader : IDownloaderObserver {
             fragment.button.text = context.getString(R.string.beatmap_downloader_cancel)
 
             downloader.observer = this@BeatmapDownloader
-            downloader.download()
+
+            async {
+                downloader.execute()
+
+                mainThread {
+                    fragment.text.text = StringTable.format(R.string.beatmap_downloader_downloading, currentFilename)
+                }
+            }
 
             fragment.button.setOnClickListener {
                 downloader.cancel()
@@ -76,14 +85,8 @@ object BeatmapDownloader : IDownloaderObserver {
     }
 
 
-    override fun onDownloadStart(downloader: Downloader) {
-        context.runOnUiThread {
-            fragment.text.text = StringTable.format(R.string.beatmap_downloader_downloading, currentFilename)
-        }
-    }
-
-    override fun onDownloadEnd(downloader: Downloader) {
-        context.runOnUiThread {
+    override fun onDownloadEnd(downloader: FileRequest) {
+        mainThread {
             fragment.progressBar.visibility = View.GONE
             fragment.progressBar.isIndeterminate = true
             fragment.progressBar.visibility = View.VISIBLE
@@ -97,13 +100,13 @@ object BeatmapDownloader : IDownloaderObserver {
         try {
             ZipFile(file).use {
                 if (!it.isValidZipFile) {
-                    context.runOnUiThread(fragment::dismiss)
+                    mainThread(fragment::dismiss)
                     ToastLogger.showText("Import failed, invalid ZIP file.", true)
                     return
                 }
 
                 if (!FileUtils.extractZip(file.path, Config.getBeatmapPath())) {
-                    context.runOnUiThread(fragment::dismiss)
+                    mainThread(fragment::dismiss)
                     ToastLogger.showText("Import failed, failed to extract ZIP file.", true)
                     return
                 }
@@ -114,7 +117,7 @@ object BeatmapDownloader : IDownloaderObserver {
             ToastLogger.showText("Import failed:" + e.message, true)
         }
 
-        context.runOnUiThread(fragment::dismiss)
+        mainThread(fragment::dismiss)
 
         if (Multiplayer.isConnected)
             RoomScene.onRoomBeatmapChange(Multiplayer.room!!.beatmap)
@@ -122,30 +125,28 @@ object BeatmapDownloader : IDownloaderObserver {
         isDownloading = false
     }
 
-    override fun onDownloadCancel(downloader: Downloader) {
+    override fun onDownloadCancel(downloader: FileRequest) {
         ToastLogger.showText("Download canceled.", true)
 
-        context.runOnUiThread(fragment::dismiss)
+        mainThread(fragment::dismiss)
         isDownloading = false
     }
 
-    override fun onDownloadUpdate(downloader: Downloader) {
+    override fun onDownloadUpdate(downloader: FileRequest) {
 
-        val info = "\n%.3f kb/s (%d%%)".format(downloader.getSpeed(SizeMeasure.MBPS), downloader.progress.toInt())
+        val info = "\n%.3f kb/s (%d%%)".format(downloader.speedKbps / 1024, downloader.progress.toInt())
 
-        context.runOnUiThread {
-            fragment.text.text = context.getString(R.string.beatmap_downloader_downloading).format(
-                currentFilename
-            ) + info
+        mainThread {
+            fragment.text.text = context.getString(R.string.beatmap_downloader_downloading).format(currentFilename) + info
             fragment.progressBar.isIndeterminate = false
             fragment.progressBar.progress = downloader.progress.toInt()
         }
     }
 
-    override fun onDownloadFail(downloader: Downloader) {
-        ToastLogger.showText("Download failed. " + downloader.exception?.message, true)
+    override fun onDownloadFail(downloader: FileRequest, exception: Exception) {
+        ToastLogger.showText("Download failed. " + exception.message, true)
 
-        context.runOnUiThread(fragment::dismiss)
+        mainThread(fragment::dismiss)
         isDownloading = false
     }
 }

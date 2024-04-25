@@ -19,8 +19,7 @@ import com.google.android.material.progressindicator.CircularProgressIndicator
 import com.reco1l.framework.bass.URLBassStream
 import com.reco1l.framework.lang.mainThread
 import com.reco1l.framework.net.IDownloaderObserver
-import com.reco1l.framework.net.JsonRequester
-import com.reco1l.framework.net.QueryContent
+import com.reco1l.framework.net.JsonArrayRequest
 import com.reco1l.legacy.ui.OsuColors
 import kotlinx.coroutines.CoroutineExceptionHandler
 import kotlinx.coroutines.CoroutineScope
@@ -134,16 +133,16 @@ object BeatmapListing : BaseFragment(),
                 mainThread { adapter.notifyItemRangeRemoved(0, itemCount) }
             }
 
-            JsonRequester(mirror.search.endpoint).use { request ->
+            JsonArrayRequest(mirror.search.endpoint).use { request ->
 
-                request.query = QueryContent().apply {
+                request.buildUrl {
 
-                    put("mode", 0)
-                    put("query", searchBox.text)
-                    put("offset", offset)
+                    addQueryParameter("mode", "0")
+                    addQueryParameter("query", searchBox.text.toString())
+                    addQueryParameter("offset", offset.toString())
                 }
 
-                val beatmapSets = mirror.search.mapResponse(request.executeAndGetJson().toArray()!!)
+                val beatmapSets = mirror.search.mapResponse(request.execute().json)
                 adapter.data.addAll(beatmapSets)
 
                 mainThread {
