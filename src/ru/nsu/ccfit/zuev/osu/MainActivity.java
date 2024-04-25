@@ -233,7 +233,7 @@ public class MainActivity extends BaseGameActivity implements
                         editor.commit();
                     });
 
-            alert.show();
+            Execution.mainThread(alert::show);
         }
 
         if (!prefs.getBoolean("qualitySet", false)) {
