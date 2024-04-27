@@ -15,7 +15,7 @@ import com.reco1l.ibancho.RoomAPI;
 import com.reco1l.osu.Execution;
 import com.reco1l.osu.graphics.BlankTextureRegion;
 import com.reco1l.osu.graphics.VideoSprite;
-import com.reco1l.osu.ui.InGameLeaderboard;
+import com.reco1l.osu.ui.GameplayLeaderboard;
 import com.reco1l.osu.multiplayer.Multiplayer;
 import com.reco1l.osu.multiplayer.RoomScene;
 
@@ -141,7 +141,7 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
     private Queue<BreakPeriod> breakPeriods = new LinkedList<>();
     private BreakAnimator breakAnimator;
     private ScoreBar scorebar;
-    public InGameLeaderboard scoreBoard;
+    public GameplayLeaderboard scoreBoard;
     private HitErrorMeter hitErrorMeter;
     private Metronome metronome;
     private boolean isFirst = true;
@@ -1068,7 +1068,7 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
         }
 
         if (Config.isShowScoreboard()) {
-            scoreBoard = new InGameLeaderboard(playname, stat);
+            scoreBoard = new GameplayLeaderboard(playname, stat);
             fgScene.attachChild(scoreBoard);
         }
 
