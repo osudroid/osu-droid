@@ -48,7 +48,7 @@ object LobbyAPI
                 }
             }
 
-            return List(it.json.length()) { i ->
+            return List(it.execute().json.length()) { i ->
 
                 val json = it.json.optJSONObject(i)
 
