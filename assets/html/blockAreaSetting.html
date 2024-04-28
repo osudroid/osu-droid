@@ -168,12 +168,11 @@
 
 
     function loadConfig(importConfig) {
-        if (importConfig === null) {
-            config = importConfig
-        } else if (!importConfig.rects) {
+        importConfig = JSON.parse(importConfig)
+        if (!importConfig.rects) {
             importConfig.rects = defaultConfig.rects
         }
-
+        config = importConfig
         canvas.style.aspectRatio = config.screen.width / config.screen.height
         height = canvas.clientHeight
         width = canvas.clientWidth
