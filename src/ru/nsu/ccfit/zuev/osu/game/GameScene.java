@@ -711,6 +711,7 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
         bgScene.setBackgroundEnabled(false);
         mgScene.setBackgroundEnabled(false);
         fgScene.setBackgroundEnabled(false);
+        BlockAreaManager.INSTANCE.reset();
         isFirst = true;
         failcount = 0;
         mainCursorId = -1;
@@ -2343,7 +2344,10 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
         if (id < 0 || id >= CursorCount) {
             return false;
         }
-
+        if (BlockAreaManager.INSTANCE.needBlock(event, false)) {
+            BlockAreaManager.INSTANCE.applyBlock(event);
+            return true;
+        }
         var cursor = cursors[id];
         var sprite = !GameHelper.isAuto() && !GameHelper.isAutopilotMod() && cursorSprites != null
                 ? cursorSprites[id]
@@ -2357,10 +2361,6 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
         }
 
         if (event.isActionDown()) {
-            if (BlockAreaManager.INSTANCE.needBlock(event.getX(), event.getY())) {
-                // Block Input if in any of the areas
-                return true;
-            }
 
             if (sprite != null) {
                 sprite.setShowing(true);

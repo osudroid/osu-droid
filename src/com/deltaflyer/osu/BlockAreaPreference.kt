@@ -10,6 +10,8 @@ import ru.nsu.ccfit.zuev.osu.Config
 
 
 public class BlockAreaPreference : Preference {
+    private val TAG = "BlockAreaPreference"
+
     constructor(context: Context?, attrs: AttributeSet?) : super(context!!, attrs)
     constructor(context: Context?, attrs: AttributeSet?, defStyleAttr: Int) : super(
         context!!,
