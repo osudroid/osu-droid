@@ -7,7 +7,7 @@ import java.io.FileInputStream;
 import java.math.BigInteger;
 import java.security.MessageDigest;
 
-public class MD5Calcuator {
+public class MD5Calculator {
     public static String getFileMD5(final File file) {
         String md5 = "";
         try {
