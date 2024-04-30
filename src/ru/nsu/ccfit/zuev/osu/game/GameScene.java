@@ -2355,7 +2355,8 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
             sprite.setPosition(cursor.mousePos.x, cursor.mousePos.y);
         }
 
-        var eventTime = (int) (secPassed * 1000 + (SystemClock.uptimeMillis() - previousFrameTime) * timeMultiplier);
+        var frameOffset = (event.getMotionEvent().getEventTime() - previousFrameTime) * timeMultiplier;
+        var eventTime = (int) (secPassed * 1000 + frameOffset);
 
         if (event.isActionDown()) {
 
@@ -2364,7 +2365,7 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
             }
 
             cursor.mouseDown = true;
-            cursor.mouseDownOffsetMS = (event.getMotionEvent().getEventTime() - previousFrameTime) * timeMultiplier;
+            cursor.mouseDownOffsetMS = frameOffset;
 
             for (var value : cursors)
                 value.mouseOldDown = false;
