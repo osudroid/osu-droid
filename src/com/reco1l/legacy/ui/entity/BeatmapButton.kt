@@ -139,7 +139,7 @@ class BeatmapButton : Sprite(0f, 0f, getResources().getTexture("menu-button-back
             creatorInfo.text += "\n${
 
                 if (beatmap.parentSetID == null)
-                    "Beatmap not found on Chimu."
+                    "Beatmap not available for download."
                 else
                     "Tap to download."
             }"

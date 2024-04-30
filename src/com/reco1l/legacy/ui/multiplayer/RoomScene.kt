@@ -793,7 +793,7 @@ object RoomScene : Scene(), IRoomEventListener, IPlayerEventListener
 
         // Notify to the host when other players can't download the beatmap.
         if (isRoomHost && beatmap != null && beatmap.parentSetID == null)
-            ToastLogger.showText("This beatmap isn't available on Chimu.", false)
+            ToastLogger.showText("This beatmap isn't available for download.", false)
 
         // Updating player status
         invalidateStatus()
