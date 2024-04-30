@@ -1,6 +1,8 @@
 package com.reco1l.osu.beatmaplisting
 
+import android.content.Intent
 import android.graphics.BitmapFactory
+import android.net.Uri
 import android.util.Log
 import android.view.ContextThemeWrapper
 import android.view.KeyEvent
@@ -91,6 +93,8 @@ class BeatmapListing : BaseFragment(),
 
     private lateinit var searchBox: EditText
 
+    private lateinit var logoView: ImageView
+
 
     init {
         current?.dismiss()
@@ -121,6 +125,15 @@ class BeatmapListing : BaseFragment(),
         searchBox.setOnKeyListener(this)
 
         indicator = findViewById(R.id.indicator)!!
+
+        logoView = findViewById(R.id.logo)!!
+        logoView.setOnClickListener {
+            val url = "https://osu.direct/browse"
+            val i = Intent(Intent.ACTION_VIEW)
+
+            i.data = Uri.parse(url)
+            startActivity(i)
+        }
 
         findViewById<ImageButton>(R.id.close)!!.setOnClickListener {
             dismiss()

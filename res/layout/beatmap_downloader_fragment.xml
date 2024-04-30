@@ -47,10 +47,12 @@
             android:id="@+id/logo"
             android:layout_width="100dp"
             android:layout_height="36dp"
-            android:layout_alignParentRight="true"
-            android:layout_centerVertical="true"
             android:layout_marginRight="12dp"
-            android:src="@drawable/powered_by_osudirect" />
+            android:src="@drawable/powered_by_osudirect"
+            android:layout_centerVertical="true"
+            android:layout_alignParentRight="true"
+            android:background="@drawable/click_effect"
+            android:clickable="true"/>
 
         <com.google.android.material.progressindicator.CircularProgressIndicator
             android:id="@+id/indicator"
