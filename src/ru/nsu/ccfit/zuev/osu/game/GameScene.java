@@ -2582,6 +2582,8 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
             sprite.setPosition(cursor.mousePos.x, cursor.mousePos.y);
         }
 
+        var eventTime = (int) (secPassed * 1000 + SystemClock.uptimeMillis() - previousFrameTime);
+
         if (event.isActionDown()) {
 
             if (sprite != null) {
@@ -2596,7 +2598,7 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
 
             PointF gamePoint = applyCursorTrackCoordinates(cursor);
             if (replay != null) {
-                replay.addPress(secPassed, gamePoint, id);
+                replay.addPress(eventTime, gamePoint, id);
             }
             cursorIIsDown[id] = true;
 
@@ -2604,7 +2606,7 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
 
             PointF gamePoint = applyCursorTrackCoordinates(cursor);
             if (replay != null) {
-                replay.addMove(secPassed, gamePoint, id);
+                replay.addMove(eventTime, gamePoint, id);
             }
 
         } else if (event.isActionUp()) {
@@ -2616,7 +2618,7 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
             cursorIIsDown[id] = false;
 
             if (replay != null) {
-                replay.addUp(secPassed, id);
+                replay.addUp(eventTime, id);
             }
 
         } else {
