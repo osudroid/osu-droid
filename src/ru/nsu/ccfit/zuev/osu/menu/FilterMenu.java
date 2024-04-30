@@ -302,7 +302,7 @@ public class FilterMenu implements IUpdateHandler, IFilterMenu {
                     //显示选择收藏夹的dialog
                     GlobalManager.getInstance().getMainActivity().runOnUiThread(() -> {
                         FavoriteManagerFragment dialog = new FavoriteManagerFragment();
-                        dialog.showToSelectFloder(folder1 -> {
+                        dialog.showToSelectFolder(folder1 -> {
                             favoriteFolder = folder1;
                             this.setText(StringTable.get(R.string.favorite_folder) + " " + (favoriteFolder == null ? StringTable.get(R.string.favorite_default) : favoriteFolder));
                         });

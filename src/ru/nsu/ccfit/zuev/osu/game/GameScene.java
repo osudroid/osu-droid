@@ -10,7 +10,6 @@ import com.edlplan.framework.support.osb.StoryboardSprite;
 import com.edlplan.framework.utils.functionality.SmartIterator;
 import com.edlplan.osu.support.timing.TimingPoints;
 import com.edlplan.osu.support.timing.controlpoint.ControlPoints;
-import com.edlplan.ui.fragment.InGameSettingMenu;
 import com.reco1l.api.ibancho.RoomAPI;
 import com.reco1l.framework.lang.Execution;
 import com.reco1l.framework.lang.execution.Async;
@@ -321,7 +320,6 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
     }
 
     private boolean loadGame(final TrackInfo track, final String rFile) {
-        InGameSettingMenu.getInstance().dismiss();
         if (rFile != null && rFile.startsWith("https://")) {
             this.replayFile = Config.getCachePath() + "/" +
                     MD5Calcuator.getStringMD5(rFile) + ".odr";

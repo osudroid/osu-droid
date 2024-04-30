@@ -1,6 +1,5 @@
 package ru.nsu.ccfit.zuev.osu.scoring;
 
-import com.edlplan.ui.fragment.InGameSettingMenu;
 import com.edlplan.framework.utils.functionality.SmartIterator;
 import com.reco1l.framework.lang.Execution;
 import com.reco1l.legacy.Multiplayer;
@@ -74,7 +73,6 @@ public class ScoringScene {
         if (replay != null && track == null) {
             replayStat = stat;
         }
-        InGameSettingMenu.getInstance().dismiss();
         TextureRegion tex = ResourceManager.getInstance()
                 .getTextureIfLoaded("::background");
         if (tex == null) {

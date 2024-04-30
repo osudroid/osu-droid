@@ -55,6 +55,7 @@ public class ModMenu implements IModSwitcher {
     private Float customOD = null;
     private Float customHP = null;
     private Float customCS = null;
+    private InGameSettingMenu menu;
 
     private ModMenu() {
         mod = EnumSet.noneOf(GameMod.class);
@@ -81,7 +82,11 @@ public class ModMenu implements IModSwitcher {
         parent = scene;
         setSelectedTrack(selectedTrack);
         scene.setChildScene(getScene(), false, true, true);
-        Execution.uiThread(InGameSettingMenu.getInstance()::show);
+        if (menu == null) {
+            menu = new InGameSettingMenu();
+        }
+
+        Execution.uiThread(menu::show);
         update();
     }
 
@@ -156,7 +161,8 @@ public class ModMenu implements IModSwitcher {
             parent.clearChildScene();
             parent = null;
         }
-        InGameSettingMenu.getInstance().dismiss();
+
+        menu.dismiss();
 
         if (Multiplayer.isConnected())
         {

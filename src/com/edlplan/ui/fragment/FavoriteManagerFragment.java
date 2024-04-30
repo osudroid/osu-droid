@@ -104,7 +104,7 @@ public class FavoriteManagerFragment extends BaseFragment {
         return selected;
     }
 
-    public void showToSelectFloder(OnSelectListener onSelectListener) {
+    public void showToSelectFolder(OnSelectListener onSelectListener) {
         onLoadViewFunc = () -> {
             adapter = new SelectAdapter(onSelectListener);
             ((RecyclerView) findViewById(R.id.main_recycler_view)).setAdapter(adapter);
@@ -112,7 +112,7 @@ public class FavoriteManagerFragment extends BaseFragment {
         show();
     }
 
-    public void showToAddToFloder(String track) {
+    public void showToAddToFolder(String track) {
         onLoadViewFunc = () -> {
             adapter = new AddAdapter(track);
             ((RecyclerView) findViewById(R.id.main_recycler_view)).setAdapter(adapter);
