@@ -2,10 +2,22 @@ package com.reco1l.osu.beatmaplisting
 
 import android.graphics.BitmapFactory
 import android.util.Log
-import android.view.*
-import android.view.View.*
+import android.view.ContextThemeWrapper
+import android.view.KeyEvent
+import android.view.LayoutInflater
+import android.view.View
+import android.view.View.GONE
+import android.view.View.OnKeyListener
+import android.view.View.VISIBLE
+import android.view.ViewGroup
+import android.view.ViewOutlineProvider
 import android.view.inputmethod.EditorInfo
-import android.widget.*
+import android.widget.Button
+import android.widget.EditText
+import android.widget.ImageButton
+import android.widget.ImageView
+import android.widget.LinearLayout
+import android.widget.TextView
 import android.widget.TextView.OnEditorActionListener
 import androidx.core.text.buildSpannedString
 import androidx.core.text.color
@@ -17,11 +29,15 @@ import androidx.recyclerview.widget.RecyclerView.OnScrollListener
 import com.edlplan.ui.fragment.BaseFragment
 import com.google.android.material.progressindicator.CircularProgressIndicator
 import com.reco1l.framework.bass.URLBassStream
-import com.reco1l.osu.mainThread
 import com.reco1l.framework.net.IDownloaderObserver
 import com.reco1l.framework.net.JsonArrayRequest
 import com.reco1l.osu.OsuColors
-import kotlinx.coroutines.*
+import com.reco1l.osu.mainThread
+import kotlinx.coroutines.CoroutineExceptionHandler
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.launch
 import ru.nsu.ccfit.zuev.audio.Status
 import ru.nsu.ccfit.zuev.osu.Config
 import ru.nsu.ccfit.zuev.osu.GlobalManager
@@ -30,7 +46,7 @@ import ru.nsu.ccfit.zuev.osu.ToastLogger
 import ru.nsu.ccfit.zuev.osuplus.R
 import java.net.URL
 import java.text.SimpleDateFormat
-import java.util.*
+import java.util.TimeZone
 
 
 object BeatmapListing : BaseFragment(),

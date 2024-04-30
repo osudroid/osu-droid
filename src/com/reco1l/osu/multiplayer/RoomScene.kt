@@ -4,23 +4,27 @@ import android.app.AlertDialog
 import com.reco1l.ibancho.IPlayerEventListener
 import com.reco1l.ibancho.IRoomEventListener
 import com.reco1l.ibancho.RoomAPI
-import com.reco1l.ibancho.data.PlayerStatus.*
-import com.reco1l.ibancho.data.RoomTeam.BLUE
-import com.reco1l.ibancho.data.RoomTeam.RED
-import com.reco1l.ibancho.data.TeamMode.HEAD_TO_HEAD
-import com.reco1l.ibancho.data.TeamMode.TEAM_VS_TEAM
-import com.reco1l.ibancho.data.WinCondition.*
 import com.reco1l.ibancho.data.PlayerStatus
+import com.reco1l.ibancho.data.PlayerStatus.MISSING_BEATMAP
+import com.reco1l.ibancho.data.PlayerStatus.NOT_READY
+import com.reco1l.ibancho.data.PlayerStatus.PLAYING
+import com.reco1l.ibancho.data.PlayerStatus.READY
 import com.reco1l.ibancho.data.Room
 import com.reco1l.ibancho.data.RoomBeatmap
 import com.reco1l.ibancho.data.RoomGameplaySettings
 import com.reco1l.ibancho.data.RoomMods
 import com.reco1l.ibancho.data.RoomPlayer
 import com.reco1l.ibancho.data.RoomTeam
+import com.reco1l.ibancho.data.RoomTeam.BLUE
+import com.reco1l.ibancho.data.RoomTeam.RED
 import com.reco1l.ibancho.data.TeamMode
+import com.reco1l.ibancho.data.TeamMode.HEAD_TO_HEAD
+import com.reco1l.ibancho.data.TeamMode.TEAM_VS_TEAM
 import com.reco1l.ibancho.data.WinCondition
-import com.reco1l.toolkt.kotlin.runSafe
-import com.reco1l.osu.updateThread
+import com.reco1l.ibancho.data.WinCondition.ACCURACY
+import com.reco1l.ibancho.data.WinCondition.MAX_COMBO
+import com.reco1l.ibancho.data.WinCondition.SCORE_V1
+import com.reco1l.ibancho.data.WinCondition.SCORE_V2
 import com.reco1l.osu.mainThread
 import com.reco1l.osu.multiplayer.Multiplayer.isConnected
 import com.reco1l.osu.multiplayer.Multiplayer.isRoomHost
@@ -28,6 +32,8 @@ import com.reco1l.osu.multiplayer.Multiplayer.player
 import com.reco1l.osu.multiplayer.Multiplayer.room
 import com.reco1l.osu.ui.BeatmapButton
 import com.reco1l.osu.ui.ComposedText
+import com.reco1l.osu.updateThread
+import com.reco1l.toolkt.kotlin.runSafe
 import com.rian.osu.ui.DifficultyAlgorithmSwitcher
 import org.anddev.andengine.engine.camera.SmoothCamera
 import org.anddev.andengine.entity.primitive.Rectangle
@@ -49,7 +55,7 @@ import ru.nsu.ccfit.zuev.osu.online.OnlinePanel
 import ru.nsu.ccfit.zuev.osu.scoring.Replay
 import ru.nsu.ccfit.zuev.skins.OsuSkin
 import java.text.SimpleDateFormat
-import java.util.*
+import java.util.TimeZone
 import ru.nsu.ccfit.zuev.osu.GlobalManager.getInstance as getGlobal
 import ru.nsu.ccfit.zuev.osu.LibraryManager.INSTANCE as library
 import ru.nsu.ccfit.zuev.osu.ResourceManager.getInstance as getResources
