@@ -1,6 +1,8 @@
 package com.reco1l.legacy.ui.beatmapdownloader
 
+import android.content.Intent
 import android.graphics.BitmapFactory
+import android.net.Uri
 import android.util.Log
 import android.view.*
 import android.view.View.*
@@ -97,6 +99,15 @@ object BeatmapListing : BaseFragment(),
         searchBox.setOnKeyListener(this)
 
         indicator = findViewById(R.id.indicator)!!
+
+        val imageView = findViewById<ImageView>(R.id.logo)
+        imageView?.setOnClickListener {
+            val url = "https://osu.direct/browse"
+            val i = Intent(Intent.ACTION_VIEW)
+            i.data = Uri.parse(url)
+            startActivity(i)
+        }
+
 
         val close = findViewById<ImageButton>(R.id.close)!!
         close.setOnClickListener {
