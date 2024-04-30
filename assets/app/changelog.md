@@ -1,10 +1,14 @@
 Version 1.7.2 Hotfix
 ====================
 
+## Additions
+
+- Added ability to display the current beatmap's ranking status
+  - Powered by osu.direct, thank you!
+
 ## Changes
 - Replaced Chimu with an integrated beatmap downloader
-  - Supports multiple mirrors, but currently only supports osu.direct as it is the only mirror we have an agreement on
-    (thank you!)
+  - Supports multiple mirrors, but currently only supports osu.direct.
 - Combo text shadow now fades 2.5 times faster
 - Updated copyright year
 
