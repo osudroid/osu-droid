@@ -188,9 +188,7 @@ object RoomScene : Scene(), IRoomEventListener, IPlayerEventListener
             attachChild(it)
         }
 
-        OsuSkin.get().getColor("MenuItemDefaultTextColor", BeatmapButton.DEFAULT_TEXT_COLOR).apply(
-            beatmapInfoText
-        )
+        OsuSkin.get().getColor("MenuItemDefaultTextColor", BeatmapButton.DEFAULT_TEXT_COLOR).apply(beatmapInfoText)
 
         // Ready button, this button will switch player status
         readyButton = object : TextButton(getResources().getFont("CaptionFont"), "Ready")
@@ -549,7 +547,7 @@ object RoomScene : Scene(), IRoomEventListener, IPlayerEventListener
         modsButton!!.isVisible = isRoomHost || room!!.gameplaySettings.isFreeMod
 
         if (modsButton!!.isVisible) {
-            difficultySwitcher!!.setPosition(modsButton!!.x, difficultySwitcher!!.y)
+            difficultySwitcher!!.setPosition(modsButton!!.x + modsButton!!.widthScaled, difficultySwitcher!!.y)
         }
     }
 

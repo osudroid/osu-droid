@@ -21,11 +21,7 @@ import com.reco1l.osu.mainThread
 import com.reco1l.framework.net.IDownloaderObserver
 import com.reco1l.framework.net.JsonArrayRequest
 import com.reco1l.osu.OsuColors
-import kotlinx.coroutines.CoroutineExceptionHandler
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.Job
-import kotlinx.coroutines.launch
+import kotlinx.coroutines.*
 import ru.nsu.ccfit.zuev.audio.Status
 import ru.nsu.ccfit.zuev.osu.Config
 import ru.nsu.ccfit.zuev.osu.GlobalManager
@@ -120,8 +116,14 @@ object BeatmapListing : BaseFragment(),
             ToastLogger.showText("Failed to connect to server, please check your internet connection.", false)
 
             Log.e("BeatmapListing", "Failed to connect to beatmap mirror.", throwable)
-            mainThread { indicator.visibility = GONE }
 
+            mainThread {
+                indicator.visibility = GONE
+
+                if (adapter.data.isEmpty()) {
+                    dismiss()
+                }
+            }
         }) {
 
             if (!keepData) {
@@ -298,10 +300,7 @@ class BeatmapSetDetails(val beatmapSet: BeatmapSetModel, val holder: BeatmapSetV
 
         downloadButton.setOnClickListener {
             val url = BeatmapListing.mirror.downloadEndpoint(beatmapSet.id)
-            BeatmapDownloader.download(
-                url,
-                "${beatmapSet.id} ${beatmapSet.artist} - ${beatmapSet.title}.osz"
-            )
+            BeatmapDownloader.download(url, "${beatmapSet.id} ${beatmapSet.artist} - ${beatmapSet.title}.osz")
         }
 
         cover.setImageDrawable(holder.cover.drawable)
@@ -500,10 +499,7 @@ class BeatmapSetViewHolder(itemView: View, private val mediaScope: CoroutineScop
 
         downloadButton.setOnClickListener {
             val url = BeatmapListing.mirror.downloadEndpoint(beatmapSet.id)
-            BeatmapDownloader.download(
-                url,
-                "${beatmapSet.id} ${beatmapSet.artist} - ${beatmapSet.title}.osz"
-            )
+            BeatmapDownloader.download(url, "${beatmapSet.id} ${beatmapSet.artist} - ${beatmapSet.title}.osz")
         }
 
 

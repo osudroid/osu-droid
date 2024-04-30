@@ -2355,6 +2355,9 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
             sprite.setPosition(cursor.mousePos.x, cursor.mousePos.y);
         }
 
+        var frameOffset = (event.getMotionEvent().getEventTime() - previousFrameTime) * timeMultiplier;
+        var eventTime = (int) (secPassed * 1000 + frameOffset);
+
         if (event.isActionDown()) {
 
             if (sprite != null) {
@@ -2362,14 +2365,14 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
             }
 
             cursor.mouseDown = true;
-            cursor.mouseDownOffsetMS = (event.getMotionEvent().getEventTime() - previousFrameTime) * timeMultiplier;
+            cursor.mouseDownOffsetMS = frameOffset;
 
             for (var value : cursors)
                 value.mouseOldDown = false;
 
             PointF gamePoint = applyCursorTrackCoordinates(cursor);
             if (replay != null) {
-                replay.addPress(secPassed, gamePoint, id);
+                replay.addPress(eventTime, gamePoint, id);
             }
             cursorIIsDown[id] = true;
 
@@ -2377,7 +2380,7 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
 
             PointF gamePoint = applyCursorTrackCoordinates(cursor);
             if (replay != null) {
-                replay.addMove(secPassed, gamePoint, id);
+                replay.addMove(eventTime, gamePoint, id);
             }
 
         } else if (event.isActionUp()) {
@@ -2389,7 +2392,7 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
             cursorIIsDown[id] = false;
 
             if (replay != null) {
-                replay.addUp(secPassed, id);
+                replay.addUp(eventTime, id);
             }
 
         } else {
@@ -2441,6 +2444,8 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
 
         // Release all pressed cursors to avoid getting stuck at resume.
         if (!GameHelper.isAuto() && !GameHelper.isAutopilotMod() && !replaying) {
+            var time = (int) (secPassed * 1000 + (SystemClock.uptimeMillis() - previousFrameTime) * timeMultiplier);
+
             for (int i = 0; i < CursorCount; ++i) {
                 var cursor = cursors[i];
 
@@ -2448,7 +2453,7 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
                     cursor.mouseDown = false;
 
                     if (replay != null)
-                        replay.addUp(secPassed, i);
+                        replay.addUp(time, i);
                 }
                 if (cursorSprites != null)
                     cursorSprites[i].setShowing(false);
