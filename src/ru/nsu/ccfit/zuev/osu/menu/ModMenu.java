@@ -231,6 +231,8 @@ public class ModMenu implements IModSwitcher {
         multiplierText.setScale(1.2f);
         scene.attachChild(multiplierText);
 
+        menu = new InGameSettingMenu();
+
         changeMultiplierText();
 
         final int offset = 100;
