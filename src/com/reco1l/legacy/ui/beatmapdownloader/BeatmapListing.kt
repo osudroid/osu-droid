@@ -128,8 +128,14 @@ object BeatmapListing : BaseFragment(),
             ToastLogger.showText("Failed to connect to server, please check your internet connection.", false)
 
             Log.e("BeatmapListing", "Failed to connect to beatmap mirror.", throwable)
-            mainThread { indicator.visibility = GONE }
 
+            mainThread {
+                indicator.visibility = GONE
+
+                if (adapter.data.isEmpty()) {
+                    dismiss()
+                }
+            }
         }) {
 
             if (!keepData) {
