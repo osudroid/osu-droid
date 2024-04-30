@@ -2,8 +2,6 @@ package com.reco1l.api.ibancho
 
 import com.dgsrz.bancho.security.SecurityUtils
 import com.reco1l.api.ibancho.data.*
-import com.reco1l.api.ibancho.data.Room
-import com.reco1l.api.ibancho.data.RoomTeam
 import com.reco1l.legacy.Multiplayer
 import io.socket.client.IO
 import io.socket.client.Socket
@@ -17,7 +15,7 @@ object RoomAPI
     /**
      * The API version.
      */
-    private const val API_VERSION = 6
+    private const val API_VERSION = 7
 
     /**
      * The listener for player events.
