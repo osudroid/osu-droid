@@ -22,6 +22,7 @@ Version 1.7.2 Hotfix
 - Fixed NC with speed modify not giving sound pitch
 - Fixed storyboard overlay layer not correctly handled
 - Fixed auto cursor falling behind fast moving objects
+- Fixed replay cursor recording time desynchronization
 
 Version 1.7.2
 =============
