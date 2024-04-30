@@ -11,9 +11,9 @@ import com.rian.difficultycalculator.calculator.PerformanceCalculationParameters
 import com.rian.difficultycalculator.calculator.PerformanceCalculator;
 
 import java.util.HashMap;
-import java.util.LinkedHashMap;
 import java.util.List;
 
+import com.rian.difficultycalculator.utils.LRUCache;
 import ru.nsu.ccfit.zuev.osu.beatmap.BeatmapData;
 import ru.nsu.ccfit.zuev.osu.scoring.StatisticV2;
 
@@ -306,27 +306,6 @@ public final class BeatmapDifficultyCalculator {
 
         // Allow a maximum of 5 minutes of living cache.
         cacheManager.addCache(parameters, attributes, Math.min(beatmap.getDuration(), 5 * 60 * 1000));
-    }
-
-    /**
-     * An implementation of least-recently-used cache using {@link LinkedHashMap}s.
-     *
-     * @param <K> The key of the cache.
-     * @param <V> The value to cache.
-     */
-    private static final class LRUCache<K, V> extends LinkedHashMap<K, V> {
-        private final int maxSize;
-
-        public LRUCache(int maxSize) {
-            super((int) Math.ceil(maxSize / 0.75f), 0.75f, true);
-
-            this.maxSize = maxSize;
-        }
-
-        @Override
-        protected boolean removeEldestEntry(Entry<K, V> eldest) {
-            return size() > maxSize;
-        }
     }
 
     /**
