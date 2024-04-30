@@ -2443,6 +2443,8 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
 
         // Release all pressed cursors to avoid getting stuck at resume.
         if (!GameHelper.isAuto() && !GameHelper.isAutopilotMod() && !replaying) {
+            var time = (int) (secPassed * 1000 + SystemClock.uptimeMillis() - previousFrameTime);
+
             for (int i = 0; i < CursorCount; ++i) {
                 var cursor = cursors[i];
 
@@ -2450,7 +2452,7 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
                     cursor.mouseDown = false;
 
                     if (replay != null)
-                        replay.addUp(secPassed, i);
+                        replay.addUp(time, i);
                 }
                 if (cursorSprites != null)
                     cursorSprites[i].setShowing(false);
