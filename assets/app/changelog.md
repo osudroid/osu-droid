@@ -1,3 +1,24 @@
+Version 1.7.2 Hotfix
+====================
+
+## Changes
+- Replaced Chimu with an integrated beatmap downloader
+  - Supports multiple mirrors, but currently only supports osu.direct as it is the only mirror we have an agreement on
+    (thank you!)
+- Combo text shadow now fades 2.5 times faster
+- Updated copyright year
+
+## Fixes
+- Fixed flipped custom difficulty statistics score multiplier
+- Fixed in-game updater not working due to missing app permission
+- Fixed beatmap picking in multiplayer not working properly if the first beatmap in a beatmapset is selected
+- Fixed disconnect during gameplay in multiplayer restarting the entire beatmap
+- Fixed failing status in multiplayer not accounting for Easy mod lives
+- Fixed HR/REZ/EZ not disabling upon enabling all force difficulty statistics if the mods are enabled first
+- Fixed NC with speed modify not giving sound pitch
+- Fixed storyboard overlay layer not correctly handled
+- Fixed auto cursor falling behind fast moving objects
+
 Version 1.7.2
 =============
 
