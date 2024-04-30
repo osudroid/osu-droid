@@ -12,8 +12,8 @@ import com.reco1l.api.ibancho.data.TeamMode.HEAD_TO_HEAD
 import com.reco1l.api.ibancho.data.TeamMode.TEAM_VS_TEAM
 import com.reco1l.api.ibancho.data.WinCondition.*
 import com.reco1l.framework.extensions.ignoreException
-import com.reco1l.framework.lang.updateThread
 import com.reco1l.framework.lang.mainThread
+import com.reco1l.framework.lang.updateThread
 import com.reco1l.legacy.Multiplayer
 import com.reco1l.legacy.Multiplayer.isConnected
 import com.reco1l.legacy.Multiplayer.isRoomHost
@@ -541,7 +541,7 @@ object RoomScene : Scene(), IRoomEventListener, IPlayerEventListener
         modsButton!!.isVisible = isRoomHost || room!!.gameplaySettings.isFreeMod
 
         if (modsButton!!.isVisible) {
-            difficultySwitcher!!.setPosition(modsButton!!.x, difficultySwitcher!!.y)
+            difficultySwitcher!!.setPosition(modsButton!!.x + modsButton!!.widthScaled, difficultySwitcher!!.y)
         }
     }
 
