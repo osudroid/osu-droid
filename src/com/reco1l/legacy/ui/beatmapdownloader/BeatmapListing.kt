@@ -17,7 +17,7 @@ import androidx.recyclerview.widget.RecyclerView.OnScrollListener
 import com.edlplan.ui.fragment.BaseFragment
 import com.google.android.material.progressindicator.CircularProgressIndicator
 import com.reco1l.framework.bass.URLBassStream
-import com.reco1l.framework.lang.uiThread
+import com.reco1l.framework.lang.mainThread
 import com.reco1l.framework.net.IDownloaderObserver
 import com.reco1l.framework.net.JsonRequester
 import com.reco1l.framework.net.QueryContent
@@ -109,7 +109,7 @@ object BeatmapListing : BaseFragment(),
 
     fun search(keepData: Boolean) {
 
-        uiThread { indicator.visibility = VISIBLE }
+        mainThread { indicator.visibility = VISIBLE }
 
         pendingRequest?.cancel()
         pendingRequest = searchScope.launch(CoroutineExceptionHandler { _, throwable ->
@@ -117,7 +117,7 @@ object BeatmapListing : BaseFragment(),
             ToastLogger.showText("Failed to connect to server, please check your internet connection.", false)
 
             Log.e("BeatmapListing", "Failed to connect to beatmap mirror.", throwable)
-            uiThread { indicator.visibility = GONE }
+            mainThread { indicator.visibility = GONE }
 
         }) {
 
@@ -127,7 +127,7 @@ object BeatmapListing : BaseFragment(),
                 val itemCount = adapter.data.size
                 adapter.data.clear()
 
-                uiThread { adapter.notifyItemRangeRemoved(0, itemCount) }
+                mainThread { adapter.notifyItemRangeRemoved(0, itemCount) }
             }
 
             JsonRequester(mirror.search.endpoint).use { request ->
@@ -142,7 +142,7 @@ object BeatmapListing : BaseFragment(),
                 val beatmapSets = mirror.search.mapResponse(request.executeAndGetJson().toArray()!!)
                 adapter.data.addAll(beatmapSets)
 
-                uiThread {
+                mainThread {
                     adapter.notifyItemRangeChanged(offset, 50)
                     indicator.visibility = GONE
                 }
@@ -201,7 +201,7 @@ object BeatmapListing : BaseFragment(),
         offset = 0
         adapter.data.clear()
 
-        uiThread {
+        mainThread {
             searchBox.text = null
             adapter.notifyDataSetChanged()
             super.dismiss()
@@ -467,13 +467,13 @@ class BeatmapSetViewHolder(itemView: View, private val mediaScope: CoroutineScop
                     URL(beatmapSet.thumbnail).openStream().use {
                         val bitmap = BitmapFactory.decodeStream(it)
 
-                        uiThread { cover.setImageBitmap(bitmap) }
+                        mainThread { cover.setImageBitmap(bitmap) }
                     }
 
                 } catch (e: Exception) {
                     Log.e("BeatmapDownloader", "Failed to load cover.", e)
 
-                    uiThread { cover.setImageDrawable(null) }
+                    mainThread { cover.setImageDrawable(null) }
                 }
 
                 coverJob = null
@@ -523,7 +523,7 @@ class BeatmapSetViewHolder(itemView: View, private val mediaScope: CoroutineScop
                 previewStream!!.setVolume(Config.getBgmVolume())
                 previewStream!!.play()
 
-                uiThread {
+                mainThread {
                     previewButton.setCompoundDrawablesWithIntrinsicBounds(R.drawable.pause_24px, 0, 0, 0)
                     detailsFragment?.previewButton?.setCompoundDrawablesWithIntrinsicBounds(R.drawable.pause_24px, 0, 0, 0)
                 }
@@ -549,7 +549,7 @@ class BeatmapSetViewHolder(itemView: View, private val mediaScope: CoroutineScop
             Log.e("BeatmapListing", "Failed to stop preview", e)
         }
 
-        uiThread {
+        mainThread {
             previewButton.setCompoundDrawablesWithIntrinsicBounds(R.drawable.play_arrow_24px, 0, 0, 0)
             detailsFragment?.previewButton?.setCompoundDrawablesWithIntrinsicBounds(R.drawable.play_arrow_24px, 0, 0, 0)
         }
