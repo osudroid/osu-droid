@@ -2355,7 +2355,7 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
             sprite.setPosition(cursor.mousePos.x, cursor.mousePos.y);
         }
 
-        var eventTime = (int) (secPassed * 1000 + SystemClock.uptimeMillis() - previousFrameTime);
+        var eventTime = (int) (secPassed * 1000 + (SystemClock.uptimeMillis() - previousFrameTime) * timeMultiplier);
 
         if (event.isActionDown()) {
 
@@ -2443,7 +2443,7 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
 
         // Release all pressed cursors to avoid getting stuck at resume.
         if (!GameHelper.isAuto() && !GameHelper.isAutopilotMod() && !replaying) {
-            var time = (int) (secPassed * 1000 + SystemClock.uptimeMillis() - previousFrameTime);
+            var time = (int) (secPassed * 1000 + (SystemClock.uptimeMillis() - previousFrameTime) * timeMultiplier);
 
             for (int i = 0; i < CursorCount; ++i) {
                 var cursor = cursors[i];
