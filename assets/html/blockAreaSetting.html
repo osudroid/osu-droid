@@ -144,8 +144,8 @@
         };
     const canvas = document.getElementById('canvas');
 
-    let height = null;
-    let width = null;
+    let canvasHeight = null;
+    let canvasWidth = null;
     let status = {
         deleteMode: false,
         rectElems: []
@@ -174,8 +174,8 @@
         }
         config = importConfig;
         canvas.style.aspectRatio = config.screen.width / config.screen.height;
-        height = canvas.clientHeight;
-        width = canvas.clientWidth;
+        canvasHeight = canvas.clientHeight;
+        canvasWidth = canvas.clientWidth;
 
         config.rects.forEach(createRectangle);
         registerButton();
@@ -185,10 +185,10 @@
         config.rects = [];
         for (let rectElem of status.rectElems) {
             if (!rectElem.isConnected) continue;
-            const top = parseInt(rectElem.style.top, 10) / height;
-            const left = parseInt(rectElem.style.left, 10) / width;
-            const elemWidth = parseInt(rectElem.style.width, 10) / width;
-            const elemHeight = parseInt(rectElem.style.height, 10) / height;
+            const top = parseInt(rectElem.style.top, 10) / canvasHeight;
+            const left = parseInt(rectElem.style.left, 10) / canvasWidth;
+            const elemWidth = parseInt(rectElem.style.width, 10) / canvasWidth;
+            const elemHeight = parseInt(rectElem.style.height, 10) / canvasHeight;
             const bottom = top + elemHeight;
             const right = left + elemWidth;
             config.rects.push({top: top, bottom: bottom, left: left, right: right});
@@ -289,6 +289,53 @@
             });
         }
 
+        function isPointInElement(elem, clientX, clientY) {
+            const rect = elem.getBoundingClientRect();
+            return (
+                clientX >= rect.left &&
+                clientX <= rect.right &&
+                clientY >= rect.top &&
+                clientY <= rect.bottom
+            );
+        }
+
+
+        function setStyle(div, top, left, width, height,) {
+             if (width === undefined) {
+                top = parseInt(div.style.top.slice(0, -2));
+            }
+            if (height === undefined) {
+                left = parseInt(div.style.left.slice(0, -2));
+            }
+            if (width === undefined) {
+                width = parseInt(div.style.width.slice(0, -2));
+            }
+            if (height === undefined) {
+                height = parseInt(div.style.height.slice(0, -2));
+            }
+
+            //Limit minimum width and height
+            if (width < 5) width = 5;
+            if (height < 5) height = 5;
+
+
+            //Avoid the rect out of bound
+            if (left < 0) {
+                left = 0;
+            }
+            if (top < 0) {
+                top = 0;
+            }
+            if (left + width > canvasWidth) left = canvasWidth - width;
+            if (top + height > canvasHeight) top = canvasHeight - height;
+
+
+            div.style.width = width + 'px';
+            div.style.height = height + 'px';
+            div.style.top = top + 'px';
+            div.style.left = left + 'px';
+        }
+
         function setupResize(div, resizer, pos) {
             resizer.addEventListener(eventMap.start, function (event) {
                 event.stopPropagation();
@@ -303,31 +350,39 @@
 
                 function onMouseMove(event) {
                     const [x, y] = getClientPosition(event);
+                    if (!isPointInElement(canvas, x, y)) {
+                        return;
+                    }
                     const dx = x - initialX;
                     const dy = y - initialY;
-
+                    let width, height, top, left;
                     switch (pos) {
                         case 'tl':
-                            div.style.width = (initialWidth - dx) + 'px';
-                            div.style.height = (initialHeight - dy) + 'px';
-                            div.style.top = (initialTop + dy) + 'px';
-                            div.style.left = (initialLeft + dx) + 'px';
+                            width = initialWidth - dx;
+                            height = initialHeight - dy;
+                            top = initialTop + dy;
+                            left = initialLeft + dx;
                             break;
                         case 'tr':
-                            div.style.width = (initialWidth + dx) + 'px';
-                            div.style.height = (initialHeight - dy) + 'px';
-                            div.style.top = (initialTop + dy) + 'px';
+                            width = initialWidth + dx;
+                            height = initialHeight - dy;
+                            top = initialTop + dy;
                             break;
                         case 'bl':
-                            div.style.width = (initialWidth - dx) + 'px';
-                            div.style.height = (initialHeight + dy) + 'px';
-                            div.style.left = (initialLeft + dx) + 'px';
+                            width = initialWidth - dx;
+                            height = initialHeight + dy;
+                            left = initialLeft + dx;
                             break;
                         case 'br':
-                            div.style.width = (initialWidth + dx) + 'px';
-                            div.style.height = (initialHeight + dy) + 'px';
+                            width = initialWidth + dx;
+                            height = initialHeight + dy;
                             break;
                     }
+                    //Prevent move the other edge while dragging top or left
+                    if (top > initialTop + initialHeight) top = initialTop + initialHeight;
+                    if (left > initialLeft + initialWidth) left = initialLeft + initialWidth;
+
+                    setStyle(div, top, left, width, height);
                 }
 
                 function onMouseUp(event) {
@@ -361,8 +416,10 @@
                     const dx = x - startX;
                     const dy = y - startY;
 
-                    el.style.top = (startPosTop + dy) + 'px';
-                    el.style.left = (startPosLeft + dx) + 'px';
+                    const top = startPosTop + dy;
+                    const left = startPosLeft + dx;
+                    setStyle(el, top, left);
+
                 };
 
                 const onMouseUp = function () {
@@ -377,10 +434,8 @@
 
         const div = document.createElement('div');
         div.className = 'draggable';
-        div.style.top = (rect.top * height) + 'px';
-        div.style.left = (rect.left * width) + 'px';
-        div.style.width = ((rect.right - rect.left) * width) + 'px';
-        div.style.height = ((rect.bottom - rect.top) * height) + 'px';
+        setStyle(div, rect.top * canvasHeight, rect.left * canvasWidth,
+            (rect.right - rect.left) * canvasWidth, (rect.bottom - rect.top) * canvasHeight);
         canvas.appendChild(div);
         status.rectElems.push(div)
         registerClickListener(div);
