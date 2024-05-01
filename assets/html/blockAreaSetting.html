@@ -301,10 +301,10 @@
 
 
         function setStyle(div, top, left, width, height,) {
-             if (width === undefined) {
+             if (top === undefined) {
                 top = parseInt(div.style.top.slice(0, -2));
             }
-            if (height === undefined) {
+            if (left === undefined) {
                 left = parseInt(div.style.left.slice(0, -2));
             }
             if (width === undefined) {
@@ -329,7 +329,7 @@
             if (left + width > canvasWidth) left = canvasWidth - width;
             if (top + height > canvasHeight) top = canvasHeight - height;
 
-
+            console.log(JSON.stringify({top, left, width, height}))
             div.style.width = width + 'px';
             div.style.height = height + 'px';
             div.style.top = top + 'px';
@@ -406,23 +406,29 @@
                 if (status.deleteMode) {
                     return;
                 }
+                console.log(event.type)
 
                 const [startX, startY] = getClientPosition(event);
                 const startPosTop = el.offsetTop;
                 const startPosLeft = el.offsetLeft;
 
                 const onMouseMove = function (event) {
+                console.log(event.type)
+
                     const [x, y] = getClientPosition(event);
                     const dx = x - startX;
                     const dy = y - startY;
 
                     const top = startPosTop + dy;
                     const left = startPosLeft + dx;
+                    console.log(top,left)
                     setStyle(el, top, left);
 
                 };
 
                 const onMouseUp = function () {
+                console.log(event.type)
+
                     document.removeEventListener(eventMap.move, onMouseMove);
                     document.removeEventListener(eventMap.end, onMouseUp);
                 };
