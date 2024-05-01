@@ -261,15 +261,19 @@
             config.rects.forEach(createRectangle);
         });
 
-
+        let saveButtonTextTimeout = null;
         let saveButton = document.getElementById('saveButton');
         saveButton.addEventListener(eventMap.click, function () {
             saveConfig();
-            if (saveButton.innerText === 'Save Changes') {
-                saveButton.innerText = "Change Saved!";
-            } else {
-                saveButton.innerText = 'Save Changes';
+            saveButton.innerText = "Changes Saved!";
+
+            if (saveButtonTextTimeout !== null) {
+                clearTimeout(saveButtonTextTimeout);
             }
+
+            saveButtonTextTimeout = setTimeout(() => {
+                saveButton.innerText = "Save Changes";
+            }, 2000);
         });
     }
 
