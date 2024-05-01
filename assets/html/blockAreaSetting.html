@@ -117,7 +117,7 @@
             {top: 0.2, bottom: 0.8, left: 0, right: 0.1},
             {top: 0.2, bottom: 0.8, left: 0.9, right: 1}
         ]
-    }
+    };
 
     let defaultConfig = {
         rects: [
@@ -126,9 +126,9 @@
             {top: 0.2, bottom: 0.8, left: 0, right: 0.1},
             {top: 0.2, bottom: 0.8, left: 0.9, right: 1}
         ]
-    }
+    };
 
-    let isBrowser = navigator.userAgent.includes('Chrome/')
+    let isBrowser = navigator.userAgent.includes('Chrome/');
 
     const eventMap = isBrowser ?
         {
@@ -141,61 +141,61 @@
             move: 'touchmove',
             end: 'touchend',
             click: 'touchend',
-        }
+        };
     const canvas = document.getElementById('canvas');
 
-    let height = null
-    let width = null
+    let height = null;
+    let width = null;
     let status = {
         deleteMode: false,
         rectElems: []
-    }
+    };
     document.addEventListener("DOMContentLoaded", function () {
         Android.postMessage(`{"message":'ok'}`);
     });
 
     function getClientPosition(event) {
         if (!event.touches) {
-            return [event.clientX, event.clientY]
+            return [event.clientX, event.clientY];
         } else {
             return [
                 (event.touches[0].clientX),
                 (event.touches[0].clientY)
-            ]
+            ];
 
         }
     }
 
 
     function loadConfig(importConfig) {
-        importConfig = JSON.parse(importConfig)
+        importConfig = JSON.parse(importConfig);
         if (!importConfig.rects) {
-            importConfig.rects = defaultConfig.rects
+            importConfig.rects = defaultConfig.rects;
         }
-        config = importConfig
-        canvas.style.aspectRatio = config.screen.width / config.screen.height
-        height = canvas.clientHeight
-        width = canvas.clientWidth
+        config = importConfig;
+        canvas.style.aspectRatio = config.screen.width / config.screen.height;
+        height = canvas.clientHeight;
+        width = canvas.clientWidth;
 
         config.rects.forEach(createRectangle);
-        registerButton()
+        registerButton();
     }
 
     function saveConfig() {
-        config.rects = []
+        config.rects = [];
         for (let rectElem of status.rectElems) {
-            if (!rectElem.isConnected) continue
+            if (!rectElem.isConnected) continue;
             const top = parseInt(rectElem.style.top, 10) / height;
             const left = parseInt(rectElem.style.left, 10) / width;
             const elemWidth = parseInt(rectElem.style.width, 10) / width;
             const elemHeight = parseInt(rectElem.style.height, 10) / height;
             const bottom = top + elemHeight;
             const right = left + elemWidth;
-            config.rects.push({top: top, bottom: bottom, left: left, right: right})
+            config.rects.push({top: top, bottom: bottom, left: left, right: right});
         }
-        console.log(config)
-        Android.postMessage(JSON.stringify(config))
-        return config
+        console.log(config);
+        Android.postMessage(JSON.stringify(config));
+        return config;
     }
 
 
@@ -219,12 +219,12 @@
         }
 
         document.addEventListener(eventMap.end, handleOutsideClick);
-        let isFirst = true
+        let isFirst = true;
 
         function handleOutsideClick(event) {
             if (isFirst) {
-                isFirst = false
-                return
+                isFirst = false;
+                return;
             }
             if (event.target !== buttonDiv && event.target !== target) {
                 buttonDiv.remove();
@@ -235,42 +235,42 @@
 
 
     function registerButton() {
-        let activeButton = document.getElementById('activeButton')
-        activeButton.innerText = config.activated ? "Current: Enabled" : "Current: Disabled"
+        let activeButton = document.getElementById('activeButton');
+        activeButton.innerText = config.activated ? "Current: Enabled" : "Current: Disabled";
         activeButton.addEventListener(eventMap.click, function () {
-            config.activated = !config.activated
-            activeButton.innerText = config.activated ? "Current: Enabled" : "Current: Disabled"
-        })
+            config.activated = !config.activated;
+            activeButton.innerText = config.activated ? "Current: Enabled" : "Current: Disabled";
+        });
 
-        let addButton = document.getElementById("addButton")
+        let addButton = document.getElementById("addButton");
         addButton.addEventListener(eventMap.click, function () {
-            createRectangle({top: 0.2, bottom: 0.8, left: 0.25, right: 0.4},)
-        })
+            createRectangle({top: 0.2, bottom: 0.8, left: 0.25, right: 0.4});
+        });
 
-        let deleteButton = document.getElementById("deleteButton")
+        let deleteButton = document.getElementById("deleteButton");
         deleteButton.addEventListener(eventMap.click, function () {
-            status.deleteMode = !status.deleteMode
-            deleteButton.innerText = status.deleteMode ? "Delete: On" : "Delete Area"
-        })
+            status.deleteMode = !status.deleteMode;
+            deleteButton.innerText = status.deleteMode ? "Delete: On" : "Delete Area";
+        });
 
-        let resetButton = document.getElementById('resetButton')
+        let resetButton = document.getElementById('resetButton');
         resetButton.addEventListener(eventMap.click, function () {
-            status.rectElems.forEach(x => x.remove())
-            status.rectElems = []
-            config.rects = defaultConfig.rects
+            status.rectElems.forEach(x => x.remove());
+            status.rectElems = [];
+            config.rects = defaultConfig.rects;
             config.rects.forEach(createRectangle);
-        })
+        });
 
 
-        let saveButton = document.getElementById('saveButton')
+        let saveButton = document.getElementById('saveButton');
         saveButton.addEventListener(eventMap.click, function () {
-            saveConfig()
+            saveConfig();
             if (saveButton.innerText === 'Save Changes') {
-                saveButton.innerText = "Change Saved!"
+                saveButton.innerText = "Change Saved!";
             } else {
-                saveButton.innerText = 'Save Changes'
+                saveButton.innerText = 'Save Changes';
             }
-        })
+        });
     }
 
 
@@ -339,36 +339,35 @@
             el.addEventListener(eventMap.end, function (event) {
                 if (status.deleteMode) {
                     createFloatingButton(el, "Delete this area?", function () {
-                        el.remove()
-                    })
+                        el.remove();
+                    });
                 }
-            })
+            });
             el.addEventListener(eventMap.start, function (event) {
                 if (status.deleteMode) {
-
-                } else {
-                    const [startX, startY] = getClientPosition(event);
-                    const startPosTop = el.offsetTop;
-                    const startPosLeft = el.offsetLeft;
-
-                    const onMouseMove = function (event) {
-                        const [x, y] = getClientPosition(event)
-                        const dx = x - startX;
-                        const dy = y - startY;
-
-                        el.style.top = (startPosTop + dy) + 'px';
-                        el.style.left = (startPosLeft + dx) + 'px';
-                    };
-
-                    const onMouseUp = function () {
-                        document.removeEventListener(eventMap.move, onMouseMove);
-                        document.removeEventListener(eventMap.end, onMouseUp);
-                    };
-
-                    document.addEventListener(eventMap.move, onMouseMove);
-                    document.addEventListener(eventMap.end, onMouseUp);
+                    return;
                 }
 
+                const [startX, startY] = getClientPosition(event);
+                const startPosTop = el.offsetTop;
+                const startPosLeft = el.offsetLeft;
+
+                const onMouseMove = function (event) {
+                    const [x, y] = getClientPosition(event)
+                    const dx = x - startX;
+                    const dy = y - startY;
+
+                    el.style.top = (startPosTop + dy) + 'px';
+                    el.style.left = (startPosLeft + dx) + 'px';
+                };
+
+                const onMouseUp = function () {
+                    document.removeEventListener(eventMap.move, onMouseMove);
+                    document.removeEventListener(eventMap.end, onMouseUp);
+                };
+
+                document.addEventListener(eventMap.move, onMouseMove);
+                document.addEventListener(eventMap.end, onMouseUp);
             });
         }
 
