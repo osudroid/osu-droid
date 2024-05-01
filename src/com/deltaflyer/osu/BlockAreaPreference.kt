@@ -5,7 +5,6 @@ import android.util.AttributeSet
 import android.util.Log
 import androidx.preference.Preference
 import org.json.JSONObject
-import ru.nsu.ccfit.zuev.osu.Config
 
 
 class BlockAreaPreference : Preference {
@@ -27,8 +26,8 @@ class BlockAreaPreference : Preference {
             jsonObj = JSONObject(currentConfig)
         }
         val screen = JSONObject()
-        screen.put("height", Config.getRES_HEIGHT())
-        screen.put("width", Config.getRES_WIDTH())
+        screen.put("height", BlockAreaManager.screenHeight)
+        screen.put("width", BlockAreaManager.screenWidth)
         jsonObj.put("screen", screen)
         return jsonObj.toString()
     }

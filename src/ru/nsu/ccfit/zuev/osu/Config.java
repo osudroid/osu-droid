@@ -225,6 +225,7 @@ public class Config {
         safeBeatmapBg = prefs.getBoolean("safebeatmapbg", false);
         displayRealTimePPCounter = prefs.getBoolean("displayRealTimePPCounter", false);
         difficultyAlgorithm = DifficultyAlgorithm.droid;
+        BlockAreaManager.INSTANCE.setScreenSize(context);
         BlockAreaManager.INSTANCE.reload(prefs.getString("blockArea", "null"));
 
         // Multiplayer
