@@ -302,7 +302,7 @@
                 document.addEventListener(eventMap.end, onMouseUp);
 
                 function onMouseMove(event) {
-                    const [x, y] = getClientPosition(event)
+                    const [x, y] = getClientPosition(event);
                     const dx = x - initialX;
                     const dy = y - initialY;
 
@@ -357,7 +357,7 @@
                 const startPosLeft = el.offsetLeft;
 
                 const onMouseMove = function (event) {
-                    const [x, y] = getClientPosition(event)
+                    const [x, y] = getClientPosition(event);
                     const dx = x - startX;
                     const dy = y - startY;
 
