@@ -1,5 +1,15 @@
-Version 1.7.2 Hotfix
-====================
+Version 1.7.2 Patch 2
+=====================
+
+## Changes
+- Changed "Chimu" in multiplayer beatmap card to something else that denotes download availability
+
+## Fixes
+- Fixed crash when the game detects low available memory
+- Fixed crash when leaving multiplayer
+
+Version 1.7.2 Patch 1
+=====================
 
 ## Additions
 
