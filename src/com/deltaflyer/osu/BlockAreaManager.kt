@@ -19,38 +19,16 @@ object BlockAreaManager {
         config = BlockAreaConfig.fromJson(newConfig)
     }
 
-    fun isInBlockArea(x: Float, y: Float): Boolean {
-
-        val relativeX = x / Config.getRES_WIDTH()
-        val relativeY = y / Config.getRES_HEIGHT()
-
-        for (rect in config.rects) {
-            if (relativeY >= rect.top && relativeY <= rect.bottom && relativeX >= rect.left && relativeX <= rect.right) {
-                return true
-            }
-        }
-        return false
-    }
-
     fun reset() {
         cursorIsIgnored.fill(false)
     }
 
-    fun verbose(event: TouchEvent) {
-        var eventType = "down"
-        if (event.isActionMove) {
-            eventType = "move"
-            return
+    fun applyBlock(event: TouchEvent) {
+        cursorIsIgnored[event.pointerID] = when {
+            event.isActionDown -> true
+            event.isActionUp -> false
+            else -> cursorIsIgnored[event.pointerID]
         }
-        if (event.isActionUp) {
-            eventType = "up"
-        }
-        Log.d(
-            "TouchTest",
-            "eventType:$eventType x:${event.x} y:${event.y} id:${event.pointerID} block:${
-                needBlock(event)
-            } inSection: ${isInBlockArea(event.x, event.y)}"
-        );
     }
 
     fun needBlock(event: TouchEvent, verbose: Boolean = false): Boolean {
@@ -76,13 +54,31 @@ object BlockAreaManager {
         return false
     }
 
-    fun applyBlock(event: TouchEvent) {
-        if (event.isActionDown) {
-            cursorIsIgnored[event.pointerID] = true
-        } else if (event.isActionMove) {
+    private fun isInBlockArea(x: Float, y: Float): Boolean {
+        val relativeX = x / Config.getRES_WIDTH()
+        val relativeY = y / Config.getRES_HEIGHT()
 
-        } else if (event.isActionUp) {
-            cursorIsIgnored[event.pointerID] = false
+        for (rect in config.rects) {
+            if (relativeY >= rect.top && relativeY <= rect.bottom && relativeX >= rect.left && relativeX <= rect.right) {
+                return true
+            }
         }
+        return false
+    }
+
+    private fun verbose(event: TouchEvent) {
+        var eventType = "down"
+        if (event.isActionMove) {
+            return
+        }
+        if (event.isActionUp) {
+            eventType = "up"
+        }
+        Log.d(
+            "TouchTest",
+            "eventType:$eventType x:${event.x} y:${event.y} id:${event.pointerID} block:${
+                needBlock(event)
+            } inSection: ${isInBlockArea(event.x, event.y)}"
+        );
     }
 }

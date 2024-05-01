@@ -15,7 +15,7 @@ class BlockAreaWebViewFragment : WebViewFragment() {
 
     override fun onLoadView() {
         super.onLoadView()
-        myWebView = findViewById<WebView>(R.id.web)!!;
+        myWebView = findViewById<WebView>(R.id.web)!!
         myWebView.addJavascriptInterface(object : Any() {
             @JavascriptInterface
             fun postMessage(message: String?) {
