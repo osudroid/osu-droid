@@ -1,7 +1,7 @@
 package com.reco1l.ibancho.data
 
-import com.reco1l.osu.multiplayer.modsToReadable
 import com.reco1l.osu.multiplayer.Multiplayer
+import com.reco1l.osu.multiplayer.modsToReadable
 import ru.nsu.ccfit.zuev.osu.game.mods.GameMod
 import ru.nsu.ccfit.zuev.osu.game.mods.GameMod.*
 import java.util.*
@@ -73,9 +73,9 @@ data class RoomMods(
                 // DoubleTime and NightCore, comparing them as one.
                 && (MOD_DOUBLETIME in set || MOD_NIGHTCORE in set) == (MOD_DOUBLETIME in other.set || MOD_NIGHTCORE in other.set)
                 // HalfTime
-                && (MOD_HALFTIME in set == MOD_HALFTIME in other.set)
+                && MOD_HALFTIME in set == MOD_HALFTIME in other.set
                 // ScoreV2
-                && (MOD_SCOREV2 in set == MOD_SCOREV2 in other.set)
+                && MOD_SCOREV2 in set == MOD_SCOREV2 in other.set
 
                 || set == other.set
 

@@ -147,7 +147,7 @@ class StatisticSelector(stats: Array<StatisticV2>?) : ScrollableList(), ITouchAr
         }
     }
 
-    override fun contains(pX: Float, pY: Float): Boolean = pX in (570f .. 570f + 140f)
+    override fun contains(pX: Float, pY: Float): Boolean = pX in 570f .. 570f + 140f
 
     override fun onAreaTouched(event: TouchEvent?, x: Float, y: Float) = super.onSceneTouchEvent(event)
 }
