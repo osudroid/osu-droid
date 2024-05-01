@@ -36,7 +36,6 @@ class BlockAreaPreference : Preference {
         super.onClick()
 
         BlockAreaWebViewFragment().also {
-            it.setCurrentConfig(getPersistedString("null"))
 
             it.setCallback(object : BlockAreaWebViewFragment.Callback {
                 override fun onMessageReceived(message: String?) {
@@ -57,7 +56,7 @@ class BlockAreaPreference : Preference {
                 }
             })
 
-            it.setURL("file:///android_asset/html/blockAreaSetting.html")
+            it.url = "file:///android_asset/html/blockAreaSetting.html"
             it.show()
         }
     }
