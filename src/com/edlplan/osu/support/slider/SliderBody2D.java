@@ -5,7 +5,7 @@ import com.edlplan.andengine.TriangleBuilder;
 import com.edlplan.andengine.TrianglePack;
 import com.edlplan.framework.math.Color4;
 import com.edlplan.framework.math.line.LinePath;
-import com.reco1l.framework.lang.Execution;
+import com.reco1l.osu.Execution;
 
 import org.anddev.andengine.entity.IEntity;
 import org.anddev.andengine.entity.modifier.*;

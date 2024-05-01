@@ -14,8 +14,8 @@ import com.edlplan.framework.easing.Easing
 import com.edlplan.framework.math.FMath
 import com.edlplan.ui.BaseAnimationListener
 import com.edlplan.ui.EasingHelper
-import com.reco1l.framework.lang.mainThread
-import com.reco1l.legacy.Multiplayer
+import com.reco1l.osu.mainThread
+import com.reco1l.osu.multiplayer.Multiplayer
 import org.anddev.andengine.input.touch.TouchEvent
 import ru.nsu.ccfit.zuev.osu.Config
 import ru.nsu.ccfit.zuev.osu.GlobalManager

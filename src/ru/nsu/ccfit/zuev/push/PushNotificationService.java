@@ -60,7 +60,7 @@ public class PushNotificationService extends FirebaseMessagingService {
                     notificationBuilder.setLargeIcon(bitmap)
                         .setStyle(new NotificationCompat.BigPictureStyle()
                             .bigPicture(bitmap)
-                            .bigLargeIcon(null));
+                            .bigLargeIcon((Bitmap) null));
                 }
             }
 

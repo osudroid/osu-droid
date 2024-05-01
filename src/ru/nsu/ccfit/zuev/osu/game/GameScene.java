@@ -11,13 +11,13 @@ import com.edlplan.framework.support.osb.StoryboardSprite;
 import com.edlplan.framework.utils.functionality.SmartIterator;
 import com.edlplan.osu.support.timing.TimingPoints;
 import com.edlplan.osu.support.timing.controlpoint.ControlPoints;
-import com.reco1l.api.ibancho.RoomAPI;
-import com.reco1l.framework.lang.Execution;
-import com.reco1l.legacy.engine.BlankTextureRegion;
-import com.reco1l.legacy.engine.VideoSprite;
-import com.reco1l.legacy.ui.entity.InGameLeaderboard;
-import com.reco1l.legacy.Multiplayer;
-import com.reco1l.legacy.ui.multiplayer.RoomScene;
+import com.reco1l.ibancho.RoomAPI;
+import com.reco1l.osu.Execution;
+import com.reco1l.osu.graphics.BlankTextureRegion;
+import com.reco1l.osu.graphics.VideoSprite;
+import com.reco1l.osu.ui.GameplayLeaderboard;
+import com.reco1l.osu.multiplayer.Multiplayer;
+import com.reco1l.osu.multiplayer.RoomScene;
 
 import com.rian.osu.beatmap.Beatmap;
 import com.rian.osu.beatmap.constants.BeatmapCountdown;
@@ -141,7 +141,7 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
     private Queue<BreakPeriod> breakPeriods = new LinkedList<>();
     private BreakAnimator breakAnimator;
     private ScoreBar scorebar;
-    public InGameLeaderboard scoreBoard;
+    public GameplayLeaderboard scoreBoard;
     private HitErrorMeter hitErrorMeter;
     private Metronome metronome;
     private boolean isFirst = true;
@@ -1068,7 +1068,7 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
         }
 
         if (Config.isShowScoreboard()) {
-            scoreBoard = new InGameLeaderboard(playname, stat);
+            scoreBoard = new GameplayLeaderboard(playname, stat);
             fgScene.attachChild(scoreBoard);
         }
 
@@ -1153,7 +1153,7 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
                     if (!Objects.equals(liveScore, lastScoreSent))
                     {
                         lastScoreSent = liveScore;
-                        Execution.asyncIgnoreExceptions(() -> RoomAPI.submitLiveScore(lastScoreSent.toJson()));
+                        Execution.async(() -> Execution.runSafe(() -> RoomAPI.submitLiveScore(lastScoreSent.toJson())));
                     }
                 }
             }
@@ -1724,7 +1724,7 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
                         Multiplayer.log("Match ended, moving to results scene.");
                         RoomScene.INSTANCE.getChat().show();
 
-                        Execution.asyncIgnoreExceptions(() -> RoomAPI.submitFinalScore(stat.toJson()));
+                        Execution.async(() -> Execution.runSafe(() -> RoomAPI.submitFinalScore(stat.toJson())));
 
                         ToastLogger.showText("Loading room statistics...", false);
                     }
@@ -2422,7 +2422,7 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
             {
                 // Room being null can happen when the player disconnects from socket while playing
                 if (Multiplayer.isConnected())
-                    Execution.asyncIgnoreExceptions(() -> RoomAPI.submitFinalScore(stat.toJson()));
+                    Execution.async(() -> Execution.runSafe(() -> RoomAPI.submitFinalScore(stat.toJson())));
 
                 Multiplayer.log("Player left the match.");
                 quit();
@@ -2476,7 +2476,7 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
             if (Multiplayer.isConnected())
             {
                 Multiplayer.log("Player has lost, moving to room scene.");
-                Execution.asyncIgnoreExceptions(() -> RoomAPI.submitFinalScore(stat.toJson()));
+                Execution.async(() -> Execution.runSafe(() -> RoomAPI.submitFinalScore(stat.toJson())));
             }
             quit();
             return;

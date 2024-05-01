@@ -158,6 +158,7 @@ android {
 
 dependencies {
     implementation project(':AndEngine')
+    implementation project(':LibBASS')
     implementation project(':andnext_markdown')
     implementation 'androidx.legacy:legacy-support-v4:1.0.0'
     implementation 'androidx.preference:preference:1.2.1'
@@ -166,22 +167,18 @@ dependencies {
     implementation 'com.google.firebase:firebase-analytics:21.5.1'
     implementation 'com.google.firebase:firebase-messaging:23.4.1'
 
-    // implementation 'io.reactivex.rxjava2:rxandroid:2.1.1'
-    // implementation 'io.reactivex.rxjava2:rxjava:2.2.21'
     implementation 'com.squareup.okhttp3:okhttp:4.12.0'
-    // implementation 'com.squareup.retrofit2:adapter-rxjava2:2.9.0'
     implementation 'com.google.code.gson:gson:2.10.1'
-    //implementation 'com.github.tbruyelle:rxpermissions:0.12'
     implementation 'pub.devrel:easypermissions:3.0.0'
     implementation 'net.lingala.zip4j:zip4j:2.11.5'
 
     implementation 'com.github.EdrowsLuo:osudroidstrings:bd9507b289'
     implementation 'com.github.EdrowsLuo.EdlGameFramework:EdlJavaExt:d91c53fcff'
     implementation 'com.github.EdrowsLuo.EdlGameFramework:EdlOsbSupport:d91c53fcff'
-    implementation project(path: ':LibBASS')
 
+    // Tools
+    implementation 'com.github.Reco1I:Toolkt:1.1.9'
     implementation 'commons-io:commons-io:2.15.1'
-    implementation 'com.github.delight-im:Android-AdvancedWebView:v3.2.1'
 
     // Multiplayer
     implementation('org.jetbrains.kotlinx:kotlinx-coroutines-core:1.7.3')

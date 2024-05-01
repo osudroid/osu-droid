@@ -41,13 +41,13 @@ import androidx.preference.PreferenceManager;
 import com.edlplan.ui.ActivityOverlay;
 import com.google.firebase.analytics.FirebaseAnalytics;
 import com.google.firebase.crashlytics.FirebaseCrashlytics;
-import com.reco1l.api.ibancho.LobbyAPI;
-import com.reco1l.framework.lang.Execution;
-import com.reco1l.legacy.AccessibilityDetector;
-import com.reco1l.legacy.Multiplayer;
-import com.reco1l.legacy.UpdateManager;
-import com.reco1l.legacy.ui.multiplayer.LobbyScene;
-import com.reco1l.legacy.ui.multiplayer.RoomScene;
+import com.reco1l.ibancho.LobbyAPI;
+import com.reco1l.osu.AccessibilityDetector;
+import com.reco1l.osu.Execution;
+import com.reco1l.osu.multiplayer.Multiplayer;
+import com.reco1l.osu.UpdateManager;
+import com.reco1l.osu.multiplayer.LobbyScene;
+import com.reco1l.osu.multiplayer.RoomScene;
 
 import com.rian.osu.difficulty.BeatmapDifficultyCalculator;
 import net.lingala.zip4j.ZipFile;
@@ -723,7 +723,7 @@ public class MainActivity extends BaseGameActivity implements
             if (Multiplayer.isConnected()
                     && (getEngine().getScene() == RoomScene.INSTANCE
                     || getEngine().getScene() == GlobalManager.getInstance().getSongMenu().getScene())) {
-                Execution.asyncIgnoreExceptions(RoomScene.INSTANCE::invalidateStatus);
+                Execution.async(() -> Execution.runSafe(RoomScene.INSTANCE::invalidateStatus));
             }
         }
 
