@@ -1,31 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string-array name="bg_quality_names">
-        <item>High</item>
-        <item>Medium</item>
-        <item>Low</item>
-        <item>Disabled</item>
-    </string-array>
-    <string-array name="bg_quality_values">
-        <item>1</item>
-        <item>2</item>
-        <item>4</item>
-        <item>0</item>
-    </string-array>
-    <!-- <string-array name="bg_brightness_names">
-        <item>100%</item>
-        <item>75%</item>
-        <item>50%</item>
-        <item>25%</item>
-        <item>0%</item>
-    </string-array>
-    <string-array name="bg_brightness_values">
-        <item>100</item>
-        <item>75</item>
-        <item>50</item>
-        <item>25</item>
-        <item>0</item>
-    </string-array> -->
+
     <string-array name="error_meter_display_names">
         <item>Always</item>
         <item>Replay Only</item>

@@ -987,7 +987,7 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
             comboText.attachToScene(fgScene);
             accText.attachToScene(fgScene);
             scoreText.attachToScene(fgScene);
-            if (Config.isComplexAnimations()) {
+            if (Config.isAnimateComboText()) {
                 scoreShadow = new GameScoreTextShadow(0, Config.getRES_HEIGHT()
                         - Utils.toRes(90), "0000x", 1.5f, comboText);
                 scoreShadow.attachToScene(bgScene);
@@ -1357,7 +1357,7 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
                 strBuilder.append('*');
             }
             var comboStr = strBuilder.toString();
-            if (Config.isComplexAnimations()) {
+            if (Config.isAnimateComboText()) {
                 scoreShadow.changeText(comboStr);
             } else {
                 comboText.changeText(comboStr);
@@ -2601,7 +2601,7 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
     }
 
     private void createBurstEffect(final PointF pos, final RGBColor color) {
-        if (!Config.isComplexAnimations() || !Config.isBurstEffects() || stat.getMod().contains(GameMod.MOD_HIDDEN))
+        if (!Config.isBurstEffects() || stat.getMod().contains(GameMod.MOD_HIDDEN))
             return;
         final GameEffect burst1 = GameObjectPool.getInstance().getEffect("hitcircle");
         burst1.init(mgScene, pos, scale,
@@ -2619,7 +2619,7 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
     }
 
     private void createBurstEffectSliderStart(final PointF pos, final RGBColor color) {
-        if (!Config.isComplexAnimations() || !Config.isBurstEffects() || stat.getMod().contains(GameMod.MOD_HIDDEN))
+        if (!Config.isBurstEffects() || stat.getMod().contains(GameMod.MOD_HIDDEN))
             return;
         final GameEffect burst1 = GameObjectPool.getInstance().getEffect("sliderstartcircle");
         burst1.init(mgScene, pos, scale,
@@ -2637,7 +2637,7 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
     }
 
     private void createBurstEffectSliderEnd(final PointF pos, final RGBColor color) {
-        if (!Config.isComplexAnimations() || !Config.isBurstEffects() || stat.getMod().contains(GameMod.MOD_HIDDEN))
+        if (!Config.isBurstEffects() || stat.getMod().contains(GameMod.MOD_HIDDEN))
             return;
         final GameEffect burst1 = GameObjectPool.getInstance().getEffect("sliderendcircle");
         burst1.init(mgScene, pos, scale,
@@ -2655,7 +2655,7 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
     }
 
     private void createBurstEffectSliderReverse(final PointF pos, float ang, final RGBColor color) {
-        if (!Config.isComplexAnimations() || !Config.isBurstEffects() || stat.getMod().contains(GameMod.MOD_HIDDEN))
+        if (!Config.isBurstEffects() || stat.getMod().contains(GameMod.MOD_HIDDEN))
             return;
         final GameEffect burst1 = GameObjectPool.getInstance().getEffect("reversearrow");
         burst1.hit.setRotation(ang);

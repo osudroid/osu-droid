@@ -13,7 +13,6 @@ import ru.nsu.ccfit.zuev.osu.ToastLogger
 import ru.nsu.ccfit.zuev.osu.helper.AnimSprite
 import ru.nsu.ccfit.zuev.osu.helper.StringTable
 import ru.nsu.ccfit.zuev.osu.menu.LoadingScreen
-import ru.nsu.ccfit.zuev.osu.menu.SettingsMenu
 import ru.nsu.ccfit.zuev.osuplus.R
 import ru.nsu.ccfit.zuev.osu.GlobalManager.getInstance as getGlobal
 import ru.nsu.ccfit.zuev.osu.ResourceManager.getInstance as getResources
@@ -114,7 +113,7 @@ class MainMenu(val main: MainScene)
                     setColor(1f, 1f, 1f)
                     if (main.isOnExitAnim) return true
                     getGlobal().songService.isGaming = true
-                    getGlobal().mainActivity.runOnUiThread { SettingsMenu().show() }
+                    getGlobal().mainActivity.runOnUiThread { SettingsFragment().show() }
                     return true
                 }
                 return false

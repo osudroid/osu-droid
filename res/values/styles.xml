@@ -15,7 +15,13 @@
     </style>
 
     <style name="AppTheme.PreferenceThemeOverlay" parent="@style/PreferenceThemeOverlay">
-        <item name="android:layout">@layout/fragment_settings</item>
+        <item name="android:layout">@layout/settings_fragment</item>
+        <item name="preferenceStyle">@style/settings_preference</item>
+        <item name="dialogPreferenceStyle">@style/settings_preference_dialog</item>
+        <item name="editTextPreferenceStyle">@style/settings_preference_edittext</item>
+        <item name="preferenceCategoryStyle">@style/settings_preference_category</item>
+        <item name="checkBoxPreferenceStyle">@style/settings_preference_checkbox</item>
+        <item name="seekBarPreferenceStyle">@style/settings_preference_seekbar</item>
     </style>
 
 
@@ -30,7 +36,91 @@
         <item name="android:paddingTop">4dp</item>
         <item name="android:paddingBottom">4dp</item>
         <item name="android:layout_marginRight">6dp</item>
-
     </style>
+
+    <!--Settings-->
+    <style name="settings_preference" parent="@style/Preference.Material">
+        <item name="layout">@layout/settings_preference</item>
+        <item name="allowDividerAbove">false</item>
+        <item name="allowDividerBelow">false</item>
+    </style>
+    <style name="settings_preference_dialog" parent="@style/Preference.DialogPreference">
+        <item name="layout">@layout/settings_preference</item>
+        <item name="allowDividerAbove">false</item>
+        <item name="allowDividerBelow">false</item>
+    </style>
+    <style name="settings_preference_edittext" parent="@style/Preference.DialogPreference.EditTextPreference">
+        <item name="layout">@layout/settings_preference</item>
+        <item name="allowDividerAbove">false</item>
+        <item name="allowDividerBelow">false</item>
+    </style>
+    <style name="settings_preference_checkbox" parent="@style/Preference.CheckBoxPreference.Material">
+        <item name="layout">@layout/settings_preference_checkbox</item>
+        <item name="allowDividerAbove">false</item>
+        <item name="allowDividerBelow">false</item>
+    </style>
+    <style name="settings_preference_seekbar" parent="@style/Preference.SeekBarPreference.Material">
+        <item name="layout">@layout/settings_preference_seekbar</item>
+        <item name="allowDividerAbove">false</item>
+        <item name="allowDividerBelow">false</item>
+    </style>
+    <style name="settings_preference_category" parent="@style/Preference.Category.Material">
+        <item name="layout">@layout/settings_preference_category</item>
+        <item name="allowDividerAbove">false</item>
+        <item name="allowDividerBelow">false</item>
+    </style>
+
+    <style name="settings_tab_text">
+        <item name="android:layout_width">200dp</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:drawablePadding">12dp</item>
+        <item name="android:gravity">left|center</item>
+        <item name="drawableTint">#FFF</item>
+        <item name="android:padding">12dp</item>
+        <item name="android:textColor">#FFF</item>
+    </style>
+
+    <style name="settings_row">
+        <item name="android:layout_width">match_parent</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:padding">18dp</item>
+        <item name="android:layout_marginLeft">12dp</item>
+        <item name="android:layout_marginRight">12dp</item>
+        <item name="android:background">#161622</item>
+        <item name="android:gravity">center</item>
+    </style>
+
+    <style name="settings_row_bottom" parent="settings_row">
+        <item name="android:background">@drawable/rounded_half_bottom</item>
+        <item name="android:backgroundTint">#161622</item>
+    </style>
+
+    <style name="settings_row_title">
+        <item name="android:id">@android:id/title</item>
+        <item name="android:layout_width">match_parent</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:textSize">14sp</item>
+        <item name="android:textStyle">bold</item>
+        <item name="android:textColor">#FFF</item>
+    </style>
+
+    <style name="settings_row_summary" parent="settings_row_title">
+        <item name="android:id">@android:id/summary</item>
+        <item name="android:textSize">12sp</item>
+        <item name="android:textStyle">normal</item>
+        <item name="android:textColor">#FFB2B2CC</item>
+    </style>
+
+    <style name="settings_row_seekbar">
+        <item name="android:id">@id/seekbar</item>
+        <item name="android:layout_width">match_parent</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:layout_marginTop">16dp</item>
+        <item name="android:maxHeight">10dp</item>
+        <item name="android:progressDrawable">@drawable/settings_seekbar</item>
+        <item name="android:splitTrack">false</item>
+        <item name="android:thumb">@drawable/settings_seekbar_thumb</item>
+    </style>
+
 
 </resources>  

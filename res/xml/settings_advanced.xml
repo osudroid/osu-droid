@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.preference.PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+
+
+    <PreferenceCategory android:title="Directories">
+
+        <EditTextPreference
+            android:key="corePath"
+            android:summary="@string/opt_corepath_summary"
+            android:title="@string/opt_corepath_title" />
+
+        <EditTextPreference
+            android:key="skinTopPath"
+            android:summary="@string/opt_skin_top_path_summary"
+            android:title="@string/opt_skin_top_path_title" />
+
+        <EditTextPreference
+            android:defaultValue="/sdcard/osu!droid/Songs"
+            android:key="directory"
+            android:summary="@string/opt_directory_summary"
+            android:title="@string/opt_directory_title"
+            app:layout="@layout/settings_preference_bottom" />
+
+    </PreferenceCategory>
+
+    <PreferenceCategory android:title="Debug">
+
+        <CheckBoxPreference
+            android:defaultValue="true"
+            android:key="fps"
+            android:summary="@string/opt_fps_summary"
+            android:title="@string/opt_fps_title"
+            app:layout="@layout/settings_preference_checkbox_bottom" />
+
+    </PreferenceCategory>
+
+    <PreferenceCategory android:title="Miscellaneous">
+
+        <CheckBoxPreference
+            android:defaultValue="false"
+            android:key="calculateSliderPathInGameStart"
+            android:summary="@string/opt_calculate_slider_path_in_game_start_summary"
+            android:title="@string/opt_calculate_slider_path_in_game_start_title" />
+
+        <CheckBoxPreference
+            android:defaultValue="false"
+            android:key="safebeatmapbg"
+            android:summary="@string/opt_safe_beatmap_bg_summary"
+            android:title="@string/opt_safe_beatmap_bg_title"
+            app:layout="@layout/settings_preference_checkbox_bottom" />
+
+    </PreferenceCategory>
+
+</androidx.preference.PreferenceScreen>

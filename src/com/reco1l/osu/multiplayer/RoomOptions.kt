@@ -33,16 +33,12 @@ import ru.nsu.ccfit.zuev.osu.Config
 import ru.nsu.ccfit.zuev.osu.MainActivity
 import ru.nsu.ccfit.zuev.osu.ToastLogger
 import ru.nsu.ccfit.zuev.osu.helper.StringTable
-import ru.nsu.ccfit.zuev.osu.menu.SettingsMenu
 import ru.nsu.ccfit.zuev.osuplus.R
 import ru.nsu.ccfit.zuev.osu.GlobalManager.getInstance as getGlobal
 import ru.nsu.ccfit.zuev.osu.ResourceManager.getInstance as getResourceManager
 import ru.nsu.ccfit.zuev.skins.SkinManager.getInstance as getSkinManager
 
 
-/**
- * Based on [SettingsMenu]
- */
 class RoomOptions : SettingsFragment()
 {
 
