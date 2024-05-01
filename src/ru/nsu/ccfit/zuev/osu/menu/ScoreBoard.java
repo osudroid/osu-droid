@@ -661,7 +661,9 @@ public class ScoreBoard extends Entity implements ScrollDetector.IScrollDetector
         public void onDetached()
         {
             if (avatarTexture != null)
-                ResourceManager.getInstance().unloadTexture(avatarTexture);
+                // Ensure texture unloading happens in the next tick of the
+                // update thread to prevent concurrency problems.
+                Execution.updateThread(() -> ResourceManager.getInstance().unloadTexture(avatarTexture));
 
             mainScene.unregisterTouchArea(this);
         }
