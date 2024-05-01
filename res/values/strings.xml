@@ -139,7 +139,7 @@
 
 	<!-- Block Area -->
 	<string name="opt_block_area_title">Input Block Area</string>
-	<string name="opt_block_area_summary">Configures areas where presses will be ignored during gameplay to prevent ghost touch.</string>
+	<string name="opt_block_area_summary">Configure areas where presses will be ignored during gameplay</string>
 
 	<string name="network_not_connected">网络连接失败，请检查网络设置</string>
 	<string name="xml_parser_failed">数据解析异常</string>
