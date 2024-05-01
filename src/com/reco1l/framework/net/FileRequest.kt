@@ -71,7 +71,7 @@ class FileRequest(val file: File, url: HttpUrl): WebRequest(url) {
                     val elapsedMilliseconds = (System.currentTimeMillis() - startTime).toFloat()
 
                     progress = totalBytes / length * 100
-                    speedKbps = (totalBytes / elapsedMilliseconds) / 1024f * 1000f
+                    speedKbps = totalBytes / elapsedMilliseconds / 1024f * 1000f
 
                     observer?.onDownloadUpdate(this)
                 }
