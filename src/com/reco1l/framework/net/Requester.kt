@@ -113,10 +113,13 @@ open class Requester(url: String) : AutoCloseable
         requireNotNull(client)
         requireNotNull(request)
 
-        if (query != null)
-        {
-            request = request!!.newBuilder().url("${request!!.url}$query").build()
-        }
+        request = request!!
+            .newBuilder()
+            .url("${request!!.url}${query ?: ""}")
+            // Use Chrome/Android user agent to bypass web crawler preventions.
+            .removeHeader("User-Agent")
+            .addHeader("User-Agent", "Chrome/Android")
+            .build()
 
         call = client!!.newCall(request!!)
 
