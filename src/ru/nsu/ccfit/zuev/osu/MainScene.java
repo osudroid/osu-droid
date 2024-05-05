@@ -428,7 +428,7 @@ public class MainScene implements IUpdateHandler {
 
                 if (pSceneTouchEvent.isActionUp()) {
                     setColor(1, 1, 1);
-                    BeatmapListing.INSTANCE.show();
+                    new BeatmapListing().show();
                     return true;
                 }
 
