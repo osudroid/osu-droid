@@ -2,22 +2,10 @@ package com.reco1l.osu.beatmaplisting
 
 import android.graphics.BitmapFactory
 import android.util.Log
-import android.view.ContextThemeWrapper
-import android.view.KeyEvent
-import android.view.LayoutInflater
-import android.view.View
-import android.view.View.GONE
-import android.view.View.OnKeyListener
-import android.view.View.VISIBLE
-import android.view.ViewGroup
-import android.view.ViewOutlineProvider
+import android.view.*
+import android.view.View.*
 import android.view.inputmethod.EditorInfo
-import android.widget.Button
-import android.widget.EditText
-import android.widget.ImageButton
-import android.widget.ImageView
-import android.widget.LinearLayout
-import android.widget.TextView
+import android.widget.*
 import android.widget.TextView.OnEditorActionListener
 import androidx.core.text.buildSpannedString
 import androidx.core.text.color
@@ -33,11 +21,7 @@ import com.reco1l.framework.net.IDownloaderObserver
 import com.reco1l.framework.net.JsonArrayRequest
 import com.reco1l.osu.OsuColors
 import com.reco1l.osu.mainThread
-import kotlinx.coroutines.CoroutineExceptionHandler
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.Job
-import kotlinx.coroutines.launch
+import kotlinx.coroutines.*
 import ru.nsu.ccfit.zuev.audio.Status
 import ru.nsu.ccfit.zuev.osu.Config
 import ru.nsu.ccfit.zuev.osu.GlobalManager
@@ -46,7 +30,7 @@ import ru.nsu.ccfit.zuev.osu.ToastLogger
 import ru.nsu.ccfit.zuev.osuplus.R
 import java.net.URL
 import java.text.SimpleDateFormat
-import java.util.TimeZone
+import java.util.*
 
 
 object BeatmapListing : BaseFragment(),
@@ -158,6 +142,12 @@ object BeatmapListing : BaseFragment(),
                     addQueryParameter("mode", "0")
                     addQueryParameter("query", searchBox.text.toString())
                     addQueryParameter("offset", offset.toString())
+                }
+
+                request.buildRequest {
+
+                    removeHeader("User-Agent")
+                    addHeader("User-Agent", "Chrome/Android")
                 }
 
                 val beatmapSets = mirror.search.mapResponse(request.execute().json)
