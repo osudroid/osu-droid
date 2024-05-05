@@ -86,7 +86,7 @@ class BeatmapListing : BaseFragment(),
 
     private lateinit var recyclerView: RecyclerView
 
-    private lateinit var refreshButton: Button
+    private lateinit var retryButton: Button
 
     private lateinit var searchBox: EditText
 
@@ -112,8 +112,8 @@ class BeatmapListing : BaseFragment(),
         recyclerView.addOnScrollListener(scrollListener)
         recyclerView.adapter = adapter
 
-        refreshButton = findViewById(R.id.refresh)!!
-        refreshButton.setOnClickListener { search(true) }
+        retryButton = findViewById(R.id.refresh)!!
+        retryButton.setOnClickListener { search(true) }
 
         searchBox = findViewById(R.id.search)!!
         searchBox.setOnEditorActionListener(this)
@@ -133,7 +133,7 @@ class BeatmapListing : BaseFragment(),
 
         mainThread {
             indicator.visibility = VISIBLE
-            refreshButton.visibility = GONE
+            retryButton.visibility = GONE
         }
 
         pendingRequest?.cancel()
@@ -149,7 +149,7 @@ class BeatmapListing : BaseFragment(),
                 if (adapter.data.isEmpty()) {
                     dismiss()
                 } else {
-                    refreshButton.visibility = VISIBLE
+                    retryButton.visibility = VISIBLE
                 }
             }
         }) {
