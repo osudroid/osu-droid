@@ -41,6 +41,7 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.SupervisorJob
 import ru.nsu.ccfit.zuev.audio.Status
 import ru.nsu.ccfit.zuev.osu.Config
 import ru.nsu.ccfit.zuev.osu.GlobalManager
@@ -63,7 +64,7 @@ class BeatmapListing : BaseFragment(),
 
     private val adapter = BeatmapSetAdapter()
 
-    private val searchScope = CoroutineScope(Dispatchers.IO)
+    private val searchScope = CoroutineScope(Dispatchers.IO + SupervisorJob())
 
     private val scrollListener = object : OnScrollListener() {
 
