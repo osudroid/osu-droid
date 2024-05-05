@@ -145,12 +145,7 @@ class BeatmapListing : BaseFragment(),
 
             mainThread {
                 indicator.visibility = GONE
-
-                if (adapter.data.isEmpty()) {
-                    dismiss()
-                } else {
-                    retryButton.visibility = VISIBLE
-                }
+                retryButton.visibility = VISIBLE
             }
         }) {
 
