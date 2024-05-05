@@ -78,7 +78,7 @@
             android:visibility="gone"
             android:drawableTint="#FFF"
             android:padding="16dp"
-            android:text="Refresh"
+            android:text="Retry"
             android:textAllCaps="false"
             android:textColor="#FFF" />
 
