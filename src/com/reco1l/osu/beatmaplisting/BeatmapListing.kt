@@ -86,6 +86,8 @@ class BeatmapListing : BaseFragment(),
 
     private lateinit var recyclerView: RecyclerView
 
+    private lateinit var refreshButton: Button
+
     private lateinit var searchBox: EditText
 
 
@@ -110,14 +112,16 @@ class BeatmapListing : BaseFragment(),
         recyclerView.addOnScrollListener(scrollListener)
         recyclerView.adapter = adapter
 
+        refreshButton = findViewById(R.id.refresh)!!
+        refreshButton.setOnClickListener { search(true) }
+
         searchBox = findViewById(R.id.search)!!
         searchBox.setOnEditorActionListener(this)
         searchBox.setOnKeyListener(this)
 
         indicator = findViewById(R.id.indicator)!!
 
-        val close = findViewById<ImageButton>(R.id.close)!!
-        close.setOnClickListener {
+        findViewById<ImageButton>(R.id.close)!!.setOnClickListener {
             dismiss()
         }
 
@@ -127,7 +131,10 @@ class BeatmapListing : BaseFragment(),
 
     fun search(keepData: Boolean) {
 
-        mainThread { indicator.visibility = VISIBLE }
+        mainThread {
+            indicator.visibility = VISIBLE
+            refreshButton.visibility = GONE
+        }
 
         pendingRequest?.cancel()
         pendingRequest = searchScope.launch(CoroutineExceptionHandler { _, throwable ->
@@ -141,6 +148,8 @@ class BeatmapListing : BaseFragment(),
 
                 if (adapter.data.isEmpty()) {
                     dismiss()
+                } else {
+                    refreshButton.visibility = VISIBLE
                 }
             }
         }) {

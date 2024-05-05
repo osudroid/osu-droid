@@ -47,23 +47,40 @@
             android:id="@+id/logo"
             android:layout_width="100dp"
             android:layout_height="36dp"
-            android:layout_marginRight="12dp"
-            android:src="@drawable/powered_by_osudirect"
+            android:layout_alignParentRight="true"
             android:layout_centerVertical="true"
-            android:layout_alignParentRight="true"/>
+            android:layout_marginRight="12dp"
+            android:src="@drawable/powered_by_osudirect" />
 
         <com.google.android.material.progressindicator.CircularProgressIndicator
             android:id="@+id/indicator"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_toLeftOf="@id/logo"
             android:layout_centerVertical="true"
             android:layout_marginRight="12dp"
+            android:layout_toLeftOf="@id/refresh"
             android:indeterminate="true"
-            app:trackThickness="3dp"
-            app:trackCornerRadius="2dp"
             app:indicatorColor="#FFF"
-            app:indicatorSize="20dp" />
+            app:indicatorSize="20dp"
+            app:trackCornerRadius="2dp"
+            app:trackThickness="3dp" />
+
+        <Button
+            android:id="@+id/refresh"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_centerVertical="true"
+            android:layout_marginRight="12dp"
+            android:layout_toLeftOf="@id/logo"
+            android:background="?attr/selectableItemBackground"
+            android:drawableLeft="@drawable/refresh_24px"
+            android:drawablePadding="8dp"
+            android:visibility="gone"
+            android:drawableTint="#FFF"
+            android:padding="16dp"
+            android:text="Refresh"
+            android:textAllCaps="false"
+            android:textColor="#FFF" />
 
     </RelativeLayout>
 
