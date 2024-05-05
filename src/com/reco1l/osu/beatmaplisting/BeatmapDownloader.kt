@@ -2,12 +2,12 @@ package com.reco1l.osu.beatmaplisting
 
 import android.os.Environment.DIRECTORY_DOWNLOADS
 import android.view.View
-import com.reco1l.osu.mainThread
 import com.reco1l.framework.net.FileRequest
 import com.reco1l.framework.net.IDownloaderObserver
+import com.reco1l.osu.mainThread
 import com.reco1l.osu.multiplayer.Multiplayer
-import com.reco1l.osu.ui.DownloadFragment
 import com.reco1l.osu.multiplayer.RoomScene
+import com.reco1l.osu.ui.DownloadFragment
 import com.reco1l.toolkt.kotlin.async
 import com.reco1l.toolkt.kotlin.decodeAsURL
 import com.reco1l.toolkt.kotlin.replaceAlphanumeric
@@ -21,7 +21,6 @@ import ru.nsu.ccfit.zuev.osu.helper.FileUtils
 import ru.nsu.ccfit.zuev.osu.helper.StringTable
 import ru.nsu.ccfit.zuev.osuplus.R
 import java.io.IOException
-import java.lang.Exception
 
 object BeatmapDownloader : IDownloaderObserver {
 
@@ -57,6 +56,11 @@ object BeatmapDownloader : IDownloaderObserver {
         val file = directory?.resolve("$filename.osz")!!
 
         val downloader = FileRequest(file, url)
+        downloader.buildRequest {
+
+            removeHeader("User-Agent")
+            addHeader("User-Agent", "Chrome/Android")
+        }
 
         fragment = DownloadFragment()
         fragment.setDownloader(downloader) {

@@ -168,6 +168,12 @@ class BeatmapListing : BaseFragment(),
                     addQueryParameter("offset", offset.toString())
                 }
 
+                request.buildRequest {
+
+                    removeHeader("User-Agent")
+                    addHeader("User-Agent", "Chrome/Android")
+                }
+
                 val beatmapSets = mirror.search.mapResponse(request.execute().json)
                 adapter.data.addAll(beatmapSets)
 
