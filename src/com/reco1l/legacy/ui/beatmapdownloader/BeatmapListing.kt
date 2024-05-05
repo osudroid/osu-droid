@@ -4,10 +4,22 @@ import android.content.Intent
 import android.graphics.BitmapFactory
 import android.net.Uri
 import android.util.Log
-import android.view.*
-import android.view.View.*
+import android.view.ContextThemeWrapper
+import android.view.KeyEvent
+import android.view.LayoutInflater
+import android.view.View
+import android.view.View.GONE
+import android.view.View.OnKeyListener
+import android.view.View.VISIBLE
+import android.view.ViewGroup
+import android.view.ViewOutlineProvider
 import android.view.inputmethod.EditorInfo
-import android.widget.*
+import android.widget.Button
+import android.widget.EditText
+import android.widget.ImageButton
+import android.widget.ImageView
+import android.widget.LinearLayout
+import android.widget.TextView
 import android.widget.TextView.OnEditorActionListener
 import androidx.core.text.buildSpannedString
 import androidx.core.text.color
@@ -24,7 +36,11 @@ import com.reco1l.framework.net.IDownloaderObserver
 import com.reco1l.framework.net.JsonRequester
 import com.reco1l.framework.net.QueryContent
 import com.reco1l.legacy.ui.OsuColors
-import kotlinx.coroutines.*
+import kotlinx.coroutines.CoroutineExceptionHandler
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.launch
 import ru.nsu.ccfit.zuev.audio.Status
 import ru.nsu.ccfit.zuev.osu.Config
 import ru.nsu.ccfit.zuev.osu.GlobalManager
@@ -33,7 +49,7 @@ import ru.nsu.ccfit.zuev.osu.ToastLogger
 import ru.nsu.ccfit.zuev.osuplus.R
 import java.net.URL
 import java.text.SimpleDateFormat
-import java.util.*
+import java.util.TimeZone
 
 
 class BeatmapListing : BaseFragment(),
@@ -73,6 +89,8 @@ class BeatmapListing : BaseFragment(),
 
     private lateinit var recyclerView: RecyclerView
 
+    private lateinit var refreshButton: Button
+
     private lateinit var searchBox: EditText
 
 
@@ -97,6 +115,9 @@ class BeatmapListing : BaseFragment(),
         recyclerView.addOnScrollListener(scrollListener)
         recyclerView.adapter = adapter
 
+        refreshButton = findViewById(R.id.refresh)!!
+        refreshButton.setOnClickListener { search(true) }
+
         searchBox = findViewById(R.id.search)!!
         searchBox.setOnEditorActionListener(this)
         searchBox.setOnKeyListener(this)
@@ -111,9 +132,7 @@ class BeatmapListing : BaseFragment(),
             startActivity(i)
         }
 
-
-        val close = findViewById<ImageButton>(R.id.close)!!
-        close.setOnClickListener {
+        findViewById<ImageButton>(R.id.close)!!.setOnClickListener {
             dismiss()
         }
 
@@ -123,7 +142,10 @@ class BeatmapListing : BaseFragment(),
 
     fun search(keepData: Boolean) {
 
-        mainThread { indicator.visibility = VISIBLE }
+        mainThread {
+            indicator.visibility = VISIBLE
+            refreshButton.visibility = GONE
+        }
 
         pendingRequest?.cancel()
         pendingRequest = searchScope.launch(CoroutineExceptionHandler { _, throwable ->
@@ -137,6 +159,8 @@ class BeatmapListing : BaseFragment(),
 
                 if (adapter.data.isEmpty()) {
                     dismiss()
+                } else {
+                    refreshButton.visibility = VISIBLE
                 }
             }
         }) {
