@@ -77,7 +77,7 @@ class MainMenu(val main: MainScene)
                         getGlobal().songService.isGaming = false
                         getGlobal().engine.scene = main.scene
 
-                        BeatmapListing.show()
+                        BeatmapListing().show()
                     } else {
                         main.musicControl(MusicOption.PLAY)
 
