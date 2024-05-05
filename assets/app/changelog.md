@@ -1,3 +1,17 @@
+Version 1.7.2 Patch 3
+=====================
+
+## Additions
+- Added a (more) apparent way to retry beatmap loading in beatmap downloader if the original attempt fails
+
+## Changes
+- Changed user agent in beatmap downloader to bypass web crawler preventions
+  - This speeds up requests in beatmap downloader.
+
+## Fixes
+- Fixed another crash when the game detects low available memory
+- Fixed a crash when entering new player name
+
 Version 1.7.2 Patch 2
 =====================
 
