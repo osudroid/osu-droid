@@ -36,16 +36,10 @@ import java.text.SimpleDateFormat
 import java.util.*
 
 
-object BeatmapListing : BaseFragment(),
+class BeatmapListing : BaseFragment(),
     IDownloaderObserver,
     OnEditorActionListener,
     OnKeyListener {
-
-
-    var mirror = BeatmapMirror.OSU_DIRECT
-
-    var isPlayingMusic = false
-        private set
 
 
     override val layoutID = R.layout.beatmap_downloader_fragment
@@ -80,6 +74,15 @@ object BeatmapListing : BaseFragment(),
     private lateinit var recyclerView: RecyclerView
 
     private lateinit var searchBox: EditText
+
+
+    init {
+        current?.dismiss()
+
+        mainThread {
+            current = this
+        }
+    }
 
 
     override fun onLoadView() {
@@ -222,8 +225,22 @@ object BeatmapListing : BaseFragment(),
             searchBox.text = null
             adapter.notifyDataSetChanged()
             super.dismiss()
+            current = null
         }
     }
+
+
+    companion object {
+
+        var current: BeatmapListing? = null
+
+        var mirror = BeatmapMirror.OSU_DIRECT
+
+        var isPlayingMusic = false
+            private set
+
+    }
+
 }
 
 
@@ -303,7 +320,7 @@ class BeatmapSetDetails(val beatmapSet: BeatmapSetModel, val holder: BeatmapSetV
         previewButton.setOnClickListener {
 
             if (holder.previewStream == null) {
-                BeatmapListing.stopPreviews(false)
+                BeatmapListing.current!!.stopPreviews(false)
                 holder.playPreview(beatmapSet)
             } else {
                 holder.stopPreview(true)
@@ -502,7 +519,7 @@ class BeatmapSetViewHolder(itemView: View, private val mediaScope: CoroutineScop
         previewButton.setOnClickListener {
 
             if (previewStream == null) {
-                BeatmapListing.stopPreviews(false)
+                BeatmapListing.current!!.stopPreviews(false)
                 playPreview(beatmapSet)
             } else {
                 stopPreview(true)
@@ -524,7 +541,7 @@ class BeatmapSetViewHolder(itemView: View, private val mediaScope: CoroutineScop
     fun playPreview(beatmapSet: BeatmapSetModel) {
         previewJob = mediaScope.launch {
 
-            BeatmapListing.stopPreviews(true)
+            BeatmapListing.current!!.stopPreviews(true)
 
             try {
                 previewStream = URLBassStream(BeatmapListing.mirror.previewEndpoint(beatmapSet.beatmaps[0].id)) {

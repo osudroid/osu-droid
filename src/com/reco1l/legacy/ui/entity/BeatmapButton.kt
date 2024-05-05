@@ -84,7 +84,7 @@ class BeatmapButton : Sprite(0f, 0f, getResources().getTexture("menu-button-back
             if (libraryManager.library.isEmpty())
             {
                 getGlobal().songService.pause()
-                BeatmapListing.show()
+                BeatmapListing().show()
                 return true
             }
 
