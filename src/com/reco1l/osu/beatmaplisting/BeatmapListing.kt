@@ -220,14 +220,8 @@ class BeatmapListing : BaseFragment(),
         stopPreviews(true)
 
         pendingRequest?.cancel()
-        pendingRequest = null
-
-        offset = 0
-        adapter.data.clear()
 
         mainThread {
-            searchBox.text = null
-            adapter.notifyDataSetChanged()
             super.dismiss()
             current = null
         }
