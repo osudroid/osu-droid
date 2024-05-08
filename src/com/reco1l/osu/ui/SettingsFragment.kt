@@ -15,6 +15,7 @@ import android.widget.TextView
 import androidx.annotation.XmlRes
 import androidx.core.content.getSystemService
 import androidx.core.view.forEach
+import androidx.core.view.get
 import androidx.preference.CheckBoxPreference
 import androidx.preference.EditTextPreference
 import androidx.preference.ListPreference
@@ -32,6 +33,9 @@ import com.reco1l.osu.async
 import com.reco1l.osu.mainThread
 import com.reco1l.osu.multiplayer.Multiplayer
 import com.reco1l.osu.multiplayer.RoomScene
+import com.reco1l.toolkt.android.bottomMargin
+import com.reco1l.toolkt.android.dp
+import com.reco1l.toolkt.android.topMargin
 import ru.nsu.ccfit.zuev.osu.Config
 import ru.nsu.ccfit.zuev.osu.GlobalManager
 import ru.nsu.ccfit.zuev.osu.LibraryManager
@@ -140,6 +144,10 @@ class SettingsFragment : com.edlplan.ui.fragment.SettingsFragment() {
 
         createSectionButton("Input", R.drawable.trackpad_input_24px, Section.Input)
         createSectionButton("Advanced", R.drawable.manufacturing_24px, Section.Advanced)
+
+
+        sectionSelector[0].topMargin = 32f.dp
+        sectionSelector[sectionSelector.childCount - 1].bottomMargin = 32f.dp
 
 
         findViewById<View>(R.id.close)!!.setOnClickListener {
