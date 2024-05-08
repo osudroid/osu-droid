@@ -81,6 +81,7 @@ class SettingsFragment : com.edlplan.ui.fragment.SettingsFragment() {
     override fun onLoadView() {
 
         sectionSelector = findViewById(R.id.section_selector)!!
+        sectionSelector.removeAllViews()
 
         fun createSectionButton(text: String, icon: Int, section: Section) {
 
@@ -99,6 +100,7 @@ class SettingsFragment : com.edlplan.ui.fragment.SettingsFragment() {
                     }
                 }
 
+                this.section = section
                 setPreferencesFromResource(section.xml, null)
             }
 
