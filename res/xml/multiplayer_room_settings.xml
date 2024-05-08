@@ -1,61 +1,65 @@
 <?xml version="1.0" encoding="utf-8"?>
-<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
 
-    <PreferenceCategory
-            android:title="Room options">
 
-        <Preference
-                android:key="room_link"
-                android:title="Get invite link"
-                android:summary="Copy invite link to clipboard"/>
+    <PreferenceCategory android:title="Details">
 
         <EditTextPreference
-                android:key="room_name"
-                android:title="Room name"
-                android:summary="Change room name"
-        />
+            android:key="room_name"
+            android:summary="Change room name"
+            android:title="Room name" />
 
         <EditTextPreference
-                android:key="room_password"
-                android:title="Room password"
-                android:summary="Change room password, empty will set room to public."
-        />
-
-        <CheckBoxPreference
-                android:key="room_free_mods"
-                android:title="Enable free mods"
-                android:summary="Allow any player to choose mods (speed changing mods can only be enabled by room host)"
-        />
-
-        <CheckBoxPreference
-                android:key="room_allowForceDifficultyStatistics"
-                android:title="Allow force difficulty statistics in free mod"
-                android:summary="Allow players to use forced difficulty statistics in free mod"
-        />
-
-        <ListPreference
-                android:key="room_versus_mode"
-                android:title="Team mode"
-                android:entries="@array/team_versus_names"
-                android:entryValues="@array/team_versus_values"
-                android:summary="Change room versus mode"
-        />
-
-        <ListPreference
-                android:key="room_win_condition"
-                android:title="Win condition"
-                android:entries="@array/win_condition_names"
-                android:entryValues="@array/win_condition_values"
-                android:summary="Change room win condition"
-        />
-
-        <CheckBoxPreference
-                android:key="room_removeSliderLock"
-                android:title="@string/opt_remove_sliderlock_spinnerlock_title"
-                android:summary="@string/opt_remove_sliderlock_spinnerlock_summary"
-        />
+            android:key="room_password"
+            android:summary="Change room password, empty will set room to public."
+            android:title="Room password"
+            app:layout="@layout/settings_preference_bottom" />
 
     </PreferenceCategory>
 
+    <PreferenceCategory android:title="Variables">
+
+        <CheckBoxPreference
+            android:key="room_free_mods"
+            android:summary="Allow any player to choose mods (speed changing mods can only be enabled by room host)"
+            android:title="Enable free mods" />
+
+        <CheckBoxPreference
+            android:key="room_allowForceDifficultyStatistics"
+            android:summary="Allow players to use forced difficulty statistics in free mod"
+            android:title="Allow force difficulty statistics in free mod" />
+
+        <ListPreference
+            android:entries="@array/team_versus_names"
+            android:entryValues="@array/team_versus_values"
+            android:key="room_versus_mode"
+            android:summary="Change room versus mode"
+            android:title="Team mode" />
+
+        <ListPreference
+            android:entries="@array/win_condition_names"
+            android:entryValues="@array/win_condition_values"
+            android:key="room_win_condition"
+            android:summary="Change room win condition"
+            android:title="Win condition" />
+
+        <CheckBoxPreference
+            android:key="room_removeSliderLock"
+            android:summary="@string/opt_remove_sliderlock_spinnerlock_summary"
+            android:title="@string/opt_remove_sliderlock_spinnerlock_title"
+            app:layout="@layout/settings_preference_checkbox_bottom" />
+
+    </PreferenceCategory>
+
+    <PreferenceCategory android:title="Share">
+
+        <Preference
+            android:key="room_link"
+            android:summary="Copy invite link to clipboard"
+            android:title="Get invite link"
+            app:layout="@layout/settings_preference_bottom" />
+
+    </PreferenceCategory>
 
 </PreferenceScreen>
