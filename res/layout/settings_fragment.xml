@@ -36,6 +36,7 @@
         <ScrollView
             android:id="@+id/scrollview"
             android:layout_width="wrap_content"
+            android:scrollbarThumbVertical="@null"
             android:layout_height="match_parent">
 
             <LinearLayout

@@ -140,7 +140,8 @@
             hexValue="true"
             android:defaultValue="@integer/COLOR_YELLOW"
             android:key="combo4"
-            android:title="Combo 4" />
+            android:title="Combo 4"
+            app:layout="@layout/settings_preference_bottom"/>
 
     </PreferenceCategory>
 

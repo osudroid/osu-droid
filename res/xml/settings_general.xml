@@ -61,7 +61,7 @@
             android:key="update"
             android:summary="@string/opt_update_summary"
             android:title="@string/opt_update_title"
-            android:layout="@layout/settings_preference_bottom"/>
+            app:layout="@layout/settings_preference_bottom"/>
 
     </PreferenceCategory>
 
