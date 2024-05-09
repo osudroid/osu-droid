@@ -189,6 +189,11 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
     private List<TimedDifficultyAttributes<StandardDifficultyAttributes>> standardTimedDifficultyAttributes;
     private ChangeableText ppText;
 
+    /**
+     * The time at which the last frame was rendered with respect to {@link SystemClock#uptimeMillis()}.
+     * <br>
+     * If 0, a frame has not been rendered yet.
+     */
     private long previousFrameTime;
 
 
@@ -874,6 +879,7 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
         comboWasMissed = false;
 
         final int leadIn = beatmap.general.audioLeadIn;
+        previousFrameTime = 0;
         secPassed = -leadIn / 1000f;
         if (secPassed > -1) {
             secPassed = -1;
@@ -2355,7 +2361,7 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
             sprite.setPosition(cursor.mousePos.x, cursor.mousePos.y);
         }
 
-        var frameOffset = (event.getMotionEvent().getEventTime() - previousFrameTime) * timeMultiplier;
+        var frameOffset = previousFrameTime > 0 ? (event.getMotionEvent().getEventTime() - previousFrameTime) * timeMultiplier : 0;
         var eventTime = (int) (secPassed * 1000 + frameOffset);
 
         if (event.isActionDown()) {
@@ -2444,7 +2450,8 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
 
         // Release all pressed cursors to avoid getting stuck at resume.
         if (!GameHelper.isAuto() && !GameHelper.isAutopilotMod() && !replaying) {
-            var time = (int) (secPassed * 1000 + (SystemClock.uptimeMillis() - previousFrameTime) * timeMultiplier);
+            var frameOffset = previousFrameTime > 0 ? (SystemClock.uptimeMillis() - previousFrameTime) * timeMultiplier : 0;
+            var time = (int) (secPassed * 1000 + frameOffset);
 
             for (int i = 0; i < CursorCount; ++i) {
                 var cursor = cursors[i];
