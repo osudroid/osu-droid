@@ -56,11 +56,7 @@ object BeatmapDownloader : IDownloaderObserver {
         val file = directory?.resolve("$filename.osz")!!
 
         val downloader = FileRequest(file, url)
-        downloader.buildRequest {
-
-            removeHeader("User-Agent")
-            addHeader("User-Agent", "Chrome/Android")
-        }
+        downloader.buildRequest { header("User-Agent", "Chrome/Android") }
 
         fragment = DownloadFragment()
         fragment.setDownloader(downloader) {

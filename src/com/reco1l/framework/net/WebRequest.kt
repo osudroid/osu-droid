@@ -3,10 +3,12 @@ package com.reco1l.framework.net
 import android.util.Log
 import okhttp3.*
 import okhttp3.HttpUrl.Companion.toHttpUrl
+import okhttp3.MediaType.Companion.toMediaTypeOrNull
+import okhttp3.RequestBody.Companion.toRequestBody
+import org.json.JSONObject
 import ru.nsu.ccfit.zuev.osuplus.BuildConfig
 import java.io.IOException
 import java.util.*
-import java.util.concurrent.TimeUnit
 
 open class WebRequest(private var url: HttpUrl) : AutoCloseable {
 
@@ -28,36 +30,45 @@ open class WebRequest(private var url: HttpUrl) : AutoCloseable {
         protected set
 
 
-    private var client = DEFAULT_CLIENT
+    /**
+     * The client to be used for this request.
+     *
+     * By default the [global client][globalClient] is used with default settings, if you want to
+     * change specific settings is better to build a new one upon it using [OkHttpClient.newBuilder].
+     */
+    var client = globalClient
+
 
     private var request = Request.Builder().url(url).build()
 
 
     /**
-     * Builds a new Okio HTTP client upon the current one.
+     * Builds a new request upon the current one.
      */
-    fun buildClient(unit: OkHttpClient.Builder.() -> Unit) {
-        val builder = client.newBuilder()
-        builder.unit()
-        client = builder.build()
+    fun buildRequest(block: Request.Builder.() -> Unit) {
+
+        request = request.newBuilder().apply(block).build()
     }
 
     /**
-     * Builds a new request upon the current one.
+     * Builds a JSON request body with data to be sent to server.
      */
-    fun buildRequest(unit: Request.Builder.() -> Unit) {
-        val builder = request.newBuilder()
-        builder.unit()
-        request = builder.build()
+    fun buildRequestBody(block: JSONObject.() -> Unit) {
+
+        val json = JSONObject()
+        json.block()
+
+        buildRequest {
+            post(json.toString().toRequestBody(JSON_UTF_8))
+        }
     }
 
     /**
      * Builds an HTTP URL upon the current one.
      */
-    fun buildUrl(unit: HttpUrl.Builder.() -> Unit) {
-        val builder = url.newBuilder()
-        builder.unit()
-        url = builder.build()
+    fun buildUrl(block: HttpUrl.Builder.() -> Unit) {
+
+        url = url.newBuilder().apply(block).build()
     }
 
 
@@ -115,7 +126,7 @@ open class WebRequest(private var url: HttpUrl) : AutoCloseable {
             if (response.isSuccessful) {
                 onResponseSuccess(response)
             } else {
-                throw ResponseException(response)
+                throw UnsuccessfulResponseException(response)
             }
 
         } catch (e: Exception) {
@@ -129,14 +140,16 @@ open class WebRequest(private var url: HttpUrl) : AutoCloseable {
     companion object {
 
         /**
-         * The default Okio HTTP client.
+         * The Json UTF-8 media type specification.
+         */
+        val JSON_UTF_8 = "application/json; charset=utf-8".toMediaTypeOrNull()
+
+        /**
+         * The global Okio HTTP client.
          *
          * This client uses by default a 10 seconds timeout configuration.
          */
-        val DEFAULT_CLIENT = OkHttpClient
-            .Builder()
-            .connectTimeout(10000, TimeUnit.MILLISECONDS)
-            .build()
+        val globalClient = OkHttpClient()
 
     }
 }
@@ -145,6 +158,11 @@ open class WebRequest(private var url: HttpUrl) : AutoCloseable {
 /**
  * Denotes a response that is not successful.
  */
-class ResponseException(response: Response) : IOException("Unexpected response: $response") {
+class UnsuccessfulResponseException(response: Response) : IOException(response.message) {
+
+    /**
+     * The response code.
+     */
     val code: Int = response.code
+
 }
