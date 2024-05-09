@@ -4,6 +4,7 @@ import android.annotation.SuppressLint
 import android.content.ClipData
 import android.content.ClipboardManager
 import android.content.Intent
+import android.graphics.Color
 import android.net.Uri
 import android.os.Bundle
 import android.text.InputType.TYPE_CLASS_TEXT
@@ -35,6 +36,8 @@ import com.reco1l.osu.multiplayer.Multiplayer
 import com.reco1l.osu.multiplayer.RoomScene
 import com.reco1l.toolkt.android.bottomMargin
 import com.reco1l.toolkt.android.dp
+import com.reco1l.toolkt.android.drawableLeft
+import com.reco1l.toolkt.android.layoutWidth
 import com.reco1l.toolkt.android.topMargin
 import ru.nsu.ccfit.zuev.osu.Config
 import ru.nsu.ccfit.zuev.osu.GlobalManager
@@ -91,8 +94,11 @@ class SettingsFragment : com.edlplan.ui.fragment.SettingsFragment() {
 
             val button = TextView(ContextThemeWrapper(context, R.style.settings_tab_text))
 
+            button.layoutWidth = 200f.dp
             button.text = text
-            button.setCompoundDrawablesWithIntrinsicBounds(icon, 0, 0, 0)
+            button.drawableLeft = requireContext().getDrawable(icon)!!
+            button.drawableLeft!!.setTint(Color.WHITE)
+
             button.setOnClickListener {
 
                 sectionSelector.forEach {
@@ -109,6 +115,10 @@ class SettingsFragment : com.edlplan.ui.fragment.SettingsFragment() {
             }
 
             sectionSelector.addView(button)
+
+            if (this.section == section) {
+                button.callOnClick()
+            }
         }
 
 
@@ -148,7 +158,6 @@ class SettingsFragment : com.edlplan.ui.fragment.SettingsFragment() {
 
         sectionSelector[0].topMargin = 32f.dp
         sectionSelector[sectionSelector.childCount - 1].bottomMargin = 32f.dp
-
 
         findViewById<View>(R.id.close)!!.setOnClickListener {
             dismiss()
