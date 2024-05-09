@@ -7,8 +7,6 @@ import android.util.Log
 import android.view.MotionEvent
 import org.anddev.andengine.input.touch.TouchEvent
 import ru.nsu.ccfit.zuev.osu.game.GameScene
-import kotlin.math.max
-import kotlin.math.min
 
 
 object BlockAreaManager {
@@ -24,9 +22,10 @@ object BlockAreaManager {
     fun setScreenSize(context: Context) {
         val dm = DisplayMetrics()
         (context as Activity).windowManager.defaultDisplay.getMetrics(dm)
-        screenWidth =
-            max(dm.widthPixels.toDouble(), dm.heightPixels.toDouble()).toInt()
-        screenHeight = min(dm.widthPixels.toDouble(), dm.heightPixels.toDouble()).toInt()
+
+        screenWidth = dm.widthPixels
+        screenHeight = dm.heightPixels
+
         Log.d(TAG, "setScreenSize: $screenWidth/$screenHeight")
     }
 
