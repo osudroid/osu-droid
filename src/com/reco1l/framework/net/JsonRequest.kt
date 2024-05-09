@@ -45,6 +45,10 @@ class JsonObjectRequest(url: HttpUrl) : JsonRequest<JSONObject>(url) {
 
     override fun onCreateResponseJson(responseBody: String): JSONObject {
 
+        if (!responseBody.isBetween('{' to '}')) {
+            throw JSONException("Response is not a JSON object:\n$responseBody")
+        }
+
         val json = JSONObject(responseBody)
 
         if (BuildConfig.DEBUG) {
@@ -62,6 +66,10 @@ class JsonArrayRequest(url: HttpUrl) : JsonRequest<JSONArray>(url) {
 
 
     override fun onCreateResponseJson(responseBody: String): JSONArray {
+
+        if (!responseBody.isBetween('[' to ']')) {
+            throw JSONException("Response is not a JSON array:\n$responseBody")
+        }
 
         val json = JSONArray(responseBody)
 
