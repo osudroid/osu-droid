@@ -98,20 +98,17 @@ public class Replay {
 
     public void addPress(final int timeMs, final PointF pos, final int pid) {
         if (pid > GameScene.CursorCount || isSaving) return;
-        int itime = Math.max(0, timeMs);
-        cursorMoves.get(pid).pushBack(this, itime, pos.x, pos.y, TouchType.DOWN);
+        cursorMoves.get(pid).pushBack(this, timeMs, pos.x, pos.y, TouchType.DOWN);
     }
 
     public void addMove(final int timeMs, final PointF pos, final int pid) {
         if (pid > GameScene.CursorCount || isSaving) return;
-        int itime = Math.max(0, timeMs);
-        cursorMoves.get(pid).pushBack(this, itime, pos.x, pos.y, TouchType.MOVE);
+        cursorMoves.get(pid).pushBack(this, timeMs, pos.x, pos.y, TouchType.MOVE);
     }
 
     public void addUp(final int timeMs, final int pid) {
         if (pid > GameScene.CursorCount || isSaving) return;
-        int itime = Math.max(0, timeMs);
-        cursorMoves.get(pid).pushBack(itime, TouchType.UP);
+        cursorMoves.get(pid).pushBack(timeMs, TouchType.UP);
     }
 
     public void save(final String filename) {
