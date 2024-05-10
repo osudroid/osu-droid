@@ -131,7 +131,7 @@ class InGameSettingMenu : BaseFragment() {
         customHPText = findViewById(R.id.custom_hp_text)!!
         customHPToggle = findViewById(R.id.custom_hp_toggle)!!
 
-        findViewById<RelativeLayout>(R.id.frg_background)!!.isClickable = false
+        findViewById<View>(R.id.frg_background)!!.isClickable = false
 
         findViewById<CheckBox>(R.id.enableStoryboard)!!.apply {
             isChecked = Config.isEnableStoryboard()
