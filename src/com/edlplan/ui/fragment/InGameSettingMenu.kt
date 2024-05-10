@@ -5,7 +5,6 @@ import android.os.Bundle
 import android.view.View
 import android.widget.CheckBox
 import android.widget.LinearLayout
-import android.widget.RelativeLayout
 import android.widget.SeekBar
 import android.widget.SeekBar.OnSeekBarChangeListener
 import android.widget.TextView
@@ -191,34 +190,19 @@ class InGameSettingMenu : BaseFragment() {
                     progress: Int,
                     fromUser: Boolean
                 ) {
-                    findViewById<TextView>(R.id.brightPreviewText)!!.text = progress.toString()
                     findViewById<TextView>(R.id.bgBrightnessText)!!.text = "$progress%"
-                    val clamped = FMath.clamp(255 * (progress / 100f), 0f, 255f).roundToInt()
-                    findViewById<View>(R.id.brightnessPreview)!!.setBackgroundColor(
-                        0xFF shl 24 or (clamped shl 16) or (clamped shl 8) or clamped
-                    )
                 }
 
                 override fun onStartTrackingTouch(seekBar: SeekBar?) {
-                    findViewById<RelativeLayout>(R.id.brightnessPreviewLayout)!!.visibility =
-                        View.VISIBLE
-                    val progress = seekBar!!.progress
-                    findViewById<TextView>(R.id.brightPreviewText)!!.text = progress.toString()
-                    findViewById<TextView>(R.id.bgBrightnessText)!!.text = "$progress%"
-                    val clamped = FMath.clamp(255 * (progress / 100f), 0f, 255f).roundToInt()
-                    findViewById<View>(R.id.brightnessPreview)!!.setBackgroundColor(
-                        0xFF shl 24 or (clamped shl 16) or (clamped shl 8) or clamped
-                    )
+                    findViewById<TextView>(R.id.bgBrightnessText)!!.text = "${seekBar!!.progress}%"
                 }
 
                 override fun onStopTrackingTouch(seekBar: SeekBar?) {
-                    findViewById<RelativeLayout>(R.id.brightnessPreviewLayout)!!.visibility =
-                        View.GONE
                     val progress = seekBar!!.progress
                     findViewById<TextView>(R.id.bgBrightnessText)!!.text = "$progress%"
+
                     Config.setBackgroundBrightness(seekBar.progress / 100f)
-                    PreferenceManager.getDefaultSharedPreferences(context!!).edit()
-                        .putInt("bgbrightness", progress).commit()
+                    PreferenceManager.getDefaultSharedPreferences(context!!).edit().putInt("bgbrightness", progress).commit()
                 }
             }
         )
@@ -509,7 +493,7 @@ class InGameSettingMenu : BaseFragment() {
                 object : BaseAnimationListener() {
                     override fun onAnimationEnd(animation: Animator) {
                         super.onAnimationEnd(animation)
-                        val background = findViewById<RelativeLayout>(R.id.frg_background)!!
+                        val background = findViewById<View>(R.id.frg_background)!!
                         background.isClickable = true
                         background.setOnClickListener {
                             playShowPanelAnim()
@@ -531,7 +515,7 @@ class InGameSettingMenu : BaseFragment() {
                 object : BaseAnimationListener() {
                     override fun onAnimationEnd(animation: Animator) {
                         super.onAnimationEnd(animation)
-                        findViewById<RelativeLayout>(R.id.frg_background)!!.isClickable = false
+                        findViewById<View>(R.id.frg_background)!!.isClickable = false
                     }
                 }
             )
