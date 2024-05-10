@@ -480,7 +480,7 @@ class InGameSettingMenu : BaseFragment() {
     private fun toggleSettingPanel() {
         updateVisibility()
 
-        val background = findViewById<RelativeLayout>(R.id.frg_background)!!
+        val background = findViewById<View>(R.id.frg_background)!!
         if (isSettingPanelShow()) {
             playHidePanelAnim()
             background.setOnTouchListener(null)
