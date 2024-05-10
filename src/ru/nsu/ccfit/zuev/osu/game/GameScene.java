@@ -2384,6 +2384,10 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
 
         } else if (event.isActionMove()) {
 
+            if (sprite != null) {
+                sprite.setShowing(true);
+            }
+
             PointF gamePoint = applyCursorTrackCoordinates(cursor);
             if (replay != null) {
                 replay.addMove(eventTime, gamePoint, id);
