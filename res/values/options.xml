@@ -305,6 +305,9 @@
     <string name="opt_flashlight_follow_delay_title">FL Follow delay</string>
     <string name="opt_changespeed_title">Speed Modify</string>
     <string name="opt_forcear_title">Force AR</string>
+    <string name="opt_forceod_title">Force OD</string>
+    <string name="opt_forcehp_title">Force HP</string>
+    <string name="opt_forcecs_title">Force CS</string>
     <string name="opt_enablenc_whenspeedchange_title">Enable pitch shift in speed modify</string>
     <string name="opt_enablespeedchange_title">Enable speed modify</string>
     <string name="opt_enableforcear_title">Enable force AR</string>

@@ -16,6 +16,7 @@ import com.edlplan.ui.BaseAnimationListener
 import com.edlplan.ui.EasingHelper
 import com.reco1l.osu.mainThread
 import com.reco1l.osu.multiplayer.Multiplayer
+import com.reco1l.toolkt.android.dp
 import org.anddev.andengine.input.touch.TouchEvent
 import ru.nsu.ccfit.zuev.osu.Config
 import ru.nsu.ccfit.zuev.osu.GlobalManager
@@ -28,6 +29,7 @@ import kotlin.math.abs
 import kotlin.math.roundToInt
 
 class InGameSettingMenu : BaseFragment() {
+
     private lateinit var speedModifyRow: View
     private lateinit var speedModifyBar: SeekBar
     private lateinit var speedModifyText: TextView
@@ -37,30 +39,26 @@ class InGameSettingMenu : BaseFragment() {
     private lateinit var followDelayBar: SeekBar
     private lateinit var followDelayText: TextView
 
-    private lateinit var forceDifficultyStatisticsSplitter: View
+    private lateinit var customDifficultySection: View
 
-    private lateinit var customARLayout: RelativeLayout
     private lateinit var customARToggle: CheckBox
     private lateinit var customARText: TextView
     private lateinit var customARBar: SeekBar
 
-    private lateinit var customODLayout: RelativeLayout
     private lateinit var customODToggle: CheckBox
     private lateinit var customODText: TextView
     private lateinit var customODBar: SeekBar
 
-    private lateinit var customCSLayout: RelativeLayout
     private lateinit var customCSToggle: CheckBox
     private lateinit var customCSText: TextView
     private lateinit var customCSBar: SeekBar
 
-    private lateinit var customHPLayout: RelativeLayout
     private lateinit var customHPToggle: CheckBox
     private lateinit var customHPText: TextView
     private lateinit var customHPBar: SeekBar
 
     override val layoutID: Int
-        get() = R.layout.fragment_in_game_option
+        get() = R.layout.mod_customization_fragment
 
     override fun onLoadView() {
         reload(load())
@@ -78,24 +76,20 @@ class InGameSettingMenu : BaseFragment() {
         putInt("followDelayBar", followDelayBar.progress)
         putString("followDelayText", followDelayText.text.toString())
 
-        putInt("forceDifficultyStatisticsSplitter", forceDifficultyStatisticsSplitter.visibility)
+        putInt("customDifficultyRow", customDifficultySection.visibility)
 
-        putInt("customARLayout", customARLayout.visibility)
         putBoolean("customARToggle", customARToggle.isChecked)
         putString("customARText", customARText.text.toString())
         putInt("customARBar", customARBar.progress)
 
-        putInt("customODLayout", customODLayout.visibility)
         putBoolean("customODToggle", customODToggle.isChecked)
         putString("customODText", customODText.text.toString())
         putInt("customODBar", customODBar.progress)
 
-        putInt("customCSLayout", customCSLayout.visibility)
         putBoolean("customCSToggle", customCSToggle.isChecked)
         putString("customCSText", customCSText.text.toString())
         putInt("customCSBar", customCSBar.progress)
 
-        putInt("customHPLayout", customHPLayout.visibility)
         putBoolean("customHPToggle", customHPToggle.isChecked)
         putString("customHPText", customHPText.text.toString())
         putInt("customHPBar", customHPBar.progress)
@@ -112,43 +106,27 @@ class InGameSettingMenu : BaseFragment() {
             this.setInitialSavedState(state)
         }
 
-        val showMore = findViewById<View>(R.id.showMoreButton) ?: return
-        showMore.setOnTouchListener { v, event ->
-            if (event.action == TouchEvent.ACTION_DOWN) {
-                v.animate().cancel()
-                v.animate().scaleX(0.9f).scaleY(0.9f).translationY(v.height * 0.1f).setDuration(100)
-                    .start()
-                toggleSettingPanel()
-                return@setOnTouchListener true
-            } else if (event.action == TouchEvent.ACTION_UP) {
-                v.animate().cancel()
-                v.animate().scaleX(1f).scaleY(1f).translationY(0f).setDuration(100).start()
-                return@setOnTouchListener true
-            }
-            false
+        findViewById<View>(R.id.showMoreButton)!!.setOnClickListener {
+            toggleSettingPanel()
         }
 
         speedModifyRow = findViewById(R.id.speed_modify)!!
         followDelayRow = findViewById(R.id.follow_delay_row)!!
 
-        forceDifficultyStatisticsSplitter = findViewById(R.id.force_diffstat_split_view)!!
+        customDifficultySection = findViewById(R.id.custom_difficulty)!!
 
-        customARLayout = findViewById(R.id.custom_ar_layout)!!
         customARBar = findViewById(R.id.custom_ar_bar)!!
         customARText = findViewById(R.id.custom_ar_text)!!
         customARToggle = findViewById(R.id.custom_ar_toggle)!!
 
-        customODLayout = findViewById(R.id.custom_od_layout)!!
         customODBar = findViewById(R.id.custom_od_bar)!!
         customODText = findViewById(R.id.custom_od_text)!!
         customODToggle = findViewById(R.id.custom_od_toggle)!!
 
-        customCSLayout = findViewById(R.id.custom_cs_layout)!!
         customCSBar = findViewById(R.id.custom_cs_bar)!!
         customCSText = findViewById(R.id.custom_cs_text)!!
         customCSToggle = findViewById(R.id.custom_cs_toggle)!!
 
-        customHPLayout = findViewById(R.id.custom_hp_layout)!!
         customHPBar = findViewById(R.id.custom_hp_bar)!!
         customHPText = findViewById(R.id.custom_hp_text)!!
         customHPToggle = findViewById(R.id.custom_hp_toggle)!!
@@ -447,31 +425,27 @@ class InGameSettingMenu : BaseFragment() {
             }
         }
 
-        forceDifficultyStatisticsSplitter.visibility = visibility
+        customDifficultySection.visibility = visibility
 
         val customAR = ModMenu.getInstance().customAR
-        customARLayout.visibility = visibility
         customARToggle.isChecked = customAR != null
         customARBar.isEnabled = customAR != null
         customARBar.progress = (((customAR ?: track?.approachRate) ?: 10f) * 10).toInt()
         customARText.text = "${customARBar.progress / 10f}"
 
         val customOD = ModMenu.getInstance().customOD
-        customODLayout.visibility = visibility
         customODToggle.isChecked = customOD != null
         customODBar.isEnabled = customOD != null
         customODBar.progress = (((customOD ?: track?.overallDifficulty) ?: 10f) * 10).toInt()
         customODText.text = "${customODBar.progress / 10f}"
 
         val customCS = ModMenu.getInstance().customCS
-        customCSLayout.visibility = visibility
         customCSToggle.isChecked = customCS != null
         customCSBar.isEnabled = customCS != null
         customCSBar.progress = (((customCS ?: track?.circleSize) ?: 10f) * 10).toInt()
         customCSText.text = "${customCSBar.progress / 10f}"
 
         val customHP = ModMenu.getInstance().customHP
-        customHPLayout.visibility = visibility
         customHPToggle.isChecked = customHP != null
         customHPBar.isEnabled = customHP != null
         customHPBar.progress = (((customHP ?: track?.hpDrain) ?: 10f) * 10).toInt()
@@ -528,7 +502,7 @@ class InGameSettingMenu : BaseFragment() {
         val layout = findViewById<View>(R.id.fullLayout)
         layout?.animate()?.cancel()
         layout?.animate()
-            ?.translationY(0f)
+            ?.translationX(0f)
             ?.setDuration(200)
             ?.setInterpolator(EasingHelper.asInterpolator(Easing.InOutQuad))
             ?.setListener(
@@ -550,7 +524,7 @@ class InGameSettingMenu : BaseFragment() {
         val layout = findViewById<View>(R.id.fullLayout)
         layout?.animate()?.cancel()
         layout?.animate()
-            ?.translationY(findViewById<LinearLayout>(R.id.optionBody)!!.height.toFloat())
+            ?.translationX(-(350f.dp.toFloat()))
             ?.setDuration(200)
             ?.setInterpolator(EasingHelper.asInterpolator(Easing.InOutQuad))
             ?.setListener(
