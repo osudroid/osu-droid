@@ -1,3 +1,11 @@
+Version 1.7.2 Patch 4
+=====================
+
+## Fixes
+
+- Fixed an issue where finger presses/movements/releases may be improperly recorded to replay before music starts
+- Fixed an issue where the timestamp of a finger press/movement/release may be improperly recorded to replay after first gameplay
+
 Version 1.7.2 Patch 3
 =====================
 
