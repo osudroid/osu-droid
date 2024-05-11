@@ -233,28 +233,59 @@
         }
     }
 
+    function registerOnTouch(elem, callback) {
+        if (!isBrowser) {
+            elem.addEventListener('touchstart', function (event) {
+                const [initialX, initialY] = getClientPosition(event);
+                let moved = false;
+
+                function onTouchMove(event) {
+                    if (!moved) {
+                        const [endX, endY] = getClientPosition(event);
+                        if (Math.abs(endX - initialX) + Math.abs(endY - initialY) > 30 || event.target !== elem) {
+                            moved = true;
+                        }
+                    }
+                }
+
+                function onTouchEnd(event) {
+                    if (!moved) {
+                        callback(event);
+                    }
+                    elem.removeEventListener('touchend', onTouchEnd);
+                    elem.removeEventListener('touchmove', onTouchMove);
+                }
+
+                elem.addEventListener('touchend', onTouchEnd);
+                elem.addEventListener('touchmove', onTouchMove);
+            })
+        } else {
+            elem.addEventListener('click', callback);
+        }
+    }
+
 
     function registerButton() {
         let activeButton = document.getElementById('activeButton');
         activeButton.innerText = config.activated ? "Current: Enabled" : "Current: Disabled";
-        activeButton.addEventListener(eventMap.click, function () {
+        registerOnTouch(activeButton, function () {
             config.activated = !config.activated;
             activeButton.innerText = config.activated ? "Current: Enabled" : "Current: Disabled";
         });
 
         let addButton = document.getElementById("addButton");
-        addButton.addEventListener(eventMap.click, function () {
+        registerOnTouch(addButton, function () {
             createRectangle({top: 0.2, bottom: 0.8, left: 0.25, right: 0.4});
-        });
+        })
 
         let deleteButton = document.getElementById("deleteButton");
-        deleteButton.addEventListener(eventMap.click, function () {
+        registerOnTouch(deleteButton, function () {
             status.deleteMode = !status.deleteMode;
             deleteButton.innerText = status.deleteMode ? "Delete: On" : "Delete Area";
         });
 
         let resetButton = document.getElementById('resetButton');
-        resetButton.addEventListener(eventMap.click, function () {
+        registerOnTouch(resetButton, function () {
             status.rectElems.forEach(x => x.remove());
             status.rectElems = [];
             config.rects = defaultConfig.rects;
@@ -263,7 +294,7 @@
 
         let saveButtonTextTimeout = null;
         let saveButton = document.getElementById('saveButton');
-        saveButton.addEventListener(eventMap.click, function () {
+        registerOnTouch(saveButton, function () {
             saveConfig();
             saveButton.innerText = "Changes Saved!";
 
@@ -301,7 +332,7 @@
 
 
         function setStyle(div, top, left, width, height,) {
-             if (top === undefined) {
+            if (top === undefined) {
                 top = parseInt(div.style.top.slice(0, -2));
             }
             if (left === undefined) {
@@ -405,14 +436,12 @@
                 if (status.deleteMode) {
                     return;
                 }
-                console.log(event.type)
 
                 const [startX, startY] = getClientPosition(event);
                 const startPosTop = el.offsetTop;
                 const startPosLeft = el.offsetLeft;
 
                 const onMouseMove = function (event) {
-                console.log(event.type)
 
                     const [x, y] = getClientPosition(event);
                     const dx = x - startX;
@@ -420,13 +449,11 @@
 
                     const top = startPosTop + dy;
                     const left = startPosLeft + dx;
-                    console.log(top,left)
                     setStyle(el, top, left);
 
                 };
 
                 const onMouseUp = function () {
-                console.log(event.type)
 
                     document.removeEventListener(eventMap.move, onMouseMove);
                     document.removeEventListener(eventMap.end, onMouseUp);
