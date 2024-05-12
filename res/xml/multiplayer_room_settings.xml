@@ -7,7 +7,7 @@
 
         <EditTextPreference
             android:key="room_name"
-            android:summary="Change room name"
+            android:summary="Change the room's name."
             android:title="Room name" />
 
         <EditTextPreference
