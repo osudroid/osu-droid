@@ -468,10 +468,6 @@ public class Config {
         Config.playMusicPreview = playMusicPreview;
     }
 
-    public static String getLocalUsername() {
-        return "Guest";
-    }
-
     public static boolean isShowCursor() {
         return showCursor;
     }

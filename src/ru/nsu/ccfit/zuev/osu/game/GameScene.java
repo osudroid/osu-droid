@@ -1045,7 +1045,7 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
             unranked.setVisible(true);
         }
 
-        String playname = Config.getLocalUsername();
+        String playname = Config.getOnlineUsername();
 
         ChangeableText replayText = new ChangeableText(0, 0, ResourceManager.getInstance().getFont("font"), "", 1000);
         replayText.setVisible(false);
@@ -1063,8 +1063,6 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
             //noinspection DataFlowIssue
             playname = Multiplayer.player.getTeam().toString();
 
-        } else if (OnlineManager.getInstance().isStayOnline()) {
-            playname = Config.getOnlineUsername();
         }
 
         if (Config.isShowScoreboard()) {
