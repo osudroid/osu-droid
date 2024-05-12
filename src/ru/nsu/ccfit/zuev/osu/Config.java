@@ -485,7 +485,7 @@ public class Config {
     }
 
     public static String getOnlineUsername() {
-        return onlineUsername;
+        return !onlineUsername.isEmpty() ? onlineUsername : "Guest";
     }
 
     public static void setOnlineUsername(String onlineUsername) {
