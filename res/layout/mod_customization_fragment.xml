@@ -29,25 +29,66 @@
                 android:orientation="vertical"
                 android:paddingRight="4dp">
 
-                <TextView
-                    style="@style/settings_tab_divider"
-                    android:layout_marginTop="12dp"
-                    android:text="HUD" />
-
-                <!--HUD-->
+                <!--Visuals-->
                 <GridLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
+                    android:layout_marginHorizontal="12dp"
                     android:layout_marginTop="12dp"
+                    android:background="@drawable/rounded_rect"
+                    android:backgroundTint="#161622"
                     android:columnCount="2"
-                    android:paddingHorizontal="12dp">
+                    android:paddingHorizontal="12dp"
+                    android:paddingVertical="8dp">
+
+                    <!--Background-->
+                    <GridLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_columnSpan="2"
+                        android:layout_marginBottom="12dp"
+                        android:columnCount="2"
+                        android:gravity="center">
+
+                        <TextView
+                            style="@style/settings_tab_divider"
+                            android:layout_columnSpan="2"
+                            android:layout_marginBottom="12dp"
+                            android:text="Visuals" />
+
+                        <TextView
+                            android:layout_width="0px"
+                            android:layout_height="wrap_content"
+                            android:layout_columnWeight="10"
+                            android:padding="8dp"
+                            android:saveEnabled="false"
+                            android:text="@string/opt_bgbrightness_title" />
+
+                        <TextView
+                            android:id="@+id/bgBrightnessText"
+                            style="@style/settings_row_title"
+                            android:layout_width="wrap_content"
+                            android:padding="8dp"
+                            android:text="1.0x"
+                            android:textSize="12sp" />
+
+                        <SeekBar
+                            android:id="@+id/backgroundBrightnessBar"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_columnSpan="2"
+                            android:layout_marginTop="6dp"
+                            android:paddingVertical="12dp"
+                            android:saveEnabled="false" />
+
+                    </GridLayout>
 
                     <CheckBox
                         android:id="@+id/enableStoryboard"
                         android:layout_width="0px"
                         android:layout_height="wrap_content"
                         android:layout_columnWeight="1"
-                        android:padding="12dp"
+                        android:paddingVertical="12dp"
                         android:saveEnabled="false"
                         android:text="@string/opt_enableStoryboard_title"
                         tools:checked="true" />
@@ -57,7 +98,7 @@
                         android:layout_width="0px"
                         android:layout_height="wrap_content"
                         android:layout_columnWeight="1"
-                        android:padding="12dp"
+                        android:paddingVertical="12dp"
                         android:saveEnabled="false"
                         android:text="Enable video" />
 
@@ -66,84 +107,47 @@
                         android:layout_width="0px"
                         android:layout_height="wrap_content"
                         android:layout_columnWeight="1"
-                        android:padding="12dp"
+                        android:paddingVertical="12dp"
                         android:saveEnabled="false"
                         android:text="@string/opt_show_scoreboard_title" />
 
-                </GridLayout>
-
-                <!--Background-->
-                <GridLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:columnCount="2"
-                    android:gravity="center"
-                    android:rowCount="2">
-
-                    <TextView
-                        android:layout_width="0px"
-                        android:layout_height="wrap_content"
-                        android:layout_columnWeight="10"
-                        android:layout_marginLeft="12dp"
-                        android:layout_marginTop="8dp"
-                        android:padding="8dp"
-                        android:saveEnabled="false"
-                        android:text="@string/opt_bgbrightness_title" />
-
-                    <TextView
-                        android:id="@+id/bgBrightnessText"
-                        style="@style/settings_row_title"
-                        android:layout_width="0px"
-                        android:layout_columnWeight="1"
-                        android:layout_marginLeft="12dp"
-                        android:layout_marginTop="8dp"
-                        android:layout_marginRight="12dp"
-                        android:text="1.0x"
-                        android:textSize="12sp" />
-
-                    <SeekBar
-                        android:id="@+id/backgroundBrightnessBar"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:layout_columnSpan="2"
-                        android:layout_marginTop="8dp"
-                        android:layout_marginBottom="8dp"
-                        android:saveEnabled="false"
-                        tools:progress="50" />
 
                 </GridLayout>
 
-                <TextView
-                    style="@style/settings_tab_divider"
-                    android:layout_marginTop="12dp"
-                    android:text="Speed" />
 
                 <!--Speed-->
                 <GridLayout
                     android:id="@+id/speed_modify"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
+                    android:layout_marginHorizontal="12dp"
+                    android:layout_marginTop="12dp"
+                    android:background="@drawable/rounded_rect"
+                    android:backgroundTint="#161622"
                     android:columnCount="2"
                     android:gravity="center"
-                    android:paddingVertical="8dp"
-                    android:rowCount="2">
+                    android:paddingHorizontal="12dp"
+                    android:paddingVertical="8dp">
+
+                    <TextView
+                        style="@style/settings_tab_divider"
+                        android:layout_columnSpan="2"
+                        android:layout_marginBottom="12dp"
+                        android:text="Speed" />
 
                     <CheckBox
                         android:id="@+id/enableSpeedChange"
                         android:layout_width="0px"
                         android:layout_height="wrap_content"
-                        android:layout_columnWeight="10"
-                        android:layout_marginLeft="12dp"
+                        android:layout_columnWeight="1"
                         android:saveEnabled="false"
                         android:text="@string/opt_changespeed_title" />
 
                     <TextView
                         android:id="@+id/changeSpeedText"
                         style="@style/settings_row_title"
-                        android:layout_width="0px"
-                        android:layout_columnWeight="1"
-                        android:layout_marginLeft="12dp"
-                        android:layout_marginRight="12dp"
+                        android:layout_width="wrap_content"
+                        android:padding="8dp"
                         android:text="1.0x"
                         android:textSize="12sp" />
 
@@ -152,236 +156,199 @@
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:layout_columnSpan="2"
-                        android:layout_marginTop="8dp"
+                        android:paddingVertical="12dp"
+                        android:saveEnabled="false"
+                        tools:progress="50" />
+
+                    <CheckBox
+                        android:id="@+id/enableNCwhenSpeedChange"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_columnSpan="2"
+                        android:layout_marginTop="6dp"
+                        android:paddingVertical="12dp"
+                        android:saveEnabled="false"
+                        android:text="@string/opt_enablenc_whenspeedchange_title" />
+
+                </GridLayout>
+
+                <!--Difficulty-->
+                <GridLayout
+                    android:id="@+id/custom_difficulty"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginHorizontal="12dp"
+                    android:layout_marginTop="12dp"
+                    android:background="@drawable/rounded_rect"
+                    android:backgroundTint="#161622"
+                    android:columnCount="2"
+                    android:gravity="center"
+                    android:paddingHorizontal="12dp"
+                    android:paddingVertical="8dp">
+
+                    <TextView
+                        style="@style/settings_tab_divider"
+                        android:layout_columnSpan="2"
+                        android:layout_marginBottom="12dp"
+                        android:text="Difficulty" />
+
+                    <!--Force AR-->
+                    <CheckBox
+                        android:id="@+id/custom_ar_toggle"
+                        android:layout_width="0px"
+                        android:layout_height="wrap_content"
+                        android:layout_columnWeight="1"
+                        android:saveEnabled="false"
+                        android:text="@string/opt_forcear_title" />
+
+                    <TextView
+                        android:id="@+id/custom_ar_text"
+                        style="@style/settings_row_title"
+                        android:layout_width="wrap_content"
+                        android:padding="8dp"
+                        android:text="10.0"
+                        android:textSize="12sp" />
+
+                    <SeekBar
+                        android:id="@+id/custom_ar_bar"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_columnSpan="2"
+                        android:layout_marginBottom="12dp"
+                        android:paddingVertical="12dp"
+                        android:saveEnabled="false"
+                        tools:progress="50" />
+
+                    <!--Force OD-->
+                    <CheckBox
+                        android:id="@+id/custom_od_toggle"
+                        android:layout_width="0px"
+                        android:layout_height="wrap_content"
+                        android:layout_columnWeight="10"
+                        android:saveEnabled="false"
+                        android:text="@string/opt_forceod_title" />
+
+                    <TextView
+                        android:id="@+id/custom_od_text"
+                        style="@style/settings_row_title"
+                        android:layout_width="wrap_content"
+                        android:padding="8dp"
+                        android:text="10.0"
+                        android:textSize="12sp" />
+
+                    <SeekBar
+                        android:id="@+id/custom_od_bar"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_columnSpan="2"
+                        android:layout_marginBottom="12dp"
+                        android:paddingVertical="12dp"
+                        android:saveEnabled="false"
+                        tools:progress="50" />
+
+                    <!--Force CS-->
+                    <CheckBox
+                        android:id="@+id/custom_cs_toggle"
+                        android:layout_width="0px"
+                        android:layout_height="wrap_content"
+                        android:layout_columnWeight="1"
+                        android:saveEnabled="false"
+                        android:text="@string/opt_forcecs_title" />
+
+                    <TextView
+                        android:id="@+id/custom_cs_text"
+                        style="@style/settings_row_title"
+                        android:layout_width="wrap_content"
+                        android:padding="8dp"
+                        android:text="10.0"
+                        android:textSize="12sp" />
+
+                    <SeekBar
+                        android:id="@+id/custom_cs_bar"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_columnSpan="2"
+                        android:layout_marginBottom="12dp"
+                        android:paddingVertical="12dp"
+                        android:saveEnabled="false"
+                        tools:progress="50" />
+
+                    <!--Force HP-->
+                    <CheckBox
+                        android:id="@+id/custom_hp_toggle"
+                        android:layout_width="0px"
+                        android:layout_height="wrap_content"
+                        android:layout_columnWeight="1"
+                        android:saveEnabled="false"
+                        android:text="@string/opt_forcehp_title" />
+
+                    <TextView
+                        android:id="@+id/custom_hp_text"
+                        style="@style/settings_row_title"
+                        android:layout_width="wrap_content"
+                        android:padding="8dp"
+                        android:text="10.0"
+                        android:textSize="12sp" />
+
+                    <SeekBar
+                        android:id="@+id/custom_hp_bar"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_columnSpan="2"
+                        android:paddingVertical="12dp"
                         android:saveEnabled="false"
                         tools:progress="50" />
 
                 </GridLayout>
 
-
-                <CheckBox
-                    android:id="@+id/enableNCwhenSpeedChange"
+                <!--FL follow delay-->
+                <GridLayout
+                    android:id="@+id/follow_delay_row"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_marginHorizontal="12dp"
                     android:layout_marginTop="12dp"
-                    android:saveEnabled="false"
-                    android:text="@string/opt_enablenc_whenspeedchange_title" />
-
-                <!--Difficulty-->
-                <LinearLayout
-                    android:id="@+id/custom_difficulty"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="12dp"
-                    android:orientation="vertical">
+                    android:layout_marginBottom="12dp"
+                    android:background="@drawable/rounded_rect"
+                    android:backgroundTint="#161622"
+                    android:columnCount="2"
+                    android:gravity="center"
+                    android:paddingHorizontal="12dp"
+                    android:paddingVertical="8dp">
 
                     <TextView
                         style="@style/settings_tab_divider"
-                        android:text="Difficulty" />
+                        android:layout_columnSpan="2"
+                        android:layout_marginBottom="12dp"
+                        android:text="FL follow delay" />
 
-                    <!--Force AR-->
-                    <GridLayout
+                    <TextView
+                        android:layout_width="0px"
+                        android:layout_height="wrap_content"
+                        android:layout_columnWeight="1"
+                        android:padding="8dp"
+                        android:saveEnabled="false"
+                        android:text="@string/opt_flashlight_follow_delay_title" />
+
+                    <TextView
+                        android:id="@+id/flashlightFollowDelayText"
+                        style="@style/settings_row_title"
+                        android:layout_width="wrap_content"
+                        android:padding="8dp"
+                        android:text="1.0x"
+                        android:textSize="12sp" />
+
+                    <SeekBar
+                        android:id="@+id/flashlightFollowDelayBar"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:columnCount="2"
-                        android:gravity="center"
-                        android:paddingVertical="8dp">
+                        android:layout_columnSpan="2"
+                        android:paddingVertical="12dp"
+                        android:saveEnabled="false"
+                        tools:progress="50" />
 
-                        <CheckBox
-                            android:id="@+id/custom_ar_toggle"
-                            android:layout_width="0px"
-                            android:layout_height="wrap_content"
-                            android:layout_columnWeight="10"
-                            android:layout_marginLeft="12dp"
-                            android:saveEnabled="false"
-                            android:text="@string/opt_forcear_title" />
+                </GridLayout>
 
-                        <TextView
-                            android:id="@+id/custom_ar_text"
-                            style="@style/settings_row_title"
-                            android:layout_width="0px"
-                            android:layout_columnWeight="1"
-                            android:layout_marginLeft="12dp"
-                            android:layout_marginRight="12dp"
-                            android:text="10.0"
-                            android:textSize="12sp" />
-
-                        <SeekBar
-                            android:id="@+id/custom_ar_bar"
-                            android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
-                            android:layout_columnSpan="2"
-                            android:layout_marginTop="8dp"
-                            android:saveEnabled="false"
-                            tools:progress="50" />
-
-                    </GridLayout>
-
-                    <!--Force OD-->
-                    <GridLayout
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:columnCount="2"
-                        android:gravity="center"
-                        android:paddingVertical="8dp">
-
-                        <CheckBox
-                            android:id="@+id/custom_od_toggle"
-                            android:layout_width="0px"
-                            android:layout_height="wrap_content"
-                            android:layout_columnWeight="10"
-                            android:layout_marginLeft="12dp"
-                            android:saveEnabled="false"
-                            android:text="@string/opt_forceod_title" />
-
-                        <TextView
-                            android:id="@+id/custom_od_text"
-                            style="@style/settings_row_title"
-                            android:layout_width="0px"
-                            android:layout_columnWeight="1"
-                            android:layout_marginLeft="12dp"
-                            android:layout_marginRight="12dp"
-                            android:text="10.0"
-                            android:textSize="12sp" />
-
-                        <SeekBar
-                            android:id="@+id/custom_od_bar"
-                            android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
-                            android:layout_columnSpan="2"
-                            android:layout_marginTop="8dp"
-                            android:saveEnabled="false"
-                            tools:progress="50" />
-
-                    </GridLayout>
-
-                    <!--Force CS-->
-                    <GridLayout
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:columnCount="2"
-                        android:gravity="center"
-                        android:paddingVertical="8dp">
-
-                        <CheckBox
-                            android:id="@+id/custom_cs_toggle"
-                            android:layout_width="0px"
-                            android:layout_height="wrap_content"
-                            android:layout_columnWeight="10"
-                            android:layout_marginLeft="12dp"
-                            android:saveEnabled="false"
-                            android:text="@string/opt_forcecs_title" />
-
-                        <TextView
-                            android:id="@+id/custom_cs_text"
-                            style="@style/settings_row_title"
-                            android:layout_width="0px"
-                            android:layout_columnWeight="1"
-                            android:layout_marginLeft="12dp"
-                            android:layout_marginRight="12dp"
-                            android:text="10.0"
-                            android:textSize="12sp" />
-
-                        <SeekBar
-                            android:id="@+id/custom_cs_bar"
-                            android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
-                            android:layout_columnSpan="2"
-                            android:layout_marginTop="8dp"
-                            android:saveEnabled="false"
-                            tools:progress="50" />
-
-                    </GridLayout>
-
-                    <!--Force HP-->
-                    <GridLayout
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:columnCount="2"
-                        android:gravity="center"
-                        android:paddingVertical="8dp">
-
-                        <CheckBox
-                            android:id="@+id/custom_hp_toggle"
-                            android:layout_width="0px"
-                            android:layout_height="wrap_content"
-                            android:layout_columnWeight="10"
-                            android:layout_marginLeft="12dp"
-                            android:saveEnabled="false"
-                            android:text="@string/opt_forcehp_title" />
-
-                        <TextView
-                            android:id="@+id/custom_hp_text"
-                            style="@style/settings_row_title"
-                            android:layout_width="0px"
-                            android:layout_columnWeight="1"
-                            android:layout_marginLeft="12dp"
-                            android:layout_marginRight="12dp"
-                            android:text="10.0"
-                            android:textSize="12sp" />
-
-                        <SeekBar
-                            android:id="@+id/custom_hp_bar"
-                            android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
-                            android:layout_columnSpan="2"
-                            android:layout_marginTop="8dp"
-                            android:saveEnabled="false"
-                            tools:progress="50" />
-
-                    </GridLayout>
-
-                    <!--FL follow delay-->
-                    <GridLayout
-                        android:id="@+id/follow_delay_row"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:layout_marginTop="12dp"
-                        android:layout_marginBottom="20dp"
-                        android:columnCount="2"
-                        android:gravity="center"
-                        android:rowCount="2">
-
-                        <TextView
-                            style="@style/settings_tab_divider"
-                            android:layout_columnSpan="2"
-                            android:text="FL follow delay" />
-
-                        <TextView
-                            android:layout_width="0px"
-                            android:layout_height="wrap_content"
-                            android:layout_columnWeight="10"
-                            android:layout_marginLeft="12dp"
-                            android:layout_marginTop="8dp"
-                            android:padding="8dp"
-                            android:saveEnabled="false"
-                            android:text="@string/opt_flashlight_follow_delay_title" />
-
-                        <TextView
-                            android:id="@+id/flashlightFollowDelayText"
-                            style="@style/settings_row_title"
-                            android:layout_width="0px"
-                            android:layout_columnWeight="1"
-                            android:layout_marginLeft="12dp"
-                            android:layout_marginTop="8dp"
-                            android:layout_marginRight="12dp"
-                            android:text="1.0x"
-                            android:textSize="12sp" />
-
-                        <SeekBar
-                            android:id="@+id/flashlightFollowDelayBar"
-                            android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
-                            android:layout_columnSpan="2"
-                            android:layout_marginTop="8dp"
-                            android:layout_marginBottom="8dp"
-                            android:saveEnabled="false"
-                            tools:progress="50" />
-
-                    </GridLayout>
-
-                </LinearLayout>
 
             </LinearLayout>
 
@@ -397,6 +364,5 @@
             android:src="@drawable/tune_24px" />
 
     </LinearLayout>
-
 
 </FrameLayout>
