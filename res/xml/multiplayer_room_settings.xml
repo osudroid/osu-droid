@@ -12,7 +12,7 @@
 
         <EditTextPreference
             android:key="room_password"
-            android:summary="Change room password, empty will set room to public."
+            android:summary="Change the room's password. If empty, the room will be public."
             android:title="Room password"
             app:layout="@layout/settings_preference_bottom" />
 
