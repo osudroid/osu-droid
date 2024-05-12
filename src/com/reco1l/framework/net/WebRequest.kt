@@ -69,6 +69,11 @@ open class WebRequest(private var url: HttpUrl) : AutoCloseable {
     fun buildUrl(block: HttpUrl.Builder.() -> Unit) {
 
         url = url.newBuilder().apply(block).build()
+
+        // Rebuild the request to apply the URL change.
+        buildRequest {
+            url(url)
+        }
     }
 
 
