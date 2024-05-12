@@ -146,7 +146,7 @@ class SettingsFragment : com.edlplan.ui.fragment.SettingsFragment() {
 
         createSectionButton("Gameplay", R.drawable.videogame_asset_24px, Section.Gameplay)
         createSectionButton("Graphics", R.drawable.display_settings_24px, Section.Graphics)
-        createSectionButton("Sound", R.drawable.headphones_24px, Section.Sounds)
+        createSectionButton("Audio", R.drawable.headphones_24px, Section.Sounds)
 
         if (!Multiplayer.isMultiplayer) {
             createSectionButton("Library", R.drawable.library_music_24px, Section.Library)
