@@ -58,7 +58,7 @@ enum class Section(@XmlRes val xml: Int) {
     General(R.xml.settings_general),
     Gameplay(R.xml.settings_gameplay),
     Graphics(R.xml.settings_graphics),
-    Sounds(R.xml.settings_audio),
+    Audio(R.xml.settings_audio),
     Library(R.xml.settings_library),
     Input(R.xml.settings_input),
     Advanced(R.xml.settings_advanced),
