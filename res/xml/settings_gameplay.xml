@@ -94,6 +94,13 @@
 
         <CheckBoxPreference
             android:defaultValue="true"
+            android:key="fps"
+            android:summary="@string/opt_fps_summary"
+            android:title="@string/opt_fps_title"
+            app:layout="@layout/settings_preference_checkbox_bottom" />
+
+        <CheckBoxPreference
+            android:defaultValue="true"
             android:key="displayScoreStatistics"
             android:summary="@string/opt_display_score_statistics_summary"
             android:title="@string/opt_display_score_statistics_title" />
