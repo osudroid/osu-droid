@@ -386,12 +386,8 @@ public class MainActivity extends BaseGameActivity implements
     @Override
     protected void onSetContentView() {
         this.mRenderSurfaceView = new RenderSurfaceView(this);
-        if (Config.isUseDither()) {
-            this.mRenderSurfaceView.setEGLConfigChooser(8, 8, 8, 8, 24, 0);
-            this.mRenderSurfaceView.getHolder().setFormat(PixelFormat.RGBA_8888);
-        } else {
-            this.mRenderSurfaceView.setEGLConfigChooser(true);
-        }
+        this.mRenderSurfaceView.setEGLConfigChooser(8, 8, 8, 8, 24, 0);
+        this.mRenderSurfaceView.getHolder().setFormat(PixelFormat.RGBA_8888);
         this.mRenderSurfaceView.setRenderer(this.mEngine);
 
         RelativeLayout layout = new RelativeLayout(this);

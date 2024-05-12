@@ -13,6 +13,7 @@ import java.util.Map;
 import org.anddev.andengine.util.Debug;
 
 import ru.nsu.ccfit.zuev.osu.Config;
+import ru.nsu.ccfit.zuev.osuplus.R;
 
 public class SkinPathPreference extends ListPreference {
     
@@ -21,7 +22,7 @@ public class SkinPathPreference extends ListPreference {
     }
 
     public SkinPathPreference(Context context, AttributeSet attrs, int defStyleAttr) {
-        super(context, attrs);
+        super(context, attrs, defStyleAttr);
     }
  
     public SkinPathPreference(Context context, AttributeSet attrs) {

@@ -18,6 +18,7 @@ import com.reco1l.osu.multiplayer.Multiplayer.player
 import com.reco1l.osu.multiplayer.Multiplayer.room
 import com.reco1l.osu.ui.BeatmapButton
 import com.reco1l.osu.ui.ComposedText
+import com.reco1l.osu.ui.SettingsFragment
 import com.reco1l.osu.updateThread
 import com.reco1l.toolkt.kotlin.runSafe
 import com.rian.osu.ui.DifficultyAlgorithmSwitcher
@@ -104,7 +105,7 @@ object RoomScene : Scene(), IRoomEventListener, IPlayerEventListener
 
     private var playerList: RoomPlayerList? = null
 
-    private var options: RoomOptions? = null
+    private var settingsFragment: SettingsFragment? = null
 
     private val onlinePanel = OnlinePanel()
 
@@ -284,8 +285,8 @@ object RoomScene : Scene(), IRoomEventListener, IPlayerEventListener
                     return true
                 }
                 else mainThread {
-                    options = RoomOptions()
-                    options!!.show()
+                    settingsFragment = SettingsFragment()
+                    settingsFragment!!.show()
                 }
                 return false
             }
@@ -615,7 +616,7 @@ object RoomScene : Scene(), IRoomEventListener, IPlayerEventListener
 
         mainThread {
             playerList?.menu?.dismiss()
-            options?.dismiss()
+            settingsFragment?.dismiss()
 
             updateThread {
                 getModMenu().hide()

@@ -177,7 +177,7 @@ dependencies {
     implementation 'com.github.EdrowsLuo.EdlGameFramework:EdlOsbSupport:d91c53fcff'
 
     // Tools
-    implementation 'com.github.Reco1I:Toolkt:1.1.9'
+    implementation 'com.github.Reco1I:Toolkt:1.0.14'
     implementation 'commons-io:commons-io:2.15.1'
 
     // Multiplayer

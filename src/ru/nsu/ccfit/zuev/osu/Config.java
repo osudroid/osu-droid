@@ -33,7 +33,6 @@ public class Config {
         skinPath,
         skinTopPath,
         scorePath,
-        localUsername,
         onlineUsername,
         onlinePassword,
         onlineDeviceID;
@@ -47,7 +46,8 @@ public class Config {
         useCustomSounds,
         corovans,
         showFPS,
-        complexAnimations,
+        animateFollowCircle,
+        animateComboText,
         snakingInSliders,
         playMusicPreview,
         showCursor,
@@ -61,7 +61,6 @@ public class Config {
         syncMusic,
         burstEffects,
         hitLighting,
-        useDither,
         useParticles,
         useCustomComboColors,
         forceRomanized,
@@ -74,7 +73,6 @@ public class Config {
         receiveAnnouncements,
         enableStoryboard,
         safeBeatmapBg,
-        trianglesAnimation,
         displayRealTimePPCounter,
         useNightcoreOnMultiplayer,
         videoEnabled,
@@ -87,7 +85,6 @@ public class Config {
         RES_HEIGHT,
         errorMeter,
         spinnerStyle,
-        backgroundQuality,
         metronomeSwitch;
     
     private static float soundVolume,
@@ -109,10 +106,7 @@ public class Config {
         Config.context = context;
         final SharedPreferences prefs = PreferenceManager
                 .getDefaultSharedPreferences(context);
-        String s;
         // graphics
-        s = prefs.getString("background", "2");
-        backgroundQuality = Integer.parseInt(s);
         useCustomSkins = prefs.getBoolean("skin", false);
         useCustomSounds = prefs.getBoolean("beatmapSounds", true);
         comboburst = prefs.getBoolean("comboburst", false);
@@ -124,7 +118,6 @@ public class Config {
         metronomeSwitch = Integer.parseInt(prefs.getString("metronomeswitch", "1"));
         showScoreboard = prefs.getBoolean("showscoreboard", true);
         enableStoryboard = prefs.getBoolean("enableStoryboard", false);
-        trianglesAnimation = prefs.getBoolean("trianglesAnimation", true);
         videoEnabled = prefs.getBoolean("enableVideo", false);
         keepBackgroundAspectRatio = prefs.getBoolean("keepBackgroundAspectRatio", false);
         noChangeDimInBreaks = prefs.getBoolean("noChangeDimInBreaks", false);
@@ -133,7 +126,8 @@ public class Config {
         setPlayfieldSize(prefs.getInt("playfieldSize", 100) / 100f);
 
         shrinkPlayfieldDownwards = prefs.getBoolean("shrinkPlayfieldDownwards", true);
-        complexAnimations = prefs.getBoolean("complexanimations", true);
+        animateFollowCircle = prefs.getBoolean("animateFollowCircle", true);
+        animateComboText = prefs.getBoolean("animateComboText", true);
         snakingInSliders = prefs.getBoolean("snakingInSliders", true);
 
         try {
@@ -186,7 +180,6 @@ public class Config {
         cachePath = context.getCacheDir().getPath();
         burstEffects = prefs.getBoolean("bursts", burstEffects);
         hitLighting = prefs.getBoolean("hitlighting", hitLighting);
-        useDither = prefs.getBoolean("dither", useDither);
         useParticles = prefs.getBoolean("particles", useParticles);
         useCustomComboColors = prefs.getBoolean("useCustomColors", useCustomComboColors);
         comboColors = new RGBColor[4];
@@ -210,7 +203,6 @@ public class Config {
 
         // other
         playMusicPreview = prefs.getBoolean("musicpreview", true);
-        localUsername = prefs.getString("playername", "");
         showCursor = prefs.getBoolean("showcursor", false);
         hideNaviBar = prefs.getBoolean("hidenavibar", false);
         enablePP = false;//prefs.getBoolean("enablePP",true);
@@ -370,14 +362,6 @@ public class Config {
         Config.offset = offset;
     }
 
-    public static int getBackgroundQuality() {
-        return backgroundQuality;
-    }
-
-    public static void setBackgroundQuality(final int backgroundQuality) {
-        Config.backgroundQuality = backgroundQuality;
-    }
-
     public static String getCorePath() {
         return corePath;
     }
@@ -462,17 +446,18 @@ public class Config {
         Config.backgroundBrightness = backgroundBrightness;
     }
 
-    public static boolean isComplexAnimations() {
-        return complexAnimations;
+    public static boolean isAnimateFollowCircle() {
+        return animateFollowCircle;
     }
+
+    public static boolean isAnimateComboText() {
+        return animateComboText;
+    }
+
 
     public static boolean isSnakingInSliders()
     {
         return snakingInSliders;
-    }
-
-    public static void setComplexAnimations(final boolean complexAnimations) {
-        Config.complexAnimations = complexAnimations;
     }
 
     public static boolean isPlayMusicPreview() {
@@ -481,14 +466,6 @@ public class Config {
 
     public static void setPlayMusicPreview(final boolean playMusicPreview) {
         Config.playMusicPreview = playMusicPreview;
-    }
-
-    public static String getLocalUsername() {
-        return localUsername;
-    }
-
-    public static void setLocalUsername(final String localUsername) {
-        Config.localUsername = localUsername;
     }
 
     public static boolean isShowCursor() {
@@ -573,14 +550,6 @@ public class Config {
 
     public static void setHitLighting(boolean hitLighting) {
         Config.hitLighting = hitLighting;
-    }
-
-    public static boolean isUseDither() {
-        return useDither;
-    }
-
-    public static void setUseDither(boolean useDither) {
-        Config.useDither = useDither;
     }
 
     public static boolean isUseParticles() {
@@ -748,11 +717,7 @@ public class Config {
     }
 
     public static boolean isTrianglesAnimation() {
-        return trianglesAnimation;
-    }
-
-    public static void setTrianglesAnimation(boolean trianglesAnimation) {
-        Config.trianglesAnimation = trianglesAnimation;
+        return false;
     }
 
     public static String getDefaultCorePath() {

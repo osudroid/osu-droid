@@ -37,8 +37,6 @@ public class ScaledBitmapSource extends BaseTextureAtlasSource implements
 
         final BitmapFactory.Options decodeOptions = new BitmapFactory.Options();
         decodeOptions.inJustDecodeBounds = true;
-        decodeOptions.inSampleSize = ru.nsu.ccfit.zuev.osu.Config
-                .getBackgroundQuality();
 
         InputStream in = null;
         try {
@@ -104,8 +102,6 @@ public class ScaledBitmapSource extends BaseTextureAtlasSource implements
         }
         final BitmapFactory.Options decodeOptions = new BitmapFactory.Options();
         decodeOptions.inPreferredConfig = pBitmapConfig;
-        decodeOptions.inSampleSize = ru.nsu.ccfit.zuev.osu.Config
-                .getBackgroundQuality();
 
         InputStream in = null;
         try {

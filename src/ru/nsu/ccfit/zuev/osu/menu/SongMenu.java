@@ -1184,7 +1184,6 @@ public class SongMenu implements IUpdateHandler, MenuItemListener,
         updateScoringSwitcherStatus(false);
         board.init(track);
 
-        final int quality = Config.getBackgroundQuality();
         synchronized (backgroundMutex) {
 
             if (!reloadBG && (track.getBackground() == null || bgName.equals(track.getBackground()))) {
@@ -1195,9 +1194,6 @@ public class SongMenu implements IUpdateHandler, MenuItemListener,
             bg = null;
             bgLoaded = false;
             scene.setBackground(new ColorBackground(0, 0, 0));
-            if (quality == 0) {
-                Config.setBackgroundQuality(4);
-            }
         }
 
         Execution.async(() -> {
@@ -1230,7 +1226,6 @@ public class SongMenu implements IUpdateHandler, MenuItemListener,
                             bgName = "";
                         }
                         scene.setBackground(new SpriteBackground(bg));
-                        Config.setBackgroundQuality(quality);
                         synchronized (bgMutex) {
                             bgLoaded = true;
                         }

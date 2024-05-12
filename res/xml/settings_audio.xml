@@ -1,0 +1,69 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.preference.PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+
+    <PreferenceCategory android:title="Volume">
+
+        <SeekBarPreference
+            android:defaultValue="100"
+            android:key="bgmvolume"
+            android:summary="@string/opt_bgm_volume_summary"
+            android:title="@string/opt_bgm_volume_title"
+            app:showSeekBarValue="true" />
+
+        <SeekBarPreference
+            android:defaultValue="100"
+            android:key="soundvolume"
+            android:summary="@string/opt_sound_volume_summary"
+            android:title="@string/opt_sound_volume_title"
+            app:showSeekBarValue="true"
+            app:layout="@layout/settings_preference_seekbar_bottom" />
+
+    </PreferenceCategory>
+
+    <PreferenceCategory android:title="Offset">
+
+        <SeekBarPreference
+            android:defaultValue="0"
+            android:key="offset"
+            android:max="500"
+            android:summary="@string/opt_offset_summary"
+            android:title="@string/opt_offset_title"
+            app:min="-500"
+            app:showSeekBarValue="true"
+            app:layout="@layout/settings_preference_seekbar_bottom" />
+
+    </PreferenceCategory>
+
+
+    <PreferenceCategory android:title="Metronome">
+
+        <ListPreference
+            android:defaultValue="1"
+            android:entries="@array/metronome_switch_names"
+            android:entryValues="@array/metronome_switch_values"
+            android:key="metronomeswitch"
+            android:summary="@string/opt_metronome_switch_summary"
+            android:title="@string/opt_metronome_switch_title"
+            app:layout="@layout/settings_preference_bottom" />
+
+    </PreferenceCategory>
+
+    <PreferenceCategory android:title="Miscellaneous">
+
+        <CheckBoxPreference
+            android:defaultValue="true"
+            android:key="beatmapSounds"
+            android:summary="@string/opt_sound_summary"
+            android:title="@string/opt_sound_title" />
+
+        <CheckBoxPreference
+            android:defaultValue="true"
+            android:key="musicpreview"
+            android:summary="@string/opt_musicpreview_summary"
+            android:title="@string/opt_musicpreview_title"
+            app:layout="@layout/settings_preference_checkbox_bottom" />
+
+    </PreferenceCategory>
+
+</androidx.preference.PreferenceScreen>

@@ -4,6 +4,7 @@ import com.reco1l.osu.async
 import com.reco1l.osu.multiplayer.LobbyScene
 import com.reco1l.osu.multiplayer.Multiplayer
 import com.reco1l.osu.beatmaplisting.BeatmapListing
+import com.reco1l.osu.mainThread
 import com.reco1l.osu.multiplayer.RoomScene
 import org.anddev.andengine.input.touch.TouchEvent
 import ru.nsu.ccfit.zuev.osu.LibraryManager
@@ -13,7 +14,6 @@ import ru.nsu.ccfit.zuev.osu.ToastLogger
 import ru.nsu.ccfit.zuev.osu.helper.AnimSprite
 import ru.nsu.ccfit.zuev.osu.helper.StringTable
 import ru.nsu.ccfit.zuev.osu.menu.LoadingScreen
-import ru.nsu.ccfit.zuev.osu.menu.SettingsMenu
 import ru.nsu.ccfit.zuev.osuplus.R
 import ru.nsu.ccfit.zuev.osu.GlobalManager.getInstance as getGlobal
 import ru.nsu.ccfit.zuev.osu.ResourceManager.getInstance as getResources
@@ -114,7 +114,7 @@ class MainMenu(val main: MainScene)
                     setColor(1f, 1f, 1f)
                     if (main.isOnExitAnim) return true
                     getGlobal().songService.isGaming = true
-                    getGlobal().mainActivity.runOnUiThread { SettingsMenu().show() }
+                    mainThread { SettingsFragment().show() }
                     return true
                 }
                 return false

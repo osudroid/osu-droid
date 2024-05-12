@@ -444,7 +444,7 @@ public class Slider extends GameObject {
             }
         }));
 
-        if (!Config.isComplexAnimations()) {
+        if (!Config.isAnimateFollowCircle()) {
             followCircle.detachSelf();
         }
         startCircle.detachSelf();
@@ -566,7 +566,7 @@ public class Slider extends GameObject {
         listener.onSliderEnd(id, firstHitAccuracy, tickSet);
         // Remove slider from scene
 
-        if (Config.isComplexAnimations() && mWasInRadius) {
+        if (Config.isAnimateFollowCircle() && mWasInRadius) {
             mIsAnimating = true;
 
             followCircle.clearEntityModifiers();
@@ -742,7 +742,7 @@ public class Slider extends GameObject {
 
             followCircle = SpritePool.getInstance().getSprite("sliderfollowcircle");
             followCircle.setAlpha(0);
-            if (!Config.isComplexAnimations()) {
+            if (!Config.isAnimateFollowCircle()) {
                 followCircle.setScale(scale);
             }
 
@@ -769,7 +769,7 @@ public class Slider extends GameObject {
         listener.onTrackingSliders(inRadius);
         tickTime += dt;
 
-        if (Config.isComplexAnimations()) {
+        if (Config.isAnimateFollowCircle()) {
             float remainTime = (float) ((maxTime * GameHelper.getTimeMultiplier() * repeatCount) - passedTime);
 
             if (inRadius && !mWasInRadius) {
@@ -822,7 +822,7 @@ public class Slider extends GameObject {
                 Utils.playHitSound(listener, 16);
                 listener.onSliderHit(id, 10, null, ballpos, false, color, GameObjectListener.SLIDER_TICK);
 
-                if (Config.isComplexAnimations() && !mIsAnimating) {
+                if (Config.isAnimateFollowCircle() && !mIsAnimating) {
                     followCircle.clearEntityModifiers();
                     followCircle.registerEntityModifier(new ScaleModifier((float)
                         Math.min(tickInterval / GameHelper.getTickRate(), 0.2f) * GameHelper.getTimeMultiplier(),
