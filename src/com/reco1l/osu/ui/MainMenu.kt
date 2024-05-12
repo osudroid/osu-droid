@@ -113,7 +113,7 @@ class MainMenu(val main: MainScene)
                     setColor(1f, 1f, 1f)
                     if (main.isOnExitAnim) return true
                     getGlobal().songService.isGaming = true
-                    getGlobal().mainActivity.runOnUiThread { SettingsFragment().show() }
+                    mainThread { SettingsFragment().show() }
                     return true
                 }
                 return false
