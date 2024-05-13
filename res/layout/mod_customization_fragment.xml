@@ -158,6 +158,7 @@
                         android:layout_columnSpan="2"
                         android:paddingVertical="12dp"
                         android:saveEnabled="false"
+                        android:max="30"
                         tools:progress="50" />
 
                     <CheckBox
