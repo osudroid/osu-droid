@@ -24,6 +24,7 @@
             android:text="@string/frg_score_menu_title" />
 
         <Button
+            android:id="@+id/exportReplay"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="12dp"
@@ -32,6 +33,7 @@
             android:text="@string/frg_score_menu_export_score" />
 
         <Button
+            android:id="@+id/deleteReplay"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="12dp"
