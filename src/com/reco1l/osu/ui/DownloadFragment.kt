@@ -11,7 +11,7 @@ import ru.nsu.ccfit.zuev.osuplus.R
 
 class DownloadFragment : LoadingFragment() {
 
-    override val layoutID = R.layout.fragment_downloading
+    override val layoutID = R.layout.file_download_fragment
 
 
     private lateinit var downloader: FileRequest
