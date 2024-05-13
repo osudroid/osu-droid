@@ -5,35 +5,35 @@
     android:id="@+id/frg_background"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@color/frgDialogStyleBackground"
+    android:background="#40000000"
     android:elevation="1dp">
-
 
     <LinearLayout
         android:id="@+id/frg_body"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:minWidth="200dp"
-        android:layout_alignParentBottom="true"
         android:layout_centerHorizontal="true"
-        android:background="@drawable/rounded_half_top"
+        android:layout_alignParentBottom="true"
+        android:layout_marginBottom="20dp"
+        android:background="@drawable/rounded_rect"
         android:backgroundTint="#13131A"
+        android:divider="@drawable/divider"
         android:gravity="center"
+        android:minWidth="200dp"
         android:orientation="vertical"
-        android:paddingHorizontal="12dp"
-        android:paddingTop="12dp"
-        android:paddingBottom="24dp">
+        android:showDividers="middle">
 
         <TextView
             style="@style/settings_tab_divider"
+            android:paddingVertical="12dp"
             android:text="Download" />
 
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:gravity="center"
-            android:layout_marginTop="12dp"
-            android:orientation="horizontal">
+            android:orientation="horizontal"
+            android:padding="12dp">
 
             <com.google.android.material.progressindicator.CircularProgressIndicator
                 android:id="@+id/progress"
@@ -45,7 +45,7 @@
                 app:indicatorDirectionCircular="counterclockwise"
                 app:trackCornerRadius="12dp"
                 tools:indeterminate="false"
-                tools:progress="100" />
+                tools:progress="50" />
 
             <TextView
                 android:id="@+id/text"
@@ -54,20 +54,23 @@
                 android:layout_marginHorizontal="12dp"
                 android:maxWidth="400dp"
                 android:visibility="gone"
-                tools:visibility="visible"
-                tools:text="Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua." />
+                tools:text="Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua."
+                tools:visibility="visible" />
 
         </LinearLayout>
 
         <Button
-            android:id="@+id/button"
+            android:id="@+id/cancel_button"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:background="@null"
+            android:drawableLeft="@drawable/close_24px"
+            android:drawableTint="#FFBFBF"
             android:minWidth="300dp"
+            android:text="@string/beatmap_downloader_cancel"
+            android:textColor="#FFBFBF"
             android:visibility="gone"
-            tools:visibility="visible"
-            android:layout_marginTop="12dp"
-            tools:text="Button" />
+            tools:visibility="visible" />
 
     </LinearLayout>
 

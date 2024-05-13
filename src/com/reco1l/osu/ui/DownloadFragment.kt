@@ -11,7 +11,7 @@ import ru.nsu.ccfit.zuev.osuplus.R
 
 class DownloadFragment : LoadingFragment() {
 
-    override val layoutID = R.layout.file_download_fragment
+    override val layoutID = R.layout.download_fragment
 
 
     private lateinit var downloader: FileRequest
@@ -33,7 +33,7 @@ class DownloadFragment : LoadingFragment() {
         super.onLoadView()
 
         text = findViewById(R.id.text)!!
-        button = findViewById(R.id.button)!!
+        button = findViewById(R.id.cancel_button)!!
         progressBar = findViewById(R.id.progress)!!
 
         onLoad.run()
