@@ -33,7 +33,7 @@ public class ScoreMenuFragment extends BaseFragment {
 
     @Override
     protected int getLayoutID() {
-        return R.layout.fragment_score_menu;
+        return R.layout.score_options_fragment;
     }
 
     @Override
