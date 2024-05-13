@@ -18,31 +18,10 @@ sealed class JsonRequest<T : Any>(url: HttpUrl) : WebRequest(url) {
 
 
     /**
-     * Whether response should be logged.
-     */
-    var logResponse = false
-
-    /**
      * The response JSON.
      */
     lateinit var json: T
         private set
-
-
-    fun buildRequestBody(unit: JSONObject.() -> Unit) {
-
-        buildRequest {
-
-            val json = JSONObject()
-            json.unit()
-            post(json.toString().toRequestBody(JSON_UTF_8))
-
-
-            if (BuildConfig.DEBUG) {
-                Log.i("JsonRequest", "Inserting JSON: " + json.toString(4))
-            }
-        }
-    }
 
 
     protected abstract fun onCreateResponseJson(responseBody: String): T
@@ -56,11 +35,6 @@ sealed class JsonRequest<T : Any>(url: HttpUrl) : WebRequest(url) {
     @Suppress("UNCHECKED_CAST")
     override fun execute() = super.execute() as JsonRequest<T>
 
-
-    companion object {
-
-        var JSON_UTF_8 = "application/json; charset=utf-8".toMediaTypeOrNull()
-    }
 }
 
 
@@ -72,7 +46,7 @@ class JsonObjectRequest(url: HttpUrl) : JsonRequest<JSONObject>(url) {
     override fun onCreateResponseJson(responseBody: String): JSONObject {
 
         if (!responseBody.isBetween('{' to '}')) {
-            throw JSONException("Response is not a JSON object.\n$responseBody")
+            throw JSONException("Response is not a JSON object:\n$responseBody")
         }
 
         val json = JSONObject(responseBody)
@@ -94,7 +68,7 @@ class JsonArrayRequest(url: HttpUrl) : JsonRequest<JSONArray>(url) {
     override fun onCreateResponseJson(responseBody: String): JSONArray {
 
         if (!responseBody.isBetween('[' to ']')) {
-            throw JSONException("Response is not a JSON array.\n$responseBody")
+            throw JSONException("Response is not a JSON array:\n$responseBody")
         }
 
         val json = JSONArray(responseBody)

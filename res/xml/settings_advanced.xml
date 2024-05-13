@@ -24,17 +24,6 @@
 
     </PreferenceCategory>
 
-    <PreferenceCategory android:title="Debug">
-
-        <CheckBoxPreference
-            android:defaultValue="true"
-            android:key="fps"
-            android:summary="@string/opt_fps_summary"
-            android:title="@string/opt_fps_title"
-            app:layout="@layout/settings_preference_checkbox_bottom" />
-
-    </PreferenceCategory>
-
     <PreferenceCategory android:title="Miscellaneous">
 
         <CheckBoxPreference

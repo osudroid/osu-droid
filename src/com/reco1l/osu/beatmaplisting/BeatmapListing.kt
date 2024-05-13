@@ -38,6 +38,7 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.SupervisorJob
 import ru.nsu.ccfit.zuev.audio.Status
 import ru.nsu.ccfit.zuev.osu.Config
 import ru.nsu.ccfit.zuev.osu.GlobalManager
@@ -49,16 +50,10 @@ import java.text.SimpleDateFormat
 import java.util.TimeZone
 
 
-object BeatmapListing : BaseFragment(),
+class BeatmapListing : BaseFragment(),
     IDownloaderObserver,
     OnEditorActionListener,
     OnKeyListener {
-
-
-    var mirror = BeatmapMirror.OSU_DIRECT
-
-    var isPlayingMusic = false
-        private set
 
 
     override val layoutID = R.layout.beatmap_downloader_fragment
@@ -66,7 +61,7 @@ object BeatmapListing : BaseFragment(),
 
     private val adapter = BeatmapSetAdapter()
 
-    private val searchScope = CoroutineScope(Dispatchers.IO)
+    private val searchScope = CoroutineScope(Dispatchers.IO + SupervisorJob())
 
     private val scrollListener = object : OnScrollListener() {
 
@@ -92,7 +87,18 @@ object BeatmapListing : BaseFragment(),
 
     private lateinit var recyclerView: RecyclerView
 
+    private lateinit var retryButton: Button
+
     private lateinit var searchBox: EditText
+
+
+    init {
+        current?.dismiss()
+
+        mainThread {
+            current = this
+        }
+    }
 
 
     override fun onLoadView() {
@@ -107,14 +113,16 @@ object BeatmapListing : BaseFragment(),
         recyclerView.addOnScrollListener(scrollListener)
         recyclerView.adapter = adapter
 
+        retryButton = findViewById(R.id.refresh)!!
+        retryButton.setOnClickListener { search(true) }
+
         searchBox = findViewById(R.id.search)!!
         searchBox.setOnEditorActionListener(this)
         searchBox.setOnKeyListener(this)
 
         indicator = findViewById(R.id.indicator)!!
 
-        val close = findViewById<ImageButton>(R.id.close)!!
-        close.setOnClickListener {
+        findViewById<ImageButton>(R.id.close)!!.setOnClickListener {
             dismiss()
         }
 
@@ -124,7 +132,10 @@ object BeatmapListing : BaseFragment(),
 
     fun search(keepData: Boolean) {
 
-        mainThread { indicator.visibility = VISIBLE }
+        mainThread {
+            indicator.visibility = VISIBLE
+            retryButton.visibility = GONE
+        }
 
         pendingRequest?.cancel()
         pendingRequest = searchScope.launch(CoroutineExceptionHandler { _, throwable ->
@@ -135,10 +146,7 @@ object BeatmapListing : BaseFragment(),
 
             mainThread {
                 indicator.visibility = GONE
-
-                if (adapter.data.isEmpty()) {
-                    dismiss()
-                }
+                retryButton.visibility = VISIBLE
             }
         }) {
 
@@ -160,6 +168,8 @@ object BeatmapListing : BaseFragment(),
                     addQueryParameter("offset", offset.toString())
                 }
 
+                request.buildRequest { header("User-Agent", "Chrome/Android") }
+
                 val beatmapSets = mirror.search.mapResponse(request.execute().json)
                 adapter.data.addAll(beatmapSets)
 
@@ -174,7 +184,7 @@ object BeatmapListing : BaseFragment(),
     }
 
     fun stopPreviews(shouldResumeMusic: Boolean) {
-        if (!BeatmapListing::recyclerView.isInitialized) {
+        if (!::recyclerView.isInitialized) {
             return
         }
 
@@ -217,17 +227,25 @@ object BeatmapListing : BaseFragment(),
         stopPreviews(true)
 
         pendingRequest?.cancel()
-        pendingRequest = null
-
-        offset = 0
-        adapter.data.clear()
 
         mainThread {
-            searchBox.text = null
-            adapter.notifyDataSetChanged()
             super.dismiss()
+            current = null
         }
     }
+
+
+    companion object {
+
+        var current: BeatmapListing? = null
+
+        var mirror = BeatmapMirror.OSU_DIRECT
+
+        var isPlayingMusic = false
+            private set
+
+    }
+
 }
 
 
@@ -307,7 +325,7 @@ class BeatmapSetDetails(val beatmapSet: BeatmapSetModel, val holder: BeatmapSetV
         previewButton.setOnClickListener {
 
             if (holder.previewStream == null) {
-                BeatmapListing.stopPreviews(false)
+                BeatmapListing.current!!.stopPreviews(false)
                 holder.playPreview(beatmapSet)
             } else {
                 holder.stopPreview(true)
@@ -506,7 +524,7 @@ class BeatmapSetViewHolder(itemView: View, private val mediaScope: CoroutineScop
         previewButton.setOnClickListener {
 
             if (previewStream == null) {
-                BeatmapListing.stopPreviews(false)
+                BeatmapListing.current!!.stopPreviews(false)
                 playPreview(beatmapSet)
             } else {
                 stopPreview(true)
@@ -528,7 +546,7 @@ class BeatmapSetViewHolder(itemView: View, private val mediaScope: CoroutineScop
     fun playPreview(beatmapSet: BeatmapSetModel) {
         previewJob = mediaScope.launch {
 
-            BeatmapListing.stopPreviews(true)
+            BeatmapListing.current!!.stopPreviews(true)
 
             try {
                 previewStream = URLBassStream(BeatmapListing.mirror.previewEndpoint(beatmapSet.beatmaps[0].id)) {

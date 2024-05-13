@@ -4,6 +4,7 @@ import com.reco1l.osu.async
 import com.reco1l.osu.multiplayer.LobbyScene
 import com.reco1l.osu.multiplayer.Multiplayer
 import com.reco1l.osu.beatmaplisting.BeatmapListing
+import com.reco1l.osu.mainThread
 import com.reco1l.osu.multiplayer.RoomScene
 import org.anddev.andengine.input.touch.TouchEvent
 import ru.nsu.ccfit.zuev.osu.LibraryManager
@@ -76,7 +77,7 @@ class MainMenu(val main: MainScene)
                         getGlobal().songService.isGaming = false
                         getGlobal().engine.scene = main.scene
 
-                        BeatmapListing.show()
+                        BeatmapListing().show()
                     } else {
                         main.musicControl(MusicOption.PLAY)
 
@@ -113,7 +114,7 @@ class MainMenu(val main: MainScene)
                     setColor(1f, 1f, 1f)
                     if (main.isOnExitAnim) return true
                     getGlobal().songService.isGaming = true
-                    getGlobal().mainActivity.runOnUiThread { SettingsFragment().show() }
+                    mainThread { SettingsFragment().show() }
                     return true
                 }
                 return false
