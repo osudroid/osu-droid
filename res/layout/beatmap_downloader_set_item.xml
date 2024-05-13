@@ -81,6 +81,7 @@
                 android:backgroundTint="#363653"
                 android:drawableLeft="@drawable/play_arrow_24px"
                 android:drawableTint="#FFF"
+                android:drawablePadding="0dp"
                 android:minWidth="0dp"
                 android:paddingHorizontal="12dp"
                 android:textAllCaps="false"

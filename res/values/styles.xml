@@ -16,9 +16,11 @@
         <item name="android:windowBackground">#000</item>
         <item name="android:forceDarkAllowed" tools:targetApi="q">false</item>
 
-        <item name="checkboxStyle">@style/checkbox</item>
         <item name="android:textViewStyle">@style/textView</item>
+        <item name="editTextStyle">@style/edittext</item>
+        <item name="checkboxStyle">@style/checkbox</item>
         <item name="seekBarStyle">@style/seekbar</item>
+        <item name="buttonStyle">@style/button</item>
     </style>
 
     <style name="AppTheme.PreferenceThemeOverlay" parent="@style/PreferenceThemeOverlay">
@@ -36,6 +38,40 @@
     <style name="textView" parent="Widget.AppCompat.TextView">
         <item name="android:textColor">@color/textview</item>
         <item name="android:textSize">12sp</item>
+    </style>
+
+    <style name="edittext" parent="Widget.AppCompat.EditText">
+        <item name="android:layout_centerHorizontal">true</item>
+        <item name="android:layout_centerVertical">true</item>
+        <item name="android:background">@drawable/rounded_rect</item>
+        <item name="android:backgroundTint">#363653</item>
+        <item name="drawableTint">#8C8CB4</item>
+        <item name="android:paddingLeft">14dp</item>
+        <item name="android:paddingRight">14dp</item>
+        <item name="android:paddingTop">10dp</item>
+        <item name="android:paddingBottom">10dp</item>
+        <item name="android:singleLine">true</item>
+        <item name="android:textColor">@color/textview</item>
+        <item name="android:textColorHint">#8C8CB4</item>
+        <item name="android:textSize">14sp</item>
+    </style>
+
+    <style name="button" parent="Widget.AppCompat.Button">
+        <item name="android:layout_width">wrap_content</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:background">@drawable/rounded_rect</item>
+        <item name="android:backgroundTint">#363653</item>
+        <item name="drawableTint">#FFF</item>
+        <item name="android:minWidth">0dp</item>
+        <item name="android:minHeight">0dp</item>
+        <item name="android:paddingLeft">12dp</item>
+        <item name="android:drawablePadding">6dp</item>
+        <item name="android:paddingRight">12dp</item>
+        <item name="android:paddingTop">10dp</item>
+        <item name="android:paddingBottom">10dp</item>
+        <item name="android:textAllCaps">false</item>
+        <item name="android:textColor">@color/textview</item>
+        <item name="android:textSize">14sp</item>
     </style>
 
     <style name="checkbox" parent="Widget.AppCompat.CompoundButton.CheckBox">

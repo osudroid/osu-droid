@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/frg_background"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <LinearLayout
+        android:id="@+id/frg_body"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_centerHorizontal="true"
+        android:layout_marginTop="8dp"
+        android:background="@drawable/rounded_rect"
+        android:backgroundTint="@color/colorPrimary"
+        android:gravity="center"
+        android:orientation="horizontal"
+        android:padding="8dp">
+
+        <CheckBox
+            android:id="@+id/showFav"
+            style="@style/button"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:background="@null"
+            android:button="@null"
+            android:checked="false"
+            android:layout_marginRight="8dp"
+            android:drawableLeft="@drawable/search_favorite_checkbox"
+            android:drawablePadding="0dp"
+            app:drawableTint="@color/checkbox" />
+
+        <EditText
+            android:id="@+id/searchEditText"
+            android:layout_width="200dp"
+            android:layout_height="wrap_content"
+            android:ems="10"
+            android:hint="@string/menu_search_filter"
+            android:imeOptions="actionDone|flagNoFullscreen|flagNoExtractUi" />
+
+        <Button
+            android:id="@+id/sortButton"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="12dp"
+            android:background="@null"
+            android:drawableLeft="@drawable/sort_24px"
+            tools:text="Sort" />
+
+        <View
+            android:layout_width="1dp"
+            android:layout_height="match_parent"
+            android:layout_marginHorizontal="4dp"
+            android:layout_marginVertical="4dp"
+            android:background="#0DFFFFFF" />
+
+        <Button
+            android:id="@+id/favFolder"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:background="@null"
+            android:drawableLeft="@drawable/folder_24px"
+            tools:text="Folder" />
+
+    </LinearLayout>
+
+</RelativeLayout>

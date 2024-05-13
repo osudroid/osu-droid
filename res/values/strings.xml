@@ -106,7 +106,7 @@
 	<string name="menu_deletescore_delete_success">Delete score success!</string>
 
 	<string name="menu_search_title">Search options</string>
-	<string name="menu_search_filter">Search for:</string>
+	<string name="menu_search_filter">Search for...</string>
 	<string name="menu_search_sort">Sort by:</string>
 	<string name="menu_search_sort_title">Title</string>
 	<string name="menu_search_sort_date">Date</string>
@@ -116,8 +116,6 @@
 	<string name="menu_search_sort_droid_stars">osu!droid Stars</string>
 	<string name="menu_search_sort_standard_stars">osu!standard Stars</string>
 	<string name="menu_search_sort_length">Length</string>
-	<string name="menu_search_favsenabled">Favorites only: enabled</string>
-	<string name="menu_search_favsdisabled">Favorites only: disabled</string>
 
 	<string name="downloader_page" formatted="false">Page %d of %d</string>
 	<string name="downloader_nomaps">No beatmaps found</string>
