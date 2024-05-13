@@ -7,12 +7,12 @@
 
         <EditTextPreference
             android:key="room_name"
-            android:summary="Change room name"
+            android:summary="Change the room's name."
             android:title="Room name" />
 
         <EditTextPreference
             android:key="room_password"
-            android:summary="Change room password, empty will set room to public."
+            android:summary="Change the room's password. If empty, the room will be public."
             android:title="Room password"
             app:layout="@layout/settings_preference_bottom" />
 
@@ -22,7 +22,7 @@
 
         <CheckBoxPreference
             android:key="room_free_mods"
-            android:summary="Allow any player to choose mods (speed changing mods can only be enabled by room host)"
+            android:summary="Allow players to choose mods except speed-changing mods"
             android:title="Enable free mods" />
 
         <CheckBoxPreference

@@ -58,7 +58,7 @@ enum class Section(@XmlRes val xml: Int) {
     General(R.xml.settings_general),
     Gameplay(R.xml.settings_gameplay),
     Graphics(R.xml.settings_graphics),
-    Sounds(R.xml.settings_audio),
+    Audio(R.xml.settings_audio),
     Library(R.xml.settings_library),
     Input(R.xml.settings_input),
     Advanced(R.xml.settings_advanced),
@@ -146,7 +146,7 @@ class SettingsFragment : com.edlplan.ui.fragment.SettingsFragment() {
 
         createSectionButton("Gameplay", R.drawable.videogame_asset_24px, Section.Gameplay)
         createSectionButton("Graphics", R.drawable.display_settings_24px, Section.Graphics)
-        createSectionButton("Sound", R.drawable.headphones_24px, Section.Sounds)
+        createSectionButton("Audio", R.drawable.headphones_24px, Section.Audio)
 
         if (!Multiplayer.isMultiplayer) {
             createSectionButton("Library", R.drawable.library_music_24px, Section.Library)
@@ -256,7 +256,7 @@ class SettingsFragment : com.edlplan.ui.fragment.SettingsFragment() {
         }
 
         Section.Graphics -> Unit
-        Section.Sounds -> Unit
+        Section.Audio -> Unit
         Section.Input -> Unit
 
         Section.Player -> {
