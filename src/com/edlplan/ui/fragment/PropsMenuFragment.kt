@@ -1,184 +1,179 @@
-package com.edlplan.ui.fragment;
+package com.edlplan.ui.fragment
 
-import android.animation.Animator;
-import android.content.Context;
-import android.text.Editable;
-import android.text.TextWatcher;
-import android.view.View;
-import android.widget.CheckBox;
-import android.widget.EditText;
+import android.animation.Animator
+import android.content.Context
+import android.text.Editable
+import android.text.TextWatcher
+import android.view.View
+import android.widget.CheckBox
+import android.widget.CompoundButton
+import android.widget.EditText
+import com.edlplan.framework.easing.Easing
+import com.edlplan.ui.BaseAnimationListener
+import com.edlplan.ui.EasingHelper
+import ru.nsu.ccfit.zuev.osu.BeatmapProperties
+import ru.nsu.ccfit.zuev.osu.GlobalManager
+import ru.nsu.ccfit.zuev.osu.PropertiesLibrary
+import ru.nsu.ccfit.zuev.osu.menu.IPropsMenu
+import ru.nsu.ccfit.zuev.osu.menu.MenuItem
+import ru.nsu.ccfit.zuev.osu.menu.SongMenu
+import ru.nsu.ccfit.zuev.osu.scoring.ScoreLibrary
+import ru.nsu.ccfit.zuev.osuplus.R
+import kotlin.math.abs
 
-import com.edlplan.framework.easing.Easing;
-import com.edlplan.ui.BaseAnimationListener;
-import com.edlplan.ui.EasingHelper;
+/// Converted to Kotlin ///
+class PropsMenuFragment : BaseFragment(), IPropsMenu {
 
-import ru.nsu.ccfit.zuev.osu.BeatmapProperties;
-import ru.nsu.ccfit.zuev.osu.GlobalManager;
-import ru.nsu.ccfit.zuev.osu.PropertiesLibrary;
-import ru.nsu.ccfit.zuev.osu.menu.IPropsMenu;
-import ru.nsu.ccfit.zuev.osu.menu.MenuItem;
-import ru.nsu.ccfit.zuev.osu.menu.SongMenu;
-import ru.nsu.ccfit.zuev.osu.scoring.ScoreLibrary;
-import ru.nsu.ccfit.zuev.osuplus.R;
+    var menu: SongMenu? = null
+    var item: MenuItem? = null
+    var props: BeatmapProperties? = null
 
-public class PropsMenuFragment extends BaseFragment implements IPropsMenu {
+    private var offset: EditText? = null
+    private var isFav: CheckBox? = null
 
-    SongMenu menu;
-    MenuItem item;
-    BeatmapProperties props;
-
-    private EditText offset;
-    private CheckBox isFav;
-
-    public PropsMenuFragment() {
-        setDismissOnBackgroundClick(true);
+    init {
+        isDismissOnBackgroundClick = true
     }
 
-    @Override
-    protected int getLayoutID() {
-        return R.layout.fragment_props_menu;
-    }
+    override val layoutID: Int
+        get() = R.layout.beatmap_options_fragment
 
-    @Override
-    protected void onLoadView() {
-        offset = findViewById(R.id.offsetBox);
-        isFav = findViewById(R.id.addToFav);
+    override fun onLoadView() {
+        offset = findViewById<EditText>(R.id.offsetBox)
+        isFav = findViewById<CheckBox>(R.id.addToFav)
 
-        offset.setText(String.valueOf(props.getOffset()));
-        isFav.setChecked(props.isFavorite());
+        offset!!.setText(props!!.getOffset().toString())
+        isFav!!.isChecked = props!!.isFavorite
 
-        isFav.setOnCheckedChangeListener((buttonView, isChecked) -> {
-            props.setFavorite(isChecked);
-            saveProp();
-        });
+        isFav!!.setOnCheckedChangeListener { buttonView: CompoundButton?, isChecked: Boolean ->
+            props!!.isFavorite = isChecked
+            saveProp()
+        }
 
-        offset.addTextChangedListener(new TextWatcher() {
+        offset!!.addTextChangedListener(object : TextWatcher {
+            var needRest: Boolean = false
 
-            boolean needRest = false;
+            var o: Int = 0
 
-            int o;
+            var pos: Int = 0
 
-            int pos;
-
-            @Override
-            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
-                pos = start;
+            override fun beforeTextChanged(s: CharSequence, start: Int, count: Int, after: Int) {
+                pos = start
             }
 
-            @Override
-            public void onTextChanged(CharSequence s, int start, int before, int count) {
-
+            override fun onTextChanged(s: CharSequence, start: Int, before: Int, count: Int) {
             }
 
-            @Override
-            public void afterTextChanged(Editable s) {
-
+            override fun afterTextChanged(s: Editable) {
                 try {
-                    o = Integer.parseInt(s.toString());
-                    needRest = false;
-                    if (Math.abs(o) > 250) {
-                        o = 250 * (o > 0 ? 1 : -1);
-                        needRest = true;
+                    o = s.toString().toInt()
+                    needRest = false
+                    if (abs(o.toDouble()) > 250) {
+                        o = 250 * (if (o > 0) 1 else -1)
+                        needRest = true
                     }
                     if (needRest) {
-                        offset.removeTextChangedListener(this);
-                        offset.setText(String.valueOf(o));
-                        offset.setSelection(pos);
-                        offset.addTextChangedListener(this);
+                        offset!!.removeTextChangedListener(this)
+                        offset!!.setText(o.toString())
+                        offset!!.setSelection(pos)
+                        offset!!.addTextChangedListener(this)
                     }
-                    props.setOffset(o);
-                    saveProp();
-                } catch (NumberFormatException e) {
-                    if (s.length() == 0) {
-                        props.setOffset(0);
-                        saveProp();
+                    props!!.setOffset(o)
+                    saveProp()
+                } catch (e: NumberFormatException) {
+                    if (s.length == 0) {
+                        props!!.setOffset(0)
+                        saveProp()
                     }
                 }
             }
-        });
+        })
 
-        findViewById(R.id.manageFavButton).setOnClickListener(v -> {
-            FavoriteManagerFragment dialog = new FavoriteManagerFragment();
+        findViewById<View>(R.id.offset_plus)!!.setOnClickListener {
+            offset!!.setText((offset!!.text.toString().toInt() + 1).coerceIn(-250, 250).toString())
+        }
+
+        findViewById<View>(R.id.offset_minus)!!.setOnClickListener {
+            offset!!.setText((offset!!.text.toString().toInt() - 1).coerceIn(-250, 250).toString())
+        }
+
+
+        findViewById<View>(R.id.manageFavButton)!!.setOnClickListener { v: View? ->
+            val dialog = FavoriteManagerFragment()
             //TODO : 铺面引用还是全局耦合的，需要分离
-            dialog.showToAddToFolder(ScoreLibrary.getTrackDir(GlobalManager.getInstance().getSelectedTrack().getFilename()));
-        });
+            dialog.showToAddToFolder(ScoreLibrary.getTrackDir(GlobalManager.getInstance().selectedTrack.filename))
+        }
 
-        findViewById(R.id.deleteBeatmap).setOnClickListener(v -> {
-            ConfirmDialogFragment confirm = new ConfirmDialogFragment();
-            confirm.showForResult(isAccepted -> {
+        findViewById<View>(R.id.deleteBeatmap)!!.setOnClickListener { v: View? ->
+            val confirm = ConfirmDialogFragment()
+            confirm.showForResult { isAccepted: Boolean ->
                 if (isAccepted) {
                     if (menu != null) {
-                        menu.scene.postRunnable(item::delete);
+                        menu!!.scene.postRunnable { item!!.delete() }
                     }
-                    dismiss();
+                    dismiss()
                 }
-            });
-        });
-
-        playOnLoadAnim();
-    }
-
-    private void playOnLoadAnim() {
-        View body = findViewById(R.id.fullLayout);
-        body.setAlpha(0);
-        body.setTranslationY(200);
-        body.animate().cancel();
-        body.animate()
-                .translationY(0)
-                .alpha(1)
-                .setInterpolator(EasingHelper.asInterpolator(Easing.InOutQuad))
-                .setDuration(150)
-                .start();
-        playBackgroundHideInAnim(150);
-    }
-
-    private void playEndAnim(Runnable action) {
-        View body = findViewById(R.id.fullLayout);
-        body.animate().cancel();
-        body.animate()
-                .translationY(200)
-                .alpha(0)
-                .setDuration(200)
-                .setInterpolator(EasingHelper.asInterpolator(Easing.InOutQuad))
-                .setListener(new BaseAnimationListener() {
-                    @Override
-                    public void onAnimationEnd(Animator animation) {
-                        if (action != null) {
-                            action.run();
-                        }
-                    }
-                })
-                .start();
-        playBackgroundHideOutAnim(200);
-    }
-
-
-    @Override
-    public void dismiss() {
-        playEndAnim(super::dismiss);
-    }
-
-    @Override
-    public void onAttach(Context context) {
-        super.onAttach(context);
-
-    }
-
-    @Override
-    public void show(SongMenu menu, MenuItem item) {
-        this.menu = menu;
-        this.item = item;
-        props = PropertiesLibrary.getInstance().getProperties(item.getBeatmap().getPath());
-        if (props == null) {
-            props = new BeatmapProperties();
+            }
         }
-        show();
+
+        playOnLoadAnim()
     }
 
-    public void saveProp() {
+    private fun playOnLoadAnim() {
+        val body = findViewById<View>(R.id.fullLayout)
+        body!!.alpha = 0f
+        body.translationY = 200f
+        body.animate().cancel()
+        body.animate()
+            .translationY(0f)
+            .alpha(1f)
+            .setInterpolator(EasingHelper.asInterpolator(Easing.InOutQuad))
+            .setDuration(150)
+            .start()
+        playBackgroundHideInAnim(150)
+    }
+
+    private fun playEndAnim(action: Runnable?) {
+        val body = findViewById<View>(R.id.fullLayout)
+        body!!.animate().cancel()
+        body.animate()
+            .translationY(200f)
+            .alpha(0f)
+            .setDuration(200)
+            .setInterpolator(EasingHelper.asInterpolator(Easing.InOutQuad))
+            .setListener(object : BaseAnimationListener() {
+                override fun onAnimationEnd(animation: Animator) {
+                    action?.run()
+                }
+            })
+            .start()
+        playBackgroundHideOutAnim(200)
+    }
+
+
+    override fun dismiss() {
+        playEndAnim { super.dismiss() }
+    }
+
+    override fun onAttach(context: Context) {
+        super.onAttach(context)
+    }
+
+    override fun show(menu: SongMenu, item: MenuItem) {
+        this.menu = menu
+        this.item = item
+        props = PropertiesLibrary.getInstance().getProperties(item.beatmap.path)
+        if (props == null) {
+            props = BeatmapProperties()
+        }
+        show()
+    }
+
+    fun saveProp() {
         PropertiesLibrary.getInstance().setProperties(
-                item.getBeatmap().getPath(), props);
-        item.setFavorite(props.favorite);
-        PropertiesLibrary.getInstance().save();
+            item!!.beatmap.path, props
+        )
+        item!!.isFavorite = props!!.favorite
+        PropertiesLibrary.getInstance().save()
     }
 }
