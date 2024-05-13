@@ -48,7 +48,6 @@ import org.anddev.andengine.entity.sprite.Sprite;
 import org.anddev.andengine.entity.text.ChangeableText;
 import org.anddev.andengine.entity.util.FPSCounter;
 import org.anddev.andengine.input.touch.TouchEvent;
-import org.anddev.andengine.opengl.font.Font;
 import org.anddev.andengine.opengl.texture.region.TextureRegion;
 import org.anddev.andengine.util.Debug;
 
@@ -168,7 +167,7 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
     private Replay replay;
     private boolean replaying;
     private String replayFile;
-    private float avgOffset;
+    private float offsetSum;
     private int offsetRegs;
     private Rectangle dimRectangle = null;
     private String title, artist, version;
@@ -186,7 +185,13 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
 
     private List<TimedDifficultyAttributes<DroidDifficultyAttributes>> droidTimedDifficultyAttributes;
     private List<TimedDifficultyAttributes<StandardDifficultyAttributes>> standardTimedDifficultyAttributes;
+
+    private final List<ChangeableText> counterTexts = new ArrayList<>(5);
+    private ChangeableText fpsText;
+    private ChangeableText avgOffsetText;
+    private ChangeableText urText;
     private ChangeableText ppText;
+    private ChangeableText memText;
 
     /**
      * The time at which the last frame was rendered with respect to {@link SystemClock#uptimeMillis()}.
@@ -593,7 +598,7 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
         ModifierFactory.clear();
 
         // TODO replay
-        avgOffset = 0;
+        offsetSum = 0;
         offsetRegs = 0;
 
         File trackFile = new File(track.getFilename());
@@ -754,72 +759,53 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
         }
         setBackground();
 
-        if (Config.isShowFPS() || Config.isDisplayRealTimePPCounter()) {
-            final Font font = ResourceManager.getInstance().getFont(
-                    "smallFont");
-            final ChangeableText fpsText = new ChangeableText(Utils.toRes(790),
-                    Utils.toRes(520), font, "00.00 FPS");
-            final ChangeableText urText = new ChangeableText(Utils.toRes(720),
-                    Utils.toRes(480), font, "00.00 UR    ");
-            final ChangeableText accText = new ChangeableText(Utils.toRes(720),
-                    Utils.toRes(440), font, "Avg offset: 0ms     ");
-            fpsText.setPosition(Config.getRES_WIDTH() - fpsText.getWidth() - 5, Config.getRES_HEIGHT() - fpsText.getHeight() - 10);
-            accText.setPosition(Config.getRES_WIDTH() - accText.getWidth() - 5, fpsText.getY() - accText.getHeight());
-            urText.setPosition(Config.getRES_WIDTH() - urText.getWidth() - 5, accText.getY() - urText.getHeight());
-            fgScene.attachChild(fpsText);
-            fgScene.attachChild(accText);
-            fgScene.attachChild(urText);
+        // Set up counter texts
+        for (var text : counterTexts) {
+            text.detachSelf();
+        }
 
-            if (Config.isDisplayRealTimePPCounter()) {
-                ppText = new ChangeableText(Utils.toRes(720),
-                        Utils.toRes(440), font, "0.00pp", 100);
-                fgScene.attachChild(ppText);
-            }
+        counterTexts.clear();
+        var counterTextFont = ResourceManager.getInstance().getFont("smallFont");
 
-            ChangeableText memText = null;
-            if (BuildConfig.DEBUG) {
-                memText = new ChangeableText(Utils.toRes(780),
-                        Utils.toRes(520), font, "0 MB/0 MB    ");
-                fgScene.attachChild(memText);
-            }
+        if (Config.isShowFPS()) {
+            fpsText = new ChangeableText(790, 520, counterTextFont, "00.00 FPS");
+            counterTexts.add(fpsText);
 
-            final ChangeableText fmemText = memText;
             fgScene.registerUpdateHandler(new FPSCounter() {
-                int elapsedInt = 0;
                 @Override
                 public void onUpdate(final float pSecondsElapsed) {
                     super.onUpdate(pSecondsElapsed);
-                    elapsedInt++;
-                    fpsText.setText(Math.round(this.getFPS()) + " FPS");
-                    if (offsetRegs != 0 && elapsedInt > 200) {
-                        float mean = avgOffset / offsetRegs;
-                        accText.setText("Avg offset: "
-                                + (int) (mean * 1000f)
-                                + "ms");
-                        elapsedInt = 0;
-                    }
-                    urText.setText(String.format(Locale.ENGLISH, "%.2f UR    ", stat.getUnstableRate()));
 
-                    fpsText.setPosition(Config.getRES_WIDTH() - fpsText.getWidth() - 5, Config.getRES_HEIGHT() - fpsText.getHeight() - 10);
-                    accText.setPosition(Config.getRES_WIDTH() - accText.getWidth() - 5, fpsText.getY() - accText.getHeight());
-                    urText.setPosition(Config.getRES_WIDTH() - urText.getWidth() - 5, accText.getY() - urText.getHeight());
-                    if (ppText != null) {
-                        ppText.setPosition(Config.getRES_WIDTH() - ppText.getWidth() - 5, urText.getY() - ppText.getHeight());
-                    }
-
-                    if (fmemText != null) {
-                        Runtime runtime = Runtime.getRuntime();
-                        fmemText.setText(
-                            ((runtime.totalMemory() - runtime.freeMemory()) / 1024 / 1024) + " MB"
-                            + "/" + (runtime.totalMemory() / 1024 / 1024) + " MB    ");
-                        fmemText.setPosition(
-                                Config.getRES_WIDTH() - fmemText.getWidth() - 5,
-                                (ppText != null ? ppText : urText).getY() - fmemText.getHeight()
-                        );
-                    }
-
+                    fpsText.setText(Math.round(getFPS()) + " FPS");
                 }
             });
+        }
+
+        if (Config.isShowUnstableRate()) {
+            urText = new ChangeableText(720, 480, counterTextFont, "00.00 UR    ");
+            counterTexts.add(urText);
+        }
+
+        if (Config.isShowAverageOffset()) {
+            avgOffsetText = new ChangeableText(720, 440, counterTextFont, "Avg offset: 0ms     ");
+            counterTexts.add(avgOffsetText);
+        }
+
+        if (Config.isDisplayRealTimePPCounter()) {
+            ppText = new ChangeableText(720, 400, counterTextFont, "0.00pp");
+            counterTexts.add(ppText);
+        }
+
+        if (BuildConfig.DEBUG) {
+            memText = new ChangeableText(780, 520, counterTextFont, "0/0 MB    ");
+            counterTexts.add(memText);
+        }
+
+        updateCounterTexts();
+
+        // Attach the counter texts
+        for (var text : counterTexts) {
+            fgScene.attachChild(text);
         }
 
         stat = new StatisticV2();
@@ -1137,6 +1123,8 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
             }
             secPassed += dt;
         }
+
+        updateCounterTexts();
 
         if (Multiplayer.isMultiplayer)
         {
@@ -2683,7 +2671,7 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
         if (hitErrorMeter != null) {
             hitErrorMeter.putErrorResult((float) acc);
         }
-        avgOffset += (float) acc;
+        offsetSum += (float) acc;
         offsetRegs++;
 
         stat.addHitOffset(acc);
@@ -2835,6 +2823,34 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
         else{
             ToastLogger.showText(StringTable.get(R.string.message_save_replay_failed), true);
             return false;
+        }
+    }
+
+    private void updateCounterTexts() {
+        // We are not updating FPS text as it is handled by FPSCounter, as well
+        // as PP text as it is updated in updatePPCounter.
+        if (avgOffsetText != null) {
+            float avgOffset = offsetRegs > 0 ? offsetSum / offsetRegs : 0;
+
+            avgOffsetText.setText("Avg offset: " + (int) (avgOffset * 1000f) + "ms");
+        }
+
+        if (urText != null) {
+            urText.setText(String.format(Locale.ENGLISH, "%.2f UR    ", stat != null ? stat.getUnstableRate() : 0));
+        }
+
+        if (BuildConfig.DEBUG) {
+            var totalMemory = Runtime.getRuntime().totalMemory();
+            var usedMemory = totalMemory - Runtime.getRuntime().freeMemory();
+
+            memText.setText(usedMemory / 1024 / 1024 + "/" + totalMemory / 1024 / 1024 + " MB    ");
+        }
+
+        // Update counter text positions
+        for (int i = 0; i < counterTexts.size(); ++i) {
+            var text = counterTexts.get(i);
+
+            text.setPosition(Config.getRES_WIDTH() - text.getWidth() - 5, Config.getRES_HEIGHT() - text.getHeight() - 10 - i * text.getHeight());
         }
     }
 
