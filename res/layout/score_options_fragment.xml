@@ -3,7 +3,7 @@
     android:id="@+id/frg_background"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@color/frgDialogStyleBackground"
+    android:background="#1A000000"
     android:orientation="vertical">
 
     <LinearLayout
@@ -12,34 +12,33 @@
         android:layout_height="wrap_content"
         android:layout_alignParentBottom="true"
         android:layout_centerHorizontal="true"
-        android:background="@drawable/rounded_half_top"
+        android:layout_marginBottom="20dp"
+        android:background="@drawable/rounded_rect"
         android:backgroundTint="#13131A"
+        android:divider="@drawable/divider"
         android:orientation="vertical"
-        android:paddingHorizontal="12dp"
-        android:paddingTop="12dp"
-        android:paddingBottom="24dp">
+        android:showDividers="middle">
 
         <TextView
+            android:id="@+id/room_player"
             style="@style/settings_tab_divider"
+            android:paddingVertical="12dp"
             android:text="@string/frg_score_menu_title" />
 
         <Button
             android:id="@+id/exportReplay"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="12dp"
+            android:background="@null"
             android:drawableLeft="@drawable/ios_share_24px"
-            android:drawablePadding="0dp"
             android:text="@string/frg_score_menu_export_score" />
 
         <Button
             android:id="@+id/deleteReplay"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="12dp"
-            android:backgroundTint="#592424"
+            android:background="@null"
             android:drawableLeft="@drawable/delete_24px"
-            android:drawablePadding="0dp"
             android:drawableTint="#FFBFBF"
             android:text="@string/menu_deletescore_delete"
             android:textColor="#FFBFBF" />
