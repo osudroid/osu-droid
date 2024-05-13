@@ -3,62 +3,59 @@
     android:id="@+id/frg_background"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@color/frgDialogStyleBackground"
+    android:background="#40000000"
     android:orientation="vertical">
 
     <LinearLayout
         android:id="@+id/fullLayout"
-        android:layout_width="300dp"
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_alignParentBottom="true"
         android:layout_centerHorizontal="true"
-        android:background="@drawable/rounded_half_top"
+        android:layout_marginBottom="20dp"
+        android:background="@drawable/rounded_rect"
         android:backgroundTint="#13131A"
+        android:divider="@drawable/divider"
+        android:minWidth="250dp"
         android:orientation="vertical"
-        android:paddingHorizontal="12dp"
-        android:paddingTop="12dp"
-        android:paddingBottom="24dp">
+        android:showDividers="middle">
 
         <TextView
             android:id="@+id/room_player"
             style="@style/settings_tab_divider"
+            android:paddingVertical="12dp"
             android:text="Player" />
 
         <Button
             android:id="@+id/room_profile"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="12dp"
+            android:background="@null"
             android:drawableLeft="@drawable/account_box_24px"
-            android:drawablePadding="0dp"
             android:text="Visit profile" />
 
         <Button
             android:id="@+id/room_mute"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="12dp"
+            android:background="@null"
             android:drawableLeft="@drawable/volume_off_24px"
-            android:drawablePadding="0dp"
             android:text="Mute" />
 
         <Button
             android:id="@+id/room_host"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="12dp"
+            android:background="@null"
             android:drawableLeft="@drawable/shield_person_24px"
-            android:drawablePadding="0dp"
             android:text="Make room host" />
 
         <Button
             android:id="@+id/room_kick"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="12dp"
-            android:backgroundTint="#592424"
+            android:background="@null"
             android:drawableLeft="@drawable/person_remove_24px"
-            android:drawablePadding="0dp"
             android:drawableTint="#FFBFBF"
             android:text="Kick"
             android:textColor="#FFBFBF" />
