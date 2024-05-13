@@ -97,21 +97,21 @@
             android:key="fps"
             android:summary="@string/opt_fps_summary"
             android:title="@string/opt_fps_title"
-            app:layout="@layout/settings_preference_checkbox_bottom" />
+            app:layout="@layout/settings_preference_checkbox" />
 
         <CheckBoxPreference
             android:defaultValue="true"
             android:key="averageOffset"
             android:summary="@string/opt_averageoffset_summary"
             android:title="@string/opt_averageoffset_title"
-            app:layout="@layout/settings_preference_checkbox_bottom" />
+            app:layout="@layout/settings_preference_checkbox" />
 
         <CheckBoxPreference
             android:defaultValue="true"
             android:key="unstableRate"
             android:summary="@string/opt_unstablerate_summary"
             android:title="@string/opt_unstablerate_title"
-            app:layout="@layout/settings_preference_checkbox_bottom" />
+            app:layout="@layout/settings_preference_checkbox" />
 
         <CheckBoxPreference
             android:defaultValue="true"
