@@ -3,6 +3,7 @@ package com.reco1l.osu.multiplayer
 import android.animation.Animator
 import android.app.AlertDialog
 import android.view.View
+import android.widget.Button
 import android.widget.TextView
 import com.edlplan.framework.easing.Easing
 import com.edlplan.ui.BaseAnimationListener
@@ -50,22 +51,13 @@ class RoomPlayerMenu : BaseFragment()
             }
         }
 
-        val muteText = findViewById<TextView>(R.id.mute_text)!!
-
-        fun updateText()
-        {
-            if (player!!.isMuted)
-                muteText.text = "Unmute"
-            else
-                muteText.text = "Mute"
-        }
-
-        updateText()
-
-        findViewById<View>(R.id.room_mute)!!.setOnClickListener {
+        val mute = findViewById<Button>(R.id.room_mute)!!
+        mute.setOnClickListener {
             player!!.isMuted = !player!!.isMuted
-            updateText()
+            mute.text = if (player!!.isMuted) "Unmute" else "Mute"
         }
+        mute.text = if (player!!.isMuted) "Unmute" else "Mute"
+
 
         val kick = findViewById<View>(R.id.room_kick)!!
         val host = findViewById<View>(R.id.room_host)!!
