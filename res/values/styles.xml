@@ -186,7 +186,6 @@
         <item name="android:gravity">center</item>
         <item name="android:paddingTop">4dp</item>
         <item name="android:paddingBottom">4dp</item>
-        <item name="android:text">Game</item>
         <item name="android:textColor">#FFB2B2CC</item>
         <item name="android:textSize">12dp</item>
     </style>
