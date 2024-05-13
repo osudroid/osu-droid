@@ -77,8 +77,6 @@
 	<string name="favorite_default">Default</string>
 	<string name="favorite_select">Select</string>
 	<string name="favorite_delete">Delete Folder</string>
-	<string name="favorite_add">Add</string>
-	<string name="favorite_remove">Remove</string>
 	<string name="favorite_new_folder">Create new folder</string>
 	<string name="favorite_warning_on_delete_default">you can\'t delete default folder</string>
 	<string name="favorite_ensure">Are you sure?</string>
