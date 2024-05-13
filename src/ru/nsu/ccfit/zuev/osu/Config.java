@@ -46,6 +46,8 @@ public class Config {
         useCustomSounds,
         corovans,
         showFPS,
+        showAverageOffset,
+        showUnstableRate,
         animateFollowCircle,
         animateComboText,
         snakingInSliders,
@@ -111,7 +113,9 @@ public class Config {
         useCustomSounds = prefs.getBoolean("beatmapSounds", true);
         comboburst = prefs.getBoolean("comboburst", false);
         corovans = prefs.getBoolean("images", false);
-        showFPS = prefs.getBoolean("fps", false);
+        showFPS = prefs.getBoolean("fps", true);
+        showAverageOffset = prefs.getBoolean("averageOffset", true);
+        showUnstableRate = prefs.getBoolean("unstableRate", true);
         errorMeter = Integer.parseInt(prefs.getString("errormeter", "0"));
         spinnerStyle = Integer.parseInt(prefs.getString("spinnerstyle", "0"));
         showFirstApproachCircle = prefs.getBoolean("showfirstapproachcircle", false);
@@ -320,6 +324,22 @@ public class Config {
 
     public static void setShowFPS(final boolean showFPS) {
         Config.showFPS = showFPS;
+    }
+
+    public static boolean isShowAverageOffset() {
+        return showAverageOffset;
+    }
+
+    public static void setShowAverageOffset(final boolean showAverageOffset) {
+        Config.showAverageOffset = showAverageOffset;
+    }
+
+    public static boolean isShowUnstableRate() {
+        return showUnstableRate;
+    }
+
+    public static void setShowUnstableRate(final boolean showUnstableRate) {
+        Config.showUnstableRate = showUnstableRate;
     }
 
     public static boolean isShowScoreboard() {

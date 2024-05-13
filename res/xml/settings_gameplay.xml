@@ -101,6 +101,20 @@
 
         <CheckBoxPreference
             android:defaultValue="true"
+            android:key="averageOffset"
+            android:summary="@string/opt_averageoffset_summary"
+            android:title="@string/opt_averageoffset_title"
+            app:layout="@layout/settings_preference_checkbox_bottom" />
+
+        <CheckBoxPreference
+            android:defaultValue="true"
+            android:key="unstableRate"
+            android:summary="@string/opt_unstablerate_summary"
+            android:title="@string/opt_unstablerate_title"
+            app:layout="@layout/settings_preference_checkbox_bottom" />
+
+        <CheckBoxPreference
+            android:defaultValue="true"
             android:key="displayScoreStatistics"
             android:summary="@string/opt_display_score_statistics_summary"
             android:title="@string/opt_display_score_statistics_title" />
