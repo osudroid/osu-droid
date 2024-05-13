@@ -10,7 +10,6 @@ import android.widget.SeekBar.OnSeekBarChangeListener
 import android.widget.TextView
 import androidx.preference.PreferenceManager
 import com.edlplan.framework.easing.Easing
-import com.edlplan.framework.math.FMath
 import com.edlplan.ui.BaseAnimationListener
 import com.edlplan.ui.EasingHelper
 import com.reco1l.osu.mainThread
@@ -24,7 +23,6 @@ import ru.nsu.ccfit.zuev.osu.game.mods.GameMod
 import ru.nsu.ccfit.zuev.osu.menu.ModMenu
 import ru.nsu.ccfit.zuev.osuplus.R
 import java.util.Locale
-import kotlin.math.abs
 import kotlin.math.roundToInt
 
 class InGameSettingMenu : BaseFragment() {
