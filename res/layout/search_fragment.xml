@@ -35,6 +35,8 @@
             android:id="@+id/searchEditText"
             android:layout_width="200dp"
             android:layout_height="wrap_content"
+            android:drawableTint="#8C8CB4"
+            android:drawableRight="@drawable/search_24px"
             android:ems="10"
             android:hint="@string/menu_search_filter"
             android:imeOptions="actionDone|flagNoFullscreen|flagNoExtractUi" />
