@@ -13,7 +13,7 @@ public class LoadingFragment extends BaseFragment {
 
     @Override
     protected int getLayoutID() {
-        return R.layout.load_fragment;
+        return R.layout.loading_fragment;
     }
 
     @Override
