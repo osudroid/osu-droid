@@ -94,7 +94,7 @@ class SettingsFragment : com.edlplan.ui.fragment.SettingsFragment() {
 
             val button = TextView(ContextThemeWrapper(context, R.style.settings_tab_text))
 
-            button.layoutWidth = 200f.dp
+            button.layoutWidth = 200.dp
             button.text = text
             button.drawableLeft = requireContext().getDrawable(icon)!!
             button.drawableLeft!!.setTint(Color.WHITE)
@@ -156,8 +156,8 @@ class SettingsFragment : com.edlplan.ui.fragment.SettingsFragment() {
         createSectionButton("Advanced", R.drawable.manufacturing_24px, Section.Advanced)
 
 
-        sectionSelector[0].topMargin = 32f.dp
-        sectionSelector[sectionSelector.childCount - 1].bottomMargin = 32f.dp
+        sectionSelector[0].topMargin = 32.dp
+        sectionSelector[sectionSelector.childCount - 1].bottomMargin = 32.dp
 
         findViewById<View>(R.id.close)!!.setOnClickListener {
             dismiss()
