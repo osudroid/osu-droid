@@ -19,6 +19,7 @@
         android:layout_weight="1"
         android:gravity="center|left"
         android:padding="16dp"
+        android:textColor="@color/textview"
         android:singleLine="false"
         tools:text="Folder name" />
 

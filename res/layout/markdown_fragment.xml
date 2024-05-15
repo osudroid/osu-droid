@@ -31,6 +31,7 @@
             android:layout_height="wrap_content"
             android:layout_marginHorizontal="8dp"
             android:layout_weight="1"
+            android:textColor="@color/textview"
             android:text="@string/markdown_title"
             android:textStyle="bold" />
 

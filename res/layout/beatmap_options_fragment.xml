@@ -1,9 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/frg_background"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="#40000000"
+    android:background="#80000000"
     android:orientation="vertical">
 
     <LinearLayout
@@ -52,6 +53,7 @@
                     android:gravity="center"
                     android:paddingTop="4dp"
                     android:text="@string/menu_properties_offset"
+                    android:textColor="@color/textview"
                     android:textSize="10sp" />
 
                 <EditText
@@ -63,7 +65,8 @@
                     android:ems="5"
                     android:gravity="center"
                     android:inputType="numberSigned"
-                    android:text="0" />
+                    android:text="0"
+                    android:textColor="@color/textview" />
 
             </LinearLayout>
 
@@ -86,7 +89,9 @@
             android:background="@null"
             android:button="@null"
             android:drawableLeft="@drawable/search_favorite_checkbox"
-            android:text="@string/menu_properties_tofavs" />
+            android:drawableTint="@color/checkbox"
+            android:text="@string/menu_properties_tofavs"
+            tools:checked="true" />
 
         <Button
             android:id="@+id/manageFavButton"
