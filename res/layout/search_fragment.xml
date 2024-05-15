@@ -8,9 +8,10 @@
 
     <LinearLayout
         android:id="@+id/frg_body"
-        android:layout_width="wrap_content"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_centerHorizontal="true"
+        android:layout_marginHorizontal="60dp"
         android:layout_marginTop="8dp"
         android:background="@drawable/rounded_rect"
         android:backgroundTint="@color/colorPrimary"
@@ -23,20 +24,22 @@
             style="@style/button"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:layout_marginRight="8dp"
             android:background="@null"
             android:button="@null"
             android:checked="false"
-            android:layout_marginRight="8dp"
             android:drawableLeft="@drawable/search_favorite_checkbox"
             android:drawablePadding="0dp"
             app:drawableTint="@color/checkbox" />
 
         <EditText
             android:id="@+id/searchEditText"
-            android:layout_width="200dp"
+            style="@style/editText"
+            android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:drawableTint="#8C8CB4"
+            android:layout_weight="1"
             android:drawableRight="@drawable/search_24px"
+            android:drawableTint="#8C8CB4"
             android:ems="10"
             android:hint="@string/menu_search_filter"
             android:imeOptions="actionDone|flagNoFullscreen|flagNoExtractUi" />

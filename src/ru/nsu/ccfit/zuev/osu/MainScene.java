@@ -7,8 +7,8 @@ import android.net.Uri;
 import android.os.PowerManager;
 import android.util.Log;
 
-import com.edlplan.ui.fragment.ConfirmDialogFragment;
 import com.reco1l.osu.Execution;
+import com.reco1l.osu.ui.Dialog;
 import com.reco1l.osu.ui.MainMenu;
 
 import com.reco1l.osu.beatmaplisting.BeatmapListing;
@@ -188,16 +188,21 @@ public class MainScene implements IUpdateHandler {
 
 
             @Override
-            public boolean onAreaTouched(final TouchEvent pSceneTouchEvent,
-                                         final float pTouchAreaLocalX, final float pTouchAreaLocalY) {
+            public boolean onAreaTouched(final TouchEvent pSceneTouchEvent, final float pTouchAreaLocalX, final float pTouchAreaLocalY) {
                 if (pSceneTouchEvent.isActionDown()) {
-                    new ConfirmDialogFragment().setMessage(R.string.dialog_visit_osu_website_message).showForResult(
-                            isAccepted -> {
-                                if (isAccepted) {
-                                    Intent browserIntent = new Intent(Intent.ACTION_VIEW, Uri.parse("https://osu.ppy.sh"));
-                                    GlobalManager.getInstance().getMainActivity().startActivity(browserIntent);
-                                }
-                            }
+
+                    Dialog.showAlert("Alert", context.getString(R.string.dialog_visit_osu_website_message), true, null,
+
+                        "Yes", dialog -> {
+                            Intent browserIntent = new Intent(Intent.ACTION_VIEW, Uri.parse("https://osu.ppy.sh"));
+                            GlobalManager.getInstance().getMainActivity().startActivity(browserIntent);
+                            dialog.dismiss();
+                            return null;
+                        },
+                        "No", dialog -> {
+                            dialog.dismiss();
+                            return null;
+                        }
                     );
                     return true;
                 }
@@ -211,17 +216,23 @@ public class MainScene implements IUpdateHandler {
                 "            Global Ranking\n   Provided by iBancho") {
 
             @Override
-            public boolean onAreaTouched(final TouchEvent pSceneTouchEvent,
-                                         final float pTouchAreaLocalX, final float pTouchAreaLocalY) {
+            public boolean onAreaTouched(final TouchEvent pSceneTouchEvent, final float pTouchAreaLocalX, final float pTouchAreaLocalY) {
                 if (pSceneTouchEvent.isActionDown()) {
-                    new ConfirmDialogFragment().setMessage(R.string.dialog_visit_osudroid_website_message).showForResult(
-                            isAccepted -> {
-                                if (isAccepted) {
-                                    Intent browserIntent = new Intent(Intent.ACTION_VIEW, Uri.parse("https://" + OnlineManager.hostname));
-                                    GlobalManager.getInstance().getMainActivity().startActivity(browserIntent);
-                                }
-                            }
+
+                    Dialog.showAlert("Alert", context.getString(R.string.dialog_visit_osudroid_website_message), true, null,
+
+                        "Yes", dialog -> {
+                            Intent browserIntent = new Intent(Intent.ACTION_VIEW, Uri.parse("https://" + OnlineManager.hostname));
+                            GlobalManager.getInstance().getMainActivity().startActivity(browserIntent);
+                            dialog.dismiss();
+                            return null;
+                        },
+                        "No", dialog -> {
+                            dialog.dismiss();
+                            return null;
+                        }
                     );
+
                     return true;
                 }
                 return false;
@@ -911,13 +922,19 @@ public class MainScene implements IUpdateHandler {
     }
 
     public void showExitDialog() {
-        GlobalManager.getInstance().getMainActivity().runOnUiThread(() -> new ConfirmDialogFragment().setMessage(R.string.dialog_exit_message).showForResult(
-                isAccepted -> {
-                    if (isAccepted) {
-                        exit();
-                    }
-                }
-        ));
+
+        Dialog.showAlert("Exit", context.getString(R.string.dialog_exit_message), true, null,
+
+            "Yes", dialog -> {
+                dialog.dismiss();
+                exit();
+                return null;
+            },
+            "Yes", dialog -> {
+                dialog.dismiss();
+                return null;
+            }
+        );
     }
 
     public void exit() {
@@ -971,20 +988,6 @@ public class MainScene implements IUpdateHandler {
                 GlobalManager.getInstance().getMainActivity().finish();
             }
         }, 3000, TimeUnit.MILLISECONDS);
-    }
-
-    public void restart() {
-        MainActivity mActivity = GlobalManager.getInstance().getMainActivity();
-        mActivity.runOnUiThread(() -> new ConfirmDialogFragment().setMessage(R.string.dialog_dither_confirm).showForResult(
-                isAccepted -> {
-                    if (isAccepted) {
-                        Intent mIntent = new Intent(mActivity, MainActivity.class);
-                        mIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
-                        mActivity.startActivity(mIntent);
-                        System.exit(0);
-                    }
-                }
-        ));
     }
 
     public Scene getScene() {

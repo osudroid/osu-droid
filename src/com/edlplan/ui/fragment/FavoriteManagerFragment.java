@@ -16,7 +16,7 @@ import com.edlplan.favorite.FavoriteLibrary;
 import com.edlplan.framework.easing.Easing;
 import com.edlplan.ui.BaseAnimationListener;
 import com.edlplan.ui.EasingHelper;
-import com.edlplan.ui.InputDialog;
+import com.reco1l.osu.ui.Dialog;
 import com.reco1l.toolkt.android.Texts;
 
 import java.util.ArrayList;
@@ -48,17 +48,18 @@ public class FavoriteManagerFragment extends BaseFragment {
 
         ((RecyclerView) findViewById(R.id.main_recycler_view)).setLayoutManager(layoutManager);
 
-        Button newFolder = findViewById(R.id.new_folder);
-        newFolder.setOnClickListener(v -> {
-            InputDialog dialog = new InputDialog(getContext());
-            dialog.showForResult(s -> {
-                if (s.isEmpty()) return;
-                if (FavoriteLibrary.get().getMaps(s) == null && !s.equals(StringTable.get(R.string.favorite_default))) {
-                    FavoriteLibrary.get().addFolder(s);
-                    adapter.add(s);
-                }
-            });
-        });
+        findViewById(R.id.new_folder).setOnClickListener(v -> Dialog.showPrompt("New folder", null, true, input -> {
+
+            if (input.isEmpty())
+                return null;
+
+            if (FavoriteLibrary.get().getMaps(input) == null && !input.equals(StringTable.get(R.string.favorite_default))) {
+                FavoriteLibrary.get().addFolder(input);
+                adapter.add(input);
+            }
+
+            return null;
+        }));
 
         if (onLoadViewFunc != null) {
             onLoadViewFunc.run();

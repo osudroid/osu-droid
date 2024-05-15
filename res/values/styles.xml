@@ -16,8 +16,6 @@
         <item name="android:windowBackground">#000</item>
         <item name="android:forceDarkAllowed" tools:targetApi="q">false</item>
 
-        <item name="android:textViewStyle">@style/textView</item>
-        <item name="editTextStyle">@style/edittext</item>
         <item name="checkboxStyle">@style/checkbox</item>
         <item name="seekBarStyle">@style/seekbar</item>
         <item name="buttonStyle">@style/button</item>
@@ -35,12 +33,7 @@
 
 
     <!--Elements-->
-    <style name="textView" parent="Widget.AppCompat.TextView">
-        <item name="android:textColor">@color/textview</item>
-        <item name="android:textSize">12sp</item>
-    </style>
-
-    <style name="edittext" parent="Widget.AppCompat.EditText">
+    <style name="editText" parent="Widget.AppCompat.EditText">
         <item name="android:layout_centerHorizontal">true</item>
         <item name="android:layout_centerVertical">true</item>
         <item name="android:background">@drawable/rounded_rect</item>
@@ -107,26 +100,31 @@
         <item name="allowDividerAbove">false</item>
         <item name="allowDividerBelow">false</item>
     </style>
+
     <style name="settings_preference_dialog" parent="@style/Preference.DialogPreference">
         <item name="layout">@layout/settings_preference</item>
         <item name="allowDividerAbove">false</item>
         <item name="allowDividerBelow">false</item>
     </style>
+
     <style name="settings_preference_edittext" parent="@style/Preference.DialogPreference.EditTextPreference">
         <item name="layout">@layout/settings_preference</item>
         <item name="allowDividerAbove">false</item>
         <item name="allowDividerBelow">false</item>
     </style>
+
     <style name="settings_preference_checkbox" parent="@style/Preference.CheckBoxPreference.Material">
         <item name="layout">@layout/settings_preference_checkbox</item>
         <item name="allowDividerAbove">false</item>
         <item name="allowDividerBelow">false</item>
     </style>
+
     <style name="settings_preference_seekbar" parent="@style/Preference.SeekBarPreference.Material">
         <item name="layout">@layout/settings_preference_seekbar</item>
         <item name="allowDividerAbove">false</item>
         <item name="allowDividerBelow">false</item>
     </style>
+
     <style name="settings_preference_category" parent="@style/Preference.Category.Material">
         <item name="layout">@layout/settings_preference_category</item>
         <item name="allowDividerAbove">false</item>
@@ -188,7 +186,7 @@
         <item name="android:paddingTop">4dp</item>
         <item name="android:paddingBottom">4dp</item>
         <item name="android:textColor">#FFB2B2CC</item>
-        <item name="android:textSize">12dp</item>
+        <item name="android:textSize">12sp</item>
     </style>
 
 
