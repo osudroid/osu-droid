@@ -12,6 +12,7 @@ import android.view.View.OnKeyListener
 import android.view.ViewGroup
 import android.view.inputmethod.EditorInfo
 import android.view.inputmethod.InputMethodManager
+import android.widget.Button
 import android.widget.EditText
 import android.widget.LinearLayout
 import android.widget.TextView
@@ -80,6 +81,10 @@ class RoomChat : BaseFragment(), OnEditorActionListener, OnKeyListener
         recyclerView = findViewById(R.id.chat_text)!!
         recyclerView.layoutManager = LinearLayoutManager(context, RecyclerView.VERTICAL, true)
         recyclerView.adapter = adapter
+
+        findViewById<Button>(R.id.chat_send)!!.setOnClickListener {
+            sendMessage()
+        }
 
         findViewById<View>(R.id.frg_header)!!.animate().cancel()
         findViewById<View>(R.id.frg_header)!!.alpha = 0f
