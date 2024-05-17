@@ -18,7 +18,6 @@
         android:gravity="center"
         android:drawableTint="#8282A8"
         android:drawablePadding="4dp"
-        tools:drawableRight="@drawable/deployed_code_account_16px"
         tools:text="Player name"
         tools:visibility="visible" />
 

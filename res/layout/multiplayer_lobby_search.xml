@@ -1,114 +1,76 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:orientation="vertical"
-                android:id="@+id/frg_background">
-
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/frg_background"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical">
 
     <RelativeLayout
-            android:id="@+id/brightnessPreviewLayout"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:visibility="gone">
+        android:id="@+id/brightnessPreviewLayout"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:visibility="gone">
 
         <View
-                android:id="@+id/brightnessPreview"
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"/>
+            android:id="@+id/brightnessPreview"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent" />
 
         <TextView
-                android:id="@+id/brightPreviewText"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_centerHorizontal="true"
-                android:layout_margin="20dp"
-                android:background="#000000"
-                android:padding="5dp"
-                android:textColor="#FFFFFF"
-                android:textStyle="bold"/>
+            android:id="@+id/brightPreviewText"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_centerHorizontal="true"
+            android:layout_margin="20dp"
+            android:background="#000000"
+            android:padding="5dp"
+            android:textColor="#FFFFFF"
+            android:textStyle="bold" />
     </RelativeLayout>
 
 
     <LinearLayout
-            android:id="@+id/fullLayout"
+        android:id="@+id/fullLayout"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        android:gravity="center"
+        android:orientation="vertical">
+
+        <Button
+            android:id="@+id/showMoreButton"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:background="@drawable/rounded_half_top"
+            android:drawableLeft="@drawable/search_24px"
+            android:gravity="center"
+            android:minWidth="140dp"
+            android:text="Search" />
+
+        <FrameLayout
+            android:id="@+id/optionBody"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_alignParentBottom="true"
-            android:gravity="center"
-            android:orientation="vertical"
-            android:translationY="60dp">
-
-
-        <RelativeLayout
-                android:id="@+id/frg_header"
-                android:layout_width="match_parent"
-                android:layout_height="40dp">
-
-            <RelativeLayout
-                    android:id="@+id/showMoreButton"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_alignParentBottom="true"
-                    android:layout_centerHorizontal="true">
-
-                <View
-                        android:layout_width="100dp"
-                        android:layout_height="25dp"
-                        android:background="#99E63E8C"/>
-
-                <com.edlplan.ui.TriangleEffectView
-                        android:layout_width="100dp"
-                        android:layout_height="25dp"
-                        android:alpha="0.5"/>
-
-                <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_centerInParent="true"
-                        android:text="Search"
-                        android:textColor="#FFFFFFFF"
-                        android:textSize="15sp"
-                        android:textStyle="bold"/>
-
-            </RelativeLayout>
-        </RelativeLayout>
-
-        <LinearLayout
-                android:id="@+id/optionBody"
-                android:layout_width="match_parent"
-                android:layout_height="60dp"
-                android:background="@color/frgBodyBackgroundLight"
-                android:clickable="true"
-                android:orientation="vertical">
-
-            <RelativeLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content">
-
-                <View
-                        android:layout_width="match_parent"
-                        android:layout_height="5dp"
-                        android:background="@color/triangleBackground"/>
-
-                <com.edlplan.ui.TriangleEffectView
-                        android:layout_width="match_parent"
-                        android:layout_height="5dp"/>
-            </RelativeLayout>
+            android:background="@color/colorPrimary"
+            android:clickable="true"
+            android:visibility="gone"
+            tools:visibility="visible">
 
             <EditText
-                    android:id="@+id/search_field"
-                    android:layout_width="match_parent"
-                    android:layout_height="60dp"
-                    android:padding="16dp"
-                    android:layout_alignParentBottom="true"
-                    android:hint="Search..."
-                    android:singleLine="true"
-                    android:imeOptions="actionSend"
-                    android:background="#FFF"
-                    android:textColor="#000000"
-            />
+                android:id="@+id/search_field"
+                style="@style/editText"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_margin="12dp"
+                android:drawableRight="@drawable/search_24px"
+                android:hint="Search..."
+                android:imeOptions="actionSend"
+                android:singleLine="true"
+                android:textColor="#000000" />
 
-        </LinearLayout>
+        </FrameLayout>
+
     </LinearLayout>
+
 </RelativeLayout>
