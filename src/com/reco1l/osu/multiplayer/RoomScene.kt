@@ -611,7 +611,7 @@ object RoomScene : Scene(), IRoomEventListener, IPlayerEventListener
         player = null
 
         // Clearing chat
-        chat.log.clear()
+        chat.clear()
         chat.dismiss()
 
         mainThread {

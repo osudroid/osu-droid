@@ -47,7 +47,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:background="@null"
-            android:drawableLeft="@drawable/shield_person_24px"
+            android:drawableLeft="@drawable/crown_24px"
             android:text="Make room host" />
 
         <Button
