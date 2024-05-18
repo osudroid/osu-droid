@@ -85,17 +85,7 @@ class RoomChat : BaseFragment(), OnEditorActionListener, OnKeyListener
         findViewById<Button>(R.id.chat_send)!!.setOnClickListener {
             sendMessage()
         }
-
-        findViewById<View>(R.id.frg_header)!!.animate().cancel()
-        findViewById<View>(R.id.frg_header)!!.alpha = 0f
-        findViewById<View>(R.id.frg_header)!!.translationY = 100f
-        findViewById<View>(R.id.frg_header)!!.animate()
-                .alpha(1f)
-                .translationY(0f)
-                .setDuration(200)
-                .setInterpolator(EasingHelper.asInterpolator(Easing.InOutQuad))
-                .start()
-    }
+     }
 
 
     fun clear() {
