@@ -4,10 +4,13 @@ import android.content.DialogInterface
 import android.content.DialogInterface.*
 import android.view.View
 import android.widget.EditText
+import android.widget.FrameLayout
 import androidx.appcompat.app.AlertDialog
 import com.reco1l.osu.mainThread
 import com.reco1l.toolkt.android.dp
+import com.reco1l.toolkt.android.ensureLayoutParams
 import com.reco1l.toolkt.android.horizontalMargin
+import com.reco1l.toolkt.android.horizontalPadding
 import ru.nsu.ccfit.zuev.osu.GlobalManager
 
 
@@ -66,14 +69,19 @@ object Dialog {
 
     ) = mainThread {
 
-        val input = EditText(GlobalManager.getInstance().mainActivity)
-        input.horizontalMargin = 20.dp
+        val context = GlobalManager.getInstance().mainActivity
+
+        val frame = FrameLayout(context)
+        frame.horizontalPadding = 20.dp
+
+        val input = EditText(context)
+        frame.addView(input)
 
         showAlert(
             title = title,
             message = message,
             cancelable = cancelable,
-            view = input,
+            view = frame,
             positiveButtonText = "Accept",
             onPositiveButtonClick = {
                 it.dismiss()
