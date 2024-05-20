@@ -18,10 +18,7 @@ import androidx.core.content.getSystemService
 import androidx.core.view.forEach
 import androidx.core.view.get
 import androidx.preference.CheckBoxPreference
-import androidx.preference.EditTextPreference
-import androidx.preference.ListPreference
 import androidx.preference.Preference
-import com.edlplan.ui.SkinPathPreference
 import com.edlplan.ui.fragment.LoadingFragment
 import com.google.android.material.snackbar.Snackbar
 import com.reco1l.ibancho.LobbyAPI
@@ -173,7 +170,7 @@ class SettingsFragment : com.edlplan.ui.fragment.SettingsFragment() {
     override fun onBindPreferences() = when(section) {
 
         Section.General -> {
-            findPreference<EditTextPreference>("onlinePassword")!!.setOnBindEditTextListener {
+            findPreference<InputPreference>("onlinePassword")!!.setOnTextInputBind {
                 it.inputType = TYPE_CLASS_TEXT or TYPE_TEXT_VARIATION_PASSWORD
             }
 
@@ -189,14 +186,15 @@ class SettingsFragment : com.edlplan.ui.fragment.SettingsFragment() {
         }
 
         Section.Gameplay -> {
-            findPreference<SkinPathPreference>("skinPath")!!.apply {
+            findPreference<SelectPreference>("skinPath")!!.apply {
 
-                reloadSkinList()
+                val skinMain = File(Config.getSkinTopPath())
+                val skins = Config.getSkins().map { Option(it.key, it.value) }.toMutableList()
+                skins.add(0, Option(skinMain.name + " (Default)", skinMain.path))
+
+                options = skins
+
                 setOnPreferenceChangeListener { _, newValue ->
-
-                    if (GlobalManager.getInstance().skinNow == newValue.toString()) {
-                        return@setOnPreferenceChangeListener false
-                    }
 
                     val loading = LoadingFragment()
                     loading.show()
@@ -232,9 +230,9 @@ class SettingsFragment : com.edlplan.ui.fragment.SettingsFragment() {
         }
 
         Section.Advanced -> {
-            findPreference<EditTextPreference>("skinTopPath")!!.setOnPreferenceChangeListener { it, newValue ->
+            findPreference<InputPreference>("skinTopPath")!!.setOnPreferenceChangeListener { it, newValue ->
 
-                it as EditTextPreference
+                it as InputPreference
 
                 if (newValue.toString().trim { it <= ' ' }.isEmpty()) {
                     it.text = Config.getCorePath() + "Skin/"
@@ -261,7 +259,7 @@ class SettingsFragment : com.edlplan.ui.fragment.SettingsFragment() {
 
         Section.Player -> {
 
-            findPreference<ListPreference>("player_team")!!.apply {
+            findPreference<SelectPreference>("player_team")!!.apply {
                 isEnabled = Multiplayer.room!!.teamMode == TeamMode.TEAM_VS_TEAM
                 value = Multiplayer.player!!.team?.ordinal?.toString()
 
@@ -295,7 +293,7 @@ class SettingsFragment : com.edlplan.ui.fragment.SettingsFragment() {
                 true
             }
 
-            findPreference<EditTextPreference>("room_name")!!.apply {
+            findPreference<InputPreference>("room_name")!!.apply {
 
                 text = Multiplayer.room!!.name
 
@@ -311,7 +309,7 @@ class SettingsFragment : com.edlplan.ui.fragment.SettingsFragment() {
                 }
             }
 
-            findPreference<EditTextPreference>("room_password")!!.apply {
+            findPreference<InputPreference>("room_password")!!.apply {
                 text = null
 
                 setOnPreferenceChangeListener { _, newValue ->
@@ -338,7 +336,7 @@ class SettingsFragment : com.edlplan.ui.fragment.SettingsFragment() {
                 }
             }
 
-            findPreference<ListPreference>("room_versus_mode")!!.apply {
+            findPreference<SelectPreference>("room_versus_mode")!!.apply {
                 value = Multiplayer.room!!.teamMode.ordinal.toString()
 
                 setOnPreferenceChangeListener { _, newValue ->
@@ -347,7 +345,7 @@ class SettingsFragment : com.edlplan.ui.fragment.SettingsFragment() {
                 }
             }
 
-            findPreference<ListPreference>("room_win_condition")!!.apply {
+            findPreference<SelectPreference>("room_win_condition")!!.apply {
                 value = Multiplayer.room!!.winCondition.ordinal.toString()
 
                 setOnPreferenceChangeListener { _, newValue ->

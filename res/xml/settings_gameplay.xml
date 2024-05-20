@@ -4,14 +4,14 @@
 
     <PreferenceCategory android:title="Skin">
 
-        <com.edlplan.ui.SkinPathPreference
+        <com.reco1l.osu.ui.SelectPreference
             android:entries="@array/placeholder_array"
             android:entryValues="@array/placeholder_array"
             android:key="skinPath"
             android:summary="@string/opt_skinpath_summary"
             android:title="@string/opt_skinpath_title" />
 
-        <ListPreference
+        <com.reco1l.osu.ui.SelectPreference
             android:defaultValue="1"
             android:entries="@array/spinner_style_names"
             android:entryValues="@array/spinner_style_values"
@@ -84,7 +84,7 @@
             android:summary="Show live leaderboard while playing"
             android:title="Show leaderboard" />
 
-        <ListPreference
+        <com.reco1l.osu.ui.SelectPreference
             android:defaultValue="0"
             android:entries="@array/error_meter_display_names"
             android:entryValues="@array/error_meter_display_values"

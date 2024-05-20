@@ -1,97 +1,203 @@
 package com.reco1l.osu.ui
 
-import android.content.DialogInterface
-import android.content.DialogInterface.*
-import android.view.View
+import android.graphics.Color
+import android.graphics.drawable.Drawable
+import android.view.ContextThemeWrapper
+import android.view.ViewGroup.LayoutParams.MATCH_PARENT
+import android.view.inputmethod.EditorInfo
+import android.widget.Button
 import android.widget.EditText
-import android.widget.FrameLayout
-import androidx.appcompat.app.AlertDialog
-import com.reco1l.osu.mainThread
+import android.widget.LinearLayout
+import android.widget.TextView
+import androidx.core.view.isVisible
+import androidx.core.widget.doOnTextChanged
+import com.edlplan.ui.fragment.BaseFragment
 import com.reco1l.toolkt.android.dp
-import com.reco1l.toolkt.android.ensureLayoutParams
-import com.reco1l.toolkt.android.horizontalMargin
-import com.reco1l.toolkt.android.horizontalPadding
-import ru.nsu.ccfit.zuev.osu.GlobalManager
+import com.reco1l.toolkt.android.drawableLeft
+import com.reco1l.toolkt.android.fontColor
+import com.reco1l.toolkt.android.layoutWidth
+import ru.nsu.ccfit.zuev.osuplus.R
 
 
-object Dialog {
+data class DialogButton(
+    val text: String,
+    val icon: Drawable? = null,
+    val tint: Int = Color.WHITE,
+    val clickListener: (MessageDialog) -> Unit
+)
 
-    @JvmStatic
-    @JvmOverloads
-    fun showAlert(
+open class MessageDialog : BaseFragment() {
 
-        title: String,
-        message: String? = null,
-        cancelable: Boolean = true,
-        view: View? = null,
 
-        // We can use pairs of button text and click listener for this but the Java syntax to do
-        // pairs is genuinely a pain in the ass.
+    override val layoutID = R.layout.dialog_message_fragment
 
-        positiveButtonText: String? = null,
-        onPositiveButtonClick: ((DialogInterface) -> Unit)? = null,
-        negativeButtonText: String? = null,
-        onNegativeButtonClick: ((DialogInterface) -> Unit)? = null,
 
-        onCancel: OnCancelListener? = null,
+    protected var title: CharSequence = "Alert"
 
-    ) = mainThread {
+    protected var message: CharSequence = ""
 
-        AlertDialog.Builder(GlobalManager.getInstance().mainActivity).apply {
+    protected var allowDismiss = true
 
-            setView(view)
-            setTitle(title)
-            setMessage(message)
-            setCancelable(cancelable)
-            setOnCancelListener(onCancel)
+    protected var onDismiss: (() -> Unit)? = null
 
-            if (positiveButtonText != null && onPositiveButtonClick != null) {
-                setPositiveButton(positiveButtonText) { dialog, _ -> onPositiveButtonClick(dialog) }
-            }
+    protected var buttons = mutableListOf<DialogButton>()
 
-            if (negativeButtonText != null && onNegativeButtonClick != null) {
-                setNegativeButton(negativeButtonText) { dialog, _ -> onNegativeButtonClick(dialog) }
-            }
 
-        }.show()
+    override fun onLoadView() {
+
+        findViewById<TextView>(R.id.title)!!.text = title
+        findViewById<TextView>(R.id.message)?.text = message
+
+        val buttonLayout = findViewById<LinearLayout>(R.id.button_layout)!!
+
+        for (button in buttons) {
+            buttonLayout.addView(Button(ContextThemeWrapper(context, R.style.button)).apply {
+
+                minWidth = 300.dp
+                background = null
+                layoutWidth = MATCH_PARENT
+
+                text = button.text
+                fontColor = button.tint
+                drawableLeft = button.icon?.apply { setTint(button.tint) }
+
+                setOnClickListener { button.clickListener(this@MessageDialog) }
+            })
+        }
 
     }
 
-    @JvmStatic
+
+    /**
+     * The text to be show displayed in the dialog title.
+     */
+    fun setTitle(text: String): MessageDialog {
+        title = text
+        return this
+    }
+
+    /**
+     * The text to be show displayed in the dialog message.
+     */
+    fun setMessage(text: String): MessageDialog {
+        message = text
+        return this
+    }
+
+    /**
+     * Whether the dialog is cancelable or not.
+     */
+    fun setAllowDismiss(value: Boolean): MessageDialog {
+        allowDismiss = value
+        return this
+    }
+
+    /**
+     * The function to be called when the dialog is dismissed.
+     */
+    fun setOnDismiss(action: () -> Unit): MessageDialog {
+        onDismiss = action
+        return this
+    }
+
+    /**
+     * Adds a new button.
+     */
     @JvmOverloads
-    fun showPrompt(
+    open fun addButton(text: String, iconDrawable: Drawable? = null, tint: Int = Color.WHITE, clickListener: (MessageDialog) -> Unit): MessageDialog {
+        buttons.add(DialogButton(text, iconDrawable, tint, clickListener))
+        return this
+    }
 
-        title: String,
-        message: String? = null,
-        cancelable: Boolean = true,
-        onInsert: (String) -> Unit,
-        onCancel: OnCancelListener? = null,
 
-    ) = mainThread {
+    override fun callDismissOnBackPress() {
+        if (allowDismiss) {
+            super.callDismissOnBackPress()
+        }
+    }
 
-        val context = GlobalManager.getInstance().mainActivity
+    override fun dismiss() {
+        onDismiss?.invoke()
+        super.dismiss()
+    }
+}
 
-        val frame = FrameLayout(context)
-        frame.horizontalPadding = 20.dp
 
-        val input = EditText(context)
-        frame.addView(input)
+open class PromptDialog : MessageDialog() {
 
-        showAlert(
-            title = title,
-            message = message,
-            cancelable = cancelable,
-            view = frame,
-            positiveButtonText = "Accept",
-            onPositiveButtonClick = {
-                it.dismiss()
-                onInsert(input.text.toString())
-            },
-            negativeButtonText = "Cancel",
-            onNegativeButtonClick = DialogInterface::dismiss,
-            onCancel = onCancel
-        )
+    override val layoutID = R.layout.dialog_input_fragment
+
+
+    /**
+     * The text input by user.
+     */
+    var input: String? = null
+        protected set
+
+
+    private var hint: String? = null
+
+    private var onTextChanged: ((PromptDialog) -> Unit)? = null
+
+    private var onTextInputBind: ((EditText) -> Unit)? = null
+
+
+    override fun onLoadView() {
+
+        super.onLoadView()
+
+        findViewById<TextView>(R.id.message)!!.isVisible = message.isNotBlank()
+        findViewById<EditText>(R.id.input)!!.apply {
+
+            setText(input)
+
+            doOnTextChanged { text, _, _, _ ->
+                input = text.toString()
+                onTextChanged?.invoke(this@PromptDialog)
+            }
+
+            onTextInputBind?.invoke(this)
+        }
+
+    }
+
+
+
+    fun setInput(text: String?): PromptDialog {
+        input = text
+        return this
+    }
+
+    /**
+     * The text to be show displayed in the input hint.
+     */
+    fun setHint(text: String): PromptDialog {
+        hint = text
+        return this
+    }
+
+    /**
+     * The function to be called when the text input is changed.
+     */
+    fun setOnTextChanged(action: (PromptDialog) -> Unit): PromptDialog {
+        onTextChanged = action
+        return this
+    }
+
+    /**
+     * The function to be called when the EditText is created.
+     */
+    fun setOnTextInputBind(action: (EditText) -> Unit): PromptDialog {
+        onTextInputBind = action
+        return this
+    }
+
+
+    override fun addButton(text: String, iconDrawable: Drawable?, tint: Int, clickListener: (MessageDialog) -> Unit): PromptDialog {
+        return super.addButton(text, iconDrawable, tint, clickListener) as PromptDialog
     }
 
 }
+
+
 

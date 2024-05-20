@@ -8,10 +8,10 @@ import android.os.PowerManager;
 import android.util.Log;
 
 import com.reco1l.osu.Execution;
-import com.reco1l.osu.ui.Dialog;
 import com.reco1l.osu.ui.MainMenu;
 
 import com.reco1l.osu.beatmaplisting.BeatmapListing;
+import com.reco1l.osu.ui.MessageDialog;
 import com.rian.osu.beatmap.parser.BeatmapParser;
 import org.anddev.andengine.engine.handler.IUpdateHandler;
 import org.anddev.andengine.entity.IEntity;
@@ -191,19 +191,20 @@ public class MainScene implements IUpdateHandler {
             public boolean onAreaTouched(final TouchEvent pSceneTouchEvent, final float pTouchAreaLocalX, final float pTouchAreaLocalY) {
                 if (pSceneTouchEvent.isActionDown()) {
 
-                    Dialog.showAlert("Alert", context.getString(R.string.dialog_visit_osu_website_message), true, null,
-
-                        "Yes", dialog -> {
+                    new MessageDialog()
+                        .setMessage(context.getString(R.string.dialog_visit_osu_website_message))
+                        .addButton("Yes", dialog -> {
                             Intent browserIntent = new Intent(Intent.ACTION_VIEW, Uri.parse("https://osu.ppy.sh"));
                             GlobalManager.getInstance().getMainActivity().startActivity(browserIntent);
                             dialog.dismiss();
                             return null;
-                        },
-                        "No", dialog -> {
+                        })
+                        .addButton("No", dialog -> {
                             dialog.dismiss();
                             return null;
-                        }
-                    );
+                        })
+                        .show();
+
                     return true;
                 }
                 return false;
@@ -211,27 +212,25 @@ public class MainScene implements IUpdateHandler {
         };
         author.setPosition(10, Config.getRES_HEIGHT() - author.getHeight() - 10);
 
-        final Text yasonline = new Text(720, 530, ResourceManager
-                .getInstance().getFont("font"),
-                "            Global Ranking\n   Provided by iBancho") {
+        final Text yasonline = new Text(720, 530, ResourceManager.getInstance().getFont("font"), "            Global Ranking\n   Provided by iBancho") {
 
             @Override
             public boolean onAreaTouched(final TouchEvent pSceneTouchEvent, final float pTouchAreaLocalX, final float pTouchAreaLocalY) {
                 if (pSceneTouchEvent.isActionDown()) {
 
-                    Dialog.showAlert("Alert", context.getString(R.string.dialog_visit_osudroid_website_message), true, null,
-
-                        "Yes", dialog -> {
+                    new MessageDialog()
+                        .setMessage(context.getString(R.string.dialog_visit_osudroid_website_message))
+                        .addButton("Yes", dialog -> {
                             Intent browserIntent = new Intent(Intent.ACTION_VIEW, Uri.parse("https://" + OnlineManager.hostname));
                             GlobalManager.getInstance().getMainActivity().startActivity(browserIntent);
                             dialog.dismiss();
                             return null;
-                        },
-                        "No", dialog -> {
+                        })
+                        .addButton("No", dialog -> {
                             dialog.dismiss();
                             return null;
-                        }
-                    );
+                        })
+                        .show();
 
                     return true;
                 }
@@ -923,18 +922,19 @@ public class MainScene implements IUpdateHandler {
 
     public void showExitDialog() {
 
-        Dialog.showAlert("Exit", context.getString(R.string.dialog_exit_message), true, null,
-
-            "Yes", dialog -> {
+        new MessageDialog()
+            .setTitle("Exit")
+            .setMessage(context.getString(R.string.dialog_exit_message))
+            .addButton("Yes", dialog -> {
                 dialog.dismiss();
                 exit();
                 return null;
-            },
-            "Yes", dialog -> {
+            })
+            .addButton("No", dialog -> {
                 dialog.dismiss();
                 return null;
-            }
-        );
+            })
+            .show();
     }
 
     public void exit() {

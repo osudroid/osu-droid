@@ -17,7 +17,7 @@ import com.edlplan.replay.OsuDroidReplay;
 import com.edlplan.replay.OsuDroidReplayPack;
 import com.edlplan.ui.BaseAnimationListener;
 import com.edlplan.ui.EasingHelper;
-import com.reco1l.osu.ui.Dialog;
+import com.reco1l.osu.ui.MessageDialog;
 
 import java.io.File;
 import java.util.List;
@@ -78,34 +78,39 @@ public class ScoreMenuFragment extends BaseFragment {
                 }
             }
         });
-        findViewById(R.id.deleteReplay).setOnClickListener(v -> Dialog.showAlert("Delete replay", "Are you sure", true, null,
 
-            "Yes", d -> {
-                var replays = OdrDatabase.get().getReplayById(scoreId);
-                if (replays.isEmpty()) {
-                    return null;
-                }
+        findViewById(R.id.deleteReplay).setOnClickListener(v -> {
+            new MessageDialog()
+                .setTitle("Delete replay").setMessage("Are you sure?")
+                .addButton("Yes", dialog -> {
 
-                try {
-                    ScoreMenuFragment.this.dismiss();
-
-                    if (OdrDatabase.get().deleteReplay(scoreId) == 0) {
-                        Snackbar.make(v, "Failed to delete replay!", 1500).show();
-                    } else {
-                        Snackbar.make(v, R.string.menu_deletescore_delete_success, 1500).show();
+                    var replays = OdrDatabase.get().getReplayById(scoreId);
+                    if (replays.isEmpty()) {
+                        return null;
                     }
-                } catch (Exception e) {
-                    Log.e("ScoreMenuFragment", "Failed to delete replay", e);
-                    Toast.makeText(v.getContext(), "Failed to delete replay!", Toast.LENGTH_SHORT).show();
-                }
-                return null;
-            },
 
-            "Cancel", d -> {
-                d.dismiss();
-                return null;
-            }
-        ));
+                    try {
+                        ScoreMenuFragment.this.dismiss();
+
+                        if (OdrDatabase.get().deleteReplay(scoreId) == 0) {
+                            Snackbar.make(v, "Failed to delete replay!", 1500).show();
+                        } else {
+                            Snackbar.make(v, R.string.menu_deletescore_delete_success, 1500).show();
+                        }
+                    } catch (Exception e) {
+                        Log.e("ScoreMenuFragment", "Failed to delete replay", e);
+                        Toast.makeText(v.getContext(), "Failed to delete replay!", Toast.LENGTH_SHORT).show();
+                    }
+
+                    return null;
+                })
+                .addButton("Cancel", dialog -> {
+                    dialog.dismiss();
+                    return null;
+                })
+                .show();
+        });
+
         playOnLoadAnim();
     }
 

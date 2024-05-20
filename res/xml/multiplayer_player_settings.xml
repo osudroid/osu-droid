@@ -4,7 +4,7 @@
 
     <PreferenceCategory android:title="Team">
 
-        <ListPreference
+        <com.reco1l.osu.ui.SelectPreference
             android:entries="@array/team_names"
             android:entryValues="@array/team_values"
             android:key="player_team"

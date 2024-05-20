@@ -5,17 +5,17 @@
 
     <PreferenceCategory android:title="Directories">
 
-        <EditTextPreference
+        <com.reco1l.osu.ui.InputPreference
             android:key="corePath"
             android:summary="@string/opt_corepath_summary"
             android:title="@string/opt_corepath_title" />
 
-        <EditTextPreference
+        <com.reco1l.osu.ui.InputPreference
             android:key="skinTopPath"
             android:summary="@string/opt_skin_top_path_summary"
             android:title="@string/opt_skin_top_path_title" />
 
-        <EditTextPreference
+        <com.reco1l.osu.ui.InputPreference
             android:defaultValue="/sdcard/osu!droid/Songs"
             android:key="directory"
             android:summary="@string/opt_directory_summary"

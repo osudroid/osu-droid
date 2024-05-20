@@ -2,7 +2,7 @@ package ru.nsu.ccfit.zuev.osu.online;
 
 
 import com.edlplan.ui.fragment.WebViewFragment;
-import com.reco1l.osu.ui.Dialog;
+import com.reco1l.osu.ui.MessageDialog;
 
 import org.anddev.andengine.entity.Entity;
 import org.anddev.andengine.entity.primitive.Rectangle;
@@ -49,18 +49,18 @@ public class OnlinePanel extends Entity {
                     this.setColor(0.2f, 0.2f, 0.2f, 0.5f);
                     if (!moved && OnlineManager.getInstance().isStayOnline()) {
 
-                        Dialog.showAlert("Alert", StringTable.get(R.string.dialog_visit_profile_page), true, null,
-
-                            "Yes", dialog -> {
+                        new MessageDialog()
+                            .setMessage(StringTable.get(R.string.dialog_visit_profile_page))
+                            .addButton("Yes", dialog -> {
                                 new WebViewFragment().setURL(WebViewFragment.PROFILE_URL + OnlineManager.getInstance().getUserId()).show();
                                 dialog.dismiss();
                                 return null;
-                            },
-                            "No", dialog -> {
+                            })
+                            .addButton("No", dialog -> {
                                 dialog.dismiss();
                                 return null;
-                            }
-                        );
+                            })
+                            .show();
                     }
                     return true;
                 }

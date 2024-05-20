@@ -11,7 +11,7 @@ import android.widget.EditText
 import com.edlplan.framework.easing.Easing
 import com.edlplan.ui.BaseAnimationListener
 import com.edlplan.ui.EasingHelper
-import com.reco1l.osu.ui.Dialog
+import com.reco1l.osu.ui.MessageDialog
 import ru.nsu.ccfit.zuev.osu.BeatmapProperties
 import ru.nsu.ccfit.zuev.osu.GlobalManager
 import ru.nsu.ccfit.zuev.osu.PropertiesLibrary
@@ -107,19 +107,22 @@ class PropsMenuFragment : BaseFragment(), IPropsMenu {
 
         findViewById<View>(R.id.deleteBeatmap)!!.setOnClickListener { v: View? ->
 
-            Dialog.showAlert(
-                title = "Delete beatmap",
-                message = "Are you sure?",
-                positiveButtonText = "Yes",
-                onPositiveButtonClick = {
+            MessageDialog().apply {
+
+                setTitle("Delete beatmap")
+                setMessage("Are you sure?")
+
+                addButton("Yes") {
                     if (menu != null) {
                         menu!!.scene.postRunnable { item!!.delete() }
                     }
                     dismiss()
-                },
-                negativeButtonText = "No",
-                onNegativeButtonClick = { it.dismiss() }
-            )
+                }
+
+                addButton("No") { it.dismiss() }
+
+            }.show()
+
         }
 
         playOnLoadAnim()

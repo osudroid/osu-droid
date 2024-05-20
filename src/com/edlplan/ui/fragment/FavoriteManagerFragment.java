@@ -16,10 +16,9 @@ import com.edlplan.favorite.FavoriteLibrary;
 import com.edlplan.framework.easing.Easing;
 import com.edlplan.ui.BaseAnimationListener;
 import com.edlplan.ui.EasingHelper;
-import com.reco1l.osu.ui.Dialog;
+import com.reco1l.osu.ui.MessageDialog;
+import com.reco1l.osu.ui.PromptDialog;
 import com.reco1l.toolkt.android.Texts;
-
-import org.anddev.andengine.entity.text.Text;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -50,18 +49,33 @@ public class FavoriteManagerFragment extends BaseFragment {
 
         ((RecyclerView) findViewById(R.id.main_recycler_view)).setLayoutManager(layoutManager);
 
-        findViewById(R.id.new_folder).setOnClickListener(v -> Dialog.showPrompt("New folder", null, true, input -> {
+        findViewById(R.id.new_folder).setOnClickListener(v -> {
 
-            if (input.isEmpty())
-                return null;
+            new PromptDialog()
+                .setTitle("New folder")
+                .addButton("Create", dialog -> {
 
-            if (FavoriteLibrary.get().getMaps(input) == null && !input.equals(StringTable.get(R.string.favorite_default))) {
-                FavoriteLibrary.get().addFolder(input);
-                adapter.add(input);
-            }
+                    var input = ((PromptDialog) dialog).getInput();
+                    if (input == null || input.isEmpty()) {
+                        dialog.dismiss();
+                        return null;
+                    }
 
-            return null;
-        }));
+                    if (FavoriteLibrary.get().getMaps(input) == null && !input.equals(StringTable.get(R.string.favorite_default))) {
+                        FavoriteLibrary.get().addFolder(input);
+                        adapter.add(input);
+                    }
+
+                    dialog.dismiss();
+                    return null;
+                })
+                .addButton("Cancel", dialog -> {
+                    dialog.dismiss();
+                    return null;
+                })
+                .show();
+
+        });
 
         if (onLoadViewFunc != null) {
             onLoadViewFunc.run();
