@@ -14,7 +14,7 @@
         android:layout_centerInParent="true"
         android:layout_marginVertical="12dp"
         android:background="@drawable/rounded_rect"
-        android:backgroundTint="#13131A"
+        android:backgroundTint="#1E1E2E"
         android:divider="@drawable/divider"
         android:gravity="center"
         android:minWidth="300dp"
@@ -39,6 +39,19 @@
                 android:layout_columnSpan="2"
                 android:columnCount="2"
                 android:paddingHorizontal="12dp">
+
+                <TextView
+                    android:id="@+id/room_error_text"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="12dp"
+                    android:layout_columnSpan="2"
+                    android:gravity="center"
+                    android:padding="8dp"
+                    android:text="Name cannot be empty!"
+                    android:textColor="#FFBFBF"
+                    android:visibility="gone"
+                    tools:visibility="visible" />
 
                 <TextView
                     android:layout_width="match_parent"
@@ -117,19 +130,6 @@
                     android:layout_marginTop="6dp"
                     android:paddingVertical="12dp"
                     android:saveEnabled="false" />
-
-                <TextView
-                    android:id="@+id/room_error_text"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_columnSpan="2"
-                    android:layout_marginTop="12dp"
-                    android:gravity="center"
-                    android:padding="8dp"
-                    android:text="Name cannot be empty!"
-                    android:textColor="#FFBFBF"
-                    android:visibility="gone"
-                    tools:visibility="visible" />
 
             </GridLayout>
 

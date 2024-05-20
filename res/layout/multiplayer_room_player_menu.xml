@@ -14,7 +14,7 @@
         android:layout_centerHorizontal="true"
         android:layout_marginBottom="20dp"
         android:background="@drawable/rounded_rect"
-        android:backgroundTint="#13131A"
+        android:backgroundTint="#1E1E2E"
         android:divider="@drawable/divider"
         android:minWidth="250dp"
         android:orientation="vertical"
