@@ -19,6 +19,8 @@ import com.edlplan.ui.EasingHelper;
 import com.reco1l.osu.ui.Dialog;
 import com.reco1l.toolkt.android.Texts;
 
+import org.anddev.andengine.entity.text.Text;
+
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -132,6 +134,8 @@ public class FavoriteManagerFragment extends BaseFragment {
 
         public TextView folderName;
 
+        public TextView folderCount;
+
         public Button button1;
 
         public Button button2;
@@ -142,6 +146,7 @@ public class FavoriteManagerFragment extends BaseFragment {
             super(itemView);
             mainBody = itemView.findViewById(R.id.mainBody);
             folderName = itemView.findViewById(R.id.folder_name);
+            folderCount = itemView.findViewById(R.id.folder_count);
             button1 = itemView.findViewById(R.id.button);
             button2 = itemView.findViewById(R.id.button2);
         }
@@ -217,7 +222,14 @@ public class FavoriteManagerFragment extends BaseFragment {
         protected void updateFolderNameText(VH holder, String name) {
             var maps = FavoriteLibrary.get().getMaps(name);
 
-            holder.folderName.setText(String.format("%s (%s)", name, maps == null ? "*" : maps.size()));
+            holder.folderName.setText(name);
+
+            if (maps == null) {
+                holder.folderCount.setVisibility(View.GONE);
+            } else {
+                holder.folderCount.setVisibility(View.VISIBLE);
+                holder.folderCount.setText("· " + maps.size() + " beatmaps");
+            }
         }
     }
 

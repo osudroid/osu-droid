@@ -7,38 +7,54 @@
     android:layout_marginBottom="8dp"
     android:background="@drawable/rounded_rect"
     android:backgroundTint="#1E1E2E"
+    android:divider="@drawable/divider"
     android:gravity="center"
     android:orientation="horizontal"
-    android:divider="@drawable/divider"
     android:showDividers="middle">
 
-    <TextView
-        android:id="@+id/folder_name"
+    <LinearLayout
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_weight="1"
         android:gravity="center|left"
         android:padding="16dp"
-        android:textColor="@color/textview"
-        android:singleLine="false"
-        tools:text="Folder name" />
+        android:orientation="horizontal">
+
+        <TextView
+            android:id="@+id/folder_name"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:singleLine="false"
+            android:textColor="#FFF"
+            tools:text="Folder name" />
+
+        <TextView
+            android:id="@+id/folder_count"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="6dp"
+            android:textColor="#8282A8"
+            tools:text="· 0 beatmaps" />
+
+    </LinearLayout>
+
 
     <Button
         android:id="@+id/button"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:background="@null"
-        android:paddingHorizontal="24dp"
         android:drawablePadding="0dp"
+        android:paddingHorizontal="24dp"
         tools:drawableLeft="@drawable/delete_24px" />
 
     <Button
         android:id="@+id/button2"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:paddingHorizontal="24dp"
         android:background="@null"
         android:drawablePadding="0dp"
+        android:paddingHorizontal="24dp"
         tools:drawableLeft="@drawable/add_24px" />
 
 </LinearLayout>
