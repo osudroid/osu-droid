@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/frg_background"
     android:layout_width="match_parent"
@@ -15,7 +16,7 @@
         android:layout_centerHorizontal="true"
         android:layout_marginBottom="20dp"
         android:background="@drawable/rounded_rect"
-        android:backgroundTint="#13131A"
+        android:backgroundTint="#1E1E2E"
         android:divider="@drawable/divider"
         android:orientation="vertical"
         android:showDividers="middle">
@@ -89,8 +90,8 @@
             android:background="@null"
             android:button="@null"
             android:drawableLeft="@drawable/search_favorite_checkbox"
-            android:drawableTint="@color/checkbox"
             android:text="@string/menu_properties_tofavs"
+            app:drawableTint="@color/checkbox"
             tools:checked="true" />
 
         <Button
