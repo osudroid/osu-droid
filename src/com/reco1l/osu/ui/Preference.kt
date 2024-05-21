@@ -6,6 +6,7 @@ import android.content.res.TypedArray
 import android.os.Parcel
 import android.os.Parcelable
 import android.util.AttributeSet
+import android.view.KeyEvent
 import android.view.inputmethod.EditorInfo.IME_ACTION_DONE
 import android.widget.EditText
 import androidx.core.content.res.TypedArrayUtils
@@ -15,14 +16,13 @@ import androidx.preference.R
 import com.reco1l.toolkt.android.hideKeyboard
 
 
+/// Select
+
 @SuppressLint("RestrictedApi")
 open class SelectPreference(context: Context, attrs: AttributeSet?, defStyleAttr: Int, defStyleRes: Int): Preference(context, attrs, defStyleAttr, defStyleRes) {
 
-
     constructor(context: Context) : this(context, null)
-
     constructor(context: Context, attrs: AttributeSet?, defStyleAttr: Int) : this(context, attrs, defStyleAttr, 0)
-
     constructor(context: Context, attrs: AttributeSet?) : this(context, attrs, TypedArrayUtils.getAttr(context, R.attr.dialogPreferenceStyle, android.R.attr.dialogPreferenceStyle))
 
 
@@ -130,13 +130,27 @@ open class SelectPreference(context: Context, attrs: AttributeSet?, defStyleAttr
 }
 
 
+/// Input
+
+class InputView(context: Context, attrs: AttributeSet?, defStyleAttr: Int) : androidx.appcompat.widget.AppCompatEditText(context, attrs, defStyleAttr) {
+
+    constructor(context: Context): this(context, null)
+    constructor(context: Context, attrs: AttributeSet?): this(context, attrs, android.R.attr.editTextStyle)
+
+    override fun onKeyPreIme(keyCode: Int, event: KeyEvent): Boolean {
+        if (keyCode == KeyEvent.KEYCODE_BACK && event.action == KeyEvent.ACTION_UP) {
+            hideKeyboard()
+        }
+        return super.onKeyPreIme(keyCode, event)
+    }
+}
+
+
 @SuppressLint("RestrictedApi")
 class InputPreference(context: Context, attrs: AttributeSet?, defStyleAttr: Int, defStyleRes: Int): Preference(context, attrs, defStyleAttr, defStyleRes) {
 
     constructor(context: Context) : this(context, null)
-
     constructor(context: Context, attrs: AttributeSet?, defStyleAttr: Int) : this(context, attrs, defStyleAttr, 0)
-
     constructor(context: Context, attrs: AttributeSet?) : this(context, attrs, TypedArrayUtils.getAttr(context, R.attr.editTextPreferenceStyle, android.R.attr.editTextPreferenceStyle))
 
 

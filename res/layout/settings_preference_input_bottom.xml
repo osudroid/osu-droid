@@ -12,7 +12,7 @@
         style="@style/settings_row_summary"
         tools:text="Summary" />
 
-    <EditText
+    <com.reco1l.osu.ui.InputView
         android:id="@+id/input"
         style="@style/editText"
         android:layout_width="match_parent"
