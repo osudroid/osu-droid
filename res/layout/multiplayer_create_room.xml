@@ -137,9 +137,9 @@
 
         <Button
             android:id="@+id/room_create"
+            style="@style/button_borderless"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:background="@null"
             android:drawablePadding="0dp"
             android:gravity="center"
             android:minWidth="300dp"

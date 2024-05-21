@@ -12,8 +12,8 @@
         android:id="@+id/frg_body"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_centerHorizontal="true"
         android:layout_alignParentBottom="true"
+        android:layout_centerHorizontal="true"
         android:layout_marginBottom="20dp"
         android:background="@drawable/rounded_rect"
         android:backgroundTint="#1E1E2E"
@@ -53,8 +53,8 @@
                 android:layout_height="wrap_content"
                 android:layout_marginHorizontal="12dp"
                 android:maxWidth="400dp"
-                android:visibility="gone"
                 android:textColor="#FFF"
+                android:visibility="gone"
                 tools:text="Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua."
                 tools:visibility="visible" />
 
@@ -62,9 +62,9 @@
 
         <Button
             android:id="@+id/cancel_button"
+            style="@style/button_borderless"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:background="@null"
             android:drawableLeft="@drawable/close_24px"
             android:drawableTint="#FFBFBF"
             android:minWidth="300dp"

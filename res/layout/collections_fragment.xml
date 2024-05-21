@@ -23,7 +23,7 @@
             android:id="@+id/new_folder"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:background="@null"
+            android:background="?attr/selectableItemBackgroundBorderless"
             android:drawableLeft="@drawable/add_24px"
             android:paddingVertical="12dp"
             android:layout_marginTop="8dp"

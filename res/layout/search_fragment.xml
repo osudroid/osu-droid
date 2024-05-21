@@ -21,11 +21,11 @@
 
         <CheckBox
             android:id="@+id/showFav"
-            style="@style/button"
+            style="@style/button_borderless"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginRight="8dp"
-            android:background="@null"
+            android:background="?attr/selectableItemBackgroundBorderless"
             android:button="@null"
             android:checked="false"
             android:drawableLeft="@drawable/search_favorite_checkbox"
@@ -49,7 +49,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginLeft="12dp"
-            android:background="@null"
+            android:background="?attr/selectableItemBackgroundBorderless"
             android:drawableLeft="@drawable/sort_24px"
             tools:text="Sort" />
 
@@ -64,7 +64,7 @@
             android:id="@+id/favFolder"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:background="@null"
+            android:background="?attr/selectableItemBackgroundBorderless"
             android:drawableLeft="@drawable/folder_24px"
             tools:text="Folder" />
 

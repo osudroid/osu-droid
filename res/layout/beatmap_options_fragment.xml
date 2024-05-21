@@ -35,9 +35,9 @@
 
             <Button
                 android:id="@+id/offset_minus"
+                style="@style/button_borderless"
                 android:layout_width="wrap_content"
                 android:layout_height="match_parent"
-                android:background="@null"
                 android:drawableLeft="@drawable/remove_24px"
                 android:drawablePadding="0dp"
                 android:paddingHorizontal="24dp" />
@@ -62,7 +62,7 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
-                    android:background="@null"
+                    android:background="?attr/selectableItemBackground"
                     android:ems="5"
                     android:gravity="center"
                     android:inputType="numberSigned"
@@ -73,9 +73,9 @@
 
             <Button
                 android:id="@+id/offset_plus"
+                style="@style/button_borderless"
                 android:layout_width="wrap_content"
                 android:layout_height="match_parent"
-                android:background="@null"
                 android:drawableLeft="@drawable/add_24px"
                 android:drawablePadding="0dp"
                 android:paddingHorizontal="24dp" />
@@ -84,7 +84,7 @@
 
         <CheckBox
             android:id="@+id/addToFav"
-            style="@style/button"
+            style="@style/button_borderless"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:background="@null"
@@ -96,19 +96,19 @@
 
         <Button
             android:id="@+id/manageFavButton"
+            style="@style/button_borderless"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:background="@null"
             android:drawableLeft="@drawable/folder_24px"
             android:text="@string/favorite_manage" />
 
         <Button
             android:id="@+id/deleteBeatmap"
+            style="@style/button_borderless"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:background="@null"
             android:drawableLeft="@drawable/delete_24px"
-            android:drawableTint="#FFBFBF"
+            app:drawableTint="#FFBFBF"
             android:text="@string/menu_properties_delete"
             android:textColor="#FFBFBF" />
 

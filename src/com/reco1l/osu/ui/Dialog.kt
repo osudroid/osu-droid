@@ -61,7 +61,7 @@ open class MessageDialog : BaseFragment() {
         val buttonLayout = findViewById<LinearLayout>(R.id.button_layout)!!
 
         for (button in buttons) {
-            buttonLayout.addView(Button(ContextThemeWrapper(context, R.style.button)).apply {
+            buttonLayout.addView(Button(ContextThemeWrapper(context, R.style.button_borderless)).apply {
 
                 minWidth = 300.dp
                 background = null

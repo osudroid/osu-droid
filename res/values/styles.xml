@@ -68,6 +68,10 @@
         <item name="android:textSize">14sp</item>
     </style>
 
+    <style name="button_borderless" parent="button">
+        <item name="android:background">?attr/selectableItemBackground</item>
+    </style>
+
     <style name="checkbox" parent="Widget.AppCompat.CompoundButton.CheckBox">
         <item name="buttonTint">@color/checkbox</item>
         <item name="android:textColor">#FFF</item>

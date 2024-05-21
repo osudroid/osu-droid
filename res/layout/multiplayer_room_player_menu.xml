@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:id="@+id/frg_background"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
@@ -28,35 +29,35 @@
 
         <Button
             android:id="@+id/room_profile"
+            style="@style/button_borderless"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:background="@null"
             android:drawableLeft="@drawable/account_box_24px"
             android:text="Visit profile" />
 
         <Button
             android:id="@+id/room_mute"
+            style="@style/button_borderless"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:background="@null"
             android:drawableLeft="@drawable/volume_off_24px"
             android:text="Mute" />
 
         <Button
             android:id="@+id/room_host"
+            style="@style/button_borderless"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:background="@null"
             android:drawableLeft="@drawable/crown_24px"
             android:text="Make room host" />
 
         <Button
             android:id="@+id/room_kick"
+            style="@style/button_borderless"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:background="@null"
             android:drawableLeft="@drawable/person_remove_24px"
-            android:drawableTint="#FFBFBF"
+            app:drawableTint="#FFBFBF"
             android:text="Kick"
             android:textColor="#FFBFBF" />
 
