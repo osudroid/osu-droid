@@ -3,6 +3,7 @@ package com.reco1l.osu.ui
 import android.graphics.Color
 import android.graphics.drawable.Drawable
 import android.view.ContextThemeWrapper
+import android.view.View
 import android.view.ViewGroup.LayoutParams.MATCH_PARENT
 import android.view.inputmethod.EditorInfo
 import android.widget.Button
@@ -11,11 +12,20 @@ import android.widget.LinearLayout
 import android.widget.TextView
 import androidx.core.view.isVisible
 import androidx.core.widget.doOnTextChanged
+import com.edlplan.framework.easing.Easing
+import com.edlplan.ui.EasingHelper
 import com.edlplan.ui.fragment.BaseFragment
 import com.reco1l.toolkt.android.dp
 import com.reco1l.toolkt.android.drawableLeft
 import com.reco1l.toolkt.android.fontColor
 import com.reco1l.toolkt.android.layoutWidth
+import com.reco1l.toolkt.animation.TimeEasing
+import com.reco1l.toolkt.animation.cancelAnimators
+import com.reco1l.toolkt.animation.toAlpha
+import com.reco1l.toolkt.animation.toScaleX
+import com.reco1l.toolkt.animation.toScaleY
+import com.reco1l.toolkt.animation.toTranslationX
+import com.reco1l.toolkt.animation.toTranslationY
 import ru.nsu.ccfit.zuev.osuplus.R
 
 
@@ -65,6 +75,20 @@ open class MessageDialog : BaseFragment() {
             })
         }
 
+        val background = findViewById<View>(R.id.frg_background)!!
+        background.setOnClickListener { callDismissOnBackPress() }
+
+        background.cancelAnimators()
+            .toAlpha(0f)
+            .toAlpha(1f, 200, ease = TimeEasing.DECELERATE)
+
+        val body = findViewById<View>(R.id.frg_body)!!
+
+        body.cancelAnimators()
+            .toScaleX(0.9f)
+            .toScaleY(0.9f)
+            .toScaleX(1f, 300, ease = TimeEasing.BOUNCE_OUT)
+            .toScaleY(1f, 300, ease = TimeEasing.BOUNCE_OUT)
     }
 
 
