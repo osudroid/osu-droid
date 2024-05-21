@@ -6,11 +6,14 @@ import android.content.res.TypedArray
 import android.os.Parcel
 import android.os.Parcelable
 import android.util.AttributeSet
+import android.view.inputmethod.EditorInfo.IME_ACTION_DONE
 import android.widget.EditText
 import androidx.core.content.res.TypedArrayUtils
-import androidx.preference.EditTextPreference.OnBindEditTextListener
+import androidx.core.widget.doAfterTextChanged
 import androidx.preference.Preference
+import androidx.preference.PreferenceViewHolder
 import androidx.preference.R
+import com.reco1l.toolkt.android.hideKeyboard
 
 
 @SuppressLint("RestrictedApi")
@@ -138,65 +141,122 @@ class InputPreference(context: Context, attrs: AttributeSet?, defStyleAttr: Int,
     constructor(context: Context, attrs: AttributeSet?) : this(context, attrs, TypedArrayUtils.getAttr(context, R.attr.editTextPreferenceStyle, android.R.attr.editTextPreferenceStyle))
 
 
-    var text: String? = null
-        set(value) {
-
-            val wasBlocking = shouldDisableDependents()
-
-            field = value
-            dialog.setInput(value)
-            persistString(value)
-
-            val isBlocking = shouldDisableDependents()
-            if (isBlocking != wasBlocking) {
-                notifyDependencyChange(isBlocking)
-            }
-
-            notifyChanged()
-        }
-
-
-    private var dialog = PromptDialog()
-
-
     init {
+        val attributes = context.obtainStyledAttributes(attrs, R.styleable.Preference, defStyleAttr, defStyleRes)
 
-        dialog.setTitle(title.toString())
+        val layout = TypedArrayUtils.getResourceId(
+            attributes,
+            R.styleable.Preference_layout,
+            R.styleable.Preference_android_layout,
+            ru.nsu.ccfit.zuev.osuplus.R.layout.settings_preference_input
+        )
 
-        dialog.addButton("Accept") {
-            text = (it as PromptDialog).input
-            it.dismiss()
-        }
+        attributes.recycle()
 
-        dialog.addButton("Cancel") {
-            it.dismiss()
+        if (layout != ru.nsu.ccfit.zuev.osuplus.R.layout.settings_preference_input &&
+            layout != ru.nsu.ccfit.zuev.osuplus.R.layout.settings_preference_input_bottom) {
+            layoutResource = ru.nsu.ccfit.zuev.osuplus.R.layout.settings_preference_input
         }
     }
+
+
+    private lateinit var input: EditText
+
+
+    private var onTextInputBind: EditText.() -> Unit = {}
+
+    private var value: String? = null
 
 
     /**
      * Set the function to be called when the text input is bound.
      */
-    fun setOnTextInputBind(listener: (EditText) -> Unit) {
-        dialog.setOnTextInputBind(listener)
+    fun setOnTextInputBind(listener: EditText.() -> Unit) {
+        onTextInputBind = listener
+    }
+
+    /**
+     * Set the text to be displayed in the input.
+     */
+    fun setText(value: String?) {
+
+        if (!::input.isInitialized) {
+            this.value = value
+            return
+        }
+
+        input.setText(value)
+        input.post { onValueChange(value) }
+    }
+
+    /**
+     * Returns the text from the input.
+     */
+    fun getText() = value
+
+
+    private fun onValueChange(value: String?) {
+
+        val wasBlocking = shouldDisableDependents()
+
+        this.value = value
+        persistString(value)
+
+        if (::input.isInitialized) {
+            input.setText(value)
+        }
+
+        val isBlocking = shouldDisableDependents()
+        if (isBlocking != wasBlocking) {
+            notifyDependencyChange(isBlocking)
+        }
+
+        notifyChanged()
     }
 
 
-    override fun onClick() = dialog.show()
+    override fun onBindViewHolder(holder: PreferenceViewHolder) {
+        super.onBindViewHolder(holder)
 
-    override fun shouldDisableDependents() = text.isNullOrEmpty() || super.shouldDisableDependents()
+        input = holder.findViewById(ru.nsu.ccfit.zuev.osuplus.R.id.input)!! as EditText
+        input.setText(value)
+        input.onTextInputBind()
+        input.imeOptions = IME_ACTION_DONE
 
+        input.setOnEditorActionListener { view, action, _ ->
+
+            // Only if user press done it'll save the value.
+            if (action == IME_ACTION_DONE) {
+                input.hideKeyboard()
+                view.post { onValueChange(value) }
+                return@setOnEditorActionListener true
+            }
+            false
+        }
+
+        // We ensure if the focus was lost we restore the value.
+        input.setOnFocusChangeListener { _, hasFocus ->
+            if (!hasFocus) {
+                input.setText(value)
+            }
+        }
+
+        input.doAfterTextChanged { value = it.toString() }
+    }
 
     override fun onGetDefaultValue(a: TypedArray, index: Int) = a.getString(index)
 
     override fun onSetInitialValue(defaultValue: Any?) {
-        text = getPersistedString(defaultValue as String?)
+        setText(getPersistedString(defaultValue as String?))
     }
+
+
+    override fun shouldDisableDependents() = value.isNullOrEmpty() || super.shouldDisableDependents()
 
 
     override fun onSaveInstanceState(): Parcelable? {
         val superState = super.onSaveInstanceState()
-        return if (isPersistent) superState else SavedState(superState).also { it.text = text }
+        return if (isPersistent) superState else SavedState(superState).also { it.text = value }
     }
 
     override fun onRestoreInstanceState(state: Parcelable?) {
@@ -207,7 +267,7 @@ class InputPreference(context: Context, attrs: AttributeSet?, defStyleAttr: Int,
         }
 
         super.onRestoreInstanceState(state.superState)
-        text = state.text
+        value = state.text
     }
 
 
@@ -227,4 +287,5 @@ class InputPreference(context: Context, attrs: AttributeSet?, defStyleAttr: Int,
         }
 
     }
+
 }

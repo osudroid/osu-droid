@@ -171,7 +171,7 @@ class SettingsFragment : com.edlplan.ui.fragment.SettingsFragment() {
 
         Section.General -> {
             findPreference<InputPreference>("onlinePassword")!!.setOnTextInputBind {
-                it.inputType = TYPE_CLASS_TEXT or TYPE_TEXT_VARIATION_PASSWORD
+                inputType = TYPE_CLASS_TEXT or TYPE_TEXT_VARIATION_PASSWORD
             }
 
             findPreference<Preference>("registerAcc")!!.setOnPreferenceClickListener {
@@ -235,7 +235,7 @@ class SettingsFragment : com.edlplan.ui.fragment.SettingsFragment() {
                 it as InputPreference
 
                 if (newValue.toString().trim { it <= ' ' }.isEmpty()) {
-                    it.text = Config.getCorePath() + "Skin/"
+                    it.setText(Config.getCorePath() + "Skin/")
                     Config.loadConfig(requireActivity())
                     return@setOnPreferenceChangeListener false
                 }
@@ -247,7 +247,7 @@ class SettingsFragment : com.edlplan.ui.fragment.SettingsFragment() {
                     return@setOnPreferenceChangeListener false
                 }
 
-                it.text = newValue.toString()
+                it.setText(newValue.toString())
                 Config.loadConfig(requireActivity())
                 false
             }
@@ -295,8 +295,7 @@ class SettingsFragment : com.edlplan.ui.fragment.SettingsFragment() {
 
             findPreference<InputPreference>("room_name")!!.apply {
 
-                text = Multiplayer.room!!.name
-
+                setText(Multiplayer.room!!.name)
                 setOnPreferenceChangeListener { _, newValue ->
 
                     val newName = newValue as String
@@ -310,8 +309,7 @@ class SettingsFragment : com.edlplan.ui.fragment.SettingsFragment() {
             }
 
             findPreference<InputPreference>("room_password")!!.apply {
-                text = null
-
+                setText(null)
                 setOnPreferenceChangeListener { _, newValue ->
                     RoomAPI.setRoomPassword(newValue as String)
                     true
