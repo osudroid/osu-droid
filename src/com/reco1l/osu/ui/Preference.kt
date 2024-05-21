@@ -9,7 +9,6 @@ import android.util.AttributeSet
 import android.view.inputmethod.EditorInfo.IME_ACTION_DONE
 import android.widget.EditText
 import androidx.core.content.res.TypedArrayUtils
-import androidx.core.widget.doAfterTextChanged
 import androidx.preference.Preference
 import androidx.preference.PreferenceViewHolder
 import androidx.preference.R
@@ -185,7 +184,6 @@ class InputPreference(context: Context, attrs: AttributeSet?, defStyleAttr: Int,
             return
         }
 
-        input.setText(value)
         input.post { onValueChange(value) }
     }
 
@@ -223,12 +221,18 @@ class InputPreference(context: Context, attrs: AttributeSet?, defStyleAttr: Int,
         input.onTextInputBind()
         input.imeOptions = IME_ACTION_DONE
 
+        // If the value was changed before binding.
+        persistString(value)
+
         input.setOnEditorActionListener { view, action, _ ->
 
             // Only if user press done it'll save the value.
             if (action == IME_ACTION_DONE) {
+
+                val value = input.text.toString()
                 input.hideKeyboard()
                 view.post { onValueChange(value) }
+
                 return@setOnEditorActionListener true
             }
             false
@@ -240,8 +244,6 @@ class InputPreference(context: Context, attrs: AttributeSet?, defStyleAttr: Int,
                 input.setText(value)
             }
         }
-
-        input.doAfterTextChanged { value = it.toString() }
     }
 
     override fun onGetDefaultValue(a: TypedArray, index: Int) = a.getString(index)
