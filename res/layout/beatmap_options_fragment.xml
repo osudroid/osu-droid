@@ -87,7 +87,6 @@
             style="@style/button_borderless"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:background="@null"
             android:button="@null"
             android:drawableLeft="@drawable/search_favorite_checkbox"
             android:text="@string/menu_properties_tofavs"
