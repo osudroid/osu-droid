@@ -6,7 +6,9 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="#80000000"
-    android:gravity="center|bottom">
+    android:gravity="center|bottom"
+    android:clipToOutline="true"
+    android:outlineProvider="background">
 
     <LinearLayout
         android:id="@+id/frg_body"
@@ -17,23 +19,22 @@
         android:backgroundTint="#13131A"
         android:clickable="true"
         android:orientation="vertical"
-        android:paddingHorizontal="12dp">
+        android:divider="@drawable/divider"
+        android:showDividers="middle">
 
         <Button
+            style="@style/button_borderless"
             android:id="@+id/new_folder"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:background="?attr/selectableItemBackgroundBorderless"
             android:drawableLeft="@drawable/add_24px"
-            android:paddingVertical="12dp"
-            android:layout_marginTop="8dp"
             android:text="@string/favorite_new_folder" />
 
         <androidx.recyclerview.widget.RecyclerView
             android:id="@+id/main_recycler_view"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:layout_marginTop="8dp"
+            android:padding="12dp"
             app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
             app:spanCount="2"
             tools:listitem="@layout/collections_item" />
