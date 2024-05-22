@@ -5,7 +5,7 @@ import com.reco1l.ibancho.data.Room
 import com.reco1l.ibancho.data.RoomPlayer
 import com.reco1l.ibancho.data.RoomTeam.*
 import com.reco1l.ibancho.data.TeamMode
-import com.reco1l.osu.ui.ScrollableList
+import com.reco1l.osu.ui.entity.ScrollableList
 import org.anddev.andengine.entity.primitive.Rectangle
 import org.anddev.andengine.entity.sprite.Sprite
 import org.anddev.andengine.entity.text.ChangeableText

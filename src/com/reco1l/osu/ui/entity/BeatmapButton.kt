@@ -1,4 +1,4 @@
-package com.reco1l.osu.ui
+package com.reco1l.osu.ui.entity
 
 import com.reco1l.ibancho.RoomAPI
 import com.reco1l.ibancho.data.PlayerStatus.READY

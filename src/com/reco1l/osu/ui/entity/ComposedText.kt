@@ -1,4 +1,4 @@
-package com.reco1l.osu.ui
+package com.reco1l.osu.ui.entity
 
 import org.anddev.andengine.entity.Entity
 import org.anddev.andengine.entity.text.ChangeableText

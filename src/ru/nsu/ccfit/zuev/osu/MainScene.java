@@ -8,7 +8,7 @@ import android.os.PowerManager;
 import android.util.Log;
 
 import com.reco1l.osu.Execution;
-import com.reco1l.osu.ui.MainMenu;
+import com.reco1l.osu.ui.entity.MainMenu;
 
 import com.reco1l.osu.beatmaplisting.BeatmapListing;
 import com.reco1l.osu.ui.MessageDialog;

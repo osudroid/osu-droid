@@ -1,4 +1,4 @@
-package com.reco1l.osu.ui
+package com.reco1l.osu.ui.entity
 
 import org.anddev.andengine.entity.scene.Scene
 import org.anddev.andengine.entity.shape.Shape

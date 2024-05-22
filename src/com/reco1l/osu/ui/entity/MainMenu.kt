@@ -1,4 +1,4 @@
-package com.reco1l.osu.ui
+package com.reco1l.osu.ui.entity
 
 import com.reco1l.osu.async
 import com.reco1l.osu.multiplayer.LobbyScene
@@ -6,6 +6,7 @@ import com.reco1l.osu.multiplayer.Multiplayer
 import com.reco1l.osu.beatmaplisting.BeatmapListing
 import com.reco1l.osu.mainThread
 import com.reco1l.osu.multiplayer.RoomScene
+import com.reco1l.osu.ui.SettingsFragment
 import org.anddev.andengine.input.touch.TouchEvent
 import ru.nsu.ccfit.zuev.osu.LibraryManager
 import ru.nsu.ccfit.zuev.osu.MainScene

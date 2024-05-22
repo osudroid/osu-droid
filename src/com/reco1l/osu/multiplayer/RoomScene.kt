@@ -16,8 +16,8 @@ import com.reco1l.osu.multiplayer.Multiplayer.isConnected
 import com.reco1l.osu.multiplayer.Multiplayer.isRoomHost
 import com.reco1l.osu.multiplayer.Multiplayer.player
 import com.reco1l.osu.multiplayer.Multiplayer.room
-import com.reco1l.osu.ui.BeatmapButton
-import com.reco1l.osu.ui.ComposedText
+import com.reco1l.osu.ui.entity.BeatmapButton
+import com.reco1l.osu.ui.entity.ComposedText
 import com.reco1l.osu.ui.SettingsFragment
 import com.reco1l.osu.updateThread
 import com.reco1l.toolkt.kotlin.runSafe
