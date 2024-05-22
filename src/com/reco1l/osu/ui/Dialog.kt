@@ -3,6 +3,7 @@ package com.reco1l.osu.ui
 import android.graphics.Color
 import android.graphics.drawable.Drawable
 import android.view.ContextThemeWrapper
+import android.view.Gravity
 import android.view.View
 import android.view.ViewGroup.LayoutParams.MATCH_PARENT
 import android.view.inputmethod.EditorInfo
@@ -64,12 +65,17 @@ open class MessageDialog : BaseFragment() {
             buttonLayout.addView(Button(ContextThemeWrapper(context, R.style.button_borderless)).apply {
 
                 minWidth = 300.dp
-                background = null
-                layoutWidth = MATCH_PARENT
+                gravity = Gravity.LEFT
 
                 text = button.text
                 fontColor = button.tint
-                drawableLeft = button.icon?.apply { setTint(button.tint) }
+
+                if (button.icon == null) {
+                    compoundDrawablePadding = 0
+                } else {
+                    drawableLeft = button.icon
+                    drawableLeft!!.setTint(button.tint)
+                }
 
                 setOnClickListener { button.clickListener(this@MessageDialog) }
             })
