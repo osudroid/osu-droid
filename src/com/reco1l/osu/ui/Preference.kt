@@ -168,8 +168,7 @@ class InputPreference(context: Context, attrs: AttributeSet?, defStyleAttr: Int,
 
         attributes.recycle()
 
-        if (layout != ru.nsu.ccfit.zuev.osuplus.R.layout.settings_preference_input &&
-            layout != ru.nsu.ccfit.zuev.osuplus.R.layout.settings_preference_input_bottom) {
+        if (layout != ru.nsu.ccfit.zuev.osuplus.R.layout.settings_preference_input && layout != ru.nsu.ccfit.zuev.osuplus.R.layout.settings_preference_input_bottom) {
             layoutResource = ru.nsu.ccfit.zuev.osuplus.R.layout.settings_preference_input
         }
     }

@@ -20,7 +20,7 @@
             android:key="directory"
             android:summary="@string/opt_directory_summary"
             android:title="@string/opt_directory_title"
-            app:layout="@layout/settings_preference_bottom" />
+            app:layout="@layout/settings_preference_input_bottom" />
 
     </PreferenceCategory>
 
