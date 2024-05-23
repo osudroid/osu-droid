@@ -5,6 +5,7 @@ import android.content.Context
 import android.content.res.TypedArray
 import android.os.Parcel
 import android.os.Parcelable
+import android.text.TextUtils
 import android.util.AttributeSet
 import android.view.KeyEvent
 import android.view.inputmethod.EditorInfo.IME_ACTION_DONE
@@ -32,16 +33,18 @@ open class SelectPreference(context: Context, attrs: AttributeSet?, defStyleAttr
     var value: String? = null
         set(value) {
 
-            // Always persist/notify the first time.
             val changed = !field.contentEquals(value)
 
-            if (changed || !wasValueSet) {
+            if (changed || !isValueSet) {
+
                 field = value
-                dialog.setSelected(value)
-                wasValueSet = true
+                isValueSet = true
 
                 persistString(value)
+                dialog.setSelected(value)
+
                 if (changed) {
+                    onPreferenceChangeListener?.onPreferenceChange(this, value)
                     notifyChanged()
                 }
             }
@@ -57,7 +60,7 @@ open class SelectPreference(context: Context, attrs: AttributeSet?, defStyleAttr
         }
 
 
-    private var wasValueSet = false
+    private var isValueSet = false
 
 
     private val dialog = SelectDialog()
@@ -91,7 +94,6 @@ open class SelectPreference(context: Context, attrs: AttributeSet?, defStyleAttr
     override fun onSetInitialValue(defaultValue: Any?) {
         value = getPersistedString(defaultValue as String?)
     }
-
 
 
     override fun onSaveInstanceState(): Parcelable? {
