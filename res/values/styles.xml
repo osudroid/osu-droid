@@ -154,6 +154,7 @@
         <item name="android:paddingLeft">18dp</item>
         <item name="android:paddingRight">18dp</item>
         <item name="android:background">#161622</item>
+        <item name="android:foreground">@drawable/ripple</item>
         <item name="android:gravity">center</item>
     </style>
 
