@@ -140,6 +140,7 @@
         <item name="android:layout_width">200dp</item>
         <item name="android:layout_height">wrap_content</item>
         <item name="android:drawablePadding">12dp</item>
+        <item name="android:foreground">@drawable/ripple</item>
         <item name="android:gravity">left|center</item>
         <item name="drawableTint">#FFF</item>
         <item name="android:padding">12dp</item>

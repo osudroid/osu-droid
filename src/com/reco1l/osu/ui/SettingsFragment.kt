@@ -35,6 +35,7 @@ import com.reco1l.osu.mainThread
 import com.reco1l.osu.multiplayer.Multiplayer
 import com.reco1l.osu.multiplayer.RoomScene
 import com.reco1l.toolkt.android.bottomMargin
+import com.reco1l.toolkt.android.cornerRadius
 import com.reco1l.toolkt.android.dp
 import com.reco1l.toolkt.android.drawableLeft
 import com.reco1l.toolkt.android.layoutWidth
@@ -94,6 +95,7 @@ class SettingsFragment : com.edlplan.ui.fragment.SettingsFragment() {
 
             val button = TextView(ContextThemeWrapper(context, R.style.settings_tab_text))
 
+            button.cornerRadius = 15f.dp
             button.layoutWidth = 200.dp
             button.text = text
             button.drawableLeft = requireContext().getDrawable(icon)!!
@@ -106,12 +108,7 @@ class SettingsFragment : com.edlplan.ui.fragment.SettingsFragment() {
                 root!!.findFocus()?.clearFocus()
 
                 sectionSelector.forEach {
-                    if (it == button) {
-                        it.setBackgroundResource(R.drawable.rounded_rect)
-                        it.background.setTint(0xFF363653.toInt())
-                    } else {
-                        it.background = null
-                    }
+                    it.setBackgroundColor(if (it == button) 0xFF363653.toInt() else Color.TRANSPARENT)
                 }
 
                 this.section = section
