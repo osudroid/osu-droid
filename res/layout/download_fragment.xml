@@ -66,7 +66,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:drawableLeft="@drawable/close_24px"
-            android:drawableTint="#FFBFBF"
+            app:drawableTint="#FFBFBF"
             android:minWidth="300dp"
             android:text="@string/beatmap_downloader_cancel"
             android:textColor="#FFBFBF"

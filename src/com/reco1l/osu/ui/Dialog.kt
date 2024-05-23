@@ -33,7 +33,6 @@ import ru.nsu.ccfit.zuev.osuplus.R
 
 data class DialogButton(
     val text: String,
-    val icon: Drawable? = null,
     val tint: Int = Color.WHITE,
     val clickListener: (MessageDialog) -> Unit
 )
@@ -67,17 +66,11 @@ open class MessageDialog : BaseFragment() {
 
                 minWidth = 300.dp
                 minHeight = 56.dp
-                gravity = CENTER_VERTICAL or LEFT
+                gravity = CENTER
                 background = context.getDrawable(R.drawable.ripple)
                 text = button.text
                 fontColor = button.tint
-
-                if (button.icon == null) {
-                    compoundDrawablePadding = 0
-                } else {
-                    drawableLeft = button.icon
-                    drawableLeft!!.setTint(button.tint)
-                }
+                compoundDrawablePadding = 0
 
                 setOnClickListener { button.clickListener(this@MessageDialog) }
             })
@@ -136,8 +129,8 @@ open class MessageDialog : BaseFragment() {
      * Adds a new button.
      */
     @JvmOverloads
-    open fun addButton(text: String, iconDrawable: Drawable? = null, tint: Int = Color.WHITE, clickListener: (MessageDialog) -> Unit): MessageDialog {
-        buttons.add(DialogButton(text, iconDrawable, tint, clickListener))
+    open fun addButton(text: String, tint: Int = Color.WHITE, clickListener: (MessageDialog) -> Unit): MessageDialog {
+        buttons.add(DialogButton(text, tint, clickListener))
         return this
     }
 
@@ -225,9 +218,7 @@ open class PromptDialog : MessageDialog() {
     }
 
 
-    override fun addButton(text: String, iconDrawable: Drawable?, tint: Int, clickListener: (MessageDialog) -> Unit): PromptDialog {
-        return super.addButton(text, iconDrawable, tint, clickListener) as PromptDialog
-    }
+    override fun addButton(text: String, tint: Int, clickListener: (MessageDialog) -> Unit) = super.addButton(text, tint, clickListener) as PromptDialog
 
 }
 

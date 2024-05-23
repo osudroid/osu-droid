@@ -111,6 +111,7 @@
                     android:background="@drawable/rounded_rect"
                     android:backgroundTint="#363653"
                     android:drawableLeft="@drawable/play_arrow_24px"
+                    android:drawablePadding="0dp"
                     android:drawableTint="#FFF"
                     android:minWidth="0dp"
                     android:paddingHorizontal="12dp"
