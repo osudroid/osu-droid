@@ -15,17 +15,16 @@
         android:layout_marginTop="8dp"
         android:background="@drawable/rounded_rect"
         android:backgroundTint="@color/colorPrimary"
+        android:divider="@drawable/divider"
         android:gravity="center"
         android:orientation="horizontal"
-        android:padding="8dp">
+        android:showDividers="middle">
 
         <CheckBox
             android:id="@+id/showFav"
             style="@style/button_borderless"
             android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginRight="8dp"
-            android:background="?attr/selectableItemBackgroundBorderless"
+            android:layout_height="match_parent"
             android:button="@null"
             android:checked="false"
             android:drawableLeft="@drawable/search_favorite_checkbox"
@@ -37,6 +36,8 @@
             style="@style/editText"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
+            android:layout_marginHorizontal="12dp"
+            android:layout_marginVertical="8dp"
             android:layout_weight="1"
             android:drawableRight="@drawable/search_24px"
             android:drawableTint="#8C8CB4"
@@ -46,25 +47,17 @@
 
         <Button
             android:id="@+id/sortButton"
+            style="@style/button_borderless"
             android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginLeft="12dp"
-            android:background="?attr/selectableItemBackgroundBorderless"
+            android:layout_height="match_parent"
             android:drawableLeft="@drawable/sort_24px"
             tools:text="Sort" />
 
-        <View
-            android:layout_width="1dp"
-            android:layout_height="match_parent"
-            android:layout_marginHorizontal="4dp"
-            android:layout_marginVertical="4dp"
-            android:background="#0DFFFFFF" />
-
         <Button
             android:id="@+id/favFolder"
+            style="@style/button_borderless"
             android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:background="?attr/selectableItemBackgroundBorderless"
+            android:layout_height="match_parent"
             android:drawableLeft="@drawable/folder_24px"
             tools:text="Folder" />
 

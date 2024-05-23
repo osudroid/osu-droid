@@ -34,10 +34,11 @@
             android:layout_height="wrap_content"
             android:gravity="center"
             android:maxWidth="500dp"
+            android:minWidth="300dp"
             android:minHeight="100dp"
             android:padding="16dp"
             android:textColor="#FFF"
-            tools:text="Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Nec sagittis aliquam malesuada bibendum arcu. Auctor augue mauris augue neque gravida in. Dictumst quisque sagittis purus sit amet volutpat consequat mauris. Aliquam vestibulum morbi blandit cursus risus at." />
+            tools:text="Message" />
 
         <LinearLayout
             android:id="@+id/button_layout"
@@ -45,10 +46,7 @@
             android:layout_height="wrap_content"
             android:orientation="vertical"
             android:divider="@drawable/divider"
-            android:showDividers="middle">
-
-        </LinearLayout>
-
+            android:showDividers="middle" />
 
     </LinearLayout>
 

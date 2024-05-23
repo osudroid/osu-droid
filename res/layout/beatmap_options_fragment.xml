@@ -59,13 +59,14 @@
 
                 <EditText
                     android:id="@+id/offsetBox"
+                    style="@style/button_borderless"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
-                    android:background="?attr/selectableItemBackground"
                     android:ems="5"
                     android:gravity="center"
                     android:inputType="numberSigned"
+                    android:padding="0dp"
                     android:text="0"
                     android:textColor="@color/textview" />
 
@@ -107,9 +108,9 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:drawableLeft="@drawable/delete_24px"
-            app:drawableTint="#FFBFBF"
             android:text="@string/menu_properties_delete"
-            android:textColor="#FFBFBF" />
+            android:textColor="#FFBFBF"
+            app:drawableTint="#FFBFBF" />
 
     </LinearLayout>
 
