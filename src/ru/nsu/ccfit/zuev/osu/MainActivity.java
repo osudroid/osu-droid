@@ -49,6 +49,8 @@ import com.reco1l.osu.UpdateManager;
 import com.reco1l.osu.multiplayer.LobbyScene;
 import com.reco1l.osu.multiplayer.RoomScene;
 
+import com.reco1l.osu.ui.MessageDialog;
+import com.reco1l.osu.ui.PromptDialog;
 import com.rian.osu.difficulty.BeatmapDifficultyCalculator;
 import net.lingala.zip4j.ZipFile;
 
@@ -207,33 +209,6 @@ public class MainActivity extends BaseGameActivity implements
     private void initPreferences() {
         final SharedPreferences prefs = PreferenceManager
                 .getDefaultSharedPreferences(this);
-
-        if (Objects.equals(prefs.getString("playername", ""), "")) {
-            final SharedPreferences.Editor editor = prefs.edit();
-            editor.putString("playername", "Guest");
-            editor.commit();
-
-            Execution.mainThread(() -> {
-                final AlertDialog.Builder alert = new AlertDialog.Builder(this);
-
-                alert.setTitle(StringTable.get(R.string.dialog_playername_title));
-                alert.setMessage(StringTable
-                        .get(R.string.dialog_playername_message));
-
-                final EditText input = new EditText(this);
-                input.setText("Guest");
-                alert.setView(input);
-
-                alert.setPositiveButton(StringTable.get(R.string.dialog_ok),
-                        (dialog, whichButton) -> {
-                            final String value = input.getText().toString();
-                            editor.putString("playername", value);
-                            editor.commit();
-                        });
-
-                alert.show();
-            });
-        }
 
         if (!prefs.getBoolean("qualitySet", false)) {
             final SharedPreferences.Editor editor = prefs.edit();
