@@ -16,6 +16,7 @@ import com.edlplan.favorite.FavoriteLibrary;
 import com.edlplan.framework.easing.Easing;
 import com.edlplan.ui.BaseAnimationListener;
 import com.edlplan.ui.EasingHelper;
+import com.reco1l.osu.ui.MessageDialog;
 import com.reco1l.osu.ui.PromptDialog;
 import com.reco1l.toolkt.android.Dimensions;
 import com.reco1l.toolkt.android.Texts;
@@ -218,21 +219,24 @@ public class FavoriteManagerFragment extends BaseFragment {
             Texts.getDrawableLeft(holder.button1).setTint(0xFFFFBFBF);
             holder.button1.setVisibility(isDefaultFolder ? View.GONE : View.VISIBLE);
 
-            holder.button1.setOnClickListener(v -> new AlertDialog.Builder(getContext()) {{
+            holder.button1.setOnClickListener(v -> {
 
-                setTitle("Remove collection");
-                setMessage(R.string.favorite_ensure);
-
-                setPositiveButton("Yes", (d, __) -> {
-                    FavoriteLibrary.get().remove(folder);
-                    load();
-                    notifyDataSetChanged();
-                });
-
-                setNegativeButton("No", (d, __) -> d.dismiss());
-
-            }}.show());
-
+                new MessageDialog()
+                    .setTitle("Remove collection")
+                    .setMessage(getContext().getString(R.string.favorite_ensure))
+                    .addButton("Yes", dialog -> {
+                        FavoriteLibrary.get().remove(folder);
+                        load();
+                        notifyDataSetChanged();
+                        dialog.dismiss();
+                        return null;
+                    })
+                    .addButton("No", dialog -> {
+                        dialog.dismiss();
+                        return null;
+                    })
+                    .show();
+            });
         }
 
         protected void updateFolderNameText(VH holder, String name) {

@@ -8,6 +8,7 @@ import android.content.Context.ACCESSIBILITY_SERVICE
 import android.content.Intent
 import android.provider.Settings
 import android.view.accessibility.AccessibilityManager
+import com.reco1l.osu.ui.MessageDialog
 import ru.nsu.ccfit.zuev.osu.MainActivity
 import ru.nsu.ccfit.zuev.osuplus.R
 
@@ -25,7 +26,7 @@ object AccessibilityDetector
     /**
      * The alert that notifies the user which services are not allowed
      */
-    private var alert: AlertDialog? = null
+    private var alert: MessageDialog? = null
 
 
     @JvmStatic
@@ -58,7 +59,7 @@ object AccessibilityDetector
     }
 
 
-    private fun showAlert(context: MainActivity, services: List<AccessibilityServiceInfo>) = AlertDialog.Builder(context).apply {
+    private fun showAlert(context: MainActivity, services: List<AccessibilityServiceInfo>) = MessageDialog().apply {
 
         val message = buildString {
 
@@ -71,24 +72,24 @@ object AccessibilityDetector
             }
         }
 
-        setTitle(R.string.accessibility_detector_title)
+        setTitle(context.getString(R.string.accessibility_detector_title))
         setMessage(message)
-        setCancelable(false)
+        setAllowDismiss(false)
 
         val intent = Intent(Settings.ACTION_ACCESSIBILITY_SETTINGS)
 
-        if (intent.resolveActivity(context.packageManager) != null)
-            setNeutralButton(R.string.accessibility_detector_settings) { _, _ ->
-
+        if (intent.resolveActivity(context.packageManager) != null) {
+            addButton(context.getString(R.string.accessibility_detector_settings)) {
                 context.startActivity(intent)
                 alert = null
             }
-
-        setNegativeButton(R.string.accessibility_detector_exit) { alert, _ ->
-
-            context.forcedExit()
-            alert.dismiss()
         }
 
-    }.show()
+        addButton(context.getString(R.string.accessibility_detector_exit)) {
+            context.forcedExit()
+            it.dismiss()
+        }
+
+        show()
+    }
 }

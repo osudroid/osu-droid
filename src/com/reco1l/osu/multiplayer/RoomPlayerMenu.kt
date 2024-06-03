@@ -12,10 +12,10 @@ import com.edlplan.ui.fragment.BaseFragment
 import com.edlplan.ui.fragment.WebViewFragment
 import com.reco1l.ibancho.RoomAPI
 import com.reco1l.ibancho.data.RoomPlayer
+import com.reco1l.osu.ui.MessageDialog
 import com.reco1l.toolkt.android.cornerRadius
 import com.reco1l.toolkt.android.dp
 import ru.nsu.ccfit.zuev.osuplus.R
-import ru.nsu.ccfit.zuev.osu.GlobalManager.getInstance as getGlobal
 
 class RoomPlayerMenu : BaseFragment()
 {
@@ -72,38 +72,47 @@ class RoomPlayerMenu : BaseFragment()
         }
 
         kick.setOnClickListener {
-            AlertDialog.Builder(getGlobal().mainActivity).apply {
+
+            MessageDialog().apply {
 
                 setTitle("Kick ${player!!.name}")
                 setMessage("Are you sure?")
-                setPositiveButton("Yes") { dialog, _ ->
 
-                    dialog.dismiss()
+                addButton("Yes") {
+
+                    it.dismiss()
                     dismiss()
 
                     if (Multiplayer.isConnected)
                         RoomAPI.kickPlayer(player!!.id)
                 }
-                setNegativeButton("No") { dialog, _ -> dialog.dismiss() }
+
+                addButton("No") {
+                    it.dismiss()
+                }
 
             }.show()
         }
 
         host.setOnClickListener {
 
-            AlertDialog.Builder(getGlobal().mainActivity).apply {
+            MessageDialog().apply {
 
                 setTitle("Make ${player!!.name} room host")
                 setMessage("Are you sure?")
-                setPositiveButton("Yes") { dialog, _ ->
 
-                    dialog.dismiss()
+                addButton("Yes") {
+
+                    it.dismiss()
                     dismiss()
 
                     if (Multiplayer.isConnected)
                         RoomAPI.setRoomHost(player!!.id)
                 }
-                setNegativeButton("No") { dialog, _ -> dialog.dismiss() }
+
+                addButton("No") {
+                    it.dismiss()
+                }
 
             }.show()
         }
