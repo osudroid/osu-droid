@@ -12,6 +12,8 @@ import com.edlplan.framework.easing.Easing
 import com.edlplan.ui.BaseAnimationListener
 import com.edlplan.ui.EasingHelper
 import com.reco1l.osu.ui.MessageDialog
+import com.reco1l.toolkt.android.cornerRadius
+import com.reco1l.toolkt.android.dp
 import ru.nsu.ccfit.zuev.osu.BeatmapProperties
 import ru.nsu.ccfit.zuev.osu.GlobalManager
 import ru.nsu.ccfit.zuev.osu.PropertiesLibrary
@@ -40,6 +42,8 @@ class PropsMenuFragment : BaseFragment(), IPropsMenu {
         get() = R.layout.beatmap_options_fragment
 
     override fun onLoadView() {
+        findViewById<View>(R.id.fullLayout)!!.cornerRadius = 14f.dp
+
         offset = findViewById<EditText>(R.id.offsetBox)
         isFav = findViewById<CheckBox>(R.id.addToFav)
 

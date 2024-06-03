@@ -12,6 +12,8 @@ import com.edlplan.ui.fragment.BaseFragment
 import com.edlplan.ui.fragment.WebViewFragment
 import com.reco1l.ibancho.RoomAPI
 import com.reco1l.ibancho.data.RoomPlayer
+import com.reco1l.toolkt.android.cornerRadius
+import com.reco1l.toolkt.android.dp
 import ru.nsu.ccfit.zuev.osuplus.R
 import ru.nsu.ccfit.zuev.osu.GlobalManager.getInstance as getGlobal
 
@@ -41,6 +43,7 @@ class RoomPlayerMenu : BaseFragment()
             return
         }
 
+        findViewById<View>(R.id.fullLayout)!!.cornerRadius = 14f.dp
         findViewById<TextView>(R.id.room_player)!!.text = player!!.name
 
         findViewById<View>(R.id.room_profile)!!.setOnClickListener {

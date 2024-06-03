@@ -16,9 +16,10 @@ import com.edlplan.favorite.FavoriteLibrary;
 import com.edlplan.framework.easing.Easing;
 import com.edlplan.ui.BaseAnimationListener;
 import com.edlplan.ui.EasingHelper;
-import com.reco1l.osu.ui.MessageDialog;
 import com.reco1l.osu.ui.PromptDialog;
+import com.reco1l.toolkt.android.Dimensions;
 import com.reco1l.toolkt.android.Texts;
+import com.reco1l.toolkt.android.Views;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -82,6 +83,7 @@ public class FavoriteManagerFragment extends BaseFragment {
         }
 
         playOnLoadAnim();
+        Views.setCornerRadius(findViewById(R.id.frg_body), Dimensions.getDp(14f));
     }
 
     private void playOnLoadAnim() {

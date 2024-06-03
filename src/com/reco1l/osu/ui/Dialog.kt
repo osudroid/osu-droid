@@ -17,6 +17,7 @@ import androidx.core.widget.doOnTextChanged
 import com.edlplan.framework.easing.Easing
 import com.edlplan.ui.EasingHelper
 import com.edlplan.ui.fragment.BaseFragment
+import com.reco1l.toolkt.android.cornerRadius
 import com.reco1l.toolkt.android.dp
 import com.reco1l.toolkt.android.drawableLeft
 import com.reco1l.toolkt.android.fontColor
@@ -84,6 +85,7 @@ open class MessageDialog : BaseFragment() {
             .toAlpha(1f, 200, ease = TimeEasing.DECELERATE)
 
         val body = findViewById<View>(R.id.frg_body)!!
+        body.cornerRadius = 14f.dp
 
         body.cancelAnimators()
             .toScaleX(0.9f)

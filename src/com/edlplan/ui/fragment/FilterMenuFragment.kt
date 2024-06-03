@@ -16,6 +16,8 @@ import com.edlplan.framework.support.util.Updater
 import com.edlplan.ui.BaseAnimationListener
 import com.edlplan.ui.EasingHelper
 import com.reco1l.osu.mainThread
+import com.reco1l.toolkt.android.cornerRadius
+import com.reco1l.toolkt.android.dp
 import org.anddev.andengine.engine.handler.IUpdateHandler
 import org.anddev.andengine.entity.scene.Scene
 import ru.nsu.ccfit.zuev.osu.helper.InputManager
@@ -56,6 +58,8 @@ class FilterMenuFragment : BaseFragment(), IUpdateHandler, IFilterMenu {
     override fun onLoadView() {
         reloadViewData()
         playOnLoadAnim()
+
+        findViewById<View>(R.id.frg_body)!!.cornerRadius = 14f.dp
     }
 
     override fun getFilter(): String {
