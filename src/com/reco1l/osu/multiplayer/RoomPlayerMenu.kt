@@ -67,8 +67,8 @@ class RoomPlayerMenu : BaseFragment()
 
         if (!Multiplayer.isRoomHost)
         {
-            kick.visibility = View.INVISIBLE
-            host.visibility = View.INVISIBLE
+            kick.visibility = View.GONE
+            host.visibility = View.GONE
         }
 
         kick.setOnClickListener {
