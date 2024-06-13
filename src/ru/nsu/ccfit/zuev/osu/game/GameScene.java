@@ -4,6 +4,7 @@ import android.graphics.PointF;
 import android.os.Build;
 import android.os.SystemClock;
 
+import com.dgsrz.bancho.security.SecurityUtils;
 import com.edlplan.ext.EdExtensionHelper;
 import com.edlplan.framework.math.FMath;
 import com.edlplan.framework.support.ProxySprite;
@@ -322,6 +323,11 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
     }
 
     private boolean loadGame(final TrackInfo track, final String rFile) {
+        if (!SecurityUtils.verifyFileIntegrity(GlobalManager.getInstance().getMainActivity())) {
+            ToastLogger.showTextId(R.string.file_integrity_tampered, true);
+            return false;
+        }
+
         if (rFile != null && rFile.startsWith("https://")) {
             this.replayFile = Config.getCachePath() + "/" +
                     MD5Calculator.getStringMD5(rFile) + ".odr";
