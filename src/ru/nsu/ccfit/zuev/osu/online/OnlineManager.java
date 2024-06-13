@@ -131,6 +131,7 @@ public class OnlineManager {
         ArrayList<String> response = sendRequest(post, endpoint + "login.php");
 
         if (response == null) {
+            failMessage = "Cannot connect to server";
             return false;
         }
         if (response.size() < 2) {
