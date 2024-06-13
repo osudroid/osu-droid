@@ -6,13 +6,17 @@ import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.Signature;
 import android.content.pm.SigningInfo;
+import android.util.Log;
 
+import java.io.IOException;
+import java.security.InvalidKeyException;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 
 import javax.crypto.Mac;
 import javax.crypto.spec.SecretKeySpec;
 
+import kotlin.io.ByteStreamsKt;
 import ru.nsu.ccfit.zuev.osu.BuildType;
 
 /**
@@ -31,6 +35,9 @@ public final class SecurityUtils {
 
     private static String appSignature = null;
     private static byte[] secretBuffer = null;
+
+    private static final String flashlightCursorHash = "3b3afff3dab87f214053ded3163ff4e91cc3474e";
+    private static final String flashlightDimLayerHash = "59dfd45eecdfbeb7a91761a7af4b3e0162d13e9f";
 
     /**
      * @return 得到整数x的非零位个数
@@ -122,6 +129,28 @@ public final class SecurityUtils {
             return toHexString(mac.doFinal(digest.getBytes()));
         } catch (Exception e) {
             throw new RuntimeException("Unsupported Algorithm");
+        }
+    }
+
+    public static boolean verifyFileIntegrity(Context context) {
+        return verifyFileIntegrity(context, "flashlight_cursor.png", flashlightCursorHash)
+                && verifyFileIntegrity(context, "flashlight_dim_layer.png", flashlightDimLayerHash);
+    }
+
+    private static boolean verifyFileIntegrity(Context context, String fileName, String hash) {
+        try (var in = context.getAssets().open(fileName)) {
+            Mac mac = Mac.getInstance("HmacSHA1");
+            SecretKeySpec secret = new SecretKeySpec(getSecretKey(), mac.getAlgorithm());
+            mac.init(secret);
+            byte[] bytes = ByteStreamsKt.readBytes(in);
+
+            return toHexString(mac.doFinal(bytes)).equals(hash);
+        } catch (IOException e) {
+            Log.e("SecurityUtils", "Failed to check file integrity for " + fileName, e);
+
+            return false;
+        } catch (NoSuchAlgorithmException | InvalidKeyException e) {
+            throw new RuntimeException(e);
         }
     }
 

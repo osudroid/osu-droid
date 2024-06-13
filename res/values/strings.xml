@@ -205,6 +205,8 @@
 
 	<string name="force_diffstat_mod_unpickable">Some mods have been disabled as all forced difficulty statistics are enabled.</string>
 
+	<string name="file_integrity_tampered">File integrity check failed. Aborting gameplay.</string>
+
 	<!-- Beatmap parser errors -->
 	<string name="beatmap_parser_cannot_open_file" formatted="false">Failed loading %s: Could not open beatmap file</string>
 	<string name="beatmap_parser_music_not_found" formatted="false">Failed loading %s: Could not find audio file</string>
