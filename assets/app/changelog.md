@@ -1,3 +1,12 @@
+Version 1.7.2 Patch 5
+=====================
+
+## Additions
+- Added integrity check for some critical gameplay files
+- Added login fail troubleshoot criteria
+  - Many players are reporting inability to login due to many factors, but the most prevalent one that has been reported is ISP
+    block. This is confusing for the player, so this is a quick addition to give the player something to troubleshoot. 
+
 Version 1.7.2 Patch 4
 =====================
 
