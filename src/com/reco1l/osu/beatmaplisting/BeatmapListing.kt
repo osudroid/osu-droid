@@ -143,6 +143,8 @@ class BeatmapListing : BaseFragment(),
         }
 
         search(false)
+
+        previewPlayCount = 0
         Choreographer.getInstance().postFrameCallback(this)
     }
 
