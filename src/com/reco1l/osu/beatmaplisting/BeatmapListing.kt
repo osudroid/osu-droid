@@ -4,6 +4,8 @@ import android.content.Intent
 import android.graphics.BitmapFactory
 import android.net.Uri
 import android.util.Log
+import android.view.Choreographer
+import android.view.Choreographer.FrameCallback
 import android.view.ContextThemeWrapper
 import android.view.KeyEvent
 import android.view.LayoutInflater
@@ -55,7 +57,8 @@ import java.util.TimeZone
 class BeatmapListing : BaseFragment(),
     IDownloaderObserver,
     OnEditorActionListener,
-    OnKeyListener {
+    OnKeyListener,
+    FrameCallback {
 
 
     override val layoutID = R.layout.beatmap_downloader_fragment
@@ -140,6 +143,20 @@ class BeatmapListing : BaseFragment(),
         }
 
         search(false)
+        Choreographer.getInstance().postFrameCallback(this)
+    }
+
+
+    override fun doFrame(frameTimeNanos: Long) {
+
+        // Restoring play count in case it's preventing user from play another preview.
+        if (previewPlayCount >= 2 && System.currentTimeMillis() - lastTimePreviewPlayed > 5000) {
+            previewPlayCount = 0
+        }
+
+        if (!isDetached) {
+            Choreographer.getInstance().postFrameCallback(this)
+        }
     }
 
 
@@ -250,12 +267,31 @@ class BeatmapListing : BaseFragment(),
 
     companion object {
 
+        /**
+         * The current [BeatmapListing] instance.
+         */
         var current: BeatmapListing? = null
 
+        /**
+         * The current selected beatmap mirror.
+         */
         var mirror = BeatmapMirror.OSU_DIRECT
 
+        /**
+         * Whether is a beatmap preview music playing or not.
+         */
         var isPlayingMusic = false
             private set
+
+        /**
+         * The last time a song preview was played in milliseconds.
+         */
+        var lastTimePreviewPlayed = 0L
+
+        /**
+         * The count of previews played within a short time (5 seconds).
+         */
+        var previewPlayCount = 0
 
     }
 
@@ -557,6 +593,14 @@ class BeatmapSetViewHolder(itemView: View, private val mediaScope: CoroutineScop
 
 
     fun playPreview(beatmapSet: BeatmapSetModel) {
+
+        if (BeatmapListing.previewPlayCount >= 2) {
+            ToastLogger.showText("Please wait a few seconds, before trying again.", false)
+            return
+        }
+
+
+
         previewJob = mediaScope.launch {
 
             BeatmapListing.current!!.stopPreviews(true)
@@ -568,12 +612,17 @@ class BeatmapSetViewHolder(itemView: View, private val mediaScope: CoroutineScop
                     if (BeatmapListing.isPlayingMusic) {
                         GlobalManager.getInstance().mainScene.musicControl(MusicOption.PLAY)
                     }
+
+
                 }
 
                 GlobalManager.getInstance().mainScene.musicControl(MusicOption.PAUSE)
 
                 previewStream!!.setVolume(Config.getBgmVolume())
                 previewStream!!.play()
+
+                BeatmapListing.previewPlayCount++
+                BeatmapListing.lastTimePreviewPlayed = System.currentTimeMillis()
 
                 mainThread {
                     previewButton.setCompoundDrawablesWithIntrinsicBounds(R.drawable.pause_24px, 0, 0, 0)
