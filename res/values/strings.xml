@@ -93,7 +93,7 @@
 	<string name="menu_properties_offset">Song offset:</string>
 	<string name="menu_properties_tofavs">Add to favorites</string>
 	<string name="menu_properties_fromfavs">Remove from favorites</string>
-	<string name="menu_properties_delete">Delete map</string>
+	<string name="menu_properties_delete">Delete beatmap</string>
 	<string name="menu_properties_delete_confirm">Are you sure?</string>
 
     <string name="menu_settings_title">Options</string>
