@@ -67,8 +67,8 @@ open class SelectPreference(context: Context, attrs: AttributeSet?, defStyleAttr
 
         val attributes = context.obtainStyledAttributes(attrs, R.styleable.ListPreference, defStyleAttr, defStyleRes)
 
-        val entries = attributes.getTextArray(R.styleable.ListPreference_entries) ?: attributes.getTextArray(R.styleable.ListPreference_android_entries)
-        val values = attributes.getTextArray(R.styleable.ListPreference_entryValues) ?: attributes.getTextArray(R.styleable.ListPreference_android_entryValues)
+        val entries = TypedArrayUtils.getTextArray(attributes, R.styleable.ListPreference_entries, R.styleable.ListPreference_android_entries)
+        val values = TypedArrayUtils.getTextArray(attributes, R.styleable.ListPreference_entryValues, R.styleable.ListPreference_android_entryValues)
 
         attributes.recycle()
 
