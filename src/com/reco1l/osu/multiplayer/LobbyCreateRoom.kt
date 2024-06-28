@@ -49,7 +49,7 @@ class LobbyCreateRoom : BaseFragment()
                 {
                     override fun onProgressChanged(seekBar: SeekBar?, progress: Int, fromUser: Boolean)
                     {
-                        maxText.text = "Max players: $progress"
+                        maxText.text = progress.toString()
                     }
 
                     override fun onStartTrackingTouch(seekBar: SeekBar?) = Unit
