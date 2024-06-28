@@ -129,7 +129,10 @@
                     android:layout_columnSpan="2"
                     android:layout_marginTop="6dp"
                     android:paddingVertical="12dp"
-                    android:saveEnabled="false" />
+                    android:saveEnabled="false"
+                    android:min="2"
+                    android:progress="8"
+                    android:max="16" />
 
             </GridLayout>
 
