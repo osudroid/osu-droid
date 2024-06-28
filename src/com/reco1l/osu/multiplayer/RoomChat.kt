@@ -31,6 +31,7 @@ import com.reco1l.toolkt.android.drawableLeft
 import com.reco1l.toolkt.android.drawableRight
 import com.reco1l.toolkt.android.fontColor
 import com.reco1l.toolkt.kotlin.async
+import com.reco1l.toolkt.kotlin.forEachTrim
 import org.anddev.andengine.input.touch.TouchEvent
 import ru.nsu.ccfit.zuev.osu.RGBColor
 import ru.nsu.ccfit.zuev.osu.ResourceManager
@@ -322,7 +323,7 @@ class MessageAdapter : RecyclerView.Adapter<MessageViewHolder>() {
         val msg = data[position]
 
         // The sender label will be shown if the previous message is not from the same sender
-        val showSender = position == 0 || data[position - 1].sender != msg.sender
+        val showSender = position == data.size - 1 || data[position + 1].sender != msg.sender
 
         holder.bind(msg, showSender)
     }
