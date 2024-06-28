@@ -330,20 +330,22 @@ class MessageAdapter : RecyclerView.Adapter<MessageViewHolder>() {
 
 }
 
-class MessageViewHolder(val root: LinearLayout) : RecyclerView.ViewHolder(root) {
+class MessageViewHolder(private val root: LinearLayout) : RecyclerView.ViewHolder(root) {
 
 
-    lateinit var senderText: TextView
+    private lateinit var senderText: TextView
 
-    lateinit var messageText: TextView
+    private lateinit var messageText: TextView
 
 
     fun bind(msg: Message, showSender: Boolean) {
+
         senderText = root.findViewById(R.id.sender_text)!!
         messageText = root.findViewById(R.id.message_text)!!
 
         if (msg.sender == null) {
             messageText.isVisible = false
+            senderText.isVisible = true
             senderText.text = msg.text
 
             root.gravity = Gravity.CENTER
