@@ -306,7 +306,7 @@ class MessageAdapter : RecyclerView.Adapter<MessageViewHolder>() {
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): MessageViewHolder {
 
         val inflater = LayoutInflater.from(parent.context)
-        val view = inflater.inflate(R.layout.mutliplayer_room_chat_item, parent, false) as LinearLayout
+        val view = inflater.inflate(R.layout.multiplayer_room_chat_item, parent, false) as LinearLayout
 
         return MessageViewHolder(view)
     }
@@ -339,6 +339,8 @@ class MessageViewHolder(val root: LinearLayout) : RecyclerView.ViewHolder(root) 
 
 
     fun bind(msg: Message, showSender: Boolean) {
+        senderText = root.findViewById(R.id.sender_text)!!
+        messageText = root.findViewById(R.id.message_text)!!
 
         if (msg.sender == null) {
             messageText.isVisible = false

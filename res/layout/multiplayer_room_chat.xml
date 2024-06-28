@@ -44,7 +44,7 @@
                 android:fadingEdgeLength="8dp"
                 android:gravity="bottom"
                 android:paddingVertical="16dp"
-                tools:listitem="@layout/mutliplayer_room_chat_item" />
+                tools:listitem="@layout/multiplayer_room_chat_item" />
 
             <LinearLayout
                 android:layout_width="match_parent"
