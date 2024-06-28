@@ -97,7 +97,7 @@ class RoomChat : BaseFragment(), OnEditorActionListener, OnKeyListener
 
     fun onRoomChatMessage(player: RoomPlayer, message: String) = mainThread {
 
-        appendMessage(Message(player.id, message))
+        prependMessage(Message(player.id, message))
 
         val color = when(player.id)
         {
@@ -112,20 +112,19 @@ class RoomChat : BaseFragment(), OnEditorActionListener, OnKeyListener
     fun onSystemChatMessage(message: String, color: String) = mainThread {
 
         Multiplayer.log("System message: $message")
-        appendMessage(Message(null, message, Color.parseColor(color)))
+        prependMessage(Message(null, message, Color.parseColor(color)))
         showPreview(message, contentColor = color)
     }
 
 
-    private fun appendMessage(message: Message) {
+    private fun prependMessage(message: Message) {
 
         if (getGlobal().engine.scene != getGlobal().gameScene.scene) {
             ResourceManager.getInstance().getSound("heartbeat")?.play(0.75f)
         }
 
-        val index = adapter.data.size
-        adapter.data.add(message)
-        adapter.notifyItemRangeInserted(index, 1)
+        adapter.data.add(0, message)
+        adapter.notifyItemRangeChanged(0, adapter.data.size)
     }
 
     private fun showPreview(content: String, contentColor: String? = null, tag: String? = null, tagColor: String? = null) {
