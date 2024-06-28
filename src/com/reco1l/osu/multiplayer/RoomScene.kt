@@ -692,7 +692,7 @@ object RoomScene : Scene(), IRoomEventListener, IPlayerEventListener
                 chat.onRoomChatMessage(player, message)
         }
         else
-            chat.onSystemChatMessage(message, "#007BFF")
+            chat.onSystemChatMessage(message, "#459FFF")
     }
 
     // Connection
@@ -700,7 +700,7 @@ object RoomScene : Scene(), IRoomEventListener, IPlayerEventListener
     override fun onRoomConnect(newRoom: Room)
     {
         if (room != newRoom)
-            chat.onSystemChatMessage("Welcome to osu!droid multiplayer", "#007BFF")
+            chat.onSystemChatMessage("Welcome to osu!droid multiplayer", "#459FFF")
 
         // Setting new room
         room = newRoom
@@ -773,7 +773,7 @@ object RoomScene : Scene(), IRoomEventListener, IPlayerEventListener
             awaitStatusChange = true
             awaitModsChange = true
 
-            chat.onSystemChatMessage("Connection lost, trying to reconnect...", "#FF0000")
+            chat.onSystemChatMessage("Connection lost, trying to reconnect...", "#FFBFBF")
             Multiplayer.onReconnect()
             return
         }
@@ -849,7 +849,7 @@ object RoomScene : Scene(), IRoomEventListener, IPlayerEventListener
     {
         room!!.host = uid
 
-        chat.onSystemChatMessage("Player ${room!!.playersMap[uid]?.name} is now the room host.", "#007BFF")
+        chat.onSystemChatMessage("Player ${room!!.playersMap[uid]?.name} is now the room host.", "#459FFF")
 
         // Reloading mod menu
         updateThread {
@@ -1056,7 +1056,7 @@ object RoomScene : Scene(), IRoomEventListener, IPlayerEventListener
     {
         // We send the message if the player wasn't in the room, sometimes this event can be called by a reconnection.
         if (room!!.addPlayer(player))
-            chat.onSystemChatMessage("Player ${player.name} (ID: ${player.id}) joined.", "#007BFF")
+            chat.onSystemChatMessage("Player ${player.name} (ID: ${player.id}) joined.", "#459FFF")
 
         // Updating state text
         updateInformation()
@@ -1071,7 +1071,7 @@ object RoomScene : Scene(), IRoomEventListener, IPlayerEventListener
 
         // Notifying in chat
         if (player != null)
-            chat.onSystemChatMessage("Player ${player.name} (ID: $uid) left.", "#007BFF")
+            chat.onSystemChatMessage("Player ${player.name} (ID: $uid) left.", "#459FFF")
 
         // Updating state text
         updateInformation()
@@ -1108,7 +1108,7 @@ object RoomScene : Scene(), IRoomEventListener, IPlayerEventListener
 
         // Notifying in chat
         if (player != null)
-            chat.onSystemChatMessage("Player ${player.name} (ID: $uid) was kicked.", "#FF0000")
+            chat.onSystemChatMessage("Player ${player.name} (ID: $uid) was kicked.", "#FFBFBF")
 
         // Updating state text
         updateInformation()

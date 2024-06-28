@@ -155,7 +155,7 @@ class RoomChat : BaseFragment(), OnEditorActionListener, OnKeyListener
             try {
                 RoomAPI.sendMessage(message.toString())
             } catch (e: Exception) {
-                onSystemChatMessage("Error to send message: ${e.message}", "#FF0000")
+                onSystemChatMessage("Error to send message: ${e.message}", "#FFBFBF")
                 e.printStackTrace()
             }
 
