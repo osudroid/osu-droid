@@ -12,8 +12,6 @@ import android.widget.EditText
 import android.widget.TextView
 import android.widget.TextView.OnEditorActionListener
 import androidx.core.view.isVisible
-import com.edlplan.framework.easing.Easing
-import com.edlplan.ui.EasingHelper
 import com.edlplan.ui.fragment.BaseFragment
 import org.anddev.andengine.input.touch.TouchEvent
 import ru.nsu.ccfit.zuev.osuplus.R
@@ -99,7 +97,7 @@ class LobbySearch : BaseFragment(), OnEditorActionListener, OnKeyListener
     @SuppressLint("ClickableViewAccessibility")
     private fun toggleVisibility()
     {
-        field?.clearFocus()
+        field.clearFocus()
 
         if (isExtended) {
 
