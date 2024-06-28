@@ -123,7 +123,7 @@ class LobbyCreateRoom : BaseFragment()
 
     private fun playOnLoadAnim()
     {
-        val body = findViewById<View>(R.id.fullLayout)
+        val body = findViewById<View>(R.id.frg_body)
         body!!.alpha = 0f
         body.translationY = 200f
         body.animate().cancel()
@@ -138,7 +138,7 @@ class LobbyCreateRoom : BaseFragment()
 
     private fun playEndAnim(action: Runnable?)
     {
-        val body = findViewById<View>(R.id.fullLayout)
+        val body = findViewById<View>(R.id.frg_body)
         body!!.animate().cancel()
         body.animate()
                 .translationY(200f)
