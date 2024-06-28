@@ -147,8 +147,7 @@
             android:gravity="center"
             android:minWidth="300dp"
             android:text="Create"
-            android:textColor="#FFF"
-            android:visibility="gone"
+            android:textColor="#FFBFBF"
             tools:visibility="visible" />
 
     </LinearLayout>
