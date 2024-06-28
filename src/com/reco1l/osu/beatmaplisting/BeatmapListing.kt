@@ -601,21 +601,18 @@ class BeatmapSetViewHolder(itemView: View, private val mediaScope: CoroutineScop
             return
         }
 
-
-
         previewJob = mediaScope.launch {
 
             BeatmapListing.current!!.stopPreviews(true)
 
             try {
+
                 previewStream = URLBassStream(BeatmapListing.mirror.previewEndpoint(beatmapSet.beatmaps[0].id)) {
                     stopPreview(true)
 
                     if (BeatmapListing.isPlayingMusic) {
                         GlobalManager.getInstance().mainScene.musicControl(MusicOption.PLAY)
                     }
-
-
                 }
 
                 GlobalManager.getInstance().mainScene.musicControl(MusicOption.PAUSE)
