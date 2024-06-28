@@ -1,6 +1,5 @@
 package com.reco1l.osu.multiplayer
 
-import android.app.AlertDialog
 import com.reco1l.ibancho.IPlayerEventListener
 import com.reco1l.ibancho.IRoomEventListener
 import com.reco1l.ibancho.RoomAPI
