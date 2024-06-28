@@ -1,30 +1,27 @@
 package com.reco1l.osu.ui
 
-import android.annotation.SuppressLint
 import android.content.Context
 import android.content.res.TypedArray
 import android.os.Parcel
 import android.os.Parcelable
-import android.text.TextUtils
 import android.util.AttributeSet
 import android.view.KeyEvent
 import android.view.inputmethod.EditorInfo.IME_ACTION_DONE
 import android.widget.EditText
-import androidx.core.content.res.TypedArrayUtils
 import androidx.preference.Preference
 import androidx.preference.PreferenceViewHolder
 import androidx.preference.R
 import com.reco1l.toolkt.android.hideKeyboard
+import ru.nsu.ccfit.zuev.osuplus.R as osu
 
 
 /// Select
 
-@SuppressLint("RestrictedApi")
 open class SelectPreference(context: Context, attrs: AttributeSet?, defStyleAttr: Int, defStyleRes: Int): Preference(context, attrs, defStyleAttr, defStyleRes) {
 
     constructor(context: Context) : this(context, null)
+    constructor(context: Context, attrs: AttributeSet?) : this(context, attrs, 0)
     constructor(context: Context, attrs: AttributeSet?, defStyleAttr: Int) : this(context, attrs, defStyleAttr, 0)
-    constructor(context: Context, attrs: AttributeSet?) : this(context, attrs, TypedArrayUtils.getAttr(context, R.attr.dialogPreferenceStyle, android.R.attr.dialogPreferenceStyle))
 
 
     /**
@@ -70,8 +67,8 @@ open class SelectPreference(context: Context, attrs: AttributeSet?, defStyleAttr
 
         val attributes = context.obtainStyledAttributes(attrs, R.styleable.ListPreference, defStyleAttr, defStyleRes)
 
-        val entries = TypedArrayUtils.getTextArray(attributes, R.styleable.ListPreference_entries, R.styleable.ListPreference_android_entries)
-        val values = TypedArrayUtils.getTextArray(attributes, R.styleable.ListPreference_entryValues, R.styleable.ListPreference_android_entryValues)
+        val entries = attributes.getTextArray(R.styleable.ListPreference_entries) ?: attributes.getTextArray(R.styleable.ListPreference_android_entries)
+        val values = attributes.getTextArray(R.styleable.ListPreference_entryValues) ?: attributes.getTextArray(R.styleable.ListPreference_android_entryValues)
 
         attributes.recycle()
 
@@ -148,28 +145,23 @@ class InputView(context: Context, attrs: AttributeSet?, defStyleAttr: Int) : and
 }
 
 
-@SuppressLint("RestrictedApi")
 class InputPreference(context: Context, attrs: AttributeSet?, defStyleAttr: Int, defStyleRes: Int): Preference(context, attrs, defStyleAttr, defStyleRes) {
 
     constructor(context: Context) : this(context, null)
+    constructor(context: Context, attrs: AttributeSet?) : this(context, attrs, 0)
     constructor(context: Context, attrs: AttributeSet?, defStyleAttr: Int) : this(context, attrs, defStyleAttr, 0)
-    constructor(context: Context, attrs: AttributeSet?) : this(context, attrs, TypedArrayUtils.getAttr(context, R.attr.editTextPreferenceStyle, android.R.attr.editTextPreferenceStyle))
 
 
     init {
         val attributes = context.obtainStyledAttributes(attrs, R.styleable.Preference, defStyleAttr, defStyleRes)
 
-        val layout = TypedArrayUtils.getResourceId(
-            attributes,
-            R.styleable.Preference_layout,
-            R.styleable.Preference_android_layout,
-            ru.nsu.ccfit.zuev.osuplus.R.layout.settings_preference_input
-        )
+        val resourceId = attributes.getResourceId(R.styleable.Preference_android_layout, osu.layout.settings_preference_input)
+        val layout = attributes.getResourceId(R.styleable.Preference_layout, resourceId)
 
         attributes.recycle()
 
-        if (layout != ru.nsu.ccfit.zuev.osuplus.R.layout.settings_preference_input && layout != ru.nsu.ccfit.zuev.osuplus.R.layout.settings_preference_input_bottom) {
-            layoutResource = ru.nsu.ccfit.zuev.osuplus.R.layout.settings_preference_input
+        if (layout != osu.layout.settings_preference_input && layout != osu.layout.settings_preference_input_bottom) {
+            layoutResource = osu.layout.settings_preference_input
         }
     }
 
@@ -231,7 +223,7 @@ class InputPreference(context: Context, attrs: AttributeSet?, defStyleAttr: Int,
     override fun onBindViewHolder(holder: PreferenceViewHolder) {
         super.onBindViewHolder(holder)
 
-        input = holder.findViewById(ru.nsu.ccfit.zuev.osuplus.R.id.input)!! as EditText
+        input = holder.findViewById(osu.id.input)!! as EditText
         input.setText(value)
         input.onTextInputBind()
         input.imeOptions = IME_ACTION_DONE
