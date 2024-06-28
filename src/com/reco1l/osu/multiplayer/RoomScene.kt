@@ -619,7 +619,6 @@ object RoomScene : Scene(), IRoomEventListener, IPlayerEventListener
 
         mainThread {
             playerList?.menu?.dismiss()
-            settingsFragment?.dismiss()
 
             updateThread {
                 getModMenu().hide()
