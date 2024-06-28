@@ -31,7 +31,6 @@ import com.reco1l.toolkt.android.drawableLeft
 import com.reco1l.toolkt.android.drawableRight
 import com.reco1l.toolkt.android.fontColor
 import com.reco1l.toolkt.kotlin.async
-import com.reco1l.toolkt.kotlin.forEachTrim
 import org.anddev.andengine.input.touch.TouchEvent
 import ru.nsu.ccfit.zuev.osu.RGBColor
 import ru.nsu.ccfit.zuev.osu.ResourceManager
