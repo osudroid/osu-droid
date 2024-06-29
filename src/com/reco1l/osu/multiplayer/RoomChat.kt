@@ -381,11 +381,11 @@ class MessageViewHolder(private val root: LinearLayout) : RecyclerView.ViewHolde
 
             if (isOwnMessage) {
                 senderText.drawableLeft = drawable
-                senderText.drawableLeft?.setTint(color)
             } else {
                 senderText.drawableRight = drawable
-                senderText.drawableRight?.setTint(color)
             }
+
+            drawable?.setTint(color)
 
             senderText.fontColor = color
         }
