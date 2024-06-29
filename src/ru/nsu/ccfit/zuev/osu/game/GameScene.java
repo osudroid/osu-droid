@@ -16,7 +16,7 @@ import com.reco1l.ibancho.RoomAPI;
 import com.reco1l.osu.Execution;
 import com.reco1l.osu.graphics.BlankTextureRegion;
 import com.reco1l.osu.graphics.VideoSprite;
-import com.reco1l.osu.ui.GameplayLeaderboard;
+import com.reco1l.osu.ui.entity.GameplayLeaderboard;
 import com.reco1l.osu.multiplayer.Multiplayer;
 import com.reco1l.osu.multiplayer.RoomScene;
 

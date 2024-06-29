@@ -7,11 +7,13 @@ import android.widget.TextView
 import com.edlplan.ui.fragment.LoadingFragment
 import com.google.android.material.progressindicator.CircularProgressIndicator
 import com.reco1l.framework.net.FileRequest
+import com.reco1l.toolkt.android.cornerRadius
+import com.reco1l.toolkt.android.dp
 import ru.nsu.ccfit.zuev.osuplus.R
 
 class DownloadFragment : LoadingFragment() {
 
-    override val layoutID = R.layout.fragment_downloading
+    override val layoutID = R.layout.download_fragment
 
 
     private lateinit var downloader: FileRequest
@@ -32,8 +34,10 @@ class DownloadFragment : LoadingFragment() {
     override fun onLoadView() {
         super.onLoadView()
 
+        findViewById<View>(R.id.frg_body)!!.cornerRadius = 14f.dp
+
         text = findViewById(R.id.text)!!
-        button = findViewById(R.id.button)!!
+        button = findViewById(R.id.cancel_button)!!
         progressBar = findViewById(R.id.progress)!!
 
         onLoad.run()

@@ -1,8 +1,6 @@
 package com.reco1l.osu.multiplayer
 
-import android.app.AlertDialog
 import android.view.inputmethod.EditorInfo
-import android.widget.EditText
 import com.reco1l.ibancho.RoomAPI
 import com.reco1l.ibancho.data.Room
 import com.reco1l.ibancho.data.RoomStatus.*
@@ -10,7 +8,8 @@ import com.reco1l.ibancho.data.TeamMode.HEAD_TO_HEAD
 import com.reco1l.ibancho.data.TeamMode.TEAM_VS_TEAM
 import com.reco1l.ibancho.data.WinCondition.*
 import com.reco1l.osu.mainThread
-import com.reco1l.osu.ui.ScrollableList
+import com.reco1l.osu.ui.PromptDialog
+import com.reco1l.osu.ui.entity.ScrollableList
 import com.reco1l.toolkt.kotlin.async
 import org.anddev.andengine.entity.sprite.Sprite
 import org.anddev.andengine.entity.text.Text
@@ -19,7 +18,6 @@ import org.anddev.andengine.util.MathUtils
 import ru.nsu.ccfit.zuev.osu.Config
 import ru.nsu.ccfit.zuev.osu.ToastLogger
 import ru.nsu.ccfit.zuev.osu.menu.LoadingScreen
-import ru.nsu.ccfit.zuev.osu.GlobalManager.getInstance as getGlobal
 import ru.nsu.ccfit.zuev.osu.ResourceManager.getInstance as getResources
 import ru.nsu.ccfit.zuev.osu.online.OnlineManager.getInstance as getOnline
 
@@ -39,23 +37,25 @@ class LobbyRoomList : ScrollableList()
 
     private fun showPasswordPrompt(room: Room) = mainThread {
 
-        val input = EditText(getGlobal().mainActivity)
-        input.inputType = EditorInfo.TYPE_TEXT_VARIATION_PASSWORD
-
-        AlertDialog.Builder(getGlobal().mainActivity).apply {
-
+        PromptDialog().apply {
             setTitle(room.name)
             setMessage("Please enter the room password:")
-            setView(input)
-            setCancelable(false)
-            setPositiveButton("Join") { dialog, _ ->
+            setAllowDismiss(false)
 
-                val password = input.text.toString()
-                dialog.dismiss()
+            setOnTextInputBind {
+                it.inputType = EditorInfo.TYPE_TEXT_VARIATION_PASSWORD
+            }
+
+            addButton("Join") {
+                val password = (it as PromptDialog).input
+                it.dismiss()
                 connectToRoom(room, password)
             }
 
-            setNegativeButton("Cancel") { dialog, _ -> dialog.dismiss() }
+            addButton("Cancel") {
+                it.dismiss()
+            }
+
         }.show()
     }
 

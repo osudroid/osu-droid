@@ -5,12 +5,12 @@
 
     <PreferenceCategory android:title="Details">
 
-        <EditTextPreference
+        <com.reco1l.osu.ui.InputPreference
             android:key="room_name"
             android:summary="Change the room's name."
             android:title="Room name" />
 
-        <EditTextPreference
+        <com.reco1l.osu.ui.InputPreference
             android:key="room_password"
             android:summary="Change the room's password. If empty, the room will be public."
             android:title="Room password"
@@ -30,14 +30,14 @@
             android:summary="Allow players to use forced difficulty statistics in free mod"
             android:title="Allow force difficulty statistics in free mod" />
 
-        <ListPreference
+        <com.reco1l.osu.ui.SelectPreference
             android:entries="@array/team_versus_names"
             android:entryValues="@array/team_versus_values"
             android:key="room_versus_mode"
             android:summary="Change room versus mode"
             android:title="Team mode" />
 
-        <ListPreference
+        <com.reco1l.osu.ui.SelectPreference
             android:entries="@array/win_condition_names"
             android:entryValues="@array/win_condition_values"
             android:key="room_win_condition"

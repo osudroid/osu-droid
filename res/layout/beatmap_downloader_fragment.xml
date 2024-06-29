@@ -16,10 +16,10 @@
 
         <ImageButton
             android:id="@+id/close"
+            style="@style/button_borderless"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_centerVertical="true"
-            android:background="?attr/selectableItemBackground"
             android:padding="16dp"
             android:src="@drawable/arrow_back_24px"
             app:tint="#FFF" />
@@ -69,20 +69,21 @@
 
         <Button
             android:id="@+id/refresh"
+            style="@style/button_borderless"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_centerVertical="true"
             android:layout_marginRight="12dp"
             android:layout_toLeftOf="@id/logo"
-            android:background="?attr/selectableItemBackground"
             android:drawableLeft="@drawable/refresh_24px"
             android:drawablePadding="8dp"
-            android:visibility="gone"
             android:drawableTint="#FFF"
             android:padding="16dp"
             android:text="Retry"
             android:textAllCaps="false"
-            android:textColor="#FFF" />
+            android:textColor="#FFF"
+            android:visibility="gone"
+            tools:visibility="visible" />
 
     </RelativeLayout>
 

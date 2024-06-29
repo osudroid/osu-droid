@@ -38,7 +38,7 @@
 
     <PreferenceCategory android:title="Metronome">
 
-        <ListPreference
+        <com.reco1l.osu.ui.SelectPreference
             android:defaultValue="1"
             android:entries="@array/metronome_switch_names"
             android:entryValues="@array/metronome_switch_values"

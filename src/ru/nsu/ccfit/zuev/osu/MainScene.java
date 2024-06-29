@@ -7,11 +7,11 @@ import android.net.Uri;
 import android.os.PowerManager;
 import android.util.Log;
 
-import com.edlplan.ui.fragment.ConfirmDialogFragment;
 import com.reco1l.osu.Execution;
-import com.reco1l.osu.ui.MainMenu;
+import com.reco1l.osu.ui.entity.MainMenu;
 
 import com.reco1l.osu.beatmaplisting.BeatmapListing;
+import com.reco1l.osu.ui.MessageDialog;
 import com.rian.osu.beatmap.parser.BeatmapParser;
 import org.anddev.andengine.engine.handler.IUpdateHandler;
 import org.anddev.andengine.entity.IEntity;
@@ -188,17 +188,23 @@ public class MainScene implements IUpdateHandler {
 
 
             @Override
-            public boolean onAreaTouched(final TouchEvent pSceneTouchEvent,
-                                         final float pTouchAreaLocalX, final float pTouchAreaLocalY) {
+            public boolean onAreaTouched(final TouchEvent pSceneTouchEvent, final float pTouchAreaLocalX, final float pTouchAreaLocalY) {
                 if (pSceneTouchEvent.isActionDown()) {
-                    new ConfirmDialogFragment().setMessage(R.string.dialog_visit_osu_website_message).showForResult(
-                            isAccepted -> {
-                                if (isAccepted) {
-                                    Intent browserIntent = new Intent(Intent.ACTION_VIEW, Uri.parse("https://osu.ppy.sh"));
-                                    GlobalManager.getInstance().getMainActivity().startActivity(browserIntent);
-                                }
-                            }
-                    );
+
+                    new MessageDialog()
+                        .setMessage(context.getString(R.string.dialog_visit_osu_website_message))
+                        .addButton("Yes", dialog -> {
+                            Intent browserIntent = new Intent(Intent.ACTION_VIEW, Uri.parse("https://osu.ppy.sh"));
+                            GlobalManager.getInstance().getMainActivity().startActivity(browserIntent);
+                            dialog.dismiss();
+                            return null;
+                        })
+                        .addButton("No", dialog -> {
+                            dialog.dismiss();
+                            return null;
+                        })
+                        .show();
+
                     return true;
                 }
                 return false;
@@ -206,22 +212,26 @@ public class MainScene implements IUpdateHandler {
         };
         author.setPosition(10, Config.getRES_HEIGHT() - author.getHeight() - 10);
 
-        final Text yasonline = new Text(720, 530, ResourceManager
-                .getInstance().getFont("font"),
-                "            Global Ranking\n   Provided by iBancho") {
+        final Text yasonline = new Text(720, 530, ResourceManager.getInstance().getFont("font"), "            Global Ranking\n   Provided by iBancho") {
 
             @Override
-            public boolean onAreaTouched(final TouchEvent pSceneTouchEvent,
-                                         final float pTouchAreaLocalX, final float pTouchAreaLocalY) {
+            public boolean onAreaTouched(final TouchEvent pSceneTouchEvent, final float pTouchAreaLocalX, final float pTouchAreaLocalY) {
                 if (pSceneTouchEvent.isActionDown()) {
-                    new ConfirmDialogFragment().setMessage(R.string.dialog_visit_osudroid_website_message).showForResult(
-                            isAccepted -> {
-                                if (isAccepted) {
-                                    Intent browserIntent = new Intent(Intent.ACTION_VIEW, Uri.parse("https://" + OnlineManager.hostname));
-                                    GlobalManager.getInstance().getMainActivity().startActivity(browserIntent);
-                                }
-                            }
-                    );
+
+                    new MessageDialog()
+                        .setMessage(context.getString(R.string.dialog_visit_osudroid_website_message))
+                        .addButton("Yes", dialog -> {
+                            Intent browserIntent = new Intent(Intent.ACTION_VIEW, Uri.parse("https://" + OnlineManager.hostname));
+                            GlobalManager.getInstance().getMainActivity().startActivity(browserIntent);
+                            dialog.dismiss();
+                            return null;
+                        })
+                        .addButton("No", dialog -> {
+                            dialog.dismiss();
+                            return null;
+                        })
+                        .show();
+
                     return true;
                 }
                 return false;
@@ -911,13 +921,20 @@ public class MainScene implements IUpdateHandler {
     }
 
     public void showExitDialog() {
-        GlobalManager.getInstance().getMainActivity().runOnUiThread(() -> new ConfirmDialogFragment().setMessage(R.string.dialog_exit_message).showForResult(
-                isAccepted -> {
-                    if (isAccepted) {
-                        exit();
-                    }
-                }
-        ));
+
+        new MessageDialog()
+            .setTitle("Exit")
+            .setMessage(context.getString(R.string.dialog_exit_message))
+            .addButton("Yes", dialog -> {
+                dialog.dismiss();
+                exit();
+                return null;
+            })
+            .addButton("No", dialog -> {
+                dialog.dismiss();
+                return null;
+            })
+            .show();
     }
 
     public void exit() {
@@ -971,20 +988,6 @@ public class MainScene implements IUpdateHandler {
                 GlobalManager.getInstance().getMainActivity().finish();
             }
         }, 3000, TimeUnit.MILLISECONDS);
-    }
-
-    public void restart() {
-        MainActivity mActivity = GlobalManager.getInstance().getMainActivity();
-        mActivity.runOnUiThread(() -> new ConfirmDialogFragment().setMessage(R.string.dialog_dither_confirm).showForResult(
-                isAccepted -> {
-                    if (isAccepted) {
-                        Intent mIntent = new Intent(mActivity, MainActivity.class);
-                        mIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
-                        mActivity.startActivity(mIntent);
-                        System.exit(0);
-                    }
-                }
-        ));
     }
 
     public Scene getScene() {

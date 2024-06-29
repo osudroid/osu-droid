@@ -3,6 +3,7 @@ package com.reco1l.osu.multiplayer
 import android.animation.Animator
 import android.app.AlertDialog
 import android.view.View
+import android.widget.Button
 import android.widget.TextView
 import com.edlplan.framework.easing.Easing
 import com.edlplan.ui.BaseAnimationListener
@@ -11,8 +12,10 @@ import com.edlplan.ui.fragment.BaseFragment
 import com.edlplan.ui.fragment.WebViewFragment
 import com.reco1l.ibancho.RoomAPI
 import com.reco1l.ibancho.data.RoomPlayer
+import com.reco1l.osu.ui.MessageDialog
+import com.reco1l.toolkt.android.cornerRadius
+import com.reco1l.toolkt.android.dp
 import ru.nsu.ccfit.zuev.osuplus.R
-import ru.nsu.ccfit.zuev.osu.GlobalManager.getInstance as getGlobal
 
 class RoomPlayerMenu : BaseFragment()
 {
@@ -40,6 +43,7 @@ class RoomPlayerMenu : BaseFragment()
             return
         }
 
+        findViewById<View>(R.id.fullLayout)!!.cornerRadius = 14f.dp
         findViewById<TextView>(R.id.room_player)!!.text = player!!.name
 
         findViewById<View>(R.id.room_profile)!!.setOnClickListener {
@@ -50,65 +54,65 @@ class RoomPlayerMenu : BaseFragment()
             }
         }
 
-        val muteText = findViewById<TextView>(R.id.mute_text)!!
-
-        fun updateText()
-        {
-            if (player!!.isMuted)
-                muteText.text = "Unmute"
-            else
-                muteText.text = "Mute"
-        }
-
-        updateText()
-
-        findViewById<View>(R.id.room_mute)!!.setOnClickListener {
+        val mute = findViewById<Button>(R.id.room_mute)!!
+        mute.setOnClickListener {
             player!!.isMuted = !player!!.isMuted
-            updateText()
+            mute.text = if (player!!.isMuted) "Unmute" else "Mute"
         }
+        mute.text = if (player!!.isMuted) "Unmute" else "Mute"
+
 
         val kick = findViewById<View>(R.id.room_kick)!!
         val host = findViewById<View>(R.id.room_host)!!
 
         if (!Multiplayer.isRoomHost)
         {
-            kick.visibility = View.INVISIBLE
-            host.visibility = View.INVISIBLE
+            kick.visibility = View.GONE
+            host.visibility = View.GONE
         }
 
         kick.setOnClickListener {
-            AlertDialog.Builder(getGlobal().mainActivity).apply {
+
+            MessageDialog().apply {
 
                 setTitle("Kick ${player!!.name}")
                 setMessage("Are you sure?")
-                setPositiveButton("Yes") { dialog, _ ->
 
-                    dialog.dismiss()
+                addButton("Yes") {
+
+                    it.dismiss()
                     dismiss()
 
                     if (Multiplayer.isConnected)
                         RoomAPI.kickPlayer(player!!.id)
                 }
-                setNegativeButton("No") { dialog, _ -> dialog.dismiss() }
+
+                addButton("No") {
+                    it.dismiss()
+                }
 
             }.show()
         }
 
         host.setOnClickListener {
 
-            AlertDialog.Builder(getGlobal().mainActivity).apply {
+            MessageDialog().apply {
 
                 setTitle("Make ${player!!.name} room host")
                 setMessage("Are you sure?")
-                setPositiveButton("Yes") { dialog, _ ->
 
-                    dialog.dismiss()
+                addButton("Yes") {
+
+                    it.dismiss()
                     dismiss()
 
                     if (Multiplayer.isConnected)
                         RoomAPI.setRoomHost(player!!.id)
                 }
-                setNegativeButton("No") { dialog, _ -> dialog.dismiss() }
+
+                addButton("No") {
+                    it.dismiss()
+                }
 
             }.show()
         }

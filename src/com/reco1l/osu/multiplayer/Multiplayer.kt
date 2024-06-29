@@ -169,13 +169,13 @@ object Multiplayer
         {
             isReconnecting = false
 
-            RoomScene.chat.onSystemChatMessage("Connection was successfully restored.", "#007BFF")
+            RoomScene.chat.onSystemChatMessage("Connection was successfully restored.", "#459FFF")
         }
         else if (attemptCount < 5)
         {
             attemptCount++
 
-            RoomScene.chat.onSystemChatMessage("Failed to reconnect, trying again in 5 seconds...", "#FF0000")
+            RoomScene.chat.onSystemChatMessage("Failed to reconnect, trying again in 5 seconds...", "#FFBFBF")
         }
         else
         {

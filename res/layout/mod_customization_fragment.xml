@@ -62,7 +62,9 @@
                             android:layout_columnWeight="10"
                             android:padding="8dp"
                             android:saveEnabled="false"
-                            android:text="@string/opt_bgbrightness_title" />
+                            android:text="@string/opt_bgbrightness_title"
+                            android:textColor="@color/textview"
+                            android:textSize="12sp" />
 
                         <TextView
                             android:id="@+id/bgBrightnessText"
@@ -156,9 +158,9 @@
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:layout_columnSpan="2"
+                        android:max="30"
                         android:paddingVertical="12dp"
                         android:saveEnabled="false"
-                        android:max="30"
                         tools:progress="50" />
 
                     <CheckBox
@@ -329,7 +331,9 @@
                         android:layout_columnWeight="1"
                         android:padding="8dp"
                         android:saveEnabled="false"
-                        android:text="@string/opt_flashlight_follow_delay_title" />
+                        android:text="@string/opt_flashlight_follow_delay_title"
+                        android:textColor="@color/textview"
+                        android:textSize="12sp" />
 
                     <TextView
                         android:id="@+id/flashlightFollowDelayText"

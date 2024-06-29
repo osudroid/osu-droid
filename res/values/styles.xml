@@ -2,7 +2,7 @@
 <resources xmlns:tools="http://schemas.android.com/tools">
 
     <!-- Base application theme. -->
-    <style name="AppTheme" parent="Theme.AppCompat.Light">
+    <style name="AppTheme" parent="Theme.AppCompat.DayNight">
         <!-- Customize your theme here. -->
         <item name="colorPrimary">@color/colorPrimary</item>
         <item name="colorAccent">@color/colorAccent</item>
@@ -16,8 +16,6 @@
         <item name="android:windowBackground">#000</item>
         <item name="android:forceDarkAllowed" tools:targetApi="q">false</item>
 
-        <item name="android:textViewStyle">@style/textView</item>
-        <item name="editTextStyle">@style/edittext</item>
         <item name="checkboxStyle">@style/checkbox</item>
         <item name="seekBarStyle">@style/seekbar</item>
         <item name="buttonStyle">@style/button</item>
@@ -35,12 +33,7 @@
 
 
     <!--Elements-->
-    <style name="textView" parent="Widget.AppCompat.TextView">
-        <item name="android:textColor">@color/textview</item>
-        <item name="android:textSize">12sp</item>
-    </style>
-
-    <style name="edittext" parent="Widget.AppCompat.EditText">
+    <style name="editText" parent="Widget.AppCompat.EditText">
         <item name="android:layout_centerHorizontal">true</item>
         <item name="android:layout_centerVertical">true</item>
         <item name="android:background">@drawable/rounded_rect</item>
@@ -64,14 +57,20 @@
         <item name="drawableTint">#FFF</item>
         <item name="android:minWidth">0dp</item>
         <item name="android:minHeight">0dp</item>
-        <item name="android:paddingLeft">12dp</item>
-        <item name="android:drawablePadding">6dp</item>
-        <item name="android:paddingRight">12dp</item>
-        <item name="android:paddingTop">10dp</item>
-        <item name="android:paddingBottom">10dp</item>
+        <item name="android:paddingTop">14dp</item>
+        <item name="android:paddingBottom">14dp</item>
+        <item name="android:paddingLeft">16dp</item>
+        <item name="android:paddingRight">16dp</item>
+        <item name="android:drawablePadding">12dp</item>
+        <item name="android:gravity">center_vertical|left</item>
         <item name="android:textAllCaps">false</item>
         <item name="android:textColor">@color/textview</item>
         <item name="android:textSize">14sp</item>
+    </style>
+
+    <style name="button_borderless" parent="button">
+        <item name="android:minHeight">56dp</item>
+        <item name="android:background">@drawable/ripple</item>
     </style>
 
     <style name="checkbox" parent="Widget.AppCompat.CompoundButton.CheckBox">
@@ -106,26 +105,31 @@
         <item name="allowDividerAbove">false</item>
         <item name="allowDividerBelow">false</item>
     </style>
+
     <style name="settings_preference_dialog" parent="@style/Preference.DialogPreference">
         <item name="layout">@layout/settings_preference</item>
         <item name="allowDividerAbove">false</item>
         <item name="allowDividerBelow">false</item>
     </style>
+
     <style name="settings_preference_edittext" parent="@style/Preference.DialogPreference.EditTextPreference">
         <item name="layout">@layout/settings_preference</item>
         <item name="allowDividerAbove">false</item>
         <item name="allowDividerBelow">false</item>
     </style>
+
     <style name="settings_preference_checkbox" parent="@style/Preference.CheckBoxPreference.Material">
         <item name="layout">@layout/settings_preference_checkbox</item>
         <item name="allowDividerAbove">false</item>
         <item name="allowDividerBelow">false</item>
     </style>
+
     <style name="settings_preference_seekbar" parent="@style/Preference.SeekBarPreference.Material">
         <item name="layout">@layout/settings_preference_seekbar</item>
         <item name="allowDividerAbove">false</item>
         <item name="allowDividerBelow">false</item>
     </style>
+
     <style name="settings_preference_category" parent="@style/Preference.Category.Material">
         <item name="layout">@layout/settings_preference_category</item>
         <item name="allowDividerAbove">false</item>
@@ -136,6 +140,7 @@
         <item name="android:layout_width">200dp</item>
         <item name="android:layout_height">wrap_content</item>
         <item name="android:drawablePadding">12dp</item>
+        <item name="android:foreground">@drawable/ripple</item>
         <item name="android:gravity">left|center</item>
         <item name="drawableTint">#FFF</item>
         <item name="android:padding">12dp</item>
@@ -150,6 +155,7 @@
         <item name="android:paddingLeft">18dp</item>
         <item name="android:paddingRight">18dp</item>
         <item name="android:background">#161622</item>
+        <item name="android:foreground">@drawable/ripple</item>
         <item name="android:gravity">center</item>
     </style>
 
@@ -186,9 +192,8 @@
         <item name="android:gravity">center</item>
         <item name="android:paddingTop">4dp</item>
         <item name="android:paddingBottom">4dp</item>
-        <item name="android:text">Game</item>
         <item name="android:textColor">#FFB2B2CC</item>
-        <item name="android:textSize">12dp</item>
+        <item name="android:textSize">12sp</item>
     </style>
 
 

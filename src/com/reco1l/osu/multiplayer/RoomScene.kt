@@ -1,6 +1,5 @@
 package com.reco1l.osu.multiplayer
 
-import android.app.AlertDialog
 import com.reco1l.ibancho.IPlayerEventListener
 import com.reco1l.ibancho.IRoomEventListener
 import com.reco1l.ibancho.RoomAPI
@@ -16,8 +15,9 @@ import com.reco1l.osu.multiplayer.Multiplayer.isConnected
 import com.reco1l.osu.multiplayer.Multiplayer.isRoomHost
 import com.reco1l.osu.multiplayer.Multiplayer.player
 import com.reco1l.osu.multiplayer.Multiplayer.room
-import com.reco1l.osu.ui.BeatmapButton
-import com.reco1l.osu.ui.ComposedText
+import com.reco1l.osu.ui.MessageDialog
+import com.reco1l.osu.ui.entity.BeatmapButton
+import com.reco1l.osu.ui.entity.ComposedText
 import com.reco1l.osu.ui.SettingsFragment
 import com.reco1l.osu.updateThread
 import com.reco1l.toolkt.kotlin.runSafe
@@ -77,16 +77,19 @@ object RoomScene : Scene(), IRoomEventListener, IPlayerEventListener
 
     val chatPreview = ComposedText(0f, 0f, getResources().getFont("smallFont"), 100)
 
-    val leaveDialog = AlertDialog.Builder(getGlobal().mainActivity).apply {
+    val leaveDialog = MessageDialog().apply {
 
         setTitle("Leave room")
         setMessage("Are you sure?")
-        setPositiveButton("Yes") { dialog, _ ->
+        addButton("Yes") {
 
-            dialog.dismiss()
+            it.dismiss()
             back()
         }
-        setNegativeButton("No") { dialog, _ -> dialog.dismiss() }
+
+        addButton("No") {
+            it.dismiss()
+        }
 
     }
 
@@ -611,12 +614,11 @@ object RoomScene : Scene(), IRoomEventListener, IPlayerEventListener
         player = null
 
         // Clearing chat
-        chat.log.clear()
+        chat.clear()
         chat.dismiss()
 
         mainThread {
             playerList?.menu?.dismiss()
-            settingsFragment?.dismiss()
 
             updateThread {
                 getModMenu().hide()
@@ -688,7 +690,7 @@ object RoomScene : Scene(), IRoomEventListener, IPlayerEventListener
                 chat.onRoomChatMessage(player, message)
         }
         else
-            chat.onSystemChatMessage(message, "#007BFF")
+            chat.onSystemChatMessage(message, "#459FFF")
     }
 
     // Connection
@@ -696,7 +698,7 @@ object RoomScene : Scene(), IRoomEventListener, IPlayerEventListener
     override fun onRoomConnect(newRoom: Room)
     {
         if (room != newRoom)
-            chat.onSystemChatMessage("Welcome to osu!droid multiplayer", "#007BFF")
+            chat.onSystemChatMessage("Welcome to osu!droid multiplayer", "#459FFF")
 
         // Setting new room
         room = newRoom
@@ -769,7 +771,7 @@ object RoomScene : Scene(), IRoomEventListener, IPlayerEventListener
             awaitStatusChange = true
             awaitModsChange = true
 
-            chat.onSystemChatMessage("Connection lost, trying to reconnect...", "#FF0000")
+            chat.onSystemChatMessage("Connection lost, trying to reconnect...", "#FFBFBF")
             Multiplayer.onReconnect()
             return
         }
@@ -845,7 +847,7 @@ object RoomScene : Scene(), IRoomEventListener, IPlayerEventListener
     {
         room!!.host = uid
 
-        chat.onSystemChatMessage("Player ${room!!.playersMap[uid]?.name} is now the room host.", "#007BFF")
+        chat.onSystemChatMessage("Player ${room!!.playersMap[uid]?.name} is now the room host.", "#459FFF")
 
         // Reloading mod menu
         updateThread {
@@ -1052,7 +1054,7 @@ object RoomScene : Scene(), IRoomEventListener, IPlayerEventListener
     {
         // We send the message if the player wasn't in the room, sometimes this event can be called by a reconnection.
         if (room!!.addPlayer(player))
-            chat.onSystemChatMessage("Player ${player.name} (ID: ${player.id}) joined.", "#007BFF")
+            chat.onSystemChatMessage("Player ${player.name} (ID: ${player.id}) joined.", "#459FFF")
 
         // Updating state text
         updateInformation()
@@ -1067,7 +1069,7 @@ object RoomScene : Scene(), IRoomEventListener, IPlayerEventListener
 
         // Notifying in chat
         if (player != null)
-            chat.onSystemChatMessage("Player ${player.name} (ID: $uid) left.", "#007BFF")
+            chat.onSystemChatMessage("Player ${player.name} (ID: $uid) left.", "#459FFF")
 
         // Updating state text
         updateInformation()
@@ -1089,11 +1091,11 @@ object RoomScene : Scene(), IRoomEventListener, IPlayerEventListener
 
             back()
             mainThread {
-                AlertDialog.Builder(getGlobal().mainActivity).apply {
+                MessageDialog().apply {
 
                     setTitle("Message")
                     setMessage("You've been kicked by room host.")
-                    setPositiveButton("Close") { dialog, _ -> dialog.dismiss() }
+                    addButton("Close") { it.dismiss() }
 
                 }.show()
             }
@@ -1104,7 +1106,7 @@ object RoomScene : Scene(), IRoomEventListener, IPlayerEventListener
 
         // Notifying in chat
         if (player != null)
-            chat.onSystemChatMessage("Player ${player.name} (ID: $uid) was kicked.", "#FF0000")
+            chat.onSystemChatMessage("Player ${player.name} (ID: $uid) was kicked.", "#FFBFBF")
 
         // Updating state text
         updateInformation()

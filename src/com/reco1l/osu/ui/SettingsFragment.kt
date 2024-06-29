@@ -5,12 +5,15 @@ import android.content.ClipData
 import android.content.ClipboardManager
 import android.content.Intent
 import android.graphics.Color
+import android.graphics.Rect
 import android.net.Uri
 import android.os.Bundle
 import android.text.InputType.TYPE_CLASS_TEXT
 import android.text.InputType.TYPE_TEXT_VARIATION_PASSWORD
 import android.view.ContextThemeWrapper
+import android.view.MotionEvent
 import android.view.View
+import android.widget.EditText
 import android.widget.LinearLayout
 import android.widget.TextView
 import androidx.annotation.XmlRes
@@ -18,10 +21,7 @@ import androidx.core.content.getSystemService
 import androidx.core.view.forEach
 import androidx.core.view.get
 import androidx.preference.CheckBoxPreference
-import androidx.preference.EditTextPreference
-import androidx.preference.ListPreference
 import androidx.preference.Preference
-import com.edlplan.ui.SkinPathPreference
 import com.edlplan.ui.fragment.LoadingFragment
 import com.google.android.material.snackbar.Snackbar
 import com.reco1l.ibancho.LobbyAPI
@@ -35,6 +35,7 @@ import com.reco1l.osu.mainThread
 import com.reco1l.osu.multiplayer.Multiplayer
 import com.reco1l.osu.multiplayer.RoomScene
 import com.reco1l.toolkt.android.bottomMargin
+import com.reco1l.toolkt.android.cornerRadius
 import com.reco1l.toolkt.android.dp
 import com.reco1l.toolkt.android.drawableLeft
 import com.reco1l.toolkt.android.layoutWidth
@@ -94,20 +95,20 @@ class SettingsFragment : com.edlplan.ui.fragment.SettingsFragment() {
 
             val button = TextView(ContextThemeWrapper(context, R.style.settings_tab_text))
 
-            button.layoutWidth = 200f.dp
+            button.cornerRadius = 15f.dp
+            button.layoutWidth = 200.dp
             button.text = text
             button.drawableLeft = requireContext().getDrawable(icon)!!
             button.drawableLeft!!.setTint(Color.WHITE)
 
             button.setOnClickListener {
 
+                // Workaround to IllegalStateException being thrown when an EditText is focused
+                // while trying to change section.
+                root!!.findFocus()?.clearFocus()
+
                 sectionSelector.forEach {
-                    if (it == button) {
-                        it.setBackgroundResource(R.drawable.rounded_rect)
-                        it.background.setTint(0xFF363653.toInt())
-                    } else {
-                        it.background = null
-                    }
+                    it.setBackgroundColor(if (it == button) 0xFF363653.toInt() else Color.TRANSPARENT)
                 }
 
                 this.section = section
@@ -156,8 +157,8 @@ class SettingsFragment : com.edlplan.ui.fragment.SettingsFragment() {
         createSectionButton("Advanced", R.drawable.manufacturing_24px, Section.Advanced)
 
 
-        sectionSelector[0].topMargin = 32f.dp
-        sectionSelector[sectionSelector.childCount - 1].bottomMargin = 32f.dp
+        sectionSelector[0].topMargin = 32.dp
+        sectionSelector[sectionSelector.childCount - 1].bottomMargin = 32.dp
 
         findViewById<View>(R.id.close)!!.setOnClickListener {
             dismiss()
@@ -173,8 +174,8 @@ class SettingsFragment : com.edlplan.ui.fragment.SettingsFragment() {
     override fun onBindPreferences() = when(section) {
 
         Section.General -> {
-            findPreference<EditTextPreference>("onlinePassword")!!.setOnBindEditTextListener {
-                it.inputType = TYPE_CLASS_TEXT or TYPE_TEXT_VARIATION_PASSWORD
+            findPreference<InputPreference>("onlinePassword")!!.setOnTextInputBind {
+                inputType = TYPE_CLASS_TEXT or TYPE_TEXT_VARIATION_PASSWORD
             }
 
             findPreference<Preference>("registerAcc")!!.setOnPreferenceClickListener {
@@ -189,14 +190,15 @@ class SettingsFragment : com.edlplan.ui.fragment.SettingsFragment() {
         }
 
         Section.Gameplay -> {
-            findPreference<SkinPathPreference>("skinPath")!!.apply {
+            findPreference<SelectPreference>("skinPath")!!.apply {
 
-                reloadSkinList()
+                val skinMain = File(Config.getSkinTopPath())
+                val skins = Config.getSkins().map { Option(it.key, it.value) }.toMutableList()
+                skins.add(0, Option(skinMain.name + " (Default)", skinMain.path))
+
+                options = skins
+
                 setOnPreferenceChangeListener { _, newValue ->
-
-                    if (GlobalManager.getInstance().skinNow == newValue.toString()) {
-                        return@setOnPreferenceChangeListener false
-                    }
 
                     val loading = LoadingFragment()
                     loading.show()
@@ -232,12 +234,12 @@ class SettingsFragment : com.edlplan.ui.fragment.SettingsFragment() {
         }
 
         Section.Advanced -> {
-            findPreference<EditTextPreference>("skinTopPath")!!.setOnPreferenceChangeListener { it, newValue ->
+            findPreference<InputPreference>("skinTopPath")!!.setOnPreferenceChangeListener { it, newValue ->
 
-                it as EditTextPreference
+                it as InputPreference
 
                 if (newValue.toString().trim { it <= ' ' }.isEmpty()) {
-                    it.text = Config.getCorePath() + "Skin/"
+                    it.setText(Config.getCorePath() + "Skin/")
                     Config.loadConfig(requireActivity())
                     return@setOnPreferenceChangeListener false
                 }
@@ -249,7 +251,7 @@ class SettingsFragment : com.edlplan.ui.fragment.SettingsFragment() {
                     return@setOnPreferenceChangeListener false
                 }
 
-                it.text = newValue.toString()
+                it.setText(newValue.toString())
                 Config.loadConfig(requireActivity())
                 false
             }
@@ -261,7 +263,7 @@ class SettingsFragment : com.edlplan.ui.fragment.SettingsFragment() {
 
         Section.Player -> {
 
-            findPreference<ListPreference>("player_team")!!.apply {
+            findPreference<SelectPreference>("player_team")!!.apply {
                 isEnabled = Multiplayer.room!!.teamMode == TeamMode.TEAM_VS_TEAM
                 value = Multiplayer.player!!.team?.ordinal?.toString()
 
@@ -295,10 +297,9 @@ class SettingsFragment : com.edlplan.ui.fragment.SettingsFragment() {
                 true
             }
 
-            findPreference<EditTextPreference>("room_name")!!.apply {
+            findPreference<InputPreference>("room_name")!!.apply {
 
-                text = Multiplayer.room!!.name
-
+                setText(Multiplayer.room!!.name)
                 setOnPreferenceChangeListener { _, newValue ->
 
                     val newName = newValue as String
@@ -311,9 +312,8 @@ class SettingsFragment : com.edlplan.ui.fragment.SettingsFragment() {
                 }
             }
 
-            findPreference<EditTextPreference>("room_password")!!.apply {
-                text = null
-
+            findPreference<InputPreference>("room_password")!!.apply {
+                setText(null)
                 setOnPreferenceChangeListener { _, newValue ->
                     RoomAPI.setRoomPassword(newValue as String)
                     true
@@ -338,7 +338,7 @@ class SettingsFragment : com.edlplan.ui.fragment.SettingsFragment() {
                 }
             }
 
-            findPreference<ListPreference>("room_versus_mode")!!.apply {
+            findPreference<SelectPreference>("room_versus_mode")!!.apply {
                 value = Multiplayer.room!!.teamMode.ordinal.toString()
 
                 setOnPreferenceChangeListener { _, newValue ->
@@ -347,7 +347,7 @@ class SettingsFragment : com.edlplan.ui.fragment.SettingsFragment() {
                 }
             }
 
-            findPreference<ListPreference>("room_win_condition")!!.apply {
+            findPreference<SelectPreference>("room_win_condition")!!.apply {
                 value = Multiplayer.room!!.winCondition.ordinal.toString()
 
                 setOnPreferenceChangeListener { _, newValue ->

@@ -16,6 +16,8 @@ import com.reco1l.ibancho.RoomAPI
 import com.reco1l.ibancho.data.RoomBeatmap
 import com.reco1l.osu.async
 import com.reco1l.osu.mainThread
+import com.reco1l.toolkt.android.cornerRadius
+import com.reco1l.toolkt.android.dp
 import ru.nsu.ccfit.zuev.osu.ToastLogger
 import ru.nsu.ccfit.zuev.osu.menu.LoadingScreen
 import ru.nsu.ccfit.zuev.osuplus.R
@@ -34,6 +36,8 @@ class LobbyCreateRoom : BaseFragment()
 
     override fun onLoadView()
     {
+        findViewById<View>(R.id.frg_body)!!.cornerRadius = 14f.dp
+
         val nameField = findViewById<EditText>(R.id.room_name)
         val passwordField = findViewById<EditText>(R.id.room_password)
         val errorText = findViewById<TextView>(R.id.room_error_text)!!
@@ -45,7 +49,7 @@ class LobbyCreateRoom : BaseFragment()
                 {
                     override fun onProgressChanged(seekBar: SeekBar?, progress: Int, fromUser: Boolean)
                     {
-                        maxText.text = "Max players: $progress"
+                        maxText.text = progress.toString()
                     }
 
                     override fun onStartTrackingTouch(seekBar: SeekBar?) = Unit
@@ -119,7 +123,7 @@ class LobbyCreateRoom : BaseFragment()
 
     private fun playOnLoadAnim()
     {
-        val body = findViewById<View>(R.id.fullLayout)
+        val body = findViewById<View>(R.id.frg_body)
         body!!.alpha = 0f
         body.translationY = 200f
         body.animate().cancel()
@@ -134,7 +138,7 @@ class LobbyCreateRoom : BaseFragment()
 
     private fun playEndAnim(action: Runnable?)
     {
-        val body = findViewById<View>(R.id.fullLayout)
+        val body = findViewById<View>(R.id.frg_body)
         body!!.animate().cancel()
         body.animate()
                 .translationY(200f)

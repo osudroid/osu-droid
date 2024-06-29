@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/frg_background"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="#80000000"
+    android:gravity="center|bottom"
+    android:clipToOutline="true"
+    android:outlineProvider="background">
+
+    <LinearLayout
+        android:id="@+id/frg_body"
+        android:layout_width="500dp"
+        android:layout_height="match_parent"
+        android:layout_margin="20dp"
+        android:background="@drawable/rounded_rect"
+        android:backgroundTint="#13131A"
+        android:clickable="true"
+        android:orientation="vertical"
+        android:divider="@drawable/divider"
+        android:showDividers="middle">
+
+        <Button
+            style="@style/button_borderless"
+            android:id="@+id/new_folder"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:drawableLeft="@drawable/add_24px"
+            android:text="@string/favorite_new_folder" />
+
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/main_recycler_view"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:padding="12dp"
+            app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
+            app:spanCount="2"
+            tools:listitem="@layout/collections_item" />
+
+    </LinearLayout>
+
+</LinearLayout>

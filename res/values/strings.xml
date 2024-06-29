@@ -77,8 +77,6 @@
 	<string name="favorite_default">Default</string>
 	<string name="favorite_select">Select</string>
 	<string name="favorite_delete">Delete Folder</string>
-	<string name="favorite_add">Add</string>
-	<string name="favorite_remove">Remove</string>
 	<string name="favorite_new_folder">Create new folder</string>
 	<string name="favorite_warning_on_delete_default">you can\'t delete default folder</string>
 	<string name="favorite_ensure">Are you sure?</string>
@@ -95,7 +93,7 @@
 	<string name="menu_properties_offset">Song offset:</string>
 	<string name="menu_properties_tofavs">Add to favorites</string>
 	<string name="menu_properties_fromfavs">Remove from favorites</string>
-	<string name="menu_properties_delete">Delete map</string>
+	<string name="menu_properties_delete">Delete beatmap</string>
 	<string name="menu_properties_delete_confirm">Are you sure?</string>
 
     <string name="menu_settings_title">Options</string>
