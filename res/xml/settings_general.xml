@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.preference.PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+
+    <PreferenceCategory
+        android:key="onlineOption_normal"
+        android:title="Online">
+
+        <CheckBoxPreference
+            android:defaultValue="false"
+            android:key="stayOnline"
+            android:summary="@string/opt_stayonline_summary"
+            android:title="@string/opt_stayonline_title" />
+
+        <CheckBoxPreference
+            android:defaultValue="false"
+            android:key="loadAvatar"
+            android:summary="@string/opt_loadavatar_summary"
+            android:title="@string/opt_loadavatar_title"
+            app:layout="@layout/settings_preference_checkbox_bottom" />
+
+    </PreferenceCategory>
+
+    <PreferenceCategory
+        android:key="onlineOption_user"
+        android:title="Account">
+
+        <com.reco1l.osu.ui.InputPreference
+            android:key="onlineUsername"
+            android:summary="@string/opt_login_summary"
+            android:title="@string/opt_login_title" />
+
+        <com.reco1l.osu.ui.InputPreference
+            android:inputType="textPassword"
+            android:key="onlinePassword"
+            android:summary="@string/opt_password_summary"
+            android:title="@string/opt_password_title" />
+
+        <Preference
+            android:key="registerAcc"
+            android:summary="@string/opt_register_summary"
+            android:title="@string/opt_register_title"
+            app:layout="@layout/settings_preference_bottom" />
+
+    </PreferenceCategory>
+
+    <PreferenceCategory android:title="Community">
+
+        <CheckBoxPreference
+            android:defaultValue="true"
+            android:key="receiveAnnouncements"
+            android:summary="@string/opt_receive_announcements_summary"
+            android:title="@string/opt_receive_announcements_title"
+            app:layout="@layout/settings_preference_checkbox_bottom" />
+
+    </PreferenceCategory>
+
+    <PreferenceCategory android:title="Updates">
+
+        <Preference
+            android:key="update"
+            android:summary="@string/opt_update_summary"
+            android:title="@string/opt_update_title"
+            app:layout="@layout/settings_preference_bottom"/>
+
+    </PreferenceCategory>
+
+</androidx.preference.PreferenceScreen>

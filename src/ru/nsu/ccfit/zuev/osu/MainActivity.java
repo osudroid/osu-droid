@@ -41,15 +41,17 @@ import androidx.preference.PreferenceManager;
 import com.edlplan.ui.ActivityOverlay;
 import com.google.firebase.analytics.FirebaseAnalytics;
 import com.google.firebase.crashlytics.FirebaseCrashlytics;
-import com.reco1l.api.ibancho.LobbyAPI;
-import com.reco1l.framework.lang.Execution;
-import com.reco1l.framework.lang.execution.Async;
-import com.reco1l.legacy.AccessibilityDetector;
-import com.reco1l.legacy.Multiplayer;
-import com.reco1l.legacy.UpdateManager;
-import com.reco1l.legacy.ui.multiplayer.LobbyScene;
-import com.reco1l.legacy.ui.multiplayer.RoomScene;
+import com.reco1l.ibancho.LobbyAPI;
+import com.reco1l.osu.AccessibilityDetector;
+import com.reco1l.osu.Execution;
+import com.reco1l.osu.multiplayer.Multiplayer;
+import com.reco1l.osu.UpdateManager;
+import com.reco1l.osu.multiplayer.LobbyScene;
+import com.reco1l.osu.multiplayer.RoomScene;
 
+import com.reco1l.osu.ui.MessageDialog;
+import com.reco1l.osu.ui.PromptDialog;
+import com.rian.osu.difficulty.BeatmapDifficultyCalculator;
 import net.lingala.zip4j.ZipFile;
 
 import org.anddev.andengine.engine.Engine;
@@ -81,9 +83,7 @@ import java.util.concurrent.TimeUnit;
 import ru.nsu.ccfit.zuev.audio.BassAudioPlayer;
 import ru.nsu.ccfit.zuev.audio.serviceAudio.SaveServiceObject;
 import ru.nsu.ccfit.zuev.audio.serviceAudio.SongService;
-import ru.nsu.ccfit.zuev.osu.async.SyncTaskManager;
 import ru.nsu.ccfit.zuev.osu.game.SpritePool;
-import ru.nsu.ccfit.zuev.osu.helper.BeatmapDifficultyCalculator;
 import ru.nsu.ccfit.zuev.osu.helper.FileUtils;
 import ru.nsu.ccfit.zuev.osu.helper.InputManager;
 import ru.nsu.ccfit.zuev.osu.helper.StringTable;
@@ -125,7 +125,6 @@ public class MainActivity extends BaseGameActivity implements
         //Debug.setDebugLevel(Debug.DebugLevel.NONE);
         StringTable.setContext(this);
         ToastLogger.init(this);
-        SyncTaskManager.getInstance().init(this);
         InputManager.setContext(this);
         OnlineManager.getInstance().Init(getApplicationContext());
         crashlytics.setUserId(Config.getOnlineDeviceID());
@@ -211,31 +210,6 @@ public class MainActivity extends BaseGameActivity implements
         final SharedPreferences prefs = PreferenceManager
                 .getDefaultSharedPreferences(this);
 
-        if (Objects.equals(prefs.getString("playername", ""), "")) {
-            final SharedPreferences.Editor editor = prefs.edit();
-            editor.putString("playername", "Guest");
-            editor.commit();
-
-            final AlertDialog.Builder alert = new AlertDialog.Builder(this);
-
-            alert.setTitle(StringTable.get(R.string.dialog_playername_title));
-            alert.setMessage(StringTable
-                    .get(R.string.dialog_playername_message));
-
-            final EditText input = new EditText(this);
-            input.setText("Guest");
-            alert.setView(input);
-
-            alert.setPositiveButton(StringTable.get(R.string.dialog_ok),
-                    (dialog, whichButton) -> {
-                        final String value = input.getText().toString();
-                        editor.putString("playername", value);
-                        editor.commit();
-                    });
-
-            alert.show();
-        }
-
         if (!prefs.getBoolean("qualitySet", false)) {
             final SharedPreferences.Editor editor = prefs.edit();
             editor.putBoolean("qualitySet", true);
@@ -276,7 +250,7 @@ public class MainActivity extends BaseGameActivity implements
         ResourceManager.getInstance().loadHighQualityAsset("multi", "multi.png");
         ResourceManager.getInstance().loadHighQualityAsset("back", "back.png");
         ResourceManager.getInstance().loadHighQualityAsset("exit", "exit.png");
-        ResourceManager.getInstance().loadHighQualityAsset("chimu", "chimu.png");
+        ResourceManager.getInstance().loadHighQualityAsset("beatmap_downloader", "beatmap_downloader.png");
         ResourceManager.getInstance().loadHighQualityAsset("options", "options.png");
         ResourceManager.getInstance().loadHighQualityAsset("offline-avatar", "offline-avatar.png");
         ResourceManager.getInstance().loadHighQualityAsset("star", "gfx/star.png");
@@ -319,7 +293,7 @@ public class MainActivity extends BaseGameActivity implements
         LobbyScene.INSTANCE.init();
         RoomScene.INSTANCE.init();
 
-        Async.run(() -> {
+        Execution.async(() -> {
             BassAudioPlayer.initDevice();
             GlobalManager.getInstance().init();
             analytics.logEvent(FirebaseAnalytics.Event.APP_OPEN, null);
@@ -334,34 +308,32 @@ public class MainActivity extends BaseGameActivity implements
 
             SplashScene.INSTANCE.playWelcomeAnimation();
 
-            try {
-                Thread.sleep(2500);
-            } catch (InterruptedException ignored) {
-            }
+            Execution.delayed(2500, () -> {
 
-            UpdateManager.INSTANCE.onActivityStart();
-            GlobalManager.getInstance().setInfo("");
-            GlobalManager.getInstance().setLoadingProgress(100);
-            ResourceManager.getInstance().loadFont("font", null, 28, Color.WHITE);
-            GlobalManager.getInstance().getEngine().setScene(GlobalManager.getInstance().getMainScene().getScene());
-            GlobalManager.getInstance().getMainScene().loadBeatmap();
-            initPreferences();
-            availableInternalMemory();
+                UpdateManager.INSTANCE.onActivityStart();
+                GlobalManager.getInstance().setInfo("");
+                GlobalManager.getInstance().setLoadingProgress(100);
+                ResourceManager.getInstance().loadFont("font", null, 28, Color.WHITE);
+                GlobalManager.getInstance().getEngine().setScene(GlobalManager.getInstance().getMainScene().getScene());
+                GlobalManager.getInstance().getMainScene().loadBeatmap();
+                initPreferences();
+                availableInternalMemory();
 
-            scheduledExecutor.scheduleAtFixedRate(() -> {
-                AccessibilityDetector.check(MainActivity.this);
-                BeatmapDifficultyCalculator.invalidateExpiredCache();
-            }, 0, 100, TimeUnit.MILLISECONDS);
+                scheduledExecutor.scheduleAtFixedRate(() -> {
+                    AccessibilityDetector.check(MainActivity.this);
+                    BeatmapDifficultyCalculator.invalidateExpiredCache();
+                }, 0, 100, TimeUnit.MILLISECONDS);
 
-            if (roomInviteLink != null) {
-                LobbyScene.INSTANCE.connectFromLink(roomInviteLink);
-                return;
-            }
+                if (roomInviteLink != null) {
+                    LobbyScene.INSTANCE.connectFromLink(roomInviteLink);
+                    return;
+                }
 
-            if (willReplay) {
-                GlobalManager.getInstance().getMainScene().watchReplay(beatmapToAdd);
-                willReplay = false;
-            }
+                if (willReplay) {
+                    GlobalManager.getInstance().getMainScene().watchReplay(beatmapToAdd);
+                    willReplay = false;
+                }
+            });
         });
     }
 
@@ -380,7 +352,7 @@ public class MainActivity extends BaseGameActivity implements
         availableMemory = (double) stat.getAvailableBytes();
         String toastMessage = String.format(StringTable.get(R.string.message_low_storage_space), df.format(availableMemory / minMem));
         if (availableMemory < 0.5 * minMem) { //I set 512MiB as a minimum
-            Toast.makeText(this, toastMessage, Toast.LENGTH_SHORT).show();
+            Execution.mainThread(() -> Toast.makeText(this, toastMessage, Toast.LENGTH_LONG).show());
         }
         Debug.i("Free Space: " + df.format(availableMemory / minMem));
     }
@@ -389,12 +361,8 @@ public class MainActivity extends BaseGameActivity implements
     @Override
     protected void onSetContentView() {
         this.mRenderSurfaceView = new RenderSurfaceView(this);
-        if (Config.isUseDither()) {
-            this.mRenderSurfaceView.setEGLConfigChooser(8, 8, 8, 8, 24, 0);
-            this.mRenderSurfaceView.getHolder().setFormat(PixelFormat.RGBA_8888);
-        } else {
-            this.mRenderSurfaceView.setEGLConfigChooser(true);
-        }
+        this.mRenderSurfaceView.setEGLConfigChooser(8, 8, 8, 8, 24, 0);
+        this.mRenderSurfaceView.getHolder().setFormat(PixelFormat.RGBA_8888);
         this.mRenderSurfaceView.setRenderer(this.mEngine);
 
         RelativeLayout layout = new RelativeLayout(this);
@@ -726,7 +694,7 @@ public class MainActivity extends BaseGameActivity implements
             if (Multiplayer.isConnected()
                     && (getEngine().getScene() == RoomScene.INSTANCE
                     || getEngine().getScene() == GlobalManager.getInstance().getSongMenu().getScene())) {
-                Execution.asyncIgnoreExceptions(RoomScene.INSTANCE::invalidateStatus);
+                Execution.async(() -> Execution.runSafe(RoomScene.INSTANCE::invalidateStatus));
             }
         }
 

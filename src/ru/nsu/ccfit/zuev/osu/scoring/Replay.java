@@ -96,22 +96,19 @@ public class Replay {
         objectData[id].result = score.getId();
     }
 
-    public void addPress(final float time, final PointF pos, final int pid) {
+    public void addPress(final int timeMs, final PointF pos, final int pid) {
         if (pid > GameScene.CursorCount || isSaving) return;
-        int itime = Math.max(0, (int) (time * 1000));
-        cursorMoves.get(pid).pushBack(this, itime, pos.x, pos.y, TouchType.DOWN);
+        cursorMoves.get(pid).pushBack(this, timeMs, pos.x, pos.y, TouchType.DOWN);
     }
 
-    public void addMove(final float time, final PointF pos, final int pid) {
+    public void addMove(final int timeMs, final PointF pos, final int pid) {
         if (pid > GameScene.CursorCount || isSaving) return;
-        int itime = Math.max(0, (int) (time * 1000));
-        cursorMoves.get(pid).pushBack(this, itime, pos.x, pos.y, TouchType.MOVE);
+        cursorMoves.get(pid).pushBack(this, timeMs, pos.x, pos.y, TouchType.MOVE);
     }
 
-    public void addUp(final float time, final int pid) {
+    public void addUp(final int timeMs, final int pid) {
         if (pid > GameScene.CursorCount || isSaving) return;
-        int itime = Math.max(0, (int) (time * 1000));
-        cursorMoves.get(pid).pushBack(itime, TouchType.UP);
+        cursorMoves.get(pid).pushBack(timeMs, TouchType.UP);
     }
 
     public void save(final String filename) {

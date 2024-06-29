@@ -1,0 +1,95 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.preference.PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+
+    <PreferenceCategory android:title="Cursor">
+
+        <CheckBoxPreference
+            android:defaultValue="false"
+            android:key="showcursor"
+            android:summary="@string/opt_showcursor_summary"
+            android:title="@string/opt_showcursor_title" />
+
+        <SeekBarPreference
+            android:defaultValue="50"
+            android:key="cursorSize"
+            android:max="300"
+            android:summary="@string/opt_cursor_size_summary"
+            android:title="@string/opt_cursor_size"
+            app:min="25"
+            app:showSeekBarValue="true"
+            app:layout="@layout/settings_preference_seekbar_bottom"/>
+
+    </PreferenceCategory>
+
+    <PreferenceCategory android:title="Animations and effects">
+
+        <CheckBoxPreference
+            android:defaultValue="false"
+            android:key="comboburst"
+            android:summary="@string/opt_combo_burst_summary"
+            android:title="@string/opt_combo_burst_title" />
+
+        <CheckBoxPreference
+            android:defaultValue="false"
+            android:key="images"
+            android:summary="@string/opt_largeimages_summary"
+            android:title="@string/opt_largeimages_title" />
+
+        <CheckBoxPreference
+            android:defaultValue="true"
+            android:key="animateFollowCircle"
+            android:summary="Enable slider follow circle animations when hitting/releasing follow circle."
+            android:title="Animate follow circle" />
+
+        <CheckBoxPreference
+            android:defaultValue="true"
+            android:key="animateComboText"
+            android:summary="Enable combo text shadow animation when increasing combo."
+            android:title="Animate combo text" />
+
+        <CheckBoxPreference
+            android:defaultValue="true"
+            android:key="snakingInSliders"
+            android:summary="@string/opt_snakingInSliders_summary"
+            android:title="@string/opt_snakingInSliders_title" />
+
+        <CheckBoxPreference
+            android:defaultValue="false"
+            android:key="noChangeDimInBreaks"
+            android:summary="@string/opt_noChangeDimInBreaks_summary"
+            android:title="@string/opt_noChangeDimInBreaks_title" />
+
+        <CheckBoxPreference
+            android:defaultValue="true"
+            android:key="bursts"
+            android:summary="@string/opt_bursts_summary"
+            android:title="@string/opt_bursts_title" />
+
+        <CheckBoxPreference
+            android:defaultValue="false"
+            android:key="hitlighting"
+            android:summary="@string/opt_hitlighting_summary"
+            android:title="@string/opt_hitlighting_title" />
+
+        <CheckBoxPreference
+            android:defaultValue="false"
+            android:key="particles"
+            android:summary="@string/opt_particles_summary"
+            android:title="@string/opt_particles_title"
+            app:layout="@layout/settings_preference_checkbox_bottom" />
+
+    </PreferenceCategory>
+
+    <PreferenceCategory android:title="Display">
+
+        <CheckBoxPreference
+            android:defaultValue="false"
+            android:key="hidenavibar"
+            android:summary="@string/opt_hide_navibar_summary"
+            android:title="@string/opt_hide_navibar_title"
+            app:layout="@layout/settings_preference_checkbox_bottom" />
+
+    </PreferenceCategory>
+
+</androidx.preference.PreferenceScreen>

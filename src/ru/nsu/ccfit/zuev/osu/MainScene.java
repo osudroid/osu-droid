@@ -7,10 +7,12 @@ import android.net.Uri;
 import android.os.PowerManager;
 import android.util.Log;
 
-import com.edlplan.ui.fragment.ConfirmDialogFragment;
-import com.reco1l.legacy.ui.ChimuWebView;
-import com.reco1l.legacy.ui.MainMenu;
+import com.reco1l.osu.Execution;
+import com.reco1l.osu.ui.entity.MainMenu;
 
+import com.reco1l.osu.beatmaplisting.BeatmapListing;
+import com.reco1l.osu.ui.MessageDialog;
+import com.rian.osu.beatmap.parser.BeatmapParser;
 import org.anddev.andengine.engine.handler.IUpdateHandler;
 import org.anddev.andengine.entity.IEntity;
 import org.anddev.andengine.entity.modifier.IEntityModifier;
@@ -58,9 +60,6 @@ import javax.microedition.khronos.opengles.GL10;
 
 import ru.nsu.ccfit.zuev.audio.BassSoundProvider;
 import ru.nsu.ccfit.zuev.audio.Status;
-import ru.nsu.ccfit.zuev.osu.async.SyncTaskManager;
-import ru.nsu.ccfit.zuev.osu.beatmap.BeatmapData;
-import ru.nsu.ccfit.zuev.osu.beatmap.parser.BeatmapParser;
 import ru.nsu.ccfit.zuev.osu.game.SongProgressBar;
 import ru.nsu.ccfit.zuev.osu.game.TimingPoint;
 import ru.nsu.ccfit.zuev.osu.helper.ModifierFactory;
@@ -189,17 +188,23 @@ public class MainScene implements IUpdateHandler {
 
 
             @Override
-            public boolean onAreaTouched(final TouchEvent pSceneTouchEvent,
-                                         final float pTouchAreaLocalX, final float pTouchAreaLocalY) {
+            public boolean onAreaTouched(final TouchEvent pSceneTouchEvent, final float pTouchAreaLocalX, final float pTouchAreaLocalY) {
                 if (pSceneTouchEvent.isActionDown()) {
-                    new ConfirmDialogFragment().setMessage(R.string.dialog_visit_osu_website_message).showForResult(
-                            isAccepted -> {
-                                if (isAccepted) {
-                                    Intent browserIntent = new Intent(Intent.ACTION_VIEW, Uri.parse("https://osu.ppy.sh"));
-                                    GlobalManager.getInstance().getMainActivity().startActivity(browserIntent);
-                                }
-                            }
-                    );
+
+                    new MessageDialog()
+                        .setMessage(context.getString(R.string.dialog_visit_osu_website_message))
+                        .addButton("Yes", dialog -> {
+                            Intent browserIntent = new Intent(Intent.ACTION_VIEW, Uri.parse("https://osu.ppy.sh"));
+                            GlobalManager.getInstance().getMainActivity().startActivity(browserIntent);
+                            dialog.dismiss();
+                            return null;
+                        })
+                        .addButton("No", dialog -> {
+                            dialog.dismiss();
+                            return null;
+                        })
+                        .show();
+
                     return true;
                 }
                 return false;
@@ -207,22 +212,26 @@ public class MainScene implements IUpdateHandler {
         };
         author.setPosition(10, Config.getRES_HEIGHT() - author.getHeight() - 10);
 
-        final Text yasonline = new Text(720, 530, ResourceManager
-                .getInstance().getFont("font"),
-                "            Global Ranking\n   Provided by iBancho") {
+        final Text yasonline = new Text(720, 530, ResourceManager.getInstance().getFont("font"), "            Global Ranking\n   Provided by iBancho") {
 
             @Override
-            public boolean onAreaTouched(final TouchEvent pSceneTouchEvent,
-                                         final float pTouchAreaLocalX, final float pTouchAreaLocalY) {
+            public boolean onAreaTouched(final TouchEvent pSceneTouchEvent, final float pTouchAreaLocalX, final float pTouchAreaLocalY) {
                 if (pSceneTouchEvent.isActionDown()) {
-                    new ConfirmDialogFragment().setMessage(R.string.dialog_visit_osudroid_website_message).showForResult(
-                            isAccepted -> {
-                                if (isAccepted) {
-                                    Intent browserIntent = new Intent(Intent.ACTION_VIEW, Uri.parse("https://" + OnlineManager.hostname));
-                                    GlobalManager.getInstance().getMainActivity().startActivity(browserIntent);
-                                }
-                            }
-                    );
+
+                    new MessageDialog()
+                        .setMessage(context.getString(R.string.dialog_visit_osudroid_website_message))
+                        .addButton("Yes", dialog -> {
+                            Intent browserIntent = new Intent(Intent.ACTION_VIEW, Uri.parse("https://" + OnlineManager.hostname));
+                            GlobalManager.getInstance().getMainActivity().startActivity(browserIntent);
+                            dialog.dismiss();
+                            return null;
+                        })
+                        .addButton("No", dialog -> {
+                            dialog.dismiss();
+                            return null;
+                        })
+                        .show();
+
                     return true;
                 }
                 return false;
@@ -418,8 +427,8 @@ public class MainScene implements IUpdateHandler {
             scene.attachChild(particleSystem[1]);
         }
 
-        TextureRegion chimuTex = ResourceManager.getInstance().getTexture("chimu");
-        Sprite chimu = new Sprite(Config.getRES_WIDTH() - chimuTex.getWidth(), (Config.getRES_HEIGHT() - chimuTex.getHeight()) / 2f, chimuTex) {
+        TextureRegion beatmapDownloaderTex = ResourceManager.getInstance().getTexture("beatmap_downloader");
+        Sprite beatmapDownloader = new Sprite(Config.getRES_WIDTH() - beatmapDownloaderTex.getWidth(), (Config.getRES_HEIGHT() - beatmapDownloaderTex.getHeight()) / 2f, beatmapDownloaderTex) {
             public boolean onAreaTouched(TouchEvent pSceneTouchEvent, float pTouchAreaLocalX, float pTouchAreaLocalY) {
                 if (pSceneTouchEvent.isActionDown()) {
                     setColor(0.7f, 0.7f, 0.7f);
@@ -429,8 +438,7 @@ public class MainScene implements IUpdateHandler {
 
                 if (pSceneTouchEvent.isActionUp()) {
                     setColor(1, 1, 1);
-                    musicControl(MusicOption.STOP);
-                    ChimuWebView.INSTANCE.show();
+                    new BeatmapListing().show();
                     return true;
                 }
 
@@ -474,11 +482,11 @@ public class MainScene implements IUpdateHandler {
         scene.attachChild(music_pause);
         scene.attachChild(music_stop);
         scene.attachChild(music_next);
-        scene.attachChild(chimu);
+        scene.attachChild(beatmapDownloader);
 
         scene.registerTouchArea(logo);
         scene.registerTouchArea(author);
-        scene.registerTouchArea(chimu);
+        scene.registerTouchArea(beatmapDownloader);
         scene.registerTouchArea(yasonline);
         scene.registerTouchArea(music_prev);
         scene.registerTouchArea(music_play);
@@ -514,7 +522,7 @@ public class MainScene implements IUpdateHandler {
 
     public void reloadOnlinePanel() {
         // IndexOutOfBoundsException 141 fix
-        SyncTaskManager.getInstance().run(() -> {
+        Execution.updateThread(() -> {
             scene.detachChild(OnlineScoring.getInstance().getPanel());
             createOnlinePanel(scene);
         });
@@ -889,33 +897,44 @@ public class MainScene implements IUpdateHandler {
             Arrays.fill(peakDownRate, 1f);
             Arrays.fill(peakAlpha, 0f);
 
-            BeatmapParser parser = new BeatmapParser(selectedTrack.getFilename());
-            BeatmapData beatmapData = parser.parse(false);
-            if (beatmapData != null) {
-                timingPoints = new LinkedList<>();
-                for (final String s : beatmapData.rawTimingPoints) {
-                    final TimingPoint tp = new TimingPoint(s.split(","), currentTimingPoint);
-                    timingPoints.add(tp);
-                    if (!tp.wasInderited() || currentTimingPoint == null) {
-                        currentTimingPoint = tp;
+            try (var parser = new BeatmapParser(selectedTrack.getFilename())) {
+                var beatmap = parser.parse(false);
+
+                if (beatmap != null) {
+                    timingPoints = new LinkedList<>();
+
+                    for (final String s : beatmap.rawTimingPoints) {
+                        final TimingPoint tp = new TimingPoint(s.split(","), currentTimingPoint);
+                        timingPoints.add(tp);
+                        if (!tp.wasInderited() || currentTimingPoint == null) {
+                            currentTimingPoint = tp;
+                        }
                     }
+
+                    firstTimingPoint = timingPoints.remove(0);
+                    currentTimingPoint = firstTimingPoint;
+                    lastTimingPoint = currentTimingPoint;
+                    bpmLength = firstTimingPoint.getBeatLength() * 1000f;
                 }
-                firstTimingPoint = timingPoints.remove(0);
-                currentTimingPoint = firstTimingPoint;
-                lastTimingPoint = currentTimingPoint;
-                bpmLength = firstTimingPoint.getBeatLength() * 1000f;
             }
         }
     }
 
     public void showExitDialog() {
-        GlobalManager.getInstance().getMainActivity().runOnUiThread(() -> new ConfirmDialogFragment().setMessage(R.string.dialog_exit_message).showForResult(
-                isAccepted -> {
-                    if (isAccepted) {
-                        exit();
-                    }
-                }
-        ));
+
+        new MessageDialog()
+            .setTitle("Exit")
+            .setMessage(context.getString(R.string.dialog_exit_message))
+            .addButton("Yes", dialog -> {
+                dialog.dismiss();
+                exit();
+                return null;
+            })
+            .addButton("No", dialog -> {
+                dialog.dismiss();
+                return null;
+            })
+            .show();
     }
 
     public void exit() {
@@ -969,20 +988,6 @@ public class MainScene implements IUpdateHandler {
                 GlobalManager.getInstance().getMainActivity().finish();
             }
         }, 3000, TimeUnit.MILLISECONDS);
-    }
-
-    public void restart() {
-        MainActivity mActivity = GlobalManager.getInstance().getMainActivity();
-        mActivity.runOnUiThread(() -> new ConfirmDialogFragment().setMessage(R.string.dialog_dither_confirm).showForResult(
-                isAccepted -> {
-                    if (isAccepted) {
-                        Intent mIntent = new Intent(mActivity, MainActivity.class);
-                        mIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
-                        mActivity.startActivity(mIntent);
-                        System.exit(0);
-                    }
-                }
-        ));
     }
 
     public Scene getScene() {

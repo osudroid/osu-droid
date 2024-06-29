@@ -1,31 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string-array name="bg_quality_names">
-        <item>High</item>
-        <item>Medium</item>
-        <item>Low</item>
-        <item>Disabled</item>
-    </string-array>
-    <string-array name="bg_quality_values">
-        <item>1</item>
-        <item>2</item>
-        <item>4</item>
-        <item>0</item>
-    </string-array>
-    <!-- <string-array name="bg_brightness_names">
-        <item>100%</item>
-        <item>75%</item>
-        <item>50%</item>
-        <item>25%</item>
-        <item>0%</item>
-    </string-array>
-    <string-array name="bg_brightness_values">
-        <item>100</item>
-        <item>75</item>
-        <item>50</item>
-        <item>25</item>
-        <item>0</item>
-    </string-array> -->
+
     <string-array name="error_meter_display_names">
         <item>Always</item>
         <item>Replay Only</item>
@@ -154,6 +129,12 @@
     <string name="opt_fps_title">FPS</string>
     <string name="opt_fps_summary">Display (frames per second) during gameplay</string>
 
+    <string name="opt_averageoffset_title">Average offset</string>
+    <string name="opt_averageoffset_summary">Display average offset of hits during gameplay. Higher value means hits are more offset</string>
+
+    <string name="opt_unstablerate_title">Unstable rate</string>
+    <string name="opt_unstablerate_summary">Display unstable rate during gameplay. Higher value means hits are more inconsistent</string>
+
     <!-- <string name="opt_skipoffset_title">Skip offset</string>
     <string name="opt_skipoffset_summary">This offset will be added when you press the &quot;Skip&quot; button. Enter -1 for auto offset</string> -->
 
@@ -224,7 +205,7 @@
     <string name="opt_register_summary">Register a new account</string>
 
     <string name="opt_loadavatar_title">Load Avatar</string>
-    <string name="opt_loadavatar_summary">Load without WiFi connection.</string>
+    <string name="opt_loadavatar_summary">Load avatar in online leaderboard</string>
 
 
     <string name="opt_error_meter_display_title">Hit error meter</string>
@@ -330,6 +311,9 @@
     <string name="opt_flashlight_follow_delay_title">FL Follow delay</string>
     <string name="opt_changespeed_title">Speed Modify</string>
     <string name="opt_forcear_title">Force AR</string>
+    <string name="opt_forceod_title">Force OD</string>
+    <string name="opt_forcehp_title">Force HP</string>
+    <string name="opt_forcecs_title">Force CS</string>
     <string name="opt_enablenc_whenspeedchange_title">Enable pitch shift in speed modify</string>
     <string name="opt_enablespeedchange_title">Enable speed modify</string>
     <string name="opt_enableforcear_title">Enable force AR</string>

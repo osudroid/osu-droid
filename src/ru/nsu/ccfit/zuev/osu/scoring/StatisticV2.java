@@ -7,8 +7,8 @@ import java.util.EnumSet;
 import java.util.Locale;
 import java.util.Random;
 
-import com.reco1l.api.ibancho.data.WinCondition;
-import com.reco1l.legacy.Multiplayer;
+import com.reco1l.ibancho.data.WinCondition;
+import com.reco1l.osu.multiplayer.Multiplayer;
 import org.jetbrains.annotations.Nullable;
 import org.json.JSONObject;
 import ru.nsu.ccfit.zuev.osu.Config;
@@ -39,7 +39,7 @@ public class StatisticV2 implements Serializable {
     private float hp = 1;
     private float diffModifier = 1;
     private EnumSet<GameMod> mod = EnumSet.noneOf(GameMod.class);
-    private String playerName = "";
+    private String playerName = Config.getOnlineUsername();
     private String fileName = "";
     private String replayName = "";
     private int forcedScore = -1;
@@ -86,18 +86,7 @@ public class StatisticV2 implements Serializable {
 
     private int life = 1;
 
-
-    public StatisticV2() {
-        playerName = null;
-        if (Config.isStayOnline()) {
-            playerName = OnlineManager.getInstance().getUsername();
-            if (playerName == null || playerName.length() == 0)
-                playerName = Config.getOnlineUsername();
-        }
-
-        if (playerName == null || playerName.length() == 0)
-            playerName = Config.getLocalUsername();
-    }
+    public StatisticV2() {}
 
     public StatisticV2(final Statistic stat) {
         notes = stat.notes;
@@ -119,7 +108,7 @@ public class StatisticV2 implements Serializable {
             life = 3;
         }
 
-        setPlayerName(Config.getLocalUsername());
+        setPlayerName(Config.getOnlineUsername());
         computeModScoreMultiplier();
     }
 
@@ -665,7 +654,7 @@ public class StatisticV2 implements Serializable {
         builder.append(' ');
         builder.append(getMisses());
         builder.append(' ');
-        builder.append((int) (getAccuracy() * 100000f));
+        builder.append(getAccuracy());
         builder.append(' ');
         builder.append(getTime());
         builder.append(' ');

@@ -3,8 +3,6 @@ package com.edlplan.ui.fragment;
 import android.animation.Animator;
 import android.view.View;
 
-import androidx.annotation.StringRes;
-
 import com.edlplan.framework.easing.Easing;
 import com.edlplan.ui.BaseAnimationListener;
 import com.edlplan.ui.EasingHelper;
@@ -15,7 +13,7 @@ public class LoadingFragment extends BaseFragment {
 
     @Override
     protected int getLayoutID() {
-        return R.layout.fragment_loading;
+        return R.layout.loading_fragment;
     }
 
     @Override

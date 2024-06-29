@@ -9,13 +9,16 @@ import com.edlplan.replay.OdrDatabase;
 import com.edlplan.ui.fragment.FilterMenuFragment;
 import com.edlplan.ui.fragment.PropsMenuFragment;
 import com.edlplan.ui.fragment.ScoreMenuFragment;
-import com.reco1l.api.ibancho.RoomAPI;
-import com.reco1l.legacy.Multiplayer;
-import com.reco1l.legacy.ui.multiplayer.RoomScene;
-import com.reco1l.framework.lang.execution.Async;
-import com.rian.difficultycalculator.attributes.DifficultyAttributes;
-import com.rian.difficultycalculator.calculator.DifficultyCalculationParameters;
+import com.reco1l.ibancho.RoomAPI;
+import com.reco1l.osu.Execution;
+import com.reco1l.osu.multiplayer.Multiplayer;
+import com.reco1l.osu.multiplayer.RoomScene;
 
+import com.rian.osu.beatmap.parser.BeatmapParser;
+import com.rian.osu.difficulty.BeatmapDifficultyCalculator;
+import com.rian.osu.difficulty.calculator.DifficultyCalculationParameters;
+import com.rian.osu.ui.DifficultyAlgorithmSwitcher;
+import com.rian.osu.utils.LRUCache;
 import org.anddev.andengine.engine.Engine;
 import org.anddev.andengine.engine.handler.IUpdateHandler;
 import org.anddev.andengine.entity.Entity;
@@ -42,18 +45,15 @@ import ru.nsu.ccfit.zuev.osu.BeatmapInfo;
 import ru.nsu.ccfit.zuev.osu.Config;
 import ru.nsu.ccfit.zuev.osu.GlobalManager;
 import ru.nsu.ccfit.zuev.osu.LibraryManager;
+import ru.nsu.ccfit.zuev.osu.RankedStatus;
 import ru.nsu.ccfit.zuev.osu.ResourceManager;
 import ru.nsu.ccfit.zuev.osu.ToastLogger;
 import ru.nsu.ccfit.zuev.osu.TrackInfo;
 import ru.nsu.ccfit.zuev.osu.Utils;
-import ru.nsu.ccfit.zuev.osu.async.SyncTaskManager;
-import ru.nsu.ccfit.zuev.osu.beatmap.BeatmapData;
-import ru.nsu.ccfit.zuev.osu.beatmap.parser.BeatmapParser;
 import ru.nsu.ccfit.zuev.osu.game.GameHelper;
 import ru.nsu.ccfit.zuev.osu.game.GameScene;
 import ru.nsu.ccfit.zuev.osu.game.mods.GameMod;
 import ru.nsu.ccfit.zuev.osu.helper.AnimSprite;
-import ru.nsu.ccfit.zuev.osu.helper.BeatmapDifficultyCalculator;
 import ru.nsu.ccfit.zuev.osu.helper.StringTable;
 import ru.nsu.ccfit.zuev.osu.online.OnlineManager;
 import ru.nsu.ccfit.zuev.osu.online.OnlineManager.OnlineManagerException;
@@ -66,6 +66,8 @@ import ru.nsu.ccfit.zuev.osu.scoring.StatisticV2;
 import ru.nsu.ccfit.zuev.osuplus.R;
 import ru.nsu.ccfit.zuev.skins.OsuSkin;
 import ru.nsu.ccfit.zuev.skins.SkinLayout;
+
+import static com.rian.osu.utils.ModConverter.convertLegacyMods;
 
 public class SongMenu implements IUpdateHandler, MenuItemListener,
         IScrollBarListener {
@@ -110,6 +112,7 @@ public class SongMenu implements IUpdateHandler, MenuItemListener,
     private final long previousSelectionInterval = 1000;
     private boolean previousSelectionPerformed;
     private final LinkedList<MenuItem> previousSelectedItems = new LinkedList<>();
+    private final LRUCache<String, RankedStatus> mapStatuses = new LRUCache<>(50);
 
     public SongMenu() {
     }
@@ -601,6 +604,8 @@ public class SongMenu implements IUpdateHandler, MenuItemListener,
             }
         };
 
+        final var difficultySwitcher = new DifficultyAlgorithmSwitcher();
+
         if (modSelection != null)
             modSelection.setScale(1.5f);
 
@@ -652,6 +657,7 @@ public class SongMenu implements IUpdateHandler, MenuItemListener,
                     Config.getRES_HEIGHT() - Utils.toRes(90));
         }
 
+        difficultySwitcher.setPosition(randomMap.getX() + randomMap.getWidthScaled() - 18, Config.getRES_HEIGHT() - difficultySwitcher.getHeightScaled());
 
         frontLayer.attachChild(backButton);
         scene.registerTouchArea(backButton);
@@ -665,16 +671,19 @@ public class SongMenu implements IUpdateHandler, MenuItemListener,
         scene.registerTouchArea(optionSelection);
         frontLayer.attachChild(randomMap);
         scene.registerTouchArea(randomMap);
+        frontLayer.attachChild(difficultySwitcher);
+        scene.registerTouchArea(difficultySwitcher);
 
         if (OnlineScoring.getInstance().createSecondPanel() != null) {
             OnlinePanel panel = OnlineScoring.getInstance().getSecondPanel();
             panel.detachSelf();
-            panel.setPosition(randomMap.getX() + randomMap.getWidthScaled() - 18, Config.getRES_HEIGHT() - Utils.toRes(110));
+            panel.setPosition(difficultySwitcher.getX() + difficultySwitcher.getWidthScaled() + 20, Config.getRES_HEIGHT() - 110);
             OnlineScoring.getInstance().loadAvatar(false);
             frontLayer.attachChild(panel);
 
-
-            scoringSwitcher = new AnimSprite(Utils.toRes(5), Utils.toRes(10), 0, "ranking_enabled", "ranking_disabled") {
+            scoringSwitcher = new AnimSprite(Utils.toRes(5), Utils.toRes(10), 0,
+                    "ranking_disabled", "ranking_enabled", "selection-ranked", "selection-approved",
+                    "selection-loved", "selection-question") {
                 @Override
                 public boolean onAreaTouched(TouchEvent pSceneTouchEvent,
                                              float pTouchAreaLocalX, float pTouchAreaLocalY) {
@@ -683,7 +692,8 @@ public class SongMenu implements IUpdateHandler, MenuItemListener,
                     return true;
                 }
             };
-            scoringSwitcher.setFrame(1);
+
+            scoringSwitcher.setFrame(0);
             scoringSwitcher.setPosition(10, 10);
             scene.registerTouchArea(scoringSwitcher);
             frontLayer.attachChild(scoringSwitcher);
@@ -704,24 +714,13 @@ public class SongMenu implements IUpdateHandler, MenuItemListener,
         if (board.isShowOnlineScores()) {
             board.setShowOnlineScores(false);
             board.init(selectedTrack);
-            scoringSwitcher.setFrame(1);
             updateInfo(selectedTrack);
         } else if (OnlineManager.getInstance().isStayOnline()) {
             board.setShowOnlineScores(true);
             board.init(selectedTrack);
-            setRank();
         }
-    }
 
-    public void setRank() {
-        if (!board.isShowOnlineScores()) {
-            if (scoringSwitcher != null) {
-                scoringSwitcher.setFrame(1);
-            }
-            updateInfo(selectedTrack);
-            return;
-        }
-        scoringSwitcher.setFrame(0);
+        updateScoringSwitcherStatus(true);
     }
 
     public Scene getScene() {
@@ -793,10 +792,14 @@ public class SongMenu implements IUpdateHandler, MenuItemListener,
                     final float bpm1 = i1.getFirstTrack().getBpmMax();
                     final float bpm2 = i2.getFirstTrack().getBpmMax();
                     return Float.compare(bpm2, bpm1);
-                case Stars:
-                    final float float1 = i1.getFirstTrack().getDifficulty();
-                    final float float2 = i2.getFirstTrack().getDifficulty();
-                    return Float.compare(float2, float1);
+                case DroidStars:
+                    final float droid1 = i1.getFirstTrack().getDroidDifficulty();
+                    final float droid2 = i2.getFirstTrack().getDroidDifficulty();
+                    return Float.compare(droid2, droid1);
+                case StandardStars:
+                    final float standard1 = i1.getFirstTrack().getStandardDifficulty();
+                    final float standard2 = i2.getFirstTrack().getStandardDifficulty();
+                    return Float.compare(standard2, standard1);
                 case Length:
                     final Long length1 = i1.getFirstTrack().getMusicLength();
                     final Long length2 = i2.getFirstTrack().getMusicLength();
@@ -1052,9 +1055,26 @@ public class SongMenu implements IUpdateHandler, MenuItemListener,
                 .append("OD: ").append(GameHelper.Round(od, 2)).append(" ")
                 .append("CS: ").append(GameHelper.Round(cs, 2)).append(" ")
                 .append("HP: ").append(GameHelper.Round(hp, 2)).append(" ")
-                .append("Stars: ").append(GameHelper.Round(track.getDifficulty(), 2));
+                .append("Stars: ");
+
+        switch (Config.getDifficultyAlgorithm()) {
+            case droid:
+                dimensionStringBuilder.append(GameHelper.Round(track.getDroidDifficulty(), 2));
+                break;
+            case standard:
+                dimensionStringBuilder.append(GameHelper.Round(track.getStandardDifficulty(), 2));
+                break;
+        }
 
         dimensionInfo.setText(dimensionStringBuilder.toString());
+    }
+
+    public void switchDifficultyAlgorithm() {
+        updateInfo(selectedTrack);
+
+        if (selectedItem != null) {
+            selectedItem.reloadTracks();
+        }
     }
 
     public void updateInfo(TrackInfo track) {
@@ -1071,39 +1091,49 @@ public class SongMenu implements IUpdateHandler, MenuItemListener,
         mapper.setText(mapperStr);
         beatmapInfo2.setText(binfoStr2);
         changeDimensionInfo(track);
-        Async.run(() -> {
-            BeatmapData beatmapData = new BeatmapParser(track.getFilename()).parse(true);
+        Execution.async(() -> {
+            try (var parser = new BeatmapParser(track.getFilename())) {
+                var beatmap = parser.parse(true);
 
-            if (beatmapData == null) {
-                setStarsDisplay(0);
-                return;
+                if (beatmap == null) {
+                    setStarsDisplay(0);
+                    return;
+                }
+
+                track.populate(beatmap);
+                changeDimensionInfo(track);
+
+                var parameters = new DifficultyCalculationParameters();
+                var modMenu = ModMenu.getInstance();
+
+                parameters.setMods(convertLegacyMods(
+                    modMenu.getMod(),
+                    modMenu.isCustomCS() ? modMenu.getCustomCS() : null,
+                    modMenu.isCustomAR() ? modMenu.getCustomAR() : null,
+                    modMenu.isCustomOD() ? modMenu.getCustomOD() : null
+                ));
+                parameters.setCustomSpeedMultiplier(modMenu.getChangeSpeed());
+
+                switch (Config.getDifficultyAlgorithm()) {
+                    case droid -> {
+                        var attributes = BeatmapDifficultyCalculator.calculateDroidDifficulty(
+                            beatmap,
+                            parameters
+                        );
+
+                        setStarsDisplay(GameHelper.Round(attributes.starRating, 2));
+                    }
+
+                    case standard -> {
+                        var attributes = BeatmapDifficultyCalculator.calculateStandardDifficulty(
+                            beatmap,
+                            parameters
+                        );
+
+                        setStarsDisplay(GameHelper.Round(attributes.starRating, 2));
+                    }
+                }
             }
-
-            beatmapData.populateMetadata(track);
-            changeDimensionInfo(track);
-
-            DifficultyCalculationParameters parameters = new DifficultyCalculationParameters();
-            var modMenu = ModMenu.getInstance();
-
-            parameters.mods = modMenu.getMod();
-            parameters.customSpeedMultiplier = modMenu.getChangeSpeed();
-
-            if (modMenu.isCustomCS()) {
-                parameters.customCS = modMenu.getCustomCS();
-            }
-            if (modMenu.isCustomAR()) {
-                parameters.customAR = modMenu.getCustomAR();
-            }
-            if (modMenu.isCustomOD()) {
-                parameters.customOD = modMenu.getCustomOD();
-            }
-
-            DifficultyAttributes attributes = BeatmapDifficultyCalculator.calculateDifficulty(
-                    beatmapData,
-                    parameters
-            );
-
-            setStarsDisplay(GameHelper.Round(attributes.starRating, 2));
         });
     }
 
@@ -1114,10 +1144,6 @@ public class SongMenu implements IUpdateHandler, MenuItemListener,
 
         if (selectedAudioTrack == null || !Objects.equals(selectedAudioTrack.getAudioFilename(), track.getAudioFilename())) {
             playMusic(track.getAudioFilename(), track.getPreviewTime());
-        }
-
-        if (board.isShowOnlineScores()) {
-            Async.run(this::setRank);
         }
 
         if (selectedTrack == track) {
@@ -1155,9 +1181,9 @@ public class SongMenu implements IUpdateHandler, MenuItemListener,
         EdExtensionHelper.onSelectTrack(track);
         GlobalManager.getInstance().setSelectedTrack(track);
         updateInfo(track);
+        updateScoringSwitcherStatus(false);
         board.init(track);
 
-        final int quality = Config.getBackgroundQuality();
         synchronized (backgroundMutex) {
 
             if (!reloadBG && (track.getBackground() == null || bgName.equals(track.getBackground()))) {
@@ -1168,12 +1194,9 @@ public class SongMenu implements IUpdateHandler, MenuItemListener,
             bg = null;
             bgLoaded = false;
             scene.setBackground(new ColorBackground(0, 0, 0));
-            if (quality == 0) {
-                Config.setBackgroundQuality(4);
-            }
         }
 
-        Async.run(() -> {
+        Execution.async(() -> {
             synchronized (backgroundMutex) {
                 final TextureRegion tex = Config.isSafeBeatmapBg() || track.getBackground() == null?
                         ResourceManager.getInstance().getTexture("menu-background") :
@@ -1188,7 +1211,7 @@ public class SongMenu implements IUpdateHandler, MenuItemListener,
                     bg.setColor(0, 0, 0);
                 }
 
-                SyncTaskManager.getInstance().run(() -> {
+                Execution.updateThread(() -> {
                     synchronized (backgroundMutex) {
                         if (bg == null) {
                             final TextureRegion tex1 = ResourceManager
@@ -1203,7 +1226,6 @@ public class SongMenu implements IUpdateHandler, MenuItemListener,
                             bgName = "";
                         }
                         scene.setBackground(new SpriteBackground(bg));
-                        Config.setBackgroundQuality(quality);
                         synchronized (bgMutex) {
                             bgLoaded = true;
                         }
@@ -1231,9 +1253,9 @@ public class SongMenu implements IUpdateHandler, MenuItemListener,
     public void openScore(final int id, boolean showOnline, final String playerName) {
         if (showOnline) {
             engine.setScene(new LoadingScreen().getScene());
-            ToastLogger.showTextId(R.string.online_loadrecord, false);
+            ToastLogger.showTextId(com.edlplan.osudroidresource.R.string.online_loadrecord, false);
 
-            Async.run(() -> {
+            Execution.async(() -> {
                 try {
                     String scorePack = OnlineManager.getInstance().getScorePack(id);
                     String[] params = scorePack.split("\\s+");
@@ -1374,7 +1396,7 @@ public class SongMenu implements IUpdateHandler, MenuItemListener,
             return;
         }
 
-        Async.run(() -> {
+        Execution.async(() -> {
             synchronized (musicMutex) {
                 if (GlobalManager.getInstance().getSongService() != null) {
                     GlobalManager.getInstance().getSongService().stop();
@@ -1451,7 +1473,8 @@ public class SongMenu implements IUpdateHandler, MenuItemListener,
             case Bpm:
                 reloadMenuItems(GroupType.MapSet);
                 break;
-            case Stars:
+            case DroidStars:
+            case StandardStars:
             case Length:
                 reloadMenuItems(GroupType.SingleDiff);
                 break;
@@ -1532,8 +1555,66 @@ public class SongMenu implements IUpdateHandler, MenuItemListener,
         }
     }
 
+    private void updateScoringSwitcherStatus(boolean forceUpdate) {
+        if (scoringSwitcher == null) {
+            return;
+        }
+
+        if (selectedTrack == null || !board.isShowOnlineScores()) {
+            scoringSwitcher.setFrame(0);
+            return;
+        }
+
+        var md5 = selectedTrack.getMD5();
+
+        if (!forceUpdate && mapStatuses.containsKey(md5)) {
+            scoringSwitcher.setFrame(switch (Objects.requireNonNull(mapStatuses.get(md5))) {
+                case ranked -> 2;
+                case approved -> 3;
+                case loved -> 4;
+                default -> 5;
+            });
+
+            return;
+        }
+
+        scoringSwitcher.setFrame(1);
+
+        Execution.async(() -> {
+            try {
+                var status = OnlineManager.getInstance().getBeatmapStatus(md5);
+
+                if (!board.isShowOnlineScores() || status == null || scoringSwitcher == null || selectedTrack == null || !selectedTrack.getMD5().equals(md5)) {
+                    return;
+                }
+
+                mapStatuses.put(md5, status);
+
+                scoringSwitcher.setFrame(switch (status) {
+                    case ranked -> 2;
+                    case approved -> 3;
+                    case loved -> 4;
+                    default -> 5;
+                });
+            } catch (OnlineManagerException e) {
+                Debug.e("Cannot get beatmap status: " + e.getMessage(), e);
+
+                if (scoringSwitcher != null) {
+                    scoringSwitcher.setFrame(1);
+                }
+            }
+        });
+    }
+
     public enum SortOrder {
-        Title, Artist, Creator, Date, Bpm, Stars, Length
+        Title,
+        Artist,
+        Creator,
+        Date,
+        Bpm,
+        DroidStars,
+        StandardStars,
+        Length
     }
 
     public enum GroupType {

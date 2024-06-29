@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.preference.PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+
+    <PreferenceCategory android:title="Playfield">
+
+        <SeekBarPreference
+            android:defaultValue="100"
+            android:key="playfieldSize"
+            android:max="100"
+            android:summary="@string/opt_setplayfield_summary"
+            android:title="@string/opt_setplayfield_title"
+            app:min="50"
+            app:showSeekBarValue="true" />
+
+        <CheckBoxPreference
+            android:defaultValue="false"
+            android:key="shrinkPlayfieldDownwards"
+            android:summary="@string/opt_shrink_playfield_downwards_summary"
+            android:title="@string/opt_shrink_playfield_downwards_title"
+            app:layout="@layout/settings_preference_checkbox_bottom"/>
+
+    </PreferenceCategory>
+
+
+    <PreferenceCategory android:title="Gameplay">
+
+        <CheckBoxPreference
+            android:defaultValue="false"
+            android:key="removeSliderLock"
+            android:summary="@string/opt_remove_sliderlock_spinnerlock_summary"
+            android:title="@string/opt_remove_sliderlock_spinnerlock_title"
+            app:layout="@layout/settings_preference_checkbox_bottom"/>
+
+    </PreferenceCategory>
+
+    <PreferenceCategory android:title="Synchronization">
+
+        <CheckBoxPreference
+            android:defaultValue="true"
+            android:key="syncMusic"
+            android:summary="@string/opt_syncmusic_summary"
+            android:title="@string/opt_syncmusic_title" />
+
+        <CheckBoxPreference
+            android:defaultValue="true"
+            android:key="fixFrameOffset"
+            android:summary="@string/opt_fix_frame_offset_summary"
+            android:title="@string/opt_fix_frame_offset_title"
+            app:layout="@layout/settings_preference_checkbox_bottom" />
+
+    </PreferenceCategory>
+
+
+</androidx.preference.PreferenceScreen>

@@ -2,6 +2,8 @@ package ru.nsu.ccfit.zuev.osu.game;
 
 import android.graphics.PointF;
 
+import com.reco1l.osu.Execution;
+
 import org.anddev.andengine.entity.IEntity;
 import org.anddev.andengine.entity.modifier.AlphaModifier;
 import org.anddev.andengine.entity.modifier.DelayModifier;
@@ -22,7 +24,6 @@ import ru.nsu.ccfit.zuev.osu.Config;
 import ru.nsu.ccfit.zuev.osu.Constants;
 import ru.nsu.ccfit.zuev.osu.ResourceManager;
 import ru.nsu.ccfit.zuev.osu.Utils;
-import ru.nsu.ccfit.zuev.osu.async.SyncTaskManager;
 import ru.nsu.ccfit.zuev.osu.helper.CentredSprite;
 import ru.nsu.ccfit.zuev.osu.scoring.ScoreNumber;
 import ru.nsu.ccfit.zuev.osu.scoring.StatisticV2;
@@ -133,7 +134,7 @@ public class Spinner extends GameObject {
                     }
 
                     public void onModifierFinished(IModifier<IEntity> pModifier, IEntity pItem) {
-                        SyncTaskManager.getInstance().run(Spinner.this::removeFromScene);
+                        Execution.updateThread(Spinner.this::removeFromScene);
                     }
                 },
                 new SequenceEntityModifier(

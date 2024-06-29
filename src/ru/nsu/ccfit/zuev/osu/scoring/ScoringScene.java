@@ -1,14 +1,16 @@
 package ru.nsu.ccfit.zuev.osu.scoring;
 
 import com.edlplan.framework.utils.functionality.SmartIterator;
-import com.edlplan.ui.fragment.InGameSettingMenu;
-import com.reco1l.framework.lang.Execution;
-import com.reco1l.legacy.Multiplayer;
-import com.reco1l.legacy.ui.multiplayer.RoomScene;
-import com.reco1l.legacy.ui.entity.StatisticSelector;
-import com.rian.difficultycalculator.attributes.DifficultyAttributes;
-import com.rian.difficultycalculator.attributes.PerformanceAttributes;
+import com.reco1l.osu.Execution;
+import com.reco1l.osu.multiplayer.Multiplayer;
+import com.reco1l.osu.multiplayer.RoomScene;
+import com.reco1l.osu.ui.entity.StatisticSelector;
 
+import com.rian.osu.beatmap.Beatmap;
+import com.rian.osu.beatmap.parser.BeatmapParser;
+import com.rian.osu.difficulty.BeatmapDifficultyCalculator;
+import com.rian.osu.difficulty.attributes.DroidPerformanceAttributes;
+import com.rian.osu.ui.SendingPanel;
 import org.anddev.andengine.engine.Engine;
 import org.anddev.andengine.entity.modifier.FadeInModifier;
 import org.anddev.andengine.entity.modifier.ParallelEntityModifier;
@@ -22,6 +24,7 @@ import org.anddev.andengine.input.touch.TouchEvent;
 import org.anddev.andengine.opengl.texture.region.TextureRegion;
 import org.anddev.andengine.util.Debug;
 
+import java.io.File;
 import java.util.Locale;
 
 import ru.nsu.ccfit.zuev.audio.serviceAudio.SongService;
@@ -30,16 +33,12 @@ import ru.nsu.ccfit.zuev.osu.GlobalManager;
 import ru.nsu.ccfit.zuev.osu.ResourceManager;
 import ru.nsu.ccfit.zuev.osu.TrackInfo;
 import ru.nsu.ccfit.zuev.osu.Utils;
-import ru.nsu.ccfit.zuev.osu.beatmap.BeatmapData;
-import ru.nsu.ccfit.zuev.osu.beatmap.parser.BeatmapParser;
 import ru.nsu.ccfit.zuev.osu.game.GameScene;
 import ru.nsu.ccfit.zuev.osu.game.cursor.flashlight.FlashLightEntity;
 import ru.nsu.ccfit.zuev.osu.game.mods.GameMod;
-import ru.nsu.ccfit.zuev.osu.helper.BeatmapDifficultyCalculator;
 import ru.nsu.ccfit.zuev.osu.menu.ModMenu;
 import ru.nsu.ccfit.zuev.osu.menu.SongMenu;
 import ru.nsu.ccfit.zuev.osu.online.OnlineManager;
-import ru.nsu.ccfit.zuev.osu.online.SendingPanel;
 import ru.nsu.ccfit.zuev.osuplus.BuildConfig;
 
 public class ScoringScene {
@@ -472,28 +471,61 @@ public class ScoringScene {
         //calculatePP
         if (Config.isDisplayScoreStatistics()){
             StringBuilder ppinfo = new StringBuilder();
-            BeatmapData beatmapData = new BeatmapParser(this.track.getFilename()).parse(true);
 
-            if (beatmapData != null) {
-                DifficultyAttributes difficultyAttributes = BeatmapDifficultyCalculator.calculateDifficulty(
-                        beatmapData, stat
-                );
-                PerformanceAttributes performanceAttributes = BeatmapDifficultyCalculator.calculatePerformance(
-                        difficultyAttributes, stat
-                );
-                PerformanceAttributes maxPerformanceAttributes = BeatmapDifficultyCalculator.calculatePerformance(
-                        difficultyAttributes
-                );
-                ppinfo.append(String.format(Locale.ENGLISH, "%.2f★ | %.2f/%.2fpp", difficultyAttributes.starRating, performanceAttributes.total, maxPerformanceAttributes.total));
+            Beatmap beatmap;
+
+            try (var parser = new BeatmapParser(this.track.getFilename())) {
+                beatmap = parser.parse(true);
             }
+
+            if (beatmap != null) {
+                switch (Config.getDifficultyAlgorithm()) {
+                    case droid -> {
+                        var difficultyAttributes = BeatmapDifficultyCalculator.calculateDroidDifficulty(beatmap, stat);
+
+                        DroidPerformanceAttributes performanceAttributes;
+
+                        // Don't try to load online replay
+                        if (replay != null && trackToReplay != null && !replay.startsWith("https://")) {
+                            var trackFile = new File(trackToReplay.getFilename());
+                            var replayLoad = new Replay();
+                            replayLoad.setObjectCount(trackToReplay.getTotalHitObjectCount());
+                            replayLoad.setMap(trackFile.getParentFile().getName(), trackFile.getName(), mapMD5);
+
+                            if (replayLoad.load(replay)) {
+                                performanceAttributes = BeatmapDifficultyCalculator.calculateDroidPerformance(
+                                        beatmap, difficultyAttributes, replayLoad.cursorMoves, replayLoad.objectData, stat
+                                );
+                            } else {
+                                performanceAttributes = BeatmapDifficultyCalculator.calculateDroidPerformance(difficultyAttributes, stat);
+                            }
+                        } else {
+                            performanceAttributes = BeatmapDifficultyCalculator.calculateDroidPerformance(difficultyAttributes, stat);
+                        }
+
+                        var maxPerformanceAttributes = BeatmapDifficultyCalculator.calculateDroidPerformance(difficultyAttributes);
+
+                        ppinfo.append(String.format(Locale.ENGLISH, "%.2f★ | %.2f/%.2fdpp", difficultyAttributes.starRating, performanceAttributes.total, maxPerformanceAttributes.total));
+                    }
+                    case standard -> {
+                        var difficultyAttributes = BeatmapDifficultyCalculator.calculateStandardDifficulty(beatmap, stat);
+                        var performanceAttributes = BeatmapDifficultyCalculator.calculateStandardPerformance(difficultyAttributes, stat);
+                        var maxPerformanceAttributes = BeatmapDifficultyCalculator.calculateStandardPerformance(difficultyAttributes);
+
+                        ppinfo.append(String.format(Locale.ENGLISH, "%.2f★ | %.2f/%.2fpp", difficultyAttributes.starRating, performanceAttributes.total, maxPerformanceAttributes.total));
+                    }
+                }
+            }
+
             if (stat.getUnstableRate() > 0) {
-                if (beatmapData != null) {
+                if (beatmap != null) {
                     ppinfo.append("\n");
                 }
                 ppinfo.append(String.format(Locale.ENGLISH, "Error: %.2fms - %.2fms avg", stat.getNegativeHitError(), stat.getPositiveHitError()));
                 ppinfo.append("\n");
                 ppinfo.append(String.format(Locale.ENGLISH, "Unstable Rate: %.2f", stat.getUnstableRate()));
             }
+
             final Text ppInfo = new Text(Utils.toRes(4), Config.getRES_HEIGHT() - playerInfo.getHeight() - Utils.toRes(2),
                     ResourceManager.getInstance().getFont("smallFont"), ppinfo.toString());
             ppInfo.setPosition(Utils.toRes(244), Config.getRES_HEIGHT() - ppInfo.getHeight() - Utils.toRes(2));
@@ -538,8 +570,8 @@ public class ScoringScene {
                 }
 
                 SendingPanel sendingPanel = new SendingPanel(OnlineManager.getInstance().getRank(),
-                        OnlineManager.getInstance().getScore(), OnlineManager.getInstance().getAccuracy());
-                sendingPanel.setPosition((float) Config.getRES_WIDTH() / 2 - 400, Utils.toRes(-300));
+                        OnlineManager.getInstance().getScore(), OnlineManager.getInstance().getAccuracy(),
+                        OnlineManager.getInstance().getPP());
                 scene.registerTouchArea(sendingPanel.getDismissTouchArea());
                 scene.attachChild(sendingPanel);
                 ScoreLibrary.getInstance().sendScoreOnline(stat, replay, sendingPanel);
@@ -553,7 +585,7 @@ public class ScoringScene {
 
             if (selector != null) {
                 var oldSelector = selector;
-                Execution.glThread(() -> {
+                Execution.updateThread(() -> {
                     oldSelector.detachSelf();
                     oldSelector.detachChildren();
 

@@ -7,9 +7,9 @@ import android.util.Log;
 
 import com.dgsrz.bancho.security.SecurityUtils;
 
-import com.reco1l.framework.data.IniReader;
-import com.reco1l.legacy.data.SkinConverter;
-import com.reco1l.legacy.engine.BlankTextureRegion;
+import com.reco1l.osu.skinning.IniReader;
+import com.reco1l.osu.skinning.SkinConverter;
+import com.reco1l.osu.graphics.BlankTextureRegion;
 import org.anddev.andengine.engine.Engine;
 import org.anddev.andengine.opengl.font.Font;
 import org.anddev.andengine.opengl.font.FontFactory;
@@ -289,6 +289,10 @@ public class ResourceManager {
         loadTexture("ranking_button", "ranking_button.png", false);
         loadTexture("ranking_enabled", "ranking_enabled.png", false);
         loadTexture("ranking_disabled", "ranking_disabled.png", false);
+        loadTexture("selection-approved", "selection-approved.png", false);
+        loadTexture("selection-loved", "selection-loved.png", false);
+        loadTexture("selection-question", "selection-question.png", false);
+        loadTexture("selection-ranked", "selection-ranked.png", false);
         if (!textures.containsKey("lighting"))
             textures.put("lighting", null);
 //		textures.put("fail-background", null);

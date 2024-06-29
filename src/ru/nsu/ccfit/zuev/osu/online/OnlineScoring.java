@@ -1,8 +1,10 @@
 package ru.nsu.ccfit.zuev.osu.online;
 
-import com.reco1l.framework.lang.execution.Async;
-import com.reco1l.legacy.ui.multiplayer.LobbyScene;
-import com.reco1l.legacy.ui.multiplayer.RoomScene;
+import com.reco1l.osu.Execution;
+import com.reco1l.osu.multiplayer.LobbyScene;
+import com.reco1l.osu.multiplayer.RoomScene;
+import com.rian.osu.ui.SendingPanel;
+
 import org.anddev.andengine.util.Debug;
 
 import java.io.File;
@@ -79,7 +81,7 @@ public class OnlineScoring {
             return;
         avatarLoaded = false;
 
-        Async.run(() -> {
+        Execution.async(() -> {
             synchronized (onlineMutex) {
                 boolean success = false;
 
@@ -117,7 +119,7 @@ public class OnlineScoring {
         if (!OnlineManager.getInstance().isStayOnline())
             return;
 
-        Async.run(() -> {
+        Execution.async(() -> {
             synchronized (onlineMutex) {
                 for (int i = 0; i < attemptCount; i++) {
                     try {
@@ -144,7 +146,7 @@ public class OnlineScoring {
 
         final String recordData = record.compile();
 
-        Async.run(() -> {
+        Execution.async(() -> {
             boolean success = false;
             synchronized (onlineMutex) {
                 for (int i = 0; i < attemptCount; i++) {
@@ -154,7 +156,7 @@ public class OnlineScoring {
                     }
 
                     try {
-                        success = OnlineManager.getInstance().sendRecord(recordData);
+                        success = OnlineManager.getInstance().sendRecord(recordData, replay);
                     } catch (OnlineManager.OnlineManagerException e) {
                         Debug.e("Login error: " + e.getMessage());
                         success = false;
@@ -165,10 +167,9 @@ public class OnlineScoring {
                         if (OnlineManager.getInstance().getFailMessage().equals("Invalid record data"))
                             i = attemptCount;
                     } else if (success) {
-                        OnlineManager.getInstance().sendReplay(replay);
                         updatePanels();
                         OnlineManager mgr = OnlineManager.getInstance();
-                        panel.show(mgr.getMapRank(), mgr.getScore(), mgr.getRank(), mgr.getAccuracy());
+                        panel.show(mgr.getMapRank(), mgr.getRank(), mgr.getScore(), mgr.getAccuracy(), mgr.getPP());
                         break;
                     }
 
@@ -202,7 +203,7 @@ public class OnlineScoring {
         if (avatarUrl == null || avatarUrl.length() == 0)
             return;
 
-        Async.run(() -> {
+        Execution.async(() -> {
             synchronized (onlineMutex) {
                 avatarLoaded = OnlineManager.getInstance().loadAvatarToTextureManager();
                 if (both)

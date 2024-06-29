@@ -2,8 +2,8 @@ package ru.nsu.ccfit.zuev.osu.menu;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
-import com.reco1l.api.ibancho.data.WinCondition;
-import com.reco1l.legacy.Multiplayer;
+import com.reco1l.ibancho.data.WinCondition;
+import com.reco1l.osu.multiplayer.Multiplayer;
 import org.json.JSONObject;
 
 import java.text.NumberFormat;

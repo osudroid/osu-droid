@@ -6,10 +6,21 @@
 	<string name="accessibility_detector_settings">Go to accessibility settings</string>
 	<string name="accessibility_detector_exit">Exit game</string>
 
-	<string name="chimu_cancel">Cancel</string>
-	<string name="chimu_connecting">Connecting to server...</string>
-	<string name="chimu_downloading">Downloading beatmap %s...</string>
-	<string name="chimu_importing">Importing beatmap %s...</string>
+	<!--Beatmap downloader-->
+	<string name="beatmap_downloader_cancel">Cancel</string>
+	<string name="beatmap_downloader_connecting">Connecting to server...</string>
+	<string name="beatmap_downloader_downloading">Downloading beatmap %s...</string>
+	<string name="beatmap_downloader_importing">Importing beatmap %s...</string>
+
+	<!--Ranked status-->
+	<string name="ranked_status_ranked"><font color="#41FF64">Ranked</font></string>
+	<string name="ranked_status_approved"><font color="#41FF64">Approved</font></string>
+	<string name="ranked_status_qualified"><font color="#64F2FF">Qualified</font></string>
+	<string name="ranked_status_loved"><font color="#FA64FF">Loved</font></string>
+	<string name="ranked_status_pending"><font color="#FFAC64">Pending</font></string>
+	<string name="ranked_status_wip"><font color="#FFAC64">Work in Progress</font></string>
+	<string name="ranked_status_graveyard"><font color="#FFFFFF">Graveyard</font></string>
+
 
 	<string name="message_error">Error: %s</string>
 	<string name="message_error_createdir">Cannot create %s</string>
@@ -66,8 +77,6 @@
 	<string name="favorite_default">Default</string>
 	<string name="favorite_select">Select</string>
 	<string name="favorite_delete">Delete Folder</string>
-	<string name="favorite_add">Add</string>
-	<string name="favorite_remove">Remove</string>
 	<string name="favorite_new_folder">Create new folder</string>
 	<string name="favorite_warning_on_delete_default">you can\'t delete default folder</string>
 	<string name="favorite_ensure">Are you sure?</string>
@@ -84,7 +93,7 @@
 	<string name="menu_properties_offset">Song offset:</string>
 	<string name="menu_properties_tofavs">Add to favorites</string>
 	<string name="menu_properties_fromfavs">Remove from favorites</string>
-	<string name="menu_properties_delete">Delete map</string>
+	<string name="menu_properties_delete">Delete beatmap</string>
 	<string name="menu_properties_delete_confirm">Are you sure?</string>
 
     <string name="menu_settings_title">Options</string>
@@ -95,17 +104,16 @@
 	<string name="menu_deletescore_delete_success">Delete score success!</string>
 
 	<string name="menu_search_title">Search options</string>
-	<string name="menu_search_filter">Search for:</string>
+	<string name="menu_search_filter">Search for...</string>
 	<string name="menu_search_sort">Sort by:</string>
 	<string name="menu_search_sort_title">Title</string>
 	<string name="menu_search_sort_date">Date</string>
 	<string name="menu_search_sort_creator">Creator</string>
 	<string name="menu_search_sort_artist">Artist</string>
 	<string name="menu_search_sort_bpm">Bpm</string>
-	<string name="menu_search_sort_stars">Stars</string>
+	<string name="menu_search_sort_droid_stars">osu!droid Stars</string>
+	<string name="menu_search_sort_standard_stars">osu!standard Stars</string>
 	<string name="menu_search_sort_length">Length</string>
-	<string name="menu_search_favsenabled">Favorites only: enabled</string>
-	<string name="menu_search_favsdisabled">Favorites only: disabled</string>
 
 	<string name="downloader_page" formatted="false">Page %d of %d</string>
 	<string name="downloader_nomaps">No beatmaps found</string>
@@ -194,6 +202,8 @@
     <string name="message_autoclicker_detected">Please disable your accessibility service(s) with the Perform Gestures permission before playing the game.</string>
 
 	<string name="force_diffstat_mod_unpickable">Some mods have been disabled as all forced difficulty statistics are enabled.</string>
+
+	<string name="file_integrity_tampered">File integrity check failed. Aborting gameplay.</string>
 
 	<!-- Beatmap parser errors -->
 	<string name="beatmap_parser_cannot_open_file" formatted="false">Failed loading %s: Could not open beatmap file</string>

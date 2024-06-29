@@ -1,45 +1,32 @@
 <?xml version="1.0" encoding="utf-8"?>
-<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
 
-    <PreferenceCategory
-            android:title="Player options">
+    <PreferenceCategory android:title="Team">
 
-        <ListPreference
-                android:key="player_team"
-                android:title="Team"
-                android:entries="@array/team_names"
-                android:entryValues="@array/team_values"
-                android:summary="Change team"
-        />
+        <com.reco1l.osu.ui.SelectPreference
+            android:entries="@array/team_names"
+            android:entryValues="@array/team_values"
+            android:key="player_team"
+            android:summary="Change team"
+            android:title="Team"
+            app:layout="@layout/settings_preference_bottom" />
 
-        <CheckBoxPreference
-                android:key="player_submitScore"
-                android:title="Enable score submission"
-                android:summary="Submit your score at the end of the round if you did not fail"
-                android:defaultValue="true"
-        />
+    </PreferenceCategory>
+
+    <PreferenceCategory android:title="In-game">
 
         <CheckBoxPreference
-                android:key="player_nightcore"
-                android:title="Use NightCore"
-                android:summary="Enable NightCore mod instead when DoubleTime is enabled"
-        />
+            android:defaultValue="true"
+            android:key="player_submitScore"
+            android:summary="Submit your score at the end of the round if you did not fail"
+            android:title="Enable score submission" />
 
         <CheckBoxPreference
-                android:key="showscoreboard"
-                android:title="Show leaderboard"
-                android:summary="Show live leaderboard while playing"
-        />
-
-        <CheckBoxPreference
-                android:key="enableStoryboard"
-                android:title="@string/opt_enableStoryboard_title"
-        />
-
-        <CheckBoxPreference
-                android:key="enableVideo"
-                android:title="Enable video"
-        />
+            android:key="player_nightcore"
+            android:summary="Enable NightCore mod instead when DoubleTime is enabled"
+            android:title="Use NightCore"
+            app:layout="@layout/settings_preference_checkbox_bottom" />
 
     </PreferenceCategory>
 

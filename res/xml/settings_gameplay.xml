@@ -1,0 +1,169 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.preference.PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+
+    <PreferenceCategory android:title="Skin">
+
+        <com.reco1l.osu.ui.SelectPreference
+            android:entries="@array/placeholder_array"
+            android:entryValues="@array/placeholder_array"
+            android:key="skinPath"
+            android:summary="@string/opt_skinpath_summary"
+            android:title="@string/opt_skinpath_title" />
+
+        <com.reco1l.osu.ui.SelectPreference
+            android:defaultValue="1"
+            android:entries="@array/spinner_style_names"
+            android:entryValues="@array/spinner_style_values"
+            android:key="spinnerstyle"
+            android:summary="@string/opt_spinner_style_summary"
+            android:title="@string/opt_spinner_style_title" />
+
+        <CheckBoxPreference
+            android:defaultValue="false"
+            android:key="skin"
+            android:summary="@string/opt_skin_summary"
+            android:title="@string/opt_skin_title"
+            app:layout="@layout/settings_preference_checkbox_bottom" />
+
+    </PreferenceCategory>
+
+    <PreferenceCategory android:title="Hit objects">
+
+        <CheckBoxPreference
+            android:defaultValue="false"
+            android:key="showfirstapproachcircle"
+            android:summary="@string/opt_show_first_approach_circle_summary"
+            android:title="@string/opt_show_first_approach_circle_title"
+            app:layout="@layout/settings_preference_checkbox_bottom" />
+
+    </PreferenceCategory>
+
+    <PreferenceCategory android:title="Background">
+
+        <SeekBarPreference
+            android:defaultValue="25"
+            android:key="bgbrightness"
+            android:summary="@string/opt_bgbrightness_summary"
+            android:title="@string/opt_bgbrightness_title"
+            app:showSeekBarValue="true" />
+
+        <CheckBoxPreference
+            android:defaultValue="false"
+            android:key="keepBackgroundAspectRatio"
+            android:summary="When enabled, the background (and storyboard) will not be scaled to fill screen bounds during gameplay"
+            android:title="Keep background aspect ratio" />
+
+        <CheckBoxPreference
+            android:key="enableStoryboard"
+            android:title="@string/opt_enableStoryboard_title" />
+
+        <CheckBoxPreference
+            android:key="enableVideo"
+            android:title="Enable video"
+            app:layout="@layout/settings_preference_checkbox_bottom" />
+
+    </PreferenceCategory>
+
+    <PreferenceCategory android:title="HUD">
+
+        <CheckBoxPreference
+            android:defaultValue="false"
+            android:key="hideInGameUI"
+            android:summary="@string/opt_hide_ingame_ui_summary"
+            android:title="@string/opt_hide_ingame_ui_title" />
+
+        <CheckBoxPreference
+            android:defaultValue="false"
+            android:key="hideReplayMarquee"
+            android:summary="@string/opt_hide_replay_marquee_summary"
+            android:title="@string/opt_hide_replay_marquee_title" />
+
+        <CheckBoxPreference
+            android:key="showscoreboard"
+            android:summary="Show live leaderboard while playing"
+            android:title="Show leaderboard" />
+
+        <com.reco1l.osu.ui.SelectPreference
+            android:defaultValue="0"
+            android:entries="@array/error_meter_display_names"
+            android:entryValues="@array/error_meter_display_values"
+            android:key="errormeter"
+            android:summary="@string/opt_error_meter_display_summary"
+            android:title="@string/opt_error_meter_display_title" />
+
+        <CheckBoxPreference
+            android:defaultValue="true"
+            android:key="fps"
+            android:summary="@string/opt_fps_summary"
+            android:title="@string/opt_fps_title"
+            app:layout="@layout/settings_preference_checkbox" />
+
+        <CheckBoxPreference
+            android:defaultValue="true"
+            android:key="averageOffset"
+            android:summary="@string/opt_averageoffset_summary"
+            android:title="@string/opt_averageoffset_title"
+            app:layout="@layout/settings_preference_checkbox" />
+
+        <CheckBoxPreference
+            android:defaultValue="true"
+            android:key="unstableRate"
+            android:summary="@string/opt_unstablerate_summary"
+            android:title="@string/opt_unstablerate_title"
+            app:layout="@layout/settings_preference_checkbox" />
+
+        <CheckBoxPreference
+            android:defaultValue="true"
+            android:key="displayScoreStatistics"
+            android:summary="@string/opt_display_score_statistics_summary"
+            android:title="@string/opt_display_score_statistics_title" />
+
+        <CheckBoxPreference
+            android:defaultValue="false"
+            android:key="displayRealTimePPCounter"
+            android:summary="@string/opt_display_realtime_pp_counter_summary"
+            android:title="@string/opt_display_realtime_pp_counter_title"
+            app:layout="@layout/settings_preference_checkbox_bottom" />
+
+    </PreferenceCategory>
+
+    <PreferenceCategory android:title="@string/opt_combo_colors_title">
+
+        <CheckBoxPreference
+            android:key="useCustomColors"
+            android:summary="@string/opt_combo_colors_summary"
+            android:title="@string/opt_combo_colors_title" />
+
+        <net.margaritov.preference.colorpicker.ColorPickerPreference
+            alphaSlider="false"
+            hexValue="true"
+            android:defaultValue="@integer/COLOR_GREEN"
+            android:key="combo1"
+            android:title="Combo 1" />
+
+        <net.margaritov.preference.colorpicker.ColorPickerPreference
+            alphaSlider="false"
+            hexValue="true"
+            android:defaultValue="@integer/COLOR_BLUE"
+            android:key="combo2"
+            android:title="Combo 2" />
+
+        <net.margaritov.preference.colorpicker.ColorPickerPreference
+            alphaSlider="false"
+            hexValue="true"
+            android:defaultValue="@integer/COLOR_RED"
+            android:key="combo3"
+            android:title="Combo 3" />
+
+        <net.margaritov.preference.colorpicker.ColorPickerPreference
+            alphaSlider="false"
+            hexValue="true"
+            android:defaultValue="@integer/COLOR_YELLOW"
+            android:key="combo4"
+            android:title="Combo 4"
+            app:layout="@layout/settings_preference_bottom"/>
+
+    </PreferenceCategory>
+
+</androidx.preference.PreferenceScreen>

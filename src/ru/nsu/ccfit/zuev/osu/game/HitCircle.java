@@ -18,7 +18,6 @@ public class HitCircle extends GameObject {
     private final Sprite approachCircle;
     private final RGBColor color = new RGBColor();
     private CircleNumber number;
-    private float scale;
     private GameObjectListener listener;
     private Scene scene;
     private int soundId;
@@ -46,7 +45,6 @@ public class HitCircle extends GameObject {
         // Storing parameters into fields
         //Log.i("note-ini", time + "s");
         this.replayObjectData = null;
-        this.scale = scale;
         this.pos = pos;
         this.listener = listener;
         this.scene = pScene;
@@ -147,10 +145,7 @@ public class HitCircle extends GameObject {
     }
 
     private void playSound() {
-        // Sound is playing only if we hit in time
-        if (approachCircle.getScaleX() <= scale * 1.5f) {
-            Utils.playHitSound(listener, soundId, sampleSet, addition);
-        }
+        Utils.playHitSound(listener, soundId, sampleSet, addition);
     }
 
     private void removeFromScene() {
