@@ -4,6 +4,7 @@ import com.rian.osu.GameMode
 import com.rian.osu.beatmap.Beatmap
 import com.rian.osu.beatmap.BeatmapConverter
 import com.rian.osu.beatmap.BeatmapProcessor
+import com.rian.osu.beatmap.hitobject.getEndTime
 import com.rian.osu.difficulty.DifficultyHitObject
 import com.rian.osu.difficulty.attributes.DifficultyAttributes
 import com.rian.osu.difficulty.attributes.TimedDifficultyAttributes
@@ -99,24 +100,24 @@ abstract class DifficultyCalculator<TObject : DifficultyHitObject, TAttributes :
             difficulty.apply(beatmapToCalculate.difficulty)
         }
 
-        // Add the first object in the beatmap, otherwise it will be ignored.
-        progressiveBeatmap.hitObjects.add(beatmapToCalculate.hitObjects.objects.first())
+        val difficultyObjects = createDifficultyHitObjects(beatmapToCalculate, parameters)
+        var currentIndex = 0
 
-        val objects = createDifficultyHitObjects(beatmapToCalculate, parameters)
+        for (obj in beatmap.hitObjects.objects) {
+            progressiveBeatmap.hitObjects.add(obj)
 
-        for (i in objects.indices) {
-            val obj = objects[i]
+            while (currentIndex < difficultyObjects.size && difficultyObjects[currentIndex].obj.getEndTime() <= obj.getEndTime()) {
+                for (skill in skills) {
+                    skill.process(difficultyObjects[currentIndex])
+                }
 
-            progressiveBeatmap.hitObjects.add(obj.obj)
-
-            for (skill in skills) {
-                skill.process(obj)
+                currentIndex++
             }
 
             attributes.add(
                 TimedDifficultyAttributes(
-                    obj.endTime * (parameters?.totalSpeedMultiplier?.toDouble() ?: 1.0),
-                    createDifficultyAttributes(progressiveBeatmap, skills, objects.subList(0, i + 1), parameters)
+                    obj.getEndTime(),
+                    createDifficultyAttributes(progressiveBeatmap, skills, difficultyObjects.subList(0, currentIndex), parameters)
                 )
             )
         }
