@@ -19,6 +19,8 @@ class VideoSprite(source: String, private val engine: Engine) : Sprite(0f, 0f, V
 
     val texture = textureRegion.texture as VideoTexture
 
+    private var isMali: Boolean? = null
+
     init
     {
         engine.textureManager.loadTexture(texture)
@@ -32,7 +34,18 @@ class VideoSprite(source: String, private val engine: Engine) : Sprite(0f, 0f, V
 
     override fun doDraw(pGL: GL10, pCamera: Camera?)
     {
+        if (isMali == null) {
+            isMali = pGL.glGetString(GL10.GL_RENDERER).contains("Mali", true)
+        }
+
         onInitDraw(pGL)
+
+        // Apparently there is either a bug or unintended behavior in Mali GPUs' OpenGL ES implementation.
+        // Causes the wrong texture to be displayed when GL_TEXTURE_2D is enabled before enabling GL_TEXTURE_EXTERNAL_OES.
+        if (isMali == true) {
+            pGL.glDisable(GL10.GL_TEXTURE_2D)
+        }
+
         pGL.glEnable(GL_TEXTURE_EXTERNAL_OES)
 
         textureRegion.onApply(pGL)
@@ -41,6 +54,10 @@ class VideoSprite(source: String, private val engine: Engine) : Sprite(0f, 0f, V
         drawVertices(pGL, pCamera)
 
         pGL.glDisable(GL_TEXTURE_EXTERNAL_OES)
+
+        if (isMali == true) {
+            pGL.glEnable(GL10.GL_TEXTURE_2D)
+        }
     }
 
     override fun finalize()
@@ -98,9 +115,6 @@ class VideoTexture(val source: String)
         if (!isLoadedToHardware)
             return
 
-        bindTextureOnHardware(pGL)
-        applyTextureOptions(pGL)
-
         if (surfaceTexture == null)
         {
             surfaceTexture = SurfaceTexture(mHardwareTextureID)
@@ -150,7 +164,7 @@ class VideoTexture(val source: String)
         /**
          * See [MediaPlayer documentation](https://developer.android.com/guide/topics/media/platform/supported-formats)
          */
-        val SUPPORTED_VIDEO_FORMATS = arrayOf("3gp", "mp4", "mkv", "webm")
+        private val SUPPORTED_VIDEO_FORMATS = arrayOf("3gp", "mp4", "mkv", "webm")
 
         fun isSupportedVideo(file: File): Boolean = file.extension.lowercase() in SUPPORTED_VIDEO_FORMATS
     }
