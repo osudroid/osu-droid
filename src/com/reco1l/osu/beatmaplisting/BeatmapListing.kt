@@ -597,7 +597,7 @@ class BeatmapSetViewHolder(itemView: View, private val mediaScope: CoroutineScop
     fun playPreview(beatmapSet: BeatmapSetModel) {
 
         if (BeatmapListing.previewPlayCount >= 2) {
-            ToastLogger.showText("Please wait a few seconds, before trying again.", false)
+            ToastLogger.showText("Please wait a few seconds before trying again.", false)
             return
         }
 
