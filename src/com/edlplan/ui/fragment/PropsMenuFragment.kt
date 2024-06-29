@@ -74,7 +74,7 @@ class PropsMenuFragment : BaseFragment(), IPropsMenu {
                     o = s.toString().toInt()
                     needRest = false
                     if (abs(o.toDouble()) > 250) {
-                        o = 250 * (if (o > 0) 1 else -1)
+                        o = 250 * if (o > 0) 1 else -1
                         needRest = true
                     }
                     if (needRest) {
