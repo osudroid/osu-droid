@@ -102,7 +102,7 @@
                         android:layout_columnWeight="1"
                         android:paddingVertical="12dp"
                         android:saveEnabled="false"
-                        android:text="Enable video" />
+                        android:text="@string/opt_video_title" />
 
                     <CheckBox
                         android:id="@+id/showScoreboard"

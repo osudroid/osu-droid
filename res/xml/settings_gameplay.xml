@@ -60,7 +60,8 @@
 
         <CheckBoxPreference
             android:key="enableVideo"
-            android:title="Enable video"
+            android:title="@string/opt_video_title"
+            android:summary="@string/opt_video_summary"
             app:layout="@layout/settings_preference_checkbox_bottom" />
 
     </PreferenceCategory>
