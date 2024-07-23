@@ -2551,26 +2551,19 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
 
     private void createHitEffect(final PointF pos, final String name, RGBColor color) {
         final GameEffect effect = GameObjectPool.getInstance().getEffect(name);
+        final float timeMultiplier = GameHelper.getTimeMultiplier();
+
         if (name.equals("hit0")) {
-            if(GameHelper.isSuddenDeath()){
-                effect.init(
-                    mgScene,
-                    pos,
-                    scale * 3,
-                    new SequenceEntityModifier(ModifierFactory
-                            .newFadeInModifier(0.15f), ModifierFactory
-                            .newDelayModifier(0.35f), ModifierFactory
-                            .newFadeOutModifier(0.25f)));
-                return;
-            }
             effect.init(
                     mgScene,
                     pos,
-                    scale,
-                    new SequenceEntityModifier(ModifierFactory
-                            .newFadeInModifier(0.15f), ModifierFactory
-                            .newDelayModifier(0.35f), ModifierFactory
-                            .newFadeOutModifier(0.25f)));
+                    GameHelper.isSuddenDeath() ? scale * 3 : scale,
+                    new SequenceEntityModifier(
+                            ModifierFactory.newFadeInModifier(0.15f * timeMultiplier),
+                            ModifierFactory.newDelayModifier(0.35f * timeMultiplier),
+                            ModifierFactory.newFadeOutModifier(0.25f * timeMultiplier)
+                    ));
+
             return;
         }
 
@@ -2584,12 +2577,11 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
                     bgScene,
                     pos,
                     scale,
-                    ModifierFactory.newFadeOutModifier(1f),
-                    new SequenceEntityModifier(ModifierFactory
-                            .newScaleModifier(0.25f, scale, 1.5f * scale),
-                            ModifierFactory.newScaleModifier(0.45f,
-                                    scale * 1.5f, 1.9f * scale),
-                            ModifierFactory.newScaleModifier(0.3f, scale * 1.9f, scale * 2f)
+                    ModifierFactory.newFadeOutModifier(timeMultiplier),
+                    new SequenceEntityModifier(
+                            ModifierFactory.newScaleModifier(0.25f * timeMultiplier, scale, 1.5f * scale),
+                            ModifierFactory.newScaleModifier(0.45f * timeMultiplier, scale * 1.5f, 1.9f * scale),
+                            ModifierFactory.newScaleModifier(0.3f * timeMultiplier, scale * 1.9f, scale * 2f)
                     ));
             light.setBlendFunction(GL10.GL_SRC_ALPHA, GL10.GL_DST_ALPHA);
         }
@@ -2598,74 +2590,84 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
                 mgScene,
                 pos,
                 scale,
-                new SequenceEntityModifier(ModifierFactory.newScaleModifier(
-                        0.15f, scale, 1.2f * scale), ModifierFactory
-                        .newScaleModifier(0.05f, 1.2f * scale, scale),
-                        ModifierFactory.newAlphaModifier(0.5f, 1, 0)));
+                new SequenceEntityModifier(
+                        ModifierFactory.newScaleModifier(0.15f * timeMultiplier, scale, 1.2f * scale),
+                        ModifierFactory.newScaleModifier(0.05f * timeMultiplier, 1.2f * scale, scale),
+                        ModifierFactory.newAlphaModifier(0.5f * timeMultiplier, 1, 0)
+                ));
     }
 
     private void createBurstEffect(final PointF pos, final RGBColor color) {
         if (!Config.isBurstEffects() || stat.getMod().contains(GameMod.MOD_HIDDEN))
             return;
+
+        final float timeMultiplier = GameHelper.getTimeMultiplier();
+
         final GameEffect burst1 = GameObjectPool.getInstance().getEffect("hitcircle");
         burst1.init(mgScene, pos, scale,
-                ModifierFactory.newScaleModifier(0.25f, scale, 1.5f * scale),
-                ModifierFactory.newAlphaModifier(0.25f, 0.8f, 0)
+                ModifierFactory.newScaleModifier(0.25f * timeMultiplier, scale, 1.5f * scale),
+                ModifierFactory.newAlphaModifier(0.25f * timeMultiplier, 0.8f, 0)
         );
         burst1.setColor(color);
 
         final GameEffect burst2 = GameObjectPool.getInstance().getEffect("hitcircleoverlay");
         burst2.init(mgScene, pos, scale,
-                ModifierFactory.newScaleModifier(0.25f, scale, 1.5f * scale),
-                ModifierFactory.newAlphaModifier(0.25f, 0.8f, 0)
+                ModifierFactory.newScaleModifier(0.25f * timeMultiplier, scale, 1.5f * scale),
+                ModifierFactory.newAlphaModifier(0.25f * timeMultiplier, 0.8f, 0)
         );
-
     }
 
     private void createBurstEffectSliderStart(final PointF pos, final RGBColor color) {
         if (!Config.isBurstEffects() || stat.getMod().contains(GameMod.MOD_HIDDEN))
             return;
+
+        final float timeMultiplier = GameHelper.getTimeMultiplier();
+
         final GameEffect burst1 = GameObjectPool.getInstance().getEffect("sliderstartcircle");
         burst1.init(mgScene, pos, scale,
-                ModifierFactory.newScaleModifier(0.25f, scale, 1.5f * scale),
-                ModifierFactory.newAlphaModifier(0.25f, 0.8f, 0)
+                ModifierFactory.newScaleModifier(0.25f * timeMultiplier, scale, 1.5f * scale),
+                ModifierFactory.newAlphaModifier(0.25f * timeMultiplier, 0.8f, 0)
         );
         burst1.setColor(color);
 
         final GameEffect burst2 = GameObjectPool.getInstance().getEffect("sliderstartcircleoverlay");
         burst2.init(mgScene, pos, scale,
-                ModifierFactory.newScaleModifier(0.25f, scale, 1.5f * scale),
-                ModifierFactory.newAlphaModifier(0.25f, 0.8f, 0)
+                ModifierFactory.newScaleModifier(0.25f * timeMultiplier, scale, 1.5f * scale),
+                ModifierFactory.newAlphaModifier(0.25f * timeMultiplier, 0.8f, 0)
         );
-
     }
 
     private void createBurstEffectSliderEnd(final PointF pos, final RGBColor color) {
         if (!Config.isBurstEffects() || stat.getMod().contains(GameMod.MOD_HIDDEN))
             return;
+
+        final float timeMultiplier = GameHelper.getTimeMultiplier();
+
         final GameEffect burst1 = GameObjectPool.getInstance().getEffect("sliderendcircle");
         burst1.init(mgScene, pos, scale,
-                ModifierFactory.newScaleModifier(0.25f, scale, 1.5f * scale),
-                ModifierFactory.newAlphaModifier(0.25f, 0.8f, 0)
+                ModifierFactory.newScaleModifier(0.25f * timeMultiplier, scale, 1.5f * scale),
+                ModifierFactory.newAlphaModifier(0.25f * timeMultiplier, 0.8f, 0)
         );
         burst1.setColor(color);
 
         final GameEffect burst2 = GameObjectPool.getInstance().getEffect("sliderendcircleoverlay");
         burst2.init(mgScene, pos, scale,
-                ModifierFactory.newScaleModifier(0.25f, scale, 1.5f * scale),
-                ModifierFactory.newAlphaModifier(0.25f, 0.8f, 0)
+                ModifierFactory.newScaleModifier(0.25f * timeMultiplier, scale, 1.5f * scale),
+                ModifierFactory.newAlphaModifier(0.25f * timeMultiplier, 0.8f, 0)
         );
-
     }
 
     private void createBurstEffectSliderReverse(final PointF pos, float ang, final RGBColor color) {
         if (!Config.isBurstEffects() || stat.getMod().contains(GameMod.MOD_HIDDEN))
             return;
+
+        final float timeMultiplier = GameHelper.getTimeMultiplier();
+
         final GameEffect burst1 = GameObjectPool.getInstance().getEffect("reversearrow");
         burst1.hit.setRotation(ang);
         burst1.init(mgScene, pos, scale,
-                ModifierFactory.newScaleModifier(0.25f, scale, 1.5f * scale),
-                ModifierFactory.newAlphaModifier(0.25f, 0.8f, 0)
+                ModifierFactory.newScaleModifier(0.25f * timeMultiplier, scale, 1.5f * scale),
+                ModifierFactory.newAlphaModifier(0.25f * timeMultiplier, 0.8f, 0)
         );
 
     }
