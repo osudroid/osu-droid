@@ -1,7 +1,6 @@
 package ru.nsu.ccfit.zuev.osu.scoring;
 
 import com.edlplan.framework.utils.functionality.SmartIterator;
-import com.reco1l.ibancho.data.RoomTeam;
 import com.reco1l.osu.Execution;
 import com.reco1l.osu.multiplayer.Multiplayer;
 import com.reco1l.osu.multiplayer.RoomScene;
@@ -27,7 +26,6 @@ import org.anddev.andengine.util.Debug;
 
 import java.io.File;
 import java.util.Locale;
-import java.util.Objects;
 
 import ru.nsu.ccfit.zuev.audio.serviceAudio.SongService;
 import ru.nsu.ccfit.zuev.osu.Config;
