@@ -61,21 +61,18 @@ public class Spinner extends GameObject {
         ResourceManager.getInstance().checkSpinnerTextures();
         this.pos = new PointF((float) Constants.MAP_WIDTH / 2, (float) Constants.MAP_HEIGHT / 2);
         center = Utils.trackToRealCoords(pos);
-        background = SpritePool.getInstance().getCenteredSprite(
-                "spinner-background", center);
+        background = new CentredSprite(center.x, center.y, ResourceManager.getInstance().getTexture("spinner-background"));
         final float scaleX = Config.getRES_WIDTH() / background.getWidth();
         background.setScale(scaleX);
 
-        circle = SpritePool.getInstance().getCenteredSprite("spinner-circle",
-                center);
+        circle = new CentredSprite(center.x, center.y, ResourceManager.getInstance().getTexture("spinner-circle"));
         mregion = ResourceManager.getInstance().getTexture("spinner-metre")
                 .deepCopy();
         metre = new Sprite(center.x - (float) Config.getRES_WIDTH() / 2,
                 Config.getRES_HEIGHT(), mregion);
         metre.setWidth(Config.getRES_WIDTH());
         metre.setHeight(background.getHeightScaled());
-        approachCircle = SpritePool.getInstance().getCenteredSprite(
-                "spinner-approachcircle", center);
+        approachCircle = new CentredSprite(center.x, center.y, ResourceManager.getInstance().getTexture("spinner-approachcircle"));
         spinText = new CentredSprite(center.x, center.y * 1.5f, ResourceManager
                 .getInstance().getTexture("spinner-spin"));
     }
@@ -165,7 +162,6 @@ public class Spinner extends GameObject {
     void removeFromScene() {
         if (clearText != null) {
             scene.detachChild(clearText);
-            SpritePool.getInstance().putSprite("spinner-clear", clearText);
         }
         scene.detachChild(spinText);
         scene.detachChild(background);
@@ -290,8 +286,8 @@ public class Spinner extends GameObject {
         if (percentfill > 1 || clear) {
             percentfill = 1;
             if (!clear) {
-                clearText = SpritePool.getInstance().getCenteredSprite(
-                        "spinner-clear", new PointF(center.x, center.y * 0.5f));
+                final PointF pos1 = new PointF(center.x, center.y * 0.5f);
+                clearText = new CentredSprite(pos1.x, pos1.y, ResourceManager.getInstance().getTexture("spinner-clear"));
                 clearText.registerEntityModifier(new ParallelEntityModifier(
                         new FadeInModifier(0.25f), new ScaleModifier(0.25f,
                         1.5f, 1)));

@@ -601,7 +601,6 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
         GameHelper.setInitalBeatLength(GameHelper.getBeatLength());
 
         GameObjectPool.getInstance().purge();
-        SpritePool.getInstance().purge();
         ModifierFactory.clear();
 
         // TODO replay
@@ -1676,7 +1675,6 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
             scene = new Scene();
             SkinManager.setSkinEnabled(false);
             GameObjectPool.getInstance().purge();
-            SpritePool.getInstance().purge();
             passiveObjects.clear();
             breakPeriods.clear();
             cursorSprites = null;
@@ -1860,7 +1858,6 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
 
         SkinManager.setSkinEnabled(false);
         GameObjectPool.getInstance().purge();
-        SpritePool.getInstance().purge();
         if (passiveObjects != null) {
             passiveObjects.clear();
         }

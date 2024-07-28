@@ -8,6 +8,7 @@ import org.anddev.andengine.entity.sprite.Sprite;
 
 import ru.nsu.ccfit.zuev.osu.Config;
 import ru.nsu.ccfit.zuev.osu.RGBColor;
+import ru.nsu.ccfit.zuev.osu.ResourceManager;
 import ru.nsu.ccfit.zuev.osu.Utils;
 import ru.nsu.ccfit.zuev.osu.scoring.ResultType;
 import ru.nsu.ccfit.zuev.skins.OsuSkin;
@@ -32,11 +33,11 @@ public class HitCircle extends GameObject {
 
     public HitCircle() {
         // Getting sprites from sprite pool
-        circle = SpritePool.getInstance().getSprite("hitcircle");
+        circle = new Sprite(0, 0, ResourceManager.getInstance().getTexture("hitcircle"));
         circle.setAlpha(0);
-        overlay = SpritePool.getInstance().getSprite("hitcircleoverlay");
+        overlay = new Sprite(0, 0, ResourceManager.getInstance().getTexture("hitcircleoverlay"));
         overlay.setAlpha(0);
-        approachCircle = SpritePool.getInstance().getSprite("approachcircle");
+        approachCircle = new Sprite(0, 0, ResourceManager.getInstance().getTexture("approachcircle"));
     }
 
     public void init(final GameObjectListener listener, final Scene pScene,

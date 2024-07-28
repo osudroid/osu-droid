@@ -18,6 +18,7 @@ import org.anddev.andengine.util.modifier.IModifier;
 import ru.nsu.ccfit.zuev.osu.Constants;
 import ru.nsu.ccfit.zuev.osu.ResourceManager;
 import ru.nsu.ccfit.zuev.osu.Utils;
+import ru.nsu.ccfit.zuev.osu.helper.CentredSprite;
 import ru.nsu.ccfit.zuev.osu.scoring.ScoreNumber;
 import ru.nsu.ccfit.zuev.osu.scoring.StatisticV2;
 
@@ -55,16 +56,11 @@ public class ModernSpinner extends Spinner {
         ResourceManager.getInstance().checkEvoSpinnerTextures();
         center = Utils.trackToRealCoords(new PointF((float) Constants.MAP_WIDTH / 2,
                 (float) Constants.MAP_HEIGHT / 2));
-        middle = SpritePool.getInstance().getCenteredSprite(
-                "spinner-middle", center);
-        middle2 = SpritePool.getInstance().getCenteredSprite(
-                "spinner-middle2", center);
-        bottom = SpritePool.getInstance().getCenteredSprite(
-                "spinner-bottom", center);
-        top = SpritePool.getInstance().getCenteredSprite(
-                "spinner-top", center);
-        glow = SpritePool.getInstance().getCenteredSprite(
-                "spinner-glow", center);
+        middle = new CentredSprite(center.x, center.y, ResourceManager.getInstance().getTexture("spinner-middle"));
+        middle2 = new CentredSprite(center.x, center.y, ResourceManager.getInstance().getTexture("spinner-middle2"));
+        bottom = new CentredSprite(center.x, center.y, ResourceManager.getInstance().getTexture("spinner-bottom"));
+        top = new CentredSprite(center.x, center.y, ResourceManager.getInstance().getTexture("spinner-top"));
+        glow = new CentredSprite(center.x, center.y, ResourceManager.getInstance().getTexture("spinner-glow"));
     }
 
     public void init(GameObjectListener listener, Scene scene,
