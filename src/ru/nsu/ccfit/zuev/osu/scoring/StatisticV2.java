@@ -7,6 +7,7 @@ import java.util.EnumSet;
 import java.util.Locale;
 import java.util.Random;
 
+import com.reco1l.ibancho.data.RoomTeam;
 import com.reco1l.ibancho.data.WinCondition;
 import com.reco1l.osu.multiplayer.Multiplayer;
 import org.jetbrains.annotations.Nullable;
@@ -17,7 +18,6 @@ import ru.nsu.ccfit.zuev.osu.game.GameHelper;
 import ru.nsu.ccfit.zuev.osu.game.cursor.flashlight.FlashLightEntity;
 import ru.nsu.ccfit.zuev.osu.game.mods.GameMod;
 import ru.nsu.ccfit.zuev.osu.menu.ScoreBoardItem;
-import ru.nsu.ccfit.zuev.osu.online.OnlineManager;
 
 public class StatisticV2 implements Serializable {
     private static final long serialVersionUID = 8339570462000129479L;
@@ -950,6 +950,13 @@ public class StatisticV2 implements Serializable {
      */
     public boolean isLegacySC() {
         return isLegacySC;
+    }
+
+    /**
+     * Whether the statistic corresponds to a team.
+     */
+    public boolean isTeamStatistic() {
+        return Multiplayer.isConnected() && (playerName.equals(RoomTeam.RED.toString()) || playerName.equals(RoomTeam.BLUE.toString()));
     }
 
     /**

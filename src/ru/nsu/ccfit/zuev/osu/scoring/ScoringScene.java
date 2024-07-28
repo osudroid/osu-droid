@@ -1,6 +1,7 @@
 package ru.nsu.ccfit.zuev.osu.scoring;
 
 import com.edlplan.framework.utils.functionality.SmartIterator;
+import com.reco1l.ibancho.data.RoomTeam;
 import com.reco1l.osu.Execution;
 import com.reco1l.osu.multiplayer.Multiplayer;
 import com.reco1l.osu.multiplayer.RoomScene;
@@ -26,6 +27,7 @@ import org.anddev.andengine.util.Debug;
 
 import java.io.File;
 import java.util.Locale;
+import java.util.Objects;
 
 import ru.nsu.ccfit.zuev.audio.serviceAudio.SongService;
 import ru.nsu.ccfit.zuev.osu.Config;
@@ -468,10 +470,10 @@ public class ScoringScene {
                 ResourceManager.getInstance().getFont("smallFont"), mapperStr);
         final Text playerInfo = new Text(Utils.toRes(4), mapperInfo.getY() + mapperInfo.getHeight() + Utils.toRes(2),
                 ResourceManager.getInstance().getFont("smallFont"), playerStr);
-        //calculatePP
-        if (Config.isDisplayScoreStatistics()){
-            StringBuilder ppinfo = new StringBuilder();
 
+        if (Config.isDisplayScoreStatistics() && !currentStatistic.isTeamStatistic()) {
+
+            StringBuilder ppinfo = new StringBuilder();
             Beatmap beatmap;
 
             try (var parser = new BeatmapParser(this.track.getFilename())) {
