@@ -153,6 +153,12 @@ public class HitCircle extends GameObject {
         if (scene == null) {
             return;
         }
+
+        overlay.clearEntityModifiers();
+        circle.clearEntityModifiers();
+        number.clearEntityModifiers();
+        approachCircle.clearEntityModifiers();
+
         // Detach all objects
         overlay.detachSelf();
         circle.detachSelf();
