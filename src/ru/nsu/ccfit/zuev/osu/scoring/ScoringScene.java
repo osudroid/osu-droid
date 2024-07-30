@@ -468,10 +468,10 @@ public class ScoringScene {
                 ResourceManager.getInstance().getFont("smallFont"), mapperStr);
         final Text playerInfo = new Text(Utils.toRes(4), mapperInfo.getY() + mapperInfo.getHeight() + Utils.toRes(2),
                 ResourceManager.getInstance().getFont("smallFont"), playerStr);
-        //calculatePP
-        if (Config.isDisplayScoreStatistics()){
-            StringBuilder ppinfo = new StringBuilder();
 
+        if (Config.isDisplayScoreStatistics() && !currentStatistic.isTeamStatistic()) {
+
+            StringBuilder ppinfo = new StringBuilder();
             Beatmap beatmap;
 
             try (var parser = new BeatmapParser(this.track.getFilename())) {
