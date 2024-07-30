@@ -327,98 +327,10 @@ public class ScoringScene {
         scene.registerTouchArea(backBtn);
         scene.attachChild(mark);
 
-        float modX = mark.getX() - 30;
-        final float modY = mark.getY() + mark.getHeight() * 2 / 3;
-        if (stat.getMod().contains(GameMod.MOD_SCOREV2)) {
-            final Sprite modSprite = new Sprite(modX, modY, ResourceManager
-                    .getInstance().getTexture("selection-mod-scorev2"));
-            modX -= Utils.toRes(30);
-            scene.attachChild(modSprite);
-        }
-        if (stat.getMod().contains(GameMod.MOD_HARDROCK)) {
-            final Sprite modSprite = new Sprite(modX, modY, ResourceManager
-                    .getInstance().getTexture("selection-mod-hardrock"));
-            modX -= Utils.toRes(30);
-            scene.attachChild(modSprite);
-        } else if (stat.getMod().contains(GameMod.MOD_EASY)) {
-            final Sprite modSprite = new Sprite(modX, modY, ResourceManager
-                    .getInstance().getTexture("selection-mod-easy"));
-            modX -= Utils.toRes(30);
-            scene.attachChild(modSprite);
-        }
-
-        if (stat.getMod().contains(GameMod.MOD_HIDDEN)) {
-            final Sprite modSprite = new Sprite(modX, modY, ResourceManager
-                    .getInstance().getTexture("selection-mod-hidden"));
-            modX -= Utils.toRes(30);
-            scene.attachChild(modSprite);
-        }
-
-        if (stat.getMod().contains(GameMod.MOD_FLASHLIGHT)) {
-            final Sprite modSprite = new Sprite(modX, modY, ResourceManager
-                    .getInstance().getTexture("selection-mod-flashlight"));
-            modX -= Utils.toRes(30);
-            scene.attachChild(modSprite);
-        }
-        if (stat.getMod().contains(GameMod.MOD_NOFAIL)) {
-            final Sprite modSprite = new Sprite(modX, modY, ResourceManager
-                    .getInstance().getTexture("selection-mod-nofail"));
-            modX -= Utils.toRes(30);
-            scene.attachChild(modSprite);
-        } else if (stat.getMod().contains(GameMod.MOD_SUDDENDEATH)) {
-            final Sprite modSprite = new Sprite(modX, modY, ResourceManager
-                    .getInstance().getTexture("selection-mod-suddendeath"));
-            modX -= Utils.toRes(30);
-            scene.attachChild(modSprite);
-        } else if (stat.getMod().contains(GameMod.MOD_PERFECT)) {
-            final Sprite modSprite = new Sprite(modX, modY, ResourceManager
-                    .getInstance().getTexture("selection-mod-perfect"));
-            modX -= Utils.toRes(30);
-            scene.attachChild(modSprite);
-        }
-        if (stat.getMod().contains(GameMod.MOD_AUTO)) {
-            final Sprite modSprite = new Sprite(modX, modY, ResourceManager
-                    .getInstance().getTexture("selection-mod-autoplay"));
-            modX -= Utils.toRes(30);
-            scene.attachChild(modSprite);
-        } else if (stat.getMod().contains(GameMod.MOD_AUTOPILOT)) {
-            final Sprite modSprite = new Sprite(modX, modY, ResourceManager
-                    .getInstance().getTexture("selection-mod-relax2"));
-            modX -= Utils.toRes(30);
-            scene.attachChild(modSprite);
-        } else if (stat.getMod().contains(GameMod.MOD_RELAX)) {
-            final Sprite modSprite = new Sprite(modX, modY, ResourceManager
-                    .getInstance().getTexture("selection-mod-relax"));
-            modX -= Utils.toRes(30);
-            scene.attachChild(modSprite);
-        }
-        if (stat.getMod().contains(GameMod.MOD_DOUBLETIME)) {
-            final Sprite modSprite = new Sprite(modX, modY, ResourceManager
-                    .getInstance().getTexture("selection-mod-doubletime"));
-            modX -= Utils.toRes(30);
-            scene.attachChild(modSprite);
-        } else if (stat.getMod().contains(GameMod.MOD_NIGHTCORE)) {
-            final Sprite modSprite = new Sprite(modX, modY, ResourceManager
-                    .getInstance().getTexture("selection-mod-nightcore"));
-            modX -= Utils.toRes(30);
-            scene.attachChild(modSprite);
-        } else if (stat.getMod().contains(GameMod.MOD_HALFTIME)) {
-            final Sprite modSprite = new Sprite(modX, modY, ResourceManager
-                    .getInstance().getTexture("selection-mod-halftime"));
-            modX -= Utils.toRes(30);
-            scene.attachChild(modSprite);
-        }
-
-        if (stat.getMod().contains(GameMod.MOD_PRECISE)) {
-            final Sprite modSprite = new Sprite(modX, modY, ResourceManager
-                    .getInstance().getTexture("selection-mod-precise"));
-            modX -= Utils.toRes(30);
-            scene.attachChild(modSprite);
-        }
-        //new mods in 1.6.8
-        if (stat.getMod().contains(GameMod.MOD_REALLYEASY)) {
-            final Sprite modSprite = new Sprite(modX, modY, ResourceManager
-                    .getInstance().getTexture("selection-mod-reallyeasy"));
+        var modX = mark.getX() - 30;
+        var modY = mark.getY() + mark.getHeight() * 2 / 3;
+        for (GameMod mod : stat.getMod()) {
+            var modSprite = new Sprite(modX, modY, ResourceManager.getInstance().getTexture("selection-mod-" + GameMod.getTextureName(mod)));
             modX -= Utils.toRes(30);
             scene.attachChild(modSprite);
         }
