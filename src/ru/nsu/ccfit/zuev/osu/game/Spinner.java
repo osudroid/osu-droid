@@ -3,22 +3,12 @@ package ru.nsu.ccfit.zuev.osu.game;
 import android.graphics.PointF;
 
 import com.reco1l.osu.Execution;
+import com.reco1l.osu.graphics.Modifiers;
 
-import org.anddev.andengine.entity.IEntity;
-import org.anddev.andengine.entity.modifier.AlphaModifier;
-import org.anddev.andengine.entity.modifier.DelayModifier;
-import org.anddev.andengine.entity.modifier.FadeInModifier;
-import org.anddev.andengine.entity.modifier.FadeOutModifier;
-import org.anddev.andengine.entity.modifier.IEntityModifier;
-import org.anddev.andengine.entity.modifier.IEntityModifier.IEntityModifierListener;
-import org.anddev.andengine.entity.modifier.ParallelEntityModifier;
-import org.anddev.andengine.entity.modifier.ScaleModifier;
-import org.anddev.andengine.entity.modifier.SequenceEntityModifier;
 import org.anddev.andengine.entity.scene.Scene;
 import org.anddev.andengine.entity.sprite.Sprite;
 import org.anddev.andengine.opengl.texture.region.TextureRegion;
 import org.anddev.andengine.util.MathUtils;
-import org.anddev.andengine.util.modifier.IModifier;
 
 import ru.nsu.ccfit.zuev.osu.Config;
 import ru.nsu.ccfit.zuev.osu.Constants;
@@ -105,49 +95,49 @@ public class Spinner extends GameObject {
             this.addition = Integer.parseInt(group[1]);
         }
 
-        final IEntityModifier appearMoifier = new SequenceEntityModifier(
-                new DelayModifier(pretime * 0.75f), new FadeInModifier(
-                pretime * 0.25f));
-
         background.setAlpha(0);
-        background.registerEntityModifier(appearMoifier.deepCopy());
+        background.registerEntityModifier(Modifiers.sequence(
+            Modifiers.delay(pretime * 0.75f),
+            Modifiers.fadeIn(pretime * 0.25f)
+        ));
 
         circle.setAlpha(0);
-        circle.registerEntityModifier(appearMoifier.deepCopy());
+        circle.registerEntityModifier(Modifiers.sequence(
+            Modifiers.delay(pretime * 0.75f),
+            Modifiers.fadeIn(pretime * 0.25f)
+        ));
 
         metreY = (Config.getRES_HEIGHT() - background.getHeightScaled()) / 2;
         metre.setAlpha(0);
-        metre.registerEntityModifier(appearMoifier.deepCopy());
+        metre.registerEntityModifier(Modifiers.sequence(
+            Modifiers.delay(pretime * 0.75f),
+            Modifiers.fadeIn(pretime * 0.25f)
+        ));
         mregion.setTexturePosition(0, (int) metre.getHeightScaled());
 
         approachCircle.setAlpha(0);
         if (GameHelper.isHidden()) {
             approachCircle.setVisible(false);
         }
-        approachCircle.registerEntityModifier(new SequenceEntityModifier(
-                new IEntityModifierListener() {
-
-                    public void onModifierStarted(IModifier<IEntity> pModifier, IEntity pItem) {
-                    }
-
-                    public void onModifierFinished(IModifier<IEntity> pModifier, IEntity pItem) {
-                        Execution.updateThread(Spinner.this::removeFromScene);
-                    }
-                },
-                new SequenceEntityModifier(
-                        new DelayModifier(pretime),
-                        new ParallelEntityModifier(
-                                new AlphaModifier(time, 0.75f, 1),
-                                new ScaleModifier(time, 2.0f, 0)
-                        )
+        approachCircle.registerEntityModifier(
+            Modifiers.sequence(
+                Modifiers.delay(pretime),
+                Modifiers.parallel(
+                    Modifiers.alpha(time, 0.75f, 1),
+                    Modifiers.scale(time, 2.0f, 0)
                 )
-        ));
+            ).setOnFinished(entity -> Execution.updateThread(Spinner.this::removeFromScene))
+        );
 
         spinText.setAlpha(0);
-        spinText.registerEntityModifier(new SequenceEntityModifier(
-                new DelayModifier(pretime * 0.75f), new FadeInModifier(
-                pretime * 0.25f), new DelayModifier(pretime / 2),
-                new FadeOutModifier(pretime * 0.25f)));
+        spinText.registerEntityModifier(
+            Modifiers.sequence(
+                Modifiers.delay(pretime * 0.75f),
+                Modifiers.fadeIn(pretime * 0.25f),
+                Modifiers.delay(pretime / 2),
+                Modifiers.fadeOut(pretime * 0.25f)
+            )
+        );
 
         scene.attachChild(spinText, 0);
         scene.attachChild(approachCircle, 0);
@@ -288,9 +278,10 @@ public class Spinner extends GameObject {
             if (!clear) {
                 final PointF pos1 = new PointF(center.x, center.y * 0.5f);
                 clearText = new CentredSprite(pos1.x, pos1.y, ResourceManager.getInstance().getTexture("spinner-clear"));
-                clearText.registerEntityModifier(new ParallelEntityModifier(
-                        new FadeInModifier(0.25f), new ScaleModifier(0.25f,
-                        1.5f, 1)));
+                clearText.registerEntityModifier(Modifiers.parallel(
+                    Modifiers.fadeIn(0.25f),
+                    Modifiers.scale(0.25f, 1.5f, 1)
+                ));
                 scene.attachChild(clearText);
                 clear = true;
             } else if (Math.abs(rotations) > 1) {
