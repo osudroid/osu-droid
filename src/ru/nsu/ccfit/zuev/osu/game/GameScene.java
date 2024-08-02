@@ -598,6 +598,7 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
         GameHelper.setInitalBeatLength(GameHelper.getBeatLength());
 
         GameObjectPool.getInstance().purge();
+        Slider.tickSpritePool.clear();
         Modifiers.clearPool();
 
         // TODO replay

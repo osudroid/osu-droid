@@ -5,6 +5,7 @@ import com.edlplan.framework.math.Vec2;
 import com.edlplan.framework.math.line.LinePath;
 import com.edlplan.osu.support.slider.SliderBody2D;
 import com.edlplan.osu.support.timing.controlpoint.TimingControlPoint;
+import com.reco1l.framework.Pool;
 import com.reco1l.osu.Execution;
 import com.reco1l.osu.graphics.Modifiers;
 
@@ -30,6 +31,15 @@ import java.util.Arrays;
 import java.util.BitSet;
 
 public class Slider extends GameObject {
+
+    public static final Pool<Sprite> tickSpritePool = new Pool<>(
+        pool -> new CentredSprite(
+            0f, 0f,
+            ResourceManager.getInstance().getTexture("sliderscorepoint")
+        )
+    );
+
+
     private final Sprite startCircle, endCircle;
     private final Sprite startOverlay, endOverlay;
     private final Sprite approachCircle;
@@ -330,7 +340,8 @@ public class Slider extends GameObject {
         ticks.clear();
         for (int i = 1; i <= tickCount; i++) {
             var pos1 = getPercentPosition((float) (i * tickInterval / (maxTime * GameHelper.getTickRate())), null);
-            var tick = new CentredSprite(pos1.x, pos1.y, ResourceManager.getInstance().getTexture("sliderscorepoint"));
+            var tick = tickSpritePool.obtain();
+            tick.setPosition(pos1.x, pos1.y);
             tick.setScale(scale);
             tick.setAlpha(0);
             ticks.add(tick);
@@ -464,6 +475,7 @@ public class Slider extends GameObject {
         for (int i = 0, ticksSize = ticks.size(); i < ticksSize; i++) {
             Sprite sp = ticks.get(i);
             sp.detachSelf();
+            tickSpritePool.free(sp);
         }
         listener.removeObject(this);
         // Put this and number into pool
