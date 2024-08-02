@@ -94,19 +94,20 @@ fun interface OnModifierFinished {
  */
 class UniversalModifier(private val pool: Pool<UniversalModifier>? = null) : IModifier<IEntity>, IEntityModifier {
 
+
     private var elapsedSec = 0f
+
     private var data = FloatArray(2)
 
     private var _type = NONE
 
     private var _duration = 0f
 
-    private var _easeFunction = IEaseFunction.DEFAULT
+    private var _modifiers: Array<out UniversalModifier>? = null
 
     private var _onFinished: OnModifierFinished? = null
 
-    private var _innerModifiers: Array<out UniversalModifier>? = null
-
+    private var _easeFunction = IEaseFunction.DEFAULT
 
 
     override fun isFinished() = elapsedSec == _duration
@@ -131,6 +132,7 @@ class UniversalModifier(private val pool: Pool<UniversalModifier>? = null) : IMo
             return 0f
         }
 
+        val modifiers = _modifiers
         val percentage = _easeFunction.getPercentage(elapsedSec, _duration)
 
         var usedSec = min(_duration - elapsedSec, deltaSec)
@@ -156,8 +158,17 @@ class UniversalModifier(private val pool: Pool<UniversalModifier>? = null) : IMo
             SEQUENCE -> {
                 var remainingSec = deltaSec
 
-                while (remainingSec > 0) {
-                    remainingSec -= _innerModifiers?.first()?.onUpdate(remainingSec, item) ?: 0f
+                while (modifiers != null && remainingSec > 0) {
+
+                    for (modifier in modifiers) {
+
+                        if (modifier.isFinished) {
+                            continue
+                        }
+
+                        remainingSec -= modifier.onUpdate(remainingSec, item)
+                        break
+                    }
                 }
 
                 usedSec = deltaSec - remainingSec
@@ -166,10 +177,10 @@ class UniversalModifier(private val pool: Pool<UniversalModifier>? = null) : IMo
             PARALLEL -> {
                 var remainingSec = deltaSec
 
-                while (remainingSec > 0) {
+                while (modifiers != null && remainingSec > 0) {
 
-                    _innerModifiers?.forEach {
-                        usedSec = max(usedSec, it.onUpdate(deltaSec, item))
+                    for (modifier in modifiers) {
+                        usedSec = max(usedSec, modifier.onUpdate(deltaSec, item))
                     }
 
                     remainingSec -= usedSec
@@ -187,7 +198,7 @@ class UniversalModifier(private val pool: Pool<UniversalModifier>? = null) : IMo
         if (elapsedSec >= _duration) {
             elapsedSec = _duration
 
-            _innerModifiers = null
+            _modifiers = null
 
             _onFinished?.invoke(item)
             _onFinished = null
@@ -208,7 +219,7 @@ class UniversalModifier(private val pool: Pool<UniversalModifier>? = null) : IMo
             throw IllegalArgumentException("Modifiers list must not be empty")
         }
 
-        _innerModifiers = modifiers
+        _modifiers = modifiers
         setDuration(_duration)
         return this
     }
@@ -220,7 +231,7 @@ class UniversalModifier(private val pool: Pool<UniversalModifier>? = null) : IMo
     fun setType(type: ModifierType): UniversalModifier {
 
         if (type != SEQUENCE && type != PARALLEL) {
-            _innerModifiers = null
+            _modifiers = null
         }
 
         _type = type
@@ -270,13 +281,9 @@ class UniversalModifier(private val pool: Pool<UniversalModifier>? = null) : IMo
      */
     fun setDuration(duration: Float): UniversalModifier {
 
-        if (duration < 0) {
-            throw IllegalArgumentException("Duration must be >= 0")
-        }
-
         _duration = when (_type) {
-            SEQUENCE -> _innerModifiers?.sumOf { it._duration } ?: 0f
-            PARALLEL -> _innerModifiers?.maxOf { it._duration } ?: 0f
+            SEQUENCE -> _modifiers?.sumOf { it._duration } ?: 0f
+            PARALLEL -> _modifiers?.maxOf { it._duration } ?: 0f
             else -> duration
         }
 
@@ -315,7 +322,7 @@ class UniversalModifier(private val pool: Pool<UniversalModifier>? = null) : IMo
 
         _duration = 0f
         _onFinished = null
-        _innerModifiers?.forEach { it.reset() }
+        _modifiers?.forEach { it.reset() }
 
         elapsedSec = 0f
     }
