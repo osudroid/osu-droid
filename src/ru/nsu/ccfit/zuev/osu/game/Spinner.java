@@ -26,7 +26,7 @@ public class Spinner extends GameObject {
     private final Sprite metre;
     private final Sprite spinText;
     private final TextureRegion mregion;
-    private Sprite clearText = null;
+    private final Sprite clearText;
     private PointF oldMouse;
     private GameObjectListener listener;
     private Scene scene;
@@ -65,12 +65,13 @@ public class Spinner extends GameObject {
         approachCircle = new CentredSprite(center.x, center.y, ResourceManager.getInstance().getTexture("spinner-approachcircle"));
         spinText = new CentredSprite(center.x, center.y * 1.5f, ResourceManager
                 .getInstance().getTexture("spinner-spin"));
+
+        clearText = new CentredSprite(center.x, center.y * 0.5f, ResourceManager.getInstance().getTexture("spinner-clear"));
     }
 
     public void init(final GameObjectListener listener, final Scene scene,
                      final float pretime, final float time, final float rps,
                      final int sound, final String tempSound, final StatisticV2 stat) {
-        clearText = null;
         fullrotations = 0;
         rotations = 0;
         this.scene = scene;
@@ -276,8 +277,6 @@ public class Spinner extends GameObject {
         if (percentfill > 1 || clear) {
             percentfill = 1;
             if (!clear) {
-                final PointF pos1 = new PointF(center.x, center.y * 0.5f);
-                clearText = new CentredSprite(pos1.x, pos1.y, ResourceManager.getInstance().getTexture("spinner-clear"));
                 clearText.registerEntityModifier(Modifiers.parallel(
                     Modifiers.fadeIn(0.25f),
                     Modifiers.scale(0.25f, 1.5f, 1)
