@@ -23,14 +23,12 @@ class Pool<T : Any>(private val factory: (Pool<T>) -> T) {
      * Obtain an object from the pool. If the pool is empty, a new object is created using the
      * factory and its arguments.
      */
-    fun obtain() = if (objects.isEmpty()) factory(this) else objects.removeFirst()
+    fun obtain() = objects.firstOrNull() ?: factory(this)
 
     /**
      * Return an object to the pool.
      */
-    fun free(obj: T) {
-        objects.add(obj)
-    }
+    fun free(obj: T) = objects.add(obj)
 
     /**
      * Clear the pool.
