@@ -11,7 +11,9 @@ import com.reco1l.osu.graphics.Modifiers;
 import org.anddev.andengine.entity.scene.Scene;
 import org.anddev.andengine.util.modifier.ease.EaseQuadOut;
 
+import ru.nsu.ccfit.zuev.osu.Config;
 import ru.nsu.ccfit.zuev.osu.RGBColor;
+import ru.nsu.ccfit.zuev.osu.game.Slider;
 
 public class SliderBody2D extends AbstractSliderBody {
 
@@ -231,7 +233,7 @@ public class SliderBody2D extends AbstractSliderBody {
         }
     }
 
-    public void removeFromScene(Scene scene, float duration)
+    public void removeFromScene(Scene scene, float duration, Slider slider)
     {
         if (hint != null) {
             hint.registerEntityModifier(Modifiers.alpha(duration, hintAlpha, 0));
@@ -243,7 +245,16 @@ public class SliderBody2D extends AbstractSliderBody {
 
         if (border != null) {
             border.registerEntityModifier(Modifiers.fadeOut(duration).setOnFinished(entity -> {
-                Execution.updateThread(() -> removeFromScene(scene));
+                Execution.updateThread(() -> {
+                    removeFromScene(scene);
+
+                    // We can pool the hit object once all animations are finished.
+                    // The follow circle animation is the last one to finish but if it's disabled this will be, so should
+                    // pool the object here in that case.
+                    if (!Config.isAnimateFollowCircle()) {
+                        slider.poolObject();
+                    }
+                });
             }));
         }
     }

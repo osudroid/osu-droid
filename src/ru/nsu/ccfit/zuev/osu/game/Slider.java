@@ -68,8 +68,8 @@ public class Slider extends GameObject {
     private int currentTick;
     private double tickInterval;
 
-    private AnimSprite ball;
-    private Sprite followCircle;
+    private final AnimSprite ball;
+    private final Sprite followCircle;
 
     private PointF tmpPoint = new PointF();
     private float ballAngle;
@@ -155,16 +155,6 @@ public class Slider extends GameObject {
         mWasInRadius = false;
 
         maxTime = (float) (spanDuration / 1000);
-
-        ball.setFps((float) (0.1f * GameHelper.getSpeed() * scale / timing.getBeatLength()));
-        ball.setScale(scale);
-        ball.setFlippedHorizontal(false);
-
-        followCircle.setAlpha(0);
-        if (!Config.isAnimateFollowCircle()) {
-            followCircle.setScale(scale);
-        }
-
         repeatCount = repeats;
         reverse = false;
         startHit = false;
@@ -306,7 +296,7 @@ public class Slider extends GameObject {
         }
 
         if (approachCircle.isVisible()) {
-            approachCircle.registerEntityModifier(Modifiers.scale(Math.min(fadeInDuration * 2, time * GameHelper.getTimeMultiplier()), 0, 0.9f));
+            approachCircle.registerEntityModifier(Modifiers.alpha(Math.min(fadeInDuration * 2, time * GameHelper.getTimeMultiplier()), 0, 0.9f));
             approachCircle.registerEntityModifier(Modifiers.scale(time * GameHelper.getTimeMultiplier(), scale * 3, scale));
         }
 
@@ -383,9 +373,6 @@ public class Slider extends GameObject {
             abstractSliderBody.setBorderColor(scolor.r(), scolor.g(), scolor.b());
         }
 
-        scene.attachChild(ball);
-        scene.attachChild(followCircle);
-
         applyBodyFadeAdjustments(fadeInDuration);
     }
 
@@ -454,7 +441,7 @@ public class Slider extends GameObject {
             if (GameHelper.isHidden()) {
                 abstractSliderBody.removeFromScene(scene);
             } else {
-                abstractSliderBody.removeFromScene(scene, 0.24f * GameHelper.getTimeMultiplier());
+                abstractSliderBody.removeFromScene(scene, 0.24f * GameHelper.getTimeMultiplier(), this);
             }
         }
 
@@ -465,6 +452,7 @@ public class Slider extends GameObject {
         if (!Config.isAnimateFollowCircle()) {
             followCircle.detachSelf();
         }
+
         startCircle.detachSelf();
         endCircle.detachSelf();
         startOverlay.detachSelf();
@@ -478,11 +466,13 @@ public class Slider extends GameObject {
             tickSpritePool.free(sp);
         }
         listener.removeObject(this);
-        // Put this and number into pool
+        scene = null;
+    }
+
+    public void poolObject() {
         GameHelper.putPath(path);
         GameObjectPool.getInstance().putSlider(this);
         GameObjectPool.getInstance().putNumber(number);
-        scene = null;
     }
 
     private void over() {
@@ -586,13 +576,20 @@ public class Slider extends GameObject {
             mIsAnimating = true;
 
             followCircle.clearEntityModifiers();
+            followCircle.registerEntityModifier(Modifiers.scale(0.2f * GameHelper.getTimeMultiplier(), followCircle.getScaleX(), followCircle.getScaleX() * 0.8f).setEaseFunction(EaseQuadOut.getInstance()));
             followCircle.registerEntityModifier(
-                Modifiers.parallel(
-                    Modifiers.scale(0.2f * GameHelper.getTimeMultiplier(), followCircle.getScaleX(), followCircle.getScaleX() * 0.8f).setEaseFunction(EaseQuadOut.getInstance()),
-                    Modifiers.alpha(0.2f * GameHelper.getTimeMultiplier(), followCircle.getAlpha(), 0f).setOnFinished(entity -> {
-                        Execution.updateThread(entity::detachSelf);
-                    }).setEaseFunction(EaseQuadIn.getInstance())
-                ).setOnFinished(entity -> mIsAnimating = false)
+                Modifiers.alpha(0.2f * GameHelper.getTimeMultiplier(), followCircle.getAlpha(), 0f).setOnFinished(entity -> {
+                    Execution.updateThread(() -> {
+                        entity.detachSelf();
+
+                        mIsAnimating = false;
+
+                        // We can pool the hit object once all animations are finished.
+                        // The follow circle animation is the last one to finish if it's enabled.
+                        poolObject();
+                    });
+
+                })
             );
         }
 
@@ -736,11 +733,25 @@ public class Slider extends GameObject {
             startOverlay.setAlpha(0);
         }
 
-        number.detachSelf();
+        if (!ball.hasParent()) {
+            number.detachSelf();
 
-        approachCircle.clearEntityModifiers();
-        approachCircle.setAlpha(0);
-        ball.registerEntityModifier(Modifiers.fadeIn(0.1f * GameHelper.getTimeMultiplier()));
+            approachCircle.clearEntityModifiers();
+            approachCircle.setAlpha(0);
+
+            ball.setFps((float) (0.1f * GameHelper.getSpeed() * scale / timing.getBeatLength()));
+            ball.setScale(scale);
+            ball.setFlippedHorizontal(false);
+            ball.registerEntityModifier(Modifiers.fadeIn(0.1f * GameHelper.getTimeMultiplier()));
+
+            followCircle.setAlpha(0);
+            if (!Config.isAnimateFollowCircle()) {
+                followCircle.setScale(scale);
+            }
+
+            scene.attachChild(ball);
+            scene.attachChild(followCircle);
+        }
 
         // Ball positiong
         final float percentage = (float) (passedTime / maxTime);
@@ -773,26 +784,25 @@ public class Slider extends GameObject {
                 float initialScale = followCircle.getAlpha() == 0 ? scale * 0.5f : followCircle.getScaleX();
 
                 followCircle.clearEntityModifiers();
+                followCircle.registerEntityModifier(Modifiers.alpha(Math.min(remainTime, 0.06f * GameHelper.getTimeMultiplier()), followCircle.getAlpha(), 1f));
                 followCircle.registerEntityModifier(
-                    Modifiers.parallel(
-                        Modifiers.scale(Math.min(remainTime, 0.18f * GameHelper.getTimeMultiplier()), initialScale, scale).setEaseFunction(EaseQuadOut.getInstance()),
-                        Modifiers.alpha(Math.min(remainTime, 0.06f * GameHelper.getTimeMultiplier()), followCircle.getAlpha(), 1f)
-                    ).setOnFinished(entity -> mIsAnimating = false)
+                    Modifiers.scale(Math.min(remainTime, 0.18f * GameHelper.getTimeMultiplier()), initialScale, scale)
+                        .setEaseFunction(EaseQuadOut.getInstance())
+                        .setOnFinished(entity -> mIsAnimating = false)
                 );
             } else if (!inRadius && mWasInRadius) {
                 mWasInRadius = false;
                 mIsAnimating = true;
 
                 followCircle.clearEntityModifiers();
+                followCircle.registerEntityModifier(Modifiers.scale(0.1f * GameHelper.getTimeMultiplier(), followCircle.getScaleX(), scale * 2f));
                 followCircle.registerEntityModifier(
-                    Modifiers.parallel(
-                        Modifiers.scale(0.1f * GameHelper.getTimeMultiplier(), followCircle.getScaleX(), scale * 2f),
-                        Modifiers.alpha(0.1f * GameHelper.getTimeMultiplier(), followCircle.getAlpha(), 0f).setOnFinished(entity -> {
-                            if (mIsOver) {
-                                Execution.updateThread(entity::detachSelf);
-                            }
-                        })
-                    ).setOnFinished(entity -> mIsAnimating = false)
+                    Modifiers.alpha(0.1f * GameHelper.getTimeMultiplier(), followCircle.getAlpha(), 0f).setOnFinished(entity -> {
+                        if (mIsOver) {
+                            Execution.updateThread(entity::detachSelf);
+                        }
+                        mIsAnimating = false;
+                    })
                 );
             }
         } else {
@@ -811,9 +821,7 @@ public class Slider extends GameObject {
 
                 if (Config.isAnimateFollowCircle() && !mIsAnimating) {
                     followCircle.clearEntityModifiers();
-                    followCircle.registerEntityModifier(new ScaleModifier((float)
-                        Math.min(tickInterval / GameHelper.getTickRate(), 0.2f) * GameHelper.getTimeMultiplier(),
-                        scale * 1.1f, scale, EaseQuadOut.getInstance()));
+                    followCircle.registerEntityModifier(Modifiers.scale((float) Math.min(tickInterval / GameHelper.getTickRate(), 0.2f) * GameHelper.getTimeMultiplier(), scale * 1.1f, scale).setEaseFunction(EaseQuadOut.getInstance()));
                 }
 
                 ticksGot++;

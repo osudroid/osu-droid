@@ -132,12 +132,8 @@ public class HitCircle extends GameObject {
         }
 
         if (approachCircle.isVisible()) {
-            approachCircle.registerEntityModifier(Modifiers.alpha(
-                    Math.min(fadeInDuration * 2, time * GameHelper.getTimeMultiplier()), 0, 0.9f
-            ));
-            approachCircle.registerEntityModifier(Modifiers.scale(
-                    time * GameHelper.getTimeMultiplier(), scale * 3, scale
-            ));
+            approachCircle.registerEntityModifier(Modifiers.alpha(Math.min(fadeInDuration * 2, time * GameHelper.getTimeMultiplier()), 0, 0.9f));
+            approachCircle.registerEntityModifier(Modifiers.scale(time * GameHelper.getTimeMultiplier(), scale * 3, scale));
         }
 
         scene.attachChild(number, 0);
@@ -154,13 +150,18 @@ public class HitCircle extends GameObject {
         if (scene == null) {
             return;
         }
+
+        overlay.clearEntityModifiers();
+        circle.clearEntityModifiers();
+        number.clearEntityModifiers();
+        approachCircle.clearEntityModifiers();
+
         // Detach all objects
         overlay.detachSelf();
         circle.detachSelf();
         number.detachSelf();
         approachCircle.detachSelf();
         listener.removeObject(this);
-        // Put circle and number into pool
         GameObjectPool.getInstance().putCircle(this);
         GameObjectPool.getInstance().putNumber(number);
         scene = null;

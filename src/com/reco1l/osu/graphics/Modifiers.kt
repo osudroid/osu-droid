@@ -132,7 +132,6 @@ class UniversalModifier(private val pool: Pool<UniversalModifier>? = null) : IMo
             return 0f
         }
 
-        val modifiers = _modifiers
         val percentage = _easeFunction.getPercentage(elapsedSec, _duration)
 
         var usedSec = min(_duration - elapsedSec, deltaSec)
@@ -158,15 +157,12 @@ class UniversalModifier(private val pool: Pool<UniversalModifier>? = null) : IMo
             SEQUENCE -> {
                 var remainingSec = deltaSec
 
-                while (modifiers != null && remainingSec > 0) {
+                while (remainingSec > 0 && _modifiers != null) {
 
-                    for (modifier in modifiers) {
+                    remainingSec -= _modifiers!![0].onUpdate(remainingSec, item)
 
-                        if (modifier.isFinished) {
-                            continue
-                        }
-
-                        remainingSec -= modifier.onUpdate(remainingSec, item)
+                    if (_modifiers!![0].isFinished) {
+                        _modifiers = if (_modifiers!!.size > 1) _modifiers!!.copyOfRange(1, _modifiers!!.size) else null
                         break
                     }
                 }
@@ -177,14 +173,21 @@ class UniversalModifier(private val pool: Pool<UniversalModifier>? = null) : IMo
             PARALLEL -> {
                 var remainingSec = deltaSec
 
-                while (modifiers != null && remainingSec > 0) {
+                while (remainingSec > 0 && _modifiers != null) {
+
+                    val modifiers = _modifiers!!
 
                     for (modifier in modifiers) {
                         usedSec = max(usedSec, modifier.onUpdate(deltaSec, item))
+
+                        if (modifier.isFinished) {
+                            _modifiers = if (_modifiers!!.size > 1) _modifiers!!.copyOfRange(1, _modifiers!!.size) else null
+                        }
                     }
 
                     remainingSec -= usedSec
                 }
+
                 usedSec = deltaSec - remainingSec
             }
 
@@ -209,6 +212,10 @@ class UniversalModifier(private val pool: Pool<UniversalModifier>? = null) : IMo
         return usedSec
     }
 
+    override fun onUnregister() {
+        pool?.free(this)
+    }
+
 
     /**
      * Set inner modifiers for sequence or parallel modifier types.
@@ -220,6 +227,11 @@ class UniversalModifier(private val pool: Pool<UniversalModifier>? = null) : IMo
         }
 
         _modifiers = modifiers
+
+        if (_type == PARALLEL) {
+            _modifiers!!.sortBy { it._duration }
+        }
+
         setDuration(_duration)
         return this
     }
