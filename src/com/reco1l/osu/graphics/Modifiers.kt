@@ -332,9 +332,16 @@ class UniversalModifier(private val pool: Pool<UniversalModifier>? = null) : IMo
 
         data.fill(0f)
 
+        _type = NONE
         _duration = 0f
         _onFinished = null
-        _modifiers?.forEach { it.reset() }
+        _easeFunction = IEaseFunction.DEFAULT
+
+        _modifiers?.forEach {
+            it.reset()
+            pool?.free(it)
+        }
+        _modifiers = null
 
         elapsedSec = 0f
     }
