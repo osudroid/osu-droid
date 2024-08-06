@@ -125,6 +125,16 @@ class UniversalModifier(private val pool: Pool<UniversalModifier>? = null) : IMo
         return from + (to - from) * percentage
     }
 
+    private fun trimModifiers() {
+
+        if (_modifiers!!.size == 1) {
+            _modifiers = null
+            return
+        }
+
+        _modifiers = _modifiers!!.copyOfRange(1, _modifiers!!.size)
+    }
+
 
     override fun onUpdate(deltaSec: Float, item: IEntity): Float {
 
@@ -162,7 +172,7 @@ class UniversalModifier(private val pool: Pool<UniversalModifier>? = null) : IMo
                     remainingSec -= _modifiers!![0].onUpdate(remainingSec, item)
 
                     if (_modifiers!![0].isFinished) {
-                        _modifiers = if (_modifiers!!.size > 1) _modifiers!!.copyOfRange(1, _modifiers!!.size) else null
+                        trimModifiers()
                         break
                     }
                 }
@@ -181,7 +191,7 @@ class UniversalModifier(private val pool: Pool<UniversalModifier>? = null) : IMo
                         usedSec = max(usedSec, modifier.onUpdate(deltaSec, item))
 
                         if (modifier.isFinished) {
-                            _modifiers = if (_modifiers!!.size > 1) _modifiers!!.copyOfRange(1, _modifiers!!.size) else null
+                            trimModifiers()
                         }
                     }
 
@@ -339,7 +349,7 @@ class UniversalModifier(private val pool: Pool<UniversalModifier>? = null) : IMo
 
         _modifiers?.forEach {
             it.reset()
-            pool?.free(it)
+            it.onUnregister()
         }
         _modifiers = null
 
