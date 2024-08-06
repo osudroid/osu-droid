@@ -2,16 +2,14 @@ package ru.nsu.ccfit.zuev.osu.game;
 
 import android.graphics.PointF;
 
-import com.reco1l.osu.Execution;
 
-import org.anddev.andengine.entity.IEntity;
-import org.anddev.andengine.entity.modifier.IEntityModifier;
-import org.anddev.andengine.entity.modifier.IEntityModifier.IEntityModifierListener;
-import org.anddev.andengine.entity.modifier.ParallelEntityModifier;
+import com.reco1l.osu.Execution;
+import com.reco1l.osu.graphics.Modifiers;
+import com.reco1l.osu.graphics.UniversalModifier;
+
 import org.anddev.andengine.entity.scene.Scene;
 import org.anddev.andengine.entity.shape.Shape;
 import org.anddev.andengine.entity.sprite.Sprite;
-import org.anddev.andengine.util.modifier.IModifier;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -22,7 +20,7 @@ import ru.nsu.ccfit.zuev.osu.RGBColor;
 import ru.nsu.ccfit.zuev.osu.ResourceManager;
 import ru.nsu.ccfit.zuev.osu.helper.AnimSprite;
 
-public class GameEffect extends GameObject implements IEntityModifierListener {
+public class GameEffect extends GameObject {
     private static final HashSet<String> animationEffects = new HashSet<>(Arrays.asList(
             "hit0", "hit50", "hit100", "hit100k", "hit300", "hit300k", "hit300g"
     ));
@@ -57,14 +55,18 @@ public class GameEffect extends GameObject implements IEntityModifierListener {
     }
 
     public void init(final Scene scene, final PointF pos, final float scale,
-                     final IEntityModifier... entityModifiers) {
+                     final UniversalModifier... entityModifiers) {
         if (hit instanceof AnimSprite) {
             ((AnimSprite) hit).setAnimTime(0);
         }
-        hit.setPosition(pos.x - hit.getTextureRegion().getWidth() / 2f, pos.y
-                - hit.getTextureRegion().getHeight() / 2f);
-        hit.registerEntityModifier(new ParallelEntityModifier(this,
-                entityModifiers));
+        hit.setPosition(pos.x - hit.getTextureRegion().getWidth() / 2f, pos.y - hit.getTextureRegion().getHeight() / 2f);
+        hit.registerEntityModifier(Modifiers.parallel(entityModifiers).setOnFinished(entity -> {
+            Execution.updateThread(() -> {
+                hit.detachSelf();
+                hit.clearEntityModifiers();
+                GameObjectPool.getInstance().putEffect(GameEffect.this);
+            });
+        }));
         hit.setScale(scale);
         hit.setAlpha(1);
         hit.detachSelf();
@@ -84,17 +86,4 @@ public class GameEffect extends GameObject implements IEntityModifierListener {
     public void update(final float dt) {
     }
 
-    @Override
-    public void onModifierStarted(final IModifier<IEntity> pModifier, final IEntity pItem) {
-
-    }
-
-    @Override
-    public void onModifierFinished(final IModifier<IEntity> pModifier, final IEntity pItem) {
-        Execution.updateThread(() -> {
-            hit.detachSelf();
-            hit.clearEntityModifiers();
-            GameObjectPool.getInstance().putEffect(GameEffect.this);
-        });
-    }
 }

@@ -2,12 +2,14 @@ package ru.nsu.ccfit.zuev.osu.game;
 
 import android.graphics.PointF;
 
-import org.anddev.andengine.entity.modifier.*;
+import com.reco1l.osu.graphics.Modifiers;
+
 import org.anddev.andengine.entity.scene.Scene;
 import org.anddev.andengine.entity.sprite.Sprite;
 
 import ru.nsu.ccfit.zuev.osu.Config;
 import ru.nsu.ccfit.zuev.osu.RGBColor;
+import ru.nsu.ccfit.zuev.osu.ResourceManager;
 import ru.nsu.ccfit.zuev.osu.Utils;
 import ru.nsu.ccfit.zuev.osu.scoring.ResultType;
 import ru.nsu.ccfit.zuev.skins.OsuSkin;
@@ -32,11 +34,11 @@ public class HitCircle extends GameObject {
 
     public HitCircle() {
         // Getting sprites from sprite pool
-        circle = SpritePool.getInstance().getSprite("hitcircle");
+        circle = new Sprite(0, 0, ResourceManager.getInstance().getTexture("hitcircle"));
         circle.setAlpha(0);
-        overlay = SpritePool.getInstance().getSprite("hitcircleoverlay");
+        overlay = new Sprite(0, 0, ResourceManager.getInstance().getTexture("hitcircleoverlay"));
         overlay.setAlpha(0);
-        approachCircle = SpritePool.getInstance().getSprite("approachcircle");
+        approachCircle = new Sprite(0, 0, ResourceManager.getInstance().getTexture("approachcircle"));
     }
 
     public void init(final GameObjectListener listener, final Scene pScene,
@@ -105,17 +107,17 @@ public class HitCircle extends GameObject {
             fadeInDuration = time * 0.4f * GameHelper.getTimeMultiplier();
             float fadeOutDuration = time * 0.3f * GameHelper.getTimeMultiplier();
 
-            number.registerEntityModifiers(() -> new SequenceEntityModifier(
-                    new FadeInModifier(fadeInDuration),
-                    new FadeOutModifier(fadeOutDuration)
+            number.registerEntityModifier(Modifiers.sequence(
+                    Modifiers.fadeIn(fadeInDuration),
+                    Modifiers.fadeOut(fadeOutDuration)
             ));
-            overlay.registerEntityModifier(new SequenceEntityModifier(
-                    new FadeInModifier(fadeInDuration),
-                    new FadeOutModifier(fadeOutDuration)
+            overlay.registerEntityModifier(Modifiers.sequence(
+                    Modifiers.fadeIn(fadeInDuration),
+                    Modifiers.fadeOut(fadeOutDuration)
             ));
-            circle.registerEntityModifier(new SequenceEntityModifier(
-                    new FadeInModifier(fadeInDuration),
-                    new FadeOutModifier(fadeOutDuration)
+            circle.registerEntityModifier(Modifiers.sequence(
+                    Modifiers.fadeIn(fadeInDuration),
+                    Modifiers.fadeOut(fadeOutDuration)
             ));
         } else {
             // Preempt time can go below 450ms. Normally, this is achieved via the DT mod which uniformly speeds up all animations game wide regardless of AR.
@@ -124,18 +126,14 @@ public class HitCircle extends GameObject {
             // This adjustment is necessary for AR>10, otherwise TimePreempt can become smaller leading to hitcircles not fully fading in.
             fadeInDuration = 0.4f * Math.min(1, time / 0.45f) * GameHelper.getTimeMultiplier();
 
-            circle.registerEntityModifier(new FadeInModifier(fadeInDuration));
-            overlay.registerEntityModifier(new FadeInModifier(fadeInDuration));
-            number.registerEntityModifier(new FadeInModifier(fadeInDuration));
+            circle.registerEntityModifier(Modifiers.fadeIn(fadeInDuration));
+            overlay.registerEntityModifier(Modifiers.fadeIn(fadeInDuration));
+            number.registerEntityModifier(Modifiers.fadeIn(fadeInDuration));
         }
 
         if (approachCircle.isVisible()) {
-            approachCircle.registerEntityModifier(new AlphaModifier(
-                    Math.min(fadeInDuration * 2, time * GameHelper.getTimeMultiplier()), 0, 0.9f
-            ));
-            approachCircle.registerEntityModifier(new ScaleModifier(
-                    time * GameHelper.getTimeMultiplier(), scale * 3, scale
-            ));
+            approachCircle.registerEntityModifier(Modifiers.alpha(Math.min(fadeInDuration * 2, time * GameHelper.getTimeMultiplier()), 0, 0.9f));
+            approachCircle.registerEntityModifier(Modifiers.scale(time * GameHelper.getTimeMultiplier(), scale * 3, scale));
         }
 
         scene.attachChild(number, 0);
@@ -152,13 +150,18 @@ public class HitCircle extends GameObject {
         if (scene == null) {
             return;
         }
+
+        overlay.clearEntityModifiers();
+        circle.clearEntityModifiers();
+        number.clearEntityModifiers();
+        approachCircle.clearEntityModifiers();
+
         // Detach all objects
         overlay.detachSelf();
         circle.detachSelf();
         number.detachSelf();
         approachCircle.detachSelf();
         listener.removeObject(this);
-        // Put circle and number into pool
         GameObjectPool.getInstance().putCircle(this);
         GameObjectPool.getInstance().putNumber(number);
         scene = null;

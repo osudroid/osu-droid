@@ -6,14 +6,14 @@ import com.edlplan.andengine.TrianglePack;
 import com.edlplan.framework.math.Color4;
 import com.edlplan.framework.math.line.LinePath;
 import com.reco1l.osu.Execution;
+import com.reco1l.osu.graphics.Modifiers;
 
-import org.anddev.andengine.entity.IEntity;
-import org.anddev.andengine.entity.modifier.*;
 import org.anddev.andengine.entity.scene.Scene;
-import org.anddev.andengine.util.modifier.IModifier;
 import org.anddev.andengine.util.modifier.ease.EaseQuadOut;
 
+import ru.nsu.ccfit.zuev.osu.Config;
 import ru.nsu.ccfit.zuev.osu.RGBColor;
+import ru.nsu.ccfit.zuev.osu.game.Slider;
 
 public class SliderBody2D extends AbstractSliderBody {
 
@@ -74,15 +74,15 @@ public class SliderBody2D extends AbstractSliderBody {
 
     public void applyFadeAdjustments(float fadeInDuration) {
         if (body != null) {
-            body.registerEntityModifier(new AlphaModifier(fadeInDuration, 0, sliderBodyBaseAlpha));
+            body.registerEntityModifier(Modifiers.alpha(fadeInDuration, 0, sliderBodyBaseAlpha));
         }
 
         if (border != null) {
-            border.registerEntityModifier(new FadeInModifier(fadeInDuration));
+            border.registerEntityModifier(Modifiers.fadeIn(fadeInDuration));
         }
 
         if (hint != null) {
-            hint.registerEntityModifier(new AlphaModifier(fadeInDuration, 0, hintAlpha));
+            hint.registerEntityModifier(Modifiers.alpha(fadeInDuration, 0, hintAlpha));
         }
     }
 
@@ -90,23 +90,23 @@ public class SliderBody2D extends AbstractSliderBody {
         final EaseQuadOut easing = EaseQuadOut.getInstance();
 
         if (body != null) {
-            body.registerEntityModifier(new SequenceEntityModifier(
-                    new AlphaModifier(fadeInDuration, 0, sliderBodyBaseAlpha),
-                    new AlphaModifier(fadeOutDuration, sliderBodyBaseAlpha, 0, easing)
+            body.registerEntityModifier(Modifiers.sequence(
+                    Modifiers.alpha(fadeInDuration, 0, sliderBodyBaseAlpha),
+                    Modifiers.alpha(fadeOutDuration, sliderBodyBaseAlpha, 0).setEaseFunction(easing)
             ));
         }
 
         if (border != null) {
-            border.registerEntityModifier(new SequenceEntityModifier(
-                    new FadeInModifier(fadeInDuration),
-                    new FadeOutModifier(fadeOutDuration, easing)
+            border.registerEntityModifier(Modifiers.sequence(
+                    Modifiers.fadeIn(fadeInDuration),
+                    Modifiers.fadeOut(fadeOutDuration).setEaseFunction(easing)
             ));
         }
 
         if (hint != null) {
-            hint.registerEntityModifier(new SequenceEntityModifier(
-                    new AlphaModifier(fadeInDuration, 0, hintAlpha),
-                    new AlphaModifier(fadeOutDuration, hintAlpha, 0, easing)
+            hint.registerEntityModifier(Modifiers.sequence(
+                    Modifiers.alpha(fadeInDuration, 0, hintAlpha),
+                    Modifiers.alpha(fadeOutDuration, hintAlpha, 0).setEaseFunction(easing)
             ));
         }
     }
@@ -233,26 +233,28 @@ public class SliderBody2D extends AbstractSliderBody {
         }
     }
 
-    public void removeFromScene(Scene scene, float duration)
+    public void removeFromScene(Scene scene, float duration, Slider slider)
     {
-        if (hint != null)
-        {
-            hint.registerEntityModifier(new AlphaModifier(duration, hintAlpha, 0));
+        if (hint != null) {
+            hint.registerEntityModifier(Modifiers.alpha(duration, hintAlpha, 0));
         }
-        if (body != null)
-        {
-            body.registerEntityModifier(new AlphaModifier(duration, sliderBodyBaseAlpha, 0));
-        }
-        if (border != null)
-        {
-            border.registerEntityModifier(new FadeOutModifier(duration, new IEntityModifier.IEntityModifierListener()
-            {
-                @Override public void onModifierStarted(IModifier<IEntity> pModifier, IEntity pItem) {}
 
-                @Override public void onModifierFinished(IModifier<IEntity> pModifier, IEntity pItem)
-                {
-                    Execution.updateThread(() -> removeFromScene(scene));
-                }
+        if (body != null) {
+            body.registerEntityModifier(Modifiers.alpha(duration, sliderBodyBaseAlpha, 0));
+        }
+
+        if (border != null) {
+            border.registerEntityModifier(Modifiers.fadeOut(duration).setOnFinished(entity -> {
+                Execution.updateThread(() -> {
+                    removeFromScene(scene);
+
+                    // We can pool the hit object once all animations are finished.
+                    // The follow circle animation is the last one to finish but if it's disabled this will be, so should
+                    // pool the object here in that case.
+                    if (!Config.isAnimateFollowCircle()) {
+                        slider.poolObject();
+                    }
+                });
             }));
         }
     }
