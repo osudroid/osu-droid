@@ -32,13 +32,9 @@ import java.util.BitSet;
 
 public class Slider extends GameObject {
 
-    public static final Pool<Sprite> tickSpritePool = new Pool<>(
-        pool -> new CentredSprite(
-            0f, 0f,
-            ResourceManager.getInstance().getTexture("sliderscorepoint")
-        )
+    public static final Pool<Sprite> tickSpritePool = new Pool<>(0, Integer.MAX_VALUE,
+        pool -> new CentredSprite(0f, 0f, ResourceManager.getInstance().getTexture("sliderscorepoint"))
     );
-
 
     private final Sprite startCircle, endCircle;
     private final Sprite startOverlay, endOverlay;
