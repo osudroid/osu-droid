@@ -18,7 +18,7 @@ import kotlin.math.min
  */
 object Modifiers {
 
-    private val pool = Pool(::UniversalModifier)
+    private val pool = Pool(10, 50, ::UniversalModifier)
 
 
     @JvmStatic

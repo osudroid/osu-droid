@@ -4,12 +4,21 @@ package com.reco1l.framework
  * A simple object pool implementation.
  *
  * @param T The type of object to pool.
+ * @param initialSize The initial size of the pool.
  * @param factory The factory to use to create new objects.
  * @author Reco1l
  */
-class Pool<T : Any>(private val factory: (Pool<T>) -> T) {
+class Pool<T : Any>(initialSize: Int = 0, private val maxSize: Int, private val factory: (Pool<T>) -> T) {
+
 
     private val objects = mutableListOf<T>()
+
+
+    init {
+        repeat(initialSize) {
+            objects.add(factory(this))
+        }
+    }
 
 
     /**
@@ -28,7 +37,14 @@ class Pool<T : Any>(private val factory: (Pool<T>) -> T) {
     /**
      * Return an object to the pool.
      */
-    fun free(obj: T) = objects.add(obj)
+    fun free(obj: T): Boolean {
+
+        if (objects.size >= maxSize) {
+            return false
+        }
+
+        return objects.add(obj)
+    }
 
     /**
      * Clear the pool.
