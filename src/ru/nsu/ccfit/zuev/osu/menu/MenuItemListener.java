@@ -1,11 +1,11 @@
 package ru.nsu.ccfit.zuev.osu.menu;
 
-import ru.nsu.ccfit.zuev.osu.TrackInfo;
+import com.reco1l.osu.BeatmapInfo;
 
 public interface MenuItemListener {
-    void select(MenuItem item);
+    void select(BeatmapSetItem item);
 
-    void selectTrack(TrackInfo track, boolean reloadBG);
+    void selectBeatmap(BeatmapInfo track, boolean reloadBG);
 
     void stopScroll(float y);
 
@@ -17,5 +17,5 @@ public interface MenuItemListener {
 
     boolean isSelectAllowed();
 
-    void showPropertiesMenu(MenuItem item);
+    void showPropertiesMenu(BeatmapSetItem item);
 }

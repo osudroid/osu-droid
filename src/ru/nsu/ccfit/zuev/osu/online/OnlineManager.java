@@ -7,6 +7,7 @@ import android.os.Bundle;
 
 import com.google.firebase.analytics.FirebaseAnalytics;
 
+import com.reco1l.osu.BeatmapInfo;
 import okhttp3.MediaType;
 import okhttp3.OkHttpClient;
 
@@ -18,11 +19,9 @@ import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 
-import ru.nsu.ccfit.zuev.osu.BeatmapInfo;
 import ru.nsu.ccfit.zuev.osu.Config;
 import ru.nsu.ccfit.zuev.osu.GlobalManager;
 import ru.nsu.ccfit.zuev.osu.ResourceManager;
-import ru.nsu.ccfit.zuev.osu.TrackInfo;
 import ru.nsu.ccfit.zuev.osu.helper.FileUtils;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -179,15 +178,13 @@ public class OnlineManager {
         return true;
     }
 
-    public void startPlay(final TrackInfo track, final String hash) throws OnlineManagerException {
+    public void startPlay(final BeatmapInfo beatmapInfo, final String hash) throws OnlineManagerException {
         Debug.i("Starting play...");
         playID = null;
-        final BeatmapInfo beatmap = track.getBeatmap();
-        if (beatmap == null) return;
 
-        File trackfile = new File(track.getFilename());
-        trackfile.getParentFile().getName();
-        String osuID = trackfile.getParentFile().getName();
+        File beatmapFile = new File(beatmapInfo.getAudio());
+        beatmapFile.getParentFile().getName();
+        String osuID = beatmapFile.getParentFile().getName();
         Debug.i("osuid = " + osuID);
         if (osuID.matches("^[0-9]+ .*"))
             osuID = osuID.substring(0, osuID.indexOf(' '));
@@ -197,11 +194,11 @@ public class OnlineManager {
         PostBuilder post = new URLEncodedPostBuilder();
         post.addParam("userID", String.valueOf(userId));
         post.addParam("ssid", ssid);
-        post.addParam("filename", trackfile.getName());
+        post.addParam("filename", beatmapFile.getName());
         post.addParam("hash", hash);
-        post.addParam("songTitle", beatmap.getTitle());
-        post.addParam("songArtist", beatmap.getArtist());
-        post.addParam("songCreator", beatmap.getCreator());
+        post.addParam("songTitle", beatmapInfo.getTitle());
+        post.addParam("songArtist", beatmapInfo.getArtist());
+        post.addParam("songCreator", beatmapInfo.getCreator());
         if (osuID != null)
             post.addParam("songID", osuID);
 
@@ -210,7 +207,7 @@ public class OnlineManager {
         if (response == null) {
             if (failMessage.equals("Cannot log in") && stayOnline) {
                 if (tryToLogIn()) {
-                    startPlay(track, hash);
+                    startPlay(beatmapInfo, hash);
                 }
             }
             return;

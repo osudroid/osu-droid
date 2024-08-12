@@ -5,15 +5,12 @@ import android.content.ClipData
 import android.content.ClipboardManager
 import android.content.Intent
 import android.graphics.Color
-import android.graphics.Rect
 import android.net.Uri
 import android.os.Bundle
 import android.text.InputType.TYPE_CLASS_TEXT
 import android.text.InputType.TYPE_TEXT_VARIATION_PASSWORD
 import android.view.ContextThemeWrapper
-import android.view.MotionEvent
 import android.view.View
-import android.widget.EditText
 import android.widget.LinearLayout
 import android.widget.TextView
 import androidx.annotation.XmlRes
@@ -223,7 +220,7 @@ class SettingsFragment : com.edlplan.ui.fragment.SettingsFragment() {
 
         Section.Library -> {
             findPreference<Preference>("clear")!!.setOnPreferenceClickListener {
-                LibraryManager.INSTANCE.clearCache()
+                LibraryManager.clearDatabase()
                 true
             }
 

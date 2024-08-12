@@ -47,8 +47,8 @@ public class ScoreLibrary {
         return track;
     }
 
-    public static String getTrackDir(final String track) {
-        String s = getTrackPath(track);
+    public static String getBeatmapSetDirectory(final String beatmapSetPath) {
+        String s = getTrackPath(beatmapSetPath);
         if (s.endsWith(".osu")) {
             return s.substring(0, s.indexOf('/'));
         } else {

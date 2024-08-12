@@ -7,6 +7,8 @@ import android.net.Uri;
 import android.os.PowerManager;
 import android.util.Log;
 
+import com.reco1l.osu.BeatmapInfo;
+import com.reco1l.osu.BeatmapSetInfo;
 import com.reco1l.osu.Execution;
 import com.reco1l.osu.ui.entity.MainMenu;
 
@@ -45,7 +47,6 @@ import org.anddev.andengine.util.modifier.ease.EaseCubicOut;
 import org.anddev.andengine.util.modifier.ease.EaseElasticOut;
 import org.anddev.andengine.util.modifier.ease.EaseExponentialOut;
 
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
@@ -77,7 +78,6 @@ import ru.nsu.ccfit.zuev.osuplus.R;
  */
 public class MainScene implements IUpdateHandler {
     public SongProgressBar progressBar;
-    public BeatmapInfo beatmapInfo;
     private Context context;
     private Sprite logo, logoOverlay, background, lastBackground;
     private Sprite music_nowplay;
@@ -389,8 +389,6 @@ public class MainScene implements IUpdateHandler {
             scene.attachChild(spectrum[i]);
         }
 
-        LibraryManager.INSTANCE.loadLibraryCache(false);
-
         TextureRegion starRegion = ResourceManager.getInstance().getTexture("star");
 
         {
@@ -529,7 +527,7 @@ public class MainScene implements IUpdateHandler {
     }
 
     public void musicControl(MusicOption option) {
-        if (GlobalManager.getInstance().getSongService() == null || beatmapInfo == null) {
+        if (GlobalManager.getInstance().getSongService() == null || GlobalManager.getInstance().getSelectedBeatmap() == null) {
             return;
         }
         switch (option) {
@@ -538,7 +536,7 @@ public class MainScene implements IUpdateHandler {
                     GlobalManager.getInstance().getSongService().stop();
                 }
                 firstTimingPoint = null;
-                LibraryManager.INSTANCE.getPrevBeatmap();
+                LibraryManager.selectPreviousBeatmap();
                 loadBeatmapInfo();
                 loadTimingPoints(true);
                 doChange = false;
@@ -549,7 +547,7 @@ public class MainScene implements IUpdateHandler {
                 if (GlobalManager.getInstance().getSongService().getStatus() == Status.PAUSED || GlobalManager.getInstance().getSongService().getStatus() == Status.STOPPED) {
                     if (GlobalManager.getInstance().getSongService().getStatus() == Status.STOPPED) {
                         loadTimingPoints(false);
-                        GlobalManager.getInstance().getSongService().preLoad(beatmapInfo.getMusic());
+                        GlobalManager.getInstance().getSongService().preLoad(GlobalManager.getInstance().getSelectedBeatmap().getAudio());
                         if (firstTimingPoint != null) {
                             bpmLength = firstTimingPoint.getBeatLength() * 1000f;
                             if (lastTimingPoint != null) {
@@ -593,7 +591,7 @@ public class MainScene implements IUpdateHandler {
                 if (GlobalManager.getInstance().getSongService().getStatus() == Status.PLAYING || GlobalManager.getInstance().getSongService().getStatus() == Status.PAUSED) {
                     GlobalManager.getInstance().getSongService().stop();
                 }
-                LibraryManager.INSTANCE.getNextBeatmap();
+                LibraryManager.selectNextBeatmap();
                 firstTimingPoint = null;
                 loadBeatmapInfo();
                 loadTimingPoints(true);
@@ -803,27 +801,27 @@ public class MainScene implements IUpdateHandler {
     }
 
     public void loadBeatmap() {
-        LibraryManager.INSTANCE.shuffleLibrary();
+        LibraryManager.shuffleLibrary();
         loadBeatmapInfo();
         loadTimingPoints(true);
     }
 
     public void loadBeatmapInfo() {
-        if (LibraryManager.INSTANCE.getSizeOfBeatmaps() != 0) {
-            beatmapInfo = LibraryManager.INSTANCE.getBeatmap();
-            Log.w("MainMenuActivity", "Next song: " + beatmapInfo.getMusic() + ", Start at: " + beatmapInfo.getPreviewTime());
+        if (LibraryManager.getSizeOfBeatmaps() != 0) {
+            var beatmapInfo = GlobalManager.getInstance().getSelectedBeatmap();
+            Log.w("MainMenuActivity", "Next song: " + beatmapInfo.getAudio() + ", Start at: " + beatmapInfo.getPreviewTime());
 
             if (musicInfoText == null) {
                 musicInfoText = new ChangeableText(Utils.toRes(Config.getRES_WIDTH() - 500), Utils.toRes(3),
                         ResourceManager.getInstance().getFont("font"), "None...", HorizontalAlign.RIGHT, 35);
             }
-            if (beatmapInfo.getArtistUnicode() != null && beatmapInfo.getTitleUnicode() != null && !Config.isForceRomanized()) {
+
+            if (!Config.isForceRomanized()) {
                 musicInfoText.setText(beatmapInfo.getArtistUnicode() + " - " + beatmapInfo.getTitleUnicode(), true);
-            } else if (beatmapInfo.getArtist() != null && beatmapInfo.getTitle() != null) {
-                musicInfoText.setText(beatmapInfo.getArtist() + " - " + beatmapInfo.getTitle(), true);
             } else {
-                musicInfoText.setText("Failure to load QAQ", true);
+                musicInfoText.setText(beatmapInfo.getArtist() + " - " + beatmapInfo.getTitle(), true);
             }
+
             try {
                 musicInfoText.setPosition(Utils.toRes(Config.getRES_WIDTH() - 500 + 470 - musicInfoText.getWidth()), musicInfoText.getY());
                 music_nowplay.setPosition(Utils.toRes(Config.getRES_WIDTH() - 500 + 470 - musicInfoText.getWidth() - 130), 0);
@@ -835,6 +833,7 @@ public class MainScene implements IUpdateHandler {
     }
 
     public void loadTimingPoints(boolean reloadMusic) {
+        var beatmapInfo = GlobalManager.getInstance().getSelectedBeatmap();
         if (beatmapInfo == null) {
             return;
         }
@@ -844,78 +843,71 @@ public class MainScene implements IUpdateHandler {
         }
         particleEnabled = false;
 
-        ArrayList<TrackInfo> trackInfos = beatmapInfo.getTracks();
-        if (trackInfos != null && trackInfos.size() > 0) {
-            int trackIndex = random.nextInt(trackInfos.size());
-            TrackInfo selectedTrack = trackInfos.get(trackIndex);
-            GlobalManager.getInstance().setSelectedTrack(selectedTrack);
+        if (beatmapInfo.getBackground() != null) {
+            try {
+                final TextureRegion tex = Config.isSafeBeatmapBg() ?
+                        ResourceManager.getInstance().getTexture("menu-background") :
+                        ResourceManager.getInstance().loadBackground(beatmapInfo.getBackground());
 
-            if (selectedTrack.getBackground() != null) {
-                try {
-                    final TextureRegion tex = Config.isSafeBeatmapBg() ?
-                            ResourceManager.getInstance().getTexture("menu-background") :
-                            ResourceManager.getInstance().loadBackground(selectedTrack.getBackground());
+                if (tex != null) {
+                    float height = tex.getHeight();
+                    height *= Config.getRES_WIDTH()
+                            / (float) tex.getWidth();
+                    background = new Sprite(0,
+                            (Config.getRES_HEIGHT() - height) / 2, Config
+                            .getRES_WIDTH(), height, tex);
+                    lastBackground.registerEntityModifier(new org.anddev.andengine.entity.modifier.AlphaModifier(1.5f, 1, 0, new IEntityModifier.IEntityModifierListener() {
+                        @Override
+                        public void onModifierStarted(IModifier<IEntity> pModifier, IEntity pItem) {
+                            scene.attachChild(background, 0);
+                        }
 
-                    if (tex != null) {
-                        float height = tex.getHeight();
-                        height *= Config.getRES_WIDTH()
-                                / (float) tex.getWidth();
-                        background = new Sprite(0,
-                                (Config.getRES_HEIGHT() - height) / 2, Config
-                                .getRES_WIDTH(), height, tex);
-                        lastBackground.registerEntityModifier(new org.anddev.andengine.entity.modifier.AlphaModifier(1.5f, 1, 0, new IEntityModifier.IEntityModifierListener() {
-                            @Override
-                            public void onModifierStarted(IModifier<IEntity> pModifier, IEntity pItem) {
-                                scene.attachChild(background, 0);
-                            }
-
-                            @Override
-                            public void onModifierFinished(IModifier<IEntity> pModifier, final IEntity pItem) {
-                                GlobalManager.getInstance().getMainActivity().runOnUpdateThread(pItem::detachSelf);
-                            }
-                        }));
-                        lastBackground = background;
-                    }
-                } catch (Exception e) {
-                    Debug.e(e.toString());
-                    lastBackground.setAlpha(0);
+                        @Override
+                        public void onModifierFinished(IModifier<IEntity> pModifier, final IEntity pItem) {
+                            GlobalManager.getInstance().getMainActivity().runOnUpdateThread(pItem::detachSelf);
+                        }
+                    }));
+                    lastBackground = background;
                 }
-            } else {
+            } catch (Exception e) {
+                Debug.e(e.toString());
                 lastBackground.setAlpha(0);
             }
+        } else {
+            lastBackground.setAlpha(0);
+        }
 
-            if (reloadMusic) {
-                if (GlobalManager.getInstance().getSongService() != null) {
-                    GlobalManager.getInstance().getSongService().preLoad(beatmapInfo.getMusic());
-                    musicStarted = false;
-                } else {
-                    Log.w("nullpoint", "GlobalManager.getInstance().getSongService() is null while reload music (MainScene.loadTimeingPoints)");
-                }
+        if (reloadMusic) {
+            if (GlobalManager.getInstance().getSongService() != null) {
+                GlobalManager.getInstance().getSongService().preLoad(beatmapInfo.getAudio());
+                musicStarted = false;
+            } else {
+                Log.w("nullpoint", "GlobalManager.getInstance().getSongService() is null while reload music (MainScene.loadTimeingPoints)");
             }
+        }
 
-            Arrays.fill(peakLevel, 0f);
-            Arrays.fill(peakDownRate, 1f);
-            Arrays.fill(peakAlpha, 0f);
+        Arrays.fill(peakLevel, 0f);
+        Arrays.fill(peakDownRate, 1f);
+        Arrays.fill(peakAlpha, 0f);
 
-            try (var parser = new BeatmapParser(selectedTrack.getFilename())) {
-                var beatmap = parser.parse(false);
+        try (var parser = new BeatmapParser(beatmapInfo.getPath())) {
+            var beatmap = parser.parse(false);
 
-                if (beatmap != null) {
-                    timingPoints = new LinkedList<>();
+            if (beatmap != null) {
+                timingPoints = new LinkedList<>();
 
-                    for (final String s : beatmap.rawTimingPoints) {
-                        final TimingPoint tp = new TimingPoint(s.split(","), currentTimingPoint);
-                        timingPoints.add(tp);
-                        if (!tp.wasInderited() || currentTimingPoint == null) {
-                            currentTimingPoint = tp;
-                        }
+                for (final String s : beatmap.rawTimingPoints) {
+                    final TimingPoint tp = new TimingPoint(s.split(","), currentTimingPoint);
+                    timingPoints.add(tp);
+                    if (!tp.wasInderited() || currentTimingPoint == null) {
+                        currentTimingPoint = tp;
                     }
-
-                    firstTimingPoint = timingPoints.remove(0);
-                    currentTimingPoint = firstTimingPoint;
-                    lastTimingPoint = currentTimingPoint;
-                    bpmLength = firstTimingPoint.getBeatLength() * 1000f;
                 }
+
+                firstTimingPoint = timingPoints.remove(0);
+                currentTimingPoint = firstTimingPoint;
+                lastTimingPoint = currentTimingPoint;
+                bpmLength = firstTimingPoint.getBeatLength() * 1000f;
             }
         }
     }
@@ -994,13 +986,8 @@ public class MainScene implements IUpdateHandler {
         return scene;
     }
 
-    public BeatmapInfo getBeatmapInfo() {
-        return beatmapInfo;
-    }
-
-    public void setBeatmap(BeatmapInfo info) {
-        int playIndex = LibraryManager.INSTANCE.findBeatmap(info);
-        Debug.i("index " + playIndex);
+    public void setBeatmapSet(BeatmapSetInfo beatmapSet) {
+        LibraryManager.findBeatmapSet(beatmapSet);
         loadBeatmapInfo();
         loadTimingPoints(false);
         musicControl(MusicOption.SYNC);
@@ -1013,14 +1000,14 @@ public class MainScene implements IUpdateHandler {
                 //replay
                 ScoringScene scorescene = GlobalManager.getInstance().getScoring();
                 StatisticV2 stat = replay.getStat();
-                TrackInfo track = LibraryManager.INSTANCE.findTrackByFileNameAndMD5(replay.getMapFile(), replay.getMd5());
-                if (track != null) {
-                    GlobalManager.getInstance().getMainScene().setBeatmap(track.getBeatmap());
+                BeatmapInfo beatmap = LibraryManager.findBeatmapByMD5(replay.getMd5());
+                if (beatmap != null) {
+                    GlobalManager.getInstance().getMainScene().setBeatmapSet(beatmap.getBeatmapSet());
                     GlobalManager.getInstance().getSongMenu().select();
-                    ResourceManager.getInstance().loadBackground(track.getBackground());
-                    GlobalManager.getInstance().getSongService().preLoad(track.getBeatmap().getMusic());
+                    ResourceManager.getInstance().loadBackground(beatmap.getBackground());
+                    GlobalManager.getInstance().getSongService().preLoad(beatmap.getAudio());
                     GlobalManager.getInstance().getSongService().play();
-                    scorescene.load(stat, null, ru.nsu.ccfit.zuev.osu.GlobalManager.getInstance().getSongService(), replayFile, null, track);
+                    scorescene.load(stat, null, GlobalManager.getInstance().getSongService(), replayFile, null, beatmap);
                     GlobalManager.getInstance().getEngine().setScene(scorescene.getScene());
                 }
             }
@@ -1030,8 +1017,8 @@ public class MainScene implements IUpdateHandler {
     public void show() {
         GlobalManager.getInstance().getSongService().setGaming(false);
         GlobalManager.getInstance().getEngine().setScene(getScene());
-        if (GlobalManager.getInstance().getSelectedTrack() != null) {
-            setBeatmap(GlobalManager.getInstance().getSelectedTrack().getBeatmap());
+        if (GlobalManager.getInstance().getSelectedBeatmap() != null) {
+            setBeatmapSet(GlobalManager.getInstance().getSelectedBeatmap().getBeatmapSet());
         }
     }
 

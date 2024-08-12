@@ -1,10 +1,11 @@
 package ru.nsu.ccfit.zuev.osu;
 
-import android.util.DisplayMetrics;
-
+import com.reco1l.osu.BeatmapInfo;
+import com.reco1l.osu.DatabaseManager;
 import org.anddev.andengine.engine.Engine;
 import org.anddev.andengine.engine.camera.Camera;
 
+import org.jetbrains.annotations.Nullable;
 import ru.nsu.ccfit.zuev.audio.serviceAudio.SaveServiceObject;
 import ru.nsu.ccfit.zuev.audio.serviceAudio.SongService;
 import ru.nsu.ccfit.zuev.osu.game.GameScene;
@@ -27,7 +28,7 @@ public class GlobalManager {
     private int loadingProgress;
     private String info;
     private SongService songService;
-    private TrackInfo selectedTrack;
+    private BeatmapInfo selectedBeatmap;
     private SaveServiceObject saveServiceObject;
     private String skinNow;
 
@@ -38,15 +39,17 @@ public class GlobalManager {
         return instance;
     }
 
-    public TrackInfo getSelectedTrack() {
-        return selectedTrack;
+    @Nullable
+    public BeatmapInfo getSelectedBeatmap() {
+        return selectedBeatmap;
     }
 
-    public void setSelectedTrack(TrackInfo selectedTrack) {
-        this.selectedTrack = selectedTrack;
+    public void setSelectedBeatmap(@Nullable BeatmapInfo selectedBeatmap) {
+        this.selectedBeatmap = selectedBeatmap;
     }
 
     public void init() {
+        DatabaseManager.load(mainActivity);
         saveServiceObject = (SaveServiceObject) mainActivity.getApplication();
         songService = saveServiceObject.getSongService();
         setLoadingProgress(10);
@@ -170,9 +173,4 @@ public class GlobalManager {
         this.saveServiceObject = saveServiceObject;
     }
 
-    public DisplayMetrics getDisplayMetrics() {
-        final DisplayMetrics dm = new DisplayMetrics();
-        mainActivity.getWindowManager().getDefaultDisplay().getMetrics(dm);
-        return dm;
-    }
 }

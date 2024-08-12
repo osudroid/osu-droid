@@ -70,10 +70,9 @@ class MainMenu(val main: MainScene)
                     LoadingScreen().show()
 
                     getGlobal().mainActivity.checkNewSkins()
-                    getGlobal().mainActivity.checkNewBeatmaps()
-                    LibraryManager.INSTANCE.updateLibrary(true)
+                    getGlobal().mainActivity.loadBeatmapSetLibrary()
 
-                    if (LibraryManager.INSTANCE.library.isEmpty())
+                    if (LibraryManager.getLibrary().isEmpty())
                     {
                         getGlobal().songService.isGaming = false
                         getGlobal().engine.scene = main.scene
@@ -146,8 +145,7 @@ class MainMenu(val main: MainScene)
                     LoadingScreen().show()
 
                     getGlobal().mainActivity.checkNewSkins()
-                    getGlobal().mainActivity.checkNewBeatmaps()
-                    LibraryManager.INSTANCE.updateLibrary(true)
+                    getGlobal().mainActivity.loadBeatmapSetLibrary()
 
                     getGlobal().songMenu.reload()
 

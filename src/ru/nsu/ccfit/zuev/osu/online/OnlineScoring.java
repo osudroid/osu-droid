@@ -1,5 +1,6 @@
 package ru.nsu.ccfit.zuev.osu.online;
 
+import com.reco1l.osu.BeatmapInfo;
 import com.reco1l.osu.Execution;
 import com.reco1l.osu.multiplayer.LobbyScene;
 import com.reco1l.osu.multiplayer.RoomScene;
@@ -11,7 +12,6 @@ import java.io.File;
 import java.util.ArrayList;
 
 import ru.nsu.ccfit.zuev.osu.ToastLogger;
-import ru.nsu.ccfit.zuev.osu.TrackInfo;
 import ru.nsu.ccfit.zuev.osu.scoring.StatisticV2;
 
 public class OnlineScoring {
@@ -115,7 +115,7 @@ public class OnlineScoring {
         });
     }
 
-    public void startPlay(final TrackInfo track, final String hash) {
+    public void startPlay(final BeatmapInfo beatmapInfo, final String hash) {
         if (!OnlineManager.getInstance().isStayOnline())
             return;
 
@@ -123,7 +123,7 @@ public class OnlineScoring {
             synchronized (onlineMutex) {
                 for (int i = 0; i < attemptCount; i++) {
                     try {
-                        OnlineManager.getInstance().startPlay(track, hash);
+                        OnlineManager.getInstance().startPlay(beatmapInfo, hash);
                     } catch (OnlineManager.OnlineManagerException e) {
                         Debug.e("Login error: " + e.getMessage());
                         continue;

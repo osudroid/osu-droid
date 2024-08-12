@@ -2,6 +2,7 @@ package ru.nsu.ccfit.zuev.osu.menu;
 
 import android.database.Cursor;
 
+import com.reco1l.osu.BeatmapInfo;
 import com.reco1l.osu.Execution;
 import com.reco1l.osu.multiplayer.Multiplayer;
 
@@ -36,7 +37,7 @@ public class ScoreBoard extends Entity implements ScrollDetector.IScrollDetector
     private final ChangeableText loadingText;
     private float percentShow = -1;
     private boolean showOnlineScores = false;
-    private TrackInfo lastTrack;
+    private BeatmapInfo lastBeatmapInfo;
     private boolean wasOnline = false;
     private boolean isScroll = false;
 
@@ -78,7 +79,7 @@ public class ScoreBoard extends Entity implements ScrollDetector.IScrollDetector
     public static String convertModString(StringBuilder sb, String s) {
         // Account for SC being removed.
         // Too dirty of a solution, but no other clean way :/
-        var track = GlobalManager.getInstance().getSelectedTrack();
+        var track = GlobalManager.getInstance().getSelectedBeatmap();
         var cs = track.getCircleSize();
         var hasLegacySC = false;
 
@@ -190,7 +191,7 @@ public class ScoreBoard extends Entity implements ScrollDetector.IScrollDetector
         return sb.toString();
     }
 
-    private void initFromOnline(final TrackInfo track) {
+    private void initFromOnline(BeatmapInfo beatmapInfo) {
         loadingText.setText("Loading scores...");
 
         currentTask = new LoadTask(true) {
@@ -198,11 +199,11 @@ public class ScoreBoard extends Entity implements ScrollDetector.IScrollDetector
             @Override
             public void run() {
 
-                File trackFile = new File(track.getFilename());
+                File trackFile = new File(beatmapInfo.getPath());
                 List<String> scores;
 
                 try {
-                    scores = OnlineManager.getInstance().getTop(trackFile, track.getMD5());
+                    scores = OnlineManager.getInstance().getTop(trackFile, beatmapInfo.getMD5());
                 } catch (OnlineManager.OnlineManagerException e) {
                     Debug.e("Cannot load scores " + e.getMessage());
                     
@@ -286,14 +287,14 @@ public class ScoreBoard extends Entity implements ScrollDetector.IScrollDetector
         loadExecutor.submit(currentTask);
     }
 
-    private void initFromLocal(TrackInfo track) {
+    private void initFromLocal(BeatmapInfo track) {
 
         currentTask = new LoadTask(false) {
 
             @Override
             public void run() {
                 String[] columns = { "id", "playername", "score", "combo", "mark", "accuracy", "mode" };
-                try (Cursor scoreSet = ScoreLibrary.getInstance().getMapScores(columns, track.getFilename())) {
+                try (Cursor scoreSet = ScoreLibrary.getInstance().getMapScores(columns, track.getPath())) {
                     if (scoreSet == null || scoreSet.getCount() == 0 || !isActive()) {
 
                         // This allows the in-game leaderboard to show even if the local database is empty, it'll append
@@ -352,8 +353,8 @@ public class ScoreBoard extends Entity implements ScrollDetector.IScrollDetector
         loadExecutor.submit(currentTask);
     }
 
-    public synchronized void init(final TrackInfo track) {
-        if (lastTrack == track && showOnlineScores == wasOnline && wasOnline) {
+    public synchronized void init(final BeatmapInfo beatmapInfo) {
+        if (lastBeatmapInfo == beatmapInfo && showOnlineScores == wasOnline && wasOnline) {
             return;
         }
 
@@ -361,7 +362,7 @@ public class ScoreBoard extends Entity implements ScrollDetector.IScrollDetector
             currentTask.avatarExecutor.shutdownNow();
 
         loadingText.setText("");
-        lastTrack = track;
+        lastBeatmapInfo = beatmapInfo;
         wasOnline = showOnlineScores;
         scoreItems = null;
 
@@ -371,15 +372,15 @@ public class ScoreBoard extends Entity implements ScrollDetector.IScrollDetector
             currentAvatarTask = null;
             attachChild(loadingText);
 
-            if (track == null)
+            if (beatmapInfo == null)
                 return;
 
             if (OnlineManager.getInstance().isStayOnline() && showOnlineScores) {
-                initFromOnline(track);
+                initFromOnline(beatmapInfo);
                 return;
             }
 
-            initFromLocal(track);
+            initFromLocal(beatmapInfo);
         });
     }
 

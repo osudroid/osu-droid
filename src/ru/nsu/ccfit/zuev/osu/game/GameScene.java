@@ -5,7 +5,6 @@ import android.os.Build;
 import android.os.SystemClock;
 
 import com.dgsrz.bancho.security.SecurityUtils;
-import com.edlplan.ext.EdExtensionHelper;
 import com.edlplan.framework.math.FMath;
 import com.edlplan.framework.support.ProxySprite;
 import com.edlplan.framework.support.osb.StoryboardSprite;
@@ -13,6 +12,7 @@ import com.edlplan.framework.utils.functionality.SmartIterator;
 import com.edlplan.osu.support.timing.TimingPoints;
 import com.edlplan.osu.support.timing.controlpoint.ControlPoints;
 import com.reco1l.ibancho.RoomAPI;
+import com.reco1l.osu.BeatmapInfo;
 import com.reco1l.osu.Execution;
 import com.reco1l.osu.graphics.BlankTextureRegion;
 import com.reco1l.osu.graphics.VideoSprite;
@@ -72,7 +72,6 @@ import ru.nsu.ccfit.zuev.osu.RGBAColor;
 import ru.nsu.ccfit.zuev.osu.RGBColor;
 import ru.nsu.ccfit.zuev.osu.ResourceManager;
 import ru.nsu.ccfit.zuev.osu.ToastLogger;
-import ru.nsu.ccfit.zuev.osu.TrackInfo;
 import ru.nsu.ccfit.zuev.osu.Utils;
 import ru.nsu.ccfit.zuev.osu.game.GameHelper.SliderPath;
 import ru.nsu.ccfit.zuev.osu.game.cursor.flashlight.FlashLightEntity;
@@ -116,7 +115,7 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
     private Scene bgScene, mgScene, fgScene;
     private Scene oldScene;
     private Beatmap beatmap;
-    private TrackInfo lastTrack;
+    private BeatmapInfo lastBeatmapInfo;
     private ScoringScene scoringScene;
     private TimingPoint currentTimingPoint;
     private TimingPoint soundTimingPoint;
@@ -275,7 +274,7 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
                 videoStarted = false;
                 videoOffset = beatmap.events.videoStartTime / 1000f;
 
-                video = new VideoSprite(lastTrack.getBeatmap().getPath() + "/" + beatmap.events.videoFilename, engine);
+                video = new VideoSprite(lastBeatmapInfo.getBeatmapSet().getPath() + "/" + beatmap.events.videoFilename, engine);
                 video.setAlpha(0f);
 
                 bgSprite = video;
@@ -330,7 +329,7 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
         }
     }
 
-    private boolean loadGame(final TrackInfo track, final String rFile) {
+    private boolean loadGame(final BeatmapInfo beatmapInfo, final String rFile) {
         if (!SecurityUtils.verifyFileIntegrity(GlobalManager.getInstance().getMainActivity())) {
             ToastLogger.showTextId(R.string.file_integrity_tampered, true);
             return false;
@@ -347,14 +346,12 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
         } else
             this.replayFile = rFile;
 
-        try (var parser = new BeatmapParser(track.getFilename())) {
+        try (var parser = new BeatmapParser(beatmapInfo.getPath())) {
             if (parser.openFile()) {
                 beatmap = parser.parse(true);
             } else {
                 Debug.e("startGame: cannot open file");
-                ToastLogger.showText(
-                        StringTable.format(R.string.message_error_open,
-                                track.getFilename()), true);
+                ToastLogger.showText(StringTable.format(R.string.message_error_open, beatmapInfo.getPath()), true);
                 return false;
             }
         }
@@ -372,7 +369,7 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
         }
 
         totalOffset = Config.getOffset();
-        String beatmapName = track.getFilename();
+        String beatmapName = beatmapInfo.getPath();
         beatmapName = beatmapName.substring(0, beatmapName.lastIndexOf('/'));
         final BeatmapProperties props = PropertiesLibrary.getInstance()
                 .getProperties(beatmapName);
@@ -381,7 +378,7 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
         }
 
         try {
-            var musicFile = new File(track.getAudioFilename());
+            var musicFile = new File(beatmapInfo.getAudio());
 
             if (!musicFile.exists()) {
                 throw new FileNotFoundException(musicFile.getPath());
@@ -608,8 +605,8 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
         offsetSum = 0;
         offsetRegs = 0;
 
-        File trackFile = new File(track.getFilename());
-        trackMD5 = track.getMD5();
+        File trackFile = new File(beatmapInfo.getPath());
+        trackMD5 = beatmapInfo.getMD5();
         replaying = false;
         replay = new Replay();
         replay.setObjectCount(objects.size());
@@ -628,10 +625,10 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
 
         //TODO online
         if (!replaying)
-            OnlineScoring.getInstance().startPlay(track, trackMD5);
+            OnlineScoring.getInstance().startPlay(beatmapInfo, trackMD5);
 
         if (Config.isEnableStoryboard()) {
-            storyboardSprite.loadStoryboard(track.getFilename());
+            storyboardSprite.loadStoryboard(beatmapInfo.getPath());
         }
 
         GameObjectPool.getInstance().preload();
@@ -664,7 +661,7 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
             }
         }
 
-        lastTrack = track;
+        lastBeatmapInfo = beatmapInfo;
         if (Config.isCalculateSliderPathInGameStart()){
             stackNotes();
             calculateAllSliderPaths();
@@ -689,17 +686,11 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
     }
 
     public void restartGame() {
-        if (!replaying) {
-            EdExtensionHelper.onRestartGame(lastTrack);
-        }
         startGame(null, null);
     }
 
-    public void startGame(final TrackInfo track, final String replayFile) {
+    public void startGame(final BeatmapInfo beatmapInfo, final String replayFile) {
         GameHelper.updateGameid();
-        if (!replaying) {
-            EdExtensionHelper.onStartGame(track);
-        }
 
         scene = new Scene();
         if (Config.isEnableStoryboard()) {
@@ -732,11 +723,11 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
         final LoadingScreen screen = new LoadingScreen();
         engine.setScene(screen.getScene());
 
-        final String rfile = track != null ? replayFile : this.replayFile;
+        final String rfile = beatmapInfo != null ? replayFile : this.replayFile;
 
         Execution.async(() -> {
 
-            if (loadGame(track != null ? track : lastTrack, rfile)) {
+            if (loadGame(beatmapInfo != null ? beatmapInfo : lastBeatmapInfo, rfile)) {
                 prepareScene();
             } else {
                 ModMenu.getInstance().setMod(Replay.oldMod);
@@ -829,8 +820,8 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
         multiplier += (Math.min(beatmap.difficulty.cs, 17.62f) - 3) / 4f;
 
         stat.setDiffModifier(multiplier);
-        stat.setMaxObjectsCount(lastTrack.getTotalHitObjectCount());
-        stat.setMaxHighestCombo(lastTrack.getMaxCombo());
+        stat.setMaxObjectsCount(lastBeatmapInfo.getTotalHitObjectCount());
+        stat.setMaxHighestCombo(lastBeatmapInfo.getMaxCombo());
 
         stat.setBeatmapCS(beatmap.difficulty.cs);
         stat.setBeatmapOD(beatmap.difficulty.od);
@@ -1685,7 +1676,7 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
             if (replay != null && !replaying) {
                 String ctime = String.valueOf(System.currentTimeMillis());
                 replayFile = Config.getCorePath() + "Scores/"
-                        + MD5Calculator.getStringMD5(lastTrack.getFilename() + ctime)
+                        + MD5Calculator.getStringMD5(lastBeatmapInfo.getPath() + ctime)
                         + ctime.substring(0, Math.min(3, ctime.length())) + ".odr";
                 replay.setStat(stat);
                 replay.save(replayFile);
@@ -1710,13 +1701,11 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
                 }
 
                 if (replaying)
-                    scoringScene.load(scoringScene.getReplayStat(), null, GlobalManager.getInstance().getSongService(), replayFile, null, lastTrack);
+                    scoringScene.load(scoringScene.getReplayStat(), null, GlobalManager.getInstance().getSongService(), replayFile, null, lastBeatmapInfo);
                 else {
                     if (stat.getMod().contains(GameMod.MOD_AUTO)) {
                         stat.setPlayerName("osu!");
                     }
-
-                    EdExtensionHelper.onEndGame(lastTrack, stat);
 
                     if (Multiplayer.isConnected())
                     {
@@ -1727,7 +1716,7 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
 
                         ToastLogger.showText("Loading room statistics...", false);
                     }
-                    scoringScene.load(stat, lastTrack, GlobalManager.getInstance().getSongService(), replayFile, trackMD5, null);
+                    scoringScene.load(stat, lastBeatmapInfo, GlobalManager.getInstance().getSongService(), replayFile, trackMD5, null);
                 }
                 GlobalManager.getInstance().getSongService().setVolume(0.2f);
                 engine.setScene(scoringScene.getScene());
@@ -1852,12 +1841,6 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
 
     private void onExit() {
 
-        //游戏退出
-
-        if (!replaying) {
-            EdExtensionHelper.onExitGame(lastTrack);
-        }
-
         SkinManager.setSkinEnabled(false);
         GameObjectPool.getInstance().purge();
         SpritePool.getInstance().purge();
@@ -1896,10 +1879,6 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
         var touchOptions = new TouchOptions();
         touchOptions.setRunOnUpdateThread(true);
         engine.getTouchController().applyTouchOptions(touchOptions);
-
-        if (!replaying) {
-            EdExtensionHelper.onQuitGame(lastTrack);
-        }
 
         if (storyboardSprite != null) {
             storyboardSprite.detachSelf();
@@ -2437,10 +2416,6 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
             return;
         }
 
-        if (!replaying) {
-            EdExtensionHelper.onPauseGame(lastTrack);
-        }
-
         if (video != null && videoStarted) {
             video.getTexture().pause();
         }
@@ -2486,10 +2461,6 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
             return;
         }
 
-        if (!replaying) {
-            EdExtensionHelper.onGameover(lastTrack);
-        }
-
         if(scorebar != null) scorebar.flush();
         ResourceManager.getInstance().getSound("failsound").play();
         final PauseMenu menu = new PauseMenu(engine, this, true);
@@ -2518,10 +2489,6 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
                 && !stat.getMod().contains(GameMod.MOD_AUTOPILOT)) {
             quit();
             return;
-        }
-
-        if (!replaying) {
-            EdExtensionHelper.onResume(lastTrack);
         }
 
         if (video != null && videoStarted) {
@@ -2762,10 +2729,10 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
 
     private void calculateAllSliderPaths(){
         if (!objects.isEmpty()){
-            if (lastTrack.getSliderCount() <= 0){
+            if (lastBeatmapInfo.getSliderCount() <= 0){
                 return;
             }
-            sliderPaths = new SliderPath[lastTrack.getSliderCount()];
+            sliderPaths = new SliderPath[lastBeatmapInfo.getSliderCount()];
             sliderIndex = 0;
             for (GameObjectData data : objects){
                 final String[] params = data.getData();
@@ -2821,11 +2788,11 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
             //save replay
             String ctime = String.valueOf(System.currentTimeMillis());
             replayFile = Config.getCorePath() + "Scores/"
-                    + MD5Calculator.getStringMD5(lastTrack.getFilename() + ctime)
+                    + MD5Calculator.getStringMD5(lastBeatmapInfo.getPath() + ctime)
                     + ctime.substring(0, Math.min(3, ctime.length())) + ".odr";
             replay.setStat(stat);
             replay.save(replayFile);
-            ScoreLibrary.getInstance().addScore(lastTrack.getFilename(), stat, replayFile);
+            ScoreLibrary.getInstance().addScore(lastBeatmapInfo.getPath(), stat, replayFile);
             ToastLogger.showText(StringTable.get(R.string.message_save_replay_successful), true);
             replayFile = null;
             return true;

@@ -2,6 +2,7 @@ package ru.nsu.ccfit.zuev.osu.menu;
 
 import com.edlplan.ui.fragment.InGameSettingMenu;
 import com.reco1l.ibancho.RoomAPI;
+import com.reco1l.osu.BeatmapInfo;
 import com.reco1l.osu.Execution;
 import com.reco1l.osu.multiplayer.Multiplayer;
 import com.reco1l.ibancho.data.RoomMods;
@@ -43,7 +44,6 @@ public class ModMenu implements IModSwitcher {
     private Scene scene = null, parent;
     private EnumSet<GameMod> mod;
     private ChangeableText multiplierText;
-    private TrackInfo selectedTrack;
     private final Map<GameMod, ModButton> modButtons = new TreeMap<>();
     private float changeSpeed = 1.0f;
     private boolean enableNCWhenSpeedChange = false;
@@ -78,9 +78,11 @@ public class ModMenu implements IModSwitcher {
         init();
     }
 
-    public void show(Scene scene, TrackInfo selectedTrack) {
+    public void show(Scene scene, BeatmapInfo beatmapInfo) {
         parent = scene;
-        setSelectedTrack(selectedTrack);
+        if (beatmapInfo != null) {
+            changeMultiplierText();
+        }
         scene.setChildScene(getScene(), false, true, true);
         if (menu == null) {
             menu = new InGameSettingMenu();
@@ -318,9 +320,9 @@ public class ModMenu implements IModSwitcher {
                                          final float pTouchAreaLocalX, final float pTouchAreaLocalY) {
                 if (pSceneTouchEvent.isActionUp()) {
                     Execution.async(() -> {
-                        if (GlobalManager.getInstance().getSongMenu().getSelectedTrack() != null) {
+                        if (GlobalManager.getInstance().getSongMenu().getSelectedBeatmap() != null) {
                             try (var parser = new BeatmapParser(
-                                    GlobalManager.getInstance().getSongMenu().getSelectedTrack().getFilename()
+                                    GlobalManager.getInstance().getSongMenu().getSelectedBeatmap().getAudio()
                             )) {
                                 var beatmap = parser.parse(true);
                                 if (beatmap == null) {
@@ -399,7 +401,7 @@ public class ModMenu implements IModSwitcher {
     }
 
     private void changeMultiplierText() {
-        GlobalManager.getInstance().getSongMenu().changeDimensionInfo(selectedTrack);
+        GlobalManager.getInstance().getSongMenu().changeDimensionInfo(GlobalManager.getInstance().getSelectedBeatmap());
         //calculateAble = true;
         float mult = 1;
         for (GameMod m : mod) {
@@ -408,13 +410,13 @@ public class ModMenu implements IModSwitcher {
         if (changeSpeed != 1.0f){
             mult *= StatisticV2.getSpeedChangeScoreMultiplier(getSpeed(), mod);
         }
-        if (selectedTrack != null) {
+        if (GlobalManager.getInstance().getSelectedBeatmap() != null) {
             if (isCustomCS()) {
-                mult *= StatisticV2.getCustomCSScoreMultiplier(selectedTrack.getCircleSize(), customCS);
+                mult *= StatisticV2.getCustomCSScoreMultiplier(GlobalManager.getInstance().getSelectedBeatmap().getCircleSize(), customCS);
             }
 
             if (isCustomOD()) {
-                mult *= StatisticV2.getCustomODScoreMultiplier(selectedTrack.getOverallDifficulty(), customOD);
+                mult *= StatisticV2.getCustomODScoreMultiplier(GlobalManager.getInstance().getSelectedBeatmap().getOverallDifficulty(), customOD);
             }
         }
 
@@ -504,13 +506,6 @@ public class ModMenu implements IModSwitcher {
         changeMultiplierText();
 
         return returnValue;
-    }
-
-    public void setSelectedTrack(TrackInfo selectedTrack) {
-        this.selectedTrack = selectedTrack;
-        if (selectedTrack != null) {
-            changeMultiplierText();
-        }
     }
 
     public float getSpeed(){

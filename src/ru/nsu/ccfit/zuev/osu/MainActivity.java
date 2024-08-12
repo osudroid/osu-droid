@@ -2,7 +2,6 @@ package ru.nsu.ccfit.zuev.osu;
 
 import android.Manifest;
 import android.annotation.SuppressLint;
-import android.app.AlertDialog;
 import android.content.ComponentName;
 import android.content.ContentResolver;
 import android.content.Context;
@@ -29,7 +28,6 @@ import android.view.KeyEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.WindowManager;
-import android.widget.EditText;
 import android.widget.FrameLayout;
 import android.widget.RelativeLayout;
 import android.widget.Toast;
@@ -49,8 +47,6 @@ import com.reco1l.osu.UpdateManager;
 import com.reco1l.osu.multiplayer.LobbyScene;
 import com.reco1l.osu.multiplayer.RoomScene;
 
-import com.reco1l.osu.ui.MessageDialog;
-import com.reco1l.osu.ui.PromptDialog;
 import com.rian.osu.difficulty.BeatmapDifficultyCalculator;
 import net.lingala.zip4j.ZipFile;
 
@@ -75,7 +71,6 @@ import java.io.IOException;
 import java.math.RoundingMode;
 import java.text.DecimalFormat;
 import java.util.ArrayList;
-import java.util.Objects;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
@@ -300,11 +295,7 @@ public class MainActivity extends BaseGameActivity implements
             GlobalManager.getInstance().setLoadingProgress(50);
             checkNewSkins();
             Config.loadSkins();
-            checkNewBeatmaps();
-
-            if (!LibraryManager.INSTANCE.loadLibraryCache(true)) {
-                LibraryManager.INSTANCE.scanLibrary();
-            }
+            loadBeatmapSetLibrary();
 
             SplashScene.INSTANCE.playWelcomeAnimation();
 
@@ -392,7 +383,7 @@ public class MainActivity extends BaseGameActivity implements
         ActivityOverlay.initial(this, frameLayout.getId());
     }
 
-    public void checkNewBeatmaps() {
+    public void loadBeatmapSetLibrary() {
         GlobalManager.getInstance().setInfo("Checking for new maps...");
         final File mainDir = new File(Config.getCorePath());
         if (beatmapToAdd != null) {
@@ -404,7 +395,6 @@ public class MainActivity extends BaseGameActivity implements
 
                 FileUtils.extractZip(beatmapToAdd, Config.getBeatmapPath());
                 // LibraryManager.INSTANCE.sort();
-                LibraryManager.INSTANCE.saveToCache();
             } else if (file.getName().endsWith(".odr")) {
                 willReplay = true;
             }
@@ -461,9 +451,11 @@ public class MainActivity extends BaseGameActivity implements
                 // Config.setDELETE_OSZ(deleteOsz);
 
                 // LibraryManager.INSTANCE.sort();
-                LibraryManager.INSTANCE.saveToCache();
             }
         }
+
+        LibraryManager.scanDirectory();
+        LibraryManager.loadLibrary();
     }
 
     public void checkNewSkins() {
@@ -651,7 +643,7 @@ public class MainActivity extends BaseGameActivity implements
             } else GlobalManager.getInstance().getGameScene().pause();
         }
         if (GlobalManager.getInstance().getMainScene() != null) {
-            BeatmapInfo beatmapInfo = GlobalManager.getInstance().getMainScene().beatmapInfo;
+            var beatmapInfo = GlobalManager.getInstance().getSelectedBeatmap();
             if (songService != null && beatmapInfo != null && !songService.isGaming()) {
                 songService.showNotification();
 
