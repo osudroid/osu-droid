@@ -86,6 +86,7 @@ public class SongMenu implements IUpdateHandler, MenuItemListener,
     private Entity backLayer = new Entity();
     private ArrayList<BeatmapSetItem> items = new ArrayList<>();
     private BeatmapSetItem selectedItem = null;
+    private BeatmapInfo selectedBeatmap;
     private Sprite bg = null;
     private Boolean bgLoaded = false;
     private String bgName = "";
@@ -175,6 +176,7 @@ public class SongMenu implements IUpdateHandler, MenuItemListener,
         velocityY = 0;
         selectedItem = null;
         items = new ArrayList<>();
+        selectedBeatmap = null;
         bgLoaded = true;
         SongMenuPool.getInstance().init();
         loadFilterFragment();
@@ -351,6 +353,9 @@ public class SongMenu implements IUpdateHandler, MenuItemListener,
                     }
                     if (pSceneTouchEvent.isActionUp()) {
                         // back
+                        if (selectedBeatmap == null) {
+                            return true;
+                        }
                         if (!moved) {
                             backButton.setScale(1f);
                             back();
@@ -395,6 +400,9 @@ public class SongMenu implements IUpdateHandler, MenuItemListener,
                     }
                     if (pSceneTouchEvent.isActionUp()) {
                         // back
+                        if (selectedBeatmap == null) {
+                            return true;
+                        }
                         if (!moved) {
                             backButton.setScale(1f);
                             back();
@@ -436,7 +444,7 @@ public class SongMenu implements IUpdateHandler, MenuItemListener,
                         setFrame(0);
                         if (!moved) {
                             velocityY = 0;
-                            ModMenu.getInstance().show(scene, GlobalManager.getInstance().getSelectedBeatmap());
+                            ModMenu.getInstance().show(scene, selectedBeatmap);
                         }
                         return true;
                     }
@@ -713,11 +721,11 @@ public class SongMenu implements IUpdateHandler, MenuItemListener,
     public void toggleScoringSwitcher() {
         if (board.isShowOnlineScores()) {
             board.setShowOnlineScores(false);
-            board.init(GlobalManager.getInstance().getSelectedBeatmap());
-            updateInfo(GlobalManager.getInstance().getSelectedBeatmap());
+            board.init(selectedBeatmap);
+            updateInfo(selectedBeatmap);
         } else if (OnlineManager.getInstance().isStayOnline()) {
             board.setShowOnlineScores(true);
-            board.init(GlobalManager.getInstance().getSelectedBeatmap());
+            board.init(selectedBeatmap);
         }
 
         updateScoringSwitcherStatus(true);
@@ -735,8 +743,8 @@ public class SongMenu implements IUpdateHandler, MenuItemListener,
     public void setFilter(final String filter, final SortOrder order,
                           final boolean favsOnly, Set<String> limit) {
         String oldBeatmapPath = "";
-        if (GlobalManager.getInstance().getSelectedBeatmap() != null) {
-            oldBeatmapPath = GlobalManager.getInstance().getSelectedBeatmap().getAudio();
+        if (selectedBeatmap != null) {
+            oldBeatmapPath = selectedBeatmap.getAudio();
         }
         if (!order.equals(sortOrder)) {
             sortOrder = order;
@@ -764,7 +772,7 @@ public class SongMenu implements IUpdateHandler, MenuItemListener,
         }
         if (selectedItem != null && !selectedItem.isVisible()) {
             selectedItem = null;
-            GlobalManager.getInstance().setSelectedBeatmap(null);
+            selectedBeatmap = null;
         }
     }
 
@@ -905,7 +913,7 @@ public class SongMenu implements IUpdateHandler, MenuItemListener,
 
         selectedItem = item;
         velocityY = 0;
-        GlobalManager.getInstance().setSelectedBeatmap(null);
+        selectedBeatmap = null;
         float height = 0;
         for (int i = 0; i < items.size(); i++) {
             if (items.get(i) == selectedItem) {
@@ -1103,11 +1111,10 @@ public class SongMenu implements IUpdateHandler, MenuItemListener,
                 }
 
                 // Replace the entry in the database in case of changes.
-                var newBeatmapInfo = BeatmapInfo.from(beatmap, beatmapInfo.getParentPath(), beatmapInfo.getDateImported(), beatmapInfo.getPath());
-                DatabaseManager.getBeatmapTable().insert(newBeatmapInfo);
+                selectedBeatmap = BeatmapInfo.from(beatmap, beatmapInfo.getParentPath(), beatmapInfo.getDateImported(), beatmapInfo.getPath());
+                DatabaseManager.getBeatmapTable().insert(selectedBeatmap);
                 LibraryManager.loadLibrary();
-                GlobalManager.getInstance().setSelectedBeatmap(newBeatmapInfo);
-
+                GlobalManager.getInstance().setSelectedBeatmap(selectedBeatmap);
                 changeDimensionInfo(beatmapInfo);
 
                 var parameters = new DifficultyCalculationParameters();
@@ -1148,13 +1155,13 @@ public class SongMenu implements IUpdateHandler, MenuItemListener,
     public void selectBeatmap(final BeatmapInfo beatmapInfo, boolean reloadBG) {
 
         // Playing corresponding audio for the selected track.
-        var selectedAudio = GlobalManager.getInstance().getSelectedBeatmap();
+        var selectedAudio = selectedBeatmap != null ? selectedBeatmap : GlobalManager.getInstance().getSelectedBeatmap();
 
         if (selectedAudio == null || !Objects.equals(selectedAudio.getAudio(), beatmapInfo.getAudio())) {
             playMusic(beatmapInfo.getAudio(), beatmapInfo.getPreviewTime());
         }
 
-        if (GlobalManager.getInstance().getSelectedBeatmap() == beatmapInfo) {
+        if (selectedBeatmap == beatmapInfo) {
             synchronized (bgMutex) {
                 if (!bgLoaded) {
                     return;
@@ -1164,7 +1171,7 @@ public class SongMenu implements IUpdateHandler, MenuItemListener,
             ResourceManager.getInstance().getSound("menuhit").play();
             if (Multiplayer.isMultiplayer)
             {
-                setMultiplayerRoomBeatmap(GlobalManager.getInstance().getSelectedBeatmap());
+                setMultiplayerRoomBeatmap(selectedBeatmap);
                 back(false);
                 return;
             }
@@ -1250,7 +1257,7 @@ public class SongMenu implements IUpdateHandler, MenuItemListener,
     }
 
     public void updateScore() {
-        board.init(GlobalManager.getInstance().getSelectedBeatmap());
+        board.init(selectedBeatmap);
         if (selectedItem != null) {
             selectedItem.updateMarks();
         }
@@ -1270,11 +1277,11 @@ public class SongMenu implements IUpdateHandler, MenuItemListener,
 
                     StatisticV2 stat = new StatisticV2(params);
                     if (stat.isLegacySC()) {
-                        stat.processLegacySC(GlobalManager.getInstance().getSelectedBeatmap());
+                        stat.processLegacySC(selectedBeatmap);
                     }
 
                     stat.setPlayerName(playerName);
-                    scoreScene.load(stat, null, null, OnlineManager.getReplayURL(id), null, GlobalManager.getInstance().getSelectedBeatmap());
+                    scoreScene.load(stat, null, null, OnlineManager.getReplayURL(id), null, selectedBeatmap);
                     engine.setScene(scoreScene.getScene());
                 } catch (OnlineManagerException e) {
                     Debug.e("Cannot load play info: " + e.getMessage(), e);
@@ -1287,7 +1294,7 @@ public class SongMenu implements IUpdateHandler, MenuItemListener,
 
         StatisticV2 stat = ScoreLibrary.getInstance().getScore(id);
         if (stat.isLegacySC()) {
-            stat.processLegacySC(GlobalManager.getInstance().getSelectedBeatmap());
+            stat.processLegacySC(selectedBeatmap);
         }
 
         scoreScene.load(stat, null, null, stat.getReplayName(), null, GlobalManager.getInstance().getSelectedBeatmap());
@@ -1446,7 +1453,7 @@ public class SongMenu implements IUpdateHandler, MenuItemListener,
     }
 
     public void reloadScoreBroad() {
-        board.init(GlobalManager.getInstance().getSelectedBeatmap());
+        board.init(selectedBeatmap);
     }
 
     public void select() {
@@ -1467,7 +1474,7 @@ public class SongMenu implements IUpdateHandler, MenuItemListener,
     }
 
     public BeatmapInfo getSelectedBeatmap() {
-        return GlobalManager.getInstance().getSelectedBeatmap();
+        return selectedBeatmap;
     }
 
     private void tryReloadMenuItems(SortOrder order) {
@@ -1534,7 +1541,7 @@ public class SongMenu implements IUpdateHandler, MenuItemListener,
 
     private void reSelectItem(String oldBeatmapPath) {
         if (!oldBeatmapPath.isEmpty()) {
-            if (GlobalManager.getInstance().getSelectedBeatmap().getPath().equals(oldBeatmapPath) && items.size() > 1 && selectedItem != null && selectedItem.isVisible()) {
+            if (selectedBeatmap.getPath().equals(oldBeatmapPath) && items.size() > 1 && selectedItem != null && selectedItem.isVisible()) {
                 velocityY = 0;
                 float height = 0;
                 for (int i = 0; i < items.size(); i++) {
@@ -1566,12 +1573,12 @@ public class SongMenu implements IUpdateHandler, MenuItemListener,
             return;
         }
 
-        if (GlobalManager.getInstance().getSelectedBeatmap() == null || !board.isShowOnlineScores()) {
+        if (selectedBeatmap == null || !board.isShowOnlineScores()) {
             scoringSwitcher.setFrame(0);
             return;
         }
 
-        var md5 = GlobalManager.getInstance().getSelectedBeatmap().getMD5();
+        var md5 = selectedBeatmap.getMD5();
 
         if (!forceUpdate && mapStatuses.containsKey(md5)) {
             scoringSwitcher.setFrame(switch (Objects.requireNonNull(mapStatuses.get(md5))) {
@@ -1590,7 +1597,7 @@ public class SongMenu implements IUpdateHandler, MenuItemListener,
             try {
                 var status = OnlineManager.getInstance().getBeatmapStatus(md5);
 
-                if (!board.isShowOnlineScores() || status == null || scoringSwitcher == null || GlobalManager.getInstance().getSelectedBeatmap() == null || !GlobalManager.getInstance().getSelectedBeatmap().getMD5().equals(md5)) {
+                if (!board.isShowOnlineScores() || status == null || scoringSwitcher == null || selectedBeatmap == null || !selectedBeatmap.getMD5().equals(md5)) {
                     return;
                 }
 

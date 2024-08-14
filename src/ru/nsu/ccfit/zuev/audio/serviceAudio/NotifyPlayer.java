@@ -27,6 +27,7 @@ import androidx.core.app.NotificationCompat;
 import androidx.core.app.NotificationManagerCompat;
 
 import com.reco1l.osu.BeatmapInfo;
+
 import ru.nsu.ccfit.zuev.audio.Status;
 import ru.nsu.ccfit.zuev.osu.Config;
 import ru.nsu.ccfit.zuev.osu.GlobalManager;
@@ -92,14 +93,14 @@ public class NotifyPlayer {
                         break;
                     case actionPrev:
                         service.stop();
-                        BeatmapInfo prevBeatmap = LibraryManager.selectPreviousBeatmap();
+                        BeatmapInfo prevBeatmap = LibraryManager.selectPreviousBeatmapSet().get(0);
                         service.preLoad(prevBeatmap.getAudio());
                         updateSong(prevBeatmap);
                         service.play();
                         break;
                     case actionNext:
                         service.stop();
-                        BeatmapInfo nextBeatmap = LibraryManager.selectNextBeatmap();
+                        BeatmapInfo nextBeatmap = LibraryManager.selectNextBeatmapSet().get(0);
                         service.preLoad(nextBeatmap.getAudio());
                         updateSong(nextBeatmap);
                         service.play();

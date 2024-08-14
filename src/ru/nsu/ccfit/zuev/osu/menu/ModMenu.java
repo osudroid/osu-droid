@@ -44,6 +44,7 @@ public class ModMenu implements IModSwitcher {
     private Scene scene = null, parent;
     private EnumSet<GameMod> mod;
     private ChangeableText multiplierText;
+    private BeatmapInfo selectedBeatmap;
     private final Map<GameMod, ModButton> modButtons = new TreeMap<>();
     private float changeSpeed = 1.0f;
     private boolean enableNCWhenSpeedChange = false;
@@ -78,11 +79,9 @@ public class ModMenu implements IModSwitcher {
         init();
     }
 
-    public void show(Scene scene, BeatmapInfo beatmapInfo) {
+    public void show(Scene scene, BeatmapInfo selectedBeatmap) {
         parent = scene;
-        if (beatmapInfo != null) {
-            changeMultiplierText();
-        }
+        setSelectedTrack(selectedBeatmap);
         scene.setChildScene(getScene(), false, true, true);
         if (menu == null) {
             menu = new InGameSettingMenu();
@@ -399,7 +398,7 @@ public class ModMenu implements IModSwitcher {
     }
 
     private void changeMultiplierText() {
-        GlobalManager.getInstance().getSongMenu().changeDimensionInfo(GlobalManager.getInstance().getSelectedBeatmap());
+        GlobalManager.getInstance().getSongMenu().changeDimensionInfo(selectedBeatmap);
         //calculateAble = true;
         float mult = 1;
         for (GameMod m : mod) {
@@ -408,13 +407,13 @@ public class ModMenu implements IModSwitcher {
         if (changeSpeed != 1.0f){
             mult *= StatisticV2.getSpeedChangeScoreMultiplier(getSpeed(), mod);
         }
-        if (GlobalManager.getInstance().getSelectedBeatmap() != null) {
+        if (selectedBeatmap != null) {
             if (isCustomCS()) {
-                mult *= StatisticV2.getCustomCSScoreMultiplier(GlobalManager.getInstance().getSelectedBeatmap().getCircleSize(), customCS);
+                mult *= StatisticV2.getCustomCSScoreMultiplier(selectedBeatmap.getCircleSize(), customCS);
             }
 
             if (isCustomOD()) {
-                mult *= StatisticV2.getCustomODScoreMultiplier(GlobalManager.getInstance().getSelectedBeatmap().getOverallDifficulty(), customOD);
+                mult *= StatisticV2.getCustomODScoreMultiplier(selectedBeatmap.getOverallDifficulty(), customOD);
             }
         }
 
@@ -504,6 +503,13 @@ public class ModMenu implements IModSwitcher {
         changeMultiplierText();
 
         return returnValue;
+    }
+
+    public void setSelectedTrack(BeatmapInfo selectedBeatmap) {
+        this.selectedBeatmap = selectedBeatmap;
+        if (selectedBeatmap != null) {
+            changeMultiplierText();
+        }
     }
 
     public float getSpeed(){

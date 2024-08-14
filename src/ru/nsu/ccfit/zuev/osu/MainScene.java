@@ -78,6 +78,7 @@ import ru.nsu.ccfit.zuev.osuplus.R;
  */
 public class MainScene implements IUpdateHandler {
     public SongProgressBar progressBar;
+    public BeatmapInfo beatmapInfo;
     private Context context;
     private Sprite logo, logoOverlay, background, lastBackground;
     private Sprite music_nowplay;
@@ -527,7 +528,7 @@ public class MainScene implements IUpdateHandler {
     }
 
     public void musicControl(MusicOption option) {
-        if (GlobalManager.getInstance().getSongService() == null || GlobalManager.getInstance().getSelectedBeatmap() == null) {
+        if (GlobalManager.getInstance().getSongService() == null || beatmapInfo == null) {
             return;
         }
         switch (option) {
@@ -536,7 +537,7 @@ public class MainScene implements IUpdateHandler {
                     GlobalManager.getInstance().getSongService().stop();
                 }
                 firstTimingPoint = null;
-                LibraryManager.selectPreviousBeatmap();
+                LibraryManager.selectPreviousBeatmapSet();
                 loadBeatmapInfo();
                 loadTimingPoints(true);
                 doChange = false;
@@ -547,7 +548,7 @@ public class MainScene implements IUpdateHandler {
                 if (GlobalManager.getInstance().getSongService().getStatus() == Status.PAUSED || GlobalManager.getInstance().getSongService().getStatus() == Status.STOPPED) {
                     if (GlobalManager.getInstance().getSongService().getStatus() == Status.STOPPED) {
                         loadTimingPoints(false);
-                        GlobalManager.getInstance().getSongService().preLoad(GlobalManager.getInstance().getSelectedBeatmap().getAudio());
+                        GlobalManager.getInstance().getSongService().preLoad(beatmapInfo.getAudio());
                         if (firstTimingPoint != null) {
                             bpmLength = firstTimingPoint.getBeatLength() * 1000f;
                             if (lastTimingPoint != null) {
@@ -591,7 +592,7 @@ public class MainScene implements IUpdateHandler {
                 if (GlobalManager.getInstance().getSongService().getStatus() == Status.PLAYING || GlobalManager.getInstance().getSongService().getStatus() == Status.PAUSED) {
                     GlobalManager.getInstance().getSongService().stop();
                 }
-                LibraryManager.selectNextBeatmap();
+                LibraryManager.selectNextBeatmapSet();
                 firstTimingPoint = null;
                 loadBeatmapInfo();
                 loadTimingPoints(true);
@@ -808,20 +809,18 @@ public class MainScene implements IUpdateHandler {
 
     public void loadBeatmapInfo() {
         if (LibraryManager.getSizeOfBeatmaps() != 0) {
-            var beatmapInfo = GlobalManager.getInstance().getSelectedBeatmap();
-            Log.w("MainMenuActivity", "Next song: " + beatmapInfo.getAudio() + ", Start at: " + beatmapInfo.getPreviewTime());
+            var beatmapSet = LibraryManager.getCurrentBeatmapSet();
+            beatmapInfo = beatmapSet.get(0);
 
             if (musicInfoText == null) {
                 musicInfoText = new ChangeableText(Utils.toRes(Config.getRES_WIDTH() - 500), Utils.toRes(3),
                         ResourceManager.getInstance().getFont("font"), "None...", HorizontalAlign.RIGHT, 35);
             }
-
             if (!Config.isForceRomanized()) {
                 musicInfoText.setText(beatmapInfo.getArtistUnicode() + " - " + beatmapInfo.getTitleUnicode(), true);
             } else {
                 musicInfoText.setText(beatmapInfo.getArtist() + " - " + beatmapInfo.getTitle(), true);
             }
-
             try {
                 musicInfoText.setPosition(Utils.toRes(Config.getRES_WIDTH() - 500 + 470 - musicInfoText.getWidth()), musicInfoText.getY());
                 music_nowplay.setPosition(Utils.toRes(Config.getRES_WIDTH() - 500 + 470 - musicInfoText.getWidth() - 130), 0);
@@ -833,7 +832,6 @@ public class MainScene implements IUpdateHandler {
     }
 
     public void loadTimingPoints(boolean reloadMusic) {
-        var beatmapInfo = GlobalManager.getInstance().getSelectedBeatmap();
         if (beatmapInfo == null) {
             return;
         }
@@ -984,6 +982,10 @@ public class MainScene implements IUpdateHandler {
 
     public Scene getScene() {
         return scene;
+    }
+
+    public BeatmapInfo getBeatmapInfo() {
+        return beatmapInfo;
     }
 
     public void setBeatmapSet(BeatmapSetInfo beatmapSet) {

@@ -15,9 +15,14 @@ import com.rian.osu.beatmap.Beatmap as RianBeatmap
 data class BeatmapInfo(
 
     /**
-     * The beatmap MD5.
+     * The beatmap path.
      */
     @PrimaryKey
+    val path: String,
+
+    /**
+     * The beatmap MD5.
+     */
     @get:JvmName("getMD5")
     val md5: String,
 
@@ -25,11 +30,6 @@ data class BeatmapInfo(
      * The beatmap ID.
      */
     val id: Long?,
-
-    /**
-     * The beatmap path.
-     */
-    val path: String,
 
     /**
      * The audio filename.

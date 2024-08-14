@@ -41,6 +41,7 @@ import com.google.firebase.analytics.FirebaseAnalytics;
 import com.google.firebase.crashlytics.FirebaseCrashlytics;
 import com.reco1l.ibancho.LobbyAPI;
 import com.reco1l.osu.AccessibilityDetector;
+import com.reco1l.osu.BeatmapInfo;
 import com.reco1l.osu.Execution;
 import com.reco1l.osu.multiplayer.Multiplayer;
 import com.reco1l.osu.UpdateManager;
@@ -643,7 +644,7 @@ public class MainActivity extends BaseGameActivity implements
             } else GlobalManager.getInstance().getGameScene().pause();
         }
         if (GlobalManager.getInstance().getMainScene() != null) {
-            var beatmapInfo = GlobalManager.getInstance().getSelectedBeatmap();
+            BeatmapInfo beatmapInfo = GlobalManager.getInstance().getMainScene().beatmapInfo;
             if (songService != null && beatmapInfo != null && !songService.isGaming()) {
                 songService.showNotification();
 

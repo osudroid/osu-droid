@@ -189,27 +189,29 @@ public class LibraryManager {
     }
 
 
-    public static BeatmapInfo selectNextBeatmap() {
+    public static BeatmapSetInfo getCurrentBeatmapSet() {
+        return library.get(currentIndex);
+    }
+
+    public static BeatmapSetInfo selectNextBeatmapSet() {
 
         if (library.isEmpty()) {
             GlobalManager.getInstance().setSelectedBeatmap(null);
             return null;
         }
 
-        var newIndex = ++currentIndex % library.size();
-        GlobalManager.getInstance().setSelectedBeatmap(library.get(newIndex).get(0));
-        return GlobalManager.getInstance().getSelectedBeatmap();
+        currentIndex = ++currentIndex % library.size();
+        return library.get(currentIndex);
     }
 
-    public static BeatmapInfo selectPreviousBeatmap() {
+    public static BeatmapSetInfo selectPreviousBeatmapSet() {
 
         if (library.isEmpty()) {
             return null;
         }
 
-        var newIndex = currentIndex == 0 ? library.size() - 1 : --currentIndex;
-        GlobalManager.getInstance().setSelectedBeatmap(library.get(newIndex).get(0));
-        return GlobalManager.getInstance().getSelectedBeatmap();
+        currentIndex = currentIndex == 0 ? library.size() - 1 : --currentIndex;
+        return library.get(currentIndex);
     }
 
 

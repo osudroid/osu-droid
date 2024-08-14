@@ -224,7 +224,7 @@ public class SongService extends Service {
         }
 
         notify.show();
-        notify.updateSong(GlobalManager.getInstance().getSelectedBeatmap());
+        notify.updateSong(GlobalManager.getInstance().getMainScene().getBeatmapInfo());
         notify.updateState();
     }
 

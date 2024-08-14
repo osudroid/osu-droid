@@ -39,12 +39,11 @@ public class GlobalManager {
         return instance;
     }
 
-    @Nullable
     public BeatmapInfo getSelectedBeatmap() {
         return selectedBeatmap;
     }
 
-    public void setSelectedBeatmap(@Nullable BeatmapInfo selectedBeatmap) {
+    public void setSelectedBeatmap(BeatmapInfo selectedBeatmap) {
         this.selectedBeatmap = selectedBeatmap;
     }
 
