@@ -36,8 +36,8 @@ object DatabaseManager {
         database = Room.databaseBuilder(context, DroidDatabase::class.java, "DroidDatabase")
             // If you want to support migrations, you should add them here. And it's preferable than
             // destructive migrations where there's data loss.
-            // see https://developer.android.com/training/data-storage/room/migrating-db-versions.
-            .fallbackToDestructiveMigrationFrom(1)
+            // See https://developer.android.com/training/data-storage/room/migrating-db-versions.
+            .fallbackToDestructiveMigration()
             .fallbackToDestructiveMigrationOnDowngrade()
             .build()
     }
