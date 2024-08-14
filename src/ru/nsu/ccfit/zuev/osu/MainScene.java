@@ -841,7 +841,7 @@ public class MainScene implements IUpdateHandler {
             particleSpout.setParticlesSpawnEnabled(false);
         }
         particleEnabled = false;
-
+        GlobalManager.getInstance().setSelectedBeatmap(beatmapInfo);
         if (beatmapInfo.getBackground() != null) {
             try {
                 final TextureRegion tex = Config.isSafeBeatmapBg() ?
