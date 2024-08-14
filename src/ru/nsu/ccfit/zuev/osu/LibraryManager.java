@@ -220,12 +220,10 @@ public class LibraryManager {
         for (int i = 0; i < library.size(); i++) {
 
             if (library.get(i).getPath().equals(info.getPath())) {
-                GlobalManager.getInstance().setSelectedBeatmap(library.get(i).get(0));
                 return currentIndex = i;
             }
         }
 
-        GlobalManager.getInstance().setSelectedBeatmap(null);
         return currentIndex = 0;
     }
 
