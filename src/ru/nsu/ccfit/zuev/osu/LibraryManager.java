@@ -213,11 +213,11 @@ public class LibraryManager {
     }
 
 
-    public static void findBeatmapSet(BeatmapSetInfo info) {
+    public static void findBeatmapSetIndex(BeatmapInfo info) {
 
         for (int i = 0; i < library.size(); i++) {
 
-            if (library.get(i).getPath().equals(info.getPath())) {
+            if (library.get(i).getPath().equals(info.getParentPath())) {
                 currentIndex = i;
                 return;
             }

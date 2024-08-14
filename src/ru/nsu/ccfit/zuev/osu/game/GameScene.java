@@ -274,7 +274,7 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
                 videoStarted = false;
                 videoOffset = beatmap.events.videoStartTime / 1000f;
 
-                video = new VideoSprite(lastBeatmapInfo.getBeatmapSet().getPath() + "/" + beatmap.events.videoFilename, engine);
+                video = new VideoSprite(lastBeatmapInfo.getParentPath() + "/" + beatmap.events.videoFilename, engine);
                 video.setAlpha(0f);
 
                 bgSprite = video;

@@ -8,7 +8,6 @@ import android.os.PowerManager;
 import android.util.Log;
 
 import com.reco1l.osu.BeatmapInfo;
-import com.reco1l.osu.BeatmapSetInfo;
 import com.reco1l.osu.Execution;
 import com.reco1l.osu.ui.entity.MainMenu;
 
@@ -809,8 +808,10 @@ public class MainScene implements IUpdateHandler {
 
     public void loadBeatmapInfo() {
         if (LibraryManager.getSizeOfBeatmaps() != 0) {
-            var beatmapSet = LibraryManager.getCurrentBeatmapSet();
-            beatmapInfo = beatmapSet.get(0);
+
+            if (beatmapInfo == null) {
+                beatmapInfo = LibraryManager.getCurrentBeatmapSet().get(0);
+            }
 
             if (musicInfoText == null) {
                 musicInfoText = new ChangeableText(Utils.toRes(Config.getRES_WIDTH() - 500), Utils.toRes(3),
@@ -988,8 +989,11 @@ public class MainScene implements IUpdateHandler {
         return beatmapInfo;
     }
 
-    public void setBeatmapSet(BeatmapSetInfo beatmapSet) {
-        LibraryManager.findBeatmapSet(beatmapSet);
+    public void setBeatmap(BeatmapInfo beatmapInfo) {
+
+        LibraryManager.findBeatmapSetIndex(beatmapInfo);
+        this.beatmapInfo = beatmapInfo;
+
         loadBeatmapInfo();
         loadTimingPoints(false);
         musicControl(MusicOption.SYNC);
@@ -1004,7 +1008,7 @@ public class MainScene implements IUpdateHandler {
                 StatisticV2 stat = replay.getStat();
                 BeatmapInfo beatmap = LibraryManager.findBeatmapByMD5(replay.getMd5());
                 if (beatmap != null) {
-                    GlobalManager.getInstance().getMainScene().setBeatmapSet(beatmap.getBeatmapSet());
+                    GlobalManager.getInstance().getMainScene().setBeatmap(beatmap);
                     GlobalManager.getInstance().getSongMenu().select();
                     ResourceManager.getInstance().loadBackground(beatmap.getBackground());
                     GlobalManager.getInstance().getSongService().preLoad(beatmap.getAudio());
@@ -1020,7 +1024,7 @@ public class MainScene implements IUpdateHandler {
         GlobalManager.getInstance().getSongService().setGaming(false);
         GlobalManager.getInstance().getEngine().setScene(getScene());
         if (GlobalManager.getInstance().getSelectedBeatmap() != null) {
-            setBeatmapSet(GlobalManager.getInstance().getSelectedBeatmap().getBeatmapSet());
+            setBeatmap(GlobalManager.getInstance().getSelectedBeatmap());
         }
     }
 

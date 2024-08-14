@@ -190,15 +190,6 @@ data class BeatmapInfo(
 
 ) {
 
-
-    /**
-     * The beatmap set.
-     */
-    @Ignore
-    lateinit var beatmapSet: BeatmapSetInfo
-
-
-
     companion object {
 
         /**
@@ -336,13 +327,6 @@ data class BeatmapSetInfo(
      */
     val count
         get() = beatmaps.size
-
-
-    init {
-        beatmaps.fastForEach {
-            it.beatmapSet = this
-        }
-    }
 
 
     /**
