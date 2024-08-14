@@ -172,10 +172,6 @@ public class SongMenu implements IUpdateHandler, MenuItemListener,
         SongMenuPool.getInstance().init();
         loadFilterFragment();
 
-        // Preventing ModMenu to reload mod set
-        if (!Multiplayer.isMultiplayer)
-            ModMenu.getInstance().reload();
-
         bindDataBaseChangedListener();
 
         scene.attachChild(backLayer);
@@ -689,6 +685,11 @@ public class SongMenu implements IUpdateHandler, MenuItemListener,
             scoringSwitcher.setPosition(10, 10);
             scene.registerTouchArea(scoringSwitcher);
             frontLayer.attachChild(scoringSwitcher);
+        }
+
+        // Preventing ModMenu to reload mod set
+        if (!Multiplayer.isMultiplayer) {
+            ModMenu.getInstance().reload();
         }
     }
 
