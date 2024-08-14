@@ -2,11 +2,7 @@ package com.reco1l.osu
 
 import android.content.Context
 import androidx.room.*
-import androidx.room.migration.AutoMigrationSpec
-import androidx.room.migration.Migration
-import androidx.sqlite.db.SupportSQLiteDatabase
-import ru.nsu.ccfit.zuev.osu.LibraryManager
-import ru.nsu.ccfit.zuev.osu.ToastLogger
+
 
 // Ported from rimu! project
 
@@ -19,7 +15,7 @@ import ru.nsu.ccfit.zuev.osu.ToastLogger
 object DatabaseManager {
 
     /**
-     * Get beatmaps table.
+     * Get the beatmaps table.
      */
     @JvmStatic
     val beatmapTable
@@ -34,8 +30,8 @@ object DatabaseManager {
 
         // Be careful when changing the database name, it may cause data loss.
         database = Room.databaseBuilder(context, DroidDatabase::class.java, "DroidDatabase")
-            // If you want to support migrations, you should add them here. And it's preferable than
-            // destructive migrations where there's data loss.
+            // Is preferable to support migrations, otherwise destructive migration will run forcing
+            // tables to recreate (in case of beatmaps table it'll re-import all beatmaps).
             // See https://developer.android.com/training/data-storage/room/migrating-db-versions.
             .fallbackToDestructiveMigration()
             .build()
@@ -47,7 +43,7 @@ object DatabaseManager {
  * The osu!droid database object class, this should be unique per instance.
  */
 @Database(
-    version = 2,
+    version = 1,
     entities = [
         BeatmapInfo::class,
     ]
