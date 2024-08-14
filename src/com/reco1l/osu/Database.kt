@@ -38,7 +38,6 @@ object DatabaseManager {
             // destructive migrations where there's data loss.
             // See https://developer.android.com/training/data-storage/room/migrating-db-versions.
             .fallbackToDestructiveMigration()
-            .fallbackToDestructiveMigrationOnDowngrade()
             .build()
     }
 
