@@ -223,7 +223,7 @@ object LobbyScene : Scene()
                 LoadingScreen().show()
 
                 getGlobal().mainActivity.checkNewSkins()
-                getGlobal().mainActivity.loadBeatmapSetLibrary()
+                getGlobal().mainActivity.loadBeatmapLibrary()
 
                 RoomScene.load()
                 load()

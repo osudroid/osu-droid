@@ -70,6 +70,9 @@ data class BeatmapInfo(
      */
     val title: String,
 
+    /**
+     * The title in unicode.
+     */
     val titleUnicode: String,
 
     /**
@@ -77,6 +80,9 @@ data class BeatmapInfo(
      */
     val artist: String,
 
+    /**
+     * The artist in unicode.
+     */
     val artistUnicode: String,
 
     /**
@@ -196,7 +202,7 @@ data class BeatmapInfo(
     companion object {
 
         /**
-         * Parse a new Beatmap from a [BeatmapData] instance.
+         * Parse a new [BeatmapInfo] from a [RianBeatmap] instance.
          */
         @JvmStatic
         fun from(data: RianBeatmap, parentPath: String, lastModified: Long, path: String): BeatmapInfo {
@@ -276,42 +282,23 @@ interface IBeatmapDAO {
     fun insert(beatmapInfo: BeatmapInfo): Long
 
     /**
-     * Delete a beatmap from the table.
-     */
-    @Delete
-    fun delete(beatmapInfo: BeatmapInfo)
-
-    /**
      * Delete a beatmap set from the table using it key (MD5 or ID).
      */
     @Query("DELETE FROM BeatmapInfo WHERE parentPath = :beatmapSetKey")
     fun deleteBeatmapSet(beatmapSetKey: String)
 
     /**
-     * Get all beatmaps from the parent [BeatmapSetInfo.path].
-     */
-    @Query("SELECT * FROM BeatmapInfo WHERE parentPath = :parentPath")
-    fun getFromParent(parentPath: String): Array<BeatmapInfo>
-
-    /**
-     * Find an specific beatmap from its MD5 hash.
-     */
-    @Query("SELECT * FROM BeatmapInfo WHERE md5 = :hash")
-    fun findByHash(hash: String): BeatmapInfo?
-
-    /**
-     * Find an specific beatmap from its ID.
-     */
-    @Query("SELECT * FROM BeatmapInfo WHERE id = :id")
-    fun findByID(id: Long): BeatmapInfo?
-
-    /**
      * Get a flow that listens to database changes for the beatmap table.
-     * It collects a list of [BeatmapSetInfo] that each one wraps its corresponding beatmaps.
+     * It collects a list of [BeatmapSetInfo] that each one wraps its corresponding [BeatmapInfo].
      */
     @Transaction
     @Query("SELECT DISTINCT parentPath, parentId FROM BeatmapInfo")
     fun getBeatmapSetList() : List<BeatmapSetInfo>
+
+
+    @Transaction
+    @Query("SELECT DISTINCT parentPath FROM BeatmapInfo")
+    fun getBeatmapSetPaths() : List<String>
 
 
     @Query("DELETE FROM BeatmapInfo")

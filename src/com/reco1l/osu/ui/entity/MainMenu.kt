@@ -70,7 +70,7 @@ class MainMenu(val main: MainScene)
                     LoadingScreen().show()
 
                     getGlobal().mainActivity.checkNewSkins()
-                    getGlobal().mainActivity.loadBeatmapSetLibrary()
+                    getGlobal().mainActivity.loadBeatmapLibrary()
 
                     if (LibraryManager.getLibrary().isEmpty())
                     {
@@ -145,7 +145,7 @@ class MainMenu(val main: MainScene)
                     LoadingScreen().show()
 
                     getGlobal().mainActivity.checkNewSkins()
-                    getGlobal().mainActivity.loadBeatmapSetLibrary()
+                    getGlobal().mainActivity.loadBeatmapLibrary()
 
                     getGlobal().songMenu.reload()
 

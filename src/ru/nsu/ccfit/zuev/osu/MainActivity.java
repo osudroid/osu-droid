@@ -296,7 +296,7 @@ public class MainActivity extends BaseGameActivity implements
             GlobalManager.getInstance().setLoadingProgress(50);
             checkNewSkins();
             Config.loadSkins();
-            loadBeatmapSetLibrary();
+            loadBeatmapLibrary();
 
             SplashScene.INSTANCE.playWelcomeAnimation();
 
@@ -384,7 +384,7 @@ public class MainActivity extends BaseGameActivity implements
         ActivityOverlay.initial(this, frameLayout.getId());
     }
 
-    public void loadBeatmapSetLibrary() {
+    public void loadBeatmapLibrary() {
         GlobalManager.getInstance().setInfo("Checking for new maps...");
         final File mainDir = new File(Config.getCorePath());
         if (beatmapToAdd != null) {

@@ -70,6 +70,9 @@ public class LibraryManager {
         library = DatabaseManager.getBeatmapTable().getBeatmapSetList();
     }
 
+    /**
+     * Scan the beatmap directory to find differences between the database and the file system.
+     */
     public static void scanDirectory() {
 
         if (!checkDirectory(Config.getBeatmapPath())) {
@@ -79,7 +82,7 @@ public class LibraryManager {
         var directory = new File(Config.getBeatmapPath());
         var files = FileUtils.listFiles(directory);
 
-        new LibraryDatabaseManager(files.length, files).start(library);
+        new LibraryDatabaseManager(files.length, files).start();
 
         // Wait for all threads to finish
         while (isCaching) {
@@ -107,25 +110,23 @@ public class LibraryManager {
         loadLibrary();
     }
 
-    private static void scanBeatmapSetFolder(String path) {
+    private static void scanBeatmapSetFolder(File directory) {
 
-        var directory = new File(path);
-        var fileList = FileUtils.listFiles(directory, ".osu");
+        var files = FileUtils.listFiles(directory, ".osu");
 
-        if (fileList == null) {
+        if (files == null) {
             return;
         }
 
-        // var parentKey = FileUtils.getMD5Checksum(directory);
         var beatmapsFound = 0;
 
         for (int i = library.size() - 1; i >= 0; --i) {
-            if (library.get(i).getPath().equals(path /*parentKey*/)) {
+            if (library.get(i).getPath().equals(directory.getPath())) {
                 return;
             }
         }
 
-        for (var file : fileList) {
+        for (var file : files) {
 
             try (var parser = new BeatmapParser(file)) {
 
@@ -133,18 +134,13 @@ public class LibraryManager {
 
                 if (beatmap == null) {
                     if (Config.isDeleteUnimportedBeatmaps()) {
+                        //noinspection ResultOfMethodCallIgnored
                         file.delete();
                     }
                     continue;
                 }
 
-                // We can associate beatmap to beatmap sets by their beatmap set ID, but this will require a storage
-                // system that ensures beatmap files are where they should be.
-                // if (beatmap.metadata.beatmapSetId > 0) {
-                //     parentKey = String.valueOf(beatmap.metadata.beatmapSetId);
-                // }
-
-                var beatmapInfo = BeatmapInfo.from(beatmap, path /*parentKey*/, directory.lastModified(), file.getPath());
+                var beatmapInfo = BeatmapInfo.from(beatmap, directory.getPath(), directory.lastModified(), file.getPath());
 
                 if (beatmap.events.videoFilename != null && Config.isDeleteUnsupportedVideos()) {
                     try {
@@ -160,6 +156,8 @@ public class LibraryManager {
                 }
 
                 try {
+                    // Conflict strategy is set to replace when the primary key is already in the
+                    // database. But that shouldn't never happen because the path is the primary key.
                     DatabaseManager.getBeatmapTable().insert(beatmapInfo);
                 } catch (Exception e) {
                     Log.e("LibraryManager", "Failed to insert beatmap into database", e);
@@ -181,7 +179,7 @@ public class LibraryManager {
 
     public static void shuffleLibrary() {
         Collections.shuffle(library);
-        GlobalManager.getInstance().setSelectedBeatmap(library.get(0).get(0));
+        currentIndex = 0;
     }
 
     public static int getSizeOfBeatmaps() {
@@ -196,7 +194,7 @@ public class LibraryManager {
     public static BeatmapSetInfo selectNextBeatmapSet() {
 
         if (library.isEmpty()) {
-            GlobalManager.getInstance().setSelectedBeatmap(null);
+            currentIndex = 0;
             return null;
         }
 
@@ -215,16 +213,17 @@ public class LibraryManager {
     }
 
 
-    public static int findBeatmapSet(BeatmapSetInfo info) {
+    public static void findBeatmapSet(BeatmapSetInfo info) {
 
         for (int i = 0; i < library.size(); i++) {
 
             if (library.get(i).getPath().equals(info.getPath())) {
-                return currentIndex = i;
+                currentIndex = i;
+                return;
             }
         }
 
-        return currentIndex = 0;
+        currentIndex = 0;
     }
 
 
@@ -254,11 +253,15 @@ public class LibraryManager {
 
     private static final class LibraryDatabaseManager {
 
-        private final ExecutorService executors;
 
         private final List<File> files;
 
-        private final int fileCount;
+        private final List<String> savedPaths;
+
+        private final ExecutorService executors;
+
+
+        private volatile int fileCount;
 
         private volatile int fileCached = 0;
 
@@ -268,10 +271,11 @@ public class LibraryManager {
             this.fileCount = fileCount;
             this.files = Arrays.asList(files);
             this.executors = Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors());
+            this.savedPaths = DatabaseManager.getBeatmapTable().getBeatmapSetPaths();
         }
 
 
-        public void start(List<BeatmapSetInfo> previousLibrary) {
+        public void start() {
 
             int optimalChunkSize = (int) Math.ceil((double) fileCount / Runtime.getRuntime().availableProcessors());
 
@@ -282,35 +286,39 @@ public class LibraryManager {
             executors.shutdown();
 
             try {
+
                 if (executors.awaitTermination(1, TimeUnit.HOURS)) {
+
                     isCaching = false;
 
                     synchronized (LibraryManager.class) {
                         LibraryManager.class.notify();
                     }
+
                 } else {
                     Log.e("LibraryManager", "Timeout");
                 }
+
             } catch (InterruptedException e) {
                 Log.e("LibraryManager", "Failed to wait for executor termination", e);
             }
 
             // Removing beatmap sets from the database that are not in the library anymore.
-            for (int i = previousLibrary.size() - 1; i >= 0; i--) {
+            for (int i = savedPaths.size() - 1; i >= 0; i--) {
 
-                var beatmapSet = previousLibrary.get(i);
+                var path = savedPaths.get(i);
                 var found = false;
 
                 for (int j = files.size() - 1; j >= 0; j--) {
 
-                    if (files.get(j).getPath().equals(beatmapSet.getPath())) {
+                    if (path.equals(files.get(j).getPath())) {
                         found = true;
                         break;
                     }
                 }
 
                 if (!found) {
-                    DatabaseManager.getBeatmapTable().deleteBeatmapSet(beatmapSet.getPath());
+                    DatabaseManager.getBeatmapTable().deleteBeatmapSet(path);
                 }
             }
         }
@@ -320,6 +328,20 @@ public class LibraryManager {
             executors.submit(() -> {
 
                 for (var file : files) {
+
+                    var found = false;
+                    for (int i = 0; i < savedPaths.size(); i++) {
+                        if (savedPaths.get(i).equals(file.getPath())) {
+                            synchronized (this) {
+                                fileCount--;
+                            }
+                            found = true;
+                        }
+                    }
+
+                    if (found) {
+                        continue;
+                    }
 
                     GlobalManager.getInstance().setLoadingProgress(50 + 50 * fileCached / fileCount);
                     GlobalManager.getInstance().setInfo("Loading " + file.getName() + "...");
@@ -334,7 +356,7 @@ public class LibraryManager {
                         continue;
                     }
 
-                    scanBeatmapSetFolder(file.getPath());
+                    scanBeatmapSetFolder(file);
                 }
             });
         }
