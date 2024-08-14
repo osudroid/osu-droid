@@ -1087,7 +1087,7 @@ public class SongMenu implements IUpdateHandler, MenuItemListener,
         beatmapInfo2.setText(binfoStr2);
         changeDimensionInfo(beatmapInfo);
         Execution.async(() -> {
-            try (var parser = new BeatmapParser(beatmapInfo.getAudio())) {
+            try (var parser = new BeatmapParser(beatmapInfo.getPath())) {
                 var beatmap = parser.parse(true);
 
                 if (beatmap == null) {
