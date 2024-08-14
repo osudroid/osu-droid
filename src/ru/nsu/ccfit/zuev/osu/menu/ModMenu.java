@@ -321,9 +321,7 @@ public class ModMenu implements IModSwitcher {
                 if (pSceneTouchEvent.isActionUp()) {
                     Execution.async(() -> {
                         if (GlobalManager.getInstance().getSongMenu().getSelectedBeatmap() != null) {
-                            try (var parser = new BeatmapParser(
-                                    GlobalManager.getInstance().getSongMenu().getSelectedBeatmap().getAudio()
-                            )) {
+                            try (var parser = new BeatmapParser(GlobalManager.getInstance().getSongMenu().getSelectedBeatmap().getPath())) {
                                 var beatmap = parser.parse(true);
                                 if (beatmap == null) {
                                     GlobalManager.getInstance().getSongMenu().setStarsDisplay(0);
