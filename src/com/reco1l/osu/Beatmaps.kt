@@ -188,6 +188,7 @@ data class BeatmapInfo(
     /**
      * The beatmap set.
      */
+    @Ignore
     lateinit var beatmapSet: BeatmapSetInfo
 
 
@@ -309,7 +310,7 @@ interface IBeatmapDAO {
      * It collects a list of [BeatmapSetInfo] that each one wraps its corresponding beatmaps.
      */
     @Transaction
-    @Query("SELECT DISTINCT parentPath FROM BeatmapInfo")
+    @Query("SELECT DISTINCT parentPath, parentId FROM BeatmapInfo")
     fun getBeatmapSetList() : List<BeatmapSetInfo>
 
 
