@@ -116,77 +116,77 @@ data class BeatmapInfo(
     /**
      * The approach rate.
      */
-    val approachRate: Float = 0f,
+    val approachRate: Float,
 
     /**
      * The overall difficulty.
      */
-    val overallDifficulty: Float = 0f,
+    val overallDifficulty: Float,
 
     /**
      * The circle size.
      */
-    val circleSize: Float = 0f,
+    val circleSize: Float,
 
     /**
      * The HP drain rate
      */
-    val hpDrainRate: Float = 0f,
+    val hpDrainRate: Float,
 
     /**
      * The cached osu!droid star rating.
      */
-    val droidStarRating: Float = 0f,
+    val droidStarRating: Float,
 
     /**
      * The cached osu!std star rating.
      */
-    val standardStarRating: Float = 0f,
+    val standardStarRating: Float,
 
     /**
      * The max BPM.
      */
-    val bpmMax: Float = 0f,
+    val bpmMax: Float,
 
     /**
      * The min BPM.
      */
-    val bpmMin: Float = 0f,
+    val bpmMin: Float,
 
     /**
      * The total length of the beatmap.
      */
-    val length: Long = 0,
+    val length: Long,
 
     /**
      * The preview time.
      */
-    val previewTime: Int = 0,
+    val previewTime: Int,
 
     /**
      * The total hit object count.
      */
-    val totalHitObjectCount: Int = 0,
+    val totalHitObjectCount: Int,
 
     /**
      * The hit circle count.
      */
-    val hitCircleCount: Int = 0,
+    val hitCircleCount: Int,
 
     /**
      * The slider count.
      */
-    val spinnerCount: Int = 0,
+    val spinnerCount: Int,
 
     /**
      * The spinner count.
      */
-    val sliderCount: Int = 0,
+    val sliderCount: Int,
 
     /**
      * The max combo.
      */
-    val maxCombo: Int = 0
+    val maxCombo: Int
 
 ) {
 
