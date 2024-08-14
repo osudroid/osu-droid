@@ -8,7 +8,7 @@ import java.util.Queue;
 public class SongMenuPool {
     private static final SongMenuPool instance = new SongMenuPool();
     private final Queue<MenuItemBackground> backgrounds = new LinkedList<>();
-    private final Queue<BeatmapItem> tracks = new LinkedList<>();
+    private final Queue<BeatmapItem> beatmapItems = new LinkedList<>();
     private int count = 0;
     private SongMenuPool() {
     }
@@ -19,13 +19,13 @@ public class SongMenuPool {
 
     public void init() {
         count = 0;
-        tracks.clear();
+        beatmapItems.clear();
         backgrounds.clear();
         for (int i = 0; i < 15; i++) {
             backgrounds.add(new MenuItemBackground());
         }
         for (int i = 0; i < 5; i++) {
-            tracks.add(new BeatmapItem());
+            beatmapItems.add(new BeatmapItem());
         }
         count = 20;
     }
@@ -43,17 +43,17 @@ public class SongMenuPool {
         backgrounds.add(background);
     }
 
-    public BeatmapItem newTrack() {
-        if (!tracks.isEmpty()) {
-            return tracks.poll();
+    public BeatmapItem newBeatmapItem() {
+        if (!beatmapItems.isEmpty()) {
+            return beatmapItems.poll();
         }
         count++;
         Debug.i("Count = " + count);
         return new BeatmapItem();
     }
 
-    public void putTrack(final BeatmapItem track) {
-        tracks.add(track);
+    public void putBeatmapItem(final BeatmapItem beatmapItem) {
+        beatmapItems.add(beatmapItem);
     }
 
 }

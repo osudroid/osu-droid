@@ -101,7 +101,14 @@ public class SongMenu implements IUpdateHandler, MenuItemListener,
     private float secPassed = 0, tapTime;
     private Sprite backButton = null;
     private ScrollBar scrollbar;
-    private ChangeableText trackInfo, mapper, beatmapInfoText, beatmapInfo2, dimensionInfo;
+
+    private ChangeableText
+            beatmapMetadataText,
+            beatmapCreatorText,
+            beatmapLengthText,
+            beatmapHitObjectsText,
+            beatmapDifficultyText;
+
     private boolean isSelectComplete = true;
     private AnimSprite scoringSwitcher = null;
     private FilterMenuFragment filterMenu = null;
@@ -281,25 +288,25 @@ public class SongMenu implements IUpdateHandler, MenuItemListener,
         songSelectTop.setAlpha(0.6f);
         frontLayer.attachChild(songSelectTop);
 
-        trackInfo = new ChangeableText(Utils.toRes(70), Utils.toRes(2),
+        beatmapMetadataText = new ChangeableText(Utils.toRes(70), Utils.toRes(2),
                 ResourceManager.getInstance().getFont("font"), "title", 1024);
-        frontLayer.attachChild(trackInfo);
+        frontLayer.attachChild(beatmapMetadataText);
 
-        mapper = new ChangeableText(Utils.toRes(70), trackInfo.getY() + trackInfo.getHeight() + Utils.toRes(2),
+        beatmapCreatorText = new ChangeableText(Utils.toRes(70), beatmapMetadataText.getY() + beatmapMetadataText.getHeight() + Utils.toRes(2),
                 ResourceManager.getInstance().getFont("middleFont"), "mapper", 1024);
-        frontLayer.attachChild(mapper);
+        frontLayer.attachChild(beatmapCreatorText);
 
-        beatmapInfoText = new ChangeableText(Utils.toRes(4), mapper.getY() + mapper.getHeight() + Utils.toRes(2),
+        beatmapLengthText = new ChangeableText(Utils.toRes(4), beatmapCreatorText.getY() + beatmapCreatorText.getHeight() + Utils.toRes(2),
                 ResourceManager.getInstance().getFont("middleFont"), "beatmapInfo", 1024);
-        frontLayer.attachChild(beatmapInfoText);
+        frontLayer.attachChild(beatmapLengthText);
 
-        beatmapInfo2 = new ChangeableText(Utils.toRes(4), beatmapInfoText.getY() + beatmapInfoText.getHeight() + Utils.toRes(2),
+        beatmapHitObjectsText = new ChangeableText(Utils.toRes(4), beatmapLengthText.getY() + beatmapLengthText.getHeight() + Utils.toRes(2),
                 ResourceManager.getInstance().getFont("middleFont"), "beatmapInfo2", 1024);
-        frontLayer.attachChild(beatmapInfo2);
+        frontLayer.attachChild(beatmapHitObjectsText);
 
-        dimensionInfo = new ChangeableText(Utils.toRes(4), beatmapInfo2.getY() + beatmapInfo2.getHeight() + Utils.toRes(2),
+        beatmapDifficultyText = new ChangeableText(Utils.toRes(4), beatmapHitObjectsText.getY() + beatmapHitObjectsText.getHeight() + Utils.toRes(2),
                 ResourceManager.getInstance().getFont("smallFont"), "dimensionInfo", 1024);
-        frontLayer.attachChild(dimensionInfo);
+        frontLayer.attachChild(beatmapDifficultyText);
 
 
         SkinLayout layoutBackButton = OsuSkin.get().getLayout("BackButton");
@@ -727,15 +734,15 @@ public class SongMenu implements IUpdateHandler, MenuItemListener,
 
     public void setFilter(final String filter, final SortOrder order,
                           final boolean favsOnly, Set<String> limit) {
-        String oldTrackFileName = "";
+        String oldBeatmapPath = "";
         if (GlobalManager.getInstance().getSelectedBeatmap() != null) {
-            oldTrackFileName = GlobalManager.getInstance().getSelectedBeatmap().getAudio();
+            oldBeatmapPath = GlobalManager.getInstance().getSelectedBeatmap().getAudio();
         }
         if (!order.equals(sortOrder)) {
             sortOrder = order;
             tryReloadMenuItems(sortOrder);
             sort();
-            reSelectItem(oldTrackFileName);
+            reSelectItem(oldBeatmapPath);
         }
         if (filter == null || filterText.equals(filter)) {
             if (favsOnly == this.favsOnly && limitC == limit) {
@@ -753,7 +760,7 @@ public class SongMenu implements IUpdateHandler, MenuItemListener,
         if (favsOnly != this.favsOnly) {
             this.favsOnly = favsOnly;
         } else {
-            reSelectItem(oldTrackFileName);
+            reSelectItem(oldBeatmapPath);
         }
         if (selectedItem != null && !selectedItem.isVisible()) {
             selectedItem = null;
@@ -924,15 +931,15 @@ public class SongMenu implements IUpdateHandler, MenuItemListener,
         long length = beatmapInfo.getLength();
         EnumSet<GameMod> mod = ModMenu.getInstance().getMod();
 
-        dimensionInfo.setColor(1, 1, 1);
-        beatmapInfoText.setColor(1, 1, 1);
+        beatmapDifficultyText.setColor(1, 1, 1);
+        beatmapLengthText.setColor(1, 1, 1);
 
         if (mod.contains(GameMod.MOD_EASY)) {
             ar *= 0.5f;
             od *= 0.5f;
             cs -= 1f;
             hp *= 0.5f;
-            dimensionInfo.setColor(46 / 255f, 139 / 255f, 87 / 255f);
+            beatmapDifficultyText.setColor(46 / 255f, 139 / 255f, 87 / 255f);
         }
         if (mod.contains(GameMod.MOD_HARDROCK) || mod.contains(GameMod.MOD_PRECISE)) {
             if (mod.contains(GameMod.MOD_HARDROCK)) {
@@ -941,7 +948,7 @@ public class SongMenu implements IUpdateHandler, MenuItemListener,
                 ++cs;
                 hp = Math.min(hp * 1.4f, 10);
             }
-            dimensionInfo.setColor(205 / 255f, 85 / 255f, 85 / 255f);
+            beatmapDifficultyText.setColor(205 / 255f, 85 / 255f, 85 / 255f);
         }
         if (ModMenu.getInstance().getChangeSpeed() != 1) {
             float speed = ModMenu.getInstance().getSpeed();
@@ -949,33 +956,33 @@ public class SongMenu implements IUpdateHandler, MenuItemListener,
             bpm_min *= speed;
             length /= speed;
             if (speed > 1) {
-                beatmapInfoText.setColor(205 / 255f, 85 / 255f, 85 / 255f);
-                dimensionInfo.setColor(205 / 255f, 85 / 255f, 85 / 255f);
+                beatmapLengthText.setColor(205 / 255f, 85 / 255f, 85 / 255f);
+                beatmapDifficultyText.setColor(205 / 255f, 85 / 255f, 85 / 255f);
             } else if (speed < 1) {
-                beatmapInfoText.setColor(46 / 255f, 139 / 255f, 87 / 255f);
-                dimensionInfo.setColor(46 / 255f, 139 / 255f, 87 / 255f);
+                beatmapLengthText.setColor(46 / 255f, 139 / 255f, 87 / 255f);
+                beatmapDifficultyText.setColor(46 / 255f, 139 / 255f, 87 / 255f);
             }
         } else {
             if (mod.contains(GameMod.MOD_DOUBLETIME)) {
                 bpm_max *= 1.5f;
                 bpm_min *= 1.5f;
                 length *= 2 / 3f;
-                beatmapInfoText.setColor(205 / 255f, 85 / 255f, 85 / 255f);
-                dimensionInfo.setColor(205 / 255f, 85 / 255f, 85 / 255f);
+                beatmapLengthText.setColor(205 / 255f, 85 / 255f, 85 / 255f);
+                beatmapDifficultyText.setColor(205 / 255f, 85 / 255f, 85 / 255f);
             }
             if (mod.contains(GameMod.MOD_NIGHTCORE)) {
                 bpm_max *= 1.5f;
                 bpm_min *= 1.5f;
                 length *= 2 / 3f;
-                beatmapInfoText.setColor(205 / 255f, 85 / 255f, 85 / 255f);
-                dimensionInfo.setColor(205 / 255f, 85 / 255f, 85 / 255f);
+                beatmapLengthText.setColor(205 / 255f, 85 / 255f, 85 / 255f);
+                beatmapDifficultyText.setColor(205 / 255f, 85 / 255f, 85 / 255f);
             }
             if (mod.contains(GameMod.MOD_HALFTIME)) {
                 bpm_max *= 0.75f;
                 bpm_min *= 0.75f;
                 length *= 4 / 3f;
-                beatmapInfoText.setColor(46 / 255f, 139 / 255f, 87 / 255f);
-                dimensionInfo.setColor(46 / 255f, 139 / 255f, 87 / 255f);
+                beatmapLengthText.setColor(46 / 255f, 139 / 255f, 87 / 255f);
+                beatmapDifficultyText.setColor(46 / 255f, 139 / 255f, 87 / 255f);
             }
         }
         if (mod.contains(GameMod.MOD_REALLYEASY)) {
@@ -992,7 +999,7 @@ public class SongMenu implements IUpdateHandler, MenuItemListener,
             od *= 0.5f;
             cs -= 1f;
             hp *= 0.5f;
-            dimensionInfo.setColor(46 / 255f, 139 / 255f, 87 / 255f);
+            beatmapDifficultyText.setColor(46 / 255f, 139 / 255f, 87 / 255f);
         }
 
         @SuppressLint("SimpleDateFormat") SimpleDateFormat sdf = new SimpleDateFormat("mm:ss");
@@ -1007,7 +1014,7 @@ public class SongMenu implements IUpdateHandler, MenuItemListener,
                     (bpm_min == bpm_max ? GameHelper.Round(bpm_min, 1) : GameHelper.Round(bpm_min, 1) + "-" + GameHelper.Round(bpm_max, 1)),
                     beatmapInfo.getMaxCombo());
         }
-        beatmapInfoText.setText(binfoStr);
+        beatmapLengthText.setText(binfoStr);
 
         final StringBuilder dimensionStringBuilder = new StringBuilder();
         if (ModMenu.getInstance().getChangeSpeed() != 1) {
@@ -1040,7 +1047,7 @@ public class SongMenu implements IUpdateHandler, MenuItemListener,
         }
 
         if (ar != rawAR || od != rawOD || cs != rawCS || hp != rawHP) {
-            dimensionInfo.setColor(255 / 255f, 180 / 255f, 0 / 255f);
+            beatmapDifficultyText.setColor(255 / 255f, 180 / 255f, 0 / 255f);
         }
 
         dimensionStringBuilder
@@ -1059,14 +1066,14 @@ public class SongMenu implements IUpdateHandler, MenuItemListener,
                 break;
         }
 
-        dimensionInfo.setText(dimensionStringBuilder.toString());
+        beatmapDifficultyText.setText(dimensionStringBuilder.toString());
     }
 
     public void switchDifficultyAlgorithm() {
         updateInfo(GlobalManager.getInstance().getSelectedBeatmap());
 
         if (selectedItem != null) {
-            selectedItem.reloadTracks();
+            selectedItem.reloadBeatmaps();
         }
     }
 
@@ -1082,9 +1089,9 @@ public class SongMenu implements IUpdateHandler, MenuItemListener,
         String mapperStr = "Beatmap by " + beatmapInfo.getCreator();
         String binfoStr2 = String.format(StringTable.get(R.string.binfoStr2),
                 beatmapInfo.getHitCircleCount(), beatmapInfo.getSliderCount(), beatmapInfo.getSpinnerCount(), beatmapInfo.getParentId());
-        trackInfo.setText(tinfoStr);
-        mapper.setText(mapperStr);
-        beatmapInfo2.setText(binfoStr2);
+        beatmapMetadataText.setText(tinfoStr);
+        beatmapCreatorText.setText(mapperStr);
+        beatmapHitObjectsText.setText(binfoStr2);
         changeDimensionInfo(beatmapInfo);
         Execution.async(() -> {
             try (var parser = new BeatmapParser(beatmapInfo.getPath())) {
@@ -1141,9 +1148,9 @@ public class SongMenu implements IUpdateHandler, MenuItemListener,
     public void selectBeatmap(final BeatmapInfo beatmapInfo, boolean reloadBG) {
 
         // Playing corresponding audio for the selected track.
-        var selectedAudioTrack = GlobalManager.getInstance().getSelectedBeatmap();
+        var selectedAudio = GlobalManager.getInstance().getSelectedBeatmap();
 
-        if (selectedAudioTrack == null || !Objects.equals(selectedAudioTrack.getAudio(), beatmapInfo.getAudio())) {
+        if (selectedAudio == null || !Objects.equals(selectedAudio.getAudio(), beatmapInfo.getAudio())) {
             playMusic(beatmapInfo.getAudio(), beatmapInfo.getPreviewTime());
         }
 
@@ -1518,10 +1525,10 @@ public class SongMenu implements IUpdateHandler, MenuItemListener,
     }
 
     public void setStarsDisplay(float star) {
-        String str = dimensionInfo.getText();
+        String str = beatmapDifficultyText.getText();
         String[] strs = str.split("Stars: ");
         if (strs.length == 2) {
-            dimensionInfo.setText(strs[0] + "Stars: " + star);
+            beatmapDifficultyText.setText(strs[0] + "Stars: " + star);
         }
     }
 
@@ -1542,11 +1549,11 @@ public class SongMenu implements IUpdateHandler, MenuItemListener,
             }
             for (final BeatmapSetItem item : items) {
                 if (item == null || !item.isVisible()) continue;
-                int trackid = item.tryGetCorrespondingBeatmapId(oldBeatmapPath);
-                if (trackid >= 0) {
+                int beatmapId = item.tryGetCorrespondingBeatmapId(oldBeatmapPath);
+                if (beatmapId >= 0) {
                     item.select(true, true);
-                    if (trackid != 0) {
-                        item.selectBeatmap(item.getBeatmapSpritesById(trackid), false);
+                    if (beatmapId != 0) {
+                        item.selectBeatmap(item.getBeatmapSpritesById(beatmapId), false);
                     }
                     break;
                 }

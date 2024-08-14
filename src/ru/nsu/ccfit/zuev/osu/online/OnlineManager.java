@@ -287,9 +287,9 @@ public class OnlineManager {
         return true;
     }
 
-    public ArrayList<String> getTop(final File trackFile, final String hash) throws OnlineManagerException {
+    public ArrayList<String> getTop(final File beatmapFile, final String hash) throws OnlineManagerException {
         PostBuilder post = new URLEncodedPostBuilder();
-        post.addParam("filename", trackFile.getName());
+        post.addParam("filename", beatmapFile.getName());
         post.addParam("hash", hash);
         post.addParam("uid", String.valueOf(userId));
 

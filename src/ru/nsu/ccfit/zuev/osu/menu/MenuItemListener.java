@@ -5,7 +5,7 @@ import com.reco1l.osu.BeatmapInfo;
 public interface MenuItemListener {
     void select(BeatmapSetItem item);
 
-    void selectBeatmap(BeatmapInfo track, boolean reloadBG);
+    void selectBeatmap(BeatmapInfo beatmapInfo, boolean reloadBG);
 
     void stopScroll(float y);
 

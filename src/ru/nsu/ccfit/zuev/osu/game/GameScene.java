@@ -122,7 +122,7 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
     private TimingPoint firstTimingPoint;
     private Queue<TimingPoint> timingPoints;
     private Queue<TimingPoint> activeTimingPoints;
-    private String trackMD5;
+    private String beatmapMD5;
     private int lastObjectId = -1;
     private float secPassed = 0;
     private float leadOut = 0;
@@ -605,12 +605,12 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
         offsetSum = 0;
         offsetRegs = 0;
 
-        File trackFile = new File(beatmapInfo.getPath());
-        trackMD5 = beatmapInfo.getMD5();
+        File beatmapFile = new File(beatmapInfo.getPath());
+        beatmapMD5 = beatmapInfo.getMD5();
         replaying = false;
         replay = new Replay();
         replay.setObjectCount(objects.size());
-        replay.setMap(trackFile.getParentFile().getName(), trackFile.getName(), trackMD5);
+        replay.setMap(beatmapFile.getParentFile().getName(), beatmapFile.getName(), beatmapMD5);
 
         if (replayFile != null) {
             replaying = replay.load(replayFile);
@@ -625,7 +625,7 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
 
         //TODO online
         if (!replaying)
-            OnlineScoring.getInstance().startPlay(beatmapInfo, trackMD5);
+            OnlineScoring.getInstance().startPlay(beatmapInfo, beatmapMD5);
 
         if (Config.isEnableStoryboard()) {
             storyboardSprite.loadStoryboard(beatmapInfo.getPath());
@@ -1716,7 +1716,7 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
 
                         ToastLogger.showText("Loading room statistics...", false);
                     }
-                    scoringScene.load(stat, lastBeatmapInfo, GlobalManager.getInstance().getSongService(), replayFile, trackMD5, null);
+                    scoringScene.load(stat, lastBeatmapInfo, GlobalManager.getInstance().getSongService(), replayFile, beatmapMD5, null);
                 }
                 GlobalManager.getInstance().getSongService().setVolume(0.2f);
                 engine.setScene(scoringScene.getScene());

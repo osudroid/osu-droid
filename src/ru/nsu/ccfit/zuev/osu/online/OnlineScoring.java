@@ -186,10 +186,10 @@ public class OnlineScoring {
         });
     }
 
-    public ArrayList<String> getTop(final File trackFile, final String hash) {
+    public ArrayList<String> getTop(final File beatmapFile, final String hash) {
         synchronized (onlineMutex) {
             try {
-                return OnlineManager.getInstance().getTop(trackFile, hash);
+                return OnlineManager.getInstance().getTop(beatmapFile, hash);
             } catch (OnlineManager.OnlineManagerException e) {
                 Debug.e("Cannot load scores " + e.getMessage());
                 return new ArrayList<>();

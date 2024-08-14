@@ -79,8 +79,8 @@ public class ScoreBoard extends Entity implements ScrollDetector.IScrollDetector
     public static String convertModString(StringBuilder sb, String s) {
         // Account for SC being removed.
         // Too dirty of a solution, but no other clean way :/
-        var track = GlobalManager.getInstance().getSelectedBeatmap();
-        var cs = track.getCircleSize();
+        var beatmapInfo = GlobalManager.getInstance().getSelectedBeatmap();
+        var cs = beatmapInfo.getCircleSize();
         var hasLegacySC = false;
 
         sb.setLength(0);
@@ -199,11 +199,11 @@ public class ScoreBoard extends Entity implements ScrollDetector.IScrollDetector
             @Override
             public void run() {
 
-                File trackFile = new File(beatmapInfo.getPath());
+                File beatmapFile = new File(beatmapInfo.getPath());
                 List<String> scores;
 
                 try {
-                    scores = OnlineManager.getInstance().getTop(trackFile, beatmapInfo.getMD5());
+                    scores = OnlineManager.getInstance().getTop(beatmapFile, beatmapInfo.getMD5());
                 } catch (OnlineManager.OnlineManagerException e) {
                     Debug.e("Cannot load scores " + e.getMessage());
                     
@@ -287,14 +287,14 @@ public class ScoreBoard extends Entity implements ScrollDetector.IScrollDetector
         loadExecutor.submit(currentTask);
     }
 
-    private void initFromLocal(BeatmapInfo track) {
+    private void initFromLocal(BeatmapInfo beatmap) {
 
         currentTask = new LoadTask(false) {
 
             @Override
             public void run() {
                 String[] columns = { "id", "playername", "score", "combo", "mark", "accuracy", "mode" };
-                try (Cursor scoreSet = ScoreLibrary.getInstance().getMapScores(columns, track.getPath())) {
+                try (Cursor scoreSet = ScoreLibrary.getInstance().getMapScores(columns, beatmap.getPath())) {
                     if (scoreSet == null || scoreSet.getCount() == 0 || !isActive()) {
 
                         // This allows the in-game leaderboard to show even if the local database is empty, it'll append

@@ -156,7 +156,7 @@ public class BeatmapItem extends Sprite {
             }
             if (!item.get().isBeatmapSelected(this)) {
                 ResourceManager.getInstance().getSound("menuclick").play();
-                item.get().deselectTrack();
+                item.get().deselectBeatmap();
             }
             item.get().selectBeatmap(this, false);
 
