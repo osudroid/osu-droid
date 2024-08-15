@@ -4,11 +4,16 @@ package com.reco1l.framework
  * A simple object pool implementation.
  *
  * @param T The type of object to pool.
- * @param initialSize The initial size of the pool.
+ * @param initialSize The initial size of the pool, by default 0.
+ * @param maxSize The maximum size of the pool, by default -1 (no limit).
  * @param factory The factory to use to create new objects.
  * @author Reco1l
  */
-class Pool<T : Any>(initialSize: Int = 0, private val maxSize: Int, private val factory: (Pool<T>) -> T) {
+class Pool<T : Any> @JvmOverloads constructor(
+    initialSize: Int = 0,
+    private val maxSize: Int = -1,
+    private val factory: (Pool<T>) -> T
+) {
 
 
     private val objects = mutableListOf<T>()
@@ -39,7 +44,7 @@ class Pool<T : Any>(initialSize: Int = 0, private val maxSize: Int, private val 
      */
     fun free(obj: T): Boolean {
 
-        if (objects.size >= maxSize) {
+        if (maxSize > 0 && objects.size >= maxSize) {
             return false
         }
 

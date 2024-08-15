@@ -599,6 +599,7 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
 
         GameObjectPool.getInstance().purge();
         Slider.tickSpritePool.clear();
+        FollowTrack.pointSpritePool.clear();
         Modifiers.clearPool();
 
         // TODO replay
