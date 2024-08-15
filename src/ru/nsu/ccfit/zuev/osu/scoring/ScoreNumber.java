@@ -10,10 +10,26 @@ import ru.nsu.ccfit.zuev.osu.ResourceManager;
 import ru.nsu.ccfit.zuev.skins.OsuSkin;
 
 public class ScoreNumber extends Entity {
+
+
+    private final float scale;
+
+    private final boolean center;
+
+
     private float height;
+
 
     public ScoreNumber(final float x, final float y, final String text, final float scale, final boolean center) {
         super(x, y);
+        this.scale = scale;
+        this.center = center;
+        setText(text);
+    }
+
+
+    public void setText(String text) {
+
         float totalWidth = 0;
         for (int i = 0; i < text.length(); i++) {
 
@@ -49,8 +65,9 @@ public class ScoreNumber extends Entity {
                         new ScaleModifier(0.2f, scale, scale * 1.5f),
                         new ScaleModifier(0.4f, scale * 1.5f, scale)));
             }
-        }// if center
+        }
     }
+
 
     // Leaving this to support old usages.
     public void attachToScene(final Scene scene) {

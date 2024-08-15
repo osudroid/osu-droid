@@ -256,6 +256,10 @@ class UniversalModifier(private val pool: Pool<UniversalModifier>? = null) : IMo
             _modifiers = null
         }
 
+        if (type == SEQUENCE || type == PARALLEL || type == NONE) {
+            data.fill(0f)
+        }
+
         _type = type
         setDuration(_duration)
         return this

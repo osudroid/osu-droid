@@ -27,6 +27,7 @@ public class Spinner extends GameObject {
     private final Sprite spinText;
     private final TextureRegion mregion;
     private final Sprite clearText;
+    private final ScoreNumber bonusScore;
     private PointF oldMouse;
     private GameObjectListener listener;
     private Scene scene;
@@ -37,7 +38,6 @@ public class Spinner extends GameObject {
     private int soundId;
     private int sampleSet;
     private int addition;
-    private ScoreNumber bonusScore = null;
     private int score = 1;
     private float metreY;
     private StatisticV2 stat;
@@ -67,6 +67,7 @@ public class Spinner extends GameObject {
                 .getInstance().getTexture("spinner-spin"));
 
         clearText = new CentredSprite(center.x, center.y * 0.5f, ResourceManager.getInstance().getTexture("spinner-clear"));
+        bonusScore = new ScoreNumber(center.x, center.y + 100, "", 1.1f, true);
     }
 
     public void init(final GameObjectListener listener, final Scene scene,
@@ -86,7 +87,6 @@ public class Spinner extends GameObject {
         startHit = true;
         clear = false;
         if(totalTime <= 0f) clear = true;
-        bonusScore = null;
         score = 1;
         ResourceManager.getInstance().checkSpinnerTextures();
 
@@ -120,25 +120,21 @@ public class Spinner extends GameObject {
         if (GameHelper.isHidden()) {
             approachCircle.setVisible(false);
         }
-        approachCircle.registerEntityModifier(
-            Modifiers.sequence(
-                Modifiers.delay(pretime),
-                Modifiers.parallel(
-                    Modifiers.alpha(time, 0.75f, 1),
-                    Modifiers.scale(time, 2.0f, 0)
-                )
-            ).setOnFinished(entity -> Execution.updateThread(Spinner.this::removeFromScene))
-        );
+        approachCircle.registerEntityModifier(Modifiers.sequence(
+            Modifiers.delay(pretime),
+            Modifiers.parallel(
+                Modifiers.alpha(time, 0.75f, 1),
+                Modifiers.scale(time, 2.0f, 0)
+            )
+        ).setOnFinished(entity -> Execution.updateThread(this::removeFromScene)));
 
         spinText.setAlpha(0);
-        spinText.registerEntityModifier(
-            Modifiers.sequence(
-                Modifiers.delay(pretime * 0.75f),
-                Modifiers.fadeIn(pretime * 0.25f),
-                Modifiers.delay(pretime / 2),
-                Modifiers.fadeOut(pretime * 0.25f)
-            )
-        );
+        spinText.registerEntityModifier(Modifiers.sequence(
+            Modifiers.delay(pretime * 0.75f),
+            Modifiers.fadeIn(pretime * 0.25f),
+            Modifiers.delay(pretime / 2),
+            Modifiers.fadeOut(pretime * 0.25f)
+        ));
 
         scene.attachChild(spinText, 0);
         scene.attachChild(approachCircle, 0);
@@ -151,19 +147,14 @@ public class Spinner extends GameObject {
     }
 
     void removeFromScene() {
-        if (clearText != null) {
-            scene.detachChild(clearText);
-        }
+        scene.detachChild(clearText);
         scene.detachChild(spinText);
         scene.detachChild(background);
         approachCircle.detachSelf();
         scene.detachChild(circle);
         scene.detachChild(metre);
-        // GameObjectPool.getInstance().putSpinner(this);
+        scene.detachChild(bonusScore);
 
-        if (bonusScore != null) {
-            bonusScore.detachFromScene(scene);
-        }
         listener.removeObject(Spinner.this);
         int score = 0;
         if (replayObjectData != null) {
@@ -282,12 +273,11 @@ public class Spinner extends GameObject {
                 scene.attachChild(clearText);
                 clear = true;
             } else if (Math.abs(rotations) > 1) {
-                if (bonusScore != null) {
+                if (bonusScore.hasParent()) {
                     scene.detachChild(bonusScore);
                 }
                 rotations -= 1 * Math.signum(rotations);
-                bonusScore = new ScoreNumber(center.x, center.y + 100,
-                        String.valueOf(score * 1000), 1.1f, true);
+                bonusScore.setText(String.valueOf(score * 1000));
                 listener.onSpinnerHit(id, 1000, false, 0);
                 score++;
                 scene.attachChild(bonusScore);

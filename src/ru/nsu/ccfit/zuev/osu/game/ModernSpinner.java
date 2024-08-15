@@ -28,6 +28,7 @@ public class ModernSpinner extends Spinner {
     private final Sprite glow;
     // private final Sprite spin;
     // private final Sprite clear;
+    private final ScoreNumber bonusScore;
 
     private GameObjectListener listener;
     private Scene scene;
@@ -39,7 +40,6 @@ public class ModernSpinner extends Spinner {
     private boolean clear;
     private int score = 1;
     private StatisticV2 stat;
-    private ScoreNumber bonusScore;
     private PointF oldMouse;
     private float totalTime;
 
@@ -55,6 +55,8 @@ public class ModernSpinner extends Spinner {
         bottom = new CentredSprite(center.x, center.y, ResourceManager.getInstance().getTexture("spinner-bottom"));
         top = new CentredSprite(center.x, center.y, ResourceManager.getInstance().getTexture("spinner-top"));
         glow = new CentredSprite(center.x, center.y, ResourceManager.getInstance().getTexture("spinner-glow"));
+
+        bonusScore = new ScoreNumber(center.x, center.y + 100, "", 1.1f, true);
     }
 
     public void init(GameObjectListener listener, Scene scene,
@@ -92,9 +94,11 @@ public class ModernSpinner extends Spinner {
         scene.attachChild(middle);
         scene.attachChild(middle2);
 
-        top.registerEntityModifier(Modifiers.fadeIn(aheadTime).setOnFinished(entity -> {
-            Execution.updateThread(ModernSpinner.this::removeFromScene);
-        }));
+        top.registerEntityModifier(Modifiers.sequence(
+            Modifiers.fadeIn(aheadTime),
+            Modifiers.delay(time).setOnFinished(entity -> Execution.updateThread(this::removeFromScene))
+        ));
+
         bottom.registerEntityModifier(Modifiers.fadeIn(aheadTime));
         middle.registerEntityModifier(Modifiers.fadeIn(aheadTime));
         middle2.registerEntityModifier(Modifiers.fadeIn(aheadTime));
@@ -170,12 +174,11 @@ public class ModernSpinner extends Spinner {
                 // Clear Sprite
                 clear = true;
             } else if (Math.abs(rotations) > 1) {
-                if (bonusScore != null) {
+                if (bonusScore.hasParent()) {
                     scene.detachChild(bonusScore);
                 }
                 rotations -= 1 * Math.signum(rotations);
-                bonusScore = new ScoreNumber(center.x, center.y + 100,
-                        String.valueOf(score * 1000), 1.1f, true);
+                bonusScore.setText(String.valueOf(score * 1000));
                 listener.onSpinnerHit(id, 1000, false, 0);
                 score++;
                 scene.attachChild(bonusScore);
@@ -219,11 +222,8 @@ public class ModernSpinner extends Spinner {
         scene.detachChild(bottom);
         scene.detachChild(top);
         scene.detachChild(glow);
-        // GameObjectPool.getInstance().putSpinner(this);
+        scene.detachChild(bonusScore);
 
-        if (bonusScore != null) {
-            bonusScore.detachFromScene(scene);
-        }
         listener.removeObject(ModernSpinner.this);
         int score = 0;
         if (replayObjectData != null) {
