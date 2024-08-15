@@ -25,7 +25,7 @@ import ru.nsu.ccfit.zuev.osuplus.R;
 
 public class BeatmapSetItem {
     private final BeatmapItem[] beatmapItems;
-    private final BeatmapSetInfo beatmapSetInfo;
+    private BeatmapSetInfo beatmapSetInfo;
     private final String beatmapSetDir;
     private final int bgHeight;
     private final String titleStr;
@@ -90,9 +90,15 @@ public class BeatmapSetItem {
 
     }
 
+
+    public void setBeatmapSetInfo(BeatmapSetInfo beatmapSetInfo) {
+        this.beatmapSetInfo = beatmapSetInfo;
+    }
+
     public BeatmapSetInfo getBeatmapSetInfo() {
         return beatmapSetInfo;
     }
+
 
     public void updateMarks() {
         for (final BeatmapItem tr : beatmapItems) {

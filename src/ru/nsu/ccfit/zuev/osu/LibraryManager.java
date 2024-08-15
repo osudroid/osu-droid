@@ -229,24 +229,23 @@ public class LibraryManager {
 
     @Nullable
     public static BeatmapInfo findBeatmapByMD5(String md5) {
-        if (md5 == null)
+
+        if (md5 == null) {
             return null;
-
-        int i = library.size() - 1;
-
-        while (i >= 0) {
-            var tracks = library.get(i).getBeatmaps();
-
-            int j = tracks.size() - 1;
-            while (j >= 0) {
-                var track = tracks.get(j);
-
-                if (md5.equals(track.getMD5()))
-                    return track;
-                --j;
-            }
-            --i;
         }
+
+        for (int i = library.size() - 1; i >= 0; i--) {
+            var beatmaps = library.get(i).getBeatmaps();
+
+            for (int j = beatmaps.size() - 1; j >= 0; j--) {
+                var beatmap = beatmaps.get(j);
+
+                if (md5.equals(beatmap.getMD5())) {
+                    return beatmap;
+                }
+            }
+        }
+
         return null;
     }
 

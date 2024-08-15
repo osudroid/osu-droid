@@ -1085,6 +1085,27 @@ public class SongMenu implements IUpdateHandler, MenuItemListener,
         }
     }
 
+
+    public void rebindItemsData() {
+
+        var library = LibraryManager.getLibrary();
+
+        // Rebind the new beatmap set info instance to the items.
+        for (int i = items.size() - 1; i >= 0; i--) {
+            var item = items.get(i);
+
+            for (int j = library.size() - 1; j >= 0; j--) {
+                var set = library.get(j);
+
+                if (item.getBeatmapSetInfo().equals(set)) {
+                    item.setBeatmapSetInfo(set);
+                    break;
+                }
+            }
+        }
+    }
+
+
     public void updateInfo(BeatmapInfo beatmapInfo) {
         if (beatmapInfo == null) {
             return;
@@ -1110,15 +1131,18 @@ public class SongMenu implements IUpdateHandler, MenuItemListener,
                     return;
                 }
 
-                selectedBeatmap = BeatmapInfo.from(beatmap, beatmapInfo.getParentPath(), beatmapInfo.getDateImported(), beatmapInfo.getPath());
                 // Replace the entry in the database in case of changes.
-                DatabaseManager.getBeatmapTable().insert(selectedBeatmap);
-
+                DatabaseManager.getBeatmapTable().insert(BeatmapInfo.from(
+                        beatmap,
+                        beatmapInfo.getParentPath(),
+                        beatmapInfo.getDateImported(),
+                        beatmapInfo.getPath()
+                ));
                 LibraryManager.loadLibrary();
-                selectedBeatmap = LibraryManager.findBeatmapByMD5(selectedBeatmap.getMD5());
 
+                selectedBeatmap = LibraryManager.findBeatmapByMD5(beatmap.md5);
                 GlobalManager.getInstance().setSelectedBeatmap(selectedBeatmap);
-
+                rebindItemsData();
 
                 changeDimensionInfo(beatmapInfo);
 
@@ -1166,7 +1190,7 @@ public class SongMenu implements IUpdateHandler, MenuItemListener,
             playMusic(beatmapInfo.getAudio(), beatmapInfo.getPreviewTime());
         }
 
-        if (selectedBeatmap == beatmapInfo) {
+        if (selectedBeatmap != null && selectedBeatmap.equals(beatmapInfo)) {
             synchronized (bgMutex) {
                 if (!bgLoaded) {
                     return;

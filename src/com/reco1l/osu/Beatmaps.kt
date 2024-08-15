@@ -190,6 +190,10 @@ data class BeatmapInfo(
 
 ) {
 
+
+    override fun equals(other: Any?) = other is BeatmapInfo && other.path == path
+
+
     companion object {
 
         /**
