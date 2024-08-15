@@ -60,7 +60,7 @@ data class BeatmapInfo(
     /**
      * This indicates the parent set ID.
      */
-    val parentId: Int,
+    val parentId: Int?,
 
 
     // Metadata
@@ -312,7 +312,7 @@ data class BeatmapSetInfo(
      * The ID.
      */
     @ColumnInfo(name = "parentId")
-    val id: Int,
+    val id: Int?,
 
     /**
      * This can equal to the set ID or its MD5.
