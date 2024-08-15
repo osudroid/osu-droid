@@ -1111,10 +1111,7 @@ public class SongMenu implements IUpdateHandler, MenuItemListener,
             return;
         }
 
-        var artist = Config.isForceRomanized() ? beatmapInfo.getArtist() : beatmapInfo.getArtistUnicode();
-        var title = Config.isForceRomanized() ? beatmapInfo.getTitle() : beatmapInfo.getTitleUnicode();
-
-        String tinfoStr = title + " - " + artist + " [" + beatmapInfo.getVersion() + "]";
+        String tinfoStr = beatmapInfo.getTitleText() + " - " + beatmapInfo.getArtistText() + " [" + beatmapInfo.getVersion() + "]";
         String mapperStr = "Beatmap by " + beatmapInfo.getCreator();
         String binfoStr2 = String.format(StringTable.get(R.string.binfoStr2),
                 beatmapInfo.getHitCircleCount(), beatmapInfo.getSliderCount(), beatmapInfo.getSpinnerCount(), beatmapInfo.getParentId());

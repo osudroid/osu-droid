@@ -1,8 +1,8 @@
 package com.reco1l.osu
 
 import androidx.room.*
-import com.reco1l.toolkt.kotlin.fastForEach
 import com.rian.osu.difficulty.BeatmapDifficultyCalculator
+import ru.nsu.ccfit.zuev.osu.Config
 import ru.nsu.ccfit.zuev.osu.game.GameHelper
 import kotlin.math.max
 import kotlin.math.min
@@ -190,6 +190,21 @@ data class BeatmapInfo(
      */
     val totalHitObjectCount
         get() = hitCircleCount + sliderCount + spinnerCount
+
+    /**
+     * Returns the title text based on the current configuration, whether romanization is forced it
+     * will return [title], otherwise [titleUnicode] if it's not blank.
+     */
+    val titleText
+        get() = if (Config.isForceRomanized()) title else titleUnicode.takeUnless { it.isBlank() } ?: title
+
+
+    /**
+     * Returns the artist text based on the current configuration, whether romanization is forced it
+     * will return [artist], otherwise [artistUnicode] if it's not blank.
+     */
+    val artistText
+        get() = if (Config.isForceRomanized()) artist else artistUnicode.takeUnless { it.isBlank() } ?: artist
 
 
     override fun equals(other: Any?) = other is BeatmapInfo && other.path == path

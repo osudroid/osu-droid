@@ -66,7 +66,7 @@ public class BeatmapItem extends Sprite {
     public void setBeatmapInfo(final BeatmapInfo beatmapInfo) {
         this.beatmapInfo = beatmapInfo;
         beatmapTitle.setText(beatmapInfo.getVersion() + " (" + beatmapInfo.getCreator() + ")");
-        beatmapLeftText.setText("\n" + beatmapInfo.getTitle());
+        beatmapLeftText.setText("\n" + beatmapInfo.getTitleText());
 
         for (final Sprite s : stars) {
             s.setVisible(false);

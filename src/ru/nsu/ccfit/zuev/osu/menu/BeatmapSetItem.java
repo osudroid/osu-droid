@@ -53,9 +53,7 @@ public class BeatmapSetItem {
 //                + (beatmap.getTitleUnicode() == null ? beatmap.getTitle() : beatmap.getTitleUnicode());
         var beatmapInfo = this.beatmapSetInfo.getBeatmaps().get(0);
 
-        var artist = Config.isForceRomanized() ? beatmapInfo.getArtist() : beatmapInfo.getArtistUnicode();
-        var title = Config.isForceRomanized() ? beatmapInfo.getTitle() : beatmapInfo.getTitleUnicode();
-        titleStr = artist + " - " + title;
+        titleStr = beatmapInfo.getArtistText() + " - " + beatmapInfo.getTitleText();
 
         creatorStr = StringTable.format(R.string.menu_creator,
                 beatmapInfo.getCreator());
@@ -78,9 +76,7 @@ public class BeatmapSetItem {
 //                + (beatmap.getTitleUnicode() == null ? beatmap.getTitle() : beatmap.getTitleUnicode());
         var beatmapInfo = this.beatmapSetInfo.getBeatmaps().get(0);
 
-        var artist = Config.isForceRomanized() ? beatmapInfo.getArtist() : beatmapInfo.getArtistUnicode();
-        var title = Config.isForceRomanized() ? beatmapInfo.getTitle() : beatmapInfo.getTitleUnicode();
-        titleStr = artist + " - " + title;
+        titleStr = beatmapInfo.getArtistText() + " - " + beatmapInfo.getTitleText();
 
         creatorStr = StringTable.format(R.string.menu_creator, beatmapInfo.getCreator());
         beatmapItems = new BeatmapItem[1];

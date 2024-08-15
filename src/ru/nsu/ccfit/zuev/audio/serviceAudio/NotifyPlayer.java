@@ -29,7 +29,6 @@ import androidx.core.app.NotificationManagerCompat;
 import com.reco1l.osu.BeatmapInfo;
 
 import ru.nsu.ccfit.zuev.audio.Status;
-import ru.nsu.ccfit.zuev.osu.Config;
 import ru.nsu.ccfit.zuev.osu.GlobalManager;
 import ru.nsu.ccfit.zuev.osu.LibraryManager;
 import ru.nsu.ccfit.zuev.osu.MainActivity;
@@ -134,15 +133,13 @@ public class NotifyPlayer {
             create();
 
         Bitmap bitmap = null;
-        String title = Config.isForceRomanized() ? beatmap.getTitle() : beatmap.getTitleUnicode();
-        String artist = Config.isForceRomanized() ? beatmap.getArtist() : beatmap.getArtistUnicode();
 
         if (beatmap.getBackground() != null) {
             bitmap = BitmapFactory.decodeFile(beatmap.getBackground());
         }
 
-        builder.setContentTitle(title);
-        builder.setContentText(artist);
+        builder.setContentTitle(beatmap.getTitleText());
+        builder.setContentText(beatmap.getArtistText());
         builder.setLargeIcon(bitmap != null ? bitmap : defaultIcon);
 
         notification = builder.build();

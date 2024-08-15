@@ -423,10 +423,7 @@ public class ScoringScene {
             scene.attachChild(modSprite);
         }
 
-        var artist = Config.isForceRomanized() ? this.beatmapInfo.getArtist() : this.beatmapInfo.getArtistUnicode();
-        var title = Config.isForceRomanized() ? this.beatmapInfo.getTitle() : this.beatmapInfo.getTitleUnicode();
-
-        String infoStr = artist + " - " + title + " [" + this.beatmapInfo.getVersion() + "]";
+        String infoStr = beatmapInfo.getArtistText() + " - " + beatmapInfo.getTitleText() + " [" + this.beatmapInfo.getVersion() + "]";
 
         String mapperStr = "Beatmap by " + this.beatmapInfo.getCreator();
         String playerStr = "Played by " + stat.getPlayerName() + " on " +
