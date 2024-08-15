@@ -43,7 +43,7 @@ object DatabaseManager {
  * The osu!droid database object class, this should be unique per instance.
  */
 @Database(
-    version = 1,
+    version = 2,
     entities = [
         BeatmapInfo::class,
     ]
