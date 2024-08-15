@@ -164,11 +164,6 @@ data class BeatmapInfo(
     val previewTime: Int,
 
     /**
-     * The total hit object count.
-     */
-    val totalHitObjectCount: Int,
-
-    /**
      * The hit circle count.
      */
     val hitCircleCount: Int,
@@ -189,6 +184,12 @@ data class BeatmapInfo(
     val maxCombo: Int
 
 ) {
+
+    /**
+     * The total hit object count.
+     */
+    val totalHitObjectCount
+        get() = hitCircleCount + sliderCount + spinnerCount
 
 
     override fun equals(other: Any?) = other is BeatmapInfo && other.path == path
@@ -254,7 +255,6 @@ data class BeatmapInfo(
                 bpmMax = bpmMax,
                 length = data.duration.toLong(),
                 previewTime = data.general.previewTime,
-                totalHitObjectCount = data.hitObjects.objects.size,
                 hitCircleCount = data.hitObjects.circleCount,
                 sliderCount = data.hitObjects.sliderCount,
                 spinnerCount = data.hitObjects.spinnerCount,
