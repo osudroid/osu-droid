@@ -40,7 +40,7 @@ object DatabaseManager {
             // Is preferable to support migrations, otherwise destructive migration will run forcing
             // tables to recreate (in case of beatmaps table it'll re-import all beatmaps).
             // See https://developer.android.com/training/data-storage/room/migrating-db-versions.
-            .fallbackToDestructiveMigration()
+            //.fallbackToDestructiveMigration()
             .allowMainThreadQueries()
             .build()
     }
@@ -51,7 +51,7 @@ object DatabaseManager {
  * The osu!droid database object class, this should be unique per instance.
  */
 @Database(
-    version = 2,
+    version = 1,
     entities = [
         BeatmapInfo::class,
         Score::class
