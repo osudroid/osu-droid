@@ -41,40 +41,51 @@ public class ScoreLibrary {
         var helper = DBOpenHelper.getOrCreate(context);
 
         // Importing scores from the old database to the new database.
+        GlobalManager.getInstance().setInfo("Importing scores from old database...");
+
         try (var db = helper.getWritableDatabase()) {
 
             String[] columns = { "id", "playername", "score", "combo", "mark", "accuracy", "mode" };
 
-            try (var row = db.query(DBOpenHelper.SCORES_TABLENAME, columns, null, null, null, null, null)) {
+            try (var cursor = db.query(DBOpenHelper.SCORES_TABLENAME, columns, null, null, null, null, null)) {
 
-                while (row.moveToNext()) try {
+                var pendingScores = cursor.getCount();
+
+                while (cursor.moveToNext()) try {
 
                     var score = new Score(
-                            row.getInt(row.getColumnIndexOrThrow("id")),
-                            row.getString(row.getColumnIndexOrThrow("filename")),
-                            row.getString(row.getColumnIndexOrThrow("playername")),
-                            row.getString(row.getColumnIndexOrThrow("replayfile")),
-                            row.getString(row.getColumnIndexOrThrow("mode")),
-                            row.getInt(row.getColumnIndexOrThrow("score")),
-                            row.getInt(row.getColumnIndexOrThrow("combo")),
-                            row.getString(row.getColumnIndexOrThrow("mark")),
-                            row.getInt(row.getColumnIndexOrThrow("h300k")),
-                            row.getInt(row.getColumnIndexOrThrow("h300")),
-                            row.getInt(row.getColumnIndexOrThrow("h100k")),
-                            row.getInt(row.getColumnIndexOrThrow("h100")),
-                            row.getInt(row.getColumnIndexOrThrow("h50")),
-                            row.getInt(row.getColumnIndexOrThrow("misses")),
-                            row.getFloat(row.getColumnIndexOrThrow("accuracy")),
-                            row.getLong(row.getColumnIndexOrThrow("time")),
-                            row.getInt(row.getColumnIndexOrThrow("perfect")) == 1
+                            cursor.getInt(cursor.getColumnIndexOrThrow("id")),
+                            cursor.getString(cursor.getColumnIndexOrThrow("filename")),
+                            cursor.getString(cursor.getColumnIndexOrThrow("playername")),
+                            cursor.getString(cursor.getColumnIndexOrThrow("replayfile")),
+                            cursor.getString(cursor.getColumnIndexOrThrow("mode")),
+                            cursor.getInt(cursor.getColumnIndexOrThrow("score")),
+                            cursor.getInt(cursor.getColumnIndexOrThrow("combo")),
+                            cursor.getString(cursor.getColumnIndexOrThrow("mark")),
+                            cursor.getInt(cursor.getColumnIndexOrThrow("h300k")),
+                            cursor.getInt(cursor.getColumnIndexOrThrow("h300")),
+                            cursor.getInt(cursor.getColumnIndexOrThrow("h100k")),
+                            cursor.getInt(cursor.getColumnIndexOrThrow("h100")),
+                            cursor.getInt(cursor.getColumnIndexOrThrow("h50")),
+                            cursor.getInt(cursor.getColumnIndexOrThrow("misses")),
+                            cursor.getFloat(cursor.getColumnIndexOrThrow("accuracy")),
+                            cursor.getLong(cursor.getColumnIndexOrThrow("time")),
+                            cursor.getInt(cursor.getColumnIndexOrThrow("perfect")) == 1
                     );
 
                     DatabaseManager.getScoreTable().insertScore(score);
+
+                    // Removing the score from the old database so if the process fails we can try again later.
+                    db.delete(DBOpenHelper.SCORES_TABLENAME, "id = ?", new String[] { String.valueOf(score.getId()) });
+                    pendingScores--;
 
                 } catch (Exception e) {
                     Log.e("ScoreLibrary", "Failed to import score from old database.", e);
                 }
 
+                if (pendingScores <= 0) {
+                    oldDatabaseFile.delete();
+                }
             }
 
         } catch (Exception e) {
