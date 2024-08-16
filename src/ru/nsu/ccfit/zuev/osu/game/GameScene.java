@@ -12,7 +12,7 @@ import com.edlplan.framework.utils.functionality.SmartIterator;
 import com.edlplan.osu.support.timing.TimingPoints;
 import com.edlplan.osu.support.timing.controlpoint.ControlPoints;
 import com.reco1l.ibancho.RoomAPI;
-import com.reco1l.osu.BeatmapInfo;
+import com.reco1l.osu.data.BeatmapInfo;
 import com.reco1l.osu.Execution;
 import com.reco1l.osu.graphics.BlankTextureRegion;
 import com.reco1l.osu.graphics.VideoSprite;
@@ -2792,7 +2792,7 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
                     + ctime.substring(0, Math.min(3, ctime.length())) + ".odr";
             replay.setStat(stat);
             replay.save(replayFile);
-            ScoreLibrary.getInstance().addScore(lastBeatmapInfo.getPath(), stat, replayFile);
+            ScoreLibrary.addScore(lastBeatmapInfo.getPath(), stat, replayFile);
             ToastLogger.showText(StringTable.get(R.string.message_save_replay_successful), true);
             replayFile = null;
             return true;

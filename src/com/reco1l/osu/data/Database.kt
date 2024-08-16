@@ -1,4 +1,4 @@
-package com.reco1l.osu
+package com.reco1l.osu.data
 
 import android.content.Context
 import androidx.room.*
@@ -21,6 +21,13 @@ object DatabaseManager {
     val beatmapTable
         get() = database.getBeatmapTable()
 
+    /**
+     * Get the scores table.
+     */
+    @JvmStatic
+    val scoreTable
+        get() = database.getScoreTable()
+
 
     private lateinit var database: DroidDatabase
 
@@ -34,6 +41,7 @@ object DatabaseManager {
             // tables to recreate (in case of beatmaps table it'll re-import all beatmaps).
             // See https://developer.android.com/training/data-storage/room/migrating-db-versions.
             .fallbackToDestructiveMigration()
+            .allowMainThreadQueries()
             .build()
     }
 
@@ -46,10 +54,13 @@ object DatabaseManager {
     version = 2,
     entities = [
         BeatmapInfo::class,
+        Score::class
     ]
 )
 abstract class DroidDatabase : RoomDatabase() {
 
     abstract fun getBeatmapTable(): IBeatmapDAO
+
+    abstract fun getScoreTable(): IScoreDAO
 
 }

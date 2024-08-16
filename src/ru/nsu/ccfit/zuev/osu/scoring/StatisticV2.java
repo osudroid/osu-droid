@@ -9,7 +9,7 @@ import java.util.Random;
 
 import com.reco1l.ibancho.data.RoomTeam;
 import com.reco1l.ibancho.data.WinCondition;
-import com.reco1l.osu.BeatmapInfo;
+import com.reco1l.osu.data.BeatmapInfo;
 import com.reco1l.osu.multiplayer.Multiplayer;
 import org.jetbrains.annotations.Nullable;
 import org.json.JSONObject;

@@ -31,7 +31,7 @@ import ru.nsu.ccfit.zuev.audio.serviceAudio.SongService;
 import ru.nsu.ccfit.zuev.osu.Config;
 import ru.nsu.ccfit.zuev.osu.GlobalManager;
 import ru.nsu.ccfit.zuev.osu.ResourceManager;
-import com.reco1l.osu.BeatmapInfo;
+import com.reco1l.osu.data.BeatmapInfo;
 import ru.nsu.ccfit.zuev.osu.Utils;
 import ru.nsu.ccfit.zuev.osu.game.GameScene;
 import ru.nsu.ccfit.zuev.osu.game.cursor.flashlight.FlashLightEntity;
@@ -547,7 +547,7 @@ public class ScoringScene {
         if (beatmapInfo != null && beatmapInfo.getMD5().equals(mapMD5)) {
             ResourceManager.getInstance().getSound("applause").play();
             if (!Multiplayer.isMultiplayer || !GlobalManager.getInstance().getGameScene().hasFailed) {
-                ScoreLibrary.getInstance().addScore(beatmapInfo.getPath(), stat, replay);
+                ScoreLibrary.addScore(beatmapInfo.getPath(), stat, replay);
             }
 
             if (stat.getTotalScoreWithMultiplier() > 0 && OnlineManager.getInstance().isStayOnline() &&
@@ -574,7 +574,7 @@ public class ScoringScene {
                         OnlineManager.getInstance().getPP());
                 scene.registerTouchArea(sendingPanel.getDismissTouchArea());
                 scene.attachChild(sendingPanel);
-                ScoreLibrary.getInstance().sendScoreOnline(stat, replay, sendingPanel);
+                ScoreLibrary.sendScoreOnline(stat, replay, sendingPanel);
             }
         }
     }

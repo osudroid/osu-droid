@@ -4,14 +4,13 @@ import android.annotation.SuppressLint;
 import android.app.Activity;
 
 import com.edlplan.favorite.FavoriteLibrary;
-import com.edlplan.replay.OdrDatabase;
 import com.edlplan.ui.fragment.FilterMenuFragment;
 import com.edlplan.ui.fragment.PropsMenuFragment;
 import com.edlplan.ui.fragment.ScoreMenuFragment;
 import com.reco1l.ibancho.RoomAPI;
-import com.reco1l.osu.BeatmapInfo;
-import com.reco1l.osu.BeatmapSetInfo;
-import com.reco1l.osu.DatabaseManager;
+import com.reco1l.osu.data.BeatmapInfo;
+import com.reco1l.osu.data.BeatmapSetInfo;
+import com.reco1l.osu.data.DatabaseManager;
 import com.reco1l.osu.Execution;
 import com.reco1l.osu.multiplayer.Multiplayer;
 import com.reco1l.osu.multiplayer.RoomScene;
@@ -180,8 +179,6 @@ public class SongMenu implements IUpdateHandler, MenuItemListener,
         bgLoaded = true;
         SongMenuPool.getInstance().init();
         loadFilterFragment();
-
-        bindDataBaseChangedListener();
 
         scene.attachChild(backLayer);
         scene.attachChild(frontLayer);
@@ -1319,7 +1316,7 @@ public class SongMenu implements IUpdateHandler, MenuItemListener,
         }
 
 
-        StatisticV2 stat = ScoreLibrary.getInstance().getScore(id);
+        StatisticV2 stat = ScoreLibrary.getScore(id);
         if (stat.isLegacySC()) {
             stat.processLegacySC(selectedBeatmap);
         }
@@ -1342,7 +1339,6 @@ public class SongMenu implements IUpdateHandler, MenuItemListener,
     }
 
     private void back(boolean resetMultiplayerBeatmap) {
-        unbindDataBaseChangedListener();
 
         if (Multiplayer.isMultiplayer) {
             if (resetMultiplayerBeatmap) {
@@ -1410,14 +1406,6 @@ public class SongMenu implements IUpdateHandler, MenuItemListener,
         }
     }
 
-    public void bindDataBaseChangedListener() {
-        OdrDatabase.get().setOnDatabaseChangedListener(this::reloadScoreBroad);
-    }
-
-    public void unbindDataBaseChangedListener() {
-        OdrDatabase.get().setOnDatabaseChangedListener(null);
-    }
-
     public void setY(final float y) {
         velocityY = 0;
         camY = y;
@@ -1479,7 +1467,12 @@ public class SongMenu implements IUpdateHandler, MenuItemListener,
         (new ScoreMenuFragment()).show(scoreId);
     }
 
-    public void reloadScoreBroad() {
+    public void onScoreTableChange() {
+
+        if (GlobalManager.getInstance().getEngine().getScene() != scene) {
+            return;
+        }
+
         board.init(selectedBeatmap);
     }
 

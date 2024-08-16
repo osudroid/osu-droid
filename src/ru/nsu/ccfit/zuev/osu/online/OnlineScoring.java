@@ -1,6 +1,6 @@
 package ru.nsu.ccfit.zuev.osu.online;
 
-import com.reco1l.osu.BeatmapInfo;
+import com.reco1l.osu.data.BeatmapInfo;
 import com.reco1l.osu.Execution;
 import com.reco1l.osu.multiplayer.LobbyScene;
 import com.reco1l.osu.multiplayer.RoomScene;
@@ -184,17 +184,6 @@ public class OnlineScoring {
                 }
             }
         });
-    }
-
-    public ArrayList<String> getTop(final File beatmapFile, final String hash) {
-        synchronized (onlineMutex) {
-            try {
-                return OnlineManager.getInstance().getTop(beatmapFile, hash);
-            } catch (OnlineManager.OnlineManagerException e) {
-                Debug.e("Cannot load scores " + e.getMessage());
-                return new ArrayList<>();
-            }
-        }
     }
 
     public void loadAvatar(final boolean both) {

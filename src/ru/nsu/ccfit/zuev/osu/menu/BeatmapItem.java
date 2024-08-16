@@ -1,6 +1,6 @@
 package ru.nsu.ccfit.zuev.osu.menu;
 
-import com.reco1l.osu.BeatmapInfo;
+import com.reco1l.osu.data.BeatmapInfo;
 import org.anddev.andengine.entity.sprite.Sprite;
 import org.anddev.andengine.entity.text.ChangeableText;
 import org.anddev.andengine.input.touch.TouchEvent;
@@ -103,7 +103,7 @@ public class BeatmapItem extends Sprite {
         if (beatmapInfo == null) {
             return;
         }
-        final String newmark = ScoreLibrary.getInstance().getBestMark(
+        final String newmark = ScoreLibrary.getBestMark(
                 beatmapInfo.getPath());
         if (currentMark != null && currentMark.equals(newmark)) {
             return;

@@ -16,6 +16,7 @@ import ru.nsu.ccfit.zuev.osu.Config;
 /**
  * Created by Fuuko on 2015/2/27.
  */
+@Deprecated // TODO: Please consider to remove this in the future.
 public class DatabaseContext extends ContextWrapper {
 
     private static final String DEBUG_CONTEXT = "DatabaseContext";
