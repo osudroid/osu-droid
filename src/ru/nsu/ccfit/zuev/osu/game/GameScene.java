@@ -2175,9 +2175,9 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
                     pos,
                     scale,
                     Modifiers.sequence(
-                        Modifiers.fadeIn(0.15f),
-                        Modifiers.delay(0.35f),
-                        Modifiers.fadeOut(0.25f)
+                        Modifiers.fadeIn(0.15f * timeMultiplier),
+                        Modifiers.delay(0.35f * timeMultiplier),
+                        Modifiers.fadeOut(0.25f * timeMultiplier)
                     )
             );
             registerHit(id, 0, endCombo);
@@ -2199,10 +2199,10 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
                     mgScene,
                     pos,
                     scale,
-                    Modifiers.fadeOut(0.7f),
+                    Modifiers.fadeOut(0.7f * timeMultiplier),
                     Modifiers.sequence(
-                        Modifiers.scale(0.25f, scale, 1.5f * scale),
-                        Modifiers.scale(0.45f, 1.5f * scale, 2f * scale)
+                        Modifiers.scale(0.25f * timeMultiplier, scale, 1.5f * scale),
+                        Modifiers.scale(0.45f * timeMultiplier, 1.5f * scale, 2f * scale)
                     )
             );
         }
@@ -2213,15 +2213,15 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
                 pos,
                 scale,
                 Modifiers.sequence(
-                    Modifiers.scale(0.15f, scale, 1.2f * scale),
-                    Modifiers.scale(0.05f, 1.2f * scale, scale),
-                    Modifiers.fadeOut(1f)
+                    Modifiers.scale(0.15f * timeMultiplier, scale, 1.2f * scale),
+                    Modifiers.scale(0.05f * timeMultiplier, 1.2f * scale, scale),
+                    Modifiers.fadeOut(timeMultiplier)
                 )
         );
 
         pos.y /= 2f;
         effect = GameObjectPool.getInstance().getEffect("spinner-osu");
-        effect.init(mgScene, pos, 1, Modifiers.fadeOut(1.5f));
+        effect.init(mgScene, pos, 1, Modifiers.fadeOut(1.5f * timeMultiplier));
     }
 
     public void playSound(final String name, final int sampleSet, final int addition) {

@@ -183,10 +183,11 @@ public class ModernSpinner extends Spinner {
                 score++;
                 scene.attachChild(bonusScore);
                 ResourceManager.getInstance().getSound("spinnerbonus").play();
+                float timeMultiplier = GameHelper.getTimeMultiplier();
                 glow.registerEntityModifier(
                     Modifiers.sequence(
-                        Modifiers.color(0.1f, 0f, 1f, 0.8f, 1f, 1f, 1f),
-                        Modifiers.color(0.1f, 1f, 0f, 1f, 0.8f, 1f, 1f)
+                        Modifiers.color(0.1f * timeMultiplier, 0f, 1f, 0.8f, 1f, 1f, 1f),
+                        Modifiers.color(0.1f * timeMultiplier, 1f, 0f, 1f, 0.8f, 1f, 1f)
                     )
                 );
                 float rate = 0.375f;

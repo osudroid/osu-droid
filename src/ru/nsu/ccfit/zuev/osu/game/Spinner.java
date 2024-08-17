@@ -268,8 +268,9 @@ public class Spinner extends GameObject {
         if (percentfill > 1 || clear) {
             percentfill = 1;
             if (!clear) {
-                clearText.registerEntityModifier(Modifiers.fadeIn(0.25f));
-                clearText.registerEntityModifier(Modifiers.scale(0.25f, 1.5f, 1));
+                float timeMultiplier = GameHelper.getTimeMultiplier();
+                clearText.registerEntityModifier(Modifiers.fadeIn(0.25f * timeMultiplier));
+                clearText.registerEntityModifier(Modifiers.scale(0.25f * timeMultiplier, 1.5f, 1));
                 scene.attachChild(clearText);
                 clear = true;
             } else if (Math.abs(rotations) > 1) {
