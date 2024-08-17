@@ -77,10 +77,4 @@ public class CircleNumber extends Entity
         return super.getAlpha();
     }
 
-    // The default registerEntityModifier() doesn't apply the modifiers to the nested Entities, so we've to apply to each one.
-    // Modifiers cannot be shared between multiple Entities, and using deepCopy() can be expensive, so we use a supplier instead.
-    public void registerEntityModifiers(Supplier<IEntityModifier> modifier) {
-        for (int i = 0; i < getChildCount(); i++)
-            getChild(i).registerEntityModifier(modifier.get());
-    }
 }

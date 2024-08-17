@@ -3,22 +3,12 @@ package ru.nsu.ccfit.zuev.osu.game;
 import android.graphics.PointF;
 
 import com.reco1l.osu.Execution;
+import com.reco1l.osu.graphics.Modifiers;
 
-import org.anddev.andengine.entity.IEntity;
-import org.anddev.andengine.entity.modifier.AlphaModifier;
-import org.anddev.andengine.entity.modifier.DelayModifier;
-import org.anddev.andengine.entity.modifier.FadeInModifier;
-import org.anddev.andengine.entity.modifier.FadeOutModifier;
-import org.anddev.andengine.entity.modifier.IEntityModifier;
-import org.anddev.andengine.entity.modifier.IEntityModifier.IEntityModifierListener;
-import org.anddev.andengine.entity.modifier.ParallelEntityModifier;
-import org.anddev.andengine.entity.modifier.ScaleModifier;
-import org.anddev.andengine.entity.modifier.SequenceEntityModifier;
 import org.anddev.andengine.entity.scene.Scene;
 import org.anddev.andengine.entity.sprite.Sprite;
 import org.anddev.andengine.opengl.texture.region.TextureRegion;
 import org.anddev.andengine.util.MathUtils;
-import org.anddev.andengine.util.modifier.IModifier;
 
 import ru.nsu.ccfit.zuev.osu.Config;
 import ru.nsu.ccfit.zuev.osu.Constants;
@@ -36,7 +26,8 @@ public class Spinner extends GameObject {
     private final Sprite metre;
     private final Sprite spinText;
     private final TextureRegion mregion;
-    private Sprite clearText = null;
+    private final Sprite clearText;
+    private final ScoreNumber bonusScore;
     private PointF oldMouse;
     private GameObjectListener listener;
     private Scene scene;
@@ -47,7 +38,6 @@ public class Spinner extends GameObject {
     private int soundId;
     private int sampleSet;
     private int addition;
-    private ScoreNumber bonusScore = null;
     private int score = 1;
     private float metreY;
     private StatisticV2 stat;
@@ -61,29 +51,28 @@ public class Spinner extends GameObject {
         ResourceManager.getInstance().checkSpinnerTextures();
         this.pos = new PointF((float) Constants.MAP_WIDTH / 2, (float) Constants.MAP_HEIGHT / 2);
         center = Utils.trackToRealCoords(pos);
-        background = SpritePool.getInstance().getCenteredSprite(
-                "spinner-background", center);
+        background = new CentredSprite(center.x, center.y, ResourceManager.getInstance().getTexture("spinner-background"));
         final float scaleX = Config.getRES_WIDTH() / background.getWidth();
         background.setScale(scaleX);
 
-        circle = SpritePool.getInstance().getCenteredSprite("spinner-circle",
-                center);
+        circle = new CentredSprite(center.x, center.y, ResourceManager.getInstance().getTexture("spinner-circle"));
         mregion = ResourceManager.getInstance().getTexture("spinner-metre")
                 .deepCopy();
         metre = new Sprite(center.x - (float) Config.getRES_WIDTH() / 2,
                 Config.getRES_HEIGHT(), mregion);
         metre.setWidth(Config.getRES_WIDTH());
         metre.setHeight(background.getHeightScaled());
-        approachCircle = SpritePool.getInstance().getCenteredSprite(
-                "spinner-approachcircle", center);
+        approachCircle = new CentredSprite(center.x, center.y, ResourceManager.getInstance().getTexture("spinner-approachcircle"));
         spinText = new CentredSprite(center.x, center.y * 1.5f, ResourceManager
                 .getInstance().getTexture("spinner-spin"));
+
+        clearText = new CentredSprite(center.x, center.y * 0.5f, ResourceManager.getInstance().getTexture("spinner-clear"));
+        bonusScore = new ScoreNumber(center.x, center.y + 100, "", 1.1f, true);
     }
 
     public void init(final GameObjectListener listener, final Scene scene,
                      final float pretime, final float time, final float rps,
                      final int sound, final String tempSound, final StatisticV2 stat) {
-        clearText = null;
         fullrotations = 0;
         rotations = 0;
         this.scene = scene;
@@ -98,7 +87,6 @@ public class Spinner extends GameObject {
         startHit = true;
         clear = false;
         if(totalTime <= 0f) clear = true;
-        bonusScore = null;
         score = 1;
         ResourceManager.getInstance().checkSpinnerTextures();
 
@@ -108,49 +96,45 @@ public class Spinner extends GameObject {
             this.addition = Integer.parseInt(group[1]);
         }
 
-        final IEntityModifier appearMoifier = new SequenceEntityModifier(
-                new DelayModifier(pretime * 0.75f), new FadeInModifier(
-                pretime * 0.25f));
-
         background.setAlpha(0);
-        background.registerEntityModifier(appearMoifier.deepCopy());
+        background.registerEntityModifier(Modifiers.sequence(
+            Modifiers.delay(pretime * 0.75f),
+            Modifiers.fadeIn(pretime * 0.25f)
+        ));
 
         circle.setAlpha(0);
-        circle.registerEntityModifier(appearMoifier.deepCopy());
+        circle.registerEntityModifier(Modifiers.sequence(
+            Modifiers.delay(pretime * 0.75f),
+            Modifiers.fadeIn(pretime * 0.25f)
+        ));
 
         metreY = (Config.getRES_HEIGHT() - background.getHeightScaled()) / 2;
         metre.setAlpha(0);
-        metre.registerEntityModifier(appearMoifier.deepCopy());
+        metre.registerEntityModifier(Modifiers.sequence(
+            Modifiers.delay(pretime * 0.75f),
+            Modifiers.fadeIn(pretime * 0.25f)
+        ));
         mregion.setTexturePosition(0, (int) metre.getHeightScaled());
 
         approachCircle.setAlpha(0);
         if (GameHelper.isHidden()) {
             approachCircle.setVisible(false);
         }
-        approachCircle.registerEntityModifier(new SequenceEntityModifier(
-                new IEntityModifierListener() {
-
-                    public void onModifierStarted(IModifier<IEntity> pModifier, IEntity pItem) {
-                    }
-
-                    public void onModifierFinished(IModifier<IEntity> pModifier, IEntity pItem) {
-                        Execution.updateThread(Spinner.this::removeFromScene);
-                    }
-                },
-                new SequenceEntityModifier(
-                        new DelayModifier(pretime),
-                        new ParallelEntityModifier(
-                                new AlphaModifier(time, 0.75f, 1),
-                                new ScaleModifier(time, 2.0f, 0)
-                        )
-                )
-        ));
+        approachCircle.registerEntityModifier(Modifiers.sequence(
+            Modifiers.delay(pretime),
+            Modifiers.parallel(
+                Modifiers.alpha(time, 0.75f, 1),
+                Modifiers.scale(time, 2.0f, 0)
+            )
+        ).setOnFinished(entity -> Execution.updateThread(this::removeFromScene)));
 
         spinText.setAlpha(0);
-        spinText.registerEntityModifier(new SequenceEntityModifier(
-                new DelayModifier(pretime * 0.75f), new FadeInModifier(
-                pretime * 0.25f), new DelayModifier(pretime / 2),
-                new FadeOutModifier(pretime * 0.25f)));
+        spinText.registerEntityModifier(Modifiers.sequence(
+            Modifiers.delay(pretime * 0.75f),
+            Modifiers.fadeIn(pretime * 0.25f),
+            Modifiers.delay(pretime / 2),
+            Modifiers.fadeOut(pretime * 0.25f)
+        ));
 
         scene.attachChild(spinText, 0);
         scene.attachChild(approachCircle, 0);
@@ -163,20 +147,14 @@ public class Spinner extends GameObject {
     }
 
     void removeFromScene() {
-        if (clearText != null) {
-            scene.detachChild(clearText);
-            SpritePool.getInstance().putSprite("spinner-clear", clearText);
-        }
+        scene.detachChild(clearText);
         scene.detachChild(spinText);
         scene.detachChild(background);
         approachCircle.detachSelf();
         scene.detachChild(circle);
         scene.detachChild(metre);
-        // GameObjectPool.getInstance().putSpinner(this);
+        scene.detachChild(bonusScore);
 
-        if (bonusScore != null) {
-            bonusScore.detachFromScene(scene);
-        }
         listener.removeObject(Spinner.this);
         int score = 0;
         if (replayObjectData != null) {
@@ -290,20 +268,16 @@ public class Spinner extends GameObject {
         if (percentfill > 1 || clear) {
             percentfill = 1;
             if (!clear) {
-                clearText = SpritePool.getInstance().getCenteredSprite(
-                        "spinner-clear", new PointF(center.x, center.y * 0.5f));
-                clearText.registerEntityModifier(new ParallelEntityModifier(
-                        new FadeInModifier(0.25f), new ScaleModifier(0.25f,
-                        1.5f, 1)));
+                clearText.registerEntityModifier(Modifiers.fadeIn(0.25f));
+                clearText.registerEntityModifier(Modifiers.scale(0.25f, 1.5f, 1));
                 scene.attachChild(clearText);
                 clear = true;
             } else if (Math.abs(rotations) > 1) {
-                if (bonusScore != null) {
+                if (bonusScore.hasParent()) {
                     scene.detachChild(bonusScore);
                 }
                 rotations -= 1 * Math.signum(rotations);
-                bonusScore = new ScoreNumber(center.x, center.y + 100,
-                        String.valueOf(score * 1000), 1.1f, true);
+                bonusScore.setText(String.valueOf(score * 1000));
                 listener.onSpinnerHit(id, 1000, false, 0);
                 score++;
                 scene.attachChild(bonusScore);

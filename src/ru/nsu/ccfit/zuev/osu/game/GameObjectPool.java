@@ -13,7 +13,7 @@ public class GameObjectPool {
     public Map<String, LinkedList<GameEffect>> effects = new HashMap<>();
     public LinkedList<Slider> sliders = new LinkedList<>();
     public LinkedList<FollowTrack> tracks = new LinkedList<>();
-    public LinkedList<Spinner> spinners = new LinkedList<>();
+    //public LinkedList<Spinner> spinners = new LinkedList<>();
     private int objectsCreated = 0;
     private GameObjectPool() {
     }
@@ -36,11 +36,11 @@ public class GameObjectPool {
     }
 
     public Spinner getSpinner() {
-        if (spinners.isEmpty() == false) {
+        /*if (spinners.isEmpty() == false) {
             return spinners.poll();
         }
 
-        objectsCreated++;
+        objectsCreated++;*/
         if (Config.getSpinnerStyle() == 1) {
             return new ModernSpinner();
         } else {
@@ -48,9 +48,9 @@ public class GameObjectPool {
         }
     }
 
-    public void putSpinner(final Spinner spinner) {
+    /*public void putSpinner(final Spinner spinner) {
         spinners.add(spinner);
-    }
+    }*/
 
     public CircleNumber getNumber(final int num) {
         if (numbers.containsKey(num) && numbers.get(num).isEmpty() == false) {

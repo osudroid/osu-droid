@@ -62,7 +62,6 @@ import ru.nsu.ccfit.zuev.audio.BassSoundProvider;
 import ru.nsu.ccfit.zuev.audio.Status;
 import ru.nsu.ccfit.zuev.osu.game.SongProgressBar;
 import ru.nsu.ccfit.zuev.osu.game.TimingPoint;
-import ru.nsu.ccfit.zuev.osu.helper.ModifierFactory;
 import ru.nsu.ccfit.zuev.osu.online.OnlineManager;
 import ru.nsu.ccfit.zuev.osu.online.OnlinePanel;
 import ru.nsu.ccfit.zuev.osu.online.OnlineScoring;
@@ -966,15 +965,15 @@ public class MainScene implements IUpdateHandler {
         Rectangle bg = new Rectangle(0, 0, Config.getRES_WIDTH(),
                 Config.getRES_HEIGHT());
         bg.setColor(0, 0, 0, 1.0f);
-        bg.registerEntityModifier(ModifierFactory.newAlphaModifier(3.0f, 0, 1));
+        bg.registerEntityModifier(new org.anddev.andengine.entity.modifier.AlphaModifier(3.0f, 0, 1));
         scene.attachChild(bg);
         logo.registerEntityModifier(new ParallelEntityModifier(
                 new RotationModifier(3.0f, 0, -15),
-                ModifierFactory.newScaleModifier(3.0f, 1f, 0.8f)
+                new org.anddev.andengine.entity.modifier.ScaleModifier(3.0f, 1f, 0.8f)
         ));
         logoOverlay.registerEntityModifier(new ParallelEntityModifier(
                 new RotationModifier(3.0f, 0, -15),
-                ModifierFactory.newScaleModifier(3.0f, 1f, 0.8f)
+                new org.anddev.andengine.entity.modifier.ScaleModifier(3.0f, 1f, 0.8f)
         ));
 
         if (GlobalManager.getInstance().getSongService() != null) {
