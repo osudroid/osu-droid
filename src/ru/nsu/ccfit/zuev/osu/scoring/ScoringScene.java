@@ -330,7 +330,7 @@ public class ScoringScene {
         var modX = mark.getX() - 30;
         var modY = mark.getY() + mark.getHeight() * 2 / 3;
         for (GameMod mod : stat.getMod()) {
-            var modSprite = new Sprite(modX, modY, ResourceManager.getInstance().getTexture("selection-mod-" + GameMod.getTextureName(mod)));
+            var modSprite = new Sprite(modX, modY, ResourceManager.getInstance().getTexture(GameMod.getTextureName(mod)));
             modX -= Utils.toRes(30);
             scene.attachChild(modSprite);
         }
