@@ -543,9 +543,9 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
         currentComboNum = 0;
         lastActiveObjectHitTime = 0;
 
-        activeTimingPoint = beatmap.controlPoints.timing.controlPointAt(0);
-        activeSamplePoint = beatmap.controlPoints.sample.controlPointAt(0);
-        activeEffectPoint = beatmap.controlPoints.effect.controlPointAt(0);
+        activeTimingPoint = beatmap.controlPoints.timing.controlPointAt(Double.NEGATIVE_INFINITY);
+        activeSamplePoint = beatmap.controlPoints.sample.controlPointAt(Double.NEGATIVE_INFINITY);
+        activeEffectPoint = beatmap.controlPoints.effect.controlPointAt(Double.NEGATIVE_INFINITY);
 
         GameHelper.setTimingOffset(activeSamplePoint.time / 1000);
         GameHelper.setBeatLength((activeTimingPoint.msPerBeat / 1000) * GameHelper.getSpeed() / 100f);
