@@ -34,6 +34,7 @@ object DatabaseManager {
             // tables to recreate (in case of beatmaps table it'll re-import all beatmaps).
             // See https://developer.android.com/training/data-storage/room/migrating-db-versions.
             .fallbackToDestructiveMigration()
+            .allowMainThreadQueries()
             .build()
     }
 
