@@ -12,7 +12,10 @@ import com.rian.osu.beatmap.Beatmap as RianBeatmap
 
 /// Ported from rimu! project
 
-@Entity
+@Entity(indices = [
+    Index(name = "parentPathIdx", value = ["parentPath"]),
+    Index(name = "parentIdx", value = ["parentPath", "parentId"])
+])
 data class BeatmapInfo(
 
     /**
