@@ -6,6 +6,7 @@ import org.anddev.andengine.entity.scene.Scene;
 import org.anddev.andengine.entity.sprite.Sprite;
 
 import java.lang.ref.WeakReference;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.Set;
 import java.util.regex.Matcher;
@@ -235,9 +236,9 @@ public class BeatmapSetItem {
         builder.append(beatmapInfo.getSource());
         builder.append(' ');
         builder.append(beatmapInfo.getId());
-        for (BeatmapInfo beatmap : beatmapSetInfo.getBeatmaps()) {
+        for (var i = beatmapSetInfo.getCount() - 1; i >= 0; i--) {
             builder.append(' ');
-            builder.append(beatmap.getVersion());
+            builder.append(beatmapSetInfo.get(i).getVersion());
         }
 
         boolean canVisible = true;
@@ -252,9 +253,9 @@ public class BeatmapSetItem {
                 String value = matcher.group(3);
                 boolean vis = false;
                 if(beatmapId < 0){
-                    for (BeatmapInfo beatmap : beatmapSetInfo.getBeatmaps()) {
+                    for (var i = beatmapSetInfo.getCount() - 1; i >= 0; i--) {
                         if (key != null) {
-                            vis |= visibleBeatmap(beatmap, key, opt, value);
+                            vis |= visibleBeatmap(beatmapSetInfo.get(i), key, opt, value);
                         }
                     }
                 }
@@ -498,22 +499,18 @@ public class BeatmapSetItem {
 
     public int tryGetCorrespondingBeatmapId(String oldBeatmapPath){
         if (beatmapId <= -1){
-            int i = 0;
-            for (BeatmapInfo beatmap : beatmapSetInfo.getBeatmaps()){
-                if (beatmap == null) continue;
-                if (beatmap.getPath().equals(oldBeatmapPath)){
+            for (var i = beatmapSetInfo.getCount() - 1; i >= 0; i--) {
+                if (beatmapSetInfo.get(i).getPath().equals(oldBeatmapPath)){
                     return i;
                 }
-                i++;
             }
-        }
-        else if (beatmapSetInfo.get(beatmapId).getPath().equals(oldBeatmapPath)){
+        } else if (beatmapSetInfo.get(beatmapId).getPath().equals(oldBeatmapPath)){
             return beatmapId;
         }
         return -1;
     }
 
     public BeatmapItem getBeatmapSpritesById(int index){
-        return beatmapItems[index];
+        return beatmapItems[index % beatmapItems.length];
     }
 }

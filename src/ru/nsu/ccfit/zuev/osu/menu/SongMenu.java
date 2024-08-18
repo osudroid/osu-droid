@@ -1581,7 +1581,8 @@ public class SongMenu implements IUpdateHandler, MenuItemListener,
                 camY += items.get(0).getTotalHeight() / 2;
                 return;
             }
-            for (final BeatmapSetItem item : items) {
+            for (int i = items.size() - 1; i >= 0; i--) {
+                BeatmapSetItem item = items.get(i);
                 if (item == null || !item.isVisible()) continue;
                 int beatmapId = item.tryGetCorrespondingBeatmapId(oldBeatmapPath);
                 if (beatmapId >= 0) {
