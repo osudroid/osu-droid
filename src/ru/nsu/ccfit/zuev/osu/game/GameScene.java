@@ -21,6 +21,7 @@ import com.reco1l.osu.ui.entity.GameplayLeaderboard;
 import com.reco1l.osu.multiplayer.Multiplayer;
 import com.reco1l.osu.multiplayer.RoomScene;
 
+import com.rian.osu.GameMode;
 import com.rian.osu.beatmap.Beatmap;
 import com.rian.osu.beatmap.constants.BeatmapCountdown;
 import com.rian.osu.beatmap.constants.SampleBank;
@@ -346,7 +347,7 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
 
         try (var parser = new BeatmapParser(track.getFilename())) {
             if (parser.openFile()) {
-                beatmap = parser.parse(true);
+                beatmap = parser.parse(true, GameMode.Droid);
             } else {
                 Debug.e("startGame: cannot open file");
                 ToastLogger.showText(
