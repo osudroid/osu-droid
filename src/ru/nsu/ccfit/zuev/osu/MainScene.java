@@ -671,7 +671,7 @@ public class MainScene implements IUpdateHandler {
         }
 
         if (beatPassTime >= bpmLength) {
-            beatPassTime %= (float) bpmLength;
+            beatPassTime %= bpmLength;
 
             if (logo != null) {
                 logo.registerEntityModifier(new SequenceEntityModifier(new org.anddev.andengine.entity.modifier.ScaleModifier((float) (bpmLength / 1000 * 0.9f), 1f, 1.07f),
