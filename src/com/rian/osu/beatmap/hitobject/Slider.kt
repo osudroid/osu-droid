@@ -31,8 +31,7 @@ class Slider(
     /**
      * The path of this [Slider].
      */
-    @JvmField
-    var path: SliderPath,
+    path: SliderPath,
 
     /**
      * Whether this [Slider] starts a new combo.
@@ -64,6 +63,15 @@ class Slider(
         get() = endTime - startTime
 
     private val endPositionCache = Cached(position)
+
+    /**
+     * The path of this [Slider].
+     */
+    var path = path
+        set(value) {
+            field = value
+            updateNestedPositions()
+        }
 
     /**
      * The end position of this [Slider].
