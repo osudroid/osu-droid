@@ -13,6 +13,9 @@ import com.reco1l.osu.ui.entity.MainMenu;
 import com.reco1l.osu.beatmaplisting.BeatmapListing;
 import com.reco1l.osu.ui.MessageDialog;
 import com.rian.osu.beatmap.parser.BeatmapParser;
+import com.rian.osu.beatmap.timings.EffectControlPoint;
+import com.rian.osu.beatmap.timings.TimingControlPoint;
+
 import org.anddev.andengine.engine.handler.IUpdateHandler;
 import org.anddev.andengine.entity.IEntity;
 import org.anddev.andengine.entity.modifier.IEntityModifier;
@@ -48,7 +51,6 @@ import org.anddev.andengine.util.modifier.ease.EaseExponentialOut;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.LinkedList;
-import java.util.List;
 import java.util.Locale;
 import java.util.Random;
 import java.util.TimerTask;
@@ -61,7 +63,6 @@ import javax.microedition.khronos.opengles.GL10;
 import ru.nsu.ccfit.zuev.audio.BassSoundProvider;
 import ru.nsu.ccfit.zuev.audio.Status;
 import ru.nsu.ccfit.zuev.osu.game.SongProgressBar;
-import ru.nsu.ccfit.zuev.osu.game.TimingPoint;
 import ru.nsu.ccfit.zuev.osu.online.OnlineManager;
 import ru.nsu.ccfit.zuev.osu.online.OnlinePanel;
 import ru.nsu.ccfit.zuev.osu.online.OnlineScoring;
@@ -87,8 +88,10 @@ public class MainScene implements IUpdateHandler {
     private final float[] peakLevel = new float[120];
     private final float[] peakDownRate = new float[120];
     private final float[] peakAlpha = new float[120];
-    private List<TimingPoint> timingPoints;
-    private TimingPoint currentTimingPoint, lastTimingPoint, firstTimingPoint;
+    private LinkedList<TimingControlPoint> timingControlPoints;
+    private LinkedList<EffectControlPoint> effectControlPoints;
+    private TimingControlPoint currentTimingPoint, lastTimingPoint, firstTimingPoint;
+    private EffectControlPoint currentEffectPoint;
 
     private int particleBeginTime = 0;
     private boolean particleEnabled = false;
@@ -550,9 +553,9 @@ public class MainScene implements IUpdateHandler {
                         loadTimingPoints(false);
                         GlobalManager.getInstance().getSongService().preLoad(beatmapInfo.getMusic());
                         if (firstTimingPoint != null) {
-                            bpmLength = firstTimingPoint.getBeatLength() * 1000f;
+                            bpmLength = firstTimingPoint.msPerBeat;
                             if (lastTimingPoint != null) {
-                                offset = lastTimingPoint.getTime() * 1000f % bpmLength;
+                                offset = lastTimingPoint.time % bpmLength;
                             }
                         }
                     }
@@ -562,7 +565,7 @@ public class MainScene implements IUpdateHandler {
                         }
                         if (lastTimingPoint != null) {
                             int position = GlobalManager.getInstance().getSongService().getPosition();
-                            offset = (position - lastTimingPoint.getTime() * 1000f) % bpmLength;
+                            offset = (position - lastTimingPoint.time) % bpmLength;
                         }
                     }
                     Debug.i("BPM: " + 60 / bpmLength * 1000 + " Offset: " + offset);
@@ -604,7 +607,7 @@ public class MainScene implements IUpdateHandler {
                 if (GlobalManager.getInstance().getSongService().getStatus() == Status.PLAYING) {
                     if (lastTimingPoint != null) {
                         int position = GlobalManager.getInstance().getSongService().getPosition();
-                        offset = (position - lastTimingPoint.getTime() * 1000f) % bpmLength;
+                        offset = (position - lastTimingPoint.time) % bpmLength;
                     }
                     Debug.i("BPM: " + 60 / bpmLength * 1000 + " Offset: " + offset);
                 }
@@ -694,7 +697,7 @@ public class MainScene implements IUpdateHandler {
         if (GlobalManager.getInstance().getSongService() != null) {
             if (!musicStarted) {
                 if (firstTimingPoint != null) {
-                    bpmLength = firstTimingPoint.getBeatLength() * 1000f;
+                    bpmLength = firstTimingPoint.msPerBeat;
                 } else {
                     return;
                 }
@@ -702,7 +705,7 @@ public class MainScene implements IUpdateHandler {
                 GlobalManager.getInstance().getSongService().play();
                 GlobalManager.getInstance().getSongService().setVolume(Config.getBgmVolume());
                 if (lastTimingPoint != null) {
-                    offset = lastTimingPoint.getTime() * 1000f % bpmLength;
+                    offset = lastTimingPoint.msPerBeat % bpmLength;
                 }
                 Debug.i("BPM: " + 60 / bpmLength * 1000 + " Offset: " + offset);
 //				ToastLogger.showText("BPM: " + 60 / bpmLength * 1000 + " Offset: " + offset, false);
@@ -721,28 +724,25 @@ public class MainScene implements IUpdateHandler {
 //                    syncPassedTime = 0;
 //                }
 
-                if (currentTimingPoint != null && position > currentTimingPoint.getTime() * 1000) {
-                    if (!isContinuousKiai && currentTimingPoint.isKiai()) {
+                if (!timingControlPoints.isEmpty() && position > timingControlPoints.peek().time) {
+                    lastTimingPoint = currentTimingPoint;
+                    currentTimingPoint = timingControlPoints.pop();
+                    bpmLength = currentTimingPoint.msPerBeat;
+                    offset = lastTimingPoint.time % bpmLength;
+                }
+
+                if (!effectControlPoints.isEmpty() && position > effectControlPoints.peek().time) {
+                    currentEffectPoint = effectControlPoints.pop();
+
+                    if (!isContinuousKiai && currentEffectPoint.isKiai) {
                         for (ParticleSystem particleSpout : particleSystem) {
                             particleSpout.setParticlesSpawnEnabled(true);
                         }
                         particleBeginTime = position;
                         particleEnabled = true;
                     }
-                    isContinuousKiai = currentTimingPoint.isKiai();
 
-                    if (timingPoints.size() > 0) {
-                        currentTimingPoint = timingPoints.remove(0);
-                        if (!currentTimingPoint.wasInderited()) {
-                            lastTimingPoint = currentTimingPoint;
-                            bpmLength = currentTimingPoint.getBeatLength() * 1000;
-                            offset = lastTimingPoint.getTime() * 1000f % bpmLength;
-                            Debug.i("BPM: " + 60 / bpmLength * 1000 + " Offset: " + offset);
-//							ToastLogger.showText("BPM: " + 60 / bpmLength * 1000 + " Offset: " + offset, false);
-                        }
-                    } else {
-                        currentTimingPoint = null;
-                    }
+                    isContinuousKiai = currentEffectPoint.isKiai;
                 }
 
                 if (particleEnabled && (position - particleBeginTime > 2000)) {
@@ -900,20 +900,15 @@ public class MainScene implements IUpdateHandler {
                 var beatmap = parser.parse(false);
 
                 if (beatmap != null) {
-                    timingPoints = new LinkedList<>();
+                    timingControlPoints = new LinkedList<>(beatmap.controlPoints.timing.getControlPoints());
+                    effectControlPoints = new LinkedList<>(beatmap.controlPoints.effect.getControlPoints());
 
-                    for (final String s : beatmap.rawTimingPoints) {
-                        final TimingPoint tp = new TimingPoint(s.split(","), currentTimingPoint);
-                        timingPoints.add(tp);
-                        if (!tp.wasInderited() || currentTimingPoint == null) {
-                            currentTimingPoint = tp;
-                        }
-                    }
-
-                    firstTimingPoint = timingPoints.remove(0);
+                    firstTimingPoint = beatmap.controlPoints.timing.controlPointAt(0);
                     currentTimingPoint = firstTimingPoint;
                     lastTimingPoint = currentTimingPoint;
-                    bpmLength = firstTimingPoint.getBeatLength() * 1000f;
+                    bpmLength = firstTimingPoint.msPerBeat;
+
+                    currentEffectPoint = beatmap.controlPoints.effect.controlPointAt(0);
                 }
             }
         }
