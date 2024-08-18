@@ -283,33 +283,19 @@ data class BeatmapInfo(
 @Dao
 interface IBeatmapDAO {
 
-    /**
-     * Insert a new beatmap to the table.
-     *
-     * [OnConflictStrategy.REPLACE]
-     */
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     fun insert(beatmapInfo: BeatmapInfo): Long
 
-    /**
-     * Delete a beatmap set from the table using it key (MD5 or ID).
-     */
     @Query("DELETE FROM BeatmapInfo WHERE parentPath = :beatmapSetKey")
     fun deleteBeatmapSet(beatmapSetKey: String)
 
-    /**
-     * Get a flow that listens to database changes for the beatmap table.
-     * It collects a list of [BeatmapSetInfo] that each one wraps its corresponding [BeatmapInfo].
-     */
     @Transaction
     @Query("SELECT DISTINCT parentPath, parentId FROM BeatmapInfo")
     fun getBeatmapSetList() : List<BeatmapSetInfo>
 
-
     @Transaction
     @Query("SELECT DISTINCT parentPath FROM BeatmapInfo")
     fun getBeatmapSetPaths() : List<String>
-
 
     @Query("DELETE FROM BeatmapInfo")
     fun deleteAll()
@@ -335,7 +321,9 @@ data class BeatmapSetInfo(
     @ColumnInfo(name = "parentPath")
     val path: String,
 
-    /**The list of beatmaps*/
+    /**
+     * The list of beatmaps
+     */
     @Relation(parentColumn = "parentPath", entityColumn = "parentPath")
     val beatmaps: List<BeatmapInfo>
 
