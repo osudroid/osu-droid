@@ -157,7 +157,7 @@ public class LibraryManager {
 
                 try {
                     // Conflict strategy is set to replace when the primary key is already in the
-                    // database. But that shouldn't never happen because the path is the primary key.
+                    // database. But that should never happen because the path is the primary key.
                     DatabaseManager.getBeatmapTable().insert(beatmapInfo);
                 } catch (Exception e) {
                     Log.e("LibraryManager", "Failed to insert beatmap into database", e);
