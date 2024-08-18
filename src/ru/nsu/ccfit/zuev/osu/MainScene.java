@@ -809,9 +809,7 @@ public class MainScene implements IUpdateHandler {
     public void loadBeatmapInfo() {
         if (LibraryManager.getSizeOfBeatmaps() != 0) {
 
-            if (beatmapInfo == null) {
-                beatmapInfo = LibraryManager.getCurrentBeatmapSet().get(0);
-            }
+            beatmapInfo = LibraryManager.getCurrentBeatmapSet().get(0);
 
             if (musicInfoText == null) {
                 musicInfoText = new ChangeableText(Utils.toRes(Config.getRES_WIDTH() - 500), Utils.toRes(3),

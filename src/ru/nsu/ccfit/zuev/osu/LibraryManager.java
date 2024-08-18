@@ -205,6 +205,7 @@ public class LibraryManager {
     public static BeatmapSetInfo selectPreviousBeatmapSet() {
 
         if (library.isEmpty()) {
+            currentIndex = 0;
             return null;
         }
 
