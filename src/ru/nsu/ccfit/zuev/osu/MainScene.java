@@ -90,7 +90,7 @@ public class MainScene implements IUpdateHandler {
     private final float[] peakAlpha = new float[120];
     private LinkedList<TimingControlPoint> timingControlPoints;
     private LinkedList<EffectControlPoint> effectControlPoints;
-    private TimingControlPoint currentTimingPoint, lastTimingPoint, firstTimingPoint;
+    private TimingControlPoint currentTimingPoint;
     private EffectControlPoint currentEffectPoint;
 
     private int particleBeginTime = 0;
@@ -105,10 +105,7 @@ public class MainScene implements IUpdateHandler {
     private BassSoundProvider hitsound;
 
     private double bpmLength = 1000;
-    private double lastBpmLength = 0;
-    private double offset = 0;
-    private float beatPassTime = 0;
-    private float lastBeatPassTime = 0;
+    private double beatPassTime = 0;
     private boolean doChange = false;
     private boolean doStop = false;
     private long lastHit = 0;
@@ -116,8 +113,8 @@ public class MainScene implements IUpdateHandler {
 
     private boolean isMenuShowed = false;
     private boolean doMenuShow = false;
-    private float showPassTime = 0, syncPassedTime = 0;
-    private float menuBarX = 0, playY, exitY;
+    private float showPassTime = 0;
+    private float menuBarX = 0;
 
     private MainMenu menu;
 
@@ -464,8 +461,6 @@ public class MainScene implements IUpdateHandler {
         menu.getThird().setPosition(logo.getX() + logo.getWidth() - Config.getRES_WIDTH() / 3f, menu.getSecond().getY() + menu.getSecond().getHeight() + 40 * Config.getRES_WIDTH() / 1024f);
 
         menuBarX = menu.getFirst().getX();
-        playY = menu.getFirst().getScaleY();
-        exitY = menu.getThird().getScaleY();
 
         scene.attachChild(lastBackground, 0);
         scene.attachChild(bgTopRect);
@@ -539,7 +534,7 @@ public class MainScene implements IUpdateHandler {
                 if (GlobalManager.getInstance().getSongService().getStatus() == Status.PLAYING || GlobalManager.getInstance().getSongService().getStatus() == Status.PAUSED) {
                     GlobalManager.getInstance().getSongService().stop();
                 }
-                firstTimingPoint = null;
+                currentTimingPoint = null;
                 LibraryManager.INSTANCE.getPrevBeatmap();
                 loadBeatmapInfo();
                 loadTimingPoints(true);
@@ -552,24 +547,18 @@ public class MainScene implements IUpdateHandler {
                     if (GlobalManager.getInstance().getSongService().getStatus() == Status.STOPPED) {
                         loadTimingPoints(false);
                         GlobalManager.getInstance().getSongService().preLoad(beatmapInfo.getMusic());
-                        if (firstTimingPoint != null) {
-                            bpmLength = firstTimingPoint.msPerBeat;
-                            if (lastTimingPoint != null) {
-                                offset = lastTimingPoint.time % bpmLength;
-                            }
+
+                        if (currentTimingPoint != null) {
+                            bpmLength = currentTimingPoint.msPerBeat;
+                            beatPassTime = 0;
                         }
                     }
-                    if (GlobalManager.getInstance().getSongService().getStatus() == Status.PAUSED) {
-                        if (lastBpmLength > 0) {
-                            bpmLength = lastBpmLength;
-                        }
-                        if (lastTimingPoint != null) {
-                            int position = GlobalManager.getInstance().getSongService().getPosition();
-                            offset = (position - lastTimingPoint.time) % bpmLength;
-                        }
+                    if (GlobalManager.getInstance().getSongService().getStatus() == Status.PAUSED && currentTimingPoint != null) {
+                        bpmLength = currentTimingPoint.msPerBeat;
+                        int position = GlobalManager.getInstance().getSongService().getPosition();
+                        beatPassTime = (position - currentTimingPoint.time) % bpmLength;
                     }
-                    Debug.i("BPM: " + 60 / bpmLength * 1000 + " Offset: " + offset);
-//						ToastLogger.showText("BPM: " + 60 / bpmLength * 1000 + " Offset: " + offset, false);
+
                     GlobalManager.getInstance().getSongService().play();
                     doStop = false;
                 }
@@ -578,16 +567,16 @@ public class MainScene implements IUpdateHandler {
             case PAUSE: {
                 if (GlobalManager.getInstance().getSongService().getStatus() == Status.PLAYING) {
                     GlobalManager.getInstance().getSongService().pause();
-                    lastBpmLength = bpmLength;
                     bpmLength = 1000;
+                    beatPassTime = 0;
                 }
             }
             break;
             case STOP: {
                 if (GlobalManager.getInstance().getSongService().getStatus() == Status.PLAYING || GlobalManager.getInstance().getSongService().getStatus() == Status.PAUSED) {
                     GlobalManager.getInstance().getSongService().stop();
-                    lastBpmLength = bpmLength;
                     bpmLength = 1000;
+                    beatPassTime = 0;
                 }
             }
             break;
@@ -596,7 +585,7 @@ public class MainScene implements IUpdateHandler {
                     GlobalManager.getInstance().getSongService().stop();
                 }
                 LibraryManager.INSTANCE.getNextBeatmap();
-                firstTimingPoint = null;
+                currentTimingPoint = null;
                 loadBeatmapInfo();
                 loadTimingPoints(true);
                 doChange = false;
@@ -604,12 +593,9 @@ public class MainScene implements IUpdateHandler {
             }
             break;
             case SYNC: {
-                if (GlobalManager.getInstance().getSongService().getStatus() == Status.PLAYING) {
-                    if (lastTimingPoint != null) {
-                        int position = GlobalManager.getInstance().getSongService().getPosition();
-                        offset = (position - lastTimingPoint.time) % bpmLength;
-                    }
-                    Debug.i("BPM: " + 60 / bpmLength * 1000 + " Offset: " + offset);
+                if (GlobalManager.getInstance().getSongService().getStatus() == Status.PLAYING && currentTimingPoint != null) {
+                    int position = GlobalManager.getInstance().getSongService().getPosition();
+                    beatPassTime = (position - currentTimingPoint.time) % bpmLength;
                 }
             }
         }
@@ -617,7 +603,7 @@ public class MainScene implements IUpdateHandler {
 
     @Override
     public void onUpdate(final float pSecondsElapsed) {
-        beatPassTime += pSecondsElapsed * 1000f;
+        beatPassTime += pSecondsElapsed * 1000;
         if (isOnExitAnim) {
             for (Rectangle specRectangle : spectrum) {
                 specRectangle.setWidth(0);
@@ -628,7 +614,6 @@ public class MainScene implements IUpdateHandler {
 
         if (GlobalManager.getInstance().getSongService() == null || !musicStarted || GlobalManager.getInstance().getSongService().getStatus() == Status.STOPPED) {
             bpmLength = 1000;
-            offset = 0;
         }
 
         if (doMenuShow && !isMenuShowed) {
@@ -685,9 +670,9 @@ public class MainScene implements IUpdateHandler {
             }
         }
 
-        if (beatPassTime - lastBeatPassTime >= bpmLength - offset) {
-            lastBeatPassTime = beatPassTime;
-            offset = 0;
+        if (beatPassTime >= bpmLength) {
+            beatPassTime %= (float) bpmLength;
+
             if (logo != null) {
                 logo.registerEntityModifier(new SequenceEntityModifier(new org.anddev.andengine.entity.modifier.ScaleModifier((float) (bpmLength / 1000 * 0.9f), 1f, 1.07f),
                         new org.anddev.andengine.entity.modifier.ScaleModifier((float) (bpmLength / 1000 * 0.07f), 1.07f, 1f)));
@@ -696,18 +681,15 @@ public class MainScene implements IUpdateHandler {
 
         if (GlobalManager.getInstance().getSongService() != null) {
             if (!musicStarted) {
-                if (firstTimingPoint != null) {
-                    bpmLength = firstTimingPoint.msPerBeat;
-                } else {
+                if (currentTimingPoint == null) {
                     return;
                 }
+
+                bpmLength = currentTimingPoint.msPerBeat;
+                beatPassTime = 0;
                 progressBar.setStartTime(0);
                 GlobalManager.getInstance().getSongService().play();
                 GlobalManager.getInstance().getSongService().setVolume(Config.getBgmVolume());
-                if (lastTimingPoint != null) {
-                    offset = lastTimingPoint.msPerBeat % bpmLength;
-                }
-                Debug.i("BPM: " + 60 / bpmLength * 1000 + " Offset: " + offset);
 //				ToastLogger.showText("BPM: " + 60 / bpmLength * 1000 + " Offset: " + offset, false);
                 musicStarted = true;
             }
@@ -719,20 +701,19 @@ public class MainScene implements IUpdateHandler {
                 progressBar.setPassedTime(position);
                 progressBar.update(pSecondsElapsed * 1000);
 
-//                if (syncPassedTime > bpmLength * 8) {
-//                    musicControl(MusicOption.SYNC);
-//                    syncPassedTime = 0;
-//                }
-
                 if (!timingControlPoints.isEmpty() && position > timingControlPoints.peek().time) {
-                    lastTimingPoint = currentTimingPoint;
-                    currentTimingPoint = timingControlPoints.pop();
+                    while (!timingControlPoints.isEmpty() && position > timingControlPoints.peek().time) {
+                        currentTimingPoint = timingControlPoints.pop();
+                    }
+
                     bpmLength = currentTimingPoint.msPerBeat;
-                    offset = lastTimingPoint.time % bpmLength;
+                    beatPassTime = (position - currentTimingPoint.time) % bpmLength;
                 }
 
                 if (!effectControlPoints.isEmpty() && position > effectControlPoints.peek().time) {
-                    currentEffectPoint = effectControlPoints.pop();
+                    while (!effectControlPoints.isEmpty() && position > effectControlPoints.peek().time) {
+                        currentEffectPoint = effectControlPoints.pop();
+                    }
 
                     if (!isContinuousKiai && currentEffectPoint.isKiai) {
                         for (ParticleSystem particleSpout : particleSystem) {
@@ -903,12 +884,15 @@ public class MainScene implements IUpdateHandler {
                     timingControlPoints = new LinkedList<>(beatmap.controlPoints.timing.getControlPoints());
                     effectControlPoints = new LinkedList<>(beatmap.controlPoints.effect.getControlPoints());
 
-                    firstTimingPoint = beatmap.controlPoints.timing.controlPointAt(0);
-                    currentTimingPoint = firstTimingPoint;
-                    lastTimingPoint = currentTimingPoint;
-                    bpmLength = firstTimingPoint.msPerBeat;
+                    // Getting the first timing point is not always accurate - case in point is when the music is not reloaded.
+                    int position = GlobalManager.getInstance().getSongService() != null ?
+                            GlobalManager.getInstance().getSongService().getPosition() : 0;
 
-                    currentEffectPoint = beatmap.controlPoints.effect.controlPointAt(0);
+                    currentTimingPoint = beatmap.controlPoints.timing.controlPointAt(position);
+                    bpmLength = currentTimingPoint.msPerBeat;
+                    beatPassTime = (position - currentTimingPoint.time) % bpmLength;
+
+                    currentEffectPoint = beatmap.controlPoints.effect.controlPointAt(position);
                 }
             }
         }
