@@ -1,6 +1,5 @@
 package com.rian.osu.beatmap.hitobject
 
-import com.rian.osu.GameMode
 import com.rian.osu.math.Vector2
 
 /**
@@ -22,7 +21,7 @@ class Spinner(
         }
     }
 
-    override fun getStackedPosition(mode: GameMode) = position
+    override val stackedPosition = position
 
     override val duration: Double
         get() = endTime - startTime

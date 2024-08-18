@@ -2,8 +2,6 @@ package com.rian.osu.difficulty.calculator
 
 import com.rian.osu.GameMode
 import com.rian.osu.beatmap.Beatmap
-import com.rian.osu.beatmap.BeatmapConverter
-import com.rian.osu.beatmap.BeatmapProcessor
 import com.rian.osu.beatmap.hitobject.getEndTime
 import com.rian.osu.difficulty.DifficultyHitObject
 import com.rian.osu.difficulty.attributes.DifficultyAttributes
@@ -61,7 +59,7 @@ abstract class DifficultyCalculator<TObject : DifficultyHitObject, TAttributes :
         parameters: DifficultyCalculationParameters? = null
     ): TAttributes {
         // Always operate on a clone of the original beatmap when needed, to not modify it game-wide
-        val beatmapToCalculate = convertBeatmap(beatmap, parameters)
+        val beatmapToCalculate = beatmap.createPlayableBeatmap(mode, parameters?.mods, parameters?.customSpeedMultiplier ?: 1f)
         val skills = createSkills(beatmapToCalculate, parameters)
         val objects = createDifficultyHitObjects(beatmapToCalculate, parameters)
 
@@ -88,7 +86,7 @@ abstract class DifficultyCalculator<TObject : DifficultyHitObject, TAttributes :
         parameters: DifficultyCalculationParameters? = null
     ): List<TimedDifficultyAttributes<TAttributes>> {
         // Always operate on a clone of the original beatmap when needed, to not modify it game-wide
-        val beatmapToCalculate = convertBeatmap(beatmap, parameters)
+        val beatmapToCalculate = beatmap.createPlayableBeatmap(mode, parameters?.mods, parameters?.customSpeedMultiplier ?: 1f)
         val skills = createSkills(beatmapToCalculate, parameters)
         val attributes = mutableListOf<TimedDifficultyAttributes<TAttributes>>()
 
@@ -163,43 +161,4 @@ abstract class DifficultyCalculator<TObject : DifficultyHitObject, TAttributes :
         objects: List<TObject>,
         parameters: DifficultyCalculationParameters?
     ): TAttributes
-
-    private fun convertBeatmap(beatmap: Beatmap, parameters: DifficultyCalculationParameters?): Beatmap {
-        val converter = BeatmapConverter(beatmap)
-
-        // Convert
-        val converted = converter.convert()
-
-        // Apply difficulty mods
-        parameters?.mods?.filterIsInstance<IApplicableToDifficulty>()?.forEach {
-            it.applyToDifficulty(mode, converted.difficulty)
-        }
-
-        parameters?.mods?.filterIsInstance<IApplicableToDifficultyWithSettings>()?.forEach {
-            it.applyToDifficulty(mode, converted.difficulty, parameters.mods, parameters.customSpeedMultiplier)
-        }
-
-        val processor = BeatmapProcessor(converted)
-
-        processor.preProcess()
-
-        // Compute default values for hit objects, including creating nested hit objects in-case they're needed
-        converted.hitObjects.objects.forEach {
-            it.applyDefaults(converted.controlPoints, converted.difficulty, mode)
-        }
-
-        parameters?.mods?.filterIsInstance<IApplicableToHitObject>()?.forEach {
-            for (obj in converted.hitObjects.objects) {
-                it.applyToHitObject(mode, obj)
-            }
-        }
-
-        processor.postProcess(mode)
-
-        parameters?.mods?.filterIsInstance<IApplicableToBeatmap>()?.forEach {
-            it.applyToBeatmap(converted)
-        }
-
-        return converted
-    }
 }

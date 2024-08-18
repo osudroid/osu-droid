@@ -48,6 +48,11 @@ public interface IModifier<T> {
 
 	public float onUpdate(final float pSecondsElapsed, final T pItem);
 
+	// BEGIN osu!droid modified
+	default void onUnregister() {
+	}
+	// END osu!droid modified
+
 	public void addModifierListener(final IModifierListener<T> pModifierListener);
 	public boolean removeModifierListener(final IModifierListener<T> pModifierListener);
 

@@ -210,7 +210,7 @@ abstract class DifficultyHitObject(
 
         val lastCursorPosition = getEndCursorPosition(lastObj)
 
-        lazyJumpDistance = (obj.getStackedPosition(mode) * scalingFactor - lastCursorPosition * scalingFactor).length.toDouble()
+        lazyJumpDistance = (obj.stackedPosition * scalingFactor - lastCursorPosition * scalingFactor).length.toDouble()
         minimumJumpTime = strainTime
         minimumJumpDistance = lazyJumpDistance
 
@@ -238,7 +238,7 @@ abstract class DifficultyHitObject(
             // In this case the most natural jump path is better approximated by a new distance called "tailJumpDistance" - the distance between the slider's tail and the next hit object.
             //
             // Thus, the player is assumed to jump the minimum of these two distances in all cases.
-            val tailJumpDistance = (lastObj.tail.getStackedPosition(mode) - obj.getStackedPosition(mode)).length * scalingFactor
+            val tailJumpDistance = (lastObj.tail.stackedPosition - obj.stackedPosition).length * scalingFactor
 
             minimumJumpDistance = max(
                 0.0,
@@ -251,8 +251,8 @@ abstract class DifficultyHitObject(
 
         if (lastLastObj != null && lastLastObj !is Spinner) {
             val lastLastCursorPosition = getEndCursorPosition(lastLastObj)
-            val v1 = lastLastCursorPosition - lastObj.getStackedPosition(mode)
-            val v2 = obj.getStackedPosition(mode) - lastCursorPosition
+            val v1 = lastLastCursorPosition - lastObj.stackedPosition
+            val v2 = obj.stackedPosition - lastCursorPosition
 
             val dot = v1.dot(v2)
             val det = v1.x * v2.y - v1.y * v2.x
@@ -268,7 +268,7 @@ abstract class DifficultyHitObject(
 
         if (mode == GameMode.Droid) {
             // Temporary lazy end position until a real result can be derived.
-            slider.lazyEndPosition = slider.getStackedPosition(mode)
+            slider.lazyEndPosition = slider.stackedPosition
 
             // Stop here if the slider has very short duration, allowing the player to essentially
             // complete the slider without movement, making travel distance and time irrelevant.
@@ -287,14 +287,14 @@ abstract class DifficultyHitObject(
         }
 
         // Temporary lazy end position until a real result can be derived.
-        slider.lazyEndPosition = slider.getStackedPosition(mode) + slider.path.positionAt(endTimeMin)
+        slider.lazyEndPosition = slider.stackedPosition + slider.path.positionAt(endTimeMin)
 
-        var currentCursorPosition = slider.getStackedPosition(mode)
+        var currentCursorPosition = slider.stackedPosition
         val scalingFactor = NORMALIZED_RADIUS / slider.radius
 
         for (i in 1 until slider.nestedHitObjects.size) {
             val currentMovementObject = slider.nestedHitObjects[i]
-            var currentMovement = currentMovementObject.getStackedPosition(mode) - currentCursorPosition
+            var currentMovement = currentMovementObject.stackedPosition - currentCursorPosition
             var currentMovementLength = scalingFactor * currentMovement.length
 
             // The amount of movement required so that the cursor position needs to be updated.
@@ -337,7 +337,7 @@ abstract class DifficultyHitObject(
     }
 
     private fun getEndCursorPosition(obj: HitObject): Vector2 {
-        var pos = obj.getStackedPosition(mode)
+        var pos = obj.stackedPosition
 
         if (obj is Slider) {
             computeSliderCursorPosition(obj)

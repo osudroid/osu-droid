@@ -3,21 +3,16 @@ package ru.nsu.ccfit.zuev.osu.game;
 import android.graphics.PointF;
 
 import com.reco1l.osu.Execution;
+import com.reco1l.osu.graphics.Modifiers;
 
-import org.anddev.andengine.entity.IEntity;
-import org.anddev.andengine.entity.modifier.AlphaModifier;
-import org.anddev.andengine.entity.modifier.ColorModifier;
-import org.anddev.andengine.entity.modifier.DelayModifier;
-import org.anddev.andengine.entity.modifier.IEntityModifier;
-import org.anddev.andengine.entity.modifier.SequenceEntityModifier;
 import org.anddev.andengine.entity.scene.Scene;
 import org.anddev.andengine.entity.sprite.Sprite;
 import org.anddev.andengine.util.MathUtils;
-import org.anddev.andengine.util.modifier.IModifier;
 
 import ru.nsu.ccfit.zuev.osu.Constants;
 import ru.nsu.ccfit.zuev.osu.ResourceManager;
 import ru.nsu.ccfit.zuev.osu.Utils;
+import ru.nsu.ccfit.zuev.osu.helper.CentredSprite;
 import ru.nsu.ccfit.zuev.osu.scoring.ScoreNumber;
 import ru.nsu.ccfit.zuev.osu.scoring.StatisticV2;
 
@@ -33,6 +28,7 @@ public class ModernSpinner extends Spinner {
     private final Sprite glow;
     // private final Sprite spin;
     // private final Sprite clear;
+    private final ScoreNumber bonusScore;
 
     private GameObjectListener listener;
     private Scene scene;
@@ -44,7 +40,6 @@ public class ModernSpinner extends Spinner {
     private boolean clear;
     private int score = 1;
     private StatisticV2 stat;
-    private ScoreNumber bonusScore;
     private PointF oldMouse;
     private float totalTime;
 
@@ -55,16 +50,13 @@ public class ModernSpinner extends Spinner {
         ResourceManager.getInstance().checkEvoSpinnerTextures();
         center = Utils.trackToRealCoords(new PointF((float) Constants.MAP_WIDTH / 2,
                 (float) Constants.MAP_HEIGHT / 2));
-        middle = SpritePool.getInstance().getCenteredSprite(
-                "spinner-middle", center);
-        middle2 = SpritePool.getInstance().getCenteredSprite(
-                "spinner-middle2", center);
-        bottom = SpritePool.getInstance().getCenteredSprite(
-                "spinner-bottom", center);
-        top = SpritePool.getInstance().getCenteredSprite(
-                "spinner-top", center);
-        glow = SpritePool.getInstance().getCenteredSprite(
-                "spinner-glow", center);
+        middle = new CentredSprite(center.x, center.y, ResourceManager.getInstance().getTexture("spinner-middle"));
+        middle2 = new CentredSprite(center.x, center.y, ResourceManager.getInstance().getTexture("spinner-middle2"));
+        bottom = new CentredSprite(center.x, center.y, ResourceManager.getInstance().getTexture("spinner-bottom"));
+        top = new CentredSprite(center.x, center.y, ResourceManager.getInstance().getTexture("spinner-top"));
+        glow = new CentredSprite(center.x, center.y, ResourceManager.getInstance().getTexture("spinner-glow"));
+
+        bonusScore = new ScoreNumber(center.x, center.y + 100, "", 1.1f, true);
     }
 
     public void init(GameObjectListener listener, Scene scene,
@@ -102,26 +94,14 @@ public class ModernSpinner extends Spinner {
         scene.attachChild(middle);
         scene.attachChild(middle2);
 
-        top.registerEntityModifier(
-                new SequenceEntityModifier(
-                        new IEntityModifier.IEntityModifierListener() {
-                            @Override
-                            public void onModifierStarted(final IModifier<IEntity> pModifier, final IEntity pItem) {
-                            }
+        top.registerEntityModifier(Modifiers.sequence(
+            Modifiers.fadeIn(aheadTime),
+            Modifiers.delay(time).setOnFinished(entity -> Execution.updateThread(this::removeFromScene))
+        ));
 
-                            @Override
-                            public void onModifierFinished(final IModifier<IEntity> pModifier, final IEntity pItem) {
-                                Execution.updateThread(ModernSpinner.this::removeFromScene);
-                            }
-                        },
-                        new SequenceEntityModifier(
-                                new AlphaModifier(aheadTime, 0, 1f),
-                                new DelayModifier(time)
-                        )
-                ));
-        bottom.registerEntityModifier(new AlphaModifier(aheadTime, 0, 1f));
-        middle.registerEntityModifier(new AlphaModifier(aheadTime, 0, 1f));
-        middle2.registerEntityModifier(new AlphaModifier(aheadTime, 0, 1f));
+        bottom.registerEntityModifier(Modifiers.fadeIn(aheadTime));
+        middle.registerEntityModifier(Modifiers.fadeIn(aheadTime));
+        middle2.registerEntityModifier(Modifiers.fadeIn(aheadTime));
     }
 
     @Override
@@ -194,20 +174,22 @@ public class ModernSpinner extends Spinner {
                 // Clear Sprite
                 clear = true;
             } else if (Math.abs(rotations) > 1) {
-                if (bonusScore != null) {
+                if (bonusScore.hasParent()) {
                     scene.detachChild(bonusScore);
                 }
                 rotations -= 1 * Math.signum(rotations);
-                bonusScore = new ScoreNumber(center.x, center.y + 100,
-                        String.valueOf(score * 1000), 1.1f, true);
+                bonusScore.setText(String.valueOf(score * 1000));
                 listener.onSpinnerHit(id, 1000, false, 0);
                 score++;
                 scene.attachChild(bonusScore);
                 ResourceManager.getInstance().getSound("spinnerbonus").play();
-                glow.registerEntityModifier(new SequenceEntityModifier(
-                        new ColorModifier(0.1f, 0f, 1f, 0.8f, 1f, 1f, 1f),
-                        new ColorModifier(0.1f, 1f, 0f, 1f, 0.8f, 1f, 1f)
-                ));
+                float timeMultiplier = GameHelper.getTimeMultiplier();
+                glow.registerEntityModifier(
+                    Modifiers.sequence(
+                        Modifiers.color(0.1f * timeMultiplier, 0f, 1f, 0.8f, 1f, 1f, 1f),
+                        Modifiers.color(0.1f * timeMultiplier, 1f, 0f, 1f, 0.8f, 1f, 1f)
+                    )
+                );
                 float rate = 0.375f;
                 if (GameHelper.getDrain() > 0) {
                     rate = 1 + (GameHelper.getDrain() / 4f);
@@ -241,11 +223,8 @@ public class ModernSpinner extends Spinner {
         scene.detachChild(bottom);
         scene.detachChild(top);
         scene.detachChild(glow);
-        // GameObjectPool.getInstance().putSpinner(this);
+        scene.detachChild(bonusScore);
 
-        if (bonusScore != null) {
-            bonusScore.detachFromScene(scene);
-        }
         listener.removeObject(ModernSpinner.this);
         int score = 0;
         if (replayObjectData != null) {

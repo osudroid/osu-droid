@@ -31,8 +31,7 @@ class Slider(
     /**
      * The path of this [Slider].
      */
-    @JvmField
-    var path: SliderPath,
+    path: SliderPath,
 
     /**
      * Whether this [Slider] starts a new combo.
@@ -66,6 +65,15 @@ class Slider(
     private val endPositionCache = Cached(position)
 
     /**
+     * The path of this [Slider].
+     */
+    var path = path
+        set(value) {
+            field = value
+            updateNestedPositions()
+        }
+
+    /**
      * The end position of this [Slider].
      */
     val endPosition: Vector2
@@ -78,12 +86,10 @@ class Slider(
         }
 
     /**
-     * Gets the stacked end position of this [Slider].
-     *
-     * @param mode The [GameMode] to calculate for.
-     * @return The stacked end position.
+     * The stacked end position of this [Slider].
      */
-    fun getStackedEndPosition(mode: GameMode) = evaluateStackedPosition(endPosition, mode)
+    val stackedEndPosition
+        get() = endPosition + stackOffset
 
     /**
      * The distance of this [Slider].

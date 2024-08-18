@@ -24,7 +24,7 @@
 
 	<string name="message_error">Error: %s</string>
 	<string name="message_error_createdir">Cannot create %s</string>
-	<string name="message_error_multitouch">Multitouch is not supported by your device</string>
+	<string name="message_error_multitouch">Multitouch may not be supported by your device</string>
 	<string name="message_error_audio">Cannot initialize audio. Please, restart the song</string>
 	<string name="message_error_sdcard">External storage is not mounted</string>
 	<string name="message_error_sdcardread">External storage is read only</string>

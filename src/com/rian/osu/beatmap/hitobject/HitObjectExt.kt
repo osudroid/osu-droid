@@ -19,6 +19,4 @@ fun HitObject.getEndPosition() = if (this is Slider) this.endPosition else this.
  *
  * @param mode The [GameMode] to get.
  */
-fun HitObject.getStackedEndPosition(mode: GameMode) =
-    if (this is Slider) this.getStackedEndPosition(mode)
-    else this.getStackedPosition(mode)
+fun HitObject.getStackedEndPosition() = if (this is Slider) this.stackedEndPosition else this.stackedPosition

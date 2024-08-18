@@ -1,6 +1,5 @@
 package com.rian.osu.replay
 
-import com.rian.osu.GameMode
 import com.rian.osu.beatmap.Beatmap
 import com.rian.osu.beatmap.DroidHitWindow
 import com.rian.osu.beatmap.HitWindow
@@ -355,7 +354,7 @@ class ThreeFingerChecker(
                 continue
             }
 
-            val objPosition = obj.getStackedPosition(GameMode.Droid)
+            val objPosition = obj.stackedPosition
             val hitTime = obj.startTime + objData.accuracy
 
             // Observe the cursor position at the object's hit time.

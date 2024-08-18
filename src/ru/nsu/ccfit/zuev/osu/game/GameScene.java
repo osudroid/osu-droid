@@ -15,11 +15,13 @@ import com.reco1l.ibancho.RoomAPI;
 import com.reco1l.osu.BeatmapInfo;
 import com.reco1l.osu.Execution;
 import com.reco1l.osu.graphics.BlankTextureRegion;
+import com.reco1l.osu.graphics.Modifiers;
 import com.reco1l.osu.graphics.VideoSprite;
 import com.reco1l.osu.ui.entity.GameplayLeaderboard;
 import com.reco1l.osu.multiplayer.Multiplayer;
 import com.reco1l.osu.multiplayer.RoomScene;
 
+import com.rian.osu.GameMode;
 import com.rian.osu.beatmap.Beatmap;
 import com.rian.osu.beatmap.constants.BeatmapCountdown;
 import com.rian.osu.beatmap.constants.SampleBank;
@@ -35,11 +37,8 @@ import org.anddev.andengine.engine.Engine;
 import org.anddev.andengine.engine.camera.SmoothCamera;
 import org.anddev.andengine.engine.handler.IUpdateHandler;
 import org.anddev.andengine.engine.options.TouchOptions;
-import org.anddev.andengine.entity.modifier.FadeOutModifier;
 import org.anddev.andengine.entity.modifier.LoopEntityModifier;
 import org.anddev.andengine.entity.modifier.MoveXModifier;
-import org.anddev.andengine.entity.modifier.ParallelEntityModifier;
-import org.anddev.andengine.entity.modifier.SequenceEntityModifier;
 import org.anddev.andengine.entity.primitive.Rectangle;
 import org.anddev.andengine.entity.scene.Scene;
 import org.anddev.andengine.entity.scene.Scene.IOnSceneTouchListener;
@@ -82,7 +81,6 @@ import ru.nsu.ccfit.zuev.osu.game.mods.GameMod;
 import ru.nsu.ccfit.zuev.osu.helper.AnimSprite;
 import ru.nsu.ccfit.zuev.osu.helper.DifficultyHelper;
 import ru.nsu.ccfit.zuev.osu.helper.MD5Calculator;
-import ru.nsu.ccfit.zuev.osu.helper.ModifierFactory;
 import ru.nsu.ccfit.zuev.osu.helper.StringTable;
 import ru.nsu.ccfit.zuev.osu.menu.LoadingScreen;
 import ru.nsu.ccfit.zuev.osu.menu.ModMenu;
@@ -348,7 +346,7 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
 
         try (var parser = new BeatmapParser(beatmapInfo.getPath())) {
             if (parser.openFile()) {
-                beatmap = parser.parse(true);
+                beatmap = parser.parse(true, GameMode.Droid);
             } else {
                 Debug.e("startGame: cannot open file");
                 ToastLogger.showText(StringTable.format(R.string.message_error_open, beatmapInfo.getPath()), true);
@@ -598,8 +596,9 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
         GameHelper.setInitalBeatLength(GameHelper.getBeatLength());
 
         GameObjectPool.getInstance().purge();
-        SpritePool.getInstance().purge();
-        ModifierFactory.clear();
+        Slider.tickSpritePool.clear();
+        FollowTrack.pointSpritePool.clear();
+        Modifiers.clearPool();
 
         // TODO replay
         offsetSum = 0;
@@ -997,12 +996,12 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
 
                 var effect = GameObjectPool.getInstance().getEffect(GameMod.getTextureName(mod));
 
-                effect.init(fgScene, position, scale, new SequenceEntityModifier(
-                    ModifierFactory.newScaleModifier(0.25f, 1.2f, 1f),
-                    ModifierFactory.newDelayModifier(2f - timeOffset),
-                    new ParallelEntityModifier(
-                        ModifierFactory.newFadeOutModifier(0.5f),
-                        ModifierFactory.newScaleModifier(0.5f, 1f, 1.5f)
+                effect.init(fgScene, position, scale, Modifiers.sequence(
+                    Modifiers.scale(0.25f, 1.2f, 1f),
+                    Modifiers.delay(2f - timeOffset),
+                    Modifiers.parallel(
+                        Modifiers.fadeOut(0.5f),
+                        Modifiers.scale(0.5f, 1f, 1.5f)
                     )
                 ));
 
@@ -1667,7 +1666,6 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
             scene = new Scene();
             SkinManager.setSkinEnabled(false);
             GameObjectPool.getInstance().purge();
-            SpritePool.getInstance().purge();
             passiveObjects.clear();
             breakPeriods.clear();
             cursorSprites = null;
@@ -1843,7 +1841,6 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
 
         SkinManager.setSkinEnabled(false);
         GameObjectPool.getInstance().purge();
-        SpritePool.getInstance().purge();
         if (passiveObjects != null) {
             passiveObjects.clear();
         }
@@ -2157,10 +2154,12 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
                     scene,
                     pos,
                     scale,
-                    new SequenceEntityModifier(ModifierFactory
-                            .newFadeInModifier(0.15f), ModifierFactory
-                            .newDelayModifier(0.35f), ModifierFactory
-                            .newFadeOutModifier(0.25f)));
+                    Modifiers.sequence(
+                        Modifiers.fadeIn(0.15f * timeMultiplier),
+                        Modifiers.delay(0.35f * timeMultiplier),
+                        Modifiers.fadeOut(0.25f * timeMultiplier)
+                    )
+            );
             registerHit(id, 0, endCombo);
             return;
         }
@@ -2180,11 +2179,12 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
                     mgScene,
                     pos,
                     scale,
-                    new FadeOutModifier(0.7f),
-                    new SequenceEntityModifier(ModifierFactory
-                            .newScaleModifier(0.25f, scale, 1.5f * scale),
-                            ModifierFactory.newScaleModifier(0.45f,
-                                    scale * 1.5f, 2f * scale)));
+                    Modifiers.fadeOut(0.7f * timeMultiplier),
+                    Modifiers.sequence(
+                        Modifiers.scale(0.25f * timeMultiplier, scale, 1.5f * scale),
+                        Modifiers.scale(0.45f * timeMultiplier, 1.5f * scale, 2f * scale)
+                    )
+            );
         }
 
         GameEffect effect = GameObjectPool.getInstance().getEffect(scoreName);
@@ -2192,14 +2192,16 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
                 mgScene,
                 pos,
                 scale,
-                new SequenceEntityModifier(ModifierFactory.newScaleModifier(
-                        0.15f, scale, 1.2f * scale), ModifierFactory
-                        .newScaleModifier(0.05f, 1.2f * scale, scale),
-                        ModifierFactory.newAlphaModifier(1f, 1, 0)));
+                Modifiers.sequence(
+                    Modifiers.scale(0.15f * timeMultiplier, scale, 1.2f * scale),
+                    Modifiers.scale(0.05f * timeMultiplier, 1.2f * scale, scale),
+                    Modifiers.fadeOut(timeMultiplier)
+                )
+        );
 
         pos.y /= 2f;
         effect = GameObjectPool.getInstance().getEffect("spinner-osu");
-        effect.init(mgScene, pos, 1, ModifierFactory.newFadeOutModifier(1.5f));
+        effect.init(mgScene, pos, 1, Modifiers.fadeOut(1.5f * timeMultiplier));
     }
 
     public void playSound(final String name, final int sampleSet, final int addition) {
@@ -2484,9 +2486,7 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
 
         scene.getChildScene().back();
         paused = false;
-        if (stat.getHp() <= 0 && !stat.getMod().contains(GameMod.MOD_NOFAIL)
-                && !stat.getMod().contains(GameMod.MOD_RELAX)
-                && !stat.getMod().contains(GameMod.MOD_AUTOPILOT)) {
+        if (stat.getHp() <= 0 && !stat.getMod().contains(GameMod.MOD_NOFAIL)) {
             quit();
             return;
         }
@@ -2525,11 +2525,12 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
                     mgScene,
                     pos,
                     GameHelper.isSuddenDeath() ? scale * 3 : scale,
-                    new SequenceEntityModifier(
-                            ModifierFactory.newFadeInModifier(0.15f * timeMultiplier),
-                            ModifierFactory.newDelayModifier(0.35f * timeMultiplier),
-                            ModifierFactory.newFadeOutModifier(0.25f * timeMultiplier)
-                    ));
+                    Modifiers.sequence(
+                        Modifiers.fadeIn(0.15f * timeMultiplier),
+                        Modifiers.delay(0.35f * timeMultiplier),
+                        Modifiers.fadeOut(0.25f * timeMultiplier)
+                    )
+            );
 
             return;
         }
@@ -2544,12 +2545,13 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
                     bgScene,
                     pos,
                     scale,
-                    ModifierFactory.newFadeOutModifier(timeMultiplier),
-                    new SequenceEntityModifier(
-                            ModifierFactory.newScaleModifier(0.25f * timeMultiplier, scale, 1.5f * scale),
-                            ModifierFactory.newScaleModifier(0.45f * timeMultiplier, scale * 1.5f, 1.9f * scale),
-                            ModifierFactory.newScaleModifier(0.3f * timeMultiplier, scale * 1.9f, scale * 2f)
-                    ));
+                    Modifiers.fadeOut(timeMultiplier),
+                    Modifiers.sequence(
+                        Modifiers.scale(0.25f * timeMultiplier, scale, 1.5f * scale),
+                        Modifiers.scale(0.45f * timeMultiplier, scale * 1.5f, 1.9f * scale),
+                        Modifiers.scale(0.3f * timeMultiplier, scale * 1.9f, scale * 2f)
+                    )
+            );
             light.setBlendFunction(GL10.GL_SRC_ALPHA, GL10.GL_DST_ALPHA);
         }
 
@@ -2557,11 +2559,12 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
                 mgScene,
                 pos,
                 scale,
-                new SequenceEntityModifier(
-                        ModifierFactory.newScaleModifier(0.15f * timeMultiplier, scale, 1.2f * scale),
-                        ModifierFactory.newScaleModifier(0.05f * timeMultiplier, 1.2f * scale, scale),
-                        ModifierFactory.newAlphaModifier(0.5f * timeMultiplier, 1, 0)
-                ));
+                Modifiers.sequence(
+                    Modifiers.scale(0.15f * timeMultiplier, scale, 1.2f * scale),
+                    Modifiers.scale(0.05f * timeMultiplier, 1.2f * scale, scale),
+                    Modifiers.fadeOut(0.5f * timeMultiplier)
+                )
+        );
     }
 
     private void createBurstEffect(final PointF pos, final RGBColor color) {
@@ -2572,15 +2575,15 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
 
         final GameEffect burst1 = GameObjectPool.getInstance().getEffect("hitcircle");
         burst1.init(mgScene, pos, scale,
-                ModifierFactory.newScaleModifier(0.25f * timeMultiplier, scale, 1.5f * scale),
-                ModifierFactory.newAlphaModifier(0.25f * timeMultiplier, 0.8f, 0)
+                Modifiers.scale(0.25f * timeMultiplier, scale, 1.5f * scale),
+                Modifiers.alpha(0.25f * timeMultiplier, 0.8f, 0)
         );
         burst1.setColor(color);
 
         final GameEffect burst2 = GameObjectPool.getInstance().getEffect("hitcircleoverlay");
         burst2.init(mgScene, pos, scale,
-                ModifierFactory.newScaleModifier(0.25f * timeMultiplier, scale, 1.5f * scale),
-                ModifierFactory.newAlphaModifier(0.25f * timeMultiplier, 0.8f, 0)
+                Modifiers.scale(0.25f * timeMultiplier, scale, 1.5f * scale),
+                Modifiers.alpha(0.25f * timeMultiplier, 0.8f, 0)
         );
     }
 
@@ -2592,15 +2595,15 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
 
         final GameEffect burst1 = GameObjectPool.getInstance().getEffect("sliderstartcircle");
         burst1.init(mgScene, pos, scale,
-                ModifierFactory.newScaleModifier(0.25f * timeMultiplier, scale, 1.5f * scale),
-                ModifierFactory.newAlphaModifier(0.25f * timeMultiplier, 0.8f, 0)
+                Modifiers.scale(0.25f * timeMultiplier, scale, 1.5f * scale),
+                Modifiers.alpha(0.25f * timeMultiplier, 0.8f, 0)
         );
         burst1.setColor(color);
 
         final GameEffect burst2 = GameObjectPool.getInstance().getEffect("sliderstartcircleoverlay");
         burst2.init(mgScene, pos, scale,
-                ModifierFactory.newScaleModifier(0.25f * timeMultiplier, scale, 1.5f * scale),
-                ModifierFactory.newAlphaModifier(0.25f * timeMultiplier, 0.8f, 0)
+                Modifiers.scale(0.25f * timeMultiplier, scale, 1.5f * scale),
+                Modifiers.alpha(0.25f * timeMultiplier, 0.8f, 0)
         );
     }
 
@@ -2612,15 +2615,15 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
 
         final GameEffect burst1 = GameObjectPool.getInstance().getEffect("sliderendcircle");
         burst1.init(mgScene, pos, scale,
-                ModifierFactory.newScaleModifier(0.25f * timeMultiplier, scale, 1.5f * scale),
-                ModifierFactory.newAlphaModifier(0.25f * timeMultiplier, 0.8f, 0)
+                Modifiers.scale(0.25f * timeMultiplier, scale, 1.5f * scale),
+                Modifiers.alpha(0.25f * timeMultiplier, 0.8f, 0)
         );
         burst1.setColor(color);
 
         final GameEffect burst2 = GameObjectPool.getInstance().getEffect("sliderendcircleoverlay");
         burst2.init(mgScene, pos, scale,
-                ModifierFactory.newScaleModifier(0.25f * timeMultiplier, scale, 1.5f * scale),
-                ModifierFactory.newAlphaModifier(0.25f * timeMultiplier, 0.8f, 0)
+                Modifiers.scale(0.25f * timeMultiplier, scale, 1.5f * scale),
+                Modifiers.alpha(0.25f * timeMultiplier, 0.8f, 0)
         );
     }
 
@@ -2633,8 +2636,8 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
         final GameEffect burst1 = GameObjectPool.getInstance().getEffect("reversearrow");
         burst1.hit.setRotation(ang);
         burst1.init(mgScene, pos, scale,
-                ModifierFactory.newScaleModifier(0.25f * timeMultiplier, scale, 1.5f * scale),
-                ModifierFactory.newAlphaModifier(0.25f * timeMultiplier, 0.8f, 0)
+                Modifiers.scale(0.25f * timeMultiplier, scale, 1.5f * scale),
+                Modifiers.alpha(0.25f * timeMultiplier, 0.8f, 0)
         );
 
     }

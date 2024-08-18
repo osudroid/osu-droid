@@ -15,6 +15,7 @@ import org.anddev.andengine.util.ParameterCallable;
 import org.anddev.andengine.util.SmartList;
 import org.anddev.andengine.util.Transformation;
 import org.anddev.andengine.util.constants.Constants;
+import org.anddev.andengine.util.modifier.IModifier;
 
 
 /**
@@ -681,6 +682,11 @@ public class Entity implements IEntity {
 		if(this.mEntityModifiers == null) {
 			return false;
 		}
+
+		// BEGIN osu!droid modified
+		pEntityModifier.onUnregister();
+		// END osu!droid modified
+
 		return this.mEntityModifiers.remove(pEntityModifier);
 	}
 
@@ -689,6 +695,16 @@ public class Entity implements IEntity {
 		if(this.mEntityModifiers == null) {
 			return false;
 		}
+
+		// BEGIN osu!droid modified
+		for (int i = this.mEntityModifiers.size() - 1; i >= 0; i--) {
+			IModifier<IEntity> modifier = this.mEntityModifiers.get(i);
+			if (pEntityModifierMatcher.matches(modifier)) {
+				modifier.onUnregister();
+			}
+		}
+		// END osu!droid modified
+
 		return this.mEntityModifiers.removeAll(pEntityModifierMatcher);
 	}
 
@@ -697,6 +713,13 @@ public class Entity implements IEntity {
 		if(this.mEntityModifiers == null) {
 			return;
 		}
+
+		// BEGIN osu!droid modified
+		for (int i = this.mEntityModifiers.size() - 1; i >= 0; i--) {
+			this.mEntityModifiers.get(i).onUnregister();
+		}
+		// END osu!droid modified
+
 		this.mEntityModifiers.clear();
 	}
 

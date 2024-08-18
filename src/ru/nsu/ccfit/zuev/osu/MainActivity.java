@@ -61,6 +61,7 @@ import org.anddev.andengine.extension.input.touch.controller.MultiTouch;
 import org.anddev.andengine.extension.input.touch.controller.MultiTouchController;
 import org.anddev.andengine.extension.input.touch.exception.MultiTouchException;
 import org.anddev.andengine.input.touch.TouchEvent;
+import org.anddev.andengine.input.touch.controller.SingleTouchControler;
 import org.anddev.andengine.opengl.view.RenderSurfaceView;
 import org.anddev.andengine.sensor.accelerometer.AccelerometerData;
 import org.anddev.andengine.sensor.accelerometer.IAccelerometerListener;
@@ -79,7 +80,6 @@ import java.util.concurrent.TimeUnit;
 import ru.nsu.ccfit.zuev.audio.BassAudioPlayer;
 import ru.nsu.ccfit.zuev.audio.serviceAudio.SaveServiceObject;
 import ru.nsu.ccfit.zuev.audio.serviceAudio.SongService;
-import ru.nsu.ccfit.zuev.osu.game.SpritePool;
 import ru.nsu.ccfit.zuev.osu.helper.FileUtils;
 import ru.nsu.ccfit.zuev.osu.helper.InputManager;
 import ru.nsu.ccfit.zuev.osu.helper.StringTable;
@@ -148,19 +148,13 @@ public class MainActivity extends BaseGameActivity implements
         opt.getRenderOptions().disableExtensionVertexBufferObjects();
         opt.getTouchOptions().enableRunOnUpdateThread();
         final Engine engine = new Engine(opt);
-        try {
-            if (MultiTouch.isSupported(this)) {
-                engine.setTouchController(new MultiTouchController());
-            } else {
-                ToastLogger.showText(
-                        StringTable.get(R.string.message_error_multitouch),
-                        false);
-            }
-        } catch (final MultiTouchException e) {
-            ToastLogger.showText(
-                    StringTable.get(R.string.message_error_multitouch),
-                    false);
+
+        if (!MultiTouch.isSupported(this)) {
+            // Warning player that they will have to single tap forever.
+            ToastLogger.showText(StringTable.get(R.string.message_error_multitouch), false);
         }
+        engine.setTouchController(new MultiTouchController());
+
         GlobalManager.getInstance().setCamera(mCamera);
         GlobalManager.getInstance().setEngine(engine);
         GlobalManager.getInstance().setMainActivity(this);
@@ -635,7 +629,6 @@ public class MainActivity extends BaseGameActivity implements
         }
         if (GlobalManager.getInstance().getEngine() != null && GlobalManager.getInstance().getGameScene() != null
                 && GlobalManager.getInstance().getEngine().getScene() == GlobalManager.getInstance().getGameScene().getScene()) {
-            SpritePool.getInstance().purge();
 
             if (Multiplayer.isMultiplayer) {
                 ToastLogger.showText("You've left the match.", true);

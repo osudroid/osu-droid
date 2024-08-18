@@ -122,8 +122,8 @@ class DroidDifficultyHitObject(
         }
 
         if (considerDistance) {
-            val position = obj.getStackedPosition(mode)
-            var distance = previous.obj.getStackedEndPosition(mode).getDistance(position)
+            val position = obj.stackedPosition
+            var distance = previous.obj.getStackedEndPosition().getDistance(position)
 
             if (previous.obj is Slider && previous.obj.lazyEndPosition != null) {
                 distance = min(
@@ -178,14 +178,14 @@ class DroidDifficultyHitObject(
         }
 
         for (hitObject in prevVisibleObjects) {
-            val distance = obj.getStackedPosition(mode).getDistance(hitObject.getStackedEndPosition(mode))
+            val distance = obj.stackedPosition.getDistance(hitObject.getStackedEndPosition())
             val deltaTime = startTime - hitObject.getEndTime() / clockRate
 
             applyToOverlappingFactor(distance, deltaTime)
         }
 
         for (hitObject in nextVisibleObjects) {
-            val distance = hitObject.getStackedPosition(mode).getDistance(obj.getStackedEndPosition(mode))
+            val distance = hitObject.stackedPosition.getDistance(obj.getStackedEndPosition())
 
             // We are not using clock rate adjusted delta time here for note density calculation.
             val deltaTime = hitObject.startTime - obj.getEndTime()
