@@ -326,7 +326,7 @@ data class BeatmapSetInfo(
      * The list of beatmaps
      */
     @Relation(parentColumn = "parentPath", entityColumn = "parentPath")
-    val beatmaps: List<BeatmapInfo>
+    val beatmaps: Array<BeatmapInfo>
 
 ) {
 
@@ -344,5 +344,13 @@ data class BeatmapSetInfo(
 
 
     override fun equals(other: Any?) = other is BeatmapSetInfo && other.path == path
+
+    override fun hashCode(): Int {
+        var result = id ?: 0
+        result = 31 * result + path.hashCode()
+        result = 31 * result + beatmaps.contentHashCode()
+        result = 31 * result + count
+        return result
+    }
 
 }

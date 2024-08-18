@@ -6,6 +6,7 @@ import org.anddev.andengine.entity.scene.Scene;
 import org.anddev.andengine.entity.sprite.Sprite;
 
 import java.lang.ref.WeakReference;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.Set;
 import java.util.regex.Matcher;
@@ -51,7 +52,7 @@ public class BeatmapSetItem {
                 - Utils.toRes(25);
 //        titleStr = (beatmap.getArtistUnicode() == null ? beatmap.getArtist() : beatmap.getArtistUnicode()) + " - "
 //                + (beatmap.getTitleUnicode() == null ? beatmap.getTitle() : beatmap.getTitleUnicode());
-        var beatmapInfo = this.beatmapSetInfo.getBeatmaps().get(0);
+        var beatmapInfo = this.beatmapSetInfo.getBeatmaps()[0];
 
         titleStr = beatmapInfo.getArtistText() + " - " + beatmapInfo.getTitleText();
 
@@ -74,7 +75,7 @@ public class BeatmapSetItem {
                 - Utils.toRes(25);
 //        titleStr = (beatmap.getArtistUnicode() == null ? beatmap.getArtist() : beatmap.getArtistUnicode()) + " - "
 //                + (beatmap.getTitleUnicode() == null ? beatmap.getTitle() : beatmap.getTitleUnicode());
-        var beatmapInfo = this.beatmapSetInfo.getBeatmaps().get(0);
+        var beatmapInfo = this.beatmapSetInfo.getBeatmaps()[0];
 
         titleStr = beatmapInfo.getArtistText() + " - " + beatmapInfo.getTitleText();
 
@@ -173,7 +174,7 @@ public class BeatmapSetItem {
         initBeatmaps();
         percentAppeared = 0;
 
-        var beatmapInfo = beatmapSetInfo.getBeatmaps().get(0);
+        var beatmapInfo = beatmapSetInfo.getBeatmaps()[0];
 
         final String musicFileName = beatmapInfo.getAudio();
         if (reloadMusic) {
@@ -221,7 +222,7 @@ public class BeatmapSetItem {
             return;
         }
 
-        var beatmapInfo = beatmapSetInfo.getBeatmaps().get(0);
+        var beatmapInfo = beatmapSetInfo.getBeatmaps()[0];
 
         final StringBuilder builder = new StringBuilder();
         builder.append(beatmapInfo.getTitle());
@@ -403,9 +404,9 @@ public class BeatmapSetItem {
         if (beatmapId == -1) {
             // Tracks are originally sorted by osu!droid difficulty, so for osu!standard difficulty they need to be sorted again.
             if (Config.getDifficultyAlgorithm() == DifficultyAlgorithm.standard) {
-                Collections.sort(beatmapSetInfo.getBeatmaps(), (o1, o2) -> Float.compare(o1.getStandardStarRating(), o2.getStandardStarRating()));
+                Arrays.sort(beatmapSetInfo.getBeatmaps(), (o1, o2) -> Float.compare(o1.getStandardStarRating(), o2.getStandardStarRating()));
             } else {
-                Collections.sort(beatmapSetInfo.getBeatmaps(), (o1, o2) -> Float.compare(o1.getDroidStarRating(), o2.getDroidStarRating()));
+                Arrays.sort(beatmapSetInfo.getBeatmaps(), (o1, o2) -> Float.compare(o1.getDroidStarRating(), o2.getDroidStarRating()));
             }
 
             var selectedBeatmap = selectedBeatmapItem != null ? selectedBeatmapItem.getBeatmapInfo() : null;
@@ -430,9 +431,9 @@ public class BeatmapSetItem {
         if (beatmapId == -1) {
             // Tracks are originally sorted by osu!droid difficulty, so for osu!standard difficulty they need to be sorted again.
             if (Config.getDifficultyAlgorithm() == DifficultyAlgorithm.standard) {
-                Collections.sort(beatmapSetInfo.getBeatmaps(), (o1, o2) -> Float.compare(o1.getStandardStarRating(), o2.getStandardStarRating()));
+                Arrays.sort(beatmapSetInfo.getBeatmaps(), (o1, o2) -> Float.compare(o1.getStandardStarRating(), o2.getStandardStarRating()));
             } else {
-                Collections.sort(beatmapSetInfo.getBeatmaps(), (o1, o2) -> Float.compare(o1.getDroidStarRating(), o2.getDroidStarRating()));
+                Arrays.sort(beatmapSetInfo.getBeatmaps(), (o1, o2) -> Float.compare(o1.getDroidStarRating(), o2.getDroidStarRating()));
             }
 
             for (int i = 0; i < beatmapItems.length; i++) {
