@@ -327,11 +327,12 @@ public class LibraryManager {
 
             executors.submit(() -> {
 
-                for (var file : files) {
+                for (int i = files.size() - 1; i >= 0; i--) {
+                    var file = files.get(i);
 
                     var found = false;
-                    for (int i = 0; i < savedPaths.size(); i++) {
-                        if (savedPaths.get(i).equals(file.getPath())) {
+                    for (int j = savedPaths.size() - 1; j >= 0; j--) {
+                        if (savedPaths.get(j).equals(file.getPath())) {
                             synchronized (this) {
                                 fileCount--;
                             }
