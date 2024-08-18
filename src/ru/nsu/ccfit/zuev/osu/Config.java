@@ -104,18 +104,10 @@ public class Config {
     private static RGBColor[] comboColors;
     private static Context context;
 
-
-    /**
-     * Shared preferences for the application.
-     */
-    private static SharedPreferences prefs;
-
-
     public static void loadConfig(final Context context) {
         Config.context = context;
-
-        prefs = PreferenceManager.getDefaultSharedPreferences(context);
-
+        final SharedPreferences prefs = PreferenceManager
+                .getDefaultSharedPreferences(context);
         // graphics
         useCustomSkins = prefs.getBoolean("skin", false);
         useCustomSounds = prefs.getBoolean("beatmapSounds", true);
@@ -256,6 +248,9 @@ public class Config {
     }
 
     public static void loadOnlineConfig(final Context context) {
+        final SharedPreferences prefs = PreferenceManager
+                .getDefaultSharedPreferences(context);
+
         onlineUsername = prefs.getString("onlineUsername", "");
         onlinePassword = prefs.getString("onlinePassword", null);
         stayOnline = prefs.getBoolean("stayOnline", false);
@@ -801,32 +796,5 @@ public class Config {
 
     public static boolean isNoChangeDimInBreaks() {
         return noChangeDimInBreaks;
-    }
-
-
-    // Please use this instead of storing a new variable in this class.
-
-    public static void setInteger(String key, int value) {
-        prefs.edit().putInt(key, value).apply();
-    }
-
-    public static int getInteger(String key, int defaultValue) {
-        return prefs.getInt(key, defaultValue);
-    }
-
-    public static void setBoolean(String key, boolean value) {
-        prefs.edit().putBoolean(key, value).apply();
-    }
-
-    public static boolean getBoolean(String key, boolean defaultValue) {
-        return prefs.getBoolean(key, defaultValue);
-    }
-
-    public static void setString(String key, String value) {
-        prefs.edit().putString(key, value).apply();
-    }
-
-    public static String getString(String key, String defaultValue) {
-        return prefs.getString(key, defaultValue);
     }
 }
