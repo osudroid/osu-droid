@@ -2196,16 +2196,19 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
         if (name.equals("sliderslide") || name.equals("sliderwhistle")) {
             snd.setLooping(true);
         }
+
+        float volume = activeSamplePoint.sampleVolume / 100f;
+
         if (name.equals("hitnormal")) {
-            snd.play(activeSamplePoint.sampleVolume * 0.8f);
+            snd.play(volume * 0.8f);
             return;
         }
         if (name.equals("hitwhistle")
                 || name.equals("hitclap")) {
-            snd.play(activeSamplePoint.sampleVolume * 0.85f);
+            snd.play(volume * 0.85f);
             return;
         }
-        snd.play(activeSamplePoint.sampleVolume);
+        snd.play(volume);
     }
 
 
