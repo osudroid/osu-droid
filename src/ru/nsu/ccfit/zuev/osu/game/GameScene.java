@@ -22,7 +22,6 @@ import com.reco1l.osu.multiplayer.RoomScene;
 import com.rian.osu.GameMode;
 import com.rian.osu.beatmap.Beatmap;
 import com.rian.osu.beatmap.constants.BeatmapCountdown;
-import com.rian.osu.beatmap.constants.SampleBank;
 import com.rian.osu.beatmap.parser.BeatmapParser;
 import com.rian.osu.beatmap.timings.EffectControlPoint;
 import com.rian.osu.beatmap.timings.SampleControlPoint;
@@ -543,12 +542,6 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
         comboNum = -1;
         currentComboNum = 0;
         lastActiveObjectHitTime = 0;
-        var defSound = beatmap.general.sampleBank;
-        if (defSound == SampleBank.Soft) {
-            TimingPoint.setDefaultSound("soft");
-        } else {
-            TimingPoint.setDefaultSound("normal");
-        }
 
         activeTimingPoint = beatmap.controlPoints.timing.controlPointAt(0);
         activeSamplePoint = beatmap.controlPoints.sample.controlPointAt(0);
