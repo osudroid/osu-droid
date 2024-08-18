@@ -45,7 +45,7 @@ object StandardFlashlightEvaluator {
 
             // Exclude overlapping objects that can be tapped at once.
             if (currentObject.obj !is Spinner) {
-                val jumpDistance = current.obj.getStackedPosition(GameMode.Standard)
+                val jumpDistance = current.obj.stackedPosition
                     .getDistance(currentObject.obj.getEndPosition())
 
                 cumulativeStrainTime += last.strainTime

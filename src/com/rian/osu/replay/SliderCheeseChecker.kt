@@ -1,6 +1,5 @@
 package com.rian.osu.replay
 
-import com.rian.osu.GameMode
 import com.rian.osu.beatmap.Beatmap
 import com.rian.osu.beatmap.DroidHitWindow
 import com.rian.osu.beatmap.PreciseDroidHitWindow
@@ -101,7 +100,7 @@ class SliderCheeseChecker(
             }
 
             val slider = objects[difficultSlider.index] as Slider
-            val sliderStartPosition = slider.getStackedPosition(GameMode.Droid)
+            val sliderStartPosition = slider.stackedPosition
 
             // These time boundaries should consider the delta time between the previous and next
             // object as well as their hit accuracy. However, they are somewhat complicated to
@@ -238,7 +237,7 @@ class SliderCheeseChecker(
                 }
 
                 val nestedObject = slider.nestedHitObjects[i]
-                val nestedPosition = nestedObject.getStackedPosition(GameMode.Droid)
+                val nestedPosition = nestedObject.stackedPosition
 
                 while (occurrenceLoopIndex < movements.size && movements[occurrenceLoopIndex].time < nestedObject.startTime) {
                     ++occurrenceLoopIndex

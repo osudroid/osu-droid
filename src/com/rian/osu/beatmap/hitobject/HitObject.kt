@@ -42,7 +42,7 @@ abstract class HitObject(
     open var stackHeight = 0
 
     /**
-     * The osu!standard scale of this [HitObject].
+     * The scale of this [HitObject].
      */
     open var scale = 0f
 
@@ -75,7 +75,7 @@ abstract class HitObject(
      * Whether this [HitObject] is in kiai time.
      */
     @JvmField
-    var kiai: Boolean = false
+    var kiai = false
 
     /**
      * The radius of this [HitObject].
@@ -84,11 +84,16 @@ abstract class HitObject(
         get() = (OBJECT_RADIUS * scale).toDouble()
 
     /**
-     * Gets the stacked position of this [HitObject].
-     *
-     * @param mode The [GameMode] to calculate for.
+     * The stacked position of this [HitObject].
      */
-    open fun getStackedPosition(mode: GameMode) = evaluateStackedPosition(position, mode)
+    open val stackedPosition
+        get() = position + stackOffset
+
+    /**
+     * The stack offset of this [HitObject].
+     */
+    protected var stackOffset = Vector2(0f)
+        private set
 
     /**
      * Applies defaults to this [HitObject].
@@ -119,6 +124,11 @@ abstract class HitObject(
 
             GameMode.Standard -> CircleSizeCalculator.standardCSToStandardScale(difficulty.cs, true)
         }
+
+        stackOffset = when (mode) {
+            GameMode.Droid -> Vector2(stackHeight * scale * 4f)
+            GameMode.Standard -> Vector2(stackHeight * scale * -6.4f)
+        }
     }
 
     /**
@@ -133,14 +143,6 @@ abstract class HitObject(
     }
 
     /**
-     * Evaluates a stacked position relative to this [HitObject].
-     *
-     * @param mode The [GameMode] to evaluate for.
-     * @return The evaluated stacked position.
-     */
-    protected fun evaluateStackedPosition(position: Vector2, mode: GameMode) = position + getStackOffset(mode)
-
-    /**
      * Creates a [BankHitSampleInfo] based on the sample settings of the first [BankHitSampleInfo.HIT_NORMAL] sample in [samples].
      * If no sample is available, sane default settings will be used instead.
      *
@@ -152,11 +154,6 @@ abstract class HitObject(
     protected fun createHitSampleInfo(sampleName: String) =
         samples.filterIsInstance<BankHitSampleInfo>().find { it.name == BankHitSampleInfo.HIT_NORMAL }?.copy(name = sampleName) ?:
         BankHitSampleInfo(sampleName, SampleBank.None)
-
-    private fun getStackOffset(mode: GameMode) = when (mode) {
-        GameMode.Droid -> Vector2(stackHeight * scale * 4f)
-        GameMode.Standard -> Vector2(stackHeight * scale * -6.4f)
-    }
 
     companion object {
         /**

@@ -78,12 +78,10 @@ class Slider(
         }
 
     /**
-     * Gets the stacked end position of this [Slider].
-     *
-     * @param mode The [GameMode] to calculate for.
-     * @return The stacked end position.
+     * The stacked end position of this [Slider].
      */
-    fun getStackedEndPosition(mode: GameMode) = evaluateStackedPosition(endPosition, mode)
+    val stackedEndPosition
+        get() = endPosition + stackOffset
 
     /**
      * The distance of this [Slider].
