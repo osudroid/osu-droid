@@ -10,8 +10,6 @@ import com.edlplan.framework.math.FMath;
 import com.edlplan.framework.support.ProxySprite;
 import com.edlplan.framework.support.osb.StoryboardSprite;
 import com.edlplan.framework.utils.functionality.SmartIterator;
-import com.edlplan.osu.support.timing.TimingPoints;
-import com.edlplan.osu.support.timing.controlpoint.ControlPoints;
 import com.reco1l.ibancho.RoomAPI;
 import com.reco1l.osu.Execution;
 import com.reco1l.osu.graphics.BlankTextureRegion;
@@ -26,6 +24,9 @@ import com.rian.osu.beatmap.Beatmap;
 import com.rian.osu.beatmap.constants.BeatmapCountdown;
 import com.rian.osu.beatmap.constants.SampleBank;
 import com.rian.osu.beatmap.parser.BeatmapParser;
+import com.rian.osu.beatmap.timings.EffectControlPoint;
+import com.rian.osu.beatmap.timings.SampleControlPoint;
+import com.rian.osu.beatmap.timings.TimingControlPoint;
 import com.rian.osu.difficulty.BeatmapDifficultyCalculator;
 import com.rian.osu.difficulty.attributes.DifficultyAttributes;
 import com.rian.osu.difficulty.attributes.DroidDifficultyAttributes;
@@ -116,11 +117,9 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
     private Beatmap beatmap;
     private TrackInfo lastTrack;
     private ScoringScene scoringScene;
-    private TimingPoint currentTimingPoint;
-    private TimingPoint soundTimingPoint;
-    private TimingPoint firstTimingPoint;
-    private Queue<TimingPoint> timingPoints;
-    private Queue<TimingPoint> activeTimingPoints;
+    private TimingControlPoint activeTimingPoint;
+    private EffectControlPoint activeEffectPoint;
+    private SampleControlPoint activeSamplePoint;
     private String trackMD5;
     private int lastObjectId = -1;
     private float secPassed = 0;
@@ -550,52 +549,15 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
         } else {
             TimingPoint.setDefaultSound("normal");
         }
-        timingPoints = new LinkedList<>();
-        activeTimingPoints = new LinkedList<>();
 
-        // Find the first uninherited timing point.
-        currentTimingPoint = new TimingPoint(
-                // This is the default uninherited timing point.
-                // If there are no uninherited timing points, this will be used.
-                // Reference: https://osu.ppy.sh/wiki/en/Client/File_formats/Osu_%28file_format%29#timing-points
-                new String[] {"0", "1000", "4", "0", "0", "100", "1", "0"},
-                null
-        );
+        activeTimingPoint = beatmap.controlPoints.timing.controlPointAt(0);
+        activeSamplePoint = beatmap.controlPoints.sample.controlPointAt(0);
+        activeEffectPoint = beatmap.controlPoints.effect.controlPointAt(0);
 
-        for (final String s : beatmap.rawTimingPoints) {
-            final TimingPoint tp = new TimingPoint(s.split(","),
-                    currentTimingPoint);
-            if (!tp.wasInderited()) {
-                currentTimingPoint = tp;
-                break;
-            }
-        }
-
-        for (final String s : beatmap.rawTimingPoints) {
-            final TimingPoint tp = new TimingPoint(s.split(","),
-                    currentTimingPoint);
-            timingPoints.add(tp);
-            if (!tp.wasInderited()) {
-                currentTimingPoint = tp;
-            }
-        }
-
-        GameHelper.controlPoints = new ControlPoints();
-        GameHelper.controlPoints.load(TimingPoints.parse(beatmap.rawTimingPoints));
-        currentTimingPoint = timingPoints.peek();
-        firstTimingPoint = currentTimingPoint;
-        soundTimingPoint = currentTimingPoint;
-        if (soundTimingPoint != null) {
-            GameHelper.setTimingOffset(soundTimingPoint.getTime());
-            GameHelper.setBeatLength(soundTimingPoint.getBeatLength() * GameHelper.getSpeed() / 100f);
-            GameHelper.setTimeSignature(soundTimingPoint.getSignature());
-            GameHelper.setKiai(soundTimingPoint.isKiai());
-        } else {
-            GameHelper.setTimingOffset(0);
-            GameHelper.setBeatLength(1);
-            GameHelper.setTimeSignature(4);
-            GameHelper.setKiai(false);
-        }
+        GameHelper.setTimingOffset(activeSamplePoint.time / 1000);
+        GameHelper.setBeatLength((activeTimingPoint.msPerBeat / 1000) * GameHelper.getSpeed() / 100f);
+        GameHelper.setTimeSignature(activeTimingPoint.timeSignature);
+        GameHelper.setKiai(activeEffectPoint.isKiai);
         GameHelper.setInitalBeatLength(GameHelper.getBeatLength());
 
         GameObjectPool.getInstance().purge();
@@ -1158,17 +1120,18 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
         }
 
         double gtime;
-        if (soundTimingPoint == null || soundTimingPoint.getTime() > secPassed) {
+        if (activeEffectPoint.time / 1000 > secPassed) {
             gtime = 0;
         } else {
-            gtime = (secPassed - firstTimingPoint.getTime())
+            gtime = (secPassed - activeEffectPoint.time / 1000)
                     % (GameHelper.getKiaiTickLength());
         }
         GameHelper.setGlobalTime(gtime);
+        final float mSecPassed = secPassed * 1000;
 
         if (Config.isEnableStoryboard()) {
             if (storyboardSprite != null) {
-                storyboardSprite.updateTime(secPassed * 1000);
+                storyboardSprite.updateTime(mSecPassed);
             }
         }
 
@@ -1267,21 +1230,14 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
             flashlightSprite.onUpdate(stat.getCombo());
         }
 
-        while (!timingPoints.isEmpty()
-                && timingPoints.peek().getTime() <= secPassed + approachRate) {
-            currentTimingPoint = timingPoints.poll();
-            activeTimingPoints.add(currentTimingPoint);
-        }
-        while (!activeTimingPoints.isEmpty()
-                && activeTimingPoints.peek().getTime() <= secPassed) {
-            soundTimingPoint = activeTimingPoints.poll();
-            if (!soundTimingPoint.inherited) {
-                GameHelper.setBeatLength(soundTimingPoint.getBeatLength());
-                GameHelper.setTimingOffset(soundTimingPoint.getTime());
-            }
-            GameHelper.setTimeSignature(soundTimingPoint.getSignature());
-            GameHelper.setKiai(soundTimingPoint.isKiai());
-        }
+        activeTimingPoint = beatmap.controlPoints.timing.controlPointAt(mSecPassed);
+        activeSamplePoint = beatmap.controlPoints.sample.controlPointAt(mSecPassed);
+        activeEffectPoint = beatmap.controlPoints.effect.controlPointAt(mSecPassed);
+
+        GameHelper.setBeatLength((activeTimingPoint.msPerBeat / 1000) * GameHelper.getSpeed() / 100f);
+        GameHelper.setTimingOffset(activeSamplePoint.time / 1000);
+        GameHelper.setTimeSignature(activeTimingPoint.timeSignature);
+        GameHelper.setKiai(activeEffectPoint.isKiai);
 
         if (!breakPeriods.isEmpty()) {
             if (!breakAnimator.isBreak()
@@ -1495,11 +1451,7 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
                 pos.y += data.getPosOffset();
             }
             if (nextObj != null) {
-                distToNextObject = nextObj.getTime() - data.getTime();
-                if (soundTimingPoint != null
-                        && distToNextObject < soundTimingPoint.getBeatLength() / 2) {
-                    distToNextObject = soundTimingPoint.getBeatLength() / 2;
-                }
+                distToNextObject = Math.max(nextObj.getTime() - data.getTime(), activeTimingPoint.msPerBeat / 1000 / 2);
             } else {
                 distToNextObject = 0;
             }
@@ -1608,7 +1560,7 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
                         Integer.parseInt(params[4]),
                         Integer.parseInt(params[6]),
                         Float.parseFloat(params[7]), params[5],
-                        currentTimingPoint, soundspec, tempSound, isFirst, Double.parseDouble(params[2]),
+                        beatmap.controlPoints, soundspec, tempSound, isFirst, Double.parseDouble(params[2]),
                         sliderPath);
                     sliderIndex++;
                 }
@@ -1618,7 +1570,7 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
                     Integer.parseInt(params[4]),
                     Integer.parseInt(params[6]),
                     Float.parseFloat(params[7]), params[5],
-                    currentTimingPoint, soundspec, tempSound, isFirst, Double.parseDouble(params[2]));
+                    beatmap.controlPoints, soundspec, tempSound, isFirst, Double.parseDouble(params[2]));
                 }
                 slider.setEndsCombo(nextObj == null || nextObj.isNewCombo());
                 addObject(slider);
@@ -2233,18 +2185,17 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
         if (sampleSet > 0 && sampleSet < Constants.SAMPLE_PREFIX.length) {
             playSound(Constants.SAMPLE_PREFIX[sampleSet], name);
         } else {
-            playSound(soundTimingPoint.getHitSound(), name);
+            playSound(activeSamplePoint.sampleBank.prefix, name);
         }
     }
 
     public void playSound(final String prefix, final String name) {
         final String fullName = prefix + "-" + name;
         BassSoundProvider snd;
-        if (soundTimingPoint.getCustomSound() == 0) {
+        if (activeSamplePoint.customSampleBank == 0) {
             snd = ResourceManager.getInstance().getSound(fullName);
         } else {
-            snd = ResourceManager.getInstance().getCustomSound(fullName,
-                    soundTimingPoint.getCustomSound());
+            snd = ResourceManager.getInstance().getCustomSound(fullName, activeSamplePoint.customSampleBank);
         }
         if(snd == null) {
             return;
@@ -2253,15 +2204,15 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
             snd.setLooping(true);
         }
         if (name.equals("hitnormal")) {
-            snd.play(soundTimingPoint.getVolume() * 0.8f);
+            snd.play(activeSamplePoint.sampleVolume * 0.8f);
             return;
         }
         if (name.equals("hitwhistle")
                 || name.equals("hitclap")) {
-            snd.play(soundTimingPoint.getVolume() * 0.85f);
+            snd.play(activeSamplePoint.sampleVolume * 0.85f);
             return;
         }
-        snd.play(soundTimingPoint.getVolume());
+        snd.play(activeSamplePoint.sampleVolume);
     }
 
 
@@ -2408,7 +2359,7 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
 
 
     public void stopSound(final String name) {
-        final String prefix = soundTimingPoint.getHitSound() + "-";
+        final String prefix = activeSamplePoint.sampleBank.prefix + "-";
         final BassSoundProvider snd = ResourceManager.getInstance().getSound(prefix + name);
         if (snd != null) {
             snd.stop();
