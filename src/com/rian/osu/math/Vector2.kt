@@ -64,6 +64,13 @@ data class Vector2(
     }
 
     /**
+     * Converts this vector to a [PointF].
+     *
+     * @return The converted [PointF].
+     */
+    fun toPointF() = PointF(x, y)
+
+    /**
      * Multiplies this vector with another vector.
      *
      * @param vec The other vector.
