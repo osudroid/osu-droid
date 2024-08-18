@@ -1,6 +1,7 @@
 package com.reco1l.osu
 
 import androidx.room.*
+import com.reco1l.toolkt.kotlin.fastForEach
 import com.rian.osu.difficulty.BeatmapDifficultyCalculator
 import ru.nsu.ccfit.zuev.osu.Config
 import ru.nsu.ccfit.zuev.osu.game.GameHelper
@@ -222,9 +223,9 @@ data class BeatmapInfo(
             var bpmMax = 0f
 
             // Timing points
-            for (point in data.controlPoints.timing.getControlPoints()) {
+            data.controlPoints.timing.getControlPoints().fastForEach {
 
-                val bpm = point.bpm.toFloat()
+                val bpm = it.bpm.toFloat()
 
                 bpmMin = if (bpmMin != Float.MAX_VALUE) min(bpmMin, bpm) else bpm
                 bpmMax = if (bpmMax != 0f) max(bpmMax, bpm) else bpm
