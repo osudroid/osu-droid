@@ -114,8 +114,6 @@ class BeatmapParser : Closeable {
             formatVersion = beatmapFormatVersion
         }
 
-        val hitObjectsParser = if (withHitObjects) BeatmapHitObjectsParser() else null
-
         try {
             while (source!!.readUtf8Line().also { currentLine = it } != null) {
                 // Check if beatmap is not an osu!standard beatmap
@@ -170,7 +168,9 @@ class BeatmapParser : Closeable {
                             BeatmapColorParser.parse(beatmap, line)
 
                         BeatmapSection.HitObjects ->
-                            hitObjectsParser?.parse(beatmap, line)
+                            if (withHitObjects) {
+                                BeatmapHitObjectsParser.parse(beatmap, line)
+                            }
 
                         else -> continue
                     }

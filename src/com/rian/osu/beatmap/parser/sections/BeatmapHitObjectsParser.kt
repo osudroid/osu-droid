@@ -12,10 +12,7 @@ import kotlin.math.min
 /**
  * A parser for parsing a beatmap's hit objects section.
  */
-class BeatmapHitObjectsParser : BeatmapSectionParser() {
-    private var firstObject = true
-    private var lastObject: HitObject? = null
-
+object BeatmapHitObjectsParser : BeatmapSectionParser() {
     override fun parse(beatmap: Beatmap, line: String) = line
         .split(",".toRegex())
         .dropLastWhile { it.isEmpty() }
@@ -44,7 +41,7 @@ class BeatmapHitObjectsParser : BeatmapSectionParser() {
 
             val obj = when (HitObjectType.valueOf(type % 16)) {
                 HitObjectType.Normal, HitObjectType.NormalNewCombo ->
-                    createCircle(it, time, position, beatmap.hitObjects.objects.isEmpty() || isNewCombo, comboOffset, bankInfo)
+                    createCircle(it, beatmap, time, position, beatmap.hitObjects.objects.isEmpty() || isNewCombo, comboOffset, bankInfo)
 
                 HitObjectType.Slider, HitObjectType.SliderNewCombo ->
                     createSlider(it, beatmap, time, position, beatmap.hitObjects.objects.isEmpty() || isNewCombo, comboOffset, soundType, bankInfo)
@@ -53,21 +50,22 @@ class BeatmapHitObjectsParser : BeatmapSectionParser() {
                     createSpinner(it, beatmap, time, isNewCombo, bankInfo)
 
                 else -> throw UnsupportedOperationException("Malformed hit object")
-            }.also { h ->
-                h.samples.addAll(convertSoundType(soundType, bankInfo))
-                lastObject = h
-            }
-
-            firstObject = false
+            }.also { h -> h.samples.addAll(convertSoundType(soundType, bankInfo)) }
 
             beatmap.rawHitObjects.add(line)
             beatmap.hitObjects.add(obj)
         }
 
-    private fun createCircle(pars: List<String>, time: Double, position: Vector2, isNewCombo: Boolean, comboOffset: Int, bankInfo: SampleBankInfo) =
-        HitCircle(time, position, firstObject || lastObject is Spinner || isNewCombo, comboOffset).also {
-            readCustomSampleBanks(bankInfo, pars.getOrNull(5))
-        }
+    private fun createCircle(pars: List<String>, beatmap: Beatmap, time: Double, position: Vector2, isNewCombo: Boolean, comboOffset: Int, bankInfo: SampleBankInfo) =
+        HitCircle(
+            time,
+            position,
+            // First object
+            beatmap.hitObjects.objects.isEmpty() ||
+                // The last object was a spinner
+                beatmap.hitObjects.objects.lastOrNull() is Spinner || isNewCombo,
+            comboOffset
+        ).also { readCustomSampleBanks(bankInfo, pars.getOrNull(5)) }
 
     @Throws(UnsupportedOperationException::class)
     private fun createSlider(pars: List<String>, beatmap: Beatmap, time: Double, startPosition: Vector2, isNewCombo: Boolean, comboOffset: Int, soundType: HitSoundType, bankInfo: SampleBankInfo): Slider {
@@ -177,7 +175,10 @@ class BeatmapHitObjectsParser : BeatmapSectionParser() {
             startPosition,
             repeatCount,
             path,
-            firstObject || lastObject is Spinner || isNewCombo,
+            // First object
+            beatmap.hitObjects.objects.isEmpty() ||
+                // The last object was a spinner
+                beatmap.hitObjects.objects.lastOrNull() is Spinner || isNewCombo,
             comboOffset,
             nodeSamples
         ).also {
