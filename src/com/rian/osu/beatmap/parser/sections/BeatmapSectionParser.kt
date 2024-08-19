@@ -18,11 +18,6 @@ abstract class BeatmapSectionParser {
     abstract fun parse(beatmap: Beatmap, line: String)
 
     /**
-     * Resets this parser into its original state.
-     */
-    open fun reset() {}
-
-    /**
      * Attempts to parse a string into an integer.
      *
      * @param str The string to parse.
