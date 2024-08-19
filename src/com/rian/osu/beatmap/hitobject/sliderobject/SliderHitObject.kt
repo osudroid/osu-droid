@@ -27,7 +27,7 @@ abstract class SliderHitObject(
      * The start time of the span at which this [SliderHitObject] lies, in milliseconds.
      */
     spanStartTime: Double
-) : HitObject(startTime, position) {
+) : HitObject(startTime, position, false, 0) {
     /**
      * The index of the span at which this [SliderHitObject] lies.
      */
