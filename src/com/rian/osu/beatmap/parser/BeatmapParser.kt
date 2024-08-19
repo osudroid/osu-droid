@@ -189,7 +189,10 @@ class BeatmapParser : Closeable {
                 it.applySamples(controlPoints)
             }
 
-            BeatmapProcessor(this).postProcess(mode)
+            BeatmapProcessor(this).also {
+                it.preProcess()
+                it.postProcess(mode)
+            }
         }
     }
 

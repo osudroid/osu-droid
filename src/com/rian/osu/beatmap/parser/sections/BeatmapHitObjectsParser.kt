@@ -13,8 +13,8 @@ import kotlin.math.min
  * A parser for parsing a beatmap's hit objects section.
  */
 class BeatmapHitObjectsParser : BeatmapSectionParser() {
-    private var extraComboColorOffset = 0
-    private var forceNewCombo = false
+    private var firstObject = true
+    private var lastObject: HitObject? = null
 
     override fun parse(beatmap: Beatmap, line: String) = line
         .split(",".toRegex())
@@ -29,7 +29,7 @@ class BeatmapHitObjectsParser : BeatmapSectionParser() {
 
             var tempType = type
 
-            val comboColorOffset = tempType and HitObjectType.ComboColorOffset.value shr 4
+            val comboOffset = tempType and HitObjectType.ComboColorOffset.value shr 4
             tempType = tempType and HitObjectType.ComboColorOffset.value.inv()
 
             val isNewCombo = tempType and HitObjectType.NewCombo.value != 0
@@ -44,40 +44,33 @@ class BeatmapHitObjectsParser : BeatmapSectionParser() {
 
             val obj = when (HitObjectType.valueOf(type % 16)) {
                 HitObjectType.Normal, HitObjectType.NormalNewCombo ->
-                    createCircle(it, time, position, beatmap.hitObjects.objects.isEmpty() || isNewCombo, comboColorOffset, bankInfo)
+                    createCircle(it, time, position, beatmap.hitObjects.objects.isEmpty() || isNewCombo, comboOffset, bankInfo)
 
                 HitObjectType.Slider, HitObjectType.SliderNewCombo ->
-                    createSlider(it, beatmap, time, position, beatmap.hitObjects.objects.isEmpty() || isNewCombo, comboColorOffset, soundType, bankInfo)
+                    createSlider(it, beatmap, time, position, beatmap.hitObjects.objects.isEmpty() || isNewCombo, comboOffset, soundType, bankInfo)
 
                 HitObjectType.Spinner ->
-                    createSpinner(it, beatmap, time, isNewCombo, comboColorOffset, bankInfo)
+                    createSpinner(it, beatmap, time, isNewCombo, bankInfo)
 
                 else -> throw UnsupportedOperationException("Malformed hit object")
-            }.apply {
-                samples.addAll(convertSoundType(soundType, bankInfo))
+            }.also { h ->
+                h.samples.addAll(convertSoundType(soundType, bankInfo))
+                lastObject = h
             }
+
+            firstObject = false
 
             beatmap.rawHitObjects.add(line)
             beatmap.hitObjects.add(obj)
         }
 
-    override fun reset() {
-        super.reset()
-
-        forceNewCombo = false
-        extraComboColorOffset = 0
-    }
-
-    private fun createCircle(pars: List<String>, time: Double, position: Vector2, isNewCombo: Boolean, comboColorOffset: Int, bankInfo: SampleBankInfo) =
-        HitCircle(time, position, isNewCombo || forceNewCombo, comboColorOffset + extraComboColorOffset).also {
+    private fun createCircle(pars: List<String>, time: Double, position: Vector2, isNewCombo: Boolean, comboOffset: Int, bankInfo: SampleBankInfo) =
+        HitCircle(time, position, firstObject || lastObject is Spinner || isNewCombo, comboOffset).also {
             readCustomSampleBanks(bankInfo, pars.getOrNull(5))
-
-            forceNewCombo = false
-            extraComboColorOffset = 0
         }
 
     @Throws(UnsupportedOperationException::class)
-    private fun createSlider(pars: List<String>, beatmap: Beatmap, time: Double, startPosition: Vector2, isNewCombo: Boolean, comboColorOffset: Int, soundType: HitSoundType, bankInfo: SampleBankInfo): Slider {
+    private fun createSlider(pars: List<String>, beatmap: Beatmap, time: Double, startPosition: Vector2, isNewCombo: Boolean, comboOffset: Int, soundType: HitSoundType, bankInfo: SampleBankInfo): Slider {
         if (pars.size < 8) {
             throw UnsupportedOperationException("Malformed slider")
         }
@@ -177,9 +170,6 @@ class BeatmapHitObjectsParser : BeatmapSectionParser() {
             }
         }
 
-        forceNewCombo = false
-        extraComboColorOffset = 0
-
         val difficultyControlPoint = beatmap.controlPoints.difficulty.controlPointAt(time)
 
         return Slider(
@@ -187,8 +177,8 @@ class BeatmapHitObjectsParser : BeatmapSectionParser() {
             startPosition,
             repeatCount,
             path,
-            isNewCombo || forceNewCombo,
-            comboColorOffset + extraComboColorOffset,
+            firstObject || lastObject is Spinner || isNewCombo,
+            comboOffset,
             nodeSamples
         ).also {
             it.tickDistanceMultiplier = when {
@@ -203,14 +193,9 @@ class BeatmapHitObjectsParser : BeatmapSectionParser() {
         }
     }
 
-    private fun createSpinner(pars: List<String>, beatmap: Beatmap, time: Double, isNewCombo: Boolean, comboColorOffset: Int, bankInfo: SampleBankInfo) =
-        Spinner(time, beatmap.getOffsetTime(parseInt(pars[5])).toDouble()).also {
+    private fun createSpinner(pars: List<String>, beatmap: Beatmap, time: Double, isNewCombo: Boolean, bankInfo: SampleBankInfo) =
+        Spinner(time, beatmap.getOffsetTime(parseInt(pars[5])).toDouble(), isNewCombo).also {
             readCustomSampleBanks(bankInfo, pars.getOrNull(6))
-
-            // Spinners don't create the new combo themselves, but force the next non-spinner hit object to create a new combo.
-            // Their combo offset is still added to that next hit object's combo index.
-            forceNewCombo = forceNewCombo || beatmap.formatVersion <= 8 || isNewCombo
-            extraComboColorOffset += comboColorOffset
         }
 
     /**

@@ -11,8 +11,13 @@ class Spinner(
      */
     startTime: Double,
 
-    override var endTime: Double
-) : HitObject(startTime, Vector2(256f, 192f)), IHasDuration {
+    override var endTime: Double,
+
+    /**
+     * Whether this [Spinner] starts a new combo.
+     */
+    isNewCombo: Boolean,
+) : HitObject(startTime, Vector2(256f, 192f), isNewCombo, 0), IHasDuration {
     init {
         auxiliarySamples.apply {
             samples.filterIsInstance<BankHitSampleInfo>().firstOrNull()?.let { add(it.copy(name = "spinnerspin")) }
