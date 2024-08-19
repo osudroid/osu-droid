@@ -63,7 +63,6 @@ object BeatmapControlPointsParser : BeatmapSectionParser() {
                 sample.add(SampleControlPoint(time, sampleSet, sampleVolume, customSampleBank))
             }
 
-            beatmap.rawTimingPoints.add(line)
             Unit
         }
 
