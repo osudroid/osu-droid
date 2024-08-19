@@ -80,7 +80,11 @@ public class LibraryManager {
         }
 
         var directory = new File(Config.getBeatmapPath());
-        var files = FileUtils.listFiles(directory);
+        var files = directory.listFiles();
+
+        if (files == null) {
+            return;
+        }
 
         new LibraryDatabaseManager(files.length, files).start();
 
@@ -112,7 +116,7 @@ public class LibraryManager {
 
     private static void scanBeatmapSetFolder(File directory) {
 
-        var files = FileUtils.listFiles(directory, ".osu");
+        var files = directory.listFiles((dir, name) -> name.endsWith(".osu"));
 
         if (files == null) {
             return;
@@ -248,7 +252,7 @@ public class LibraryManager {
     private static final class LibraryDatabaseManager {
 
 
-        private final List<File> files;
+        private final File[] files;
 
         private final List<String> savedPaths;
 
@@ -263,7 +267,7 @@ public class LibraryManager {
         private LibraryDatabaseManager(int fileCount, File[] files) {
 
             this.fileCount = fileCount;
-            this.files = Arrays.asList(files);
+            this.files = files;
             this.executors = Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors());
             this.savedPaths = DatabaseManager.getBeatmapTable().getBeatmapSetPaths();
         }
@@ -273,8 +277,8 @@ public class LibraryManager {
 
             int optimalChunkSize = (int) Math.ceil((double) fileCount / Runtime.getRuntime().availableProcessors());
 
-            for (int i = 0; i < files.size(); i += optimalChunkSize) {
-                submitToExecutor(files.subList(i, Math.min(i + optimalChunkSize, files.size())));
+            for (int i = 0; i < files.length; i += optimalChunkSize) {
+                submitToExecutor(Arrays.copyOfRange(files, i, Math.min(i + optimalChunkSize, files.length)));
             }
 
             executors.shutdown();
@@ -303,9 +307,9 @@ public class LibraryManager {
                 var path = savedPaths.get(i);
                 var found = false;
 
-                for (int j = files.size() - 1; j >= 0; j--) {
+                for (int j = files.length - 1; j >= 0; j--) {
 
-                    if (path.equals(files.get(j).getPath())) {
+                    if (path.equals(files[j].getPath())) {
                         found = true;
                         break;
                     }
@@ -317,12 +321,12 @@ public class LibraryManager {
             }
         }
 
-        private void submitToExecutor(List<File> files) {
+        private void submitToExecutor(File[] files) {
 
             executors.submit(() -> {
 
-                for (int i = files.size() - 1; i >= 0; i--) {
-                    var file = files.get(i);
+                for (int i = files.length - 1; i >= 0; i--) {
+                    var file = files[i];
 
                     if (!file.isDirectory()) {
                         continue;
