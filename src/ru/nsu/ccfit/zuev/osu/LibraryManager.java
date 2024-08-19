@@ -333,6 +333,7 @@ public class LibraryManager {
                         if (savedPaths.get(j).equals(file.getPath())) {
                             fileCount--;
                             found = true;
+                            break;
                         }
                     }
 
