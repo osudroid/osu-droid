@@ -120,12 +120,6 @@ public class LibraryManager {
 
         var beatmapsFound = 0;
 
-        for (int i = library.size() - 1; i >= 0; --i) {
-            if (library.get(i).getPath().equals(directory.getPath())) {
-                return;
-            }
-        }
-
         for (var file : files) {
 
             try (var parser = new BeatmapParser(file)) {
@@ -261,9 +255,9 @@ public class LibraryManager {
         private final ExecutorService executors;
 
 
-        private volatile int fileCount;
+        private int fileCount;
 
-        private volatile int fileCached = 0;
+        private int fileCached = 0;
 
 
         private LibraryDatabaseManager(int fileCount, File[] files) {
@@ -330,12 +324,14 @@ public class LibraryManager {
                 for (int i = files.size() - 1; i >= 0; i--) {
                     var file = files.get(i);
 
+                    if (!file.isDirectory()) {
+                        continue;
+                    }
+
                     var found = false;
                     for (int j = savedPaths.size() - 1; j >= 0; j--) {
                         if (savedPaths.get(j).equals(file.getPath())) {
-                            synchronized (this) {
-                                fileCount--;
-                            }
+                            fileCount--;
                             found = true;
                         }
                     }
@@ -348,14 +344,7 @@ public class LibraryManager {
                     GlobalManager.getInstance().setInfo("Loading " + file.getName() + "...");
 
                     ToastLogger.setPercentage(fileCached * 100f / fileCount);
-
-                    synchronized (this) {
-                        fileCached++;
-                    }
-
-                    if (!file.isDirectory()) {
-                        continue;
-                    }
+                    fileCached++;
 
                     scanBeatmapSetFolder(file);
                 }
