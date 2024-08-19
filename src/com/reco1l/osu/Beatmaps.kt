@@ -222,7 +222,7 @@ data class BeatmapInfo(
         @JvmStatic
         fun from(data: RianBeatmap, parentPath: String, lastModified: Long, path: String): BeatmapInfo {
 
-            var bpmMin = 0f
+            var bpmMin = Float.MAX_VALUE
             var bpmMax = 0f
 
             // Timing points
