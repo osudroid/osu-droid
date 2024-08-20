@@ -65,7 +65,7 @@ abstract class HitObject(
      * Whether this is the last [HitObject] in the current combo.
      */
     var lastInCombo = false
-        private set
+        internal set
 
     /**
      * The stack height of this [HitObject].
