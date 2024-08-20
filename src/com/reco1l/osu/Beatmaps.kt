@@ -249,8 +249,6 @@ data class BeatmapInfo(
                 bpmMax = if (bpmMax != 0f) max(bpmMax, bpm) else bpm
             }
 
-            data.hitObjects.objects.isEmpty()
-
             var droidStarRating: Float? = null
             var standardStarRating: Float? = null
 
