@@ -44,6 +44,11 @@ object DatabaseManager {
 
 /**
  * The osu!droid database object class, this should be unique per instance.
+ *
+ * Version history:
+ * - 1: Initial version.
+ * - 2: First official version.
+ * - 3: Star rating change; they may be nullable.
  */
 @Database(
     version = 3,
