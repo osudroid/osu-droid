@@ -28,7 +28,7 @@ class StatisticSelector(stats: Array<StatisticV2>?) : ScrollableList(), ITouchAr
             {
                 field = value
 
-                getGlobal().scoring.load(value, getGlobal().scoring.track, getGlobal().songService, null, null, null)
+                getGlobal().scoring.load(value, getGlobal().scoring.beatmapInfo, getGlobal().songService, null, null, null)
                 getGlobal().engine.scene = getGlobal().scoring.scene
             }
         }

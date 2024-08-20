@@ -18,7 +18,7 @@ import ru.nsu.ccfit.zuev.osu.BeatmapProperties
 import ru.nsu.ccfit.zuev.osu.GlobalManager
 import ru.nsu.ccfit.zuev.osu.PropertiesLibrary
 import ru.nsu.ccfit.zuev.osu.menu.IPropsMenu
-import ru.nsu.ccfit.zuev.osu.menu.MenuItem
+import ru.nsu.ccfit.zuev.osu.menu.BeatmapSetItem
 import ru.nsu.ccfit.zuev.osu.menu.SongMenu
 import ru.nsu.ccfit.zuev.osu.scoring.ScoreLibrary
 import ru.nsu.ccfit.zuev.osuplus.R
@@ -28,7 +28,7 @@ import kotlin.math.abs
 class PropsMenuFragment : BaseFragment(), IPropsMenu {
 
     var menu: SongMenu? = null
-    var item: MenuItem? = null
+    var item: BeatmapSetItem? = null
     var props: BeatmapProperties? = null
 
     private var offset: EditText? = null
@@ -106,7 +106,7 @@ class PropsMenuFragment : BaseFragment(), IPropsMenu {
         findViewById<View>(R.id.manageFavButton)!!.setOnClickListener { v: View? ->
             val dialog = FavoriteManagerFragment()
             //TODO : 铺面引用还是全局耦合的，需要分离
-            dialog.showToAddToFolder(ScoreLibrary.getTrackDir(GlobalManager.getInstance().selectedTrack.filename))
+            dialog.showToAddToFolder(ScoreLibrary.getBeatmapSetDirectory(GlobalManager.getInstance().selectedBeatmap!!.path))
         }
 
         findViewById<View>(R.id.deleteBeatmap)!!.setOnClickListener { v: View? ->
@@ -172,10 +172,10 @@ class PropsMenuFragment : BaseFragment(), IPropsMenu {
         super.onAttach(context)
     }
 
-    override fun show(menu: SongMenu, item: MenuItem) {
+    override fun show(menu: SongMenu, item: BeatmapSetItem) {
         this.menu = menu
         this.item = item
-        props = PropertiesLibrary.getInstance().getProperties(item.beatmap.path)
+        props = PropertiesLibrary.getInstance().getProperties(item.beatmapSetInfo.path)
         if (props == null) {
             props = BeatmapProperties()
         }
@@ -184,7 +184,7 @@ class PropsMenuFragment : BaseFragment(), IPropsMenu {
 
     fun saveProp() {
         PropertiesLibrary.getInstance().setProperties(
-            item!!.beatmap.path, props
+            item!!.beatmapSetInfo.path, props
         )
         item!!.isFavorite = props!!.favorite
         PropertiesLibrary.getInstance().save()

@@ -111,7 +111,7 @@ object BeatmapDownloader : IDownloaderObserver {
                     return
                 }
 
-                LibraryManager.INSTANCE.updateLibrary(true)
+                GlobalManager.getInstance().mainActivity.loadBeatmapLibrary()
             }
         } catch (e: IOException) {
             ToastLogger.showText("Import failed:" + e.message, true)

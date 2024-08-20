@@ -1,6 +1,7 @@
 buildscript {
-    ext{
-        kotlin_version = '1.9.22'
+    ext {
+        kotlin_version = '2.0.10'
+        room_version = '2.6.1'
     }
     repositories {
         google()
@@ -12,7 +13,12 @@ buildscript {
         classpath 'com.google.gms:google-services:4.4.1'
         classpath 'com.google.firebase:firebase-crashlytics-gradle:2.9.9'
         classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version"
+        classpath "androidx.room:room-gradle-plugin:$room_version"
     }
+}
+
+plugins {
+    id 'com.google.devtools.ksp' version '2.0.10-1.0.24'
 }
 
 allprojects {
@@ -46,6 +52,7 @@ apply plugin: 'com.android.application'
 apply plugin: 'com.google.gms.google-services'
 apply plugin: 'com.google.firebase.crashlytics'
 apply plugin: 'kotlin-android'
+apply plugin: 'androidx.room'
 
 android {
     namespace 'ru.nsu.ccfit.zuev.osuplus'
@@ -57,6 +64,7 @@ android {
         targetSdkVersion 29
         versionCode getReleaseVersionCode()
         versionName getReleaseVersionName()
+        multiDexEnabled true
         ndk {
             abiFilters 'x86', 'x86_64', 'armeabi-v7a', 'arm64-v8a'
         }
@@ -67,6 +75,9 @@ android {
         }
     }
 
+    room {
+        schemaDirectory "$projectDir/schemas"
+    }
 
     signingConfigs {
         debug {
@@ -181,9 +192,15 @@ dependencies {
     implementation 'commons-io:commons-io:2.15.1'
 
     // Multiplayer
-    implementation('org.jetbrains.kotlinx:kotlinx-coroutines-core:1.7.3')
-    implementation 'org.jetbrains.kotlin:kotlin-reflect:1.9.22'
+    implementation 'org.jetbrains.kotlinx:kotlinx-coroutines-core:1.7.3'
+    implementation "org.jetbrains.kotlin:kotlin-reflect:$kotlin_version"
     implementation ('io.socket:socket.io-client:2.1.0') {
         exclude group: 'org.json', module: 'json'
     }
+
+    // Room
+    implementation "androidx.room:room-runtime:$room_version"
+    annotationProcessor "androidx.room:room-compiler:$room_version"
+    ksp "androidx.room:room-compiler:$room_version"
+    implementation "androidx.room:room-ktx:$room_version"
 }

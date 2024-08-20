@@ -396,7 +396,7 @@ class InGameSettingMenu : BaseFragment() {
     }
 
     private fun updateDifficultyAdjustValues() {
-        val track = GlobalManager.getInstance().selectedTrack
+        val beatmapInfo = GlobalManager.getInstance().selectedBeatmap
         var visibility = View.VISIBLE
 
         if (Multiplayer.room != null) {
@@ -412,25 +412,25 @@ class InGameSettingMenu : BaseFragment() {
         val customAR = ModMenu.getInstance().customAR
         customARToggle.isChecked = customAR != null
         customARBar.isEnabled = customAR != null
-        customARBar.progress = (((customAR ?: track?.approachRate) ?: 10f) * 10).toInt()
+        customARBar.progress = (((customAR ?: beatmapInfo?.approachRate) ?: 10f) * 10).toInt()
         customARText.text = "${customARBar.progress / 10f}"
 
         val customOD = ModMenu.getInstance().customOD
         customODToggle.isChecked = customOD != null
         customODBar.isEnabled = customOD != null
-        customODBar.progress = (((customOD ?: track?.overallDifficulty) ?: 10f) * 10).toInt()
+        customODBar.progress = (((customOD ?: beatmapInfo?.overallDifficulty) ?: 10f) * 10).toInt()
         customODText.text = "${customODBar.progress / 10f}"
 
         val customCS = ModMenu.getInstance().customCS
         customCSToggle.isChecked = customCS != null
         customCSBar.isEnabled = customCS != null
-        customCSBar.progress = (((customCS ?: track?.circleSize) ?: 10f) * 10).toInt()
+        customCSBar.progress = (((customCS ?: beatmapInfo?.circleSize) ?: 10f) * 10).toInt()
         customCSText.text = "${customCSBar.progress / 10f}"
 
         val customHP = ModMenu.getInstance().customHP
         customHPToggle.isChecked = customHP != null
         customHPBar.isEnabled = customHP != null
-        customHPBar.progress = (((customHP ?: track?.hpDrain) ?: 10f) * 10).toInt()
+        customHPBar.progress = (((customHP ?: beatmapInfo?.hpDrainRate) ?: 10f) * 10).toInt()
         customHPText.text = "${customHPBar.progress / 10f}"
 
         ModMenu.getInstance().updateMultiplierText()

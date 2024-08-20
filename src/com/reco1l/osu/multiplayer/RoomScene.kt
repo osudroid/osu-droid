@@ -33,6 +33,7 @@ import org.anddev.andengine.util.MathUtils
 import org.json.JSONArray
 import ru.nsu.ccfit.zuev.osu.Config
 import ru.nsu.ccfit.zuev.osu.DifficultyAlgorithm
+import ru.nsu.ccfit.zuev.osu.LibraryManager
 import ru.nsu.ccfit.zuev.osu.ToastLogger
 import ru.nsu.ccfit.zuev.osu.game.mods.GameMod.MOD_SCOREV2
 import ru.nsu.ccfit.zuev.osu.helper.AnimSprite
@@ -44,7 +45,6 @@ import ru.nsu.ccfit.zuev.skins.OsuSkin
 import java.text.SimpleDateFormat
 import java.util.*
 import ru.nsu.ccfit.zuev.osu.GlobalManager.getInstance as getGlobal
-import ru.nsu.ccfit.zuev.osu.LibraryManager.INSTANCE as library
 import ru.nsu.ccfit.zuev.osu.ResourceManager.getInstance as getResources
 import ru.nsu.ccfit.zuev.osu.menu.ModMenu.getInstance as getModMenu
 import ru.nsu.ccfit.zuev.osu.online.OnlineManager.getInstance as getOnline
@@ -390,7 +390,7 @@ object RoomScene : Scene(), IRoomEventListener, IPlayerEventListener
                 {
                     frame = 0
                     if (!moved)
-                        getModMenu().show(this@RoomScene, getGlobal().selectedTrack)
+                        getModMenu().show(this@RoomScene, getGlobal().selectedBeatmap)
                     return true
                 }
                 if (event.isActionOutside || event.isActionMove && MathUtils.distance(dx, dy, localX, localY) > 50)
@@ -435,7 +435,7 @@ object RoomScene : Scene(), IRoomEventListener, IPlayerEventListener
     override fun onSceneTouchEvent(event: TouchEvent): Boolean {
         trackButton?.also {
             beatmapInfoRectangle?.isVisible =
-                getGlobal().selectedTrack != null &&
+                getGlobal().selectedBeatmap != null &&
                 !event.isActionUp &&
                 event.x in it.x..it.x + it.width &&
                 event.y in it.y..it.y + it.height
@@ -549,23 +549,23 @@ object RoomScene : Scene(), IRoomEventListener, IPlayerEventListener
 
     private fun updateBeatmapInfo()
     {
-        beatmapInfoRectangle!!.isVisible = getGlobal().selectedTrack?.let { track ->
+        beatmapInfoRectangle!!.isVisible = getGlobal().selectedBeatmap?.let { beatmapInfo ->
 
             beatmapInfoText.text = """
                 Length: ${
-                    SimpleDateFormat(if (track.musicLength > 3600 * 1000) "HH:mm:ss" else "mm:ss").let {
+                    SimpleDateFormat(if (beatmapInfo.length > 3600 * 1000) "HH:mm:ss" else "mm:ss").let {
                         it.timeZone = TimeZone.getTimeZone("GMT+0")
-                        it.format(track.musicLength)
+                        it.format(beatmapInfo.length)
                     }
                 } BPM: ${
-                    if (track.bpmMin == track.bpmMax) 
-                        "%.1f".format(track.bpmMin) 
+                    if (beatmapInfo.bpmMin == beatmapInfo.bpmMax) 
+                        "%.1f".format(beatmapInfo.bpmMin) 
                     else 
-                        "%.1f-%.1f".format(track.bpmMin, track.bpmMax)
+                        "%.1f-%.1f".format(beatmapInfo.bpmMin, beatmapInfo.bpmMax)
                 } 
-                CS: ${track.circleSize} AR: ${track.approachRate} OD: ${track.overallDifficulty} HP: ${track.hpDrain} Star Rating: ${
-                    if (Config.getDifficultyAlgorithm() == DifficultyAlgorithm.standard) track.standardDifficulty
-                    else track.droidDifficulty
+                CS: ${beatmapInfo.circleSize} AR: ${beatmapInfo.approachRate} OD: ${beatmapInfo.overallDifficulty} HP: ${beatmapInfo.hpDrainRate} Star Rating: ${
+                    if (Config.getDifficultyAlgorithm() == DifficultyAlgorithm.standard) beatmapInfo.standardStarRating
+                    else beatmapInfo.droidStarRating
                 }
             """.trimIndent()
 
@@ -599,7 +599,7 @@ object RoomScene : Scene(), IRoomEventListener, IPlayerEventListener
 
         var newStatus = NOT_READY
 
-        if (room!!.beatmap != null && getGlobal().selectedTrack == null)
+        if (room!!.beatmap != null && getGlobal().selectedBeatmap == null)
             newStatus = MISSING_BEATMAP
 
         if (player!!.status != newStatus)
@@ -751,7 +751,7 @@ object RoomScene : Scene(), IRoomEventListener, IPlayerEventListener
             {
                 // Handling special case when the beatmap could have been changed and match was started while player was
                 // disconnected.
-                if (getGlobal().selectedTrack != null)
+                if (getGlobal().selectedBeatmap != null)
                     onRoomMatchPlay()
                 else
                     invalidateStatus()
@@ -807,7 +807,7 @@ object RoomScene : Scene(), IRoomEventListener, IPlayerEventListener
         room!!.beatmap = beatmap
 
         // Searching the beatmap in the library
-        getGlobal().selectedTrack = library.findTrackByMD5(beatmap?.md5)
+        getGlobal().selectedBeatmap = LibraryManager.findBeatmapByMD5(beatmap?.md5)
 
         // Updating track button
         trackButton!!.updateBeatmap(beatmap)
@@ -821,25 +821,25 @@ object RoomScene : Scene(), IRoomEventListener, IPlayerEventListener
 
         // Notify to the host when other players can't download the beatmap.
         if (isRoomHost && beatmap != null && beatmap.parentSetID == null)
-            ToastLogger.showText("This beatmap isn't available on Chimu.", false)
+            ToastLogger.showText("This beatmap isn't available in the download mirror servers.", false)
 
         // Updating player status
         invalidateStatus()
 
         // Updating background
-        updateBackground(getGlobal().selectedTrack?.background)
+        updateBackground(getGlobal().selectedBeatmap?.background)
         updateBeatmapInfo()
 
         // Releasing await lock
         awaitBeatmapChange = false
 
-        if (getGlobal().selectedTrack == null)
+        if (getGlobal().selectedBeatmap == null)
         {
             getGlobal().songService.stop()
             return
         }
 
-        getGlobal().songService.preLoad(getGlobal().selectedTrack.beatmap.music)
+        getGlobal().songService.preLoad(getGlobal().selectedBeatmap!!.audio)
         getGlobal().songService.play()
     }
 
@@ -996,7 +996,7 @@ object RoomScene : Scene(), IRoomEventListener, IPlayerEventListener
     {
         if (player!!.status != MISSING_BEATMAP && getGlobal().engine.scene != getGlobal().gameScene.scene)
         {
-            if (getGlobal().selectedTrack == null)
+            if (getGlobal().selectedBeatmap == null)
             {
                 Multiplayer.log("WARNING: Attempt to start match with null track.")
                 return
@@ -1013,7 +1013,7 @@ object RoomScene : Scene(), IRoomEventListener, IPlayerEventListener
             Replay.oldCustomCS = getModMenu().customCS
             Replay.oldCustomHP = getModMenu().customHP
 
-            getGlobal().gameScene.startGame(getGlobal().selectedTrack, null)
+            getGlobal().gameScene.startGame(getGlobal().selectedBeatmap, null)
 
             // Hiding any player menu if its shown
             mainThread { playerList!!.menu.dismiss() }

@@ -26,8 +26,9 @@ import android.support.v4.media.session.MediaSessionCompat;
 import androidx.core.app.NotificationCompat;
 import androidx.core.app.NotificationManagerCompat;
 
+import com.reco1l.osu.BeatmapInfo;
+
 import ru.nsu.ccfit.zuev.audio.Status;
-import ru.nsu.ccfit.zuev.osu.BeatmapInfo;
 import ru.nsu.ccfit.zuev.osu.GlobalManager;
 import ru.nsu.ccfit.zuev.osu.LibraryManager;
 import ru.nsu.ccfit.zuev.osu.MainActivity;
@@ -91,15 +92,15 @@ public class NotifyPlayer {
                         break;
                     case actionPrev:
                         service.stop();
-                        BeatmapInfo prevBeatmap = LibraryManager.INSTANCE.getPrevBeatmap();
-                        service.preLoad(prevBeatmap.getMusic());
+                        BeatmapInfo prevBeatmap = LibraryManager.selectPreviousBeatmapSet().get(0);
+                        service.preLoad(prevBeatmap.getAudio());
                         updateSong(prevBeatmap);
                         service.play();
                         break;
                     case actionNext:
                         service.stop();
-                        BeatmapInfo nextBeatmap = LibraryManager.INSTANCE.getNextBeatmap();
-                        service.preLoad(nextBeatmap.getMusic());
+                        BeatmapInfo nextBeatmap = LibraryManager.selectNextBeatmapSet().get(0);
+                        service.preLoad(nextBeatmap.getAudio());
                         updateSong(nextBeatmap);
                         service.play();
                         break;
@@ -132,24 +133,13 @@ public class NotifyPlayer {
             create();
 
         Bitmap bitmap = null;
-        String title = " ";
-        String artist = " ";
 
-        if (beatmap.getArtistUnicode() != null && beatmap.getTitleUnicode() != null) {
-            title = beatmap.getTitleUnicode();
-            artist = beatmap.getArtistUnicode();
-        }
-        else if (beatmap.getArtist() != null && beatmap.getTitle() != null) {
-            title = beatmap.getTitle();
-            artist = beatmap.getArtist();
+        if (beatmap.getBackground() != null) {
+            bitmap = BitmapFactory.decodeFile(beatmap.getBackground());
         }
 
-        if (beatmap.getTrack(0).getBackground() != null) {
-            bitmap = BitmapFactory.decodeFile(beatmap.getTrack(0).getBackground());
-        }
-
-        builder.setContentTitle(title);
-        builder.setContentText(artist);
+        builder.setContentTitle(beatmap.getTitleText());
+        builder.setContentText(beatmap.getArtistText());
         builder.setLargeIcon(bitmap != null ? bitmap : defaultIcon);
 
         notification = builder.build();

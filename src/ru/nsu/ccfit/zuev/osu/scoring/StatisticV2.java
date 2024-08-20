@@ -9,11 +9,11 @@ import java.util.Random;
 
 import com.reco1l.ibancho.data.RoomTeam;
 import com.reco1l.ibancho.data.WinCondition;
+import com.reco1l.osu.BeatmapInfo;
 import com.reco1l.osu.multiplayer.Multiplayer;
 import org.jetbrains.annotations.Nullable;
 import org.json.JSONObject;
 import ru.nsu.ccfit.zuev.osu.Config;
-import ru.nsu.ccfit.zuev.osu.TrackInfo;
 import ru.nsu.ccfit.zuev.osu.game.GameHelper;
 import ru.nsu.ccfit.zuev.osu.game.cursor.flashlight.FlashLightEntity;
 import ru.nsu.ccfit.zuev.osu.game.mods.GameMod;
@@ -962,7 +962,7 @@ public class StatisticV2 implements Serializable {
     /**
      * Applies the equivalent of the old SC mod with custom CS according to the track passed.
      */
-    public void processLegacySC(TrackInfo track) {
+    public void processLegacySC(BeatmapInfo track) {
 
         var cs = track.getCircleSize();
 

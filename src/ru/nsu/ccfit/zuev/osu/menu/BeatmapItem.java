@@ -1,5 +1,6 @@
 package ru.nsu.ccfit.zuev.osu.menu;
 
+import com.reco1l.osu.BeatmapInfo;
 import org.anddev.andengine.entity.sprite.Sprite;
 import org.anddev.andengine.entity.text.ChangeableText;
 import org.anddev.andengine.input.touch.TouchEvent;
@@ -13,36 +14,36 @@ import ru.nsu.ccfit.zuev.osu.*;
 import ru.nsu.ccfit.zuev.skins.OsuSkin;
 import ru.nsu.ccfit.zuev.osu.scoring.ScoreLibrary;
 
-public class MenuItemTrack extends Sprite {
+public class BeatmapItem extends Sprite {
 
     private static final RGBColor DEFAULT_COLOR = new RGBColor(25 / 255f, 25 / 255f, 240 / 255f);
     private static final RGBColor SELECTED_COLOR = new RGBColor(1, 1, 1);
 
     private static final RGBColor DEFAULT_TEXT_COLOR = new RGBColor(1, 1, 1);
     private static final RGBColor SELECTED_TEXT_COLOR = new RGBColor(0, 0, 0);
-    private final ChangeableText trackTitle, trackLeftText;
+    private final ChangeableText beatmapTitle, beatmapLeftText;
     private final Sprite[] stars;
     private final Sprite halfStar;
     private boolean moved = false;
     private float dx = 0, dy = 0;
-    private WeakReference<MenuItem> item;
-    private TrackInfo track;
+    private WeakReference<BeatmapSetItem> item;
+    private BeatmapInfo beatmapInfo;
     private String currentMark = null;
     private Sprite mark;
     private float downTime = -1;
 
-    public MenuItemTrack() {
+    public BeatmapItem() {
         super(0, 0, ResourceManager.getInstance().getTexture(
                 "menu-button-background"));
 
-        trackTitle = new ChangeableText(Utils.toRes(32), Utils.toRes(22),
+        beatmapTitle = new ChangeableText(Utils.toRes(32), Utils.toRes(22),
                 ResourceManager.getInstance().getFont("font"), "", 200);
-        trackLeftText = new ChangeableText(Utils.toRes(350), Utils.toRes(22),
+        beatmapLeftText = new ChangeableText(Utils.toRes(350), Utils.toRes(22),
                 ResourceManager.getInstance().getFont("font"), "", 30);
         OsuSkin.get().getColor("MenuItemVersionsDefaultColor", DEFAULT_COLOR).apply(this);
-        OsuSkin.get().getColor("MenuItemDefaultTextColor", DEFAULT_TEXT_COLOR).applyAll(trackTitle, trackLeftText);
+        OsuSkin.get().getColor("MenuItemDefaultTextColor", DEFAULT_TEXT_COLOR).applyAll(beatmapTitle, beatmapLeftText);
         setAlpha(0.8f);
-        attachChild(trackTitle);
+        attachChild(beatmapTitle);
 //		attachChild(trackLeftText);
 
         stars = new Sprite[10];
@@ -58,14 +59,14 @@ public class MenuItemTrack extends Sprite {
         attachChild(halfStar);
     }
 
-    public void setItem(final MenuItem it) {
+    public void setItem(final BeatmapSetItem it) {
         item = new WeakReference<>(it);
     }
 
-    public void setTrack(final TrackInfo track, final BeatmapInfo info) {
-        this.track = track;
-        trackTitle.setText(track.getMode() + " (" + track.getCreator() + ")");
-        trackLeftText.setText("\n" + info.getTitle());
+    public void setBeatmapInfo(final BeatmapInfo beatmapInfo) {
+        this.beatmapInfo = beatmapInfo;
+        beatmapTitle.setText(beatmapInfo.getVersion() + " (" + beatmapInfo.getCreator() + ")");
+        beatmapLeftText.setText("\n" + beatmapInfo.getTitleText());
 
         for (final Sprite s : stars) {
             s.setVisible(false);
@@ -74,7 +75,7 @@ public class MenuItemTrack extends Sprite {
 
         final float diff = Math.min(
             Config.getDifficultyAlgorithm() == DifficultyAlgorithm.standard ?
-                track.getStandardDifficulty() : track.getDroidDifficulty(),
+                beatmapInfo.getStandardStarRating() : beatmapInfo.getDroidStarRating(),
             10
         );
 
@@ -99,11 +100,11 @@ public class MenuItemTrack extends Sprite {
     }
 
     public void updateMark() {
-        if (track == null) {
+        if (beatmapInfo == null) {
             return;
         }
         final String newmark = ScoreLibrary.getInstance().getBestMark(
-                track.getFilename());
+                beatmapInfo.getPath());
         if (currentMark != null && currentMark.equals(newmark)) {
             return;
         }
@@ -121,18 +122,18 @@ public class MenuItemTrack extends Sprite {
         currentMark = newmark;
     }
 
-    public TrackInfo getTrack() {
-        return track;
+    public BeatmapInfo getBeatmapInfo() {
+        return beatmapInfo;
     }
 
     public void setDeselectColor() {
         OsuSkin.get().getColor("MenuItemVersionsDefaultColor", DEFAULT_COLOR).apply(this);
-        OsuSkin.get().getColor("MenuItemDefaultTextColor", DEFAULT_TEXT_COLOR).applyAll(trackTitle, trackLeftText);
+        OsuSkin.get().getColor("MenuItemDefaultTextColor", DEFAULT_TEXT_COLOR).applyAll(beatmapTitle, beatmapLeftText);
     }
 
     public void setSelectedColor() {
         OsuSkin.get().getColor("MenuItemVersionsSelectedColor", SELECTED_COLOR).apply(this);
-        OsuSkin.get().getColor("MenuItemSelectedTextColor", SELECTED_TEXT_COLOR).applyAll(trackTitle, trackLeftText);
+        OsuSkin.get().getColor("MenuItemSelectedTextColor", SELECTED_TEXT_COLOR).applyAll(beatmapTitle, beatmapLeftText);
     }
 
     @Override
@@ -153,11 +154,11 @@ public class MenuItemTrack extends Sprite {
             if (item == null) {
                 return true;
             }
-            if (!item.get().isTrackSelected(this)) {
+            if (!item.get().isBeatmapSelected(this)) {
                 ResourceManager.getInstance().getSound("menuclick").play();
-                item.get().deselectTrack();
+                item.get().deselectBeatmap();
             }
-            item.get().selectTrack(this, false);
+            item.get().selectBeatmap(this, false);
 
             return true;
         } else if (pSceneTouchEvent.isActionOutside()

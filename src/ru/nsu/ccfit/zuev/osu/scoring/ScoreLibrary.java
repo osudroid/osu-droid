@@ -39,16 +39,16 @@ public class ScoreLibrary {
         return lib;
     }
 
-    public static String getTrackPath(final String track) {
-        final Matcher newPathMather = newPathPattern.matcher(track);
+    public static String getBeatmapPath(final String path) {
+        final Matcher newPathMather = newPathPattern.matcher(path);
         if (newPathMather.find()) {
             return newPathMather.group();
         }
-        return track;
+        return path;
     }
 
-    public static String getTrackDir(final String track) {
-        String s = getTrackPath(track);
+    public static String getBeatmapSetDirectory(final String beatmapPath) {
+        String s = getBeatmapPath(beatmapPath);
         if (s.endsWith(".osu")) {
             return s.substring(0, s.indexOf('/'));
         } else {
@@ -126,9 +126,9 @@ public class ScoreLibrary {
             }
 
             if (scores != null) {
-                for (String track : scores.keySet()) {
-                    for (StatisticV2 stat : scores.get(track)) {
-                        addScore(track, stat, null);
+                for (String beatmap : scores.keySet()) {
+                    for (StatisticV2 stat : scores.get(beatmap)) {
+                        addScore(beatmap, stat, null);
                     }
                 }
             }
@@ -152,15 +152,15 @@ public class ScoreLibrary {
         OnlineScoring.getInstance().sendRecord(stat, panel, replay);
     }
 
-    public void addScore(final String trackPath, final StatisticV2 stat, final String replay) {
+    public void addScore(final String beatmapPath, final StatisticV2 stat, final String replay) {
         if (stat.getTotalScoreWithMultiplier() == 0 || stat.getMod().contains(GameMod.MOD_AUTO)) {
             return;
         }
-        final String track = getTrackPath(trackPath);
+        final String path = getBeatmapPath(beatmapPath);
 
         if (db == null) return;
         ContentValues values = new ContentValues();
-        values.put("filename", track);
+        values.put("filename", path);
         values.put("playername", stat.getPlayerName());
         values.put("replayfile", replay);
         values.put("mode", stat.getModString());
@@ -213,18 +213,18 @@ public class ScoreLibrary {
     }
 
     public Cursor getMapScores(String[] columns, String filename) {
-        final String track = getTrackPath(filename);
+        final String beatmapPath = getBeatmapPath(filename);
         if (db == null) return null;
         return db.query(DBOpenHelper.SCORES_TABLENAME, columns, "filename = ?",
-                new String[]{track}, null, null, "score DESC");
+                new String[]{beatmapPath}, null, null, "score DESC");
     }
 
-    public String getBestMark(final String trackPath) {
-        final String track = getTrackPath(trackPath);
+    public String getBestMark(final String beatmapPath) {
+        final String path = getBeatmapPath(beatmapPath);
         String[] columns = {"mark", "filename", "id", "score"};
         Cursor response =
                 db.query(DBOpenHelper.SCORES_TABLENAME, columns, "filename = ?",
-                        new String[]{track}, null, null, "score DESC");
+                        new String[]{path}, null, null, "score DESC");
         if (response.getCount() == 0) {
             response.close();
             return null;

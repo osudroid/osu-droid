@@ -41,6 +41,7 @@ import com.google.firebase.analytics.FirebaseAnalytics;
 import com.google.firebase.crashlytics.FirebaseCrashlytics;
 import com.reco1l.ibancho.LobbyAPI;
 import com.reco1l.osu.AccessibilityDetector;
+import com.reco1l.osu.BeatmapInfo;
 import com.reco1l.osu.Execution;
 import com.reco1l.osu.multiplayer.Multiplayer;
 import com.reco1l.osu.UpdateManager;
@@ -289,11 +290,7 @@ public class MainActivity extends BaseGameActivity implements
             GlobalManager.getInstance().setLoadingProgress(50);
             checkNewSkins();
             Config.loadSkins();
-            checkNewBeatmaps();
-
-            if (!LibraryManager.INSTANCE.loadLibraryCache(true)) {
-                LibraryManager.INSTANCE.scanLibrary();
-            }
+            loadBeatmapLibrary();
 
             SplashScene.INSTANCE.playWelcomeAnimation();
 
@@ -381,7 +378,7 @@ public class MainActivity extends BaseGameActivity implements
         ActivityOverlay.initial(this, frameLayout.getId());
     }
 
-    public void checkNewBeatmaps() {
+    public void loadBeatmapLibrary() {
         GlobalManager.getInstance().setInfo("Checking for new maps...");
         final File mainDir = new File(Config.getCorePath());
         if (beatmapToAdd != null) {
@@ -393,7 +390,6 @@ public class MainActivity extends BaseGameActivity implements
 
                 FileUtils.extractZip(beatmapToAdd, Config.getBeatmapPath());
                 // LibraryManager.INSTANCE.sort();
-                LibraryManager.INSTANCE.saveToCache();
             } else if (file.getName().endsWith(".odr")) {
                 willReplay = true;
             }
@@ -450,9 +446,11 @@ public class MainActivity extends BaseGameActivity implements
                 // Config.setDELETE_OSZ(deleteOsz);
 
                 // LibraryManager.INSTANCE.sort();
-                LibraryManager.INSTANCE.saveToCache();
             }
         }
+
+        LibraryManager.scanDirectory();
+        LibraryManager.loadLibrary();
     }
 
     public void checkNewSkins() {
