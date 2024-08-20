@@ -315,8 +315,11 @@ interface IBeatmapDAO {
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     fun insertAll(beatmapInfo: List<BeatmapInfo>)
 
-    @Query("DELETE FROM BeatmapInfo WHERE parentPath = :beatmapSetKey")
-    fun deleteBeatmapSet(beatmapSetKey: String)
+    @Query("DELETE FROM BeatmapInfo WHERE parentPath = :path")
+    fun deleteBeatmapSet(path: String)
+
+    @Query("DELETE FROM BeatmapInfo WHERE parentPath IN (:paths)")
+    fun deleteBeatmapSets(paths: List<String>)
 
     @Transaction
     @Query("SELECT DISTINCT parentPath, parentId FROM BeatmapInfo")

@@ -281,11 +281,26 @@ public class LibraryManager {
             this.fileCount = fileCount;
             this.files = files;
             this.executors = Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors());
-            this.savedPaths = DatabaseManager.getBeatmapTable().getBeatmapSetPaths();
+            this.savedPaths = new ArrayList<>(DatabaseManager.getBeatmapTable().getBeatmapSetPaths());
         }
 
 
         public void start() {
+
+            var iterator = savedPaths.iterator();
+            while (iterator.hasNext()) {
+                var path = iterator.next();
+
+                for (var i = files.length - 1; i >= 0; i--) {
+                    var file = files[i];
+
+                    if (file != null && path.equals(file.getPath())) {
+                        files[i] = null;
+                        iterator.remove();
+                        break;
+                    }
+                }
+            }
 
             int optimalChunkSize = (int) Math.ceil((double) fileCount / Runtime.getRuntime().availableProcessors());
 
@@ -314,22 +329,8 @@ public class LibraryManager {
             }
 
             // Removing beatmap sets from the database that are not in the library anymore.
-            for (int i = savedPaths.size() - 1; i >= 0; i--) {
-
-                var path = savedPaths.get(i);
-                var found = false;
-
-                for (int j = files.length - 1; j >= 0; j--) {
-
-                    if (path.equals(files[j].getPath())) {
-                        found = true;
-                        break;
-                    }
-                }
-
-                if (!found) {
-                    DatabaseManager.getBeatmapTable().deleteBeatmapSet(path);
-                }
+            if (!savedPaths.isEmpty()) {
+                DatabaseManager.getBeatmapTable().deleteBeatmapSets(savedPaths);
             }
         }
 
@@ -337,23 +338,10 @@ public class LibraryManager {
 
             executors.submit(() -> {
 
-                for (int i = files.length - 1; i >= 0; i--) {
-                    var file = files[i];
+                for (var file : files) {
 
-                    if (!file.isDirectory()) {
-                        continue;
-                    }
-
-                    var found = false;
-                    for (int j = savedPaths.size() - 1; j >= 0; j--) {
-                        if (savedPaths.get(j).equals(file.getPath())) {
-                            fileCount--;
-                            found = true;
-                            break;
-                        }
-                    }
-
-                    if (found) {
+                    if (file == null || !file.isDirectory()) {
+                        fileCount--;
                         continue;
                     }
 
