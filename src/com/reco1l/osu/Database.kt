@@ -48,7 +48,7 @@ object DatabaseManager {
  * Version history:
  * - 1: Initial version.
  * - 2: First official version.
- * - 3: Star rating change; they may be nullable.
+ * - 3: `droidStarRating` and `standardStarRating` are now nullable.
  */
 @Database(
     version = 3,
