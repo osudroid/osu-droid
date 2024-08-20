@@ -89,7 +89,7 @@ public class LibraryManager {
             return;
         }
 
-        new LibraryDatabaseManager(files.length, files).start();
+        new LibraryDatabaseManager(files).start();
 
         // Wait for all threads to finish
         while (isCaching) {
@@ -126,29 +126,29 @@ public class LibraryManager {
 
     private static void scanBeatmapSetFolder(File directory) {
 
-        var files = directory.listFiles((dir, name) -> name.endsWith(".osu"));
+        var osuFiles = directory.listFiles((dir, name) -> name.endsWith(".osu"));
 
-        if (files == null) {
+        if (osuFiles == null) {
             return;
         }
 
         var beatmapsFound = 0;
 
-        for (var file : files) {
+        for (var osuFile : osuFiles) {
 
-            try (var parser = new BeatmapParser(file)) {
+            try (var parser = new BeatmapParser(osuFile)) {
 
                 var beatmap = parser.parse(true);
 
                 if (beatmap == null) {
                     if (Config.isDeleteUnimportedBeatmaps()) {
                         //noinspection ResultOfMethodCallIgnored
-                        file.delete();
+                        osuFile.delete();
                     }
                     continue;
                 }
 
-                var beatmapInfo = BeatmapInfo.from(beatmap, directory.getPath(), directory.lastModified(), file.getPath(), false);
+                var beatmapInfo = BeatmapInfo.from(beatmap, directory.getPath(), directory.lastModified(), osuFile.getPath(), false);
 
                 if (beatmap.events.videoFilename != null && Config.isDeleteUnsupportedVideos()) {
                     try {
@@ -264,22 +264,22 @@ public class LibraryManager {
     private static final class LibraryDatabaseManager {
 
 
-        private final File[] files;
+        private final File[] directories;
 
         private final List<String> savedPaths;
 
         private final ExecutorService executors;
 
 
-        private int fileCount;
+        private int directoryCount;
 
         private int fileCached = 0;
 
 
-        private LibraryDatabaseManager(int fileCount, File[] files) {
+        private LibraryDatabaseManager(File[] directories) {
 
-            this.fileCount = fileCount;
-            this.files = files;
+            this.directories = directories;
+            this.directoryCount = directories.length;
             this.executors = Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors());
             this.savedPaths = new ArrayList<>(DatabaseManager.getBeatmapTable().getBeatmapSetPaths());
         }
@@ -291,21 +291,21 @@ public class LibraryManager {
             while (iterator.hasNext()) {
                 var path = iterator.next();
 
-                for (var i = files.length - 1; i >= 0; i--) {
-                    var file = files[i];
+                for (var i = directories.length - 1; i >= 0; i--) {
+                    var file = directories[i];
 
                     if (file != null && path.equals(file.getPath())) {
-                        files[i] = null;
+                        directories[i] = null;
                         iterator.remove();
                         break;
                     }
                 }
             }
 
-            int optimalChunkSize = (int) Math.ceil((double) fileCount / Runtime.getRuntime().availableProcessors());
+            int optimalChunkSize = (int) Math.ceil((double) directoryCount / Runtime.getRuntime().availableProcessors());
 
-            for (int i = 0; i < files.length; i += optimalChunkSize) {
-                submitToExecutor(Arrays.copyOfRange(files, i, Math.min(i + optimalChunkSize, files.length)));
+            for (int i = 0; i < directories.length; i += optimalChunkSize) {
+                submitToExecutor(Arrays.copyOfRange(directories, i, Math.min(i + optimalChunkSize, directories.length)));
             }
 
             executors.shutdown();
@@ -334,24 +334,24 @@ public class LibraryManager {
             }
         }
 
-        private void submitToExecutor(File[] files) {
+        private void submitToExecutor(File[] directories) {
 
             executors.submit(() -> {
 
-                for (var file : files) {
+                for (var directory : directories) {
 
-                    if (file == null || !file.isDirectory()) {
-                        fileCount--;
+                    if (directory == null || !directory.isDirectory()) {
+                        directoryCount--;
                         continue;
                     }
 
-                    GlobalManager.getInstance().setLoadingProgress(50 + 50 * fileCached / fileCount);
-                    GlobalManager.getInstance().setInfo("Loading " + file.getName() + "...");
+                    GlobalManager.getInstance().setLoadingProgress(50 + 50 * fileCached / directoryCount);
+                    GlobalManager.getInstance().setInfo("Loading " + directory.getName() + "...");
 
-                    ToastLogger.setPercentage(fileCached * 100f / fileCount);
+                    ToastLogger.setPercentage(fileCached * 100f / directoryCount);
                     fileCached++;
 
-                    scanBeatmapSetFolder(file);
+                    scanBeatmapSetFolder(directory);
                 }
             });
         }
