@@ -13,8 +13,10 @@ import kotlin.math.min
  * A parser for parsing a beatmap's hit objects section.
  */
 object BeatmapHitObjectsParser : BeatmapSectionParser() {
+    private val pipePropertyRegex = "[|]".toRegex()
+
     override fun parse(beatmap: Beatmap, line: String) = line
-        .split(",".toRegex())
+        .split(COMMA_PROPERTY_REGEX)
         .dropLastWhile { it.isEmpty() }
         .let {
             if (it.size < 4) {
@@ -83,14 +85,14 @@ object BeatmapHitObjectsParser : BeatmapSectionParser() {
         // osu!stable treated the first span of the slider as a repeat, but no repeats are happening
         repeatCount = max(0, repeatCount - 1)
 
-        val curvePointsData = pars[5].split("[|]".toRegex()).dropLastWhile { it.isEmpty() }
+        val curvePointsData = pars[5].split(pipePropertyRegex).dropLastWhile { it.isEmpty() }
         var sliderType = SliderPathType.parse(curvePointsData[0][0])
 
         val curvePoints = mutableListOf<Vector2>().apply { add(Vector2(0f)) }
 
         curvePointsData.run {
             for (i in 1 until size) {
-                this[i].split(":".toRegex()).dropLastWhile { it.isEmpty() }.let {
+                this[i].split(COLON_PROPERTY_REGEX).dropLastWhile { it.isEmpty() }.let {
                     val curvePointPosition = Vector2(
                         parseInt(it[0]).toFloat(),
                         parseInt(it[1]).toFloat()
@@ -138,7 +140,7 @@ object BeatmapHitObjectsParser : BeatmapSectionParser() {
             }
 
             // Read any per-node sample banks
-            val sets = pars.getOrNull(9)?.split("\\|".toRegex())
+            val sets = pars.getOrNull(9)?.split(pipePropertyRegex)
             if (sets != null) {
                 for (i in 0 until min(sets.size, nodes)) {
                     readCustomSampleBanks(this[i], sets[i])
@@ -153,7 +155,7 @@ object BeatmapHitObjectsParser : BeatmapSectionParser() {
             }
 
             // Read any per-node sound types
-            val adds = pars.getOrNull(8)?.split("\\|".toRegex())
+            val adds = pars.getOrNull(8)?.split(pipePropertyRegex)
             if (adds != null) {
                 for (i in 0 until min(adds.size, nodes)) {
                     set(i, HitSoundType.parse(parseInt(adds[i])))
@@ -246,7 +248,7 @@ object BeatmapHitObjectsParser : BeatmapSectionParser() {
             return
         }
 
-        val s = str.split(":".toRegex())
+        val s = str.split(COLON_PROPERTY_REGEX)
 
         bankInfo.normal = SampleBank.parse(parseInt(s[0]))
         bankInfo.add = SampleBank.parse(parseInt(s[1])).takeIf { it != SampleBank.Normal } ?: bankInfo.normal

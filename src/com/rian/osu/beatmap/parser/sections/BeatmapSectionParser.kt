@@ -92,6 +92,12 @@ abstract class BeatmapSectionParser {
     }
 
     companion object {
+        @JvmStatic
+        protected val COMMA_PROPERTY_REGEX = ",".toRegex()
+
+        @JvmStatic
+        protected val COLON_PROPERTY_REGEX = ":".toRegex()
+
         private const val MAX_PARSE_LIMIT = Int.MAX_VALUE
     }
 }

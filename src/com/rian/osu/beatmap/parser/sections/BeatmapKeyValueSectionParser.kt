@@ -17,15 +17,15 @@ abstract class BeatmapKeyValueSectionParser : BeatmapSectionParser() {
      * @param line The line.
      */
     protected fun splitProperty(line: String): Array<String> =
-         line.split(":".toRegex())
+         line.split(COLON_PROPERTY_REGEX)
              .dropLastWhile { it.isEmpty() }
              .toTypedArray()
              .let { s ->
-                arrayOf(
+                 arrayOf(
                      s[0].trim { it <= ' ' },
                      if (s.size > 1)
                          TextUtils.join(":", Arrays.copyOfRange(s, 1, s.size)).trim { it <= ' ' }
                      else ""
                  )
-            }
+             }
 }
