@@ -47,15 +47,6 @@ public class ScoreLibrary {
         return path;
     }
 
-    public static String getBeatmapSetDirectory(final String beatmapPath) {
-        String s = getBeatmapPath(beatmapPath);
-        if (s.endsWith(".osu")) {
-            return s.substring(0, s.indexOf('/'));
-        } else {
-            return s.substring(s.indexOf('/') + 1);
-        }
-    }
-
     public SQLiteDatabase getDb() {
         return db;
     }
