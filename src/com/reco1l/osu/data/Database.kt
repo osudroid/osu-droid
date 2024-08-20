@@ -1,4 +1,4 @@
-package com.reco1l.osu
+package com.reco1l.osu.data
 
 import android.content.Context
 import androidx.room.*

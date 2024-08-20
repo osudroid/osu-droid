@@ -1,4 +1,4 @@
-package com.reco1l.osu
+package com.reco1l.osu.data
 
 import androidx.room.*
 import com.reco1l.toolkt.kotlin.fastForEach

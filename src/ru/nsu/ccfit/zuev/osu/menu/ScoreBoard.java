@@ -2,7 +2,7 @@ package ru.nsu.ccfit.zuev.osu.menu;
 
 import android.database.Cursor;
 
-import com.reco1l.osu.BeatmapInfo;
+import com.reco1l.osu.data.BeatmapInfo;
 import com.reco1l.osu.Execution;
 import com.reco1l.osu.multiplayer.Multiplayer;
 

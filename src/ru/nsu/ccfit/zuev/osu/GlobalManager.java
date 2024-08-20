@@ -1,11 +1,10 @@
 package ru.nsu.ccfit.zuev.osu;
 
-import com.reco1l.osu.BeatmapInfo;
-import com.reco1l.osu.DatabaseManager;
+import com.reco1l.osu.data.BeatmapInfo;
+import com.reco1l.osu.data.DatabaseManager;
 import org.anddev.andengine.engine.Engine;
 import org.anddev.andengine.engine.camera.Camera;
 
-import org.jetbrains.annotations.Nullable;
 import ru.nsu.ccfit.zuev.audio.serviceAudio.SaveServiceObject;
 import ru.nsu.ccfit.zuev.audio.serviceAudio.SongService;
 import ru.nsu.ccfit.zuev.osu.game.GameScene;

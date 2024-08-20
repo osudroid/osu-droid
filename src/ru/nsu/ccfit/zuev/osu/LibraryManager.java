@@ -1,8 +1,8 @@
 package ru.nsu.ccfit.zuev.osu;
 
 import android.util.Log;
-import com.reco1l.osu.BeatmapSetInfo;
-import com.reco1l.osu.DatabaseManager;
+import com.reco1l.osu.data.BeatmapSetInfo;
+import com.reco1l.osu.data.DatabaseManager;
 import com.reco1l.osu.graphics.VideoTexture;
 import com.rian.osu.beatmap.parser.BeatmapParser;
 import kotlin.io.FilesKt;
@@ -17,7 +17,7 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 
-import com.reco1l.osu.BeatmapInfo;
+import com.reco1l.osu.data.BeatmapInfo;
 
 
 public class LibraryManager {
