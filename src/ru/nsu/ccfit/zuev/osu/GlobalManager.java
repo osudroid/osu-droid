@@ -57,8 +57,6 @@ public class GlobalManager {
         skinNow = Config.getSkinPath();
         ResourceManager.getInstance().loadSkin(skinNow);
         ScoreLibrary.getInstance().load(mainActivity);
-        setLoadingProgress(20);
-        PropertiesLibrary.getInstance().load(mainActivity);
         setLoadingProgress(30);
         setGameScene(new GameScene(getEngine()));
         setSongMenu(new SongMenu());

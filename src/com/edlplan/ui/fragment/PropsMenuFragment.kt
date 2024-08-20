@@ -11,12 +11,12 @@ import android.widget.EditText
 import com.edlplan.framework.easing.Easing
 import com.edlplan.ui.BaseAnimationListener
 import com.edlplan.ui.EasingHelper
+import com.reco1l.osu.data.BeatmapOptions
+import com.reco1l.osu.data.DatabaseManager
 import com.reco1l.osu.ui.MessageDialog
 import com.reco1l.toolkt.android.cornerRadius
 import com.reco1l.toolkt.android.dp
-import ru.nsu.ccfit.zuev.osu.BeatmapProperties
 import ru.nsu.ccfit.zuev.osu.GlobalManager
-import ru.nsu.ccfit.zuev.osu.PropertiesLibrary
 import ru.nsu.ccfit.zuev.osu.menu.IPropsMenu
 import ru.nsu.ccfit.zuev.osu.menu.BeatmapSetItem
 import ru.nsu.ccfit.zuev.osu.menu.SongMenu
@@ -29,7 +29,7 @@ class PropsMenuFragment : BaseFragment(), IPropsMenu {
 
     var menu: SongMenu? = null
     var item: BeatmapSetItem? = null
-    var props: BeatmapProperties? = null
+    var props: BeatmapOptions? = null
 
     private var offset: EditText? = null
     private var isFav: CheckBox? = null
@@ -47,7 +47,7 @@ class PropsMenuFragment : BaseFragment(), IPropsMenu {
         offset = findViewById<EditText>(R.id.offsetBox)
         isFav = findViewById<CheckBox>(R.id.addToFav)
 
-        offset!!.setText(props!!.getOffset().toString())
+        offset!!.setText(props!!.offset.toString())
         isFav!!.isChecked = props!!.isFavorite
 
         isFav!!.setOnCheckedChangeListener { buttonView: CompoundButton?, isChecked: Boolean ->
@@ -83,11 +83,11 @@ class PropsMenuFragment : BaseFragment(), IPropsMenu {
                         offset!!.setSelection(pos)
                         offset!!.addTextChangedListener(this)
                     }
-                    props!!.setOffset(o)
+                    props!!.offset = o
                     saveProp()
                 } catch (e: NumberFormatException) {
                     if (s.length == 0) {
-                        props!!.setOffset(0)
+                        props!!.offset = 0
                         saveProp()
                     }
                 }
@@ -175,18 +175,15 @@ class PropsMenuFragment : BaseFragment(), IPropsMenu {
     override fun show(menu: SongMenu, item: BeatmapSetItem) {
         this.menu = menu
         this.item = item
-        props = PropertiesLibrary.getInstance().getProperties(item.beatmapSetInfo.path)
+        props = DatabaseManager.beatmapOptionsTable.getOptions(item.beatmapSetInfo.path)
         if (props == null) {
-            props = BeatmapProperties()
+            props = BeatmapOptions(item.beatmapSetInfo.path)
         }
         show()
     }
 
     fun saveProp() {
-        PropertiesLibrary.getInstance().setProperties(
-            item!!.beatmapSetInfo.path, props
-        )
-        item!!.isFavorite = props!!.favorite
-        PropertiesLibrary.getInstance().save()
+        item!!.isFavorite = props!!.isFavorite
+        DatabaseManager.beatmapOptionsTable.setOptions(props!!)
     }
 }

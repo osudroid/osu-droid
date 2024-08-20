@@ -11,12 +11,12 @@ import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import ru.nsu.ccfit.zuev.osu.BeatmapProperties;
 import ru.nsu.ccfit.zuev.osu.Config;
 import ru.nsu.ccfit.zuev.osu.LibraryManager;
-import ru.nsu.ccfit.zuev.osu.PropertiesLibrary;
 import ru.nsu.ccfit.zuev.osu.ResourceManager;
 import com.reco1l.osu.data.BeatmapInfo;
+import com.reco1l.osu.data.DatabaseManager;
+
 import ru.nsu.ccfit.zuev.osu.Utils;
 import ru.nsu.ccfit.zuev.osu.DifficultyAlgorithm;
 import ru.nsu.ccfit.zuev.osu.helper.StringTable;
@@ -59,8 +59,7 @@ public class BeatmapSetItem {
                 beatmapInfo.getCreator());
         beatmapItems = new BeatmapItem[beatmapSetInfo.getCount()];
 
-        final BeatmapProperties props = PropertiesLibrary.getInstance()
-                .getProperties(beatmapSetInfo.getPath());
+        var props = DatabaseManager.getBeatmapOptionsTable().getOptions(beatmapSetInfo.getPath());
         favorite = props != null && props.isFavorite();
 
     }
@@ -81,7 +80,8 @@ public class BeatmapSetItem {
         creatorStr = StringTable.format(R.string.menu_creator, beatmapInfo.getCreator());
         beatmapItems = new BeatmapItem[1];
         beatmapId = id;
-        final BeatmapProperties props = PropertiesLibrary.getInstance().getProperties(beatmapSetInfo.getPath());
+
+        var props = DatabaseManager.getBeatmapOptionsTable().getOptions(beatmapSetInfo.getPath());
         favorite = props != null && props.isFavorite();
 
     }
