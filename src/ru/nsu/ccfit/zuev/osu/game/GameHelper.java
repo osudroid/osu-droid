@@ -2,8 +2,6 @@ package ru.nsu.ccfit.zuev.osu.game;
 
 import android.graphics.PointF;
 
-import com.edlplan.osu.support.timing.controlpoint.ControlPoints;
-
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.util.ArrayList;
@@ -18,7 +16,6 @@ import ru.nsu.ccfit.zuev.osu.helper.DifficultyHelper;
 import ru.nsu.ccfit.zuev.osu.polygon.Spline;
 
 public class GameHelper {
-    public static ControlPoints controlPoints;
     private static double tickRate = 1;
     private static float scale = 1;
     private static double speed = 1;

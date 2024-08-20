@@ -91,7 +91,7 @@ abstract class ControlPointManager<T : ControlPoint>(
 
     /**
      * Binary searches one of the control point lists to find the active control point at the given time.
-     * <br></br><br></br>
+     *
      * Includes logic for returning the default control point when no matching point is found.
      *
      * @param time The time to find the control point at, in milliseconds.

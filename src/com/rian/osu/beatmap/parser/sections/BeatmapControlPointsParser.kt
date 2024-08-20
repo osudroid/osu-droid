@@ -12,7 +12,7 @@ import com.rian.osu.beatmap.timings.TimingControlPoint
  */
 object BeatmapControlPointsParser : BeatmapSectionParser() {
     override fun parse(beatmap: Beatmap, line: String) = line
-        .split(",".toRegex())
+        .split(COMMA_PROPERTY_REGEX)
         .dropLastWhile { it.isEmpty() }
         .let {
             if (it.size < 2) {
@@ -63,7 +63,6 @@ object BeatmapControlPointsParser : BeatmapSectionParser() {
                 sample.add(SampleControlPoint(time, sampleSet, sampleVolume, customSampleBank))
             }
 
-            beatmap.rawTimingPoints.add(line)
             Unit
         }
 
