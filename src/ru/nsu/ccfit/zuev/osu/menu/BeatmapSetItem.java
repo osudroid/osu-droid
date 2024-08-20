@@ -6,7 +6,6 @@ import org.anddev.andengine.entity.scene.Scene;
 import org.anddev.andengine.entity.sprite.Sprite;
 
 import java.lang.ref.WeakReference;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.Set;
 import java.util.regex.Matcher;
@@ -14,12 +13,12 @@ import java.util.regex.Pattern;
 
 import ru.nsu.ccfit.zuev.osu.BeatmapProperties;
 import ru.nsu.ccfit.zuev.osu.Config;
+import ru.nsu.ccfit.zuev.osu.DifficultyAlgorithm;
 import ru.nsu.ccfit.zuev.osu.LibraryManager;
 import ru.nsu.ccfit.zuev.osu.PropertiesLibrary;
 import ru.nsu.ccfit.zuev.osu.ResourceManager;
 import com.reco1l.osu.BeatmapInfo;
 import ru.nsu.ccfit.zuev.osu.Utils;
-import ru.nsu.ccfit.zuev.osu.DifficultyAlgorithm;
 import ru.nsu.ccfit.zuev.osu.helper.StringTable;
 import ru.nsu.ccfit.zuev.osu.scoring.ScoreLibrary;
 import ru.nsu.ccfit.zuev.osuplus.R;
@@ -305,10 +304,10 @@ public class BeatmapSetItem {
             case "hp":
                 return calOpt(beatmap.getHpDrainRate(), Float.parseFloat(value), opt);
             case "droidstar":
-                return calOpt(beatmap.getDroidStarRating(), Float.parseFloat(value), opt);
+                return calOpt(beatmap.getStarRating(DifficultyAlgorithm.droid), Float.parseFloat(value), opt);
             case "standardstar":
             case "star":
-                return calOpt(beatmap.getStandardStarRating(), Float.parseFloat(value), opt);
+                return calOpt(beatmap.getStarRating(DifficultyAlgorithm.standard), Float.parseFloat(value), opt);
             default:
                 return false;
         }
@@ -403,11 +402,10 @@ public class BeatmapSetItem {
     public void reloadBeatmaps() {
         if (beatmapId == -1) {
             // Tracks are originally sorted by osu!droid difficulty, so for osu!standard difficulty they need to be sorted again.
-            if (Config.getDifficultyAlgorithm() == DifficultyAlgorithm.standard) {
-                Collections.sort(beatmapSetInfo.getBeatmaps(), (o1, o2) -> Float.compare(o1.getStandardStarRating(), o2.getStandardStarRating()));
-            } else {
-                Collections.sort(beatmapSetInfo.getBeatmaps(), (o1, o2) -> Float.compare(o1.getDroidStarRating(), o2.getDroidStarRating()));
-            }
+            Collections.sort(beatmapSetInfo.getBeatmaps(), (o1, o2) -> Float.compare(
+                o1.getStarRating(),
+                o2.getStarRating()
+            ));
 
             var selectedBeatmap = selectedBeatmapItem != null ? selectedBeatmapItem.getBeatmapInfo() : null;
 
@@ -430,11 +428,10 @@ public class BeatmapSetItem {
     private void initBeatmaps() {
         if (beatmapId == -1) {
             // Tracks are originally sorted by osu!droid difficulty, so for osu!standard difficulty they need to be sorted again.
-            if (Config.getDifficultyAlgorithm() == DifficultyAlgorithm.standard) {
-                Collections.sort(beatmapSetInfo.getBeatmaps(), (o1, o2) -> Float.compare(o1.getStandardStarRating(), o2.getStandardStarRating()));
-            } else {
-                Collections.sort(beatmapSetInfo.getBeatmaps(), (o1, o2) -> Float.compare(o1.getDroidStarRating(), o2.getDroidStarRating()));
-            }
+            Collections.sort(beatmapSetInfo.getBeatmaps(), (o1, o2) -> Float.compare(
+                o1.getStarRating(),
+                o2.getStarRating()
+            ));
 
             for (int i = 0; i < beatmapItems.length; i++) {
                 beatmapItems[i] = SongMenuPool.getInstance().newBeatmapItem();

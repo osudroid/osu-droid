@@ -4,6 +4,7 @@ import androidx.room.*
 import com.reco1l.toolkt.kotlin.fastForEach
 import com.rian.osu.difficulty.BeatmapDifficultyCalculator
 import ru.nsu.ccfit.zuev.osu.Config
+import ru.nsu.ccfit.zuev.osu.DifficultyAlgorithm
 import ru.nsu.ccfit.zuev.osu.game.GameHelper
 import kotlin.math.max
 import kotlin.math.min
@@ -140,12 +141,12 @@ data class BeatmapInfo(
     /**
      * The cached osu!droid star rating.
      */
-    val droidStarRating: Float,
+    var droidStarRating: Float?,
 
     /**
      * The cached osu!std star rating.
      */
-    val standardStarRating: Float,
+    var standardStarRating: Float?,
 
     /**
      * The max BPM.
@@ -170,22 +171,22 @@ data class BeatmapInfo(
     /**
      * The hit circle count.
      */
-    val hitCircleCount: Int,
+    var hitCircleCount: Int,
 
     /**
      * The slider count.
      */
-    val spinnerCount: Int,
+    var spinnerCount: Int,
 
     /**
      * The spinner count.
      */
-    val sliderCount: Int,
+    var sliderCount: Int,
 
     /**
      * The max combo.
      */
-    val maxCombo: Int
+    var maxCombo: Int
 
 ) {
 
@@ -211,6 +212,17 @@ data class BeatmapInfo(
         get() = if (Config.isForceRomanized()) artist else artistUnicode.takeUnless { it.isBlank() } ?: artist
 
 
+    /**
+     * Returns the star rating based on the current algorithm configuration, whether droid or standard.
+     * Additionally you can pass a custom algorithm to get the star rating.
+     */
+    @JvmOverloads
+    fun getStarRating(algorithm: DifficultyAlgorithm = Config.getDifficultyAlgorithm()) = when (algorithm) {
+        DifficultyAlgorithm.standard -> standardStarRating ?: 0f
+        DifficultyAlgorithm.droid -> droidStarRating ?: 0f
+    }
+
+
     override fun equals(other: Any?) = other is BeatmapInfo && other.path == path
 
 
@@ -220,7 +232,7 @@ data class BeatmapInfo(
          * Parse a new [BeatmapInfo] from a [RianBeatmap] instance.
          */
         @JvmStatic
-        fun from(data: RianBeatmap, parentPath: String, lastModified: Long, path: String): BeatmapInfo {
+        fun from(data: RianBeatmap, parentPath: String, lastModified: Long, path: String, withDifficulty: Boolean): BeatmapInfo {
 
             var bpmMin = Float.MAX_VALUE
             var bpmMax = 0f
@@ -234,8 +246,18 @@ data class BeatmapInfo(
                 bpmMax = if (bpmMax != 0f) max(bpmMax, bpm) else bpm
             }
 
-            val droidAttributes = BeatmapDifficultyCalculator.calculateDroidDifficulty(data)
-            val standardAttributes = BeatmapDifficultyCalculator.calculateStandardDifficulty(data)
+            data.hitObjects.objects.isEmpty()
+
+            var droidStarRating: Float? = null
+            var standardStarRating: Float? = null
+
+            if (withDifficulty) {
+                val droidAttributes = BeatmapDifficultyCalculator.calculateDroidDifficulty(data)
+                val standardAttributes = BeatmapDifficultyCalculator.calculateStandardDifficulty(data)
+
+                droidStarRating = GameHelper.Round(droidAttributes.starRating, 2)
+                standardStarRating = GameHelper.Round(standardAttributes.starRating, 2)
+            }
 
             return BeatmapInfo(
 
@@ -268,16 +290,16 @@ data class BeatmapInfo(
                 overallDifficulty = data.difficulty.od,
                 circleSize = data.difficulty.cs,
                 hpDrainRate = data.difficulty.hp,
-                droidStarRating = GameHelper.Round(droidAttributes.starRating, 2),
-                standardStarRating = GameHelper.Round(standardAttributes.starRating, 2),
+                droidStarRating = droidStarRating,
+                standardStarRating = standardStarRating,
                 bpmMin = bpmMin,
                 bpmMax = bpmMax,
                 length = data.duration.toLong(),
                 previewTime = data.general.previewTime,
-                hitCircleCount = data.hitObjects.circleCount,
-                sliderCount = data.hitObjects.sliderCount,
-                spinnerCount = data.hitObjects.spinnerCount,
-                maxCombo = data.maxCombo
+                hitCircleCount = if (withDifficulty) data.hitObjects.circleCount else 0,
+                sliderCount = if (withDifficulty) data.hitObjects.sliderCount else 0,
+                spinnerCount = if (withDifficulty) data.hitObjects.spinnerCount else 0,
+                maxCombo = if (withDifficulty) data.maxCombo else 0
             )
         }
     }
@@ -289,6 +311,9 @@ interface IBeatmapDAO {
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     fun insert(beatmapInfo: BeatmapInfo): Long
+
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    fun insertAll(beatmapInfo: List<BeatmapInfo>)
 
     @Query("DELETE FROM BeatmapInfo WHERE parentPath = :beatmapSetKey")
     fun deleteBeatmapSet(beatmapSetKey: String)

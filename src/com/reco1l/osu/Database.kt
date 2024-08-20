@@ -28,6 +28,8 @@ object DatabaseManager {
     @JvmStatic
     fun load(context: Context) {
 
+        context.deleteDatabase(DroidDatabase::class.simpleName)
+
         // Be careful when changing the database name, it may cause data loss.
         database = Room.databaseBuilder(context, DroidDatabase::class.java, DroidDatabase::class.simpleName)
             // Is preferable to support migrations, otherwise destructive migration will run forcing
@@ -44,7 +46,7 @@ object DatabaseManager {
  * The osu!droid database object class, this should be unique per instance.
  */
 @Database(
-    version = 2,
+    version = 3,
     entities = [
         BeatmapInfo::class,
     ]

@@ -3,6 +3,7 @@ package ru.nsu.ccfit.zuev.osu;
 import android.util.Log;
 import com.reco1l.osu.BeatmapSetInfo;
 import com.reco1l.osu.DatabaseManager;
+import com.reco1l.osu.DifficultyCalculationManager;
 import com.reco1l.osu.graphics.VideoTexture;
 import com.rian.osu.beatmap.parser.BeatmapParser;
 import kotlin.io.FilesKt;
@@ -28,6 +29,8 @@ public class LibraryManager {
     private static int currentIndex = 0;
 
     private static boolean isCaching = true;
+
+    private static List<BeatmapInfo> pendingBeatmaps = null;
 
 
     private LibraryManager() {
@@ -99,6 +102,13 @@ public class LibraryManager {
         }
 
         isCaching = true;
+
+        if (pendingBeatmaps != null) {
+            DatabaseManager.getBeatmapTable().insertAll(pendingBeatmaps);
+            pendingBeatmaps = null;
+        }
+
+        DifficultyCalculationManager.calculateDifficulties();
     }
 
 
@@ -138,7 +148,7 @@ public class LibraryManager {
                     continue;
                 }
 
-                var beatmapInfo = BeatmapInfo.from(beatmap, directory.getPath(), directory.lastModified(), file.getPath());
+                var beatmapInfo = BeatmapInfo.from(beatmap, directory.getPath(), directory.lastModified(), file.getPath(), false);
 
                 if (beatmap.events.videoFilename != null && Config.isDeleteUnsupportedVideos()) {
                     try {
@@ -154,9 +164,11 @@ public class LibraryManager {
                 }
 
                 try {
-                    // Conflict strategy is set to replace when the primary key is already in the
-                    // database. But that should never happen because the path is the primary key.
-                    DatabaseManager.getBeatmapTable().insert(beatmapInfo);
+                    if (pendingBeatmaps == null) {
+                        pendingBeatmaps = new ArrayList<>();
+                    }
+
+                    pendingBeatmaps.add(beatmapInfo);
                 } catch (Exception e) {
                     Log.e("LibraryManager", "Failed to insert beatmap into database", e);
                 }
