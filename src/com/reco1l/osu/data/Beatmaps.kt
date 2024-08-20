@@ -202,7 +202,6 @@ data class BeatmapInfo(
     val titleText
         get() = if (Config.isForceRomanized()) title else titleUnicode.takeUnless { it.isBlank() } ?: title
 
-
     /**
      * Returns the artist text based on the current configuration, whether romanization is forced it
      * will return [artist], otherwise [artistUnicode] if it's not blank.
