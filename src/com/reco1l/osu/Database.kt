@@ -45,11 +45,9 @@ object DatabaseManager {
  *
  * Version history:
  * - 1: Initial version.
- * - 2: First official version.
- * - 3: `droidStarRating` and `standardStarRating` are now nullable.
  */
 @Database(
-    version = 3,
+    version = 1,
     entities = [
         BeatmapInfo::class,
     ]
