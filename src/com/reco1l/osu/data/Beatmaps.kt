@@ -1,3 +1,4 @@
+@file:JvmName("Beatmaps")
 package com.reco1l.osu.data
 
 import androidx.room.*
@@ -210,81 +211,74 @@ data class BeatmapInfo(
         get() = if (Config.isForceRomanized()) artist else artistUnicode.takeUnless { it.isBlank() } ?: artist
 
 
-    override fun equals(other: Any?) = other is BeatmapInfo && other.path == path
-
-
-    companion object {
-
-        /**
-         * Parse a new [BeatmapInfo] from a [RianBeatmap] instance.
-         */
-        @JvmStatic
-        fun from(data: RianBeatmap, parentPath: String, lastModified: Long, path: String): BeatmapInfo {
-
-            var bpmMin = Float.MAX_VALUE
-            var bpmMax = 0f
-
-            // Timing points
-            data.controlPoints.timing.getControlPoints().fastForEach {
-
-                val bpm = it.bpm.toFloat()
-
-                bpmMin = if (bpmMin != Float.MAX_VALUE) min(bpmMin, bpm) else bpm
-                bpmMax = if (bpmMax != 0f) max(bpmMax, bpm) else bpm
-            }
-
-            val droidAttributes = BeatmapDifficultyCalculator.calculateDroidDifficulty(data)
-            val standardAttributes = BeatmapDifficultyCalculator.calculateStandardDifficulty(data)
-
-            return BeatmapInfo(
-
-                md5 = data.md5,
-                id = data.metadata.beatmapId.toLong(),
-                path = path,
-                audio = data.folder!! + '/' + data.general.audioFilename,
-                background = data.folder!! + '/' + data.events.backgroundFilename,
-
-                // Online
-                status = null, // TODO: Should we cache ranking status ?
-
-                // Parent set
-                parentPath = parentPath,
-                parentId = data.metadata.beatmapSetId,
-
-                // Metadata
-                title = data.metadata.title,
-                titleUnicode = data.metadata.titleUnicode,
-                artist = data.metadata.artist,
-                artistUnicode = data.metadata.artistUnicode,
-                creator = data.metadata.creator,
-                version = data.metadata.version,
-                tags = data.metadata.tags,
-                source = data.metadata.source,
-                dateImported = lastModified,
-
-                // Difficulty
-                approachRate = data.difficulty.ar,
-                overallDifficulty = data.difficulty.od,
-                circleSize = data.difficulty.cs,
-                hpDrainRate = data.difficulty.hp,
-                droidStarRating = GameHelper.Round(droidAttributes.starRating, 2),
-                standardStarRating = GameHelper.Round(standardAttributes.starRating, 2),
-                bpmMin = bpmMin,
-                bpmMax = bpmMax,
-                length = data.duration.toLong(),
-                previewTime = data.general.previewTime,
-                hitCircleCount = data.hitObjects.circleCount,
-                sliderCount = data.hitObjects.sliderCount,
-                spinnerCount = data.hitObjects.spinnerCount,
-                maxCombo = data.maxCombo
-            )
-        }
+    override fun equals(other: Any?): Boolean {
+        return other is BeatmapInfo && other.path == path
     }
+
 }
 
+fun BeatmapInfo(data: RianBeatmap, parentPath: String, lastModified: Long, path: String): BeatmapInfo {
 
-@Dao
-interface IBeatmapDAO {
+    var bpmMin = Float.MAX_VALUE
+    var bpmMax = 0f
+
+    // Timing points
+    data.controlPoints.timing.getControlPoints().fastForEach {
+
+        val bpm = it.bpm.toFloat()
+
+        bpmMin = if (bpmMin != Float.MAX_VALUE) min(bpmMin, bpm) else bpm
+        bpmMax = if (bpmMax != 0f) max(bpmMax, bpm) else bpm
+    }
+
+    val droidAttributes = BeatmapDifficultyCalculator.calculateDroidDifficulty(data)
+    val standardAttributes = BeatmapDifficultyCalculator.calculateStandardDifficulty(data)
+
+    return BeatmapInfo(
+
+        md5 = data.md5,
+        id = data.metadata.beatmapId.toLong(),
+        path = path,
+        audio = data.folder!! + '/' + data.general.audioFilename,
+        background = data.folder!! + '/' + data.events.backgroundFilename,
+
+        // Online
+        status = null, // TODO: Should we cache ranking status ?
+
+        // Parent set
+        parentPath = parentPath,
+        parentId = data.metadata.beatmapSetId,
+
+        // Metadata
+        title = data.metadata.title,
+        titleUnicode = data.metadata.titleUnicode,
+        artist = data.metadata.artist,
+        artistUnicode = data.metadata.artistUnicode,
+        creator = data.metadata.creator,
+        version = data.metadata.version,
+        tags = data.metadata.tags,
+        source = data.metadata.source,
+        dateImported = lastModified,
+
+        // Difficulty
+        approachRate = data.difficulty.ar,
+        overallDifficulty = data.difficulty.od,
+        circleSize = data.difficulty.cs,
+        hpDrainRate = data.difficulty.hp,
+        droidStarRating = GameHelper.Round(droidAttributes.starRating, 2),
+        standardStarRating = GameHelper.Round(standardAttributes.starRating, 2),
+        bpmMin = bpmMin,
+        bpmMax = bpmMax,
+        length = data.duration.toLong(),
+        previewTime = data.general.previewTime,
+        hitCircleCount = data.hitObjects.circleCount,
+        sliderCount = data.hitObjects.sliderCount,
+        spinnerCount = data.hitObjects.spinnerCount,
+        maxCombo = data.maxCombo
+    )
+}
+
+@Dao interface IBeatmapInfoDAO {
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     fun insert(beatmapInfo: BeatmapInfo): Long
@@ -303,7 +297,6 @@ interface IBeatmapDAO {
     @Query("DELETE FROM BeatmapInfo")
     fun deleteAll()
 }
-
 
 
 /**
@@ -342,9 +335,13 @@ data class BeatmapSetInfo(
     /**
      * Get a beatmap from its index.
      */
-    operator fun get(index: Int) = beatmaps[index]
+    @JvmName("getBeatmap")
+    operator fun get(index: Int): BeatmapInfo {
+        return beatmaps[index]
+    }
 
-
-    override fun equals(other: Any?) = other is BeatmapSetInfo && other.path == path
+    override fun equals(other: Any?): Boolean {
+        return other is BeatmapSetInfo && other.path == path
+    }
 
 }

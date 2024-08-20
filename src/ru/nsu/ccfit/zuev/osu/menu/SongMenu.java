@@ -11,6 +11,7 @@ import com.edlplan.ui.fragment.ScoreMenuFragment;
 import com.reco1l.ibancho.RoomAPI;
 import com.reco1l.osu.data.BeatmapInfo;
 import com.reco1l.osu.data.BeatmapSetInfo;
+import com.reco1l.osu.data.Beatmaps;
 import com.reco1l.osu.data.DatabaseManager;
 import com.reco1l.osu.Execution;
 import com.reco1l.osu.multiplayer.Multiplayer;
@@ -67,6 +68,7 @@ import ru.nsu.ccfit.zuev.osuplus.R;
 import ru.nsu.ccfit.zuev.skins.OsuSkin;
 import ru.nsu.ccfit.zuev.skins.SkinLayout;
 
+import static com.reco1l.osu.data.Beatmaps.BeatmapInfo;
 import static com.rian.osu.utils.ModConverter.convertLegacyMods;
 
 public class SongMenu implements IUpdateHandler, MenuItemListener,
@@ -1129,12 +1131,8 @@ public class SongMenu implements IUpdateHandler, MenuItemListener,
                 }
 
                 // Replace the entry in the database in case of changes.
-                DatabaseManager.getBeatmapTable().insert(BeatmapInfo.from(
-                        beatmap,
-                        beatmapInfo.getParentPath(),
-                        beatmapInfo.getDateImported(),
-                        beatmapInfo.getPath()
-                ));
+                var newBeatmapInfo = BeatmapInfo(beatmap, beatmapInfo.getParentPath(), beatmapInfo.getDateImported(), beatmapInfo.getPath());
+                DatabaseManager.getBeatmapTable().insert(newBeatmapInfo);
                 LibraryManager.loadLibrary();
 
                 selectedBeatmap = LibraryManager.findBeatmapByMD5(beatmap.md5);

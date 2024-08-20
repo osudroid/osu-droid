@@ -92,14 +92,14 @@ public class NotifyPlayer {
                         break;
                     case actionPrev:
                         service.stop();
-                        BeatmapInfo prevBeatmap = LibraryManager.selectPreviousBeatmapSet().get(0);
+                        BeatmapInfo prevBeatmap = LibraryManager.selectPreviousBeatmapSet().getBeatmap(0);
                         service.preLoad(prevBeatmap.getAudio());
                         updateSong(prevBeatmap);
                         service.play();
                         break;
                     case actionNext:
                         service.stop();
-                        BeatmapInfo nextBeatmap = LibraryManager.selectNextBeatmapSet().get(0);
+                        BeatmapInfo nextBeatmap = LibraryManager.selectNextBeatmapSet().getBeatmap(0);
                         service.preLoad(nextBeatmap.getAudio());
                         updateSong(nextBeatmap);
                         service.play();

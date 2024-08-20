@@ -7,15 +7,12 @@ import androidx.room.*
 // Ported from rimu! project
 
 /**
- * The ~~rimu!~~ osu!droid database manager.
- * It joins all entities DAOs in one class.
- *
- * @see IBeatmapDAO
+ * The osu!droid database manager.
  */
 object DatabaseManager {
 
     /**
-     * Get the beatmaps table.
+     * Get the beatmaps table DAO.
      */
     @JvmStatic
     val beatmapTable
@@ -40,9 +37,6 @@ object DatabaseManager {
 
 }
 
-/**
- * The osu!droid database object class, this should be unique per instance.
- */
 @Database(
     version = 2,
     entities = [
@@ -51,6 +45,6 @@ object DatabaseManager {
 )
 abstract class DroidDatabase : RoomDatabase() {
 
-    abstract fun getBeatmapTable(): IBeatmapDAO
+    abstract fun getBeatmapTable(): IBeatmapInfoDAO
 
 }
