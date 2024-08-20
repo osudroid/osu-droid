@@ -15,8 +15,8 @@ object DatabaseManager {
      * Get the beatmaps table DAO.
      */
     @JvmStatic
-    val beatmapTable
-        get() = database.getBeatmapTable()
+    val beatmapInfoTable
+        get() = database.getBeatmapInfoTable()
 
 
     private lateinit var database: DroidDatabase
@@ -45,6 +45,6 @@ object DatabaseManager {
 )
 abstract class DroidDatabase : RoomDatabase() {
 
-    abstract fun getBeatmapTable(): IBeatmapInfoDAO
+    abstract fun getBeatmapInfoTable(): IBeatmapInfoDAO
 
 }

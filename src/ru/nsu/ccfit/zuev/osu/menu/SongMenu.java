@@ -11,7 +11,6 @@ import com.edlplan.ui.fragment.ScoreMenuFragment;
 import com.reco1l.ibancho.RoomAPI;
 import com.reco1l.osu.data.BeatmapInfo;
 import com.reco1l.osu.data.BeatmapSetInfo;
-import com.reco1l.osu.data.Beatmaps;
 import com.reco1l.osu.data.DatabaseManager;
 import com.reco1l.osu.Execution;
 import com.reco1l.osu.multiplayer.Multiplayer;
@@ -1132,7 +1131,7 @@ public class SongMenu implements IUpdateHandler, MenuItemListener,
 
                 // Replace the entry in the database in case of changes.
                 var newBeatmapInfo = BeatmapInfo(beatmap, beatmapInfo.getParentPath(), beatmapInfo.getDateImported(), beatmapInfo.getPath());
-                DatabaseManager.getBeatmapTable().insert(newBeatmapInfo);
+                DatabaseManager.getBeatmapInfoTable().insert(newBeatmapInfo);
                 LibraryManager.loadLibrary();
 
                 selectedBeatmap = LibraryManager.findBeatmapByMD5(beatmap.md5);

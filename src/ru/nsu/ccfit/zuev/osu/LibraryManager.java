@@ -69,7 +69,7 @@ public class LibraryManager {
         }
 
         currentIndex = 0;
-        library = DatabaseManager.getBeatmapTable().getBeatmapSetList();
+        library = DatabaseManager.getBeatmapInfoTable().getBeatmapSetList();
     }
 
     /**
@@ -105,14 +105,14 @@ public class LibraryManager {
 
 
     public static void clearDatabase() {
-        DatabaseManager.getBeatmapTable().deleteAll();
+        DatabaseManager.getBeatmapInfoTable().deleteAll();
         loadLibrary();
         currentIndex = 0;
     }
 
     public static void deleteBeatmapSet(BeatmapSetInfo beatmapSet) {
         FilesKt.deleteRecursively(new File(beatmapSet.getPath()));
-        DatabaseManager.getBeatmapTable().deleteBeatmapSet(beatmapSet.getPath());
+        DatabaseManager.getBeatmapInfoTable().deleteBeatmapSet(beatmapSet.getPath());
         loadLibrary();
     }
 
@@ -158,7 +158,7 @@ public class LibraryManager {
                 try {
                     // Conflict strategy is set to replace when the primary key is already in the
                     // database. But that should never happen because the path is the primary key.
-                    DatabaseManager.getBeatmapTable().insert(beatmapInfo);
+                    DatabaseManager.getBeatmapInfoTable().insert(beatmapInfo);
                 } catch (Exception e) {
                     Log.e("LibraryManager", "Failed to insert beatmap into database", e);
                 }
@@ -271,7 +271,7 @@ public class LibraryManager {
             this.fileCount = fileCount;
             this.files = files;
             this.executors = Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors());
-            this.savedPaths = DatabaseManager.getBeatmapTable().getBeatmapSetPaths();
+            this.savedPaths = DatabaseManager.getBeatmapInfoTable().getBeatmapSetPaths();
         }
 
 
@@ -318,7 +318,7 @@ public class LibraryManager {
                 }
 
                 if (!found) {
-                    DatabaseManager.getBeatmapTable().deleteBeatmapSet(path);
+                    DatabaseManager.getBeatmapInfoTable().deleteBeatmapSet(path);
                 }
             }
         }
