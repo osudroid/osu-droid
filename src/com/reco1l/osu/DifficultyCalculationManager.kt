@@ -38,7 +38,7 @@ object DifficultyCalculationManager {
                 return@launch
             }
 
-            ToastLogger.showText("Running background difficulty calculation. song select menu's sort order may not be accurate during this process.", true)
+            ToastLogger.showText("Running background difficulty calculation. Song select menu's sort order may not be accurate during this process.", true)
 
             beatmapSets.fastForEach { beatmapSetInfo ->
 
