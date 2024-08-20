@@ -9,7 +9,7 @@ import ru.nsu.ccfit.zuev.osu.RGBColor
  */
 object BeatmapColorParser : BeatmapKeyValueSectionParser() {
     override fun parse(beatmap: Beatmap, line: String) = splitProperty(line).let { p ->
-        val s = p[1].split(",".toRegex()).dropLastWhile { it.isEmpty() }.toTypedArray()
+        val s = p[1].split(COMMA_PROPERTY_REGEX).dropLastWhile { it.isEmpty() }.toTypedArray()
 
         if (s.size != 3 && s.size != 4) {
             throw UnsupportedOperationException("Color specified in incorrect format (should be R,G,B or R,G,B,A)")
