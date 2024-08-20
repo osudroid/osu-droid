@@ -9,7 +9,7 @@ import ru.nsu.ccfit.zuev.osu.RGBColor
  */
 object BeatmapColorParser : BeatmapKeyValueSectionParser() {
     override fun parse(beatmap: Beatmap, line: String) = splitProperty(line).let { p ->
-        val s = p[1].split(COMMA_PROPERTY_REGEX).dropLastWhile { it.isEmpty() }.toTypedArray()
+        val s = p.second.split(COMMA_PROPERTY_REGEX).dropLastWhile { it.isEmpty() }.toTypedArray()
 
         if (s.size != 3 && s.size != 4) {
             throw UnsupportedOperationException("Color specified in incorrect format (should be R,G,B or R,G,B,A)")
@@ -21,8 +21,8 @@ object BeatmapColorParser : BeatmapKeyValueSectionParser() {
             parseInt(s[2]).toFloat()
         )
 
-        if (p[0].startsWith("Combo")) {
-            val index = p[0].substring(5).toIntOrNull() ?: (beatmap.colors.comboColors.size + 1)
+        if (p.first.startsWith("Combo")) {
+            val index = p.first.substring(5).toIntOrNull() ?: (beatmap.colors.comboColors.size + 1)
 
             beatmap.colors.comboColors.apply {
                 add(ComboColor(index, color))
@@ -31,7 +31,7 @@ object BeatmapColorParser : BeatmapKeyValueSectionParser() {
             }
         }
 
-        if (p[0].startsWith("SliderBorder")) {
+        if (p.first.startsWith("SliderBorder")) {
             beatmap.colors.sliderBorderColor = color
         }
     }

@@ -12,16 +12,14 @@ abstract class BeatmapKeyValueSectionParser : BeatmapSectionParser() {
      *
      * For example, `ApproachRate:9` will be split into `["ApproachRate", "9"]`.
      *
-     * Will return `null` for invalid lines.
-     *
      * @param line The line.
      */
-    protected fun splitProperty(line: String): Array<String> =
+    protected fun splitProperty(line: String): Pair<String, String> =
          line.split(COLON_PROPERTY_REGEX)
              .dropLastWhile { it.isEmpty() }
              .toTypedArray()
              .let { s ->
-                 arrayOf(
+                 Pair(
                      s[0].trim { it <= ' ' },
                      if (s.size > 1)
                          TextUtils.join(":", Arrays.copyOfRange(s, 1, s.size)).trim { it <= ' ' }

@@ -7,17 +7,17 @@ import com.rian.osu.beatmap.Beatmap
  */
 object BeatmapMetadataParser : BeatmapKeyValueSectionParser() {
     override fun parse(beatmap: Beatmap, line: String) = splitProperty(line).let {
-        when (it[0]) {
-            "Title" -> beatmap.metadata.title = it[1]
-            "TitleUnicode" -> beatmap.metadata.titleUnicode = it[1]
-            "Artist" -> beatmap.metadata.artist = it[1]
-            "ArtistUnicode" -> beatmap.metadata.artistUnicode = it[1]
-            "Creator" -> beatmap.metadata.creator = it[1]
-            "Version" -> beatmap.metadata.version = it[1]
-            "Source" -> beatmap.metadata.source = it[1]
-            "Tags" -> beatmap.metadata.tags = it[1]
-            "BeatmapID" -> beatmap.metadata.beatmapId = parseInt(it[1])
-            "BeatmapSetID" -> beatmap.metadata.beatmapSetId = parseInt(it[1])
+        when (it.first) {
+            "Title" -> beatmap.metadata.title = it.second
+            "TitleUnicode" -> beatmap.metadata.titleUnicode = it.second
+            "Artist" -> beatmap.metadata.artist = it.second
+            "ArtistUnicode" -> beatmap.metadata.artistUnicode = it.second
+            "Creator" -> beatmap.metadata.creator = it.second
+            "Version" -> beatmap.metadata.version = it.second
+            "Source" -> beatmap.metadata.source = it.second
+            "Tags" -> beatmap.metadata.tags = it.second
+            "BeatmapID" -> beatmap.metadata.beatmapId = parseInt(it.second)
+            "BeatmapSetID" -> beatmap.metadata.beatmapSetId = parseInt(it.second)
         }
     }
 }
