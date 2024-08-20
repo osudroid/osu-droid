@@ -286,11 +286,9 @@ fun BeatmapInfo(data: RianBeatmap, parentPath: String, lastModified: Long, path:
     @Query("DELETE FROM BeatmapInfo WHERE parentPath = :beatmapSetKey")
     fun deleteBeatmapSet(beatmapSetKey: String)
 
-    @Transaction
     @Query("SELECT DISTINCT parentPath, parentId FROM BeatmapInfo")
     fun getBeatmapSetList() : List<BeatmapSetInfo>
 
-    @Transaction
     @Query("SELECT DISTINCT parentPath FROM BeatmapInfo")
     fun getBeatmapSetPaths() : List<String>
 
