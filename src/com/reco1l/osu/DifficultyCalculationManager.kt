@@ -38,7 +38,7 @@ object DifficultyCalculationManager {
                 return@launch
             }
 
-            ToastLogger.showText("Caching beatmaps difficulty, song select menu's sort order may not be accurate during this process.", true)
+            ToastLogger.showText("Running background difficulty calculation. song select menu's sort order may not be accurate during this process.", true)
 
             beatmapSets.fastForEach { beatmapSetInfo ->
 
@@ -84,7 +84,7 @@ object DifficultyCalculationManager {
 
         }.invokeOnCompletion {
             LibraryManager.loadLibrary()
-            ToastLogger.showText("The beatmaps difficulty cache has finished.", true)
+            ToastLogger.showText("Background difficulty calculation has finished.", true)
 
             GlobalManager.getInstance().songMenu?.also {
 
