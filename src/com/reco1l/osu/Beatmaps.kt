@@ -214,7 +214,10 @@ data class BeatmapInfo(
 
     /**
      * Returns the star rating based on the current algorithm configuration, whether droid or standard.
-     * Additionally you can pass a custom algorithm to get the star rating.
+     *
+     * Optionally, you can pass a custom algorithm to get the star rating.
+     *
+     * Returns 0 if the star rating has not been calculated.
      */
     @JvmOverloads
     fun getStarRating(algorithm: DifficultyAlgorithm = Config.getDifficultyAlgorithm()) = when (algorithm) {
