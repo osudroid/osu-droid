@@ -8,7 +8,7 @@ import ru.nsu.ccfit.zuev.osu.RGBColor
  * A parser for parsing a beatmap's colors section.
  */
 object BeatmapColorParser : BeatmapKeyValueSectionParser() {
-    override fun parse(beatmap: Beatmap, line: String) = splitProperty(line).let { p ->
+    override fun parse(beatmap: Beatmap, line: String) = splitProperty(line)?.let { p ->
         val s = p.second.split(COMMA_PROPERTY_REGEX).dropLastWhile { it.isEmpty() }.toTypedArray()
 
         if (s.size != 3 && s.size != 4) {
@@ -34,5 +34,5 @@ object BeatmapColorParser : BeatmapKeyValueSectionParser() {
         if (p.first.startsWith("SliderBorder")) {
             beatmap.colors.sliderBorderColor = color
         }
-    }
+    } ?: throw UnsupportedOperationException("Malformed color property: $line")
 }

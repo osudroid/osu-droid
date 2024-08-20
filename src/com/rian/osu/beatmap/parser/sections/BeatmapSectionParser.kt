@@ -11,7 +11,9 @@ abstract class BeatmapSectionParser {
      *
      * @param beatmap The beatmap to fill.
      * @param line The line to parse.
+     * @throws UnsupportedOperationException When the performed operation for the line is not supported.
      */
+    @Throws(UnsupportedOperationException::class)
     abstract fun parse(beatmap: Beatmap, line: String)
 
     /**

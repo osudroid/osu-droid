@@ -175,7 +175,7 @@ class BeatmapParser : Closeable {
                         else -> continue
                     }
                 } catch (e: Exception) {
-                    Log.e("BeatmapParser.parse", "Unable to parse line $line", e)
+                    Log.e("BeatmapParser.parse", "Unable to parse line", e)
                 }
             }
         } catch (e: IOException) {

@@ -6,7 +6,7 @@ import com.rian.osu.beatmap.Beatmap
  * A parser for parsing a beatmap's metadata section.
  */
 object BeatmapMetadataParser : BeatmapKeyValueSectionParser() {
-    override fun parse(beatmap: Beatmap, line: String) = splitProperty(line).let {
+    override fun parse(beatmap: Beatmap, line: String) = splitProperty(line)?.let {
         when (it.first) {
             "Title" -> beatmap.metadata.title = it.second
             "TitleUnicode" -> beatmap.metadata.titleUnicode = it.second
@@ -19,5 +19,5 @@ object BeatmapMetadataParser : BeatmapKeyValueSectionParser() {
             "BeatmapID" -> beatmap.metadata.beatmapId = parseInt(it.second)
             "BeatmapSetID" -> beatmap.metadata.beatmapSetId = parseInt(it.second)
         }
-    }
+    } ?: throw UnsupportedOperationException("Malformed metadata property: $line")
 }

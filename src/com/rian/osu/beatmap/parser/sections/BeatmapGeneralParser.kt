@@ -8,7 +8,7 @@ import com.rian.osu.beatmap.constants.SampleBank
  * A parser for parsing a beatmap's general section.
  */
 object BeatmapGeneralParser : BeatmapKeyValueSectionParser() {
-    override fun parse(beatmap: Beatmap, line: String) = splitProperty(line).let {
+    override fun parse(beatmap: Beatmap, line: String) = splitProperty(line)?.let {
         when (it.first) {
             "AudioFilename" -> beatmap.general.audioFilename = it.second
             "AudioLeadIn" -> beatmap.general.audioLeadIn = parseInt(it.second)
@@ -20,5 +20,5 @@ object BeatmapGeneralParser : BeatmapKeyValueSectionParser() {
             "LetterboxInBreaks" -> beatmap.general.letterboxInBreaks = it.second == "1"
             "Mode" -> beatmap.general.mode = parseInt(it.second)
         }
-    }
+    } ?: throw UnsupportedOperationException("Malformed general property: $line")
 }
