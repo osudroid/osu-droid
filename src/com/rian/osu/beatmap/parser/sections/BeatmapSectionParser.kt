@@ -6,21 +6,15 @@ import com.rian.osu.beatmap.Beatmap
  * A parser for parsing a specific beatmap section.
  */
 abstract class BeatmapSectionParser {
-    protected val maxCoordinateValue = 131072
-    private val maxParseLimit = Int.MAX_VALUE
-
     /**
      * Parses a line.
      *
      * @param beatmap The beatmap to fill.
      * @param line The line to parse.
+     * @throws UnsupportedOperationException When the performed operation for the line is not supported.
      */
+    @Throws(UnsupportedOperationException::class)
     abstract fun parse(beatmap: Beatmap, line: String)
-
-    /**
-     * Resets this parser into its original state.
-     */
-    open fun reset() {}
 
     /**
      * Attempts to parse a string into an integer.
@@ -31,7 +25,7 @@ abstract class BeatmapSectionParser {
      * @throws NumberFormatException When the resulting value is invalid, or it is out of the parse limit bound.
      */
     @Throws(NumberFormatException::class)
-    protected fun parseInt(str: String, parseLimit: Int = maxParseLimit) = str.toInt().also {
+    protected fun parseInt(str: String, parseLimit: Int = MAX_PARSE_LIMIT) = str.toInt().also {
         if (it < -parseLimit) {
             throw NumberFormatException("Value is too low")
         }
@@ -54,7 +48,7 @@ abstract class BeatmapSectionParser {
     @Throws(NumberFormatException::class)
     protected fun parseFloat(
         str: String,
-        parseLimit: Float = maxParseLimit.toFloat(),
+        parseLimit: Float = MAX_PARSE_LIMIT.toFloat(),
         allowNaN: Boolean = false
     ) = str.toFloat().also {
         if (it < -parseLimit) {
@@ -83,7 +77,7 @@ abstract class BeatmapSectionParser {
     @Throws(NumberFormatException::class)
     protected fun parseDouble(
         str: String,
-        parseLimit: Double = maxParseLimit.toDouble(),
+        parseLimit: Double = MAX_PARSE_LIMIT.toDouble(),
         allowNaN: Boolean = false
     ) = str.toDouble().also {
         if (it < -parseLimit) {
@@ -97,5 +91,15 @@ abstract class BeatmapSectionParser {
         if (!allowNaN && it.isNaN()) {
             throw NumberFormatException("Not a number")
         }
+    }
+
+    companion object {
+        @JvmStatic
+        protected val COMMA_PROPERTY_REGEX = ",".toRegex()
+
+        @JvmStatic
+        protected val COLON_PROPERTY_REGEX = ":".toRegex()
+
+        private const val MAX_PARSE_LIMIT = Int.MAX_VALUE
     }
 }

@@ -64,12 +64,6 @@ class Beatmap : Cloneable {
     var hitObjects = BeatmapHitObjects()
 
     /**
-     * Raw timing points data.
-     */
-    @JvmField
-    var rawTimingPoints = mutableListOf<String>()
-
-    /**
      * Raw hit objects data.
      */
     @JvmField

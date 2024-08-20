@@ -17,8 +17,14 @@
             android:summary="@string/opt_cursor_size_summary"
             android:title="@string/opt_cursor_size"
             app:min="25"
-            app:showSeekBarValue="true"
-            app:layout="@layout/settings_preference_seekbar_bottom"/>
+            app:showSeekBarValue="true" />
+
+        <CheckBoxPreference
+            android:defaultValue="false"
+            android:key="particles"
+            android:summary="@string/opt_particles_summary"
+            android:title="@string/opt_particles_title"
+            app:layout="@layout/settings_preference_checkbox_bottom" />
 
     </PreferenceCategory>
 
@@ -70,13 +76,7 @@
             android:defaultValue="false"
             android:key="hitlighting"
             android:summary="@string/opt_hitlighting_summary"
-            android:title="@string/opt_hitlighting_title" />
-
-        <CheckBoxPreference
-            android:defaultValue="false"
-            android:key="particles"
-            android:summary="@string/opt_particles_summary"
-            android:title="@string/opt_particles_title"
+            android:title="@string/opt_hitlighting_title"
             app:layout="@layout/settings_preference_checkbox_bottom" />
 
     </PreferenceCategory>

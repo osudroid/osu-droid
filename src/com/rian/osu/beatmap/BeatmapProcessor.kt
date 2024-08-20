@@ -24,7 +24,14 @@ class BeatmapProcessor(
      *
      * This can only be used to add alterations to [HitObject]s generated directly through the conversion process.
      */
-    fun preProcess() = Unit
+    fun preProcess() {
+        var lastObj: HitObject? = null
+
+        beatmap.hitObjects.objects.forEach {
+            it.updateComboInformation(lastObj)
+            lastObj = it
+        }
+    }
 
     /**
      * Processes the converted [Beatmap] after [HitObject.applyDefaults] has been invoked.

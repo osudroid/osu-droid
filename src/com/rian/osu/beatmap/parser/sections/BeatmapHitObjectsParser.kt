@@ -12,12 +12,11 @@ import kotlin.math.min
 /**
  * A parser for parsing a beatmap's hit objects section.
  */
-class BeatmapHitObjectsParser : BeatmapSectionParser() {
-    private var extraComboColorOffset = 0
-    private var forceNewCombo = false
+object BeatmapHitObjectsParser : BeatmapSectionParser() {
+    private val pipePropertyRegex = "[|]".toRegex()
 
     override fun parse(beatmap: Beatmap, line: String) = line
-        .split(",".toRegex())
+        .split(COMMA_PROPERTY_REGEX)
         .dropLastWhile { it.isEmpty() }
         .let {
             if (it.size < 4) {
@@ -29,7 +28,7 @@ class BeatmapHitObjectsParser : BeatmapSectionParser() {
 
             var tempType = type
 
-            val comboColorOffset = tempType and HitObjectType.ComboColorOffset.value shr 4
+            val comboOffset = tempType and HitObjectType.ComboColorOffset.value shr 4
             tempType = tempType and HitObjectType.ComboColorOffset.value.inv()
 
             val isNewCombo = tempType and HitObjectType.NewCombo.value != 0
@@ -44,40 +43,34 @@ class BeatmapHitObjectsParser : BeatmapSectionParser() {
 
             val obj = when (HitObjectType.valueOf(type % 16)) {
                 HitObjectType.Normal, HitObjectType.NormalNewCombo ->
-                    createCircle(it, time, position, beatmap.hitObjects.objects.isEmpty() || isNewCombo, comboColorOffset, bankInfo)
+                    createCircle(it, beatmap, time, position, beatmap.hitObjects.objects.isEmpty() || isNewCombo, comboOffset, bankInfo)
 
                 HitObjectType.Slider, HitObjectType.SliderNewCombo ->
-                    createSlider(it, beatmap, time, position, beatmap.hitObjects.objects.isEmpty() || isNewCombo, comboColorOffset, soundType, bankInfo)
+                    createSlider(it, beatmap, time, position, beatmap.hitObjects.objects.isEmpty() || isNewCombo, comboOffset, soundType, bankInfo)
 
                 HitObjectType.Spinner ->
-                    createSpinner(it, beatmap, time, isNewCombo, comboColorOffset, bankInfo)
+                    createSpinner(it, beatmap, time, isNewCombo, bankInfo)
 
                 else -> throw UnsupportedOperationException("Malformed hit object")
-            }.apply {
-                samples.addAll(convertSoundType(soundType, bankInfo))
-            }
+            }.also { h -> h.samples.addAll(convertSoundType(soundType, bankInfo)) }
 
             beatmap.rawHitObjects.add(line)
             beatmap.hitObjects.add(obj)
         }
 
-    override fun reset() {
-        super.reset()
-
-        forceNewCombo = false
-        extraComboColorOffset = 0
-    }
-
-    private fun createCircle(pars: List<String>, time: Double, position: Vector2, isNewCombo: Boolean, comboColorOffset: Int, bankInfo: SampleBankInfo) =
-        HitCircle(time, position, isNewCombo || forceNewCombo, comboColorOffset + extraComboColorOffset).also {
-            readCustomSampleBanks(bankInfo, pars.getOrNull(5))
-
-            forceNewCombo = false
-            extraComboColorOffset = 0
-        }
+    private fun createCircle(pars: List<String>, beatmap: Beatmap, time: Double, position: Vector2, isNewCombo: Boolean, comboOffset: Int, bankInfo: SampleBankInfo) =
+        HitCircle(
+            time,
+            position,
+            // First object
+            beatmap.hitObjects.objects.isEmpty() ||
+                // The last object was a spinner
+                beatmap.hitObjects.objects.lastOrNull() is Spinner || isNewCombo,
+            comboOffset
+        ).also { readCustomSampleBanks(bankInfo, pars.getOrNull(5)) }
 
     @Throws(UnsupportedOperationException::class)
-    private fun createSlider(pars: List<String>, beatmap: Beatmap, time: Double, startPosition: Vector2, isNewCombo: Boolean, comboColorOffset: Int, soundType: HitSoundType, bankInfo: SampleBankInfo): Slider {
+    private fun createSlider(pars: List<String>, beatmap: Beatmap, time: Double, startPosition: Vector2, isNewCombo: Boolean, comboOffset: Int, soundType: HitSoundType, bankInfo: SampleBankInfo): Slider {
         if (pars.size < 8) {
             throw UnsupportedOperationException("Malformed slider")
         }
@@ -92,14 +85,14 @@ class BeatmapHitObjectsParser : BeatmapSectionParser() {
         // osu!stable treated the first span of the slider as a repeat, but no repeats are happening
         repeatCount = max(0, repeatCount - 1)
 
-        val curvePointsData = pars[5].split("[|]".toRegex()).dropLastWhile { it.isEmpty() }
+        val curvePointsData = pars[5].split(pipePropertyRegex).dropLastWhile { it.isEmpty() }
         var sliderType = SliderPathType.parse(curvePointsData[0][0])
 
         val curvePoints = mutableListOf<Vector2>().apply { add(Vector2(0f)) }
 
         curvePointsData.run {
             for (i in 1 until size) {
-                this[i].split(":".toRegex()).dropLastWhile { it.isEmpty() }.let {
+                this[i].split(COLON_PROPERTY_REGEX).dropLastWhile { it.isEmpty() }.let {
                     val curvePointPosition = Vector2(
                         parseInt(it[0]).toFloat(),
                         parseInt(it[1]).toFloat()
@@ -147,7 +140,7 @@ class BeatmapHitObjectsParser : BeatmapSectionParser() {
             }
 
             // Read any per-node sample banks
-            val sets = pars.getOrNull(9)?.split("\\|".toRegex())
+            val sets = pars.getOrNull(9)?.split(pipePropertyRegex)
             if (sets != null) {
                 for (i in 0 until min(sets.size, nodes)) {
                     readCustomSampleBanks(this[i], sets[i])
@@ -162,7 +155,7 @@ class BeatmapHitObjectsParser : BeatmapSectionParser() {
             }
 
             // Read any per-node sound types
-            val adds = pars.getOrNull(8)?.split("\\|".toRegex())
+            val adds = pars.getOrNull(8)?.split(pipePropertyRegex)
             if (adds != null) {
                 for (i in 0 until min(adds.size, nodes)) {
                     set(i, HitSoundType.parse(parseInt(adds[i])))
@@ -177,9 +170,6 @@ class BeatmapHitObjectsParser : BeatmapSectionParser() {
             }
         }
 
-        forceNewCombo = false
-        extraComboColorOffset = 0
-
         val difficultyControlPoint = beatmap.controlPoints.difficulty.controlPointAt(time)
 
         return Slider(
@@ -187,8 +177,11 @@ class BeatmapHitObjectsParser : BeatmapSectionParser() {
             startPosition,
             repeatCount,
             path,
-            isNewCombo || forceNewCombo,
-            comboColorOffset + extraComboColorOffset,
+            // First object
+            beatmap.hitObjects.objects.isEmpty() ||
+                // The last object was a spinner
+                beatmap.hitObjects.objects.lastOrNull() is Spinner || isNewCombo,
+            comboOffset,
             nodeSamples
         ).also {
             it.tickDistanceMultiplier = when {
@@ -203,14 +196,9 @@ class BeatmapHitObjectsParser : BeatmapSectionParser() {
         }
     }
 
-    private fun createSpinner(pars: List<String>, beatmap: Beatmap, time: Double, isNewCombo: Boolean, comboColorOffset: Int, bankInfo: SampleBankInfo) =
-        Spinner(time, beatmap.getOffsetTime(parseInt(pars[5])).toDouble()).also {
+    private fun createSpinner(pars: List<String>, beatmap: Beatmap, time: Double, isNewCombo: Boolean, bankInfo: SampleBankInfo) =
+        Spinner(time, beatmap.getOffsetTime(parseInt(pars[5])).toDouble(), isNewCombo).also {
             readCustomSampleBanks(bankInfo, pars.getOrNull(6))
-
-            // Spinners don't create the new combo themselves, but force the next non-spinner hit object to create a new combo.
-            // Their combo offset is still added to that next hit object's combo index.
-            forceNewCombo = forceNewCombo || beatmap.formatVersion <= 8 || isNewCombo
-            extraComboColorOffset += comboColorOffset
         }
 
     /**
@@ -260,7 +248,7 @@ class BeatmapHitObjectsParser : BeatmapSectionParser() {
             return
         }
 
-        val s = str.split(":".toRegex())
+        val s = str.split(COLON_PROPERTY_REGEX)
 
         bankInfo.normal = SampleBank.parse(parseInt(s[0]))
         bankInfo.add = SampleBank.parse(parseInt(s[1])).takeIf { it != SampleBank.Normal } ?: bankInfo.normal

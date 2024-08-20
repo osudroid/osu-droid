@@ -41,7 +41,7 @@ class BeatmapConverter(
                 hitObject.startTime,
                 hitObject.position,
                 hitObject.isNewCombo,
-                hitObject.comboColorOffset
+                hitObject.comboOffset
             )
 
             is Slider -> Slider(
@@ -50,7 +50,7 @@ class BeatmapConverter(
                 hitObject.repeatCount,
                 hitObject.path,
                 hitObject.isNewCombo,
-                hitObject.comboColorOffset,
+                hitObject.comboOffset,
                 hitObject.nodeSamples
             ).also {
                 // Prior to v8, speed multipliers don't adjust for how many ticks are generated over the same distance.
@@ -61,7 +61,7 @@ class BeatmapConverter(
                 it.generateTicks = hitObject.generateTicks
             }
 
-            is Spinner -> Spinner(hitObject.startTime, hitObject.endTime)
+            is Spinner -> Spinner(hitObject.startTime, hitObject.endTime, hitObject.isNewCombo)
 
             else -> throw IllegalArgumentException("Invalid type of hit object")
         }.also { it.samples = hitObject.samples }

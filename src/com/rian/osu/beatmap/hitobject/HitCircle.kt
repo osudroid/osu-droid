@@ -19,10 +19,15 @@ class HitCircle(
     /**
      * Whether this [HitCircle] starts a new combo.
      */
-    isNewCombo: Boolean = false,
+    isNewCombo: Boolean,
 
     /**
-     * How many combo colors to skip, if this [HitCircle] starts a new combo.
+     * When starting a new combo, the offset of the new combo relative to the current one.
+     *
+     * This is generally a setting provided by a beatmap creator to choreograph interesting color patterns
+     * which can only be achieved by skipping combo colors with per-[HitObject] level.
+     *
+     * It is exposed via [HitObject.comboIndexWithOffsets].
      */
-    comboColorOffset: Int = 0
-) : HitObject(startTime, position, isNewCombo, comboColorOffset)
+    comboOffset: Int
+) : HitObject(startTime, position, isNewCombo, comboOffset)

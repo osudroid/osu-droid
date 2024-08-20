@@ -9,8 +9,10 @@ import kotlin.math.max
  * A parser for parsing a beatmap's events section.
  */
 object BeatmapEventsParser : BeatmapSectionParser() {
+    private val splitRegex = "\\s*,\\s*".toRegex()
+
     override fun parse(beatmap: Beatmap, line: String) = line
-        .split("\\s*,\\s*".toRegex())
+        .split(splitRegex)
         .dropLastWhile { it.isEmpty() }
         .let {
             if (it.size >= 3) {

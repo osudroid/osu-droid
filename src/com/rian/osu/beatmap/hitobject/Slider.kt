@@ -36,12 +36,17 @@ class Slider(
     /**
      * Whether this [Slider] starts a new combo.
      */
-    isNewCombo: Boolean = false,
+    isNewCombo: Boolean,
 
     /**
-     * How many combo colors to skip, if this [Slider] starts a new combo.
+     * When starting a new combo, the offset of the new combo relative to the current one.
+     *
+     * This is generally a setting provided by a beatmap creator to choreograph interesting color patterns
+     * which can only be achieved by skipping combo colors with per-[HitObject] level.
+     *
+     * It is exposed via [HitObject.comboIndexWithOffsets].
      */
-    comboColorOffset: Int = 0,
+    comboOffset: Int,
 
     /**
      * The samples to be played when each node of this [Slider] is hit.
@@ -55,7 +60,8 @@ class Slider(
      */
     @JvmField
     var nodeSamples: MutableList<MutableList<HitSampleInfo>>
-) : HitObject(startTime, position, isNewCombo, comboColorOffset), IHasDuration {
+) : HitObject(startTime, position, isNewCombo, comboOffset),
+    IHasDuration {
     override val endTime: Double
         get() = startTime + spanCount * path.expectedDistance / velocity
 

@@ -28,14 +28,45 @@ abstract class HitObject(
      * Whether this [HitObject] starts a new combo.
      */
     @JvmField
-    val isNewCombo: Boolean = false,
+    val isNewCombo: Boolean,
 
     /**
-     * How many combo colors to skip, if this [HitObject] starts a new combo.
+     * When starting a new combo, the offset of the new combo relative to the current one.
+     *
+     * This is generally a setting provided by a beatmap creator to choreograph interesting color patterns
+     * which can only be achieved by skipping combo colors with per-[HitObject] level.
+     *
+     * It is exposed via [comboIndexWithOffsets].
      */
     @JvmField
-    val comboColorOffset: Int = 0
+    val comboOffset: Int
 ) {
+    /**
+     * The index of this [HitObject] in the current combo.
+     */
+    var indexInCurrentCombo = 0
+        private set
+
+    /**
+     * The index of this [HitObject]'s combo in relation to the beatmap.
+     *
+     * In other words, this is incremented by 1 each time an [isNewCombo] is reached.
+     */
+    var comboIndex = 0
+        private set
+
+    /**
+     * The index of this [HitObject]'s combo in relation to the beatmap, with all aggregate s applied.
+     */
+    var comboIndexWithOffsets = 0
+        private set
+
+    /**
+     * Whether this is the last [HitObject] in the current combo.
+     */
+    var lastInCombo = false
+        private set
+
     /**
      * The stack height of this [HitObject].
      */
@@ -140,6 +171,25 @@ abstract class HitObject(
         val sampleControlPoint = controlPoints.sample.controlPointAt(getEndTime() + CONTROL_POINT_LENIENCY)
 
         samples = samples.map { sampleControlPoint.applyTo(it) }.toMutableList()
+    }
+
+    /**
+     * Given the previous [HitObject] in the beatmap, update relevant combo information.
+     */
+    fun updateComboInformation(lastObj: HitObject?) {
+        comboIndex = lastObj?.comboIndex ?: 0
+        comboIndexWithOffsets = lastObj?.comboIndexWithOffsets ?: 0
+        indexInCurrentCombo = if (lastObj != null) lastObj.indexInCurrentCombo + 1 else 0
+
+        if (isNewCombo || lastObj == null) {
+            indexInCurrentCombo = 0
+            ++comboIndex
+            comboIndexWithOffsets += comboOffset + 1
+
+            if (lastObj != null) {
+                lastObj.lastInCombo = true
+            }
+        }
     }
 
     /**
