@@ -5,9 +5,9 @@ import com.reco1l.osu.data.DatabaseManager
 import com.reco1l.toolkt.kotlin.fastForEach
 import com.rian.osu.beatmap.parser.BeatmapParser
 import com.rian.osu.difficulty.BeatmapDifficultyCalculator
+import kotlinx.coroutines.CoroutineExceptionHandler
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.async
 import kotlinx.coroutines.launch
 import ru.nsu.ccfit.zuev.osu.GlobalManager
 import ru.nsu.ccfit.zuev.osu.LibraryManager
@@ -29,23 +29,26 @@ object DifficultyCalculationManager {
         }
         isRunning = true
 
+        var shouldNotify = false
+
         CoroutineScope(Dispatchers.Default).launch {
 
             val beatmaps = LibraryManager.getLibrary().flatMap { set -> set.beatmaps.filter { it.needsDifficultyCalculation } }
 
-            // No beatmaps difficulties pending to calculate.
             if (beatmaps.isEmpty()) {
-                isRunning = false
                 return@launch
             }
+            shouldNotify = true
 
             ToastLogger.showText("Running background difficulty calculation. Song select menu's sort order may not be accurate during this process.", true)
 
-            var processedBeatmaps = 0
+            val exceptionHandler = CoroutineExceptionHandler { _, e ->
+                Log.e("DifficultyCalculation", "Error while calculating difficulty.", e)
+            }
 
             beatmaps.fastForEach { beatmapInfo ->
 
-                launch {
+                launch(exceptionHandler) {
 
                     val msStartTime = System.currentTimeMillis()
 
@@ -70,21 +73,18 @@ object DifficultyCalculationManager {
                         Log.i("DifficultyCalculation", "Calculated difficulty for ${beatmapInfo.path}, took ${System.currentTimeMillis() - msStartTime}ms.")
                     }
 
-                    processedBeatmaps++
-
-                    // When it's the last one, reload the library and notify the song menu.
-                    if (processedBeatmaps >= beatmaps.size) {
-
-                        LibraryManager.loadLibrary()
-                        GlobalManager.getInstance().songMenu?.onDifficultyCalculationEnd()
-                        isRunning = false
-
-                        ToastLogger.showText("Background difficulty calculation has finished.", true)
-                    }
                 }
 
             }
 
+        }.invokeOnCompletion {
+
+            if (shouldNotify) {
+                ToastLogger.showText("Background difficulty calculation has finished.", true)
+                GlobalManager.getInstance().songMenu?.onDifficultyCalculationEnd()
+            }
+
+            isRunning = false
         }
 
     }
