@@ -283,14 +283,24 @@ fun BeatmapInfo(data: RianBeatmap, parentPath: String, lastModified: Long, path:
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     fun insert(beatmapInfo: BeatmapInfo): Long
 
-    @Query("DELETE FROM BeatmapInfo WHERE parentPath = :beatmapSetKey")
-    fun deleteBeatmapSet(beatmapSetKey: String)
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    fun insertAll(beatmapInfo: List<BeatmapInfo>)
 
+    @Query("DELETE FROM BeatmapInfo WHERE parentPath = :path")
+    fun deleteBeatmapSet(path: String)
+
+    @Query("DELETE FROM BeatmapInfo WHERE parentPath IN (:paths)")
+    fun deleteAllBeatmapSets(paths: List<String>)
+
+    @Transaction
     @Query("SELECT DISTINCT parentPath, parentId FROM BeatmapInfo")
     fun getBeatmapSetList() : List<BeatmapSetInfo>
 
     @Query("SELECT DISTINCT parentPath FROM BeatmapInfo")
     fun getBeatmapSetPaths() : List<String>
+
+    @Query("SELECT EXISTS(SELECT parentPath FROM BeatmapInfo WHERE parentPath = :path LIMIT 1)")
+    fun isBeatmapSetImported(path: String): Boolean
 
     @Query("DELETE FROM BeatmapInfo")
     fun deleteAll()
