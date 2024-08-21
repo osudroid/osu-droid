@@ -44,6 +44,7 @@ import org.jetbrains.annotations.Nullable;
 import ru.nsu.ccfit.zuev.audio.BassSoundProvider;
 import ru.nsu.ccfit.zuev.audio.Status;
 import ru.nsu.ccfit.zuev.osu.Config;
+import ru.nsu.ccfit.zuev.osu.DifficultyAlgorithm;
 import ru.nsu.ccfit.zuev.osu.GlobalManager;
 import ru.nsu.ccfit.zuev.osu.LibraryManager;
 import ru.nsu.ccfit.zuev.osu.RankedStatus;
@@ -802,12 +803,12 @@ public class SongMenu implements IUpdateHandler, MenuItemListener,
                     final float bpm2 = i2.getFirstBeatmap().getBpmMax();
                     return Float.compare(bpm2, bpm1);
                 case DroidStars:
-                    final float droid1 = i1.getFirstBeatmap().getDroidStarRating();
-                    final float droid2 = i2.getFirstBeatmap().getDroidStarRating();
+                    final float droid1 = i1.getFirstBeatmap().getStarRating(DifficultyAlgorithm.droid);
+                    final float droid2 = i2.getFirstBeatmap().getStarRating(DifficultyAlgorithm.droid);
                     return Float.compare(droid2, droid1);
                 case StandardStars:
-                    final float standard1 = i1.getFirstBeatmap().getStandardStarRating();
-                    final float standard2 = i2.getFirstBeatmap().getStandardStarRating();
+                    final float standard1 = i1.getFirstBeatmap().getStarRating(DifficultyAlgorithm.standard);
+                    final float standard2 = i2.getFirstBeatmap().getStarRating(DifficultyAlgorithm.standard);
                     return Float.compare(standard2, standard1);
                 case Length:
                     final Long length1 = i1.getFirstBeatmap().getLength();
@@ -1066,14 +1067,7 @@ public class SongMenu implements IUpdateHandler, MenuItemListener,
                 .append("HP: ").append(GameHelper.Round(hp, 2)).append(" ")
                 .append("Stars: ");
 
-        switch (Config.getDifficultyAlgorithm()) {
-            case droid:
-                dimensionStringBuilder.append(GameHelper.Round(beatmapInfo.getDroidStarRating(), 2));
-                break;
-            case standard:
-                dimensionStringBuilder.append(GameHelper.Round(beatmapInfo.getStandardStarRating(), 2));
-                break;
-        }
+        dimensionStringBuilder.append(GameHelper.Round(beatmapInfo.getStarRating(), 2));
 
         beatmapDifficultyText.setText(dimensionStringBuilder.toString());
     }
@@ -1085,27 +1079,6 @@ public class SongMenu implements IUpdateHandler, MenuItemListener,
             selectedItem.reloadBeatmaps();
         }
     }
-
-
-    public void rebindItemsData() {
-
-        var library = LibraryManager.getLibrary();
-
-        // Rebind the new beatmap set info instance to the items.
-        for (int i = items.size() - 1; i >= 0; i--) {
-            var item = items.get(i);
-
-            for (int j = library.size() - 1; j >= 0; j--) {
-                var set = library.get(j);
-
-                if (item.getBeatmapSetInfo().equals(set)) {
-                    item.setBeatmapSetInfo(set);
-                    break;
-                }
-            }
-        }
-    }
-
 
     public void updateInfo(BeatmapInfo beatmapInfo) {
         if (beatmapInfo == null) {
@@ -1129,14 +1102,11 @@ public class SongMenu implements IUpdateHandler, MenuItemListener,
                     return;
                 }
 
-                // Replace the entry in the database in case of changes.
-                var newBeatmapInfo = BeatmapInfo(beatmap, beatmapInfo.getParentPath(), beatmapInfo.getDateImported(), beatmapInfo.getPath());
-                DatabaseManager.getBeatmapInfoTable().insert(newBeatmapInfo);
-                LibraryManager.loadLibrary();
+                var newInfo = BeatmapInfo(beatmap, beatmapInfo.getParentPath(), beatmapInfo.getDateImported(), beatmapInfo.getPath(), true);
 
-                selectedBeatmap = LibraryManager.findBeatmapByMD5(beatmap.md5);
-                GlobalManager.getInstance().setSelectedBeatmap(selectedBeatmap);
-                rebindItemsData();
+                // Update the record in the database.
+                beatmapInfo.apply(newInfo);
+                DatabaseManager.getBeatmapInfoTable().update(beatmapInfo);
 
                 changeDimensionInfo(beatmapInfo);
 
@@ -1643,6 +1613,23 @@ public class SongMenu implements IUpdateHandler, MenuItemListener,
             }
         });
     }
+
+    /**
+     * Called when the beatmap table changes. Most commonly during difficulty calculation.
+     */
+    public void onDifficultyCalculationEnd() {
+
+        if (GlobalManager.getInstance().getEngine().getScene() != scene) {
+            return;
+        }
+
+        Execution.updateThread(() -> {
+            reload();
+            show();
+            select();
+        });
+    }
+
 
     public enum SortOrder {
         Title,

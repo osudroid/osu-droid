@@ -3,6 +3,8 @@ package ru.nsu.ccfit.zuev.osu;
 import static com.reco1l.osu.data.Beatmaps.BeatmapInfo;
 
 import android.util.Log;
+
+import com.reco1l.osu.DifficultyCalculationManager;
 import com.reco1l.osu.data.BeatmapSetInfo;
 import com.reco1l.osu.data.DatabaseManager;
 import com.reco1l.osu.graphics.VideoTexture;
@@ -72,6 +74,8 @@ public class LibraryManager {
 
         currentIndex = 0;
         library = DatabaseManager.getBeatmapInfoTable().getBeatmapSetList();
+
+        DifficultyCalculationManager.calculateDifficulties();
     }
 
     /**
@@ -134,7 +138,7 @@ public class LibraryManager {
 
             try (var parser = new BeatmapParser(osuFile)) {
 
-                var data = parser.parse(true);
+                var data = parser.parse(false);
 
                 if (data == null) {
                     if (Config.isDeleteUnimportedBeatmaps()) {
@@ -144,7 +148,7 @@ public class LibraryManager {
                     continue;
                 }
 
-                var beatmapInfo = BeatmapInfo(data, directory.getPath(), directory.lastModified(), osuFile.getPath());
+                var beatmapInfo = BeatmapInfo(data, directory.getPath(), directory.lastModified(), osuFile.getPath(), false);
 
                 if (data.events.videoFilename != null && Config.isDeleteUnsupportedVideos()) {
                     try {

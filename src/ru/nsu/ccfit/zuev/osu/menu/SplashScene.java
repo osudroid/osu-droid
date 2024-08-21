@@ -3,12 +3,15 @@ package ru.nsu.ccfit.zuev.osu.menu;
 import com.reco1l.osu.Execution;
 
 import org.anddev.andengine.engine.handler.IUpdateHandler;
+import org.anddev.andengine.entity.IEntity;
 import org.anddev.andengine.entity.modifier.*;
 import org.anddev.andengine.entity.scene.Scene;
 import org.anddev.andengine.entity.sprite.Sprite;
 import org.anddev.andengine.entity.text.ChangeableText;
 
 import org.anddev.andengine.util.HorizontalAlign;
+import org.anddev.andengine.util.modifier.IModifier;
+
 import ru.nsu.ccfit.zuev.osu.Config;
 import ru.nsu.ccfit.zuev.osu.GlobalManager;
 import ru.nsu.ccfit.zuev.osu.ResourceManager;
@@ -56,7 +59,7 @@ public class SplashScene implements IUpdateHandler {
 
     public Scene getScene() { return scene; }
 
-    public void playWelcomeAnimation()
+    public void playWelcomeAnimation(Runnable onFinished)
     {
         mStarting = false;
 
@@ -90,11 +93,21 @@ public class SplashScene implements IUpdateHandler {
         welcomePiano.play();
 
         welcomeSprite.registerEntityModifier(new ParallelEntityModifier(
-                new FadeInModifier(2.5f),
-                new SequenceEntityModifier(
-                        new ScaleModifier(0.25f, 1f, 1f, 0f, 1f),
-                        new ScaleModifier(2.25f, 1f, 1.1f)
-                )
+            new IEntityModifier.IEntityModifierListener() {
+                @Override
+                public void onModifierStarted(IModifier<IEntity> pModifier, IEntity pItem) {
+                }
+
+                @Override
+                public void onModifierFinished(IModifier<IEntity> pModifier, IEntity pItem) {
+                    onFinished.run();
+                }
+            },
+            new FadeInModifier(2.5f),
+            new SequenceEntityModifier(
+                new ScaleModifier(0.25f, 1f, 1f, 0f, 1f),
+                new ScaleModifier(2.25f, 1f, 1.1f)
+            )
         ));
     }
 
