@@ -3,6 +3,7 @@ package ru.nsu.ccfit.zuev.osu.game;
 import android.graphics.PointF;
 import android.os.Build;
 import android.os.SystemClock;
+import android.util.Log;
 
 import com.dgsrz.bancho.security.SecurityUtils;
 import com.edlplan.framework.math.FMath;
@@ -89,7 +90,6 @@ import ru.nsu.ccfit.zuev.osu.online.OnlineFileOperator;
 import ru.nsu.ccfit.zuev.osu.online.OnlineScoring;
 import ru.nsu.ccfit.zuev.osu.scoring.Replay;
 import ru.nsu.ccfit.zuev.osu.scoring.ResultType;
-import ru.nsu.ccfit.zuev.osu.scoring.ScoreLibrary;
 import ru.nsu.ccfit.zuev.osu.scoring.ScoringScene;
 import ru.nsu.ccfit.zuev.osu.scoring.StatisticV2;
 import ru.nsu.ccfit.zuev.osu.scoring.TouchType;
@@ -2738,7 +2738,16 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
                     + ctime.substring(0, Math.min(3, ctime.length())) + ".odr";
             replay.setStat(stat);
             replay.save(replayFile);
-            ScoreLibrary.getInstance().addScore(lastBeatmapInfo.getPath(), stat, replayFile);
+
+            if (stat.getTotalScoreWithMultiplier() > 0 && !stat.getMod().contains(GameMod.MOD_AUTO)) {
+                stat.setReplayName(replayFile);
+                try {
+                    DatabaseManager.getScoreInfoTable().insertScore(stat.toScoreInfo());
+                } catch (Exception e) {
+                    Log.e("GameScene", "Failed to save score to database", e);
+                }
+            }
+
             ToastLogger.showText(StringTable.get(R.string.message_save_replay_successful), true);
             replayFile = null;
             return true;

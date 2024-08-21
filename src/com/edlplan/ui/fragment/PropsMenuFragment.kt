@@ -20,7 +20,6 @@ import ru.nsu.ccfit.zuev.osu.GlobalManager
 import ru.nsu.ccfit.zuev.osu.menu.IPropsMenu
 import ru.nsu.ccfit.zuev.osu.menu.BeatmapSetItem
 import ru.nsu.ccfit.zuev.osu.menu.SongMenu
-import ru.nsu.ccfit.zuev.osu.scoring.ScoreLibrary
 import ru.nsu.ccfit.zuev.osuplus.R
 import kotlin.math.abs
 
