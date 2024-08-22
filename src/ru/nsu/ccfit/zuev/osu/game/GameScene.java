@@ -10,8 +10,9 @@ import com.edlplan.framework.support.ProxySprite;
 import com.edlplan.framework.support.osb.StoryboardSprite;
 import com.edlplan.framework.utils.functionality.SmartIterator;
 import com.reco1l.ibancho.RoomAPI;
-import com.reco1l.osu.BeatmapInfo;
+import com.reco1l.osu.data.BeatmapInfo;
 import com.reco1l.osu.Execution;
+import com.reco1l.osu.data.DatabaseManager;
 import com.reco1l.osu.graphics.BlankTextureRegion;
 import com.reco1l.osu.graphics.Modifiers;
 import com.reco1l.osu.graphics.VideoSprite;
@@ -61,12 +62,10 @@ import ru.nsu.ccfit.zuev.audio.BassSoundProvider;
 import ru.nsu.ccfit.zuev.audio.Status;
 import ru.nsu.ccfit.zuev.audio.effect.Metronome;
 import ru.nsu.ccfit.zuev.audio.serviceAudio.PlayMode;
-import ru.nsu.ccfit.zuev.osu.BeatmapProperties;
 import ru.nsu.ccfit.zuev.osu.Config;
 import ru.nsu.ccfit.zuev.osu.Constants;
 import ru.nsu.ccfit.zuev.osu.DifficultyAlgorithm;
 import ru.nsu.ccfit.zuev.osu.GlobalManager;
-import ru.nsu.ccfit.zuev.osu.PropertiesLibrary;
 import ru.nsu.ccfit.zuev.osu.RGBAColor;
 import ru.nsu.ccfit.zuev.osu.RGBColor;
 import ru.nsu.ccfit.zuev.osu.ResourceManager;
@@ -365,10 +364,7 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
         }
 
         totalOffset = Config.getOffset();
-        String beatmapName = beatmapInfo.getPath();
-        beatmapName = beatmapName.substring(0, beatmapName.lastIndexOf('/'));
-        final BeatmapProperties props = PropertiesLibrary.getInstance()
-                .getProperties(beatmapName);
+        var props = DatabaseManager.getBeatmapOptionsTable().getOptions(beatmapInfo.getParentPath());
         if (props != null) {
             totalOffset += props.getOffset();
         }

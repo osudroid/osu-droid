@@ -7,7 +7,7 @@ import android.net.Uri;
 import android.os.PowerManager;
 import android.util.Log;
 
-import com.reco1l.osu.BeatmapInfo;
+import com.reco1l.osu.data.BeatmapInfo;
 import com.reco1l.osu.Execution;
 import com.reco1l.osu.ui.entity.MainMenu;
 
@@ -787,7 +787,7 @@ public class MainScene implements IUpdateHandler {
     public void loadBeatmapInfo() {
         if (LibraryManager.getSizeOfBeatmaps() != 0) {
 
-            beatmapInfo = LibraryManager.getCurrentBeatmapSet().get(0);
+            beatmapInfo = LibraryManager.getCurrentBeatmapSet().getBeatmap(0);
 
             if (musicInfoText == null) {
                 musicInfoText = new ChangeableText(Utils.toRes(Config.getRES_WIDTH() - 500), Utils.toRes(3),

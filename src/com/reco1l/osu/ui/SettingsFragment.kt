@@ -28,6 +28,7 @@ import com.reco1l.ibancho.data.TeamMode
 import com.reco1l.ibancho.data.WinCondition
 import com.reco1l.osu.UpdateManager
 import com.reco1l.osu.async
+import com.reco1l.osu.data.DatabaseManager
 import com.reco1l.osu.mainThread
 import com.reco1l.osu.multiplayer.Multiplayer
 import com.reco1l.osu.multiplayer.RoomScene
@@ -41,7 +42,6 @@ import ru.nsu.ccfit.zuev.osu.Config
 import ru.nsu.ccfit.zuev.osu.GlobalManager
 import ru.nsu.ccfit.zuev.osu.LibraryManager
 import ru.nsu.ccfit.zuev.osu.MainActivity
-import ru.nsu.ccfit.zuev.osu.PropertiesLibrary
 import ru.nsu.ccfit.zuev.osu.ResourceManager
 import ru.nsu.ccfit.zuev.osu.ToastLogger
 import ru.nsu.ccfit.zuev.osu.helper.StringTable
@@ -225,7 +225,7 @@ class SettingsFragment : com.edlplan.ui.fragment.SettingsFragment() {
             }
 
             findPreference<Preference>("clear_properties")!!.setOnPreferenceClickListener {
-                PropertiesLibrary.getInstance().clear(requireActivity())
+                DatabaseManager.beatmapOptionsTable.clearOptions()
                 true
             }
         }

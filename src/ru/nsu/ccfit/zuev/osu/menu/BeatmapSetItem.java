@@ -1,23 +1,22 @@
 package ru.nsu.ccfit.zuev.osu.menu;
 
-import com.reco1l.osu.BeatmapSetInfo;
+import com.reco1l.osu.data.BeatmapSetInfo;
 import org.anddev.andengine.entity.Entity;
 import org.anddev.andengine.entity.scene.Scene;
 import org.anddev.andengine.entity.sprite.Sprite;
 
 import java.lang.ref.WeakReference;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import ru.nsu.ccfit.zuev.osu.BeatmapProperties;
 import ru.nsu.ccfit.zuev.osu.Config;
 import ru.nsu.ccfit.zuev.osu.LibraryManager;
-import ru.nsu.ccfit.zuev.osu.PropertiesLibrary;
 import ru.nsu.ccfit.zuev.osu.ResourceManager;
-import com.reco1l.osu.BeatmapInfo;
+import com.reco1l.osu.data.BeatmapInfo;
+import com.reco1l.osu.data.DatabaseManager;
+
 import ru.nsu.ccfit.zuev.osu.Utils;
 import ru.nsu.ccfit.zuev.osu.DifficultyAlgorithm;
 import ru.nsu.ccfit.zuev.osu.helper.StringTable;
@@ -60,8 +59,7 @@ public class BeatmapSetItem {
                 beatmapInfo.getCreator());
         beatmapItems = new BeatmapItem[beatmapSetInfo.getCount()];
 
-        final BeatmapProperties props = PropertiesLibrary.getInstance()
-                .getProperties(beatmapSetInfo.getPath());
+        var props = DatabaseManager.getBeatmapOptionsTable().getOptions(beatmapSetInfo.getPath());
         favorite = props != null && props.isFavorite();
 
     }
@@ -82,7 +80,8 @@ public class BeatmapSetItem {
         creatorStr = StringTable.format(R.string.menu_creator, beatmapInfo.getCreator());
         beatmapItems = new BeatmapItem[1];
         beatmapId = id;
-        final BeatmapProperties props = PropertiesLibrary.getInstance().getProperties(beatmapSetInfo.getPath());
+
+        var props = DatabaseManager.getBeatmapOptionsTable().getOptions(beatmapSetInfo.getPath());
         favorite = props != null && props.isFavorite();
 
     }
@@ -238,7 +237,7 @@ public class BeatmapSetItem {
         builder.append(beatmapInfo.getId());
         for (var i = beatmapSetInfo.getCount() - 1; i >= 0; i--) {
             builder.append(' ');
-            builder.append(beatmapSetInfo.get(i).getVersion());
+            builder.append(beatmapSetInfo.getBeatmap(i).getVersion());
         }
 
         boolean canVisible = true;
@@ -255,13 +254,13 @@ public class BeatmapSetItem {
                 if(beatmapId < 0){
                     for (var i = beatmapSetInfo.getCount() - 1; i >= 0; i--) {
                         if (key != null) {
-                            vis |= visibleBeatmap(beatmapSetInfo.get(i), key, opt, value);
+                            vis |= visibleBeatmap(beatmapSetInfo.getBeatmap(i), key, opt, value);
                         }
                     }
                 }
                 else{
                     if (key != null) {
-                        vis = visibleBeatmap(beatmapSetInfo.get(beatmapId), key, opt, value);
+                        vis = visibleBeatmap(beatmapSetInfo.getBeatmap(beatmapId), key, opt, value);
                     }
                 }
                 canVisible &= vis;
@@ -412,10 +411,10 @@ public class BeatmapSetItem {
             var selectedBeatmap = selectedBeatmapItem != null ? selectedBeatmapItem.getBeatmapInfo() : null;
 
             for (int i = 0; i < beatmapItems.length; i++) {
-                beatmapItems[i].setBeatmapInfo(beatmapSetInfo.get(i));
+                beatmapItems[i].setBeatmapInfo(beatmapSetInfo.getBeatmap(i));
 
                 // Ensure the selected track is still selected after reloading.
-                if (selectedBeatmap != null && selectedBeatmap == beatmapSetInfo.get(i)) {
+                if (selectedBeatmap != null && selectedBeatmap == beatmapSetInfo.getBeatmap(i)) {
                     beatmapItems[i].setSelectedColor();
                     selectedBeatmapItem = beatmapItems[i];
                 } else {
@@ -423,7 +422,7 @@ public class BeatmapSetItem {
                 }
             }
         } else {
-            beatmapItems[0].setBeatmapInfo(beatmapSetInfo.get(beatmapId));
+            beatmapItems[0].setBeatmapInfo(beatmapSetInfo.getBeatmap(beatmapId));
         }
     }
 
@@ -439,7 +438,7 @@ public class BeatmapSetItem {
             for (int i = 0; i < beatmapItems.length; i++) {
                 beatmapItems[i] = SongMenuPool.getInstance().newBeatmapItem();
                 beatmapItems[i].setItem(this);
-                beatmapItems[i].setBeatmapInfo(beatmapSetInfo.get(i));
+                beatmapItems[i].setBeatmapInfo(beatmapSetInfo.getBeatmap(i));
                 if (!beatmapItems[i].hasParent()) {
                     layer.attachChild(beatmapItems[i]);
                 }
@@ -449,7 +448,7 @@ public class BeatmapSetItem {
         } else {
             beatmapItems[0] = SongMenuPool.getInstance().newBeatmapItem();
             beatmapItems[0].setItem(this);
-            beatmapItems[0].setBeatmapInfo(beatmapSetInfo.get(beatmapId));
+            beatmapItems[0].setBeatmapInfo(beatmapSetInfo.getBeatmap(beatmapId));
             if (!beatmapItems[0].hasParent()) {
                 layer.attachChild(beatmapItems[0]);
             }
@@ -482,7 +481,7 @@ public class BeatmapSetItem {
     }
 
     public BeatmapInfo getFirstBeatmap(){
-        return beatmapSetInfo.get(Math.max(beatmapId, 0));
+        return beatmapSetInfo.getBeatmap(Math.max(beatmapId, 0));
     }
 
     public void removeFromScene() {
@@ -500,11 +499,11 @@ public class BeatmapSetItem {
     public int tryGetCorrespondingBeatmapId(String oldBeatmapPath){
         if (beatmapId <= -1){
             for (var i = beatmapSetInfo.getCount() - 1; i >= 0; i--) {
-                if (beatmapSetInfo.get(i).getPath().equals(oldBeatmapPath)){
+                if (beatmapSetInfo.getBeatmap(i).getPath().equals(oldBeatmapPath)){
                     return i;
                 }
             }
-        } else if (beatmapSetInfo.get(beatmapId).getPath().equals(oldBeatmapPath)){
+        } else if (beatmapSetInfo.getBeatmap(beatmapId).getPath().equals(oldBeatmapPath)){
             return beatmapId;
         }
         return -1;

@@ -1,6 +1,6 @@
 package ru.nsu.ccfit.zuev.osu.menu;
 
-import com.reco1l.osu.BeatmapInfo;
+import com.reco1l.osu.data.BeatmapInfo;
 
 public interface MenuItemListener {
     void select(BeatmapSetItem item);

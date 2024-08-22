@@ -1,4 +1,4 @@
-package com.reco1l.osu
+package com.reco1l.osu.data
 
 import androidx.room.*
 import com.reco1l.toolkt.kotlin.fastForEach
@@ -202,7 +202,6 @@ data class BeatmapInfo(
     val titleText
         get() = if (Config.isForceRomanized()) title else titleUnicode.takeUnless { it.isBlank() } ?: title
 
-
     /**
      * Returns the artist text based on the current configuration, whether romanization is forced it
      * will return [artist], otherwise [artistUnicode] if it's not blank.
@@ -211,14 +210,12 @@ data class BeatmapInfo(
         get() = if (Config.isForceRomanized()) artist else artistUnicode.takeUnless { it.isBlank() } ?: artist
 
 
-    override fun equals(other: Any?) = other is BeatmapInfo && other.path == path
-
+    override fun equals(other: Any?): Boolean {
+        return other is BeatmapInfo && other.path == path
+    }
 
     companion object {
 
-        /**
-         * Parse a new [BeatmapInfo] from a [RianBeatmap] instance.
-         */
         @JvmStatic
         fun from(data: RianBeatmap, parentPath: String, lastModified: Long, path: String): BeatmapInfo {
 
@@ -280,12 +277,11 @@ data class BeatmapInfo(
                 maxCombo = data.maxCombo
             )
         }
+
     }
 }
 
-
-@Dao
-interface IBeatmapDAO {
+@Dao interface IBeatmapInfoDAO {
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     fun insert(beatmapInfo: BeatmapInfo): Long
@@ -293,11 +289,9 @@ interface IBeatmapDAO {
     @Query("DELETE FROM BeatmapInfo WHERE parentPath = :beatmapSetKey")
     fun deleteBeatmapSet(beatmapSetKey: String)
 
-    @Transaction
     @Query("SELECT DISTINCT parentPath, parentId FROM BeatmapInfo")
     fun getBeatmapSetList() : List<BeatmapSetInfo>
 
-    @Transaction
     @Query("SELECT DISTINCT parentPath FROM BeatmapInfo")
     fun getBeatmapSetPaths() : List<String>
 
@@ -307,45 +301,3 @@ interface IBeatmapDAO {
 
 
 
-/**
- * Defines a beatmap set, they're virtually created by the database using DISTINCT operation. This means it doesn't have
- * a table.
- */
-data class BeatmapSetInfo(
-
-    /**
-     * The ID.
-     */
-    @ColumnInfo(name = "parentId")
-    val id: Int?,
-
-    /**
-     * This can equal to the set ID or its MD5.
-     */
-    @ColumnInfo(name = "parentPath")
-    val path: String,
-
-    /**
-     * The list of beatmaps
-     */
-    @Relation(parentColumn = "parentPath", entityColumn = "parentPath")
-    val beatmaps: List<BeatmapInfo>
-
-) {
-
-    /**
-     * The beatmap set size.
-     */
-    val count
-        get() = beatmaps.size
-
-
-    /**
-     * Get a beatmap from its index.
-     */
-    operator fun get(index: Int) = beatmaps[index]
-
-
-    override fun equals(other: Any?) = other is BeatmapSetInfo && other.path == path
-
-}
