@@ -1,4 +1,3 @@
-@file:JvmName("Beatmaps")
 package com.reco1l.osu.data
 
 import androidx.room.*
