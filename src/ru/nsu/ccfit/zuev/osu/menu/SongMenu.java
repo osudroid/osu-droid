@@ -67,7 +67,6 @@ import ru.nsu.ccfit.zuev.osuplus.R;
 import ru.nsu.ccfit.zuev.skins.OsuSkin;
 import ru.nsu.ccfit.zuev.skins.SkinLayout;
 
-import static com.reco1l.osu.data.Beatmaps.BeatmapInfo;
 import static com.rian.osu.utils.ModConverter.convertLegacyMods;
 
 public class SongMenu implements IUpdateHandler, MenuItemListener,
@@ -1130,7 +1129,7 @@ public class SongMenu implements IUpdateHandler, MenuItemListener,
                 }
 
                 // Replace the entry in the database in case of changes.
-                var newBeatmapInfo = BeatmapInfo(beatmap, beatmapInfo.getParentPath(), beatmapInfo.getDateImported(), beatmapInfo.getPath());
+                var newBeatmapInfo = BeatmapInfo.from(beatmap, beatmapInfo.getParentPath(), beatmapInfo.getDateImported(), beatmapInfo.getPath());
                 DatabaseManager.getBeatmapInfoTable().insert(newBeatmapInfo);
                 LibraryManager.loadLibrary();
 
