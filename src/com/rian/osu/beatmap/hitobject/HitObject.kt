@@ -7,6 +7,9 @@ import com.rian.osu.beatmap.sections.BeatmapDifficulty
 import com.rian.osu.math.Vector2
 import com.rian.osu.utils.CircleSizeCalculator
 import kotlin.math.min
+import ru.nsu.ccfit.zuev.osu.Config
+import ru.nsu.ccfit.zuev.osu.Constants
+import ru.nsu.ccfit.zuev.osu.Utils
 
 /**
  * Represents a hit object.
@@ -130,26 +133,37 @@ abstract class HitObject(
     // Gameplay object positions
 
     /**
+     * The position of this [HitObject] in gameplay, in pixels.
+     */
+    @JvmField
+    val gameplayPosition =
+        position *
+        // Scale the position to the actual play field size on screen
+        Vector2(position.x * Constants.MAP_ACTUAL_WIDTH / Constants.MAP_WIDTH) +
+        // Center the position on the screen
+        Vector2(Config.getRES_WIDTH() - Constants.MAP_ACTUAL_WIDTH, Config.getRES_HEIGHT() - Constants.MAP_ACTUAL_HEIGHT) / 2f
+
+    /**
      * The scale of this [HitObject] in gameplay.
      */
     open var gameplayScale = 0f
 
     /**
-     * The radius of this [HitObject] in gameplay, in "gameplay" distance units.
+     * The radius of this [HitObject] in gameplay, in pixels.
      */
     val gameplayRadius
         get() = (OBJECT_RADIUS * gameplayScale).toDouble()
 
     /**
-     * The stack offset of this [HitObject] in gameplay, in "gameplay" distance units.
+     * The stack offset of this [HitObject] in gameplay, in pixels.
      */
     open var gameplayStackOffset = Vector2(0f)
 
     /**
-     * The stacked position of this [HitObject] in gameplay, in "gameplay" distance units.
+     * The stacked position of this [HitObject] in gameplay, in pixels.
      */
     open val gameplayStackedPosition
-        get() = position + gameplayStackOffset
+        get() = gameplayPosition + gameplayStackOffset
 
     /**
      * Applies defaults to this [HitObject].
