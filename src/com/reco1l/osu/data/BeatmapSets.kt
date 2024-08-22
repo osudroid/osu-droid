@@ -44,8 +44,4 @@ data class BeatmapSetInfo(
         return beatmaps[index]
     }
 
-    override fun equals(other: Any?): Boolean {
-        return other is BeatmapSetInfo && other.path == path
-    }
-
 }
