@@ -201,10 +201,16 @@ public class GameHelper {
         GameHelper.approachRate = approachRate;
     }
 
+    /**
+     * Gets the rate at which gameplay progresses in terms of time.
+     */
     public static float getSpeedMultiplier() {
         return speedMultiplier;
     }
 
+    /**
+     * Sets the rate at which gameplay progresses in terms of time.
+     */
     public static void setSpeedMultiplier(float speedMultiplier) {
         GameHelper.speedMultiplier = speedMultiplier;
     }
