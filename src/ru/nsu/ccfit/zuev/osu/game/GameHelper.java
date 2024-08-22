@@ -23,7 +23,7 @@ public class GameHelper {
     private static float approachRate = 1;
     private static float drain = 0;
     private static float stackLeniency = 0;
-    private static float timeMultiplier = 0;
+    private static float speedMultiplier = 0;
     private static RGBColor sliderColor = new RGBColor();
     private static boolean hidden = false;
     private static boolean flashLight = false;
@@ -201,12 +201,18 @@ public class GameHelper {
         GameHelper.approachRate = approachRate;
     }
 
-    public static float getTimeMultiplier() {
-        return timeMultiplier;
+    /**
+     * Gets the rate at which gameplay progresses in terms of time.
+     */
+    public static float getSpeedMultiplier() {
+        return speedMultiplier;
     }
 
-    public static void setTimeMultiplier(float timeMultiplier) {
-        GameHelper.timeMultiplier = timeMultiplier;
+    /**
+     * Sets the rate at which gameplay progresses in terms of time.
+     */
+    public static void setSpeedMultiplier(float speedMultiplier) {
+        GameHelper.speedMultiplier = speedMultiplier;
     }
 
     public static double getSpeed() {
