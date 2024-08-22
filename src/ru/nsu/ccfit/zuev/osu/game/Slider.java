@@ -245,8 +245,8 @@ public class Slider extends GameObject {
         float fadeInDuration;
 
         if (GameHelper.isHidden()) {
-            fadeInDuration = time * 0.4f * GameHelper.getTimeMultiplier();
-            float fadeOutDuration = time * 0.3f * GameHelper.getTimeMultiplier();
+            fadeInDuration = time * 0.4f / GameHelper.getSpeedMultiplier();
+            float fadeOutDuration = time * 0.3f / GameHelper.getSpeedMultiplier();
 
             number.registerEntityModifier(Modifiers.sequence(
                 Modifiers.fadeIn(fadeInDuration),
@@ -278,7 +278,7 @@ public class Slider extends GameObject {
             // This uniform speedup is hard to match 1:1, however we can at least make AR>10 (via mods) feel good by extending the upper linear function above.
             // Note that this doesn't exactly match the AR>10 visuals as they're classically known, but it feels good.
             // This adjustment is necessary for AR>10, otherwise TimePreempt can become smaller leading to hitcircles not fully fading in.
-            fadeInDuration = 0.4f * Math.min(1, time / ((float) GameHelper.ar2ms(10) / 1000)) * GameHelper.getTimeMultiplier();
+            fadeInDuration = 0.4f * Math.min(1, time / ((float) GameHelper.ar2ms(10) / 1000)) / GameHelper.getSpeedMultiplier();
 
             number.registerEntityModifier(Modifiers.fadeIn(fadeInDuration));
             startCircle.registerEntityModifier(Modifiers.fadeIn(fadeInDuration));
@@ -288,8 +288,8 @@ public class Slider extends GameObject {
         }
 
         if (approachCircle.isVisible()) {
-            approachCircle.registerEntityModifier(Modifiers.alpha(Math.min(fadeInDuration * 2, time * GameHelper.getTimeMultiplier()), 0, 0.9f));
-            approachCircle.registerEntityModifier(Modifiers.scale(time * GameHelper.getTimeMultiplier(), scale * 3, scale));
+            approachCircle.registerEntityModifier(Modifiers.alpha(Math.min(fadeInDuration * 2, time / GameHelper.getSpeedMultiplier()), 0, 0.9f));
+            approachCircle.registerEntityModifier(Modifiers.scale(time / GameHelper.getSpeedMultiplier(), scale * 3, scale));
         }
 
         scene.attachChild(number, 0);
@@ -433,11 +433,11 @@ public class Slider extends GameObject {
             if (GameHelper.isHidden()) {
                 abstractSliderBody.removeFromScene(scene);
             } else {
-                abstractSliderBody.removeFromScene(scene, 0.24f * GameHelper.getTimeMultiplier(), this);
+                abstractSliderBody.removeFromScene(scene, 0.24f / GameHelper.getSpeedMultiplier(), this);
             }
         }
 
-        ball.registerEntityModifier(Modifiers.fadeOut(0.1f * GameHelper.getTimeMultiplier()).setOnFinished(entity -> {
+        ball.registerEntityModifier(Modifiers.fadeOut(0.1f / GameHelper.getSpeedMultiplier()).setOnFinished(entity -> {
             Execution.updateThread(entity::detachSelf);
         }));
 
@@ -568,9 +568,9 @@ public class Slider extends GameObject {
             mIsAnimating = true;
 
             followCircle.clearEntityModifiers();
-            followCircle.registerEntityModifier(Modifiers.scale(0.2f * GameHelper.getTimeMultiplier(), followCircle.getScaleX(), followCircle.getScaleX() * 0.8f).setEaseFunction(EaseQuadOut.getInstance()));
+            followCircle.registerEntityModifier(Modifiers.scale(0.2f / GameHelper.getSpeedMultiplier(), followCircle.getScaleX(), followCircle.getScaleX() * 0.8f).setEaseFunction(EaseQuadOut.getInstance()));
             followCircle.registerEntityModifier(
-                Modifiers.alpha(0.2f * GameHelper.getTimeMultiplier(), followCircle.getAlpha(), 0f).setOnFinished(entity -> {
+                Modifiers.alpha(0.2f / GameHelper.getSpeedMultiplier(), followCircle.getAlpha(), 0f).setOnFinished(entity -> {
                     Execution.updateThread(() -> {
                         entity.detachSelf();
 
@@ -734,7 +734,7 @@ public class Slider extends GameObject {
             ball.setFps((float) (100 * GameHelper.getSpeed() * scale / timingControlPoint.msPerBeat));
             ball.setScale(scale);
             ball.setFlippedHorizontal(false);
-            ball.registerEntityModifier(Modifiers.fadeIn(0.1f * GameHelper.getTimeMultiplier()));
+            ball.registerEntityModifier(Modifiers.fadeIn(0.1f / GameHelper.getSpeedMultiplier()));
 
             followCircle.setAlpha(0);
             if (!Config.isAnimateFollowCircle()) {
@@ -766,7 +766,7 @@ public class Slider extends GameObject {
         tickTime += dt;
 
         if (Config.isAnimateFollowCircle()) {
-            float remainTime = (float) ((maxTime * GameHelper.getTimeMultiplier() * repeatCount) - passedTime);
+            float remainTime = (float) ((maxTime / GameHelper.getSpeedMultiplier() * repeatCount) - passedTime);
 
             if (inRadius && !mWasInRadius) {
                 mWasInRadius = true;
@@ -776,9 +776,9 @@ public class Slider extends GameObject {
                 float initialScale = followCircle.getAlpha() == 0 ? scale * 0.5f : followCircle.getScaleX();
 
                 followCircle.clearEntityModifiers();
-                followCircle.registerEntityModifier(Modifiers.alpha(Math.min(remainTime, 0.06f * GameHelper.getTimeMultiplier()), followCircle.getAlpha(), 1f));
+                followCircle.registerEntityModifier(Modifiers.alpha(Math.min(remainTime, 0.06f / GameHelper.getSpeedMultiplier()), followCircle.getAlpha(), 1f));
                 followCircle.registerEntityModifier(
-                    Modifiers.scale(Math.min(remainTime, 0.18f * GameHelper.getTimeMultiplier()), initialScale, scale)
+                    Modifiers.scale(Math.min(remainTime, 0.18f / GameHelper.getSpeedMultiplier()), initialScale, scale)
                         .setEaseFunction(EaseQuadOut.getInstance())
                         .setOnFinished(entity -> mIsAnimating = false)
                 );
@@ -787,9 +787,9 @@ public class Slider extends GameObject {
                 mIsAnimating = true;
 
                 followCircle.clearEntityModifiers();
-                followCircle.registerEntityModifier(Modifiers.scale(0.1f * GameHelper.getTimeMultiplier(), followCircle.getScaleX(), scale * 2f));
+                followCircle.registerEntityModifier(Modifiers.scale(0.1f / GameHelper.getSpeedMultiplier(), followCircle.getScaleX(), scale * 2f));
                 followCircle.registerEntityModifier(
-                    Modifiers.alpha(0.1f * GameHelper.getTimeMultiplier(), followCircle.getAlpha(), 0f).setOnFinished(entity -> {
+                    Modifiers.alpha(0.1f / GameHelper.getSpeedMultiplier(), followCircle.getAlpha(), 0f).setOnFinished(entity -> {
                         if (mIsOver) {
                             Execution.updateThread(entity::detachSelf);
                         }
@@ -813,7 +813,7 @@ public class Slider extends GameObject {
 
                 if (Config.isAnimateFollowCircle() && !mIsAnimating) {
                     followCircle.clearEntityModifiers();
-                    followCircle.registerEntityModifier(Modifiers.scale((float) Math.min(tickInterval / GameHelper.getTickRate(), 0.2f) * GameHelper.getTimeMultiplier(), scale * 1.1f, scale).setEaseFunction(EaseQuadOut.getInstance()));
+                    followCircle.registerEntityModifier(Modifiers.scale((float) Math.min(tickInterval / GameHelper.getTickRate(), 0.2f) / GameHelper.getSpeedMultiplier(), scale * 1.1f, scale).setEaseFunction(EaseQuadOut.getInstance()));
                 }
 
                 ticksGot++;
@@ -854,8 +854,8 @@ public class Slider extends GameObject {
 
         if (GameHelper.isHidden()) {
             // New duration from completed fade in to end (before fading out)
-            float realFadeInDuration = fadeInDuration / GameHelper.getTimeMultiplier();
-            float fadeOutDuration = (float) ((maxTime * repeatCount + preTime - realFadeInDuration) * GameHelper.getTimeMultiplier());
+            float realFadeInDuration = fadeInDuration / GameHelper.getSpeedMultiplier();
+            float fadeOutDuration = (float) ((maxTime * repeatCount + preTime - realFadeInDuration) / GameHelper.getSpeedMultiplier());
 
             abstractSliderBody.applyFadeAdjustments(fadeInDuration, fadeOutDuration);
         } else {

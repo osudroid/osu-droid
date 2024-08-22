@@ -95,10 +95,10 @@ public class HitCircle extends GameObject {
         number.init(pos, GameHelper.getScale());
         number.setAlpha(0);
 
-        float fadeInDuration = (float) beatmapCircle.timeFadeIn / 1000 * GameHelper.getTimeMultiplier();
+        float fadeInDuration = (float) beatmapCircle.timeFadeIn / 1000 / GameHelper.getSpeedMultiplier();
 
         if (GameHelper.isHidden()) {
-            float fadeOutDuration = timePreempt * 0.3f * GameHelper.getTimeMultiplier();
+            float fadeOutDuration = timePreempt * 0.3f / GameHelper.getSpeedMultiplier();
 
             number.registerEntityModifier(Modifiers.sequence(
                     Modifiers.fadeIn(fadeInDuration),
@@ -119,8 +119,8 @@ public class HitCircle extends GameObject {
         }
 
         if (approachCircle.isVisible()) {
-            approachCircle.registerEntityModifier(Modifiers.alpha(Math.min(fadeInDuration * 2, timePreempt * GameHelper.getTimeMultiplier()), 0, 0.9f));
-            approachCircle.registerEntityModifier(Modifiers.scale(timePreempt * GameHelper.getTimeMultiplier(), scale * 3, scale));
+            approachCircle.registerEntityModifier(Modifiers.alpha(Math.min(fadeInDuration * 2, timePreempt / GameHelper.getSpeedMultiplier()), 0, 0.9f));
+            approachCircle.registerEntityModifier(Modifiers.scale(timePreempt / GameHelper.getSpeedMultiplier(), scale * 3, scale));
         }
 
         scene.attachChild(number, 0);
