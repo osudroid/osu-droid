@@ -465,7 +465,7 @@ public class ScoringScene {
             if (!Multiplayer.isMultiplayer || !GlobalManager.getInstance().getGameScene().hasFailed) {
 
                 if (stat.getTotalScoreWithMultiplier() > 0 && !stat.getMod().contains(GameMod.MOD_AUTO)) {
-                    stat.setReplayName(replay);
+                    stat.setReplayFilename(replay);
                     try {
                         DatabaseManager.getScoreInfoTable().insertScore(stat.toScoreInfo());
                     } catch (Exception e) {

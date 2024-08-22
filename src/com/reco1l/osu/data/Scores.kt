@@ -8,6 +8,7 @@ import androidx.room.OnConflictStrategy
 import androidx.room.PrimaryKey
 import androidx.room.Query
 import org.json.JSONObject
+import ru.nsu.ccfit.zuev.osu.Config
 import ru.nsu.ccfit.zuev.osu.scoring.StatisticV2
 
 
@@ -33,7 +34,7 @@ data class ScoreInfo @JvmOverloads constructor(
     /**
      * The replay file path.
      */
-    var replayPath: String,
+    var replayFilename: String,
 
     /**
      * The mods used.
@@ -102,14 +103,21 @@ data class ScoreInfo @JvmOverloads constructor(
 
 ) {
 
+    /**
+     * The replay file path.
+     */
+    val replayPath
+        get() = "${Config.getScorePath()}/$replayFilename"
+
+
     fun toJSON() = JSONObject().apply {
 
-        // The keys doesn't correspond to the table columns in order to keep compatibility with the old replays.
+        // The keys don't correspond to the table columns in order to keep compatibility with the old replays.
 
         put("id", id)
         put("filename", beatmapFilename)
         put("playername", playerName)
-        put("replayfile", replayPath)
+        put("replayfile", replayFilename)
         put("mod", mods)
         put("score", score)
         put("combo", maxCombo)
@@ -129,7 +137,7 @@ data class ScoreInfo @JvmOverloads constructor(
     fun toStatisticV2() = StatisticV2().also {
 
         it.playerName = playerName
-        it.replayName = replayPath
+        it.replayFilename = replayFilename
         it.setModFromString(mods)
         it.setForcedScore(score)
         it.maxCombo = maxCombo
@@ -146,17 +154,24 @@ data class ScoreInfo @JvmOverloads constructor(
 
     }
 
-
 }
 
 fun ScoreInfo(json: JSONObject) = ScoreInfo(
 
-    // The keys doesn't correspond to the table columns in order to keep compatibility with the old replays.
+    // The keys don't correspond to the table columns in order to keep compatibility with the old replays.
 
     id = json.optLong("id", 0),
     beatmapFilename = json.getString("filename"),
     playerName = json.getString("playername"),
-    replayPath = json.getString("replayfile"),
+    replayFilename = json.getString("replayfile").let {
+
+        // The old format used the full path, so we need to extract the file name.
+        if (it.endsWith('/')) {
+            it.substring(0, it.length - 1).substringAfterLast('/')
+        } else {
+            it.substringAfterLast('/')
+        }
+    },
     mods = json.getString("mod"),
     score = json.getInt("score"),
     maxCombo = json.getInt("combo"),

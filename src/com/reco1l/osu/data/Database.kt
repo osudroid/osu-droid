@@ -124,7 +124,15 @@ object DatabaseManager {
                                         it.getInt(it.getColumnIndexOrThrow("id")).toLong(),
                                         it.getString(it.getColumnIndexOrThrow("filename")),
                                         it.getString(it.getColumnIndexOrThrow("playername")),
-                                        it.getString(it.getColumnIndexOrThrow("replayfile")),
+                                        it.getString(it.getColumnIndexOrThrow("replayfile")).let { result ->
+
+                                            // The old format used the full path, so we need to extract the file name.
+                                            if (result.endsWith('/')) {
+                                                result.substring(0, result.length - 1).substringAfterLast('/')
+                                            } else {
+                                                result.substringAfterLast('/')
+                                            }
+                                        },
                                         it.getString(it.getColumnIndexOrThrow("mode")),
                                         it.getInt(it.getColumnIndexOrThrow("score")),
                                         it.getInt(it.getColumnIndexOrThrow("combo")),

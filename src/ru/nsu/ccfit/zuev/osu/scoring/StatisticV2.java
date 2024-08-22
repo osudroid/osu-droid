@@ -42,7 +42,7 @@ public class StatisticV2 implements Serializable {
     private EnumSet<GameMod> mod = EnumSet.noneOf(GameMod.class);
     private String playerName = Config.getOnlineUsername();
     private String fileName = "";
-    private String replayName = "";
+    private String replayFilename = "";
     private int forcedScore = -1;
     private String mark = null;
     private float changeSpeed = 1.0f;
@@ -605,12 +605,12 @@ public class StatisticV2 implements Serializable {
         computeModScoreMultiplier();
     }
 
-    public String getReplayName() {
-        return replayName;
+    public String getReplayFilename() {
+        return replayFilename;
     }
 
-    public void setReplayName(String replayName) {
-        this.replayName = replayName;
+    public void setReplayFilename(String replayName) {
+        this.replayFilename = replayName;
     }
 
     public void setForcedScore(int forcedScore) {
@@ -917,7 +917,7 @@ public class StatisticV2 implements Serializable {
         return new ScoreInfo(
             fileName,
             playerName,
-            replayName,
+                replayFilename,
             getModString(),
             getTotalScoreWithMultiplier(),
             maxCombo,

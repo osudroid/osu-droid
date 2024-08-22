@@ -162,7 +162,7 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
     private int mainCursorId = -1;
     private Replay replay;
     private boolean replaying;
-    private String replayFile;
+    private String replayFilePath;
     private float offsetSum;
     private int offsetRegs;
     private Rectangle dimRectangle = null;
@@ -331,15 +331,15 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
         }
 
         if (rFile != null && rFile.startsWith("https://")) {
-            this.replayFile = Config.getCachePath() + "/" +
+            this.replayFilePath = Config.getCachePath() + "/" +
                     MD5Calculator.getStringMD5(rFile) + ".odr";
-            Debug.i("ReplayFile = " + replayFile);
-            if (!OnlineFileOperator.downloadFile(rFile, this.replayFile)) {
+            Debug.i("ReplayFile = " + replayFilePath);
+            if (!OnlineFileOperator.downloadFile(rFile, this.replayFilePath)) {
                 ToastLogger.showTextId(R.string.replay_cantdownload, true);
                 return false;
             }
         } else
-            this.replayFile = rFile;
+            this.replayFilePath = rFile;
 
         try (var parser = new BeatmapParser(beatmapInfo.getPath())) {
             if (parser.openFile()) {
@@ -562,8 +562,8 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
         replay.setObjectCount(objects.size());
         replay.setMap(beatmapFile.getParentFile().getName(), beatmapFile.getName(), beatmapMD5);
 
-        if (replayFile != null) {
-            replaying = replay.load(replayFile);
+        if (replayFilePath != null) {
+            replaying = replay.load(replayFilePath);
             if (!replaying) {
                 ToastLogger.showTextId(R.string.replay_invalid, true);
                 return false;
@@ -673,7 +673,7 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
         final LoadingScreen screen = new LoadingScreen();
         engine.setScene(screen.getScene());
 
-        final String rfile = beatmapInfo != null ? replayFile : this.replayFile;
+        final String rfile = beatmapInfo != null ? replayFile : this.replayFilePath;
 
         Execution.async(() -> {
 
@@ -1799,7 +1799,7 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
         }
 
         if (replaying) {
-            replayFile = null;
+            replayFilePath = null;
             ModMenu.getInstance().setMod(Replay.oldMod);
             ModMenu.getInstance().setChangeSpeed(Replay.oldChangeSpeed);
             ModMenu.getInstance().setFLfollowDelay(Replay.oldFLFollowDelay);
@@ -2731,16 +2731,16 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
                 stat.registerHit(0, false, false);
                 replay.addObjectScore(++lastObjectId, ResultType.MISS);
             }
-            //save replay
-            String ctime = String.valueOf(System.currentTimeMillis());
-            replayFile = Config.getCorePath() + "Scores/"
-                    + MD5Calculator.getStringMD5(lastBeatmapInfo.getFilename() + ctime)
-                    + ctime.substring(0, Math.min(3, ctime.length())) + ".odr";
+
+            var currentTime = String.valueOf(System.currentTimeMillis());
+            var odrFilename = MD5Calculator.getStringMD5(lastBeatmapInfo.getFilename() + currentTime) + currentTime.substring(0, Math.min(3, currentTime.length())) + ".odr";
+
+            replayFilePath = Config.getCorePath() + "Scores/" + odrFilename;
             replay.setStat(stat);
-            replay.save(replayFile);
+            replay.save(replayFilePath);
 
             if (stat.getTotalScoreWithMultiplier() > 0 && !stat.getMod().contains(GameMod.MOD_AUTO)) {
-                stat.setReplayName(replayFile);
+                stat.setReplayFilename(odrFilename);
                 try {
                     DatabaseManager.getScoreInfoTable().insertScore(stat.toScoreInfo());
                 } catch (Exception e) {
@@ -2749,7 +2749,7 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
             }
 
             ToastLogger.showText(StringTable.get(R.string.message_save_replay_successful), true);
-            replayFile = null;
+            replayFilePath = null;
             return true;
         }
         else{
