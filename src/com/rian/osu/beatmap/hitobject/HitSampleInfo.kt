@@ -12,5 +12,11 @@ open class HitSampleInfo protected constructor(
     @JvmField
     val volume: Int = 0
 ) {
+    /**
+     * All possible filenames that can be used as an audio source, returned in order of preference (highest first).
+     */
+    open val lookupNames
+        get() = emptyList<String>()
+
     fun copy(volume: Int? = null) = HitSampleInfo(volume ?: this.volume)
 }

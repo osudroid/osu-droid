@@ -41,6 +41,16 @@ class BankHitSampleInfo(
     @JvmField
     val isLayered: Boolean = false
 ) : HitSampleInfo(volume) {
+    override val lookupNames
+        get() = mutableListOf<String>().also {
+            if (customSampleBank >= 2) {
+                it.add("${bank.prefix}-${name}${customSampleBank}")
+            }
+
+            it.add("${bank.prefix}-${name}")
+            it.add(name)
+        }
+
     fun copy(name: String? = null, bank: SampleBank? = null, customSampleBank: Int? = null, volume: Int? = null, isLayered: Boolean? = null) =
         BankHitSampleInfo(name ?: this.name, bank ?: this.bank,
             customSampleBank ?: this.customSampleBank, volume ?: this.volume, isLayered ?: this.isLayered)
