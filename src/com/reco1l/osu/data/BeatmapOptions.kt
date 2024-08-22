@@ -7,6 +7,8 @@ import androidx.room.OnConflictStrategy
 import androidx.room.PrimaryKey
 import androidx.room.Query
 import androidx.room.Update
+import java.io.Serial
+import java.io.Serializable
 
 @Entity
 data class BeatmapOptions(
@@ -44,3 +46,18 @@ data class BeatmapOptions(
     fun clearOptions()
 
 }
+
+
+@Deprecated("This class exist only to be able to migrate old beatmap properties to the new system. Should not be used.")
+class BeatmapProperties : Serializable {
+
+    var offset = 0
+
+    var favorite = false
+
+    companion object {
+        @Serial
+        private const val serialVersionUID = -7229486402310659139L
+    }
+}
+

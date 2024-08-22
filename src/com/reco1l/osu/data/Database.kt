@@ -3,7 +3,6 @@ package com.reco1l.osu.data
 import android.content.Context
 import android.util.Log
 import androidx.room.*
-import ru.nsu.ccfit.zuev.osu.BeatmapProperties
 import ru.nsu.ccfit.zuev.osu.Config
 import ru.nsu.ccfit.zuev.osu.GlobalManager
 import ru.nsu.ccfit.zuev.osu.helper.sql.DBOpenHelper
@@ -77,7 +76,7 @@ object DatabaseManager {
                         // Ignoring first object which is intended to be the version.
                         ois.readObject()
 
-                        val options = (ois.readObject() as Map<String, BeatmapProperties>).map { (path, props) ->
+                        val options = (ois.readObject() as Map<String, BeatmapProperties>).map { (path, properties) ->
 
                             // Old properties storage system stores the absolute path of the beatmap
                             // set so we're extracting it here to use the directory name.
@@ -87,7 +86,7 @@ object DatabaseManager {
                                 path.substringAfterLast('/')
                             }
 
-                            BeatmapOptions(setDirectory, props.isFavorite, props.offset)
+                            BeatmapOptions(setDirectory, properties.favorite, properties.offset)
                         }
 
                         beatmapOptionsTable.addAll(options)
