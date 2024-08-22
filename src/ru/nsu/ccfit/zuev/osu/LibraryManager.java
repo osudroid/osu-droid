@@ -1,6 +1,6 @@
 package ru.nsu.ccfit.zuev.osu;
 
-import static com.reco1l.osu.data.Beatmaps.BeatmapInfo;
+import static com.reco1l.osu.data.BeatmapsKt.BeatmapInfo;
 
 import android.util.Log;
 
