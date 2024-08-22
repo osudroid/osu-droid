@@ -1,7 +1,5 @@
 package ru.nsu.ccfit.zuev.osu.game;
 
-import android.graphics.PointF;
-
 import com.reco1l.osu.graphics.Modifiers;
 
 import org.anddev.andengine.entity.scene.Scene;
@@ -25,11 +23,9 @@ public class HitCircle extends GameObject {
     private int soundId;
     private int sampleSet;
     private int addition;
-    //private PointF pos;
     private float radius;
     private float passedTime;
-    private float time;
-    private boolean isFirstNote;
+    private float timePreempt;
     private boolean kiai;
 
     public HitCircle() {
@@ -42,20 +38,20 @@ public class HitCircle extends GameObject {
     }
 
     public void init(final GameObjectListener listener, final Scene pScene,
-                     final PointF pos, final float time, final float r, final float g,
-                     final float b, final float scale, int num, final int sound, final String tempSound, final boolean isFirstNote) {
+                     final com.rian.osu.beatmap.hitobject.HitCircle beatmapCircle, final float r, final float g,
+                     final float b, final int sound, final String tempSound, final boolean isFirstNote) {
         // Storing parameters into fields
         //Log.i("note-ini", time + "s");
         this.replayObjectData = null;
-        this.pos = pos;
+        this.pos = beatmapCircle.getGameplayStackedPosition().toPointF();
+        this.endsCombo = beatmapCircle.getLastInCombo();
         this.listener = listener;
         this.scene = pScene;
         this.soundId = sound;
         this.sampleSet = 0;
         this.addition = 0;
         // TODO: 外部音效文件支持
-        this.time = time;
-        this.isFirstNote = isFirstNote;
+        this.timePreempt = (float) beatmapCircle.timePreempt / 1000;
         passedTime = 0;
         startHit = false;
         kiai = GameHelper.isKiai();
@@ -68,44 +64,41 @@ public class HitCircle extends GameObject {
         }
 
         // Calculating position of top/left corner for sprites and hit radius
-        radius = Utils.toRes(128) * scale / 2;
+        final float scale = beatmapCircle.getGameplayScale();
+        radius = (float) beatmapCircle.getGameplayRadius();
         radius *= radius;
 
         // Initializing sprites
-        //circle.setPosition(rpos.x, rpos.y);
         circle.setColor(r, g, b);
         circle.setScale(scale);
         circle.setAlpha(0);
         Utils.putSpriteAnchorCenter(pos, circle);
 
-        //overlay.setPosition(rpos.x, rpos.y);
         overlay.setScale(scale);
         overlay.setAlpha(0);
         Utils.putSpriteAnchorCenter(pos, overlay);
 
-        //approachCircle.setPosition(rpos.x, rpos.y);
         approachCircle.setColor(r, g, b);
         approachCircle.setScale(scale * 3);
         approachCircle.setAlpha(0);
         Utils.putSpriteAnchorCenter(pos, approachCircle);
         if (GameHelper.isHidden()) {
-            approachCircle.setVisible(Config.isShowFirstApproachCircle() && this.isFirstNote);
+            approachCircle.setVisible(Config.isShowFirstApproachCircle() && isFirstNote);
         }
 
         // and getting new number from sprite pool
-        num += 1;
+        int comboNum = beatmapCircle.getIndexInCurrentCombo() + 1;
         if (OsuSkin.get().isLimitComboTextLength()) {
-            num %= 10;
+            comboNum %= 10;
         }
-        number = GameObjectPool.getInstance().getNumber(num);
+        number = GameObjectPool.getInstance().getNumber(comboNum);
         number.init(pos, GameHelper.getScale());
         number.setAlpha(0);
 
-        float fadeInDuration;
+        float fadeInDuration = (float) beatmapCircle.timeFadeIn / 1000 * GameHelper.getTimeMultiplier();
 
         if (GameHelper.isHidden()) {
-            fadeInDuration = time * 0.4f * GameHelper.getTimeMultiplier();
-            float fadeOutDuration = time * 0.3f * GameHelper.getTimeMultiplier();
+            float fadeOutDuration = timePreempt * 0.3f * GameHelper.getTimeMultiplier();
 
             number.registerEntityModifier(Modifiers.sequence(
                     Modifiers.fadeIn(fadeInDuration),
@@ -120,20 +113,14 @@ public class HitCircle extends GameObject {
                     Modifiers.fadeOut(fadeOutDuration)
             ));
         } else {
-            // Preempt time can go below 450ms. Normally, this is achieved via the DT mod which uniformly speeds up all animations game wide regardless of AR.
-            // This uniform speedup is hard to match 1:1, however we can at least make AR>10 (via mods) feel good by extending the upper linear function above.
-            // Note that this doesn't exactly match the AR>10 visuals as they're classically known, but it feels good.
-            // This adjustment is necessary for AR>10, otherwise TimePreempt can become smaller leading to hitcircles not fully fading in.
-            fadeInDuration = 0.4f * Math.min(1, time / 0.45f) * GameHelper.getTimeMultiplier();
-
             circle.registerEntityModifier(Modifiers.fadeIn(fadeInDuration));
             overlay.registerEntityModifier(Modifiers.fadeIn(fadeInDuration));
             number.registerEntityModifier(Modifiers.fadeIn(fadeInDuration));
         }
 
         if (approachCircle.isVisible()) {
-            approachCircle.registerEntityModifier(Modifiers.alpha(Math.min(fadeInDuration * 2, time * GameHelper.getTimeMultiplier()), 0, 0.9f));
-            approachCircle.registerEntityModifier(Modifiers.scale(time * GameHelper.getTimeMultiplier(), scale * 3, scale));
+            approachCircle.registerEntityModifier(Modifiers.alpha(Math.min(fadeInDuration * 2, timePreempt * GameHelper.getTimeMultiplier()), 0, 0.9f));
+            approachCircle.registerEntityModifier(Modifiers.scale(timePreempt * GameHelper.getTimeMultiplier(), scale * 3, scale));
         }
 
         scene.attachChild(number, 0);
@@ -171,7 +158,7 @@ public class HitCircle extends GameObject {
         for (int i = 0, count = listener.getCursorsCount(); i < count; i++) {
 
             var inPosition = Utils.squaredDistance(pos, listener.getMousePos(i)) <= radius;
-            if (GameHelper.isRelaxMod() && passedTime - time >= 0 && inPosition) {
+            if (GameHelper.isRelaxMod() && passedTime - timePreempt >= 0 && inPosition) {
                 return true;
             }
 
@@ -190,7 +177,7 @@ public class HitCircle extends GameObject {
         for (int i = 0, count = listener.getCursorsCount(); i < count; i++) {
 
             var inPosition = Utils.squaredDistance(pos, listener.getMousePos(i)) <= radius;
-            if (GameHelper.isRelaxMod() && passedTime - time >= 0 && inPosition) {
+            if (GameHelper.isRelaxMod() && passedTime - timePreempt >= 0 && inPosition) {
                 return 0;
             }
 
@@ -213,7 +200,7 @@ public class HitCircle extends GameObject {
         }
         // If we have clicked circle
         if (replayObjectData != null) {
-            if (passedTime - time + dt / 2 > replayObjectData.accuracy / 1000f) {
+            if (passedTime - timePreempt + dt / 2 > replayObjectData.accuracy / 1000f) {
                 final float acc = Math.abs(replayObjectData.accuracy / 1000f);
                 if (acc <= GameHelper.getDifficultyHelper().hitWindowFor50(GameHelper.getDifficulty())) {
                     playSound();
@@ -225,8 +212,8 @@ public class HitCircle extends GameObject {
                 removeFromScene();
                 return;
             }
-        } else if (passedTime * 2 > time && isHit()) {
-            float signAcc = passedTime - time;
+        } else if (passedTime * 2 > timePreempt && isHit()) {
+            float signAcc = passedTime - timePreempt;
             if (Config.isFixFrameOffset()) {
                 signAcc += (float) hitOffsetToPreviousFrame() / 1000f;
             }
@@ -260,7 +247,7 @@ public class HitCircle extends GameObject {
         passedTime += dt;
 
         // We are still at approach time. Let entity modifiers finish first.
-        if (passedTime < time) {
+        if (passedTime < timePreempt) {
             return;
         }
 
@@ -275,7 +262,7 @@ public class HitCircle extends GameObject {
             approachCircle.setAlpha(0);
 
             // If passed too much time, counting it as miss
-            if (passedTime > time + GameHelper.getDifficultyHelper().hitWindowFor50(GameHelper.getDifficulty())) {
+            if (passedTime > timePreempt + GameHelper.getDifficultyHelper().hitWindowFor50(GameHelper.getDifficulty())) {
                 passedTime = -1;
                 final byte forcedScore = (replayObjectData == null) ? 0 : replayObjectData.result;
 
@@ -286,9 +273,9 @@ public class HitCircle extends GameObject {
     } // update(float dt)
 
     @Override
-    public void tryHit(final float dt){
-        if (passedTime * 2 > time && isHit()) {
-            float signAcc = passedTime - time;
+    public void tryHit(final float dt) {
+        if (passedTime * 2 > timePreempt && isHit()) {
+            float signAcc = passedTime - timePreempt;
             if (Config.isFixFrameOffset()) {
                 signAcc += (float) hitOffsetToPreviousFrame() / 1000f;
             }

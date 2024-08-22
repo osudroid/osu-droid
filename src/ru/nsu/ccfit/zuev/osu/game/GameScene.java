@@ -23,6 +23,7 @@ import com.reco1l.osu.multiplayer.RoomScene;
 import com.rian.osu.GameMode;
 import com.rian.osu.beatmap.Beatmap;
 import com.rian.osu.beatmap.constants.BeatmapCountdown;
+import com.rian.osu.beatmap.hitobject.HitObject;
 import com.rian.osu.beatmap.parser.BeatmapParser;
 import com.rian.osu.beatmap.timings.EffectControlPoint;
 import com.rian.osu.beatmap.timings.SampleControlPoint;
@@ -121,6 +122,7 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
     private int lastObjectId = -1;
     private float secPassed = 0;
     private float leadOut = 0;
+    private LinkedList<HitObject> parsedObjects;
     private LinkedList<GameObjectData> objects;
     private ArrayList<RGBColor> combos;
     private int comboNum; // use this to show combo color
@@ -505,6 +507,7 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
             return false;
         }
 
+        parsedObjects = new LinkedList<>(beatmap.hitObjects.objects);
         activeObjects = new LinkedList<>();
         passiveObjects = new LinkedList<>();
         expiredObjects = new LinkedList<>();
@@ -1401,6 +1404,8 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
                 && secPassed + approachRate > objects.peek().getTime()) {
             gameStarted = true;
             final GameObjectData data = objects.poll();
+            final HitObject obj = parsedObjects.poll();
+
             final String[] params = data.getData();
 
             final PointF pos = data.getPos();
@@ -1458,19 +1463,19 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
             }
 
             if ((objDefine & 1) > 0) {
-                final RGBColor col = getComboColor(comboNum);
+                final RGBColor col = getComboColor(obj.getComboIndexWithOffsets());
                 final HitCircle circle = GameObjectPool.getInstance().getCircle();
                 String tempSound = null;
                 if (params.length > 5) {
                     tempSound = params[5];
                 }
 
-                circle.init(this, mgScene, pos, data.getTime() - secPassed,
-                        col.r(), col.g(), col.b(), scale, currentComboNum,
+                circle.init(this, mgScene,
+                        (com.rian.osu.beatmap.hitobject.HitCircle) obj, col.r(), col.g(), col.b(),
                         Integer.parseInt(params[4]), tempSound, isFirst);
-                circle.setEndsCombo(nextObj == null || nextObj.isNewCombo());
                 addObject(circle);
                 isFirst = false;
+
                 if (nextObj != null
                         && !nextObj.isNewCombo()) {
                     final FollowTrack track = GameObjectPool.getInstance()

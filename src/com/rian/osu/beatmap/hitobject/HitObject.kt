@@ -9,7 +9,6 @@ import com.rian.osu.utils.CircleSizeCalculator
 import kotlin.math.min
 import ru.nsu.ccfit.zuev.osu.Config
 import ru.nsu.ccfit.zuev.osu.Constants
-import ru.nsu.ccfit.zuev.osu.Utils
 
 /**
  * Represents a hit object.
@@ -139,7 +138,7 @@ abstract class HitObject(
     val gameplayPosition =
         position *
         // Scale the position to the actual play field size on screen
-        Vector2(position.x * Constants.MAP_ACTUAL_WIDTH / Constants.MAP_WIDTH) +
+        Vector2(Constants.MAP_ACTUAL_WIDTH / Constants.MAP_WIDTH.toFloat(), Constants.MAP_ACTUAL_HEIGHT / Constants.MAP_HEIGHT.toFloat()) +
         // Center the position on the screen
         Vector2(Config.getRES_WIDTH() - Constants.MAP_ACTUAL_WIDTH, Config.getRES_HEIGHT() - Constants.MAP_ACTUAL_HEIGHT) / 2f
 
