@@ -64,13 +64,13 @@ object DatabaseManager {
 
         // BeatmapOptions
         try {
-            val file = File(context.filesDir, "properties")
+            val oldPropertiesFile = File(context.filesDir, "properties")
 
-            if (file.exists()) {
+            if (oldPropertiesFile.exists()) {
 
                 GlobalManager.getInstance().info = "Migrating beatmap properties..."
 
-                file.inputStream().use { fis ->
+                oldPropertiesFile.inputStream().use { fis ->
 
                     ObjectInputStream(fis).use { ois ->
 
@@ -95,9 +95,9 @@ object DatabaseManager {
 
         // Score table
         try {
-            val file = File(Config.getCorePath(), "databases/osudroid_test.db")
+            val oldDatabaseFile = File(Config.getCorePath(), "databases/osudroid_test.db")
 
-            if (file.exists()) {
+            if (oldDatabaseFile.exists()) {
 
                 GlobalManager.getInstance().info = "Migrating score table..."
 
@@ -142,7 +142,7 @@ object DatabaseManager {
                             }
 
                             if (pendingScores <= 0) {
-                                file.delete()
+                                oldDatabaseFile.renameTo(File(Config.getCorePath(), "databases/osudroid_test.olddb"))
                             }
                         }
                     }
