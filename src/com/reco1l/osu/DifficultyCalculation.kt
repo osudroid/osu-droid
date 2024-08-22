@@ -13,6 +13,7 @@ import ru.nsu.ccfit.zuev.osu.LibraryManager
 import ru.nsu.ccfit.zuev.osu.ToastLogger
 import ru.nsu.ccfit.zuev.osuplus.BuildConfig
 import ru.nsu.ccfit.zuev.osuplus.R
+import java.util.concurrent.ExecutorService
 import java.util.concurrent.Executors
 import java.util.concurrent.TimeUnit
 import kotlin.math.max
@@ -59,7 +60,14 @@ object DifficultyCalculationManager {
 
                     threadPool.submit {
 
-                        chunk.fastForEach { beatmapInfo ->
+                        // .indices to avoid creating an iterator.
+                        for(i in chunk.indices) {
+
+                            if (!isRunning) {
+                                break
+                            }
+
+                            val beatmapInfo = chunk[i]
 
                             try {
                                 val msStartTime = System.currentTimeMillis()
@@ -97,14 +105,21 @@ object DifficultyCalculationManager {
                 threadPool.shutdown()
                 try {
 
-                    if (threadPool.awaitTermination(1, TimeUnit.HOURS)) {
-                        ToastLogger.showText("Background difficulty calculation has finished successfully.", true)
+                    val isTimeout = threadPool.awaitTermination(1, TimeUnit.HOURS)
+
+                    if (isRunning) {
+                        if (isTimeout) {
+                            ToastLogger.showText("Background difficulty calculation has finished.", true)
+                        } else {
+                            ToastLogger.showText("Something went wrong during background difficulty calculation.", true)
+                        }
                     } else {
-                        ToastLogger.showText("Something went wrong during background difficulty calculation.", true)
+                        ToastLogger.showText("Difficulty calculation has been paused.", false)
                     }
 
                     mainThread {
                         badge?.dismiss()
+                        badge = null
                     }
                     GlobalManager.getInstance().songMenu?.onDifficultyCalculationEnd()
 
@@ -116,6 +131,12 @@ object DifficultyCalculationManager {
             }
 
         }.start()
+    }
+
+
+    @JvmStatic
+    fun stopCalculation() {
+        isRunning = false
     }
 
 }

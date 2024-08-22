@@ -10,6 +10,7 @@ import com.edlplan.framework.support.ProxySprite;
 import com.edlplan.framework.support.osb.StoryboardSprite;
 import com.edlplan.framework.utils.functionality.SmartIterator;
 import com.reco1l.ibancho.RoomAPI;
+import com.reco1l.osu.DifficultyCalculationManager;
 import com.reco1l.osu.data.BeatmapInfo;
 import com.reco1l.osu.Execution;
 import com.reco1l.osu.data.DatabaseManager;
@@ -676,6 +677,8 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
         final String rfile = beatmapInfo != null ? replayFile : this.replayFile;
 
         Execution.async(() -> {
+
+            DifficultyCalculationManager.stopCalculation();
 
             if (loadGame(beatmapInfo != null ? beatmapInfo : lastBeatmapInfo, rfile)) {
                 prepareScene();
@@ -1663,6 +1666,9 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
                 engine.setScene(oldScene);
             }
 
+            // Resume difficulty calculation.
+            DifficultyCalculationManager.calculateDifficulties();
+
             // Handle input back in update thread
             var touchOptions = new TouchOptions();
             touchOptions.setRunOnUpdateThread(true);
@@ -1849,6 +1855,9 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
         }
         ResourceManager.getInstance().getSound("failsound").stop();
         engine.setScene(oldScene);
+
+        // Resume difficulty calculation.
+        DifficultyCalculationManager.calculateDifficulties();
     }
 
 
