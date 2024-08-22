@@ -210,10 +210,6 @@ data class BeatmapInfo(
         get() = if (Config.isForceRomanized()) artist else artistUnicode.takeUnless { it.isBlank() } ?: artist
 
 
-    override fun equals(other: Any?): Boolean {
-        return other is BeatmapInfo && other.path == path
-    }
-
 }
 
 /**
