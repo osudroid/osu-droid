@@ -459,7 +459,8 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
         }
 
         if (ModMenu.getInstance().isCustomAR()){
-            approachRate = (float) GameHelper.ar2ms(ModMenu.getInstance().getCustomAR()) / 1000f;
+            // Scale the approach rate with speed multiplier to ensure that the real-time AR value stays the same.
+            approachRate = (float) GameHelper.ar2ms(ModMenu.getInstance().getCustomAR()) / 1000f * GameHelper.getSpeedMultiplier();
         }
         if (ModMenu.getInstance().isCustomOD()) {
             overallDifficulty = ModMenu.getInstance().getCustomOD();
