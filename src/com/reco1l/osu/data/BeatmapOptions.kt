@@ -12,10 +12,10 @@ import androidx.room.Update
 data class BeatmapOptions(
 
     /**
-     * The beatmap path.
+     * The beatmap set directory.
      */
     @PrimaryKey
-    val parentPath: String,
+    val setDirectory: String,
 
     /**
      * Whether the beatmap is marked as favorite.
@@ -25,14 +25,14 @@ data class BeatmapOptions(
     /**
      * The beatmap offset.
      */
-    var offset: Int = 0,
+    var offset: Int = 0
 
 )
 
 @Dao interface IBeatmapOptionsDAO {
 
-    @Query("SELECT * FROM BeatmapOptions WHERE parentPath = :path")
-    fun getOptions(path: String): BeatmapOptions?
+    @Query("SELECT * FROM BeatmapOptions WHERE setDirectory = :setDirectory")
+    fun getOptions(setDirectory: String): BeatmapOptions?
 
     @Update
     fun setOptions(options: BeatmapOptions)

@@ -58,7 +58,7 @@ public class BeatmapSetItem {
                 beatmapInfo.getCreator());
         beatmapItems = new BeatmapItem[beatmapSetInfo.getCount()];
 
-        var props = DatabaseManager.getBeatmapOptionsTable().getOptions(beatmapSetInfo.getPath());
+        var props = DatabaseManager.getBeatmapOptionsTable().getOptions(beatmapSetInfo.getDirectory());
         favorite = props != null && props.isFavorite();
 
     }
@@ -80,7 +80,7 @@ public class BeatmapSetItem {
         beatmapItems = new BeatmapItem[1];
         beatmapId = id;
 
-        var props = DatabaseManager.getBeatmapOptionsTable().getOptions(beatmapSetInfo.getPath());
+        var props = DatabaseManager.getBeatmapOptionsTable().getOptions(beatmapSetInfo.getDirectory());
         favorite = props != null && props.isFavorite();
 
     }

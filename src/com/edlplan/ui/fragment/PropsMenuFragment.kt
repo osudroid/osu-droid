@@ -173,7 +173,7 @@ class PropsMenuFragment : BaseFragment(), IPropsMenu {
     override fun show(menu: SongMenu, item: BeatmapSetItem) {
         this.menu = menu
         this.item = item
-        props = DatabaseManager.beatmapOptionsTable.getOptions(item.beatmapSetInfo.path)
+        props = DatabaseManager.beatmapOptionsTable.getOptions(item.beatmapSetInfo.directory)
         if (props == null) {
             props = BeatmapOptions(item.beatmapSetInfo.path)
         }

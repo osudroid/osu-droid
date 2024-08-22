@@ -60,7 +60,7 @@ object DatabaseManager {
     }
 
     @Suppress("UNCHECKED_CAST")
-    fun loadLegacyMigrations(context: Context) {
+    private fun loadLegacyMigrations(context: Context) {
 
         // BeatmapOptions
         try {
@@ -79,14 +79,23 @@ object DatabaseManager {
 
                         val options = (ois.readObject() as Map<String, BeatmapProperties>).map { (path, props) ->
 
-                            BeatmapOptions(path, props.isFavorite, props.offset)
+                            // Old properties storage system stores the absolute path of the beatmap
+                            // set so we're extracting it here to use the directory name.
+                            val setDirectory = if (path.endsWith('/')) {
+                                path.substring(0, path.length - 1).substringAfterLast('/')
+                            } else {
+                                path.substringAfterLast('/')
+                            }
+
+                            BeatmapOptions(setDirectory, props.isFavorite, props.offset)
                         }
 
                         beatmapOptionsTable.addAll(options)
                     }
 
-
                 }
+
+                oldPropertiesFile.renameTo(File(context.filesDir, "properties.old"))
             }
 
         } catch (e: IOException) {
