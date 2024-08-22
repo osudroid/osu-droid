@@ -64,7 +64,7 @@ public class ScoringScene {
         menu = pMenu;
     }
 
-    public void load(final StatisticV2 stat, BeatmapInfo beatmapInfo,
+    public void load(final StatisticV2 stat, final BeatmapInfo beatmap,
                      final SongService player, final String replay, final String mapMD5,
                      final BeatmapInfo beatmapToReplay) {
         scene = new Scene();
@@ -88,10 +88,11 @@ public class ScoringScene {
         bgTopRect.setColor(0, 0, 0, 0.8f);
         scene.attachChild(bgTopRect);
 
-        this.beatmapInfo = beatmapToReplay;
-        if (beatmapToReplay == null && beatmapInfo != null) {
-            this.beatmapInfo = beatmapInfo;
+        BeatmapInfo beatmapInfo = beatmapToReplay;
+        if (beatmapToReplay == null && beatmap != null) {
+            beatmapInfo = beatmap;
         }
+        this.beatmapInfo = beatmapInfo;
 
         final int x = 0, y = 100;
         final TextureRegion panelr = ResourceManager.getInstance().getTexture(
@@ -384,16 +385,16 @@ public class ScoringScene {
         if (Config.isDisplayScoreStatistics() && !currentStatistic.isTeamStatistic()) {
 
             StringBuilder ppinfo = new StringBuilder();
-            Beatmap beatmap;
+            Beatmap beatmapData;
 
             try (var parser = new BeatmapParser(this.beatmapInfo.getPath())) {
-                beatmap = parser.parse(true);
+                beatmapData = parser.parse(true);
             }
 
-            if (beatmap != null) {
+            if (beatmapData != null) {
                 switch (Config.getDifficultyAlgorithm()) {
                     case droid -> {
-                        var difficultyAttributes = BeatmapDifficultyCalculator.calculateDroidDifficulty(beatmap, stat);
+                        var difficultyAttributes = BeatmapDifficultyCalculator.calculateDroidDifficulty(beatmapData, stat);
 
                         DroidPerformanceAttributes performanceAttributes;
 
@@ -406,7 +407,7 @@ public class ScoringScene {
 
                             if (replayLoad.load(replay)) {
                                 performanceAttributes = BeatmapDifficultyCalculator.calculateDroidPerformance(
-                                        beatmap, difficultyAttributes, replayLoad.cursorMoves, replayLoad.objectData, stat
+                                        beatmapData, difficultyAttributes, replayLoad.cursorMoves, replayLoad.objectData, stat
                                 );
                             } else {
                                 performanceAttributes = BeatmapDifficultyCalculator.calculateDroidPerformance(difficultyAttributes, stat);
@@ -420,7 +421,7 @@ public class ScoringScene {
                         ppinfo.append(String.format(Locale.ENGLISH, "%.2f★ | %.2f/%.2fdpp", difficultyAttributes.starRating, performanceAttributes.total, maxPerformanceAttributes.total));
                     }
                     case standard -> {
-                        var difficultyAttributes = BeatmapDifficultyCalculator.calculateStandardDifficulty(beatmap, stat);
+                        var difficultyAttributes = BeatmapDifficultyCalculator.calculateStandardDifficulty(beatmapData, stat);
                         var performanceAttributes = BeatmapDifficultyCalculator.calculateStandardPerformance(difficultyAttributes, stat);
                         var maxPerformanceAttributes = BeatmapDifficultyCalculator.calculateStandardPerformance(difficultyAttributes);
 
@@ -430,7 +431,7 @@ public class ScoringScene {
             }
 
             if (stat.getUnstableRate() > 0) {
-                if (beatmap != null) {
+                if (beatmapData != null) {
                     ppinfo.append("\n");
                 }
                 ppinfo.append(String.format(Locale.ENGLISH, "Error: %.2fms - %.2fms avg", stat.getNegativeHitError(), stat.getPositiveHitError()));
