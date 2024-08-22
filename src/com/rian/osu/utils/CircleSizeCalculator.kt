@@ -125,7 +125,7 @@ object CircleSizeCalculator {
      * @return The calculated osu!droid scale.
      */
     private fun droidCSToDroidScale(cs: Float, height: Float) =
-        max(1e-3f, height / 480 * (54.42f - cs * 4.48f) * 2 / 128 + DROID_SCALE_MULTIPLIER)
+        max(1e-3f, (height / 480 * (54.42 - cs * 4.48) * 2 / 128).toFloat() + DROID_SCALE_MULTIPLIER)
 
     /**
      * Converts osu!droid scale to osu!droid circle size.
