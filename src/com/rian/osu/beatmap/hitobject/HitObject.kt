@@ -106,7 +106,7 @@ abstract class HitObject(
     // Difficulty calculation object positions
 
     /**
-     * The scale of this [HitObject] in difficulty calculation.
+     * The osu!standard scale of this [HitObject] in difficulty calculation.
      */
     open var difficultyScale = 0f
 
