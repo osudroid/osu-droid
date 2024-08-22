@@ -214,71 +214,67 @@ data class BeatmapInfo(
         return other is BeatmapInfo && other.path == path
     }
 
-    companion object {
+}
 
-        @JvmStatic
-        fun from(data: RianBeatmap, parentPath: String, lastModified: Long, path: String): BeatmapInfo {
+fun BeatmapInfo(data: RianBeatmap, parentPath: String, lastModified: Long, path: String): BeatmapInfo {
 
-            var bpmMin = Float.MAX_VALUE
-            var bpmMax = 0f
+    var bpmMin = Float.MAX_VALUE
+    var bpmMax = 0f
 
-            // Timing points
-            data.controlPoints.timing.getControlPoints().fastForEach {
+    // Timing points
+    data.controlPoints.timing.getControlPoints().fastForEach {
 
-                val bpm = it.bpm.toFloat()
+        val bpm = it.bpm.toFloat()
 
-                bpmMin = if (bpmMin != Float.MAX_VALUE) min(bpmMin, bpm) else bpm
-                bpmMax = if (bpmMax != 0f) max(bpmMax, bpm) else bpm
-            }
-
-            val droidAttributes = BeatmapDifficultyCalculator.calculateDroidDifficulty(data)
-            val standardAttributes = BeatmapDifficultyCalculator.calculateStandardDifficulty(data)
-
-            return BeatmapInfo(
-
-                md5 = data.md5,
-                id = data.metadata.beatmapId.toLong(),
-                path = path,
-                audio = data.folder!! + '/' + data.general.audioFilename,
-                background = data.folder!! + '/' + data.events.backgroundFilename,
-
-                // Online
-                status = null, // TODO: Should we cache ranking status ?
-
-                // Parent set
-                parentPath = parentPath,
-                parentId = data.metadata.beatmapSetId,
-
-                // Metadata
-                title = data.metadata.title,
-                titleUnicode = data.metadata.titleUnicode,
-                artist = data.metadata.artist,
-                artistUnicode = data.metadata.artistUnicode,
-                creator = data.metadata.creator,
-                version = data.metadata.version,
-                tags = data.metadata.tags,
-                source = data.metadata.source,
-                dateImported = lastModified,
-
-                // Difficulty
-                approachRate = data.difficulty.ar,
-                overallDifficulty = data.difficulty.od,
-                circleSize = data.difficulty.cs,
-                hpDrainRate = data.difficulty.hp,
-                droidStarRating = GameHelper.Round(droidAttributes.starRating, 2),
-                standardStarRating = GameHelper.Round(standardAttributes.starRating, 2),
-                bpmMin = bpmMin,
-                bpmMax = bpmMax,
-                length = data.duration.toLong(),
-                previewTime = data.general.previewTime,
-                hitCircleCount = data.hitObjects.circleCount,
-                sliderCount = data.hitObjects.sliderCount,
-                spinnerCount = data.hitObjects.spinnerCount,
-                maxCombo = data.maxCombo
-            )
-        }
-
+        bpmMin = if (bpmMin != Float.MAX_VALUE) min(bpmMin, bpm) else bpm
+        bpmMax = if (bpmMax != 0f) max(bpmMax, bpm) else bpm
     }
+
+    val droidAttributes = BeatmapDifficultyCalculator.calculateDroidDifficulty(data)
+    val standardAttributes = BeatmapDifficultyCalculator.calculateStandardDifficulty(data)
+
+    return BeatmapInfo(
+
+        md5 = data.md5,
+        id = data.metadata.beatmapId.toLong(),
+        path = path,
+        audio = data.folder!! + '/' + data.general.audioFilename,
+        background = data.folder!! + '/' + data.events.backgroundFilename,
+
+        // Online
+        status = null, // TODO: Should we cache ranking status ?
+
+        // Parent set
+        parentPath = parentPath,
+        parentId = data.metadata.beatmapSetId,
+
+        // Metadata
+        title = data.metadata.title,
+        titleUnicode = data.metadata.titleUnicode,
+        artist = data.metadata.artist,
+        artistUnicode = data.metadata.artistUnicode,
+        creator = data.metadata.creator,
+        version = data.metadata.version,
+        tags = data.metadata.tags,
+        source = data.metadata.source,
+        dateImported = lastModified,
+
+        // Difficulty
+        approachRate = data.difficulty.ar,
+        overallDifficulty = data.difficulty.od,
+        circleSize = data.difficulty.cs,
+        hpDrainRate = data.difficulty.hp,
+        droidStarRating = GameHelper.Round(droidAttributes.starRating, 2),
+        standardStarRating = GameHelper.Round(standardAttributes.starRating, 2),
+        bpmMin = bpmMin,
+        bpmMax = bpmMax,
+        length = data.duration.toLong(),
+        previewTime = data.general.previewTime,
+        hitCircleCount = data.hitObjects.circleCount,
+        sliderCount = data.hitObjects.sliderCount,
+        spinnerCount = data.hitObjects.spinnerCount,
+        maxCombo = data.maxCombo
+    )
 }
 
 @Dao interface IBeatmapInfoDAO {
@@ -300,4 +296,49 @@ data class BeatmapInfo(
 }
 
 
+/**
+ * Defines a beatmap set, they're virtually created by the database using DISTINCT operation. This means it doesn't have
+ * a table.
+ */
+data class BeatmapSetInfo(
 
+    /**
+     * The ID.
+     */
+    @ColumnInfo(name = "parentId")
+    val id: Int?,
+
+    /**
+     * This can equal to the set ID or its MD5.
+     */
+    @ColumnInfo(name = "parentPath")
+    val path: String,
+
+    /**
+     * The list of beatmaps
+     */
+    @Relation(parentColumn = "parentPath", entityColumn = "parentPath")
+    val beatmaps: List<BeatmapInfo>
+
+) {
+
+    /**
+     * The beatmap set size.
+     */
+    val count
+        get() = beatmaps.size
+
+
+    /**
+     * Get a beatmap from its index.
+     */
+    @JvmName("getBeatmap")
+    operator fun get(index: Int): BeatmapInfo {
+        return beatmaps[index]
+    }
+
+    override fun equals(other: Any?): Boolean {
+        return other is BeatmapSetInfo && other.path == path
+    }
+
+}
