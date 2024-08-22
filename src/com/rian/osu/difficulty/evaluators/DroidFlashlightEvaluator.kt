@@ -42,7 +42,7 @@ object DroidFlashlightEvaluator {
             return 0.0
         }
 
-        val scalingFactor = 52 / current.obj.radius
+        val scalingFactor = 52 / current.obj.difficultyRadius
 
         var smallDistNerf = 1.0
         var cumulativeStrainTime = 0.0
@@ -55,7 +55,7 @@ object DroidFlashlightEvaluator {
 
             // Exclude overlapping objects that can be tapped at once.
             if (currentObject.obj !is Spinner) {
-                val jumpDistance = current.obj.stackedPosition
+                val jumpDistance = current.obj.difficultyStackedPosition
                     .getDistance(currentObject.obj.getStackedEndPosition())
 
                 cumulativeStrainTime += last.strainTime

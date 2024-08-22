@@ -94,8 +94,8 @@ class Slider(
     /**
      * The stacked end position of this [Slider].
      */
-    val stackedEndPosition
-        get() = endPosition + stackOffset
+    val difficultyStackedEndPosition
+        get() = endPosition + difficultyStackOffset
 
     /**
      * The distance of this [Slider].
@@ -196,11 +196,32 @@ class Slider(
             nestedHitObjects.forEach { it.stackHeight = value }
         }
 
-    override var scale = super.scale
+    override var difficultyScale = super.difficultyScale
         set(value) {
             field = value
 
-            nestedHitObjects.forEach { it.scale = value }
+            nestedHitObjects.forEach { it.difficultyScale = value }
+        }
+
+    override var gameplayScale = super.gameplayScale
+        set(value) {
+            field = value
+
+            nestedHitObjects.forEach { it.gameplayScale = value }
+        }
+
+    override var difficultyStackOffset = super.difficultyStackOffset
+        set(value) {
+            field = value
+
+            nestedHitObjects.forEach { it.difficultyStackOffset = value }
+        }
+
+    override var gameplayStackOffset = super.gameplayStackOffset
+        set(value) {
+            field = value
+
+            nestedHitObjects.forEach { it.gameplayStackOffset = value }
         }
 
     init {

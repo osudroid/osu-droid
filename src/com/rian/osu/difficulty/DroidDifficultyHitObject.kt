@@ -53,7 +53,7 @@ class DroidDifficultyHitObject(
 
     override val scalingFactor: Float
         get() {
-            val radius = obj.radius.toFloat()
+            val radius = obj.difficultyRadius.toFloat()
 
             // We will scale distances by this factor, so we can assume a uniform CircleSize among beatmaps.
             var scalingFactor = NORMALIZED_RADIUS / radius
@@ -122,7 +122,7 @@ class DroidDifficultyHitObject(
         }
 
         if (considerDistance) {
-            val position = obj.stackedPosition
+            val position = obj.difficultyStackedPosition
             var distance = previous.obj.getStackedEndPosition().getDistance(position)
 
             if (previous.obj is Slider && previous.obj.lazyEndPosition != null) {
@@ -132,7 +132,7 @@ class DroidDifficultyHitObject(
                 )
             }
 
-            return distance <= 2 * obj.radius
+            return distance <= 2 * obj.difficultyRadius
         }
 
         return true
@@ -178,14 +178,14 @@ class DroidDifficultyHitObject(
         }
 
         for (hitObject in prevVisibleObjects) {
-            val distance = obj.stackedPosition.getDistance(hitObject.getStackedEndPosition())
+            val distance = obj.difficultyStackedPosition.getDistance(hitObject.getStackedEndPosition())
             val deltaTime = startTime - hitObject.getEndTime() / clockRate
 
             applyToOverlappingFactor(distance, deltaTime)
         }
 
         for (hitObject in nextVisibleObjects) {
-            val distance = hitObject.stackedPosition.getDistance(obj.getStackedEndPosition())
+            val distance = hitObject.difficultyStackedPosition.getDistance(obj.getStackedEndPosition())
 
             // We are not using clock rate adjusted delta time here for note density calculation.
             val deltaTime = hitObject.startTime - obj.getEndTime()
@@ -204,7 +204,7 @@ class DroidDifficultyHitObject(
         // and delta time to prevent stream maps from being overweighted.
         overlappingFactor += max(
             0.0,
-            1 - distance / (2.5 * obj.radius)
+            1 - distance / (2.5 * obj.difficultyRadius)
         ) * 7.5 / (1 + exp(0.15 * (max(deltaTime, MIN_DELTA_TIME) - 75)))
     }
 }

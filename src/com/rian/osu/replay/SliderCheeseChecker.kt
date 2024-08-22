@@ -83,7 +83,7 @@ class SliderCheeseChecker(
             cursorLoopIndices.add(0)
         }
 
-        val objectRadius = objects.first().radius
+        val objectRadius = objects.first().difficultyRadius
         val sliderBallRadius = objectRadius * 2
 
         // Sort difficult sliders by index so that cursor loop indices work properly.
@@ -100,7 +100,7 @@ class SliderCheeseChecker(
             }
 
             val slider = objects[difficultSlider.index] as Slider
-            val sliderStartPosition = slider.stackedPosition
+            val sliderStartPosition = slider.difficultyStackedPosition
 
             // These time boundaries should consider the delta time between the previous and next
             // object as well as their hit accuracy. However, they are somewhat complicated to
@@ -237,7 +237,7 @@ class SliderCheeseChecker(
                 }
 
                 val nestedObject = slider.nestedHitObjects[i]
-                val nestedPosition = nestedObject.stackedPosition
+                val nestedPosition = nestedObject.difficultyStackedPosition
 
                 while (occurrenceLoopIndex < movements.size && movements[occurrenceLoopIndex].time < nestedObject.startTime) {
                     ++occurrenceLoopIndex

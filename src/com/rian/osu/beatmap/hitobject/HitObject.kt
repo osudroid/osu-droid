@@ -19,7 +19,7 @@ abstract class HitObject(
     var startTime: Double,
 
     /**
-     * The position of this [HitObject].
+     * The position of this [HitObject] in osu!pixels.
      */
     @JvmField
     var position: Vector2,
@@ -73,11 +73,6 @@ abstract class HitObject(
     open var stackHeight = 0
 
     /**
-     * The scale of this [HitObject].
-     */
-    open var scale = 0f
-
-    /**
      * The time at which the approach circle of this [HitObject] should appear before [startTime].
      */
     @JvmField
@@ -108,23 +103,53 @@ abstract class HitObject(
     @JvmField
     var kiai = false
 
-    /**
-     * The radius of this [HitObject].
-     */
-    val radius
-        get() = (OBJECT_RADIUS * scale).toDouble()
+    // Difficulty calculation object positions
 
     /**
-     * The stacked position of this [HitObject].
+     * The scale of this [HitObject] in difficulty calculation.
      */
-    open val stackedPosition
-        get() = position + stackOffset
+    open var difficultyScale = 0f
 
     /**
-     * The stack offset of this [HitObject].
+     * The radius of this [HitObject] in difficulty calculation, in osu!pixels.
      */
-    protected var stackOffset = Vector2(0f)
-        private set
+    val difficultyRadius
+        get() = (OBJECT_RADIUS * difficultyScale).toDouble()
+
+    /**
+     * The stack offset of this [HitObject] in difficulty calculation, in osu!pixels.
+     */
+    open var difficultyStackOffset = Vector2(0f)
+
+    /**
+     * The stacked position of this [HitObject] in difficulty calculation, in osu!pixels.
+     */
+    open val difficultyStackedPosition
+        get() = position + difficultyStackOffset
+
+    // Gameplay object positions
+
+    /**
+     * The scale of this [HitObject] in gameplay.
+     */
+    open var gameplayScale = 0f
+
+    /**
+     * The radius of this [HitObject] in gameplay, in "gameplay" distance units.
+     */
+    val gameplayRadius
+        get() = (OBJECT_RADIUS * gameplayScale).toDouble()
+
+    /**
+     * The stack offset of this [HitObject] in gameplay, in "gameplay" distance units.
+     */
+    open var gameplayStackOffset = Vector2(0f)
+
+    /**
+     * The stacked position of this [HitObject] in gameplay, in "gameplay" distance units.
+     */
+    open val gameplayStackedPosition
+        get() = position + gameplayStackOffset
 
     /**
      * Applies defaults to this [HitObject].
@@ -144,9 +169,9 @@ abstract class HitObject(
         // This adjustment is necessary for AR>10, otherwise timePreempt can become smaller leading to hit circles not fully fading in.
         timeFadeIn = 400 * min(1.0, timePreempt / PREEMPT_MIN)
 
-        scale = when (mode) {
+        difficultyScale = when (mode) {
             GameMode.Droid -> {
-                val droidScale = CircleSizeCalculator.droidCSToDroidScale(difficulty.cs)
+                val droidScale = CircleSizeCalculator.droidCSToDroidDifficultyScale(difficulty.cs)
                 val radius = CircleSizeCalculator.droidScaleToStandardRadius(droidScale)
                 val standardCS = CircleSizeCalculator.standardRadiusToStandardCS(radius, true)
 
@@ -156,9 +181,19 @@ abstract class HitObject(
             GameMode.Standard -> CircleSizeCalculator.standardCSToStandardScale(difficulty.cs, true)
         }
 
-        stackOffset = when (mode) {
-            GameMode.Droid -> Vector2(stackHeight * CircleSizeCalculator.standardScaleToDroidScale(scale, true) * 4f)
-            GameMode.Standard -> Vector2(stackHeight * scale * -6.4f)
+        difficultyStackOffset = when (mode) {
+            GameMode.Droid -> Vector2(stackHeight * CircleSizeCalculator.standardScaleToDroidDifficultyScale(difficultyScale, true) * 4f)
+            GameMode.Standard -> Vector2(stackHeight * difficultyScale * -6.4f)
+        }
+
+        gameplayScale = when (mode) {
+            GameMode.Droid -> CircleSizeCalculator.droidCSToDroidGameplayScale(difficulty.cs)
+            GameMode.Standard -> difficultyScale
+        }
+
+        gameplayStackOffset = when (mode) {
+            GameMode.Droid -> Vector2(stackHeight * gameplayScale * 4f)
+            GameMode.Standard -> difficultyStackOffset.copy()
         }
     }
 

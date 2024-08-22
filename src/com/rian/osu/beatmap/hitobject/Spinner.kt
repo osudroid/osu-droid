@@ -26,7 +26,9 @@ class Spinner(
         }
     }
 
-    override val stackedPosition = position
+    override val difficultyStackedPosition = position
+
+    override val gameplayStackedPosition = position
 
     override val duration: Double
         get() = endTime - startTime
