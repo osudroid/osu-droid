@@ -1095,18 +1095,16 @@ public class SongMenu implements IUpdateHandler, MenuItemListener,
         changeDimensionInfo(beatmapInfo);
         Execution.async(() -> {
             try (var parser = new BeatmapParser(beatmapInfo.getPath())) {
-                var beatmap = parser.parse(true);
+                var data = parser.parse(true);
 
-                if (beatmap == null) {
+                if (data == null) {
                     setStarsDisplay(0);
                     return;
                 }
 
-                var newInfo = BeatmapInfo(beatmap, beatmapInfo.getParentPath(), beatmapInfo.getDateImported(), beatmapInfo.getPath(), true);
-
-                // Update the record in the database.
+                var newInfo = BeatmapInfo(data, beatmapInfo.getParentPath(), beatmapInfo.getDateImported(), beatmapInfo.getPath(), true);
                 beatmapInfo.apply(newInfo);
-                DatabaseManager.getBeatmapInfoTable().update(beatmapInfo);
+                DatabaseManager.getBeatmapInfoTable().update(newInfo);
 
                 changeDimensionInfo(beatmapInfo);
 
@@ -1124,7 +1122,7 @@ public class SongMenu implements IUpdateHandler, MenuItemListener,
                 switch (Config.getDifficultyAlgorithm()) {
                     case droid -> {
                         var attributes = BeatmapDifficultyCalculator.calculateDroidDifficulty(
-                            beatmap,
+                            data,
                             parameters
                         );
 
@@ -1133,7 +1131,7 @@ public class SongMenu implements IUpdateHandler, MenuItemListener,
 
                     case standard -> {
                         var attributes = BeatmapDifficultyCalculator.calculateStandardDifficulty(
-                            beatmap,
+                            data,
                             parameters
                         );
 

@@ -33,7 +33,8 @@ public class LibraryManager {
 
     private static boolean isCaching = true;
 
-    private static ArrayList<BeatmapInfo> pendingBeatmaps = new ArrayList<>();
+
+    private static final ArrayList<BeatmapInfo> pendingBeatmaps = new ArrayList<>();
 
 
     private LibraryManager() {
@@ -324,6 +325,7 @@ public class LibraryManager {
 
             try {
                 DatabaseManager.getBeatmapInfoTable().insertAll(pendingBeatmaps);
+                pendingBeatmaps.clear();
             } catch (Exception e) {
                 Log.e("LibraryManager", "Failed to insert beatmaps into database.", e);
                 return;

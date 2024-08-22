@@ -290,7 +290,9 @@ public class MainActivity extends BaseGameActivity implements
             Config.loadSkins();
             loadBeatmapLibrary();
 
-            SplashScene.INSTANCE.playWelcomeAnimation(() -> {
+            SplashScene.INSTANCE.playWelcomeAnimation();
+
+            Execution.delayed(2500, () -> {
 
                 UpdateManager.INSTANCE.onActivityStart();
                 GlobalManager.getInstance().setInfo("");

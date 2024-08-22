@@ -348,7 +348,7 @@ fun BeatmapInfo(data: RianBeatmap, parentPath: String, lastModified: Long, path:
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     fun insertAll(beatmapInfo: List<BeatmapInfo>)
 
-    @Update
+    @Update(onConflict = OnConflictStrategy.REPLACE)
     fun update(beatmapInfo: BeatmapInfo)
 
     @Query("DELETE FROM BeatmapInfo WHERE parentPath = :path")
