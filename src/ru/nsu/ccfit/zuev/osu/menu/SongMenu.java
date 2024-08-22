@@ -1072,7 +1072,7 @@ public class SongMenu implements IUpdateHandler, MenuItemListener,
         beatmapDifficultyText.setText(dimensionStringBuilder.toString());
     }
 
-    public void switchDifficultyAlgorithm() {
+    public void reloadCurrentSelection() {
         updateInfo(selectedBeatmap);
 
         if (selectedItem != null) {
@@ -1622,9 +1622,16 @@ public class SongMenu implements IUpdateHandler, MenuItemListener,
         }
 
         Execution.updateThread(() -> {
-            reload();
-            show();
-            select();
+
+            // If the sort order is related to difficulty, we need to reload the menu items.
+            if (sortOrder == SortOrder.DroidStars || sortOrder == SortOrder.StandardStars) {
+                reload();
+                show();
+                select();
+            } else {
+                reloadCurrentSelection();
+            }
+
         });
     }
 

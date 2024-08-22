@@ -52,7 +52,7 @@ class DifficultyAlgorithmSwitcher : AnimSprite(
         if (Multiplayer.isConnected) {
             RoomScene.switchDifficultyAlgorithm()
         } else {
-            getGlobal().songMenu.switchDifficultyAlgorithm()
+            getGlobal().songMenu.reloadCurrentSelection()
         }
 
         onDeselect()
