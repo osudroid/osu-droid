@@ -103,16 +103,15 @@ public class Slider extends GameObject {
     }
 
     public void init(final GameObjectListener listener, final Scene scene,
-                     final PointF pos, final float offset, final float time, final float r, final float g,
-                     final float b, final float scale, int num, final int sound, final int repeats,
-                     final float length, final String data, final BeatmapControlPoints controlPoints, final String customSound,
+                     final PointF pos, final float offset, final float time, final RGBColor comboColor,
+                     final float scale, int num, final int sound, final int repeats, final float length,
+                     final String data, final BeatmapControlPoints controlPoints, final String customSound,
                      final String tempSound, final boolean isFirstNote, final double realTime) {
-        init(listener, scene, pos, offset, time, r, g, b, scale, num, sound, repeats, length, data, controlPoints, customSound, tempSound, isFirstNote, realTime, null);
+        init(listener, scene, pos, offset, time, comboColor, scale, num, sound, repeats, length, data, controlPoints, customSound, tempSound, isFirstNote, realTime, null);
     }
 
     public void init(final GameObjectListener listener, final Scene scene,
-                     final PointF pos, final float offset, final float time, final float r, final float g,
-                     final float b, final float scale, int num, final int sound, final int repeats,
+                     final PointF pos, final float offset, final float time, final RGBColor comboColor, final float scale, int num, final int sound, final int repeats,
                      final float length, final String data, final BeatmapControlPoints controlPoints, final String customSound,
                      final String tempSound, final boolean isFirstNote, final double realTime, SliderPath sliderPath) {
         this.listener = listener;
@@ -160,11 +159,11 @@ public class Slider extends GameObject {
         tickSet.clear();
         kiai = GameHelper.isKiai();
         preStageFinish = false;
-        color.set(r, g, b);
+        color.set(comboColor.r(), comboColor.g(), comboColor.b());
         if (!OsuSkin.get().isSliderFollowComboColor()) {
             color = new RGBColor(OsuSkin.get().getSliderBodyColor());
         }
-        circleColor.set(r, g, b);
+        circleColor.set(comboColor.r(), comboColor.g(), comboColor.b());
 
         if (soundId.length < repeats + 1) {
             soundId = new int[repeats + 1];
@@ -200,7 +199,7 @@ public class Slider extends GameObject {
         soundIdIndex = 1;
 
         startCircle.setScale(scale);
-        startCircle.setColor(r, g, b);
+        startCircle.setColor(comboColor.r(), comboColor.g(), comboColor.b());
         startCircle.setAlpha(0);
         startPosition = pos;
         Utils.putSpriteAnchorCenter(pos, startCircle);
@@ -209,7 +208,7 @@ public class Slider extends GameObject {
         startOverlay.setAlpha(0);
         Utils.putSpriteAnchorCenter(pos, startOverlay);
 
-        approachCircle.setColor(r, g, b);
+        approachCircle.setColor(comboColor.r(), comboColor.g(), comboColor.b());
         approachCircle.setScale(scale * 3);
         approachCircle.setAlpha(0);
         Utils.putSpriteAnchorCenter(pos, approachCircle);
@@ -223,7 +222,7 @@ public class Slider extends GameObject {
             endPos = path.points.get(path.points.size() - 1);
         }
         endCircle.setScale(scale);
-        endCircle.setColor(r, g, b);
+        endCircle.setColor(comboColor.r(), comboColor.g(), comboColor.b());
         endCircle.setAlpha(0);
         endPosition = endPos;
         Utils.putSpriteAnchorCenter(Config.isSnakingInSliders() ? pos : endPos, endCircle);

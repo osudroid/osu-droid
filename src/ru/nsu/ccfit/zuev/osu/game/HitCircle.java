@@ -38,8 +38,8 @@ public class HitCircle extends GameObject {
     }
 
     public void init(final GameObjectListener listener, final Scene pScene,
-                     final com.rian.osu.beatmap.hitobject.HitCircle beatmapCircle, final float r, final float g,
-                     final float b, final int sound, final String tempSound, final boolean isFirstNote) {
+                     final com.rian.osu.beatmap.hitobject.HitCircle beatmapCircle, final RGBColor comboColor,
+                     final int sound, final String tempSound, final boolean isFirstNote) {
         // Storing parameters into fields
         //Log.i("note-ini", time + "s");
         this.replayObjectData = null;
@@ -55,7 +55,7 @@ public class HitCircle extends GameObject {
         passedTime = 0;
         startHit = false;
         kiai = GameHelper.isKiai();
-        color.set(r, g, b);
+        color.set(comboColor.r(), comboColor.g(), comboColor.b());
 
         if (!Utils.isEmpty(tempSound)) {
             final String[] group = tempSound.split(":");
@@ -69,7 +69,7 @@ public class HitCircle extends GameObject {
         radius *= radius;
 
         // Initializing sprites
-        circle.setColor(r, g, b);
+        circle.setColor(comboColor.r(), comboColor.g(), comboColor.b());
         circle.setScale(scale);
         circle.setAlpha(0);
         Utils.putSpriteAnchorCenter(pos, circle);
@@ -78,7 +78,7 @@ public class HitCircle extends GameObject {
         overlay.setAlpha(0);
         Utils.putSpriteAnchorCenter(pos, overlay);
 
-        approachCircle.setColor(r, g, b);
+        approachCircle.setColor(comboColor.r(), comboColor.g(), comboColor.b());
         approachCircle.setScale(scale * 3);
         approachCircle.setAlpha(0);
         Utils.putSpriteAnchorCenter(pos, approachCircle);

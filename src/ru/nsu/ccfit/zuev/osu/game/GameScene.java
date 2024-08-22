@@ -1462,8 +1462,9 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
                 }
             }
 
+            final RGBColor comboColor = getComboColor(obj.getComboIndexWithOffsets());
+
             if ((objDefine & 1) > 0) {
-                final RGBColor col = getComboColor(obj.getComboIndexWithOffsets());
                 final HitCircle circle = GameObjectPool.getInstance().getCircle();
                 String tempSound = null;
                 if (params.length > 5) {
@@ -1471,8 +1472,8 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
                 }
 
                 circle.init(this, mgScene,
-                        (com.rian.osu.beatmap.hitobject.HitCircle) obj, col.r(), col.g(), col.b(),
-                        Integer.parseInt(params[4]), tempSound, isFirst);
+                        (com.rian.osu.beatmap.hitobject.HitCircle) obj, comboColor, Integer.parseInt(params[4]),
+                        tempSound, isFirst);
                 addObject(circle);
                 isFirst = false;
 
@@ -1531,7 +1532,6 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
                 }
 
             } else if ((objDefine & 2) > 0) {
-                final RGBColor col = getComboColor(comboNum);
                 final String soundspec = params.length > 8 ? params[8] : null;
                 final Slider slider = GameObjectPool.getInstance().getSlider();
                 String tempSound = null;
@@ -1541,7 +1541,7 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
                 if (Config.isCalculateSliderPathInGameStart()){
                     SliderPath sliderPath = getSliderPath(sliderIndex);
                     slider.init(this, mgScene, pos, data.getPosOffset(), data.getTime() - secPassed,
-                        col.r(), col.g(), col.b(), scale, currentComboNum,
+                        comboColor, scale, currentComboNum,
                         Integer.parseInt(params[4]),
                         Integer.parseInt(params[6]),
                         Float.parseFloat(params[7]), params[5],
@@ -1551,7 +1551,7 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
                 }
                 else{
                     slider.init(this, mgScene, pos, data.getPosOffset(), data.getTime() - secPassed,
-                    col.r(), col.g(), col.b(), scale, currentComboNum,
+                    comboColor, scale, currentComboNum,
                     Integer.parseInt(params[4]),
                     Integer.parseInt(params[6]),
                     Float.parseFloat(params[7]), params[5],
