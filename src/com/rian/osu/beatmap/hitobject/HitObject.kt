@@ -73,13 +73,13 @@ abstract class HitObject(
     open var stackHeight = 0
 
     /**
-     * The time at which the approach circle of this [HitObject] should appear before [startTime].
+     * The time at which the approach circle of this [HitObject] should appear before [startTime] in milliseconds.
      */
     @JvmField
     var timePreempt = 600.0
 
     /**
-     * The time at which this [HitObject] should fade after this [HitObject] appears with respect to [timePreempt].
+     * The time at which this [HitObject] should fade after this [HitObject] appears with respect to [timePreempt] in milliseconds.
      */
     @JvmField
     var timeFadeIn = 400.0
