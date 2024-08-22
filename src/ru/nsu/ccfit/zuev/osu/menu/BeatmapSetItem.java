@@ -174,7 +174,7 @@ public class BeatmapSetItem {
 
         var beatmapInfo = beatmapSetInfo.getBeatmaps().get(0);
 
-        final String musicFileName = beatmapInfo.getAudio();
+        final String musicFileName = beatmapInfo.getAudioPath();
         if (reloadMusic) {
             listener.get().playMusic(musicFileName, beatmapInfo.getPreviewTime());
         }
@@ -498,11 +498,11 @@ public class BeatmapSetItem {
     public int tryGetCorrespondingBeatmapId(String oldBeatmapPath){
         if (beatmapId <= -1){
             for (var i = beatmapSetInfo.getCount() - 1; i >= 0; i--) {
-                if (beatmapSetInfo.getBeatmap(i).getPath().equals(oldBeatmapPath)){
+                if (beatmapSetInfo.getBeatmap(i).getFilename().equals(oldBeatmapPath)){
                     return i;
                 }
             }
-        } else if (beatmapSetInfo.getBeatmap(beatmapId).getPath().equals(oldBeatmapPath)){
+        } else if (beatmapSetInfo.getBeatmap(beatmapId).getFilename().equals(oldBeatmapPath)){
             return beatmapId;
         }
         return -1;

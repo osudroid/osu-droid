@@ -144,7 +144,7 @@ public class LibraryManager {
 
                 if (beatmap.events.videoFilename != null && Config.isDeleteUnsupportedVideos()) {
                     try {
-                        var videoFile = new File(beatmapInfo.getPath(), beatmap.events.videoFilename);
+                        var videoFile = new File(beatmapInfo.getFilename(), beatmap.events.videoFilename);
 
                         if (!VideoTexture.Companion.isSupportedVideo(videoFile)) {
                             //noinspection ResultOfMethodCallIgnored

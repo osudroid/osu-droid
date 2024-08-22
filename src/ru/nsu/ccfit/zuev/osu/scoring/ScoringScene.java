@@ -403,7 +403,7 @@ public class ScoringScene {
 
                         // Don't try to load online replay
                         if (replay != null && beatmapToReplay != null && !replay.startsWith("https://")) {
-                            var beatmapFile = new File(beatmapToReplay.getPath());
+                            var beatmapFile = new File(beatmapToReplay.getFilename());
                             var replayLoad = new Replay();
                             replayLoad.setObjectCount(beatmapToReplay.getTotalHitObjectCount());
                             replayLoad.setMap(beatmapFile.getParentFile().getName(), beatmapFile.getName(), mapMD5);
@@ -562,7 +562,7 @@ public class ScoringScene {
         if (songService != null) {
             songService.stop();
 //            songService.preLoadWithLoop(game.filePath);
-            songService.preLoad(beatmapInfo.getAudio());
+            songService.preLoad(beatmapInfo.getAudioPath());
             songService.play();
         }
     }

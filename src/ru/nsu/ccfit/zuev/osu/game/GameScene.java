@@ -346,7 +346,7 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
                 beatmap = parser.parse(true, GameMode.Droid);
             } else {
                 Debug.e("startGame: cannot open file");
-                ToastLogger.showText(StringTable.format(R.string.message_error_open, beatmapInfo.getPath()), true);
+                ToastLogger.showText(StringTable.format(R.string.message_error_open, beatmapInfo.getFilename()), true);
                 return false;
             }
         }
@@ -370,7 +370,7 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
         }
 
         try {
-            var musicFile = new File(beatmapInfo.getAudio());
+            var musicFile = new File(beatmapInfo.getAudioPath());
 
             if (!musicFile.exists()) {
                 throw new FileNotFoundException(musicFile.getPath());
@@ -555,7 +555,7 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
         offsetSum = 0;
         offsetRegs = 0;
 
-        File beatmapFile = new File(beatmapInfo.getPath());
+        File beatmapFile = new File(beatmapInfo.getFilename());
         beatmapMD5 = beatmapInfo.getMD5();
         replaying = false;
         replay = new Replay();
@@ -578,7 +578,7 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
             OnlineScoring.getInstance().startPlay(beatmapInfo, beatmapMD5);
 
         if (Config.isEnableStoryboard()) {
-            storyboardSprite.loadStoryboard(beatmapInfo.getPath());
+            storyboardSprite.loadStoryboard(beatmapInfo.getFilename());
         }
 
         GameObjectPool.getInstance().preload();
@@ -1615,7 +1615,7 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
             if (replay != null && !replaying) {
                 String ctime = String.valueOf(System.currentTimeMillis());
                 replayFile = Config.getCorePath() + "Scores/"
-                        + MD5Calculator.getStringMD5(lastBeatmapInfo.getPath() + ctime)
+                        + MD5Calculator.getStringMD5(lastBeatmapInfo.getFilename() + ctime)
                         + ctime.substring(0, Math.min(3, ctime.length())) + ".odr";
                 replay.setStat(stat);
                 replay.save(replayFile);
@@ -2734,7 +2734,7 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
             //save replay
             String ctime = String.valueOf(System.currentTimeMillis());
             replayFile = Config.getCorePath() + "Scores/"
-                    + MD5Calculator.getStringMD5(lastBeatmapInfo.getPath() + ctime)
+                    + MD5Calculator.getStringMD5(lastBeatmapInfo.getFilename() + ctime)
                     + ctime.substring(0, Math.min(3, ctime.length())) + ".odr";
             replay.setStat(stat);
             replay.save(replayFile);

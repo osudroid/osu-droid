@@ -191,7 +191,4 @@ interface IScoreInfoDAO {
     @Query("DELETE FROM ScoreInfo WHERE id = :id")
     fun deleteScore(id: Int): Int
 
-    @Query("SELECT id FROM ScoreInfo WHERE beatmapFilename = :beatmapFilename ORDER BY score DESC LIMIT 1")
-    fun getBestScoreId(beatmapFilename: String): Int?
-
 }

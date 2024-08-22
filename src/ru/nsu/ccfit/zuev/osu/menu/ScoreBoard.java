@@ -198,7 +198,7 @@ public class ScoreBoard extends Entity implements ScrollDetector.IScrollDetector
             @Override
             public void run() {
 
-                File beatmapFile = new File(beatmapInfo.getPath());
+                File beatmapFile = new File(beatmapInfo.getFilename());
                 List<String> scores;
 
                 try {
@@ -305,7 +305,7 @@ public class ScoreBoard extends Entity implements ScrollDetector.IScrollDetector
 
             @Override
             public void run() {
-                var scores = DatabaseManager.getScoreInfoTable().getBeatmapScores(beatmap.getPath());
+                var scores = DatabaseManager.getScoreInfoTable().getBeatmapScores(beatmap.getFilename());
 
                 if (scores.isEmpty() || !isActive()) {
 

@@ -19,10 +19,10 @@ import com.rian.osu.beatmap.Beatmap as RianBeatmap
 data class BeatmapInfo(
 
     /**
-     * The beatmap path.
+     * The `.osu` filename.
      */
     @PrimaryKey
-    val path: String,
+    val filename: String,
 
     /**
      * The beatmap MD5.
@@ -38,12 +38,12 @@ data class BeatmapInfo(
     /**
      * The audio filename.
      */
-    val audio: String,
+    val audioFilename: String,
 
     /**
      * The background filename.
      */
-    val background: String?,
+    val backgroundFilename: String?,
 
 
     // Online
@@ -190,6 +190,25 @@ data class BeatmapInfo(
 ) {
 
     /**
+     * The `.osu` file path.
+     */
+    val path
+        get() = "${Config.getBeatmapPath()}/$parentPath/$filename"
+
+    /**
+     * The audio file path.
+     */
+    val audioPath
+        get() = "${Config.getBeatmapPath()}/$parentPath/$audioFilename"
+
+    /**
+     * The background file path.
+     */
+    val backgroundPath
+        get() = "${Config.getBeatmapPath()}/$parentPath/$backgroundFilename"
+
+
+    /**
      * The total hit object count.
      */
     val totalHitObjectCount
@@ -236,9 +255,9 @@ fun BeatmapInfo(data: RianBeatmap, parentPath: String, lastModified: Long, path:
 
         md5 = data.md5,
         id = data.metadata.beatmapId.toLong(),
-        path = path,
-        audio = data.folder!! + '/' + data.general.audioFilename,
-        background = data.folder!! + '/' + data.events.backgroundFilename,
+        filename = data.filename,
+        audioFilename = data.general.audioFilename,
+        backgroundFilename = data.events.backgroundFilename,
 
         // Online
         status = null, // TODO: Should we cache ranking status ?
