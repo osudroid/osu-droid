@@ -104,8 +104,8 @@ public class HitCircle extends GameObject {
         float fadeInDuration;
 
         if (GameHelper.isHidden()) {
-            fadeInDuration = time * 0.4f * GameHelper.getTimeMultiplier();
-            float fadeOutDuration = time * 0.3f * GameHelper.getTimeMultiplier();
+            fadeInDuration = time * 0.4f / GameHelper.getSpeedMultiplier();
+            float fadeOutDuration = time * 0.3f / GameHelper.getSpeedMultiplier();
 
             number.registerEntityModifier(Modifiers.sequence(
                     Modifiers.fadeIn(fadeInDuration),
@@ -124,7 +124,7 @@ public class HitCircle extends GameObject {
             // This uniform speedup is hard to match 1:1, however we can at least make AR>10 (via mods) feel good by extending the upper linear function above.
             // Note that this doesn't exactly match the AR>10 visuals as they're classically known, but it feels good.
             // This adjustment is necessary for AR>10, otherwise TimePreempt can become smaller leading to hitcircles not fully fading in.
-            fadeInDuration = 0.4f * Math.min(1, time / 0.45f) * GameHelper.getTimeMultiplier();
+            fadeInDuration = 0.4f * Math.min(1, time / 0.45f) / GameHelper.getSpeedMultiplier();
 
             circle.registerEntityModifier(Modifiers.fadeIn(fadeInDuration));
             overlay.registerEntityModifier(Modifiers.fadeIn(fadeInDuration));
@@ -132,8 +132,8 @@ public class HitCircle extends GameObject {
         }
 
         if (approachCircle.isVisible()) {
-            approachCircle.registerEntityModifier(Modifiers.alpha(Math.min(fadeInDuration * 2, time * GameHelper.getTimeMultiplier()), 0, 0.9f));
-            approachCircle.registerEntityModifier(Modifiers.scale(time * GameHelper.getTimeMultiplier(), scale * 3, scale));
+            approachCircle.registerEntityModifier(Modifiers.alpha(Math.min(fadeInDuration * 2, time / GameHelper.getSpeedMultiplier()), 0, 0.9f));
+            approachCircle.registerEntityModifier(Modifiers.scale(time / GameHelper.getSpeedMultiplier(), scale * 3, scale));
         }
 
         scene.attachChild(number, 0);
