@@ -48,7 +48,7 @@ data class BeatmapOptions(
 }
 
 
-@Deprecated("This class exist only to be able to migrate old beatmap properties to the new system. Should not be used.")
+@Deprecated("This class is used to do legacy migration, should not be used and will be removed in future releases.")
 class BeatmapProperties : Serializable {
 
     var offset = 0
