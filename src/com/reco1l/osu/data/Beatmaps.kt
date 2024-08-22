@@ -13,8 +13,8 @@ import com.rian.osu.beatmap.Beatmap as RianBeatmap
 /// Ported from rimu! project
 
 @Entity(indices = [
-    Index(name = "parentPathIdx", value = ["parentPath"]),
-    Index(name = "parentIdx", value = ["parentPath", "parentId"])
+    Index(name = "setDirectoryIdx", value = ["setDirectory"]),
+    Index(name = "setIdx", value = ["setDirectory", "setId"])
 ])
 data class BeatmapInfo(
 
@@ -57,14 +57,14 @@ data class BeatmapInfo(
     // Parent set
 
     /**
-     * This indicates the parent set path.
+     * The beatmap set directory.
      */
-    val parentPath: String,
+    val setDirectory: String,
 
     /**
-     * This indicates the parent set ID.
+     * The beatmap set ID.
      */
-    val parentId: Int?,
+    val setId: Int?,
 
 
     // Metadata
@@ -193,20 +193,19 @@ data class BeatmapInfo(
      * The `.osu` file path.
      */
     val path
-        get() = "${Config.getBeatmapPath()}/$parentPath/$filename"
+        get() = "${Config.getBeatmapPath()}/$setDirectory/$filename"
 
     /**
      * The audio file path.
      */
     val audioPath
-        get() = "${Config.getBeatmapPath()}/$parentPath/$audioFilename"
+        get() = "${Config.getBeatmapPath()}/$setDirectory/$audioFilename"
 
     /**
      * The background file path.
      */
     val backgroundPath
-        get() = "${Config.getBeatmapPath()}/$parentPath/$backgroundFilename"
-
+        get() = "${Config.getBeatmapPath()}/$setDirectory/$backgroundFilename"
 
     /**
      * The total hit object count.
@@ -263,8 +262,8 @@ fun BeatmapInfo(data: RianBeatmap, parentPath: String, lastModified: Long, path:
         status = null, // TODO: Should we cache ranking status ?
 
         // Parent set
-        parentPath = parentPath,
-        parentId = data.metadata.beatmapSetId,
+        setDirectory = parentPath,
+        setId = data.metadata.beatmapSetId,
 
         // Metadata
         title = data.metadata.title,
@@ -300,13 +299,13 @@ fun BeatmapInfo(data: RianBeatmap, parentPath: String, lastModified: Long, path:
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     fun insert(beatmapInfo: BeatmapInfo): Long
 
-    @Query("DELETE FROM BeatmapInfo WHERE parentPath = :beatmapSetKey")
-    fun deleteBeatmapSet(beatmapSetKey: String)
+    @Query("DELETE FROM BeatmapInfo WHERE setDirectory = :directory")
+    fun deleteBeatmapSet(directory: String)
 
-    @Query("SELECT DISTINCT parentPath, parentId FROM BeatmapInfo")
+    @Query("SELECT DISTINCT setDirectory, setId FROM BeatmapInfo")
     fun getBeatmapSetList() : List<BeatmapSetInfo>
 
-    @Query("SELECT DISTINCT parentPath FROM BeatmapInfo")
+    @Query("SELECT DISTINCT setDirectory FROM BeatmapInfo")
     fun getBeatmapSetPaths() : List<String>
 
     @Query("DELETE FROM BeatmapInfo")

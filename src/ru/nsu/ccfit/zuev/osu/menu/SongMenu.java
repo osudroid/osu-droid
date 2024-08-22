@@ -1094,7 +1094,7 @@ public class SongMenu implements IUpdateHandler, MenuItemListener,
             for (int j = library.size() - 1; j >= 0; j--) {
                 var set = library.get(j);
 
-                if (item.getBeatmapSetInfo().getPath().equals(set.getPath())) {
+                if (item.getBeatmapSetInfo().getDirectory().equals(set.getDirectory())) {
                     item.setBeatmapSetInfo(set);
                     break;
                 }
@@ -1111,7 +1111,7 @@ public class SongMenu implements IUpdateHandler, MenuItemListener,
         String tinfoStr = beatmapInfo.getTitleText() + " - " + beatmapInfo.getArtistText() + " [" + beatmapInfo.getVersion() + "]";
         String mapperStr = "Beatmap by " + beatmapInfo.getCreator();
         String binfoStr2 = String.format(StringTable.get(R.string.binfoStr2),
-                beatmapInfo.getHitCircleCount(), beatmapInfo.getSliderCount(), beatmapInfo.getSpinnerCount(), beatmapInfo.getParentId());
+                beatmapInfo.getHitCircleCount(), beatmapInfo.getSliderCount(), beatmapInfo.getSpinnerCount(), beatmapInfo.getSetId());
         beatmapMetadataText.setText(tinfoStr);
         beatmapCreatorText.setText(mapperStr);
         beatmapHitObjectsText.setText(binfoStr2);
@@ -1126,7 +1126,7 @@ public class SongMenu implements IUpdateHandler, MenuItemListener,
                 }
 
                 // Replace the entry in the database in case of changes.
-                var newBeatmapInfo = BeatmapInfo(beatmap, beatmapInfo.getParentPath(), beatmapInfo.getDateImported(), beatmapInfo.getFilename());
+                var newBeatmapInfo = BeatmapInfo(beatmap, beatmapInfo.getSetDirectory(), beatmapInfo.getDateImported(), beatmapInfo.getFilename());
                 DatabaseManager.getBeatmapInfoTable().insert(newBeatmapInfo);
                 LibraryManager.loadLibrary();
 
@@ -1479,7 +1479,7 @@ public class SongMenu implements IUpdateHandler, MenuItemListener,
             var i = items.size() - 1;
             while (i >= 0) {
                 var item = items.get(i);
-                if (item.getBeatmapSetInfo().getPath().equals(beatmapInfo.getParentPath())) {
+                if (item.getBeatmapSetInfo().getDirectory().equals(beatmapInfo.getSetDirectory())) {
                     secondsSinceLastSelect = 2;
                     item.select(false, true);
                     break;

@@ -112,7 +112,7 @@ public class LibraryManager {
 
     public static void deleteBeatmapSet(BeatmapSetInfo beatmapSet) {
         FilesKt.deleteRecursively(new File(beatmapSet.getPath()));
-        DatabaseManager.getBeatmapInfoTable().deleteBeatmapSet(beatmapSet.getPath());
+        DatabaseManager.getBeatmapInfoTable().deleteBeatmapSet(beatmapSet.getDirectory());
         loadLibrary();
     }
 
@@ -218,7 +218,7 @@ public class LibraryManager {
 
         for (int i = 0; i < library.size(); i++) {
 
-            if (library.get(i).getPath().equals(info.getParentPath())) {
+            if (library.get(i).getDirectory().equals(info.getSetDirectory())) {
                 currentIndex = i;
                 return;
             }
