@@ -210,75 +210,70 @@ data class BeatmapInfo(
         get() = if (Config.isForceRomanized()) artist else artistUnicode.takeUnless { it.isBlank() } ?: artist
 
 
-    override fun equals(other: Any?): Boolean {
-        return other is BeatmapInfo && other.path == path
+}
+
+/**
+ * Represents a beatmap information.
+ */
+fun BeatmapInfo(data: RianBeatmap, parentPath: String, lastModified: Long, path: String): BeatmapInfo {
+
+    var bpmMin = Float.MAX_VALUE
+    var bpmMax = 0f
+
+    // Timing points
+    data.controlPoints.timing.getControlPoints().fastForEach {
+
+        val bpm = it.bpm.toFloat()
+
+        bpmMin = if (bpmMin != Float.MAX_VALUE) min(bpmMin, bpm) else bpm
+        bpmMax = if (bpmMax != 0f) max(bpmMax, bpm) else bpm
     }
 
-    companion object {
+    val droidAttributes = BeatmapDifficultyCalculator.calculateDroidDifficulty(data)
+    val standardAttributes = BeatmapDifficultyCalculator.calculateStandardDifficulty(data)
 
-        @JvmStatic
-        fun from(data: RianBeatmap, parentPath: String, lastModified: Long, path: String): BeatmapInfo {
+    return BeatmapInfo(
 
-            var bpmMin = Float.MAX_VALUE
-            var bpmMax = 0f
+        md5 = data.md5,
+        id = data.metadata.beatmapId.toLong(),
+        path = path,
+        audio = data.folder!! + '/' + data.general.audioFilename,
+        background = data.folder!! + '/' + data.events.backgroundFilename,
 
-            // Timing points
-            data.controlPoints.timing.getControlPoints().fastForEach {
+        // Online
+        status = null, // TODO: Should we cache ranking status ?
 
-                val bpm = it.bpm.toFloat()
+        // Parent set
+        parentPath = parentPath,
+        parentId = data.metadata.beatmapSetId,
 
-                bpmMin = if (bpmMin != Float.MAX_VALUE) min(bpmMin, bpm) else bpm
-                bpmMax = if (bpmMax != 0f) max(bpmMax, bpm) else bpm
-            }
+        // Metadata
+        title = data.metadata.title,
+        titleUnicode = data.metadata.titleUnicode,
+        artist = data.metadata.artist,
+        artistUnicode = data.metadata.artistUnicode,
+        creator = data.metadata.creator,
+        version = data.metadata.version,
+        tags = data.metadata.tags,
+        source = data.metadata.source,
+        dateImported = lastModified,
 
-            val droidAttributes = BeatmapDifficultyCalculator.calculateDroidDifficulty(data)
-            val standardAttributes = BeatmapDifficultyCalculator.calculateStandardDifficulty(data)
-
-            return BeatmapInfo(
-
-                md5 = data.md5,
-                id = data.metadata.beatmapId.toLong(),
-                path = path,
-                audio = data.folder!! + '/' + data.general.audioFilename,
-                background = data.folder!! + '/' + data.events.backgroundFilename,
-
-                // Online
-                status = null, // TODO: Should we cache ranking status ?
-
-                // Parent set
-                parentPath = parentPath,
-                parentId = data.metadata.beatmapSetId,
-
-                // Metadata
-                title = data.metadata.title,
-                titleUnicode = data.metadata.titleUnicode,
-                artist = data.metadata.artist,
-                artistUnicode = data.metadata.artistUnicode,
-                creator = data.metadata.creator,
-                version = data.metadata.version,
-                tags = data.metadata.tags,
-                source = data.metadata.source,
-                dateImported = lastModified,
-
-                // Difficulty
-                approachRate = data.difficulty.ar,
-                overallDifficulty = data.difficulty.od,
-                circleSize = data.difficulty.cs,
-                hpDrainRate = data.difficulty.hp,
-                droidStarRating = GameHelper.Round(droidAttributes.starRating, 2),
-                standardStarRating = GameHelper.Round(standardAttributes.starRating, 2),
-                bpmMin = bpmMin,
-                bpmMax = bpmMax,
-                length = data.duration.toLong(),
-                previewTime = data.general.previewTime,
-                hitCircleCount = data.hitObjects.circleCount,
-                sliderCount = data.hitObjects.sliderCount,
-                spinnerCount = data.hitObjects.spinnerCount,
-                maxCombo = data.maxCombo
-            )
-        }
-
-    }
+        // Difficulty
+        approachRate = data.difficulty.ar,
+        overallDifficulty = data.difficulty.od,
+        circleSize = data.difficulty.cs,
+        hpDrainRate = data.difficulty.hp,
+        droidStarRating = GameHelper.Round(droidAttributes.starRating, 2),
+        standardStarRating = GameHelper.Round(standardAttributes.starRating, 2),
+        bpmMin = bpmMin,
+        bpmMax = bpmMax,
+        length = data.duration.toLong(),
+        previewTime = data.general.previewTime,
+        hitCircleCount = data.hitObjects.circleCount,
+        sliderCount = data.hitObjects.sliderCount,
+        spinnerCount = data.hitObjects.spinnerCount,
+        maxCombo = data.maxCombo
+    )
 }
 
 @Dao interface IBeatmapInfoDAO {
@@ -298,6 +293,5 @@ data class BeatmapInfo(
     @Query("DELETE FROM BeatmapInfo")
     fun deleteAll()
 }
-
 
 
