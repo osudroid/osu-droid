@@ -65,7 +65,7 @@ import ru.nsu.ccfit.zuev.osuplus.R;
 import ru.nsu.ccfit.zuev.skins.OsuSkin;
 import ru.nsu.ccfit.zuev.skins.SkinLayout;
 
-import static com.reco1l.osu.data.Beatmaps.BeatmapInfo;
+import static com.reco1l.osu.data.BeatmapsKt.BeatmapInfo;
 import static com.rian.osu.utils.ModConverter.convertLegacyMods;
 
 public class SongMenu implements IUpdateHandler, MenuItemListener,
@@ -1094,7 +1094,7 @@ public class SongMenu implements IUpdateHandler, MenuItemListener,
             for (int j = library.size() - 1; j >= 0; j--) {
                 var set = library.get(j);
 
-                if (item.getBeatmapSetInfo().equals(set)) {
+                if (item.getBeatmapSetInfo().getPath().equals(set.getPath())) {
                     item.setBeatmapSetInfo(set);
                     break;
                 }
@@ -1180,7 +1180,7 @@ public class SongMenu implements IUpdateHandler, MenuItemListener,
             playMusic(beatmapInfo.getAudio(), beatmapInfo.getPreviewTime());
         }
 
-        if (selectedBeatmap != null && selectedBeatmap.equals(beatmapInfo)) {
+        if (selectedBeatmap != null && selectedBeatmap.getPath().equals(beatmapInfo.getPath())) {
             synchronized (bgMutex) {
                 if (!bgLoaded) {
                     return;

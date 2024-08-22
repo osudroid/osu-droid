@@ -1,4 +1,3 @@
-@file:JvmName("Beatmaps")
 package com.reco1l.osu.data
 
 import androidx.room.*
@@ -211,12 +210,11 @@ data class BeatmapInfo(
         get() = if (Config.isForceRomanized()) artist else artistUnicode.takeUnless { it.isBlank() } ?: artist
 
 
-    override fun equals(other: Any?): Boolean {
-        return other is BeatmapInfo && other.path == path
-    }
-
 }
 
+/**
+ * Represents a beatmap information.
+ */
 fun BeatmapInfo(data: RianBeatmap, parentPath: String, lastModified: Long, path: String): BeatmapInfo {
 
     var bpmMin = Float.MAX_VALUE
@@ -297,49 +295,3 @@ fun BeatmapInfo(data: RianBeatmap, parentPath: String, lastModified: Long, path:
 }
 
 
-/**
- * Defines a beatmap set, they're virtually created by the database using DISTINCT operation. This means it doesn't have
- * a table.
- */
-data class BeatmapSetInfo(
-
-    /**
-     * The ID.
-     */
-    @ColumnInfo(name = "parentId")
-    val id: Int?,
-
-    /**
-     * This can equal to the set ID or its MD5.
-     */
-    @ColumnInfo(name = "parentPath")
-    val path: String,
-
-    /**
-     * The list of beatmaps
-     */
-    @Relation(parentColumn = "parentPath", entityColumn = "parentPath")
-    val beatmaps: List<BeatmapInfo>
-
-) {
-
-    /**
-     * The beatmap set size.
-     */
-    val count
-        get() = beatmaps.size
-
-
-    /**
-     * Get a beatmap from its index.
-     */
-    @JvmName("getBeatmap")
-    operator fun get(index: Int): BeatmapInfo {
-        return beatmaps[index]
-    }
-
-    override fun equals(other: Any?): Boolean {
-        return other is BeatmapSetInfo && other.path == path
-    }
-
-}

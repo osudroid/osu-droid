@@ -311,7 +311,7 @@ public class Slider extends GameObject {
         }
         scene.attachChild(endCircle, 0);
 
-        tickInterval = timingControlPoint.msPerBeat / 1000 * speedMultiplier;
+        tickInterval = timingControlPoint.msPerBeat / 1000;
         int tickCount = (int) (maxTime * GameHelper.getTickRate() / tickInterval);
         if (Double.isNaN(tickInterval) || tickInterval < GameHelper.getSliderTickLength() / 1000) {
             tickCount = 0;

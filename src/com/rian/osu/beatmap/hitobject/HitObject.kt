@@ -65,7 +65,7 @@ abstract class HitObject(
      * Whether this is the last [HitObject] in the current combo.
      */
     var lastInCombo = false
-        private set
+        internal set
 
     /**
      * The stack height of this [HitObject].
@@ -157,7 +157,7 @@ abstract class HitObject(
         }
 
         stackOffset = when (mode) {
-            GameMode.Droid -> Vector2(stackHeight * scale * 4f)
+            GameMode.Droid -> Vector2(stackHeight * CircleSizeCalculator.standardScaleToDroidScale(scale, true) * 4f)
             GameMode.Standard -> Vector2(stackHeight * scale * -6.4f)
         }
     }
