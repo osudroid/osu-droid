@@ -157,7 +157,7 @@ abstract class HitObject(
         }
 
         stackOffset = when (mode) {
-            GameMode.Droid -> Vector2(stackHeight * scale * 4f)
+            GameMode.Droid -> Vector2(stackHeight * CircleSizeCalculator.standardScaleToDroidScale(scale, true) * 4f)
             GameMode.Standard -> Vector2(stackHeight * scale * -6.4f)
         }
     }
