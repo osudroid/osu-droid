@@ -4,7 +4,7 @@ import com.rian.osu.GameMode
 import com.rian.osu.beatmap.hitobject.*
 import com.rian.osu.mods.Mod
 import com.rian.osu.utils.CircleSizeCalculator
-import kotlin.math.sqrt
+import kotlin.math.pow
 
 /**
  * Provides functionality to alter a [Beatmap] after it has been converted.
@@ -77,13 +77,13 @@ class BeatmapProcessor(
             val next = this[i + 1]
 
             if (next.startTime - current.startTime < 2000 * beatmap.general.stackLeniency) {
-                val distance = next.position.getDistance(current.position)
+                val distanceSquared = next.position.getDistance(current.position).pow(2)
 
-                if (distance < sqrt(droidDifficultyScale)) {
+                if (distanceSquared < droidDifficultyScale) {
                     next.difficultyStackHeight = current.difficultyStackHeight + 1
                 }
 
-                if (distance < sqrt(current.gameplayScale)) {
+                if (distanceSquared < current.gameplayScale) {
                     next.gameplayStackHeight = current.gameplayStackHeight + 1
                 }
             }
