@@ -3,7 +3,6 @@ package ru.nsu.ccfit.zuev.osu.menu;
 import android.annotation.SuppressLint;
 import android.app.Activity;
 
-import com.edlplan.favorite.FavoriteLibrary;
 import com.edlplan.ui.fragment.FilterMenuFragment;
 import com.edlplan.ui.fragment.PropsMenuFragment;
 import com.edlplan.ui.fragment.ScoreMenuFragment;
@@ -93,7 +92,7 @@ public class SongMenu implements IUpdateHandler, MenuItemListener,
     private Float touchY = null;
     private String filterText = "";
     private boolean favsOnly = false;
-    private Set<String> limitC;
+    private List<String> limitC;
     private float secondsSinceLastSelect = 0;
     private float maxY = 100500;
     private int pointerId = -1;
@@ -156,8 +155,12 @@ public class SongMenu implements IUpdateHandler, MenuItemListener,
     }
 
     public void loadFilter(IFilterMenu filterMenu) {
-        setFilter(filterMenu.getFilter(), filterMenu.getOrder(), filterMenu.isFavoritesOnly(),
-                filterMenu.getFavoriteFolder() == null ? null : FavoriteLibrary.get().getMaps(filterMenu.getFavoriteFolder()));
+        setFilter(
+            filterMenu.getFilter(),
+            filterMenu.getOrder(),
+            filterMenu.isFavoritesOnly(),
+            filterMenu.getFavoriteFolder() == null ? null : DatabaseManager.getBeatmapCollectionsTable().getBeatmaps(filterMenu.getFavoriteFolder())
+        );
     }
 
     public void reload() {
@@ -738,7 +741,7 @@ public class SongMenu implements IUpdateHandler, MenuItemListener,
     }
 
     public void setFilter(final String filter, final SortOrder order,
-                          final boolean favsOnly, Set<String> limit) {
+                          final boolean favsOnly, List<String> limit) {
         String oldBeatmapPath = "";
         if (selectedBeatmap != null) {
             oldBeatmapPath = selectedBeatmap.getFilename();
@@ -1540,7 +1543,8 @@ public class SongMenu implements IUpdateHandler, MenuItemListener,
             }
             final String lowerFilter = filterMenu.getFilter().toLowerCase();
             final boolean favsOnly = filterMenu.isFavoritesOnly();
-            final Set<String> limit = FavoriteLibrary.get().getMaps(filterMenu.getFavoriteFolder());
+
+            var limit = DatabaseManager.getBeatmapCollectionsTable().getBeatmaps(filterMenu.getFavoriteFolder());
             for (final BeatmapSetItem item : items) {
                 item.applyFilter(lowerFilter, favsOnly, limit);
             }
