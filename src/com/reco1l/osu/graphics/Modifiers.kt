@@ -95,7 +95,7 @@ fun interface OnModifierFinished {
 class UniversalModifier(private val pool: Pool<UniversalModifier>? = null) : IModifier<IEntity>, IEntityModifier {
 
 
-    private var elapsedSec = 0f
+    private var elapsedSeconds = 0f
 
     private var data = FloatArray(2)
 
@@ -110,11 +110,11 @@ class UniversalModifier(private val pool: Pool<UniversalModifier>? = null) : IMo
     private var _easeFunction = IEaseFunction.DEFAULT
 
 
-    override fun isFinished() = elapsedSec == _duration
+    override fun isFinished() = elapsedSeconds == _duration
 
     override fun getDuration() = _duration
 
-    override fun getSecondsElapsed() = elapsedSec
+    override fun getSecondsElapsed() = elapsedSeconds
 
 
     private fun getValueAt(dataIndex: Int, percentage: Float): Float {
@@ -136,15 +136,15 @@ class UniversalModifier(private val pool: Pool<UniversalModifier>? = null) : IMo
     }
 
 
-    override fun onUpdate(deltaSec: Float, item: IEntity): Float {
+    override fun onUpdate(deltaSeconds: Float, item: IEntity): Float {
 
-        if (elapsedSec == _duration) {
+        if (elapsedSeconds == _duration) {
             return 0f
         }
 
-        var usedSec = min(_duration - elapsedSec, deltaSec)
+        var usedSeconds = min(_duration - elapsedSeconds, deltaSeconds)
 
-        val percentage = _easeFunction.getPercentage(elapsedSec + usedSec, _duration)
+        val percentage = _easeFunction.getPercentage(elapsedSeconds + usedSeconds, _duration)
 
         when (_type) {
 
@@ -165,11 +165,11 @@ class UniversalModifier(private val pool: Pool<UniversalModifier>? = null) : IMo
             }
 
             SEQUENCE -> {
-                var remainingSec = deltaSec
+                var remainingSeconds = deltaSeconds
 
-                while (remainingSec > 0 && _modifiers != null) {
+                while (remainingSeconds > 0 && _modifiers != null) {
 
-                    remainingSec -= _modifiers!![0].onUpdate(remainingSec, item)
+                    remainingSeconds -= _modifiers!![0].onUpdate(remainingSeconds, item)
 
                     if (_modifiers!![0].isFinished) {
                         trimModifiers()
@@ -177,28 +177,28 @@ class UniversalModifier(private val pool: Pool<UniversalModifier>? = null) : IMo
                     }
                 }
 
-                usedSec = deltaSec - remainingSec
+                usedSeconds = deltaSeconds - remainingSeconds
             }
 
             PARALLEL -> {
-                var remainingSec = deltaSec
+                var remainingSeconds = deltaSeconds
 
-                while (remainingSec > 0 && _modifiers != null) {
+                while (remainingSeconds > 0 && _modifiers != null) {
 
                     val modifiers = _modifiers!!
 
                     for (modifier in modifiers) {
-                        usedSec = max(usedSec, modifier.onUpdate(deltaSec, item))
+                        usedSeconds = max(usedSeconds, modifier.onUpdate(deltaSeconds, item))
 
                         if (modifier.isFinished) {
                             trimModifiers()
                         }
                     }
 
-                    remainingSec -= usedSec
+                    remainingSeconds -= usedSeconds
                 }
 
-                usedSec = deltaSec - remainingSec
+                usedSeconds = deltaSeconds - remainingSeconds
             }
 
             NONE -> {
@@ -206,10 +206,10 @@ class UniversalModifier(private val pool: Pool<UniversalModifier>? = null) : IMo
             }
         }
 
-        elapsedSec += usedSec
+        elapsedSeconds += usedSeconds
 
-        if (elapsedSec >= _duration) {
-            elapsedSec = _duration
+        if (elapsedSeconds >= _duration) {
+            elapsedSeconds = _duration
 
             _modifiers = null
 
@@ -219,7 +219,7 @@ class UniversalModifier(private val pool: Pool<UniversalModifier>? = null) : IMo
             pool?.free(this)
         }
 
-        return usedSec
+        return usedSeconds
     }
 
     override fun onUnregister() {
@@ -357,7 +357,7 @@ class UniversalModifier(private val pool: Pool<UniversalModifier>? = null) : IMo
         }
         _modifiers = null
 
-        elapsedSec = 0f
+        elapsedSeconds = 0f
     }
 
 
