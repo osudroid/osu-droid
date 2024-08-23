@@ -106,18 +106,19 @@ public class HitCircle extends GameObject {
                 actualFadeOutDuration,
                 Math.max(0, actualFadeOutDuration + remainingFadeInDuration - passedTime / GameHelper.getSpeedMultiplier())
             );
+            float fadeOutProgress = 1 - remainingFadeOutDuration / actualFadeOutDuration;
 
             number.registerEntityModifier(Modifiers.sequence(
                     Modifiers.alpha(remainingFadeInDuration, fadeInProgress, 1),
-                    Modifiers.fadeOut(remainingFadeOutDuration)
+                    Modifiers.alpha(remainingFadeOutDuration, fadeOutProgress, 0)
             ));
             overlay.registerEntityModifier(Modifiers.sequence(
                     Modifiers.alpha(remainingFadeInDuration, fadeInProgress, 1),
-                    Modifiers.fadeOut(actualFadeOutDuration)
+                    Modifiers.alpha(remainingFadeOutDuration, fadeOutProgress, 0)
             ));
             circle.registerEntityModifier(Modifiers.sequence(
                     Modifiers.alpha(remainingFadeInDuration, fadeInProgress, 1),
-                    Modifiers.fadeOut(actualFadeOutDuration)
+                    Modifiers.alpha(remainingFadeOutDuration, fadeOutProgress, 0)
             ));
         } else {
             circle.registerEntityModifier(Modifiers.alpha(remainingFadeInDuration, fadeInProgress, 1));
