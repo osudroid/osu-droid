@@ -37,13 +37,13 @@ data class BeatmapOptions(
     fun getOptions(setDirectory: String): BeatmapOptions?
 
     @Update
-    fun setOptions(options: BeatmapOptions)
+    fun insert(options: BeatmapOptions)
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
-    fun addAll(options: List<BeatmapOptions>)
+    fun insertAll(options: List<BeatmapOptions>)
 
     @Query("DELETE FROM BeatmapOptions")
-    fun clearOptions()
+    fun deleteAll()
 
 }
 

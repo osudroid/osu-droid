@@ -89,7 +89,7 @@ object DatabaseManager {
                             BeatmapOptions(setDirectory, properties.favorite, properties.offset)
                         }
 
-                        beatmapOptionsTable.addAll(options)
+                        beatmapOptionsTable.insertAll(options)
                     }
 
                 }
