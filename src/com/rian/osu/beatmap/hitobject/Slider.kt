@@ -189,11 +189,20 @@ class Slider(
     val spanDuration: Double
         get() = duration / spanCount
 
-    override var stackHeight = super.stackHeight
+    override var stackOffsetMultiplier = super.stackOffsetMultiplier
         set(value) {
             field = value
 
-            nestedHitObjects.forEach { it.stackHeight = value }
+            nestedHitObjects.forEach { it.stackOffsetMultiplier = value }
+        }
+
+    // Difficulty calculation object positions
+
+    override var difficultyStackHeight = super.difficultyStackHeight
+        set(value) {
+            field = value
+
+            nestedHitObjects.forEach { it.difficultyStackHeight = value }
         }
 
     override var difficultyScale = super.difficultyScale
@@ -203,25 +212,20 @@ class Slider(
             nestedHitObjects.forEach { it.difficultyScale = value }
         }
 
+    // Gameplay object positions
+
+    override var gameplayStackHeight = super.gameplayStackHeight
+        set(value) {
+            field = value
+
+            nestedHitObjects.forEach { it.gameplayStackHeight = value }
+        }
+
     override var gameplayScale = super.gameplayScale
         set(value) {
             field = value
 
             nestedHitObjects.forEach { it.gameplayScale = value }
-        }
-
-    override var difficultyStackOffset = super.difficultyStackOffset
-        set(value) {
-            field = value
-
-            nestedHitObjects.forEach { it.difficultyStackOffset = value }
-        }
-
-    override var gameplayStackOffset = super.gameplayStackOffset
-        set(value) {
-            field = value
-
-            nestedHitObjects.forEach { it.gameplayStackOffset = value }
         }
 
     init {

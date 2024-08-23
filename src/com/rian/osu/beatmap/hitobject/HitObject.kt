@@ -70,11 +70,6 @@ abstract class HitObject(
         internal set
 
     /**
-     * The stack height of this [HitObject].
-     */
-    open var stackHeight = 0
-
-    /**
      * The time at which the approach circle of this [HitObject] should appear before [startTime] in milliseconds.
      */
     @JvmField
@@ -105,7 +100,17 @@ abstract class HitObject(
     @JvmField
     var kiai = false
 
+    /**
+     * The multiplier used to calculate stack offset.
+     */
+    open var stackOffsetMultiplier = 0f
+
     // Difficulty calculation object positions
+
+    /**
+     * The stack height of this [HitObject] in difficulty calculation.
+     */
+    open var difficultyStackHeight = 0
 
     /**
      * The osu!standard scale of this [HitObject] in difficulty calculation.
@@ -121,7 +126,8 @@ abstract class HitObject(
     /**
      * The stack offset of this [HitObject] in difficulty calculation, in osu!pixels.
      */
-    open var difficultyStackOffset = Vector2(0f)
+    open val difficultyStackOffset
+        get() = Vector2(difficultyStackHeight * difficultyScale * stackOffsetMultiplier)
 
     /**
      * The stacked position of this [HitObject] in difficulty calculation, in osu!pixels.
@@ -130,6 +136,16 @@ abstract class HitObject(
         get() = position + difficultyStackOffset
 
     // Gameplay object positions
+
+    /**
+     * The stack offset of this [HitObject] in gameplay.
+     */
+    open var gameplayStackHeight = 0
+
+    /**
+     * The scale of this [HitObject] in gameplay.
+     */
+    open var gameplayScale = 0f
 
     /**
      * The position of this [HitObject] in gameplay, in pixels.
@@ -143,11 +159,6 @@ abstract class HitObject(
         Vector2(Config.getRES_WIDTH() - Constants.MAP_ACTUAL_WIDTH, Config.getRES_HEIGHT() - Constants.MAP_ACTUAL_HEIGHT) / 2f
 
     /**
-     * The scale of this [HitObject] in gameplay.
-     */
-    open var gameplayScale = 0f
-
-    /**
      * The radius of this [HitObject] in gameplay, in pixels.
      */
     val gameplayRadius
@@ -156,7 +167,8 @@ abstract class HitObject(
     /**
      * The stack offset of this [HitObject] in gameplay, in pixels.
      */
-    open var gameplayStackOffset = Vector2(0f)
+    val gameplayStackOffset
+        get() = Vector2(gameplayStackHeight * gameplayScale * stackOffsetMultiplier)
 
     /**
      * The stacked position of this [HitObject] in gameplay, in pixels.
@@ -182,6 +194,11 @@ abstract class HitObject(
         // This adjustment is necessary for AR>10, otherwise timePreempt can become smaller leading to hit circles not fully fading in.
         timeFadeIn = 400 * min(1.0, timePreempt / PREEMPT_MIN)
 
+        stackOffsetMultiplier = when (mode) {
+            GameMode.Droid -> 4f
+            GameMode.Standard -> -6.4f
+        }
+
         difficultyScale = when (mode) {
             GameMode.Droid -> {
                 val droidScale = CircleSizeCalculator.droidCSToDroidDifficultyScale(difficulty.cs)
@@ -194,19 +211,9 @@ abstract class HitObject(
             GameMode.Standard -> CircleSizeCalculator.standardCSToStandardScale(difficulty.cs, true)
         }
 
-        difficultyStackOffset = when (mode) {
-            GameMode.Droid -> Vector2(stackHeight * CircleSizeCalculator.standardScaleToDroidDifficultyScale(difficultyScale, true) * 4f)
-            GameMode.Standard -> Vector2(stackHeight * difficultyScale * -6.4f)
-        }
-
         gameplayScale = when (mode) {
             GameMode.Droid -> CircleSizeCalculator.droidCSToDroidGameplayScale(difficulty.cs)
             GameMode.Standard -> difficultyScale
-        }
-
-        gameplayStackOffset = when (mode) {
-            GameMode.Droid -> Vector2(stackHeight * gameplayScale * 4f)
-            GameMode.Standard -> difficultyStackOffset.copy()
         }
     }
 
