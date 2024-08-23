@@ -1504,17 +1504,14 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
                 }
 
             } else if ((objDefine & 8) > 0) {
-                final float endTime = Integer.parseInt(params[5]) / 1000.0f;
                 final float rps = 2 + 2 * overallDifficulty / 10f;
                 final Spinner spinner = GameObjectPool.getInstance().getSpinner();
                 String tempSound = null;
                 if (params.length > 6) {
                     tempSound = params[6];
                 }
-                spinner.init(this, bgScene, (data.getTime() - secPassed) / GameHelper.getSpeedMultiplier(),
-                        (endTime - data.getTime()) / GameHelper.getSpeedMultiplier(), rps, Integer.parseInt(params[4]),
-                        tempSound, stat);
-                spinner.setEndsCombo(nextObj == null || nextObj.isNewCombo());
+                spinner.init(this, bgScene, (com.rian.osu.beatmap.hitobject.Spinner) obj, rps,
+                        Integer.parseInt(params[4]), tempSound, stat);
                 addObject(spinner);
                 isFirst = false;
 
