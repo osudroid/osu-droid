@@ -1,0 +1,76 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="#13131A"
+    android:clickable="true">
+
+    <LinearLayout
+        android:id="@+id/toolbar"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:background="@drawable/rounded_rect"
+        android:backgroundTint="#1E1E2E"
+        android:gravity="center"
+        android:elevation="1dp"
+        tools:layout_centerInParent="true">
+
+        <ImageView
+            android:id="@+id/drag"
+            android:layout_width="36dp"
+            android:layout_height="match_parent"
+            android:alpha="0.1"
+            android:paddingHorizontal="6dp"
+            android:src="@drawable/drag_indicator_24px" />
+
+        <ImageButton
+            android:id="@+id/close"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_centerVertical="true"
+            android:layout_marginLeft="6dp"
+            android:background="@drawable/rounded_rect"
+            android:backgroundTint="#00FFFFFF"
+            android:paddingHorizontal="14dp"
+            android:paddingVertical="14dp"
+            android:src="@drawable/arrow_back_24px"
+            app:tint="#FFF" />
+
+        <Button
+            android:id="@+id/add"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginVertical="4dp"
+            android:layout_marginLeft="6dp"
+            android:background="@drawable/rounded_rect"
+            android:backgroundTint="#363653"
+            android:drawableLeft="@drawable/add_24px"
+            android:drawablePadding="12dp"
+            android:drawableTint="#FFF"
+            android:minWidth="0dp"
+            android:paddingHorizontal="12dp"
+            android:text="@string/block_area_manager_fragment_add"
+            android:textAllCaps="false"
+            android:textColor="#FFF" />
+
+        <Button
+            android:id="@+id/reset"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginHorizontal="6dp"
+            android:background="@null"
+            android:drawableLeft="@drawable/restart_alt_24px"
+            android:drawablePadding="12dp"
+            android:drawableTint="#FFF"
+            android:minWidth="0dp"
+            android:paddingHorizontal="12dp"
+            android:text="@string/block_area_manager_fragment_reset"
+            android:textAllCaps="false"
+            android:textColor="#FFF" />
+
+    </LinearLayout>
+
+
+</RelativeLayout>

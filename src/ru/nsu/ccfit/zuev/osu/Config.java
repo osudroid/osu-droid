@@ -16,6 +16,7 @@ import com.google.firebase.messaging.FirebaseMessaging;
 import java.io.File;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Set;
 import java.util.UUID;
 
 import com.reco1l.osu.multiplayer.Multiplayer;
@@ -104,44 +105,50 @@ public class Config {
     private static RGBColor[] comboColors;
     private static Context context;
 
+
+    /**
+     * Shared preferences for the application.
+     */
+    private static SharedPreferences preferences;
+
+
     public static void loadConfig(final Context context) {
         Config.context = context;
-        final SharedPreferences prefs = PreferenceManager
-                .getDefaultSharedPreferences(context);
+        preferences = PreferenceManager.getDefaultSharedPreferences(context);
         // graphics
-        useCustomSkins = prefs.getBoolean("skin", false);
-        useCustomSounds = prefs.getBoolean("beatmapSounds", true);
-        comboburst = prefs.getBoolean("comboburst", false);
-        corovans = prefs.getBoolean("images", false);
-        showFPS = prefs.getBoolean("fps", true);
-        showAverageOffset = prefs.getBoolean("averageOffset", true);
-        showUnstableRate = prefs.getBoolean("unstableRate", true);
-        errorMeter = Integer.parseInt(prefs.getString("errormeter", "0"));
-        spinnerStyle = Integer.parseInt(prefs.getString("spinnerstyle", "0"));
-        showFirstApproachCircle = prefs.getBoolean("showfirstapproachcircle", false);
-        metronomeSwitch = Integer.parseInt(prefs.getString("metronomeswitch", "1"));
-        showScoreboard = prefs.getBoolean("showscoreboard", true);
-        enableStoryboard = prefs.getBoolean("enableStoryboard", false);
-        videoEnabled = prefs.getBoolean("enableVideo", false);
-        keepBackgroundAspectRatio = prefs.getBoolean("keepBackgroundAspectRatio", false);
-        noChangeDimInBreaks = prefs.getBoolean("noChangeDimInBreaks", false);
+        useCustomSkins = preferences.getBoolean("skin", false);
+        useCustomSounds = preferences.getBoolean("beatmapSounds", true);
+        comboburst = preferences.getBoolean("comboburst", false);
+        corovans = preferences.getBoolean("images", false);
+        showFPS = preferences.getBoolean("fps", true);
+        showAverageOffset = preferences.getBoolean("averageOffset", true);
+        showUnstableRate = preferences.getBoolean("unstableRate", true);
+        errorMeter = Integer.parseInt(preferences.getString("errormeter", "0"));
+        spinnerStyle = Integer.parseInt(preferences.getString("spinnerstyle", "0"));
+        showFirstApproachCircle = preferences.getBoolean("showfirstapproachcircle", false);
+        metronomeSwitch = Integer.parseInt(preferences.getString("metronomeswitch", "1"));
+        showScoreboard = preferences.getBoolean("showscoreboard", true);
+        enableStoryboard = preferences.getBoolean("enableStoryboard", false);
+        videoEnabled = preferences.getBoolean("enableVideo", false);
+        keepBackgroundAspectRatio = preferences.getBoolean("keepBackgroundAspectRatio", false);
+        noChangeDimInBreaks = preferences.getBoolean("noChangeDimInBreaks", false);
 
         setSize();
-        setPlayfieldSize(prefs.getInt("playfieldSize", 100) / 100f);
+        setPlayfieldSize(preferences.getInt("playfieldSize", 100) / 100f);
 
-        shrinkPlayfieldDownwards = prefs.getBoolean("shrinkPlayfieldDownwards", true);
-        animateFollowCircle = prefs.getBoolean("animateFollowCircle", true);
-        animateComboText = prefs.getBoolean("animateComboText", true);
-        snakingInSliders = prefs.getBoolean("snakingInSliders", true);
+        shrinkPlayfieldDownwards = preferences.getBoolean("shrinkPlayfieldDownwards", true);
+        animateFollowCircle = preferences.getBoolean("animateFollowCircle", true);
+        animateComboText = preferences.getBoolean("animateComboText", true);
+        snakingInSliders = preferences.getBoolean("snakingInSliders", true);
 
         try {
-            offset = (int) FMath.clamp(prefs.getInt("offset", 0), -250, 250);
-            backgroundBrightness = prefs.getInt("bgbrightness", 25) / 100f;
-            soundVolume = prefs.getInt("soundvolume", 100) / 100f;
-            bgmVolume = prefs.getInt("bgmvolume", 100) / 100f;
-            cursorSize = prefs.getInt("cursorSize", 50) / 100f;
+            offset = (int) FMath.clamp(preferences.getInt("offset", 0), -250, 250);
+            backgroundBrightness = preferences.getInt("bgbrightness", 25) / 100f;
+            soundVolume = preferences.getInt("soundvolume", 100) / 100f;
+            bgmVolume = preferences.getInt("bgmvolume", 100) / 100f;
+            cursorSize = preferences.getInt("cursorSize", 50) / 100f;
         }catch(RuntimeException e) { // use valid integer since this makes the game crash on android m
-            prefs.edit()
+            preferences.edit()
                 .putInt("offset", 0)
                 .putInt("bgbrightness", 25)
                 .putInt("soundvolume", 100)
@@ -154,7 +161,7 @@ public class Config {
 
         //advanced
         defaultCorePath = Environment.getExternalStorageDirectory() + "/osu!droid/";
-        corePath = prefs.getString("corePath", defaultCorePath);
+        corePath = preferences.getString("corePath", defaultCorePath);
         if (corePath.length() == 0) {
             corePath = defaultCorePath;
         }
@@ -163,7 +170,7 @@ public class Config {
         }
         scorePath = corePath + "Scores/";
 
-        skinPath = prefs.getString("skinPath", corePath + "Skin/");
+        skinPath = preferences.getString("skinPath", corePath + "Skin/");
         if (skinPath.length() == 0) {
             skinPath = corePath + "Skin/";
         }
@@ -171,7 +178,7 @@ public class Config {
             skinPath += "/";
         }
 
-        skinTopPath = prefs.getString("skinTopPath", skinPath);
+        skinTopPath = preferences.getString("skinTopPath", skinPath);
         if (skinTopPath.length() == 0) {
             skinTopPath = skinPath;
         }
@@ -179,51 +186,51 @@ public class Config {
             skinTopPath += "/";
         }
 
-        syncMusic = prefs.getBoolean("syncMusic", syncMusic);
+        syncMusic = preferences.getBoolean("syncMusic", syncMusic);
         enableExtension = false;// prefs.getBoolean("enableExtension", false);
         cachePath = context.getCacheDir().getPath();
-        burstEffects = prefs.getBoolean("bursts", burstEffects);
-        hitLighting = prefs.getBoolean("hitlighting", hitLighting);
-        useParticles = prefs.getBoolean("particles", useParticles);
-        useCustomComboColors = prefs.getBoolean("useCustomColors", useCustomComboColors);
+        burstEffects = preferences.getBoolean("bursts", burstEffects);
+        hitLighting = preferences.getBoolean("hitlighting", hitLighting);
+        useParticles = preferences.getBoolean("particles", useParticles);
+        useCustomComboColors = preferences.getBoolean("useCustomColors", useCustomComboColors);
         comboColors = new RGBColor[4];
         for (int i = 1; i <= 4; i++) {
-            comboColors[i - 1] = RGBColor.hex2Rgb(ColorPickerPreference.convertToRGB(prefs.getInt("combo" + i, 0xff000000)));
+            comboColors[i - 1] = RGBColor.hex2Rgb(ColorPickerPreference.convertToRGB(preferences.getInt("combo" + i, 0xff000000)));
         }
 
         // beatmaps
-        DELETE_OSZ = prefs.getBoolean("deleteosz", true);
-        SCAN_DOWNLOAD = prefs.getBoolean("scandownload", false);
-        deleteUnimportedBeatmaps = prefs.getBoolean("deleteUnimportedBeatmaps", false);
-        forceRomanized = prefs.getBoolean("forceromanized", false);
-        beatmapPath = prefs.getString("directory", corePath + "Songs/");
+        DELETE_OSZ = preferences.getBoolean("deleteosz", true);
+        SCAN_DOWNLOAD = preferences.getBoolean("scandownload", false);
+        deleteUnimportedBeatmaps = preferences.getBoolean("deleteUnimportedBeatmaps", false);
+        forceRomanized = preferences.getBoolean("forceromanized", false);
+        beatmapPath = preferences.getString("directory", corePath + "Songs/");
         if (beatmapPath.length() == 0) {
             beatmapPath = corePath + "Songs/";
         }
         if (beatmapPath.charAt(beatmapPath.length() - 1) != '/') {
             beatmapPath += "/";
         }
-        deleteUnsupportedVideos = prefs.getBoolean("deleteUnsupportedVideos", true);
+        deleteUnsupportedVideos = preferences.getBoolean("deleteUnsupportedVideos", true);
 
         // other
-        playMusicPreview = prefs.getBoolean("musicpreview", true);
-        showCursor = prefs.getBoolean("showcursor", false);
-        hideNaviBar = prefs.getBoolean("hidenavibar", false);
+        playMusicPreview = preferences.getBoolean("musicpreview", true);
+        showCursor = preferences.getBoolean("showcursor", false);
+        hideNaviBar = preferences.getBoolean("hidenavibar", false);
         enablePP = false;//prefs.getBoolean("enablePP",true);
-        fixFrameOffset = prefs.getBoolean("fixFrameOffset", true);
-        removeSliderLock = prefs.getBoolean("removeSliderLock", false);
-        calculateSliderPathInGameStart = prefs.getBoolean("calculateSliderPathInGameStart", false);
-        displayScoreStatistics = prefs.getBoolean("displayScoreStatistics", false);
-        hideReplayMarquee = prefs.getBoolean("hideReplayMarquee", false);
-        hideInGameUI = prefs.getBoolean("hideInGameUI", false);
-        receiveAnnouncements = prefs.getBoolean("receiveAnnouncements", true);
-        safeBeatmapBg = prefs.getBoolean("safebeatmapbg", false);
-        displayRealTimePPCounter = prefs.getBoolean("displayRealTimePPCounter", false);
+        fixFrameOffset = preferences.getBoolean("fixFrameOffset", true);
+        removeSliderLock = preferences.getBoolean("removeSliderLock", false);
+        calculateSliderPathInGameStart = preferences.getBoolean("calculateSliderPathInGameStart", false);
+        displayScoreStatistics = preferences.getBoolean("displayScoreStatistics", false);
+        hideReplayMarquee = preferences.getBoolean("hideReplayMarquee", false);
+        hideInGameUI = preferences.getBoolean("hideInGameUI", false);
+        receiveAnnouncements = preferences.getBoolean("receiveAnnouncements", true);
+        safeBeatmapBg = preferences.getBoolean("safebeatmapbg", false);
+        displayRealTimePPCounter = preferences.getBoolean("displayRealTimePPCounter", false);
         difficultyAlgorithm = DifficultyAlgorithm.droid;
 
         // Multiplayer
-        useNightcoreOnMultiplayer = prefs.getBoolean("player_nightcore", false);
-        submitScoreOnMultiplayer = prefs.getBoolean("player_submitScore", true);
+        useNightcoreOnMultiplayer = preferences.getBoolean("player_nightcore", false);
+        submitScoreOnMultiplayer = preferences.getBoolean("player_submitScore", true);
 
         if(receiveAnnouncements) {
             FirebaseMessaging.getInstance().subscribeToTopic("announcements");
@@ -232,10 +239,10 @@ public class Config {
         }
 
         //Init
-        onlineDeviceID = prefs.getString("installID", null);
+        onlineDeviceID = preferences.getString("installID", null);
         if (onlineDeviceID == null) {
             onlineDeviceID = UUID.randomUUID().toString().replace("-", "").substring(0, 32);
-            Editor editor = prefs.edit();
+            Editor editor = preferences.edit();
             editor.putString("installID", onlineDeviceID);
             editor.putString("corePath", corePath);
             editor.putString("skinTopPath", skinTopPath);
@@ -243,18 +250,15 @@ public class Config {
             editor.commit();
         }
 
-        loadOnlineConfig(context);
+        loadOnlineConfig();
         FavoriteLibrary.get().load();
     }
 
-    public static void loadOnlineConfig(final Context context) {
-        final SharedPreferences prefs = PreferenceManager
-                .getDefaultSharedPreferences(context);
-
-        onlineUsername = prefs.getString("onlineUsername", "");
-        onlinePassword = prefs.getString("onlinePassword", null);
-        stayOnline = prefs.getBoolean("stayOnline", false);
-        loadAvatar = prefs.getBoolean("loadAvatar",false);
+    public static void loadOnlineConfig() {
+        onlineUsername = preferences.getString("onlineUsername", "");
+        onlinePassword = preferences.getString("onlinePassword", null);
+        stayOnline = preferences.getBoolean("stayOnline", false);
+        loadAvatar = preferences.getBoolean("loadAvatar",false);
     }
 
     public static void setSize() {
@@ -796,5 +800,46 @@ public class Config {
 
     public static boolean isNoChangeDimInBreaks() {
         return noChangeDimInBreaks;
+    }
+
+
+    public static boolean get(String key, boolean defaultValue) {
+        return preferences.getBoolean(key, defaultValue);
+    }
+
+    public static int get(String key, int defaultValue) {
+        return preferences.getInt(key, defaultValue);
+    }
+
+    public static float get(String key, float defaultValue) {
+        return preferences.getFloat(key, defaultValue);
+    }
+
+    public static String get(String key, String defaultValue) {
+        return preferences.getString(key, defaultValue);
+    }
+
+    public static Set<String> get(String key, Set<String> defaultValue) {
+        return preferences.getStringSet(key, defaultValue);
+    }
+
+    public static void set(String key, boolean value) {
+        preferences.edit().putBoolean(key, value).apply();
+    }
+
+    public static void set(String key, int value) {
+        preferences.edit().putInt(key, value).apply();
+    }
+
+    public static void set(String key, String value) {
+        preferences.edit().putString(key, value).apply();
+    }
+
+    public static void set(String key, float value) {
+        preferences.edit().putFloat(key, value).apply();
+    }
+
+    public static void set(String key, Set<String> value) {
+        preferences.edit().putStringSet(key, value).apply();
     }
 }

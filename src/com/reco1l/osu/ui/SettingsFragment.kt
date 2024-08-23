@@ -256,7 +256,13 @@ class SettingsFragment : com.edlplan.ui.fragment.SettingsFragment() {
 
         Section.Graphics -> Unit
         Section.Audio -> Unit
-        Section.Input -> Unit
+
+        Section.Input -> {
+            findPreference<Preference>("block_areas")!!.setOnPreferenceClickListener {
+                BlockAreaManagerFragment().show()
+                true
+            }
+        }
 
         Section.Player -> {
 

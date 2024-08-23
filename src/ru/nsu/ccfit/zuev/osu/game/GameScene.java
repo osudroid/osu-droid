@@ -16,6 +16,7 @@ import com.reco1l.osu.data.DatabaseManager;
 import com.reco1l.osu.graphics.BlankTextureRegion;
 import com.reco1l.osu.graphics.Modifiers;
 import com.reco1l.osu.graphics.VideoSprite;
+import com.reco1l.osu.ui.BlockAreaManager;
 import com.reco1l.osu.ui.entity.GameplayLeaderboard;
 import com.reco1l.osu.multiplayer.Multiplayer;
 import com.reco1l.osu.multiplayer.RoomScene;
@@ -2261,6 +2262,10 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
 
         var id = event.getPointerID();
         if (id < 0 || id >= CursorCount) {
+            return false;
+        }
+
+        if (BlockAreaManager.isInsideBlockArea(event.getMotionEvent())) {
             return false;
         }
 
