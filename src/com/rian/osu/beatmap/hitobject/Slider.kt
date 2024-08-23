@@ -421,21 +421,23 @@ class Slider(
     private fun updateNestedSamples() {
         val bankSamples = samples.filterIsInstance<BankHitSampleInfo>()
         val normalSample = bankSamples.find { it.name == BankHitSampleInfo.HIT_NORMAL }
-        val sampleList = mutableListOf<HitSampleInfo>().apply {
-            (normalSample ?: bankSamples.firstOrNull())?.let {
-                add(it.copy(name = "slidertick"))
+        val sliderTickSamples = mutableListOf<HitSampleInfo>().also {
+            val sample = normalSample ?: bankSamples.firstOrNull()
+
+            if (sample != null) {
+                it.add(sample.copy(name = "slidertick"))
             }
         }
 
         fun getSample(index: Int) = nodeSamples.getOrNull(index) ?: samples
 
-        nestedHitObjects.onEach {
+        nestedHitObjects.forEach {
             it.samples.addAll(
                 when (it) {
                     is SliderHead -> getSample(0)
                     is SliderRepeat -> getSample(it.spanIndex + 1)
                     is SliderTail -> getSample(spanCount)
-                    else -> sampleList
+                    else -> sliderTickSamples
                 }
             )
         }
