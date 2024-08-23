@@ -148,6 +148,8 @@ public class Slider extends GameObject {
         mWasInRadius = false;
 
         maxTime = (float) (spanDuration / 1000);
+        ball.detachSelf();
+        followCircle.detachSelf();
         repeatCount = repeats;
         reverse = false;
         startHit = false;
@@ -574,14 +576,11 @@ public class Slider extends GameObject {
                 Modifiers.alpha(0.2f / GameHelper.getSpeedMultiplier(), followCircle.getAlpha(), 0f).setOnFinished(entity -> {
                     Execution.updateThread(() -> {
                         entity.detachSelf();
-
-                        mIsAnimating = false;
-
                         // We can pool the hit object once all animations are finished.
                         // The follow circle animation is the last one to finish if it's enabled.
                         poolObject();
                     });
-
+                    mIsAnimating = false;
                 })
             );
         }
