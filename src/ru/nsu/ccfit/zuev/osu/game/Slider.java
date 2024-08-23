@@ -63,7 +63,7 @@ public class Slider extends GameObject {
     private int currentTick;
     private double tickInterval;
 
-    private final AnimSprite ball;
+    private final AnimSprite ballSprite;
     private final Sprite followCircleSprite;
 
     private PointF tmpPoint = new PointF();
@@ -109,7 +109,7 @@ public class Slider extends GameObject {
         endArrow = new Sprite(0, 0, ResourceManager.getInstance().getTexture("reversearrow"));
 
         int ballFrameCount = SkinManager.getFrames("sliderb");
-        ball = new AnimSprite(0, 0, "sliderb", ballFrameCount, ballFrameCount);
+        ballSprite = new AnimSprite(0, 0, "sliderb", ballFrameCount, ballFrameCount);
         followCircleSprite = new Sprite(0, 0, ResourceManager.getInstance().getTexture("sliderfollowcircle"));
     }
 
@@ -159,6 +159,8 @@ public class Slider extends GameObject {
         isOnHitRadius = false;
 
         maxTime = (float) (spanDuration / 1000);
+        ballSprite.detachSelf();
+        followCircleSprite.detachSelf();
         repeatCount = repeats;
         reverse = false;
         startHit = false;
@@ -449,7 +451,7 @@ public class Slider extends GameObject {
             }
         }
 
-        ball.registerEntityModifier(Modifiers.fadeOut(0.1f * GameHelper.getTimeMultiplier()).setOnFinished(entity -> {
+        ballSprite.registerEntityModifier(Modifiers.fadeOut(0.1f * GameHelper.getTimeMultiplier()).setOnFinished(entity -> {
             Execution.updateThread(entity::detachSelf);
         }));
 
@@ -508,7 +510,7 @@ public class Slider extends GameObject {
             reverse = !reverse;
             passedTime -= maxTime;
             tickTime = passedTime;
-            ball.setFlippedHorizontal(reverse);
+            ballSprite.setFlippedHorizontal(reverse);
             // Restore ticks
             for (final Sprite sp : ticks) {
                 sp.setAlpha(1);
@@ -732,23 +734,23 @@ public class Slider extends GameObject {
             startOverlay.setAlpha(0);
         }
 
-        if (!ball.hasParent()) {
+        if (!ballSprite.hasParent()) {
             number.detachSelf();
 
             approachCircle.clearEntityModifiers();
             approachCircle.setAlpha(0);
 
-            ball.setFps((float) (100 * GameHelper.getSpeed() * scale / timingControlPoint.msPerBeat));
-            ball.setScale(scale);
-            ball.setFlippedHorizontal(false);
-            ball.registerEntityModifier(Modifiers.fadeIn(0.1f * GameHelper.getTimeMultiplier()));
+            ballSprite.setFps((float) (100 * GameHelper.getSpeed() * scale / timingControlPoint.msPerBeat));
+            ballSprite.setScale(scale);
+            ballSprite.setFlippedHorizontal(false);
+            ballSprite.registerEntityModifier(Modifiers.fadeIn(0.1f * GameHelper.getTimeMultiplier()));
 
             followCircleSprite.setAlpha(0);
             if (!Config.isAnimateFollowCircle()) {
                 followCircleSprite.setScale(scale);
             }
 
-            scene.attachChild(ball);
+            scene.attachChild(ballSprite);
             scene.attachChild(followCircleSprite);
         }
 
@@ -837,9 +839,9 @@ public class Slider extends GameObject {
         // Setting position of ball and follow circle
         followCircleSprite.setPosition(ballpos.x - followCircleSprite.getWidth() / 2,
                 ballpos.y - followCircleSprite.getHeight() / 2);
-        ball.setPosition(ballpos.x - ball.getWidth() / 2,
-                ballpos.y - ball.getHeight() / 2);
-        ball.setRotation(ballAngle);
+        ballSprite.setPosition(ballpos.x - ballSprite.getWidth() / 2,
+                ballpos.y - ballSprite.getHeight() / 2);
+        ballSprite.setRotation(ballAngle);
 
         if (GameHelper.isAuto() || GameHelper.isAutopilotMod()) {
             listener.updateAutoBasedPos(ballpos.x, ballpos.y);
