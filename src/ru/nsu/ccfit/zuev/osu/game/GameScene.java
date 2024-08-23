@@ -1468,8 +1468,8 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
                 }
 
                 circle.init(this, mgScene,
-                        (com.rian.osu.beatmap.hitobject.HitCircle) obj, comboColor, Integer.parseInt(params[4]),
-                        tempSound, isFirst);
+                        (com.rian.osu.beatmap.hitobject.HitCircle) obj, secPassed, comboColor,
+                        Integer.parseInt(params[4]), tempSound, isFirst);
                 addObject(circle);
                 isFirst = false;
 

@@ -1,6 +1,7 @@
 package ru.nsu.ccfit.zuev.osu.game;
 
 import com.reco1l.osu.graphics.Modifiers;
+import com.rian.osu.mods.ModHidden;
 
 import org.anddev.andengine.entity.scene.Scene;
 import org.anddev.andengine.entity.sprite.Sprite;
@@ -38,8 +39,8 @@ public class HitCircle extends GameObject {
     }
 
     public void init(final GameObjectListener listener, final Scene pScene,
-                     final com.rian.osu.beatmap.hitobject.HitCircle beatmapCircle, final RGBColor comboColor,
-                     final int sound, final String tempSound, final boolean isFirstNote) {
+                     final com.rian.osu.beatmap.hitobject.HitCircle beatmapCircle, final float secPassed,
+                     final RGBColor comboColor, final int sound, final String tempSound, final boolean isFirstNote) {
         // Storing parameters into fields
         //Log.i("note-ini", time + "s");
         this.replayObjectData = null;
@@ -52,7 +53,7 @@ public class HitCircle extends GameObject {
         this.addition = 0;
         // TODO: 外部音效文件支持
         this.timePreempt = (float) beatmapCircle.timePreempt / 1000;
-        passedTime = 0;
+        passedTime = secPassed - ((float) beatmapCircle.startTime / 1000 - timePreempt);
         startHit = false;
         kiai = GameHelper.isKiai();
         color.set(comboColor.r(), comboColor.g(), comboColor.b());
@@ -68,19 +69,23 @@ public class HitCircle extends GameObject {
         radius = (float) beatmapCircle.getGameplayRadius();
         radius *= radius;
 
+        float actualFadeInDuration = (float) beatmapCircle.timeFadeIn / 1000 / GameHelper.getSpeedMultiplier();
+        float remainingFadeInDuration = Math.max(0, actualFadeInDuration - passedTime / GameHelper.getSpeedMultiplier());
+        float fadeInProgress = 1 - remainingFadeInDuration / actualFadeInDuration;
+
         // Initializing sprites
         circle.setColor(comboColor.r(), comboColor.g(), comboColor.b());
         circle.setScale(scale);
-        circle.setAlpha(0);
+        circle.setAlpha(fadeInProgress);
         Utils.putSpriteAnchorCenter(pos, circle);
 
         overlay.setScale(scale);
-        overlay.setAlpha(0);
+        overlay.setAlpha(fadeInProgress);
         Utils.putSpriteAnchorCenter(pos, overlay);
 
         approachCircle.setColor(comboColor.r(), comboColor.g(), comboColor.b());
-        approachCircle.setScale(scale * 3);
-        approachCircle.setAlpha(0);
+        approachCircle.setScale(scale * (3 - 2 * fadeInProgress));
+        approachCircle.setAlpha(0.9f * fadeInProgress);
         Utils.putSpriteAnchorCenter(pos, approachCircle);
         if (GameHelper.isHidden()) {
             approachCircle.setVisible(Config.isShowFirstApproachCircle() && isFirstNote);
@@ -95,32 +100,50 @@ public class HitCircle extends GameObject {
         number.init(pos, GameHelper.getScale());
         number.setAlpha(0);
 
-        float fadeInDuration = (float) beatmapCircle.timeFadeIn / 1000 / GameHelper.getSpeedMultiplier();
-
         if (GameHelper.isHidden()) {
-            float fadeOutDuration = timePreempt * 0.3f / GameHelper.getSpeedMultiplier();
+            float actualFadeOutDuration = timePreempt * (float) ModHidden.FADE_OUT_DURATION_MULTIPLIER / GameHelper.getSpeedMultiplier();
+            float remainingFadeOutDuration = Math.min(
+                actualFadeOutDuration,
+                Math.max(0, actualFadeOutDuration + remainingFadeInDuration - passedTime / GameHelper.getSpeedMultiplier())
+            );
 
             number.registerEntityModifier(Modifiers.sequence(
-                    Modifiers.fadeIn(fadeInDuration),
-                    Modifiers.fadeOut(fadeOutDuration)
+                    Modifiers.alpha(remainingFadeInDuration, fadeInProgress, 1),
+                    Modifiers.fadeOut(remainingFadeOutDuration)
             ));
             overlay.registerEntityModifier(Modifiers.sequence(
-                    Modifiers.fadeIn(fadeInDuration),
-                    Modifiers.fadeOut(fadeOutDuration)
+                    Modifiers.alpha(remainingFadeInDuration, fadeInProgress, 1),
+                    Modifiers.fadeOut(actualFadeOutDuration)
             ));
             circle.registerEntityModifier(Modifiers.sequence(
-                    Modifiers.fadeIn(fadeInDuration),
-                    Modifiers.fadeOut(fadeOutDuration)
+                    Modifiers.alpha(remainingFadeInDuration, fadeInProgress, 1),
+                    Modifiers.fadeOut(actualFadeOutDuration)
             ));
         } else {
-            circle.registerEntityModifier(Modifiers.fadeIn(fadeInDuration));
-            overlay.registerEntityModifier(Modifiers.fadeIn(fadeInDuration));
-            number.registerEntityModifier(Modifiers.fadeIn(fadeInDuration));
+            circle.registerEntityModifier(Modifiers.alpha(remainingFadeInDuration, fadeInProgress, 1));
+            overlay.registerEntityModifier(Modifiers.alpha(remainingFadeInDuration, fadeInProgress, 1));
+            number.registerEntityModifier(Modifiers.alpha(remainingFadeInDuration, fadeInProgress, 1));
         }
 
         if (approachCircle.isVisible()) {
-            approachCircle.registerEntityModifier(Modifiers.alpha(Math.min(fadeInDuration * 2, timePreempt / GameHelper.getSpeedMultiplier()), 0, 0.9f));
-            approachCircle.registerEntityModifier(Modifiers.scale(timePreempt / GameHelper.getSpeedMultiplier(), scale * 3, scale));
+            approachCircle.registerEntityModifier(
+                Modifiers.alpha(
+                    Math.min(
+                        Math.min(actualFadeInDuration * 2, remainingFadeInDuration),
+                        timePreempt / GameHelper.getSpeedMultiplier()
+                    ),
+                    0.9f * fadeInProgress,
+                    0.9f
+                )
+            );
+
+            approachCircle.registerEntityModifier(
+                Modifiers.scale(
+            Math.max(0, timePreempt - passedTime) / GameHelper.getSpeedMultiplier(),
+                    approachCircle.getScaleX(),
+                    scale
+                )
+            );
         }
 
         scene.attachChild(number, 0);
