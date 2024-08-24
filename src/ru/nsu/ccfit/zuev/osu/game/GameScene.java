@@ -354,6 +354,11 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
             return false;
         }
 
+        if (beatmap.hitObjects.objects.isEmpty()) {
+            ToastLogger.showText("Empty Beatmap", true);
+            return false;
+        }
+
         // TODO skin manager
         SkinManager.getInstance().loadBeatmapSkin(beatmap.folder);
 
@@ -492,11 +497,6 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
         objects = new LinkedList<>();
         for (final String s : beatmap.rawHitObjects) {
             objects.add(new GameObjectData(s));
-        }
-
-        if (objects.isEmpty()) {
-            ToastLogger.showText("Empty Beatmap", true);
-            return false;
         }
 
         parsedObjects = new LinkedList<>(beatmap.hitObjects.objects);
