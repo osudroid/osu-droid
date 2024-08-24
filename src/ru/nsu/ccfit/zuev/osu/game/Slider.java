@@ -200,7 +200,7 @@ public class Slider extends GameObject {
         }
 
         // End circle
-        endPos = beatmapSlider.getGameplayStackedEndPosition().toPointF();
+        endPos = path.points.get(path.points.size() - 1);
         endCircle.setScale(scale);
         endCircle.setColor(comboColor.r(), comboColor.g(), comboColor.b());
         endCircle.setAlpha(0);
@@ -273,7 +273,7 @@ public class Slider extends GameObject {
         if (spanCount > 1) {
             endArrow.setAlpha(0);
             endArrow.setScale(scale);
-            endArrow.setRotation(MathUtils.radToDeg(Utils.direction(path.points.get(path.points.size() - 2), endPos)));
+            endArrow.setRotation(MathUtils.radToDeg(Utils.direction(endPos, path.points.get(path.points.size() - 2))));
 
             Utils.putSpriteAnchorCenter(Config.isSnakingInSliders() ? pos : endPos, endArrow);
             scene.attachChild(endArrow, 0);
