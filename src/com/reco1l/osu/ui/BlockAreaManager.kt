@@ -31,7 +31,7 @@ class BlockAreaManagerFragment : BaseFragment() {
     private val blockAreaItems = mutableListOf<BlockAreaItem>()
 
 
-    private var isEditing = false
+    private var isEditing = true
 
 
     override fun onLoadView() {
