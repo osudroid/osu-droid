@@ -14,37 +14,16 @@ import com.reco1l.osu.data.BlockArea
 import com.reco1l.osu.data.DatabaseManager
 import com.reco1l.toolkt.android.dp
 import com.reco1l.toolkt.android.removeSelf
-import com.reco1l.toolkt.kotlin.fastForEach
 import com.rian.osu.math.Vector2
+import ru.nsu.ccfit.zuev.osu.game.GameScene
 import ru.nsu.ccfit.zuev.osuplus.R
-
-
-object BlockAreaManager {
-
-
-    private val blockAreas = DatabaseManager.blockAreaTable.getAll()
-
-
-    @JvmStatic
-    fun isInsideBlockArea(event: MotionEvent): Boolean {
-
-        blockAreas.fastForEach {
-
-            if (event.x >= it.x && event.x <= it.x + it.width &&
-                event.y >= it.y && event.y <= it.y + it.height) {
-                return true
-            }
-        }
-        return false
-    }
-
-}
 
 
 class BlockAreaManagerFragment : BaseFragment() {
 
 
-    override val layoutID = R.layout.block_area_manager_fragment
+    override val layoutID
+        get() = if (isEditing) R.layout.block_area_manager_fragment else R.layout.block_area_layer_fragment
 
 
     private val toolbarMoveVector = Vector2(0f, 0f)
@@ -52,7 +31,18 @@ class BlockAreaManagerFragment : BaseFragment() {
     private val blockAreaItems = mutableListOf<BlockAreaItem>()
 
 
+    private var isEditing = false
+
+
     override fun onLoadView() {
+
+        DatabaseManager.blockAreaTable.getAll().forEach {
+            blockAreaItems.add(BlockAreaItem(it, isEditing))
+        }
+
+        if (!isEditing) {
+            return
+        }
 
         val toolbarView = findViewById<LinearLayout>(R.id.toolbar)!!
 
@@ -95,7 +85,7 @@ class BlockAreaManagerFragment : BaseFragment() {
                 width = 128f.dp,
                 height = 128f.dp
             )
-            blockAreaItems.add(BlockAreaItem(blockArea))
+            blockAreaItems.add(BlockAreaItem(blockArea, true))
             DatabaseManager.blockAreaTable.insert(blockArea)
         }
 
@@ -107,34 +97,26 @@ class BlockAreaManagerFragment : BaseFragment() {
             }
         }
 
+    }
 
-        DatabaseManager.blockAreaTable.getAll().forEach {
-            blockAreaItems.add(BlockAreaItem(it))
-        }
+    fun show(isEditing: Boolean) {
+        this.isEditing = isEditing
+        super.show()
     }
 
 
-    inner class BlockAreaItem(val data: BlockArea) {
+    inner class BlockAreaItem(private val data: BlockArea, isEditing: Boolean) {
 
-
-        val itemView = LayoutInflater.from(context).inflate(R.layout.block_area_item_fragment, root as ViewGroup, false)!!
-
-
-        private val block: View = itemView.findViewById(R.id.block)
-
-        private val move: ImageView = itemView.findViewById(R.id.move)
-
-        private val remove: ImageButton = itemView.findViewById(R.id.remove)
-
-        private val resize: ImageButton = itemView.findViewById(R.id.resize)
-
-
-        private val moveVector = Vector2(0f, 0f)
-
-        private val resizeVector = Vector2(0f, 0f)
+        val itemView = LayoutInflater.from(context).inflate(
+            if (isEditing) R.layout.block_area_manager_item else R.layout.block_area_layer_item,
+            root as ViewGroup,
+            false
+        )!!
 
 
         init {
+
+            val block = itemView.findViewById<View>(R.id.block)!!
 
             itemView.x = data.x
             itemView.y = data.y
@@ -143,81 +125,94 @@ class BlockAreaManagerFragment : BaseFragment() {
                 height = data.height.toInt()
             }
 
-            // The margin between the block and the actual view bound, because the Remove and Resize
-            // buttons are slightly outside of the block we have to account for that when setting limits.
-            val blockMargin = 8f.dp
+            if (isEditing) {
 
-            move.setOnTouchListener { _, event ->
+                val move = itemView.findViewById<ImageView>(R.id.move)
+                val remove = itemView.findViewById<ImageButton>(R.id.remove)
+                val resize = itemView.findViewById<ImageButton>(R.id.resize)
 
-                when(event.action) {
+                val moveVector = Vector2(0f, 0f)
+                val resizeVector = Vector2(0f, 0f)
 
-                    ACTION_DOWN -> {
-                        moveVector.x = event.x
-                        moveVector.y = event.y
-                        true
-                    }
+                // The margin between the block and the actual view bound, because the Remove and Resize
+                // buttons are slightly outside of the block we have to account for that when setting limits.
+                val blockMargin = 8f.dp
 
-                    ACTION_MOVE -> {
+                move.setOnTouchListener { _, event ->
 
-                        val deltaX = event.x - moveVector.x
-                        val deltaY = event.y - moveVector.y
+                    when(event.action) {
 
-                        itemView.x = (itemView.x + deltaX).coerceIn(-blockMargin, root!!.width - block.width - blockMargin)
-                        itemView.y = (itemView.y + deltaY).coerceIn(-blockMargin, root!!.height - block.height - blockMargin)
-
-                        data.x = itemView.x
-                        data.y = itemView.y
-                        true
-                    }
-
-                    ACTION_UP -> {
-                        DatabaseManager.blockAreaTable.update(data)
-                        true
-                    }
-
-                    else -> false
-                }
-            }
-
-            remove.setOnClickListener {
-                itemView.removeSelf()
-                DatabaseManager.blockAreaTable.delete(data)
-            }
-
-            resize.setOnTouchListener { _, event ->
-
-                when(event.action) {
-
-                    ACTION_DOWN -> {
-                        resizeVector.x = event.x
-                        resizeVector.y = event.y
-                        true
-                    }
-
-                    ACTION_MOVE -> {
-
-                        val deltaWidth = resizeVector.x - event.x
-
-                        // Inverted because the Y axis starts from the top left corner in Android.
-                        val deltaHeight = event.y - resizeVector.y
-
-                        block.updateLayoutParams {
-                            width = (block.width + deltaWidth).coerceAtLeast(MINIMUM_AREA_SIZE.dp).toInt()
-                            height = (block.height + deltaHeight).coerceAtLeast(MINIMUM_AREA_SIZE.dp).toInt()
+                        ACTION_DOWN -> {
+                            moveVector.x = event.x
+                            moveVector.y = event.y
+                            true
                         }
 
-                        data.width = block.width.toFloat()
-                        data.height = block.height.toFloat()
-                        true
-                    }
+                        ACTION_MOVE -> {
 
-                    ACTION_UP -> {
-                        DatabaseManager.blockAreaTable.update(data)
-                        true
-                    }
+                            val deltaX = event.x - moveVector.x
+                            val deltaY = event.y - moveVector.y
 
-                    else -> false
+                            itemView.x = (itemView.x + deltaX).coerceIn(-blockMargin, root!!.width - block.width - blockMargin)
+                            itemView.y = (itemView.y + deltaY).coerceIn(-blockMargin, root!!.height - block.height - blockMargin)
+
+                            data.x = itemView.x
+                            data.y = itemView.y
+                            true
+                        }
+
+                        ACTION_UP -> {
+                            DatabaseManager.blockAreaTable.update(data)
+                            true
+                        }
+
+                        else -> false
+                    }
                 }
+
+                remove.setOnClickListener {
+                    itemView.removeSelf()
+                    DatabaseManager.blockAreaTable.delete(data)
+                }
+
+                resize.setOnTouchListener { _, event ->
+
+                    when(event.action) {
+
+                        ACTION_DOWN -> {
+                            resizeVector.x = event.x
+                            resizeVector.y = event.y
+                            true
+                        }
+
+                        ACTION_MOVE -> {
+
+                            val deltaWidth = resizeVector.x - event.x
+
+                            // Inverted because the Y axis starts from the top left corner in Android.
+                            val deltaHeight = event.y - resizeVector.y
+
+                            block.updateLayoutParams {
+                                width = (block.width + deltaWidth).coerceAtLeast(MINIMUM_AREA_SIZE.dp).toInt()
+                                height = (block.height + deltaHeight).coerceAtLeast(MINIMUM_AREA_SIZE.dp).toInt()
+                            }
+
+                            data.width = block.width.toFloat()
+                            data.height = block.height.toFloat()
+                            true
+                        }
+
+                        ACTION_UP -> {
+                            DatabaseManager.blockAreaTable.update(data)
+                            true
+                        }
+
+                        else -> false
+                    }
+                }
+            } else {
+                // Intercepting touch events.
+                block.setOnTouchListener { _, _ -> true }
             }
 
             (root as ViewGroup).addView(itemView)

@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:clickable="true"
+    android:padding="8dp"
+    android:clipToPadding="false">
+
+    <View
+        android:id="@+id/block"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        tools:layout_width="128dp"
+        tools:layout_height="128dp"
+        android:alpha="0.15"
+        android:clickable="true"
+        android:background="@drawable/block_area_item_background" />
+
+</RelativeLayout>

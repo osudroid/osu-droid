@@ -1,5 +1,6 @@
 package com.reco1l.osu.data
 
+import android.view.MotionEvent
 import androidx.room.Dao
 import androidx.room.Delete
 import androidx.room.Entity
@@ -23,7 +24,17 @@ data class BlockArea(
 
     var height: Float = 0f
 
-)
+) {
+
+    operator fun contains(event: MotionEvent): Boolean {
+        return contains(event.x, event.y)
+    }
+
+    fun contains(x: Float, y: Float): Boolean {
+        return x >= this.x && x <= this.x + width && y >= this.y && y <= this.y + height
+    }
+
+}
 
 @Dao
 interface IBlockAreaDAO {
