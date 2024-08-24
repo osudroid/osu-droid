@@ -627,7 +627,7 @@ public class Slider extends GameObject {
         }
 
         if (GameHelper.isKiai()) {
-            final float kiaiModifier = (float) Math.max(0, 1 - GameHelper.getGlobalTime() / GameHelper.getKiaiTickLength()) * 0.50f;
+            final float kiaiModifier = (float) Math.max(0, 1 - GameHelper.getCurrentBeatTime() / GameHelper.getBeatLength()) * 0.5f;
             final float r = Math.min(1, circleColor.r() + (1 - circleColor.r()) * kiaiModifier);
             final float g = Math.min(1, circleColor.g() + (1 - circleColor.g()) * kiaiModifier);
             final float b = Math.min(1, circleColor.b() + (1 - circleColor.b()) * kiaiModifier);

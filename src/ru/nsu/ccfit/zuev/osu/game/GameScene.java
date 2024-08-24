@@ -467,7 +467,7 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
         GameHelper.setBeatLength(activeTimingPoint.msPerBeat / 1000);
         GameHelper.setTimeSignature(activeTimingPoint.timeSignature);
         GameHelper.setKiai(activeEffectPoint.isKiai);
-        GameHelper.setInitalBeatLength(GameHelper.getBeatLength());
+        GameHelper.setCurrentBeatTime(0);
 
         GameObjectPool.getInstance().purge();
         Slider.tickSpritePool.clear();
@@ -819,7 +819,6 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
             skipBtn.setAlpha(0.7f);
             fgScene.attachChild(skipBtn);
         }
-        GameHelper.setGlobalTime(0);
 
         breakAnimator = new BreakAnimator(this, fgScene, stat, beatmap.general.letterboxInBreaks, dimRectangle);
         if(!Config.isHideInGameUI()){
@@ -1010,14 +1009,6 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
             }
         }
 
-        double gtime;
-        if (activeEffectPoint.time / 1000 > secPassed) {
-            gtime = 0;
-        } else {
-            gtime = (secPassed - activeEffectPoint.time / 1000)
-                    % (GameHelper.getKiaiTickLength());
-        }
-        GameHelper.setGlobalTime(gtime);
         final float mSecPassed = secPassed * 1000;
 
         if (Config.isEnableStoryboard()) {
@@ -1129,6 +1120,7 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
         GameHelper.setBeatLength(activeTimingPoint.msPerBeat / 1000);
         GameHelper.setTimeSignature(activeTimingPoint.timeSignature);
         GameHelper.setKiai(activeEffectPoint.isKiai);
+        GameHelper.setCurrentBeatTime(Math.max(0, secPassed - activeTimingPoint.time / 1000) % GameHelper.getBeatLength());
 
         if (!breakPeriods.isEmpty()) {
             if (!breakAnimator.isBreak()

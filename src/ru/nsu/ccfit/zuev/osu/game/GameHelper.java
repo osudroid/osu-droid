@@ -37,8 +37,7 @@ public class GameHelper {
     private static double beatLength = 0;
     private static double timingOffset = 0;
     private static int timeSignature = 4;
-    private static double initalBeatLength = 0;
-    private static double globalTime = 0;
+    private static double currentBeatTime = 0;
     private static final Queue<SliderPath> pathPool = new LinkedList<>();
     private static final Queue<PointF> pointPool = new LinkedList<>();
 
@@ -238,12 +237,12 @@ public class GameHelper {
         GameHelper.isKiai = isKiai;
     }
 
-    public static double getGlobalTime() {
-        return globalTime;
+    public static double getCurrentBeatTime() {
+        return currentBeatTime;
     }
 
-    public static void setGlobalTime(final double globalTime) {
-        GameHelper.globalTime = globalTime;
+    public static void setCurrentBeatTime(final double currentBeatTime) {
+        GameHelper.currentBeatTime = currentBeatTime;
     }
 
     public static double getBeatLength() {
@@ -268,14 +267,6 @@ public class GameHelper {
 
     public static void setTimeSignature(int timeSignature) {
         GameHelper.timeSignature = timeSignature;
-    }
-
-    public static void setInitalBeatLength(double initalBeatLength) {
-        GameHelper.initalBeatLength = initalBeatLength;
-    }
-
-    public static double getKiaiTickLength() {
-        return initalBeatLength;
     }
 
     public static boolean isRelaxMod() {
