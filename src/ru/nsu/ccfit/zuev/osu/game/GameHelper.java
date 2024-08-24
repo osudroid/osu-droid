@@ -2,10 +2,14 @@ package ru.nsu.ccfit.zuev.osu.game;
 
 import android.graphics.PointF;
 
+import com.rian.osu.beatmap.hitobject.SliderPathType;
+import com.rian.osu.math.Vector2;
+
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.util.ArrayList;
 import java.util.LinkedList;
+import java.util.List;
 import java.util.Queue;
 import java.util.Random;
 
@@ -45,7 +49,6 @@ public class GameHelper {
     private static int timeSignature = 4;
     private static double initalBeatLength = 0;
     private static double globalTime = 0;
-    private static Spline.CurveTypes curveType;
     private static int gameid = 0;
     private static final Queue<SliderPath> pathPool = new LinkedList<>();
     private static final Queue<PointF> pointPool = new LinkedList<>();
@@ -92,39 +95,55 @@ public class GameHelper {
         gameid = (new Random().nextInt(233333333) + 1);
     }
 
-    public static SliderPath calculatePath(final PointF pos,
-                                           final String[] data, final float maxLength, final float offset) {
+    /**
+     * Converts a difficulty-calculated slider path of a {@link com.rian.osu.beatmap.hitobject.Slider} to one that can be used in gameplay.
+     *
+     * @return The converted {@link SliderPath}.
+     */
+    public static SliderPath convertSliderPath(final com.rian.osu.beatmap.hitobject.Slider slider) {
+        var path = newPath();
+        var startPosition = slider.position.plus(slider.getGameplayStackOffset());
+
+        for (var p : slider.getPath().getCalculatedPath()) {
+            var point = newPointF();
+            point.set(startPosition.x + p.x, startPosition.y + p.y);
+
+            path.points.add(Utils.trackToRealCoords(point));
+        }
+
+        for (double l : slider.getPath().getCumulativeLength()) {
+            path.length.add((float) l);
+        }
+
+        return path;
+    }
+
+    public static SliderPath calculatePath(final Vector2 startPosition, final SliderPathType pathType,
+                                           final List<Vector2> controlPoints, final float maxLength) {
         final ArrayList<ArrayList<PointF>> points = new ArrayList<>();
         points.add(new ArrayList<>());
         int lastIndex = 0;
-        points.get(lastIndex).add(pos);
+        points.get(lastIndex).add(startPosition.toPointF());
 
         final SliderPath path = newPath();
+        final Spline.CurveTypes curveType = switch (pathType) {
+            case Bezier -> Spline.CurveTypes.Bezier;
+            case Catmull -> Spline.CurveTypes.Catmull;
+            case Linear -> Spline.CurveTypes.Linear;
+            case PerfectCurve -> Spline.CurveTypes.PerfectCurve;
+        };
 
-        for (final String s : data) {
-            if (s.equals(data[0])) {
-                curveType = Spline.getCurveType(s.charAt(0));
+        for (var controlPoint : controlPoints) {
+            var point = newPointF();
+            point.set(startPosition.x + controlPoint.x, startPosition.y + controlPoint.y);
 
-                if (curveType == Spline.CurveTypes.PerfectCurve && data.length != 3) {
-                    // A perfect circle curve must have exactly 3 control points: the initial position, and 2 other control points.
-                    // Fallback to a Bézier curve if there are more or less control points.
-                    curveType = Spline.CurveTypes.Bezier;
-                }
-
-                continue;
-            }
-            final String[] nums = s.split(":");
-            final PointF point = newPointF();
-            point.set(Integer.parseInt(nums[0]), Integer.parseInt(nums[1]));
-            point.x += offset;
-            point.y += offset;
             final PointF ppoint = points.get(lastIndex).get(
                     points.get(lastIndex).size() - 1);
-            if (point.x == ppoint.x && point.y == ppoint.y
-                    || data[0].equals("C")) {
-                if (data[0].equals("C")) {
+            if (point.x == ppoint.x && point.y == ppoint.y || curveType == Spline.CurveTypes.Catmull) {
+                if (curveType == Spline.CurveTypes.Catmull) {
                     points.get(lastIndex).add(point);
                 }
+
                 points.add(new ArrayList<>());
                 lastIndex++;
             }
@@ -151,7 +170,6 @@ public class GameHelper {
                 section = spline.getPoints();
             }
 
-            // Debug.i("section size=" + section.size());
             for (final PointF p : section) {
                 if (pind < 0
                         || Math.abs(p.x - path.points.get(pind).x)
@@ -387,16 +405,8 @@ public class GameHelper {
         GameHelper.timeSignature = timeSignature;
     }
 
-    public static double getInitalBeatLength() {
-        return initalBeatLength;
-    }
-
     public static void setInitalBeatLength(double initalBeatLength) {
         GameHelper.initalBeatLength = initalBeatLength;
-    }
-
-    public static double getSliderTickLength() {
-        return 100f * initalBeatLength / speed;
     }
 
     public static double getKiaiTickLength() {

@@ -151,12 +151,7 @@ abstract class HitObject(
      * The position of this [HitObject] in gameplay, in pixels.
      */
     @JvmField
-    val gameplayPosition =
-        position *
-        // Scale the position to the actual play field size on screen
-        Vector2(Constants.MAP_ACTUAL_WIDTH / Constants.MAP_WIDTH.toFloat(), Constants.MAP_ACTUAL_HEIGHT / Constants.MAP_HEIGHT.toFloat()) +
-        // Center the position on the screen
-        Vector2(Config.getRES_WIDTH() - Constants.MAP_ACTUAL_WIDTH, Config.getRES_HEIGHT() - Constants.MAP_ACTUAL_HEIGHT) / 2f
+    val gameplayPosition = convertPositionToRealCoordinates(position)
 
     /**
      * The radius of this [HitObject] in gameplay, in pixels.
@@ -246,6 +241,19 @@ abstract class HitObject(
             }
         }
     }
+
+    /**
+     * Converts a position in osu!pixels to real screen coordinates.
+     *
+     * @param position The position in osu!pixels.
+     * @return The position in real screen coordinates.
+     */
+    protected fun convertPositionToRealCoordinates(position: Vector2) =
+        position *
+        // Scale the position to the actual play field size on screen
+        Vector2(Constants.MAP_ACTUAL_WIDTH / Constants.MAP_WIDTH.toFloat(), Constants.MAP_ACTUAL_HEIGHT / Constants.MAP_HEIGHT.toFloat()) +
+        // Center the position on the screen
+        Vector2(Config.getRES_WIDTH() - Constants.MAP_ACTUAL_WIDTH, Config.getRES_HEIGHT() - Constants.MAP_ACTUAL_HEIGHT) / 2f
 
     /**
      * Creates a [BankHitSampleInfo] based on the sample settings of the first [BankHitSampleInfo.HIT_NORMAL] sample in [samples].

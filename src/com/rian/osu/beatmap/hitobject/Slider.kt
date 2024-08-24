@@ -76,11 +76,12 @@ class Slider(
     var path = path
         set(value) {
             field = value
+
             updateNestedPositions()
         }
 
     /**
-     * The end position of this [Slider].
+     * The end position of this [Slider] in osu!pixels.
      */
     val endPosition: Vector2
         get() {
@@ -90,12 +91,6 @@ class Slider(
 
             return endPositionCache.value
         }
-
-    /**
-     * The stacked end position of this [Slider].
-     */
-    val difficultyStackedEndPosition
-        get() = endPosition + difficultyStackOffset
 
     /**
      * The distance of this [Slider].
@@ -184,7 +179,7 @@ class Slider(
     var lazyTravelTime = 0.0
 
     /**
-     * The duration of one span of this [Slider].
+     * The duration of one span of this [Slider] in milliseconds.
      */
     val spanDuration: Double
         get() = duration / spanCount
@@ -197,6 +192,12 @@ class Slider(
         }
 
     // Difficulty calculation object positions
+
+    /**
+     * The stacked end position of this [Slider] in difficulty calculation, in osu!pixels.
+     */
+    val difficultyStackedEndPosition
+        get() = endPosition + difficultyStackOffset
 
     override var difficultyStackHeight = super.difficultyStackHeight
         set(value) {
@@ -213,6 +214,18 @@ class Slider(
         }
 
     // Gameplay object positions
+
+    /**
+     * The end position of this [Slider] in gameplay, in pixels.
+     */
+    val gameplayEndPosition
+        get() = convertPositionToRealCoordinates(endPosition)
+
+    /**
+     * The stacked end position of this [Slider] in gameplay, in pixels.
+     */
+    val gameplayStackedEndPosition
+        get() = gameplayEndPosition + gameplayStackOffset
 
     override var gameplayStackHeight = super.gameplayStackHeight
         set(value) {
@@ -284,7 +297,7 @@ class Slider(
     }
 
     /**
-     * Computes the position on this [Slider] relative to how much of this [Slider] has been completed.
+     * Computes the position on this [Slider] relative to how much of this [Slider] has been completed in osu!pixels.
      *
      * @param progress `[0. 1]` where 0 is the start time of this [Slider] and 1 is the end time of this [Slider].
      * @return The position on the [Slider].

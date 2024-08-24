@@ -125,8 +125,6 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
     private LinkedList<HitObject> parsedObjects;
     private LinkedList<GameObjectData> objects;
     private ArrayList<RGBColor> combos;
-    private int comboNum; // use this to show combo color
-    private int currentComboNum;
     private boolean comboWasMissed = false;
     private boolean comboWas100 = false;
     private LinkedList<GameObject> activeObjects;
@@ -531,8 +529,7 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
             combos.clear();
             combos.addAll(OsuSkin.get().getComboColor());
         }
-        comboNum = -1;
-        currentComboNum = 0;
+
         lastActiveObjectHitTime = 0;
 
         activeTimingPoint = beatmap.controlPoints.timing.controlPointAt(Double.NEGATIVE_INFINITY);
@@ -611,10 +608,7 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
         }
 
         lastBeatmapInfo = beatmapInfo;
-        if (Config.isCalculateSliderPathInGameStart()){
-            stackNotes();
-            calculateAllSliderPaths();
-        }
+        calculateAllSliderPaths();
 
         // Resetting variables before starting the game.
         Multiplayer.finalData = null;
@@ -1404,7 +1398,6 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
 
             final String[] params = data.getData();
 
-            final PointF pos = data.getPos();
             // Fix matching error on new beatmaps
             final int objDefine = Integer.parseInt(params[3]);
 
@@ -1417,45 +1410,10 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
             // usage of this is done if condition 'objects.isEmpty()' is false. Ignore IDE warnings.
             var nextObj = objects.peek();
 
-            // Stack notes
-            // If Config.isCalculateSliderPathInGameStart(), do this in stackNotes()
-            if (!Config.isCalculateSliderPathInGameStart() && nextObj != null && (objDefine & 1) > 0) {
-                if (nextObj.getTime() - data.getTime() < 2f * GameHelper.getStackLeniency()
-                        && Utils.squaredDistance(pos, nextObj.getPos()) < scale) {
-                    nextObj.setPosOffset(
-                            data.getPosOffset() + 4 * scale);
-                }
-            }
-            // If this object is silder and isCalculateSliderPathInGameStart(), the pos is += in calculateAllSliderPaths()
-            if (!Config.isCalculateSliderPathInGameStart() || (objDefine & 2) <= 0){
-                pos.x += data.getPosOffset();
-                pos.y += data.getPosOffset();
-            }
             if (nextObj != null) {
                 distToNextObject = Math.max(nextObj.getTime() - data.getTime(), activeTimingPoint.msPerBeat / 1000 / 2);
             } else {
                 distToNextObject = 0;
-            }
-            // Calculate combo color
-            int comboCode = objDefine;
-            if (comboCode == 12) {
-                currentComboNum = 0;
-            } else if (comboNum == -1) {
-                comboNum = 1;
-                currentComboNum = 0;
-            } else if ((comboCode & 4) > 0) {
-                currentComboNum = 0;
-                if (comboCode / 15 > 0) {
-                    comboCode /= 15;
-                    for (int i = 0; true; i++) {
-                        if (comboCode >> i == 1) {
-                            comboNum = i;
-                            break;
-                        }
-                    }
-                } else {
-                    comboNum = (comboNum + 1) % combos.size();
-                }
             }
 
             final RGBColor comboColor = getComboColor(obj.getComboIndexWithOffsets());
@@ -1491,14 +1449,8 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
                     circle.setAutoPlay();
                 }
                 circle.setHitTime(data.getTime());
-
-                if (nextObj != null) {
-                    if (nextObj.getTime() > data.getTime()) {
-                        currentComboNum++;
-                    }
-                }
-
                 circle.setId(++lastObjectId);
+
                 if (replaying) {
                     circle.setReplayData(replay.objectData[circle.getId()]);
                 }
@@ -1531,26 +1483,11 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
                 if (params.length > 9) {
                     tempSound = params[9];
                 }
-                if (Config.isCalculateSliderPathInGameStart()){
-                    SliderPath sliderPath = getSliderPath(sliderIndex);
-                    slider.init(this, mgScene, pos, data.getPosOffset(), data.getTime() - secPassed,
-                        comboColor, scale, currentComboNum,
-                        Integer.parseInt(params[4]),
-                        Integer.parseInt(params[6]),
-                        Float.parseFloat(params[7]), params[5],
-                        beatmap.controlPoints, soundspec, tempSound, isFirst, Double.parseDouble(params[2]),
-                        sliderPath);
-                    sliderIndex++;
-                }
-                else{
-                    slider.init(this, mgScene, pos, data.getPosOffset(), data.getTime() - secPassed,
-                    comboColor, scale, currentComboNum,
-                    Integer.parseInt(params[4]),
-                    Integer.parseInt(params[6]),
-                    Float.parseFloat(params[7]), params[5],
-                    beatmap.controlPoints, soundspec, tempSound, isFirst, Double.parseDouble(params[2]));
-                }
-                slider.setEndsCombo(nextObj == null || nextObj.isNewCombo());
+
+                slider.init(this, mgScene, (com.rian.osu.beatmap.hitobject.Slider) obj, secPassed,
+                    comboColor, Integer.parseInt(params[4]), beatmap.controlPoints, soundspec, tempSound,
+                    isFirst, getSliderPath(sliderIndex++));
+
                 addObject(slider);
                 isFirst = false;
 
@@ -1572,14 +1509,6 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
                     slider.setAutoPlay();
                 }
                 slider.setHitTime(data.getTime());
-
-
-                if (nextObj != null) {
-                    if (nextObj.getTime() > data.getTime()) {
-                        currentComboNum++;
-                    }
-                }
-
                 slider.setId(++lastObjectId);
                 if (replaying) {
                     slider.setReplayData(replay.objectData[slider.getId()]);
@@ -2655,54 +2584,23 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
         return id;
     }
 
-    private void stackNotes(){
-        // Stack notes
-        int i = 0;
-        for (GameObjectData data : objects){
-            final PointF pos = data.getPos();
-            final String[] params = data.getData();
-            final int objDefine = Integer.parseInt(params[3]);
-            if (!objects.isEmpty() && (objDefine & 1) > 0 && i + 1 < objects.size()) {
-                if (objects.get(i + 1).getTime() - data.getTime() < 2f * GameHelper.getStackLeniency()
-                        && Utils.squaredDistance(pos, objects.get(i + 1).getPos()) < scale) {
-                    objects.get(i + 1).setPosOffset(
-                            data.getPosOffset() + Utils.toRes(4) * scale);
-                }
-            }
-            i++;
+    private void calculateAllSliderPaths() {
+        if (beatmap.hitObjects.getSliderCount() == 0) {
+            return;
         }
-    }
 
-    private void calculateAllSliderPaths(){
-        if (!objects.isEmpty()){
-            if (lastBeatmapInfo.getSliderCount() <= 0){
-                return;
+        sliderPaths = new SliderPath[beatmap.hitObjects.getSliderCount()];
+        sliderIndex = 0;
+
+        for (var obj : beatmap.hitObjects.objects) {
+            if (!(obj instanceof com.rian.osu.beatmap.hitobject.Slider slider)) {
+                continue;
             }
-            sliderPaths = new SliderPath[lastBeatmapInfo.getSliderCount()];
-            sliderIndex = 0;
-            for (GameObjectData data : objects){
-                final String[] params = data.getData();
-                final int objDefine = Integer.parseInt(params[3]);
-                //is slider
-                if ((objDefine & 2) > 0) {
-                    final PointF pos = data.getPos();
-                    final float length = Float.parseFloat(params[7]);
-                    final float offset = data.getPosOffset();
-                    pos.x += data.getPosOffset();
-                    pos.y += data.getPosOffset();
-                    if (length < 0){
-                        sliderPaths[sliderIndex] = GameHelper.calculatePath(Utils.realToTrackCoords(pos),
-                                params[5].split("[|]"), 0, offset);
-                    }
-                    else{
-                        sliderPaths[sliderIndex] = GameHelper.calculatePath(Utils.realToTrackCoords(pos),
-                                params[5].split("[|]"), length, offset);
-                    }
-                    sliderIndex++;
-                }
-            }
-            sliderIndex = 0;
+
+            sliderPaths[sliderIndex++] = GameHelper.convertSliderPath(slider);
         }
+
+        sliderIndex = 0;
     }
 
     private SliderPath getSliderPath(int index){
