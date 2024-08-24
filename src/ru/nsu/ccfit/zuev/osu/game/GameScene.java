@@ -139,12 +139,10 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
     private Metronome metronome;
     private boolean isFirst = true;
     private float scale;
-    private float approachRate;
+    private float objectTimePreempt;
     private float rawCircleSize;
     private float rawDifficulty;
-    private float overallDifficulty;
     private float rawDrain;
-    private float drain;
     public StatisticV2 stat;
     private boolean gameStarted;
     private float totalOffset;
@@ -406,18 +404,16 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
         version = beatmap.metadata.version;
 
         scale = beatmap.hitObjects.objects.get(0).getGameplayScale();
-        approachRate = (float) GameHelper.ar2ms(beatmap.difficulty.getAr()) / 1000f;
-        overallDifficulty = beatmap.difficulty.od;
-        drain = beatmap.difficulty.hp;
+        objectTimePreempt = (float) GameHelper.ar2ms(beatmap.difficulty.getAr()) / 1000f;
 
         rawCircleSize = parsedBeatmap.difficulty.cs;
         rawDifficulty = parsedBeatmap.difficulty.od;
         rawDrain = parsedBeatmap.difficulty.hp;
 
         GameHelper.setSpeed(beatmap.difficulty.sliderMultiplier * 100);
-        GameHelper.setOverallDifficulty(overallDifficulty);
-        GameHelper.setHealthDrain(drain);
-        GameHelper.setObjectTimePreempt(approachRate);
+        GameHelper.setOverallDifficulty(beatmap.difficulty.od);
+        GameHelper.setHealthDrain(beatmap.difficulty.hp);
+        GameHelper.setObjectTimePreempt(objectTimePreempt);
         GameHelper.setSpeedMultiplier(modMenu.getSpeed());
 
         GlobalManager.getInstance().getSongService().preLoad(audioFilePath, GameHelper.getSpeedMultiplier(),
@@ -491,8 +487,8 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
                 ToastLogger.showTextId(R.string.replay_invalid, true);
                 return false;
             } else
-                replay.countMarks(overallDifficulty);
-        } else if (ModMenu.getInstance().getMod().contains(GameMod.MOD_AUTO)) {
+                replay.countMarks(beatmap.difficulty.od);
+        } else if (modMenu.getMod().contains(GameMod.MOD_AUTO)) {
             replay = null;
         }
 
@@ -735,7 +731,7 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
         }
 
         if (!objects.isEmpty()) {
-            skipTime = objects.peek().getTime() - approachRate - 1f;
+            skipTime = objects.peek().getTime() - objectTimePreempt - 1f;
         } else {
             skipTime = 0;
         }
@@ -793,7 +789,7 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
             hitErrorMeter = new HitErrorMeter(
                     fgScene,
                     new PointF((float) Config.getRES_WIDTH() / 2, Config.getRES_HEIGHT() - 20),
-                    overallDifficulty,
+                    beatmap.difficulty.od,
                     12,
                     difficultyHelper);
         }
@@ -1156,8 +1152,8 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
 
         if (gameStarted) {
             double rate = 0.375;
-            if (drain > 0 && distToNextObject > 0) {
-                rate = 1 + drain / (2 * distToNextObject);
+            if (beatmap.difficulty.hp > 0 && distToNextObject > 0) {
+                rate = 1 + beatmap.difficulty.hp / (2 * distToNextObject);
             }
             stat.changeHp((float) -rate * 0.01f * dt);
 
@@ -1299,7 +1295,7 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
         boolean shouldBePunished = false;
 
         while (!objects.isEmpty()
-                && secPassed + approachRate > objects.peek().getTime()) {
+                && secPassed + objectTimePreempt > objects.peek().getTime()) {
             gameStarted = true;
             final GameObjectData data = objects.poll();
             final HitObject obj = parsedObjects.poll();
@@ -1350,7 +1346,7 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
                         end = data.getPos();
                     }
                     track.init(this, bgScene, end, nextObj.getPos(),
-                            nextObj.getTime() - secPassed, approachRate,
+                            nextObj.getTime() - secPassed, objectTimePreempt,
                             scale);
                 }
                 if (GameHelper.isAuto()) {
@@ -1364,7 +1360,7 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
                 }
 
             } else if ((objDefine & 8) > 0) {
-                final float rps = 2 + 2 * overallDifficulty / 10f;
+                final float rps = 2 + 2 * beatmap.difficulty.od / 10f;
                 final Spinner spinner = GameObjectPool.getInstance().getSpinner();
                 String tempSound = null;
                 if (params.length > 6) {
@@ -1410,7 +1406,7 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
                         end = data.getPos();
                     }
                     track.init(this, bgScene, end, nextObj.getPos(),
-                            nextObj.getTime() - secPassed, approachRate,
+                            nextObj.getTime() - secPassed, objectTimePreempt,
                             scale);
                 }
                 if (GameHelper.isAuto()) {
@@ -1797,6 +1793,7 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
         }
 
         //(30 - overallDifficulty) / 100f
+        float overallDifficulty = beatmap.difficulty.od;
         if (accuracy > difficultyHelper.hitWindowFor50(overallDifficulty) || forcedScore == ResultType.MISS.getId()) {
             createHitEffect(pos, "hit0", color);
             registerHit(id, 0, endCombo);
