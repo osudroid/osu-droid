@@ -479,13 +479,12 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
         GameHelper.setAutopilotMod(ModMenu.getInstance().getMod().contains(GameMod.MOD_AUTOPILOT));
         GameHelper.setAuto(ModMenu.getInstance().getMod().contains(GameMod.MOD_AUTO));
 
-        GameHelper.setStackLeniency(beatmap.general.stackLeniency);
         if (scale < 0.001f){
             scale = 0.001f;
         }
+
         GameHelper.setSpeed(beatmap.difficulty.sliderMultiplier * 100);
         GameHelper.setTickRate((float) beatmap.difficulty.sliderTickRate);
-        GameHelper.setScale(scale);
         GameHelper.setDifficulty(overallDifficulty);
         GameHelper.setDrain(drain);
         GameHelper.setApproachRate(approachRate);
@@ -633,8 +632,6 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
     }
 
     public void startGame(final BeatmapInfo beatmapInfo, final String replayFile) {
-        GameHelper.updateGameid();
-
         scene = new Scene();
         if (Config.isEnableStoryboard()) {
             if (storyboardSprite == null || storyboardOverlayProxy == null) {

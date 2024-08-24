@@ -7,7 +7,6 @@ import java.math.RoundingMode;
 import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.Queue;
-import java.util.Random;
 
 import ru.nsu.ccfit.zuev.osu.RGBColor;
 import ru.nsu.ccfit.zuev.skins.OsuSkin;
@@ -16,12 +15,10 @@ import ru.nsu.ccfit.zuev.osu.helper.DifficultyHelper;
 
 public class GameHelper {
     private static double tickRate = 1;
-    private static float scale = 1;
     private static double speed = 1;
     private static float difficulty = 1;
     private static float approachRate = 1;
     private static float drain = 0;
-    private static float stackLeniency = 0;
     private static float speedMultiplier = 0;
     private static RGBColor sliderColor = new RGBColor();
     private static boolean hidden = false;
@@ -36,7 +33,6 @@ public class GameHelper {
     private static boolean perfect = false;
     private static boolean scoreV2;
     private static boolean isEasy;
-    private static boolean useReplay;
     private static boolean isKiai = false;
     private static boolean auto = false;
     private static double beatLength = 0;
@@ -44,7 +40,6 @@ public class GameHelper {
     private static int timeSignature = 4;
     private static double initalBeatLength = 0;
     private static double globalTime = 0;
-    private static int gameid = 0;
     private static final Queue<SliderPath> pathPool = new LinkedList<>();
     private static final Queue<PointF> pointPool = new LinkedList<>();
 
@@ -82,14 +77,6 @@ public class GameHelper {
         GameHelper.tickRate = tickRate;
     }
 
-    public static int getGameid() {
-        return gameid;
-    }
-
-    public static void updateGameid() {
-        gameid = (new Random().nextInt(233333333) + 1);
-    }
-
     /**
      * Converts a difficulty-calculated slider path of a {@link com.rian.osu.beatmap.hitobject.Slider} to one that can be used in gameplay.
      *
@@ -111,14 +98,6 @@ public class GameHelper {
         }
 
         return path;
-    }
-
-    public static float getScale() {
-        return scale;
-    }
-
-    public static void setScale(final float scale) {
-        GameHelper.scale = scale;
     }
 
     public static float getApproachRate() {
@@ -172,14 +151,6 @@ public class GameHelper {
         return pointPool.poll();
     }
 
-    public static float getStackLeniency() {
-        return stackLeniency;
-    }
-
-    public static void setStackLeniency(final float stackLeniency) {
-        GameHelper.stackLeniency = stackLeniency;
-    }
-
     public static RGBColor getSliderColor() {
         return sliderColor;
     }
@@ -219,6 +190,7 @@ public class GameHelper {
     public static void setFlashLight(final boolean flashLight) {
         GameHelper.flashLight = flashLight;
     }
+
     public static boolean isHalfTime() {
         return halfTime;
     }
@@ -265,14 +237,6 @@ public class GameHelper {
 
     public static void setScoreV2(boolean scoreV2) {
         GameHelper.scoreV2 = scoreV2;
-    }
-
-    public static boolean isUseReplay() {
-        return useReplay;
-    }
-
-    public static void setUseReplay(final boolean useReplay) {
-        GameHelper.useReplay = useReplay;
     }
 
     public static boolean isKiai() {

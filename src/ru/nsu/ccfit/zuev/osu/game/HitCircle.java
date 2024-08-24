@@ -97,7 +97,7 @@ public class HitCircle extends GameObject {
             comboNum %= 10;
         }
         number = GameObjectPool.getInstance().getNumber(comboNum);
-        number.init(pos, GameHelper.getScale());
+        number.init(pos, scale);
         number.setAlpha(0);
 
         if (GameHelper.isHidden()) {
