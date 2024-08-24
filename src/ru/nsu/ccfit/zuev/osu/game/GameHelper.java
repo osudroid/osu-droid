@@ -2,14 +2,10 @@ package ru.nsu.ccfit.zuev.osu.game;
 
 import android.graphics.PointF;
 
-import com.rian.osu.beatmap.hitobject.SliderPathType;
-import com.rian.osu.math.Vector2;
-
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.util.ArrayList;
 import java.util.LinkedList;
-import java.util.List;
 import java.util.Queue;
 import java.util.Random;
 
@@ -17,7 +13,6 @@ import ru.nsu.ccfit.zuev.osu.RGBColor;
 import ru.nsu.ccfit.zuev.skins.OsuSkin;
 import ru.nsu.ccfit.zuev.osu.Utils;
 import ru.nsu.ccfit.zuev.osu.helper.DifficultyHelper;
-import ru.nsu.ccfit.zuev.osu.polygon.Spline;
 
 public class GameHelper {
     private static double tickRate = 1;
@@ -113,91 +108,6 @@ public class GameHelper {
 
         for (double l : slider.getPath().getCumulativeLength()) {
             path.length.add((float) l);
-        }
-
-        return path;
-    }
-
-    public static SliderPath calculatePath(final Vector2 startPosition, final SliderPathType pathType,
-                                           final List<Vector2> controlPoints, final float maxLength) {
-        final ArrayList<ArrayList<PointF>> points = new ArrayList<>();
-        points.add(new ArrayList<>());
-        int lastIndex = 0;
-        points.get(lastIndex).add(startPosition.toPointF());
-
-        final SliderPath path = newPath();
-        final Spline.CurveTypes curveType = switch (pathType) {
-            case Bezier -> Spline.CurveTypes.Bezier;
-            case Catmull -> Spline.CurveTypes.Catmull;
-            case Linear -> Spline.CurveTypes.Linear;
-            case PerfectCurve -> Spline.CurveTypes.PerfectCurve;
-        };
-
-        for (var controlPoint : controlPoints) {
-            var point = newPointF();
-            point.set(startPosition.x + controlPoint.x, startPosition.y + controlPoint.y);
-
-            final PointF ppoint = points.get(lastIndex).get(
-                    points.get(lastIndex).size() - 1);
-            if (point.x == ppoint.x && point.y == ppoint.y || curveType == Spline.CurveTypes.Catmull) {
-                if (curveType == Spline.CurveTypes.Catmull) {
-                    points.get(lastIndex).add(point);
-                }
-
-                points.add(new ArrayList<>());
-                lastIndex++;
-            }
-            points.get(lastIndex).add(point);
-        }
-
-        ArrayList<PointF> section;
-        int pind = -1;
-        float trackLength = 0;
-        final PointF vec = newPointF();
-
-        MainCycle:
-        for (final ArrayList<PointF> plist : points) {
-            final Spline spline = Spline.getInstance();
-            spline.setControlPoints(plist);
-            spline.setType(curveType);
-            spline.Refresh();
-            section = spline.getPoints();
-
-            // If for some reason a circular arc could not be fit to the 3 given points, fall back to a numerically stable Bézier approximation.
-            if (curveType == Spline.CurveTypes.PerfectCurve && section.isEmpty()) {
-                spline.setType(Spline.CurveTypes.Bezier);
-                spline.Refresh();
-                section = spline.getPoints();
-            }
-
-            for (final PointF p : section) {
-                if (pind < 0
-                        || Math.abs(p.x - path.points.get(pind).x)
-                        + Math.abs(p.y - path.points.get(pind).y) > 1f) {
-                    if (!path.points.isEmpty()) {
-                        vec.set(p.x - path.points.get(path.points.size() - 1).x,
-                                p.y - path.points.get(path.points.size() - 1).y);
-                        trackLength += Utils.length(vec);
-                        path.length.add(trackLength);
-                    }
-                    path.points.add(p);
-                    pind++;
-
-                    if (trackLength >= maxLength) {
-                        break MainCycle;
-                    }
-                }
-            }
-        }
-
-        for (int i = 0; i < path.points.size(); i++) {
-            path.points.set(i, Utils.trackToRealCoords(path.points.get(i)));
-        }
-
-        if (path.points.size() == 1) {
-            path.points.add(new PointF(path.points.get(0).x,
-                    path.points.get(0).y));
-            path.length.add(0f);
         }
 
         return path;
