@@ -259,7 +259,7 @@ class SettingsFragment : com.edlplan.ui.fragment.SettingsFragment() {
 
         Section.Input -> {
             findPreference<Preference>("block_areas")!!.setOnPreferenceClickListener {
-                BlockAreaManagerFragment().show()
+                BlockAreaFragment().show(true)
                 true
             }
         }

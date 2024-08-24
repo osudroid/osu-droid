@@ -1,7 +1,6 @@
 package com.reco1l.osu.ui
 
 import android.view.LayoutInflater
-import android.view.MotionEvent
 import android.view.MotionEvent.*
 import android.view.View
 import android.view.ViewGroup
@@ -15,15 +14,14 @@ import com.reco1l.osu.data.DatabaseManager
 import com.reco1l.toolkt.android.dp
 import com.reco1l.toolkt.android.removeSelf
 import com.rian.osu.math.Vector2
-import ru.nsu.ccfit.zuev.osu.game.GameScene
 import ru.nsu.ccfit.zuev.osuplus.R
 
 
-class BlockAreaManagerFragment : BaseFragment() {
+class BlockAreaFragment : BaseFragment() {
 
 
     override val layoutID
-        get() = if (isEditing) R.layout.block_area_manager_fragment else R.layout.block_area_layer_fragment
+        get() = if (isEditing) R.layout.block_area_editor_fragment else R.layout.block_area_layer_fragment
 
 
     private val toolbarMoveVector = Vector2(0f, 0f)
@@ -108,7 +106,7 @@ class BlockAreaManagerFragment : BaseFragment() {
     inner class BlockAreaItem(private val data: BlockArea, isEditing: Boolean) {
 
         val itemView = LayoutInflater.from(context).inflate(
-            if (isEditing) R.layout.block_area_manager_item else R.layout.block_area_layer_item,
+            if (isEditing) R.layout.block_area_editor_item else R.layout.block_area_layer_item,
             root as ViewGroup,
             false
         )!!

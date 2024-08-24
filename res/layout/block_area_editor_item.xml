@@ -14,7 +14,7 @@
         android:layout_height="wrap_content"
         tools:layout_width="128dp"
         tools:layout_height="128dp"
-        android:background="@drawable/block_area_item_background" />
+        android:background="@drawable/block_area_background" />
 
     <ImageView
         android:id="@+id/move"
