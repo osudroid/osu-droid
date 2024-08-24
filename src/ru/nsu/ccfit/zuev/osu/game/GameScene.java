@@ -62,7 +62,6 @@ import javax.microedition.khronos.opengles.GL10;
 import ru.nsu.ccfit.zuev.audio.BassSoundProvider;
 import ru.nsu.ccfit.zuev.audio.Status;
 import ru.nsu.ccfit.zuev.audio.effect.Metronome;
-import ru.nsu.ccfit.zuev.audio.serviceAudio.PlayMode;
 import ru.nsu.ccfit.zuev.osu.Config;
 import ru.nsu.ccfit.zuev.osu.Constants;
 import ru.nsu.ccfit.zuev.osu.DifficultyAlgorithm;
@@ -108,7 +107,7 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
     private final Cursor[] cursors = new Cursor[CursorCount];
     private final boolean[] cursorIIsDown = new boolean[CursorCount];
     private final StringBuilder strBuilder = new StringBuilder();
-    public String filePath = null;
+    public String audioFilePath = null;
     private Scene scene;
     private Scene bgScene, mgScene, fgScene;
     private Scene oldScene;
@@ -340,9 +339,11 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
         } else
             this.replayFile = rFile;
 
+        Beatmap parsedBeatmap;
+
         try (var parser = new BeatmapParser(beatmapInfo.getPath())) {
             if (parser.openFile()) {
-                beatmap = parser.parse(true, GameMode.Droid);
+                parsedBeatmap = parser.parse(true, GameMode.Droid);
             } else {
                 Debug.e("startGame: cannot open file");
                 ToastLogger.showText(StringTable.format(R.string.message_error_open, beatmapInfo.getPath()), true);
@@ -350,14 +351,25 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
             }
         }
 
-        if (beatmap == null) {
+        if (parsedBeatmap == null) {
             return false;
         }
 
-        if (beatmap.hitObjects.objects.isEmpty()) {
+        if (parsedBeatmap.hitObjects.objects.isEmpty()) {
             ToastLogger.showText("Empty Beatmap", true);
             return false;
         }
+
+        var modMenu = ModMenu.getInstance();
+        var convertedMods = convertLegacyMods(
+            modMenu.getMod(),
+            modMenu.isCustomCS() ? modMenu.getCustomCS() : null,
+            modMenu.isCustomAR() ? modMenu.getCustomAR() : null,
+            modMenu.isCustomOD() ? modMenu.getCustomOD() : null,
+            modMenu.isCustomHP() ? modMenu.getCustomHP() : null
+        );
+
+        beatmap = parsedBeatmap.createPlayableBeatmap(GameMode.Droid, convertedMods, modMenu.getChangeSpeed());
 
         // TODO skin manager
         SkinManager.getInstance().loadBeatmapSkin(beatmap.folder);
@@ -380,7 +392,7 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
                 throw new FileNotFoundException(musicFile.getPath());
             }
 
-            filePath = musicFile.getPath();
+            audioFilePath = musicFile.getPath();
 
         } catch (final Exception e) {
             Debug.e("Load Music: " + e.getMessage());
@@ -392,106 +404,23 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
         artist = beatmap.metadata.artist;
         version = beatmap.metadata.version;
 
-
-        scale = (float) ((Config.getRES_HEIGHT() / 480.0f)
-                * (54.42 - beatmap.difficulty.cs * 4.48)
-                * 2 / GameObjectSize.BASE_OBJECT_SIZE)
-                + 0.5f * Config.getScaleMultiplier();
-
-
-        float rawApproachRate = beatmap.difficulty.getAr();
-        approachRate = (float) GameHelper.ar2ms(rawApproachRate) / 1000f;
-
+        scale = beatmap.hitObjects.objects.get(0).getGameplayScale();
+        approachRate = (float) GameHelper.ar2ms(beatmap.difficulty.getAr()) / 1000f;
         overallDifficulty = beatmap.difficulty.od;
         drain = beatmap.difficulty.hp;
-        rawDifficulty = overallDifficulty;
-        rawDrain = drain;
 
-        if (ModMenu.getInstance().getMod().contains(GameMod.MOD_EASY)) {
-            scale += 0.125f;
-            drain *= 0.5f;
-            overallDifficulty *= 0.5f;
-            approachRate = (float) GameHelper.ar2ms(rawApproachRate / 2f) / 1000f;
-        }
-
-        GameHelper.setHardrock(false);
-        if (ModMenu.getInstance().getMod().contains(GameMod.MOD_HARDROCK)) {
-            scale -= 0.125f;
-            drain = Math.min(1.4f * drain, 10f);
-            overallDifficulty = Math.min(1.4f * overallDifficulty, 10f);
-            approachRate = (float) GameHelper.ar2ms(Math.min(1.4f * rawApproachRate, 10f)) / 1000f;
-            GameHelper.setHardrock(true);
-        }
-
-        GameHelper.setSpeedMultiplier(1f);
-        GameHelper.setDoubleTime(false);
-        GameHelper.setNightCore(false);
-        GameHelper.setHalfTime(false);
-
-        GlobalManager.getInstance().getSongService().preLoad(filePath, PlayMode.MODE_NONE);
-
-        //Speed Change
-        if (ModMenu.getInstance().getChangeSpeed() != 1.00f){
-            GlobalManager.getInstance().getSongService().preLoad(filePath, ModMenu.getInstance().getSpeed(),
-                ModMenu.getInstance().isEnableNCWhenSpeedChange() ||
-                        ModMenu.getInstance().getMod().contains(GameMod.MOD_NIGHTCORE));
-            GameHelper.setSpeedMultiplier(ModMenu.getInstance().getSpeed());
-        } else if (ModMenu.getInstance().getMod().contains(GameMod.MOD_DOUBLETIME)) {
-            GlobalManager.getInstance().getSongService().preLoad(filePath, PlayMode.MODE_DT);
-            GameHelper.setDoubleTime(true);
-            GameHelper.setSpeedMultiplier(1.5f);
-        } else if (ModMenu.getInstance().getMod().contains(GameMod.MOD_NIGHTCORE)) {
-            GlobalManager.getInstance().getSongService().preLoad(filePath, PlayMode.MODE_NC);
-            GameHelper.setNightCore(true);
-            GameHelper.setSpeedMultiplier(1.5f);
-        } else if (ModMenu.getInstance().getMod().contains(GameMod.MOD_HALFTIME)) {
-            GlobalManager.getInstance().getSongService().preLoad(filePath, PlayMode.MODE_HT);
-            GameHelper.setHalfTime(true);
-            GameHelper.setSpeedMultiplier(0.75f);
-        }
-
-        if (ModMenu.getInstance().getMod().contains(GameMod.MOD_REALLYEASY)) {
-            scale += 0.125f;
-            drain *= 0.5f;
-            overallDifficulty *= 0.5f;
-            float ar = (float)GameHelper.ms2ar(approachRate * 1000f);
-            if (ModMenu.getInstance().getMod().contains(GameMod.MOD_EASY)) {
-                ar *= 2;
-                ar -= 0.5f;
-            }
-            ar -= (GameHelper.getSpeedMultiplier() - 1.0f) + 0.5f;
-            approachRate = (float)(GameHelper.ar2ms(ar) / 1000f);
-        }
-
-        if (ModMenu.getInstance().isCustomAR()){
-            // Scale the approach rate with speed multiplier to ensure that the real-time AR value stays the same.
-            approachRate = (float) GameHelper.ar2ms(ModMenu.getInstance().getCustomAR()) / 1000f * GameHelper.getSpeedMultiplier();
-        }
-        if (ModMenu.getInstance().isCustomOD()) {
-            overallDifficulty = ModMenu.getInstance().getCustomOD();
-        }
-        if (ModMenu.getInstance().isCustomCS()) {
-            scale = Config.getRES_HEIGHT() / 480.0f
-                    * (54.42f - ModMenu.getInstance().getCustomCS() * 4.48f)
-                    * 2f / GameObjectSize.BASE_OBJECT_SIZE
-                    + 0.5f * Config.getScaleMultiplier();
-        }
-        if (ModMenu.getInstance().isCustomHP()) {
-            drain = ModMenu.getInstance().getCustomHP();
-        }
-
-        GameHelper.setRelaxMod(ModMenu.getInstance().getMod().contains(GameMod.MOD_RELAX));
-        GameHelper.setAutopilotMod(ModMenu.getInstance().getMod().contains(GameMod.MOD_AUTOPILOT));
-        GameHelper.setAuto(ModMenu.getInstance().getMod().contains(GameMod.MOD_AUTO));
-
-        if (scale < 0.001f){
-            scale = 0.001f;
-        }
+        rawDifficulty = parsedBeatmap.difficulty.od;
+        rawDrain = parsedBeatmap.difficulty.hp;
 
         GameHelper.setSpeed(beatmap.difficulty.sliderMultiplier * 100);
         GameHelper.setDifficulty(overallDifficulty);
         GameHelper.setDrain(drain);
         GameHelper.setApproachRate(approachRate);
+        GameHelper.setSpeedMultiplier(modMenu.getSpeed());
+
+        GlobalManager.getInstance().getSongService().preLoad(audioFilePath, GameHelper.getSpeedMultiplier(),
+            GameHelper.getSpeedMultiplier() != 1f &&
+                (modMenu.isEnableNCWhenSpeedChange() || modMenu.getMod().contains(GameMod.MOD_NIGHTCORE)));
 
         // Parsing hit objects
         objects = new LinkedList<>();
@@ -581,26 +510,18 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
         if (Config.isDisplayRealTimePPCounter()) {
             // Calculate timed difficulty attributes
             var parameters = new DifficultyCalculationParameters();
-            var modMenu = ModMenu.getInstance();
 
-            parameters.setMods(convertLegacyMods(
-                    modMenu.getMod(),
-                    modMenu.isCustomCS() ? modMenu.getCustomCS() : null,
-                    modMenu.isCustomAR() ? modMenu.getCustomAR() : null,
-                    modMenu.isCustomOD() ? modMenu.getCustomOD() : null
-            ));
+            parameters.setMods(convertedMods);
             parameters.setCustomSpeedMultiplier(modMenu.getChangeSpeed());
 
             switch (Config.getDifficultyAlgorithm()) {
                 case droid ->
                     droidTimedDifficultyAttributes = BeatmapDifficultyCalculator.calculateDroidTimedDifficulty(
-                        beatmap,
-                        parameters
+                        parsedBeatmap, parameters
                     );
                 case standard ->
                     standardTimedDifficultyAttributes = BeatmapDifficultyCalculator.calculateStandardTimedDifficulty(
-                        beatmap,
-                        parameters
+                        parsedBeatmap, parameters
                     );
             }
         }
@@ -781,6 +702,7 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
         GameHelper.setFlashLight(stat.getMod().contains(GameMod.MOD_FLASHLIGHT));
         GameHelper.setRelaxMod(stat.getMod().contains(GameMod.MOD_RELAX));
         GameHelper.setAutopilotMod(stat.getMod().contains(GameMod.MOD_AUTOPILOT));
+        GameHelper.setAuto(stat.getMod().contains(GameMod.MOD_AUTO));
         GameHelper.setSuddenDeath(stat.getMod().contains(GameMod.MOD_SUDDENDEATH));
         GameHelper.setPerfect(stat.getMod().contains(GameMod.MOD_PERFECT));
         GameHelper.setScoreV2(stat.getMod().contains(GameMod.MOD_SCOREV2));
@@ -1716,7 +1638,7 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
 
         if (GlobalManager.getInstance().getSongService() != null) {
             GlobalManager.getInstance().getSongService().stop();
-            GlobalManager.getInstance().getSongService().preLoad(filePath);
+            GlobalManager.getInstance().getSongService().preLoad(audioFilePath);
             GlobalManager.getInstance().getSongService().play();
             GlobalManager.getInstance().getSongService().setVolume(Config.getBgmVolume());
         }
