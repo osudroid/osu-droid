@@ -22,21 +22,9 @@
             android:layout_width="36dp"
             android:layout_height="match_parent"
             android:alpha="0.1"
+            android:layout_marginLeft="6dp"
             android:paddingHorizontal="6dp"
             android:src="@drawable/drag_indicator_24px" />
-
-        <ImageButton
-            android:id="@+id/close"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_centerVertical="true"
-            android:layout_marginLeft="6dp"
-            android:background="@drawable/rounded_rect"
-            android:backgroundTint="#00FFFFFF"
-            android:paddingHorizontal="14dp"
-            android:paddingVertical="14dp"
-            android:src="@drawable/arrow_back_24px"
-            app:tint="#FFF" />
 
         <Button
             android:id="@+id/add"
@@ -59,7 +47,7 @@
             android:id="@+id/reset"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginHorizontal="6dp"
+            android:layout_marginLeft="6dp"
             android:background="@null"
             android:drawableLeft="@drawable/restart_alt_24px"
             android:drawablePadding="12dp"
@@ -67,6 +55,21 @@
             android:minWidth="0dp"
             android:paddingHorizontal="12dp"
             android:text="@string/block_area_manager_fragment_reset"
+            android:textAllCaps="false"
+            android:textColor="#FFF" />
+
+        <Button
+            android:id="@+id/close"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginHorizontal="6dp"
+            android:background="@null"
+            android:drawableLeft="@drawable/check_24px"
+            android:drawablePadding="12dp"
+            android:drawableTint="#FFF"
+            android:minWidth="0dp"
+            android:paddingHorizontal="12dp"
+            android:text="@string/block_area_manager_fragment_done"
             android:textAllCaps="false"
             android:textColor="#FFF" />
 
