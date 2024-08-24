@@ -339,7 +339,7 @@ public class Slider extends GameObject {
         applyBodyFadeAdjustments(fadeInDuration);
     }
 
-    private PointF getPercentPosition(final float percentage, final boolean updateBallAngle) {
+    private PointF getPositionAt(final float percentage, final boolean updateBallAngle) {
         if (path.points.isEmpty()) {
             tmpPoint.set(pos);
             return tmpPoint;
@@ -672,7 +672,7 @@ public class Slider extends GameObject {
                         abstractSliderBody.onUpdate();
                     }
 
-                    var position = getPercentPosition(percentage, false);
+                    var position = getPositionAt(percentage, false);
 
                     Utils.putSpriteAnchorCenter(position, endCircle);
                     Utils.putSpriteAnchorCenter(position, endOverlay);
@@ -729,7 +729,7 @@ public class Slider extends GameObject {
         // Ball position
         final float spanDuration = (float) beatmapSlider.getSpanDuration() / 1000;
         final float percentage = (float) passedTime / spanDuration;
-        final PointF ballPos = getPercentPosition(reverse ? 1 - percentage : percentage, true);
+        final PointF ballPos = getPositionAt(reverse ? 1 - percentage : percentage, true);
         // Calculating if cursor in follow circle bounds
         final float followCircleRadius = 128 * scale;
         boolean inRadius = false;
