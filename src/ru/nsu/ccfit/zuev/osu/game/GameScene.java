@@ -163,7 +163,6 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
     private float offsetSum;
     private int offsetRegs;
     private Rectangle dimRectangle = null;
-    private String title, artist, version;
     private ComboBurst comboBurst;
     private int failcount = 0;
     private float lastActiveObjectHitTime = 0;
@@ -398,10 +397,6 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
             ToastLogger.showText(e.getMessage(), true);
             return false;
         }
-
-        title = beatmap.metadata.title;
-        artist = beatmap.metadata.artist;
-        version = beatmap.metadata.version;
 
         scale = beatmap.hitObjects.objects.get(0).getGameplayScale();
         objectTimePreempt = (float) GameHelper.ar2ms(beatmap.difficulty.getAr()) / 1000f;
@@ -900,7 +895,7 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
         fgScene.attachChild(replayText, 0);
         if (stat.getMod().contains(GameMod.MOD_AUTO) || replaying) {
             playname = replaying ? GlobalManager.getInstance().getScoring().getReplayStat().getPlayerName() : "osu!";
-            replayText.setText("Watching " + playname + " play " + artist + " - " + title + " [" + version + "]");
+            replayText.setText("Watching " + playname + " play " + beatmap.metadata.artist + " - " + beatmap.metadata.title + " [" + beatmap.metadata.version + "]");
             replayText.registerEntityModifier(new LoopEntityModifier(new MoveXModifier(40,
                     Config.getRES_WIDTH() + 5, -replayText.getWidth() - 5)));
             replayText.setVisible(!Config.isHideReplayMarquee());
