@@ -123,7 +123,7 @@ public class Statistic implements Serializable {
             return;
         }
         if (score == 0 && k == true) {
-            changeHp(-(5 + GameHelper.getDrain()) / 100f);
+            changeHp(-(5 + GameHelper.getHealthDrain()) / 100f);
             if (currentCombo > maxCombo) {
                 maxCombo = currentCombo;
             }
@@ -164,7 +164,7 @@ public class Statistic implements Serializable {
                 currentCombo++;
                 break;
             default:
-                changeHp(-(5 + GameHelper.getDrain()) / 100f);
+                changeHp(-(5 + GameHelper.getHealthDrain()) / 100f);
                 misses++;
                 if (currentCombo > maxCombo) {
                     maxCombo = currentCombo;

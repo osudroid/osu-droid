@@ -510,7 +510,7 @@ public class Slider extends GameObject {
             // Getting a 300 for a slider requires getting a 300 judgement for the slider head.
             // Getting a 100 for a slider requires getting a 100 judgement or better for the slider head.
             DifficultyHelper diffHelper = GameHelper.getDifficultyHelper();
-            float od = GameHelper.getDifficulty();
+            float od = GameHelper.getOverallDifficulty();
 
             if (Math.abs(firstHitAccuracy) <= diffHelper.hitWindowFor300(od) * 1000) {
                 firstHitScore = 300;
@@ -538,7 +538,7 @@ public class Slider extends GameObject {
                     endPos, endsCombo, color, GameObjectListener.SLIDER_END);
         }
         if (!startHit) {
-            firstHitAccuracy = (int) (GameHelper.getDifficultyHelper().hitWindowFor50(GameHelper.getDifficulty()) * 1000 + 13);
+            firstHitAccuracy = (int) (GameHelper.getDifficultyHelper().hitWindowFor50(GameHelper.getOverallDifficulty()) * 1000 + 13);
         }
         listener.onSliderEnd(id, firstHitAccuracy, tickSet);
         // Remove slider from scene
@@ -598,7 +598,7 @@ public class Slider extends GameObject {
         if (!startHit) // If we didn't get start hit(click)
         {
             // If it's too late, mark this hit missing
-            if (passedTime > GameHelper.getDifficultyHelper().hitWindowFor50(GameHelper.getDifficulty())) {
+            if (passedTime > GameHelper.getDifficultyHelper().hitWindowFor50(GameHelper.getOverallDifficulty())) {
                 startHit = true;
                 listener.onSliderHit(id, -1, null, pos, false, color, GameObjectListener.SLIDER_START);
                 firstHitAccuracy = (int) (passedTime * 1000);
@@ -608,13 +608,13 @@ public class Slider extends GameObject {
                 ticksGot++;
                 listener.onSliderHit(id, 30, null, pos, false, color, GameObjectListener.SLIDER_START);
             } else if (replayObjectData != null &&
-                    Math.abs(replayObjectData.accuracy / 1000f) <= GameHelper.getDifficultyHelper().hitWindowFor50(GameHelper.getDifficulty()) &&
+                    Math.abs(replayObjectData.accuracy / 1000f) <= GameHelper.getDifficultyHelper().hitWindowFor50(GameHelper.getOverallDifficulty()) &&
                     passedTime + dt / 2 > replayObjectData.accuracy / 1000f) {
                 startHit = true;
                 Utils.playHitSound(listener, soundId[0], sampleSet[0], addition[0]);
                 ticksGot++;
                 listener.onSliderHit(id, 30, null, pos, false, color, GameObjectListener.SLIDER_START);
-            } else if (isHit() && -passedTime < GameHelper.getDifficultyHelper().hitWindowFor50(GameHelper.getDifficulty())) {
+            } else if (isHit() && -passedTime < GameHelper.getDifficultyHelper().hitWindowFor50(GameHelper.getOverallDifficulty())) {
                 // if we clicked
                 listener.registerAccuracy(passedTime);
                 startHit = true;
@@ -847,7 +847,7 @@ public class Slider extends GameObject {
     public void tryHit(final float dt) {
         if (!startHit) // If we didn't get start hit(click)
         {
-            if (isHit() && -passedTime < GameHelper.getDifficultyHelper().hitWindowFor50(GameHelper.getDifficulty())) // if
+            if (isHit() && -passedTime < GameHelper.getDifficultyHelper().hitWindowFor50(GameHelper.getOverallDifficulty())) // if
             {
                 listener.registerAccuracy(passedTime);
                 startHit = true;

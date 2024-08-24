@@ -226,7 +226,7 @@ public class HitCircle extends GameObject {
         if (replayObjectData != null) {
             if (passedTime - timePreempt + dt / 2 > replayObjectData.accuracy / 1000f) {
                 final float acc = Math.abs(replayObjectData.accuracy / 1000f);
-                if (acc <= GameHelper.getDifficultyHelper().hitWindowFor50(GameHelper.getDifficulty())) {
+                if (acc <= GameHelper.getDifficultyHelper().hitWindowFor50(GameHelper.getOverallDifficulty())) {
                     playSound();
                 }
                 listener.registerAccuracy(replayObjectData.accuracy / 1000f);
@@ -243,7 +243,7 @@ public class HitCircle extends GameObject {
             }
             final float acc = Math.abs(signAcc);
             //Log.i("note-ini", "signAcc: " + signAcc);
-            if (acc <= GameHelper.getDifficultyHelper().hitWindowFor50(GameHelper.getDifficulty())) {
+            if (acc <= GameHelper.getDifficultyHelper().hitWindowFor50(GameHelper.getOverallDifficulty())) {
                 playSound();
             }
             listener.registerAccuracy(signAcc);
@@ -286,7 +286,7 @@ public class HitCircle extends GameObject {
             approachCircle.setAlpha(0);
 
             // If passed too much time, counting it as miss
-            if (passedTime > timePreempt + GameHelper.getDifficultyHelper().hitWindowFor50(GameHelper.getDifficulty())) {
+            if (passedTime > timePreempt + GameHelper.getDifficultyHelper().hitWindowFor50(GameHelper.getOverallDifficulty())) {
                 passedTime = -1;
                 final byte forcedScore = (replayObjectData == null) ? 0 : replayObjectData.result;
 
@@ -305,7 +305,7 @@ public class HitCircle extends GameObject {
             }
             final float acc = Math.abs(signAcc);
             //Log.i("note-ini", "signAcc: " + signAcc);
-            if (acc <= GameHelper.getDifficultyHelper().hitWindowFor50(GameHelper.getDifficulty())) {
+            if (acc <= GameHelper.getDifficultyHelper().hitWindowFor50(GameHelper.getOverallDifficulty())) {
                 playSound();
             }
             listener.registerAccuracy(signAcc);

@@ -195,8 +195,8 @@ public class ModernSpinner extends Spinner {
                     )
                 );
                 float rate = 0.375f;
-                if (GameHelper.getDrain() > 0) {
-                    rate = 1 + (GameHelper.getDrain() / 4f);
+                if (GameHelper.getHealthDrain() > 0) {
+                    rate = 1 + (GameHelper.getHealthDrain() / 4f);
                 }
                 stat.changeHp(rate * 0.01f * duration / needRotations);
             }
@@ -206,8 +206,8 @@ public class ModernSpinner extends Spinner {
                 fullRotations++;
                 stat.registerSpinnerHit();
                 float rate = 0.375f;
-                if (GameHelper.getDrain() > 0) {
-                    rate = 1 + (GameHelper.getDrain() / 2f);
+                if (GameHelper.getHealthDrain() > 0) {
+                    rate = 1 + (GameHelper.getHealthDrain() / 2f);
                 }
                 stat.changeHp(rate * 0.01f * duration / needRotations);
             }

@@ -415,9 +415,9 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
         rawDrain = parsedBeatmap.difficulty.hp;
 
         GameHelper.setSpeed(beatmap.difficulty.sliderMultiplier * 100);
-        GameHelper.setDifficulty(overallDifficulty);
-        GameHelper.setDrain(drain);
-        GameHelper.setApproachRate(approachRate);
+        GameHelper.setOverallDifficulty(overallDifficulty);
+        GameHelper.setHealthDrain(drain);
+        GameHelper.setObjectTimePreempt(approachRate);
         GameHelper.setSpeedMultiplier(modMenu.getSpeed());
 
         GlobalManager.getInstance().getSongService().preLoad(audioFilePath, GameHelper.getSpeedMultiplier(),

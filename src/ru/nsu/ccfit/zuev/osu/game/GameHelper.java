@@ -15,9 +15,9 @@ import ru.nsu.ccfit.zuev.osu.helper.DifficultyHelper;
 
 public class GameHelper {
     private static double speed = 1;
-    private static float difficulty = 1;
-    private static float approachRate = 1;
-    private static float drain = 0;
+    private static float overallDifficulty = 1;
+    private static float objectTimePreempt = 1;
+    private static float healthDrain = 0;
     private static float speedMultiplier = 0;
     private static RGBColor sliderColor = new RGBColor();
     private static boolean hidden = false;
@@ -49,20 +49,20 @@ public class GameHelper {
         GameHelper.difficultyHelper = difficultyHelper;
     }
 
-    public static float getDrain() {
-        return drain;
+    public static float getHealthDrain() {
+        return healthDrain;
     }
 
-    public static void setDrain(final float drain) {
-        GameHelper.drain = drain;
+    public static void setHealthDrain(final float healthDrain) {
+        GameHelper.healthDrain = healthDrain;
     }
 
-    public static float getDifficulty() {
-        return difficulty;
+    public static float getOverallDifficulty() {
+        return overallDifficulty;
     }
 
-    public static void setDifficulty(final float difficulty) {
-        GameHelper.difficulty = difficulty;
+    public static void setOverallDifficulty(final float overallDifficulty) {
+        GameHelper.overallDifficulty = overallDifficulty;
     }
 
     /**
@@ -88,12 +88,12 @@ public class GameHelper {
         return path;
     }
 
-    public static float getApproachRate() {
-        return approachRate;
+    public static float getObjectTimePreempt() {
+        return objectTimePreempt;
     }
 
-    public static void setApproachRate(float approachRate) {
-        GameHelper.approachRate = approachRate;
+    public static void setObjectTimePreempt(float objectTimePreempt) {
+        GameHelper.objectTimePreempt = objectTimePreempt;
     }
 
     /**
