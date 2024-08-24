@@ -266,7 +266,7 @@ abstract class HitObject(
      */
     protected fun createHitSampleInfo(sampleName: String) =
         samples.filterIsInstance<BankHitSampleInfo>().find { it.name == BankHitSampleInfo.HIT_NORMAL }?.copy(name = sampleName) ?:
-        BankHitSampleInfo(sampleName, SampleBank.None)
+        BankHitSampleInfo(sampleName, SampleBank.Normal)
 
     companion object {
         /**
