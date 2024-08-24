@@ -52,7 +52,6 @@ public class Slider extends GameObject {
     private CircleNumber number;
     private SliderPath path;
     private double passedTime;
-    private double tickTime;
     private int completedSpanCount;
     private boolean reverse;
     private int[] soundId = new int[3];
@@ -61,6 +60,7 @@ public class Slider extends GameObject {
 
     private int soundIdIndex;
     private int ticksGot;
+    private double tickTime;
     private double tickInterval;
     private int currentTick;
 
@@ -72,7 +72,7 @@ public class Slider extends GameObject {
     private float ballAngle;
 
     private boolean kiai;
-    private RGBColor color = new RGBColor();
+    private final RGBColor color = new RGBColor();
     private final RGBColor circleColor = new RGBColor();
 
     //for replay
@@ -143,7 +143,8 @@ public class Slider extends GameObject {
         preStageFinish = false;
         color.set(comboColor.r(), comboColor.g(), comboColor.b());
         if (!OsuSkin.get().isSliderFollowComboColor()) {
-            color = new RGBColor(OsuSkin.get().getSliderBodyColor());
+            var sliderBodyColor = OsuSkin.get().getSliderBodyColor();
+            color.set(sliderBodyColor.r(), sliderBodyColor.g(), sliderBodyColor.b());
         }
         circleColor.set(comboColor.r(), comboColor.g(), comboColor.b());
 
