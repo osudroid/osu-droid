@@ -2450,6 +2450,11 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
             return;
         }
 
+        if (blockAreaFragment == null) {
+            blockAreaFragment = new BlockAreaFragment();
+        }
+        blockAreaFragment.show();
+
         scene.getChildScene().back();
         paused = false;
         if (stat.getHp() <= 0 && !stat.getMod().contains(GameMod.MOD_NOFAIL)) {

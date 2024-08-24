@@ -99,6 +99,8 @@ class BlockAreaFragment : BaseFragment() {
 
     fun show(isEditing: Boolean) {
         this.isEditing = isEditing
+        isDismissOnBackPress = !isEditing
+        interceptBackPress = isEditing
         super.show()
     }
 

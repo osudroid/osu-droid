@@ -5,6 +5,7 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentManager
 import com.edlplan.ui.fragment.BackPressListener
+import com.edlplan.ui.fragment.BaseFragment
 import java.util.*
 
 object ActivityOverlay {
@@ -28,7 +29,7 @@ object ActivityOverlay {
             if(overlay is BackPressListener) {
                 overlay.callDismissOnBackPress()
             }
-            return true
+            return overlay !is BaseFragment || overlay.interceptBackPress
         }
         return false
     }
