@@ -463,8 +463,8 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
         activeSamplePoint = beatmap.controlPoints.sample.controlPointAt(Double.NEGATIVE_INFINITY);
         activeEffectPoint = beatmap.controlPoints.effect.controlPointAt(Double.NEGATIVE_INFINITY);
 
-        GameHelper.setTimingOffset(activeSamplePoint.time / 1000);
-        GameHelper.setBeatLength((activeTimingPoint.msPerBeat / 1000) * GameHelper.getSpeed() / 100f);
+        GameHelper.setTimingOffset(activeTimingPoint.time / 1000);
+        GameHelper.setBeatLength(activeTimingPoint.msPerBeat / 1000);
         GameHelper.setTimeSignature(activeTimingPoint.timeSignature);
         GameHelper.setKiai(activeEffectPoint.isKiai);
         GameHelper.setInitalBeatLength(GameHelper.getBeatLength());
@@ -1125,8 +1125,8 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
         activeSamplePoint = beatmap.controlPoints.sample.controlPointAt(mSecPassed);
         activeEffectPoint = beatmap.controlPoints.effect.controlPointAt(mSecPassed);
 
-        GameHelper.setBeatLength((activeTimingPoint.msPerBeat / 1000) * GameHelper.getSpeed() / 100f);
-        GameHelper.setTimingOffset(activeSamplePoint.time / 1000);
+        GameHelper.setTimingOffset(activeTimingPoint.time / 1000);
+        GameHelper.setBeatLength(activeTimingPoint.msPerBeat / 1000);
         GameHelper.setTimeSignature(activeTimingPoint.timeSignature);
         GameHelper.setKiai(activeEffectPoint.isKiai);
 
