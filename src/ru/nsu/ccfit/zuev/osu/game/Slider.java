@@ -436,7 +436,7 @@ public class Slider extends GameObject {
         GameObjectPool.getInstance().putNumber(number);
     }
 
-    private void over() {
+    private void onSpanFinish() {
         ++completedSpanCount;
 
         int totalSpanCount = beatmapSlider.getSpanCount();
@@ -496,7 +496,7 @@ public class Slider extends GameObject {
                     reverse ? endArrow.getRotation() : startArrow.getRotation(),
                     color);
             if (passedTime >= spanDuration) {
-                over();
+                onSpanFinish();
             }
             return;
         }
@@ -823,7 +823,7 @@ public class Slider extends GameObject {
 
         // If we got 100% time, finishing slider
         if (percentage >= 1) {
-            over();
+            onSpanFinish();
         }
     }
 
