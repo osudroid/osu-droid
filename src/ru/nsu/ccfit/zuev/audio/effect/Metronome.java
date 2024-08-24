@@ -35,10 +35,10 @@ public class Metronome {
         }
         lastBeatIndex = beatIndex;
 
-        int beatInBar = beatIndex % GameHelper.getTimeSignature();
+        int beatInBar = beatIndex % activeTimingPoint.timeSignature;
 
         // 每隔8小节在第4拍kick+finish
-        if (beatIndex % (8 * GameHelper.getTimeSignature()) == 0) {
+        if (beatIndex % (8 * activeTimingPoint.timeSignature) == 0) {
             kickSound.play();
             if (beatIndex > 0) {
                 finishSound.play();

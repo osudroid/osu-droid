@@ -35,7 +35,6 @@ public class GameHelper {
     private static boolean isKiai = false;
     private static boolean auto = false;
     private static double beatLength = 0;
-    private static int timeSignature = 4;
     private static double currentBeatTime = 0;
     private static final Queue<SliderPath> pathPool = new LinkedList<>();
     private static final Queue<PointF> pointPool = new LinkedList<>();
@@ -250,14 +249,6 @@ public class GameHelper {
 
     public static void setBeatLength(final double beatLength) {
         GameHelper.beatLength = beatLength;
-    }
-
-    public static int getTimeSignature() {
-        return timeSignature;
-    }
-
-    public static void setTimeSignature(int timeSignature) {
-        GameHelper.timeSignature = timeSignature;
     }
 
     public static boolean isRelaxMod() {

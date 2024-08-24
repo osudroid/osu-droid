@@ -464,7 +464,6 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
         activeEffectPoint = beatmap.controlPoints.effect.controlPointAt(Double.NEGATIVE_INFINITY);
 
         GameHelper.setBeatLength(activeTimingPoint.msPerBeat / 1000);
-        GameHelper.setTimeSignature(activeTimingPoint.timeSignature);
         GameHelper.setKiai(activeEffectPoint.isKiai);
         GameHelper.setCurrentBeatTime(0);
 
@@ -1116,7 +1115,6 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
         activeEffectPoint = beatmap.controlPoints.effect.controlPointAt(mSecPassed);
 
         GameHelper.setBeatLength(activeTimingPoint.msPerBeat / 1000);
-        GameHelper.setTimeSignature(activeTimingPoint.timeSignature);
         GameHelper.setKiai(activeEffectPoint.isKiai);
         GameHelper.setCurrentBeatTime(Math.max(0, secPassed - activeTimingPoint.time / 1000) % GameHelper.getBeatLength());
 
