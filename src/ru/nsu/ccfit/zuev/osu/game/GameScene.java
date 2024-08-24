@@ -463,7 +463,6 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
         activeSamplePoint = beatmap.controlPoints.sample.controlPointAt(Double.NEGATIVE_INFINITY);
         activeEffectPoint = beatmap.controlPoints.effect.controlPointAt(Double.NEGATIVE_INFINITY);
 
-        GameHelper.setTimingOffset(activeTimingPoint.time / 1000);
         GameHelper.setBeatLength(activeTimingPoint.msPerBeat / 1000);
         GameHelper.setTimeSignature(activeTimingPoint.timeSignature);
         GameHelper.setKiai(activeEffectPoint.isKiai);
@@ -1116,7 +1115,6 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
         activeSamplePoint = beatmap.controlPoints.sample.controlPointAt(mSecPassed);
         activeEffectPoint = beatmap.controlPoints.effect.controlPointAt(mSecPassed);
 
-        GameHelper.setTimingOffset(activeTimingPoint.time / 1000);
         GameHelper.setBeatLength(activeTimingPoint.msPerBeat / 1000);
         GameHelper.setTimeSignature(activeTimingPoint.timeSignature);
         GameHelper.setKiai(activeEffectPoint.isKiai);
@@ -1430,7 +1428,7 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
 
         // 节拍器
         if (metronome != null) {
-            metronome.update(secPassed);
+            metronome.update(secPassed, activeTimingPoint);
         }
 
         //Status playerStatus = music.getStatus();

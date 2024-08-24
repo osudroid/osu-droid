@@ -35,7 +35,6 @@ public class GameHelper {
     private static boolean isKiai = false;
     private static boolean auto = false;
     private static double beatLength = 0;
-    private static double timingOffset = 0;
     private static int timeSignature = 4;
     private static double currentBeatTime = 0;
     private static final Queue<SliderPath> pathPool = new LinkedList<>();
@@ -251,14 +250,6 @@ public class GameHelper {
 
     public static void setBeatLength(final double beatLength) {
         GameHelper.beatLength = beatLength;
-    }
-
-    public static double getTimingOffset() {
-        return timingOffset;
-    }
-
-    public static void setTimingOffset(double timingOffset) {
-        GameHelper.timingOffset = timingOffset;
     }
 
     public static int getTimeSignature() {
