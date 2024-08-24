@@ -129,9 +129,11 @@ public class Utils {
 
     public static float direction(final float x, final float y) {
         float len = (float) Math.sqrt(x * x + y * y);
-        if (Math.abs(len) < 0.0001f) {
+
+        if (len == 0) {
             return 0;
         }
+
         if (x > 0) {
             len = (float) Math.asin(y / len);
         } else {
