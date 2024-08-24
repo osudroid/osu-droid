@@ -140,6 +140,7 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
     private boolean isFirst = true;
     private float scale;
     private float approachRate;
+    private float rawCircleSize;
     private float rawDifficulty;
     private float overallDifficulty;
     private float rawDrain;
@@ -409,6 +410,7 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
         overallDifficulty = beatmap.difficulty.od;
         drain = beatmap.difficulty.hp;
 
+        rawCircleSize = parsedBeatmap.difficulty.cs;
         rawDifficulty = parsedBeatmap.difficulty.od;
         rawDrain = parsedBeatmap.difficulty.hp;
 
@@ -675,7 +677,7 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
         float multiplier = 1 + Math.min(rawDifficulty, 10) / 10f + Math.min(rawDrain, 10) / 10f;
 
         // The maximum CS of osu!droid mapped to osu!standard is ~17.62.
-        multiplier += (Math.min(beatmap.difficulty.cs, 17.62f) - 3) / 4f;
+        multiplier += (Math.min(rawCircleSize, 17.62f) - 3) / 4f;
 
         stat.setDiffModifier(multiplier);
         stat.setMaxObjectsCount(lastBeatmapInfo.getTotalHitObjectCount());
