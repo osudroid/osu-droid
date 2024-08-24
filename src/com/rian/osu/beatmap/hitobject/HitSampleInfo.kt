@@ -15,8 +15,7 @@ open class HitSampleInfo protected constructor(
     /**
      * All possible filenames that can be used as an audio source, returned in order of preference (highest first).
      */
-    open val lookupNames
-        get() = emptyList<String>()
+    open val lookupNames = emptyList<String>()
 
     fun copy(volume: Int? = null) = HitSampleInfo(volume ?: this.volume)
 }
