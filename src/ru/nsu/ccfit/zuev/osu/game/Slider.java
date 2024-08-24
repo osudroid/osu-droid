@@ -106,7 +106,7 @@ public class Slider extends GameObject {
 
     public void init(final GameObjectListener listener, final Scene scene,
                      final com.rian.osu.beatmap.hitobject.Slider beatmapSlider, final float secPassed,
-                     final RGBColor comboColor, final int sound,
+                     final RGBColor comboColor, final float tickRate, final int sound,
                      final BeatmapControlPoints controlPoints, final String customSound,
                      final String tempSound, final boolean isFirstNote, SliderPath sliderPath) {
         this.listener = listener;
@@ -280,7 +280,7 @@ public class Slider extends GameObject {
         }
         scene.attachChild(endCircle, 0);
 
-        tickInterval = timingControlPoint.msPerBeat / 1000;
+        tickInterval = timingControlPoint.msPerBeat / 1000 / tickRate;
         tickSprites.clear();
 
         for (int i = 1; i < beatmapSlider.getNestedHitObjects().size(); ++i) {
@@ -786,8 +786,8 @@ public class Slider extends GameObject {
 
         // Some magic with slider ticks. If it'll crash it's not my fault ^_^"
         while (!tickSprites.isEmpty() && percentage < 1 - 0.02f / spanDuration
-                && tickTime * GameHelper.getTickRate() > tickInterval) {
-            tickTime -= tickInterval / GameHelper.getTickRate();
+                && tickTime > tickInterval) {
+            tickTime -= tickInterval;
             if (followCircle.getAlpha() > 0 && replayObjectData == null ||
                     replayObjectData != null && replayObjectData.tickSet.get(replayTickIndex)) {
                 Utils.playHitSound(listener, 16);
@@ -795,7 +795,7 @@ public class Slider extends GameObject {
 
                 if (Config.isAnimateFollowCircle() && !mIsAnimating) {
                     followCircle.clearEntityModifiers();
-                    followCircle.registerEntityModifier(Modifiers.scale((float) Math.min(tickInterval / GameHelper.getTickRate(), 0.2f) / GameHelper.getSpeedMultiplier(), scale * 1.1f, scale).setEaseFunction(EaseQuadOut.getInstance()));
+                    followCircle.registerEntityModifier(Modifiers.scale((float) Math.min(tickInterval, 0.2f) / GameHelper.getSpeedMultiplier(), scale * 1.1f, scale).setEaseFunction(EaseQuadOut.getInstance()));
                 }
 
                 ticksGot++;

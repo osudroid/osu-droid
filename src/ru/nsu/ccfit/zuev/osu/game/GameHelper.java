@@ -14,7 +14,6 @@ import ru.nsu.ccfit.zuev.osu.Utils;
 import ru.nsu.ccfit.zuev.osu.helper.DifficultyHelper;
 
 public class GameHelper {
-    private static double tickRate = 1;
     private static double speed = 1;
     private static float difficulty = 1;
     private static float approachRate = 1;
@@ -67,14 +66,6 @@ public class GameHelper {
 
     public static void setDifficulty(final float difficulty) {
         GameHelper.difficulty = difficulty;
-    }
-
-    public static double getTickRate() {
-        return tickRate;
-    }
-
-    public static void setTickRate(final double tickRate) {
-        GameHelper.tickRate = tickRate;
     }
 
     /**

@@ -484,7 +484,6 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
         }
 
         GameHelper.setSpeed(beatmap.difficulty.sliderMultiplier * 100);
-        GameHelper.setTickRate((float) beatmap.difficulty.sliderTickRate);
         GameHelper.setDifficulty(overallDifficulty);
         GameHelper.setDrain(drain);
         GameHelper.setApproachRate(approachRate);
@@ -1482,8 +1481,8 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
                 }
 
                 slider.init(this, mgScene, (com.rian.osu.beatmap.hitobject.Slider) obj, secPassed,
-                    comboColor, Integer.parseInt(params[4]), beatmap.controlPoints, soundspec, tempSound,
-                    isFirst, getSliderPath(sliderIndex++));
+                    comboColor, (float) beatmap.difficulty.sliderTickRate, Integer.parseInt(params[4]),
+                    beatmap.controlPoints, soundspec, tempSound, isFirst, getSliderPath(sliderIndex++));
 
                 addObject(slider);
                 isFirst = false;
