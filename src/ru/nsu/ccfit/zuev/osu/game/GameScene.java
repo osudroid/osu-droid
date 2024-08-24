@@ -725,11 +725,8 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
             secPassed = Math.min(videoOffset, secPassed);
         }
 
-        if (!objects.isEmpty()) {
-            skipTime = objects.peek().getTime() - objectTimePreempt - 1f;
-        } else {
-            skipTime = 0;
-        }
+        float firstObjStartTime = (float) parsedObjects.peek().startTime / 1000;
+        skipTime = firstObjStartTime - objectTimePreempt - 1f;
 
         metronome = null;
         if ((Config.getMetronomeSwitch() == 1 && GameHelper.isNightCore())
@@ -764,29 +761,26 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
         if (Config.isCorovans() && countdown != BeatmapCountdown.NoCountdown) {
             float cdSpeed = countdown.speed;
             skipTime -= cdSpeed * Countdown.COUNTDOWN_LENGTH;
-            if (cdSpeed != 0 && objects.peek().getTime() - secPassed >= cdSpeed * Countdown.COUNTDOWN_LENGTH) {
-                addPassiveObject(new Countdown(this, bgScene, cdSpeed, 0, objects.peek().getTime() - secPassed));
+            if (cdSpeed != 0 && firstObjStartTime - secPassed >= cdSpeed * Countdown.COUNTDOWN_LENGTH) {
+                addPassiveObject(new Countdown(this, bgScene, cdSpeed, 0, firstObjStartTime - secPassed));
             }
         }
 
-        float lastObjectTime = 0;
-        if (!objects.isEmpty())
-            lastObjectTime = objects.getLast().getTime();
+        if (!Config.isHideInGameUI()) {
+            SongProgressBar progressBar = new SongProgressBar(this, fgScene,
+                (float) HitObjectUtils.getEndTime(parsedObjects.getLast()) / 1000, firstObjStartTime,
+                new PointF(0, Config.getRES_HEIGHT() - 7), Config.getRES_WIDTH(), 7);
 
-        if(!Config.isHideInGameUI()) {
-            SongProgressBar progressBar = new SongProgressBar(this, fgScene, lastObjectTime, objects
-                    .getFirst().getTime(), new PointF(0, Config.getRES_HEIGHT() - 7), Config.getRES_WIDTH(), 7);
             progressBar.setProgressRectColor(new RGBAColor(153f / 255f, 204f / 255f, 51f / 255f, 0.4f));
         }
 
-        if (Config.getErrorMeter() == 1
-                || (Config.getErrorMeter() == 2 && replaying)) {
+        if (Config.getErrorMeter() == 1 || (Config.getErrorMeter() == 2 && replaying)) {
             hitErrorMeter = new HitErrorMeter(
-                    fgScene,
-                    new PointF((float) Config.getRES_WIDTH() / 2, Config.getRES_HEIGHT() - 20),
-                    beatmap.difficulty.od,
-                    12,
-                    difficultyHelper);
+                fgScene,
+                new PointF(Config.getRES_WIDTH() / 2f, Config.getRES_HEIGHT() - 20),
+                beatmap.difficulty.od,
+                12,
+                difficultyHelper);
         }
 
         skipBtn = null;
@@ -812,7 +806,7 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
         }
 
         breakAnimator = new BreakAnimator(this, fgScene, stat, beatmap.general.letterboxInBreaks, dimRectangle);
-        if(!Config.isHideInGameUI()){
+        if (!Config.isHideInGameUI()) {
             scorebar = new ScoreBar(this, fgScene, stat);
             addPassiveObject(scorebar);
             final TextureRegion scoreDigitTex = ResourceManager.getInstance()
@@ -1289,80 +1283,65 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
 
         boolean shouldBePunished = false;
 
-        while (!objects.isEmpty()
-                && secPassed + objectTimePreempt > objects.peek().getTime()) {
+        while (!objects.isEmpty() && !parsedObjects.isEmpty()
+                && secPassed + objectTimePreempt > (float) parsedObjects.peek().startTime / 1000) {
             gameStarted = true;
             final GameObjectData data = objects.poll();
-            final HitObject obj = parsedObjects.poll();
-
+            final var obj = parsedObjects.poll();
             final String[] params = data.getData();
 
-            // Fix matching error on new beatmaps
-            final int objDefine = Integer.parseInt(params[3]);
-
-            final float time = data.getRawTime();
-            if (time > totalLength) {
+            if (obj.startTime > totalLength) {
                 shouldBePunished = true;
             }
 
-            // Next object from the polled one, this returns null if the list if empty. That's why every
+            // Next object from the polled one, this returns null if the list is empty. That's why every
             // usage of this is done if condition 'objects.isEmpty()' is false. Ignore IDE warnings.
-            var nextObj = objects.peek();
+            final var nextObj = parsedObjects.peek();
 
-            if (nextObj != null) {
-                distToNextObject = Math.max(nextObj.getTime() - data.getTime(), activeTimingPoint.msPerBeat / 1000 / 2);
-            } else {
-                distToNextObject = 0;
-            }
+            distToNextObject = nextObj != null ?
+                Math.max(nextObj.startTime - obj.startTime, activeTimingPoint.msPerBeat / 2) / 1000 :
+                0;
 
             final RGBColor comboColor = getComboColor(obj.getComboIndexWithOffsets());
 
-            if ((objDefine & 1) > 0) {
+            if (obj instanceof com.rian.osu.beatmap.hitobject.HitCircle parsedCircle) {
                 final HitCircle circle = GameObjectPool.getInstance().getCircle();
                 String tempSound = null;
                 if (params.length > 5) {
                     tempSound = params[5];
                 }
 
-                circle.init(this, mgScene,
-                        (com.rian.osu.beatmap.hitobject.HitCircle) obj, secPassed, comboColor,
+                circle.init(this, mgScene, parsedCircle, secPassed, comboColor,
                         Integer.parseInt(params[4]), tempSound, isFirst);
                 addObject(circle);
                 isFirst = false;
 
-                if (nextObj != null
-                        && !nextObj.isNewCombo()) {
-                    final FollowTrack track = GameObjectPool.getInstance()
-                            .getTrack();
-                    PointF end;
-                    if (nextObj.getTime() > data.getTime()) {
-                        end = data.getEnd();
-                    } else {
-                        end = data.getPos();
-                    }
-                    track.init(this, bgScene, end, nextObj.getPos(),
-                            nextObj.getTime() - secPassed, objectTimePreempt,
-                            scale);
+                if (nextObj != null && !obj.getLastInCombo()) {
+                    final FollowTrack track = GameObjectPool.getInstance().getTrack();
+                    track.init(this, bgScene, obj.getGameplayStackedPosition().toPointF(),
+                        nextObj.getGameplayStackedPosition().toPointF(),
+                        (float) nextObj.startTime / 1000 - secPassed, objectTimePreempt, scale);
                 }
+
                 if (GameHelper.isAuto()) {
                     circle.setAutoPlay();
                 }
-                circle.setHitTime(data.getTime());
+
+                circle.setHitTime((float) obj.startTime / 1000);
                 circle.setId(++lastObjectId);
 
                 if (replaying) {
                     circle.setReplayData(replay.objectData[circle.getId()]);
                 }
 
-            } else if ((objDefine & 8) > 0) {
+            } else if (obj instanceof com.rian.osu.beatmap.hitobject.Spinner parsedSpinner) {
                 final float rps = 2 + 2 * beatmap.difficulty.od / 10f;
                 final Spinner spinner = GameObjectPool.getInstance().getSpinner();
                 String tempSound = null;
                 if (params.length > 6) {
                     tempSound = params[6];
                 }
-                spinner.init(this, bgScene, (com.rian.osu.beatmap.hitobject.Spinner) obj, rps,
-                        Integer.parseInt(params[4]), tempSound, stat);
+                spinner.init(this, bgScene, parsedSpinner, rps, Integer.parseInt(params[4]), tempSound, stat);
                 addObject(spinner);
                 isFirst = false;
 
@@ -1375,39 +1354,33 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
                     spinner.setReplayData(replay.objectData[spinner.getId()]);
                 }
 
-            } else if ((objDefine & 2) > 0) {
+            } else if (obj instanceof com.rian.osu.beatmap.hitobject.Slider parsedSlider) {
                 final String soundspec = params.length > 8 ? params[8] : null;
                 final Slider slider = GameObjectPool.getInstance().getSlider();
+
                 String tempSound = null;
                 if (params.length > 9) {
                     tempSound = params[9];
                 }
 
-                slider.init(this, mgScene, (com.rian.osu.beatmap.hitobject.Slider) obj, secPassed,
+                slider.init(this, mgScene, parsedSlider, secPassed,
                     comboColor, (float) beatmap.difficulty.sliderTickRate, Integer.parseInt(params[4]),
                     beatmap.controlPoints, soundspec, tempSound, isFirst, getSliderPath(sliderIndex++));
 
                 addObject(slider);
                 isFirst = false;
 
-                if (nextObj != null
-                        && !nextObj.isNewCombo()) {
-                    final FollowTrack track = GameObjectPool.getInstance()
-                            .getTrack();
-                    PointF end;
-                    if (nextObj.getTime() > data.getTime()) {
-                        end = data.getEnd();
-                    } else {
-                        end = data.getPos();
-                    }
-                    track.init(this, bgScene, end, nextObj.getPos(),
-                            nextObj.getTime() - secPassed, objectTimePreempt,
-                            scale);
+                if (nextObj != null && !obj.getLastInCombo()) {
+                    final FollowTrack track = GameObjectPool.getInstance().getTrack();
+
+                    track.init(this, bgScene, parsedSlider.getGameplayStackedEndPosition().toPointF(),
+                        nextObj.getGameplayStackedPosition().toPointF(),
+                        (float) nextObj.startTime / 1000 - secPassed, objectTimePreempt, scale);
                 }
                 if (GameHelper.isAuto()) {
                     slider.setAutoPlay();
                 }
-                slider.setHitTime(data.getTime());
+                slider.setHitTime((float) obj.startTime / 1000);
                 slider.setId(++lastObjectId);
                 if (replaying) {
                     slider.setReplayData(replay.objectData[slider.getId()]);
