@@ -230,7 +230,6 @@ public class HitCircle extends GameObject {
                 signAcc += (float) hitOffsetToPreviousFrame() / 1000f;
             }
             final float acc = Math.abs(signAcc);
-            //Log.i("note-ini", "signAcc: " + signAcc);
             if (acc <= GameHelper.getDifficultyHelper().hitWindowFor50(GameHelper.getOverallDifficulty())) {
                 playSound();
             }
@@ -292,7 +291,6 @@ public class HitCircle extends GameObject {
                 signAcc += (float) hitOffsetToPreviousFrame() / 1000f;
             }
             final float acc = Math.abs(signAcc);
-            //Log.i("note-ini", "signAcc: " + signAcc);
             if (acc <= GameHelper.getDifficultyHelper().hitWindowFor50(GameHelper.getOverallDifficulty())) {
                 playSound();
             }
