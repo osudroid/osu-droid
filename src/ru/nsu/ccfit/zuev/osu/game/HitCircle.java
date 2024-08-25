@@ -40,14 +40,12 @@ public class HitCircle extends GameObject {
                      final com.rian.osu.beatmap.hitobject.HitCircle beatmapCircle, final float secPassed,
                      final RGBColor comboColor, final boolean isFirstNote) {
         // Storing parameters into fields
-        //Log.i("note-ini", time + "s");
         this.replayObjectData = null;
         this.beatmapCircle = beatmapCircle;
         this.pos = beatmapCircle.getGameplayStackedPosition().toPointF();
         this.endsCombo = beatmapCircle.getLastInCombo();
         this.listener = listener;
         this.scene = pScene;
-        // TODO: 外部音效文件支持
         this.timePreempt = (float) beatmapCircle.timePreempt / 1000;
         passedTime = secPassed - ((float) beatmapCircle.startTime / 1000 - timePreempt);
         startHit = false;
