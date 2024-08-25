@@ -1938,7 +1938,7 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
         BassSoundProvider snd = null;
 
         for (var name : sample.getLookupNames()) {
-            snd = resourceManager.getSound(name, false);
+            snd = resourceManager.getCustomSound(name, false);
 
             if (snd != null) {
                 break;
@@ -1959,7 +1959,7 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
 
         for (var sample : obj.getAuxiliarySamples()) {
             for (var name : sample.getLookupNames()) {
-                var snd = resourceManager.getSound(name, false);
+                var snd = resourceManager.getCustomSound(name, false);
 
                 if (snd != null) {
                     snd.stop();

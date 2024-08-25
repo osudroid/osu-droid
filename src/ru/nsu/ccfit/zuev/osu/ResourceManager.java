@@ -703,6 +703,14 @@ public class ResourceManager {
         customSounds.put(resName, snd);
     }
 
+    public BassSoundProvider getCustomSound(final String name, final boolean defaultToEmpty) {
+        if (SkinManager.isSkinEnabled() && customSounds.containsKey(name)) {
+            return customSounds.get(name);
+        }
+
+        return getSound(name, defaultToEmpty);
+    }
+
     public BassSoundProvider getCustomSound(final String resname, final int set) {
         if (!SkinManager.isSkinEnabled()) {
             return getSound(resname);
