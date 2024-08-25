@@ -676,6 +676,10 @@ public class Slider extends GameObject {
                         preStageFinish = true;
                     }
 
+                    endArrow.setRotation(
+                        MathUtils.radToDeg(Utils.direction(curveEndPos, path.points.get(path.points.size() - 2)))
+                    );
+
                     Utils.putSpriteAnchorCenter(curveEndPos, endCircle);
                     Utils.putSpriteAnchorCenter(curveEndPos, endOverlay);
                     Utils.putSpriteAnchorCenter(curveEndPos, endArrow);
