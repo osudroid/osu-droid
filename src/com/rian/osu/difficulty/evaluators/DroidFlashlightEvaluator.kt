@@ -2,7 +2,7 @@ package com.rian.osu.difficulty.evaluators
 
 import com.rian.osu.beatmap.hitobject.Slider
 import com.rian.osu.beatmap.hitobject.Spinner
-import com.rian.osu.beatmap.hitobject.getStackedEndPosition
+import com.rian.osu.beatmap.hitobject.getDifficultyStackedEndPosition
 import com.rian.osu.difficulty.DroidDifficultyHitObject
 import kotlin.math.abs
 import kotlin.math.max
@@ -56,7 +56,7 @@ object DroidFlashlightEvaluator {
             // Exclude overlapping objects that can be tapped at once.
             if (currentObject.obj !is Spinner) {
                 val jumpDistance = current.obj.difficultyStackedPosition
-                    .getDistance(currentObject.obj.getStackedEndPosition())
+                    .getDistance(currentObject.obj.getDifficultyStackedEndPosition())
 
                 cumulativeStrainTime += last.strainTime
 
