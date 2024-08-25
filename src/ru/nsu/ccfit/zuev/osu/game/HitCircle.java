@@ -22,7 +22,7 @@ public class HitCircle extends GameObject {
     private CircleNumber number;
     private GameObjectListener listener;
     private Scene scene;
-    private float radius;
+    private float radiusSquared;
     private float passedTime;
     private float timePreempt;
     private boolean kiai;
@@ -54,8 +54,8 @@ public class HitCircle extends GameObject {
 
         // Calculating position of top/left corner for sprites and hit radius
         final float scale = beatmapCircle.getGameplayScale();
-        radius = (float) beatmapCircle.getGameplayRadius();
-        radius *= radius;
+        radiusSquared = (float) beatmapCircle.getGameplayRadius();
+        radiusSquared *= radiusSquared;
 
         float actualFadeInDuration = (float) beatmapCircle.timeFadeIn / 1000 / GameHelper.getSpeedMultiplier();
         float remainingFadeInDuration = Math.max(0, actualFadeInDuration - passedTime / GameHelper.getSpeedMultiplier());
@@ -169,7 +169,7 @@ public class HitCircle extends GameObject {
     private boolean isHit() {
         for (int i = 0, count = listener.getCursorsCount(); i < count; i++) {
 
-            var inPosition = Utils.squaredDistance(pos, listener.getMousePos(i)) <= radius;
+            var inPosition = Utils.squaredDistance(pos, listener.getMousePos(i)) <= radiusSquared;
             if (GameHelper.isRelaxMod() && passedTime - timePreempt >= 0 && inPosition) {
                 return true;
             }
@@ -188,7 +188,7 @@ public class HitCircle extends GameObject {
         // 因为这里是阻塞队列, 所以提前点的地方会影响判断
         for (int i = 0, count = listener.getCursorsCount(); i < count; i++) {
 
-            var inPosition = Utils.squaredDistance(pos, listener.getMousePos(i)) <= radius;
+            var inPosition = Utils.squaredDistance(pos, listener.getMousePos(i)) <= radiusSquared;
             if (GameHelper.isRelaxMod() && passedTime - timePreempt >= 0 && inPosition) {
                 return 0;
             }
