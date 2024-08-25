@@ -122,8 +122,7 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
     private int lastObjectId = -1;
     private float secPassed = 0;
     private float leadOut = 0;
-    private LinkedList<HitObject> parsedObjects;
-    private LinkedList<GameObjectData> objects;
+    private LinkedList<HitObject> objects;
     private ArrayList<RGBColor> combos;
     private boolean comboWasMissed = false;
     private boolean comboWas100 = false;
@@ -416,13 +415,7 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
             GameHelper.getSpeedMultiplier() != 1f &&
                 (modMenu.isEnableNCWhenSpeedChange() || modMenu.getMod().contains(GameMod.MOD_NIGHTCORE)));
 
-        // Parsing hit objects
-        objects = new LinkedList<>();
-        for (final String s : beatmap.rawHitObjects) {
-            objects.add(new GameObjectData(s));
-        }
-
-        parsedObjects = new LinkedList<>(beatmap.hitObjects.objects);
+        objects = new LinkedList<>(beatmap.hitObjects.objects);
         activeObjects = new LinkedList<>();
         passiveObjects = new LinkedList<>();
         expiredObjects = new LinkedList<>();
@@ -726,7 +719,7 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
             secPassed = Math.min(videoOffset, secPassed);
         }
 
-        float firstObjStartTime = (float) parsedObjects.peek().startTime / 1000;
+        float firstObjStartTime = (float) objects.peek().startTime / 1000;
         skipTime = firstObjStartTime - objectTimePreempt - 1f;
 
         metronome = null;
@@ -769,7 +762,7 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
 
         if (!Config.isHideInGameUI()) {
             SongProgressBar progressBar = new SongProgressBar(this, fgScene,
-                (float) HitObjectUtils.getEndTime(parsedObjects.getLast()) / 1000, firstObjStartTime,
+                (float) HitObjectUtils.getEndTime(objects.getLast()) / 1000, firstObjStartTime,
                 new PointF(0, Config.getRES_HEIGHT() - 7), Config.getRES_WIDTH(), 7);
 
             progressBar.setProgressRectColor(new RGBAColor(153f / 255f, 204f / 255f, 51f / 255f, 0.4f));
@@ -1134,10 +1127,8 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
             }
         }
 
-        if (objects.isEmpty() && activeObjects.isEmpty()) {
-            if (GameHelper.isFlashLight()) {
-                flashlightSprite.onBreak(true);
-            }
+        if (objects.isEmpty() && activeObjects.isEmpty() && GameHelper.isFlashLight()) {
+            flashlightSprite.onBreak(true);
         }
 
         if (gameStarted) {
@@ -1284,10 +1275,10 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
 
         boolean shouldBePunished = false;
 
-        while (!parsedObjects.isEmpty()
-                && secPassed + objectTimePreempt > (float) parsedObjects.peek().startTime / 1000) {
+        while (!objects.isEmpty()
+                && secPassed + objectTimePreempt > (float) objects.peek().startTime / 1000) {
             gameStarted = true;
-            final var obj = parsedObjects.poll();
+            final var obj = objects.poll();
 
             if (obj.startTime > totalLength) {
                 shouldBePunished = true;
@@ -1295,7 +1286,7 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
 
             // Next object from the polled one, this returns null if the list is empty. That's why every
             // usage of this is done if condition 'objects.isEmpty()' is false. Ignore IDE warnings.
-            final var nextObj = parsedObjects.peek();
+            final var nextObj = objects.peek();
 
             distToNextObject = nextObj != null ?
                 Math.max(nextObj.startTime - obj.startTime, activeTimingPoint.msPerBeat / 2) / 1000 :
