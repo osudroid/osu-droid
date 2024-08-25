@@ -547,7 +547,7 @@ public class Slider extends GameObject {
     }
 
     private boolean isHit() {
-        float radius = Utils.sqr(64 * beatmapSlider.getGameplayScale());
+        float radius = Utils.sqr((float) beatmapSlider.getGameplayRadius());
         for (int i = 0, count = listener.getCursorsCount(); i < count; i++) {
 
             var inPosition = Utils.squaredDistance(pos, listener.getMousePos(i)) <= radius;
@@ -716,7 +716,7 @@ public class Slider extends GameObject {
         final float percentage = (float) passedTime / spanDuration;
         final PointF ballPos = getPositionAt(reverse ? 1 - percentage : percentage, true, false);
         // Calculating if cursor in follow circle bounds
-        final float followCircleRadius = 128 * scale;
+        final float followCircleRadius = (float) beatmapSlider.getGameplayRadius() * 2;
         boolean inRadius = false;
         for (int i = 0, cursorCount = listener.getCursorsCount(); i < cursorCount; i++) {
 
