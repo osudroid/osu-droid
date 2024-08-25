@@ -581,11 +581,13 @@ public class Slider extends GameObject {
             // If it's too late, mark this hit missing
             if (passedTime > GameHelper.getDifficultyHelper().hitWindowFor50(GameHelper.getOverallDifficulty())) {
                 startHit = true;
+                currentNestedObjectIndex++;
                 listener.onSliderHit(id, -1, null, pos, false, color, GameObjectListener.SLIDER_START);
                 firstHitAccuracy = (int) (passedTime * 1000);
             } else if (autoPlay && passedTime >= 0) {
                 startHit = true;
                 playCurrentNestedObjectHitSound();
+                currentNestedObjectIndex++;
                 ticksGot++;
                 listener.onSliderHit(id, 30, null, pos, false, color, GameObjectListener.SLIDER_START);
             } else if (replayObjectData != null &&
@@ -593,6 +595,7 @@ public class Slider extends GameObject {
                     passedTime + dt / 2 > replayObjectData.accuracy / 1000f) {
                 startHit = true;
                 playCurrentNestedObjectHitSound();
+                currentNestedObjectIndex++;
                 ticksGot++;
                 listener.onSliderHit(id, 30, null, pos, false, color, GameObjectListener.SLIDER_START);
             } else if (isHit() && -passedTime < GameHelper.getDifficultyHelper().hitWindowFor50(GameHelper.getOverallDifficulty())) {
@@ -600,13 +603,12 @@ public class Slider extends GameObject {
                 listener.registerAccuracy(passedTime);
                 startHit = true;
                 playCurrentNestedObjectHitSound();
+                currentNestedObjectIndex++;
                 ticksGot++;
                 firstHitAccuracy = (int) (passedTime * 1000);
                 listener.onSliderHit(id, 30, null, pos,
                         false, color, GameObjectListener.SLIDER_START);
             }
-
-            currentNestedObjectIndex++;
         }
 
         if (GameHelper.isKiai()) {
@@ -861,6 +863,7 @@ public class Slider extends GameObject {
                 listener.registerAccuracy(passedTime);
                 startHit = true;
                 playCurrentNestedObjectHitSound();
+                currentNestedObjectIndex++;
                 ticksGot++;
                 firstHitAccuracy = (int) (passedTime * 1000);
                 listener.onSliderHit(id, 30, null, pos,
@@ -873,8 +876,6 @@ public class Slider extends GameObject {
                     approachCircle.setAlpha(0);
                 }
             }
-
-            currentNestedObjectIndex++;
         }
     }
 
