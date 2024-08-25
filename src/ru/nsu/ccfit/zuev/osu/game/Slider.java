@@ -30,7 +30,6 @@ import ru.nsu.ccfit.zuev.skins.OsuSkin;
 import ru.nsu.ccfit.zuev.skins.SkinManager;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.BitSet;
 
 public class Slider extends GameObject {
@@ -54,11 +53,8 @@ public class Slider extends GameObject {
     private double passedTime;
     private int completedSpanCount;
     private boolean reverse;
-    private int[] soundId = new int[3];
-    private int[] sampleSet = new int[3];
-    private int[] addition = new int[3];
 
-    private int soundIdIndex;
+    private int currentNestedObjectIndex;
     private int ticksGot;
     private double tickTime;
     private double tickInterval;
@@ -106,9 +102,8 @@ public class Slider extends GameObject {
 
     public void init(final GameObjectListener listener, final Scene scene,
                      final com.rian.osu.beatmap.hitobject.Slider beatmapSlider, final float secPassed,
-                     final RGBColor comboColor, final float tickRate, final int sound,
-                     final BeatmapControlPoints controlPoints, final String customSound,
-                     final String tempSound, final boolean isFirstNote, SliderPath sliderPath) {
+                     final RGBColor comboColor, final float tickRate, final BeatmapControlPoints controlPoints,
+                     final boolean isFirstNote, SliderPath sliderPath) {
         this.listener = listener;
         this.scene = scene;
         this.beatmapSlider = beatmapSlider;
@@ -147,40 +142,7 @@ public class Slider extends GameObject {
             color.set(sliderBodyColor.r(), sliderBodyColor.g(), sliderBodyColor.b());
         }
         circleColor.set(comboColor.r(), comboColor.g(), comboColor.b());
-
-        int spanCount = beatmapSlider.getSpanCount();
-        if (soundId.length < spanCount) {
-            soundId = new int[spanCount];
-            sampleSet = new int[spanCount];
-            addition = new int[spanCount];
-        }
-
-        Arrays.fill(soundId, sound);
-        Arrays.fill(sampleSet, 0);
-        Arrays.fill(addition, 0);
-
-        if (customSound != null) {
-            final String[] pars = customSound.split("[|]");
-            for (int i = 0; i < soundId.length; i++) {
-                if (i < pars.length) {
-                    soundId[i] = Integer.parseInt(pars[i]);
-                }
-            }
-        }
-
-        if (!Utils.isEmpty(tempSound)) {
-            final String[] pars = tempSound.split("[|]");
-            for (int i = 0; i < pars.length; i++) {
-                final String[] group = pars[i].split(":");
-                if (i < sampleSet.length) {
-                    sampleSet[i] = Integer.parseInt(group[0]);
-                }
-                if (i < addition.length) {
-                    addition[i] = Integer.parseInt(group[1]);
-                }
-            }
-        }
-        soundIdIndex = 1;
+        currentNestedObjectIndex = 0;
 
         startCircle.setScale(scale);
         startCircle.setColor(comboColor.r(), comboColor.g(), comboColor.b());
@@ -212,6 +174,7 @@ public class Slider extends GameObject {
 
         scene.attachChild(startOverlay, 0);
         // Repeat arrow at start
+        int spanCount = beatmapSlider.getSpanCount();
         if (spanCount > 2) {
             startArrow.setAlpha(0);
             startArrow.setScale(scale);
@@ -456,11 +419,10 @@ public class Slider extends GameObject {
 
         if (mWasInRadius && replayObjectData == null ||
                 replayObjectData != null && replayObjectData.tickSet.get(replayTickIndex)) {
-            if (soundIdIndex < soundId.length)
-                Utils.playHitSound(listener, soundId[soundIdIndex],
-                        sampleSet[soundIdIndex], addition[soundIdIndex]);
+            playCurrentNestedObjectHitSound();
             ticksGot++;
             tickSet.set(replayTickIndex++, true);
+
             if (stillHasSpan) {
                 listener.onSliderHit(id, 30, null,
                         reverse ? pos : endPos,
@@ -468,13 +430,15 @@ public class Slider extends GameObject {
             }
         } else {
             tickSet.set(replayTickIndex++, false);
+
             if (stillHasSpan) {
                 listener.onSliderHit(id, -1, null,
                         reverse ? pos : endPos,
                         false, color, GameObjectListener.SLIDER_REPEAT);
             }
         }
-        soundIdIndex++;
+
+        currentNestedObjectIndex++;
 
         // If slider has more spans
         if (stillHasSpan) {
@@ -621,26 +585,28 @@ public class Slider extends GameObject {
                 firstHitAccuracy = (int) (passedTime * 1000);
             } else if (autoPlay && passedTime >= 0) {
                 startHit = true;
-                Utils.playHitSound(listener, soundId[0], sampleSet[0], addition[0]);
+                playCurrentNestedObjectHitSound();
                 ticksGot++;
                 listener.onSliderHit(id, 30, null, pos, false, color, GameObjectListener.SLIDER_START);
             } else if (replayObjectData != null &&
                     Math.abs(replayObjectData.accuracy / 1000f) <= GameHelper.getDifficultyHelper().hitWindowFor50(GameHelper.getOverallDifficulty()) &&
                     passedTime + dt / 2 > replayObjectData.accuracy / 1000f) {
                 startHit = true;
-                Utils.playHitSound(listener, soundId[0], sampleSet[0], addition[0]);
+                playCurrentNestedObjectHitSound();
                 ticksGot++;
                 listener.onSliderHit(id, 30, null, pos, false, color, GameObjectListener.SLIDER_START);
             } else if (isHit() && -passedTime < GameHelper.getDifficultyHelper().hitWindowFor50(GameHelper.getOverallDifficulty())) {
                 // if we clicked
                 listener.registerAccuracy(passedTime);
                 startHit = true;
-                Utils.playHitSound(listener, soundId[0], sampleSet[0], addition[0]);
+                playCurrentNestedObjectHitSound();
                 ticksGot++;
                 firstHitAccuracy = (int) (passedTime * 1000);
                 listener.onSliderHit(id, 30, null, pos,
                         false, color, GameObjectListener.SLIDER_START);
             }
+
+            currentNestedObjectIndex++;
         }
 
         if (GameHelper.isKiai()) {
@@ -770,6 +736,7 @@ public class Slider extends GameObject {
             if (inRadius && !mWasInRadius) {
                 mWasInRadius = true;
                 mIsAnimating = true;
+                playSlidingSamples();
 
                 // If alpha doesn't equal 0 means that it has been into an animation before
                 float initialScale = followCircle.getAlpha() == 0 ? scale * 0.5f : followCircle.getScaleX();
@@ -784,6 +751,7 @@ public class Slider extends GameObject {
             } else if (!inRadius && mWasInRadius) {
                 mWasInRadius = false;
                 mIsAnimating = true;
+                stopSlidingSamples();
 
                 followCircle.clearEntityModifiers();
                 followCircle.registerEntityModifier(Modifiers.scale(0.1f / GameHelper.getSpeedMultiplier(), followCircle.getScaleX(), scale * 2f));
@@ -797,6 +765,12 @@ public class Slider extends GameObject {
                 );
             }
         } else {
+            if (inRadius && !mWasInRadius) {
+                playSlidingSamples();
+            } else if (!inRadius && mWasInRadius) {
+                stopSlidingSamples();
+            }
+
             mWasInRadius = inRadius;
             followCircle.setAlpha(inRadius ? 1 : 0);
         }
@@ -809,7 +783,7 @@ public class Slider extends GameObject {
             if (tickSprite.getAlpha() > 0) {
                 if (followCircle.getAlpha() > 0 && replayObjectData == null ||
                         replayObjectData != null && replayObjectData.tickSet.get(replayTickIndex)) {
-                    Utils.playHitSound(listener, 16);
+                    playCurrentNestedObjectHitSound();
                     listener.onSliderHit(id, 10, null, ballPos, false, color, GameObjectListener.SLIDER_TICK);
 
                     if (Config.isAnimateFollowCircle() && !mIsAnimating) {
@@ -823,6 +797,8 @@ public class Slider extends GameObject {
                     listener.onSliderHit(id, -1, null, ballPos, false, color, GameObjectListener.SLIDER_TICK);
                     tickSet.set(replayTickIndex++, false);
                 }
+
+                currentNestedObjectIndex++;
             }
 
             tickSprite.setAlpha(0);
@@ -864,6 +840,18 @@ public class Slider extends GameObject {
         }
     }
 
+    private void playCurrentNestedObjectHitSound() {
+        listener.playSamples(beatmapSlider.getNestedHitObjects().get(currentNestedObjectIndex));
+    }
+
+    private void playSlidingSamples() {
+        listener.playAuxiliarySamples(beatmapSlider);
+    }
+
+    private void stopSlidingSamples() {
+        listener.stopAuxiliarySamples(beatmapSlider);
+    }
+
     @Override
     public void tryHit(final float dt) {
         if (!startHit) // If we didn't get start hit(click)
@@ -872,7 +860,7 @@ public class Slider extends GameObject {
             {
                 listener.registerAccuracy(passedTime);
                 startHit = true;
-                Utils.playHitSound(listener, soundId[0], sampleSet[0], addition[0]);
+                playCurrentNestedObjectHitSound();
                 ticksGot++;
                 firstHitAccuracy = (int) (passedTime * 1000);
                 listener.onSliderHit(id, 30, null, pos,
@@ -885,6 +873,8 @@ public class Slider extends GameObject {
                     approachCircle.setAlpha(0);
                 }
             }
+
+            currentNestedObjectIndex++;
         }
     }
 

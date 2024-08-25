@@ -1356,17 +1356,11 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
                 }
 
             } else if (obj instanceof com.rian.osu.beatmap.hitobject.Slider parsedSlider) {
-                final String soundspec = params.length > 8 ? params[8] : null;
                 final Slider slider = GameObjectPool.getInstance().getSlider();
 
-                String tempSound = null;
-                if (params.length > 9) {
-                    tempSound = params[9];
-                }
-
                 slider.init(this, mgScene, parsedSlider, secPassed,
-                    comboColor, (float) beatmap.difficulty.sliderTickRate, Integer.parseInt(params[4]),
-                    beatmap.controlPoints, soundspec, tempSound, isFirst, getSliderPath(sliderIndex++));
+                    comboColor, (float) beatmap.difficulty.sliderTickRate,
+                    beatmap.controlPoints, isFirst, getSliderPath(sliderIndex++));
 
                 addObject(slider);
                 isFirst = false;
@@ -1949,11 +1943,24 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
     }
 
     @Override
-    public void playSound(final HitSampleInfo sampleInfo) {
+    public void playSamples(final HitObject obj) {
+        for (var sample : obj.getSamples()) {
+            playSample(sample, false);
+        }
+    }
+
+    @Override
+    public void playAuxiliarySamples(final HitObject obj) {
+        for (var sample : obj.getAuxiliarySamples()) {
+            playSample(sample, true);
+        }
+    }
+
+    private void playSample(HitSampleInfo sample, boolean loop) {
         var resourceManager = ResourceManager.getInstance();
         BassSoundProvider snd = null;
 
-        for (var name : sampleInfo.getLookupNames()) {
+        for (var name : sample.getLookupNames()) {
             snd = resourceManager.getSound(name, false);
 
             if (snd != null) {
@@ -1961,24 +1968,42 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
             }
         }
 
-        if (snd != null) {
-            snd.play(sampleInfo.volume / 100f);
+        if (snd == null) {
+            return;
+        }
+
+        snd.setLooping(loop);
+        snd.play(sample.volume / 100f);
+    }
+
+    @Override
+    public void stopAuxiliarySamples(final HitObject obj) {
+        var resourceManager = ResourceManager.getInstance();
+
+        for (var sample : obj.getAuxiliarySamples()) {
+            for (var name : sample.getLookupNames()) {
+                var snd = resourceManager.getSound(name, false);
+
+                if (snd != null) {
+                    snd.stop();
+                }
+            }
         }
     }
 
     public void playSound(final String name, final int sampleSet, final int addition) {
         if (addition > 0 && !name.equals("hitnormal") && addition < Constants.SAMPLE_PREFIX.length) {
-            playSound(Constants.SAMPLE_PREFIX[addition], name);
+            playSample(Constants.SAMPLE_PREFIX[addition], name);
             return;
         }
         if (sampleSet > 0 && sampleSet < Constants.SAMPLE_PREFIX.length) {
-            playSound(Constants.SAMPLE_PREFIX[sampleSet], name);
+            playSample(Constants.SAMPLE_PREFIX[sampleSet], name);
         } else {
-            playSound(activeSamplePoint.sampleBank.prefix, name);
+            playSample(activeSamplePoint.sampleBank.prefix, name);
         }
     }
 
-    public void playSound(final String prefix, final String name) {
+    public void playSample(final String prefix, final String name) {
         final String fullName = prefix + "-" + name;
         BassSoundProvider snd;
         if (activeSamplePoint.customSampleBank == 0) {

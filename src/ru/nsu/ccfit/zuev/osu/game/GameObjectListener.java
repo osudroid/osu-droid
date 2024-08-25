@@ -2,6 +2,7 @@ package ru.nsu.ccfit.zuev.osu.game;
 
 import android.graphics.PointF;
 
+import com.rian.osu.beatmap.hitobject.HitObject;
 import com.rian.osu.beatmap.hitobject.HitSampleInfo;
 
 import java.util.BitSet;
@@ -21,9 +22,13 @@ public interface GameObjectListener {
 
     void onSpinnerHit(int id, int score, boolean endCombo, int totalScore);
 
-    void playSound(HitSampleInfo sampleInfo);
+    void playSamples(HitObject obj);
+
+    void playAuxiliarySamples(HitObject obj);
 
     void playSound(String name, int sampleSet, int addition);
+
+    void stopAuxiliarySamples(HitObject obj);
 
     void stopSound(String name);
 
