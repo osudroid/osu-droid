@@ -482,6 +482,13 @@ public class Slider extends GameObject {
             reverse = !reverse;
             passedTime -= spanDuration;
             tickTime = passedTime;
+
+            if (reverse) {
+                // In reversed spans, a slider's tick position remains the same as the non-reversed span.
+                // Therefore, we need to offset the tick time such that the travelled time is (tickInterval - nextTickTime).
+                tickTime += tickInterval - spanDuration % tickInterval;
+            }
+
             ball.setFlippedHorizontal(reverse);
             // Restore ticks
             for (int i = 0, size = tickSprites.size(); i < size; i++) {
@@ -797,23 +804,28 @@ public class Slider extends GameObject {
         // Some magic with slider ticks. If it'll crash it's not my fault ^_^"
         while (!tickSprites.isEmpty() && percentage < 1 - 0.02f / spanDuration && tickTime > tickInterval) {
             tickTime -= tickInterval;
-            if (followCircle.getAlpha() > 0 && replayObjectData == null ||
-                    replayObjectData != null && replayObjectData.tickSet.get(replayTickIndex)) {
-                Utils.playHitSound(listener, 16);
-                listener.onSliderHit(id, 10, null, ballPos, false, color, GameObjectListener.SLIDER_TICK);
+            var tickSprite = tickSprites.get(currentTickSpriteIndex);
 
-                if (Config.isAnimateFollowCircle() && !mIsAnimating) {
-                    followCircle.clearEntityModifiers();
-                    followCircle.registerEntityModifier(Modifiers.scale((float) Math.min(tickInterval, 0.2f) / GameHelper.getSpeedMultiplier(), scale * 1.1f, scale).setEaseFunction(EaseQuadOut.getInstance()));
+            if (tickSprite.getAlpha() > 0) {
+                if (followCircle.getAlpha() > 0 && replayObjectData == null ||
+                        replayObjectData != null && replayObjectData.tickSet.get(replayTickIndex)) {
+                    Utils.playHitSound(listener, 16);
+                    listener.onSliderHit(id, 10, null, ballPos, false, color, GameObjectListener.SLIDER_TICK);
+
+                    if (Config.isAnimateFollowCircle() && !mIsAnimating) {
+                        followCircle.clearEntityModifiers();
+                        followCircle.registerEntityModifier(Modifiers.scale((float) Math.min(tickInterval, 0.2f) / GameHelper.getSpeedMultiplier(), scale * 1.1f, scale).setEaseFunction(EaseQuadOut.getInstance()));
+                    }
+
+                    ticksGot++;
+                    tickSet.set(replayTickIndex++, true);
+                } else {
+                    listener.onSliderHit(id, -1, null, ballPos, false, color, GameObjectListener.SLIDER_TICK);
+                    tickSet.set(replayTickIndex++, false);
                 }
-
-                ticksGot++;
-                tickSet.set(replayTickIndex++, true);
-            } else {
-                listener.onSliderHit(id, -1, null, ballPos, false, color, GameObjectListener.SLIDER_TICK);
-                tickSet.set(replayTickIndex++, false);
             }
-            tickSprites.get(currentTickSpriteIndex).setAlpha(0);
+
+            tickSprite.setAlpha(0);
             if (reverse && currentTickSpriteIndex > 0) {
                 currentTickSpriteIndex--;
             } else if (!reverse && currentTickSpriteIndex < tickSprites.size() - 1) {
