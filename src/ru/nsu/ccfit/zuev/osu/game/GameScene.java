@@ -27,7 +27,6 @@ import com.rian.osu.beatmap.hitobject.HitObject;
 import com.rian.osu.beatmap.hitobject.HitSampleInfo;
 import com.rian.osu.beatmap.parser.BeatmapParser;
 import com.rian.osu.beatmap.timings.EffectControlPoint;
-import com.rian.osu.beatmap.timings.SampleControlPoint;
 import com.rian.osu.beatmap.timings.TimingControlPoint;
 import com.rian.osu.difficulty.BeatmapDifficultyCalculator;
 import com.rian.osu.difficulty.attributes.DifficultyAttributes;
@@ -117,7 +116,6 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
     private ScoringScene scoringScene;
     private TimingControlPoint activeTimingPoint;
     private EffectControlPoint activeEffectPoint;
-    private SampleControlPoint activeSamplePoint;
     private String beatmapMD5;
     private int lastObjectId = -1;
     private float secPassed = 0;
@@ -446,7 +444,6 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
         lastActiveObjectHitTime = 0;
 
         activeTimingPoint = beatmap.controlPoints.timing.controlPointAt(Double.NEGATIVE_INFINITY);
-        activeSamplePoint = beatmap.controlPoints.sample.controlPointAt(Double.NEGATIVE_INFINITY);
         activeEffectPoint = beatmap.controlPoints.effect.controlPointAt(Double.NEGATIVE_INFINITY);
 
         GameHelper.setBeatLength(activeTimingPoint.msPerBeat / 1000);
@@ -1091,7 +1088,6 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
         }
 
         activeTimingPoint = beatmap.controlPoints.timing.controlPointAt(mSecPassed);
-        activeSamplePoint = beatmap.controlPoints.sample.controlPointAt(mSecPassed);
         activeEffectPoint = beatmap.controlPoints.effect.controlPointAt(mSecPassed);
 
         GameHelper.setBeatLength(activeTimingPoint.msPerBeat / 1000);
@@ -1972,48 +1968,6 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
         }
     }
 
-    public void playSound(final String name, final int sampleSet, final int addition) {
-        if (addition > 0 && !name.equals("hitnormal") && addition < Constants.SAMPLE_PREFIX.length) {
-            playSample(Constants.SAMPLE_PREFIX[addition], name);
-            return;
-        }
-        if (sampleSet > 0 && sampleSet < Constants.SAMPLE_PREFIX.length) {
-            playSample(Constants.SAMPLE_PREFIX[sampleSet], name);
-        } else {
-            playSample(activeSamplePoint.sampleBank.prefix, name);
-        }
-    }
-
-    public void playSample(final String prefix, final String name) {
-        final String fullName = prefix + "-" + name;
-        BassSoundProvider snd;
-        if (activeSamplePoint.customSampleBank == 0) {
-            snd = ResourceManager.getInstance().getSound(fullName);
-        } else {
-            snd = ResourceManager.getInstance().getCustomSound(fullName, activeSamplePoint.customSampleBank);
-        }
-        if(snd == null) {
-            return;
-        }
-        if (name.equals("sliderslide") || name.equals("sliderwhistle")) {
-            snd.setLooping(true);
-        }
-
-        float volume = activeSamplePoint.sampleVolume / 100f;
-
-        if (name.equals("hitnormal")) {
-            snd.play(volume * 0.8f);
-            return;
-        }
-        if (name.equals("hitwhistle")
-                || name.equals("hitclap")) {
-            snd.play(volume * 0.85f);
-            return;
-        }
-        snd.play(volume);
-    }
-
-
     public void addObject(final GameObject object) {
         activeObjects.add(object);
     }
@@ -2153,15 +2107,6 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
             return false;
         }
         return true;
-    }
-
-
-    public void stopSound(final String name) {
-        final String prefix = activeSamplePoint.sampleBank.prefix + "-";
-        final BassSoundProvider snd = ResourceManager.getInstance().getSound(prefix + name);
-        if (snd != null) {
-            snd.stop();
-        }
     }
 
     public void pause() {
