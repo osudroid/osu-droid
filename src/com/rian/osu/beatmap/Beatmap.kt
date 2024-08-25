@@ -64,12 +64,6 @@ class Beatmap : Cloneable {
     var hitObjects = BeatmapHitObjects()
 
     /**
-     * Raw hit objects data.
-     */
-    @JvmField
-    var rawHitObjects = mutableListOf<String>()
-
-    /**
      * The path of parent folder of this [Beatmap].
      */
     @JvmField

@@ -54,7 +54,6 @@ object BeatmapHitObjectsParser : BeatmapSectionParser() {
                 else -> throw UnsupportedOperationException("Malformed hit object")
             }.also { h -> h.samples.addAll(convertSoundType(soundType, bankInfo)) }
 
-            beatmap.rawHitObjects.add(line)
             beatmap.hitObjects.add(obj)
         }
 
