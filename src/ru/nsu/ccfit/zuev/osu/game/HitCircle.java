@@ -18,12 +18,10 @@ public class HitCircle extends GameObject {
     private final Sprite overlay;
     private final Sprite approachCircle;
     private final RGBColor color = new RGBColor();
+    private com.rian.osu.beatmap.hitobject.HitCircle beatmapCircle;
     private CircleNumber number;
     private GameObjectListener listener;
     private Scene scene;
-    private int soundId;
-    private int sampleSet;
-    private int addition;
     private float radius;
     private float passedTime;
     private float timePreempt;
@@ -40,29 +38,21 @@ public class HitCircle extends GameObject {
 
     public void init(final GameObjectListener listener, final Scene pScene,
                      final com.rian.osu.beatmap.hitobject.HitCircle beatmapCircle, final float secPassed,
-                     final RGBColor comboColor, final int sound, final String tempSound, final boolean isFirstNote) {
+                     final RGBColor comboColor, final boolean isFirstNote) {
         // Storing parameters into fields
         //Log.i("note-ini", time + "s");
         this.replayObjectData = null;
+        this.beatmapCircle = beatmapCircle;
         this.pos = beatmapCircle.getGameplayStackedPosition().toPointF();
         this.endsCombo = beatmapCircle.getLastInCombo();
         this.listener = listener;
         this.scene = pScene;
-        this.soundId = sound;
-        this.sampleSet = 0;
-        this.addition = 0;
         // TODO: 外部音效文件支持
         this.timePreempt = (float) beatmapCircle.timePreempt / 1000;
         passedTime = secPassed - ((float) beatmapCircle.startTime / 1000 - timePreempt);
         startHit = false;
         kiai = GameHelper.isKiai();
         color.set(comboColor.r(), comboColor.g(), comboColor.b());
-
-        if (!Utils.isEmpty(tempSound)) {
-            final String[] group = tempSound.split(":");
-            this.sampleSet = Integer.parseInt(group[0]);
-            this.addition = Integer.parseInt(group[1]);
-        }
 
         // Calculating position of top/left corner for sprites and hit radius
         final float scale = beatmapCircle.getGameplayScale();
@@ -154,7 +144,7 @@ public class HitCircle extends GameObject {
     }
 
     private void playSound() {
-        Utils.playHitSound(listener, soundId, sampleSet, addition);
+        listener.playSamples(beatmapCircle);
     }
 
     private void removeFromScene() {

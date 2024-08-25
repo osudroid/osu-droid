@@ -26,6 +26,8 @@ public interface GameObjectListener {
 
     void playAuxiliarySamples(HitObject obj);
 
+    void playSample(HitSampleInfo sample, boolean loop);
+
     void playSound(String name, int sampleSet, int addition);
 
     void stopAuxiliarySamples(HitObject obj);

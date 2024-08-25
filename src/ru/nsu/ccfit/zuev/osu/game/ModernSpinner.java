@@ -34,7 +34,6 @@ public class ModernSpinner extends Spinner {
     private float needRotations;
     private int fullRotations = 0;
     private float rotations = 0;
-    private int soundId;
     private boolean clear;
     private int score = 1;
     private StatisticV2 stat;
@@ -60,16 +59,18 @@ public class ModernSpinner extends Spinner {
     @Override
     public void init(final GameObjectListener listener, final Scene scene,
                      final com.rian.osu.beatmap.hitobject.Spinner beatmapSpinner, final float rps,
-                     final int sound, final String tempSound, final StatisticV2 stat) {
+                     final StatisticV2 stat) {
         this.scene = scene;
+        this.beatmapSpinner = beatmapSpinner;
         this.duration = (float) beatmapSpinner.getDuration() / 1000;
         this.needRotations = rps * duration;
         this.listener = listener;
-        this.soundId = sound;
         this.stat = stat;
         this.clear = false;
         this.fullRotations = 0;
         this.rotations = 0;
+
+        reloadHitSounds();
 
         glow.setAlpha(0f);
         glow.setScale(0.9f);
@@ -161,6 +162,11 @@ public class ModernSpinner extends Spinner {
             }
             // bottom.setRotation(-degree);
         }
+
+        if (dFill > 0) {
+            playSpinnerSpinSound();
+        }
+
         rotations += dFill / 4f;
         float percentFilled = (Math.abs(rotations) + fullRotations) / needRotations;
         float percent = Math.min(percentFilled, 1);
@@ -186,7 +192,7 @@ public class ModernSpinner extends Spinner {
                 listener.onSpinnerHit(id, 1000, false, 0);
                 score++;
                 scene.attachChild(bonusScore);
-                ResourceManager.getInstance().getSound("spinnerbonus").play();
+                playSpinnerBonusSound();
                 float speedMultiplier = GameHelper.getSpeedMultiplier();
                 glow.registerEntityModifier(
                     Modifiers.sequence(
@@ -260,7 +266,7 @@ public class ModernSpinner extends Spinner {
         }
         listener.onSpinnerHit(id, score, endsCombo, this.score + fullRotations - 1);
         if (score > 0) {
-            Utils.playHitSound(listener, soundId);
+            listener.playSamples(beatmapSpinner);
         }
     }
 }

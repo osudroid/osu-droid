@@ -4,6 +4,8 @@ import android.graphics.PointF;
 
 import com.reco1l.osu.Execution;
 import com.reco1l.osu.graphics.Modifiers;
+import com.rian.osu.beatmap.hitobject.BankHitSampleInfo;
+import com.rian.osu.beatmap.hitobject.HitSampleInfo;
 
 import org.anddev.andengine.entity.scene.Scene;
 import org.anddev.andengine.entity.sprite.Sprite;
@@ -28,6 +30,7 @@ public class Spinner extends GameObject {
     private final TextureRegion metreRegion;
     private final Sprite clearText;
     private final ScoreNumber bonusScore;
+    protected com.rian.osu.beatmap.hitobject.Spinner beatmapSpinner;
     private PointF oldMouse;
     private GameObjectListener listener;
     private Scene scene;
@@ -35,13 +38,12 @@ public class Spinner extends GameObject {
     private float rotations = 0;
     private float needRotations;
     private boolean clear = false;
-    private int soundId;
-    private int sampleSet;
-    private int addition;
     private int score = 1;
     private float metreY;
     private StatisticV2 stat;
     private float duration;
+    protected HitSampleInfo spinnerSpinSample;
+    protected HitSampleInfo spinnerBonusSample;
 
     private final PointF currMouse = new PointF();
 
@@ -71,11 +73,12 @@ public class Spinner extends GameObject {
 
     public void init(final GameObjectListener listener, final Scene scene,
                      final com.rian.osu.beatmap.hitobject.Spinner beatmapSpinner, final float rps,
-                     final int sound, final String tempSound, final StatisticV2 stat) {
+                     final StatisticV2 stat) {
         fullRotations = 0;
         rotations = 0;
         this.scene = scene;
         this.duration = (float) beatmapSpinner.getDuration() / 1000 / GameHelper.getSpeedMultiplier();
+        this.beatmapSpinner = beatmapSpinner;
         endsCombo = beatmapSpinner.getLastInCombo();
 
         needRotations = rps * duration;
@@ -84,20 +87,12 @@ public class Spinner extends GameObject {
         }
 
         this.listener = listener;
-        this.soundId = sound;
-        this.sampleSet = 0;
-        this.addition = 0;
         this.stat = stat;
         startHit = true;
         clear = duration <= 0f;
         score = 1;
-        ResourceManager.getInstance().checkSpinnerTextures();
 
-        if (!Utils.isEmpty(tempSound)) {
-            final String[] group = tempSound.split(":");
-            this.sampleSet = Integer.parseInt(group[0]);
-            this.addition = Integer.parseInt(group[1]);
-        }
+        ResourceManager.getInstance().checkSpinnerTextures();
 
         float timePreempt = (float) beatmapSpinner.timePreempt / 1000;
 
@@ -177,8 +172,7 @@ public class Spinner extends GameObject {
             if (fullRotations >= needRotations)
                 clear = true;
         }
-        float percentfill = (Math.abs(rotations) + fullRotations)
-                / needRotations;
+        float percentfill = (Math.abs(rotations) + fullRotations) / needRotations;
         if(needRotations <= 0.1f){
             clear = true;
             percentfill = 1;
@@ -203,7 +197,7 @@ public class Spinner extends GameObject {
         }
         listener.onSpinnerHit(id, score, endsCombo, this.score + fullRotations - 1);
         if (score > 0) {
-            Utils.playHitSound(listener, soundId, sampleSet, addition);
+            listener.playSamples(beatmapSpinner);
         }
     }
 
@@ -259,6 +253,11 @@ public class Spinner extends GameObject {
                listener.updateAutoBasedPos(pX, pY);
             }
         }
+
+        if (dfill > 0) {
+            playSpinnerSpinSound();
+        }
+
         rotations += dfill / 4f;
         float percentfill = (Math.abs(rotations) + fullRotations) / needRotations;
 
@@ -279,7 +278,7 @@ public class Spinner extends GameObject {
                 listener.onSpinnerHit(id, 1000, false, 0);
                 score++;
                 scene.attachChild(bonusScore);
-                ResourceManager.getInstance().getSound("spinnerbonus").play();
+                playSpinnerBonusSound();
                 float rate = 0.375f;
                 if (GameHelper.getHealthDrain() > 0) {
                     rate = 1 + (GameHelper.getHealthDrain() / 4f);
@@ -304,5 +303,38 @@ public class Spinner extends GameObject {
                 (int) (metre.getBaseHeight() * (1 - Math.abs(percentfill))));
 
         oldMouse.set(currMouse);
+    }
+
+    protected void reloadHitSounds() {
+        spinnerBonusSample = null;
+        spinnerSpinSample = null;
+
+        for (var sample : beatmapSpinner.getAuxiliarySamples()) {
+            if (spinnerBonusSample != null && spinnerSpinSample != null) {
+                break;
+            }
+
+            if (!(sample instanceof BankHitSampleInfo bankSample)) {
+                continue;
+            }
+
+            if (bankSample.name.equals("spinnerbonus")) {
+                spinnerBonusSample = bankSample;
+            } else if (bankSample.name.equals("spinnerspin")) {
+                spinnerSpinSample = bankSample;
+            }
+        }
+    }
+
+    protected void playSpinnerBonusSound() {
+        if (spinnerBonusSample != null) {
+            listener.playSample(spinnerBonusSample, false);
+        }
+    }
+
+    protected void playSpinnerSpinSound() {
+        if (spinnerSpinSample != null) {
+            listener.playSample(spinnerSpinSample, false);
+        }
     }
 }

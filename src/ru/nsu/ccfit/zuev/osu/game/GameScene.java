@@ -1284,12 +1284,10 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
 
         boolean shouldBePunished = false;
 
-        while (!objects.isEmpty() && !parsedObjects.isEmpty()
+        while (!parsedObjects.isEmpty()
                 && secPassed + objectTimePreempt > (float) parsedObjects.peek().startTime / 1000) {
             gameStarted = true;
-            final GameObjectData data = objects.poll();
             final var obj = parsedObjects.poll();
-            final String[] params = data.getData();
 
             if (obj.startTime > totalLength) {
                 shouldBePunished = true;
@@ -1307,13 +1305,8 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
 
             if (obj instanceof com.rian.osu.beatmap.hitobject.HitCircle parsedCircle) {
                 final HitCircle circle = GameObjectPool.getInstance().getCircle();
-                String tempSound = null;
-                if (params.length > 5) {
-                    tempSound = params[5];
-                }
 
-                circle.init(this, mgScene, parsedCircle, secPassed, comboColor,
-                        Integer.parseInt(params[4]), tempSound, isFirst);
+                circle.init(this, mgScene, parsedCircle, secPassed, comboColor, isFirst);
                 addObject(circle);
                 isFirst = false;
 
@@ -1338,11 +1331,8 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
             } else if (obj instanceof com.rian.osu.beatmap.hitobject.Spinner parsedSpinner) {
                 final float rps = 2 + 2 * beatmap.difficulty.od / 10f;
                 final Spinner spinner = GameObjectPool.getInstance().getSpinner();
-                String tempSound = null;
-                if (params.length > 6) {
-                    tempSound = params[6];
-                }
-                spinner.init(this, bgScene, parsedSpinner, rps, Integer.parseInt(params[4]), tempSound, stat);
+
+                spinner.init(this, bgScene, parsedSpinner, rps, stat);
                 addObject(spinner);
                 isFirst = false;
 
@@ -1956,7 +1946,8 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
         }
     }
 
-    private void playSample(HitSampleInfo sample, boolean loop) {
+    @Override
+    public void playSample(HitSampleInfo sample, boolean loop) {
         var resourceManager = ResourceManager.getInstance();
         BassSoundProvider snd = null;
 
