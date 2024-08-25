@@ -2,6 +2,8 @@ package ru.nsu.ccfit.zuev.osu.game;
 
 import android.graphics.PointF;
 
+import com.rian.osu.beatmap.hitobject.HitSampleInfo;
+
 import java.util.BitSet;
 
 import ru.nsu.ccfit.zuev.osu.RGBColor;
@@ -18,6 +20,8 @@ public interface GameObjectListener {
     void onSliderEnd(int id, int accuracy, BitSet tickSet);
 
     void onSpinnerHit(int id, int score, boolean endCombo, int totalScore);
+
+    void playSound(HitSampleInfo sampleInfo);
 
     void playSound(String name, int sampleSet, int addition);
 

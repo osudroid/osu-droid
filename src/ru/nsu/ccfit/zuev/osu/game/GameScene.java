@@ -24,6 +24,7 @@ import com.rian.osu.GameMode;
 import com.rian.osu.beatmap.Beatmap;
 import com.rian.osu.beatmap.constants.BeatmapCountdown;
 import com.rian.osu.beatmap.hitobject.HitObject;
+import com.rian.osu.beatmap.hitobject.HitSampleInfo;
 import com.rian.osu.beatmap.parser.BeatmapParser;
 import com.rian.osu.beatmap.timings.EffectControlPoint;
 import com.rian.osu.beatmap.timings.SampleControlPoint;
@@ -1945,6 +1946,24 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
         pos.y /= 2f;
         effect = GameObjectPool.getInstance().getEffect("spinner-osu");
         effect.init(mgScene, pos, 1, Modifiers.fadeOut(1.5f / speedMultiplier));
+    }
+
+    @Override
+    public void playSound(final HitSampleInfo sampleInfo) {
+        var resourceManager = ResourceManager.getInstance();
+        BassSoundProvider snd = null;
+
+        for (var name : sampleInfo.getLookupNames()) {
+            snd = resourceManager.getSound(name, false);
+
+            if (snd != null) {
+                break;
+            }
+        }
+
+        if (snd != null) {
+            snd.play(sampleInfo.volume / 100f);
+        }
     }
 
     public void playSound(final String name, final int sampleSet, final int addition) {
