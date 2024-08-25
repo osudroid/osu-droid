@@ -43,7 +43,7 @@ public class Slider extends GameObject {
     private final Sprite startArrow, endArrow;
     private final ArrayList<Sprite> tickSprites = new ArrayList<>();
     private com.rian.osu.beatmap.hitobject.Slider beatmapSlider;
-    private PointF endPos;
+    private PointF curveEndPos;
     private Scene scene;
     private GameObjectListener listener;
     private CircleNumber number;
@@ -159,15 +159,15 @@ public class Slider extends GameObject {
         }
 
         // End circle
-        endPos = path.points.get(path.points.size() - 1);
+        curveEndPos = path.points.get(path.points.size() - 1);
         endCircle.setScale(scale);
         endCircle.setColor(comboColor.r(), comboColor.g(), comboColor.b());
         endCircle.setAlpha(0);
-        Utils.putSpriteAnchorCenter(Config.isSnakingInSliders() ? pos : endPos, endCircle);
+        Utils.putSpriteAnchorCenter(Config.isSnakingInSliders() ? pos : curveEndPos, endCircle);
 
         endOverlay.setScale(scale);
         endOverlay.setAlpha(0);
-        Utils.putSpriteAnchorCenter(Config.isSnakingInSliders() ? pos : endPos, endOverlay);
+        Utils.putSpriteAnchorCenter(Config.isSnakingInSliders() ? pos : curveEndPos, endOverlay);
 
         scene.attachChild(startOverlay, 0);
         // Repeat arrow at start
@@ -233,9 +233,9 @@ public class Slider extends GameObject {
         if (spanCount > 1) {
             endArrow.setAlpha(0);
             endArrow.setScale(scale);
-            endArrow.setRotation(MathUtils.radToDeg(Utils.direction(endPos, path.points.get(path.points.size() - 2))));
+            endArrow.setRotation(MathUtils.radToDeg(Utils.direction(curveEndPos, path.points.get(path.points.size() - 2))));
 
-            Utils.putSpriteAnchorCenter(Config.isSnakingInSliders() ? pos : endPos, endArrow);
+            Utils.putSpriteAnchorCenter(Config.isSnakingInSliders() ? pos : curveEndPos, endArrow);
             scene.attachChild(endArrow, 0);
         }
         scene.attachChild(endCircle, 0);
@@ -307,7 +307,7 @@ public class Slider extends GameObject {
         }
 
         if (percentage >= 1) {
-            tmpPoint.set(endPos);
+            tmpPoint.set(curveEndPos);
             return tmpPoint;
         } else if (percentage <= 0) {
             if (path.points.size() >= 2) {
@@ -423,7 +423,7 @@ public class Slider extends GameObject {
 
             if (stillHasSpan) {
                 listener.onSliderHit(id, 30, null,
-                        reverse ? pos : endPos,
+                        reverse ? pos : curveEndPos,
                         false, color, GameObjectListener.SLIDER_REPEAT);
             }
         } else {
@@ -431,7 +431,7 @@ public class Slider extends GameObject {
 
             if (stillHasSpan) {
                 listener.onSliderHit(id, -1, null,
-                        reverse ? pos : endPos,
+                        reverse ? pos : curveEndPos,
                         false, color, GameObjectListener.SLIDER_REPEAT);
             }
         }
@@ -472,7 +472,7 @@ public class Slider extends GameObject {
             }
 
             ((GameScene) listener).onSliderReverse(
-                    !reverse ? pos : endPos,
+                    !reverse ? pos : curveEndPos,
                     reverse ? endArrow.getRotation() : startArrow.getRotation(),
                     color);
             if (passedTime >= spanDuration) {
@@ -511,10 +511,10 @@ public class Slider extends GameObject {
         // If slider was in reverse mode, we should swap start and end points
         if (reverse) {
             Slider.this.listener.onSliderHit(id, score,
-                    endPos, pos, endsCombo, color, GameObjectListener.SLIDER_END);
+                    curveEndPos, pos, endsCombo, color, GameObjectListener.SLIDER_END);
         } else {
             Slider.this.listener.onSliderHit(id, score, pos,
-                    endPos, endsCombo, color, GameObjectListener.SLIDER_END);
+                    curveEndPos, endsCombo, color, GameObjectListener.SLIDER_END);
         }
         if (!startHit) {
             firstHitAccuracy = (int) (GameHelper.getDifficultyHelper().hitWindowFor50(GameHelper.getOverallDifficulty()) * 1000 + 13);
@@ -676,9 +676,9 @@ public class Slider extends GameObject {
                         preStageFinish = true;
                     }
 
-                    Utils.putSpriteAnchorCenter(endPos, endCircle);
-                    Utils.putSpriteAnchorCenter(endPos, endOverlay);
-                    Utils.putSpriteAnchorCenter(endPos, endArrow);
+                    Utils.putSpriteAnchorCenter(curveEndPos, endCircle);
+                    Utils.putSpriteAnchorCenter(curveEndPos, endOverlay);
+                    Utils.putSpriteAnchorCenter(curveEndPos, endArrow);
                 }
             }
             return;
