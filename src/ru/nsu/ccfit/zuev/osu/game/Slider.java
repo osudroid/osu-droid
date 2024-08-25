@@ -62,7 +62,7 @@ public class Slider extends GameObject {
     private int ticksGot;
     private double tickTime;
     private double tickInterval;
-    private int currentTick;
+    private int currentTickSpriteIndex;
 
     private final AnimSprite ball;
     private final Sprite followCircle;
@@ -135,7 +135,7 @@ public class Slider extends GameObject {
         ticksGot = 0;
         tickTime = 0;
         completedSpanCount = 0;
-        currentTick = 0;
+        currentTickSpriteIndex = 0;
         replayTickIndex = 0;
         firstHitAccuracy = 0;
         tickSet.clear();
@@ -487,7 +487,7 @@ public class Slider extends GameObject {
             for (int i = 0, size = tickSprites.size(); i < size; i++) {
                 tickSprites.get(i).setAlpha(1);
             }
-            currentTick = reverse ? tickSprites.size() - 1 : 0;
+            currentTickSpriteIndex = reverse ? tickSprites.size() - 1 : 0;
 
             // Setting visibility of repeat arrows
             if (reverse) {
@@ -795,8 +795,7 @@ public class Slider extends GameObject {
         }
 
         // Some magic with slider ticks. If it'll crash it's not my fault ^_^"
-        while (!tickSprites.isEmpty() && percentage < 1 - 0.02f / spanDuration
-                && tickTime > tickInterval) {
+        while (!tickSprites.isEmpty() && percentage < 1 - 0.02f / spanDuration && tickTime > tickInterval) {
             tickTime -= tickInterval;
             if (followCircle.getAlpha() > 0 && replayObjectData == null ||
                     replayObjectData != null && replayObjectData.tickSet.get(replayTickIndex)) {
@@ -814,11 +813,11 @@ public class Slider extends GameObject {
                 listener.onSliderHit(id, -1, null, ballPos, false, color, GameObjectListener.SLIDER_TICK);
                 tickSet.set(replayTickIndex++, false);
             }
-            tickSprites.get(currentTick).setAlpha(0);
-            if (reverse && currentTick > 0) {
-                currentTick--;
-            } else if (!reverse && currentTick < tickSprites.size() - 1) {
-                currentTick++;
+            tickSprites.get(currentTickSpriteIndex).setAlpha(0);
+            if (reverse && currentTickSpriteIndex > 0) {
+                currentTickSpriteIndex--;
+            } else if (!reverse && currentTickSpriteIndex < tickSprites.size() - 1) {
+                currentTickSpriteIndex++;
             }
         }
         // Setting position of ball and follow circle
