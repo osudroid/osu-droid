@@ -10,7 +10,6 @@ import com.reco1l.osu.Execution;
 import com.reco1l.osu.graphics.Modifiers;
 import com.rian.osu.beatmap.hitobject.sliderobject.SliderTick;
 import com.rian.osu.beatmap.sections.BeatmapControlPoints;
-import com.rian.osu.beatmap.timings.TimingControlPoint;
 import com.rian.osu.math.Interpolation;
 import com.rian.osu.mods.ModHidden;
 
@@ -47,7 +46,6 @@ public class Slider extends GameObject {
     private PointF endPos;
     private Scene scene;
     private GameObjectListener listener;
-    private TimingControlPoint timingControlPoint;
     private CircleNumber number;
     private SliderPath path;
     private double passedTime;
@@ -107,7 +105,6 @@ public class Slider extends GameObject {
         this.listener = listener;
         this.scene = scene;
         this.beatmapSlider = beatmapSlider;
-        this.timingControlPoint = controlPoints.timing.controlPointAt(beatmapSlider.startTime);
         this.pos = beatmapSlider.getGameplayStackedPosition().toPointF();
         endsCombo = beatmapSlider.getLastInCombo();
         passedTime = secPassed - (float) beatmapSlider.startTime / 1000;
@@ -243,6 +240,7 @@ public class Slider extends GameObject {
         }
         scene.attachChild(endCircle, 0);
 
+        var timingControlPoint = controlPoints.timing.controlPointAt(beatmapSlider.startTime);
         tickInterval = timingControlPoint.msPerBeat / 1000 / tickRate;
         tickSprites.clear();
 
@@ -697,7 +695,9 @@ public class Slider extends GameObject {
             approachCircle.clearEntityModifiers();
             approachCircle.setAlpha(0);
 
-            ball.setFps((float) (100 * GameHelper.getSpeed() * scale / timingControlPoint.msPerBeat));
+            // velocity = 100 * difficulty.sliderMultiplier / (timingPoint.msPerBeat * bpmMultiplier)
+
+            ball.setFps((float) beatmapSlider.getVelocity() * 100 * scale);
             ball.setScale(scale);
             ball.setFlippedHorizontal(false);
             ball.registerEntityModifier(Modifiers.fadeIn(0.1f / GameHelper.getSpeedMultiplier()));

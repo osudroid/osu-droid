@@ -14,7 +14,6 @@ import ru.nsu.ccfit.zuev.osu.Utils;
 import ru.nsu.ccfit.zuev.osu.helper.DifficultyHelper;
 
 public class GameHelper {
-    private static double speed = 1;
     private static float overallDifficulty = 1;
     private static float objectTimePreempt = 1;
     private static float healthDrain = 0;
@@ -108,14 +107,6 @@ public class GameHelper {
      */
     public static void setSpeedMultiplier(float speedMultiplier) {
         GameHelper.speedMultiplier = speedMultiplier;
-    }
-
-    public static double getSpeed() {
-        return speed;
-    }
-
-    public static void setSpeed(final double speed) {
-        GameHelper.speed = speed;
     }
 
     public static void putPath(final SliderPath path) {

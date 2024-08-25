@@ -405,7 +405,6 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
         rawDifficulty = parsedBeatmap.difficulty.od;
         rawDrain = parsedBeatmap.difficulty.hp;
 
-        GameHelper.setSpeed(beatmap.difficulty.sliderMultiplier * 100);
         GameHelper.setOverallDifficulty(beatmap.difficulty.od);
         GameHelper.setHealthDrain(beatmap.difficulty.hp);
         GameHelper.setObjectTimePreempt(objectTimePreempt);
