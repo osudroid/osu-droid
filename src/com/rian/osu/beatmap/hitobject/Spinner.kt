@@ -19,11 +19,11 @@ class Spinner(
     isNewCombo: Boolean,
 ) : HitObject(startTime, Vector2(256f, 192f), isNewCombo, 0), IHasDuration {
     init {
-        auxiliarySamples.apply {
-            samples.filterIsInstance<BankHitSampleInfo>().firstOrNull()?.let { add(it.copy(name = "spinnerspin")) }
-
-            add(createHitSampleInfo("spinnerbonus"))
+        samples.filterIsInstance<BankHitSampleInfo>().firstOrNull()?.let {
+            auxiliarySamples.add(it.copy(name = "spinnerspin"))
         }
+
+        auxiliarySamples.add(createHitSampleInfo("spinnerbonus"))
     }
 
     override val difficultyStackedPosition = position

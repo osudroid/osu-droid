@@ -243,14 +243,14 @@ class Slider(
 
     init {
         // Create sliding samples
-        samples.filterIsInstance<BankHitSampleInfo>().apply {
-            find { it.name == BankHitSampleInfo.HIT_NORMAL }?.let {
-                auxiliarySamples.add(it.copy(name = "sliderslide"))
-            }
+        val bankSamples = samples.filterIsInstance<BankHitSampleInfo>()
 
-            find { it.name == BankHitSampleInfo.HIT_WHISTLE }?.let {
-                auxiliarySamples.add(it.copy(name = "sliderwhistle"))
-            }
+        bankSamples.find { it.name == BankHitSampleInfo.HIT_NORMAL }?.let {
+            auxiliarySamples.add(it.copy(name = "sliderslide"))
+        }
+
+        bankSamples.find { it.name == BankHitSampleInfo.HIT_WHISTLE }?.let {
+            auxiliarySamples.add(it.copy(name = "sliderwhistle"))
         }
     }
 
