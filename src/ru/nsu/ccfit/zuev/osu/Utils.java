@@ -12,12 +12,10 @@ import org.anddev.andengine.util.MathUtils;
 import java.util.Arrays;
 
 import ru.nsu.ccfit.zuev.osu.game.GameHelper;
-import ru.nsu.ccfit.zuev.osu.game.GameObjectListener;
 
 public class Utils {
     private static final String FSReservedChars = "|\\?*<\":>+[]/";
     private static int accSign = 0;
-    private static int soundMask = 0;
 
     public static <T> T[] oneObjectArray(T object, T[] ary) {
         Arrays.fill(ary, object);
@@ -175,50 +173,11 @@ public class Utils {
         return ((v2x - v1x) * (v2x - v1x) + (v2y - v1y) * (v2y - v1y));
     }
 
-    public static void clearSoundMask() {
-        soundMask = 0;
-    }
-
     public static boolean isEmpty(final String str) {
         return str == null || str.isEmpty();
     }
 
-    public static void playHitSound(final GameObjectListener listener,
-                                    final int soundId) {
-        playHitSound(listener, soundId, 0, 0);
-    }
-
-    public static void playHitSound(final GameObjectListener listener,
-                                    final int soundId, final int sampleSet, final int addition) {
-        if ((soundId & 32) > 0) {
-            return;
-        }
-
-        if ((soundId & 16) > 0 && (soundMask & 16) == 0) {
-            soundMask |= 16;
-            listener.playSound("slidertick", sampleSet, addition);
-            return;
-        }
-
-        if ((soundMask & 1) == 0) {
-            soundMask |= 1;
-            listener.playSound("hitnormal", sampleSet, addition);
-        }
-        if ((soundId & 2) > 0 && (soundMask & 2) == 0) {
-            soundMask |= 2;
-            listener.playSound("hitwhistle", sampleSet, addition);
-        }
-        if ((soundId & 4) > 0 && (soundMask & 4) == 0) {
-            soundMask |= 4;
-            listener.playSound("hitfinish", sampleSet, addition);
-        }
-        if ((soundId & 8) > 0 && (soundMask & 8) == 0) {
-            soundMask |= 8;
-            listener.playSound("hitclap", sampleSet, addition);
-        }
-    }
-
-    static public int toRes(final int i) {
+    public static int toRes(final int i) {
         return i / Config.getTextureQuality();
     }
 

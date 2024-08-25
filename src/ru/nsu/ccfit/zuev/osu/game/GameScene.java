@@ -938,7 +938,7 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
     @Override
     public void onUpdate(final float pSecondsElapsed) {
         previousFrameTime = SystemClock.uptimeMillis();
-        Utils.clearSoundMask();
+
         float dt = pSecondsElapsed * GameHelper.getSpeedMultiplier();
         if (GlobalManager.getInstance().getSongService().getStatus() == Status.PLAYING) {
             //处理时间差过于庞大的情况
