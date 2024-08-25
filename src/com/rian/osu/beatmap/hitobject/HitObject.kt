@@ -150,8 +150,8 @@ abstract class HitObject(
     /**
      * The position of this [HitObject] in gameplay, in pixels.
      */
-    @JvmField
-    val gameplayPosition = convertPositionToRealCoordinates(position)
+    val gameplayPosition
+        get() = convertPositionToRealCoordinates(position)
 
     /**
      * The radius of this [HitObject] in gameplay, in pixels.
