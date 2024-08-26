@@ -25,8 +25,8 @@
 	<string name="block_area_editor_fragment_add">Add area</string>
 	<string name="block_area_editor_fragment_reset">Reset</string>
 	<string name="block_area_editor_fragment_done">Done</string>
-	<string name="block_area_preference_title">Customize input block areas</string>
-	<string name="block_area_preference_summary">Add, remove, and resize input block areas</string>
+<string name="block_area_preference_title">Manage input block areas</string>
+	<string name="block_area_preference_summary">Manage specific areas within the screen where presses will be ignored during gameplay</string>
 
 
 	<string name="message_error">Error: %s</string>
