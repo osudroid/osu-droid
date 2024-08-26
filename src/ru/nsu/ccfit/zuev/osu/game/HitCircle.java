@@ -17,7 +17,7 @@ public class HitCircle extends GameObject {
     private final Sprite circle;
     private final Sprite overlay;
     private final Sprite approachCircle;
-    private final RGBColor color = new RGBColor();
+    private final RGBColor comboColor = new RGBColor();
     private com.rian.osu.beatmap.hitobject.HitCircle beatmapCircle;
     private CircleNumber number;
     private GameObjectListener listener;
@@ -50,7 +50,7 @@ public class HitCircle extends GameObject {
         passedTime = secPassed - ((float) beatmapCircle.startTime / 1000 - timePreempt);
         startHit = false;
         kiai = GameHelper.isKiai();
-        color.set(comboColor.r(), comboColor.g(), comboColor.b());
+        this.comboColor.set(comboColor.r(), comboColor.g(), comboColor.b());
 
         // Calculating position of top/left corner for sprites and hit radius
         final float scale = beatmapCircle.getGameplayScale();
@@ -220,7 +220,7 @@ public class HitCircle extends GameObject {
                 listener.registerAccuracy(replayObjectData.accuracy / 1000f);
                 passedTime = -1;
                 // Remove circle and register hit in update thread
-                listener.onCircleHit(id, replayObjectData.accuracy / 1000f, pos,endsCombo, replayObjectData.result, color);
+                listener.onCircleHit(id, replayObjectData.accuracy / 1000f, pos,endsCombo, replayObjectData.result, comboColor);
                 removeFromScene();
                 return;
             }
@@ -238,20 +238,20 @@ public class HitCircle extends GameObject {
             // Remove circle and register hit in update thread
             float finalSignAcc = signAcc;
             startHit = true;
-            listener.onCircleHit(id, finalSignAcc, pos, endsCombo, (byte) 0, color);
+            listener.onCircleHit(id, finalSignAcc, pos, endsCombo, (byte) 0, comboColor);
             removeFromScene();
             return;
         }
 
         if (GameHelper.isKiai()) {
             final float kiaiModifier = (float) Math.max(0, 1 - GameHelper.getCurrentBeatTime() / GameHelper.getBeatLength()) * 0.5f;
-            final float r = Math.min(1, color.r() + (1 - color.r()) * kiaiModifier);
-            final float g = Math.min(1, color.g() + (1 - color.g()) * kiaiModifier);
-            final float b = Math.min(1, color.b() + (1 - color.b()) * kiaiModifier);
+            final float r = Math.min(1, comboColor.r() + (1 - comboColor.r()) * kiaiModifier);
+            final float g = Math.min(1, comboColor.g() + (1 - comboColor.g()) * kiaiModifier);
+            final float b = Math.min(1, comboColor.b() + (1 - comboColor.b()) * kiaiModifier);
             kiai = true;
             circle.setColor(r, g, b);
         } else if (kiai) {
-            circle.setColor(color.r(), color.g(), color.b());
+            circle.setColor(comboColor.r(), comboColor.g(), comboColor.b());
             kiai = false;
         }
 
@@ -266,7 +266,7 @@ public class HitCircle extends GameObject {
             playSound();
             passedTime = -1;
             // Remove circle and register hit in update thread
-            listener.onCircleHit(id, 0, pos, endsCombo, ResultType.HIT300.getId(), color);
+            listener.onCircleHit(id, 0, pos, endsCombo, ResultType.HIT300.getId(), comboColor);
             removeFromScene();
         } else {
             approachCircle.clearEntityModifiers();
@@ -278,7 +278,7 @@ public class HitCircle extends GameObject {
                 final byte forcedScore = (replayObjectData == null) ? 0 : replayObjectData.result;
 
                 removeFromScene();
-                listener.onCircleHit(id, 10, pos, false, forcedScore, color);
+                listener.onCircleHit(id, 10, pos, false, forcedScore, comboColor);
             }
         }
     } // update(float dt)
@@ -298,7 +298,7 @@ public class HitCircle extends GameObject {
             passedTime = -1;
             // Remove circle and register hit in update thread
             float finalSignAcc = signAcc;
-            listener.onCircleHit(id, finalSignAcc, pos, endsCombo, (byte) 0, color);
+            listener.onCircleHit(id, finalSignAcc, pos, endsCombo, (byte) 0, comboColor);
             removeFromScene();
         }
     }
