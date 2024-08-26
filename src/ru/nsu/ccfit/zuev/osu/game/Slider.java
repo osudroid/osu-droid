@@ -184,7 +184,7 @@ public class Slider extends GameObject {
         float fadeInDuration = (float) beatmapSlider.timeFadeIn / 1000 / GameHelper.getSpeedMultiplier();
 
         if (GameHelper.isHidden()) {
-            float fadeOutDuration = (float) (beatmapSlider.timePreempt * ModHidden.FADE_OUT_DURATION_MULTIPLIER) / GameHelper.getSpeedMultiplier();
+            float fadeOutDuration = (float) (beatmapSlider.timePreempt / 1000 * ModHidden.FADE_OUT_DURATION_MULTIPLIER) / GameHelper.getSpeedMultiplier();
 
             number.registerEntityModifier(Modifiers.sequence(
                 Modifiers.fadeIn(fadeInDuration),
@@ -838,7 +838,7 @@ public class Slider extends GameObject {
 
         if (GameHelper.isHidden()) {
             // New duration from completed fade in to end (before fading out)
-            float fadeOutDuration = (float) (beatmapSlider.getDuration() + beatmapSlider.timePreempt) / GameHelper.getSpeedMultiplier() - fadeInDuration;
+            float fadeOutDuration = (float) (beatmapSlider.getDuration() + beatmapSlider.timePreempt) / 1000 / GameHelper.getSpeedMultiplier() - fadeInDuration;
 
             abstractSliderBody.applyFadeAdjustments(fadeInDuration, fadeOutDuration);
         } else {
