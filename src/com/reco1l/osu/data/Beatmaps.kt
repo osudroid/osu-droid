@@ -12,16 +12,22 @@ import com.rian.osu.beatmap.Beatmap as RianBeatmap
 
 /// Ported from rimu! project
 
-@Entity(indices = [
-    Index(name = "setDirectoryIdx", value = ["setDirectory"]),
-    Index(name = "setIdx", value = ["setDirectory", "setId"])
-])
+@Entity(
+    primaryKeys = [
+        "filename",
+        "setDirectory"
+    ],
+    indices = [
+        Index(name = "filenameIdx", value = ["filename"]),
+        Index(name = "setDirectoryIdx", value = ["setDirectory"]),
+        Index(name = "setIdx", value = ["setDirectory", "setId"])
+    ]
+)
 data class BeatmapInfo(
 
     /**
      * The `.osu` filename.
      */
-    @PrimaryKey
     val filename: String,
 
     /**
