@@ -84,15 +84,17 @@ object DatabaseManager {
 
                         val options = (ois.readObject() as Map<String, BeatmapProperties>).map { (path, properties) ->
 
-                            // Old properties storage system stores the absolute path of the beatmap
-                            // set so we're extracting it here to use the directory name.
-                            val setDirectory = if (path.endsWith('/')) {
-                                path.substring(0, path.length - 1).substringAfterLast('/')
-                            } else {
-                                path.substringAfterLast('/')
-                            }
-
-                            BeatmapOptions(setDirectory, properties.favorite, properties.offset)
+                            BeatmapOptions(
+                                setDirectory = path.let {
+                                    if (it.endsWith('/')) {
+                                        it.substring(0, it.length - 1).substringAfterLast('/')
+                                    } else {
+                                        it.substringAfterLast('/')
+                                    }
+                                },
+                                isFavorite = properties.favorite,
+                                offset = properties.offset
+                            )
                         }
 
                         beatmapOptionsTable.insertAll(options)
@@ -121,7 +123,16 @@ object DatabaseManager {
                     beatmapCollectionsTable.insertCollection(collectionName)
 
                     for (beatmapPath in json.getJSONArray(collectionName)) {
-                        beatmapCollectionsTable.addBeatmap(collectionName, beatmapPath.toString().extractFilename())
+                        beatmapCollectionsTable.addBeatmap(
+                            collectionName = collectionName,
+                            setDirectory = beatmapPath.toString().let {
+                                if (it.endsWith('/')) {
+                                    it.substring(0, it.length - 1).substringAfterLast('/')
+                                } else {
+                                    it.substringAfterLast('/')
+                                }
+                            }
+                        )
                     }
                 }
 
