@@ -3,6 +3,7 @@ package com.reco1l.osu.data
 
 import androidx.room.Dao
 import androidx.room.Entity
+import androidx.room.Index
 import androidx.room.Insert
 import androidx.room.OnConflictStrategy
 import androidx.room.PrimaryKey
@@ -12,7 +13,11 @@ import ru.nsu.ccfit.zuev.osu.Config
 import ru.nsu.ccfit.zuev.osu.scoring.StatisticV2
 
 
-@Entity
+@Entity(
+    indices = [
+        Index(name = "beatmapPathIdx", value = ["beatmapPath"])
+    ]
+)
 data class ScoreInfo @JvmOverloads constructor(
 
     /**
@@ -22,9 +27,10 @@ data class ScoreInfo @JvmOverloads constructor(
     val id: Long = 0,
 
     /**
-     * The beatmap file name.
+     * The beatmap path.
+     * This is the relative path to [Config.getBeatmapPath()].
      */
-    val beatmapFilename: String,
+    val beatmapPath: String,
 
     /**
      * The player name.
@@ -115,8 +121,8 @@ data class ScoreInfo @JvmOverloads constructor(
         // The keys don't correspond to the table columns in order to keep compatibility with the old replays.
 
         put("id", id)
-        put("filename", beatmapFilename)
-        put("playername", playerName)
+        put("filename", beatmapPath)
+        put("playername", beatmapPath)
         put("replayfile", replayFilename)
         put("mod", mods)
         put("score", score)
@@ -137,6 +143,7 @@ data class ScoreInfo @JvmOverloads constructor(
     fun toStatisticV2() = StatisticV2().also {
 
         it.playerName = playerName
+        it.fileName = beatmapPath
         it.replayFilename = replayFilename
         it.setModFromString(mods)
         it.setForcedScore(score)
@@ -161,7 +168,7 @@ fun ScoreInfo(json: JSONObject) = ScoreInfo(
     // The keys don't correspond to the table columns in order to keep compatibility with the old replays.
 
     id = json.optLong("id", 0),
-    beatmapFilename = json.getString("filename"),
+    beatmapPath = json.getString("filename"),
     playerName = json.getString("playername"),
     replayFilename = json.getString("replayfile").let {
 
@@ -191,19 +198,22 @@ fun ScoreInfo(json: JSONObject) = ScoreInfo(
 @Dao
 interface IScoreInfoDAO {
 
-    @Query("SELECT * FROM ScoreInfo WHERE beatmapFilename = :beatmapFilename")
-    fun getBeatmapScores(beatmapFilename: String): List<ScoreInfo>
+    @Query("SELECT * FROM ScoreInfo WHERE beatmapPath = :relativePath")
+    fun getBeatmapScores(relativePath: String): List<ScoreInfo>
 
     @Query("SELECT * FROM ScoreInfo WHERE id = :id")
     fun getScore(id: Int): ScoreInfo?
 
-    @Query("SELECT mark FROM ScoreInfo WHERE beatmapFilename = :beatmapFilename ORDER BY score DESC LIMIT 1")
-    fun getBestMark(beatmapFilename: String): String?
+    @Query("SELECT mark FROM ScoreInfo WHERE beatmapPath = :relativePath ORDER BY score DESC LIMIT 1")
+    fun getBestMark(relativePath: String): String?
 
     @Insert(onConflict = OnConflictStrategy.ABORT)
     fun insertScore(score: ScoreInfo): Long
 
     @Query("DELETE FROM ScoreInfo WHERE id = :id")
     fun deleteScore(id: Int): Int
+
+    @Query("SELECT id FROM ScoreInfo WHERE beatmapPath = :beatmapPath ORDER BY score DESC LIMIT 1")
+    fun getBestScoreId(beatmapPath: String): Int?
 
 }
