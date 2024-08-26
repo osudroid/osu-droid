@@ -51,10 +51,14 @@ public class Utils {
     }
 
     public static PointF trackToRealCoords(final PointF coords) {
+        return trackToRealCoords(coords, true);
+    }
+
+    public static PointF trackToRealCoords(final PointF coords, final boolean flipIfHardRock) {
         final PointF pos = scaleToReal(coords);
         pos.y += (Config.getRES_HEIGHT() - toRes(Constants.MAP_ACTUAL_HEIGHT)) / 2f;
         pos.x += (Config.getRES_WIDTH() - toRes(Constants.MAP_ACTUAL_WIDTH)) / 2f;
-        if (GameHelper.isHardrock()) {
+        if (flipIfHardRock && GameHelper.isHardrock()) {
             pos.y -= (float) Config.getRES_HEIGHT() / 2;
             pos.y *= -1;
             pos.y += (float) Config.getRES_HEIGHT() / 2;

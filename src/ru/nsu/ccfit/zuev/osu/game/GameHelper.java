@@ -77,7 +77,8 @@ public class GameHelper {
             var point = newPointF();
             point.set(startPosition.x + p.x, startPosition.y + p.y);
 
-            path.points.add(Utils.trackToRealCoords(point));
+            // The path is already flipped when the library applies the Hard Rock mod, so we don't need to do it here.
+            path.points.add(Utils.trackToRealCoords(point, false));
         }
 
         for (double l : slider.getPath().getCumulativeLength()) {
