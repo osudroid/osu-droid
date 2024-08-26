@@ -123,7 +123,7 @@ object DatabaseManager {
                                     val scoreInfo = ScoreInfo(
                                         id = it.getInt(it.getColumnIndexOrThrow("id")).toLong(),
                                         // "filename" can contain the full path, so we need to extract both filename and directory name refers
-                                        // to the beatmap set directory. The pattern could be `/beatmapSetDirectory/beatmapFilename/`with or
+                                        // to the beatmap set directory. The pattern could be `/beatmapSetDirectory/beatmapFilename/` with or
                                         // without the trailing slash.
                                         beatmapFilename = it.getString(it.getColumnIndexOrThrow("filename")).let { result ->
                                             if (result.endsWith('/')) {
