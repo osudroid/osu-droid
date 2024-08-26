@@ -121,26 +121,26 @@ object DatabaseManager {
 
                                 try {
                                     val scoreInfo = ScoreInfo(
-                                        it.getInt(it.getColumnIndexOrThrow("id")).toLong(),
+                                        id = it.getInt(it.getColumnIndexOrThrow("id")).toLong(),
                                         // "filename" can contain the full path, so we need to extract both filename and directory name
                                         // which refers to the beatmap set directory. The pattern could be `/beatmapSetDirectory/beatmapFilename/`
                                         // with or without the trailing slash.
-                                        it.getString(it.getColumnIndexOrThrow("filename")).let { result ->
+                                        beatmapFilename = it.getString(it.getColumnIndexOrThrow("filename")).let { result ->
                                             if (result.endsWith('/')) {
                                                 result.substring(0, result.length - 1).substringAfterLast('/')
                                             } else {
                                                 result.substringAfterLast('/')
                                             }
                                         },
-                                        it.getString(it.getColumnIndexOrThrow("filename")).let { result ->
+                                        beatmapSetDirectory = it.getString(it.getColumnIndexOrThrow("filename")).let { result ->
                                             if (result.endsWith('/')) {
                                                 result.substringBeforeLast('/').substringBeforeLast('/').substringAfterLast('/')
                                             } else {
                                                 result.substringBeforeLast('/').substringAfterLast('/')
                                             }
                                         },
-                                        it.getString(it.getColumnIndexOrThrow("playername")),
-                                        it.getString(it.getColumnIndexOrThrow("replayfile")).let { result ->
+                                        playerName = it.getString(it.getColumnIndexOrThrow("playername")),
+                                        replayFilename = it.getString(it.getColumnIndexOrThrow("replayfile")).let { result ->
 
                                             // The old format used the full path, so we need to extract the file name.
                                             if (result.endsWith('/')) {
@@ -149,19 +149,19 @@ object DatabaseManager {
                                                 result.substringAfterLast('/')
                                             }
                                         },
-                                        it.getString(it.getColumnIndexOrThrow("mode")),
-                                        it.getInt(it.getColumnIndexOrThrow("score")),
-                                        it.getInt(it.getColumnIndexOrThrow("combo")),
-                                        it.getString(it.getColumnIndexOrThrow("mark")),
-                                        it.getInt(it.getColumnIndexOrThrow("h300k")),
-                                        it.getInt(it.getColumnIndexOrThrow("h300")),
-                                        it.getInt(it.getColumnIndexOrThrow("h100k")),
-                                        it.getInt(it.getColumnIndexOrThrow("h100")),
-                                        it.getInt(it.getColumnIndexOrThrow("h50")),
-                                        it.getInt(it.getColumnIndexOrThrow("misses")),
-                                        it.getFloat(it.getColumnIndexOrThrow("accuracy")),
-                                        it.getLong(it.getColumnIndexOrThrow("time")),
-                                        it.getInt(it.getColumnIndexOrThrow("perfect")) == 1
+                                        mods = it.getString(it.getColumnIndexOrThrow("mode")),
+                                        score = it.getInt(it.getColumnIndexOrThrow("score")),
+                                        maxCombo = it.getInt(it.getColumnIndexOrThrow("combo")),
+                                        mark = it.getString(it.getColumnIndexOrThrow("mark")),
+                                        hit300k = it.getInt(it.getColumnIndexOrThrow("h300k")),
+                                        hit300 = it.getInt(it.getColumnIndexOrThrow("h300")),
+                                        hit100k = it.getInt(it.getColumnIndexOrThrow("h100k")),
+                                        hit100 = it.getInt(it.getColumnIndexOrThrow("h100")),
+                                        hit50 = it.getInt(it.getColumnIndexOrThrow("h50")),
+                                        misses = it.getInt(it.getColumnIndexOrThrow("misses")),
+                                        accuracy = it.getFloat(it.getColumnIndexOrThrow("accuracy")),
+                                        time = it.getLong(it.getColumnIndexOrThrow("time")),
+                                        isPerfect = it.getInt(it.getColumnIndexOrThrow("perfect")) == 1
 
                                     )
 
