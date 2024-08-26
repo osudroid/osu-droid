@@ -138,9 +138,7 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
     private boolean isFirst = true;
     private float scale;
     private float objectTimePreempt;
-    private float rawCircleSize;
-    private float rawDifficulty;
-    private float rawDrain;
+    private float difficultyStatisticsScoreMultiplier;
     public StatisticV2 stat;
     private boolean gameStarted;
     private float totalOffset;
@@ -399,9 +397,11 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
         scale = beatmap.hitObjects.objects.get(0).getGameplayScale();
         objectTimePreempt = (float) GameHelper.ar2ms(beatmap.difficulty.getAr()) / 1000f;
 
-        rawCircleSize = parsedBeatmap.difficulty.cs;
-        rawDifficulty = parsedBeatmap.difficulty.od;
-        rawDrain = parsedBeatmap.difficulty.hp;
+        difficultyStatisticsScoreMultiplier = 1 +
+            Math.min(parsedBeatmap.difficulty.od, 10) / 10f + Math.min(parsedBeatmap.difficulty.hp, 10) / 10f;
+
+        // The maximum CS of osu!droid mapped to osu!standard is ~17.62.
+        difficultyStatisticsScoreMultiplier += (Math.min(parsedBeatmap.difficulty.cs, 17.62f) - 3) / 4f;
 
         GameHelper.setOverallDifficulty(beatmap.difficulty.od);
         GameHelper.setHealthDrain(beatmap.difficulty.hp);
@@ -655,12 +655,7 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
                 && !stat.getMod().contains(GameMod.MOD_AUTOPILOT)
                 && !stat.getMod().contains(GameMod.MOD_AUTO);
 
-        float multiplier = 1 + Math.min(rawDifficulty, 10) / 10f + Math.min(rawDrain, 10) / 10f;
-
-        // The maximum CS of osu!droid mapped to osu!standard is ~17.62.
-        multiplier += (Math.min(rawCircleSize, 17.62f) - 3) / 4f;
-
-        stat.setDiffModifier(multiplier);
+        stat.setDiffModifier(difficultyStatisticsScoreMultiplier);
         stat.setMaxObjectsCount(lastBeatmapInfo.getTotalHitObjectCount());
         stat.setMaxHighestCombo(lastBeatmapInfo.getMaxCombo());
 
