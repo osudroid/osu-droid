@@ -66,7 +66,7 @@ public class Slider extends GameObject {
     private float ballAngle;
 
     private boolean kiai;
-    private final RGBColor color = new RGBColor();
+    private final RGBColor bodyColor = new RGBColor();
     private final RGBColor circleColor = new RGBColor();
 
     //for replay
@@ -133,10 +133,10 @@ public class Slider extends GameObject {
         tickSet.clear();
         kiai = GameHelper.isKiai();
         preStageFinish = false;
-        color.set(comboColor.r(), comboColor.g(), comboColor.b());
+        bodyColor.set(comboColor.r(), comboColor.g(), comboColor.b());
         if (!OsuSkin.get().isSliderFollowComboColor()) {
             var sliderBodyColor = OsuSkin.get().getSliderBodyColor();
-            color.set(sliderBodyColor.r(), sliderBodyColor.g(), sliderBodyColor.b());
+            bodyColor.set(sliderBodyColor.r(), sliderBodyColor.g(), sliderBodyColor.b());
         }
         circleColor.set(comboColor.r(), comboColor.g(), comboColor.b());
         currentNestedObjectIndex = 0;
@@ -287,12 +287,12 @@ public class Slider extends GameObject {
                 if (hintColor != null) {
                     abstractSliderBody.setHintColor(hintColor.r(), hintColor.g(), hintColor.b());
                 } else {
-                    abstractSliderBody.setHintColor(color.r(), color.g(), color.b());
+                    abstractSliderBody.setHintColor(bodyColor.r(), bodyColor.g(), bodyColor.b());
                 }
             }
 
             abstractSliderBody.applyToScene(scene, Config.isSnakingInSliders());
-            abstractSliderBody.setBodyColor(color.r(), color.g(), color.b());
+            abstractSliderBody.setBodyColor(bodyColor.r(), bodyColor.g(), bodyColor.b());
             RGBColor sliderColor = GameHelper.getSliderColor();
             abstractSliderBody.setBorderColor(sliderColor.r(), sliderColor.g(), sliderColor.b());
         }
@@ -424,7 +424,7 @@ public class Slider extends GameObject {
             if (stillHasSpan) {
                 listener.onSliderHit(id, 30, null,
                         reverse ? pos : curveEndPos,
-                        false, color, GameObjectListener.SLIDER_REPEAT);
+                        false, bodyColor, GameObjectListener.SLIDER_REPEAT);
             }
         } else {
             tickSet.set(replayTickIndex++, false);
@@ -432,7 +432,7 @@ public class Slider extends GameObject {
             if (stillHasSpan) {
                 listener.onSliderHit(id, -1, null,
                         reverse ? pos : curveEndPos,
-                        false, color, GameObjectListener.SLIDER_REPEAT);
+                        false, bodyColor, GameObjectListener.SLIDER_REPEAT);
             }
         }
 
@@ -474,7 +474,7 @@ public class Slider extends GameObject {
             ((GameScene) listener).onSliderReverse(
                     !reverse ? pos : curveEndPos,
                     reverse ? endArrow.getRotation() : startArrow.getRotation(),
-                    color);
+                    bodyColor);
             if (passedTime >= spanDuration) {
                 onSpanFinish();
             }
@@ -511,10 +511,10 @@ public class Slider extends GameObject {
         // If slider was in reverse mode, we should swap start and end points
         if (reverse) {
             Slider.this.listener.onSliderHit(id, score,
-                    curveEndPos, pos, endsCombo, color, GameObjectListener.SLIDER_END);
+                    curveEndPos, pos, endsCombo, bodyColor, GameObjectListener.SLIDER_END);
         } else {
             Slider.this.listener.onSliderHit(id, score, pos,
-                    curveEndPos, endsCombo, color, GameObjectListener.SLIDER_END);
+                    curveEndPos, endsCombo, bodyColor, GameObjectListener.SLIDER_END);
         }
         if (!startHit) {
             firstHitAccuracy = (int) (GameHelper.getDifficultyHelper().hitWindowFor50(GameHelper.getOverallDifficulty()) * 1000 + 13);
@@ -580,14 +580,14 @@ public class Slider extends GameObject {
             if (passedTime > GameHelper.getDifficultyHelper().hitWindowFor50(GameHelper.getOverallDifficulty())) {
                 startHit = true;
                 currentNestedObjectIndex++;
-                listener.onSliderHit(id, -1, null, pos, false, color, GameObjectListener.SLIDER_START);
+                listener.onSliderHit(id, -1, null, pos, false, bodyColor, GameObjectListener.SLIDER_START);
                 firstHitAccuracy = (int) (passedTime * 1000);
             } else if (autoPlay && passedTime >= 0) {
                 startHit = true;
                 playCurrentNestedObjectHitSound();
                 currentNestedObjectIndex++;
                 ticksGot++;
-                listener.onSliderHit(id, 30, null, pos, false, color, GameObjectListener.SLIDER_START);
+                listener.onSliderHit(id, 30, null, pos, false, bodyColor, GameObjectListener.SLIDER_START);
             } else if (replayObjectData != null &&
                     Math.abs(replayObjectData.accuracy / 1000f) <= GameHelper.getDifficultyHelper().hitWindowFor50(GameHelper.getOverallDifficulty()) &&
                     passedTime + dt / 2 > replayObjectData.accuracy / 1000f) {
@@ -595,7 +595,7 @@ public class Slider extends GameObject {
                 playCurrentNestedObjectHitSound();
                 currentNestedObjectIndex++;
                 ticksGot++;
-                listener.onSliderHit(id, 30, null, pos, false, color, GameObjectListener.SLIDER_START);
+                listener.onSliderHit(id, 30, null, pos, false, bodyColor, GameObjectListener.SLIDER_START);
             } else if (isHit() && -passedTime < GameHelper.getDifficultyHelper().hitWindowFor50(GameHelper.getOverallDifficulty())) {
                 // if we clicked
                 listener.registerAccuracy(passedTime);
@@ -605,7 +605,7 @@ public class Slider extends GameObject {
                 ticksGot++;
                 firstHitAccuracy = (int) (passedTime * 1000);
                 listener.onSliderHit(id, 30, null, pos,
-                        false, color, GameObjectListener.SLIDER_START);
+                        false, bodyColor, GameObjectListener.SLIDER_START);
             }
         }
 
@@ -790,7 +790,7 @@ public class Slider extends GameObject {
                 if (followCircle.getAlpha() > 0 && replayObjectData == null ||
                         replayObjectData != null && replayObjectData.tickSet.get(replayTickIndex)) {
                     playCurrentNestedObjectHitSound();
-                    listener.onSliderHit(id, 10, null, ballPos, false, color, GameObjectListener.SLIDER_TICK);
+                    listener.onSliderHit(id, 10, null, ballPos, false, bodyColor, GameObjectListener.SLIDER_TICK);
 
                     if (Config.isAnimateFollowCircle() && !mIsAnimating) {
                         followCircle.clearEntityModifiers();
@@ -800,7 +800,7 @@ public class Slider extends GameObject {
                     ticksGot++;
                     tickSet.set(replayTickIndex++, true);
                 } else {
-                    listener.onSliderHit(id, -1, null, ballPos, false, color, GameObjectListener.SLIDER_TICK);
+                    listener.onSliderHit(id, -1, null, ballPos, false, bodyColor, GameObjectListener.SLIDER_TICK);
                     tickSet.set(replayTickIndex++, false);
                 }
 
@@ -871,7 +871,7 @@ public class Slider extends GameObject {
                 ticksGot++;
                 firstHitAccuracy = (int) (passedTime * 1000);
                 listener.onSliderHit(id, 30, null, pos,
-                        false, color, GameObjectListener.SLIDER_START);
+                        false, bodyColor, GameObjectListener.SLIDER_START);
             }
             if (passedTime < 0) // we at approach time
             {
