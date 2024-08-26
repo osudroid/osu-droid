@@ -305,7 +305,7 @@ public class ScoreBoard extends Entity implements ScrollDetector.IScrollDetector
 
             @Override
             public void run() {
-                var scores = DatabaseManager.getScoreInfoTable().getBeatmapScores(beatmap.getFilename());
+                var scores = DatabaseManager.getScoreInfoTable().getBeatmapScores(beatmap.getSetDirectory(), beatmap.getFilename());
 
                 if (scores.isEmpty() || !isActive()) {
 

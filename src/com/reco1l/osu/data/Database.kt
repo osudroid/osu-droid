@@ -122,7 +122,23 @@ object DatabaseManager {
                                 try {
                                     val scoreInfo = ScoreInfo(
                                         it.getInt(it.getColumnIndexOrThrow("id")).toLong(),
-                                        it.getString(it.getColumnIndexOrThrow("filename")),
+                                        // "filename" can contain the full path, so we need to extract both filename and directory name
+                                        // which refers to the beatmap set directory. The pattern could be `/beatmapSetDirectory/beatmapFilename/`
+                                        // with or without the trailing slash.
+                                        it.getString(it.getColumnIndexOrThrow("filename")).let { result ->
+                                            if (result.endsWith('/')) {
+                                                result.substring(0, result.length - 1).substringAfterLast('/')
+                                            } else {
+                                                result.substringAfterLast('/')
+                                            }
+                                        },
+                                        it.getString(it.getColumnIndexOrThrow("filename")).let { result ->
+                                            if (result.endsWith('/')) {
+                                                result.substringBeforeLast('/').substringBeforeLast('/').substringAfterLast('/')
+                                            } else {
+                                                result.substringBeforeLast('/').substringAfterLast('/')
+                                            }
+                                        },
                                         it.getString(it.getColumnIndexOrThrow("playername")),
                                         it.getString(it.getColumnIndexOrThrow("replayfile")).let { result ->
 
@@ -146,6 +162,7 @@ object DatabaseManager {
                                         it.getFloat(it.getColumnIndexOrThrow("accuracy")),
                                         it.getLong(it.getColumnIndexOrThrow("time")),
                                         it.getInt(it.getColumnIndexOrThrow("perfect")) == 1
+
                                     )
 
                                     scoreInfoTable.insertScore(scoreInfo)
