@@ -51,7 +51,7 @@ public class ScoreMenuFragment extends BaseFragment {
                     final File file = new File(
                             new File(Environment.getExternalStorageDirectory(), "osu!droid/export"),
                             String.format(Locale.getDefault(), "%s [%s]-%d.edr",
-                                    scoreInfo.getBeatmapFilename().subSequence(scoreInfo.getBeatmapFilename().indexOf('/') + 1, scoreInfo.getBeatmapFilename().lastIndexOf('.')),
+                                    scoreInfo.getBeatmapPath().subSequence(scoreInfo.getBeatmapPath().indexOf('/') + 1, scoreInfo.getBeatmapPath().lastIndexOf('.')),
                                     scoreInfo.getPlayerName(),
                                     scoreInfo.getTime())
                     );
