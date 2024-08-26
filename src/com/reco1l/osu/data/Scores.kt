@@ -134,7 +134,8 @@ data class ScoreInfo @JvmOverloads constructor(
 
     fun toStatisticV2() = StatisticV2().also {
 
-        it.playerName = beatmapPath
+        it.playerName = playerName
+        it.fileName = beatmapPath
         it.replayName = replayPath
         it.setModFromString(mods)
         it.setForcedScore(score)
