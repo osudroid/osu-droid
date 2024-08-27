@@ -786,26 +786,29 @@ public class Slider extends GameObject {
             tickTime -= tickInterval;
             var tickSprite = tickSprites.get(currentTickSpriteIndex);
 
-            if (tickSprite.getAlpha() > 0) {
-                if (followCircle.getAlpha() > 0 && replayObjectData == null ||
-                        replayObjectData != null && replayObjectData.tickSet.get(replayTickIndex)) {
-                    playCurrentNestedObjectHitSound();
-                    listener.onSliderHit(id, 10, null, ballPos, false, bodyColor, GameObjectListener.SLIDER_TICK);
+            if (tickSprite.getAlpha() == 0) {
+                // All ticks in the current span had been judged.
+                break;
+            }
 
-                    if (Config.isAnimateFollowCircle() && !mIsAnimating) {
-                        followCircle.clearEntityModifiers();
-                        followCircle.registerEntityModifier(Modifiers.scale((float) Math.min(tickInterval, 0.2f) / GameHelper.getSpeedMultiplier(), scale * 1.1f, scale).setEaseFunction(EaseQuadOut.getInstance()));
-                    }
+            if (followCircle.getAlpha() > 0 && replayObjectData == null ||
+                    replayObjectData != null && replayObjectData.tickSet.get(replayTickIndex)) {
+                playCurrentNestedObjectHitSound();
+                listener.onSliderHit(id, 10, null, ballPos, false, bodyColor, GameObjectListener.SLIDER_TICK);
 
-                    ticksGot++;
-                    tickSet.set(replayTickIndex++, true);
-                } else {
-                    listener.onSliderHit(id, -1, null, ballPos, false, bodyColor, GameObjectListener.SLIDER_TICK);
-                    tickSet.set(replayTickIndex++, false);
+                if (Config.isAnimateFollowCircle() && !mIsAnimating) {
+                    followCircle.clearEntityModifiers();
+                    followCircle.registerEntityModifier(Modifiers.scale((float) Math.min(tickInterval, 0.2f) / GameHelper.getSpeedMultiplier(), scale * 1.1f, scale).setEaseFunction(EaseQuadOut.getInstance()));
                 }
 
-                currentNestedObjectIndex++;
+                ticksGot++;
+                tickSet.set(replayTickIndex++, true);
+            } else {
+                listener.onSliderHit(id, -1, null, ballPos, false, bodyColor, GameObjectListener.SLIDER_TICK);
+                tickSet.set(replayTickIndex++, false);
             }
+
+            currentNestedObjectIndex++;
 
             tickSprite.setAlpha(0);
             if (reverse && currentTickSpriteIndex > 0) {
