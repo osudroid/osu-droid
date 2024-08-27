@@ -43,7 +43,7 @@ public class Slider extends GameObject {
     private final Sprite startArrow, endArrow;
     private final ArrayList<Sprite> tickSprites = new ArrayList<>();
     private com.rian.osu.beatmap.hitobject.Slider beatmapSlider;
-    private PointF curveEndPos;
+    private final PointF curveEndPos = new PointF();
     private Scene scene;
     private GameObjectListener listener;
     private CircleNumber number;
@@ -160,9 +160,6 @@ public class Slider extends GameObject {
         }
 
         // End circle
-        if (curveEndPos == null) {
-            curveEndPos = new PointF();
-        }
         curveEndPos.x = path.getX(path.pointCount - 1);
         curveEndPos.y = path.getY(path.pointCount - 1);
 
