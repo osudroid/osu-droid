@@ -725,19 +725,24 @@ public class Slider extends GameObject {
         ballPos = getPositionAt(reverse ? 1 - percentage : percentage, true, false);
 
         // Calculating if cursor in follow circle bounds
-        final float followCircleRadius = (float) beatmapSlider.getGameplayRadius() * 2;
+        float trackingDistanceThresholdSquared = getTrackingDistanceThresholdSquared();
         boolean inRadius = false;
-        for (int i = 0, cursorCount = listener.getCursorsCount(); i < cursorCount; i++) {
 
+        for (int i = 0, cursorCount = listener.getCursorsCount(); i < cursorCount; i++) {
             var isPressed = listener.isMouseDown(i);
 
-            if (autoPlay || (isPressed && Utils.squaredDistance(listener.getMousePos(i), ballPos) <= followCircleRadius * followCircleRadius)) {
+            if (GameHelper.isAutopilotMod() && isPressed) {
                 inRadius = true;
                 break;
             }
-            if (GameHelper.isAutopilotMod() && isPressed)
+
+            if (autoPlay || (isPressed &&
+                    Utils.squaredDistance(listener.getMousePos(i), ballPos) <= trackingDistanceThresholdSquared)) {
                 inRadius = true;
+                break;
+            }
         }
+
         listener.onTrackingSliders(inRadius);
         tickTime += dt;
 
@@ -804,6 +809,18 @@ public class Slider extends GameObject {
         if (percentage >= 1) {
             onSpanFinish();
         }
+    }
+
+    private float getTrackingDistanceThresholdSquared() {
+        float radius = (float) beatmapSlider.getGameplayRadius();
+        float distanceThresholdSquared = radius * radius;
+
+        if (mWasInRadius) {
+            // Multiply by 4 as the follow circle radius is 2 times larger than the object radius.
+            distanceThresholdSquared *= 4;
+        }
+
+        return distanceThresholdSquared;
     }
 
     private void judgeSliderTicks() {
