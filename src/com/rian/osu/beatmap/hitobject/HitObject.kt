@@ -113,6 +113,12 @@ abstract class HitObject(
     var kiai = false
 
     /**
+     * Whether this [HitObject] is the first [HitObject] in the beatmap.
+     */
+    val isFirstNote
+        get() = comboIndex == 0 && indexInCurrentCombo == 0
+
+    /**
      * The multiplier used to calculate stack offset.
      */
     open var stackOffsetMultiplier = 0f

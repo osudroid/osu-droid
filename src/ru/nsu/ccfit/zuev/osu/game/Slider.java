@@ -102,7 +102,7 @@ public class Slider extends GameObject {
     public void init(final GameObjectListener listener, final Scene scene,
                      final com.rian.osu.beatmap.hitobject.Slider beatmapSlider, final float secPassed,
                      final RGBColor comboColor, final RGBColor borderColor, final float tickRate,
-                     final BeatmapControlPoints controlPoints, final boolean isFirstNote, SliderPath sliderPath) {
+                     final BeatmapControlPoints controlPoints, final SliderPath sliderPath) {
         this.listener = listener;
         this.scene = scene;
         this.beatmapSlider = beatmapSlider;
@@ -156,7 +156,7 @@ public class Slider extends GameObject {
         approachCircle.setAlpha(0);
         Utils.putSpriteAnchorCenter(pos, approachCircle);
         if (GameHelper.isHidden()) {
-            approachCircle.setVisible(Config.isShowFirstApproachCircle() && isFirstNote);
+            approachCircle.setVisible(Config.isShowFirstApproachCircle() && beatmapSlider.isFirstNote());
         }
 
         // End circle

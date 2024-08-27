@@ -38,7 +38,7 @@ public class HitCircle extends GameObject {
 
     public void init(final GameObjectListener listener, final Scene pScene,
                      final com.rian.osu.beatmap.hitobject.HitCircle beatmapCircle, final float secPassed,
-                     final RGBColor comboColor, final boolean isFirstNote) {
+                     final RGBColor comboColor) {
         // Storing parameters into fields
         this.replayObjectData = null;
         this.beatmapCircle = beatmapCircle;
@@ -76,7 +76,7 @@ public class HitCircle extends GameObject {
         approachCircle.setAlpha(0.9f * fadeInProgress);
         Utils.putSpriteAnchorCenter(pos, approachCircle);
         if (GameHelper.isHidden()) {
-            approachCircle.setVisible(Config.isShowFirstApproachCircle() && isFirstNote);
+            approachCircle.setVisible(Config.isShowFirstApproachCircle() && beatmapCircle.isFirstNote());
         }
 
         // and getting new number from sprite pool

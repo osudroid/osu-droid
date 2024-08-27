@@ -135,7 +135,6 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
     public GameplayLeaderboard scoreBoard;
     private HitErrorMeter hitErrorMeter;
     private Metronome metronome;
-    private boolean isFirst = true;
     private float scale;
     private float objectTimePreempt;
     private float difficultyStatisticsScoreMultiplier;
@@ -559,7 +558,6 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
         bgScene.setBackgroundEnabled(false);
         mgScene.setBackgroundEnabled(false);
         fgScene.setBackgroundEnabled(false);
-        isFirst = true;
         failcount = 0;
         mainCursorId = -1;
         final LoadingScreen screen = new LoadingScreen();
@@ -1288,9 +1286,8 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
             if (obj instanceof com.rian.osu.beatmap.hitobject.HitCircle parsedCircle) {
                 final HitCircle circle = GameObjectPool.getInstance().getCircle();
 
-                circle.init(this, mgScene, parsedCircle, secPassed, comboColor, isFirst);
+                circle.init(this, mgScene, parsedCircle, secPassed, comboColor);
                 addObject(circle);
-                isFirst = false;
 
                 if (nextObj != null && !obj.getLastInCombo()) {
                     final FollowTrack track = GameObjectPool.getInstance().getTrack();
@@ -1316,7 +1313,6 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
 
                 spinner.init(this, bgScene, parsedSpinner, rps, stat);
                 addObject(spinner);
-                isFirst = false;
 
                 if (GameHelper.isAuto() || GameHelper.isAutopilotMod()) {
                     spinner.setAutoPlay();
@@ -1331,11 +1327,10 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
                 final Slider slider = GameObjectPool.getInstance().getSlider();
 
                 slider.init(this, mgScene, parsedSlider, secPassed,
-                    comboColor, sliderBorderColor, (float) beatmap.difficulty.sliderTickRate,
-                    beatmap.controlPoints, isFirst, getSliderPath(sliderIndex++));
+                    comboColor, sliderBorderColor, (float) beatmap.difficulty.sliderTickRate, beatmap.controlPoints,
+                    getSliderPath(sliderIndex++));
 
                 addObject(slider);
-                isFirst = false;
 
                 if (nextObj != null && !obj.getLastInCombo()) {
                     final FollowTrack track = GameObjectPool.getInstance().getTrack();
