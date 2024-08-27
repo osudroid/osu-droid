@@ -29,6 +29,8 @@ class Spinner(
     override fun applySamples(controlPoints: BeatmapControlPoints) {
         super.applySamples(controlPoints)
 
+        auxiliarySamples.clear()
+
         samples.filterIsInstance<BankHitSampleInfo>().firstOrNull()?.let {
             auxiliarySamples.add(it.copy(name = "spinnerspin"))
         }
