@@ -59,6 +59,7 @@ public class Slider extends GameObject {
     private int currentTickSpriteIndex;
 
     private final AnimSprite ball;
+    private PointF ballPos;
     private final Sprite followCircle;
 
     // Temporarily used PointF to avoid allocations
@@ -409,6 +410,9 @@ public class Slider extends GameObject {
     }
 
     private void onSpanFinish() {
+        // Ensure that all slider ticks in the current span has been judged.
+        judgeSliderTicks();
+
         ++completedSpanCount;
 
         int totalSpanCount = beatmapSlider.getSpanCount();
@@ -718,7 +722,8 @@ public class Slider extends GameObject {
         // Ball position
         final float spanDuration = (float) beatmapSlider.getSpanDuration() / 1000;
         final float percentage = (float) passedTime / spanDuration;
-        final PointF ballPos = getPositionAt(reverse ? 1 - percentage : percentage, true, false);
+        ballPos = getPositionAt(reverse ? 1 - percentage : percentage, true, false);
+
         // Calculating if cursor in follow circle bounds
         final float followCircleRadius = (float) beatmapSlider.getGameplayRadius() * 2;
         boolean inRadius = false;
@@ -781,8 +786,34 @@ public class Slider extends GameObject {
             followCircle.setAlpha(inRadius ? 1 : 0);
         }
 
+        judgeSliderTicks();
+
+        // Setting position of ball and follow circle
+        followCircle.setPosition(ballPos.x - followCircle.getWidth() / 2,
+                ballPos.y - followCircle.getHeight() / 2);
+        ball.setPosition(ballPos.x - ball.getWidth() / 2,
+                ballPos.y - ball.getHeight() / 2);
+        ball.setRotation(ballAngle);
+
+        if (GameHelper.isAuto() || GameHelper.isAutopilotMod()) {
+            listener.updateAutoBasedPos(ballPos.x, ballPos.y);
+        }
+
+        // If we got 100% time, finishing slider
+        if (percentage >= 1) {
+            onSpanFinish();
+        }
+    }
+
+    private void judgeSliderTicks() {
+        if (tickSprites.isEmpty()) {
+            return;
+        }
+
+        float scale = beatmapSlider.getGameplayScale();
+
         // Some magic with slider ticks. If it'll crash it's not my fault ^_^"
-        while (!tickSprites.isEmpty() && percentage < 1 - 0.02f / spanDuration && tickTime > tickInterval) {
+        while (tickTime >= tickInterval) {
             tickTime -= tickInterval;
             var tickSprite = tickSprites.get(currentTickSpriteIndex);
 
@@ -791,7 +822,7 @@ public class Slider extends GameObject {
                 break;
             }
 
-            if (inRadius && replayObjectData == null ||
+            if (mWasInRadius && replayObjectData == null ||
                     replayObjectData != null && replayObjectData.tickSet.get(replayTickIndex)) {
                 playCurrentNestedObjectHitSound();
                 listener.onSliderHit(id, 10, null, ballPos, false, bodyColor, GameObjectListener.SLIDER_TICK);
@@ -816,21 +847,6 @@ public class Slider extends GameObject {
             } else if (!reverse && currentTickSpriteIndex < tickSprites.size() - 1) {
                 currentTickSpriteIndex++;
             }
-        }
-        // Setting position of ball and follow circle
-        followCircle.setPosition(ballPos.x - followCircle.getWidth() / 2,
-                ballPos.y - followCircle.getHeight() / 2);
-        ball.setPosition(ballPos.x - ball.getWidth() / 2,
-                ballPos.y - ball.getHeight() / 2);
-        ball.setRotation(ballAngle);
-
-        if (GameHelper.isAuto() || GameHelper.isAutopilotMod()) {
-            listener.updateAutoBasedPos(ballPos.x, ballPos.y);
-        }
-
-        // If we got 100% time, finishing slider
-        if (percentage >= 1) {
-            onSpanFinish();
         }
     }
 
