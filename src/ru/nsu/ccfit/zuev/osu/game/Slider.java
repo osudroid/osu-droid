@@ -400,6 +400,7 @@ public class Slider extends GameObject {
             tickSpritePool.free(sp);
         }
         listener.removeObject(this);
+        stopSlidingSamples();
         scene = null;
     }
 
