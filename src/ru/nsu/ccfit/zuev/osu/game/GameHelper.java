@@ -18,7 +18,6 @@ public class GameHelper {
     private static float objectTimePreempt = 1;
     private static float healthDrain = 0;
     private static float speedMultiplier = 0;
-    private static RGBColor sliderColor = new RGBColor();
     private static boolean hidden = false;
     private static boolean flashLight = false;
     private static boolean hardrock = false;
@@ -129,14 +128,6 @@ public class GameHelper {
             return new PointF();
         }
         return pointPool.poll();
-    }
-
-    public static RGBColor getSliderColor() {
-        return sliderColor;
-    }
-
-    public static void setSliderColor(final RGBColor sliderColor) {
-        GameHelper.sliderColor = sliderColor;
     }
 
     public static boolean isEasy() {

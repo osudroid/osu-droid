@@ -101,8 +101,8 @@ public class Slider extends GameObject {
 
     public void init(final GameObjectListener listener, final Scene scene,
                      final com.rian.osu.beatmap.hitobject.Slider beatmapSlider, final float secPassed,
-                     final RGBColor comboColor, final float tickRate, final BeatmapControlPoints controlPoints,
-                     final boolean isFirstNote, SliderPath sliderPath) {
+                     final RGBColor comboColor, final RGBColor borderColor, final float tickRate,
+                     final BeatmapControlPoints controlPoints, final boolean isFirstNote, SliderPath sliderPath) {
         this.listener = listener;
         this.scene = scene;
         this.beatmapSlider = beatmapSlider;
@@ -294,8 +294,7 @@ public class Slider extends GameObject {
 
             abstractSliderBody.applyToScene(scene, Config.isSnakingInSliders());
             abstractSliderBody.setBodyColor(bodyColor.r(), bodyColor.g(), bodyColor.b());
-            RGBColor sliderColor = GameHelper.getSliderColor();
-            abstractSliderBody.setBorderColor(sliderColor.r(), sliderColor.g(), sliderColor.b());
+            abstractSliderBody.setBorderColor(borderColor.r(), borderColor.g(), borderColor.b());
         }
 
         applyBodyFadeAdjustments(fadeInDuration);

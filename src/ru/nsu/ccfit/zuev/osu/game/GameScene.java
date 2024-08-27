@@ -161,6 +161,7 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
     private Rectangle dimRectangle = null;
     private ComboBurst comboBurst;
     private int failcount = 0;
+    private RGBColor sliderBorderColor;
     private float lastActiveObjectHitTime = 0;
     private SliderPath[] sliderPaths = null;
     private int sliderIndex = 0;
@@ -418,13 +419,13 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
         expiredObjects = new LinkedList<>();
         lastObjectId = -1;
 
-        GameHelper.setSliderColor(SkinManager.getInstance().getSliderColor());
+        sliderBorderColor = SkinManager.getInstance().getSliderColor();
         if (beatmap.colors.sliderBorderColor != null) {
-            GameHelper.setSliderColor(beatmap.colors.sliderBorderColor);
+            sliderBorderColor = beatmap.colors.sliderBorderColor;
         }
 
         if (OsuSkin.get().isForceOverrideSliderBorderColor()) {
-            GameHelper.setSliderColor(new RGBColor(OsuSkin.get().getSliderBorderColor()));
+            sliderBorderColor = OsuSkin.get().getSliderBorderColor();
         }
 
         combos = new ArrayList<>();
@@ -1330,7 +1331,7 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
                 final Slider slider = GameObjectPool.getInstance().getSlider();
 
                 slider.init(this, mgScene, parsedSlider, secPassed,
-                    comboColor, (float) beatmap.difficulty.sliderTickRate,
+                    comboColor, sliderBorderColor, (float) beatmap.difficulty.sliderTickRate,
                     beatmap.controlPoints, isFirst, getSliderPath(sliderIndex++));
 
                 addObject(slider);
