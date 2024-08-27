@@ -410,9 +410,6 @@ public class Slider extends GameObject {
     }
 
     private void onSpanFinish() {
-        // Ensure that all slider ticks in the current span has been judged.
-        judgeSliderTicks();
-
         ++completedSpanCount;
 
         int totalSpanCount = beatmapSlider.getSpanCount();
@@ -479,9 +476,16 @@ public class Slider extends GameObject {
                     !reverse ? pos : curveEndPos,
                     reverse ? endArrow.getRotation() : startArrow.getRotation(),
                     bodyColor);
+
             if (passedTime >= spanDuration) {
+                // This condition can happen under low frame rate and/or short span duration, which will cause all
+                // slider tick judgements in this span to be skipped. Ensure that all slider ticks in the current
+                // span has been judged before proceeding to the next span.
+                judgeSliderTicks();
+
                 onSpanFinish();
             }
+
             return;
         }
         mIsOver = true;
