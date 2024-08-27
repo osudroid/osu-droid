@@ -742,7 +742,8 @@ public class Slider extends GameObject {
         tickTime += dt;
 
         if (Config.isAnimateFollowCircle()) {
-            float remainTime = (float) (spanDuration / GameHelper.getSpeedMultiplier() * beatmapSlider.getSpanCount() - passedTime);
+            float realSliderDuration = (float) beatmapSlider.getDuration() / 1000 / GameHelper.getSpeedMultiplier();
+            float remainTime = realSliderDuration - (float) passedTime;
 
             if (inRadius && !mWasInRadius) {
                 mWasInRadius = true;
