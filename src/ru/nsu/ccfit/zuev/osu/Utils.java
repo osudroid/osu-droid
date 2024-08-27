@@ -58,7 +58,7 @@ public class Utils {
         final PointF pos = scaleToReal(coords);
         pos.y += (Config.getRES_HEIGHT() - toRes(Constants.MAP_ACTUAL_HEIGHT)) / 2f;
         pos.x += (Config.getRES_WIDTH() - toRes(Constants.MAP_ACTUAL_WIDTH)) / 2f;
-        if (flipVertically && GameHelper.isHardrock()) {
+        if (flipVertically) {
             flipRealCoordsVertically(pos);
         }
         return pos;
