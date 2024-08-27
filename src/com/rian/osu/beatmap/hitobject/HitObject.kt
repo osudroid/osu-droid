@@ -170,7 +170,7 @@ abstract class HitObject(
             return difficultyStackOffsetCache.value
         }
 
-    private val difficultyStackedPositionCache = Cached(Vector2(0))
+    private val difficultyStackedPositionCache = Cached(position)
 
     /**
      * The stacked position of this [HitObject] in difficulty calculation, in osu!pixels.
@@ -242,7 +242,7 @@ abstract class HitObject(
             return gameplayStackOffsetCache.value
         }
 
-    private val gameplayStackedPositionCache = Cached(Vector2(0))
+    private val gameplayStackedPositionCache = Cached(gameplayPosition)
 
     /**
      * The stacked position of this [HitObject] in gameplay, in pixels.
