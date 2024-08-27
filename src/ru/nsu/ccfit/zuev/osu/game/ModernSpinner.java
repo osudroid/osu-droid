@@ -39,6 +39,7 @@ public class ModernSpinner extends Spinner {
     private StatisticV2 stat;
     private PointF oldMouse;
     private float duration;
+    private boolean spinnable;
 
     private final PointF currMouse = new PointF();
 
@@ -69,6 +70,7 @@ public class ModernSpinner extends Spinner {
         this.clear = false;
         this.fullRotations = 0;
         this.rotations = 0;
+        spinnable = false;
 
         reloadHitSounds();
 
@@ -97,7 +99,7 @@ public class ModernSpinner extends Spinner {
         float timePreempt = (float) beatmapSpinner.timePreempt / 1000;
 
         top.registerEntityModifier(Modifiers.sequence(
-            Modifiers.fadeIn(timePreempt),
+            Modifiers.fadeIn(timePreempt).setOnFinished(entity -> spinnable = true),
             Modifiers.delay(duration).setOnFinished(entity -> Execution.updateThread(this::removeFromScene))
         ));
 
@@ -109,7 +111,7 @@ public class ModernSpinner extends Spinner {
     @Override
     public void update(float dt) {
         // Allow the spinner to fully fade in first before receiving spins.
-        if (top.getAlpha() < 1) {
+        if (!spinnable) {
             return;
         }
 
