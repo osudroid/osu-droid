@@ -54,10 +54,15 @@ public class Utils {
         return trackToRealCoords(coords, false);
     }
 
-    public static PointF trackToRealCoords(final PointF coords, final boolean flipVertically) {
-        final PointF pos = scaleToReal(coords);
+    public static PointF trackToRealCoords(final PointF pos, final boolean flipVertically) {
+
+        // Utils.scaleToReal(coords);
+        pos.x *= Constants.MAP_ACTUAL_WIDTH / (float) Constants.MAP_WIDTH;
+        pos.y *= Constants.MAP_ACTUAL_HEIGHT / (float) Constants.MAP_HEIGHT;
+
         pos.y += (Config.getRES_HEIGHT() - toRes(Constants.MAP_ACTUAL_HEIGHT)) / 2f;
         pos.x += (Config.getRES_WIDTH() - toRes(Constants.MAP_ACTUAL_WIDTH)) / 2f;
+
         if (flipVertically) {
             flipRealCoordsVertically(pos);
         }
@@ -100,15 +105,6 @@ public class Utils {
     public static short flipY(final short y) {
         final int height = Config.getRES_HEIGHT() / 2;
         return (short) (((y - height) * -1) + height);
-    }
-
-    public static PointF scaleToReal(final PointF v) {
-        final PointF pos = new PointF(v.x, v.y);
-        pos.x *= toRes(Constants.MAP_ACTUAL_WIDTH)
-                / (float) Constants.MAP_WIDTH;
-        pos.y *= toRes(Constants.MAP_ACTUAL_HEIGHT)
-                / (float) Constants.MAP_HEIGHT;
-        return pos;
     }
 
     public static PointF scaleToRealC(final PointF v) {
