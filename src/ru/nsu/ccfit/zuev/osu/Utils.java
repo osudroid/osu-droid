@@ -55,8 +55,6 @@ public class Utils {
     }
 
     public static PointF trackToRealCoords(final PointF pos, final boolean flipVertically) {
-
-        // Utils.scaleToReal(coords);
         pos.x *= Constants.MAP_ACTUAL_WIDTH / (float) Constants.MAP_WIDTH;
         pos.y *= Constants.MAP_ACTUAL_HEIGHT / (float) Constants.MAP_HEIGHT;
 
