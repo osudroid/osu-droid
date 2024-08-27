@@ -32,7 +32,7 @@ public class Spinner extends GameObject {
     private final ScoreNumber bonusScore;
     protected com.rian.osu.beatmap.hitobject.Spinner beatmapSpinner;
     private PointF oldMouse;
-    private GameObjectListener listener;
+    protected GameObjectListener listener;
     private Scene scene;
     private int fullRotations = 0;
     private float rotations = 0;

@@ -28,7 +28,6 @@ public class ModernSpinner extends Spinner {
     private final Sprite glow;
     private final ScoreNumber bonusScore;
 
-    private GameObjectListener listener;
     private Scene scene;
     public PointF center;
     private float needRotations;
@@ -42,7 +41,6 @@ public class ModernSpinner extends Spinner {
     private boolean spinnable;
 
     private final PointF currMouse = new PointF();
-
 
     public ModernSpinner() {
         ResourceManager.getInstance().checkEvoSpinnerTextures();
