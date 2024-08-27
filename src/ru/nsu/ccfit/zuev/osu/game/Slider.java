@@ -830,7 +830,6 @@ public class Slider extends GameObject {
 
         float scale = beatmapSlider.getGameplayScale();
 
-        // Some magic with slider ticks. If it'll crash it's not my fault ^_^"
         while (tickTime >= tickInterval) {
             tickTime -= tickInterval;
             var tickSprite = tickSprites.get(currentTickSpriteIndex);
