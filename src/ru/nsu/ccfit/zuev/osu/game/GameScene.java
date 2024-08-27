@@ -121,7 +121,7 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
     private float secPassed = 0;
     private float leadOut = 0;
     private LinkedList<HitObject> objects;
-    private ArrayList<RGBColor> combos;
+    private ArrayList<RGBColor> comboColors;
     private boolean comboWasMissed = false;
     private boolean comboWas100 = false;
     private LinkedList<GameObject> activeObjects;
@@ -428,18 +428,18 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
             sliderBorderColor = OsuSkin.get().getSliderBorderColor();
         }
 
-        combos = new ArrayList<>();
+        comboColors = new ArrayList<>();
         for (RGBColor color : beatmap.colors.comboColors) {
-            combos.add(new RGBColor(color.r() / 255, color.g() / 255, color.b() / 255));
+            comboColors.add(new RGBColor(color.r() / 255, color.g() / 255, color.b() / 255));
         }
 
-        if (combos.isEmpty() || Config.isUseCustomComboColors()) {
-            combos.clear();
-            combos.addAll(Arrays.asList(Config.getComboColors()));
+        if (comboColors.isEmpty() || Config.isUseCustomComboColors()) {
+            comboColors.clear();
+            comboColors.addAll(Arrays.asList(Config.getComboColors()));
         }
         if (OsuSkin.get().isForceOverrideComboColor()) {
-            combos.clear();
-            combos.addAll(OsuSkin.get().getComboColor());
+            comboColors.clear();
+            comboColors.addAll(OsuSkin.get().getComboColor());
         }
 
         lastActiveObjectHitTime = 0;
@@ -924,7 +924,7 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
     }
 
     public RGBColor getComboColor(int num) {
-        return combos.get(num % combos.size());
+        return comboColors.get(num % comboColors.size());
     }
 
     @Override
