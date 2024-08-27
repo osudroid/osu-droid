@@ -51,7 +51,7 @@ public class Utils {
     }
 
     public static PointF trackToRealCoords(final PointF coords) {
-        return trackToRealCoords(coords, true);
+        return trackToRealCoords(coords, false);
     }
 
     public static PointF trackToRealCoords(final PointF coords, final boolean flipVertically) {
