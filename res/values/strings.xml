@@ -211,4 +211,9 @@
 
 	<!-- Multiplayer errors -->
 	<string name="multiplayer_not_online">You must be logged in to the server to play multiplayer!</string>
+
+	<!--Graphics options-->
+	<string name="setting_dim_hit_objects_title">Enable hit objects dim</string>
+	<string name="setting_dim_hit_objects_summary">Dim hit objects when they are ready to be hit.</string>
+
 </resources>

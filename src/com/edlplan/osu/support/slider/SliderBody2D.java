@@ -13,6 +13,7 @@ import org.anddev.andengine.util.modifier.ease.EaseQuadOut;
 
 import ru.nsu.ccfit.zuev.osu.Config;
 import ru.nsu.ccfit.zuev.osu.RGBColor;
+import ru.nsu.ccfit.zuev.osu.game.GameHelper;
 import ru.nsu.ccfit.zuev.osu.game.Slider;
 
 public class SliderBody2D extends AbstractSliderBody {
@@ -110,6 +111,45 @@ public class SliderBody2D extends AbstractSliderBody {
             ));
         }
     }
+
+    public void applyDimAnimations(float delayTimeToDim) {
+
+        var colorDim = 195f / 255f;
+
+         body.setColor(bodyColor.r() * colorDim, bodyColor.g() * colorDim, bodyColor.b() * colorDim);
+         body.registerEntityModifier(Modifiers.sequence(
+            Modifiers.delay(delayTimeToDim),
+            Modifiers.color(0.1f / GameHelper.getSpeedMultiplier(),
+                 body.getRed(), bodyColor.r(),
+                 body.getGreen(), bodyColor.g(),
+                 body.getBlue(), bodyColor.b()
+            )
+        ));
+
+        border.setColor(borderColor.r() * colorDim, borderColor.g() * colorDim, borderColor.b() * colorDim);
+        border.registerEntityModifier(Modifiers.sequence(
+            Modifiers.delay(delayTimeToDim),
+            Modifiers.color(0.1f / GameHelper.getSpeedMultiplier(),
+                border.getRed(), borderColor.r(),
+                border.getGreen(), borderColor.g(),
+                border.getBlue(), borderColor.b()
+            )
+        ));
+
+        if (hint != null) {
+            hint.setColor(hintColor.r() * colorDim, hintColor.g() * colorDim, hintColor.b() * colorDim);
+            hint.registerEntityModifier(Modifiers.sequence(
+                Modifiers.delay(delayTimeToDim),
+                Modifiers.color(0.1f / GameHelper.getSpeedMultiplier(),
+                    hint.getRed(), hintColor.r(),
+                    hint.getGreen(), hintColor.g(),
+                    hint.getBlue(), hintColor.b()
+                )
+            ));
+
+        }
+    }
+
 
     @Override
     public void onUpdate() {

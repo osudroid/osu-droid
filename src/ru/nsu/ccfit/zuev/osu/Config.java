@@ -80,7 +80,8 @@ public class Config {
         deleteUnsupportedVideos,
         submitScoreOnMultiplayer,
         keepBackgroundAspectRatio,
-        noChangeDimInBreaks;
+        noChangeDimInBreaks,
+        dimHitObjects;
 
     private static int RES_WIDTH,
         RES_HEIGHT,
@@ -124,6 +125,7 @@ public class Config {
         videoEnabled = prefs.getBoolean("enableVideo", false);
         keepBackgroundAspectRatio = prefs.getBoolean("keepBackgroundAspectRatio", false);
         noChangeDimInBreaks = prefs.getBoolean("noChangeDimInBreaks", false);
+        dimHitObjects = prefs.getBoolean("dimHitObjects", true);
 
         setSize();
         setPlayfieldSize(prefs.getInt("playfieldSize", 100) / 100f);
@@ -790,5 +792,9 @@ public class Config {
 
     public static boolean isNoChangeDimInBreaks() {
         return noChangeDimInBreaks;
+    }
+
+    public static boolean isDimHitObjects() {
+        return dimHitObjects;
     }
 }

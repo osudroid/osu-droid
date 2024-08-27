@@ -78,12 +78,19 @@ public class Slider extends GameObject {
     private LinePath superPath = null;
     private boolean preStageFinish = false;
 
-    private SliderBody2D abstractSliderBody = null;
+    private SliderBody2D sliderBody = null;
 
     private boolean
             mIsOver,
             mIsAnimating,
             mWasInRadius;
+
+    /**
+     * Whether the head and tail circle bodies are being animated.
+     * Used to prevent the Kiai animation collides with the dimming animation.
+     */
+    private boolean isCircleDimming;
+
 
     public Slider() {
         startCircle = new Sprite(0, 0, ResourceManager.getInstance().getTexture("sliderstartcircle"));
@@ -122,6 +129,7 @@ public class Slider extends GameObject {
         mIsOver = false;
         mIsAnimating = false;
         mWasInRadius = false;
+        isCircleDimming = false;
 
         reverse = false;
         startHit = false;
@@ -275,30 +283,106 @@ public class Slider extends GameObject {
             superPath.measure();
 
             var bodyWidth = (OsuSkin.get().getSliderBodyWidth() - OsuSkin.get().getSliderBorderWidth()) * scale;
-            abstractSliderBody = new SliderBody2D(superPath);
-            abstractSliderBody.setBodyWidth(bodyWidth);
-            abstractSliderBody.setBorderWidth(OsuSkin.get().getSliderBodyWidth() * scale);
-            abstractSliderBody.setSliderBodyBaseAlpha(OsuSkin.get().getSliderBodyBaseAlpha());
+            sliderBody = new SliderBody2D(superPath);
+            sliderBody.setBodyWidth(bodyWidth);
+            sliderBody.setBorderWidth(OsuSkin.get().getSliderBodyWidth() * scale);
+            sliderBody.setSliderBodyBaseAlpha(OsuSkin.get().getSliderBodyBaseAlpha());
 
             if (OsuSkin.get().isSliderHintEnable() && beatmapSlider.getDistance() > OsuSkin.get().getSliderHintShowMinLength()) {
-                abstractSliderBody.setEnableHint(true);
-                abstractSliderBody.setHintAlpha(OsuSkin.get().getSliderHintAlpha());
-                abstractSliderBody.setHintWidth(Math.min(OsuSkin.get().getSliderHintWidth() * scale, bodyWidth));
+                sliderBody.setEnableHint(true);
+                sliderBody.setHintAlpha(OsuSkin.get().getSliderHintAlpha());
+                sliderBody.setHintWidth(Math.min(OsuSkin.get().getSliderHintWidth() * scale, bodyWidth));
                 RGBColor hintColor = OsuSkin.get().getSliderHintColor();
                 if (hintColor != null) {
-                    abstractSliderBody.setHintColor(hintColor.r(), hintColor.g(), hintColor.b());
+                    sliderBody.setHintColor(hintColor.r(), hintColor.g(), hintColor.b());
                 } else {
-                    abstractSliderBody.setHintColor(bodyColor.r(), bodyColor.g(), bodyColor.b());
+                    sliderBody.setHintColor(bodyColor.r(), bodyColor.g(), bodyColor.b());
                 }
             }
 
-            abstractSliderBody.applyToScene(scene, Config.isSnakingInSliders());
-            abstractSliderBody.setBodyColor(bodyColor.r(), bodyColor.g(), bodyColor.b());
-            abstractSliderBody.setBorderColor(borderColor.r(), borderColor.g(), borderColor.b());
+            sliderBody.applyToScene(scene, Config.isSnakingInSliders());
+            sliderBody.setBodyColor(bodyColor.r(), bodyColor.g(), bodyColor.b());
+            sliderBody.setBorderColor(borderColor.r(), borderColor.g(), borderColor.b());
+        }
+
+        if (Config.isDimHitObjects()) {
+            isCircleDimming = true;
+
+            // Source: https://github.com/peppy/osu/blob/60271fb0f7e091afb754455f93180094c63fc3fb/osu.Game.Rulesets.Osu/Objects/Drawables/DrawableOsuHitObject.cs#L101
+            var delayTimeToDim = (float) beatmapSlider.timePreempt / 1000 - GameHelper.getDifficultyHelper().hitWindowFor50(GameHelper.getOverallDifficulty());
+            var colorDim = 195f / 255f;
+
+            applyCircleDimming(startCircle, startOverlay, delayTimeToDim, comboColor);
+            applyCircleDimming(endCircle, endOverlay, delayTimeToDim, comboColor);
+
+            number.setColor(colorDim, colorDim, colorDim);
+            number.registerEntityModifier(Modifiers.sequence(
+                Modifiers.delay(delayTimeToDim),
+                Modifiers.color(0.1f / GameHelper.getSpeedMultiplier(),
+                    number.getRed(), 1f,
+                    number.getGreen(), 1f,
+                    number.getBlue(), 1f
+                )
+            ));
+
+            endArrow.setColor(colorDim, colorDim, colorDim);
+            endArrow.registerEntityModifier(Modifiers.sequence(
+                Modifiers.delay(delayTimeToDim),
+                Modifiers.color(0.1f / GameHelper.getSpeedMultiplier(),
+                    endArrow.getRed(), 1f,
+                    endArrow.getGreen(), 1f,
+                    endArrow.getBlue(), 1f
+                )
+            ));
+
+            for (int i = tickSprites.size() - 1; i >= 0; --i) {
+                var tickSprite = tickSprites.get(i);
+                tickSprite.setColor(colorDim, colorDim, colorDim);
+                tickSprite.registerEntityModifier(Modifiers.sequence(
+                    Modifiers.delay(delayTimeToDim),
+                    Modifiers.color(0.1f / GameHelper.getSpeedMultiplier(),
+                        tickSprite.getRed(), 1f,
+                        tickSprite.getGreen(), 1f,
+                        tickSprite.getBlue(), 1f
+                    )
+                ));
+            }
+
+            sliderBody.applyDimAnimations(delayTimeToDim);
+        } else {
+            isCircleDimming = false;
         }
 
         applyBodyFadeAdjustments(fadeInDuration);
     }
+
+    private void applyCircleDimming(Sprite circle, Sprite overlay, float delayTimeToDim, RGBColor comboColor) {
+
+        var colorDim = 195f / 255f;
+
+        // Circle requires special handling because it's tinted with combo color.
+        circle.setColor(comboColor.r() * colorDim, comboColor.g() * colorDim, comboColor.b() * colorDim);
+        circle.registerEntityModifier(Modifiers.sequence(
+            Modifiers.delay(delayTimeToDim),
+            Modifiers.color(0.1f / GameHelper.getSpeedMultiplier(),
+                circle.getRed(), comboColor.r(),
+                circle.getGreen(), comboColor.g(),
+                circle.getBlue(), comboColor.b()
+            )
+        ).setOnFinished(entity -> isCircleDimming = true));
+
+        overlay.setColor(colorDim, colorDim, colorDim);
+        overlay.registerEntityModifier(Modifiers.sequence(
+            Modifiers.delay(delayTimeToDim),
+            Modifiers.color(0.1f / GameHelper.getSpeedMultiplier(),
+                overlay.getRed(), 1f,
+                overlay.getGreen(), 1f,
+                overlay.getBlue(), 1f
+            )
+        ));
+    }
+
+
 
     private PointF getPositionAt(final float percentage, final boolean updateBallAngle, final boolean updateEndArrowRotation) {
         if (path.points.isEmpty()) {
@@ -370,11 +454,11 @@ public class Slider extends GameObject {
             return;
         }
         // Detach all objects
-        if (abstractSliderBody != null) {
+        if (sliderBody != null) {
             if (GameHelper.isHidden()) {
-                abstractSliderBody.removeFromScene(scene);
+                sliderBody.removeFromScene(scene);
             } else {
-                abstractSliderBody.removeFromScene(scene, 0.24f / GameHelper.getSpeedMultiplier(), this);
+                sliderBody.removeFromScene(scene, 0.24f / GameHelper.getSpeedMultiplier(), this);
             }
         }
 
@@ -617,18 +701,20 @@ public class Slider extends GameObject {
             }
         }
 
-        if (GameHelper.isKiai()) {
-            final float kiaiModifier = (float) Math.max(0, 1 - GameHelper.getCurrentBeatTime() / GameHelper.getBeatLength()) * 0.5f;
-            final float r = Math.min(1, circleColor.r() + (1 - circleColor.r()) * kiaiModifier);
-            final float g = Math.min(1, circleColor.g() + (1 - circleColor.g()) * kiaiModifier);
-            final float b = Math.min(1, circleColor.b() + (1 - circleColor.b()) * kiaiModifier);
-            kiai = true;
-            startCircle.setColor(r, g, b);
-            endCircle.setColor(r, g, b);
-        } else if (kiai) {
-            startCircle.setColor(circleColor.r(), circleColor.g(), circleColor.b());
-            endCircle.setColor(circleColor.r(), circleColor.g(), circleColor.b());
-            kiai = false;
+        if (!isCircleDimming) {
+            if (GameHelper.isKiai()) {
+                var kiaiModifier = (float) Math.max(0, 1 - GameHelper.getCurrentBeatTime() / GameHelper.getBeatLength()) * 0.5f;
+                var r = Math.min(1, circleColor.r() + (1 - circleColor.r()) * kiaiModifier);
+                var g = Math.min(1, circleColor.g() + (1 - circleColor.g()) * kiaiModifier);
+                var b = Math.min(1, circleColor.b() + (1 - circleColor.b()) * kiaiModifier);
+                kiai = true;
+                startCircle.setColor(r, g, b);
+                endCircle.setColor(r, g, b);
+            } else if (kiai) {
+                startCircle.setColor(circleColor.r(), circleColor.g(), circleColor.b());
+                endCircle.setColor(circleColor.r(), circleColor.g(), circleColor.b());
+                kiai = false;
+            }
         }
 
         if (passedTime < 0) // we at approach time
@@ -656,11 +742,11 @@ public class Slider extends GameObject {
                 }
 
                 if (Config.isSnakingInSliders()) {
-                    if (superPath != null && abstractSliderBody != null) {
+                    if (superPath != null && sliderBody != null) {
                         float l = superPath.getMeasurer().maxLength() * percentage;
 
-                        abstractSliderBody.setEndLength(l);
-                        abstractSliderBody.onUpdate();
+                        sliderBody.setEndLength(l);
+                        sliderBody.onUpdate();
                     }
 
                     var position = getPositionAt(percentage, false, true);
@@ -678,9 +764,9 @@ public class Slider extends GameObject {
                     endArrow.setAlpha(1);
                 }
                 if (Config.isSnakingInSliders()) {
-                    if (!preStageFinish && superPath != null && abstractSliderBody != null) {
-                        abstractSliderBody.setEndLength(superPath.getMeasurer().maxLength());
-                        abstractSliderBody.onUpdate();
+                    if (!preStageFinish && superPath != null && sliderBody != null) {
+                        sliderBody.setEndLength(superPath.getMeasurer().maxLength());
+                        sliderBody.onUpdate();
                         preStageFinish = true;
                     }
 
@@ -872,7 +958,7 @@ public class Slider extends GameObject {
     }
 
     private void applyBodyFadeAdjustments(float fadeInDuration) {
-        if (abstractSliderBody == null) {
+        if (sliderBody == null) {
             return;
         }
 
@@ -880,9 +966,9 @@ public class Slider extends GameObject {
             // New duration from completed fade in to end (before fading out)
             float fadeOutDuration = (float) (beatmapSlider.getDuration() + beatmapSlider.timePreempt) / 1000 / GameHelper.getSpeedMultiplier() - fadeInDuration;
 
-            abstractSliderBody.applyFadeAdjustments(fadeInDuration, fadeOutDuration);
+            sliderBody.applyFadeAdjustments(fadeInDuration, fadeOutDuration);
         } else {
-            abstractSliderBody.applyFadeAdjustments(fadeInDuration);
+            sliderBody.applyFadeAdjustments(fadeInDuration);
         }
     }
 

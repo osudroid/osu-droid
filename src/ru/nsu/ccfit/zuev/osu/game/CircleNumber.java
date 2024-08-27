@@ -57,13 +57,11 @@ public class CircleNumber extends Entity
     }
 
     @Override
-    public void setAlpha(float pAlpha)
-    {
-        var count = getChildCount();
+    public void setAlpha(float pAlpha) {
 
-        if (count > 0)
-            for (int i = 0; i < count; i++)
-                getChild(i).setAlpha(pAlpha);
+        for (int i = getChildCount() - 1; i >= 0; i--) {
+            getChild(i).setAlpha(pAlpha);
+        }
 
         super.setAlpha(pAlpha);
     }
@@ -71,10 +69,50 @@ public class CircleNumber extends Entity
     @Override
     public float getAlpha()
     {
-        if (getFirstChild() != null)
+        if (getFirstChild() != null) {
             return getFirstChild().getAlpha();
+        }
 
         return super.getAlpha();
     }
 
+    @Override
+    public void setColor(float pRed, float pGreen, float pBlue) {
+
+        for (int i = getChildCount() - 1; i >= 0; i--) {
+            getChild(i).setColor(pRed, pGreen, pBlue);
+        }
+
+        super.setColor(pRed, pGreen, pBlue);
+    }
+
+    @Override
+    public float getRed() {
+
+        if (getFirstChild() != null) {
+            return getFirstChild().getRed();
+        }
+
+        return super.getRed();
+    }
+
+    @Override
+    public float getGreen() {
+
+        if (getFirstChild() != null) {
+            return getFirstChild().getGreen();
+        }
+
+        return super.getGreen();
+    }
+
+    @Override
+    public float getBlue() {
+
+        if (getFirstChild() != null) {
+            return getFirstChild().getBlue();
+        }
+
+        return super.getBlue();
+    }
 }
