@@ -1,6 +1,6 @@
 package com.reco1l.ibancho
 
-import com.dgsrz.bancho.security.SecurityUtils
+import ru.nsu.ccfit.zuev.osu.SecurityUtils
 import com.reco1l.ibancho.data.PlayerStatus
 import com.reco1l.ibancho.data.Room
 import com.reco1l.ibancho.data.RoomStatus
