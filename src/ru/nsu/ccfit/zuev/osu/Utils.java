@@ -59,17 +59,15 @@ public class Utils {
         pos.y += (Config.getRES_HEIGHT() - toRes(Constants.MAP_ACTUAL_HEIGHT)) / 2f;
         pos.x += (Config.getRES_WIDTH() - toRes(Constants.MAP_ACTUAL_WIDTH)) / 2f;
         if (flipIfHardRock && GameHelper.isHardrock()) {
-            pos.y -= (float) Config.getRES_HEIGHT() / 2;
-            pos.y *= -1;
-            pos.y += (float) Config.getRES_HEIGHT() / 2;
+            flipRealCoordsVertically(pos);
         }
-		/*if (pos.y < 18) {
-			pos.y = 18;
-		}*/
-		/*if (pos.y > Config.getRES_HEIGHT() - 18) {
-			pos.y = Config.getRES_HEIGHT() - 18;
-		}*/
         return pos;
+    }
+
+    public static void flipRealCoordsVertically(final PointF coords) {
+        coords.y -= Config.getRES_HEIGHT() / 2f;
+        coords.y *= -1;
+        coords.y += Config.getRES_HEIGHT() / 2f;
     }
 
     public static void changeTrackToRealCoords(final PointF coords) {
