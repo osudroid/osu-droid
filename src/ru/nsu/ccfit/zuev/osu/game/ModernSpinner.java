@@ -68,6 +68,7 @@ public class ModernSpinner extends Spinner {
         this.clear = false;
         this.fullRotations = 0;
         this.rotations = 0;
+        endsCombo = beatmapSpinner.isLastInCombo();
         spinnable = false;
 
         reloadHitSounds();
