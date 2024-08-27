@@ -290,19 +290,6 @@ class Slider(
             nestedHitObjects.forEach { it.gameplayScale = value }
         }
 
-    init {
-        // Create sliding samples
-        val bankSamples = samples.filterIsInstance<BankHitSampleInfo>()
-
-        bankSamples.find { it.name == BankHitSampleInfo.HIT_NORMAL }?.let {
-            auxiliarySamples.add(it.copy(name = "sliderslide"))
-        }
-
-        bankSamples.find { it.name == BankHitSampleInfo.HIT_WHISTLE }?.let {
-            auxiliarySamples.add(it.copy(name = "sliderwhistle"))
-        }
-    }
-
     override fun applyDefaults(controlPoints: BeatmapControlPoints, difficulty: BeatmapDifficulty, mode: GameMode) {
         super.applyDefaults(controlPoints, difficulty, mode)
 
@@ -336,6 +323,18 @@ class Slider(
 
     override fun applySamples(controlPoints: BeatmapControlPoints) {
         super.applySamples(controlPoints)
+
+        // Create sliding samples
+        auxiliarySamples.clear()
+        val bankSamples = samples.filterIsInstance<BankHitSampleInfo>()
+
+        bankSamples.find { it.name == BankHitSampleInfo.HIT_NORMAL }?.let {
+            auxiliarySamples.add(it.copy(name = "sliderslide"))
+        }
+
+        bankSamples.find { it.name == BankHitSampleInfo.HIT_WHISTLE }?.let {
+            auxiliarySamples.add(it.copy(name = "sliderwhistle"))
+        }
 
         nodeSamples.forEachIndexed { i, sampleList ->
             val time = startTime + i * spanDuration + CONTROL_POINT_LENIENCY
