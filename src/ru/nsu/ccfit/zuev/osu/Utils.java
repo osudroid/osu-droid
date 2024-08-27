@@ -54,10 +54,13 @@ public class Utils {
         return trackToRealCoords(coords, false);
     }
 
-    public static PointF trackToRealCoords(final PointF coords, final boolean flipVertically) {
-        final PointF pos = scaleToReal(coords);
+    public static PointF trackToRealCoords(final PointF pos, final boolean flipVertically) {
+        pos.x *= Constants.MAP_ACTUAL_WIDTH / (float) Constants.MAP_WIDTH;
+        pos.y *= Constants.MAP_ACTUAL_HEIGHT / (float) Constants.MAP_HEIGHT;
+
         pos.y += (Config.getRES_HEIGHT() - toRes(Constants.MAP_ACTUAL_HEIGHT)) / 2f;
         pos.x += (Config.getRES_WIDTH() - toRes(Constants.MAP_ACTUAL_WIDTH)) / 2f;
+
         if (flipVertically) {
             flipRealCoordsVertically(pos);
         }
@@ -102,15 +105,6 @@ public class Utils {
         return (short) (((y - height) * -1) + height);
     }
 
-    public static PointF scaleToReal(final PointF v) {
-        final PointF pos = new PointF(v.x, v.y);
-        pos.x *= toRes(Constants.MAP_ACTUAL_WIDTH)
-                / (float) Constants.MAP_WIDTH;
-        pos.y *= toRes(Constants.MAP_ACTUAL_HEIGHT)
-                / (float) Constants.MAP_HEIGHT;
-        return pos;
-    }
-
     public static PointF scaleToRealC(final PointF v) {
         v.x *= toRes(Constants.MAP_ACTUAL_WIDTH) / (float) Constants.MAP_WIDTH;
         v.y *= toRes(Constants.MAP_ACTUAL_HEIGHT)
@@ -146,8 +140,8 @@ public class Utils {
         return direction(vector.x, vector.y);
     }
 
-    public static float direction(final PointF v1, final PointF v2) {
-        return direction(v2.x - v1.x, v2.y - v1.y);
+    public static float direction(float x1, float y1, float x2, float y2) {
+        return direction(x2 - x1, y2 - y1);
     }
 
     public static float length(final PointF vector) {

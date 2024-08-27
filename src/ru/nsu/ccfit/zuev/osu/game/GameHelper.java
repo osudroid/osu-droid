@@ -4,7 +4,7 @@ import android.graphics.PointF;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
-import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.Queue;
 
@@ -34,7 +34,6 @@ public class GameHelper {
     private static double beatLength = 0;
     private static double currentBeatTime = 0;
     private static final Queue<SliderPath> pathPool = new LinkedList<>();
-    private static final Queue<PointF> pointPool = new LinkedList<>();
 
     private static DifficultyHelper difficultyHelper = DifficultyHelper.StdDifficulty;
 
@@ -71,16 +70,27 @@ public class GameHelper {
         var path = newPath();
         var startPosition = slider.getPosition().plus(slider.getGameplayStackOffset());
 
-        for (var p : slider.getPath().getCalculatedPath()) {
-            var point = newPointF();
-            point.set(startPosition.x + p.x, startPosition.y + p.y);
+        var calculatedPath = slider.getPath().getCalculatedPath();
+        var cumulativeLength = slider.getPath().getCumulativeLength();
+
+        path.allocate(calculatedPath.size());
+
+        var tmpPoint = new PointF();
+
+        for (var i = 0; i < calculatedPath.size(); i++) {
+
+            var p = calculatedPath.get(i);
+            tmpPoint.set(startPosition.x + p.x, startPosition.y + p.y);
 
             // The path is already flipped when the library applies the Hard Rock mod, so we don't need to do it here.
-            path.points.add(Utils.trackToRealCoords(point));
-        }
+            Utils.trackToRealCoords(tmpPoint);
+            path.setPoint(i, tmpPoint.x, tmpPoint.y);
 
-        for (double l : slider.getPath().getCumulativeLength()) {
-            path.length.add((float) l);
+            if (i < cumulativeLength.size()) {
+                path.setLength(i, (float) (double) cumulativeLength.get(i));
+            } else {
+                path.setLength(i, -1f);
+            }
         }
 
         return path;
@@ -109,9 +119,7 @@ public class GameHelper {
     }
 
     public static void putPath(final SliderPath path) {
-        pointPool.addAll(path.points);
-        path.points.clear();
-        path.length.clear();
+        path.allocate(0);
         pathPool.add(path);
     }
 
@@ -120,13 +128,6 @@ public class GameHelper {
             return new SliderPath();
         }
         return pathPool.poll();
-    }
-
-    private static PointF newPointF() {
-        if (pointPool.isEmpty()) {
-            return new PointF();
-        }
-        return pointPool.poll();
     }
 
     public static boolean isEasy() {
@@ -285,7 +286,57 @@ public class GameHelper {
     }
 
     public static class SliderPath {
-        public ArrayList<PointF> points = new ArrayList<>();
-        public ArrayList<Float> length = new ArrayList<>();
+
+        private static final int strip = 3;
+        private static final int offsetX = 0;
+        private static final int offsetY = 1;
+        private static final int offsetLength = 2;
+
+        private float[] data = new float[0];
+
+        public int lengthCount;
+        public int pointCount;
+
+
+        public void allocate(int size) {
+            data = new float[size * strip];
+            pointCount = 0;
+            lengthCount = 0;
+        }
+
+
+        public void setPoint(int index, float x, float y) {
+            data[index * strip + offsetX] = x;
+            data[index * strip + offsetY] = y;
+            pointCount++;
+        }
+
+        public void setLength(int index, float length) {
+
+            var targetIndex = index * strip + offsetLength;
+
+            // This condition can be triggered if there's a mismatch between the number of points
+            // and the number of lengths. Should never happen in practice but it's better to be safe.
+            if (targetIndex >= data.length) {
+                data = Arrays.copyOf(data, data.length + strip);
+            }
+
+            data[targetIndex] = length;
+            lengthCount++;
+        }
+
+
+        public float getX(int index) {
+            return data[index * strip + offsetX];
+        }
+
+        public float getY(int index) {
+            return data[index * strip + offsetY];
+        }
+
+        public float getLength(int index) {
+            return data[index * strip + offsetLength];
+        }
+
     }
 }
