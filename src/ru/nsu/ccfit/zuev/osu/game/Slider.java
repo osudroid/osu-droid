@@ -791,7 +791,7 @@ public class Slider extends GameObject {
                 break;
             }
 
-            if (followCircle.getAlpha() > 0 && replayObjectData == null ||
+            if (inRadius && replayObjectData == null ||
                     replayObjectData != null && replayObjectData.tickSet.get(replayTickIndex)) {
                 playCurrentNestedObjectHitSound();
                 listener.onSliderHit(id, 10, null, ballPos, false, bodyColor, GameObjectListener.SLIDER_TICK);
