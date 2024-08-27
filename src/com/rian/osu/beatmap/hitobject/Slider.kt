@@ -62,13 +62,11 @@ class Slider(
     var nodeSamples: MutableList<MutableList<HitSampleInfo>>
 ) : HitObject(startTime, position, isNewCombo, comboOffset),
     IHasDuration {
-    override val endTime: Double
+    override val endTime
         get() = startTime + spanCount * path.expectedDistance / velocity
 
-    override val duration: Double
+    override val duration
         get() = endTime - startTime
-
-    private val endPositionCache = Cached(position)
 
     /**
      * The path of this [Slider].
@@ -79,6 +77,16 @@ class Slider(
 
             updateNestedPositions()
         }
+
+    override var position
+        get() = super.position
+        set(value) {
+            super.position = value
+
+            updateNestedPositions()
+        }
+
+    private val endPositionCache = Cached(position)
 
     /**
      * The end position of this [Slider] in osu!pixels.
@@ -95,7 +103,7 @@ class Slider(
     /**
      * The distance of this [Slider].
      */
-    val distance: Double
+    val distance
         get() = path.expectedDistance
 
     /**
@@ -104,13 +112,14 @@ class Slider(
     var repeatCount = repeatCount
         set(value) {
             field = value.coerceAtLeast(0)
+
             updateNestedPositions()
         }
 
     /**
      * The amount of times the length of this [Slider] spans.
      */
-    val spanCount: Int
+    val spanCount
         get() = repeatCount + 1
 
     /**
@@ -181,62 +190,102 @@ class Slider(
     /**
      * The duration of one span of this [Slider] in milliseconds.
      */
-    val spanDuration: Double
+    val spanDuration
         get() = duration / spanCount
 
-    override var stackOffsetMultiplier = super.stackOffsetMultiplier
+    override var stackOffsetMultiplier
+        get() = super.stackOffsetMultiplier
         set(value) {
-            field = value
+            super.stackOffsetMultiplier = value
+
+            difficultyStackedEndPositionCache.invalidate()
+            gameplayStackedEndPositionCache.invalidate()
 
             nestedHitObjects.forEach { it.stackOffsetMultiplier = value }
         }
 
     // Difficulty calculation object positions
 
+    private val difficultyStackedEndPositionCache = Cached(position)
+
     /**
      * The stacked end position of this [Slider] in difficulty calculation, in osu!pixels.
      */
-    val difficultyStackedEndPosition
-        get() = endPosition + difficultyStackOffset
+    val difficultyStackedEndPosition: Vector2
+        get() {
+            if (!difficultyStackedEndPositionCache.isValid) {
+                difficultyStackedEndPositionCache.value = endPosition + difficultyStackOffset
+            }
 
-    override var difficultyStackHeight = super.difficultyStackHeight
+            return difficultyStackedEndPositionCache.value
+        }
+
+    override var difficultyStackHeight
+        get() = super.difficultyStackHeight
         set(value) {
-            field = value
+            super.difficultyStackHeight = value
+
+            difficultyStackedEndPositionCache.invalidate()
 
             nestedHitObjects.forEach { it.difficultyStackHeight = value }
         }
 
-    override var difficultyScale = super.difficultyScale
+    override var difficultyScale
+        get() = super.difficultyScale
         set(value) {
-            field = value
+            super.difficultyScale = value
+
+            difficultyStackedEndPositionCache.invalidate()
 
             nestedHitObjects.forEach { it.difficultyScale = value }
         }
 
     // Gameplay object positions
 
+    private val gameplayEndPositionCache = Cached(convertPositionToRealCoordinates(position))
+
     /**
      * The end position of this [Slider] in gameplay, in pixels.
      */
-    val gameplayEndPosition
-        get() = convertPositionToRealCoordinates(endPosition)
+    val gameplayEndPosition: Vector2
+        get() {
+            if (!gameplayEndPositionCache.isValid) {
+                gameplayEndPositionCache.value = convertPositionToRealCoordinates(endPosition)
+            }
+
+            return gameplayEndPositionCache.value
+        }
+
+    private val gameplayStackedEndPositionCache = Cached(gameplayEndPosition)
 
     /**
      * The stacked end position of this [Slider] in gameplay, in pixels.
      */
-    val gameplayStackedEndPosition
-        get() = gameplayEndPosition + gameplayStackOffset
+    val gameplayStackedEndPosition: Vector2
+        get() {
+            if (!gameplayStackedEndPositionCache.isValid) {
+                gameplayStackedEndPositionCache.value = gameplayEndPosition + gameplayStackOffset
+            }
 
-    override var gameplayStackHeight = super.gameplayStackHeight
+            return gameplayStackedEndPositionCache.value
+        }
+
+    override var gameplayStackHeight
+        get() = super.gameplayStackHeight
         set(value) {
-            field = value
+            super.gameplayStackHeight = value
+
+            gameplayStackedEndPositionCache.invalidate()
 
             nestedHitObjects.forEach { it.gameplayStackHeight = value }
         }
 
-    override var gameplayScale = super.gameplayScale
+    override var gameplayScale
+        get() = super.gameplayScale
         set(value) {
-            field = value
+            super.gameplayScale = value
+
+            gameplayStackedEndPositionCache.invalidate()
 
             nestedHitObjects.forEach { it.gameplayScale = value }
         }
@@ -278,7 +327,7 @@ class Slider(
             else Double.POSITIVE_INFINITY
 
         // Invalidate the end position in case there are timing changes.
-        endPositionCache.invalidate()
+        invalidateEndPositions()
 
         createNestedHitObjects(mode)
 
@@ -425,10 +474,17 @@ class Slider(
     }
 
     private fun updateNestedPositions() {
-        endPositionCache.invalidate()
+        invalidateEndPositions()
 
         head.position = position
         tail.position = endPosition
+    }
+
+    private fun invalidateEndPositions() {
+        endPositionCache.invalidate()
+        difficultyStackedEndPositionCache.invalidate()
+        gameplayEndPositionCache.invalidate()
+        gameplayStackedEndPositionCache.invalidate()
     }
 
     private fun updateNestedSamples() {

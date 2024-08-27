@@ -5,6 +5,7 @@ import com.rian.osu.beatmap.constants.SampleBank
 import com.rian.osu.beatmap.sections.BeatmapControlPoints
 import com.rian.osu.beatmap.sections.BeatmapDifficulty
 import com.rian.osu.math.Vector2
+import com.rian.osu.utils.Cached
 import com.rian.osu.utils.CircleSizeCalculator
 import kotlin.math.min
 import ru.nsu.ccfit.zuev.osu.Config
@@ -23,8 +24,7 @@ abstract class HitObject(
     /**
      * The position of this [HitObject] in osu!pixels.
      */
-    @JvmField
-    var position: Vector2,
+    position: Vector2,
 
     /**
      * Whether this [HitObject] starts a new combo.
@@ -43,6 +43,18 @@ abstract class HitObject(
     @JvmField
     val comboOffset: Int
 ) {
+    /**
+     * The position of this [HitObject] in osu!pixels.
+     */
+    open var position = position
+        set(value) {
+            field = value
+
+            difficultyStackedPositionCache.invalidate()
+            gameplayPositionCache.invalidate()
+            gameplayStackedPositionCache.invalidate()
+        }
+
     /**
      * The index of this [HitObject] in the current combo.
      */
@@ -104,6 +116,14 @@ abstract class HitObject(
      * The multiplier used to calculate stack offset.
      */
     open var stackOffsetMultiplier = 0f
+        set(value) {
+            field = value
+
+            difficultyStackOffsetCache.invalidate()
+            difficultyStackedPositionCache.invalidate()
+            gameplayStackOffsetCache.invalidate()
+            gameplayStackedPositionCache.invalidate()
+        }
 
     // Difficulty calculation object positions
 
@@ -111,11 +131,23 @@ abstract class HitObject(
      * The stack height of this [HitObject] in difficulty calculation.
      */
     open var difficultyStackHeight = 0
+        set(value) {
+            field = value
+
+            difficultyStackOffsetCache.invalidate()
+            difficultyStackedPositionCache.invalidate()
+        }
 
     /**
      * The osu!standard scale of this [HitObject] in difficulty calculation.
      */
     open var difficultyScale = 0f
+        set(value) {
+            field = value
+
+            difficultyStackOffsetCache.invalidate()
+            difficultyStackedPositionCache.invalidate()
+        }
 
     /**
      * The radius of this [HitObject] in difficulty calculation, in osu!pixels.
@@ -123,17 +155,34 @@ abstract class HitObject(
     val difficultyRadius
         get() = (OBJECT_RADIUS * difficultyScale).toDouble()
 
+    private val difficultyStackOffsetCache = Cached(Vector2(0))
+
     /**
      * The stack offset of this [HitObject] in difficulty calculation, in osu!pixels.
      */
-    open val difficultyStackOffset
-        get() = Vector2(difficultyStackHeight * difficultyScale * stackOffsetMultiplier)
+    open val difficultyStackOffset: Vector2
+        get() {
+            if (!difficultyStackOffsetCache.isValid) {
+                difficultyStackOffsetCache.value =
+                    Vector2(difficultyStackHeight * difficultyScale * stackOffsetMultiplier)
+            }
+
+            return difficultyStackOffsetCache.value
+        }
+
+    private val difficultyStackedPositionCache = Cached(Vector2(0))
 
     /**
      * The stacked position of this [HitObject] in difficulty calculation, in osu!pixels.
      */
-    open val difficultyStackedPosition
-        get() = position + difficultyStackOffset
+    open val difficultyStackedPosition: Vector2
+        get() {
+            if (!difficultyStackedPositionCache.isValid) {
+                difficultyStackedPositionCache.value = position + difficultyStackOffset
+            }
+
+            return difficultyStackedPositionCache.value
+        }
 
     // Gameplay object positions
 
@@ -141,17 +190,37 @@ abstract class HitObject(
      * The stack offset of this [HitObject] in gameplay.
      */
     open var gameplayStackHeight = 0
+        set(value) {
+            field = value
+
+            gameplayStackOffsetCache.invalidate()
+            gameplayStackedPositionCache.invalidate()
+        }
 
     /**
      * The scale of this [HitObject] in gameplay.
      */
     open var gameplayScale = 0f
+        set(value) {
+            field = value
+
+            gameplayStackOffsetCache.invalidate()
+            gameplayStackedPositionCache.invalidate()
+        }
+
+    private val gameplayPositionCache = Cached(convertPositionToRealCoordinates(position))
 
     /**
      * The position of this [HitObject] in gameplay, in pixels.
      */
-    val gameplayPosition
-        get() = convertPositionToRealCoordinates(position)
+    val gameplayPosition: Vector2
+        get() {
+            if (!gameplayPositionCache.isValid) {
+                gameplayPositionCache.value = convertPositionToRealCoordinates(position)
+            }
+
+            return gameplayPositionCache.value
+        }
 
     /**
      * The radius of this [HitObject] in gameplay, in pixels.
@@ -159,17 +228,33 @@ abstract class HitObject(
     val gameplayRadius
         get() = (OBJECT_RADIUS * gameplayScale).toDouble()
 
+    private val gameplayStackOffsetCache = Cached(Vector2(0))
+
     /**
      * The stack offset of this [HitObject] in gameplay, in pixels.
      */
-    val gameplayStackOffset
-        get() = Vector2(gameplayStackHeight * gameplayScale * stackOffsetMultiplier)
+    val gameplayStackOffset: Vector2
+        get() {
+            if (!gameplayStackOffsetCache.isValid) {
+                gameplayStackOffsetCache.value = Vector2(gameplayStackHeight * gameplayScale * stackOffsetMultiplier)
+            }
+
+            return gameplayStackOffsetCache.value
+        }
+
+    private val gameplayStackedPositionCache = Cached(Vector2(0))
 
     /**
      * The stacked position of this [HitObject] in gameplay, in pixels.
      */
-    open val gameplayStackedPosition
-        get() = gameplayPosition + gameplayStackOffset
+    open val gameplayStackedPosition: Vector2
+        get() {
+            if (!gameplayStackedPositionCache.isValid) {
+                gameplayStackedPositionCache.value = gameplayPosition + gameplayStackOffset
+            }
+
+            return gameplayStackedPositionCache.value
+        }
 
     /**
      * Applies defaults to this [HitObject].

@@ -71,7 +71,7 @@ public class GameHelper {
      */
     public static SliderPath convertSliderPath(final com.rian.osu.beatmap.hitobject.Slider slider) {
         var path = newPath();
-        var startPosition = slider.position.plus(slider.getGameplayStackOffset());
+        var startPosition = slider.getPosition().plus(slider.getGameplayStackOffset());
 
         for (var p : slider.getPath().getCalculatedPath()) {
             var point = newPointF();
