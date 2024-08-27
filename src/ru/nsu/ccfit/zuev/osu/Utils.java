@@ -142,8 +142,8 @@ public class Utils {
         return direction(vector.x, vector.y);
     }
 
-    public static float direction(final PointF v1, final PointF v2) {
-        return direction(v2.x - v1.x, v2.y - v1.y);
+    public static float direction(float x1, float y1, float x2, float y2) {
+        return direction(x2 - x1, y2 - y1);
     }
 
     public static float length(final PointF vector) {
