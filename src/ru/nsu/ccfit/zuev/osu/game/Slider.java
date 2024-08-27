@@ -279,7 +279,7 @@ public class Slider extends GameObject {
             abstractSliderBody.setBorderWidth(OsuSkin.get().getSliderBodyWidth() * scale);
             abstractSliderBody.setSliderBodyBaseAlpha(OsuSkin.get().getSliderBodyBaseAlpha());
 
-            if (OsuSkin.get().isSliderHintEnable() && beatmapSlider.getPath().getExpectedDistance() > OsuSkin.get().getSliderHintShowMinLength()) {
+            if (OsuSkin.get().isSliderHintEnable() && beatmapSlider.getDistance() > OsuSkin.get().getSliderHintShowMinLength()) {
                 abstractSliderBody.setEnableHint(true);
                 abstractSliderBody.setHintAlpha(OsuSkin.get().getSliderHintAlpha());
                 abstractSliderBody.setHintWidth(Math.min(OsuSkin.get().getSliderHintWidth() * scale, bodyWidth));
