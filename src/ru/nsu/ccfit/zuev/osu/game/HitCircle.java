@@ -43,7 +43,7 @@ public class HitCircle extends GameObject {
         this.replayObjectData = null;
         this.beatmapCircle = beatmapCircle;
         this.pos = beatmapCircle.getGameplayStackedPosition().toPointF();
-        this.endsCombo = beatmapCircle.getLastInCombo();
+        this.endsCombo = beatmapCircle.isLastInCombo();
         this.listener = listener;
         this.scene = pScene;
         this.timePreempt = (float) beatmapCircle.timePreempt / 1000;

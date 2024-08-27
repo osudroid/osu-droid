@@ -78,7 +78,7 @@ abstract class HitObject(
     /**
      * Whether this is the last [HitObject] in the current combo.
      */
-    var lastInCombo = false
+    var isLastInCombo = false
         internal set
 
     /**
@@ -328,7 +328,7 @@ abstract class HitObject(
             comboIndexWithOffsets += comboOffset + 1
 
             if (lastObj != null) {
-                lastObj.lastInCombo = true
+                lastObj.isLastInCombo = true
             }
         }
     }

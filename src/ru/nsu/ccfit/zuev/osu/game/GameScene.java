@@ -1289,7 +1289,7 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
                 circle.init(this, mgScene, parsedCircle, secPassed, comboColor);
                 addObject(circle);
 
-                if (nextObj != null && !obj.getLastInCombo()) {
+                if (nextObj != null && !obj.isLastInCombo()) {
                     final FollowTrack track = GameObjectPool.getInstance().getTrack();
                     track.init(this, bgScene, obj.getGameplayStackedPosition().toPointF(),
                         nextObj.getGameplayStackedPosition().toPointF(),
@@ -1332,7 +1332,7 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
 
                 addObject(slider);
 
-                if (nextObj != null && !obj.getLastInCombo()) {
+                if (nextObj != null && !obj.isLastInCombo()) {
                     final FollowTrack track = GameObjectPool.getInstance().getTrack();
 
                     track.init(this, bgScene, parsedSlider.getGameplayStackedEndPosition().toPointF(),

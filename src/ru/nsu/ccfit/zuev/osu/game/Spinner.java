@@ -79,7 +79,7 @@ public class Spinner extends GameObject {
         this.scene = scene;
         this.duration = (float) beatmapSpinner.getDuration() / 1000 / GameHelper.getSpeedMultiplier();
         this.beatmapSpinner = beatmapSpinner;
-        endsCombo = beatmapSpinner.getLastInCombo();
+        endsCombo = beatmapSpinner.isLastInCombo();
 
         needRotations = rps * duration;
         if (duration < 0.05f) {

@@ -34,7 +34,7 @@ class BeatmapProcessor(
 
         // Mark the last object in the beatmap as last in combo.
         if (lastObj != null) {
-            lastObj!!.lastInCombo = true
+            lastObj!!.isLastInCombo = true
         }
     }
 

@@ -107,7 +107,7 @@ public class Slider extends GameObject {
         this.scene = scene;
         this.beatmapSlider = beatmapSlider;
         this.pos = beatmapSlider.getGameplayStackedPosition().toPointF();
-        endsCombo = beatmapSlider.getLastInCombo();
+        endsCombo = beatmapSlider.isLastInCombo();
         passedTime = secPassed - (float) beatmapSlider.startTime / 1000;
         path = sliderPath;
 
