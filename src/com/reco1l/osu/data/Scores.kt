@@ -15,7 +15,7 @@ import ru.nsu.ccfit.zuev.osu.scoring.StatisticV2
 
 @Entity(
     indices = [
-        Index(name = "beatmapPathIdx", value = ["beatmapPath"])
+        Index(name = "beatmapIdx", value = ["beatmapFilename", "beatmapSetDirectory"]),
     ]
 )
 data class ScoreInfo @JvmOverloads constructor(
@@ -146,7 +146,7 @@ data class ScoreInfo @JvmOverloads constructor(
     fun toStatisticV2() = StatisticV2().also {
 
         it.playerName = playerName
-        it.fileName = "$beatmapSetDirectory/$beatmapFilename"
+        it.setBeatmap(beatmapSetDirectory, beatmapFilename)
         it.replayFilename = replayFilename
         it.setModFromString(mods)
         it.setForcedScore(score)

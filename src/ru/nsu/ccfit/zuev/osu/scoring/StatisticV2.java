@@ -41,7 +41,6 @@ public class StatisticV2 implements Serializable {
     private float diffModifier = 1;
     private EnumSet<GameMod> mod = EnumSet.noneOf(GameMod.class);
     private String playerName = Config.getOnlineUsername();
-    private String fileName = "";
     private String replayFilename = "";
     private int forcedScore = -1;
     private String mark = null;
@@ -85,7 +84,19 @@ public class StatisticV2 implements Serializable {
      */
     private float modScoreMultiplier = 1;
 
+    /**
+     * The directory of the beatmap set.
+     */
+    private String beatmapSetDirectory = "";
+
+    /**
+     * The filename of the beatmap.
+     */
+    private String beatmapFilename = "";
+
+
     private int life = 1;
+
 
     public StatisticV2() {}
 
@@ -618,12 +629,9 @@ public class StatisticV2 implements Serializable {
         totalScore = forcedScore;
     }
 
-    public String getFileName() {
-        return fileName;
-    }
-
-    public void setFileName(String fileName) {
-        this.fileName = fileName;
+    public void setBeatmap(String beatmapSetDirectory, String beatmapFilename) {
+        this.beatmapSetDirectory = beatmapSetDirectory;
+        this.beatmapFilename = beatmapFilename;
     }
 
     public final boolean isScoreValid() {
@@ -915,9 +923,10 @@ public class StatisticV2 implements Serializable {
      */
     public ScoreInfo toScoreInfo() {
         return new ScoreInfo(
-            fileName,
             playerName,
-                replayFilename,
+            beatmapFilename,
+            beatmapSetDirectory,
+            replayFilename,
             getModString(),
             getTotalScoreWithMultiplier(),
             maxCombo,

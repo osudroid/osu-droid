@@ -2739,6 +2739,8 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
 
             if (stat.getTotalScoreWithMultiplier() > 0 && !stat.getMod().contains(GameMod.MOD_AUTO)) {
                 stat.setReplayFilename(odrFilename);
+                stat.setBeatmap(lastBeatmapInfo.getSetDirectory(), lastBeatmapInfo.getFilename());
+
                 try {
                     DatabaseManager.getScoreInfoTable().insertScore(stat.toScoreInfo());
                 } catch (Exception e) {

@@ -466,6 +466,8 @@ public class ScoringScene {
 
                 if (stat.getTotalScoreWithMultiplier() > 0 && !stat.getMod().contains(GameMod.MOD_AUTO)) {
                     stat.setReplayFilename(replay);
+                    stat.setBeatmap(beatmapInfo.getSetDirectory(), beatmapInfo.getFilename());
+
                     try {
                         DatabaseManager.getScoreInfoTable().insertScore(stat.toScoreInfo());
                     } catch (Exception e) {
