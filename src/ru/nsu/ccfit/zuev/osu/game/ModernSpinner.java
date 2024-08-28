@@ -61,13 +61,18 @@ public class ModernSpinner extends Spinner {
                      final StatisticV2 stat) {
         this.scene = scene;
         this.beatmapSpinner = beatmapSpinner;
-        this.duration = (float) beatmapSpinner.getDuration() / 1000 / GameHelper.getSpeedMultiplier();
-        this.needRotations = rps * duration;
         this.listener = listener;
         this.stat = stat;
-        this.clear = false;
-        this.fullRotations = 0;
-        this.rotations = 0;
+        duration = (float) beatmapSpinner.getDuration() / 1000 / GameHelper.getSpeedMultiplier();
+        needRotations = rps * duration;
+
+        if (duration < 0.05f) {
+            needRotations = 0.1f;
+        }
+
+        clear = duration <= 0f;
+        fullRotations = 0;
+        rotations = 0;
         endsCombo = beatmapSpinner.isLastInCombo();
         spinnable = false;
 
