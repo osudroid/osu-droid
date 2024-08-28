@@ -94,7 +94,7 @@ public class HitCircle extends GameObject {
                 actualFadeOutDuration,
                 Math.max(0, actualFadeOutDuration + remainingFadeInDuration - passedTime / GameHelper.getSpeedMultiplier())
             );
-            float fadeOutProgress = 1 - remainingFadeOutDuration / actualFadeOutDuration;
+            float fadeOutProgress = remainingFadeOutDuration / actualFadeOutDuration;
 
             number.registerEntityModifier(Modifiers.sequence(
                     Modifiers.alpha(remainingFadeInDuration, fadeInProgress, 1),
