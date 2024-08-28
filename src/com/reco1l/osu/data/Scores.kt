@@ -114,7 +114,7 @@ data class ScoreInfo @JvmOverloads constructor(
 
         put("id", id)
         put("filename", beatmapPath)
-        put("playername", beatmapPath)
+        put("playername", playerName)
         put("replayfile", replayPath)
         put("mod", mods)
         put("score", score)
