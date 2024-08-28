@@ -112,7 +112,7 @@ public class GameObjectPool {
         return new FollowTrack();
     }
 
-    public void putTrac(final FollowTrack track) {
+    public void putTrack(final FollowTrack track) {
         tracks.add(track);
     }
 
@@ -139,7 +139,7 @@ public class GameObjectPool {
         }
         for (int i = 0; i < 5; i++) {
             putSlider(new Slider());
-            putTrac(new FollowTrack());
+            putTrack(new FollowTrack());
         }
         for (int i = 0; i < 3; i++) {
             putSpinner(new Spinner());
