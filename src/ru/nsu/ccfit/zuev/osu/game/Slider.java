@@ -52,6 +52,7 @@ public class Slider extends GameObject {
     private double passedTime;
     private int completedSpanCount;
     private boolean reverse;
+    private boolean slidingSamplesPlaying;
 
     private int currentNestedObjectIndex;
     private int ticksGot;
@@ -111,6 +112,7 @@ public class Slider extends GameObject {
         endsCombo = beatmapSlider.isLastInCombo();
         passedTime = secPassed - (float) beatmapSlider.startTime / 1000;
         realTimePreempt = (float) beatmapSlider.timePreempt / 1000 / GameHelper.getSpeedMultiplier();
+        slidingSamplesPlaying = false;
         path = sliderPath;
 
         float scale = beatmapSlider.getGameplayScale();
@@ -901,11 +903,26 @@ public class Slider extends GameObject {
         listener.playSamples(beatmapSlider.getNestedHitObjects().get(currentNestedObjectIndex));
     }
 
+    @Override
+    public void stopAuxiliarySamples() {
+        stopSlidingSamples();
+    }
+
     private void playSlidingSamples() {
+        if (slidingSamplesPlaying) {
+            return;
+        }
+
+        slidingSamplesPlaying = true;
         listener.playAuxiliarySamples(beatmapSlider);
     }
 
     private void stopSlidingSamples() {
+        if (!slidingSamplesPlaying) {
+            return;
+        }
+
+        slidingSamplesPlaying = false;
         listener.stopAuxiliarySamples(beatmapSlider);
     }
 

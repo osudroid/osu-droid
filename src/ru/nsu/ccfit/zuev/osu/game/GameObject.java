@@ -55,4 +55,6 @@ public abstract class GameObject {
     public void tryHit(float dt) {}
 
     public PointF getPos() {return pos;}
+
+    public void stopAuxiliarySamples() {}
 }

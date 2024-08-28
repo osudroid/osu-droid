@@ -328,6 +328,17 @@ public class Spinner extends GameObject {
         }
     }
 
+    @Override
+    public void stopAuxiliarySamples() {
+        if (spinnerBonusSample != null) {
+            listener.stopSample(spinnerBonusSample);
+        }
+
+        if (spinnerSpinSample != null) {
+            listener.stopSample(spinnerSpinSample);
+        }
+    }
+
     protected void playSpinnerBonusSound() {
         if (spinnerBonusSample != null) {
             listener.playSample(spinnerBonusSample, false);

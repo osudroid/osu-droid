@@ -1544,6 +1544,7 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
         SkinManager.setSkinEnabled(false);
         GameObjectPool.getInstance().purge();
         GameHelper.purgeSliderPathPool();
+        stopAllAuxiliarySamples();
         if (passiveObjects != null) {
             passiveObjects.clear();
         }
@@ -1947,16 +1948,27 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
 
     @Override
     public void stopAuxiliarySamples(final HitObject obj) {
+        for (var sample : obj.getAuxiliarySamples()) {
+            stopSample(sample);
+        }
+    }
+
+    @Override
+    public void stopSample(HitSampleInfo sample) {
         var resourceManager = ResourceManager.getInstance();
 
-        for (var sample : obj.getAuxiliarySamples()) {
-            for (var name : sample.getLookupNames()) {
-                var snd = resourceManager.getCustomSound(name, false);
+        for (var name : sample.getLookupNames()) {
+            var snd = resourceManager.getCustomSound(name, false);
 
-                if (snd != null) {
-                    snd.stop();
-                }
+            if (snd != null) {
+                snd.stop();
             }
+        }
+    }
+
+    private void stopAllAuxiliarySamples() {
+        for (int i = 0, size = activeObjects.size(); i < size; i++) {
+            activeObjects.get(i).stopAuxiliarySamples();
         }
     }
 
@@ -2129,6 +2141,8 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
             video.getTexture().pause();
         }
 
+        stopAllAuxiliarySamples();
+
         // Release all pressed cursors to avoid getting stuck at resume.
         if (!GameHelper.isAuto() && !GameHelper.isAutopilotMod() && !replaying) {
             var frameOffset = previousFrameTime > 0 ? (SystemClock.uptimeMillis() - previousFrameTime) * GameHelper.getSpeedMultiplier() : 0;
@@ -2158,7 +2172,6 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
     }
 
     public void gameover() {
-
         if (Multiplayer.isMultiplayer)
         {
             if (Multiplayer.isConnected())
@@ -2171,6 +2184,7 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
         }
 
         if(scorebar != null) scorebar.flush();
+        stopAllAuxiliarySamples();
         ResourceManager.getInstance().getSound("failsound").play();
         final PauseMenu menu = new PauseMenu(engine, this, true);
         gameStarted = false;
