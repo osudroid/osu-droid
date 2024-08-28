@@ -16,73 +16,67 @@ import com.rian.osu.mods.Mod
  */
 class Beatmap : Cloneable {
     /**
-     * The format version of this beatmap.
+     * The format version of this [Beatmap].
      */
     @JvmField
     var formatVersion = 14
 
     /**
-     * The general section of this beatmap.
+     * The general section of this [Beatmap].
      */
     @JvmField
     var general = BeatmapGeneral()
 
     /**
-     * The metadata section of this beatmap.
+     * The metadata section of this [Beatmap].
      */
     @JvmField
     var metadata = BeatmapMetadata()
 
     /**
-     * The difficulty section of this beatmap.
+     * The difficulty section of this [Beatmap].
      */
     @JvmField
     var difficulty = BeatmapDifficulty()
 
     /**
-     * The events section of this beatmap.
+     * The events section of this [Beatmap].
      */
     @JvmField
     var events = BeatmapEvents()
 
     /**
-     * The colors section of this beatmap.
+     * The colors section of this [Beatmap].
      */
     @JvmField
     var colors = BeatmapColor()
 
     /**
-     * The control points of this beatmap.
+     * The control points of this [Beatmap].
      */
     @JvmField
     var controlPoints = BeatmapControlPoints()
 
     /**
-     * The hit objects of this beatmap.
+     * The hit objects of this [Beatmap].
      */
     @JvmField
     var hitObjects = BeatmapHitObjects()
 
     /**
-     * Raw hit objects data.
-     */
-    @JvmField
-    var rawHitObjects = mutableListOf<String>()
-
-    /**
-     * The path of parent folder of this beatmap.
+     * The path of parent folder of this [Beatmap].
      */
     @JvmField
     var folder: String? = null
 
     /**
-     * The name of the `.osu` file of this beatmap.
+     * The name of the `.osu` file of this [Beatmap].
      */
     @JvmField
     var filename = ""
 
     /**
-     * The MD5 hash of this beatmap.
+     * The MD5 hash of this [Beatmap].
      */
     @JvmField
     var md5 = ""
@@ -106,7 +100,7 @@ class Beatmap : Cloneable {
     fun getOffsetTime(time: Int) = time + if (formatVersion < 5) 24 else 0
 
     /**
-     * Gets the max combo of this beatmap.
+     * Gets the max combo of this [Beatmap].
      */
     val maxCombo by lazy {
         hitObjects.objects.sumOf {
@@ -115,7 +109,7 @@ class Beatmap : Cloneable {
     }
 
     /**
-     * The duration of this beatmap.
+     * The duration of this [Beatmap].
      */
     val duration: Int
         get() = hitObjects.objects.lastOrNull()?.getEndTime()?.toInt() ?: 0
