@@ -61,7 +61,7 @@ public class ModernSpinner extends Spinner {
                      final StatisticV2 stat) {
         this.scene = scene;
         this.beatmapSpinner = beatmapSpinner;
-        this.duration = (float) beatmapSpinner.getDuration() / 1000;
+        this.duration = (float) beatmapSpinner.getDuration() / 1000 / GameHelper.getSpeedMultiplier();
         this.needRotations = rps * duration;
         this.listener = listener;
         this.stat = stat;
@@ -95,7 +95,7 @@ public class ModernSpinner extends Spinner {
         scene.attachChild(middle);
         scene.attachChild(middle2);
 
-        float timePreempt = (float) beatmapSpinner.timePreempt / 1000;
+        float timePreempt = (float) beatmapSpinner.timePreempt / 1000 / GameHelper.getSpeedMultiplier();
 
         top.registerEntityModifier(Modifiers.sequence(
             Modifiers.fadeIn(timePreempt).setOnFinished(entity -> spinnable = true),
