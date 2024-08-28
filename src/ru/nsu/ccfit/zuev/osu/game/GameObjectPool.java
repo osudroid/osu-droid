@@ -14,7 +14,6 @@ public class GameObjectPool {
     public LinkedList<Slider> sliders = new LinkedList<>();
     public LinkedList<FollowTrack> tracks = new LinkedList<>();
     public LinkedList<Spinner> spinners = new LinkedList<>();
-    public LinkedList<ModernSpinner> modernSpinners = new LinkedList<>();
     private int objectsCreated = 0;
     private GameObjectPool() {
     }
@@ -37,10 +36,8 @@ public class GameObjectPool {
     }
 
     public Spinner getSpinner() {
-        var pool = Config.getSpinnerStyle() == 1 ? modernSpinners : spinners;
-
-        if (!pool.isEmpty()) {
-            return pool.poll();
+        if (!spinners.isEmpty()) {
+            return spinners.poll();
         }
 
         objectsCreated++;
@@ -49,11 +46,7 @@ public class GameObjectPool {
     }
 
     public void putSpinner(final Spinner spinner) {
-        if (Config.getSpinnerStyle() == 1) {
-            modernSpinners.add((ModernSpinner) spinner);
-        } else {
-            spinners.add(spinner);
-        }
+        spinners.add(spinner);
     }
 
     public CircleNumber getNumber(final int num) {
@@ -127,7 +120,6 @@ public class GameObjectPool {
         sliders.clear();
         tracks.clear();
         spinners.clear();
-        modernSpinners.clear();
 
         objectsCreated = 0;
     }
@@ -142,10 +134,9 @@ public class GameObjectPool {
             putTrack(new FollowTrack());
         }
         for (int i = 0; i < 3; i++) {
-            putSpinner(new Spinner());
-            putSpinner(new ModernSpinner());
+            putSpinner(Config.getSpinnerStyle() == 1 ? new ModernSpinner() : new Spinner());
         }
 
-        objectsCreated = 36;
+        objectsCreated = 33;
     }
 }
