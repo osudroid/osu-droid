@@ -3,6 +3,7 @@ package com.reco1l.ibancho.data
 import com.reco1l.osu.multiplayer.Multiplayer
 
 data class Room(
+
     /**
      * The room ID.
      */

@@ -265,7 +265,7 @@ class SettingsFragment : com.edlplan.ui.fragment.SettingsFragment() {
                 value = Multiplayer.player!!.team?.ordinal?.toString()
 
                 setOnPreferenceChangeListener { _, newValue ->
-                    RoomAPI.setPlayerTeam(RoomTeam.from((newValue as String).toInt()))
+                    RoomAPI.setPlayerTeam(RoomTeam[(newValue as String).toInt()])
                     true
                 }
             }
@@ -339,7 +339,7 @@ class SettingsFragment : com.edlplan.ui.fragment.SettingsFragment() {
                 value = Multiplayer.room!!.teamMode.ordinal.toString()
 
                 setOnPreferenceChangeListener { _, newValue ->
-                    RoomAPI.setRoomTeamMode(TeamMode.from((newValue as String).toInt()))
+                    RoomAPI.setRoomTeamMode(TeamMode[(newValue as String).toInt()])
                     true
                 }
             }
