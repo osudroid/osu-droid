@@ -5,7 +5,7 @@ import android.os.Build;
 import android.os.SystemClock;
 import android.util.Log;
 
-import com.dgsrz.bancho.security.SecurityUtils;
+import ru.nsu.ccfit.zuev.osu.SecurityUtils;
 import com.edlplan.framework.math.FMath;
 import com.edlplan.framework.support.ProxySprite;
 import com.edlplan.framework.support.osb.StoryboardSprite;
@@ -155,7 +155,6 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
     private float skipTime;
     private boolean musicStarted;
     private double distToNextObject;
-    private float timeMultiplier = 1.0f;
     private CursorEntity[] cursorSprites;
     private AutoCursor autoCursor;
     private FlashLightEntity flashlightSprite;
@@ -264,7 +263,7 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
         if (Config.isVideoEnabled() && beatmap.events.videoFilename != null
                 // Unfortunately MediaPlayer API doesn't allow to change playback speed on APIs < 23, so in that case
                 // the video will not be shown.
-                && (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M || timeMultiplier == 1.0f)) {
+                && (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M || GameHelper.getSpeedMultiplier() == 1.0f)) {
             try {
                 videoStarted = false;
                 videoOffset = beatmap.events.videoStartTime / 1000f;
@@ -419,35 +418,31 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
             GameHelper.setHardrock(true);
         }
 
-        timeMultiplier = 1f;
+        GameHelper.setSpeedMultiplier(1f);
         GameHelper.setDoubleTime(false);
         GameHelper.setNightCore(false);
         GameHelper.setHalfTime(false);
 
         GlobalManager.getInstance().getSongService().preLoad(filePath, PlayMode.MODE_NONE);
-        GameHelper.setTimeMultiplier(1f);
+
         //Speed Change
         if (ModMenu.getInstance().getChangeSpeed() != 1.00f){
-            timeMultiplier = ModMenu.getInstance().getSpeed();
-            GlobalManager.getInstance().getSongService().preLoad(filePath, timeMultiplier,
+            GlobalManager.getInstance().getSongService().preLoad(filePath, ModMenu.getInstance().getSpeed(),
                 ModMenu.getInstance().isEnableNCWhenSpeedChange() ||
                         ModMenu.getInstance().getMod().contains(GameMod.MOD_NIGHTCORE));
-            GameHelper.setTimeMultiplier(1 / timeMultiplier);
+            GameHelper.setSpeedMultiplier(ModMenu.getInstance().getSpeed());
         } else if (ModMenu.getInstance().getMod().contains(GameMod.MOD_DOUBLETIME)) {
             GlobalManager.getInstance().getSongService().preLoad(filePath, PlayMode.MODE_DT);
-            timeMultiplier = 1.5f;
             GameHelper.setDoubleTime(true);
-            GameHelper.setTimeMultiplier(2 / 3f);
+            GameHelper.setSpeedMultiplier(1.5f);
         } else if (ModMenu.getInstance().getMod().contains(GameMod.MOD_NIGHTCORE)) {
             GlobalManager.getInstance().getSongService().preLoad(filePath, PlayMode.MODE_NC);
-            timeMultiplier = 1.5f;
             GameHelper.setNightCore(true);
-            GameHelper.setTimeMultiplier(2 / 3f);
+            GameHelper.setSpeedMultiplier(1.5f);
         } else if (ModMenu.getInstance().getMod().contains(GameMod.MOD_HALFTIME)) {
             GlobalManager.getInstance().getSongService().preLoad(filePath, PlayMode.MODE_HT);
-            timeMultiplier = 0.75f;
             GameHelper.setHalfTime(true);
-            GameHelper.setTimeMultiplier(4 / 3f);
+            GameHelper.setSpeedMultiplier(0.75f);
         }
 
         if (ModMenu.getInstance().getMod().contains(GameMod.MOD_REALLYEASY)) {
@@ -459,12 +454,13 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
                 ar *= 2;
                 ar -= 0.5f;
             }
-            ar -= (timeMultiplier - 1.0f) + 0.5f;
+            ar -= (GameHelper.getSpeedMultiplier() - 1.0f) + 0.5f;
             approachRate = (float)(GameHelper.ar2ms(ar) / 1000f);
         }
 
         if (ModMenu.getInstance().isCustomAR()){
-            approachRate = (float) GameHelper.ar2ms(ModMenu.getInstance().getCustomAR()) / 1000f * timeMultiplier;
+            // Scale the approach rate with speed multiplier to ensure that the real-time AR value stays the same.
+            approachRate = (float) GameHelper.ar2ms(ModMenu.getInstance().getCustomAR()) / 1000f * GameHelper.getSpeedMultiplier();
         }
         if (ModMenu.getInstance().isCustomOD()) {
             overallDifficulty = ModMenu.getInstance().getCustomOD();
@@ -1050,7 +1046,7 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
     public void onUpdate(final float pSecondsElapsed) {
         previousFrameTime = SystemClock.uptimeMillis();
         Utils.clearSoundMask();
-        float dt = pSecondsElapsed * timeMultiplier;
+        float dt = pSecondsElapsed * GameHelper.getSpeedMultiplier();
         if (GlobalManager.getInstance().getSongService().getStatus() == Status.PLAYING) {
             //处理时间差过于庞大的情况
             final float offset = totalOffset / 1000f;
@@ -1378,7 +1374,7 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
         {
             if (!videoStarted) {
                 video.getTexture().play();
-                video.getTexture().setPlaybackSpeed(timeMultiplier);
+                video.getTexture().setPlaybackSpeed(GameHelper.getSpeedMultiplier());
                 videoStarted = true;
             }
 
@@ -1509,8 +1505,8 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
                 if (params.length > 6) {
                     tempSound = params[6];
                 }
-                spinner.init(this, bgScene, (data.getTime() - secPassed) / timeMultiplier,
-                        (endTime - data.getTime()) / timeMultiplier, rps, Integer.parseInt(params[4]),
+                spinner.init(this, bgScene, (data.getTime() - secPassed) / GameHelper.getSpeedMultiplier(),
+                        (endTime - data.getTime()) / GameHelper.getSpeedMultiplier(), rps, Integer.parseInt(params[4]),
                         tempSound, stat);
                 spinner.setEndsCombo(nextObj == null || nextObj.isNewCombo());
                 addObject(spinner);
@@ -2088,6 +2084,8 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
 
         final PointF pos = new PointF((float) Config.getRES_WIDTH() / 2,
                 (float) Config.getRES_HEIGHT() / 2);
+        final float speedMultiplier = GameHelper.getSpeedMultiplier();
+
         if (score == 0) {
             final GameEffect effect = GameObjectPool.getInstance().getEffect(
                     "hit0");
@@ -2096,9 +2094,9 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
                     pos,
                     scale,
                     Modifiers.sequence(
-                        Modifiers.fadeIn(0.15f * timeMultiplier),
-                        Modifiers.delay(0.35f * timeMultiplier),
-                        Modifiers.fadeOut(0.25f * timeMultiplier)
+                        Modifiers.fadeIn(0.15f / speedMultiplier),
+                        Modifiers.delay(0.35f / speedMultiplier),
+                        Modifiers.fadeOut(0.25f / speedMultiplier)
                     )
             );
             registerHit(id, 0, endCombo);
@@ -2120,10 +2118,10 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
                     mgScene,
                     pos,
                     scale,
-                    Modifiers.fadeOut(0.7f * timeMultiplier),
+                    Modifiers.fadeOut(0.7f / speedMultiplier),
                     Modifiers.sequence(
-                        Modifiers.scale(0.25f * timeMultiplier, scale, 1.5f * scale),
-                        Modifiers.scale(0.45f * timeMultiplier, 1.5f * scale, 2f * scale)
+                        Modifiers.scale(0.25f / speedMultiplier, scale, 1.5f * scale),
+                        Modifiers.scale(0.45f / speedMultiplier, 1.5f * scale, 2f * scale)
                     )
             );
         }
@@ -2134,15 +2132,15 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
                 pos,
                 scale,
                 Modifiers.sequence(
-                    Modifiers.scale(0.15f * timeMultiplier, scale, 1.2f * scale),
-                    Modifiers.scale(0.05f * timeMultiplier, 1.2f * scale, scale),
-                    Modifiers.fadeOut(timeMultiplier)
+                    Modifiers.scale(0.15f / speedMultiplier, scale, 1.2f * scale),
+                    Modifiers.scale(0.05f / speedMultiplier, 1.2f * scale, scale),
+                    Modifiers.fadeOut(1 / speedMultiplier)
                 )
         );
 
         pos.y /= 2f;
         effect = GameObjectPool.getInstance().getEffect("spinner-osu");
-        effect.init(mgScene, pos, 1, Modifiers.fadeOut(1.5f * timeMultiplier));
+        effect.init(mgScene, pos, 1, Modifiers.fadeOut(1.5f / speedMultiplier));
     }
 
     public void playSound(final String name, final int sampleSet, final int addition) {
@@ -2278,7 +2276,7 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
             sprite.setPosition(cursor.mousePos.x, cursor.mousePos.y);
         }
 
-        var frameOffset = previousFrameTime > 0 ? (event.getMotionEvent().getEventTime() - previousFrameTime) * timeMultiplier : 0;
+        var frameOffset = previousFrameTime > 0 ? (event.getMotionEvent().getEventTime() - previousFrameTime) * GameHelper.getSpeedMultiplier() : 0;
         var eventTime = (int) (secPassed * 1000 + frameOffset);
 
         if (event.isActionDown()) {
@@ -2367,7 +2365,7 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
 
         // Release all pressed cursors to avoid getting stuck at resume.
         if (!GameHelper.isAuto() && !GameHelper.isAutopilotMod() && !replaying) {
-            var frameOffset = previousFrameTime > 0 ? (SystemClock.uptimeMillis() - previousFrameTime) * timeMultiplier : 0;
+            var frameOffset = previousFrameTime > 0 ? (SystemClock.uptimeMillis() - previousFrameTime) * GameHelper.getSpeedMultiplier() : 0;
             var time = (int) (secPassed * 1000 + frameOffset);
 
             for (int i = 0; i < CursorCount; ++i) {
@@ -2461,7 +2459,7 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
 
     private void createHitEffect(final PointF pos, final String name, RGBColor color) {
         final GameEffect effect = GameObjectPool.getInstance().getEffect(name);
-        final float timeMultiplier = GameHelper.getTimeMultiplier();
+        final float speedMultiplier = GameHelper.getSpeedMultiplier();
 
         if (name.equals("hit0")) {
             effect.init(
@@ -2469,9 +2467,9 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
                     pos,
                     GameHelper.isSuddenDeath() ? scale * 3 : scale,
                     Modifiers.sequence(
-                        Modifiers.fadeIn(0.15f * timeMultiplier),
-                        Modifiers.delay(0.35f * timeMultiplier),
-                        Modifiers.fadeOut(0.25f * timeMultiplier)
+                        Modifiers.fadeIn(0.15f / speedMultiplier),
+                        Modifiers.delay(0.35f / speedMultiplier),
+                        Modifiers.fadeOut(0.25f / speedMultiplier)
                     )
             );
 
@@ -2488,11 +2486,11 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
                     bgScene,
                     pos,
                     scale,
-                    Modifiers.fadeOut(timeMultiplier),
+                    Modifiers.fadeOut(1 / speedMultiplier),
                     Modifiers.sequence(
-                        Modifiers.scale(0.25f * timeMultiplier, scale, 1.5f * scale),
-                        Modifiers.scale(0.45f * timeMultiplier, scale * 1.5f, 1.9f * scale),
-                        Modifiers.scale(0.3f * timeMultiplier, scale * 1.9f, scale * 2f)
+                        Modifiers.scale(0.25f / speedMultiplier, scale, 1.5f * scale),
+                        Modifiers.scale(0.45f / speedMultiplier, scale * 1.5f, 1.9f * scale),
+                        Modifiers.scale(0.3f / speedMultiplier, scale * 1.9f, scale * 2f)
                     )
             );
             light.setBlendFunction(GL10.GL_SRC_ALPHA, GL10.GL_DST_ALPHA);
@@ -2503,9 +2501,9 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
                 pos,
                 scale,
                 Modifiers.sequence(
-                    Modifiers.scale(0.15f * timeMultiplier, scale, 1.2f * scale),
-                    Modifiers.scale(0.05f * timeMultiplier, 1.2f * scale, scale),
-                    Modifiers.fadeOut(0.5f * timeMultiplier)
+                    Modifiers.scale(0.15f / speedMultiplier, scale, 1.2f * scale),
+                    Modifiers.scale(0.05f / speedMultiplier, 1.2f * scale, scale),
+                    Modifiers.fadeOut(0.5f / speedMultiplier)
                 )
         );
     }
@@ -2514,19 +2512,19 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
         if (!Config.isBurstEffects() || stat.getMod().contains(GameMod.MOD_HIDDEN))
             return;
 
-        final float timeMultiplier = GameHelper.getTimeMultiplier();
+        final float speedMultiplier = GameHelper.getSpeedMultiplier();
 
         final GameEffect burst1 = GameObjectPool.getInstance().getEffect("hitcircle");
         burst1.init(mgScene, pos, scale,
-                Modifiers.scale(0.25f * timeMultiplier, scale, 1.5f * scale),
-                Modifiers.alpha(0.25f * timeMultiplier, 0.8f, 0)
+                Modifiers.scale(0.25f / speedMultiplier, scale, 1.5f * scale),
+                Modifiers.alpha(0.25f / speedMultiplier, 0.8f, 0)
         );
         burst1.setColor(color);
 
         final GameEffect burst2 = GameObjectPool.getInstance().getEffect("hitcircleoverlay");
         burst2.init(mgScene, pos, scale,
-                Modifiers.scale(0.25f * timeMultiplier, scale, 1.5f * scale),
-                Modifiers.alpha(0.25f * timeMultiplier, 0.8f, 0)
+                Modifiers.scale(0.25f / speedMultiplier, scale, 1.5f * scale),
+                Modifiers.alpha(0.25f / speedMultiplier, 0.8f, 0)
         );
     }
 
@@ -2534,19 +2532,19 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
         if (!Config.isBurstEffects() || stat.getMod().contains(GameMod.MOD_HIDDEN))
             return;
 
-        final float timeMultiplier = GameHelper.getTimeMultiplier();
+        final float speedMultiplier = GameHelper.getSpeedMultiplier();
 
         final GameEffect burst1 = GameObjectPool.getInstance().getEffect("sliderstartcircle");
         burst1.init(mgScene, pos, scale,
-                Modifiers.scale(0.25f * timeMultiplier, scale, 1.5f * scale),
-                Modifiers.alpha(0.25f * timeMultiplier, 0.8f, 0)
+                Modifiers.scale(0.25f / speedMultiplier, scale, 1.5f * scale),
+                Modifiers.alpha(0.25f / speedMultiplier, 0.8f, 0)
         );
         burst1.setColor(color);
 
         final GameEffect burst2 = GameObjectPool.getInstance().getEffect("sliderstartcircleoverlay");
         burst2.init(mgScene, pos, scale,
-                Modifiers.scale(0.25f * timeMultiplier, scale, 1.5f * scale),
-                Modifiers.alpha(0.25f * timeMultiplier, 0.8f, 0)
+                Modifiers.scale(0.25f / speedMultiplier, scale, 1.5f * scale),
+                Modifiers.alpha(0.25f / speedMultiplier, 0.8f, 0)
         );
     }
 
@@ -2554,19 +2552,19 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
         if (!Config.isBurstEffects() || stat.getMod().contains(GameMod.MOD_HIDDEN))
             return;
 
-        final float timeMultiplier = GameHelper.getTimeMultiplier();
+        final float speedMultiplier = GameHelper.getSpeedMultiplier();
 
         final GameEffect burst1 = GameObjectPool.getInstance().getEffect("sliderendcircle");
         burst1.init(mgScene, pos, scale,
-                Modifiers.scale(0.25f * timeMultiplier, scale, 1.5f * scale),
-                Modifiers.alpha(0.25f * timeMultiplier, 0.8f, 0)
+                Modifiers.scale(0.25f / speedMultiplier, scale, 1.5f * scale),
+                Modifiers.alpha(0.25f / speedMultiplier, 0.8f, 0)
         );
         burst1.setColor(color);
 
         final GameEffect burst2 = GameObjectPool.getInstance().getEffect("sliderendcircleoverlay");
         burst2.init(mgScene, pos, scale,
-                Modifiers.scale(0.25f * timeMultiplier, scale, 1.5f * scale),
-                Modifiers.alpha(0.25f * timeMultiplier, 0.8f, 0)
+                Modifiers.scale(0.25f / speedMultiplier, scale, 1.5f * scale),
+                Modifiers.alpha(0.25f / speedMultiplier, 0.8f, 0)
         );
     }
 
@@ -2574,13 +2572,13 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
         if (!Config.isBurstEffects() || stat.getMod().contains(GameMod.MOD_HIDDEN))
             return;
 
-        final float timeMultiplier = GameHelper.getTimeMultiplier();
+        final float speedMultiplier = GameHelper.getSpeedMultiplier();
 
         final GameEffect burst1 = GameObjectPool.getInstance().getEffect("reversearrow");
         burst1.hit.setRotation(ang);
         burst1.init(mgScene, pos, scale,
-                Modifiers.scale(0.25f * timeMultiplier, scale, 1.5f * scale),
-                Modifiers.alpha(0.25f * timeMultiplier, 0.8f, 0)
+                Modifiers.scale(0.25f / speedMultiplier, scale, 1.5f * scale),
+                Modifiers.alpha(0.25f / speedMultiplier, 0.8f, 0)
         );
 
     }

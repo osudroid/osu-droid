@@ -1,6 +1,6 @@
 package ru.nsu.ccfit.zuev.osu.scoring;
 
-import com.dgsrz.bancho.security.SecurityUtils;
+import ru.nsu.ccfit.zuev.osu.SecurityUtils;
 
 import java.io.Serializable;
 import java.util.EnumSet;

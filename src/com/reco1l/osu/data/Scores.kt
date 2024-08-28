@@ -164,6 +164,7 @@ data class ScoreInfo @JvmOverloads constructor(
 
     }
 
+
 }
 
 fun ScoreInfo(json: JSONObject) = ScoreInfo(
