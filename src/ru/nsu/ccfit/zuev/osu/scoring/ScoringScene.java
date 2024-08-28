@@ -1,7 +1,10 @@
 package ru.nsu.ccfit.zuev.osu.scoring;
 
+import android.util.Log;
+
 import com.edlplan.framework.utils.functionality.SmartIterator;
 import com.reco1l.osu.Execution;
+import com.reco1l.osu.data.DatabaseManager;
 import com.reco1l.osu.multiplayer.Multiplayer;
 import com.reco1l.osu.multiplayer.RoomScene;
 import com.reco1l.osu.ui.entity.StatisticSelector;
@@ -39,6 +42,7 @@ import ru.nsu.ccfit.zuev.osu.game.mods.GameMod;
 import ru.nsu.ccfit.zuev.osu.menu.ModMenu;
 import ru.nsu.ccfit.zuev.osu.menu.SongMenu;
 import ru.nsu.ccfit.zuev.osu.online.OnlineManager;
+import ru.nsu.ccfit.zuev.osu.online.OnlineScoring;
 import ru.nsu.ccfit.zuev.osuplus.BuildConfig;
 
 public class ScoringScene {
@@ -459,7 +463,15 @@ public class ScoringScene {
         if (beatmapInfo != null && beatmapInfo.getMD5().equals(mapMD5)) {
             ResourceManager.getInstance().getSound("applause").play();
             if (!Multiplayer.isMultiplayer || !GlobalManager.getInstance().getGameScene().hasFailed) {
-                ScoreLibrary.getInstance().addScore(beatmapInfo.getPath(), stat, replay);
+
+                if (stat.getTotalScoreWithMultiplier() > 0 && !stat.getMod().contains(GameMod.MOD_AUTO)) {
+                    stat.setReplayName(replay);
+                    try {
+                        DatabaseManager.getScoreInfoTable().insertScore(stat.toScoreInfo());
+                    } catch (Exception e) {
+                        Log.e("GameScene", "Failed to save score to database", e);
+                    }
+                }
             }
 
             if (stat.getTotalScoreWithMultiplier() > 0 && OnlineManager.getInstance().isStayOnline() &&
@@ -486,7 +498,8 @@ public class ScoringScene {
                         OnlineManager.getInstance().getPP());
                 scene.registerTouchArea(sendingPanel.getDismissTouchArea());
                 scene.attachChild(sendingPanel);
-                ScoreLibrary.getInstance().sendScoreOnline(stat, replay, sendingPanel);
+
+                OnlineScoring.getInstance().sendRecord(stat, sendingPanel, replay);
             }
         }
     }

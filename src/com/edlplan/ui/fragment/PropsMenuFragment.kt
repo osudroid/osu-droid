@@ -20,7 +20,6 @@ import ru.nsu.ccfit.zuev.osu.GlobalManager
 import ru.nsu.ccfit.zuev.osu.menu.IPropsMenu
 import ru.nsu.ccfit.zuev.osu.menu.BeatmapSetItem
 import ru.nsu.ccfit.zuev.osu.menu.SongMenu
-import ru.nsu.ccfit.zuev.osu.scoring.ScoreLibrary
 import ru.nsu.ccfit.zuev.osuplus.R
 import kotlin.math.abs
 
@@ -106,7 +105,7 @@ class PropsMenuFragment : BaseFragment(), IPropsMenu {
         findViewById<View>(R.id.manageFavButton)!!.setOnClickListener { v: View? ->
             val dialog = FavoriteManagerFragment()
             //TODO : 铺面引用还是全局耦合的，需要分离
-            dialog.showToAddToFolder(ScoreLibrary.getBeatmapSetDirectory(GlobalManager.getInstance().selectedBeatmap!!.path))
+            dialog.showToAddToFolder(GlobalManager.getInstance().selectedBeatmap!!.parentPath)
         }
 
         findViewById<View>(R.id.deleteBeatmap)!!.setOnClickListener { v: View? ->

@@ -20,7 +20,6 @@ import com.reco1l.osu.data.DatabaseManager;
 import ru.nsu.ccfit.zuev.osu.Utils;
 import ru.nsu.ccfit.zuev.osu.DifficultyAlgorithm;
 import ru.nsu.ccfit.zuev.osu.helper.StringTable;
-import ru.nsu.ccfit.zuev.osu.scoring.ScoreLibrary;
 import ru.nsu.ccfit.zuev.osuplus.R;
 
 public class BeatmapSetItem {
@@ -45,7 +44,7 @@ public class BeatmapSetItem {
     public BeatmapSetItem(final MenuItemListener listener, final BeatmapSetInfo beatmapSetInfo) {
         this.listener = new WeakReference<>(listener);
         this.beatmapSetInfo = beatmapSetInfo;
-        beatmapSetDir = ScoreLibrary.getBeatmapSetDirectory(this.beatmapSetInfo.getPath());
+        beatmapSetDir = beatmapSetInfo.getPath();
         bgHeight = ResourceManager.getInstance()
                 .getTexture("menu-button-background").getHeight()
                 - Utils.toRes(25);
@@ -67,7 +66,7 @@ public class BeatmapSetItem {
     public BeatmapSetItem(final MenuItemListener listener, final BeatmapSetInfo beatmapSetInfo, int id) {
         this.listener = new WeakReference<>(listener);
         this.beatmapSetInfo = beatmapSetInfo;
-        beatmapSetDir = ScoreLibrary.getBeatmapSetDirectory(this.beatmapSetInfo.getPath());
+        beatmapSetDir = this.beatmapSetInfo.getPath();
         bgHeight = ResourceManager.getInstance()
                 .getTexture("menu-button-background").getHeight()
                 - Utils.toRes(25);
