@@ -7,7 +7,7 @@ import ru.nsu.ccfit.zuev.osu.game.mods.GameMod
 import ru.nsu.ccfit.zuev.osu.game.mods.GameMod.*
 import ru.nsu.ccfit.zuev.osu.menu.ModMenu
 import ru.nsu.ccfit.zuev.osu.menu.ScoreBoardItem
-import ru.nsu.ccfit.zuev.osu.scoring.StatisticV2
+import ru.nsu.ccfit.zuev.osu.scoring.Statistics
 import java.util.*
 
 
@@ -149,7 +149,7 @@ fun jsonToScoreboardItem(json: JSONObject) = ScoreBoardItem().apply {
 /**
  * Specifically made to handle `scoreSubmission` event.
  */
-fun jsonToStatistic(json: JSONObject) = StatisticV2().apply {
+fun jsonToStatistic(json: JSONObject) = Statistics().apply {
 
     playerName = json.getString("username")
     setForcedScore(json.getInt("score"))

@@ -30,7 +30,7 @@ import ru.nsu.ccfit.zuev.osu.game.mods.IModSwitcher;
 import ru.nsu.ccfit.zuev.osu.game.mods.ModButton;
 import ru.nsu.ccfit.zuev.osu.helper.StringTable;
 import ru.nsu.ccfit.zuev.osu.helper.TextButton;
-import ru.nsu.ccfit.zuev.osu.scoring.StatisticV2;
+import ru.nsu.ccfit.zuev.osu.scoring.Statistics;
 import ru.nsu.ccfit.zuev.osuplus.R;
 
 import static com.rian.osu.utils.ModConverter.convertLegacyMods;
@@ -405,15 +405,15 @@ public class ModMenu implements IModSwitcher {
             mult *= m.scoreMultiplier;
         }
         if (changeSpeed != 1.0f){
-            mult *= StatisticV2.getSpeedChangeScoreMultiplier(getSpeed(), mod);
+            mult *= Statistics.getSpeedChangeScoreMultiplier(getSpeed(), mod);
         }
         if (selectedBeatmap != null) {
             if (isCustomCS()) {
-                mult *= StatisticV2.getCustomCSScoreMultiplier(selectedBeatmap.getCircleSize(), customCS);
+                mult *= Statistics.getCustomCSScoreMultiplier(selectedBeatmap.getCircleSize(), customCS);
             }
 
             if (isCustomOD()) {
-                mult *= StatisticV2.getCustomODScoreMultiplier(selectedBeatmap.getOverallDifficulty(), customOD);
+                mult *= Statistics.getCustomODScoreMultiplier(selectedBeatmap.getOverallDifficulty(), customOD);
             }
         }
 

@@ -14,7 +14,7 @@ import org.json.JSONArray
 import ru.nsu.ccfit.zuev.osu.Config
 import ru.nsu.ccfit.zuev.osu.MainActivity
 import ru.nsu.ccfit.zuev.osu.ToastLogger
-import ru.nsu.ccfit.zuev.osu.scoring.StatisticV2
+import ru.nsu.ccfit.zuev.osu.scoring.Statistics
 import java.io.File
 import ru.nsu.ccfit.zuev.osu.GlobalManager.getInstance as getGlobal
 import ru.nsu.ccfit.zuev.osu.online.OnlineManager.getInstance as getOnline
@@ -50,7 +50,7 @@ object Multiplayer
      * Array containing final leaderboard
      */
     @JvmField
-    var finalData: Array<StatisticV2>? = null
+    var finalData: Array<Statistics>? = null
 
 
     /**
@@ -126,7 +126,7 @@ object Multiplayer
             return
         }
 
-        val list = mutableListOf<StatisticV2>()
+        val list = mutableListOf<Statistics>()
 
         for (i in 0 until array.length())
         {

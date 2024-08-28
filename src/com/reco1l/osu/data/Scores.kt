@@ -9,7 +9,7 @@ import androidx.room.OnConflictStrategy
 import androidx.room.PrimaryKey
 import androidx.room.Query
 import org.json.JSONObject
-import ru.nsu.ccfit.zuev.osu.scoring.StatisticV2
+import ru.nsu.ccfit.zuev.osu.scoring.Statistics
 
 
 @Entity(
@@ -132,7 +132,7 @@ data class ScoreInfo @JvmOverloads constructor(
 
     }
 
-    fun toStatisticV2() = StatisticV2().also {
+    fun toStatistics() = Statistics().also {
 
         it.playerName = playerName
         it.fileName = beatmapPath

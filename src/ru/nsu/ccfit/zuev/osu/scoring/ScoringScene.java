@@ -51,12 +51,12 @@ public class ScoringScene {
     private final SongMenu menu;
     private Scene scene;
     private SongService songService;
-    private StatisticV2 replayStat;
+    private Statistics replayStat;
     private int replayID = -1;
     public BeatmapInfo beatmapInfo;
 
     // Multiplayer
-    public StatisticV2 currentStatistic;
+    public Statistics currentStatistics;
 
     private StatisticSelector selector;
 
@@ -68,12 +68,12 @@ public class ScoringScene {
         menu = pMenu;
     }
 
-    public void load(final StatisticV2 stat, BeatmapInfo beatmapInfo,
+    public void load(final Statistics stat, BeatmapInfo beatmapInfo,
                      final SongService player, final String replay, final String mapMD5,
                      final BeatmapInfo beatmapToReplay) {
         scene = new Scene();
         songService = player;
-        currentStatistic = stat;
+        currentStatistics = stat;
         if (replay != null && beatmapInfo == null) {
             replayStat = stat;
         }
@@ -385,7 +385,7 @@ public class ScoringScene {
         final Text playerInfo = new Text(Utils.toRes(4), mapperInfo.getY() + mapperInfo.getHeight() + Utils.toRes(2),
                 ResourceManager.getInstance().getFont("smallFont"), playerStr);
 
-        if (Config.isDisplayScoreStatistics() && !currentStatistic.isTeamStatistic()) {
+        if (Config.isDisplayScoreStatistics() && !currentStatistics.isTeamStatistic()) {
 
             StringBuilder ppinfo = new StringBuilder();
             Beatmap beatmap;
@@ -531,7 +531,7 @@ public class ScoringScene {
     public void back() {
         ResourceManager.getInstance().getSound("applause").stop();
         Multiplayer.finalData = null;
-        currentStatistic = null;
+        currentStatistics = null;
 
         if (Multiplayer.isMultiplayer)
         {
@@ -567,11 +567,11 @@ public class ScoringScene {
         }
     }
 
-    public StatisticV2 getReplayStat() {
+    public Statistics getReplayStat() {
         return replayStat;
     }
 
-    public void setReplayStat(StatisticV2 replayStat) {
+    public void setReplayStat(Statistics replayStat) {
         this.replayStat = replayStat;
     }
 

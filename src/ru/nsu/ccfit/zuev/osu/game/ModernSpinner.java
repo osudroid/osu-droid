@@ -14,7 +14,7 @@ import ru.nsu.ccfit.zuev.osu.ResourceManager;
 import ru.nsu.ccfit.zuev.osu.Utils;
 import ru.nsu.ccfit.zuev.osu.helper.CentredSprite;
 import ru.nsu.ccfit.zuev.osu.scoring.ScoreNumber;
-import ru.nsu.ccfit.zuev.osu.scoring.StatisticV2;
+import ru.nsu.ccfit.zuev.osu.scoring.Statistics;
 
 /**
  * Created by dgsrz on 15/10/19.
@@ -35,7 +35,7 @@ public class ModernSpinner extends Spinner {
     private float rotations = 0;
     private boolean clear;
     private int score = 1;
-    private StatisticV2 stat;
+    private Statistics stat;
     private PointF oldMouse;
     private float duration;
     private boolean spinnable;
@@ -58,7 +58,7 @@ public class ModernSpinner extends Spinner {
     @Override
     public void init(final GameObjectListener listener, final Scene scene,
                      final com.rian.osu.beatmap.hitobject.Spinner beatmapSpinner, final float rps,
-                     final StatisticV2 stat) {
+                     final Statistics stat) {
         this.scene = scene;
         this.beatmapSpinner = beatmapSpinner;
         this.listener = listener;

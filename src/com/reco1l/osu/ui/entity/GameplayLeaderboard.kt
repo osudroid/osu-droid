@@ -7,11 +7,11 @@ import org.anddev.andengine.entity.sprite.Sprite
 import org.anddev.andengine.entity.text.ChangeableText
 import ru.nsu.ccfit.zuev.osu.Config
 import ru.nsu.ccfit.zuev.osu.menu.ScoreBoardItem
-import ru.nsu.ccfit.zuev.osu.scoring.StatisticV2
+import ru.nsu.ccfit.zuev.osu.scoring.Statistics
 import ru.nsu.ccfit.zuev.osu.GlobalManager.getInstance as getGlobal
 import ru.nsu.ccfit.zuev.osu.ResourceManager.getInstance as getResources
 
-class GameplayLeaderboard(var playerName: String, private val stats: StatisticV2) : Entity(0f, 0f)
+class GameplayLeaderboard(var playerName: String, private val stats: Statistics) : Entity(0f, 0f)
 {
 
     var nextItems: List<ScoreBoardItem>? = null

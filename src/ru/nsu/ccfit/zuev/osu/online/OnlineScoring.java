@@ -12,7 +12,7 @@ import java.io.File;
 import java.util.ArrayList;
 
 import ru.nsu.ccfit.zuev.osu.ToastLogger;
-import ru.nsu.ccfit.zuev.osu.scoring.StatisticV2;
+import ru.nsu.ccfit.zuev.osu.scoring.Statistics;
 
 public class OnlineScoring {
     private static final int attemptCount = 5;
@@ -138,7 +138,7 @@ public class OnlineScoring {
         });
     }
 
-    public void sendRecord(final StatisticV2 record, final SendingPanel panel, final String replay) {
+    public void sendRecord(final Statistics record, final SendingPanel panel, final String replay) {
         if (!OnlineManager.getInstance().isStayOnline() || !OnlineManager.getInstance().isReadyToSend())
             return;
 

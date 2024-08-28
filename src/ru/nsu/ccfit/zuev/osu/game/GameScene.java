@@ -90,7 +90,7 @@ import ru.nsu.ccfit.zuev.osu.online.OnlineScoring;
 import ru.nsu.ccfit.zuev.osu.scoring.Replay;
 import ru.nsu.ccfit.zuev.osu.scoring.ResultType;
 import ru.nsu.ccfit.zuev.osu.scoring.ScoringScene;
-import ru.nsu.ccfit.zuev.osu.scoring.StatisticV2;
+import ru.nsu.ccfit.zuev.osu.scoring.Statistics;
 import ru.nsu.ccfit.zuev.osu.scoring.TouchType;
 import ru.nsu.ccfit.zuev.osuplus.BuildConfig;
 import ru.nsu.ccfit.zuev.osuplus.R;
@@ -137,7 +137,7 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
     private float scale;
     private float objectTimePreempt;
     private float difficultyStatisticsScoreMultiplier;
-    public StatisticV2 stat;
+    public Statistics stat;
     private boolean gameStarted;
     private float totalOffset;
     //private IMusicPlayer music = null;
@@ -646,7 +646,7 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
             fgScene.attachChild(text);
         }
 
-        stat = new StatisticV2();
+        stat = new Statistics();
         stat.setMod(ModMenu.getInstance().getMod());
         stat.canFail = !stat.getMod().contains(GameMod.MOD_NOFAIL)
                 && !stat.getMod().contains(GameMod.MOD_RELAX)

@@ -60,7 +60,7 @@ import ru.nsu.ccfit.zuev.osu.online.OnlinePanel;
 import ru.nsu.ccfit.zuev.osu.online.OnlineScoring;
 import ru.nsu.ccfit.zuev.osu.scoring.Replay;
 import ru.nsu.ccfit.zuev.osu.scoring.ScoringScene;
-import ru.nsu.ccfit.zuev.osu.scoring.StatisticV2;
+import ru.nsu.ccfit.zuev.osu.scoring.Statistics;
 import ru.nsu.ccfit.zuev.osuplus.R;
 import ru.nsu.ccfit.zuev.skins.OsuSkin;
 import ru.nsu.ccfit.zuev.skins.SkinLayout;
@@ -1295,7 +1295,7 @@ public class SongMenu implements IUpdateHandler, MenuItemListener,
 
                     if (params.length < 11) return;
 
-                    StatisticV2 stat = new StatisticV2(params);
+                    Statistics stat = new Statistics(params);
                     if (stat.isLegacySC()) {
                         stat.processLegacySC(selectedBeatmap);
                     }
@@ -1312,7 +1312,7 @@ public class SongMenu implements IUpdateHandler, MenuItemListener,
         }
 
 
-        var stat = DatabaseManager.getScoreInfoTable().getScore(id).toStatisticV2();
+        var stat = DatabaseManager.getScoreInfoTable().getScore(id).toStatistics();
 
         if (stat.isLegacySC()) {
             stat.processLegacySC(selectedBeatmap);

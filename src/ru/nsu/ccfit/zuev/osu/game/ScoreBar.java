@@ -9,11 +9,11 @@ import java.util.List;
 import ru.nsu.ccfit.zuev.osu.ResourceManager;
 import ru.nsu.ccfit.zuev.osu.Utils;
 import ru.nsu.ccfit.zuev.osu.helper.AnimSprite;
-import ru.nsu.ccfit.zuev.osu.scoring.StatisticV2;
+import ru.nsu.ccfit.zuev.osu.scoring.Statistics;
 
 public class ScoreBar extends GameObject {
     private static float speed = 0.75f;
-    private final StatisticV2 stat;
+    private final Statistics stat;
     private final Sprite bg;
     private final Sprite colour;
     private final AnimSprite ki;
@@ -21,7 +21,7 @@ public class ScoreBar extends GameObject {
     private float lasthp = 0;
 
     public ScoreBar(final GameObjectListener listener, final Scene scene,
-                    final StatisticV2 stat) {
+                    final Statistics stat) {
         this.stat = stat;
         bg = new Sprite(0, 0, ResourceManager.getInstance().getTexture(
                 "scorebar-bg"));

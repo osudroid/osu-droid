@@ -11,7 +11,7 @@ import com.rian.osu.utils.LRUCache
 import com.rian.osu.utils.convertLegacyMods
 import ru.nsu.ccfit.zuev.osu.scoring.Replay.MoveArray
 import ru.nsu.ccfit.zuev.osu.scoring.Replay.ReplayObjectData
-import ru.nsu.ccfit.zuev.osu.scoring.StatisticV2
+import ru.nsu.ccfit.zuev.osu.scoring.Statistics
 import kotlin.math.min
 
 /**
@@ -27,14 +27,14 @@ object BeatmapDifficultyCalculator {
     private val standardDifficultyCalculator = StandardDifficultyCalculator()
 
     /**
-     * Constructs a [DifficultyCalculationParameters] from a [StatisticV2].
+     * Constructs a [DifficultyCalculationParameters] from a [Statistics].
      *
-     * @param stat The [StatisticV2] to construct the [DifficultyCalculationParameters] from.
-     * @return The [DifficultyCalculationParameters] representing the [StatisticV2],
-     * `null` if the [StatisticV2] instance is `null`.
+     * @param stat The [Statistics] to construct the [DifficultyCalculationParameters] from.
+     * @return The [DifficultyCalculationParameters] representing the [Statistics],
+     * `null` if the [Statistics] instance is `null`.
      */
     @JvmStatic
-    fun constructDifficultyParameters(stat: StatisticV2?) = stat?.run {
+    fun constructDifficultyParameters(stat: Statistics?) = stat?.run {
         DifficultyCalculationParameters().also {
             it.mods = convertLegacyMods(
                 mod,
@@ -49,14 +49,14 @@ object BeatmapDifficultyCalculator {
     }
 
     /**
-     * Constructs a [DroidPerformanceCalculationParameters] from a [StatisticV2].
+     * Constructs a [DroidPerformanceCalculationParameters] from a [Statistics].
      *
-     * @param stat The [StatisticV2] to construct the [DroidPerformanceCalculationParameters] from.
-     * @return The [DroidPerformanceCalculationParameters] representing the [StatisticV2],
-     * `null` if the [StatisticV2] instance is `null`.
+     * @param stat The [Statistics] to construct the [DroidPerformanceCalculationParameters] from.
+     * @return The [DroidPerformanceCalculationParameters] representing the [Statistics],
+     * `null` if the [Statistics] instance is `null`.
      */
     @JvmStatic
-    fun constructDroidPerformanceParameters(stat: StatisticV2?) = stat?.run {
+    fun constructDroidPerformanceParameters(stat: Statistics?) = stat?.run {
         DroidPerformanceCalculationParameters().also {
             it.maxCombo = getMaxCombo()
             it.countGreat = hit300
@@ -67,14 +67,14 @@ object BeatmapDifficultyCalculator {
     }
 
     /**
-     * Constructs a [PerformanceCalculationParameters] from a [StatisticV2].
+     * Constructs a [PerformanceCalculationParameters] from a [Statistics].
      *
-     * @param stat The [StatisticV2] to construct the [PerformanceCalculationParameters] from.
-     * @return The [PerformanceCalculationParameters] representing the [StatisticV2],
-     * `null` if the [StatisticV2] instance is `null`.
+     * @param stat The [Statistics] to construct the [PerformanceCalculationParameters] from.
+     * @return The [PerformanceCalculationParameters] representing the [Statistics],
+     * `null` if the [Statistics] instance is `null`.
      */
     @JvmStatic
-    fun constructStandardPerformanceParameters(stat: StatisticV2?) = stat?.run {
+    fun constructStandardPerformanceParameters(stat: Statistics?) = stat?.run {
         PerformanceCalculationParameters().also {
             it.maxCombo = getMaxCombo()
             it.countGreat = hit300
@@ -88,11 +88,11 @@ object BeatmapDifficultyCalculator {
      * Calculates the osu!droid difficulty of a [Beatmap].
      *
      * @param beatmap The [Beatmap] to calculate.
-     * @param stat The [StatisticV2] to calculate.
-     * @return A structure describing the osu!droid difficulty of the [Beatmap] relating to the [StatisticV2].
+     * @param stat The [Statistics] to calculate.
+     * @return A structure describing the osu!droid difficulty of the [Beatmap] relating to the [Statistics].
      */
     @JvmStatic
-    fun calculateDroidDifficulty(beatmap: Beatmap, stat: StatisticV2) =
+    fun calculateDroidDifficulty(beatmap: Beatmap, stat: Statistics) =
         calculateDroidDifficulty(beatmap, constructDifficultyParameters(stat))
 
     /**
@@ -127,11 +127,11 @@ object BeatmapDifficultyCalculator {
      * Calculates the osu!standard difficulty of a [Beatmap].
      *
      * @param beatmap The [Beatmap] to calculate.
-     * @param stat The [StatisticV2] to calculate for.
-     * @return A structure describing the osu!standard difficulty of the [Beatmap] relating to the [StatisticV2].
+     * @param stat The [Statistics] to calculate for.
+     * @return A structure describing the osu!standard difficulty of the [Beatmap] relating to the [Statistics].
      */
     @JvmStatic
-    fun calculateStandardDifficulty(beatmap: Beatmap, stat: StatisticV2) =
+    fun calculateStandardDifficulty(beatmap: Beatmap, stat: Statistics) =
         calculateStandardDifficulty(beatmap, constructDifficultyParameters(stat))
 
     /**
@@ -166,11 +166,11 @@ object BeatmapDifficultyCalculator {
      * Calculates the performance of a [DroidDifficultyAttributes].
      *
      * @param attributes The [DroidDifficultyAttributes] to calculate.
-     * @param stat The [StatisticV2] to calculate for.
-     * @return A structure describing the performance of the [DroidDifficultyAttributes] relating to the [StatisticV2].
+     * @param stat The [Statistics] to calculate for.
+     * @return A structure describing the performance of the [DroidDifficultyAttributes] relating to the [Statistics].
      */
     @JvmStatic
-    fun calculateDroidPerformance(attributes: DroidDifficultyAttributes, stat: StatisticV2) =
+    fun calculateDroidPerformance(attributes: DroidDifficultyAttributes, stat: Statistics) =
         calculateDroidPerformance(attributes, constructDroidPerformanceParameters(stat))
 
     /**
@@ -195,8 +195,8 @@ object BeatmapDifficultyCalculator {
      * @param attributes The [DroidDifficultyAttributes] of the [Beatmap].
      * @param replayMovements The replay movements of the player.
      * @param replayObjectData The replay object data of the player.
-     * @param stat The [StatisticV2] to calculate for.
-     * @return A structure describing the performance of the [DroidDifficultyAttributes] relating to the [StatisticV2].
+     * @param stat The [Statistics] to calculate for.
+     * @return A structure describing the performance of the [DroidDifficultyAttributes] relating to the [Statistics].
      */
     @JvmStatic
     fun calculateDroidPerformance(
@@ -204,7 +204,7 @@ object BeatmapDifficultyCalculator {
         attributes: DroidDifficultyAttributes,
         replayMovements: List<MoveArray>,
         replayObjectData: Array<ReplayObjectData>,
-        stat: StatisticV2
+        stat: Statistics
     ) = calculateDroidPerformance(beatmap, attributes, replayMovements, replayObjectData, constructDroidPerformanceParameters(stat))
 
     /**
@@ -245,11 +245,11 @@ object BeatmapDifficultyCalculator {
      * Calculates the performance of a [StandardDifficultyAttributes].
      *
      * @param attributes The [StandardDifficultyAttributes] to calculate.
-     * @param stat The [StatisticV2] to calculate for.
-     * @return A structure describing the performance of the [StandardDifficultyAttributes] relating to the [StatisticV2].
+     * @param stat The [Statistics] to calculate for.
+     * @return A structure describing the performance of the [StandardDifficultyAttributes] relating to the [Statistics].
      */
     @JvmStatic
-    fun calculateStandardPerformance(attributes: StandardDifficultyAttributes, stat: StatisticV2) =
+    fun calculateStandardPerformance(attributes: StandardDifficultyAttributes, stat: Statistics) =
         calculateStandardPerformance(attributes, constructStandardPerformanceParameters(stat))
 
     /**

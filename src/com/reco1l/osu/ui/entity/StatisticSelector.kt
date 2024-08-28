@@ -8,7 +8,7 @@ import org.anddev.andengine.entity.sprite.Sprite
 import org.anddev.andengine.entity.text.ChangeableText
 import org.anddev.andengine.input.touch.TouchEvent
 import org.anddev.andengine.util.MathUtils
-import ru.nsu.ccfit.zuev.osu.scoring.StatisticV2
+import ru.nsu.ccfit.zuev.osu.scoring.Statistics
 import java.text.NumberFormat.getNumberInstance
 import java.util.Locale.ENGLISH
 import java.util.Locale.US
@@ -18,10 +18,10 @@ import ru.nsu.ccfit.zuev.osu.ResourceManager.getInstance as getResources
 /**
  * Scoreboard list used for multiplayer scores in results screen.
  */
-class StatisticSelector(stats: Array<StatisticV2>?) : ScrollableList(), ITouchArea
+class StatisticSelector(stats: Array<Statistics>?) : ScrollableList(), ITouchArea
 {
 
-    private var selected: StatisticV2? = getGlobal().scoring.currentStatistic
+    private var selected: Statistics? = getGlobal().scoring.currentStatistics
         set(value)
         {
             if (value != field && value != null)
@@ -38,7 +38,7 @@ class StatisticSelector(stats: Array<StatisticV2>?) : ScrollableList(), ITouchAr
         stats?.forEachIndexed { i, stat -> addItem(i, stat) }
     }
 
-    private fun addItem(index: Int, stats: StatisticV2)
+    private fun addItem(index: Int, stats: Statistics)
     {
         camY = -146f
 
@@ -73,7 +73,7 @@ class StatisticSelector(stats: Array<StatisticV2>?) : ScrollableList(), ITouchAr
     }
 
 
-    inner class BoardItem(val index: Int, private val stats: StatisticV2) :
+    inner class BoardItem(val index: Int, private val stats: Statistics) :
             Sprite(570f, 0f, getResources().getTexture("menu-button-background"))
     {
 

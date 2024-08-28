@@ -39,7 +39,7 @@ public class Replay {
     public int[] lastMoveIndex;
     public ReplayObjectData[] objectData = null;
     public int replayVersion;
-    public StatisticV2 stat = null;
+    public Statistics stat = null;
     private String md5 = "";
     private String mapFile = "";
     private String mapName = "";
@@ -237,7 +237,7 @@ public class Replay {
             Debug.i(md5);
 
             if (version >= 3) {
-                stat = new StatisticV2();
+                stat = new Statistics();
                 stat.setTime(os.readLong());
                 stat.setHit300k(os.readInt());
                 stat.setHit300(os.readInt());
@@ -314,7 +314,7 @@ public class Replay {
             }
 
             if (version >= 3) {
-                stat = new StatisticV2();
+                stat = new Statistics();
                 stat.setTime(os.readLong());
                 stat.setHit300k(os.readInt());
                 stat.setHit300(os.readInt());
@@ -380,11 +380,11 @@ public class Replay {
     public void countMarks(float difficulty) {
     }
 
-    public StatisticV2 getStat() {
+    public Statistics getStat() {
         return stat;
     }
 
-    public void setStat(StatisticV2 stat) {
+    public void setStat(Statistics stat) {
         this.stat = stat;
     }
 

@@ -1,7 +1,5 @@
 package ru.nsu.ccfit.zuev.osu.game;
 
-import android.graphics.PointF;
-
 import com.reco1l.osu.multiplayer.Multiplayer;
 import com.reco1l.osu.multiplayer.RoomScene;
 import org.anddev.andengine.entity.modifier.*;
@@ -14,12 +12,12 @@ import ru.nsu.ccfit.zuev.osu.Config;
 import ru.nsu.ccfit.zuev.osu.ResourceManager;
 import ru.nsu.ccfit.zuev.osu.Utils;
 import ru.nsu.ccfit.zuev.osu.helper.CentredSprite;
-import ru.nsu.ccfit.zuev.osu.scoring.StatisticV2;
+import ru.nsu.ccfit.zuev.osu.scoring.Statistics;
 import ru.nsu.ccfit.zuev.skins.OsuSkin;
 
 public class BreakAnimator extends GameObject {
     private final Scene scene;
-    private final StatisticV2 stat;
+    private final Statistics stat;
     private final Sprite[] arrows = new Sprite[4];
     private float length = 0;
     private float time;
@@ -32,7 +30,7 @@ public class BreakAnimator extends GameObject {
     private Rectangle dimRectangle = null;
 
     public BreakAnimator(final GameObjectListener listener, final Scene scene,
-                         final StatisticV2 stat, final boolean showMark, Rectangle bgSprtie) {
+                         final Statistics stat, final boolean showMark, Rectangle bgSprtie) {
         length = 0;
         this.showMark = showMark;
         this.scene = scene;

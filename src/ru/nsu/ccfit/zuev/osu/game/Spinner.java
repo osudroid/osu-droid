@@ -18,7 +18,7 @@ import ru.nsu.ccfit.zuev.osu.ResourceManager;
 import ru.nsu.ccfit.zuev.osu.Utils;
 import ru.nsu.ccfit.zuev.osu.helper.CentredSprite;
 import ru.nsu.ccfit.zuev.osu.scoring.ScoreNumber;
-import ru.nsu.ccfit.zuev.osu.scoring.StatisticV2;
+import ru.nsu.ccfit.zuev.osu.scoring.Statistics;
 
 public class Spinner extends GameObject {
     private final Sprite background;
@@ -40,7 +40,7 @@ public class Spinner extends GameObject {
     private boolean clear = false;
     private int score = 1;
     private float metreY;
-    private StatisticV2 stat;
+    private Statistics stat;
     private float duration;
     protected HitSampleInfo spinnerSpinSample;
     protected HitSampleInfo spinnerBonusSample;
@@ -73,7 +73,7 @@ public class Spinner extends GameObject {
 
     public void init(final GameObjectListener listener, final Scene scene,
                      final com.rian.osu.beatmap.hitobject.Spinner beatmapSpinner, final float rps,
-                     final StatisticV2 stat) {
+                     final Statistics stat) {
         fullRotations = 0;
         rotations = 0;
         this.scene = scene;

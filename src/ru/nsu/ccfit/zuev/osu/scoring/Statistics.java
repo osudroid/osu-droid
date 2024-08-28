@@ -20,7 +20,7 @@ import ru.nsu.ccfit.zuev.osu.game.cursor.flashlight.FlashLightEntity;
 import ru.nsu.ccfit.zuev.osu.game.mods.GameMod;
 import ru.nsu.ccfit.zuev.osu.menu.ScoreBoardItem;
 
-public class StatisticV2 implements Serializable {
+public class Statistics implements Serializable {
     private static final long serialVersionUID = 8339570462000129479L;
     private static final Random random = new Random();
 
@@ -87,33 +87,9 @@ public class StatisticV2 implements Serializable {
 
     private int life = 1;
 
-    public StatisticV2() {}
+    public Statistics() {}
 
-    public StatisticV2(final Statistic stat) {
-        notes = stat.notes;
-        hit300 = stat.hit300;
-        hit100 = stat.hit100;
-        hit50 = stat.hit50;
-        hit300k = stat.hit300k;
-        hit100k = stat.hit100k;
-        misses = stat.misses;
-        maxCombo = stat.maxCombo;
-        currentCombo = stat.currentCombo;
-        totalScore = stat.totalScore;
-        possibleScore = stat.possibleScore;
-        realScore = stat.realScore;
-        hp = stat.hp;
-        diffModifier = stat.diffModifier;
-        mod = stat.mod.clone();
-        if (stat.mod.contains(GameMod.MOD_EASY)) {
-            life = 3;
-        }
-
-        setPlayerName(Config.getOnlineUsername());
-        computeModScoreMultiplier();
-    }
-
-    public StatisticV2(final String[] params) {
+    public Statistics(final String[] params) {
         playerName = "";
         if (params.length < 6) return;
 
