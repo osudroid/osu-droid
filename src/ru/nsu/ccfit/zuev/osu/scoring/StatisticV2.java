@@ -65,6 +65,7 @@ public class StatisticV2 implements Serializable {
     private Float customOD;
     private Float customCS;
     private Float customHP;
+    private int life = 1;
 
     private boolean isLegacySC = false;
 
@@ -93,9 +94,6 @@ public class StatisticV2 implements Serializable {
      * The filename of the beatmap.
      */
     private String beatmapFilename = "";
-
-
-    private int life = 1;
 
 
     public StatisticV2() {}
