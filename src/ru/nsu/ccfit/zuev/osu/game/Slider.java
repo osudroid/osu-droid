@@ -928,26 +928,24 @@ public class Slider extends GameObject {
 
     @Override
     public void tryHit(final float dt) {
-        if (!startHit) // If we didn't get start hit(click)
-        {
-            if (isHit() && -passedTime < GameHelper.getDifficultyHelper().hitWindowFor50(GameHelper.getOverallDifficulty())) // if
-            {
-                listener.registerAccuracy(passedTime);
-                startHit = true;
-                playCurrentNestedObjectHitSound();
-                currentNestedObjectIndex++;
-                ticksGot++;
-                firstHitAccuracy = (int) (passedTime * 1000);
-                listener.onSliderHit(id, 30, null, pos,
-                        false, bodyColor, GameObjectListener.SLIDER_START);
-            }
-            if (passedTime < 0) // we at approach time
-            {
-                if (startHit) {
-                    approachCircle.clearEntityModifiers();
-                    approachCircle.setAlpha(0);
-                }
-            }
+        if (startHit) {
+            return;
+        }
+
+        if (isHit() && -passedTime < GameHelper.getDifficultyHelper().hitWindowFor50(GameHelper.getOverallDifficulty())) {
+            listener.registerAccuracy(passedTime);
+            startHit = true;
+            playCurrentNestedObjectHitSound();
+            currentNestedObjectIndex++;
+            ticksGot++;
+            firstHitAccuracy = (int) (passedTime * 1000);
+            listener.onSliderHit(id, 30, null, pos,
+                    false, bodyColor, GameObjectListener.SLIDER_START);
+        }
+
+        if (passedTime < 0 && startHit) {
+            approachCircle.clearEntityModifiers();
+            approachCircle.setAlpha(0);
         }
     }
 
