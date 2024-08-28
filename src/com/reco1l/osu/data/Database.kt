@@ -171,7 +171,7 @@ object DatabaseManager {
     entities = [
         BeatmapInfo::class,
         BeatmapOptions::class,
-        ScoreInfo::class
+        ScoreInfo::class,
         BlockArea::class
     ]
 )
