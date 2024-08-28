@@ -1543,6 +1543,7 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
 
         SkinManager.setSkinEnabled(false);
         GameObjectPool.getInstance().purge();
+        GameHelper.purgeSliderPathPool();
         if (passiveObjects != null) {
             passiveObjects.clear();
         }

@@ -96,6 +96,13 @@ public class GameHelper {
         return path;
     }
 
+    /**
+     * Purges the {@link SliderPath} pool.
+     */
+    public static void purgeSliderPathPool() {
+        pathPool.clear();
+    }
+
     public static float getObjectTimePreempt() {
         return objectTimePreempt;
     }
