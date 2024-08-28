@@ -10,6 +10,7 @@ import java.util.Random;
 import com.reco1l.ibancho.data.RoomTeam;
 import com.reco1l.ibancho.data.WinCondition;
 import com.reco1l.osu.data.BeatmapInfo;
+import com.reco1l.osu.data.ScoreInfo;
 import com.reco1l.osu.multiplayer.Multiplayer;
 import org.jetbrains.annotations.Nullable;
 import org.json.JSONObject;
@@ -908,6 +909,31 @@ public class StatisticV2 implements Serializable {
 
         return new ScoreBoardItem(playerName, getTotalScoreWithMultiplier(), combo, getAccuracyForServer(), isAlive);
     }
+
+    /**
+     * Converts the statistic to a ScoreInfo.
+     */
+    public ScoreInfo toScoreInfo() {
+        return new ScoreInfo(
+            fileName,
+            playerName,
+            replayName,
+            getModString(),
+            getTotalScoreWithMultiplier(),
+            maxCombo,
+            getMark(),
+            hit300k,
+            hit300,
+            hit100k,
+            hit100,
+            hit50,
+            misses,
+            getAccuracy(),
+            time,
+            isPerfect()
+        );
+    }
+
 
     private void computeModScoreMultiplier() {
         modScoreMultiplier = 1;
