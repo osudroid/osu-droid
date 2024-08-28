@@ -38,4 +38,10 @@ public class StringTable {
         f.format(get(resid), objects);
         return sb.toString();
     }
+
+    public static String format(final String format, final Object... objects) {
+        allocateFormatter();
+        f.format(format, objects);
+        return sb.toString();
+    }
 }

@@ -551,14 +551,11 @@ public class Slider extends GameObject {
                 Modifiers.alpha(0.2f / GameHelper.getSpeedMultiplier(), followCircle.getAlpha(), 0f).setOnFinished(entity -> {
                     Execution.updateThread(() -> {
                         entity.detachSelf();
-
-                        mIsAnimating = false;
-
                         // We can pool the hit object once all animations are finished.
                         // The follow circle animation is the last one to finish if it's enabled.
                         poolObject();
                     });
-
+                    mIsAnimating = false;
                 })
             );
         }
@@ -718,8 +715,6 @@ public class Slider extends GameObject {
 
             approachCircle.clearEntityModifiers();
             approachCircle.setAlpha(0);
-
-            // velocity = 100 * difficulty.sliderMultiplier / (timingPoint.msPerBeat * bpmMultiplier)
 
             ball.setFps((float) beatmapSlider.getVelocity() * 100 * scale);
             ball.setScale(scale);

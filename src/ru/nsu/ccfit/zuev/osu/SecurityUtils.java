@@ -1,4 +1,4 @@
-package com.dgsrz.bancho.security;
+package ru.nsu.ccfit.zuev.osu;
 
 import android.os.Build;
 import android.content.Context;
@@ -17,7 +17,6 @@ import javax.crypto.Mac;
 import javax.crypto.spec.SecretKeySpec;
 
 import kotlin.io.ByteStreamsKt;
-import ru.nsu.ccfit.zuev.osu.BuildType;
 
 /**
  * 加解密工具类

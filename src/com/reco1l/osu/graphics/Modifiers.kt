@@ -142,9 +142,9 @@ class UniversalModifier(private val pool: Pool<UniversalModifier>? = null) : IMo
             return 0f
         }
 
-        val percentage = _easeFunction.getPercentage(elapsedSec, _duration)
-
         var usedSec = min(_duration - elapsedSec, deltaSec)
+
+        val percentage = _easeFunction.getPercentage(elapsedSec + usedSec, _duration)
 
         when (_type) {
 
