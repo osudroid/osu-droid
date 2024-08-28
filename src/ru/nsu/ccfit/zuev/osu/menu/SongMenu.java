@@ -1111,7 +1111,7 @@ public class SongMenu implements IUpdateHandler, MenuItemListener,
             return;
         }
 
-        String tinfoStr = beatmapInfo.getTitleText() + " - " + beatmapInfo.getArtistText() + " [" + beatmapInfo.getVersion() + "]";
+        String tinfoStr = beatmapInfo.getArtistText() + " - " + beatmapInfo.getTitleText() + " [" + beatmapInfo.getVersion() + "]";
         String mapperStr = "Beatmap by " + beatmapInfo.getCreator();
         String binfoStr2 = String.format(StringTable.get(R.string.binfoStr2),
                 beatmapInfo.getHitCircleCount(), beatmapInfo.getSliderCount(), beatmapInfo.getSpinnerCount(), beatmapInfo.getSetId());

@@ -1,6 +1,6 @@
 package ru.nsu.ccfit.zuev.osu.online;
 
-import com.dgsrz.bancho.security.SecurityUtils;
+import ru.nsu.ccfit.zuev.osu.SecurityUtils;
 
 import okhttp3.RequestBody;
 import okhttp3.Response;
