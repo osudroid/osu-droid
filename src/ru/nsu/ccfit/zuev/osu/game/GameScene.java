@@ -574,7 +574,7 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
             OnlineScoring.getInstance().startPlay(beatmapInfo, beatmapMD5);
 
         if (Config.isEnableStoryboard()) {
-            storyboardSprite.loadStoryboard(beatmapInfo.getFilename());
+            storyboardSprite.loadStoryboard(beatmapInfo.getPath());
         }
 
         GameObjectPool.getInstance().preload();
