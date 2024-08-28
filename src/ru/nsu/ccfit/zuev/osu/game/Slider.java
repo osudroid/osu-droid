@@ -309,15 +309,15 @@ public class Slider extends GameObject {
             isCircleDimming = true;
 
             // Source: https://github.com/peppy/osu/blob/60271fb0f7e091afb754455f93180094c63fc3fb/osu.Game.Rulesets.Osu/Objects/Drawables/DrawableOsuHitObject.cs#L101
-            var delayTimeToDim = (float) beatmapSlider.timePreempt / 1000 - GameHelper.getDifficultyHelper().hitWindowFor50(GameHelper.getOverallDifficulty());
+            var dimDelaySec = (float) beatmapSlider.timePreempt / 1000 - 0.4f;
             var colorDim = 195f / 255f;
 
-            applyCircleDimming(startCircle, startOverlay, delayTimeToDim, comboColor);
-            applyCircleDimming(endCircle, endOverlay, delayTimeToDim, comboColor);
+            applyCircleDimming(startCircle, startOverlay, dimDelaySec, comboColor);
+            applyCircleDimming(endCircle, endOverlay, dimDelaySec, comboColor);
 
             number.setColor(colorDim, colorDim, colorDim);
             number.registerEntityModifier(Modifiers.sequence(
-                Modifiers.delay(delayTimeToDim),
+                Modifiers.delay(dimDelaySec / GameHelper.getSpeedMultiplier()),
                 Modifiers.color(0.1f / GameHelper.getSpeedMultiplier(),
                     number.getRed(), 1f,
                     number.getGreen(), 1f,
@@ -327,7 +327,7 @@ public class Slider extends GameObject {
 
             endArrow.setColor(colorDim, colorDim, colorDim);
             endArrow.registerEntityModifier(Modifiers.sequence(
-                Modifiers.delay(delayTimeToDim),
+                Modifiers.delay(dimDelaySec / GameHelper.getSpeedMultiplier()),
                 Modifiers.color(0.1f / GameHelper.getSpeedMultiplier(),
                     endArrow.getRed(), 1f,
                     endArrow.getGreen(), 1f,
@@ -335,20 +335,7 @@ public class Slider extends GameObject {
                 )
             ));
 
-            for (int i = tickSprites.size() - 1; i >= 0; --i) {
-                var tickSprite = tickSprites.get(i);
-                tickSprite.setColor(colorDim, colorDim, colorDim);
-                tickSprite.registerEntityModifier(Modifiers.sequence(
-                    Modifiers.delay(delayTimeToDim),
-                    Modifiers.color(0.1f / GameHelper.getSpeedMultiplier(),
-                        tickSprite.getRed(), 1f,
-                        tickSprite.getGreen(), 1f,
-                        tickSprite.getBlue(), 1f
-                    )
-                ));
-            }
-
-            sliderBody.applyDimAnimations(delayTimeToDim);
+            sliderBody.applyDimAnimations(dimDelaySec);
         } else {
             isCircleDimming = false;
         }
@@ -363,7 +350,7 @@ public class Slider extends GameObject {
         // Circle requires special handling because it's tinted with combo color.
         circle.setColor(comboColor.r() * colorDim, comboColor.g() * colorDim, comboColor.b() * colorDim);
         circle.registerEntityModifier(Modifiers.sequence(
-            Modifiers.delay(delayTimeToDim),
+            Modifiers.delay(delayTimeToDim / GameHelper.getSpeedMultiplier()),
             Modifiers.color(0.1f / GameHelper.getSpeedMultiplier(),
                 circle.getRed(), comboColor.r(),
                 circle.getGreen(), comboColor.g(),
@@ -373,7 +360,7 @@ public class Slider extends GameObject {
 
         overlay.setColor(colorDim, colorDim, colorDim);
         overlay.registerEntityModifier(Modifiers.sequence(
-            Modifiers.delay(delayTimeToDim),
+            Modifiers.delay(delayTimeToDim / GameHelper.getSpeedMultiplier()),
             Modifiers.color(0.1f / GameHelper.getSpeedMultiplier(),
                 overlay.getRed(), 1f,
                 overlay.getGreen(), 1f,
@@ -701,7 +688,13 @@ public class Slider extends GameObject {
             }
         }
 
-        if (!isCircleDimming) {
+        if (isCircleDimming) {
+            // This is used to the dim animation. Instead of applying a modifier for each tick sprite,
+            // we can just pair the color with the start circle overlay sprite.
+            for (int i = tickSprites.size() - 1; i >= 0; --i) {
+                tickSprites.get(i).setColor(startOverlay.getRed(), startOverlay.getGreen(), startOverlay.getBlue());
+            }
+        } else {
             if (GameHelper.isKiai()) {
                 var kiaiModifier = (float) Math.max(0, 1 - GameHelper.getCurrentBeatTime() / GameHelper.getBeatLength()) * 0.5f;
                 var r = Math.min(1, circleColor.r() + (1 - circleColor.r()) * kiaiModifier);

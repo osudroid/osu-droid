@@ -142,13 +142,13 @@ public class HitCircle extends GameObject {
             isCircleDimming = true;
 
             // Source: https://github.com/peppy/osu/blob/60271fb0f7e091afb754455f93180094c63fc3fb/osu.Game.Rulesets.Osu/Objects/Drawables/DrawableOsuHitObject.cs#L101
-            var delayTimeToDim = timePreempt - GameHelper.getDifficultyHelper().hitWindowFor50(GameHelper.getOverallDifficulty());
+            var dimDelaySec = timePreempt - 0.4f;
             var colorDim = 195f / 255f;
 
             // Circle requires special handling because it's tinted with combo color.
             circle.setColor(comboColor.r() * colorDim, comboColor.g() * colorDim, comboColor.b() * colorDim);
             circle.registerEntityModifier(Modifiers.sequence(
-                Modifiers.delay(delayTimeToDim),
+                Modifiers.delay(dimDelaySec / GameHelper.getSpeedMultiplier()),
                 Modifiers.color(0.1f / GameHelper.getSpeedMultiplier(),
                     circle.getRed(), comboColor.r(),
                     circle.getGreen(), comboColor.g(),
@@ -158,7 +158,7 @@ public class HitCircle extends GameObject {
 
             overlay.setColor(colorDim, colorDim, colorDim);
             overlay.registerEntityModifier(Modifiers.sequence(
-                Modifiers.delay(delayTimeToDim),
+                Modifiers.delay(dimDelaySec / GameHelper.getSpeedMultiplier()),
                 Modifiers.color(0.1f / GameHelper.getSpeedMultiplier(),
                     overlay.getRed(), 1f,
                     overlay.getGreen(), 1f,
@@ -168,7 +168,7 @@ public class HitCircle extends GameObject {
 
             number.setColor(colorDim, colorDim, colorDim);
             number.registerEntityModifier(Modifiers.sequence(
-                Modifiers.delay(delayTimeToDim),
+                Modifiers.delay(dimDelaySec / GameHelper.getSpeedMultiplier()),
                 Modifiers.color(0.1f / GameHelper.getSpeedMultiplier(),
                     number.getRed(), 1f,
                     number.getGreen(), 1f,
