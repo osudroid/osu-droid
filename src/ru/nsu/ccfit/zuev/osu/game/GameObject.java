@@ -22,10 +22,6 @@ public abstract class GameObject {
         this.replayObjectData = replayObjectData;
     }
 
-    public void setEndsCombo(final boolean endsCombo) {
-        this.endsCombo = endsCombo;
-    }
-
     public void setAutoPlay() {
         autoPlay = true;
     }
