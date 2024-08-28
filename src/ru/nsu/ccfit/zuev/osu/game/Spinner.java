@@ -156,6 +156,8 @@ public class Spinner extends GameObject {
         scene.detachChild(bonusScore);
 
         listener.removeObject(Spinner.this);
+        GameObjectPool.getInstance().putSpinner(this);
+
         int score = 0;
         if (replayObjectData != null) {
             //int bonusRot = (int) (replayData.accuracy / 4 - needRotations + 1);

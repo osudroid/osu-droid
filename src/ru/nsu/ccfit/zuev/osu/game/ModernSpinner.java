@@ -233,6 +233,8 @@ public class ModernSpinner extends Spinner {
         scene.detachChild(bonusScore);
 
         listener.removeObject(ModernSpinner.this);
+        GameObjectPool.getInstance().putSpinner(this);
+
         int score = 0;
         if (replayObjectData != null) {
             if (fullRotations < replayObjectData.accuracy / 4)

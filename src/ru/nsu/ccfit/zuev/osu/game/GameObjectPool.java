@@ -13,7 +13,8 @@ public class GameObjectPool {
     public Map<String, LinkedList<GameEffect>> effects = new HashMap<>();
     public LinkedList<Slider> sliders = new LinkedList<>();
     public LinkedList<FollowTrack> tracks = new LinkedList<>();
-    //public LinkedList<Spinner> spinners = new LinkedList<>();
+    public LinkedList<Spinner> spinners = new LinkedList<>();
+    public LinkedList<ModernSpinner> modernSpinners = new LinkedList<>();
     private int objectsCreated = 0;
     private GameObjectPool() {
     }
@@ -23,7 +24,7 @@ public class GameObjectPool {
     }
 
     public HitCircle getCircle() {
-        if (circles.isEmpty() == false) {
+        if (!circles.isEmpty()) {
             return circles.poll();
         }
 
@@ -36,24 +37,27 @@ public class GameObjectPool {
     }
 
     public Spinner getSpinner() {
-        /*if (spinners.isEmpty() == false) {
-            return spinners.poll();
+        var pool = Config.getSpinnerStyle() == 1 ? modernSpinners : spinners;
+
+        if (!pool.isEmpty()) {
+            return pool.poll();
         }
 
-        objectsCreated++;*/
+        objectsCreated++;
+
+        return Config.getSpinnerStyle() == 1 ? new ModernSpinner() : new Spinner();
+    }
+
+    public void putSpinner(final Spinner spinner) {
         if (Config.getSpinnerStyle() == 1) {
-            return new ModernSpinner();
+            modernSpinners.add((ModernSpinner) spinner);
         } else {
-            return new Spinner();
+            spinners.add(spinner);
         }
     }
 
-    /*public void putSpinner(final Spinner spinner) {
-        spinners.add(spinner);
-    }*/
-
     public CircleNumber getNumber(final int num) {
-        if (numbers.containsKey(num) && numbers.get(num).isEmpty() == false) {
+        if (numbers.containsKey(num) && !numbers.get(num).isEmpty()) {
             return numbers.get(num).poll();
         }
 
@@ -62,15 +66,15 @@ public class GameObjectPool {
     }
 
     public void putNumber(final CircleNumber number) {
-        if (numbers.containsKey(number.getNum()) == false) {
+        if (!numbers.containsKey(number.getNum())) {
             numbers.put(number.getNum(), new LinkedList<>());
         }
+
         numbers.get(number.getNum()).add(number);
     }
 
     public GameEffect getEffect(final String texname) {
-        if (effects.containsKey(texname)
-                && effects.get(texname).isEmpty() == false) {
+        if (effects.containsKey(texname) && !effects.get(texname).isEmpty()) {
             return effects.get(texname).poll();
         }
 
@@ -79,14 +83,15 @@ public class GameObjectPool {
     }
 
     public void putEffect(final GameEffect effect) {
-        if (effects.containsKey(effect.getTexname()) == false) {
+        if (!effects.containsKey(effect.getTexname())) {
             effects.put(effect.getTexname(), new LinkedList<>());
         }
+
         effects.get(effect.getTexname()).add(effect);
     }
 
     public Slider getSlider() {
-        if (sliders.isEmpty() == false) {
+        if (!sliders.isEmpty()) {
             return sliders.poll();
         }
 
@@ -99,7 +104,7 @@ public class GameObjectPool {
     }
 
     public FollowTrack getTrack() {
-        if (tracks.isEmpty() == false) {
+        if (!tracks.isEmpty()) {
             return tracks.poll();
         }
 
@@ -121,6 +126,9 @@ public class GameObjectPool {
         numbers.clear();
         sliders.clear();
         tracks.clear();
+        spinners.clear();
+        modernSpinners.clear();
+
         objectsCreated = 0;
     }
 
@@ -133,7 +141,11 @@ public class GameObjectPool {
             putSlider(new Slider());
             putTrac(new FollowTrack());
         }
-        new Spinner();
-        objectsCreated = 31;
+        for (int i = 0; i < 3; i++) {
+            putSpinner(new Spinner());
+            putSpinner(new ModernSpinner());
+        }
+
+        objectsCreated = 36;
     }
 }
