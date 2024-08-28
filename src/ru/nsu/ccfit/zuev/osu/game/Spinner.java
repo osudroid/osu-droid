@@ -94,7 +94,7 @@ public class Spinner extends GameObject {
 
         ResourceManager.getInstance().checkSpinnerTextures();
 
-        float timePreempt = (float) beatmapSpinner.timePreempt / 1000;
+        float timePreempt = (float) beatmapSpinner.timePreempt / 1000 / GameHelper.getSpeedMultiplier();
 
         background.setAlpha(0);
         background.registerEntityModifier(Modifiers.sequence(
