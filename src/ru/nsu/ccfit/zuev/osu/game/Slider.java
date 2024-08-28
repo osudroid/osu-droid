@@ -48,6 +48,7 @@ public class Slider extends GameObject {
     private GameObjectListener listener;
     private CircleNumber number;
     private SliderPath path;
+    private float realTimePreempt;
     private double passedTime;
     private int completedSpanCount;
     private boolean reverse;
@@ -109,6 +110,7 @@ public class Slider extends GameObject {
         this.pos = beatmapSlider.getGameplayStackedPosition().toPointF();
         endsCombo = beatmapSlider.isLastInCombo();
         passedTime = secPassed - (float) beatmapSlider.startTime / 1000;
+        realTimePreempt = (float) beatmapSlider.timePreempt / 1000 / GameHelper.getSpeedMultiplier();
         path = sliderPath;
 
         float scale = beatmapSlider.getGameplayScale();
@@ -187,7 +189,7 @@ public class Slider extends GameObject {
         float fadeInDuration = (float) beatmapSlider.timeFadeIn / 1000 / GameHelper.getSpeedMultiplier();
 
         if (GameHelper.isHidden()) {
-            float fadeOutDuration = (float) (beatmapSlider.timePreempt / 1000 * ModHidden.FADE_OUT_DURATION_MULTIPLIER) / GameHelper.getSpeedMultiplier();
+            float fadeOutDuration = realTimePreempt * (float) ModHidden.FADE_OUT_DURATION_MULTIPLIER;
 
             number.registerEntityModifier(Modifiers.sequence(
                 Modifiers.fadeIn(fadeInDuration),
@@ -222,8 +224,6 @@ public class Slider extends GameObject {
         }
 
         if (approachCircle.isVisible()) {
-            float realTimePreempt = (float) beatmapSlider.timePreempt / 1000 / GameHelper.getSpeedMultiplier();
-
             approachCircle.registerEntityModifier(Modifiers.alpha(Math.min(fadeInDuration * 2, realTimePreempt), 0, 0.9f));
             approachCircle.registerEntityModifier(Modifiers.scale(realTimePreempt, scale * 3, scale));
         }
@@ -643,14 +643,14 @@ public class Slider extends GameObject {
 
         if (passedTime < 0) // we at approach time
         {
-            float timePreempt = (float) beatmapSlider.timePreempt / 1000;
+            float gameTimePreempt = realTimePreempt * GameHelper.getSpeedMultiplier();
             if (startHit) {
                 // Hide the approach circle if the slider is already hit.
                 approachCircle.clearEntityModifiers();
                 approachCircle.setAlpha(0);
             }
 
-            float percentage = (float) (1 + passedTime / timePreempt);
+            float percentage = (float) (1 + passedTime / gameTimePreempt);
             if (percentage <= 0.5f) {
                 // Following core doing a very cute show animation ^_^"
                 percentage = Math.min(1, percentage * 2);
@@ -679,7 +679,7 @@ public class Slider extends GameObject {
                     Utils.putSpriteAnchorCenter(position, endOverlay);
                     Utils.putSpriteAnchorCenter(position, endArrow);
                 }
-            } else if (percentage - dt / timePreempt <= 0.5f) {
+            } else if (percentage - dt / gameTimePreempt <= 0.5f) {
                 // Setting up positions of slider parts
                 for (int i = 0, size = tickSprites.size(); i < size; i++) {
                     tickSprites.get(i).setAlpha(1);
@@ -888,7 +888,8 @@ public class Slider extends GameObject {
 
         if (GameHelper.isHidden()) {
             // New duration from completed fade in to end (before fading out)
-            float fadeOutDuration = (float) (beatmapSlider.getDuration() + beatmapSlider.timePreempt) / 1000 / GameHelper.getSpeedMultiplier() - fadeInDuration;
+            float realSliderDuration = (float) beatmapSlider.getDuration() / 1000 / GameHelper.getSpeedMultiplier();
+            float fadeOutDuration = realSliderDuration + realTimePreempt - fadeInDuration;
 
             abstractSliderBody.applyFadeAdjustments(fadeInDuration, fadeOutDuration);
         } else {
