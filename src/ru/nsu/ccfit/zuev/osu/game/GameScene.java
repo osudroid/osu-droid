@@ -551,7 +551,7 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
         offsetSum = 0;
         offsetRegs = 0;
 
-        File beatmapFile = new File(beatmapInfo.getFilename());
+        File beatmapFile = new File(beatmapInfo.getPath());
         beatmapMD5 = beatmapInfo.getMD5();
         replaying = false;
         replay = new Replay();
