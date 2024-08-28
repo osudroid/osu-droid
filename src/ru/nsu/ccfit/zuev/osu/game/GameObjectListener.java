@@ -30,6 +30,8 @@ public interface GameObjectListener {
 
     void stopAuxiliarySamples(HitObject obj);
 
+    void stopSample(HitSampleInfo sample);
+
     void addObject(GameObject object);
 
     void removeObject(GameObject object);

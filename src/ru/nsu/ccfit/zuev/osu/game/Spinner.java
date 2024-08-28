@@ -94,7 +94,7 @@ public class Spinner extends GameObject {
 
         ResourceManager.getInstance().checkSpinnerTextures();
 
-        float timePreempt = (float) beatmapSpinner.timePreempt / 1000;
+        float timePreempt = (float) beatmapSpinner.timePreempt / 1000 / GameHelper.getSpeedMultiplier();
 
         background.setAlpha(0);
         background.registerEntityModifier(Modifiers.sequence(
@@ -156,6 +156,8 @@ public class Spinner extends GameObject {
         scene.detachChild(bonusScore);
 
         listener.removeObject(Spinner.this);
+        GameObjectPool.getInstance().putSpinner(this);
+
         int score = 0;
         if (replayObjectData != null) {
             //int bonusRot = (int) (replayData.accuracy / 4 - needRotations + 1);
@@ -323,6 +325,17 @@ public class Spinner extends GameObject {
             } else if (bankSample.name.equals("spinnerspin")) {
                 spinnerSpinSample = bankSample;
             }
+        }
+    }
+
+    @Override
+    public void stopAuxiliarySamples() {
+        if (spinnerBonusSample != null) {
+            listener.stopSample(spinnerBonusSample);
+        }
+
+        if (spinnerSpinSample != null) {
+            listener.stopSample(spinnerSpinSample);
         }
     }
 

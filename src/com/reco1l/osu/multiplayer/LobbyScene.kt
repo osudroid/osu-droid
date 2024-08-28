@@ -2,7 +2,7 @@ package com.reco1l.osu.multiplayer
 
 import android.net.Uri
 import android.util.Log
-import com.dgsrz.bancho.security.SecurityUtils
+import ru.nsu.ccfit.zuev.osu.SecurityUtils
 import com.reco1l.ibancho.LobbyAPI
 import com.reco1l.ibancho.RoomAPI
 import com.reco1l.osu.updateThread

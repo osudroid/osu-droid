@@ -61,13 +61,19 @@ public class ModernSpinner extends Spinner {
                      final StatisticV2 stat) {
         this.scene = scene;
         this.beatmapSpinner = beatmapSpinner;
-        this.duration = (float) beatmapSpinner.getDuration() / 1000;
-        this.needRotations = rps * duration;
         this.listener = listener;
         this.stat = stat;
-        this.clear = false;
-        this.fullRotations = 0;
-        this.rotations = 0;
+        duration = (float) beatmapSpinner.getDuration() / 1000 / GameHelper.getSpeedMultiplier();
+        needRotations = rps * duration;
+
+        if (duration < 0.05f) {
+            needRotations = 0.1f;
+        }
+
+        clear = duration <= 0f;
+        fullRotations = 0;
+        rotations = 0;
+        endsCombo = beatmapSpinner.isLastInCombo();
         spinnable = false;
 
         reloadHitSounds();
@@ -94,7 +100,7 @@ public class ModernSpinner extends Spinner {
         scene.attachChild(middle);
         scene.attachChild(middle2);
 
-        float timePreempt = (float) beatmapSpinner.timePreempt / 1000;
+        float timePreempt = (float) beatmapSpinner.timePreempt / 1000 / GameHelper.getSpeedMultiplier();
 
         top.registerEntityModifier(Modifiers.sequence(
             Modifiers.fadeIn(timePreempt).setOnFinished(entity -> spinnable = true),
@@ -232,6 +238,8 @@ public class ModernSpinner extends Spinner {
         scene.detachChild(bonusScore);
 
         listener.removeObject(ModernSpinner.this);
+        GameObjectPool.getInstance().putSpinner(this);
+
         int score = 0;
         if (replayObjectData != null) {
             if (fullRotations < replayObjectData.accuracy / 4)

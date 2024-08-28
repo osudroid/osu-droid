@@ -3,8 +3,9 @@ package ru.nsu.ccfit.zuev.osu.game;
 import android.graphics.PointF;
 import android.os.Build;
 import android.os.SystemClock;
+import android.util.Log;
 
-import com.dgsrz.bancho.security.SecurityUtils;
+import ru.nsu.ccfit.zuev.osu.SecurityUtils;
 import com.edlplan.framework.math.FMath;
 import com.edlplan.framework.support.ProxySprite;
 import com.edlplan.framework.support.osb.StoryboardSprite;
@@ -89,7 +90,6 @@ import ru.nsu.ccfit.zuev.osu.online.OnlineFileOperator;
 import ru.nsu.ccfit.zuev.osu.online.OnlineScoring;
 import ru.nsu.ccfit.zuev.osu.scoring.Replay;
 import ru.nsu.ccfit.zuev.osu.scoring.ResultType;
-import ru.nsu.ccfit.zuev.osu.scoring.ScoreLibrary;
 import ru.nsu.ccfit.zuev.osu.scoring.ScoringScene;
 import ru.nsu.ccfit.zuev.osu.scoring.StatisticV2;
 import ru.nsu.ccfit.zuev.osu.scoring.TouchType;
@@ -1543,6 +1543,8 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
 
         SkinManager.setSkinEnabled(false);
         GameObjectPool.getInstance().purge();
+        GameHelper.purgeSliderPathPool();
+        stopAllAuxiliarySamples();
         if (passiveObjects != null) {
             passiveObjects.clear();
         }
@@ -1946,16 +1948,27 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
 
     @Override
     public void stopAuxiliarySamples(final HitObject obj) {
+        for (var sample : obj.getAuxiliarySamples()) {
+            stopSample(sample);
+        }
+    }
+
+    @Override
+    public void stopSample(HitSampleInfo sample) {
         var resourceManager = ResourceManager.getInstance();
 
-        for (var sample : obj.getAuxiliarySamples()) {
-            for (var name : sample.getLookupNames()) {
-                var snd = resourceManager.getCustomSound(name, false);
+        for (var name : sample.getLookupNames()) {
+            var snd = resourceManager.getCustomSound(name, false);
 
-                if (snd != null) {
-                    snd.stop();
-                }
+            if (snd != null) {
+                snd.stop();
             }
+        }
+    }
+
+    private void stopAllAuxiliarySamples() {
+        for (int i = 0, size = activeObjects.size(); i < size; i++) {
+            activeObjects.get(i).stopAuxiliarySamples();
         }
     }
 
@@ -2128,6 +2141,8 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
             video.getTexture().pause();
         }
 
+        stopAllAuxiliarySamples();
+
         // Release all pressed cursors to avoid getting stuck at resume.
         if (!GameHelper.isAuto() && !GameHelper.isAutopilotMod() && !replaying) {
             var frameOffset = previousFrameTime > 0 ? (SystemClock.uptimeMillis() - previousFrameTime) * GameHelper.getSpeedMultiplier() : 0;
@@ -2157,7 +2172,6 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
     }
 
     public void gameover() {
-
         if (Multiplayer.isMultiplayer)
         {
             if (Multiplayer.isConnected())
@@ -2170,6 +2184,7 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
         }
 
         if(scorebar != null) scorebar.flush();
+        stopAllAuxiliarySamples();
         ResourceManager.getInstance().getSound("failsound").play();
         final PauseMenu menu = new PauseMenu(engine, this, true);
         gameStarted = false;
@@ -2470,7 +2485,16 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
                     + ctime.substring(0, Math.min(3, ctime.length())) + ".odr";
             replay.setStat(stat);
             replay.save(replayFile);
-            ScoreLibrary.getInstance().addScore(lastBeatmapInfo.getPath(), stat, replayFile);
+
+            if (stat.getTotalScoreWithMultiplier() > 0 && !stat.getMod().contains(GameMod.MOD_AUTO)) {
+                stat.setReplayName(replayFile);
+                try {
+                    DatabaseManager.getScoreInfoTable().insertScore(stat.toScoreInfo());
+                } catch (Exception e) {
+                    Log.e("GameScene", "Failed to save score to database", e);
+                }
+            }
+
             ToastLogger.showText(StringTable.get(R.string.message_save_replay_successful), true);
             replayFile = null;
             return true;

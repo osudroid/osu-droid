@@ -6,7 +6,7 @@ import android.widget.EditText
 import android.widget.SeekBar
 import android.widget.SeekBar.OnSeekBarChangeListener
 import android.widget.TextView
-import com.dgsrz.bancho.security.SecurityUtils
+import ru.nsu.ccfit.zuev.osu.SecurityUtils
 import com.edlplan.framework.easing.Easing
 import com.edlplan.ui.BaseAnimationListener
 import com.edlplan.ui.EasingHelper

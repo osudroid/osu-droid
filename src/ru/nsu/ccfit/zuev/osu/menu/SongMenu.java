@@ -4,7 +4,6 @@ import android.annotation.SuppressLint;
 import android.app.Activity;
 
 import com.edlplan.favorite.FavoriteLibrary;
-import com.edlplan.replay.OdrDatabase;
 import com.edlplan.ui.fragment.FilterMenuFragment;
 import com.edlplan.ui.fragment.PropsMenuFragment;
 import com.edlplan.ui.fragment.ScoreMenuFragment;
@@ -60,7 +59,6 @@ import ru.nsu.ccfit.zuev.osu.online.OnlineManager.OnlineManagerException;
 import ru.nsu.ccfit.zuev.osu.online.OnlinePanel;
 import ru.nsu.ccfit.zuev.osu.online.OnlineScoring;
 import ru.nsu.ccfit.zuev.osu.scoring.Replay;
-import ru.nsu.ccfit.zuev.osu.scoring.ScoreLibrary;
 import ru.nsu.ccfit.zuev.osu.scoring.ScoringScene;
 import ru.nsu.ccfit.zuev.osu.scoring.StatisticV2;
 import ru.nsu.ccfit.zuev.osuplus.R;
@@ -181,8 +179,6 @@ public class SongMenu implements IUpdateHandler, MenuItemListener,
         bgLoaded = true;
         SongMenuPool.getInstance().init();
         loadFilterFragment();
-
-        bindDataBaseChangedListener();
 
         scene.attachChild(backLayer);
         scene.attachChild(frontLayer);
@@ -1112,7 +1108,7 @@ public class SongMenu implements IUpdateHandler, MenuItemListener,
             return;
         }
 
-        String tinfoStr = beatmapInfo.getTitleText() + " - " + beatmapInfo.getArtistText() + " [" + beatmapInfo.getVersion() + "]";
+        String tinfoStr = beatmapInfo.getArtistText() + " - " + beatmapInfo.getTitleText() + " [" + beatmapInfo.getVersion() + "]";
         String mapperStr = "Beatmap by " + beatmapInfo.getCreator();
         String binfoStr2 = String.format(StringTable.get(R.string.binfoStr2),
                 beatmapInfo.getHitCircleCount(), beatmapInfo.getSliderCount(), beatmapInfo.getSpinnerCount(), beatmapInfo.getParentId());
@@ -1316,7 +1312,8 @@ public class SongMenu implements IUpdateHandler, MenuItemListener,
         }
 
 
-        StatisticV2 stat = ScoreLibrary.getInstance().getScore(id);
+        var stat = DatabaseManager.getScoreInfoTable().getScore(id).toStatisticV2();
+
         if (stat.isLegacySC()) {
             stat.processLegacySC(selectedBeatmap);
         }
@@ -1339,7 +1336,6 @@ public class SongMenu implements IUpdateHandler, MenuItemListener,
     }
 
     private void back(boolean resetMultiplayerBeatmap) {
-        unbindDataBaseChangedListener();
 
         if (Multiplayer.isMultiplayer) {
             if (resetMultiplayerBeatmap) {
@@ -1407,12 +1403,12 @@ public class SongMenu implements IUpdateHandler, MenuItemListener,
         }
     }
 
-    public void bindDataBaseChangedListener() {
-        OdrDatabase.get().setOnDatabaseChangedListener(this::reloadScoreBroad);
-    }
+    public void reloadScoreboard() {
+        if (GlobalManager.getInstance().getEngine().getScene() != scene) {
+            return;
+        }
 
-    public void unbindDataBaseChangedListener() {
-        OdrDatabase.get().setOnDatabaseChangedListener(null);
+        board.init(selectedBeatmap);
     }
 
     public void setY(final float y) {
@@ -1474,10 +1470,6 @@ public class SongMenu implements IUpdateHandler, MenuItemListener,
 
     public void showDeleteScoreMenu(int scoreId) {
         (new ScoreMenuFragment()).show(scoreId);
-    }
-
-    public void reloadScoreBroad() {
-        board.init(selectedBeatmap);
     }
 
     public void select() {
