@@ -5,7 +5,7 @@ import android.graphics.PointF;
 import org.anddev.andengine.entity.primitive.Rectangle;
 import org.anddev.andengine.entity.scene.Scene;
 
-import ru.nsu.ccfit.zuev.osu.RGBAColor;
+import ru.nsu.ccfit.zuev.osu.RGBColor;
 import ru.nsu.ccfit.zuev.osu.Utils;
 
 public class SongProgressBar extends GameObject {
@@ -65,7 +65,11 @@ public class SongProgressBar extends GameObject {
         this.passedTime = passedTime;
     }
 
-    public void setProgressRectColor(RGBAColor color) {
-        this.progressRect.setColor(color.r(), color.g(), color.b(), color.a());
+    public void setProgressRectColor(RGBColor color) {
+        this.progressRect.setColor(color.r(), color.g(), color.b());
+    }
+
+    public void setProgressRectAlpha(float alpha) {
+        this.progressRect.setAlpha(alpha);
     }
 }

@@ -67,7 +67,6 @@ import ru.nsu.ccfit.zuev.osu.Config;
 import ru.nsu.ccfit.zuev.osu.Constants;
 import ru.nsu.ccfit.zuev.osu.DifficultyAlgorithm;
 import ru.nsu.ccfit.zuev.osu.GlobalManager;
-import ru.nsu.ccfit.zuev.osu.RGBAColor;
 import ru.nsu.ccfit.zuev.osu.RGBColor;
 import ru.nsu.ccfit.zuev.osu.ResourceManager;
 import ru.nsu.ccfit.zuev.osu.ToastLogger;
@@ -755,7 +754,8 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
                 (float) HitObjectUtils.getEndTime(objects.getLast()) / 1000, firstObjStartTime,
                 new PointF(0, Config.getRES_HEIGHT() - 7), Config.getRES_WIDTH(), 7);
 
-            progressBar.setProgressRectColor(new RGBAColor(153f / 255f, 204f / 255f, 51f / 255f, 0.4f));
+            progressBar.setProgressRectColor(new RGBColor(153f / 255f, 204f / 255f, 51f / 255f));
+            progressBar.setProgressRectAlpha(0.4f);
         }
 
         if (Config.getErrorMeter() == 1 || (Config.getErrorMeter() == 2 && replaying)) {
