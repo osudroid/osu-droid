@@ -222,7 +222,7 @@ interface IScoreInfoDAO {
     @Query("SELECT * FROM ScoreInfo WHERE id = :id")
     fun getScore(id: Int): ScoreInfo?
 
-    @Query("SELECT mark FROM ScoreInfo WHERE beatmapSetDirectory = :beatmapFilename ORDER BY score DESC LIMIT 1")
+    @Query("SELECT mark FROM ScoreInfo WHERE beatmapSetDirectory = :beatmapSetDirectory AND beatmapFilename = :beatmapFilename ORDER BY score DESC LIMIT 1")
     fun getBestMark(beatmapSetDirectory: String, beatmapFilename: String): String?
 
     @Insert(onConflict = OnConflictStrategy.ABORT)
