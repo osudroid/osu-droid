@@ -12,12 +12,10 @@ import org.anddev.andengine.util.MathUtils;
 import java.util.Arrays;
 
 import ru.nsu.ccfit.zuev.osu.game.GameHelper;
-import ru.nsu.ccfit.zuev.osu.game.GameObjectListener;
 
 public class Utils {
     private static final String FSReservedChars = "|\\?*<\":>+[]/";
     private static int accSign = 0;
-    private static int soundMask = 0;
 
     public static <T> T[] oneObjectArray(T object, T[] ary) {
         Arrays.fill(ary, object);
@@ -53,21 +51,26 @@ public class Utils {
     }
 
     public static PointF trackToRealCoords(final PointF coords) {
-        final PointF pos = scaleToReal(coords);
+        return trackToRealCoords(coords, false);
+    }
+
+    public static PointF trackToRealCoords(final PointF pos, final boolean flipVertically) {
+        pos.x *= Constants.MAP_ACTUAL_WIDTH / (float) Constants.MAP_WIDTH;
+        pos.y *= Constants.MAP_ACTUAL_HEIGHT / (float) Constants.MAP_HEIGHT;
+
         pos.y += (Config.getRES_HEIGHT() - toRes(Constants.MAP_ACTUAL_HEIGHT)) / 2f;
         pos.x += (Config.getRES_WIDTH() - toRes(Constants.MAP_ACTUAL_WIDTH)) / 2f;
-        if (GameHelper.isHardrock()) {
-            pos.y -= (float) Config.getRES_HEIGHT() / 2;
-            pos.y *= -1;
-            pos.y += (float) Config.getRES_HEIGHT() / 2;
+
+        if (flipVertically) {
+            flipRealCoordsVertically(pos);
         }
-		/*if (pos.y < 18) {
-			pos.y = 18;
-		}*/
-		/*if (pos.y > Config.getRES_HEIGHT() - 18) {
-			pos.y = Config.getRES_HEIGHT() - 18;
-		}*/
         return pos;
+    }
+
+    public static void flipRealCoordsVertically(final PointF coords) {
+        coords.y -= Config.getRES_HEIGHT() / 2f;
+        coords.y *= -1;
+        coords.y += Config.getRES_HEIGHT() / 2f;
     }
 
     public static void changeTrackToRealCoords(final PointF coords) {
@@ -102,15 +105,6 @@ public class Utils {
         return (short) (((y - height) * -1) + height);
     }
 
-    public static PointF scaleToReal(final PointF v) {
-        final PointF pos = new PointF(v.x, v.y);
-        pos.x *= toRes(Constants.MAP_ACTUAL_WIDTH)
-                / (float) Constants.MAP_WIDTH;
-        pos.y *= toRes(Constants.MAP_ACTUAL_HEIGHT)
-                / (float) Constants.MAP_HEIGHT;
-        return pos;
-    }
-
     public static PointF scaleToRealC(final PointF v) {
         v.x *= toRes(Constants.MAP_ACTUAL_WIDTH) / (float) Constants.MAP_WIDTH;
         v.y *= toRes(Constants.MAP_ACTUAL_HEIGHT)
@@ -129,9 +123,11 @@ public class Utils {
 
     public static float direction(final float x, final float y) {
         float len = (float) Math.sqrt(x * x + y * y);
-        if (Math.abs(len) < 0.0001f) {
+
+        if (len == 0) {
             return 0;
         }
+
         if (x > 0) {
             len = (float) Math.asin(y / len);
         } else {
@@ -144,8 +140,8 @@ public class Utils {
         return direction(vector.x, vector.y);
     }
 
-    public static float direction(final PointF v1, final PointF v2) {
-        return direction(v2.x - v1.x, v2.y - v1.y);
+    public static float direction(float x1, float y1, float x2, float y2) {
+        return direction(x2 - x1, y2 - y1);
     }
 
     public static float length(final PointF vector) {
@@ -173,50 +169,11 @@ public class Utils {
         return ((v2x - v1x) * (v2x - v1x) + (v2y - v1y) * (v2y - v1y));
     }
 
-    public static void clearSoundMask() {
-        soundMask = 0;
-    }
-
     public static boolean isEmpty(final String str) {
         return str == null || str.isEmpty();
     }
 
-    public static void playHitSound(final GameObjectListener listener,
-                                    final int soundId) {
-        playHitSound(listener, soundId, 0, 0);
-    }
-
-    public static void playHitSound(final GameObjectListener listener,
-                                    final int soundId, final int sampleSet, final int addition) {
-        if ((soundId & 32) > 0) {
-            return;
-        }
-
-        if ((soundId & 16) > 0 && (soundMask & 16) == 0) {
-            soundMask |= 16;
-            listener.playSound("slidertick", sampleSet, addition);
-            return;
-        }
-
-        if ((soundMask & 1) == 0) {
-            soundMask |= 1;
-            listener.playSound("hitnormal", sampleSet, addition);
-        }
-        if ((soundId & 2) > 0 && (soundMask & 2) == 0) {
-            soundMask |= 2;
-            listener.playSound("hitwhistle", sampleSet, addition);
-        }
-        if ((soundId & 4) > 0 && (soundMask & 4) == 0) {
-            soundMask |= 4;
-            listener.playSound("hitfinish", sampleSet, addition);
-        }
-        if ((soundId & 8) > 0 && (soundMask & 8) == 0) {
-            soundMask |= 8;
-            listener.playSound("hitclap", sampleSet, addition);
-        }
-    }
-
-    static public int toRes(final int i) {
+    public static int toRes(final int i) {
         return i / Config.getTextureQuality();
     }
 

@@ -26,25 +26,21 @@ public class ModernSpinner extends Spinner {
     private final Sprite bottom;
     private final Sprite top;
     private final Sprite glow;
-    // private final Sprite spin;
-    // private final Sprite clear;
     private final ScoreNumber bonusScore;
 
-    private GameObjectListener listener;
     private Scene scene;
     public PointF center;
     private float needRotations;
     private int fullRotations = 0;
     private float rotations = 0;
-    private int soundId;
     private boolean clear;
     private int score = 1;
     private StatisticV2 stat;
     private PointF oldMouse;
-    private float totalTime;
+    private float duration;
+    private boolean spinnable;
 
     private final PointF currMouse = new PointF();
-
 
     public ModernSpinner() {
         ResourceManager.getInstance().checkEvoSpinnerTextures();
@@ -59,18 +55,28 @@ public class ModernSpinner extends Spinner {
         bonusScore = new ScoreNumber(center.x, center.y + 100, "", 1.1f, true);
     }
 
-    public void init(GameObjectListener listener, Scene scene,
-                     float aheadTime, float time, float rps,
-                     int sound, String tempSound, StatisticV2 stat) {
+    @Override
+    public void init(final GameObjectListener listener, final Scene scene,
+                     final com.rian.osu.beatmap.hitobject.Spinner beatmapSpinner, final float rps,
+                     final StatisticV2 stat) {
         this.scene = scene;
-        this.needRotations = rps * time;
+        this.beatmapSpinner = beatmapSpinner;
         this.listener = listener;
-        this.soundId = sound;
         this.stat = stat;
-        this.totalTime = time;
-        this.clear = false;
-        this.fullRotations = 0;
-        this.rotations = 0;
+        duration = (float) beatmapSpinner.getDuration() / 1000 / GameHelper.getSpeedMultiplier();
+        needRotations = rps * duration;
+
+        if (duration < 0.05f) {
+            needRotations = 0.1f;
+        }
+
+        clear = duration <= 0f;
+        fullRotations = 0;
+        rotations = 0;
+        endsCombo = beatmapSpinner.isLastInCombo();
+        spinnable = false;
+
+        reloadHitSounds();
 
         glow.setAlpha(0f);
         glow.setScale(0.9f);
@@ -94,18 +100,24 @@ public class ModernSpinner extends Spinner {
         scene.attachChild(middle);
         scene.attachChild(middle2);
 
+        float timePreempt = (float) beatmapSpinner.timePreempt / 1000 / GameHelper.getSpeedMultiplier();
+
         top.registerEntityModifier(Modifiers.sequence(
-            Modifiers.fadeIn(aheadTime),
-            Modifiers.delay(time).setOnFinished(entity -> Execution.updateThread(this::removeFromScene))
+            Modifiers.fadeIn(timePreempt).setOnFinished(entity -> spinnable = true),
+            Modifiers.delay(duration).setOnFinished(entity -> Execution.updateThread(this::removeFromScene))
         ));
 
-        bottom.registerEntityModifier(Modifiers.fadeIn(aheadTime));
-        middle.registerEntityModifier(Modifiers.fadeIn(aheadTime));
-        middle2.registerEntityModifier(Modifiers.fadeIn(aheadTime));
+        bottom.registerEntityModifier(Modifiers.fadeIn(timePreempt));
+        middle.registerEntityModifier(Modifiers.fadeIn(timePreempt));
+        middle2.registerEntityModifier(Modifiers.fadeIn(timePreempt));
     }
 
     @Override
     public void update(float dt) {
+        // Allow the spinner to fully fade in first before receiving spins.
+        if (!spinnable) {
+            return;
+        }
 
         PointF mouse = null;
 
@@ -139,14 +151,14 @@ public class ModernSpinner extends Spinner {
 
         var len1 = Utils.length(currMouse);
         var len2 = Utils.length(oldMouse);
-        var dfill = (currMouse.x / len1) * (oldMouse.y / len2) - (currMouse.y / len1) * (oldMouse.x / len2);
+        var dFill = (currMouse.x / len1) * (oldMouse.y / len2) - (currMouse.y / len1) * (oldMouse.x / len2);
 
         if (Math.abs(len1) < 0.0001f || Math.abs(len2) < 0.0001f)
-            dfill = 0;
+            dFill = 0;
 
         if (autoPlay) {
-            dfill = 5 * 4 * dt;
-            degree = (rotations + dfill / 4f) * 360;
+            dFill = 5 * 4 * dt;
+            degree = (rotations + dFill / 4f) * 360;
             top.setRotation(degree);
             //auto时，FL光圈绕中心旋转
             if (GameHelper.isAutopilotMod() || GameHelper.isAuto()) {
@@ -156,9 +168,14 @@ public class ModernSpinner extends Spinner {
             }
             // bottom.setRotation(-degree);
         }
-        rotations += dfill / 4f;
-        float percentfill = (Math.abs(rotations) + fullRotations) / needRotations;
-        float percent = percentfill > 1 ? 1 : percentfill;
+
+        if (dFill > 0) {
+            playSpinnerSpinSound();
+        }
+
+        rotations += dFill / 4f;
+        float percentFilled = (Math.abs(rotations) + fullRotations) / needRotations;
+        float percent = Math.min(percentFilled, 1);
 
         middle.setColor(1, 1 - percent, 1 - percent);
         top.setScale(0.9f + percent * 0.1f);
@@ -168,8 +185,7 @@ public class ModernSpinner extends Spinner {
         glow.setAlpha(percent * 0.8f);
         glow.setScale(0.9f + percent * 0.1f);
 
-        if (percentfill > 1 || clear) {
-            percentfill = 1;
+        if (percentFilled > 1 || clear) {
             if (!clear) {
                 // Clear Sprite
                 clear = true;
@@ -182,7 +198,7 @@ public class ModernSpinner extends Spinner {
                 listener.onSpinnerHit(id, 1000, false, 0);
                 score++;
                 scene.attachChild(bonusScore);
-                ResourceManager.getInstance().getSound("spinnerbonus").play();
+                playSpinnerBonusSound();
                 float speedMultiplier = GameHelper.getSpeedMultiplier();
                 glow.registerEntityModifier(
                     Modifiers.sequence(
@@ -191,10 +207,10 @@ public class ModernSpinner extends Spinner {
                     )
                 );
                 float rate = 0.375f;
-                if (GameHelper.getDrain() > 0) {
-                    rate = 1 + (GameHelper.getDrain() / 4f);
+                if (GameHelper.getHealthDrain() > 0) {
+                    rate = 1 + (GameHelper.getHealthDrain() / 4f);
                 }
-                stat.changeHp(rate * 0.01f * totalTime / needRotations);
+                stat.changeHp(rate * 0.01f * duration / needRotations);
             }
         } else if (Math.abs(rotations) > 1) {
             rotations -= 1 * Math.signum(rotations);
@@ -202,10 +218,10 @@ public class ModernSpinner extends Spinner {
                 fullRotations++;
                 stat.registerSpinnerHit();
                 float rate = 0.375f;
-                if (GameHelper.getDrain() > 0) {
-                    rate = 1 + (GameHelper.getDrain() / 2f);
+                if (GameHelper.getHealthDrain() > 0) {
+                    rate = 1 + (GameHelper.getHealthDrain() / 2f);
                 }
-                stat.changeHp(rate * 0.01f * totalTime / needRotations);
+                stat.changeHp(rate * 0.01f * duration / needRotations);
             }
         }
 
@@ -213,10 +229,6 @@ public class ModernSpinner extends Spinner {
     }
 
     public void removeFromScene() {
-//        if (clearText != null) {
-//            scene.detachChild(clearText);
-//            SpritePool.getInstance().putSprite("spinner-clear", clearText);
-//        }
         glow.clearEntityModifiers();
         scene.detachChild(middle);
         scene.detachChild(middle2);
@@ -226,48 +238,43 @@ public class ModernSpinner extends Spinner {
         scene.detachChild(bonusScore);
 
         listener.removeObject(ModernSpinner.this);
+        GameObjectPool.getInstance().putSpinner(this);
+
         int score = 0;
         if (replayObjectData != null) {
             if (fullRotations < replayObjectData.accuracy / 4)
                 fullRotations = replayObjectData.accuracy / 4;
             if (fullRotations >= needRotations)
                 clear = true;
-            int bonusRot = (int) (replayObjectData.accuracy / 4 - needRotations + 1);
+            int bonusRot = (int) (replayObjectData.accuracy / 4f - needRotations + 1);
             while (bonusRot < score) {
                 bonusRot++;
                 listener.onSpinnerHit(id, 1000, false, 0);
             }
         }
-        float percentfill = (Math.abs(rotations) + fullRotations)
+        float percentFilled = (Math.abs(rotations) + fullRotations)
                 / needRotations;
-        if (percentfill > 0.9f) {
+        if (percentFilled > 0.9f) {
             score = 50;
         }
-        if (percentfill > 0.95f) {
+        if (percentFilled > 0.95f) {
             score = 100;
         }
         if (clear) {
             score = 300;
         }
         if (replayObjectData != null) {
-            switch (replayObjectData.accuracy % 4) {
-                case 0:
-                    score = 0;
-                    break;
-                case 1:
-                    score = 50;
-                    break;
-                case 2:
-                    score = 100;
-                    break;
-                case 3:
-                    score = 300;
-                    break;
-            }
+            score = switch (replayObjectData.accuracy % 4) {
+                case 0 -> 0;
+                case 1 -> 50;
+                case 2 -> 100;
+                case 3 -> 300;
+                default -> score;
+            };
         }
         listener.onSpinnerHit(id, score, endsCombo, this.score + fullRotations - 1);
         if (score > 0) {
-            Utils.playHitSound(listener, soundId);
+            listener.playSamples(beatmapSpinner);
         }
     }
 }

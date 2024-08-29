@@ -61,7 +61,7 @@ public class FollowTrack extends GameObject {
         count = Math.min(count, 30);
         if (count <= 0) {
             empty = true;
-            GameObjectPool.getInstance().putTrac(this);
+            GameObjectPool.getInstance().putTrack(this);
             return;
         }
         empty = false;
@@ -138,7 +138,7 @@ public class FollowTrack extends GameObject {
                 pointSpritePool.free(sp);
             }
             listener.removePassiveObject(FollowTrack.this);
-            GameObjectPool.getInstance().putTrac(FollowTrack.this);
+            GameObjectPool.getInstance().putTrack(FollowTrack.this);
         }
     }
 }

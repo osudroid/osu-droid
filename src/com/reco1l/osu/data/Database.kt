@@ -45,6 +45,13 @@ object DatabaseManager {
     val scoreInfoTable
         get() = database.getScoreInfoTable()
 
+    /**
+     * Get the block area table DAO.
+     */
+    @JvmStatic
+    val blockAreaTable
+        get() = database.getBlockAreaTable()
+
 
     private lateinit var database: DroidDatabase
 
@@ -241,7 +248,8 @@ object DatabaseManager {
         BeatmapOptions::class,
         ScoreInfo::class,
         BeatmapSetCollection::class,
-        BeatmapSetCollection_BeatmapSetInfo::class
+        BeatmapSetCollection_BeatmapSetInfo::class,
+        BlockArea::class
     ]
 )
 abstract class DroidDatabase : RoomDatabase() {
@@ -254,4 +262,5 @@ abstract class DroidDatabase : RoomDatabase() {
 
     abstract fun getScoreInfoTable(): IScoreInfoDAO
 
+    abstract fun getBlockAreaTable(): IBlockAreaDAO
 }

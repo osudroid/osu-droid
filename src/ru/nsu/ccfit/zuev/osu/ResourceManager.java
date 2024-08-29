@@ -659,10 +659,18 @@ public class ResourceManager {
         return snd;
     }
 
-    public BassSoundProvider getSound(final String resname) {
-        var sound = sounds.get(resname);
+    public BassSoundProvider getSound(final String name) {
+        return getSound(name, true);
+    }
 
-        return sound != null ? sound : emptySound;
+    public BassSoundProvider getSound(final String name, final boolean defaultToEmpty) {
+        var sound = sounds.get(name);
+
+        if (sound == null && defaultToEmpty) {
+            return emptySound;
+        }
+
+        return sound;
     }
 
     public void loadCustomSound(final File file) {
@@ -691,6 +699,14 @@ public class ResourceManager {
         }
 
         customSounds.put(resName, snd);
+    }
+
+    public BassSoundProvider getCustomSound(final String name, final boolean defaultToEmpty) {
+        if (SkinManager.isSkinEnabled() && customSounds.containsKey(name)) {
+            return customSounds.get(name);
+        }
+
+        return getSound(name, defaultToEmpty);
     }
 
     public BassSoundProvider getCustomSound(final String resname, final int set) {

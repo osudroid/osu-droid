@@ -15,7 +15,7 @@ import ru.nsu.ccfit.zuev.osu.scoring.StatisticV2
 
 @Entity(
     indices = [
-        Index(name = "beatmapPathIdx", value = ["beatmapPath"])
+        Index(name = "beatmapIdx", value = ["beatmapFilename", "beatmapSetDirectory"]),
     ]
 )
 data class ScoreInfo @JvmOverloads constructor(
@@ -146,7 +146,7 @@ data class ScoreInfo @JvmOverloads constructor(
     fun toStatisticV2() = StatisticV2().also {
 
         it.playerName = playerName
-        it.fileName = "$beatmapSetDirectory/$beatmapFilename"
+        it.setBeatmap(beatmapSetDirectory, beatmapFilename)
         it.replayFilename = replayFilename
         it.setModFromString(mods)
         it.setForcedScore(score)
@@ -222,7 +222,7 @@ interface IScoreInfoDAO {
     @Query("SELECT * FROM ScoreInfo WHERE id = :id")
     fun getScore(id: Int): ScoreInfo?
 
-    @Query("SELECT mark FROM ScoreInfo WHERE beatmapSetDirectory = :beatmapFilename ORDER BY score DESC LIMIT 1")
+    @Query("SELECT mark FROM ScoreInfo WHERE beatmapSetDirectory = :beatmapSetDirectory AND beatmapFilename = :beatmapFilename ORDER BY score DESC LIMIT 1")
     fun getBestMark(beatmapSetDirectory: String, beatmapFilename: String): String?
 
     @Insert(onConflict = OnConflictStrategy.ABORT)

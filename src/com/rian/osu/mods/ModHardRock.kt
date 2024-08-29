@@ -18,9 +18,9 @@ class ModHardRock : Mod(), IApplicableToDifficulty, IApplicableToHitObject {
     override fun applyToDifficulty(mode: GameMode, difficulty: BeatmapDifficulty) = difficulty.run {
         cs = when (mode) {
             GameMode.Droid -> {
-                val scale = CircleSizeCalculator.droidCSToDroidScale(cs)
+                val scale = CircleSizeCalculator.droidCSToDroidGameplayScale(cs)
 
-                CircleSizeCalculator.droidScaleToDroidCS(scale - 0.125f)
+                CircleSizeCalculator.droidGameplayScaleToDroidCS(scale - 0.125f)
             }
 
             // CS uses a custom 1.3 ratio.

@@ -22,10 +22,6 @@ public abstract class GameObject {
         this.replayObjectData = replayObjectData;
     }
 
-    public void setEndsCombo(final boolean endsCombo) {
-        this.endsCombo = endsCombo;
-    }
-
     public void setAutoPlay() {
         autoPlay = true;
     }
@@ -55,4 +51,6 @@ public abstract class GameObject {
     public void tryHit(float dt) {}
 
     public PointF getPos() {return pos;}
+
+    public void stopAuxiliarySamples() {}
 }

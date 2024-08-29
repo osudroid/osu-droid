@@ -67,7 +67,6 @@ public class Config {
         forceRomanized,
         fixFrameOffset,
         removeSliderLock,
-        calculateSliderPathInGameStart,
         displayScoreStatistics,
         hideReplayMarquee,
         hideInGameUI,
@@ -211,7 +210,6 @@ public class Config {
         enablePP = false;//prefs.getBoolean("enablePP",true);
         fixFrameOffset = prefs.getBoolean("fixFrameOffset", true);
         removeSliderLock = prefs.getBoolean("removeSliderLock", false);
-        calculateSliderPathInGameStart = prefs.getBoolean("calculateSliderPathInGameStart", false);
         displayScoreStatistics = prefs.getBoolean("displayScoreStatistics", false);
         hideReplayMarquee = prefs.getBoolean("hideReplayMarquee", false);
         hideInGameUI = prefs.getBoolean("hideInGameUI", false);
@@ -286,10 +284,6 @@ public class Config {
     public static boolean isRemoveSliderLock() {
         //noinspection DataFlowIssue
         return Multiplayer.isConnected() ? Multiplayer.room.getGameplaySettings().isRemoveSliderLock() : removeSliderLock;
-    }
-
-    public static boolean isCalculateSliderPathInGameStart() {
-        return calculateSliderPathInGameStart;
     }
 
     public static boolean isDisplayScoreStatistics() {

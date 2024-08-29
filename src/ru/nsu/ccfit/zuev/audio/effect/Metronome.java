@@ -1,5 +1,7 @@
 package ru.nsu.ccfit.zuev.audio.effect;
 
+import com.rian.osu.beatmap.timings.TimingControlPoint;
+
 import ru.nsu.ccfit.zuev.audio.BassSoundProvider;
 import ru.nsu.ccfit.zuev.osu.ResourceManager;
 import ru.nsu.ccfit.zuev.osu.game.GameHelper;
@@ -15,13 +17,15 @@ public class Metronome {
 
     private int lastBeatIndex = -1;
 
-    public void update(float elapsedTime) {
-        if (elapsedTime - GameHelper.getTimingOffset() <= 0) {
+    public void update(float elapsedTime, TimingControlPoint activeTimingPoint) {
+        float timingPointTime = (float) activeTimingPoint.time / 1000;
+
+        if (elapsedTime - timingPointTime <= 0) {
             return;
         }
 
-        float playSeconds = (float) (elapsedTime - GameHelper.getTimingOffset());
-        int beatIndex = (int) (playSeconds * 2 / GameHelper.getBeatLength());
+        float playSeconds = elapsedTime - timingPointTime;
+        int beatIndex = (int) (playSeconds * 2 / (activeTimingPoint.msPerBeat / 1000));
 
         if (beatIndex < 0) {
             return;
@@ -31,10 +35,10 @@ public class Metronome {
         }
         lastBeatIndex = beatIndex;
 
-        int beatInBar = beatIndex % GameHelper.getTimeSignature();
+        int beatInBar = beatIndex % activeTimingPoint.timeSignature;
 
         // 每隔8小节在第4拍kick+finish
-        if (beatIndex % (8 * GameHelper.getTimeSignature()) == 0) {
+        if (beatIndex % (8 * activeTimingPoint.timeSignature) == 0) {
             kickSound.play();
             if (beatIndex > 0) {
                 finishSound.play();

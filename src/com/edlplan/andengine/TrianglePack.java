@@ -9,9 +9,7 @@ import org.anddev.andengine.opengl.util.GLHelper;
 import org.anddev.andengine.opengl.vertex.VertexBuffer;
 
 import javax.microedition.khronos.opengles.GL10;
-import javax.microedition.khronos.opengles.GL11;
 
-import ru.nsu.ccfit.zuev.osu.polygon.PolygonVertexBuffer;
 
 public class TrianglePack extends Shape {
 
@@ -20,8 +18,6 @@ public class TrianglePack extends Shape {
     // ===========================================================
 
     private FloatArraySlice mVertices;
-
-    private PolygonVertexBuffer mPolygonVertexBuffer;
 
     private boolean clearDepthOnStart = false;
 
@@ -35,23 +31,6 @@ public class TrianglePack extends Shape {
         super(0, 0);
         mVertices = new FloatArraySlice();
         mVertices.ary = new float[0];
-    }
-
-    public TrianglePack(final float pX, final float pY, final float[] pVertices) {
-        this(pX, pY, pVertices, new PolygonVertexBuffer(pVertices.length,
-                GL11.GL_STATIC_DRAW, true));
-    }
-
-    public TrianglePack(final float pX, final float pY, final float[] pVertices,
-                        final PolygonVertexBuffer pPolygonVertexBuffer) {
-        super(pX, pY);
-
-        this.mVertices = new FloatArraySlice();
-        mVertices.ary = pVertices;
-        mVertices.length = pVertices.length;
-
-        this.mPolygonVertexBuffer = pPolygonVertexBuffer;
-        this.updateVertexBuffer();
     }
 
     public void setClearDepthOnStart(boolean clearDepthOnStart) {
@@ -85,7 +64,7 @@ public class TrianglePack extends Shape {
 
     @Override
     protected VertexBuffer getVertexBuffer() {
-        return this.mPolygonVertexBuffer;
+        return null;
     }
 
 

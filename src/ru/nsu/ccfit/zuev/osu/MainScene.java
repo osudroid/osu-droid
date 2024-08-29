@@ -489,7 +489,8 @@ public class MainScene implements IUpdateHandler {
         scene.setTouchAreaBindingEnabled(true);
 
         progressBar = new SongProgressBar(null, scene, 0, 0, new PointF(Utils.toRes(Config.getRES_WIDTH() - 320), Utils.toRes(100)));
-        progressBar.setProgressRectColor(new RGBAColor(0.9f, 0.9f, 0.9f, 0.8f));
+        progressBar.setProgressRectColor(new RGBColor(0.9f, 0.9f, 0.9f));
+        progressBar.setProgressRectAlpha(0.8f);
 
         createOnlinePanel(scene);
         scene.registerUpdateHandler(this);
