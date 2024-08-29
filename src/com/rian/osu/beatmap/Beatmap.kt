@@ -64,16 +64,18 @@ class Beatmap : Cloneable {
     var hitObjects = BeatmapHitObjects()
 
     /**
-     * The path of parent folder of this [Beatmap].
-     */
-    @JvmField
-    var folder: String? = null
-
-    /**
      * The path to the `.osu` file of this [Beatmap].
      */
     @JvmField
     var filePath = ""
+
+    /**
+     * The path of the parent folder of this [Beatmap].
+     *
+     * In other words, this is the beatmapset folder of this [Beatmap].
+     */
+    val beatmapsetPath
+        get() = filePath.substringBeforeLast("/")
 
     /**
      * The MD5 hash of this [Beatmap].

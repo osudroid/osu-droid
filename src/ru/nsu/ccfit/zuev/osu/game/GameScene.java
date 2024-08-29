@@ -368,7 +368,7 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
         beatmap = parsedBeatmap.createPlayableBeatmap(GameMode.Droid, convertedMods, modMenu.getChangeSpeed());
 
         // TODO skin manager
-        SkinManager.getInstance().loadBeatmapSkin(beatmap.folder);
+        SkinManager.getInstance().loadBeatmapSkin(beatmap.getBeatmapsetPath());
 
         breakPeriods = new LinkedList<>();
         for (var period : beatmap.events.breaks) {
