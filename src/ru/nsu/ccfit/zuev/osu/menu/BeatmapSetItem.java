@@ -8,7 +8,6 @@ import org.anddev.andengine.entity.sprite.Sprite;
 import java.lang.ref.WeakReference;
 import java.util.Collections;
 import java.util.List;
-import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
