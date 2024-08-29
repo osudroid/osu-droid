@@ -1129,7 +1129,7 @@ public class SongMenu implements IUpdateHandler, MenuItemListener,
                 }
 
                 // Replace the entry in the database in case of changes.
-                var newBeatmapInfo = BeatmapInfo(beatmap, beatmapInfo.getSetDirectory(), beatmapInfo.getDateImported(), beatmapInfo.getFilename());
+                var newBeatmapInfo = BeatmapInfo(beatmap, beatmapInfo.getSetDirectory(), beatmapInfo.getDateImported());
                 DatabaseManager.getBeatmapInfoTable().insert(newBeatmapInfo);
                 LibraryManager.loadLibrary();
 

@@ -239,7 +239,7 @@ data class BeatmapInfo(
 /**
  * Represents a beatmap information.
  */
-fun BeatmapInfo(data: RianBeatmap, parentPath: String, lastModified: Long, path: String): BeatmapInfo {
+fun BeatmapInfo(data: RianBeatmap, parentPath: String, lastModified: Long): BeatmapInfo {
 
     var bpmMin = Float.MAX_VALUE
     var bpmMax = 0f
