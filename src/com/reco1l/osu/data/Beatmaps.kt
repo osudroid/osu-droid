@@ -239,7 +239,7 @@ data class BeatmapInfo(
 /**
  * Represents a beatmap information.
  */
-fun BeatmapInfo(data: RianBeatmap, parentPath: String, lastModified: Long): BeatmapInfo {
+fun BeatmapInfo(data: RianBeatmap, lastModified: Long): BeatmapInfo {
 
     var bpmMin = Float.MAX_VALUE
     var bpmMax = 0f
@@ -268,7 +268,7 @@ fun BeatmapInfo(data: RianBeatmap, parentPath: String, lastModified: Long): Beat
         status = null, // TODO: Should we cache ranking status ?
 
         // Parent set
-        setDirectory = parentPath,
+        setDirectory = data.beatmapsetPath,
         setId = data.metadata.beatmapSetId,
 
         // Metadata

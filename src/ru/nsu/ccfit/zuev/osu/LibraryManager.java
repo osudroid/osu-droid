@@ -140,7 +140,7 @@ public class LibraryManager {
                     continue;
                 }
 
-                var beatmapInfo = BeatmapInfo(beatmap, directory.getPath(), directory.lastModified());
+                var beatmapInfo = BeatmapInfo(beatmap, directory.lastModified());
 
                 if (beatmap.events.videoFilename != null && Config.isDeleteUnsupportedVideos()) {
                     try {
