@@ -221,6 +221,7 @@ class SettingsFragment : com.edlplan.ui.fragment.SettingsFragment() {
         Section.Library -> {
             findPreference<Preference>("clear")!!.setOnPreferenceClickListener {
                 LibraryManager.clearDatabase()
+                ToastLogger.showText(StringTable.get(R.string.message_lib_cleared), true)
                 true
             }
 
