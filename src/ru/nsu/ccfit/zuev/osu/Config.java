@@ -9,7 +9,6 @@ import android.util.DisplayMetrics;
 
 import androidx.preference.PreferenceManager;
 
-import com.edlplan.favorite.FavoriteLibrary;
 import com.edlplan.framework.math.FMath;
 import com.google.firebase.messaging.FirebaseMessaging;
 
@@ -242,7 +241,6 @@ public class Config {
         }
 
         loadOnlineConfig(context);
-        FavoriteLibrary.get().load();
     }
 
     public static void loadOnlineConfig(final Context context) {

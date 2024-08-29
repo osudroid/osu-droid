@@ -3,6 +3,8 @@ package com.reco1l.osu.data
 import android.content.Context
 import android.util.Log
 import androidx.room.*
+import com.reco1l.toolkt.data.iterator
+import org.json.JSONObject
 import ru.nsu.ccfit.zuev.osu.Config
 import ru.nsu.ccfit.zuev.osu.GlobalManager
 import ru.nsu.ccfit.zuev.osu.helper.sql.DBOpenHelper
@@ -31,6 +33,13 @@ object DatabaseManager {
     @JvmStatic
     val beatmapOptionsTable
         get() = database.getBeatmapOptionsTable()
+
+    /**
+     * Get the beatmap collections table DAO.
+     */
+    @JvmStatic
+    val beatmapCollectionsTable
+        get() = database.getBeatmapCollectionsTable()
 
     /**
      * Get the score table DAO.
@@ -85,15 +94,17 @@ object DatabaseManager {
 
                         val options = (ois.readObject() as Map<String, BeatmapProperties>).map { (path, properties) ->
 
-                            // Old properties storage system stores the absolute path of the beatmap
-                            // set so we're extracting it here to use the directory name.
-                            val setDirectory = if (path.endsWith('/')) {
-                                path.substring(0, path.length - 1).substringAfterLast('/')
-                            } else {
-                                path.substringAfterLast('/')
-                            }
-
-                            BeatmapOptions(setDirectory, properties.favorite, properties.offset)
+                            BeatmapOptions(
+                                setDirectory = path.let {
+                                    if (it.endsWith('/')) {
+                                        it.substring(0, it.length - 1).substringAfterLast('/')
+                                    } else {
+                                        it.substringAfterLast('/')
+                                    }
+                                },
+                                isFavorite = properties.favorite,
+                                offset = properties.offset
+                            )
                         }
 
                         beatmapOptionsTable.insertAll(options)
@@ -108,7 +119,41 @@ object DatabaseManager {
             Log.e("DatabaseManager", "Failed to migrate legacy beatmap properties", e)
         }
 
-        // Score table
+        // BeatmapCollections
+        try {
+            val oldFavoritesFile = File(Config.getCorePath(), "json/favorites.json")
+
+            if (oldFavoritesFile.exists()) {
+
+                val json = JSONObject(oldFavoritesFile.readText())
+
+                GlobalManager.getInstance().info = "Migrating beatmap collections..."
+
+                for (collectionName in json.keys()) {
+                    beatmapCollectionsTable.insertCollection(collectionName)
+
+                    for (beatmapPath in json.getJSONArray(collectionName)) {
+                        beatmapCollectionsTable.addBeatmap(
+                            collectionName = collectionName,
+                            setDirectory = beatmapPath.toString().let {
+                                if (it.endsWith('/')) {
+                                    it.substring(0, it.length - 1).substringAfterLast('/')
+                                } else {
+                                    it.substringAfterLast('/')
+                                }
+                            }
+                        )
+                    }
+                }
+
+                oldFavoritesFile.renameTo(File(Config.getCorePath(), "json/favorites.oldjson"))
+            }
+
+        } catch (e: IOException) {
+            Log.e("DatabaseManager", "Failed to migrate legacy beatmap properties", e)
+        }
+
+        // ScoreInfo
         try {
             val oldDatabaseFile = File(Config.getCorePath(), "databases/osudroid_test.db")
 
@@ -205,6 +250,8 @@ object DatabaseManager {
         BeatmapInfo::class,
         BeatmapOptions::class,
         ScoreInfo::class,
+        BeatmapSetCollection::class,
+        BeatmapSetCollection_BeatmapSetInfo::class,
         BlockArea::class
     ]
 )
@@ -213,6 +260,8 @@ abstract class DroidDatabase : RoomDatabase() {
     abstract fun getBeatmapInfoTable(): IBeatmapInfoDAO
 
     abstract fun getBeatmapOptionsTable(): IBeatmapOptionsDAO
+
+    abstract fun getBeatmapCollectionsTable(): IBeatmapCollectionsDAO
 
     abstract fun getScoreInfoTable(): IScoreInfoDAO
 

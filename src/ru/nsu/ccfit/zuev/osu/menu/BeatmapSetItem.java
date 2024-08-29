@@ -7,7 +7,7 @@ import org.anddev.andengine.entity.sprite.Sprite;
 
 import java.lang.ref.WeakReference;
 import java.util.Collections;
-import java.util.Set;
+import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -208,7 +208,7 @@ public class BeatmapSetItem {
         selectedBeatmapItem = null;
     }
 
-    public void applyFilter(final String filter, final boolean favs, Set<String> limit) {
+    public void applyFilter(final String filter, final boolean favs, List<String> limit) {
         if ((favs && !isFavorite())
                 || (limit != null && !limit.contains(beatmapSetDir))) {
             //System.out.println(trackDir);
