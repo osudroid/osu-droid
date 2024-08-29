@@ -543,7 +543,7 @@ public class MainScene implements IUpdateHandler {
                 if (GlobalManager.getInstance().getSongService().getStatus() == Status.PAUSED || GlobalManager.getInstance().getSongService().getStatus() == Status.STOPPED) {
                     if (GlobalManager.getInstance().getSongService().getStatus() == Status.STOPPED) {
                         loadTimingPoints(false);
-                        GlobalManager.getInstance().getSongService().preLoad(beatmapInfo.getAudio());
+                        GlobalManager.getInstance().getSongService().preLoad(beatmapInfo.getAudioPath());
 
                         if (currentTimingPoint != null) {
                             bpmLength = currentTimingPoint.msPerBeat;
@@ -817,11 +817,11 @@ public class MainScene implements IUpdateHandler {
         }
         particleEnabled = false;
         GlobalManager.getInstance().setSelectedBeatmap(beatmapInfo);
-        if (beatmapInfo.getBackground() != null) {
+        if (beatmapInfo.getBackgroundFilename() != null) {
             try {
                 final TextureRegion tex = Config.isSafeBeatmapBg() ?
                         ResourceManager.getInstance().getTexture("menu-background") :
-                        ResourceManager.getInstance().loadBackground(beatmapInfo.getBackground());
+                        ResourceManager.getInstance().loadBackground(beatmapInfo.getBackgroundPath());
 
                 if (tex != null) {
                     float height = tex.getHeight();
@@ -853,7 +853,7 @@ public class MainScene implements IUpdateHandler {
 
         if (reloadMusic) {
             if (GlobalManager.getInstance().getSongService() != null) {
-                GlobalManager.getInstance().getSongService().preLoad(beatmapInfo.getAudio());
+                GlobalManager.getInstance().getSongService().preLoad(beatmapInfo.getAudioPath());
                 musicStarted = false;
             } else {
                 Log.w("nullpoint", "GlobalManager.getInstance().getSongService() is null while reload music (MainScene.loadTimeingPoints)");
@@ -983,8 +983,8 @@ public class MainScene implements IUpdateHandler {
                 if (beatmap != null) {
                     GlobalManager.getInstance().getMainScene().setBeatmap(beatmap);
                     GlobalManager.getInstance().getSongMenu().select();
-                    ResourceManager.getInstance().loadBackground(beatmap.getBackground());
-                    GlobalManager.getInstance().getSongService().preLoad(beatmap.getAudio());
+                    ResourceManager.getInstance().loadBackground(beatmap.getBackgroundPath());
+                    GlobalManager.getInstance().getSongService().preLoad(beatmap.getAudioPath());
                     GlobalManager.getInstance().getSongService().play();
                     scorescene.load(stat, null, GlobalManager.getInstance().getSongService(), replayFile, null, beatmap);
                     GlobalManager.getInstance().getEngine().setScene(scorescene.getScene());

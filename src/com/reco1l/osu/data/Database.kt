@@ -3,7 +3,6 @@ package com.reco1l.osu.data
 import android.content.Context
 import android.util.Log
 import androidx.room.*
-import ru.nsu.ccfit.zuev.osu.BeatmapProperties
 import ru.nsu.ccfit.zuev.osu.Config
 import ru.nsu.ccfit.zuev.osu.GlobalManager
 import ru.nsu.ccfit.zuev.osu.helper.sql.DBOpenHelper
@@ -67,7 +66,7 @@ object DatabaseManager {
     }
 
     @Suppress("UNCHECKED_CAST")
-    fun loadLegacyMigrations(context: Context) {
+    private fun loadLegacyMigrations(context: Context) {
 
         // BeatmapOptions
         try {
@@ -84,16 +83,25 @@ object DatabaseManager {
                         // Ignoring first object which is intended to be the version.
                         ois.readObject()
 
-                        val options = (ois.readObject() as Map<String, BeatmapProperties>).map { (path, props) ->
+                        val options = (ois.readObject() as Map<String, BeatmapProperties>).map { (path, properties) ->
 
-                            BeatmapOptions(path, props.isFavorite, props.offset)
+                            // Old properties storage system stores the absolute path of the beatmap
+                            // set so we're extracting it here to use the directory name.
+                            val setDirectory = if (path.endsWith('/')) {
+                                path.substring(0, path.length - 1).substringAfterLast('/')
+                            } else {
+                                path.substringAfterLast('/')
+                            }
+
+                            BeatmapOptions(setDirectory, properties.favorite, properties.offset)
                         }
 
-                        beatmapOptionsTable.addAll(options)
+                        beatmapOptionsTable.insertAll(options)
                     }
 
-
                 }
+
+                oldPropertiesFile.renameTo(File(context.filesDir, "properties.old"))
             }
 
         } catch (e: IOException) {
@@ -120,23 +128,48 @@ object DatabaseManager {
 
                                 try {
                                     val scoreInfo = ScoreInfo(
-                                        it.getInt(it.getColumnIndexOrThrow("id")).toLong(),
-                                        it.getString(it.getColumnIndexOrThrow("filename")),
-                                        it.getString(it.getColumnIndexOrThrow("playername")),
-                                        it.getString(it.getColumnIndexOrThrow("replayfile")),
-                                        it.getString(it.getColumnIndexOrThrow("mode")),
-                                        it.getInt(it.getColumnIndexOrThrow("score")),
-                                        it.getInt(it.getColumnIndexOrThrow("combo")),
-                                        it.getString(it.getColumnIndexOrThrow("mark")),
-                                        it.getInt(it.getColumnIndexOrThrow("h300k")),
-                                        it.getInt(it.getColumnIndexOrThrow("h300")),
-                                        it.getInt(it.getColumnIndexOrThrow("h100k")),
-                                        it.getInt(it.getColumnIndexOrThrow("h100")),
-                                        it.getInt(it.getColumnIndexOrThrow("h50")),
-                                        it.getInt(it.getColumnIndexOrThrow("misses")),
-                                        it.getFloat(it.getColumnIndexOrThrow("accuracy")),
-                                        it.getLong(it.getColumnIndexOrThrow("time")),
-                                        it.getInt(it.getColumnIndexOrThrow("perfect")) == 1
+                                        id = it.getInt(it.getColumnIndexOrThrow("id")).toLong(),
+                                        // "filename" can contain the full path, so we need to extract both filename and directory name refers
+                                        // to the beatmap set directory. The pattern could be `/beatmapSetDirectory/beatmapFilename/` with or
+                                        // without the trailing slash.
+                                        beatmapFilename = it.getString(it.getColumnIndexOrThrow("filename")).let { result ->
+                                            if (result.endsWith('/')) {
+                                                result.substring(0, result.length - 1).substringAfterLast('/')
+                                            } else {
+                                                result.substringAfterLast('/')
+                                            }
+                                        },
+                                        beatmapSetDirectory = it.getString(it.getColumnIndexOrThrow("filename")).let { result ->
+                                            if (result.endsWith('/')) {
+                                                result.substringBeforeLast('/').substringBeforeLast('/').substringAfterLast('/')
+                                            } else {
+                                                result.substringBeforeLast('/').substringAfterLast('/')
+                                            }
+                                        },
+                                        playerName = it.getString(it.getColumnIndexOrThrow("playername")),
+                                        replayFilename = it.getString(it.getColumnIndexOrThrow("replayfile")).let { result ->
+
+                                            // The old format used the full path, so we need to extract the file name.
+                                            if (result.endsWith('/')) {
+                                                result.substring(0, result.length - 1).substringAfterLast('/')
+                                            } else {
+                                                result.substringAfterLast('/')
+                                            }
+                                        },
+                                        mods = it.getString(it.getColumnIndexOrThrow("mode")),
+                                        score = it.getInt(it.getColumnIndexOrThrow("score")),
+                                        maxCombo = it.getInt(it.getColumnIndexOrThrow("combo")),
+                                        mark = it.getString(it.getColumnIndexOrThrow("mark")),
+                                        hit300k = it.getInt(it.getColumnIndexOrThrow("h300k")),
+                                        hit300 = it.getInt(it.getColumnIndexOrThrow("h300")),
+                                        hit100k = it.getInt(it.getColumnIndexOrThrow("h100k")),
+                                        hit100 = it.getInt(it.getColumnIndexOrThrow("h100")),
+                                        hit50 = it.getInt(it.getColumnIndexOrThrow("h50")),
+                                        misses = it.getInt(it.getColumnIndexOrThrow("misses")),
+                                        accuracy = it.getFloat(it.getColumnIndexOrThrow("accuracy")),
+                                        time = it.getLong(it.getColumnIndexOrThrow("time")),
+                                        isPerfect = it.getInt(it.getColumnIndexOrThrow("perfect")) == 1
+
                                     )
 
                                     scoreInfoTable.insertScore(scoreInfo)

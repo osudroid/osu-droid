@@ -2,6 +2,7 @@ package com.reco1l.osu.data
 
 import androidx.room.ColumnInfo
 import androidx.room.Relation
+import ru.nsu.ccfit.zuev.osu.Config
 
 /**
  * Defines a beatmap set, they're virtually created by the database using DISTINCT operation. This means it doesn't have
@@ -12,19 +13,19 @@ data class BeatmapSetInfo(
     /**
      * The ID.
      */
-    @ColumnInfo(name = "parentId")
+    @ColumnInfo(name = "setId")
     val id: Int?,
 
     /**
-     * This can equal to the set ID or its MD5.
+     * The directory name.
      */
-    @ColumnInfo(name = "parentPath")
-    val path: String,
+    @ColumnInfo(name = "setDirectory")
+    val directory: String,
 
     /**
-     * The list of beatmaps
+     * The list of beatmaps.
      */
-    @Relation(parentColumn = "parentPath", entityColumn = "parentPath")
+    @Relation(parentColumn = "setDirectory", entityColumn = "setDirectory")
     val beatmaps: List<BeatmapInfo>
 
 ) {
@@ -34,6 +35,12 @@ data class BeatmapSetInfo(
      */
     val count
         get() = beatmaps.size
+
+    /**
+     * The absolute path.
+     */
+    val path
+        get() = "${Config.getBeatmapPath()}/${directory}"
 
 
     /**

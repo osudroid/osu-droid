@@ -88,7 +88,7 @@ public class SongMenu implements IUpdateHandler, MenuItemListener,
     private BeatmapInfo selectedBeatmap;
     private Sprite bg = null;
     private Boolean bgLoaded = false;
-    private String bgName = "";
+    private String backgroundPath = "";
     private ScoreBoard board;
     private Float touchY = null;
     private String filterText = "";
@@ -739,15 +739,15 @@ public class SongMenu implements IUpdateHandler, MenuItemListener,
 
     public void setFilter(final String filter, final SortOrder order,
                           final boolean favsOnly, Set<String> limit) {
-        String oldBeatmapPath = "";
+        String beatmapFilename = "";
         if (selectedBeatmap != null) {
-            oldBeatmapPath = selectedBeatmap.getPath();
+            beatmapFilename = selectedBeatmap.getFilename();
         }
         if (!order.equals(sortOrder)) {
             sortOrder = order;
             tryReloadMenuItems(sortOrder);
             sort();
-            reSelectItem(oldBeatmapPath);
+            reSelectItem(beatmapFilename);
         }
         if (filter == null || filterText.equals(filter)) {
             if (favsOnly == this.favsOnly && limitC == limit) {
@@ -765,7 +765,7 @@ public class SongMenu implements IUpdateHandler, MenuItemListener,
         if (favsOnly != this.favsOnly) {
             this.favsOnly = favsOnly;
         } else {
-            reSelectItem(oldBeatmapPath);
+            reSelectItem(beatmapFilename);
         }
         if (selectedItem != null && !selectedItem.isVisible()) {
             selectedItem = null;
@@ -1094,7 +1094,7 @@ public class SongMenu implements IUpdateHandler, MenuItemListener,
             for (int j = library.size() - 1; j >= 0; j--) {
                 var set = library.get(j);
 
-                if (item.getBeatmapSetInfo().getPath().equals(set.getPath())) {
+                if (item.getBeatmapSetInfo().getDirectory().equals(set.getDirectory())) {
                     item.setBeatmapSetInfo(set);
                     break;
                 }
@@ -1111,7 +1111,7 @@ public class SongMenu implements IUpdateHandler, MenuItemListener,
         String tinfoStr = beatmapInfo.getArtistText() + " - " + beatmapInfo.getTitleText() + " [" + beatmapInfo.getVersion() + "]";
         String mapperStr = "Beatmap by " + beatmapInfo.getCreator();
         String binfoStr2 = String.format(StringTable.get(R.string.binfoStr2),
-                beatmapInfo.getHitCircleCount(), beatmapInfo.getSliderCount(), beatmapInfo.getSpinnerCount(), beatmapInfo.getParentId());
+                beatmapInfo.getHitCircleCount(), beatmapInfo.getSliderCount(), beatmapInfo.getSpinnerCount(), beatmapInfo.getSetId());
         beatmapMetadataText.setText(tinfoStr);
         beatmapCreatorText.setText(mapperStr);
         beatmapHitObjectsText.setText(binfoStr2);
@@ -1126,7 +1126,7 @@ public class SongMenu implements IUpdateHandler, MenuItemListener,
                 }
 
                 // Replace the entry in the database in case of changes.
-                var newBeatmapInfo = BeatmapInfo(beatmap, beatmapInfo.getParentPath(), beatmapInfo.getDateImported(), beatmapInfo.getPath());
+                var newBeatmapInfo = BeatmapInfo(beatmap, beatmapInfo.getSetDirectory(), beatmapInfo.getDateImported(), beatmapInfo.getFilename());
                 DatabaseManager.getBeatmapInfoTable().insert(newBeatmapInfo);
                 LibraryManager.loadLibrary();
 
@@ -1176,11 +1176,11 @@ public class SongMenu implements IUpdateHandler, MenuItemListener,
         // Playing corresponding audio for the selected track.
         var selectedAudio = selectedBeatmap != null ? selectedBeatmap : GlobalManager.getInstance().getSelectedBeatmap();
 
-        if (selectedAudio == null || !Objects.equals(selectedAudio.getAudio(), beatmapInfo.getAudio())) {
-            playMusic(beatmapInfo.getAudio(), beatmapInfo.getPreviewTime());
+        if (selectedAudio == null || !Objects.equals(selectedAudio.getAudioFilename(), beatmapInfo.getAudioFilename())) {
+            playMusic(beatmapInfo.getAudioPath(), beatmapInfo.getPreviewTime());
         }
 
-        if (selectedBeatmap != null && selectedBeatmap.getPath().equals(beatmapInfo.getPath())) {
+        if (selectedBeatmap != null && selectedBeatmap.getFilename().equals(beatmapInfo.getFilename())) {
             synchronized (bgMutex) {
                 if (!bgLoaded) {
                     return;
@@ -1219,11 +1219,11 @@ public class SongMenu implements IUpdateHandler, MenuItemListener,
 
         synchronized (backgroundMutex) {
 
-            if (!reloadBG && (beatmapInfo.getBackground() == null || bgName.equals(beatmapInfo.getBackground()))) {
+            if (!reloadBG && (beatmapInfo.getBackgroundFilename() == null || backgroundPath.equals(beatmapInfo.getBackgroundPath()))) {
                 isSelectComplete = true;
                 return;
             }
-            bgName = beatmapInfo.getBackground();
+            backgroundPath = beatmapInfo.getBackgroundPath();
             bg = null;
             bgLoaded = false;
             scene.setBackground(new ColorBackground(0, 0, 0));
@@ -1231,9 +1231,9 @@ public class SongMenu implements IUpdateHandler, MenuItemListener,
 
         Execution.async(() -> {
             synchronized (backgroundMutex) {
-                final TextureRegion tex = Config.isSafeBeatmapBg() || beatmapInfo.getBackground() == null?
+                final TextureRegion tex = Config.isSafeBeatmapBg() || beatmapInfo.getBackgroundFilename() == null?
                         ResourceManager.getInstance().getTexture("menu-background") :
-                        ResourceManager.getInstance().loadBackground(bgName);
+                        ResourceManager.getInstance().loadBackground(backgroundPath);
                 if (tex != null) {
                     float height = tex.getHeight();
                     height *= Config.getRES_WIDTH()
@@ -1256,7 +1256,7 @@ public class SongMenu implements IUpdateHandler, MenuItemListener,
                                     0,
                                     (Config.getRES_HEIGHT() - height) / 2,
                                     Config.getRES_WIDTH(), height, tex1);
-                            bgName = "";
+                            backgroundPath = "";
                         }
                         scene.setBackground(new SpriteBackground(bg));
                         synchronized (bgMutex) {
@@ -1318,7 +1318,7 @@ public class SongMenu implements IUpdateHandler, MenuItemListener,
             stat.processLegacySC(selectedBeatmap);
         }
 
-        scoreScene.load(stat, null, null, stat.getReplayName(), null, selectedBeatmap);
+        scoreScene.load(stat, null, null, stat.getReplayFilename(), null, selectedBeatmap);
         engine.setScene(scoreScene.getScene());
     }
 
@@ -1424,7 +1424,7 @@ public class SongMenu implements IUpdateHandler, MenuItemListener,
         }
     }
 
-    public void playMusic(final String filename, final int previewTime) {
+    public void playMusic(final String filePath, final int previewTime) {
         if (!Config.isPlayMusicPreview()) {
             return;
         }
@@ -1436,7 +1436,7 @@ public class SongMenu implements IUpdateHandler, MenuItemListener,
                 }
 
                 try {
-                    GlobalManager.getInstance().getSongService().preLoad(filename);
+                    GlobalManager.getInstance().getSongService().preLoad(filePath);
                     GlobalManager.getInstance().getSongService().play();
                     GlobalManager.getInstance().getSongService().setVolume(0);
                     if (previewTime >= 0) {
@@ -1479,7 +1479,7 @@ public class SongMenu implements IUpdateHandler, MenuItemListener,
             var i = items.size() - 1;
             while (i >= 0) {
                 var item = items.get(i);
-                if (item.getBeatmapSetInfo().getPath().equals(beatmapInfo.getParentPath())) {
+                if (item.getBeatmapSetInfo().getDirectory().equals(beatmapInfo.getSetDirectory())) {
                     secondsSinceLastSelect = 2;
                     item.select(false, true);
                     break;
@@ -1555,9 +1555,9 @@ public class SongMenu implements IUpdateHandler, MenuItemListener,
         }
     }
 
-    private void reSelectItem(String oldBeatmapPath) {
-        if (!oldBeatmapPath.isEmpty()) {
-            if (selectedBeatmap.getPath().equals(oldBeatmapPath) && items.size() > 1 && selectedItem != null && selectedItem.isVisible()) {
+    private void reSelectItem(String beatmapFilename) {
+        if (!beatmapFilename.isEmpty()) {
+            if (selectedBeatmap.getFilename().equals(beatmapFilename) && items.size() > 1 && selectedItem != null && selectedItem.isVisible()) {
                 velocityY = 0;
                 float height = 0;
                 for (int i = 0; i < items.size(); i++) {
@@ -1573,7 +1573,7 @@ public class SongMenu implements IUpdateHandler, MenuItemListener,
             for (int i = items.size() - 1; i >= 0; i--) {
                 BeatmapSetItem item = items.get(i);
                 if (item == null || !item.isVisible()) continue;
-                int beatmapId = item.tryGetCorrespondingBeatmapId(oldBeatmapPath);
+                int beatmapId = item.tryGetCorrespondingBeatmapId(beatmapFilename);
                 if (beatmapId >= 0) {
                     item.select(true, true);
                     if (beatmapId != 0) {

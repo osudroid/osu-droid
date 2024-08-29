@@ -225,7 +225,7 @@ class SettingsFragment : com.edlplan.ui.fragment.SettingsFragment() {
             }
 
             findPreference<Preference>("clear_properties")!!.setOnPreferenceClickListener {
-                DatabaseManager.beatmapOptionsTable.clearOptions()
+                DatabaseManager.beatmapOptionsTable.deleteAll()
                 true
             }
         }

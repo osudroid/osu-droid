@@ -41,8 +41,7 @@ public class StatisticV2 implements Serializable {
     private float diffModifier = 1;
     private EnumSet<GameMod> mod = EnumSet.noneOf(GameMod.class);
     private String playerName = Config.getOnlineUsername();
-    private String fileName = "";
-    private String replayName = "";
+    private String replayFilename = "";
     private int forcedScore = -1;
     private String mark = null;
     private float changeSpeed = 1.0f;
@@ -66,6 +65,7 @@ public class StatisticV2 implements Serializable {
     private Float customOD;
     private Float customCS;
     private Float customHP;
+    private int life = 1;
 
     private boolean isLegacySC = false;
 
@@ -85,7 +85,16 @@ public class StatisticV2 implements Serializable {
      */
     private float modScoreMultiplier = 1;
 
-    private int life = 1;
+    /**
+     * The directory of the beatmap set.
+     */
+    private String beatmapSetDirectory = "";
+
+    /**
+     * The filename of the beatmap.
+     */
+    private String beatmapFilename = "";
+
 
     public StatisticV2() {}
 
@@ -605,12 +614,12 @@ public class StatisticV2 implements Serializable {
         computeModScoreMultiplier();
     }
 
-    public String getReplayName() {
-        return replayName;
+    public String getReplayFilename() {
+        return replayFilename;
     }
 
-    public void setReplayName(String replayName) {
-        this.replayName = replayName;
+    public void setReplayFilename(String replayName) {
+        this.replayFilename = replayName;
     }
 
     public void setForcedScore(int forcedScore) {
@@ -618,12 +627,9 @@ public class StatisticV2 implements Serializable {
         totalScore = forcedScore;
     }
 
-    public String getFileName() {
-        return fileName;
-    }
-
-    public void setFileName(String fileName) {
-        this.fileName = fileName;
+    public void setBeatmap(String beatmapSetDirectory, String beatmapFilename) {
+        this.beatmapSetDirectory = beatmapSetDirectory;
+        this.beatmapFilename = beatmapFilename;
     }
 
     public final boolean isScoreValid() {
@@ -915,9 +921,10 @@ public class StatisticV2 implements Serializable {
      */
     public ScoreInfo toScoreInfo() {
         return new ScoreInfo(
-            fileName,
             playerName,
-            replayName,
+            beatmapFilename,
+            beatmapSetDirectory,
+            replayFilename,
             getModString(),
             getTotalScoreWithMultiplier(),
             maxCombo,

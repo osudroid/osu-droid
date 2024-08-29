@@ -465,7 +465,9 @@ public class ScoringScene {
             if (!Multiplayer.isMultiplayer || !GlobalManager.getInstance().getGameScene().hasFailed) {
 
                 if (stat.getTotalScoreWithMultiplier() > 0 && !stat.getMod().contains(GameMod.MOD_AUTO)) {
-                    stat.setReplayName(replay);
+                    stat.setReplayFilename(replay);
+                    stat.setBeatmap(beatmapInfo.getSetDirectory(), beatmapInfo.getFilename());
+
                     try {
                         DatabaseManager.getScoreInfoTable().insertScore(stat.toScoreInfo());
                     } catch (Exception e) {
@@ -562,7 +564,7 @@ public class ScoringScene {
         if (songService != null) {
             songService.stop();
 //            songService.preLoadWithLoop(game.filePath);
-            songService.preLoad(beatmapInfo.getAudio());
+            songService.preLoad(beatmapInfo.getAudioPath());
             songService.play();
         }
     }
