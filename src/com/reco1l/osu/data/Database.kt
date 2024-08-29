@@ -34,6 +34,9 @@ object DatabaseManager {
     val beatmapOptionsTable
         get() = database.getBeatmapOptionsTable()
 
+    /**
+     * Get the beatmap collections table DAO.
+     */
     @JvmStatic
     val beatmapCollectionsTable
         get() = database.getBeatmapCollectionsTable()
