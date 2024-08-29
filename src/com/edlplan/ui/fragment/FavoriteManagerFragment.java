@@ -62,7 +62,7 @@ public class FavoriteManagerFragment extends BaseFragment {
                         return null;
                     }
 
-                    if (!DatabaseManager.getBeatmapCollectionsTable().existsCollection(input) && !input.equals(StringTable.get(R.string.favorite_default))) {
+                    if (!DatabaseManager.getBeatmapCollectionsTable().collectionExists(input) && !input.equals(StringTable.get(R.string.favorite_default))) {
                         DatabaseManager.getBeatmapCollectionsTable().insertCollection(input);
                         adapter.add(input);
                     }

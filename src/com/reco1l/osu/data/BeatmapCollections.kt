@@ -39,7 +39,7 @@ interface IBeatmapCollectionsDAO {
     fun clearCollection(collectionName: String)
 
     @Query("SELECT EXISTS(SELECT name FROM BeatmapSetCollection WHERE name = :name)")
-    fun existsCollection(name: String): Boolean
+    fun collectionExists(name: String): Boolean
 
 
     @Query("SELECT setDirectory FROM BeatmapSetCollection_BeatmapSetInfo WHERE collectionName = :collectionName")
