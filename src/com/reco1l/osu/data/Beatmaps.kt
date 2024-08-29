@@ -63,7 +63,7 @@ data class BeatmapInfo(
     // Parent set
 
     /**
-     * The beatmap set directory.
+     * The beatmap set directory relative to [Config.getBeatmapPath].
      */
     val setDirectory: String,
 
@@ -260,7 +260,8 @@ fun BeatmapInfo(data: RianBeatmap, lastModified: Long): BeatmapInfo {
 
         md5 = data.md5,
         id = data.metadata.beatmapId.toLong(),
-        filename = data.filePath,
+        // The returned path is absolute. We only want the beatmap path relative to the beatmapset path.
+        filename = data.filePath.substringAfterLast('/'),
         audioFilename = data.general.audioFilename,
         backgroundFilename = data.events.backgroundFilename,
 
@@ -268,7 +269,8 @@ fun BeatmapInfo(data: RianBeatmap, lastModified: Long): BeatmapInfo {
         status = null, // TODO: Should we cache ranking status ?
 
         // Parent set
-        setDirectory = data.beatmapsetPath,
+        // The returned path is absolute. We only want the beatmapset path relative to the player-configured songs path.
+        setDirectory = data.beatmapsetPath.substringAfterLast('/'),
         setId = data.metadata.beatmapSetId,
 
         // Metadata
