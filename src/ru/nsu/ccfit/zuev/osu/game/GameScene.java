@@ -17,6 +17,7 @@ import com.reco1l.osu.data.DatabaseManager;
 import com.reco1l.osu.graphics.BlankTextureRegion;
 import com.reco1l.osu.graphics.Modifiers;
 import com.reco1l.osu.graphics.VideoSprite;
+import com.reco1l.osu.ui.BlockAreaFragment;
 import com.reco1l.osu.ui.entity.GameplayLeaderboard;
 import com.reco1l.osu.multiplayer.Multiplayer;
 import com.reco1l.osu.multiplayer.RoomScene;
@@ -221,6 +222,8 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
     /**Last score data chunk sent to server, used to determine if the data was changed.*/
     private ScoreBoardItem lastScoreSent = null;
 
+    /**The block area manager fragment used to manage the block area.*/
+    private BlockAreaFragment blockAreaFragment;
 
 
     public GameScene(final Engine engine) {
@@ -919,6 +922,9 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
 
         engine.setScene(scene);
         scene.registerUpdateHandler(this);
+
+        blockAreaFragment = new BlockAreaFragment();
+        blockAreaFragment.show(false);
     }
 
     public RGBColor getComboColor(int num) {
@@ -1388,6 +1394,12 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
                     camera.setCenterDirect((float) Config.getRES_WIDTH() / 2, (float) Config.getRES_HEIGHT() / 2);
                 }
             }
+
+            if (blockAreaFragment != null) {
+                blockAreaFragment.dismiss();
+                blockAreaFragment = null;
+            }
+
             if (scoringScene != null) {
                 if (replaying) {
                     ModMenu.getInstance().setMod(Replay.oldMod);
@@ -1575,6 +1587,11 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
     }
 
     public void quit() {
+
+        if (blockAreaFragment != null) {
+            blockAreaFragment.dismiss();
+            blockAreaFragment = null;
+        }
 
         // Handle input back in update thread
         var touchOptions = new TouchOptions();
@@ -2082,7 +2099,6 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
             if (replay != null) {
                 replay.addPress(eventTime, gamePoint, id);
             }
-            cursorIIsDown[id] = true;
 
         } else if (event.isActionMove()) {
 
@@ -2162,6 +2178,10 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
             }
         }
 
+        if (blockAreaFragment != null) {
+            blockAreaFragment.dismiss();
+        }
+
         if (GlobalManager.getInstance().getSongService() != null && GlobalManager.getInstance().getSongService().getStatus() == Status.PLAYING) {
             GlobalManager.getInstance().getSongService().pause();
         }
@@ -2181,6 +2201,11 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
             }
             quit();
             return;
+        }
+
+        if (blockAreaFragment != null) {
+            blockAreaFragment.dismiss();
+            blockAreaFragment = null;
         }
 
         if(scorebar != null) scorebar.flush();
@@ -2204,6 +2229,11 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
         if (!paused) {
             return;
         }
+
+        if (blockAreaFragment == null) {
+            blockAreaFragment = new BlockAreaFragment();
+        }
+        blockAreaFragment.show();
 
         scene.getChildScene().back();
         paused = false;
