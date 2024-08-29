@@ -260,7 +260,7 @@ fun BeatmapInfo(data: RianBeatmap, parentPath: String, lastModified: Long, path:
 
         md5 = data.md5,
         id = data.metadata.beatmapId.toLong(),
-        filename = data.filename,
+        filename = data.filePath,
         audioFilename = data.general.audioFilename,
         backgroundFilename = data.events.backgroundFilename,
 

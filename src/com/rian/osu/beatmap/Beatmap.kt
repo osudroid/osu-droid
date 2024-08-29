@@ -70,10 +70,10 @@ class Beatmap : Cloneable {
     var folder: String? = null
 
     /**
-     * The name of the `.osu` file of this [Beatmap].
+     * The path to the `.osu` file of this [Beatmap].
      */
     @JvmField
-    var filename = ""
+    var filePath = ""
 
     /**
      * The MD5 hash of this [Beatmap].

@@ -110,7 +110,7 @@ class BeatmapParser : Closeable {
         val beatmap = Beatmap().also {
             it.md5 = FileUtils.getMD5Checksum(file)
             it.folder = file.parent
-            it.filename = file.path
+            it.filePath = file.path
             it.formatVersion = beatmapFormatVersion
         }
 
