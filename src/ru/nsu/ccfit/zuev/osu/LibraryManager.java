@@ -288,7 +288,7 @@ public class LibraryManager {
 
                         var directory = directoriesSlice[i1];
 
-                        if (DatabaseManager.getBeatmapInfoTable().isBeatmapSetImported(directory.getPath())) {
+                        if (DatabaseManager.getBeatmapInfoTable().isBeatmapSetImported(directory.getName())) {
                             directoryCount--;
                             continue;
                         }
