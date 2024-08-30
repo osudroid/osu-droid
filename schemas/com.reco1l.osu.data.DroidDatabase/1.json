@@ -2,15 +2,15 @@
   "formatVersion": 1,
   "database": {
     "version": 1,
-    "identityHash": "9694629c09918e2c1b77bc9966a903db",
+    "identityHash": "49e3a368b321869b51790d730406bd5d",
     "entities": [
       {
         "tableName": "BeatmapInfo",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`path` TEXT NOT NULL, `md5` TEXT NOT NULL, `id` INTEGER, `audio` TEXT NOT NULL, `background` TEXT, `status` INTEGER, `parentPath` TEXT NOT NULL, `parentId` INTEGER, `title` TEXT NOT NULL, `titleUnicode` TEXT NOT NULL, `artist` TEXT NOT NULL, `artistUnicode` TEXT NOT NULL, `creator` TEXT NOT NULL, `version` TEXT NOT NULL, `tags` TEXT NOT NULL, `source` TEXT NOT NULL, `dateImported` INTEGER NOT NULL, `approachRate` REAL NOT NULL, `overallDifficulty` REAL NOT NULL, `circleSize` REAL NOT NULL, `hpDrainRate` REAL NOT NULL, `droidStarRating` REAL, `standardStarRating` REAL, `bpmMax` REAL NOT NULL, `bpmMin` REAL NOT NULL, `length` INTEGER NOT NULL, `previewTime` INTEGER NOT NULL, `hitCircleCount` INTEGER NOT NULL, `spinnerCount` INTEGER NOT NULL, `sliderCount` INTEGER NOT NULL, `maxCombo` INTEGER NOT NULL, PRIMARY KEY(`path`))",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`filename` TEXT NOT NULL, `md5` TEXT NOT NULL, `id` INTEGER, `audioFilename` TEXT NOT NULL, `backgroundFilename` TEXT, `status` INTEGER, `setDirectory` TEXT NOT NULL, `setId` INTEGER, `title` TEXT NOT NULL, `titleUnicode` TEXT NOT NULL, `artist` TEXT NOT NULL, `artistUnicode` TEXT NOT NULL, `creator` TEXT NOT NULL, `version` TEXT NOT NULL, `tags` TEXT NOT NULL, `source` TEXT NOT NULL, `dateImported` INTEGER NOT NULL, `approachRate` REAL NOT NULL, `overallDifficulty` REAL NOT NULL, `circleSize` REAL NOT NULL, `hpDrainRate` REAL NOT NULL, `droidStarRating` REAL, `standardStarRating` REAL, `bpmMax` REAL NOT NULL, `bpmMin` REAL NOT NULL, `length` INTEGER NOT NULL, `previewTime` INTEGER NOT NULL, `hitCircleCount` INTEGER NOT NULL, `spinnerCount` INTEGER NOT NULL, `sliderCount` INTEGER NOT NULL, `maxCombo` INTEGER NOT NULL, PRIMARY KEY(`filename`, `setDirectory`))",
         "fields": [
           {
-            "fieldPath": "path",
-            "columnName": "path",
+            "fieldPath": "filename",
+            "columnName": "filename",
             "affinity": "TEXT",
             "notNull": true
           },
@@ -27,14 +27,14 @@
             "notNull": false
           },
           {
-            "fieldPath": "audio",
-            "columnName": "audio",
+            "fieldPath": "audioFilename",
+            "columnName": "audioFilename",
             "affinity": "TEXT",
             "notNull": true
           },
           {
-            "fieldPath": "background",
-            "columnName": "background",
+            "fieldPath": "backgroundFilename",
+            "columnName": "backgroundFilename",
             "affinity": "TEXT",
             "notNull": false
           },
@@ -45,14 +45,14 @@
             "notNull": false
           },
           {
-            "fieldPath": "parentPath",
-            "columnName": "parentPath",
+            "fieldPath": "setDirectory",
+            "columnName": "setDirectory",
             "affinity": "TEXT",
             "notNull": true
           },
           {
-            "fieldPath": "parentId",
-            "columnName": "parentId",
+            "fieldPath": "setId",
+            "columnName": "setId",
             "affinity": "INTEGER",
             "notNull": false
           },
@@ -198,39 +198,49 @@
         "primaryKey": {
           "autoGenerate": false,
           "columnNames": [
-            "path"
+            "filename",
+            "setDirectory"
           ]
         },
         "indices": [
           {
-            "name": "parentPathIdx",
+            "name": "filenameIdx",
             "unique": false,
             "columnNames": [
-              "parentPath"
+              "filename"
             ],
             "orders": [],
-            "createSql": "CREATE INDEX IF NOT EXISTS `parentPathIdx` ON `${TABLE_NAME}` (`parentPath`)"
+            "createSql": "CREATE INDEX IF NOT EXISTS `filenameIdx` ON `${TABLE_NAME}` (`filename`)"
           },
           {
-            "name": "parentIdx",
+            "name": "setDirectoryIdx",
             "unique": false,
             "columnNames": [
-              "parentPath",
-              "parentId"
+              "setDirectory"
             ],
             "orders": [],
-            "createSql": "CREATE INDEX IF NOT EXISTS `parentIdx` ON `${TABLE_NAME}` (`parentPath`, `parentId`)"
+            "createSql": "CREATE INDEX IF NOT EXISTS `setDirectoryIdx` ON `${TABLE_NAME}` (`setDirectory`)"
+          },
+          {
+            "name": "setIdx",
+            "unique": false,
+            "columnNames": [
+              "setDirectory",
+              "setId"
+            ],
+            "orders": [],
+            "createSql": "CREATE INDEX IF NOT EXISTS `setIdx` ON `${TABLE_NAME}` (`setDirectory`, `setId`)"
           }
         ],
         "foreignKeys": []
       },
       {
         "tableName": "BeatmapOptions",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`parentPath` TEXT NOT NULL, `isFavorite` INTEGER NOT NULL, `offset` INTEGER NOT NULL, PRIMARY KEY(`parentPath`))",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`setDirectory` TEXT NOT NULL, `isFavorite` INTEGER NOT NULL, `offset` INTEGER NOT NULL, PRIMARY KEY(`setDirectory`))",
         "fields": [
           {
-            "fieldPath": "parentPath",
-            "columnName": "parentPath",
+            "fieldPath": "setDirectory",
+            "columnName": "setDirectory",
             "affinity": "TEXT",
             "notNull": true
           },
@@ -250,7 +260,231 @@
         "primaryKey": {
           "autoGenerate": false,
           "columnNames": [
-            "parentPath"
+            "setDirectory"
+          ]
+        },
+        "indices": [],
+        "foreignKeys": []
+      },
+      {
+        "tableName": "ScoreInfo",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `beatmapFilename` TEXT NOT NULL, `beatmapSetDirectory` TEXT NOT NULL, `playerName` TEXT NOT NULL, `replayFilename` TEXT NOT NULL, `mods` TEXT NOT NULL, `score` INTEGER NOT NULL, `maxCombo` INTEGER NOT NULL, `mark` TEXT NOT NULL, `hit300k` INTEGER NOT NULL, `hit300` INTEGER NOT NULL, `hit100k` INTEGER NOT NULL, `hit100` INTEGER NOT NULL, `hit50` INTEGER NOT NULL, `misses` INTEGER NOT NULL, `accuracy` REAL NOT NULL, `time` INTEGER NOT NULL, `isPerfect` INTEGER NOT NULL)",
+        "fields": [
+          {
+            "fieldPath": "id",
+            "columnName": "id",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "beatmapFilename",
+            "columnName": "beatmapFilename",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "beatmapSetDirectory",
+            "columnName": "beatmapSetDirectory",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "playerName",
+            "columnName": "playerName",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "replayFilename",
+            "columnName": "replayFilename",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "mods",
+            "columnName": "mods",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "score",
+            "columnName": "score",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "maxCombo",
+            "columnName": "maxCombo",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "mark",
+            "columnName": "mark",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "hit300k",
+            "columnName": "hit300k",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "hit300",
+            "columnName": "hit300",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "hit100k",
+            "columnName": "hit100k",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "hit100",
+            "columnName": "hit100",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "hit50",
+            "columnName": "hit50",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "misses",
+            "columnName": "misses",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "accuracy",
+            "columnName": "accuracy",
+            "affinity": "REAL",
+            "notNull": true
+          },
+          {
+            "fieldPath": "time",
+            "columnName": "time",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "isPerfect",
+            "columnName": "isPerfect",
+            "affinity": "INTEGER",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": true,
+          "columnNames": [
+            "id"
+          ]
+        },
+        "indices": [
+          {
+            "name": "beatmapIdx",
+            "unique": false,
+            "columnNames": [
+              "beatmapFilename",
+              "beatmapSetDirectory"
+            ],
+            "orders": [],
+            "createSql": "CREATE INDEX IF NOT EXISTS `beatmapIdx` ON `${TABLE_NAME}` (`beatmapFilename`, `beatmapSetDirectory`)"
+          }
+        ],
+        "foreignKeys": []
+      },
+      {
+        "tableName": "BeatmapSetCollection",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`name` TEXT NOT NULL, PRIMARY KEY(`name`))",
+        "fields": [
+          {
+            "fieldPath": "name",
+            "columnName": "name",
+            "affinity": "TEXT",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": false,
+          "columnNames": [
+            "name"
+          ]
+        },
+        "indices": [],
+        "foreignKeys": []
+      },
+      {
+        "tableName": "BeatmapSetCollection_BeatmapSetInfo",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`collectionName` TEXT NOT NULL, `setDirectory` TEXT NOT NULL, PRIMARY KEY(`collectionName`, `setDirectory`))",
+        "fields": [
+          {
+            "fieldPath": "collectionName",
+            "columnName": "collectionName",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "setDirectory",
+            "columnName": "setDirectory",
+            "affinity": "TEXT",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": false,
+          "columnNames": [
+            "collectionName",
+            "setDirectory"
+          ]
+        },
+        "indices": [],
+        "foreignKeys": []
+      },
+      {
+        "tableName": "BlockArea",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `x` REAL NOT NULL, `y` REAL NOT NULL, `width` REAL NOT NULL, `height` REAL NOT NULL)",
+        "fields": [
+          {
+            "fieldPath": "id",
+            "columnName": "id",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "x",
+            "columnName": "x",
+            "affinity": "REAL",
+            "notNull": true
+          },
+          {
+            "fieldPath": "y",
+            "columnName": "y",
+            "affinity": "REAL",
+            "notNull": true
+          },
+          {
+            "fieldPath": "width",
+            "columnName": "width",
+            "affinity": "REAL",
+            "notNull": true
+          },
+          {
+            "fieldPath": "height",
+            "columnName": "height",
+            "affinity": "REAL",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": true,
+          "columnNames": [
+            "id"
           ]
         },
         "indices": [],
@@ -260,7 +494,7 @@
     "views": [],
     "setupQueries": [
       "CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY,identity_hash TEXT)",
-      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '9694629c09918e2c1b77bc9966a903db')"
+      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '49e3a368b321869b51790d730406bd5d')"
     ]
   }
 }
