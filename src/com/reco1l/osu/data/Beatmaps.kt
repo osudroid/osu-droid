@@ -379,6 +379,7 @@ fun BeatmapInfo(data: Beatmap, lastModified: Long, calculateDifficulty: Boolean)
     @Query("DELETE FROM BeatmapInfo WHERE setDirectory IN (:directories)")
     fun deleteAllBeatmapSets(directories: List<String>)
 
+    @Transaction
     @Query("SELECT DISTINCT setDirectory, setId FROM BeatmapInfo")
     fun getBeatmapSetList() : List<BeatmapSetInfo>
 

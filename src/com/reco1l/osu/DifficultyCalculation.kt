@@ -75,7 +75,7 @@ object DifficultyCalculationManager {
                                 BeatmapParser(beatmapInfo.path).use { parser ->
 
                                     val data = parser.parse(true)!!
-                                    val newInfo = BeatmapInfo(data, beatmapInfo.parentPath, beatmapInfo.dateImported, beatmapInfo.path, true)
+                                    val newInfo = BeatmapInfo(data, beatmapInfo.dateImported, true)
                                     beatmapInfo.apply(newInfo)
 
                                     DatabaseManager.beatmapInfoTable.update(newInfo)
