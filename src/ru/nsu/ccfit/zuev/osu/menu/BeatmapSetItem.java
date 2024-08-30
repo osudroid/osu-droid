@@ -7,7 +7,7 @@ import org.anddev.andengine.entity.sprite.Sprite;
 
 import java.lang.ref.WeakReference;
 import java.util.Collections;
-import java.util.Set;
+import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -58,7 +58,7 @@ public class BeatmapSetItem {
                 beatmapInfo.getCreator());
         beatmapItems = new BeatmapItem[beatmapSetInfo.getCount()];
 
-        var props = DatabaseManager.getBeatmapOptionsTable().getOptions(beatmapSetInfo.getPath());
+        var props = DatabaseManager.getBeatmapOptionsTable().getOptions(beatmapSetInfo.getDirectory());
         favorite = props != null && props.isFavorite();
 
     }
@@ -80,7 +80,7 @@ public class BeatmapSetItem {
         beatmapItems = new BeatmapItem[1];
         beatmapId = id;
 
-        var props = DatabaseManager.getBeatmapOptionsTable().getOptions(beatmapSetInfo.getPath());
+        var props = DatabaseManager.getBeatmapOptionsTable().getOptions(beatmapSetInfo.getDirectory());
         favorite = props != null && props.isFavorite();
 
     }
@@ -174,7 +174,7 @@ public class BeatmapSetItem {
 
         var beatmapInfo = beatmapSetInfo.getBeatmaps().get(0);
 
-        final String musicFileName = beatmapInfo.getAudio();
+        final String musicFileName = beatmapInfo.getAudioPath();
         if (reloadMusic) {
             listener.get().playMusic(musicFileName, beatmapInfo.getPreviewTime());
         }
@@ -208,7 +208,7 @@ public class BeatmapSetItem {
         selectedBeatmapItem = null;
     }
 
-    public void applyFilter(final String filter, final boolean favs, Set<String> limit) {
+    public void applyFilter(final String filter, final boolean favs, List<String> limit) {
         if ((favs && !isFavorite())
                 || (limit != null && !limit.contains(beatmapSetDir))) {
             //System.out.println(trackDir);
@@ -495,14 +495,14 @@ public class BeatmapSetItem {
         scene = null;
     }
 
-    public int tryGetCorrespondingBeatmapId(String oldBeatmapPath){
+    public int tryGetCorrespondingBeatmapId(String beatmapFilename){
         if (beatmapId <= -1){
             for (var i = beatmapSetInfo.getCount() - 1; i >= 0; i--) {
-                if (beatmapSetInfo.getBeatmap(i).getPath().equals(oldBeatmapPath)){
+                if (beatmapSetInfo.getBeatmap(i).getFilename().equals(beatmapFilename)){
                     return i;
                 }
             }
-        } else if (beatmapSetInfo.getBeatmap(beatmapId).getPath().equals(oldBeatmapPath)){
+        } else if (beatmapSetInfo.getBeatmap(beatmapId).getFilename().equals(beatmapFilename)){
             return beatmapId;
         }
         return -1;

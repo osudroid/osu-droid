@@ -3,7 +3,8 @@ package com.reco1l.osu.data
 import android.content.Context
 import android.util.Log
 import androidx.room.*
-import ru.nsu.ccfit.zuev.osu.BeatmapProperties
+import com.reco1l.toolkt.data.iterator
+import org.json.JSONObject
 import ru.nsu.ccfit.zuev.osu.Config
 import ru.nsu.ccfit.zuev.osu.GlobalManager
 import ru.nsu.ccfit.zuev.osu.helper.sql.DBOpenHelper
@@ -34,11 +35,25 @@ object DatabaseManager {
         get() = database.getBeatmapOptionsTable()
 
     /**
+     * Get the beatmap collections table DAO.
+     */
+    @JvmStatic
+    val beatmapCollectionsTable
+        get() = database.getBeatmapCollectionsTable()
+
+    /**
      * Get the score table DAO.
      */
     @JvmStatic
     val scoreInfoTable
         get() = database.getScoreInfoTable()
+
+    /**
+     * Get the block area table DAO.
+     */
+    @JvmStatic
+    val blockAreaTable
+        get() = database.getBlockAreaTable()
 
 
     private lateinit var database: DroidDatabase
@@ -60,7 +75,7 @@ object DatabaseManager {
     }
 
     @Suppress("UNCHECKED_CAST")
-    fun loadLegacyMigrations(context: Context) {
+    private fun loadLegacyMigrations(context: Context) {
 
         // BeatmapOptions
         try {
@@ -77,23 +92,68 @@ object DatabaseManager {
                         // Ignoring first object which is intended to be the version.
                         ois.readObject()
 
-                        val options = (ois.readObject() as Map<String, BeatmapProperties>).map { (path, props) ->
+                        val options = (ois.readObject() as Map<String, BeatmapProperties>).map { (path, properties) ->
 
-                            BeatmapOptions(path, props.isFavorite, props.offset)
+                            BeatmapOptions(
+                                setDirectory = path.let {
+                                    if (it.endsWith('/')) {
+                                        it.substring(0, it.length - 1).substringAfterLast('/')
+                                    } else {
+                                        it.substringAfterLast('/')
+                                    }
+                                },
+                                isFavorite = properties.favorite,
+                                offset = properties.offset
+                            )
                         }
 
-                        beatmapOptionsTable.addAll(options)
+                        beatmapOptionsTable.insertAll(options)
                     }
 
-
                 }
+
+                oldPropertiesFile.renameTo(File(context.filesDir, "properties.old"))
             }
 
         } catch (e: IOException) {
             Log.e("DatabaseManager", "Failed to migrate legacy beatmap properties", e)
         }
 
-        // Score table
+        // BeatmapCollections
+        try {
+            val oldFavoritesFile = File(Config.getCorePath(), "json/favorites.json")
+
+            if (oldFavoritesFile.exists()) {
+
+                val json = JSONObject(oldFavoritesFile.readText())
+
+                GlobalManager.getInstance().info = "Migrating beatmap collections..."
+
+                for (collectionName in json.keys()) {
+                    beatmapCollectionsTable.insertCollection(collectionName)
+
+                    for (beatmapPath in json.getJSONArray(collectionName)) {
+                        beatmapCollectionsTable.addBeatmap(
+                            collectionName = collectionName,
+                            setDirectory = beatmapPath.toString().let {
+                                if (it.endsWith('/')) {
+                                    it.substring(0, it.length - 1).substringAfterLast('/')
+                                } else {
+                                    it.substringAfterLast('/')
+                                }
+                            }
+                        )
+                    }
+                }
+
+                oldFavoritesFile.renameTo(File(Config.getCorePath(), "json/favorites.oldjson"))
+            }
+
+        } catch (e: IOException) {
+            Log.e("DatabaseManager", "Failed to migrate legacy beatmap properties", e)
+        }
+
+        // ScoreInfo
         try {
             val oldDatabaseFile = File(Config.getCorePath(), "databases/osudroid_test.db")
 
@@ -113,23 +173,48 @@ object DatabaseManager {
 
                                 try {
                                     val scoreInfo = ScoreInfo(
-                                        it.getInt(it.getColumnIndexOrThrow("id")).toLong(),
-                                        it.getString(it.getColumnIndexOrThrow("filename")),
-                                        it.getString(it.getColumnIndexOrThrow("playername")),
-                                        it.getString(it.getColumnIndexOrThrow("replayfile")),
-                                        it.getString(it.getColumnIndexOrThrow("mode")),
-                                        it.getInt(it.getColumnIndexOrThrow("score")),
-                                        it.getInt(it.getColumnIndexOrThrow("combo")),
-                                        it.getString(it.getColumnIndexOrThrow("mark")),
-                                        it.getInt(it.getColumnIndexOrThrow("h300k")),
-                                        it.getInt(it.getColumnIndexOrThrow("h300")),
-                                        it.getInt(it.getColumnIndexOrThrow("h100k")),
-                                        it.getInt(it.getColumnIndexOrThrow("h100")),
-                                        it.getInt(it.getColumnIndexOrThrow("h50")),
-                                        it.getInt(it.getColumnIndexOrThrow("misses")),
-                                        it.getFloat(it.getColumnIndexOrThrow("accuracy")),
-                                        it.getLong(it.getColumnIndexOrThrow("time")),
-                                        it.getInt(it.getColumnIndexOrThrow("perfect")) == 1
+                                        id = it.getInt(it.getColumnIndexOrThrow("id")).toLong(),
+                                        // "filename" can contain the full path, so we need to extract both filename and directory name refers
+                                        // to the beatmap set directory. The pattern could be `/beatmapSetDirectory/beatmapFilename/` with or
+                                        // without the trailing slash.
+                                        beatmapFilename = it.getString(it.getColumnIndexOrThrow("filename")).let { result ->
+                                            if (result.endsWith('/')) {
+                                                result.substring(0, result.length - 1).substringAfterLast('/')
+                                            } else {
+                                                result.substringAfterLast('/')
+                                            }
+                                        },
+                                        beatmapSetDirectory = it.getString(it.getColumnIndexOrThrow("filename")).let { result ->
+                                            if (result.endsWith('/')) {
+                                                result.substringBeforeLast('/').substringBeforeLast('/').substringAfterLast('/')
+                                            } else {
+                                                result.substringBeforeLast('/').substringAfterLast('/')
+                                            }
+                                        },
+                                        playerName = it.getString(it.getColumnIndexOrThrow("playername")),
+                                        replayFilename = it.getString(it.getColumnIndexOrThrow("replayfile")).let { result ->
+
+                                            // The old format used the full path, so we need to extract the file name.
+                                            if (result.endsWith('/')) {
+                                                result.substring(0, result.length - 1).substringAfterLast('/')
+                                            } else {
+                                                result.substringAfterLast('/')
+                                            }
+                                        },
+                                        mods = it.getString(it.getColumnIndexOrThrow("mode")),
+                                        score = it.getInt(it.getColumnIndexOrThrow("score")),
+                                        maxCombo = it.getInt(it.getColumnIndexOrThrow("combo")),
+                                        mark = it.getString(it.getColumnIndexOrThrow("mark")),
+                                        hit300k = it.getInt(it.getColumnIndexOrThrow("h300k")),
+                                        hit300 = it.getInt(it.getColumnIndexOrThrow("h300")),
+                                        hit100k = it.getInt(it.getColumnIndexOrThrow("h100k")),
+                                        hit100 = it.getInt(it.getColumnIndexOrThrow("h100")),
+                                        hit50 = it.getInt(it.getColumnIndexOrThrow("h50")),
+                                        misses = it.getInt(it.getColumnIndexOrThrow("misses")),
+                                        accuracy = it.getFloat(it.getColumnIndexOrThrow("accuracy")),
+                                        time = it.getLong(it.getColumnIndexOrThrow("time")),
+                                        isPerfect = it.getInt(it.getColumnIndexOrThrow("perfect")) == 1
+
                                     )
 
                                     scoreInfoTable.insertScore(scoreInfo)
@@ -164,7 +249,10 @@ object DatabaseManager {
     entities = [
         BeatmapInfo::class,
         BeatmapOptions::class,
-        ScoreInfo::class
+        ScoreInfo::class,
+        BeatmapSetCollection::class,
+        BeatmapSetCollection_BeatmapSetInfo::class,
+        BlockArea::class
     ]
 )
 abstract class DroidDatabase : RoomDatabase() {
@@ -173,6 +261,9 @@ abstract class DroidDatabase : RoomDatabase() {
 
     abstract fun getBeatmapOptionsTable(): IBeatmapOptionsDAO
 
+    abstract fun getBeatmapCollectionsTable(): IBeatmapCollectionsDAO
+
     abstract fun getScoreInfoTable(): IScoreInfoDAO
 
+    abstract fun getBlockAreaTable(): IBlockAreaDAO
 }

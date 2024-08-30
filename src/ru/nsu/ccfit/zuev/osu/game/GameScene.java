@@ -17,6 +17,7 @@ import com.reco1l.osu.data.DatabaseManager;
 import com.reco1l.osu.graphics.BlankTextureRegion;
 import com.reco1l.osu.graphics.Modifiers;
 import com.reco1l.osu.graphics.VideoSprite;
+import com.reco1l.osu.ui.BlockAreaFragment;
 import com.reco1l.osu.ui.entity.GameplayLeaderboard;
 import com.reco1l.osu.multiplayer.Multiplayer;
 import com.reco1l.osu.multiplayer.RoomScene;
@@ -67,7 +68,6 @@ import ru.nsu.ccfit.zuev.osu.Config;
 import ru.nsu.ccfit.zuev.osu.Constants;
 import ru.nsu.ccfit.zuev.osu.DifficultyAlgorithm;
 import ru.nsu.ccfit.zuev.osu.GlobalManager;
-import ru.nsu.ccfit.zuev.osu.RGBAColor;
 import ru.nsu.ccfit.zuev.osu.RGBColor;
 import ru.nsu.ccfit.zuev.osu.ResourceManager;
 import ru.nsu.ccfit.zuev.osu.ToastLogger;
@@ -154,7 +154,7 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
     private int mainCursorId = -1;
     private Replay replay;
     private boolean replaying;
-    private String replayFile;
+    private String replayFilePath;
     private float offsetSum;
     private int offsetRegs;
     private Rectangle dimRectangle = null;
@@ -222,6 +222,8 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
     /**Last score data chunk sent to server, used to determine if the data was changed.*/
     private ScoreBoardItem lastScoreSent = null;
 
+    /**The block area manager fragment used to manage the block area.*/
+    private BlockAreaFragment blockAreaFragment;
 
 
     public GameScene(final Engine engine) {
@@ -261,7 +263,7 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
                 videoStarted = false;
                 videoOffset = beatmap.events.videoStartTime / 1000f;
 
-                video = new VideoSprite(lastBeatmapInfo.getParentPath() + "/" + beatmap.events.videoFilename, engine);
+                video = new VideoSprite(lastBeatmapInfo.getSetDirectory() + "/" + beatmap.events.videoFilename, engine);
                 video.setAlpha(0f);
 
                 bgSprite = video;
@@ -323,15 +325,15 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
         }
 
         if (rFile != null && rFile.startsWith("https://")) {
-            this.replayFile = Config.getCachePath() + "/" +
+            this.replayFilePath = Config.getCachePath() + "/" +
                     MD5Calculator.getStringMD5(rFile) + ".odr";
-            Debug.i("ReplayFile = " + replayFile);
-            if (!OnlineFileOperator.downloadFile(rFile, this.replayFile)) {
+            Debug.i("ReplayFile = " + replayFilePath);
+            if (!OnlineFileOperator.downloadFile(rFile, this.replayFilePath)) {
                 ToastLogger.showTextId(R.string.replay_cantdownload, true);
                 return false;
             }
         } else
-            this.replayFile = rFile;
+            this.replayFilePath = rFile;
 
         Beatmap parsedBeatmap;
 
@@ -340,7 +342,7 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
                 parsedBeatmap = parser.parse(true, GameMode.Droid);
             } else {
                 Debug.e("startGame: cannot open file");
-                ToastLogger.showText(StringTable.format(R.string.message_error_open, beatmapInfo.getPath()), true);
+                ToastLogger.showText(StringTable.format(R.string.message_error_open, beatmapInfo.getFilename()), true);
                 return false;
             }
         }
@@ -366,7 +368,7 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
         beatmap = parsedBeatmap.createPlayableBeatmap(GameMode.Droid, convertedMods, modMenu.getChangeSpeed());
 
         // TODO skin manager
-        SkinManager.getInstance().loadBeatmapSkin(beatmap.folder);
+        SkinManager.getInstance().loadBeatmapSkin(beatmap.getBeatmapsetPath());
 
         breakPeriods = new LinkedList<>();
         for (var period : beatmap.events.breaks) {
@@ -374,13 +376,13 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
         }
 
         totalOffset = Config.getOffset();
-        var props = DatabaseManager.getBeatmapOptionsTable().getOptions(beatmapInfo.getParentPath());
+        var props = DatabaseManager.getBeatmapOptionsTable().getOptions(beatmapInfo.getSetDirectory());
         if (props != null) {
             totalOffset += props.getOffset();
         }
 
         try {
-            var musicFile = new File(beatmapInfo.getAudio());
+            var musicFile = new File(beatmapInfo.getAudioPath());
 
             if (!musicFile.exists()) {
                 throw new FileNotFoundException(musicFile.getPath());
@@ -466,8 +468,8 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
         replay.setObjectCount(objects.size());
         replay.setMap(beatmapFile.getParentFile().getName(), beatmapFile.getName(), beatmapMD5);
 
-        if (replayFile != null) {
-            replaying = replay.load(replayFile);
+        if (replayFilePath != null) {
+            replaying = replay.load(replayFilePath);
             if (!replaying) {
                 ToastLogger.showTextId(R.string.replay_invalid, true);
                 return false;
@@ -563,7 +565,7 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
         final LoadingScreen screen = new LoadingScreen();
         engine.setScene(screen.getScene());
 
-        final String rfile = beatmapInfo != null ? replayFile : this.replayFile;
+        final String rfile = beatmapInfo != null ? replayFile : this.replayFilePath;
 
         Execution.async(() -> {
 
@@ -755,7 +757,8 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
                 (float) HitObjectUtils.getEndTime(objects.getLast()) / 1000, firstObjStartTime,
                 new PointF(0, Config.getRES_HEIGHT() - 7), Config.getRES_WIDTH(), 7);
 
-            progressBar.setProgressRectColor(new RGBAColor(153f / 255f, 204f / 255f, 51f / 255f, 0.4f));
+            progressBar.setProgressRectColor(new RGBColor(153f / 255f, 204f / 255f, 51f / 255f));
+            progressBar.setProgressRectAlpha(0.4f);
         }
 
         if (Config.getErrorMeter() == 1 || (Config.getErrorMeter() == 2 && replaying)) {
@@ -919,6 +922,9 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
 
         engine.setScene(scene);
         scene.registerUpdateHandler(this);
+
+        blockAreaFragment = new BlockAreaFragment();
+        blockAreaFragment.show(false);
     }
 
     public RGBColor getComboColor(int num) {
@@ -1376,7 +1382,7 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
             if (replay != null && !replaying) {
                 String ctime = String.valueOf(System.currentTimeMillis());
                 replayFile = Config.getCorePath() + "Scores/"
-                        + MD5Calculator.getStringMD5(lastBeatmapInfo.getPath() + ctime)
+                        + MD5Calculator.getStringMD5(lastBeatmapInfo.getFilename() + ctime)
                         + ctime.substring(0, Math.min(3, ctime.length())) + ".odr";
                 replay.setStat(stat);
                 replay.save(replayFile);
@@ -1388,6 +1394,12 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
                     camera.setCenterDirect((float) Config.getRES_WIDTH() / 2, (float) Config.getRES_HEIGHT() / 2);
                 }
             }
+
+            if (blockAreaFragment != null) {
+                blockAreaFragment.dismiss();
+                blockAreaFragment = null;
+            }
+
             if (scoringScene != null) {
                 if (replaying) {
                     ModMenu.getInstance().setMod(Replay.oldMod);
@@ -1562,7 +1574,7 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
         }
 
         if (replaying) {
-            replayFile = null;
+            replayFilePath = null;
             ModMenu.getInstance().setMod(Replay.oldMod);
             ModMenu.getInstance().setChangeSpeed(Replay.oldChangeSpeed);
             ModMenu.getInstance().setFLfollowDelay(Replay.oldFLFollowDelay);
@@ -1575,6 +1587,11 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
     }
 
     public void quit() {
+
+        if (blockAreaFragment != null) {
+            blockAreaFragment.dismiss();
+            blockAreaFragment = null;
+        }
 
         // Handle input back in update thread
         var touchOptions = new TouchOptions();
@@ -2082,7 +2099,6 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
             if (replay != null) {
                 replay.addPress(eventTime, gamePoint, id);
             }
-            cursorIIsDown[id] = true;
 
         } else if (event.isActionMove()) {
 
@@ -2162,6 +2178,10 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
             }
         }
 
+        if (blockAreaFragment != null) {
+            blockAreaFragment.dismiss();
+        }
+
         if (GlobalManager.getInstance().getSongService() != null && GlobalManager.getInstance().getSongService().getStatus() == Status.PLAYING) {
             GlobalManager.getInstance().getSongService().pause();
         }
@@ -2181,6 +2201,11 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
             }
             quit();
             return;
+        }
+
+        if (blockAreaFragment != null) {
+            blockAreaFragment.dismiss();
+            blockAreaFragment = null;
         }
 
         if(scorebar != null) scorebar.flush();
@@ -2204,6 +2229,11 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
         if (!paused) {
             return;
         }
+
+        if (blockAreaFragment == null) {
+            blockAreaFragment = new BlockAreaFragment();
+        }
+        blockAreaFragment.show();
 
         scene.getChildScene().back();
         paused = false;
@@ -2478,16 +2508,18 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
                 stat.registerHit(0, false, false);
                 replay.addObjectScore(++lastObjectId, ResultType.MISS);
             }
-            //save replay
-            String ctime = String.valueOf(System.currentTimeMillis());
-            replayFile = Config.getCorePath() + "Scores/"
-                    + MD5Calculator.getStringMD5(lastBeatmapInfo.getPath() + ctime)
-                    + ctime.substring(0, Math.min(3, ctime.length())) + ".odr";
+
+            var currentTime = String.valueOf(System.currentTimeMillis());
+            var odrFilename = MD5Calculator.getStringMD5(lastBeatmapInfo.getFilename() + currentTime) + currentTime.substring(0, Math.min(3, currentTime.length())) + ".odr";
+
+            replayFilePath = Config.getCorePath() + "Scores/" + odrFilename;
             replay.setStat(stat);
-            replay.save(replayFile);
+            replay.save(replayFilePath);
 
             if (stat.getTotalScoreWithMultiplier() > 0 && !stat.getMod().contains(GameMod.MOD_AUTO)) {
-                stat.setReplayName(replayFile);
+                stat.setReplayFilename(odrFilename);
+                stat.setBeatmap(lastBeatmapInfo.getSetDirectory(), lastBeatmapInfo.getFilename());
+
                 try {
                     DatabaseManager.getScoreInfoTable().insertScore(stat.toScoreInfo());
                 } catch (Exception e) {
@@ -2496,7 +2528,7 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
             }
 
             ToastLogger.showText(StringTable.get(R.string.message_save_replay_successful), true);
-            replayFile = null;
+            replayFilePath = null;
             return true;
         }
         else{

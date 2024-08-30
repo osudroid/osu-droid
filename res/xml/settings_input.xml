@@ -17,11 +17,15 @@
             android:defaultValue="false"
             android:key="shrinkPlayfieldDownwards"
             android:summary="@string/opt_shrink_playfield_downwards_summary"
-            android:title="@string/opt_shrink_playfield_downwards_title"
-            app:layout="@layout/settings_preference_checkbox_bottom"/>
+            android:title="@string/opt_shrink_playfield_downwards_title" />
+
+        <Preference
+            android:key="block_areas"
+            android:title="@string/block_area_preference_title"
+            android:summary="@string/block_area_preference_summary"
+            app:layout="@layout/settings_preference_bottom" />
 
     </PreferenceCategory>
-
 
     <PreferenceCategory android:title="Gameplay">
 

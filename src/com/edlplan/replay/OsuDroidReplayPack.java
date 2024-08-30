@@ -1,5 +1,7 @@
 package com.edlplan.replay;
 
+import static com.reco1l.osu.data.Scores.ScoreInfo;
+
 import com.reco1l.osu.data.ScoreInfo;
 import com.reco1l.osu.data.Scores;
 
@@ -42,10 +44,9 @@ public class OsuDroidReplayPack {
 
             outputStream.write(entryJson.toString(2).getBytes());
 
-            outputStream.putNextEntry(new ZipEntry(scoreInfo.getReplayPath()));
+            outputStream.putNextEntry(new ZipEntry(scoreInfo.getReplayFilename()));
 
-            File file = scoreInfo.getReplayPath().contains("/") ?
-                    new File(scoreInfo.getReplayPath()) : new File(Config.getScorePath(), scoreInfo.getReplayPath());
+            File file = new File(scoreInfo.getReplayPath());
 
             try (FileInputStream inputStream = new FileInputStream(file)) {
                 byte[] buffer = new byte[1024];
@@ -76,8 +77,8 @@ public class OsuDroidReplayPack {
         }
         inputStream.close();
 
-        entry.scoreInfo = Scores.ScoreInfo(new JSONObject(new String(zipEntryMap.get("entry.json"))).getJSONObject("replaydata"));
-        entry.replayFile = zipEntryMap.get(entry.scoreInfo.getReplayPath());
+        entry.scoreInfo = ScoreInfo(new JSONObject(new String(zipEntryMap.get("entry.json"))).getJSONObject("replaydata"));
+        entry.replayFile = zipEntryMap.get(entry.scoreInfo.getReplayFilename());
 
         return entry;
     }

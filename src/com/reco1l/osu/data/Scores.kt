@@ -9,12 +9,13 @@ import androidx.room.OnConflictStrategy
 import androidx.room.PrimaryKey
 import androidx.room.Query
 import org.json.JSONObject
+import ru.nsu.ccfit.zuev.osu.Config
 import ru.nsu.ccfit.zuev.osu.scoring.StatisticV2
 
 
 @Entity(
     indices = [
-        Index(name = "beatmapPathIdx", value = ["beatmapPath"])
+        Index(name = "beatmapIdx", value = ["beatmapFilename", "beatmapSetDirectory"]),
     ]
 )
 data class ScoreInfo @JvmOverloads constructor(
@@ -26,10 +27,14 @@ data class ScoreInfo @JvmOverloads constructor(
     val id: Long = 0,
 
     /**
-     * The beatmap path.
-     * This is the relative path to [Config.getBeatmapPath()].
+     * The beatmap filename.
      */
-    val beatmapPath: String,
+    val beatmapFilename: String,
+
+    /**
+     * The beatmap set directory.
+     */
+    val beatmapSetDirectory: String,
 
     /**
      * The player name.
@@ -39,7 +44,7 @@ data class ScoreInfo @JvmOverloads constructor(
     /**
      * The replay file path.
      */
-    var replayPath: String,
+    var replayFilename: String,
 
     /**
      * The mods used.
@@ -108,14 +113,20 @@ data class ScoreInfo @JvmOverloads constructor(
 
 ) {
 
+    /**
+     * The replay file path.
+     */
+    val replayPath
+        get() = "${Config.getScorePath()}/$replayFilename"
+
+
     fun toJSON() = JSONObject().apply {
 
-        // The keys doesn't correspond to the table columns in order to keep compatibility with the old replays.
-
+        // The keys don't correspond to the table columns in order to keep compatibility with the old replays.
         put("id", id)
-        put("filename", beatmapPath)
+        put("filename", "$beatmapSetDirectory/$beatmapFilename")
         put("playername", playerName)
-        put("replayfile", replayPath)
+        put("replayfile", replayFilename)
         put("mod", mods)
         put("score", score)
         put("combo", maxCombo)
@@ -135,8 +146,8 @@ data class ScoreInfo @JvmOverloads constructor(
     fun toStatisticV2() = StatisticV2().also {
 
         it.playerName = playerName
-        it.fileName = beatmapPath
-        it.replayName = replayPath
+        it.setBeatmap(beatmapSetDirectory, beatmapFilename)
+        it.replayFilename = replayFilename
         it.setModFromString(mods)
         it.setForcedScore(score)
         it.maxCombo = maxCombo
@@ -158,12 +169,34 @@ data class ScoreInfo @JvmOverloads constructor(
 
 fun ScoreInfo(json: JSONObject) = ScoreInfo(
 
-    // The keys doesn't correspond to the table columns in order to keep compatibility with the old replays.
+    // "filename" can contain the full path, so we need to extract both filename and directory name
+    // which refers to the beatmap set directory. The pattern could be `/beatmapSetDirectory/beatmapFilename/`
+    // with or without the trailing slash.
+    beatmapFilename = json.getString("filename").let {
+        if (it.endsWith('/')) {
+            it.substring(0, it.length - 1).substringAfterLast('/')
+        } else {
+            it.substringAfterLast('/')
+        }
+    },
+    beatmapSetDirectory = json.getString("filename").let {
+        if (it.endsWith('/')) {
+            it.substringBeforeLast('/').substringBeforeLast('/').substringAfterLast('/')
+        } else {
+            it.substringBeforeLast('/').substringAfterLast('/')
+        }
+    },
+    replayFilename = json.getString("replayfile").let {
+        if (it.endsWith('/')) {
+            it.substring(0, it.length - 1).substringAfterLast('/')
+        } else {
+            it.substringAfterLast('/')
+        }
+    },
 
+    // The keys don't correspond to the table columns in order to keep compatibility with the old replays.
     id = json.optLong("id", 0),
-    beatmapPath = json.getString("filename"),
     playerName = json.getString("playername"),
-    replayPath = json.getString("replayfile"),
     mods = json.getString("mod"),
     score = json.getInt("score"),
     maxCombo = json.getInt("combo"),
@@ -183,22 +216,19 @@ fun ScoreInfo(json: JSONObject) = ScoreInfo(
 @Dao
 interface IScoreInfoDAO {
 
-    @Query("SELECT * FROM ScoreInfo WHERE beatmapPath = :relativePath")
-    fun getBeatmapScores(relativePath: String): List<ScoreInfo>
+    @Query("SELECT * FROM ScoreInfo WHERE beatmapSetDirectory = :beatmapSetDirectory AND beatmapFilename = :beatmapFilename")
+    fun getBeatmapScores(beatmapSetDirectory: String, beatmapFilename: String): List<ScoreInfo>
 
     @Query("SELECT * FROM ScoreInfo WHERE id = :id")
     fun getScore(id: Int): ScoreInfo?
 
-    @Query("SELECT mark FROM ScoreInfo WHERE beatmapPath = :relativePath ORDER BY score DESC LIMIT 1")
-    fun getBestMark(relativePath: String): String?
+    @Query("SELECT mark FROM ScoreInfo WHERE beatmapSetDirectory = :beatmapSetDirectory AND beatmapFilename = :beatmapFilename ORDER BY score DESC LIMIT 1")
+    fun getBestMark(beatmapSetDirectory: String, beatmapFilename: String): String?
 
     @Insert(onConflict = OnConflictStrategy.ABORT)
     fun insertScore(score: ScoreInfo): Long
 
     @Query("DELETE FROM ScoreInfo WHERE id = :id")
     fun deleteScore(id: Int): Int
-
-    @Query("SELECT id FROM ScoreInfo WHERE beatmapPath = :beatmapPath ORDER BY score DESC LIMIT 1")
-    fun getBestScoreId(beatmapPath: String): Int?
 
 }

@@ -21,6 +21,13 @@
 	<string name="ranked_status_wip"><font color="#FFAC64">Work in Progress</font></string>
 	<string name="ranked_status_graveyard"><font color="#FFFFFF">Graveyard</font></string>
 
+	<!--Block area manager fragment-->
+	<string name="block_area_editor_fragment_add">Add area</string>
+	<string name="block_area_editor_fragment_reset">Reset</string>
+	<string name="block_area_editor_fragment_done">Done</string>
+<string name="block_area_preference_title">Manage input block areas</string>
+	<string name="block_area_preference_summary">Manage specific areas within the screen where presses will be ignored during gameplay</string>
+
 
 	<string name="message_error">Error: %s</string>
 	<string name="message_error_createdir">Cannot create %s</string>

@@ -9,7 +9,6 @@ import android.util.DisplayMetrics;
 
 import androidx.preference.PreferenceManager;
 
-import com.edlplan.favorite.FavoriteLibrary;
 import com.edlplan.framework.math.FMath;
 import com.google.firebase.messaging.FirebaseMessaging;
 
@@ -117,7 +116,7 @@ public class Config {
         showAverageOffset = prefs.getBoolean("averageOffset", true);
         showUnstableRate = prefs.getBoolean("unstableRate", true);
         errorMeter = Integer.parseInt(prefs.getString("errormeter", "0"));
-        spinnerStyle = Integer.parseInt(prefs.getString("spinnerstyle", "0"));
+        spinnerStyle = Integer.parseInt(prefs.getString("spinnerstyle", "1"));
         showFirstApproachCircle = prefs.getBoolean("showfirstapproachcircle", false);
         metronomeSwitch = Integer.parseInt(prefs.getString("metronomeswitch", "1"));
         showScoreboard = prefs.getBoolean("showscoreboard", true);
@@ -244,7 +243,6 @@ public class Config {
         }
 
         loadOnlineConfig(context);
-        FavoriteLibrary.get().load();
     }
 
     public static void loadOnlineConfig(final Context context) {

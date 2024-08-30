@@ -93,14 +93,14 @@ public class NotifyPlayer {
                     case actionPrev:
                         service.stop();
                         BeatmapInfo prevBeatmap = LibraryManager.selectPreviousBeatmapSet().getBeatmap(0);
-                        service.preLoad(prevBeatmap.getAudio());
+                        service.preLoad(prevBeatmap.getAudioPath());
                         updateSong(prevBeatmap);
                         service.play();
                         break;
                     case actionNext:
                         service.stop();
                         BeatmapInfo nextBeatmap = LibraryManager.selectNextBeatmapSet().getBeatmap(0);
-                        service.preLoad(nextBeatmap.getAudio());
+                        service.preLoad(nextBeatmap.getAudioPath());
                         updateSong(nextBeatmap);
                         service.play();
                         break;
@@ -134,8 +134,8 @@ public class NotifyPlayer {
 
         Bitmap bitmap = null;
 
-        if (beatmap.getBackground() != null) {
-            bitmap = BitmapFactory.decodeFile(beatmap.getBackground());
+        if (beatmap.getBackgroundFilename() != null) {
+            bitmap = BitmapFactory.decodeFile(beatmap.getBackgroundPath());
         }
 
         builder.setContentTitle(beatmap.getTitleText());
