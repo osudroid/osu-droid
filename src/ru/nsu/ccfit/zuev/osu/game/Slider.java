@@ -361,14 +361,14 @@ public class Slider extends GameObject {
         applyBodyFadeAdjustments(fadeInDuration);
     }
 
-    private void applyCircleDimming(Sprite circle, Sprite overlay, float delayTimeToDim, RGBColor comboColor) {
+    private void applyCircleDimming(Sprite circle, Sprite overlay, float dimDelaySec, RGBColor comboColor) {
 
         var colorDim = 195f / 255f;
 
         // Circle requires special handling because it's tinted with combo color.
         circle.setColor(comboColor.r() * colorDim, comboColor.g() * colorDim, comboColor.b() * colorDim);
         circle.registerEntityModifier(Modifiers.sequence(
-            Modifiers.delay(delayTimeToDim / GameHelper.getSpeedMultiplier()),
+            Modifiers.delay(dimDelaySec / GameHelper.getSpeedMultiplier()),
             Modifiers.color(0.1f / GameHelper.getSpeedMultiplier(),
                 circle.getRed(), comboColor.r(),
                 circle.getGreen(), comboColor.g(),
@@ -378,7 +378,7 @@ public class Slider extends GameObject {
 
         overlay.setColor(colorDim, colorDim, colorDim);
         overlay.registerEntityModifier(Modifiers.sequence(
-            Modifiers.delay(delayTimeToDim / GameHelper.getSpeedMultiplier()),
+            Modifiers.delay(dimDelaySec / GameHelper.getSpeedMultiplier()),
             Modifiers.color(0.1f / GameHelper.getSpeedMultiplier(),
                 overlay.getRed(), 1f,
                 overlay.getGreen(), 1f,
