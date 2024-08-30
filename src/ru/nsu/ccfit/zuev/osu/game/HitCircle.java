@@ -166,6 +166,10 @@ public class HitCircle extends GameObject {
         scene = null;
     }
 
+    private boolean canBeHit() {
+        return passedTime >= Math.max(0, timePreempt - objectHittableRange);
+    }
+
     private boolean isHit() {
         for (int i = 0, count = listener.getCursorsCount(); i < count; i++) {
 
@@ -224,7 +228,7 @@ public class HitCircle extends GameObject {
                 removeFromScene();
                 return;
             }
-        } else if (passedTime * 2 > timePreempt && isHit()) {
+        } else if (canBeHit() && isHit()) {
             float signAcc = passedTime - timePreempt;
             if (Config.isFixFrameOffset()) {
                 signAcc += (float) hitOffsetToPreviousFrame() / 1000f;
@@ -285,7 +289,7 @@ public class HitCircle extends GameObject {
 
     @Override
     public void tryHit(final float dt) {
-        if (passedTime * 2 > timePreempt && isHit()) {
+        if (canBeHit() && isHit()) {
             float signAcc = passedTime - timePreempt;
             if (Config.isFixFrameOffset()) {
                 signAcc += (float) hitOffsetToPreviousFrame() / 1000f;

@@ -5,6 +5,11 @@ import android.graphics.PointF;
 import ru.nsu.ccfit.zuev.osu.scoring.Replay;
 
 public abstract class GameObject {
+    /**
+     * The maximum allowable time difference from the start time of an object
+     * to its hit time to be considered a hit, in seconds.
+     */
+    protected static final float objectHittableRange = 0.4f;
 
     protected boolean endsCombo;
     protected boolean autoPlay = false;
