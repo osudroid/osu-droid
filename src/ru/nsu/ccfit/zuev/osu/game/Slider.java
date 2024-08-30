@@ -82,10 +82,20 @@ public class Slider extends GameObject {
 
     private SliderBody2D sliderBody = null;
 
-    private boolean
-            mIsOver,
-            mIsAnimating,
-            mWasInRadius;
+    /**
+     * Whether the slider has ended (and all its spans).
+     */
+    private boolean isOver;
+
+    /**
+     * Whether the follow circle sprite is being animated.
+     */
+    private boolean isFollowCircleAnimating;
+
+    /**
+     * Whether the cursor is in the slider's radius.
+     */
+    private boolean isInRadius;
 
     /**
      * Whether the head and tail circle bodies are being animated.
@@ -130,9 +140,9 @@ public class Slider extends GameObject {
         number = GameObjectPool.getInstance().getNumber(comboNum);
         number.init(pos, scale);
 
-        mIsOver = false;
-        mIsAnimating = false;
-        mWasInRadius = false;
+        isOver = false;
+        isFollowCircleAnimating = false;
+        isInRadius = false;
         isCircleDimming = false;
 
         reverse = false;
@@ -499,7 +509,7 @@ public class Slider extends GameObject {
         int remainingSpans = totalSpanCount - completedSpanCount;
         boolean stillHasSpan = remainingSpans > 0;
 
-        if (mWasInRadius && replayObjectData == null ||
+        if (isInRadius && replayObjectData == null ||
                 replayObjectData != null && replayObjectData.tickSet.get(replayTickIndex)) {
             playCurrentNestedObjectHitSound();
             ticksGot++;
@@ -571,7 +581,7 @@ public class Slider extends GameObject {
 
             return;
         }
-        mIsOver = true;
+        isOver = true;
 
         // Calculating score
         int firstHitScore = 0;
@@ -613,8 +623,8 @@ public class Slider extends GameObject {
         listener.onSliderEnd(id, firstHitAccuracy, tickSet);
         // Remove slider from scene
 
-        if (Config.isAnimateFollowCircle() && mWasInRadius) {
-            mIsAnimating = true;
+        if (Config.isAnimateFollowCircle() && isInRadius) {
+            isFollowCircleAnimating = true;
 
             followCircle.clearEntityModifiers();
             followCircle.registerEntityModifier(Modifiers.scale(0.2f / GameHelper.getSpeedMultiplier(), followCircle.getScaleX(), followCircle.getScaleX() * 0.8f).setEaseFunction(EaseQuadOut.getInstance()));
@@ -626,7 +636,7 @@ public class Slider extends GameObject {
                         // The follow circle animation is the last one to finish if it's enabled.
                         poolObject();
                     });
-                    mIsAnimating = false;
+                    isFollowCircleAnimating = false;
                 })
             );
         }
@@ -840,9 +850,9 @@ public class Slider extends GameObject {
             float realSliderDuration = (float) beatmapSlider.getDuration() / 1000 / GameHelper.getSpeedMultiplier();
             float remainTime = realSliderDuration - (float) passedTime;
 
-            if (inRadius && !mWasInRadius) {
-                mWasInRadius = true;
-                mIsAnimating = true;
+            if (inRadius && !isInRadius) {
+                isInRadius = true;
+                isFollowCircleAnimating = true;
                 playSlidingSamples();
 
                 // If alpha doesn't equal 0 means that it has been into an animation before
@@ -853,32 +863,32 @@ public class Slider extends GameObject {
                 followCircle.registerEntityModifier(
                     Modifiers.scale(Math.min(remainTime, 0.18f / GameHelper.getSpeedMultiplier()), initialScale, scale)
                         .setEaseFunction(EaseQuadOut.getInstance())
-                        .setOnFinished(entity -> mIsAnimating = false)
+                        .setOnFinished(entity -> isFollowCircleAnimating = false)
                 );
-            } else if (!inRadius && mWasInRadius) {
-                mWasInRadius = false;
-                mIsAnimating = true;
+            } else if (!inRadius && isInRadius) {
+                isInRadius = false;
+                isFollowCircleAnimating = true;
                 stopSlidingSamples();
 
                 followCircle.clearEntityModifiers();
                 followCircle.registerEntityModifier(Modifiers.scale(0.1f / GameHelper.getSpeedMultiplier(), followCircle.getScaleX(), scale * 2f));
                 followCircle.registerEntityModifier(
                     Modifiers.alpha(0.1f / GameHelper.getSpeedMultiplier(), followCircle.getAlpha(), 0f).setOnFinished(entity -> {
-                        if (mIsOver) {
+                        if (isOver) {
                             Execution.updateThread(entity::detachSelf);
                         }
-                        mIsAnimating = false;
+                        isFollowCircleAnimating = false;
                     })
                 );
             }
         } else {
-            if (inRadius && !mWasInRadius) {
+            if (inRadius && !isInRadius) {
                 playSlidingSamples();
-            } else if (!inRadius && mWasInRadius) {
+            } else if (!inRadius && isInRadius) {
                 stopSlidingSamples();
             }
 
-            mWasInRadius = inRadius;
+            isInRadius = inRadius;
             followCircle.setAlpha(inRadius ? 1 : 0);
         }
 
@@ -905,7 +915,7 @@ public class Slider extends GameObject {
         float radius = (float) beatmapSlider.getGameplayRadius();
         float distanceThresholdSquared = radius * radius;
 
-        if (mWasInRadius) {
+        if (isInRadius) {
             // Multiply by 4 as the follow circle radius is 2 times larger than the object radius.
             distanceThresholdSquared *= 4;
         }
@@ -929,12 +939,12 @@ public class Slider extends GameObject {
                 break;
             }
 
-            if (mWasInRadius && replayObjectData == null ||
+            if (isInRadius && replayObjectData == null ||
                     replayObjectData != null && replayObjectData.tickSet.get(replayTickIndex)) {
                 playCurrentNestedObjectHitSound();
                 listener.onSliderHit(id, 10, null, ballPos, false, bodyColor, GameObjectListener.SLIDER_TICK);
 
-                if (Config.isAnimateFollowCircle() && !mIsAnimating) {
+                if (Config.isAnimateFollowCircle() && !isFollowCircleAnimating) {
                     followCircle.clearEntityModifiers();
                     followCircle.registerEntityModifier(Modifiers.scale((float) Math.min(tickInterval, 0.2f) / GameHelper.getSpeedMultiplier(), scale * 1.1f, scale).setEaseFunction(EaseQuadOut.getInstance()));
                 }
