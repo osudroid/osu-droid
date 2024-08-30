@@ -231,4 +231,7 @@ interface IScoreInfoDAO {
     @Query("DELETE FROM ScoreInfo WHERE id = :id")
     fun deleteScore(id: Int): Int
 
+    @Query("SELECT EXISTS(SELECT 1 FROM ScoreInfo WHERE id = :id)")
+    fun scoreExists(id: Long): Boolean
+
 }
