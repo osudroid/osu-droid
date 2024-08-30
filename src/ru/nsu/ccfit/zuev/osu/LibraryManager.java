@@ -36,6 +36,8 @@ public class LibraryManager {
 
     private static final ArrayList<BeatmapInfo> pendingBeatmaps = new ArrayList<>();
 
+    private static final Object mutex = new Object();
+
 
     private LibraryManager() {
     }
@@ -98,11 +100,12 @@ public class LibraryManager {
 
         // Wait for all threads to finish
         while (isCaching) {
-            try {
-                Thread.currentThread().wait();
-            } catch (InterruptedException e) {
-                Thread.currentThread().interrupt();
-                Log.e("LibraryManager", "Failed to wait for thread termination", e);
+            synchronized (mutex) {
+                try {
+                    mutex.wait();
+                } catch (InterruptedException e) {
+                    Log.e("LibraryManager", "Failed to wait for thread termination", e);
+                }
             }
         }
 
@@ -311,8 +314,8 @@ public class LibraryManager {
 
                     isCaching = false;
 
-                    synchronized (LibraryManager.class) {
-                        LibraryManager.class.notify();
+                    synchronized (mutex) {
+                        mutex.notify();
                     }
 
                 } else {
