@@ -563,6 +563,10 @@ public class Slider extends GameObject {
         removeFromScene();
     }
 
+    private boolean canBeHit() {
+        return passedTime >= -objectHittableRange;
+    }
+
     private boolean isHit() {
         float radius = Utils.sqr((float) beatmapSlider.getGameplayRadius());
         for (int i = 0, count = listener.getCursorsCount(); i < count; i++) {
@@ -613,16 +617,23 @@ public class Slider extends GameObject {
                 currentNestedObjectIndex++;
                 ticksGot++;
                 listener.onSliderHit(id, 30, null, pos, false, bodyColor, GameObjectListener.SLIDER_START);
-            } else if (isHit() && -passedTime < GameHelper.getDifficultyHelper().hitWindowFor50(GameHelper.getOverallDifficulty())) {
+            } else if (canBeHit() && isHit()) {
                 // if we clicked
                 listener.registerAccuracy(passedTime);
                 startHit = true;
-                playCurrentNestedObjectHitSound();
-                currentNestedObjectIndex++;
                 ticksGot++;
                 firstHitAccuracy = (int) (passedTime * 1000);
-                listener.onSliderHit(id, 30, null, pos,
+
+                if (-passedTime < GameHelper.getDifficultyHelper().hitWindowFor50(GameHelper.getOverallDifficulty())) {
+                    playCurrentNestedObjectHitSound();
+                    listener.onSliderHit(id, 30, null, pos,
                         false, bodyColor, GameObjectListener.SLIDER_START);
+                } else {
+                    listener.onSliderHit(id, -1, null, pos,
+                        false, bodyColor, GameObjectListener.SLIDER_START);
+                }
+
+                currentNestedObjectIndex++;
             }
         }
 
@@ -927,15 +938,22 @@ public class Slider extends GameObject {
             return;
         }
 
-        if (isHit() && -passedTime < GameHelper.getDifficultyHelper().hitWindowFor50(GameHelper.getOverallDifficulty())) {
+        if (canBeHit() && isHit()) {
             listener.registerAccuracy(passedTime);
             startHit = true;
-            playCurrentNestedObjectHitSound();
-            currentNestedObjectIndex++;
             ticksGot++;
             firstHitAccuracy = (int) (passedTime * 1000);
-            listener.onSliderHit(id, 30, null, pos,
+
+            if (-passedTime < GameHelper.getDifficultyHelper().hitWindowFor50(GameHelper.getOverallDifficulty())) {
+                playCurrentNestedObjectHitSound();
+                listener.onSliderHit(id, 30, null, pos,
                     false, bodyColor, GameObjectListener.SLIDER_START);
+            } else {
+                listener.onSliderHit(id, -1, null, pos,
+                        false, bodyColor, GameObjectListener.SLIDER_START);
+            }
+
+            currentNestedObjectIndex++;
         }
 
         if (passedTime < 0 && startHit) {
