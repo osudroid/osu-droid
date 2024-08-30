@@ -39,6 +39,9 @@ data class BeatmapOptions(
     @Insert(onConflict = OnConflictStrategy.IGNORE)
     fun insert(options: BeatmapOptions)
 
+    @Update(onConflict = OnConflictStrategy.REPLACE)
+    fun update(options: BeatmapOptions)
+
     @Query("DELETE FROM BeatmapOptions")
     fun deleteAll()
 
