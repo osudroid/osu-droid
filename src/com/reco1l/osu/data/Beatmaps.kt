@@ -9,7 +9,7 @@ import ru.nsu.ccfit.zuev.osu.DifficultyAlgorithm.*
 import ru.nsu.ccfit.zuev.osu.game.GameHelper
 import kotlin.math.max
 import kotlin.math.min
-import com.rian.osu.beatmap.Beatmap as RianBeatmap
+import com.rian.osu.beatmap.Beatmap
 
 
 /// Ported from rimu! project
@@ -294,7 +294,7 @@ data class BeatmapInfo(
 /**
  * Represents a beatmap information.
  */
-fun BeatmapInfo(data: RianBeatmap, lastModified: Long, calculateDifficulty: Boolean): BeatmapInfo {
+fun BeatmapInfo(data: Beatmap, lastModified: Long, calculateDifficulty: Boolean): BeatmapInfo {
 
     var bpmMin = Float.MAX_VALUE
     var bpmMax = 0f
