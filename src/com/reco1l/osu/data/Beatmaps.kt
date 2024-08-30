@@ -259,11 +259,11 @@ data class BeatmapInfo(
     fun apply(b: BeatmapInfo) {
         md5 = b.md5
         id = b.id
-        audio = b.audio
-        background = b.background
+        audioFilename = b.audioFilename
+        backgroundFilename = b.backgroundFilename
         status = b.status
-        parentPath = b.parentPath
-        parentId = b.parentId
+        setDirectory = b.setDirectory
+        setId = b.setId
         title = b.title
         titleUnicode = b.titleUnicode
         artist = b.artist
