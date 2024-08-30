@@ -93,7 +93,7 @@ object DatabaseManager {
 
                         for ((directory, properties) in ois.readObject() as Map<String, BeatmapProperties>) {
 
-                            val options = BeatmapOptions(
+                            beatmapOptionsTable.insert(BeatmapOptions(
                                 setDirectory = directory.let {
                                     if (it.endsWith('/')) {
                                         it.substring(0, it.length - 1).substringAfterLast('/')
@@ -103,9 +103,7 @@ object DatabaseManager {
                                 },
                                 isFavorite = properties.favorite,
                                 offset = properties.offset
-                            )
-
-                            beatmapOptionsTable.insert(options)
+                            ))
                         }
                     }
                 }
