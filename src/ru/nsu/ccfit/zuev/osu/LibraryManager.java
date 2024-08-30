@@ -335,7 +335,7 @@ public class LibraryManager {
 
             for (var i = missingDirectories.size() - 1; i >= 0; i--) {
 
-                if (new File(missingDirectories.get(i)).exists()) {
+                if (new File(Config.getBeatmapPath(), missingDirectories.get(i)).exists()) {
                     missingDirectories.remove(i);
                 }
             }
