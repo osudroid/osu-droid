@@ -36,11 +36,11 @@ data class BeatmapOptions(
     @Query("SELECT * FROM BeatmapOptions WHERE setDirectory = :setDirectory")
     fun getOptions(setDirectory: String): BeatmapOptions?
 
-    @Update
+    @Insert(onConflict = OnConflictStrategy.IGNORE)
     fun insert(options: BeatmapOptions)
 
-    @Insert(onConflict = OnConflictStrategy.REPLACE)
-    fun insertAll(options: List<BeatmapOptions>)
+    @Update(onConflict = OnConflictStrategy.REPLACE)
+    fun update(options: BeatmapOptions)
 
     @Query("DELETE FROM BeatmapOptions")
     fun deleteAll()
