@@ -91,10 +91,10 @@ object DatabaseManager {
                         // Ignoring first object which is intended to be the version.
                         ois.readObject()
 
-                        for ((directory, properties) in ois.readObject() as Map<String, BeatmapProperties>) {
+                        for ((path, properties) in ois.readObject() as Map<String, BeatmapProperties>) {
 
                             beatmapOptionsTable.insert(BeatmapOptions(
-                                setDirectory = directory.let {
+                                setDirectory = path.let {
                                     if (it.endsWith('/')) {
                                         it.substring(0, it.length - 1).substringAfterLast('/')
                                     } else {
