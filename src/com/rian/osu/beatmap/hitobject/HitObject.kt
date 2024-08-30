@@ -5,8 +5,11 @@ import com.rian.osu.beatmap.constants.SampleBank
 import com.rian.osu.beatmap.sections.BeatmapControlPoints
 import com.rian.osu.beatmap.sections.BeatmapDifficulty
 import com.rian.osu.math.Vector2
+import com.rian.osu.utils.Cached
 import com.rian.osu.utils.CircleSizeCalculator
 import kotlin.math.min
+import ru.nsu.ccfit.zuev.osu.Config
+import ru.nsu.ccfit.zuev.osu.Constants
 
 /**
  * Represents a hit object.
@@ -19,10 +22,9 @@ abstract class HitObject(
     var startTime: Double,
 
     /**
-     * The position of this [HitObject].
+     * The position of this [HitObject] in osu!pixels.
      */
-    @JvmField
-    var position: Vector2,
+    position: Vector2,
 
     /**
      * Whether this [HitObject] starts a new combo.
@@ -41,6 +43,18 @@ abstract class HitObject(
     @JvmField
     val comboOffset: Int
 ) {
+    /**
+     * The position of this [HitObject] in osu!pixels.
+     */
+    open var position = position
+        set(value) {
+            field = value
+
+            difficultyStackedPositionCache.invalidate()
+            gameplayPositionCache.invalidate()
+            gameplayStackedPositionCache.invalidate()
+        }
+
     /**
      * The index of this [HitObject] in the current combo.
      */
@@ -64,27 +78,17 @@ abstract class HitObject(
     /**
      * Whether this is the last [HitObject] in the current combo.
      */
-    var lastInCombo = false
+    var isLastInCombo = false
         internal set
 
     /**
-     * The stack height of this [HitObject].
-     */
-    open var stackHeight = 0
-
-    /**
-     * The scale of this [HitObject].
-     */
-    open var scale = 0f
-
-    /**
-     * The time at which the approach circle of this [HitObject] should appear before [startTime].
+     * The time at which the approach circle of this [HitObject] should appear before [startTime] in milliseconds.
      */
     @JvmField
     var timePreempt = 600.0
 
     /**
-     * The time at which this [HitObject] should fade after this [HitObject] appears with respect to [timePreempt].
+     * The time at which this [HitObject] should fade after this [HitObject] appears with respect to [timePreempt] in milliseconds.
      */
     @JvmField
     var timeFadeIn = 400.0
@@ -109,22 +113,154 @@ abstract class HitObject(
     var kiai = false
 
     /**
-     * The radius of this [HitObject].
+     * Whether this [HitObject] is the first [HitObject] in the beatmap.
      */
-    val radius
-        get() = (OBJECT_RADIUS * scale).toDouble()
+    val isFirstNote
+        get() = comboIndex == 0 && indexInCurrentCombo == 0
 
     /**
-     * The stacked position of this [HitObject].
+     * The multiplier used to calculate stack offset.
      */
-    open val stackedPosition
-        get() = position + stackOffset
+    open var stackOffsetMultiplier = 0f
+        set(value) {
+            field = value
+
+            difficultyStackOffsetCache.invalidate()
+            difficultyStackedPositionCache.invalidate()
+            gameplayStackOffsetCache.invalidate()
+            gameplayStackedPositionCache.invalidate()
+        }
+
+    // Difficulty calculation object positions
 
     /**
-     * The stack offset of this [HitObject].
+     * The stack height of this [HitObject] in difficulty calculation.
      */
-    protected var stackOffset = Vector2(0f)
-        private set
+    open var difficultyStackHeight = 0
+        set(value) {
+            field = value
+
+            difficultyStackOffsetCache.invalidate()
+            difficultyStackedPositionCache.invalidate()
+        }
+
+    /**
+     * The osu!standard scale of this [HitObject] in difficulty calculation.
+     */
+    open var difficultyScale = 0f
+        set(value) {
+            field = value
+
+            difficultyStackOffsetCache.invalidate()
+            difficultyStackedPositionCache.invalidate()
+        }
+
+    /**
+     * The radius of this [HitObject] in difficulty calculation, in osu!pixels.
+     */
+    val difficultyRadius
+        get() = (OBJECT_RADIUS * difficultyScale).toDouble()
+
+    private val difficultyStackOffsetCache = Cached(Vector2(0))
+
+    /**
+     * The stack offset of this [HitObject] in difficulty calculation, in osu!pixels.
+     */
+    open val difficultyStackOffset: Vector2
+        get() {
+            if (!difficultyStackOffsetCache.isValid) {
+                difficultyStackOffsetCache.value =
+                    Vector2(difficultyStackHeight * difficultyScale * stackOffsetMultiplier)
+            }
+
+            return difficultyStackOffsetCache.value
+        }
+
+    private val difficultyStackedPositionCache = Cached(position)
+
+    /**
+     * The stacked position of this [HitObject] in difficulty calculation, in osu!pixels.
+     */
+    open val difficultyStackedPosition: Vector2
+        get() {
+            if (!difficultyStackedPositionCache.isValid) {
+                difficultyStackedPositionCache.value = position + difficultyStackOffset
+            }
+
+            return difficultyStackedPositionCache.value
+        }
+
+    // Gameplay object positions
+
+    /**
+     * The stack offset of this [HitObject] in gameplay.
+     */
+    open var gameplayStackHeight = 0
+        set(value) {
+            field = value
+
+            gameplayStackOffsetCache.invalidate()
+            gameplayStackedPositionCache.invalidate()
+        }
+
+    /**
+     * The scale of this [HitObject] in gameplay.
+     */
+    open var gameplayScale = 0f
+        set(value) {
+            field = value
+
+            gameplayStackOffsetCache.invalidate()
+            gameplayStackedPositionCache.invalidate()
+        }
+
+    private val gameplayPositionCache = Cached(convertPositionToRealCoordinates(position))
+
+    /**
+     * The position of this [HitObject] in gameplay, in pixels.
+     */
+    val gameplayPosition: Vector2
+        get() {
+            if (!gameplayPositionCache.isValid) {
+                gameplayPositionCache.value = convertPositionToRealCoordinates(position)
+            }
+
+            return gameplayPositionCache.value
+        }
+
+    /**
+     * The radius of this [HitObject] in gameplay, in pixels.
+     */
+    val gameplayRadius
+        get() = (OBJECT_RADIUS * gameplayScale).toDouble()
+
+    private val gameplayStackOffsetCache = Cached(Vector2(0))
+
+    /**
+     * The stack offset of this [HitObject] in gameplay, in pixels.
+     */
+    val gameplayStackOffset: Vector2
+        get() {
+            if (!gameplayStackOffsetCache.isValid) {
+                gameplayStackOffsetCache.value = Vector2(gameplayStackHeight * gameplayScale * stackOffsetMultiplier)
+            }
+
+            return gameplayStackOffsetCache.value
+        }
+
+    private val gameplayStackedPositionCache = Cached(gameplayPosition)
+
+    /**
+     * The stacked position of this [HitObject] in gameplay, in pixels.
+     */
+    open val gameplayStackedPosition: Vector2
+        get() {
+            if (!gameplayStackedPositionCache.isValid) {
+                gameplayStackedPositionCache.value = gameplayPosition + gameplayStackOffset
+            }
+
+            return gameplayStackedPositionCache.value
+        }
 
     /**
      * Applies defaults to this [HitObject].
@@ -144,9 +280,14 @@ abstract class HitObject(
         // This adjustment is necessary for AR>10, otherwise timePreempt can become smaller leading to hit circles not fully fading in.
         timeFadeIn = 400 * min(1.0, timePreempt / PREEMPT_MIN)
 
-        scale = when (mode) {
+        stackOffsetMultiplier = when (mode) {
+            GameMode.Droid -> 4f
+            GameMode.Standard -> -6.4f
+        }
+
+        difficultyScale = when (mode) {
             GameMode.Droid -> {
-                val droidScale = CircleSizeCalculator.droidCSToDroidScale(difficulty.cs)
+                val droidScale = CircleSizeCalculator.droidCSToDroidDifficultyScale(difficulty.cs)
                 val radius = CircleSizeCalculator.droidScaleToStandardRadius(droidScale)
                 val standardCS = CircleSizeCalculator.standardRadiusToStandardCS(radius, true)
 
@@ -156,9 +297,9 @@ abstract class HitObject(
             GameMode.Standard -> CircleSizeCalculator.standardCSToStandardScale(difficulty.cs, true)
         }
 
-        stackOffset = when (mode) {
-            GameMode.Droid -> Vector2(stackHeight * CircleSizeCalculator.standardScaleToDroidScale(scale, true) * 4f)
-            GameMode.Standard -> Vector2(stackHeight * scale * -6.4f)
+        gameplayScale = when (mode) {
+            GameMode.Droid -> CircleSizeCalculator.droidCSToDroidGameplayScale(difficulty.cs)
+            GameMode.Standard -> difficultyScale
         }
     }
 
@@ -187,10 +328,23 @@ abstract class HitObject(
             comboIndexWithOffsets += comboOffset + 1
 
             if (lastObj != null) {
-                lastObj.lastInCombo = true
+                lastObj.isLastInCombo = true
             }
         }
     }
+
+    /**
+     * Converts a position in osu!pixels to real screen coordinates.
+     *
+     * @param position The position in osu!pixels.
+     * @return The position in real screen coordinates.
+     */
+    protected fun convertPositionToRealCoordinates(position: Vector2) =
+        position *
+        // Scale the position to the actual play field size on screen
+        Vector2(Constants.MAP_ACTUAL_WIDTH / Constants.MAP_WIDTH.toFloat(), Constants.MAP_ACTUAL_HEIGHT / Constants.MAP_HEIGHT.toFloat()) +
+        // Center the position on the screen
+        Vector2(Config.getRES_WIDTH() - Constants.MAP_ACTUAL_WIDTH, Config.getRES_HEIGHT() - Constants.MAP_ACTUAL_HEIGHT) / 2f
 
     /**
      * Creates a [BankHitSampleInfo] based on the sample settings of the first [BankHitSampleInfo.HIT_NORMAL] sample in [samples].
@@ -203,7 +357,7 @@ abstract class HitObject(
      */
     protected fun createHitSampleInfo(sampleName: String) =
         samples.filterIsInstance<BankHitSampleInfo>().find { it.name == BankHitSampleInfo.HIT_NORMAL }?.copy(name = sampleName) ?:
-        BankHitSampleInfo(sampleName, SampleBank.None)
+        BankHitSampleInfo(sampleName, SampleBank.Normal)
 
     companion object {
         /**

@@ -14,17 +14,23 @@ import com.rian.osu.beatmap.Beatmap as RianBeatmap
 
 /// Ported from rimu! project
 
-@Entity(indices = [
-    Index(name = "parentPathIdx", value = ["parentPath"]),
-    Index(name = "parentIdx", value = ["parentPath", "parentId"])
-])
+@Entity(
+    primaryKeys = [
+        "filename",
+        "setDirectory"
+    ],
+    indices = [
+        Index(name = "filenameIdx", value = ["filename"]),
+        Index(name = "setDirectoryIdx", value = ["setDirectory"]),
+        Index(name = "setIdx", value = ["setDirectory", "setId"])
+    ]
+)
 data class BeatmapInfo(
 
     /**
-     * The beatmap path.
+     * The `.osu` filename.
      */
-    @PrimaryKey
-    val path: String,
+    val filename: String,
 
     /**
      * The beatmap MD5.
@@ -40,12 +46,12 @@ data class BeatmapInfo(
     /**
      * The audio filename.
      */
-    var audio: String,
+    var audioFilename: String,
 
     /**
      * The background filename.
      */
-    var background: String?,
+    var backgroundFilename: String?,
 
 
     // Online
@@ -59,14 +65,14 @@ data class BeatmapInfo(
     // Parent set
 
     /**
-     * This indicates the parent set path.
+     * The beatmap set directory relative to [Config.getBeatmapPath].
      */
-    var parentPath: String,
+    var setDirectory: String,
 
     /**
-     * This indicates the parent set ID.
+     * The beatmap set ID.
      */
-    var parentId: Int?,
+    var setId: Int?,
 
 
     // Metadata
@@ -194,6 +200,24 @@ data class BeatmapInfo(
 ) {
 
     /**
+     * The `.osu` file path.
+     */
+    val path
+        get() = "${Config.getBeatmapPath()}/$setDirectory/$filename"
+
+    /**
+     * The audio file path.
+     */
+    val audioPath
+        get() = "${Config.getBeatmapPath()}/$setDirectory/$audioFilename"
+
+    /**
+     * The background file path.
+     */
+    val backgroundPath
+        get() = "${Config.getBeatmapPath()}/$setDirectory/$backgroundFilename"
+
+    /**
      * The total hit object count.
      */
     val totalHitObjectCount
@@ -270,7 +294,7 @@ data class BeatmapInfo(
 /**
  * Represents a beatmap information.
  */
-fun BeatmapInfo(data: RianBeatmap, parentPath: String, lastModified: Long, path: String, calculateDifficulty: Boolean): BeatmapInfo {
+fun BeatmapInfo(data: RianBeatmap, lastModified: Long, calculateDifficulty: Boolean): BeatmapInfo {
 
     var bpmMin = Float.MAX_VALUE
     var bpmMax = 0f
@@ -299,16 +323,18 @@ fun BeatmapInfo(data: RianBeatmap, parentPath: String, lastModified: Long, path:
 
         md5 = data.md5,
         id = data.metadata.beatmapId.toLong(),
-        path = path,
-        audio = data.folder!! + '/' + data.general.audioFilename,
-        background = data.folder!! + '/' + data.events.backgroundFilename,
+        // The returned path is absolute. We only want the beatmap path relative to the beatmapset path.
+        filename = data.filePath.substringAfterLast('/'),
+        audioFilename = data.general.audioFilename,
+        backgroundFilename = data.events.backgroundFilename,
 
         // Online
         status = null, // TODO: Should we cache ranking status ?
 
         // Parent set
-        parentPath = parentPath,
-        parentId = data.metadata.beatmapSetId,
+        // The returned path is absolute. We only want the beatmapset path relative to the player-configured songs path.
+        setDirectory = data.beatmapsetPath.substringAfterLast('/'),
+        setId = data.metadata.beatmapSetId,
 
         // Metadata
         title = data.metadata.title,
@@ -347,21 +373,20 @@ fun BeatmapInfo(data: RianBeatmap, parentPath: String, lastModified: Long, path:
     @Update(onConflict = OnConflictStrategy.REPLACE)
     fun update(beatmapInfo: BeatmapInfo)
 
-    @Query("DELETE FROM BeatmapInfo WHERE parentPath = :path")
-    fun deleteBeatmapSet(path: String)
+    @Query("DELETE FROM BeatmapInfo WHERE setDirectory = :directory")
+    fun deleteBeatmapSet(directory: String)
 
-    @Query("DELETE FROM BeatmapInfo WHERE parentPath IN (:paths)")
-    fun deleteAllBeatmapSets(paths: List<String>)
+    @Query("DELETE FROM BeatmapInfo WHERE setDirectory IN (:directories)")
+    fun deleteAllBeatmapSets(directories: List<String>)
 
-    @Transaction
-    @Query("SELECT DISTINCT parentPath, parentId FROM BeatmapInfo")
+    @Query("SELECT DISTINCT setDirectory, setId FROM BeatmapInfo")
     fun getBeatmapSetList() : List<BeatmapSetInfo>
 
-    @Query("SELECT DISTINCT parentPath FROM BeatmapInfo")
+    @Query("SELECT DISTINCT setDirectory FROM BeatmapInfo")
     fun getBeatmapSetPaths() : List<String>
 
-    @Query("SELECT EXISTS(SELECT parentPath FROM BeatmapInfo WHERE parentPath = :path LIMIT 1)")
-    fun isBeatmapSetImported(path: String): Boolean
+    @Query("SELECT EXISTS(SELECT setDirectory FROM BeatmapInfo WHERE setDirectory = :directory LIMIT 1)")
+    fun isBeatmapSetImported(directory: String): Boolean
 
     @Query("DELETE FROM BeatmapInfo")
     fun deleteAll()

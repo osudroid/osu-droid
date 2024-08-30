@@ -354,7 +354,7 @@ class ThreeFingerChecker(
                 continue
             }
 
-            val objPosition = obj.stackedPosition
+            val objPosition = obj.difficultyStackedPosition
             val hitTime = obj.startTime + objData.accuracy
 
             // Observe the cursor position at the object's hit time.
@@ -379,7 +379,7 @@ class ThreeFingerChecker(
                     // Only consider cursor at interval prev.time <= hitTime <= current.time.
                     if (prevMovement.time <= hitTime && hitTime <= movement.time) {
                         isInObject = when (movement.touchType) {
-                            TouchType.UP -> movementPosition.getDistance(prevMovementPosition) <= obj.radius
+                            TouchType.UP -> movementPosition.getDistance(prevMovementPosition) <= obj.difficultyRadius
 
                             TouchType.MOVE -> {
                                 // Interpolate movement.
@@ -398,7 +398,7 @@ class ThreeFingerChecker(
                                     )
                                 )
 
-                                cursorPosition.getDistance(objPosition) <= obj.radius
+                                cursorPosition.getDistance(objPosition) <= obj.difficultyRadius
                             }
 
                             else -> break

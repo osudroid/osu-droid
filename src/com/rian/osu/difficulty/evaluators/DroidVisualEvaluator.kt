@@ -74,7 +74,7 @@ object DroidVisualEvaluator {
         strain /= 10 * (1 + current.overlappingFactor)
 
         if (current.obj is Slider && withSliders) {
-            val scalingFactor = 50 / current.obj.radius
+            val scalingFactor = 50 / current.obj.difficultyRadius
 
             // Invert the scaling factor to determine the true travel distance independent of circle size.
             val pixelTravelDistance = current.obj.lazyTravelDistance / scalingFactor

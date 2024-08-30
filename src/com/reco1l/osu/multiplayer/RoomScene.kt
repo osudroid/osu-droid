@@ -824,7 +824,7 @@ object RoomScene : Scene(), IRoomEventListener, IPlayerEventListener
         invalidateStatus()
 
         // Updating background
-        updateBackground(getGlobal().selectedBeatmap?.background)
+        updateBackground(getGlobal().selectedBeatmap?.backgroundPath)
         updateBeatmapInfo()
 
         // Releasing await lock
@@ -836,7 +836,7 @@ object RoomScene : Scene(), IRoomEventListener, IPlayerEventListener
             return
         }
 
-        getGlobal().songService.preLoad(getGlobal().selectedBeatmap!!.audio)
+        getGlobal().songService.preLoad(getGlobal().selectedBeatmap!!.audioPath)
         getGlobal().songService.play()
     }
 

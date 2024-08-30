@@ -1,5 +1,6 @@
 package com.rian.osu.beatmap.hitobject
 
+import com.rian.osu.beatmap.sections.BeatmapControlPoints
 import com.rian.osu.math.Vector2
 
 /**
@@ -18,16 +19,22 @@ class Spinner(
      */
     isNewCombo: Boolean,
 ) : HitObject(startTime, Vector2(256f, 192f), isNewCombo, 0), IHasDuration {
-    init {
-        auxiliarySamples.apply {
-            samples.filterIsInstance<BankHitSampleInfo>().firstOrNull()?.let { add(it.copy(name = "spinnerspin")) }
+    override val difficultyStackedPosition = position
 
-            add(createHitSampleInfo("spinnerbonus"))
-        }
-    }
+    override val gameplayStackedPosition = position
 
-    override val stackedPosition = position
-
-    override val duration: Double
+    override val duration
         get() = endTime - startTime
+
+    override fun applySamples(controlPoints: BeatmapControlPoints) {
+        super.applySamples(controlPoints)
+
+        auxiliarySamples.clear()
+
+        samples.filterIsInstance<BankHitSampleInfo>().firstOrNull()?.let {
+            auxiliarySamples.add(it.copy(name = "spinnerspin"))
+        }
+
+        auxiliarySamples.add(createHitSampleInfo("spinnerbonus"))
+    }
 }

@@ -19,6 +19,8 @@ data class Vector2(
     @JvmField
     var y: Float
 ) {
+    constructor(value: Int): this(value, value);
+    constructor(x: Int, y: Int): this(x.toFloat(), y.toFloat())
     constructor(value: Float) : this(value, value)
     constructor(pointF: PointF) : this(pointF.x, pointF.y)
 

@@ -20,7 +20,6 @@ import ru.nsu.ccfit.zuev.osu.GlobalManager
 import ru.nsu.ccfit.zuev.osu.menu.IPropsMenu
 import ru.nsu.ccfit.zuev.osu.menu.BeatmapSetItem
 import ru.nsu.ccfit.zuev.osu.menu.SongMenu
-import ru.nsu.ccfit.zuev.osu.scoring.ScoreLibrary
 import ru.nsu.ccfit.zuev.osuplus.R
 import kotlin.math.abs
 
@@ -29,7 +28,7 @@ class PropsMenuFragment : BaseFragment(), IPropsMenu {
 
     var menu: SongMenu? = null
     var item: BeatmapSetItem? = null
-    var props: BeatmapOptions? = null
+    var beatmapProperties: BeatmapOptions? = null
 
     private var offset: EditText? = null
     private var isFav: CheckBox? = null
@@ -47,11 +46,11 @@ class PropsMenuFragment : BaseFragment(), IPropsMenu {
         offset = findViewById<EditText>(R.id.offsetBox)
         isFav = findViewById<CheckBox>(R.id.addToFav)
 
-        offset!!.setText(props!!.offset.toString())
-        isFav!!.isChecked = props!!.isFavorite
+        offset!!.setText(beatmapProperties!!.offset.toString())
+        isFav!!.isChecked = beatmapProperties!!.isFavorite
 
         isFav!!.setOnCheckedChangeListener { buttonView: CompoundButton?, isChecked: Boolean ->
-            props!!.isFavorite = isChecked
+            beatmapProperties!!.isFavorite = isChecked
             saveProp()
         }
 
@@ -83,11 +82,11 @@ class PropsMenuFragment : BaseFragment(), IPropsMenu {
                         offset!!.setSelection(pos)
                         offset!!.addTextChangedListener(this)
                     }
-                    props!!.offset = o
+                    beatmapProperties!!.offset = o
                     saveProp()
                 } catch (e: NumberFormatException) {
                     if (s.length == 0) {
-                        props!!.offset = 0
+                        beatmapProperties!!.offset = 0
                         saveProp()
                     }
                 }
@@ -105,8 +104,7 @@ class PropsMenuFragment : BaseFragment(), IPropsMenu {
 
         findViewById<View>(R.id.manageFavButton)!!.setOnClickListener { v: View? ->
             val dialog = FavoriteManagerFragment()
-            //TODO : 铺面引用还是全局耦合的，需要分离
-            dialog.showToAddToFolder(ScoreLibrary.getBeatmapSetDirectory(GlobalManager.getInstance().selectedBeatmap!!.path))
+            dialog.showToAddToFolder(GlobalManager.getInstance().selectedBeatmap!!.setDirectory)
         }
 
         findViewById<View>(R.id.deleteBeatmap)!!.setOnClickListener { v: View? ->
@@ -175,15 +173,15 @@ class PropsMenuFragment : BaseFragment(), IPropsMenu {
     override fun show(menu: SongMenu, item: BeatmapSetItem) {
         this.menu = menu
         this.item = item
-        props = DatabaseManager.beatmapOptionsTable.getOptions(item.beatmapSetInfo.path)
-        if (props == null) {
-            props = BeatmapOptions(item.beatmapSetInfo.path)
+        beatmapProperties = DatabaseManager.beatmapOptionsTable.getOptions(item.beatmapSetInfo.directory)
+        if (beatmapProperties == null) {
+            beatmapProperties = BeatmapOptions(item.beatmapSetInfo.path)
         }
         show()
     }
 
     fun saveProp() {
-        item!!.isFavorite = props!!.isFavorite
-        DatabaseManager.beatmapOptionsTable.setOptions(props!!)
+        item!!.isFavorite = beatmapProperties!!.isFavorite
+        DatabaseManager.beatmapOptionsTable.insert(beatmapProperties!!)
     }
 }

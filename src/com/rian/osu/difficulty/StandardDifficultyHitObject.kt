@@ -45,7 +45,7 @@ class StandardDifficultyHitObject(
     override val scalingFactor: Float
         get() {
             // We will scale distances by this factor, so we can assume a uniform CircleSize among beatmaps.
-            val radius = obj.radius.toFloat()
+            val radius = obj.difficultyRadius.toFloat()
             var scalingFactor = NORMALIZED_RADIUS / radius
 
             // High circle size (small CS) bonus

@@ -7,15 +7,17 @@ import androidx.room.OnConflictStrategy
 import androidx.room.PrimaryKey
 import androidx.room.Query
 import androidx.room.Update
+import java.io.Serial
+import java.io.Serializable
 
 @Entity
 data class BeatmapOptions(
 
     /**
-     * The beatmap path.
+     * The beatmap set directory.
      */
     @PrimaryKey
-    val parentPath: String,
+    val setDirectory: String,
 
     /**
      * Whether the beatmap is marked as favorite.
@@ -25,22 +27,37 @@ data class BeatmapOptions(
     /**
      * The beatmap offset.
      */
-    var offset: Int = 0,
+    var offset: Int = 0
 
 )
 
 @Dao interface IBeatmapOptionsDAO {
 
-    @Query("SELECT * FROM BeatmapOptions WHERE parentPath = :path")
-    fun getOptions(path: String): BeatmapOptions?
+    @Query("SELECT * FROM BeatmapOptions WHERE setDirectory = :setDirectory")
+    fun getOptions(setDirectory: String): BeatmapOptions?
 
     @Update
-    fun setOptions(options: BeatmapOptions)
+    fun insert(options: BeatmapOptions)
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
-    fun addAll(options: List<BeatmapOptions>)
+    fun insertAll(options: List<BeatmapOptions>)
 
     @Query("DELETE FROM BeatmapOptions")
-    fun clearOptions()
+    fun deleteAll()
 
 }
+
+
+@Deprecated("This class is used to do legacy migration, should not be used and will be removed in future releases.")
+class BeatmapProperties : Serializable {
+
+    var offset = 0
+
+    var favorite = false
+
+    companion object {
+        @Serial
+        private const val serialVersionUID = -7229486402310659139L
+    }
+}
+

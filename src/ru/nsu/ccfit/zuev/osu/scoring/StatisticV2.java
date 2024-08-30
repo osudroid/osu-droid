@@ -1,6 +1,6 @@
 package ru.nsu.ccfit.zuev.osu.scoring;
 
-import com.dgsrz.bancho.security.SecurityUtils;
+import ru.nsu.ccfit.zuev.osu.SecurityUtils;
 
 import java.io.Serializable;
 import java.util.EnumSet;
@@ -10,6 +10,7 @@ import java.util.Random;
 import com.reco1l.ibancho.data.RoomTeam;
 import com.reco1l.ibancho.data.WinCondition;
 import com.reco1l.osu.data.BeatmapInfo;
+import com.reco1l.osu.data.ScoreInfo;
 import com.reco1l.osu.multiplayer.Multiplayer;
 import org.jetbrains.annotations.Nullable;
 import org.json.JSONObject;
@@ -40,8 +41,7 @@ public class StatisticV2 implements Serializable {
     private float diffModifier = 1;
     private EnumSet<GameMod> mod = EnumSet.noneOf(GameMod.class);
     private String playerName = Config.getOnlineUsername();
-    private String fileName = "";
-    private String replayName = "";
+    private String replayFilename = "";
     private int forcedScore = -1;
     private String mark = null;
     private float changeSpeed = 1.0f;
@@ -65,6 +65,7 @@ public class StatisticV2 implements Serializable {
     private Float customOD;
     private Float customCS;
     private Float customHP;
+    private int life = 1;
 
     private boolean isLegacySC = false;
 
@@ -84,7 +85,16 @@ public class StatisticV2 implements Serializable {
      */
     private float modScoreMultiplier = 1;
 
-    private int life = 1;
+    /**
+     * The directory of the beatmap set.
+     */
+    private String beatmapSetDirectory = "";
+
+    /**
+     * The filename of the beatmap.
+     */
+    private String beatmapFilename = "";
+
 
     public StatisticV2() {}
 
@@ -186,7 +196,7 @@ public class StatisticV2 implements Serializable {
             return;
         }
         if (score == 0 && k == true) {
-            changeHp(-(5 + GameHelper.getDrain()) / 100f);
+            changeHp(-(5 + GameHelper.getHealthDrain()) / 100f);
             if (currentCombo > maxCombo) {
                 maxCombo = currentCombo;
             }
@@ -226,7 +236,7 @@ public class StatisticV2 implements Serializable {
                 currentCombo++;
                 break;
             default:
-                changeHp(-(5 + GameHelper.getDrain()) / 100f);
+                changeHp(-(5 + GameHelper.getHealthDrain()) / 100f);
                 misses++;
                 perfect = false;
                 if (currentCombo > maxCombo) {
@@ -604,12 +614,12 @@ public class StatisticV2 implements Serializable {
         computeModScoreMultiplier();
     }
 
-    public String getReplayName() {
-        return replayName;
+    public String getReplayFilename() {
+        return replayFilename;
     }
 
-    public void setReplayName(String replayName) {
-        this.replayName = replayName;
+    public void setReplayFilename(String replayName) {
+        this.replayFilename = replayName;
     }
 
     public void setForcedScore(int forcedScore) {
@@ -617,12 +627,9 @@ public class StatisticV2 implements Serializable {
         totalScore = forcedScore;
     }
 
-    public String getFileName() {
-        return fileName;
-    }
-
-    public void setFileName(String fileName) {
-        this.fileName = fileName;
+    public void setBeatmap(String beatmapSetDirectory, String beatmapFilename) {
+        this.beatmapSetDirectory = beatmapSetDirectory;
+        this.beatmapFilename = beatmapFilename;
     }
 
     public final boolean isScoreValid() {
@@ -908,6 +915,32 @@ public class StatisticV2 implements Serializable {
 
         return new ScoreBoardItem(playerName, getTotalScoreWithMultiplier(), combo, getAccuracyForServer(), isAlive);
     }
+
+    /**
+     * Converts the statistic to a ScoreInfo.
+     */
+    public ScoreInfo toScoreInfo() {
+        return new ScoreInfo(
+            playerName,
+            beatmapFilename,
+            beatmapSetDirectory,
+            replayFilename,
+            getModString(),
+            getTotalScoreWithMultiplier(),
+            maxCombo,
+            getMark(),
+            hit300k,
+            hit300,
+            hit100k,
+            hit100,
+            hit50,
+            misses,
+            getAccuracy(),
+            time,
+            isPerfect()
+        );
+    }
+
 
     private void computeModScoreMultiplier() {
         modScoreMultiplier = 1;

@@ -4,7 +4,7 @@ import com.rian.osu.GameMode
 import com.rian.osu.beatmap.hitobject.*
 import com.rian.osu.mods.Mod
 import com.rian.osu.utils.CircleSizeCalculator
-import kotlin.math.sqrt
+import kotlin.math.pow
 
 /**
  * Provides functionality to alter a [Beatmap] after it has been converted.
@@ -34,7 +34,7 @@ class BeatmapProcessor(
 
         // Mark the last object in the beatmap as last in combo.
         if (lastObj != null) {
-            lastObj!!.lastInCombo = true
+            lastObj!!.isLastInCombo = true
         }
     }
 
@@ -54,7 +54,10 @@ class BeatmapProcessor(
         }
 
         // Reset stacking
-        forEach { it.stackHeight = 0 }
+        forEach {
+            it.difficultyStackHeight = 0
+            it.gameplayStackHeight = 0
+        }
 
         when (mode) {
             GameMode.Droid -> applyDroidStacking()
@@ -67,16 +70,22 @@ class BeatmapProcessor(
             return@run
         }
 
-        val droidScale = CircleSizeCalculator.standardScaleToDroidScale(this[0].scale)
+        val droidDifficultyScale = CircleSizeCalculator.standardScaleToDroidDifficultyScale(this[0].difficultyScale)
 
         for (i in 0 until size - 1) {
             val current = this[i]
             val next = this[i + 1]
 
-            if (next.startTime - current.startTime < 2000 * beatmap.general.stackLeniency &&
-                next.position.getDistance(current.position) < sqrt(droidScale)
-            ) {
-                next.stackHeight = current.stackHeight + 1
+            if (next.startTime - current.startTime < 2000 * beatmap.general.stackLeniency) {
+                val distanceSquared = next.position.getDistance(current.position).pow(2)
+
+                if (distanceSquared < droidDifficultyScale) {
+                    next.difficultyStackHeight = current.difficultyStackHeight + 1
+                }
+
+                if (distanceSquared < current.gameplayScale) {
+                    next.gameplayStackHeight = current.gameplayStackHeight + 1
+                }
             }
         }
     }
@@ -117,7 +126,8 @@ class BeatmapProcessor(
                         stackBaseIndex = n
 
                         // HitObjects after the specified update range haven't been reset yet
-                        objectN.stackHeight = 0
+                        objectN.difficultyStackHeight = 0
+                        objectN.gameplayStackHeight = 0
                     }
                 }
 
@@ -145,7 +155,7 @@ class BeatmapProcessor(
             // then we come backwards on the i-th loop iteration until we reach 3 and handle 1.
             // 2 and 1 will be ignored in the i-th loop because they already have a stack value.
             var objectI = objects[i]
-            if (objectI.stackHeight != 0 || objectI is Spinner) {
+            if (objectI.difficultyStackHeight != 0 || objectI is Spinner) {
                 continue
             }
 
@@ -167,21 +177,23 @@ class BeatmapProcessor(
                     }
 
                     // Hit objects before the specified update range haven't been reset yet
-                    objectN.stackHeight = 0
+                    objectN.difficultyStackHeight = 0
+                    objectN.gameplayStackHeight = 0
 
                     // This is a special case where hit circles are moved DOWN and RIGHT (negative stacking) if they are under the *last* slider in a stacked pattern.
                     // o==o <- slider is at original location
                     //     o <- hitCircle has stack of -1
                     //      o <- hitCircle has stack of -2
                     if (objectN is Slider && objectN.endPosition.getDistance(objectI.position) < STACK_DISTANCE) {
-                        val offset = objectI.stackHeight - objectN.stackHeight + 1
+                        val offset = objectI.difficultyStackHeight - objectN.difficultyStackHeight + 1
 
                         for (j in n + 1..i) {
                             // For each object which was declared under this slider, we will offset it to appear *below* the slider end (rather than above).
                             val objectJ = objects[j]
 
                             if (objectN.endPosition.getDistance(objectJ.position) < STACK_DISTANCE) {
-                                objectJ.stackHeight -= offset
+                                objectJ.difficultyStackHeight -= offset
+                                objectJ.gameplayStackHeight -= offset
                             }
                         }
 
@@ -193,7 +205,8 @@ class BeatmapProcessor(
                     if (objectN.position.getDistance(objectI.position) < STACK_DISTANCE) {
                         // Keep processing as if there are no sliders. If we come across a slider, this gets cancelled out.
                         // NOTE: Sliders with start positions stacking are a special case that is also handled here.
-                        objectN.stackHeight = objectI.stackHeight + 1
+                        objectN.difficultyStackHeight = objectI.difficultyStackHeight + 1
+                        objectN.gameplayStackHeight = objectI.gameplayStackHeight + 1
                         objectI = objectN
                     }
                 }
@@ -212,7 +225,8 @@ class BeatmapProcessor(
                     }
 
                     if (objectN.getEndPosition().getDistance(objectI.position) < STACK_DISTANCE) {
-                        objectN.stackHeight = objectI.stackHeight + 1
+                        objectN.difficultyStackHeight = objectI.difficultyStackHeight + 1
+                        objectN.gameplayStackHeight = objectI.gameplayStackHeight + 1
                         objectI = objectN
                     }
                 }
@@ -225,7 +239,7 @@ class BeatmapProcessor(
 
         for (i in objects.indices) {
             val currentObject = objects[i]
-            if (currentObject.stackHeight != 0 && currentObject !is Slider) {
+            if (currentObject.difficultyStackHeight != 0 && currentObject !is Slider) {
                 continue
             }
 
@@ -247,11 +261,14 @@ class BeatmapProcessor(
                 //
                 // Reference: https://github.com/ppy/osu/pull/24188
                 if (objects[j].position.getDistance(currentObject.position) < STACK_DISTANCE) {
-                    ++currentObject.stackHeight
+                    ++currentObject.difficultyStackHeight
+                    ++currentObject.gameplayStackHeight
                     startTime = objects[j].startTime
                 } else if (objects[j].position.getDistance(currentObject.getEndPosition()) < STACK_DISTANCE) {
                     // Case for sliders - bump notes down and right, rather than up and left.
-                    objects[j].stackHeight -= ++sliderStack
+                    ++sliderStack
+                    objects[j].difficultyStackHeight -= sliderStack
+                    objects[j].gameplayStackHeight -= sliderStack
                     startTime = objects[j].startTime
                 }
             }

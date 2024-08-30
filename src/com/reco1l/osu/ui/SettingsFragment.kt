@@ -221,11 +221,12 @@ class SettingsFragment : com.edlplan.ui.fragment.SettingsFragment() {
         Section.Library -> {
             findPreference<Preference>("clear")!!.setOnPreferenceClickListener {
                 LibraryManager.clearDatabase()
+                ToastLogger.showText(StringTable.get(R.string.message_lib_cleared), true)
                 true
             }
 
             findPreference<Preference>("clear_properties")!!.setOnPreferenceClickListener {
-                DatabaseManager.beatmapOptionsTable.clearOptions()
+                DatabaseManager.beatmapOptionsTable.deleteAll()
                 true
             }
         }
@@ -256,7 +257,13 @@ class SettingsFragment : com.edlplan.ui.fragment.SettingsFragment() {
 
         Section.Graphics -> Unit
         Section.Audio -> Unit
-        Section.Input -> Unit
+
+        Section.Input -> {
+            findPreference<Preference>("block_areas")!!.setOnPreferenceClickListener {
+                BlockAreaFragment().show(true)
+                true
+            }
+        }
 
         Section.Player -> {
 

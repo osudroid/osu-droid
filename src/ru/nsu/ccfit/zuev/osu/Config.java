@@ -9,7 +9,6 @@ import android.util.DisplayMetrics;
 
 import androidx.preference.PreferenceManager;
 
-import com.edlplan.favorite.FavoriteLibrary;
 import com.edlplan.framework.math.FMath;
 import com.google.firebase.messaging.FirebaseMessaging;
 
@@ -68,7 +67,6 @@ public class Config {
         forceRomanized,
         fixFrameOffset,
         removeSliderLock,
-        calculateSliderPathInGameStart,
         displayScoreStatistics,
         hideReplayMarquee,
         hideInGameUI,
@@ -117,7 +115,7 @@ public class Config {
         showAverageOffset = prefs.getBoolean("averageOffset", true);
         showUnstableRate = prefs.getBoolean("unstableRate", true);
         errorMeter = Integer.parseInt(prefs.getString("errormeter", "0"));
-        spinnerStyle = Integer.parseInt(prefs.getString("spinnerstyle", "0"));
+        spinnerStyle = Integer.parseInt(prefs.getString("spinnerstyle", "1"));
         showFirstApproachCircle = prefs.getBoolean("showfirstapproachcircle", false);
         metronomeSwitch = Integer.parseInt(prefs.getString("metronomeswitch", "1"));
         showScoreboard = prefs.getBoolean("showscoreboard", true);
@@ -212,7 +210,6 @@ public class Config {
         enablePP = false;//prefs.getBoolean("enablePP",true);
         fixFrameOffset = prefs.getBoolean("fixFrameOffset", true);
         removeSliderLock = prefs.getBoolean("removeSliderLock", false);
-        calculateSliderPathInGameStart = prefs.getBoolean("calculateSliderPathInGameStart", false);
         displayScoreStatistics = prefs.getBoolean("displayScoreStatistics", false);
         hideReplayMarquee = prefs.getBoolean("hideReplayMarquee", false);
         hideInGameUI = prefs.getBoolean("hideInGameUI", false);
@@ -244,7 +241,6 @@ public class Config {
         }
 
         loadOnlineConfig(context);
-        FavoriteLibrary.get().load();
     }
 
     public static void loadOnlineConfig(final Context context) {
@@ -288,10 +284,6 @@ public class Config {
     public static boolean isRemoveSliderLock() {
         //noinspection DataFlowIssue
         return Multiplayer.isConnected() ? Multiplayer.room.getGameplaySettings().isRemoveSliderLock() : removeSliderLock;
-    }
-
-    public static boolean isCalculateSliderPathInGameStart() {
-        return calculateSliderPathInGameStart;
     }
 
     public static boolean isDisplayScoreStatistics() {
