@@ -292,21 +292,21 @@ public class BeatmapSetItem {
         visible = false;
     }
 
-    private boolean visibleBeatmap(BeatmapInfo beatmap, String key, String opt, String value) {
+    private boolean visibleBeatmap(BeatmapInfo beatmapInfo, String key, String opt, String value) {
         switch (key) {
             case "ar":
-                return calOpt(beatmap.getApproachRate(), Float.parseFloat(value), opt);
+                return calOpt(beatmapInfo.getApproachRate(), Float.parseFloat(value), opt);
             case "od":
-                return calOpt(beatmap.getOverallDifficulty(), Float.parseFloat(value), opt);
+                return calOpt(beatmapInfo.getOverallDifficulty(), Float.parseFloat(value), opt);
             case "cs":
-                return calOpt(beatmap.getCircleSize(), Float.parseFloat(value), opt);
+                return calOpt(beatmapInfo.getCircleSize(), Float.parseFloat(value), opt);
             case "hp":
-                return calOpt(beatmap.getHpDrainRate(), Float.parseFloat(value), opt);
+                return calOpt(beatmapInfo.getHpDrainRate(), Float.parseFloat(value), opt);
             case "droidstar":
-                return calOpt(beatmap.getDroidStarRating(), Float.parseFloat(value), opt);
+                return calOpt(beatmapInfo.getStarRating(DifficultyAlgorithm.droid), Float.parseFloat(value), opt);
             case "standardstar":
             case "star":
-                return calOpt(beatmap.getStandardStarRating(), Float.parseFloat(value), opt);
+                return calOpt(beatmapInfo.getStarRating(DifficultyAlgorithm.standard), Float.parseFloat(value), opt);
             default:
                 return false;
         }
@@ -401,11 +401,7 @@ public class BeatmapSetItem {
     public void reloadBeatmaps() {
         if (beatmapId == -1) {
             // Tracks are originally sorted by osu!droid difficulty, so for osu!standard difficulty they need to be sorted again.
-            if (Config.getDifficultyAlgorithm() == DifficultyAlgorithm.standard) {
-                Collections.sort(beatmapSetInfo.getBeatmaps(), (o1, o2) -> Float.compare(o1.getStandardStarRating(), o2.getStandardStarRating()));
-            } else {
-                Collections.sort(beatmapSetInfo.getBeatmaps(), (o1, o2) -> Float.compare(o1.getDroidStarRating(), o2.getDroidStarRating()));
-            }
+            Collections.sort(beatmapSetInfo.getBeatmaps(), (o1, o2) -> Float.compare(o1.getStarRating(), o2.getStarRating()));
 
             var selectedBeatmap = selectedBeatmapItem != null ? selectedBeatmapItem.getBeatmapInfo() : null;
 
@@ -428,11 +424,7 @@ public class BeatmapSetItem {
     private void initBeatmaps() {
         if (beatmapId == -1) {
             // Tracks are originally sorted by osu!droid difficulty, so for osu!standard difficulty they need to be sorted again.
-            if (Config.getDifficultyAlgorithm() == DifficultyAlgorithm.standard) {
-                Collections.sort(beatmapSetInfo.getBeatmaps(), (o1, o2) -> Float.compare(o1.getStandardStarRating(), o2.getStandardStarRating()));
-            } else {
-                Collections.sort(beatmapSetInfo.getBeatmaps(), (o1, o2) -> Float.compare(o1.getDroidStarRating(), o2.getDroidStarRating()));
-            }
+            Collections.sort(beatmapSetInfo.getBeatmaps(), (o1, o2) -> Float.compare(o1.getStarRating(), o2.getStarRating()));
 
             for (int i = 0; i < beatmapItems.length; i++) {
                 beatmapItems[i] = SongMenuPool.getInstance().newBeatmapItem();

@@ -4,10 +4,12 @@ import androidx.room.*
 import com.reco1l.toolkt.kotlin.fastForEach
 import com.rian.osu.difficulty.BeatmapDifficultyCalculator
 import ru.nsu.ccfit.zuev.osu.Config
+import ru.nsu.ccfit.zuev.osu.DifficultyAlgorithm
+import ru.nsu.ccfit.zuev.osu.DifficultyAlgorithm.*
 import ru.nsu.ccfit.zuev.osu.game.GameHelper
 import kotlin.math.max
 import kotlin.math.min
-import com.rian.osu.beatmap.Beatmap as RianBeatmap
+import com.rian.osu.beatmap.Beatmap
 
 
 /// Ported from rimu! project
@@ -34,22 +36,22 @@ data class BeatmapInfo(
      * The beatmap MD5.
      */
     @get:JvmName("getMD5")
-    val md5: String,
+    var md5: String,
 
     /**
      * The beatmap ID.
      */
-    val id: Long?,
+    var id: Long?,
 
     /**
      * The audio filename.
      */
-    val audioFilename: String,
+    var audioFilename: String,
 
     /**
      * The background filename.
      */
-    val backgroundFilename: String?,
+    var backgroundFilename: String?,
 
 
     // Online
@@ -57,7 +59,7 @@ data class BeatmapInfo(
     /**
      * The beatmap ranked status.
      */
-    val status: Int?,
+    var status: Int?,
 
 
     // Parent set
@@ -65,12 +67,12 @@ data class BeatmapInfo(
     /**
      * The beatmap set directory relative to [Config.getBeatmapPath].
      */
-    val setDirectory: String,
+    var setDirectory: String,
 
     /**
      * The beatmap set ID.
      */
-    val setId: Int?,
+    var setId: Int?,
 
 
     // Metadata
@@ -78,47 +80,47 @@ data class BeatmapInfo(
     /**
      * The title.
      */
-    val title: String,
+    var title: String,
 
     /**
      * The title in unicode.
      */
-    val titleUnicode: String,
+    var titleUnicode: String,
 
     /**
      * The artist.
      */
-    val artist: String,
+    var artist: String,
 
     /**
      * The artist in unicode.
      */
-    val artistUnicode: String,
+    var artistUnicode: String,
 
     /**
      * The beatmap creator.
      */
-    val creator: String,
+    var creator: String,
 
     /**
      * The beatmap version.
      */
-    val version: String,
+    var version: String,
 
     /**
      * The beatmap tags.
      */
-    val tags: String,
+    var tags: String,
 
     /**
      * The beatmap source.
      */
-    val source: String,
+    var source: String,
 
     /**
      * The date when the beatmap has been imported
      */
-    val dateImported: Long,
+    var dateImported: Long,
 
 
     // Cached difficulty
@@ -126,72 +128,74 @@ data class BeatmapInfo(
     /**
      * The approach rate.
      */
-    val approachRate: Float,
+    var approachRate: Float,
 
     /**
      * The overall difficulty.
      */
-    val overallDifficulty: Float,
+    var overallDifficulty: Float,
 
     /**
      * The circle size.
      */
-    val circleSize: Float,
+    var circleSize: Float,
 
     /**
      * The HP drain rate
      */
-    val hpDrainRate: Float,
+    var hpDrainRate: Float,
 
     /**
      * The cached osu!droid star rating.
+     * Do not use this value directly, use [getStarRating] instead.
      */
-    val droidStarRating: Float,
+    var droidStarRating: Float?,
 
     /**
      * The cached osu!std star rating.
+     * Do not use this value directly, use [getStarRating] instead.
      */
-    val standardStarRating: Float,
+    var standardStarRating: Float?,
 
     /**
      * The max BPM.
      */
-    val bpmMax: Float,
+    var bpmMax: Float,
 
     /**
      * The min BPM.
      */
-    val bpmMin: Float,
+    var bpmMin: Float,
 
     /**
      * The total length of the beatmap.
      */
-    val length: Long,
+    var length: Long,
 
     /**
      * The preview time.
      */
-    val previewTime: Int,
+    var previewTime: Int,
 
     /**
      * The hit circle count.
      */
-    val hitCircleCount: Int,
+    var hitCircleCount: Int,
 
     /**
      * The slider count.
      */
-    val spinnerCount: Int,
+    var spinnerCount: Int,
 
     /**
      * The spinner count.
      */
-    val sliderCount: Int,
+    var sliderCount: Int,
 
     /**
      * The max combo.
      */
-    val maxCombo: Int
+    var maxCombo: Int
 
 ) {
 
@@ -233,13 +237,64 @@ data class BeatmapInfo(
     val artistText
         get() = if (Config.isForceRomanized()) artist else artistUnicode.takeUnless { it.isBlank() } ?: artist
 
+    /**
+     * Whether the beatmap needs a difficulty calculation.
+     */
+    val needsDifficultyCalculation
+        get() = droidStarRating == null || standardStarRating == null
 
+
+    /**
+     * Returns the star rating based on the current algorithm configuration, whether droid or standard.
+     * Optionally, you can pass a custom algorithm to get the star rating.
+     *
+     * Returns 0 if the star rating has not been calculated.
+     */
+    @JvmOverloads
+    fun getStarRating(algorithm: DifficultyAlgorithm = Config.getDifficultyAlgorithm()) = when(algorithm) {
+        droid -> droidStarRating ?: 0f
+        standard -> standardStarRating ?: 0f
+    }
+
+    fun apply(b: BeatmapInfo) {
+        md5 = b.md5
+        id = b.id
+        audioFilename = b.audioFilename
+        backgroundFilename = b.backgroundFilename
+        status = b.status
+        setDirectory = b.setDirectory
+        setId = b.setId
+        title = b.title
+        titleUnicode = b.titleUnicode
+        artist = b.artist
+        artistUnicode = b.artistUnicode
+        creator = b.creator
+        version = b.version
+        tags = b.tags
+        source = b.source
+        dateImported = b.dateImported
+        approachRate = b.approachRate
+        overallDifficulty = b.overallDifficulty
+        circleSize = b.circleSize
+        hpDrainRate = b.hpDrainRate
+        droidStarRating = b.droidStarRating
+        standardStarRating = b.standardStarRating
+        bpmMax = b.bpmMax
+        bpmMin = b.bpmMin
+        length = b.length
+        previewTime = b.previewTime
+        hitCircleCount = b.hitCircleCount
+        sliderCount = b.sliderCount
+        spinnerCount = b.spinnerCount
+        maxCombo = b.maxCombo
+
+    }
 }
 
 /**
  * Represents a beatmap information.
  */
-fun BeatmapInfo(data: RianBeatmap, lastModified: Long): BeatmapInfo {
+fun BeatmapInfo(data: Beatmap, lastModified: Long, calculateDifficulty: Boolean): BeatmapInfo {
 
     var bpmMin = Float.MAX_VALUE
     var bpmMax = 0f
@@ -253,8 +308,16 @@ fun BeatmapInfo(data: RianBeatmap, lastModified: Long): BeatmapInfo {
         bpmMax = if (bpmMax != 0f) max(bpmMax, bpm) else bpm
     }
 
-    val droidAttributes = BeatmapDifficultyCalculator.calculateDroidDifficulty(data)
-    val standardAttributes = BeatmapDifficultyCalculator.calculateStandardDifficulty(data)
+    var droidStarRating: Float? = null
+    var standardStarRating: Float? = null
+
+    if (calculateDifficulty) {
+        val droidAttributes = BeatmapDifficultyCalculator.calculateDroidDifficulty(data)
+        val standardAttributes = BeatmapDifficultyCalculator.calculateStandardDifficulty(data)
+
+        droidStarRating = GameHelper.Round(droidAttributes.starRating, 2)
+        standardStarRating = GameHelper.Round(standardAttributes.starRating, 2)
+    }
 
     return BeatmapInfo(
 
@@ -289,8 +352,8 @@ fun BeatmapInfo(data: RianBeatmap, lastModified: Long): BeatmapInfo {
         overallDifficulty = data.difficulty.od,
         circleSize = data.difficulty.cs,
         hpDrainRate = data.difficulty.hp,
-        droidStarRating = GameHelper.Round(droidAttributes.starRating, 2),
-        standardStarRating = GameHelper.Round(standardAttributes.starRating, 2),
+        droidStarRating = droidStarRating,
+        standardStarRating = standardStarRating,
         bpmMin = bpmMin,
         bpmMax = bpmMax,
         length = data.duration.toLong(),
@@ -305,16 +368,26 @@ fun BeatmapInfo(data: RianBeatmap, lastModified: Long): BeatmapInfo {
 @Dao interface IBeatmapInfoDAO {
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
-    fun insert(beatmapInfo: BeatmapInfo): Long
+    fun insertAll(beatmapInfo: List<BeatmapInfo>)
+
+    @Update(onConflict = OnConflictStrategy.REPLACE)
+    fun update(beatmapInfo: BeatmapInfo)
 
     @Query("DELETE FROM BeatmapInfo WHERE setDirectory = :directory")
     fun deleteBeatmapSet(directory: String)
 
+    @Query("DELETE FROM BeatmapInfo WHERE setDirectory IN (:directories)")
+    fun deleteAllBeatmapSets(directories: List<String>)
+
+    @Transaction
     @Query("SELECT DISTINCT setDirectory, setId FROM BeatmapInfo")
     fun getBeatmapSetList() : List<BeatmapSetInfo>
 
     @Query("SELECT DISTINCT setDirectory FROM BeatmapInfo")
     fun getBeatmapSetPaths() : List<String>
+
+    @Query("SELECT EXISTS(SELECT setDirectory FROM BeatmapInfo WHERE setDirectory = :directory LIMIT 1)")
+    fun isBeatmapSetImported(directory: String): Boolean
 
     @Query("DELETE FROM BeatmapInfo")
     fun deleteAll()

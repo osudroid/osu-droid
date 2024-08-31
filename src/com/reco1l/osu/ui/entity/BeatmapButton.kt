@@ -148,9 +148,7 @@ class BeatmapButton : Sprite(0f, 0f, getResources().getTexture("menu-button-back
             return
         }
 
-        val difficulty =
-            if (Config.getDifficultyAlgorithm() == DifficultyAlgorithm.standard) getGlobal().selectedBeatmap!!.standardStarRating
-            else getGlobal().selectedBeatmap!!.droidStarRating
+        val difficulty = getGlobal().selectedBeatmap!!.getStarRating()
 
         stars.forEachIndexed { i, it ->
             it.isVisible = difficulty >= i

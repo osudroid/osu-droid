@@ -3,6 +3,8 @@ package ru.nsu.ccfit.zuev.osu;
 import static com.reco1l.osu.data.BeatmapsKt.BeatmapInfo;
 
 import android.util.Log;
+
+import com.reco1l.osu.DifficultyCalculationManager;
 import com.reco1l.osu.data.BeatmapSetInfo;
 import com.reco1l.osu.data.DatabaseManager;
 import com.reco1l.osu.graphics.VideoTexture;
@@ -30,6 +32,11 @@ public class LibraryManager {
     private static int currentIndex = 0;
 
     private static boolean isCaching = true;
+
+
+    private static final ArrayList<BeatmapInfo> pendingBeatmaps = new ArrayList<>();
+
+    private static final Object mutex = new Object();
 
 
     private LibraryManager() {
@@ -70,6 +77,8 @@ public class LibraryManager {
 
         currentIndex = 0;
         library = DatabaseManager.getBeatmapInfoTable().getBeatmapSetList();
+
+        DifficultyCalculationManager.calculateDifficulties();
     }
 
     /**
@@ -81,22 +90,22 @@ public class LibraryManager {
             return;
         }
 
-        var directory = new File(Config.getBeatmapPath());
-        var files = directory.listFiles();
+        var directories = new File(Config.getBeatmapPath()).listFiles(File::isDirectory);
 
-        if (files == null) {
+        if (directories == null) {
             return;
         }
 
-        new LibraryDatabaseManager(files.length, files).start();
+        new LibraryDatabaseManager(directories).start();
 
         // Wait for all threads to finish
         while (isCaching) {
-            try {
-                Thread.currentThread().wait();
-            } catch (InterruptedException e) {
-                Thread.currentThread().interrupt();
-                Log.e("LibraryManager", "Failed to wait for thread termination", e);
+            synchronized (mutex) {
+                try {
+                    mutex.wait();
+                } catch (InterruptedException e) {
+                    Log.e("LibraryManager", "Failed to wait for thread termination", e);
+                }
             }
         }
 
@@ -118,33 +127,36 @@ public class LibraryManager {
 
     private static void scanBeatmapSetFolder(File directory) {
 
-        var files = directory.listFiles((dir, name) -> name.endsWith(".osu"));
+        var osuFiles = directory.listFiles((dir, name) -> name.endsWith(".osu"));
 
-        if (files == null) {
+        if (osuFiles == null) {
+            if (Config.isDeleteUnimportedBeatmaps()) {
+                FilesKt.deleteRecursively(directory);
+            }
             return;
         }
 
         var beatmapsFound = 0;
 
-        for (var file : files) {
+        for (var osuFile : osuFiles) {
 
-            try (var parser = new BeatmapParser(file)) {
+            try (var parser = new BeatmapParser(osuFile)) {
 
-                var beatmap = parser.parse(true);
+                var data = parser.parse(false);
 
-                if (beatmap == null) {
+                if (data == null) {
                     if (Config.isDeleteUnimportedBeatmaps()) {
                         //noinspection ResultOfMethodCallIgnored
-                        file.delete();
+                        osuFile.delete();
                     }
                     continue;
                 }
 
-                var beatmapInfo = BeatmapInfo(beatmap, directory.lastModified());
+                var beatmapInfo = BeatmapInfo(data, directory.lastModified(), false);
 
-                if (beatmap.events.videoFilename != null && Config.isDeleteUnsupportedVideos()) {
+                if (data.events.videoFilename != null && Config.isDeleteUnsupportedVideos()) {
                     try {
-                        var videoFile = new File(beatmapInfo.getSetDirectory(), beatmap.events.videoFilename);
+                        var videoFile = new File(beatmapInfo.getSetDirectory(), data.events.videoFilename);
 
                         if (!VideoTexture.Companion.isSupportedVideo(videoFile)) {
                             //noinspection ResultOfMethodCallIgnored
@@ -155,14 +167,7 @@ public class LibraryManager {
                     }
                 }
 
-                try {
-                    // Conflict strategy is set to replace when the primary key is already in the
-                    // database. But that should never happen because the path is the primary key.
-                    DatabaseManager.getBeatmapInfoTable().insert(beatmapInfo);
-                } catch (Exception e) {
-                    Log.e("LibraryManager", "Failed to insert beatmap into database", e);
-                }
-
+                pendingBeatmaps.add(beatmapInfo);
                 beatmapsFound++;
             }
         }
@@ -254,108 +259,93 @@ public class LibraryManager {
     private static final class LibraryDatabaseManager {
 
 
-        private final File[] files;
-
-        private final List<String> savedPaths;
+        private final File[] directories;
 
         private final ExecutorService executors;
 
 
-        private int fileCount;
+        private int directoryCount;
 
         private int fileCached = 0;
 
 
-        private LibraryDatabaseManager(int fileCount, File[] files) {
+        private LibraryDatabaseManager(File[] directories) {
 
-            this.fileCount = fileCount;
-            this.files = files;
+            this.directories = directories;
+            this.directoryCount = directories.length;
             this.executors = Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors());
-            this.savedPaths = DatabaseManager.getBeatmapInfoTable().getBeatmapSetPaths();
         }
 
 
         public void start() {
 
-            int optimalChunkSize = (int) Math.ceil((double) fileCount / Runtime.getRuntime().availableProcessors());
+            int optimalChunkSize = (int) Math.ceil((double) directoryCount / Runtime.getRuntime().availableProcessors());
 
-            for (int i = 0; i < files.length; i += optimalChunkSize) {
-                submitToExecutor(Arrays.copyOfRange(files, i, Math.min(i + optimalChunkSize, files.length)));
+            for (int i = 0; i < directories.length; i += optimalChunkSize) {
+
+                var directoriesSlice = Arrays.copyOfRange(directories, i, Math.min(i + optimalChunkSize, directories.length));
+
+                executors.submit(() -> {
+
+                    for (int i1 = directoriesSlice.length - 1; i1 >= 0; i1--) {
+
+                        var directory = directoriesSlice[i1];
+
+                        if (DatabaseManager.getBeatmapInfoTable().isBeatmapSetImported(directory.getName())) {
+                            directoryCount--;
+                            continue;
+                        }
+
+                        GlobalManager.getInstance().setLoadingProgress(50 + 50 * fileCached / directoryCount);
+                        GlobalManager.getInstance().setInfo("Loading " + directory.getName() + "...");
+
+                        ToastLogger.setPercentage(fileCached * 100f / directoryCount);
+                        fileCached++;
+
+                        scanBeatmapSetFolder(directory);
+                    }
+                });
             }
 
             executors.shutdown();
 
             try {
-
                 if (executors.awaitTermination(1, TimeUnit.HOURS)) {
 
                     isCaching = false;
 
-                    synchronized (LibraryManager.class) {
-                        LibraryManager.class.notify();
+                    synchronized (mutex) {
+                        mutex.notify();
                     }
 
                 } else {
-                    Log.e("LibraryManager", "Timeout");
+                    Log.e("LibraryManager", "Timeout while waiting for executor termination.");
                 }
 
             } catch (InterruptedException e) {
-                Log.e("LibraryManager", "Failed to wait for executor termination", e);
+                Log.e("LibraryManager", "Failed while waiting for executor termination.", e);
             }
 
-            // Removing beatmap sets from the database that are not in the library anymore.
-            for (int i = savedPaths.size() - 1; i >= 0; i--) {
+            try {
+                DatabaseManager.getBeatmapInfoTable().insertAll(pendingBeatmaps);
+                pendingBeatmaps.clear();
+            } catch (Exception e) {
+                Log.e("LibraryManager", "Failed to insert beatmaps into database.", e);
+                return;
+            }
 
-                var path = savedPaths.get(i);
-                var found = false;
+            var missingDirectories = new ArrayList<>(DatabaseManager.getBeatmapInfoTable().getBeatmapSetPaths());
 
-                for (int j = files.length - 1; j >= 0; j--) {
+            for (var i = missingDirectories.size() - 1; i >= 0; i--) {
 
-                    if (path.equals(files[j].getPath())) {
-                        found = true;
-                        break;
-                    }
-                }
-
-                if (!found) {
-                    DatabaseManager.getBeatmapInfoTable().deleteBeatmapSet(path);
+                if (new File(Config.getBeatmapPath(), missingDirectories.get(i)).exists()) {
+                    missingDirectories.remove(i);
                 }
             }
-        }
 
-        private void submitToExecutor(File[] files) {
-
-            executors.submit(() -> {
-
-                for (int i = files.length - 1; i >= 0; i--) {
-                    var file = files[i];
-
-                    if (!file.isDirectory()) {
-                        continue;
-                    }
-
-                    var found = false;
-                    for (int j = savedPaths.size() - 1; j >= 0; j--) {
-                        if (savedPaths.get(j).equals(file.getPath())) {
-                            fileCount--;
-                            found = true;
-                            break;
-                        }
-                    }
-
-                    if (found) {
-                        continue;
-                    }
-
-                    GlobalManager.getInstance().setLoadingProgress(50 + 50 * fileCached / fileCount);
-                    GlobalManager.getInstance().setInfo("Loading " + file.getName() + "...");
-
-                    ToastLogger.setPercentage(fileCached * 100f / fileCount);
-                    fileCached++;
-
-                    scanBeatmapSetFolder(file);
-                }
-            });
+            if (!missingDirectories.isEmpty()) {
+                DatabaseManager.getBeatmapInfoTable().deleteAllBeatmapSets(missingDirectories);
+            }
         }
 
     }

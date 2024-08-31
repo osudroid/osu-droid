@@ -563,10 +563,7 @@ object RoomScene : Scene(), IRoomEventListener, IPlayerEventListener
                     else 
                         "%.1f-%.1f".format(beatmapInfo.bpmMin, beatmapInfo.bpmMax)
                 } 
-                CS: ${beatmapInfo.circleSize} AR: ${beatmapInfo.approachRate} OD: ${beatmapInfo.overallDifficulty} HP: ${beatmapInfo.hpDrainRate} Star Rating: ${
-                    if (Config.getDifficultyAlgorithm() == DifficultyAlgorithm.standard) beatmapInfo.standardStarRating
-                    else beatmapInfo.droidStarRating
-                }
+                CS: ${beatmapInfo.circleSize} AR: ${beatmapInfo.approachRate} OD: ${beatmapInfo.overallDifficulty} HP: ${beatmapInfo.hpDrainRate} Star Rating: ${beatmapInfo.getStarRating()}
             """.trimIndent()
 
             true

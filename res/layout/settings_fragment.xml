@@ -52,6 +52,7 @@
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:layout_marginLeft="32dp"
+            android:animateLayoutChanges="false"
             tools:ignore="NewApi" />
 
     </LinearLayout>
