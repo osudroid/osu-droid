@@ -82,7 +82,6 @@ object DatabaseManager {
             val oldPropertiesFile = File(context.filesDir, "properties")
 
             if (oldPropertiesFile.exists()) {
-
                 GlobalManager.getInstance().info = "Migrating beatmap properties..."
 
                 oldPropertiesFile.inputStream().use { fis ->
@@ -92,9 +91,9 @@ object DatabaseManager {
                         // Ignoring first object which is intended to be the version.
                         ois.readObject()
 
-                        val options = (ois.readObject() as Map<String, BeatmapProperties>).map { (path, properties) ->
+                        for ((path, properties) in ois.readObject() as Map<String, BeatmapProperties>) {
 
-                            BeatmapOptions(
+                            beatmapOptionsTable.insert(BeatmapOptions(
                                 setDirectory = path.let {
                                     if (it.endsWith('/')) {
                                         it.substring(0, it.length - 1).substringAfterLast('/')
@@ -104,15 +103,12 @@ object DatabaseManager {
                                 },
                                 isFavorite = properties.favorite,
                                 offset = properties.offset
-                            )
+                            ))
                         }
-
-                        beatmapOptionsTable.insertAll(options)
                     }
-
                 }
 
-                oldPropertiesFile.renameTo(File(context.filesDir, "properties.old"))
+                oldPropertiesFile.renameTo(File(context.filesDir, "properties_old"))
             }
 
         } catch (e: IOException) {
@@ -124,15 +120,15 @@ object DatabaseManager {
             val oldFavoritesFile = File(Config.getCorePath(), "json/favorites.json")
 
             if (oldFavoritesFile.exists()) {
+                GlobalManager.getInstance().info = "Migrating beatmap collections..."
 
                 val json = JSONObject(oldFavoritesFile.readText())
-
-                GlobalManager.getInstance().info = "Migrating beatmap collections..."
 
                 for (collectionName in json.keys()) {
                     beatmapCollectionsTable.insertCollection(collectionName)
 
                     for (beatmapPath in json.getJSONArray(collectionName)) {
+
                         beatmapCollectionsTable.addBeatmap(
                             collectionName = collectionName,
                             setDirectory = beatmapPath.toString().let {
@@ -146,7 +142,7 @@ object DatabaseManager {
                     }
                 }
 
-                oldFavoritesFile.renameTo(File(Config.getCorePath(), "json/favorites.oldjson"))
+                oldFavoritesFile.renameTo(File(Config.getCorePath(), "json/favorites_old.json"))
             }
 
         } catch (e: IOException) {
@@ -158,7 +154,6 @@ object DatabaseManager {
             val oldDatabaseFile = File(Config.getCorePath(), "databases/osudroid_test.db")
 
             if (oldDatabaseFile.exists()) {
-
                 GlobalManager.getInstance().info = "Migrating score table..."
 
                 DBOpenHelper.getOrCreate(context).use { helper ->
@@ -172,8 +167,15 @@ object DatabaseManager {
                             while (it.moveToNext()) {
 
                                 try {
+                                    val id = it.getInt(it.getColumnIndexOrThrow("id")).toLong()
+
+                                    if (scoreInfoTable.scoreExists(id)) {
+                                        pendingScores--
+                                        continue
+                                    }
+
                                     val scoreInfo = ScoreInfo(
-                                        id = it.getInt(it.getColumnIndexOrThrow("id")).toLong(),
+                                        id = id,
                                         // "filename" can contain the full path, so we need to extract both filename and directory name refers
                                         // to the beatmap set directory. The pattern could be `/beatmapSetDirectory/beatmapFilename/` with or
                                         // without the trailing slash.
@@ -218,7 +220,6 @@ object DatabaseManager {
                                     )
 
                                     scoreInfoTable.insertScore(scoreInfo)
-                                    db.rawQuery("DELETE FROM scores WHERE id = ${scoreInfo.id}", null)
                                     pendingScores--
 
                                 } catch (e: Exception) {
@@ -227,7 +228,7 @@ object DatabaseManager {
                             }
 
                             if (pendingScores <= 0) {
-                                oldDatabaseFile.renameTo(File(Config.getCorePath(), "databases/osudroid_test.olddb"))
+                                oldDatabaseFile.renameTo(File(Config.getCorePath(), "databases/osudroid_old.db"))
                             }
                         }
                     }

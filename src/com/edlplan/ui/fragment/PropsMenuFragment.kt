@@ -182,6 +182,6 @@ class PropsMenuFragment : BaseFragment(), IPropsMenu {
 
     fun saveProp() {
         item!!.isFavorite = beatmapProperties!!.isFavorite
-        DatabaseManager.beatmapOptionsTable.insert(beatmapProperties!!)
+        DatabaseManager.beatmapOptionsTable.update(beatmapProperties!!)
     }
 }

@@ -29,7 +29,7 @@ interface IBeatmapCollectionsDAO {
     @Query("SELECT name FROM BeatmapSetCollection")
     fun getCollections(): List<String>
 
-    @Query("INSERT INTO BeatmapSetCollection (name) VALUES (:name)")
+    @Query("INSERT OR IGNORE INTO BeatmapSetCollection (name) VALUES (:name)")
     fun insertCollection(name: String): Long
 
     @Query("DELETE FROM BeatmapSetCollection WHERE name = :name")
@@ -45,7 +45,7 @@ interface IBeatmapCollectionsDAO {
     @Query("SELECT setDirectory FROM BeatmapSetCollection_BeatmapSetInfo WHERE collectionName = :collectionName")
     fun getBeatmaps(collectionName: String): List<String>?
 
-    @Query("INSERT INTO BeatmapSetCollection_BeatmapSetInfo (collectionName, setDirectory) VALUES (:collectionName, :setDirectory)")
+    @Query("INSERT OR IGNORE INTO BeatmapSetCollection_BeatmapSetInfo (collectionName, setDirectory) VALUES (:collectionName, :setDirectory)")
     fun addBeatmap(collectionName: String, setDirectory: String): Long
 
     @Query("DELETE FROM BeatmapSetCollection_BeatmapSetInfo WHERE collectionName = :collectionName AND setDirectory = :setDirectory")
