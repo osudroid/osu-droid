@@ -118,7 +118,7 @@ public class SliderBody2D extends AbstractSliderBody {
 
          body.setColor(bodyColor.r() * colorDim, bodyColor.g() * colorDim, bodyColor.b() * colorDim);
          body.registerEntityModifier(Modifiers.sequence(
-            Modifiers.delay(dimDelaySec / GameHelper.getSpeedMultiplier()),
+            Modifiers.delay(dimDelaySec),
             Modifiers.color(0.1f / GameHelper.getSpeedMultiplier(),
                  body.getRed(), bodyColor.r(),
                  body.getGreen(), bodyColor.g(),
@@ -128,7 +128,7 @@ public class SliderBody2D extends AbstractSliderBody {
 
         border.setColor(borderColor.r() * colorDim, borderColor.g() * colorDim, borderColor.b() * colorDim);
         border.registerEntityModifier(Modifiers.sequence(
-            Modifiers.delay(dimDelaySec / GameHelper.getSpeedMultiplier()),
+            Modifiers.delay(dimDelaySec),
             Modifiers.color(0.1f / GameHelper.getSpeedMultiplier(),
                 border.getRed(), borderColor.r(),
                 border.getGreen(), borderColor.g(),
@@ -139,7 +139,7 @@ public class SliderBody2D extends AbstractSliderBody {
         if (hint != null) {
             hint.setColor(hintColor.r() * colorDim, hintColor.g() * colorDim, hintColor.b() * colorDim);
             hint.registerEntityModifier(Modifiers.sequence(
-                Modifiers.delay(dimDelaySec / GameHelper.getSpeedMultiplier()),
+                Modifiers.delay(dimDelaySec),
                 Modifiers.color(0.1f / GameHelper.getSpeedMultiplier(),
                     hint.getRed(), hintColor.r(),
                     hint.getGreen(), hintColor.g(),

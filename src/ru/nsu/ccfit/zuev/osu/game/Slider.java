@@ -327,7 +327,7 @@ public class Slider extends GameObject {
             isCircleDimming = true;
 
             // Source: https://github.com/peppy/osu/blob/60271fb0f7e091afb754455f93180094c63fc3fb/osu.Game.Rulesets.Osu/Objects/Drawables/DrawableOsuHitObject.cs#L101
-            var dimDelaySec = (float) beatmapSlider.timePreempt / 1000 - 0.4f;
+            var dimDelaySec = ((float) beatmapSlider.timePreempt / 1000f - objectHittableRange) / GameHelper.getSpeedMultiplier();
             var colorDim = 195f / 255f;
 
             applyCircleDimming(startCircle, startOverlay, dimDelaySec, comboColor);
@@ -335,7 +335,7 @@ public class Slider extends GameObject {
 
             number.setColor(colorDim, colorDim, colorDim);
             number.registerEntityModifier(Modifiers.sequence(
-                Modifiers.delay(dimDelaySec / GameHelper.getSpeedMultiplier()),
+                Modifiers.delay(dimDelaySec),
                 Modifiers.color(0.1f / GameHelper.getSpeedMultiplier(),
                     number.getRed(), 1f,
                     number.getGreen(), 1f,
@@ -345,7 +345,7 @@ public class Slider extends GameObject {
 
             endArrow.setColor(colorDim, colorDim, colorDim);
             endArrow.registerEntityModifier(Modifiers.sequence(
-                Modifiers.delay(dimDelaySec / GameHelper.getSpeedMultiplier()),
+                Modifiers.delay(dimDelaySec),
                 Modifiers.color(0.1f / GameHelper.getSpeedMultiplier(),
                     endArrow.getRed(), 1f,
                     endArrow.getGreen(), 1f,
@@ -368,7 +368,7 @@ public class Slider extends GameObject {
         // Circle requires special handling because it's tinted with combo color.
         circle.setColor(comboColor.r() * colorDim, comboColor.g() * colorDim, comboColor.b() * colorDim);
         circle.registerEntityModifier(Modifiers.sequence(
-            Modifiers.delay(dimDelaySec / GameHelper.getSpeedMultiplier()),
+            Modifiers.delay(dimDelaySec),
             Modifiers.color(0.1f / GameHelper.getSpeedMultiplier(),
                 circle.getRed(), comboColor.r(),
                 circle.getGreen(), comboColor.g(),
@@ -378,7 +378,7 @@ public class Slider extends GameObject {
 
         overlay.setColor(colorDim, colorDim, colorDim);
         overlay.registerEntityModifier(Modifiers.sequence(
-            Modifiers.delay(dimDelaySec / GameHelper.getSpeedMultiplier()),
+            Modifiers.delay(dimDelaySec),
             Modifiers.color(0.1f / GameHelper.getSpeedMultiplier(),
                 overlay.getRed(), 1f,
                 overlay.getGreen(), 1f,
