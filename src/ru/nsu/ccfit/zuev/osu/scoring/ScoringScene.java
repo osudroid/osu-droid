@@ -315,7 +315,7 @@ public class ScoringScene {
             perfect.setPosition(0, accuracy.getY() + accuracy.getHeight() + 10);
             scene.attachChild(perfect);
         }
-        if (beatmapInfo != null && retryBtn != null) {
+        if (beatmap != null && retryBtn != null) {
             retryBtn.setPosition(Config.getRES_WIDTH() - backBtn.getWidth() - 10, backBtn.getY() - retryBtn.getHeight() - 10);
             scene.attachChild(retryBtn);
         } else if (replay != null && replayBtn != null) {
@@ -324,7 +324,7 @@ public class ScoringScene {
         }
 
         scene.setTouchAreaBindingEnabled(true);
-        if (beatmapInfo != null && retryBtn != null) {
+        if (beatmap != null && retryBtn != null) {
             scene.registerTouchArea(retryBtn);
         } else if (replay != null && replayBtn != null) {
             scene.registerTouchArea(replayBtn);
