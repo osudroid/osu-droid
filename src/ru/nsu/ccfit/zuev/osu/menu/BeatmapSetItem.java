@@ -44,7 +44,7 @@ public class BeatmapSetItem {
     public BeatmapSetItem(final MenuItemListener listener, final BeatmapSetInfo beatmapSetInfo) {
         this.listener = new WeakReference<>(listener);
         this.beatmapSetInfo = beatmapSetInfo;
-        beatmapSetDir = beatmapSetInfo.getPath();
+        beatmapSetDir = beatmapSetInfo.getDirectory();
         bgHeight = ResourceManager.getInstance()
                 .getTexture("menu-button-background").getHeight()
                 - Utils.toRes(25);
@@ -66,7 +66,7 @@ public class BeatmapSetItem {
     public BeatmapSetItem(final MenuItemListener listener, final BeatmapSetInfo beatmapSetInfo, int id) {
         this.listener = new WeakReference<>(listener);
         this.beatmapSetInfo = beatmapSetInfo;
-        beatmapSetDir = this.beatmapSetInfo.getPath();
+        beatmapSetDir = this.beatmapSetInfo.getDirectory();
         bgHeight = ResourceManager.getInstance()
                 .getTexture("menu-button-background").getHeight()
                 - Utils.toRes(25);
@@ -210,7 +210,7 @@ public class BeatmapSetItem {
 
     public void applyFilter(final String filter, final boolean favs, List<String> limit) {
         if ((favs && !isFavorite())
-                || (limit != null && !limit.contains(beatmapSetDir))) {
+                || (limit != null && !limit.isEmpty() && !limit.contains(beatmapSetDir))) {
             //System.out.println(trackDir);
             if (selected) {
                 deselect();

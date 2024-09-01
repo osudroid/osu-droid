@@ -40,7 +40,7 @@ data class BeatmapSetInfo(
      * The absolute path.
      */
     val path
-        get() = "${Config.getBeatmapPath()}/${directory}"
+        get() = "${Config.getBeatmapPath()}${directory}"
 
 
     /**
