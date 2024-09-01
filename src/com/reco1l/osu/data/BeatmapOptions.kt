@@ -47,17 +47,3 @@ data class BeatmapOptions(
 
 }
 
-
-@Deprecated("This class is used to do legacy migration, should not be used and will be removed in future releases.")
-class BeatmapProperties : Serializable {
-
-    var offset = 0
-
-    var favorite = false
-
-    companion object {
-        @Serial
-        private const val serialVersionUID = -7229486402310659139L
-    }
-}
-
