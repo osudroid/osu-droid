@@ -83,8 +83,8 @@ class BlockAreaFragment : BaseFragment() {
                 width = 128f.dp,
                 height = 128f.dp
             )
+            blockArea.id = DatabaseManager.blockAreaTable.insert(blockArea)
             blockAreaItems.add(BlockAreaItem(blockArea, true))
-            DatabaseManager.blockAreaTable.insert(blockArea)
         }
 
         findViewById<View>(R.id.reset)!!.setOnClickListener {
