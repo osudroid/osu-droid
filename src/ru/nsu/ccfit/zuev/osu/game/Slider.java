@@ -48,7 +48,6 @@ public class Slider extends GameObject {
     private GameObjectListener listener;
     private CircleNumber number;
     private SliderPath path;
-    private float realTimePreempt;
     private double passedTime;
     private int completedSpanCount;
     private boolean reverse;
@@ -111,7 +110,6 @@ public class Slider extends GameObject {
         this.pos = beatmapSlider.getGameplayStackedPosition().toPointF();
         endsCombo = beatmapSlider.isLastInCombo();
         passedTime = secPassed - (float) beatmapSlider.startTime / 1000;
-        realTimePreempt = (float) beatmapSlider.timePreempt / 1000 / GameHelper.getSpeedMultiplier();
         slidingSamplesPlaying = false;
         path = sliderPath;
 
@@ -188,6 +186,7 @@ public class Slider extends GameObject {
             scene.attachChild(startArrow, 0);
         }
 
+        float realTimePreempt = (float) beatmapSlider.timePreempt / 1000 / GameHelper.getSpeedMultiplier();
         float fadeInDuration = (float) beatmapSlider.timeFadeIn / 1000 / GameHelper.getSpeedMultiplier();
 
         if (GameHelper.isHidden()) {
@@ -653,14 +652,15 @@ public class Slider extends GameObject {
 
         if (passedTime < 0) // we at approach time
         {
-            float gameTimePreempt = realTimePreempt * GameHelper.getSpeedMultiplier();
             if (startHit) {
                 // Hide the approach circle if the slider is already hit.
                 approachCircle.clearEntityModifiers();
                 approachCircle.setAlpha(0);
             }
 
-            float percentage = (float) (1 + passedTime / gameTimePreempt);
+            float timePreempt = (float) beatmapSlider.timePreempt / 1000;
+            float percentage = (float) (1 + passedTime / timePreempt);
+
             if (percentage <= 0.5f) {
                 // Following core doing a very cute show animation ^_^"
                 percentage = Math.min(1, percentage * 2);
@@ -689,7 +689,7 @@ public class Slider extends GameObject {
                     Utils.putSpriteAnchorCenter(position, endOverlay);
                     Utils.putSpriteAnchorCenter(position, endArrow);
                 }
-            } else if (percentage - dt / gameTimePreempt <= 0.5f) {
+            } else if (percentage - dt / timePreempt <= 0.5f) {
                 // Setting up positions of slider parts
                 for (int i = 0, size = tickSprites.size(); i < size; i++) {
                     tickSprites.get(i).setAlpha(1);
@@ -896,8 +896,8 @@ public class Slider extends GameObject {
 
         if (GameHelper.isHidden()) {
             // New duration from completed fade in to end (before fading out)
-            float realSliderDuration = (float) beatmapSlider.getDuration() / 1000 / GameHelper.getSpeedMultiplier();
-            float fadeOutDuration = realSliderDuration + realTimePreempt - fadeInDuration;
+            float fadeOutDuration = (float) (beatmapSlider.getDuration() + beatmapSlider.timePreempt) / 1000
+                / GameHelper.getSpeedMultiplier() - fadeInDuration;
 
             abstractSliderBody.applyFadeAdjustments(fadeInDuration, fadeOutDuration);
         } else {
