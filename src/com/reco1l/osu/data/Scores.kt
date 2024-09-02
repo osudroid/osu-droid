@@ -228,6 +228,9 @@ interface IScoreInfoDAO {
     @Insert(onConflict = OnConflictStrategy.ABORT)
     fun insertScore(score: ScoreInfo): Long
 
+    @Insert(onConflict = OnConflictStrategy.ABORT)
+    fun insertScores(scores: List<ScoreInfo>)
+
     @Query("DELETE FROM ScoreInfo WHERE id = :id")
     fun deleteScore(id: Int): Int
 

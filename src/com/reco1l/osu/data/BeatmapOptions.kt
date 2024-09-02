@@ -7,8 +7,6 @@ import androidx.room.OnConflictStrategy
 import androidx.room.PrimaryKey
 import androidx.room.Query
 import androidx.room.Update
-import java.io.Serial
-import java.io.Serializable
 
 @Entity
 data class BeatmapOptions(
@@ -38,6 +36,9 @@ data class BeatmapOptions(
 
     @Insert(onConflict = OnConflictStrategy.IGNORE)
     fun insert(options: BeatmapOptions)
+
+    @Insert(onConflict = OnConflictStrategy.IGNORE)
+    fun insertAll(options: List<BeatmapOptions>)
 
     @Update(onConflict = OnConflictStrategy.REPLACE)
     fun update(options: BeatmapOptions)
