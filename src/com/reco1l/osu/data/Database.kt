@@ -105,7 +105,7 @@ object DatabaseManager {
                             )
                         }
 
-                        beatmapOptionsTable.insert(*beatmapOptions.toTypedArray())
+                        beatmapOptionsTable.insertAll(beatmapOptions)
                     }
                 }
 

@@ -35,7 +35,10 @@ data class BeatmapOptions(
     fun getOptions(setDirectory: String): BeatmapOptions?
 
     @Insert(onConflict = OnConflictStrategy.IGNORE)
-    fun insert(vararg options: BeatmapOptions)
+    fun insert(options: BeatmapOptions)
+
+    @Insert(onConflict = OnConflictStrategy.IGNORE)
+    fun insertAll(options: List<BeatmapOptions>)
 
     @Update(onConflict = OnConflictStrategy.REPLACE)
     fun update(options: BeatmapOptions)
