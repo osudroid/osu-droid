@@ -12,12 +12,12 @@
         android:layout_height="match_parent"
         android:gravity="bottom"
         android:orientation="horizontal"
-        android:translationX="-350dp"
+        android:translationX="-450dp"
         tools:translationX="0dp">
 
         <ScrollView
             android:id="@+id/scrollView"
-            android:layout_width="350dp"
+            android:layout_width="450dp"
             android:layout_height="match_parent"
             android:background="#13131A"
             android:gravity="center|top"
@@ -92,6 +92,7 @@
                         android:layout_columnWeight="1"
                         android:paddingVertical="12dp"
                         android:saveEnabled="false"
+                        android:layout_gravity="fill"
                         android:text="@string/opt_enableStoryboard_title"
                         tools:checked="true" />
 
@@ -100,6 +101,7 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_columnWeight="1"
+                        android:layout_gravity="fill"
                         android:paddingVertical="12dp"
                         android:saveEnabled="false"
                         android:text="@string/opt_video_title" />
@@ -108,6 +110,7 @@
                         android:id="@+id/showScoreboard"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
+                        android:layout_gravity="fill"
                         android:layout_columnWeight="1"
                         android:paddingVertical="12dp"
                         android:saveEnabled="false"
