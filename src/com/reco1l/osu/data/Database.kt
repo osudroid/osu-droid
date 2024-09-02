@@ -4,6 +4,7 @@ import android.content.Context
 import android.util.Log
 import androidx.room.*
 import com.reco1l.toolkt.data.iterator
+import org.apache.commons.io.FilenameUtils
 import org.json.JSONObject
 import ru.nsu.ccfit.zuev.osu.*
 import ru.nsu.ccfit.zuev.osu.helper.sql.DBOpenHelper
@@ -87,19 +88,14 @@ object DatabaseManager {
 
                     ObjectInputStream(fis).use { ois ->
 
+                        val beatmapOptions = mutableListOf<BeatmapOptions>()
+
                         // Ignoring first object which is intended to be the version.
                         ois.readObject()
 
-                        val beatmapOptions = mutableListOf<BeatmapOptions>()
                         for ((path, properties) in ois.readObject() as Map<String, BeatmapProperties>) {
                             beatmapOptions += BeatmapOptions(
-                                setDirectory = path.let {
-                                    if (it.endsWith('/')) {
-                                        it.substring(0, it.length - 1).substringAfterLast('/')
-                                    } else {
-                                        it.substringAfterLast('/')
-                                    }
-                                },
+                                setDirectory = FilenameUtils.getName(FilenameUtils.normalizeNoEndSeparator(path)),
                                 isFavorite = properties.favorite,
                                 offset = properties.offset
                             )
@@ -132,13 +128,7 @@ object DatabaseManager {
 
                         beatmapCollectionsTable.addBeatmap(
                             collectionName = collectionName,
-                            setDirectory = beatmapPath.toString().let {
-                                if (it.endsWith('/')) {
-                                    it.substring(0, it.length - 1).substringAfterLast('/')
-                                } else {
-                                    it.substringAfterLast('/')
-                                }
-                            }
+                            setDirectory = FilenameUtils.getName(FilenameUtils.normalizeNoEndSeparator(beatmapPath.toString()))
                         )
                     }
                 }
@@ -174,35 +164,14 @@ object DatabaseManager {
                                     continue
                                 }
 
+                                val beatmapPath = FilenameUtils.normalizeNoEndSeparator(it.getString(it.getColumnIndexOrThrow("filename")))
+
                                 scoreInfos += ScoreInfo(
                                     id = id,
-                                    // "filename" can contain the full path, so we need to extract both filename and directory name refers
-                                    // to the beatmap set directory. The pattern could be `/beatmapSetDirectory/beatmapFilename/` with or
-                                    // without the trailing slash.
-                                    beatmapFilename = it.getString(it.getColumnIndexOrThrow("filename")).let { result ->
-                                        if (result.endsWith('/')) {
-                                            result.substring(0, result.length - 1).substringAfterLast('/')
-                                        } else {
-                                            result.substringAfterLast('/')
-                                        }
-                                    },
-                                    beatmapSetDirectory = it.getString(it.getColumnIndexOrThrow("filename")).let { result ->
-                                        if (result.endsWith('/')) {
-                                            result.substringBeforeLast('/').substringBeforeLast('/').substringAfterLast('/')
-                                        } else {
-                                            result.substringBeforeLast('/').substringAfterLast('/')
-                                        }
-                                    },
+                                    beatmapFilename = FilenameUtils.getName(beatmapPath),
+                                    beatmapSetDirectory = FilenameUtils.getName(beatmapPath.substringBeforeLast('/')),
                                     playerName = it.getString(it.getColumnIndexOrThrow("playername")),
-                                    replayFilename = it.getString(it.getColumnIndexOrThrow("replayfile")).let { result ->
-
-                                        // The old format used the full path, so we need to extract the file name.
-                                        if (result.endsWith('/')) {
-                                            result.substring(0, result.length - 1).substringAfterLast('/')
-                                        } else {
-                                            result.substringAfterLast('/')
-                                        }
-                                    },
+                                    replayFilename = FilenameUtils.getName(it.getString(it.getColumnIndexOrThrow("replayfile"))),
                                     mods = it.getString(it.getColumnIndexOrThrow("mode")),
                                     score = it.getInt(it.getColumnIndexOrThrow("score")),
                                     maxCombo = it.getInt(it.getColumnIndexOrThrow("combo")),
