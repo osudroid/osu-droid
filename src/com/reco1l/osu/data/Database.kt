@@ -90,9 +90,9 @@ object DatabaseManager {
                         // Ignoring first object which is intended to be the version.
                         ois.readObject()
 
+                        val beatmapOptions = mutableListOf<BeatmapOptions>()
                         for ((path, properties) in ois.readObject() as Map<String, BeatmapProperties>) {
-
-                            beatmapOptionsTable.insert(BeatmapOptions(
+                            beatmapOptions += BeatmapOptions(
                                 setDirectory = path.let {
                                     if (it.endsWith('/')) {
                                         it.substring(0, it.length - 1).substringAfterLast('/')
@@ -102,8 +102,10 @@ object DatabaseManager {
                                 },
                                 isFavorite = properties.favorite,
                                 offset = properties.offset
-                            ))
+                            )
                         }
+
+                        beatmapOptionsTable.insert(*beatmapOptions.toTypedArray())
                     }
                 }
 
@@ -163,6 +165,7 @@ object DatabaseManager {
 
                             var pendingScores = it.count
 
+                            val scoreInfos = mutableListOf<ScoreInfo>()
                             while (it.moveToNext()) {
 
                                 try {
@@ -173,7 +176,7 @@ object DatabaseManager {
                                         continue
                                     }
 
-                                    val scoreInfo = ScoreInfo(
+                                    scoreInfos += ScoreInfo(
                                         id = id,
                                         // "filename" can contain the full path, so we need to extract both filename and directory name refers
                                         // to the beatmap set directory. The pattern could be `/beatmapSetDirectory/beatmapFilename/` with or
@@ -218,13 +221,14 @@ object DatabaseManager {
 
                                     )
 
-                                    scoreInfoTable.insertScore(scoreInfo)
                                     pendingScores--
 
                                 } catch (e: Exception) {
                                     Log.e("ScoreLibrary", "Failed to import score from old database.", e)
                                 }
                             }
+
+                            scoreInfoTable.insertScores(scoreInfos)
 
                             if (pendingScores <= 0) {
                                 oldDatabaseFile.renameTo(File(Config.getCorePath(), "databases/osudroid_old.db"))
