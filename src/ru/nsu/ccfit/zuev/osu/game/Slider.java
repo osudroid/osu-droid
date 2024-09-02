@@ -374,7 +374,7 @@ public class Slider extends GameObject {
                 circle.getGreen(), comboColor.g(),
                 circle.getBlue(), comboColor.b()
             )
-        ).setOnFinished(entity -> isCircleDimming = true));
+        ).setOnFinished(entity -> isCircleDimming = false));
 
         overlay.setColor(colorDim, colorDim, colorDim);
         overlay.registerEntityModifier(Modifiers.sequence(
