@@ -157,82 +157,79 @@ object DatabaseManager {
             if (oldDatabaseFile.exists()) {
                 GlobalManager.getInstance().info = "Migrating score table..."
 
-                DBOpenHelper.getOrCreate(context).use { helper ->
+                DBOpenHelper.getOrCreate(context).writableDatabase.use { db ->
 
-                    helper.writableDatabase.use { db ->
+                    db.rawQuery("SELECT * FROM scores", null).use {
 
-                        db.rawQuery("SELECT * FROM scores", null).use {
+                        var pendingScores = it.count
 
-                            var pendingScores = it.count
+                        val scoreInfos = mutableListOf<ScoreInfo>()
+                        while (it.moveToNext()) {
 
-                            val scoreInfos = mutableListOf<ScoreInfo>()
-                            while (it.moveToNext()) {
+                            try {
+                                val id = it.getInt(it.getColumnIndexOrThrow("id")).toLong()
 
-                                try {
-                                    val id = it.getInt(it.getColumnIndexOrThrow("id")).toLong()
-
-                                    if (scoreInfoTable.scoreExists(id)) {
-                                        pendingScores--
-                                        continue
-                                    }
-
-                                    scoreInfos += ScoreInfo(
-                                        id = id,
-                                        // "filename" can contain the full path, so we need to extract both filename and directory name refers
-                                        // to the beatmap set directory. The pattern could be `/beatmapSetDirectory/beatmapFilename/` with or
-                                        // without the trailing slash.
-                                        beatmapFilename = it.getString(it.getColumnIndexOrThrow("filename")).let { result ->
-                                            if (result.endsWith('/')) {
-                                                result.substring(0, result.length - 1).substringAfterLast('/')
-                                            } else {
-                                                result.substringAfterLast('/')
-                                            }
-                                        },
-                                        beatmapSetDirectory = it.getString(it.getColumnIndexOrThrow("filename")).let { result ->
-                                            if (result.endsWith('/')) {
-                                                result.substringBeforeLast('/').substringBeforeLast('/').substringAfterLast('/')
-                                            } else {
-                                                result.substringBeforeLast('/').substringAfterLast('/')
-                                            }
-                                        },
-                                        playerName = it.getString(it.getColumnIndexOrThrow("playername")),
-                                        replayFilename = it.getString(it.getColumnIndexOrThrow("replayfile")).let { result ->
-
-                                            // The old format used the full path, so we need to extract the file name.
-                                            if (result.endsWith('/')) {
-                                                result.substring(0, result.length - 1).substringAfterLast('/')
-                                            } else {
-                                                result.substringAfterLast('/')
-                                            }
-                                        },
-                                        mods = it.getString(it.getColumnIndexOrThrow("mode")),
-                                        score = it.getInt(it.getColumnIndexOrThrow("score")),
-                                        maxCombo = it.getInt(it.getColumnIndexOrThrow("combo")),
-                                        mark = it.getString(it.getColumnIndexOrThrow("mark")),
-                                        hit300k = it.getInt(it.getColumnIndexOrThrow("h300k")),
-                                        hit300 = it.getInt(it.getColumnIndexOrThrow("h300")),
-                                        hit100k = it.getInt(it.getColumnIndexOrThrow("h100k")),
-                                        hit100 = it.getInt(it.getColumnIndexOrThrow("h100")),
-                                        hit50 = it.getInt(it.getColumnIndexOrThrow("h50")),
-                                        misses = it.getInt(it.getColumnIndexOrThrow("misses")),
-                                        accuracy = it.getFloat(it.getColumnIndexOrThrow("accuracy")),
-                                        time = it.getLong(it.getColumnIndexOrThrow("time")),
-                                        isPerfect = it.getInt(it.getColumnIndexOrThrow("perfect")) == 1
-
-                                    )
-
+                                if (scoreInfoTable.scoreExists(id)) {
                                     pendingScores--
-
-                                } catch (e: Exception) {
-                                    Log.e("ScoreLibrary", "Failed to import score from old database.", e)
+                                    continue
                                 }
-                            }
 
-                            scoreInfoTable.insertScores(scoreInfos)
+                                scoreInfos += ScoreInfo(
+                                    id = id,
+                                    // "filename" can contain the full path, so we need to extract both filename and directory name refers
+                                    // to the beatmap set directory. The pattern could be `/beatmapSetDirectory/beatmapFilename/` with or
+                                    // without the trailing slash.
+                                    beatmapFilename = it.getString(it.getColumnIndexOrThrow("filename")).let { result ->
+                                        if (result.endsWith('/')) {
+                                            result.substring(0, result.length - 1).substringAfterLast('/')
+                                        } else {
+                                            result.substringAfterLast('/')
+                                        }
+                                    },
+                                    beatmapSetDirectory = it.getString(it.getColumnIndexOrThrow("filename")).let { result ->
+                                        if (result.endsWith('/')) {
+                                            result.substringBeforeLast('/').substringBeforeLast('/').substringAfterLast('/')
+                                        } else {
+                                            result.substringBeforeLast('/').substringAfterLast('/')
+                                        }
+                                    },
+                                    playerName = it.getString(it.getColumnIndexOrThrow("playername")),
+                                    replayFilename = it.getString(it.getColumnIndexOrThrow("replayfile")).let { result ->
 
-                            if (pendingScores <= 0) {
-                                oldDatabaseFile.renameTo(File(Config.getCorePath(), "databases/osudroid_old.db"))
+                                        // The old format used the full path, so we need to extract the file name.
+                                        if (result.endsWith('/')) {
+                                            result.substring(0, result.length - 1).substringAfterLast('/')
+                                        } else {
+                                            result.substringAfterLast('/')
+                                        }
+                                    },
+                                    mods = it.getString(it.getColumnIndexOrThrow("mode")),
+                                    score = it.getInt(it.getColumnIndexOrThrow("score")),
+                                    maxCombo = it.getInt(it.getColumnIndexOrThrow("combo")),
+                                    mark = it.getString(it.getColumnIndexOrThrow("mark")),
+                                    hit300k = it.getInt(it.getColumnIndexOrThrow("h300k")),
+                                    hit300 = it.getInt(it.getColumnIndexOrThrow("h300")),
+                                    hit100k = it.getInt(it.getColumnIndexOrThrow("h100k")),
+                                    hit100 = it.getInt(it.getColumnIndexOrThrow("h100")),
+                                    hit50 = it.getInt(it.getColumnIndexOrThrow("h50")),
+                                    misses = it.getInt(it.getColumnIndexOrThrow("misses")),
+                                    accuracy = it.getFloat(it.getColumnIndexOrThrow("accuracy")),
+                                    time = it.getLong(it.getColumnIndexOrThrow("time")),
+                                    isPerfect = it.getInt(it.getColumnIndexOrThrow("perfect")) == 1
+
+                                )
+
+                                pendingScores--
+
+                            } catch (e: Exception) {
+                                Log.e("ScoreLibrary", "Failed to import score from old database.", e)
                             }
+                        }
+
+                        scoreInfoTable.insertScores(scoreInfos)
+
+                        if (pendingScores <= 0) {
+                            oldDatabaseFile.renameTo(File(Config.getCorePath(), "databases/osudroid_old.db"))
                         }
                     }
 
