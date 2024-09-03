@@ -714,7 +714,7 @@ public class Slider extends GameObject {
                     }
 
                     currentNestedObjectIndex++;
-                } else {
+                } else if (Config.isShakeHitObjects()) {
                     applyShakeAnimations();
                 }
             }
@@ -1055,7 +1055,7 @@ public class Slider extends GameObject {
                 }
 
                 currentNestedObjectIndex++;
-            } else {
+            } else if (Config.isShakeHitObjects()) {
                 applyShakeAnimations();
             }
         }

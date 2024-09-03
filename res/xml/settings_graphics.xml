@@ -32,6 +32,12 @@
 
         <CheckBoxPreference
             android:defaultValue="true"
+            android:key="shakeHitObjects"
+            android:summary="@string/setting_shake_hit_objects_summary"
+            android:title="@string/setting_shake_hit_objects_title" />
+
+        <CheckBoxPreference
+            android:defaultValue="true"
             android:key="dimHitObjects"
             android:summary="@string/setting_dim_hit_objects_summary"
             android:title="@string/setting_dim_hit_objects_title" />

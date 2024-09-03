@@ -80,7 +80,8 @@ public class Config {
         submitScoreOnMultiplayer,
         keepBackgroundAspectRatio,
         noChangeDimInBreaks,
-        dimHitObjects;
+        dimHitObjects,
+        shakeHitObjects;
 
     private static int RES_WIDTH,
         RES_HEIGHT,
@@ -125,6 +126,7 @@ public class Config {
         keepBackgroundAspectRatio = prefs.getBoolean("keepBackgroundAspectRatio", false);
         noChangeDimInBreaks = prefs.getBoolean("noChangeDimInBreaks", false);
         dimHitObjects = prefs.getBoolean("dimHitObjects", true);
+        shakeHitObjects = prefs.getBoolean("shakeHitObjects", false);
 
         setSize();
         setPlayfieldSize(prefs.getInt("playfieldSize", 100) / 100f);
@@ -794,5 +796,9 @@ public class Config {
 
     public static boolean isDimHitObjects() {
         return dimHitObjects;
+    }
+
+    public static boolean isShakeHitObjects() {
+        return shakeHitObjects;
     }
 }

@@ -291,10 +291,7 @@ public class HitCircle extends GameObject {
                 startHit = true;
                 listener.onCircleHit(id, finalSignAcc, pos, endsCombo, (byte) 0, comboColor);
                 removeFromScene();
-            } else {
-
-                var modifier = Modifiers.shakeHorizontal(0.32f / GameHelper.getSpeedMultiplier(), circle.getX(), 8f);
-
+            } else if (Config.isShakeHitObjects()) {
                 circle.registerEntityModifier(Modifiers.shakeHorizontal(0.32f / GameHelper.getSpeedMultiplier(), circle.getX(), 8f));
                 overlay.registerEntityModifier(Modifiers.shakeHorizontal(0.32f / GameHelper.getSpeedMultiplier(), overlay.getX(), 8f));
                 number.registerEntityModifier(Modifiers.shakeHorizontal(0.32f / GameHelper.getSpeedMultiplier(), number.getX(), 8f));
