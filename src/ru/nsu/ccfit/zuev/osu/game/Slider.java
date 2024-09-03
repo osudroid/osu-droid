@@ -367,13 +367,14 @@ public class Slider extends GameObject {
         // Circle requires special handling because it's tinted with combo color.
         circle.setColor(comboColor.r() * colorDim, comboColor.g() * colorDim, comboColor.b() * colorDim);
         circle.registerEntityModifier(Modifiers.sequence(
+            entity -> isCircleDimming = false,
             Modifiers.delay(dimDelaySec),
             Modifiers.color(0.1f / GameHelper.getSpeedMultiplier(),
                 circle.getRed(), comboColor.r(),
                 circle.getGreen(), comboColor.g(),
                 circle.getBlue(), comboColor.b()
             )
-        ).setOnFinished(entity -> isCircleDimming = false));
+        ));
 
         overlay.setColor(colorDim, colorDim, colorDim);
         overlay.registerEntityModifier(Modifiers.sequence(
@@ -470,7 +471,7 @@ public class Slider extends GameObject {
             }
         }
 
-        ball.registerEntityModifier(Modifiers.fadeOut(0.1f / GameHelper.getSpeedMultiplier()).setOnFinished(entity -> {
+        ball.registerEntityModifier(Modifiers.fadeOut(0.1f / GameHelper.getSpeedMultiplier(), entity -> {
             Execution.updateThread(entity::detachSelf);
         }));
 
@@ -626,18 +627,16 @@ public class Slider extends GameObject {
             isFollowCircleAnimating = true;
 
             followCircle.clearEntityModifiers();
-            followCircle.registerEntityModifier(Modifiers.scale(0.2f / GameHelper.getSpeedMultiplier(), followCircle.getScaleX(), followCircle.getScaleX() * 0.8f).setEaseFunction(EaseQuadOut.getInstance()));
-            followCircle.registerEntityModifier(
-                Modifiers.alpha(0.2f / GameHelper.getSpeedMultiplier(), followCircle.getAlpha(), 0f).setOnFinished(entity -> {
-                    Execution.updateThread(() -> {
-                        entity.detachSelf();
-                        // We can pool the hit object once all animations are finished.
-                        // The follow circle animation is the last one to finish if it's enabled.
-                        poolObject();
-                    });
-                    isFollowCircleAnimating = false;
-                })
-            );
+            followCircle.registerEntityModifier(Modifiers.scale(0.2f / GameHelper.getSpeedMultiplier(), followCircle.getScaleX(), followCircle.getScaleX() * 0.8f, null, EaseQuadOut.getInstance()));
+            followCircle.registerEntityModifier(Modifiers.alpha(0.2f / GameHelper.getSpeedMultiplier(), followCircle.getAlpha(), 0f, entity -> {
+                Execution.updateThread(() -> {
+                    entity.detachSelf();
+                    // We can pool the hit object once all animations are finished.
+                    // The follow circle animation is the last one to finish if it's enabled.
+                    poolObject();
+                });
+                isFollowCircleAnimating = false;
+            }));
         }
 
         removeFromScene();
@@ -871,11 +870,7 @@ public class Slider extends GameObject {
 
                 followCircle.clearEntityModifiers();
                 followCircle.registerEntityModifier(Modifiers.alpha(Math.min(remainTime, 0.06f / GameHelper.getSpeedMultiplier()), followCircle.getAlpha(), 1f));
-                followCircle.registerEntityModifier(
-                    Modifiers.scale(Math.min(remainTime, 0.18f / GameHelper.getSpeedMultiplier()), initialScale, scale)
-                        .setEaseFunction(EaseQuadOut.getInstance())
-                        .setOnFinished(entity -> isFollowCircleAnimating = false)
-                );
+                followCircle.registerEntityModifier(Modifiers.scale(Math.min(remainTime, 0.18f / GameHelper.getSpeedMultiplier()), initialScale, scale, entity -> isFollowCircleAnimating = false, EaseQuadOut.getInstance()));
             } else if (!inRadius && isInRadius) {
                 isInRadius = false;
                 isFollowCircleAnimating = true;
@@ -883,14 +878,12 @@ public class Slider extends GameObject {
 
                 followCircle.clearEntityModifiers();
                 followCircle.registerEntityModifier(Modifiers.scale(0.1f / GameHelper.getSpeedMultiplier(), followCircle.getScaleX(), scale * 2f));
-                followCircle.registerEntityModifier(
-                    Modifiers.alpha(0.1f / GameHelper.getSpeedMultiplier(), followCircle.getAlpha(), 0f).setOnFinished(entity -> {
-                        if (isOver) {
-                            Execution.updateThread(entity::detachSelf);
-                        }
-                        isFollowCircleAnimating = false;
-                    })
-                );
+                followCircle.registerEntityModifier(Modifiers.alpha(0.1f / GameHelper.getSpeedMultiplier(), followCircle.getAlpha(), 0f, entity -> {
+                    if (isOver) {
+                        Execution.updateThread(entity::detachSelf);
+                    }
+                    isFollowCircleAnimating = false;
+                }));
             }
         } else {
             if (inRadius && !isInRadius) {
@@ -957,7 +950,7 @@ public class Slider extends GameObject {
 
                 if (Config.isAnimateFollowCircle() && !isFollowCircleAnimating) {
                     followCircle.clearEntityModifiers();
-                    followCircle.registerEntityModifier(Modifiers.scale((float) Math.min(tickInterval, 0.2f) / GameHelper.getSpeedMultiplier(), scale * 1.1f, scale).setEaseFunction(EaseQuadOut.getInstance()));
+                    followCircle.registerEntityModifier(Modifiers.scale((float) Math.min(tickInterval, 0.2f) / GameHelper.getSpeedMultiplier(), scale * 1.1f, scale, null, EaseQuadOut.getInstance()));
                 }
 
                 ticksGot++;

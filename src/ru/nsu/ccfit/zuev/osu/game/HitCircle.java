@@ -148,13 +148,14 @@ public class HitCircle extends GameObject {
             // Circle requires special handling because it's tinted with combo color.
             circle.setColor(comboColor.r() * colorDim, comboColor.g() * colorDim, comboColor.b() * colorDim);
             circle.registerEntityModifier(Modifiers.sequence(
+                entity -> isCircleDimming = false,
                 Modifiers.delay(dimDelaySec),
                 Modifiers.color(0.1f / GameHelper.getSpeedMultiplier(),
                     circle.getRed(), comboColor.r(),
                     circle.getGreen(), comboColor.g(),
                     circle.getBlue(), comboColor.b()
                 )
-            ).setOnFinished(entity -> isCircleDimming = false));
+            ));
 
             overlay.setColor(colorDim, colorDim, colorDim);
             overlay.registerEntityModifier(Modifiers.sequence(

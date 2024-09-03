@@ -103,8 +103,8 @@ public class ModernSpinner extends Spinner {
         float timePreempt = (float) beatmapSpinner.timePreempt / 1000 / GameHelper.getSpeedMultiplier();
 
         top.registerEntityModifier(Modifiers.sequence(
-            Modifiers.fadeIn(timePreempt).setOnFinished(entity -> spinnable = true),
-            Modifiers.delay(duration).setOnFinished(entity -> Execution.updateThread(this::removeFromScene))
+            Modifiers.fadeIn(timePreempt, entity -> spinnable = true),
+            Modifiers.delay(duration, entity -> Execution.updateThread(this::removeFromScene))
         ));
 
         bottom.registerEntityModifier(Modifiers.fadeIn(timePreempt));

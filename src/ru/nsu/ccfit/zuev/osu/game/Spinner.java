@@ -121,12 +121,13 @@ public class Spinner extends GameObject {
             approachCircle.setVisible(false);
         }
         approachCircle.registerEntityModifier(Modifiers.sequence(
+            entity -> Execution.updateThread(this::removeFromScene),
             Modifiers.delay(timePreempt),
             Modifiers.parallel(
                 Modifiers.alpha(duration, 0.75f, 1),
                 Modifiers.scale(duration, 2.0f, 0)
-            ).setOnFinished(entity -> Execution.updateThread(this::removeFromScene)))
-        );
+            )
+        ));
 
         spinText.setAlpha(0);
         spinText.registerEntityModifier(Modifiers.sequence(

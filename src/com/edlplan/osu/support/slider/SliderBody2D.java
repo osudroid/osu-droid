@@ -93,21 +93,21 @@ public class SliderBody2D extends AbstractSliderBody {
         if (body != null) {
             body.registerEntityModifier(Modifiers.sequence(
                     Modifiers.alpha(fadeInDuration, 0, sliderBodyBaseAlpha),
-                    Modifiers.alpha(fadeOutDuration, sliderBodyBaseAlpha, 0).setEaseFunction(easing)
+                    Modifiers.alpha(fadeOutDuration, sliderBodyBaseAlpha, 0, null, easing)
             ));
         }
 
         if (border != null) {
             border.registerEntityModifier(Modifiers.sequence(
                     Modifiers.fadeIn(fadeInDuration),
-                    Modifiers.fadeOut(fadeOutDuration).setEaseFunction(easing)
+                    Modifiers.fadeOut(fadeOutDuration, null, easing)
             ));
         }
 
         if (hint != null) {
             hint.registerEntityModifier(Modifiers.sequence(
                     Modifiers.alpha(fadeInDuration, 0, hintAlpha),
-                    Modifiers.alpha(fadeOutDuration, hintAlpha, 0).setEaseFunction(easing)
+                    Modifiers.alpha(fadeOutDuration, hintAlpha, 0, null, easing)
             ));
         }
     }
@@ -284,7 +284,7 @@ public class SliderBody2D extends AbstractSliderBody {
         }
 
         if (border != null) {
-            border.registerEntityModifier(Modifiers.fadeOut(duration).setOnFinished(entity -> {
+            border.registerEntityModifier(Modifiers.fadeOut(duration, entity -> {
                 Execution.updateThread(() -> {
                     removeFromScene(scene);
 

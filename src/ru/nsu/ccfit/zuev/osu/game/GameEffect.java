@@ -60,13 +60,13 @@ public class GameEffect extends GameObject {
             ((AnimSprite) hit).setAnimTime(0);
         }
         hit.setPosition(pos.x - hit.getTextureRegion().getWidth() / 2f, pos.y - hit.getTextureRegion().getHeight() / 2f);
-        hit.registerEntityModifier(Modifiers.parallel(entityModifiers).setOnFinished(entity -> {
+        hit.registerEntityModifier(Modifiers.parallel(entity -> {
             Execution.updateThread(() -> {
                 hit.detachSelf();
                 hit.clearEntityModifiers();
                 GameObjectPool.getInstance().putEffect(GameEffect.this);
             });
-        }));
+        }, entityModifiers));
         hit.setScale(scale);
         hit.setAlpha(1);
         hit.detachSelf();
