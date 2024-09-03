@@ -4,9 +4,9 @@ import android.content.Context
 import android.util.Log
 import androidx.room.*
 import com.reco1l.toolkt.data.iterator
+import org.apache.commons.io.FilenameUtils
 import org.json.JSONObject
-import ru.nsu.ccfit.zuev.osu.Config
-import ru.nsu.ccfit.zuev.osu.GlobalManager
+import ru.nsu.ccfit.zuev.osu.*
 import ru.nsu.ccfit.zuev.osu.helper.sql.DBOpenHelper
 import java.io.File
 import java.io.IOException
@@ -63,7 +63,7 @@ object DatabaseManager {
     fun load(context: Context) {
 
         // Be careful when changing the database name, it may cause data loss.
-        database = Room.databaseBuilder(context, DroidDatabase::class.java, DroidDatabase::class.simpleName)
+        database = Room.databaseBuilder(context, DroidDatabase::class.java, "${Config.getCorePath()}databases/room.db")
             // Is preferable to support migrations, otherwise destructive migration will run forcing
             // tables to recreate (in case of beatmaps table it'll re-import all beatmaps).
             // See https://developer.android.com/training/data-storage/room/migrating-db-versions.
@@ -88,23 +88,20 @@ object DatabaseManager {
 
                     ObjectInputStream(fis).use { ois ->
 
+                        val beatmapOptions = mutableListOf<BeatmapOptions>()
+
                         // Ignoring first object which is intended to be the version.
                         ois.readObject()
 
                         for ((path, properties) in ois.readObject() as Map<String, BeatmapProperties>) {
-
-                            beatmapOptionsTable.insert(BeatmapOptions(
-                                setDirectory = path.let {
-                                    if (it.endsWith('/')) {
-                                        it.substring(0, it.length - 1).substringAfterLast('/')
-                                    } else {
-                                        it.substringAfterLast('/')
-                                    }
-                                },
+                            beatmapOptions += BeatmapOptions(
+                                setDirectory = FilenameUtils.getName(FilenameUtils.normalizeNoEndSeparator(path)),
                                 isFavorite = properties.favorite,
                                 offset = properties.offset
-                            ))
+                            )
                         }
+
+                        beatmapOptionsTable.insertAll(beatmapOptions)
                     }
                 }
 
@@ -131,13 +128,7 @@ object DatabaseManager {
 
                         beatmapCollectionsTable.addBeatmap(
                             collectionName = collectionName,
-                            setDirectory = beatmapPath.toString().let {
-                                if (it.endsWith('/')) {
-                                    it.substring(0, it.length - 1).substringAfterLast('/')
-                                } else {
-                                    it.substringAfterLast('/')
-                                }
-                            }
+                            setDirectory = FilenameUtils.getName(FilenameUtils.normalizeNoEndSeparator(beatmapPath.toString()))
                         )
                     }
                 }
@@ -156,80 +147,58 @@ object DatabaseManager {
             if (oldDatabaseFile.exists()) {
                 GlobalManager.getInstance().info = "Migrating score table..."
 
-                DBOpenHelper.getOrCreate(context).use { helper ->
+                DBOpenHelper.getOrCreate(context).writableDatabase.use { db ->
 
-                    helper.writableDatabase.use { db ->
+                    db.rawQuery("SELECT * FROM scores", null).use {
 
-                        db.rawQuery("SELECT * FROM scores", null).use {
+                        var pendingScores = it.count
 
-                            var pendingScores = it.count
+                        val scoreInfos = mutableListOf<ScoreInfo>()
+                        while (it.moveToNext()) {
 
-                            while (it.moveToNext()) {
+                            try {
+                                val id = it.getInt(it.getColumnIndexOrThrow("id")).toLong()
 
-                                try {
-                                    val id = it.getInt(it.getColumnIndexOrThrow("id")).toLong()
-
-                                    if (scoreInfoTable.scoreExists(id)) {
-                                        pendingScores--
-                                        continue
-                                    }
-
-                                    val scoreInfo = ScoreInfo(
-                                        id = id,
-                                        // "filename" can contain the full path, so we need to extract both filename and directory name refers
-                                        // to the beatmap set directory. The pattern could be `/beatmapSetDirectory/beatmapFilename/` with or
-                                        // without the trailing slash.
-                                        beatmapFilename = it.getString(it.getColumnIndexOrThrow("filename")).let { result ->
-                                            if (result.endsWith('/')) {
-                                                result.substring(0, result.length - 1).substringAfterLast('/')
-                                            } else {
-                                                result.substringAfterLast('/')
-                                            }
-                                        },
-                                        beatmapSetDirectory = it.getString(it.getColumnIndexOrThrow("filename")).let { result ->
-                                            if (result.endsWith('/')) {
-                                                result.substringBeforeLast('/').substringBeforeLast('/').substringAfterLast('/')
-                                            } else {
-                                                result.substringBeforeLast('/').substringAfterLast('/')
-                                            }
-                                        },
-                                        playerName = it.getString(it.getColumnIndexOrThrow("playername")),
-                                        replayFilename = it.getString(it.getColumnIndexOrThrow("replayfile")).let { result ->
-
-                                            // The old format used the full path, so we need to extract the file name.
-                                            if (result.endsWith('/')) {
-                                                result.substring(0, result.length - 1).substringAfterLast('/')
-                                            } else {
-                                                result.substringAfterLast('/')
-                                            }
-                                        },
-                                        mods = it.getString(it.getColumnIndexOrThrow("mode")),
-                                        score = it.getInt(it.getColumnIndexOrThrow("score")),
-                                        maxCombo = it.getInt(it.getColumnIndexOrThrow("combo")),
-                                        mark = it.getString(it.getColumnIndexOrThrow("mark")),
-                                        hit300k = it.getInt(it.getColumnIndexOrThrow("h300k")),
-                                        hit300 = it.getInt(it.getColumnIndexOrThrow("h300")),
-                                        hit100k = it.getInt(it.getColumnIndexOrThrow("h100k")),
-                                        hit100 = it.getInt(it.getColumnIndexOrThrow("h100")),
-                                        hit50 = it.getInt(it.getColumnIndexOrThrow("h50")),
-                                        misses = it.getInt(it.getColumnIndexOrThrow("misses")),
-                                        accuracy = it.getFloat(it.getColumnIndexOrThrow("accuracy")),
-                                        time = it.getLong(it.getColumnIndexOrThrow("time")),
-                                        isPerfect = it.getInt(it.getColumnIndexOrThrow("perfect")) == 1
-
-                                    )
-
-                                    scoreInfoTable.insertScore(scoreInfo)
+                                if (scoreInfoTable.scoreExists(id)) {
                                     pendingScores--
-
-                                } catch (e: Exception) {
-                                    Log.e("ScoreLibrary", "Failed to import score from old database.", e)
+                                    continue
                                 }
-                            }
 
-                            if (pendingScores <= 0) {
-                                oldDatabaseFile.renameTo(File(Config.getCorePath(), "databases/osudroid_old.db"))
+                                val beatmapPath = FilenameUtils.normalizeNoEndSeparator(it.getString(it.getColumnIndexOrThrow("filename")))
+
+                                scoreInfos += ScoreInfo(
+                                    id = id,
+                                    beatmapFilename = FilenameUtils.getName(beatmapPath),
+                                    beatmapSetDirectory = FilenameUtils.getName(beatmapPath.substringBeforeLast('/')),
+                                    playerName = it.getString(it.getColumnIndexOrThrow("playername")),
+                                    replayFilename = FilenameUtils.getName(it.getString(it.getColumnIndexOrThrow("replayfile"))),
+                                    mods = it.getString(it.getColumnIndexOrThrow("mode")),
+                                    score = it.getInt(it.getColumnIndexOrThrow("score")),
+                                    maxCombo = it.getInt(it.getColumnIndexOrThrow("combo")),
+                                    mark = it.getString(it.getColumnIndexOrThrow("mark")),
+                                    hit300k = it.getInt(it.getColumnIndexOrThrow("h300k")),
+                                    hit300 = it.getInt(it.getColumnIndexOrThrow("h300")),
+                                    hit100k = it.getInt(it.getColumnIndexOrThrow("h100k")),
+                                    hit100 = it.getInt(it.getColumnIndexOrThrow("h100")),
+                                    hit50 = it.getInt(it.getColumnIndexOrThrow("h50")),
+                                    misses = it.getInt(it.getColumnIndexOrThrow("misses")),
+                                    accuracy = it.getFloat(it.getColumnIndexOrThrow("accuracy")),
+                                    time = it.getLong(it.getColumnIndexOrThrow("time")),
+                                    isPerfect = it.getInt(it.getColumnIndexOrThrow("perfect")) == 1
+
+                                )
+
+                                pendingScores--
+
+                            } catch (e: Exception) {
+                                Log.e("ScoreLibrary", "Failed to import score from old database.", e)
                             }
+                        }
+
+                        scoreInfoTable.insertScores(scoreInfos)
+
+                        if (pendingScores <= 0) {
+                            oldDatabaseFile.renameTo(File(Config.getCorePath(), "databases/osudroid_old.db"))
                         }
                     }
 

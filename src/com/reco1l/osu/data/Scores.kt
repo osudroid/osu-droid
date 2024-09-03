@@ -8,6 +8,7 @@ import androidx.room.Insert
 import androidx.room.OnConflictStrategy
 import androidx.room.PrimaryKey
 import androidx.room.Query
+import org.apache.commons.io.FilenameUtils
 import org.json.JSONObject
 import ru.nsu.ccfit.zuev.osu.Config
 import ru.nsu.ccfit.zuev.osu.scoring.StatisticV2
@@ -167,50 +168,34 @@ data class ScoreInfo @JvmOverloads constructor(
 
 }
 
-fun ScoreInfo(json: JSONObject) = ScoreInfo(
+fun ScoreInfo(json: JSONObject): ScoreInfo {
 
-    // "filename" can contain the full path, so we need to extract both filename and directory name
-    // which refers to the beatmap set directory. The pattern could be `/beatmapSetDirectory/beatmapFilename/`
-    // with or without the trailing slash.
-    beatmapFilename = json.getString("filename").let {
-        if (it.endsWith('/')) {
-            it.substring(0, it.length - 1).substringAfterLast('/')
-        } else {
-            it.substringAfterLast('/')
-        }
-    },
-    beatmapSetDirectory = json.getString("filename").let {
-        if (it.endsWith('/')) {
-            it.substringBeforeLast('/').substringBeforeLast('/').substringAfterLast('/')
-        } else {
-            it.substringBeforeLast('/').substringAfterLast('/')
-        }
-    },
-    replayFilename = json.getString("replayfile").let {
-        if (it.endsWith('/')) {
-            it.substring(0, it.length - 1).substringAfterLast('/')
-        } else {
-            it.substringAfterLast('/')
-        }
-    },
+    val beatmapPath = FilenameUtils.normalizeNoEndSeparator(json.getString("filename"))
 
-    // The keys don't correspond to the table columns in order to keep compatibility with the old replays.
-    id = json.optLong("id", 0),
-    playerName = json.getString("playername"),
-    mods = json.getString("mod"),
-    score = json.getInt("score"),
-    maxCombo = json.getInt("combo"),
-    mark = json.getString("mark"),
-    hit300k = json.getInt("h300k"),
-    hit300 = json.getInt("h300"),
-    hit100k = json.getInt("h100k"),
-    hit100 = json.getInt("h100"),
-    hit50 = json.getInt("h50"),
-    misses = json.getInt("misses"),
-    accuracy = json.getDouble("accuracy").toFloat(),
-    time = json.getLong("time"),
-    isPerfect = json.getInt("isPerfect") == 1
-)
+    return ScoreInfo(
+
+        beatmapFilename = FilenameUtils.getName(beatmapPath),
+        beatmapSetDirectory = FilenameUtils.getName(beatmapPath.substringBeforeLast('/')),
+        replayFilename = FilenameUtils.getName(json.getString("replayfile")),
+
+        // The keys don't correspond to the table columns in order to keep compatibility with the old replays.
+        id = json.optLong("id", 0),
+        playerName = json.getString("playername"),
+        mods = json.getString("mod"),
+        score = json.getInt("score"),
+        maxCombo = json.getInt("combo"),
+        mark = json.getString("mark"),
+        hit300k = json.getInt("h300k"),
+        hit300 = json.getInt("h300"),
+        hit100k = json.getInt("h100k"),
+        hit100 = json.getInt("h100"),
+        hit50 = json.getInt("h50"),
+        misses = json.getInt("misses"),
+        accuracy = json.getDouble("accuracy").toFloat(),
+        time = json.getLong("time"),
+        isPerfect = json.getInt("isPerfect") == 1
+    )
+}
 
 
 @Dao
@@ -227,6 +212,9 @@ interface IScoreInfoDAO {
 
     @Insert(onConflict = OnConflictStrategy.ABORT)
     fun insertScore(score: ScoreInfo): Long
+
+    @Insert(onConflict = OnConflictStrategy.ABORT)
+    fun insertScores(scores: List<ScoreInfo>)
 
     @Query("DELETE FROM ScoreInfo WHERE id = :id")
     fun deleteScore(id: Int): Int

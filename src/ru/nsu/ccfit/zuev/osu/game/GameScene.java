@@ -1380,15 +1380,15 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
             passiveObjects.clear();
             breakPeriods.clear();
             cursorSprites = null;
-            String replayFile = null;
+            String replayPath = null;
             stat.setTime(System.currentTimeMillis());
             if (replay != null && !replaying) {
                 String ctime = String.valueOf(System.currentTimeMillis());
-                replayFile = Config.getCorePath() + "Scores/"
+                replayPath = Config.getCorePath() + "Scores/"
                         + MD5Calculator.getStringMD5(lastBeatmapInfo.getFilename() + ctime)
                         + ctime.substring(0, Math.min(3, ctime.length())) + ".odr";
                 replay.setStat(stat);
-                replay.save(replayFile);
+                replay.save(replayPath);
             }
             if (GlobalManager.getInstance().getCamera() instanceof SmoothCamera) {
                 SmoothCamera camera = (SmoothCamera) (GlobalManager.getInstance().getCamera());
@@ -1416,7 +1416,7 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
                 }
 
                 if (replaying)
-                    scoringScene.load(scoringScene.getReplayStat(), null, GlobalManager.getInstance().getSongService(), replayFile, null, lastBeatmapInfo);
+                    scoringScene.load(scoringScene.getReplayStat(), null, GlobalManager.getInstance().getSongService(), replayPath, null, lastBeatmapInfo);
                 else {
                     if (stat.getMod().contains(GameMod.MOD_AUTO)) {
                         stat.setPlayerName("osu!");
@@ -1431,7 +1431,7 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
 
                         ToastLogger.showText("Loading room statistics...", false);
                     }
-                    scoringScene.load(stat, lastBeatmapInfo, GlobalManager.getInstance().getSongService(), replayFile, beatmapMD5, null);
+                    scoringScene.load(stat, lastBeatmapInfo, GlobalManager.getInstance().getSongService(), replayPath, beatmapMD5, null);
                 }
                 GlobalManager.getInstance().getSongService().setVolume(0.2f);
                 engine.setScene(scoringScene.getScene());

@@ -185,9 +185,7 @@ class UniversalModifier(private val pool: Pool<UniversalModifier>? = null) : IMo
 
                 while (remainingSec > 0 && _modifiers != null) {
 
-                    val modifiers = _modifiers!!
-
-                    for (modifier in modifiers) {
+                    for (modifier in _modifiers!!) {
                         usedSec = max(usedSec, modifier.onUpdate(deltaSec, item))
 
                         if (modifier.isFinished) {

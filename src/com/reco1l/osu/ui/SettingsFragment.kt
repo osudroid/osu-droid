@@ -17,6 +17,7 @@ import androidx.annotation.XmlRes
 import androidx.core.content.getSystemService
 import androidx.core.view.forEach
 import androidx.core.view.get
+import androidx.datastore.preferences.core.*
 import androidx.preference.CheckBoxPreference
 import androidx.preference.Preference
 import com.edlplan.ui.fragment.LoadingFragment
@@ -109,6 +110,10 @@ class SettingsFragment : com.edlplan.ui.fragment.SettingsFragment() {
                 }
 
                 this.section = section
+
+                // Older SDKs may potentially throw an IllegalStateException when trying to change
+                // preference screen, so we need to remove all views first to prevent that.
+                listView.removeAllViews()
                 setPreferencesFromResource(section.xml, null)
             }
 
