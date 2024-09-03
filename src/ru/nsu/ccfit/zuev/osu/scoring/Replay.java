@@ -25,6 +25,7 @@ import java.util.zip.ZipOutputStream;
 import ru.nsu.ccfit.zuev.osu.Config;
 import ru.nsu.ccfit.zuev.osu.ToastLogger;
 import ru.nsu.ccfit.zuev.osu.Utils;
+import ru.nsu.ccfit.zuev.osu.game.GameHelper;
 import ru.nsu.ccfit.zuev.osu.game.GameScene;
 import ru.nsu.ccfit.zuev.osu.game.cursor.flashlight.FlashLightEntity;
 import ru.nsu.ccfit.zuev.osu.game.mods.GameMod;
@@ -467,11 +468,13 @@ public class Replay {
                             baseX / Config.getTextureQuality(),
                             baseY / Config.getTextureQuality()
                     );
+                    boolean isHardRock = GameHelper.isHardrock();
                     PointF realPoint = replay.replayVersion > 1 ?
-                            Utils.trackToRealCoords(gamePoint) :
-                            Utils.trackToRealCoords(
-                                    Utils.realToTrackCoords(gamePoint, 1024, 600, true)
-                            );
+                        Utils.trackToRealCoords(gamePoint, isHardRock) :
+                        Utils.trackToRealCoords(
+                            Utils.realToTrackCoords(gamePoint, 1024, 600, true),
+                            isHardRock
+                        );
                     movement.point.set(realPoint);
                 }
             }
