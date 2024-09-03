@@ -102,6 +102,11 @@ public class Slider extends GameObject {
      */
     private boolean isCircleDimming;
 
+    /**
+     * Whether the slider is shaking.
+     */
+    private boolean isShaking;
+
 
     public Slider() {
         startCircle = new Sprite(0, 0, ResourceManager.getInstance().getTexture("sliderstartcircle"));
@@ -142,6 +147,7 @@ public class Slider extends GameObject {
         isFollowCircleAnimating = false;
         isInRadius = false;
         isCircleDimming = false;
+        isShaking = false;
 
         reverse = false;
         startHit = false;
@@ -976,12 +982,22 @@ public class Slider extends GameObject {
     }
 
     private void applyShakeAnimations() {
+
+        if (isShaking) {
+            return;
+        }
+        isShaking = true;
+
+        sliderBody.applyShakeAnimations();
         startCircle.registerEntityModifier(Modifiers.shakeHorizontal(0.32f / GameHelper.getSpeedMultiplier(), startCircle.getX(), 8f));
         startOverlay.registerEntityModifier(Modifiers.shakeHorizontal(0.32f / GameHelper.getSpeedMultiplier(), startOverlay.getX(), 8f));
         endCircle.registerEntityModifier(Modifiers.shakeHorizontal(0.32f / GameHelper.getSpeedMultiplier(), endCircle.getX(), 8f));
-        endOverlay.registerEntityModifier(Modifiers.shakeHorizontal(0.32f / GameHelper.getSpeedMultiplier(), endOverlay.getX(), 8f));
+        endOverlay.registerEntityModifier(Modifiers.shakeHorizontal(0.32f / GameHelper.getSpeedMultiplier(), endOverlay.getX(), 8f, entity -> {
+            isShaking = false;
+        }));
+
+        // We're not applying this to the start arrow because it should be hidden at this point.
         endArrow.registerEntityModifier(Modifiers.shakeHorizontal(0.32f / GameHelper.getSpeedMultiplier(), endArrow.getX(), 8f));
-        sliderBody.applyShakeAnimations();
 
         for (int i = 0, size = tickSprites.size(); i < size; i++) {
             tickSprites.get(i).registerEntityModifier(Modifiers.shakeHorizontal(0.32f / GameHelper.getSpeedMultiplier(), tickSprites.get(i).getX(), 8f));

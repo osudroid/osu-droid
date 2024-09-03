@@ -27,12 +27,16 @@ public class HitCircle extends GameObject {
     private float timePreempt;
     private boolean kiai;
 
-
     /**
      * Whether the circle body is being animated.
      * Used to prevent the Kiai animation collides with the dimming animation.
      */
     private boolean isCircleDimming;
+
+    /**
+     * Whether the slider is shaking.
+     */
+    private boolean isShaking;
 
 
     public HitCircle() {
@@ -60,6 +64,7 @@ public class HitCircle extends GameObject {
         kiai = GameHelper.isKiai();
         this.comboColor.set(comboColor.r(), comboColor.g(), comboColor.b());
         isCircleDimming = false;
+        isShaking = false;
 
         // Calculating position of top/left corner for sprites and hit radius
         final float scale = beatmapCircle.getGameplayScale();
@@ -292,9 +297,7 @@ public class HitCircle extends GameObject {
                 listener.onCircleHit(id, finalSignAcc, pos, endsCombo, (byte) 0, comboColor);
                 removeFromScene();
             } else if (Config.isShakeHitObjects()) {
-                circle.registerEntityModifier(Modifiers.shakeHorizontal(0.32f / GameHelper.getSpeedMultiplier(), circle.getX(), 8f));
-                overlay.registerEntityModifier(Modifiers.shakeHorizontal(0.32f / GameHelper.getSpeedMultiplier(), overlay.getX(), 8f));
-                number.registerEntityModifier(Modifiers.shakeHorizontal(0.32f / GameHelper.getSpeedMultiplier(), number.getX(), 8f));
+                applyShakeAnimation();
             }
             return;
         }
@@ -343,21 +346,38 @@ public class HitCircle extends GameObject {
 
     @Override
     public void tryHit(final float dt) {
-        if (canBeHit() && isHit()) {
-            float signAcc = passedTime - timePreempt;
-            if (Config.isFixFrameOffset()) {
-                signAcc += (float) hitOffsetToPreviousFrame() / 1000f;
+        if (isHit()) {
+            if (canBeHit()) {
+                float signAcc = passedTime - timePreempt;
+                if (Config.isFixFrameOffset()) {
+                    signAcc += (float) hitOffsetToPreviousFrame() / 1000f;
+                }
+                final float acc = Math.abs(signAcc);
+                if (acc <= GameHelper.getDifficultyHelper().hitWindowFor50(GameHelper.getOverallDifficulty())) {
+                    playSound();
+                }
+                listener.registerAccuracy(signAcc);
+                passedTime = -1;
+                // Remove circle and register hit in update thread
+                float finalSignAcc = signAcc;
+                listener.onCircleHit(id, finalSignAcc, pos, endsCombo, (byte) 0, comboColor);
+                removeFromScene();
+            } else if (Config.isShakeHitObjects()) {
+                applyShakeAnimation();
             }
-            final float acc = Math.abs(signAcc);
-            if (acc <= GameHelper.getDifficultyHelper().hitWindowFor50(GameHelper.getOverallDifficulty())) {
-                playSound();
-            }
-            listener.registerAccuracy(signAcc);
-            passedTime = -1;
-            // Remove circle and register hit in update thread
-            float finalSignAcc = signAcc;
-            listener.onCircleHit(id, finalSignAcc, pos, endsCombo, (byte) 0, comboColor);
-            removeFromScene();
         }
+    }
+
+    private void applyShakeAnimation() {
+        if (isShaking) {
+            return;
+        }
+        isShaking = true;
+
+        circle.registerEntityModifier(Modifiers.shakeHorizontal(0.32f / GameHelper.getSpeedMultiplier(), circle.getX(), 8f));
+        overlay.registerEntityModifier(Modifiers.shakeHorizontal(0.32f / GameHelper.getSpeedMultiplier(), overlay.getX(), 8f));
+        number.registerEntityModifier(Modifiers.shakeHorizontal(0.32f / GameHelper.getSpeedMultiplier(), number.getX(), 8f, entity -> {
+            isShaking = false;
+        }));
     }
 }
