@@ -203,19 +203,19 @@ data class BeatmapInfo(
      * The `.osu` file path.
      */
     val path
-        get() = "${Config.getBeatmapPath()}/$setDirectory/$filename"
+        get() = "${Config.getBeatmapPath()}$setDirectory/$filename"
 
     /**
      * The audio file path.
      */
     val audioPath
-        get() = "${Config.getBeatmapPath()}/$setDirectory/$audioFilename"
+        get() = "${Config.getBeatmapPath()}$setDirectory/$audioFilename"
 
     /**
      * The background file path.
      */
     val backgroundPath
-        get() = "${Config.getBeatmapPath()}/$setDirectory/$backgroundFilename"
+        get() = "${Config.getBeatmapPath()}$setDirectory/$backgroundFilename"
 
     /**
      * The total hit object count.

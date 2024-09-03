@@ -14,7 +14,7 @@ import androidx.room.Update
 data class BlockArea(
 
     @PrimaryKey(autoGenerate = true)
-    val id: Long = 0,
+    var id: Long = 0,
 
     var x: Float = 0f,
 
@@ -44,7 +44,7 @@ interface IBlockAreaDAO {
     fun getAll(): List<BlockArea>
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
-    fun insert(blockArea: BlockArea)
+    fun insert(blockArea: BlockArea): Long
 
     @Update
     fun update(blockArea: BlockArea)

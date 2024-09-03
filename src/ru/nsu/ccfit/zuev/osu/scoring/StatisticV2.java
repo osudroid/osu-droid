@@ -921,9 +921,9 @@ public class StatisticV2 implements Serializable {
      */
     public ScoreInfo toScoreInfo() {
         return new ScoreInfo(
-            playerName,
             beatmapFilename,
             beatmapSetDirectory,
+            playerName,
             replayFilename,
             getModString(),
             getTotalScoreWithMultiplier(),

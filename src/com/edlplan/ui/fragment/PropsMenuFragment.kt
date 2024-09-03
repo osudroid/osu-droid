@@ -28,7 +28,7 @@ class PropsMenuFragment : BaseFragment(), IPropsMenu {
 
     var menu: SongMenu? = null
     var item: BeatmapSetItem? = null
-    var beatmapProperties: BeatmapOptions? = null
+    var beatmapOptions: BeatmapOptions? = null
 
     private var offset: EditText? = null
     private var isFav: CheckBox? = null
@@ -46,11 +46,11 @@ class PropsMenuFragment : BaseFragment(), IPropsMenu {
         offset = findViewById<EditText>(R.id.offsetBox)
         isFav = findViewById<CheckBox>(R.id.addToFav)
 
-        offset!!.setText(beatmapProperties!!.offset.toString())
-        isFav!!.isChecked = beatmapProperties!!.isFavorite
+        offset!!.setText(beatmapOptions!!.offset.toString())
+        isFav!!.isChecked = beatmapOptions!!.isFavorite
 
         isFav!!.setOnCheckedChangeListener { buttonView: CompoundButton?, isChecked: Boolean ->
-            beatmapProperties!!.isFavorite = isChecked
+            beatmapOptions!!.isFavorite = isChecked
             saveProp()
         }
 
@@ -82,11 +82,11 @@ class PropsMenuFragment : BaseFragment(), IPropsMenu {
                         offset!!.setSelection(pos)
                         offset!!.addTextChangedListener(this)
                     }
-                    beatmapProperties!!.offset = o
+                    beatmapOptions!!.offset = o
                     saveProp()
                 } catch (e: NumberFormatException) {
                     if (s.length == 0) {
-                        beatmapProperties!!.offset = 0
+                        beatmapOptions!!.offset = 0
                         saveProp()
                     }
                 }
@@ -173,15 +173,16 @@ class PropsMenuFragment : BaseFragment(), IPropsMenu {
     override fun show(menu: SongMenu, item: BeatmapSetItem) {
         this.menu = menu
         this.item = item
-        beatmapProperties = DatabaseManager.beatmapOptionsTable.getOptions(item.beatmapSetInfo.directory)
-        if (beatmapProperties == null) {
-            beatmapProperties = BeatmapOptions(item.beatmapSetInfo.path)
+        beatmapOptions = DatabaseManager.beatmapOptionsTable.getOptions(item.beatmapSetInfo.directory)
+        if (beatmapOptions == null) {
+            beatmapOptions = BeatmapOptions(item.beatmapSetInfo.directory)
+            DatabaseManager.beatmapOptionsTable.insert(beatmapOptions!!)
         }
         show()
     }
 
     fun saveProp() {
-        item!!.isFavorite = beatmapProperties!!.isFavorite
-        DatabaseManager.beatmapOptionsTable.update(beatmapProperties!!)
+        item!!.isFavorite = beatmapOptions!!.isFavorite
+        DatabaseManager.beatmapOptionsTable.update(beatmapOptions!!)
     }
 }

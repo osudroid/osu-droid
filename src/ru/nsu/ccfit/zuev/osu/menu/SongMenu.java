@@ -1289,7 +1289,7 @@ public class SongMenu implements IUpdateHandler, MenuItemListener,
             stat.processLegacySC(selectedBeatmap);
         }
 
-        scoreScene.load(stat, null, null, stat.getReplayFilename(), null, selectedBeatmap);
+        scoreScene.load(stat, null, null, Config.getScorePath() + stat.getReplayFilename(), null, selectedBeatmap);
         engine.setScene(scoreScene.getScene());
     }
 

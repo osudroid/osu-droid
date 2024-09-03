@@ -7,8 +7,6 @@ import androidx.room.OnConflictStrategy
 import androidx.room.PrimaryKey
 import androidx.room.Query
 import androidx.room.Update
-import java.io.Serial
-import java.io.Serializable
 
 @Entity
 data class BeatmapOptions(
@@ -39,25 +37,14 @@ data class BeatmapOptions(
     @Insert(onConflict = OnConflictStrategy.IGNORE)
     fun insert(options: BeatmapOptions)
 
+    @Insert(onConflict = OnConflictStrategy.IGNORE)
+    fun insertAll(options: List<BeatmapOptions>)
+
     @Update(onConflict = OnConflictStrategy.REPLACE)
     fun update(options: BeatmapOptions)
 
     @Query("DELETE FROM BeatmapOptions")
     fun deleteAll()
 
-}
-
-
-@Deprecated("This class is used to do legacy migration, should not be used and will be removed in future releases.")
-class BeatmapProperties : Serializable {
-
-    var offset = 0
-
-    var favorite = false
-
-    companion object {
-        @Serial
-        private const val serialVersionUID = -7229486402310659139L
-    }
 }
 

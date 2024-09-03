@@ -506,7 +506,7 @@ class InGameSettingMenu : BaseFragment() {
         val layout = findViewById<View>(R.id.fullLayout)
         layout?.animate()?.cancel()
         layout?.animate()
-            ?.translationX(-350f.dp.toFloat())
+            ?.translationX((-450f).dp)
             ?.setDuration(200)
             ?.setInterpolator(EasingHelper.asInterpolator(Easing.InOutQuad))
             ?.setListener(
