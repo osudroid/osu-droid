@@ -696,23 +696,27 @@ public class Slider extends GameObject {
                 currentNestedObjectIndex++;
                 ticksGot++;
                 listener.onSliderHit(id, 30, null, pos, false, bodyColor, GameObjectListener.SLIDER_START);
-            } else if (canBeHit() && isHit()) {
-                // if we clicked
-                listener.registerAccuracy(passedTime);
-                startHit = true;
-                ticksGot++;
-                firstHitAccuracy = (int) (passedTime * 1000);
+            } else if (isHit()) {
 
-                if (-passedTime < GameHelper.getDifficultyHelper().hitWindowFor50(GameHelper.getOverallDifficulty())) {
-                    playCurrentNestedObjectHitSound();
-                    listener.onSliderHit(id, 30, null, pos,
-                        false, bodyColor, GameObjectListener.SLIDER_START);
+                if (canBeHit()) {
+                    listener.registerAccuracy(passedTime);
+                    startHit = true;
+                    ticksGot++;
+                    firstHitAccuracy = (int) (passedTime * 1000);
+
+                    if (-passedTime < GameHelper.getDifficultyHelper().hitWindowFor50(GameHelper.getOverallDifficulty())) {
+                        playCurrentNestedObjectHitSound();
+                        listener.onSliderHit(id, 30, null, pos,
+                                false, bodyColor, GameObjectListener.SLIDER_START);
+                    } else {
+                        listener.onSliderHit(id, -1, null, pos,
+                                false, bodyColor, GameObjectListener.SLIDER_START);
+                    }
+
+                    currentNestedObjectIndex++;
                 } else {
-                    listener.onSliderHit(id, -1, null, pos,
-                        false, bodyColor, GameObjectListener.SLIDER_START);
+                    applyShakeAnimations();
                 }
-
-                currentNestedObjectIndex++;
             }
         }
 
@@ -971,6 +975,19 @@ public class Slider extends GameObject {
         }
     }
 
+    private void applyShakeAnimations() {
+        startCircle.registerEntityModifier(Modifiers.shakeHorizontal(0.32f / GameHelper.getSpeedMultiplier(), startCircle.getX(), 8f));
+        startOverlay.registerEntityModifier(Modifiers.shakeHorizontal(0.32f / GameHelper.getSpeedMultiplier(), startOverlay.getX(), 8f));
+        endCircle.registerEntityModifier(Modifiers.shakeHorizontal(0.32f / GameHelper.getSpeedMultiplier(), endCircle.getX(), 8f));
+        endOverlay.registerEntityModifier(Modifiers.shakeHorizontal(0.32f / GameHelper.getSpeedMultiplier(), endOverlay.getX(), 8f));
+        endArrow.registerEntityModifier(Modifiers.shakeHorizontal(0.32f / GameHelper.getSpeedMultiplier(), endArrow.getX(), 8f));
+        sliderBody.applyShakeAnimations();
+
+        for (int i = 0, size = tickSprites.size(); i < size; i++) {
+            tickSprites.get(i).registerEntityModifier(Modifiers.shakeHorizontal(0.32f / GameHelper.getSpeedMultiplier(), tickSprites.get(i).getX(), 8f));
+        }
+    }
+
     private void applyBodyFadeAdjustments(float fadeInDuration) {
         if (sliderBody == null) {
             return;
@@ -1020,22 +1037,27 @@ public class Slider extends GameObject {
             return;
         }
 
-        if (canBeHit() && isHit()) {
-            listener.registerAccuracy(passedTime);
-            startHit = true;
-            ticksGot++;
-            firstHitAccuracy = (int) (passedTime * 1000);
+        if (isHit()) {
 
-            if (-passedTime < GameHelper.getDifficultyHelper().hitWindowFor50(GameHelper.getOverallDifficulty())) {
-                playCurrentNestedObjectHitSound();
-                listener.onSliderHit(id, 30, null, pos,
-                    false, bodyColor, GameObjectListener.SLIDER_START);
+            if (canBeHit()) {
+                listener.registerAccuracy(passedTime);
+                startHit = true;
+                ticksGot++;
+                firstHitAccuracy = (int) (passedTime * 1000);
+
+                if (-passedTime < GameHelper.getDifficultyHelper().hitWindowFor50(GameHelper.getOverallDifficulty())) {
+                    playCurrentNestedObjectHitSound();
+                    listener.onSliderHit(id, 30, null, pos,
+                            false, bodyColor, GameObjectListener.SLIDER_START);
+                } else {
+                    listener.onSliderHit(id, -1, null, pos,
+                            false, bodyColor, GameObjectListener.SLIDER_START);
+                }
+
+                currentNestedObjectIndex++;
             } else {
-                listener.onSliderHit(id, -1, null, pos,
-                        false, bodyColor, GameObjectListener.SLIDER_START);
+                applyShakeAnimations();
             }
-
-            currentNestedObjectIndex++;
         }
 
         if (passedTime < 0 && startHit) {

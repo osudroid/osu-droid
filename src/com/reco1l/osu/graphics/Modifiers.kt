@@ -6,6 +6,8 @@ import com.reco1l.toolkt.kotlin.sumOf
 import org.anddev.andengine.entity.IEntity
 import org.anddev.andengine.entity.modifier.IEntityModifier
 import org.anddev.andengine.util.modifier.IModifier
+import org.anddev.andengine.util.modifier.ease.EaseSineInOut
+import org.anddev.andengine.util.modifier.ease.EaseSineOut
 import org.anddev.andengine.util.modifier.ease.IEaseFunction
 import kotlin.math.max
 import kotlin.math.min
@@ -96,10 +98,6 @@ object Modifiers {
     }
 
     @JvmStatic
-    fun delay(duration: Float) = pool.obtain()
-        .also { it.reset() }
-        .setType(NONE)
-        .setDuration(duration)
     @JvmOverloads
     fun delay(duration: Float, onFinished: OnModifierFinished? = null) = pool.obtain().also {
         it.reset()
@@ -108,6 +106,49 @@ object Modifiers {
         it.onFinished = onFinished
     }
 
+    @JvmStatic
+    @JvmOverloads
+    fun moveX(duration: Float, from: Float, to: Float, onFinished: OnModifierFinished? = null, easeFunction: IEaseFunction = DefaultEaseFunction) = pool.obtain().also {
+        it.reset()
+        it.type = MOVE_X
+        it.duration = duration
+        it.values = floatArrayOf(from, to)
+        it.easeFunction = easeFunction
+        it.onFinished = onFinished
+    }
+
+    @JvmStatic
+    @JvmOverloads
+    fun moveY(duration: Float, from: Float, to: Float, onFinished: OnModifierFinished? = null, easeFunction: IEaseFunction = DefaultEaseFunction) = pool.obtain().also {
+        it.reset()
+        it.type = MOVE_Y
+        it.duration = duration
+        it.values = floatArrayOf(from, to)
+        it.easeFunction = easeFunction
+        it.onFinished = onFinished
+    }
+
+    @JvmStatic
+    @JvmOverloads
+    fun shakeHorizontal(duration: Float, originX: Float, magnitude: Float, onFinished: OnModifierFinished? = null) = pool.obtain().also {
+
+        // Based on osu!lazer's shake effect: https://github.com/ppy/osu/blob/5341a335a6165ceef4d91e910fa2ea5aecbfd025/osu.Game/Extensions/DrawableExtensions.cs#L19-L37
+
+        val boundLeft = originX - magnitude
+        val boundRight = originX + magnitude
+
+        it.reset()
+        it.type = SEQUENCE
+        it.modifiers = arrayOf(
+            moveX(duration / 8f,     originX,    boundRight,  easeFunction = EaseSineOut.getInstance()),
+            moveX(duration / 4f,     boundRight, boundLeft,   easeFunction = EaseSineInOut.getInstance()),
+            moveX(duration / 4f,     boundLeft,  boundRight,  easeFunction = EaseSineInOut.getInstance()),
+            moveX(duration / 4f,     boundRight, boundLeft,   easeFunction = EaseSineInOut.getInstance()),
+            moveX(duration / 8f,     boundLeft,  originX,     easeFunction = EaseSineInOut.getInstance()),
+        )
+        it.onFinished = onFinished
+
+    }
 
     @JvmStatic
     fun free(modifier: UniversalModifier) = pool.free(modifier)
@@ -173,6 +214,7 @@ class UniversalModifier(private val pool: Pool<UniversalModifier>? = null) : IMo
      * modifier needs 3 value spans, one per each color channel.
      *
      * Disposition of the values:
+     * * [MOVE] -> [xFrom, xTo, yFrom, yTo]
      * * [RGB] -> [redFrom, redTo, greenFrom, greenTo, blueFrom, blueTo]
      * * [SCALE] and [ALPHA] -> [scaleFrom, scaleTo]
      */
@@ -229,6 +271,27 @@ class UniversalModifier(private val pool: Pool<UniversalModifier>? = null) : IMo
 
             SCALE -> {
                 item.setScale(getValueAt(0, percentage))
+            }
+
+            MOVE -> {
+                item.setPosition(
+                    getValueAt(0, percentage),
+                    getValueAt(1, percentage)
+                )
+            }
+
+            MOVE_X -> {
+                item.setPosition(
+                    getValueAt(0, percentage),
+                    item.y
+                )
+            }
+
+            MOVE_Y -> {
+                item.setPosition(
+                    item.x,
+                    getValueAt(0, percentage)
+                )
             }
 
             RGB -> {
@@ -423,6 +486,21 @@ enum class ModifierType {
      * Modifies the entity's color values.
      */
     RGB,
+
+    /**
+     * Modifies the entity's position in both axis.
+     */
+    MOVE,
+
+    /**
+     * Modifies the entity's X position.
+     */
+    MOVE_X,
+
+    /**
+     * Modifies the entity's Y position.
+     */
+    MOVE_Y,
 
     /**
      * Modifies the entity's with inner modifiers in sequence.

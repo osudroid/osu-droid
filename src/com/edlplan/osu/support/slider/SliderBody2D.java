@@ -150,6 +150,14 @@ public class SliderBody2D extends AbstractSliderBody {
         }
     }
 
+    public void applyShakeAnimations() {
+        body.registerEntityModifier(Modifiers.shakeHorizontal(0.32f / GameHelper.getSpeedMultiplier(), body.getX(), 8f));
+        border.registerEntityModifier(Modifiers.shakeHorizontal(0.32f / GameHelper.getSpeedMultiplier(), border.getX(), 8f));
+        if (hint != null) {
+            hint.registerEntityModifier(Modifiers.shakeHorizontal(0.32f / GameHelper.getSpeedMultiplier(), hint.getX(), 8f));
+        }
+    }
+
 
     @Override
     public void onUpdate() {

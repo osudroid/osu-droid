@@ -273,22 +273,32 @@ public class HitCircle extends GameObject {
                 removeFromScene();
                 return;
             }
-        } else if (canBeHit() && isHit()) {
-            float signAcc = passedTime - timePreempt;
-            if (Config.isFixFrameOffset()) {
-                signAcc += (float) hitOffsetToPreviousFrame() / 1000f;
+        } else if (isHit()) {
+
+            if (canBeHit()) {
+                float signAcc = passedTime - timePreempt;
+                if (Config.isFixFrameOffset()) {
+                    signAcc += (float) hitOffsetToPreviousFrame() / 1000f;
+                }
+                final float acc = Math.abs(signAcc);
+                if (acc <= GameHelper.getDifficultyHelper().hitWindowFor50(GameHelper.getOverallDifficulty())) {
+                    playSound();
+                }
+                listener.registerAccuracy(signAcc);
+                passedTime = -1;
+                // Remove circle and register hit in update thread
+                float finalSignAcc = signAcc;
+                startHit = true;
+                listener.onCircleHit(id, finalSignAcc, pos, endsCombo, (byte) 0, comboColor);
+                removeFromScene();
+            } else {
+
+                var modifier = Modifiers.shakeHorizontal(0.32f / GameHelper.getSpeedMultiplier(), circle.getX(), 8f);
+
+                circle.registerEntityModifier(Modifiers.shakeHorizontal(0.32f / GameHelper.getSpeedMultiplier(), circle.getX(), 8f));
+                overlay.registerEntityModifier(Modifiers.shakeHorizontal(0.32f / GameHelper.getSpeedMultiplier(), overlay.getX(), 8f));
+                number.registerEntityModifier(Modifiers.shakeHorizontal(0.32f / GameHelper.getSpeedMultiplier(), number.getX(), 8f));
             }
-            final float acc = Math.abs(signAcc);
-            if (acc <= GameHelper.getDifficultyHelper().hitWindowFor50(GameHelper.getOverallDifficulty())) {
-                playSound();
-            }
-            listener.registerAccuracy(signAcc);
-            passedTime = -1;
-            // Remove circle and register hit in update thread
-            float finalSignAcc = signAcc;
-            startHit = true;
-            listener.onCircleHit(id, finalSignAcc, pos, endsCombo, (byte) 0, comboColor);
-            removeFromScene();
             return;
         }
 
