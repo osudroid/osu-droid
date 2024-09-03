@@ -59,15 +59,13 @@ class BeatmapConverter(
                     if (beatmap.formatVersion < 8) 1.0 / beatmap.controlPoints.difficulty.controlPointAt(it.startTime).speedMultiplier
                     else 1.0
                 it.generateTicks = hitObject.generateTicks
-                it.auxiliarySamples = hitObject.auxiliarySamples
             }
 
-            is Spinner -> Spinner(
-                hitObject.startTime,
-                hitObject.endTime,
-                hitObject.isNewCombo
-            ).also { it.auxiliarySamples = hitObject.auxiliarySamples }
+            is Spinner -> Spinner(hitObject.startTime, hitObject.endTime, hitObject.isNewCombo)
 
             else -> throw IllegalArgumentException("Invalid type of hit object")
-        }.also { it.samples = hitObject.samples }
+        }.also {
+            it.samples = hitObject.samples
+            it.auxiliarySamples = hitObject.auxiliarySamples
+        }
 }
