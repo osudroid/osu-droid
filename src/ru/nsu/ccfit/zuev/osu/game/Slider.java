@@ -494,15 +494,29 @@ public class Slider extends GameObject {
         endArrow.detachSelf();
         for (int i = 0, size = tickSprites.size(); i < size; i++) {
             Sprite sp = tickSprites.get(i);
+            sp.clearEntityModifiers();
             sp.detachSelf();
             tickSpritePool.free(sp);
         }
+        tickSprites.clear();
         listener.removeObject(this);
         stopSlidingSamples();
         scene = null;
     }
 
     public void poolObject() {
+
+        number.clearEntityModifiers();
+        startCircle.clearEntityModifiers();
+        endCircle.clearEntityModifiers();
+        startOverlay.clearEntityModifiers();
+        endOverlay.clearEntityModifiers();
+        startArrow.clearEntityModifiers();
+        endArrow.clearEntityModifiers();
+        approachCircle.clearEntityModifiers();
+        followCircle.clearEntityModifiers();
+        ball.clearEntityModifiers();
+
         GameHelper.putPath(path);
         GameObjectPool.getInstance().putSlider(this);
         GameObjectPool.getInstance().putNumber(number);

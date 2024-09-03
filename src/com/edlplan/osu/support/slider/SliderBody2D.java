@@ -310,16 +310,19 @@ public class SliderBody2D extends AbstractSliderBody {
     @Override
     public void removeFromScene(Scene scene) {
         if (hint != null) {
+            hint.clearEntityModifiers();
             hint.detachSelf();
             SpriteCache.trianglePackCache.save(hint);
             hint = null;
         }
         if (body != null) {
+            body.clearEntityModifiers();
             body.detachSelf();
             SpriteCache.trianglePackCache.save(body);
             body = null;
         }
         if (border != null) {
+            border.clearEntityModifiers();
             border.detachSelf();
             SpriteCache.trianglePackCache.save(border);
             border = null;
