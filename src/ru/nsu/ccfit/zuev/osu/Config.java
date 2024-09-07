@@ -85,6 +85,7 @@ public class Config {
         RES_HEIGHT,
         errorMeter,
         spinnerStyle,
+        beatmapLeaderboardScoringMode,
         metronomeSwitch;
     
     private static float soundVolume,
@@ -251,6 +252,7 @@ public class Config {
         onlinePassword = prefs.getString("onlinePassword", null);
         stayOnline = prefs.getBoolean("stayOnline", false);
         loadAvatar = prefs.getBoolean("loadAvatar",false);
+        beatmapLeaderboardScoringMode = Integer.parseInt(prefs.getString("beatmapLeaderboardScoringMode", "0"));
     }
 
     public static void setSize() {
@@ -518,6 +520,10 @@ public class Config {
 
     public static void setStayOnline(boolean stayOnline) {
         Config.stayOnline = stayOnline;
+    }
+
+    public static int getBeatmapLeaderboardScoringMode() {
+        return beatmapLeaderboardScoringMode;
     }
 
     public static boolean getLoadAvatar() {
