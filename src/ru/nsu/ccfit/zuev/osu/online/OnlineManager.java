@@ -28,6 +28,7 @@ import org.json.JSONObject;
 import ru.nsu.ccfit.zuev.osu.*;
 import ru.nsu.ccfit.zuev.osu.helper.MD5Calculator;
 import ru.nsu.ccfit.zuev.osu.online.PostBuilder.RequestException;
+import ru.nsu.ccfit.zuev.osu.scoring.BeatmapLeaderboardScoringMode;
 
 public class OnlineManager {
     public static final String hostname = "osudroid.moe";
@@ -292,6 +293,12 @@ public class OnlineManager {
         post.addParam("filename", beatmapFile.getName());
         post.addParam("hash", hash);
         post.addParam("uid", String.valueOf(userId));
+
+        if (Config.getBeatmapLeaderboardScoringMode() == BeatmapLeaderboardScoringMode.PP) {
+            post.addParam("type", "pp");
+        } else {
+            post.addParam("type", "score");
+        }
 
         ArrayList<String> response = sendRequest(post, endpoint + "getrank.php");
 

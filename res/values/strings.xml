@@ -90,6 +90,7 @@
 	<string name="favorite_manage">Manage Beatmap folder</string>
 
 	<string name="menu_score" formatted="false">Score: %s (%dx)</string>
+	<string name="menu_performance" formatted="false">Performance: %spp (%dx)</string>
 	<string name="menu_creator">Creator: %s</string>
 	<string name="menu_mod_back">Back</string>
 	<string name="menu_mod_title">Mod selection</string>
