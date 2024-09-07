@@ -186,17 +186,6 @@ public class OnlineScoring {
         });
     }
 
-    public ArrayList<String> getTop(final File beatmapFile, final String hash) {
-        synchronized (onlineMutex) {
-            try {
-                return OnlineManager.getInstance().getTop(beatmapFile, hash);
-            } catch (OnlineManager.OnlineManagerException e) {
-                Debug.e("Cannot load scores " + e.getMessage());
-                return new ArrayList<>();
-            }
-        }
-    }
-
     public void loadAvatar(final boolean both) {
         if (!OnlineManager.getInstance().isStayOnline()) return;
         final String avatarUrl = OnlineManager.getInstance().getAvatarURL();
