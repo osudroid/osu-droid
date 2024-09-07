@@ -1,7 +1,7 @@
 package ru.nsu.ccfit.zuev.osu.scoring;
 
 /**
- * Represents the scoring mode used in beatmap leaderboard.
+ * Represents the scoring mode used in online beatmap leaderboard.
  */
 public enum BeatmapLeaderboardScoringMode {
     SCORE,

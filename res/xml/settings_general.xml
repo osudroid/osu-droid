@@ -21,11 +21,11 @@
 
         <com.reco1l.osu.ui.SelectPreference
             android:defaultValue="0"
-            android:entries="@array/beatmap_leaderboard_scoring_mode_names"
-            android:entryValues="@array/beatmap_leaderboard_scoring_mode_values"
+            android:entries="@array/global_beatmap_leaderboard_scoring_mode_names"
+            android:entryValues="@array/global_beatmap_leaderboard_scoring_mode_values"
             android:key="beatmapLeaderboardScoringMode"
-            android:summary="@string/opt_leaderboard_scoring_mode_summary"
-            android:title="@string/opt_leaderboard_scoring_mode_title"
+            android:summary="@string/opt_global_beatmap_leaderboard_scoring_mode_summary"
+            android:title="@string/opt_global_beatmap_leaderboard_scoring_mode_title"
             app:layout="@layout/settings_preference_bottom" />
 
     </PreferenceCategory>

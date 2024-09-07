@@ -68,11 +68,11 @@
         <item>1</item>
         <item>2</item>
     </string-array>
-    <string-array name="beatmap_leaderboard_scoring_mode_names">
+    <string-array name="global_beatmap_leaderboard_scoring_mode_names">
         <item>Score</item>
         <item>Performance Points</item>
     </string-array>
-    <string-array name="beatmap_leaderboard_scoring_mode_values">
+    <string-array name="global_beatmap_leaderboard_scoring_mode_values">
         <item>0</item>
         <item>1</item>
     </string-array>
@@ -215,8 +215,8 @@
     <string name="opt_loadavatar_title">Load Avatar</string>
     <string name="opt_loadavatar_summary">Load avatar in online leaderboard</string>
 
-    <string name="opt_leaderboard_scoring_mode_title">Beatmap leaderboard scoring mode</string>
-    <string name="opt_leaderboard_scoring_mode_summary">Choose the scoring mode for the beatmap leaderboard</string>
+    <string name="opt_global_beatmap_leaderboard_scoring_mode_title">Global beatmap leaderboard scoring mode</string>
+    <string name="opt_global_beatmap_leaderboard_scoring_mode_summary">Choose the scoring mode for global beatmap leaderboards</string>
 
 
     <string name="opt_error_meter_display_title">Hit error meter</string>
