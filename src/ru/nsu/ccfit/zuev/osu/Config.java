@@ -23,6 +23,7 @@ import net.margaritov.preference.colorpicker.ColorPickerPreference;
 import org.anddev.andengine.util.Debug;
 
 import ru.nsu.ccfit.zuev.osu.helper.FileUtils;
+import ru.nsu.ccfit.zuev.osu.scoring.BeatmapLeaderboardScoringMode;
 
 public class Config {
     private static String corePath,
@@ -85,7 +86,6 @@ public class Config {
         RES_HEIGHT,
         errorMeter,
         spinnerStyle,
-        beatmapLeaderboardScoringMode,
         metronomeSwitch;
     
     private static float soundVolume,
@@ -97,6 +97,8 @@ public class Config {
         cursorSize;
 
     private static DifficultyAlgorithm difficultyAlgorithm;
+
+    private static BeatmapLeaderboardScoringMode beatmapLeaderboardScoringMode;
 
     private static Map<String, String> skins;
 
@@ -252,7 +254,7 @@ public class Config {
         onlinePassword = prefs.getString("onlinePassword", null);
         stayOnline = prefs.getBoolean("stayOnline", false);
         loadAvatar = prefs.getBoolean("loadAvatar",false);
-        beatmapLeaderboardScoringMode = Integer.parseInt(prefs.getString("beatmapLeaderboardScoringMode", "0"));
+        beatmapLeaderboardScoringMode = BeatmapLeaderboardScoringMode.parse(Integer.parseInt(prefs.getString("beatmapLeaderboardScoringMode", "0")));
     }
 
     public static void setSize() {
@@ -522,7 +524,7 @@ public class Config {
         Config.stayOnline = stayOnline;
     }
 
-    public static int getBeatmapLeaderboardScoringMode() {
+    public static BeatmapLeaderboardScoringMode getBeatmapLeaderboardScoringMode() {
         return beatmapLeaderboardScoringMode;
     }
 
