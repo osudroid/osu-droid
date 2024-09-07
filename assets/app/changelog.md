@@ -44,6 +44,7 @@ for preventing accidental touches.
 
 ## Smaller additions
 
+- Added support for pp-based global beatmap leaderboard in song selection menu
 - Added video setting summary regarding supported video formats
 - Added a new button in song selection menu to switch difficulty algorithm between osu!droid and osu!standard
 - Added support for `sliderslide` and `sliderwhistle` hitsounds
