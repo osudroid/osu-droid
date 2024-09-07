@@ -1096,6 +1096,11 @@ public class SongMenu implements IUpdateHandler, MenuItemListener,
             try (var parser = new BeatmapParser(beatmapInfo.getPath())) {
                 var data = parser.parse(true);
 
+                // Do not update if the beatmap has been changed.
+                if (data != null && selectedBeatmap != null && !data.md5.equals(selectedBeatmap.getMD5())) {
+                    return;
+                }
+
                 if (data == null) {
                     setStarsDisplay(0);
                     return;
