@@ -461,13 +461,13 @@ public class ScoringScene {
         }
 
         //save and upload score
-        if (beatmapInfo != null && beatmapInfo.getMD5().equals(mapMD5)) {
+        if (beatmap != null && beatmap.getMD5().equals(mapMD5)) {
             ResourceManager.getInstance().getSound("applause").play();
 
             if ((!Multiplayer.isMultiplayer || !GlobalManager.getInstance().getGameScene().hasFailed) &&
                     stat.getTotalScoreWithMultiplier() > 0 && !stat.getMod().contains(GameMod.MOD_AUTO)) {
                 stat.setReplayFilename(FilenameUtils.getName(replayPath));
-                stat.setBeatmap(beatmapInfo.getSetDirectory(), beatmapInfo.getFilename());
+                stat.setBeatmap(beatmap.getSetDirectory(), beatmap.getFilename());
 
                 try {
                     DatabaseManager.getScoreInfoTable().insertScore(stat.toScoreInfo());
