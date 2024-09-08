@@ -309,7 +309,7 @@ public class ScoringScene {
             };
         }
 
-        if (stat.accuracy == 1 || stat.getMaxCombo() == this.beatmapInfo.getMaxCombo() || stat.isPerfect()) {
+        if (stat.accuracy == 1 || stat.getMaxCombo() == beatmapInfo.getMaxCombo() || stat.isPerfect()) {
             final Sprite perfect = new Sprite(0, 0, ResourceManager
                     .getInstance().getTexture("ranking-perfect"));
             perfect.setPosition(0, accuracy.getY() + accuracy.getHeight() + 10);
@@ -340,9 +340,9 @@ public class ScoringScene {
             scene.attachChild(modSprite);
         }
 
-        String infoStr = beatmapInfo.getArtistText() + " - " + beatmapInfo.getTitleText() + " [" + this.beatmapInfo.getVersion() + "]";
+        String infoStr = beatmapInfo.getArtistText() + " - " + beatmapInfo.getTitleText() + " [" + beatmapInfo.getVersion() + "]";
 
-        String mapperStr = "Beatmap by " + this.beatmapInfo.getCreator();
+        String mapperStr = "Beatmap by " + beatmapInfo.getCreator();
         String playerStr = "Played by " + stat.getPlayerName() + " on " +
                 new java.text.SimpleDateFormat("yyyy/MM/dd HH:mm:ss", Locale.getDefault()).format(new java.util.Date(stat.getTime()));
         playerStr += String.format("  %s(%s)", BuildConfig.VERSION_NAME, BuildConfig.BUILD_TYPE);
@@ -391,7 +391,7 @@ public class ScoringScene {
             StringBuilder ppinfo = new StringBuilder();
             Beatmap beatmapData;
 
-            try (var parser = new BeatmapParser(this.beatmapInfo.getPath())) {
+            try (var parser = new BeatmapParser(beatmapInfo.getPath())) {
                 beatmapData = parser.parse(true);
             }
 
