@@ -163,7 +163,9 @@ public class ModMenu implements IModSwitcher {
             parent = null;
         }
 //        InGameSettingMenu.Companion.getInstance().dismiss();
-        menu.dismiss();
+        if (menu != null) {
+            menu.dismiss();
+        }
 
         if (Multiplayer.isConnected())
         {
