@@ -93,11 +93,10 @@ public class ScoringScene {
         bgTopRect.setColor(0, 0, 0, 0.8f);
         scene.attachChild(bgTopRect);
 
-        BeatmapInfo beatmapInfo = beatmapToReplay;
+        beatmapInfo = beatmapToReplay;
         if (beatmapToReplay == null && beatmap != null) {
             beatmapInfo = beatmap;
         }
-        this.beatmapInfo = beatmapInfo;
 
         final int x = 0, y = 100;
         final TextureRegion panelr = ResourceManager.getInstance().getTexture(
@@ -464,17 +463,16 @@ public class ScoringScene {
         //save and upload score
         if (beatmapInfo != null && beatmapInfo.getMD5().equals(mapMD5)) {
             ResourceManager.getInstance().getSound("applause").play();
-            if (!Multiplayer.isMultiplayer || !GlobalManager.getInstance().getGameScene().hasFailed) {
 
-                if (stat.getTotalScoreWithMultiplier() > 0 && !stat.getMod().contains(GameMod.MOD_AUTO)) {
-                    stat.setReplayFilename(FilenameUtils.getName(replayPath));
-                    stat.setBeatmap(beatmapInfo.getSetDirectory(), beatmapInfo.getFilename());
+            if ((!Multiplayer.isMultiplayer || !GlobalManager.getInstance().getGameScene().hasFailed) &&
+                    stat.getTotalScoreWithMultiplier() > 0 && !stat.getMod().contains(GameMod.MOD_AUTO)) {
+                stat.setReplayFilename(FilenameUtils.getName(replayPath));
+                stat.setBeatmap(beatmapInfo.getSetDirectory(), beatmapInfo.getFilename());
 
-                    try {
-                        DatabaseManager.getScoreInfoTable().insertScore(stat.toScoreInfo());
-                    } catch (Exception e) {
-                        Log.e("GameScene", "Failed to save score to database", e);
-                    }
+                try {
+                    DatabaseManager.getScoreInfoTable().insertScore(stat.toScoreInfo());
+                } catch (Exception e) {
+                    Log.e("GameScene", "Failed to save score to database", e);
                 }
             }
 
