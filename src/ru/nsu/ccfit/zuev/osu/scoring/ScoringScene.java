@@ -199,7 +199,7 @@ public class ScoringScene {
 
         final Sprite mark = new Sprite(Utils.toRes(610), 0, ResourceManager
                 .getInstance().getTexture("ranking-" + stat.getMark()));
-        if (beatmapInfo != null) {
+        if (beatmap != null) {
             mark.setAlpha(0);
             mark.setScale(1.5f);
             mark.registerEntityModifier(new ParallelEntityModifier(
