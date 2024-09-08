@@ -1,5 +1,9 @@
 package ru.nsu.ccfit.zuev.osu.online;
 
+import android.content.Intent;
+import android.net.Uri;
+
+import com.google.android.material.snackbar.Snackbar;
 import com.reco1l.osu.data.BeatmapInfo;
 import com.reco1l.osu.Execution;
 import com.reco1l.osu.multiplayer.LobbyScene;
@@ -11,6 +15,7 @@ import org.anddev.andengine.util.Debug;
 import java.io.File;
 import java.util.ArrayList;
 
+import ru.nsu.ccfit.zuev.osu.GlobalManager;
 import ru.nsu.ccfit.zuev.osu.ToastLogger;
 import ru.nsu.ccfit.zuev.osu.scoring.StatisticV2;
 
@@ -21,6 +26,9 @@ public class OnlineScoring {
     private OnlinePanel panel = null;
     private OnlinePanel secondPanel = null;
     private boolean avatarLoaded = false;
+    private final Snackbar snackbar = Snackbar.make(
+            GlobalManager.getInstance().getMainActivity().getWindow().getDecorView(),
+            "", 10000);
 
     public static OnlineScoring getInstance() {
         if (instance == null)
@@ -110,6 +118,18 @@ public class OnlineScoring {
                 } else {
                     setPanelMessage("Cannot log in", OnlineManager.getInstance().getFailMessage());
                     OnlineManager.getInstance().setStayOnline(false);
+
+                    if (OnlineManager.getInstance().getFailMessage().equals("Cannot connect to server")) {
+                        snackbar.setText("Cannot connect to server. Please check the following article for troubleshooting.");
+
+                        snackbar.setAction("Check", (v) -> {
+                            var intent = new Intent(Intent.ACTION_VIEW, Uri.parse("https://neroyuki.github.io/osudroid-guide/help/login_fail"));
+
+                            GlobalManager.getInstance().getMainActivity().startActivity(intent);
+                        });
+
+                        snackbar.show();
+                    }
                 }
             }
         });
