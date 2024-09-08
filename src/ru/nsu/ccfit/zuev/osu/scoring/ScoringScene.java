@@ -75,7 +75,7 @@ public class ScoringScene {
         scene = new Scene();
         songService = player;
         currentStatistic = stat;
-        if (replayPath != null && beatmapInfo == null) {
+        if (replayPath != null && beatmap == null) {
             replayStat = stat;
         }
         TextureRegion tex = ResourceManager.getInstance()
