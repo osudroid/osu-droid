@@ -36,6 +36,8 @@ import ru.nsu.ccfit.zuev.osu.Config;
 import ru.nsu.ccfit.zuev.osu.GlobalManager;
 import ru.nsu.ccfit.zuev.osu.ResourceManager;
 import com.reco1l.osu.data.BeatmapInfo;
+
+import ru.nsu.ccfit.zuev.osu.ToastLogger;
 import ru.nsu.ccfit.zuev.osu.Utils;
 import ru.nsu.ccfit.zuev.osu.game.GameScene;
 import ru.nsu.ccfit.zuev.osu.game.cursor.flashlight.FlashLightEntity;
@@ -45,6 +47,7 @@ import ru.nsu.ccfit.zuev.osu.menu.SongMenu;
 import ru.nsu.ccfit.zuev.osu.online.OnlineManager;
 import ru.nsu.ccfit.zuev.osu.online.OnlineScoring;
 import ru.nsu.ccfit.zuev.osuplus.BuildConfig;
+import ru.nsu.ccfit.zuev.osuplus.R;
 
 public class ScoringScene {
     private final Engine engine;
@@ -463,6 +466,15 @@ public class ScoringScene {
         //save and upload score
         if (beatmap != null && beatmap.getMD5().equals(mapMD5)) {
             ResourceManager.getInstance().getSound("applause").play();
+
+            int totalNotes = stat.getHit300() + stat.getHit100() + stat.getHit50() + stat.getMisses();
+
+            // Do not save and submit score if note count does not match, since it indicates a corrupted score
+            // (potentially from bugging the gameplay by any unnecessary means).
+            if (totalNotes != beatmap.getTotalHitObjectCount()) {
+                ToastLogger.showTextId(R.string.replay_corrupted, true);
+                return;
+            }
 
             if ((!Multiplayer.isMultiplayer || !GlobalManager.getInstance().getGameScene().hasFailed) &&
                     stat.getTotalScoreWithMultiplier() > 0 && !stat.getMod().contains(GameMod.MOD_AUTO)) {
