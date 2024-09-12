@@ -124,7 +124,7 @@ class DroidPerformanceCalculator(
         aimValue *= sliderCheesePenalty.aim
 
         // Scale the aim value with deviation.
-        aimValue *= 1.05 * sqrt(ErrorFunction.erf(25 / (sqrt(2.0) * deviation)))
+        aimValue *= 1.025 * ErrorFunction.erf(25 / (sqrt(2.0) * deviation)).pow(0.475)
 
         // OD 7 SS stays the same.
         aimValue *= 0.98 + 7.0.pow(2) / 2500
@@ -153,7 +153,7 @@ class DroidPerformanceCalculator(
             (1 + 1 / (1 + exp(-(normalizedDeviation - 7500 / averageBPM) / (2 * 300 / averageBPM))))
 
         // Scale the tap value with tap deviation.
-        tapValue *= 1.1 * ErrorFunction.erf(20 / (sqrt(2.0) * adjustedDeviation)).pow(0.625)
+        tapValue *= 1.05 * ErrorFunction.erf(20 / (sqrt(2.0) * adjustedDeviation)).pow(0.6)
 
         // Additional scaling for tap value based on average BPM and how "vibroable" the beatmap is.
         // Higher BPMs require more precise tapping. When the deviation is too high,
@@ -176,7 +176,7 @@ class DroidPerformanceCalculator(
             return@run 0.0
         }
 
-        var accuracyValue = 800 * exp(-0.1 * deviation)
+        var accuracyValue = 650 * exp(-0.1 * deviation)
 
         val accuracyObjectCount =
             if (mods.any { it is ModScoreV2 }) totalHits - spinnerCount
@@ -231,7 +231,7 @@ class DroidPerformanceCalculator(
         visualValue *= sliderCheesePenalty.visual
 
         // Scale the visual value with deviation.
-        visualValue *= 1.065 * ErrorFunction.erf(25 / (sqrt(2.0) * deviation)).pow(0.8)
+        visualValue *= 1.05 * ErrorFunction.erf(25 / (sqrt(2.0) * deviation)).pow(0.775)
 
         // OD 5 SS stays the same.
         visualValue *= 0.98 + 5.0.pow(2) / 2500
