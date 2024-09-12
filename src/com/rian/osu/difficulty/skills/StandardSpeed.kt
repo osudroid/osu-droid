@@ -14,12 +14,7 @@ class StandardSpeed(
     /**
      * The [Mod]s that this skill processes.
      */
-    mods: List<Mod>,
-
-    /**
-     * The 300 hit window.
-     */
-    private val greatWindow: Double
+    mods: List<Mod>
 ) : StandardStrainSkill(mods) {
     override val difficultyMultiplier = 1.04
     override val reducedSectionCount = 5
@@ -49,9 +44,9 @@ class StandardSpeed(
 
     override fun strainValueAt(current: StandardDifficultyHitObject): Double {
         currentStrain *= strainDecay(current.strainTime)
-        currentStrain += StandardSpeedEvaluator.evaluateDifficultyOf(current, greatWindow) * skillMultiplier
+        currentStrain += StandardSpeedEvaluator.evaluateDifficultyOf(current) * skillMultiplier
 
-        currentRhythm = StandardRhythmEvaluator.evaluateDifficultyOf(current, greatWindow)
+        currentRhythm = StandardRhythmEvaluator.evaluateDifficultyOf(current)
         val totalStrain = currentStrain * currentRhythm
 
         objectStrains.add(totalStrain)

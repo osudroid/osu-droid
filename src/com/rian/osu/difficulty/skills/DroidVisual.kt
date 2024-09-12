@@ -17,11 +17,6 @@ class DroidVisual(
     mods: List<Mod>,
 
     /**
-     * The 300 hit window.
-     */
-    private val greatWindow: Double,
-
-    /**
      * Whether to consider sliders in the calculation.
      */
     private val withSliders: Boolean
@@ -41,7 +36,7 @@ class DroidVisual(
         currentStrain *= strainDecay(current.deltaTime)
         currentStrain += DroidVisualEvaluator.evaluateDifficultyOf(current, isHidden, withSliders) * skillMultiplier
 
-        currentRhythm = DroidRhythmEvaluator.evaluateDifficultyOf(current, greatWindow)
+        currentRhythm = DroidRhythmEvaluator.evaluateDifficultyOf(current)
 
         return currentStrain * currentRhythm
     }
