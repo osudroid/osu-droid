@@ -385,7 +385,10 @@ abstract class DifficultyHitObject(
         @JvmStatic
         protected val NORMALIZED_RADIUS = 50f
 
+        /**
+         * The minimum delta time between hit objects.
+         */
         @JvmStatic
-        protected val MIN_DELTA_TIME = 25.0
+        val MIN_DELTA_TIME = 25.0
     }
 }

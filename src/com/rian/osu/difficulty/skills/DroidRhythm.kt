@@ -12,7 +12,12 @@ class DroidRhythm(
     /**
      * The [Mod]s that this skill processes.
      */
-    mods: List<Mod>
+    mods: List<Mod>,
+
+    /**
+     * The clock rate of the beatmap.
+     */
+    private val clockRate: Double
 ) : DroidStrainSkill(mods) {
     override val reducedSectionCount = 5
     override val starsPerDouble = 1.75
@@ -25,7 +30,7 @@ class DroidRhythm(
 
     override fun strainValueAt(current: DroidDifficultyHitObject): Double {
         currentStrain *= strainDecay(current.deltaTime)
-        currentStrain += DroidRhythmEvaluator.evaluateDifficultyOf(current) - 1
+        currentStrain += DroidRhythmEvaluator.evaluateDifficultyOf(current, clockRate) - 1
 
         return currentStrain
     }

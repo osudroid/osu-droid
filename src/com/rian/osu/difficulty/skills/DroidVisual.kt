@@ -17,6 +17,11 @@ class DroidVisual(
     mods: List<Mod>,
 
     /**
+     * The clock rate of the beatmap.
+     */
+    private val clockRate: Double,
+
+    /**
      * Whether to consider sliders in the calculation.
      */
     private val withSliders: Boolean
@@ -36,7 +41,7 @@ class DroidVisual(
         currentStrain *= strainDecay(current.deltaTime)
         currentStrain += DroidVisualEvaluator.evaluateDifficultyOf(current, isHidden, withSliders) * skillMultiplier
 
-        currentRhythm = DroidRhythmEvaluator.evaluateDifficultyOf(current)
+        currentRhythm = DroidRhythmEvaluator.evaluateDifficultyOf(current, clockRate)
 
         return currentStrain * currentRhythm
     }
