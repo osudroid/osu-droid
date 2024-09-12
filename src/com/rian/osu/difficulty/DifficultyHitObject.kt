@@ -199,6 +199,26 @@ abstract class DifficultyHitObject(
         return nonHiddenOpacity
     }
 
+    /**
+     * How possible is it to doubletap this object together with the next one and get perfect
+     * judgement in range from 0 to 1.
+     *
+     * A value closer to 1 indicates a higher possibility.
+     */
+    val doubletapness: Double
+        get() {
+            val next = next(0) ?: return 1.0
+
+            val currentDeltaTime = max(1.0, deltaTime)
+            val nextDeltaTime = max(1.0, next.deltaTime)
+            val deltaDifference = abs(nextDeltaTime - currentDeltaTime)
+
+            val speedRatio = currentDeltaTime / max(currentDeltaTime, deltaDifference)
+            val windowRatio = min(1.0, currentDeltaTime / fullGreatWindow).pow(2)
+
+            return 1 - speedRatio.pow(1 - windowRatio)
+        }
+
     private fun setDistances(clockRate: Double) {
         if (obj is Slider) {
             computeSliderCursorPosition(obj)

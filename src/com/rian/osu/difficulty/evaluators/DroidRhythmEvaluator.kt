@@ -143,18 +143,7 @@ object DroidRhythmEvaluator {
         }
 
         // Nerf doubles that can be tapped at the same time to get Great hit results.
-        val next = current.next(0)
-        var doubletapness = 1.0
-
-        if (next != null) {
-            val currentDeltaTime = max(1.0, current.deltaTime)
-            val nextDeltaTime = max(1.0, next.deltaTime)
-            val deltaDifference = abs(nextDeltaTime - currentDeltaTime)
-
-            val speedRatio = currentDeltaTime / max(currentDeltaTime, deltaDifference)
-            val windowRatio = min(1.0, currentDeltaTime / current.fullGreatWindow).pow(2)
-            doubletapness = speedRatio.pow(1 - windowRatio)
-        }
+        val doubletapness = 1 - current.doubletapness
 
         return sqrt(4 + rhythmComplexitySum * RHYTHM_MULTIPLIER * doubletapness) / 2
     }

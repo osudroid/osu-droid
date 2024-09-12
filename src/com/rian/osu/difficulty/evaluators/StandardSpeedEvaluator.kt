@@ -32,19 +32,7 @@ object StandardSpeedEvaluator {
         var strainTime = current.strainTime
 
         // Nerf double-tappable doubles.
-        val next = current.next(0)
-        var doubletapness = 1.0
-
-        if (next != null) {
-            val currentDeltaTime = max(1.0, current.deltaTime)
-            val nextDeltaTime = max(1.0, next.deltaTime)
-            val deltaDifference = abs(nextDeltaTime - currentDeltaTime)
-
-            val speedRatio = currentDeltaTime / max(currentDeltaTime, deltaDifference)
-            val windowRatio = min(1.0, currentDeltaTime / current.fullGreatWindow).pow(2.0)
-
-            doubletapness = speedRatio.pow(1 - windowRatio)
-        }
+        val doubletapness = 1 - current.doubletapness
 
         // Cap deltatime to the OD 300 hitwindow.
         // 0.93 is derived from making sure 260 BPM 1/4 OD8 streams aren't nerfed harshly, whilst 0.92 limits the effect of the cap.
