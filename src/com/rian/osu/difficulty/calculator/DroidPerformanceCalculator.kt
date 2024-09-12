@@ -138,8 +138,9 @@ class DroidPerformanceCalculator(
         tapValue *= calculateStrainBasedMissPenalty(tapDifficultStrainCount)
 
         // Scale the tap value with estimated full combo deviation.
-        // Require more objects to be present as object count can rack up easily in tap-oriented beatmaps.
-        tapValue *= calculateDeviationBasedLengthScaling(totalHits / 1.45)
+        // Consider notes that are difficult to tap with respect to other notes, but
+        // also cap the note count to prevent buffing filler patterns.
+        tapValue *= calculateDeviationBasedLengthScaling(min(speedNoteCount, totalHits / 1.45))
 
         // Normalize the deviation to 300 BPM.
         val normalizedDeviation = tapDeviation * max(1.0, 50 / averageSpeedDeltaTime)
