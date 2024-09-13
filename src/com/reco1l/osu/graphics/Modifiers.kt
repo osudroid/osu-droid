@@ -196,7 +196,6 @@ class UniversalModifier(private val pool: Pool<UniversalModifier>? = null) : IMo
             }
 
             field = value
-            calculateDuration()
         }
 
     /**
@@ -224,15 +223,6 @@ class UniversalModifier(private val pool: Pool<UniversalModifier>? = null) : IMo
      * Inner modifiers for [SEQUENCE] or [PARALLEL] modifier types.
      */
     var modifiers: Array<out UniversalModifier>? = null
-        set(value) {
-
-            if (value != null && type == PARALLEL) {
-                value.sortBy { it.duration }
-            }
-
-            field = value
-            calculateDuration()
-        }
 
     /**
      * Easing function to be used.
@@ -255,7 +245,7 @@ class UniversalModifier(private val pool: Pool<UniversalModifier>? = null) : IMo
 
     override fun onUpdate(deltaSec: Float, item: IEntity): Float {
 
-        if (elapsedSec == duration) {
+        if (isFinished) {
             return 0f
         }
 
@@ -327,7 +317,7 @@ class UniversalModifier(private val pool: Pool<UniversalModifier>? = null) : IMo
                 while (remainingSec > 0 && modifiers != null) {
 
                     for (modifier in modifiers!!) {
-                        usedSec = max(usedSec, modifier.onUpdate(deltaSec, item))
+                        usedSec = max(usedSec, modifier.onUpdate(remainingSec, item))
 
                         if (modifier.isFinished) {
                             trimModifiers()
@@ -348,7 +338,7 @@ class UniversalModifier(private val pool: Pool<UniversalModifier>? = null) : IMo
 
         elapsedSec += usedSec
 
-        if (elapsedSec >= duration) {
+        if (isFinished) {
             elapsedSec = duration
 
             onFinished?.invoke(item)
@@ -391,41 +381,26 @@ class UniversalModifier(private val pool: Pool<UniversalModifier>? = null) : IMo
         modifiers = modifiers!!.copyOfRange(1, modifiers!!.size)
     }
 
-    private fun calculateDuration() {
 
-        duration = when (type) {
-
-            // When the type is sequence, the duration is the sum of all inner modifiers.
-            SEQUENCE -> modifiers?.sumOf { it.duration } ?: 0f
-
-            // When the type is parallel, the duration is the maximum duration of all inner modifiers.
-            PARALLEL -> modifiers?.maxOf { it.duration } ?: 0f
-
-            else -> duration
-        }
+    fun setDuration(value: Float) {
+        duration = value
     }
-
 
     override fun getDuration(): Float {
         return duration
     }
 
-    fun setDuration(value: Float) {
-        if (duration == value) {
-            return
-        }
-
-        duration = value
-        calculateDuration()
-    }
-
-
     override fun getSecondsElapsed(): Float {
         return elapsedSec
     }
 
-    override fun isFinished(): Boolean {
-        return elapsedSec == duration
+    override fun isFinished() = when (type) {
+
+        // If the modifier is a sequence or parallel, it is finished when all the inner modifiers are finished.
+        SEQUENCE, PARALLEL -> modifiers.isNullOrEmpty()
+
+        // Otherwise, it is finished when the elapsed time is greater or equal to the duration.
+        else -> elapsedSec >= duration
     }
 
     override fun isRemoveWhenFinished(): Boolean {
