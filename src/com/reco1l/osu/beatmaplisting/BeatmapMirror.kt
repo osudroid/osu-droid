@@ -41,11 +41,11 @@ enum class BeatmapMirror(
     /**
      * osu.direct beatmap mirror.
      *
-     * [See documentation](https://old.osu.direct/doc)
+     * [See documentation](https://osu.direct/api/docs)
      */
     OSU_DIRECT(
         search = MirrorAction(
-            endpoint = "https://api.osu.direct/v2/search",
+            endpoint = "https://osu.direct/api/v2/search",
             mapResponse = { array ->
 
                 MutableList(array.length()) { index ->
@@ -89,8 +89,8 @@ enum class BeatmapMirror(
 
             }
         ),
-        downloadEndpoint = { "https://api.osu.direct/d/$it" },
-        previewEndpoint = { "https://api.osu.direct/media/preview/$it" },
+        downloadEndpoint = { "https://osu.direct/api/d/$it" },
+        previewEndpoint = { "https://osu.direct/api/media/preview/$it" },
     );
 
 }
