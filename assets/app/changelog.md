@@ -5,6 +5,9 @@ Version 1.7.2 Patch 6
 - Updated osu.direct URL to point to new API endpoint
 - Prevented the player from spamming beatmap previews in beatmap downloader due to rate limiting
 
+## Bug Fixes
+- Fixed song selection menu potentially displaying incorrect beatmap information after difficulty calculation has finished
+
 Version 1.7.2 Patch 5
 =====================
 
