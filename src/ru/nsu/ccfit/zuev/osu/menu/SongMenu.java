@@ -1071,6 +1071,10 @@ public class SongMenu implements IUpdateHandler, MenuItemListener,
                 return;
             }
 
+            if (selectedTrack != null && !beatmapData.getMD5().equals(selectedTrack.getMD5())) {
+                return;
+            }
+
             beatmapData.populateMetadata(track);
             changeDimensionInfo(track);
 
