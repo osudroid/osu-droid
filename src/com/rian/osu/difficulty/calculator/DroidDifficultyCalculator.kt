@@ -25,6 +25,7 @@ class DroidDifficultyCalculator : DifficultyCalculator<DroidDifficultyHitObject,
     override val difficultyAdjustmentMods = mutableSetOf<Mod>().also {
         it.addAll(super.difficultyAdjustmentMods)
         it.add(ModPrecise())
+        it.add(ModAutopilot())
     }.toSet()
 
     private val maximumSectionDeltaTime = 2000
@@ -184,6 +185,12 @@ class DroidDifficultyCalculator : DifficultyCalculator<DroidDifficultyHitObject,
             rhythmDifficulty = 0.0
             flashlightDifficulty *= 0.7
             visualDifficulty = 0.0
+        }
+
+        if (mods.any { it is ModAutopilot }) {
+            aimDifficulty = 0.0
+            flashlightDifficulty *= 0.3
+            visualDifficulty *= 0.8
         }
 
         val baseAimPerformance = (5 * max(1.0, aimDifficulty.pow(0.8) / 0.0675) - 4).pow(3.0) / 100000
