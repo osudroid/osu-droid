@@ -1,3 +1,10 @@
+Version 1.7.2 Patch 6
+=====================
+
+## Changes
+- Updated osu.direct URL to point to new API endpoint
+- Prevented the player from spamming beatmap previews in beatmap downloader due to rate limiting
+
 Version 1.7.2 Patch 5
 =====================
 
