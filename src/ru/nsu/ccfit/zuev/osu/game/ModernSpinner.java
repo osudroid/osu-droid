@@ -5,14 +5,17 @@ import android.graphics.PointF;
 import com.reco1l.osu.Execution;
 import com.reco1l.osu.graphics.Modifiers;
 
+import org.anddev.andengine.entity.IEntity;
 import org.anddev.andengine.entity.scene.Scene;
 import org.anddev.andengine.entity.sprite.Sprite;
 import org.anddev.andengine.util.MathUtils;
+import org.anddev.andengine.util.modifier.IModifier;
 
 import ru.nsu.ccfit.zuev.osu.Constants;
 import ru.nsu.ccfit.zuev.osu.ResourceManager;
 import ru.nsu.ccfit.zuev.osu.Utils;
 import ru.nsu.ccfit.zuev.osu.helper.CentredSprite;
+import ru.nsu.ccfit.zuev.osu.helper.ModifierListener;
 import ru.nsu.ccfit.zuev.osu.scoring.ScoreNumber;
 import ru.nsu.ccfit.zuev.osu.scoring.StatisticV2;
 
@@ -103,8 +106,18 @@ public class ModernSpinner extends Spinner {
         float timePreempt = (float) beatmapSpinner.timePreempt / 1000 / GameHelper.getSpeedMultiplier();
 
         top.registerEntityModifier(Modifiers.sequence(
-            Modifiers.fadeIn(timePreempt, entity -> spinnable = true),
-            Modifiers.delay(duration, entity -> Execution.updateThread(this::removeFromScene))
+            Modifiers.fadeIn(timePreempt, new ModifierListener() {
+                @Override
+                public void onModifierFinished(IModifier<IEntity> pModifier, IEntity pItem) {
+                    spinnable = true;
+                }
+            }),
+            Modifiers.delay(duration, new ModifierListener() {
+                @Override
+                public void onModifierFinished(IModifier<IEntity> pModifier, IEntity pItem) {
+                    Execution.updateThread(() -> removeFromScene());
+                }
+            })
         ));
 
         bottom.registerEntityModifier(Modifiers.fadeIn(timePreempt));

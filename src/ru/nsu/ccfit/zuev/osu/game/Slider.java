@@ -13,9 +13,11 @@ import com.rian.osu.beatmap.sections.BeatmapControlPoints;
 import com.rian.osu.math.Interpolation;
 import com.rian.osu.mods.ModHidden;
 
+import org.anddev.andengine.entity.IEntity;
 import org.anddev.andengine.entity.scene.Scene;
 import org.anddev.andengine.entity.sprite.Sprite;
 import org.anddev.andengine.util.MathUtils;
+import org.anddev.andengine.util.modifier.IModifier;
 import org.anddev.andengine.util.modifier.ease.EaseQuadOut;
 import ru.nsu.ccfit.zuev.osu.Config;
 import ru.nsu.ccfit.zuev.osu.RGBColor;
@@ -25,6 +27,7 @@ import ru.nsu.ccfit.zuev.osu.game.GameHelper.SliderPath;
 import ru.nsu.ccfit.zuev.osu.helper.AnimSprite;
 import ru.nsu.ccfit.zuev.osu.helper.CentredSprite;
 import ru.nsu.ccfit.zuev.osu.helper.DifficultyHelper;
+import ru.nsu.ccfit.zuev.osu.helper.ModifierListener;
 import ru.nsu.ccfit.zuev.skins.OsuSkin;
 import ru.nsu.ccfit.zuev.skins.SkinManager;
 
@@ -373,7 +376,12 @@ public class Slider extends GameObject {
         // Circle requires special handling because it's tinted with combo color.
         circle.setColor(comboColor.r() * colorDim, comboColor.g() * colorDim, comboColor.b() * colorDim);
         circle.registerEntityModifier(Modifiers.sequence(
-            entity -> isCircleDimming = false,
+            new ModifierListener() {
+                @Override
+                public void onModifierFinished(IModifier<IEntity> pModifier, IEntity pItem) {
+                    isCircleDimming = false;
+                }
+            },
             Modifiers.delay(dimDelaySec),
             Modifiers.color(0.1f / GameHelper.getSpeedMultiplier(),
                 circle.getRed(), comboColor.r(),
@@ -477,8 +485,11 @@ public class Slider extends GameObject {
             }
         }
 
-        ball.registerEntityModifier(Modifiers.fadeOut(0.1f / GameHelper.getSpeedMultiplier(), entity -> {
-            Execution.updateThread(entity::detachSelf);
+        ball.registerEntityModifier(Modifiers.fadeOut(0.1f / GameHelper.getSpeedMultiplier(), new ModifierListener() {
+            @Override
+            public void onModifierFinished(IModifier<IEntity> pModifier, IEntity pItem) {
+                    Execution.updateThread(pItem::detachSelf);
+            }
         }));
 
         if (!Config.isAnimateFollowCircle()) {
@@ -648,14 +659,17 @@ public class Slider extends GameObject {
 
             followCircle.clearEntityModifiers();
             followCircle.registerEntityModifier(Modifiers.scale(0.2f / GameHelper.getSpeedMultiplier(), followCircle.getScaleX(), followCircle.getScaleX() * 0.8f, null, EaseQuadOut.getInstance()));
-            followCircle.registerEntityModifier(Modifiers.alpha(0.2f / GameHelper.getSpeedMultiplier(), followCircle.getAlpha(), 0f, entity -> {
-                Execution.updateThread(() -> {
-                    entity.detachSelf();
-                    // We can pool the hit object once all animations are finished.
-                    // The follow circle animation is the last one to finish if it's enabled.
-                    poolObject();
-                });
-                isFollowCircleAnimating = false;
+            followCircle.registerEntityModifier(Modifiers.alpha(0.2f / GameHelper.getSpeedMultiplier(), followCircle.getAlpha(), 0f, new ModifierListener() {
+                @Override
+                public void onModifierFinished(IModifier<IEntity> pModifier, IEntity pItem) {
+                    Execution.updateThread(() -> {
+                        pItem.detachSelf();
+                        // We can pool the hit object once all animations are finished.
+                        // The follow circle animation is the last one to finish if it's enabled.
+                        poolObject();
+                    });
+                    isFollowCircleAnimating = false;
+                }
             }));
         }
 
@@ -894,7 +908,12 @@ public class Slider extends GameObject {
 
                 followCircle.clearEntityModifiers();
                 followCircle.registerEntityModifier(Modifiers.alpha(Math.min(remainTime, 0.06f / GameHelper.getSpeedMultiplier()), followCircle.getAlpha(), 1f));
-                followCircle.registerEntityModifier(Modifiers.scale(Math.min(remainTime, 0.18f / GameHelper.getSpeedMultiplier()), initialScale, scale, entity -> isFollowCircleAnimating = false, EaseQuadOut.getInstance()));
+                followCircle.registerEntityModifier(Modifiers.scale(Math.min(remainTime, 0.18f / GameHelper.getSpeedMultiplier()), initialScale, scale, new ModifierListener() {
+                    @Override
+                    public void onModifierFinished(IModifier<IEntity> pModifier, IEntity pItem) {
+                        isFollowCircleAnimating = false;
+                    }
+                }, EaseQuadOut.getInstance()));
             } else if (!inRadius && isInRadius) {
                 isInRadius = false;
                 isFollowCircleAnimating = true;
@@ -902,11 +921,14 @@ public class Slider extends GameObject {
 
                 followCircle.clearEntityModifiers();
                 followCircle.registerEntityModifier(Modifiers.scale(0.1f / GameHelper.getSpeedMultiplier(), followCircle.getScaleX(), scale * 2f));
-                followCircle.registerEntityModifier(Modifiers.alpha(0.1f / GameHelper.getSpeedMultiplier(), followCircle.getAlpha(), 0f, entity -> {
-                    if (isOver) {
-                        Execution.updateThread(entity::detachSelf);
+                followCircle.registerEntityModifier(Modifiers.alpha(0.1f / GameHelper.getSpeedMultiplier(), followCircle.getAlpha(), 0f, new ModifierListener() {
+                    @Override
+                    public void onModifierFinished(IModifier<IEntity> pModifier, IEntity pItem) {
+                        if (isOver) {
+                            Execution.updateThread(pItem::detachSelf);
+                        }
+                        isFollowCircleAnimating = false;
                     }
-                    isFollowCircleAnimating = false;
                 }));
             }
         } else {
@@ -1006,8 +1028,11 @@ public class Slider extends GameObject {
         startCircle.registerEntityModifier(Modifiers.shakeHorizontal(0.32f / GameHelper.getSpeedMultiplier(), startCircle.getX(), 8f));
         startOverlay.registerEntityModifier(Modifiers.shakeHorizontal(0.32f / GameHelper.getSpeedMultiplier(), startOverlay.getX(), 8f));
         endCircle.registerEntityModifier(Modifiers.shakeHorizontal(0.32f / GameHelper.getSpeedMultiplier(), endCircle.getX(), 8f));
-        endOverlay.registerEntityModifier(Modifiers.shakeHorizontal(0.32f / GameHelper.getSpeedMultiplier(), endOverlay.getX(), 8f, entity -> {
-            isShaking = false;
+        endOverlay.registerEntityModifier(Modifiers.shakeHorizontal(0.32f / GameHelper.getSpeedMultiplier(), endOverlay.getX(), 8f, new ModifierListener() {
+            @Override
+            public void onModifierFinished(IModifier<IEntity> pModifier, IEntity pItem) {
+                isShaking = false;
+            }
         }));
 
         // We're not applying this to the start arrow because it should be hidden at this point.

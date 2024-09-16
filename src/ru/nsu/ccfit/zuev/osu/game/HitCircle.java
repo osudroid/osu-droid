@@ -3,13 +3,16 @@ package ru.nsu.ccfit.zuev.osu.game;
 import com.reco1l.osu.graphics.Modifiers;
 import com.rian.osu.mods.ModHidden;
 
+import org.anddev.andengine.entity.IEntity;
 import org.anddev.andengine.entity.scene.Scene;
 import org.anddev.andengine.entity.sprite.Sprite;
+import org.anddev.andengine.util.modifier.IModifier;
 
 import ru.nsu.ccfit.zuev.osu.Config;
 import ru.nsu.ccfit.zuev.osu.RGBColor;
 import ru.nsu.ccfit.zuev.osu.ResourceManager;
 import ru.nsu.ccfit.zuev.osu.Utils;
+import ru.nsu.ccfit.zuev.osu.helper.ModifierListener;
 import ru.nsu.ccfit.zuev.osu.scoring.ResultType;
 import ru.nsu.ccfit.zuev.skins.OsuSkin;
 
@@ -153,7 +156,12 @@ public class HitCircle extends GameObject {
             // Circle requires special handling because it's tinted with combo color.
             circle.setColor(comboColor.r() * colorDim, comboColor.g() * colorDim, comboColor.b() * colorDim);
             circle.registerEntityModifier(Modifiers.sequence(
-                entity -> isCircleDimming = false,
+                new ModifierListener() {
+                    @Override
+                    public void onModifierFinished(IModifier<IEntity> pModifier, IEntity pItem) {
+                        isCircleDimming = false;
+                    }
+                },
                 Modifiers.delay(dimDelaySec),
                 Modifiers.color(0.1f / GameHelper.getSpeedMultiplier(),
                     circle.getRed(), comboColor.r(),
@@ -376,8 +384,11 @@ public class HitCircle extends GameObject {
 
         circle.registerEntityModifier(Modifiers.shakeHorizontal(0.32f / GameHelper.getSpeedMultiplier(), circle.getX(), 8f));
         overlay.registerEntityModifier(Modifiers.shakeHorizontal(0.32f / GameHelper.getSpeedMultiplier(), overlay.getX(), 8f));
-        number.registerEntityModifier(Modifiers.shakeHorizontal(0.32f / GameHelper.getSpeedMultiplier(), number.getX(), 8f, entity -> {
-            isShaking = false;
+        number.registerEntityModifier(Modifiers.shakeHorizontal(0.32f / GameHelper.getSpeedMultiplier(), number.getX(), 8f, new ModifierListener() {
+            @Override
+            public void onModifierFinished(IModifier<IEntity> pModifier, IEntity pItem) {
+                isShaking = false;
+            }
         }));
     }
 }

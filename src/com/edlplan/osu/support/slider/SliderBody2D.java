@@ -8,13 +8,16 @@ import com.edlplan.framework.math.line.LinePath;
 import com.reco1l.osu.Execution;
 import com.reco1l.osu.graphics.Modifiers;
 
+import org.anddev.andengine.entity.IEntity;
 import org.anddev.andengine.entity.scene.Scene;
+import org.anddev.andengine.util.modifier.IModifier;
 import org.anddev.andengine.util.modifier.ease.EaseQuadOut;
 
 import ru.nsu.ccfit.zuev.osu.Config;
 import ru.nsu.ccfit.zuev.osu.RGBColor;
 import ru.nsu.ccfit.zuev.osu.game.GameHelper;
 import ru.nsu.ccfit.zuev.osu.game.Slider;
+import ru.nsu.ccfit.zuev.osu.helper.ModifierListener;
 
 public class SliderBody2D extends AbstractSliderBody {
 
@@ -292,17 +295,21 @@ public class SliderBody2D extends AbstractSliderBody {
         }
 
         if (border != null) {
-            border.registerEntityModifier(Modifiers.fadeOut(duration, entity -> {
-                Execution.updateThread(() -> {
-                    removeFromScene(scene);
+            border.registerEntityModifier(Modifiers.fadeOut(duration, new ModifierListener() {
 
-                    // We can pool the hit object once all animations are finished.
-                    // The follow circle animation is the last one to finish but if it's disabled this will be, so should
-                    // pool the object here in that case.
-                    if (!Config.isAnimateFollowCircle()) {
-                        slider.poolObject();
-                    }
-                });
+                @Override
+                public void onModifierFinished(IModifier<IEntity> pModifier, IEntity pItem) {
+                    Execution.updateThread(() -> {
+                        removeFromScene(scene);
+
+                        // We can pool the hit object once all animations are finished.
+                        // The follow circle animation is the last one to finish but if it's disabled this will be, so should
+                        // pool the object here in that case.
+                        if (!Config.isAnimateFollowCircle()) {
+                            slider.poolObject();
+                        }
+                    });
+                }
             }));
         }
     }

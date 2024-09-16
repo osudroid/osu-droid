@@ -7,9 +7,11 @@ import com.reco1l.osu.Execution;
 import com.reco1l.osu.graphics.Modifiers;
 import com.reco1l.osu.graphics.UniversalModifier;
 
+import org.anddev.andengine.entity.IEntity;
 import org.anddev.andengine.entity.scene.Scene;
 import org.anddev.andengine.entity.shape.Shape;
 import org.anddev.andengine.entity.sprite.Sprite;
+import org.anddev.andengine.util.modifier.IModifier;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -19,6 +21,7 @@ import java.util.List;
 import ru.nsu.ccfit.zuev.osu.RGBColor;
 import ru.nsu.ccfit.zuev.osu.ResourceManager;
 import ru.nsu.ccfit.zuev.osu.helper.AnimSprite;
+import ru.nsu.ccfit.zuev.osu.helper.ModifierListener;
 
 public class GameEffect extends GameObject {
     private static final HashSet<String> animationEffects = new HashSet<>(Arrays.asList(
@@ -60,12 +63,15 @@ public class GameEffect extends GameObject {
             ((AnimSprite) hit).setAnimTime(0);
         }
         hit.setPosition(pos.x - hit.getTextureRegion().getWidth() / 2f, pos.y - hit.getTextureRegion().getHeight() / 2f);
-        hit.registerEntityModifier(Modifiers.parallel(entity -> {
-            Execution.updateThread(() -> {
-                hit.detachSelf();
-                hit.clearEntityModifiers();
-                GameObjectPool.getInstance().putEffect(GameEffect.this);
-            });
+        hit.registerEntityModifier(Modifiers.parallel(new ModifierListener() {
+            @Override
+            public void onModifierFinished(IModifier<IEntity> pModifier, IEntity pItem) {
+                Execution.updateThread(() -> {
+                    hit.detachSelf();
+                    hit.clearEntityModifiers();
+                    GameObjectPool.getInstance().putEffect(GameEffect.this);
+                });
+            }
         }, entityModifiers));
         hit.setScale(scale);
         hit.setAlpha(1);
