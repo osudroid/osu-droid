@@ -101,8 +101,4 @@ open class ExtendedEntity @JvmOverloads constructor(
 
     }
 
-    override fun onApplyVertices(pGL: GL10) {
-
-        super.onApplyVertices(pGL)
-    }
 }
