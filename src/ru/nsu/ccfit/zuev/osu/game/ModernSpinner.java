@@ -3,6 +3,7 @@ package ru.nsu.ccfit.zuev.osu.game;
 import android.graphics.PointF;
 
 import com.reco1l.osu.Execution;
+import com.reco1l.osu.graphics.ExtendedSprite;
 import com.reco1l.osu.graphics.Modifiers;
 
 import org.anddev.andengine.entity.IEntity;
@@ -24,11 +25,11 @@ import ru.nsu.ccfit.zuev.osu.scoring.StatisticV2;
  */
 public class ModernSpinner extends Spinner {
 
-    private final Sprite middle;
-    private final Sprite middle2;
-    private final Sprite bottom;
-    private final Sprite top;
-    private final Sprite glow;
+    private final ExtendedSprite middle;
+    private final ExtendedSprite middle2;
+    private final ExtendedSprite bottom;
+    private final ExtendedSprite top;
+    private final ExtendedSprite glow;
     private final ScoreNumber bonusScore;
 
     private Scene scene;

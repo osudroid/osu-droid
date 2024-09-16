@@ -2,6 +2,7 @@ package ru.nsu.ccfit.zuev.osu.game;
 
 import android.graphics.PointF;
 
+import com.reco1l.osu.graphics.ExtendedSprite;
 import com.reco1l.osu.multiplayer.Multiplayer;
 import com.reco1l.osu.multiplayer.RoomScene;
 import org.anddev.andengine.entity.modifier.*;
@@ -23,7 +24,7 @@ public class BreakAnimator extends GameObject {
     private final Sprite[] arrows = new Sprite[4];
     private float length = 0;
     private float time;
-    private Sprite passfail;
+    private ExtendedSprite passfail;
     private String ending;
     private Sprite mark = null;
     private boolean showMark = false;

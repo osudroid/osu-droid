@@ -1,6 +1,7 @@
 package com.edlplan.andengine;
 
 import com.edlplan.framework.utils.FloatArraySlice;
+import com.reco1l.osu.graphics.ExtendedEntity;
 
 import org.anddev.andengine.engine.camera.Camera;
 import org.anddev.andengine.entity.shape.IShape;
@@ -11,7 +12,7 @@ import org.anddev.andengine.opengl.vertex.VertexBuffer;
 import javax.microedition.khronos.opengles.GL10;
 
 
-public class TrianglePack extends Shape {
+public class TrianglePack extends ExtendedEntity {
 
     // ===========================================================
     // Fields
@@ -63,7 +64,7 @@ public class TrianglePack extends Shape {
 
 
     @Override
-    protected VertexBuffer getVertexBuffer() {
+    public VertexBuffer getVertexBuffer() {
         return null;
     }
 

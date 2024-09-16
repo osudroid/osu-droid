@@ -110,9 +110,9 @@ object Modifiers {
 
     @JvmStatic
     @JvmOverloads
-    fun moveX(duration: Float, from: Float, to: Float, listener: IModifierListener<IEntity>? = null, easeFunction: IEaseFunction = DefaultEaseFunction) = pool.obtain().also {
+    fun translateX(duration: Float, from: Float, to: Float, listener: IModifierListener<IEntity>? = null, easeFunction: IEaseFunction = DefaultEaseFunction) = pool.obtain().also {
         it.reset()
-        it.type = MOVE_X
+        it.type = TRANSLATE_X
         it.duration = duration
         it.values = floatArrayOf(from, to)
         it.easeFunction = easeFunction
@@ -121,9 +121,9 @@ object Modifiers {
 
     @JvmStatic
     @JvmOverloads
-    fun moveY(duration: Float, from: Float, to: Float, listener: IModifierListener<IEntity>? = null, easeFunction: IEaseFunction = DefaultEaseFunction) = pool.obtain().also {
+    fun translateY(duration: Float, from: Float, to: Float, listener: IModifierListener<IEntity>? = null, easeFunction: IEaseFunction = DefaultEaseFunction) = pool.obtain().also {
         it.reset()
-        it.type = MOVE_Y
+        it.type = TRANSLATE_Y
         it.duration = duration
         it.values = floatArrayOf(from, to)
         it.easeFunction = easeFunction
@@ -132,21 +132,18 @@ object Modifiers {
 
     @JvmStatic
     @JvmOverloads
-    fun shakeHorizontal(duration: Float, originX: Float, magnitude: Float, listener: IModifierListener<IEntity>? = null) = pool.obtain().also {
+    fun shakeHorizontal(duration: Float, magnitude: Float, listener: IModifierListener<IEntity>? = null) = pool.obtain().also {
 
         // Based on osu!lazer's shake effect: https://github.com/ppy/osu/blob/5341a335a6165ceef4d91e910fa2ea5aecbfd025/osu.Game/Extensions/DrawableExtensions.cs#L19-L37
-
-        val boundLeft = originX - magnitude
-        val boundRight = originX + magnitude
 
         it.reset()
         it.type = SEQUENCE
         it.modifiers = arrayOf(
-            moveX(duration / 8f,     originX,    boundRight,  easeFunction = EaseSineOut.getInstance()),
-            moveX(duration / 4f,     boundRight, boundLeft,   easeFunction = EaseSineInOut.getInstance()),
-            moveX(duration / 4f,     boundLeft,  boundRight,  easeFunction = EaseSineInOut.getInstance()),
-            moveX(duration / 4f,     boundRight, boundLeft,   easeFunction = EaseSineInOut.getInstance()),
-            moveX(duration / 8f,     boundLeft,  originX,     easeFunction = EaseSineInOut.getInstance()),
+            translateX(duration / 8f,  0f,          magnitude,   easeFunction = EaseSineOut.getInstance()),
+            translateX(duration / 4f,  magnitude,   -magnitude,  easeFunction = EaseSineInOut.getInstance()),
+            translateX(duration / 4f,  -magnitude,  magnitude,   easeFunction = EaseSineInOut.getInstance()),
+            translateX(duration / 4f,  magnitude,   -magnitude,  easeFunction = EaseSineInOut.getInstance()),
+            translateX(duration / 8f,  -magnitude,  0f,          easeFunction = EaseSineInOut.getInstance()),
         )
         it.listener = listener
 
@@ -218,7 +215,7 @@ class UniversalModifier(private val pool: Pool<UniversalModifier>? = null) : IMo
      * modifier needs 3 value spans, one per each color channel.
      *
      * Disposition of the values:
-     * * [MOVE] -> [xFrom, xTo, yFrom, yTo]
+     * * [TRANSLATE] -> [xFrom, xTo, yFrom, yTo]
      * * [RGB] -> [redFrom, redTo, greenFrom, greenTo, blueFrom, blueTo]
      * * [SCALE] and [ALPHA] -> [scaleFrom, scaleTo]
      */
@@ -278,25 +275,23 @@ class UniversalModifier(private val pool: Pool<UniversalModifier>? = null) : IMo
                 item.setScale(getValueAt(0, percentage))
             }
 
-            MOVE -> {
-                item.setPosition(
-                    getValueAt(0, percentage),
-                    getValueAt(1, percentage)
-                )
+            TRANSLATE -> {
+                if (item is ExtendedEntity) {
+                    item.translationX = getValueAt(0, percentage)
+                    item.translationY = getValueAt(1, percentage)
+                }
             }
 
-            MOVE_X -> {
-                item.setPosition(
-                    getValueAt(0, percentage),
-                    item.y
-                )
+            TRANSLATE_X -> {
+                if (item is ExtendedEntity) {
+                    item.translationX = getValueAt(0, percentage)
+                }
             }
 
-            MOVE_Y -> {
-                item.setPosition(
-                    item.x,
-                    getValueAt(0, percentage)
-                )
+            TRANSLATE_Y -> {
+                if (item is ExtendedEntity) {
+                    item.translationY = getValueAt(0, percentage)
+                }
             }
 
             RGB -> {
@@ -487,19 +482,19 @@ enum class ModifierType {
     RGB,
 
     /**
-     * Modifies the entity's position in both axis.
+     * Modifies the entity's translation in both axis.
      */
-    MOVE,
+    TRANSLATE,
 
     /**
-     * Modifies the entity's X position.
+     * Modifies the entity's X translation.
      */
-    MOVE_X,
+    TRANSLATE_X,
 
     /**
-     * Modifies the entity's Y position.
+     * Modifies the entity's Y translation.
      */
-    MOVE_Y,
+    TRANSLATE_Y,
 
     /**
      * Modifies the entity's with inner modifiers in sequence.

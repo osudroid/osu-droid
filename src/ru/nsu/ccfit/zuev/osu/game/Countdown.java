@@ -2,6 +2,8 @@ package ru.nsu.ccfit.zuev.osu.game;
 
 import android.graphics.PointF;
 
+import com.reco1l.osu.graphics.ExtendedSprite;
+
 import org.anddev.andengine.entity.modifier.DelayModifier;
 import org.anddev.andengine.entity.modifier.FadeInModifier;
 import org.anddev.andengine.entity.modifier.FadeOutModifier;
@@ -20,9 +22,9 @@ import ru.nsu.ccfit.zuev.osu.helper.CentredSprite;
 
 public class Countdown extends GameObject {
     public static final float COUNTDOWN_LENGTH = 3f;
-    private final Sprite ready;
+    private final ExtendedSprite ready;
     private final Sprite count1, count2, count3;
-    private final Sprite go;
+    private final ExtendedSprite go;
     private final GameObjectListener listener;
     private final float speed;
     private float timepassed;

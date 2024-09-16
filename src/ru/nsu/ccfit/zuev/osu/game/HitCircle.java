@@ -12,14 +12,15 @@ import ru.nsu.ccfit.zuev.osu.Config;
 import ru.nsu.ccfit.zuev.osu.RGBColor;
 import ru.nsu.ccfit.zuev.osu.ResourceManager;
 import ru.nsu.ccfit.zuev.osu.Utils;
+import ru.nsu.ccfit.zuev.osu.helper.CentredSprite;
 import ru.nsu.ccfit.zuev.osu.helper.ModifierListener;
 import ru.nsu.ccfit.zuev.osu.scoring.ResultType;
 import ru.nsu.ccfit.zuev.skins.OsuSkin;
 
 public class HitCircle extends GameObject {
-    private final Sprite circle;
-    private final Sprite overlay;
-    private final Sprite approachCircle;
+    private final CentredSprite circle;
+    private final CentredSprite overlay;
+    private final CentredSprite approachCircle;
     private final RGBColor comboColor = new RGBColor();
     private com.rian.osu.beatmap.hitobject.HitCircle beatmapCircle;
     private CircleNumber number;
@@ -44,11 +45,11 @@ public class HitCircle extends GameObject {
 
     public HitCircle() {
         // Getting sprites from sprite pool
-        circle = new Sprite(0, 0, ResourceManager.getInstance().getTexture("hitcircle"));
+        circle = new CentredSprite(0, 0, ResourceManager.getInstance().getTexture("hitcircle"));
         circle.setAlpha(0);
-        overlay = new Sprite(0, 0, ResourceManager.getInstance().getTexture("hitcircleoverlay"));
+        overlay = new CentredSprite(0, 0, ResourceManager.getInstance().getTexture("hitcircleoverlay"));
         overlay.setAlpha(0);
-        approachCircle = new Sprite(0, 0, ResourceManager.getInstance().getTexture("approachcircle"));
+        approachCircle = new CentredSprite(0, 0, ResourceManager.getInstance().getTexture("approachcircle"));
     }
 
     public void init(final GameObjectListener listener, final Scene pScene,
@@ -82,16 +83,17 @@ public class HitCircle extends GameObject {
         circle.setColor(comboColor.r(), comboColor.g(), comboColor.b());
         circle.setScale(scale);
         circle.setAlpha(fadeInProgress);
-        Utils.putSpriteAnchorCenter(pos, circle);
+        circle.setPosition(pos.x, pos.y);
 
         overlay.setScale(scale);
         overlay.setAlpha(fadeInProgress);
-        Utils.putSpriteAnchorCenter(pos, overlay);
+        overlay.setPosition(pos.x, pos.y);
 
         approachCircle.setColor(comboColor.r(), comboColor.g(), comboColor.b());
         approachCircle.setScale(scale * (3 - 2 * fadeInProgress));
         approachCircle.setAlpha(0.9f * fadeInProgress);
-        Utils.putSpriteAnchorCenter(pos, approachCircle);
+        approachCircle.setPosition(pos.x, pos.y);
+
         if (GameHelper.isHidden()) {
             approachCircle.setVisible(Config.isShowFirstApproachCircle() && beatmapCircle.isFirstNote());
         }
@@ -382,9 +384,9 @@ public class HitCircle extends GameObject {
         }
         isShaking = true;
 
-        circle.registerEntityModifier(Modifiers.shakeHorizontal(0.32f / GameHelper.getSpeedMultiplier(), circle.getX(), 8f));
-        overlay.registerEntityModifier(Modifiers.shakeHorizontal(0.32f / GameHelper.getSpeedMultiplier(), overlay.getX(), 8f));
-        number.registerEntityModifier(Modifiers.shakeHorizontal(0.32f / GameHelper.getSpeedMultiplier(), number.getX(), 8f, new ModifierListener() {
+        circle.registerEntityModifier(Modifiers.shakeHorizontal(0.32f / GameHelper.getSpeedMultiplier(), 8f));
+        overlay.registerEntityModifier(Modifiers.shakeHorizontal(0.32f / GameHelper.getSpeedMultiplier(), 8f));
+        number.registerEntityModifier(Modifiers.shakeHorizontal(0.32f / GameHelper.getSpeedMultiplier(), 8f, new ModifierListener() {
             @Override
             public void onModifierFinished(IModifier<IEntity> pModifier, IEntity pItem) {
                 isShaking = false;

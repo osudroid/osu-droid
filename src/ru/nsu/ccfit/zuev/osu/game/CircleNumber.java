@@ -3,6 +3,9 @@ package ru.nsu.ccfit.zuev.osu.game;
 import android.graphics.PointF;
 
 import androidx.core.util.Supplier;
+
+import com.reco1l.osu.graphics.ExtendedEntity;
+
 import org.anddev.andengine.entity.Entity;
 import org.anddev.andengine.entity.modifier.IEntityModifier;
 import org.anddev.andengine.entity.sprite.Sprite;
@@ -10,15 +13,16 @@ import org.anddev.andengine.entity.sprite.Sprite;
 import ru.nsu.ccfit.zuev.osu.ResourceManager;
 import ru.nsu.ccfit.zuev.skins.OsuSkin;
 
-public class CircleNumber extends Entity
-{
+public class CircleNumber extends ExtendedEntity {
 
     private final int num;
 
     public CircleNumber(final int number) {
         super(0, 0);
+        setOrigin(0.5f, 0.5f);
+
         num = number;
-        final String snum = String.valueOf(Math.abs(number));
+        var snum = String.valueOf(Math.abs(number));
 
         for (int i = 0; i < snum.length(); i++) {
             var tex = ResourceManager.getInstance().getTextureWithPrefix(OsuSkin.get().getHitCirclePrefix(), String.valueOf(snum.charAt(i)));
@@ -28,10 +32,13 @@ public class CircleNumber extends Entity
     }
 
     public void init(final PointF pos, float scale) {
-        scale *= OsuSkin.get().getComboTextScale();
+
+        setScale(scale);
 
         var overlap = OsuSkin.get().getHitCircleOverlap();
-        float maxWidthScaled = 0f;
+        var textScale = OsuSkin.get().getComboTextScale();
+
+        float maxWidth = 0f;
         float maxHeight = 0f;
 
         for (int i = 0; i < getChildCount(); i++)
@@ -39,17 +46,15 @@ public class CircleNumber extends Entity
             // We assume all attached child are Sprite
             var sprite = (Sprite) getChild(i);
 
-            sprite.setScale(scale);
-            sprite.setPosition(maxWidthScaled, 0f);
+            sprite.setScale(textScale);
+            sprite.setPosition(maxWidth, 0f);
 
-            maxWidthScaled += sprite.getWidthScaled() - overlap;
+            maxWidth += sprite.getWidthScaled() - overlap;
             maxHeight = Math.max(maxHeight, sprite.getHeight());
         }
 
-        // Computing max width without scale, so we can properly align the entity.
-        var maxWidth = getLastChild().getX() + ((Sprite) getLastChild()).getWidth();
-
-        setPosition(pos.x - maxWidth / 2f, pos.y - maxHeight / 2f);
+        setSize(maxWidth, maxHeight);
+        setPosition(pos.x, pos.y);
     }
 
     public int getNum() {

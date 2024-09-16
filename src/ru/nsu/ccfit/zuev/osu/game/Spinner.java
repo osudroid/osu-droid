@@ -3,6 +3,7 @@ package ru.nsu.ccfit.zuev.osu.game;
 import android.graphics.PointF;
 
 import com.reco1l.osu.Execution;
+import com.reco1l.osu.graphics.ExtendedSprite;
 import com.reco1l.osu.graphics.Modifiers;
 import com.rian.osu.beatmap.hitobject.BankHitSampleInfo;
 import com.rian.osu.beatmap.hitobject.HitSampleInfo;
@@ -24,14 +25,14 @@ import ru.nsu.ccfit.zuev.osu.scoring.ScoreNumber;
 import ru.nsu.ccfit.zuev.osu.scoring.StatisticV2;
 
 public class Spinner extends GameObject {
-    private final Sprite background;
+    private final ExtendedSprite background;
     public final PointF center;
-    private final Sprite circle;
-    private final Sprite approachCircle;
+    private final ExtendedSprite circle;
+    private final ExtendedSprite approachCircle;
     private final Sprite metre;
-    private final Sprite spinText;
+    private final ExtendedSprite spinText;
     private final TextureRegion metreRegion;
-    private final Sprite clearText;
+    private final ExtendedSprite clearText;
     private final ScoreNumber bonusScore;
     protected com.rian.osu.beatmap.hitobject.Spinner beatmapSpinner;
     private PointF oldMouse;

@@ -1,21 +1,15 @@
 package ru.nsu.ccfit.zuev.osu.helper;
 
-import org.anddev.andengine.entity.sprite.Sprite;
+import com.reco1l.osu.graphics.ExtendedSprite;
+
 import org.anddev.andengine.opengl.texture.region.TextureRegion;
 
-public class CentredSprite extends Sprite {
+public class CentredSprite extends ExtendedSprite {
 
     public CentredSprite(final float pX, final float pY, final TextureRegion pTextureRegion) {
-        super(pX - (float) pTextureRegion.getWidth() / 2, pY - (float) pTextureRegion.getHeight() / 2, pTextureRegion);
-    }
-
-    @Override
-    public void setPosition(float pX, float pY) {
-
-        pX -= (float) getTextureRegion().getWidth() / 2;
-        pY -= (float) getTextureRegion().getHeight() / 2;
-
-        super.setPosition(pX, pY);
+        super(pX, pY);
+        setTextureRegion(pTextureRegion);
+        setOrigin(0.5f, 0.5f);
     }
 
 }
