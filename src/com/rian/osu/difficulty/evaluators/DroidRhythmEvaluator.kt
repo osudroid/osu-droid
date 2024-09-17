@@ -194,9 +194,15 @@ object DroidRhythmEvaluator {
                     island = Island(currentDelta.toInt(), deltaDifferenceEpsilon)
                 }
             } else if (prevDelta > deltaDifferenceEpsilon + currentDelta) {
-                // We want to be speeding up.
+                // We're speeding up.
                 // Begin counting island until we change speed again.
                 firstDeltaSwitch = true
+
+                // Reduce ratio if we're starting after a slider.
+                if (prevObject.obj is Slider) {
+                    effectiveRatio *= 0.3
+                }
+
                 startRatio = effectiveRatio
                 island = Island(currentDelta.toInt(), deltaDifferenceEpsilon)
             }
