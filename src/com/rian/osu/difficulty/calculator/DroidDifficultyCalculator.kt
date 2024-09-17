@@ -39,6 +39,7 @@ class DroidDifficultyCalculator : DifficultyCalculator<DroidDifficultyHitObject,
         parameters: DifficultyCalculationParameters?
     ) = DroidDifficultyAttributes().apply {
         mods = parameters?.mods?.slice(parameters.mods.indices) ?: mods
+        customSpeedMultiplier = parameters?.customSpeedMultiplier ?: customSpeedMultiplier
         clockRate = parameters?.totalSpeedMultiplier?.toDouble() ?: clockRate
 
         maxCombo = beatmap.maxCombo

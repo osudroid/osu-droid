@@ -31,13 +31,13 @@ data class CursorGroup(
     /**
      * The start time of this [CursorGroup].
      */
-    val startTime: Int
+    val startTime
         get() = down.time
 
     /**
      * The end time of this [CursorGroup].
      */
-    val endTime: Int
+    val endTime
         get() = up?.time ?: moves.lastOrNull()?.time ?: down.time
 
     /**
@@ -45,7 +45,7 @@ data class CursorGroup(
      *
      * This iterates through all movements and as such should be used sparingly or stored locally.
      */
-    val allMovements: List<ReplayMovement>
+    val allMovements
         get() = mutableListOf<ReplayMovement>().apply {
             add(down)
             addAll(moves)

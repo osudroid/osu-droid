@@ -8,6 +8,7 @@ import com.rian.osu.beatmap.hitobject.Slider
 import com.rian.osu.difficulty.attributes.DroidDifficultyAttributes
 import com.rian.osu.math.Interpolation
 import com.rian.osu.math.Vector2
+import com.rian.osu.mods.ModHardRock
 import com.rian.osu.mods.ModPrecise
 import ru.nsu.ccfit.zuev.osu.scoring.Replay
 import ru.nsu.ccfit.zuev.osu.scoring.ResultType
@@ -15,6 +16,7 @@ import ru.nsu.ccfit.zuev.osu.scoring.TouchType
 import kotlin.math.max
 import kotlin.math.min
 import kotlin.math.pow
+import ru.nsu.ccfit.zuev.osu.scoring.Replay.ReplayMovement
 
 /**
  * Utility to check whether relevant [Slider]s in a [Beatmap] are cheesed.
@@ -131,7 +133,7 @@ class SliderCheeseChecker(
                     }
 
                     if (group.startTime >= minTimeLimit) {
-                        val distance = Vector2(group.down.point).getDistance(sliderStartPosition)
+                        val distance = getMovementPosition(group.down).getDistance(sliderStartPosition)
 
                         if (closestDistance > distance) {
                             closestDistance = distance
@@ -155,7 +157,7 @@ class SliderCheeseChecker(
                         var distance = Float.POSITIVE_INFINITY
 
                         when (movement.touchType) {
-                            TouchType.UP -> distance = Vector2(prevMovement.point).getDistance(sliderStartPosition)
+                            TouchType.UP -> distance = getMovementPosition(prevMovement).getDistance(sliderStartPosition)
 
                             TouchType.MOVE -> {
                                 var mSecPassed = max(prevMovement.time.toDouble(), minTimeLimit)
@@ -166,9 +168,10 @@ class SliderCheeseChecker(
                                     val t = (mSecPassed.toFloat() - prevMovement.time) /
                                         (movement.time - prevMovement.time)
 
-                                    val interpolatedPosition = Vector2(
-                                        Interpolation.linear(prevMovement.point.x, movement.point.x, t),
-                                        Interpolation.linear(prevMovement.point.y, movement.point.y, t)
+                                    val interpolatedPosition = Interpolation.linear(
+                                        getMovementPosition(prevMovement),
+                                        getMovementPosition(movement),
+                                        t
                                     )
 
                                     distance = interpolatedPosition.getDistance(sliderStartPosition)
@@ -256,15 +259,16 @@ class SliderCheeseChecker(
                         val t = (nestedObject.startTime.toFloat() - prevMovement.time) /
                             (movement.time - prevMovement.time)
 
-                        val interpolatedPosition = Vector2(
-                            Interpolation.linear(prevMovement.point.x, movement.point.x, t),
-                            Interpolation.linear(prevMovement.point.y, movement.point.y, t)
+                        val interpolatedPosition = Interpolation.linear(
+                            getMovementPosition(prevMovement),
+                            getMovementPosition(movement),
+                            t
                         )
 
                         interpolatedPosition.getDistance(nestedPosition) > sliderBallRadius
                     }
 
-                    TouchType.UP -> Vector2(prevMovement.point).getDistance(nestedPosition) > sliderBallRadius
+                    TouchType.UP -> getMovementPosition(prevMovement).getDistance(nestedPosition) > sliderBallRadius
 
                     else -> false
                 }
@@ -279,4 +283,8 @@ class SliderCheeseChecker(
     }
 
     private fun computePenalty(factor: Double, ratingSum: Double) = max(factor, (1 - ratingSum * factor).pow(2))
+
+    private fun getMovementPosition(movement: ReplayMovement) =
+        if (difficultyAttributes.mods.any { it is ModHardRock }) Vector2(movement.point.x, 512 - movement.point.y)
+        else Vector2(movement.point)
 }
