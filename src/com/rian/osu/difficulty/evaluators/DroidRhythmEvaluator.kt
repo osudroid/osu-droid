@@ -41,7 +41,7 @@ object DroidRhythmEvaluator {
         override fun equals(other: Any?) = other?.hashCode() == hashCode()
     }
 
-    private const val RHYTHM_MULTIPLIER = 1.05
+    private const val RHYTHM_MULTIPLIER = 1.2
     private const val MAX_ISLAND_SIZE = 7
     private const val HISTORY_OBJECTS_MAX = 24
     private const val HISTORY_TIME_MAX = 4000 // 4 seconds of calculateRhythmBonus max.
@@ -111,7 +111,7 @@ object DroidRhythmEvaluator {
             val prevDelta = prevObject.strainTime
             val lastDelta = lastObject.strainTime
 
-            val currentRatio = 1 + 5.8 * min(
+            val currentRatio = 1 + 10 * min(
                 0.5,
                 sin(Math.PI / (min(prevDelta, currentDelta) / max(prevDelta, currentDelta))).pow(2)
             )
