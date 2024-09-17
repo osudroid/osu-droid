@@ -12,10 +12,6 @@ import com.rian.osu.math.Vector2
 import com.rian.osu.mods.Mod
 import com.rian.osu.mods.ModHardRock
 import com.rian.osu.mods.ModPrecise
-import kotlin.Array
-import kotlin.Double
-import kotlin.Int
-import kotlin.apply
 import kotlin.math.max
 import kotlin.math.pow
 import ru.nsu.ccfit.zuev.osu.scoring.Replay.ReplayMovement
