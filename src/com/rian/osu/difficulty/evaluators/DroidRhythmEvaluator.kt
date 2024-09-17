@@ -138,11 +138,9 @@ object DroidRhythmEvaluator {
                     }
 
                     // BPM change was from a slider, this is typically easier than circle -> circle.
-                    // Unintentional side effect is that bursts with kicksliders at the ends might
-                    // have lower difficulty than bursts without sliders. Therefore, we're checking for
-                    // quick sliders and don't lower the difficulty for them since they don't really
-                    // make tapping easier (no time to adjust).
-                    if (prevObject.obj is Slider && prevObject.travelTime > prevDelta * 1.5) {
+                    // Unintentional side effect is that bursts with kick-sliders at the ends might
+                    // have lower difficulty than bursts without sliders.
+                    if (prevObject.obj is Slider) {
                         effectiveRatio /= 4
                     }
 
