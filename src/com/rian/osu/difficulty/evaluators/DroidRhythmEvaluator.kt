@@ -43,18 +43,17 @@ object DroidRhythmEvaluator {
 
     private const val RHYTHM_MULTIPLIER = 1.05
     private const val MAX_ISLAND_SIZE = 7
-    private const val HISTORY_OBJECTS_MAX = 32
-    private const val HISTORY_TIME_MAX = 5000 // 5 seconds of calculateRhythmBonus max.
+    private const val HISTORY_OBJECTS_MAX = 24
+    private const val HISTORY_TIME_MAX = 4000 // 4 seconds of calculateRhythmBonus max.
 
     /**
      * Calculates a rhythm multiplier for the difficulty of the tap associated
      * with historic data of the current object.
      *
      * @param current The current object.
-     * @param clockRate The clock rate of the beatmap.
      */
     @JvmStatic
-    fun evaluateDifficultyOf(current: DroidDifficultyHitObject, clockRate: Double): Double {
+    fun evaluateDifficultyOf(current: DroidDifficultyHitObject): Double {
         if (
             current.obj is Spinner ||
             // Exclude overlapping objects that can be tapped at once.
@@ -70,15 +69,12 @@ object DroidRhythmEvaluator {
         var previousIsland = Island(deltaDifferenceEpsilon)
         val islandCounts = mutableMapOf<Island, Int>()
 
-        val historyTimeMaxAdjusted = ceil(HISTORY_TIME_MAX / clockRate).toInt()
-        val historyObjectsMaxAdjusted = ceil(HISTORY_OBJECTS_MAX / clockRate).toInt()
-
         // Store the ratio of the current start of an island to buff for tighter rhythms.
         var startRatio = 0.0
         var firstDeltaSwitch = false
         var rhythmStart = 0
 
-        val historicalNoteCount = min(current.index, historyObjectsMaxAdjusted)
+        val historicalNoteCount = min(current.index, HISTORY_OBJECTS_MAX)
 
         // Exclude overlapping objects that can be tapped at once.
         val validPrevious = mutableListOf<DroidDifficultyHitObject>()
@@ -93,7 +89,7 @@ object DroidRhythmEvaluator {
 
         while (
             rhythmStart < validPrevious.size - 2 &&
-            current.startTime - validPrevious[rhythmStart].startTime < historyTimeMaxAdjusted
+            current.startTime - validPrevious[rhythmStart].startTime < HISTORY_TIME_MAX
         ) {
             ++rhythmStart
         }
@@ -105,7 +101,7 @@ object DroidRhythmEvaluator {
 
             // Scale note 0 to 1 from history to now.
             var currentHistoricalDecay =
-                (historyTimeMaxAdjusted - (current.startTime - currentObject.startTime)) / historyTimeMaxAdjusted
+                (HISTORY_TIME_MAX - (current.startTime - currentObject.startTime)) / HISTORY_TIME_MAX
 
             // Either we're limited by time or limited by object count.
             currentHistoricalDecay =

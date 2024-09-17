@@ -17,11 +17,6 @@ class DroidTap(
     mods: List<Mod>,
 
     /**
-     * The clock rate of the beatmap.
-     */
-    private val clockRate: Double,
-
-    /**
      * Whether to consider cheesability.
      */
     private val considerCheesability: Boolean,
@@ -86,7 +81,7 @@ class DroidTap(
             current, considerCheesability, strainTimeCap
         ) * skillMultiplier
 
-        currentRhythm = DroidRhythmEvaluator.evaluateDifficultyOf(current, clockRate)
+        currentRhythm = DroidRhythmEvaluator.evaluateDifficultyOf(current)
 
         objectDeltaTimes.add(current.deltaTime)
 

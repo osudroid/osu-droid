@@ -89,7 +89,7 @@ class DroidDifficultyCalculator : DifficultyCalculator<DroidDifficultyHitObject,
             averageSpeedDeltaTime = it.relevantDeltaTime()
 
             if (tapDifficulty > 0) {
-                val tapSkillVibro = DroidTap(mods, clockRate, true, averageSpeedDeltaTime)
+                val tapSkillVibro = DroidTap(mods, true, averageSpeedDeltaTime)
 
                 objects.forEach { o -> tapSkillVibro.process(o) }
 
@@ -223,18 +223,17 @@ class DroidDifficultyCalculator : DifficultyCalculator<DroidDifficultyHitObject,
         parameters: DifficultyCalculationParameters?
     ): Array<Skill<DroidDifficultyHitObject>> {
         val mods = parameters?.mods ?: mutableListOf()
-        val clockRate = parameters?.totalSpeedMultiplier?.toDouble() ?: 1.0
 
         return arrayOf(
             DroidAim(mods, true),
             DroidAim(mods, false),
-            DroidTap(mods, clockRate, true),
-            DroidTap(mods, clockRate, false),
-            DroidRhythm(mods, clockRate),
+            DroidTap(mods, true),
+            DroidTap(mods, false),
+            DroidRhythm(mods),
             DroidFlashlight(mods, true),
             DroidFlashlight(mods, false),
-            DroidVisual(mods, clockRate, true),
-            DroidVisual(mods, clockRate, false)
+            DroidVisual(mods, true),
+            DroidVisual(mods, false)
         )
     }
 
