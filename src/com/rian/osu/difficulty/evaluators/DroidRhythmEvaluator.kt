@@ -156,6 +156,11 @@ object DroidRhythmEvaluator {
                         effectiveRatio /= 8
                     }
 
+                    // Singletaps are easier to control.
+                    if (island.deltas.size == 1) {
+                        effectiveRatio /= 2
+                    }
+
                     if (island in islandCounts) {
                         // Only add island to island counts if they're going one after another.
                         if (previousIsland == island) {
