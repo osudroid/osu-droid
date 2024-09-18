@@ -5,6 +5,7 @@ import static org.anddev.andengine.util.constants.Constants.VERTEX_INDEX_Y;
 
 import org.anddev.andengine.engine.camera.Camera;
 import org.anddev.andengine.entity.primitive.Line;
+import org.anddev.andengine.entity.shape.IShape;
 import org.anddev.andengine.entity.shape.RectangularShape;
 import org.anddev.andengine.util.MathUtils;
 
@@ -14,6 +15,10 @@ import org.anddev.andengine.util.MathUtils;
  * 
  * @author Nicolas Gramlich
  * @since 11:50:19 - 11.03.2010
+ */
+/*
+ * osu!droid modified:
+ * - First parameter of method `checkContains` and `fillVertices` now allows IShape types rather than RectangularShape.
  */
 public class RectangularShapeCollisionChecker extends ShapeCollisionChecker {
 	// ===========================================================
@@ -47,7 +52,7 @@ public class RectangularShapeCollisionChecker extends ShapeCollisionChecker {
 	// Methods
 	// ===========================================================
 
-	public static boolean checkContains(final RectangularShape pRectangularShape, final float pX, final float pY) {
+	public static boolean checkContains(final IShape pRectangularShape, final float pX, final float pY) {
 		RectangularShapeCollisionChecker.fillVertices(pRectangularShape, VERTICES_CONTAINS_TMP);
 		return ShapeCollisionChecker.checkContains(VERTICES_CONTAINS_TMP, 2 * RECTANGULARSHAPE_VERTEX_COUNT, pX, pY);
 	}
@@ -66,21 +71,21 @@ public class RectangularShapeCollisionChecker extends ShapeCollisionChecker {
 		return ShapeCollisionChecker.checkCollision(2 * RECTANGULARSHAPE_VERTEX_COUNT, VERTICES_COLLISION_TMP_A, 2 * LINE_VERTEX_COUNT, VERTICES_COLLISION_TMP_B);
 	}
 
-	public static boolean checkCollision(final RectangularShape pRectangularShapeA, final RectangularShape pRectangularShapeB) {
+	public static boolean checkCollision(final IShape pRectangularShapeA, final RectangularShape pRectangularShapeB) {
 		RectangularShapeCollisionChecker.fillVertices(pRectangularShapeA, VERTICES_COLLISION_TMP_A);
 		RectangularShapeCollisionChecker.fillVertices(pRectangularShapeB, VERTICES_COLLISION_TMP_B);
 
 		return ShapeCollisionChecker.checkCollision(2 * RECTANGULARSHAPE_VERTEX_COUNT, VERTICES_COLLISION_TMP_A, 2 * RECTANGULARSHAPE_VERTEX_COUNT, VERTICES_COLLISION_TMP_B);
 	}
 
-	public static boolean checkCollision(final RectangularShape pRectangularShape, final Line pLine) {
+	public static boolean checkCollision(final IShape pRectangularShape, final Line pLine) {
 		RectangularShapeCollisionChecker.fillVertices(pRectangularShape, VERTICES_COLLISION_TMP_A);
 		LineCollisionChecker.fillVertices(pLine, VERTICES_COLLISION_TMP_B);
 
 		return ShapeCollisionChecker.checkCollision(2 * RECTANGULARSHAPE_VERTEX_COUNT, VERTICES_COLLISION_TMP_A, 2 * LINE_VERTEX_COUNT, VERTICES_COLLISION_TMP_B);
 	}
 
-	public static void fillVertices(final RectangularShape pRectangularShape, final float[] pVertices) {
+	public static void fillVertices(final IShape pRectangularShape, final float[] pVertices) {
 		final float left = 0;
 		final float top = 0;
 		final float right = pRectangularShape.getWidth();
