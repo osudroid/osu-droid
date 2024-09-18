@@ -40,11 +40,6 @@ public class HitCircle extends GameObject {
      */
     private boolean isCircleDimming;
 
-    /**
-     * Whether the slider is shaking.
-     */
-    private boolean isShaking;
-
 
     public HitCircle() {
         circlePiece = new NumberedCirclePiece("hitcircle", "hitcircleoverlay");
@@ -67,7 +62,6 @@ public class HitCircle extends GameObject {
         kiai = GameHelper.isKiai();
         this.comboColor.set(comboColor.r(), comboColor.g(), comboColor.b());
         isCircleDimming = false;
-        isShaking = false;
 
         // Calculating position of top/left corner for sprites and hit radius
         final float scale = beatmapCircle.getGameplayScale();
@@ -239,27 +233,22 @@ public class HitCircle extends GameObject {
                 removeFromScene();
                 return;
             }
-        } else if (isHit()) {
-
-            if (canBeHit()) {
-                float signAcc = passedTime - timePreempt;
-                if (Config.isFixFrameOffset()) {
-                    signAcc += (float) hitOffsetToPreviousFrame() / 1000f;
-                }
-                final float acc = Math.abs(signAcc);
-                if (acc <= GameHelper.getDifficultyHelper().hitWindowFor50(GameHelper.getOverallDifficulty())) {
-                    playSound();
-                }
-                listener.registerAccuracy(signAcc);
-                passedTime = -1;
-                // Remove circle and register hit in update thread
-                float finalSignAcc = signAcc;
-                startHit = true;
-                listener.onCircleHit(id, finalSignAcc, pos, endsCombo, (byte) 0, comboColor);
-                removeFromScene();
-            } else if (Config.isShakeHitObjects()) {
-                applyShakeAnimation();
+        } else if (isHit() && canBeHit()) {
+            float signAcc = passedTime - timePreempt;
+            if (Config.isFixFrameOffset()) {
+                signAcc += (float) hitOffsetToPreviousFrame() / 1000f;
             }
+            final float acc = Math.abs(signAcc);
+            if (acc <= GameHelper.getDifficultyHelper().hitWindowFor50(GameHelper.getOverallDifficulty())) {
+                playSound();
+            }
+            listener.registerAccuracy(signAcc);
+            passedTime = -1;
+            // Remove circle and register hit in update thread
+            float finalSignAcc = signAcc;
+            startHit = true;
+            listener.onCircleHit(id, finalSignAcc, pos, endsCombo, (byte) 0, comboColor);
+            removeFromScene();
             return;
         }
 
@@ -307,39 +296,22 @@ public class HitCircle extends GameObject {
 
     @Override
     public void tryHit(final float dt) {
-        if (isHit()) {
-            if (canBeHit()) {
-                float signAcc = passedTime - timePreempt;
-                if (Config.isFixFrameOffset()) {
-                    signAcc += (float) hitOffsetToPreviousFrame() / 1000f;
-                }
-                final float acc = Math.abs(signAcc);
-                if (acc <= GameHelper.getDifficultyHelper().hitWindowFor50(GameHelper.getOverallDifficulty())) {
-                    playSound();
-                }
-                listener.registerAccuracy(signAcc);
-                passedTime = -1;
-                // Remove circle and register hit in update thread
-                float finalSignAcc = signAcc;
-                listener.onCircleHit(id, finalSignAcc, pos, endsCombo, (byte) 0, comboColor);
-                removeFromScene();
-            } else if (Config.isShakeHitObjects()) {
-                applyShakeAnimation();
+        if (isHit() && canBeHit()) {
+            float signAcc = passedTime - timePreempt;
+            if (Config.isFixFrameOffset()) {
+                signAcc += (float) hitOffsetToPreviousFrame() / 1000f;
             }
+            final float acc = Math.abs(signAcc);
+            if (acc <= GameHelper.getDifficultyHelper().hitWindowFor50(GameHelper.getOverallDifficulty())) {
+                playSound();
+            }
+            listener.registerAccuracy(signAcc);
+            passedTime = -1;
+            // Remove circle and register hit in update thread
+            float finalSignAcc = signAcc;
+            listener.onCircleHit(id, finalSignAcc, pos, endsCombo, (byte) 0, comboColor);
+            removeFromScene();
         }
     }
 
-    private void applyShakeAnimation() {
-        if (isShaking) {
-            return;
-        }
-        isShaking = true;
-
-        circlePiece.registerEntityModifier(Modifiers.shakeHorizontal(0.32f / GameHelper.getSpeedMultiplier(), 8f, new ModifierListener() {
-            @Override
-            public void onModifierFinished(IModifier<IEntity> pModifier, IEntity pItem) {
-                isShaking = false;
-            }
-        }));
-    }
 }

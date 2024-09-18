@@ -115,11 +115,6 @@ public class Slider extends GameObject {
      */
     private boolean isCircleDimming;
 
-    /**
-     * Whether the slider is shaking.
-     */
-    private boolean isShaking;
-
 
     public Slider() {
 
@@ -154,7 +149,6 @@ public class Slider extends GameObject {
         isFollowCircleAnimating = false;
         isInRadius = false;
         isCircleDimming = false;
-        isShaking = false;
 
         reverse = false;
         startHit = false;
@@ -692,27 +686,22 @@ public class Slider extends GameObject {
                 currentNestedObjectIndex++;
                 ticksGot++;
                 listener.onSliderHit(id, 30, null, pos, false, bodyColor, GameObjectListener.SLIDER_START);
-            } else if (isHit()) {
+            } else if (isHit() && canBeHit()) {
+                listener.registerAccuracy(passedTime);
+                startHit = true;
+                ticksGot++;
+                firstHitAccuracy = (int) (passedTime * 1000);
 
-                if (canBeHit()) {
-                    listener.registerAccuracy(passedTime);
-                    startHit = true;
-                    ticksGot++;
-                    firstHitAccuracy = (int) (passedTime * 1000);
-
-                    if (-passedTime < GameHelper.getDifficultyHelper().hitWindowFor50(GameHelper.getOverallDifficulty())) {
-                        playCurrentNestedObjectHitSound();
-                        listener.onSliderHit(id, 30, null, pos,
-                                false, bodyColor, GameObjectListener.SLIDER_START);
-                    } else {
-                        listener.onSliderHit(id, -1, null, pos,
-                                false, bodyColor, GameObjectListener.SLIDER_START);
-                    }
-
-                    currentNestedObjectIndex++;
-                } else if (Config.isShakeHitObjects()) {
-                    applyShakeAnimations();
+                if (-passedTime < GameHelper.getDifficultyHelper().hitWindowFor50(GameHelper.getOverallDifficulty())) {
+                    playCurrentNestedObjectHitSound();
+                    listener.onSliderHit(id, 30, null, pos,
+                            false, bodyColor, GameObjectListener.SLIDER_START);
+                } else {
+                    listener.onSliderHit(id, -1, null, pos,
+                            false, bodyColor, GameObjectListener.SLIDER_START);
                 }
+
+                currentNestedObjectIndex++;
             }
         }
 
@@ -974,29 +963,6 @@ public class Slider extends GameObject {
         }
     }
 
-    private void applyShakeAnimations() {
-        if (isShaking) {
-            return;
-        }
-        isShaking = true;
-
-        sliderBody.applyShakeAnimations();
-        headCirclePiece.registerEntityModifier(Modifiers.shakeHorizontal(0.32f / GameHelper.getSpeedMultiplier(), 8f));
-        tailCirclePiece.registerEntityModifier(Modifiers.shakeHorizontal(0.32f / GameHelper.getSpeedMultiplier(), 8f, new ModifierListener() {
-            @Override
-            public void onModifierFinished(IModifier<IEntity> pModifier, IEntity pItem) {
-                isShaking = false;
-            }
-        }));
-
-        // We're not applying this to the start arrow because it should be hidden at this point.
-        endArrow.registerEntityModifier(Modifiers.shakeHorizontal(0.32f / GameHelper.getSpeedMultiplier(), 8f));
-
-        for (int i = 0, size = tickSprites.size(); i < size; i++) {
-            tickSprites.get(i).registerEntityModifier(Modifiers.shakeHorizontal(0.32f / GameHelper.getSpeedMultiplier(), 8f));
-        }
-    }
-
     private void applyBodyFadeAdjustments(float fadeInDuration) {
         if (sliderBody == null) {
             return;
@@ -1046,27 +1012,22 @@ public class Slider extends GameObject {
             return;
         }
 
-        if (isHit()) {
+        if (isHit() && canBeHit()) {
+            listener.registerAccuracy(passedTime);
+            startHit = true;
+            ticksGot++;
+            firstHitAccuracy = (int) (passedTime * 1000);
 
-            if (canBeHit()) {
-                listener.registerAccuracy(passedTime);
-                startHit = true;
-                ticksGot++;
-                firstHitAccuracy = (int) (passedTime * 1000);
-
-                if (-passedTime < GameHelper.getDifficultyHelper().hitWindowFor50(GameHelper.getOverallDifficulty())) {
-                    playCurrentNestedObjectHitSound();
-                    listener.onSliderHit(id, 30, null, pos,
-                            false, bodyColor, GameObjectListener.SLIDER_START);
-                } else {
-                    listener.onSliderHit(id, -1, null, pos,
-                            false, bodyColor, GameObjectListener.SLIDER_START);
-                }
-
-                currentNestedObjectIndex++;
-            } else if (Config.isShakeHitObjects()) {
-                applyShakeAnimations();
+            if (-passedTime < GameHelper.getDifficultyHelper().hitWindowFor50(GameHelper.getOverallDifficulty())) {
+                playCurrentNestedObjectHitSound();
+                listener.onSliderHit(id, 30, null, pos,
+                        false, bodyColor, GameObjectListener.SLIDER_START);
+            } else {
+                listener.onSliderHit(id, -1, null, pos,
+                        false, bodyColor, GameObjectListener.SLIDER_START);
             }
+
+            currentNestedObjectIndex++;
         }
 
         if (passedTime < 0 && startHit) {

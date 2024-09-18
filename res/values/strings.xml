@@ -222,7 +222,5 @@
 	<!--Graphics options-->
 	<string name="setting_dim_hit_objects_title">Enable hit objects dim</string>
 	<string name="setting_dim_hit_objects_summary">Dim hit objects when they are ready to be hit.</string>
-	<string name="setting_shake_hit_objects_title">Enable hit object shake animation</string>
-	<string name="setting_shake_hit_objects_summary">Shake hit objects when they are hit before being ready.</string>
 
 </resources>
