@@ -11,15 +11,7 @@ import javax.microedition.khronos.opengles.*
 /**
  * Sprite that allows to change texture once created.
  */
-open class ExtendedSprite @JvmOverloads constructor(
-
-    x: Float = 0f,
-    y: Float = 0f,
-    width: Float = 0f,
-    height: Float = 0f,
-    vertexBuffer: RectangleVertexBuffer = RectangleVertexBuffer(GL11.GL_STATIC_DRAW, true)
-
-) : ExtendedEntity(x, y, width, height, vertexBuffer) {
+open class ExtendedSprite : ExtendedEntity() {
 
     /**
      * Whether the size of the sprite should be adjusted to the size of the texture.
@@ -82,7 +74,7 @@ open class ExtendedSprite @JvmOverloads constructor(
     }
 
     override fun onUpdateVertexBuffer() {
-        (vertexBuffer as RectangleVertexBuffer).update(this.mWidth, this.mHeight)
+        (vertexBuffer as RectangleVertexBuffer).update(width, height)
     }
 
     override fun onInitDraw(pGL: GL10) {

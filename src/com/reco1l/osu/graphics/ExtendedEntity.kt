@@ -1,6 +1,8 @@
 package com.reco1l.osu.graphics
 
+import org.anddev.andengine.collision.*
 import org.anddev.andengine.engine.camera.*
+import org.anddev.andengine.entity.primitive.*
 import org.anddev.andengine.entity.shape.*
 import org.anddev.andengine.opengl.util.*
 import org.anddev.andengine.opengl.vertex.*
@@ -12,15 +14,15 @@ import javax.microedition.khronos.opengles.*
  *
  * @author Reco1l
  */
-open class ExtendedEntity @JvmOverloads constructor(
+open class ExtendedEntity(
 
-    x: Float = 0f,
-    y: Float = 0f,
-    width: Float = 0f,
-    height: Float = 0f,
-    vertexBuffer: VertexBuffer = RectangleVertexBuffer(GL11.GL_STATIC_DRAW, true)
+    private var width: Float = 0f,
 
-) : RectangularShape(x, y, width, height, vertexBuffer) {
+    private var height: Float = 0f,
+
+    private val vertexBuffer: VertexBuffer = RectangleVertexBuffer(GL11.GL_STATIC_DRAW, true)
+
+) : Shape(0f, 0f) {
 
     /**
      * The origin factor of the entity in the X axis.
@@ -136,7 +138,79 @@ open class ExtendedEntity @JvmOverloads constructor(
         GLHelper.blendFunction(pGL, mSourceBlendFunction, mDestinationBlendFunction)
     }
 
+    override fun drawVertices(pGL: GL10, pCamera: Camera) {
+        pGL.glDrawArrays(GL10.GL_TRIANGLE_STRIP, 0, 4)
+    }
 
-    override fun onUpdateVertexBuffer() = Unit
+
+    override fun onUpdateVertexBuffer() {
+    }
+
+
+    fun setSize(width: Float, height: Float) {
+        if (this.width != width || this.height != height) {
+            this.width = width
+            this.height = height
+            onUpdateVertexBuffer()
+        }
+    }
+
+    fun setWidth(value: Float) {
+        if (width != value) {
+            width = value
+            onUpdateVertexBuffer()
+        }
+    }
+
+    override fun getWidth(): Float {
+        return width
+    }
+
+    fun setHeight(value: Float) {
+        if (height != value) {
+            height = value
+            onUpdateVertexBuffer()
+        }
+    }
+
+    override fun getHeight(): Float {
+        return height
+    }
+
+
+    // Base width and height are not needed for this class.
+
+    override fun getBaseWidth(): Float {
+        return width
+    }
+
+    override fun getBaseHeight(): Float {
+        return height
+    }
+
+
+    override fun getVertexBuffer(): VertexBuffer {
+        return vertexBuffer
+    }
+
+
+    override fun collidesWith(pOtherShape: IShape?): Boolean {
+        return when (pOtherShape) {
+            is RectangularShape -> RectangularShapeCollisionChecker.checkCollision(this, pOtherShape)
+            is Line -> RectangularShapeCollisionChecker.checkCollision(this, pOtherShape)
+            else -> false
+        }
+    }
+
+    override fun contains(pX: Float, pY: Float): Boolean {
+        return RectangularShapeCollisionChecker.checkContains(this, pX, pY)
+    }
+
+    override fun isCulled(pCamera: Camera): Boolean {
+        return mX > pCamera.maxX
+            || mY > pCamera.maxY
+            || mX + this.width < pCamera.minX
+            || mY + this.height < pCamera.minY
+    }
 
 }
