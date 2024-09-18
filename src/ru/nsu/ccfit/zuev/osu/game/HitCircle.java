@@ -1,11 +1,11 @@
 package ru.nsu.ccfit.zuev.osu.game;
 
 import com.reco1l.osu.graphics.Modifiers;
+import com.reco1l.osu.playfield.NumberedCirclePiece;
 import com.rian.osu.mods.ModHidden;
 
 import org.anddev.andengine.entity.IEntity;
 import org.anddev.andengine.entity.scene.Scene;
-import org.anddev.andengine.entity.sprite.Sprite;
 import org.anddev.andengine.util.modifier.IModifier;
 
 import ru.nsu.ccfit.zuev.osu.Config;
@@ -18,18 +18,21 @@ import ru.nsu.ccfit.zuev.osu.scoring.ResultType;
 import ru.nsu.ccfit.zuev.skins.OsuSkin;
 
 public class HitCircle extends GameObject {
-    private final CentredSprite circle;
-    private final CentredSprite overlay;
+
     private final CentredSprite approachCircle;
     private final RGBColor comboColor = new RGBColor();
     private com.rian.osu.beatmap.hitobject.HitCircle beatmapCircle;
-    private CircleNumber number;
     private GameObjectListener listener;
     private Scene scene;
     private float radiusSquared;
     private float passedTime;
     private float timePreempt;
     private boolean kiai;
+
+    /**
+     * The circle piece that represents the circle body and overlay.
+     */
+    private final NumberedCirclePiece circlePiece;
 
     /**
      * Whether the circle body is being animated.
@@ -44,11 +47,7 @@ public class HitCircle extends GameObject {
 
 
     public HitCircle() {
-        // Getting sprites from sprite pool
-        circle = new CentredSprite(0, 0, ResourceManager.getInstance().getTexture("hitcircle"));
-        circle.setAlpha(0);
-        overlay = new CentredSprite(0, 0, ResourceManager.getInstance().getTexture("hitcircleoverlay"));
-        overlay.setAlpha(0);
+        circlePiece = new NumberedCirclePiece("hitcircle", "hitcircleoverlay");
         approachCircle = new CentredSprite(0, 0, ResourceManager.getInstance().getTexture("approachcircle"));
     }
 
@@ -80,14 +79,17 @@ public class HitCircle extends GameObject {
         float fadeInProgress = 1 - remainingFadeInDuration / actualFadeInDuration;
 
         // Initializing sprites
-        circle.setColor(comboColor.r(), comboColor.g(), comboColor.b());
-        circle.setScale(scale);
-        circle.setAlpha(fadeInProgress);
-        circle.setPosition(pos.x, pos.y);
+        circlePiece.setCircleColor(comboColor.r(), comboColor.g(), comboColor.b());
+        circlePiece.setScale(scale);
+        circlePiece.setAlpha(fadeInProgress);
+        circlePiece.setPosition(pos.x, pos.y);
 
-        overlay.setScale(scale);
-        overlay.setAlpha(fadeInProgress);
-        overlay.setPosition(pos.x, pos.y);
+        int comboNum = beatmapCircle.getIndexInCurrentCombo() + 1;
+        if (OsuSkin.get().isLimitComboTextLength()) {
+            comboNum %= 10;
+        }
+        circlePiece.setNumberText(comboNum);
+        circlePiece.setNumberScale(OsuSkin.get().getComboTextScale());
 
         approachCircle.setColor(comboColor.r(), comboColor.g(), comboColor.b());
         approachCircle.setScale(scale * (3 - 2 * fadeInProgress));
@@ -98,14 +100,6 @@ public class HitCircle extends GameObject {
             approachCircle.setVisible(Config.isShowFirstApproachCircle() && beatmapCircle.isFirstNote());
         }
 
-        // and getting new number from sprite pool
-        int comboNum = beatmapCircle.getIndexInCurrentCombo() + 1;
-        if (OsuSkin.get().isLimitComboTextLength()) {
-            comboNum %= 10;
-        }
-        number = GameObjectPool.getInstance().getNumber(comboNum);
-        number.init(pos, scale);
-        number.setAlpha(0);
 
         if (GameHelper.isHidden()) {
             float actualFadeOutDuration = timePreempt * (float) ModHidden.FADE_OUT_DURATION_MULTIPLIER / GameHelper.getSpeedMultiplier();
@@ -115,22 +109,12 @@ public class HitCircle extends GameObject {
             );
             float fadeOutProgress = remainingFadeOutDuration / actualFadeOutDuration;
 
-            number.registerEntityModifier(Modifiers.sequence(
-                    Modifiers.alpha(remainingFadeInDuration, fadeInProgress, 1),
-                    Modifiers.alpha(remainingFadeOutDuration, fadeOutProgress, 0)
-            ));
-            overlay.registerEntityModifier(Modifiers.sequence(
-                    Modifiers.alpha(remainingFadeInDuration, fadeInProgress, 1),
-                    Modifiers.alpha(remainingFadeOutDuration, fadeOutProgress, 0)
-            ));
-            circle.registerEntityModifier(Modifiers.sequence(
+            circlePiece.registerEntityModifier(Modifiers.sequence(
                     Modifiers.alpha(remainingFadeInDuration, fadeInProgress, 1),
                     Modifiers.alpha(remainingFadeOutDuration, fadeOutProgress, 0)
             ));
         } else {
-            circle.registerEntityModifier(Modifiers.alpha(remainingFadeInDuration, fadeInProgress, 1));
-            overlay.registerEntityModifier(Modifiers.alpha(remainingFadeInDuration, fadeInProgress, 1));
-            number.registerEntityModifier(Modifiers.alpha(remainingFadeInDuration, fadeInProgress, 1));
+            circlePiece.registerEntityModifier(Modifiers.alpha(remainingFadeInDuration, fadeInProgress, 1));
         }
 
         if (approachCircle.isVisible()) {
@@ -155,49 +139,21 @@ public class HitCircle extends GameObject {
             var dimDelaySec = (timePreempt - objectHittableRange) / GameHelper.getSpeedMultiplier();
             var colorDim = 195f / 255f;
 
-            // Circle requires special handling because it's tinted with combo color.
-            circle.setColor(comboColor.r() * colorDim, comboColor.g() * colorDim, comboColor.b() * colorDim);
-            circle.registerEntityModifier(Modifiers.sequence(
-                new ModifierListener() {
-                    @Override
-                    public void onModifierFinished(IModifier<IEntity> pModifier, IEntity pItem) {
-                        isCircleDimming = false;
-                    }
-                },
+            circlePiece.setColor(colorDim, colorDim, colorDim);
+            circlePiece.registerEntityModifier(Modifiers.sequence(
                 Modifiers.delay(dimDelaySec),
                 Modifiers.color(0.1f / GameHelper.getSpeedMultiplier(),
-                    circle.getRed(), comboColor.r(),
-                    circle.getGreen(), comboColor.g(),
-                    circle.getBlue(), comboColor.b()
+                    circlePiece.getRed(), 1f,
+                    circlePiece.getGreen(), 1f,
+                    circlePiece.getBlue(), 1f
                 )
             ));
 
-            overlay.setColor(colorDim, colorDim, colorDim);
-            overlay.registerEntityModifier(Modifiers.sequence(
-                Modifiers.delay(dimDelaySec),
-                Modifiers.color(0.1f / GameHelper.getSpeedMultiplier(),
-                    overlay.getRed(), 1f,
-                    overlay.getGreen(), 1f,
-                    overlay.getBlue(), 1f
-                )
-            ));
-
-            number.setColor(colorDim, colorDim, colorDim);
-            number.registerEntityModifier(Modifiers.sequence(
-                Modifiers.delay(dimDelaySec),
-                Modifiers.color(0.1f / GameHelper.getSpeedMultiplier(),
-                    number.getRed(), 1f,
-                    number.getGreen(), 1f,
-                    number.getBlue(), 1f
-                )
-            ));
         } else {
             isCircleDimming = false;
         }
 
-        scene.attachChild(number, 0);
-        scene.attachChild(overlay, 0);
-        scene.attachChild(circle, 0);
+        scene.attachChild(circlePiece, 0);
         scene.attachChild(approachCircle);
     }
 
@@ -210,19 +166,14 @@ public class HitCircle extends GameObject {
             return;
         }
 
-        overlay.clearEntityModifiers();
-        circle.clearEntityModifiers();
-        number.clearEntityModifiers();
+        circlePiece.clearEntityModifiers();
         approachCircle.clearEntityModifiers();
 
         // Detach all objects
-        overlay.detachSelf();
-        circle.detachSelf();
-        number.detachSelf();
+        circlePiece.detachSelf();
         approachCircle.detachSelf();
         listener.removeObject(this);
         GameObjectPool.getInstance().putCircle(this);
-        GameObjectPool.getInstance().putNumber(number);
         scene = null;
     }
 
@@ -319,9 +270,9 @@ public class HitCircle extends GameObject {
                 var g = Math.min(1, comboColor.g() + (1 - comboColor.g()) * kiaiModifier);
                 var b = Math.min(1, comboColor.b() + (1 - comboColor.b()) * kiaiModifier);
                 kiai = true;
-                circle.setColor(r, g, b);
+                circlePiece.setCircleColor(r, g, b);
             } else if (kiai) {
-                circle.setColor(comboColor.r(), comboColor.g(), comboColor.b());
+                circlePiece.setCircleColor(comboColor.r(), comboColor.g(), comboColor.b());
                 kiai = false;
             }
         }
@@ -384,9 +335,7 @@ public class HitCircle extends GameObject {
         }
         isShaking = true;
 
-        circle.registerEntityModifier(Modifiers.shakeHorizontal(0.32f / GameHelper.getSpeedMultiplier(), 8f));
-        overlay.registerEntityModifier(Modifiers.shakeHorizontal(0.32f / GameHelper.getSpeedMultiplier(), 8f));
-        number.registerEntityModifier(Modifiers.shakeHorizontal(0.32f / GameHelper.getSpeedMultiplier(), 8f, new ModifierListener() {
+        circlePiece.registerEntityModifier(Modifiers.shakeHorizontal(0.32f / GameHelper.getSpeedMultiplier(), 8f, new ModifierListener() {
             @Override
             public void onModifierFinished(IModifier<IEntity> pModifier, IEntity pItem) {
                 isShaking = false;

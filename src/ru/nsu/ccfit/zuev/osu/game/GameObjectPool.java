@@ -9,7 +9,6 @@ import ru.nsu.ccfit.zuev.osu.Config;
 public class GameObjectPool {
     public static GameObjectPool instance = new GameObjectPool();
     public LinkedList<HitCircle> circles = new LinkedList<>();
-    public Map<Integer, LinkedList<CircleNumber>> numbers = new HashMap<>();
     public Map<String, LinkedList<GameEffect>> effects = new HashMap<>();
     public LinkedList<Slider> sliders = new LinkedList<>();
     public LinkedList<FollowTrack> tracks = new LinkedList<>();
@@ -47,23 +46,6 @@ public class GameObjectPool {
 
     public void putSpinner(final Spinner spinner) {
         spinners.add(spinner);
-    }
-
-    public CircleNumber getNumber(final int num) {
-        if (numbers.containsKey(num) && !numbers.get(num).isEmpty()) {
-            return numbers.get(num).poll();
-        }
-
-        objectsCreated++;
-        return new CircleNumber(num);
-    }
-
-    public void putNumber(final CircleNumber number) {
-        if (!numbers.containsKey(number.getNum())) {
-            numbers.put(number.getNum(), new LinkedList<>());
-        }
-
-        numbers.get(number.getNum()).add(number);
     }
 
     public GameEffect getEffect(final String texname) {
@@ -116,7 +98,6 @@ public class GameObjectPool {
     public void purge() {
         effects.clear();
         circles.clear();
-        numbers.clear();
         sliders.clear();
         tracks.clear();
         spinners.clear();
@@ -127,7 +108,6 @@ public class GameObjectPool {
     public void preload() {
         for (int i = 0; i < 10; i++) {
             putCircle(new HitCircle());
-            putNumber(new CircleNumber(i + 1));
         }
         for (int i = 0; i < 5; i++) {
             putSlider(new Slider());

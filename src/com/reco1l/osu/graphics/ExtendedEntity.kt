@@ -1,6 +1,8 @@
 package com.reco1l.osu.graphics
 
+import org.anddev.andengine.engine.camera.*
 import org.anddev.andengine.entity.shape.*
+import org.anddev.andengine.opengl.util.*
 import org.anddev.andengine.opengl.vertex.*
 import javax.microedition.khronos.opengles.*
 
@@ -40,6 +42,11 @@ open class ExtendedEntity @JvmOverloads constructor(
      */
     var translationY = 0f
 
+    /**
+     * Whether the color should be inherited from all the parents in the hierarchy.
+     */
+    var inheritColor = true
+
 
     init {
         mRotationCenterX = 0.5f
@@ -77,7 +84,6 @@ open class ExtendedEntity @JvmOverloads constructor(
         val offsetX = width * rotationCenterX
         val offsetY = height * rotationCenterY
 
-
         pGL.glTranslatef(offsetX, offsetY, 0f)
         pGL.glRotatef(rotation, 0f, 0f, 1f)
         pGL.glTranslatef(-offsetX, -offsetY, 0f)
@@ -97,8 +103,40 @@ open class ExtendedEntity @JvmOverloads constructor(
         pGL.glTranslatef(-offsetX, -offsetY, 0f)
     }
 
-    override fun onUpdateVertexBuffer() {
+    private fun applyColor(pGL: GL10) {
 
+        var red = mRed
+        var green = mGreen
+        var blue = mBlue
+        var alpha = mAlpha
+
+        if (inheritColor) {
+
+            var parent = parent
+            while (parent != null) {
+
+                red *= parent.red
+                green *= parent.green
+                blue *= parent.blue
+                alpha *= parent.alpha
+
+                parent = parent.parent
+            }
+        }
+
+        GLHelper.setColor(pGL, red, green, blue, alpha)
     }
+
+
+    override fun onInitDraw(pGL: GL10) {
+
+        applyColor(pGL)
+
+        GLHelper.enableVertexArray(pGL)
+        GLHelper.blendFunction(pGL, mSourceBlendFunction, mDestinationBlendFunction)
+    }
+
+
+    override fun onUpdateVertexBuffer() = Unit
 
 }

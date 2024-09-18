@@ -69,7 +69,7 @@ open class ExtendedSprite @JvmOverloads constructor(
                 setSize(textureRegion?.width?.toFloat() ?: 0f, textureRegion?.height?.toFloat() ?: 0f)
                 updateVertexBuffer()
             }
-    }
+        }
 
 
     private fun applyBlendFunction() {
@@ -85,7 +85,7 @@ open class ExtendedSprite @JvmOverloads constructor(
         (vertexBuffer as RectangleVertexBuffer).update(this.mWidth, this.mHeight)
     }
 
-    override fun onInitDraw(pGL: GL10?) {
+    override fun onInitDraw(pGL: GL10) {
         super.onInitDraw(pGL)
         GLHelper.enableTextures(pGL)
         GLHelper.enableTexCoordArray(pGL)
