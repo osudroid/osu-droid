@@ -109,12 +109,6 @@ public class Slider extends GameObject {
      */
     private boolean isInRadius;
 
-    /**
-     * Whether the head and tail circle bodies are being animated.
-     * Used to prevent the Kiai animation collides with the dimming animation.
-     */
-    private boolean isCircleDimming;
-
 
     public Slider() {
 
@@ -148,7 +142,6 @@ public class Slider extends GameObject {
         isOver = false;
         isFollowCircleAnimating = false;
         isInRadius = false;
-        isCircleDimming = false;
 
         reverse = false;
         startHit = false;
@@ -320,7 +313,6 @@ public class Slider extends GameObject {
         }
 
         if (Config.isDimHitObjects()) {
-            isCircleDimming = true;
 
             // Source: https://github.com/peppy/osu/blob/60271fb0f7e091afb754455f93180094c63fc3fb/osu.Game.Rulesets.Osu/Objects/Drawables/DrawableOsuHitObject.cs#L101
             var dimDelaySec = ((float) beatmapSlider.timePreempt / 1000f - objectHittableRange) / GameHelper.getSpeedMultiplier();
@@ -357,8 +349,6 @@ public class Slider extends GameObject {
             ));
 
             sliderBody.applyDimAnimations(dimDelaySec);
-        } else {
-            isCircleDimming = false;
         }
 
         applyBodyFadeAdjustments(fadeInDuration);
@@ -705,24 +695,22 @@ public class Slider extends GameObject {
             }
         }
 
-        if (isCircleDimming) {
-            // This is used to the dim animation. Instead of applying a modifier for each tick sprite,
-            // we can just pair the color with the start circle overlay sprite.
-            for (int i = tickSprites.size() - 1; i >= 0; --i) {
-                tickSprites.get(i).setColor(headCirclePiece.getRed(), headCirclePiece.getGreen(), headCirclePiece.getBlue());
-            }
-        } else {
-            if (GameHelper.isKiai()) {
-                var kiaiModifier = (float) Math.max(0, 1 - GameHelper.getCurrentBeatTime() / GameHelper.getBeatLength()) * 0.5f;
-                var r = Math.min(1, circleColor.r() + (1 - circleColor.r()) * kiaiModifier);
-                var g = Math.min(1, circleColor.g() + (1 - circleColor.g()) * kiaiModifier);
-                var b = Math.min(1, circleColor.b() + (1 - circleColor.b()) * kiaiModifier);
-                kiai = true;
-                headCirclePiece.setCircleColor(r, g, b);
-            } else if (kiai) {
-                headCirclePiece.setCircleColor(circleColor.r(), circleColor.g(), circleColor.b());
-                kiai = false;
-            }
+        // This is used to the dim animation. Instead of applying a modifier for each tick sprite,
+        // we can just pair the color with the head circle piece sprite.
+        for (int i = tickSprites.size() - 1; i >= 0; --i) {
+            tickSprites.get(i).setColor(headCirclePiece.getRed(), headCirclePiece.getGreen(), headCirclePiece.getBlue());
+        }
+
+        if (GameHelper.isKiai()) {
+            var kiaiModifier = (float) Math.max(0, 1 - GameHelper.getCurrentBeatTime() / GameHelper.getBeatLength()) * 0.5f;
+            var r = Math.min(1, circleColor.r() + (1 - circleColor.r()) * kiaiModifier);
+            var g = Math.min(1, circleColor.g() + (1 - circleColor.g()) * kiaiModifier);
+            var b = Math.min(1, circleColor.b() + (1 - circleColor.b()) * kiaiModifier);
+            kiai = true;
+            headCirclePiece.setCircleColor(r, g, b);
+        } else if (kiai) {
+            headCirclePiece.setCircleColor(circleColor.r(), circleColor.g(), circleColor.b());
+            kiai = false;
         }
 
         if (passedTime < 0) // we at approach time

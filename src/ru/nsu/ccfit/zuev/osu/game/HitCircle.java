@@ -34,12 +34,6 @@ public class HitCircle extends GameObject {
      */
     private final NumberedCirclePiece circlePiece;
 
-    /**
-     * Whether the circle body is being animated.
-     * Used to prevent the Kiai animation collides with the dimming animation.
-     */
-    private boolean isCircleDimming;
-
 
     public HitCircle() {
         circlePiece = new NumberedCirclePiece("hitcircle", "hitcircleoverlay");
@@ -61,7 +55,6 @@ public class HitCircle extends GameObject {
         startHit = false;
         kiai = GameHelper.isKiai();
         this.comboColor.set(comboColor.r(), comboColor.g(), comboColor.b());
-        isCircleDimming = false;
 
         // Calculating position of top/left corner for sprites and hit radius
         final float scale = beatmapCircle.getGameplayScale();
@@ -127,7 +120,6 @@ public class HitCircle extends GameObject {
         }
 
         if (Config.isDimHitObjects()) {
-            isCircleDimming = true;
 
             // Source: https://github.com/peppy/osu/blob/60271fb0f7e091afb754455f93180094c63fc3fb/osu.Game.Rulesets.Osu/Objects/Drawables/DrawableOsuHitObject.cs#L101
             var dimDelaySec = (timePreempt - objectHittableRange) / GameHelper.getSpeedMultiplier();
@@ -142,9 +134,6 @@ public class HitCircle extends GameObject {
                     circlePiece.getBlue(), 1f
                 )
             ));
-
-        } else {
-            isCircleDimming = false;
         }
 
         scene.attachChild(circlePiece, 0);
@@ -252,18 +241,16 @@ public class HitCircle extends GameObject {
             return;
         }
 
-        if (!isCircleDimming) {
-            if (GameHelper.isKiai()) {
-                var kiaiModifier = (float) Math.max(0, 1 - GameHelper.getCurrentBeatTime() / GameHelper.getBeatLength()) * 0.5f;
-                var r = Math.min(1, comboColor.r() + (1 - comboColor.r()) * kiaiModifier);
-                var g = Math.min(1, comboColor.g() + (1 - comboColor.g()) * kiaiModifier);
-                var b = Math.min(1, comboColor.b() + (1 - comboColor.b()) * kiaiModifier);
-                kiai = true;
-                circlePiece.setCircleColor(r, g, b);
-            } else if (kiai) {
-                circlePiece.setCircleColor(comboColor.r(), comboColor.g(), comboColor.b());
-                kiai = false;
-            }
+        if (GameHelper.isKiai()) {
+            var kiaiModifier = (float) Math.max(0, 1 - GameHelper.getCurrentBeatTime() / GameHelper.getBeatLength()) * 0.5f;
+            var r = Math.min(1, comboColor.r() + (1 - comboColor.r()) * kiaiModifier);
+            var g = Math.min(1, comboColor.g() + (1 - comboColor.g()) * kiaiModifier);
+            var b = Math.min(1, comboColor.b() + (1 - comboColor.b()) * kiaiModifier);
+            kiai = true;
+            circlePiece.setCircleColor(r, g, b);
+        } else if (kiai) {
+            circlePiece.setCircleColor(comboColor.r(), comboColor.g(), comboColor.b());
+            kiai = false;
         }
 
         passedTime += dt;
