@@ -89,11 +89,11 @@ public class Entity implements IEntity {
 	private boolean mLocalToParentTransformationDirty = true;
 	private boolean mParentToLocalTransformationDirty = true;
 
-	private final Transformation mLocalToParentTransformation = new Transformation();
-	private final Transformation mParentToLocalTransformation = new Transformation();
+	private Transformation mLocalToParentTransformation;
+	private Transformation mParentToLocalTransformation;
 
-	private final Transformation mLocalToSceneTransformation = new Transformation();
-	private final Transformation mSceneToLocalTransformation = new Transformation();
+	private Transformation mLocalToSceneTransformation;
+	private Transformation mSceneToLocalTransformation;
 
 	private Object mUserData;
 
@@ -729,6 +729,13 @@ public class Entity implements IEntity {
 	}
 
 	public Transformation getLocalToParentTransformation() {
+
+		// BEGIN osu!droid modified
+		if (this.mLocalToParentTransformation == null) {
+			this.mLocalToParentTransformation = new Transformation();
+		}
+		// END osu!droid modified
+
 		final Transformation localToParentTransformation = this.mLocalToParentTransformation;
 		if(this.mLocalToParentTransformationDirty) {
 			localToParentTransformation.setToIdentity();
@@ -771,6 +778,13 @@ public class Entity implements IEntity {
 	}
 
 	public Transformation getParentToLocalTransformation() {
+
+		// BEGIN osu!droid modified
+		if (this.mParentToLocalTransformation == null) {
+			this.mParentToLocalTransformation = new Transformation();
+		}
+		// END osu!droid modified
+
 		final Transformation parentToLocalTransformation = this.mParentToLocalTransformation;
 		if(this.mParentToLocalTransformationDirty) {
 			parentToLocalTransformation.setToIdentity();
@@ -811,6 +825,13 @@ public class Entity implements IEntity {
 
 	@Override
 	public Transformation getLocalToSceneTransformation() {
+
+		// BEGIN osu!droid modified
+		if (this.mLocalToSceneTransformation == null) {
+			this.mLocalToSceneTransformation = new Transformation();
+		}
+		// END osu!droid modified
+
 		// TODO Cache if parent(recursive) not dirty.
 		final Transformation localToSceneTransformation = this.mLocalToSceneTransformation;
 		localToSceneTransformation.setTo(this.getLocalToParentTransformation());
@@ -825,6 +846,13 @@ public class Entity implements IEntity {
 
 	@Override
 	public Transformation getSceneToLocalTransformation() {
+
+		// BEGIN osu!droid modified
+		if (this.mSceneToLocalTransformation == null) {
+			this.mSceneToLocalTransformation = new Transformation();
+		}
+		// END osu!droid modified
+
 		// TODO Cache if parent(recursive) not dirty.
 		final Transformation sceneToLocalTransformation = this.mSceneToLocalTransformation;
 		sceneToLocalTransformation.setTo(this.getParentToLocalTransformation());
