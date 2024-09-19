@@ -59,6 +59,7 @@ import org.anddev.andengine.input.touch.TouchEvent;
 import org.anddev.andengine.opengl.texture.region.TextureRegion;
 import org.anddev.andengine.util.Debug;
 import org.anddev.andengine.util.modifier.ease.EaseQuadIn;
+import org.anddev.andengine.util.modifier.ease.EaseQuadOut;
 
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -2326,11 +2327,11 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
                 bgScene,
                 pos,
                 scale,
-                Modifiers.fadeOut(1 / speedMultiplier),
+                Modifiers.scale(0.6f / speedMultiplier, scale * 0.8f, scale * 1.2f, null, EaseQuadOut.getInstance()),
                 Modifiers.sequence(
-                    Modifiers.scale(0.25f / speedMultiplier, scale, 1.5f * scale),
-                    Modifiers.scale(0.45f / speedMultiplier, scale * 1.5f, 1.9f * scale),
-                    Modifiers.scale(0.3f / speedMultiplier, scale * 1.9f, scale * 2f)
+                    Modifiers.fadeIn(0.2f / speedMultiplier),
+                    Modifiers.delay(0.2f / speedMultiplier),
+                    Modifiers.fadeOut(1f / speedMultiplier)
                 )
             );
         }
@@ -2354,7 +2355,7 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
     }
 
     private void createBurstEffect(final PointF pos, final RGBColor color) {
-        if (!Config.isBurstEffects() || stat.getMod().contains(GameMod.MOD_HIDDEN))
+        if (!Config.isBurstEffects() || GameHelper.isHidden())
             return;
 
         final float speedMultiplier = GameHelper.getSpeedMultiplier();
@@ -2374,7 +2375,7 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
     }
 
     private void createBurstEffectSliderStart(final PointF pos, final RGBColor color) {
-        if (!Config.isBurstEffects() || stat.getMod().contains(GameMod.MOD_HIDDEN))
+        if (!Config.isBurstEffects() || GameHelper.isHidden())
             return;
 
         final float speedMultiplier = GameHelper.getSpeedMultiplier();
@@ -2394,7 +2395,7 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
     }
 
     private void createBurstEffectSliderEnd(final PointF pos, final RGBColor color) {
-        if (!Config.isBurstEffects() || stat.getMod().contains(GameMod.MOD_HIDDEN))
+        if (!Config.isBurstEffects() || GameHelper.isHidden())
             return;
 
         final float speedMultiplier = GameHelper.getSpeedMultiplier();
@@ -2414,7 +2415,7 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
     }
 
     private void createBurstEffectSliderReverse(final PointF pos, float ang, final RGBColor color) {
-        if (!Config.isBurstEffects() || stat.getMod().contains(GameMod.MOD_HIDDEN))
+        if (!Config.isBurstEffects() || GameHelper.isHidden())
             return;
 
         final float speedMultiplier = GameHelper.getSpeedMultiplier();
