@@ -199,6 +199,7 @@ class UniversalModifier(private val pool: Pool<UniversalModifier>? = null) : IMo
             }
 
             field = value
+            duration = getDuration()
         }
 
     /**
@@ -211,6 +212,10 @@ class UniversalModifier(private val pool: Pool<UniversalModifier>? = null) : IMo
      * Inner modifiers for [SEQUENCE] or [PARALLEL] modifier types.
      */
     var modifiers: Array<out UniversalModifier>? = null
+        set(value) {
+            field = value
+            duration = getDuration()
+        }
 
     /**
      * Easing function to be used.
@@ -275,7 +280,7 @@ class UniversalModifier(private val pool: Pool<UniversalModifier>? = null) : IMo
 
         var usedSec = min(duration - elapsedSec, deltaSec)
 
-        val percentage = easeFunction.getPercentage(elapsedSec + usedSec, duration)
+        val percentage = if (duration > 0) easeFunction.getPercentage(elapsedSec + usedSec, duration) else 1f
 
         when (type) {
 
