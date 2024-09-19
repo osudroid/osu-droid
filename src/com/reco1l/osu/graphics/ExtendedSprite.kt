@@ -1,7 +1,6 @@
 package com.reco1l.osu.graphics
 
 import org.anddev.andengine.engine.camera.*
-import org.anddev.andengine.entity.shape.*
 import org.anddev.andengine.opengl.texture.region.*
 import org.anddev.andengine.opengl.util.*
 import org.anddev.andengine.opengl.vertex.*
@@ -67,9 +66,9 @@ open class ExtendedSprite : ExtendedEntity(vertexBuffer = RectangleVertexBuffer(
     private fun applyBlendFunction() {
 
         if (textureRegion?.texture?.textureOptions?.mPreMultipyAlpha == true) {
-            setBlendFunction(Shape.BLENDFUNCTION_SOURCE_PREMULTIPLYALPHA_DEFAULT, Shape.BLENDFUNCTION_DESTINATION_PREMULTIPLYALPHA_DEFAULT)
+            setBlendFunction(BLENDFUNCTION_SOURCE_PREMULTIPLYALPHA_DEFAULT, BLENDFUNCTION_DESTINATION_PREMULTIPLYALPHA_DEFAULT)
         } else {
-            setBlendFunction(Shape.BLENDFUNCTION_SOURCE_DEFAULT, Shape.BLENDFUNCTION_DESTINATION_DEFAULT)
+            setBlendFunction(BLENDFUNCTION_SOURCE_DEFAULT, BLENDFUNCTION_DESTINATION_DEFAULT)
         }
     }
 
