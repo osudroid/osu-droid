@@ -1799,7 +1799,6 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
         }
 
         if (score == 0) {
-            createHitEffect(start, "hit0", color);
             createHitEffect(end, "hit0", color);
             registerHit(id, 0, endCombo);
             return;
