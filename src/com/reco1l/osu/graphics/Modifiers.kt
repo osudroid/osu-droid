@@ -133,6 +133,17 @@ object Modifiers {
 
     @JvmStatic
     @JvmOverloads
+    fun rotation(duration: Float, from: Float, to: Float, listener: IModifierListener<IEntity>? = null, easeFunction: IEaseFunction = DefaultEaseFunction) = pool.obtain().also {
+        it.reset()
+        it.type = ROTATION
+        it.duration = duration
+        it.values = floatArrayOf(from, to)
+        it.easeFunction = easeFunction
+        it.listener = listener
+    }
+
+    @JvmStatic
+    @JvmOverloads
     fun shakeHorizontal(duration: Float, magnitude: Float, listener: IModifierListener<IEntity>? = null) = pool.obtain().also {
 
         // Based on osu!lazer's shake effect: https://github.com/ppy/osu/blob/5341a335a6165ceef4d91e910fa2ea5aecbfd025/osu.Game/Extensions/DrawableExtensions.cs#L19-L37
@@ -293,6 +304,10 @@ class UniversalModifier(private val pool: Pool<UniversalModifier>? = null) : IMo
                 if (item is ExtendedEntity) {
                     item.translationY = getValueAt(0, percentage)
                 }
+            }
+
+            ROTATION -> {
+                item.rotation = getValueAt(0, percentage)
             }
 
             RGB -> {
@@ -496,6 +511,11 @@ enum class ModifierType {
      * Modifies the entity's Y translation.
      */
     TRANSLATE_Y,
+
+    /**
+     * Modifies the entity's rotation.
+     */
+    ROTATION,
 
     /**
      * Modifies the entity's with inner modifiers in sequence.

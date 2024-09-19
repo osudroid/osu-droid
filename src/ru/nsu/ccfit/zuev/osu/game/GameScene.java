@@ -2286,15 +2286,25 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
         final float speedMultiplier = GameHelper.getSpeedMultiplier();
 
         if (name.equals("hit0")) {
+
+            // Reference https://github.com/ppy/osu/blob/ebf637bd3c33f1c886f6bfc81aa9ea2132c9e0d2/osu.Game/Skinning/LegacyJudgementPieceOld.cs#L69-L82
+
+            var rotation = (float) Random.Default.nextDouble(8.6 * 2) - 8.6f;
+
+            var fadeInLength = 0.12f / speedMultiplier;
+            var fadeOutLength = 0.6f / speedMultiplier;
+            var fadeOutDelay = 0.5f / speedMultiplier;
+
             effect.init(
-                    mgScene,
-                    pos,
-                    GameHelper.isSuddenDeath() ? scale * 3 : scale,
-                    Modifiers.sequence(
-                        Modifiers.fadeIn(0.15f / speedMultiplier),
-                        Modifiers.delay(0.35f / speedMultiplier),
-                        Modifiers.fadeOut(0.25f / speedMultiplier)
-                    )
+                mgScene,
+                pos,
+                scale * 1.6f,
+                Modifiers.scale(0.1f / speedMultiplier, scale * 1.6f, scale, null, EaseQuadIn.getInstance()),
+                Modifiers.translateY(fadeOutDelay + fadeOutLength, -5f, 80f, null, EaseQuadIn.getInstance()),
+                Modifiers.sequence(
+                    Modifiers.rotation(fadeInLength, 0, rotation, null, EaseQuadIn.getInstance()),
+                    Modifiers.rotation(fadeOutDelay + fadeOutLength - fadeInLength, rotation, rotation * 2, null, EaseQuadIn.getInstance())
+                )
             );
 
             return;
