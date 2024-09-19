@@ -10,6 +10,7 @@ import com.reco1l.ibancho.data.RoomTeam.RED
 import com.reco1l.ibancho.data.TeamMode.HEAD_TO_HEAD
 import com.reco1l.ibancho.data.TeamMode.TEAM_VS_TEAM
 import com.reco1l.ibancho.data.WinCondition.*
+import com.reco1l.osu.graphics.*
 import com.reco1l.osu.mainThread
 import com.reco1l.osu.multiplayer.Multiplayer.isConnected
 import com.reco1l.osu.multiplayer.Multiplayer.isRoomHost
@@ -94,7 +95,7 @@ object RoomScene : Scene(), IRoomEventListener, IPlayerEventListener
     }
 
 
-    private var backButton: Sprite? = null
+    private var backButton: ExtendedSprite? = null
 
     private var readyButton: TextButton? = null
 
