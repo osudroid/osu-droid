@@ -62,17 +62,20 @@ open class ExtendedSprite : ExtendedEntity(vertexBuffer = RectangleVertexBuffer(
 
             if (value == null) {
                 if (adjustSizeWithTexture) {
-                    setSize(0f, 0f)
+                    width = 0f
+                    height = 0f
                 }
-                return
+            } else {
+                value.isFlippedVertical = flippedVertical
+                value.isFlippedHorizontal = flippedHorizontal
+
+                if (adjustSizeWithTexture) {
+                    width = value.width.toFloat()
+                    height = value.height.toFloat()
+                }
             }
 
-            value.isFlippedVertical = flippedVertical
-            value.isFlippedHorizontal = flippedHorizontal
-
-            if (adjustSizeWithTexture) {
-                setSize(value.width.toFloat(), value.height.toFloat())
-            }
+            updateVertexBuffer()
         }
 
 
