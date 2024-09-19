@@ -99,26 +99,24 @@ public class AnimSprite extends ExtendedSprite {
         int frameByTime = (int) (this.animTime * fps);
         switch (loopType) {
             case LOOP:
-                frame = frameByTime % count;
+                setFrameInternal(frameByTime % count);
                 break;
             case STOP:
-                frame = Math.min(frameByTime, count - 1);
+                setFrameInternal(Math.min(frameByTime, count - 1));
                 break;
             case DISAPPEAR:
-                frame = Math.min(frameByTime, count);
+                setFrameInternal(Math.min(frameByTime, count));
                 break;
             default:
                 break;
         }
-
-        setTextureRegion(regions[frame]);
     }
 
     /**
      * It's not recommended to call this method if you are not initialing this sprite
      */
     public void setFps(final float fps) {
-        frame = 0;
+        setFrameInternal(0);
         this.fps = fps;
     }
 
@@ -129,12 +127,18 @@ public class AnimSprite extends ExtendedSprite {
      */
     public void setFrame(int frame) {
         if (this.loopType == LoopType.FROZE || fps == 0) {
-            this.frame = frame;
+            setFrameInternal(frame);
         } else {
             this.animTime = (frame + 0.0001f) / fps;
             updateFrame();
         }
     }
+
+    private void setFrameInternal(int frame) {
+        this.frame = frame;
+        setTextureRegion(regions[frame]);
+    }
+
 
     public int getFrame() {
         return frame;
