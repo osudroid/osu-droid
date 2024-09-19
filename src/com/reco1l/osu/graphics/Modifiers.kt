@@ -233,7 +233,7 @@ class UniversalModifier(private val pool: Pool<UniversalModifier>? = null) : IMo
         // 0 = "From" value in the span.
         // 1 = "To" value in the span.
 
-        val from = values?.get(2 * dataIndex + 0) ?: 0f
+        val from = values?.get(2 * dataIndex) ?: 0f
         val to = values?.get(2 * dataIndex + 1) ?: 0f
 
         return from + (to - from) * percentage
