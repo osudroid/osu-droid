@@ -13,6 +13,7 @@ import org.anddev.andengine.util.modifier.ease.EaseSineOut
 import org.anddev.andengine.util.modifier.ease.IEaseFunction
 import kotlin.math.max
 import kotlin.math.min
+import org.anddev.andengine.util.modifier.ease.EaseSineIn
 import org.anddev.andengine.util.modifier.ease.IEaseFunction.DEFAULT as DefaultEaseFunction
 
 /**
@@ -143,7 +144,7 @@ object Modifiers {
             translateX(duration / 4f,  magnitude,   -magnitude,  easeFunction = EaseSineInOut.getInstance()),
             translateX(duration / 4f,  -magnitude,  magnitude,   easeFunction = EaseSineInOut.getInstance()),
             translateX(duration / 4f,  magnitude,   -magnitude,  easeFunction = EaseSineInOut.getInstance()),
-            translateX(duration / 8f,  -magnitude,  0f,          easeFunction = EaseSineInOut.getInstance()),
+            translateX(duration / 8f,  -magnitude,  0f,          easeFunction = EaseSineIn.getInstance()),
         )
         it.listener = listener
 
