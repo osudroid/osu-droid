@@ -17,11 +17,6 @@ class DroidTap(
     mods: List<Mod>,
 
     /**
-     * The 300 hit window.
-     */
-    private val greatWindow: Double,
-
-    /**
      * Whether to consider cheesability.
      */
     private val considerCheesability: Boolean,
@@ -83,10 +78,10 @@ class DroidTap(
     override fun strainValueAt(current: DroidDifficultyHitObject): Double {
         currentStrain *= strainDecay(current.strainTime)
         currentStrain += DroidTapEvaluator.evaluateDifficultyOf(
-            current, greatWindow, considerCheesability, strainTimeCap
+            current, considerCheesability, strainTimeCap
         ) * skillMultiplier
 
-        currentRhythm = DroidRhythmEvaluator.evaluateDifficultyOf(current, greatWindow)
+        currentRhythm = DroidRhythmEvaluator.evaluateDifficultyOf(current)
 
         objectDeltaTimes.add(current.deltaTime)
 

@@ -715,8 +715,8 @@ object RoomScene : Scene(), IRoomEventListener, IPlayerEventListener
 
         // Reloading mod menu, we set player mods first in case the scene was reloaded (due to skin change).
         clearChildScene()
-        getModMenu().setMods(player!!.mods, false, true)
         getModMenu().init()
+        getModMenu().setMods(player!!.mods, false, true)
         getModMenu().setMods(newRoom.mods, newRoom.gameplaySettings.isFreeMod, newRoom.gameplaySettings.allowForceDifficultyStatistics)
 
         // Updating player mods for other clients

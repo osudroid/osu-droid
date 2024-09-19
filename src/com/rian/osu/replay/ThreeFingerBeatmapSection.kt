@@ -13,10 +13,4 @@ class ThreeFingerBeatmapSection(
      */
     @JvmField
     val objects: List<ThreeFingerObject>,
-
-    /**
-     * The index of the cursor that is dragging this section.
-     */
-    @JvmField
-    val dragFingerIndex: Int
 ) : HighStrainSection(section.firstObjectIndex, section.lastObjectIndex, section.sumStrain)

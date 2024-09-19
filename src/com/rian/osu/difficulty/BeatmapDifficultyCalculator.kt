@@ -229,12 +229,18 @@ object BeatmapDifficultyCalculator {
     ): DroidPerformanceAttributes {
         val actualParameters =
             (parameters ?: DroidPerformanceCalculationParameters()).also {
+                val playableBeatmap = beatmap.createPlayableBeatmap(
+                    GameMode.Droid, attributes.mods, attributes.customSpeedMultiplier
+                )
+
+                val cursorGroups = createCursorGroups(replayMovements)
+
                 it.tapPenalty = ThreeFingerChecker(
-                    beatmap, attributes, createCursorGroups(replayMovements), replayObjectData
+                    playableBeatmap, attributes, cursorGroups, replayObjectData
                 ).calculatePenalty()
 
                 it.sliderCheesePenalty = SliderCheeseChecker(
-                    beatmap, attributes, createCursorGroups(replayMovements), replayObjectData
+                    playableBeatmap, attributes, cursorGroups, replayObjectData
                 ).calculatePenalty()
             }
 

@@ -47,7 +47,12 @@ abstract class DifficultyHitObject(
      * This is one less than the actual index of the hit object in the beatmap.
      */
     @JvmField
-    val index: Int
+    val index: Int,
+
+    /**
+     * The great window of the hit object.
+     */
+    greatWindow: Double
 ) {
     /**
      * The normalized distance from the "lazy" end position of the previous hit object to the start position of this hit object.
@@ -122,6 +127,12 @@ abstract class DifficultyHitObject(
     @JvmField
     val endTime = obj.getEndTime() / clockRate
 
+    /**
+     * The full great window of the hit object.
+     */
+    @JvmField
+    val fullGreatWindow = greatWindow * 2
+
     protected abstract val mode: GameMode
     protected abstract val scalingFactor: Float
 
@@ -187,6 +198,26 @@ abstract class DifficultyHitObject(
 
         return nonHiddenOpacity
     }
+
+    /**
+     * How possible is it to doubletap this object together with the next one and get perfect
+     * judgement in range from 0 to 1.
+     *
+     * A value closer to 1 indicates a higher possibility.
+     */
+    val doubletapness: Double
+        get() {
+            val next = next(0) ?: return 1.0
+
+            val currentDeltaTime = max(1.0, deltaTime)
+            val nextDeltaTime = max(1.0, next.deltaTime)
+            val deltaDifference = abs(nextDeltaTime - currentDeltaTime)
+
+            val speedRatio = currentDeltaTime / max(currentDeltaTime, deltaDifference)
+            val windowRatio = min(1.0, currentDeltaTime / fullGreatWindow).pow(2)
+
+            return 1 - speedRatio.pow(1 - windowRatio)
+        }
 
     private fun setDistances(clockRate: Double) {
         if (obj is Slider) {
@@ -354,7 +385,10 @@ abstract class DifficultyHitObject(
         @JvmStatic
         protected val NORMALIZED_RADIUS = 50f
 
+        /**
+         * The minimum delta time between hit objects.
+         */
         @JvmStatic
-        protected val MIN_DELTA_TIME = 25.0
+        val MIN_DELTA_TIME = 25.0
     }
 }

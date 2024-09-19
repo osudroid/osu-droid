@@ -25,6 +25,7 @@ class DroidDifficultyCalculator : DifficultyCalculator<DroidDifficultyHitObject,
     override val difficultyAdjustmentMods = mutableSetOf<Mod>().also {
         it.addAll(super.difficultyAdjustmentMods)
         it.add(ModPrecise())
+        it.add(ModAutopilot())
     }.toSet()
 
     private val maximumSectionDeltaTime = 2000
@@ -38,6 +39,7 @@ class DroidDifficultyCalculator : DifficultyCalculator<DroidDifficultyHitObject,
         parameters: DifficultyCalculationParameters?
     ) = DroidDifficultyAttributes().apply {
         mods = parameters?.mods?.slice(parameters.mods.indices) ?: mods
+        customSpeedMultiplier = parameters?.customSpeedMultiplier ?: customSpeedMultiplier
         clockRate = parameters?.totalSpeedMultiplier?.toDouble() ?: clockRate
 
         maxCombo = beatmap.maxCombo
@@ -88,7 +90,7 @@ class DroidDifficultyCalculator : DifficultyCalculator<DroidDifficultyHitObject,
             averageSpeedDeltaTime = it.relevantDeltaTime()
 
             if (tapDifficulty > 0) {
-                val tapSkillVibro = DroidTap(mods, greatWindow, true, averageSpeedDeltaTime)
+                val tapSkillVibro = DroidTap(mods, true, averageSpeedDeltaTime)
 
                 objects.forEach { o -> tapSkillVibro.process(o) }
 
@@ -186,6 +188,12 @@ class DroidDifficultyCalculator : DifficultyCalculator<DroidDifficultyHitObject,
             visualDifficulty = 0.0
         }
 
+        if (mods.any { it is ModAutopilot }) {
+            aimDifficulty = 0.0
+            flashlightDifficulty *= 0.3
+            visualDifficulty *= 0.8
+        }
+
         val baseAimPerformance = (5 * max(1.0, aimDifficulty.pow(0.8) / 0.0675) - 4).pow(3.0) / 100000
         val baseTapPerformance = (5 * max(1.0, tapDifficulty / 0.0675) - 4).pow(3.0) / 100000
         val baseFlashlightPerformance =
@@ -216,28 +224,17 @@ class DroidDifficultyCalculator : DifficultyCalculator<DroidDifficultyHitObject,
         parameters: DifficultyCalculationParameters?
     ): Array<Skill<DroidDifficultyHitObject>> {
         val mods = parameters?.mods ?: mutableListOf()
-        val difficultyAdjustMod = mods.find { it is ModDifficultyAdjust } as ModDifficultyAdjust?
-
-        val od = difficultyAdjustMod?.od ?: beatmap.difficulty.od
-        var greatWindow = (
-            if (mods.any { it is ModPrecise }) PreciseDroidHitWindow(od)
-            else DroidHitWindow(od)
-        ).greatWindow.toDouble()
-
-        if (difficultyAdjustMod?.od == null) {
-            greatWindow /= parameters?.totalSpeedMultiplier?.toDouble() ?: 1.0
-        }
 
         return arrayOf(
             DroidAim(mods, true),
             DroidAim(mods, false),
-            DroidTap(mods, greatWindow, true),
-            DroidTap(mods, greatWindow, false),
-            DroidRhythm(mods, greatWindow),
+            DroidTap(mods, true),
+            DroidTap(mods, false),
+            DroidRhythm(mods),
             DroidFlashlight(mods, true),
             DroidFlashlight(mods, false),
-            DroidVisual(mods, greatWindow, true),
-            DroidVisual(mods, greatWindow, false)
+            DroidVisual(mods, true),
+            DroidVisual(mods, false)
         )
     }
 
@@ -246,6 +243,17 @@ class DroidDifficultyCalculator : DifficultyCalculator<DroidDifficultyHitObject,
         parameters: DifficultyCalculationParameters?
     ) = mutableListOf<DroidDifficultyHitObject>().apply {
         val clockRate = parameters?.totalSpeedMultiplier?.toDouble() ?: 1.0
+        val difficultyAdjustMod = parameters?.mods?.find { it is ModDifficultyAdjust } as ModDifficultyAdjust?
+
+        val od = difficultyAdjustMod?.od ?: beatmap.difficulty.od
+        var greatWindow = (
+            if (parameters?.mods?.any { it is ModPrecise } == true) PreciseDroidHitWindow(od)
+            else DroidHitWindow(od)
+        ).greatWindow.toDouble()
+
+        if (difficultyAdjustMod?.od == null) {
+            greatWindow /= clockRate
+        }
 
         beatmap.hitObjects.objects.let {
             for (i in 0 until it.size) {
@@ -257,6 +265,7 @@ class DroidDifficultyCalculator : DifficultyCalculator<DroidDifficultyHitObject,
                         clockRate,
                         this,
                         size - 1,
+                        greatWindow,
                         (parameters?.mods?.find { m -> m is ModDifficultyAdjust } as ModDifficultyAdjust?)?.ar != null
                     ).also { d -> d.computeProperties(clockRate, it) }
                 )

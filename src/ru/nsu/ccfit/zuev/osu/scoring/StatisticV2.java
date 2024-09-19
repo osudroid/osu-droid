@@ -136,7 +136,7 @@ public class StatisticV2 implements Serializable {
         hit100 = Integer.parseInt(params[7]);
         hit50 = Integer.parseInt(params[8]);
         misses = Integer.parseInt(params[9]);
-        accuracy = Integer.parseInt(params[10]) / 100000f;
+        accuracy = Float.parseFloat(params[10]);
         if (params.length >= 12) {
             time = Long.parseLong(params[11]);
         }

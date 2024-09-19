@@ -36,6 +36,8 @@ import ru.nsu.ccfit.zuev.osu.Config;
 import ru.nsu.ccfit.zuev.osu.GlobalManager;
 import ru.nsu.ccfit.zuev.osu.ResourceManager;
 import com.reco1l.osu.data.BeatmapInfo;
+
+import ru.nsu.ccfit.zuev.osu.ToastLogger;
 import ru.nsu.ccfit.zuev.osu.Utils;
 import ru.nsu.ccfit.zuev.osu.game.GameScene;
 import ru.nsu.ccfit.zuev.osu.game.cursor.flashlight.FlashLightEntity;
@@ -45,6 +47,7 @@ import ru.nsu.ccfit.zuev.osu.menu.SongMenu;
 import ru.nsu.ccfit.zuev.osu.online.OnlineManager;
 import ru.nsu.ccfit.zuev.osu.online.OnlineScoring;
 import ru.nsu.ccfit.zuev.osuplus.BuildConfig;
+import ru.nsu.ccfit.zuev.osuplus.R;
 
 public class ScoringScene {
     private final Engine engine;
@@ -75,7 +78,7 @@ public class ScoringScene {
         scene = new Scene();
         songService = player;
         currentStatistic = stat;
-        if (replayPath != null && beatmapInfo == null) {
+        if (replayPath != null && beatmap == null) {
             replayStat = stat;
         }
         TextureRegion tex = ResourceManager.getInstance()
@@ -93,11 +96,10 @@ public class ScoringScene {
         bgTopRect.setColor(0, 0, 0, 0.8f);
         scene.attachChild(bgTopRect);
 
-        BeatmapInfo beatmapInfo = beatmapToReplay;
+        beatmapInfo = beatmapToReplay;
         if (beatmapToReplay == null && beatmap != null) {
             beatmapInfo = beatmap;
         }
-        this.beatmapInfo = beatmapInfo;
 
         final int x = 0, y = 100;
         final TextureRegion panelr = ResourceManager.getInstance().getTexture(
@@ -200,7 +202,7 @@ public class ScoringScene {
 
         final Sprite mark = new Sprite(Utils.toRes(610), 0, ResourceManager
                 .getInstance().getTexture("ranking-" + stat.getMark()));
-        if (beatmapInfo != null) {
+        if (beatmap != null) {
             mark.setAlpha(0);
             mark.setScale(1.5f);
             mark.registerEntityModifier(new ParallelEntityModifier(
@@ -310,7 +312,7 @@ public class ScoringScene {
             };
         }
 
-        if (stat.accuracy == 1 || stat.getMaxCombo() == this.beatmapInfo.getMaxCombo() || stat.isPerfect()) {
+        if (stat.accuracy == 1 || stat.getMaxCombo() == beatmapInfo.getMaxCombo() || stat.isPerfect()) {
             final Sprite perfect = new Sprite(0, 0, ResourceManager
                     .getInstance().getTexture("ranking-perfect"));
             perfect.setPosition(0, accuracy.getY() + accuracy.getHeight() + 10);
@@ -341,9 +343,9 @@ public class ScoringScene {
             scene.attachChild(modSprite);
         }
 
-        String infoStr = beatmapInfo.getArtistText() + " - " + beatmapInfo.getTitleText() + " [" + this.beatmapInfo.getVersion() + "]";
+        String infoStr = beatmapInfo.getArtistText() + " - " + beatmapInfo.getTitleText() + " [" + beatmapInfo.getVersion() + "]";
 
-        String mapperStr = "Beatmap by " + this.beatmapInfo.getCreator();
+        String mapperStr = "Beatmap by " + beatmapInfo.getCreator();
         String playerStr = "Played by " + stat.getPlayerName() + " on " +
                 new java.text.SimpleDateFormat("yyyy/MM/dd HH:mm:ss", Locale.getDefault()).format(new java.util.Date(stat.getTime()));
         playerStr += String.format("  %s(%s)", BuildConfig.VERSION_NAME, BuildConfig.BUILD_TYPE);
@@ -392,7 +394,7 @@ public class ScoringScene {
             StringBuilder ppinfo = new StringBuilder();
             Beatmap beatmapData;
 
-            try (var parser = new BeatmapParser(this.beatmapInfo.getPath())) {
+            try (var parser = new BeatmapParser(beatmapInfo.getPath())) {
                 beatmapData = parser.parse(true);
             }
 
@@ -462,19 +464,27 @@ public class ScoringScene {
         }
 
         //save and upload score
-        if (beatmapInfo != null && beatmapInfo.getMD5().equals(mapMD5)) {
+        if (beatmap != null && beatmap.getMD5().equals(mapMD5)) {
             ResourceManager.getInstance().getSound("applause").play();
-            if (!Multiplayer.isMultiplayer || !GlobalManager.getInstance().getGameScene().hasFailed) {
 
-                if (stat.getTotalScoreWithMultiplier() > 0 && !stat.getMod().contains(GameMod.MOD_AUTO)) {
-                    stat.setReplayFilename(FilenameUtils.getName(replayPath));
-                    stat.setBeatmap(beatmapInfo.getSetDirectory(), beatmapInfo.getFilename());
+            int totalNotes = stat.getHit300() + stat.getHit100() + stat.getHit50() + stat.getMisses();
 
-                    try {
-                        DatabaseManager.getScoreInfoTable().insertScore(stat.toScoreInfo());
-                    } catch (Exception e) {
-                        Log.e("GameScene", "Failed to save score to database", e);
-                    }
+            // Do not save and submit score if note count does not match, since it indicates a corrupted score
+            // (potentially from bugging the gameplay by any unnecessary means).
+            if (totalNotes != beatmap.getTotalHitObjectCount()) {
+                ToastLogger.showTextId(R.string.replay_corrupted, true);
+                return;
+            }
+
+            if ((!Multiplayer.isMultiplayer || !GlobalManager.getInstance().getGameScene().hasFailed) &&
+                    stat.getTotalScoreWithMultiplier() > 0 && !stat.getMod().contains(GameMod.MOD_AUTO)) {
+                stat.setReplayFilename(FilenameUtils.getName(replayPath));
+                stat.setBeatmap(beatmap.getSetDirectory(), beatmap.getFilename());
+
+                try {
+                    DatabaseManager.getScoreInfoTable().insertScore(stat.toScoreInfo());
+                } catch (Exception e) {
+                    Log.e("GameScene", "Failed to save score to database", e);
                 }
             }
 

@@ -44,6 +44,7 @@ for preventing accidental touches.
 
 ## Smaller additions
 
+- Added support for pp-based global beatmap leaderboard in song selection menu
 - Added video setting summary regarding supported video formats
 - Added a new button in song selection menu to switch difficulty algorithm between osu!droid and osu!standard
 - Added support for `sliderslide` and `sliderwhistle` hitsounds
@@ -58,12 +59,6 @@ for preventing accidental touches.
 This updates migrates the storage location of local scores, beatmap collections, and beatmap options into an integrated
 database. Doing this increases the import time of beatmaps and fixes the problem of duplicated beatmapsets in song
 selection menu.
-
-This also allows us to implement a new feature that allows players to export and import local scores (excluding replays),
-beatmap collections, and beatmap options. This feature can be accessed in options under the "Library" category.
-
-**It is important to note that clearing the app data via system settings will delete all local scores, beatmap
-collections, and beatmap options.**
 
 ## Background difficulty calculation
 
@@ -82,7 +77,7 @@ During gameplay, background difficulty calculation is paused to prevent performa
     slider breaking for hitting a slider's head too early
 - More significant performance improvements in gameplay than version 1.7.2
 - Separated average offset and unstable rate displays in gameplay into separate settings
-- Beatmap previews in beatmap downloader have been slowed down to prevent spamming
+- Beatmap preview rate limit in beatmap downloader has been reduced to prevent spamming
 
 # Removals
 
@@ -93,6 +88,7 @@ were reduced by 20% and clap hitsounds' volume were reduced by 15%
 
 # Bug fixes
 
+- Fixed login fail messages other than "Cannot connect to server" not displaying properly
 - Fixed "Show FPS" setting affecting the display of other counters (average offset, unstable rate, and real-time PP counter)
 - Fixed wrong textures being displayed before in-game video plays on devices with Mali GPUs
 - Fixed real-time pp counter taking the next object's difficulty attributes when the current object is active in gameplay

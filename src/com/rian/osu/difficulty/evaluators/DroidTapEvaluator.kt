@@ -3,9 +3,7 @@ package com.rian.osu.difficulty.evaluators
 import com.rian.osu.beatmap.hitobject.Spinner
 import com.rian.osu.difficulty.DroidDifficultyHitObject
 import com.rian.osu.math.ErrorFunction
-import kotlin.math.abs
 import kotlin.math.max
-import kotlin.math.min
 import kotlin.math.pow
 
 /**
@@ -23,7 +21,6 @@ object DroidTapEvaluator {
      * * and how easily they can be cheesed.
      *
      * @param current The current object.
-     * @param greatWindow The great hit window of the current object.
      * @param considerCheesability Whether to consider cheesability.
      * @param strainTimeCap The strain time to cap to.
      */
@@ -31,7 +28,6 @@ object DroidTapEvaluator {
     @JvmOverloads
     fun evaluateDifficultyOf(
         current: DroidDifficultyHitObject,
-        greatWindow: Double,
         considerCheesability: Boolean,
         strainTimeCap: Double? = null
     ): Double {
@@ -43,23 +39,7 @@ object DroidTapEvaluator {
             return 0.0
         }
 
-        var doubletapness = 1.0
-
-        if (considerCheesability) {
-            // Nerf doubletappable doubles.
-            val next = current.next(0)
-
-            if (next != null) {
-                val greatWindowFull = greatWindow * 2
-                val currentDeltaTime = max(1.0, current.deltaTime)
-                val nextDeltaTime = max(1.0, next.deltaTime)
-                val deltaDifference = abs(nextDeltaTime - currentDeltaTime)
-
-                val speedRatio = currentDeltaTime / max(currentDeltaTime, deltaDifference)
-                val windowRatio = min(1.0, currentDeltaTime / greatWindowFull).pow(2)
-                doubletapness = speedRatio.pow(1 - windowRatio)
-            }
-        }
+        val doubletapness = if (considerCheesability) 1 - current.doubletapness else 1.0
 
         val strainTime =
             if (strainTimeCap != null) max(50.0, max(strainTimeCap, current.strainTime))

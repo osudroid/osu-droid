@@ -79,12 +79,13 @@ object DroidVisualEvaluator {
             // Invert the scaling factor to determine the true travel distance independent of circle size.
             val pixelTravelDistance = current.obj.lazyTravelDistance / scalingFactor
             val currentVelocity = pixelTravelDistance / current.travelTime
+            val spanTravelDistance = pixelTravelDistance / current.obj.spanCount
 
             strain +=
                 // Reward sliders based on velocity, while also avoiding overbuffing extremely fast sliders.
                 min(6.0, currentVelocity * 1.5) *
                 // Longer sliders require more reading.
-                (pixelTravelDistance / 100)
+                (spanTravelDistance / 100)
 
             var cumulativeStrainTime = 0.0
 
@@ -105,13 +106,14 @@ object DroidVisualEvaluator {
                 // Invert the scaling factor to determine the true travel distance independent of circle size.
                 val lastPixelTravelDistance = last.obj.lazyTravelDistance / scalingFactor
                 val lastVelocity = lastPixelTravelDistance / last.travelTime
+                val lastSpanTravelDistance = lastPixelTravelDistance / last.obj.spanCount
 
                 strain +=
                     // Reward past sliders based on velocity changes, while also
                     // avoiding overbuffing extremely fast velocity changes.
                     min(10.0, 2.5 * abs(currentVelocity - lastVelocity)) *
                     // Longer sliders require more reading.
-                    (lastPixelTravelDistance / 125) *
+                    (lastSpanTravelDistance / 125) *
                     // Avoid overbuffing past sliders.
                     min(1.0, 300 / cumulativeStrainTime)
             }

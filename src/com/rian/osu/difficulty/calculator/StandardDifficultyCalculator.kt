@@ -96,19 +96,11 @@ class StandardDifficultyCalculator : DifficultyCalculator<StandardDifficultyHitO
         parameters: DifficultyCalculationParameters?
     ): Array<Skill<StandardDifficultyHitObject>> {
         val mods = parameters?.mods ?: mutableListOf()
-        val difficultyAdjustMod = mods.find { it is ModDifficultyAdjust } as ModDifficultyAdjust?
-
-        val od = difficultyAdjustMod?.od ?: beatmap.difficulty.od
-        var greatWindow = StandardHitWindow(od).greatWindow.toDouble()
-
-        if (difficultyAdjustMod?.od == null) {
-            greatWindow /= parameters?.totalSpeedMultiplier?.toDouble() ?: 1.0
-        }
 
         return arrayOf(
             StandardAim(mods, true),
             StandardAim(mods, false),
-            StandardSpeed(mods, greatWindow),
+            StandardSpeed(mods),
             StandardFlashlight(mods)
         )
     }
@@ -118,6 +110,14 @@ class StandardDifficultyCalculator : DifficultyCalculator<StandardDifficultyHitO
         parameters: DifficultyCalculationParameters?
     ) = mutableListOf<StandardDifficultyHitObject>().apply {
         val clockRate = parameters?.totalSpeedMultiplier?.toDouble() ?: 1.0
+        val difficultyAdjustMod = parameters?.mods?.find { it is ModDifficultyAdjust } as ModDifficultyAdjust?
+
+        val od = difficultyAdjustMod?.od ?: beatmap.difficulty.od
+        var greatWindow = StandardHitWindow(od).greatWindow.toDouble()
+
+        if (difficultyAdjustMod?.od == null) {
+            greatWindow /= clockRate
+        }
 
         beatmap.hitObjects.objects.let {
             for (i in 1 until it.size) {
@@ -128,7 +128,8 @@ class StandardDifficultyCalculator : DifficultyCalculator<StandardDifficultyHitO
                         it.getOrNull(i - 2),
                         clockRate,
                         this,
-                        size
+                        size,
+                        greatWindow
                     ).also { d -> d.computeProperties(clockRate, it) }
                 )
             }

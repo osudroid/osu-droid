@@ -17,9 +17,8 @@ object StandardRhythmEvaluator {
      * with historic data of the current object.
      *
      * @param current The current object.
-     * @param greatWindow The great hit window of the current object.
      */
-    fun evaluateDifficultyOf(current: StandardDifficultyHitObject, greatWindow: Double): Double {
+    fun evaluateDifficultyOf(current: StandardDifficultyHitObject): Double {
         if (current.obj is Spinner) {
             return 0.0
         }
@@ -63,7 +62,7 @@ object StandardRhythmEvaluator {
             )
 
             val windowPenalty =
-                ((abs(prevDelta - currentDelta) - greatWindow * 0.6) / (greatWindow * 0.6)).coerceIn(0.0, 1.0)
+                ((abs(prevDelta - currentDelta) - current.fullGreatWindow * 0.3) / (current.fullGreatWindow * 0.3)).coerceIn(0.0, 1.0)
 
             var effectiveRatio = windowPenalty * currentRatio
 

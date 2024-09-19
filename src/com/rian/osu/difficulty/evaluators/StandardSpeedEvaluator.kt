@@ -22,35 +22,21 @@ object StandardSpeedEvaluator {
      *  * and how easily they can be cheesed.
      *
      * @param current The current object.
-     * @param greatWindow The great hit window of the current object.
      */
-    fun evaluateDifficultyOf(current: StandardDifficultyHitObject, greatWindow: Double): Double {
+    fun evaluateDifficultyOf(current: StandardDifficultyHitObject): Double {
         if (current.obj is Spinner) {
             return 0.0
         }
 
         val prev = current.previous(0)
         var strainTime = current.strainTime
-        val greatWindowFull = greatWindow * 2
 
         // Nerf double-tappable doubles.
-        val next = current.next(0)
-        var doubletapness = 1.0
-
-        if (next != null) {
-            val currentDeltaTime = max(1.0, current.deltaTime)
-            val nextDeltaTime = max(1.0, next.deltaTime)
-            val deltaDifference = abs(nextDeltaTime - currentDeltaTime)
-
-            val speedRatio = currentDeltaTime / max(currentDeltaTime, deltaDifference)
-            val windowRatio = min(1.0, currentDeltaTime / greatWindowFull).pow(2.0)
-
-            doubletapness = speedRatio.pow(1 - windowRatio)
-        }
+        val doubletapness = 1 - current.doubletapness
 
         // Cap deltatime to the OD 300 hitwindow.
         // 0.93 is derived from making sure 260 BPM 1/4 OD8 streams aren't nerfed harshly, whilst 0.92 limits the effect of the cap.
-        strainTime /= (strainTime / greatWindowFull / 0.93).coerceIn(0.92, 1.0)
+        strainTime /= (strainTime / current.fullGreatWindow / 0.93).coerceIn(0.92, 1.0)
 
         var speedBonus = 1.0
         if (strainTime < MIN_SPEED_BONUS) {

@@ -44,10 +44,15 @@ class DroidDifficultyHitObject(
     index: Int,
 
     /**
+     * The full great window of the hit object.
+     */
+    greatWindow: Double,
+
+    /**
      * Whether force AR was enabled.
      */
     forceAR: Boolean
-) : DifficultyHitObject(obj, lastObj, lastLastObj, clockRate, difficultyHitObjects, index) {
+) : DifficultyHitObject(obj, lastObj, lastLastObj, clockRate, difficultyHitObjects, index, greatWindow) {
     override val mode = GameMode.Droid
     override val maximumSliderRadius = NORMALIZED_RADIUS * 2
 
