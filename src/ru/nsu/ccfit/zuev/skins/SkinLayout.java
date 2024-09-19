@@ -2,7 +2,7 @@ package ru.nsu.ccfit.zuev.skins;
 
 import androidx.annotation.NonNull;
 
-import org.anddev.andengine.entity.sprite.Sprite;
+import com.reco1l.osu.graphics.ExtendedSprite;
 import org.json.JSONObject;
 
 public class SkinLayout {
@@ -25,7 +25,7 @@ public class SkinLayout {
         return layout;
     }
 
-    public void baseApply(@NonNull Sprite entity) {
+    public void baseApply(@NonNull ExtendedSprite entity) {
         entity.setPosition(xOffset, yOffset);
         if (scale != -1) {
             entity.setScale(scale);

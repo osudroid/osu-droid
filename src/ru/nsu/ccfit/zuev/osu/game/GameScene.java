@@ -5,6 +5,7 @@ import android.os.Build;
 import android.os.SystemClock;
 import android.util.Log;
 
+import kotlin.random.Random;
 import ru.nsu.ccfit.zuev.osu.SecurityUtils;
 import com.edlplan.framework.math.FMath;
 import com.edlplan.framework.support.ProxySprite;
@@ -16,6 +17,7 @@ import com.reco1l.osu.data.BeatmapInfo;
 import com.reco1l.osu.Execution;
 import com.reco1l.osu.data.DatabaseManager;
 import com.reco1l.osu.graphics.BlankTextureRegion;
+import com.reco1l.osu.graphics.ExtendedSprite;
 import com.reco1l.osu.graphics.Modifiers;
 import com.reco1l.osu.graphics.VideoSprite;
 import com.reco1l.osu.playfield.SliderTickSprite;
@@ -56,6 +58,7 @@ import org.anddev.andengine.entity.util.FPSCounter;
 import org.anddev.andengine.input.touch.TouchEvent;
 import org.anddev.andengine.opengl.texture.region.TextureRegion;
 import org.anddev.andengine.util.Debug;
+import org.anddev.andengine.util.modifier.ease.EaseQuadIn;
 
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -146,7 +149,7 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
     //private IMusicPlayer music = null;
     private int totalLength = Integer.MAX_VALUE;
     private boolean paused;
-    private Sprite skipBtn;
+    private ExtendedSprite skipBtn;
     private float skipTime;
     private boolean musicStarted;
     private double distToNextObject;
@@ -789,8 +792,9 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
                         loadedSkipTextures.toArray(new String[0]));
             } else {
                 tex = ResourceManager.getInstance().getTexture("play-skip");
-                skipBtn = new Sprite(Config.getRES_WIDTH() - tex.getWidth(),
-                        Config.getRES_HEIGHT() - tex.getHeight(), tex);
+                skipBtn = new ExtendedSprite();
+                skipBtn.setPosition(Config.getRES_WIDTH() - tex.getWidth(), Config.getRES_HEIGHT() - tex.getHeight());
+                skipBtn.setTextureRegion(tex);
             }
             skipBtn.setAlpha(0.7f);
             fgScene.attachChild(skipBtn);

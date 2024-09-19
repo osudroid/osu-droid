@@ -1,15 +1,13 @@
 package ru.nsu.ccfit.zuev.osu.helper;
 
-import org.anddev.andengine.engine.camera.Camera;
-import org.anddev.andengine.entity.sprite.Sprite;
-import org.anddev.andengine.opengl.texture.region.TextureRegion;
+import com.reco1l.osu.graphics.ExtendedSprite;
 
-import javax.microedition.khronos.opengles.GL10;
+import org.anddev.andengine.opengl.texture.region.TextureRegion;
 
 import ru.nsu.ccfit.zuev.osu.ResourceManager;
 import ru.nsu.ccfit.zuev.skins.StringSkinData;
 
-public class AnimSprite extends Sprite {
+public class AnimSprite extends ExtendedSprite {
 
     public enum LoopType {
         STOP, // stop at last frame
@@ -25,9 +23,11 @@ public class AnimSprite extends Sprite {
     private float fps;
     private LoopType loopType = LoopType.LOOP;
 
-    public AnimSprite(float px, float py, StringSkinData prefix, String name, int count, float fps)
-    {
-        super(px, py, ResourceManager.getInstance().getTextureWithPrefix(prefix, (name != null ? name : "") + (count == 1 ? "" : "0")));
+    public AnimSprite(float px, float py, StringSkinData prefix, String name, int count, float fps) {
+
+        setPosition(px, py);
+        setTextureRegion(ResourceManager.getInstance().getTextureWithPrefix(prefix, (name != null ? name : "") + (count == 1 ? "" : "0")));
+
         if (count == 0) {
             count = 1;
         }
@@ -44,9 +44,11 @@ public class AnimSprite extends Sprite {
         }
     }
 
-    public AnimSprite(final float px, final float py, final String texname,
-                      int count, final float fps) {
-        super(px, py, ResourceManager.getInstance().getTexture(texname + "0"));
+    public AnimSprite(final float px, final float py, final String texname, int count, final float fps) {
+
+        setPosition(px, py);
+        setTextureRegion(ResourceManager.getInstance().getTexture(texname + "0"));
+
         if (count == 0) {
             count = 1;
         }
@@ -61,9 +63,11 @@ public class AnimSprite extends Sprite {
         }
     }
 
-    public AnimSprite(final float px, final float py, final float fps,
-                      final String... textures) {
-        super(px, py, ResourceManager.getInstance().getTextureIfLoaded(textures[0]));
+    public AnimSprite(final float px, final float py, final float fps, final String... textures) {
+
+        setPosition(px, py);
+        setTextureRegion(ResourceManager.getInstance().getTextureIfLoaded(textures[0]));
+
         this.count = textures.length;
         this.fps = fps;
         regions = new TextureRegion[count];
@@ -106,6 +110,8 @@ public class AnimSprite extends Sprite {
             default:
                 break;
         }
+
+        setTextureRegion(regions[frame]);
     }
 
     /**
@@ -146,45 +152,4 @@ public class AnimSprite extends Sprite {
         super.onManagedUpdate(pSecondsElapsed);
     }
 
-
-    @Override
-    protected void doDraw(final GL10 pGL, final Camera pCamera) {
-        if (regions.length == 0 || frame < 0 || frame >= regions.length) {
-            return;
-        }
-        regions[frame].onApply(pGL);
-        onInitDraw(pGL);
-        onApplyVertices(pGL);
-        drawVertices(pGL, pCamera);
-    }
-
-
-    @Override
-    public void setFlippedHorizontal(final boolean pFlippedHorizontal) {
-        for (final TextureRegion reg : regions) {
-            reg.setFlippedHorizontal(pFlippedHorizontal);
-        }
-    }
-
-    public float getFrameWidth() {
-        if (frame < regions.length && frame >= 0) {
-            return regions[frame].getWidth();
-        } else if (regions.length > 0) {
-            return regions[0].getWidth();
-        } else {
-            return 40;
-        }
-    }
-
-    public void setTextureRegion(final int index, final TextureRegion region) {
-        regions[index] = region;
-    }
-
-    public TextureRegion getTextureRegionAt(final int index) {
-        return regions[index];
-    }
-
-    public int getTextureRegionCount() {
-        return regions.length;
-    }
 }

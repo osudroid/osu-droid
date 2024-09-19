@@ -1,7 +1,6 @@
 package ru.nsu.ccfit.zuev.osu.game;
 
 import org.anddev.andengine.entity.scene.Scene;
-import org.anddev.andengine.entity.sprite.Sprite;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -68,7 +67,7 @@ public class GameScoreText {
             if (ch >= '0' && ch <= '9') {
                 digit.setVisible(true);
                 digit.setFrame(ch - '0');
-                digit.setWidth(digit.getFrameWidth() * scale);
+                digit.setWidth(digit.getWidth() * scale);
                 digit.setPosition(digits.get(0).getX() + totalWidth, digit.getY());
                 totalWidth += digit.getWidth();
                 j++;
@@ -90,20 +89,20 @@ public class GameScoreText {
     }
 
     public void attachToScene(final Scene scene) {
-        for (final Sprite sp : letters) {
+        for (var sp : letters) {
             scene.attachChild(sp, 0);
         }
     }
 
     public void detachFromScene() {
-        for (final Sprite sp : letters) {
+        for (var sp : letters) {
             sp.detachSelf();
         }
     }
 
     public void setPosition(float x, float y){
         float width = 0;
-        for (final Sprite sp : letters){
+        for (var sp : letters){
             sp.setPosition(x + width, y);
             width += sp.getWidth();
         }

@@ -5,6 +5,7 @@ import android.util.Log
 import ru.nsu.ccfit.zuev.osu.SecurityUtils
 import com.reco1l.ibancho.LobbyAPI
 import com.reco1l.ibancho.RoomAPI
+import com.reco1l.osu.graphics.*
 import com.reco1l.osu.updateThread
 import com.reco1l.toolkt.kotlin.async
 import org.anddev.andengine.entity.modifier.LoopEntityModifier
@@ -43,7 +44,7 @@ object LobbyScene : Scene()
         }
 
 
-    private var backButton: Sprite? = null
+    private var backButton: ExtendedSprite? = null
 
     private var createButton: TextButton? = null
 

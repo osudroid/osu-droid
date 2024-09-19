@@ -1,5 +1,7 @@
 package ru.nsu.ccfit.zuev.osu.game;
 
+import com.reco1l.osu.graphics.ExtendedSprite;
+
 import org.anddev.andengine.entity.scene.Scene;
 import org.anddev.andengine.entity.sprite.Sprite;
 
@@ -15,7 +17,7 @@ public class ScoreBar extends GameObject {
     private static float speed = 0.75f;
     private final StatisticV2 stat;
     private final Sprite bg;
-    private final Sprite colour;
+    private final ExtendedSprite colour;
     private final AnimSprite ki;
     private final float width;
     private float lasthp = 0;
@@ -38,8 +40,9 @@ public class ScoreBar extends GameObject {
             colour = new AnimSprite(Utils.toRes(5), Utils.toRes(16), loadedScoreBarTextures.size(),
                     loadedScoreBarTextures.toArray(new String[0]));
         } else {
-            colour = new Sprite(Utils.toRes(5), Utils.toRes(16),
-                    ResourceManager.getInstance().getTexture("scorebar-colour"));
+            colour = new ExtendedSprite();
+            colour.setPosition(5, 5);
+            colour.setTextureRegion(ResourceManager.getInstance().getTexture("scorebar-colour"));
         }
         width = colour.getWidth();
 		/*for (int i = 0; i < colour.getTextureRegionCount(); i++) {

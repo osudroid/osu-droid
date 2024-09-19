@@ -11,6 +11,7 @@ import com.reco1l.osu.data.BeatmapInfo;
 import com.reco1l.osu.data.BeatmapSetInfo;
 import com.reco1l.osu.data.DatabaseManager;
 import com.reco1l.osu.Execution;
+import com.reco1l.osu.graphics.ExtendedSprite;
 import com.reco1l.osu.multiplayer.Multiplayer;
 import com.reco1l.osu.multiplayer.RoomScene;
 
@@ -99,7 +100,7 @@ public class SongMenu implements IUpdateHandler, MenuItemListener,
     private int pointerId = -1;
     private float initalY = -1;
     private float secPassed = 0, tapTime;
-    private Sprite backButton = null;
+    private ExtendedSprite backButton = null;
     private ScrollBar scrollbar;
 
     private ChangeableText
@@ -374,12 +375,15 @@ public class SongMenu implements IUpdateHandler, MenuItemListener,
                 }
             };
         } else {
-            backButton = new Sprite(0, 0, ResourceManager.getInstance().getTexture("menu-back")) {
+            backButton = new ExtendedSprite() {
+
                 boolean moved = false;
                 float dx = 0, dy = 0;
                 boolean scaleWhenHold = true;
 
                 {
+                    setTextureRegion(ResourceManager.getInstance().getTexture("menu-back"));
+
                     if (layoutBackButton != null) {
                         scaleWhenHold = layoutBackButton.property.optBoolean("scaleWhenHold", true);
                     }

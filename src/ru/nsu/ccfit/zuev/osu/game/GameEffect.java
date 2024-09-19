@@ -4,13 +4,13 @@ import android.graphics.PointF;
 
 
 import com.reco1l.osu.Execution;
+import com.reco1l.osu.graphics.ExtendedSprite;
 import com.reco1l.osu.graphics.Modifiers;
 import com.reco1l.osu.graphics.UniversalModifier;
 
 import org.anddev.andengine.entity.IEntity;
 import org.anddev.andengine.entity.scene.Scene;
 import org.anddev.andengine.entity.shape.Shape;
-import org.anddev.andengine.entity.sprite.Sprite;
 import org.anddev.andengine.util.modifier.IModifier;
 
 import java.util.ArrayList;
@@ -28,7 +28,7 @@ public class GameEffect extends GameObject {
             "hit0", "hit50", "hit100", "hit100k", "hit300", "hit300k", "hit300g"
     ));
 
-    Sprite hit;
+    ExtendedSprite hit;
     String texname;
 
     public GameEffect(final String texname) {
@@ -45,7 +45,8 @@ public class GameEffect extends GameObject {
             hit.setLoopType(AnimSprite.LoopType.STOP);
             this.hit = hit;
         } else {
-            hit = new Sprite(0, 0, ResourceManager.getInstance().getTexture(texname));
+            hit = new ExtendedSprite();
+            hit.setTextureRegion(ResourceManager.getInstance().getTexture(texname));
         }
     }
 

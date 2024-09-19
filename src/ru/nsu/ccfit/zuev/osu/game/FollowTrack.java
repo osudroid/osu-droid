@@ -3,9 +3,9 @@ package ru.nsu.ccfit.zuev.osu.game;
 import android.graphics.PointF;
 
 import com.reco1l.framework.Pool;
+import com.reco1l.osu.graphics.ExtendedSprite;
 
 import org.anddev.andengine.entity.scene.Scene;
-import org.anddev.andengine.entity.sprite.Sprite;
 import org.anddev.andengine.opengl.texture.region.TextureRegion;
 
 import java.util.ArrayList;
@@ -19,16 +19,18 @@ public class FollowTrack extends GameObject {
 
     private static int FRAME_COUNT = 1;
 
-    public static final Pool<Sprite> pointSpritePool = new Pool<>(pool -> {
+    public static final Pool<ExtendedSprite> pointSpritePool = new Pool<>(pool -> {
 
         if (FRAME_COUNT == 1) {
-            return new Sprite(0, 0, ResourceManager.getInstance().getTexture("followpoint"));
+            var sprite = new ExtendedSprite();
+            sprite.setTextureRegion(ResourceManager.getInstance().getTexture("followpoint"));
+            return sprite;
         } else {
             return new AnimSprite(0, 0, "followpoint-", FRAME_COUNT, FRAME_COUNT);
         }
     });
 
-    private final ArrayList<Sprite> points = new ArrayList<>();
+    private final ArrayList<ExtendedSprite> points = new ArrayList<>();
     private GameObjectListener listener;
     private float timeLeft;
     private float time;
@@ -133,7 +135,7 @@ public class FollowTrack extends GameObject {
             empty = true;
 
             for (int i = 0, pointsSize = points.size(); i < pointsSize; i++) {
-                Sprite sp = points.get(i);
+                var sp = points.get(i);
                 sp.detachSelf();
                 pointSpritePool.free(sp);
             }
