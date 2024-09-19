@@ -1,5 +1,6 @@
 package ru.nsu.ccfit.zuev.osu.game;
 
+import com.reco1l.osu.graphics.ExtendedSprite;
 import com.reco1l.osu.graphics.Modifiers;
 import com.reco1l.osu.playfield.NumberedCirclePiece;
 import com.rian.osu.mods.ModHidden;
@@ -10,13 +11,12 @@ import ru.nsu.ccfit.zuev.osu.Config;
 import ru.nsu.ccfit.zuev.osu.RGBColor;
 import ru.nsu.ccfit.zuev.osu.ResourceManager;
 import ru.nsu.ccfit.zuev.osu.Utils;
-import ru.nsu.ccfit.zuev.osu.helper.CentredSprite;
 import ru.nsu.ccfit.zuev.osu.scoring.ResultType;
 import ru.nsu.ccfit.zuev.skins.OsuSkin;
 
 public class HitCircle extends GameObject {
 
-    private final CentredSprite approachCircle;
+    private final ExtendedSprite approachCircle;
     private final RGBColor comboColor = new RGBColor();
     private com.rian.osu.beatmap.hitobject.HitCircle beatmapCircle;
     private GameObjectListener listener;
@@ -34,7 +34,9 @@ public class HitCircle extends GameObject {
 
     public HitCircle() {
         circlePiece = new NumberedCirclePiece("hitcircle", "hitcircleoverlay");
-        approachCircle = new CentredSprite(0, 0, ResourceManager.getInstance().getTexture("approachcircle"));
+        approachCircle = new ExtendedSprite();
+        approachCircle.setOrigin(0.5f, 0.5f);
+        approachCircle.setTextureRegion(ResourceManager.getInstance().getTexture("approachcircle"));
     }
 
     public void init(final GameObjectListener listener, final Scene pScene,

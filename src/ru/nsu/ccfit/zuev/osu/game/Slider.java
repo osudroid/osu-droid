@@ -6,6 +6,7 @@ import com.edlplan.framework.math.Vec2;
 import com.edlplan.framework.math.line.LinePath;
 import com.edlplan.osu.support.slider.SliderBody;
 import com.reco1l.osu.Execution;
+import com.reco1l.osu.graphics.ExtendedSprite;
 import com.reco1l.osu.graphics.Modifiers;
 import com.reco1l.osu.playfield.CirclePiece;
 import com.reco1l.osu.playfield.NumberedCirclePiece;
@@ -26,7 +27,6 @@ import ru.nsu.ccfit.zuev.osu.ResourceManager;
 import ru.nsu.ccfit.zuev.osu.Utils;
 import ru.nsu.ccfit.zuev.osu.game.GameHelper.SliderPath;
 import ru.nsu.ccfit.zuev.osu.helper.AnimSprite;
-import ru.nsu.ccfit.zuev.osu.helper.CentredSprite;
 import ru.nsu.ccfit.zuev.osu.helper.DifficultyHelper;
 import ru.nsu.ccfit.zuev.osu.helper.ModifierListener;
 import ru.nsu.ccfit.zuev.skins.OsuSkin;
@@ -36,8 +36,8 @@ import java.util.BitSet;
 
 public class Slider extends GameObject {
 
-    private final CentredSprite approachCircle;
-    private final CentredSprite startArrow, endArrow;
+    private final ExtendedSprite approachCircle;
+    private final ExtendedSprite startArrow, endArrow;
     private com.rian.osu.beatmap.hitobject.Slider beatmapSlider;
     private final PointF curveEndPos = new PointF();
     private Scene scene;
@@ -113,9 +113,17 @@ public class Slider extends GameObject {
         headCirclePiece = new NumberedCirclePiece("sliderstartcircle", "sliderstartcircleoverlay");
         tailCirclePiece = new CirclePiece("sliderendcircle", "sliderendcircleoverlay");
 
-        approachCircle = new CentredSprite(0, 0, ResourceManager.getInstance().getTexture("approachcircle"));
-        startArrow = new CentredSprite(0, 0, ResourceManager.getInstance().getTexture("reversearrow"));
-        endArrow = new CentredSprite(0, 0, ResourceManager.getInstance().getTexture("reversearrow"));
+        approachCircle = new ExtendedSprite();
+        approachCircle.setOrigin(0.5f, 0.5f);
+        approachCircle.setTextureRegion(ResourceManager.getInstance().getTexture("approachcircle"));
+
+        startArrow = new ExtendedSprite();
+        startArrow.setOrigin(0.5f, 0.5f);
+        startArrow.setTextureRegion(ResourceManager.getInstance().getTexture("reversearrow"));
+
+        endArrow = new ExtendedSprite();
+        endArrow.setOrigin(0.5f, 0.5f);
+        endArrow.setTextureRegion(ResourceManager.getInstance().getTexture("reversearrow"));
 
         int ballFrameCount = SkinManager.getFrames("sliderb");
         ball = new AnimSprite(0, 0, "sliderb", ballFrameCount, ballFrameCount);

@@ -8,14 +8,12 @@ import com.reco1l.osu.graphics.Modifiers;
 
 import org.anddev.andengine.entity.IEntity;
 import org.anddev.andengine.entity.scene.Scene;
-import org.anddev.andengine.entity.sprite.Sprite;
 import org.anddev.andengine.util.MathUtils;
 import org.anddev.andengine.util.modifier.IModifier;
 
 import ru.nsu.ccfit.zuev.osu.Constants;
 import ru.nsu.ccfit.zuev.osu.ResourceManager;
 import ru.nsu.ccfit.zuev.osu.Utils;
-import ru.nsu.ccfit.zuev.osu.helper.CentredSprite;
 import ru.nsu.ccfit.zuev.osu.helper.ModifierListener;
 import ru.nsu.ccfit.zuev.osu.scoring.ScoreNumber;
 import ru.nsu.ccfit.zuev.osu.scoring.StatisticV2;
@@ -48,13 +46,32 @@ public class ModernSpinner extends Spinner {
 
     public ModernSpinner() {
         ResourceManager.getInstance().checkEvoSpinnerTextures();
-        center = Utils.trackToRealCoords(new PointF((float) Constants.MAP_WIDTH / 2,
-                (float) Constants.MAP_HEIGHT / 2));
-        middle = new CentredSprite(center.x, center.y, ResourceManager.getInstance().getTexture("spinner-middle"));
-        middle2 = new CentredSprite(center.x, center.y, ResourceManager.getInstance().getTexture("spinner-middle2"));
-        bottom = new CentredSprite(center.x, center.y, ResourceManager.getInstance().getTexture("spinner-bottom"));
-        top = new CentredSprite(center.x, center.y, ResourceManager.getInstance().getTexture("spinner-top"));
-        glow = new CentredSprite(center.x, center.y, ResourceManager.getInstance().getTexture("spinner-glow"));
+        center = Utils.trackToRealCoords(new PointF((float) Constants.MAP_WIDTH / 2, (float) Constants.MAP_HEIGHT / 2));
+
+        middle = new ExtendedSprite();
+        middle.setOrigin(0.5f, 0.5f);
+        middle.setPosition(center.x, center.y);
+        middle.setTextureRegion(ResourceManager.getInstance().getTexture("spinner-middle"));
+
+        middle2 = new ExtendedSprite();
+        middle2.setOrigin(0.5f, 0.5f);
+        middle2.setPosition(center.x, center.y);
+        middle2.setTextureRegion(ResourceManager.getInstance().getTexture("spinner-middle2"));
+
+        bottom = new ExtendedSprite();
+        bottom.setOrigin(0.5f, 0.5f);
+        bottom.setPosition(center.x, center.y);
+        bottom.setTextureRegion(ResourceManager.getInstance().getTexture("spinner-bottom"));
+
+        top = new ExtendedSprite();
+        top.setOrigin(0.5f, 0.5f);
+        top.setPosition(center.x, center.y);
+        top.setTextureRegion(ResourceManager.getInstance().getTexture("spinner-top"));
+
+        glow = new ExtendedSprite();
+        glow.setOrigin(0.5f, 0.5f);
+        glow.setPosition(center.x, center.y);
+        glow.setTextureRegion(ResourceManager.getInstance().getTexture("spinner-glow"));
 
         bonusScore = new ScoreNumber(center.x, center.y + 100, "", 1.1f, true);
     }

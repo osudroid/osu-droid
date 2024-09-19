@@ -18,7 +18,6 @@ import org.anddev.andengine.opengl.texture.region.TextureRegion;
 import java.util.ArrayList;
 
 import ru.nsu.ccfit.zuev.osu.*;
-import ru.nsu.ccfit.zuev.osu.helper.CentredSprite;
 
 public class LoadingScreen implements IUpdateHandler {
     private final LoadingScene scene;
@@ -63,12 +62,11 @@ public class LoadingScreen implements IUpdateHandler {
         ToastLogger.setPercentage(-1);
         percentage = -1;
 
-        final TextureRegion ltexture = ResourceManager.getInstance()
-                .getTexture("loading");
-        final ExtendedSprite circle = new CentredSprite(Config.getRES_WIDTH() / 2f,
-                Config.getRES_HEIGHT() / 2f, ltexture);
-        circle.registerEntityModifier(new LoopEntityModifier(
-                new RotationByModifier(2.0f, 360)));
+        var circle = new ExtendedSprite();
+        circle.setOrigin(0.5f, 0.5f);
+        circle.setPosition(Config.getRES_WIDTH() / 2f, Config.getRES_HEIGHT() / 2f);
+        circle.setTextureRegion(ResourceManager.getInstance().getTexture("loading"));
+        circle.registerEntityModifier(new LoopEntityModifier(new RotationByModifier(2.0f, 360)));
         scene.attachChild(circle);
 
         scene.registerUpdateHandler(this);
