@@ -62,25 +62,20 @@ public class SliderBody extends ExtendedEntity {
     }
 
 
-    public void setPath(LinePath path) {
+    public void setPath(LinePath path, boolean beginEmpty) {
 
         reset();
         this.path = path;
 
-        if (Config.isSnakingInSliders()) {
+        startLength = 0;
 
-            if (hint != null) {
-                hint.getVertices().length = 0;
-            }
-            background.getVertices().length = 0;
-            border.getVertices().length = 0;
-            shouldRebuildVertices = true;
-
+        if (beginEmpty) {
+            endLength = 0;
         } else {
-            buildVertices(path);
             endLength = path.getMeasurer().maxLength();
-            shouldRebuildVertices = false;
         }
+
+        shouldRebuildVertices = true;
     }
 
 
@@ -143,14 +138,16 @@ public class SliderBody extends ExtendedEntity {
     }
 
 
-    public void onUpdate() {
+    @Override
+    protected void onManagedUpdate(float pSecondsElapsed) {
 
-        if (path == null || !shouldRebuildVertices) {
-            return;
+        if (path != null && shouldRebuildVertices) {
+            shouldRebuildVertices = false;
+
+            buildVertices(path.cutPath(startLength, endLength).fitToLinePath(buildCache.path));
         }
-        shouldRebuildVertices = false;
 
-        buildVertices(path.cutPath(startLength, endLength).fitToLinePath(buildCache.path));
+        super.onManagedUpdate(pSecondsElapsed);
     }
 
 

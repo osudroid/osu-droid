@@ -275,7 +275,7 @@ public class Slider extends GameObject {
             superPath = superPath.fitToLinePath();
             superPath.measure();
 
-            sliderBody.setPath(superPath);
+            sliderBody.setPath(superPath, Config.isSnakingInSliders());
             sliderBody.setBackgroundWidth(OsuSkin.get().getSliderBodyWidth() * scale);
             sliderBody.setBackgroundColor(bodyColor.r(), bodyColor.g(), bodyColor.b(), OsuSkin.get().getSliderBodyBaseAlpha());
 
@@ -758,7 +758,6 @@ public class Slider extends GameObject {
                         float l = superPath.getMeasurer().maxLength() * percentage;
 
                         sliderBody.setEndLength(l);
-                        sliderBody.onUpdate();
                     }
 
                     var position = getPositionAt(percentage, false, true);
@@ -778,7 +777,6 @@ public class Slider extends GameObject {
                 if (Config.isSnakingInSliders()) {
                     if (!preStageFinish && superPath != null && sliderBody != null) {
                         sliderBody.setEndLength(superPath.getMeasurer().maxLength());
-                        sliderBody.onUpdate();
                         preStageFinish = true;
                     }
 
