@@ -435,7 +435,11 @@ public class Slider extends GameObject {
 
         if (GameHelper.isHidden()) {
             sliderBody.detachSelf();
-            poolObject();
+
+            // If the animation is enabled, at this point it will be still animating.
+            if (!Config.isAnimateFollowCircle() || !isFollowCircleAnimating) {
+                poolObject();
+            }
         } else {
             sliderBody.registerEntityModifier(Modifiers.fadeOut(0.24f / GameHelper.getSpeedMultiplier(), new ModifierListener() {
 
@@ -460,7 +464,7 @@ public class Slider extends GameObject {
         }));
 
         // Follow circle might still be animating when the slider is removed from the scene.
-        if (!Config.isAnimateFollowCircle()) {
+        if (!Config.isAnimateFollowCircle() || !isFollowCircleAnimating) {
             followCircle.detachSelf();
         }
 
@@ -623,7 +627,14 @@ public class Slider extends GameObject {
             followCircle.registerEntityModifier(Modifiers.alpha(0.2f / GameHelper.getSpeedMultiplier(), followCircle.getAlpha(), 0f, new ModifierListener() {
                 @Override
                 public void onModifierFinished(IModifier<IEntity> pModifier, IEntity pItem) {
-                    Execution.updateThread(followCircle::detachSelf);
+                    Execution.updateThread(() -> {
+                        followCircle.detachSelf();
+
+                        // When hidden mod is enabled, the follow circle is the last object to finish animating.
+                        if (GameHelper.isHidden()) {
+                            poolObject();
+                        }
+                    });
                     isFollowCircleAnimating = false;
                 }
             }));
