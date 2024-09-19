@@ -46,7 +46,9 @@ public class CircleNumber extends ExtendedEntity {
                 var sprite = (ExtendedSprite) getChild(i);
                 var textureRegion = ResourceManager.getInstance().getTextureWithPrefix(prefix, String.valueOf(numberStr.charAt(i)));
 
-                sprite.setPosition(Math.max(0, width - overlap), 0f);
+                if (i > 0) {
+                    sprite.setPosition(width - overlap, 0f);
+                }
                 sprite.setTextureRegion(textureRegion);
 
                 width = sprite.getX() + sprite.getWidth();
