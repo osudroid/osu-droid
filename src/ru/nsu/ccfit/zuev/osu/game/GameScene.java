@@ -2282,23 +2282,30 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
     }
 
     private void createHitEffect(final PointF pos, final String name, RGBColor color) {
-        final GameEffect effect = GameObjectPool.getInstance().getEffect(name);
-        final float speedMultiplier = GameHelper.getSpeedMultiplier();
+
+        var effect = GameObjectPool.getInstance().getEffect(name);
+        var speedMultiplier = GameHelper.getSpeedMultiplier();
+
+        // Reference https://github.com/ppy/osu/blob/ebf637bd3c33f1c886f6bfc81aa9ea2132c9e0d2/osu.Game/Skinning/LegacyJudgementPieceOld.cs
+        var fadeInLength = 0.12f / speedMultiplier;
+        var fadeOutLength = 0.6f / speedMultiplier;
+        var fadeOutDelay = 0.5f / speedMultiplier;
+
+        var fadeSequence = Modifiers.sequence(
+            Modifiers.fadeIn(fadeInLength),
+            Modifiers.delay(fadeOutDelay),
+            Modifiers.fadeOut(fadeOutLength)
+        );
 
         if (name.equals("hit0")) {
 
-            // Reference https://github.com/ppy/osu/blob/ebf637bd3c33f1c886f6bfc81aa9ea2132c9e0d2/osu.Game/Skinning/LegacyJudgementPieceOld.cs#L69-L82
-
             var rotation = (float) Random.Default.nextDouble(8.6 * 2) - 8.6f;
-
-            var fadeInLength = 0.12f / speedMultiplier;
-            var fadeOutLength = 0.6f / speedMultiplier;
-            var fadeOutDelay = 0.5f / speedMultiplier;
 
             effect.init(
                 mgScene,
                 pos,
                 scale * 1.6f,
+                fadeSequence,
                 Modifiers.scale(0.1f / speedMultiplier, scale * 1.6f, scale, null, EaseQuadIn.getInstance()),
                 Modifiers.translateY(fadeOutDelay + fadeOutLength, -5f, 80f, null, EaseQuadIn.getInstance()),
                 Modifiers.sequence(
@@ -2310,35 +2317,39 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
             return;
         }
 
-        if (Config.isHitLighting()
-                && !name.equals("sliderpoint10")
-                && !name.equals("sliderpoint30")
-                && ResourceManager.getInstance().getTexture("lighting") != null) {
-            final GameEffect light = GameObjectPool.getInstance().getEffect("lighting");
+        if (Config.isHitLighting() && !name.equals("sliderpoint10") && !name.equals("sliderpoint30") && ResourceManager.getInstance().getTexture("lighting") != null) {
+
+            var light = GameObjectPool.getInstance().getEffect("lighting");
+            light.setBlendFunction(GL10.GL_SRC_ALPHA, GL10.GL_DST_ALPHA);
             light.setColor(color);
             light.init(
-                    bgScene,
-                    pos,
-                    scale,
-                    Modifiers.fadeOut(1 / speedMultiplier),
-                    Modifiers.sequence(
-                        Modifiers.scale(0.25f / speedMultiplier, scale, 1.5f * scale),
-                        Modifiers.scale(0.45f / speedMultiplier, scale * 1.5f, 1.9f * scale),
-                        Modifiers.scale(0.3f / speedMultiplier, scale * 1.9f, scale * 2f)
-                    )
+                bgScene,
+                pos,
+                scale,
+                Modifiers.fadeOut(1 / speedMultiplier),
+                Modifiers.sequence(
+                    Modifiers.scale(0.25f / speedMultiplier, scale, 1.5f * scale),
+                    Modifiers.scale(0.45f / speedMultiplier, scale * 1.5f, 1.9f * scale),
+                    Modifiers.scale(0.3f / speedMultiplier, scale * 1.9f, scale * 2f)
+                )
             );
-            light.setBlendFunction(GL10.GL_SRC_ALPHA, GL10.GL_DST_ALPHA);
         }
 
         effect.init(
-                mgScene,
-                pos,
-                scale,
-                Modifiers.sequence(
-                    Modifiers.scale(0.15f / speedMultiplier, scale, 1.2f * scale),
-                    Modifiers.scale(0.05f / speedMultiplier, 1.2f * scale, scale),
-                    Modifiers.fadeOut(0.5f / speedMultiplier)
-                )
+            mgScene,
+            pos,
+            scale * 0.6f,
+            fadeSequence,
+            Modifiers.sequence(
+                Modifiers.scale(fadeInLength * 0.8f, scale * 0.6f, scale * 1.1f),
+                Modifiers.delay(fadeInLength * 0.2f),
+                Modifiers.scale(fadeInLength * 0.2f, scale * 1.1f, scale * 0.9f),
+
+                // stable dictates scale of 0.9->1 over time 1.0 to 1.4, but we are already at 1.2.
+                // so we need to force the current value to be correct at 1.2 (0.95) then complete the
+                // second half of the transform.
+                Modifiers.scale(fadeInLength * 0.2f, scale * 0.95f, scale)
+            )
         );
     }
 
