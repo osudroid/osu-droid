@@ -256,7 +256,7 @@ public class Slider extends GameObject {
         var timingControlPoint = controlPoints.timing.controlPointAt(beatmapSlider.startTime);
         tickInterval = timingControlPoint.msPerBeat / 1000 / tickRate;
 
-        tickContainer.init(beatmapSlider, scale);
+        tickContainer.init(beatmapSlider);
         scene.attachChild(tickContainer, 0);
 
         // Slider track

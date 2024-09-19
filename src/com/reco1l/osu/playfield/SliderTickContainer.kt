@@ -8,9 +8,11 @@ import ru.nsu.ccfit.zuev.osu.*
 
 class SliderTickContainer : ExtendedEntity() {
 
-    fun init(beatmapSlider: Slider, scale: Float) {
+    fun init(beatmapSlider: Slider) {
 
         detachChildren()
+
+        val scale = beatmapSlider.gameplayScale
 
         for (i in 1 until beatmapSlider.nestedHitObjects.size) {
 
