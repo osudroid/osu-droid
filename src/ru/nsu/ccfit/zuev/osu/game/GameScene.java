@@ -18,6 +18,7 @@ import com.reco1l.osu.data.DatabaseManager;
 import com.reco1l.osu.graphics.BlankTextureRegion;
 import com.reco1l.osu.graphics.Modifiers;
 import com.reco1l.osu.graphics.VideoSprite;
+import com.reco1l.osu.playfield.SliderTickSprite;
 import com.reco1l.osu.ui.BlockAreaFragment;
 import com.reco1l.osu.ui.entity.GameplayLeaderboard;
 import com.reco1l.osu.multiplayer.Multiplayer;
@@ -454,7 +455,7 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
         GameHelper.setCurrentBeatTime(0);
 
         GameObjectPool.getInstance().purge();
-        Slider.tickSpritePool.clear();
+        SliderTickSprite.getPool().clear();
         FollowTrack.pointSpritePool.clear();
         Modifiers.clearPool();
 

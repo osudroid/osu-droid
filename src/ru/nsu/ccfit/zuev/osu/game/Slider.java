@@ -5,12 +5,11 @@ import android.graphics.PointF;
 import com.edlplan.framework.math.Vec2;
 import com.edlplan.framework.math.line.LinePath;
 import com.edlplan.osu.support.slider.SliderBody;
-import com.reco1l.framework.Pool;
 import com.reco1l.osu.Execution;
 import com.reco1l.osu.graphics.Modifiers;
 import com.reco1l.osu.playfield.CirclePiece;
 import com.reco1l.osu.playfield.NumberedCirclePiece;
-import com.rian.osu.beatmap.hitobject.sliderobject.SliderTick;
+import com.reco1l.osu.playfield.SliderTickContainer;
 import com.rian.osu.beatmap.sections.BeatmapControlPoints;
 import com.rian.osu.math.Interpolation;
 import com.rian.osu.mods.ModHidden;
@@ -33,18 +32,12 @@ import ru.nsu.ccfit.zuev.osu.helper.ModifierListener;
 import ru.nsu.ccfit.zuev.skins.OsuSkin;
 import ru.nsu.ccfit.zuev.skins.SkinManager;
 
-import java.util.ArrayList;
 import java.util.BitSet;
 
 public class Slider extends GameObject {
 
-    public static final Pool<CentredSprite> tickSpritePool = new Pool<>(
-        pool -> new CentredSprite(0f, 0f, ResourceManager.getInstance().getTexture("sliderscorepoint"))
-    );
-
     private final CentredSprite approachCircle;
     private final CentredSprite startArrow, endArrow;
-    private final ArrayList<CentredSprite> tickSprites = new ArrayList<>();
     private com.rian.osu.beatmap.hitobject.Slider beatmapSlider;
     private final PointF curveEndPos = new PointF();
     private Scene scene;
@@ -95,6 +88,11 @@ public class Slider extends GameObject {
     private final CirclePiece tailCirclePiece;
 
     /**
+     * The slider tick container.
+     */
+    private final SliderTickContainer tickContainer;
+
+    /**
      * Whether the slider has ended (and all its spans).
      */
     private boolean isOver;
@@ -121,8 +119,10 @@ public class Slider extends GameObject {
 
         int ballFrameCount = SkinManager.getFrames("sliderb");
         ball = new AnimSprite(0, 0, "sliderb", ballFrameCount, ballFrameCount);
+
         followCircle = new Sprite(0, 0, ResourceManager.getInstance().getTexture("sliderfollowcircle"));
         sliderBody = new SliderBody(OsuSkin.get().isSliderHintEnable());
+        tickContainer = new SliderTickContainer();
     }
 
     public void init(final GameObjectListener listener, final Scene scene,
@@ -255,24 +255,9 @@ public class Slider extends GameObject {
 
         var timingControlPoint = controlPoints.timing.controlPointAt(beatmapSlider.startTime);
         tickInterval = timingControlPoint.msPerBeat / 1000 / tickRate;
-        tickSprites.clear();
 
-        for (int i = 1; i < beatmapSlider.getNestedHitObjects().size(); ++i) {
-            var obj = beatmapSlider.getNestedHitObjects().get(i);
-
-            if (!(obj instanceof SliderTick tick)) {
-                break;
-            }
-
-            var tickPosition = tick.getGameplayStackedPosition();
-            var tickSprite = tickSpritePool.obtain();
-
-            tickSprite.setPosition(tickPosition.x, tickPosition.y);
-            tickSprite.setScale(scale);
-            tickSprite.setAlpha(0);
-            tickSprites.add(tickSprite);
-            scene.attachChild(tickSprite, 0);
-        }
+        tickContainer.init(beatmapSlider, scale);
+        scene.attachChild(tickContainer, 0);
 
         // Slider track
         if (path.pointCount != 0) {
@@ -357,6 +342,16 @@ public class Slider extends GameObject {
                     sliderBody.getRed(), 1f,
                     sliderBody.getGreen(), 1f,
                     sliderBody.getBlue(), 1f
+                )
+            ));
+
+            tickContainer.setColor(colorDim, colorDim, colorDim);
+            tickContainer.registerEntityModifier(Modifiers.sequence(
+                Modifiers.delay(dimDelaySec),
+                Modifiers.color(0.1f / GameHelper.getSpeedMultiplier(),
+                    tickContainer.getRed(), 1f,
+                    tickContainer.getGreen(), 1f,
+                    tickContainer.getBlue(), 1f
                 )
             ));
         }
@@ -474,13 +469,8 @@ public class Slider extends GameObject {
         approachCircle.detachSelf();
         startArrow.detachSelf();
         endArrow.detachSelf();
-        for (int i = 0, size = tickSprites.size(); i < size; i++) {
-            var sp = tickSprites.get(i);
-            sp.clearEntityModifiers();
-            sp.detachSelf();
-            tickSpritePool.free(sp);
-        }
-        tickSprites.clear();
+        tickContainer.detachSelf();
+
         listener.removeObject(this);
         stopSlidingSamples();
         scene = null;
@@ -497,6 +487,7 @@ public class Slider extends GameObject {
         followCircle.clearEntityModifiers();
         ball.clearEntityModifiers();
         sliderBody.clearEntityModifiers();
+        tickContainer.clearEntityModifiers();
 
         GameHelper.putPath(path);
         GameObjectPool.getInstance().putSlider(this);
@@ -547,10 +538,11 @@ public class Slider extends GameObject {
 
             ball.setFlippedHorizontal(reverse);
             // Restore ticks
-            for (int i = 0, size = tickSprites.size(); i < size; i++) {
-                tickSprites.get(i).setAlpha(1);
+            for (int i = 0, size = tickContainer.getChildCount(); i < size; i++) {
+                tickContainer.getChild(i).setAlpha(1f);
             }
-            currentTickSpriteIndex = reverse ? tickSprites.size() - 1 : 0;
+
+            currentTickSpriteIndex = reverse ? tickContainer.getChildCount() - 1 : 0;
 
             // Setting visibility of repeat arrows
             if (reverse) {
@@ -713,12 +705,6 @@ public class Slider extends GameObject {
             }
         }
 
-        // This is used to the dim animation. Instead of applying a modifier for each tick sprite,
-        // we can just pair the color with the head circle piece sprite.
-        for (int i = tickSprites.size() - 1; i >= 0; --i) {
-            tickSprites.get(i).setColor(headCirclePiece.getRed(), headCirclePiece.getGreen(), headCirclePiece.getBlue());
-        }
-
         if (GameHelper.isKiai()) {
             var kiaiModifier = (float) Math.max(0, 1 - GameHelper.getCurrentBeatTime() / GameHelper.getBeatLength()) * 0.5f;
             var r = Math.min(1, circleColor.r() + (1 - circleColor.r()) * kiaiModifier);
@@ -746,9 +732,9 @@ public class Slider extends GameObject {
                 // Following core doing a very cute show animation ^_^"
                 percentage = Math.min(1, percentage * 2);
 
-                for (int i = 0, size = tickSprites.size(); i < size; i++) {
+                for (int i = 0, size = tickContainer.getChildCount(); i < size; i++) {
                     if (percentage > (float) (i + 1) / size) {
-                        tickSprites.get(i).setAlpha(1);
+                        tickContainer.getChild(i).setAlpha(1f);
                     }
                 }
 
@@ -770,10 +756,11 @@ public class Slider extends GameObject {
                     endArrow.setPosition(position.x, position.y);
                 }
             } else if (percentage - dt / timePreempt <= 0.5f) {
-                // Setting up positions of slider parts
-                for (int i = 0, size = tickSprites.size(); i < size; i++) {
-                    tickSprites.get(i).setAlpha(1);
+
+                for (int i = 0, size = tickContainer.getChildCount(); i < size; i++) {
+                    tickContainer.getChild(i).setAlpha(1f);
                 }
+
                 if (beatmapSlider.getSpanCount() > 1) {
                     endArrow.setAlpha(1);
                 }
@@ -800,8 +787,6 @@ public class Slider extends GameObject {
         float scale = beatmapSlider.getGameplayScale();
 
         if (!ball.hasParent()) {
-            //number.detachSelf();
-
             approachCircle.clearEntityModifiers();
             approachCircle.setAlpha(0);
 
@@ -926,7 +911,7 @@ public class Slider extends GameObject {
     }
 
     private void judgeSliderTicks() {
-        if (tickSprites.isEmpty()) {
+        if (tickContainer.getChildCount() == 0) {
             return;
         }
 
@@ -934,7 +919,7 @@ public class Slider extends GameObject {
 
         while (tickTime >= tickInterval) {
             tickTime -= tickInterval;
-            var tickSprite = tickSprites.get(currentTickSpriteIndex);
+            var tickSprite = tickContainer.getChild(currentTickSpriteIndex);
 
             if (tickSprite.getAlpha() == 0) {
                 // All ticks in the current span had been judged.
@@ -963,7 +948,7 @@ public class Slider extends GameObject {
             tickSprite.setAlpha(0);
             if (reverse && currentTickSpriteIndex > 0) {
                 currentTickSpriteIndex--;
-            } else if (!reverse && currentTickSpriteIndex < tickSprites.size() - 1) {
+            } else if (!reverse && currentTickSpriteIndex < tickContainer.getChildCount() - 1) {
                 currentTickSpriteIndex++;
             }
         }
