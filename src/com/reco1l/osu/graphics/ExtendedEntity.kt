@@ -20,7 +20,7 @@ open class ExtendedEntity(
 
     private var height: Float = 0f,
 
-    private val vertexBuffer: VertexBuffer = RectangleVertexBuffer(GL11.GL_STATIC_DRAW, true)
+    private val vertexBuffer: VertexBuffer? = null
 
 ) : Shape(0f, 0f) {
 
@@ -139,11 +139,22 @@ open class ExtendedEntity(
     }
 
     override fun drawVertices(pGL: GL10, pCamera: Camera) {
-        pGL.glDrawArrays(GL10.GL_TRIANGLE_STRIP, 0, 4)
+        if (vertexBuffer != null) {
+            pGL.glDrawArrays(GL10.GL_TRIANGLE_STRIP, 0, 4)
+        }
     }
 
 
-    override fun onUpdateVertexBuffer() {
+    override fun onUpdateVertexBuffer() {}
+
+    override fun onApplyVertices(pGL: GL10) {
+        if (vertexBuffer != null) {
+            super.onApplyVertices(pGL)
+        }
+    }
+
+    override fun getVertexBuffer(): VertexBuffer? {
+        return vertexBuffer
     }
 
 
@@ -186,11 +197,6 @@ open class ExtendedEntity(
 
     override fun getBaseHeight(): Float {
         return height
-    }
-
-
-    override fun getVertexBuffer(): VertexBuffer {
-        return vertexBuffer
     }
 
 
