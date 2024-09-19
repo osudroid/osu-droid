@@ -87,7 +87,7 @@ object Modifiers {
     fun sequence(listener: IModifierListener<IEntity>? = null, vararg modifiers: UniversalModifier) = pool.obtain().also {
         it.reset()
         it.type = SEQUENCE
-        it.modifiers = modifiers
+        it.modifiers = arrayOf(*modifiers)
         it.listener = listener
     }
 
@@ -96,7 +96,7 @@ object Modifiers {
     fun parallel(listener: IModifierListener<IEntity>? = null, vararg modifiers: UniversalModifier) = pool.obtain().also {
         it.reset()
         it.type = PARALLEL
-        it.modifiers = modifiers
+        it.modifiers = arrayOf(*modifiers)
         it.listener = listener
     }
 
@@ -211,7 +211,7 @@ class UniversalModifier(private val pool: Pool<UniversalModifier>? = null) : IMo
     /**
      * Inner modifiers for [SEQUENCE] or [PARALLEL] modifier types.
      */
-    var modifiers: Array<out UniversalModifier>? = null
+    var modifiers: Array<UniversalModifier?>? = null
         set(value) {
             field = value
             duration = getDuration()
@@ -257,18 +257,8 @@ class UniversalModifier(private val pool: Pool<UniversalModifier>? = null) : IMo
     }
 
     private fun clearModifiers() {
-        modifiers?.forEach { it.onUnregister() }
+        modifiers?.forEach { it?.onUnregister() }
         modifiers = null
-    }
-
-    private fun trimModifiers() {
-
-        if (modifiers!!.size == 1) {
-            modifiers = null
-            return
-        }
-
-        modifiers = modifiers!!.copyOfRange(1, modifiers!!.size)
     }
 
 
@@ -326,15 +316,25 @@ class UniversalModifier(private val pool: Pool<UniversalModifier>? = null) : IMo
             SEQUENCE -> {
                 var remainingSec = deltaSec
 
-                while (remainingSec > 0 && modifiers != null) {
+                while (remainingSec > 0) {
 
-                    val modifier = modifiers!!.first()
+                    var isCurrentModifierFinished = false
 
-                    remainingSec -= modifier.onUpdate(remainingSec, item)
+                    for (i in 0 until modifiers!!.size) {
 
-                    if (modifier.isFinished) {
-                        trimModifiers()
-                        modifier.onUnregister()
+                        val modifier = modifiers!![i] ?: continue
+
+                        remainingSec -= modifier.onUpdate(remainingSec, item)
+
+                        if (modifier.isFinished) {
+                            modifier.onUnregister()
+                            modifiers!![i] = null
+                            isCurrentModifierFinished = true
+                        }
+                        break
+                    }
+
+                    if (isCurrentModifierFinished) {
                         break
                     }
                 }
@@ -345,13 +345,16 @@ class UniversalModifier(private val pool: Pool<UniversalModifier>? = null) : IMo
             PARALLEL -> {
                 var remainingSec = deltaSec
 
-                while (remainingSec > 0 && modifiers != null) {
+                while (remainingSec > 0) {
 
-                    for (modifier in modifiers!!) {
+                    for (i in 0 until modifiers!!.size) {
+
+                        val modifier = modifiers!![i] ?: continue
+
                         usedSec = max(usedSec, modifier.onUpdate(deltaSec, item))
 
                         if (modifier.isFinished) {
-                            trimModifiers()
+                            modifiers!![i] = null
                             modifier.onUnregister()
                         }
                     }
@@ -420,9 +423,9 @@ class UniversalModifier(private val pool: Pool<UniversalModifier>? = null) : IMo
      */
     override fun getDuration() = when(type) {
 
-        SEQUENCE -> modifiers?.sumOf { it.duration } ?: 0f
+        SEQUENCE -> modifiers?.sumOf { it?.duration ?: 0f } ?: 0f
 
-        PARALLEL -> modifiers?.maxOf { it.duration } ?: 0f
+        PARALLEL -> modifiers?.maxOf { it?.duration ?: 0f } ?: 0f
 
         else -> duration
     }
@@ -438,7 +441,7 @@ class UniversalModifier(private val pool: Pool<UniversalModifier>? = null) : IMo
      */
     override fun isFinished() = when (type) {
 
-        SEQUENCE, PARALLEL -> modifiers.isNullOrEmpty()
+        SEQUENCE, PARALLEL -> modifiers?.all { it == null } ?: true
 
         else -> elapsedSec >= duration
     }
@@ -476,7 +479,7 @@ class UniversalModifier(private val pool: Pool<UniversalModifier>? = null) : IMo
         modifier.listener = listener
         modifier.easeFunction = easeFunction
         modifier.values = values?.copyOf()
-        modifier.modifiers = modifiers?.map { it.deepCopy() }?.toTypedArray()
+        modifier.modifiers = modifiers?.mapNotNull { it?.deepCopy() }?.toTypedArray()
     }
 }
 
