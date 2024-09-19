@@ -28,19 +28,23 @@ open class ExtendedSprite : ExtendedEntity(vertexBuffer = RectangleVertexBuffer(
     /**
      * Whether the texture should be flipped horizontally.
      */
-    var flippedHorizontal
-        get() = textureRegion?.isFlippedHorizontal ?: false
+    open var flippedHorizontal = false
         set(value) {
-            textureRegion?.isFlippedHorizontal = value
+            if (field != value) {
+                field = value
+                textureRegion?.isFlippedHorizontal = value
+            }
         }
 
     /**
      * Whether the texture should be flipped vertically.
      */
-    var flippedVertical
-        get() = textureRegion?.isFlippedVertical ?: false
+    open var flippedVertical = false
         set(value) {
-            textureRegion?.isFlippedVertical = value
+            if (field != value) {
+                field = value
+                textureRegion?.isFlippedVertical = value
+            }
         }
 
     /**
@@ -56,9 +60,18 @@ open class ExtendedSprite : ExtendedEntity(vertexBuffer = RectangleVertexBuffer(
             field = value
             applyBlendFunction()
 
+            if (value == null) {
+                if (adjustSizeWithTexture) {
+                    setSize(0f, 0f)
+                }
+                return
+            }
+
+            value.isFlippedVertical = flippedVertical
+            value.isFlippedHorizontal = flippedHorizontal
+
             if (adjustSizeWithTexture) {
-                setSize(textureRegion?.width?.toFloat() ?: 0f, textureRegion?.height?.toFloat() ?: 0f)
-                updateVertexBuffer()
+                setSize(value.width.toFloat(), value.height.toFloat())
             }
         }
 
