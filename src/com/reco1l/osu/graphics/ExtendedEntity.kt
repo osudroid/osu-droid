@@ -58,10 +58,9 @@ open class ExtendedEntity(
     }
 
 
-    @JvmOverloads
-    fun setOrigin(x: Float, y: Float = x) {
-        originX = x
-        originY = y
+    fun setOrigin(origin: Origin) {
+        originX = origin.factorX
+        originY = origin.factorY
     }
 
 
@@ -218,5 +217,31 @@ open class ExtendedEntity(
             || mX + this.width < pCamera.minX
             || mY + this.height < pCamera.minY
     }
+
+}
+
+
+/**
+ * Determines the origin of the sprite.
+ */
+enum class Origin(val factorX: Float, val factorY: Float) {
+
+    TopLeft(0f, 0f),
+
+    TopCenter(0.5f, 0f),
+
+    TopRight(1f, 0f),
+
+    CenterLeft(0f, 0.5f),
+
+    Center(0.5f, 0.5f),
+
+    CenterRight(1f, 0.5f),
+
+    BottomLeft(0f, 1f),
+
+    BottomCenter(0.5f, 1f),
+
+    BottomRight(1f, 1f)
 
 }

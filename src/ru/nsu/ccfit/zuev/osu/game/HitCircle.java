@@ -2,6 +2,7 @@ package ru.nsu.ccfit.zuev.osu.game;
 
 import com.reco1l.osu.graphics.ExtendedSprite;
 import com.reco1l.osu.graphics.Modifiers;
+import com.reco1l.osu.graphics.Origin;
 import com.reco1l.osu.playfield.NumberedCirclePiece;
 import com.rian.osu.mods.ModHidden;
 
@@ -35,7 +36,7 @@ public class HitCircle extends GameObject {
     public HitCircle() {
         circlePiece = new NumberedCirclePiece("hitcircle", "hitcircleoverlay");
         approachCircle = new ExtendedSprite();
-        approachCircle.setOrigin(0.5f, 0.5f);
+        approachCircle.setOrigin(Origin.Center);
         approachCircle.setTextureRegion(ResourceManager.getInstance().getTexture("approachcircle"));
     }
 

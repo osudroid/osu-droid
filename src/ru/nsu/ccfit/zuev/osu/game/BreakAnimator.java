@@ -1,6 +1,7 @@
 package ru.nsu.ccfit.zuev.osu.game;
 
 import com.reco1l.osu.graphics.ExtendedSprite;
+import com.reco1l.osu.graphics.Origin;
 import com.reco1l.osu.multiplayer.Multiplayer;
 import com.reco1l.osu.multiplayer.RoomScene;
 import org.anddev.andengine.entity.modifier.*;
@@ -83,7 +84,7 @@ public class BreakAnimator extends GameObject {
         ending = stat.getHp() > 0.5f ? "pass" : "fail";
 
         passfail = new ExtendedSprite();
-        passfail.setOrigin(0.5f, 0.5f);
+        passfail.setOrigin(Origin.Center);
         passfail.setPosition(Config.getRES_WIDTH() / 2f, Config.getRES_HEIGHT() / 2f);
         passfail.setTextureRegion(ResourceManager.getInstance().getTexture("section-" + ending));
 

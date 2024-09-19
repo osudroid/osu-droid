@@ -8,6 +8,7 @@ import com.edlplan.osu.support.slider.SliderBody;
 import com.reco1l.osu.Execution;
 import com.reco1l.osu.graphics.ExtendedSprite;
 import com.reco1l.osu.graphics.Modifiers;
+import com.reco1l.osu.graphics.Origin;
 import com.reco1l.osu.playfield.CirclePiece;
 import com.reco1l.osu.playfield.NumberedCirclePiece;
 import com.reco1l.osu.playfield.SliderTickContainer;
@@ -114,15 +115,15 @@ public class Slider extends GameObject {
         tailCirclePiece = new CirclePiece("sliderendcircle", "sliderendcircleoverlay");
 
         approachCircle = new ExtendedSprite();
-        approachCircle.setOrigin(0.5f, 0.5f);
+        approachCircle.setOrigin(Origin.Center);
         approachCircle.setTextureRegion(ResourceManager.getInstance().getTexture("approachcircle"));
 
         startArrow = new ExtendedSprite();
-        startArrow.setOrigin(0.5f, 0.5f);
+        startArrow.setOrigin(Origin.Center);
         startArrow.setTextureRegion(ResourceManager.getInstance().getTexture("reversearrow"));
 
         endArrow = new ExtendedSprite();
-        endArrow.setOrigin(0.5f, 0.5f);
+        endArrow.setOrigin(Origin.Center);
         endArrow.setTextureRegion(ResourceManager.getInstance().getTexture("reversearrow"));
 
         int ballFrameCount = SkinManager.getFrames("sliderb");
