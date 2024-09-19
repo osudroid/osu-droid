@@ -14,11 +14,6 @@ public class CircleNumber extends ExtendedEntity {
     private boolean isInvalid = false;
 
 
-    public CircleNumber() {
-        super(0, 0);
-    }
-
-
     private void allocateSprites(int count) {
         if (count < getChildCount()) {
             for (int i = getChildCount() - 1; i >= count; i--) {
@@ -40,8 +35,8 @@ public class CircleNumber extends ExtendedEntity {
             var numberStr = String.valueOf(Math.abs(number));
 
             allocateSprites(numberStr.length());
-            mWidth = 0f;
-            mHeight = 0f;
+            var width = 0f;
+            var height = 0f;
 
             var prefix = OsuSkin.get().getHitCirclePrefix();
             var overlap = OsuSkin.get().getHitCircleOverlap();
@@ -51,14 +46,14 @@ public class CircleNumber extends ExtendedEntity {
                 var sprite = (ExtendedSprite) getChild(i);
                 var textureRegion = ResourceManager.getInstance().getTextureWithPrefix(prefix, String.valueOf(numberStr.charAt(i)));
 
-                sprite.setPosition(Math.max(0, mWidth - overlap), 0f);
+                sprite.setPosition(Math.max(0, width - overlap), 0f);
                 sprite.setTextureRegion(textureRegion);
 
-                mWidth = sprite.getX() + sprite.getWidth();
-                mHeight = Math.max(mHeight, sprite.getHeight());
+                width = sprite.getX() + sprite.getWidth();
+                height = Math.max(height, sprite.getHeight());
             }
 
-            updateVertexBuffer();
+            setSize(width, height);
         }
 
         super.onManagedUpdate(pSecondsElapsed);

@@ -4,7 +4,7 @@ import android.graphics.PointF;
 
 import com.edlplan.framework.math.Vec2;
 import com.edlplan.framework.math.line.LinePath;
-import com.edlplan.osu.support.slider.SliderBody2D;
+import com.edlplan.osu.support.slider.SliderBody;
 import com.reco1l.framework.Pool;
 import com.reco1l.osu.Execution;
 import com.reco1l.osu.graphics.Modifiers;
@@ -81,7 +81,7 @@ public class Slider extends GameObject {
     private LinePath superPath = null;
     private boolean preStageFinish = false;
 
-    private SliderBody2D sliderBody = null;
+    private final SliderBody sliderBody;
 
 
     /**
@@ -122,6 +122,7 @@ public class Slider extends GameObject {
         int ballFrameCount = SkinManager.getFrames("sliderb");
         ball = new AnimSprite(0, 0, "sliderb", ballFrameCount, ballFrameCount);
         followCircle = new Sprite(0, 0, ResourceManager.getInstance().getTexture("sliderfollowcircle"));
+        sliderBody = new SliderBody(OsuSkin.get().isSliderHintEnable());
     }
 
     public void init(final GameObjectListener listener, final Scene scene,
@@ -289,27 +290,28 @@ public class Slider extends GameObject {
             superPath = superPath.fitToLinePath();
             superPath.measure();
 
-            var bodyWidth = (OsuSkin.get().getSliderBodyWidth() - OsuSkin.get().getSliderBorderWidth()) * scale;
-            sliderBody = new SliderBody2D(superPath);
-            sliderBody.setBodyWidth(bodyWidth);
-            sliderBody.setBorderWidth(OsuSkin.get().getSliderBodyWidth() * scale);
-            sliderBody.setSliderBodyBaseAlpha(OsuSkin.get().getSliderBodyBaseAlpha());
+            sliderBody.setPath(superPath);
+            sliderBody.setBackgroundWidth(OsuSkin.get().getSliderBodyWidth() * scale);
+            sliderBody.setBackgroundColor(bodyColor.r(), bodyColor.g(), bodyColor.b(), OsuSkin.get().getSliderBodyBaseAlpha());
+
+            sliderBody.setBorderWidth(OsuSkin.get().getSliderBorderWidth() * scale);
+            sliderBody.setBorderColor(borderColor.r(), borderColor.g(), borderColor.b());
 
             if (OsuSkin.get().isSliderHintEnable() && beatmapSlider.getDistance() > OsuSkin.get().getSliderHintShowMinLength()) {
-                sliderBody.setEnableHint(true);
-                sliderBody.setHintAlpha(OsuSkin.get().getSliderHintAlpha());
-                sliderBody.setHintWidth(Math.min(OsuSkin.get().getSliderHintWidth() * scale, bodyWidth));
+                sliderBody.setHintVisible(true);
+                sliderBody.setHintWidth(OsuSkin.get().getSliderHintWidth() * scale);
+
                 RGBColor hintColor = OsuSkin.get().getSliderHintColor();
                 if (hintColor != null) {
-                    sliderBody.setHintColor(hintColor.r(), hintColor.g(), hintColor.b());
+                    sliderBody.setHintColor(hintColor.r(), hintColor.g(), hintColor.b(), OsuSkin.get().getSliderHintAlpha());
                 } else {
-                    sliderBody.setHintColor(bodyColor.r(), bodyColor.g(), bodyColor.b());
+                    sliderBody.setHintColor(bodyColor.r(), bodyColor.g(), bodyColor.b(), OsuSkin.get().getSliderHintAlpha());
                 }
+            } else {
+                sliderBody.setHintVisible(false);
             }
 
-            sliderBody.applyToScene(scene, Config.isSnakingInSliders());
-            sliderBody.setBodyColor(bodyColor.r(), bodyColor.g(), bodyColor.b());
-            sliderBody.setBorderColor(borderColor.r(), borderColor.g(), borderColor.b());
+            scene.attachChild(sliderBody, 0);
         }
 
         if (Config.isDimHitObjects()) {
@@ -348,7 +350,15 @@ public class Slider extends GameObject {
                 )
             ));
 
-            sliderBody.applyDimAnimations(dimDelaySec);
+            sliderBody.setColor(colorDim, colorDim, colorDim);
+            sliderBody.registerEntityModifier(Modifiers.sequence(
+                Modifiers.delay(dimDelaySec),
+                Modifiers.color(0.1f / GameHelper.getSpeedMultiplier(),
+                    sliderBody.getRed(), 1f,
+                    sliderBody.getGreen(), 1f,
+                    sliderBody.getBlue(), 1f
+                )
+            ));
         }
 
         applyBodyFadeAdjustments(fadeInDuration);
@@ -427,22 +437,34 @@ public class Slider extends GameObject {
         if (scene == null) {
             return;
         }
-        // Detach all objects
-        if (sliderBody != null) {
-            if (GameHelper.isHidden()) {
-                sliderBody.removeFromScene(scene);
-            } else {
-                sliderBody.removeFromScene(scene, 0.24f / GameHelper.getSpeedMultiplier(), this);
-            }
+
+        if (GameHelper.isHidden()) {
+            sliderBody.detachSelf();
+            poolObject();
+        } else {
+            sliderBody.registerEntityModifier(Modifiers.fadeOut(0.24f / GameHelper.getSpeedMultiplier(), new ModifierListener() {
+
+                @Override
+                public void onModifierFinished(IModifier<IEntity> pModifier, IEntity pItem) {
+                    Execution.updateThread(() -> {
+                        sliderBody.detachSelf();
+
+                        // We can pool the hit object once all animations are finished.
+                        // The slider body is the last object to finish animating.
+                        poolObject();
+                    });
+                }
+            }));
         }
 
         ball.registerEntityModifier(Modifiers.fadeOut(0.1f / GameHelper.getSpeedMultiplier(), new ModifierListener() {
             @Override
             public void onModifierFinished(IModifier<IEntity> pModifier, IEntity pItem) {
-                    Execution.updateThread(pItem::detachSelf);
+                Execution.updateThread(ball::detachSelf);
             }
         }));
 
+        // Follow circle might still be animating when the slider is removed from the scene.
         if (!Config.isAnimateFollowCircle()) {
             followCircle.detachSelf();
         }
@@ -474,6 +496,7 @@ public class Slider extends GameObject {
         approachCircle.clearEntityModifiers();
         followCircle.clearEntityModifiers();
         ball.clearEntityModifiers();
+        sliderBody.clearEntityModifiers();
 
         GameHelper.putPath(path);
         GameObjectPool.getInstance().putSlider(this);
@@ -608,12 +631,7 @@ public class Slider extends GameObject {
             followCircle.registerEntityModifier(Modifiers.alpha(0.2f / GameHelper.getSpeedMultiplier(), followCircle.getAlpha(), 0f, new ModifierListener() {
                 @Override
                 public void onModifierFinished(IModifier<IEntity> pModifier, IEntity pItem) {
-                    Execution.updateThread(() -> {
-                        pItem.detachSelf();
-                        // We can pool the hit object once all animations are finished.
-                        // The follow circle animation is the last one to finish if it's enabled.
-                        poolObject();
-                    });
+                    Execution.updateThread(followCircle::detachSelf);
                     isFollowCircleAnimating = false;
                 }
             }));
@@ -952,18 +970,17 @@ public class Slider extends GameObject {
     }
 
     private void applyBodyFadeAdjustments(float fadeInDuration) {
-        if (sliderBody == null) {
-            return;
-        }
 
         if (GameHelper.isHidden()) {
             // New duration from completed fade in to end (before fading out)
-            float fadeOutDuration = (float) (beatmapSlider.getDuration() + beatmapSlider.timePreempt) / 1000
-                / GameHelper.getSpeedMultiplier() - fadeInDuration;
+            float fadeOutDuration = (float) (beatmapSlider.getDuration() + beatmapSlider.timePreempt) / 1000 / GameHelper.getSpeedMultiplier() - fadeInDuration;
 
-            sliderBody.applyFadeAdjustments(fadeInDuration, fadeOutDuration);
+            sliderBody.registerEntityModifier(Modifiers.sequence(
+                Modifiers.fadeIn(fadeInDuration),
+                Modifiers.fadeOut(fadeOutDuration, null, EaseQuadOut.getInstance())
+            ));
         } else {
-            sliderBody.applyFadeAdjustments(fadeInDuration);
+            sliderBody.registerEntityModifier(Modifiers.fadeIn(fadeInDuration));
         }
     }
 
