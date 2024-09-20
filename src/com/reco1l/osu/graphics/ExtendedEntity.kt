@@ -7,6 +7,7 @@ import org.anddev.andengine.entity.shape.*
 import org.anddev.andengine.opengl.util.*
 import org.anddev.andengine.opengl.vertex.*
 import javax.microedition.khronos.opengles.*
+import kotlin.math.*
 
 
 /**
@@ -50,6 +51,15 @@ open class ExtendedEntity(
     var inheritColor = true
 
 
+    /**
+     * The current scale.
+     *
+     * This is the maximum value between [mScaleX] and [mScaleY].
+     */
+    val scale
+        get() = max(scaleX, scaleY)
+
+
     init {
         mRotationCenterX = 0.5f
         mRotationCenterY = 0.5f
@@ -61,6 +71,28 @@ open class ExtendedEntity(
     fun setOrigin(origin: Origin) {
         originX = origin.factorX
         originY = origin.factorY
+    }
+
+    fun setRotationCenter(center: Origin) {
+        mRotationCenterX = center.factorX
+        mRotationCenterY = center.factorY
+    }
+
+    fun setScaleCenter(center: Origin) {
+        mScaleCenterX = center.factorX
+        mScaleCenterY = center.factorY
+    }
+
+    fun setX(value: Float) {
+        if (mX != value) {
+            setPosition(value, mY)
+        }
+    }
+
+    fun setY(value: Float) {
+        if (mY != value) {
+            setPosition(mX, value)
+        }
     }
 
 
@@ -144,7 +176,9 @@ open class ExtendedEntity(
     }
 
 
-    override fun onUpdateVertexBuffer() {}
+    override fun onUpdateVertexBuffer() {
+
+    }
 
     override fun onApplyVertices(pGL: GL10) {
         if (vertexBuffer != null) {
