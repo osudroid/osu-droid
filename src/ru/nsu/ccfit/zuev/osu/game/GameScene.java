@@ -19,7 +19,9 @@ import com.reco1l.osu.data.DatabaseManager;
 import com.reco1l.osu.graphics.BlankTextureRegion;
 import com.reco1l.osu.graphics.ExtendedSprite;
 import com.reco1l.osu.graphics.Modifiers;
+import com.reco1l.osu.graphics.Origin;
 import com.reco1l.osu.graphics.VideoSprite;
+import com.reco1l.osu.playfield.ScoreText;
 import com.reco1l.osu.playfield.SliderTickSprite;
 import com.reco1l.osu.ui.BlockAreaFragment;
 import com.reco1l.osu.ui.entity.GameplayLeaderboard;
@@ -133,8 +135,7 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
     private LinkedList<GameObject> activeObjects;
     private LinkedList<GameObject> passiveObjects;
     private LinkedList<GameObject> expiredObjects;
-    private GameScoreText comboText, accText, scoreText;  //显示的文字  连击数  ACC  分数
-    private GameScoreTextShadow scoreShadow;
+    private ScoreText comboText, accuracyText, scoreText;  //显示的文字  连击数  ACC  分数
     private Queue<BreakPeriod> breakPeriods = new LinkedList<>();
     private BreakAnimator breakAnimator;
     private ScoreBar scorebar;
@@ -805,25 +806,29 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
         if (!Config.isHideInGameUI()) {
             scorebar = new ScoreBar(this, fgScene, stat);
             addPassiveObject(scorebar);
-            final TextureRegion scoreDigitTex = ResourceManager.getInstance()
-                    .getTexture("score-0");
-            accText = new GameScoreText(OsuSkin.get().getScorePrefix(), Config.getRES_WIDTH()
-                    - scoreDigitTex.getWidth() * 4.75f, 50,
-                    "000.00%", 0.6f);
-            comboText = new GameScoreText(OsuSkin.get().getComboPrefix(), Utils.toRes(2), Config.getRES_HEIGHT()
-                    - Utils.toRes(95), "0000x", 1.5f);
-            comboText.changeText("0****");
-            scoreText = new GameScoreText(OsuSkin.get().getScorePrefix(), Config.getRES_WIDTH()
-                    - scoreDigitTex.getWidth() * 7.25f, 0, "0000000000", 0.9f);
-            comboText.attachToScene(fgScene);
-            accText.attachToScene(fgScene);
-            scoreText.attachToScene(fgScene);
-            if (Config.isAnimateComboText()) {
-                scoreShadow = new GameScoreTextShadow(0, Config.getRES_HEIGHT()
-                        - Utils.toRes(90), "0000x", 1.5f, comboText);
-                scoreShadow.attachToScene(bgScene);
-                passiveObjects.add(scoreShadow);
-            }
+
+            scoreText = new ScoreText(OsuSkin.get().getScorePrefix());
+            scoreText.setPosition(Config.getRES_WIDTH(), 0);
+            scoreText.setOrigin(Origin.TopRight);
+            scoreText.setText("0000000000");
+            scoreText.setScale(0.9f);
+
+            accuracyText = new ScoreText(OsuSkin.get().getScorePrefix());
+            accuracyText.setPosition(Config.getRES_WIDTH(), 50);
+            accuracyText.setOrigin(Origin.TopRight);
+            accuracyText.setText("000.00%");
+            accuracyText.setScale(0.6f);
+
+            comboText = new ScoreText(OsuSkin.get().getComboPrefix(), Config.isAnimateComboText());
+            comboText.setY(Config.getRES_HEIGHT());
+            comboText.setOrigin(Origin.BottomLeft);
+            comboText.setScaleCenter(Origin.BottomLeft);
+            comboText.setScale(1.5f);
+            comboText.setText("0x");
+
+            fgScene.attachChild(comboText);
+            fgScene.attachChild(accuracyText);
+            fgScene.attachChild(scoreText);
 
             if (Config.isComboburst()) {
                 comboBurst = new ComboBurst(Config.getRES_WIDTH(), Config.getRES_HEIGHT());
@@ -1173,11 +1178,7 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
                 strBuilder.append('*');
             }
             var comboStr = strBuilder.toString();
-            if (Config.isAnimateComboText()) {
-                scoreShadow.changeText(comboStr);
-            } else {
-                comboText.changeText(comboStr);
-            }
+            comboText.setText(comboStr);
 
             strBuilder.setLength(0);
             float rawAccuracy = stat.getAccuracy() * 100f;
@@ -1195,21 +1196,14 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
             if (strBuilder.length() < 6) {
                 strBuilder.insert(0, '*');
             }
-            accText.changeText(strBuilder.toString());
+            accuracyText.setText(strBuilder.toString());
             strBuilder.setLength(0);
             strBuilder.append(stat.getTotalScoreWithMultiplier());
             while (strBuilder.length() < 8) {
                 strBuilder.insert(0, '0');
             }
 
-            int scoreTextOffset = 0;
-            while (strBuilder.length() < 10) {
-                strBuilder.insert(0, '*');
-                scoreTextOffset++;
-            }
-
-            scoreText.setPosition(Config.getRES_WIDTH() - scoreText.getDigitWidth() * (9.25f - scoreTextOffset), 0);
-            scoreText.changeText(strBuilder.toString());
+            scoreText.setText(strBuilder.toString());
         }
 
         if (comboBurst != null) {
@@ -2287,6 +2281,7 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
         var speedMultiplier = GameHelper.getSpeedMultiplier();
 
         // Reference https://github.com/ppy/osu/blob/ebf637bd3c33f1c886f6bfc81aa9ea2132c9e0d2/osu.Game/Skinning/LegacyJudgementPieceOld.cs
+
         var fadeInLength = 0.12f / speedMultiplier;
         var fadeOutLength = 0.6f / speedMultiplier;
         var fadeOutDelay = 0.5f / speedMultiplier;
@@ -2318,6 +2313,8 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
         }
 
         if (Config.isHitLighting() && !name.equals("sliderpoint10") && !name.equals("sliderpoint30") && ResourceManager.getInstance().getTexture("lighting") != null) {
+
+            // Reference https://github.com/ppy/osu/blob/a7e110f6693beca6f6e6a20efb69a6913d58550e/osu.Game.Rulesets.Osu/Objects/Drawables/DrawableOsuJudgement.cs#L71-L88
 
             var light = GameObjectPool.getInstance().getEffect("lighting");
             light.setBlendFunction(GL10.GL_SRC_ALPHA, GL10.GL_DST_ALPHA);
