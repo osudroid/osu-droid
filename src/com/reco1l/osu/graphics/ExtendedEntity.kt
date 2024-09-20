@@ -51,14 +51,6 @@ open class ExtendedEntity(
     var inheritColor = true
 
 
-    /**
-     * The current scale.
-     *
-     * This is the maximum value between [mScaleX] and [mScaleY].
-     */
-    val scale
-        get() = max(scaleX, scaleY)
-
 
     init {
         mRotationCenterX = 0.5f
