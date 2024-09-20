@@ -2309,7 +2309,7 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
                 Modifiers.scale(0.1f / speedMultiplier, scale * 1.6f, scale, null, EaseQuadIn.getInstance()),
                 Modifiers.translateY(fadeOutDelay + fadeOutLength, -5f, 80f, null, EaseQuadIn.getInstance()),
                 Modifiers.sequence(
-                    Modifiers.rotation(fadeInLength, 0, rotation, null, EaseQuadIn.getInstance()),
+                    Modifiers.rotation(fadeInLength, 0, rotation),
                     Modifiers.rotation(fadeOutDelay + fadeOutLength - fadeInLength, rotation, rotation * 2, null, EaseQuadIn.getInstance())
                 )
             );
