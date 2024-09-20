@@ -2325,7 +2325,7 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
             light.init(
                 bgScene,
                 pos,
-                scale,
+                scale * 0.8f,
                 Modifiers.scale(0.6f / speedMultiplier, scale * 0.8f, scale * 1.2f, null, EaseQuadOut.getInstance()),
                 Modifiers.sequence(
                     Modifiers.fadeIn(0.2f / speedMultiplier),
