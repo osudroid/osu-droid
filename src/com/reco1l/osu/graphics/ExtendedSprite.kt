@@ -19,8 +19,9 @@ open class ExtendedSprite : ExtendedEntity(vertexBuffer = RectangleVertexBuffer(
         set(value) {
             field = value
 
-            if (value) {
-                setSize(textureRegion?.width?.toFloat() ?: 0f, textureRegion?.height?.toFloat() ?: 0f)
+            if (value && textureRegion != null) {
+                width = textureRegion?.width?.toFloat() ?: 0f
+                height = textureRegion?.height?.toFloat() ?: 0f
                 updateVertexBuffer()
             }
         }
