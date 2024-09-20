@@ -30,7 +30,7 @@ object Modifiers {
     @JvmStatic
     @JvmOverloads
     fun alpha(duration: Float, from: Float, to: Float, listener: IModifierListener<IEntity>? = null, easeFunction: IEaseFunction = DefaultEaseFunction) = pool.obtain().also {
-        it.reset()
+        it.setToDefault()
         it.type = ALPHA
         it.duration = duration
         it.values = floatArrayOf(from, to)
@@ -49,7 +49,7 @@ object Modifiers {
     @JvmStatic
     @JvmOverloads
     fun scale(duration: Float, from: Float, to: Float, listener: IModifierListener<IEntity>? = null, easeFunction: IEaseFunction = DefaultEaseFunction) = pool.obtain().also {
-        it.reset()
+        it.setToDefault()
         it.type = SCALE
         it.duration = duration
         it.values = floatArrayOf(from, to)
@@ -70,7 +70,7 @@ object Modifiers {
         listener: IModifierListener<IEntity>? = null,
         easeFunction: IEaseFunction = DefaultEaseFunction
     ) = pool.obtain().also {
-        it.reset()
+        it.setToDefault()
         it.type = RGB
         it.duration = duration
         it.listener = listener
@@ -85,25 +85,25 @@ object Modifiers {
     @JvmStatic
     @JvmOverloads
     fun sequence(listener: IModifierListener<IEntity>? = null, vararg modifiers: UniversalModifier) = pool.obtain().also {
-        it.reset()
+        it.setToDefault()
         it.type = SEQUENCE
-        it.modifiers = arrayOf(*modifiers)
+        it.modifiers = modifiers
         it.listener = listener
     }
 
     @JvmStatic
     @JvmOverloads
     fun parallel(listener: IModifierListener<IEntity>? = null, vararg modifiers: UniversalModifier) = pool.obtain().also {
-        it.reset()
+        it.setToDefault()
         it.type = PARALLEL
-        it.modifiers = arrayOf(*modifiers)
+        it.modifiers = modifiers
         it.listener = listener
     }
 
     @JvmStatic
     @JvmOverloads
     fun delay(duration: Float, listener: IModifierListener<IEntity>? = null) = pool.obtain().also {
-        it.reset()
+        it.setToDefault()
         it.type = NONE
         it.duration = duration
         it.listener = listener
@@ -112,7 +112,7 @@ object Modifiers {
     @JvmStatic
     @JvmOverloads
     fun translateX(duration: Float, from: Float, to: Float, listener: IModifierListener<IEntity>? = null, easeFunction: IEaseFunction = DefaultEaseFunction) = pool.obtain().also {
-        it.reset()
+        it.setToDefault()
         it.type = TRANSLATE_X
         it.duration = duration
         it.values = floatArrayOf(from, to)
@@ -123,7 +123,7 @@ object Modifiers {
     @JvmStatic
     @JvmOverloads
     fun translateY(duration: Float, from: Float, to: Float, listener: IModifierListener<IEntity>? = null, easeFunction: IEaseFunction = DefaultEaseFunction) = pool.obtain().also {
-        it.reset()
+        it.setToDefault()
         it.type = TRANSLATE_Y
         it.duration = duration
         it.values = floatArrayOf(from, to)
@@ -134,7 +134,7 @@ object Modifiers {
     @JvmStatic
     @JvmOverloads
     fun rotation(duration: Float, from: Float, to: Float, listener: IModifierListener<IEntity>? = null, easeFunction: IEaseFunction = DefaultEaseFunction) = pool.obtain().also {
-        it.reset()
+        it.setToDefault()
         it.type = ROTATION
         it.duration = duration
         it.values = floatArrayOf(from, to)
@@ -148,7 +148,7 @@ object Modifiers {
 
         // Based on osu!lazer's shake effect: https://github.com/ppy/osu/blob/5341a335a6165ceef4d91e910fa2ea5aecbfd025/osu.Game/Extensions/DrawableExtensions.cs#L19-L37
 
-        it.reset()
+        it.setToDefault()
         it.type = SEQUENCE
         it.modifiers = arrayOf(
             translateX(duration / 8f,  0f,          magnitude,   easeFunction = EaseSineOut.getInstance()),
@@ -178,7 +178,35 @@ object Modifiers {
  * @see ModifierType
  * @author Reco1l
  */
-class UniversalModifier(private val pool: Pool<UniversalModifier>? = null) : IModifier<IEntity>, IEntityModifier {
+class UniversalModifier @JvmOverloads constructor(private val pool: Pool<UniversalModifier>? = null) : IModifier<IEntity>, IEntityModifier {
+
+
+    @JvmOverloads
+    constructor(type: ModifierType, duration: Float, from: Float, to: Float, listener: IModifierListener<IEntity>? = null, easeFunction: IEaseFunction = DefaultEaseFunction) : this(null) {
+        this.type = type
+        this.duration = duration
+        this.values = floatArrayOf(from, to)
+        this.listener = listener
+        this.easeFunction = easeFunction
+    }
+
+
+    @JvmOverloads
+    constructor(type: ModifierType, duration: Float, values: FloatArray, listener: IModifierListener<IEntity>? = null, easeFunction: IEaseFunction = DefaultEaseFunction) : this(null) {
+        this.type = type
+        this.duration = duration
+        this.values = values
+        this.listener = listener
+        this.easeFunction = easeFunction
+    }
+
+    @JvmOverloads
+    constructor(type: ModifierType, listener: IModifierListener<IEntity>? = null, vararg modifiers: UniversalModifier) : this(null) {
+        this.type = type
+        this.listener = listener
+        this.modifiers = modifiers
+    }
+
 
     /**
      * The type of the modifier.
@@ -186,20 +214,17 @@ class UniversalModifier(private val pool: Pool<UniversalModifier>? = null) : IMo
      */
     var type = NONE
         set(value) {
-            if (field == value) {
-                return
-            }
+            if (field != value) {
 
-            if (value != SEQUENCE && value != PARALLEL) {
-                clearModifiers()
-            }
+                if (value != SEQUENCE && value != PARALLEL) {
+                    clearNestedModifiers()
+                }
 
-            if (type == SEQUENCE || type == PARALLEL || type == NONE) {
+                field = value
+
                 values = null
+                duration = getDuration()
             }
-
-            field = value
-            duration = getDuration()
         }
 
     /**
@@ -211,8 +236,14 @@ class UniversalModifier(private val pool: Pool<UniversalModifier>? = null) : IMo
     /**
      * Inner modifiers for [SEQUENCE] or [PARALLEL] modifier types.
      */
-    var modifiers: Array<UniversalModifier?>? = null
+    var modifiers: Array<out UniversalModifier>? = null
         set(value) {
+
+            if (value != null && type != SEQUENCE && type != PARALLEL) {
+                Log.w("UniversalModifier", "Inner modifiers can only be set for sequence or parallel modifiers, ignoring.")
+                return
+            }
+
             field = value
             duration = getDuration()
         }
@@ -239,10 +270,17 @@ class UniversalModifier(private val pool: Pool<UniversalModifier>? = null) : IMo
     var values: FloatArray? = null
 
 
+    private var removeWhenFinished = true
+
     private var elapsedSec = 0f
 
     private var duration = 0f
 
+
+    private fun clearNestedModifiers() {
+        modifiers?.forEach { it.onUnregister() }
+        modifiers = null
+    }
 
     private fun getValueAt(dataIndex: Int, percentage: Float): Float {
 
@@ -256,11 +294,6 @@ class UniversalModifier(private val pool: Pool<UniversalModifier>? = null) : IMo
         return from + (to - from) * percentage
     }
 
-    private fun clearModifiers() {
-        modifiers?.forEach { it?.onUnregister() }
-        modifiers = null
-    }
-
 
     override fun onUpdate(deltaSec: Float, item: IEntity): Float {
 
@@ -268,106 +301,93 @@ class UniversalModifier(private val pool: Pool<UniversalModifier>? = null) : IMo
             return 0f
         }
 
-        var usedSec = min(duration - elapsedSec, deltaSec)
+        var usedSec = 0f
 
-        val percentage = if (duration > 0) easeFunction.getPercentage(elapsedSec + usedSec, duration) else 1f
+        if (type == SEQUENCE || type == PARALLEL) {
 
-        when (type) {
+            var remainingSec = deltaSec
 
-            ALPHA -> {
-                item.alpha = getValueAt(0, percentage)
-            }
+            while (remainingSec > 0) {
 
-            SCALE -> {
-                item.setScale(getValueAt(0, percentage))
-            }
+                var isCurrentModifierFinished = false
 
-            TRANSLATE -> {
-                if (item is ExtendedEntity) {
-                    item.translationX = getValueAt(0, percentage)
-                    item.translationY = getValueAt(1, percentage)
-                }
-            }
+                for (modifier in modifiers!!) {
 
-            TRANSLATE_X -> {
-                if (item is ExtendedEntity) {
-                    item.translationX = getValueAt(0, percentage)
-                }
-            }
+                    if (modifier.isFinished) {
+                        continue
+                    }
 
-            TRANSLATE_Y -> {
-                if (item is ExtendedEntity) {
-                    item.translationY = getValueAt(0, percentage)
-                }
-            }
-
-            ROTATION -> {
-                item.rotation = getValueAt(0, percentage)
-            }
-
-            RGB -> {
-                item.setColor(
-                    getValueAt(0, percentage),
-                    getValueAt(1, percentage),
-                    getValueAt(2, percentage)
-                )
-            }
-
-            SEQUENCE -> {
-                var remainingSec = deltaSec
-
-                while (remainingSec > 0) {
-
-                    var isCurrentModifierFinished = false
-
-                    for (i in 0 until modifiers!!.size) {
-
-                        val modifier = modifiers!![i] ?: continue
-
+                    if (type == SEQUENCE) {
                         remainingSec -= modifier.onUpdate(remainingSec, item)
 
-                        if (modifier.isFinished) {
-                            modifier.onUnregister()
-                            modifiers!![i] = null
-                            isCurrentModifierFinished = true
-                        }
+                        isCurrentModifierFinished = modifier.isFinished()
                         break
                     }
 
-                    if (isCurrentModifierFinished) {
-                        break
+                    usedSec = max(usedSec, modifier.onUpdate(deltaSec, item))
+                }
+
+                if (type == SEQUENCE && isCurrentModifierFinished) {
+                    break
+                }
+
+                remainingSec -= usedSec
+            }
+
+            usedSec = deltaSec - remainingSec
+
+        } else {
+
+            val percentage = easeFunction.getPercentage(elapsedSec + usedSec, duration)
+
+            when (type) {
+
+                ALPHA -> {
+                    item.alpha = getValueAt(0, percentage)
+                }
+
+                SCALE -> {
+                    val value = getValueAt(0, percentage)
+                    item.scaleX = value
+                    item.scaleY = value
+                }
+
+                TRANSLATE -> {
+                    if (item is ExtendedEntity) {
+                        item.translationX = getValueAt(0, percentage)
+                        item.translationY = getValueAt(1, percentage)
                     }
                 }
 
-                usedSec = deltaSec - remainingSec
-            }
-
-            PARALLEL -> {
-                var remainingSec = deltaSec
-
-                while (remainingSec > 0) {
-
-                    for (i in 0 until modifiers!!.size) {
-
-                        val modifier = modifiers!![i] ?: continue
-
-                        usedSec = max(usedSec, modifier.onUpdate(deltaSec, item))
-
-                        if (modifier.isFinished) {
-                            modifiers!![i] = null
-                            modifier.onUnregister()
-                        }
+                TRANSLATE_X -> {
+                    if (item is ExtendedEntity) {
+                        item.translationX = getValueAt(0, percentage)
                     }
-
-                    remainingSec -= usedSec
                 }
 
-                usedSec = deltaSec - remainingSec
+                TRANSLATE_Y -> {
+                    if (item is ExtendedEntity) {
+                        item.translationY = getValueAt(0, percentage)
+                    }
+                }
+
+                ROTATION -> {
+                    item.rotation = getValueAt(0, percentage)
+                }
+
+                RGB -> {
+                    item.setColor(
+                        getValueAt(0, percentage),
+                        getValueAt(1, percentage),
+                        getValueAt(2, percentage)
+                    )
+                }
+
+                else -> Unit
             }
 
-            NONE -> {
-                // Works as delay modifier that can be inserted in a sequence modifier.
-            }
+            usedSec = min(duration - elapsedSec, deltaSec)
+
         }
 
         elapsedSec += usedSec
@@ -376,27 +396,38 @@ class UniversalModifier(private val pool: Pool<UniversalModifier>? = null) : IMo
             elapsedSec = duration
 
             listener?.onModifierFinished(this, item)
-            listener = null
         }
 
         return usedSec
     }
 
     override fun onUnregister() {
-        reset()
+        setToDefault()
         pool?.free(this)
     }
 
+
+    /**
+     * Resets the modifier to its initial state.
+     */
     override fun reset() {
+        elapsedSec = 0f
+        modifiers?.forEach { it.reset() }
+    }
+
+    /**
+     * Sets the modifier to its default state.
+     *
+     * This will remove all the inner modifiers, the listener, reset the elapsed time, and set the type to [NONE].
+     */
+    fun setToDefault() {
 
         type = NONE
         values = null
-        duration = 0f
-        elapsedSec = 0f
         listener = null
-        easeFunction = DefaultEaseFunction
 
-        clearModifiers()
+        clearNestedModifiers()
+        reset()
     }
 
 
@@ -421,55 +452,49 @@ class UniversalModifier(private val pool: Pool<UniversalModifier>? = null) : IMo
      * When the modifier is a [SEQUENCE] modifier, the duration is the sum of the inner modifiers' durations, meanwhile, when it is a [PARALLEL] modifier, it is the maximum duration of the
      * inner modifiers. Otherwise, it is the duration of the modifier itself.
      */
-    override fun getDuration() = when(type) {
+    override fun getDuration(): Float  = when(type) {
 
-        SEQUENCE -> modifiers?.sumOf { it?.duration ?: 0f } ?: 0f
-
-        PARALLEL -> modifiers?.maxOf { it?.duration ?: 0f } ?: 0f
+        SEQUENCE -> modifiers?.sumOf { it.duration } ?: 0f
+        PARALLEL -> modifiers?.maxOf { it.duration } ?: 0f
 
         else -> duration
     }
+
 
     override fun getSecondsElapsed(): Float {
         return elapsedSec
     }
 
-    /**
-     * Returns whether the modifier is finished or not.
-     *
-     * When the modifier is a [SEQUENCE] or [PARALLEL] modifier, it is finished when all the inner modifiers are finished.
-     */
-    override fun isFinished() = when (type) {
 
-        SEQUENCE, PARALLEL -> modifiers?.all { it == null } ?: true
+    override fun isFinished(): Boolean {
 
-        else -> elapsedSec >= duration
+        if (type == SEQUENCE || type == PARALLEL) {
+
+            if (modifiers == null) {
+                return true
+            }
+
+            return modifiers!!.all { it.isFinished }
+        }
+
+        return elapsedSec >= duration
     }
 
-
     override fun isRemoveWhenFinished(): Boolean {
-        return true
+        return removeWhenFinished
     }
 
     override fun setRemoveWhenFinished(value: Boolean) {
-        throw UnsupportedOperationException("Cannot set remove when finished for UniversalModifier.")
+        removeWhenFinished = value
     }
 
 
     override fun addModifierListener(listener: IModifierListener<IEntity>) {
-        Log.w("UniversalModifier", "Multiple entity modifiers are not allowed, overwriting previous listener.")
-        this.listener = listener
+        throw UnsupportedOperationException("Multiple entity modifiers are not allowed, consider using `setListener()` instead.")
     }
 
     override fun removeModifierListener(listener: IModifierListener<IEntity>): Boolean {
-
-        if (listener == this.listener) {
-            this.listener = null
-            return true
-        }
-
-        Log.w("UniversalModifier", "The listener to remove is not the current listener.")
-        return false
+        throw UnsupportedOperationException("Multiple entity modifiers are not allowed, consider using `setListener()` instead.")
     }
 
 
@@ -479,7 +504,7 @@ class UniversalModifier(private val pool: Pool<UniversalModifier>? = null) : IMo
         modifier.listener = listener
         modifier.easeFunction = easeFunction
         modifier.values = values?.copyOf()
-        modifier.modifiers = modifiers?.mapNotNull { it?.deepCopy() }?.toTypedArray()
+        modifier.modifiers = modifiers?.map { it.deepCopy() }?.toTypedArray()
     }
 }
 
@@ -507,16 +532,22 @@ enum class ModifierType {
 
     /**
      * Modifies the entity's translation in both axis.
+     *
+     * Note: This is only available for [ExtendedEntity] instances.
      */
     TRANSLATE,
 
     /**
      * Modifies the entity's X translation.
+     *
+     * Note: This is only available for [ExtendedEntity] instances.
      */
     TRANSLATE_X,
 
     /**
      * Modifies the entity's Y translation.
+     *
+     * Note: This is only available for [ExtendedEntity] instances.
      */
     TRANSLATE_Y,
 
