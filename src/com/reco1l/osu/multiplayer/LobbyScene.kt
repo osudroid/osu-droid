@@ -5,6 +5,7 @@ import android.util.Log
 import ru.nsu.ccfit.zuev.osu.SecurityUtils
 import com.reco1l.ibancho.LobbyAPI
 import com.reco1l.ibancho.RoomAPI
+import com.reco1l.osu.graphics.*
 import com.reco1l.osu.updateThread
 import com.reco1l.toolkt.kotlin.async
 import org.anddev.andengine.entity.modifier.LoopEntityModifier
@@ -17,7 +18,6 @@ import org.anddev.andengine.entity.text.ChangeableText
 import org.anddev.andengine.input.touch.TouchEvent
 import org.anddev.andengine.util.MathUtils
 import ru.nsu.ccfit.zuev.osu.*
-import ru.nsu.ccfit.zuev.osu.helper.AnimSprite
 import ru.nsu.ccfit.zuev.osu.helper.TextButton
 import ru.nsu.ccfit.zuev.osu.menu.LoadingScreen
 import ru.nsu.ccfit.zuev.osu.online.OnlinePanel
@@ -43,7 +43,7 @@ object LobbyScene : Scene()
         }
 
 
-    private var backButton: Sprite? = null
+    private var backButton: ExtendedSprite? = null
 
     private var createButton: TextButton? = null
 
@@ -112,10 +112,9 @@ object LobbyScene : Scene()
         }
         else loadedBackTextures.add("menu-back")
 
-        backButton = object : AnimSprite(0f, 0f, loadedBackTextures.size.toFloat(), *loadedBackTextures.toTypedArray<String>())
-        {
-            var scaleWhenHold = layoutBackButton?.property?.optBoolean("scaleWhenHold", true) ?: false
+        backButton = object : AnimatedSprite(*loadedBackTextures.toTypedArray<String>()) {
 
+            var scaleWhenHold = layoutBackButton?.property?.optBoolean("scaleWhenHold", true) ?: false
             var moved = false
             var dx = 0f
             var dy = 0f

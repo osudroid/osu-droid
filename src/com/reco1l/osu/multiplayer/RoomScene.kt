@@ -10,6 +10,7 @@ import com.reco1l.ibancho.data.RoomTeam.RED
 import com.reco1l.ibancho.data.TeamMode.HEAD_TO_HEAD
 import com.reco1l.ibancho.data.TeamMode.TEAM_VS_TEAM
 import com.reco1l.ibancho.data.WinCondition.*
+import com.reco1l.osu.graphics.*
 import com.reco1l.osu.mainThread
 import com.reco1l.osu.multiplayer.Multiplayer.isConnected
 import com.reco1l.osu.multiplayer.Multiplayer.isRoomHost
@@ -32,11 +33,9 @@ import org.anddev.andengine.input.touch.TouchEvent
 import org.anddev.andengine.util.MathUtils
 import org.json.JSONArray
 import ru.nsu.ccfit.zuev.osu.Config
-import ru.nsu.ccfit.zuev.osu.DifficultyAlgorithm
 import ru.nsu.ccfit.zuev.osu.LibraryManager
 import ru.nsu.ccfit.zuev.osu.ToastLogger
 import ru.nsu.ccfit.zuev.osu.game.mods.GameMod.MOD_SCOREV2
-import ru.nsu.ccfit.zuev.osu.helper.AnimSprite
 import ru.nsu.ccfit.zuev.osu.helper.TextButton
 import ru.nsu.ccfit.zuev.osu.menu.LoadingScreen.LoadingScene
 import ru.nsu.ccfit.zuev.osu.online.OnlinePanel
@@ -94,7 +93,7 @@ object RoomScene : Scene(), IRoomEventListener, IPlayerEventListener
     }
 
 
-    private var backButton: Sprite? = null
+    private var backButton: AnimatedSprite? = null
 
     private var readyButton: TextButton? = null
 
@@ -102,7 +101,7 @@ object RoomScene : Scene(), IRoomEventListener, IPlayerEventListener
 
     private var trackButton: BeatmapButton? = null
 
-    private var modsButton: AnimSprite? = null
+    private var modsButton: ExtendedSprite? = null
 
     private var difficultySwitcher: DifficultyAlgorithmSwitcher? = null
 
@@ -316,7 +315,7 @@ object RoomScene : Scene(), IRoomEventListener, IPlayerEventListener
         }
         else loadedBackTextures.add("menu-back")
 
-        backButton = object : AnimSprite(0f, 0f, loadedBackTextures.size.toFloat(), *loadedBackTextures.toTypedArray<String>())
+        backButton = object : AnimatedSprite(*loadedBackTextures.toTypedArray<String>())
         {
             var scaleWhenHold = layoutBackButton?.property?.optBoolean("scaleWhenHold", true) ?: false
 
@@ -366,11 +365,15 @@ object RoomScene : Scene(), IRoomEventListener, IPlayerEventListener
         }
 
         // Mods button, shown only if free mods or if the player it's the host
-        modsButton = object : AnimSprite(0f, 0f, 0f, "selection-mods", "selection-mods-over")
+        modsButton = object : ExtendedSprite()
         {
             var moved = false
             var dx = 0f
             var dy = 0f
+
+            init {
+                textureRegion = getResources().getTextureIfLoaded("selection-mods")
+            }
 
             override fun onAreaTouched(event: TouchEvent, localX: Float, localY: Float): Boolean
             {
@@ -383,19 +386,19 @@ object RoomScene : Scene(), IRoomEventListener, IPlayerEventListener
                     dx = localX
                     dy = localY
 
-                    frame = 1
+                    textureRegion = getResources().getTextureIfLoaded("selection-mods-over")
                     return true
                 }
                 if (event.isActionUp)
                 {
-                    frame = 0
+                    textureRegion = getResources().getTextureIfLoaded("selection-mods")
                     if (!moved)
                         getModMenu().show(this@RoomScene, getGlobal().selectedBeatmap)
                     return true
                 }
                 if (event.isActionOutside || event.isActionMove && MathUtils.distance(dx, dy, localX, localY) > 50)
                 {
-                    frame = 0
+                    textureRegion = getResources().getTextureIfLoaded("selection-mods")
                     moved = true
                 }
                 return false

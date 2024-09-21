@@ -4,12 +4,15 @@ import android.graphics.PointF;
 
 
 import com.reco1l.osu.Execution;
+import com.reco1l.osu.graphics.AnimatedSprite;
+import com.reco1l.osu.graphics.ExtendedSprite;
 import com.reco1l.osu.graphics.Modifiers;
 import com.reco1l.osu.graphics.UniversalModifier;
 
+import org.anddev.andengine.entity.IEntity;
 import org.anddev.andengine.entity.scene.Scene;
 import org.anddev.andengine.entity.shape.Shape;
-import org.anddev.andengine.entity.sprite.Sprite;
+import org.anddev.andengine.util.modifier.IModifier;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -18,14 +21,14 @@ import java.util.List;
 
 import ru.nsu.ccfit.zuev.osu.RGBColor;
 import ru.nsu.ccfit.zuev.osu.ResourceManager;
-import ru.nsu.ccfit.zuev.osu.helper.AnimSprite;
+import ru.nsu.ccfit.zuev.osu.helper.ModifierListener;
 
 public class GameEffect extends GameObject {
     private static final HashSet<String> animationEffects = new HashSet<>(Arrays.asList(
             "hit0", "hit50", "hit100", "hit100k", "hit300", "hit300k", "hit300g"
     ));
 
-    Sprite hit;
+    ExtendedSprite hit;
     String texname;
 
     public GameEffect(final String texname) {
@@ -38,11 +41,13 @@ public class GameEffect extends GameObject {
                     loadedScoreBarTextures.add(texname + "-" + i);
                 else break;
             }
-            AnimSprite hit = new AnimSprite(0, 0, 60, loadedScoreBarTextures.toArray(new String[0]));
-            hit.setLoopType(AnimSprite.LoopType.STOP);
+            var hit = new AnimatedSprite(loadedScoreBarTextures.toArray(new String[0]));
+            hit.setFps(60);
+            hit.setLoop(false);
             this.hit = hit;
         } else {
-            hit = new Sprite(0, 0, ResourceManager.getInstance().getTexture(texname));
+            hit = new ExtendedSprite();
+            hit.setTextureRegion(ResourceManager.getInstance().getTexture(texname));
         }
     }
 
@@ -51,22 +56,29 @@ public class GameEffect extends GameObject {
     }
 
     public void setColor(final RGBColor color) {
-        hit.setColor(color.r(), color.g(), color.b());
+        if (color == null) {
+            hit.setColor(1f, 1f, 1f);
+        } else {
+            hit.setColor(color.r(), color.g(), color.b());
+        }
     }
 
     public void init(final Scene scene, final PointF pos, final float scale,
                      final UniversalModifier... entityModifiers) {
-        if (hit instanceof AnimSprite) {
-            ((AnimSprite) hit).setAnimTime(0);
+        if (hit instanceof AnimatedSprite animatedHit) {
+            animatedHit.setElapsedSec(0f);
         }
-        hit.setPosition(pos.x - hit.getTextureRegion().getWidth() / 2f, pos.y - hit.getTextureRegion().getHeight() / 2f);
-        hit.registerEntityModifier(Modifiers.parallel(entityModifiers).setOnFinished(entity -> {
-            Execution.updateThread(() -> {
-                hit.detachSelf();
-                hit.clearEntityModifiers();
-                GameObjectPool.getInstance().putEffect(GameEffect.this);
-            });
-        }));
+        hit.setPosition(pos.x - hit.getWidth() / 2f, pos.y - hit.getHeight() / 2f);
+        hit.registerEntityModifier(Modifiers.parallel(new ModifierListener() {
+            @Override
+            public void onModifierFinished(IModifier<IEntity> pModifier, IEntity pItem) {
+                Execution.updateThread(() -> {
+                    hit.detachSelf();
+                    hit.clearEntityModifiers();
+                    GameObjectPool.getInstance().putEffect(GameEffect.this);
+                });
+            }
+        }, entityModifiers));
         hit.setScale(scale);
         hit.setAlpha(1);
         hit.detachSelf();

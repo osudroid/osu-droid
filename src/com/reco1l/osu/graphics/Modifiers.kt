@@ -1,14 +1,20 @@
 package com.reco1l.osu.graphics
 
+import android.util.*
 import com.reco1l.framework.Pool
 import com.reco1l.osu.graphics.ModifierType.*
 import com.reco1l.toolkt.kotlin.sumOf
 import org.anddev.andengine.entity.IEntity
 import org.anddev.andengine.entity.modifier.IEntityModifier
 import org.anddev.andengine.util.modifier.IModifier
+import org.anddev.andengine.util.modifier.IModifier.*
+import org.anddev.andengine.util.modifier.ease.EaseSineInOut
+import org.anddev.andengine.util.modifier.ease.EaseSineOut
 import org.anddev.andengine.util.modifier.ease.IEaseFunction
 import kotlin.math.max
 import kotlin.math.min
+import org.anddev.andengine.util.modifier.ease.EaseSineIn
+import org.anddev.andengine.util.modifier.ease.IEaseFunction.DEFAULT as DefaultEaseFunction
 
 /**
  * A collection of static methods to create different types of modifiers.
@@ -22,50 +28,138 @@ object Modifiers {
 
 
     @JvmStatic
-    fun alpha(duration: Float, from: Float, to: Float) = pool.obtain()
-        .also { it.reset() }
-        .setType(ALPHA)
-        .setDuration(duration)
-        .setValueSpan(from, to)
+    @JvmOverloads
+    fun alpha(duration: Float, from: Float, to: Float, listener: IModifierListener<IEntity>? = null, easeFunction: IEaseFunction = DefaultEaseFunction) = pool.obtain().also {
+        it.setToDefault()
+        it.type = ALPHA
+        it.duration = duration
+        it.values = floatArrayOf(from, to)
+        it.easeFunction = easeFunction
+        it.listener = listener
+    }
 
     @JvmStatic
-    fun fadeIn(duration: Float) = alpha(duration, 0f, 1f)
+    @JvmOverloads
+    fun fadeIn(duration: Float, listener: IModifierListener<IEntity>? = null, easeFunction: IEaseFunction = DefaultEaseFunction) = alpha(duration, 0f, 1f, listener, easeFunction)
 
     @JvmStatic
-    fun fadeOut(duration: Float) = alpha(duration, 1f, 0f)
+    @JvmOverloads
+    fun fadeOut(duration: Float, listener: IModifierListener<IEntity>? = null, easeFunction: IEaseFunction = DefaultEaseFunction) = alpha(duration, 1f, 0f, listener, easeFunction)
 
     @JvmStatic
-    fun scale(duration: Float, from: Float, to: Float) = pool.obtain()
-        .also { it.reset() }
-        .setType(SCALE)
-        .setDuration(duration)
-        .setValueSpan(from, to)
+    @JvmOverloads
+    fun scale(duration: Float, from: Float, to: Float, listener: IModifierListener<IEntity>? = null, easeFunction: IEaseFunction = DefaultEaseFunction) = pool.obtain().also {
+        it.setToDefault()
+        it.type = SCALE
+        it.duration = duration
+        it.values = floatArrayOf(from, to)
+        it.easeFunction = easeFunction
+        it.listener = listener
+    }
 
     @JvmStatic
-    fun color(duration: Float, fromRed: Float, toRed: Float, fromGreen: Float, toGreen: Float, fromBlue: Float, toBlue: Float) = pool.obtain()
-        .also { it.reset() }
-        .setType(RGB)
-        .setDuration(duration)
-        .setRGBSpan(fromRed, toRed, fromGreen, toGreen, fromBlue, toBlue)
+    @JvmOverloads
+    fun color(
+        duration: Float,
+        fromRed: Float,
+        toRed: Float,
+        fromGreen: Float,
+        toGreen: Float,
+        fromBlue: Float,
+        toBlue: Float,
+        listener: IModifierListener<IEntity>? = null,
+        easeFunction: IEaseFunction = DefaultEaseFunction
+    ) = pool.obtain().also {
+        it.setToDefault()
+        it.type = RGB
+        it.duration = duration
+        it.listener = listener
+        it.easeFunction = easeFunction
+        it.values = floatArrayOf(
+            fromRed, toRed,
+            fromGreen, toGreen,
+            fromBlue, toBlue
+        )
+    }
 
     @JvmStatic
-    fun sequence(vararg modifiers: UniversalModifier) = pool.obtain()
-        .also { it.reset() }
-        .setType(SEQUENCE)
-        .setInnerModifiers(*modifiers)
+    @JvmOverloads
+    fun sequence(listener: IModifierListener<IEntity>? = null, vararg modifiers: UniversalModifier) = pool.obtain().also {
+        it.setToDefault()
+        it.type = SEQUENCE
+        it.modifiers = modifiers
+        it.listener = listener
+    }
 
     @JvmStatic
-    fun parallel(vararg modifiers: UniversalModifier) = pool.obtain()
-        .also { it.reset() }
-        .setType(PARALLEL)
-        .setInnerModifiers(*modifiers)
+    @JvmOverloads
+    fun parallel(listener: IModifierListener<IEntity>? = null, vararg modifiers: UniversalModifier) = pool.obtain().also {
+        it.setToDefault()
+        it.type = PARALLEL
+        it.modifiers = modifiers
+        it.listener = listener
+    }
 
     @JvmStatic
-    fun delay(duration: Float) = pool.obtain()
-        .also { it.reset() }
-        .setType(NONE)
-        .setDuration(duration)
+    @JvmOverloads
+    fun delay(duration: Float, listener: IModifierListener<IEntity>? = null) = pool.obtain().also {
+        it.setToDefault()
+        it.type = NONE
+        it.duration = duration
+        it.listener = listener
+    }
 
+    @JvmStatic
+    @JvmOverloads
+    fun translateX(duration: Float, from: Float, to: Float, listener: IModifierListener<IEntity>? = null, easeFunction: IEaseFunction = DefaultEaseFunction) = pool.obtain().also {
+        it.setToDefault()
+        it.type = TRANSLATE_X
+        it.duration = duration
+        it.values = floatArrayOf(from, to)
+        it.easeFunction = easeFunction
+        it.listener = listener
+    }
+
+    @JvmStatic
+    @JvmOverloads
+    fun translateY(duration: Float, from: Float, to: Float, listener: IModifierListener<IEntity>? = null, easeFunction: IEaseFunction = DefaultEaseFunction) = pool.obtain().also {
+        it.setToDefault()
+        it.type = TRANSLATE_Y
+        it.duration = duration
+        it.values = floatArrayOf(from, to)
+        it.easeFunction = easeFunction
+        it.listener = listener
+    }
+
+    @JvmStatic
+    @JvmOverloads
+    fun rotation(duration: Float, from: Float, to: Float, listener: IModifierListener<IEntity>? = null, easeFunction: IEaseFunction = DefaultEaseFunction) = pool.obtain().also {
+        it.setToDefault()
+        it.type = ROTATION
+        it.duration = duration
+        it.values = floatArrayOf(from, to)
+        it.easeFunction = easeFunction
+        it.listener = listener
+    }
+
+    @JvmStatic
+    @JvmOverloads
+    fun shakeHorizontal(duration: Float, magnitude: Float, listener: IModifierListener<IEntity>? = null) = pool.obtain().also {
+
+        // Based on osu!lazer's shake effect: https://github.com/ppy/osu/blob/5341a335a6165ceef4d91e910fa2ea5aecbfd025/osu.Game/Extensions/DrawableExtensions.cs#L19-L37
+
+        it.setToDefault()
+        it.type = SEQUENCE
+        it.modifiers = arrayOf(
+            translateX(duration / 8f,  0f,          magnitude,   easeFunction = EaseSineOut.getInstance()),
+            translateX(duration / 4f,  magnitude,   -magnitude,  easeFunction = EaseSineInOut.getInstance()),
+            translateX(duration / 4f,  -magnitude,  magnitude,   easeFunction = EaseSineInOut.getInstance()),
+            translateX(duration / 4f,  magnitude,   -magnitude,  easeFunction = EaseSineInOut.getInstance()),
+            translateX(duration / 8f,  -magnitude,  0f,          easeFunction = EaseSineIn.getInstance()),
+        )
+        it.listener = listener
+
+    }
 
     @JvmStatic
     fun free(modifier: UniversalModifier) = pool.free(modifier)
@@ -77,14 +171,6 @@ object Modifiers {
 
 
 /**
- * Callback to be called when the modifier is finished.
- * @author Reco1l
- */
-fun interface OnModifierFinished {
-    operator fun invoke(item: IEntity)
-}
-
-/**
  * A universal modifier is a modifier that can be used to apply different types of modifications to
  * an entity. The main reason for this class is to be able to recycle it by using a single pool and
  * just changing the type.
@@ -92,281 +178,333 @@ fun interface OnModifierFinished {
  * @see ModifierType
  * @author Reco1l
  */
-class UniversalModifier(private val pool: Pool<UniversalModifier>? = null) : IModifier<IEntity>, IEntityModifier {
+class UniversalModifier @JvmOverloads constructor(private val pool: Pool<UniversalModifier>? = null) : IModifier<IEntity>, IEntityModifier {
 
+
+    @JvmOverloads
+    constructor(type: ModifierType, duration: Float, from: Float, to: Float, listener: IModifierListener<IEntity>? = null, easeFunction: IEaseFunction = DefaultEaseFunction) : this(null) {
+        this.type = type
+        this.duration = duration
+        this.values = floatArrayOf(from, to)
+        this.listener = listener
+        this.easeFunction = easeFunction
+    }
+
+
+    @JvmOverloads
+    constructor(type: ModifierType, duration: Float, values: FloatArray, listener: IModifierListener<IEntity>? = null, easeFunction: IEaseFunction = DefaultEaseFunction) : this(null) {
+        this.type = type
+        this.duration = duration
+        this.values = values
+        this.listener = listener
+        this.easeFunction = easeFunction
+    }
+
+    @JvmOverloads
+    constructor(type: ModifierType, listener: IModifierListener<IEntity>? = null, vararg modifiers: UniversalModifier) : this(null) {
+        this.type = type
+        this.listener = listener
+        this.modifiers = modifiers
+    }
+
+
+    /**
+     * The type of the modifier.
+     * @see ModifierType
+     */
+    var type = NONE
+        set(value) {
+            if (field != value) {
+
+                if (value != SEQUENCE && value != PARALLEL) {
+                    clearNestedModifiers()
+                }
+
+                field = value
+
+                values = null
+                duration = getDuration()
+            }
+        }
+
+    /**
+     * The modifier listener.
+     * @see IModifierListener
+     */
+    var listener: IModifierListener<IEntity>? = null
+
+    /**
+     * Inner modifiers for [SEQUENCE] or [PARALLEL] modifier types.
+     */
+    var modifiers: Array<out UniversalModifier>? = null
+        set(value) {
+
+            if (value != null && type != SEQUENCE && type != PARALLEL) {
+                Log.w("UniversalModifier", "Inner modifiers can only be set for sequence or parallel modifiers, ignoring.")
+                return
+            }
+
+            field = value
+            duration = getDuration()
+        }
+
+    /**
+     * Easing function to be used.
+     */
+    var easeFunction: IEaseFunction = DefaultEaseFunction
+
+    /**
+     * An array of values to be used in the modifier.
+     *
+     * The values are stored in an array of spans of 2 elements where the first element is the `from` value and the second is the
+     * `to` values, the amount of spans needed depends on the type of the modifier.
+     *
+     * As an example, the `MOVE` modifier needs 2 value spans, one for the X axis and one for the Y axis. Meanwhile, the `RGB`
+     * modifier needs 3 value spans, one per each color channel.
+     *
+     * Disposition of the values:
+     * * [TRANSLATE] -> [xFrom, xTo, yFrom, yTo]
+     * * [RGB] -> [redFrom, redTo, greenFrom, greenTo, blueFrom, blueTo]
+     * * [SCALE] and [ALPHA] -> [scaleFrom, scaleTo]
+     */
+    var values: FloatArray? = null
+
+
+    private var removeWhenFinished = true
 
     private var elapsedSec = 0f
 
-    private var data = FloatArray(2)
-
-    private var _type = NONE
-
-    private var _duration = 0f
-
-    private var _modifiers: Array<out UniversalModifier>? = null
-
-    private var _onFinished: OnModifierFinished? = null
-
-    private var _easeFunction = IEaseFunction.DEFAULT
+    private var duration = 0f
 
 
-    override fun isFinished() = elapsedSec == _duration
-
-    override fun getDuration() = _duration
-
-    override fun getSecondsElapsed() = elapsedSec
-
+    private fun clearNestedModifiers() {
+        modifiers?.forEach { it.onUnregister() }
+        modifiers = null
+    }
 
     private fun getValueAt(dataIndex: Int, percentage: Float): Float {
 
-        val from = data[DATA_SIZE * dataIndex + FROM_INDEX]
-        val to = data[DATA_SIZE * dataIndex + TO_INDEX]
+        // 2 = Data span size.
+        // 0 = "From" value in the span.
+        // 1 = "To" value in the span.
+
+        val from = values?.get(2 * dataIndex) ?: 0f
+        val to = values?.get(2 * dataIndex + 1) ?: 0f
 
         return from + (to - from) * percentage
-    }
-
-    private fun trimModifiers() {
-
-        if (_modifiers!!.size == 1) {
-            _modifiers = null
-            return
-        }
-
-        _modifiers = _modifiers!!.copyOfRange(1, _modifiers!!.size)
     }
 
 
     override fun onUpdate(deltaSec: Float, item: IEntity): Float {
 
-        if (elapsedSec == _duration) {
+        if (isFinished) {
             return 0f
         }
 
-        var usedSec = min(_duration - elapsedSec, deltaSec)
+        var usedSec = 0f
 
-        val percentage = _easeFunction.getPercentage(elapsedSec + usedSec, _duration)
+        if (type == SEQUENCE || type == PARALLEL) {
 
-        when (_type) {
+            var remainingSec = deltaSec
 
-            ALPHA -> {
-                item.alpha = getValueAt(0, percentage)
-            }
+            while (remainingSec > 0) {
 
-            SCALE -> {
-                item.setScale(getValueAt(0, percentage))
-            }
+                var isCurrentModifierFinished = false
 
-            RGB -> {
-                item.setColor(
-                    getValueAt(0, percentage),
-                    getValueAt(1, percentage),
-                    getValueAt(2, percentage)
-                )
-            }
+                for (modifier in modifiers!!) {
 
-            SEQUENCE -> {
-                var remainingSec = deltaSec
+                    if (modifier.isFinished) {
+                        continue
+                    }
 
-                while (remainingSec > 0 && _modifiers != null) {
+                    if (type == SEQUENCE) {
+                        remainingSec -= modifier.onUpdate(remainingSec, item)
 
-                    remainingSec -= _modifiers!![0].onUpdate(remainingSec, item)
-
-                    if (_modifiers!![0].isFinished) {
-                        trimModifiers()
+                        isCurrentModifierFinished = modifier.isFinished()
                         break
                     }
+
+                    usedSec = max(usedSec, modifier.onUpdate(deltaSec, item))
                 }
 
-                usedSec = deltaSec - remainingSec
+                if (type == SEQUENCE && isCurrentModifierFinished) {
+                    break
+                }
+
+                remainingSec -= usedSec
             }
 
-            PARALLEL -> {
-                var remainingSec = deltaSec
+            usedSec = deltaSec - remainingSec
 
-                while (remainingSec > 0 && _modifiers != null) {
+        } else {
 
-                    for (modifier in _modifiers!!) {
-                        usedSec = max(usedSec, modifier.onUpdate(deltaSec, item))
+            val percentage = easeFunction.getPercentage(elapsedSec + usedSec, duration)
 
-                        if (modifier.isFinished) {
-                            trimModifiers()
-                        }
+            when (type) {
+
+                ALPHA -> {
+                    item.alpha = getValueAt(0, percentage)
+                }
+
+                SCALE -> {
+                    val value = getValueAt(0, percentage)
+                    item.scaleX = value
+                    item.scaleY = value
+                }
+
+                TRANSLATE -> {
+                    if (item is ExtendedEntity) {
+                        item.translationX = getValueAt(0, percentage)
+                        item.translationY = getValueAt(1, percentage)
                     }
-
-                    remainingSec -= usedSec
                 }
 
-                usedSec = deltaSec - remainingSec
+                TRANSLATE_X -> {
+                    if (item is ExtendedEntity) {
+                        item.translationX = getValueAt(0, percentage)
+                    }
+                }
+
+                TRANSLATE_Y -> {
+                    if (item is ExtendedEntity) {
+                        item.translationY = getValueAt(0, percentage)
+                    }
+                }
+
+                ROTATION -> {
+                    item.rotation = getValueAt(0, percentage)
+                }
+
+                RGB -> {
+                    item.setColor(
+                        getValueAt(0, percentage),
+                        getValueAt(1, percentage),
+                        getValueAt(2, percentage)
+                    )
+                }
+
+                else -> Unit
             }
 
-            NONE -> {
-                // Works as delay modifier that can be inserted in a sequence modifier.
-            }
+            usedSec = min(duration - elapsedSec, deltaSec)
+
         }
 
         elapsedSec += usedSec
 
-        if (elapsedSec >= _duration) {
-            elapsedSec = _duration
+        if (isFinished) {
+            elapsedSec = duration
 
-            _modifiers = null
-
-            _onFinished?.invoke(item)
-            _onFinished = null
-
-            pool?.free(this)
+            listener?.onModifierFinished(this, item)
         }
 
         return usedSec
     }
 
     override fun onUnregister() {
+        setToDefault()
         pool?.free(this)
     }
 
 
     /**
-     * Set inner modifiers for sequence or parallel modifier types.
+     * Resets the modifier to its initial state.
      */
-    fun setInnerModifiers(vararg modifiers: UniversalModifier): UniversalModifier {
-
-        if (modifiers.isEmpty()) {
-            throw IllegalArgumentException("Modifiers list must not be empty")
-        }
-
-        _modifiers = modifiers
-
-        if (_type == PARALLEL) {
-            _modifiers!!.sortBy { it._duration }
-        }
-
-        setDuration(_duration)
-        return this
-    }
-
-    /**
-     * The type of the modifier.
-     * @see ModifierType
-     */
-    fun setType(type: ModifierType): UniversalModifier {
-
-        if (type != SEQUENCE && type != PARALLEL) {
-            _modifiers = null
-        }
-
-        if (type == SEQUENCE || type == PARALLEL || type == NONE) {
-            data.fill(0f)
-        }
-
-        _type = type
-        setDuration(_duration)
-        return this
-    }
-
-    /**
-     * Set the span values.
-     */
-    fun setValueSpan(from: Float, to: Float): UniversalModifier {
-        data[FROM_INDEX] = from
-        data[TO_INDEX] = to
-        return this
-    }
-
-    /**
-     * Set the RGB span values.
-     */
-    fun setRGBSpan(
-        fromRed: Float,
-        toRed: Float,
-        fromGreen: Float,
-        toGreen: Float,
-        fromBlue: Float,
-        toBlue: Float,
-    ): UniversalModifier {
-
-        if (data.size < 6) {
-            data = data.copyOf(6)
-        }
-
-        data[DATA_SIZE * 0 + FROM_INDEX] = fromRed
-        data[DATA_SIZE * 0 + TO_INDEX] = toRed
-
-        data[DATA_SIZE * 1 + FROM_INDEX] = fromGreen
-        data[DATA_SIZE * 1 + TO_INDEX] = toGreen
-
-        data[DATA_SIZE * 2 + FROM_INDEX] = fromBlue
-        data[DATA_SIZE * 2 + TO_INDEX] = toBlue
-
-        return this
-    }
-
-    /**
-     * Duration of the modifier in seconds.
-     */
-    fun setDuration(duration: Float): UniversalModifier {
-
-        _duration = when (_type) {
-            SEQUENCE -> _modifiers?.sumOf { it._duration } ?: 0f
-            PARALLEL -> _modifiers?.maxOf { it._duration } ?: 0f
-            else -> duration
-        }
-
-        return this
-    }
-
-    /**
-     * Callback to be called when the modifier is finished.
-     */
-    fun setOnFinished(onFinished: OnModifierFinished?): UniversalModifier {
-        _onFinished = onFinished
-        return this
-    }
-
-    /**
-     * Easing function to be used.
-     */
-    fun setEaseFunction(easeFunction: IEaseFunction): UniversalModifier {
-        _easeFunction = easeFunction
-        return this
-    }
-
-
-    override fun isRemoveWhenFinished() = true
-
-
-    override fun deepCopy() = throw NotImplementedError()
-    override fun setRemoveWhenFinished(value: Boolean) = throw NotImplementedError()
-    override fun addModifierListener(listener: IModifier.IModifierListener<IEntity>) = throw NotImplementedError()
-    override fun removeModifierListener(listener: IModifier.IModifierListener<IEntity>) = throw NotImplementedError()
-
-
     override fun reset() {
-
-        data.fill(0f)
-
-        _type = NONE
-        _duration = 0f
-        _onFinished = null
-        _easeFunction = IEaseFunction.DEFAULT
-
-        _modifiers?.forEach {
-            it.reset()
-            it.onUnregister()
-        }
-        _modifiers = null
-
         elapsedSec = 0f
+        modifiers?.forEach { it.reset() }
+    }
+
+    /**
+     * Sets the modifier to its default state.
+     *
+     * This will remove all the inner modifiers, the listener, reset the elapsed time, and set the type to [NONE].
+     */
+    fun setToDefault() {
+
+        type = NONE
+        values = null
+        listener = null
+
+        clearNestedModifiers()
+        reset()
     }
 
 
-    companion object {
+    /**
+     * Sets the duration of the modifier.
+     *
+     * Note: If the modifier is a [SEQUENCE] or [PARALLEL] modifier, this method will do nothing.
+     */
+    fun setDuration(value: Float) {
 
-        private const val FROM_INDEX = 0
+        if (type == SEQUENCE || type == PARALLEL) {
+            Log.w("UniversalModifier", "Cannot set duration for sequence or parallel modifiers, ignoring.")
+            return
+        }
 
-        private const val TO_INDEX = 1
+        duration = value
+    }
 
-        private const val DATA_SIZE = 2
+    /**
+     * Returns the duration of the modifier.
+     *
+     * When the modifier is a [SEQUENCE] modifier, the duration is the sum of the inner modifiers' durations, meanwhile, when it is a [PARALLEL] modifier, it is the maximum duration of the
+     * inner modifiers. Otherwise, it is the duration of the modifier itself.
+     */
+    override fun getDuration(): Float  = when(type) {
 
+        SEQUENCE -> modifiers?.sumOf { it.duration } ?: 0f
+        PARALLEL -> modifiers?.maxOf { it.duration } ?: 0f
+
+        else -> duration
+    }
+
+
+    override fun getSecondsElapsed(): Float {
+        return elapsedSec
+    }
+
+
+    override fun isFinished(): Boolean {
+
+        if (type == SEQUENCE || type == PARALLEL) {
+
+            if (modifiers == null) {
+                return true
+            }
+
+            return modifiers!!.all { it.isFinished }
+        }
+
+        return elapsedSec >= duration
+    }
+
+    override fun isRemoveWhenFinished(): Boolean {
+        return removeWhenFinished
+    }
+
+    override fun setRemoveWhenFinished(value: Boolean) {
+        removeWhenFinished = value
+    }
+
+
+    override fun addModifierListener(listener: IModifierListener<IEntity>) {
+        throw UnsupportedOperationException("Multiple entity modifiers are not allowed, consider using `setListener()` instead.")
+    }
+
+    override fun removeModifierListener(listener: IModifierListener<IEntity>): Boolean {
+        throw UnsupportedOperationException("Multiple entity modifiers are not allowed, consider using `setListener()` instead.")
+    }
+
+
+    override fun deepCopy(): UniversalModifier = UniversalModifier(pool).also { modifier ->
+        modifier.type = type
+        modifier.duration = duration
+        modifier.listener = listener
+        modifier.easeFunction = easeFunction
+        modifier.values = values?.copyOf()
+        modifier.modifiers = modifiers?.map { it.deepCopy() }?.toTypedArray()
     }
 }
 
@@ -391,6 +529,32 @@ enum class ModifierType {
      * Modifies the entity's color values.
      */
     RGB,
+
+    /**
+     * Modifies the entity's translation in both axis.
+     *
+     * Note: This is only available for [ExtendedEntity] instances.
+     */
+    TRANSLATE,
+
+    /**
+     * Modifies the entity's X translation.
+     *
+     * Note: This is only available for [ExtendedEntity] instances.
+     */
+    TRANSLATE_X,
+
+    /**
+     * Modifies the entity's Y translation.
+     *
+     * Note: This is only available for [ExtendedEntity] instances.
+     */
+    TRANSLATE_Y,
+
+    /**
+     * Modifies the entity's rotation.
+     */
+    ROTATION,
 
     /**
      * Modifies the entity's with inner modifiers in sequence.

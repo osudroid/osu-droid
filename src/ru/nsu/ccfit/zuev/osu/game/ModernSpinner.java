@@ -3,16 +3,19 @@ package ru.nsu.ccfit.zuev.osu.game;
 import android.graphics.PointF;
 
 import com.reco1l.osu.Execution;
+import com.reco1l.osu.graphics.ExtendedSprite;
 import com.reco1l.osu.graphics.Modifiers;
+import com.reco1l.osu.graphics.Origin;
 
+import org.anddev.andengine.entity.IEntity;
 import org.anddev.andengine.entity.scene.Scene;
-import org.anddev.andengine.entity.sprite.Sprite;
 import org.anddev.andengine.util.MathUtils;
+import org.anddev.andengine.util.modifier.IModifier;
 
 import ru.nsu.ccfit.zuev.osu.Constants;
 import ru.nsu.ccfit.zuev.osu.ResourceManager;
 import ru.nsu.ccfit.zuev.osu.Utils;
-import ru.nsu.ccfit.zuev.osu.helper.CentredSprite;
+import ru.nsu.ccfit.zuev.osu.helper.ModifierListener;
 import ru.nsu.ccfit.zuev.osu.scoring.ScoreNumber;
 import ru.nsu.ccfit.zuev.osu.scoring.StatisticV2;
 
@@ -21,11 +24,11 @@ import ru.nsu.ccfit.zuev.osu.scoring.StatisticV2;
  */
 public class ModernSpinner extends Spinner {
 
-    private final Sprite middle;
-    private final Sprite middle2;
-    private final Sprite bottom;
-    private final Sprite top;
-    private final Sprite glow;
+    private final ExtendedSprite middle;
+    private final ExtendedSprite middle2;
+    private final ExtendedSprite bottom;
+    private final ExtendedSprite top;
+    private final ExtendedSprite glow;
     private final ScoreNumber bonusScore;
 
     private Scene scene;
@@ -44,13 +47,32 @@ public class ModernSpinner extends Spinner {
 
     public ModernSpinner() {
         ResourceManager.getInstance().checkEvoSpinnerTextures();
-        center = Utils.trackToRealCoords(new PointF((float) Constants.MAP_WIDTH / 2,
-                (float) Constants.MAP_HEIGHT / 2));
-        middle = new CentredSprite(center.x, center.y, ResourceManager.getInstance().getTexture("spinner-middle"));
-        middle2 = new CentredSprite(center.x, center.y, ResourceManager.getInstance().getTexture("spinner-middle2"));
-        bottom = new CentredSprite(center.x, center.y, ResourceManager.getInstance().getTexture("spinner-bottom"));
-        top = new CentredSprite(center.x, center.y, ResourceManager.getInstance().getTexture("spinner-top"));
-        glow = new CentredSprite(center.x, center.y, ResourceManager.getInstance().getTexture("spinner-glow"));
+        center = Utils.trackToRealCoords(new PointF((float) Constants.MAP_WIDTH / 2, (float) Constants.MAP_HEIGHT / 2));
+
+        middle = new ExtendedSprite();
+        middle.setOrigin(Origin.Center);
+        middle.setPosition(center.x, center.y);
+        middle.setTextureRegion(ResourceManager.getInstance().getTexture("spinner-middle"));
+
+        middle2 = new ExtendedSprite();
+        middle2.setOrigin(Origin.Center);
+        middle2.setPosition(center.x, center.y);
+        middle2.setTextureRegion(ResourceManager.getInstance().getTexture("spinner-middle2"));
+
+        bottom = new ExtendedSprite();
+        bottom.setOrigin(Origin.Center);
+        bottom.setPosition(center.x, center.y);
+        bottom.setTextureRegion(ResourceManager.getInstance().getTexture("spinner-bottom"));
+
+        top = new ExtendedSprite();
+        top.setOrigin(Origin.Center);
+        top.setPosition(center.x, center.y);
+        top.setTextureRegion(ResourceManager.getInstance().getTexture("spinner-top"));
+
+        glow = new ExtendedSprite();
+        glow.setOrigin(Origin.Center);
+        glow.setPosition(center.x, center.y);
+        glow.setTextureRegion(ResourceManager.getInstance().getTexture("spinner-glow"));
 
         bonusScore = new ScoreNumber(center.x, center.y + 100, "", 1.1f, true);
     }
@@ -103,8 +125,18 @@ public class ModernSpinner extends Spinner {
         float timePreempt = (float) beatmapSpinner.timePreempt / 1000 / GameHelper.getSpeedMultiplier();
 
         top.registerEntityModifier(Modifiers.sequence(
-            Modifiers.fadeIn(timePreempt).setOnFinished(entity -> spinnable = true),
-            Modifiers.delay(duration).setOnFinished(entity -> Execution.updateThread(this::removeFromScene))
+            Modifiers.fadeIn(timePreempt, new ModifierListener() {
+                @Override
+                public void onModifierFinished(IModifier<IEntity> pModifier, IEntity pItem) {
+                    spinnable = true;
+                }
+            }),
+            Modifiers.delay(duration, new ModifierListener() {
+                @Override
+                public void onModifierFinished(IModifier<IEntity> pModifier, IEntity pItem) {
+                    Execution.updateThread(() -> removeFromScene());
+                }
+            })
         ));
 
         bottom.registerEntityModifier(Modifiers.fadeIn(timePreempt));

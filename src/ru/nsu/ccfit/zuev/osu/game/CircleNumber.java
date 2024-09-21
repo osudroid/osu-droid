@@ -1,80 +1,73 @@
 package ru.nsu.ccfit.zuev.osu.game;
 
-import android.graphics.PointF;
-
-import androidx.core.util.Supplier;
-import org.anddev.andengine.entity.Entity;
-import org.anddev.andengine.entity.modifier.IEntityModifier;
-import org.anddev.andengine.entity.sprite.Sprite;
+import com.reco1l.osu.graphics.ExtendedEntity;
+import com.reco1l.osu.graphics.ExtendedSprite;
 
 import ru.nsu.ccfit.zuev.osu.ResourceManager;
 import ru.nsu.ccfit.zuev.skins.OsuSkin;
 
-public class CircleNumber extends Entity
-{
+public class CircleNumber extends ExtendedEntity {
 
-    private final int num;
 
-    public CircleNumber(final int number) {
-        super(0, 0);
-        num = number;
-        final String snum = String.valueOf(Math.abs(number));
+    private int number = 0;
 
-        for (int i = 0; i < snum.length(); i++) {
-            var tex = ResourceManager.getInstance().getTextureWithPrefix(OsuSkin.get().getHitCirclePrefix(), String.valueOf(snum.charAt(i)));
+    private boolean isInvalid = false;
 
-            attachChild(new Sprite(0, 0, tex));
+
+    private void allocateSprites(int count) {
+        if (count < getChildCount()) {
+            for (int i = getChildCount() - 1; i >= count; i--) {
+                detachChild(getChild(i));
+            }
+        } else {
+            for (int i = getChildCount(); i < count; i++) {
+                attachChild(new ExtendedSprite());
+            }
         }
     }
 
-    public void init(final PointF pos, float scale) {
-        scale *= OsuSkin.get().getComboTextScale();
+    @Override
+    protected void onManagedUpdate(float pSecondsElapsed) {
 
-        var overlap = OsuSkin.get().getHitCircleOverlap();
-        float maxWidthScaled = 0f;
-        float maxHeight = 0f;
+        if (isInvalid) {
+            isInvalid = false;
 
-        for (int i = 0; i < getChildCount(); i++)
-        {
-            // We assume all attached child are Sprite
-            var sprite = (Sprite) getChild(i);
+            var numberStr = String.valueOf(Math.abs(number));
 
-            sprite.setScale(scale);
-            sprite.setPosition(maxWidthScaled, 0f);
+            allocateSprites(numberStr.length());
+            var width = 0f;
+            var height = 0f;
 
-            maxWidthScaled += sprite.getWidthScaled() - overlap;
-            maxHeight = Math.max(maxHeight, sprite.getHeight());
+            var prefix = OsuSkin.get().getHitCirclePrefix();
+            var overlap = OsuSkin.get().getHitCircleOverlap();
+
+            for (int i = 0; i < numberStr.length(); i++) {
+
+                var sprite = (ExtendedSprite) getChild(i);
+                var textureRegion = ResourceManager.getInstance().getTextureWithPrefix(prefix, String.valueOf(numberStr.charAt(i)));
+
+                if (i > 0) {
+                    sprite.setPosition(width - overlap, 0f);
+                }
+                sprite.setTextureRegion(textureRegion);
+
+                width = sprite.getX() + sprite.getWidth();
+                height = Math.max(height, sprite.getHeight());
+            }
+
+            setSize(width, height);
         }
 
-        // Computing max width without scale, so we can properly align the entity.
-        var maxWidth = getLastChild().getX() + ((Sprite) getLastChild()).getWidth();
-
-        setPosition(pos.x - maxWidth / 2f, pos.y - maxHeight / 2f);
+        super.onManagedUpdate(pSecondsElapsed);
     }
 
-    public int getNum() {
-        return num;
-    }
 
-    @Override
-    public void setAlpha(float pAlpha)
-    {
-        var count = getChildCount();
-
-        if (count > 0)
-            for (int i = 0; i < count; i++)
-                getChild(i).setAlpha(pAlpha);
-
-        super.setAlpha(pAlpha);
-    }
-
-    @Override
-    public float getAlpha()
-    {
-        if (getFirstChild() != null)
-            return getFirstChild().getAlpha();
-
-        return super.getAlpha();
+    public void setNumber(int number) {
+        if (this.number == number) {
+            return;
+        }
+        this.number = number;
+        isInvalid = true;
     }
 
 }

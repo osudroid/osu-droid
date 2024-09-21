@@ -31,6 +31,12 @@
     <PreferenceCategory android:title="Animations and effects">
 
         <CheckBoxPreference
+            android:defaultValue="true"
+            android:key="dimHitObjects"
+            android:summary="@string/setting_dim_hit_objects_summary"
+            android:title="@string/setting_dim_hit_objects_title" />
+
+        <CheckBoxPreference
             android:defaultValue="false"
             android:key="comboburst"
             android:summary="@string/opt_combo_burst_summary"

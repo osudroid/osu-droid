@@ -5,6 +5,7 @@ import android.os.Build;
 import android.os.SystemClock;
 import android.util.Log;
 
+import kotlin.random.Random;
 import ru.nsu.ccfit.zuev.osu.SecurityUtils;
 import com.edlplan.framework.math.FMath;
 import com.edlplan.framework.support.ProxySprite;
@@ -15,9 +16,14 @@ import com.reco1l.osu.DifficultyCalculationManager;
 import com.reco1l.osu.data.BeatmapInfo;
 import com.reco1l.osu.Execution;
 import com.reco1l.osu.data.DatabaseManager;
+import com.reco1l.osu.graphics.AnimatedSprite;
 import com.reco1l.osu.graphics.BlankTextureRegion;
+import com.reco1l.osu.graphics.ExtendedSprite;
 import com.reco1l.osu.graphics.Modifiers;
+import com.reco1l.osu.graphics.Origin;
 import com.reco1l.osu.graphics.VideoSprite;
+import com.reco1l.osu.playfield.ScoreText;
+import com.reco1l.osu.playfield.SliderTickSprite;
 import com.reco1l.osu.ui.BlockAreaFragment;
 import com.reco1l.osu.ui.entity.GameplayLeaderboard;
 import com.reco1l.osu.multiplayer.Multiplayer;
@@ -53,8 +59,9 @@ import org.anddev.andengine.entity.sprite.Sprite;
 import org.anddev.andengine.entity.text.ChangeableText;
 import org.anddev.andengine.entity.util.FPSCounter;
 import org.anddev.andengine.input.touch.TouchEvent;
-import org.anddev.andengine.opengl.texture.region.TextureRegion;
 import org.anddev.andengine.util.Debug;
+import org.anddev.andengine.util.modifier.ease.EaseQuadIn;
+import org.anddev.andengine.util.modifier.ease.EaseQuadOut;
 
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -79,7 +86,6 @@ import ru.nsu.ccfit.zuev.osu.game.cursor.main.AutoCursor;
 import ru.nsu.ccfit.zuev.osu.game.cursor.main.Cursor;
 import ru.nsu.ccfit.zuev.osu.game.cursor.main.CursorEntity;
 import ru.nsu.ccfit.zuev.osu.game.mods.GameMod;
-import ru.nsu.ccfit.zuev.osu.helper.AnimSprite;
 import ru.nsu.ccfit.zuev.osu.helper.DifficultyHelper;
 import ru.nsu.ccfit.zuev.osu.helper.MD5Calculator;
 import ru.nsu.ccfit.zuev.osu.helper.StringTable;
@@ -128,8 +134,7 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
     private LinkedList<GameObject> activeObjects;
     private LinkedList<GameObject> passiveObjects;
     private LinkedList<GameObject> expiredObjects;
-    private GameScoreText comboText, accText, scoreText;  //显示的文字  连击数  ACC  分数
-    private GameScoreTextShadow scoreShadow;
+    private ScoreText comboText, accuracyText, scoreText;  //显示的文字  连击数  ACC  分数
     private Queue<BreakPeriod> breakPeriods = new LinkedList<>();
     private BreakAnimator breakAnimator;
     private ScoreBar scorebar;
@@ -145,7 +150,7 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
     //private IMusicPlayer music = null;
     private int totalLength = Integer.MAX_VALUE;
     private boolean paused;
-    private Sprite skipBtn;
+    private ExtendedSprite skipBtn;
     private float skipTime;
     private boolean musicStarted;
     private double distToNextObject;
@@ -454,7 +459,7 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
         GameHelper.setCurrentBeatTime(0);
 
         GameObjectPool.getInstance().purge();
-        Slider.tickSpritePool.clear();
+        SliderTickSprite.getPool().clear();
         FollowTrack.pointSpritePool.clear();
         Modifiers.clearPool();
 
@@ -775,22 +780,20 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
 
         skipBtn = null;
         if (skipTime > 1) {
-            final TextureRegion tex;
             if (ResourceManager.getInstance().isTextureLoaded("play-skip-0")) {
                 List<String> loadedSkipTextures = new ArrayList<>();
                 for (int i = 0; i < 60; i++) {
                     if (ResourceManager.getInstance().isTextureLoaded("play-skip-" + i))
                         loadedSkipTextures.add("play-skip-" + i);
                 }
-                tex = ResourceManager.getInstance().getTexture("play-skip-0");
-                skipBtn = new AnimSprite(Config.getRES_WIDTH() - tex.getWidth(),
-                        Config.getRES_HEIGHT() - tex.getHeight(), loadedSkipTextures.size(),
-                        loadedSkipTextures.toArray(new String[0]));
+                skipBtn = new AnimatedSprite(loadedSkipTextures.toArray(new String[0]));
             } else {
-                tex = ResourceManager.getInstance().getTexture("play-skip");
-                skipBtn = new Sprite(Config.getRES_WIDTH() - tex.getWidth(),
-                        Config.getRES_HEIGHT() - tex.getHeight(), tex);
+                skipBtn = new ExtendedSprite();
+                skipBtn.setTextureRegion(ResourceManager.getInstance().getTexture("play-skip"));
             }
+
+            skipBtn.setOrigin(Origin.BottomRight);
+            skipBtn.setPosition(Config.getRES_WIDTH(), Config.getRES_HEIGHT());
             skipBtn.setAlpha(0.7f);
             fgScene.attachChild(skipBtn);
         }
@@ -799,25 +802,29 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
         if (!Config.isHideInGameUI()) {
             scorebar = new ScoreBar(this, fgScene, stat);
             addPassiveObject(scorebar);
-            final TextureRegion scoreDigitTex = ResourceManager.getInstance()
-                    .getTexture("score-0");
-            accText = new GameScoreText(OsuSkin.get().getScorePrefix(), Config.getRES_WIDTH()
-                    - scoreDigitTex.getWidth() * 4.75f, 50,
-                    "000.00%", 0.6f);
-            comboText = new GameScoreText(OsuSkin.get().getComboPrefix(), Utils.toRes(2), Config.getRES_HEIGHT()
-                    - Utils.toRes(95), "0000x", 1.5f);
-            comboText.changeText("0****");
-            scoreText = new GameScoreText(OsuSkin.get().getScorePrefix(), Config.getRES_WIDTH()
-                    - scoreDigitTex.getWidth() * 7.25f, 0, "0000000000", 0.9f);
-            comboText.attachToScene(fgScene);
-            accText.attachToScene(fgScene);
-            scoreText.attachToScene(fgScene);
-            if (Config.isAnimateComboText()) {
-                scoreShadow = new GameScoreTextShadow(0, Config.getRES_HEIGHT()
-                        - Utils.toRes(90), "0000x", 1.5f, comboText);
-                scoreShadow.attachToScene(bgScene);
-                passiveObjects.add(scoreShadow);
-            }
+
+            scoreText = new ScoreText(OsuSkin.get().getScorePrefix());
+            scoreText.setPosition(Config.getRES_WIDTH(), 0);
+            scoreText.setOrigin(Origin.TopRight);
+            scoreText.setText("0000000000");
+            scoreText.setScale(0.9f);
+
+            accuracyText = new ScoreText(OsuSkin.get().getScorePrefix());
+            accuracyText.setPosition(Config.getRES_WIDTH(), 50);
+            accuracyText.setOrigin(Origin.TopRight);
+            accuracyText.setText("000.00%");
+            accuracyText.setScale(0.6f);
+
+            comboText = new ScoreText(OsuSkin.get().getComboPrefix(), Config.isAnimateComboText());
+            comboText.setY(Config.getRES_HEIGHT());
+            comboText.setOrigin(Origin.BottomLeft);
+            comboText.setScaleCenter(Origin.BottomLeft);
+            comboText.setScale(1.5f);
+            comboText.setText("0x");
+
+            fgScene.attachChild(comboText);
+            fgScene.attachChild(accuracyText);
+            fgScene.attachChild(scoreText);
 
             if (Config.isComboburst()) {
                 comboBurst = new ComboBurst(Config.getRES_WIDTH(), Config.getRES_HEIGHT());
@@ -1167,11 +1174,7 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
                 strBuilder.append('*');
             }
             var comboStr = strBuilder.toString();
-            if (Config.isAnimateComboText()) {
-                scoreShadow.changeText(comboStr);
-            } else {
-                comboText.changeText(comboStr);
-            }
+            comboText.setText(comboStr);
 
             strBuilder.setLength(0);
             float rawAccuracy = stat.getAccuracy() * 100f;
@@ -1189,21 +1192,14 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
             if (strBuilder.length() < 6) {
                 strBuilder.insert(0, '*');
             }
-            accText.changeText(strBuilder.toString());
+            accuracyText.setText(strBuilder.toString());
             strBuilder.setLength(0);
             strBuilder.append(stat.getTotalScoreWithMultiplier());
             while (strBuilder.length() < 8) {
                 strBuilder.insert(0, '0');
             }
 
-            int scoreTextOffset = 0;
-            while (strBuilder.length() < 10) {
-                strBuilder.insert(0, '*');
-                scoreTextOffset++;
-            }
-
-            scoreText.setPosition(Config.getRES_WIDTH() - scoreText.getDigitWidth() * (9.25f - scoreTextOffset), 0);
-            scoreText.changeText(strBuilder.toString());
+            scoreText.setText(strBuilder.toString());
         }
 
         if (comboBurst != null) {
@@ -1793,7 +1789,6 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
         }
 
         if (score == 0) {
-            createHitEffect(start, "hit0", color);
             createHitEffect(end, "hit0", color);
             registerHit(id, 0, endCombo);
             return;
@@ -1904,37 +1899,7 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
             default -> "hit0";
         };
 
-        if (Config.isHitLighting() &&
-                ResourceManager.getInstance().getTexture("lighting") != null) {
-            final GameEffect light = GameObjectPool.getInstance().getEffect(
-                    "lighting");
-            light.init(
-                    mgScene,
-                    pos,
-                    scale,
-                    Modifiers.fadeOut(0.7f / speedMultiplier),
-                    Modifiers.sequence(
-                        Modifiers.scale(0.25f / speedMultiplier, scale, 1.5f * scale),
-                        Modifiers.scale(0.45f / speedMultiplier, 1.5f * scale, 2f * scale)
-                    )
-            );
-        }
-
-        GameEffect effect = GameObjectPool.getInstance().getEffect(scoreName);
-        effect.init(
-                mgScene,
-                pos,
-                scale,
-                Modifiers.sequence(
-                    Modifiers.scale(0.15f / speedMultiplier, scale, 1.2f * scale),
-                    Modifiers.scale(0.05f / speedMultiplier, 1.2f * scale, scale),
-                    Modifiers.fadeOut(1 / speedMultiplier)
-                )
-        );
-
-        pos.y /= 2f;
-        effect = GameObjectPool.getInstance().getEffect("spinner-osu");
-        effect.init(mgScene, pos, 1, Modifiers.fadeOut(1.5f / speedMultiplier));
+        createHitEffect(pos, scoreName, null);
     }
 
     @Override
@@ -2277,129 +2242,135 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
     }
 
     private void createHitEffect(final PointF pos, final String name, RGBColor color) {
-        final GameEffect effect = GameObjectPool.getInstance().getEffect(name);
-        final float speedMultiplier = GameHelper.getSpeedMultiplier();
+
+        var effect = GameObjectPool.getInstance().getEffect(name);
+        var speedMultiplier = GameHelper.getSpeedMultiplier();
+
+        // Reference https://github.com/ppy/osu/blob/ebf637bd3c33f1c886f6bfc81aa9ea2132c9e0d2/osu.Game/Skinning/LegacyJudgementPieceOld.cs
+
+        var fadeInLength = 0.12f / speedMultiplier;
+        var fadeOutLength = 0.6f / speedMultiplier;
+        var fadeOutDelay = 0.5f / speedMultiplier;
+
+        var fadeSequence = Modifiers.sequence(
+            Modifiers.fadeIn(fadeInLength),
+            Modifiers.delay(fadeOutDelay),
+            Modifiers.fadeOut(fadeOutLength)
+        );
 
         if (name.equals("hit0")) {
+
+            var rotation = (float) Random.Default.nextDouble(8.6 * 2) - 8.6f;
+
             effect.init(
-                    mgScene,
-                    pos,
-                    GameHelper.isSuddenDeath() ? scale * 3 : scale,
-                    Modifiers.sequence(
-                        Modifiers.fadeIn(0.15f / speedMultiplier),
-                        Modifiers.delay(0.35f / speedMultiplier),
-                        Modifiers.fadeOut(0.25f / speedMultiplier)
-                    )
+                mgScene,
+                pos,
+                scale * 1.6f,
+                fadeSequence,
+                Modifiers.scale(0.1f / speedMultiplier, scale * 1.6f, scale, null, EaseQuadIn.getInstance()),
+                Modifiers.translateY(fadeOutDelay + fadeOutLength, -5f, 80f, null, EaseQuadIn.getInstance()),
+                Modifiers.sequence(
+                    Modifiers.rotation(fadeInLength, 0, rotation),
+                    Modifiers.rotation(fadeOutDelay + fadeOutLength - fadeInLength, rotation, rotation * 2, null, EaseQuadIn.getInstance())
+                )
             );
 
             return;
         }
 
-        if (Config.isHitLighting()
-                && !name.equals("sliderpoint10")
-                && !name.equals("sliderpoint30")
-                && ResourceManager.getInstance().getTexture("lighting") != null) {
-            final GameEffect light = GameObjectPool.getInstance().getEffect("lighting");
+        if (Config.isHitLighting() && !name.equals("sliderpoint10") && !name.equals("sliderpoint30") && ResourceManager.getInstance().getTexture("lighting") != null) {
+
+            // Reference https://github.com/ppy/osu/blob/a7e110f6693beca6f6e6a20efb69a6913d58550e/osu.Game.Rulesets.Osu/Objects/Drawables/DrawableOsuJudgement.cs#L71-L88
+
+            var light = GameObjectPool.getInstance().getEffect("lighting");
+            light.setBlendFunction(GL10.GL_SRC_ALPHA, GL10.GL_DST_ALPHA);
             light.setColor(color);
             light.init(
-                    bgScene,
-                    pos,
-                    scale,
-                    Modifiers.fadeOut(1 / speedMultiplier),
-                    Modifiers.sequence(
-                        Modifiers.scale(0.25f / speedMultiplier, scale, 1.5f * scale),
-                        Modifiers.scale(0.45f / speedMultiplier, scale * 1.5f, 1.9f * scale),
-                        Modifiers.scale(0.3f / speedMultiplier, scale * 1.9f, scale * 2f)
-                    )
+                bgScene,
+                pos,
+                scale * 0.8f,
+                Modifiers.scale(0.6f / speedMultiplier, scale * 0.8f, scale * 1.2f, null, EaseQuadOut.getInstance()),
+                Modifiers.sequence(
+                    Modifiers.fadeIn(0.2f / speedMultiplier),
+                    Modifiers.delay(0.2f / speedMultiplier),
+                    Modifiers.fadeOut(1f / speedMultiplier)
+                )
             );
-            light.setBlendFunction(GL10.GL_SRC_ALPHA, GL10.GL_DST_ALPHA);
         }
 
         effect.init(
-                mgScene,
-                pos,
-                scale,
-                Modifiers.sequence(
-                    Modifiers.scale(0.15f / speedMultiplier, scale, 1.2f * scale),
-                    Modifiers.scale(0.05f / speedMultiplier, 1.2f * scale, scale),
-                    Modifiers.fadeOut(0.5f / speedMultiplier)
-                )
+            mgScene,
+            pos,
+            scale * 0.6f,
+            fadeSequence,
+            Modifiers.sequence(
+                Modifiers.scale(fadeInLength * 0.8f, scale * 0.6f, scale * 1.1f),
+                Modifiers.delay(fadeInLength * 0.2f),
+                Modifiers.scale(fadeInLength * 0.2f, scale * 1.1f, scale * 0.9f),
+
+                // stable dictates scale of 0.9->1 over time 1.0 to 1.4, but we are already at 1.2.
+                // so we need to force the current value to be correct at 1.2 (0.95) then complete the
+                // second half of the transform.
+                Modifiers.scale(fadeInLength * 0.2f, scale * 0.95f, scale)
+            )
+        );
+    }
+
+    private void applyBurstEffect(GameEffect effect, PointF pos) {
+
+        // Reference: https://github.com/ppy/osu/blob/c5893f245ce7a89d1900dbb620390823702481fe/osu.Game.Rulesets.Osu/Skinning/Legacy/LegacyMainCirclePiece.cs#L152-L174
+
+        var fadeDuration = 0.24f / GameHelper.getSpeedMultiplier();
+
+        effect.init(mgScene, pos, scale,
+            Modifiers.scale(fadeDuration, scale, scale * 1.4f, null, EaseQuadOut.getInstance()),
+            Modifiers.fadeOut(fadeDuration)
         );
     }
 
     private void createBurstEffect(final PointF pos, final RGBColor color) {
-        if (!Config.isBurstEffects() || stat.getMod().contains(GameMod.MOD_HIDDEN))
+        if (!Config.isBurstEffects() || GameHelper.isHidden())
             return;
 
-        final float speedMultiplier = GameHelper.getSpeedMultiplier();
-
         final GameEffect burst1 = GameObjectPool.getInstance().getEffect("hitcircle");
-        burst1.init(mgScene, pos, scale,
-                Modifiers.scale(0.25f / speedMultiplier, scale, 1.5f * scale),
-                Modifiers.alpha(0.25f / speedMultiplier, 0.8f, 0)
-        );
+        applyBurstEffect(burst1, pos);
         burst1.setColor(color);
 
         final GameEffect burst2 = GameObjectPool.getInstance().getEffect("hitcircleoverlay");
-        burst2.init(mgScene, pos, scale,
-                Modifiers.scale(0.25f / speedMultiplier, scale, 1.5f * scale),
-                Modifiers.alpha(0.25f / speedMultiplier, 0.8f, 0)
-        );
+        applyBurstEffect(burst2, pos);
     }
 
     private void createBurstEffectSliderStart(final PointF pos, final RGBColor color) {
-        if (!Config.isBurstEffects() || stat.getMod().contains(GameMod.MOD_HIDDEN))
+        if (!Config.isBurstEffects() || GameHelper.isHidden())
             return;
 
-        final float speedMultiplier = GameHelper.getSpeedMultiplier();
-
         final GameEffect burst1 = GameObjectPool.getInstance().getEffect("sliderstartcircle");
-        burst1.init(mgScene, pos, scale,
-                Modifiers.scale(0.25f / speedMultiplier, scale, 1.5f * scale),
-                Modifiers.alpha(0.25f / speedMultiplier, 0.8f, 0)
-        );
+        applyBurstEffect(burst1, pos);
         burst1.setColor(color);
 
         final GameEffect burst2 = GameObjectPool.getInstance().getEffect("sliderstartcircleoverlay");
-        burst2.init(mgScene, pos, scale,
-                Modifiers.scale(0.25f / speedMultiplier, scale, 1.5f * scale),
-                Modifiers.alpha(0.25f / speedMultiplier, 0.8f, 0)
-        );
+        applyBurstEffect(burst2, pos);
     }
 
     private void createBurstEffectSliderEnd(final PointF pos, final RGBColor color) {
-        if (!Config.isBurstEffects() || stat.getMod().contains(GameMod.MOD_HIDDEN))
+        if (!Config.isBurstEffects() || GameHelper.isHidden())
             return;
 
-        final float speedMultiplier = GameHelper.getSpeedMultiplier();
-
         final GameEffect burst1 = GameObjectPool.getInstance().getEffect("sliderendcircle");
-        burst1.init(mgScene, pos, scale,
-                Modifiers.scale(0.25f / speedMultiplier, scale, 1.5f * scale),
-                Modifiers.alpha(0.25f / speedMultiplier, 0.8f, 0)
-        );
+        applyBurstEffect(burst1, pos);
         burst1.setColor(color);
 
         final GameEffect burst2 = GameObjectPool.getInstance().getEffect("sliderendcircleoverlay");
-        burst2.init(mgScene, pos, scale,
-                Modifiers.scale(0.25f / speedMultiplier, scale, 1.5f * scale),
-                Modifiers.alpha(0.25f / speedMultiplier, 0.8f, 0)
-        );
+        applyBurstEffect(burst2, pos);
     }
 
     private void createBurstEffectSliderReverse(final PointF pos, float ang, final RGBColor color) {
-        if (!Config.isBurstEffects() || stat.getMod().contains(GameMod.MOD_HIDDEN))
+        if (!Config.isBurstEffects() || GameHelper.isHidden())
             return;
-
-        final float speedMultiplier = GameHelper.getSpeedMultiplier();
 
         final GameEffect burst1 = GameObjectPool.getInstance().getEffect("reversearrow");
         burst1.hit.setRotation(ang);
-        burst1.init(mgScene, pos, scale,
-                Modifiers.scale(0.25f / speedMultiplier, scale, 1.5f * scale),
-                Modifiers.alpha(0.25f / speedMultiplier, 0.8f, 0)
-        );
-
+        applyBurstEffect(burst1, pos);
     }
 
     public int getCursorsCount() {
