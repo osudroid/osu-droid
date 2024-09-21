@@ -70,7 +70,7 @@ class BeatmapProcessor(
             return@run
         }
 
-        val droidDifficultyScale = CircleSizeCalculator.standardScaleToDroidDifficultyScale(this[0].difficultyScale)
+        val droidDifficultyScale = CircleSizeCalculator.standardScaleToDroidDifficultyScale(this[0].difficultyScale, true)
 
         for (i in 0 until size - 1) {
             val current = this[i]
