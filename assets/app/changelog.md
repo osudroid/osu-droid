@@ -57,7 +57,7 @@ for preventing accidental touches.
 
 ## Storage migration
 
-This updates migrates the storage location of local scores, beatmap collections, and beatmap options into an integrated
+This update migrates the storage location of local scores, beatmap collections, and beatmap options into an integrated
 database. Doing this increases the import time of beatmaps and fixes the problem of duplicated beatmapsets in song
 selection menu.
 
