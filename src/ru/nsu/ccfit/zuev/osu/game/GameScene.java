@@ -1902,37 +1902,7 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
             default -> "hit0";
         };
 
-        if (Config.isHitLighting() &&
-                ResourceManager.getInstance().getTexture("lighting") != null) {
-            final GameEffect light = GameObjectPool.getInstance().getEffect(
-                    "lighting");
-            light.init(
-                    mgScene,
-                    pos,
-                    scale,
-                    Modifiers.fadeOut(0.7f / speedMultiplier),
-                    Modifiers.sequence(
-                        Modifiers.scale(0.25f / speedMultiplier, scale, 1.5f * scale),
-                        Modifiers.scale(0.45f / speedMultiplier, 1.5f * scale, 2f * scale)
-                    )
-            );
-        }
-
-        GameEffect effect = GameObjectPool.getInstance().getEffect(scoreName);
-        effect.init(
-                mgScene,
-                pos,
-                scale,
-                Modifiers.sequence(
-                    Modifiers.scale(0.15f / speedMultiplier, scale, 1.2f * scale),
-                    Modifiers.scale(0.05f / speedMultiplier, 1.2f * scale, scale),
-                    Modifiers.fadeOut(1 / speedMultiplier)
-                )
-        );
-
-        pos.y /= 2f;
-        effect = GameObjectPool.getInstance().getEffect("spinner-osu");
-        effect.init(mgScene, pos, 1, Modifiers.fadeOut(1.5f / speedMultiplier));
+        createHitEffect(pos, scoreName, null);
     }
 
     @Override

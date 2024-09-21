@@ -56,7 +56,11 @@ public class GameEffect extends GameObject {
     }
 
     public void setColor(final RGBColor color) {
-        hit.setColor(color.r(), color.g(), color.b());
+        if (color == null) {
+            hit.setColor(1f, 1f, 1f);
+        } else {
+            hit.setColor(color.r(), color.g(), color.b());
+        }
     }
 
     public void init(final Scene scene, final PointF pos, final float scale,
