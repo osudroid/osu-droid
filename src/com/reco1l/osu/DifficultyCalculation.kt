@@ -42,7 +42,7 @@ object DifficultyCalculationManager {
         isRunning = true
         mainThread {
             badge = LoadingBadgeFragment().apply {
-                text = "Calculating beatmap difficulties... (0%)"
+                text = "Calculating beatmap difficulties..."
                 isIndeterminate = true
                 show()
             }
