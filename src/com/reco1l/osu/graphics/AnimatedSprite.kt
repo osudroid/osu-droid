@@ -10,7 +10,7 @@ open class AnimatedSprite(frames: List<TextureRegion>) : ExtendedSprite() {
 
 
     @JvmOverloads
-    constructor(texturePrefix: StringSkinData? = null, textureName: String?, frameCount: Int) : this(List(frameCount) {
+    constructor(texturePrefix: StringSkinData? = null, textureName: String?, frameCount: Int) : this(List(frameCount.coerceAtLeast(1)) {
 
         if (texturePrefix == null) {
             ResourceManager.getInstance().getTexture(textureName + it)
