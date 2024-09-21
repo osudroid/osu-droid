@@ -32,8 +32,10 @@ object DifficultyCalculationManager {
             return
         }
 
-        val beatmaps = LibraryManager.getLibrary().flatMap { set -> set.beatmaps.filter { it.needsDifficultyCalculation } }
-        if (beatmaps.isEmpty()) {
+        val totalBeatmaps = LibraryManager.getLibrary().sumOf { it.beatmaps.size }
+
+        val pendingBeatmaps = LibraryManager.getLibrary().flatMap { set -> set.beatmaps.filter { it.needsDifficultyCalculation } }
+        if (pendingBeatmaps.isEmpty()) {
             return
         }
 
@@ -53,14 +55,14 @@ object DifficultyCalculationManager {
                 val threadCount = Runtime.getRuntime().availableProcessors()
                 val threadPool = Executors.newFixedThreadPool(threadCount)
 
-                var calculated = 0
+                var calculated = totalBeatmaps - pendingBeatmaps.size
 
-                beatmaps.chunked(max(beatmaps.size / threadCount, 1)).fastForEach { chunk ->
+                pendingBeatmaps.chunked(max(pendingBeatmaps.size / threadCount, 1)).fastForEach { chunk ->
 
                     threadPool.submit {
 
                         // .indices to avoid creating an iterator.
-                        for(i in chunk.indices) {
+                        for (i in chunk.indices) {
 
                             if (!isRunning) {
                                 break
@@ -88,7 +90,7 @@ object DifficultyCalculationManager {
                                 mainThread {
                                     badge?.apply {
                                         isIndeterminate = false
-                                        progress = calculated * 100 / beatmaps.size
+                                        progress = calculated * 100 / totalBeatmaps
                                         text = "Calculating beatmap difficulties... (${progress}%)"
                                     }
                                 }
