@@ -323,6 +323,10 @@ object RoomScene : Scene(), IRoomEventListener, IPlayerEventListener
             var dx = 0f
             var dy = 0f
 
+            init {
+                adjustSizeWithTexture = false
+            }
+
             override fun onAreaTouched(event: TouchEvent, localX: Float, localY: Float): Boolean
             {
                 if (event.isActionDown)
@@ -373,6 +377,7 @@ object RoomScene : Scene(), IRoomEventListener, IPlayerEventListener
 
             init {
                 textureRegion = getResources().getTextureIfLoaded("selection-mods")
+                adjustSizeWithTexture = false
             }
 
             override fun onAreaTouched(event: TouchEvent, localX: Float, localY: Float): Boolean
