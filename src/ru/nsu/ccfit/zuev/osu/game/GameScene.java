@@ -2327,7 +2327,7 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
 
         effect.init(mgScene, pos, scale,
             Modifiers.scale(fadeDuration, scale, scale * 1.4f, null, EaseQuadOut.getInstance()),
-            Modifiers.fadeOut(fadeDuration, null, EaseQuadOut.getInstance())
+            Modifiers.fadeOut(fadeDuration)
         );
     }
 
