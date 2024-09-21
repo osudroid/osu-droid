@@ -86,9 +86,13 @@ open class AnimatedSprite(frames: List<TextureRegion>) : ExtendedSprite() {
 
     override fun onManagedUpdate(pSecondsElapsed: Float) {
 
-        elapsedSec += pSecondsElapsed
+        if (frames.isEmpty()) {
+            return
+        }
 
         if (state == PLAYING) {
+            elapsedSec += pSecondsElapsed
+
             var frameIndex = (elapsedSec * fps).toInt()
 
             if (isLoop) {
