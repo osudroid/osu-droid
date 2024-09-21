@@ -51,6 +51,7 @@ for preventing accidental touches.
 - Added support for custom file hitsounds
 - Added an animation to slider end arrow rotation when snaking animation is enabled
 - Added a slight dim to hitobjects that cannot be hit yet in gameplay
+- Added a rotation effect to miss hit judgement effects in gameplay
 
 # Changes
 
@@ -77,7 +78,9 @@ During gameplay, background difficulty calculation is paused to prevent performa
     slider breaking for hitting a slider's head too early
 - More significant performance improvements in gameplay than version 1.7.2
 - Separated average offset and unstable rate displays in gameplay into separate settings
-- Beatmap preview rate limit in beatmap downloader has been reduced to prevent spamming
+- Changed hit lighting effect animation to match osu!stable
+- Changed combo counter animation to match osu!stable
+- Miss hit judgement effect only plays in a slider's tail rather than its head and tail
 
 # Removals
 
