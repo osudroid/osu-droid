@@ -59,7 +59,6 @@ import org.anddev.andengine.entity.sprite.Sprite;
 import org.anddev.andengine.entity.text.ChangeableText;
 import org.anddev.andengine.entity.util.FPSCounter;
 import org.anddev.andengine.input.touch.TouchEvent;
-import org.anddev.andengine.opengl.texture.region.TextureRegion;
 import org.anddev.andengine.util.Debug;
 import org.anddev.andengine.util.modifier.ease.EaseQuadIn;
 import org.anddev.andengine.util.modifier.ease.EaseQuadOut;
@@ -781,22 +780,20 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
 
         skipBtn = null;
         if (skipTime > 1) {
-            final TextureRegion tex;
             if (ResourceManager.getInstance().isTextureLoaded("play-skip-0")) {
                 List<String> loadedSkipTextures = new ArrayList<>();
                 for (int i = 0; i < 60; i++) {
                     if (ResourceManager.getInstance().isTextureLoaded("play-skip-" + i))
                         loadedSkipTextures.add("play-skip-" + i);
                 }
-                tex = ResourceManager.getInstance().getTexture("play-skip-0");
                 skipBtn = new AnimatedSprite(loadedSkipTextures.toArray(new String[0]));
-                skipBtn.setPosition(Config.getRES_WIDTH() - tex.getWidth(), Config.getRES_HEIGHT() - tex.getHeight());
             } else {
-                tex = ResourceManager.getInstance().getTexture("play-skip");
                 skipBtn = new ExtendedSprite();
-                skipBtn.setPosition(Config.getRES_WIDTH() - tex.getWidth(), Config.getRES_HEIGHT() - tex.getHeight());
-                skipBtn.setTextureRegion(tex);
+                skipBtn.setTextureRegion(ResourceManager.getInstance().getTexture("play-skip"));
             }
+
+            skipBtn.setOrigin(Origin.BottomRight);
+            skipBtn.setPosition(Config.getRES_WIDTH(), Config.getRES_HEIGHT());
             skipBtn.setAlpha(0.7f);
             fgScene.attachChild(skipBtn);
         }
