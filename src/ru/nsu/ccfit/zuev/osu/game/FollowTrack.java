@@ -3,6 +3,7 @@ package ru.nsu.ccfit.zuev.osu.game;
 import android.graphics.PointF;
 
 import com.reco1l.framework.Pool;
+import com.reco1l.osu.graphics.AnimatedSprite;
 import com.reco1l.osu.graphics.ExtendedSprite;
 
 import org.anddev.andengine.entity.scene.Scene;
@@ -13,7 +14,6 @@ import java.util.ArrayList;
 import ru.nsu.ccfit.zuev.osu.ResourceManager;
 import ru.nsu.ccfit.zuev.skins.SkinManager;
 import ru.nsu.ccfit.zuev.osu.Utils;
-import ru.nsu.ccfit.zuev.osu.helper.AnimSprite;
 
 public class FollowTrack extends GameObject {
 
@@ -26,7 +26,7 @@ public class FollowTrack extends GameObject {
             sprite.setTextureRegion(ResourceManager.getInstance().getTexture("followpoint"));
             return sprite;
         } else {
-            return new AnimSprite(0, 0, "followpoint-", FRAME_COUNT, FRAME_COUNT);
+            return new AnimatedSprite("followpoint-", FRAME_COUNT);
         }
     });
 

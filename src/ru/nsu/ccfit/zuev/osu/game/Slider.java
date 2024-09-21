@@ -6,6 +6,7 @@ import com.edlplan.framework.math.Vec2;
 import com.edlplan.framework.math.line.LinePath;
 import com.edlplan.osu.support.slider.SliderBody;
 import com.reco1l.osu.Execution;
+import com.reco1l.osu.graphics.AnimatedSprite;
 import com.reco1l.osu.graphics.ExtendedSprite;
 import com.reco1l.osu.graphics.Modifiers;
 import com.reco1l.osu.graphics.Origin;
@@ -27,7 +28,6 @@ import ru.nsu.ccfit.zuev.osu.RGBColor;
 import ru.nsu.ccfit.zuev.osu.ResourceManager;
 import ru.nsu.ccfit.zuev.osu.Utils;
 import ru.nsu.ccfit.zuev.osu.game.GameHelper.SliderPath;
-import ru.nsu.ccfit.zuev.osu.helper.AnimSprite;
 import ru.nsu.ccfit.zuev.osu.helper.DifficultyHelper;
 import ru.nsu.ccfit.zuev.osu.helper.ModifierListener;
 import ru.nsu.ccfit.zuev.skins.OsuSkin;
@@ -55,7 +55,6 @@ public class Slider extends GameObject {
     private double tickInterval;
     private int currentTickSpriteIndex;
 
-    private final AnimSprite ball;
     private PointF ballPos;
     private final Sprite followCircle;
 
@@ -77,6 +76,11 @@ public class Slider extends GameObject {
 
     private final SliderBody sliderBody;
 
+
+    /**
+     * The slider ball sprite.
+     */
+    private final AnimatedSprite ball;
 
     /**
      * The start circle piece of the slider.
@@ -127,7 +131,7 @@ public class Slider extends GameObject {
         endArrow.setTextureRegion(ResourceManager.getInstance().getTexture("reversearrow"));
 
         int ballFrameCount = SkinManager.getFrames("sliderb");
-        ball = new AnimSprite(0, 0, "sliderb", ballFrameCount, ballFrameCount);
+        ball = new AnimatedSprite("sliderb", ballFrameCount);
 
         followCircle = new Sprite(0, 0, ResourceManager.getInstance().getTexture("sliderfollowcircle"));
         sliderBody = new SliderBody(OsuSkin.get().isSliderHintEnable());

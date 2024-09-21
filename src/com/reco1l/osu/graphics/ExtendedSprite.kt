@@ -17,12 +17,12 @@ open class ExtendedSprite : ExtendedEntity(vertexBuffer = RectangleVertexBuffer(
      */
     var adjustSizeWithTexture = true
         set(value) {
-            field = value
+            if (field != value) {
+                field = value
 
-            if (value && textureRegion != null) {
-                width = textureRegion?.width?.toFloat() ?: 0f
-                height = textureRegion?.height?.toFloat() ?: 0f
-                updateVertexBuffer()
+                if (value) {
+                    super.setSize(textureRegion?.width?.toFloat() ?: 0f, textureRegion?.height?.toFloat() ?: 0f)
+                }
             }
         }
 
@@ -61,22 +61,30 @@ open class ExtendedSprite : ExtendedEntity(vertexBuffer = RectangleVertexBuffer(
             field = value
             applyBlendFunction()
 
+            // Avoiding unnecessary buffer updates
+            var wasBufferUpdated = false
+
             if (value == null) {
-                if (adjustSizeWithTexture) {
-                    width = 0f
-                    height = 0f
+                if (adjustSizeWithTexture && (width != 0f || height != 0f)) {
+                    super.setSize(0f, 0f)
+                    wasBufferUpdated = true
                 }
             } else {
                 value.isFlippedVertical = flippedVertical
                 value.isFlippedHorizontal = flippedHorizontal
 
-                if (adjustSizeWithTexture) {
-                    width = value.width.toFloat()
-                    height = value.height.toFloat()
+                val textureWidth = value.width.toFloat()
+                val textureHeight = value.height.toFloat()
+
+                if (adjustSizeWithTexture && (width != textureWidth || height != textureHeight)) {
+                    super.setSize(textureWidth, textureHeight)
+                    wasBufferUpdated = true
                 }
             }
 
-            updateVertexBuffer()
+            if (!wasBufferUpdated) {
+                updateVertexBuffer()
+            }
         }
 
 
@@ -88,6 +96,26 @@ open class ExtendedSprite : ExtendedEntity(vertexBuffer = RectangleVertexBuffer(
             setBlendFunction(BLENDFUNCTION_SOURCE_DEFAULT, BLENDFUNCTION_DESTINATION_DEFAULT)
         }
     }
+
+
+    override fun setSize(w: Float, h: Float) {
+        if (!adjustSizeWithTexture) {
+            super.setSize(w, h)
+        }
+    }
+
+    override fun setWidth(value: Float) {
+        if (!adjustSizeWithTexture) {
+            super.setWidth(value)
+        }
+    }
+
+    override fun setHeight(value: Float) {
+        if (!adjustSizeWithTexture) {
+            super.setHeight(value)
+        }
+    }
+
 
     override fun onUpdateVertexBuffer() {
         (vertexBuffer as RectangleVertexBuffer).update(width, height)

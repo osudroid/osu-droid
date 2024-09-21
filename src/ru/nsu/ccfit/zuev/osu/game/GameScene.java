@@ -16,6 +16,7 @@ import com.reco1l.osu.DifficultyCalculationManager;
 import com.reco1l.osu.data.BeatmapInfo;
 import com.reco1l.osu.Execution;
 import com.reco1l.osu.data.DatabaseManager;
+import com.reco1l.osu.graphics.AnimatedSprite;
 import com.reco1l.osu.graphics.BlankTextureRegion;
 import com.reco1l.osu.graphics.ExtendedSprite;
 import com.reco1l.osu.graphics.Modifiers;
@@ -86,7 +87,6 @@ import ru.nsu.ccfit.zuev.osu.game.cursor.main.AutoCursor;
 import ru.nsu.ccfit.zuev.osu.game.cursor.main.Cursor;
 import ru.nsu.ccfit.zuev.osu.game.cursor.main.CursorEntity;
 import ru.nsu.ccfit.zuev.osu.game.mods.GameMod;
-import ru.nsu.ccfit.zuev.osu.helper.AnimSprite;
 import ru.nsu.ccfit.zuev.osu.helper.DifficultyHelper;
 import ru.nsu.ccfit.zuev.osu.helper.MD5Calculator;
 import ru.nsu.ccfit.zuev.osu.helper.StringTable;
@@ -789,9 +789,8 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
                         loadedSkipTextures.add("play-skip-" + i);
                 }
                 tex = ResourceManager.getInstance().getTexture("play-skip-0");
-                skipBtn = new AnimSprite(Config.getRES_WIDTH() - tex.getWidth(),
-                        Config.getRES_HEIGHT() - tex.getHeight(), loadedSkipTextures.size(),
-                        loadedSkipTextures.toArray(new String[0]));
+                skipBtn = new AnimatedSprite(loadedSkipTextures.toArray(new String[0]));
+                skipBtn.setPosition(Config.getRES_WIDTH() - tex.getWidth(), Config.getRES_HEIGHT() - tex.getHeight());
             } else {
                 tex = ResourceManager.getInstance().getTexture("play-skip");
                 skipBtn = new ExtendedSprite();

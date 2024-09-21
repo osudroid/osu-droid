@@ -18,7 +18,6 @@ import org.anddev.andengine.entity.text.ChangeableText
 import org.anddev.andengine.input.touch.TouchEvent
 import org.anddev.andengine.util.MathUtils
 import ru.nsu.ccfit.zuev.osu.*
-import ru.nsu.ccfit.zuev.osu.helper.AnimSprite
 import ru.nsu.ccfit.zuev.osu.helper.TextButton
 import ru.nsu.ccfit.zuev.osu.menu.LoadingScreen
 import ru.nsu.ccfit.zuev.osu.online.OnlinePanel
@@ -113,10 +112,9 @@ object LobbyScene : Scene()
         }
         else loadedBackTextures.add("menu-back")
 
-        backButton = object : AnimSprite(0f, 0f, loadedBackTextures.size.toFloat(), *loadedBackTextures.toTypedArray<String>())
-        {
-            var scaleWhenHold = layoutBackButton?.property?.optBoolean("scaleWhenHold", true) ?: false
+        backButton = object : AnimatedSprite(*loadedBackTextures.toTypedArray<String>()) {
 
+            var scaleWhenHold = layoutBackButton?.property?.optBoolean("scaleWhenHold", true) ?: false
             var moved = false
             var dx = 0f
             var dy = 0f

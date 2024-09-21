@@ -1,24 +1,26 @@
 package com.rian.osu.ui
 
+import com.reco1l.osu.graphics.*
 import com.reco1l.osu.multiplayer.Multiplayer
 import com.reco1l.osu.multiplayer.RoomScene
 import org.anddev.andengine.input.touch.TouchEvent
 import org.anddev.andengine.util.MathUtils
 import ru.nsu.ccfit.zuev.osu.Config
 import ru.nsu.ccfit.zuev.osu.DifficultyAlgorithm
-import ru.nsu.ccfit.zuev.osu.helper.AnimSprite
+import ru.nsu.ccfit.zuev.osu.ResourceManager
 import ru.nsu.ccfit.zuev.osu.GlobalManager.getInstance as getGlobal
 
-class DifficultyAlgorithmSwitcher : AnimSprite(
-    0f, 0f, 0f,
-    "selection-difficulty-droid",
-    "selection-difficulty-droid-over",
-    "selection-difficulty-standard",
-    "selection-difficulty-standard-over"
-) {
+class DifficultyAlgorithmSwitcher : ExtendedSprite() {
     private var moved = false
     private var initialX: Float? = null
     private var initialY: Float? = null
+
+    private val textures = arrayOf(
+        ResourceManager.getInstance().getTextureIfLoaded("selection-difficulty-droid"),
+        ResourceManager.getInstance().getTextureIfLoaded("selection-difficulty-droid-over"),
+        ResourceManager.getInstance().getTextureIfLoaded("selection-difficulty-standard"),
+        ResourceManager.getInstance().getTextureIfLoaded("selection-difficulty-standard-over")
+    )
 
     init {
         onDeselect()
@@ -61,10 +63,10 @@ class DifficultyAlgorithmSwitcher : AnimSprite(
     }
 
     private fun onSelect() {
-        frame = if (Config.getDifficultyAlgorithm() == DifficultyAlgorithm.standard) 3 else 1
+        textureRegion = textures[if (Config.getDifficultyAlgorithm() == DifficultyAlgorithm.standard) 3 else 1]
     }
 
     private fun onDeselect() {
-        frame = if (Config.getDifficultyAlgorithm() == DifficultyAlgorithm.standard) 2 else 0
+        textureRegion = textures[if (Config.getDifficultyAlgorithm() == DifficultyAlgorithm.standard) 2 else 0]
     }
 }

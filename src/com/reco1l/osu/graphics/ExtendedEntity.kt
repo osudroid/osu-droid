@@ -7,7 +7,6 @@ import org.anddev.andengine.entity.shape.*
 import org.anddev.andengine.opengl.util.*
 import org.anddev.andengine.opengl.vertex.*
 import javax.microedition.khronos.opengles.*
-import kotlin.math.*
 
 
 /**
@@ -21,7 +20,7 @@ open class ExtendedEntity(
 
     private var height: Float = 0f,
 
-    private val vertexBuffer: VertexBuffer? = null
+    private var vertexBuffer: VertexBuffer? = null
 
 ) : Shape(0f, 0f) {
 
@@ -183,18 +182,18 @@ open class ExtendedEntity(
     }
 
 
-    fun setSize(width: Float, height: Float) {
-        if (this.width != width || this.height != height) {
-            this.width = width
-            this.height = height
-            onUpdateVertexBuffer()
+    open fun setSize(w: Float, h: Float) {
+        if (width != w || height != h) {
+            width = w
+            height = h
+            updateVertexBuffer()
         }
     }
 
-    fun setWidth(value: Float) {
+    open fun setWidth(value: Float) {
         if (width != value) {
             width = value
-            onUpdateVertexBuffer()
+            updateVertexBuffer()
         }
     }
 
@@ -202,10 +201,10 @@ open class ExtendedEntity(
         return width
     }
 
-    fun setHeight(value: Float) {
+    open fun setHeight(value: Float) {
         if (height != value) {
             height = value
-            onUpdateVertexBuffer()
+            updateVertexBuffer()
         }
     }
 

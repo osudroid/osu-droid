@@ -4,6 +4,7 @@ import android.graphics.PointF;
 
 
 import com.reco1l.osu.Execution;
+import com.reco1l.osu.graphics.AnimatedSprite;
 import com.reco1l.osu.graphics.ExtendedSprite;
 import com.reco1l.osu.graphics.Modifiers;
 import com.reco1l.osu.graphics.UniversalModifier;
@@ -20,7 +21,6 @@ import java.util.List;
 
 import ru.nsu.ccfit.zuev.osu.RGBColor;
 import ru.nsu.ccfit.zuev.osu.ResourceManager;
-import ru.nsu.ccfit.zuev.osu.helper.AnimSprite;
 import ru.nsu.ccfit.zuev.osu.helper.ModifierListener;
 
 public class GameEffect extends GameObject {
@@ -41,8 +41,9 @@ public class GameEffect extends GameObject {
                     loadedScoreBarTextures.add(texname + "-" + i);
                 else break;
             }
-            AnimSprite hit = new AnimSprite(0, 0, 60, loadedScoreBarTextures.toArray(new String[0]));
-            hit.setLoopType(AnimSprite.LoopType.STOP);
+            var hit = new AnimatedSprite(loadedScoreBarTextures.toArray(new String[0]));
+            hit.setFps(60);
+            hit.setLoop(false);
             this.hit = hit;
         } else {
             hit = new ExtendedSprite();
@@ -60,10 +61,10 @@ public class GameEffect extends GameObject {
 
     public void init(final Scene scene, final PointF pos, final float scale,
                      final UniversalModifier... entityModifiers) {
-        if (hit instanceof AnimSprite) {
-            ((AnimSprite) hit).setAnimTime(0);
+        if (hit instanceof AnimatedSprite animatedHit) {
+            animatedHit.setElapsedSec(0f);
         }
-        hit.setPosition(pos.x - hit.getTextureRegion().getWidth() / 2f, pos.y - hit.getTextureRegion().getHeight() / 2f);
+        hit.setPosition(pos.x - hit.getWidth() / 2f, pos.y - hit.getHeight() / 2f);
         hit.registerEntityModifier(Modifiers.parallel(new ModifierListener() {
             @Override
             public void onModifierFinished(IModifier<IEntity> pModifier, IEntity pItem) {
