@@ -91,6 +91,7 @@ were reduced by 20% and clap hitsounds' volume were reduced by 15%
 
 # Bug fixes
 
+- Fixed beatmapsets potentially getting duplicated after import operation
 - Fixed login fail messages other than "Cannot connect to server" not displaying properly
 - Fixed "Show FPS" setting affecting the display of other counters (average offset, unstable rate, and real-time PP counter)
 - Fixed wrong textures being displayed before in-game video plays on devices with Mali GPUs
