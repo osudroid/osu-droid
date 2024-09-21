@@ -9,7 +9,7 @@ Many of menu-related user interfaces in the game have been redesigned to bring a
 The following menus have been redesigned:
 
 - Options menu
-- Mod customization menu 9that pops up when "Settings" in the mod menu)
+- Mod customization menu (that pops up when "Settings" in the mod menu is pressed)
 - Beatmap management dialog
 - Score management dialog
 - Game exit
