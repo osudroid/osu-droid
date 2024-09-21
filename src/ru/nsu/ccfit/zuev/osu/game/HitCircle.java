@@ -145,6 +145,9 @@ public class HitCircle extends GameObject {
     }
 
     private void removeFromScene() {
+        if (scene == null) {
+            return;
+        }
 
         circlePiece.clearEntityModifiers();
         approachCircle.clearEntityModifiers();
