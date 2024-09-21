@@ -284,12 +284,12 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
         }
 
         // storyboard sprite will draw background and dimRectangle if needed, so skip here
-        if (storyboardSprite == null || !storyboardSprite.isStoryboardAvailable()) {
-            if (bgSprite == null && beatmap.events.backgroundFilename != null) {
-                var tex = Config.isSafeBeatmapBg() ?
-                        ResourceManager.getInstance().getTexture("menu-background")
-                        :
-                        ResourceManager.getInstance().getTextureIfLoaded("::background");
+        if (!Config.isEnableStoryboard() || storyboardSprite == null || !storyboardSprite.isStoryboardAvailable()) {
+            if (bgSprite == null) {
+
+                var tex = Config.isSafeBeatmapBg() || beatmap.events.backgroundFilename == null
+                        ? ResourceManager.getInstance().getTexture("menu-background")
+                        : ResourceManager.getInstance().getTextureIfLoaded("::background");
 
                 if (tex != null)
                     bgSprite = new Sprite(0, 0, tex);
