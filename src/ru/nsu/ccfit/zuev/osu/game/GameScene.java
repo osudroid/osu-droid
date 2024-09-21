@@ -2319,79 +2319,61 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
         );
     }
 
+    private void applyBurstEffect(GameEffect effect, PointF pos) {
+
+        // Reference: https://github.com/ppy/osu/blob/c5893f245ce7a89d1900dbb620390823702481fe/osu.Game.Rulesets.Osu/Skinning/Legacy/LegacyMainCirclePiece.cs#L152-L174
+
+        var fadeDuration = 0.24f / GameHelper.getSpeedMultiplier();
+
+        effect.init(mgScene, pos, scale,
+            Modifiers.scale(fadeDuration, scale, scale * 1.4f, null, EaseQuadOut.getInstance()),
+            Modifiers.fadeOut(fadeDuration, null, EaseQuadOut.getInstance())
+        );
+    }
+
     private void createBurstEffect(final PointF pos, final RGBColor color) {
         if (!Config.isBurstEffects() || GameHelper.isHidden())
             return;
 
-        final float speedMultiplier = GameHelper.getSpeedMultiplier();
-
         final GameEffect burst1 = GameObjectPool.getInstance().getEffect("hitcircle");
-        burst1.init(mgScene, pos, scale,
-                Modifiers.scale(0.25f / speedMultiplier, scale, 1.5f * scale),
-                Modifiers.alpha(0.25f / speedMultiplier, 0.8f, 0)
-        );
+        applyBurstEffect(burst1, pos);
         burst1.setColor(color);
 
         final GameEffect burst2 = GameObjectPool.getInstance().getEffect("hitcircleoverlay");
-        burst2.init(mgScene, pos, scale,
-                Modifiers.scale(0.25f / speedMultiplier, scale, 1.5f * scale),
-                Modifiers.alpha(0.25f / speedMultiplier, 0.8f, 0)
-        );
+        applyBurstEffect(burst2, pos);
     }
 
     private void createBurstEffectSliderStart(final PointF pos, final RGBColor color) {
         if (!Config.isBurstEffects() || GameHelper.isHidden())
             return;
 
-        final float speedMultiplier = GameHelper.getSpeedMultiplier();
-
         final GameEffect burst1 = GameObjectPool.getInstance().getEffect("sliderstartcircle");
-        burst1.init(mgScene, pos, scale,
-                Modifiers.scale(0.25f / speedMultiplier, scale, 1.5f * scale),
-                Modifiers.alpha(0.25f / speedMultiplier, 0.8f, 0)
-        );
+        applyBurstEffect(burst1, pos);
         burst1.setColor(color);
 
         final GameEffect burst2 = GameObjectPool.getInstance().getEffect("sliderstartcircleoverlay");
-        burst2.init(mgScene, pos, scale,
-                Modifiers.scale(0.25f / speedMultiplier, scale, 1.5f * scale),
-                Modifiers.alpha(0.25f / speedMultiplier, 0.8f, 0)
-        );
+        applyBurstEffect(burst2, pos);
     }
 
     private void createBurstEffectSliderEnd(final PointF pos, final RGBColor color) {
         if (!Config.isBurstEffects() || GameHelper.isHidden())
             return;
 
-        final float speedMultiplier = GameHelper.getSpeedMultiplier();
-
         final GameEffect burst1 = GameObjectPool.getInstance().getEffect("sliderendcircle");
-        burst1.init(mgScene, pos, scale,
-                Modifiers.scale(0.25f / speedMultiplier, scale, 1.5f * scale),
-                Modifiers.alpha(0.25f / speedMultiplier, 0.8f, 0)
-        );
+        applyBurstEffect(burst1, pos);
         burst1.setColor(color);
 
         final GameEffect burst2 = GameObjectPool.getInstance().getEffect("sliderendcircleoverlay");
-        burst2.init(mgScene, pos, scale,
-                Modifiers.scale(0.25f / speedMultiplier, scale, 1.5f * scale),
-                Modifiers.alpha(0.25f / speedMultiplier, 0.8f, 0)
-        );
+        applyBurstEffect(burst2, pos);
     }
 
     private void createBurstEffectSliderReverse(final PointF pos, float ang, final RGBColor color) {
         if (!Config.isBurstEffects() || GameHelper.isHidden())
             return;
 
-        final float speedMultiplier = GameHelper.getSpeedMultiplier();
-
         final GameEffect burst1 = GameObjectPool.getInstance().getEffect("reversearrow");
         burst1.hit.setRotation(ang);
-        burst1.init(mgScene, pos, scale,
-                Modifiers.scale(0.25f / speedMultiplier, scale, 1.5f * scale),
-                Modifiers.alpha(0.25f / speedMultiplier, 0.8f, 0)
-        );
-
+        applyBurstEffect(burst1, pos);
     }
 
     public int getCursorsCount() {
