@@ -1535,12 +1535,12 @@ public class SongMenu implements IUpdateHandler, MenuItemListener,
         var cachedStatus = mapStatuses.get(md5);
 
         if (!forceUpdate && cachedStatus != null) {
-            scoringSwitcher.setTextureRegion(ResourceManager.getInstance().getTextureIfLoaded(switch (cachedStatus) {
-                case ranked -> "selection-ranked";
-                case approved -> "selection-approved";
-                case loved -> "selection-loved";
-                default -> "selection-question";
-            }));
+            scoringSwitcher.setTextureRegion(ResourceManager.getInstance().getTextureIfLoaded(
+                "selection-" + switch (cachedStatus) {
+                    case ranked, approved, loved -> cachedStatus.name().toLowerCase();
+                    default -> "question";
+                }
+            ));
             return;
         }
 
@@ -1556,12 +1556,12 @@ public class SongMenu implements IUpdateHandler, MenuItemListener,
 
                 mapStatuses.put(md5, status);
 
-                scoringSwitcher.setTextureRegion(ResourceManager.getInstance().getTextureIfLoaded(switch (status) {
-                    case ranked -> "selection-ranked";
-                    case approved -> "selection-approved";
-                    case loved -> "selection-loved";
-                    default -> "selection-question";
-                }));
+                scoringSwitcher.setTextureRegion(ResourceManager.getInstance().getTextureIfLoaded(
+                    "selection-" + switch (status) {
+                        case ranked, approved, loved -> status.name().toLowerCase();
+                        default -> "question";
+                    }
+                ));
             } catch (OnlineManagerException e) {
                 Debug.e("Cannot get beatmap status: " + e.getMessage(), e);
 
