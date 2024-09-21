@@ -145,9 +145,6 @@ public class HitCircle extends GameObject {
     }
 
     private void removeFromScene() {
-        if (scene == null) {
-            return;
-        }
 
         circlePiece.clearEntityModifiers();
         approachCircle.clearEntityModifiers();
@@ -206,6 +203,7 @@ public class HitCircle extends GameObject {
     public void update(final float dt) {
         // PassedTime < 0 means circle logic is over
         if (passedTime < 0) {
+            removeFromScene();
             return;
         }
         // If we have clicked circle

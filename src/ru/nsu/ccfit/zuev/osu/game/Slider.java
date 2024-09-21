@@ -442,9 +442,6 @@ public class Slider extends GameObject {
     }
 
     private void removeFromScene() {
-        if (scene == null) {
-            return;
-        }
 
         if (GameHelper.isHidden()) {
             sliderBody.detachSelf();
