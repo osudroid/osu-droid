@@ -84,6 +84,7 @@ During gameplay, background difficulty calculation is paused to prevent performa
 - More significant performance improvements in gameplay than version 1.7.2
 - Separated average offset and unstable rate displays in gameplay into separate settings
 - Changed hit lighting effect animation to match osu!stable
+- Changed hit judgement effect animation to match osu!stable
 - Changed combo counter animation to match osu!stable
 - Miss hit judgement effect only plays in a slider's tail rather than its head and tail
 
