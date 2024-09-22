@@ -12,6 +12,7 @@ import ru.nsu.ccfit.zuev.osu.Config;
 import ru.nsu.ccfit.zuev.osu.RGBColor;
 import ru.nsu.ccfit.zuev.osu.ResourceManager;
 import ru.nsu.ccfit.zuev.osu.Utils;
+import ru.nsu.ccfit.zuev.osu.menu.ModMenu;
 import ru.nsu.ccfit.zuev.osu.scoring.ResultType;
 import ru.nsu.ccfit.zuev.skins.OsuSkin;
 
@@ -44,16 +45,25 @@ public class HitCircle extends GameObject {
                      final com.rian.osu.beatmap.hitobject.HitCircle beatmapCircle, final float secPassed,
                      final RGBColor comboColor) {
         // Storing parameters into fields
-        this.replayObjectData = null;
+        replayObjectData = null;
         this.beatmapCircle = beatmapCircle;
 
         var stackedPosition = beatmapCircle.getGameplayStackedPosition();
         position.set(stackedPosition.x, stackedPosition.y);
 
-        this.endsCombo = beatmapCircle.isLastInCombo();
+        endsCombo = beatmapCircle.isLastInCombo();
         this.listener = listener;
-        this.scene = pScene;
-        this.timePreempt = (float) beatmapCircle.timePreempt / 1000;
+        scene = pScene;
+        timePreempt = (float) beatmapCircle.timePreempt / 1000;
+
+        // Cancel the effect of speed multiplier on force AR.
+        boolean isCustomAR = ModMenu.getInstance().isCustomAR();
+        float speedMultiplier = GameHelper.getSpeedMultiplier();
+
+        if (isCustomAR) {
+            timePreempt *= speedMultiplier;
+        }
+
         passedTime = secPassed - ((float) beatmapCircle.startTime / 1000 - timePreempt);
         startHit = false;
         kiai = GameHelper.isKiai();
@@ -65,6 +75,11 @@ public class HitCircle extends GameObject {
         radiusSquared *= radiusSquared;
 
         float actualFadeInDuration = (float) beatmapCircle.timeFadeIn / 1000f;
+
+        if (isCustomAR) {
+            actualFadeInDuration *= speedMultiplier;
+        }
+
         float remainingFadeInDuration = Math.max(0, actualFadeInDuration - passedTime);
         float fadeInProgress = 1 - remainingFadeInDuration / actualFadeInDuration;
 

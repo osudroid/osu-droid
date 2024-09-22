@@ -30,6 +30,7 @@ import ru.nsu.ccfit.zuev.osu.Utils;
 import ru.nsu.ccfit.zuev.osu.game.GameHelper.SliderPath;
 import ru.nsu.ccfit.zuev.osu.helper.DifficultyHelper;
 import ru.nsu.ccfit.zuev.osu.helper.ModifierListener;
+import ru.nsu.ccfit.zuev.osu.menu.ModMenu;
 import ru.nsu.ccfit.zuev.skins.OsuSkin;
 import ru.nsu.ccfit.zuev.skins.SkinManager;
 
@@ -45,6 +46,7 @@ public class Slider extends GameObject {
     private GameObjectListener listener;
     private SliderPath path;
     private double passedTime;
+    private float timePreempt;
     private int completedSpanCount;
     private boolean reverse;
     private boolean slidingSamplesPlaying;
@@ -225,11 +227,23 @@ public class Slider extends GameObject {
             scene.attachChild(startArrow, 0);
         }
 
-        float realTimePreempt = (float) beatmapSlider.timePreempt / 1000;
+        timePreempt = (float) beatmapSlider.timePreempt / 1000;
         float fadeInDuration = (float) beatmapSlider.timeFadeIn / 1000;
+        boolean isCustomAR = ModMenu.getInstance().isCustomAR();
+        float speedMultiplier = GameHelper.getSpeedMultiplier();
+
+        // Cancel the effect of speed multiplier on force AR.
+        if (isCustomAR) {
+            timePreempt *= speedMultiplier;
+            fadeInDuration *= speedMultiplier;
+        }
 
         if (GameHelper.isHidden()) {
-            float fadeOutDuration = realTimePreempt * (float) ModHidden.FADE_OUT_DURATION_MULTIPLIER;
+            float fadeOutDuration = timePreempt * (float) ModHidden.FADE_OUT_DURATION_MULTIPLIER;
+
+            if (isCustomAR) {
+                fadeOutDuration *= speedMultiplier;
+            }
 
             headCirclePiece.registerEntityModifier(Modifiers.sequence(
                 Modifiers.fadeIn(fadeInDuration),
@@ -247,8 +261,8 @@ public class Slider extends GameObject {
         }
 
         if (approachCircle.isVisible()) {
-            approachCircle.registerEntityModifier(Modifiers.alpha(Math.min(fadeInDuration * 2, realTimePreempt), 0, 0.9f));
-            approachCircle.registerEntityModifier(Modifiers.scale(realTimePreempt, scale * 3, scale));
+            approachCircle.registerEntityModifier(Modifiers.alpha(Math.min(fadeInDuration * 2, timePreempt), 0, 0.9f));
+            approachCircle.registerEntityModifier(Modifiers.scale(timePreempt, scale * 3, scale));
         }
 
         scene.attachChild(headCirclePiece, 0);
@@ -318,7 +332,7 @@ public class Slider extends GameObject {
         if (Config.isDimHitObjects()) {
 
             // Source: https://github.com/peppy/osu/blob/60271fb0f7e091afb754455f93180094c63fc3fb/osu.Game.Rulesets.Osu/Objects/Drawables/DrawableOsuHitObject.cs#L101
-            var dimDelaySec = (float) beatmapSlider.timePreempt / 1000f - objectHittableRange;
+            var dimDelaySec = timePreempt - objectHittableRange;
             var colorDim = 195f / 255f;
 
             headCirclePiece.setColor(colorDim, colorDim, colorDim);
@@ -752,7 +766,6 @@ public class Slider extends GameObject {
                 approachCircle.setAlpha(0);
             }
 
-            float timePreempt = (float) beatmapSlider.timePreempt / 1000;
             float percentage = (float) (1 + passedTime / timePreempt);
 
             if (percentage <= 0.5f) {
@@ -983,7 +996,7 @@ public class Slider extends GameObject {
 
         if (GameHelper.isHidden()) {
             // New duration from completed fade in to end (before fading out)
-            float fadeOutDuration = (float) (beatmapSlider.getDuration() + beatmapSlider.timePreempt) / 1000f - fadeInDuration;
+            float fadeOutDuration = (float) beatmapSlider.getDuration() / 1000 + timePreempt - fadeInDuration;
 
             sliderBody.registerEntityModifier(Modifiers.sequence(
                 Modifiers.fadeIn(fadeInDuration),

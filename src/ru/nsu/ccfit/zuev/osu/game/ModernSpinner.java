@@ -16,6 +16,7 @@ import ru.nsu.ccfit.zuev.osu.Constants;
 import ru.nsu.ccfit.zuev.osu.ResourceManager;
 import ru.nsu.ccfit.zuev.osu.Utils;
 import ru.nsu.ccfit.zuev.osu.helper.ModifierListener;
+import ru.nsu.ccfit.zuev.osu.menu.ModMenu;
 import ru.nsu.ccfit.zuev.osu.scoring.ScoreNumber;
 import ru.nsu.ccfit.zuev.osu.scoring.StatisticV2;
 
@@ -123,6 +124,10 @@ public class ModernSpinner extends Spinner {
         scene.attachChild(middle2);
 
         float timePreempt = (float) beatmapSpinner.timePreempt / 1000f;
+
+        if (ModMenu.getInstance().isCustomAR()) {
+            timePreempt *= GameHelper.getSpeedMultiplier();
+        }
 
         top.registerEntityModifier(Modifiers.sequence(
             Modifiers.fadeIn(timePreempt, new ModifierListener() {

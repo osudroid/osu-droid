@@ -21,6 +21,7 @@ import ru.nsu.ccfit.zuev.osu.Constants;
 import ru.nsu.ccfit.zuev.osu.ResourceManager;
 import ru.nsu.ccfit.zuev.osu.Utils;
 import ru.nsu.ccfit.zuev.osu.helper.ModifierListener;
+import ru.nsu.ccfit.zuev.osu.menu.ModMenu;
 import ru.nsu.ccfit.zuev.osu.scoring.ScoreNumber;
 import ru.nsu.ccfit.zuev.osu.scoring.StatisticV2;
 
@@ -116,6 +117,11 @@ public class Spinner extends GameObject {
         ResourceManager.getInstance().checkSpinnerTextures();
 
         float timePreempt = (float) beatmapSpinner.timePreempt / 1000f;
+
+        // Cancel the effect of speed multiplier on force AR.
+        if (ModMenu.getInstance().isCustomAR()) {
+            timePreempt *= GameHelper.getSpeedMultiplier();
+        }
 
         background.setAlpha(0);
         background.registerEntityModifier(Modifiers.sequence(
