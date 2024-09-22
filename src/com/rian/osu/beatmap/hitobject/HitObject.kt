@@ -116,7 +116,7 @@ abstract class HitObject(
      * Whether this [HitObject] is the first [HitObject] in the beatmap.
      */
     val isFirstNote
-        get() = comboIndex == 0 && indexInCurrentCombo == 0
+        get() = comboIndex == 1 && indexInCurrentCombo == 0
 
     /**
      * The multiplier used to calculate stack offset.
