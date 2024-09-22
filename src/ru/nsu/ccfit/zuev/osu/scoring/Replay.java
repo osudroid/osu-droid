@@ -25,10 +25,10 @@ import java.util.zip.ZipOutputStream;
 import ru.nsu.ccfit.zuev.osu.Config;
 import ru.nsu.ccfit.zuev.osu.ToastLogger;
 import ru.nsu.ccfit.zuev.osu.Utils;
-import ru.nsu.ccfit.zuev.osu.game.GameHelper;
 import ru.nsu.ccfit.zuev.osu.game.GameScene;
 import ru.nsu.ccfit.zuev.osu.game.cursor.flashlight.FlashLightEntity;
 import ru.nsu.ccfit.zuev.osu.game.mods.GameMod;
+import ru.nsu.ccfit.zuev.osu.menu.ModMenu;
 import ru.nsu.ccfit.zuev.osuplus.R;
 
 public class Replay {
@@ -452,6 +452,7 @@ public class Replay {
 
         @NonNull
         public static MoveArray readFrom(@NonNull ObjectInputStream is, Replay replay) throws IOException {
+            boolean isHardRock = ModMenu.getInstance().getMod().contains(GameMod.MOD_HARDROCK);
             int size = is.readInt();
             MoveArray array = new MoveArray(size);
             array.size = size;
@@ -468,7 +469,6 @@ public class Replay {
                             baseX / Config.getTextureQuality(),
                             baseY / Config.getTextureQuality()
                     );
-                    boolean isHardRock = GameHelper.isHardrock();
                     PointF realPoint = replay.replayVersion > 1 ?
                         Utils.trackToRealCoords(gamePoint, isHardRock) :
                         Utils.trackToRealCoords(
