@@ -64,8 +64,8 @@ public class HitCircle extends GameObject {
         radiusSquared = (float) beatmapCircle.getGameplayRadius();
         radiusSquared *= radiusSquared;
 
-        float actualFadeInDuration = (float) beatmapCircle.timeFadeIn / 1000 / GameHelper.getSpeedMultiplier();
-        float remainingFadeInDuration = Math.max(0, actualFadeInDuration - passedTime / GameHelper.getSpeedMultiplier());
+        float actualFadeInDuration = (float) beatmapCircle.timeFadeIn / 1000f;
+        float remainingFadeInDuration = Math.max(0, actualFadeInDuration - passedTime);
         float fadeInProgress = 1 - remainingFadeInDuration / actualFadeInDuration;
 
         // Initializing sprites
@@ -92,10 +92,10 @@ public class HitCircle extends GameObject {
 
 
         if (GameHelper.isHidden()) {
-            float actualFadeOutDuration = timePreempt * (float) ModHidden.FADE_OUT_DURATION_MULTIPLIER / GameHelper.getSpeedMultiplier();
+            float actualFadeOutDuration = timePreempt * (float) ModHidden.FADE_OUT_DURATION_MULTIPLIER;
             float remainingFadeOutDuration = Math.min(
                 actualFadeOutDuration,
-                Math.max(0, actualFadeOutDuration + remainingFadeInDuration - passedTime / GameHelper.getSpeedMultiplier())
+                Math.max(0, actualFadeOutDuration + remainingFadeInDuration - passedTime)
             );
             float fadeOutProgress = remainingFadeOutDuration / actualFadeOutDuration;
 
@@ -112,26 +112,26 @@ public class HitCircle extends GameObject {
                 Modifiers.alpha(
                     Math.min(
                         Math.min(actualFadeInDuration * 2, remainingFadeInDuration),
-                        timePreempt / GameHelper.getSpeedMultiplier()
+                        timePreempt
                     ),
                     0.9f * fadeInProgress,
                     0.9f
                 )
             );
 
-            approachCircle.registerEntityModifier(Modifiers.scale(Math.max(0, timePreempt - passedTime) / GameHelper.getSpeedMultiplier(), approachCircle.getScaleX(), scale));
+            approachCircle.registerEntityModifier(Modifiers.scale(Math.max(0, timePreempt - passedTime), approachCircle.getScaleX(), scale));
         }
 
         if (Config.isDimHitObjects()) {
 
             // Source: https://github.com/peppy/osu/blob/60271fb0f7e091afb754455f93180094c63fc3fb/osu.Game.Rulesets.Osu/Objects/Drawables/DrawableOsuHitObject.cs#L101
-            var dimDelaySec = (timePreempt - objectHittableRange) / GameHelper.getSpeedMultiplier();
+            var dimDelaySec = timePreempt - objectHittableRange;
             var colorDim = 195f / 255f;
 
             circlePiece.setColor(colorDim, colorDim, colorDim);
             circlePiece.registerEntityModifier(Modifiers.sequence(
                 Modifiers.delay(dimDelaySec),
-                Modifiers.color(0.1f / GameHelper.getSpeedMultiplier(),
+                Modifiers.color(0.1f,
                     circlePiece.getRed(), 1f,
                     circlePiece.getGreen(), 1f,
                     circlePiece.getBlue(), 1f

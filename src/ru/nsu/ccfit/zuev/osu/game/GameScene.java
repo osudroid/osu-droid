@@ -22,6 +22,7 @@ import com.reco1l.osu.graphics.ExtendedSprite;
 import com.reco1l.osu.graphics.Modifiers;
 import com.reco1l.osu.graphics.Origin;
 import com.reco1l.osu.graphics.VideoSprite;
+import com.reco1l.osu.graphics.ExtendedScene;
 import com.reco1l.osu.playfield.ScoreText;
 import com.reco1l.osu.playfield.SliderTickSprite;
 import com.reco1l.osu.ui.BlockAreaFragment;
@@ -115,7 +116,7 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
     private final boolean[] cursorIIsDown = new boolean[CursorCount];
     private final StringBuilder strBuilder = new StringBuilder();
     public String audioFilePath = null;
-    private Scene scene;
+    private ExtendedScene scene;
     private Scene bgScene, mgScene, fgScene;
     private Scene oldScene;
     private Beatmap beatmap;
@@ -234,7 +235,7 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
 
     public GameScene(final Engine engine) {
         this.engine = engine;
-        scene = new Scene();
+        scene = new ExtendedScene();
         bgScene = new Scene();
         fgScene = new Scene();
         mgScene = new Scene();
@@ -415,6 +416,7 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
         GameHelper.setHealthDrain(beatmap.difficulty.hp);
         GameHelper.setObjectTimePreempt(objectTimePreempt);
         GameHelper.setSpeedMultiplier(modMenu.getSpeed());
+        scene.setTimeMultiplier(GameHelper.getSpeedMultiplier());
 
         GlobalManager.getInstance().getSongService().preLoad(audioFilePath, GameHelper.getSpeedMultiplier(),
             GameHelper.getSpeedMultiplier() != 1f &&
@@ -541,7 +543,7 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
     }
 
     public void startGame(final BeatmapInfo beatmapInfo, final String replayFile) {
-        scene = new Scene();
+        scene = new ExtendedScene();
         if (Config.isEnableStoryboard()) {
             if (storyboardSprite == null || storyboardOverlayProxy == null) {
                 storyboardSprite = new StoryboardSprite(Config.getRES_WIDTH(), Config.getRES_HEIGHT());
@@ -621,8 +623,9 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
 
             fgScene.registerUpdateHandler(new FPSCounter() {
                 @Override
-                public void onUpdate(final float pSecondsElapsed) {
-                    super.onUpdate(pSecondsElapsed);
+                public void onUpdate(float pSecondsElapsed) {
+                    // Cancelling the speed multiplier for the FPS counter.
+                    super.onUpdate(pSecondsElapsed / GameHelper.getSpeedMultiplier());
 
                     fpsText.setText(Math.round(getFPS()) + " FPS");
                 }
@@ -887,8 +890,11 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
         if (stat.getMod().contains(GameMod.MOD_AUTO) || replaying) {
             playname = replaying ? GlobalManager.getInstance().getScoring().getReplayStat().getPlayerName() : "osu!";
             replayText.setText("Watching " + playname + " play " + beatmap.metadata.artist + " - " + beatmap.metadata.title + " [" + beatmap.metadata.version + "]");
-            replayText.registerEntityModifier(new LoopEntityModifier(new MoveXModifier(40,
-                    Config.getRES_WIDTH() + 5, -replayText.getWidth() - 5)));
+
+            // We're cancelling the speed multiplier here because we don't want the replay text to move too fast or slow.
+            var translationDuration = 40f * GameHelper.getSpeedMultiplier();
+
+            replayText.registerEntityModifier(new LoopEntityModifier(new MoveXModifier(translationDuration, Config.getRES_WIDTH() + 5, -replayText.getWidth() - 5)));
             replayText.setVisible(!Config.isHideReplayMarquee());
         } else if (Multiplayer.room != null && Multiplayer.room.isTeamVersus()) {
 
@@ -945,7 +951,7 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
     public void onUpdate(final float pSecondsElapsed) {
         previousFrameTime = SystemClock.uptimeMillis();
 
-        float dt = pSecondsElapsed * GameHelper.getSpeedMultiplier();
+        float dt = pSecondsElapsed;
         if (GlobalManager.getInstance().getSongService().getStatus() == Status.PLAYING) {
             //处理时间差过于庞大的情况
             final float offset = totalOffset / 1000f;
@@ -1365,7 +1371,7 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
         }
 
         if (shouldBePunished || (objects.isEmpty() && activeObjects.isEmpty() && leadOut > 2)) {
-            scene = new Scene();
+            scene = new ExtendedScene();
             SkinManager.setSkinEnabled(false);
             GameObjectPool.getInstance().purge();
             passiveObjects.clear();
@@ -1617,7 +1623,7 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
                 camera.setCenterDirect((float) Config.getRES_WIDTH() / 2, (float) Config.getRES_HEIGHT() / 2);
             }
         }
-        scene = new Scene();
+        scene = new ExtendedScene();
 
         if (Multiplayer.isMultiplayer)
         {
@@ -1868,7 +1874,6 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
 
         final PointF pos = new PointF((float) Config.getRES_WIDTH() / 2,
                 (float) Config.getRES_HEIGHT() / 2);
-        final float speedMultiplier = GameHelper.getSpeedMultiplier();
 
         if (score == 0) {
             final GameEffect effect = GameObjectPool.getInstance().getEffect(
@@ -1878,9 +1883,9 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
                     pos,
                     scale,
                     Modifiers.sequence(
-                        Modifiers.fadeIn(0.15f / speedMultiplier),
-                        Modifiers.delay(0.35f / speedMultiplier),
-                        Modifiers.fadeOut(0.25f / speedMultiplier)
+                        Modifiers.fadeIn(0.15f),
+                        Modifiers.delay(0.35f),
+                        Modifiers.fadeOut(0.25f)
                     )
             );
             registerHit(id, 0, endCombo);
@@ -2239,13 +2244,12 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
     private void createHitEffect(final PointF pos, final String name, RGBColor color) {
 
         var effect = GameObjectPool.getInstance().getEffect(name);
-        var speedMultiplier = GameHelper.getSpeedMultiplier();
 
         // Reference https://github.com/ppy/osu/blob/ebf637bd3c33f1c886f6bfc81aa9ea2132c9e0d2/osu.Game/Skinning/LegacyJudgementPieceOld.cs
 
-        var fadeInLength = 0.12f / speedMultiplier;
-        var fadeOutLength = 0.6f / speedMultiplier;
-        var fadeOutDelay = 0.5f / speedMultiplier;
+        var fadeInLength = 0.12f;
+        var fadeOutLength = 0.6f;
+        var fadeOutDelay = 0.5f;
 
         var fadeSequence = Modifiers.sequence(
             Modifiers.fadeIn(fadeInLength),
@@ -2262,7 +2266,7 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
                 pos,
                 scale * 1.6f,
                 fadeSequence,
-                Modifiers.scale(0.1f / speedMultiplier, scale * 1.6f, scale, null, EaseQuadIn.getInstance()),
+                Modifiers.scale(0.1f, scale * 1.6f, scale, null, EaseQuadIn.getInstance()),
                 Modifiers.translateY(fadeOutDelay + fadeOutLength, -5f, 80f, null, EaseQuadIn.getInstance()),
                 Modifiers.sequence(
                     Modifiers.rotation(fadeInLength, 0, rotation),
@@ -2284,11 +2288,11 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
                 bgScene,
                 pos,
                 scale * 0.8f,
-                Modifiers.scale(0.6f / speedMultiplier, scale * 0.8f, scale * 1.2f, null, EaseQuadOut.getInstance()),
+                Modifiers.scale(0.6f, scale * 0.8f, scale * 1.2f, null, EaseQuadOut.getInstance()),
                 Modifiers.sequence(
-                    Modifiers.fadeIn(0.2f / speedMultiplier),
-                    Modifiers.delay(0.2f / speedMultiplier),
-                    Modifiers.fadeOut(1f / speedMultiplier)
+                    Modifiers.fadeIn(0.2f),
+                    Modifiers.delay(0.2f),
+                    Modifiers.fadeOut(1f)
                 )
             );
         }
@@ -2315,7 +2319,7 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
 
         // Reference: https://github.com/ppy/osu/blob/c5893f245ce7a89d1900dbb620390823702481fe/osu.Game.Rulesets.Osu/Skinning/Legacy/LegacyMainCirclePiece.cs#L152-L174
 
-        var fadeDuration = 0.24f / GameHelper.getSpeedMultiplier();
+        var fadeDuration = 0.24f;
 
         effect.init(mgScene, pos, scale,
             Modifiers.scale(fadeDuration, scale, scale * 1.4f, null, EaseQuadOut.getInstance()),
