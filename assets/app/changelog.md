@@ -111,3 +111,4 @@ were reduced by 20% and clap hitsounds' volume were reduced by 15%
 - Fixed modern spinners being able to be spun before the start time of the spinner, giving more score than classical spinners
 - Fixed modern spinners not auto-completing like classical spinners when its duration is under 50ms
 - Fixed a slider's length potentially falling short from its expected length
+- Fixed force OD not scaling on speed multiplier in song selection menu
