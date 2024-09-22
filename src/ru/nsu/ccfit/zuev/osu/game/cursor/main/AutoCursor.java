@@ -68,8 +68,8 @@ public class AutoCursor extends CursorEntity implements ISliderListener {
             return;
         }
 
-        float movePositionX = object.getPos().x;
-        float movePositionY = object.getPos().y;
+        float movePositionX = object.getPosition().x;
+        float movePositionY = object.getPosition().y;
         float deltaT = object.getHitTime() - secPassed;
 
         if (object instanceof Spinner) {

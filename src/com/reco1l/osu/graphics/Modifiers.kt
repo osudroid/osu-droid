@@ -190,7 +190,6 @@ class UniversalModifier @JvmOverloads constructor(private val pool: Pool<Univers
         this.easeFunction = easeFunction
     }
 
-
     @JvmOverloads
     constructor(type: ModifierType, duration: Float, values: FloatArray, listener: IModifierListener<IEntity>? = null, easeFunction: IEaseFunction = DefaultEaseFunction) : this(null) {
         this.type = type
@@ -337,6 +336,7 @@ class UniversalModifier @JvmOverloads constructor(private val pool: Pool<Univers
             usedSec = deltaSec - remainingSec
 
         } else {
+            usedSec = min(duration - elapsedSec, deltaSec)
 
             val percentage = easeFunction.getPercentage(elapsedSec + usedSec, duration)
 
@@ -385,9 +385,6 @@ class UniversalModifier @JvmOverloads constructor(private val pool: Pool<Univers
 
                 else -> Unit
             }
-
-            usedSec = min(duration - elapsedSec, deltaSec)
-
         }
 
         elapsedSec += usedSec

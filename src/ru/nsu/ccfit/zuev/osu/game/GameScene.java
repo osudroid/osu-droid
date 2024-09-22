@@ -284,12 +284,12 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
         }
 
         // storyboard sprite will draw background and dimRectangle if needed, so skip here
-        if (storyboardSprite == null || !storyboardSprite.isStoryboardAvailable()) {
-            if (bgSprite == null && beatmap.events.backgroundFilename != null) {
-                var tex = Config.isSafeBeatmapBg() ?
-                        ResourceManager.getInstance().getTexture("menu-background")
-                        :
-                        ResourceManager.getInstance().getTextureIfLoaded("::background");
+        if (!Config.isEnableStoryboard() || storyboardSprite == null || !storyboardSprite.isStoryboardAvailable()) {
+            if (bgSprite == null) {
+
+                var tex = Config.isSafeBeatmapBg() || beatmap.events.backgroundFilename == null
+                        ? ResourceManager.getInstance().getTexture("menu-background")
+                        : ResourceManager.getInstance().getTextureIfLoaded("::background");
 
                 if (tex != null)
                     bgSprite = new Sprite(0, 0, tex);
@@ -1296,9 +1296,7 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
 
                 if (nextObj != null && !obj.isLastInCombo()) {
                     final FollowTrack track = GameObjectPool.getInstance().getTrack();
-                    track.init(this, bgScene, obj.getGameplayStackedPosition().toPointF(),
-                        nextObj.getGameplayStackedPosition().toPointF(),
-                        (float) nextObj.startTime / 1000 - secPassed, objectTimePreempt, scale);
+                    track.init(this, bgScene, obj.getGameplayStackedPosition(), nextObj.getGameplayStackedPosition(), (float) nextObj.startTime / 1000 - secPassed, objectTimePreempt, scale);
                 }
 
                 if (GameHelper.isAuto()) {
@@ -1339,10 +1337,7 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
 
                 if (nextObj != null && !obj.isLastInCombo()) {
                     final FollowTrack track = GameObjectPool.getInstance().getTrack();
-
-                    track.init(this, bgScene, parsedSlider.getGameplayStackedEndPosition().toPointF(),
-                        nextObj.getGameplayStackedPosition().toPointF(),
-                        (float) nextObj.startTime / 1000 - secPassed, objectTimePreempt, scale);
+                    track.init(this, bgScene, parsedSlider.getGameplayStackedEndPosition(), nextObj.getGameplayStackedPosition(), (float) nextObj.startTime / 1000 - secPassed, objectTimePreempt, scale);
                 }
                 if (GameHelper.isAuto()) {
                     slider.setAutoPlay();

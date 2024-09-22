@@ -5,15 +5,16 @@ import android.graphics.PointF;
 import com.reco1l.framework.Pool;
 import com.reco1l.osu.graphics.AnimatedSprite;
 import com.reco1l.osu.graphics.ExtendedSprite;
+import com.rian.osu.math.Vector2;
 
 import org.anddev.andengine.entity.scene.Scene;
 import org.anddev.andengine.opengl.texture.region.TextureRegion;
+import org.anddev.andengine.util.MathUtils;
 
 import java.util.ArrayList;
 
 import ru.nsu.ccfit.zuev.osu.ResourceManager;
 import ru.nsu.ccfit.zuev.skins.SkinManager;
-import ru.nsu.ccfit.zuev.osu.Utils;
 
 public class FollowTrack extends GameObject {
 
@@ -42,14 +43,14 @@ public class FollowTrack extends GameObject {
     }
 
     public void init(final GameObjectListener listener, final Scene scene,
-                     final PointF start, final PointF end, final float time,
+                     final Vector2 start, final Vector2 end, final float time,
                      final float approachtime, final float scale) {
         this.listener = listener;
         this.approach = approachtime;
         timeLeft = time;
         this.time = 0;
 
-        final float dist = Utils.distance(start, end);
+        final float dist = MathUtils.distance(start.x, start.y, end.x, end.y);
         final float angle = (float) Math.atan2(end.y - start.y, end.x - start.x);
         TextureRegion region = ResourceManager.getInstance().getTexture(FRAME_COUNT > 1 ? "followpoint-0" : "followpoint");
         if (region == null) {

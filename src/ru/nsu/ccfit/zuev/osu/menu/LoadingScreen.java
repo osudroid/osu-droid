@@ -33,7 +33,6 @@ public class LoadingScreen implements IUpdateHandler {
         }
 
         scene = new LoadingScene();
-        scene.registerEntityModifier(new FadeOutModifier(0.4f));
 
         final TextureRegion tex = ResourceManager.getInstance().getTexture("menu-background");
         if (tex != null) {

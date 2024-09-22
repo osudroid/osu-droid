@@ -341,6 +341,8 @@ public class SongMenu implements IUpdateHandler, MenuItemListener,
                 if (layoutBackButton != null) {
                     scaleWhenHold = layoutBackButton.property.optBoolean("scaleWhenHold", true);
                 }
+
+                setAdjustSizeWithTexture(false);
             }
 
             @Override
@@ -388,6 +390,7 @@ public class SongMenu implements IUpdateHandler, MenuItemListener,
 
                 {
                     setTextureRegion(ResourceManager.getInstance().getTextureIfLoaded("selection-mods"));
+                    setAdjustSizeWithTexture(false);
                 }
 
                 @Override
@@ -425,6 +428,7 @@ public class SongMenu implements IUpdateHandler, MenuItemListener,
 
             {
                 setTextureRegion(ResourceManager.getInstance().getTextureIfLoaded("selection-options"));
+                setAdjustSizeWithTexture(false);
             }
 
             @Override
@@ -465,6 +469,7 @@ public class SongMenu implements IUpdateHandler, MenuItemListener,
 
             {
                 setTextureRegion(ResourceManager.getInstance().getTextureIfLoaded("selection-random"));
+                setAdjustSizeWithTexture(false);
             }
 
             @Override

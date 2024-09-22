@@ -201,7 +201,7 @@ fun ScoreInfo(json: JSONObject): ScoreInfo {
 @Dao
 interface IScoreInfoDAO {
 
-    @Query("SELECT * FROM ScoreInfo WHERE beatmapSetDirectory = :beatmapSetDirectory AND beatmapFilename = :beatmapFilename")
+    @Query("SELECT * FROM ScoreInfo WHERE beatmapSetDirectory = :beatmapSetDirectory AND beatmapFilename = :beatmapFilename ORDER BY score DESC")
     fun getBeatmapScores(beatmapSetDirectory: String, beatmapFilename: String): List<ScoreInfo>
 
     @Query("SELECT * FROM ScoreInfo WHERE id = :id")
