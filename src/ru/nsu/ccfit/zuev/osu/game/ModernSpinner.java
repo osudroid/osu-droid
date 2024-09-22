@@ -85,7 +85,7 @@ public class ModernSpinner extends Spinner {
         this.beatmapSpinner = beatmapSpinner;
         this.listener = listener;
         this.stat = stat;
-        duration = (float) beatmapSpinner.getDuration() / 1000 / GameHelper.getSpeedMultiplier();
+        duration = (float) beatmapSpinner.getDuration() / 1000f;
         needRotations = rps * duration;
 
         if (duration < 0.05f) {
@@ -122,7 +122,7 @@ public class ModernSpinner extends Spinner {
         scene.attachChild(middle);
         scene.attachChild(middle2);
 
-        float timePreempt = (float) beatmapSpinner.timePreempt / 1000 / GameHelper.getSpeedMultiplier();
+        float timePreempt = (float) beatmapSpinner.timePreempt / 1000f;
 
         top.registerEntityModifier(Modifiers.sequence(
             Modifiers.fadeIn(timePreempt, new ModifierListener() {
@@ -231,11 +231,10 @@ public class ModernSpinner extends Spinner {
                 score++;
                 scene.attachChild(bonusScore);
                 playSpinnerBonusSound();
-                float speedMultiplier = GameHelper.getSpeedMultiplier();
                 glow.registerEntityModifier(
                     Modifiers.sequence(
-                        Modifiers.color(0.1f / speedMultiplier, 0f, 1f, 0.8f, 1f, 1f, 1f),
-                        Modifiers.color(0.1f / speedMultiplier, 1f, 0f, 1f, 0.8f, 1f, 1f)
+                        Modifiers.color(0.1f, 0f, 1f, 0.8f, 1f, 1f, 1f),
+                        Modifiers.color(0.1f, 1f, 0f, 1f, 0.8f, 1f, 1f)
                     )
                 );
                 float rate = 0.375f;

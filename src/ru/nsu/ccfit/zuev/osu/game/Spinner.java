@@ -98,7 +98,7 @@ public class Spinner extends GameObject {
         fullRotations = 0;
         rotations = 0;
         this.scene = scene;
-        this.duration = (float) beatmapSpinner.getDuration() / 1000 / GameHelper.getSpeedMultiplier();
+        this.duration = (float) beatmapSpinner.getDuration() / 1000f;
         this.beatmapSpinner = beatmapSpinner;
         endsCombo = beatmapSpinner.isLastInCombo();
 
@@ -115,7 +115,7 @@ public class Spinner extends GameObject {
 
         ResourceManager.getInstance().checkSpinnerTextures();
 
-        float timePreempt = (float) beatmapSpinner.timePreempt / 1000 / GameHelper.getSpeedMultiplier();
+        float timePreempt = (float) beatmapSpinner.timePreempt / 1000f;
 
         background.setAlpha(0);
         background.registerEntityModifier(Modifiers.sequence(
@@ -293,9 +293,8 @@ public class Spinner extends GameObject {
         if (percentfill > 1 || clear) {
             percentfill = 1;
             if (!clear) {
-                float speedMultiplier = GameHelper.getSpeedMultiplier();
-                clearText.registerEntityModifier(Modifiers.fadeIn(0.25f / speedMultiplier));
-                clearText.registerEntityModifier(Modifiers.scale(0.25f / speedMultiplier, 1.5f, 1));
+                clearText.registerEntityModifier(Modifiers.fadeIn(0.25f));
+                clearText.registerEntityModifier(Modifiers.scale(0.25f, 1.5f, 1));
                 scene.attachChild(clearText);
                 clear = true;
             } else if (Math.abs(rotations) > 1) {
