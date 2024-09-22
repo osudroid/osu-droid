@@ -989,6 +989,11 @@ public class SongMenu implements IUpdateHandler, MenuItemListener,
         }
         beatmapLengthText.setText(binfoStr);
 
+        // Unlike other forced statistics, force OD scales on speed multiplier.
+        if (ModMenu.getInstance().isCustomOD()) {
+            od = ModMenu.getInstance().getCustomOD();
+        }
+
         final StringBuilder dimensionStringBuilder = new StringBuilder();
         if (ModMenu.getInstance().getChangeSpeed() != 1) {
             float speed = ModMenu.getInstance().getSpeed();
@@ -1008,9 +1013,6 @@ public class SongMenu implements IUpdateHandler, MenuItemListener,
 
         if (ModMenu.getInstance().isCustomAR()) {
             ar = ModMenu.getInstance().getCustomAR();
-        }
-        if (ModMenu.getInstance().isCustomOD()) {
-            od = ModMenu.getInstance().getCustomOD();
         }
         if (ModMenu.getInstance().isCustomCS()) {
             cs = ModMenu.getInstance().getCustomCS();
