@@ -46,7 +46,10 @@ public class HitCircle extends GameObject {
         // Storing parameters into fields
         this.replayObjectData = null;
         this.beatmapCircle = beatmapCircle;
-        this.pos = beatmapCircle.getGameplayStackedPosition().toPointF();
+
+        var stackedPosition = beatmapCircle.getGameplayStackedPosition();
+        position.set(stackedPosition.x, stackedPosition.y);
+
         this.endsCombo = beatmapCircle.isLastInCombo();
         this.listener = listener;
         this.scene = pScene;
@@ -69,7 +72,7 @@ public class HitCircle extends GameObject {
         circlePiece.setCircleColor(comboColor.r(), comboColor.g(), comboColor.b());
         circlePiece.setScale(scale);
         circlePiece.setAlpha(fadeInProgress);
-        circlePiece.setPosition(pos.x, pos.y);
+        circlePiece.setPosition(this.position.x, this.position.y);
 
         int comboNum = beatmapCircle.getIndexInCurrentCombo() + 1;
         if (OsuSkin.get().isLimitComboTextLength()) {
@@ -81,7 +84,7 @@ public class HitCircle extends GameObject {
         approachCircle.setColor(comboColor.r(), comboColor.g(), comboColor.b());
         approachCircle.setScale(scale * (3 - 2 * fadeInProgress));
         approachCircle.setAlpha(0.9f * fadeInProgress);
-        approachCircle.setPosition(pos.x, pos.y);
+        approachCircle.setPosition(this.position.x, this.position.y);
 
         if (GameHelper.isHidden()) {
             approachCircle.setVisible(Config.isShowFirstApproachCircle() && beatmapCircle.isFirstNote());
@@ -167,7 +170,7 @@ public class HitCircle extends GameObject {
     private boolean isHit() {
         for (int i = 0, count = listener.getCursorsCount(); i < count; i++) {
 
-            var inPosition = Utils.squaredDistance(pos, listener.getMousePos(i)) <= radiusSquared;
+            var inPosition = Utils.squaredDistance(position, listener.getMousePos(i)) <= radiusSquared;
             if (GameHelper.isRelaxMod() && passedTime - timePreempt >= 0 && inPosition) {
                 return true;
             }
@@ -186,7 +189,7 @@ public class HitCircle extends GameObject {
         // 因为这里是阻塞队列, 所以提前点的地方会影响判断
         for (int i = 0, count = listener.getCursorsCount(); i < count; i++) {
 
-            var inPosition = Utils.squaredDistance(pos, listener.getMousePos(i)) <= radiusSquared;
+            var inPosition = Utils.squaredDistance(position, listener.getMousePos(i)) <= radiusSquared;
             if (GameHelper.isRelaxMod() && passedTime - timePreempt >= 0 && inPosition) {
                 return 0;
             }
@@ -219,7 +222,7 @@ public class HitCircle extends GameObject {
                 listener.registerAccuracy(replayObjectData.accuracy / 1000f);
                 passedTime = -1;
                 // Remove circle and register hit in update thread
-                listener.onCircleHit(id, replayObjectData.accuracy / 1000f, pos,endsCombo, replayObjectData.result, comboColor);
+                listener.onCircleHit(id, replayObjectData.accuracy / 1000f, position,endsCombo, replayObjectData.result, comboColor);
                 removeFromScene();
                 return;
             }
@@ -237,7 +240,7 @@ public class HitCircle extends GameObject {
             // Remove circle and register hit in update thread
             float finalSignAcc = signAcc;
             startHit = true;
-            listener.onCircleHit(id, finalSignAcc, pos, endsCombo, (byte) 0, comboColor);
+            listener.onCircleHit(id, finalSignAcc, position, endsCombo, (byte) 0, comboColor);
             removeFromScene();
             return;
         }
@@ -265,7 +268,7 @@ public class HitCircle extends GameObject {
             playSound();
             passedTime = -1;
             // Remove circle and register hit in update thread
-            listener.onCircleHit(id, 0, pos, endsCombo, ResultType.HIT300.getId(), comboColor);
+            listener.onCircleHit(id, 0, position, endsCombo, ResultType.HIT300.getId(), comboColor);
             removeFromScene();
         } else {
             approachCircle.clearEntityModifiers();
@@ -277,7 +280,7 @@ public class HitCircle extends GameObject {
                 final byte forcedScore = (replayObjectData == null) ? 0 : replayObjectData.result;
 
                 removeFromScene();
-                listener.onCircleHit(id, 10, pos, false, forcedScore, comboColor);
+                listener.onCircleHit(id, 10, position, false, forcedScore, comboColor);
             }
         }
     } // update(float dt)
@@ -297,7 +300,7 @@ public class HitCircle extends GameObject {
             passedTime = -1;
             // Remove circle and register hit in update thread
             float finalSignAcc = signAcc;
-            listener.onCircleHit(id, finalSignAcc, pos, endsCombo, (byte) 0, comboColor);
+            listener.onCircleHit(id, finalSignAcc, position, endsCombo, (byte) 0, comboColor);
             removeFromScene();
         }
     }

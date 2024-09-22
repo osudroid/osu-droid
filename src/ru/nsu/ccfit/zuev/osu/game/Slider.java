@@ -145,7 +145,10 @@ public class Slider extends GameObject {
         this.listener = listener;
         this.scene = scene;
         this.beatmapSlider = beatmapSlider;
-        this.pos = beatmapSlider.getGameplayStackedPosition().toPointF();
+
+        var stackedPosition = beatmapSlider.getGameplayStackedPosition();
+        position.set(stackedPosition.x, stackedPosition.y);
+
         endsCombo = beatmapSlider.isLastInCombo();
         passedTime = secPassed - (float) beatmapSlider.startTime / 1000;
         slidingSamplesPlaying = false;
@@ -180,7 +183,7 @@ public class Slider extends GameObject {
         headCirclePiece.setScale(scale);
         headCirclePiece.setCircleColor(comboColor.r(), comboColor.g(), comboColor.b());
         headCirclePiece.setAlpha(0);
-        headCirclePiece.setPosition(pos.x, pos.y);
+        headCirclePiece.setPosition(this.position.x, this.position.y);
         int comboNum = beatmapSlider.getIndexInCurrentCombo() + 1;
         if (OsuSkin.get().isLimitComboTextLength()) {
             comboNum %= 10;
@@ -191,7 +194,7 @@ public class Slider extends GameObject {
         approachCircle.setColor(comboColor.r(), comboColor.g(), comboColor.b());
         approachCircle.setScale(scale * 3);
         approachCircle.setAlpha(0);
-        approachCircle.setPosition(pos.x, pos.y);
+        approachCircle.setPosition(this.position.x, this.position.y);
 
         if (GameHelper.isHidden()) {
             approachCircle.setVisible(Config.isShowFirstApproachCircle() && beatmapSlider.isFirstNote());
@@ -206,7 +209,7 @@ public class Slider extends GameObject {
         tailCirclePiece.setAlpha(0);
 
         if (Config.isSnakingInSliders()) {
-            tailCirclePiece.setPosition(pos.x, pos.y);
+            tailCirclePiece.setPosition(this.position.x, this.position.y);
         } else {
             tailCirclePiece.setPosition(curveEndPos.x, curveEndPos.y);
         }
@@ -216,8 +219,8 @@ public class Slider extends GameObject {
         if (spanCount > 2) {
             startArrow.setAlpha(0);
             startArrow.setScale(scale);
-            startArrow.setRotation(MathUtils.radToDeg(Utils.direction(pos.x, pos.y, path.getX(1), path.getY(1))));
-            startArrow.setPosition(pos.x, pos.y);
+            startArrow.setRotation(MathUtils.radToDeg(Utils.direction(this.position.x, this.position.y, path.getX(1), path.getY(1))));
+            startArrow.setPosition(this.position.x, this.position.y);
 
             scene.attachChild(startArrow, 0);
         }
@@ -257,7 +260,7 @@ public class Slider extends GameObject {
             endArrow.setRotation(MathUtils.radToDeg(Utils.direction(curveEndPos.x, curveEndPos.y, path.getX(path.pointCount - 2), path.getY(path.pointCount - 2))));
 
             if (Config.isSnakingInSliders()) {
-                endArrow.setPosition(pos.x, pos.y);
+                endArrow.setPosition(this.position.x, this.position.y);
             } else {
                 endArrow.setPosition(curveEndPos.x, curveEndPos.y);
             }
@@ -374,7 +377,7 @@ public class Slider extends GameObject {
 
     private PointF getPositionAt(final float percentage, final boolean updateBallAngle, final boolean updateEndArrowRotation) {
         if (path.pointCount == 0) {
-            tmpPoint.set(pos);
+            tmpPoint.set(position);
             return tmpPoint;
         }
 
@@ -384,15 +387,15 @@ public class Slider extends GameObject {
         } else if (percentage <= 0) {
             if (path.pointCount >= 2) {
                 if (updateBallAngle) {
-                    ballAngle = MathUtils.radToDeg(Utils.direction(path.getX(1), path.getY(1), pos.x, pos.y));
+                    ballAngle = MathUtils.radToDeg(Utils.direction(path.getX(1), path.getY(1), position.x, position.y));
                 }
 
                 if (updateEndArrowRotation) {
-                    endArrow.setRotation(MathUtils.radToDeg(Utils.direction(pos.x, pos.y, path.getX(1), path.getY(1))));
+                    endArrow.setRotation(MathUtils.radToDeg(Utils.direction(position.x, position.y, path.getX(1), path.getY(1))));
                 }
             }
 
-            tmpPoint.set(pos);
+            tmpPoint.set(position);
             return tmpPoint;
         }
 
@@ -525,7 +528,7 @@ public class Slider extends GameObject {
 
             if (stillHasSpan) {
                 listener.onSliderHit(id, 30, null,
-                        reverse ? pos : curveEndPos,
+                        reverse ? position : curveEndPos,
                         false, bodyColor, GameObjectListener.SLIDER_REPEAT);
             }
         } else {
@@ -533,7 +536,7 @@ public class Slider extends GameObject {
 
             if (stillHasSpan) {
                 listener.onSliderHit(id, -1, null,
-                        reverse ? pos : curveEndPos,
+                        reverse ? position : curveEndPos,
                         false, bodyColor, GameObjectListener.SLIDER_REPEAT);
             }
         }
@@ -575,7 +578,7 @@ public class Slider extends GameObject {
             }
 
             ((GameScene) listener).onSliderReverse(
-                    !reverse ? pos : curveEndPos,
+                    !reverse ? position : curveEndPos,
                     reverse ? endArrow.getRotation() : startArrow.getRotation(),
                     bodyColor);
 
@@ -621,9 +624,9 @@ public class Slider extends GameObject {
         // If slider was in reverse mode, we should swap start and end points
         if (reverse) {
             Slider.this.listener.onSliderHit(id, score,
-                    curveEndPos, pos, endsCombo, bodyColor, GameObjectListener.SLIDER_END);
+                    curveEndPos, position, endsCombo, bodyColor, GameObjectListener.SLIDER_END);
         } else {
-            Slider.this.listener.onSliderHit(id, score, pos,
+            Slider.this.listener.onSliderHit(id, score, position,
                     curveEndPos, endsCombo, bodyColor, GameObjectListener.SLIDER_END);
         }
         if (!startHit) {
@@ -664,7 +667,7 @@ public class Slider extends GameObject {
         float radius = Utils.sqr((float) beatmapSlider.getGameplayRadius());
         for (int i = 0, count = listener.getCursorsCount(); i < count; i++) {
 
-            var inPosition = Utils.squaredDistance(pos, listener.getMousePos(i)) <= radius;
+            var inPosition = Utils.squaredDistance(position, listener.getMousePos(i)) <= radius;
             if (GameHelper.isRelaxMod() && passedTime >= 0 && inPosition) {
                 return true;
             }
@@ -694,14 +697,14 @@ public class Slider extends GameObject {
             if (passedTime > GameHelper.getDifficultyHelper().hitWindowFor50(GameHelper.getOverallDifficulty())) {
                 startHit = true;
                 currentNestedObjectIndex++;
-                listener.onSliderHit(id, -1, null, pos, false, bodyColor, GameObjectListener.SLIDER_START);
+                listener.onSliderHit(id, -1, null, position, false, bodyColor, GameObjectListener.SLIDER_START);
                 firstHitAccuracy = (int) (passedTime * 1000);
             } else if (autoPlay && passedTime >= 0) {
                 startHit = true;
                 playCurrentNestedObjectHitSound();
                 currentNestedObjectIndex++;
                 ticksGot++;
-                listener.onSliderHit(id, 30, null, pos, false, bodyColor, GameObjectListener.SLIDER_START);
+                listener.onSliderHit(id, 30, null, position, false, bodyColor, GameObjectListener.SLIDER_START);
             } else if (replayObjectData != null &&
                     Math.abs(replayObjectData.accuracy / 1000f) <= GameHelper.getDifficultyHelper().hitWindowFor50(GameHelper.getOverallDifficulty()) &&
                     passedTime + dt / 2 > replayObjectData.accuracy / 1000f) {
@@ -709,7 +712,7 @@ public class Slider extends GameObject {
                 playCurrentNestedObjectHitSound();
                 currentNestedObjectIndex++;
                 ticksGot++;
-                listener.onSliderHit(id, 30, null, pos, false, bodyColor, GameObjectListener.SLIDER_START);
+                listener.onSliderHit(id, 30, null, position, false, bodyColor, GameObjectListener.SLIDER_START);
             } else if (isHit() && canBeHit()) {
                 listener.registerAccuracy(passedTime);
                 startHit = true;
@@ -718,10 +721,10 @@ public class Slider extends GameObject {
 
                 if (-passedTime < GameHelper.getDifficultyHelper().hitWindowFor50(GameHelper.getOverallDifficulty())) {
                     playCurrentNestedObjectHitSound();
-                    listener.onSliderHit(id, 30, null, pos,
+                    listener.onSliderHit(id, 30, null, position,
                             false, bodyColor, GameObjectListener.SLIDER_START);
                 } else {
-                    listener.onSliderHit(id, -1, null, pos,
+                    listener.onSliderHit(id, -1, null, position,
                             false, bodyColor, GameObjectListener.SLIDER_START);
                 }
 
@@ -1032,10 +1035,10 @@ public class Slider extends GameObject {
 
             if (-passedTime < GameHelper.getDifficultyHelper().hitWindowFor50(GameHelper.getOverallDifficulty())) {
                 playCurrentNestedObjectHitSound();
-                listener.onSliderHit(id, 30, null, pos,
+                listener.onSliderHit(id, 30, null, position,
                         false, bodyColor, GameObjectListener.SLIDER_START);
             } else {
-                listener.onSliderHit(id, -1, null, pos,
+                listener.onSliderHit(id, -1, null, position,
                         false, bodyColor, GameObjectListener.SLIDER_START);
             }
 

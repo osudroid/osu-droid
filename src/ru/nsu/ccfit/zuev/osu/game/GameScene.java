@@ -1296,9 +1296,7 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
 
                 if (nextObj != null && !obj.isLastInCombo()) {
                     final FollowTrack track = GameObjectPool.getInstance().getTrack();
-                    track.init(this, bgScene, obj.getGameplayStackedPosition().toPointF(),
-                        nextObj.getGameplayStackedPosition().toPointF(),
-                        (float) nextObj.startTime / 1000 - secPassed, objectTimePreempt, scale);
+                    track.init(this, bgScene, obj.getGameplayStackedPosition(), nextObj.getGameplayStackedPosition(), (float) nextObj.startTime / 1000 - secPassed, objectTimePreempt, scale);
                 }
 
                 if (GameHelper.isAuto()) {
@@ -1339,10 +1337,7 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
 
                 if (nextObj != null && !obj.isLastInCombo()) {
                     final FollowTrack track = GameObjectPool.getInstance().getTrack();
-
-                    track.init(this, bgScene, parsedSlider.getGameplayStackedEndPosition().toPointF(),
-                        nextObj.getGameplayStackedPosition().toPointF(),
-                        (float) nextObj.startTime / 1000 - secPassed, objectTimePreempt, scale);
+                    track.init(this, bgScene, parsedSlider.getGameplayStackedEndPosition(), nextObj.getGameplayStackedPosition(), (float) nextObj.startTime / 1000 - secPassed, objectTimePreempt, scale);
                 }
                 if (GameHelper.isAuto()) {
                     slider.setAutoPlay();

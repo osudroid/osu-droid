@@ -17,7 +17,7 @@ public abstract class GameObject {
     protected int id = -1;
     protected Replay.ReplayObjectData replayObjectData = null;
     protected boolean startHit = false;
-    protected PointF pos = new PointF();
+    protected PointF position = new PointF();
 
     public Replay.ReplayObjectData getReplayData() {
         return replayObjectData;
@@ -55,7 +55,9 @@ public abstract class GameObject {
 
     public void tryHit(float dt) {}
 
-    public PointF getPos() {return pos;}
+    public PointF getPosition() {
+        return position;
+    }
 
     public void stopAuxiliarySamples() {}
 }
