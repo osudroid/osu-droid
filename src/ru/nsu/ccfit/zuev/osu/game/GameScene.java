@@ -1181,9 +1181,6 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
         if(!Config.isHideInGameUI()) {
             strBuilder.setLength(0);
             strBuilder.append(stat.getCombo());
-            while (strBuilder.length() < 5) {
-                strBuilder.append('*');
-            }
             strBuilder.append('x');
             var comboStr = strBuilder.toString();
             comboText.setText(comboStr);
@@ -1201,9 +1198,6 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
                 strBuilder.append('0');
             }
             strBuilder.append((int) rawAccuracy);
-            if (strBuilder.length() < 6) {
-                strBuilder.insert(0, '*');
-            }
             strBuilder.append('%');
             accuracyText.setText(strBuilder.toString());
             strBuilder.setLength(0);
