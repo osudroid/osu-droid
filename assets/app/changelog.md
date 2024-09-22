@@ -102,7 +102,7 @@ were reduced by 20% and clap hitsounds' volume were reduced by 15%
 - Fixed wrong textures being displayed before in-game video plays on devices with Mali GPUs
 - Fixed real-time pp counter taking the next object's difficulty attributes when the current object is active in gameplay
 - Fixed real-time pp counter text potentially getting cut off
-- Fixed some gameplay animations not scaling on speed multiplier
+- Fixed some gameplay animations not being affected by speed multiplier
 - Fixed pp being calculated and displayed in multiplayer team mode
 - Fixed multitouch detection not working properly due to improperly specified hardware features from the system
 - Fixed device back button resuming gameplay after game over when playing Sudden Death + Relax/Autopilot
@@ -116,4 +116,4 @@ were reduced by 20% and clap hitsounds' volume were reduced by 15%
 - Fixed modern spinners being able to be spun before the start time of the spinner, giving more score than classical spinners
 - Fixed modern spinners not auto-completing like classical spinners when its duration is under 50ms
 - Fixed a slider's length potentially falling short from its expected length
-- Fixed force OD not scaling on speed multiplier in song selection menu
+- Fixed force OD not being affected by speed multiplier in song selection menu
