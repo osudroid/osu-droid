@@ -46,7 +46,12 @@ for preventing accidental touches.
 
 - Added support for pp-based global beatmap leaderboard in song selection menu
 - Added video setting summary regarding supported video formats
-- Added a new button in song selection menu to switch difficulty algorithm between osu!droid and osu!standard
+- Added a new button in song selection menu to switch difficulty algorithm between osu!droid and osu!standard. This 
+  button can be skinned with the following skin element names:
+  - `selection-difficulty-droid`
+  - `selection-difficulty-droid-over`
+  - `selection-difficulty-standard`
+  - `selection-difficulty-standard-over`
 - Added support for `sliderslide` and `sliderwhistle` hitsounds
 - Added support for custom file hitsounds
 - Added an animation to slider end arrow rotation when snaking animation is enabled
