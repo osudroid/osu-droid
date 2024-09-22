@@ -88,10 +88,7 @@ public class HitCircle extends GameObject {
 
         if (GameHelper.isHidden()) {
             approachCircle.setVisible(Config.isShowFirstApproachCircle() && beatmapCircle.isFirstNote());
-        }
 
-
-        if (GameHelper.isHidden()) {
             float actualFadeOutDuration = timePreempt * (float) ModHidden.FADE_OUT_DURATION_MULTIPLIER;
             float remainingFadeOutDuration = Math.min(
                 actualFadeOutDuration,
