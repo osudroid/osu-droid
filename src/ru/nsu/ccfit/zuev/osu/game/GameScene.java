@@ -1203,6 +1203,7 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
             if (strBuilder.length() < 6) {
                 strBuilder.insert(0, '*');
             }
+            strBuilder.append('%');
             accuracyText.setText(strBuilder.toString());
             strBuilder.setLength(0);
             strBuilder.append(stat.getTotalScoreWithMultiplier());
