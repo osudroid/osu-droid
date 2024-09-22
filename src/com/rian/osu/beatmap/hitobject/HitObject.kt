@@ -322,7 +322,12 @@ abstract class HitObject(
         comboIndexWithOffsets = lastObj?.comboIndexWithOffsets ?: 0
         indexInCurrentCombo = if (lastObj != null) lastObj.indexInCurrentCombo + 1 else 0
 
-        if (isNewCombo || lastObj == null) {
+        if (this is Spinner) {
+            // For the purpose of combo colors, spinners never start a new combo even if they are flagged as doing so.
+            return
+        }
+
+        if (isNewCombo || lastObj == null || lastObj is Spinner) {
             indexInCurrentCombo = 0
             ++comboIndex
             comboIndexWithOffsets += comboOffset + 1
