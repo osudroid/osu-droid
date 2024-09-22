@@ -1306,11 +1306,6 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
                 circle.init(this, mgScene, parsedCircle, secPassed, comboColor);
                 addObject(circle);
 
-                if (nextObj != null && !obj.isLastInCombo()) {
-                    final FollowTrack track = GameObjectPool.getInstance().getTrack();
-                    track.init(this, bgScene, obj.getGameplayStackedPosition(), nextObj.getGameplayStackedPosition(), (float) nextObj.startTime / 1000 - secPassed, objectTimePreempt, scale);
-                }
-
                 if (GameHelper.isAuto()) {
                     circle.setAutoPlay();
                 }
@@ -1347,10 +1342,6 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
 
                 addObject(slider);
 
-                if (nextObj != null && !obj.isLastInCombo()) {
-                    final FollowTrack track = GameObjectPool.getInstance().getTrack();
-                    track.init(this, bgScene, parsedSlider.getGameplayStackedEndPosition(), nextObj.getGameplayStackedPosition(), (float) nextObj.startTime / 1000 - secPassed, objectTimePreempt, scale);
-                }
                 if (GameHelper.isAuto()) {
                     slider.setAutoPlay();
                 }
@@ -1361,6 +1352,11 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
                     if (slider.getReplayData().tickSet == null)
                         slider.getReplayData().tickSet = new BitSet();
                 }
+            }
+
+            if (!(obj instanceof com.rian.osu.beatmap.hitobject.Spinner) && nextObj != null && !(nextObj instanceof com.rian.osu.beatmap.hitobject.Spinner) && !obj.isLastInCombo()) {
+                final FollowTrack track = GameObjectPool.getInstance().getTrack();
+                track.init(this, bgScene, HitObjectUtils.getGameplayStackedEndPosition(obj), nextObj.getGameplayStackedPosition(), (float) nextObj.startTime / 1000 - secPassed, objectTimePreempt, scale);
             }
         }
 
