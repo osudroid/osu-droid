@@ -1184,6 +1184,7 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
             while (strBuilder.length() < 5) {
                 strBuilder.append('*');
             }
+            strBuilder.append('x');
             var comboStr = strBuilder.toString();
             comboText.setText(comboStr);
 
