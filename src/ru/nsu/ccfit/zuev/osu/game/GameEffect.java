@@ -22,6 +22,7 @@ import java.util.List;
 import ru.nsu.ccfit.zuev.osu.RGBColor;
 import ru.nsu.ccfit.zuev.osu.ResourceManager;
 import ru.nsu.ccfit.zuev.osu.helper.ModifierListener;
+import ru.nsu.ccfit.zuev.skins.OsuSkin;
 
 public class GameEffect extends GameObject {
     private static final HashSet<String> animationEffects = new HashSet<>(Arrays.asList(
@@ -35,14 +36,7 @@ public class GameEffect extends GameObject {
         this.texname = texname;
 
         if (isAnimationEffect(texname) && ResourceManager.getInstance().isTextureLoaded(texname + "-0")) {
-            List<String> loadedScoreBarTextures = new ArrayList<>();
-            for (int i = 0; i < 60; i++) {
-                if (ResourceManager.getInstance().isTextureLoaded(texname + "-" + i))
-                    loadedScoreBarTextures.add(texname + "-" + i);
-                else break;
-            }
-            var hit = new AnimatedSprite(loadedScoreBarTextures.toArray(new String[0]));
-            hit.setFps(60);
+            var hit = new AnimatedSprite(texname, true, OsuSkin.get().getAnimationFramerate());
             hit.setLoop(false);
             this.hit = hit;
         } else {

@@ -789,18 +789,7 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
 
         skipBtn = null;
         if (skipTime > 1) {
-            if (ResourceManager.getInstance().isTextureLoaded("play-skip-0")) {
-                List<String> loadedSkipTextures = new ArrayList<>();
-                for (int i = 0; i < 60; i++) {
-                    if (ResourceManager.getInstance().isTextureLoaded("play-skip-" + i))
-                        loadedSkipTextures.add("play-skip-" + i);
-                }
-                skipBtn = new AnimatedSprite(loadedSkipTextures.toArray(new String[0]));
-            } else {
-                skipBtn = new ExtendedSprite();
-                skipBtn.setTextureRegion(ResourceManager.getInstance().getTexture("play-skip"));
-            }
-
+            skipBtn = new AnimatedSprite("play-skip", true, OsuSkin.get().getAnimationFramerate());
             skipBtn.setOrigin(Origin.BottomRight);
             skipBtn.setPosition(Config.getRES_WIDTH(), Config.getRES_HEIGHT());
             skipBtn.setAlpha(0.7f);

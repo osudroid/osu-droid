@@ -10,6 +10,7 @@ import org.anddev.andengine.util.modifier.*
 import org.anddev.andengine.util.modifier.ease.*
 import ru.nsu.ccfit.zuev.osu.*
 import ru.nsu.ccfit.zuev.osu.helper.*
+import ru.nsu.ccfit.zuev.skins.OsuSkin
 import kotlin.math.*
 
 object FollowPointConnection {
@@ -25,7 +26,7 @@ object FollowPointConnection {
 
         // For optimization we avoid to use AnimatedSprite if there's one frame.
         if (ResourceManager.getInstance().isTextureLoaded("followpoint-0")) {
-            AnimatedSprite("followpoint", true)
+            AnimatedSprite("followpoint", true, OsuSkin.get().animationFramerate)
         } else {
             ExtendedSprite(ResourceManager.getInstance().getTexture("followpoint"))
         }

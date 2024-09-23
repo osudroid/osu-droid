@@ -4,13 +4,14 @@ import com.reco1l.osu.graphics.AnimationState.*
 import org.anddev.andengine.opengl.texture.region.*
 import ru.nsu.ccfit.zuev.osu.*
 import ru.nsu.ccfit.zuev.skins.*
+import kotlin.math.*
 
 
-open class AnimatedSprite(frames: List<TextureRegion?>) : ExtendedSprite() {
+open class AnimatedSprite(frames: Array<TextureRegion?>) : ExtendedSprite() {
 
 
     @JvmOverloads
-    constructor(texturePrefix: StringSkinData? = null, textureName: String?, frameCount: Int) : this(List(frameCount.coerceAtLeast(1)) {
+    constructor(texturePrefix: StringSkinData? = null, textureName: String?, frameCount: Int) : this(Array(frameCount.coerceAtLeast(1)) {
 
         if (texturePrefix == null) {
             ResourceManager.getInstance().getTexture(textureName + it)
@@ -19,24 +20,27 @@ open class AnimatedSprite(frames: List<TextureRegion?>) : ExtendedSprite() {
         }
     })
 
-    constructor(vararg textureNames: String) : this(textureNames.map {
-        ResourceManager.getInstance().getTexture(it)
-    })
+    constructor(textureName: String, withHyphen: Boolean, fps: Float) : this(mutableListOf<TextureRegion?>().also { frames ->
 
-    constructor(textureName: String, withHyphen: Boolean) : this(mutableListOf<TextureRegion?>().also { frames ->
+        // FIXME: Using 120 is a workaround, the amount of available frames for a given texture should be computed previously to this.
+        //  This can be an issue for skins with more than 120 frames animations.
 
-        for (i in 0 until DEFAULT_FRAMERATE) {
+        for (i in 0 until (if (fps < 0) 120 else fps.toInt())) {
             val frameName = textureName + (if (withHyphen) "-" else "") + i
 
-            if (ResourceManager.getInstance().isTextureLoaded(frameName)) {
-                frames.add(ResourceManager.getInstance().getTexture(frameName))
+            if (!ResourceManager.getInstance().isTextureLoaded(frameName)) {
+                break
             }
+
+            frames.add(ResourceManager.getInstance().getTexture(frameName))
         }
 
         if (frames.isEmpty()) {
             frames.add(ResourceManager.getInstance().getTexture(textureName))
         }
-    })
+    }.toTypedArray()) {
+        this.fps = fps
+    }
 
 
     /**
@@ -46,19 +50,17 @@ open class AnimatedSprite(frames: List<TextureRegion?>) : ExtendedSprite() {
      */
     var frames = frames
         set(value) {
-            if (field != value) {
-                state = STOPPED
-                textureRegion = value.firstOrNull()
-                field = value
-            }
+            state = STOPPED
+            textureRegion = value.firstOrNull()
+            field = value
         }
 
     /**
      * The current state of the animation.
      *
-     * Setting FPS to 0 is equivalent to setting the state to [STOPPED].
+     * Negative values will set the frame count as the frame rate.
      */
-    var fps = frames.size.toFloat()
+    var fps = -1f
 
     /**
      * The current state of the animation.
@@ -101,14 +103,13 @@ open class AnimatedSprite(frames: List<TextureRegion?>) : ExtendedSprite() {
 
     override fun onManagedUpdate(pSecondsElapsed: Float) {
 
-        if (frames.isEmpty()) {
-            return
-        }
+        if (frames.isNotEmpty() && state == PLAYING) {
 
-        if (state == PLAYING) {
             elapsedSec += pSecondsElapsed
 
-            var frameIndex = (elapsedSec * fps).toInt()
+            val framePerSec = if (fps < 0) frames.size.toFloat() else fps
+
+            var frameIndex = (elapsedSec * framePerSec).roundToInt()
 
             if (isLoop) {
                 frameIndex %= frames.size
@@ -127,10 +128,9 @@ open class AnimatedSprite(frames: List<TextureRegion?>) : ExtendedSprite() {
     }
 
 
-    companion object {
-
-        const val DEFAULT_FRAMERATE = 60
-
+    override fun reset() {
+        super.reset()
+        elapsedSec = 0f
     }
 
 }
