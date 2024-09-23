@@ -77,8 +77,8 @@ object FollowPointConnection {
             // Note that this doesn't exactly match the AR>10 visuals as they're classically known, but it feels good.
             val preempt = PREEMPT * min(1.0, start.timePreempt / HitObject.PREEMPT_MIN)
 
-            val fadeOutTime = startTime + fraction * duration
-            val fadeInTime = fadeOutTime - preempt
+            val fadeOutTime = (startTime + fraction * duration).toFloat() / 1000f
+            val fadeInTime = (fadeOutTime - preempt).toFloat() / 1000f
 
             val fp = pool.obtain()
 
@@ -92,13 +92,13 @@ object FollowPointConnection {
 
             fp.clearEntityModifiers()
             fp.registerEntityModifier(Modifiers.sequence(null,
-                Modifiers.delay(fadeInTime.toFloat() / 1000 - secPassed),
+                Modifiers.delay(fadeInTime - secPassed),
                 Modifiers.parallel(null,
                     Modifiers.fadeIn(endFadeInTime),
                     Modifiers.scale(endFadeInTime, 1.5f * scale, scale, null, EaseQuadOut.getInstance()),
                     Modifiers.move(endFadeInTime, pointStartX, pointEndX, pointStartY, pointEndY, null, EaseQuadOut.getInstance()),
                     Modifiers.sequence(null,
-                        Modifiers.delay((fadeOutTime - fadeInTime).toFloat() / 1000),
+                        Modifiers.delay(fadeOutTime - fadeInTime),
                         Modifiers.fadeOut(endFadeInTime, expire)
                     )
                 )
