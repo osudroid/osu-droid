@@ -32,17 +32,18 @@ object FollowPointConnection {
     }
 
 
-    @JvmStatic
-    fun addConnection(scene: Scene, start: HitObject, end: HitObject) {
-
-        val expire = object : ModifierListener() {
-            override fun onModifierFinished(pModifier: IModifier<IEntity>, fp: IEntity) {
-                updateThread {
-                    fp.detachSelf()
-                    pool.free(fp as ExtendedSprite)
-                }
+    private val expire = object : ModifierListener() {
+        override fun onModifierFinished(pModifier: IModifier<IEntity>, fp: IEntity) {
+            updateThread {
+                fp.detachSelf()
+                pool.free(fp as ExtendedSprite)
             }
         }
+    }
+
+
+    @JvmStatic
+    fun addConnection(scene: Scene, secPassed: Float, start: HitObject, end: HitObject) {
 
         // Reference: https://github.com/ppy/osu/blob/7bc8908ca9c026fed1d831eb6e58df7624a8d614/osu.Game.Rulesets.Osu/Objects/Drawables/Connections/FollowPointConnection.cs
         val scale = start.gameplayScale
@@ -89,13 +90,18 @@ object FollowPointConnection {
 
             val endFadeInTime = end.timeFadeIn.toFloat() / 1000f
 
-            fp.registerEntityModifier(Modifiers.fadeIn(endFadeInTime))
-            fp.registerEntityModifier(Modifiers.scale(endFadeInTime, 1.5f * scale, scale, null, EaseQuadOut.getInstance()))
-            fp.registerEntityModifier(Modifiers.move(endFadeInTime, pointStartX, pointEndX, pointStartY, pointEndY, null, EaseQuadOut.getInstance()))
-
+            fp.clearEntityModifiers()
             fp.registerEntityModifier(Modifiers.sequence(null,
-                Modifiers.delay((fadeOutTime - fadeInTime).toFloat() / 1000f),
-                Modifiers.fadeOut(endFadeInTime, expire)
+                Modifiers.delay(fadeInTime.toFloat() / 1000 - secPassed),
+                Modifiers.parallel(null,
+                    Modifiers.fadeIn(endFadeInTime),
+                    Modifiers.scale(endFadeInTime, 1.5f * scale, scale, null, EaseQuadOut.getInstance()),
+                    Modifiers.move(endFadeInTime, pointStartX, pointEndX, pointStartY, pointEndY, null, EaseQuadOut.getInstance()),
+                    Modifiers.sequence(null,
+                        Modifiers.delay((fadeOutTime - fadeInTime).toFloat() / 1000),
+                        Modifiers.fadeOut(endFadeInTime, expire)
+                    )
+                )
             ))
 
             scene.attachChild(fp, 0)
