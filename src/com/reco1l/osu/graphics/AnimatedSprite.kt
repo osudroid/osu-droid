@@ -3,7 +3,6 @@ package com.reco1l.osu.graphics
 import com.reco1l.osu.graphics.AnimationState.*
 import org.anddev.andengine.opengl.texture.region.*
 import ru.nsu.ccfit.zuev.osu.*
-import ru.nsu.ccfit.zuev.skins.*
 import kotlin.math.*
 
 
