@@ -79,7 +79,7 @@ object FollowPointConnection {
             val preempt = PREEMPT * min(1.0, start.timePreempt / HitObject.PREEMPT_MIN)
 
             val fadeOutTime = (startTime + fraction * duration).toFloat() / 1000f
-            val fadeInTime = (fadeOutTime - preempt).toFloat() / 1000f
+            val fadeInTime = (fadeOutTime - preempt / 1000f).toFloat()
 
             val fp = pool.obtain()
 
