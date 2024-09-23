@@ -97,11 +97,9 @@ object FollowPointConnection {
                     Modifiers.fadeIn(endFadeInTime),
                     Modifiers.scale(endFadeInTime, 1.5f * scale, scale, null, EaseQuadOut.getInstance()),
                     Modifiers.move(endFadeInTime, pointStartX, pointEndX, pointStartY, pointEndY, null, EaseQuadOut.getInstance()),
-                    Modifiers.sequence(null,
-                        Modifiers.delay(fadeOutTime - fadeInTime),
-                        Modifiers.fadeOut(endFadeInTime, expire)
-                    )
-                )
+                ),
+                Modifiers.delay(fadeOutTime - fadeInTime),
+                Modifiers.fadeOut(endFadeInTime, expire)
             ))
 
             scene.attachChild(fp, 0)
