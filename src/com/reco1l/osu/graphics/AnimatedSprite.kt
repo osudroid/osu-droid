@@ -28,11 +28,9 @@ open class AnimatedSprite(frames: Array<TextureRegion?>) : ExtendedSprite() {
         for (i in 0 until frameCount) {
             val frameName = textureName + (if (withHyphen) "-" else "") + i
 
-            if (!ResourceManager.getInstance().isTextureLoaded(frameName)) {
-                break
+            if (ResourceManager.getInstance().isTextureLoaded(frameName)) {
+                frames.add(ResourceManager.getInstance().getTexture(frameName))
             }
-
-            ResourceManager.getInstance().getTexture(frameName)?.also { frames.add(it) }
         }
 
         if (frames.isEmpty()) {
