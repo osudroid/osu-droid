@@ -1351,7 +1351,7 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
             }
 
             if (!(obj instanceof com.rian.osu.beatmap.hitobject.Spinner) && nextObj != null && !(nextObj instanceof com.rian.osu.beatmap.hitobject.Spinner) && !obj.isLastInCombo()) {
-                FollowPointConnection.addConnection(bgScene, obj, nextObj, scale);
+                FollowPointConnection.addConnection(bgScene, obj, nextObj);
             }
         }
 

@@ -33,7 +33,7 @@ object FollowPointConnection {
 
 
     @JvmStatic
-    fun addConnection(scene: Scene, start: HitObject, end: HitObject, scale: Float) {
+    fun addConnection(scene: Scene, start: HitObject, end: HitObject) {
 
         val expire = object : ModifierListener() {
             override fun onModifierFinished(pModifier: IModifier<IEntity>, fp: IEntity) {
@@ -45,6 +45,7 @@ object FollowPointConnection {
         }
 
         // Reference: https://github.com/ppy/osu/blob/7bc8908ca9c026fed1d831eb6e58df7624a8d614/osu.Game.Rulesets.Osu/Objects/Drawables/Connections/FollowPointConnection.cs
+        val scale = start.gameplayScale
         val startTime = start.getEndTime()
 
         val startPosition = start.getGameplayStackedEndPosition()
