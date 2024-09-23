@@ -543,7 +543,7 @@ enum class ModifierType {
     RGB,
 
     /**
-     * Modifies the entity's translation in both axis.
+     * Modifies the entity's position in both axis.
      */
     MOVE,
 
