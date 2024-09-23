@@ -1,5 +1,8 @@
 package ru.nsu.ccfit.zuev.osu;
 
+import static kotlin.collections.ArraysKt.any;
+import static kotlin.collections.ArraysKt.filter;
+
 import android.content.Context;
 import android.graphics.Color;
 import android.graphics.Typeface;
@@ -198,34 +201,43 @@ public class ResourceManager {
         customFrameCount.clear();
 
         try {
-            for (final String s : Objects.requireNonNull(context.getAssets().list("gfx"))) {
-                final String name = s.substring(0, s.length() - 4);
-                if (!Config.isCorovans()) {
-                    if (name.equals("count1") || name.equals("count2")
-                            || name.equals("count3") || name.equals("go")
-                            || name.equals("ready")) {
-                        continue;
+
+            String[] animatableTextures = { "play-skip-", "menu-back-", "scorebar-colour-", "hit0-", "hit50-", "hit100-", "hit100k-", "hit300-", "hit300k-", "hit300g-", "followpoint-", "sliderb", "sliderfollowcircle-" };
+            String[] availableAnimatableFilenames = filter(availableFiles.keySet().toArray(new String[0]), f -> any(animatableTextures, f::startsWith)).toArray(new String[0]);
+
+            for (var assetName : Objects.requireNonNull(context.getAssets().list("gfx"))) {
+
+                var textureName = assetName.substring(0, assetName.length() - 4);
+
+                // Animatable textures are managed separately unless they're not present in the skin folder.
+                var skip = false;
+                for (var animatableTexture : animatableTextures) {
+                    if (textureName.startsWith(animatableTexture) && any(availableAnimatableFilenames, f -> f.startsWith(animatableTexture))) {
+                        skip = true;
+                        break;
                     }
                 }
-                if (availableFiles.containsKey(name)) {
-                    loadTexture(name, Objects.requireNonNull(availableFiles.get(name)).getPath(), true);
-                    if (Character.isDigit(name.charAt(name.length() - 1))) {
-                        noticeFrameCount(name);
-                    }
-                } else {
-                    loadTexture(name, "gfx/" + s, false);
+                if (skip) {
+                    continue;
+                }
+
+                if (availableFiles.containsKey(textureName)) {
+                    loadTexture(textureName, Objects.requireNonNull(availableFiles.get(textureName)).getPath(), true);
+                } else  {
+                    loadTexture(textureName, "gfx/" + assetName, false);
                 }
             }
+
             if (availableFiles.containsKey("scorebar-kidanger")) {
                 loadTexture("scorebar-kidanger", Objects.requireNonNull(availableFiles.get("scorebar-kidanger")).getPath(), true);
-                loadTexture("scorebar-kidanger2",
-                        Objects.requireNonNull(availableFiles.get(
-                                availableFiles.containsKey("scorebar-kidanger2") ? "scorebar-kidanger2" : "scorebar-kidanger"
-                        )).getPath(), true);
+                loadTexture("scorebar-kidanger2", Objects.requireNonNull(availableFiles.get(availableFiles.containsKey("scorebar-kidanger2") ? "scorebar-kidanger2" : "scorebar-kidanger")).getPath(), true);
             }
-            if (availableFiles.containsKey("comboburst"))
+
+            if (availableFiles.containsKey("comboburst")) {
                 loadTexture("comboburst", Objects.requireNonNull(availableFiles.get("comboburst")).getPath(), true);
-            else unloadTexture("comboburst");
+            } else {
+                unloadTexture("comboburst");
+            }
 
             for (int i = 0; i < 10; i++) {
                 String textureName = "comboburst-" + i;
@@ -239,25 +251,20 @@ public class ResourceManager {
                 }
             }
 
-            String[] names = {"play-skip-", "menu-back-", "scorebar-colour-", "hit0-", "hit50-", "hit100-", "hit100k-", "hit300-", "hit300k-", "hit300g-", "followpoint-"};
-            for (String name : names) {
-                for (int i = 0; i < 60; i++) {
-                    String textureName = name + i;
-                    if (availableFiles.containsKey(textureName)) {
-                        File file = availableFiles.get(textureName);
-                        if (file != null) {
-                            loadTexture(textureName, file.getPath(), true);
-                        } else {
-                            unloadTexture(textureName);
-                        }
-                    }
+            for (var filename : availableAnimatableFilenames) {
+
+                var file = availableFiles.get(filename);
+                if (file != null) {
+                    loadTexture(filename, file.getPath(), true);
+                    noticeFrameCount(filename);
+                } else {
+                    unloadTexture(filename);
                 }
             }
+
         } catch (final IOException e) {
             Debug.e("Resources: " + e.getMessage(), e);
         }
-
-        SkinManager.getInstance().presetFrameCount();
 
         try {
             // TODO: buggy?
@@ -306,16 +313,13 @@ public class ResourceManager {
         }
         int frameNum;
         try {
-            frameNum = Integer.parseInt(name.substring(resnameWN.length()));
+            frameNum = Integer.parseInt(name.substring(resnameWN.length() - 1));
         } catch (final NumberFormatException e) {
             return;
         }
-        if (frameNum < 0) {
-            frameNum *= -1;
-        }
-        if (!customFrameCount.containsKey(resnameWN)
-                || Objects.requireNonNull(customFrameCount.get(resnameWN)) < frameNum) {
-            customFrameCount.put(resnameWN, frameNum);
+
+        if (!customFrameCount.containsKey(resnameWN) || Objects.requireNonNull(customFrameCount.get(resnameWN)) < frameNum + 1) {
+            customFrameCount.put(resnameWN, frameNum + 1);
         }
     }
 
@@ -744,22 +748,13 @@ public class ResourceManager {
                 resnameWN = resname.substring(0, resname.lastIndexOf('-'));
             }
 
-            if (!textures.containsKey(resname)
-                    && SkinManager.getFrames(resnameWN) == 0) {
-                return;
-            }
-
             if (textures.containsKey(resnameWN)
                     || textures.containsKey(resnameWN + "-0")
                     || textures.containsKey(resnameWN + "0")) {
-                int frameNum = Integer.parseInt(resname.substring(resnameWN
-                        .length()));
-                if (frameNum < 0) {
-                    frameNum *= -1;
-                }
-                if (!customFrameCount.containsKey(resnameWN)
-                        || Objects.requireNonNull(customFrameCount.get(resnameWN)) < frameNum) {
-                    customFrameCount.put(resnameWN, frameNum);
+                int frameNum = Integer.parseInt(resname.substring(resnameWN.length() - 1));
+
+                if (!customFrameCount.containsKey(resnameWN) || Objects.requireNonNull(customFrameCount.get(resnameWN)) < frameNum + 1) {
+                    customFrameCount.put(resnameWN, frameNum + 1);
                 }
             }
         } else if (!textures.containsKey(resname)) {
@@ -767,7 +762,9 @@ public class ResourceManager {
             if (textures.containsKey(resname + "-0") || textures.containsKey(resname + "0")) {
                 if (textures.containsKey(resname + "0"))
                     delimiter = "";
-                if (SkinManager.getFrames(resname) != 0) {
+
+                var frameCount = customFrameCount.get(resname);
+                if (frameCount != null && frameCount != 0) {
                     customFrameCount.put(resname, 1);
                 }
                 multiframe = true;

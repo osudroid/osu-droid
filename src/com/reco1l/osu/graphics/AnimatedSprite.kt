@@ -9,30 +9,31 @@ import kotlin.math.*
 
 open class AnimatedSprite(frames: Array<TextureRegion?>) : ExtendedSprite() {
 
-
+    /**
+     * Creates an animated sprite with the texture name and frame count.
+     *
+     * @param textureName The base name of the texture (do not include the frame number or the hyphen if it has).
+     * @param withHyphen Whether the texture name has a hyphen before the frame number.
+     * @param fps The frame rate of the animation.
+     */
     @JvmOverloads
-    constructor(texturePrefix: StringSkinData? = null, textureName: String?, frameCount: Int) : this(Array(frameCount.coerceAtLeast(1)) {
+    constructor(textureName: String, withHyphen: Boolean, fps: Float = DEFAULT_FPS) : this(mutableListOf<TextureRegion?>().also { frames ->
 
-        if (texturePrefix == null) {
-            ResourceManager.getInstance().getTexture(textureName + it)
-        } else {
-            ResourceManager.getInstance().getTextureWithPrefix(texturePrefix, (textureName ?: "") + it)
+        var frameCount = if (fps < 0) ResourceManager.getInstance().getFrameCount(textureName) else fps.toInt()
+
+        // ResourceManager can return -1 if the textures are not present.
+        if (frameCount < 0) {
+            frameCount = DEFAULT_FPS.toInt()
         }
-    })
 
-    constructor(textureName: String, withHyphen: Boolean, fps: Float) : this(mutableListOf<TextureRegion?>().also { frames ->
-
-        // FIXME: Using 120 is a workaround, the amount of available frames for a given texture should be computed previously to this.
-        //  This can be an issue for skins with more than 120 frames animations.
-
-        for (i in 0 until (if (fps < 0) 120 else fps.toInt())) {
+        for (i in 0 until frameCount) {
             val frameName = textureName + (if (withHyphen) "-" else "") + i
 
             if (!ResourceManager.getInstance().isTextureLoaded(frameName)) {
                 break
             }
 
-            frames.add(ResourceManager.getInstance().getTexture(frameName))
+            ResourceManager.getInstance().getTexture(frameName)?.also { frames.add(it) }
         }
 
         if (frames.isEmpty()) {
@@ -131,6 +132,13 @@ open class AnimatedSprite(frames: Array<TextureRegion?>) : ExtendedSprite() {
     override fun reset() {
         super.reset()
         elapsedSec = 0f
+    }
+
+
+    companion object {
+
+        const val DEFAULT_FPS = 60f
+
     }
 
 }

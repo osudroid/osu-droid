@@ -11,18 +11,7 @@ import ru.nsu.ccfit.zuev.osu.helper.FileUtils;
 
 public class SkinManager {
     private static SkinManager instance = new SkinManager();
-    private static Map<String, Integer> frameCount = new HashMap<>();
-    private static Map<String, Integer> stdframeCount = new HashMap<>();
     private static boolean skinEnabled = true;
-
-    static {
-        stdframeCount.put("sliderb", 10);
-        stdframeCount.put("followpoint", 1);
-        stdframeCount.put("scorebar-colour", 4);
-        stdframeCount.put("play-skip", 1);
-        stdframeCount.put("sliderfollowcircle", 1);
-        frameCount.putAll(stdframeCount);
-    }
 
     private final RGBColor sliderColor = new RGBColor(1, 1, 1);
     private String skinname = "";
@@ -43,36 +32,8 @@ public class SkinManager {
         SkinManager.skinEnabled = skinEnabled;
     }
 
-    public static int getFrames(final String texname) {
-        if (frameCount.containsKey(texname) == false) {
-            return 0;
-        }
-        return frameCount.get(texname);
-    }
-
-    public static void setFrames(final String texname, final int frames) {
-        frameCount.put(texname, frames);
-    }
-
     public RGBColor getSliderColor() {
         return sliderColor;
-    }
-
-    public void presetFrameCount() {
-        stdframeCount.put("sliderb", 10);
-        stdframeCount.put("followpoint", 1);
-        stdframeCount.put("scorebar-colour", 4);
-        stdframeCount.put("play-skip", 1);
-        stdframeCount.put("sliderfollowcircle", 1);
-
-        for (final String s : stdframeCount.keySet()) {
-            final int fcount = ResourceManager.getInstance().getFrameCount(s);
-            if (fcount >= 0) {
-                stdframeCount.put(s, fcount);
-            }
-        }
-        frameCount.clear();
-        frameCount.putAll(stdframeCount);
     }
 
     public void loadBeatmapSkin(final String beatmapFolder) {
@@ -102,15 +63,6 @@ public class SkinManager {
             }
 
         }
-
-        if (!Config.isUseCustomSkins()) return;
-
-        for (final String s : frameCount.keySet()) {
-            final int fcount = ResourceManager.getInstance().getFrameCount(s);
-            if (fcount >= 0) {
-                frameCount.put(s, fcount);
-            }
-        }
     }
 
     public void clearSkin() {
@@ -118,12 +70,6 @@ public class SkinManager {
             return;
         }
         skinname = "";
-        frameCount.put("sliderb", stdframeCount.get("sliderb"));
-        frameCount.put("followpoint", stdframeCount.get("followpoint"));
-        frameCount.put("scorebar-colour", stdframeCount.get("scorebar-colour"));
-        frameCount.put("play-skip", stdframeCount.get("play-skip"));
-        frameCount.put("sliderfollowcircle",
-                stdframeCount.get("sliderfollowcircle"));
         ResourceManager.getInstance().clearCustomResources();
     }
 }
