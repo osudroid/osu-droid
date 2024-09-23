@@ -101,6 +101,6 @@ public class GameObjectPool {
             putSpinner(Config.getSpinnerStyle() == 1 ? new ModernSpinner() : new Spinner());
         }
 
-        objectsCreated = 33;
+        objectsCreated = circles.size() + sliders.size() + spinners.size();
     }
 }
