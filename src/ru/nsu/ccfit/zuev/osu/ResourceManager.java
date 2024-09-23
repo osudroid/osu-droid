@@ -239,7 +239,7 @@ public class ResourceManager {
                 }
             }
 
-            String[] names = {"play-skip-", "menu-back-", "scorebar-colour-", "hit0-", "hit50-", "hit100-", "hit100k-", "hit300-", "hit300k-", "hit300g-"};
+            String[] names = {"play-skip-", "menu-back-", "scorebar-colour-", "hit0-", "hit50-", "hit100-", "hit100k-", "hit300-", "hit300k-", "hit300g-", "followpoint-"};
             for (String name : names) {
                 for (int i = 0; i < 60; i++) {
                     String textureName = name + i;

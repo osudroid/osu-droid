@@ -133,6 +133,17 @@ object Modifiers {
 
     @JvmStatic
     @JvmOverloads
+    fun move(duration: Float, fromX: Float, toX: Float, fromY: Float, toY: Float, listener: IModifierListener<IEntity>? = null, easeFunction: IEaseFunction = DefaultEaseFunction) = pool.obtain().also {
+        it.setToDefault()
+        it.type = MOVE
+        it.duration = duration
+        it.values = floatArrayOf(fromX, toX, fromY, toY)
+        it.easeFunction = easeFunction
+        it.listener = listener
+    }
+
+    @JvmStatic
+    @JvmOverloads
     fun rotation(duration: Float, from: Float, to: Float, listener: IModifierListener<IEntity>? = null, easeFunction: IEaseFunction = DefaultEaseFunction) = pool.obtain().also {
         it.setToDefault()
         it.type = ROTATION
@@ -352,6 +363,10 @@ class UniversalModifier @JvmOverloads constructor(private val pool: Pool<Univers
                     item.scaleY = value
                 }
 
+                MOVE -> {
+                    item.setPosition(getValueAt(0, percentage), getValueAt(1, percentage))
+                }
+
                 TRANSLATE -> {
                     if (item is ExtendedEntity) {
                         item.translationX = getValueAt(0, percentage)
@@ -526,6 +541,11 @@ enum class ModifierType {
      * Modifies the entity's color values.
      */
     RGB,
+
+    /**
+     * Modifies the entity's translation in both axis.
+     */
+    MOVE,
 
     /**
      * Modifies the entity's translation in both axis.

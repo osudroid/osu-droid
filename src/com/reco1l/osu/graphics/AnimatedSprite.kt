@@ -6,7 +6,7 @@ import ru.nsu.ccfit.zuev.osu.*
 import ru.nsu.ccfit.zuev.skins.*
 
 
-open class AnimatedSprite(frames: List<TextureRegion>) : ExtendedSprite() {
+open class AnimatedSprite(frames: List<TextureRegion?>) : ExtendedSprite() {
 
 
     @JvmOverloads
@@ -21,6 +21,21 @@ open class AnimatedSprite(frames: List<TextureRegion>) : ExtendedSprite() {
 
     constructor(vararg textureNames: String) : this(textureNames.map {
         ResourceManager.getInstance().getTexture(it)
+    })
+
+    constructor(textureName: String, withHyphen: Boolean) : this(mutableListOf<TextureRegion?>().also { frames ->
+
+        for (i in 0 until DEFAULT_FRAMERATE) {
+            val frameName = textureName + (if (withHyphen) "-" else "") + i
+
+            if (ResourceManager.getInstance().isTextureLoaded(frameName)) {
+                frames.add(ResourceManager.getInstance().getTexture(frameName))
+            }
+        }
+
+        if (frames.isEmpty()) {
+            frames.add(ResourceManager.getInstance().getTexture(textureName))
+        }
     })
 
 
@@ -112,6 +127,11 @@ open class AnimatedSprite(frames: List<TextureRegion>) : ExtendedSprite() {
     }
 
 
+    companion object {
+
+        const val DEFAULT_FRAMERATE = 60
+
+    }
 
 }
 

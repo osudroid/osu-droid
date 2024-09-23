@@ -23,6 +23,7 @@ import com.reco1l.osu.graphics.Modifiers;
 import com.reco1l.osu.graphics.Origin;
 import com.reco1l.osu.graphics.VideoSprite;
 import com.reco1l.osu.graphics.ExtendedScene;
+import com.reco1l.osu.playfield.FollowPointConnection;
 import com.reco1l.osu.playfield.ScoreText;
 import com.reco1l.osu.playfield.SliderTickSprite;
 import com.reco1l.osu.ui.BlockAreaFragment;
@@ -467,7 +468,7 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
 
         GameObjectPool.getInstance().purge();
         SliderTickSprite.getPool().clear();
-        FollowTrack.pointSpritePool.clear();
+        FollowPointConnection.getPool().clear();
         Modifiers.clearPool();
 
         // TODO replay
@@ -1350,8 +1351,7 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
             }
 
             if (!(obj instanceof com.rian.osu.beatmap.hitobject.Spinner) && nextObj != null && !(nextObj instanceof com.rian.osu.beatmap.hitobject.Spinner) && !obj.isLastInCombo()) {
-                final FollowTrack track = GameObjectPool.getInstance().getTrack();
-                track.init(this, bgScene, HitObjectUtils.getGameplayStackedEndPosition(obj), nextObj.getGameplayStackedPosition(), (float) nextObj.startTime / 1000 - secPassed, objectTimePreempt, scale);
+                FollowPointConnection.addConnection(bgScene, obj, nextObj, scale);
             }
         }
 
