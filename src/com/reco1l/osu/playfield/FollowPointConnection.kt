@@ -22,7 +22,7 @@ object FollowPointConnection {
 
 
     @JvmStatic
-    val pool = Pool {
+    val pool = Pool(initialSize = 16) {
 
         // For optimization we avoid to use AnimatedSprite if there's one frame.
         if (ResourceManager.getInstance().isTextureLoaded("followpoint-0")) {
