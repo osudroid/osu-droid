@@ -36,6 +36,8 @@ import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import kotlin.text.MatchResult;
+import kotlin.text.Regex;
 import ru.nsu.ccfit.zuev.audio.BassSoundProvider;
 import ru.nsu.ccfit.zuev.osu.helper.FileUtils;
 import ru.nsu.ccfit.zuev.osu.helper.MD5Calculator;
@@ -49,6 +51,14 @@ import ru.nsu.ccfit.zuev.skins.SkinManager;
 import ru.nsu.ccfit.zuev.skins.StringSkinData;
 
 public class ResourceManager {
+
+    // Explanation:
+    // - The first capturing group will refer to the texture base name, some of them may contain one or more hyphens/dashes
+    // in the name (e.g "menu-back") but it should never end with it.
+    // - The second capturing group will refer to the frame index, which is a number that may be followed by a hyphen or not.
+    private static final Regex ANIMATABLE_TEXTURE_REGEX = new Regex("^(\\w+(?:-\\w+)*)-?(\\d+)$");
+
+
     private final static ResourceManager mgr = new ResourceManager();
     private final Map<String, Font> fonts = new HashMap<>();
     private final Map<String, TextureRegion> textures = new HashMap<>();
@@ -315,24 +325,16 @@ public class ResourceManager {
         String textureName = filename;
         int frameIndex;
 
-        try {
-            int firstDigitIndex = indexOfFirst(filename, Character::isDigit);
+        MatchResult result = ANIMATABLE_TEXTURE_REGEX.matchEntire(filename);
 
-            if (firstDigitIndex < 0) {
-                customFrameCount.remove(textureName);
-                return -1;
-            }
+        // If result is null, the filename does not match the regex pattern.
+        if (result != null) {
+            List<String> values = result.getGroupValues();
 
-            textureName = filename.substring(0, firstDigitIndex);
-            if (textureName.endsWith("-")) {
-                textureName = textureName.substring(0, textureName.length() - 1);
-            }
-
-            frameIndex = Integer.parseInt(filename.substring(firstDigitIndex));
-
-        } catch (Exception e) {
+            textureName = values.get(1);
+            frameIndex = Integer.parseInt(values.get(2));
+        } else {
             customFrameCount.remove(textureName);
-            Log.e("ResourceManager", "Failed to parse frame count for texture: " + filename, e);
             return -1;
         }
 
