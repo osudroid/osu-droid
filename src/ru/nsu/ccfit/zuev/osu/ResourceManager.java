@@ -2,6 +2,7 @@ package ru.nsu.ccfit.zuev.osu;
 
 import static kotlin.collections.ArraysKt.any;
 import static kotlin.collections.ArraysKt.filter;
+import static kotlin.text.StringsKt.indexOfFirst;
 
 import android.content.Context;
 import android.graphics.Color;
@@ -256,7 +257,7 @@ public class ResourceManager {
                 var file = availableFiles.get(filename);
                 if (file != null) {
                     loadTexture(filename, file.getPath(), true);
-                    noticeFrameCount(filename);
+                    parseFrameIndex(filename, true);
                 } else {
                     unloadTexture(filename);
                 }
@@ -304,23 +305,47 @@ public class ResourceManager {
 //		textures.put("pause-overlay", null);
     }
 
-    private void noticeFrameCount(final String name) {
-        String resnameWN;
-        if (!name.contains("-")) {
-            resnameWN = name.substring(0, name.length() - 1);
-        } else {
-            resnameWN = name.substring(0, name.lastIndexOf('-'));
-        }
-        int frameNum;
+    /**
+     * Parses the frame count from the filename and updates the customFrameCount map.
+     *
+     * @return The frame index parsed from the filename, or -1 if the frame count could not be parsed.
+     */
+    private int parseFrameIndex(String filename, boolean allowMissingFrames) {
+
+        String textureName = filename;
+        int frameIndex;
+
         try {
-            frameNum = Integer.parseInt(name.substring(resnameWN.length() - 1));
-        } catch (final NumberFormatException e) {
-            return;
+            int firstDigitIndex = indexOfFirst(filename, Character::isDigit);
+
+            if (firstDigitIndex < 0) {
+                customFrameCount.remove(textureName);
+                return -1;
+            }
+
+            textureName = filename.substring(0, firstDigitIndex);
+            if (textureName.endsWith("-")) {
+                textureName = textureName.substring(0, textureName.length() - 1);
+            }
+
+            frameIndex = Integer.parseInt(filename.substring(firstDigitIndex));
+
+        } catch (Exception e) {
+            customFrameCount.remove(textureName);
+            Log.e("ResourceManager", "Failed to parse frame count for texture: " + filename, e);
+            return -1;
         }
 
-        if (!customFrameCount.containsKey(resnameWN) || Objects.requireNonNull(customFrameCount.get(resnameWN)) < frameNum + 1) {
-            customFrameCount.put(resnameWN, frameNum + 1);
+        if (!allowMissingFrames || (!textures.containsKey(textureName) && !textures.containsKey(textureName + "-0") && !textures.containsKey(textureName + "0"))) {
+            customFrameCount.remove(textureName);
+            return -1;
         }
+
+        if (!customFrameCount.containsKey(textureName) || Objects.requireNonNull(customFrameCount.get(textureName)) < frameIndex + 1) {
+            customFrameCount.put(textureName, frameIndex + 1);
+        }
+
+        return frameIndex;
     }
 
     public Font loadFont(final String resname, final String file, int size,
@@ -739,33 +764,10 @@ public class ResourceManager {
 
         String delimiter = "-";
 
-        if (Character.isDigit(resname.charAt(resname.length() - 1))) {
-
-            String resnameWN;
-            if (!resname.contains("-")) {
-                resnameWN = resname.substring(0, resname.length() - 1);
-            } else {
-                resnameWN = resname.substring(0, resname.lastIndexOf('-'));
-            }
-
-            if (textures.containsKey(resnameWN)
-                    || textures.containsKey(resnameWN + "-0")
-                    || textures.containsKey(resnameWN + "0")) {
-                int frameNum = Integer.parseInt(resname.substring(resnameWN.length() - 1));
-
-                if (!customFrameCount.containsKey(resnameWN) || Objects.requireNonNull(customFrameCount.get(resnameWN)) < frameNum + 1) {
-                    customFrameCount.put(resnameWN, frameNum + 1);
-                }
-            }
-        } else if (!textures.containsKey(resname)) {
-
+        if (parseFrameIndex(resname, false) < 0 && !textures.containsKey(resname)) {
             if (textures.containsKey(resname + "-0") || textures.containsKey(resname + "0")) {
-                if (textures.containsKey(resname + "0"))
+                if (textures.containsKey(resname + "0")) {
                     delimiter = "";
-
-                var frameCount = customFrameCount.get(resname);
-                if (frameCount != null && frameCount != 0) {
-                    customFrameCount.put(resname, 1);
                 }
                 multiframe = true;
             } else {
