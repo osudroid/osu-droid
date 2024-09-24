@@ -254,6 +254,11 @@ class UniversalModifier @JvmOverloads constructor(private val pool: Pool<Univers
                 return
             }
 
+            if (type == PARALLEL) {
+                // Sorting to reduce iterations, obviously sequential modifiers cannot be sorted.
+                value?.sortBy { it.duration }
+            }
+
             field = value
             duration = getDuration()
         }
@@ -317,9 +322,13 @@ class UniversalModifier @JvmOverloads constructor(private val pool: Pool<Univers
 
             var remainingSec = deltaSec
 
-            while (remainingSec > 0) {
+            while (remainingSec > 0 && !modifiers!!.all { it.isFinished }) {
 
                 var isCurrentModifierFinished = false
+
+                if (type == PARALLEL) {
+                    usedSec = 0f
+                }
 
                 for (modifier in modifiers!!) {
 
@@ -329,19 +338,23 @@ class UniversalModifier @JvmOverloads constructor(private val pool: Pool<Univers
 
                     if (type == SEQUENCE) {
                         remainingSec -= modifier.onUpdate(remainingSec, item)
-
-                        isCurrentModifierFinished = modifier.isFinished()
-                        break
+                    } else {
+                        usedSec = max(usedSec, modifier.onUpdate(deltaSec, item))
                     }
 
-                    usedSec = max(usedSec, modifier.onUpdate(deltaSec, item))
+                    isCurrentModifierFinished = modifier.isFinished
+
+                    if (type == SEQUENCE) {
+                        break
+                    }
                 }
 
-                if (type == SEQUENCE && isCurrentModifierFinished) {
+                if (type == PARALLEL) {
+                    remainingSec -= usedSec
+                } else if (isCurrentModifierFinished) {
                     break
                 }
 
-                remainingSec -= usedSec
             }
 
             usedSec = deltaSec - remainingSec
