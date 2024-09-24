@@ -24,7 +24,8 @@ import org.anddev.andengine.util.modifier.ease.IEaseFunction.DEFAULT as DefaultE
  */
 object Modifiers {
 
-    private val pool = Pool(10, 50, ::UniversalModifier)
+    @JvmStatic
+    val pool = Pool(50, ::UniversalModifier)
 
 
     @JvmStatic
@@ -171,12 +172,6 @@ object Modifiers {
         it.listener = listener
 
     }
-
-    @JvmStatic
-    fun free(modifier: UniversalModifier) = pool.free(modifier)
-
-    @JvmStatic
-    fun clearPool() = pool.clear()
 
 }
 

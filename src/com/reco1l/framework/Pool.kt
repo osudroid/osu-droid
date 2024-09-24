@@ -10,20 +10,12 @@ package com.reco1l.framework
  * @author Reco1l
  */
 class Pool<T : Any> @JvmOverloads constructor(
-    initialSize: Int = 0,
     private val maxSize: Int = -1,
     private val factory: (Pool<T>) -> T
 ) {
 
 
     private val objects = mutableListOf<T>()
-
-
-    init {
-        repeat(initialSize) {
-            objects.add(factory(this))
-        }
-    }
 
 
     /**
@@ -54,5 +46,29 @@ class Pool<T : Any> @JvmOverloads constructor(
     /**
      * Clear the pool.
      */
-    fun clear() = objects.clear()
+    fun clear() {
+        objects.clear()
+    }
+
+    /**
+     * Fills the pool up to the specified number of objects using the factory defined in the constructor.
+     */
+    fun fill(size: Int) {
+
+        if (size <= 0) {
+            throw IllegalArgumentException("Size must be greater than 0.")
+        }
+
+        for (i in objects.size until size) {
+            objects.add(factory(this))
+        }
+    }
+
+    /**
+     * Clears the pool and fills it up to the specified number of objects using the factory defined in the constructor.
+     */
+    fun renew(size: Int) {
+        objects.clear()
+        fill(size)
+    }
 }

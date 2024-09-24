@@ -467,9 +467,10 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
         GameHelper.setCurrentBeatTime(0);
 
         GameObjectPool.getInstance().purge();
-        SliderTickSprite.getPool().clear();
-        FollowPointConnection.getPool().clear();
-        Modifiers.clearPool();
+
+        FollowPointConnection.getPool().renew(16);
+        SliderTickSprite.getPool().renew(16);
+        Modifiers.getPool().renew(16);
 
         // TODO replay
         offsetSum = 0;
