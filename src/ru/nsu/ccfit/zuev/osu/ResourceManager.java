@@ -338,7 +338,7 @@ public class ResourceManager {
             return -1;
         }
 
-        if (!allowMissingFrames || (!textures.containsKey(textureName) && !textures.containsKey(textureName + "-0") && !textures.containsKey(textureName + "0"))) {
+        if (!allowMissingFrames && !textures.containsKey(textureName) && !textures.containsKey(textureName + "-0") && !textures.containsKey(textureName + "0")) {
             customFrameCount.remove(textureName);
             return -1;
         }
