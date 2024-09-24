@@ -267,7 +267,7 @@ public class ResourceManager {
                 var file = availableFiles.get(filename);
                 if (file != null) {
                     loadTexture(filename, file.getPath(), true);
-                    parseFrameIndex(filename, true);
+                    parseFrameIndex(filename, false);
                 } else {
                     unloadTexture(filename);
                 }
@@ -318,9 +318,14 @@ public class ResourceManager {
     /**
      * Parses the frame count from the filename and updates the customFrameCount map.
      *
+     * @param filename The filename, this shouldn't contain the file extension.
+     * @param checkFirstFrameExists Whether to check if the first frame is loaded or not,
+     *                              if this is set to true and the first frame is not
+     *                              loaded, the frame count will not be parsed.
+     *
      * @return The frame index parsed from the filename, or -1 if the frame count could not be parsed.
      */
-    private int parseFrameIndex(String filename, boolean allowMissingFrames) {
+    private int parseFrameIndex(String filename, boolean checkFirstFrameExists) {
 
         String textureName = filename;
         int frameIndex;
@@ -338,7 +343,7 @@ public class ResourceManager {
             return -1;
         }
 
-        if (!allowMissingFrames && !textures.containsKey(textureName) && !textures.containsKey(textureName + "-0") && !textures.containsKey(textureName + "0")) {
+        if (checkFirstFrameExists && !textures.containsKey(textureName) && !textures.containsKey(textureName + "-0") && !textures.containsKey(textureName + "0")) {
             customFrameCount.remove(textureName);
             return -1;
         }
@@ -766,7 +771,7 @@ public class ResourceManager {
 
         String delimiter = "-";
 
-        if (parseFrameIndex(resname, false) < 0 && !textures.containsKey(resname)) {
+        if (parseFrameIndex(resname, true) < 0 && !textures.containsKey(resname)) {
             if (textures.containsKey(resname + "-0") || textures.containsKey(resname + "0")) {
                 if (textures.containsKey(resname + "0")) {
                     delimiter = "";
