@@ -55,7 +55,8 @@ public class ResourceManager {
     // Explanation:
     // - The first capturing group will refer to the texture base name, some of them may contain one or more hyphens/dashes
     // in the name (e.g "menu-back") but it should never end with it.
-    // - The second capturing group will refer to the frame index, which is a number that may be followed by a hyphen or not.
+    // - The second capturing group will refer to the frame index, a hyphen/dash may or may not be present before this number.
+    // (e.g with hyphen "menu-back-0" or without "sliderb0")
     private static final Regex ANIMATABLE_TEXTURE_REGEX = new Regex("^(\\w+(?:-\\w+)*)-?(\\d+)$");
 
 
