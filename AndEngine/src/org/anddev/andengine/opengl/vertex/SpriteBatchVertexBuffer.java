@@ -1,7 +1,8 @@
 package org.anddev.andengine.opengl.vertex;
 
-import org.anddev.andengine.opengl.util.FastFloatBuffer;
 import org.anddev.andengine.util.Transformation;
+
+import java.nio.FloatBuffer;
 
 
 /**
@@ -160,30 +161,32 @@ public class SpriteBatchVertexBuffer extends VertexBuffer {
 	 * +-2
 	 */
 	public void addInner(final float pX1, final float pY1, final float pX2, final float pY2) {
-		final int x1 = Float.floatToRawIntBits(pX1);
-		final int y1 = Float.floatToRawIntBits(pY1);
-		final int x2 = Float.floatToRawIntBits(pX2);
-		final int y2 = Float.floatToRawIntBits(pY2);
 
-		final int[] bufferData = this.mBufferData;
+        final FloatBuffer floatBuffer = this.mFloatBuffer;
 		int index = this.mIndex;
-		bufferData[index++] = x1;
-		bufferData[index++] = y1;
 
-		bufferData[index++] = x1;
-		bufferData[index++] = y2;
+		floatBuffer.position(0);
 
-		bufferData[index++] = x2;
-		bufferData[index++] = y1;
+		floatBuffer.put(index++, pX1);
+		floatBuffer.put(index++, pY1);
 
-		bufferData[index++] = x2;
-		bufferData[index++] = y1;
+		floatBuffer.put(index++, pX1);
+		floatBuffer.put(index++, pY2);
 
-		bufferData[index++] = x1;
-		bufferData[index++] = y2;
+		floatBuffer.put(index++, pX2);
+		floatBuffer.put(index++, pY1);
 
-		bufferData[index++] = x2;
-		bufferData[index++] = y2;
+		floatBuffer.put(index++, pX2);
+		floatBuffer.put(index++, pY1);
+
+		floatBuffer.put(index++, pX1);
+		floatBuffer.put(index++, pY2);
+
+		floatBuffer.put(index++, pX2);
+		floatBuffer.put(index++, pY2);
+
+		floatBuffer.position(0);
+
 		this.mIndex = index;
 	}
 
@@ -193,42 +196,36 @@ public class SpriteBatchVertexBuffer extends VertexBuffer {
 	 * 2-4
 	 */
 	public void addInner(final float pX1, final float pY1, final float pX2, final float pY2, final float pX3, final float pY3, final float pX4, final float pY4) {
-		final int x1 = Float.floatToRawIntBits(pX1);
-		final int y1 = Float.floatToRawIntBits(pY1);
-		final int x2 = Float.floatToRawIntBits(pX2);
-		final int y2 = Float.floatToRawIntBits(pY2);
-		final int x3 = Float.floatToRawIntBits(pX3);
-		final int y3 = Float.floatToRawIntBits(pY3);
-		final int x4 = Float.floatToRawIntBits(pX4);
-		final int y4 = Float.floatToRawIntBits(pY4);
 
-		final int[] bufferData = this.mBufferData;
+        final FloatBuffer floatBuffer = this.mFloatBuffer;
 		int index = this.mIndex;
-		bufferData[index++] = x1;
-		bufferData[index++] = y1;
 
-		bufferData[index++] = x2;
-		bufferData[index++] = y2;
+		floatBuffer.position(0);
 
-		bufferData[index++] = x3;
-		bufferData[index++] = y3;
+		floatBuffer.put(index++, pX1);
+		floatBuffer.put(index++, pY1);
 
-		bufferData[index++] = x3;
-		bufferData[index++] = y3;
+		floatBuffer.put(index++, pX2);
+		floatBuffer.put(index++, pY2);
 
-		bufferData[index++] = x2;
-		bufferData[index++] = y2;
+		floatBuffer.put(index++, pX3);
+		floatBuffer.put(index++, pY3);
 
-		bufferData[index++] = x4;
-		bufferData[index++] = y4;
+		floatBuffer.put(index++, pX3);
+		floatBuffer.put(index++, pY3);
+
+		floatBuffer.put(index++, pX2);
+		floatBuffer.put(index++, pY2);
+
+		floatBuffer.put(index++, pX4);
+		floatBuffer.put(index++, pY4);
+
+		floatBuffer.position(0);
 		this.mIndex = index;
 	}
 
 	public void submit() {
-		final FastFloatBuffer buffer = this.mFloatBuffer;
-		buffer.position(0);
-		buffer.put(this.mBufferData);
-		buffer.position(0);
+		this.mFloatBuffer.position(0);
 
 		super.setHardwareBufferNeedsUpdate();
 	}
