@@ -12,19 +12,26 @@ import javax.microedition.khronos.opengles.*
  */
 open class ExtendedSprite(textureRegion: TextureRegion? = null) : ExtendedEntity(vertexBuffer = RectangleVertexBuffer(GL11.GL_STATIC_DRAW, true)) {
 
-    /**
-     * Whether the size of the sprite should be adjusted to the size of the texture.
-     */
-    var adjustSizeWithTexture = true
+
+    override var autoSizeAxes = Axes.Both
         set(value) {
             if (field != value) {
                 field = value
 
-                if (value) {
-                    super.setSize(textureRegion?.width?.toFloat() ?: 0f, textureRegion?.height?.toFloat() ?: 0f)
+                val currentTextureWidth = textureRegion?.width?.toFloat() ?: 0f
+                val currentTextureHeight = textureRegion?.height?.toFloat() ?: 0f
+
+                when (value) {
+                    Axes.X -> setSizeInternal(currentTextureWidth, height)
+                    Axes.Y -> setSizeInternal(width, currentTextureHeight)
+                    Axes.Both -> setSizeInternal(currentTextureWidth, currentTextureHeight)
+                    Axes.None -> Unit
                 }
+
+                updateVertexBuffer()
             }
         }
+
 
     /**
      * Whether the texture should be flipped horizontally.
@@ -61,30 +68,22 @@ open class ExtendedSprite(textureRegion: TextureRegion? = null) : ExtendedEntity
             field = value
             applyBlendFunction()
 
-            // Avoiding unnecessary buffer updates
-            var wasBufferUpdated = false
+            val textureWidth = value?.width?.toFloat() ?: 0f
+            val textureHeight = value?.height?.toFloat() ?: 0f
 
-            if (value == null) {
-                if (adjustSizeWithTexture && (width != 0f || height != 0f)) {
-                    super.setSize(0f, 0f)
-                    wasBufferUpdated = true
-                }
-            } else {
+            if (value != null) {
                 value.isFlippedVertical = flippedVertical
                 value.isFlippedHorizontal = flippedHorizontal
-
-                val textureWidth = value.width.toFloat()
-                val textureHeight = value.height.toFloat()
-
-                if (adjustSizeWithTexture && (width != textureWidth || height != textureHeight)) {
-                    super.setSize(textureWidth, textureHeight)
-                    wasBufferUpdated = true
-                }
             }
 
-            if (!wasBufferUpdated) {
-                updateVertexBuffer()
+            when(autoSizeAxes) {
+                Axes.X -> setSizeInternal(textureWidth, height)
+                Axes.Y -> setSizeInternal(width, textureHeight)
+                Axes.Both -> setSizeInternal(textureWidth, textureHeight)
+                Axes.None -> Unit
             }
+
+            updateVertexBuffer()
         }
 
 
@@ -99,25 +98,6 @@ open class ExtendedSprite(textureRegion: TextureRegion? = null) : ExtendedEntity
             setBlendFunction(BLENDFUNCTION_SOURCE_PREMULTIPLYALPHA_DEFAULT, BLENDFUNCTION_DESTINATION_PREMULTIPLYALPHA_DEFAULT)
         } else {
             setBlendFunction(BLENDFUNCTION_SOURCE_DEFAULT, BLENDFUNCTION_DESTINATION_DEFAULT)
-        }
-    }
-
-
-    override fun setSize(w: Float, h: Float) {
-        if (!adjustSizeWithTexture) {
-            super.setSize(w, h)
-        }
-    }
-
-    override fun setWidth(value: Float) {
-        if (!adjustSizeWithTexture) {
-            super.setWidth(value)
-        }
-    }
-
-    override fun setHeight(value: Float) {
-        if (!adjustSizeWithTexture) {
-            super.setHeight(value)
         }
     }
 

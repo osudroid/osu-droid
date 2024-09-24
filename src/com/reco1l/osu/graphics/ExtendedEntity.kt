@@ -24,6 +24,13 @@ open class ExtendedEntity(
 
 ) : Shape(0f, 0f) {
 
+
+    /**
+     * Determines which axes the entity should automatically adjust its size to.
+     */
+    open var autoSizeAxes = Axes.None
+
+
     /**
      * The origin factor of the entity in the X axis.
      */
@@ -48,7 +55,6 @@ open class ExtendedEntity(
      * Whether the color should be inherited from all the parents in the hierarchy.
      */
     var inheritColor = true
-
 
 
     init {
@@ -182,16 +188,37 @@ open class ExtendedEntity(
     }
 
 
+    /**
+     * This will set the size of the entity without updating the buffer.
+     *
+     * Intended for internal use only to handle the [autoSizeAxes] property.
+     */
+    protected fun setSizeInternal(w: Float, h: Float) {
+        width = w
+        height = h
+    }
+
     open fun setSize(w: Float, h: Float) {
-        if (width != w || height != h) {
+
+        var updateBuffer = false
+
+        if (width != w && (autoSizeAxes == Axes.None || autoSizeAxes == Axes.Y)) {
             width = w
+            updateBuffer = true
+        }
+
+        if (height != h && (autoSizeAxes == Axes.None || autoSizeAxes == Axes.X)) {
             height = h
+            updateBuffer = true
+        }
+
+        if (updateBuffer) {
             updateVertexBuffer()
         }
     }
 
     open fun setWidth(value: Float) {
-        if (width != value) {
+        if (width != value && (autoSizeAxes == Axes.None || autoSizeAxes == Axes.Y)) {
             width = value
             updateVertexBuffer()
         }
@@ -202,7 +229,7 @@ open class ExtendedEntity(
     }
 
     open fun setHeight(value: Float) {
-        if (height != value) {
+        if (height != value && (autoSizeAxes == Axes.None || autoSizeAxes == Axes.X)) {
             height = value
             updateVertexBuffer()
         }
@@ -269,4 +296,28 @@ enum class Origin(val factorX: Float, val factorY: Float) {
 
     BottomRight(1f, 1f)
 
+}
+
+
+enum class Axes {
+
+    /**
+     * The entity will automatically adjust its size to the width of the parent.
+     */
+    X,
+
+    /**
+     * The entity will automatically adjust its size to the height of the parent.
+     */
+    Y,
+
+    /**
+     * The entity will automatically adjust its size to the width and height of the parent.
+     */
+    Both,
+
+    /**
+     * The entity will not automatically adjust its size.
+     */
+    None
 }
