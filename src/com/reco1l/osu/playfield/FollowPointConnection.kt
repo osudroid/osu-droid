@@ -83,6 +83,11 @@ object FollowPointConnection {
 
             val fp = pool.obtain()
 
+            if (fp is AnimatedSprite) {
+                // For animated follow points, reset the frame back to 0.
+                fp.elapsedSec = 0f
+            }
+
             fp.clearEntityModifiers()
             fp.setPosition(pointStartX, pointStartY)
             fp.setOrigin(Origin.Center)
