@@ -316,8 +316,9 @@ class UniversalModifier @JvmOverloads constructor(private val pool: Pool<Univers
         if (type == SEQUENCE || type == PARALLEL) {
 
             var remainingSec = deltaSec
+            var isAllModifiersFinished = false
 
-            while (remainingSec > 0 && !modifiers!!.all { it.isFinished }) {
+            while (remainingSec > 0 && !isAllModifiersFinished) {
 
                 var isCurrentModifierFinished = false
 
@@ -325,11 +326,15 @@ class UniversalModifier @JvmOverloads constructor(private val pool: Pool<Univers
                     usedSec = 0f
                 }
 
+                // Assuming all modifiers are finished until proven otherwise in the loop below.
+                isAllModifiersFinished = true
+
                 for (modifier in modifiers!!) {
 
                     if (modifier.isFinished) {
                         continue
                     }
+                    isAllModifiersFinished = false
 
                     if (type == SEQUENCE) {
                         remainingSec -= modifier.onUpdate(remainingSec, item)
