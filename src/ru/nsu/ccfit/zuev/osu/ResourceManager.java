@@ -2,7 +2,7 @@ package ru.nsu.ccfit.zuev.osu;
 
 import static kotlin.collections.ArraysKt.any;
 import static kotlin.collections.ArraysKt.filter;
-import static kotlin.text.StringsKt.indexOfFirst;
+import static kotlin.collections.ArraysKt.joinToString;
 
 import android.content.Context;
 import android.graphics.Color;
@@ -45,6 +45,7 @@ import ru.nsu.ccfit.zuev.osu.helper.QualityAssetBitmapSource;
 import ru.nsu.ccfit.zuev.osu.helper.QualityFileBitmapSource;
 import ru.nsu.ccfit.zuev.osu.helper.ScaledBitmapSource;
 import ru.nsu.ccfit.zuev.osu.online.OnlineManager;
+import ru.nsu.ccfit.zuev.osuplus.BuildConfig;
 import ru.nsu.ccfit.zuev.skins.OsuSkin;
 import ru.nsu.ccfit.zuev.skins.SkinJsonReader;
 import ru.nsu.ccfit.zuev.skins.SkinManager;
@@ -52,12 +53,28 @@ import ru.nsu.ccfit.zuev.skins.StringSkinData;
 
 public class ResourceManager {
 
+    private static final String[] ANIMATABLE_TEXTURES = {
+        "followpoint-",
+        "hit0-",
+        "hit100-",
+        "hit100k-",
+        "hit300-",
+        "hit300g-",
+        "hit300k-",
+        "hit50-",
+        "menu-back-",
+        "play-skip-",
+        "scorebar-colour-",
+        "sliderb",
+        "sliderfollowcircle-"
+    };
+
     // Explanation:
     // - The first capturing group will refer to the texture base name, some of them may contain one or more hyphens/dashes
     // in the name (e.g "menu-back") but it should never end with it.
     // - The second capturing group will refer to the frame index, a hyphen/dash may or may not be present before this number.
     // (e.g with hyphen "menu-back-0" or without "sliderb0")
-    private static final Regex ANIMATABLE_TEXTURE_REGEX = new Regex("^(\\w+(?:-\\w+)*)-?(\\d+)$");
+    private static final Regex ANIMATABLE_TEXTURE_REGEX = new Regex("^(" + joinToString(ANIMATABLE_TEXTURES, "|", "", "", -1, "", null) + ")(\\d+)$");
 
 
     private final static ResourceManager mgr = new ResourceManager();
@@ -214,8 +231,7 @@ public class ResourceManager {
 
         try {
 
-            String[] animatableTextures = { "play-skip-", "menu-back-", "scorebar-colour-", "hit0-", "hit50-", "hit100-", "hit100k-", "hit300-", "hit300k-", "hit300g-", "followpoint-", "sliderb", "sliderfollowcircle-" };
-            String[] availableAnimatableFilenames = filter(availableFiles.keySet().toArray(new String[0]), f -> any(animatableTextures, f::startsWith)).toArray(new String[0]);
+            String[] availableAnimatableFilenames = filter(availableFiles.keySet().toArray(new String[0]), f -> any(ANIMATABLE_TEXTURES, f::startsWith)).toArray(new String[0]);
 
             for (var assetName : Objects.requireNonNull(context.getAssets().list("gfx"))) {
 
@@ -223,7 +239,7 @@ public class ResourceManager {
 
                 // Animatable textures are managed separately unless they're not present in the skin folder.
                 var skip = false;
-                for (var animatableTexture : animatableTextures) {
+                for (var animatableTexture : ANIMATABLE_TEXTURES) {
                     if (textureName.startsWith(animatableTexture) && any(availableAnimatableFilenames, f -> f.startsWith(animatableTexture))) {
                         skip = true;
                         break;
@@ -338,6 +354,10 @@ public class ResourceManager {
             List<String> values = result.getGroupValues();
 
             textureName = values.get(1);
+            if (textureName.endsWith("-")) {
+                textureName = textureName.substring(0, textureName.length() - 1);
+            }
+
             frameIndex = Integer.parseInt(values.get(2));
         } else {
             customFrameCount.remove(textureName);
@@ -351,6 +371,10 @@ public class ResourceManager {
 
         if (!customFrameCount.containsKey(textureName) || Objects.requireNonNull(customFrameCount.get(textureName)) < frameIndex + 1) {
             customFrameCount.put(textureName, frameIndex + 1);
+        }
+
+        if (BuildConfig.DEBUG) {
+            Log.v("ResourceManager", "Parsed frame index: " + frameIndex + " from " + filename);
         }
 
         return frameIndex;
