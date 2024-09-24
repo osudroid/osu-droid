@@ -314,11 +314,6 @@ public class ResourceManager {
             Debug.e("Resources: " + e.getMessage(), e);
         }
 
-        loadTexture("::track", "gfx/hitcircle.png", false,
-                TextureOptions.BILINEAR_PREMULTIPLYALPHA);
-        loadTexture("::track2", "gfx/slidertrack.png", false);
-        loadTexture("::trackborder", "gfx/sliderborder.png", false,
-                TextureOptions.BILINEAR_PREMULTIPLYALPHA);
         loadTexture("ranking_button", "ranking_button.png", false);
         loadTexture("ranking_enabled", "ranking_enabled.png", false);
         loadTexture("ranking_disabled", "ranking_disabled.png", false);
@@ -328,8 +323,6 @@ public class ResourceManager {
         loadTexture("selection-ranked", "selection-ranked.png", false);
         if (!textures.containsKey("lighting"))
             textures.put("lighting", null);
-//		textures.put("fail-background", null);
-//		textures.put("pause-overlay", null);
     }
 
     /**
