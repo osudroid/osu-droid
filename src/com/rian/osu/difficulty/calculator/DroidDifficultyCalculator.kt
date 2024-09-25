@@ -251,8 +251,7 @@ class DroidDifficultyCalculator : DifficultyCalculator<DroidDifficultyHitObject,
                         clockRate,
                         this,
                         size - 1,
-                        greatWindow,
-                        (parameters?.mods?.find { m -> m is ModDifficultyAdjust } as ModDifficultyAdjust?)?.ar != null
+                        greatWindow
                     ).also { d -> d.computeProperties(clockRate, it) }
                 )
             }

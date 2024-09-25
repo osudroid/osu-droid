@@ -46,12 +46,7 @@ class DroidDifficultyHitObject(
     /**
      * The full great window of the hit object.
      */
-    greatWindow: Double,
-
-    /**
-     * Whether force AR was enabled.
-     */
-    forceAR: Boolean
+    greatWindow: Double
 ) : DifficultyHitObject(obj, lastObj, lastLastObj, clockRate, difficultyHitObjects, index, greatWindow) {
     override val mode = GameMode.Droid
     override val maximumSliderRadius = NORMALIZED_RADIUS * 2
@@ -89,7 +84,7 @@ class DroidDifficultyHitObject(
      * Adjusted preempt time of the [HitObject], taking speed multiplier into account.
      */
     @JvmField
-    val timePreempt = if (forceAR) obj.timePreempt else obj.timePreempt / clockRate
+    val timePreempt = obj.timePreempt / clockRate
 
     override fun computeProperties(clockRate: Double, objects: List<HitObject>) {
         super.computeProperties(clockRate, objects)
