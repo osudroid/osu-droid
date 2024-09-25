@@ -1,6 +1,7 @@
 package com.reco1l.osu.playfield
 
 import com.reco1l.osu.graphics.*
+import com.reco1l.osu.graphics.container.*
 import ru.nsu.ccfit.zuev.osu.*
 import ru.nsu.ccfit.zuev.osu.game.CircleNumber
 
@@ -9,13 +10,18 @@ open class CirclePiece(
     circleTexture: String,
     overlayTexture: String
 
-) : ExtendedEntity() {
+) : Container() {
+
+
+    override var originX = 0.5f
+
+    override var originY = 0.5f
 
 
     private val circle = ExtendedSprite().also {
 
-        it.originX = 0.5f
-        it.originY = 0.5f
+        it.setOrigin(Origin.Center)
+        it.setAnchor(Origin.Center)
         it.textureRegion = ResourceManager.getInstance().getTexture(circleTexture)
 
         attachChild(it)
@@ -23,8 +29,8 @@ open class CirclePiece(
 
     private val overlay = ExtendedSprite().also {
 
-        it.originX = 0.5f
-        it.originY = 0.5f
+        it.setOrigin(Origin.Center)
+        it.setAnchor(Origin.Center)
         it.textureRegion = ResourceManager.getInstance().getTexture(overlayTexture)
 
         attachChild(it)
@@ -41,8 +47,8 @@ class NumberedCirclePiece(circleTexture: String, overlayTexture: String) : Circl
 
     private val number = CircleNumber().also {
 
-        it.originX = 0.5f
-        it.originY = 0.5f
+        it.setOrigin(Origin.Center)
+        it.setAnchor(Origin.Center)
         attachChild(it)
     }
 

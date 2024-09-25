@@ -18,14 +18,14 @@ open class ExtendedSprite(textureRegion: TextureRegion? = null) : ExtendedEntity
             if (field != value) {
                 field = value
 
-                val currentTextureWidth = textureRegion?.width?.toFloat() ?: 0f
-                val currentTextureHeight = textureRegion?.height?.toFloat() ?: 0f
+                if (autoSizeAxes != Axes.None) {
+                    val currentTextureWidth = textureRegion?.width?.toFloat() ?: 0f
+                    val currentTextureHeight = textureRegion?.height?.toFloat() ?: 0f
 
-                when (value) {
-                    Axes.X -> setSizeInternal(currentTextureWidth, height)
-                    Axes.Y -> setSizeInternal(width, currentTextureHeight)
-                    Axes.Both -> setSizeInternal(currentTextureWidth, currentTextureHeight)
-                    Axes.None -> Unit
+                    setSizeInternal(
+                        if (autoSizeAxes == Axes.X || autoSizeAxes == Axes.Both) currentTextureWidth else width,
+                        if (autoSizeAxes == Axes.Y || autoSizeAxes == Axes.Both) currentTextureHeight else height
+                    )
                 }
 
                 updateVertexBuffer()
@@ -68,19 +68,19 @@ open class ExtendedSprite(textureRegion: TextureRegion? = null) : ExtendedEntity
             field = value
             applyBlendFunction()
 
-            val textureWidth = value?.width?.toFloat() ?: 0f
-            val textureHeight = value?.height?.toFloat() ?: 0f
-
             if (value != null) {
                 value.isFlippedVertical = flippedVertical
                 value.isFlippedHorizontal = flippedHorizontal
             }
 
-            when(autoSizeAxes) {
-                Axes.X -> setSizeInternal(textureWidth, height)
-                Axes.Y -> setSizeInternal(width, textureHeight)
-                Axes.Both -> setSizeInternal(textureWidth, textureHeight)
-                Axes.None -> Unit
+            if (autoSizeAxes != Axes.None) {
+                val textureWidth = value?.width?.toFloat() ?: 0f
+                val textureHeight = value?.height?.toFloat() ?: 0f
+
+                setSizeInternal(
+                    if (autoSizeAxes == Axes.X || autoSizeAxes == Axes.Both) textureWidth else width,
+                    if (autoSizeAxes == Axes.Y || autoSizeAxes == Axes.Both) textureHeight else height
+                )
             }
 
             updateVertexBuffer()

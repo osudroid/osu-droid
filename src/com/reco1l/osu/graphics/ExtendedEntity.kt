@@ -1,5 +1,6 @@
 package com.reco1l.osu.graphics
 
+import com.reco1l.osu.graphics.container.*
 import org.anddev.andengine.collision.*
 import org.anddev.andengine.engine.camera.*
 import org.anddev.andengine.entity.primitive.*
@@ -14,7 +15,7 @@ import javax.microedition.khronos.opengles.*
  *
  * @author Reco1l
  */
-open class ExtendedEntity(
+abstract class ExtendedEntity(
 
     private var width: Float = 0f,
 
@@ -30,31 +31,69 @@ open class ExtendedEntity(
      */
     open var autoSizeAxes = Axes.None
 
-
     /**
      * The origin factor of the entity in the X axis.
      */
-    var originX = 0f
+    open var originX = 0f
 
     /**
      * The origin factor of the entity in the Y axis.
      */
-    var originY = 0f
+    open var originY = 0f
+
+    /**
+     * The anchor factor of the entity in the X axis.
+     * This is used to determine the position of the entity in a container.
+     *
+     * Note: This will not take effect if the entity is not a child of a [Container].
+     */
+    open var anchorX = 0f
+
+    /**
+     * The anchor factor of the entity in the Y axis.
+     * This is used to determine the position of the entity in a container.
+     *
+     * Note: This will not take effect if the entity is not a child of a [Container].
+     */
+    open var anchorY = 0f
 
     /**
      * The translation in the X axis.
      */
-    var translationX = 0f
+    open var translationX = 0f
 
     /**
      * The translation in the Y axis.
      */
-    var translationY = 0f
+    open var translationY = 0f
 
     /**
      * Whether the color should be inherited from all the parents in the hierarchy.
      */
-    var inheritColor = true
+    open var inheritColor = true
+
+
+    /**
+     * Intended for internal use only.
+     *
+     * Despite [setWidth] this will ignore [autoSizeAxes] and force the width to be set, as well the buffer will not be updated.
+     */
+    protected var internalWidth
+        get() = width
+        set(value) {
+            width = value
+        }
+
+    /**
+     * Intended for internal use only.
+     *
+     * Despite [setHeight] this will ignore [autoSizeAxes] and force the height to be set, as well the buffer will not be updated.
+     */
+    protected var internalHeight
+        get() = height
+        set(value) {
+            height = value
+        }
 
 
     init {
@@ -65,28 +104,40 @@ open class ExtendedEntity(
     }
 
 
-    fun setOrigin(origin: Origin) {
+    open fun setAnchor(anchor: Origin) {
+        anchorX = anchor.factorX
+        anchorY = anchor.factorY
+    }
+
+    open fun setOrigin(origin: Origin) {
         originX = origin.factorX
         originY = origin.factorY
     }
 
-    fun setRotationCenter(center: Origin) {
+    open fun setRotationCenter(center: Origin) {
         mRotationCenterX = center.factorX
         mRotationCenterY = center.factorY
     }
 
-    fun setScaleCenter(center: Origin) {
+    open fun setScaleCenter(center: Origin) {
         mScaleCenterX = center.factorX
         mScaleCenterY = center.factorY
     }
 
-    fun setX(value: Float) {
+    override fun setPosition(pX: Float, pY: Float) {
+        if (mX != pX || mY != pY) {
+            super.setPosition(pX, pY)
+            (parent as? Container)?.onChildPositionChanged(this)
+        }
+    }
+
+    open fun setX(value: Float) {
         if (mX != value) {
             setPosition(value, mY)
         }
     }
 
-    fun setY(value: Float) {
+    open fun setY(value: Float) {
         if (mY != value) {
             setPosition(mX, value)
         }
@@ -95,14 +146,24 @@ open class ExtendedEntity(
 
     override fun applyTranslation(pGL: GL10) {
 
-        if (x == 0f && y == 0f && originX == 0f && originY == 0f && translationX == 0f && translationY == 0f) {
+        val parent = parent
+        if (parent is Container) {
+            parent.onApplyChildTranslation(pGL, this)
             return
         }
 
-        val offsetX = width * originX
-        val offsetY = height * originY
+        val originOffsetX = width * originX
+        val originOffsetY = height * originY
 
-        pGL.glTranslatef(x - offsetX + translationX, y - offsetY + translationY, 0f)
+        val anchorOffsetX = if (parent is IShape) parent.width * anchorX else 0f
+        val anchorOffsetY = if (parent is IShape) parent.height * anchorY else 0f
+
+        val finalX = x - originOffsetX + anchorOffsetX + translationX
+        val finalY = y - originOffsetY + anchorOffsetY + translationY
+
+        if (finalX != 0f || finalY != 0f) {
+            pGL.glTranslatef(finalX, finalY, 0f)
+        }
     }
 
     override fun applyRotation(pGL: GL10) {
@@ -133,7 +194,7 @@ open class ExtendedEntity(
         pGL.glTranslatef(-offsetX, -offsetY, 0f)
     }
 
-    private fun applyColor(pGL: GL10) {
+    protected open fun applyColor(pGL: GL10) {
 
         var red = mRed
         var green = mGreen
@@ -170,11 +231,6 @@ open class ExtendedEntity(
         if (vertexBuffer != null) {
             pGL.glDrawArrays(GL10.GL_TRIANGLE_STRIP, 0, 4)
         }
-    }
-
-
-    override fun onUpdateVertexBuffer() {
-
     }
 
     override fun onApplyVertices(pGL: GL10) {
@@ -268,6 +324,10 @@ open class ExtendedEntity(
             || mY > pCamera.maxY
             || mX + this.width < pCamera.minX
             || mY + this.height < pCamera.minY
+    }
+
+    override fun getSceneCenterCoordinates(): FloatArray {
+        return this.convertLocalToSceneCoordinates(width * 0.5f, height * 0.5f)
     }
 
 }

@@ -1,6 +1,5 @@
 package com.reco1l.osu.graphics
 
-import com.reco1l.osu.graphics.AnimationState.*
 import org.anddev.andengine.opengl.texture.region.*
 import ru.nsu.ccfit.zuev.osu.*
 import kotlin.math.*
@@ -48,7 +47,7 @@ open class AnimatedSprite(frames: Array<TextureRegion?>) : ExtendedSprite() {
      */
     var frames = frames
         set(value) {
-            state = STOPPED
+            stop()
             textureRegion = value.firstOrNull()
             field = value
         }
@@ -61,20 +60,12 @@ open class AnimatedSprite(frames: Array<TextureRegion?>) : ExtendedSprite() {
     var fps = -1f
 
     /**
-     * The current state of the animation.
+     * Whether the animation is playing.
      *
-     * @see AnimationState
+     * Setting this value to false will pause the animation and vice-versa.
+     * To stop the animation, use the [stop] method.
      */
-    var state = PLAYING
-        set(value) {
-
-            // Reset the elapsed time when the animation is started.
-            if (field == STOPPED) {
-                elapsedSec = 0f
-            }
-
-            field = value
-        }
+    var isPlaying = true
 
     /**
      * Whether the animation should loop.
@@ -101,7 +92,7 @@ open class AnimatedSprite(frames: Array<TextureRegion?>) : ExtendedSprite() {
 
     override fun onManagedUpdate(pSecondsElapsed: Float) {
 
-        if (frames.isNotEmpty() && state == PLAYING) {
+        if (frames.isNotEmpty() && isPlaying) {
 
             elapsedSec += pSecondsElapsed
 
@@ -115,14 +106,30 @@ open class AnimatedSprite(frames: Array<TextureRegion?>) : ExtendedSprite() {
                 frameIndex = frameIndex.coerceAtMost(frames.size - 1)
 
                 if (frameIndex == frames.size - 1) {
-                    state = STOPPED
+                    stop()
                 }
             }
 
             textureRegion = frames[frameIndex]
+        } else if (isPlaying) {
+            isPlaying = false
         }
 
         super.onManagedUpdate(pSecondsElapsed)
+    }
+
+
+    fun play() {
+        isPlaying = true
+    }
+
+    fun pause() {
+        isPlaying = false
+    }
+
+    fun stop() {
+        isPlaying = false
+        elapsedSec = 0f
     }
 
 
@@ -138,25 +145,4 @@ open class AnimatedSprite(frames: Array<TextureRegion?>) : ExtendedSprite() {
 
     }
 
-}
-
-/**
- * The animation state.
- */
-enum class AnimationState {
-
-    /**
-     * The animation is playing.
-     */
-    PLAYING,
-
-    /**
-     * The animation is paused.
-     */
-    PAUSED,
-
-    /**
-     * The animation is stopped.
-     */
-    STOPPED
 }

@@ -2,15 +2,14 @@ package com.reco1l.osu.playfield
 
 import com.reco1l.osu.graphics.*
 import com.reco1l.osu.graphics.ModifierType.*
+import com.reco1l.osu.graphics.container.*
 import org.anddev.andengine.engine.camera.*
 import org.anddev.andengine.opengl.texture.region.*
 import org.anddev.andengine.util.modifier.ease.EaseQuadIn
 import org.anddev.andengine.util.modifier.ease.EaseQuadOut
 import ru.nsu.ccfit.zuev.osu.*
-import ru.nsu.ccfit.zuev.osu.game.GameHelper
 import ru.nsu.ccfit.zuev.skins.*
 import javax.microedition.khronos.opengles.*
-import kotlin.math.*
 
 
 class ScoreText @JvmOverloads constructor(
@@ -19,7 +18,7 @@ class ScoreText @JvmOverloads constructor(
 
     private val withPopOut: Boolean = false
 
-) : ExtendedEntity() {
+) : LinearContainer() {
 
     /**
      * The text to display.
@@ -64,6 +63,7 @@ class ScoreText @JvmOverloads constructor(
 
         if (withPopOut) {
             popOutText = ScoreText(texturePrefix)
+            popOutText!!.setAnchor(Origin.BottomLeft)
             popOutText!!.setScaleCenter(Origin.BottomLeft)
 
             // Reference https://github.com/ppy/osu/blob/d159d6b9700d90f6a40cda0f832df59f6086e7ef/osu.Game/Skinning/LegacyComboCounter.cs#L177-L186
@@ -129,9 +129,9 @@ class ScoreText @JvmOverloads constructor(
     }
 
 
-    override fun onDrawChildren(pGL: GL10?, pCamera: Camera?) {
-        super.onDrawChildren(pGL, pCamera)
+    override fun onDrawChildren(pGL: GL10, pCamera: Camera) {
         popOutText?.onDraw(pGL, pCamera)
+        super.onDrawChildren(pGL, pCamera)
     }
 
     override fun onManagedUpdate(pSecondsElapsed: Float) {
@@ -141,23 +141,13 @@ class ScoreText @JvmOverloads constructor(
 
             allocateSprites(text.length)
 
-            var width = 0f
-            var height = 0f
-
             for (i in text.indices) {
 
                 val char = text[i]
                 val sprite = getChild(i) as? ExtendedSprite ?: continue
 
                 sprite.textureRegion = characters[char]
-                sprite.x = width
-                sprite.y = 0f
-
-                width += sprite.width
-                height = max(height, sprite.height)
             }
-
-            setSize(width, height)
 
             if (withPopOut) {
                 smallPopOutModifier!!.reset()

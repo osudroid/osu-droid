@@ -119,7 +119,7 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
     private final StringBuilder strBuilder = new StringBuilder();
     public String audioFilePath = null;
     private ExtendedScene scene;
-    private Scene bgScene, mgScene, fgScene;
+    private ExtendedScene bgScene, mgScene, fgScene;
     private Scene oldScene;
     private Beatmap beatmap;
     private BeatmapInfo lastBeatmapInfo;
@@ -240,9 +240,9 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
     public GameScene(final Engine engine) {
         this.engine = engine;
         scene = new ExtendedScene();
-        bgScene = new Scene();
-        fgScene = new Scene();
-        mgScene = new Scene();
+        bgScene = new ExtendedScene();
+        fgScene = new ExtendedScene();
+        mgScene = new ExtendedScene();
         scene.attachChild(bgScene);
         scene.attachChild(mgScene);
         scene.attachChild(fgScene);
@@ -561,9 +561,9 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
             storyboardSprite.detachSelf();
             scene.attachChild(storyboardSprite);
         }
-        bgScene = new Scene();
-        mgScene = new Scene();
-        fgScene = new Scene();
+        bgScene = new ExtendedScene();
+        mgScene = new ExtendedScene();
+        fgScene = new ExtendedScene();
         scene.attachChild(bgScene);
         scene.attachChild(mgScene);
         if (storyboardOverlayProxy != null) {
@@ -803,19 +803,22 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
             addPassiveObject(scorebar);
 
             scoreText = new ScoreText(OsuSkin.get().getScorePrefix());
-            scoreText.setPosition(Config.getRES_WIDTH(), 0);
+            scoreText.setAnchor(Origin.TopRight);
             scoreText.setOrigin(Origin.TopRight);
+            scoreText.setScaleCenter(Origin.TopRight);
             scoreText.setText("0000000000");
             scoreText.setScale(0.9f);
 
             accuracyText = new ScoreText(OsuSkin.get().getScorePrefix());
-            accuracyText.setPosition(Config.getRES_WIDTH(), 50);
+            accuracyText.setAnchor(Origin.TopRight);
             accuracyText.setOrigin(Origin.TopRight);
+            accuracyText.setScaleCenter(Origin.TopRight);
             accuracyText.setText("000.00%");
             accuracyText.setScale(0.6f);
+            accuracyText.setY(50);
 
             comboText = new ScoreText(OsuSkin.get().getComboPrefix(), Config.isAnimateComboText());
-            comboText.setY(Config.getRES_HEIGHT());
+            comboText.setAnchor(Origin.BottomLeft);
             comboText.setOrigin(Origin.BottomLeft);
             comboText.setScaleCenter(Origin.BottomLeft);
             comboText.setScale(1.5f);

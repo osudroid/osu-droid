@@ -45,6 +45,12 @@ class TriangleMesh : ExtendedEntity(vertexBuffer = null) {
         }
     }
 
+
+    override fun onUpdateVertexBuffer() {
+
+    }
+
+
     override fun drawVertices(pGL: GL10, pCamera: Camera) {
 
         if (vertices.length == 0) {
