@@ -69,11 +69,17 @@ public class ResourceManager {
         "sliderfollowcircle-"
     };
 
-    // Explanation:
-    // - The first capturing group will refer to the texture base name, some of them may contain one or more hyphens/dashes
-    // in the name (e.g "menu-back") but it should never end with it.
-    // - The second capturing group will refer to the frame index, a hyphen/dash may or may not be present before this number.
-    // (e.g with hyphen "menu-back-0" or without "sliderb0")
+    /**
+     * <h2>Explanation</h2>
+     * <p>
+     * The first capturing group will refer to the texture's base name. The name may contain one or more hyphens/dashes
+     * in the name (e.g <code>menu-back</code>), but it should never end with a hyphen/dash.
+     * </p>
+     * <p>
+     * The second capturing group will refer to the frame index. A hyphen/dash may be present before the frame index
+     * (e.g., <code>menu-back-0</code> (with hyphen) or <code>sliderb0</code> (without hyphen)).
+     * </p>
+     */
     private static final Regex ANIMATABLE_TEXTURE_REGEX = new Regex("^(" + joinToString(ANIMATABLE_TEXTURES, "|", "", "", -1, "", null) + ")(\\d+)$");
 
 
