@@ -1,5 +1,6 @@
 package com.rian.osu.difficulty.calculator
 
+import com.rian.osu.mods.IApplicableToTrackRate
 import com.rian.osu.mods.Mod
 import com.rian.osu.mods.ModDoubleTime
 import com.rian.osu.mods.ModHalfTime
@@ -22,20 +23,11 @@ class DifficultyCalculationParameters {
     /**
      * The overall speed multiplier to calculate for.
      */
-    val totalSpeedMultiplier: Float
-        get() {
-            var speedMultiplier = customSpeedMultiplier
-
-            if (mods.any { it is ModDoubleTime || it is ModNightCore }) {
-                speedMultiplier *= 1.5f
-            }
-
-            if (mods.any { it is ModHalfTime }) {
-                speedMultiplier *= 0.75f
-            }
-
-            return speedMultiplier
+    val totalSpeedMultiplier by lazy {
+        customSpeedMultiplier * mods.filterIsInstance<IApplicableToTrackRate>().fold(1f) { acc, mod ->
+            acc * mod.trackRateMultiplier
         }
+    }
 
     /**
      * Copies this instance to another instance.
