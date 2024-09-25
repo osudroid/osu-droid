@@ -16,7 +16,7 @@ import kotlin.math.*
 object FollowPointConnection {
 
 
-    private const val SPACING = 32 * 1.5f
+    private const val SPACING = 32
 
     private const val PREEMPT = 800
 
@@ -47,23 +47,6 @@ object FollowPointConnection {
     fun addConnection(scene: Scene, secPassed: Float, start: HitObject, end: HitObject) {
         // Reference: https://github.com/ppy/osu/blob/7bc8908ca9c026fed1d831eb6e58df7624a8d614/osu.Game.Rulesets.Osu/Objects/Drawables/Connections/FollowPointConnection.cs
 
-        // Since the unit of spacing is in osu!pixels, we cannot directly port the reference code. As such, we need to
-        // approach it with another method. We use the distance between the start and end positions in osu!pixels to
-        // determine the amount of sprites to spawn, and then map them into gameplay positions in pixels.
-        val osuPixelsStartPosition = start.difficultyStackedEndPosition
-        val osuPixelsEndPosition = end.difficultyStackedPosition
-
-        val osuPixelsDistance = hypot(
-            osuPixelsEndPosition.x - osuPixelsStartPosition.x,
-            osuPixelsEndPosition.y - osuPixelsStartPosition.y
-        )
-
-        val spriteCount = floor(osuPixelsDistance / SPACING).toInt()
-
-        if (spriteCount == 0) {
-            return
-        }
-
         val scale = start.gameplayScale
         val startTime = (start.endTime / 1000f).toFloat()
 
@@ -72,7 +55,6 @@ object FollowPointConnection {
 
         val distanceX = endPosition.x - startPosition.x
         val distanceY = endPosition.y - startPosition.y
-
         val rotation = atan2(distanceY, distanceX) * (180f / Math.PI).toFloat()
 
         val endFadeInTime = end.timeFadeIn.toFloat() / 1000f
@@ -82,13 +64,23 @@ object FollowPointConnection {
         // This uniform speedup is hard to match 1:1, however we can at least make AR>10 (via mods) feel good by extending the upper linear preempt function.
         // Note that this doesn't exactly match the AR>10 visuals as they're classically known, but it feels good.
         val preempt = PREEMPT * min(1.0, start.timePreempt / HitObject.PREEMPT_MIN).toFloat() / 1000f
-        val pointStartOffset = 0.1f / spriteCount
 
-        for (i in 1 ..spriteCount) {
-            val fraction = i.toFloat() / spriteCount
+        // Since the unit of spacing is in osu!pixels, we cannot directly port the reference code. As such, we need to
+        // approach it with another method. We use the distance between the start and end positions in osu!pixels to
+        // determine the amount of sprites to spawn, and then map them into gameplay positions in pixels.
+        val osuPixelsStartPosition = start.difficultyStackedEndPosition
+        val osuPixelsEndPosition = end.difficultyStackedPosition
 
-            val pointStartX = startPosition.x + distanceX * (fraction - pointStartOffset)
-            val pointStartY = startPosition.y + distanceY * (fraction - pointStartOffset)
+        val osuPixelsDistance = hypot(
+            osuPixelsEndPosition.x - osuPixelsStartPosition.x,
+            osuPixelsEndPosition.y - osuPixelsStartPosition.y
+        ).toInt()
+
+        for (d in (SPACING * 1.5f).toInt() until osuPixelsDistance - SPACING step SPACING) {
+            val fraction = d.toFloat() / osuPixelsDistance
+
+            val pointStartX = startPosition.x + distanceX * (fraction - 0.1f)
+            val pointStartY = startPosition.y + distanceY * (fraction - 0.1f)
 
             val pointEndX = startPosition.x + distanceX * fraction
             val pointEndY = startPosition.y + distanceY * fraction
