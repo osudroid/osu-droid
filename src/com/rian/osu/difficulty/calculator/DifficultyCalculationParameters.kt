@@ -2,9 +2,6 @@ package com.rian.osu.difficulty.calculator
 
 import com.rian.osu.mods.IApplicableToTrackRate
 import com.rian.osu.mods.Mod
-import com.rian.osu.mods.ModDoubleTime
-import com.rian.osu.mods.ModHalfTime
-import com.rian.osu.mods.ModNightCore
 
 /**
  * A class for specifying parameters for difficulty calculation.
