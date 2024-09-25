@@ -77,9 +77,9 @@ object FollowPointConnection {
             osuPixelsEndPosition.y - osuPixelsStartPosition.y
         )
 
-        val spriteCount = ceil(osuPixelsDistance / (SPACING * 1.5f)).toInt()
+        val spriteCount = floor(osuPixelsDistance / (SPACING * 1.5f)).toInt()
 
-        for (i in 0 until spriteCount) {
+        for (i in 1 ..spriteCount) {
             val fraction = i.toFloat() / spriteCount
 
             val pointStartX = startPosition.x + distanceX * (fraction - 0.1f)
