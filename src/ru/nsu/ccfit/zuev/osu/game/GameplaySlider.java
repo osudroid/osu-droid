@@ -13,6 +13,7 @@ import com.reco1l.osu.graphics.Origin;
 import com.reco1l.osu.playfield.CirclePiece;
 import com.reco1l.osu.playfield.NumberedCirclePiece;
 import com.reco1l.osu.playfield.SliderTickContainer;
+import com.rian.osu.beatmap.hitobject.Slider;
 import com.rian.osu.beatmap.sections.BeatmapControlPoints;
 import com.rian.osu.math.Interpolation;
 import com.rian.osu.mods.ModHidden;
@@ -33,11 +34,11 @@ import ru.nsu.ccfit.zuev.skins.OsuSkin;
 
 import java.util.BitSet;
 
-public class Slider extends GameObject {
+public class GameplaySlider extends GameObject {
 
     private final ExtendedSprite approachCircle;
     private final ExtendedSprite startArrow, endArrow;
-    private com.rian.osu.beatmap.hitobject.Slider beatmapSlider;
+    private Slider beatmapSlider;
     private final PointF curveEndPos = new PointF();
     private Scene scene;
     private GameObjectListener listener;
@@ -112,7 +113,7 @@ public class Slider extends GameObject {
     private boolean isInRadius;
 
 
-    public Slider() {
+    public GameplaySlider() {
 
         headCirclePiece = new NumberedCirclePiece("sliderstartcircle", "sliderstartcircleoverlay");
         tailCirclePiece = new CirclePiece("sliderendcircle", "sliderendcircleoverlay");
@@ -144,9 +145,9 @@ public class Slider extends GameObject {
     }
 
     public void init(final GameObjectListener listener, final Scene scene,
-                     final com.rian.osu.beatmap.hitobject.Slider beatmapSlider, final float secPassed,
-                     final RGBColor comboColor, final RGBColor borderColor, final float tickRate,
-                     final BeatmapControlPoints controlPoints, final SliderPath sliderPath) {
+                     final Slider beatmapSlider, final float secPassed, final RGBColor comboColor,
+                     final RGBColor borderColor, final float tickRate, final BeatmapControlPoints controlPoints,
+                     final SliderPath sliderPath) {
         this.listener = listener;
         this.scene = scene;
         this.beatmapSlider = beatmapSlider;
@@ -628,10 +629,10 @@ public class Slider extends GameObject {
         }
         // If slider was in reverse mode, we should swap start and end points
         if (reverse) {
-            Slider.this.listener.onSliderHit(id, score,
+            GameplaySlider.this.listener.onSliderHit(id, score,
                     curveEndPos, position, endsCombo, bodyColor, GameObjectListener.SLIDER_END);
         } else {
-            Slider.this.listener.onSliderHit(id, score, position,
+            GameplaySlider.this.listener.onSliderHit(id, score, position,
                     curveEndPos, endsCombo, bodyColor, GameObjectListener.SLIDER_END);
         }
         if (!startHit) {

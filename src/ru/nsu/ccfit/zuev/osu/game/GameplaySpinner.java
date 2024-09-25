@@ -8,6 +8,7 @@ import com.reco1l.osu.graphics.Modifiers;
 import com.reco1l.osu.graphics.Origin;
 import com.rian.osu.beatmap.hitobject.BankHitSampleInfo;
 import com.rian.osu.beatmap.hitobject.HitSampleInfo;
+import com.rian.osu.beatmap.hitobject.Spinner;
 
 import org.anddev.andengine.entity.IEntity;
 import org.anddev.andengine.entity.scene.Scene;
@@ -24,7 +25,7 @@ import ru.nsu.ccfit.zuev.osu.helper.ModifierListener;
 import ru.nsu.ccfit.zuev.osu.scoring.ScoreNumber;
 import ru.nsu.ccfit.zuev.osu.scoring.StatisticV2;
 
-public class Spinner extends GameObject {
+public class GameplaySpinner extends GameObject {
     private final ExtendedSprite background;
     public final PointF center;
     private final ExtendedSprite circle;
@@ -52,7 +53,7 @@ public class Spinner extends GameObject {
     private final PointF currMouse = new PointF();
 
 
-    public Spinner() {
+    public GameplaySpinner() {
         ResourceManager.getInstance().checkSpinnerTextures();
         this.position = new PointF((float) Constants.MAP_WIDTH / 2, (float) Constants.MAP_HEIGHT / 2);
         center = Utils.trackToRealCoords(position);
@@ -93,8 +94,7 @@ public class Spinner extends GameObject {
     }
 
     public void init(final GameObjectListener listener, final Scene scene,
-                     final com.rian.osu.beatmap.hitobject.Spinner beatmapSpinner, final float rps,
-                     final StatisticV2 stat) {
+                     final Spinner beatmapSpinner, final float rps, final StatisticV2 stat) {
         fullRotations = 0;
         rotations = 0;
         this.scene = scene;
@@ -182,7 +182,7 @@ public class Spinner extends GameObject {
         scene.detachChild(metre);
         scene.detachChild(bonusScore);
 
-        listener.removeObject(Spinner.this);
+        listener.removeObject(GameplaySpinner.this);
         GameObjectPool.getInstance().putSpinner(this);
 
         int score = 0;

@@ -4,6 +4,7 @@ import com.reco1l.osu.graphics.ExtendedSprite;
 import com.reco1l.osu.graphics.Modifiers;
 import com.reco1l.osu.graphics.Origin;
 import com.reco1l.osu.playfield.NumberedCirclePiece;
+import com.rian.osu.beatmap.hitobject.HitCircle;
 import com.rian.osu.mods.ModHidden;
 
 import org.anddev.andengine.entity.scene.Scene;
@@ -15,11 +16,11 @@ import ru.nsu.ccfit.zuev.osu.Utils;
 import ru.nsu.ccfit.zuev.osu.scoring.ResultType;
 import ru.nsu.ccfit.zuev.skins.OsuSkin;
 
-public class HitCircle extends GameObject {
+public class GameplayHitCircle extends GameObject {
 
     private final ExtendedSprite approachCircle;
     private final RGBColor comboColor = new RGBColor();
-    private com.rian.osu.beatmap.hitobject.HitCircle beatmapCircle;
+    private HitCircle beatmapCircle;
     private GameObjectListener listener;
     private Scene scene;
     private float radiusSquared;
@@ -33,7 +34,7 @@ public class HitCircle extends GameObject {
     private final NumberedCirclePiece circlePiece;
 
 
-    public HitCircle() {
+    public GameplayHitCircle() {
         circlePiece = new NumberedCirclePiece("hitcircle", "hitcircleoverlay");
         approachCircle = new ExtendedSprite();
         approachCircle.setOrigin(Origin.Center);
@@ -41,7 +42,7 @@ public class HitCircle extends GameObject {
     }
 
     public void init(final GameObjectListener listener, final Scene pScene,
-                     final com.rian.osu.beatmap.hitobject.HitCircle beatmapCircle, final float secPassed,
+                     final HitCircle beatmapCircle, final float secPassed,
                      final RGBColor comboColor) {
         // Storing parameters into fields
         replayObjectData = null;

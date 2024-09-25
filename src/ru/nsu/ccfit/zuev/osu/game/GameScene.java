@@ -34,8 +34,10 @@ import com.reco1l.osu.multiplayer.RoomScene;
 import com.rian.osu.GameMode;
 import com.rian.osu.beatmap.Beatmap;
 import com.rian.osu.beatmap.constants.BeatmapCountdown;
+import com.rian.osu.beatmap.hitobject.HitCircle;
 import com.rian.osu.beatmap.hitobject.HitObject;
 import com.rian.osu.beatmap.hitobject.HitSampleInfo;
+import com.rian.osu.beatmap.hitobject.Spinner;
 import com.rian.osu.beatmap.parser.BeatmapParser;
 import com.rian.osu.beatmap.timings.EffectControlPoint;
 import com.rian.osu.beatmap.timings.TimingControlPoint;
@@ -1280,61 +1282,61 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
 
             final RGBColor comboColor = getComboColor(obj.getComboIndexWithOffsets());
 
-            if (obj instanceof com.rian.osu.beatmap.hitobject.HitCircle parsedCircle) {
-                final HitCircle circle = GameObjectPool.getInstance().getCircle();
+            if (obj instanceof HitCircle parsedCircle) {
+                final var gameplayCircle = GameObjectPool.getInstance().getCircle();
 
-                circle.init(this, mgScene, parsedCircle, secPassed, comboColor);
-                addObject(circle);
+                gameplayCircle.init(this, mgScene, parsedCircle, secPassed, comboColor);
+                addObject(gameplayCircle);
 
                 if (GameHelper.isAuto()) {
-                    circle.setAutoPlay();
+                    gameplayCircle.setAutoPlay();
                 }
 
-                circle.setHitTime((float) obj.startTime / 1000);
-                circle.setId(++lastObjectId);
+                gameplayCircle.setHitTime((float) obj.startTime / 1000);
+                gameplayCircle.setId(++lastObjectId);
 
                 if (replaying) {
-                    circle.setReplayData(replay.objectData[circle.getId()]);
+                    gameplayCircle.setReplayData(replay.objectData[gameplayCircle.getId()]);
                 }
 
-            } else if (obj instanceof com.rian.osu.beatmap.hitobject.Spinner parsedSpinner) {
+            } else if (obj instanceof Spinner parsedSpinner) {
                 final float rps = 2 + 2 * beatmap.difficulty.od / 10f;
-                final Spinner spinner = GameObjectPool.getInstance().getSpinner();
+                final var gameplaySpinner = GameObjectPool.getInstance().getSpinner();
 
-                spinner.init(this, bgScene, parsedSpinner, rps, stat);
-                addObject(spinner);
+                gameplaySpinner.init(this, bgScene, parsedSpinner, rps, stat);
+                addObject(gameplaySpinner);
 
                 if (GameHelper.isAuto() || GameHelper.isAutopilotMod()) {
-                    spinner.setAutoPlay();
+                    gameplaySpinner.setAutoPlay();
                 }
 
-                spinner.setId(++lastObjectId);
+                gameplaySpinner.setId(++lastObjectId);
                 if (replaying) {
-                    spinner.setReplayData(replay.objectData[spinner.getId()]);
+                    gameplaySpinner.setReplayData(replay.objectData[gameplaySpinner.getId()]);
                 }
 
             } else if (obj instanceof com.rian.osu.beatmap.hitobject.Slider parsedSlider) {
-                final Slider slider = GameObjectPool.getInstance().getSlider();
+                final var gameplaySlider = GameObjectPool.getInstance().getSlider();
 
-                slider.init(this, mgScene, parsedSlider, secPassed,
+                gameplaySlider.init(this, mgScene, parsedSlider, secPassed,
                     comboColor, sliderBorderColor, (float) beatmap.difficulty.sliderTickRate, beatmap.controlPoints,
                     getSliderPath(sliderIndex++));
 
-                addObject(slider);
+                addObject(gameplaySlider);
 
                 if (GameHelper.isAuto()) {
-                    slider.setAutoPlay();
+                    gameplaySlider.setAutoPlay();
                 }
-                slider.setHitTime((float) obj.startTime / 1000);
-                slider.setId(++lastObjectId);
+                gameplaySlider.setHitTime((float) obj.startTime / 1000);
+                gameplaySlider.setId(++lastObjectId);
                 if (replaying) {
-                    slider.setReplayData(replay.objectData[slider.getId()]);
-                    if (slider.getReplayData().tickSet == null)
-                        slider.getReplayData().tickSet = new BitSet();
+                    gameplaySlider.setReplayData(replay.objectData[gameplaySlider.getId()]);
+                    if (gameplaySlider.getReplayData().tickSet == null)
+                        gameplaySlider.getReplayData().tickSet = new BitSet();
                 }
             }
 
-            if (!(obj instanceof com.rian.osu.beatmap.hitobject.Spinner) && nextObj != null && !(nextObj instanceof com.rian.osu.beatmap.hitobject.Spinner) && !obj.isLastInCombo()) {
+            if (!(obj instanceof Spinner) && nextObj != null && !(nextObj instanceof Spinner) && !obj.isLastInCombo()) {
                 FollowPointConnection.addConnection(bgScene, secPassed, obj, nextObj);
             }
         }
