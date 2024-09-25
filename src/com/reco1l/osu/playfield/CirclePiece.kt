@@ -1,7 +1,8 @@
 package com.reco1l.osu.playfield
 
-import com.reco1l.osu.graphics.*
-import com.reco1l.osu.graphics.container.*
+import com.reco1l.andengine.*
+import com.reco1l.andengine.container.*
+import com.reco1l.andengine.sprite.*
 import ru.nsu.ccfit.zuev.osu.*
 import ru.nsu.ccfit.zuev.osu.game.CircleNumber
 

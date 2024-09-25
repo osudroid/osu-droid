@@ -2,8 +2,8 @@ package com.edlplan.osu.support.slider;
 
 import com.edlplan.andengine.TriangleBuilder;
 import com.edlplan.framework.math.line.LinePath;
-import com.reco1l.osu.graphics.TriangleMesh;
-import com.reco1l.osu.graphics.container.Container;
+import com.reco1l.andengine.shape.TriangleMesh;
+import com.reco1l.andengine.container.Container;
 
 
 public class SliderBody extends Container {

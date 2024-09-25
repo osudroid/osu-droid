@@ -1,6 +1,6 @@
-package com.reco1l.osu.graphics.container
+package com.reco1l.andengine.container
 
-import com.reco1l.osu.graphics.*
+import com.reco1l.andengine.*
 import com.reco1l.toolkt.kotlin.*
 import org.anddev.andengine.entity.*
 import org.anddev.andengine.entity.IEntity.*

@@ -1,11 +1,9 @@
-package com.reco1l.osu.graphics.container
+package com.reco1l.andengine.container
 
-import com.reco1l.osu.graphics.*
-import com.reco1l.toolkt.kotlin.*
+import com.reco1l.andengine.*
 import org.anddev.andengine.entity.*
 import org.anddev.andengine.entity.shape.*
 import org.anddev.andengine.util.ParameterCallable
-import org.anddev.andengine.util.SmartList
 import javax.microedition.khronos.opengles.*
 
 /**

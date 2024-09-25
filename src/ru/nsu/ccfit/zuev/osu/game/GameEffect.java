@@ -4,20 +4,18 @@ import android.graphics.PointF;
 
 
 import com.reco1l.osu.Execution;
-import com.reco1l.osu.graphics.AnimatedSprite;
-import com.reco1l.osu.graphics.ExtendedSprite;
-import com.reco1l.osu.graphics.Modifiers;
-import com.reco1l.osu.graphics.UniversalModifier;
+import com.reco1l.andengine.sprite.AnimatedSprite;
+import com.reco1l.andengine.sprite.ExtendedSprite;
+import com.reco1l.osu.Modifiers;
+import com.reco1l.andengine.UniversalModifier;
 
 import org.anddev.andengine.entity.IEntity;
 import org.anddev.andengine.entity.scene.Scene;
 import org.anddev.andengine.entity.shape.Shape;
 import org.anddev.andengine.util.modifier.IModifier;
 
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
-import java.util.List;
 
 import ru.nsu.ccfit.zuev.osu.RGBColor;
 import ru.nsu.ccfit.zuev.osu.ResourceManager;

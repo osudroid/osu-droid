@@ -1,180 +1,14 @@
-package com.reco1l.osu.graphics
+package com.reco1l.andengine
 
 import android.util.*
-import com.reco1l.framework.Pool
-import com.reco1l.osu.graphics.ModifierType.*
-import com.reco1l.toolkt.kotlin.sumOf
-import org.anddev.andengine.entity.IEntity
-import org.anddev.andengine.entity.modifier.IEntityModifier
-import org.anddev.andengine.util.modifier.IModifier
-import org.anddev.andengine.util.modifier.IModifier.*
-import org.anddev.andengine.util.modifier.ease.EaseSineInOut
-import org.anddev.andengine.util.modifier.ease.EaseSineOut
-import org.anddev.andengine.util.modifier.ease.IEaseFunction
-import kotlin.math.max
-import kotlin.math.min
-import org.anddev.andengine.util.modifier.ease.EaseSineIn
-import org.anddev.andengine.util.modifier.ease.IEaseFunction.DEFAULT as DefaultEaseFunction
-
-/**
- * A collection of static methods to create different types of modifiers.
- * @see UniversalModifier
- * @see ModifierType
- * @author Reco1l
- */
-object Modifiers {
-
-    @JvmStatic
-    val pool = Pool(50, ::UniversalModifier)
-
-
-    @JvmStatic
-    @JvmOverloads
-    fun alpha(duration: Float, from: Float, to: Float, listener: IModifierListener<IEntity>? = null, easeFunction: IEaseFunction = DefaultEaseFunction) = pool.obtain().also {
-        it.setToDefault()
-        it.type = ALPHA
-        it.duration = duration
-        it.values = floatArrayOf(from, to)
-        it.easeFunction = easeFunction
-        it.listener = listener
-    }
-
-    @JvmStatic
-    @JvmOverloads
-    fun fadeIn(duration: Float, listener: IModifierListener<IEntity>? = null, easeFunction: IEaseFunction = DefaultEaseFunction) = alpha(duration, 0f, 1f, listener, easeFunction)
-
-    @JvmStatic
-    @JvmOverloads
-    fun fadeOut(duration: Float, listener: IModifierListener<IEntity>? = null, easeFunction: IEaseFunction = DefaultEaseFunction) = alpha(duration, 1f, 0f, listener, easeFunction)
-
-    @JvmStatic
-    @JvmOverloads
-    fun scale(duration: Float, from: Float, to: Float, listener: IModifierListener<IEntity>? = null, easeFunction: IEaseFunction = DefaultEaseFunction) = pool.obtain().also {
-        it.setToDefault()
-        it.type = SCALE
-        it.duration = duration
-        it.values = floatArrayOf(from, to)
-        it.easeFunction = easeFunction
-        it.listener = listener
-    }
-
-    @JvmStatic
-    @JvmOverloads
-    fun color(
-        duration: Float,
-        fromRed: Float,
-        toRed: Float,
-        fromGreen: Float,
-        toGreen: Float,
-        fromBlue: Float,
-        toBlue: Float,
-        listener: IModifierListener<IEntity>? = null,
-        easeFunction: IEaseFunction = DefaultEaseFunction
-    ) = pool.obtain().also {
-        it.setToDefault()
-        it.type = RGB
-        it.duration = duration
-        it.listener = listener
-        it.easeFunction = easeFunction
-        it.values = floatArrayOf(
-            fromRed, toRed,
-            fromGreen, toGreen,
-            fromBlue, toBlue
-        )
-    }
-
-    @JvmStatic
-    @JvmOverloads
-    fun sequence(listener: IModifierListener<IEntity>? = null, vararg modifiers: UniversalModifier) = pool.obtain().also {
-        it.setToDefault()
-        it.type = SEQUENCE
-        it.modifiers = modifiers
-        it.listener = listener
-    }
-
-    @JvmStatic
-    @JvmOverloads
-    fun parallel(listener: IModifierListener<IEntity>? = null, vararg modifiers: UniversalModifier) = pool.obtain().also {
-        it.setToDefault()
-        it.type = PARALLEL
-        it.modifiers = modifiers
-        it.listener = listener
-    }
-
-    @JvmStatic
-    @JvmOverloads
-    fun delay(duration: Float, listener: IModifierListener<IEntity>? = null) = pool.obtain().also {
-        it.setToDefault()
-        it.type = NONE
-        it.duration = duration
-        it.listener = listener
-    }
-
-    @JvmStatic
-    @JvmOverloads
-    fun translateX(duration: Float, from: Float, to: Float, listener: IModifierListener<IEntity>? = null, easeFunction: IEaseFunction = DefaultEaseFunction) = pool.obtain().also {
-        it.setToDefault()
-        it.type = TRANSLATE_X
-        it.duration = duration
-        it.values = floatArrayOf(from, to)
-        it.easeFunction = easeFunction
-        it.listener = listener
-    }
-
-    @JvmStatic
-    @JvmOverloads
-    fun translateY(duration: Float, from: Float, to: Float, listener: IModifierListener<IEntity>? = null, easeFunction: IEaseFunction = DefaultEaseFunction) = pool.obtain().also {
-        it.setToDefault()
-        it.type = TRANSLATE_Y
-        it.duration = duration
-        it.values = floatArrayOf(from, to)
-        it.easeFunction = easeFunction
-        it.listener = listener
-    }
-
-    @JvmStatic
-    @JvmOverloads
-    fun move(duration: Float, fromX: Float, toX: Float, fromY: Float, toY: Float, listener: IModifierListener<IEntity>? = null, easeFunction: IEaseFunction = DefaultEaseFunction) = pool.obtain().also {
-        it.setToDefault()
-        it.type = MOVE
-        it.duration = duration
-        it.values = floatArrayOf(fromX, toX, fromY, toY)
-        it.easeFunction = easeFunction
-        it.listener = listener
-    }
-
-    @JvmStatic
-    @JvmOverloads
-    fun rotation(duration: Float, from: Float, to: Float, listener: IModifierListener<IEntity>? = null, easeFunction: IEaseFunction = DefaultEaseFunction) = pool.obtain().also {
-        it.setToDefault()
-        it.type = ROTATION
-        it.duration = duration
-        it.values = floatArrayOf(from, to)
-        it.easeFunction = easeFunction
-        it.listener = listener
-    }
-
-    @JvmStatic
-    @JvmOverloads
-    fun shakeHorizontal(duration: Float, magnitude: Float, listener: IModifierListener<IEntity>? = null) = pool.obtain().also {
-
-        // Based on osu!lazer's shake effect: https://github.com/ppy/osu/blob/5341a335a6165ceef4d91e910fa2ea5aecbfd025/osu.Game/Extensions/DrawableExtensions.cs#L19-L37
-
-        it.setToDefault()
-        it.type = SEQUENCE
-        it.modifiers = arrayOf(
-            translateX(duration / 8f,  0f,          magnitude,   easeFunction = EaseSineOut.getInstance()),
-            translateX(duration / 4f,  magnitude,   -magnitude,  easeFunction = EaseSineInOut.getInstance()),
-            translateX(duration / 4f,  -magnitude,  magnitude,   easeFunction = EaseSineInOut.getInstance()),
-            translateX(duration / 4f,  magnitude,   -magnitude,  easeFunction = EaseSineInOut.getInstance()),
-            translateX(duration / 8f,  -magnitude,  0f,          easeFunction = EaseSineIn.getInstance()),
-        )
-        it.listener = listener
-
-    }
-
-}
-
+import com.reco1l.framework.*
+import com.reco1l.osu.*
+import com.reco1l.toolkt.kotlin.*
+import org.anddev.andengine.entity.*
+import org.anddev.andengine.entity.modifier.*
+import org.anddev.andengine.util.modifier.*
+import org.anddev.andengine.util.modifier.ease.*
+import kotlin.math.*
 
 /**
  * A universal modifier is a modifier that can be used to apply different types of modifications to
@@ -188,7 +22,7 @@ class UniversalModifier @JvmOverloads constructor(private val pool: Pool<Univers
 
 
     @JvmOverloads
-    constructor(type: ModifierType, duration: Float, from: Float, to: Float, listener: IModifierListener<IEntity>? = null, easeFunction: IEaseFunction = DefaultEaseFunction) : this(null) {
+    constructor(type: ModifierType, duration: Float, from: Float, to: Float, listener: IModifier.IModifierListener<IEntity>? = null, easeFunction: IEaseFunction = IEaseFunction.DEFAULT) : this(null) {
         this.type = type
         this.duration = duration
         this.values = floatArrayOf(from, to)
@@ -197,7 +31,7 @@ class UniversalModifier @JvmOverloads constructor(private val pool: Pool<Univers
     }
 
     @JvmOverloads
-    constructor(type: ModifierType, duration: Float, values: FloatArray, listener: IModifierListener<IEntity>? = null, easeFunction: IEaseFunction = DefaultEaseFunction) : this(null) {
+    constructor(type: ModifierType, duration: Float, values: FloatArray, listener: IModifier.IModifierListener<IEntity>? = null, easeFunction: IEaseFunction = IEaseFunction.DEFAULT) : this(null) {
         this.type = type
         this.duration = duration
         this.values = values
@@ -206,7 +40,7 @@ class UniversalModifier @JvmOverloads constructor(private val pool: Pool<Univers
     }
 
     @JvmOverloads
-    constructor(type: ModifierType, listener: IModifierListener<IEntity>? = null, vararg modifiers: UniversalModifier) : this(null) {
+    constructor(type: ModifierType, listener: IModifier.IModifierListener<IEntity>? = null, vararg modifiers: UniversalModifier) : this(null) {
         this.type = type
         this.listener = listener
         this.modifiers = modifiers
@@ -217,11 +51,11 @@ class UniversalModifier @JvmOverloads constructor(private val pool: Pool<Univers
      * The type of the modifier.
      * @see ModifierType
      */
-    var type = NONE
+    var type = ModifierType.NONE
         set(value) {
             if (field != value) {
 
-                if (value != SEQUENCE && value != PARALLEL) {
+                if (value != ModifierType.SEQUENCE && value != ModifierType.PARALLEL) {
                     clearNestedModifiers()
                 }
 
@@ -236,7 +70,7 @@ class UniversalModifier @JvmOverloads constructor(private val pool: Pool<Univers
      * The modifier listener.
      * @see IModifierListener
      */
-    var listener: IModifierListener<IEntity>? = null
+    var listener: IModifier.IModifierListener<IEntity>? = null
 
     /**
      * Inner modifiers for [SEQUENCE] or [PARALLEL] modifier types.
@@ -244,12 +78,12 @@ class UniversalModifier @JvmOverloads constructor(private val pool: Pool<Univers
     var modifiers: Array<out UniversalModifier>? = null
         set(value) {
 
-            if (value != null && type != SEQUENCE && type != PARALLEL) {
+            if (value != null && type != ModifierType.SEQUENCE && type != ModifierType.PARALLEL) {
                 Log.w("UniversalModifier", "Inner modifiers can only be set for sequence or parallel modifiers, ignoring.")
                 return
             }
 
-            if (type == PARALLEL) {
+            if (type == ModifierType.PARALLEL) {
                 // Sorting to reduce iterations, obviously sequential modifiers cannot be sorted.
                 value?.sortBy { it.duration }
             }
@@ -261,7 +95,7 @@ class UniversalModifier @JvmOverloads constructor(private val pool: Pool<Univers
     /**
      * Easing function to be used.
      */
-    var easeFunction: IEaseFunction = DefaultEaseFunction
+    var easeFunction: IEaseFunction = IEaseFunction.DEFAULT
 
     /**
      * An array of values to be used in the modifier.
@@ -313,7 +147,7 @@ class UniversalModifier @JvmOverloads constructor(private val pool: Pool<Univers
 
         var usedSec = 0f
 
-        if (type == SEQUENCE || type == PARALLEL) {
+        if (type == ModifierType.SEQUENCE || type == ModifierType.PARALLEL) {
 
             var remainingSec = deltaSec
             var isAllModifiersFinished = false
@@ -322,7 +156,7 @@ class UniversalModifier @JvmOverloads constructor(private val pool: Pool<Univers
 
                 var isCurrentModifierFinished = false
 
-                if (type == PARALLEL) {
+                if (type == ModifierType.PARALLEL) {
                     usedSec = 0f
                 }
 
@@ -336,7 +170,7 @@ class UniversalModifier @JvmOverloads constructor(private val pool: Pool<Univers
                     }
                     isAllModifiersFinished = false
 
-                    if (type == SEQUENCE) {
+                    if (type == ModifierType.SEQUENCE) {
                         remainingSec -= modifier.onUpdate(remainingSec, item)
                     } else {
                         usedSec = max(usedSec, modifier.onUpdate(deltaSec, item))
@@ -344,12 +178,12 @@ class UniversalModifier @JvmOverloads constructor(private val pool: Pool<Univers
 
                     isCurrentModifierFinished = modifier.isFinished
 
-                    if (type == SEQUENCE) {
+                    if (type == ModifierType.SEQUENCE) {
                         break
                     }
                 }
 
-                if (type == PARALLEL) {
+                if (type == ModifierType.PARALLEL) {
                     remainingSec -= usedSec
                 } else if (isCurrentModifierFinished) {
                     break
@@ -366,44 +200,44 @@ class UniversalModifier @JvmOverloads constructor(private val pool: Pool<Univers
 
             when (type) {
 
-                ALPHA -> {
+                ModifierType.ALPHA -> {
                     item.alpha = getValueAt(0, percentage)
                 }
 
-                SCALE -> {
+                ModifierType.SCALE -> {
                     val value = getValueAt(0, percentage)
                     item.scaleX = value
                     item.scaleY = value
                 }
 
-                MOVE -> {
+                ModifierType.MOVE -> {
                     item.setPosition(getValueAt(0, percentage), getValueAt(1, percentage))
                 }
 
-                TRANSLATE -> {
+                ModifierType.TRANSLATE -> {
                     if (item is ExtendedEntity) {
                         item.translationX = getValueAt(0, percentage)
                         item.translationY = getValueAt(1, percentage)
                     }
                 }
 
-                TRANSLATE_X -> {
+                ModifierType.TRANSLATE_X -> {
                     if (item is ExtendedEntity) {
                         item.translationX = getValueAt(0, percentage)
                     }
                 }
 
-                TRANSLATE_Y -> {
+                ModifierType.TRANSLATE_Y -> {
                     if (item is ExtendedEntity) {
                         item.translationY = getValueAt(0, percentage)
                     }
                 }
 
-                ROTATION -> {
+                ModifierType.ROTATION -> {
                     item.rotation = getValueAt(0, percentage)
                 }
 
-                RGB -> {
+                ModifierType.RGB -> {
                     item.setColor(
                         getValueAt(0, percentage),
                         getValueAt(1, percentage),
@@ -447,7 +281,7 @@ class UniversalModifier @JvmOverloads constructor(private val pool: Pool<Univers
      */
     fun setToDefault() {
 
-        type = NONE
+        type = ModifierType.NONE
         values = null
         listener = null
 
@@ -463,7 +297,7 @@ class UniversalModifier @JvmOverloads constructor(private val pool: Pool<Univers
      */
     fun setDuration(value: Float) {
 
-        if (type == SEQUENCE || type == PARALLEL) {
+        if (type == ModifierType.SEQUENCE || type == ModifierType.PARALLEL) {
             Log.w("UniversalModifier", "Cannot set duration for sequence or parallel modifiers, ignoring.")
             return
         }
@@ -479,8 +313,8 @@ class UniversalModifier @JvmOverloads constructor(private val pool: Pool<Univers
      */
     override fun getDuration(): Float  = when(type) {
 
-        SEQUENCE -> modifiers?.sumOf { it.duration } ?: 0f
-        PARALLEL -> modifiers?.maxOf { it.duration } ?: 0f
+        ModifierType.SEQUENCE -> modifiers?.sumOf { it.duration } ?: 0f
+        ModifierType.PARALLEL -> modifiers?.maxOf { it.duration } ?: 0f
 
         else -> duration
     }
@@ -493,7 +327,7 @@ class UniversalModifier @JvmOverloads constructor(private val pool: Pool<Univers
 
     override fun isFinished(): Boolean {
 
-        if (type == SEQUENCE || type == PARALLEL) {
+        if (type == ModifierType.SEQUENCE || type == ModifierType.PARALLEL) {
 
             if (modifiers == null) {
                 return true
@@ -514,11 +348,11 @@ class UniversalModifier @JvmOverloads constructor(private val pool: Pool<Univers
     }
 
 
-    override fun addModifierListener(listener: IModifierListener<IEntity>) {
+    override fun addModifierListener(listener: IModifier.IModifierListener<IEntity>) {
         throw UnsupportedOperationException("Multiple entity modifiers are not allowed, consider using `setListener()` instead.")
     }
 
-    override fun removeModifierListener(listener: IModifierListener<IEntity>): Boolean {
+    override fun removeModifierListener(listener: IModifier.IModifierListener<IEntity>): Boolean {
         throw UnsupportedOperationException("Multiple entity modifiers are not allowed, consider using `setListener()` instead.")
     }
 
@@ -532,7 +366,6 @@ class UniversalModifier @JvmOverloads constructor(private val pool: Pool<Univers
         modifier.modifiers = modifiers?.map { it.deepCopy() }?.toTypedArray()
     }
 }
-
 
 /**
  * The type of the modifier.

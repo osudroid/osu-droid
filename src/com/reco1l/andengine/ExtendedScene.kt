@@ -1,4 +1,4 @@
-package com.reco1l.osu.graphics
+package com.reco1l.andengine
 
 import android.util.*
 import org.anddev.andengine.engine.camera.*

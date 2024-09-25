@@ -1,5 +1,6 @@
-package com.reco1l.osu.graphics
+package com.reco1l.andengine.sprite
 
+import com.reco1l.andengine.*
 import org.anddev.andengine.engine.camera.*
 import org.anddev.andengine.opengl.texture.region.*
 import org.anddev.andengine.opengl.util.*

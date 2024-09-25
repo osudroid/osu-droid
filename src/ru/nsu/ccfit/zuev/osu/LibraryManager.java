@@ -7,7 +7,7 @@ import android.util.Log;
 import com.reco1l.osu.DifficultyCalculationManager;
 import com.reco1l.osu.data.BeatmapSetInfo;
 import com.reco1l.osu.data.DatabaseManager;
-import com.reco1l.osu.graphics.VideoTexture;
+import com.reco1l.andengine.texture.VideoTexture;
 import com.rian.osu.beatmap.parser.BeatmapParser;
 import kotlin.io.FilesKt;
 import org.jetbrains.annotations.Nullable;

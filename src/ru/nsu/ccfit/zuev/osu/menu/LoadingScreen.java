@@ -2,11 +2,10 @@ package ru.nsu.ccfit.zuev.osu.menu;
 
 import android.annotation.SuppressLint;
 
-import com.reco1l.osu.graphics.ExtendedSprite;
-import com.reco1l.osu.graphics.Origin;
+import com.reco1l.andengine.sprite.ExtendedSprite;
+import com.reco1l.andengine.Origin;
 
 import org.anddev.andengine.engine.handler.IUpdateHandler;
-import org.anddev.andengine.entity.modifier.FadeOutModifier;
 import org.anddev.andengine.entity.modifier.LoopEntityModifier;
 import org.anddev.andengine.entity.modifier.RotationByModifier;
 import org.anddev.andengine.entity.scene.Scene;

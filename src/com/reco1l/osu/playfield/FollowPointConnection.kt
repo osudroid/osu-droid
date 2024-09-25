@@ -1,8 +1,9 @@
 package com.reco1l.osu.playfield
 
+import com.reco1l.andengine.*
+import com.reco1l.andengine.sprite.*
 import com.reco1l.framework.*
 import com.reco1l.osu.*
-import com.reco1l.osu.graphics.*
 import com.rian.osu.beatmap.hitobject.*
 import org.anddev.andengine.entity.*
 import org.anddev.andengine.entity.scene.*
@@ -100,7 +101,8 @@ object FollowPointConnection {
             fp.rotation = rotation
             fp.alpha = 0f
 
-            fp.registerEntityModifier(Modifiers.sequence(expire,
+            fp.registerEntityModifier(
+                Modifiers.sequence(expire,
                 Modifiers.delay(fadeInTime - secPassed),
                 Modifiers.parallel(null,
                     Modifiers.fadeIn(endFadeInTime),

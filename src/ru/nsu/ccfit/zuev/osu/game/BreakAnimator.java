@@ -1,7 +1,7 @@
 package ru.nsu.ccfit.zuev.osu.game;
 
-import com.reco1l.osu.graphics.ExtendedSprite;
-import com.reco1l.osu.graphics.Origin;
+import com.reco1l.andengine.sprite.ExtendedSprite;
+import com.reco1l.andengine.Origin;
 import com.reco1l.osu.multiplayer.Multiplayer;
 import com.reco1l.osu.multiplayer.RoomScene;
 import org.anddev.andengine.entity.modifier.*;

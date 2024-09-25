@@ -3,9 +3,9 @@ package ru.nsu.ccfit.zuev.osu.game;
 import android.graphics.PointF;
 
 import com.reco1l.osu.Execution;
-import com.reco1l.osu.graphics.ExtendedSprite;
-import com.reco1l.osu.graphics.Modifiers;
-import com.reco1l.osu.graphics.Origin;
+import com.reco1l.andengine.sprite.ExtendedSprite;
+import com.reco1l.osu.Modifiers;
+import com.reco1l.andengine.Origin;
 import com.rian.osu.beatmap.hitobject.Spinner;
 
 import org.anddev.andengine.entity.IEntity;

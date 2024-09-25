@@ -1,7 +1,7 @@
 package ru.nsu.ccfit.zuev.osu.game;
 
-import com.reco1l.osu.graphics.container.LinearContainer;
-import com.reco1l.osu.graphics.ExtendedSprite;
+import com.reco1l.andengine.container.LinearContainer;
+import com.reco1l.andengine.sprite.ExtendedSprite;
 
 import ru.nsu.ccfit.zuev.osu.ResourceManager;
 import ru.nsu.ccfit.zuev.skins.OsuSkin;

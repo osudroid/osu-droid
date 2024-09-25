@@ -1,6 +1,6 @@
-package com.reco1l.osu.graphics
+package com.reco1l.andengine
 
-import com.reco1l.osu.graphics.container.*
+import com.reco1l.andengine.container.*
 import org.anddev.andengine.collision.*
 import org.anddev.andengine.engine.camera.*
 import org.anddev.andengine.entity.primitive.*

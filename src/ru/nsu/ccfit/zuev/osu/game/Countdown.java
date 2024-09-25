@@ -2,8 +2,8 @@ package ru.nsu.ccfit.zuev.osu.game;
 
 import android.graphics.PointF;
 
-import com.reco1l.osu.graphics.ExtendedSprite;
-import com.reco1l.osu.graphics.Origin;
+import com.reco1l.andengine.sprite.ExtendedSprite;
+import com.reco1l.andengine.Origin;
 
 import org.anddev.andengine.entity.modifier.DelayModifier;
 import org.anddev.andengine.entity.modifier.FadeInModifier;
