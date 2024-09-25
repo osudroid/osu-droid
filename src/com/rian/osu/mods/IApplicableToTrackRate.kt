@@ -3,7 +3,7 @@ package com.rian.osu.mods
 /**
  * An interface for [Mod]s that make adjustments to the track's playback rate.
  */
-interface IApplicableToPlaybackRate {
+interface IApplicableToTrackRate {
     /**
      * The multiplier to apply to the track's playback rate.
      */
