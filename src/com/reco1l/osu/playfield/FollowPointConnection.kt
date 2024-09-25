@@ -16,7 +16,7 @@ import kotlin.math.*
 object FollowPointConnection {
 
 
-    private const val SPACING = 32
+    private const val SPACING = 32 * 1.5f
 
     private const val PREEMPT = 800
 
@@ -77,13 +77,14 @@ object FollowPointConnection {
             osuPixelsEndPosition.y - osuPixelsStartPosition.y
         )
 
-        val spriteCount = floor(osuPixelsDistance / (SPACING * 1.5f)).toInt()
+        val spriteCount = floor(osuPixelsDistance / SPACING).toInt()
+        val pointStartOffset = 0.1f / spriteCount
 
         for (i in 1 ..spriteCount) {
             val fraction = i.toFloat() / spriteCount
 
-            val pointStartX = startPosition.x + distanceX * (fraction - 0.1f)
-            val pointStartY = startPosition.y + distanceY * (fraction - 0.1f)
+            val pointStartX = startPosition.x + distanceX * (fraction - pointStartOffset)
+            val pointStartY = startPosition.y + distanceY * (fraction - pointStartOffset)
 
             val pointEndX = startPosition.x + distanceX * fraction
             val pointEndY = startPosition.y + distanceY * fraction
