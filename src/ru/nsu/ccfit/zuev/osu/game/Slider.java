@@ -19,7 +19,6 @@ import com.rian.osu.mods.ModHidden;
 
 import org.anddev.andengine.entity.IEntity;
 import org.anddev.andengine.entity.scene.Scene;
-import org.anddev.andengine.entity.sprite.Sprite;
 import org.anddev.andengine.util.MathUtils;
 import org.anddev.andengine.util.modifier.IModifier;
 import org.anddev.andengine.util.modifier.ease.EaseQuadOut;
@@ -30,9 +29,7 @@ import ru.nsu.ccfit.zuev.osu.Utils;
 import ru.nsu.ccfit.zuev.osu.game.GameHelper.SliderPath;
 import ru.nsu.ccfit.zuev.osu.helper.DifficultyHelper;
 import ru.nsu.ccfit.zuev.osu.helper.ModifierListener;
-import ru.nsu.ccfit.zuev.osu.menu.ModMenu;
 import ru.nsu.ccfit.zuev.skins.OsuSkin;
-import ru.nsu.ccfit.zuev.skins.SkinManager;
 
 import java.util.BitSet;
 
@@ -235,21 +232,9 @@ public class Slider extends GameObject {
 
         timePreempt = (float) beatmapSlider.timePreempt / 1000;
         float fadeInDuration = (float) beatmapSlider.timeFadeIn / 1000;
-        boolean isCustomAR = ModMenu.getInstance().isCustomAR();
-        float speedMultiplier = GameHelper.getSpeedMultiplier();
-
-        // Cancel the effect of speed multiplier on force AR.
-        if (isCustomAR) {
-            timePreempt *= speedMultiplier;
-            fadeInDuration *= speedMultiplier;
-        }
 
         if (GameHelper.isHidden()) {
             float fadeOutDuration = timePreempt * (float) ModHidden.FADE_OUT_DURATION_MULTIPLIER;
-
-            if (isCustomAR) {
-                fadeOutDuration *= speedMultiplier;
-            }
 
             headCirclePiece.registerEntityModifier(Modifiers.sequence(
                 Modifiers.fadeIn(fadeInDuration),

@@ -407,11 +407,6 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
         scale = beatmap.hitObjects.objects.get(0).getGameplayScale();
         objectTimePreempt = (float) GameHelper.ar2ms(beatmap.difficulty.getAr()) / 1000f;
 
-        if (modMenu.isCustomAR()) {
-            // Cancel the effect of speed multiplier on force AR to make the AR remain unchanged to the player.
-            objectTimePreempt *= modMenu.getSpeed();
-        }
-
         difficultyStatisticsScoreMultiplier = 1 +
             Math.min(parsedBeatmap.difficulty.od, 10) / 10f + Math.min(parsedBeatmap.difficulty.hp, 10) / 10f;
 
