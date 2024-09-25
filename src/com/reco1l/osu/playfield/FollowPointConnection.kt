@@ -56,7 +56,6 @@ object FollowPointConnection {
         val distanceX = endPosition.x - startPosition.x
         val distanceY = endPosition.y - startPosition.y
 
-        val distance = hypot(distanceX, distanceY).toInt()
         val rotation = atan2(distanceY, distanceX) * (180f / Math.PI).toFloat()
 
         val endFadeInTime = end.timeFadeIn.toFloat() / 1000f
@@ -67,11 +66,21 @@ object FollowPointConnection {
         // Note that this doesn't exactly match the AR>10 visuals as they're classically known, but it feels good.
         val preempt = PREEMPT * min(1.0, start.timePreempt * 1000 / HitObject.PREEMPT_MIN).toFloat() / 1000f
 
-        var d = (SPACING * 1.5f).toInt()
+        // Since the unit of spacing is in osu!pixels, we cannot directly port the reference code. As such, we need to
+        // approach it with another method. We use the distance between the start and end positions in osu!pixels to
+        // determine the amount of sprites to spawn, and then map them into gameplay positions in pixels.
+        val osuPixelsStartPosition = start.difficultyStackedEndPosition
+        val osuPixelsEndPosition = end.difficultyStackedPosition
 
-        while (d < distance - SPACING) {
+        val osuPixelsDistance = hypot(
+            osuPixelsEndPosition.x - osuPixelsStartPosition.x,
+            osuPixelsEndPosition.y - osuPixelsStartPosition.y
+        )
 
-            val fraction = d.toFloat() / distance
+        val spriteCount = ceil(osuPixelsDistance / (SPACING * 1.5f)).toInt()
+
+        for (i in 0 until spriteCount) {
+            val fraction = i.toFloat() / spriteCount
 
             val pointStartX = startPosition.x + distanceX * (fraction - 0.1f)
             val pointStartY = startPosition.y + distanceY * (fraction - 0.1f)
@@ -110,7 +119,6 @@ object FollowPointConnection {
             ))
 
             scene.attachChild(fp, 0)
-            d += SPACING
         }
     }
 }
