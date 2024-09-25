@@ -408,7 +408,7 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
         }
 
         scale = beatmap.hitObjects.objects.get(0).getGameplayScale();
-        originalCircleSize = parsedBeatmap.difficulty.cs;
+        originalCircleSize = parsedBeatmap.difficulty.gameplayCS;
         originalOverallDifficulty = parsedBeatmap.difficulty.od;
         objectTimePreempt = (float) GameHelper.ar2ms(beatmap.difficulty.getAr()) / 1000f;
 

@@ -7,10 +7,10 @@ import kotlin.math.sign
  */
 class BeatmapDifficulty : Cloneable {
     /**
-     * The circle size of this beatmap.
+     * The circle size of this beatmap in gameplay.
      */
     @JvmField
-    var cs = 5f
+    var gameplayCS = 5f
 
     /**
      * The approach rate of this beatmap.
@@ -43,7 +43,7 @@ class BeatmapDifficulty : Cloneable {
     var sliderTickRate = 1.0
 
     fun apply(other: BeatmapDifficulty) = run {
-        cs = other.cs
+        gameplayCS = other.gameplayCS
         ar = other.ar
         od = other.od
         hp = other.hp

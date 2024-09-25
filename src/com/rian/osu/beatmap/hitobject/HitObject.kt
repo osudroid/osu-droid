@@ -321,18 +321,18 @@ abstract class HitObject(
 
         difficultyScale = when (mode) {
             GameMode.Droid -> {
-                val droidScale = CircleSizeCalculator.droidCSToDroidDifficultyScale(difficulty.cs)
+                val droidScale = CircleSizeCalculator.droidCSToDroidDifficultyScale(difficulty.gameplayCS)
                 val radius = CircleSizeCalculator.droidScaleToStandardRadius(droidScale)
                 val standardCS = CircleSizeCalculator.standardRadiusToStandardCS(radius, true)
 
                 CircleSizeCalculator.standardCSToStandardScale(standardCS, true)
             }
 
-            GameMode.Standard -> CircleSizeCalculator.standardCSToStandardScale(difficulty.cs, true)
+            GameMode.Standard -> CircleSizeCalculator.standardCSToStandardScale(difficulty.gameplayCS, true)
         }
 
         gameplayScale = when (mode) {
-            GameMode.Droid -> CircleSizeCalculator.droidCSToDroidGameplayScale(difficulty.cs)
+            GameMode.Droid -> CircleSizeCalculator.droidCSToDroidGameplayScale(difficulty.gameplayCS)
             GameMode.Standard -> difficultyScale
         }
     }

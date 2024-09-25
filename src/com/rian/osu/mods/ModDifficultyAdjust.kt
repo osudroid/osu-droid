@@ -36,7 +36,7 @@ class ModDifficultyAdjust(
 
     override fun applyToDifficulty(mode: GameMode, difficulty: BeatmapDifficulty, mods: List<Mod>, customSpeedMultiplier: Float) =
         difficulty.let {
-            it.cs = getValue(cs, it.cs)
+            it.gameplayCS = getValue(cs, it.gameplayCS)
             it.ar = getValue(ar, it.ar)
             it.od = getValue(od, it.od)
             it.hp = getValue(hp, it.hp)

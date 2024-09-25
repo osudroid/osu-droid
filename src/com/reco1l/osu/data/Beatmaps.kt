@@ -350,7 +350,7 @@ fun BeatmapInfo(data: Beatmap, lastModified: Long, calculateDifficulty: Boolean)
         // Difficulty
         approachRate = data.difficulty.ar,
         overallDifficulty = data.difficulty.od,
-        circleSize = data.difficulty.cs,
+        circleSize = data.difficulty.gameplayCS,
         hpDrainRate = data.difficulty.hp,
         droidStarRating = droidStarRating,
         standardStarRating = standardStarRating,

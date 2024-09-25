@@ -11,14 +11,14 @@ class ModEasy : Mod(), IModApplicableToDifficulty {
     override val droidString = "e"
 
     override fun applyToDifficulty(mode: GameMode, difficulty: BeatmapDifficulty) = difficulty.run {
-        cs = when (mode) {
+        gameplayCS = when (mode) {
             GameMode.Droid -> {
-                val scale = CircleSizeCalculator.droidCSToDroidGameplayScale(cs)
+                val scale = CircleSizeCalculator.droidCSToDroidGameplayScale(gameplayCS)
 
                 CircleSizeCalculator.droidGameplayScaleToDroidCS(scale + 0.125f)
             }
 
-            GameMode.Standard -> cs * ADJUST_RATIO
+            GameMode.Standard -> gameplayCS * ADJUST_RATIO
         }
 
         ar *= ADJUST_RATIO

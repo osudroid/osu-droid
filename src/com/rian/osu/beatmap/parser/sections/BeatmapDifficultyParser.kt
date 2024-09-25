@@ -8,7 +8,7 @@ import com.rian.osu.beatmap.Beatmap
 object BeatmapDifficultyParser : BeatmapKeyValueSectionParser() {
     override fun parse(beatmap: Beatmap, line: String) = splitProperty(line)?.let {
         when (it.first) {
-            "CircleSize" -> beatmap.difficulty.cs = parseFloat(it.second)
+            "CircleSize" -> beatmap.difficulty.gameplayCS = parseFloat(it.second)
             "OverallDifficulty" -> beatmap.difficulty.od = parseFloat(it.second)
             "ApproachRate" -> beatmap.difficulty.ar = parseFloat(it.second)
             "HPDrainRate" -> beatmap.difficulty.hp = parseFloat(it.second)
