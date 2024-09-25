@@ -75,7 +75,7 @@ class StandardDifficultyCalculator : DifficultyCalculator<StandardDifficultyHitO
             preempt /= parameters?.totalSpeedMultiplier?.toDouble() ?: 1.0
         }
 
-        approachRate = if (preempt > HitObject.PREEMPT_MID) (HitObject.PREEMPT_MAX - preempt) / 120 else (HitObject.PREEMPT_MID - preempt) / 150 + 5
+        approachRate = BeatmapDifficulty.inverseDifficultyRange(preempt, HitObject.PREEMPT_MIN, HitObject.PREEMPT_MID, HitObject.PREEMPT_MAX)
 
         val od = difficultyAdjustMod?.od ?: beatmap.difficulty.od
         var greatWindow = StandardHitWindow(od).greatWindow.toDouble()
