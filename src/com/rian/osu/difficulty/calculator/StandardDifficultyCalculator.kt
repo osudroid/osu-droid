@@ -70,7 +70,7 @@ class StandardDifficultyCalculator : DifficultyCalculator<StandardDifficultyHitO
         val speedMultiplier = parameters?.totalSpeedMultiplier?.toDouble() ?: 1.0
         val preempt = BeatmapDifficulty.difficultyRange(beatmap.difficulty.ar.toDouble(), HitObject.PREEMPT_MAX, HitObject.PREEMPT_MID, HitObject.PREEMPT_MIN) / speedMultiplier
 
-        approachRate = BeatmapDifficulty.inverseDifficultyRange(preempt, HitObject.PREEMPT_MIN, HitObject.PREEMPT_MID, HitObject.PREEMPT_MAX)
+        approachRate = BeatmapDifficulty.inverseDifficultyRange(preempt, HitObject.PREEMPT_MAX, HitObject.PREEMPT_MID, HitObject.PREEMPT_MIN)
 
         // Weird casts, but necessary for difficulty calculation parity
         val greatWindow = StandardHitWindow(beatmap.difficulty.od).greatWindow.toDouble() / speedMultiplier

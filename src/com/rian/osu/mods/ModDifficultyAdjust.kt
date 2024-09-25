@@ -44,10 +44,10 @@ class ModDifficultyAdjust(
             // Special case for force AR, where the AR value is kept constant with respect to game time.
             // This makes the player perceive the AR as is under all speed multipliers.
             if (ar != null) {
-                val preempt = BeatmapDifficulty.inverseDifficultyRange(ar!!.toDouble(), HitObject.PREEMPT_MIN, HitObject.PREEMPT_MID, HitObject.PREEMPT_MAX)
+                val preempt = BeatmapDifficulty.difficultyRange(ar!!.toDouble(), HitObject.PREEMPT_MAX, HitObject.PREEMPT_MID, HitObject.PREEMPT_MIN)
                 val trackRate = calculateTrackRate(mods, customSpeedMultiplier)
 
-                it.ar = BeatmapDifficulty.difficultyRange(preempt * trackRate, HitObject.PREEMPT_MIN, HitObject.PREEMPT_MID, HitObject.PREEMPT_MAX).toFloat()
+                it.ar = BeatmapDifficulty.inverseDifficultyRange(preempt * trackRate, HitObject.PREEMPT_MAX, HitObject.PREEMPT_MID, HitObject.PREEMPT_MIN).toFloat()
             }
         }
 
