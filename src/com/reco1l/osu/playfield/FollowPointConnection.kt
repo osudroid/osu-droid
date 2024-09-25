@@ -37,6 +37,9 @@ object FollowPointConnection {
         override fun onModifierFinished(pModifier: IModifier<IEntity>, fp: IEntity) {
             updateThread {
                 fp.detachSelf()
+                if (fp is AnimatedSprite) {
+                    fp.elapsedSec = 0f
+                }
                 pool.free(fp as ExtendedSprite)
             }
         }
@@ -89,11 +92,6 @@ object FollowPointConnection {
             val fadeInTime = fadeOutTime - preempt
 
             val fp = pool.obtain()
-
-            if (fp is AnimatedSprite) {
-                // For animated follow points, reset the frame back to 0.
-                fp.elapsedSec = 0f
-            }
 
             fp.clearEntityModifiers()
             fp.setPosition(pointStartX, pointStartY)
