@@ -105,6 +105,7 @@ fun convertToJson(ini: IniReader) = JSONObject().apply {
 
     putObject("Utils") {
         put("comboTextScale", 0.8f)
+        put("animationFramerate", ini["General", "AnimationFramerate"] ?: -1f)
     }
 
     putObject("Layout") {

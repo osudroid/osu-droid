@@ -306,16 +306,7 @@ object RoomScene : Scene(), IRoomEventListener, IPlayerEventListener
         val layoutBackButton = OsuSkin.get().getLayout("BackButton")
         val layoutMods = OsuSkin.get().getLayout("ModsButton")
 
-        val loadedBackTextures = mutableListOf<String>()
-
-        if (getResources().isTextureLoaded("menu-back-0"))
-        {
-            for (i in 0..59)
-                if (getResources().isTextureLoaded("menu-back-$i")) loadedBackTextures.add("menu-back-$i")
-        }
-        else loadedBackTextures.add("menu-back")
-
-        backButton = object : AnimatedSprite(*loadedBackTextures.toTypedArray<String>())
+        backButton = object : AnimatedSprite("menu-back", true, OsuSkin.get().animationFramerate)
         {
             var scaleWhenHold = layoutBackButton?.property?.optBoolean("scaleWhenHold", true) ?: false
 

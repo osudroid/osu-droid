@@ -12,12 +12,13 @@ import java.util.List;
 
 import ru.nsu.ccfit.zuev.osu.ResourceManager;
 import ru.nsu.ccfit.zuev.osu.scoring.StatisticV2;
+import ru.nsu.ccfit.zuev.skins.OsuSkin;
 
 public class ScoreBar extends GameObject {
     private static float speed = 0.75f;
     private final StatisticV2 stat;
     private final Sprite bg;
-    private final ExtendedSprite colour;
+    private final AnimatedSprite colour;
     private final ExtendedSprite ki;
     private final float width;
     private float lasthp = 0;
@@ -30,17 +31,8 @@ public class ScoreBar extends GameObject {
         bg = new Sprite(0, 0, ResourceManager.getInstance().getTexture(
                 "scorebar-bg"));
         bg.setScaleCenter(0, 0);
-        if (ResourceManager.getInstance().isTextureLoaded("scorebar-colour-0")) {
-            List<String> loadedScoreBarTextures = new ArrayList<>();
-            for (int i = 0; i < 60; i++) {
-                if (ResourceManager.getInstance().isTextureLoaded("scorebar-colour-" + i))
-                    loadedScoreBarTextures.add("scorebar-colour-" + i);
-            }
-            colour = new AnimatedSprite(loadedScoreBarTextures.toArray(new String[0]));
-        } else {
-            colour = new ExtendedSprite();
-            colour.setTextureRegion(ResourceManager.getInstance().getTexture("scorebar-colour"));
-        }
+
+        colour = new AnimatedSprite("scorebar-colour", true, OsuSkin.get().getAnimationFramerate());
         width = colour.getWidth();
         colour.setAdjustSizeWithTexture(false);
         colour.setPosition(5, 5);

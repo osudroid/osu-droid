@@ -24,7 +24,8 @@ import org.anddev.andengine.util.modifier.ease.IEaseFunction.DEFAULT as DefaultE
  */
 object Modifiers {
 
-    private val pool = Pool(10, 50, ::UniversalModifier)
+    @JvmStatic
+    val pool = Pool(50, ::UniversalModifier)
 
 
     @JvmStatic
@@ -133,6 +134,17 @@ object Modifiers {
 
     @JvmStatic
     @JvmOverloads
+    fun move(duration: Float, fromX: Float, toX: Float, fromY: Float, toY: Float, listener: IModifierListener<IEntity>? = null, easeFunction: IEaseFunction = DefaultEaseFunction) = pool.obtain().also {
+        it.setToDefault()
+        it.type = MOVE
+        it.duration = duration
+        it.values = floatArrayOf(fromX, toX, fromY, toY)
+        it.easeFunction = easeFunction
+        it.listener = listener
+    }
+
+    @JvmStatic
+    @JvmOverloads
     fun rotation(duration: Float, from: Float, to: Float, listener: IModifierListener<IEntity>? = null, easeFunction: IEaseFunction = DefaultEaseFunction) = pool.obtain().also {
         it.setToDefault()
         it.type = ROTATION
@@ -160,12 +172,6 @@ object Modifiers {
         it.listener = listener
 
     }
-
-    @JvmStatic
-    fun free(modifier: UniversalModifier) = pool.free(modifier)
-
-    @JvmStatic
-    fun clearPool() = pool.clear()
 
 }
 
@@ -243,6 +249,11 @@ class UniversalModifier @JvmOverloads constructor(private val pool: Pool<Univers
                 return
             }
 
+            if (type == PARALLEL) {
+                // Sorting to reduce iterations, obviously sequential modifiers cannot be sorted.
+                value?.sortBy { it.duration }
+            }
+
             field = value
             duration = getDuration()
         }
@@ -305,32 +316,45 @@ class UniversalModifier @JvmOverloads constructor(private val pool: Pool<Univers
         if (type == SEQUENCE || type == PARALLEL) {
 
             var remainingSec = deltaSec
+            var isAllModifiersFinished = false
 
-            while (remainingSec > 0) {
+            while (remainingSec > 0 && !isAllModifiersFinished) {
 
                 var isCurrentModifierFinished = false
+
+                if (type == PARALLEL) {
+                    usedSec = 0f
+                }
+
+                // Assuming all modifiers are finished until proven otherwise in the loop below.
+                isAllModifiersFinished = true
 
                 for (modifier in modifiers!!) {
 
                     if (modifier.isFinished) {
                         continue
                     }
+                    isAllModifiersFinished = false
 
                     if (type == SEQUENCE) {
                         remainingSec -= modifier.onUpdate(remainingSec, item)
-
-                        isCurrentModifierFinished = modifier.isFinished()
-                        break
+                    } else {
+                        usedSec = max(usedSec, modifier.onUpdate(deltaSec, item))
                     }
 
-                    usedSec = max(usedSec, modifier.onUpdate(deltaSec, item))
+                    isCurrentModifierFinished = modifier.isFinished
+
+                    if (type == SEQUENCE) {
+                        break
+                    }
                 }
 
-                if (type == SEQUENCE && isCurrentModifierFinished) {
+                if (type == PARALLEL) {
+                    remainingSec -= usedSec
+                } else if (isCurrentModifierFinished) {
                     break
                 }
 
-                remainingSec -= usedSec
             }
 
             usedSec = deltaSec - remainingSec
@@ -350,6 +374,10 @@ class UniversalModifier @JvmOverloads constructor(private val pool: Pool<Univers
                     val value = getValueAt(0, percentage)
                     item.scaleX = value
                     item.scaleY = value
+                }
+
+                MOVE -> {
+                    item.setPosition(getValueAt(0, percentage), getValueAt(1, percentage))
                 }
 
                 TRANSLATE -> {
@@ -526,6 +554,11 @@ enum class ModifierType {
      * Modifies the entity's color values.
      */
     RGB,
+
+    /**
+     * Modifies the entity's position in both axis.
+     */
+    MOVE,
 
     /**
      * Modifies the entity's translation in both axis.

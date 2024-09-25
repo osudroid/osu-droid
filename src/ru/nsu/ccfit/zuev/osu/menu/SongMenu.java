@@ -322,17 +322,7 @@ public class SongMenu implements IUpdateHandler, MenuItemListener,
         SkinLayout layoutOptions = OsuSkin.get().getLayout("OptionsButton");
         SkinLayout layoutRandom = OsuSkin.get().getLayout("RandomButton");
 
-        List<String> loadedBackTextures = new ArrayList<>();
-        if (ResourceManager.getInstance().isTextureLoaded("menu-back-0")) {
-            for (int i = 0; i < 60; i++) {
-                if (ResourceManager.getInstance().isTextureLoaded("menu-back-" + i))
-                    loadedBackTextures.add("menu-back-" + i);
-            }
-        } else {
-            loadedBackTextures.add("menu-back");
-        }
-
-        backButton = new AnimatedSprite(loadedBackTextures.toArray(new String[0])) {
+        backButton = new AnimatedSprite("menu-back", true, OsuSkin.get().getAnimationFramerate()) {
             boolean moved = false;
             float dx = 0, dy = 0;
             boolean scaleWhenHold = true;

@@ -23,6 +23,7 @@ import com.reco1l.osu.graphics.Modifiers;
 import com.reco1l.osu.graphics.Origin;
 import com.reco1l.osu.graphics.VideoSprite;
 import com.reco1l.osu.graphics.ExtendedScene;
+import com.reco1l.osu.playfield.FollowPointConnection;
 import com.reco1l.osu.playfield.ScoreText;
 import com.reco1l.osu.playfield.SliderTickSprite;
 import com.reco1l.osu.ui.BlockAreaFragment;
@@ -466,9 +467,10 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
         GameHelper.setCurrentBeatTime(0);
 
         GameObjectPool.getInstance().purge();
-        SliderTickSprite.getPool().clear();
-        FollowTrack.pointSpritePool.clear();
-        Modifiers.clearPool();
+
+        FollowPointConnection.getPool().renew(16);
+        SliderTickSprite.getPool().renew(16);
+        Modifiers.getPool().renew(16);
 
         // TODO replay
         offsetSum = 0;
@@ -788,18 +790,7 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
 
         skipBtn = null;
         if (skipTime > 1) {
-            if (ResourceManager.getInstance().isTextureLoaded("play-skip-0")) {
-                List<String> loadedSkipTextures = new ArrayList<>();
-                for (int i = 0; i < 60; i++) {
-                    if (ResourceManager.getInstance().isTextureLoaded("play-skip-" + i))
-                        loadedSkipTextures.add("play-skip-" + i);
-                }
-                skipBtn = new AnimatedSprite(loadedSkipTextures.toArray(new String[0]));
-            } else {
-                skipBtn = new ExtendedSprite();
-                skipBtn.setTextureRegion(ResourceManager.getInstance().getTexture("play-skip"));
-            }
-
+            skipBtn = new AnimatedSprite("play-skip", true, OsuSkin.get().getAnimationFramerate());
             skipBtn.setOrigin(Origin.BottomRight);
             skipBtn.setPosition(Config.getRES_WIDTH(), Config.getRES_HEIGHT());
             skipBtn.setAlpha(0.7f);
@@ -1350,8 +1341,7 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
             }
 
             if (!(obj instanceof com.rian.osu.beatmap.hitobject.Spinner) && nextObj != null && !(nextObj instanceof com.rian.osu.beatmap.hitobject.Spinner) && !obj.isLastInCombo()) {
-                final FollowTrack track = GameObjectPool.getInstance().getTrack();
-                track.init(this, bgScene, HitObjectUtils.getGameplayStackedEndPosition(obj), nextObj.getGameplayStackedPosition(), (float) nextObj.startTime / 1000 - secPassed, objectTimePreempt, scale);
+                FollowPointConnection.addConnection(bgScene, secPassed, obj, nextObj, objectTimePreempt);
             }
         }
 

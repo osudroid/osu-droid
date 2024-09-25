@@ -103,16 +103,8 @@ object LobbyScene : Scene()
 
         // Back button code copy and paste from legacy code but improved, don't blame on me.
         val layoutBackButton = OsuSkin.get().getLayout("BackButton")
-        val loadedBackTextures = mutableListOf<String>()
 
-        if (getResources().isTextureLoaded("menu-back-0"))
-        {
-            for (i in 0..59)
-                if (getResources().isTextureLoaded("menu-back-$i")) loadedBackTextures.add("menu-back-$i")
-        }
-        else loadedBackTextures.add("menu-back")
-
-        backButton = object : AnimatedSprite(*loadedBackTextures.toTypedArray<String>()) {
+        backButton = object : AnimatedSprite("menu-back", true, OsuSkin.get().animationFramerate) {
 
             var scaleWhenHold = layoutBackButton?.property?.optBoolean("scaleWhenHold", true) ?: false
             var moved = false

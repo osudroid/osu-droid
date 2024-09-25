@@ -116,6 +116,7 @@ public class SkinJsonReader extends SkinReader {
         skin.limitComboTextLength.setFromJson(data);
         skin.disableKiai.setFromJson(data);
         skin.comboTextScale.setFromJson(data);
+        skin.animationFramerate.setFromJson(data);
     }
 
     @Override

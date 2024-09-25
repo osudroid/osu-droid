@@ -58,7 +58,7 @@ public class Slider extends GameObject {
     private int currentTickSpriteIndex;
 
     private PointF ballPos;
-    private final Sprite followCircle;
+    private final ExtendedSprite followCircle;
 
     // Temporarily used PointF to avoid allocations
     private final PointF tmpPoint = new PointF();
@@ -132,10 +132,16 @@ public class Slider extends GameObject {
         endArrow.setOrigin(Origin.Center);
         endArrow.setTextureRegion(ResourceManager.getInstance().getTexture("reversearrow"));
 
-        int ballFrameCount = SkinManager.getFrames("sliderb");
-        ball = new AnimatedSprite("sliderb", ballFrameCount);
+        ball = new AnimatedSprite("sliderb", false);
 
-        followCircle = new Sprite(0, 0, ResourceManager.getInstance().getTexture("sliderfollowcircle"));
+        // Avoid to use AnimatedSprite if not necessary.
+        if (ResourceManager.getInstance().isTextureLoaded("sliderfollowcircle-0")) {
+            followCircle = new AnimatedSprite("sliderfollowcircle", true, OsuSkin.get().getAnimationFramerate());
+        } else {
+            followCircle = new ExtendedSprite();
+            followCircle.setTextureRegion(ResourceManager.getInstance().getTexture("sliderfollowcircle"));
+        }
+
         sliderBody = new SliderBody(OsuSkin.get().isSliderHintEnable());
         tickContainer = new SliderTickContainer();
     }

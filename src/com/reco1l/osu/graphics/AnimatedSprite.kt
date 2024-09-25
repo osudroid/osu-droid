@@ -3,25 +3,42 @@ package com.reco1l.osu.graphics
 import com.reco1l.osu.graphics.AnimationState.*
 import org.anddev.andengine.opengl.texture.region.*
 import ru.nsu.ccfit.zuev.osu.*
-import ru.nsu.ccfit.zuev.skins.*
+import kotlin.math.*
 
 
-open class AnimatedSprite(frames: List<TextureRegion>) : ExtendedSprite() {
+open class AnimatedSprite(frames: Array<TextureRegion?>) : ExtendedSprite() {
 
-
+    /**
+     * Creates an animated sprite with the texture name and frame count.
+     *
+     * @param textureName The base name of the texture (do not include the frame number or the hyphen if it has).
+     * @param withHyphen Whether the texture name has a hyphen before the frame number.
+     * @param fps The frame rate of the animation.
+     */
     @JvmOverloads
-    constructor(texturePrefix: StringSkinData? = null, textureName: String?, frameCount: Int) : this(List(frameCount.coerceAtLeast(1)) {
+    constructor(textureName: String, withHyphen: Boolean, fps: Float = DEFAULT_FPS) : this(mutableListOf<TextureRegion?>().also { frames ->
 
-        if (texturePrefix == null) {
-            ResourceManager.getInstance().getTexture(textureName + it)
-        } else {
-            ResourceManager.getInstance().getTextureWithPrefix(texturePrefix, (textureName ?: "") + it)
+        var frameCount = if (fps < 0) ResourceManager.getInstance().getFrameCount(textureName) else fps.toInt()
+
+        // ResourceManager can return -1 if the textures are not present.
+        if (frameCount < 0) {
+            frameCount = DEFAULT_FPS.toInt()
         }
-    })
 
-    constructor(vararg textureNames: String) : this(textureNames.map {
-        ResourceManager.getInstance().getTexture(it)
-    })
+        for (i in 0 until frameCount) {
+            val frameName = textureName + (if (withHyphen) "-" else "") + i
+
+            if (ResourceManager.getInstance().isTextureLoaded(frameName)) {
+                frames.add(ResourceManager.getInstance().getTexture(frameName))
+            }
+        }
+
+        if (frames.isEmpty()) {
+            frames.add(ResourceManager.getInstance().getTexture(textureName))
+        }
+    }.toTypedArray()) {
+        this.fps = fps
+    }
 
 
     /**
@@ -31,19 +48,17 @@ open class AnimatedSprite(frames: List<TextureRegion>) : ExtendedSprite() {
      */
     var frames = frames
         set(value) {
-            if (field != value) {
-                state = STOPPED
-                textureRegion = value.firstOrNull()
-                field = value
-            }
+            state = STOPPED
+            textureRegion = value.firstOrNull()
+            field = value
         }
 
     /**
      * The current state of the animation.
      *
-     * Setting FPS to 0 is equivalent to setting the state to [STOPPED].
+     * Negative values will set the frame count as the frame rate.
      */
-    var fps = frames.size.toFloat()
+    var fps = -1f
 
     /**
      * The current state of the animation.
@@ -86,14 +101,13 @@ open class AnimatedSprite(frames: List<TextureRegion>) : ExtendedSprite() {
 
     override fun onManagedUpdate(pSecondsElapsed: Float) {
 
-        if (frames.isEmpty()) {
-            return
-        }
+        if (frames.isNotEmpty() && state == PLAYING) {
 
-        if (state == PLAYING) {
             elapsedSec += pSecondsElapsed
 
-            var frameIndex = (elapsedSec * fps).toInt()
+            val framePerSec = if (fps < 0) frames.size.toFloat() else fps
+
+            var frameIndex = (elapsedSec * framePerSec).roundToInt()
 
             if (isLoop) {
                 frameIndex %= frames.size
@@ -112,6 +126,17 @@ open class AnimatedSprite(frames: List<TextureRegion>) : ExtendedSprite() {
     }
 
 
+    override fun reset() {
+        super.reset()
+        elapsedSec = 0f
+    }
+
+
+    companion object {
+
+        const val DEFAULT_FPS = 60f
+
+    }
 
 }
 
