@@ -31,7 +31,7 @@ class ModDifficultyAdjust(
      */
     @JvmField
     var hp: Float? = null
-) : Mod(), IApplicableToDifficultyWithSettings, IApplicableToHitObjectWithSettings {
+) : Mod(), IModApplicableToDifficultyWithSettings, IModApplicableToHitObjectWithSettings {
     override val droidString = ""
 
     override fun applyToDifficulty(mode: GameMode, difficulty: BeatmapDifficulty, mods: List<Mod>, customSpeedMultiplier: Float) =
@@ -63,7 +63,7 @@ class ModDifficultyAdjust(
     }
 
     private fun calculateTrackRate(mods: List<Mod>, customSpeedMultiplier: Float) =
-        mods.filterIsInstance<IApplicableToTrackRate>().fold(1f) { acc, mod -> acc * mod.trackRateMultiplier } * customSpeedMultiplier
+        mods.filterIsInstance<IModApplicableToTrackRate>().fold(1f) { acc, mod -> acc * mod.trackRateMultiplier } * customSpeedMultiplier
 
     private fun getValue(value: Float?, fallback: Float) = value ?: fallback
 

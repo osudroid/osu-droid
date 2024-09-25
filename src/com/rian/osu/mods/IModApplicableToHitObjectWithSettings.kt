@@ -6,11 +6,11 @@ import com.rian.osu.beatmap.hitobject.HitObject
 /**
  * An interface for [Mod]s that can be applied to [HitObject]s based on other applied [Mod]s and settings.
  *
- * This should not be used together with [IApplicableToHitObject].
+ * This should not be used together with [IModApplicableToHitObject].
  */
-interface IApplicableToHitObjectWithSettings {
+interface IModApplicableToHitObjectWithSettings {
     /**
-     * Applies this [IApplicableToHitObjectWithSettings] to a [HitObject].
+     * Applies this [IModApplicableToHitObjectWithSettings] to a [HitObject].
      *
      * This is typically called post beatmap conversion.
      *

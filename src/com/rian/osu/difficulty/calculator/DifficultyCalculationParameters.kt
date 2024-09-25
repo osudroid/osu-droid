@@ -1,6 +1,6 @@
 package com.rian.osu.difficulty.calculator
 
-import com.rian.osu.mods.IApplicableToTrackRate
+import com.rian.osu.mods.IModApplicableToTrackRate
 import com.rian.osu.mods.Mod
 
 /**
@@ -21,7 +21,7 @@ class DifficultyCalculationParameters {
      * The overall speed multiplier to calculate for.
      */
     val totalSpeedMultiplier by lazy {
-        customSpeedMultiplier * mods.filterIsInstance<IApplicableToTrackRate>().fold(1f) { acc, mod ->
+        customSpeedMultiplier * mods.filterIsInstance<IModApplicableToTrackRate>().fold(1f) { acc, mod ->
             acc * mod.trackRateMultiplier
         }
     }
