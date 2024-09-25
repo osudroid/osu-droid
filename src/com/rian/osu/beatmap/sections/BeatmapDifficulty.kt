@@ -7,7 +7,27 @@ import kotlin.math.sign
  */
 class BeatmapDifficulty : Cloneable {
     /**
+     * The circle size of this beatmap in difficulty calculation.
+     *
+     * The game calculates circle size by using the currently running device's height in a way such that it is
+     * possible to get varying difficulty calculation results under the same mod configuration across different
+     * devices. As such, in difficulty calculation the height of the device is assumed to be a fixed value.
+     * For this reason, this circle size measurement should **not** be used in gameplay unless necessary.
+     *
+     * For circle size in gameplay, see [gameplayCS].
+     */
+    @JvmField
+    var difficultyCS = 5f
+
+    /**
      * The circle size of this beatmap in gameplay.
+     *
+     * This may differ from [difficultyCS], as the game calculates circle size by using the currently running
+     * device's height in a way such that it is possible to get varying difficulty calculation results under the
+     * same mod configuration across different devices. As such, in difficulty calculation the height of the
+     * device is assumed to be a fixed value.
+     *
+     * Unlike [difficultyCS], this circle size measurement uses the device's height, and should be used in gameplay.
      */
     @JvmField
     var gameplayCS = 5f
@@ -43,6 +63,7 @@ class BeatmapDifficulty : Cloneable {
     var sliderTickRate = 1.0
 
     fun apply(other: BeatmapDifficulty) = run {
+        difficultyCS = other.difficultyCS
         gameplayCS = other.gameplayCS
         ar = other.ar
         od = other.od
