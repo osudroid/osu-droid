@@ -12,19 +12,18 @@ class Spinner(
      */
     startTime: Double,
 
-    override var endTime: Double,
+    override val endTime: Double,
 
     /**
      * Whether this [Spinner] starts a new combo.
      */
     isNewCombo: Boolean,
-) : HitObject(startTime, Vector2(256f, 192f), isNewCombo, 0), IHasDuration {
+) : HitObject(startTime, Vector2(256f, 192f), isNewCombo, 0) {
     override val difficultyStackedPosition = position
+    override val difficultyStackedEndPosition = position
 
-    override val gameplayStackedPosition = position
-
-    override val duration
-        get() = endTime - startTime
+    override val gameplayStackedPosition = gameplayPosition
+    override val gameplayStackedEndPosition = gameplayPosition
 
     override fun applySamples(controlPoints: BeatmapControlPoints) {
         super.applySamples(controlPoints)

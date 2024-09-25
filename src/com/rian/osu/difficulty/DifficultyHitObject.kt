@@ -4,7 +4,6 @@ import com.rian.osu.GameMode
 import com.rian.osu.beatmap.hitobject.HitObject
 import com.rian.osu.beatmap.hitobject.Slider
 import com.rian.osu.beatmap.hitobject.Spinner
-import com.rian.osu.beatmap.hitobject.getEndTime
 import com.rian.osu.beatmap.hitobject.sliderobject.SliderRepeat
 import com.rian.osu.math.Precision.almostEquals
 import com.rian.osu.math.Vector2
@@ -125,7 +124,7 @@ abstract class DifficultyHitObject(
      * Adjusted end time of the hit object, taking speed multiplier into account.
      */
     @JvmField
-    val endTime = obj.getEndTime() / clockRate
+    val endTime = obj.endTime / clockRate
 
     /**
      * The full great window of the hit object.

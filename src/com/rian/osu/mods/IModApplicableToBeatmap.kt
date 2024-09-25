@@ -5,9 +5,9 @@ import com.rian.osu.beatmap.Beatmap
 /**
  * An interface for [Mod]s that applies changes to a [Beatmap] after conversion and post-processing has completed.
  */
-interface IApplicableToBeatmap {
+interface IModApplicableToBeatmap {
     /**
-     * Applies this [IApplicableToBeatmap] to a [Beatmap].
+     * Applies this [IModApplicableToBeatmap] to a [Beatmap].
      *
      * @param beatmap The [Beatmap] to apply to.
      */

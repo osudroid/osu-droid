@@ -46,12 +46,7 @@ class DroidDifficultyHitObject(
     /**
      * The full great window of the hit object.
      */
-    greatWindow: Double,
-
-    /**
-     * Whether force AR was enabled.
-     */
-    forceAR: Boolean
+    greatWindow: Double
 ) : DifficultyHitObject(obj, lastObj, lastLastObj, clockRate, difficultyHitObjects, index, greatWindow) {
     override val mode = GameMode.Droid
     override val maximumSliderRadius = NORMALIZED_RADIUS * 2
@@ -89,7 +84,7 @@ class DroidDifficultyHitObject(
      * Adjusted preempt time of the [HitObject], taking speed multiplier into account.
      */
     @JvmField
-    val timePreempt = if (forceAR) obj.timePreempt else obj.timePreempt / clockRate
+    val timePreempt = obj.timePreempt / clockRate
 
     override fun computeProperties(clockRate: Double, objects: List<HitObject>) {
         super.computeProperties(clockRate, objects)
@@ -128,7 +123,7 @@ class DroidDifficultyHitObject(
 
         if (considerDistance) {
             val position = obj.difficultyStackedPosition
-            var distance = previous.obj.getDifficultyStackedEndPosition().getDistance(position)
+            var distance = previous.obj.difficultyStackedEndPosition.getDistance(position)
 
             if (previous.obj is Slider && previous.obj.lazyEndPosition != null) {
                 distance = min(
@@ -157,7 +152,7 @@ class DroidDifficultyHitObject(
                 continue
             }
 
-            if (o.startTime > obj.getEndTime() + obj.timePreempt) {
+            if (o.startTime > obj.endTime + obj.timePreempt) {
                 break
             }
 
@@ -183,17 +178,17 @@ class DroidDifficultyHitObject(
         }
 
         for (hitObject in prevVisibleObjects) {
-            val distance = obj.difficultyStackedPosition.getDistance(hitObject.getDifficultyStackedEndPosition())
-            val deltaTime = startTime - hitObject.getEndTime() / clockRate
+            val distance = obj.difficultyStackedPosition.getDistance(hitObject.difficultyStackedEndPosition)
+            val deltaTime = startTime - hitObject.endTime / clockRate
 
             applyToOverlappingFactor(distance, deltaTime)
         }
 
         for (hitObject in nextVisibleObjects) {
-            val distance = hitObject.difficultyStackedPosition.getDistance(obj.getDifficultyStackedEndPosition())
+            val distance = hitObject.difficultyStackedPosition.getDistance(obj.difficultyStackedEndPosition)
 
             // We are not using clock rate adjusted delta time here for note density calculation.
-            val deltaTime = hitObject.startTime - obj.getEndTime()
+            val deltaTime = hitObject.startTime - obj.endTime
 
             if (deltaTime >= 0) {
                 noteDensity += 1 - deltaTime / obj.timePreempt

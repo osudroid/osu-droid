@@ -319,11 +319,7 @@ class DroidPerformanceCalculator(
 
         var od = overallDifficulty.toFloat()
         var hitWindow = if (isPrecise) PreciseDroidHitWindow(od) else DroidHitWindow(od)
-        var realGreatWindow = hitWindow.greatWindow
-
-        if (!forceOD) {
-            realGreatWindow *= clockRate.toFloat()
-        }
+        val realGreatWindow = hitWindow.greatWindow * clockRate.toFloat()
 
         // Obtain the good and meh hit window for osu!droid.
         od =
@@ -398,11 +394,7 @@ class DroidPerformanceCalculator(
 
         var od = overallDifficulty.toFloat()
         var hitWindow = if (isPrecise) PreciseDroidHitWindow(od) else DroidHitWindow(od)
-        var realGreatWindow = hitWindow.greatWindow
-
-        if (!forceOD) {
-            realGreatWindow *= clockRate.toFloat()
-        }
+        val realGreatWindow = hitWindow.greatWindow * clockRate.toFloat()
 
         // Obtain the good and meh hit window for osu!droid.
         od =

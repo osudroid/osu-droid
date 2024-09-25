@@ -12,7 +12,7 @@ import kotlin.math.min
 /**
  * Represents the Hard Rock mod.
  */
-class ModHardRock : Mod(), IApplicableToDifficulty, IApplicableToHitObject {
+class ModHardRock : Mod(), IModApplicableToDifficulty, IModApplicableToHitObject {
     override val droidString = "r"
 
     override fun applyToDifficulty(mode: GameMode, difficulty: BeatmapDifficulty) = difficulty.run {

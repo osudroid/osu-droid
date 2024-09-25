@@ -44,6 +44,17 @@ abstract class HitObject(
     val comboOffset: Int
 ) {
     /**
+     * The end time of this [HitObject].
+     */
+    open val endTime = startTime
+
+    /**
+     * The duration of this [HitObject], in milliseconds.
+     */
+    val duration
+        get() = endTime - startTime
+
+    /**
      * The position of this [HitObject] in osu!pixels.
      */
     open var position = position
@@ -54,6 +65,11 @@ abstract class HitObject(
             gameplayPositionCache.invalidate()
             gameplayStackedPositionCache.invalidate()
         }
+
+    /**
+     * The end position of this [HitObject] in osu!pixels.
+     */
+    open val endPosition = position
 
     /**
      * The index of this [HitObject] in the current combo.
@@ -190,6 +206,12 @@ abstract class HitObject(
             return difficultyStackedPositionCache.value
         }
 
+    /**
+     * The stacked end position of this [HitObject] in difficulty calculation, in osu!pixels.
+     */
+    open val difficultyStackedEndPosition
+        get() = difficultyStackedPosition
+
     // Gameplay object positions
 
     /**
@@ -229,6 +251,12 @@ abstract class HitObject(
         }
 
     /**
+     * The end position of this [HitObject] in gameplay, in pixels.
+     */
+    open val gameplayEndPosition
+        get() = gameplayPosition
+
+    /**
      * The radius of this [HitObject] in gameplay, in pixels.
      */
     val gameplayRadius
@@ -261,6 +289,12 @@ abstract class HitObject(
 
             return gameplayStackedPositionCache.value
         }
+
+    /**
+     * The stacked end position of this [HitObject] in gameplay, in pixels.
+     */
+    open val gameplayStackedEndPosition
+        get() = gameplayStackedPosition
 
     /**
      * Applies defaults to this [HitObject].
@@ -309,7 +343,7 @@ abstract class HitObject(
      * @param controlPoints The control points.
      */
     open fun applySamples(controlPoints: BeatmapControlPoints) {
-        val sampleControlPoint = controlPoints.sample.controlPointAt(getEndTime() + CONTROL_POINT_LENIENCY)
+        val sampleControlPoint = controlPoints.sample.controlPointAt(endTime + CONTROL_POINT_LENIENCY)
 
         samples = samples.map { sampleControlPoint.applyTo(it) }.toMutableList()
     }

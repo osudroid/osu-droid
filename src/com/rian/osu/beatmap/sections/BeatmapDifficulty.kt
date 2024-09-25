@@ -1,5 +1,7 @@
 package com.rian.osu.beatmap.sections
 
+import kotlin.math.sign
+
 /**
  * Contains difficulty settings of a beatmap.
  */
@@ -66,6 +68,24 @@ class BeatmapDifficulty : Cloneable {
                 difficulty > 5 -> mid + (max - mid) * (difficulty - 5) / 5
                 difficulty < 5 -> mid + (mid - min) * (difficulty - 5) / 5
                 else -> mid
+            }
+
+        /**
+         * Inverse function to [difficultyRange]. Maps a value returned by the function back to the
+         * difficulty that produced it.
+         *
+         * @param difficultyValue The difficulty-dependent value to be unmapped.
+         * @param diff0 Minimum of the resulting range which will be achieved by a difficulty value of 0.
+         * @param diff5 Midpoint of the resulting range which will be achieved by a difficulty value of 5.
+         * @param diff10 Maximum of the resulting range which will be achieved by a difficulty value of 10.
+         * @return The value to which the difficulty value maps in the specified range.
+         */
+        @JvmStatic
+        fun inverseDifficultyRange(difficultyValue: Double, diff0: Double, diff5: Double, diff10: Double) =
+            if (sign(difficultyValue - diff5) == sign(diff10 - diff0)) {
+                (difficultyValue - diff5) / (diff10 - diff5) * 5 + 5
+            } else {
+                (difficultyValue - diff5) / (diff5 - diff0) * 5 + 5
             }
     }
 }

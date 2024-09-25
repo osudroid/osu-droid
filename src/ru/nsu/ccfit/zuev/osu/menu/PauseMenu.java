@@ -13,6 +13,7 @@ import ru.nsu.ccfit.zuev.osu.Config;
 import ru.nsu.ccfit.zuev.osu.GlobalManager;
 import ru.nsu.ccfit.zuev.osu.ResourceManager;
 import ru.nsu.ccfit.zuev.osu.ToastLogger;
+import ru.nsu.ccfit.zuev.osu.game.GameHelper;
 import ru.nsu.ccfit.zuev.osu.game.GameScene;
 import ru.nsu.ccfit.zuev.osuplus.R;
 
@@ -31,7 +32,13 @@ public class PauseMenu implements IOnMenuItemClickListener {
         this.game = game;
         this.fail = fail;
         replaySaved = false;
-        scene = new MenuScene(engine.getCamera());
+        scene = new MenuScene(engine.getCamera()) {
+            @Override
+            protected void onManagedUpdate(float pSecondsElapsed) {
+                // Cancel the effect of speed multiplier.
+                super.onManagedUpdate(pSecondsElapsed / GameHelper.getSpeedMultiplier());
+            }
+        };
 
         final SpriteMenuItem saveFailedReplay = new SpriteMenuItem(ITEM_SAVE_REPLAY,
                 ResourceManager.getInstance().getTexture("pause-save-replay"));

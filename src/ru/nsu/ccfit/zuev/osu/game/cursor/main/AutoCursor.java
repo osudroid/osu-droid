@@ -8,7 +8,7 @@ import ru.nsu.ccfit.zuev.osu.Config;
 import ru.nsu.ccfit.zuev.osu.game.GameObject;
 import ru.nsu.ccfit.zuev.osu.game.GameObjectListener;
 import ru.nsu.ccfit.zuev.osu.game.ISliderListener;
-import ru.nsu.ccfit.zuev.osu.game.Spinner;
+import ru.nsu.ccfit.zuev.osu.game.GameplaySpinner;
 
 public class AutoCursor extends CursorEntity implements ISliderListener {
     private MoveModifier currentModifier;
@@ -72,14 +72,14 @@ public class AutoCursor extends CursorEntity implements ISliderListener {
         float movePositionY = object.getPosition().y;
         float deltaT = object.getHitTime() - secPassed;
 
-        if (object instanceof Spinner) {
-            movePositionX = ((Spinner) object).center.x;
-            movePositionY = ((Spinner) object).center.y + 50;
+        if (object instanceof GameplaySpinner spinner) {
+            movePositionX = spinner.center.x;
+            movePositionY = spinner.center.y + 50;
         }
 
         currentObjectId = object.getId();
 
-        if (deltaT < 0.085f && !(object instanceof Spinner)) {
+        if (deltaT < 0.085f && !(object instanceof GameplaySpinner)) {
             deltaT = 0.085f;
         }
 

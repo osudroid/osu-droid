@@ -6,6 +6,7 @@ import com.reco1l.osu.Execution;
 import com.reco1l.osu.graphics.ExtendedSprite;
 import com.reco1l.osu.graphics.Modifiers;
 import com.reco1l.osu.graphics.Origin;
+import com.rian.osu.beatmap.hitobject.Spinner;
 
 import org.anddev.andengine.entity.IEntity;
 import org.anddev.andengine.entity.scene.Scene;
@@ -16,14 +17,13 @@ import ru.nsu.ccfit.zuev.osu.Constants;
 import ru.nsu.ccfit.zuev.osu.ResourceManager;
 import ru.nsu.ccfit.zuev.osu.Utils;
 import ru.nsu.ccfit.zuev.osu.helper.ModifierListener;
-import ru.nsu.ccfit.zuev.osu.menu.ModMenu;
 import ru.nsu.ccfit.zuev.osu.scoring.ScoreNumber;
 import ru.nsu.ccfit.zuev.osu.scoring.StatisticV2;
 
 /**
  * Created by dgsrz on 15/10/19.
  */
-public class ModernSpinner extends Spinner {
+public class GameplayModernSpinner extends GameplaySpinner {
 
     private final ExtendedSprite middle;
     private final ExtendedSprite middle2;
@@ -46,7 +46,7 @@ public class ModernSpinner extends Spinner {
 
     private final PointF currMouse = new PointF();
 
-    public ModernSpinner() {
+    public GameplayModernSpinner() {
         ResourceManager.getInstance().checkEvoSpinnerTextures();
         center = Utils.trackToRealCoords(new PointF((float) Constants.MAP_WIDTH / 2, (float) Constants.MAP_HEIGHT / 2));
 
@@ -80,8 +80,7 @@ public class ModernSpinner extends Spinner {
 
     @Override
     public void init(final GameObjectListener listener, final Scene scene,
-                     final com.rian.osu.beatmap.hitobject.Spinner beatmapSpinner, final float rps,
-                     final StatisticV2 stat) {
+                     final Spinner beatmapSpinner, final float rps, final StatisticV2 stat) {
         this.scene = scene;
         this.beatmapSpinner = beatmapSpinner;
         this.listener = listener;
@@ -124,10 +123,6 @@ public class ModernSpinner extends Spinner {
         scene.attachChild(middle2);
 
         float timePreempt = (float) beatmapSpinner.timePreempt / 1000f;
-
-        if (ModMenu.getInstance().isCustomAR()) {
-            timePreempt *= GameHelper.getSpeedMultiplier();
-        }
 
         top.registerEntityModifier(Modifiers.sequence(
             Modifiers.fadeIn(timePreempt, new ModifierListener() {
@@ -273,7 +268,7 @@ public class ModernSpinner extends Spinner {
         scene.detachChild(glow);
         scene.detachChild(bonusScore);
 
-        listener.removeObject(ModernSpinner.this);
+        listener.removeObject(GameplayModernSpinner.this);
         GameObjectPool.getInstance().putSpinner(this);
 
         int score = 0;

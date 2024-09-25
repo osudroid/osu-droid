@@ -1,6 +1,7 @@
 package com.rian.osu.mods
 
 import com.rian.osu.GameMode
+import com.rian.osu.beatmap.hitobject.HitObject
 import com.rian.osu.beatmap.sections.BeatmapDifficulty
 
 /**
@@ -30,15 +31,39 @@ class ModDifficultyAdjust(
      */
     @JvmField
     var hp: Float? = null
-) : Mod(), IApplicableToDifficulty {
+) : Mod(), IModApplicableToDifficultyWithSettings, IModApplicableToHitObjectWithSettings {
     override val droidString = ""
 
-    override fun applyToDifficulty(mode: GameMode, difficulty: BeatmapDifficulty) = difficulty.let {
-        it.cs = getValue(cs, it.cs)
-        it.ar = getValue(ar, it.ar)
-        it.od = getValue(od, it.od)
-        it.hp = getValue(hp, it.hp)
+    override fun applyToDifficulty(mode: GameMode, difficulty: BeatmapDifficulty, mods: List<Mod>, customSpeedMultiplier: Float) =
+        difficulty.let {
+            it.cs = getValue(cs, it.cs)
+            it.ar = getValue(ar, it.ar)
+            it.od = getValue(od, it.od)
+            it.hp = getValue(hp, it.hp)
+
+            // Special case for force AR, where the AR value is kept constant with respect to game time.
+            // This makes the player perceive the AR as is under all speed multipliers.
+            if (ar != null) {
+                val preempt = BeatmapDifficulty.difficultyRange(ar!!.toDouble(), HitObject.PREEMPT_MAX, HitObject.PREEMPT_MID, HitObject.PREEMPT_MIN)
+                val trackRate = calculateTrackRate(mods, customSpeedMultiplier)
+
+                it.ar = BeatmapDifficulty.inverseDifficultyRange(preempt * trackRate, HitObject.PREEMPT_MAX, HitObject.PREEMPT_MID, HitObject.PREEMPT_MIN).toFloat()
+            }
+        }
+
+    override fun applyToHitObject(mode: GameMode, hitObject: HitObject, mods: List<Mod>, customSpeedMultiplier: Float) {
+        // Special case for force AR, where the AR value is kept constant with respect to game time.
+        // This makes the player perceive the fade in animation as is under all speed multipliers.
+        if (ar == null) {
+            return
+        }
+
+        val trackRate = calculateTrackRate(mods, customSpeedMultiplier)
+        hitObject.timeFadeIn *= trackRate
     }
+
+    private fun calculateTrackRate(mods: List<Mod>, customSpeedMultiplier: Float) =
+        mods.filterIsInstance<IModApplicableToTrackRate>().fold(1f) { acc, mod -> acc * mod.trackRateMultiplier } * customSpeedMultiplier
 
     private fun getValue(value: Float?, fallback: Float) = value ?: fallback
 

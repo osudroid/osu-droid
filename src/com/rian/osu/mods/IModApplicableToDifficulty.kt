@@ -6,9 +6,9 @@ import com.rian.osu.beatmap.sections.BeatmapDifficulty
 /**
  * An interface for [Mod]s that make general adjustments to difficulty.
  */
-interface IApplicableToDifficulty {
+interface IModApplicableToDifficulty {
     /**
-     * Applies this [IApplicableToDifficulty] to a [BeatmapDifficulty].
+     * Applies this [IModApplicableToDifficulty] to a [BeatmapDifficulty].
      *
      * This is typically called post beatmap conversion.
      *

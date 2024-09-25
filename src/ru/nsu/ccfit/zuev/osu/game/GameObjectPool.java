@@ -8,10 +8,10 @@ import ru.nsu.ccfit.zuev.osu.Config;
 
 public class GameObjectPool {
     public static GameObjectPool instance = new GameObjectPool();
-    public LinkedList<HitCircle> circles = new LinkedList<>();
+    public LinkedList<GameplayHitCircle> circles = new LinkedList<>();
     public Map<String, LinkedList<GameEffect>> effects = new HashMap<>();
-    public LinkedList<Slider> sliders = new LinkedList<>();
-    public LinkedList<Spinner> spinners = new LinkedList<>();
+    public LinkedList<GameplaySlider> sliders = new LinkedList<>();
+    public LinkedList<GameplaySpinner> spinners = new LinkedList<>();
     private int objectsCreated = 0;
     private GameObjectPool() {
     }
@@ -20,30 +20,30 @@ public class GameObjectPool {
         return instance;
     }
 
-    public HitCircle getCircle() {
+    public GameplayHitCircle getCircle() {
         if (!circles.isEmpty()) {
             return circles.poll();
         }
 
         objectsCreated++;
-        return new HitCircle();
+        return new GameplayHitCircle();
     }
 
-    public void putCircle(final HitCircle circle) {
+    public void putCircle(final GameplayHitCircle circle) {
         circles.add(circle);
     }
 
-    public Spinner getSpinner() {
+    public GameplaySpinner getSpinner() {
         if (!spinners.isEmpty()) {
             return spinners.poll();
         }
 
         objectsCreated++;
 
-        return Config.getSpinnerStyle() == 1 ? new ModernSpinner() : new Spinner();
+        return Config.getSpinnerStyle() == 1 ? new GameplayModernSpinner() : new GameplaySpinner();
     }
 
-    public void putSpinner(final Spinner spinner) {
+    public void putSpinner(final GameplaySpinner spinner) {
         spinners.add(spinner);
     }
 
@@ -64,16 +64,16 @@ public class GameObjectPool {
         effects.get(effect.getTexname()).add(effect);
     }
 
-    public Slider getSlider() {
+    public GameplaySlider getSlider() {
         if (!sliders.isEmpty()) {
             return sliders.poll();
         }
 
         objectsCreated++;
-        return new Slider();
+        return new GameplaySlider();
     }
 
-    public void putSlider(final Slider slider) {
+    public void putSlider(final GameplaySlider slider) {
         sliders.add(slider);
     }
 
@@ -92,13 +92,13 @@ public class GameObjectPool {
 
     public void preload() {
         for (int i = 0; i < 10; i++) {
-            putCircle(new HitCircle());
+            putCircle(new GameplayHitCircle());
         }
         for (int i = 0; i < 5; i++) {
-            putSlider(new Slider());
+            putSlider(new GameplaySlider());
         }
         for (int i = 0; i < 3; i++) {
-            putSpinner(Config.getSpinnerStyle() == 1 ? new ModernSpinner() : new Spinner());
+            putSpinner(Config.getSpinnerStyle() == 1 ? new GameplayModernSpinner() : new GameplaySpinner());
         }
 
         objectsCreated = circles.size() + sliders.size() + spinners.size();

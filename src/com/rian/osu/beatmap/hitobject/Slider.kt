@@ -60,13 +60,9 @@ class Slider(
      */
     @JvmField
     var nodeSamples: MutableList<MutableList<HitSampleInfo>>
-) : HitObject(startTime, position, isNewCombo, comboOffset),
-    IHasDuration {
+) : HitObject(startTime, position, isNewCombo, comboOffset) {
     override val endTime
         get() = startTime + spanCount * path.expectedDistance / velocity
-
-    override val duration
-        get() = endTime - startTime
 
     /**
      * The path of this [Slider].
@@ -88,10 +84,7 @@ class Slider(
 
     private val endPositionCache = Cached(position)
 
-    /**
-     * The end position of this [Slider] in osu!pixels.
-     */
-    val endPosition: Vector2
+    override val endPosition: Vector2
         get() {
             if (!endPositionCache.isValid) {
                 endPositionCache.value = position + curvePositionAt(1.0)
@@ -208,10 +201,7 @@ class Slider(
 
     private val difficultyStackedEndPositionCache = Cached(position)
 
-    /**
-     * The stacked end position of this [Slider] in difficulty calculation, in osu!pixels.
-     */
-    val difficultyStackedEndPosition: Vector2
+    override val difficultyStackedEndPosition: Vector2
         get() {
             if (!difficultyStackedEndPositionCache.isValid) {
                 difficultyStackedEndPositionCache.value = endPosition + difficultyStackOffset
@@ -242,12 +232,9 @@ class Slider(
 
     // Gameplay object positions
 
-    private val gameplayEndPositionCache = Cached(convertPositionToRealCoordinates(position))
+    private val gameplayEndPositionCache = Cached(gameplayPosition)
 
-    /**
-     * The end position of this [Slider] in gameplay, in pixels.
-     */
-    val gameplayEndPosition: Vector2
+    override val gameplayEndPosition: Vector2
         get() {
             if (!gameplayEndPositionCache.isValid) {
                 gameplayEndPositionCache.value = convertPositionToRealCoordinates(endPosition)
@@ -258,10 +245,7 @@ class Slider(
 
     private val gameplayStackedEndPositionCache = Cached(gameplayEndPosition)
 
-    /**
-     * The stacked end position of this [Slider] in gameplay, in pixels.
-     */
-    val gameplayStackedEndPosition: Vector2
+    override val gameplayStackedEndPosition: Vector2
         get() {
             if (!gameplayStackedEndPositionCache.isValid) {
                 gameplayStackedEndPositionCache.value = gameplayEndPosition + gameplayStackOffset

@@ -3,12 +3,12 @@ package com.rian.osu.beatmap
 import com.rian.osu.GameMode
 import com.rian.osu.beatmap.hitobject.HitObject
 import com.rian.osu.beatmap.hitobject.Slider
-import com.rian.osu.beatmap.hitobject.getEndTime
 import com.rian.osu.beatmap.sections.*
-import com.rian.osu.mods.IApplicableToBeatmap
-import com.rian.osu.mods.IApplicableToDifficulty
-import com.rian.osu.mods.IApplicableToDifficultyWithSettings
-import com.rian.osu.mods.IApplicableToHitObject
+import com.rian.osu.mods.IModApplicableToBeatmap
+import com.rian.osu.mods.IModApplicableToDifficulty
+import com.rian.osu.mods.IModApplicableToDifficultyWithSettings
+import com.rian.osu.mods.IModApplicableToHitObject
+import com.rian.osu.mods.IModApplicableToHitObjectWithSettings
 import com.rian.osu.mods.Mod
 
 /**
@@ -114,7 +114,7 @@ class Beatmap : Cloneable {
      * The duration of this [Beatmap].
      */
     val duration: Int
-        get() = hitObjects.objects.lastOrNull()?.getEndTime()?.toInt() ?: 0
+        get() = hitObjects.objects.lastOrNull()?.endTime?.toInt() ?: 0
 
     /**
      * Constructs a playable [Beatmap] from this [Beatmap].
@@ -135,11 +135,11 @@ class Beatmap : Cloneable {
         val converted = converter.convert()
 
         // Apply difficulty mods
-        mods?.filterIsInstance<IApplicableToDifficulty>()?.forEach {
+        mods?.filterIsInstance<IModApplicableToDifficulty>()?.forEach {
             it.applyToDifficulty(mode, converted.difficulty)
         }
 
-        mods?.filterIsInstance<IApplicableToDifficultyWithSettings>()?.forEach {
+        mods?.filterIsInstance<IModApplicableToDifficultyWithSettings>()?.forEach {
             it.applyToDifficulty(mode, converted.difficulty, mods, customSpeedMultiplier)
         }
 
@@ -152,15 +152,21 @@ class Beatmap : Cloneable {
             it.applyDefaults(converted.controlPoints, converted.difficulty, mode)
         }
 
-        mods?.filterIsInstance<IApplicableToHitObject>()?.forEach {
+        mods?.filterIsInstance<IModApplicableToHitObject>()?.forEach {
             for (obj in converted.hitObjects.objects) {
                 it.applyToHitObject(mode, obj)
             }
         }
 
+        mods?.filterIsInstance<IModApplicableToHitObjectWithSettings>()?.forEach {
+            for (obj in converted.hitObjects.objects) {
+                it.applyToHitObject(mode, obj, mods, customSpeedMultiplier)
+            }
+        }
+
         processor.postProcess(mode)
 
-        mods?.filterIsInstance<IApplicableToBeatmap>()?.forEach {
+        mods?.filterIsInstance<IModApplicableToBeatmap>()?.forEach {
             it.applyToBeatmap(converted)
         }
 

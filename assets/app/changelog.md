@@ -57,6 +57,18 @@ for preventing accidental touches.
 - Added an animation to slider end arrow rotation when snaking animation is enabled
 - Added a slight dim to hitobjects that cannot be hit yet in gameplay
 - Added a rotation effect to miss hit judgement effects in gameplay
+- Added `animationFramerate` entry to `skin.json` to specify the frame rate of animated skin elements
+  - Can be set to a negative number to use the amount of skin elements as an animation's frame rate
+  - Some skin elements are unaffected by this setting, such as the `sliderb` skin element
+  - The default value is `-1` when converting a `skin.ini` to `skin.json`, and `60` otherwise
+  - To use in `skin.json`, add the following entry to your `skin.json`:
+    ```json
+    {
+      "Utils": {
+        "animationFramerate": 60
+      }
+    }
+    ```
 
 # Changes
 
@@ -75,6 +87,12 @@ calculated will display a star rating of 0.
 
 During gameplay, background difficulty calculation is paused to prevent performance degradation.
 
+## Updated follow point mechanics
+
+This update brings significant improvements to follow points, which gives you a hint of movement direction across
+hitobjects in gameplay. They work in a similar way to osu!stable, and its skin element (`followpoint`) can now be
+animated.
+
 ## Smaller changes
 
 - Circles and sliders can now be hit as early as 400ms before the circle's start time
@@ -87,6 +105,7 @@ During gameplay, background difficulty calculation is paused to prevent performa
 - Changed hit judgement effect animation to match osu!stable
 - Changed combo counter animation to match osu!stable
 - Miss hit judgement effect only plays in a slider's tail rather than its head and tail
+- The `sliderfollowcircle` and `sliderb` skin elements can now be animated
 
 # Removals
 
