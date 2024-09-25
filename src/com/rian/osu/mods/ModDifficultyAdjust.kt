@@ -1,6 +1,7 @@
 package com.rian.osu.mods
 
 import com.rian.osu.GameMode
+import com.rian.osu.beatmap.hitobject.HitObject
 import com.rian.osu.beatmap.sections.BeatmapDifficulty
 
 /**
@@ -30,15 +31,25 @@ class ModDifficultyAdjust(
      */
     @JvmField
     var hp: Float? = null
-) : Mod(), IApplicableToDifficulty {
+) : Mod(), IApplicableToDifficultyWithSettings {
     override val droidString = ""
 
-    override fun applyToDifficulty(mode: GameMode, difficulty: BeatmapDifficulty) = difficulty.let {
-        it.cs = getValue(cs, it.cs)
-        it.ar = getValue(ar, it.ar)
-        it.od = getValue(od, it.od)
-        it.hp = getValue(hp, it.hp)
-    }
+    override fun applyToDifficulty(mode: GameMode, difficulty: BeatmapDifficulty, mods: List<Mod>, customSpeedMultiplier: Float) =
+        difficulty.let {
+            it.cs = getValue(cs, it.cs)
+            it.ar = getValue(ar, it.ar)
+            it.od = getValue(od, it.od)
+            it.hp = getValue(hp, it.hp)
+
+            // Special case for force AR, where the AR value is kept constant with respect to game time.
+            // This makes the player perceive the AR as is under all speed multipliers.
+            if (ar != null) {
+                val preempt = BeatmapDifficulty.inverseDifficultyRange(ar!!.toDouble(), HitObject.PREEMPT_MIN, HitObject.PREEMPT_MID, HitObject.PREEMPT_MAX)
+                val trackRate = mods.filterIsInstance<IApplicableToTrackRate>().fold(1.0f) { acc, mod -> acc * mod.trackRateMultiplier } * customSpeedMultiplier
+
+                it.ar = BeatmapDifficulty.difficultyRange(preempt * trackRate, HitObject.PREEMPT_MIN, HitObject.PREEMPT_MID, HitObject.PREEMPT_MAX).toFloat()
+            }
+        }
 
     private fun getValue(value: Float?, fallback: Float) = value ?: fallback
 
