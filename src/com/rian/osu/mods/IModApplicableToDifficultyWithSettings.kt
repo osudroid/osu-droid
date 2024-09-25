@@ -4,13 +4,17 @@ import com.rian.osu.GameMode
 import com.rian.osu.beatmap.sections.BeatmapDifficulty
 
 /**
- * An interface for [Mod]s that make adjustments to difficulty based on other applied [Mod]s and settings.
+ * An interface for [Mod]s that make general adjustments to difficulty.
  *
- * This should not be used together with [IModApplicableToDifficulty].
+ * This is used in place of [IModApplicableToDifficulty] to *forcefully* make adjustments that
+ * correlates directly to other applied [Mod]s and settings.
+ *
+ * [Mod]s marked by this interface will have their adjustments performed after
+ * [IModApplicableToDifficulty] [Mod]s have been applied.
  */
 interface IModApplicableToDifficultyWithSettings {
     /**
-     * Appmodlies this [IModApplicableToDifficultyWithSettings] to a [BeatmapDifficulty].
+     * Applies this [IModApplicableToDifficultyWithSettings] to a [BeatmapDifficulty].
      *
      * This is typically called post beatmap conversion.
      *

@@ -4,9 +4,13 @@ import com.rian.osu.GameMode
 import com.rian.osu.beatmap.hitobject.HitObject
 
 /**
- * An interface for [Mod]s that can be applied to [HitObject]s based on other applied [Mod]s and settings.
+ * An interface for [Mod]s that can be applied to [HitObject]s.
  *
- * This should not be used together with [IModApplicableToHitObject].
+ * This is used in place of [IModApplicableToHitObject] to *forcefully* make adjustments that
+ * correlates directly to other applied [Mod]s and settings.
+ *
+ * [Mod]s marked by this interface will have their adjustments performed after
+ * [IModApplicableToHitObject] [Mod]s have been applied.
  */
 interface IModApplicableToHitObjectWithSettings {
     /**
