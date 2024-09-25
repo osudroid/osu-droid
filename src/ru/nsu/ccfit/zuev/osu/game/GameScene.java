@@ -145,6 +145,8 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
     private HitErrorMeter hitErrorMeter;
     private Metronome metronome;
     private float scale;
+    private float originalCircleSize;
+    private float originalOverallDifficulty;
     private float objectTimePreempt;
     private float difficultyStatisticsScoreMultiplier;
     public StatisticV2 stat;
@@ -406,13 +408,15 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
         }
 
         scale = beatmap.hitObjects.objects.get(0).getGameplayScale();
+        originalCircleSize = parsedBeatmap.difficulty.cs;
+        originalOverallDifficulty = parsedBeatmap.difficulty.od;
         objectTimePreempt = (float) GameHelper.ar2ms(beatmap.difficulty.getAr()) / 1000f;
 
         difficultyStatisticsScoreMultiplier = 1 +
-            Math.min(parsedBeatmap.difficulty.od, 10) / 10f + Math.min(parsedBeatmap.difficulty.hp, 10) / 10f;
+            Math.min(originalOverallDifficulty, 10) / 10f + Math.min(parsedBeatmap.difficulty.hp, 10) / 10f;
 
         // The maximum CS of osu!droid mapped to osu!standard is ~17.62.
-        difficultyStatisticsScoreMultiplier += (Math.min(parsedBeatmap.difficulty.cs, 17.62f) - 3) / 4f;
+        difficultyStatisticsScoreMultiplier += (Math.min(originalCircleSize, 17.62f) - 3) / 4f;
 
         GameHelper.setOverallDifficulty(beatmap.difficulty.od);
         GameHelper.setHealthDrain(beatmap.difficulty.hp);
@@ -674,8 +678,8 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
         stat.setMaxObjectsCount(lastBeatmapInfo.getTotalHitObjectCount());
         stat.setMaxHighestCombo(lastBeatmapInfo.getMaxCombo());
 
-        stat.setBeatmapCS(beatmap.difficulty.cs);
-        stat.setBeatmapOD(beatmap.difficulty.od);
+        stat.setBeatmapCS(originalCircleSize);
+        stat.setBeatmapOD(originalOverallDifficulty);
 
         stat.setCustomAR(ModMenu.getInstance().getCustomAR());
         stat.setCustomOD(ModMenu.getInstance().getCustomOD());
