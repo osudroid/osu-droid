@@ -72,17 +72,6 @@ class DroidDifficultyCalculator : DifficultyCalculator<DroidDifficultyHitObject,
 
         aimSliderFactor = if (aimDifficulty > 0) calculateRating(skills[1]) / aimDifficulty else 1.0
 
-        val difficultyAdjustMod = mods.find { it is ModDifficultyAdjust } as ModDifficultyAdjust?
-        val od = difficultyAdjustMod?.od ?: beatmap.difficulty.od
-        val isPrecise = mods.any { it is ModPrecise }
-        var greatWindow = (if (isPrecise) PreciseDroidHitWindow(od) else DroidHitWindow(od)).greatWindow.toDouble()
-
-        forceOD = difficultyAdjustMod?.od != null
-
-        if (!forceOD) {
-            greatWindow /= parameters?.totalSpeedMultiplier?.toDouble() ?: 1.0
-        }
-
         (skills[2] as DroidTap).let {
             tapDifficulty = calculateRating(it)
             tapDifficultStrainCount = it.countDifficultStrains()
@@ -213,6 +202,10 @@ class DroidDifficultyCalculator : DifficultyCalculator<DroidDifficultyHitObject,
             if (basePerformance > 1e-5) 0.027 * (cbrt(100000 / 2.0.pow(1 / 1.1) * basePerformance) + 4)
             else 0.0
 
+        val od = beatmap.difficulty.od
+        val isPrecise = mods.any { it is ModPrecise }
+        val greatWindow = (if (isPrecise) PreciseDroidHitWindow(od) else DroidHitWindow(od)).greatWindow.toDouble() / clockRate
+
         overallDifficulty = (
             if (isPrecise) PreciseDroidHitWindow.hitWindow300ToOverallDifficulty(greatWindow.toFloat())
             else DroidHitWindow.hitWindow300ToOverallDifficulty(greatWindow.toFloat())
@@ -243,17 +236,10 @@ class DroidDifficultyCalculator : DifficultyCalculator<DroidDifficultyHitObject,
         parameters: DifficultyCalculationParameters?
     ) = mutableListOf<DroidDifficultyHitObject>().apply {
         val clockRate = parameters?.totalSpeedMultiplier?.toDouble() ?: 1.0
-        val difficultyAdjustMod = parameters?.mods?.find { it is ModDifficultyAdjust } as ModDifficultyAdjust?
-
-        val od = difficultyAdjustMod?.od ?: beatmap.difficulty.od
-        var greatWindow = (
-            if (parameters?.mods?.any { it is ModPrecise } == true) PreciseDroidHitWindow(od)
-            else DroidHitWindow(od)
-        ).greatWindow.toDouble()
-
-        if (difficultyAdjustMod?.od == null) {
-            greatWindow /= clockRate
-        }
+        val greatWindow = (
+            if (parameters?.mods?.any { it is ModPrecise } == true) PreciseDroidHitWindow(beatmap.difficulty.od)
+            else DroidHitWindow(beatmap.difficulty.od)
+        ).greatWindow.toDouble() / clockRate
 
         beatmap.hitObjects.objects.let {
             for (i in 0 until it.size) {

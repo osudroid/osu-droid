@@ -72,13 +72,8 @@ class StandardDifficultyCalculator : DifficultyCalculator<StandardDifficultyHitO
 
         approachRate = BeatmapDifficulty.inverseDifficultyRange(preempt, HitObject.PREEMPT_MIN, HitObject.PREEMPT_MID, HitObject.PREEMPT_MAX)
 
-        val difficultyAdjustMod = mods.find { it is ModDifficultyAdjust } as ModDifficultyAdjust?
-        val od = difficultyAdjustMod?.od ?: beatmap.difficulty.od
-        var greatWindow = StandardHitWindow(od).greatWindow.toDouble()
-
-        if (difficultyAdjustMod?.od == null) {
-            greatWindow /= speedMultiplier
-        }
+        // Weird casts, but necessary for difficulty calculation parity
+        val greatWindow = StandardHitWindow(beatmap.difficulty.od).greatWindow.toDouble() / speedMultiplier
 
         overallDifficulty = StandardHitWindow.hitWindow300ToOverallDifficulty(greatWindow.toFloat()).toDouble()
         maxCombo = beatmap.maxCombo
