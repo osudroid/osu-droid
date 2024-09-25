@@ -9,6 +9,7 @@ import com.rian.osu.mods.IApplicableToBeatmap
 import com.rian.osu.mods.IApplicableToDifficulty
 import com.rian.osu.mods.IApplicableToDifficultyWithSettings
 import com.rian.osu.mods.IApplicableToHitObject
+import com.rian.osu.mods.IApplicableToHitObjectWithSettings
 import com.rian.osu.mods.Mod
 
 /**
@@ -155,6 +156,12 @@ class Beatmap : Cloneable {
         mods?.filterIsInstance<IApplicableToHitObject>()?.forEach {
             for (obj in converted.hitObjects.objects) {
                 it.applyToHitObject(mode, obj)
+            }
+        }
+
+        mods?.filterIsInstance<IApplicableToHitObjectWithSettings>()?.forEach {
+            for (obj in converted.hitObjects.objects) {
+                it.applyToHitObject(mode, obj, mods, customSpeedMultiplier)
             }
         }
 
