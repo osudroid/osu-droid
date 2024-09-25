@@ -59,6 +59,7 @@ object FollowPointConnection {
         val distance = hypot(distanceX, distanceY).toInt()
         val rotation = atan2(distanceY, distanceX) * (180f / Math.PI).toFloat()
 
+        val endFadeInTime = end.timeFadeIn.toFloat() / 1000f
         val duration = (end.startTime - start.getEndTime()).toFloat() / 1000f
 
         // Preempt time can go below 800ms. Normally, this is achieved via the DT mod which uniformly speeds up all animations game wide regardless of AR.
@@ -94,8 +95,6 @@ object FollowPointConnection {
             fp.setScale(1.5f * scale)
             fp.rotation = rotation
             fp.alpha = 0f
-
-            val endFadeInTime = end.timeFadeIn.toFloat() / 1000f
 
             fp.registerEntityModifier(Modifiers.sequence(expire,
                 Modifiers.delay(fadeInTime - secPassed),
