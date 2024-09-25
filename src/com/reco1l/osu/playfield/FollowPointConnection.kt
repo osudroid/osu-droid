@@ -44,7 +44,7 @@ object FollowPointConnection {
 
 
     @JvmStatic
-    fun addConnection(scene: Scene, secPassed: Float, start: HitObject, end: HitObject) {
+    fun addConnection(scene: Scene, secPassed: Float, start: HitObject, end: HitObject, timePreempt: Float) {
 
         // Reference: https://github.com/ppy/osu/blob/7bc8908ca9c026fed1d831eb6e58df7624a8d614/osu.Game.Rulesets.Osu/Objects/Drawables/Connections/FollowPointConnection.cs
         val scale = start.gameplayScale
@@ -65,7 +65,7 @@ object FollowPointConnection {
         // Preempt time can go below 800ms. Normally, this is achieved via the DT mod which uniformly speeds up all animations game wide regardless of AR.
         // This uniform speedup is hard to match 1:1, however we can at least make AR>10 (via mods) feel good by extending the upper linear preempt function.
         // Note that this doesn't exactly match the AR>10 visuals as they're classically known, but it feels good.
-        val preempt = PREEMPT * min(1.0, start.timePreempt / HitObject.PREEMPT_MIN).toFloat() / 1000f
+        val preempt = PREEMPT * min(1.0, timePreempt * 1000 / HitObject.PREEMPT_MIN).toFloat() / 1000f
 
         var d = (SPACING * 1.5f).toInt()
 
