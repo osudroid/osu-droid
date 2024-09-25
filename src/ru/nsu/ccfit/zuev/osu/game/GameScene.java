@@ -45,7 +45,6 @@ import com.rian.osu.difficulty.attributes.DroidDifficultyAttributes;
 import com.rian.osu.difficulty.attributes.StandardDifficultyAttributes;
 import com.rian.osu.difficulty.attributes.TimedDifficultyAttributes;
 import com.rian.osu.difficulty.calculator.DifficultyCalculationParameters;
-import com.rian.osu.beatmap.hitobject.HitObjectUtils;
 import org.anddev.andengine.engine.Engine;
 import org.anddev.andengine.engine.camera.SmoothCamera;
 import org.anddev.andengine.engine.handler.IUpdateHandler;
@@ -767,7 +766,7 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
 
         if (!Config.isHideInGameUI()) {
             SongProgressBar progressBar = new SongProgressBar(this, fgScene,
-                (float) HitObjectUtils.getEndTime(objects.getLast()) / 1000, firstObjStartTime,
+                (float) objects.getLast().getEndTime() / 1000, firstObjStartTime,
                 new PointF(0, Config.getRES_HEIGHT() - 7), Config.getRES_WIDTH(), 7);
 
             progressBar.setProgressRectColor(new RGBColor(153f / 255f, 204f / 255f, 51f / 255f));
@@ -2532,7 +2531,7 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
         }
 
         var object = beatmap.hitObjects.objects.get(objectId);
-        double time = HitObjectUtils.getEndTime(object);
+        double time = object.getEndTime();
 
         switch (Config.getDifficultyAlgorithm()) {
             case droid -> ppText.setText(String.format(Locale.ENGLISH, "%.2fdpp", getDroidPPAtTime(time)));

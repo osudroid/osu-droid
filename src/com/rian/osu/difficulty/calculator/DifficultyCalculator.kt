@@ -2,7 +2,6 @@ package com.rian.osu.difficulty.calculator
 
 import com.rian.osu.GameMode
 import com.rian.osu.beatmap.Beatmap
-import com.rian.osu.beatmap.hitobject.getEndTime
 import com.rian.osu.difficulty.DifficultyHitObject
 import com.rian.osu.difficulty.attributes.DifficultyAttributes
 import com.rian.osu.difficulty.attributes.TimedDifficultyAttributes
@@ -104,7 +103,7 @@ abstract class DifficultyCalculator<TObject : DifficultyHitObject, TAttributes :
         for (obj in beatmap.hitObjects.objects) {
             progressiveBeatmap.hitObjects.add(obj)
 
-            while (currentIndex < difficultyObjects.size && difficultyObjects[currentIndex].obj.getEndTime() <= obj.getEndTime()) {
+            while (currentIndex < difficultyObjects.size && difficultyObjects[currentIndex].obj.endTime <= obj.endTime) {
                 for (skill in skills) {
                     skill.process(difficultyObjects[currentIndex])
                 }
@@ -114,7 +113,7 @@ abstract class DifficultyCalculator<TObject : DifficultyHitObject, TAttributes :
 
             attributes.add(
                 TimedDifficultyAttributes(
-                    obj.getEndTime(),
+                    obj.endTime,
                     createDifficultyAttributes(progressiveBeatmap, skills, difficultyObjects.subList(0, currentIndex), parameters)
                 )
             )

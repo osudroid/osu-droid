@@ -2,7 +2,6 @@ package com.rian.osu.difficulty.evaluators
 
 import com.rian.osu.beatmap.hitobject.Slider
 import com.rian.osu.beatmap.hitobject.Spinner
-import com.rian.osu.beatmap.hitobject.getEndPosition
 import com.rian.osu.difficulty.StandardDifficultyHitObject
 import kotlin.math.abs
 import kotlin.math.max
@@ -45,7 +44,7 @@ object StandardFlashlightEvaluator {
             // Exclude overlapping objects that can be tapped at once.
             if (currentObject.obj !is Spinner) {
                 val jumpDistance = current.obj.difficultyStackedPosition
-                    .getDistance(currentObject.obj.getEndPosition())
+                    .getDistance(currentObject.obj.endPosition)
 
                 cumulativeStrainTime += last.strainTime
 

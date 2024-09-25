@@ -48,9 +48,9 @@ object FollowPointConnection {
 
         // Reference: https://github.com/ppy/osu/blob/7bc8908ca9c026fed1d831eb6e58df7624a8d614/osu.Game.Rulesets.Osu/Objects/Drawables/Connections/FollowPointConnection.cs
         val scale = start.gameplayScale
-        val startTime = (start.getEndTime() / 1000f).toFloat()
+        val startTime = (start.endTime / 1000f).toFloat()
 
-        val startPosition = start.getGameplayStackedEndPosition()
+        val startPosition = start.gameplayStackedEndPosition
         val endPosition = end.gameplayStackedPosition
 
         val distanceX = endPosition.x - startPosition.x
@@ -60,7 +60,7 @@ object FollowPointConnection {
         val rotation = atan2(distanceY, distanceX) * (180f / Math.PI).toFloat()
 
         val endFadeInTime = end.timeFadeIn.toFloat() / 1000f
-        val duration = (end.startTime - start.getEndTime()).toFloat() / 1000f
+        val duration = (end.startTime - start.endTime).toFloat() / 1000f
 
         // Preempt time can go below 800ms. Normally, this is achieved via the DT mod which uniformly speeds up all animations game wide regardless of AR.
         // This uniform speedup is hard to match 1:1, however we can at least make AR>10 (via mods) feel good by extending the upper linear preempt function.

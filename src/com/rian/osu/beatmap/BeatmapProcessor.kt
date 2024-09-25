@@ -112,7 +112,7 @@ class BeatmapProcessor(
                         continue
                     }
 
-                    val endTime = stackBaseObject.getEndTime()
+                    val endTime = stackBaseObject.endTime
                     val stackThreshold = objectN.timePreempt * beatmap.general.stackLeniency
 
                     if (objectN.startTime - endTime > stackThreshold) {
@@ -171,7 +171,7 @@ class BeatmapProcessor(
                         continue
                     }
 
-                    if (objectI.startTime - objectN.getEndTime() > stackThreshold) {
+                    if (objectI.startTime - objectN.endTime > stackThreshold) {
                         // We are no longer within stacking range of the previous object.
                         break
                     }
@@ -224,7 +224,7 @@ class BeatmapProcessor(
                         break
                     }
 
-                    if (objectN.getEndPosition().getDistance(objectI.position) < STACK_DISTANCE) {
+                    if (objectN.endPosition.getDistance(objectI.position) < STACK_DISTANCE) {
                         objectN.difficultyStackHeight = objectI.difficultyStackHeight + 1
                         objectN.gameplayStackHeight = objectI.gameplayStackHeight + 1
                         objectI = objectN
@@ -244,7 +244,7 @@ class BeatmapProcessor(
             }
 
             var sliderStack = 0
-            var startTime = currentObject.getEndTime()
+            var startTime = currentObject.endTime
             val stackThreshold = currentObject.timePreempt * beatmap.general.stackLeniency
 
             for (j in i + 1 until objects.size) {
@@ -264,7 +264,7 @@ class BeatmapProcessor(
                     ++currentObject.difficultyStackHeight
                     ++currentObject.gameplayStackHeight
                     startTime = objects[j].startTime
-                } else if (objects[j].position.getDistance(currentObject.getEndPosition()) < STACK_DISTANCE) {
+                } else if (objects[j].position.getDistance(currentObject.endPosition) < STACK_DISTANCE) {
                     // Case for sliders - bump notes down and right, rather than up and left.
                     ++sliderStack
                     objects[j].difficultyStackHeight -= sliderStack

@@ -4,7 +4,6 @@ import com.rian.osu.GameMode
 import com.rian.osu.beatmap.Beatmap
 import com.rian.osu.beatmap.DroidHitWindow
 import com.rian.osu.beatmap.PreciseDroidHitWindow
-import com.rian.osu.beatmap.hitobject.getEndTime
 import com.rian.osu.difficulty.DroidDifficultyHitObject
 import com.rian.osu.difficulty.attributes.DroidDifficultyAttributes
 import com.rian.osu.difficulty.attributes.HighStrainSection
@@ -93,7 +92,7 @@ class DroidDifficultyCalculator : DifficultyCalculator<DroidDifficultyHitObject,
         for (i in 0 until objects.size - 1) {
             val current = objects[i].obj
             val next = objects[i + 1].obj
-            val deltaTime = next.startTime - current.getEndTime()
+            val deltaTime = next.startTime - current.endTime
 
             if (deltaTime >= maximumSectionDeltaTime) {
                 // Ignore sections that do not meet object count requirement.

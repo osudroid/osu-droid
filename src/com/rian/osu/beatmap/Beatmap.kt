@@ -3,7 +3,6 @@ package com.rian.osu.beatmap
 import com.rian.osu.GameMode
 import com.rian.osu.beatmap.hitobject.HitObject
 import com.rian.osu.beatmap.hitobject.Slider
-import com.rian.osu.beatmap.hitobject.getEndTime
 import com.rian.osu.beatmap.sections.*
 import com.rian.osu.mods.IApplicableToBeatmap
 import com.rian.osu.mods.IApplicableToDifficulty
@@ -115,7 +114,7 @@ class Beatmap : Cloneable {
      * The duration of this [Beatmap].
      */
     val duration: Int
-        get() = hitObjects.objects.lastOrNull()?.getEndTime()?.toInt() ?: 0
+        get() = hitObjects.objects.lastOrNull()?.endTime?.toInt() ?: 0
 
     /**
      * Constructs a playable [Beatmap] from this [Beatmap].

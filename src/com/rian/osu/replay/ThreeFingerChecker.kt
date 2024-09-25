@@ -158,12 +158,12 @@ class ThreeFingerChecker(
         val objects = beatmap.hitObjects.objects
 
         for (breakPeriod in beatmap.events.breaks) {
-            val beforeIndex = (objects.indexOfFirst { it.getEndTime() >= breakPeriod.startTime } - 1)
+            val beforeIndex = (objects.indexOfFirst { it.endTime >= breakPeriod.startTime } - 1)
                 .coerceIn(0, objects.size - 2)
 
             val objectBefore = objects[beforeIndex]
             val objectBeforeData = objectData[beforeIndex]
-            var timeBefore = objectBefore.getEndTime()
+            var timeBefore = objectBefore.endTime
 
             if (objectBefore is HitCircle) {
                 timeBefore +=
