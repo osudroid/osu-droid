@@ -24,7 +24,7 @@ abstract class StandardStrainSkill(
      */
     protected open val decayWeight = 0.9
 
-    override fun difficultyValue() = currentStrainPeaks.run {
+    override fun difficultyValue() = strainPeaks.run {
         // We are reducing the highest strains first to account for extreme difficulty spikes.
         reduceHighestStrainPeaks(this)
 
