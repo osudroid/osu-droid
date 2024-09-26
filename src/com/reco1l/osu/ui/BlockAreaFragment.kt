@@ -52,7 +52,7 @@ class BlockAreaFragment : BaseFragment() {
 
         findViewById<View>(R.id.drag)!!.setOnTouchListener { _, event ->
 
-            when(event.action) {
+            when (event.action) {
 
                 ACTION_DOWN -> {
                     toolbarMoveVector.x = event.x
@@ -64,8 +64,14 @@ class BlockAreaFragment : BaseFragment() {
                     val deltaX = event.x - toolbarMoveVector.x
                     val deltaY = event.y - toolbarMoveVector.y
 
-                    toolbarView.x = (toolbarView.x + deltaX).coerceIn(0f, root!!.width - toolbarView.width.toFloat())
-                    toolbarView.y = (toolbarView.y + deltaY).coerceIn(0f, root!!.height - toolbarView.height.toFloat())
+                    toolbarView.x = (toolbarView.x + deltaX).coerceIn(
+                        0f,
+                        root!!.width - toolbarView.width.toFloat()
+                    )
+                    toolbarView.y = (toolbarView.y + deltaY).coerceIn(
+                        0f,
+                        root!!.height - toolbarView.height.toFloat()
+                    )
                     true
                 }
 
@@ -139,6 +145,7 @@ class BlockAreaFragment : BaseFragment() {
                     when(event.action) {
 
                         ACTION_DOWN -> {
+                            itemView.bringToFront()
                             moveVector.x = event.x
                             moveVector.y = event.y
                             true
@@ -180,6 +187,7 @@ class BlockAreaFragment : BaseFragment() {
                     when(event.action) {
 
                         ACTION_DOWN -> {
+                            itemView.bringToFront()
                             resizeVector.x = event.x
                             resizeVector.y = event.y
                             true
