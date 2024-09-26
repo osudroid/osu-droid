@@ -1381,6 +1381,8 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
             cursorSprites = null;
             playableBeatmap = null;
             lastDifficultyCalculationParameters = null;
+            droidTimedDifficultyAttributes = null;
+            standardTimedDifficultyAttributes = null;
             String replayPath = null;
             stat.setTime(System.currentTimeMillis());
             if (replay != null && !replaying) {
