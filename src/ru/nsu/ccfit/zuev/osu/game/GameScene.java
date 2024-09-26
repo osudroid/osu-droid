@@ -1286,6 +1286,7 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
 
             if (obj.startTime > totalLength) {
                 shouldBePunished = true;
+                break;
             }
 
             // Next object from the polled one, this returns null if the list is empty. That's why every
