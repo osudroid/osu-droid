@@ -180,6 +180,7 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
 
     private DifficultyHelper difficultyHelper = DifficultyHelper.StdDifficulty;
 
+    private DifficultyCalculationParameters lastDifficultyCalculationParameters;
     private List<TimedDifficultyAttributes<DroidDifficultyAttributes>> droidTimedDifficultyAttributes;
     private List<TimedDifficultyAttributes<StandardDifficultyAttributes>> standardTimedDifficultyAttributes;
 
@@ -511,16 +512,28 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
             parameters.setMods(convertedMods);
             parameters.setCustomSpeedMultiplier(modMenu.getChangeSpeed());
 
+            var sameParameters = lastDifficultyCalculationParameters != null &&
+                lastDifficultyCalculationParameters.equals(parameters);
+
             switch (Config.getDifficultyAlgorithm()) {
-                case droid ->
-                    droidTimedDifficultyAttributes = BeatmapDifficultyCalculator.calculateDroidTimedDifficulty(
-                        parsedBeatmap, parameters
-                    );
-                case standard ->
-                    standardTimedDifficultyAttributes = BeatmapDifficultyCalculator.calculateStandardTimedDifficulty(
-                        parsedBeatmap, parameters
-                    );
+                case droid -> {
+                    if (droidTimedDifficultyAttributes == null || !sameParameters) {
+                        droidTimedDifficultyAttributes = BeatmapDifficultyCalculator.calculateDroidTimedDifficulty(
+                            parsedBeatmap, parameters
+                        );
+                    }
+                }
+
+                case standard -> {
+                    if (standardTimedDifficultyAttributes == null || !sameParameters) {
+                        standardTimedDifficultyAttributes = BeatmapDifficultyCalculator.calculateStandardTimedDifficulty(
+                            parsedBeatmap, parameters
+                        );
+                    }
+                }
             }
+
+            lastDifficultyCalculationParameters = parameters;
         }
 
         lastBeatmapInfo = beatmapInfo;
@@ -1367,6 +1380,7 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
             breakPeriods.clear();
             cursorSprites = null;
             playableBeatmap = null;
+            lastDifficultyCalculationParameters = null;
             String replayPath = null;
             stat.setTime(System.currentTimeMillis());
             if (replay != null && !replaying) {
@@ -1566,6 +1580,7 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
         playableBeatmap = null;
         cursorSprites = null;
         scoreBoard = null;
+        lastDifficultyCalculationParameters = null;
         droidTimedDifficultyAttributes = null;
         standardTimedDifficultyAttributes = null;
 
