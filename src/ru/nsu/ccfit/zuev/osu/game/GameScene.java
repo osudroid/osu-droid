@@ -127,7 +127,6 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
     private ScoringScene scoringScene;
     private TimingControlPoint activeTimingPoint;
     private EffectControlPoint activeEffectPoint;
-    private String beatmapMD5;
     private int lastObjectId = -1;
     private float secPassed = 0;
     private float leadOut = 0;
@@ -146,8 +145,6 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
     private HitErrorMeter hitErrorMeter;
     private Metronome metronome;
     private float scale;
-    private float originalCircleSize;
-    private float originalOverallDifficulty;
     private float objectTimePreempt;
     private float difficultyStatisticsScoreMultiplier;
     public StatisticV2 stat;
@@ -414,15 +411,13 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
         }
 
         scale = playableBeatmap.hitObjects.objects.get(0).getGameplayScale();
-        originalCircleSize = parsedBeatmap.difficulty.gameplayCS;
-        originalOverallDifficulty = parsedBeatmap.difficulty.od;
         objectTimePreempt = (float) GameHelper.ar2ms(playableBeatmap.difficulty.getAr()) / 1000f;
 
         difficultyStatisticsScoreMultiplier = 1 +
-            Math.min(originalOverallDifficulty, 10) / 10f + Math.min(parsedBeatmap.difficulty.hp, 10) / 10f;
+            Math.min(parsedBeatmap.difficulty.od, 10) / 10f + Math.min(parsedBeatmap.difficulty.hp, 10) / 10f;
 
         // The maximum CS of osu!droid mapped to osu!standard is ~17.62.
-        difficultyStatisticsScoreMultiplier += (Math.min(originalCircleSize, 17.62f) - 3) / 4f;
+        difficultyStatisticsScoreMultiplier += (Math.min(parsedBeatmap.difficulty.gameplayCS, 17.62f) - 3) / 4f;
 
         GameHelper.setOverallDifficulty(playableBeatmap.difficulty.od);
         GameHelper.setHealthDrain(playableBeatmap.difficulty.hp);
@@ -483,11 +478,10 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
         offsetRegs = 0;
 
         File beatmapFile = new File(beatmapInfo.getPath());
-        beatmapMD5 = beatmapInfo.getMD5();
         replaying = false;
         replay = new Replay();
         replay.setObjectCount(objects.size());
-        replay.setMap(beatmapFile.getParentFile().getName(), beatmapFile.getName(), beatmapMD5);
+        replay.setMap(beatmapFile.getParentFile().getName(), beatmapFile.getName(), parsedBeatmap.md5);
 
         if (replayFilePath != null) {
             replaying = replay.load(replayFilePath);
@@ -502,7 +496,7 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
 
         //TODO online
         if (!replaying)
-            OnlineScoring.getInstance().startPlay(beatmapInfo, beatmapMD5);
+            OnlineScoring.getInstance().startPlay(beatmapInfo, parsedBeatmap.md5);
 
         if (Config.isEnableStoryboard()) {
             storyboardSprite.loadStoryboard(beatmapInfo.getPath());
@@ -684,8 +678,8 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
         stat.setMaxObjectsCount(lastBeatmapInfo.getTotalHitObjectCount());
         stat.setMaxHighestCombo(lastBeatmapInfo.getMaxCombo());
 
-        stat.setBeatmapCS(originalCircleSize);
-        stat.setBeatmapOD(originalOverallDifficulty);
+        stat.setBeatmapCS(parsedBeatmap.difficulty.gameplayCS);
+        stat.setBeatmapOD(parsedBeatmap.difficulty.od);
 
         stat.setCustomAR(ModMenu.getInstance().getCustomAR());
         stat.setCustomOD(ModMenu.getInstance().getCustomOD());
@@ -1421,7 +1415,7 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
 
                         ToastLogger.showText("Loading room statistics...", false);
                     }
-                    scoringScene.load(stat, lastBeatmapInfo, GlobalManager.getInstance().getSongService(), replayPath, beatmapMD5, null);
+                    scoringScene.load(stat, lastBeatmapInfo, GlobalManager.getInstance().getSongService(), replayPath, parsedBeatmap.md5, null);
                 }
                 GlobalManager.getInstance().getSongService().setVolume(0.2f);
                 engine.setScene(scoringScene.getScene());
