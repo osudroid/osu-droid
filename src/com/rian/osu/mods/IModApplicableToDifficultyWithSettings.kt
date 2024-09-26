@@ -6,10 +6,10 @@ import com.rian.osu.beatmap.sections.BeatmapDifficulty
 /**
  * An interface for [Mod]s that make general adjustments to difficulty.
  *
- * This is used in place of [IModApplicableToDifficulty] to *forcefully* make adjustments that
+ * This is used in place of [IModApplicableToDifficulty] to make adjustments that
  * correlates directly to other applied [Mod]s and settings.
  *
- * [Mod]s marked by this interface will have their adjustments performed after
+ * [Mod]s marked by this interface will have their adjustments applied after
  * [IModApplicableToDifficulty] [Mod]s have been applied.
  */
 interface IModApplicableToDifficultyWithSettings {
