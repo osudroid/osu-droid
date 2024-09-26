@@ -1364,6 +1364,7 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
             passiveObjects.clear();
             breakPeriods.clear();
             cursorSprites = null;
+            playableBeatmap = null;
             String replayPath = null;
             stat.setTime(System.currentTimeMillis());
             if (replay != null && !replaying) {
@@ -1551,6 +1552,7 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
             passiveObjects.clear();
         }
         breakPeriods.clear();
+        playableBeatmap = null;
         cursorSprites = null;
         scoreBoard = null;
         droidTimedDifficultyAttributes = null;
