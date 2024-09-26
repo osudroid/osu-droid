@@ -267,6 +267,10 @@ class DroidPerformanceCalculator(
      */
     private fun calculateDeviationBasedLengthScaling(objectCount: Double = totalHits.toDouble(),
                                                      punishForMemorization: Boolean = false): Double {
+        if (objectCount == 0.0) {
+            return 0.0
+        }
+
         // Assume a sample proportion of hits for a full combo to be `(n - 0.5) / n` due to
         // continuity correction, where `n` is the object count.
         fun calculateProportion(notes: Double) = (notes - 0.5) / notes
