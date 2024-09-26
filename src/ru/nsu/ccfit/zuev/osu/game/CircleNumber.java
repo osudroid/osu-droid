@@ -60,7 +60,7 @@ public class CircleNumber extends LinearContainer {
         if (this.number == number) {
             return;
         }
-        this.number = number + 10;
+        this.number = number;
         isInvalid = true;
     }
 
