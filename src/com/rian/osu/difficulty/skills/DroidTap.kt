@@ -74,6 +74,12 @@ class DroidTap(
         }
     }
 
+    override fun process(current: DroidDifficultyHitObject) {
+        super.process(current)
+
+        objectDeltaTimes.add(current.deltaTime)
+    }
+
     override fun strainValueAt(current: DroidDifficultyHitObject): Double {
         currentStrain *= strainDecay(current.strainTime)
         currentStrain += DroidTapEvaluator.evaluateDifficultyOf(
@@ -81,8 +87,6 @@ class DroidTap(
         ) * skillMultiplier
 
         currentRhythm = current.rhythmMultiplier
-
-        objectDeltaTimes.add(current.deltaTime)
 
         return currentStrain * currentRhythm
     }
