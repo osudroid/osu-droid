@@ -1,9 +1,12 @@
 package com.rian.osu.difficulty.skills
 
 import com.rian.osu.difficulty.DifficultyHitObject
+import com.rian.osu.math.Interpolation
 import com.rian.osu.mods.Mod
 import kotlin.math.ceil
+import kotlin.math.log10
 import kotlin.math.max
+import kotlin.math.min
 
 /**
  * Used to processes strain values of [DifficultyHitObject]s, keep track of strain levels caused by
@@ -48,12 +51,97 @@ abstract class StrainSkill<in TObject : DifficultyHitObject>(
         currentSectionPeak = max(strainValueAt(current), currentSectionPeak)
     }
 
+    /**
+     * Returns a list of the peak strains for each [sectionLength] section of the beatmap,
+     * including the peak of the current section.
+     */
     val currentStrainPeaks: MutableList<Double>
-        /**
-         * Returns a list of the peak strains for each [sectionLength] section of the beatmap,
-         * including the peak of the current section.
-         */
         get() = strainPeaks.toMutableList().apply { add(currentSectionPeak) }
+
+    /**
+     * Reduces the highest strain peaks to account for extreme difficulty spikes based on
+     * [reducedSectionCount] and [reducedSectionBaseline].
+     *
+     * @param strainPeaks The list of strain peaks to reduce.
+     */
+    protected fun reduceHighestStrainPeaks(strainPeaks: MutableList<Double>) {
+        val highestStrainPeakIndices = Array(min(strainPeaks.size, reducedSectionCount)) { -1 }
+
+        if (highestStrainPeakIndices.isEmpty()) {
+            return
+        }
+
+        for (i in strainPeaks.indices) {
+            val strain = strainPeaks[i]
+
+            // Check if the strain fits into the current top strains
+            val lowestStrain = strainPeaks.getOrNull(highestStrainPeakIndices.last()) ?: 0.0
+            if (strain <= lowestStrain) {
+                continue
+            }
+
+            // Obtain the insertion index of the current strain
+            val insertionIndex = highestStrainPeakIndices.indexOfFirst { strain > (strainPeaks.getOrNull(it) ?: 0.0) }
+
+            // Shift the indices to the right
+            for (j in (highestStrainPeakIndices.size - 1) downTo insertionIndex + 1) {
+                highestStrainPeakIndices[j] = highestStrainPeakIndices[j - 1]
+            }
+
+            // Insert the current strain
+            highestStrainPeakIndices[insertionIndex] = i
+        }
+
+        for (i in highestStrainPeakIndices.indices) {
+            val index = highestStrainPeakIndices[i]
+
+            if (index == -1) {
+                continue
+            }
+
+            val scale = log10(
+                Interpolation.linear(1.0, 10.0, i.toDouble() / reducedSectionCount)
+            )
+
+            strainPeaks[index] *= Interpolation.linear(reducedSectionBaseline, 1.0, scale)
+        }
+    }
+
+    /**
+     * Obtains the indices of the highest strain peaks based on the [reducedSectionCount]
+     * of this [StrainSkill].
+     *
+     * @param strainPeaks The list of strain peaks to obtain the indices from.
+     * @return The indices of the highest strain peaks.
+     */
+    protected fun getHighestStrainPeakIndices(strainPeaks: List<Double>): List<Int> {
+        val size = min(strainPeaks.size, reducedSectionCount)
+        val indices = MutableList(size) { 0 }
+
+        for (i in 0 until size) {
+            val strain = strainPeaks[i]
+
+            // Check if the strain fits into the current top strains
+            if (strain <= strainPeaks[indices.last()]) {
+                continue
+            }
+
+            // Obtain the insertion index of the current strain
+            val insertionIndex = indices.binarySearch { index -> strainPeaks[index].compareTo(strain) }.let {
+                if (it < 0) -it - 1 else it
+            }
+
+            // Shift the indices to the right
+            for (j in (indices.size - 1) downTo insertionIndex + 1) {
+                indices[j] = indices[j - 1]
+            }
+
+            // Insert the current strain
+            indices[insertionIndex] = i
+        }
+
+        return indices
+    }
 
     /**
      * Calculates the starting time of a strain section at an object.

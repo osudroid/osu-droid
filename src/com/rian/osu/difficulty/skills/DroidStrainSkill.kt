@@ -1,12 +1,9 @@
 package com.rian.osu.difficulty.skills
 
 import com.rian.osu.difficulty.DroidDifficultyHitObject
-import com.rian.osu.math.Interpolation
 import com.rian.osu.mods.Mod
 import kotlin.math.exp
-import kotlin.math.log10
 import kotlin.math.log2
-import kotlin.math.min
 import kotlin.math.pow
 
 /**
@@ -67,18 +64,8 @@ abstract class DroidStrainSkill(
     }
 
     override fun difficultyValue() = currentStrainPeaks.run {
-        if (reducedSectionCount > 0) {
-            sortDescending()
-
-            // We are reducing the highest strains first to account for extreme difficulty spikes.
-            for (i in 0 until min(size, reducedSectionCount)) {
-                val scale = log10(
-                    Interpolation.linear(1.0, 10.0, i.toDouble() / reducedSectionCount)
-                )
-
-                this[i] *= Interpolation.linear(reducedSectionBaseline, 1.0, scale)
-            }
-        }
+        // We are reducing the highest strains first to account for extreme difficulty spikes.
+        reduceHighestStrainPeaks(this)
 
         // Math here preserves the property that two notes of equal difficulty x, we have their summed difficulty = x * starsPerDouble.
         // This also applies to two sets of notes with equal difficulty.

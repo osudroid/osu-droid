@@ -1,10 +1,7 @@
 package com.rian.osu.difficulty.skills
 
 import com.rian.osu.difficulty.StandardDifficultyHitObject
-import com.rian.osu.math.Interpolation
 import com.rian.osu.mods.Mod
-import kotlin.math.log10
-import kotlin.math.min
 
 /**
  * Used to processes strain values of [StandardDifficultyHitObject]s, keep track of strain levels caused by
@@ -28,26 +25,12 @@ abstract class StandardStrainSkill(
     protected open val decayWeight = 0.9
 
     override fun difficultyValue() = currentStrainPeaks.run {
+        // We are reducing the highest strains first to account for extreme difficulty spikes.
+        reduceHighestStrainPeaks(this)
+
         // Difficulty is the weighted sum of the highest strains from every section.
         // We're sorting from highest to lowest strain.
         sortDescending()
-
-        if (reducedSectionCount > 0) {
-            // We are reducing the highest strains first to account for extreme difficulty spikes.
-            for (i in 0 until min(size, reducedSectionCount)) {
-                val scale = log10(
-                    Interpolation.linear(
-                        1.0,
-                        10.0,
-                        (i.toFloat() / reducedSectionCount).toDouble().coerceIn(0.0, 1.0)
-                    )
-                )
-
-                this[i] *= Interpolation.linear(reducedSectionBaseline, 1.0, scale)
-            }
-
-            sortDescending()
-        }
 
         var difficulty = 0.0
         var weight = 1.0
