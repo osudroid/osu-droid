@@ -67,7 +67,7 @@ abstract class StrainSkill<in TObject : DifficultyHitObject>(
     protected fun reduceHighestStrainPeaks(strainPeaks: MutableList<Double>) {
         // To avoid sorting operation (which is generally expensive, especially in real-time difficulty
         // calculation), we perform a linear scan to get the highest strain peaks and reduce them that way.
-        val highestStrainPeakIndices = Array(min(strainPeaks.size, reducedSectionCount)) { -1 }
+        val highestStrainPeakIndices = IntArray(min(strainPeaks.size, reducedSectionCount)) { -1 }
 
         if (highestStrainPeakIndices.isEmpty()) {
             return
