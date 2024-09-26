@@ -378,9 +378,6 @@ public class Replay {
         return true;
     }
 
-    public void countMarks(float difficulty) {
-    }
-
     public StatisticV2 getStat() {
         return stat;
     }

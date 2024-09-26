@@ -488,8 +488,7 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
             if (!replaying) {
                 ToastLogger.showTextId(R.string.replay_invalid, true);
                 return false;
-            } else
-                replay.countMarks(playableBeatmap.difficulty.od);
+            }
         } else if (modMenu.getMod().contains(GameMod.MOD_AUTO)) {
             replay = null;
         }
