@@ -1361,7 +1361,10 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
             scene = new ExtendedScene();
             SkinManager.setSkinEnabled(false);
             GameObjectPool.getInstance().purge();
+            objects.clear();
+            activeObjects.clear();
             passiveObjects.clear();
+            expiredObjects.clear();
             breakPeriods.clear();
             cursorSprites = null;
             playableBeatmap = null;
@@ -1548,8 +1551,17 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
         GameObjectPool.getInstance().purge();
         GameHelper.purgeSliderPathPool();
         stopAllAuxiliarySamples();
+        if (activeObjects != null) {
+            activeObjects.clear();
+        }
         if (passiveObjects != null) {
             passiveObjects.clear();
+        }
+        if (expiredObjects != null) {
+            expiredObjects.clear();
+        }
+        if (objects != null) {
+            objects.clear();
         }
         breakPeriods.clear();
         playableBeatmap = null;
