@@ -1,7 +1,6 @@
 package com.rian.osu.difficulty.skills
 
 import com.rian.osu.difficulty.DroidDifficultyHitObject
-import com.rian.osu.difficulty.evaluators.DroidRhythmEvaluator
 import com.rian.osu.difficulty.evaluators.DroidVisualEvaluator
 import com.rian.osu.mods.Mod
 import com.rian.osu.mods.ModHidden
