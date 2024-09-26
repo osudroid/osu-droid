@@ -363,6 +363,11 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
             return false;
         }
 
+        if (!parsedBeatmap.md5.equals(beatmapInfo.getMD5())) {
+            ToastLogger.showTextId(R.string.file_integrity_tampered, true);
+            return false;
+        }
+
         if (parsedBeatmap.hitObjects.objects.isEmpty()) {
             ToastLogger.showText("Empty Beatmap", true);
             return false;
