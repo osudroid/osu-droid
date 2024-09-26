@@ -24,8 +24,10 @@ class DroidRhythm(
     private val strainDecayBase = 0.3
 
     override fun strainValueAt(current: DroidDifficultyHitObject): Double {
+        current.rhythmMultiplier = DroidRhythmEvaluator.evaluateDifficultyOf(current)
+
         currentStrain *= strainDecay(current.deltaTime)
-        currentStrain += DroidRhythmEvaluator.evaluateDifficultyOf(current) - 1
+        currentStrain += current.rhythmMultiplier - 1
 
         return currentStrain
     }

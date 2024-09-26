@@ -71,7 +71,9 @@ class DroidDifficultyCalculator : DifficultyCalculator<DroidDifficultyHitObject,
 
         aimSliderFactor = if (aimDifficulty > 0) calculateRating(skills[1]) / aimDifficulty else 1.0
 
-        (skills[2] as DroidTap).let {
+        rhythmDifficulty = calculateRating(skills[2])
+
+        (skills[3] as DroidTap).let {
             tapDifficulty = calculateRating(it)
             tapDifficultStrainCount = it.countDifficultStrains()
             speedNoteCount = it.relevantNoteCount()
@@ -110,7 +112,7 @@ class DroidDifficultyCalculator : DifficultyCalculator<DroidDifficultyHitObject,
         }
 
         // Re-filter with tap strain in mind.
-        (skills[3] as DroidTap).objectStrains.let {
+        (skills[4] as DroidTap).objectStrains.let {
             for (section in sectionBoundaries) {
                 var inSpeedSection = false
                 var newFirstObjectIndex = section.first
@@ -151,8 +153,6 @@ class DroidDifficultyCalculator : DifficultyCalculator<DroidDifficultyHitObject,
                 }
             }
         }
-
-        rhythmDifficulty = calculateRating(skills[4])
 
         (skills[5] as DroidFlashlight).let {
             flashlightDifficulty = calculateRating(it)
@@ -220,9 +220,10 @@ class DroidDifficultyCalculator : DifficultyCalculator<DroidDifficultyHitObject,
         return arrayOf(
             DroidAim(mods, true),
             DroidAim(mods, false),
+            // Tap and visual skills depend on rhythm skill, so we put it first
+            DroidRhythm(mods),
             DroidTap(mods, true),
             DroidTap(mods, false),
-            DroidRhythm(mods),
             DroidFlashlight(mods, true),
             DroidFlashlight(mods, false),
             DroidVisual(mods, true),

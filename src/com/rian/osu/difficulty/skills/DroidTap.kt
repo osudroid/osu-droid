@@ -81,7 +81,7 @@ class DroidTap(
             current, considerCheesability, strainTimeCap
         ) * skillMultiplier
 
-        currentRhythm = DroidRhythmEvaluator.evaluateDifficultyOf(current)
+        currentRhythm = current.rhythmMultiplier
 
         objectDeltaTimes.add(current.deltaTime)
 

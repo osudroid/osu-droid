@@ -36,7 +36,7 @@ class DroidVisual(
         currentStrain *= strainDecay(current.deltaTime)
         currentStrain += DroidVisualEvaluator.evaluateDifficultyOf(current, isHidden, withSliders) * skillMultiplier
 
-        currentRhythm = DroidRhythmEvaluator.evaluateDifficultyOf(current)
+        currentRhythm = current.rhythmMultiplier
 
         return currentStrain * currentRhythm
     }
