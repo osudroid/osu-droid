@@ -32,14 +32,6 @@ abstract class ExtendedEntity(
 ) : Shape(0f, 0f), IModifierChain {
 
 
-    @Suppress("LeakingThis")
-    final override var modifierChainTarget: ExtendedEntity? = this
-        set(_) {
-            Log.e("ExtendedEntity", "The modifier chain target property is read-only for this class.")
-            field = this
-        }
-
-
     /**
      * The modifier pool for the scene this entity is attached to.
      */
@@ -370,7 +362,7 @@ abstract class ExtendedEntity(
 
         val modifier = modifierPool?.obtain() ?: UniversalModifier()
         modifier.setToDefault()
-        modifier.modifierChainTarget = modifierChainTarget
+        modifier.entity = this
         block(modifier)
 
         registerEntityModifier(modifier)

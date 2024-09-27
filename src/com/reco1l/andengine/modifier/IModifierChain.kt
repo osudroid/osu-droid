@@ -21,10 +21,14 @@ fun interface IModifierChainBlock {
 interface IModifierChain {
 
 
-    /**
-     * In a modifier chain, this is the entity that will be modified.
-     */
-    var modifierChainTarget: ExtendedEntity?
+    private val target: ExtendedEntity
+        get() = when(this) {
+
+            is ExtendedEntity -> this
+            is UniversalModifier -> entity ?: throw IllegalStateException("Modifier target is not set in this UniversalModifier cannot apply modifier.")
+
+            else -> throw IllegalStateException("IModifierChain only works with current implementations (ExtendedEntity and UniversalModifier), you must not use this interface.")
+        }
 
 
     /**
@@ -43,11 +47,6 @@ interface IModifierChain {
      * Begins a sequential chain of modifiers.
      */
     fun beginSequenceChain(onFinished: OnModifierFinished? = null, builder: IModifierChainBlock): UniversalModifier {
-
-        if (modifierChainTarget == null) {
-            throw IllegalStateException("Modifier target is not set cannot apply modifier.")
-        }
-
         return applyModifier {
             it.type = SEQUENCE
             it.onFinished = onFinished
@@ -59,11 +58,6 @@ interface IModifierChain {
      * Begins a parallel chain of modifiers.
      */
     fun beginParallelChain(onFinished: OnModifierFinished? = null, builder: IModifierChainBlock): UniversalModifier {
-
-        if (modifierChainTarget == null) {
-            throw IllegalStateException("Modifier target is not set cannot apply modifier.")
-        }
-
         return applyModifier {
             it.type = PARALLEL
             it.onFinished = onFinished
@@ -83,8 +77,8 @@ interface IModifierChain {
 
     fun translateTo(value: Float, durationSec: Float = 0f, easing: Easing? = null, onFinished: OnModifierFinished? = null): UniversalModifier {
         return apply(TRANSLATE, durationSec, easing, onFinished,
-            modifierChainTarget!!.translationX, value,
-            modifierChainTarget!!.translationY, value
+            target.translationX, value,
+            target.translationY, value
         )
     }
 
@@ -92,12 +86,12 @@ interface IModifierChain {
         return when (axes) {
 
             Axes.Both -> apply(TRANSLATE, durationSec, easing, onFinished,
-                modifierChainTarget!!.translationX, value,
-                modifierChainTarget!!.translationY, value
+                target.translationX, value,
+                target.translationY, value
             )
 
-            Axes.X -> apply(TRANSLATE_X, durationSec, easing, onFinished, modifierChainTarget!!.translationX, value)
-            Axes.Y -> apply(TRANSLATE_Y, durationSec, easing, onFinished, modifierChainTarget!!.translationY, value)
+            Axes.X -> apply(TRANSLATE_X, durationSec, easing, onFinished, target.translationX, value)
+            Axes.Y -> apply(TRANSLATE_Y, durationSec, easing, onFinished, target.translationY, value)
 
             Axes.None -> throw IllegalArgumentException("Cannot translate to none axes.")
         }
@@ -105,8 +99,8 @@ interface IModifierChain {
 
     fun translateTo(x: Float, y: Float, durationSec: Float = 0f, easing: Easing? = null, onFinished: OnModifierFinished? = null): UniversalModifier {
         return apply(TRANSLATE, durationSec, easing, onFinished,
-            modifierChainTarget!!.translationX, x,
-            modifierChainTarget!!.translationY, y
+            target.translationX, x,
+            target.translationY, y
         )
     }
 
@@ -115,8 +109,8 @@ interface IModifierChain {
 
     fun moveTo(value: Float, durationSec: Float = 0f, easing: Easing? = null, onFinished: OnModifierFinished? = null): UniversalModifier {
         return apply(MOVE, durationSec, easing, onFinished,
-            modifierChainTarget!!.x, value,
-            modifierChainTarget!!.y, value
+            target.x, value,
+            target.y, value
         )
     }
 
@@ -124,12 +118,12 @@ interface IModifierChain {
         return when (axes) {
 
             Axes.Both -> apply(MOVE, durationSec, easing, onFinished,
-                modifierChainTarget!!.x, x,
-                modifierChainTarget!!.y, y
+                target.x, x,
+                target.y, y
             )
 
-            Axes.X -> apply(MOVE_X, durationSec, easing, onFinished, modifierChainTarget!!.x, x)
-            Axes.Y -> apply(MOVE_Y, durationSec, easing, onFinished, modifierChainTarget!!.y, y)
+            Axes.X -> apply(MOVE_X, durationSec, easing, onFinished, target.x, x)
+            Axes.Y -> apply(MOVE_Y, durationSec, easing, onFinished, target.y, y)
 
             Axes.None -> throw IllegalArgumentException("Cannot move to none axes.")
         }
@@ -137,8 +131,8 @@ interface IModifierChain {
 
     fun moveTo(x: Float, y: Float, durationSec: Float = 0f, easing: Easing? = null, onFinished: OnModifierFinished? = null): UniversalModifier {
         return apply(MOVE, durationSec, easing, onFinished,
-            modifierChainTarget!!.x, x,
-            modifierChainTarget!!.y, y
+            target.x, x,
+            target.y, y
         )
     }
 
@@ -147,8 +141,8 @@ interface IModifierChain {
 
     fun scaleTo(value: Float, durationSec: Float = 0f, easing: Easing? = null, onFinished: OnModifierFinished? = null): UniversalModifier {
         return apply(SCALE, durationSec, easing, onFinished,
-            modifierChainTarget!!.scaleX, value,
-            modifierChainTarget!!.scaleY, value
+            target.scaleX, value,
+            target.scaleY, value
         )
     }
 
@@ -156,12 +150,12 @@ interface IModifierChain {
         return when (axes) {
 
             Axes.Both -> apply(SCALE, durationSec, easing, onFinished,
-                modifierChainTarget!!.scaleX, value,
-                modifierChainTarget!!.scaleY, value
+                target.scaleX, value,
+                target.scaleY, value
             )
 
-            Axes.X -> apply(SCALE_X, durationSec, easing, onFinished, modifierChainTarget!!.scaleX, value)
-            Axes.Y -> apply(SCALE_Y, durationSec, easing, onFinished, modifierChainTarget!!.scaleY, value)
+            Axes.X -> apply(SCALE_X, durationSec, easing, onFinished, target.scaleX, value)
+            Axes.Y -> apply(SCALE_Y, durationSec, easing, onFinished, target.scaleY, value)
 
             Axes.None -> throw IllegalArgumentException("Cannot scale to none axes.")
         }
@@ -169,8 +163,8 @@ interface IModifierChain {
 
     fun scaleTo(x: Float, y: Float, durationSec: Float = 0f, easing: Easing? = null, onFinished: OnModifierFinished? = null): UniversalModifier {
         return apply(SCALE, durationSec, easing, onFinished,
-            modifierChainTarget!!.scaleX, x,
-            modifierChainTarget!!.scaleY, y
+            target.scaleX, x,
+            target.scaleY, y
         )
     }
 
@@ -178,7 +172,7 @@ interface IModifierChain {
     // Coloring
 
     fun fadeTo(value: Float, durationSec: Float = 0f, easing: Easing? = null, onFinished: OnModifierFinished? = null): UniversalModifier {
-        return apply(ALPHA, durationSec, easing, onFinished, modifierChainTarget!!.alpha, value)
+        return apply(ALPHA, durationSec, easing, onFinished, target.alpha, value)
     }
 
     fun fadeIn(durationSec: Float = 0f, easing: Easing? = null, onFinished: OnModifierFinished? = null): UniversalModifier {
@@ -191,17 +185,17 @@ interface IModifierChain {
 
     fun colorTo(red: Float, green: Float, blue: Float, durationSec: Float = 0f, easing: Easing? = null, onFinished: OnModifierFinished? = null): UniversalModifier {
         return apply(COLOR, durationSec, easing, onFinished,
-            modifierChainTarget!!.red, red,
-            modifierChainTarget!!.green, green,
-            modifierChainTarget!!.blue, blue
+            target.red, red,
+            target.green, green,
+            target.blue, blue
         )
     }
 
     fun colorTo(value: Float, durationSec: Float = 0f, easing: Easing? = null, onFinished: OnModifierFinished? = null): UniversalModifier {
         return apply(COLOR, durationSec, easing, onFinished,
-            modifierChainTarget!!.red, value,
-            modifierChainTarget!!.green, value,
-            modifierChainTarget!!.blue, value
+            target.red, value,
+            target.green, value,
+            target.blue, value
         )
     }
 
@@ -209,17 +203,12 @@ interface IModifierChain {
     // Rotation
 
     fun rotateTo(value: Float, durationSec: Float = 0f, easing: Easing? = null, onFinished: OnModifierFinished? = null): UniversalModifier {
-        return apply(ROTATION, durationSec, easing, onFinished, modifierChainTarget!!.rotation, value)
+        return apply(ROTATION, durationSec, easing, onFinished, target.rotation, value)
     }
 
 
 
     private fun apply(type: ModifierType, durationSec: Float, easing: Easing?, onFinished: OnModifierFinished?, vararg values: Float): UniversalModifier {
-
-        if (modifierChainTarget == null) {
-            throw IllegalStateException("Modifier target is not set cannot apply modifier.")
-        }
-
         return applyModifier {
             it.type = type
             it.values = values

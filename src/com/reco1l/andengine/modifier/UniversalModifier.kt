@@ -38,7 +38,7 @@ class UniversalModifier @JvmOverloads constructor(private val pool: Pool<Univers
     }
 
 
-    override var modifierChainTarget: ExtendedEntity? = null
+    var entity: ExtendedEntity? = null
 
 
     /**
@@ -227,6 +227,10 @@ class UniversalModifier @JvmOverloads constructor(private val pool: Pool<Univers
 
     override fun applyModifier(block: (UniversalModifier) -> Unit): UniversalModifier {
 
+        if (entity == null) {
+            throw IllegalStateException("Modifier target is not set in this UniversalModifier cannot apply modifier.")
+        }
+
         // When this happens it means that this was called from a chained call.
         // If the type of modifier is not a sequence or parallel, we should apply
         // the modifier to the target directly.
@@ -236,27 +240,24 @@ class UniversalModifier @JvmOverloads constructor(private val pool: Pool<Univers
             // so the next chained modifiers will be applied after the delay.
             if (type == NONE) {
                 val delay = duration
+                val target = entity!!
 
                 setToDefault()
                 type = SEQUENCE
+                entity = target
 
                 modifiers = arrayOf(
-                    modifierChainTarget!!.applyModifier { it.duration = delay },
-                    modifierChainTarget!!.applyModifier(block)
+                    target.applyModifier { it.duration = delay },
+                    target.applyModifier(block)
                 )
             }
 
-
-            if (modifierChainTarget == null) {
-                throw IllegalStateException("Modifier target is not set cannot apply modifier.")
-            }
-
-            return modifierChainTarget!!.applyModifier(block)
+            return entity!!.applyModifier(block)
         }
 
         val modifier = pool?.obtain() ?: UniversalModifier()
         modifier.setToDefault()
-        modifier.modifierChainTarget = modifierChainTarget
+        modifier.entity = entity
         block(modifier)
 
         modifiers = modifiers?.plus(modifier) ?: arrayOf(modifier)
@@ -273,10 +274,10 @@ class UniversalModifier @JvmOverloads constructor(private val pool: Pool<Univers
 
         type = NONE
         values = null
+        entity = null
         duration = 0f
         onFinished = null
         easeFunction = IEaseFunction.DEFAULT
-        modifierChainTarget = null
 
         clearNestedModifiers()
         reset()
@@ -284,12 +285,20 @@ class UniversalModifier @JvmOverloads constructor(private val pool: Pool<Univers
 
     /**
      * Seeks the modifier to a specific time.
-     *
-     * This method will call the [onUpdate] method with the difference between the current elapsed time and the desired time.
      */
-    fun seekTo(seconds: Float, entity: IEntity = modifierChainTarget!!) {
-        onUpdate(seconds - elapsedSec, entity)
+    @JvmOverloads
+    fun seekTo(seconds: Float, target: IEntity? = entity!!) {
+        onUpdate(seconds - elapsedSec, target ?: return)
     }
+
+    /**
+     * Sets the progress of the modifier.
+     */
+    @JvmOverloads
+    fun setProgress(progress: Float, target: IEntity? = entity!!) {
+        onUpdate(progress * duration, target ?: return)
+    }
+
 
     /**
      * Sets the duration of the modifier.
