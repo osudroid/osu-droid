@@ -1,8 +1,14 @@
 package com.reco1l.andengine
 
+import android.util.*
+import androidx.annotation.*
 import com.reco1l.andengine.container.*
+import com.reco1l.andengine.modifier.*
+import com.reco1l.framework.*
+import com.reco1l.toolkt.kotlin.*
 import org.anddev.andengine.collision.*
 import org.anddev.andengine.engine.camera.*
+import org.anddev.andengine.entity.IEntity
 import org.anddev.andengine.entity.primitive.*
 import org.anddev.andengine.entity.shape.*
 import org.anddev.andengine.opengl.util.*
@@ -22,6 +28,16 @@ abstract class ExtendedEntity(
     private var height: Float = 0f,
 
     private var vertexBuffer: VertexBuffer? = null
+) : Shape(0f, 0f), IModifierChain {
+
+
+    @Suppress("LeakingThis")
+    final override var modifierChainTarget: IEntity? = this
+        set(_) {
+            Log.w("ExtendedEntity", "The modifier chain target property is read-only for this class.")
+            field = this
+        }
+
 
 ) : Shape(0f, 0f) {
 
@@ -144,6 +160,11 @@ abstract class ExtendedEntity(
     }
 
 
+    @CallSuper
+    override fun onDetached() {
+        modifierPool = null
+    }
+
     override fun applyTranslation(pGL: GL10) {
 
         val parent = parent
@@ -220,9 +241,7 @@ abstract class ExtendedEntity(
 
 
     override fun onInitDraw(pGL: GL10) {
-
         applyColor(pGL)
-
         GLHelper.enableVertexArray(pGL)
         GLHelper.blendFunction(pGL, mSourceBlendFunction, mDestinationBlendFunction)
     }
@@ -328,6 +347,20 @@ abstract class ExtendedEntity(
 
     override fun getSceneCenterCoordinates(): FloatArray {
         return this.convertLocalToSceneCoordinates(width * 0.5f, height * 0.5f)
+    }
+
+
+    // Transformation
+
+    override fun applyModifier(block: (UniversalModifier) -> Unit): UniversalModifier? {
+
+        val modifier = modifierPool?.obtain() ?: UniversalModifier()
+        modifier.setToDefault()
+        modifier.modifierChainTarget = modifierChainTarget
+        block(modifier)
+
+        registerEntityModifier(modifier)
+        return modifier
     }
 
 }

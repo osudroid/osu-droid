@@ -1,0 +1,383 @@
+package com.reco1l.andengine.modifier
+
+import android.util.*
+import com.reco1l.andengine.modifier.ModifierType.*
+import com.reco1l.framework.*
+import com.reco1l.toolkt.kotlin.*
+import org.anddev.andengine.entity.*
+import org.anddev.andengine.entity.modifier.*
+import org.anddev.andengine.util.modifier.*
+import org.anddev.andengine.util.modifier.ease.*
+import kotlin.math.*
+
+/**
+ * A universal modifier is a modifier that can be used to apply different types of modifications to
+ * an entity. The main reason for this class is to be able to recycle it by using a single pool and
+ * just changing the type.
+ *
+ * @see ModifierType
+ * @author Reco1l
+ */
+class UniversalModifier @JvmOverloads constructor(private val pool: Pool<UniversalModifier>? = null) : IEntityModifier, IModifierChain {
+
+    @JvmOverloads
+    constructor(type: ModifierType, duration: Float, from: Float, to: Float, listener: OnModifierFinished? = null, easeFunction: IEaseFunction = IEaseFunction.DEFAULT) : this(null) {
+        this.type = type
+        this.duration = duration
+        this.values = SpanArray(2).apply {
+            this[from, to] = 0
+        }
+        this.onFinished = listener
+        this.easeFunction = easeFunction
+    }
+
+    @JvmOverloads
+    constructor(type: ModifierType, listener: OnModifierFinished? = null, vararg modifiers: UniversalModifier) : this(null) {
+        this.type = type
+        this.onFinished = listener
+        this.modifiers = arrayOf(*modifiers)
+    }
+
+
+    override var modifierChainTarget: IEntity? = null
+
+
+    /**
+     * The type of the modifier.
+     * @see ModifierType
+     */
+    var type = NONE
+        set(value) {
+            if (field != value) {
+
+                if (value != SEQUENCE && value != PARALLEL) {
+                    clearNestedModifiers()
+                }
+
+                field = value
+
+                values = null
+                duration = getDuration()
+            }
+        }
+
+    /**
+     * Callback to be called when the modifier finishes.
+     */
+    var onFinished: OnModifierFinished? = null
+
+    /**
+     * Inner modifiers for [SEQUENCE] or [PARALLEL] modifier types.
+     */
+    var modifiers: Array<UniversalModifier>? = null
+        set(value) {
+
+            if (value != null && type != SEQUENCE && type != PARALLEL) {
+                Log.w("UniversalModifier", "Inner modifiers can only be set for sequence or parallel modifiers, ignoring.")
+                return
+            }
+
+            if (type == PARALLEL) {
+                // Sorting to reduce iterations, obviously sequential modifiers cannot be sorted.
+                value?.sortBy { it.duration }
+            }
+
+            field = value
+            duration = getDuration()
+        }
+
+    /**
+     * Easing function to be used.
+     */
+    var easeFunction: IEaseFunction = IEaseFunction.DEFAULT
+
+    /**
+     * An array of values to be used in the modifier.
+     *
+     * The values are stored in an array of spans of 2 elements where the first element is the `from` value and the second is the
+     * `to` values, the amount of spans needed depends on the type of the modifier.
+     *
+     * As an example, the `MOVE` modifier needs 2 value spans, one for the X axis and one for the Y axis. Meanwhile, the `RGB`
+     * modifier needs 3 value spans, one per each color channel.
+     *
+     * Disposition of the values:
+     * * [TRANSLATE] -> [xFrom, xTo, yFrom, yTo]
+     * * [RGB] -> [redFrom, redTo, greenFrom, greenTo, blueFrom, blueTo]
+     * * [SCALE] and [ALPHA] -> [scaleFrom, scaleTo]
+     */
+    var values: SpanArray? = null
+
+
+    private var removeWhenFinished = true
+
+    private var percentage = 0f
+
+    private var elapsedSec = 0f
+
+    private var duration = 0f
+
+
+    private fun clearNestedModifiers() {
+        modifiers?.forEach { it.onUnregister() }
+        modifiers = null
+    }
+
+
+    override fun onUpdate(deltaTimeSec: Float, entity: IEntity): Float {
+
+        if (isFinished) {
+            return 0f
+        }
+
+        var consumedTimeSec = 0f
+
+        if (type == SEQUENCE || type == PARALLEL) {
+
+            var remainingTimeSec = deltaTimeSec
+            var isAllModifiersFinished = false
+
+            while (remainingTimeSec > 0 && !isAllModifiersFinished) {
+
+                var isCurrentModifierFinished = false
+
+                // In parallel modifiers, the consumed time is equal to the maximum consumed time of the inner modifiers.
+                if (type == PARALLEL) {
+                    consumedTimeSec = 0f
+                }
+
+                // Assuming all modifiers are finished until proven otherwise.
+                isAllModifiersFinished = true
+
+                for (modifier in modifiers!!) {
+
+                    if (modifier.isFinished) {
+                        continue
+                    }
+                    isAllModifiersFinished = false
+
+                    if (type == SEQUENCE) {
+                        remainingTimeSec -= modifier.onUpdate(remainingTimeSec, entity)
+                    } else {
+                        consumedTimeSec = max(consumedTimeSec, modifier.onUpdate(deltaTimeSec, entity))
+                    }
+
+                    isCurrentModifierFinished = modifier.isFinished
+
+                    if (type == SEQUENCE) {
+                        break
+                    }
+                }
+
+                if (type == PARALLEL) {
+                    remainingTimeSec -= consumedTimeSec
+                } else if (isCurrentModifierFinished) {
+                    break
+                }
+
+            }
+
+            consumedTimeSec = deltaTimeSec - remainingTimeSec
+
+            // Not really necessary but we want to report the current percentage.
+            // Modifiers with nested modifiers will always use linear easing.
+            percentage = (elapsedSec + consumedTimeSec) / duration
+
+        } else {
+
+            consumedTimeSec = min(duration - elapsedSec, deltaTimeSec)
+
+            // In this case the consumed time is already fully calculated.
+            percentage = easeFunction.getPercentage(elapsedSec + consumedTimeSec, duration)
+
+            values?.let { values ->
+                type.onApply?.invoke(entity, values, percentage)
+            }
+        }
+
+        elapsedSec += consumedTimeSec
+
+        if (isFinished) {
+            elapsedSec = duration
+
+            onFinished?.invoke(entity)
+        }
+
+        return consumedTimeSec
+    }
+
+    override fun onUnregister() {
+        setToDefault()
+        pool?.free(this)
+    }
+
+
+    /**
+     * Resets the modifier to its initial state.
+     */
+    override fun reset() {
+        elapsedSec = 0f
+        percentage = 0f
+        modifiers?.forEach { it.reset() }
+    }
+
+
+    override fun applyModifier(block: (UniversalModifier) -> Unit): UniversalModifier? {
+
+        if (type != SEQUENCE && type != PARALLEL) {
+            Log.e("UniversalModifier", "Cannot start a nested modifier chain in a non-sequence or non-parallel modifier.")
+            return null
+        }
+
+        val modifier = pool?.obtain() ?: UniversalModifier()
+        modifier.setToDefault()
+        modifier.modifierChainTarget = modifierChainTarget
+        block(modifier)
+
+        modifiers?.last()
+        modifiers = modifiers?.plus(modifier) ?: arrayOf(modifier)
+        return modifier
+    }
+
+
+    /**
+     * Sets the modifier to its default state.
+     *
+     * This will remove all the inner modifiers, the listener, reset the elapsed time, and set the type to [NONE].
+     */
+    fun setToDefault() {
+
+        type = NONE
+        values = null
+        onFinished = null
+        easeFunction = IEaseFunction.DEFAULT
+        modifierChainTarget = null
+
+        clearNestedModifiers()
+        reset()
+    }
+
+
+    /**
+     * Sets the duration of the modifier.
+     *
+     * Note: If the modifier is a [SEQUENCE] or [PARALLEL] modifier, this method will do nothing.
+     */
+    fun setDuration(value: Float) {
+
+        if (type == SEQUENCE || type == PARALLEL) {
+            Log.w("UniversalModifier", "Cannot set duration for sequence or parallel modifiers, ignoring.")
+            return
+        }
+
+        duration = value
+    }
+
+    /**
+     * Returns the duration of the modifier.
+     *
+     * When the modifier is a [SEQUENCE] modifier, the duration is the sum of the inner modifiers' durations, meanwhile, when it is a [PARALLEL] modifier, it is the maximum duration of the
+     * inner modifiers. Otherwise, it is the duration of the modifier itself.
+     */
+    override fun getDuration(): Float  = when(type) {
+
+        SEQUENCE -> modifiers?.sumOf { it.duration } ?: 0f
+        PARALLEL -> modifiers?.maxOf { it.duration } ?: 0f
+
+        else -> duration
+    }
+
+
+    override fun getSecondsElapsed(): Float {
+        return elapsedSec
+    }
+
+
+    override fun isFinished(): Boolean {
+
+        if (type == SEQUENCE || type == PARALLEL) {
+
+            if (modifiers == null) {
+                return true
+            }
+
+            return modifiers!!.all { it.isFinished }
+        }
+
+        return elapsedSec >= duration
+    }
+
+    override fun isRemoveWhenFinished(): Boolean {
+        return removeWhenFinished
+    }
+
+    override fun setRemoveWhenFinished(value: Boolean) {
+        removeWhenFinished = value
+    }
+
+
+    override fun addModifierListener(listener: IModifier.IModifierListener<IEntity>) {
+        throw UnsupportedOperationException("Multiple entity modifiers are not allowed, consider using `setListener()` instead.")
+    }
+
+    override fun removeModifierListener(listener: IModifier.IModifierListener<IEntity>): Boolean {
+        throw UnsupportedOperationException("Multiple entity modifiers are not allowed, consider using `setListener()` instead.")
+    }
+
+
+    override fun deepCopy(): UniversalModifier = UniversalModifier(pool).also { modifier ->
+        modifier.type = type
+        modifier.duration = duration
+        modifier.onFinished = onFinished
+        modifier.easeFunction = easeFunction
+        modifier.values = values?.copyOf()
+        modifier.modifiers = modifiers?.map { it.deepCopy() }?.toTypedArray()
+    }
+
+
+}
+
+/**
+ * A function that is called when a modifier finishes.
+ */
+fun interface OnModifierFinished {
+    operator fun invoke(entity: IEntity)
+}
+
+
+/**
+ * A span array is an array of spans of two values each. Being the first value the initial value
+ * and the second the final value.
+ *
+ * This class is useful store many spans of values in a single array. Using [get] a certain value
+ * between the initial and final values can be obtained by using a percentage.
+ */
+@JvmInline
+value class SpanArray(private val values: FloatArray) {
+
+
+    constructor(size: Int) : this(FloatArray(size * 2))
+
+
+    /**
+     * Obtains a value from a span by its index.
+     *
+     * The percentage will be used to interpolate between the initial and final values in the span.
+     * A percentage of 0 will return the initial value, while a percentage of 1 will return the final value.
+     */
+    operator fun get(index: Int, percentage: Float): Float {
+        val from = values[2 * index]
+        val to = values[2 * index + 1]
+        return from + (to - from) * percentage
+    }
+
+    /**
+     * Sets the initial and final values of a span to a index.
+     */
+    operator fun set(from: Float, to: Float, index: Int) {
+        values[2 * index] = from
+        values[2 * index + 1] = to
+    }
+
+
+    fun copyOf(): SpanArray = SpanArray(values.copyOf())
+}

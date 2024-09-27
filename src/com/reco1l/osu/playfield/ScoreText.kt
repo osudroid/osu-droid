@@ -2,8 +2,9 @@ package com.reco1l.osu.playfield
 
 import com.reco1l.andengine.*
 import com.reco1l.andengine.container.*
+import com.reco1l.andengine.modifier.*
 import com.reco1l.andengine.sprite.*
-import com.reco1l.andengine.ModifierType.*
+import com.reco1l.andengine.modifier.ModifierType.*
 import org.anddev.andengine.engine.camera.*
 import org.anddev.andengine.opengl.texture.region.*
 import org.anddev.andengine.util.modifier.ease.EaseQuadIn

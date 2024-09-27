@@ -1,8 +1,8 @@
 package com.reco1l.osu
 
-import com.reco1l.andengine.*
+import com.reco1l.andengine.modifier.*
 import com.reco1l.framework.Pool
-import com.reco1l.andengine.ModifierType.*
+import com.reco1l.andengine.modifier.ModifierType.*
 import org.anddev.andengine.entity.IEntity
 import org.anddev.andengine.util.modifier.IModifier.*
 import org.anddev.andengine.util.modifier.ease.EaseSineInOut
@@ -29,9 +29,9 @@ object Modifiers {
         it.setToDefault()
         it.type = ALPHA
         it.duration = duration
-        it.values = floatArrayOf(from, to)
+        it.values = SpanArray(1).apply { this[from, to] = 0 }
         it.easeFunction = easeFunction
-        it.listener = listener
+        it.onFinished = OnModifierFinished { e -> listener?.onModifierFinished(null, e) }
     }
 
     @JvmStatic
@@ -48,9 +48,12 @@ object Modifiers {
         it.setToDefault()
         it.type = SCALE
         it.duration = duration
-        it.values = floatArrayOf(from, to)
+        it.values = SpanArray(2).apply {
+            this[from, to] = 0
+            this[from, to] = 1
+        }
         it.easeFunction = easeFunction
-        it.listener = listener
+        it.onFinished = OnModifierFinished { e -> listener?.onModifierFinished(null, e) }
     }
 
     @JvmStatic
@@ -69,13 +72,14 @@ object Modifiers {
         it.setToDefault()
         it.type = RGB
         it.duration = duration
-        it.listener = listener
+        it.onFinished = OnModifierFinished { e -> listener?.onModifierFinished(null, e) }
+
         it.easeFunction = easeFunction
-        it.values = floatArrayOf(
-            fromRed, toRed,
-            fromGreen, toGreen,
-            fromBlue, toBlue
-        )
+        it.values = SpanArray(3).apply {
+            this[fromRed, toRed] = 0
+            this[fromGreen, toGreen] = 1
+            this[fromBlue, toBlue] = 2
+        }
     }
 
     @JvmStatic
@@ -83,8 +87,9 @@ object Modifiers {
     fun sequence(listener: IModifierListener<IEntity>? = null, vararg modifiers: UniversalModifier) = pool.obtain().also {
         it.setToDefault()
         it.type = SEQUENCE
-        it.modifiers = modifiers
-        it.listener = listener
+        it.modifiers = arrayOf(*modifiers)
+        it.onFinished = OnModifierFinished { e -> listener?.onModifierFinished(null, e) }
+
     }
 
     @JvmStatic
@@ -92,8 +97,9 @@ object Modifiers {
     fun parallel(listener: IModifierListener<IEntity>? = null, vararg modifiers: UniversalModifier) = pool.obtain().also {
         it.setToDefault()
         it.type = PARALLEL
-        it.modifiers = modifiers
-        it.listener = listener
+        it.modifiers = arrayOf(*modifiers)
+        it.onFinished = OnModifierFinished { e -> listener?.onModifierFinished(null, e) }
+
     }
 
     @JvmStatic
@@ -102,7 +108,8 @@ object Modifiers {
         it.setToDefault()
         it.type = NONE
         it.duration = duration
-        it.listener = listener
+        it.onFinished = OnModifierFinished { e -> listener?.onModifierFinished(null, e) }
+
     }
 
     @JvmStatic
@@ -111,9 +118,10 @@ object Modifiers {
         it.setToDefault()
         it.type = TRANSLATE_X
         it.duration = duration
-        it.values = floatArrayOf(from, to)
+        it.values = SpanArray(1).apply { this[from, to] = 0 }
         it.easeFunction = easeFunction
-        it.listener = listener
+        it.onFinished = OnModifierFinished { e -> listener?.onModifierFinished(null, e) }
+
     }
 
     @JvmStatic
@@ -122,21 +130,27 @@ object Modifiers {
         it.setToDefault()
         it.type = TRANSLATE_Y
         it.duration = duration
-        it.values = floatArrayOf(from, to)
+        it.values = SpanArray(1).apply { this[from, to] = 0 }
         it.easeFunction = easeFunction
-        it.listener = listener
+        it.onFinished = OnModifierFinished { e -> listener?.onModifierFinished(null, e) }
+
     }
 
     @JvmStatic
     @JvmOverloads
-    fun move(duration: Float, fromX: Float, toX: Float, fromY: Float, toY: Float, listener: IModifierListener<IEntity>? = null, easeFunction: IEaseFunction = DefaultEaseFunction) = pool.obtain().also {
-        it.setToDefault()
-        it.type = MOVE
-        it.duration = duration
-        it.values = floatArrayOf(fromX, toX, fromY, toY)
-        it.easeFunction = easeFunction
-        it.listener = listener
-    }
+    fun move(duration: Float, fromX: Float, toX: Float, fromY: Float, toY: Float, listener: IModifierListener<IEntity>? = null, easeFunction: IEaseFunction = DefaultEaseFunction) =
+        pool.obtain().also {
+            it.setToDefault()
+            it.type = MOVE
+            it.duration = duration
+            it.values = SpanArray(2).apply {
+                this[fromX, toX] = 0
+                this[fromY, toY] = 1
+            }
+            it.easeFunction = easeFunction
+            it.onFinished = OnModifierFinished { e -> listener?.onModifierFinished(null, e) }
+
+        }
 
     @JvmStatic
     @JvmOverloads
@@ -144,9 +158,10 @@ object Modifiers {
         it.setToDefault()
         it.type = ROTATION
         it.duration = duration
-        it.values = floatArrayOf(from, to)
+        it.values = SpanArray(1).apply { this[from, to] = 0 }
         it.easeFunction = easeFunction
-        it.listener = listener
+        it.onFinished = OnModifierFinished { e -> listener?.onModifierFinished(null, e) }
+
     }
 
     @JvmStatic
@@ -158,13 +173,14 @@ object Modifiers {
         it.setToDefault()
         it.type = SEQUENCE
         it.modifiers = arrayOf(
-            translateX(duration / 8f,  0f,          magnitude,   easeFunction = EaseSineOut.getInstance()),
-            translateX(duration / 4f,  magnitude,   -magnitude,  easeFunction = EaseSineInOut.getInstance()),
-            translateX(duration / 4f,  -magnitude,  magnitude,   easeFunction = EaseSineInOut.getInstance()),
-            translateX(duration / 4f,  magnitude,   -magnitude,  easeFunction = EaseSineInOut.getInstance()),
-            translateX(duration / 8f,  -magnitude,  0f,          easeFunction = EaseSineIn.getInstance()),
+            translateX(duration / 8f, 0f, magnitude, easeFunction = EaseSineOut.getInstance()),
+            translateX(duration / 4f, magnitude, -magnitude, easeFunction = EaseSineInOut.getInstance()),
+            translateX(duration / 4f, -magnitude, magnitude, easeFunction = EaseSineInOut.getInstance()),
+            translateX(duration / 4f, magnitude, -magnitude, easeFunction = EaseSineInOut.getInstance()),
+            translateX(duration / 8f, -magnitude, 0f, easeFunction = EaseSineIn.getInstance()),
         )
-        it.listener = listener
+        it.onFinished = OnModifierFinished { e -> listener?.onModifierFinished(null, e) }
+
 
     }
 

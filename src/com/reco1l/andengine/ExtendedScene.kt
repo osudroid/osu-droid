@@ -1,7 +1,11 @@
 package com.reco1l.andengine
 
 import android.util.*
+import com.reco1l.andengine.modifier.*
+import com.reco1l.framework.*
+import com.reco1l.toolkt.kotlin.*
 import org.anddev.andengine.engine.camera.*
+import org.anddev.andengine.entity.IEntity
 import org.anddev.andengine.entity.scene.*
 import org.anddev.andengine.entity.shape.IShape
 import org.anddev.andengine.input.touch.*
@@ -20,10 +24,36 @@ class ExtendedScene : Scene(), IShape {
      */
     var timeMultiplier = 1f
 
+    /**
+     * The pool of modifiers for the scene and its children.
+     */
+    var modifierPool: Pool<UniversalModifier>? = null
+        get() {
+            if (field != null) {
+                return field
+            }
+
+            // Inherit the modifier pool from the parent scene.
+            field = (this as IEntity).findHierarchically(IEntity::getParent) {
+                (it as? ExtendedScene)?.modifierPool
+            }
+
+            return field
+        }
+
 
     private var cameraWidth = 0f
 
     private var cameraHeight = 0f
+
+
+    /**
+     * Allocates a modifier pool for the scene.
+     */
+    @JvmOverloads
+    fun allocateModifierPool(size: Int = 0) {
+        modifierPool = Pool(size) { UniversalModifier(it) }
+    }
 
 
     override fun onManagedUpdate(secElapsed: Float) {
