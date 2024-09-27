@@ -155,7 +155,7 @@ abstract class DifficultyHitObject(
      * @return The [DifficultyHitObject] at the index with respect to the current
      * [DifficultyHitObject]'s index, or `null` if the index is out of range.
      */
-    open fun previous(backwardsIndex: Int) = difficultyHitObjects.getOrNull(index - (backwardsIndex + 1))
+    open fun previous(backwardsIndex: Int) = if (index - (backwardsIndex + 1) >= 0) difficultyHitObjects[index - (backwardsIndex + 1)] else null
 
     /**
      * Gets the [DifficultyHitObject] at a specific index with respect to the current
@@ -167,7 +167,7 @@ abstract class DifficultyHitObject(
      * @return The [DifficultyHitObject] at the index with respect to the current
      * [DifficultyHitObject]'s index, or `null` if the index is out of range.
      */
-    open fun next(forwardsIndex: Int) = difficultyHitObjects.getOrNull(index + forwardsIndex + 1)
+    open fun next(forwardsIndex: Int) = if (index + forwardsIndex + 1 < difficultyHitObjects.size) difficultyHitObjects[index + forwardsIndex + 1] else null
 
     /**
      * Calculates the opacity of the hit object at a given time.
