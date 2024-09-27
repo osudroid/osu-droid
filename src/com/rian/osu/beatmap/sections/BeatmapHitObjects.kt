@@ -7,7 +7,7 @@ import com.rian.osu.beatmap.hitobject.Slider
 /**
  * Contains information about hit objects of a beatmap.
  */
-class BeatmapHitObjects {
+open class BeatmapHitObjects {
     /**
      * All objects in this beatmap.
      */
@@ -44,7 +44,7 @@ class BeatmapHitObjects {
      *
      * @param obj The hit object to add.
      */
-    fun add(obj: HitObject) {
+    open fun add(obj: HitObject) {
         // Objects may be out of order *only* if a user has manually edited an .osu file.
         // Unfortunately there are "ranked" maps in this state (example: https://osu.ppy.sh/s/594828).
         // Finding index is used to guarantee that the parsing order of hit objects with equal start times is maintained (stably-sorted).
@@ -63,7 +63,19 @@ class BeatmapHitObjects {
      * @param `object` The hit object to remove.
      * @return Whether the hit object was successfully removed.
      */
-    fun remove(obj: HitObject) = objects.remove(obj)
+    fun remove(obj: HitObject): Boolean {
+        val removed = objects.remove(obj)
+
+        if (removed) {
+            when (obj) {
+                is HitCircle -> --circleCount
+                is Slider -> --sliderCount
+                else -> --spinnerCount
+            }
+        }
+
+        return removed
+    }
 
     /**
      * Removes a hit object from this beatmap at a given index.
