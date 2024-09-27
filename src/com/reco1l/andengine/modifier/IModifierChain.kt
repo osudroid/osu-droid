@@ -113,6 +113,13 @@ interface IModifierChain {
 
     // Move
 
+    fun moveTo(value: Float, durationSec: Float = 0f, easing: Easing? = null, onFinished: OnModifierFinished? = null): UniversalModifier {
+        return apply(MOVE, durationSec, easing, onFinished,
+            modifierChainTarget!!.x, value,
+            modifierChainTarget!!.y, value
+        )
+    }
+
     fun moveTo(axes: Axes = Axes.Both, x: Float, y: Float, durationSec: Float = 0f, easing: Easing? = null, onFinished: OnModifierFinished? = null): UniversalModifier {
         return when (axes) {
 
@@ -137,6 +144,13 @@ interface IModifierChain {
 
 
     // Scale
+
+    fun scaleTo(value: Float, durationSec: Float = 0f, easing: Easing? = null, onFinished: OnModifierFinished? = null): UniversalModifier {
+        return apply(SCALE, durationSec, easing, onFinished,
+            modifierChainTarget!!.scaleX, value,
+            modifierChainTarget!!.scaleY, value
+        )
+    }
 
     fun scaleTo(axes: Axes = Axes.Both, value: Float, durationSec: Float = 0f, easing: Easing? = null, onFinished: OnModifierFinished? = null): UniversalModifier {
         return when (axes) {
