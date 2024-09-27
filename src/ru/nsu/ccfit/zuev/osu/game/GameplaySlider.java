@@ -45,6 +45,7 @@ public class GameplaySlider extends GameObject {
     private SliderPath path;
     private double passedTime;
     private float timePreempt;
+    private double spanDuration;
     private int completedSpanCount;
     private boolean reverse;
     private boolean slidingSamplesPlaying;
@@ -158,6 +159,7 @@ public class GameplaySlider extends GameObject {
 
         endsCombo = beatmapSlider.isLastInCombo();
         passedTime = secPassed - (float) beatmapSlider.startTime / 1000;
+        spanDuration = beatmapSlider.getSpanDuration() / 1000;
         slidingSamplesPlaying = false;
         path = sliderPath;
 
@@ -185,7 +187,7 @@ public class GameplaySlider extends GameObject {
         }
         circleColor.set(comboColor.r(), comboColor.g(), comboColor.b());
         currentNestedObjectIndex = 0;
-        sliderHeadHitTimeThreshold = Math.min((float) beatmapSlider.getSpanDuration() / 1000, GameHelper.getDifficultyHelper().hitWindowFor50(GameHelper.getOverallDifficulty()));
+        sliderHeadHitTimeThreshold = Math.min((float) spanDuration, GameHelper.getDifficultyHelper().hitWindowFor50(GameHelper.getOverallDifficulty()));
 
         // Start circle piece
         headCirclePiece.setScale(scale);
@@ -553,7 +555,6 @@ public class GameplaySlider extends GameObject {
 
         // If slider has more spans
         if (stillHasSpan) {
-            double spanDuration = beatmapSlider.getSpanDuration() / 1000;
             reverse = !reverse;
             passedTime -= spanDuration;
             tickTime = passedTime;
@@ -837,8 +838,7 @@ public class GameplaySlider extends GameObject {
         }
 
         // Ball position
-        final float spanDuration = (float) beatmapSlider.getSpanDuration() / 1000;
-        final float percentage = (float) passedTime / spanDuration;
+        final float percentage = (float) (passedTime / spanDuration);
         ballPos = getPositionAt(reverse ? 1 - percentage : percentage, true, false);
 
         // Calculating if cursor in follow circle bounds
