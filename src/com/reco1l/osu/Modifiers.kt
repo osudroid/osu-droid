@@ -17,6 +17,7 @@ import org.anddev.andengine.util.modifier.ease.IEaseFunction.DEFAULT as DefaultE
  * @see ModifierType
  * @author Reco1l
  */
+@Deprecated(message = "Use ExtendedEntity integrated functions instead.")
 object Modifiers {
 
     @JvmStatic
@@ -29,7 +30,7 @@ object Modifiers {
         it.setToDefault()
         it.type = ALPHA
         it.duration = duration
-        it.values = SpanArray(1).apply { this[from, to] = 0 }
+        it.values = floatArrayOf(from, to)
         it.easeFunction = easeFunction
         it.onFinished = OnModifierFinished { e -> listener?.onModifierFinished(null, e) }
     }
@@ -48,10 +49,7 @@ object Modifiers {
         it.setToDefault()
         it.type = SCALE
         it.duration = duration
-        it.values = SpanArray(2).apply {
-            this[from, to] = 0
-            this[from, to] = 1
-        }
+        it.values = floatArrayOf(from, to)
         it.easeFunction = easeFunction
         it.onFinished = OnModifierFinished { e -> listener?.onModifierFinished(null, e) }
     }
@@ -70,16 +68,16 @@ object Modifiers {
         easeFunction: IEaseFunction = DefaultEaseFunction
     ) = pool.obtain().also {
         it.setToDefault()
-        it.type = RGB
+        it.type = COLOR
         it.duration = duration
         it.onFinished = OnModifierFinished { e -> listener?.onModifierFinished(null, e) }
 
         it.easeFunction = easeFunction
-        it.values = SpanArray(3).apply {
-            this[fromRed, toRed] = 0
-            this[fromGreen, toGreen] = 1
-            this[fromBlue, toBlue] = 2
-        }
+        it.values = floatArrayOf(
+            fromRed, toRed,
+            fromGreen, toGreen,
+            fromBlue, toBlue
+        )
     }
 
     @JvmStatic
@@ -118,7 +116,7 @@ object Modifiers {
         it.setToDefault()
         it.type = TRANSLATE_X
         it.duration = duration
-        it.values = SpanArray(1).apply { this[from, to] = 0 }
+        it.values = floatArrayOf(from, to)
         it.easeFunction = easeFunction
         it.onFinished = OnModifierFinished { e -> listener?.onModifierFinished(null, e) }
 
@@ -130,7 +128,7 @@ object Modifiers {
         it.setToDefault()
         it.type = TRANSLATE_Y
         it.duration = duration
-        it.values = SpanArray(1).apply { this[from, to] = 0 }
+        it.values = floatArrayOf(from, to)
         it.easeFunction = easeFunction
         it.onFinished = OnModifierFinished { e -> listener?.onModifierFinished(null, e) }
 
@@ -143,10 +141,10 @@ object Modifiers {
             it.setToDefault()
             it.type = MOVE
             it.duration = duration
-            it.values = SpanArray(2).apply {
-                this[fromX, toX] = 0
-                this[fromY, toY] = 1
-            }
+            it.values = floatArrayOf(
+                fromX, toX,
+                fromY, toY
+            )
             it.easeFunction = easeFunction
             it.onFinished = OnModifierFinished { e -> listener?.onModifierFinished(null, e) }
 
@@ -158,7 +156,7 @@ object Modifiers {
         it.setToDefault()
         it.type = ROTATION
         it.duration = duration
-        it.values = SpanArray(1).apply { this[from, to] = 0 }
+        it.values = floatArrayOf(from, to)
         it.easeFunction = easeFunction
         it.onFinished = OnModifierFinished { e -> listener?.onModifierFinished(null, e) }
 

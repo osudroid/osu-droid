@@ -33,9 +33,9 @@ abstract class ExtendedEntity(
 
 
     @Suppress("LeakingThis")
-    final override var modifierChainTarget: IEntity? = this
+    final override var modifierChainTarget: ExtendedEntity? = this
         set(_) {
-            Log.w("ExtendedEntity", "The modifier chain target property is read-only for this class.")
+            Log.e("ExtendedEntity", "The modifier chain target property is read-only for this class.")
             field = this
         }
 
@@ -366,7 +366,7 @@ abstract class ExtendedEntity(
 
     // Transformation
 
-    override fun applyModifier(block: (UniversalModifier) -> Unit): UniversalModifier? {
+    override fun applyModifier(block: (UniversalModifier) -> Unit): UniversalModifier {
 
         val modifier = modifierPool?.obtain() ?: UniversalModifier()
         modifier.setToDefault()

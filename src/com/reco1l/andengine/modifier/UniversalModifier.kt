@@ -1,6 +1,7 @@
 package com.reco1l.andengine.modifier
 
 import android.util.*
+import com.reco1l.andengine.*
 import com.reco1l.andengine.modifier.ModifierType.*
 import com.reco1l.framework.*
 import com.reco1l.toolkt.kotlin.*
@@ -24,9 +25,7 @@ class UniversalModifier @JvmOverloads constructor(private val pool: Pool<Univers
     constructor(type: ModifierType, duration: Float, from: Float, to: Float, listener: OnModifierFinished? = null, easeFunction: IEaseFunction = IEaseFunction.DEFAULT) : this(null) {
         this.type = type
         this.duration = duration
-        this.values = SpanArray(2).apply {
-            this[from, to] = 0
-        }
+        this.values = floatArrayOf(from, to)
         this.onFinished = listener
         this.easeFunction = easeFunction
     }
@@ -39,7 +38,7 @@ class UniversalModifier @JvmOverloads constructor(private val pool: Pool<Univers
     }
 
 
-    override var modifierChainTarget: IEntity? = null
+    override var modifierChainTarget: ExtendedEntity? = null
 
 
     /**
@@ -102,10 +101,10 @@ class UniversalModifier @JvmOverloads constructor(private val pool: Pool<Univers
      *
      * Disposition of the values:
      * * [TRANSLATE] -> [xFrom, xTo, yFrom, yTo]
-     * * [RGB] -> [redFrom, redTo, greenFrom, greenTo, blueFrom, blueTo]
+     * * [COLOR] -> [redFrom, redTo, greenFrom, greenTo, blueFrom, blueTo]
      * * [SCALE] and [ALPHA] -> [scaleFrom, scaleTo]
      */
-    var values: SpanArray? = null
+    var values: FloatArray? = null
 
 
     private var removeWhenFinished = true
@@ -221,11 +220,33 @@ class UniversalModifier @JvmOverloads constructor(private val pool: Pool<Univers
     }
 
 
-    override fun applyModifier(block: (UniversalModifier) -> Unit): UniversalModifier? {
+    override fun applyModifier(block: (UniversalModifier) -> Unit): UniversalModifier {
 
+        // When this happens it means that this was called from a chained call.
+        // If the type of modifier is not a sequence or parallel, we should apply
+        // the modifier to the target directly.
         if (type != SEQUENCE && type != PARALLEL) {
-            Log.e("UniversalModifier", "Cannot start a nested modifier chain in a non-sequence or non-parallel modifier.")
-            return null
+
+            // If the type is delay, we should convert it to a sequence modifier with the delay first,
+            // so the next chained modifiers will be applied after the delay.
+            if (type == NONE) {
+                val delay = duration
+
+                setToDefault()
+                type = SEQUENCE
+
+                modifiers = arrayOf(
+                    modifierChainTarget!!.applyModifier { it.duration = delay },
+                    modifierChainTarget!!.applyModifier(block)
+                )
+            }
+
+
+            if (modifierChainTarget == null) {
+                throw IllegalStateException("Modifier target is not set cannot apply modifier.")
+            }
+
+            return modifierChainTarget!!.applyModifier(block)
         }
 
         val modifier = pool?.obtain() ?: UniversalModifier()
@@ -233,7 +254,6 @@ class UniversalModifier @JvmOverloads constructor(private val pool: Pool<Univers
         modifier.modifierChainTarget = modifierChainTarget
         block(modifier)
 
-        modifiers?.last()
         modifiers = modifiers?.plus(modifier) ?: arrayOf(modifier)
         return modifier
     }
@@ -248,6 +268,7 @@ class UniversalModifier @JvmOverloads constructor(private val pool: Pool<Univers
 
         type = NONE
         values = null
+        duration = 0f
         onFinished = null
         easeFunction = IEaseFunction.DEFAULT
         modifierChainTarget = null
@@ -341,43 +362,4 @@ class UniversalModifier @JvmOverloads constructor(private val pool: Pool<Univers
  */
 fun interface OnModifierFinished {
     operator fun invoke(entity: IEntity)
-}
-
-
-/**
- * A span array is an array of spans of two values each. Being the first value the initial value
- * and the second the final value.
- *
- * This class is useful store many spans of values in a single array. Using [get] a certain value
- * between the initial and final values can be obtained by using a percentage.
- */
-@JvmInline
-value class SpanArray(private val values: FloatArray) {
-
-
-    constructor(size: Int) : this(FloatArray(size * 2))
-
-
-    /**
-     * Obtains a value from a span by its index.
-     *
-     * The percentage will be used to interpolate between the initial and final values in the span.
-     * A percentage of 0 will return the initial value, while a percentage of 1 will return the final value.
-     */
-    operator fun get(index: Int, percentage: Float): Float {
-        val from = values[2 * index]
-        val to = values[2 * index + 1]
-        return from + (to - from) * percentage
-    }
-
-    /**
-     * Sets the initial and final values of a span to a index.
-     */
-    operator fun set(from: Float, to: Float, index: Int) {
-        values[2 * index] = from
-        values[2 * index + 1] = to
-    }
-
-
-    fun copyOf(): SpanArray = SpanArray(values.copyOf())
 }
