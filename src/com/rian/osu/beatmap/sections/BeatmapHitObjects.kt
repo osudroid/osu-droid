@@ -105,7 +105,7 @@ class BeatmapHitObjects {
             return 0
         }
 
-        if (startTime >= objects.last().startTime) {
+        if (startTime >= objects[objects.size - 1].startTime) {
             return objects.size
         }
 

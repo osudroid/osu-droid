@@ -190,11 +190,12 @@ class ThreeFingerChecker(
      * This also filters cursors that are in a [BreakPeriod] or happen before start/after end of the [Beatmap].
      */
     private fun filterCursorGroups() = mutableListOf<List<CursorGroup>>().apply {
-        val firstObject = beatmap.hitObjects.objects.first()
-        val firstObjectResult = objectData.first()
+        val objects = beatmap.hitObjects.objects
+        val firstObject = objects[0]
+        val firstObjectResult = objectData[0]
 
-        val lastObject = beatmap.hitObjects.objects.last()
-        val lastObjectResult = objectData.last()
+        val lastObject = objects[objects.size - 1]
+        val lastObjectResult = objectData[objectData.size - 1]
 
         // For sliders, automatically set hit window length to be as lenient as possible.
         var firstObjectHitWindow = hitWindow.mehWindow

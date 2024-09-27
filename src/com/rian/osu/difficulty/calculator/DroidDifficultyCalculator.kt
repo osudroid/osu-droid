@@ -64,9 +64,7 @@ class DroidDifficultyCalculator : DifficultyCalculator<DroidDifficultyHitObject,
             difficultSliders.sortByDescending { s -> s.difficultyRating }
 
             // Take the top 15% most difficult sliders.
-            while (difficultSliders.size > ceil(0.15 * sliderCount)) {
-                difficultSliders.remove(difficultSliders.last())
-            }
+            difficultSliders.dropLastWhile { difficultSliders.size > ceil(0.15 * sliderCount) }
         }
 
         aimSliderFactor = if (aimDifficulty > 0) calculateRating(skills[1]) / aimDifficulty else 1.0

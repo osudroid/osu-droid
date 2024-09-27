@@ -307,7 +307,7 @@ abstract class DifficultyHitObject(
             }
         }
 
-        slider.lazyTravelTime = slider.nestedHitObjects.last().startTime - slider.startTime
+        slider.lazyTravelTime = slider.nestedHitObjects[slider.nestedHitObjects.size - 1].startTime - slider.startTime
 
         var endTimeMin = slider.lazyTravelTime / slider.spanDuration
         if (endTimeMin % 2 >= 1) {

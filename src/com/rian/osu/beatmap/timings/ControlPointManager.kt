@@ -111,8 +111,9 @@ abstract class ControlPointManager<T : ControlPoint>(
             return null
         }
 
-        if (time >= controlPoints.last().time) {
-            return controlPoints.last()
+        val lastControlPoint = controlPoints[controlPoints.size - 1]
+        if (time >= lastControlPoint.time) {
+            return lastControlPoint
         }
 
         var l = 0
@@ -143,7 +144,7 @@ abstract class ControlPointManager<T : ControlPoint>(
             return 0
         }
 
-        if (time >= controlPoints.last().time) {
+        if (time >= controlPoints[controlPoints.size - 1].time) {
             return controlPoints.size
         }
 
