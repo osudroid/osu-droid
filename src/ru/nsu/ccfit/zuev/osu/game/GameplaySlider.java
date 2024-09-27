@@ -823,7 +823,7 @@ public class GameplaySlider extends GameObject {
             approachCircle.clearEntityModifiers();
             approachCircle.setAlpha(0);
 
-            ball.setFps((float) beatmapSlider.getVelocity() * 100 * scale);
+            ball.setFps((float) beatmapSlider.getVelocity() * Slider.BASE_SCORING_DISTANCE * scale);
             ball.setScale(scale);
             ball.setFlippedHorizontal(false);
             ball.registerEntityModifier(Modifiers.fadeIn(0.1f));

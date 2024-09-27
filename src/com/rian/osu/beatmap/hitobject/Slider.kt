@@ -497,6 +497,10 @@ class Slider(
 
     companion object {
         const val LEGACY_LAST_TICK_OFFSET = 36.0
-        private const val BASE_SCORING_DISTANCE = 100f
+
+        /**
+         * Scoring distance with a speed-adjusted beat length of 1 second (i.e. the speed slider balls move through their track).
+         */
+        const val BASE_SCORING_DISTANCE = 100f
     }
 }
