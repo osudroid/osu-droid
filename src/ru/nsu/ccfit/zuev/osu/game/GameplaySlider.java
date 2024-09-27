@@ -49,6 +49,7 @@ public class GameplaySlider extends GameObject {
     private boolean reverse;
     private boolean slidingSamplesPlaying;
 
+    private float sliderHeadHitTimeThreshold;
     private int currentNestedObjectIndex;
     private int ticksGot;
     private double tickTime;
@@ -184,6 +185,7 @@ public class GameplaySlider extends GameObject {
         }
         circleColor.set(comboColor.r(), comboColor.g(), comboColor.b());
         currentNestedObjectIndex = 0;
+        sliderHeadHitTimeThreshold = Math.min((float) beatmapSlider.getSpanDuration() / 1000, GameHelper.getDifficultyHelper().hitWindowFor50(GameHelper.getOverallDifficulty()));
 
         // Start circle piece
         headCirclePiece.setScale(scale);
@@ -700,7 +702,7 @@ public class GameplaySlider extends GameObject {
         if (!startHit) // If we didn't get start hit(click)
         {
             // If it's too late, mark this hit missing
-            if (passedTime > GameHelper.getDifficultyHelper().hitWindowFor50(GameHelper.getOverallDifficulty())) {
+            if (passedTime > sliderHeadHitTimeThreshold) {
                 startHit = true;
                 currentNestedObjectIndex++;
                 listener.onSliderHit(id, -1, null, position, false, bodyColor, GameObjectListener.SLIDER_START);
@@ -712,7 +714,7 @@ public class GameplaySlider extends GameObject {
                 ticksGot++;
                 listener.onSliderHit(id, 30, null, position, false, bodyColor, GameObjectListener.SLIDER_START);
             } else if (replayObjectData != null &&
-                    Math.abs(replayObjectData.accuracy / 1000f) <= GameHelper.getDifficultyHelper().hitWindowFor50(GameHelper.getOverallDifficulty()) &&
+                    Math.abs(replayObjectData.accuracy / 1000f) <= sliderHeadHitTimeThreshold &&
                     passedTime + dt / 2 > replayObjectData.accuracy / 1000f) {
                 startHit = true;
                 playCurrentNestedObjectHitSound();
