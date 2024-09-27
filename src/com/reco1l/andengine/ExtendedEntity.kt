@@ -39,7 +39,22 @@ abstract class ExtendedEntity(
         }
 
 
-) : Shape(0f, 0f) {
+    /**
+     * The modifier pool for the scene this entity is attached to.
+     */
+    var modifierPool: Pool<UniversalModifier>? = null
+        private set
+        get() {
+            if (field != null) {
+                return field
+            }
+
+            field = (this as IEntity).findHierarchically(IEntity::getParent) {
+                (it as? ExtendedScene)?.modifierPool
+            }
+
+            return field
+        }
 
 
     /**
