@@ -46,7 +46,8 @@ abstract class HitObject(
     /**
      * The end time of this [HitObject].
      */
-    open val endTime = startTime
+    open val endTime
+        get() = startTime
 
     /**
      * The duration of this [HitObject], in milliseconds.
@@ -69,7 +70,8 @@ abstract class HitObject(
     /**
      * The end position of this [HitObject] in osu!pixels.
      */
-    open val endPosition = position
+    open val endPosition
+        get() = position
 
     /**
      * The index of this [HitObject] in the current combo.
