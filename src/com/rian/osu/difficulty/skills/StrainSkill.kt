@@ -31,11 +31,7 @@ abstract class StrainSkill<in TObject : DifficultyHitObject>(
      */
     protected open val reducedSectionBaseline = 0.75
 
-    /**
-     * The strain peaks for each [sectionLength] section of the beatmap.
-     */
-    protected val strainPeaks = mutableListOf<Double>()
-
+    private val strainPeaks = mutableListOf<Double>()
     private var currentSectionPeak = 0.0
     private var currentSectionEnd = 0.0
     private val sectionLength = 400
@@ -53,12 +49,14 @@ abstract class StrainSkill<in TObject : DifficultyHitObject>(
         }
 
         currentSectionPeak = max(strainValueAt(current), currentSectionPeak)
-
-        if (current.next(0) == null) {
-            // Don't forget to save the last strain peak, which would otherwise be ignored.
-            saveCurrentPeak()
-        }
     }
+
+    /**
+     * Returns a list of the peak strains for each [sectionLength] section of the beatmap,
+     * including the peak of the current section.
+     */
+    val currentStrainPeaks
+        get() = strainPeaks.toMutableList().apply { add(currentSectionPeak) }
 
     /**
      * Reduces the highest strain peaks to account for extreme difficulty spikes based on

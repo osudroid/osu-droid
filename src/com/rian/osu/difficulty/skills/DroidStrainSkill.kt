@@ -63,7 +63,7 @@ abstract class DroidStrainSkill(
         objectStrains.add(objectStrain)
     }
 
-    override fun difficultyValue() = strainPeaks.run {
+    override fun difficultyValue() = currentStrainPeaks.run {
         // We are reducing the highest strains first to account for extreme difficulty spikes.
         reduceHighestStrainPeaks(this)
 

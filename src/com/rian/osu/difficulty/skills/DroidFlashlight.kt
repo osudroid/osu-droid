@@ -33,8 +33,7 @@ class DroidFlashlight(
     private val strainDecayBase = 0.15
     private val isHidden = mods.any { it is ModHidden }
 
-    override fun difficultyValue() =
-        (strainPeaks.sum() * starsPerDouble).pow(0.8)
+    override fun difficultyValue() = (currentStrainPeaks.sum() * starsPerDouble).pow(0.8)
 
     override fun strainValueAt(current: DroidDifficultyHitObject): Double {
         currentStrain *= strainDecay(current.deltaTime)
