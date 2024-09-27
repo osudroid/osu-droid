@@ -63,7 +63,7 @@ open class BeatmapHitObjects {
      * @param `object` The hit object to remove.
      * @return Whether the hit object was successfully removed.
      */
-    fun remove(obj: HitObject): Boolean {
+    open fun remove(obj: HitObject): Boolean {
         val removed = objects.remove(obj)
 
         if (removed) {
@@ -83,7 +83,7 @@ open class BeatmapHitObjects {
      * @param index The index of the hit object to remove.
      * @return The hit object that was removed, `null` if no hit objects were removed.
      */
-    fun remove(index: Int): HitObject? {
+    open fun remove(index: Int): HitObject? {
         if (index < 0 || index > objects.size - 1) {
             return null
         }
