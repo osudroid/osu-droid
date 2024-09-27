@@ -112,7 +112,7 @@ open class Container : ExtendedEntity() {
             return
         }
 
-        if (internalWidth != width && internalHeight != height) {
+        if (internalWidth != width || internalHeight != height) {
 
             if (autoSizeAxes == Axes.X || autoSizeAxes == Axes.Both) {
                 internalWidth = width
