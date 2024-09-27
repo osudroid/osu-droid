@@ -108,7 +108,7 @@ class StandardDifficultyCalculator : DifficultyCalculator<StandardDifficultyHitO
                     StandardDifficultyHitObject(
                         it[i],
                         it[i - 1],
-                        if (i > 1) it[2] else null,
+                        if (i > 1) it[i - 2] else null,
                         clockRate,
                         this,
                         size,
