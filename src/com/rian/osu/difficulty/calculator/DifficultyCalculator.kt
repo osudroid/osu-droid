@@ -103,7 +103,7 @@ abstract class DifficultyCalculator<TObject : DifficultyHitObject, TAttributes :
         val difficultyObjects = createDifficultyHitObjects(beatmapToCalculate, parameters)
         var currentIndex = 0
 
-        for (obj in beatmap.hitObjects.objects) {
+        for (obj in beatmapToCalculate.hitObjects.objects) {
             progressiveBeatmap.hitObjects.add(obj)
 
             while (currentIndex < difficultyObjects.size && difficultyObjects[currentIndex].obj.endTime <= obj.endTime) {
