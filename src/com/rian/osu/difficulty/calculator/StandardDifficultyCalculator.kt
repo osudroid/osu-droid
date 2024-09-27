@@ -11,7 +11,6 @@ import com.rian.osu.difficulty.skills.Skill
 import com.rian.osu.difficulty.skills.StandardAim
 import com.rian.osu.difficulty.skills.StandardFlashlight
 import com.rian.osu.difficulty.skills.StandardSpeed
-import com.rian.osu.mods.ModDifficultyAdjust
 import com.rian.osu.mods.ModFlashlight
 import com.rian.osu.mods.ModRelax
 import kotlin.math.cbrt
@@ -101,14 +100,7 @@ class StandardDifficultyCalculator : DifficultyCalculator<StandardDifficultyHitO
         parameters: DifficultyCalculationParameters?
     ) = mutableListOf<StandardDifficultyHitObject>().apply {
         val clockRate = parameters?.totalSpeedMultiplier?.toDouble() ?: 1.0
-        val difficultyAdjustMod = parameters?.mods?.find { it is ModDifficultyAdjust } as ModDifficultyAdjust?
-
-        val od = difficultyAdjustMod?.od ?: beatmap.difficulty.od
-        var greatWindow = StandardHitWindow(od).greatWindow.toDouble()
-
-        if (difficultyAdjustMod?.od == null) {
-            greatWindow /= clockRate
-        }
+        val greatWindow = StandardHitWindow(beatmap.difficulty.od).greatWindow.toDouble() / clockRate
 
         beatmap.hitObjects.objects.let {
             for (i in 1 until it.size) {
