@@ -98,9 +98,9 @@ class DroidDifficultyHitObject(
         setVisuals(clockRate, objects)
     }
 
-    override fun previous(backwardsIndex: Int) = difficultyHitObjects.getOrNull(index - backwardsIndex)
+    override fun previous(backwardsIndex: Int) = if (index - backwardsIndex >= 0) difficultyHitObjects[index - backwardsIndex] else null
 
-    override fun next(forwardsIndex: Int) = difficultyHitObjects.getOrNull(index + forwardsIndex + 2)
+    override fun next(forwardsIndex: Int) = if (index + forwardsIndex + 2 < difficultyHitObjects.size) difficultyHitObjects[index + forwardsIndex + 2] else null
 
     /**
      * Determines whether this [DroidDifficultyHitObject] is considered overlapping with the [DroidDifficultyHitObject]

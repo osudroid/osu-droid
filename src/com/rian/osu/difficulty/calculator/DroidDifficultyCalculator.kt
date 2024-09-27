@@ -246,8 +246,8 @@ class DroidDifficultyCalculator : DifficultyCalculator<DroidDifficultyHitObject,
                 add(
                     DroidDifficultyHitObject(
                         it[i],
-                        it.getOrNull(i - 1),
-                        it.getOrNull(i - 2),
+                        if (i > 0) it[i - 1] else null,
+                        if (i > 1) it[i - 2] else null,
                         clockRate,
                         this,
                         size - 1,

@@ -116,7 +116,7 @@ class StandardDifficultyCalculator : DifficultyCalculator<StandardDifficultyHitO
                     StandardDifficultyHitObject(
                         it[i],
                         it[i - 1],
-                        it.getOrNull(i - 2),
+                        if (i > 1) it[2] else null,
                         clockRate,
                         this,
                         size,

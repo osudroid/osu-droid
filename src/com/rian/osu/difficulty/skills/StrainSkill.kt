@@ -79,13 +79,15 @@ abstract class StrainSkill<in TObject : DifficultyHitObject>(
             val strain = strainPeaks[i]
 
             // Check if the strain fits into the current top strains
-            val lowestStrain = strainPeaks.getOrNull(highestStrainPeakIndices.last()) ?: 0.0
+            val lowestStrainIndex = highestStrainPeakIndices[highestStrainPeakIndices.size - 1]
+            val lowestStrain = if (lowestStrainIndex > -1) strainPeaks[lowestStrainIndex] else 0.0
+
             if (strain <= lowestStrain) {
                 continue
             }
 
             // Obtain the insertion index of the current strain
-            val insertionIndex = highestStrainPeakIndices.indexOfFirst { strain > (strainPeaks.getOrNull(it) ?: 0.0) }
+            val insertionIndex = highestStrainPeakIndices.indexOfFirst { strain > if (it > -1) strainPeaks[it] else 0.0 }
 
             // Shift the indices to the right
             for (j in (highestStrainPeakIndices.size - 1) downTo insertionIndex + 1) {
