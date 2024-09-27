@@ -111,7 +111,7 @@ class UniversalModifier @JvmOverloads constructor(private val pool: Pool<Univers
 
     private var percentage = 0f
 
-    private var elapsedSec = 0f
+    private var elapsedSec = -1f
 
     private var duration = 0f
 
@@ -126,6 +126,11 @@ class UniversalModifier @JvmOverloads constructor(private val pool: Pool<Univers
 
         if (isFinished) {
             return 0f
+        }
+
+        // We use negative elapsed time to know whether the modifier has started or not yet.
+        if (elapsedSec < 0) {
+            elapsedSec = 0f
         }
 
         var consumedTimeSec = 0f
@@ -179,17 +184,18 @@ class UniversalModifier @JvmOverloads constructor(private val pool: Pool<Univers
 
             // Not really necessary but we want to report the current percentage.
             // Modifiers with nested modifiers will always use linear easing.
-            percentage = (elapsedSec + consumedTimeSec) / duration
+            percentage = if (duration > 0) (elapsedSec + consumedTimeSec) / duration else 1f
 
         } else {
 
             consumedTimeSec = min(duration - elapsedSec, deltaTimeSec)
 
-            // In this case the consumed time is already fully calculated.
-            percentage = easeFunction.getPercentage(elapsedSec + consumedTimeSec, duration)
+            // In this case the consumed time is already fully calculated here, if the duration is 0
+            // we have to assume the percentage is 1 to avoid division by zero.
+            percentage = if (duration > 0) easeFunction.getPercentage(elapsedSec + consumedTimeSec, duration) else 1f
 
-            values?.let { values ->
-                type.onApply?.invoke(entity, values, percentage)
+            if (values != null) {
+                type.onApply?.invoke(entity, values!!, percentage)
             }
         }
 
@@ -197,7 +203,6 @@ class UniversalModifier @JvmOverloads constructor(private val pool: Pool<Univers
 
         if (isFinished) {
             elapsedSec = duration
-
             onFinished?.invoke(entity)
         }
 
@@ -214,7 +219,7 @@ class UniversalModifier @JvmOverloads constructor(private val pool: Pool<Univers
      * Resets the modifier to its initial state.
      */
     override fun reset() {
-        elapsedSec = 0f
+        elapsedSec = -1f
         percentage = 0f
         modifiers?.forEach { it.reset() }
     }
