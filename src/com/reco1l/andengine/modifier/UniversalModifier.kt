@@ -246,10 +246,8 @@ class UniversalModifier @JvmOverloads constructor(private val pool: Pool<Univers
                 type = SEQUENCE
                 entity = target
 
-                modifiers = arrayOf(
-                    target.applyModifier { it.duration = delay },
-                    target.applyModifier(block)
-                )
+                applyModifier { it.duration = delay }
+                applyModifier(block)
             }
 
             return entity!!.applyModifier(block)

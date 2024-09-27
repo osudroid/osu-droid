@@ -1,6 +1,5 @@
 package com.reco1l.andengine
 
-import android.util.*
 import androidx.annotation.*
 import com.reco1l.andengine.container.*
 import com.reco1l.andengine.modifier.*
