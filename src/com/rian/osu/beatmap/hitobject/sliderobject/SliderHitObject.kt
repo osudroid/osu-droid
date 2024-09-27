@@ -21,22 +21,12 @@ abstract class SliderHitObject(
     /**
      * The index of the span at which this [SliderHitObject] lies.
      */
-    spanIndex: Int,
+    @JvmField
+    val spanIndex: Int,
 
     /**
      * The start time of the span at which this [SliderHitObject] lies, in milliseconds.
      */
-    spanStartTime: Double
-) : HitObject(startTime, position, false, 0) {
-    /**
-     * The index of the span at which this [SliderHitObject] lies.
-     */
-    var spanIndex = spanIndex
-        private set
-
-    /**
-     * The start time of the span at which this [SliderHitObject] lies, in milliseconds.
-     */
-    var spanStartTime = spanStartTime
-        private set
-}
+    @JvmField
+    val spanStartTime: Double
+) : HitObject(startTime, position, false, 0)
