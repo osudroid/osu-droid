@@ -80,10 +80,7 @@ class SliderCheeseChecker(
         val cheesedDifficultyRatings = mutableListOf<Double>()
 
         // Current loop indices are stored for efficiency.
-        val cursorLoopIndices = mutableListOf<Int>()
-        for (i in cursorGroups.indices) {
-            cursorLoopIndices.add(0)
-        }
+        val cursorLoopIndices = IntArray(cursorGroups.size) { 0 }
 
         val objectRadius = objects.first().difficultyRadius
         val sliderBallRadius = objectRadius * 2

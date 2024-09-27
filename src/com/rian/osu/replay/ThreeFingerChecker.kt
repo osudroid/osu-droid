@@ -253,18 +253,10 @@ class ThreeFingerChecker(
      * Divides the beatmap into sections, which will be used to assign presses per object and improve detection speed.
      */
     private fun createBeatmapSections() = mutableListOf<ThreeFingerBeatmapSection>().apply {
-        val aimCursorGroupLookupIndices = mutableListOf<Int>()
-        val aimCursorLookupIndices = mutableListOf<Int>()
-        val pressCursorLookupIndices = mutableListOf<Int>()
-
-        for (i in validCursorGroups.indices) {
-            aimCursorGroupLookupIndices.add(0)
-
-            // This intentionally starts from 1 because we need to look at the previous cursor.
-            aimCursorLookupIndices.add(1)
-
-            pressCursorLookupIndices.add(0)
-        }
+        val aimCursorGroupLookupIndices = IntArray(validCursorGroups.size) { 0 }
+        // This intentionally starts from 1 because we need to look at the previous cursor.
+        val aimCursorLookupIndices = IntArray(validCursorGroups.size) { 1 }
+        val pressCursorLookupIndices = IntArray(validCursorGroups.size) { 0 }
 
         for (section in difficultyAttributes.possibleThreeFingeredSections) {
             val objects = mutableListOf<ThreeFingerObject>()
@@ -295,8 +287,8 @@ class ThreeFingerChecker(
     private fun getObjectAimIndex(
         obj: HitObject,
         objData: ReplayObjectData,
-        cursorGroupIndices: MutableList<Int>,
-        cursorIndices: MutableList<Int>
+        cursorGroupIndices: IntArray,
+        cursorIndices: IntArray
     ): Int {
         if (objData.result == ResultType.MISS.id || obj is Spinner) {
             return -1
@@ -393,7 +385,7 @@ class ThreeFingerChecker(
     private fun getObjectPressIndex(
         obj: HitObject,
         objData: ReplayObjectData,
-        cursorLookupIndices: MutableList<Int>
+        cursorLookupIndices: IntArray
     ): Int {
         if (obj is Spinner || objData.result == ResultType.MISS.id) {
             return -1
