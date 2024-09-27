@@ -2,6 +2,9 @@ package com.rian.osu.difficulty.calculator
 
 import com.rian.osu.GameMode
 import com.rian.osu.beatmap.Beatmap
+import com.rian.osu.beatmap.hitobject.HitObject
+import com.rian.osu.beatmap.hitobject.Slider
+import com.rian.osu.beatmap.sections.BeatmapHitObjects
 import com.rian.osu.difficulty.DifficultyHitObject
 import com.rian.osu.difficulty.attributes.DifficultyAttributes
 import com.rian.osu.difficulty.attributes.TimedDifficultyAttributes
@@ -93,7 +96,7 @@ abstract class DifficultyCalculator<TObject : DifficultyHitObject, TAttributes :
             return attributes
         }
 
-        val progressiveBeatmap = Beatmap().apply {
+        val progressiveBeatmap = ProgressiveCalculationBeatmap().apply {
             difficulty.apply(beatmapToCalculate.difficulty)
         }
 
@@ -160,4 +163,42 @@ abstract class DifficultyCalculator<TObject : DifficultyHitObject, TAttributes :
         objects: List<TObject>,
         parameters: DifficultyCalculationParameters?
     ): TAttributes
+
+    /**
+     * A [Beatmap] that is used for timed difficulty calculation.
+     */
+    private class ProgressiveCalculationBeatmap : Beatmap() {
+        // The implementation of maximum combo in Beatmap is lazily evaluated, so we need to override it here
+        // as the maximum combo of a progressive beatmap changes overtime.
+        override var maxCombo = 0
+            private set
+
+        override var hitObjects = object : BeatmapHitObjects() {
+            override fun add(obj: HitObject) {
+                super.add(obj)
+
+                maxCombo += if (obj is Slider) obj.nestedHitObjects.size else 1
+            }
+
+            override fun remove(obj: HitObject): Boolean {
+                val removed = super.remove(obj)
+
+                if (removed) {
+                    maxCombo -= if (obj is Slider) obj.nestedHitObjects.size else 1
+                }
+
+                return removed
+            }
+
+            override fun remove(index: Int): HitObject? {
+                val removed = super.remove(index)
+
+                if (removed != null) {
+                    maxCombo -= if (removed is Slider) removed.nestedHitObjects.size else 1
+                }
+
+                return removed
+            }
+        }
+    }
 }
