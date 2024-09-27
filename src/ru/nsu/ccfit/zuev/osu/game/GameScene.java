@@ -366,7 +366,7 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
             return false;
         }
 
-        if (parsedBeatmap.hitObjects.objects.isEmpty()) {
+        if (parsedBeatmap.getHitObjects().objects.isEmpty()) {
             ToastLogger.showText("Empty Beatmap", true);
             return false;
         }
@@ -411,7 +411,7 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
             return false;
         }
 
-        scale = playableBeatmap.hitObjects.objects.get(0).getGameplayScale();
+        scale = playableBeatmap.getHitObjects().objects.get(0).getGameplayScale();
         objectTimePreempt = (float) GameHelper.ar2ms(playableBeatmap.difficulty.getAr()) / 1000f;
 
         difficultyStatisticsScoreMultiplier = 1 +
@@ -430,7 +430,7 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
             GameHelper.getSpeedMultiplier() != 1f &&
                 (modMenu.isEnableNCWhenSpeedChange() || modMenu.getMod().contains(GameMod.MOD_NIGHTCORE)));
 
-        objects = new LinkedList<>(playableBeatmap.hitObjects.objects);
+        objects = new LinkedList<>(playableBeatmap.getHitObjects().objects);
         activeObjects = new LinkedList<>();
         passiveObjects = new LinkedList<>();
         expiredObjects = new LinkedList<>();
@@ -2461,14 +2461,14 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
     }
 
     private void calculateAllSliderPaths() {
-        if (playableBeatmap.hitObjects.getSliderCount() == 0) {
+        if (playableBeatmap.getHitObjects().getSliderCount() == 0) {
             return;
         }
 
-        sliderPaths = new SliderPath[playableBeatmap.hitObjects.getSliderCount()];
+        sliderPaths = new SliderPath[playableBeatmap.getHitObjects().getSliderCount()];
         sliderIndex = 0;
 
-        for (var obj : playableBeatmap.hitObjects.objects) {
+        for (var obj : playableBeatmap.getHitObjects().objects) {
             if (!(obj instanceof com.rian.osu.beatmap.hitobject.Slider slider)) {
                 continue;
             }
@@ -2567,7 +2567,7 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
             return;
         }
 
-        var object = playableBeatmap.hitObjects.objects.get(objectId);
+        var object = playableBeatmap.getHitObjects().objects.get(objectId);
         double time = object.getEndTime();
 
         switch (Config.getDifficultyAlgorithm()) {

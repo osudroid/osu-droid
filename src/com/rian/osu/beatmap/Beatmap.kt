@@ -14,7 +14,7 @@ import com.rian.osu.mods.Mod
 /**
  * Represents a beatmap.
  */
-class Beatmap : Cloneable {
+open class Beatmap : Cloneable {
     /**
      * The format version of this [Beatmap].
      */
@@ -60,8 +60,7 @@ class Beatmap : Cloneable {
     /**
      * The hit objects of this [Beatmap].
      */
-    @JvmField
-    var hitObjects = BeatmapHitObjects()
+    open var hitObjects = BeatmapHitObjects()
 
     /**
      * The path to the `.osu` file of this [Beatmap].
@@ -104,7 +103,7 @@ class Beatmap : Cloneable {
     /**
      * Gets the max combo of this [Beatmap].
      */
-    val maxCombo by lazy {
+    open val maxCombo by lazy {
         hitObjects.objects.sumOf {
             if (it is Slider) it.nestedHitObjects.size else 1
         }
