@@ -13,16 +13,22 @@ open class Container : ExtendedEntity() {
 
 
     override var autoSizeAxes = Axes.None
+        set(value) {
+            if (field != value) {
+                field = value
+                shouldMeasureSize = true
+            }
+        }
 
 
-    private var shouldMeasureSize = true
+    protected var shouldMeasureSize = true
 
 
     override fun onManagedUpdate(pSecondsElapsed: Float) {
 
         if (shouldMeasureSize) {
-            onMeasureSize()
             shouldMeasureSize = false
+            onMeasureSize()
         }
 
         super.onManagedUpdate(pSecondsElapsed)
@@ -45,6 +51,11 @@ open class Container : ExtendedEntity() {
     open fun onChildPositionChanged(child: IEntity) {
         shouldMeasureSize = true
     }
+
+    open fun onChildSizeChanged(child: IEntity) {
+        shouldMeasureSize = true
+    }
+
 
     open fun onApplyChildTranslation(gl: GL10, child: ExtendedEntity) {
 
@@ -172,7 +183,7 @@ open class Container : ExtendedEntity() {
 
 
 
-    override fun onUpdateVertexBuffer() = Unit
+    override fun onUpdateVertexBuffer() {}
 
 }
 

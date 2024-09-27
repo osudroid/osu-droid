@@ -31,6 +31,7 @@ class SliderTickContainer : Container() {
     }
 
     override fun onDetached() {
+        super.onDetached()
         detachChildren()
     }
 
@@ -46,6 +47,7 @@ class SliderTickSprite : ExtendedSprite() {
     }
 
     override fun onDetached() {
+        super.onDetached()
         pool.free(this)
     }
 

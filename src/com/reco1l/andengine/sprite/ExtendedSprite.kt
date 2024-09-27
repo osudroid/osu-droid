@@ -1,6 +1,7 @@
 package com.reco1l.andengine.sprite
 
 import com.reco1l.andengine.*
+import com.reco1l.andengine.container.*
 import org.anddev.andengine.engine.camera.*
 import org.anddev.andengine.opengl.texture.region.*
 import org.anddev.andengine.opengl.util.*
@@ -27,6 +28,10 @@ open class ExtendedSprite(textureRegion: TextureRegion? = null) : ExtendedEntity
                         if (autoSizeAxes == Axes.X || autoSizeAxes == Axes.Both) currentTextureWidth else width,
                         if (autoSizeAxes == Axes.Y || autoSizeAxes == Axes.Both) currentTextureHeight else height
                     )
+
+                    if (parent is Container) {
+                        (parent as Container).onChildSizeChanged(this)
+                    }
                 }
 
                 updateVertexBuffer()
@@ -82,6 +87,10 @@ open class ExtendedSprite(textureRegion: TextureRegion? = null) : ExtendedEntity
                     if (autoSizeAxes == Axes.X || autoSizeAxes == Axes.Both) textureWidth else width,
                     if (autoSizeAxes == Axes.Y || autoSizeAxes == Axes.Both) textureHeight else height
                 )
+
+                if (parent is Container) {
+                    (parent as Container).onChildSizeChanged(this)
+                }
             }
 
             updateVertexBuffer()

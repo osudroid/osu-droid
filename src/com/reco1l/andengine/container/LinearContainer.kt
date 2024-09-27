@@ -3,7 +3,7 @@ package com.reco1l.andengine.container
 import com.reco1l.andengine.*
 import com.reco1l.andengine.container.Orientation.*
 import org.anddev.andengine.engine.camera.*
-import org.anddev.andengine.entity.shape.IShape
+import org.anddev.andengine.entity.shape.*
 import javax.microedition.khronos.opengles.*
 import kotlin.math.*
 
@@ -22,6 +22,12 @@ open class LinearContainer : Container() {
      * The spacing between children.
      */
     var spacing = 0f
+        set(value) {
+            if (field != value) {
+                field = value
+                shouldMeasureSize = true
+            }
+        }
 
 
     private var lastChildX = 0f
@@ -33,29 +39,46 @@ open class LinearContainer : Container() {
 
         var cumulativeWidth = 0f
         var cumulativeHeight = 0f
+        var countedChildren = 0
 
         if (mChildren != null) {
-            for (i in mChildren.indices) {
 
+            for (i in mChildren.indices) {
                 val child = mChildren.getOrNull(i) ?: continue
+
+                // Non-shape children are ignored as they doesn't have a size there's nothing to do.
                 if (child !is IShape) {
                     continue
                 }
-
-                val spacing = if (i == 0) 0f else spacing
+                countedChildren++
 
                 when (orientation) {
 
                     Horizontal -> {
-                        cumulativeWidth += child.width + spacing
+                        cumulativeWidth += child.width
                         cumulativeHeight = max(cumulativeHeight, child.height)
                     }
 
                     Vertical -> {
                         cumulativeWidth = max(cumulativeWidth, child.width)
-                        cumulativeHeight += child.height + spacing
+                        cumulativeHeight += child.height
                     }
                 }
+
+                if (i > 0) {
+                    when(orientation) {
+                        Horizontal -> cumulativeWidth += spacing
+                        Vertical -> cumulativeHeight += spacing
+                    }
+                }
+            }
+        }
+
+        // Subtract the last children spacing.
+        if (countedChildren > 1) {
+            when (orientation) {
+                Horizontal -> cumulativeWidth -= spacing
+                Vertical -> cumulativeHeight -= spacing
             }
         }
 

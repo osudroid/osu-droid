@@ -28,6 +28,7 @@ abstract class ExtendedEntity(
     private var height: Float = 0f,
 
     private var vertexBuffer: VertexBuffer? = null
+
 ) : Shape(0f, 0f), IModifierChain {
 
 
@@ -304,14 +305,15 @@ abstract class ExtendedEntity(
 
         if (updateBuffer) {
             updateVertexBuffer()
+
+            if (parent is Container) {
+                (parent as Container).onChildSizeChanged(this)
+            }
         }
     }
 
     open fun setWidth(value: Float) {
-        if (width != value && (autoSizeAxes == Axes.None || autoSizeAxes == Axes.Y)) {
-            width = value
-            updateVertexBuffer()
-        }
+        setSize(value, height)
     }
 
     override fun getWidth(): Float {
@@ -319,10 +321,7 @@ abstract class ExtendedEntity(
     }
 
     open fun setHeight(value: Float) {
-        if (height != value && (autoSizeAxes == Axes.None || autoSizeAxes == Axes.X)) {
-            height = value
-            updateVertexBuffer()
-        }
+        setSize(width, value)
     }
 
     override fun getHeight(): Float {
