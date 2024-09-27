@@ -1,6 +1,8 @@
 package com.reco1l.andengine.modifier
 
 import android.util.*
+import com.edlplan.framework.easing.Easing
+import com.edlplan.ui.EasingHelper
 import com.reco1l.andengine.*
 import com.reco1l.andengine.modifier.ModifierType.*
 import com.reco1l.framework.*
@@ -56,7 +58,7 @@ class UniversalModifier @JvmOverloads constructor(private val pool: Pool<Univers
                 field = value
 
                 values = null
-                duration = getDuration()
+                calculateDuration()
             }
         }
 
@@ -82,7 +84,7 @@ class UniversalModifier @JvmOverloads constructor(private val pool: Pool<Univers
             }
 
             field = value
-            duration = getDuration()
+            calculateDuration()
         }
 
     /**
@@ -119,6 +121,14 @@ class UniversalModifier @JvmOverloads constructor(private val pool: Pool<Univers
     private fun clearNestedModifiers() {
         modifiers?.forEach { it.onUnregister() }
         modifiers = null
+    }
+
+    private fun calculateDuration() {
+        duration = when(type) {
+            SEQUENCE -> modifiers?.sumOf { it.duration } ?: 0f
+            PARALLEL -> modifiers?.maxOf { it.duration } ?: 0f
+            else -> duration
+        }
     }
 
 
@@ -239,15 +249,17 @@ class UniversalModifier @JvmOverloads constructor(private val pool: Pool<Univers
             // If the type is delay, we should convert it to a sequence modifier with the delay first,
             // so the next chained modifiers will be applied after the delay.
             if (type == NONE) {
-                val delay = duration
-                val target = entity!!
 
-                setToDefault()
+                // We preserve the duration because it will be reset when changing the type.
+                val delay = duration
+
+                // Changing type to sequence, at this point shouldn't be needed to
+                // call setToDefault() since this is supposed to be a delay modifier.
                 type = SEQUENCE
-                entity = target
 
                 applyModifier { it.duration = delay }
                 applyModifier(block)
+                return this
             }
 
             return entity!!.applyModifier(block)
@@ -260,6 +272,22 @@ class UniversalModifier @JvmOverloads constructor(private val pool: Pool<Univers
 
         modifiers = modifiers?.plus(modifier) ?: arrayOf(modifier)
         return modifier
+    }
+
+    /**
+     * Runs the specified block when the modifier finishes.
+     */
+    fun then(block: OnModifierFinished): UniversalModifier {
+        onFinished = block
+        return this
+    }
+
+    /**
+     * Sets the easing function to be used.
+     */
+    fun eased(easing: Easing): UniversalModifier {
+        easeFunction = EasingHelper.asEaseFunction(easing)
+        return this
     }
 
 
@@ -285,7 +313,7 @@ class UniversalModifier @JvmOverloads constructor(private val pool: Pool<Univers
      * Seeks the modifier to a specific time.
      */
     @JvmOverloads
-    fun seekTo(seconds: Float, target: IEntity? = entity!!) {
+    fun setTime(seconds: Float, target: IEntity? = entity!!) {
         onUpdate(seconds - elapsedSec, target ?: return)
     }
 
@@ -301,7 +329,7 @@ class UniversalModifier @JvmOverloads constructor(private val pool: Pool<Univers
     /**
      * Sets the duration of the modifier.
      *
-     * Note: If the modifier is a [SEQUENCE] or [PARALLEL] modifier, this method will do nothing.
+     * If the modifier is a [SEQUENCE] or [PARALLEL] modifier, this method will do nothing.
      */
     fun setDuration(value: Float) {
 
@@ -313,20 +341,10 @@ class UniversalModifier @JvmOverloads constructor(private val pool: Pool<Univers
         duration = value
     }
 
-    /**
-     * Returns the duration of the modifier.
-     *
-     * When the modifier is a [SEQUENCE] modifier, the duration is the sum of the inner modifiers' durations, meanwhile, when it is a [PARALLEL] modifier, it is the maximum duration of the
-     * inner modifiers. Otherwise, it is the duration of the modifier itself.
-     */
-    override fun getDuration(): Float  = when(type) {
 
-        SEQUENCE -> modifiers?.sumOf { it.duration } ?: 0f
-        PARALLEL -> modifiers?.maxOf { it.duration } ?: 0f
-
-        else -> duration
+    override fun getDuration(): Float {
+        return duration
     }
-
 
     override fun getSecondsElapsed(): Float {
         return elapsedSec
@@ -334,18 +352,17 @@ class UniversalModifier @JvmOverloads constructor(private val pool: Pool<Univers
 
 
     override fun isFinished(): Boolean {
-
         if (type == SEQUENCE || type == PARALLEL) {
-
-            if (modifiers == null) {
-                return true
+            for (modifier in modifiers ?: return true) {
+                if (!modifier.isFinished) {
+                    return false
+                }
             }
-
-            return modifiers!!.all { it.isFinished }
+            return true
         }
-
         return elapsedSec >= duration
     }
+
 
     override fun isRemoveWhenFinished(): Boolean {
         return removeWhenFinished

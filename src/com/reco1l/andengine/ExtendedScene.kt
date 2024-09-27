@@ -27,19 +27,8 @@ class ExtendedScene : Scene(), IShape {
     /**
      * The pool of modifiers for the scene and its children.
      */
-    var modifierPool: Pool<UniversalModifier>? = null
-        get() {
-            if (field != null) {
-                return field
-            }
-
-            // Inherit the modifier pool from the parent scene.
-            field = (this as IEntity).findHierarchically(IEntity::getParent) {
-                (it as? ExtendedScene)?.modifierPool
-            }
-
-            return field
-        }
+    var modifierPool = Pool { UniversalModifier(it) }
+        private set
 
 
     private var cameraWidth = 0f
@@ -47,14 +36,14 @@ class ExtendedScene : Scene(), IShape {
     private var cameraHeight = 0f
 
 
-    /**
-     * Allocates a modifier pool for the scene.
-     */
-    @JvmOverloads
-    fun allocateModifierPool(size: Int = 0) {
-        modifierPool = Pool(size) { UniversalModifier(it) }
-    }
+    override fun onAttached() {
 
+        val inheritedModifierPool = findHierarchically(IEntity::getParent) { (it as? ExtendedScene)?.modifierPool }
+        if (inheritedModifierPool != null) {
+            modifierPool = inheritedModifierPool
+        }
+
+    }
 
     override fun onManagedUpdate(secElapsed: Float) {
         super.onManagedUpdate(secElapsed * timeMultiplier)

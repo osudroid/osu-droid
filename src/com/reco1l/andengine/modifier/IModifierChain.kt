@@ -44,12 +44,23 @@ interface IModifierChain {
     // Nested chains
 
     /**
+     * Begins a delayed chain.
+     * In a [ExtendedEntity] this should be called instead of [delay].
+     */
+    fun beginDelayChain(durationSec: Float, builder: IModifierChainBlock): UniversalModifier {
+        return applyModifier {
+            it.type = NONE
+            it.duration = durationSec
+            builder.apply { it.build() }
+        }
+    }
+
+    /**
      * Begins a sequential chain of modifiers.
      */
-    fun beginSequenceChain(onFinished: OnModifierFinished? = null, builder: IModifierChainBlock): UniversalModifier {
+    fun beginSequenceChain(builder: IModifierChainBlock): UniversalModifier {
         return applyModifier {
             it.type = SEQUENCE
-            it.onFinished = onFinished
             builder.apply { it.build() }
         }
     }
@@ -57,10 +68,9 @@ interface IModifierChain {
     /**
      * Begins a parallel chain of modifiers.
      */
-    fun beginParallelChain(onFinished: OnModifierFinished? = null, builder: IModifierChainBlock): UniversalModifier {
+    fun beginParallelChain(builder: IModifierChainBlock): UniversalModifier {
         return applyModifier {
             it.type = PARALLEL
-            it.onFinished = onFinished
             builder.apply { it.build() }
         }
     }
@@ -68,37 +78,37 @@ interface IModifierChain {
 
     // Delay
 
-    fun delay(durationSec: Float, onFinished: OnModifierFinished? = null): UniversalModifier {
-        return apply(NONE, durationSec, null, onFinished)
+    fun delay(durationSec: Float): UniversalModifier {
+        return apply(NONE, durationSec)
     }
 
 
     // Translate
 
-    fun translateTo(value: Float, durationSec: Float = 0f, easing: Easing? = null, onFinished: OnModifierFinished? = null): UniversalModifier {
-        return apply(TRANSLATE, durationSec, easing, onFinished,
+    fun translateTo(value: Float, durationSec: Float = 0f): UniversalModifier {
+        return apply(TRANSLATE, durationSec,
             target.translationX, value,
             target.translationY, value
         )
     }
 
-    fun translateTo(axes: Axes = Axes.Both, value: Float, durationSec: Float = 0f, easing: Easing? = null, onFinished: OnModifierFinished? = null): UniversalModifier {
+    fun translateTo(axes: Axes = Axes.Both, value: Float, durationSec: Float = 0f): UniversalModifier {
         return when (axes) {
 
-            Axes.Both -> apply(TRANSLATE, durationSec, easing, onFinished,
+            Axes.Both -> apply(TRANSLATE, durationSec,
                 target.translationX, value,
                 target.translationY, value
             )
 
-            Axes.X -> apply(TRANSLATE_X, durationSec, easing, onFinished, target.translationX, value)
-            Axes.Y -> apply(TRANSLATE_Y, durationSec, easing, onFinished, target.translationY, value)
+            Axes.X -> apply(TRANSLATE_X, durationSec, target.translationX, value)
+            Axes.Y -> apply(TRANSLATE_Y, durationSec, target.translationY, value)
 
             Axes.None -> throw IllegalArgumentException("Cannot translate to none axes.")
         }
     }
 
-    fun translateTo(x: Float, y: Float, durationSec: Float = 0f, easing: Easing? = null, onFinished: OnModifierFinished? = null): UniversalModifier {
-        return apply(TRANSLATE, durationSec, easing, onFinished,
+    fun translateTo(x: Float, y: Float, durationSec: Float = 0f): UniversalModifier {
+        return apply(TRANSLATE, durationSec,
             target.translationX, x,
             target.translationY, y
         )
@@ -107,30 +117,30 @@ interface IModifierChain {
 
     // Move
 
-    fun moveTo(value: Float, durationSec: Float = 0f, easing: Easing? = null, onFinished: OnModifierFinished? = null): UniversalModifier {
-        return apply(MOVE, durationSec, easing, onFinished,
+    fun moveTo(value: Float, durationSec: Float = 0f): UniversalModifier {
+        return apply(MOVE, durationSec,
             target.x, value,
             target.y, value
         )
     }
 
-    fun moveTo(axes: Axes = Axes.Both, x: Float, y: Float, durationSec: Float = 0f, easing: Easing? = null, onFinished: OnModifierFinished? = null): UniversalModifier {
+    fun moveTo(axes: Axes = Axes.Both, x: Float, y: Float, durationSec: Float = 0f): UniversalModifier {
         return when (axes) {
 
-            Axes.Both -> apply(MOVE, durationSec, easing, onFinished,
+            Axes.Both -> apply(MOVE, durationSec,
                 target.x, x,
                 target.y, y
             )
 
-            Axes.X -> apply(MOVE_X, durationSec, easing, onFinished, target.x, x)
-            Axes.Y -> apply(MOVE_Y, durationSec, easing, onFinished, target.y, y)
+            Axes.X -> apply(MOVE_X, durationSec, target.x, x)
+            Axes.Y -> apply(MOVE_Y, durationSec, target.y, y)
 
             Axes.None -> throw IllegalArgumentException("Cannot move to none axes.")
         }
     }
 
-    fun moveTo(x: Float, y: Float, durationSec: Float = 0f, easing: Easing? = null, onFinished: OnModifierFinished? = null): UniversalModifier {
-        return apply(MOVE, durationSec, easing, onFinished,
+    fun moveTo(x: Float, y: Float, durationSec: Float = 0f): UniversalModifier {
+        return apply(MOVE, durationSec,
             target.x, x,
             target.y, y
         )
@@ -139,30 +149,30 @@ interface IModifierChain {
 
     // Scale
 
-    fun scaleTo(value: Float, durationSec: Float = 0f, easing: Easing? = null, onFinished: OnModifierFinished? = null): UniversalModifier {
-        return apply(SCALE, durationSec, easing, onFinished,
+    fun scaleTo(value: Float, durationSec: Float = 0f): UniversalModifier {
+        return apply(SCALE, durationSec,
             target.scaleX, value,
             target.scaleY, value
         )
     }
 
-    fun scaleTo(axes: Axes = Axes.Both, value: Float, durationSec: Float = 0f, easing: Easing? = null, onFinished: OnModifierFinished? = null): UniversalModifier {
+    fun scaleTo(axes: Axes = Axes.Both, value: Float, durationSec: Float = 0f): UniversalModifier {
         return when (axes) {
 
-            Axes.Both -> apply(SCALE, durationSec, easing, onFinished,
+            Axes.Both -> apply(SCALE, durationSec,
                 target.scaleX, value,
                 target.scaleY, value
             )
 
-            Axes.X -> apply(SCALE_X, durationSec, easing, onFinished, target.scaleX, value)
-            Axes.Y -> apply(SCALE_Y, durationSec, easing, onFinished, target.scaleY, value)
+            Axes.X -> apply(SCALE_X, durationSec, target.scaleX, value)
+            Axes.Y -> apply(SCALE_Y, durationSec, target.scaleY, value)
 
             Axes.None -> throw IllegalArgumentException("Cannot scale to none axes.")
         }
     }
 
-    fun scaleTo(x: Float, y: Float, durationSec: Float = 0f, easing: Easing? = null, onFinished: OnModifierFinished? = null): UniversalModifier {
-        return apply(SCALE, durationSec, easing, onFinished,
+    fun scaleTo(x: Float, y: Float, durationSec: Float = 0f): UniversalModifier {
+        return apply(SCALE, durationSec,
             target.scaleX, x,
             target.scaleY, y
         )
@@ -171,28 +181,28 @@ interface IModifierChain {
 
     // Coloring
 
-    fun fadeTo(value: Float, durationSec: Float = 0f, easing: Easing? = null, onFinished: OnModifierFinished? = null): UniversalModifier {
-        return apply(ALPHA, durationSec, easing, onFinished, target.alpha, value)
+    fun fadeTo(value: Float, durationSec: Float = 0f): UniversalModifier {
+        return apply(ALPHA, durationSec, target.alpha, value)
     }
 
-    fun fadeIn(durationSec: Float = 0f, easing: Easing? = null, onFinished: OnModifierFinished? = null): UniversalModifier {
-        return fadeTo(1f, durationSec, easing, onFinished)
+    fun fadeIn(durationSec: Float = 0f): UniversalModifier {
+        return fadeTo(1f, durationSec)
     }
 
-    fun fadeOut(durationSec: Float = 0f, easing: Easing? = null, onFinished: OnModifierFinished? = null): UniversalModifier {
-        return fadeTo(0f, durationSec, easing, onFinished)
+    fun fadeOut(durationSec: Float = 0f): UniversalModifier {
+        return fadeTo(0f, durationSec)
     }
 
-    fun colorTo(red: Float, green: Float, blue: Float, durationSec: Float = 0f, easing: Easing? = null, onFinished: OnModifierFinished? = null): UniversalModifier {
-        return apply(COLOR, durationSec, easing, onFinished,
+    fun colorTo(red: Float, green: Float, blue: Float, durationSec: Float = 0f): UniversalModifier {
+        return apply(COLOR, durationSec,
             target.red, red,
             target.green, green,
             target.blue, blue
         )
     }
 
-    fun colorTo(value: Float, durationSec: Float = 0f, easing: Easing? = null, onFinished: OnModifierFinished? = null): UniversalModifier {
-        return apply(COLOR, durationSec, easing, onFinished,
+    fun colorTo(value: Float, durationSec: Float = 0f): UniversalModifier {
+        return apply(COLOR, durationSec,
             target.red, value,
             target.green, value,
             target.blue, value
@@ -202,18 +212,17 @@ interface IModifierChain {
 
     // Rotation
 
-    fun rotateTo(value: Float, durationSec: Float = 0f, easing: Easing? = null, onFinished: OnModifierFinished? = null): UniversalModifier {
-        return apply(ROTATION, durationSec, easing, onFinished, target.rotation, value)
+    fun rotateTo(value: Float, durationSec: Float = 0f): UniversalModifier {
+        return apply(ROTATION, durationSec, target.rotation, value)
     }
 
 
+    // Private
 
-    private fun apply(type: ModifierType, durationSec: Float, easing: Easing?, onFinished: OnModifierFinished?, vararg values: Float): UniversalModifier {
+    private fun apply(type: ModifierType, durationSec: Float, vararg values: Float): UniversalModifier {
         return applyModifier {
             it.type = type
             it.values = values
-            it.onFinished = onFinished
-            it.easeFunction = EasingHelper.asEaseFunction(easing ?: Easing.None)
             it.duration = durationSec
         }
     }

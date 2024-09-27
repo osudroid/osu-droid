@@ -35,19 +35,6 @@ abstract class ExtendedEntity(
      * The modifier pool for the scene this entity is attached to.
      */
     var modifierPool: Pool<UniversalModifier>? = null
-        private set
-        get() {
-            if (field != null) {
-                return field
-            }
-
-            field = (this as IEntity).findHierarchically(IEntity::getParent) {
-                (it as? ExtendedScene)?.modifierPool
-            }
-
-            return field
-        }
-
 
     /**
      * Determines which axes the entity should automatically adjust its size to.
@@ -171,6 +158,13 @@ abstract class ExtendedEntity(
     override fun onDetached() {
         modifierPool = null
     }
+
+    @CallSuper
+    override fun onAttached() {
+        // Finding the modifier pool from the parent scene if it's set.
+        modifierPool = findHierarchically(IEntity::getParent) { (it as? ExtendedScene)?.modifierPool }
+    }
+
 
     override fun applyTranslation(pGL: GL10) {
 
@@ -356,6 +350,10 @@ abstract class ExtendedEntity(
 
 
     // Transformation
+
+    override fun delay(durationSec: Float): UniversalModifier {
+        throw IllegalStateException("Cannot call this directly to an entity. Use beginDelayChain() instead.")
+    }
 
     override fun applyModifier(block: (UniversalModifier) -> Unit): UniversalModifier {
 
