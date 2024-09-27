@@ -109,9 +109,9 @@ class UniversalModifier @JvmOverloads constructor(private val pool: Pool<Univers
 
     private var removeWhenFinished = true
 
-    private var percentage = 0f
-
     private var elapsedSec = -1f
+
+    private var percentage = 0f
 
     private var duration = 0f
 
@@ -282,6 +282,14 @@ class UniversalModifier @JvmOverloads constructor(private val pool: Pool<Univers
         reset()
     }
 
+    /**
+     * Seeks the modifier to a specific time.
+     *
+     * This method will call the [onUpdate] method with the difference between the current elapsed time and the desired time.
+     */
+    fun seekTo(seconds: Float, entity: IEntity = modifierChainTarget!!) {
+        onUpdate(seconds - elapsedSec, entity)
+    }
 
     /**
      * Sets the duration of the modifier.

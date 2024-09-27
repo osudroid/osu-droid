@@ -4,8 +4,14 @@ import com.edlplan.framework.easing.Easing
 import com.edlplan.ui.EasingHelper
 import com.reco1l.andengine.*
 import com.reco1l.andengine.modifier.ModifierType.*
-import org.anddev.andengine.util.modifier.ease.*
 
+
+/**
+ * A block to execute when a modifier chain is built.
+ */
+fun interface IModifierChainBlock {
+    fun UniversalModifier.build()
+}
 
 /**
  * A chain of modifiers that can be applied to an entity.
@@ -36,7 +42,7 @@ interface IModifierChain {
     /**
      * Begins a sequential chain of modifiers.
      */
-    fun beginSequenceChain(delay: Float = 0f, onFinished: OnModifierFinished? = null, block: UniversalModifier.() -> Unit): UniversalModifier {
+    fun beginSequenceChain(onFinished: OnModifierFinished? = null, builder: IModifierChainBlock): UniversalModifier {
 
         if (modifierChainTarget == null) {
             throw IllegalStateException("Modifier target is not set cannot apply modifier.")
@@ -45,49 +51,23 @@ interface IModifierChain {
         return applyModifier {
             it.type = SEQUENCE
             it.onFinished = onFinished
-
-            if (delay > 0) {
-                it.applyModifier { delayed ->
-                    delayed.type = NONE
-                    delayed.duration = delay
-                }
-
-                it.applyModifier { inner ->
-                    inner.type = SEQUENCE
-                    inner.block()
-                }
-            } else {
-                it.block()
-            }
+            builder.apply { it.build() }
         }
     }
 
     /**
      * Begins a parallel chain of modifiers.
      */
-    fun beginParallelChain(delay: Float = 0f, onFinished: OnModifierFinished? = null, block: UniversalModifier.() -> Unit): UniversalModifier {
+    fun beginParallelChain(onFinished: OnModifierFinished? = null, builder: IModifierChainBlock): UniversalModifier {
 
         if (modifierChainTarget == null) {
             throw IllegalStateException("Modifier target is not set cannot apply modifier.")
         }
 
         return applyModifier {
-            it.type = if (delay > 0f) SEQUENCE else PARALLEL
+            it.type = PARALLEL
             it.onFinished = onFinished
-
-            if (delay > 0) {
-                it.applyModifier { delayed ->
-                    delayed.type = NONE
-                    delayed.duration = delay
-                }
-
-                it.applyModifier { inner ->
-                    inner.type = PARALLEL
-                    inner.block()
-                }
-            } else {
-                it.block()
-            }
+            builder.apply { it.build() }
         }
     }
 
@@ -100,6 +80,13 @@ interface IModifierChain {
 
 
     // Translate
+
+    fun translateTo(value: Float, durationSec: Float = 0f, easing: Easing? = null, onFinished: OnModifierFinished? = null): UniversalModifier {
+        return apply(TRANSLATE, durationSec, easing, onFinished,
+            modifierChainTarget!!.translationX, value,
+            modifierChainTarget!!.translationY, value
+        )
+    }
 
     fun translateTo(axes: Axes = Axes.Both, value: Float, durationSec: Float = 0f, easing: Easing? = null, onFinished: OnModifierFinished? = null): UniversalModifier {
         return when (axes) {
