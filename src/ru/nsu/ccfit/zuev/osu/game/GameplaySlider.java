@@ -529,25 +529,26 @@ public class GameplaySlider extends GameObject {
         int totalSpanCount = beatmapSlider.getSpanCount();
         int remainingSpans = totalSpanCount - completedSpanCount;
         boolean stillHasSpan = remainingSpans > 0;
+        boolean incrementCombo = isIncrementCombo();
 
-        if (isInRadius && replayObjectData == null ||
-                replayObjectData != null && replayObjectData.tickSet.get(replayTickIndex)) {
+        // If slider was in reverse mode, we should swap start and end points
+        var spanEndJudgementPosition = reverse ? position : curveEndPos;
+
+        if (incrementCombo) {
             playCurrentNestedObjectHitSound();
             ticksGot++;
             tickSet.set(replayTickIndex++, true);
 
             if (stillHasSpan) {
-                listener.onSliderHit(id, 30, null,
-                        reverse ? position : curveEndPos,
-                        false, bodyColor, GameObjectListener.SLIDER_REPEAT);
+                listener.onSliderHit(id, 30, spanEndJudgementPosition, false,
+                    bodyColor, GameObjectListener.SLIDER_REPEAT, true);
             }
         } else {
             tickSet.set(replayTickIndex++, false);
 
             if (stillHasSpan) {
-                listener.onSliderHit(id, -1, null,
-                        reverse ? position : curveEndPos,
-                        false, bodyColor, GameObjectListener.SLIDER_REPEAT);
+                listener.onSliderHit(id, -1, spanEndJudgementPosition, false,
+                    bodyColor, GameObjectListener.SLIDER_REPEAT, false);
             }
         }
 
@@ -587,7 +588,7 @@ public class GameplaySlider extends GameObject {
             }
 
             ((GameScene) listener).onSliderReverse(
-                    !reverse ? position : curveEndPos,
+                    spanEndJudgementPosition,
                     reverse ? endArrow.getRotation() : startArrow.getRotation(),
                     bodyColor);
 
@@ -619,31 +620,32 @@ public class GameplaySlider extends GameObject {
                 firstHitScore = 100;
             }
         }
+
+        int totalTicks = beatmapSlider.getNestedHitObjects().size();
         int score = 0;
+
         if (ticksGot > 0) {
             score = 50;
         }
-        int totalTicks = beatmapSlider.getNestedHitObjects().size();
+
         if (ticksGot >= totalTicks / 2 && (!GameHelper.isScoreV2() || firstHitScore >= 100)) {
             score = 100;
         }
+
         if (ticksGot >= totalTicks && (!GameHelper.isScoreV2() || firstHitScore == 300)) {
             score = 300;
         }
-        // If slider was in reverse mode, we should swap start and end points
-        if (reverse) {
-            GameplaySlider.this.listener.onSliderHit(id, score,
-                    curveEndPos, position, endsCombo, bodyColor, GameObjectListener.SLIDER_END);
-        } else {
-            GameplaySlider.this.listener.onSliderHit(id, score, position,
-                    curveEndPos, endsCombo, bodyColor, GameObjectListener.SLIDER_END);
-        }
+
+        listener.onSliderHit(id, score, spanEndJudgementPosition, endsCombo, bodyColor,
+            GameObjectListener.SLIDER_END, incrementCombo);
+
         if (!startHit) {
             firstHitAccuracy = (int) (GameHelper.getDifficultyHelper().hitWindowFor50(GameHelper.getOverallDifficulty()) * 1000 + 13);
         }
-        listener.onSliderEnd(id, firstHitAccuracy, tickSet);
-        // Remove slider from scene
 
+        listener.onSliderEnd(id, firstHitAccuracy, tickSet);
+
+        // Remove slider from scene
         if (Config.isAnimateFollowCircle() && isInRadius) {
             isFollowCircleAnimating = true;
 
@@ -706,14 +708,14 @@ public class GameplaySlider extends GameObject {
             if (passedTime > sliderHeadHitTimeThreshold) {
                 startHit = true;
                 currentNestedObjectIndex++;
-                listener.onSliderHit(id, -1, null, position, false, bodyColor, GameObjectListener.SLIDER_START);
+                listener.onSliderHit(id, -1, position, false, bodyColor, GameObjectListener.SLIDER_START, false);
                 firstHitAccuracy = (int) (passedTime * 1000);
             } else if (autoPlay && passedTime >= 0) {
                 startHit = true;
                 playCurrentNestedObjectHitSound();
                 currentNestedObjectIndex++;
                 ticksGot++;
-                listener.onSliderHit(id, 30, null, position, false, bodyColor, GameObjectListener.SLIDER_START);
+                listener.onSliderHit(id, 30, position, false, bodyColor, GameObjectListener.SLIDER_START, true);
             } else if (replayObjectData != null &&
                     Math.abs(replayObjectData.accuracy / 1000f) <= sliderHeadHitTimeThreshold &&
                     passedTime + dt / 2 > replayObjectData.accuracy / 1000f) {
@@ -721,7 +723,7 @@ public class GameplaySlider extends GameObject {
                 playCurrentNestedObjectHitSound();
                 currentNestedObjectIndex++;
                 ticksGot++;
-                listener.onSliderHit(id, 30, null, position, false, bodyColor, GameObjectListener.SLIDER_START);
+                listener.onSliderHit(id, 30, position, false, bodyColor, GameObjectListener.SLIDER_START, true);
             } else if (isHit() && canBeHit()) {
                 listener.registerAccuracy(passedTime);
                 startHit = true;
@@ -730,11 +732,11 @@ public class GameplaySlider extends GameObject {
 
                 if (-passedTime < GameHelper.getDifficultyHelper().hitWindowFor50(GameHelper.getOverallDifficulty())) {
                     playCurrentNestedObjectHitSound();
-                    listener.onSliderHit(id, 30, null, position,
-                            false, bodyColor, GameObjectListener.SLIDER_START);
+                    listener.onSliderHit(id, 30, position,
+                            false, bodyColor, GameObjectListener.SLIDER_START, true);
                 } else {
-                    listener.onSliderHit(id, -1, null, position,
-                            false, bodyColor, GameObjectListener.SLIDER_START);
+                    listener.onSliderHit(id, -1, position,
+                            false, bodyColor, GameObjectListener.SLIDER_START, false);
                 }
 
                 currentNestedObjectIndex++;
@@ -958,10 +960,9 @@ public class GameplaySlider extends GameObject {
                 break;
             }
 
-            if (isInRadius && replayObjectData == null ||
-                    replayObjectData != null && replayObjectData.tickSet.get(replayTickIndex)) {
+            if (isIncrementCombo()) {
                 playCurrentNestedObjectHitSound();
-                listener.onSliderHit(id, 10, null, ballPos, false, bodyColor, GameObjectListener.SLIDER_TICK);
+                listener.onSliderHit(id, 10, ballPos, false, bodyColor, GameObjectListener.SLIDER_TICK, true);
 
                 if (Config.isAnimateFollowCircle() && !isFollowCircleAnimating) {
                     followCircle.clearEntityModifiers();
@@ -971,7 +972,7 @@ public class GameplaySlider extends GameObject {
                 ticksGot++;
                 tickSet.set(replayTickIndex++, true);
             } else {
-                listener.onSliderHit(id, -1, null, ballPos, false, bodyColor, GameObjectListener.SLIDER_TICK);
+                listener.onSliderHit(id, -1, ballPos, false, bodyColor, GameObjectListener.SLIDER_TICK, false);
                 tickSet.set(replayTickIndex++, false);
             }
 
@@ -1028,6 +1029,10 @@ public class GameplaySlider extends GameObject {
         listener.stopAuxiliarySamples(beatmapSlider);
     }
 
+    private boolean isIncrementCombo() {
+        return isInRadius && replayObjectData == null || replayObjectData != null && replayObjectData.tickSet.get(replayTickIndex);
+    }
+
     @Override
     public void tryHit(final float dt) {
         if (startHit) {
@@ -1042,11 +1047,11 @@ public class GameplaySlider extends GameObject {
 
             if (-passedTime < GameHelper.getDifficultyHelper().hitWindowFor50(GameHelper.getOverallDifficulty())) {
                 playCurrentNestedObjectHitSound();
-                listener.onSliderHit(id, 30, null, position,
-                        false, bodyColor, GameObjectListener.SLIDER_START);
+                listener.onSliderHit(id, 30, position,
+                        false, bodyColor, GameObjectListener.SLIDER_START, true);
             } else {
-                listener.onSliderHit(id, -1, null, position,
-                        false, bodyColor, GameObjectListener.SLIDER_START);
+                listener.onSliderHit(id, -1, position,
+                        false, bodyColor, GameObjectListener.SLIDER_START, false);
             }
 
             currentNestedObjectIndex++;

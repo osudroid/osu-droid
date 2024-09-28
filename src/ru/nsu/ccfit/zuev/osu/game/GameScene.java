@@ -1798,10 +1798,10 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
         createBurstEffectSliderReverse(pos, ang, color);
     }
 
-    public void onSliderHit(int id, final int score, final PointF start,
-                            final PointF end, final boolean endCombo, RGBColor color, int type) {
+    public void onSliderHit(int id, final int score, final PointF judgementPos, final boolean endCombo,
+                            RGBColor color, int type, boolean incrementCombo) {
         if (GameHelper.isFlashLight() && !GameHelper.isAuto() && !GameHelper.isAutopilotMod()) {
-            int nearestCursorId = getNearestCursorId(end.x, end.y);
+            int nearestCursorId = getNearestCursorId(judgementPos.x, judgementPos.y);
             if (nearestCursorId >= 0) {
                 mainCursorId = nearestCursorId;
                 flashlightSprite.onMouseMove(
@@ -1812,7 +1812,7 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
         }
 
         if (score == 0) {
-            createHitEffect(end, "hit0", color);
+            createHitEffect(judgementPos, "hit0", color);
             registerHit(id, 0, endCombo);
             return;
         }
@@ -1833,14 +1833,14 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
         String scoreName = "hit0";
         switch (score) {
             case 300:
-                scoreName = registerHit(id, 300, endCombo);
+                scoreName = registerHit(id, 300, endCombo, incrementCombo);
                 break;
             case 100:
-                scoreName = registerHit(id, 100, endCombo);
+                scoreName = registerHit(id, 100, endCombo, incrementCombo);
                 stat.setPerfect(false);
                 break;
             case 50:
-                scoreName = registerHit(id, 50, endCombo);
+                scoreName = registerHit(id, 50, endCombo, incrementCombo);
                 stat.setPerfect(false);
                 break;
             case 30:
@@ -1856,19 +1856,19 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
         if (score > 10) {
             switch (type) {
                 case GameObjectListener.SLIDER_START:
-                    createBurstEffectSliderStart(end, color);
+                    createBurstEffectSliderStart(judgementPos, color);
                     break;
                 case GameObjectListener.SLIDER_END:
-                    createBurstEffectSliderEnd(end, color);
+                    createBurstEffectSliderEnd(judgementPos, color);
                     break;
                 case GameObjectListener.SLIDER_REPEAT:
                     break;
                 default:
-                    createBurstEffect(end, color);
+                    createBurstEffect(judgementPos, color);
             }
         }
 
-        createHitEffect(end, scoreName, color);
+        createHitEffect(judgementPos, scoreName, color);
     }
 
 

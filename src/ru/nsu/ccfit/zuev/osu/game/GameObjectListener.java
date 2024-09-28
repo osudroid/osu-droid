@@ -15,8 +15,8 @@ public interface GameObjectListener {
 
     void onCircleHit(int id, float accuracy, PointF pos, boolean endCombo, byte forcedScore, RGBColor color);
 
-    void onSliderHit(int id, int score, PointF start, PointF end,
-                     boolean endCombo, RGBColor color, int type);
+    void onSliderHit(int id, int score, PointF judgementPos,
+                     boolean endCombo, RGBColor color, int type, boolean incrementCombo);
 
     void onSliderEnd(int id, int accuracy, BitSet tickSet);
 
