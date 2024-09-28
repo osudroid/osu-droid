@@ -238,7 +238,7 @@ class UniversalModifier @JvmOverloads constructor(private val pool: Pool<Univers
     override fun applyModifier(block: (UniversalModifier) -> Unit): UniversalModifier {
 
         if (entity == null) {
-            throw IllegalStateException("Modifier target is not set in this UniversalModifier cannot apply modifier.")
+            throw IllegalStateException("The target entity of an UniversalModifier cannot be null.")
         }
 
         // When this happens it means that this was called from a chained call.

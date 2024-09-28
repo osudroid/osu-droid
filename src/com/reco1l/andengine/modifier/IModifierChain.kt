@@ -25,7 +25,7 @@ interface IModifierChain {
         get() = when(this) {
 
             is ExtendedEntity -> this
-            is UniversalModifier -> entity ?: throw IllegalStateException("Modifier target is not set in this UniversalModifier cannot apply modifier.")
+            is UniversalModifier -> entity ?: throw IllegalStateException("The target entity of an UniversalModifier cannot be null.")
 
             else -> throw IllegalStateException("IModifierChain only works with current implementations (ExtendedEntity and UniversalModifier), you must not use this interface.")
         }
