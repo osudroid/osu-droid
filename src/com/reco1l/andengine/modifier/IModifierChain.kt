@@ -1,7 +1,5 @@
 package com.reco1l.andengine.modifier
 
-import com.edlplan.framework.easing.Easing
-import com.edlplan.ui.EasingHelper
 import com.reco1l.andengine.*
 import com.reco1l.andengine.modifier.ModifierType.*
 
