@@ -3,7 +3,7 @@ package ru.nsu.ccfit.zuev.osu.menu;
 import android.annotation.SuppressLint;
 
 import com.reco1l.andengine.sprite.ExtendedSprite;
-import com.reco1l.andengine.Origin;
+import com.reco1l.andengine.Anchor;
 
 import org.anddev.andengine.engine.handler.IUpdateHandler;
 import org.anddev.andengine.entity.modifier.LoopEntityModifier;
@@ -62,7 +62,7 @@ public class LoadingScreen implements IUpdateHandler {
         percentage = -1;
 
         var circle = new ExtendedSprite();
-        circle.setOrigin(Origin.Center);
+        circle.setOrigin(Anchor.Center);
         circle.setPosition(Config.getRES_WIDTH() / 2f, Config.getRES_HEIGHT() / 2f);
         circle.setTextureRegion(ResourceManager.getInstance().getTexture("loading"));
         circle.registerEntityModifier(new LoopEntityModifier(new RotationByModifier(2.0f, 360)));

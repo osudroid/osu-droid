@@ -20,7 +20,7 @@ import com.reco1l.andengine.sprite.AnimatedSprite;
 import com.reco1l.andengine.texture.BlankTextureRegion;
 import com.reco1l.andengine.sprite.ExtendedSprite;
 import com.reco1l.osu.Modifiers;
-import com.reco1l.andengine.Origin;
+import com.reco1l.andengine.Anchor;
 import com.reco1l.andengine.sprite.VideoSprite;
 import com.reco1l.andengine.ExtendedScene;
 import com.reco1l.osu.playfield.FollowPointConnection;
@@ -791,7 +791,7 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
         skipBtn = null;
         if (skipTime > 1) {
             skipBtn = new AnimatedSprite("play-skip", true, OsuSkin.get().getAnimationFramerate());
-            skipBtn.setOrigin(Origin.BottomRight);
+            skipBtn.setOrigin(Anchor.BottomRight);
             skipBtn.setPosition(Config.getRES_WIDTH(), Config.getRES_HEIGHT());
             skipBtn.setAlpha(0.7f);
             fgScene.attachChild(skipBtn);
@@ -803,24 +803,24 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
             addPassiveObject(scorebar);
 
             scoreText = new ScoreText(OsuSkin.get().getScorePrefix());
-            scoreText.setAnchor(Origin.TopRight);
-            scoreText.setOrigin(Origin.TopRight);
-            scoreText.setScaleCenter(Origin.TopRight);
+            scoreText.setAnchor(Anchor.TopRight);
+            scoreText.setOrigin(Anchor.TopRight);
+            scoreText.setScaleCenter(Anchor.TopRight);
             scoreText.setText("0000000000");
             scoreText.setScale(0.9f);
 
             accuracyText = new ScoreText(OsuSkin.get().getScorePrefix());
-            accuracyText.setAnchor(Origin.TopRight);
-            accuracyText.setOrigin(Origin.TopRight);
-            accuracyText.setScaleCenter(Origin.TopRight);
+            accuracyText.setAnchor(Anchor.TopRight);
+            accuracyText.setOrigin(Anchor.TopRight);
+            accuracyText.setScaleCenter(Anchor.TopRight);
             accuracyText.setText("000.00%");
             accuracyText.setScale(0.6f);
             accuracyText.setY(50);
 
             comboText = new ScoreText(OsuSkin.get().getComboPrefix(), Config.isAnimateComboText());
-            comboText.setAnchor(Origin.BottomLeft);
-            comboText.setOrigin(Origin.BottomLeft);
-            comboText.setScaleCenter(Origin.BottomLeft);
+            comboText.setAnchor(Anchor.BottomLeft);
+            comboText.setOrigin(Anchor.BottomLeft);
+            comboText.setScaleCenter(Anchor.BottomLeft);
             comboText.setScale(1.5f);
             comboText.setText("0x");
 

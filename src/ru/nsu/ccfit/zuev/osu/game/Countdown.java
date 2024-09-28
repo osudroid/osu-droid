@@ -3,7 +3,7 @@ package ru.nsu.ccfit.zuev.osu.game;
 import android.graphics.PointF;
 
 import com.reco1l.andengine.sprite.ExtendedSprite;
-import com.reco1l.andengine.Origin;
+import com.reco1l.andengine.Anchor;
 
 import org.anddev.andengine.entity.modifier.DelayModifier;
 import org.anddev.andengine.entity.modifier.FadeInModifier;
@@ -39,7 +39,7 @@ public class Countdown extends GameObject {
         final PointF center = Utils.trackToRealCoords(new PointF((float) Constants.MAP_WIDTH / 2, (float) Constants.MAP_HEIGHT / 2));
 
         ready = new ExtendedSprite();
-        ready.setOrigin(Origin.Center);
+        ready.setOrigin(Anchor.Center);
         ready.setPosition(center.x, center.y);
         ready.setTextureRegion(ResourceManager.getInstance().getTexture("ready"));
 
@@ -88,7 +88,7 @@ public class Countdown extends GameObject {
                 new FadeOutModifier(COUNTDOWN_LENGTH * speed / 18)));
 
         go = new ExtendedSprite();
-        go.setOrigin(Origin.Center);
+        go.setOrigin(Anchor.Center);
         go.setPosition(center.x, center.y);
         go.setTextureRegion(ResourceManager.getInstance().getTexture("go"));
 

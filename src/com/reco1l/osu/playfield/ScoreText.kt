@@ -65,8 +65,8 @@ class ScoreText @JvmOverloads constructor(
 
         if (withPopOut) {
             popOutText = ScoreText(texturePrefix)
-            popOutText!!.setAnchor(Origin.BottomLeft)
-            popOutText!!.setScaleCenter(Origin.BottomLeft)
+            popOutText!!.setAnchor(Anchor.BottomLeft)
+            popOutText!!.setScaleCenter(Anchor.BottomLeft)
 
             // Reference https://github.com/ppy/osu/blob/d159d6b9700d90f6a40cda0f832df59f6086e7ef/osu.Game/Skinning/LegacyComboCounter.cs#L177-L186
 

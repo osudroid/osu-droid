@@ -6,12 +6,9 @@ import com.reco1l.andengine.sprite.*
 import com.reco1l.framework.*
 import com.reco1l.osu.*
 import com.rian.osu.beatmap.hitobject.*
-import org.anddev.andengine.entity.*
 import org.anddev.andengine.entity.scene.*
-import org.anddev.andengine.util.modifier.*
 import org.anddev.andengine.util.modifier.ease.*
 import ru.nsu.ccfit.zuev.osu.*
-import ru.nsu.ccfit.zuev.osu.helper.*
 import ru.nsu.ccfit.zuev.skins.OsuSkin
 import kotlin.math.*
 
@@ -95,7 +92,7 @@ object FollowPointConnection {
 
             fp.clearEntityModifiers()
             fp.setPosition(pointStartX, pointStartY)
-            fp.setOrigin(Origin.Center)
+            fp.setOrigin(Anchor.Center)
             fp.setScale(1.5f * scale)
             fp.rotation = rotation
             fp.alpha = 0f

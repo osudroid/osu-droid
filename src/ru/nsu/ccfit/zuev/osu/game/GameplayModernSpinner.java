@@ -5,7 +5,7 @@ import android.graphics.PointF;
 import com.reco1l.osu.Execution;
 import com.reco1l.andengine.sprite.ExtendedSprite;
 import com.reco1l.osu.Modifiers;
-import com.reco1l.andengine.Origin;
+import com.reco1l.andengine.Anchor;
 import com.rian.osu.beatmap.hitobject.Spinner;
 
 import org.anddev.andengine.entity.scene.Scene;
@@ -48,27 +48,27 @@ public class GameplayModernSpinner extends GameplaySpinner {
         center = Utils.trackToRealCoords(new PointF((float) Constants.MAP_WIDTH / 2, (float) Constants.MAP_HEIGHT / 2));
 
         middle = new ExtendedSprite();
-        middle.setOrigin(Origin.Center);
+        middle.setOrigin(Anchor.Center);
         middle.setPosition(center.x, center.y);
         middle.setTextureRegion(ResourceManager.getInstance().getTexture("spinner-middle"));
 
         middle2 = new ExtendedSprite();
-        middle2.setOrigin(Origin.Center);
+        middle2.setOrigin(Anchor.Center);
         middle2.setPosition(center.x, center.y);
         middle2.setTextureRegion(ResourceManager.getInstance().getTexture("spinner-middle2"));
 
         bottom = new ExtendedSprite();
-        bottom.setOrigin(Origin.Center);
+        bottom.setOrigin(Anchor.Center);
         bottom.setPosition(center.x, center.y);
         bottom.setTextureRegion(ResourceManager.getInstance().getTexture("spinner-bottom"));
 
         top = new ExtendedSprite();
-        top.setOrigin(Origin.Center);
+        top.setOrigin(Anchor.Center);
         top.setPosition(center.x, center.y);
         top.setTextureRegion(ResourceManager.getInstance().getTexture("spinner-top"));
 
         glow = new ExtendedSprite();
-        glow.setOrigin(Origin.Center);
+        glow.setOrigin(Anchor.Center);
         glow.setPosition(center.x, center.y);
         glow.setTextureRegion(ResourceManager.getInstance().getTexture("spinner-glow"));
 

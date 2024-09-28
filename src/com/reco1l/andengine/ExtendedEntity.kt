@@ -114,22 +114,22 @@ abstract class ExtendedEntity(
     }
 
 
-    open fun setAnchor(anchor: Origin) {
+    open fun setAnchor(anchor: Anchor) {
         anchorX = anchor.factorX
         anchorY = anchor.factorY
     }
 
-    open fun setOrigin(origin: Origin) {
+    open fun setOrigin(origin: Anchor) {
         originX = origin.factorX
         originY = origin.factorY
     }
 
-    open fun setRotationCenter(center: Origin) {
+    open fun setRotationCenter(center: Anchor) {
         mRotationCenterX = center.factorX
         mRotationCenterY = center.factorY
     }
 
-    open fun setScaleCenter(center: Origin) {
+    open fun setScaleCenter(center: Anchor) {
         mScaleCenterX = center.factorX
         mScaleCenterY = center.factorY
     }
@@ -369,10 +369,7 @@ abstract class ExtendedEntity(
 }
 
 
-/**
- * Determines the origin of the sprite.
- */
-enum class Origin(val factorX: Float, val factorY: Float) {
+enum class Anchor(val factorX: Float, val factorY: Float) {
 
     TopLeft(0f, 0f),
 

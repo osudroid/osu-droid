@@ -21,8 +21,8 @@ open class CirclePiece(
 
     private val circle = ExtendedSprite().also {
 
-        it.setOrigin(Origin.Center)
-        it.setAnchor(Origin.Center)
+        it.setOrigin(Anchor.Center)
+        it.setAnchor(Anchor.Center)
         it.textureRegion = ResourceManager.getInstance().getTexture(circleTexture)
 
         attachChild(it)
@@ -30,8 +30,8 @@ open class CirclePiece(
 
     private val overlay = ExtendedSprite().also {
 
-        it.setOrigin(Origin.Center)
-        it.setAnchor(Origin.Center)
+        it.setOrigin(Anchor.Center)
+        it.setAnchor(Anchor.Center)
         it.textureRegion = ResourceManager.getInstance().getTexture(overlayTexture)
 
         attachChild(it)
@@ -48,8 +48,8 @@ class NumberedCirclePiece(circleTexture: String, overlayTexture: String) : Circl
 
     private val number = CircleNumber().also {
 
-        it.setOrigin(Origin.Center)
-        it.setAnchor(Origin.Center)
+        it.setOrigin(Anchor.Center)
+        it.setAnchor(Anchor.Center)
         attachChild(it)
     }
 

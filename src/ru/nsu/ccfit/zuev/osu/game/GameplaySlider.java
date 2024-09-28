@@ -9,7 +9,7 @@ import com.reco1l.osu.Execution;
 import com.reco1l.andengine.sprite.AnimatedSprite;
 import com.reco1l.andengine.sprite.ExtendedSprite;
 import com.reco1l.osu.Modifiers;
-import com.reco1l.andengine.Origin;
+import com.reco1l.andengine.Anchor;
 import com.reco1l.osu.playfield.CirclePiece;
 import com.reco1l.osu.playfield.NumberedCirclePiece;
 import com.reco1l.osu.playfield.SliderTickContainer;
@@ -116,15 +116,15 @@ public class GameplaySlider extends GameObject {
         tailCirclePiece = new CirclePiece("sliderendcircle", "sliderendcircleoverlay");
 
         approachCircle = new ExtendedSprite();
-        approachCircle.setOrigin(Origin.Center);
+        approachCircle.setOrigin(Anchor.Center);
         approachCircle.setTextureRegion(ResourceManager.getInstance().getTexture("approachcircle"));
 
         startArrow = new ExtendedSprite();
-        startArrow.setOrigin(Origin.Center);
+        startArrow.setOrigin(Anchor.Center);
         startArrow.setTextureRegion(ResourceManager.getInstance().getTexture("reversearrow"));
 
         endArrow = new ExtendedSprite();
-        endArrow.setOrigin(Origin.Center);
+        endArrow.setOrigin(Anchor.Center);
         endArrow.setTextureRegion(ResourceManager.getInstance().getTexture("reversearrow"));
 
         ball = new AnimatedSprite("sliderb", false);
