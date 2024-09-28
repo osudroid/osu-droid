@@ -221,7 +221,7 @@ class BlockAreaFragment : BaseFragment() {
 
     companion object {
 
-        private const val MINIMUM_AREA_SIZE = 32f
+        private const val MINIMUM_AREA_SIZE = 64f
 
     }
 
