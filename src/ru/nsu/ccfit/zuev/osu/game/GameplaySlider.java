@@ -529,27 +529,22 @@ public class GameplaySlider extends GameObject {
         int totalSpanCount = beatmapSlider.getSpanCount();
         int remainingSpans = totalSpanCount - completedSpanCount;
         boolean stillHasSpan = remainingSpans > 0;
-        boolean incrementCombo = isIncrementCombo();
+        boolean isTracking = isTracking();
 
         // If slider was in reverse mode, we should swap start and end points
         var spanEndJudgementPosition = reverse ? position : curveEndPos;
 
-        if (incrementCombo) {
+        if (isTracking) {
             playCurrentNestedObjectHitSound();
             ticksGot++;
             tickSet.set(replayTickIndex++, true);
-
-            if (stillHasSpan) {
-                listener.onSliderHit(id, 30, spanEndJudgementPosition, false,
-                    bodyColor, GameObjectListener.SLIDER_REPEAT, true);
-            }
         } else {
             tickSet.set(replayTickIndex++, false);
+        }
 
-            if (stillHasSpan) {
-                listener.onSliderHit(id, -1, spanEndJudgementPosition, false,
-                    bodyColor, GameObjectListener.SLIDER_REPEAT, false);
-            }
+        if (stillHasSpan) {
+            listener.onSliderHit(id, isTracking ? 30 : -1, spanEndJudgementPosition, false,
+                bodyColor, GameObjectListener.SLIDER_REPEAT, isTracking);
         }
 
         currentNestedObjectIndex++;
@@ -637,7 +632,7 @@ public class GameplaySlider extends GameObject {
         }
 
         listener.onSliderHit(id, score, spanEndJudgementPosition, endsCombo, bodyColor,
-            GameObjectListener.SLIDER_END, incrementCombo);
+            GameObjectListener.SLIDER_END, isTracking);
 
         if (!startHit) {
             firstHitAccuracy = (int) (GameHelper.getDifficultyHelper().hitWindowFor50(GameHelper.getOverallDifficulty()) * 1000 + 13);
@@ -950,6 +945,7 @@ public class GameplaySlider extends GameObject {
         }
 
         float scale = beatmapSlider.getGameplayScale();
+        boolean isTracking = isTracking();
 
         while (tickTime >= tickInterval) {
             tickTime -= tickInterval;
@@ -960,22 +956,20 @@ public class GameplaySlider extends GameObject {
                 break;
             }
 
-            if (isIncrementCombo()) {
-                playCurrentNestedObjectHitSound();
-                listener.onSliderHit(id, 10, ballPos, false, bodyColor, GameObjectListener.SLIDER_TICK, true);
-
+            if (isTracking) {
                 if (Config.isAnimateFollowCircle() && !isFollowCircleAnimating) {
                     followCircle.clearEntityModifiers();
                     followCircle.registerEntityModifier(Modifiers.scale((float) Math.min(tickInterval, 0.2f), scale * 1.1f, scale, null, EaseQuadOut.getInstance()));
                 }
 
+                playCurrentNestedObjectHitSound();
                 ticksGot++;
                 tickSet.set(replayTickIndex++, true);
             } else {
-                listener.onSliderHit(id, -1, ballPos, false, bodyColor, GameObjectListener.SLIDER_TICK, false);
                 tickSet.set(replayTickIndex++, false);
             }
 
+            listener.onSliderHit(id, isTracking ? 10 : -1, ballPos, false, bodyColor, GameObjectListener.SLIDER_TICK, isTracking);
             currentNestedObjectIndex++;
 
             tickSprite.setAlpha(0);
@@ -1029,7 +1023,7 @@ public class GameplaySlider extends GameObject {
         listener.stopAuxiliarySamples(beatmapSlider);
     }
 
-    private boolean isIncrementCombo() {
+    private boolean isTracking() {
         return isInRadius && replayObjectData == null || replayObjectData != null && replayObjectData.tickSet.get(replayTickIndex);
     }
 
