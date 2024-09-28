@@ -1,6 +1,7 @@
 package com.reco1l.osu.playfield
 
 import com.reco1l.andengine.*
+import com.reco1l.andengine.modifier.*
 import com.reco1l.andengine.sprite.*
 import com.reco1l.framework.*
 import com.reco1l.osu.*
@@ -34,15 +35,13 @@ object FollowPointConnection {
     }
 
 
-    private val expire = object : ModifierListener() {
-        override fun onModifierFinished(pModifier: IModifier<IEntity>, fp: IEntity) {
-            updateThread {
-                fp.detachSelf()
-                if (fp is AnimatedSprite) {
-                    fp.elapsedSec = 0f
-                }
-                pool.free(fp as ExtendedSprite)
+    private val expire = OnModifierFinished { fp ->
+        updateThread {
+            fp.detachSelf()
+            if (fp is AnimatedSprite) {
+                fp.elapsedSec = 0f
             }
+            pool.free(fp as ExtendedSprite)
         }
     }
 

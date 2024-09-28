@@ -18,10 +18,8 @@ import com.rian.osu.beatmap.sections.BeatmapControlPoints;
 import com.rian.osu.math.Interpolation;
 import com.rian.osu.mods.ModHidden;
 
-import org.anddev.andengine.entity.IEntity;
 import org.anddev.andengine.entity.scene.Scene;
 import org.anddev.andengine.util.MathUtils;
-import org.anddev.andengine.util.modifier.IModifier;
 import org.anddev.andengine.util.modifier.ease.EaseQuadOut;
 import ru.nsu.ccfit.zuev.osu.Config;
 import ru.nsu.ccfit.zuev.osu.RGBColor;
@@ -29,7 +27,6 @@ import ru.nsu.ccfit.zuev.osu.ResourceManager;
 import ru.nsu.ccfit.zuev.osu.Utils;
 import ru.nsu.ccfit.zuev.osu.game.GameHelper.SliderPath;
 import ru.nsu.ccfit.zuev.osu.helper.DifficultyHelper;
-import ru.nsu.ccfit.zuev.osu.helper.ModifierListener;
 import ru.nsu.ccfit.zuev.skins.OsuSkin;
 
 import java.util.BitSet;
@@ -463,26 +460,19 @@ public class GameplaySlider extends GameObject {
                 poolObject();
             }
         } else {
-            sliderBody.registerEntityModifier(Modifiers.fadeOut(0.24f, new ModifierListener() {
+            sliderBody.registerEntityModifier(Modifiers.fadeOut(0.24f, e -> {
+                Execution.updateThread(() -> {
+                    sliderBody.detachSelf();
 
-                @Override
-                public void onModifierFinished(IModifier<IEntity> pModifier, IEntity pItem) {
-                    Execution.updateThread(() -> {
-                        sliderBody.detachSelf();
-
-                        // We can pool the hit object once all animations are finished.
-                        // The slider body is the last object to finish animating.
-                        poolObject();
-                    });
-                }
+                    // We can pool the hit object once all animations are finished.
+                    // The slider body is the last object to finish animating.
+                    poolObject();
+                });
             }));
         }
 
-        ball.registerEntityModifier(Modifiers.fadeOut(0.1f, new ModifierListener() {
-            @Override
-            public void onModifierFinished(IModifier<IEntity> pModifier, IEntity pItem) {
-                Execution.updateThread(ball::detachSelf);
-            }
+        ball.registerEntityModifier(Modifiers.fadeOut(0.1f, e -> {
+            Execution.updateThread(ball::detachSelf);
         }));
 
         // Follow circle might still be animating when the slider is removed from the scene.
@@ -646,19 +636,16 @@ public class GameplaySlider extends GameObject {
 
             followCircle.clearEntityModifiers();
             followCircle.registerEntityModifier(Modifiers.scale(0.2f, followCircle.getScaleX(), followCircle.getScaleX() * 0.8f, null, EaseQuadOut.getInstance()));
-            followCircle.registerEntityModifier(Modifiers.alpha(0.2f, followCircle.getAlpha(), 0f, new ModifierListener() {
-                @Override
-                public void onModifierFinished(IModifier<IEntity> pModifier, IEntity pItem) {
-                    Execution.updateThread(() -> {
-                        followCircle.detachSelf();
+            followCircle.registerEntityModifier(Modifiers.alpha(0.2f, followCircle.getAlpha(), 0f, e -> {
+                Execution.updateThread(() -> {
+                    followCircle.detachSelf();
 
-                        // When hidden mod is enabled, the follow circle is the last object to finish animating.
-                        if (GameHelper.isHidden()) {
-                            poolObject();
-                        }
-                    });
-                    isFollowCircleAnimating = false;
-                }
+                    // When hidden mod is enabled, the follow circle is the last object to finish animating.
+                    if (GameHelper.isHidden()) {
+                        poolObject();
+                    }
+                });
+                isFollowCircleAnimating = false;
             }));
         }
 
@@ -875,11 +862,8 @@ public class GameplaySlider extends GameObject {
 
                 followCircle.clearEntityModifiers();
                 followCircle.registerEntityModifier(Modifiers.alpha(Math.min(remainTime, 0.06f), followCircle.getAlpha(), 1f));
-                followCircle.registerEntityModifier(Modifiers.scale(Math.min(remainTime, 0.18f), initialScale, scale, new ModifierListener() {
-                    @Override
-                    public void onModifierFinished(IModifier<IEntity> pModifier, IEntity pItem) {
-                        isFollowCircleAnimating = false;
-                    }
+                followCircle.registerEntityModifier(Modifiers.scale(Math.min(remainTime, 0.18f), initialScale, scale, e -> {
+                    isFollowCircleAnimating = false;
                 }, EaseQuadOut.getInstance()));
             } else if (!inRadius && isInRadius) {
                 isInRadius = false;
@@ -888,14 +872,11 @@ public class GameplaySlider extends GameObject {
 
                 followCircle.clearEntityModifiers();
                 followCircle.registerEntityModifier(Modifiers.scale(0.1f, followCircle.getScaleX(), scale * 2f));
-                followCircle.registerEntityModifier(Modifiers.alpha(0.1f, followCircle.getAlpha(), 0f, new ModifierListener() {
-                    @Override
-                    public void onModifierFinished(IModifier<IEntity> pModifier, IEntity pItem) {
-                        if (isOver) {
-                            Execution.updateThread(pItem::detachSelf);
-                        }
-                        isFollowCircleAnimating = false;
+                followCircle.registerEntityModifier(Modifiers.alpha(0.1f, followCircle.getAlpha(), 0f, e -> {
+                    if (isOver) {
+                        Execution.updateThread(e::detachSelf);
                     }
+                    isFollowCircleAnimating = false;
                 }));
             }
         } else {

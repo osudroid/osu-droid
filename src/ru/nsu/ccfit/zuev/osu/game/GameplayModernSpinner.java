@@ -8,15 +8,12 @@ import com.reco1l.osu.Modifiers;
 import com.reco1l.andengine.Origin;
 import com.rian.osu.beatmap.hitobject.Spinner;
 
-import org.anddev.andengine.entity.IEntity;
 import org.anddev.andengine.entity.scene.Scene;
 import org.anddev.andengine.util.MathUtils;
-import org.anddev.andengine.util.modifier.IModifier;
 
 import ru.nsu.ccfit.zuev.osu.Constants;
 import ru.nsu.ccfit.zuev.osu.ResourceManager;
 import ru.nsu.ccfit.zuev.osu.Utils;
-import ru.nsu.ccfit.zuev.osu.helper.ModifierListener;
 import ru.nsu.ccfit.zuev.osu.scoring.ScoreNumber;
 import ru.nsu.ccfit.zuev.osu.scoring.StatisticV2;
 
@@ -125,18 +122,10 @@ public class GameplayModernSpinner extends GameplaySpinner {
         float timePreempt = (float) beatmapSpinner.timePreempt / 1000f;
 
         top.registerEntityModifier(Modifiers.sequence(
-            Modifiers.fadeIn(timePreempt, new ModifierListener() {
-                @Override
-                public void onModifierFinished(IModifier<IEntity> pModifier, IEntity pItem) {
+            Modifiers.fadeIn(timePreempt, e -> {
                     spinnable = true;
-                }
             }),
-            Modifiers.delay(duration, new ModifierListener() {
-                @Override
-                public void onModifierFinished(IModifier<IEntity> pModifier, IEntity pItem) {
-                    Execution.updateThread(() -> removeFromScene());
-                }
-            })
+            Modifiers.delay(duration, e -> Execution.updateThread(this::removeFromScene))
         ));
 
         bottom.registerEntityModifier(Modifiers.fadeIn(timePreempt));
