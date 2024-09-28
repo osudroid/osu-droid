@@ -1,5 +1,7 @@
-package com.reco1l.osu.graphics
+package com.reco1l.andengine.sprite
 
+import com.reco1l.andengine.*
+import com.reco1l.andengine.container.*
 import org.anddev.andengine.engine.camera.*
 import org.anddev.andengine.opengl.texture.region.*
 import org.anddev.andengine.opengl.util.*
@@ -12,19 +14,30 @@ import javax.microedition.khronos.opengles.*
  */
 open class ExtendedSprite(textureRegion: TextureRegion? = null) : ExtendedEntity(vertexBuffer = RectangleVertexBuffer(GL11.GL_STATIC_DRAW, true)) {
 
-    /**
-     * Whether the size of the sprite should be adjusted to the size of the texture.
-     */
-    var adjustSizeWithTexture = true
+
+    override var autoSizeAxes = Axes.Both
         set(value) {
             if (field != value) {
                 field = value
 
-                if (value) {
-                    super.setSize(textureRegion?.width?.toFloat() ?: 0f, textureRegion?.height?.toFloat() ?: 0f)
+                if (autoSizeAxes != Axes.None) {
+                    val currentTextureWidth = textureRegion?.width?.toFloat() ?: 0f
+                    val currentTextureHeight = textureRegion?.height?.toFloat() ?: 0f
+
+                    setSizeInternal(
+                        if (autoSizeAxes == Axes.X || autoSizeAxes == Axes.Both) currentTextureWidth else width,
+                        if (autoSizeAxes == Axes.Y || autoSizeAxes == Axes.Both) currentTextureHeight else height
+                    )
+
+                    if (parent is Container) {
+                        (parent as Container).onChildSizeChanged(this)
+                    }
                 }
+
+                updateVertexBuffer()
             }
         }
+
 
     /**
      * Whether the texture should be flipped horizontally.
@@ -61,30 +74,26 @@ open class ExtendedSprite(textureRegion: TextureRegion? = null) : ExtendedEntity
             field = value
             applyBlendFunction()
 
-            // Avoiding unnecessary buffer updates
-            var wasBufferUpdated = false
-
-            if (value == null) {
-                if (adjustSizeWithTexture && (width != 0f || height != 0f)) {
-                    super.setSize(0f, 0f)
-                    wasBufferUpdated = true
-                }
-            } else {
+            if (value != null) {
                 value.isFlippedVertical = flippedVertical
                 value.isFlippedHorizontal = flippedHorizontal
+            }
 
-                val textureWidth = value.width.toFloat()
-                val textureHeight = value.height.toFloat()
+            if (autoSizeAxes != Axes.None) {
+                val textureWidth = value?.width?.toFloat() ?: 0f
+                val textureHeight = value?.height?.toFloat() ?: 0f
 
-                if (adjustSizeWithTexture && (width != textureWidth || height != textureHeight)) {
-                    super.setSize(textureWidth, textureHeight)
-                    wasBufferUpdated = true
+                setSizeInternal(
+                    if (autoSizeAxes == Axes.X || autoSizeAxes == Axes.Both) textureWidth else width,
+                    if (autoSizeAxes == Axes.Y || autoSizeAxes == Axes.Both) textureHeight else height
+                )
+
+                if (parent is Container) {
+                    (parent as Container).onChildSizeChanged(this)
                 }
             }
 
-            if (!wasBufferUpdated) {
-                updateVertexBuffer()
-            }
+            updateVertexBuffer()
         }
 
 
@@ -99,25 +108,6 @@ open class ExtendedSprite(textureRegion: TextureRegion? = null) : ExtendedEntity
             setBlendFunction(BLENDFUNCTION_SOURCE_PREMULTIPLYALPHA_DEFAULT, BLENDFUNCTION_DESTINATION_PREMULTIPLYALPHA_DEFAULT)
         } else {
             setBlendFunction(BLENDFUNCTION_SOURCE_DEFAULT, BLENDFUNCTION_DESTINATION_DEFAULT)
-        }
-    }
-
-
-    override fun setSize(w: Float, h: Float) {
-        if (!adjustSizeWithTexture) {
-            super.setSize(w, h)
-        }
-    }
-
-    override fun setWidth(value: Float) {
-        if (!adjustSizeWithTexture) {
-            super.setWidth(value)
-        }
-    }
-
-    override fun setHeight(value: Float) {
-        if (!adjustSizeWithTexture) {
-            super.setHeight(value)
         }
     }
 

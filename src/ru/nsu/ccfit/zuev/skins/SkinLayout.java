@@ -2,7 +2,7 @@ package ru.nsu.ccfit.zuev.skins;
 
 import androidx.annotation.NonNull;
 
-import com.reco1l.osu.graphics.ExtendedSprite;
+import com.reco1l.andengine.sprite.ExtendedSprite;
 import org.json.JSONObject;
 
 public class SkinLayout {

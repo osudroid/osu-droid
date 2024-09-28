@@ -2,13 +2,11 @@ package com.edlplan.osu.support.slider;
 
 import com.edlplan.andengine.TriangleBuilder;
 import com.edlplan.framework.math.line.LinePath;
-import com.reco1l.osu.graphics.ExtendedEntity;
-import com.reco1l.osu.graphics.TriangleMesh;
-
-import ru.nsu.ccfit.zuev.osu.Config;
+import com.reco1l.andengine.shape.TriangleMesh;
+import com.reco1l.andengine.container.Container;
 
 
-public class SliderBody extends ExtendedEntity {
+public class SliderBody extends Container {
 
     private static final BuildCache buildCache = new BuildCache();
 

@@ -1,5 +1,7 @@
 package com.reco1l.osu.multiplayer
 
+import com.reco1l.andengine.*
+import com.reco1l.andengine.sprite.*
 import com.reco1l.ibancho.IPlayerEventListener
 import com.reco1l.ibancho.IRoomEventListener
 import com.reco1l.ibancho.RoomAPI
@@ -10,7 +12,6 @@ import com.reco1l.ibancho.data.RoomTeam.RED
 import com.reco1l.ibancho.data.TeamMode.HEAD_TO_HEAD
 import com.reco1l.ibancho.data.TeamMode.TEAM_VS_TEAM
 import com.reco1l.ibancho.data.WinCondition.*
-import com.reco1l.osu.graphics.*
 import com.reco1l.osu.mainThread
 import com.reco1l.osu.multiplayer.Multiplayer.isConnected
 import com.reco1l.osu.multiplayer.Multiplayer.isRoomHost
@@ -315,7 +316,7 @@ object RoomScene : Scene(), IRoomEventListener, IPlayerEventListener
             var dy = 0f
 
             init {
-                adjustSizeWithTexture = false
+                autoSizeAxes = Axes.None
             }
 
             override fun onAreaTouched(event: TouchEvent, localX: Float, localY: Float): Boolean
@@ -368,7 +369,7 @@ object RoomScene : Scene(), IRoomEventListener, IPlayerEventListener
 
             init {
                 textureRegion = getResources().getTextureIfLoaded("selection-mods")
-                adjustSizeWithTexture = false
+                autoSizeAxes = Axes.None
             }
 
             override fun onAreaTouched(event: TouchEvent, localX: Float, localY: Float): Boolean

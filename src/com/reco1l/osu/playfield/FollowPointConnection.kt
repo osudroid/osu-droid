@@ -1,15 +1,14 @@
 package com.reco1l.osu.playfield
 
+import com.reco1l.andengine.*
+import com.reco1l.andengine.modifier.*
+import com.reco1l.andengine.sprite.*
 import com.reco1l.framework.*
 import com.reco1l.osu.*
-import com.reco1l.osu.graphics.*
 import com.rian.osu.beatmap.hitobject.*
-import org.anddev.andengine.entity.*
 import org.anddev.andengine.entity.scene.*
-import org.anddev.andengine.util.modifier.*
 import org.anddev.andengine.util.modifier.ease.*
 import ru.nsu.ccfit.zuev.osu.*
-import ru.nsu.ccfit.zuev.osu.helper.*
 import ru.nsu.ccfit.zuev.skins.OsuSkin
 import kotlin.math.*
 
@@ -33,12 +32,13 @@ object FollowPointConnection {
     }
 
 
-    private val expire = object : ModifierListener() {
-        override fun onModifierFinished(pModifier: IModifier<IEntity>, fp: IEntity) {
-            updateThread {
-                fp.detachSelf()
-                pool.free(fp as ExtendedSprite)
+    private val expire = OnModifierFinished { fp ->
+        updateThread {
+            fp.detachSelf()
+            if (fp is AnimatedSprite) {
+                fp.elapsedSec = 0f
             }
+            pool.free(fp as ExtendedSprite)
         }
     }
 
@@ -90,19 +90,15 @@ object FollowPointConnection {
 
             val fp = pool.obtain()
 
-            if (fp is AnimatedSprite) {
-                // For animated follow points, reset the frame back to 0.
-                fp.elapsedSec = 0f
-            }
-
             fp.clearEntityModifiers()
             fp.setPosition(pointStartX, pointStartY)
-            fp.setOrigin(Origin.Center)
+            fp.setOrigin(Anchor.Center)
             fp.setScale(1.5f * scale)
             fp.rotation = rotation
             fp.alpha = 0f
 
-            fp.registerEntityModifier(Modifiers.sequence(expire,
+            fp.registerEntityModifier(
+                Modifiers.sequence(expire,
                 Modifiers.delay(fadeInTime - secPassed),
                 Modifiers.parallel(null,
                     Modifiers.fadeIn(endFadeInTime),

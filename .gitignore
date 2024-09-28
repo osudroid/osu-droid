@@ -36,5 +36,6 @@ proguard_logs/
 .DS_Store
 .gradle/
 .externalNativeBuild/
+.kotlin/
 
 release.jks

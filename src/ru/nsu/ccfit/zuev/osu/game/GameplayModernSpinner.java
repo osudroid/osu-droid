@@ -3,20 +3,17 @@ package ru.nsu.ccfit.zuev.osu.game;
 import android.graphics.PointF;
 
 import com.reco1l.osu.Execution;
-import com.reco1l.osu.graphics.ExtendedSprite;
-import com.reco1l.osu.graphics.Modifiers;
-import com.reco1l.osu.graphics.Origin;
+import com.reco1l.andengine.sprite.ExtendedSprite;
+import com.reco1l.osu.Modifiers;
+import com.reco1l.andengine.Anchor;
 import com.rian.osu.beatmap.hitobject.Spinner;
 
-import org.anddev.andengine.entity.IEntity;
 import org.anddev.andengine.entity.scene.Scene;
 import org.anddev.andengine.util.MathUtils;
-import org.anddev.andengine.util.modifier.IModifier;
 
 import ru.nsu.ccfit.zuev.osu.Constants;
 import ru.nsu.ccfit.zuev.osu.ResourceManager;
 import ru.nsu.ccfit.zuev.osu.Utils;
-import ru.nsu.ccfit.zuev.osu.helper.ModifierListener;
 import ru.nsu.ccfit.zuev.osu.scoring.ScoreNumber;
 import ru.nsu.ccfit.zuev.osu.scoring.StatisticV2;
 
@@ -51,27 +48,27 @@ public class GameplayModernSpinner extends GameplaySpinner {
         center = Utils.trackToRealCoords(new PointF((float) Constants.MAP_WIDTH / 2, (float) Constants.MAP_HEIGHT / 2));
 
         middle = new ExtendedSprite();
-        middle.setOrigin(Origin.Center);
+        middle.setOrigin(Anchor.Center);
         middle.setPosition(center.x, center.y);
         middle.setTextureRegion(ResourceManager.getInstance().getTexture("spinner-middle"));
 
         middle2 = new ExtendedSprite();
-        middle2.setOrigin(Origin.Center);
+        middle2.setOrigin(Anchor.Center);
         middle2.setPosition(center.x, center.y);
         middle2.setTextureRegion(ResourceManager.getInstance().getTexture("spinner-middle2"));
 
         bottom = new ExtendedSprite();
-        bottom.setOrigin(Origin.Center);
+        bottom.setOrigin(Anchor.Center);
         bottom.setPosition(center.x, center.y);
         bottom.setTextureRegion(ResourceManager.getInstance().getTexture("spinner-bottom"));
 
         top = new ExtendedSprite();
-        top.setOrigin(Origin.Center);
+        top.setOrigin(Anchor.Center);
         top.setPosition(center.x, center.y);
         top.setTextureRegion(ResourceManager.getInstance().getTexture("spinner-top"));
 
         glow = new ExtendedSprite();
-        glow.setOrigin(Origin.Center);
+        glow.setOrigin(Anchor.Center);
         glow.setPosition(center.x, center.y);
         glow.setTextureRegion(ResourceManager.getInstance().getTexture("spinner-glow"));
 
@@ -125,18 +122,10 @@ public class GameplayModernSpinner extends GameplaySpinner {
         float timePreempt = (float) beatmapSpinner.timePreempt / 1000f;
 
         top.registerEntityModifier(Modifiers.sequence(
-            Modifiers.fadeIn(timePreempt, new ModifierListener() {
-                @Override
-                public void onModifierFinished(IModifier<IEntity> pModifier, IEntity pItem) {
+            Modifiers.fadeIn(timePreempt, e -> {
                     spinnable = true;
-                }
             }),
-            Modifiers.delay(duration, new ModifierListener() {
-                @Override
-                public void onModifierFinished(IModifier<IEntity> pModifier, IEntity pItem) {
-                    Execution.updateThread(() -> removeFromScene());
-                }
-            })
+            Modifiers.delay(duration, e -> Execution.updateThread(this::removeFromScene))
         ));
 
         bottom.registerEntityModifier(Modifiers.fadeIn(timePreempt));

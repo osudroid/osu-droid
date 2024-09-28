@@ -4,24 +4,19 @@ import android.graphics.PointF;
 
 
 import com.reco1l.osu.Execution;
-import com.reco1l.osu.graphics.AnimatedSprite;
-import com.reco1l.osu.graphics.ExtendedSprite;
-import com.reco1l.osu.graphics.Modifiers;
-import com.reco1l.osu.graphics.UniversalModifier;
+import com.reco1l.andengine.sprite.AnimatedSprite;
+import com.reco1l.andengine.sprite.ExtendedSprite;
+import com.reco1l.osu.Modifiers;
+import com.reco1l.andengine.modifier.UniversalModifier;
 
-import org.anddev.andengine.entity.IEntity;
 import org.anddev.andengine.entity.scene.Scene;
 import org.anddev.andengine.entity.shape.Shape;
-import org.anddev.andengine.util.modifier.IModifier;
 
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
-import java.util.List;
 
 import ru.nsu.ccfit.zuev.osu.RGBColor;
 import ru.nsu.ccfit.zuev.osu.ResourceManager;
-import ru.nsu.ccfit.zuev.osu.helper.ModifierListener;
 import ru.nsu.ccfit.zuev.skins.OsuSkin;
 
 public class GameEffect extends GameObject {
@@ -63,15 +58,12 @@ public class GameEffect extends GameObject {
             animatedHit.setElapsedSec(0f);
         }
         hit.setPosition(pos.x - hit.getWidth() / 2f, pos.y - hit.getHeight() / 2f);
-        hit.registerEntityModifier(Modifiers.parallel(new ModifierListener() {
-            @Override
-            public void onModifierFinished(IModifier<IEntity> pModifier, IEntity pItem) {
-                Execution.updateThread(() -> {
-                    hit.detachSelf();
-                    hit.clearEntityModifiers();
-                    GameObjectPool.getInstance().putEffect(GameEffect.this);
-                });
-            }
+        hit.registerEntityModifier(Modifiers.parallel(entity -> {
+            Execution.updateThread(() -> {
+                hit.detachSelf();
+                hit.clearEntityModifiers();
+                GameObjectPool.getInstance().putEffect(GameEffect.this);
+            });
         }, entityModifiers));
         hit.setScale(scale);
         hit.setAlpha(1);

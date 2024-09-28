@@ -1,7 +1,8 @@
-package com.reco1l.osu.graphics
+package com.reco1l.andengine.shape
 
 import com.edlplan.andengine.TriangleRenderer
 import com.edlplan.framework.utils.*
+import com.reco1l.andengine.*
 import org.anddev.andengine.engine.camera.*
 import org.anddev.andengine.opengl.util.*
 import javax.microedition.khronos.opengles.*
@@ -44,6 +45,12 @@ class TriangleMesh : ExtendedEntity(vertexBuffer = null) {
             pGL.glClear(GL10.GL_DEPTH_BUFFER_BIT)
         }
     }
+
+
+    override fun onUpdateVertexBuffer() {
+
+    }
+
 
     override fun drawVertices(pGL: GL10, pCamera: Camera) {
 

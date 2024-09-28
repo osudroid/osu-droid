@@ -1,17 +1,22 @@
 package ru.nsu.ccfit.zuev.osu.game;
 
-import com.reco1l.osu.graphics.ExtendedEntity;
-import com.reco1l.osu.graphics.ExtendedSprite;
+import com.reco1l.andengine.container.LinearContainer;
+import com.reco1l.andengine.sprite.ExtendedSprite;
 
 import ru.nsu.ccfit.zuev.osu.ResourceManager;
 import ru.nsu.ccfit.zuev.skins.OsuSkin;
 
-public class CircleNumber extends ExtendedEntity {
+public class CircleNumber extends LinearContainer {
 
 
     private int number = 0;
 
     private boolean isInvalid = false;
+
+
+    public CircleNumber() {
+        setSpacing(-OsuSkin.get().getHitCircleOverlap());
+    }
 
 
     private void allocateSprites(int count) {
@@ -35,27 +40,16 @@ public class CircleNumber extends ExtendedEntity {
             var numberStr = String.valueOf(Math.abs(number));
 
             allocateSprites(numberStr.length());
-            var width = 0f;
-            var height = 0f;
 
             var prefix = OsuSkin.get().getHitCirclePrefix();
-            var overlap = OsuSkin.get().getHitCircleOverlap();
 
             for (int i = 0; i < numberStr.length(); i++) {
 
                 var sprite = (ExtendedSprite) getChild(i);
                 var textureRegion = ResourceManager.getInstance().getTextureWithPrefix(prefix, String.valueOf(numberStr.charAt(i)));
 
-                if (i > 0) {
-                    sprite.setPosition(width - overlap, 0f);
-                }
                 sprite.setTextureRegion(textureRegion);
-
-                width = sprite.getX() + sprite.getWidth();
-                height = Math.max(height, sprite.getHeight());
             }
-
-            setSize(width, height);
         }
 
         super.onManagedUpdate(pSecondsElapsed);

@@ -1,6 +1,6 @@
 package org.anddev.andengine.opengl.vertex;
 
-import org.anddev.andengine.opengl.util.FastFloatBuffer;
+import java.nio.FloatBuffer;
 
 /**
  * (c) 2010 Nicolas Gramlich 
@@ -43,28 +43,24 @@ public class RectangleVertexBuffer extends VertexBuffer {
 	// ===========================================================
 
 	public synchronized void update(final float pWidth, final float pHeight) {
-		final int x = FLOAT_TO_RAW_INT_BITS_ZERO;
-		final int y = FLOAT_TO_RAW_INT_BITS_ZERO;
-		final int x2 = Float.floatToRawIntBits(pWidth);
-		final int y2 = Float.floatToRawIntBits(pHeight);
 
-		final int[] bufferData = this.mBufferData;
-		bufferData[0] = x;
-		bufferData[1] = y;
+        final FloatBuffer floatBuffer = this.mFloatBuffer;
 
-		bufferData[2] = x;
-		bufferData[3] = y2;
+		floatBuffer.position(0);
 
-		bufferData[4] = x2;
-		bufferData[5] = y;
+		floatBuffer.put(0, 0);
+		floatBuffer.put(1, 0);
 
-		bufferData[6] = x2;
-		bufferData[7] = y2;
+		floatBuffer.put(2, 0);
+		floatBuffer.put(3, pHeight);
 
-		final FastFloatBuffer buffer = this.getFloatBuffer();
-		buffer.position(0);
-		buffer.put(bufferData);
-		buffer.position(0);
+		floatBuffer.put(4, pWidth);
+		floatBuffer.put(5, 0);
+
+		floatBuffer.put(6, pWidth);
+		floatBuffer.put(7, pHeight);
+
+		floatBuffer.position(0);
 
 		super.setHardwareBufferNeedsUpdate();
 	}

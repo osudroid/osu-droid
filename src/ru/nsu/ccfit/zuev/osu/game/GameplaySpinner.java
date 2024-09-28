@@ -3,25 +3,22 @@ package ru.nsu.ccfit.zuev.osu.game;
 import android.graphics.PointF;
 
 import com.reco1l.osu.Execution;
-import com.reco1l.osu.graphics.ExtendedSprite;
-import com.reco1l.osu.graphics.Modifiers;
-import com.reco1l.osu.graphics.Origin;
+import com.reco1l.andengine.sprite.ExtendedSprite;
+import com.reco1l.osu.Modifiers;
+import com.reco1l.andengine.Anchor;
 import com.rian.osu.beatmap.hitobject.BankHitSampleInfo;
 import com.rian.osu.beatmap.hitobject.HitSampleInfo;
 import com.rian.osu.beatmap.hitobject.Spinner;
 
-import org.anddev.andengine.entity.IEntity;
 import org.anddev.andengine.entity.scene.Scene;
 import org.anddev.andengine.entity.sprite.Sprite;
 import org.anddev.andengine.opengl.texture.region.TextureRegion;
 import org.anddev.andengine.util.MathUtils;
-import org.anddev.andengine.util.modifier.IModifier;
 
 import ru.nsu.ccfit.zuev.osu.Config;
 import ru.nsu.ccfit.zuev.osu.Constants;
 import ru.nsu.ccfit.zuev.osu.ResourceManager;
 import ru.nsu.ccfit.zuev.osu.Utils;
-import ru.nsu.ccfit.zuev.osu.helper.ModifierListener;
 import ru.nsu.ccfit.zuev.osu.scoring.ScoreNumber;
 import ru.nsu.ccfit.zuev.osu.scoring.StatisticV2;
 
@@ -59,13 +56,13 @@ public class GameplaySpinner extends GameObject {
         center = Utils.trackToRealCoords(position);
 
         background = new ExtendedSprite();
-        background.setOrigin(Origin.Center);
+        background.setOrigin(Anchor.Center);
         background.setPosition(center.x, center.y);
         background.setTextureRegion(ResourceManager.getInstance().getTexture("spinner-background"));
         background.setScale(Config.getRES_WIDTH() / background.getWidth());
 
         circle = new ExtendedSprite();
-        circle.setOrigin(Origin.Center);
+        circle.setOrigin(Anchor.Center);
         circle.setPosition(center.x, center.y);
         circle.setTextureRegion(ResourceManager.getInstance().getTexture("spinner-circle"));
 
@@ -76,17 +73,17 @@ public class GameplaySpinner extends GameObject {
         metre.setHeight(background.getHeightScaled());
 
         approachCircle = new ExtendedSprite();
-        approachCircle.setOrigin(Origin.Center);
+        approachCircle.setOrigin(Anchor.Center);
         approachCircle.setPosition(center.x, center.y);
         approachCircle.setTextureRegion(ResourceManager.getInstance().getTexture("spinner-approachcircle"));
 
         spinText = new ExtendedSprite();
-        spinText.setOrigin(Origin.Center);
+        spinText.setOrigin(Anchor.Center);
         spinText.setPosition(center.x, center.y * 1.5f);
         spinText.setTextureRegion(ResourceManager.getInstance().getTexture("spinner-spin"));
 
         clearText = new ExtendedSprite();
-        clearText.setOrigin(Origin.Center);
+        clearText.setOrigin(Anchor.Center);
         clearText.setPosition(center.x, center.y * 0.5f);
         clearText.setTextureRegion(ResourceManager.getInstance().getTexture("spinner-clear"));
 
@@ -141,13 +138,7 @@ public class GameplaySpinner extends GameObject {
         if (GameHelper.isHidden()) {
             approachCircle.setVisible(false);
         }
-        approachCircle.registerEntityModifier(Modifiers.sequence(
-            new ModifierListener() {
-                @Override
-                public void onModifierFinished(IModifier<IEntity> pModifier, IEntity pItem) {
-                    Execution.updateThread(() -> removeFromScene());
-                }
-            },
+        approachCircle.registerEntityModifier(Modifiers.sequence(e -> Execution.updateThread(this::removeFromScene),
             Modifiers.delay(timePreempt),
             Modifiers.parallel(
                 Modifiers.alpha(duration, 0.75f, 1),

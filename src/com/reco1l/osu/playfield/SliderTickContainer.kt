@@ -1,12 +1,13 @@
 package com.reco1l.osu.playfield
 
+import com.reco1l.andengine.container.*
+import com.reco1l.andengine.sprite.*
 import com.reco1l.framework.*
-import com.reco1l.osu.graphics.*
 import com.rian.osu.beatmap.hitobject.*
 import com.rian.osu.beatmap.hitobject.sliderobject.*
 import ru.nsu.ccfit.zuev.osu.*
 
-class SliderTickContainer : ExtendedEntity() {
+class SliderTickContainer : Container() {
 
     fun init(beatmapSlider: Slider) {
 
@@ -30,6 +31,7 @@ class SliderTickContainer : ExtendedEntity() {
     }
 
     override fun onDetached() {
+        super.onDetached()
         detachChildren()
     }
 
@@ -45,6 +47,7 @@ class SliderTickSprite : ExtendedSprite() {
     }
 
     override fun onDetached() {
+        super.onDetached()
         pool.free(this)
     }
 

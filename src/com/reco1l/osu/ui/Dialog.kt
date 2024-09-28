@@ -1,13 +1,9 @@
 package com.reco1l.osu.ui
 
 import android.graphics.Color
-import android.graphics.drawable.Drawable
 import android.view.ContextThemeWrapper
-import android.view.Gravity
 import android.view.Gravity.*
 import android.view.View
-import android.view.ViewGroup.LayoutParams.MATCH_PARENT
-import android.view.inputmethod.EditorInfo
 import android.widget.Button
 import android.widget.EditText
 import android.widget.LinearLayout
@@ -19,16 +15,11 @@ import com.edlplan.ui.EasingHelper
 import com.edlplan.ui.fragment.BaseFragment
 import com.reco1l.toolkt.android.cornerRadius
 import com.reco1l.toolkt.android.dp
-import com.reco1l.toolkt.android.drawableLeft
 import com.reco1l.toolkt.android.fontColor
-import com.reco1l.toolkt.android.layoutWidth
-import com.reco1l.toolkt.animation.TimeEasing
 import com.reco1l.toolkt.animation.cancelAnimators
 import com.reco1l.toolkt.animation.toAlpha
 import com.reco1l.toolkt.animation.toScaleX
 import com.reco1l.toolkt.animation.toScaleY
-import com.reco1l.toolkt.animation.toTranslationX
-import com.reco1l.toolkt.animation.toTranslationY
 import ru.nsu.ccfit.zuev.osuplus.R
 
 
@@ -82,7 +73,7 @@ open class MessageDialog : BaseFragment() {
 
         background.cancelAnimators()
             .toAlpha(0f)
-            .toAlpha(1f, 200, ease = TimeEasing.DECELERATE)
+            .toAlpha(1f, 200, ease = EasingHelper.asInterpolator(Easing.Out))
 
         val body = findViewById<View>(R.id.frg_body)!!
         body.cornerRadius = 14f.dp
@@ -90,8 +81,8 @@ open class MessageDialog : BaseFragment() {
         body.cancelAnimators()
             .toScaleX(0.9f)
             .toScaleY(0.9f)
-            .toScaleX(1f, 300, ease = TimeEasing.BOUNCE_OUT)
-            .toScaleY(1f, 300, ease = TimeEasing.BOUNCE_OUT)
+            .toScaleX(1f, 300, ease = EasingHelper.asInterpolator(Easing.OutBounce))
+            .toScaleY(1f, 300, ease = EasingHelper.asInterpolator(Easing.OutBounce))
     }
 
 

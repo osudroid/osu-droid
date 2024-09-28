@@ -10,8 +10,11 @@ package com.reco1l.framework
  * @author Reco1l
  */
 class Pool<T : Any> @JvmOverloads constructor(
+
     private val maxSize: Int = -1,
+
     private val factory: (Pool<T>) -> T
+
 ) {
 
 

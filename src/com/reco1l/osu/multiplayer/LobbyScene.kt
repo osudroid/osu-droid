@@ -2,10 +2,10 @@ package com.reco1l.osu.multiplayer
 
 import android.net.Uri
 import android.util.Log
+import com.reco1l.andengine.sprite.*
 import ru.nsu.ccfit.zuev.osu.SecurityUtils
 import com.reco1l.ibancho.LobbyAPI
 import com.reco1l.ibancho.RoomAPI
-import com.reco1l.osu.graphics.*
 import com.reco1l.osu.updateThread
 import com.reco1l.toolkt.kotlin.async
 import org.anddev.andengine.entity.modifier.LoopEntityModifier

@@ -1,14 +1,12 @@
 package ru.nsu.ccfit.zuev.osu.game;
 
-import com.reco1l.osu.graphics.AnimatedSprite;
-import com.reco1l.osu.graphics.ExtendedSprite;
+import com.reco1l.andengine.sprite.AnimatedSprite;
+import com.reco1l.andengine.Axes;
+import com.reco1l.andengine.sprite.ExtendedSprite;
 
 import org.anddev.andengine.entity.scene.Scene;
 import org.anddev.andengine.entity.sprite.Sprite;
 import org.anddev.andengine.opengl.texture.region.TextureRegion;
-
-import java.util.ArrayList;
-import java.util.List;
 
 import ru.nsu.ccfit.zuev.osu.ResourceManager;
 import ru.nsu.ccfit.zuev.osu.scoring.StatisticV2;
@@ -34,7 +32,7 @@ public class ScoreBar extends GameObject {
 
         colour = new AnimatedSprite("scorebar-colour", true, OsuSkin.get().getAnimationFramerate());
         width = colour.getWidth();
-        colour.setAdjustSizeWithTexture(false);
+        colour.setAutoSizeAxes(Axes.None);
         colour.setPosition(5, 5);
 
         ki = new ExtendedSprite();
