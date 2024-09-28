@@ -52,7 +52,7 @@ class BlockAreaFragment : BaseFragment() {
 
         findViewById<View>(R.id.drag)!!.setOnTouchListener { _, event ->
 
-            when(event.action) {
+            when (event.action) {
 
                 ACTION_DOWN -> {
                     toolbarMoveVector.x = event.x
@@ -134,15 +134,12 @@ class BlockAreaFragment : BaseFragment() {
                 val moveVector = Vector2(0f, 0f)
                 val resizeVector = Vector2(0f, 0f)
 
-                // The margin between the block and the actual view bound, because the Remove and Resize
-                // buttons are slightly outside of the block we have to account for that when setting limits.
-                val blockMargin = 8f.dp
-
                 move.setOnTouchListener { _, event ->
 
                     when(event.action) {
 
                         ACTION_DOWN -> {
+                            itemView.bringToFront()
                             moveVector.x = event.x
                             moveVector.y = event.y
                             true
@@ -153,8 +150,8 @@ class BlockAreaFragment : BaseFragment() {
                             val deltaX = event.x - moveVector.x
                             val deltaY = event.y - moveVector.y
 
-                            itemView.x = (itemView.x + deltaX).coerceIn(-blockMargin, root!!.width - block.width - blockMargin)
-                            itemView.y = (itemView.y + deltaY).coerceIn(-blockMargin, root!!.height - block.height - blockMargin)
+                            itemView.x = (itemView.x + deltaX).coerceIn(0f, (root!!.width - block.width).toFloat())
+                            itemView.y = (itemView.y + deltaY).coerceIn(0f, (root!!.height - block.height).toFloat())
 
                             data.x = itemView.x
                             data.y = itemView.y
@@ -180,6 +177,7 @@ class BlockAreaFragment : BaseFragment() {
                     when(event.action) {
 
                         ACTION_DOWN -> {
+                            itemView.bringToFront()
                             resizeVector.x = event.x
                             resizeVector.y = event.y
                             true
