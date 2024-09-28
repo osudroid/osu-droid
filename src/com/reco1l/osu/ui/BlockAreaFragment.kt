@@ -88,11 +88,20 @@ class BlockAreaFragment : BaseFragment() {
         }
 
         findViewById<View>(R.id.reset)!!.setOnClickListener {
-            DatabaseManager.blockAreaTable.deleteAll()
+            MessageDialog()
+                .setTitle("Reset Block Areas")
+                .setMessage("Are you sure you want to reset all block areas?")
+                .addButton("Yes") { dialog ->
+                    DatabaseManager.blockAreaTable.deleteAll()
 
-            blockAreaItems.forEach {
-                it.itemView.removeSelf()
-            }
+                    blockAreaItems.forEach {
+                        it.itemView.removeSelf()
+                    }
+
+                    dialog.dismiss()
+                }
+                .addButton("No") { dialog -> dialog.dismiss() }
+                .show()
         }
 
     }
