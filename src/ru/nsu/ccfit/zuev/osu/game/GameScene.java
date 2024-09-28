@@ -1661,6 +1661,10 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
 
     //CB打击处理
     private String registerHit(final int objectId, final int score, final boolean endCombo) {
+        return registerHit(objectId, score, endCombo, true);
+    }
+
+    private String registerHit(final int objectId, final int score, final boolean endCombo, final boolean incrementCombo) {
         boolean writeReplay = objectId != -1 && replay != null && !replaying;
         if (score == 0) {
             if (stat.getCombo() > 30) {
@@ -1668,7 +1672,7 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
                         .play();
             }
             comboWasMissed = true;
-            stat.registerHit(0, false, false);
+            stat.registerHit(0, false, false, incrementCombo);
             if (writeReplay) replay.addObjectScore(objectId, ResultType.MISS);
             if (GameHelper.isPerfect()) {
                 gameover();
@@ -1688,7 +1692,7 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
 
         String scoreName = "hit300";
         if (score == 50) {
-            stat.registerHit(50, false, false);
+            stat.registerHit(50, false, false, incrementCombo);
             if (writeReplay) replay.addObjectScore(objectId, ResultType.HIT50);
             scoreName = "hit50";
             comboWas100 = true;
@@ -1702,10 +1706,10 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
             comboWas100 = true;
             if (writeReplay) replay.addObjectScore(objectId, ResultType.HIT100);
             if (endCombo && !comboWasMissed) {
-                stat.registerHit(100, true, false);
+                stat.registerHit(100, true, false, incrementCombo);
                 scoreName = "hit100k";
             } else {
-                stat.registerHit(100, false, false);
+                stat.registerHit(100, false, false, incrementCombo);
                 scoreName = "hit100";
             }
             if(GameHelper.isPerfect()){
@@ -1717,14 +1721,14 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
             if (writeReplay) replay.addObjectScore(objectId, ResultType.HIT300);
             if (endCombo && !comboWasMissed) {
                 if (!comboWas100) {
-                    stat.registerHit(300, true, true);
+                    stat.registerHit(300, true, true, incrementCombo);
                     scoreName = "hit300g";
                 } else {
-                    stat.registerHit(300, true, false);
+                    stat.registerHit(300, true, false, incrementCombo);
                     scoreName = "hit300k";
                 }
             } else {
-                stat.registerHit(300, false, false);
+                stat.registerHit(300, false, false, incrementCombo);
                 scoreName = "hit300";
             }
         }
