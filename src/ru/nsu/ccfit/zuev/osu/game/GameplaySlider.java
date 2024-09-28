@@ -50,7 +50,6 @@ public class GameplaySlider extends GameObject {
     private boolean reverse;
     private boolean slidingSamplesPlaying;
 
-    private float sliderHeadHitTimeThreshold;
     private int currentNestedObjectIndex;
     private int ticksGot;
     private double tickTime;
@@ -187,7 +186,6 @@ public class GameplaySlider extends GameObject {
         }
         circleColor.set(comboColor.r(), comboColor.g(), comboColor.b());
         currentNestedObjectIndex = 0;
-        sliderHeadHitTimeThreshold = Math.min((float) spanDuration, GameHelper.getDifficultyHelper().hitWindowFor50(GameHelper.getOverallDifficulty()));
 
         // Start circle piece
         headCirclePiece.setScale(scale);
@@ -700,7 +698,7 @@ public class GameplaySlider extends GameObject {
         if (!startHit) // If we didn't get start hit(click)
         {
             // If it's too late, mark this hit missing
-            if (passedTime > sliderHeadHitTimeThreshold) {
+            if (passedTime > Math.min((float) spanDuration, GameHelper.getDifficultyHelper().hitWindowFor50(GameHelper.getOverallDifficulty()))) {
                 startHit = true;
                 currentNestedObjectIndex++;
                 listener.onSliderHit(id, -1, position, false, bodyColor, GameObjectListener.SLIDER_START, false);
@@ -712,7 +710,10 @@ public class GameplaySlider extends GameObject {
                 ticksGot++;
                 listener.onSliderHit(id, 30, position, false, bodyColor, GameObjectListener.SLIDER_START, true);
             } else if (replayObjectData != null &&
-                    Math.abs(replayObjectData.accuracy / 1000f) <= sliderHeadHitTimeThreshold &&
+                    // Do note that not capping the hit time threshold at the slider's span duration here is intentional.
+                    // In old replays, a slider head's hit window is the 50 hit window regardless of the slider's span duration.
+                    // The cap will cause hit offsets that are greater than the slider's span duration to break and lose combo.
+                    Math.abs(replayObjectData.accuracy / 1000f) <= GameHelper.getDifficultyHelper().hitWindowFor50(GameHelper.getOverallDifficulty()) &&
                     passedTime + dt / 2 > replayObjectData.accuracy / 1000f) {
                 startHit = true;
                 playCurrentNestedObjectHitSound();
