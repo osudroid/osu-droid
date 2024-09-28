@@ -351,10 +351,9 @@ object RoomScene : Scene(), IRoomEventListener, IPlayerEventListener
 
             if (OsuSkin.get().isUseNewLayout)
             {
-                layoutBackButton?.baseApply(it)
-                it.setPosition(0f, Config.getRES_HEIGHT() - it.heightScaled)
+                layoutBackButton?.apply(it) ?: it.setPosition(0f, Config.getRES_HEIGHT() - it.heightScaled)
             }
-            else it.setPosition(0f, Config.getRES_HEIGHT() - it.height)
+            else it.setPosition(0f, Config.getRES_HEIGHT() - it.heightScaled)
 
             registerTouchArea(it)
             attachChild(it)
@@ -410,8 +409,7 @@ object RoomScene : Scene(), IRoomEventListener, IPlayerEventListener
 
             if (OsuSkin.get().isUseNewLayout)
             {
-                layoutMods?.baseApply(it)
-                it.setPosition(backButton!!.x + backButton!!.width, Config.getRES_HEIGHT() - it.heightScaled)
+                layoutMods?.apply(it) ?: it.setPosition(backButton!!.x + backButton!!.width, Config.getRES_HEIGHT() - it.heightScaled)
             }
             else it.setPosition(backButton!!.x + backButton!!.width, Config.getRES_HEIGHT() - 90f)
         }

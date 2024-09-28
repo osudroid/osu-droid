@@ -143,10 +143,9 @@ object LobbyScene : Scene()
 
             if (OsuSkin.get().isUseNewLayout)
             {
-                layoutBackButton?.baseApply(it)
-                it.setPosition(0f, Config.getRES_HEIGHT() - it.heightScaled)
+                layoutBackButton?.apply(it) ?: it.setPosition(0f, Config.getRES_HEIGHT() - it.heightScaled)
             }
-            else it.setPosition(0f, Config.getRES_HEIGHT() - it.height)
+            else it.setPosition(0f, Config.getRES_HEIGHT() - it.heightScaled)
 
             attachChild(it)
             registerTouchArea(it)

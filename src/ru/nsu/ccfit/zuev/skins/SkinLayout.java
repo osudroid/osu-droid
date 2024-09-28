@@ -5,6 +5,8 @@ import androidx.annotation.NonNull;
 import com.reco1l.andengine.sprite.ExtendedSprite;
 import org.json.JSONObject;
 
+import ru.nsu.ccfit.zuev.osu.Config;
+
 public class SkinLayout {
 
     public JSONObject property;
@@ -25,16 +27,29 @@ public class SkinLayout {
         return layout;
     }
 
-    public void baseApply(@NonNull ExtendedSprite entity) {
-        entity.setPosition(xOffset, yOffset);
+    public void apply(@NonNull ExtendedSprite sprite) {
+        apply(sprite, null);
+    }
+
+    public void apply(@NonNull ExtendedSprite sprite, ExtendedSprite previousSprite) {
         if (scale != -1) {
-            entity.setScale(scale);
+            sprite.setScale(scale);
         }
         if (width != -1) {
-            entity.setWidth(width);
+            sprite.setWidth(width);
         }
         if (height != -1) {
-            entity.setHeight(height);
+            sprite.setHeight(height);
         }
+
+        float xPosition = previousSprite != null ? previousSprite.getX() + previousSprite.getWidthScaled() : 0;
+        float yPosition = Config.getRES_HEIGHT() - sprite.getHeightScaled();
+
+        // The origin of the sprite that is using this class is in bottom left, but without its
+        // origin being set explicitly in ExtendedSprite to bottom left as touch area does not account for
+        // different origins yet. Similarly, touch area does not account for translations yet.
+        // To work around this, we need to flip the offset in the Y axis.
+        // TODO: When ExtendedSprite supports touch area properly, this should be changed to use origins and translations
+        sprite.setPosition(xPosition + xOffset, yPosition - yOffset);
     }
 }
