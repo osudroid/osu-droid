@@ -35,8 +35,7 @@ import com.google.android.material.progressindicator.CircularProgressIndicator
 import com.reco1l.framework.bass.URLBassStream
 import com.reco1l.framework.net.IDownloaderObserver
 import com.reco1l.framework.net.JsonArrayRequest
-import com.reco1l.osu.OsuColors
-import com.reco1l.osu.mainThread
+import com.reco1l.osu.*
 import kotlinx.coroutines.CoroutineExceptionHandler
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -550,7 +549,7 @@ class BeatmapSetViewHolder(itemView: View, private val mediaScope: CoroutineScop
 
         coverJob?.cancel()
 
-        if (beatmapSet.thumbnail != null) {
+        if (beatmapSet.thumbnail != null && !noTexturesMode) {
             coverJob = mediaScope.launch {
 
                 try {

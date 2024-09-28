@@ -18,8 +18,6 @@ import org.anddev.andengine.opengl.font.FontFactory;
 import org.anddev.andengine.opengl.font.StrokeFont;
 import org.anddev.andengine.opengl.texture.TextureOptions;
 import org.anddev.andengine.opengl.texture.atlas.bitmap.BitmapTextureAtlas;
-import org.anddev.andengine.opengl.texture.atlas.bitmap.source.AssetBitmapTextureAtlasSource;
-import org.anddev.andengine.opengl.texture.atlas.bitmap.source.FileBitmapTextureAtlasSource;
 import org.anddev.andengine.opengl.texture.region.TextureRegion;
 import org.anddev.andengine.opengl.texture.region.TextureRegionFactory;
 import org.anddev.andengine.util.Debug;
@@ -43,7 +41,6 @@ import ru.nsu.ccfit.zuev.osu.helper.FileUtils;
 import ru.nsu.ccfit.zuev.osu.helper.MD5Calculator;
 import ru.nsu.ccfit.zuev.osu.helper.QualityAssetBitmapSource;
 import ru.nsu.ccfit.zuev.osu.helper.QualityFileBitmapSource;
-import ru.nsu.ccfit.zuev.osu.helper.ScaledBitmapSource;
 import ru.nsu.ccfit.zuev.osu.online.OnlineManager;
 import ru.nsu.ccfit.zuev.osuplus.BuildConfig;
 import ru.nsu.ccfit.zuev.skins.OsuSkin;
@@ -455,7 +452,7 @@ public class ResourceManager {
         }
         int tw = 16, th = 16;
         TextureRegion region;
-        final ScaledBitmapSource source = new ScaledBitmapSource(new File(file));
+        final QualityFileBitmapSource source = new QualityFileBitmapSource(new File(file));
         if (source.getWidth() == 0 || source.getHeight() == 0) {
             return textures.get("menu-background");
         }
@@ -567,8 +564,7 @@ public class ResourceManager {
         int tw = 16, th = 16;
         TextureRegion region;
 
-        final AssetBitmapTextureAtlasSource source = new AssetBitmapTextureAtlasSource(
-                context, file);
+        final QualityAssetBitmapSource source = new QualityAssetBitmapSource(context, file);
         if (source.getWidth() == 0 || source.getHeight() == 0) {
             return null;
         }
@@ -595,7 +591,7 @@ public class ResourceManager {
         int tw = 16, th = 16;
         TextureRegion region;
 
-        final FileBitmapTextureAtlasSource source = new FileBitmapTextureAtlasSource(file);
+        final QualityFileBitmapSource source = new QualityFileBitmapSource(file);
         if (source.getWidth() == 0 || source.getHeight() == 0) {
             return null;
         }

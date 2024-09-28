@@ -5,6 +5,16 @@ import org.anddev.andengine.util.modifier.ease.EaseLinear
 import org.anddev.andengine.util.modifier.ease.IEaseFunction
 import kotlin.math.max
 import kotlin.math.pow
+import kotlin.random.*
+
+
+/**
+ * Returns a random color.
+ */
+@JvmOverloads
+fun Random.nextColor(until: Int = 255, alpha: Int = until): Int {
+    return Color.argb(alpha, nextInt(until), nextInt(until), nextInt(until))
+}
 
 
 object Colors {

@@ -5,6 +5,9 @@ import android.graphics.Bitmap;
 import android.graphics.Bitmap.Config;
 import android.graphics.BitmapFactory;
 
+import com.reco1l.framework.Bitmaps;
+import com.reco1l.osu.BuildUtils;
+
 import org.anddev.andengine.opengl.texture.atlas.bitmap.source.IBitmapTextureAtlasSource;
 import org.anddev.andengine.opengl.texture.source.BaseTextureAtlasSource;
 import org.anddev.andengine.util.Debug;
@@ -110,11 +113,17 @@ public class QualityAssetBitmapSource extends BaseTextureAtlasSource implements
         try {
             final BitmapFactory.Options decodeOptions = new BitmapFactory.Options();
             decodeOptions.inPreferredConfig = pBitmapConfig;
-            decodeOptions.inSampleSize = ru.nsu.ccfit.zuev.osu.Config
-                    .getTextureQuality();
+            decodeOptions.inSampleSize = ru.nsu.ccfit.zuev.osu.Config.getTextureQuality();
+            decodeOptions.inMutable = BuildUtils.noTexturesMode;
 
             in = this.mContext.getAssets().open(this.mAssetPath);
-            return BitmapFactory.decodeStream(in, null, decodeOptions);
+            var bitmap = BitmapFactory.decodeStream(in, null, decodeOptions);
+
+            if (BuildUtils.noTexturesMode) {
+                bitmap = Bitmaps.paintBitmap(bitmap);
+            }
+
+            return bitmap;
         } catch (final IOException e) {
             Debug.e("Failed loading Bitmap in "
                     + this.getClass().getSimpleName() + ". AssetPath: "
