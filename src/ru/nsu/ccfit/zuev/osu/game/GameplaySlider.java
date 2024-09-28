@@ -727,11 +727,11 @@ public class GameplaySlider extends GameObject {
             } else if (isHit() && canBeHit()) {
                 listener.registerAccuracy(passedTime);
                 startHit = true;
-                ticksGot++;
                 firstHitAccuracy = (int) (passedTime * 1000);
 
                 if (-passedTime < GameHelper.getDifficultyHelper().hitWindowFor50(GameHelper.getOverallDifficulty())) {
                     playCurrentNestedObjectHitSound();
+                    ticksGot++;
                     listener.onSliderHit(id, 30, position,
                             false, bodyColor, GameObjectListener.SLIDER_START, true);
                 } else {
@@ -1042,11 +1042,11 @@ public class GameplaySlider extends GameObject {
         if (isHit() && canBeHit()) {
             listener.registerAccuracy(passedTime);
             startHit = true;
-            ticksGot++;
             firstHitAccuracy = (int) (passedTime * 1000);
 
             if (-passedTime < GameHelper.getDifficultyHelper().hitWindowFor50(GameHelper.getOverallDifficulty())) {
                 playCurrentNestedObjectHitSound();
+                ticksGot++;
                 listener.onSliderHit(id, 30, position,
                         false, bodyColor, GameObjectListener.SLIDER_START, true);
             } else {
