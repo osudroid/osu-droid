@@ -587,37 +587,38 @@ public class SongMenu implements IUpdateHandler, MenuItemListener,
             if (layoutRandom != null) {
                 layoutRandom.baseApply(randomMap);
             }
+
             backButton.setPosition(0, Config.getRES_HEIGHT() - backButton.getHeightScaled());
 
             if (modSelection != null) {
-                modSelection.setPosition(backButton.getX() + backButton.getWidth(),
+                modSelection.setPosition(backButton.getX() + backButton.getWidthScaled(),
                                          Config.getRES_HEIGHT() - modSelection.getHeightScaled());
                 optionSelection.setPosition(
                         modSelection.getX() + modSelection.getWidthScaled(),
                         Config.getRES_HEIGHT() - optionSelection.getHeightScaled());
             } else {
-                optionSelection.setPosition(backButton.getX() + backButton.getWidth(),
+                optionSelection.setPosition(backButton.getX() + backButton.getWidthScaled(),
                                          Config.getRES_HEIGHT() - optionSelection.getHeightScaled());
             }
             randomMap.setPosition(
                     optionSelection.getX() + optionSelection.getWidthScaled(),
                     Config.getRES_HEIGHT() - randomMap.getHeightScaled());
         } else {
-            backButton.setPosition(0, Config.getRES_HEIGHT() - backButton.getHeight());
+            backButton.setPosition(0, Config.getRES_HEIGHT() - backButton.getHeightScaled());
 
             if (modSelection != null) {
-                modSelection.setPosition(backButton.getX() + backButton.getWidth(),
-                                         Config.getRES_HEIGHT() - Utils.toRes(90));
+                modSelection.setPosition(backButton.getX() + backButton.getWidthScaled(),
+                                         Config.getRES_HEIGHT() - 90);
                 optionSelection.setPosition(
                         modSelection.getX() + modSelection.getWidthScaled(),
-                        Config.getRES_HEIGHT() - Utils.toRes(90));
+                        Config.getRES_HEIGHT() - 90);
             } else {
-                optionSelection.setPosition(backButton.getX() + backButton.getWidth(),
-                                         Config.getRES_HEIGHT() - Utils.toRes(90));
+                optionSelection.setPosition(backButton.getX() + backButton.getWidthScaled(),
+                                         Config.getRES_HEIGHT() - 90);
             }
             randomMap.setPosition(
                     optionSelection.getX() + optionSelection.getWidthScaled(),
-                    Config.getRES_HEIGHT() - Utils.toRes(90));
+                    Config.getRES_HEIGHT() - 90);
         }
 
         difficultySwitcher.setPosition(randomMap.getX() + randomMap.getWidthScaled() - 18, Config.getRES_HEIGHT() - difficultySwitcher.getHeightScaled());
