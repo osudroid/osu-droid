@@ -70,29 +70,9 @@ class ConstraintContainer : Container() {
     }
 
 
-    override fun detachChild(pEntity: IEntity): Boolean {
-        return mChildren?.remove(pEntity, onDetachChild) ?: false
+    override fun onChildDetached(child: IEntity) {
+        super.onChildDetached(child)
+        removeConstraint(child as? ExtendedEntity)
     }
 
-    override fun detachChildren() {
-        constraints.clear()
-        mChildren?.clear(onDetachChild)
-    }
-
-    override fun detachChild(pEntityMatcher: IEntity.IEntityMatcher): IEntity? {
-        return mChildren?.remove(pEntityMatcher, onDetachChild)
-    }
-
-
-    companion object {
-
-        private val onDetachChild = ParameterCallable<IEntity> {
-            if (it != null) {
-                (it.parent as? ConstraintContainer)?.removeConstraint(it as? ExtendedEntity)
-                it.parent = null
-                it.onDetached()
-            }
-        }
-
-    }
 }
