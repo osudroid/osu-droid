@@ -106,6 +106,9 @@ animated.
 - Changed combo counter animation to match osu!stable
 - Miss hit judgement effect only plays in a slider's tail rather than its head and tail
 - The `sliderfollowcircle` and `sliderb` skin elements can now be animated
+- Optimized gameplay loading time by only reloading beatmap when necessary
+- Optimized real-time PP counter by not recalculating a beatmap's difficulty when retrying it
+- Optimized osu!standard difficulty calculation's difficulty spike nerf application
 
 # Removals
 
@@ -137,3 +140,5 @@ were reduced by 20% and clap hitsounds' volume were reduced by 15%
 - Fixed modern spinners not auto-completing like classical spinners when its duration is under 50ms
 - Fixed a slider's length potentially falling short from its expected length
 - Fixed force OD not being affected by speed multiplier in song selection menu
+- Fixed a slider head's hit window not being capped at the slider's span duration
+- Fixed slider ends increasing combo when not hit
