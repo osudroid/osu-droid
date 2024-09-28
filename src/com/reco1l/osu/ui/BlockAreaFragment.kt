@@ -64,14 +64,8 @@ class BlockAreaFragment : BaseFragment() {
                     val deltaX = event.x - toolbarMoveVector.x
                     val deltaY = event.y - toolbarMoveVector.y
 
-                    toolbarView.x = (toolbarView.x + deltaX).coerceIn(
-                        0f,
-                        root!!.width - toolbarView.width.toFloat()
-                    )
-                    toolbarView.y = (toolbarView.y + deltaY).coerceIn(
-                        0f,
-                        root!!.height - toolbarView.height.toFloat()
-                    )
+                    toolbarView.x = (toolbarView.x + deltaX).coerceIn(0f, root!!.width - toolbarView.width.toFloat())
+                    toolbarView.y = (toolbarView.y + deltaY).coerceIn(0f, root!!.height - toolbarView.height.toFloat())
                     true
                 }
 
@@ -156,12 +150,8 @@ class BlockAreaFragment : BaseFragment() {
                             val deltaX = event.x - moveVector.x
                             val deltaY = event.y - moveVector.y
 
-                            itemView.x = (itemView.x + deltaX).coerceIn(0f,
-                                (root!!.width - block.width).toFloat()
-                            )
-                            itemView.y = (itemView.y + deltaY).coerceIn(0f,
-                                (root!!.height - block.height).toFloat()
-                            )
+                            itemView.x = (itemView.x + deltaX).coerceIn(0f, (root!!.width - block.width).toFloat())
+                            itemView.y = (itemView.y + deltaY).coerceIn(0f, (root!!.height - block.height).toFloat())
 
                             data.x = itemView.x
                             data.y = itemView.y
