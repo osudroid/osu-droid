@@ -185,6 +185,10 @@ public class StatisticV2 implements Serializable {
     }
 
     public void registerHit(final int score, final boolean k, final boolean g) {
+        registerHit(score, k, g, true);
+    }
+
+    public void registerHit(final int score, final boolean k, final boolean g, final boolean incrementCombo) {
         if (score == 1000) {
             addScore(score, false);
             return;
@@ -216,7 +220,9 @@ public class StatisticV2 implements Serializable {
                 hit300++;
                 addScore(300, true);
                 realScore += 300;
-                currentCombo++;
+                if (incrementCombo) {
+                    currentCombo++;
+                }
                 break;
             case 100:
                 changeHp(k ? 0.15f : 0.05f);
@@ -226,14 +232,18 @@ public class StatisticV2 implements Serializable {
                 hit100++;
                 addScore(100, true);
                 realScore += 100;
-                currentCombo++;
+                if (incrementCombo) {
+                    currentCombo++;
+                }
                 break;
             case 50:
                 changeHp(0.05f);
                 hit50++;
                 addScore(50, true);
                 realScore += 50;
-                currentCombo++;
+                if (incrementCombo) {
+                    currentCombo++;
+                }
                 break;
             default:
                 changeHp(-(5 + GameHelper.getHealthDrain()) / 100f);
