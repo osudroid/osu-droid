@@ -107,7 +107,7 @@ open class AnimatedSprite(frames: Array<TextureRegion?>) : ExtendedSprite() {
                 stop()
             }
 
-            textureRegion = frames[frameTime]
+            textureRegion = frames[frameIndex]
         } else if (isPlaying) {
             isPlaying = false
         }
