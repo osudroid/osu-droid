@@ -264,16 +264,6 @@ abstract class ExtendedEntity(
     }
 
 
-    /**
-     * This will set the size of the entity without updating the buffer.
-     *
-     * Intended for internal use only to handle the [autoSizeAxes] property.
-     */
-    protected fun setSizeInternal(w: Float, h: Float) {
-        width = w
-        height = h
-    }
-
     open fun setSize(w: Float, h: Float) {
 
         var updateBuffer = false
