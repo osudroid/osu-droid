@@ -1,5 +1,6 @@
 package com.reco1l.andengine
 
+import android.util.*
 import androidx.annotation.*
 import com.reco1l.andengine.container.*
 import com.reco1l.andengine.modifier.*
@@ -106,14 +107,6 @@ abstract class ExtendedEntity(
         }
 
 
-    init {
-        mRotationCenterX = 0.5f
-        mRotationCenterY = 0.5f
-        mScaleCenterX = 0.5f
-        mScaleCenterY = 0.5f
-    }
-
-
     open fun setAnchor(anchor: Anchor) {
         anchorX = anchor.factorX
         anchorY = anchor.factorY
@@ -122,17 +115,37 @@ abstract class ExtendedEntity(
     open fun setOrigin(origin: Anchor) {
         originX = origin.factorX
         originY = origin.factorY
+        mRotationCenterX = origin.factorX
+        mRotationCenterY = origin.factorY
+        mScaleCenterX = origin.factorX
+        mScaleCenterY = origin.factorY
     }
 
-    open fun setRotationCenter(center: Anchor) {
-        mRotationCenterX = center.factorX
-        mRotationCenterY = center.factorY
+
+    final override fun setRotationCenter(pRotationCenterX: Float, pRotationCenterY: Float) {
+        Log.w("ExtendedEntity", "Rotation center is determined by the entity's origin, ignoring.")
     }
 
-    open fun setScaleCenter(center: Anchor) {
-        mScaleCenterX = center.factorX
-        mScaleCenterY = center.factorY
+    final override fun setRotationCenterX(pRotationCenterX: Float) {
+        Log.w("ExtendedEntity", "Rotation center is determined by the entity's origin, ignoring.")
     }
+
+    final override fun setRotationCenterY(pRotationCenterY: Float) {
+        Log.w("ExtendedEntity", "Rotation center is determined by the entity's origin, ignoring.")
+    }
+
+    final override fun setScaleCenter(pScaleCenterX: Float, pScaleCenterY: Float) {
+        Log.w("ExtendedEntity", "Scale center is determined by the entity's origin, ignoring.")
+    }
+
+    final override fun setScaleCenterX(pScaleCenterX: Float) {
+        Log.w("ExtendedEntity", "Scale center is determined by the entity's origin, ignoring.")
+    }
+
+    final override fun setScaleCenterY(pScaleCenterY: Float) {
+        Log.w("ExtendedEntity", "Scale center is determined by the entity's origin, ignoring.")
+    }
+
 
     override fun setPosition(pX: Float, pY: Float) {
         if (mX != pX || mY != pY) {

@@ -129,6 +129,7 @@ public class GameplaySlider extends GameObject {
         endArrow.setTextureRegion(ResourceManager.getInstance().getTexture("reversearrow"));
 
         ball = new AnimatedSprite("sliderb", false);
+        ball.setOrigin(Anchor.Center);
 
         // Avoid to use AnimatedSprite if not necessary.
         if (ResourceManager.getInstance().isTextureLoaded("sliderfollowcircle-0")) {
@@ -137,6 +138,7 @@ public class GameplaySlider extends GameObject {
             followCircle = new ExtendedSprite();
             followCircle.setTextureRegion(ResourceManager.getInstance().getTexture("sliderfollowcircle"));
         }
+        followCircle.setOrigin(Anchor.Center);
 
         sliderBody = new SliderBody(OsuSkin.get().isSliderHintEnable());
         tickContainer = new SliderTickContainer();
@@ -893,10 +895,8 @@ public class GameplaySlider extends GameObject {
         judgeSliderTicks();
 
         // Setting position of ball and follow circle
-        followCircle.setPosition(ballPos.x - followCircle.getWidth() / 2,
-                ballPos.y - followCircle.getHeight() / 2);
-        ball.setPosition(ballPos.x - ball.getWidth() / 2,
-                ballPos.y - ball.getHeight() / 2);
+        followCircle.setPosition(ballPos.x, ballPos.y);
+        ball.setPosition(ballPos.x, ballPos.y);
         ball.setRotation(ballAngle);
 
         if (GameHelper.isAuto() || GameHelper.isAutopilotMod()) {

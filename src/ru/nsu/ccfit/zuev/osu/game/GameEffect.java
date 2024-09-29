@@ -3,6 +3,7 @@ package ru.nsu.ccfit.zuev.osu.game;
 import android.graphics.PointF;
 
 
+import com.reco1l.andengine.Anchor;
 import com.reco1l.osu.Execution;
 import com.reco1l.andengine.sprite.AnimatedSprite;
 import com.reco1l.andengine.sprite.ExtendedSprite;
@@ -57,7 +58,8 @@ public class GameEffect extends GameObject {
         if (hit instanceof AnimatedSprite animatedHit) {
             animatedHit.setElapsedSec(0f);
         }
-        hit.setPosition(pos.x - hit.getWidth() / 2f, pos.y - hit.getHeight() / 2f);
+        hit.setPosition(pos.x, pos.y);
+        hit.setOrigin(Anchor.Center);
         hit.registerEntityModifier(Modifiers.parallel(entity -> {
             Execution.updateThread(() -> {
                 hit.detachSelf();
