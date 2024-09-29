@@ -76,7 +76,9 @@ object FollowPointConnection {
             osuPixelsEndPosition.y - osuPixelsStartPosition.y
         ).toInt()
 
-        for (d in (SPACING * 1.5f).toInt() until osuPixelsDistance - SPACING step SPACING) {
+        var d = (SPACING * 1.5f).toInt()
+        while (d < osuPixelsDistance - SPACING) {
+
             val fraction = d.toFloat() / osuPixelsDistance
 
             val pointStartX = startPosition.x + distanceX * (fraction - 0.1f)
@@ -112,6 +114,7 @@ object FollowPointConnection {
             ))
 
             scene.attachChild(fp, 0)
+            d += SPACING
         }
     }
 }
