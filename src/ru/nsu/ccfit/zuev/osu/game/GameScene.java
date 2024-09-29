@@ -24,6 +24,7 @@ import com.reco1l.andengine.Anchor;
 import com.reco1l.andengine.sprite.VideoSprite;
 import com.reco1l.andengine.ExtendedScene;
 import com.reco1l.osu.playfield.FollowPointConnection;
+import com.reco1l.osu.playfield.ComboCounter;
 import com.reco1l.osu.playfield.ScoreText;
 import com.reco1l.osu.playfield.SliderTickSprite;
 import com.reco1l.osu.ui.BlockAreaFragment;
@@ -137,7 +138,7 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
     private LinkedList<GameObject> activeObjects;
     private LinkedList<GameObject> passiveObjects;
     private LinkedList<GameObject> expiredObjects;
-    private ScoreText comboText, accuracyText, scoreText;  //显示的文字  连击数  ACC  分数
+    private ScoreText accuracyText, scoreText;  //显示的文字  连击数  ACC  分数
     private Queue<BreakPeriod> breakPeriods = new LinkedList<>();
     private BreakAnimator breakAnimator;
     private ScoreBar scorebar;
@@ -191,13 +192,19 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
     private ChangeableText ppText;
     private ChangeableText memText;
 
+    // HUD
+
+    private ComboCounter comboText;
+
+
+    // Timing
+
     /**
      * The time at which the last frame was rendered with respect to {@link SystemClock#uptimeMillis()}.
      * <br>
      * If 0, a frame has not been rendered yet.
      */
     private long previousFrameTime;
-
 
 
     // Video support
@@ -817,24 +824,17 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
             scoreText = new ScoreText(OsuSkin.get().getScorePrefix());
             scoreText.setAnchor(Anchor.TopRight);
             scoreText.setOrigin(Anchor.TopRight);
-            scoreText.setScaleCenter(Anchor.TopRight);
             scoreText.setText("0000000000");
             scoreText.setScale(0.9f);
 
             accuracyText = new ScoreText(OsuSkin.get().getScorePrefix());
             accuracyText.setAnchor(Anchor.TopRight);
             accuracyText.setOrigin(Anchor.TopRight);
-            accuracyText.setScaleCenter(Anchor.TopRight);
             accuracyText.setText("000.00%");
             accuracyText.setScale(0.6f);
             accuracyText.setY(50);
 
-            comboText = new ScoreText(OsuSkin.get().getComboPrefix(), Config.isAnimateComboText());
-            comboText.setAnchor(Anchor.BottomLeft);
-            comboText.setOrigin(Anchor.BottomLeft);
-            comboText.setScaleCenter(Anchor.BottomLeft);
-            comboText.setScale(1.5f);
-            comboText.setText("0x");
+            comboText = new ComboCounter();
 
             fgScene.attachChild(comboText);
             fgScene.attachChild(accuracyText);
@@ -1185,11 +1185,7 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
         }
 
         if(!Config.isHideInGameUI()) {
-            strBuilder.setLength(0);
-            strBuilder.append(stat.getCombo());
-            strBuilder.append('x');
-            var comboStr = strBuilder.toString();
-            comboText.setText(comboStr);
+            comboText.setCombo(stat.getCombo());
 
             strBuilder.setLength(0);
             float rawAccuracy = stat.getAccuracy() * 100f;
