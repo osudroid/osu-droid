@@ -1,7 +1,5 @@
 package com.reco1l.andengine.modifier
 
-import com.edlplan.framework.easing.Easing
-import com.edlplan.ui.EasingHelper
 import com.reco1l.andengine.*
 import com.reco1l.andengine.modifier.ModifierType.*
 
@@ -47,7 +45,7 @@ interface IModifierChain {
      * Begins a delayed chain.
      * In a [ExtendedEntity] this should be called instead of [delay].
      */
-    fun beginDelayChain(durationSec: Float, builder: IModifierChainBlock): UniversalModifier {
+    fun beginDelayedChain(durationSec: Float, builder: IModifierChainBlock): UniversalModifier {
         return applyModifier {
             it.type = NONE
             it.duration = durationSec
