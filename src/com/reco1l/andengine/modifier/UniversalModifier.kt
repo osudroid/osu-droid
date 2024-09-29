@@ -285,9 +285,9 @@ class UniversalModifier @JvmOverloads constructor(private val pool: Pool<Univers
     }
 
     /**
-     * Runs a block of code when the modifier finishes.
+     * Sets the callback to be called when the modifier finishes.
      */
-    fun after(block: OnModifierFinished): UniversalModifier {
+    fun then(block: OnModifierFinished): UniversalModifier {
         onFinished = block
         return this
     }
