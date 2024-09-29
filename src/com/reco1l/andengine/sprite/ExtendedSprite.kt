@@ -21,20 +21,29 @@ open class ExtendedSprite(textureRegion: TextureRegion? = null) : ExtendedEntity
                 field = value
 
                 if (autoSizeAxes != Axes.None) {
-                    val currentTextureWidth = textureRegion?.width?.toFloat() ?: 0f
-                    val currentTextureHeight = textureRegion?.height?.toFloat() ?: 0f
+                    val textureWidth = textureRegion?.width?.toFloat() ?: 0f
+                    val textureHeight = textureRegion?.height?.toFloat() ?: 0f
 
-                    setSizeInternal(
-                        if (autoSizeAxes == Axes.X || autoSizeAxes == Axes.Both) currentTextureWidth else width,
-                        if (autoSizeAxes == Axes.Y || autoSizeAxes == Axes.Both) currentTextureHeight else height
-                    )
+                    var updateBuffer = false
+
+                    if (textureWidth != internalWidth && (autoSizeAxes == Axes.X || autoSizeAxes == Axes.Both)) {
+                        internalWidth = textureWidth
+                        updateBuffer = true
+                    }
+
+                    if (textureHeight != internalHeight && (autoSizeAxes == Axes.Y || autoSizeAxes == Axes.Both)) {
+                        internalHeight = textureHeight
+                        updateBuffer = true
+                    }
+
+                    if (updateBuffer) {
+                        updateVertexBuffer()
+                    }
 
                     if (parent is Container) {
                         (parent as Container).onChildSizeChanged(this)
                     }
                 }
-
-                updateVertexBuffer()
             }
         }
 
@@ -80,20 +89,29 @@ open class ExtendedSprite(textureRegion: TextureRegion? = null) : ExtendedEntity
             }
 
             if (autoSizeAxes != Axes.None) {
-                val textureWidth = value?.width?.toFloat() ?: 0f
-                val textureHeight = value?.height?.toFloat() ?: 0f
+                val textureWidth = textureRegion?.width?.toFloat() ?: 0f
+                val textureHeight = textureRegion?.height?.toFloat() ?: 0f
 
-                setSizeInternal(
-                    if (autoSizeAxes == Axes.X || autoSizeAxes == Axes.Both) textureWidth else width,
-                    if (autoSizeAxes == Axes.Y || autoSizeAxes == Axes.Both) textureHeight else height
-                )
+                var updateBuffer = false
+
+                if (textureWidth != internalWidth && (autoSizeAxes == Axes.X || autoSizeAxes == Axes.Both)) {
+                    internalWidth = textureWidth
+                    updateBuffer = true
+                }
+
+                if (textureHeight != internalHeight && (autoSizeAxes == Axes.Y || autoSizeAxes == Axes.Both)) {
+                    internalHeight = textureHeight
+                    updateBuffer = true
+                }
+
+                if (updateBuffer) {
+                    updateVertexBuffer()
+                }
 
                 if (parent is Container) {
                     (parent as Container).onChildSizeChanged(this)
                 }
             }
-
-            updateVertexBuffer()
         }
 
 
@@ -122,7 +140,7 @@ open class ExtendedSprite(textureRegion: TextureRegion? = null) : ExtendedEntity
         GLHelper.enableTexCoordArray(pGL)
     }
 
-    override fun doDraw(pGL: GL10?, pCamera: Camera?) {
+    override fun doDraw(pGL: GL10, pCamera: Camera) {
         textureRegion?.onApply(pGL)
         super.doDraw(pGL, pCamera)
     }
