@@ -68,7 +68,7 @@ abstract class DifficultyCalculator<TObject : DifficultyHitObject, TAttributes :
         val beatmapToCalculate = beatmap.createPlayableBeatmap(mode, parameters?.mods, parameters?.customSpeedMultiplier ?: 1f, scope)
         val skills = createSkills(beatmapToCalculate, parameters)
 
-        val objects = createDifficultyHitObjects(beatmapToCalculate, parameters)
+        val objects = createDifficultyHitObjects(beatmapToCalculate, parameters, scope)
 
         for (obj in objects) {
             for (skill in skills) {
@@ -108,7 +108,7 @@ abstract class DifficultyCalculator<TObject : DifficultyHitObject, TAttributes :
             difficulty.apply(beatmapToCalculate.difficulty)
         }
 
-        val difficultyObjects = createDifficultyHitObjects(beatmapToCalculate, parameters)
+        val difficultyObjects = createDifficultyHitObjects(beatmapToCalculate, parameters, scope)
         var currentIndex = 0
 
         for (obj in beatmapToCalculate.hitObjects.objects) {
