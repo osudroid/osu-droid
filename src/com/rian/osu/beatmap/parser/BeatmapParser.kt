@@ -18,6 +18,8 @@ import java.io.Closeable
 import java.io.File
 import java.io.IOException
 import java.util.regex.Pattern
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.ensureActive
 
 /**
  * A parser for parsing `.osu` files.
@@ -39,17 +41,28 @@ class BeatmapParser : Closeable {
     private var beatmapFormatVersion = 14
 
     /**
-     * @param file The `.osu` file.
+     * The [CoroutineScope] to use for coroutines.
      */
-    constructor(file: File) {
+    private val scope: CoroutineScope?
+
+    /**
+     * @param file The `.osu` file.
+     * @param scope The [CoroutineScope] to use for coroutines.
+     */
+    @JvmOverloads
+    constructor(file: File, scope: CoroutineScope? = null) {
         this.file = file
+        this.scope = scope
     }
 
     /**
      * @param path The path to the `.osu` file.
+     * @param scope The [CoroutineScope] to use for coroutines.
      */
-    constructor(path: String) {
+    @JvmOverloads
+    constructor(path: String, scope: CoroutineScope? = null) {
         file = File(path)
+        this.scope = scope
     }
 
     /**
@@ -59,6 +72,8 @@ class BeatmapParser : Closeable {
      */
     fun openFile(): Boolean {
         try {
+            scope?.ensureActive()
+
             source = file.source().buffer()
         } catch (e: IOException) {
             Log.e("BeatmapParser.openFile", e.message!!)
@@ -67,7 +82,11 @@ class BeatmapParser : Closeable {
         }
 
         try {
+            scope?.ensureActive()
+
             val head = source!!.readUtf8Line() ?: return false
+
+            scope?.ensureActive()
 
             val pattern = Pattern.compile("osu file format v(\\d+)")
             val matcher = pattern.matcher(head)
@@ -96,6 +115,8 @@ class BeatmapParser : Closeable {
      */
     @JvmOverloads
     fun parse(withHitObjects: Boolean, mode: GameMode = GameMode.Standard): Beatmap? {
+        scope?.ensureActive()
+
         if (source == null && !openFile()) {
             ToastLogger.showText(
                 StringTable.format(R.string.beatmap_parser_cannot_open_file, file.nameWithoutExtension),
@@ -104,6 +125,8 @@ class BeatmapParser : Closeable {
 
             return null
         }
+
+        scope?.ensureActive()
 
         var currentLine: String?
         var currentSection: BeatmapSection? = null
@@ -115,6 +138,8 @@ class BeatmapParser : Closeable {
 
         try {
             while (source!!.readUtf8Line().also { currentLine = it } != null) {
+                scope?.ensureActive()
+
                 // Check if beatmap is not an osu!standard beatmap
                 if (beatmap.general.mode != 0) {
                     // Silently ignore (do not log anything to the user)
@@ -146,29 +171,31 @@ class BeatmapParser : Closeable {
                     continue
                 }
 
+                scope?.ensureActive()
+
                 try {
                     when (currentSection) {
                         BeatmapSection.General ->
-                            BeatmapGeneralParser.parse(beatmap, line)
+                            BeatmapGeneralParser.parse(beatmap, line, scope)
 
                         BeatmapSection.Metadata ->
-                            BeatmapMetadataParser.parse(beatmap, line)
+                            BeatmapMetadataParser.parse(beatmap, line, scope)
 
                         BeatmapSection.Difficulty ->
-                            BeatmapDifficultyParser.parse(beatmap, line)
+                            BeatmapDifficultyParser.parse(beatmap, line, scope)
 
                         BeatmapSection.Events ->
-                            BeatmapEventsParser.parse(beatmap, line)
+                            BeatmapEventsParser.parse(beatmap, line, scope)
 
                         BeatmapSection.TimingPoints ->
-                            BeatmapControlPointsParser.parse(beatmap, line)
+                            BeatmapControlPointsParser.parse(beatmap, line, scope)
 
                         BeatmapSection.Colors ->
-                            BeatmapColorParser.parse(beatmap, line)
+                            BeatmapColorParser.parse(beatmap, line, scope)
 
                         BeatmapSection.HitObjects ->
                             if (withHitObjects) {
-                                BeatmapHitObjectsParser.parse(beatmap, line)
+                                BeatmapHitObjectsParser.parse(beatmap, line, scope)
                             }
 
                         else -> continue
@@ -184,11 +211,13 @@ class BeatmapParser : Closeable {
 
         return beatmap.apply {
             hitObjects.objects.forEach {
+                scope?.ensureActive()
+
                 it.applyDefaults(controlPoints, difficulty, mode)
                 it.applySamples(controlPoints)
             }
 
-            BeatmapProcessor(this).also {
+            BeatmapProcessor(this, scope).also {
                 it.preProcess()
                 it.postProcess(mode)
             }

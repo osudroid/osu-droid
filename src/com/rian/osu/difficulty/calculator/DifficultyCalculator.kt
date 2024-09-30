@@ -11,6 +11,8 @@ import com.rian.osu.difficulty.attributes.TimedDifficultyAttributes
 import com.rian.osu.difficulty.skills.Skill
 import com.rian.osu.mods.*
 import kotlin.math.sqrt
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.ensureActive
 
 /**
  * A difficulty calculator for calculating star rating.
@@ -53,20 +55,24 @@ abstract class DifficultyCalculator<TObject : DifficultyHitObject, TAttributes :
      *
      * @param beatmap The [Beatmap] whose difficulty is to be calculated.
      * @param parameters The calculation parameters that should be applied to the [Beatmap].
+     * @param scope The [CoroutineScope] to use for coroutines.
      * @return A structure describing the difficulty of the [Beatmap].
      */
     @JvmOverloads
     fun calculate(
         beatmap: Beatmap,
-        parameters: DifficultyCalculationParameters? = null
+        parameters: DifficultyCalculationParameters? = null,
+        scope: CoroutineScope? = null
     ): TAttributes {
         // Always operate on a clone of the original beatmap when needed, to not modify it game-wide
-        val beatmapToCalculate = beatmap.createPlayableBeatmap(mode, parameters?.mods, parameters?.customSpeedMultiplier ?: 1f)
+        val beatmapToCalculate = beatmap.createPlayableBeatmap(mode, parameters?.mods, parameters?.customSpeedMultiplier ?: 1f, scope)
         val skills = createSkills(beatmapToCalculate, parameters)
-        val objects = createDifficultyHitObjects(beatmapToCalculate, parameters)
+
+        val objects = createDifficultyHitObjects(beatmapToCalculate, parameters, scope)
 
         for (obj in objects) {
             for (skill in skills) {
+                scope?.ensureActive()
                 skill.process(obj)
             }
         }
@@ -80,15 +86,17 @@ abstract class DifficultyCalculator<TObject : DifficultyHitObject, TAttributes :
      *
      * @param beatmap The [Beatmap] whose difficulty is to be calculated.
      * @param parameters The calculation parameters that should be applied to the [Beatmap].
+     * @param scope The [CoroutineScope] to use for coroutines.
      * @return The set of [TimedDifficultyAttributes].
      */
     @JvmOverloads
     fun calculateTimed(
         beatmap: Beatmap,
-        parameters: DifficultyCalculationParameters? = null
+        parameters: DifficultyCalculationParameters? = null,
+        scope: CoroutineScope? = null
     ): List<TimedDifficultyAttributes<TAttributes>> {
         // Always operate on a clone of the original beatmap when needed, to not modify it game-wide
-        val beatmapToCalculate = beatmap.createPlayableBeatmap(mode, parameters?.mods, parameters?.customSpeedMultiplier ?: 1f)
+        val beatmapToCalculate = beatmap.createPlayableBeatmap(mode, parameters?.mods, parameters?.customSpeedMultiplier ?: 1f, scope)
         val skills = createSkills(beatmapToCalculate, parameters)
         val attributes = mutableListOf<TimedDifficultyAttributes<TAttributes>>()
 
@@ -100,7 +108,7 @@ abstract class DifficultyCalculator<TObject : DifficultyHitObject, TAttributes :
             difficulty.apply(beatmapToCalculate.difficulty)
         }
 
-        val difficultyObjects = createDifficultyHitObjects(beatmapToCalculate, parameters)
+        val difficultyObjects = createDifficultyHitObjects(beatmapToCalculate, parameters, scope)
         var currentIndex = 0
 
         for (obj in beatmapToCalculate.hitObjects.objects) {
@@ -108,6 +116,7 @@ abstract class DifficultyCalculator<TObject : DifficultyHitObject, TAttributes :
 
             while (currentIndex < difficultyObjects.size && difficultyObjects[currentIndex].obj.endTime <= obj.endTime) {
                 for (skill in skills) {
+                    scope?.ensureActive()
                     skill.process(difficultyObjects[currentIndex])
                 }
 
@@ -139,9 +148,10 @@ abstract class DifficultyCalculator<TObject : DifficultyHitObject, TAttributes :
      *
      * @param beatmap The [Beatmap] providing the hit objects to generate from.
      * @param parameters The difficulty calculation parameter being used.
+     * @param scope The [CoroutineScope] to use for coroutines.
      * @return The generated [DifficultyHitObject]s.
      */
-    protected abstract fun createDifficultyHitObjects(beatmap: Beatmap, parameters: DifficultyCalculationParameters?): List<TObject>
+    protected abstract fun createDifficultyHitObjects(beatmap: Beatmap, parameters: DifficultyCalculationParameters?, scope: CoroutineScope? = null): List<TObject>
 
     /**
      * Calculates the rating of a [Skill] based on its difficulty.

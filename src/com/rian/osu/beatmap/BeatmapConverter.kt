@@ -1,22 +1,28 @@
 package com.rian.osu.beatmap
 
+import com.rian.osu.GameMode
 import com.rian.osu.beatmap.hitobject.HitCircle
 import com.rian.osu.beatmap.hitobject.HitObject
 import com.rian.osu.beatmap.hitobject.Slider
 import com.rian.osu.beatmap.hitobject.Spinner
 import com.rian.osu.beatmap.sections.BeatmapHitObjects
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.ensureActive
 
 /**
- * Converts a [Beatmap] for another mode.
- *
- * To be used in dpp integration.
+ * Converts a [Beatmap] for another [GameMode].
  */
-class BeatmapConverter(
+class BeatmapConverter @JvmOverloads constructor(
     /**
      * The [Beatmap] to convert.
      */
     @JvmField
-    val beatmap: Beatmap
+    val beatmap: Beatmap,
+
+    /**
+     * The [CoroutineScope] to use for coroutines.
+     */
+    private val scope: CoroutineScope? = null
 ) {
     /**
      * Converts [Beatmap].
@@ -26,11 +32,16 @@ class BeatmapConverter(
     fun convert() = beatmap.clone().also {
         // Shallow clone isn't enough to ensure we don't mutate some beatmap properties unexpectedly.
         it.difficulty = beatmap.difficulty.clone()
+
+        scope?.ensureActive()
+
         it.hitObjects = convertHitObjects().also { b -> b.objects.sortBy { o -> o.startTime } }
     }
 
     private fun convertHitObjects() = BeatmapHitObjects().also {
         beatmap.hitObjects.objects.forEach { obj ->
+            scope?.ensureActive()
+
             it.add(convertHitObject(obj))
         }
     }

@@ -8,6 +8,8 @@ import com.rian.osu.math.Precision.almostEquals
 import com.rian.osu.math.Vector2
 import kotlin.math.max
 import kotlin.math.min
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.ensureActive
 
 /**
  * A parser for parsing a beatmap's hit objects section.
@@ -15,9 +17,12 @@ import kotlin.math.min
 object BeatmapHitObjectsParser : BeatmapSectionParser() {
     private val pipePropertyRegex = "[|]".toRegex()
 
-    override fun parse(beatmap: Beatmap, line: String) = line
+    override fun parse(beatmap: Beatmap, line: String, scope: CoroutineScope?) = line
         .split(COMMA_PROPERTY_REGEX)
-        .dropLastWhile { it.isEmpty() }
+        .dropLastWhile {
+            scope?.ensureActive()
+            it.isEmpty()
+        }
         .let {
             if (it.size < 4) {
                 throw UnsupportedOperationException("Malformed hit object")
@@ -41,15 +46,17 @@ object BeatmapHitObjectsParser : BeatmapSectionParser() {
             val soundType = HitSoundType.parse(parseInt(it[4]))
             val bankInfo = SampleBankInfo()
 
+            scope?.ensureActive()
+
             val obj = when (HitObjectType.valueOf(type % 16)) {
                 HitObjectType.Normal, HitObjectType.NormalNewCombo ->
-                    createCircle(it, beatmap, time, position, beatmap.hitObjects.objects.isEmpty() || isNewCombo, comboOffset, bankInfo)
+                    createCircle(it, beatmap, time, position, beatmap.hitObjects.objects.isEmpty() || isNewCombo, comboOffset, bankInfo, scope)
 
                 HitObjectType.Slider, HitObjectType.SliderNewCombo ->
-                    createSlider(it, beatmap, time, position, beatmap.hitObjects.objects.isEmpty() || isNewCombo, comboOffset, soundType, bankInfo)
+                    createSlider(it, beatmap, time, position, beatmap.hitObjects.objects.isEmpty() || isNewCombo, comboOffset, soundType, bankInfo, scope)
 
                 HitObjectType.Spinner ->
-                    createSpinner(it, beatmap, time, isNewCombo, bankInfo)
+                    createSpinner(it, beatmap, time, isNewCombo, bankInfo, scope)
 
                 else -> throw UnsupportedOperationException("Malformed hit object")
             }.also { h -> h.samples.addAll(convertSoundType(soundType, bankInfo)) }
@@ -57,7 +64,7 @@ object BeatmapHitObjectsParser : BeatmapSectionParser() {
             beatmap.hitObjects.add(obj)
         }
 
-    private fun createCircle(pars: List<String>, beatmap: Beatmap, time: Double, position: Vector2, isNewCombo: Boolean, comboOffset: Int, bankInfo: SampleBankInfo) =
+    private fun createCircle(pars: List<String>, beatmap: Beatmap, time: Double, position: Vector2, isNewCombo: Boolean, comboOffset: Int, bankInfo: SampleBankInfo, scope: CoroutineScope?) =
         HitCircle(
             time,
             position,
@@ -66,10 +73,10 @@ object BeatmapHitObjectsParser : BeatmapSectionParser() {
                 // The last object was a spinner
                 beatmap.hitObjects.objects.lastOrNull() is Spinner || isNewCombo,
             comboOffset
-        ).also { readCustomSampleBanks(bankInfo, pars.getOrNull(5)) }
+        ).also { readCustomSampleBanks(bankInfo, pars.getOrNull(5), scope = scope) }
 
     @Throws(UnsupportedOperationException::class)
-    private fun createSlider(pars: List<String>, beatmap: Beatmap, time: Double, startPosition: Vector2, isNewCombo: Boolean, comboOffset: Int, soundType: HitSoundType, bankInfo: SampleBankInfo): Slider {
+    private fun createSlider(pars: List<String>, beatmap: Beatmap, time: Double, startPosition: Vector2, isNewCombo: Boolean, comboOffset: Int, soundType: HitSoundType, bankInfo: SampleBankInfo, scope: CoroutineScope?): Slider {
         if (pars.size < 8) {
             throw UnsupportedOperationException("Malformed slider")
         }
@@ -84,14 +91,23 @@ object BeatmapHitObjectsParser : BeatmapSectionParser() {
         // osu!stable treated the first span of the slider as a repeat, but no repeats are happening
         repeatCount = max(0, repeatCount - 1)
 
-        val curvePointsData = pars[5].split(pipePropertyRegex).dropLastWhile { it.isEmpty() }
-        var sliderType = SliderPathType.parse(curvePointsData[0][0])
+        val curvePointsData = pars[5].split(pipePropertyRegex).dropLastWhile {
+            scope?.ensureActive()
+            it.isEmpty()
+        }
 
+        var sliderType = SliderPathType.parse(curvePointsData[0][0])
         val curvePoints = mutableListOf<Vector2>().apply { add(Vector2(0f)) }
 
-        curvePointsData.run {
-            for (i in 1 until size) {
-                this[i].split(COLON_PROPERTY_REGEX).dropLastWhile { it.isEmpty() }.let {
+        for (i in 1 until curvePointsData.size) {
+            scope?.ensureActive()
+
+            curvePointsData[i]
+                .split(COLON_PROPERTY_REGEX)
+                .dropLastWhile {
+                    scope?.ensureActive()
+                    it.isEmpty()
+                }.let {
                     val curvePointPosition = Vector2(
                         parseInt(it[0]).toFloat(),
                         parseInt(it[1]).toFloat()
@@ -99,7 +115,6 @@ object BeatmapHitObjectsParser : BeatmapSectionParser() {
 
                     curvePoints.add(curvePointPosition - startPosition)
                 }
-            }
         }
 
         curvePoints.let {
@@ -125,9 +140,11 @@ object BeatmapHitObjectsParser : BeatmapSectionParser() {
             }
         }
 
+        scope?.ensureActive()
+
         val path = SliderPath(sliderType, curvePoints, rawLength)
 
-        readCustomSampleBanks(bankInfo, pars.getOrNull(10), true)
+        readCustomSampleBanks(bankInfo, pars.getOrNull(10), true, scope)
 
         // One node for each repeat + the start and end nodes
         val nodes = repeatCount + 2
@@ -137,6 +154,8 @@ object BeatmapHitObjectsParser : BeatmapSectionParser() {
             for (i in 0 until nodes) {
                 add(bankInfo.copy())
             }
+
+            scope?.ensureActive()
 
             // Read any per-node sample banks
             val sets = pars.getOrNull(9)?.split(pipePropertyRegex)
@@ -152,6 +171,8 @@ object BeatmapHitObjectsParser : BeatmapSectionParser() {
             for (i in 0 until nodes) {
                 add(soundType)
             }
+
+            scope?.ensureActive()
 
             // Read any per-node sound types
             val adds = pars.getOrNull(8)?.split(pipePropertyRegex)
@@ -170,6 +191,8 @@ object BeatmapHitObjectsParser : BeatmapSectionParser() {
         }
 
         val difficultyControlPoint = beatmap.controlPoints.difficulty.controlPointAt(time)
+
+        scope?.ensureActive()
 
         return Slider(
             time,
@@ -195,9 +218,9 @@ object BeatmapHitObjectsParser : BeatmapSectionParser() {
         }
     }
 
-    private fun createSpinner(pars: List<String>, beatmap: Beatmap, time: Double, isNewCombo: Boolean, bankInfo: SampleBankInfo) =
+    private fun createSpinner(pars: List<String>, beatmap: Beatmap, time: Double, isNewCombo: Boolean, bankInfo: SampleBankInfo, scope: CoroutineScope?) =
         Spinner(time, beatmap.getOffsetTime(parseInt(pars[5])).toDouble(), isNewCombo).also {
-            readCustomSampleBanks(bankInfo, pars.getOrNull(6))
+            readCustomSampleBanks(bankInfo, pars.getOrNull(6), scope = scope)
         }
 
     /**
@@ -242,10 +265,12 @@ object BeatmapHitObjectsParser : BeatmapSectionParser() {
      * @param str The information.
      * @param banksOnly Whether to only convert banks.
      */
-    private fun readCustomSampleBanks(bankInfo: SampleBankInfo, str: String?, banksOnly: Boolean = false) {
+    private fun readCustomSampleBanks(bankInfo: SampleBankInfo, str: String?, banksOnly: Boolean = false, scope: CoroutineScope? = null) {
         if (str.isNullOrEmpty()) {
             return
         }
+
+        scope?.ensureActive()
 
         val s = str.split(COLON_PROPERTY_REGEX)
 

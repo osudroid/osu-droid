@@ -4,6 +4,8 @@ import com.rian.osu.beatmap.Beatmap
 import com.rian.osu.beatmap.timings.BreakPeriod
 import ru.nsu.ccfit.zuev.osu.RGBColor
 import kotlin.math.max
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.ensureActive
 
 /**
  * A parser for parsing a beatmap's events section.
@@ -11,9 +13,12 @@ import kotlin.math.max
 object BeatmapEventsParser : BeatmapSectionParser() {
     private val splitRegex = "\\s*,\\s*".toRegex()
 
-    override fun parse(beatmap: Beatmap, line: String) = line
+    override fun parse(beatmap: Beatmap, line: String, scope: CoroutineScope?) = line
         .split(splitRegex)
-        .dropLastWhile { it.isEmpty() }
+        .dropLastWhile {
+            scope?.ensureActive()
+            it.isEmpty()
+        }
         .let {
             if (it.size >= 3) {
                 if (line.startsWith("0,0")) {

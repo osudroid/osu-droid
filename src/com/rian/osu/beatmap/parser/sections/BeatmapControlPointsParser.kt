@@ -6,14 +6,19 @@ import com.rian.osu.beatmap.timings.DifficultyControlPoint
 import com.rian.osu.beatmap.timings.EffectControlPoint
 import com.rian.osu.beatmap.timings.SampleControlPoint
 import com.rian.osu.beatmap.timings.TimingControlPoint
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.ensureActive
 
 /**
  * A parser for parsing a beatmap's timing points section.
  */
 object BeatmapControlPointsParser : BeatmapSectionParser() {
-    override fun parse(beatmap: Beatmap, line: String) = line
+    override fun parse(beatmap: Beatmap, line: String, scope: CoroutineScope?) = line
         .split(COMMA_PROPERTY_REGEX)
-        .dropLastWhile { it.isEmpty() }
+        .dropLastWhile {
+            scope?.ensureActive()
+            it.isEmpty()
+        }
         .let {
             if (it.size < 2) {
                 throw UnsupportedOperationException("Malformed timing point")
@@ -40,6 +45,8 @@ object BeatmapControlPointsParser : BeatmapSectionParser() {
             if (sampleSet == SampleBank.None) {
                 sampleSet = SampleBank.Normal
             }
+
+            scope?.ensureActive()
 
             beatmap.controlPoints.apply {
                 if (timingChange) {

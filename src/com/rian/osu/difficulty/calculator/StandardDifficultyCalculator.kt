@@ -16,6 +16,8 @@ import com.rian.osu.mods.ModRelax
 import kotlin.math.cbrt
 import kotlin.math.max
 import kotlin.math.pow
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.ensureActive
 
 /**
  * A difficulty calculator for calculating osu!standard star rating.
@@ -97,13 +99,16 @@ class StandardDifficultyCalculator : DifficultyCalculator<StandardDifficultyHitO
 
     override fun createDifficultyHitObjects(
         beatmap: Beatmap,
-        parameters: DifficultyCalculationParameters?
+        parameters: DifficultyCalculationParameters?,
+        scope: CoroutineScope?
     ) = mutableListOf<StandardDifficultyHitObject>().apply {
         val clockRate = parameters?.totalSpeedMultiplier?.toDouble() ?: 1.0
         val greatWindow = StandardHitWindow(beatmap.difficulty.od).greatWindow.toDouble() / clockRate
 
         beatmap.hitObjects.objects.let {
             for (i in 1 until it.size) {
+                scope?.ensureActive()
+
                 add(
                     StandardDifficultyHitObject(
                         it[i],

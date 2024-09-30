@@ -1,6 +1,7 @@
 package com.rian.osu.beatmap.parser.sections
 
 import com.rian.osu.beatmap.Beatmap
+import kotlinx.coroutines.CoroutineScope
 
 /**
  * A parser for parsing a specific beatmap section.
@@ -11,10 +12,11 @@ abstract class BeatmapSectionParser {
      *
      * @param beatmap The beatmap to fill.
      * @param line The line to parse.
+     * @param scope The [CoroutineScope] to use for coroutines.
      * @throws UnsupportedOperationException When the performed operation for the line is not supported.
      */
     @Throws(UnsupportedOperationException::class)
-    abstract fun parse(beatmap: Beatmap, line: String)
+    abstract fun parse(beatmap: Beatmap, line: String, scope: CoroutineScope? = null)
 
     /**
      * Attempts to parse a string into an integer.
