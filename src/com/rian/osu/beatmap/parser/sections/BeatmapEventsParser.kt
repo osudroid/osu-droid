@@ -17,7 +17,7 @@ object BeatmapEventsParser : BeatmapSectionParser() {
         .let {
             if (it.size >= 3) {
                 if (line.startsWith("0,0")) {
-                    beatmap.events.backgroundFilename = it[2].substring(1, it[2].length - 1)
+                    beatmap.events.backgroundFilename = cleanFilename(it[2])
                 }
 
                 if (line.startsWith("2") || line.startsWith("Break")) {
@@ -29,7 +29,7 @@ object BeatmapEventsParser : BeatmapSectionParser() {
 
                 if (line.startsWith("1") || line.startsWith("Video")) {
                     beatmap.events.videoStartTime = parseInt(it[1])
-                    beatmap.events.videoFilename = it[2].substring(1, it[2].length - 1)
+                    beatmap.events.videoFilename = cleanFilename(it[2])
                 }
             }
     
@@ -41,4 +41,6 @@ object BeatmapEventsParser : BeatmapSectionParser() {
                 )
             }
         }
+
+    private fun cleanFilename(path: String) = path.replace("\\\\", "\\").trim { it == '"' }
 }
