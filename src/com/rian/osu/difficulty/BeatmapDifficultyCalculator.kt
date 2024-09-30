@@ -13,6 +13,7 @@ import ru.nsu.ccfit.zuev.osu.scoring.Replay.MoveArray
 import ru.nsu.ccfit.zuev.osu.scoring.Replay.ReplayObjectData
 import ru.nsu.ccfit.zuev.osu.scoring.StatisticV2
 import kotlin.math.min
+import kotlinx.coroutines.CoroutineScope
 
 /**
  * A helper class for operations relating to difficulty and performance calculation.
@@ -89,24 +90,27 @@ object BeatmapDifficultyCalculator {
      *
      * @param beatmap The [Beatmap] to calculate.
      * @param stat The [StatisticV2] to calculate.
+     * @param scope The [CoroutineScope] to use for coroutines.
      * @return A structure describing the osu!droid difficulty of the [Beatmap] relating to the [StatisticV2].
      */
     @JvmStatic
-    fun calculateDroidDifficulty(beatmap: Beatmap, stat: StatisticV2) =
-        calculateDroidDifficulty(beatmap, constructDifficultyParameters(stat))
+    @JvmOverloads
+    fun calculateDroidDifficulty(beatmap: Beatmap, stat: StatisticV2, scope: CoroutineScope? = null) =
+        calculateDroidDifficulty(beatmap, constructDifficultyParameters(stat), scope)
 
     /**
      * Calculates the difficulty of a [Beatmap].
      *
      * @param beatmap The [Beatmap] to calculate.
      * @param parameters The parameters of the calculation. Can be `null`.
+     * @param scope The [CoroutineScope] to use for coroutines.
      * @return A structure describing the osu!droid difficulty of the [Beatmap] relating to the calculation parameters.
      */
     @JvmStatic
     @JvmOverloads
-    fun calculateDroidDifficulty(beatmap: Beatmap, parameters: DifficultyCalculationParameters? = null) =
+    fun calculateDroidDifficulty(beatmap: Beatmap, parameters: DifficultyCalculationParameters? = null, scope: CoroutineScope? = null) =
         difficultyCacheManager[beatmap.md5]?.getDroidDifficultyCache(parameters) ?:
-        droidDifficultyCalculator.calculate(beatmap, parameters).also { addCache(beatmap, parameters, it) }
+        droidDifficultyCalculator.calculate(beatmap, parameters, scope).also { addCache(beatmap, parameters, it) }
 
     /**
      * Calculates the difficulty of a [Beatmap], returning a set of [TimedDifficultyAttributes]
@@ -114,25 +118,28 @@ object BeatmapDifficultyCalculator {
      *
      * @param beatmap The [Beatmap] to calculate.
      * @param parameters The parameters of the calculation. Can be `null`.
+     * @param scope The [CoroutineScope] to use for coroutines.
      * @return A set of [TimedDifficultyAttributes] describing the difficulty of
      * the [Beatmap] at any relevant time relating to the calculation parameters.
      */
     @JvmStatic
     @JvmOverloads
-    fun calculateDroidTimedDifficulty(beatmap: Beatmap, parameters: DifficultyCalculationParameters? = null) =
+    fun calculateDroidTimedDifficulty(beatmap: Beatmap, parameters: DifficultyCalculationParameters? = null, scope: CoroutineScope? = null) =
         difficultyCacheManager[beatmap.md5]?.getDroidTimedDifficultyCache(parameters) ?:
-        droidDifficultyCalculator.calculateTimed(beatmap, parameters).also { addCache(beatmap, parameters, it) }
+        droidDifficultyCalculator.calculateTimed(beatmap, parameters, scope).also { addCache(beatmap, parameters, it) }
 
     /**
      * Calculates the osu!standard difficulty of a [Beatmap].
      *
      * @param beatmap The [Beatmap] to calculate.
      * @param stat The [StatisticV2] to calculate for.
+     * @param scope The [CoroutineScope] to use for coroutines.
      * @return A structure describing the osu!standard difficulty of the [Beatmap] relating to the [StatisticV2].
      */
     @JvmStatic
-    fun calculateStandardDifficulty(beatmap: Beatmap, stat: StatisticV2) =
-        calculateStandardDifficulty(beatmap, constructDifficultyParameters(stat))
+    @JvmOverloads
+    fun calculateStandardDifficulty(beatmap: Beatmap, stat: StatisticV2, scope: CoroutineScope? = null) =
+        calculateStandardDifficulty(beatmap, constructDifficultyParameters(stat), scope)
 
     /**
      * Calculates the difficulty of a [Beatmap].
@@ -143,9 +150,9 @@ object BeatmapDifficultyCalculator {
      */
     @JvmStatic
     @JvmOverloads
-    fun calculateStandardDifficulty(beatmap: Beatmap, parameters: DifficultyCalculationParameters? = null) =
+    fun calculateStandardDifficulty(beatmap: Beatmap, parameters: DifficultyCalculationParameters? = null, scope: CoroutineScope? = null) =
         difficultyCacheManager[beatmap.md5]?.getStandardDifficultyCache(parameters) ?:
-        standardDifficultyCalculator.calculate(beatmap, parameters).also { addCache(beatmap, parameters, it) }
+        standardDifficultyCalculator.calculate(beatmap, parameters, scope).also { addCache(beatmap, parameters, it) }
 
     /**
      * Calculates the difficulty of a [Beatmap], returning a set of [TimedDifficultyAttributes]
@@ -153,14 +160,15 @@ object BeatmapDifficultyCalculator {
      *
      * @param beatmap The [Beatmap] to calculate.
      * @param parameters The parameters of the calculation. Can be `null`.
+     * @param scope The [CoroutineScope] to use for coroutines.
      * @return A set of [TimedDifficultyAttributes] describing the difficulty of
      * the [Beatmap] at any relevant time relating to the calculation parameters.
      */
     @JvmStatic
     @JvmOverloads
-    fun calculateStandardTimedDifficulty(beatmap: Beatmap, parameters: DifficultyCalculationParameters? = null) =
+    fun calculateStandardTimedDifficulty(beatmap: Beatmap, parameters: DifficultyCalculationParameters? = null, scope: CoroutineScope? = null) =
         difficultyCacheManager[beatmap.md5]?.getStandardTimedDifficultyCache(parameters) ?:
-        standardDifficultyCalculator.calculateTimed(beatmap, parameters).also { addCache(beatmap, parameters, it) }
+        standardDifficultyCalculator.calculateTimed(beatmap, parameters, scope).also { addCache(beatmap, parameters, it) }
 
     /**
      * Calculates the performance of a [DroidDifficultyAttributes].
