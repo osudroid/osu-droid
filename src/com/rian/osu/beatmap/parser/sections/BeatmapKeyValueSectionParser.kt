@@ -2,6 +2,8 @@ package com.rian.osu.beatmap.parser.sections
 
 import android.text.TextUtils
 import java.util.*
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.ensureActive
 
 /**
  * A parser for parsing beatmap sections that store properties in a key-value pair.
@@ -12,13 +14,16 @@ abstract class BeatmapKeyValueSectionParser : BeatmapSectionParser() {
      *
      * For example, `ApproachRate:9` will be split into `["ApproachRate", "9"]`.
      *
-     * Will return `null` in invalid lines.
-     *
      * @param line The line.
+     * @param scope The [CoroutineScope] to use for coroutines.
+     * @return A [Pair] containing the properties, or `null` if the line is invalid.
      */
-    protected fun splitProperty(line: String): Pair<String, String>? =
+    protected fun splitProperty(line: String, scope: CoroutineScope? = null): Pair<String, String>? =
          line.split(COLON_PROPERTY_REGEX)
-             .dropLastWhile { it.isEmpty() }
+             .dropLastWhile {
+                 scope?.ensureActive()
+                 it.isEmpty()
+             }
              .toTypedArray()
              .let { s ->
                  if (s.isEmpty()) {

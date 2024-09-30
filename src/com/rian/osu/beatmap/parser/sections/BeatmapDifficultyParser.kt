@@ -1,12 +1,13 @@
 package com.rian.osu.beatmap.parser.sections
 
 import com.rian.osu.beatmap.Beatmap
+import kotlinx.coroutines.CoroutineScope
 
 /**
  * A parser for parsing a beatmap's difficulty section.
  */
 object BeatmapDifficultyParser : BeatmapKeyValueSectionParser() {
-    override fun parse(beatmap: Beatmap, line: String) = splitProperty(line)?.let {
+    override fun parse(beatmap: Beatmap, line: String, scope: CoroutineScope?) = splitProperty(line, scope)?.let {
         when (it.first) {
             "CircleSize" -> {
                 val value = parseFloat(it.second)
