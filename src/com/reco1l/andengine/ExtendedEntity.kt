@@ -8,7 +8,7 @@ import com.reco1l.framework.*
 import com.reco1l.toolkt.kotlin.*
 import org.anddev.andengine.collision.*
 import org.anddev.andengine.engine.camera.*
-import org.anddev.andengine.entity.IEntity
+import org.anddev.andengine.entity.*
 import org.anddev.andengine.entity.primitive.*
 import org.anddev.andengine.entity.shape.*
 import org.anddev.andengine.opengl.util.*
@@ -82,6 +82,21 @@ abstract class ExtendedEntity(
      * Whether the color should be inherited from all the parents in the hierarchy.
      */
     open var inheritColor = true
+
+    /**
+     * The color blending function.
+     */
+    open var blendingFunction: BlendingFunction? = BlendingFunction.Inherit
+        set(value) {
+            if (field != value) {
+                field = value
+
+                if (value != null) {
+                    mSourceBlendFunction = value.source
+                    mDestinationBlendFunction = value.destination
+                }
+            }
+        }
 
 
     /**
@@ -233,16 +248,37 @@ abstract class ExtendedEntity(
         GLHelper.setColor(pGL, red, green, blue, alpha)
     }
 
+    protected open fun applyBlending(pGL: GL10) {
+
+        // If there's a blending function set, apply it instead of the engine's method.
+        val blendingFunction = blendingFunction
+
+        if (blendingFunction != null) {
+
+            val parent = parent as? ExtendedEntity
+
+            // If the blending function is set to inherit, apply the parent's blending function.
+            if (blendingFunction == BlendingFunction.Inherit && parent != null) {
+                GLHelper.blendFunction(pGL, parent.mSourceBlendFunction, parent.mDestinationBlendFunction)
+            } else {
+                GLHelper.blendFunction(pGL, blendingFunction.source, blendingFunction.destination)
+            }
+
+        } else {
+            GLHelper.blendFunction(pGL, mSourceBlendFunction, mDestinationBlendFunction)
+        }
+    }
+
     override fun onApplyTransformations(pGL: GL10) {
         applyTranslation(pGL)
         applyRotation(pGL)
         applyScale(pGL)
         applyColor(pGL)
+        applyBlending(pGL)
     }
 
     override fun onInitDraw(pGL: GL10) {
         GLHelper.enableVertexArray(pGL)
-        GLHelper.blendFunction(pGL, mSourceBlendFunction, mDestinationBlendFunction)
     }
 
     override fun drawVertices(pGL: GL10, pCamera: Camera) {
@@ -386,6 +422,11 @@ abstract class ExtendedEntity(
 
 
     // Transformation
+
+    override fun setBlendFunction(pSourceBlendFunction: Int, pDestinationBlendFunction: Int) {
+        blendingFunction = null
+        super.setBlendFunction(pSourceBlendFunction, pDestinationBlendFunction)
+    }
 
     override fun delay(durationSec: Float): UniversalModifier {
         throw IllegalStateException("Cannot call this directly to an entity. Use beginDelayChain() instead.")

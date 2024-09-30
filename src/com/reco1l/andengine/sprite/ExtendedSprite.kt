@@ -2,6 +2,7 @@ package com.reco1l.andengine.sprite
 
 import com.reco1l.andengine.*
 import org.anddev.andengine.engine.camera.*
+import org.anddev.andengine.entity.shape.Shape
 import org.anddev.andengine.opengl.texture.region.*
 import org.anddev.andengine.opengl.util.*
 import org.anddev.andengine.opengl.vertex.*
@@ -77,7 +78,6 @@ open class ExtendedSprite(textureRegion: TextureRegion? = null) : ExtendedEntity
             }
 
             field = value
-            applyBlendFunction()
             applyTextureTranslation()
 
             value?.isFlippedVertical = flippedVertical
@@ -148,15 +148,6 @@ open class ExtendedSprite(textureRegion: TextureRegion? = null) : ExtendedEntity
     }
 
 
-    private fun applyBlendFunction() {
-
-        if (textureRegion?.texture?.textureOptions?.mPreMultipyAlpha == true) {
-            setBlendFunction(BLENDFUNCTION_SOURCE_PREMULTIPLYALPHA_DEFAULT, BLENDFUNCTION_DESTINATION_PREMULTIPLYALPHA_DEFAULT)
-        } else {
-            setBlendFunction(BLENDFUNCTION_SOURCE_DEFAULT, BLENDFUNCTION_DESTINATION_DEFAULT)
-        }
-    }
-
     private fun applyTextureTranslation() {
 
         if (portionX == 1f && portionY == 1f) {
@@ -178,6 +169,14 @@ open class ExtendedSprite(textureRegion: TextureRegion? = null) : ExtendedEntity
         this.translationY = -offsetY
     }
 
+    override fun applyBlending(pGL: GL10) {
+        if (textureRegion?.texture?.textureOptions?.mPreMultipyAlpha == true) {
+            GLHelper.blendFunction(pGL, BLENDFUNCTION_SOURCE_PREMULTIPLYALPHA_DEFAULT, BLENDFUNCTION_DESTINATION_PREMULTIPLYALPHA_DEFAULT)
+        } else {
+            super.applyBlending(pGL)
+        }
+    }
+
 
     override fun onUpdateVertexBuffer() {
         (vertexBuffer as RectangleVertexBuffer).update(width, height)
@@ -194,8 +193,4 @@ open class ExtendedSprite(textureRegion: TextureRegion? = null) : ExtendedEntity
         super.doDraw(pGL, pCamera)
     }
 
-    override fun reset() {
-        super.reset()
-        applyBlendFunction()
-    }
 }
