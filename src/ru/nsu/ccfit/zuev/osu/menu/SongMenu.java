@@ -40,8 +40,11 @@ import org.anddev.andengine.util.MathUtils;
 
 import java.text.SimpleDateFormat;
 import java.util.*;
+import java.util.concurrent.CancellationException;
 
 import org.jetbrains.annotations.Nullable;
+
+import kotlinx.coroutines.Job;
 import ru.nsu.ccfit.zuev.audio.BassSoundProvider;
 import ru.nsu.ccfit.zuev.audio.Status;
 import ru.nsu.ccfit.zuev.osu.Config;
@@ -103,6 +106,7 @@ public class SongMenu implements IUpdateHandler, MenuItemListener,
     private float secPassed = 0, tapTime;
     private ExtendedSprite backButton = null;
     private ScrollBar scrollbar;
+    private Job calculationJob;
 
     private ChangeableText
             beatmapMetadataText,
@@ -1034,8 +1038,10 @@ public class SongMenu implements IUpdateHandler, MenuItemListener,
         beatmapCreatorText.setText(mapperStr);
         beatmapHitObjectsText.setText(binfoStr2);
         changeDimensionInfo(beatmapInfo);
-        Execution.async(() -> {
-            try (var parser = new BeatmapParser(beatmapInfo.getPath())) {
+        cancelCalculationJob();
+
+        calculationJob = Execution.async(scope -> {
+            try (var parser = new BeatmapParser(beatmapInfo.getPath(), scope)) {
                 var data = parser.parse(true);
 
                 // Do not update if the beatmap has been changed.
@@ -1048,7 +1054,7 @@ public class SongMenu implements IUpdateHandler, MenuItemListener,
                     return;
                 }
 
-                var newInfo = BeatmapInfo(data, beatmapInfo.getDateImported(), true);
+                var newInfo = BeatmapInfo(data, beatmapInfo.getDateImported(), true, scope);
                 beatmapInfo.apply(newInfo);
                 DatabaseManager.getBeatmapInfoTable().update(newInfo);
 
@@ -1068,8 +1074,7 @@ public class SongMenu implements IUpdateHandler, MenuItemListener,
                 switch (Config.getDifficultyAlgorithm()) {
                     case droid -> {
                         var attributes = BeatmapDifficultyCalculator.calculateDroidDifficulty(
-                            data,
-                            parameters
+                                data, parameters, scope
                         );
 
                         setStarsDisplay(GameHelper.Round(attributes.starRating, 2));
@@ -1077,8 +1082,7 @@ public class SongMenu implements IUpdateHandler, MenuItemListener,
 
                     case standard -> {
                         var attributes = BeatmapDifficultyCalculator.calculateStandardDifficulty(
-                            data,
-                            parameters
+                                data, parameters, scope
                         );
 
                         setStarsDisplay(GameHelper.Round(attributes.starRating, 2));
@@ -1106,6 +1110,8 @@ public class SongMenu implements IUpdateHandler, MenuItemListener,
             }
 
             ResourceManager.getInstance().getSound("menuhit").play();
+            cancelCalculationJob();
+
             if (Multiplayer.isMultiplayer)
             {
                 setMultiplayerRoomBeatmap(selectedBeatmap);
@@ -1131,6 +1137,8 @@ public class SongMenu implements IUpdateHandler, MenuItemListener,
         isSelectComplete = false;
         selectedBeatmap = beatmapInfo;
         GlobalManager.getInstance().setSelectedBeatmap(beatmapInfo);
+        cancelCalculationJob();
+        ModMenu.getInstance().cancelCalculationJob();
         updateInfo(beatmapInfo);
         updateScoringSwitcherStatus(false);
         board.init(beatmapInfo);
@@ -1501,6 +1509,12 @@ public class SongMenu implements IUpdateHandler, MenuItemListener,
                     break;
                 }
             }
+        }
+    }
+
+    private void cancelCalculationJob() {
+        if (calculationJob != null) {
+            calculationJob.cancel(new CancellationException("Difficulty calculation has been cancelled."));
         }
     }
 

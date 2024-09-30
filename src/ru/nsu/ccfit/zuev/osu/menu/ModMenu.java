@@ -21,8 +21,11 @@ import org.anddev.andengine.opengl.texture.region.TextureRegion;
 import java.util.EnumSet;
 import java.util.Map;
 import java.util.TreeMap;
+import java.util.concurrent.CancellationException;
 
 import org.jetbrains.annotations.Nullable;
+
+import kotlinx.coroutines.Job;
 import ru.nsu.ccfit.zuev.osu.*;
 import ru.nsu.ccfit.zuev.osu.game.GameHelper;
 import ru.nsu.ccfit.zuev.osu.game.mods.GameMod;
@@ -50,6 +53,7 @@ public class ModMenu implements IModSwitcher {
     private boolean enableNCWhenSpeedChange = false;
     private boolean modsRemoved = false;
     private float FLfollowDelay = DEFAULT_FL_FOLLOW_DELAY;
+    private Job calculationJob;
 
 
     private Float customAR = null;
@@ -221,6 +225,8 @@ public class ModMenu implements IModSwitcher {
     }
 
     public void init() {
+        cancelCalculationJob();
+        calculationJob = null;
 
         modButtons.clear();
         scene = new Scene();
@@ -320,9 +326,11 @@ public class ModMenu implements IModSwitcher {
             public boolean onAreaTouched(final TouchEvent pSceneTouchEvent,
                                          final float pTouchAreaLocalX, final float pTouchAreaLocalY) {
                 if (pSceneTouchEvent.isActionUp()) {
-                    Execution.async(() -> {
+                    cancelCalculationJob();
+
+                    calculationJob = Execution.async(scope -> {
                         if (GlobalManager.getInstance().getSongMenu().getSelectedBeatmap() != null) {
-                            try (var parser = new BeatmapParser(GlobalManager.getInstance().getSongMenu().getSelectedBeatmap().getPath())) {
+                            try (var parser = new BeatmapParser(GlobalManager.getInstance().getSongMenu().getSelectedBeatmap().getPath(), scope)) {
                                 var beatmap = parser.parse(true);
                                 if (beatmap == null) {
                                     GlobalManager.getInstance().getSongMenu().setStarsDisplay(0);
@@ -341,8 +349,7 @@ public class ModMenu implements IModSwitcher {
                                 switch (Config.getDifficultyAlgorithm()) {
                                     case droid -> {
                                         var attributes = BeatmapDifficultyCalculator.calculateDroidDifficulty(
-                                            beatmap,
-                                            parameters
+                                            beatmap, parameters, scope
                                         );
 
                                         GlobalManager.getInstance().getSongMenu().setStarsDisplay(
@@ -352,8 +359,7 @@ public class ModMenu implements IModSwitcher {
 
                                     case standard -> {
                                         var attributes = BeatmapDifficultyCalculator.calculateStandardDifficulty(
-                                            beatmap,
-                                            parameters
+                                            beatmap, parameters, scope
                                         );
 
                                         GlobalManager.getInstance().getSongMenu().setStarsDisplay(
@@ -555,6 +561,12 @@ public class ModMenu implements IModSwitcher {
 
     public void updateMultiplierText(){
         changeMultiplierText();
+    }
+
+    public void cancelCalculationJob() {
+        if (calculationJob != null) {
+            calculationJob.cancel(new CancellationException("Difficulty calculation has been cancelled."));
+        }
     }
 
 
