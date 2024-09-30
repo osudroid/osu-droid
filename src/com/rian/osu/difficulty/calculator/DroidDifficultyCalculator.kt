@@ -13,6 +13,8 @@ import kotlin.math.cbrt
 import kotlin.math.ceil
 import kotlin.math.max
 import kotlin.math.pow
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.ensureActive
 
 /**
  * A difficulty calculator for calculating osu!droid star rating.
@@ -231,7 +233,8 @@ class DroidDifficultyCalculator : DifficultyCalculator<DroidDifficultyHitObject,
 
     override fun createDifficultyHitObjects(
         beatmap: Beatmap,
-        parameters: DifficultyCalculationParameters?
+        parameters: DifficultyCalculationParameters?,
+        scope: CoroutineScope?
     ) = mutableListOf<DroidDifficultyHitObject>().apply {
         val clockRate = parameters?.totalSpeedMultiplier?.toDouble() ?: 1.0
         val greatWindow = (
@@ -241,6 +244,8 @@ class DroidDifficultyCalculator : DifficultyCalculator<DroidDifficultyHitObject,
 
         beatmap.hitObjects.objects.let {
             for (i in 0 until it.size) {
+                scope?.ensureActive()
+
                 add(
                     DroidDifficultyHitObject(
                         it[i],
