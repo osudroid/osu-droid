@@ -10,6 +10,8 @@ import com.rian.osu.mods.IModApplicableToDifficultyWithSettings
 import com.rian.osu.mods.IModApplicableToHitObject
 import com.rian.osu.mods.IModApplicableToHitObjectWithSettings
 import com.rian.osu.mods.Mod
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.ensureActive
 
 /**
  * Represents a beatmap.
@@ -124,41 +126,47 @@ open class Beatmap : Cloneable {
      * @param mode The [GameMode] to construct the [Beatmap] for.
      * @param mods The [Mod]s to apply to the [Beatmap]. Defaults to No Mod.
      * @param customSpeedMultiplier The custom speed multiplier to apply to the [Beatmap]. Defaults to 1.
+     * @param scope The [CoroutineScope] to use for coroutines.
      * @return The constructed [Beatmap].
      */
     @JvmOverloads
-    fun createPlayableBeatmap(mode: GameMode, mods: List<Mod>? = null, customSpeedMultiplier: Float = 1f): Beatmap {
-        val converter = BeatmapConverter(this)
+    fun createPlayableBeatmap(mode: GameMode, mods: List<Mod>? = null, customSpeedMultiplier: Float = 1f, scope: CoroutineScope? = null): Beatmap {
+        val converter = BeatmapConverter(this, scope)
 
         // Convert
         val converted = converter.convert()
 
         // Apply difficulty mods
         mods?.filterIsInstance<IModApplicableToDifficulty>()?.forEach {
+            scope?.ensureActive()
             it.applyToDifficulty(mode, converted.difficulty)
         }
 
         mods?.filterIsInstance<IModApplicableToDifficultyWithSettings>()?.forEach {
+            scope?.ensureActive()
             it.applyToDifficulty(mode, converted.difficulty, mods, customSpeedMultiplier)
         }
 
-        val processor = BeatmapProcessor(converted)
+        val processor = BeatmapProcessor(converted, scope)
 
         processor.preProcess()
 
         // Compute default values for hit objects, including creating nested hit objects in-case they're needed
         converted.hitObjects.objects.forEach {
+            scope?.ensureActive()
             it.applyDefaults(converted.controlPoints, converted.difficulty, mode)
         }
 
         mods?.filterIsInstance<IModApplicableToHitObject>()?.forEach {
             for (obj in converted.hitObjects.objects) {
+                scope?.ensureActive()
                 it.applyToHitObject(mode, obj)
             }
         }
 
         mods?.filterIsInstance<IModApplicableToHitObjectWithSettings>()?.forEach {
             for (obj in converted.hitObjects.objects) {
+                scope?.ensureActive()
                 it.applyToHitObject(mode, obj, mods, customSpeedMultiplier)
             }
         }
@@ -166,6 +174,7 @@ open class Beatmap : Cloneable {
         processor.postProcess(mode)
 
         mods?.filterIsInstance<IModApplicableToBeatmap>()?.forEach {
+            scope?.ensureActive()
             it.applyToBeatmap(converted)
         }
 

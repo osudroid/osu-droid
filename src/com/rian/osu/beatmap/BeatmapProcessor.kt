@@ -5,16 +5,23 @@ import com.rian.osu.beatmap.hitobject.*
 import com.rian.osu.mods.Mod
 import com.rian.osu.utils.CircleSizeCalculator
 import kotlin.math.pow
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.ensureActive
 
 /**
  * Provides functionality to alter a [Beatmap] after it has been converted.
  */
-class BeatmapProcessor(
+class BeatmapProcessor @JvmOverloads constructor(
     /**
      * The [Beatmap] to process. This should already be converted to the applicable mode.
      */
     @JvmField
-    val beatmap: Beatmap
+    val beatmap: Beatmap,
+
+    /**
+     * The [CoroutineScope] to use for coroutines.
+     */
+    private val scope: CoroutineScope? = null
 ) {
     /**
      * Processes the converted [Beatmap] prior to [HitObject.applyDefaults] being invoked.
@@ -28,9 +35,12 @@ class BeatmapProcessor(
         var lastObj: HitObject? = null
 
         beatmap.hitObjects.objects.forEach {
+            scope?.ensureActive()
             it.updateComboInformation(lastObj)
             lastObj = it
         }
+
+        scope?.ensureActive()
 
         // Mark the last object in the beatmap as last in combo.
         if (lastObj != null) {
@@ -55,6 +65,8 @@ class BeatmapProcessor(
 
         // Reset stacking
         forEach {
+            scope?.ensureActive()
+
             it.difficultyStackHeight = 0
             it.gameplayStackHeight = 0
         }
@@ -73,6 +85,8 @@ class BeatmapProcessor(
         val droidDifficultyScale = CircleSizeCalculator.standardScaleToDroidDifficultyScale(this[0].difficultyScale, true)
 
         for (i in 0 until size - 1) {
+            scope?.ensureActive()
+
             val current = this[i]
             val next = this[i + 1]
 
@@ -97,11 +111,17 @@ class BeatmapProcessor(
         var extendedEndIndex = endIndex
 
         if (endIndex < objects.size - 1) {
+            scope?.ensureActive()
+
             // Extend the end index to include objects they are stacked on
             for (i in endIndex downTo startIndex) {
+                scope?.ensureActive()
+
                 var stackBaseIndex = i
 
                 for (n in stackBaseIndex + 1 until objects.size) {
+                    scope?.ensureActive()
+
                     val stackBaseObject = objects[stackBaseIndex]
                     if (stackBaseObject is Spinner) {
                         break
@@ -143,6 +163,8 @@ class BeatmapProcessor(
 
         // Reverse pass for stack calculation.
         for (i in extendedEndIndex downTo startIndex + 1) {
+            scope?.ensureActive()
+
             var n = i
 
             // We should check every note which has not yet got a stack.
@@ -166,6 +188,8 @@ class BeatmapProcessor(
             // Any other case is handled by the "is Slider" code below this.
             if (objectI is HitCircle) {
                 while (--n >= 0) {
+                    scope?.ensureActive()
+
                     val objectN = objects[n]
                     if (objectN is Spinner) {
                         continue
@@ -188,6 +212,8 @@ class BeatmapProcessor(
                         val offset = objectI.difficultyStackHeight - objectN.difficultyStackHeight + 1
 
                         for (j in n + 1..i) {
+                            scope?.ensureActive()
+
                             // For each object which was declared under this slider, we will offset it to appear *below* the slider end (rather than above).
                             val objectJ = objects[j]
 
@@ -214,6 +240,8 @@ class BeatmapProcessor(
                 // We have hit the first slider in a possible stack.
                 // From this point on, we ALWAYS stack positive regardless.
                 while (--n >= startIndex) {
+                    scope?.ensureActive()
+
                     val objectN = objects[n]
                     if (objectN is Spinner) {
                         continue
@@ -238,6 +266,8 @@ class BeatmapProcessor(
         val objects = beatmap.hitObjects.objects
 
         for (i in objects.indices) {
+            scope?.ensureActive()
+
             val currentObject = objects[i]
             if (currentObject.difficultyStackHeight != 0 && currentObject !is Slider) {
                 continue
@@ -248,6 +278,8 @@ class BeatmapProcessor(
             val stackThreshold = currentObject.timePreempt * beatmap.general.stackLeniency
 
             for (j in i + 1 until objects.size) {
+                scope?.ensureActive()
+
                 if (objects[j].startTime - stackThreshold > startTime) {
                     break
                 }
