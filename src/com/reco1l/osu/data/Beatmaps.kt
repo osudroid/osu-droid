@@ -10,6 +10,8 @@ import ru.nsu.ccfit.zuev.osu.game.GameHelper
 import kotlin.math.max
 import kotlin.math.min
 import com.rian.osu.beatmap.Beatmap
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.ensureActive
 
 
 /// Ported from rimu! project
@@ -294,13 +296,15 @@ data class BeatmapInfo(
 /**
  * Represents a beatmap information.
  */
-fun BeatmapInfo(data: Beatmap, lastModified: Long, calculateDifficulty: Boolean): BeatmapInfo {
+@JvmOverloads
+fun BeatmapInfo(data: Beatmap, lastModified: Long, calculateDifficulty: Boolean, scope: CoroutineScope? = null): BeatmapInfo {
 
     var bpmMin = Float.MAX_VALUE
     var bpmMax = 0f
 
     // Timing points
     data.controlPoints.timing.getControlPoints().fastForEach {
+        scope?.ensureActive()
 
         val bpm = it.bpm.toFloat()
 
@@ -312,8 +316,8 @@ fun BeatmapInfo(data: Beatmap, lastModified: Long, calculateDifficulty: Boolean)
     var standardStarRating: Float? = null
 
     if (calculateDifficulty) {
-        val droidAttributes = BeatmapDifficultyCalculator.calculateDroidDifficulty(data)
-        val standardAttributes = BeatmapDifficultyCalculator.calculateStandardDifficulty(data)
+        val droidAttributes = BeatmapDifficultyCalculator.calculateDroidDifficulty(data, scope = scope)
+        val standardAttributes = BeatmapDifficultyCalculator.calculateStandardDifficulty(data, scope = scope)
 
         droidStarRating = GameHelper.Round(droidAttributes.starRating, 2)
         standardStarRating = GameHelper.Round(standardAttributes.starRating, 2)
