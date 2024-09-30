@@ -18,6 +18,7 @@ import java.io.Closeable
 import java.io.File
 import java.io.IOException
 import java.util.regex.Pattern
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.ensureActive
 
@@ -99,6 +100,10 @@ class BeatmapParser : Closeable {
 
             beatmapFormatVersion = head.substring(formatPos + 13).toIntOrNull() ?: beatmapFormatVersion
         } catch (e: Exception) {
+            if (e is CancellationException) {
+                throw e
+            }
+
             Log.e("BeatmapParser.openFile", e.message!!)
         }
 
@@ -201,6 +206,10 @@ class BeatmapParser : Closeable {
                         else -> continue
                     }
                 } catch (e: Exception) {
+                    if (e is CancellationException) {
+                        throw e
+                    }
+
                     Log.e("BeatmapParser.parse", "Unable to parse line", e)
                 }
             }

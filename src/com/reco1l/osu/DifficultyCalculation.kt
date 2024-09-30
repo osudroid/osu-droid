@@ -92,6 +92,10 @@ object DifficultyCalculationManager {
                             }
 
                         } catch (e: Exception) {
+                            if (e is CancellationException) {
+                                throw e
+                            }
+
                             Log.e("DifficultyCalculation", "Error while calculating difficulty.", e)
                         }
 
