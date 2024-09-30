@@ -1,5 +1,3 @@
-@file:OptIn(DelicateCoroutinesApi::class)
-
 package com.reco1l.osu
 
 import android.util.Log
@@ -49,7 +47,7 @@ object DifficultyCalculationManager {
             }
         }
 
-        job = GlobalScope.launch {
+        job = async {
             val threadCount = Runtime.getRuntime().availableProcessors()
             val threadPool = Executors.newFixedThreadPool(threadCount)
 
