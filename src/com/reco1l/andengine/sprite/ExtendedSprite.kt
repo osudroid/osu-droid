@@ -1,12 +1,12 @@
 package com.reco1l.andengine.sprite
 
 import com.reco1l.andengine.*
-import com.reco1l.andengine.container.*
 import org.anddev.andengine.engine.camera.*
 import org.anddev.andengine.opengl.texture.region.*
 import org.anddev.andengine.opengl.util.*
 import org.anddev.andengine.opengl.vertex.*
 import javax.microedition.khronos.opengles.*
+import kotlin.math.*
 
 
 /**
@@ -20,30 +20,26 @@ open class ExtendedSprite(textureRegion: TextureRegion? = null) : ExtendedEntity
             if (field != value) {
                 field = value
 
-                if (autoSizeAxes != Axes.None) {
-                    val textureWidth = textureRegion?.width?.toFloat() ?: 0f
-                    val textureHeight = textureRegion?.height?.toFloat() ?: 0f
+                onApplyInternalSize(
+                    textureRegion?.width?.toFloat() ?: 0f,
+                    textureRegion?.height?.toFloat() ?: 0f
+                )
+            }
+        }
 
-                    var updateBuffer = false
+    override var translationX = 0f
+        set(value) {
+            if (field != value) {
+                field = value
+                applyTextureTranslation()
+            }
+        }
 
-                    if (textureWidth != internalWidth && (autoSizeAxes == Axes.X || autoSizeAxes == Axes.Both)) {
-                        internalWidth = textureWidth
-                        updateBuffer = true
-                    }
-
-                    if (textureHeight != internalHeight && (autoSizeAxes == Axes.Y || autoSizeAxes == Axes.Both)) {
-                        internalHeight = textureHeight
-                        updateBuffer = true
-                    }
-
-                    if (updateBuffer) {
-                        updateVertexBuffer()
-                    }
-
-                    if (parent is Container) {
-                        (parent as Container).onChildSizeChanged(this)
-                    }
-                }
+    override var translationY = 0f
+        set(value) {
+            if (field != value) {
+                field = value
+                applyTextureTranslation()
             }
         }
 
@@ -73,7 +69,7 @@ open class ExtendedSprite(textureRegion: TextureRegion? = null) : ExtendedEntity
     /**
      * The texture region of the sprite.
      */
-    var textureRegion: TextureRegion? = null
+    open var textureRegion: TextureRegion? = null
         set(value) {
 
             if (field == value) {
@@ -82,40 +78,72 @@ open class ExtendedSprite(textureRegion: TextureRegion? = null) : ExtendedEntity
 
             field = value
             applyBlendFunction()
+            applyTextureTranslation()
 
-            if (value != null) {
-                value.isFlippedVertical = flippedVertical
-                value.isFlippedHorizontal = flippedHorizontal
+            value?.isFlippedVertical = flippedVertical
+            value?.isFlippedHorizontal = flippedHorizontal
+
+            onApplyInternalSize(
+                value?.width?.toFloat() ?: 0f,
+                value?.height?.toFloat() ?: 0f
+            )
+        }
+
+    /**
+     * The X position of the texture.
+     */
+    open var textureX = 0
+        set(value) {
+            if (field != value) {
+                field = value
+                applyTextureTranslation()
             }
+        }
 
-            if (autoSizeAxes != Axes.None) {
-                val textureWidth = textureRegion?.width?.toFloat() ?: 0f
-                val textureHeight = textureRegion?.height?.toFloat() ?: 0f
+    /**
+     * The Y position of the texture.
+     */
+    open var textureY = 0
+        set(value) {
+            if (field != value) {
+                field = value
+                applyTextureTranslation()
+            }
+        }
 
-                var updateBuffer = false
+    /**
+     * The portion of the texture to display on the X axis in a range of -1 to 1.
+     *
+     * Setting a portion that is not 1 will crop the texture and override [translationX]
+     * value. Additionally negative values will crop the texture from the left.
+     */
+    open var portionX = 1f
+        set(value) {
+            val coerced = value.coerceIn(-1f, 1f)
+            if (field != coerced) {
+                field = coerced
+                applyTextureTranslation()
+            }
+        }
 
-                if (textureWidth != internalWidth && (autoSizeAxes == Axes.X || autoSizeAxes == Axes.Both)) {
-                    internalWidth = textureWidth
-                    updateBuffer = true
-                }
-
-                if (textureHeight != internalHeight && (autoSizeAxes == Axes.Y || autoSizeAxes == Axes.Both)) {
-                    internalHeight = textureHeight
-                    updateBuffer = true
-                }
-
-                if (updateBuffer) {
-                    updateVertexBuffer()
-                }
-
-                if (parent is Container) {
-                    (parent as Container).onChildSizeChanged(this)
-                }
+    /**
+     * The portion of the texture to display on the Y axis in a range of -1 to 1.
+     *
+     * Setting a portion that is not 1 will crop the texture and override [translationY]
+     * value. Additionally negative values will crop the texture from the top.
+     */
+    open var portionY = 1f
+        set(value) {
+            val coerced = value.coerceIn(-1f, 1f)
+            if (field != coerced) {
+                field = coerced
+                applyTextureTranslation()
             }
         }
 
 
     init {
+        @Suppress("LeakingThis")
         this.textureRegion = textureRegion
     }
 
@@ -127,6 +155,27 @@ open class ExtendedSprite(textureRegion: TextureRegion? = null) : ExtendedEntity
         } else {
             setBlendFunction(BLENDFUNCTION_SOURCE_DEFAULT, BLENDFUNCTION_DESTINATION_DEFAULT)
         }
+    }
+
+    private fun applyTextureTranslation() {
+
+        if (portionX == 1f && portionY == 1f) {
+            textureRegion?.setTexturePosition(textureX, textureY)
+            return
+        }
+
+        val texture = textureRegion ?: return
+
+        val offsetX = texture.width * (1f - abs(portionX)) * sign(portionX)
+        val offsetY = texture.height * (1f - abs(portionY)) * sign(portionY)
+
+        texture.setTexturePosition(
+            (textureX - offsetX).toInt(),
+            (textureY - offsetY).toInt(),
+        )
+
+        this.translationX = -offsetX
+        this.translationY = -offsetY
     }
 
 
