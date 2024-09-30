@@ -141,11 +141,14 @@ abstract class DifficultyCalculator<TObject : DifficultyHitObject, TAttributes :
      * @param parameters The difficulty calculation parameter being used.
      * @return The generated [DifficultyHitObject]s.
      */
-    protected abstract fun createDifficultyHitObjects(
-        beatmap: Beatmap,
-        parameters: DifficultyCalculationParameters?
-    ): List<TObject>
+    protected abstract fun createDifficultyHitObjects(beatmap: Beatmap, parameters: DifficultyCalculationParameters?): List<TObject>
 
+    /**
+     * Calculates the rating of a [Skill] based on its difficulty.
+     *
+     * @param skill The [Skill] to calculate the rating for.
+     * @return The rating of the [Skill].
+     */
     protected fun calculateRating(skill: Skill<TObject>) = sqrt(skill.difficultyValue()) * difficultyMultiplier
 
     /**
