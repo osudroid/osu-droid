@@ -107,6 +107,8 @@ abstract class ExtendedEntity(
         }
 
 
+    // Positions
+
     open fun setAnchor(anchor: Anchor) {
         anchorX = anchor.factorX
         anchorY = anchor.factorY
@@ -120,32 +122,6 @@ abstract class ExtendedEntity(
         mScaleCenterX = origin.factorX
         mScaleCenterY = origin.factorY
     }
-
-
-    final override fun setRotationCenter(pRotationCenterX: Float, pRotationCenterY: Float) {
-        Log.w("ExtendedEntity", "Rotation center is determined by the entity's origin, ignoring.")
-    }
-
-    final override fun setRotationCenterX(pRotationCenterX: Float) {
-        Log.w("ExtendedEntity", "Rotation center is determined by the entity's origin, ignoring.")
-    }
-
-    final override fun setRotationCenterY(pRotationCenterY: Float) {
-        Log.w("ExtendedEntity", "Rotation center is determined by the entity's origin, ignoring.")
-    }
-
-    final override fun setScaleCenter(pScaleCenterX: Float, pScaleCenterY: Float) {
-        Log.w("ExtendedEntity", "Scale center is determined by the entity's origin, ignoring.")
-    }
-
-    final override fun setScaleCenterX(pScaleCenterX: Float) {
-        Log.w("ExtendedEntity", "Scale center is determined by the entity's origin, ignoring.")
-    }
-
-    final override fun setScaleCenterY(pScaleCenterY: Float) {
-        Log.w("ExtendedEntity", "Scale center is determined by the entity's origin, ignoring.")
-    }
-
 
     override fun setPosition(pX: Float, pY: Float) {
         if (mX != pX || mY != pY) {
@@ -167,6 +143,8 @@ abstract class ExtendedEntity(
     }
 
 
+    // Attachment
+
     @CallSuper
     override fun onDetached() {
         modifierPool = null
@@ -178,6 +156,8 @@ abstract class ExtendedEntity(
         modifierPool = findHierarchically(IEntity::getParent) { (it as? ExtendedScene)?.modifierPool }
     }
 
+
+    // Drawing
 
     override fun applyTranslation(pGL: GL10) {
 
@@ -253,9 +233,14 @@ abstract class ExtendedEntity(
         GLHelper.setColor(pGL, red, green, blue, alpha)
     }
 
+    override fun onApplyTransformations(pGL: GL10) {
+        applyTranslation(pGL)
+        applyRotation(pGL)
+        applyScale(pGL)
+        applyColor(pGL)
+    }
 
     override fun onInitDraw(pGL: GL10) {
-        applyColor(pGL)
         GLHelper.enableVertexArray(pGL)
         GLHelper.blendFunction(pGL, mSourceBlendFunction, mDestinationBlendFunction)
     }
@@ -277,21 +262,51 @@ abstract class ExtendedEntity(
     }
 
 
-    open fun setSize(w: Float, h: Float) {
+    // Size
 
-        var updateBuffer = false
+    /**
+     * Applies the size of the entity.
+     *
+     * Despite [setSize] this is intended to be used internally to report a new
+     * size for when [autoSizeAxes] allows it for one or both axes.
+     */
+    protected fun onApplyInternalSize(width: Float, height: Float) {
 
-        if (width != w && (autoSizeAxes == Axes.None || autoSizeAxes == Axes.Y)) {
-            width = w
-            updateBuffer = true
+        if (autoSizeAxes == Axes.None) {
+            return
         }
 
-        if (height != h && (autoSizeAxes == Axes.None || autoSizeAxes == Axes.X)) {
-            height = h
-            updateBuffer = true
+        if (internalWidth != width || internalHeight != height) {
+
+            if (autoSizeAxes == Axes.X || autoSizeAxes == Axes.Both) {
+                internalWidth = width
+            }
+
+            if (autoSizeAxes == Axes.Y || autoSizeAxes == Axes.Both) {
+                internalHeight = height
+            }
+
+            updateVertexBuffer()
+        }
+    }
+
+    open fun setSize(weight: Float, height: Float) {
+
+        if (autoSizeAxes == Axes.Both) {
+            Log.w("ExtendedEntity", "Cannot set size when autoSizeAxes is set to Both.")
+            return
         }
 
-        if (updateBuffer) {
+        if (internalWidth != weight || internalHeight != height) {
+
+            if (autoSizeAxes == Axes.None || autoSizeAxes == Axes.Y) {
+                internalWidth = weight
+            }
+
+            if (autoSizeAxes == Axes.None || autoSizeAxes == Axes.X) {
+                internalHeight = height
+            }
+
             updateVertexBuffer()
 
             if (parent is Container) {
@@ -317,23 +332,41 @@ abstract class ExtendedEntity(
     }
 
 
-    // Base width and height are not needed for this class.
+    // Unsupported methods
 
-    override fun getBaseWidth(): Float {
-        return width
-    }
+    @Deprecated("Base width is not preserved in ExtendedEntity, use getWidth() instead.")
+    override fun getBaseWidth() = width
 
-    override fun getBaseHeight(): Float {
-        return height
-    }
+    @Deprecated("Base height is not preserved in ExtendedEntity, use getHeight() instead.")
+    override fun getBaseHeight() = height
+
+    @Deprecated("Rotation center is determined by the entity's origin, use setOrigin() instead.")
+    final override fun setRotationCenter(pRotationCenterX: Float, pRotationCenterY: Float) {}
+
+    @Deprecated("Rotation center is determined by the entity's origin, use setOrigin() instead.")
+    final override fun setRotationCenterX(pRotationCenterX: Float) {}
+
+    @Deprecated("Rotation center is determined by the entity's origin, use setOrigin() instead.")
+    final override fun setRotationCenterY(pRotationCenterY: Float) {}
+
+    @Deprecated("Scale center is determined by the entity's origin, use setOrigin() instead.")
+    final override fun setScaleCenter(pScaleCenterX: Float, pScaleCenterY: Float) {}
+
+    @Deprecated("Scale center is determined by the entity's origin, use setOrigin() instead.")
+    final override fun setScaleCenterX(pScaleCenterX: Float) {}
+
+    @Deprecated("Scale center is determined by the entity's origin, use setOrigin() instead.")
+    final override fun setScaleCenterY(pScaleCenterY: Float) {}
 
 
-    override fun collidesWith(pOtherShape: IShape?): Boolean {
-        return when (pOtherShape) {
-            is RectangularShape -> RectangularShapeCollisionChecker.checkCollision(this, pOtherShape)
-            is Line -> RectangularShapeCollisionChecker.checkCollision(this, pOtherShape)
-            else -> false
-        }
+    // Collision
+
+    override fun collidesWith(shape: IShape): Boolean = when (shape) {
+
+        is RectangularShape -> RectangularShapeCollisionChecker.checkCollision(this, shape)
+        is Line -> RectangularShapeCollisionChecker.checkCollision(this, shape)
+
+        else -> false
     }
 
     override fun contains(pX: Float, pY: Float): Boolean {
