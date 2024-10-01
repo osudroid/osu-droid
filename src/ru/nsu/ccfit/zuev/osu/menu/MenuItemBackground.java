@@ -75,7 +75,7 @@ public class MenuItemBackground extends Sprite {
             ResourceManager.getInstance().getSound("menuclick").play();
             defColor.apply(this);
             if (item != null) {
-                item.select(true, true);
+                item.select();
             }
             return true;
         } else if (pSceneTouchEvent.isActionOutside()

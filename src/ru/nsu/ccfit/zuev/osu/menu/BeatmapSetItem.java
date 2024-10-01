@@ -161,7 +161,7 @@ public class BeatmapSetItem {
         }
     }
 
-    public void select(boolean reloadMusic, boolean reloadBG) {
+    public void select() {
         if (!listener.get().isSelectAllowed() || scene == null) {
             return;
         }
@@ -172,14 +172,7 @@ public class BeatmapSetItem {
         initBeatmaps();
         percentAppeared = 0;
 
-        var beatmapInfo = beatmapSetInfo.getBeatmaps().get(0);
-
-        final String musicFileName = beatmapInfo.getAudioPath();
-        if (reloadMusic) {
-            listener.get().playMusic(musicFileName, beatmapInfo.getPreviewTime());
-        }
-
-        selectBeatmap(beatmapItems[0], reloadBG);
+        selectBeatmap(beatmapItems[0], true);
         beatmapItems[0].setSelectedColor();
     }
 
