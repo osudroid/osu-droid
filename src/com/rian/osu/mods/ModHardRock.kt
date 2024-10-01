@@ -14,6 +14,7 @@ import kotlin.math.min
  */
 class ModHardRock : Mod(), IModApplicableToDifficulty, IModApplicableToHitObject {
     override val droidString = "r"
+    override val ranked = true
     override val incompatibleMods = super.incompatibleMods + ModEasy::class
 
     override fun applyToDifficulty(mode: GameMode, difficulty: BeatmapDifficulty) = difficulty.run {

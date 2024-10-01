@@ -12,6 +12,11 @@ abstract class Mod {
     abstract val droidString: String
 
     /**
+     * Whether scores with this [Mod] active can be submitted online.
+     */
+    open val ranked = false
+
+    /**
      * The [Mod]s this [Mod] cannot be enabled with.
      */
     open val incompatibleMods = emptyArray<KClass<out Mod>>()
