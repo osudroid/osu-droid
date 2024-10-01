@@ -5,5 +5,6 @@ package com.rian.osu.mods
  */
 class ModFlashlight : Mod() {
     override val droidString = "i"
+    override val acronym = "FL"
     override val ranked = true
 }

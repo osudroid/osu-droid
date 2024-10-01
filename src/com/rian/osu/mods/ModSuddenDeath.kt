@@ -5,6 +5,7 @@ package com.rian.osu.mods
  */
 class ModSuddenDeath : Mod() {
     override val droidString = "u"
+    override val acronym = "SD"
     override val ranked = true
     override val incompatibleMods = super.incompatibleMods + arrayOf(
         ModNoFail::class, ModPerfect::class, ModAuto::class

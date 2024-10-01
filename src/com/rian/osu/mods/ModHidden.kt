@@ -9,6 +9,7 @@ import com.rian.osu.beatmap.hitobject.Slider
  */
 class ModHidden : Mod(), IModApplicableToBeatmap {
     override val droidString = "h"
+    override val acronym = "HD"
     override val ranked = true
 
     override fun applyToBeatmap(beatmap: Beatmap) {

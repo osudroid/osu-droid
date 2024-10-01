@@ -5,6 +5,7 @@ package com.rian.osu.mods
  */
 class ModNightCore : Mod(), IModApplicableToTrackRate {
     override val droidString = "c"
+    override val acronym = "NC"
     override val ranked = true
     override val incompatibleMods = super.incompatibleMods + arrayOf(
         ModDoubleTime::class, ModHalfTime::class

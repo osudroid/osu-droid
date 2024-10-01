@@ -9,6 +9,7 @@ import com.rian.osu.utils.CircleSizeCalculator
  */
 class ModEasy : Mod(), IModApplicableToDifficulty {
     override val droidString = "e"
+    override val acronym = "EZ"
     override val ranked = true
     override val incompatibleMods = super.incompatibleMods + ModHardRock::class
 

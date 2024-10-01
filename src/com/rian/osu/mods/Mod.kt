@@ -12,6 +12,11 @@ abstract class Mod {
     abstract val droidString: String
 
     /**
+     * The acronym of this [Mod].
+     */
+    abstract val acronym: String
+
+    /**
      * Whether scores with this [Mod] active can be submitted online.
      */
     open val ranked = false

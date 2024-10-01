@@ -5,6 +5,7 @@ package com.rian.osu.mods
  */
 class ModRelax : Mod() {
     override val droidString = "x"
+    override val acronym = "RX"
     override val incompatibleMods = super.incompatibleMods + arrayOf(
         ModAuto::class, ModNoFail::class, ModAutopilot::class
     )

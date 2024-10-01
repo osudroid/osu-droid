@@ -5,4 +5,5 @@ package com.rian.osu.mods
  */
 class ModScoreV2 : Mod() {
     override val droidString = "v"
+    override val acronym = "V2"
 }

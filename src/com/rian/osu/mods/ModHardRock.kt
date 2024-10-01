@@ -14,6 +14,7 @@ import kotlin.math.min
  */
 class ModHardRock : Mod(), IModApplicableToDifficulty, IModApplicableToHitObject {
     override val droidString = "r"
+    override val acronym = "HR"
     override val ranked = true
     override val incompatibleMods = super.incompatibleMods + ModEasy::class
 

@@ -5,6 +5,7 @@ package com.rian.osu.mods
  */
 class ModHalfTime : Mod(), IModApplicableToTrackRate {
     override val droidString = "t"
+    override val acronym = "HT"
     override val ranked = true
     override val incompatibleMods = super.incompatibleMods + arrayOf(
         ModDoubleTime::class, ModNightCore::class

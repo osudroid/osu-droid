@@ -33,6 +33,7 @@ class ModDifficultyAdjust(
     var hp: Float? = null
 ) : Mod(), IModApplicableToDifficultyWithSettings, IModApplicableToHitObjectWithSettings {
     override val droidString = ""
+    override val acronym = "DA"
 
     override fun applyToDifficulty(mode: GameMode, difficulty: BeatmapDifficulty, mods: List<Mod>, customSpeedMultiplier: Float) =
         difficulty.let {
