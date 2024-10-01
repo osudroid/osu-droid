@@ -3,6 +3,7 @@ package com.rian.osu.mods
 import com.rian.osu.GameMode
 import com.rian.osu.beatmap.hitobject.HitObject
 import com.rian.osu.beatmap.sections.BeatmapDifficulty
+import com.rian.osu.utils.ModUtils
 
 /**
  * Represents the Difficulty Adjust mod, serves as a container for force difficulty statistics.
@@ -64,7 +65,7 @@ class ModDifficultyAdjust(
     }
 
     private fun calculateTrackRate(mods: List<Mod>, customSpeedMultiplier: Float) =
-        mods.filterIsInstance<IModApplicableToTrackRate>().fold(1f) { acc, mod -> acc * mod.trackRateMultiplier } * customSpeedMultiplier
+        ModUtils.calculateRateWithMods(mods) * customSpeedMultiplier
 
     private fun getValue(value: Float?, fallback: Float) = value ?: fallback
 
