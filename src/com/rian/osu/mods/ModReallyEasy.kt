@@ -15,7 +15,7 @@ class ModReallyEasy : Mod(), IModApplicableToDifficultyWithSettings {
             val difficultyAdjustMod = mods.find { it is ModDifficultyAdjust } as ModDifficultyAdjust?
 
             if (difficultyAdjustMod?.ar == null) {
-                if (mods.any { it is ModHardRock }) {
+                if (mods.any { it is ModEasy }) {
                     ar *= 2
                     ar -= 0.5f
                 }
