@@ -5,4 +5,7 @@ package com.rian.osu.mods
  */
 class ModPerfect : Mod() {
     override val droidString = "f"
+    override val incompatibleMods = super.incompatibleMods + arrayOf(
+        ModNoFail::class, ModSuddenDeath::class, ModAuto::class
+    )
 }

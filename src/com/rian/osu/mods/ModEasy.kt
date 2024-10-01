@@ -9,6 +9,7 @@ import com.rian.osu.utils.CircleSizeCalculator
  */
 class ModEasy : Mod(), IModApplicableToDifficulty {
     override val droidString = "e"
+    override val incompatibleMods = super.incompatibleMods + ModHardRock::class
 
     override fun applyToDifficulty(mode: GameMode, difficulty: BeatmapDifficulty) = difficulty.run {
         difficultyCS = when (mode) {

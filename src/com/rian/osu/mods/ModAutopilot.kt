@@ -5,4 +5,7 @@ package com.rian.osu.mods
  */
 class ModAutopilot : Mod() {
     override val droidString = "p"
+    override val incompatibleMods = super.incompatibleMods + arrayOf(
+        ModRelax::class, ModAuto::class, ModNoFail::class
+    )
 }
