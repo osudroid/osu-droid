@@ -17,11 +17,18 @@ import com.reco1l.andengine.sprite.ExtendedSprite;
 import com.reco1l.osu.multiplayer.Multiplayer;
 import com.reco1l.osu.multiplayer.RoomScene;
 
+import com.rian.osu.GameMode;
+import com.rian.osu.beatmap.DroidHitWindow;
+import com.rian.osu.beatmap.PreciseDroidHitWindow;
 import com.rian.osu.beatmap.parser.BeatmapParser;
+import com.rian.osu.beatmap.sections.BeatmapDifficulty;
 import com.rian.osu.difficulty.BeatmapDifficultyCalculator;
 import com.rian.osu.difficulty.calculator.DifficultyCalculationParameters;
+import com.rian.osu.math.Precision;
 import com.rian.osu.ui.DifficultyAlgorithmSwitcher;
 import com.rian.osu.utils.LRUCache;
+import com.rian.osu.utils.ModUtils;
+
 import org.anddev.andengine.engine.Engine;
 import org.anddev.andengine.engine.handler.IUpdateHandler;
 import org.anddev.andengine.entity.Entity;
@@ -880,85 +887,94 @@ public class SongMenu implements IUpdateHandler, MenuItemListener,
         if (beatmapInfo == null) {
             return;
         }
-        float ar = beatmapInfo.getApproachRate();
-        float od = beatmapInfo.getOverallDifficulty();
-        float cs = beatmapInfo.getCircleSize();
-        float hp = beatmapInfo.getHpDrainRate();
-        float bpm_max = beatmapInfo.getBpmMax();
-        float bpm_min = beatmapInfo.getBpmMin();
-        long length = beatmapInfo.getLength();
-        EnumSet<GameMod> mod = ModMenu.getInstance().getMod();
+
+        var modMenu = ModMenu.getInstance();
+        var convertedMods = convertLegacyMods(
+            modMenu.getMod(),
+            modMenu.isCustomCS() ? modMenu.getCustomCS() : null,
+            modMenu.isCustomAR() ? modMenu.getCustomAR() : null,
+            modMenu.isCustomOD() ? modMenu.getCustomOD() : null,
+            modMenu.isCustomHP() ? modMenu.getCustomHP() : null
+        );
+
+        boolean isPreciseMod = modMenu.getMod().contains(GameMod.MOD_PRECISE);
+        float customSpeedMultiplier = modMenu.getChangeSpeed();
+        float totalSpeedMultiplier = ModUtils.calculateRateWithMods(convertedMods) * customSpeedMultiplier;
+
+        var difficulty = new BeatmapDifficulty(
+            beatmapInfo.getCircleSize(),
+            beatmapInfo.getApproachRate(),
+            beatmapInfo.getOverallDifficulty(),
+            beatmapInfo.getHpDrainRate()
+        );
+
+        ModUtils.applyModsToBeatmapDifficulty(difficulty, GameMode.Droid, convertedMods, customSpeedMultiplier);
+
+        if (isPreciseMod) {
+            // Special case for OD. The Precise mod changes the hit window and not the OD itself, but we must
+            // map the hit window back to the original hit window for the user to understand the difficulty
+            // increase of the mod.
+            float greatWindow = new PreciseDroidHitWindow(difficulty.od).getGreatWindow();
+            difficulty.od = DroidHitWindow.hitWindow300ToOverallDifficulty(greatWindow);
+        }
+
+        // Round to 2 decimal places.
+        // Using difficulty circle size is quite inaccurate here as the real circle size changes
+        // depending on the height of the running device, but for the sake of comparison across
+        // players, we assume the height of the device to be fixed.
+        difficulty.difficultyCS = GameHelper.Round(difficulty.difficultyCS, 2);
+        difficulty.setAr(GameHelper.Round(difficulty.getAr(), 2));
+        difficulty.od = GameHelper.Round(difficulty.od, 2);
+        difficulty.hp = GameHelper.Round(difficulty.hp, 2);
+
+        // Update texts
+        float originalCS = beatmapInfo.getCircleSize();
+        float originalAR = beatmapInfo.getApproachRate();
+        float originalOD = beatmapInfo.getOverallDifficulty();
+        float originalHP = beatmapInfo.getHpDrainRate();
 
         beatmapDifficultyText.setColor(1, 1, 1);
         beatmapLengthText.setColor(1, 1, 1);
 
-        if (mod.contains(GameMod.MOD_EASY)) {
-            ar *= 0.5f;
-            od *= 0.5f;
-            cs -= 1f;
-            hp *= 0.5f;
-            beatmapDifficultyText.setColor(46 / 255f, 139 / 255f, 87 / 255f);
-        }
-        if (mod.contains(GameMod.MOD_HARDROCK) || mod.contains(GameMod.MOD_PRECISE)) {
-            if (mod.contains(GameMod.MOD_HARDROCK)) {
-                ar = Math.min(ar * 1.4f, 10);
-                od = Math.min(od * 1.4f, 10);
-                ++cs;
-                hp = Math.min(hp * 1.4f, 10);
+        if (modMenu.isCustomCS() || modMenu.isCustomAR() || modMenu.isCustomOD() || modMenu.isCustomHP()) {
+            if (isPreciseMod) {
+                beatmapDifficultyText.setColor(1, 120 / 255f, 0);
+            } else {
+                beatmapDifficultyText.setColor(1, 180 / 255f, 0);
             }
-            beatmapDifficultyText.setColor(205 / 255f, 85 / 255f, 85 / 255f);
-        }
-        if (ModMenu.getInstance().getChangeSpeed() != 1) {
-            float speed = ModMenu.getInstance().getSpeed();
-            bpm_max *= speed;
-            bpm_min *= speed;
-            length /= speed;
-            if (speed > 1) {
-                beatmapLengthText.setColor(205 / 255f, 85 / 255f, 85 / 255f);
-                beatmapDifficultyText.setColor(205 / 255f, 85 / 255f, 85 / 255f);
-            } else if (speed < 1) {
-                beatmapLengthText.setColor(46 / 255f, 139 / 255f, 87 / 255f);
-                beatmapDifficultyText.setColor(46 / 255f, 139 / 255f, 87 / 255f);
-            }
-        } else {
-            if (mod.contains(GameMod.MOD_DOUBLETIME)) {
-                bpm_max *= 1.5f;
-                bpm_min *= 1.5f;
-                length *= 2 / 3f;
-                beatmapLengthText.setColor(205 / 255f, 85 / 255f, 85 / 255f);
+        } else if (
+            (!Precision.almostEquals(originalCS, difficulty.difficultyCS) && originalCS < difficulty.difficultyCS) ||
+            (!Precision.almostEquals(originalAR, difficulty.getAr()) && originalAR < difficulty.getAr()) ||
+            (!Precision.almostEquals(originalOD, difficulty.od) && originalOD < difficulty.od) ||
+            (!Precision.almostEquals(originalOD, difficulty.hp) && originalHP < difficulty.hp)
+        ) {
+            if (isPreciseMod) {
+                beatmapDifficultyText.setColor(214 / 255f, 45 / 255f, 45 / 255f);
+            } else {
                 beatmapDifficultyText.setColor(205 / 255f, 85 / 255f, 85 / 255f);
             }
-            if (mod.contains(GameMod.MOD_NIGHTCORE)) {
-                bpm_max *= 1.5f;
-                bpm_min *= 1.5f;
-                length *= 2 / 3f;
-                beatmapLengthText.setColor(205 / 255f, 85 / 255f, 85 / 255f);
-                beatmapDifficultyText.setColor(205 / 255f, 85 / 255f, 85 / 255f);
-            }
-            if (mod.contains(GameMod.MOD_HALFTIME)) {
-                bpm_max *= 0.75f;
-                bpm_min *= 0.75f;
-                length *= 4 / 3f;
-                beatmapLengthText.setColor(46 / 255f, 139 / 255f, 87 / 255f);
+        } else if (
+            (!Precision.almostEquals(originalCS, difficulty.difficultyCS) && originalCS > difficulty.difficultyCS) ||
+            (!Precision.almostEquals(originalAR, difficulty.getAr()) && originalAR > difficulty.getAr()) ||
+            (!Precision.almostEquals(originalOD, difficulty.od) && originalOD > difficulty.od) ||
+            (!Precision.almostEquals(originalOD, difficulty.hp) && originalHP > difficulty.hp)
+        ) {
+            if (isPreciseMod) {
+                beatmapDifficultyText.setColor(158 / 255f, 108 / 255f, 65 / 255f);
+            } else {
                 beatmapDifficultyText.setColor(46 / 255f, 139 / 255f, 87 / 255f);
             }
         }
-        if (mod.contains(GameMod.MOD_REALLYEASY)) {
-            if (mod.contains(GameMod.MOD_EASY)) {
-                ar *= 2f;
-                ar -= 0.5f;
-            }
-            ar -= 0.5f;
-            if (ModMenu.getInstance().getChangeSpeed() != 1) {
-                ar -= ModMenu.getInstance().getSpeed() - 1.0f;
-            } else if (mod.contains(GameMod.MOD_DOUBLETIME) || mod.contains(GameMod.MOD_NIGHTCORE)) {
-                ar -= 0.5f;
-            }
-            od *= 0.5f;
-            cs -= 1f;
-            hp *= 0.5f;
-            beatmapDifficultyText.setColor(46 / 255f, 139 / 255f, 87 / 255f);
+
+        if (totalSpeedMultiplier > 1) {
+            beatmapLengthText.setColor(205 / 255f, 85 / 255f, 85 / 255f);
+        } else if (totalSpeedMultiplier < 1) {
+            beatmapLengthText.setColor(46 / 255f, 139 / 255f, 87 / 255f);
         }
+
+        float bpm_min = beatmapInfo.getBpmMin() * totalSpeedMultiplier;
+        float bpm_max = beatmapInfo.getBpmMax() * totalSpeedMultiplier;
+        long length = (long) (beatmapInfo.getLength() / totalSpeedMultiplier);
 
         @SuppressLint("SimpleDateFormat") SimpleDateFormat sdf = new SimpleDateFormat("mm:ss");
         sdf.setTimeZone(TimeZone.getTimeZone("GMT+0"));
@@ -974,52 +990,14 @@ public class SongMenu implements IUpdateHandler, MenuItemListener,
         }
         beatmapLengthText.setText(binfoStr);
 
-        // Unlike other forced statistics, force OD scales on speed multiplier.
-        if (ModMenu.getInstance().isCustomOD()) {
-            od = ModMenu.getInstance().getCustomOD();
-        }
+        String dimensionString =
+            "AR: " + difficulty.getAr() + " " +
+            "OD: " + difficulty.od + " " +
+            "CS: " + difficulty.difficultyCS + " " +
+            "HP: " + difficulty.hp + " " +
+            "Stars: " + GameHelper.Round(beatmapInfo.getStarRating(), 2);
 
-        final StringBuilder dimensionStringBuilder = new StringBuilder();
-        if (ModMenu.getInstance().getChangeSpeed() != 1) {
-            float speed = ModMenu.getInstance().getSpeed();
-            ar = GameHelper.Round(GameHelper.ms2ar(GameHelper.ar2ms(ar) / speed), 2);
-            od = GameHelper.Round(GameHelper.ms2od(GameHelper.od2ms(od) / speed), 2);
-        } else if (mod.contains(GameMod.MOD_DOUBLETIME) || mod.contains(GameMod.MOD_NIGHTCORE)) {
-            ar = GameHelper.Round(GameHelper.ms2ar(GameHelper.ar2ms(ar) * 2 / 3), 2);
-            od = GameHelper.Round(GameHelper.ms2od(GameHelper.od2ms(od) * 2 / 3), 2);
-        } else if (mod.contains(GameMod.MOD_HALFTIME)) {
-            ar = GameHelper.Round(GameHelper.ms2ar(GameHelper.ar2ms(ar) * 4 / 3), 2);
-            od = GameHelper.Round(GameHelper.ms2od(GameHelper.od2ms(od) * 4 / 3), 2);
-        }
-        float rawAR = ar;
-        float rawOD = od;
-        float rawCS = cs;
-        float rawHP = hp;
-
-        if (ModMenu.getInstance().isCustomAR()) {
-            ar = ModMenu.getInstance().getCustomAR();
-        }
-        if (ModMenu.getInstance().isCustomCS()) {
-            cs = ModMenu.getInstance().getCustomCS();
-        }
-        if (ModMenu.getInstance().isCustomHP()) {
-            hp = ModMenu.getInstance().getCustomHP();
-        }
-
-        if (ar != rawAR || od != rawOD || cs != rawCS || hp != rawHP) {
-            beatmapDifficultyText.setColor(255 / 255f, 180 / 255f, 0 / 255f);
-        }
-
-        dimensionStringBuilder
-                .append("AR: ").append(GameHelper.Round(ar, 2)).append(" ")
-                .append("OD: ").append(GameHelper.Round(od, 2)).append(" ")
-                .append("CS: ").append(GameHelper.Round(cs, 2)).append(" ")
-                .append("HP: ").append(GameHelper.Round(hp, 2)).append(" ")
-                .append("Stars: ");
-
-        dimensionStringBuilder.append(GameHelper.Round(beatmapInfo.getStarRating(), 2));
-
-        beatmapDifficultyText.setText(dimensionStringBuilder.toString());
+        beatmapDifficultyText.setText(dimensionString);
     }
 
     public void reloadCurrentSelection() {
