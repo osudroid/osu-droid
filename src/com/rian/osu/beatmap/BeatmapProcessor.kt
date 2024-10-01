@@ -90,7 +90,7 @@ class BeatmapProcessor @JvmOverloads constructor(
             val current = this[i]
             val next = this[i + 1]
 
-            if (next.startTime - current.startTime < 2000 * beatmap.general.stackLeniency) {
+            if (current is HitCircle && next.startTime - current.startTime < 2000 * beatmap.general.stackLeniency) {
                 val distanceSquared = next.position.getDistance(current.position).pow(2)
 
                 if (distanceSquared < droidDifficultyScale) {
