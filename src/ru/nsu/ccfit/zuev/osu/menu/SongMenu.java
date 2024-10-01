@@ -79,7 +79,6 @@ import ru.nsu.ccfit.zuev.skins.OsuSkin;
 import ru.nsu.ccfit.zuev.skins.SkinLayout;
 
 import static com.reco1l.osu.data.BeatmapsKt.BeatmapInfo;
-import static com.rian.osu.utils.ModConverter.convertLegacyMods;
 
 public class SongMenu implements IUpdateHandler, MenuItemListener,
         IScrollBarListener {
@@ -889,7 +888,7 @@ public class SongMenu implements IUpdateHandler, MenuItemListener,
         }
 
         var modMenu = ModMenu.getInstance();
-        var convertedMods = convertLegacyMods(
+        var convertedMods = ModUtils.convertLegacyMods(
             modMenu.getMod(),
             modMenu.isCustomCS() ? modMenu.getCustomCS() : null,
             modMenu.isCustomAR() ? modMenu.getCustomAR() : null,
@@ -1046,7 +1045,7 @@ public class SongMenu implements IUpdateHandler, MenuItemListener,
                 var parameters = new DifficultyCalculationParameters();
                 var modMenu = ModMenu.getInstance();
 
-                parameters.setMods(convertLegacyMods(
+                parameters.setMods(ModUtils.convertLegacyMods(
                     modMenu.getMod(),
                     modMenu.isCustomCS() ? modMenu.getCustomCS() : null,
                     modMenu.isCustomAR() ? modMenu.getCustomAR() : null,

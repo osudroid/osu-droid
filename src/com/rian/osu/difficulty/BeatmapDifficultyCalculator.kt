@@ -8,7 +8,7 @@ import com.rian.osu.replay.SliderCheeseChecker
 import com.rian.osu.replay.ThreeFingerChecker
 import com.rian.osu.replay.createCursorGroups
 import com.rian.osu.utils.LRUCache
-import com.rian.osu.utils.convertLegacyMods
+import com.rian.osu.utils.ModUtils
 import ru.nsu.ccfit.zuev.osu.scoring.Replay.MoveArray
 import ru.nsu.ccfit.zuev.osu.scoring.Replay.ReplayObjectData
 import ru.nsu.ccfit.zuev.osu.scoring.StatisticV2
@@ -37,7 +37,7 @@ object BeatmapDifficultyCalculator {
     @JvmStatic
     fun constructDifficultyParameters(stat: StatisticV2?) = stat?.run {
         DifficultyCalculationParameters().also {
-            it.mods = convertLegacyMods(
+            it.mods = ModUtils.convertLegacyMods(
                 mod,
                 if (isCustomCS) customCS else null,
                 if (isCustomAR) customAR else null,

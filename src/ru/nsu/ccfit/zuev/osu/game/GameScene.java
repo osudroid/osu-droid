@@ -47,6 +47,8 @@ import com.rian.osu.difficulty.attributes.DroidDifficultyAttributes;
 import com.rian.osu.difficulty.attributes.StandardDifficultyAttributes;
 import com.rian.osu.difficulty.attributes.TimedDifficultyAttributes;
 import com.rian.osu.difficulty.calculator.DifficultyCalculationParameters;
+import com.rian.osu.utils.ModUtils;
+
 import org.anddev.andengine.engine.Engine;
 import org.anddev.andengine.engine.camera.SmoothCamera;
 import org.anddev.andengine.engine.handler.IUpdateHandler;
@@ -107,8 +109,6 @@ import ru.nsu.ccfit.zuev.osuplus.BuildConfig;
 import ru.nsu.ccfit.zuev.osuplus.R;
 import ru.nsu.ccfit.zuev.skins.OsuSkin;
 import ru.nsu.ccfit.zuev.skins.SkinManager;
-
-import static com.rian.osu.utils.ModConverter.convertLegacyMods;
 
 public class GameScene implements IUpdateHandler, GameObjectListener,
         IOnSceneTouchListener {
@@ -372,7 +372,7 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
         }
 
         var modMenu = ModMenu.getInstance();
-        var convertedMods = convertLegacyMods(
+        var convertedMods = ModUtils.convertLegacyMods(
             modMenu.getMod(),
             modMenu.isCustomCS() ? modMenu.getCustomCS() : null,
             modMenu.isCustomAR() ? modMenu.getCustomAR() : null,
