@@ -5,7 +5,29 @@ import kotlin.math.sign
 /**
  * Contains difficulty settings of a beatmap.
  */
-class BeatmapDifficulty : Cloneable {
+class BeatmapDifficulty @JvmOverloads constructor(
+    /**
+     * The circle size of this beatmap.
+     */
+    cs: Float = 5f,
+
+    /**
+     * The approach rate of this beatmap.
+     */
+    ar: Float? = null,
+
+    /**
+     * The overall difficulty of this beatmap.
+     */
+    @JvmField
+    var od: Float = 5f,
+
+    /**
+     * The health drain rate of this beatmap.
+     */
+    @JvmField
+    var hp: Float = 5f
+) : Cloneable {
     /**
      * The circle size of this beatmap in difficulty calculation.
      *
@@ -17,7 +39,7 @@ class BeatmapDifficulty : Cloneable {
      * For circle size in gameplay, see [gameplayCS].
      */
     @JvmField
-    var difficultyCS = 5f
+    var difficultyCS = cs
 
     /**
      * The circle size of this beatmap in gameplay.
@@ -30,25 +52,13 @@ class BeatmapDifficulty : Cloneable {
      * Unlike [difficultyCS], this circle size measurement uses the device's height, and should be used in gameplay.
      */
     @JvmField
-    var gameplayCS = 5f
+    var gameplayCS = cs
 
     /**
      * The approach rate of this beatmap.
      */
-    var ar = Float.NaN
+    var ar = ar ?: Float.NaN
         get() = field.takeUnless { it.isNaN() } ?: od
-
-    /**
-     * The overall difficulty of this beatmap.
-     */
-    @JvmField
-    var od = 5f
-
-    /**
-     * The health drain rate of this beatmap.
-     */
-    @JvmField
-    var hp = 5f
 
     /**
      * The base slider velocity in hundreds of osu! pixels per beat.
