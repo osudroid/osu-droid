@@ -330,6 +330,7 @@ public class SongMenu implements IUpdateHandler, MenuItemListener,
 
         SkinLayout layoutOptions = OsuSkin.get().getLayout("OptionsButton");
         SkinLayout layoutRandom = OsuSkin.get().getLayout("RandomButton");
+        SkinLayout layoutDifficultySwitcher = OsuSkin.get().getLayout("DifficultySwitcher");
 
         backButton = new AnimatedSprite("menu-back", true, OsuSkin.get().getAnimationFramerate()) {
             boolean moved = false;
@@ -593,6 +594,9 @@ public class SongMenu implements IUpdateHandler, MenuItemListener,
             if (layoutRandom != null) {
                 layoutRandom.apply(randomMap, optionSelection);
             }
+            if (layoutDifficultySwitcher != null) {
+                layoutDifficultySwitcher.apply(difficultySwitcher, randomMap);
+            }
         } else {
             backButton.setPosition(0, Config.getRES_HEIGHT() - backButton.getHeightScaled());
 
@@ -606,12 +610,13 @@ public class SongMenu implements IUpdateHandler, MenuItemListener,
                 optionSelection.setPosition(backButton.getX() + backButton.getWidthScaled(),
                                          Config.getRES_HEIGHT() - 90);
             }
+
             randomMap.setPosition(
                     optionSelection.getX() + optionSelection.getWidthScaled(),
                     Config.getRES_HEIGHT() - 90);
-        }
 
-        difficultySwitcher.setPosition(randomMap.getX() + randomMap.getWidthScaled() - 18, Config.getRES_HEIGHT() - difficultySwitcher.getHeightScaled());
+            difficultySwitcher.setPosition(randomMap.getX() + randomMap.getWidthScaled() - 18, Config.getRES_HEIGHT() - difficultySwitcher.getHeightScaled());
+        }
 
         frontLayer.attachChild(backButton);
         scene.registerTouchArea(backButton);
