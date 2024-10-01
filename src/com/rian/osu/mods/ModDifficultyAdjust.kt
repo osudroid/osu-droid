@@ -35,7 +35,7 @@ class ModDifficultyAdjust(
 ) : Mod(), IModApplicableToDifficultyWithSettings, IModApplicableToHitObjectWithSettings {
     override val droidString = ""
 
-    override fun applyToDifficulty(mode: GameMode, difficulty: BeatmapDifficulty, mods: List<Mod>, customSpeedMultiplier: Float) =
+    override fun applyToDifficulty(mode: GameMode, difficulty: BeatmapDifficulty, mods: Iterable<Mod>, customSpeedMultiplier: Float) =
         difficulty.let {
             it.difficultyCS = getValue(cs, it.difficultyCS)
             it.gameplayCS = getValue(cs, it.gameplayCS)
@@ -53,7 +53,7 @@ class ModDifficultyAdjust(
             }
         }
 
-    override fun applyToHitObject(mode: GameMode, hitObject: HitObject, mods: List<Mod>, customSpeedMultiplier: Float) {
+    override fun applyToHitObject(mode: GameMode, hitObject: HitObject, mods: Iterable<Mod>, customSpeedMultiplier: Float) {
         // Special case for force AR, where the AR value is kept constant with respect to game time.
         // This makes the player perceive the fade in animation as is under all speed multipliers.
         if (ar == null) {
@@ -64,7 +64,7 @@ class ModDifficultyAdjust(
         hitObject.timeFadeIn *= trackRate
     }
 
-    private fun calculateTrackRate(mods: List<Mod>, customSpeedMultiplier: Float) =
+    private fun calculateTrackRate(mods: Iterable<Mod>, customSpeedMultiplier: Float) =
         ModUtils.calculateRateWithMods(mods) * customSpeedMultiplier
 
     private fun getValue(value: Float?, fallback: Float) = value ?: fallback

@@ -10,7 +10,7 @@ import com.rian.osu.utils.CircleSizeCalculator
 class ModReallyEasy : Mod(), IModApplicableToDifficultyWithSettings {
     override val droidString = "l"
 
-    override fun applyToDifficulty(mode: GameMode, difficulty: BeatmapDifficulty, mods: List<Mod>, customSpeedMultiplier: Float) =
+    override fun applyToDifficulty(mode: GameMode, difficulty: BeatmapDifficulty, mods: Iterable<Mod>, customSpeedMultiplier: Float) =
         difficulty.run {
             val difficultyAdjustMod = mods.find { it is ModDifficultyAdjust } as ModDifficultyAdjust?
 
