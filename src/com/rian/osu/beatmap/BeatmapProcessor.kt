@@ -83,6 +83,7 @@ class BeatmapProcessor @JvmOverloads constructor(
         }
 
         val droidDifficultyScale = CircleSizeCalculator.standardScaleToDroidDifficultyScale(this[0].difficultyScale, true)
+        val maxDeltaTime = 2000 * beatmap.general.stackLeniency
 
         for (i in 0 until size - 1) {
             scope?.ensureActive()
@@ -90,7 +91,7 @@ class BeatmapProcessor @JvmOverloads constructor(
             val current = this[i]
             val next = this[i + 1]
 
-            if (current is HitCircle && next.startTime - current.startTime < 2000 * beatmap.general.stackLeniency) {
+            if (current is HitCircle && next.startTime - current.startTime < maxDeltaTime) {
                 val distanceSquared = next.position.getDistance(current.position).pow(2)
 
                 if (distanceSquared < droidDifficultyScale) {
