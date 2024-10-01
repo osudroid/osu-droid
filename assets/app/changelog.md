@@ -46,12 +46,28 @@ for preventing accidental touches.
 
 - Added support for pp-based global beatmap leaderboard in song selection menu
 - Added video setting summary regarding supported video formats
-- Added a new button in song selection menu to switch difficulty algorithm between osu!droid and osu!standard. This 
-  button can be skinned with the following skin element names:
-  - `selection-difficulty-droid`
-  - `selection-difficulty-droid-over`
-  - `selection-difficulty-standard`
-  - `selection-difficulty-standard-over`
+- Added a new button in song selection menu to switch difficulty algorithm between osu!droid and osu!standard
+  - The button can be skinned with the following skin element names:
+    - `selection-difficulty-droid`
+    - `selection-difficulty-droid-over`
+    - `selection-difficulty-standard`
+    - `selection-difficulty-standard-over`
+  - The button can be customized in `skin.json`'s `Layout` configuration under `DifficultySwitcher`, just like `ModsButton`
+    and the like. Here is an example configuration:
+    ```json
+    {
+      "Layout": {
+        "useNewLayout": true,
+        "DifficultySwitcher": {
+          "x": 108.2,
+          "y": 195.4,
+          "w": 120.5,
+          "h": 132.1,
+          "scale": 1.25
+        }
+      }
+    }
+    ```
 - Added support for `sliderslide` and `sliderwhistle` hitsounds
 - Added support for custom file hitsounds
 - Added an animation to slider end arrow rotation when snaking animation is enabled
@@ -109,6 +125,9 @@ animated.
 - Optimized gameplay loading time by only reloading beatmap when necessary
 - Optimized real-time PP counter by not recalculating a beatmap's difficulty when retrying it
 - Optimized osu!standard difficulty calculation's difficulty spike nerf application
+- Optimized beatmap switching operation in song selection menu
+- The `x` and `y` properties in `skin.json`'s `Layout` configuration now offsets a button's position top-right rather
+  than setting the button's position
 
 # Removals
 
