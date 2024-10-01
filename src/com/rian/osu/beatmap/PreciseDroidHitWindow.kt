@@ -11,14 +11,9 @@ class PreciseDroidHitWindow(
      */
     overallDifficulty: Float
 ) : HitWindow(overallDifficulty) {
-    override val greatWindow: Float
-        get() = 55 + 6 * (5 - overallDifficulty)
-
-    override val okWindow: Float
-        get() = 120 + 8 * (5 - overallDifficulty)
-
-    override val mehWindow: Float
-        get() = 180 + 10 * (5 - overallDifficulty)
+    override val greatWindow = 55 + 6 * (5 - overallDifficulty)
+    override val okWindow = 120 + 8 * (5 - overallDifficulty)
+    override val mehWindow = 180 + 10 * (5 - overallDifficulty)
 
     companion object {
         /**

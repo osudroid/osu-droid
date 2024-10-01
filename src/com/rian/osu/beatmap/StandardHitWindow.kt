@@ -9,14 +9,9 @@ class StandardHitWindow(
      */
     overallDifficulty: Float
 ) : HitWindow(overallDifficulty) {
-    override val greatWindow: Float
-        get() = 80 - 6 * overallDifficulty
-
-    override val okWindow: Float
-        get() = 140 - 8 * overallDifficulty
-
-    override val mehWindow: Float
-        get() = 200 - 10 * overallDifficulty
+    override val greatWindow = 80 - 6 * overallDifficulty
+    override val okWindow = 140 - 8 * overallDifficulty
+    override val mehWindow = 200 - 10 * overallDifficulty
 
     companion object {
         /**
