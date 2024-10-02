@@ -31,7 +31,7 @@ class StandardDifficultyHitObject(
     /**
      * Other hit objects in the beatmap, including this hit object.
      */
-    difficultyHitObjects: MutableList<StandardDifficultyHitObject>,
+    difficultyHitObjects: Array<StandardDifficultyHitObject>,
 
     /**
      * The index of this hit object in the list of all hit objects.

@@ -126,7 +126,7 @@ abstract class DifficultyCalculator<TObject : DifficultyHitObject, TAttributes :
             attributes.add(
                 TimedDifficultyAttributes(
                     obj.endTime,
-                    createDifficultyAttributes(progressiveBeatmap, skills, difficultyObjects.subList(0, currentIndex), parameters)
+                    createDifficultyAttributes(progressiveBeatmap, skills, difficultyObjects.sliceArray(0..currentIndex), parameters)
                 )
             )
         }
@@ -151,7 +151,7 @@ abstract class DifficultyCalculator<TObject : DifficultyHitObject, TAttributes :
      * @param scope The [CoroutineScope] to use for coroutines.
      * @return The generated [DifficultyHitObject]s.
      */
-    protected abstract fun createDifficultyHitObjects(beatmap: Beatmap, parameters: DifficultyCalculationParameters?, scope: CoroutineScope? = null): List<TObject>
+    protected abstract fun createDifficultyHitObjects(beatmap: Beatmap, parameters: DifficultyCalculationParameters?, scope: CoroutineScope? = null): Array<TObject>
 
     /**
      * Calculates the rating of a [Skill] based on its difficulty.
@@ -173,7 +173,7 @@ abstract class DifficultyCalculator<TObject : DifficultyHitObject, TAttributes :
     protected abstract fun createDifficultyAttributes(
         beatmap: Beatmap,
         skills: Array<Skill<TObject>>,
-        objects: List<TObject>,
+        objects: Array<TObject>,
         parameters: DifficultyCalculationParameters?
     ): TAttributes
 

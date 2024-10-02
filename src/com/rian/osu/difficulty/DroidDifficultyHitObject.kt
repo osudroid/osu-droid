@@ -34,7 +34,7 @@ class DroidDifficultyHitObject(
     /**
      * Other hit objects in the beatmap, including this hit object.
      */
-    difficultyHitObjects: MutableList<DroidDifficultyHitObject>,
+    difficultyHitObjects: Array<DroidDifficultyHitObject>,
 
     /**
      * The index of this hit object in the list of all hit objects.
