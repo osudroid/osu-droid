@@ -102,11 +102,12 @@ class ModDifficultyAdjust(
             return false
         }
 
-        return super.equals(other) && cs == other.cs && ar == other.ar && od == other.od && hp == other.hp
+        return super.equals(other)
     }
 
     override fun hashCode(): Int {
         var result = super.hashCode()
+
         result = 31 * result + cs.hashCode()
         result = 31 * result + ar.hashCode()
         result = 31 * result + od.hashCode()

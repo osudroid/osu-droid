@@ -10,4 +10,24 @@ abstract class ModRateAdjust : Mod(), IModApplicableToTrackRate {
     override fun calculateScoreMultiplier(difficulty: BeatmapDifficulty) =
         if (trackRateMultiplier > 1) 1 + (trackRateMultiplier - 1) * 0.24f
         else 0.3f.pow((1 - trackRateMultiplier) * 4)
+
+    override fun equals(other: Any?): Boolean {
+        if (other === this) {
+            return true
+        }
+
+        if (other !is ModRateAdjust) {
+            return false
+        }
+
+        return super.equals(other)
+    }
+
+    override fun hashCode(): Int {
+        var result = super.hashCode()
+
+        result = 31 * result + trackRateMultiplier.hashCode()
+
+        return result
+    }
 }
