@@ -13,6 +13,8 @@ class ModEasy : Mod(), IModApplicableToDifficulty {
     override val ranked = true
     override val incompatibleMods = super.incompatibleMods + ModHardRock::class
 
+    override fun calculateScoreMultiplier(difficulty: BeatmapDifficulty) = 0.5f
+
     override fun applyToDifficulty(mode: GameMode, difficulty: BeatmapDifficulty) = difficulty.run {
         difficultyCS = when (mode) {
             GameMode.Droid -> {

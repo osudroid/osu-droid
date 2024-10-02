@@ -11,6 +11,8 @@ class ModReallyEasy : Mod(), IModApplicableToDifficultyWithSettings {
     override val droidString = "l"
     override val acronym = "RE"
 
+    override fun calculateScoreMultiplier(difficulty: BeatmapDifficulty) = 0.5f
+
     override fun applyToDifficulty(mode: GameMode, difficulty: BeatmapDifficulty, mods: List<Mod>, customSpeedMultiplier: Float) =
         difficulty.run {
             val difficultyAdjustMod = mods.find { it is ModDifficultyAdjust } as ModDifficultyAdjust?

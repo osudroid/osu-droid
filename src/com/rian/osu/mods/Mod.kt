@@ -1,5 +1,6 @@
 package com.rian.osu.mods
 
+import com.rian.osu.beatmap.sections.BeatmapDifficulty
 import kotlin.reflect.KClass
 
 /**
@@ -25,6 +26,14 @@ abstract class Mod {
      * The [Mod]s this [Mod] cannot be enabled with.
      */
     open val incompatibleMods = emptyArray<KClass<out Mod>>()
+
+    /**
+     * Calculates the score multiplier for this [Mod] with the given [BeatmapDifficulty].
+     *
+     * @param difficulty The [BeatmapDifficulty] to calculate the score multiplier for.
+     * @return The score multiplier for this [Mod] with the given [BeatmapDifficulty].
+     */
+    open fun calculateScoreMultiplier(difficulty: BeatmapDifficulty) = 1f
 
     override fun equals(other: Any?): Boolean {
         if (other === this) {

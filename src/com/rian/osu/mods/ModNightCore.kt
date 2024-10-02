@@ -1,5 +1,7 @@
 package com.rian.osu.mods
 
+import com.rian.osu.beatmap.sections.BeatmapDifficulty
+
 /**
  * Represents the Night Core mod.
  */
@@ -12,4 +14,6 @@ class ModNightCore : Mod(), IModApplicableToTrackRate {
     )
 
     override val trackRateMultiplier = 1.5f
+
+    override fun calculateScoreMultiplier(difficulty: BeatmapDifficulty) = 1.12f
 }

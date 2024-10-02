@@ -1,5 +1,7 @@
 package com.rian.osu.mods
 
+import com.rian.osu.beatmap.sections.BeatmapDifficulty
+
 /**
  * Represents the Half Time mod.
  */
@@ -12,4 +14,6 @@ class ModHalfTime : Mod(), IModApplicableToTrackRate {
     )
 
     override val trackRateMultiplier = 0.75f
+
+    override fun calculateScoreMultiplier(difficulty: BeatmapDifficulty) = 0.3f
 }

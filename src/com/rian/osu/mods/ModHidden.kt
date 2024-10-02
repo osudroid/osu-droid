@@ -3,6 +3,7 @@ package com.rian.osu.mods
 import com.rian.osu.beatmap.Beatmap
 import com.rian.osu.beatmap.hitobject.HitObject
 import com.rian.osu.beatmap.hitobject.Slider
+import com.rian.osu.beatmap.sections.BeatmapDifficulty
 
 /**
  * Represents the Hidden mod.
@@ -11,6 +12,8 @@ class ModHidden : Mod(), IModApplicableToBeatmap {
     override val droidString = "h"
     override val acronym = "HD"
     override val ranked = true
+
+    override fun calculateScoreMultiplier(difficulty: BeatmapDifficulty) = 1.06f
 
     override fun applyToBeatmap(beatmap: Beatmap) {
         fun applyFadeInAdjustment(hitObject: HitObject) {

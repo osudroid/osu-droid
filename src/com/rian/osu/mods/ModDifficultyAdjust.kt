@@ -3,6 +3,8 @@ package com.rian.osu.mods
 import com.rian.osu.GameMode
 import com.rian.osu.beatmap.hitobject.HitObject
 import com.rian.osu.beatmap.sections.BeatmapDifficulty
+import kotlin.math.exp
+import kotlin.math.pow
 
 /**
  * Represents the Difficulty Adjust mod, serves as a container for force difficulty statistics.
@@ -34,6 +36,28 @@ class ModDifficultyAdjust(
 ) : Mod(), IModApplicableToDifficultyWithSettings, IModApplicableToHitObjectWithSettings {
     override val droidString = ""
     override val acronym = "DA"
+
+    override fun calculateScoreMultiplier(difficulty: BeatmapDifficulty): Float {
+        var multiplier = 1f
+
+        if (cs != null) {
+            val diff = difficulty.difficultyCS - cs!!
+
+            multiplier *=
+                if (diff >= 0) 1 + 0.0075f * diff.pow(1.5f)
+                else 2 / (1 + exp(-0.5f * diff))
+        }
+
+        if (od != null) {
+            val diff = difficulty.od - od!!
+
+            multiplier *=
+                if (diff >= 0) 1 + 0.005f * diff.pow(1.3f)
+                else 2 / (1 + exp(-0.25f * diff))
+        }
+
+        return multiplier
+    }
 
     override fun applyToDifficulty(mode: GameMode, difficulty: BeatmapDifficulty, mods: List<Mod>, customSpeedMultiplier: Float) =
         difficulty.let {
