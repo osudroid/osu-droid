@@ -47,12 +47,9 @@ class StandardDifficultyCalculator : DifficultyCalculator<StandardDifficultyHitO
             flashlightDifficulty *= 0.7
         }
 
-        val baseAimPerformance = (5 * max(1.0, aimDifficulty / 0.0675) - 4).pow(3.0) / 100000
-        val baseSpeedPerformance = (5 * max(1.0, speedDifficulty / 0.0675) - 4).pow(3.0) / 100000
-        var baseFlashlightPerformance = 0.0
-        if (parameters?.mods?.any { it is ModFlashlight } == true) {
-            baseFlashlightPerformance = flashlightDifficulty.pow(2.0) * 25.0
-        }
+        val baseAimPerformance = (5 * max(1.0, aimDifficulty / 0.0675) - 4).pow(3) / 100000
+        val baseSpeedPerformance = (5 * max(1.0, speedDifficulty / 0.0675) - 4).pow(3) / 100000
+        val baseFlashlightPerformance = if (mods.any { it is ModFlashlight }) flashlightDifficulty.pow(2) * 25 else 0.0
 
         val basePerformance = (
                 baseAimPerformance.pow(1.1) +
