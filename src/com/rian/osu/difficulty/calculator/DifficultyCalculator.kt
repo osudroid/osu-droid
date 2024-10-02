@@ -25,30 +25,28 @@ abstract class DifficultyCalculator<TObject : DifficultyHitObject, TAttributes :
      * [Mod]s that can alter the star rating when they are used in calculation with one or more [Mod]s.
      */
     protected open val difficultyAdjustmentMods = setOf(
-        ModDoubleTime(), ModHalfTime(), ModNightCore(),
-        ModRelax(), ModEasy(), ModReallyEasy(),
-        ModHardRock(), ModHidden(), ModFlashlight(),
-        ModDifficultyAdjust()
+        ModRelax::class, ModEasy::class, ModReallyEasy::class,
+        ModHardRock::class, ModHidden::class, ModFlashlight::class,
+        ModDifficultyAdjust::class, ModRateAdjust::class
     )
 
     /**
      * Retains [Mod]s that change star rating.
-     *
-     * This is used rather than [MutableCollection.retainAll] as some [Mod]s need a special treatment.
      */
-    fun retainDifficultyAdjustmentMods(parameters: DifficultyCalculationParameters) =
-        parameters.mods.iterator().run {
-            for (mod in this) {
-                // ModDifficultyAdjust always changes difficulty.
-                if (mod is ModDifficultyAdjust) {
-                    continue
-                }
+    fun retainDifficultyAdjustmentMods(parameters: DifficultyCalculationParameters) {
+        if (parameters.mods.isEmpty()) {
+            return
+        }
 
-                if (!difficultyAdjustmentMods.contains(mod)) {
-                    remove()
+        for (adjustmentMod in difficultyAdjustmentMods) {
+            for (parameterMod in parameters.mods) {
+                if (adjustmentMod.isInstance(parameterMod)) {
+                    parameters.mods.remove(parameterMod)
+                    break
                 }
             }
         }
+    }
 
     /**
      * Calculates the difficulty of a [Beatmap] with specific parameters.

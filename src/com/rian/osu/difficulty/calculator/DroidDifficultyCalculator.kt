@@ -23,11 +23,7 @@ class DroidDifficultyCalculator : DifficultyCalculator<DroidDifficultyHitObject,
     override val mode = GameMode.Droid
     override val difficultyMultiplier = 0.18
 
-    override val difficultyAdjustmentMods = mutableSetOf<Mod>().also {
-        it.addAll(super.difficultyAdjustmentMods)
-        it.add(ModPrecise())
-        it.add(ModAutopilot())
-    }.toSet()
+    override val difficultyAdjustmentMods = super.difficultyAdjustmentMods + setOf(ModPrecise::class, ModAutopilot::class)
 
     private val maximumSectionDeltaTime = 2000
     private val minimumSectionObjectCount = 5
