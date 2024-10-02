@@ -3,7 +3,7 @@ package com.rian.osu.mods
 /**
  * Represents the Sudden Death mod.
  */
-class ModSuddenDeath : Mod() {
+class ModSuddenDeath : Mod(), IModUserSelectable {
     override val droidString = "u"
     override val acronym = "SD"
     override val ranked = true

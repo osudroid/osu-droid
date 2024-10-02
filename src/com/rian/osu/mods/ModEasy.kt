@@ -7,7 +7,7 @@ import com.rian.osu.utils.CircleSizeCalculator
 /**
  * Represents the Easy mod.
  */
-class ModEasy : Mod(), IModApplicableToDifficulty {
+class ModEasy : Mod(), IModUserSelectable, IModApplicableToDifficulty {
     override val droidString = "e"
     override val acronym = "EZ"
     override val ranked = true

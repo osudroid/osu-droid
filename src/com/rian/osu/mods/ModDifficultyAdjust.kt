@@ -34,9 +34,6 @@ class ModDifficultyAdjust(
     @JvmField
     var hp: Float? = null
 ) : Mod(), IModApplicableToDifficultyWithSettings, IModApplicableToHitObjectWithSettings {
-    override val droidString = ""
-    override val acronym = "DA"
-
     override fun calculateScoreMultiplier(difficulty: BeatmapDifficulty): Float {
         var multiplier = 1f
 

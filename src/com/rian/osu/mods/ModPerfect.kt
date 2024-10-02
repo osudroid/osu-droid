@@ -3,7 +3,7 @@ package com.rian.osu.mods
 /**
  * Represents the Perfect mod.
  */
-class ModPerfect : Mod() {
+class ModPerfect : Mod(), IModUserSelectable {
     override val droidString = "f"
     override val acronym = "PF"
     override val ranked = true

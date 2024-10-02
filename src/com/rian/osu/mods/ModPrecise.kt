@@ -5,7 +5,7 @@ import com.rian.osu.beatmap.sections.BeatmapDifficulty
 /**
  * Represents the Precise mod.
  */
-class ModPrecise : Mod() {
+class ModPrecise : Mod(), IModUserSelectable {
     override val droidString = "s"
     override val acronym = "PR"
     override val ranked = true

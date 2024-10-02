@@ -8,7 +8,7 @@ import com.rian.osu.beatmap.sections.BeatmapDifficulty
 /**
  * Represents the Hidden mod.
  */
-class ModHidden : Mod(), IModApplicableToBeatmap {
+class ModHidden : Mod(), IModUserSelectable, IModApplicableToBeatmap {
     override val droidString = "h"
     override val acronym = "HD"
     override val ranked = true

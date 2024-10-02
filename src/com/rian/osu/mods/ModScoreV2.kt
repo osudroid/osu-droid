@@ -3,7 +3,7 @@ package com.rian.osu.mods
 /**
  * Represents the ScoreV2 mod.
  */
-class ModScoreV2 : Mod() {
+class ModScoreV2 : Mod(), IModUserSelectable {
     override val droidString = "v"
     override val acronym = "V2"
 }

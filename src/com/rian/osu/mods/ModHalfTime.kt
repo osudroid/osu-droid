@@ -3,7 +3,7 @@ package com.rian.osu.mods
 /**
  * Represents the Half Time mod.
  */
-class ModHalfTime : ModRateAdjust() {
+class ModHalfTime : ModRateAdjust(), IModUserSelectable {
     override val droidString = "t"
     override val acronym = "HT"
     override val ranked = true

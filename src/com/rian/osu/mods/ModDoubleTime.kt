@@ -3,7 +3,7 @@ package com.rian.osu.mods
 /**
  * Represents the Double Time mod.
  */
-class ModDoubleTime : ModRateAdjust() {
+class ModDoubleTime : ModRateAdjust(), IModUserSelectable {
     override val droidString = "d"
     override val acronym = "DT"
     override val ranked = true

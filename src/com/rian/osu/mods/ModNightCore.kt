@@ -3,7 +3,7 @@ package com.rian.osu.mods
 /**
  * Represents the Night Core mod.
  */
-class ModNightCore : ModRateAdjust() {
+class ModNightCore : ModRateAdjust(), IModUserSelectable {
     override val droidString = "c"
     override val acronym = "NC"
     override val ranked = true

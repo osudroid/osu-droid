@@ -3,7 +3,7 @@ package com.rian.osu.mods
 /**
  * Represents the Auto mod.
  */
-class ModAuto : Mod() {
+class ModAuto : Mod(), IModUserSelectable {
     override val droidString = "a"
     override val acronym = "AT"
     override val incompatibleMods = super.incompatibleMods + arrayOf(

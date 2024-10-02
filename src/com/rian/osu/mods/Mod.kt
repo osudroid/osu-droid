@@ -8,16 +8,6 @@ import kotlin.reflect.KClass
  */
 abstract class Mod {
     /**
-     * The osu!droid string representation of this [Mod].
-     */
-    abstract val droidString: String
-
-    /**
-     * The acronym of this [Mod].
-     */
-    abstract val acronym: String
-
-    /**
      * Whether scores with this [Mod] active can be submitted online.
      */
     open val ranked = false
@@ -26,6 +16,12 @@ abstract class Mod {
      * The [Mod]s this [Mod] cannot be enabled with.
      */
     open val incompatibleMods = emptyArray<KClass<out Mod>>()
+
+    /**
+     * Whether this [Mod] is playable by the user.
+     */
+    val isPlayable
+        get() = this is IModUserSelectable
 
     /**
      * Calculates the score multiplier for this [Mod] with the given [BeatmapDifficulty].
@@ -44,8 +40,19 @@ abstract class Mod {
             return false
         }
 
-        return other.droidString == droidString
+        return hashCode() == other.hashCode()
     }
 
-    override fun hashCode() = droidString.hashCode()
+    override fun hashCode(): Int {
+        var result = ranked.hashCode()
+
+        result = 31 * result + incompatibleMods.contentHashCode()
+
+        if (this is IModUserSelectable) {
+            result = 31 * result + droidString.hashCode()
+            result = 31 * result + acronym.hashCode()
+        }
+
+        return result
+    }
 }
