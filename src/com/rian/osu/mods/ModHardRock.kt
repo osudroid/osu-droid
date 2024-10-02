@@ -72,6 +72,9 @@ class ModHardRock : Mod(), IModUserSelectable, IModApplicableToDifficulty, IModA
 
     private fun applySetting(value: Float, ratio: Float = ADJUST_RATIO) = min(value * ratio, 10f)
 
+    override fun equals(other: Any?) = other === this || other is ModHardRock
+    override fun hashCode() = super.hashCode()
+
     companion object {
         private const val ADJUST_RATIO = 1.4f
     }

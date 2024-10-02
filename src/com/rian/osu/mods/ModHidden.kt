@@ -27,6 +27,9 @@ class ModHidden : Mod(), IModUserSelectable, IModApplicableToBeatmap {
         beatmap.hitObjects.objects.forEach { applyFadeInAdjustment(it) }
     }
 
+    override fun equals(other: Any?) = other === this || other is ModHidden
+    override fun hashCode() = super.hashCode()
+
     companion object {
         const val FADE_IN_DURATION_MULTIPLIER = 0.4
         const val FADE_OUT_DURATION_MULTIPLIER = 0.3

@@ -14,4 +14,7 @@ class ModNoFail : Mod(), IModUserSelectable {
     )
 
     override fun calculateScoreMultiplier(difficulty: BeatmapDifficulty) = 0.5f
+
+    override fun equals(other: Any?) = other === this || other is ModNoFail
+    override fun hashCode() = super.hashCode()
 }

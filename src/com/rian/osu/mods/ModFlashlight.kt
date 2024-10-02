@@ -11,4 +11,7 @@ class ModFlashlight : Mod(), IModUserSelectable {
     override val ranked = true
 
     override fun calculateScoreMultiplier(difficulty: BeatmapDifficulty) = 1.12f
+
+    override fun equals(other: Any?) = other === this || other is ModFlashlight
+    override fun hashCode() = super.hashCode()
 }

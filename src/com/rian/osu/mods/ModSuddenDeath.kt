@@ -10,4 +10,7 @@ class ModSuddenDeath : Mod(), IModUserSelectable {
     override val incompatibleMods = super.incompatibleMods + arrayOf(
         ModNoFail::class, ModPerfect::class, ModAuto::class
     )
+
+    override fun equals(other: Any?) = other === this || other is ModSuddenDeath
+    override fun hashCode() = super.hashCode()
 }

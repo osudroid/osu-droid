@@ -13,4 +13,7 @@ class ModRelax : Mod(), IModUserSelectable {
     )
 
     override fun calculateScoreMultiplier(difficulty: BeatmapDifficulty) = 1e-3f
+
+    override fun equals(other: Any?) = other === this || other is ModRelax
+    override fun hashCode() = super.hashCode()
 }

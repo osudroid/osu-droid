@@ -12,4 +12,7 @@ class ModNightCore : ModRateAdjust(), IModUserSelectable {
     )
 
     override val trackRateMultiplier = 1.5f
+
+    override fun equals(other: Any?) = other === this || other is ModNightCore
+    override fun hashCode() = super.hashCode()
 }

@@ -11,4 +11,7 @@ class ModPrecise : Mod(), IModUserSelectable {
     override val ranked = true
 
     override fun calculateScoreMultiplier(difficulty: BeatmapDifficulty) = 1.06f
+
+    override fun equals(other: Any?) = other === this || other is ModPrecise
+    override fun hashCode() = super.hashCode()
 }

@@ -12,4 +12,7 @@ class ModHalfTime : ModRateAdjust(), IModUserSelectable {
     )
 
     override val trackRateMultiplier = 0.75f
+
+    override fun equals(other: Any?) = other === this || other is ModHalfTime
+    override fun hashCode() = super.hashCode()
 }

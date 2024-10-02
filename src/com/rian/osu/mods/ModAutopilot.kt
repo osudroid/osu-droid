@@ -13,4 +13,7 @@ class ModAutopilot : Mod(), IModUserSelectable {
     )
 
     override fun calculateScoreMultiplier(difficulty: BeatmapDifficulty) = 1e-3f
+
+    override fun equals(other: Any?) = other === this || other is ModAutopilot
+    override fun hashCode() = super.hashCode()
 }

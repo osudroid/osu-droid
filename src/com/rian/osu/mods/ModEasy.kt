@@ -41,6 +41,9 @@ class ModEasy : Mod(), IModUserSelectable, IModApplicableToDifficulty {
         hp *= ADJUST_RATIO
     }
 
+    override fun equals(other: Any?) = other === this || other is ModEasy
+    override fun hashCode() = super.hashCode()
+
     companion object {
         private const val ADJUST_RATIO = 0.5f
     }
