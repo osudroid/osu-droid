@@ -5,9 +5,9 @@ package com.rian.osu.mods
  */
 interface IModUserSelectable {
     /**
-     * The osu!droid string representation of this [Mod].
+     * The osu!droid character representation of this [Mod].
      */
-    val droidString: String
+    val droidChar: Char
 
     /**
      * The acronym of this [Mod].

@@ -6,7 +6,7 @@ import com.rian.osu.beatmap.sections.BeatmapDifficulty
  * Represents the Autopilot mod.
  */
 class ModAutopilot : Mod(), IModUserSelectable {
-    override val droidString = "p"
+    override val droidChar = 'p'
     override val acronym = "AP"
     override val textureNameSuffix = "relax2"
     override val incompatibleMods = super.incompatibleMods + arrayOf(

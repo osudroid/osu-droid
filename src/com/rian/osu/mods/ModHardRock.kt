@@ -13,7 +13,7 @@ import kotlin.math.min
  * Represents the Hard Rock mod.
  */
 class ModHardRock : Mod(), IModUserSelectable, IModApplicableToDifficulty, IModApplicableToHitObject {
-    override val droidString = "r"
+    override val droidChar = 'r'
     override val acronym = "HR"
     override val textureNameSuffix = "hardrock"
     override val ranked = true

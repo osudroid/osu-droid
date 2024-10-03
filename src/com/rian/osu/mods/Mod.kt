@@ -43,7 +43,7 @@ abstract class Mod {
         result = 31 * result + incompatibleMods.contentHashCode()
 
         if (this is IModUserSelectable) {
-            result = 31 * result + droidString.hashCode()
+            result = 31 * result + droidChar.hashCode()
             result = 31 * result + acronym.hashCode()
         }
 

@@ -4,7 +4,7 @@ package com.rian.osu.mods
  * Represents the ScoreV2 mod.
  */
 class ModScoreV2 : Mod(), IModUserSelectable {
-    override val droidString = "v"
+    override val droidChar = 'v'
     override val acronym = "V2"
     override val textureNameSuffix = "scorev2"
 

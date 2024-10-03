@@ -6,7 +6,7 @@ import com.rian.osu.beatmap.sections.BeatmapDifficulty
  * Represents the Relax mod.
  */
 class ModRelax : Mod(), IModUserSelectable {
-    override val droidString = "x"
+    override val droidChar = 'x'
     override val acronym = "RX"
     override val textureNameSuffix = "relax"
     override val incompatibleMods = super.incompatibleMods + arrayOf(

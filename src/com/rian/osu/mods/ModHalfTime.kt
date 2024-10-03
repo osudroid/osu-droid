@@ -4,7 +4,7 @@ package com.rian.osu.mods
  * Represents the Half Time mod.
  */
 class ModHalfTime : ModRateAdjust(), IModUserSelectable {
-    override val droidString = "t"
+    override val droidChar = 't'
     override val acronym = "HT"
     override val textureNameSuffix = "halftime"
     override val ranked = true

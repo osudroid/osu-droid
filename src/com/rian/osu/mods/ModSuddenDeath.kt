@@ -4,7 +4,7 @@ package com.rian.osu.mods
  * Represents the Sudden Death mod.
  */
 class ModSuddenDeath : Mod(), IModUserSelectable {
-    override val droidString = "u"
+    override val droidChar = 'u'
     override val acronym = "SD"
     override val textureNameSuffix = "suddendeath"
     override val ranked = true

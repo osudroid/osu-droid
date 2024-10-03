@@ -4,7 +4,7 @@ package com.rian.osu.mods
  * Represents the Perfect mod.
  */
 class ModPerfect : Mod(), IModUserSelectable {
-    override val droidString = "f"
+    override val droidChar = 'f'
     override val acronym = "PF"
     override val textureNameSuffix = "perfect"
     override val ranked = true

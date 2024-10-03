@@ -6,7 +6,7 @@ import com.rian.osu.beatmap.sections.BeatmapDifficulty
  * Represents the Flashlight mod.
  */
 class ModFlashlight : Mod(), IModUserSelectable {
-    override val droidString = "i"
+    override val droidChar = 'i'
     override val acronym = "FL"
     override val textureNameSuffix = "flashlight"
     override val ranked = true

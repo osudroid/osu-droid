@@ -8,7 +8,7 @@ import com.rian.osu.utils.CircleSizeCalculator
  * Represents the Really Easy mod.
  */
 class ModReallyEasy : Mod(), IModUserSelectable, IModApplicableToDifficultyWithSettings {
-    override val droidString = "l"
+    override val droidChar = 'l'
     override val acronym = "RE"
     override val textureNameSuffix = "reallyeasy"
 

@@ -4,7 +4,7 @@ package com.rian.osu.mods
  * Represents the Auto mod.
  */
 class ModAuto : Mod(), IModUserSelectable {
-    override val droidString = "a"
+    override val droidChar = 'a'
     override val acronym = "AT"
     override val textureNameSuffix = "autoplay"
     override val incompatibleMods = super.incompatibleMods + arrayOf(

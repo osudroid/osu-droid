@@ -6,7 +6,7 @@ import com.rian.osu.beatmap.sections.BeatmapDifficulty
  * Represents the No Fail mod.
  */
 class ModNoFail : Mod(), IModUserSelectable {
-    override val droidString = "n"
+    override val droidChar = 'n'
     override val acronym = "NF"
     override val textureNameSuffix = "nofail"
     override val ranked = true
