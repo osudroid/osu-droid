@@ -53,7 +53,6 @@ class HealthDisplay(private val statistics: StatisticV2) : Container() {
 
         fill = AnimatedSpriteWithDepthTest("scorebar-colour", true, OsuSkin.get().animationFramerate)
         fill.autoSizeAxes = Axes.None // Preserve the first frame width.
-        fill.portionX = 0f
         attachChild(fill)
 
         marker = ExtendedSprite()
