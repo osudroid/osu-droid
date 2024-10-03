@@ -17,7 +17,7 @@ abstract class StrainSkill<in TObject : DifficultyHitObject>(
     /**
      * The [Mod]s that this skill processes.
      */
-    mods: List<Mod>
+    mods: Iterable<Mod>
 ) : Skill<TObject>(mods) {
     /**
      * The number of sections with the highest strains, which the peak strain reductions will apply to.

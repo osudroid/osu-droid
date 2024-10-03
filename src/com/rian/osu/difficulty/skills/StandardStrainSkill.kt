@@ -12,7 +12,7 @@ abstract class StandardStrainSkill(
     /**
      * The [Mod]s that this skill processes.
      */
-    mods: List<Mod>
+    mods: Iterable<Mod>
 ) : StrainSkill<StandardDifficultyHitObject>(mods) {
     /**
      * The final multiplier to be applied to the final difficulty value after all other calculations.

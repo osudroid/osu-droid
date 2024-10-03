@@ -12,7 +12,7 @@ class DroidRhythm(
     /**
      * The [Mod]s that this skill processes.
      */
-    mods: List<Mod>
+    mods: Iterable<Mod>
 ) : DroidStrainSkill(mods) {
     override val reducedSectionCount = 5
     override val starsPerDouble = 1.75

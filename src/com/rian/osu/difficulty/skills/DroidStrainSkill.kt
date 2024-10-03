@@ -15,7 +15,7 @@ abstract class DroidStrainSkill(
     /**
      * The [Mod]s that this skill processes.
      */
-    mods: List<Mod>
+    mods: Iterable<Mod>
 ) : StrainSkill<DroidDifficultyHitObject>(mods) {
     /**
      * The bonus multiplier that is given for a sequence of notes of equal difficulty.

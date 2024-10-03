@@ -12,7 +12,7 @@ class StandardAim(
     /**
      * The [Mod]s that this skill processes.
      */
-    mods: List<Mod>,
+    mods: Iterable<Mod>,
 
     /**
      * Whether to consider sliders in the calculation.
