@@ -42,7 +42,6 @@ import com.rian.osu.beatmap.parser.BeatmapParser;
 import com.rian.osu.beatmap.timings.EffectControlPoint;
 import com.rian.osu.beatmap.timings.TimingControlPoint;
 import com.rian.osu.difficulty.BeatmapDifficultyCalculator;
-import com.rian.osu.difficulty.attributes.DifficultyAttributes;
 import com.rian.osu.difficulty.attributes.DroidDifficultyAttributes;
 import com.rian.osu.difficulty.attributes.StandardDifficultyAttributes;
 import com.rian.osu.difficulty.attributes.TimedDifficultyAttributes;
@@ -2574,66 +2573,29 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
             return;
         }
 
-        var object = playableBeatmap.getHitObjects().objects.get(objectId);
-        double time = object.getEndTime();
-
         switch (Config.getDifficultyAlgorithm()) {
-            case droid -> ppText.setText(String.format(Locale.ENGLISH, "%.2fdpp", getDroidPPAtTime(time)));
-            case standard -> ppText.setText(String.format(Locale.ENGLISH, "%.2fpp", getStandardPPAtTime(time)));
+            case droid -> ppText.setText(String.format(Locale.ENGLISH, "%.2fdpp", getDroidPPAt(objectId)));
+            case standard -> ppText.setText(String.format(Locale.ENGLISH, "%.2fpp", getStandardPPAt(objectId)));
         }
     }
 
-    private double getDroidPPAtTime(double time) {
-        var timedAttributes = getAttributeAtTime(droidTimedDifficultyAttributes, time);
-
-        if (timedAttributes == null) {
+    private double getDroidPPAt(int objectId) {
+        if (droidTimedDifficultyAttributes == null || objectId < 0 || objectId >= droidTimedDifficultyAttributes.length) {
             return 0;
         }
+
+        var timedAttributes = droidTimedDifficultyAttributes[objectId];
 
         return BeatmapDifficultyCalculator.calculateDroidPerformance(timedAttributes.attributes, stat).total;
     }
 
-    private double getStandardPPAtTime(double time) {
-        var timedAttributes = getAttributeAtTime(standardTimedDifficultyAttributes, time);
-
-        if (timedAttributes == null) {
+    private double getStandardPPAt(int objectId) {
+        if (standardTimedDifficultyAttributes == null || objectId < 0 || objectId >= standardTimedDifficultyAttributes.length) {
             return 0;
         }
 
+        var timedAttributes = standardTimedDifficultyAttributes[objectId];
+
         return BeatmapDifficultyCalculator.calculateStandardPerformance(timedAttributes.attributes, stat).total;
-    }
-
-    private <T extends DifficultyAttributes> TimedDifficultyAttributes<T> getAttributeAtTime(
-        TimedDifficultyAttributes<T>[] timedDifficultyAttributes, double time
-    ) {
-        if (timedDifficultyAttributes == null || timedDifficultyAttributes.length == 0) {
-            return null;
-        }
-
-        if (time < timedDifficultyAttributes[0].time) {
-            return null;
-        }
-
-        if (time >= timedDifficultyAttributes[timedDifficultyAttributes.length - 1].time) {
-            return timedDifficultyAttributes[timedDifficultyAttributes.length - 1];
-        }
-
-        int l = 0;
-        int r = timedDifficultyAttributes.length - 2;
-
-        while (l <= r) {
-            int pivot = l + ((r - l) >> 1);
-            var attributes = timedDifficultyAttributes[pivot];
-
-            if (attributes.time < time) {
-                l = pivot + 1;
-            } else if (attributes.time > time) {
-                r = pivot - 1;
-            } else {
-                return attributes;
-            }
-        }
-
-        return timedDifficultyAttributes[l];
     }
 }
