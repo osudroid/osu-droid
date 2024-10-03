@@ -9,7 +9,8 @@ class ModFlashlight : Mod(), IModUserSelectable {
     override val droidChar = 'i'
     override val acronym = "FL"
     override val textureNameSuffix = "flashlight"
-    override val ranked = true
+    override val ranked
+        get() = followDelay == DEFAULT_FOLLOW_DELAY
 
     /**
      * The amount of seconds until the flashlight reaches the cursor.
