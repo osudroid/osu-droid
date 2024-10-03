@@ -11,7 +11,6 @@ import com.reco1l.osu.multiplayer.RoomScene;
 
 import com.rian.osu.beatmap.parser.BeatmapParser;
 import com.rian.osu.difficulty.BeatmapDifficultyCalculator;
-import com.rian.osu.difficulty.calculator.DifficultyCalculationParameters;
 import com.rian.osu.utils.ModUtils;
 
 import org.anddev.andengine.entity.primitive.Rectangle;
@@ -337,19 +336,19 @@ public class ModMenu implements IModSwitcher {
                                     return;
                                 }
 
-                                var parameters = new DifficultyCalculationParameters();
-                                parameters.setMods(ModUtils.convertLegacyMods(
+                                var convertedMods = ModUtils.convertLegacyMods(
                                     mod,
                                     isCustomCS() ? customCS : null,
                                     isCustomAR() ? customAR : null,
-                                    isCustomOD() ? customOD : null
-                                ));
-                                parameters.setCustomSpeedMultiplier(changeSpeed);
+                                    isCustomOD() ? customOD : null,
+                                    isCustomHP() ? customHP : null,
+                                    changeSpeed
+                                );
 
                                 switch (Config.getDifficultyAlgorithm()) {
                                     case droid -> {
                                         var attributes = BeatmapDifficultyCalculator.calculateDroidDifficulty(
-                                            beatmap, parameters, scope
+                                            beatmap, convertedMods, scope
                                         );
 
                                         GlobalManager.getInstance().getSongMenu().setStarsDisplay(
@@ -359,7 +358,7 @@ public class ModMenu implements IModSwitcher {
 
                                     case standard -> {
                                         var attributes = BeatmapDifficultyCalculator.calculateStandardDifficulty(
-                                            beatmap, parameters, scope
+                                            beatmap, convertedMods, scope
                                         );
 
                                         GlobalManager.getInstance().getSongMenu().setStarsDisplay(

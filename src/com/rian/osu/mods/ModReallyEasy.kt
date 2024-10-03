@@ -13,7 +13,7 @@ class ModReallyEasy : Mod(), IModUserSelectable, IModApplicableToDifficultyWithS
 
     override fun calculateScoreMultiplier(difficulty: BeatmapDifficulty) = 0.5f
 
-    override fun applyToDifficulty(mode: GameMode, difficulty: BeatmapDifficulty, mods: Iterable<Mod>, customSpeedMultiplier: Float) =
+    override fun applyToDifficulty(mode: GameMode, difficulty: BeatmapDifficulty, mods: Iterable<Mod>) =
         difficulty.run {
             val difficultyAdjustMod = mods.find { it is ModDifficultyAdjust } as ModDifficultyAdjust?
 
@@ -22,6 +22,8 @@ class ModReallyEasy : Mod(), IModUserSelectable, IModApplicableToDifficultyWithS
                     ar *= 2
                     ar -= 0.5f
                 }
+
+                val customSpeedMultiplier = (mods.find { it is ModCustomSpeed } as ModCustomSpeed?)?.trackRateMultiplier ?: 1f
 
                 ar -= 0.5f
                 ar -= customSpeedMultiplier - 1

@@ -9,6 +9,7 @@ import com.rian.osu.difficulty.attributes.DroidDifficultyAttributes
 import com.rian.osu.difficulty.attributes.HighStrainSection
 import com.rian.osu.difficulty.skills.*
 import com.rian.osu.mods.*
+import com.rian.osu.utils.ModUtils
 import kotlin.math.cbrt
 import kotlin.math.ceil
 import kotlin.math.max
@@ -31,13 +32,12 @@ class DroidDifficultyCalculator : DifficultyCalculator<DroidDifficultyHitObject,
 
     override fun createDifficultyAttributes(
         beatmap: Beatmap,
+        mods: Iterable<Mod>,
         skills: Array<Skill<DroidDifficultyHitObject>>,
         objects: Array<DroidDifficultyHitObject>,
-        parameters: DifficultyCalculationParameters?
     ) = DroidDifficultyAttributes().apply {
-        mods = parameters?.mods?.slice(parameters.mods.indices) ?: mods
-        customSpeedMultiplier = parameters?.customSpeedMultiplier ?: customSpeedMultiplier
-        clockRate = parameters?.totalSpeedMultiplier?.toDouble() ?: clockRate
+        this.mods = mods.toSet()
+        clockRate = ModUtils.calculateRateWithMods(this.mods).toDouble()
 
         maxCombo = beatmap.maxCombo
         hitCircleCount = beatmap.hitObjects.circleCount
@@ -206,35 +206,24 @@ class DroidDifficultyCalculator : DifficultyCalculator<DroidDifficultyHitObject,
         ).toDouble()
     }
 
-    override fun createSkills(
-        beatmap: Beatmap,
-        parameters: DifficultyCalculationParameters?
-    ): Array<Skill<DroidDifficultyHitObject>> {
-        val mods = parameters?.mods ?: mutableListOf()
-
-        return arrayOf(
-            DroidAim(mods, true),
-            DroidAim(mods, false),
-            // Tap and visual skills depend on rhythm skill, so we put it first
-            DroidRhythm(mods),
-            DroidTap(mods, true),
-            DroidTap(mods, false),
-            DroidFlashlight(mods, true),
-            DroidFlashlight(mods, false),
-            DroidVisual(mods, true),
-            DroidVisual(mods, false)
-        )
-    }
+    override fun createSkills(beatmap: Beatmap, mods: Iterable<Mod>) = arrayOf<Skill<DroidDifficultyHitObject>>(
+        DroidAim(mods, true),
+        DroidAim(mods, false),
+        // Tap and visual skills depend on rhythm skill, so we put it first
+        DroidRhythm(mods),
+        DroidTap(mods, true),
+        DroidTap(mods, false),
+        DroidFlashlight(mods, true),
+        DroidFlashlight(mods, false),
+        DroidVisual(mods, true),
+        DroidVisual(mods, false)
+    )
 
     @Suppress("UNCHECKED_CAST")
-    override fun createDifficultyHitObjects(
-        beatmap: Beatmap,
-        parameters: DifficultyCalculationParameters?,
-        scope: CoroutineScope?
-    ): Array<DroidDifficultyHitObject> {
-        val clockRate = parameters?.totalSpeedMultiplier?.toDouble() ?: 1.0
+    override fun createDifficultyHitObjects(beatmap: Beatmap, mods: Iterable<Mod>, scope: CoroutineScope?): Array<DroidDifficultyHitObject> {
+        val clockRate = ModUtils.calculateRateWithMods(mods).toDouble()
         val greatWindow = (
-            if (parameters?.mods?.any { it is ModPrecise } == true) PreciseDroidHitWindow(beatmap.difficulty.od)
+            if (mods.any { it is ModPrecise }) PreciseDroidHitWindow(beatmap.difficulty.od)
             else DroidHitWindow(beatmap.difficulty.od)
         ).greatWindow.toDouble() / clockRate
 

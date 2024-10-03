@@ -23,7 +23,6 @@ import com.rian.osu.beatmap.PreciseDroidHitWindow;
 import com.rian.osu.beatmap.parser.BeatmapParser;
 import com.rian.osu.beatmap.sections.BeatmapDifficulty;
 import com.rian.osu.difficulty.BeatmapDifficultyCalculator;
-import com.rian.osu.difficulty.calculator.DifficultyCalculationParameters;
 import com.rian.osu.math.Precision;
 import com.rian.osu.ui.DifficultyAlgorithmSwitcher;
 import com.rian.osu.utils.LRUCache;
@@ -893,7 +892,8 @@ public class SongMenu implements IUpdateHandler, MenuItemListener,
             modMenu.isCustomCS() ? modMenu.getCustomCS() : null,
             modMenu.isCustomAR() ? modMenu.getCustomAR() : null,
             modMenu.isCustomOD() ? modMenu.getCustomOD() : null,
-            modMenu.isCustomHP() ? modMenu.getCustomHP() : null
+            modMenu.isCustomHP() ? modMenu.getCustomHP() : null,
+            modMenu.getChangeSpeed()
         );
 
         boolean isPreciseMod = modMenu.getMod().contains(GameMod.MOD_PRECISE);
@@ -907,7 +907,7 @@ public class SongMenu implements IUpdateHandler, MenuItemListener,
             beatmapInfo.getHpDrainRate()
         );
 
-        ModUtils.applyModsToBeatmapDifficulty(difficulty, GameMode.Droid, convertedMods, customSpeedMultiplier);
+        ModUtils.applyModsToBeatmapDifficulty(difficulty, GameMode.Droid, convertedMods);
 
         if (isPreciseMod) {
             // Special case for OD. The Precise mod changes the hit window and not the OD itself, but we must
@@ -1042,21 +1042,20 @@ public class SongMenu implements IUpdateHandler, MenuItemListener,
 
                 changeDimensionInfo(beatmapInfo);
 
-                var parameters = new DifficultyCalculationParameters();
                 var modMenu = ModMenu.getInstance();
-
-                parameters.setMods(ModUtils.convertLegacyMods(
+                var convertedMods = ModUtils.convertLegacyMods(
                     modMenu.getMod(),
                     modMenu.isCustomCS() ? modMenu.getCustomCS() : null,
                     modMenu.isCustomAR() ? modMenu.getCustomAR() : null,
-                    modMenu.isCustomOD() ? modMenu.getCustomOD() : null
-                ));
-                parameters.setCustomSpeedMultiplier(modMenu.getChangeSpeed());
+                    modMenu.isCustomOD() ? modMenu.getCustomOD() : null,
+                    modMenu.isCustomHP() ? modMenu.getCustomHP() : null,
+                    modMenu.getChangeSpeed()
+                );
 
                 switch (Config.getDifficultyAlgorithm()) {
                     case droid -> {
                         var attributes = BeatmapDifficultyCalculator.calculateDroidDifficulty(
-                                data, parameters, scope
+                            data, convertedMods, scope
                         );
 
                         setStarsDisplay(GameHelper.Round(attributes.starRating, 2));
@@ -1064,7 +1063,7 @@ public class SongMenu implements IUpdateHandler, MenuItemListener,
 
                     case standard -> {
                         var attributes = BeatmapDifficultyCalculator.calculateStandardDifficulty(
-                                data, parameters, scope
+                            data, convertedMods, scope
                         );
 
                         setStarsDisplay(GameHelper.Round(attributes.starRating, 2));

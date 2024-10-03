@@ -44,24 +44,21 @@ abstract class DifficultyCalculator<TObject : DifficultyHitObject, TAttributes :
     }
 
     /**
-     * Calculates the difficulty of a [Beatmap] with specific parameters.
+     * Calculates the difficulty of a [Beatmap] with specific [Mod]s.
      *
      * @param beatmap The [Beatmap] whose difficulty is to be calculated.
-     * @param parameters The calculation parameters that should be applied to the [Beatmap].
+     * @param mods The [Mod]s to apply to the [Beatmap].
      * @param scope The [CoroutineScope] to use for coroutines.
      * @return A structure describing the difficulty of the [Beatmap].
      */
     @JvmOverloads
-    fun calculate(
-        beatmap: Beatmap,
-        parameters: DifficultyCalculationParameters? = null,
-        scope: CoroutineScope? = null
-    ): TAttributes {
+    fun calculate(beatmap: Beatmap, mods: Iterable<Mod>? = null, scope: CoroutineScope? = null): TAttributes {
         // Always operate on a clone of the original beatmap when needed, to not modify it game-wide
-        val beatmapToCalculate = beatmap.createPlayableBeatmap(mode, parameters?.mods, parameters?.customSpeedMultiplier ?: 1f, scope)
-        val skills = createSkills(beatmapToCalculate, parameters)
+        val modsCalculated = mods ?: emptySet()
+        val playableBeatmap = beatmap.createPlayableBeatmap(mode, modsCalculated, scope)
+        val skills = createSkills(playableBeatmap, modsCalculated)
 
-        val objects = createDifficultyHitObjects(beatmapToCalculate, parameters, scope)
+        val objects = createDifficultyHitObjects(playableBeatmap, modsCalculated, scope)
 
         for (obj in objects) {
             for (skill in skills) {
@@ -70,42 +67,39 @@ abstract class DifficultyCalculator<TObject : DifficultyHitObject, TAttributes :
             }
         }
 
-        return createDifficultyAttributes(beatmapToCalculate, skills, objects, parameters)
+        return createDifficultyAttributes(playableBeatmap, modsCalculated, skills, objects)
     }
 
     /**
-     * Calculates the difficulty of a [Beatmap] with specific parameters and returns a set of
+     * Calculates the difficulty of a [Beatmap] with specific [Mod]s and returns a set of
      * [TimedDifficultyAttributes] representing the difficulty at every relevant time value in the [Beatmap].
      *
      * @param beatmap The [Beatmap] whose difficulty is to be calculated.
-     * @param parameters The calculation parameters that should be applied to the [Beatmap].
+     * @param mods The [Mod]s to apply to the [Beatmap].
      * @param scope The [CoroutineScope] to use for coroutines.
      * @return The set of [TimedDifficultyAttributes].
      */
     @JvmOverloads
-    fun calculateTimed(
-        beatmap: Beatmap,
-        parameters: DifficultyCalculationParameters? = null,
-        scope: CoroutineScope? = null
-    ): Array<TimedDifficultyAttributes<TAttributes>> {
+    fun calculateTimed(beatmap: Beatmap, mods: Iterable<Mod>? = null, scope: CoroutineScope? = null): Array<TimedDifficultyAttributes<TAttributes>> {
         // Always operate on a clone of the original beatmap when needed, to not modify it game-wide
-        val beatmapToCalculate = beatmap.createPlayableBeatmap(mode, parameters?.mods, parameters?.customSpeedMultiplier ?: 1f, scope)
-        val skills = createSkills(beatmapToCalculate, parameters)
+        val modsCalculated = mods ?: emptySet()
+        val playableBeatmap = beatmap.createPlayableBeatmap(mode, modsCalculated, scope)
+        val skills = createSkills(playableBeatmap, modsCalculated)
 
-        if (beatmapToCalculate.hitObjects.objects.isEmpty()) {
+        if (playableBeatmap.hitObjects.objects.isEmpty()) {
             return emptyArray()
         }
 
-        val attributes = arrayOfNulls<TimedDifficultyAttributes<TAttributes>>(beatmapToCalculate.hitObjects.objects.size)
+        val attributes = arrayOfNulls<TimedDifficultyAttributes<TAttributes>>(playableBeatmap.hitObjects.objects.size)
         val progressiveBeatmap = ProgressiveCalculationBeatmap().apply {
-            difficulty.apply(beatmapToCalculate.difficulty)
+            difficulty.apply(playableBeatmap.difficulty)
         }
 
-        val difficultyObjects = createDifficultyHitObjects(beatmapToCalculate, parameters, scope)
+        val difficultyObjects = createDifficultyHitObjects(playableBeatmap, modsCalculated, scope)
         var currentIndex = 0
 
-        for (i in beatmapToCalculate.hitObjects.objects.indices) {
-            val obj = beatmapToCalculate.hitObjects.objects[i]
+        for (i in playableBeatmap.hitObjects.objects.indices) {
+            val obj = playableBeatmap.hitObjects.objects[i]
 
             progressiveBeatmap.hitObjects.add(obj)
 
@@ -120,7 +114,7 @@ abstract class DifficultyCalculator<TObject : DifficultyHitObject, TAttributes :
 
             attributes[i] = TimedDifficultyAttributes(
                 obj.endTime,
-                createDifficultyAttributes(progressiveBeatmap, skills, difficultyObjects.sliceArray(0..<currentIndex), parameters)
+                createDifficultyAttributes(progressiveBeatmap, modsCalculated, skills, difficultyObjects.sliceArray(0..<currentIndex))
             )
         }
 
@@ -132,20 +126,20 @@ abstract class DifficultyCalculator<TObject : DifficultyHitObject, TAttributes :
      * Creates the [Skill]s to calculate the difficulty of a [Beatmap].
      *
      * @param beatmap The [Beatmap] whose difficulty will be calculated.
-     * @param parameters The difficulty calculation parameter being used.
+     * @param mods The [Mod]s that are used.
      * @return The [Skill]s.
      */
-    protected abstract fun createSkills(beatmap: Beatmap, parameters: DifficultyCalculationParameters?): Array<Skill<TObject>>
+    protected abstract fun createSkills(beatmap: Beatmap, mods: Iterable<Mod> = emptySet()): Array<Skill<TObject>>
 
     /**
      * Retrieves the [DifficultyHitObject]s to calculate against.
      *
      * @param beatmap The [Beatmap] providing the hit objects to generate from.
-     * @param parameters The difficulty calculation parameter being used.
+     * @param mods The [Mod]s that are used.
      * @param scope The [CoroutineScope] to use for coroutines.
      * @return The generated [DifficultyHitObject]s.
      */
-    protected abstract fun createDifficultyHitObjects(beatmap: Beatmap, parameters: DifficultyCalculationParameters?, scope: CoroutineScope? = null): Array<TObject>
+    protected abstract fun createDifficultyHitObjects(beatmap: Beatmap, mods: Iterable<Mod> = emptySet(), scope: CoroutineScope? = null): Array<TObject>
 
     /**
      * Calculates the rating of a [Skill] based on its difficulty.
@@ -159,17 +153,12 @@ abstract class DifficultyCalculator<TObject : DifficultyHitObject, TAttributes :
      * Creates a [TAttributes] to describe a beatmap's difficulty.
      *
      * @param beatmap The [Beatmap] whose difficulty was calculated.
+     * @param mods The [Mod]s that were used.
      * @param skills The [Skill]s which processed the beatmap.
      * @param objects The [TObject]s that were generated.
-     * @param parameters The difficulty calculation parameters used.
      * @return [TAttributes] describing the beatmap's difficulty.
      */
-    protected abstract fun createDifficultyAttributes(
-        beatmap: Beatmap,
-        skills: Array<Skill<TObject>>,
-        objects: Array<TObject>,
-        parameters: DifficultyCalculationParameters?
-    ): TAttributes
+    protected abstract fun createDifficultyAttributes(beatmap: Beatmap, mods: Iterable<Mod>, skills: Array<Skill<TObject>>, objects: Array<TObject>): TAttributes
 
     /**
      * A [Beatmap] that is used for timed difficulty calculation.

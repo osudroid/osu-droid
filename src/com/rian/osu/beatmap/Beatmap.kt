@@ -125,12 +125,11 @@ open class Beatmap : Cloneable {
      *
      * @param mode The [GameMode] to construct the [Beatmap] for.
      * @param mods The [Mod]s to apply to the [Beatmap]. Defaults to No Mod.
-     * @param customSpeedMultiplier The custom speed multiplier to apply to the [Beatmap]. Defaults to 1.
      * @param scope The [CoroutineScope] to use for coroutines.
      * @return The constructed [Beatmap].
      */
     @JvmOverloads
-    fun createPlayableBeatmap(mode: GameMode, mods: List<Mod>? = null, customSpeedMultiplier: Float = 1f, scope: CoroutineScope? = null): Beatmap {
+    fun createPlayableBeatmap(mode: GameMode, mods: Iterable<Mod>? = null, scope: CoroutineScope? = null): Beatmap {
         val converter = BeatmapConverter(this, scope)
 
         // Convert
@@ -144,7 +143,7 @@ open class Beatmap : Cloneable {
 
         mods?.filterIsInstance<IModApplicableToDifficultyWithSettings>()?.forEach {
             scope?.ensureActive()
-            it.applyToDifficulty(mode, converted.difficulty, mods, customSpeedMultiplier)
+            it.applyToDifficulty(mode, converted.difficulty, mods)
         }
 
         val processor = BeatmapProcessor(converted, scope)
@@ -167,7 +166,7 @@ open class Beatmap : Cloneable {
         mods?.filterIsInstance<IModApplicableToHitObjectWithSettings>()?.forEach {
             for (obj in converted.hitObjects.objects) {
                 scope?.ensureActive()
-                it.applyToHitObject(mode, obj, mods, customSpeedMultiplier)
+                it.applyToHitObject(mode, obj, mods)
             }
         }
 

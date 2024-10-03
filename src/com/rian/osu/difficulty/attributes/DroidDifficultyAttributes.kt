@@ -8,12 +8,6 @@ import com.rian.osu.beatmap.hitobject.Slider
  */
 class DroidDifficultyAttributes : DifficultyAttributes() {
     /**
-     * The custom speed multiplier that was applied to the beatmap.
-     */
-    @JvmField
-    var customSpeedMultiplier = 1f
-
-    /**
      * The overall clock rate that was applied to the beatmap.
      */
     @JvmField

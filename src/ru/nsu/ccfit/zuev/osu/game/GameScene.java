@@ -45,7 +45,6 @@ import com.rian.osu.difficulty.BeatmapDifficultyCalculator;
 import com.rian.osu.difficulty.attributes.DroidDifficultyAttributes;
 import com.rian.osu.difficulty.attributes.StandardDifficultyAttributes;
 import com.rian.osu.difficulty.attributes.TimedDifficultyAttributes;
-import com.rian.osu.difficulty.calculator.DifficultyCalculationParameters;
 import com.rian.osu.utils.ModUtils;
 
 import org.anddev.andengine.engine.Engine;
@@ -179,7 +178,6 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
 
     private DifficultyHelper difficultyHelper = DifficultyHelper.StdDifficulty;
 
-    private DifficultyCalculationParameters lastDifficultyCalculationParameters;
     private TimedDifficultyAttributes<DroidDifficultyAttributes>[] droidTimedDifficultyAttributes;
     private TimedDifficultyAttributes<StandardDifficultyAttributes>[] standardTimedDifficultyAttributes;
 
@@ -376,10 +374,11 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
             modMenu.isCustomCS() ? modMenu.getCustomCS() : null,
             modMenu.isCustomAR() ? modMenu.getCustomAR() : null,
             modMenu.isCustomOD() ? modMenu.getCustomOD() : null,
-            modMenu.isCustomHP() ? modMenu.getCustomHP() : null
+            modMenu.isCustomHP() ? modMenu.getCustomHP() : null,
+            modMenu.getChangeSpeed()
         );
 
-        playableBeatmap = parsedBeatmap.createPlayableBeatmap(GameMode.Droid, convertedMods, modMenu.getChangeSpeed());
+        playableBeatmap = parsedBeatmap.createPlayableBeatmap(GameMode.Droid, convertedMods);
 
         // TODO skin manager
         SkinManager.getInstance().loadBeatmapSkin(playableBeatmap.getBeatmapsetPath());
@@ -506,33 +505,17 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
         ppText = null;
         if (Config.isDisplayRealTimePPCounter()) {
             // Calculate timed difficulty attributes
-            var parameters = new DifficultyCalculationParameters();
-
-            parameters.setMods(convertedMods);
-            parameters.setCustomSpeedMultiplier(modMenu.getChangeSpeed());
-
-            var sameParameters = lastDifficultyCalculationParameters != null &&
-                lastDifficultyCalculationParameters.equals(parameters);
-
             switch (Config.getDifficultyAlgorithm()) {
-                case droid -> {
-                    if (droidTimedDifficultyAttributes == null || !sameParameters) {
-                        droidTimedDifficultyAttributes = BeatmapDifficultyCalculator.calculateDroidTimedDifficulty(
-                            parsedBeatmap, parameters
-                        );
-                    }
-                }
+                case droid ->
+                    droidTimedDifficultyAttributes = BeatmapDifficultyCalculator.calculateDroidTimedDifficulty(
+                        parsedBeatmap, convertedMods
+                    );
 
-                case standard -> {
-                    if (standardTimedDifficultyAttributes == null || !sameParameters) {
-                        standardTimedDifficultyAttributes = BeatmapDifficultyCalculator.calculateStandardTimedDifficulty(
-                            parsedBeatmap, parameters
-                        );
-                    }
-                }
+                case standard ->
+                    standardTimedDifficultyAttributes = BeatmapDifficultyCalculator.calculateStandardTimedDifficulty(
+                        parsedBeatmap, convertedMods
+                    );
             }
-
-            lastDifficultyCalculationParameters = parameters;
         }
 
         lastBeatmapInfo = beatmapInfo;
@@ -1383,7 +1366,6 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
             breakPeriods.clear();
             cursorSprites = null;
             playableBeatmap = null;
-            lastDifficultyCalculationParameters = null;
             droidTimedDifficultyAttributes = null;
             standardTimedDifficultyAttributes = null;
             String replayPath = null;
@@ -1585,7 +1567,6 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
         playableBeatmap = null;
         cursorSprites = null;
         scoreBoard = null;
-        lastDifficultyCalculationParameters = null;
         droidTimedDifficultyAttributes = null;
         standardTimedDifficultyAttributes = null;
 

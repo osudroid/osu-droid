@@ -6,7 +6,6 @@ import com.rian.osu.beatmap.PreciseDroidHitWindow
 import com.rian.osu.beatmap.hitobject.HitObject
 import com.rian.osu.beatmap.sections.BeatmapDifficulty
 import com.rian.osu.mods.*
-import java.util.EnumSet
 import ru.nsu.ccfit.zuev.osu.game.mods.GameMod
 
 /**
@@ -40,12 +39,14 @@ object ModUtils {
      * @param forceAR The approach rate to enforce.
      * @param forceOD The overall difficulty to enforce.
      * @param forceHP The health drain to enforce.
-     * @return A [MutableList] containing the new [Mod]s.
+     * @param customSpeedMultiplier The custom speed multiplier to use.
+     * @return A [MutableSet] containing the new [Mod]s.
      */
     @JvmStatic
     @JvmOverloads
-    fun convertLegacyMods(mods: EnumSet<GameMod>, forceCS: Float? = null, forceAR: Float? = null,
-                          forceOD: Float? = null, forceHP: Float? = null) = mutableListOf<Mod>().apply {
+    fun convertLegacyMods(mods: Iterable<GameMod>, forceCS: Float? = null, forceAR: Float? = null,
+                          forceOD: Float? = null, forceHP: Float? = null,
+                          customSpeedMultiplier: Float = 1f) = mutableSetOf<Mod>().apply {
         mods.forEach {
             val convertedMod = modMap[it] ?:
             throw IllegalArgumentException("Cannot find the conversion of mod with short name \"${it.shortName}\"")
@@ -53,8 +54,12 @@ object ModUtils {
             add(convertedMod)
         }
 
-        if (arrayOf(forceCS, forceAR, forceOD, forceHP).any { v -> v != null }) {
+        if (forceCS != null || forceAR != null || forceOD != null || forceHP != null) {
             add(ModDifficultyAdjust(forceCS, forceAR, forceOD, forceHP))
+        }
+
+        if (customSpeedMultiplier != 1f) {
+            add(ModCustomSpeed(customSpeedMultiplier))
         }
     }
 
@@ -75,11 +80,9 @@ object ModUtils {
      * @param difficulty The [BeatmapDifficulty] to apply the [Mod]s to.
      * @param mode The [GameMode] to apply the [Mod]s for.
      * @param mods The selected [Mod]s.
-     * @param customSpeedMultiplier The custom speed multiplier to apply.
      */
     @JvmStatic
-    @JvmOverloads
-    fun applyModsToBeatmapDifficulty(difficulty: BeatmapDifficulty, mode: GameMode, mods: Iterable<Mod>, customSpeedMultiplier: Float = 1f) {
+    fun applyModsToBeatmapDifficulty(difficulty: BeatmapDifficulty, mode: GameMode, mods: Iterable<Mod>) {
         for (mod in mods) {
             if (mod is IModApplicableToDifficulty) {
                 mod.applyToDifficulty(mode, difficulty)
@@ -88,19 +91,19 @@ object ModUtils {
 
         for (mod in mods) {
             if (mod is IModApplicableToDifficultyWithSettings) {
-                mod.applyToDifficulty(mode, difficulty, mods, customSpeedMultiplier)
+                mod.applyToDifficulty(mode, difficulty, mods)
             }
         }
 
         // Apply rate adjustments
-        val totalSpeedMultiplier = calculateRateWithMods(mods) * customSpeedMultiplier
+        val trackRate = calculateRateWithMods(mods)
 
-        val preempt = BeatmapDifficulty.difficultyRange(difficulty.ar.toDouble(), HitObject.PREEMPT_MAX, HitObject.PREEMPT_MID, HitObject.PREEMPT_MIN) / totalSpeedMultiplier
+        val preempt = BeatmapDifficulty.difficultyRange(difficulty.ar.toDouble(), HitObject.PREEMPT_MAX, HitObject.PREEMPT_MID, HitObject.PREEMPT_MIN) / trackRate
         difficulty.ar = BeatmapDifficulty.inverseDifficultyRange(preempt, HitObject.PREEMPT_MAX, HitObject.PREEMPT_MID, HitObject.PREEMPT_MIN).toFloat()
 
         val isPreciseMod = mods.any { it is ModPrecise }
         val hitWindow = if (isPreciseMod) PreciseDroidHitWindow(difficulty.od) else DroidHitWindow(difficulty.od)
-        val greatWindow = hitWindow.greatWindow / totalSpeedMultiplier
+        val greatWindow = hitWindow.greatWindow / trackRate
 
         difficulty.od =
             if (isPreciseMod) PreciseDroidHitWindow.hitWindow300ToOverallDifficulty(greatWindow)

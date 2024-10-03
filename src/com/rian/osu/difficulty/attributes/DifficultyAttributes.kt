@@ -13,7 +13,7 @@ abstract class DifficultyAttributes {
      * The mods which were applied to the beatmap.
      */
     @JvmField
-    var mods = listOf<Mod>()
+    var mods = emptySet<Mod>()
 
     /**
      * The combined star rating of all skills.
