@@ -25,6 +25,7 @@ import com.reco1l.andengine.sprite.VideoSprite;
 import com.reco1l.andengine.ExtendedScene;
 import com.reco1l.osu.playfield.FollowPointConnection;
 import com.reco1l.osu.playfield.ComboCounter;
+import com.reco1l.osu.playfield.HealthDisplay;
 import com.reco1l.osu.playfield.ScoreText;
 import com.reco1l.osu.playfield.SliderTickSprite;
 import com.reco1l.osu.ui.BlockAreaFragment;
@@ -141,7 +142,6 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
     private ScoreText accuracyText, scoreText;  //显示的文字  连击数  ACC  分数
     private Queue<BreakPeriod> breakPeriods = new LinkedList<>();
     private BreakAnimator breakAnimator;
-    private ScoreBar scorebar;
     public GameplayLeaderboard scoreBoard;
     private HitErrorMeter hitErrorMeter;
     private Metronome metronome;
@@ -194,7 +194,15 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
 
     // HUD
 
+    /**
+     * The combo counter text.
+     */
     private ComboCounter comboText;
+
+    /**
+     * The health display.
+     */
+    private HealthDisplay healthDisplay;
 
 
     // Timing
@@ -818,8 +826,8 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
 
         breakAnimator = new BreakAnimator(this, fgScene, stat, playableBeatmap.general.letterboxInBreaks, dimRectangle);
         if (!Config.isHideInGameUI()) {
-            scorebar = new ScoreBar(this, fgScene, stat);
-            addPassiveObject(scorebar);
+            healthDisplay = new HealthDisplay(stat);
+            fgScene.attachChild(healthDisplay);
 
             scoreText = new ScoreText(OsuSkin.get().getScorePrefix());
             scoreText.setAnchor(Anchor.TopRight);
@@ -1133,7 +1141,7 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
                 if (Multiplayer.isConnected())
                     RoomScene.INSTANCE.getChat().show();
 
-                if(scorebar != null) scorebar.setVisible(false);
+                if(healthDisplay != null) healthDisplay.setVisible(false);
                 breakPeriods.poll();
             }
         }
@@ -1143,7 +1151,7 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
             RoomScene.INSTANCE.getChat().dismiss();
 
             gameStarted = true;
-            if(scorebar != null) scorebar.setVisible(true);
+            if(healthDisplay != null) healthDisplay.setVisible(true);
             if(GameHelper.isFlashLight()){
                 flashlightSprite.onBreak(false);
             }
@@ -1791,6 +1799,7 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
 
         createBurstEffect(pos, color);
         createHitEffect(pos, scoreName, color);
+        healthDisplay.flash();
     }
 
     public void onSliderReverse(PointF pos, float ang, RGBColor color) {
@@ -1868,6 +1877,7 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
         }
 
         createHitEffect(judgementPos, scoreName, color);
+        healthDisplay.flash();
     }
 
 
@@ -1921,6 +1931,7 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
         };
 
         createHitEffect(pos, scoreName, null);
+        healthDisplay.flash();
     }
 
     @Override
@@ -2203,7 +2214,6 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
             blockAreaFragment = null;
         }
 
-        if(scorebar != null) scorebar.flush();
         stopAllAuxiliarySamples();
         ResourceManager.getInstance().getSound("failsound").play();
         final PauseMenu menu = new PauseMenu(engine, this, true);
