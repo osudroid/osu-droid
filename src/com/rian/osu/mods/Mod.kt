@@ -13,6 +13,11 @@ abstract class Mod {
     open val ranked = false
 
     /**
+     * Whether this [Mod] can be specified as a "required" [Mod] in multiplayer context.
+     */
+    open val validForMultiplayer = true
+
+    /**
      * Whether this [Mod] can be specified as a "free" or "allowed" [Mod] in multiplayer context.
      */
     open val validForMultiplayerAsFreeMod = true
