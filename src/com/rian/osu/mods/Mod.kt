@@ -18,12 +18,6 @@ abstract class Mod {
     open val incompatibleMods = emptyArray<KClass<out Mod>>()
 
     /**
-     * Whether this [Mod] is playable by the user.
-     */
-    val isPlayable
-        get() = this is IModUserSelectable
-
-    /**
      * Calculates the score multiplier for this [Mod] with the given [BeatmapDifficulty].
      *
      * @param difficulty The [BeatmapDifficulty] to calculate the score multiplier for.
