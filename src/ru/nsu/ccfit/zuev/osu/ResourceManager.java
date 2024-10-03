@@ -50,6 +50,19 @@ import ru.nsu.ccfit.zuev.skins.StringSkinData;
 
 public class ResourceManager {
 
+    /**
+     * The textures that shouldn't fallback to the default skin if they're not present in the skin folder.
+     */
+    private static final String[] OPTIONAL_TEXTURES = {
+        "scorebar-marker",
+        "scorebar-ki",
+        "scorebar-kidanger",
+        "scorebar-kidanger2",
+    };
+
+    /**
+     * The textures that can be animated.
+     */
     private static final String[] ANIMATABLE_TEXTURES = {
         "followpoint-",
         "hit0-",
@@ -229,6 +242,8 @@ public class ResourceManager {
 
             String[] availableAnimatableFilenames = filter(availableFiles.keySet().toArray(new String[0]), f -> any(ANIMATABLE_TEXTURES, f::startsWith)).toArray(new String[0]);
 
+            boolean isDefaultSkin = Objects.equals(folder, Config.getSkinTopPath());
+
             for (var assetName : Objects.requireNonNull(context.getAssets().list("gfx"))) {
 
                 var textureName = assetName.substring(0, assetName.length() - 4);
@@ -247,8 +262,12 @@ public class ResourceManager {
 
                 if (availableFiles.containsKey(textureName)) {
                     loadTexture(textureName, Objects.requireNonNull(availableFiles.get(textureName)).getPath(), true);
-                } else  {
-                    loadTexture(textureName, "gfx/" + assetName, false);
+                } else {
+                    if (!isDefaultSkin && any(OPTIONAL_TEXTURES, textureName::startsWith)) {
+                        unloadTexture(textureName);
+                    } else {
+                        loadTexture(textureName, "gfx/" + assetName, false);
+                    }
                 }
             }
 
