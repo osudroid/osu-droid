@@ -8,7 +8,7 @@ import kotlin.math.exp
 import kotlin.math.pow
 
 /**
- * Represents the Difficulty Adjust mod, serves as a container for force difficulty statistics.
+ * Represents the Difficulty Adjust mod. Serves as a container for forced difficulty statistics.
  */
 class ModDifficultyAdjust(
     /**
@@ -36,6 +36,7 @@ class ModDifficultyAdjust(
     var hp: Float? = null
 ) : Mod(), IModApplicableToDifficultyWithSettings, IModApplicableToHitObjectWithSettings {
     override fun calculateScoreMultiplier(difficulty: BeatmapDifficulty): Float {
+        // Graph: https://www.desmos.com/calculator/yrggkhrkzz
         var multiplier = 1f
 
         if (cs != null) {
