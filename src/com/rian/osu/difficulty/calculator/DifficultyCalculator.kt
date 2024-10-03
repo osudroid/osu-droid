@@ -127,7 +127,7 @@ abstract class DifficultyCalculator<TObject : DifficultyHitObject, TAttributes :
 
             attributes[i] = TimedDifficultyAttributes(
                 obj.endTime,
-                createDifficultyAttributes(progressiveBeatmap, skills, difficultyObjects.sliceArray(0..currentIndex), parameters)
+                createDifficultyAttributes(progressiveBeatmap, skills, difficultyObjects.sliceArray(0..<currentIndex), parameters)
             )
         }
 
