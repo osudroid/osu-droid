@@ -39,7 +39,7 @@ class ModDifficultyAdjust(
         var multiplier = 1f
 
         if (cs != null) {
-            val diff = difficulty.difficultyCS - cs!!
+            val diff = cs!! - difficulty.difficultyCS
 
             multiplier *=
                 if (diff >= 0) 1 + 0.0075f * diff.pow(1.5f)
@@ -47,7 +47,7 @@ class ModDifficultyAdjust(
         }
 
         if (od != null) {
-            val diff = difficulty.od - od!!
+            val diff = od!! - difficulty.od
 
             multiplier *=
                 if (diff >= 0) 1 + 0.005f * diff.pow(1.3f)
