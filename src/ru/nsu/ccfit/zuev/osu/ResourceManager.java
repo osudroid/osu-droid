@@ -130,19 +130,12 @@ public class ResourceManager {
 
         loadCustomSkin(folder);
 
-        loadTexture("::track", "gfx/hitcircle.png", false,
-                TextureOptions.BILINEAR_PREMULTIPLYALPHA);
-        loadTexture("::track2", "gfx/slidertrack.png", false);
-        loadTexture("::trackborder", "gfx/sliderborder.png", false,
-                TextureOptions.BILINEAR_PREMULTIPLYALPHA);
         loadTexture("ranking_enabled", "ranking_enabled.png", false);
         loadTexture("ranking_disabled", "ranking_disabled.png", false);
         loadTexture("flashlight_cursor", "flashlight_cursor.png", false, TextureOptions.BILINEAR_PREMULTIPLYALPHA);
 
         if (!textures.containsKey("lighting"))
             textures.put("lighting", null);
-//		textures.put("fail-background", null);
-//		textures.put("pause-overlay", null);
     }
 
     public void loadCustomSkin(String folder) {
