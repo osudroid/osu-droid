@@ -21,10 +21,10 @@ class ScoreText(private val texturePrefix: StringSkinData) : LinearContainer() {
         }
 
 
-    private var isTextInvalid = true
-
-
-    private val characters: Map<Char, TextureRegion> = mutableMapOf<Char, TextureRegion>().also {
+    /**
+     * The characters to display.
+     */
+    val characters: Map<Char, TextureRegion> = mutableMapOf<Char, TextureRegion>().also {
 
         for (i in 0..9) {
             it['0' + i] = ResourceManager.getInstance().getTextureWithPrefix(texturePrefix, i.toString())
@@ -35,6 +35,9 @@ class ScoreText(private val texturePrefix: StringSkinData) : LinearContainer() {
         it['x'] = ResourceManager.getInstance().getTextureWithPrefix(texturePrefix, "x")
 
     }.toMap()
+
+
+    private var isTextInvalid = true
 
 
     private fun allocateSprites(count: Int) {

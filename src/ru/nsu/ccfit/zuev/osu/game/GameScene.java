@@ -64,6 +64,7 @@ import org.anddev.andengine.entity.sprite.Sprite;
 import org.anddev.andengine.entity.text.ChangeableText;
 import org.anddev.andengine.entity.util.FPSCounter;
 import org.anddev.andengine.input.touch.TouchEvent;
+import org.anddev.andengine.opengl.texture.region.TextureRegion;
 import org.anddev.andengine.util.Debug;
 import org.anddev.andengine.util.modifier.ease.EaseQuadIn;
 import org.anddev.andengine.util.modifier.ease.EaseQuadOut;
@@ -841,7 +842,8 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
             accuracyText.setOrigin(Anchor.TopRight);
             accuracyText.setScale(0.6f * 0.96f);
             accuracyText.setText("000.00%");
-            accuracyText.setPosition(scoreText.getHeight() + 9f, -17f);
+            //noinspection DataFlowIssue
+            accuracyText.setPosition(-17f, scoreText.getCharacters().get('0').getHeight() + 9f);
 
             comboText = new ComboCounter();
 
