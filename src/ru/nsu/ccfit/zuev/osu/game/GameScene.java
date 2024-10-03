@@ -833,14 +833,15 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
             scoreText.setAnchor(Anchor.TopRight);
             scoreText.setOrigin(Anchor.TopRight);
             scoreText.setText("0000000000");
-            scoreText.setScale(0.9f);
+            scoreText.setScale(0.96f);
+            scoreText.setX(-10f);
 
             accuracyText = new ScoreText(OsuSkin.get().getScorePrefix());
             accuracyText.setAnchor(Anchor.TopRight);
             accuracyText.setOrigin(Anchor.TopRight);
+            accuracyText.setScale(0.6f * 0.96f);
             accuracyText.setText("000.00%");
-            accuracyText.setScale(0.6f);
-            accuracyText.setY(50);
+            accuracyText.setPosition(scoreText.getHeight() + 9f, -17f);
 
             comboText = new ComboCounter();
 
