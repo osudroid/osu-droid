@@ -11,7 +11,7 @@ public class SkinLayout {
 
     public JSONObject property;
 
-    public float width, height, xOffset, yOffset;
+    public float width, height, xPosition, yPosition;
 
     public float scale = 1;
 
@@ -21,8 +21,8 @@ public class SkinLayout {
         layout.property = object;
         layout.width = (float) object.optDouble("w", -1);
         layout.height = (float) object.optDouble("h", -1);
-        layout.xOffset = (float) object.optDouble("x", 0);
-        layout.yOffset = (float) object.optDouble("y", 0);
+        layout.xPosition = (float) object.optDouble("x");
+        layout.yPosition = (float) object.optDouble("y");
         layout.scale = (float) object.optDouble("scale", -1);
         return layout;
     }
@@ -42,14 +42,21 @@ public class SkinLayout {
             sprite.setHeight(height);
         }
 
-        float xPosition = previousSprite != null ? previousSprite.getX() + previousSprite.getWidthScaled() : 0;
-        float yPosition = Config.getRES_HEIGHT() - sprite.getHeightScaled();
-
         // The origin of the sprite that is using this class is in bottom left, but without its
         // origin being set explicitly in ExtendedSprite to bottom left as touch area does not account for
-        // different origins yet. Similarly, touch area does not account for translations yet.
-        // To work around this, we need to flip the offset in the Y axis.
-        // TODO: When ExtendedSprite supports touch area properly, this should be changed to use origins and translations
-        sprite.setPosition(xPosition + xOffset, yPosition - yOffset);
+        // different origins yet. To work around this, we need to flip the position in the Y axis.
+        // TODO: When ExtendedSprite supports touch area properly, this should be changed to use bottom-left origin
+        float x = xPosition;
+        float y = Config.getRES_HEIGHT() - yPosition;
+
+        if (Float.isNaN(x)) {
+            x = previousSprite != null ? previousSprite.getX() + previousSprite.getWidthScaled() : 0;
+        }
+
+        if (Float.isNaN(y)) {
+            y = Config.getRES_HEIGHT() - sprite.getHeightScaled();
+        }
+
+        sprite.setPosition(x, y);
     }
 }
