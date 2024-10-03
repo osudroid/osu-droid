@@ -335,6 +335,8 @@ abstract class ExtendedEntity(
             }
 
             updateVertexBuffer()
+
+            (parent as? Container)?.onChildSizeChanged(this)
         }
     }
 
@@ -357,9 +359,7 @@ abstract class ExtendedEntity(
 
             updateVertexBuffer()
 
-            if (parent is Container) {
-                (parent as Container).onChildSizeChanged(this)
-            }
+            (parent as? Container)?.onChildSizeChanged(this)
         }
     }
 
