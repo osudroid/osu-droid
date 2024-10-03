@@ -1,14 +1,10 @@
 package com.reco1l.andengine.sprite
 
 import com.reco1l.andengine.*
-import org.anddev.andengine.engine.camera.*
-import org.anddev.andengine.entity.shape.Shape
 import org.anddev.andengine.opengl.texture.region.*
 import org.anddev.andengine.opengl.util.*
 import org.anddev.andengine.opengl.vertex.*
 import javax.microedition.khronos.opengles.*
-import kotlin.math.*
-
 
 /**
  * Sprite that allows to change texture once created.
@@ -25,22 +21,6 @@ open class ExtendedSprite(textureRegion: TextureRegion? = null) : ExtendedEntity
                     textureRegion?.width?.toFloat() ?: 0f,
                     textureRegion?.height?.toFloat() ?: 0f
                 )
-            }
-        }
-
-    override var translationX = 0f
-        set(value) {
-            if (field != value) {
-                field = value
-                applyTextureTranslation()
-            }
-        }
-
-    override var translationY = 0f
-        set(value) {
-            if (field != value) {
-                field = value
-                applyTextureTranslation()
             }
         }
 
@@ -78,8 +58,8 @@ open class ExtendedSprite(textureRegion: TextureRegion? = null) : ExtendedEntity
             }
 
             field = value
-            applyTextureTranslation()
 
+            value?.setTexturePosition(textureX, textureY)
             value?.isFlippedVertical = flippedVertical
             value?.isFlippedHorizontal = flippedHorizontal
 
@@ -96,7 +76,7 @@ open class ExtendedSprite(textureRegion: TextureRegion? = null) : ExtendedEntity
         set(value) {
             if (field != value) {
                 field = value
-                applyTextureTranslation()
+                textureRegion?.setTexturePosition(value, textureY)
             }
         }
 
@@ -107,37 +87,7 @@ open class ExtendedSprite(textureRegion: TextureRegion? = null) : ExtendedEntity
         set(value) {
             if (field != value) {
                 field = value
-                applyTextureTranslation()
-            }
-        }
-
-    /**
-     * The portion of the texture to display on the X axis in a range of -1 to 1.
-     *
-     * Setting a portion that is not 1 will crop the texture and override [translationX]
-     * value. Additionally negative values will crop the texture from the left.
-     */
-    open var portionX = 1f
-        set(value) {
-            val coerced = value.coerceIn(-1f, 1f)
-            if (field != coerced) {
-                field = coerced
-                applyTextureTranslation()
-            }
-        }
-
-    /**
-     * The portion of the texture to display on the Y axis in a range of -1 to 1.
-     *
-     * Setting a portion that is not 1 will crop the texture and override [translationY]
-     * value. Additionally negative values will crop the texture from the top.
-     */
-    open var portionY = 1f
-        set(value) {
-            val coerced = value.coerceIn(-1f, 1f)
-            if (field != coerced) {
-                field = coerced
-                applyTextureTranslation()
+                textureRegion?.setTexturePosition(textureX, value)
             }
         }
 
@@ -147,27 +97,6 @@ open class ExtendedSprite(textureRegion: TextureRegion? = null) : ExtendedEntity
         this.textureRegion = textureRegion
     }
 
-
-    private fun applyTextureTranslation() {
-
-        if (portionX == 1f && portionY == 1f) {
-            textureRegion?.setTexturePosition(textureX, textureY)
-            return
-        }
-
-        val texture = textureRegion ?: return
-
-        val offsetX = texture.width * (1f - abs(portionX)) * sign(portionX)
-        val offsetY = texture.height * (1f - abs(portionY)) * sign(portionY)
-
-        texture.setTexturePosition(
-            (textureX - offsetX).toInt(),
-            (textureY - offsetY).toInt(),
-        )
-
-        this.translationX = -offsetX
-        this.translationY = -offsetY
-    }
 
     override fun applyBlending(pGL: GL10) {
         if (textureRegion?.texture?.textureOptions?.mPreMultipyAlpha == true) {
@@ -188,9 +117,9 @@ open class ExtendedSprite(textureRegion: TextureRegion? = null) : ExtendedEntity
         GLHelper.enableTexCoordArray(pGL)
     }
 
-    override fun doDraw(pGL: GL10, pCamera: Camera) {
+    override fun onApplyVertices(pGL: GL10) {
+        super.onApplyVertices(pGL)
         textureRegion?.onApply(pGL)
-        super.doDraw(pGL, pCamera)
     }
 
 }
