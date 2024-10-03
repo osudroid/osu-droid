@@ -45,7 +45,6 @@ public class SliderBody extends Container {
 
         border = new TriangleMesh();
         border.setDepthTest(true);
-        border.setClearDepth(false);
         attachChild(border, 0);
 
         background = new TriangleMesh();
