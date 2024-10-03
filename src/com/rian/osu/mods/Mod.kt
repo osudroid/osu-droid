@@ -13,6 +13,11 @@ abstract class Mod {
     open val ranked = false
 
     /**
+     * Whether this [Mod] can be specified as a "free" or "allowed" [Mod] in multiplayer context.
+     */
+    open val validForMultiplayerAsFreeMod = true
+
+    /**
      * The [Mod]s this [Mod] cannot be enabled with.
      */
     open val incompatibleMods = emptyArray<KClass<out Mod>>()
