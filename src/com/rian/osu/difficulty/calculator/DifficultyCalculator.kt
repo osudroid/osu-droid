@@ -31,19 +31,14 @@ abstract class DifficultyCalculator<TObject : DifficultyHitObject, TAttributes :
     )
 
     /**
-     * Retains [Mod]s that change star rating.
+     * Retains [Mod]s that change star rating within a collection of [Mod]s.
+     *
+     * @param mods The collection of [Mod]s to check.
      */
-    fun retainDifficultyAdjustmentMods(parameters: DifficultyCalculationParameters) {
-        if (parameters.mods.isEmpty()) {
-            return
-        }
-
-        for (adjustmentMod in difficultyAdjustmentMods) {
-            for (parameterMod in parameters.mods) {
-                if (adjustmentMod.isInstance(parameterMod)) {
-                    parameters.mods.remove(parameterMod)
-                    break
-                }
+    fun retainDifficultyAdjustmentMods(mods: MutableCollection<Mod>) {
+        for (mod in mods) {
+            if (difficultyAdjustmentMods.none { it.isInstance(mod) }) {
+                mods.remove(mod)
             }
         }
     }

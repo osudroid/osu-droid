@@ -538,8 +538,8 @@ object BeatmapDifficultyCalculator {
             parameters?.copy()?.also {
                 // Copy the parameter for caching.
                 when (mode) {
-                    GameMode.Droid -> droidDifficultyCalculator.retainDifficultyAdjustmentMods(it)
-                    GameMode.Standard -> standardDifficultyCalculator.retainDifficultyAdjustmentMods(it)
+                    GameMode.Droid -> droidDifficultyCalculator.retainDifficultyAdjustmentMods(it.mods)
+                    GameMode.Standard -> standardDifficultyCalculator.retainDifficultyAdjustmentMods(it.mods)
                 }
             } ?: DifficultyCalculationParameters()
     }
