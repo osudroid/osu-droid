@@ -51,6 +51,7 @@ class ComboCounter : Container() {
     init {
         setAnchor(Anchor.BottomLeft)
         setOrigin(Anchor.BottomLeft)
+        setPosition(10f, -10f)
         setScale(1.28f)
     }
 
