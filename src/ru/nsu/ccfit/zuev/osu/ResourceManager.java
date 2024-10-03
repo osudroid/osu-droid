@@ -236,6 +236,13 @@ public class ResourceManager {
             }
         }
 
+        // Removing loaded animatable textures from the previous skin. Usage of toArray() is necessary to avoid ConcurrentModificationException.
+        for (var key : textures.keySet().toArray(new String[0])) {
+            if (any(ANIMATABLE_TEXTURES, key::startsWith)) {
+                unloadTexture(key);
+            }
+        }
+
         customFrameCount.clear();
 
         try {
