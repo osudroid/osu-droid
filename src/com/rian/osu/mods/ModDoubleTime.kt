@@ -3,7 +3,7 @@ package com.rian.osu.mods
 /**
  * Represents the Double Time mod.
  */
-class ModDoubleTime : ModRateAdjust(), IModUserSelectable {
+class ModDoubleTime : ModClockRateAdjust(), IModUserSelectable {
     override val droidChar = 'd'
     override val acronym = "DT"
     override val textureNameSuffix = "doubletime"

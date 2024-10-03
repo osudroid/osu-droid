@@ -3,7 +3,7 @@ package com.rian.osu.mods
 /**
  * Represents the Night Core mod.
  */
-class ModNightCore : ModRateAdjust(), IModUserSelectable {
+class ModNightCore : ModClockRateAdjust(), IModUserSelectable {
     override val droidChar = 'c'
     override val acronym = "NC"
     override val textureNameSuffix = "nightcore"

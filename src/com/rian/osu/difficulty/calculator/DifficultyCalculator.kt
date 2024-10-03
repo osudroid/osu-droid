@@ -27,7 +27,7 @@ abstract class DifficultyCalculator<TObject : DifficultyHitObject, TAttributes :
     protected open val difficultyAdjustmentMods = setOf(
         ModRelax::class, ModEasy::class, ModReallyEasy::class,
         ModHardRock::class, ModHidden::class, ModFlashlight::class,
-        ModDifficultyAdjust::class, ModRateAdjust::class
+        ModDifficultyAdjust::class, ModClockRateAdjust::class
     )
 
     /**
