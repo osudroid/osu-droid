@@ -360,7 +360,7 @@ class BeatmapSetDetails(val beatmapSet: BeatmapSetModel, val holder: BeatmapSetV
             val button = TextView(ContextThemeWrapper(context, R.style.beatmap_difficulty_icon))
             difficulty.addView(button)
 
-            button.setTextColor(OsuColors.getStarRatingColor(beatmap.starRating))
+            button.setTextColor(OsuColors.getStarRatingColor(beatmap.starRating).toInt())
             button.setOnClickListener { selectDifficulty(button, beatmap) }
 
         }
@@ -536,7 +536,7 @@ class BeatmapSetViewHolder(itemView: View, private val mediaScope: CoroutineScop
             for (i in beatmaps.indices) {
                 val beatmap = beatmaps[i]
 
-                color(OsuColors.getStarRatingColor(beatmap.starRating)) {
+                color(OsuColors.getStarRatingColor(beatmap.starRating).toInt()) {
                     append("⦿")
                 }
 

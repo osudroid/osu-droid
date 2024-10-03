@@ -84,6 +84,18 @@ abstract class ExtendedEntity(
     open var inheritColor = true
 
     /**
+     * The color of the entity boxed in a [ColorARGB] object.
+     */
+    open var color: ColorARGB
+        get() = ColorARGB(mRed, mGreen, mBlue, mAlpha)
+        set(value) {
+            mRed = value.red
+            mGreen = value.green
+            mBlue = value.blue
+            mAlpha = value.alpha
+        }
+
+    /**
      * The color blending function.
      */
     open var blendingFunction: BlendingFunction? = BlendingFunction.Inherit
