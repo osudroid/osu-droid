@@ -181,8 +181,8 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
     private DifficultyHelper difficultyHelper = DifficultyHelper.StdDifficulty;
 
     private DifficultyCalculationParameters lastDifficultyCalculationParameters;
-    private List<TimedDifficultyAttributes<DroidDifficultyAttributes>> droidTimedDifficultyAttributes;
-    private List<TimedDifficultyAttributes<StandardDifficultyAttributes>> standardTimedDifficultyAttributes;
+    private TimedDifficultyAttributes<DroidDifficultyAttributes>[] droidTimedDifficultyAttributes;
+    private TimedDifficultyAttributes<StandardDifficultyAttributes>[] standardTimedDifficultyAttributes;
 
     private final List<ChangeableText> counterTexts = new ArrayList<>(5);
     private ChangeableText fpsText;
@@ -2590,10 +2590,7 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
             return 0;
         }
 
-        return BeatmapDifficultyCalculator.calculateDroidPerformance(
-            timedAttributes.attributes,
-            stat
-        ).total;
+        return BeatmapDifficultyCalculator.calculateDroidPerformance(timedAttributes.attributes, stat).total;
     }
 
     private double getStandardPPAtTime(double time) {
@@ -2603,33 +2600,30 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
             return 0;
         }
 
-        return BeatmapDifficultyCalculator.calculateStandardPerformance(
-            timedAttributes.attributes,
-            stat
-        ).total;
+        return BeatmapDifficultyCalculator.calculateStandardPerformance(timedAttributes.attributes, stat).total;
     }
 
     private <T extends DifficultyAttributes> TimedDifficultyAttributes<T> getAttributeAtTime(
-        List<TimedDifficultyAttributes<T>> timedDifficultyAttributes, double time
+        TimedDifficultyAttributes<T>[] timedDifficultyAttributes, double time
     ) {
-        if (timedDifficultyAttributes == null || timedDifficultyAttributes.isEmpty()) {
+        if (timedDifficultyAttributes == null || timedDifficultyAttributes.length == 0) {
             return null;
         }
 
-        if (time < timedDifficultyAttributes.get(0).time) {
+        if (time < timedDifficultyAttributes[0].time) {
             return null;
         }
 
-        if (time >= timedDifficultyAttributes.get(timedDifficultyAttributes.size() - 1).time) {
-            return timedDifficultyAttributes.get(timedDifficultyAttributes.size() - 1);
+        if (time >= timedDifficultyAttributes[timedDifficultyAttributes.length - 1].time) {
+            return timedDifficultyAttributes[timedDifficultyAttributes.length - 1];
         }
 
         int l = 0;
-        int r = timedDifficultyAttributes.size() - 2;
+        int r = timedDifficultyAttributes.length - 2;
 
         while (l <= r) {
             int pivot = l + ((r - l) >> 1);
-            var attributes = timedDifficultyAttributes.get(pivot);
+            var attributes = timedDifficultyAttributes[pivot];
 
             if (attributes.time < time) {
                 l = pivot + 1;
@@ -2640,6 +2634,6 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
             }
         }
 
-        return timedDifficultyAttributes.get(l);
+        return timedDifficultyAttributes[l];
     }
 }

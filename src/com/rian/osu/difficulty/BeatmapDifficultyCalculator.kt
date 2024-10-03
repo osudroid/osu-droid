@@ -332,7 +332,7 @@ object BeatmapDifficultyCalculator {
     @JvmName("addDroidTimedCache")
     private fun addCache(
         beatmap: Beatmap, parameters: DifficultyCalculationParameters?,
-        attributes: List<TimedDifficultyAttributes<DroidDifficultyAttributes>>
+        attributes: Array<TimedDifficultyAttributes<DroidDifficultyAttributes>>
     ) =
         // Allow a maximum of 5 minutes of living cache.
         difficultyCacheManager[beatmap.md5, { BeatmapDifficultyCacheManager() }].run { addCache(parameters, attributes, min(
@@ -350,7 +350,7 @@ object BeatmapDifficultyCalculator {
     @JvmName("addStandardTimedCache")
     private fun addCache(
         beatmap: Beatmap, parameters: DifficultyCalculationParameters?,
-        attributes: List<TimedDifficultyAttributes<StandardDifficultyAttributes>>
+        attributes: Array<TimedDifficultyAttributes<StandardDifficultyAttributes>>
     ) =
         // Allow a maximum of 5 minutes of living cache.
         difficultyCacheManager[beatmap.md5, { BeatmapDifficultyCacheManager() }].run { addCache(parameters, attributes, min(
@@ -365,11 +365,11 @@ object BeatmapDifficultyCalculator {
         private val droidAttributeCache =
             LRUCache<DifficultyCalculationParameters, BeatmapDifficultyCache<DroidDifficultyAttributes>>(5)
         private val droidTimedAttributeCache =
-            LRUCache<DifficultyCalculationParameters, BeatmapDifficultyCache<List<TimedDifficultyAttributes<DroidDifficultyAttributes>>>>(3)
+            LRUCache<DifficultyCalculationParameters, BeatmapDifficultyCache<Array<TimedDifficultyAttributes<DroidDifficultyAttributes>>>>(3)
         private val standardAttributeCache =
             LRUCache<DifficultyCalculationParameters, BeatmapDifficultyCache<StandardDifficultyAttributes>>(5)
         private val standardTimedAttributeCache =
-            LRUCache<DifficultyCalculationParameters, BeatmapDifficultyCache<List<TimedDifficultyAttributes<StandardDifficultyAttributes>>>>(3)
+            LRUCache<DifficultyCalculationParameters, BeatmapDifficultyCache<Array<TimedDifficultyAttributes<StandardDifficultyAttributes>>>>(3)
 
         /**
          * Adds a [DroidDifficultyAttributes] cache to this [BeatmapDifficultyCacheManager].
@@ -405,7 +405,7 @@ object BeatmapDifficultyCalculator {
         @JvmName("addDroidTimedCache")
         fun addCache(
             parameters: DifficultyCalculationParameters?,
-            attributes: List<TimedDifficultyAttributes<DroidDifficultyAttributes>>,
+            attributes: Array<TimedDifficultyAttributes<DroidDifficultyAttributes>>,
             timeToLive: Long
         ) = addCache(parameters, GameMode.Droid, attributes, droidTimedAttributeCache, timeToLive)
 
@@ -419,7 +419,7 @@ object BeatmapDifficultyCalculator {
         @JvmName("addStandardTimedCache")
         fun addCache(
             parameters: DifficultyCalculationParameters?,
-            attributes: List<TimedDifficultyAttributes<StandardDifficultyAttributes>>,
+            attributes: Array<TimedDifficultyAttributes<StandardDifficultyAttributes>>,
             timeToLive: Long
         ) = addCache(parameters, GameMode.Standard, attributes, standardTimedAttributeCache, timeToLive)
 
