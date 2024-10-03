@@ -8,6 +8,7 @@ import com.rian.osu.beatmap.sections.BeatmapDifficulty
 class ModNoFail : Mod(), IModUserSelectable {
     override val droidString = "n"
     override val acronym = "NF"
+    override val textureNameSuffix = "nofail"
     override val ranked = true
     override val incompatibleMods = super.incompatibleMods + arrayOf(
         ModPerfect::class, ModSuddenDeath::class, ModAutopilot::class, ModRelax::class

@@ -10,6 +10,7 @@ import com.rian.osu.utils.CircleSizeCalculator
 class ModReallyEasy : Mod(), IModUserSelectable, IModApplicableToDifficultyWithSettings {
     override val droidString = "l"
     override val acronym = "RE"
+    override val textureNameSuffix = "reallyeasy"
 
     override fun calculateScoreMultiplier(difficulty: BeatmapDifficulty) = 0.5f
 

@@ -6,6 +6,7 @@ package com.rian.osu.mods
 class ModDoubleTime : ModRateAdjust(), IModUserSelectable {
     override val droidString = "d"
     override val acronym = "DT"
+    override val textureNameSuffix = "doubletime"
     override val ranked = true
     override val incompatibleMods = super.incompatibleMods + arrayOf(
         ModNightCore::class, ModHalfTime::class

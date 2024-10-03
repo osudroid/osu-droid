@@ -8,6 +8,7 @@ import com.rian.osu.beatmap.sections.BeatmapDifficulty
 class ModRelax : Mod(), IModUserSelectable {
     override val droidString = "x"
     override val acronym = "RX"
+    override val textureNameSuffix = "relax"
     override val incompatibleMods = super.incompatibleMods + arrayOf(
         ModAuto::class, ModNoFail::class, ModAutopilot::class
     )

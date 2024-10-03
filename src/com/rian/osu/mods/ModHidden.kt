@@ -11,6 +11,7 @@ import com.rian.osu.beatmap.sections.BeatmapDifficulty
 class ModHidden : Mod(), IModUserSelectable, IModApplicableToBeatmap {
     override val droidString = "h"
     override val acronym = "HD"
+    override val textureNameSuffix = "hidden"
     override val ranked = true
 
     override fun calculateScoreMultiplier(difficulty: BeatmapDifficulty) = 1.06f

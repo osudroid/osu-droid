@@ -8,6 +8,7 @@ import com.rian.osu.beatmap.sections.BeatmapDifficulty
 class ModPrecise : Mod(), IModUserSelectable {
     override val droidString = "s"
     override val acronym = "PR"
+    override val textureNameSuffix = "precise"
     override val ranked = true
 
     override fun calculateScoreMultiplier(difficulty: BeatmapDifficulty) = 1.06f

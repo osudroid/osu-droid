@@ -6,6 +6,7 @@ package com.rian.osu.mods
 class ModNightCore : ModRateAdjust(), IModUserSelectable {
     override val droidString = "c"
     override val acronym = "NC"
+    override val textureNameSuffix = "nightcore"
     override val ranked = true
     override val incompatibleMods = super.incompatibleMods + arrayOf(
         ModDoubleTime::class, ModHalfTime::class
