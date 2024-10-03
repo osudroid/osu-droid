@@ -98,7 +98,7 @@ abstract class ExtendedEntity(
     /**
      * The color blending function.
      */
-    open var blendingFunction: BlendingFunction? = BlendingFunction.Inherit
+    open var blendingFunction: BlendingFunction? = null
         set(value) {
             if (field != value) {
                 field = value
