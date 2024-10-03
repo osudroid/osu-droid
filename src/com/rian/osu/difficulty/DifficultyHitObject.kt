@@ -38,7 +38,7 @@ abstract class DifficultyHitObject(
     /**
      * Other hit objects in the beatmap, including this hit object.
      */
-    protected val difficultyHitObjects: MutableList<out DifficultyHitObject>,
+    protected val difficultyHitObjects: Array<out DifficultyHitObject>,
 
     /**
      * The index of this hit object in the list of all hit objects.

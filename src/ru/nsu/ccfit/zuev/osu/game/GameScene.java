@@ -42,11 +42,12 @@ import com.rian.osu.beatmap.parser.BeatmapParser;
 import com.rian.osu.beatmap.timings.EffectControlPoint;
 import com.rian.osu.beatmap.timings.TimingControlPoint;
 import com.rian.osu.difficulty.BeatmapDifficultyCalculator;
-import com.rian.osu.difficulty.attributes.DifficultyAttributes;
 import com.rian.osu.difficulty.attributes.DroidDifficultyAttributes;
 import com.rian.osu.difficulty.attributes.StandardDifficultyAttributes;
 import com.rian.osu.difficulty.attributes.TimedDifficultyAttributes;
 import com.rian.osu.difficulty.calculator.DifficultyCalculationParameters;
+import com.rian.osu.utils.ModUtils;
+
 import org.anddev.andengine.engine.Engine;
 import org.anddev.andengine.engine.camera.SmoothCamera;
 import org.anddev.andengine.engine.handler.IUpdateHandler;
@@ -107,8 +108,6 @@ import ru.nsu.ccfit.zuev.osuplus.BuildConfig;
 import ru.nsu.ccfit.zuev.osuplus.R;
 import ru.nsu.ccfit.zuev.skins.OsuSkin;
 import ru.nsu.ccfit.zuev.skins.SkinManager;
-
-import static com.rian.osu.utils.ModConverter.convertLegacyMods;
 
 public class GameScene implements IUpdateHandler, GameObjectListener,
         IOnSceneTouchListener {
@@ -181,8 +180,8 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
     private DifficultyHelper difficultyHelper = DifficultyHelper.StdDifficulty;
 
     private DifficultyCalculationParameters lastDifficultyCalculationParameters;
-    private List<TimedDifficultyAttributes<DroidDifficultyAttributes>> droidTimedDifficultyAttributes;
-    private List<TimedDifficultyAttributes<StandardDifficultyAttributes>> standardTimedDifficultyAttributes;
+    private TimedDifficultyAttributes<DroidDifficultyAttributes>[] droidTimedDifficultyAttributes;
+    private TimedDifficultyAttributes<StandardDifficultyAttributes>[] standardTimedDifficultyAttributes;
 
     private final List<ChangeableText> counterTexts = new ArrayList<>(5);
     private ChangeableText fpsText;
@@ -372,7 +371,7 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
         }
 
         var modMenu = ModMenu.getInstance();
-        var convertedMods = convertLegacyMods(
+        var convertedMods = ModUtils.convertLegacyMods(
             modMenu.getMod(),
             modMenu.isCustomCS() ? modMenu.getCustomCS() : null,
             modMenu.isCustomAR() ? modMenu.getCustomAR() : null,
@@ -2574,72 +2573,29 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
             return;
         }
 
-        var object = playableBeatmap.getHitObjects().objects.get(objectId);
-        double time = object.getEndTime();
-
         switch (Config.getDifficultyAlgorithm()) {
-            case droid -> ppText.setText(String.format(Locale.ENGLISH, "%.2fdpp", getDroidPPAtTime(time)));
-            case standard -> ppText.setText(String.format(Locale.ENGLISH, "%.2fpp", getStandardPPAtTime(time)));
+            case droid -> ppText.setText(String.format(Locale.ENGLISH, "%.2fdpp", getDroidPPAt(objectId)));
+            case standard -> ppText.setText(String.format(Locale.ENGLISH, "%.2fpp", getStandardPPAt(objectId)));
         }
     }
 
-    private double getDroidPPAtTime(double time) {
-        var timedAttributes = getAttributeAtTime(droidTimedDifficultyAttributes, time);
-
-        if (timedAttributes == null) {
+    private double getDroidPPAt(int objectId) {
+        if (droidTimedDifficultyAttributes == null || objectId < 0 || objectId >= droidTimedDifficultyAttributes.length) {
             return 0;
         }
 
-        return BeatmapDifficultyCalculator.calculateDroidPerformance(
-            timedAttributes.attributes,
-            stat
-        ).total;
+        var timedAttributes = droidTimedDifficultyAttributes[objectId];
+
+        return BeatmapDifficultyCalculator.calculateDroidPerformance(timedAttributes.attributes, stat).total;
     }
 
-    private double getStandardPPAtTime(double time) {
-        var timedAttributes = getAttributeAtTime(standardTimedDifficultyAttributes, time);
-
-        if (timedAttributes == null) {
+    private double getStandardPPAt(int objectId) {
+        if (standardTimedDifficultyAttributes == null || objectId < 0 || objectId >= standardTimedDifficultyAttributes.length) {
             return 0;
         }
 
-        return BeatmapDifficultyCalculator.calculateStandardPerformance(
-            timedAttributes.attributes,
-            stat
-        ).total;
-    }
+        var timedAttributes = standardTimedDifficultyAttributes[objectId];
 
-    private <T extends DifficultyAttributes> TimedDifficultyAttributes<T> getAttributeAtTime(
-        List<TimedDifficultyAttributes<T>> timedDifficultyAttributes, double time
-    ) {
-        if (timedDifficultyAttributes == null || timedDifficultyAttributes.isEmpty()) {
-            return null;
-        }
-
-        if (time < timedDifficultyAttributes.get(0).time) {
-            return null;
-        }
-
-        if (time >= timedDifficultyAttributes.get(timedDifficultyAttributes.size() - 1).time) {
-            return timedDifficultyAttributes.get(timedDifficultyAttributes.size() - 1);
-        }
-
-        int l = 0;
-        int r = timedDifficultyAttributes.size() - 2;
-
-        while (l <= r) {
-            int pivot = l + ((r - l) >> 1);
-            var attributes = timedDifficultyAttributes.get(pivot);
-
-            if (attributes.time < time) {
-                l = pivot + 1;
-            } else if (attributes.time > time) {
-                r = pivot - 1;
-            } else {
-                return attributes;
-            }
-        }
-
-        return timedDifficultyAttributes.get(l);
+        return BeatmapDifficultyCalculator.calculateStandardPerformance(timedAttributes.attributes, stat).total;
     }
 }

@@ -29,7 +29,7 @@ class StandardDifficultyCalculator : DifficultyCalculator<StandardDifficultyHitO
     override fun createDifficultyAttributes(
         beatmap: Beatmap,
         skills: Array<Skill<StandardDifficultyHitObject>>,
-        objects: List<StandardDifficultyHitObject>,
+        objects: Array<StandardDifficultyHitObject>,
         parameters: DifficultyCalculationParameters?
     ) = StandardDifficultyAttributes().apply {
         mods = parameters?.mods?.slice(parameters.mods.indices) ?: mods
@@ -47,12 +47,9 @@ class StandardDifficultyCalculator : DifficultyCalculator<StandardDifficultyHitO
             flashlightDifficulty *= 0.7
         }
 
-        val baseAimPerformance = (5 * max(1.0, aimDifficulty / 0.0675) - 4).pow(3.0) / 100000
-        val baseSpeedPerformance = (5 * max(1.0, speedDifficulty / 0.0675) - 4).pow(3.0) / 100000
-        var baseFlashlightPerformance = 0.0
-        if (parameters?.mods?.any { it is ModFlashlight } == true) {
-            baseFlashlightPerformance = flashlightDifficulty.pow(2.0) * 25.0
-        }
+        val baseAimPerformance = (5 * max(1.0, aimDifficulty / 0.0675) - 4).pow(3) / 100000
+        val baseSpeedPerformance = (5 * max(1.0, speedDifficulty / 0.0675) - 4).pow(3) / 100000
+        val baseFlashlightPerformance = if (mods.any { it is ModFlashlight }) flashlightDifficulty.pow(2) * 25 else 0.0
 
         val basePerformance = (
                 baseAimPerformance.pow(1.1) +
@@ -97,30 +94,32 @@ class StandardDifficultyCalculator : DifficultyCalculator<StandardDifficultyHitO
         )
     }
 
+    @Suppress("UNCHECKED_CAST")
     override fun createDifficultyHitObjects(
         beatmap: Beatmap,
         parameters: DifficultyCalculationParameters?,
         scope: CoroutineScope?
-    ) = mutableListOf<StandardDifficultyHitObject>().apply {
+    ): Array<StandardDifficultyHitObject> {
         val clockRate = parameters?.totalSpeedMultiplier?.toDouble() ?: 1.0
         val greatWindow = StandardHitWindow(beatmap.difficulty.od).greatWindow.toDouble() / clockRate
 
-        beatmap.hitObjects.objects.let {
-            for (i in 1 until it.size) {
-                scope?.ensureActive()
+        val objects = beatmap.hitObjects.objects
+        val arr = arrayOfNulls<StandardDifficultyHitObject>(objects.size - 1)
 
-                add(
-                    StandardDifficultyHitObject(
-                        it[i],
-                        it[i - 1],
-                        if (i > 1) it[i - 2] else null,
-                        clockRate,
-                        this,
-                        size,
-                        greatWindow
-                    ).also { d -> d.computeProperties(clockRate, it) }
-                )
-            }
+        for (i in 1 until objects.size) {
+            scope?.ensureActive()
+
+            arr[i - 1] = StandardDifficultyHitObject(
+                objects[i],
+                objects[i - 1],
+                if (i > 1) objects[i - 2] else null,
+                clockRate,
+                arr as Array<StandardDifficultyHitObject>,
+                i - 1,
+                greatWindow
+            )
         }
+
+        return arr as Array<StandardDifficultyHitObject>
     }
 }

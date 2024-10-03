@@ -32,7 +32,7 @@ class DroidDifficultyCalculator : DifficultyCalculator<DroidDifficultyHitObject,
     override fun createDifficultyAttributes(
         beatmap: Beatmap,
         skills: Array<Skill<DroidDifficultyHitObject>>,
-        objects: List<DroidDifficultyHitObject>,
+        objects: Array<DroidDifficultyHitObject>,
         parameters: DifficultyCalculationParameters?
     ) = DroidDifficultyAttributes().apply {
         mods = parameters?.mods?.slice(parameters.mods.indices) ?: mods
@@ -178,10 +178,9 @@ class DroidDifficultyCalculator : DifficultyCalculator<DroidDifficultyHitObject,
             visualDifficulty *= 0.8
         }
 
-        val baseAimPerformance = (5 * max(1.0, aimDifficulty.pow(0.8) / 0.0675) - 4).pow(3.0) / 100000
-        val baseTapPerformance = (5 * max(1.0, tapDifficulty / 0.0675) - 4).pow(3.0) / 100000
-        val baseFlashlightPerformance =
-            if (mods.any { it is ModFlashlight }) flashlightDifficulty.pow(1.6) * 25 else 0.0
+        val baseAimPerformance = (5 * max(1.0, aimDifficulty.pow(0.8) / 0.0675) - 4).pow(3) / 100000
+        val baseTapPerformance = (5 * max(1.0, tapDifficulty / 0.0675) - 4).pow(3) / 100000
+        val baseFlashlightPerformance = if (mods.any { it is ModFlashlight }) flashlightDifficulty.pow(1.6) * 25 else 0.0
         val baseVisualPerformance = visualDifficulty.pow(1.6) * 22.5
 
         val basePerformance = (
@@ -227,34 +226,36 @@ class DroidDifficultyCalculator : DifficultyCalculator<DroidDifficultyHitObject,
         )
     }
 
+    @Suppress("UNCHECKED_CAST")
     override fun createDifficultyHitObjects(
         beatmap: Beatmap,
         parameters: DifficultyCalculationParameters?,
         scope: CoroutineScope?
-    ) = mutableListOf<DroidDifficultyHitObject>().apply {
+    ): Array<DroidDifficultyHitObject> {
         val clockRate = parameters?.totalSpeedMultiplier?.toDouble() ?: 1.0
         val greatWindow = (
             if (parameters?.mods?.any { it is ModPrecise } == true) PreciseDroidHitWindow(beatmap.difficulty.od)
             else DroidHitWindow(beatmap.difficulty.od)
         ).greatWindow.toDouble() / clockRate
 
-        beatmap.hitObjects.objects.let {
-            for (i in 0 until it.size) {
-                scope?.ensureActive()
+        val objects = beatmap.hitObjects.objects
+        val arr = arrayOfNulls<DroidDifficultyHitObject>(objects.size)
 
-                add(
-                    DroidDifficultyHitObject(
-                        it[i],
-                        if (i > 0) it[i - 1] else null,
-                        if (i > 1) it[i - 2] else null,
-                        clockRate,
-                        this,
-                        size - 1,
-                        greatWindow
-                    ).also { d -> d.computeProperties(clockRate, it) }
-                )
-            }
+        for (i in objects.indices) {
+            scope?.ensureActive()
+
+            arr[i] = DroidDifficultyHitObject(
+                objects[i],
+                if (i > 0) objects[i - 1] else null,
+                if (i > 1) objects[i - 2] else null,
+                clockRate,
+                arr as Array<DroidDifficultyHitObject>,
+                i - 1,
+                greatWindow
+            ).also { d -> d.computeProperties(clockRate, objects) }
         }
+
+        return arr as Array<DroidDifficultyHitObject>
     }
 
     private fun calculateThreeFingerSummedStrain(strains: List<Double>) =

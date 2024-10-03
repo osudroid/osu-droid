@@ -92,16 +92,16 @@ abstract class DifficultyCalculator<TObject : DifficultyHitObject, TAttributes :
         beatmap: Beatmap,
         parameters: DifficultyCalculationParameters? = null,
         scope: CoroutineScope? = null
-    ): List<TimedDifficultyAttributes<TAttributes>> {
+    ): Array<TimedDifficultyAttributes<TAttributes>> {
         // Always operate on a clone of the original beatmap when needed, to not modify it game-wide
         val beatmapToCalculate = beatmap.createPlayableBeatmap(mode, parameters?.mods, parameters?.customSpeedMultiplier ?: 1f, scope)
         val skills = createSkills(beatmapToCalculate, parameters)
-        val attributes = mutableListOf<TimedDifficultyAttributes<TAttributes>>()
 
         if (beatmapToCalculate.hitObjects.objects.isEmpty()) {
-            return attributes
+            return emptyArray()
         }
 
+        val attributes = arrayOfNulls<TimedDifficultyAttributes<TAttributes>>(beatmapToCalculate.hitObjects.objects.size)
         val progressiveBeatmap = ProgressiveCalculationBeatmap().apply {
             difficulty.apply(beatmapToCalculate.difficulty)
         }
@@ -109,7 +109,9 @@ abstract class DifficultyCalculator<TObject : DifficultyHitObject, TAttributes :
         val difficultyObjects = createDifficultyHitObjects(beatmapToCalculate, parameters, scope)
         var currentIndex = 0
 
-        for (obj in beatmapToCalculate.hitObjects.objects) {
+        for (i in beatmapToCalculate.hitObjects.objects.indices) {
+            val obj = beatmapToCalculate.hitObjects.objects[i]
+
             progressiveBeatmap.hitObjects.add(obj)
 
             while (currentIndex < difficultyObjects.size && difficultyObjects[currentIndex].obj.endTime <= obj.endTime) {
@@ -121,15 +123,14 @@ abstract class DifficultyCalculator<TObject : DifficultyHitObject, TAttributes :
                 currentIndex++
             }
 
-            attributes.add(
-                TimedDifficultyAttributes(
-                    obj.endTime,
-                    createDifficultyAttributes(progressiveBeatmap, skills, difficultyObjects.subList(0, currentIndex), parameters)
-                )
+            attributes[i] = TimedDifficultyAttributes(
+                obj.endTime,
+                createDifficultyAttributes(progressiveBeatmap, skills, difficultyObjects.sliceArray(0..<currentIndex), parameters)
             )
         }
 
-        return attributes
+        @Suppress("UNCHECKED_CAST")
+        return attributes as Array<TimedDifficultyAttributes<TAttributes>>
     }
 
     /**
@@ -149,7 +150,7 @@ abstract class DifficultyCalculator<TObject : DifficultyHitObject, TAttributes :
      * @param scope The [CoroutineScope] to use for coroutines.
      * @return The generated [DifficultyHitObject]s.
      */
-    protected abstract fun createDifficultyHitObjects(beatmap: Beatmap, parameters: DifficultyCalculationParameters?, scope: CoroutineScope? = null): List<TObject>
+    protected abstract fun createDifficultyHitObjects(beatmap: Beatmap, parameters: DifficultyCalculationParameters?, scope: CoroutineScope? = null): Array<TObject>
 
     /**
      * Calculates the rating of a [Skill] based on its difficulty.
@@ -171,7 +172,7 @@ abstract class DifficultyCalculator<TObject : DifficultyHitObject, TAttributes :
     protected abstract fun createDifficultyAttributes(
         beatmap: Beatmap,
         skills: Array<Skill<TObject>>,
-        objects: List<TObject>,
+        objects: Array<TObject>,
         parameters: DifficultyCalculationParameters?
     ): TAttributes
 

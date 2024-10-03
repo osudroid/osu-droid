@@ -23,6 +23,6 @@ interface IModApplicableToDifficultyWithSettings {
      * @param mods The [Mod]s that are used.
      * @param customSpeedMultiplier The custom speed multiplier that is used.
      */
-    fun applyToDifficulty(mode: GameMode, difficulty: BeatmapDifficulty, mods: List<Mod>, customSpeedMultiplier: Float)
+    fun applyToDifficulty(mode: GameMode, difficulty: BeatmapDifficulty, mods: Iterable<Mod>, customSpeedMultiplier: Float)
 
 }

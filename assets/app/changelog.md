@@ -124,10 +124,11 @@ animated.
 - The `sliderfollowcircle` and `sliderb` skin elements can now be animated
 - Optimized gameplay loading time by only reloading beatmap when necessary
 - Optimized real-time PP counter by not recalculating a beatmap's difficulty when retrying it
+- Optimized real-time PP counter's update operation after an object's judgement
 - Optimized osu!standard difficulty calculation's difficulty spike nerf application
 - Optimized beatmap switching operation in song selection menu
-- The `x` and `y` properties in `skin.json`'s `Layout` configuration now offsets a button's position top-right rather
-  than setting the button's position
+- The `x` and `y` properties in `skin.json`'s `Layout` configuration now affects a button's position
+- CS and OD conversions in song selection menu are now displayed using osu!droid metrics rather than osu!standard
 
 # Removals
 

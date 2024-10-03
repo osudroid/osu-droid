@@ -23,5 +23,5 @@ interface IModApplicableToHitObjectWithSettings {
      * @param mods The [Mod]s that are used.
      * @param customSpeedMultiplier The custom speed multiplier that is used.
      */
-    fun applyToHitObject(mode: GameMode, hitObject: HitObject, mods: List<Mod>, customSpeedMultiplier: Float)
+    fun applyToHitObject(mode: GameMode, hitObject: HitObject, mods: Iterable<Mod>, customSpeedMultiplier: Float)
 }

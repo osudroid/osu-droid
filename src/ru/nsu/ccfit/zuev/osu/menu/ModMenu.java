@@ -12,6 +12,8 @@ import com.reco1l.osu.multiplayer.RoomScene;
 import com.rian.osu.beatmap.parser.BeatmapParser;
 import com.rian.osu.difficulty.BeatmapDifficultyCalculator;
 import com.rian.osu.difficulty.calculator.DifficultyCalculationParameters;
+import com.rian.osu.utils.ModUtils;
+
 import org.anddev.andengine.entity.primitive.Rectangle;
 import org.anddev.andengine.entity.scene.Scene;
 import org.anddev.andengine.entity.text.ChangeableText;
@@ -35,8 +37,6 @@ import ru.nsu.ccfit.zuev.osu.helper.StringTable;
 import ru.nsu.ccfit.zuev.osu.helper.TextButton;
 import ru.nsu.ccfit.zuev.osu.scoring.StatisticV2;
 import ru.nsu.ccfit.zuev.osuplus.R;
-
-import static com.rian.osu.utils.ModConverter.convertLegacyMods;
 
 
 public class ModMenu implements IModSwitcher {
@@ -338,7 +338,7 @@ public class ModMenu implements IModSwitcher {
                                 }
 
                                 var parameters = new DifficultyCalculationParameters();
-                                parameters.setMods(convertLegacyMods(
+                                parameters.setMods(ModUtils.convertLegacyMods(
                                     mod,
                                     isCustomCS() ? customCS : null,
                                     isCustomAR() ? customAR : null,
