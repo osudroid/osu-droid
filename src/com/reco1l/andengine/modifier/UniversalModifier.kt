@@ -55,7 +55,7 @@ class UniversalModifier @JvmOverloads constructor(private val pool: Pool<Univers
 
                 field = value
 
-                values = null
+                values.fill(0f)
                 calculateDuration()
             }
         }
@@ -90,22 +90,8 @@ class UniversalModifier @JvmOverloads constructor(private val pool: Pool<Univers
      */
     var easing: Easing = Easing.None
 
-    /**
-     * An array of values to be used in the modifier.
-     *
-     * The values are stored in an array of spans of 2 elements where the first element is the `from` value and the second is the
-     * `to` values, the amount of spans needed depends on the type of the modifier.
-     *
-     * As an example, the `MOVE` modifier needs 2 value spans, one for the X axis and one for the Y axis. Meanwhile, the `RGB`
-     * modifier needs 3 value spans, one per each color channel.
-     *
-     * Disposition of the values:
-     * * [TRANSLATE] -> [xFrom, xTo, yFrom, yTo]
-     * * [COLOR] -> [redFrom, redTo, greenFrom, greenTo, blueFrom, blueTo]
-     * * [SCALE] and [ALPHA] -> [scaleFrom, scaleTo]
-     */
-    var values: FloatArray? = null
 
+    private var values = FloatArray(2)
 
     private var removeWhenFinished = true
 
@@ -196,9 +182,7 @@ class UniversalModifier @JvmOverloads constructor(private val pool: Pool<Univers
             // we have to assume the percentage is 1 to avoid division by zero.
             val percentage = if (duration > 0) easing.interpolate(elapsedSec / duration) else 1f
 
-            if (values != null) {
-                type.onApply?.invoke(entity, values!!, percentage)
-            }
+            type.onApply?.invoke(entity, values, percentage)
         }
 
         if (isFinished) {
@@ -309,14 +293,33 @@ class UniversalModifier @JvmOverloads constructor(private val pool: Pool<Univers
     fun setToDefault() {
 
         type = NONE
-        values = null
         entity = null
         duration = 0f
         onFinished = null
         easing = Easing.None
 
+        values.fill(0f)
+
         clearNestedModifiers()
         reset()
+    }
+
+
+    /**
+     * Sets the transformation values for the modifier.
+     *
+     * The values are stored in an array of spans of 2 elements where the first element is the `from` value and the second is the
+     * `to` values, the amount of spans needed depends on the type of the modifier.
+     */
+    fun setValues(vararg newValues: Float) {
+
+        if (values.size < newValues.size) {
+            values = values.copyOf(newValues.size)
+        }
+
+        for (i in newValues.indices) {
+            values[i] = newValues[i]
+        }
     }
 
     /**
@@ -394,11 +397,11 @@ class UniversalModifier @JvmOverloads constructor(private val pool: Pool<Univers
 
     override fun deepCopy(): UniversalModifier = UniversalModifier(pool).also { modifier ->
         modifier.type = type
-        modifier.duration = duration
-        modifier.onFinished = onFinished
         modifier.easing = easing
-        modifier.values = values?.copyOf()
+        modifier.values = values.copyOf()
+        modifier.duration = duration
         modifier.modifiers = modifiers?.map { it.deepCopy() }?.toTypedArray()
+        modifier.onFinished = onFinished
     }
 
 

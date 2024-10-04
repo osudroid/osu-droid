@@ -24,9 +24,9 @@ object Modifiers {
         it.setToDefault()
         it.type = ALPHA
         it.duration = duration
-        it.values = floatArrayOf(from, to)
         it.easing = easeFunction
         it.onFinished = listener
+        it.setValues(from, to)
     }
 
     @JvmStatic
@@ -43,9 +43,9 @@ object Modifiers {
         it.setToDefault()
         it.type = SCALE
         it.duration = duration
-        it.values = floatArrayOf(from, to)
         it.easing = easeFunction
         it.onFinished = listener
+        it.setValues(from, to)
     }
 
     @JvmStatic
@@ -65,13 +65,8 @@ object Modifiers {
         it.type = COLOR
         it.duration = duration
         it.onFinished = listener
-
         it.easing = easeFunction
-        it.values = floatArrayOf(
-            fromRed, toRed,
-            fromGreen, toGreen,
-            fromBlue, toBlue
-        )
+        it.setValues(fromRed, toRed, fromGreen, toGreen, fromBlue, toBlue)
     }
 
     @JvmStatic
@@ -81,7 +76,6 @@ object Modifiers {
         it.type = SEQUENCE
         it.modifiers = arrayOf(*modifiers)
         it.onFinished = listener
-
     }
 
     @JvmStatic
@@ -91,7 +85,6 @@ object Modifiers {
         it.type = PARALLEL
         it.modifiers = arrayOf(*modifiers)
         it.onFinished = listener
-
     }
 
     @JvmStatic
@@ -101,7 +94,6 @@ object Modifiers {
         it.type = NONE
         it.duration = duration
         it.onFinished = listener
-
     }
 
     @JvmStatic
@@ -110,10 +102,9 @@ object Modifiers {
         it.setToDefault()
         it.type = TRANSLATE_X
         it.duration = duration
-        it.values = floatArrayOf(from, to)
         it.easing = easeFunction
         it.onFinished = listener
-
+        it.setValues(from, to)
     }
 
     @JvmStatic
@@ -122,9 +113,9 @@ object Modifiers {
         it.setToDefault()
         it.type = TRANSLATE_Y
         it.duration = duration
-        it.values = floatArrayOf(from, to)
         it.easing = easeFunction
         it.onFinished = listener
+        it.setValues(from, to)
 
     }
 
@@ -135,13 +126,9 @@ object Modifiers {
             it.setToDefault()
             it.type = MOVE
             it.duration = duration
-            it.values = floatArrayOf(
-                fromX, toX,
-                fromY, toY
-            )
             it.easing = easeFunction
             it.onFinished = listener
-
+            it.setValues(fromX, toX, fromY, toY)
         }
 
     @JvmStatic
@@ -150,9 +137,9 @@ object Modifiers {
         it.setToDefault()
         it.type = ROTATION
         it.duration = duration
-        it.values = floatArrayOf(from, to)
         it.easing = easeFunction
         it.onFinished = listener
+        it.setValues(from, to)
 
     }
 
