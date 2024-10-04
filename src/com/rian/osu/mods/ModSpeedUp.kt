@@ -5,7 +5,7 @@ import com.rian.osu.beatmap.sections.BeatmapDifficulty
 /**
  * Represents the Speed-Up mod.
  */
-class ModSpeedUp : ModClockRateAdjust(), IModUserSelectable, ILegacyMod {
+class ModSpeedUp : ModClockRateAdjust(), ILegacyMod {
     override val droidChar = 'b'
     override val acronym = "SU"
     override val textureNameSuffix = "speedup"

@@ -5,7 +5,7 @@ import com.rian.osu.beatmap.sections.BeatmapDifficulty
 /**
  * Represents the Small Circle mod.
  */
-class ModSmallCircle : Mod(), IModUserSelectable, ILegacyMod {
+class ModSmallCircle : Mod(), ILegacyMod {
     override val droidChar = 'm'
     override val acronym = "SC"
     override val textureNameSuffix = "smallcircle"
