@@ -587,6 +587,8 @@ public class SongMenu implements IUpdateHandler, MenuItemListener,
 
         optionSelection.setScale(1.5f);
         randomMap.setScale(1.5f);
+        difficultySwitcher.setScale(1.5f);
+
         if (OsuSkin.get().isUseNewLayout()) {
             if (layoutBackButton != null) {
                 layoutBackButton.apply(backButton);
