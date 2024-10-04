@@ -113,8 +113,6 @@ class UniversalModifier @JvmOverloads constructor(private val pool: Pool<Univers
 
     private var elapsedSec = -1f
 
-    private var percentage = 0f
-
     private var duration = 0f
 
 
@@ -152,9 +150,9 @@ class UniversalModifier @JvmOverloads constructor(private val pool: Pool<Univers
 
             while (remainingTimeSec > 0 && !isAllModifiersFinished) {
 
-                var isCurrentModifierFinished = false
-
-                // In parallel modifiers, the consumed time is equal to the maximum consumed time of the inner modifiers.
+                // In parallel modifiers the consumed time is equal to the maximum consumed
+                // time of the inner modifiers so we need to reset it to 0, at this point
+                // remainingTimeSec should have the previous consumed time subtracted.
                 if (type == PARALLEL) {
                     consumedTimeSec = 0f
                 }
@@ -170,39 +168,33 @@ class UniversalModifier @JvmOverloads constructor(private val pool: Pool<Univers
                     isAllModifiersFinished = false
 
                     if (type == SEQUENCE) {
+                        // In a sequence the delta time is subtracted with the consumed time of the first
+                        // non-finished modifier until it reaches 0.
+                        // We break the loop because only the first non-finished modifier should be updated.
                         remainingTimeSec -= modifier.onUpdate(remainingTimeSec, entity)
-                    } else {
-                        consumedTimeSec = max(consumedTimeSec, modifier.onUpdate(deltaTimeSec, entity))
-                    }
-
-                    isCurrentModifierFinished = modifier.isFinished
-
-                    if (type == SEQUENCE) {
                         break
+                    } else {
+                        // In parallel the consumed time is the maximum consumed time of all inner modifiers.
+                        consumedTimeSec = max(consumedTimeSec, modifier.onUpdate(remainingTimeSec, entity))
                     }
                 }
 
+                // In a parallel modifier since the consumed time is the maximum consumed time
+                // between all inner modifiers, we subtract it after all modifiers are updated.
                 if (type == PARALLEL) {
                     remainingTimeSec -= consumedTimeSec
-                } else if (isCurrentModifierFinished) {
-                    break
                 }
-
             }
 
             consumedTimeSec = deltaTimeSec - remainingTimeSec
-
-            // Not really necessary but we want to report the current percentage.
-            // Modifiers with nested modifiers will always use linear easing.
-            percentage = if (duration > 0) (elapsedSec + consumedTimeSec) / duration else 1f
 
         } else {
 
             consumedTimeSec = min(duration - elapsedSec, deltaTimeSec)
 
-            // In this case the consumed time is already fully calculated here, if the duration is 0
+            // The consumed time is already fully calculated here, if the duration is 0
             // we have to assume the percentage is 1 to avoid division by zero.
-            percentage = if (duration > 0) easeFunction.getPercentage(elapsedSec + consumedTimeSec, duration) else 1f
+            val percentage = if (duration > 0) easeFunction.getPercentage(elapsedSec + consumedTimeSec, duration) else 1f
 
             if (values != null) {
                 type.onApply?.invoke(entity, values!!, percentage)
@@ -230,7 +222,6 @@ class UniversalModifier @JvmOverloads constructor(private val pool: Pool<Univers
      */
     override fun reset() {
         elapsedSec = -1f
-        percentage = 0f
         modifiers?.forEach { it.reset() }
     }
 
