@@ -126,6 +126,7 @@ The following gameplay elements' display has been updated to match osu!stable:
 - Separated average offset and unstable rate displays in gameplay into separate settings
 - Miss hit judgement effect only plays in a slider's tail rather than its head and tail
 - The `sliderfollowcircle` and `sliderb` skin elements can now be animated
+- Optimized engine buffer update and writing logic
 - Optimized gameplay loading time by only reloading beatmap when necessary
 - Optimized real-time PP counter by not recalculating a beatmap's difficulty when retrying it
 - Optimized real-time PP counter's update operation after an object's judgement
@@ -168,3 +169,4 @@ were reduced by 20% and clap hitsounds' volume were reduced by 15%
 - Fixed slider ends increasing combo when not hit
 - Fixed animatable textures not being unloaded properly when changing skins
 - Fixed old (non-skin.json) button layouts using fixed height for offset rather than texture-based height
+- Fixed beatmap background and video paths potentially being parsed incorrectly
