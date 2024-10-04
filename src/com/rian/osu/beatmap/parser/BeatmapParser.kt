@@ -61,10 +61,7 @@ class BeatmapParser : Closeable {
      * @param scope The [CoroutineScope] to use for coroutines.
      */
     @JvmOverloads
-    constructor(path: String, scope: CoroutineScope? = null) {
-        file = File(path)
-        this.scope = scope
-    }
+    constructor(path: String, scope: CoroutineScope? = null) : this(File(path), scope)
 
     /**
      * Attempts to open the beatmap file.
