@@ -28,7 +28,11 @@ class HealthDisplay(private val statistics: StatisticV2) : Container() {
 
     private val explode: ExtendedSprite
 
-    private val kiTextures: Array<TextureRegion>?
+    private val markerNormalTexture: TextureRegion?
+
+    private val markerDangerTexture: TextureRegion?
+
+    private val markerSuperDangerTexture: TextureRegion?
 
     private val isNewStyle: Boolean
 
@@ -71,18 +75,18 @@ class HealthDisplay(private val statistics: StatisticV2) : Container() {
             marker.textureRegion = markerTexture
             explode.textureRegion = markerTexture
 
-            kiTextures = null
+            markerNormalTexture = null
+            markerDangerTexture = null
+            markerSuperDangerTexture = null
         } else {
             fill.setPosition(3f * 1.6f, 10f * 1.6f)
 
-            kiTextures = arrayOf(
-                ResourceManager.getInstance().getTextureIfLoaded("scorebar-ki"),
-                ResourceManager.getInstance().getTextureIfLoaded("scorebar-kidanger"),
-                ResourceManager.getInstance().getTextureIfLoaded("scorebar-kidanger2")
-            )
+            markerNormalTexture = ResourceManager.getInstance().getTextureIfLoaded("scorebar-ki")
+            markerDangerTexture = ResourceManager.getInstance().getTextureIfLoaded("scorebar-kidanger")
+            markerSuperDangerTexture = ResourceManager.getInstance().getTextureIfLoaded("scorebar-kidanger2")
 
-            marker.textureRegion = kiTextures[0]
-            explode.textureRegion = kiTextures[0]
+            marker.textureRegion = markerNormalTexture
+            explode.textureRegion = markerNormalTexture
         }
 
         fillClear.width = 0f
@@ -116,11 +120,11 @@ class HealthDisplay(private val statistics: StatisticV2) : Container() {
 
         } else {
 
-            marker.textureRegion = kiTextures!![when {
-                statistics.hp < 0.2f -> 2
-                statistics.hp < EPIC_CUTOFF -> 1
-                else -> 0
-            }]
+            marker.textureRegion = when {
+                statistics.hp < 0.2f -> markerSuperDangerTexture
+                statistics.hp < EPIC_CUTOFF -> markerDangerTexture
+                else -> markerNormalTexture
+            }
 
         }
 
