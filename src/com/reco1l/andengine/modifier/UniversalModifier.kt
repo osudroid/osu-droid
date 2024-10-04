@@ -2,7 +2,6 @@ package com.reco1l.andengine.modifier
 
 import android.util.*
 import com.edlplan.framework.easing.Easing
-import com.edlplan.framework.easing.EasingManager
 import com.reco1l.andengine.*
 import com.reco1l.andengine.modifier.ModifierType.*
 import com.reco1l.framework.*
@@ -28,7 +27,7 @@ class UniversalModifier @JvmOverloads constructor(private val pool: Pool<Univers
         this.duration = duration
         this.values = floatArrayOf(from, to)
         this.onFinished = listener
-        this.easeFunction = easeFunction
+        this.easing = easeFunction
     }
 
     @JvmOverloads
@@ -89,7 +88,7 @@ class UniversalModifier @JvmOverloads constructor(private val pool: Pool<Univers
     /**
      * Easing function to be used.
      */
-    var easeFunction: Easing = Easing.None
+    var easing: Easing = Easing.None
 
     /**
      * An array of values to be used in the modifier.
@@ -195,7 +194,7 @@ class UniversalModifier @JvmOverloads constructor(private val pool: Pool<Univers
 
             // The consumed time is already fully calculated here, if the duration is 0
             // we have to assume the percentage is 1 to avoid division by zero.
-            val percentage = if (duration > 0) EasingManager.apply(easeFunction, (elapsedSec / duration).toDouble()).toFloat() else 1f
+            val percentage = if (duration > 0) easing.interpolate(elapsedSec / duration) else 1f
 
             if (values != null) {
                 type.onApply?.invoke(entity, values!!, percentage)
@@ -270,7 +269,7 @@ class UniversalModifier @JvmOverloads constructor(private val pool: Pool<Univers
      * Sets the easing function to be used.
      */
     fun eased(easing: Easing): UniversalModifier {
-        easeFunction = easing
+        this.easing = easing
         return this
     }
 
@@ -314,7 +313,7 @@ class UniversalModifier @JvmOverloads constructor(private val pool: Pool<Univers
         entity = null
         duration = 0f
         onFinished = null
-        easeFunction = Easing.None
+        easing = Easing.None
 
         clearNestedModifiers()
         reset()
@@ -397,7 +396,7 @@ class UniversalModifier @JvmOverloads constructor(private val pool: Pool<Univers
         modifier.type = type
         modifier.duration = duration
         modifier.onFinished = onFinished
-        modifier.easeFunction = easeFunction
+        modifier.easing = easing
         modifier.values = values?.copyOf()
         modifier.modifiers = modifiers?.map { it.deepCopy() }?.toTypedArray()
     }

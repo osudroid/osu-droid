@@ -25,7 +25,7 @@ object Modifiers {
         it.type = ALPHA
         it.duration = duration
         it.values = floatArrayOf(from, to)
-        it.easeFunction = easeFunction
+        it.easing = easeFunction
         it.onFinished = listener
     }
 
@@ -44,7 +44,7 @@ object Modifiers {
         it.type = SCALE
         it.duration = duration
         it.values = floatArrayOf(from, to)
-        it.easeFunction = easeFunction
+        it.easing = easeFunction
         it.onFinished = listener
     }
 
@@ -66,7 +66,7 @@ object Modifiers {
         it.duration = duration
         it.onFinished = listener
 
-        it.easeFunction = easeFunction
+        it.easing = easeFunction
         it.values = floatArrayOf(
             fromRed, toRed,
             fromGreen, toGreen,
@@ -111,7 +111,7 @@ object Modifiers {
         it.type = TRANSLATE_X
         it.duration = duration
         it.values = floatArrayOf(from, to)
-        it.easeFunction = easeFunction
+        it.easing = easeFunction
         it.onFinished = listener
 
     }
@@ -123,7 +123,7 @@ object Modifiers {
         it.type = TRANSLATE_Y
         it.duration = duration
         it.values = floatArrayOf(from, to)
-        it.easeFunction = easeFunction
+        it.easing = easeFunction
         it.onFinished = listener
 
     }
@@ -139,7 +139,7 @@ object Modifiers {
                 fromX, toX,
                 fromY, toY
             )
-            it.easeFunction = easeFunction
+            it.easing = easeFunction
             it.onFinished = listener
 
         }
@@ -151,7 +151,7 @@ object Modifiers {
         it.type = ROTATION
         it.duration = duration
         it.values = floatArrayOf(from, to)
-        it.easeFunction = easeFunction
+        it.easing = easeFunction
         it.onFinished = listener
 
     }
