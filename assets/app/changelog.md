@@ -69,6 +69,7 @@ for preventing accidental touches.
     }
     ```
 - Added support for `sliderslide` and `sliderwhistle` hitsounds
+- Added support for `scorebar-marker` texture
 - Added support for custom file hitsounds
 - Added an animation to slider end arrow rotation when snaking animation is enabled
 - Added a slight dim to hitobjects that cannot be hit yet in gameplay
@@ -119,7 +120,10 @@ animated.
 - Separated average offset and unstable rate displays in gameplay into separate settings
 - Changed hit lighting effect animation to match osu!stable
 - Changed hit judgement effect animation to match osu!stable
-- Changed combo counter animation to match osu!stable
+- Changed combo counter dimensions, coordinates, and scaling to match osu!stable
+- Changed accuracy counter dimensions, coordinates, and scaling to match osu!stable
+- Changed score counter dimensions, coordinates, and scaling to match osu!stable
+- Changed health bar display mechanics to match osu!stable
 - Miss hit judgement effect only plays in a slider's tail rather than its head and tail
 - The `sliderfollowcircle` and `sliderb` skin elements can now be animated
 - Optimized gameplay loading time by only reloading beatmap when necessary
@@ -162,3 +166,5 @@ were reduced by 20% and clap hitsounds' volume were reduced by 15%
 - Fixed force OD not being affected by speed multiplier in song selection menu
 - Fixed a slider head's hit window not being capped at the slider's span duration
 - Fixed slider ends increasing combo when not hit
+- Fixed animatable textures not being unloaded properly when changing skins
+- Fixed old (non-skin.json) button layouts using fixed height for offset rather than texture-based height
