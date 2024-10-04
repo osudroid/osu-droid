@@ -501,7 +501,7 @@ public class ResourceManager {
             }
             final QualityFileBitmapSource source = new QualityFileBitmapSource(texFile, isHDTexture ? 2 : 1);
 
-            if (source.getWidth() == 0 || source.getHeight() == 0 ||!source.preload()) {
+            if (source.getWidth() == 0 || source.getHeight() == 0 || !source.preload()) {
                 return null;
             }
 
