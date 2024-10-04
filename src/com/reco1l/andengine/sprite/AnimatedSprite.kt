@@ -2,7 +2,6 @@ package com.reco1l.andengine.sprite
 
 import org.anddev.andengine.opengl.texture.region.*
 import ru.nsu.ccfit.zuev.osu.*
-import kotlin.math.*
 
 
 open class AnimatedSprite(frames: Array<TextureRegion?>) : ExtendedSprite() {
@@ -81,8 +80,8 @@ open class AnimatedSprite(frames: Array<TextureRegion?>) : ExtendedSprite() {
     /**
      * The current frame index.
      */
-    val frameIndex
-        get() = frames.indexOf(textureRegion)
+    var frameIndex = 0
+        private set
 
 
     init {
@@ -92,22 +91,20 @@ open class AnimatedSprite(frames: Array<TextureRegion?>) : ExtendedSprite() {
 
     override fun onManagedUpdate(pSecondsElapsed: Float) {
 
-        if (frames.isNotEmpty() && isPlaying) {
+        val frameCount = frames.size
+
+        if (frameCount > 0 && isPlaying) {
 
             elapsedSec += pSecondsElapsed
 
-            val framePerSec = if (fps < 0) frames.size.toFloat() else fps
-
-            var frameIndex = (elapsedSec * framePerSec).roundToInt()
+            val framePerSec = if (fps < 0) frameCount.toFloat() else fps
+            val frameTime = (elapsedSec * framePerSec).toInt()
 
             if (isLoop) {
-                frameIndex %= frames.size
-            } else {
-                frameIndex = frameIndex.coerceAtMost(frames.size - 1)
-
-                if (frameIndex == frames.size - 1) {
-                    stop()
-                }
+                frameIndex = frameTime % frameCount
+            } else if (frameTime >= frameCount) {
+                frameIndex = frameCount - 1
+                stop()
             }
 
             textureRegion = frames[frameIndex]
@@ -130,6 +127,7 @@ open class AnimatedSprite(frames: Array<TextureRegion?>) : ExtendedSprite() {
     fun stop() {
         isPlaying = false
         elapsedSec = 0f
+        frameIndex = 0
     }
 
 

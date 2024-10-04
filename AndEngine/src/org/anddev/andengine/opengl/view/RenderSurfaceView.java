@@ -157,7 +157,9 @@ public class RenderSurfaceView extends GLSurfaceView {
 		@Override
 		public void onDrawFrame(final GL10 pGL) {
 			try {
-				pGL.glClear(GL10.GL_COLOR_BUFFER_BIT | GL10.GL_DEPTH_BUFFER_BIT);
+				// BEGIN osu!droid modified: Unnecessary driver call.
+				//pGL.glClear(GL10.GL_COLOR_BUFFER_BIT | GL10.GL_DEPTH_BUFFER_BIT);
+				// END osu!droid
 				this.mEngine.onDrawFrame(pGL);
 			} catch (final InterruptedException e) {
 				Debug.e("GLThread interrupted!", e);

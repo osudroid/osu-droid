@@ -97,33 +97,7 @@ open class Container : ExtendedEntity() {
             }
         }
 
-        onApplySize(maxWidth, maxHeight)
-    }
-
-    /**
-     * Applies the size of the container.
-     *
-     * Should be called right after [onMeasureSize] to update the size of the container
-     * only if [autoSizeAxes] is not [Axes.None].
-     */
-    protected fun onApplySize(width: Float, height: Float) {
-
-        if (autoSizeAxes == Axes.None) {
-            return
-        }
-
-        if (internalWidth != width || internalHeight != height) {
-
-            if (autoSizeAxes == Axes.X || autoSizeAxes == Axes.Both) {
-                internalWidth = width
-            }
-
-            if (autoSizeAxes == Axes.Y || autoSizeAxes == Axes.Both) {
-                internalHeight = height
-            }
-
-            updateVertexBuffer()
-        }
+        onApplyInternalSize(maxWidth, maxHeight)
     }
 
 

@@ -237,10 +237,6 @@ class UniversalModifier @JvmOverloads constructor(private val pool: Pool<Univers
 
     override fun applyModifier(block: (UniversalModifier) -> Unit): UniversalModifier {
 
-        if (entity == null) {
-            throw IllegalStateException("The target entity of an UniversalModifier cannot be null.")
-        }
-
         // When this happens it means that this was called from a chained call.
         // If the type of modifier is not a sequence or parallel, we should apply
         // the modifier to the target directly.
@@ -262,6 +258,12 @@ class UniversalModifier @JvmOverloads constructor(private val pool: Pool<Univers
                 return this
             }
 
+            // If it's not a sequence or parallel modifier, we should apply the modifier directly
+            // to the target entity assuming it's not null.
+            if (entity == null) {
+                throw IllegalStateException("The target entity of an UniversalModifier cannot be null.")
+            }
+
             return entity!!.applyModifier(block)
         }
 
@@ -275,7 +277,15 @@ class UniversalModifier @JvmOverloads constructor(private val pool: Pool<Univers
     }
 
     /**
-     * Runs the specified block when the modifier finishes.
+     * Sets the easing function to be used.
+     */
+    fun eased(easing: Easing): UniversalModifier {
+        easeFunction = EasingHelper.asEaseFunction(easing)
+        return this
+    }
+
+    /**
+     * Sets the callback to be called when the modifier finishes.
      */
     fun then(block: OnModifierFinished): UniversalModifier {
         onFinished = block
@@ -283,11 +293,22 @@ class UniversalModifier @JvmOverloads constructor(private val pool: Pool<Univers
     }
 
     /**
-     * Sets the easing function to be used.
+     * Delays the next modifier with the duration of this modifier.
      */
-    fun eased(easing: Easing): UniversalModifier {
-        easeFunction = EasingHelper.asEaseFunction(easing)
-        return this
+    fun then(): UniversalModifier {
+
+        if (type == SEQUENCE) {
+            return this
+        }
+
+        if (entity == null) {
+            throw IllegalStateException("The target entity of an UniversalModifier cannot be null.")
+        }
+
+        return entity!!.applyModifier {
+            it.type = NONE
+            it.duration = duration
+        }
     }
 
 
@@ -313,7 +334,7 @@ class UniversalModifier @JvmOverloads constructor(private val pool: Pool<Univers
      * Seeks the modifier to a specific time.
      */
     @JvmOverloads
-    fun setTime(seconds: Float, target: IEntity? = entity!!) {
+    fun setTime(seconds: Float, target: IEntity? = entity) {
         onUpdate(seconds - elapsedSec, target ?: return)
     }
 
@@ -321,7 +342,7 @@ class UniversalModifier @JvmOverloads constructor(private val pool: Pool<Univers
      * Sets the progress of the modifier.
      */
     @JvmOverloads
-    fun setProgress(progress: Float, target: IEntity? = entity!!) {
+    fun setProgress(progress: Float, target: IEntity? = entity) {
         onUpdate(progress * duration, target ?: return)
     }
 

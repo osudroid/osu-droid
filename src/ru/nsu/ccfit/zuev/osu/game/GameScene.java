@@ -24,6 +24,8 @@ import com.reco1l.andengine.Anchor;
 import com.reco1l.andengine.sprite.VideoSprite;
 import com.reco1l.andengine.ExtendedScene;
 import com.reco1l.osu.playfield.FollowPointConnection;
+import com.reco1l.osu.playfield.ComboCounter;
+import com.reco1l.osu.playfield.HealthDisplay;
 import com.reco1l.osu.playfield.ScoreText;
 import com.reco1l.osu.playfield.SliderTickSprite;
 import com.reco1l.osu.ui.BlockAreaFragment;
@@ -63,6 +65,7 @@ import org.anddev.andengine.entity.sprite.Sprite;
 import org.anddev.andengine.entity.text.ChangeableText;
 import org.anddev.andengine.entity.util.FPSCounter;
 import org.anddev.andengine.input.touch.TouchEvent;
+import org.anddev.andengine.opengl.texture.region.TextureRegion;
 import org.anddev.andengine.util.Debug;
 import org.anddev.andengine.util.modifier.ease.EaseQuadIn;
 import org.anddev.andengine.util.modifier.ease.EaseQuadOut;
@@ -136,10 +139,9 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
     private LinkedList<GameObject> activeObjects;
     private LinkedList<GameObject> passiveObjects;
     private LinkedList<GameObject> expiredObjects;
-    private ScoreText comboText, accuracyText, scoreText;  //显示的文字  连击数  ACC  分数
+    private ScoreText accuracyText, scoreText;  //显示的文字  连击数  ACC  分数
     private Queue<BreakPeriod> breakPeriods = new LinkedList<>();
     private BreakAnimator breakAnimator;
-    private ScoreBar scorebar;
     public GameplayLeaderboard scoreBoard;
     private HitErrorMeter hitErrorMeter;
     private Metronome metronome;
@@ -190,13 +192,27 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
     private ChangeableText ppText;
     private ChangeableText memText;
 
+    // HUD
+
+    /**
+     * The combo counter text.
+     */
+    private ComboCounter comboText;
+
+    /**
+     * The health display.
+     */
+    private HealthDisplay healthDisplay;
+
+
+    // Timing
+
     /**
      * The time at which the last frame was rendered with respect to {@link SystemClock#uptimeMillis()}.
      * <br>
      * If 0, a frame has not been rendered yet.
      */
     private long previousFrameTime;
-
 
 
     // Video support
@@ -810,30 +826,25 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
 
         breakAnimator = new BreakAnimator(this, fgScene, stat, playableBeatmap.general.letterboxInBreaks, dimRectangle);
         if (!Config.isHideInGameUI()) {
-            scorebar = new ScoreBar(this, fgScene, stat);
-            addPassiveObject(scorebar);
+            healthDisplay = new HealthDisplay(stat);
+            fgScene.attachChild(healthDisplay);
 
             scoreText = new ScoreText(OsuSkin.get().getScorePrefix());
             scoreText.setAnchor(Anchor.TopRight);
             scoreText.setOrigin(Anchor.TopRight);
-            scoreText.setScaleCenter(Anchor.TopRight);
             scoreText.setText("0000000000");
-            scoreText.setScale(0.9f);
+            scoreText.setScale(0.96f);
+            scoreText.setX(-10f);
 
             accuracyText = new ScoreText(OsuSkin.get().getScorePrefix());
             accuracyText.setAnchor(Anchor.TopRight);
             accuracyText.setOrigin(Anchor.TopRight);
-            accuracyText.setScaleCenter(Anchor.TopRight);
+            accuracyText.setScale(0.6f * 0.96f);
             accuracyText.setText("000.00%");
-            accuracyText.setScale(0.6f);
-            accuracyText.setY(50);
+            //noinspection DataFlowIssue
+            accuracyText.setPosition(-17f, scoreText.getCharacters().get('0').getHeight() + 9f);
 
-            comboText = new ScoreText(OsuSkin.get().getComboPrefix(), Config.isAnimateComboText());
-            comboText.setAnchor(Anchor.BottomLeft);
-            comboText.setOrigin(Anchor.BottomLeft);
-            comboText.setScaleCenter(Anchor.BottomLeft);
-            comboText.setScale(1.5f);
-            comboText.setText("0x");
+            comboText = new ComboCounter();
 
             fgScene.attachChild(comboText);
             fgScene.attachChild(accuracyText);
@@ -1132,7 +1143,7 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
                 if (Multiplayer.isConnected())
                     RoomScene.INSTANCE.getChat().show();
 
-                if(scorebar != null) scorebar.setVisible(false);
+                if(healthDisplay != null) healthDisplay.setVisible(false);
                 breakPeriods.poll();
             }
         }
@@ -1142,7 +1153,7 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
             RoomScene.INSTANCE.getChat().dismiss();
 
             gameStarted = true;
-            if(scorebar != null) scorebar.setVisible(true);
+            if(healthDisplay != null) healthDisplay.setVisible(true);
             if(GameHelper.isFlashLight()){
                 flashlightSprite.onBreak(false);
             }
@@ -1184,11 +1195,7 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
         }
 
         if(!Config.isHideInGameUI()) {
-            strBuilder.setLength(0);
-            strBuilder.append(stat.getCombo());
-            strBuilder.append('x');
-            var comboStr = strBuilder.toString();
-            comboText.setText(comboStr);
+            comboText.setCombo(stat.getCombo());
 
             strBuilder.setLength(0);
             float rawAccuracy = stat.getAccuracy() * 100f;
@@ -1794,6 +1801,7 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
 
         createBurstEffect(pos, color);
         createHitEffect(pos, scoreName, color);
+        healthDisplay.flash();
     }
 
     public void onSliderReverse(PointF pos, float ang, RGBColor color) {
@@ -1871,6 +1879,7 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
         }
 
         createHitEffect(judgementPos, scoreName, color);
+        healthDisplay.flash();
     }
 
 
@@ -1924,6 +1933,7 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
         };
 
         createHitEffect(pos, scoreName, null);
+        healthDisplay.flash();
     }
 
     @Override
@@ -2206,7 +2216,6 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
             blockAreaFragment = null;
         }
 
-        if(scorebar != null) scorebar.flush();
         stopAllAuxiliarySamples();
         ResourceManager.getInstance().getSound("failsound").play();
         final PauseMenu menu = new PauseMenu(engine, this, true);
