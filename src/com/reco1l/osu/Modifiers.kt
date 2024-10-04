@@ -1,15 +1,9 @@
 package com.reco1l.osu
 
+import com.edlplan.framework.easing.Easing
 import com.reco1l.andengine.modifier.*
 import com.reco1l.framework.Pool
 import com.reco1l.andengine.modifier.ModifierType.*
-import org.anddev.andengine.entity.IEntity
-import org.anddev.andengine.util.modifier.IModifier.*
-import org.anddev.andengine.util.modifier.ease.EaseSineInOut
-import org.anddev.andengine.util.modifier.ease.EaseSineOut
-import org.anddev.andengine.util.modifier.ease.IEaseFunction
-import org.anddev.andengine.util.modifier.ease.EaseSineIn
-import org.anddev.andengine.util.modifier.ease.IEaseFunction.DEFAULT as DefaultEaseFunction
 
 /**
  * A collection of static methods to create different types of modifiers.
@@ -26,7 +20,7 @@ object Modifiers {
 
     @JvmStatic
     @JvmOverloads
-    fun alpha(duration: Float, from: Float, to: Float, listener: OnModifierFinished? = null, easeFunction: IEaseFunction = DefaultEaseFunction) = pool.obtain().also {
+    fun alpha(duration: Float, from: Float, to: Float, listener: OnModifierFinished? = null, easeFunction: Easing = Easing.None) = pool.obtain().also {
         it.setToDefault()
         it.type = ALPHA
         it.duration = duration
@@ -37,15 +31,15 @@ object Modifiers {
 
     @JvmStatic
     @JvmOverloads
-    fun fadeIn(duration: Float, listener: OnModifierFinished? = null, easeFunction: IEaseFunction = DefaultEaseFunction) = alpha(duration, 0f, 1f, listener, easeFunction)
+    fun fadeIn(duration: Float, listener: OnModifierFinished? = null, easeFunction: Easing = Easing.None) = alpha(duration, 0f, 1f, listener, easeFunction)
 
     @JvmStatic
     @JvmOverloads
-    fun fadeOut(duration: Float, listener: OnModifierFinished? = null, easeFunction: IEaseFunction = DefaultEaseFunction) = alpha(duration, 1f, 0f, listener, easeFunction)
+    fun fadeOut(duration: Float, listener: OnModifierFinished? = null, easeFunction: Easing = Easing.None) = alpha(duration, 1f, 0f, listener, easeFunction)
 
     @JvmStatic
     @JvmOverloads
-    fun scale(duration: Float, from: Float, to: Float, listener: OnModifierFinished? = null, easeFunction: IEaseFunction = DefaultEaseFunction) = pool.obtain().also {
+    fun scale(duration: Float, from: Float, to: Float, listener: OnModifierFinished? = null, easeFunction: Easing = Easing.None) = pool.obtain().also {
         it.setToDefault()
         it.type = SCALE
         it.duration = duration
@@ -65,7 +59,7 @@ object Modifiers {
         fromBlue: Float,
         toBlue: Float,
         listener: OnModifierFinished? = null,
-        easeFunction: IEaseFunction = DefaultEaseFunction
+        easeFunction: Easing = Easing.None
     ) = pool.obtain().also {
         it.setToDefault()
         it.type = COLOR
@@ -112,7 +106,7 @@ object Modifiers {
 
     @JvmStatic
     @JvmOverloads
-    fun translateX(duration: Float, from: Float, to: Float, listener: OnModifierFinished? = null, easeFunction: IEaseFunction = DefaultEaseFunction) = pool.obtain().also {
+    fun translateX(duration: Float, from: Float, to: Float, listener: OnModifierFinished? = null, easeFunction: Easing = Easing.None) = pool.obtain().also {
         it.setToDefault()
         it.type = TRANSLATE_X
         it.duration = duration
@@ -124,7 +118,7 @@ object Modifiers {
 
     @JvmStatic
     @JvmOverloads
-    fun translateY(duration: Float, from: Float, to: Float, listener: OnModifierFinished? = null, easeFunction: IEaseFunction = DefaultEaseFunction) = pool.obtain().also {
+    fun translateY(duration: Float, from: Float, to: Float, listener: OnModifierFinished? = null, easeFunction: Easing = Easing.None) = pool.obtain().also {
         it.setToDefault()
         it.type = TRANSLATE_Y
         it.duration = duration
@@ -136,7 +130,7 @@ object Modifiers {
 
     @JvmStatic
     @JvmOverloads
-    fun move(duration: Float, fromX: Float, toX: Float, fromY: Float, toY: Float, listener: OnModifierFinished? = null, easeFunction: IEaseFunction = DefaultEaseFunction) =
+    fun move(duration: Float, fromX: Float, toX: Float, fromY: Float, toY: Float, listener: OnModifierFinished? = null, easeFunction: Easing = Easing.None) =
         pool.obtain().also {
             it.setToDefault()
             it.type = MOVE
@@ -152,7 +146,7 @@ object Modifiers {
 
     @JvmStatic
     @JvmOverloads
-    fun rotation(duration: Float, from: Float, to: Float, listener: OnModifierFinished? = null, easeFunction: IEaseFunction = DefaultEaseFunction) = pool.obtain().also {
+    fun rotation(duration: Float, from: Float, to: Float, listener: OnModifierFinished? = null, easeFunction: Easing = Easing.None) = pool.obtain().also {
         it.setToDefault()
         it.type = ROTATION
         it.duration = duration
@@ -171,11 +165,11 @@ object Modifiers {
         it.setToDefault()
         it.type = SEQUENCE
         it.modifiers = arrayOf(
-            translateX(duration / 8f, 0f, magnitude, easeFunction = EaseSineOut.getInstance()),
-            translateX(duration / 4f, magnitude, -magnitude, easeFunction = EaseSineInOut.getInstance()),
-            translateX(duration / 4f, -magnitude, magnitude, easeFunction = EaseSineInOut.getInstance()),
-            translateX(duration / 4f, magnitude, -magnitude, easeFunction = EaseSineInOut.getInstance()),
-            translateX(duration / 8f, -magnitude, 0f, easeFunction = EaseSineIn.getInstance()),
+            translateX(duration / 8f, 0f, magnitude, easeFunction = Easing.OutSine),
+            translateX(duration / 4f, magnitude, -magnitude, easeFunction = Easing.InOutSine),
+            translateX(duration / 4f, -magnitude, magnitude, easeFunction = Easing.InOutSine),
+            translateX(duration / 4f, magnitude, -magnitude, easeFunction = Easing.InOutSine),
+            translateX(duration / 8f, -magnitude, 0f, easeFunction = Easing.InSine),
         )
         it.onFinished = listener
 

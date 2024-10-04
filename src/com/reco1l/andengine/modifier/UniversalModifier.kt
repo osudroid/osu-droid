@@ -2,7 +2,7 @@ package com.reco1l.andengine.modifier
 
 import android.util.*
 import com.edlplan.framework.easing.Easing
-import com.edlplan.ui.EasingHelper
+import com.edlplan.framework.easing.EasingManager
 import com.reco1l.andengine.*
 import com.reco1l.andengine.modifier.ModifierType.*
 import com.reco1l.framework.*
@@ -10,7 +10,6 @@ import com.reco1l.toolkt.kotlin.*
 import org.anddev.andengine.entity.*
 import org.anddev.andengine.entity.modifier.*
 import org.anddev.andengine.util.modifier.*
-import org.anddev.andengine.util.modifier.ease.*
 import kotlin.math.*
 
 /**
@@ -24,7 +23,7 @@ import kotlin.math.*
 class UniversalModifier @JvmOverloads constructor(private val pool: Pool<UniversalModifier>? = null) : IEntityModifier, IModifierChain {
 
     @JvmOverloads
-    constructor(type: ModifierType, duration: Float, from: Float, to: Float, listener: OnModifierFinished? = null, easeFunction: IEaseFunction = IEaseFunction.DEFAULT) : this(null) {
+    constructor(type: ModifierType, duration: Float, from: Float, to: Float, listener: OnModifierFinished? = null, easeFunction: Easing = Easing.None) : this(null) {
         this.type = type
         this.duration = duration
         this.values = floatArrayOf(from, to)
@@ -90,7 +89,7 @@ class UniversalModifier @JvmOverloads constructor(private val pool: Pool<Univers
     /**
      * Easing function to be used.
      */
-    var easeFunction: IEaseFunction = IEaseFunction.DEFAULT
+    var easeFunction: Easing = Easing.None
 
     /**
      * An array of values to be used in the modifier.
@@ -187,21 +186,21 @@ class UniversalModifier @JvmOverloads constructor(private val pool: Pool<Univers
             }
 
             consumedTimeSec = deltaTimeSec - remainingTimeSec
+            elapsedSec += consumedTimeSec
 
         } else {
 
             consumedTimeSec = min(duration - elapsedSec, deltaTimeSec)
+            elapsedSec += consumedTimeSec
 
             // The consumed time is already fully calculated here, if the duration is 0
             // we have to assume the percentage is 1 to avoid division by zero.
-            val percentage = if (duration > 0) easeFunction.getPercentage(elapsedSec + consumedTimeSec, duration) else 1f
+            val percentage = if (duration > 0) EasingManager.apply(easeFunction, (elapsedSec / duration).toDouble()).toFloat() else 1f
 
             if (values != null) {
                 type.onApply?.invoke(entity, values!!, percentage)
             }
         }
-
-        elapsedSec += consumedTimeSec
 
         if (isFinished) {
             elapsedSec = duration
@@ -271,7 +270,7 @@ class UniversalModifier @JvmOverloads constructor(private val pool: Pool<Univers
      * Sets the easing function to be used.
      */
     fun eased(easing: Easing): UniversalModifier {
-        easeFunction = EasingHelper.asEaseFunction(easing)
+        easeFunction = easing
         return this
     }
 
@@ -315,7 +314,7 @@ class UniversalModifier @JvmOverloads constructor(private val pool: Pool<Univers
         entity = null
         duration = 0f
         onFinished = null
-        easeFunction = IEaseFunction.DEFAULT
+        easeFunction = Easing.None
 
         clearNestedModifiers()
         reset()
