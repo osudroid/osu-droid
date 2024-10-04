@@ -104,11 +104,17 @@ calculated will display a star rating of 0.
 
 During gameplay, background difficulty calculation is paused to prevent performance degradation.
 
-## Updated follow point mechanics
+## Updated gameplay elements
 
-This update brings significant improvements to follow points, which gives you a hint of movement direction across
-hitobjects in gameplay. They work in a similar way to osu!stable, and its skin element (`followpoint`) can now be
-animated.
+The following gameplay elements' display has been updated to match osu!stable:
+
+- Follow points
+  - In addition to display parity, its skin element (`followpoint`) can now be animated
+- Health bar
+- Hit lighting
+- Score counter
+- Combo counter
+- Accuracy counter
 
 ## Smaller changes
 
@@ -118,12 +124,6 @@ animated.
     slider breaking for hitting a slider's head too early
 - More significant performance improvements in gameplay than version 1.7.2
 - Separated average offset and unstable rate displays in gameplay into separate settings
-- Changed hit lighting effect animation to match osu!stable
-- Changed hit judgement effect animation to match osu!stable
-- Changed combo counter dimensions, coordinates, and scaling to match osu!stable
-- Changed accuracy counter dimensions, coordinates, and scaling to match osu!stable
-- Changed score counter dimensions, coordinates, and scaling to match osu!stable
-- Changed health bar display mechanics to match osu!stable
 - Miss hit judgement effect only plays in a slider's tail rather than its head and tail
 - The `sliderfollowcircle` and `sliderb` skin elements can now be animated
 - Optimized gameplay loading time by only reloading beatmap when necessary
