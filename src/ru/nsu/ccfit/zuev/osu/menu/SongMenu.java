@@ -675,7 +675,6 @@ public class SongMenu implements IUpdateHandler, MenuItemListener,
         if (board.isShowOnlineScores()) {
             board.setShowOnlineScores(false);
             board.init(selectedBeatmap);
-            updateInfo(selectedBeatmap);
         } else if (OnlineManager.getInstance().isStayOnline()) {
             board.setShowOnlineScores(true);
             board.init(selectedBeatmap);
