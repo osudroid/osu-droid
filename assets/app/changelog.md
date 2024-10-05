@@ -69,6 +69,7 @@ for preventing accidental touches.
     }
     ```
 - Added support for `sliderslide` and `sliderwhistle` hitsounds
+- Added support for `scorebar-marker` texture
 - Added support for custom file hitsounds
 - Added an animation to slider end arrow rotation when snaking animation is enabled
 - Added a slight dim to hitobjects that cannot be hit yet in gameplay
@@ -103,11 +104,17 @@ calculated will display a star rating of 0.
 
 During gameplay, background difficulty calculation is paused to prevent performance degradation.
 
-## Updated follow point mechanics
+## Updated gameplay elements
 
-This update brings significant improvements to follow points, which gives you a hint of movement direction across
-hitobjects in gameplay. They work in a similar way to osu!stable, and its skin element (`followpoint`) can now be
-animated.
+The following gameplay elements' display has been updated to match osu!stable:
+
+- Follow points
+  - In addition to display parity, its skin element (`followpoint`) can now be animated
+- Health bar
+- Hit lighting
+- Score counter
+- Combo counter
+- Accuracy counter
 
 ## Smaller changes
 
@@ -117,11 +124,9 @@ animated.
     slider breaking for hitting a slider's head too early
 - More significant performance improvements in gameplay than version 1.7.2
 - Separated average offset and unstable rate displays in gameplay into separate settings
-- Changed hit lighting effect animation to match osu!stable
-- Changed hit judgement effect animation to match osu!stable
-- Changed combo counter animation to match osu!stable
 - Miss hit judgement effect only plays in a slider's tail rather than its head and tail
 - The `sliderfollowcircle` and `sliderb` skin elements can now be animated
+- Optimized engine buffer update and writing logic
 - Optimized gameplay loading time by only reloading beatmap when necessary
 - Optimized real-time PP counter by not recalculating a beatmap's difficulty when retrying it
 - Optimized real-time PP counter's update operation after an object's judgement
@@ -162,3 +167,6 @@ were reduced by 20% and clap hitsounds' volume were reduced by 15%
 - Fixed force OD not being affected by speed multiplier in song selection menu
 - Fixed a slider head's hit window not being capped at the slider's span duration
 - Fixed slider ends increasing combo when not hit
+- Fixed animatable textures not being unloaded properly when changing skins
+- Fixed old (non-skin.json) button layouts using fixed height for offset rather than texture-based height
+- Fixed beatmap background and video paths potentially being parsed incorrectly

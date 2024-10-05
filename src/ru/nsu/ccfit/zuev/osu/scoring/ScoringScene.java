@@ -9,6 +9,7 @@ import com.reco1l.osu.multiplayer.Multiplayer;
 import com.reco1l.osu.multiplayer.RoomScene;
 import com.reco1l.osu.ui.entity.StatisticSelector;
 
+import com.rian.osu.GameMode;
 import com.rian.osu.beatmap.Beatmap;
 import com.rian.osu.beatmap.parser.BeatmapParser;
 import com.rian.osu.difficulty.BeatmapDifficultyCalculator;
@@ -33,9 +34,11 @@ import java.util.Locale;
 
 import ru.nsu.ccfit.zuev.audio.serviceAudio.SongService;
 import ru.nsu.ccfit.zuev.osu.Config;
+import ru.nsu.ccfit.zuev.osu.DifficultyAlgorithm;
 import ru.nsu.ccfit.zuev.osu.GlobalManager;
 import ru.nsu.ccfit.zuev.osu.ResourceManager;
 import com.reco1l.osu.data.BeatmapInfo;
+import com.rian.osu.utils.ModUtils;
 
 import ru.nsu.ccfit.zuev.osu.ToastLogger;
 import ru.nsu.ccfit.zuev.osu.Utils;
@@ -395,13 +398,27 @@ public class ScoringScene {
             Beatmap beatmapData;
 
             try (var parser = new BeatmapParser(beatmapInfo.getPath())) {
-                beatmapData = parser.parse(true);
+                beatmapData = parser.parse(
+                    true,
+                    Config.getDifficultyAlgorithm() == DifficultyAlgorithm.droid ? GameMode.Droid : GameMode.Standard
+                );
             }
 
             if (beatmapData != null) {
                 switch (Config.getDifficultyAlgorithm()) {
                     case droid -> {
-                        var difficultyAttributes = BeatmapDifficultyCalculator.calculateDroidDifficulty(beatmapData, stat);
+                        var playableBeatmap = beatmapData.createDroidPlayableBeatmap(
+                            ModUtils.convertLegacyMods(
+                                stat.getMod(),
+                                stat.isCustomCS() ? stat.getCustomCS() : null,
+                                stat.isCustomAR() ? stat.getCustomAR() : null,
+                                stat.isCustomOD() ? stat.getCustomOD() : null,
+                                stat.isCustomHP() ? stat.getCustomHP() : null
+                            ),
+                            stat.getChangeSpeed()
+                        );
+
+                        var difficultyAttributes = BeatmapDifficultyCalculator.calculateDroidDifficulty(playableBeatmap);
 
                         DroidPerformanceAttributes performanceAttributes;
 
@@ -413,8 +430,8 @@ public class ScoringScene {
                             replayLoad.setMap(beatmapFile.getParentFile().getName(), beatmapFile.getName(), mapMD5);
 
                             if (replayLoad.load(replayPath)) {
-                                performanceAttributes = BeatmapDifficultyCalculator.calculateDroidPerformance(
-                                        beatmapData, difficultyAttributes, replayLoad.cursorMoves, replayLoad.objectData, stat
+                                performanceAttributes = BeatmapDifficultyCalculator.calculateDroidPerformanceWithReplayStat(
+                                    playableBeatmap, difficultyAttributes, replayLoad.cursorMoves, replayLoad.objectData, stat
                                 );
                             } else {
                                 performanceAttributes = BeatmapDifficultyCalculator.calculateDroidPerformance(difficultyAttributes, stat);

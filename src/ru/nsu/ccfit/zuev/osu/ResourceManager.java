@@ -50,6 +50,19 @@ import ru.nsu.ccfit.zuev.skins.StringSkinData;
 
 public class ResourceManager {
 
+    /**
+     * The textures that shouldn't fallback to the default skin if they're not present in the skin folder.
+     */
+    private static final String[] OPTIONAL_TEXTURES = {
+        "scorebar-marker",
+        "scorebar-ki",
+        "scorebar-kidanger",
+        "scorebar-kidanger2",
+    };
+
+    /**
+     * The textures that can be animated.
+     */
     private static final String[] ANIMATABLE_TEXTURES = {
         "followpoint-",
         "hit0-",
@@ -130,19 +143,12 @@ public class ResourceManager {
 
         loadCustomSkin(folder);
 
-        loadTexture("::track", "gfx/hitcircle.png", false,
-                TextureOptions.BILINEAR_PREMULTIPLYALPHA);
-        loadTexture("::track2", "gfx/slidertrack.png", false);
-        loadTexture("::trackborder", "gfx/sliderborder.png", false,
-                TextureOptions.BILINEAR_PREMULTIPLYALPHA);
         loadTexture("ranking_enabled", "ranking_enabled.png", false);
         loadTexture("ranking_disabled", "ranking_disabled.png", false);
         loadTexture("flashlight_cursor", "flashlight_cursor.png", false, TextureOptions.BILINEAR_PREMULTIPLYALPHA);
 
         if (!textures.containsKey("lighting"))
             textures.put("lighting", null);
-//		textures.put("fail-background", null);
-//		textures.put("pause-overlay", null);
     }
 
     public void loadCustomSkin(String folder) {
@@ -230,11 +236,20 @@ public class ResourceManager {
             }
         }
 
+        // Removing loaded animatable textures from the previous skin. Usage of toArray() is necessary to avoid ConcurrentModificationException.
+        for (var key : textures.keySet().toArray(new String[0])) {
+            if (any(ANIMATABLE_TEXTURES, key::startsWith)) {
+                unloadTexture(key);
+            }
+        }
+
         customFrameCount.clear();
 
         try {
 
             String[] availableAnimatableFilenames = filter(availableFiles.keySet().toArray(new String[0]), f -> any(ANIMATABLE_TEXTURES, f::startsWith)).toArray(new String[0]);
+
+            boolean isDefaultSkin = Objects.equals(folder, Config.getSkinTopPath());
 
             for (var assetName : Objects.requireNonNull(context.getAssets().list("gfx"))) {
 
@@ -254,8 +269,12 @@ public class ResourceManager {
 
                 if (availableFiles.containsKey(textureName)) {
                     loadTexture(textureName, Objects.requireNonNull(availableFiles.get(textureName)).getPath(), true);
-                } else  {
-                    loadTexture(textureName, "gfx/" + assetName, false);
+                } else {
+                    if (!isDefaultSkin && any(OPTIONAL_TEXTURES, textureName::startsWith)) {
+                        unloadTexture(textureName);
+                    } else {
+                        loadTexture(textureName, "gfx/" + assetName, false);
+                    }
                 }
             }
 
@@ -444,32 +463,19 @@ public class ResourceManager {
 
     public TextureRegion loadBackground(final String file, Engine engine) {
         if (textures.containsKey("::background")) {
-            engine.getTextureManager().unloadTexture(
-                    Objects.requireNonNull(textures.get("::background")).getTexture());
+            engine.getTextureManager().unloadTexture(Objects.requireNonNull(textures.get("::background")).getTexture());
         }
         if (file == null) {
             return textures.get("menu-background");
         }
-        int tw = 16, th = 16;
         TextureRegion region;
         final QualityFileBitmapSource source = new QualityFileBitmapSource(new File(file));
-        if (source.getWidth() == 0 || source.getHeight() == 0) {
-            return textures.get("menu-background");
-        }
-        while (tw < source.getWidth()) {
-            tw *= 2;
-        }
-        while (th < source.getHeight()) {
-            th *= 2;
-        }
-        if (!source.preload()) {
+        if (source.getWidth() == 0 || source.getHeight() == 0 || !source.preload()) {
             textures.put("::background", textures.get("menu-background"));
             return textures.get("::background");
         }
-        final BitmapTextureAtlas tex = new BitmapTextureAtlas(tw, th,
-                TextureOptions.BILINEAR);
-        region = TextureRegionFactory
-                .createFromSource(tex, source, 0, 0, false);
+        final BitmapTextureAtlas tex = new BitmapTextureAtlas(source.getWidth(), source.getHeight(), TextureOptions.BILINEAR);
+        region = TextureRegionFactory.createFromSource(tex, source, 0, 0, false);
         engine.getTextureManager().loadTexture(tex);
         textures.put("::background", region);
         return region;
@@ -477,7 +483,6 @@ public class ResourceManager {
 
     public TextureRegion loadTexture(final String resname, final String file,
                                      final boolean external, final TextureOptions opt, Engine engine) {
-        int tw = 4, th = 4;
         TextureRegion region;
         if (external) {
             var texFile = new File(file);
@@ -490,70 +495,36 @@ public class ResourceManager {
                 texFile = new File(file.substring(0, dotIndex) + "@2x" + file.substring(dotIndex));
                 isHDTexture = texFile.exists();
 
-                if (!isHDTexture)
+                if (!isHDTexture) {
                     return new BlankTextureRegion();
+                }
             }
             final QualityFileBitmapSource source = new QualityFileBitmapSource(texFile, isHDTexture ? 2 : 1);
-            if (source.getWidth() == 0 || source.getHeight() == 0) {
+
+            if (source.getWidth() == 0 || source.getHeight() == 0 || !source.preload()) {
                 return null;
-            }
-            while (tw < source.getWidth()) {
-                tw *= 2;
-            }
-            while (th < source.getHeight()) {
-                th *= 2;
             }
 
-            int errorCount = 0;
-            while (!source.preload() && errorCount < 3) {
-                errorCount++;
-            }
-            if (errorCount >= 3) {
-                return null;
-            }
-            final BitmapTextureAtlas tex = new BitmapTextureAtlas(tw, th, opt);
-            region = TextureRegionFactory.createFromSource(tex, source, 0, 0,
-                    false);
+            final BitmapTextureAtlas tex = new BitmapTextureAtlas(source.getWidth(), source.getHeight(), opt);
+            region = TextureRegionFactory.createFromSource(tex, source, 0, 0, false);
             engine.getTextureManager().loadTexture(tex);
             textures.put(resname, region);
         } else {
             final QualityAssetBitmapSource source;
 
             try {
-                source = new QualityAssetBitmapSource(
-                        context, file);
+                source = new QualityAssetBitmapSource(context, file);
             } catch (NullPointerException e) {
-                return textures.values().iterator().next();
+                return new BlankTextureRegion();
             }
 
-            if (source.getWidth() == 0 || source.getHeight() == 0) {
+            if (source.getWidth() == 0 || source.getHeight() == 0 || !source.preload()) {
                 return null;
             }
-            while (tw < source.getWidth()) {
-                tw *= 2;
-            }
-            while (th < source.getHeight()) {
-                th *= 2;
-            }
-            int errorCount = 0;
-            while (!source.preload() && errorCount < 3) {
-                errorCount++;
-            }
-            if (errorCount >= 3) {
-                return null;
-            }
-            final BitmapTextureAtlas tex = new BitmapTextureAtlas(tw, th, opt);
-            region = TextureRegionFactory.createFromSource(tex, source, 0, 0,
-                    false);
+            final BitmapTextureAtlas tex = new BitmapTextureAtlas(source.getWidth(), source.getHeight(), opt);
+            region = TextureRegionFactory.createFromSource(tex, source, 0, 0, false);
             engine.getTextureManager().loadTexture(tex);
             textures.put(resname, region);
-        }
-
-        if (region.getWidth() > 1) {
-            region.setWidth(region.getWidth() - 1);
-        }
-        if (region.getHeight() > 1) {
-            region.setHeight(region.getHeight() - 1);
         }
 
         return region;
@@ -561,54 +532,33 @@ public class ResourceManager {
 
     public TextureRegion loadHighQualityAsset(final String resname,
                                               final String file) {
-        int tw = 16, th = 16;
         TextureRegion region;
 
         final QualityAssetBitmapSource source = new QualityAssetBitmapSource(context, file);
         if (source.getWidth() == 0 || source.getHeight() == 0) {
             return null;
         }
-        while (tw < source.getWidth()) {
-            tw *= 2;
-        }
-        while (th < source.getHeight()) {
-            th *= 2;
-        }
-        final BitmapTextureAtlas tex = new BitmapTextureAtlas(tw, th,
-                TextureOptions.BILINEAR);
-        region = TextureRegionFactory
-                .createFromSource(tex, source, 0, 0, false);
+
+        final BitmapTextureAtlas tex = new BitmapTextureAtlas(source.getWidth(), source.getHeight(), TextureOptions.BILINEAR);
+        region = TextureRegionFactory.createFromSource(tex, source, 0, 0, false);
         engine.getTextureManager().loadTexture(tex);
         textures.put(resname, region);
-        //region.setWidth(region.getWidth() - 1);
-        //region.setHeight(region.getHeight() - 1);
 
         return region;
     }
 
     public TextureRegion loadHighQualityFile(final String resname,
                                              final File file) {
-        int tw = 16, th = 16;
         TextureRegion region;
 
         final QualityFileBitmapSource source = new QualityFileBitmapSource(file);
         if (source.getWidth() == 0 || source.getHeight() == 0) {
             return null;
         }
-        while (tw < source.getWidth()) {
-            tw *= 2;
-        }
-        while (th < source.getHeight()) {
-            th *= 2;
-        }
-        final BitmapTextureAtlas tex = new BitmapTextureAtlas(tw, th,
-                TextureOptions.BILINEAR);
-        region = TextureRegionFactory
-                .createFromSource(tex, source, 0, 0, false);
+        final BitmapTextureAtlas tex = new BitmapTextureAtlas(source.getWidth(), source.getHeight(), TextureOptions.BILINEAR);
+        region = TextureRegionFactory.createFromSource(tex, source, 0, 0, false);
         engine.getTextureManager().loadTexture(tex);
         textures.put(resname, region);
-        region.setWidth(region.getWidth() - 1);
-        region.setHeight(region.getHeight() - 1);
         return region;
     }
 

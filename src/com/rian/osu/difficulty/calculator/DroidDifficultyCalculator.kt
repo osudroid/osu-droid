@@ -1,15 +1,15 @@
 package com.rian.osu.difficulty.calculator
 
-import com.rian.osu.GameMode
 import com.rian.osu.beatmap.Beatmap
 import com.rian.osu.beatmap.DroidHitWindow
+import com.rian.osu.beatmap.DroidPlayableBeatmap
+import com.rian.osu.beatmap.PlayableBeatmap
 import com.rian.osu.beatmap.PreciseDroidHitWindow
 import com.rian.osu.difficulty.DroidDifficultyHitObject
 import com.rian.osu.difficulty.attributes.DroidDifficultyAttributes
 import com.rian.osu.difficulty.attributes.HighStrainSection
 import com.rian.osu.difficulty.skills.*
 import com.rian.osu.mods.*
-import com.rian.osu.utils.ModUtils
 import kotlin.math.cbrt
 import kotlin.math.ceil
 import kotlin.math.max
@@ -20,24 +20,22 @@ import kotlinx.coroutines.ensureActive
 /**
  * A difficulty calculator for calculating osu!droid star rating.
  */
-class DroidDifficultyCalculator : DifficultyCalculator<DroidDifficultyHitObject, DroidDifficultyAttributes>() {
-    override val mode = GameMode.Droid
+class DroidDifficultyCalculator : DifficultyCalculator<DroidPlayableBeatmap, DroidDifficultyHitObject, DroidDifficultyAttributes>() {
     override val difficultyMultiplier = 0.18
-
-    override val difficultyAdjustmentMods = super.difficultyAdjustmentMods + setOf(ModPrecise::class, ModAutopilot::class)
+    override val difficultyAdjustmentMods = super.difficultyAdjustmentMods + setOf(ModPrecise(), ModAutopilot())
 
     private val maximumSectionDeltaTime = 2000
     private val minimumSectionObjectCount = 5
     private val threeFingerStrainThreshold = 175.0
 
     override fun createDifficultyAttributes(
-        beatmap: Beatmap,
-        mods: Iterable<Mod>,
+        beatmap: PlayableBeatmap,
         skills: Array<Skill<DroidDifficultyHitObject>>,
         objects: Array<DroidDifficultyHitObject>,
     ) = DroidDifficultyAttributes().apply {
-        this.mods = mods.toSet()
-        clockRate = ModUtils.calculateRateWithMods(this.mods).toDouble()
+        mods = beatmap.mods?.toList() ?: mods
+        customSpeedMultiplier = beatmap.customSpeedMultiplier
+        clockRate = beatmap.overallSpeedMultiplier.toDouble()
 
         maxCombo = beatmap.maxCombo
         hitCircleCount = beatmap.hitObjects.circleCount
@@ -206,24 +204,29 @@ class DroidDifficultyCalculator : DifficultyCalculator<DroidDifficultyHitObject,
         ).toDouble()
     }
 
-    override fun createSkills(beatmap: Beatmap, mods: Iterable<Mod>) = arrayOf<Skill<DroidDifficultyHitObject>>(
-        DroidAim(mods, true),
-        DroidAim(mods, false),
-        // Tap and visual skills depend on rhythm skill, so we put it first
-        DroidRhythm(mods),
-        DroidTap(mods, true),
-        DroidTap(mods, false),
-        DroidFlashlight(mods, true),
-        DroidFlashlight(mods, false),
-        DroidVisual(mods, true),
-        DroidVisual(mods, false)
-    )
+    override fun createSkills(beatmap: DroidPlayableBeatmap): Array<Skill<DroidDifficultyHitObject>> {
+        val mods = beatmap.mods?.toList() ?: emptyList()
+
+        return arrayOf(
+            DroidAim(mods, true),
+            DroidAim(mods, false),
+            // Tap and visual skills depend on rhythm skill, so we put it first
+            DroidRhythm(mods),
+            DroidTap(mods, true),
+            DroidTap(mods, false),
+            DroidFlashlight(mods, true),
+            DroidFlashlight(mods, false),
+            DroidVisual(mods, true),
+            DroidVisual(mods, false)
+        )
+    }
 
     @Suppress("UNCHECKED_CAST")
-    override fun createDifficultyHitObjects(beatmap: Beatmap, mods: Iterable<Mod>, scope: CoroutineScope?): Array<DroidDifficultyHitObject> {
-        val clockRate = ModUtils.calculateRateWithMods(mods).toDouble()
+    override fun createDifficultyHitObjects(beatmap: DroidPlayableBeatmap, scope: CoroutineScope?): Array<DroidDifficultyHitObject> {
+        val clockRate = beatmap.overallSpeedMultiplier.toDouble()
+
         val greatWindow = (
-            if (mods.any { it is ModPrecise }) PreciseDroidHitWindow(beatmap.difficulty.od)
+            if (beatmap.mods?.any { it is ModPrecise } == true) PreciseDroidHitWindow(beatmap.difficulty.od)
             else DroidHitWindow(beatmap.difficulty.od)
         ).greatWindow.toDouble() / clockRate
 
@@ -246,6 +249,12 @@ class DroidDifficultyCalculator : DifficultyCalculator<DroidDifficultyHitObject,
 
         return arr as Array<DroidDifficultyHitObject>
     }
+
+    override fun createPlayableBeatmap(
+        beatmap: Beatmap,
+        parameters: DifficultyCalculationParameters?,
+        scope: CoroutineScope?
+    ) = beatmap.createDroidPlayableBeatmap(parameters?.mods, parameters?.customSpeedMultiplier ?: 1f, scope)
 
     private fun calculateThreeFingerSummedStrain(strains: List<Double>) =
         strains.fold(0.0) { acc, d -> acc + d / threeFingerStrainThreshold }.pow(0.75)

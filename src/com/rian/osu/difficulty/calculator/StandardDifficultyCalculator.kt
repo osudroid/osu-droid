@@ -1,8 +1,9 @@
 package com.rian.osu.difficulty.calculator
 
-import com.rian.osu.GameMode
 import com.rian.osu.beatmap.Beatmap
+import com.rian.osu.beatmap.PlayableBeatmap
 import com.rian.osu.beatmap.StandardHitWindow
+import com.rian.osu.beatmap.StandardPlayableBeatmap
 import com.rian.osu.beatmap.hitobject.HitObject
 import com.rian.osu.beatmap.sections.BeatmapDifficulty
 import com.rian.osu.difficulty.StandardDifficultyHitObject
@@ -11,10 +12,8 @@ import com.rian.osu.difficulty.skills.Skill
 import com.rian.osu.difficulty.skills.StandardAim
 import com.rian.osu.difficulty.skills.StandardFlashlight
 import com.rian.osu.difficulty.skills.StandardSpeed
-import com.rian.osu.mods.Mod
 import com.rian.osu.mods.ModFlashlight
 import com.rian.osu.mods.ModRelax
-import com.rian.osu.utils.ModUtils
 import kotlin.math.cbrt
 import kotlin.math.max
 import kotlin.math.pow
@@ -24,17 +23,15 @@ import kotlinx.coroutines.ensureActive
 /**
  * A difficulty calculator for calculating osu!standard star rating.
  */
-class StandardDifficultyCalculator : DifficultyCalculator<StandardDifficultyHitObject, StandardDifficultyAttributes>() {
-    override val mode = GameMode.Standard
+class StandardDifficultyCalculator : DifficultyCalculator<StandardPlayableBeatmap, StandardDifficultyHitObject, StandardDifficultyAttributes>() {
     override val difficultyMultiplier = 0.0675
 
     override fun createDifficultyAttributes(
-        beatmap: Beatmap,
-        mods: Iterable<Mod>,
+        beatmap: PlayableBeatmap,
         skills: Array<Skill<StandardDifficultyHitObject>>,
         objects: Array<StandardDifficultyHitObject>
     ) = StandardDifficultyAttributes().apply {
-        this.mods = mods.toSet()
+        mods = beatmap.mods?.toList() ?: mods
 
         aimDifficulty = calculateRating(skills[0])
         speedDifficulty = calculateRating(skills[2])
@@ -67,13 +64,13 @@ class StandardDifficultyCalculator : DifficultyCalculator<StandardDifficultyHitO
                         (cbrt(100000 / 2.0.pow(1 / 1.1) * basePerformance) + 4)
             else 0.0
 
-        val clockRate = ModUtils.calculateRateWithMods(mods)
-        val preempt = BeatmapDifficulty.difficultyRange(beatmap.difficulty.ar.toDouble(), HitObject.PREEMPT_MAX, HitObject.PREEMPT_MID, HitObject.PREEMPT_MIN) / clockRate
+        val speedMultiplier = beatmap.overallSpeedMultiplier.toDouble()
+        val preempt = BeatmapDifficulty.difficultyRange(beatmap.difficulty.ar.toDouble(), HitObject.PREEMPT_MAX, HitObject.PREEMPT_MID, HitObject.PREEMPT_MIN) / speedMultiplier
 
         approachRate = BeatmapDifficulty.inverseDifficultyRange(preempt, HitObject.PREEMPT_MAX, HitObject.PREEMPT_MID, HitObject.PREEMPT_MIN)
 
         // Weird casts, but necessary for difficulty calculation parity
-        val greatWindow = StandardHitWindow(beatmap.difficulty.od).greatWindow.toDouble() / clockRate
+        val greatWindow = StandardHitWindow(beatmap.difficulty.od).greatWindow.toDouble() / speedMultiplier
 
         overallDifficulty = StandardHitWindow.hitWindow300ToOverallDifficulty(greatWindow.toFloat()).toDouble()
         maxCombo = beatmap.maxCombo
@@ -82,16 +79,20 @@ class StandardDifficultyCalculator : DifficultyCalculator<StandardDifficultyHitO
         spinnerCount = beatmap.hitObjects.spinnerCount
     }
 
-    override fun createSkills(beatmap: Beatmap, mods: Iterable<Mod>) = arrayOf<Skill<StandardDifficultyHitObject>>(
-        StandardAim(mods, true),
-        StandardAim(mods, false),
-        StandardSpeed(mods),
-        StandardFlashlight(mods)
-    )
+    override fun createSkills(beatmap: StandardPlayableBeatmap): Array<Skill<StandardDifficultyHitObject>> {
+        val mods = beatmap.mods?.toList() ?: emptyList()
+
+        return arrayOf(
+            StandardAim(mods, true),
+            StandardAim(mods, false),
+            StandardSpeed(mods),
+            StandardFlashlight(mods)
+        )
+    }
 
     @Suppress("UNCHECKED_CAST")
-    override fun createDifficultyHitObjects(beatmap: Beatmap, mods: Iterable<Mod>, scope: CoroutineScope?): Array<StandardDifficultyHitObject> {
-        val clockRate = ModUtils.calculateRateWithMods(mods).toDouble()
+    override fun createDifficultyHitObjects(beatmap: StandardPlayableBeatmap, scope: CoroutineScope?): Array<StandardDifficultyHitObject> {
+        val clockRate = beatmap.overallSpeedMultiplier.toDouble()
         val greatWindow = StandardHitWindow(beatmap.difficulty.od).greatWindow.toDouble() / clockRate
 
         val objects = beatmap.hitObjects.objects
@@ -113,4 +114,10 @@ class StandardDifficultyCalculator : DifficultyCalculator<StandardDifficultyHitO
 
         return arr as Array<StandardDifficultyHitObject>
     }
+
+    override fun createPlayableBeatmap(
+        beatmap: Beatmap,
+        parameters: DifficultyCalculationParameters?,
+        scope: CoroutineScope?
+    ) = beatmap.createStandardPlayableBeatmap(parameters?.mods, parameters?.customSpeedMultiplier ?: 1f, scope)
 }

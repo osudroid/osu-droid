@@ -1,13 +1,10 @@
 package com.reco1l.andengine.sprite
 
 import com.reco1l.andengine.*
-import com.reco1l.andengine.container.*
-import org.anddev.andengine.engine.camera.*
 import org.anddev.andengine.opengl.texture.region.*
 import org.anddev.andengine.opengl.util.*
 import org.anddev.andengine.opengl.vertex.*
 import javax.microedition.khronos.opengles.*
-
 
 /**
  * Sprite that allows to change texture once created.
@@ -20,21 +17,10 @@ open class ExtendedSprite(textureRegion: TextureRegion? = null) : ExtendedEntity
             if (field != value) {
                 field = value
 
-                if (autoSizeAxes != Axes.None) {
-                    val currentTextureWidth = textureRegion?.width?.toFloat() ?: 0f
-                    val currentTextureHeight = textureRegion?.height?.toFloat() ?: 0f
-
-                    setSizeInternal(
-                        if (autoSizeAxes == Axes.X || autoSizeAxes == Axes.Both) currentTextureWidth else width,
-                        if (autoSizeAxes == Axes.Y || autoSizeAxes == Axes.Both) currentTextureHeight else height
-                    )
-
-                    if (parent is Container) {
-                        (parent as Container).onChildSizeChanged(this)
-                    }
-                }
-
-                updateVertexBuffer()
+                onApplyInternalSize(
+                    textureRegion?.width?.toFloat() ?: 0f,
+                    textureRegion?.height?.toFloat() ?: 0f
+                )
             }
         }
 
@@ -64,7 +50,7 @@ open class ExtendedSprite(textureRegion: TextureRegion? = null) : ExtendedEntity
     /**
      * The texture region of the sprite.
      */
-    var textureRegion: TextureRegion? = null
+    open var textureRegion: TextureRegion? = null
         set(value) {
 
             if (field == value) {
@@ -72,42 +58,51 @@ open class ExtendedSprite(textureRegion: TextureRegion? = null) : ExtendedEntity
             }
 
             field = value
-            applyBlendFunction()
 
-            if (value != null) {
-                value.isFlippedVertical = flippedVertical
-                value.isFlippedHorizontal = flippedHorizontal
+            value?.setTexturePosition(textureX, textureY)
+            value?.isFlippedVertical = flippedVertical
+            value?.isFlippedHorizontal = flippedHorizontal
+
+            onApplyInternalSize(
+                value?.width?.toFloat() ?: 0f,
+                value?.height?.toFloat() ?: 0f
+            )
+        }
+
+    /**
+     * The X position of the texture.
+     */
+    open var textureX = 0
+        set(value) {
+            if (field != value) {
+                field = value
+                textureRegion?.setTexturePosition(value, textureY)
             }
+        }
 
-            if (autoSizeAxes != Axes.None) {
-                val textureWidth = value?.width?.toFloat() ?: 0f
-                val textureHeight = value?.height?.toFloat() ?: 0f
-
-                setSizeInternal(
-                    if (autoSizeAxes == Axes.X || autoSizeAxes == Axes.Both) textureWidth else width,
-                    if (autoSizeAxes == Axes.Y || autoSizeAxes == Axes.Both) textureHeight else height
-                )
-
-                if (parent is Container) {
-                    (parent as Container).onChildSizeChanged(this)
-                }
+    /**
+     * The Y position of the texture.
+     */
+    open var textureY = 0
+        set(value) {
+            if (field != value) {
+                field = value
+                textureRegion?.setTexturePosition(textureX, value)
             }
-
-            updateVertexBuffer()
         }
 
 
     init {
+        @Suppress("LeakingThis")
         this.textureRegion = textureRegion
     }
 
 
-    private fun applyBlendFunction() {
-
+    override fun applyBlending(pGL: GL10) {
         if (textureRegion?.texture?.textureOptions?.mPreMultipyAlpha == true) {
-            setBlendFunction(BLENDFUNCTION_SOURCE_PREMULTIPLYALPHA_DEFAULT, BLENDFUNCTION_DESTINATION_PREMULTIPLYALPHA_DEFAULT)
+            GLHelper.blendFunction(pGL, BLENDFUNCTION_SOURCE_PREMULTIPLYALPHA_DEFAULT, BLENDFUNCTION_DESTINATION_PREMULTIPLYALPHA_DEFAULT)
         } else {
-            setBlendFunction(BLENDFUNCTION_SOURCE_DEFAULT, BLENDFUNCTION_DESTINATION_DEFAULT)
+            super.applyBlending(pGL)
         }
     }
 
@@ -122,13 +117,9 @@ open class ExtendedSprite(textureRegion: TextureRegion? = null) : ExtendedEntity
         GLHelper.enableTexCoordArray(pGL)
     }
 
-    override fun doDraw(pGL: GL10?, pCamera: Camera?) {
+    override fun onApplyVertices(pGL: GL10) {
+        super.onApplyVertices(pGL)
         textureRegion?.onApply(pGL)
-        super.doDraw(pGL, pCamera)
     }
 
-    override fun reset() {
-        super.reset()
-        applyBlendFunction()
-    }
 }

@@ -452,9 +452,9 @@ public class MainScene implements IUpdateHandler {
         menu.getFirst().setScale(Config.getRES_WIDTH() / 1024f);
         menu.getThird().setScale(Config.getRES_WIDTH() / 1024f);
 
-        menu.getSecond().setPosition(logo.getX() + logo.getWidth() - Config.getRES_WIDTH() / 3f, (Config.getRES_HEIGHT() - menu.getSecond().getHeight()) / 2);
-        menu.getFirst().setPosition(logo.getX() + logo.getWidth() - Config.getRES_WIDTH() / 3f, menu.getSecond().getY() - menu.getFirst().getHeight() - 40 * Config.getRES_WIDTH() / 1024f);
-        menu.getThird().setPosition(logo.getX() + logo.getWidth() - Config.getRES_WIDTH() / 3f, menu.getSecond().getY() + menu.getSecond().getHeight() + 40 * Config.getRES_WIDTH() / 1024f);
+        menu.getSecond().setPosition(logo.getX() + logo.getWidth() - Config.getRES_WIDTH() / 2.5f, (Config.getRES_HEIGHT() - menu.getSecond().getHeight()) / 2);
+        menu.getFirst().setPosition(logo.getX() + logo.getWidth() - Config.getRES_WIDTH() / 2.5f, menu.getSecond().getY() - menu.getFirst().getHeight() - 40 * Config.getRES_WIDTH() / 1024f);
+        menu.getThird().setPosition(logo.getX() + logo.getWidth() - Config.getRES_WIDTH() / 2.5f, menu.getSecond().getY() + menu.getThird().getHeight() + 40 * Config.getRES_WIDTH() / 1024f);
 
         menuBarX = menu.getFirst().getX();
 
@@ -868,18 +868,18 @@ public class MainScene implements IUpdateHandler {
             var beatmap = parser.parse(false);
 
             if (beatmap != null) {
-                timingControlPoints = new LinkedList<>(beatmap.controlPoints.timing.getControlPoints());
-                effectControlPoints = new LinkedList<>(beatmap.controlPoints.effect.getControlPoints());
+                timingControlPoints = new LinkedList<>(beatmap.getControlPoints().timing.getControlPoints());
+                effectControlPoints = new LinkedList<>(beatmap.getControlPoints().effect.getControlPoints());
 
                 // Getting the first timing point is not always accurate - case in point is when the music is not reloaded.
                 int position = GlobalManager.getInstance().getSongService() != null ?
                         GlobalManager.getInstance().getSongService().getPosition() : 0;
 
-                currentTimingPoint = beatmap.controlPoints.timing.controlPointAt(position);
+                currentTimingPoint = beatmap.getControlPoints().timing.controlPointAt(position);
                 bpmLength = currentTimingPoint.msPerBeat;
                 beatPassTime = (position - currentTimingPoint.time) % bpmLength;
 
-                currentEffectPoint = beatmap.controlPoints.effect.controlPointAt(position);
+                currentEffectPoint = beatmap.getControlPoints().effect.controlPointAt(position);
             }
         }
     }

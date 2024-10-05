@@ -586,6 +586,8 @@ public class SongMenu implements IUpdateHandler, MenuItemListener,
 
         optionSelection.setScale(1.5f);
         randomMap.setScale(1.5f);
+        difficultySwitcher.setScale(1.5f);
+
         if (OsuSkin.get().isUseNewLayout()) {
             if (layoutBackButton != null) {
                 layoutBackButton.apply(backButton);
@@ -606,21 +608,14 @@ public class SongMenu implements IUpdateHandler, MenuItemListener,
             backButton.setPosition(0, Config.getRES_HEIGHT() - backButton.getHeightScaled());
 
             if (modSelection != null) {
-                modSelection.setPosition(backButton.getX() + backButton.getWidthScaled(),
-                                         Config.getRES_HEIGHT() - 90);
-                optionSelection.setPosition(
-                        modSelection.getX() + modSelection.getWidthScaled(),
-                        Config.getRES_HEIGHT() - 90);
+                modSelection.setPosition(backButton.getX() + backButton.getWidthScaled(), Config.getRES_HEIGHT() - modSelection.getHeightScaled());
+                optionSelection.setPosition(modSelection.getX() + modSelection.getWidthScaled(), Config.getRES_HEIGHT() - optionSelection.getHeightScaled());
             } else {
-                optionSelection.setPosition(backButton.getX() + backButton.getWidthScaled(),
-                                         Config.getRES_HEIGHT() - 90);
+                optionSelection.setPosition(backButton.getX() + backButton.getWidthScaled(), Config.getRES_HEIGHT() - optionSelection.getHeightScaled());
             }
 
-            randomMap.setPosition(
-                    optionSelection.getX() + optionSelection.getWidthScaled(),
-                    Config.getRES_HEIGHT() - 90);
-
-            difficultySwitcher.setPosition(randomMap.getX() + randomMap.getWidthScaled() - 18, Config.getRES_HEIGHT() - difficultySwitcher.getHeightScaled());
+            randomMap.setPosition(optionSelection.getX() + optionSelection.getWidthScaled(), Config.getRES_HEIGHT() - randomMap.getHeightScaled());
+            difficultySwitcher.setPosition(randomMap.getX() + randomMap.getWidthScaled(), Config.getRES_HEIGHT() - difficultySwitcher.getHeightScaled());
         }
 
         frontLayer.attachChild(backButton);
@@ -679,7 +674,6 @@ public class SongMenu implements IUpdateHandler, MenuItemListener,
         if (board.isShowOnlineScores()) {
             board.setShowOnlineScores(false);
             board.init(selectedBeatmap);
-            updateInfo(selectedBeatmap);
         } else if (OnlineManager.getInstance().isStayOnline()) {
             board.setShowOnlineScores(true);
             board.init(selectedBeatmap);
@@ -1027,7 +1021,7 @@ public class SongMenu implements IUpdateHandler, MenuItemListener,
                 var data = parser.parse(true);
 
                 // Do not update if the beatmap has been changed.
-                if (data != null && selectedBeatmap != null && !data.md5.equals(selectedBeatmap.getMD5())) {
+                if (data != null && selectedBeatmap != null && !data.getMd5().equals(selectedBeatmap.getMD5())) {
                     return;
                 }
 

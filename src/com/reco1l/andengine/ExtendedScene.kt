@@ -50,8 +50,8 @@ class ExtendedScene : Scene(), IShape {
     }
 
     override fun onManagedDrawChildren(pGL: GL10, pCamera: Camera) {
-        cameraWidth = pCamera.width
-        cameraHeight = pCamera.height
+        cameraWidth = pCamera.widthRaw
+        cameraHeight = pCamera.heightRaw
         super.onManagedDrawChildren(pGL, pCamera)
     }
 

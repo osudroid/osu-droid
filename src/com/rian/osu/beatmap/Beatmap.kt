@@ -16,120 +16,64 @@ import kotlinx.coroutines.ensureActive
 /**
  * Represents a beatmap.
  */
-open class Beatmap : Cloneable {
+open class Beatmap(
     /**
-     * The format version of this [Beatmap].
+     * The [GameMode] this [Beatmap] was parsed as.
      */
     @JvmField
-    var formatVersion = 14
+    val mode: GameMode
+) : IBeatmap, Cloneable {
+    override var formatVersion = 14
+    override val general = BeatmapGeneral()
+    override val metadata = BeatmapMetadata()
+    override var difficulty = BeatmapDifficulty()
+    override val events = BeatmapEvents()
+    override val colors = BeatmapColor()
+    override val controlPoints = BeatmapControlPoints()
+    override var hitObjects = BeatmapHitObjects()
+    override var filePath = ""
+    override var md5 = ""
 
-    /**
-     * The general section of this [Beatmap].
-     */
-    @JvmField
-    var general = BeatmapGeneral()
-
-    /**
-     * The metadata section of this [Beatmap].
-     */
-    @JvmField
-    var metadata = BeatmapMetadata()
-
-    /**
-     * The difficulty section of this [Beatmap].
-     */
-    @JvmField
-    var difficulty = BeatmapDifficulty()
-
-    /**
-     * The events section of this [Beatmap].
-     */
-    @JvmField
-    var events = BeatmapEvents()
-
-    /**
-     * The colors section of this [Beatmap].
-     */
-    @JvmField
-    var colors = BeatmapColor()
-
-    /**
-     * The control points of this [Beatmap].
-     */
-    @JvmField
-    var controlPoints = BeatmapControlPoints()
-
-    /**
-     * The hit objects of this [Beatmap].
-     */
-    open var hitObjects = BeatmapHitObjects()
-
-    /**
-     * The path to the `.osu` file of this [Beatmap].
-     */
-    @JvmField
-    var filePath = ""
-
-    /**
-     * The path of the parent folder of this [Beatmap].
-     *
-     * In other words, this is the beatmapset folder of this [Beatmap].
-     */
-    val beatmapsetPath
-        get() = filePath.substringBeforeLast("/")
-
-    /**
-     * The MD5 hash of this [Beatmap].
-     */
-    @JvmField
-    var md5 = ""
-
-    /**
-     * Returns a time combined with beatmap-wide time offset.
-     *
-     * Beatmap version 4 and lower had an incorrect offset. Stable has this set as 24ms off.
-     *
-     * @param time The time.
-     */
-    fun getOffsetTime(time: Double) = time + if (formatVersion < 5) 24 else 0
-
-    /**
-     * Returns a time combined with beatmap-wide time offset.
-     *
-     * Beatmap version 4 and lower had an incorrect offset. Stable has this set as 24ms off.
-     *
-     * @param time The time.
-     */
-    fun getOffsetTime(time: Int) = time + if (formatVersion < 5) 24 else 0
-
-    /**
-     * Gets the max combo of this [Beatmap].
-     */
-    open val maxCombo by lazy {
+    override val maxCombo by lazy {
         hitObjects.objects.sumOf {
             if (it is Slider) it.nestedHitObjects.size else 1
         }
     }
 
     /**
-     * The duration of this [Beatmap].
-     */
-    val duration: Int
-        get() = hitObjects.objects.lastOrNull()?.endTime?.toInt() ?: 0
-
-    /**
-     * Constructs a playable [Beatmap] from this [Beatmap].
+     * Constructs a [DroidPlayableBeatmap] from this [Beatmap], where all [HitObject] and [BeatmapDifficulty]
+     * [Mod]s have been applied, and [HitObject]s have been fully constructed.
      *
-     * The returned [Beatmap] is in a playable state - all [HitObject] and [BeatmapDifficulty] [Mod]s have been applied,
-     * and [HitObject]s have been fully constructed.
-     *
-     * @param mode The [GameMode] to construct the [Beatmap] for.
      * @param mods The [Mod]s to apply to the [Beatmap]. Defaults to No Mod.
      * @param scope The [CoroutineScope] to use for coroutines.
-     * @return The constructed [Beatmap].
+     * @return The [DroidPlayableBeatmap].
      */
     @JvmOverloads
-    fun createPlayableBeatmap(mode: GameMode, mods: Iterable<Mod>? = null, scope: CoroutineScope? = null): Beatmap {
+    fun createDroidPlayableBeatmap(
+        mods: Iterable<Mod>? = null,
+        scope: CoroutineScope? = null
+    ) = DroidPlayableBeatmap(createPlayableBeatmap(GameMode.Droid, mods, scope), mods)
+
+    /**
+     * Constructs a [StandardPlayableBeatmap] from this [Beatmap], where all [HitObject] and [BeatmapDifficulty]
+     * [Mod]s have been applied, and [HitObject]s have been fully constructed.
+     *
+     * @param mods The [Mod]s to apply to the [Beatmap]. Defaults to No Mod.
+     * @param scope The [CoroutineScope] to use for coroutines.
+     * @return The [StandardPlayableBeatmap].
+     */
+    @JvmOverloads
+    fun createStandardPlayableBeatmap(
+        mods: Iterable<Mod>? = null,
+        scope: CoroutineScope? = null
+    ) = StandardPlayableBeatmap(createPlayableBeatmap(GameMode.Standard, mods, scope), mods)
+
+    private fun createPlayableBeatmap(mode: GameMode, mods: Iterable<Mod>?, scope: CoroutineScope?): Beatmap {
+        if (this.mode == mode && (mods?.firstOrNull() == null)) {
+            // Beatmap is already playable as is.
+            return this
+        }
+
         val converter = BeatmapConverter(this, scope)
 
         // Convert
@@ -170,7 +114,7 @@ open class Beatmap : Cloneable {
             }
         }
 
-        processor.postProcess(mode)
+        processor.postProcess()
 
         mods?.filterIsInstance<IModApplicableToBeatmap>()?.forEach {
             scope?.ensureActive()

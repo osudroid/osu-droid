@@ -61,10 +61,7 @@ class BeatmapParser : Closeable {
      * @param scope The [CoroutineScope] to use for coroutines.
      */
     @JvmOverloads
-    constructor(path: String, scope: CoroutineScope? = null) {
-        file = File(path)
-        this.scope = scope
-    }
+    constructor(path: String, scope: CoroutineScope? = null) : this(File(path), scope)
 
     /**
      * Attempts to open the beatmap file.
@@ -135,7 +132,7 @@ class BeatmapParser : Closeable {
 
         var currentLine: String?
         var currentSection: BeatmapSection? = null
-        val beatmap = Beatmap().also {
+        val beatmap = Beatmap(mode).also {
             it.md5 = FileUtils.getMD5Checksum(file)
             it.filePath = file.path
             it.formatVersion = beatmapFormatVersion
@@ -228,7 +225,7 @@ class BeatmapParser : Closeable {
 
             BeatmapProcessor(this, scope).also {
                 it.preProcess()
-                it.postProcess(mode)
+                it.postProcess()
             }
         }
     }

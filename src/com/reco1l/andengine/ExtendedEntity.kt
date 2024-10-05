@@ -1,5 +1,6 @@
 package com.reco1l.andengine
 
+import android.util.*
 import androidx.annotation.*
 import com.reco1l.andengine.container.*
 import com.reco1l.andengine.modifier.*
@@ -7,7 +8,7 @@ import com.reco1l.framework.*
 import com.reco1l.toolkt.kotlin.*
 import org.anddev.andengine.collision.*
 import org.anddev.andengine.engine.camera.*
-import org.anddev.andengine.entity.IEntity
+import org.anddev.andengine.entity.*
 import org.anddev.andengine.entity.primitive.*
 import org.anddev.andengine.entity.shape.*
 import org.anddev.andengine.opengl.util.*
@@ -82,6 +83,33 @@ abstract class ExtendedEntity(
      */
     open var inheritColor = true
 
+    /**
+     * The color of the entity boxed in a [ColorARGB] object.
+     */
+    open var color: ColorARGB
+        get() = ColorARGB(mRed, mGreen, mBlue, mAlpha)
+        set(value) {
+            mRed = value.red
+            mGreen = value.green
+            mBlue = value.blue
+            mAlpha = value.alpha
+        }
+
+    /**
+     * The color blending function.
+     */
+    open var blendingFunction: BlendingFunction? = null
+        set(value) {
+            if (field != value) {
+                field = value
+
+                if (value != null) {
+                    mSourceBlendFunction = value.source
+                    mDestinationBlendFunction = value.destination
+                }
+            }
+        }
+
 
     /**
      * Intended for internal use only.
@@ -106,13 +134,7 @@ abstract class ExtendedEntity(
         }
 
 
-    init {
-        mRotationCenterX = 0.5f
-        mRotationCenterY = 0.5f
-        mScaleCenterX = 0.5f
-        mScaleCenterY = 0.5f
-    }
-
+    // Positions
 
     open fun setAnchor(anchor: Anchor) {
         anchorX = anchor.factorX
@@ -122,16 +144,10 @@ abstract class ExtendedEntity(
     open fun setOrigin(origin: Anchor) {
         originX = origin.factorX
         originY = origin.factorY
-    }
-
-    open fun setRotationCenter(center: Anchor) {
-        mRotationCenterX = center.factorX
-        mRotationCenterY = center.factorY
-    }
-
-    open fun setScaleCenter(center: Anchor) {
-        mScaleCenterX = center.factorX
-        mScaleCenterY = center.factorY
+        mRotationCenterX = origin.factorX
+        mRotationCenterY = origin.factorY
+        mScaleCenterX = origin.factorX
+        mScaleCenterY = origin.factorY
     }
 
     override fun setPosition(pX: Float, pY: Float) {
@@ -154,6 +170,8 @@ abstract class ExtendedEntity(
     }
 
 
+    // Attachment
+
     @CallSuper
     override fun onDetached() {
         modifierPool = null
@@ -165,6 +183,8 @@ abstract class ExtendedEntity(
         modifierPool = findHierarchically(IEntity::getParent) { (it as? ExtendedScene)?.modifierPool }
     }
 
+
+    // Drawing
 
     override fun applyTranslation(pGL: GL10) {
 
@@ -240,11 +260,37 @@ abstract class ExtendedEntity(
         GLHelper.setColor(pGL, red, green, blue, alpha)
     }
 
+    protected open fun applyBlending(pGL: GL10) {
+
+        // If there's a blending function set, apply it instead of the engine's method.
+        val blendingFunction = blendingFunction
+
+        if (blendingFunction != null) {
+
+            val parent = parent as? ExtendedEntity
+
+            // If the blending function is set to inherit, apply the parent's blending function.
+            if (blendingFunction == BlendingFunction.Inherit && parent != null) {
+                GLHelper.blendFunction(pGL, parent.mSourceBlendFunction, parent.mDestinationBlendFunction)
+            } else {
+                GLHelper.blendFunction(pGL, blendingFunction.source, blendingFunction.destination)
+            }
+
+        } else {
+            GLHelper.blendFunction(pGL, mSourceBlendFunction, mDestinationBlendFunction)
+        }
+    }
+
+    override fun onApplyTransformations(pGL: GL10) {
+        applyTranslation(pGL)
+        applyRotation(pGL)
+        applyScale(pGL)
+        applyColor(pGL)
+        applyBlending(pGL)
+    }
 
     override fun onInitDraw(pGL: GL10) {
-        applyColor(pGL)
         GLHelper.enableVertexArray(pGL)
-        GLHelper.blendFunction(pGL, mSourceBlendFunction, mDestinationBlendFunction)
     }
 
     override fun drawVertices(pGL: GL10, pCamera: Camera) {
@@ -264,36 +310,56 @@ abstract class ExtendedEntity(
     }
 
 
+    // Size
+
     /**
-     * This will set the size of the entity without updating the buffer.
+     * Applies the size of the entity.
      *
-     * Intended for internal use only to handle the [autoSizeAxes] property.
+     * Despite [setSize] this is intended to be used internally to report a new
+     * size for when [autoSizeAxes] allows it for one or both axes.
      */
-    protected fun setSizeInternal(w: Float, h: Float) {
-        width = w
-        height = h
-    }
+    protected fun onApplyInternalSize(width: Float, height: Float) {
 
-    open fun setSize(w: Float, h: Float) {
-
-        var updateBuffer = false
-
-        if (width != w && (autoSizeAxes == Axes.None || autoSizeAxes == Axes.Y)) {
-            width = w
-            updateBuffer = true
+        if (autoSizeAxes == Axes.None) {
+            return
         }
 
-        if (height != h && (autoSizeAxes == Axes.None || autoSizeAxes == Axes.X)) {
-            height = h
-            updateBuffer = true
-        }
+        if (internalWidth != width || internalHeight != height) {
 
-        if (updateBuffer) {
+            if (autoSizeAxes == Axes.X || autoSizeAxes == Axes.Both) {
+                internalWidth = width
+            }
+
+            if (autoSizeAxes == Axes.Y || autoSizeAxes == Axes.Both) {
+                internalHeight = height
+            }
+
             updateVertexBuffer()
 
-            if (parent is Container) {
-                (parent as Container).onChildSizeChanged(this)
+            (parent as? Container)?.onChildSizeChanged(this)
+        }
+    }
+
+    open fun setSize(weight: Float, height: Float) {
+
+        if (autoSizeAxes == Axes.Both) {
+            Log.w("ExtendedEntity", "Cannot set size when autoSizeAxes is set to Both.")
+            return
+        }
+
+        if (internalWidth != weight || internalHeight != height) {
+
+            if (autoSizeAxes == Axes.None || autoSizeAxes == Axes.Y) {
+                internalWidth = weight
             }
+
+            if (autoSizeAxes == Axes.None || autoSizeAxes == Axes.X) {
+                internalHeight = height
+            }
+
+            updateVertexBuffer()
+
+            (parent as? Container)?.onChildSizeChanged(this)
         }
     }
 
@@ -314,23 +380,41 @@ abstract class ExtendedEntity(
     }
 
 
-    // Base width and height are not needed for this class.
+    // Unsupported methods
 
-    override fun getBaseWidth(): Float {
-        return width
-    }
+    @Deprecated("Base width is not preserved in ExtendedEntity, use getWidth() instead.")
+    override fun getBaseWidth() = width
 
-    override fun getBaseHeight(): Float {
-        return height
-    }
+    @Deprecated("Base height is not preserved in ExtendedEntity, use getHeight() instead.")
+    override fun getBaseHeight() = height
+
+    @Deprecated("Rotation center is determined by the entity's origin, use setOrigin() instead.")
+    final override fun setRotationCenter(pRotationCenterX: Float, pRotationCenterY: Float) {}
+
+    @Deprecated("Rotation center is determined by the entity's origin, use setOrigin() instead.")
+    final override fun setRotationCenterX(pRotationCenterX: Float) {}
+
+    @Deprecated("Rotation center is determined by the entity's origin, use setOrigin() instead.")
+    final override fun setRotationCenterY(pRotationCenterY: Float) {}
+
+    @Deprecated("Scale center is determined by the entity's origin, use setOrigin() instead.")
+    final override fun setScaleCenter(pScaleCenterX: Float, pScaleCenterY: Float) {}
+
+    @Deprecated("Scale center is determined by the entity's origin, use setOrigin() instead.")
+    final override fun setScaleCenterX(pScaleCenterX: Float) {}
+
+    @Deprecated("Scale center is determined by the entity's origin, use setOrigin() instead.")
+    final override fun setScaleCenterY(pScaleCenterY: Float) {}
 
 
-    override fun collidesWith(pOtherShape: IShape?): Boolean {
-        return when (pOtherShape) {
-            is RectangularShape -> RectangularShapeCollisionChecker.checkCollision(this, pOtherShape)
-            is Line -> RectangularShapeCollisionChecker.checkCollision(this, pOtherShape)
-            else -> false
-        }
+    // Collision
+
+    override fun collidesWith(shape: IShape): Boolean = when (shape) {
+
+        is RectangularShape -> RectangularShapeCollisionChecker.checkCollision(this, shape)
+        is Line -> RectangularShapeCollisionChecker.checkCollision(this, shape)
+
+        else -> false
     }
 
     override fun contains(pX: Float, pY: Float): Boolean {
@@ -351,6 +435,11 @@ abstract class ExtendedEntity(
 
     // Transformation
 
+    override fun setBlendFunction(pSourceBlendFunction: Int, pDestinationBlendFunction: Int) {
+        blendingFunction = null
+        super.setBlendFunction(pSourceBlendFunction, pDestinationBlendFunction)
+    }
+
     override fun delay(durationSec: Float): UniversalModifier {
         throw IllegalStateException("Cannot call this directly to an entity. Use beginDelayChain() instead.")
     }
@@ -369,48 +458,3 @@ abstract class ExtendedEntity(
 }
 
 
-enum class Anchor(val factorX: Float, val factorY: Float) {
-
-    TopLeft(0f, 0f),
-
-    TopCenter(0.5f, 0f),
-
-    TopRight(1f, 0f),
-
-    CenterLeft(0f, 0.5f),
-
-    Center(0.5f, 0.5f),
-
-    CenterRight(1f, 0.5f),
-
-    BottomLeft(0f, 1f),
-
-    BottomCenter(0.5f, 1f),
-
-    BottomRight(1f, 1f)
-
-}
-
-
-enum class Axes {
-
-    /**
-     * The entity will automatically adjust its size to the width of the parent.
-     */
-    X,
-
-    /**
-     * The entity will automatically adjust its size to the height of the parent.
-     */
-    Y,
-
-    /**
-     * The entity will automatically adjust its size to the width and height of the parent.
-     */
-    Both,
-
-    /**
-     * The entity will not automatically adjust its size.
-     */
-    None
-}

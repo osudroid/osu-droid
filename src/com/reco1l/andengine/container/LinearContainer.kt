@@ -82,7 +82,7 @@ open class LinearContainer : Container() {
             }
         }
 
-        onApplySize(cumulativeWidth, cumulativeHeight)
+        onApplyInternalSize(cumulativeWidth, cumulativeHeight)
     }
 
 

@@ -1,7 +1,7 @@
 package com.rian.osu.replay
 
-import com.rian.osu.beatmap.Beatmap
 import com.rian.osu.beatmap.DroidHitWindow
+import com.rian.osu.beatmap.DroidPlayableBeatmap
 import com.rian.osu.beatmap.PreciseDroidHitWindow
 import com.rian.osu.beatmap.hitobject.HitObject
 import com.rian.osu.beatmap.hitobject.Slider
@@ -19,17 +19,17 @@ import kotlin.math.pow
 import ru.nsu.ccfit.zuev.osu.scoring.Replay.ReplayMovement
 
 /**
- * Utility to check whether relevant [Slider]s in a [Beatmap] are cheesed.
+ * Utility to check whether relevant [Slider]s in a [DroidPlayableBeatmap] are cheesed.
  */
 class SliderCheeseChecker(
     /**
-     * The [Beatmap] to check.
+     * The [DroidPlayableBeatmap] to check.
      */
     @JvmField
-    val beatmap: Beatmap,
+    val beatmap: DroidPlayableBeatmap,
 
     /**
-     * The [DroidDifficultyAttributes] of the [Beatmap].
+     * The [DroidDifficultyAttributes] of the [DroidPlayableBeatmap].
      */
     @JvmField
     val difficultyAttributes: DroidDifficultyAttributes,
@@ -52,7 +52,7 @@ class SliderCheeseChecker(
     ).mehWindow
 
     /**
-     * Checks if relevant [Slider]s in the [Beatmap] are cheesed and computes the penalties.
+     * Checks if relevant [Slider]s in the [DroidPlayableBeatmap] are cheesed and computes the penalties.
      */
     fun calculatePenalty(): SliderCheesePenalty {
         if (
