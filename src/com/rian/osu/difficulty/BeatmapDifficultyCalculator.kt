@@ -2,6 +2,9 @@ package com.rian.osu.difficulty
 
 import com.rian.osu.GameMode
 import com.rian.osu.beatmap.Beatmap
+import com.rian.osu.beatmap.DroidPlayableBeatmap
+import com.rian.osu.beatmap.PlayableBeatmap
+import com.rian.osu.beatmap.StandardPlayableBeatmap
 import com.rian.osu.difficulty.attributes.*
 import com.rian.osu.difficulty.calculator.*
 import com.rian.osu.replay.SliderCheeseChecker
@@ -47,6 +50,18 @@ object BeatmapDifficultyCalculator {
 
             it.customSpeedMultiplier = changeSpeed
         }
+    }
+
+    /**
+     * Constructs a [DifficultyCalculationParameters] from a [PlayableBeatmap].
+     *
+     * @param beatmap The [PlayableBeatmap] to construct the [DifficultyCalculationParameters] from.
+     * @return The [DifficultyCalculationParameters] representing the [PlayableBeatmap].
+     */
+    @JvmStatic
+    fun constructDifficultyParameters(beatmap: PlayableBeatmap) = DifficultyCalculationParameters().also {
+        it.mods = beatmap.mods?.toMutableList() ?: mutableListOf()
+        it.customSpeedMultiplier = beatmap.customSpeedMultiplier
     }
 
     /**
@@ -113,6 +128,22 @@ object BeatmapDifficultyCalculator {
         droidDifficultyCalculator.calculate(beatmap, parameters, scope).also { addCache(beatmap, parameters, it) }
 
     /**
+     * Calculates the difficulty of a [DroidPlayableBeatmap].
+     *
+     * @param beatmap The [DroidPlayableBeatmap] to calculate.
+     * @param scope The [CoroutineScope] to use for coroutines.
+     * @return A structure describing the osu!droid difficulty of the [DroidPlayableBeatmap].
+     */
+    @JvmStatic
+    @JvmOverloads
+    fun calculateDroidDifficulty(beatmap: DroidPlayableBeatmap, scope: CoroutineScope? = null) = run {
+        val parameters = constructDifficultyParameters(beatmap)
+
+        difficultyCacheManager[beatmap.md5]?.getDroidDifficultyCache(parameters) ?:
+        droidDifficultyCalculator.calculate(beatmap, parameters, scope).also { addCache(beatmap, parameters, it) }
+    }
+
+    /**
      * Calculates the difficulty of a [Beatmap], returning a set of [TimedDifficultyAttributes]
      * representing the difficulty of the [Beatmap] at any relevant time.
      *
@@ -127,6 +158,24 @@ object BeatmapDifficultyCalculator {
     fun calculateDroidTimedDifficulty(beatmap: Beatmap, parameters: DifficultyCalculationParameters? = null, scope: CoroutineScope? = null) =
         difficultyCacheManager[beatmap.md5]?.getDroidTimedDifficultyCache(parameters) ?:
         droidDifficultyCalculator.calculateTimed(beatmap, parameters, scope).also { addCache(beatmap, parameters, it) }
+
+    /**
+     * Calculates the difficulty of a [DroidPlayableBeatmap], returning a set of [TimedDifficultyAttributes]
+     * representing the difficulty of the [DroidPlayableBeatmap] at any relevant time.
+     *
+     * @param beatmap The [DroidPlayableBeatmap] to calculate.
+     * @param scope The [CoroutineScope] to use for coroutines.
+     * @return A set of [TimedDifficultyAttributes] describing the difficulty of the [DroidPlayableBeatmap]
+     * at any relevant time.
+     */
+    @JvmStatic
+    @JvmOverloads
+    fun calculateDroidTimedDifficulty(beatmap: DroidPlayableBeatmap, scope: CoroutineScope? = null) = run {
+        val parameters = constructDifficultyParameters(beatmap)
+
+        difficultyCacheManager[beatmap.md5]?.getDroidTimedDifficultyCache(parameters) ?:
+        droidDifficultyCalculator.calculateTimed(beatmap, parameters, scope).also { addCache(beatmap, parameters, it) }
+    }
 
     /**
      * Calculates the osu!standard difficulty of a [Beatmap].
@@ -155,6 +204,22 @@ object BeatmapDifficultyCalculator {
         standardDifficultyCalculator.calculate(beatmap, parameters, scope).also { addCache(beatmap, parameters, it) }
 
     /**
+     * Calculates the difficulty of a [StandardPlayableBeatmap].
+     *
+     * @param beatmap The [StandardPlayableBeatmap] to calculate.
+     * @param scope The [CoroutineScope] to use for coroutines.
+     * @return A structure describing the osu!standard difficulty of the [StandardPlayableBeatmap].
+     */
+    @JvmStatic
+    @JvmOverloads
+    fun calculateStandardDifficulty(beatmap: StandardPlayableBeatmap, scope: CoroutineScope? = null) = run {
+        val parameters = constructDifficultyParameters(beatmap)
+
+        difficultyCacheManager[beatmap.md5]?.getStandardDifficultyCache(parameters) ?:
+        standardDifficultyCalculator.calculate(beatmap, parameters, scope).also { addCache(beatmap, parameters, it) }
+    }
+
+    /**
      * Calculates the difficulty of a [Beatmap], returning a set of [TimedDifficultyAttributes]
      * representing the difficulty of the [Beatmap] at any relevant time.
      *
@@ -169,6 +234,24 @@ object BeatmapDifficultyCalculator {
     fun calculateStandardTimedDifficulty(beatmap: Beatmap, parameters: DifficultyCalculationParameters? = null, scope: CoroutineScope? = null) =
         difficultyCacheManager[beatmap.md5]?.getStandardTimedDifficultyCache(parameters) ?:
         standardDifficultyCalculator.calculateTimed(beatmap, parameters, scope).also { addCache(beatmap, parameters, it) }
+
+    /**
+     * Calculates the difficulty of a [StandardPlayableBeatmap], returning a set of [TimedDifficultyAttributes]
+     * representing the difficulty of the [StandardPlayableBeatmap] at any relevant time.
+     *
+     * @param beatmap The [Beatmap] to calculate.
+     * @param scope The [CoroutineScope] to use for coroutines.
+     * @return A set of [TimedDifficultyAttributes] describing the difficulty of the [StandardPlayableBeatmap]
+     * at any relevant time.
+     */
+    @JvmStatic
+    @JvmOverloads
+    fun calculateStandardTimedDifficulty(beatmap: StandardPlayableBeatmap, scope: CoroutineScope? = null) = run {
+        val parameters = constructDifficultyParameters(beatmap)
+
+        difficultyCacheManager[beatmap.md5]?.getStandardTimedDifficultyCache(parameters) ?:
+        standardDifficultyCalculator.calculateTimed(beatmap, parameters, scope).also { addCache(beatmap, parameters, it) }
+    }
 
     /**
      * Calculates the performance of a [DroidDifficultyAttributes].
