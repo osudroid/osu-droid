@@ -9,12 +9,7 @@ import com.rian.osu.utils.ModUtils
  */
 abstract class PlayableBeatmap @JvmOverloads constructor(
     beatmap: Beatmap,
-
-    /**
-     * The [GameMode] this [PlayableBeatmap] is based on.
-     */
-    @JvmField
-    val mode: GameMode,
+    mode: GameMode,
 
     /**
      * The [Mod]s that were applied to this [PlayableBeatmap].
@@ -27,7 +22,7 @@ abstract class PlayableBeatmap @JvmOverloads constructor(
      */
     @JvmField
     val customSpeedMultiplier: Float = 1f
-) : Beatmap() {
+) : Beatmap(mode) {
     /**
      * The overall speed multiplier that was applied to this [PlayableBeatmap].
      */

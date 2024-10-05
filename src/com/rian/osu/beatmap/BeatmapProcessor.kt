@@ -55,10 +55,8 @@ class BeatmapProcessor @JvmOverloads constructor(
      * and [Mod]s will have been applied to all [HitObject]s.
      *
      * This should be used to add alterations to [HitObject]s while they are in their most playable state.
-     *
-     * @param mode The [GameMode] to add alterations for.
      */
-    fun postProcess(mode: GameMode) = beatmap.hitObjects.objects.run {
+    fun postProcess() = beatmap.hitObjects.objects.run {
         if (isEmpty()) {
             return@run
         }
@@ -71,7 +69,7 @@ class BeatmapProcessor @JvmOverloads constructor(
             it.gameplayStackHeight = 0
         }
 
-        when (mode) {
+        when (beatmap.mode) {
             GameMode.Droid -> applyDroidStacking()
             GameMode.Standard -> if (beatmap.formatVersion >= 6) applyStandardStacking() else applyStandardStackingOld()
         }

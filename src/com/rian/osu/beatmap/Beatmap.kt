@@ -16,7 +16,13 @@ import kotlinx.coroutines.ensureActive
 /**
  * Represents a beatmap.
  */
-open class Beatmap : Cloneable {
+open class Beatmap(
+    /**
+     * The [GameMode] this [Beatmap] was parsed as.
+     */
+    @JvmField
+    val mode: GameMode
+) : Cloneable {
     /**
      * The format version of this [Beatmap].
      */
@@ -190,7 +196,7 @@ open class Beatmap : Cloneable {
             }
         }
 
-        processor.postProcess(mode)
+        processor.postProcess()
 
         mods?.filterIsInstance<IModApplicableToBeatmap>()?.forEach {
             scope?.ensureActive()

@@ -132,7 +132,7 @@ class BeatmapParser : Closeable {
 
         var currentLine: String?
         var currentSection: BeatmapSection? = null
-        val beatmap = Beatmap().also {
+        val beatmap = Beatmap(mode).also {
             it.md5 = FileUtils.getMD5Checksum(file)
             it.filePath = file.path
             it.formatVersion = beatmapFormatVersion
@@ -225,7 +225,7 @@ class BeatmapParser : Closeable {
 
             BeatmapProcessor(this, scope).also {
                 it.preProcess()
-                it.postProcess(mode)
+                it.postProcess()
             }
         }
     }
