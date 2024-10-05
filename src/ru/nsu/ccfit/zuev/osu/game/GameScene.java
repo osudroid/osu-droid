@@ -126,6 +126,8 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
     private Beatmap playableBeatmap;
     private BeatmapInfo lastBeatmapInfo;
     private ScoringScene scoringScene;
+    private LinkedList<TimingControlPoint> timingControlPoints;
+    private LinkedList<EffectControlPoint> effectControlPoints;
     private TimingControlPoint activeTimingPoint;
     private EffectControlPoint activeEffectPoint;
     private int lastObjectId = -1;
@@ -475,8 +477,19 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
 
         lastActiveObjectHitTime = 0;
 
-        activeTimingPoint = playableBeatmap.controlPoints.timing.controlPointAt(Double.NEGATIVE_INFINITY);
-        activeEffectPoint = playableBeatmap.controlPoints.effect.controlPointAt(Double.NEGATIVE_INFINITY);
+        timingControlPoints = new LinkedList<>(playableBeatmap.controlPoints.timing.getControlPoints());
+        effectControlPoints = new LinkedList<>(playableBeatmap.controlPoints.effect.getControlPoints());
+
+        activeTimingPoint = timingControlPoints.poll();
+        activeEffectPoint = effectControlPoints.poll();
+
+        if (activeTimingPoint == null) {
+            activeTimingPoint = playableBeatmap.controlPoints.timing.getDefaultControlPoint();
+        }
+
+        if (activeEffectPoint == null) {
+            activeEffectPoint = playableBeatmap.controlPoints.effect.getDefaultControlPoint();
+        }
 
         GameHelper.setBeatLength(activeTimingPoint.msPerBeat / 1000);
         GameHelper.setKiai(activeEffectPoint.isKiai);
@@ -1123,8 +1136,13 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
             flashlightSprite.onUpdate(stat.getCombo());
         }
 
-        activeTimingPoint = playableBeatmap.controlPoints.timing.controlPointAt(mSecPassed);
-        activeEffectPoint = playableBeatmap.controlPoints.effect.controlPointAt(mSecPassed);
+        while (!timingControlPoints.isEmpty() && timingControlPoints.peek().time <= mSecPassed) {
+            activeTimingPoint = timingControlPoints.poll();
+        }
+
+        while (!effectControlPoints.isEmpty() && effectControlPoints.peek().time <= mSecPassed) {
+            activeEffectPoint = effectControlPoints.poll();
+        }
 
         GameHelper.setBeatLength(activeTimingPoint.msPerBeat / 1000);
         GameHelper.setKiai(activeEffectPoint.isKiai);
@@ -1382,6 +1400,8 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
             scene = new ExtendedScene();
             SkinManager.setSkinEnabled(false);
             GameObjectPool.getInstance().purge();
+            timingControlPoints.clear();
+            effectControlPoints.clear();
             objects.clear();
             activeObjects.clear();
             passiveObjects.clear();
@@ -1586,6 +1606,12 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
         }
         if (objects != null) {
             objects.clear();
+        }
+        if (timingControlPoints != null) {
+            timingControlPoints.clear();
+        }
+        if (effectControlPoints != null) {
+            effectControlPoints.clear();
         }
         breakPeriods.clear();
         playableBeatmap = null;
