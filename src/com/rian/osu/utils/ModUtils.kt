@@ -46,7 +46,7 @@ object ModUtils {
     @JvmOverloads
     fun convertLegacyMods(mods: Iterable<GameMod>, forceCS: Float? = null, forceAR: Float? = null,
                           forceOD: Float? = null, forceHP: Float? = null,
-                          customSpeedMultiplier: Float = 1f) = mutableSetOf<Mod>().apply {
+                          customSpeedMultiplier: Float = 1f) = ModHashSet().apply {
         mods.forEach {
             val convertedMod = modMap[it] ?:
             throw IllegalArgumentException("Cannot find the conversion of mod with short name \"${it.shortName}\"")

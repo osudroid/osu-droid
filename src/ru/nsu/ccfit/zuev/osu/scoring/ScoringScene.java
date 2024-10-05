@@ -413,9 +413,9 @@ public class ScoringScene {
                                 stat.isCustomCS() ? stat.getCustomCS() : null,
                                 stat.isCustomAR() ? stat.getCustomAR() : null,
                                 stat.isCustomOD() ? stat.getCustomOD() : null,
-                                stat.isCustomHP() ? stat.getCustomHP() : null
-                            ),
-                            stat.getChangeSpeed()
+                                stat.isCustomHP() ? stat.getCustomHP() : null,
+                                stat.getChangeSpeed()
+                            )
                         );
 
                         var difficultyAttributes = BeatmapDifficultyCalculator.calculateDroidDifficulty(playableBeatmap);

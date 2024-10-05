@@ -21,12 +21,6 @@ abstract class PlayableBeatmap @JvmOverloads constructor(
      */
     @JvmField
     val mods: Iterable<Mod>? = null,
-
-    /**
-     * The custom speed multiplier that was applied to this [PlayableBeatmap].
-     */
-    @JvmField
-    val customSpeedMultiplier: Float = 1f
 ) : IBeatmap {
     override val formatVersion = baseBeatmap.formatVersion
     override val general = baseBeatmap.general
@@ -41,8 +35,8 @@ abstract class PlayableBeatmap @JvmOverloads constructor(
     override val maxCombo = baseBeatmap.maxCombo
 
     /**
-     * The overall speed multiplier that was applied to this [PlayableBeatmap].
+     * The speed multiplier that was applied to this [PlayableBeatmap].
      */
     @JvmField
-    val overallSpeedMultiplier = customSpeedMultiplier * if (mods != null) ModUtils.calculateRateWithMods(mods) else 1f
+    val speedMultiplier = if (mods != null) ModUtils.calculateRateWithMods(mods) else 1f
 }

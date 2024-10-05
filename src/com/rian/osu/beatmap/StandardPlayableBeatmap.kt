@@ -8,6 +8,5 @@ import com.rian.osu.mods.Mod
  */
 class StandardPlayableBeatmap @JvmOverloads constructor(
     baseBeatmap: IBeatmap,
-    mods: Iterable<Mod>? = null,
-    customSpeedMultiplier: Float = 1f
-) : PlayableBeatmap(baseBeatmap, GameMode.Standard, mods, customSpeedMultiplier)
+    mods: Iterable<Mod>? = null
+) : PlayableBeatmap(baseBeatmap, GameMode.Standard, mods)
