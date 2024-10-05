@@ -237,8 +237,8 @@ object BeatmapDifficultyCalculator {
     ): DroidPerformanceAttributes {
         val actualParameters =
             (parameters ?: DroidPerformanceCalculationParameters()).also {
-                val playableBeatmap = beatmap.createPlayableBeatmap(
-                    GameMode.Droid, attributes.mods, attributes.customSpeedMultiplier
+                val playableBeatmap = beatmap.createDroidPlayableBeatmap(
+                    attributes.mods, attributes.customSpeedMultiplier
                 )
 
                 val cursorGroups = createCursorGroups(replayMovements)
