@@ -156,6 +156,11 @@ open class Beatmap(
     ) = StandardPlayableBeatmap(createPlayableBeatmap(GameMode.Standard, mods, customSpeedMultiplier, scope), mods, customSpeedMultiplier)
 
     private fun createPlayableBeatmap(mode: GameMode, mods: Iterable<Mod>?, customSpeedMultiplier: Float, scope: CoroutineScope?): Beatmap {
+        if (this.mode == mode && mods == null && customSpeedMultiplier == 1f) {
+            // Beatmap is already playable as is.
+            return this
+        }
+
         val converter = BeatmapConverter(this, scope)
 
         // Convert
