@@ -140,7 +140,7 @@ object BeatmapDifficultyCalculator {
         val parameters = constructDifficultyParameters(beatmap)
 
         difficultyCacheManager[beatmap.md5]?.getDroidDifficultyCache(parameters) ?:
-        droidDifficultyCalculator.calculate(beatmap, parameters, scope).also { addCache(beatmap, parameters, it) }
+        droidDifficultyCalculator.calculate(beatmap, scope).also { addCache(beatmap, parameters, it) }
     }
 
     /**
@@ -174,7 +174,7 @@ object BeatmapDifficultyCalculator {
         val parameters = constructDifficultyParameters(beatmap)
 
         difficultyCacheManager[beatmap.md5]?.getDroidTimedDifficultyCache(parameters) ?:
-        droidDifficultyCalculator.calculateTimed(beatmap, parameters, scope).also { addCache(beatmap, parameters, it) }
+        droidDifficultyCalculator.calculateTimed(beatmap, scope).also { addCache(beatmap, parameters, it) }
     }
 
     /**
@@ -216,7 +216,7 @@ object BeatmapDifficultyCalculator {
         val parameters = constructDifficultyParameters(beatmap)
 
         difficultyCacheManager[beatmap.md5]?.getStandardDifficultyCache(parameters) ?:
-        standardDifficultyCalculator.calculate(beatmap, parameters, scope).also { addCache(beatmap, parameters, it) }
+        standardDifficultyCalculator.calculate(beatmap, scope).also { addCache(beatmap, parameters, it) }
     }
 
     /**
@@ -250,7 +250,7 @@ object BeatmapDifficultyCalculator {
         val parameters = constructDifficultyParameters(beatmap)
 
         difficultyCacheManager[beatmap.md5]?.getStandardTimedDifficultyCache(parameters) ?:
-        standardDifficultyCalculator.calculateTimed(beatmap, parameters, scope).also { addCache(beatmap, parameters, it) }
+        standardDifficultyCalculator.calculateTimed(beatmap, scope).also { addCache(beatmap, parameters, it) }
     }
 
     /**
