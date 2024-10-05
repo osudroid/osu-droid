@@ -1,7 +1,7 @@
 package com.rian.osu.replay
 
-import com.rian.osu.beatmap.Beatmap
 import com.rian.osu.beatmap.DroidHitWindow
+import com.rian.osu.beatmap.DroidPlayableBeatmap
 import com.rian.osu.beatmap.HitWindow
 import com.rian.osu.beatmap.PreciseDroidHitWindow
 import com.rian.osu.beatmap.hitobject.*
@@ -20,17 +20,17 @@ import ru.nsu.ccfit.zuev.osu.scoring.ResultType
 import ru.nsu.ccfit.zuev.osu.scoring.TouchType
 
 /**
- * Utility to check whether a [Beatmap] is three-fingered in a replay.
+ * Utility to check whether a [DroidPlayableBeatmap] is three-fingered in a replay.
  */
 class ThreeFingerChecker(
     /**
-     * The [Beatmap] to check.
+     * The [DroidPlayableBeatmap] to check.
      */
     @JvmField
-    val beatmap: Beatmap,
+    val beatmap: DroidPlayableBeatmap,
 
     /**
-     * The [DroidDifficultyAttributes] of the [Beatmap].
+     * The [DroidDifficultyAttributes] of the [DroidPlayableBeatmap].
      */
     @JvmField
     val difficultyAttributes: DroidDifficultyAttributes,
@@ -48,7 +48,7 @@ class ThreeFingerChecker(
     private val objectData: Array<ReplayObjectData>
 ) {
     /**
-     * The [HitWindow] of the [Beatmap].
+     * The [HitWindow] of the [DroidPlayableBeatmap].
      *
      * Keep in mind that speed-changing [Mod]s do not change hit window length in game logic.
      */
@@ -72,16 +72,16 @@ class ThreeFingerChecker(
     private val validCursorGroups = filterCursorGroups()
 
     /**
-     * Extended sections of the [Beatmap] for detection.
+     * Extended sections of the [DroidPlayableBeatmap] for detection.
      */
     private val beatmapSections = createBeatmapSections()
 
     /**
      * Calculates the three-finger penalty of the replay.
      *
-     * The [Beatmap] will be separated into sections, where each section will be assigned a "nerf factor" based on
-     * whether the section is three-fingered. These nerf factors will be summed up into a final nerf factor, taking
-     * the [Beatmap]'s difficulty into account.
+     * The [DroidPlayableBeatmap] will be separated into sections, where each section will be assigned a "nerf factor"
+     * based on whether the section is three-fingered. These nerf factors will be summed up into a final nerf factor,
+     * taking the [DroidPlayableBeatmap]'s difficulty into account.
      */
     fun calculatePenalty(): Double {
         if (difficultyAttributes.possibleThreeFingeredSections.isEmpty()) {
@@ -187,7 +187,8 @@ class ThreeFingerChecker(
     /**
      * Filters the original cursor instances, returning only those with [TouchType.DOWN] movement.
      *
-     * This also filters cursors that are in a [BreakPeriod] or happen before start/after end of the [Beatmap].
+     * This also filters cursors that are in a [BreakPeriod] or happen before start/after end of the
+     * [DroidPlayableBeatmap].
      */
     private fun filterCursorGroups() = mutableListOf<List<CursorGroup>>().apply {
         val objects = beatmap.hitObjects.objects

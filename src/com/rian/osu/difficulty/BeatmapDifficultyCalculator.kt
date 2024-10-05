@@ -3,6 +3,7 @@ package com.rian.osu.difficulty
 import com.rian.osu.GameMode
 import com.rian.osu.beatmap.Beatmap
 import com.rian.osu.beatmap.DroidPlayableBeatmap
+import com.rian.osu.beatmap.IBeatmap
 import com.rian.osu.beatmap.PlayableBeatmap
 import com.rian.osu.beatmap.StandardPlayableBeatmap
 import com.rian.osu.difficulty.attributes.*
@@ -290,12 +291,14 @@ object BeatmapDifficultyCalculator {
      * @return A structure describing the performance of the [DroidDifficultyAttributes] relating to the [StatisticV2].
      */
     @JvmStatic
+    @JvmOverloads
+    @JvmName("calculateDroidPerformanceWithStat")
     fun calculateDroidPerformance(
         beatmap: Beatmap,
         attributes: DroidDifficultyAttributes,
         replayMovements: List<MoveArray>,
         replayObjectData: Array<ReplayObjectData>,
-        stat: StatisticV2
+        stat: StatisticV2? = null
     ) = calculateDroidPerformance(beatmap, attributes, replayMovements, replayObjectData, constructDroidPerformanceParameters(stat))
 
     /**
@@ -311,6 +314,7 @@ object BeatmapDifficultyCalculator {
      */
     @JvmStatic
     @JvmOverloads
+    @JvmName("calculateDroidPerformanceWithParameters")
     fun calculateDroidPerformance(
         beatmap: Beatmap,
         attributes: DroidDifficultyAttributes,
@@ -335,6 +339,7 @@ object BeatmapDifficultyCalculator {
      */
     @JvmStatic
     @JvmOverloads
+    @JvmName("calculateDroidPerformanceWithReplayStat")
     fun calculateDroidPerformance(
         beatmap: DroidPlayableBeatmap,
         attributes: DroidDifficultyAttributes,
@@ -356,6 +361,7 @@ object BeatmapDifficultyCalculator {
      */
     @JvmStatic
     @JvmOverloads
+    @JvmName("calculateDroidPerformanceWithReplayParameters")
     fun calculateDroidPerformance(
         beatmap: DroidPlayableBeatmap,
         attributes: DroidDifficultyAttributes,
@@ -425,37 +431,37 @@ object BeatmapDifficultyCalculator {
     /**
      * Adds a cache to the difficulty cache.
      *
-     * @param beatmap The [Beatmap] to cache.
+     * @param beatmap The [IBeatmap] to cache.
      * @param parameters The [DifficultyCalculationParameters] to cache.
      * @param attributes The [DifficultyAttributes] to cache.
      */
     private fun addCache(
-        beatmap: Beatmap, parameters: DifficultyCalculationParameters?,
+        beatmap: IBeatmap, parameters: DifficultyCalculationParameters?,
         attributes: DroidDifficultyAttributes
     ) = difficultyCacheManager[beatmap.md5, { BeatmapDifficultyCacheManager() }].run { addCache(parameters, attributes, 60 * 1000) }
 
     /**
      * Adds a cache to the difficulty cache.
      *
-     * @param beatmap The [Beatmap] to cache.
+     * @param beatmap The [IBeatmap] to cache.
      * @param parameters The [DifficultyCalculationParameters] to cache.
      * @param attributes The [DifficultyAttributes] to cache.
      */
     private fun addCache(
-        beatmap: Beatmap, parameters: DifficultyCalculationParameters?,
+        beatmap: IBeatmap, parameters: DifficultyCalculationParameters?,
         attributes: StandardDifficultyAttributes
     ) = difficultyCacheManager[beatmap.md5, { BeatmapDifficultyCacheManager() }].run { addCache(parameters, attributes, 60 * 1000) }
 
     /**
      * Adds a cache to the difficulty cache.
      *
-     * @param beatmap The [Beatmap] to cache.
+     * @param beatmap The [IBeatmap] to cache.
      * @param parameters The [DifficultyCalculationParameters] to cache.
      * @param attributes The [TimedDifficultyAttributes] to cache.
      */
     @JvmName("addDroidTimedCache")
     private fun addCache(
-        beatmap: Beatmap, parameters: DifficultyCalculationParameters?,
+        beatmap: IBeatmap, parameters: DifficultyCalculationParameters?,
         attributes: Array<TimedDifficultyAttributes<DroidDifficultyAttributes>>
     ) =
         // Allow a maximum of 5 minutes of living cache.
@@ -467,13 +473,13 @@ object BeatmapDifficultyCalculator {
     /**
      * Adds a cache to the difficulty cache.
      *
-     * @param beatmap The [Beatmap] to cache.
+     * @param beatmap The [IBeatmap] to cache.
      * @param parameters The [DifficultyCalculationParameters] to cache.
      * @param attributes The [TimedDifficultyAttributes] to cache.
      */
     @JvmName("addStandardTimedCache")
     private fun addCache(
-        beatmap: Beatmap, parameters: DifficultyCalculationParameters?,
+        beatmap: IBeatmap, parameters: DifficultyCalculationParameters?,
         attributes: Array<TimedDifficultyAttributes<StandardDifficultyAttributes>>
     ) =
         // Allow a maximum of 5 minutes of living cache.

@@ -7,7 +7,7 @@ import com.rian.osu.mods.Mod
  * Represents a [PlayableBeatmap] for [GameMode.Droid] game mode.
  */
 class DroidPlayableBeatmap @JvmOverloads constructor(
-    beatmap: Beatmap,
+    baseBeatmap: IBeatmap,
     mods: Iterable<Mod>? = null,
     customSpeedMultiplier: Float = 1f
-) : PlayableBeatmap(beatmap, GameMode.Droid, mods, customSpeedMultiplier)
+) : PlayableBeatmap(baseBeatmap, GameMode.Droid, mods, customSpeedMultiplier)

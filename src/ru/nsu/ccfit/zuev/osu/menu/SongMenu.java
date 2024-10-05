@@ -1021,7 +1021,7 @@ public class SongMenu implements IUpdateHandler, MenuItemListener,
                 var data = parser.parse(true);
 
                 // Do not update if the beatmap has been changed.
-                if (data != null && selectedBeatmap != null && !data.md5.equals(selectedBeatmap.getMD5())) {
+                if (data != null && selectedBeatmap != null && !data.getMd5().equals(selectedBeatmap.getMD5())) {
                     return;
                 }
 

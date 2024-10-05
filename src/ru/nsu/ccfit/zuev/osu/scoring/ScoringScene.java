@@ -430,7 +430,7 @@ public class ScoringScene {
                             replayLoad.setMap(beatmapFile.getParentFile().getName(), beatmapFile.getName(), mapMD5);
 
                             if (replayLoad.load(replayPath)) {
-                                performanceAttributes = BeatmapDifficultyCalculator.calculateDroidPerformance(
+                                performanceAttributes = BeatmapDifficultyCalculator.calculateDroidPerformanceWithReplayStat(
                                     playableBeatmap, difficultyAttributes, replayLoad.cursorMoves, replayLoad.objectData, stat
                                 );
                             } else {

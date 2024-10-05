@@ -5,11 +5,16 @@ import com.rian.osu.mods.Mod
 import com.rian.osu.utils.ModUtils
 
 /**
- * Represents a [Beatmap] that is in a playable state in a specific [GameMode].
+ * Represents an [IBeatmap] that is in a playable state in a specific [GameMode].
  */
 abstract class PlayableBeatmap @JvmOverloads constructor(
-    beatmap: Beatmap,
-    mode: GameMode,
+    baseBeatmap: IBeatmap,
+
+    /**
+     * The [GameMode] this [PlayableBeatmap] was parsed as.
+     */
+    @JvmField
+    val mode: GameMode,
 
     /**
      * The [Mod]s that were applied to this [PlayableBeatmap].
@@ -22,23 +27,22 @@ abstract class PlayableBeatmap @JvmOverloads constructor(
      */
     @JvmField
     val customSpeedMultiplier: Float = 1f
-) : Beatmap(mode) {
+) : IBeatmap {
+    override val formatVersion = baseBeatmap.formatVersion
+    override val general = baseBeatmap.general
+    override val metadata = baseBeatmap.metadata
+    override val difficulty = baseBeatmap.difficulty
+    override val events = baseBeatmap.events
+    override val colors = baseBeatmap.colors
+    override val controlPoints = baseBeatmap.controlPoints
+    override val hitObjects = baseBeatmap.hitObjects
+    override val filePath = baseBeatmap.filePath
+    override val md5 = baseBeatmap.md5
+    override val maxCombo = baseBeatmap.maxCombo
+
     /**
      * The overall speed multiplier that was applied to this [PlayableBeatmap].
      */
     @JvmField
     val overallSpeedMultiplier = customSpeedMultiplier * if (mods != null) ModUtils.calculateRateWithMods(mods) else 1f
-
-    init {
-        formatVersion = beatmap.formatVersion
-        general = beatmap.general
-        metadata = beatmap.metadata
-        difficulty = beatmap.difficulty
-        events = beatmap.events
-        colors = beatmap.colors
-        controlPoints = beatmap.controlPoints
-        hitObjects = beatmap.hitObjects
-        filePath = beatmap.filePath
-        md5 = beatmap.md5
-    }
 }

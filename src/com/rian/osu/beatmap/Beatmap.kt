@@ -22,106 +22,23 @@ open class Beatmap(
      */
     @JvmField
     val mode: GameMode
-) : Cloneable {
-    /**
-     * The format version of this [Beatmap].
-     */
-    @JvmField
-    var formatVersion = 14
+) : IBeatmap, Cloneable {
+    override var formatVersion = 14
+    override val general = BeatmapGeneral()
+    override val metadata = BeatmapMetadata()
+    override var difficulty = BeatmapDifficulty()
+    override val events = BeatmapEvents()
+    override val colors = BeatmapColor()
+    override val controlPoints = BeatmapControlPoints()
+    override var hitObjects = BeatmapHitObjects()
+    override var filePath = ""
+    override var md5 = ""
 
-    /**
-     * The general section of this [Beatmap].
-     */
-    @JvmField
-    var general = BeatmapGeneral()
-
-    /**
-     * The metadata section of this [Beatmap].
-     */
-    @JvmField
-    var metadata = BeatmapMetadata()
-
-    /**
-     * The difficulty section of this [Beatmap].
-     */
-    @JvmField
-    var difficulty = BeatmapDifficulty()
-
-    /**
-     * The events section of this [Beatmap].
-     */
-    @JvmField
-    var events = BeatmapEvents()
-
-    /**
-     * The colors section of this [Beatmap].
-     */
-    @JvmField
-    var colors = BeatmapColor()
-
-    /**
-     * The control points of this [Beatmap].
-     */
-    @JvmField
-    var controlPoints = BeatmapControlPoints()
-
-    /**
-     * The hit objects of this [Beatmap].
-     */
-    open var hitObjects = BeatmapHitObjects()
-
-    /**
-     * The path to the `.osu` file of this [Beatmap].
-     */
-    @JvmField
-    var filePath = ""
-
-    /**
-     * The path of the parent folder of this [Beatmap].
-     *
-     * In other words, this is the beatmapset folder of this [Beatmap].
-     */
-    val beatmapsetPath
-        get() = filePath.substringBeforeLast("/")
-
-    /**
-     * The MD5 hash of this [Beatmap].
-     */
-    @JvmField
-    var md5 = ""
-
-    /**
-     * Returns a time combined with beatmap-wide time offset.
-     *
-     * Beatmap version 4 and lower had an incorrect offset. Stable has this set as 24ms off.
-     *
-     * @param time The time.
-     */
-    fun getOffsetTime(time: Double) = time + if (formatVersion < 5) 24 else 0
-
-    /**
-     * Returns a time combined with beatmap-wide time offset.
-     *
-     * Beatmap version 4 and lower had an incorrect offset. Stable has this set as 24ms off.
-     *
-     * @param time The time.
-     */
-    fun getOffsetTime(time: Int) = time + if (formatVersion < 5) 24 else 0
-
-    /**
-     * The max combo of this [Beatmap].
-     */
-    open val maxCombo by lazy {
+    override val maxCombo by lazy {
         hitObjects.objects.sumOf {
             if (it is Slider) it.nestedHitObjects.size else 1
         }
     }
-
-    /**
-     * The duration of this [Beatmap].
-     */
-    val duration: Int
-        get() = hitObjects.objects.lastOrNull()?.endTime?.toInt() ?: 0
 
     /**
      * Constructs a [DroidPlayableBeatmap] from this [Beatmap], where all [HitObject] and [BeatmapDifficulty]

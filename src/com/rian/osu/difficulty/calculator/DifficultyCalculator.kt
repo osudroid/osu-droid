@@ -1,6 +1,8 @@
 package com.rian.osu.difficulty.calculator
 
+import com.rian.osu.GameMode
 import com.rian.osu.beatmap.Beatmap
+import com.rian.osu.beatmap.IBeatmap
 import com.rian.osu.beatmap.PlayableBeatmap
 import com.rian.osu.beatmap.hitobject.HitObject
 import com.rian.osu.beatmap.hitobject.Slider
@@ -200,17 +202,15 @@ abstract class DifficultyCalculator<TBeatmap : PlayableBeatmap, TObject : Diffic
 }
 
 /**
- * A [PlayableBeatmap] that is used for timed difficulty calculation.
+ * An [IBeatmap] that is used for timed difficulty calculation.
  */
 private class ProgressiveCalculationBeatmap(
     baseBeatmap: PlayableBeatmap
 ) : PlayableBeatmap(baseBeatmap, baseBeatmap.mode, baseBeatmap.mods, baseBeatmap.customSpeedMultiplier) {
-    // The implementation of maximum combo in Beatmap is lazily evaluated, so we need to override it here
-    // as the maximum combo of a progressive beatmap changes overtime.
     override var maxCombo = 0
         private set
 
-    override var hitObjects = object : BeatmapHitObjects() {
+    override val hitObjects = object : BeatmapHitObjects() {
         override fun add(obj: HitObject) {
             super.add(obj)
 
