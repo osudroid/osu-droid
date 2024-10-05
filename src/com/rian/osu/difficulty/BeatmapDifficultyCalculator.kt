@@ -317,21 +317,62 @@ object BeatmapDifficultyCalculator {
         replayMovements: List<MoveArray>,
         replayObjectData: Array<ReplayObjectData>,
         parameters: DroidPerformanceCalculationParameters? = null
+    ) = calculateDroidPerformance(
+            beatmap.createDroidPlayableBeatmap(attributes.mods, attributes.customSpeedMultiplier),
+            attributes, replayMovements, replayObjectData, parameters
+        )
+
+    /**
+     * Calculates the performance of a [DroidDifficultyAttributes] and applies necessary adjustments to
+     * the performance value using replay data.
+     *
+     * @param beatmap The [DroidPlayableBeatmap] to calculate.
+     * @param attributes The [DroidDifficultyAttributes] of the [DroidPlayableBeatmap].
+     * @param replayMovements The replay movements of the player.
+     * @param replayObjectData The replay object data of the player.
+     * @param stat The [StatisticV2] to calculate for.
+     * @return A structure describing the performance of the [DroidDifficultyAttributes] relating to the [StatisticV2].
+     */
+    @JvmStatic
+    @JvmOverloads
+    fun calculateDroidPerformance(
+        beatmap: DroidPlayableBeatmap,
+        attributes: DroidDifficultyAttributes,
+        replayMovements: List<MoveArray>,
+        replayObjectData: Array<ReplayObjectData>,
+        stat: StatisticV2? = null
+    ) = calculateDroidPerformance(beatmap, attributes, replayMovements, replayObjectData, constructDroidPerformanceParameters(stat))
+
+    /**
+     * Calculates the performance of a [DroidDifficultyAttributes] and applies necessary adjustments to
+     * the performance value using replay data.
+     *
+     * @param beatmap The [DroidPlayableBeatmap] to calculate.
+     * @param attributes The [DroidDifficultyAttributes] of the [DroidPlayableBeatmap].
+     * @param replayMovements The replay movements of the player.
+     * @param replayObjectData The replay object data of the player.
+     * @param parameters The parameters of the calculation. Can be `null`.
+     * @return A structure describing the performance of the [DroidDifficultyAttributes] relating to the calculation parameters.
+     */
+    @JvmStatic
+    @JvmOverloads
+    fun calculateDroidPerformance(
+        beatmap: DroidPlayableBeatmap,
+        attributes: DroidDifficultyAttributes,
+        replayMovements: List<MoveArray>,
+        replayObjectData: Array<ReplayObjectData>,
+        parameters: DroidPerformanceCalculationParameters? = null
     ): DroidPerformanceAttributes {
         val actualParameters =
             (parameters ?: DroidPerformanceCalculationParameters()).also {
-                val playableBeatmap = beatmap.createDroidPlayableBeatmap(
-                    attributes.mods, attributes.customSpeedMultiplier
-                )
-
                 val cursorGroups = createCursorGroups(replayMovements)
 
                 it.tapPenalty = ThreeFingerChecker(
-                    playableBeatmap, attributes, cursorGroups, replayObjectData
+                    beatmap, attributes, cursorGroups, replayObjectData
                 ).calculatePenalty()
 
                 it.sliderCheesePenalty = SliderCheeseChecker(
-                    playableBeatmap, attributes, cursorGroups, replayObjectData
+                    beatmap, attributes, cursorGroups, replayObjectData
                 ).calculatePenalty()
             }
 
