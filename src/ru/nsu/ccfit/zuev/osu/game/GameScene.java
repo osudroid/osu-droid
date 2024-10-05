@@ -35,6 +35,7 @@ import com.reco1l.osu.multiplayer.RoomScene;
 
 import com.rian.osu.GameMode;
 import com.rian.osu.beatmap.Beatmap;
+import com.rian.osu.beatmap.DroidPlayableBeatmap;
 import com.rian.osu.beatmap.constants.BeatmapCountdown;
 import com.rian.osu.beatmap.hitobject.HitCircle;
 import com.rian.osu.beatmap.hitobject.HitObject;
@@ -123,7 +124,7 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
     private ExtendedScene bgScene, mgScene, fgScene;
     private Scene oldScene;
     private Beatmap parsedBeatmap;
-    private Beatmap playableBeatmap;
+    private DroidPlayableBeatmap playableBeatmap;
     private BeatmapInfo lastBeatmapInfo;
     private ScoringScene scoringScene;
     private LinkedList<TimingControlPoint> timingControlPoints;
@@ -396,7 +397,7 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
             modMenu.isCustomHP() ? modMenu.getCustomHP() : null
         );
 
-        playableBeatmap = parsedBeatmap.createPlayableBeatmap(GameMode.Droid, convertedMods, modMenu.getChangeSpeed());
+        playableBeatmap = parsedBeatmap.createDroidPlayableBeatmap(convertedMods, modMenu.getChangeSpeed());
 
         // TODO skin manager
         SkinManager.getInstance().loadBeatmapSkin(playableBeatmap.getBeatmapsetPath());
@@ -545,9 +546,7 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
             switch (Config.getDifficultyAlgorithm()) {
                 case droid -> {
                     if (droidTimedDifficultyAttributes == null || !sameParameters) {
-                        droidTimedDifficultyAttributes = BeatmapDifficultyCalculator.calculateDroidTimedDifficulty(
-                            parsedBeatmap, parameters
-                        );
+                        droidTimedDifficultyAttributes = BeatmapDifficultyCalculator.calculateDroidTimedDifficulty(playableBeatmap);
                     }
                 }
 
