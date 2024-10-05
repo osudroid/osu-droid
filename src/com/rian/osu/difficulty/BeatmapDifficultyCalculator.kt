@@ -503,8 +503,7 @@ object BeatmapDifficultyCalculator {
          * @param cache The difficulty attributes cache to add.
          * @param cacheMap The map to add the cache to.
          * @param timeToLive The duration at which this cache is allowed to live, in milliseconds.
-         * @param <T> The difficulty attributes cache type.
-        </T> */
+         */
         private fun <T> addCache(
             parameters: DifficultyCalculationParameters?, mode: GameMode, cache: T,
             cacheMap: HashMap<DifficultyCalculationParameters, BeatmapDifficultyCache<T>>,
@@ -520,12 +519,14 @@ object BeatmapDifficultyCalculator {
          * @param mode The [GameMode] to get for.
          * @param cacheMap The map containing the cache to lookup for.
          * @return The difficulty attributes, `null` if not found.
-         * @param <T> The difficulty attributes cache type.
-        </T> */
+         */
         private fun <T> getCache(
             parameters: DifficultyCalculationParameters?, mode: GameMode,
             cacheMap: HashMap<DifficultyCalculationParameters, BeatmapDifficultyCache<T>>
-        ) = cacheMap[processParameters(parameters, mode)]?.cache
+        ) = cacheMap[processParameters(parameters, mode)]?.let {
+                it.refresh()
+                it.cache
+            }
 
         /**
          * Processes and copies a [DifficultyCalculationParameters] for caching.
@@ -552,15 +553,24 @@ object BeatmapDifficultyCalculator {
          * The cached data.
          */
         val cache: T,
+
         /**
          * The duration at which this cache is allowed to live, in milliseconds.
          */
         val timeToLive: Long
     ) {
         /**
-         * The time at which this cache was generated, in milliseconds.
+         * The time at which this cache was last accessed, in milliseconds.
          */
-        val generatedTime = System.currentTimeMillis()
+        var lastAccessedTime = System.currentTimeMillis()
+            private set
+
+        /**
+         * Refreshes the cache.
+         */
+        fun refresh() {
+            lastAccessedTime = System.currentTimeMillis()
+        }
 
         /**
          * Determines whether this cache has expired.
@@ -568,7 +578,7 @@ object BeatmapDifficultyCalculator {
          * @param time The time to test against, in milliseconds.
          * @return Whether the cache has expired.
          */
-        fun isExpired(time: Long) = generatedTime + timeToLive < time
+        fun isExpired(time: Long) = lastAccessedTime + timeToLive < time
     }
 }
 
