@@ -9,6 +9,7 @@ import com.reco1l.ibancho.data.RoomMods;
 import com.reco1l.osu.multiplayer.MultiplayerConverter;
 import com.reco1l.osu.multiplayer.RoomScene;
 
+import com.rian.osu.GameMode;
 import com.rian.osu.beatmap.parser.BeatmapParser;
 import com.rian.osu.difficulty.BeatmapDifficultyCalculator;
 import com.rian.osu.difficulty.calculator.DifficultyCalculationParameters;
@@ -329,43 +330,48 @@ public class ModMenu implements IModSwitcher {
                     cancelCalculationJob();
 
                     calculationJob = Execution.async(scope -> {
-                        if (GlobalManager.getInstance().getSongMenu().getSelectedBeatmap() != null) {
-                            try (var parser = new BeatmapParser(GlobalManager.getInstance().getSongMenu().getSelectedBeatmap().getPath(), scope)) {
-                                var beatmap = parser.parse(true);
-                                if (beatmap == null) {
-                                    GlobalManager.getInstance().getSongMenu().setStarsDisplay(0);
-                                    return;
+                        if (selectedBeatmap == null) {
+                            return;
+                        }
+
+                        try (var parser = new BeatmapParser(selectedBeatmap.getPath(), scope)) {
+                            var beatmap = parser.parse(
+                                true,
+                                Config.getDifficultyAlgorithm() == DifficultyAlgorithm.droid ? GameMode.Droid : GameMode.Standard
+                            );
+                            if (beatmap == null) {
+                                GlobalManager.getInstance().getSongMenu().setStarsDisplay(0);
+                                return;
+                            }
+
+                            var parameters = new DifficultyCalculationParameters();
+                            parameters.setMods(ModUtils.convertLegacyMods(
+                                mod,
+                                isCustomCS() ? customCS : null,
+                                isCustomAR() ? customAR : null,
+                                isCustomOD() ? customOD : null
+                            ));
+                            parameters.setCustomSpeedMultiplier(changeSpeed);
+
+                            switch (Config.getDifficultyAlgorithm()) {
+                                case droid -> {
+                                    var attributes = BeatmapDifficultyCalculator.calculateDroidDifficulty(
+                                        beatmap, parameters, scope
+                                    );
+
+                                    GlobalManager.getInstance().getSongMenu().setStarsDisplay(
+                                        GameHelper.Round(attributes.starRating, 2)
+                                    );
                                 }
 
-                                var parameters = new DifficultyCalculationParameters();
-                                parameters.setMods(ModUtils.convertLegacyMods(
-                                    mod,
-                                    isCustomCS() ? customCS : null,
-                                    isCustomAR() ? customAR : null,
-                                    isCustomOD() ? customOD : null
-                                ));
-                                parameters.setCustomSpeedMultiplier(changeSpeed);
+                                case standard -> {
+                                    var attributes = BeatmapDifficultyCalculator.calculateStandardDifficulty(
+                                        beatmap, parameters, scope
+                                    );
 
-                                switch (Config.getDifficultyAlgorithm()) {
-                                    case droid -> {
-                                        var attributes = BeatmapDifficultyCalculator.calculateDroidDifficulty(
-                                            beatmap, parameters, scope
-                                        );
-
-                                        GlobalManager.getInstance().getSongMenu().setStarsDisplay(
-                                            GameHelper.Round(attributes.starRating, 2)
-                                        );
-                                    }
-
-                                    case standard -> {
-                                        var attributes = BeatmapDifficultyCalculator.calculateStandardDifficulty(
-                                            beatmap, parameters, scope
-                                        );
-
-                                        GlobalManager.getInstance().getSongMenu().setStarsDisplay(
-                                            GameHelper.Round(attributes.starRating, 2)
-                                        );
-                                    }
+                                    GlobalManager.getInstance().getSongMenu().setStarsDisplay(
+                                        GameHelper.Round(attributes.starRating, 2)
+                                    );
                                 }
                             }
                         }
