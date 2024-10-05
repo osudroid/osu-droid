@@ -10,17 +10,17 @@ abstract class Mod {
     /**
      * Whether scores with this [Mod] active can be submitted online.
      */
-    open val ranked = false
+    open val isRanked = false
 
     /**
      * Whether this [Mod] can be specified as a "required" [Mod] in multiplayer context.
      */
-    open val validForMultiplayer = true
+    open val isValidForMultiplayer = true
 
     /**
      * Whether this [Mod] can be specified as a "free" or "allowed" [Mod] in multiplayer context.
      */
-    open val validForMultiplayerAsFreeMod = true
+    open val isValidForMultiplayerAsFreeMod = true
 
     /**
      * The [Mod]s this [Mod] cannot be enabled with.
@@ -48,7 +48,7 @@ abstract class Mod {
     }
 
     override fun hashCode(): Int {
-        var result = ranked.hashCode()
+        var result = isRanked.hashCode()
 
         result = 31 * result + incompatibleMods.contentHashCode()
 

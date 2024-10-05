@@ -7,7 +7,7 @@ class ModSuddenDeath : Mod(), IModUserSelectable {
     override val droidChar = 'u'
     override val acronym = "SD"
     override val textureNameSuffix = "suddendeath"
-    override val ranked = true
+    override val isRanked = true
     override val incompatibleMods = super.incompatibleMods + arrayOf(
         ModNoFail::class, ModPerfect::class, ModAuto::class
     )

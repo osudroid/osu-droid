@@ -7,7 +7,7 @@ class ModPerfect : Mod(), IModUserSelectable {
     override val droidChar = 'f'
     override val acronym = "PF"
     override val textureNameSuffix = "perfect"
-    override val ranked = true
+    override val isRanked = true
     override val incompatibleMods = super.incompatibleMods + arrayOf(
         ModNoFail::class, ModSuddenDeath::class, ModAuto::class
     )

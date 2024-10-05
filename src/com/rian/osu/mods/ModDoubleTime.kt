@@ -7,7 +7,7 @@ class ModDoubleTime : ModClockRateAdjust(), IModUserSelectable {
     override val droidChar = 'd'
     override val acronym = "DT"
     override val textureNameSuffix = "doubletime"
-    override val ranked = true
+    override val isRanked = true
     override val incompatibleMods = super.incompatibleMods + arrayOf(
         ModNightCore::class, ModHalfTime::class
     )

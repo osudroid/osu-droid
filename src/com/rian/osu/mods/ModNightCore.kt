@@ -7,7 +7,7 @@ class ModNightCore : ModClockRateAdjust(), IModUserSelectable {
     override val droidChar = 'c'
     override val acronym = "NC"
     override val textureNameSuffix = "nightcore"
-    override val ranked = true
+    override val isRanked = true
     override val incompatibleMods = super.incompatibleMods + arrayOf(
         ModDoubleTime::class, ModHalfTime::class
     )

@@ -11,7 +11,7 @@ class ModEasy : Mod(), IModUserSelectable, IModApplicableToDifficulty {
     override val droidChar = 'e'
     override val acronym = "EZ"
     override val textureNameSuffix = "easy"
-    override val ranked = true
+    override val isRanked = true
     override val incompatibleMods = super.incompatibleMods + ModHardRock::class
 
     override fun calculateScoreMultiplier(difficulty: BeatmapDifficulty) = 0.5f

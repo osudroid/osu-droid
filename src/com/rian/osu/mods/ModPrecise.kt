@@ -9,7 +9,7 @@ class ModPrecise : Mod(), IModUserSelectable {
     override val droidChar = 's'
     override val acronym = "PR"
     override val textureNameSuffix = "precise"
-    override val ranked = true
+    override val isRanked = true
 
     override fun calculateScoreMultiplier(difficulty: BeatmapDifficulty) = 1.06f
 

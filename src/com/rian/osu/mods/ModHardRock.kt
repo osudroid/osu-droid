@@ -16,7 +16,7 @@ class ModHardRock : Mod(), IModUserSelectable, IModApplicableToDifficulty, IModA
     override val droidChar = 'r'
     override val acronym = "HR"
     override val textureNameSuffix = "hardrock"
-    override val ranked = true
+    override val isRanked = true
     override val incompatibleMods = super.incompatibleMods + ModEasy::class
 
     override fun calculateScoreMultiplier(difficulty: BeatmapDifficulty) = 1.06f

@@ -12,7 +12,7 @@ class ModHidden : Mod(), IModUserSelectable, IModApplicableToBeatmap {
     override val droidChar = 'h'
     override val acronym = "HD"
     override val textureNameSuffix = "hidden"
-    override val ranked = true
+    override val isRanked = true
 
     override fun calculateScoreMultiplier(difficulty: BeatmapDifficulty) = 1.06f
 

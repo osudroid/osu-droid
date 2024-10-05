@@ -17,6 +17,49 @@ class ModHashSet : HashSet<Mod> {
     constructor(initialCapacity: Int) : super(initialCapacity)
     constructor(initialCapacity: Int, loadFactor: Float) : super(initialCapacity, loadFactor)
 
+    /**
+     * Converts this [ModHashSet] to a [String] that can be displayed to the player.
+     */
+    fun toReadable(): String {
+        if (isEmpty())
+            return "None"
+
+        return buildString {
+            for (m in this@ModHashSet) when (m) {
+                is ModFlashlight -> {
+                    if (m.followDelay == ModFlashlight.DEFAULT_FOLLOW_DELAY)
+                        append("${m.acronym}, ")
+                    else
+                        append("${m.acronym} ${(m.followDelay * 1000).toInt()}ms, ")
+                }
+
+                is IModUserSelectable -> append("${m.acronym}, ")
+
+                is ModDifficultyAdjust -> {
+                    if (m.ar != null) {
+                        append("AR ${m.ar}, ")
+                    }
+
+                    if (m.od != null) {
+                        append("OD ${m.od}, ")
+                    }
+
+                    if (m.cs != null) {
+                        append("CS ${m.cs}, ")
+                    }
+
+                    if (m.hp != null) {
+                        append("HP ${m.hp}, ")
+                    }
+                }
+
+                is ModCustomSpeed -> append("${m.trackRateMultiplier}x, ")
+
+                else -> Unit
+            }
+        }.substringBeforeLast('/')
+    }
+
     override fun equals(other: Any?): Boolean {
         if (other === this) {
             return true

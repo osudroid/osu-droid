@@ -7,7 +7,7 @@ import kotlin.math.pow
  * Represents a [Mod] that adjusts the track's rate.
  */
 abstract class ModClockRateAdjust : Mod(), IModApplicableToTrackRate {
-    override val validForMultiplayerAsFreeMod = false
+    override val isValidForMultiplayerAsFreeMod = false
 
     override fun calculateScoreMultiplier(difficulty: BeatmapDifficulty) =
         if (trackRateMultiplier > 1) 1 + (trackRateMultiplier - 1) * 0.24f
