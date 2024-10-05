@@ -103,7 +103,7 @@ open class Beatmap : Cloneable {
     fun getOffsetTime(time: Int) = time + if (formatVersion < 5) 24 else 0
 
     /**
-     * Gets the max combo of this [Beatmap].
+     * The max combo of this [Beatmap].
      */
     open val maxCombo by lazy {
         hitObjects.objects.sumOf {
@@ -118,19 +118,38 @@ open class Beatmap : Cloneable {
         get() = hitObjects.objects.lastOrNull()?.endTime?.toInt() ?: 0
 
     /**
-     * Constructs a playable [Beatmap] from this [Beatmap].
+     * Constructs a [DroidPlayableBeatmap] from this [Beatmap], where all [HitObject] and [BeatmapDifficulty]
+     * [Mod]s have been applied, and [HitObject]s have been fully constructed.
      *
-     * The returned [Beatmap] is in a playable state - all [HitObject] and [BeatmapDifficulty] [Mod]s have been applied,
-     * and [HitObject]s have been fully constructed.
-     *
-     * @param mode The [GameMode] to construct the [Beatmap] for.
      * @param mods The [Mod]s to apply to the [Beatmap]. Defaults to No Mod.
      * @param customSpeedMultiplier The custom speed multiplier to apply to the [Beatmap]. Defaults to 1.
      * @param scope The [CoroutineScope] to use for coroutines.
-     * @return The constructed [Beatmap].
+     * @return The [DroidPlayableBeatmap].
      */
     @JvmOverloads
-    fun createPlayableBeatmap(mode: GameMode, mods: List<Mod>? = null, customSpeedMultiplier: Float = 1f, scope: CoroutineScope? = null): Beatmap {
+    fun createDroidPlayableBeatmap(
+        mods: Iterable<Mod>? = null,
+        customSpeedMultiplier: Float = 1f,
+        scope: CoroutineScope? = null
+    ) = DroidPlayableBeatmap(createPlayableBeatmap(GameMode.Droid, mods, customSpeedMultiplier, scope), mods, customSpeedMultiplier)
+
+    /**
+     * Constructs a [StandardPlayableBeatmap] from this [Beatmap], where all [HitObject] and [BeatmapDifficulty]
+     * [Mod]s have been applied, and [HitObject]s have been fully constructed.
+     *
+     * @param mods The [Mod]s to apply to the [Beatmap]. Defaults to No Mod.
+     * @param customSpeedMultiplier The custom speed multiplier to apply to the [Beatmap]. Defaults to 1.
+     * @param scope The [CoroutineScope] to use for coroutines.
+     * @return The [StandardPlayableBeatmap].
+     */
+    @JvmOverloads
+    fun createStandardPlayableBeatmap(
+        mods: Iterable<Mod>? = null,
+        customSpeedMultiplier: Float = 1f,
+        scope: CoroutineScope? = null
+    ) = StandardPlayableBeatmap(createPlayableBeatmap(GameMode.Standard, mods, customSpeedMultiplier, scope), mods, customSpeedMultiplier)
+
+    private fun createPlayableBeatmap(mode: GameMode, mods: Iterable<Mod>?, customSpeedMultiplier: Float, scope: CoroutineScope?): Beatmap {
         val converter = BeatmapConverter(this, scope)
 
         // Convert
