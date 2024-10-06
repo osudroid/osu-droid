@@ -1,18 +1,33 @@
 package com.rian.osu.utils
 
+import com.reco1l.toolkt.kotlin.fastForEach
 import com.rian.osu.mods.*
+import kotlin.reflect.KClass
 
 /**
  * A [HashSet] of [Mod]s that has additional utilities specifically for [Mod]s.
  */
 class ModHashSet : HashSet<Mod> {
+    private val classSet = mutableSetOf<Class<out Mod>>()
+
     constructor() : super()
-    constructor(mods: Collection<Mod>) : super(mods)
-    constructor(mods: Iterable<Mod>) : super() { addAll(mods) }
+    constructor(mods: Collection<Mod>) : this(mods as Iterable<Mod>)
     constructor(initialCapacity: Int) : super(initialCapacity)
     constructor(initialCapacity: Int, loadFactor: Float) : super(initialCapacity, loadFactor)
 
+    constructor(mods: Iterable<Mod>) : super() {
+        for (m in mods) {
+            add(m)
+            classSet.add(m::class.java)
+        }
+    }
+
     override fun add(element: Mod): Boolean {
+        // Ensure the mod itself is not a duplicate.
+        if (element::class in this) {
+            remove(element)
+        }
+
         // If all difficulty statistics are set, all other difficulty adjusting mods are irrelevant, so we remove them.
         // This prevents potential abuse cases where score multipliers from non-affecting mods stack (i.e., forcing
         // all difficulty statistics while using the Hard Rock mod).
@@ -23,25 +38,75 @@ class ModHashSet : HashSet<Mod> {
             element.od != null &&
             element.hp != null
 
-        for (m in this) {
-            // Ensure the mod itself is not a duplicate.
-            if (m::class == element::class) {
-                remove(m)
-                continue
-            }
+        if (removeDifficultyAdjustmentMods) {
+            remove(ModEasy::class)
+            remove(ModHardRock::class)
+            remove(ModReallyEasy::class)
+        }
 
-            if (removeDifficultyAdjustmentMods && (m is IModApplicableToDifficulty || m is IModApplicableToDifficultyWithSettings)) {
-                remove(m)
-                continue
-            }
-
-            // Check if there is any mod that is incompatible with the new mod.
-            if (element.incompatibleMods.any { it.isInstance(m) }) {
-                remove(m)
+        // Check if there is any mod that is incompatible with the new mod.
+        element.incompatibleMods.fastForEach {
+            if (it in this) {
+                remove(it)
             }
         }
 
+        classSet.add(element::class.java)
         return super.add(element)
+    }
+
+    /**
+     * Checks if this [ModHashSet] contains a [Mod] of the specified type.
+     *
+     * @param mod The [Mod] type to check for.
+     * @return `true` if this [ModHashSet] contains a [Mod] of the specified type, `false` otherwise.
+     */
+    operator fun contains(mod: KClass<out Mod>) = mod.java in classSet
+
+    /**
+     * Checks if this [ModHashSet] contains a [Mod] of the specified type.
+     *
+     * @param mod The [Mod] type to check for.
+     * @return `true` if this [ModHashSet] contains a [Mod] of the specified type, `false` otherwise.
+     */
+    operator fun contains(mod: Class<out Mod>) = mod in classSet
+
+    /**
+     * Removes a [Mod] of the specified type from this [ModHashSet].
+     *
+     * @param mod The [Mod] type to remove.
+     * @return `true` if a [Mod] of the specified type was removed, `false` otherwise.
+     */
+    fun remove(mod: KClass<out Mod>) = remove(mod.java)
+
+    /**
+     * Removes a [Mod] of the specified type from this [ModHashSet].
+     *
+     * @param mod The [Mod] type to remove.
+     * @return `true` if a [Mod] of the specified type was removed, `false` otherwise.
+     */
+    fun remove(mod: Class<out Mod>): Boolean {
+        if (mod !in classSet) {
+            return false
+        }
+
+        for (m in this) {
+            if (mod.isInstance(m)) {
+                return remove(m)
+            }
+        }
+
+        return false
+    }
+
+    override fun remove(element: Mod): Boolean {
+        val removed = super.remove(element)
+
+        if (removed) {
+            classSet.remove(element::class.java)
+        }
+
+        return removed
     }
 
     /**
@@ -84,7 +149,7 @@ class ModHashSet : HashSet<Mod> {
 
                 else -> Unit
             }
-        }.substringBeforeLast('/')
+        }.substringBeforeLast(',')
     }
 
     override fun equals(other: Any?): Boolean {
@@ -99,17 +164,15 @@ class ModHashSet : HashSet<Mod> {
         return size == other.size && containsAll(other)
     }
 
-    override fun hashCode(): Int {
-        var result = 0
-
-        for (mod in this) {
-            result = 31 * result + mod.hashCode()
-        }
-
-        return result
-    }
+    override fun hashCode() = fold(0) { acc, mod -> 31 * acc + mod.hashCode() }
 
     override fun toString() = buildString {
+        modStringOrder.fastForEach {
+            if (it::class.java in classSet) {
+                append((it as IModUserSelectable).droidChar)
+            }
+        }
+
         var difficultyAdjust: ModDifficultyAdjust? = null
         var customSpeed: ModCustomSpeed? = null
         var flashlight: ModFlashlight? = null
@@ -117,14 +180,13 @@ class ModHashSet : HashSet<Mod> {
         for (m in this@ModHashSet) when (m) {
             is ModDifficultyAdjust -> difficultyAdjust = m
             is ModCustomSpeed -> customSpeed = m
-            is ILegacyMod -> continue
-
-            is IModUserSelectable -> {
-                if (m is ModFlashlight) {
-                    flashlight = m
+            is ModFlashlight -> flashlight = m
+            else -> {
+                if (difficultyAdjust != null && customSpeed != null && flashlight != null) {
+                    break
                 }
 
-                append(m.droidChar)
+                continue
             }
         }
 
@@ -143,10 +205,6 @@ class ModHashSet : HashSet<Mod> {
         }
 
         difficultyAdjust?.let {
-            if (customSpeed != null) {
-                append('|')
-            }
-
             if (it.ar != null) {
                 append(String.format("AR%.1f|", it.ar))
             }
@@ -168,4 +226,17 @@ class ModHashSet : HashSet<Mod> {
             append(String.format("FLD%.2f|", flashlight.followDelay))
         }
     }.substringBeforeLast('|')
+
+    companion object {
+        /**
+         * The order in which mods should be displayed.
+         *
+         * This is intentionally kept to keep the order consistent with what players are used to.
+         */
+        private val modStringOrder = arrayOf<Mod>(
+            ModAuto(), ModRelax(), ModAutopilot(), ModEasy(), ModNoFail(), ModHardRock(),
+            ModHidden(), ModFlashlight(), ModDoubleTime(), ModNightCore(), ModHalfTime(),
+            ModPrecise(), ModReallyEasy(), ModPerfect(), ModSuddenDeath(), ModScoreV2()
+        )
+    }
 }
