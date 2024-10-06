@@ -40,7 +40,7 @@ data class BlockArea(
 interface IBlockAreaDAO {
 
     // Sorting because this will affect the attachment order, newer areas will be on top.
-    @Query("SELECT * FROM BlockArea ORDER BY id ASC")
+    @Query("SELECT * FROM BlockArea")
     fun getAll(): List<BlockArea>
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
