@@ -1,14 +1,9 @@
 package com.rian.osu.utils
 
-import com.rian.osu.mods.ILegacyMod
-import com.rian.osu.mods.IModUserSelectable
-import com.rian.osu.mods.Mod
-import com.rian.osu.mods.ModCustomSpeed
-import com.rian.osu.mods.ModDifficultyAdjust
-import com.rian.osu.mods.ModFlashlight
+import com.rian.osu.mods.*
 
 /**
- * A [HashSet] of [Mod]s that can be compared against each other.
+ * A [HashSet] of [Mod]s that has additional utilities specifically for [Mod]s.
  */
 class ModHashSet : HashSet<Mod> {
     constructor() : super()
@@ -16,6 +11,38 @@ class ModHashSet : HashSet<Mod> {
     constructor(mods: Iterable<Mod>) : super() { addAll(mods) }
     constructor(initialCapacity: Int) : super(initialCapacity)
     constructor(initialCapacity: Int, loadFactor: Float) : super(initialCapacity, loadFactor)
+
+    override fun add(element: Mod): Boolean {
+        // If all difficulty statistics are set, all other difficulty adjusting mods are irrelevant, so we remove them.
+        // This prevents potential abuse cases where score multipliers from non-affecting mods stack (i.e., forcing
+        // all difficulty statistics while using the Hard Rock mod).
+        val removeDifficultyAdjustmentMods =
+            element is ModDifficultyAdjust &&
+            element.cs != null &&
+            element.ar != null &&
+            element.od != null &&
+            element.hp != null
+
+        for (m in this) {
+            // Ensure the mod itself is not a duplicate.
+            if (m::class == element::class) {
+                remove(m)
+                continue
+            }
+
+            if (removeDifficultyAdjustmentMods && (m is IModApplicableToDifficulty || m is IModApplicableToDifficultyWithSettings)) {
+                remove(m)
+                continue
+            }
+
+            // Check if there is any mod that is incompatible with the new mod.
+            if (element.incompatibleMods.any { it.isInstance(m) }) {
+                remove(m)
+            }
+        }
+
+        return super.add(element)
+    }
 
     /**
      * Converts this [ModHashSet] to a [String] that can be displayed to the player.
