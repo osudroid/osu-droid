@@ -4,6 +4,7 @@ import com.rian.osu.beatmap.Beatmap
 import com.rian.osu.beatmap.hitobject.HitObject
 import com.rian.osu.beatmap.hitobject.Slider
 import com.rian.osu.beatmap.sections.BeatmapDifficulty
+import ru.nsu.ccfit.zuev.osu.game.mods.GameMod
 
 /**
  * Represents the Hidden mod.
@@ -11,6 +12,7 @@ import com.rian.osu.beatmap.sections.BeatmapDifficulty
 class ModHidden : Mod(), IModUserSelectable, IModApplicableToBeatmap {
     override val droidChar = 'h'
     override val acronym = "HD"
+    override val enum = GameMod.MOD_HIDDEN
     override val textureNameSuffix = "hidden"
     override val isRanked = true
 

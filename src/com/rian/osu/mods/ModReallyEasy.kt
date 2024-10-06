@@ -3,6 +3,7 @@ package com.rian.osu.mods
 import com.rian.osu.GameMode
 import com.rian.osu.beatmap.sections.BeatmapDifficulty
 import com.rian.osu.utils.CircleSizeCalculator
+import ru.nsu.ccfit.zuev.osu.game.mods.GameMod
 
 /**
  * Represents the Really Easy mod.
@@ -11,6 +12,7 @@ class ModReallyEasy : Mod(), IModUserSelectable, IModApplicableToDifficultyWithS
     override val droidChar = 'l'
     override val acronym = "RE"
     override val textureNameSuffix = "reallyeasy"
+    override val enum = GameMod.MOD_REALLYEASY
 
     override fun calculateScoreMultiplier(difficulty: BeatmapDifficulty) = 0.5f
 

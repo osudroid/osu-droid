@@ -19,8 +19,10 @@ public enum GameMod {
     MOD_PERFECT("pf", 1),
     MOD_FLASHLIGHT("fl", 1.12f),
     MOD_PRECISE("pr", 1.06f),
+    MOD_SMALLCIRCLE("sc", 1.06f, true),
     MOD_REALLYEASY("re", 0.5f, true),
-    MOD_SCOREV2("v2", 1, true);
+    MOD_SCOREV2("v2", 1, true),
+    MOD_SPEEDUP("su", 1.06f, true);
 
     public final String shortName;
     public final float scoreMultiplier;
@@ -56,8 +58,10 @@ public enum GameMod {
             case MOD_PERFECT -> "perfect";
             case MOD_FLASHLIGHT -> "flashlight";
             case MOD_PRECISE -> "precise";
+            case MOD_SMALLCIRCLE -> "smallcircle";
             case MOD_REALLYEASY -> "reallyeasy";
             case MOD_SCOREV2 -> "scorev2";
+            case MOD_SPEEDUP -> "speedup";
         };
     }
 }

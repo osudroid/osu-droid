@@ -8,6 +8,7 @@ import com.rian.osu.beatmap.sections.BeatmapDifficulty
 import com.rian.osu.math.Vector2
 import com.rian.osu.utils.CircleSizeCalculator
 import kotlin.math.min
+import ru.nsu.ccfit.zuev.osu.game.mods.GameMod
 
 /**
  * Represents the Hard Rock mod.
@@ -16,6 +17,7 @@ class ModHardRock : Mod(), IModUserSelectable, IModApplicableToDifficulty, IModA
     override val droidChar = 'r'
     override val acronym = "HR"
     override val textureNameSuffix = "hardrock"
+    override val enum = GameMod.MOD_HARDROCK
     override val isRanked = true
     override val incompatibleMods = super.incompatibleMods + ModEasy::class
 

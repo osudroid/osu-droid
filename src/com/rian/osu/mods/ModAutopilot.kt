@@ -1,6 +1,7 @@
 package com.rian.osu.mods
 
 import com.rian.osu.beatmap.sections.BeatmapDifficulty
+import ru.nsu.ccfit.zuev.osu.game.mods.GameMod
 
 /**
  * Represents the Autopilot mod.
@@ -9,6 +10,7 @@ class ModAutopilot : Mod(), IModUserSelectable {
     override val droidChar = 'p'
     override val acronym = "AP"
     override val textureNameSuffix = "relax2"
+    override val enum = GameMod.MOD_AUTOPILOT
     override val incompatibleMods = super.incompatibleMods + arrayOf(
         ModRelax::class, ModAuto::class, ModNoFail::class
     )

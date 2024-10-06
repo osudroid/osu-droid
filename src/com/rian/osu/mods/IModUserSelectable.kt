@@ -1,5 +1,7 @@
 package com.rian.osu.mods
 
+import ru.nsu.ccfit.zuev.osu.game.mods.GameMod
+
 /**
  * An interface for [Mod]s which can be selected by the user.
  */
@@ -24,4 +26,9 @@ interface IModUserSelectable {
      */
     val textureName
         get() = "selection-mod-${textureNameSuffix}"
+
+    /**
+     * The [GameMod] equivalent of this [Mod]. Used in replay serialization.
+     */
+    val enum: GameMod
 }
