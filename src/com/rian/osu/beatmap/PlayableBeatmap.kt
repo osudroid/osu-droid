@@ -2,6 +2,7 @@ package com.rian.osu.beatmap
 
 import com.rian.osu.GameMode
 import com.rian.osu.mods.Mod
+import com.rian.osu.utils.ModHashSet
 import com.rian.osu.utils.ModUtils
 
 /**
@@ -16,12 +17,14 @@ abstract class PlayableBeatmap @JvmOverloads constructor(
     @JvmField
     val mode: GameMode,
 
+    mods: Iterable<Mod>? = null,
+) : IBeatmap {
     /**
      * The [Mod]s that were applied to this [PlayableBeatmap].
      */
     @JvmField
-    val mods: Iterable<Mod>? = null,
-) : IBeatmap {
+    val mods = ModHashSet(mods)
+
     override val formatVersion = baseBeatmap.formatVersion
     override val general = baseBeatmap.general
     override val metadata = baseBeatmap.metadata
