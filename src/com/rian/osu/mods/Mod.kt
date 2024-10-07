@@ -60,6 +60,8 @@ abstract class Mod {
         if (this is IModUserSelectable) {
             result = 31 * result + droidChar.hashCode()
             result = 31 * result + acronym.hashCode()
+            result = 31 * result + textureNameSuffix.hashCode()
+            result = 31 * result + enum.hashCode()
         }
 
         return result
