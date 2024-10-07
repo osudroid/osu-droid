@@ -3,7 +3,7 @@ package com.rian.osu.mods
 /**
  * Represents the Custom Speed mod. Serves as a container for custom speed multipliers.
  */
-class ModCustomSpeed(override val trackRateMultiplier: Float) : ModClockRateAdjust() {
+class ModCustomSpeed(override var trackRateMultiplier: Float) : ModClockRateAdjust() {
     override val isRanked = true
 
     override fun equals(other: Any?): Boolean {
