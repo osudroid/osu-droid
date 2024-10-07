@@ -23,6 +23,7 @@ import com.reco1l.osu.ui.entity.ComposedText
 import com.reco1l.osu.ui.SettingsFragment
 import com.reco1l.osu.updateThread
 import com.reco1l.toolkt.kotlin.runSafe
+import com.rian.osu.mods.ModScoreV2
 import com.rian.osu.ui.DifficultyAlgorithmSwitcher
 import org.anddev.andengine.engine.camera.SmoothCamera
 import org.anddev.andengine.entity.primitive.Rectangle
@@ -36,11 +37,9 @@ import org.json.JSONArray
 import ru.nsu.ccfit.zuev.osu.Config
 import ru.nsu.ccfit.zuev.osu.LibraryManager
 import ru.nsu.ccfit.zuev.osu.ToastLogger
-import ru.nsu.ccfit.zuev.osu.game.mods.GameMod.MOD_SCOREV2
 import ru.nsu.ccfit.zuev.osu.helper.TextButton
 import ru.nsu.ccfit.zuev.osu.menu.LoadingScreen.LoadingScene
 import ru.nsu.ccfit.zuev.osu.online.OnlinePanel
-import ru.nsu.ccfit.zuev.osu.scoring.Replay
 import ru.nsu.ccfit.zuev.skins.OsuSkin
 import java.text.SimpleDateFormat
 import java.util.*
@@ -720,15 +719,7 @@ object RoomScene : Scene(), IRoomEventListener, IPlayerEventListener
         // Updating player mods for other clients
         awaitModsChange = true
 
-        RoomAPI.setPlayerMods(
-            modsToString(getModMenu().mod),
-            getModMenu().changeSpeed,
-            getModMenu().fLfollowDelay,
-            getModMenu().customAR,
-            getModMenu().customOD,
-            getModMenu().customCS,
-            getModMenu().customHP
-        )
+        RoomAPI.setPlayerMods(getModMenu().enabledMods.toString())
 
         // Updating UI
         updateInformation()
@@ -875,15 +866,7 @@ object RoomScene : Scene(), IRoomEventListener, IPlayerEventListener
         // Updating player mods
         awaitModsChange = true
 
-        RoomAPI.setPlayerMods(
-            modsToString(getModMenu().mod),
-            getModMenu().changeSpeed,
-            getModMenu().fLfollowDelay,
-            getModMenu().customAR,
-            getModMenu().customOD,
-            getModMenu().customCS,
-            getModMenu().customHP
-        )
+        RoomAPI.setPlayerMods(getModMenu().enabledMods.toString())
 
         // Update room info text
         updateInformation()
@@ -960,21 +943,13 @@ object RoomScene : Scene(), IRoomEventListener, IPlayerEventListener
             val roomMods = room!!.mods.set.apply {
 
                 if (winCondition == SCORE_V2)
-                    add(MOD_SCOREV2)
+                    add(ModScoreV2())
                 else
-                    remove(MOD_SCOREV2)
+                    remove(ModScoreV2())
             }
 
-            // Applying to all room
-            RoomAPI.setRoomMods(
-                modsToString(roomMods),
-                getModMenu().changeSpeed,
-                getModMenu().fLfollowDelay,
-                getModMenu().customAR,
-                getModMenu().customOD,
-                getModMenu().customCS,
-                getModMenu().customHP
-            )
+            // Applying to all players
+            RoomAPI.setRoomMods(roomMods.toString())
         }
 
         // Updating player list
@@ -998,17 +973,7 @@ object RoomScene : Scene(), IRoomEventListener, IPlayerEventListener
             }
 
             getGlobal().songMenu.stopMusic()
-
-            Replay.oldMod = getModMenu().mod
-            Replay.oldChangeSpeed = getModMenu().changeSpeed
-            Replay.oldFLFollowDelay = getModMenu().fLfollowDelay
-
-            Replay.oldCustomAR = getModMenu().customAR
-            Replay.oldCustomOD = getModMenu().customOD
-            Replay.oldCustomCS = getModMenu().customCS
-            Replay.oldCustomHP = getModMenu().customHP
-
-            getGlobal().gameScene.startGame(getGlobal().selectedBeatmap, null)
+            getGlobal().gameScene.startGame(getGlobal().selectedBeatmap, null, getModMenu().enabledMods)
 
             // Hiding any player menu if its shown
             mainThread { playerList!!.menu.dismiss() }

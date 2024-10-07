@@ -8,6 +8,8 @@ import androidx.room.Insert
 import androidx.room.OnConflictStrategy
 import androidx.room.PrimaryKey
 import androidx.room.Query
+import com.rian.osu.beatmap.sections.BeatmapDifficulty
+import com.rian.osu.utils.ModUtils
 import org.apache.commons.io.FilenameUtils
 import org.json.JSONObject
 import ru.nsu.ccfit.zuev.osu.Config
@@ -144,12 +146,13 @@ data class ScoreInfo @JvmOverloads constructor(
 
     }
 
-    fun toStatisticV2() = StatisticV2().also {
+    @JvmOverloads
+    fun toStatisticV2(difficulty: BeatmapDifficulty? = null) = StatisticV2().also {
 
         it.playerName = playerName
         it.setBeatmap(beatmapSetDirectory, beatmapFilename)
         it.replayFilename = replayFilename
-        it.setModFromString(mods)
+        it.mod = ModUtils.convertModString(mods)
         it.setForcedScore(score)
         it.maxCombo = maxCombo
         it.mark = mark
@@ -162,6 +165,11 @@ data class ScoreInfo @JvmOverloads constructor(
         it.accuracy = accuracy
         it.time = time
         it.isPerfect = isPerfect
+
+        if (difficulty != null) {
+            it.migrateLegacyMods(difficulty)
+            it.calculateModScoreMultiplier(difficulty)
+        }
 
     }
 

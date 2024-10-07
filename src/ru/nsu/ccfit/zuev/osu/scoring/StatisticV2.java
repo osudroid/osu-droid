@@ -2,25 +2,28 @@ package ru.nsu.ccfit.zuev.osu.scoring;
 
 import ru.nsu.ccfit.zuev.osu.SecurityUtils;
 
+import java.io.Serial;
 import java.io.Serializable;
-import java.util.EnumSet;
-import java.util.Locale;
 import java.util.Random;
 
 import com.reco1l.ibancho.data.RoomTeam;
 import com.reco1l.ibancho.data.WinCondition;
-import com.reco1l.osu.data.BeatmapInfo;
 import com.reco1l.osu.data.ScoreInfo;
 import com.reco1l.osu.multiplayer.Multiplayer;
-import org.jetbrains.annotations.Nullable;
+import com.rian.osu.beatmap.sections.BeatmapDifficulty;
+import com.rian.osu.mods.ILegacyMod;
+import com.rian.osu.mods.ModFlashlight;
+import com.rian.osu.mods.ModHidden;
+import com.rian.osu.utils.ModHashSet;
+import com.rian.osu.utils.ModUtils;
+
 import org.json.JSONObject;
 import ru.nsu.ccfit.zuev.osu.Config;
 import ru.nsu.ccfit.zuev.osu.game.GameHelper;
-import ru.nsu.ccfit.zuev.osu.game.cursor.flashlight.FlashLightEntity;
-import ru.nsu.ccfit.zuev.osu.game.mods.GameMod;
 import ru.nsu.ccfit.zuev.osu.menu.ScoreBoardItem;
 
 public class StatisticV2 implements Serializable {
+    @Serial
     private static final long serialVersionUID = 8339570462000129479L;
     private static final Random random = new Random();
 
@@ -39,35 +42,24 @@ public class StatisticV2 implements Serializable {
     private int realScore = 0;
     private float hp = 1;
     private float diffModifier = 1;
-    private EnumSet<GameMod> mod = EnumSet.noneOf(GameMod.class);
+    private ModHashSet mod = new ModHashSet();
     private String playerName = Config.getOnlineUsername();
     private String replayFilename = "";
     private int forcedScore = -1;
     private String mark = null;
-    private float changeSpeed = 1.0f;
     private final int MAX_SCORE = 1000000;
     private final float ACC_PORTION = 0.3f;
     private final float COMBO_PORTION = 0.7f;
     private int maxObjectsCount = 0;
     private int maxHighestCombo = 0;
     private int bonusScore = 0;
-    private float flFollowDelay = FlashLightEntity.defaultMoveDelayS;
     private int positiveTotalOffsetSum;
     private double positiveHitOffsetSum;
     private int negativeTotalOffsetSum;
     private double negativeHitOffsetSum;
     private double unstableRate;
 
-    private Float beatmapCS;
-    private Float beatmapOD;
-
-    private Float customAR;
-    private Float customOD;
-    private Float customCS;
-    private Float customHP;
     private int life = 1;
-
-    private boolean isLegacySC = false;
 
     /**
      * Indicates that the player is alive (HP hasn't reached 0, or it recovered), this is exclusively used for
@@ -98,35 +90,15 @@ public class StatisticV2 implements Serializable {
 
     public StatisticV2() {}
 
-    public StatisticV2(final Statistic stat) {
-        notes = stat.notes;
-        hit300 = stat.hit300;
-        hit100 = stat.hit100;
-        hit50 = stat.hit50;
-        hit300k = stat.hit300k;
-        hit100k = stat.hit100k;
-        misses = stat.misses;
-        maxCombo = stat.maxCombo;
-        currentCombo = stat.currentCombo;
-        totalScore = stat.totalScore;
-        possibleScore = stat.possibleScore;
-        realScore = stat.realScore;
-        hp = stat.hp;
-        diffModifier = stat.diffModifier;
-        mod = stat.mod.clone();
-        if (stat.mod.contains(GameMod.MOD_EASY)) {
-            life = 3;
-        }
-
-        setPlayerName(Config.getOnlineUsername());
-        computeModScoreMultiplier();
+    public StatisticV2(final String[] params) {
+        this(params, null);
     }
 
-    public StatisticV2(final String[] params) {
+    public StatisticV2(final String[] params, final BeatmapDifficulty originalDifficulty) {
         playerName = "";
         if (params.length < 6) return;
 
-        setModFromString(params[0]);
+        mod = ModUtils.convertModString(params[0]);
         setForcedScore(Integer.parseInt(params[1]));
         maxCombo = Integer.parseInt(params[2]);
         mark = params[3];
@@ -146,7 +118,11 @@ public class StatisticV2 implements Serializable {
         if (params.length >= 14) {
             playerName = params[13];
         }
-        computeModScoreMultiplier();
+
+        if (originalDifficulty != null) {
+            migrateLegacyMods(originalDifficulty);
+            calculateModScoreMultiplier(originalDifficulty);
+        }
     }
 
     public float getHp() {
@@ -337,18 +313,8 @@ public class StatisticV2 implements Serializable {
     public String getMark() {
         if (mark != null)
             return mark;
-        boolean isH = false;
-        forcycle:
-        for (final GameMod m : mod) {
-            switch (m) {
-                case MOD_HIDDEN:
-                case MOD_FLASHLIGHT:
-                    isH = true;
-                    break forcycle;
-                default:
-                    break;
-            }
-        }
+
+        boolean isH = mod.contains(ModHidden.class) || mod.contains(ModFlashlight.class);
 
         if (hit100 == 0 && hit50 == 0 && misses == 0) {
             if (isH) {
@@ -476,14 +442,12 @@ public class StatisticV2 implements Serializable {
         this.time = time;
     }
 
-    public EnumSet<GameMod> getMod() {
+    public ModHashSet getMod() {
         return mod;
     }
 
-    public void setMod(final EnumSet<GameMod> mod) {
-        this.mod = mod.clone();
-
-        computeModScoreMultiplier();
+    public void setMod(final ModHashSet mod) {
+        this.mod = mod;
     }
 
     public float getDiffModifier() {
@@ -500,128 +464,6 @@ public class StatisticV2 implements Serializable {
 
     public void setPlayerName(final String playerName) {
         this.playerName = playerName;
-    }
-
-    public String getModString() {
-        String s = "";
-
-        if (mod.contains(GameMod.MOD_AUTO)) {
-            s += "a";
-        }
-        if (mod.contains(GameMod.MOD_RELAX)) {
-            s += "x";
-        }
-        if (mod.contains(GameMod.MOD_AUTOPILOT)) {
-            s += "p";
-        }
-        if (mod.contains(GameMod.MOD_EASY)) {
-            s += "e";
-        }
-        if (mod.contains(GameMod.MOD_NOFAIL)) {
-            s += "n";
-        }
-        if (mod.contains(GameMod.MOD_HARDROCK)) {
-            s += "r";
-        }
-        if (mod.contains(GameMod.MOD_HIDDEN)) {
-            s += "h";
-        }
-        if (mod.contains(GameMod.MOD_FLASHLIGHT)) {
-            s += "i";
-        }
-        if (mod.contains(GameMod.MOD_DOUBLETIME)) {
-            s += "d";
-        }
-        if (mod.contains(GameMod.MOD_NIGHTCORE)) {
-            s += "c";
-        }
-        if (mod.contains(GameMod.MOD_HALFTIME)) {
-            s += "t";
-        }
-        if (mod.contains(GameMod.MOD_PRECISE)) {
-            s += "s";
-        }
-        if (mod.contains(GameMod.MOD_REALLYEASY)) {
-            s += "l";
-        }
-        if (mod.contains(GameMod.MOD_PERFECT)) {
-            s += "f";
-        }
-        if (mod.contains(GameMod.MOD_SUDDENDEATH)) {
-            s += "u";
-        }
-        if (mod.contains(GameMod.MOD_SCOREV2)) {
-            s += "v";
-        }
-        s += "|";
-        s += getExtraModString();
-        return s;
-    }
-
-    public void setModFromString(String s) {
-        String[] strMod = s.split("\\|", 2);
-        mod = EnumSet.noneOf(GameMod.class);
-        for (int i = 0; i < strMod[0].length(); i++) {
-            switch (strMod[0].charAt(i)) {
-                case 'a':
-                    mod.add(GameMod.MOD_AUTO);
-                    break;
-                case 'x':
-                    mod.add(GameMod.MOD_RELAX);
-                    break;
-                case 'p':
-                    mod.add(GameMod.MOD_AUTOPILOT);
-                    break;
-                case 'e':
-                    mod.add(GameMod.MOD_EASY);
-                    life = 3;
-                    break;
-                case 'n':
-                    mod.add(GameMod.MOD_NOFAIL);
-                    break;
-                case 'r':
-                    mod.add(GameMod.MOD_HARDROCK);
-                    break;
-                case 'h':
-                    mod.add(GameMod.MOD_HIDDEN);
-                    break;
-                case 'i':
-                    mod.add(GameMod.MOD_FLASHLIGHT);
-                    break;
-                case 'd':
-                    mod.add(GameMod.MOD_DOUBLETIME);
-                    break;
-                case 'c':
-                    mod.add(GameMod.MOD_NIGHTCORE);
-                    break;
-                case 't':
-                    mod.add(GameMod.MOD_HALFTIME);
-                    break;
-                case 's':
-                    mod.add(GameMod.MOD_PRECISE);
-                    break;
-                // Special handle for old removed SmallCircles mod.
-                case 'm':
-                    isLegacySC = true;
-                    break;
-                case 'l':
-                    mod.add(GameMod.MOD_REALLYEASY);
-                    break;    
-                case 'u':
-                    mod.add(GameMod.MOD_SUDDENDEATH);
-                    break;    
-                case 'f':
-                    mod.add(GameMod.MOD_PERFECT);
-                    break;
-                case 'v':
-                    mod.add(GameMod.MOD_SCOREV2);
-                    break;   
-            }
-        }
-        if (strMod.length > 1)
-            setExtraModFromString(strMod[1]);
-
-        computeModScoreMultiplier();
     }
 
     public String getReplayFilename() {
@@ -648,7 +490,7 @@ public class StatisticV2 implements Serializable {
 
     public String compile() {
         StringBuilder builder = new StringBuilder();
-        String mstring = getModString();
+        String mstring = mod.toString();
         if (mstring.length() == 0)
             mstring = "-";
         builder.append(mstring);
@@ -686,84 +528,6 @@ public class StatisticV2 implements Serializable {
     }
     public void setMaxHighestCombo(int count){
         maxHighestCombo = count;
-    }
-
-    public float getChangeSpeed(){
-        return changeSpeed;
-    }
-
-    public void setChangeSpeed(float speed){
-        changeSpeed = speed;
-
-        computeModScoreMultiplier();
-    }
-
-
-    public boolean isCustomAR() {
-        return customAR != null;
-    }
-
-    public Float getCustomAR() {
-        return customAR;
-    }
-
-    public void setCustomAR(@Nullable Float ar) {
-        customAR = ar;
-    }
-
-    public boolean isCustomOD() {
-        return customOD != null;
-    }
-
-    public Float getCustomOD() {
-        return customOD;
-    }
-
-    public void setCustomOD(@Nullable Float customOD) {
-        this.customOD = customOD;
-    }
-
-
-    public boolean isCustomHP() {
-        return customHP != null;
-    }
-
-    public Float getCustomHP() {
-        return customHP;
-    }
-
-    public void setCustomHP(@Nullable Float customHP) {
-        this.customHP = customHP;
-    }
-
-
-    public boolean isCustomCS() {
-        return customCS != null;
-    }
-
-    public Float getCustomCS() {
-        return customCS;
-    }
-
-    public void setCustomCS(@Nullable Float customCS) {
-        this.customCS = customCS;
-    }
-
-    public void setBeatmapCS(float beatmapCS) {
-        this.beatmapCS = beatmapCS;
-    }
-
-    public void setBeatmapOD(float beatmapOD) {
-        this.beatmapOD = beatmapOD;
-    }
-
-
-    public void setFLFollowDelay(float delay) {
-        flFollowDelay = delay;
-    }
-
-    public float getFLFollowDelay() {
-        return flFollowDelay;
     }
 
     public double getUnstableRate() {
@@ -805,92 +569,6 @@ public class StatisticV2 implements Serializable {
         return positiveTotalOffsetSum == 0 ? 0 : positiveHitOffsetSum / positiveTotalOffsetSum;
     }
 
-    public float getSpeed(){
-        float speed = changeSpeed;
-        if (mod.contains(GameMod.MOD_DOUBLETIME) || mod.contains(GameMod.MOD_NIGHTCORE)){
-            speed *= 1.5f;
-        }
-        if (mod.contains(GameMod.MOD_HALFTIME)){
-            speed *= 0.75f;
-        }
-        return speed;
-    }
-
-    public static float getSpeedChangeScoreMultiplier(float speed, EnumSet<GameMod> mod) {
-        float multi = speed;
-        if (multi > 1){
-            multi = 1.0f + (multi - 1.0f) * 0.24f;
-        } else if (multi < 1){
-            multi = (float) Math.pow(0.3, (1.0 - multi) * 4);
-        } else {
-            return 1f;
-        }
-        if (mod.contains(GameMod.MOD_DOUBLETIME) || mod.contains(GameMod.MOD_NIGHTCORE)){
-            multi /= 1.12f;
-        }
-        if (mod.contains(GameMod.MOD_HALFTIME)){
-            multi /= 0.3f;
-        }
-        return multi;
-    }
-
-    private float getSpeedChangeScoreMultiplier(){
-        return getSpeedChangeScoreMultiplier(getSpeed(), mod);
-    }
-
-    public String getExtraModString() {
-        StringBuilder builder = new StringBuilder();
-        if (changeSpeed != 1){
-            builder.append(String.format(Locale.ENGLISH, "x%.2f|", changeSpeed));
-        }
-        if (isCustomAR()){
-            builder.append(String.format(Locale.ENGLISH, "AR%.1f|", customAR));
-        }
-        if (isCustomOD()){
-            builder.append(String.format(Locale.ENGLISH, "OD%.1f|", customOD));
-        }
-        if (isCustomCS()){
-            builder.append(String.format(Locale.ENGLISH, "CS%.1f|", customCS));
-        }
-        if (isCustomHP()){
-            builder.append(String.format(Locale.ENGLISH, "HP%.1f|", customHP));
-        }
-        if (flFollowDelay != FlashLightEntity.defaultMoveDelayS) {
-            builder.append(String.format(Locale.ENGLISH, "FLD%.2f|", flFollowDelay));
-        }
-        if (builder.length() > 0){
-            builder.delete(builder.length() - 1, builder.length());
-        }
-
-        return builder.toString();
-    }
-
-    public void setExtraModFromString(String s) {
-        for (String str: s.split("\\|")){
-            if (str.startsWith("x") && str.length() == 5){
-                changeSpeed = Float.parseFloat(str.substring(1));
-                continue;
-            }
-            if (str.startsWith("AR")){
-                customAR = Float.parseFloat(str.substring(2));
-            }
-            if (str.startsWith("OD")){
-                customOD = Float.parseFloat(str.substring(2));
-            }
-            if (str.startsWith("CS")){
-                customCS = Float.parseFloat(str.substring(2));
-            }
-            if (str.startsWith("HP")){
-                customHP = Float.parseFloat(str.substring(2));
-            }
-            if (str.startsWith("FLD")) {
-                flFollowDelay = Float.parseFloat(str.substring(3));
-            }
-        }
-
-        computeModScoreMultiplier();
-    }
-
     /**
      * Converts the statistic into a JSONObject readable by the multiplayer server.
      */
@@ -900,7 +578,7 @@ public class StatisticV2 implements Serializable {
                 put("accuracy", getAccuracyForServer());
                 put("score", getTotalScoreWithMultiplier());
                 put("username", playerName);
-                put("modstring", getModString());
+                put("modstring", mod.toString());
                 put("maxCombo", maxCombo);
                 put("geki", hit300k);
                 put("perfect", hit300);
@@ -935,7 +613,7 @@ public class StatisticV2 implements Serializable {
             beatmapSetDirectory,
             playerName,
             replayFilename,
-            getModString(),
+            mod.toString(),
             getTotalScoreWithMultiplier(),
             maxCombo,
             getMark(),
@@ -951,48 +629,21 @@ public class StatisticV2 implements Serializable {
         );
     }
 
-
-    private void computeModScoreMultiplier() {
+    public void calculateModScoreMultiplier(final BeatmapDifficulty originalDifficulty) {
         modScoreMultiplier = 1;
 
-        for (GameMod m : mod) {
-            modScoreMultiplier *= m.scoreMultiplier;
-        }
-
-        if (isCustomCS() && beatmapCS != null) {
-            modScoreMultiplier *= getCustomCSScoreMultiplier(beatmapCS, customCS);
-        }
-
-        if (isCustomOD() && beatmapOD != null) {
-            modScoreMultiplier *= getCustomODScoreMultiplier(beatmapOD, customOD);
-        }
-
-        if (changeSpeed != 1f) {
-            modScoreMultiplier *= getSpeedChangeScoreMultiplier();
+        for (var m : mod) {
+            modScoreMultiplier *= m.calculateScoreMultiplier(originalDifficulty);
         }
     }
 
-    public static float getCustomCSScoreMultiplier(float beatmapCS, float customCS) {
-        float diff = customCS - beatmapCS;
-
-        return diff >= 0
-            ? 1 + 0.0075f * (float) Math.pow(diff, 1.5)
-            : 2 / (1 + (float) Math.exp(-0.5 * diff));
-    }
-
-    public static float getCustomODScoreMultiplier(float beatmapOD, float customOD) {
-        float diff = customOD - beatmapOD;
-
-        return diff >= 0
-            ? 1 + 0.005f * (float) Math.pow(diff, 1.3)
-            : 2 / (1 + (float) Math.exp(-0.25 * diff));
-    }
-
-    /**
-     * Determines if the score has the old SC mod enabled, this will be replaced with a custom CS when replaying.
-     */
-    public boolean isLegacySC() {
-        return isLegacySC;
+    public void migrateLegacyMods(final BeatmapDifficulty originalDifficulty) {
+        for (var m : mod) {
+            if (m instanceof ILegacyMod legacyMod) {
+                mod.remove(m);
+                mod.add(legacyMod.migrate(originalDifficulty));
+            }
+        }
     }
 
     /**
@@ -1000,26 +651,5 @@ public class StatisticV2 implements Serializable {
      */
     public boolean isTeamStatistic() {
         return Multiplayer.isConnected() && (playerName.equals(RoomTeam.RED.toString()) || playerName.equals(RoomTeam.BLUE.toString()));
-    }
-
-    /**
-     * Applies the equivalent of the old SC mod with custom CS according to the track passed.
-     */
-    public void processLegacySC(BeatmapInfo track) {
-
-        var cs = track.getCircleSize();
-
-        for (GameMod m : mod) switch (m) {
-
-            case MOD_HARDROCK:
-                ++cs;
-                continue;
-
-            case MOD_EASY:
-            case MOD_REALLYEASY:
-                --cs;
-        }
-
-        customCS = cs + 4;
     }
 }

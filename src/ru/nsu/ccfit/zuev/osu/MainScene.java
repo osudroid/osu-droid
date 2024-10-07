@@ -974,23 +974,33 @@ public class MainScene implements IUpdateHandler {
 
     public void watchReplay(String replayFile) {
         Replay replay = new Replay();
-        if (replay.loadInfo(replayFile)) {
-            if (replay.replayVersion >= 3) {
-                //replay
-                ScoringScene scorescene = GlobalManager.getInstance().getScoring();
-                StatisticV2 stat = replay.getStat();
-                BeatmapInfo beatmap = LibraryManager.findBeatmapByMD5(replay.getMd5());
-                if (beatmap != null) {
-                    GlobalManager.getInstance().getMainScene().setBeatmap(beatmap);
-                    GlobalManager.getInstance().getSongMenu().select();
-                    ResourceManager.getInstance().loadBackground(beatmap.getBackgroundPath());
-                    GlobalManager.getInstance().getSongService().preLoad(beatmap.getAudioPath());
-                    GlobalManager.getInstance().getSongService().play();
-                    scorescene.load(stat, null, GlobalManager.getInstance().getSongService(), replayFile, null, beatmap);
-                    GlobalManager.getInstance().getEngine().setScene(scorescene.getScene());
-                }
-            }
+
+        if (!replay.loadInfo(replayFile) || replay.replayVersion < 3) {
+            return;
         }
+
+        BeatmapInfo beatmap = LibraryManager.findBeatmapByMD5(replay.getMd5());
+
+        if (beatmap == null) {
+            return;
+        }
+
+        GlobalManager.getInstance().getMainScene().setBeatmap(beatmap);
+        StatisticV2 stat = replay.getStat();
+
+        var difficulty = beatmap.getBeatmapDifficulty();
+
+        stat.migrateLegacyMods(difficulty);
+        stat.calculateModScoreMultiplier(difficulty);
+
+        GlobalManager.getInstance().getSongMenu().select();
+        ResourceManager.getInstance().loadBackground(beatmap.getBackgroundPath());
+        GlobalManager.getInstance().getSongService().preLoad(beatmap.getAudioPath());
+        GlobalManager.getInstance().getSongService().play();
+
+        ScoringScene scorescene = GlobalManager.getInstance().getScoring();
+        scorescene.load(stat, null, GlobalManager.getInstance().getSongService(), replayFile, null, beatmap);
+        GlobalManager.getInstance().getEngine().setScene(scorescene.getScene());
     }
 
     public void show() {

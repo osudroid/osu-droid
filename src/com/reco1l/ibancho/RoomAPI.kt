@@ -3,13 +3,13 @@ package com.reco1l.ibancho
 import ru.nsu.ccfit.zuev.osu.SecurityUtils
 import com.reco1l.ibancho.data.PlayerStatus
 import com.reco1l.ibancho.data.Room
+import com.reco1l.ibancho.data.RoomMods
 import com.reco1l.ibancho.data.RoomStatus
 import com.reco1l.ibancho.data.RoomTeam
 import com.reco1l.ibancho.data.TeamMode
 import com.reco1l.ibancho.data.WinCondition
 import com.reco1l.ibancho.data.parseBeatmap
 import com.reco1l.ibancho.data.parseGameplaySettings
-import com.reco1l.ibancho.data.parseMods
 import com.reco1l.ibancho.data.parsePlayer
 import com.reco1l.ibancho.data.parsePlayers
 import com.reco1l.osu.multiplayer.Multiplayer
@@ -69,16 +69,16 @@ object RoomAPI
         Multiplayer.log("RECEIVED: playerModsChanged -> ${it.contentToString()}")
 
         val id = (it[0] as String).toLong()
-        val json = it[1] as JSONObject
+        val mods = it[1] as String
 
-        playerEventListener?.onPlayerModsChange(id, parseMods(json))
+        playerEventListener?.onPlayerModsChange(id, RoomMods(mods))
     }
 
     private val roomModsChanged = Listener {
         Multiplayer.log("RECEIVED: roomModsChanged -> ${it.contentToString()}")
 
-        val json = it[0] as JSONObject
-        roomEventListener?.onRoomModsChange(parseMods(json))
+        val mods = it[0] as String
+        roomEventListener?.onRoomModsChange(RoomMods(mods))
     }
 
     private val roomGameplaySettingsChanged = Listener {
@@ -163,7 +163,7 @@ object RoomAPI
                 name = json.getString("name"),
                 isLocked = json.getBoolean("isLocked"),
                 maxPlayers = json.getInt("maxPlayers"),
-                mods = parseMods(json.getJSONObject("mods")),
+                mods = RoomMods(json.getString("mods")),
                 gameplaySettings = parseGameplaySettings(json.getJSONObject("gameplaySettings")),
                 teamMode = TeamMode.from(json.getInt("teamMode")),
                 winCondition = WinCondition.from(json.getInt("winCondition")),
@@ -405,32 +405,13 @@ object RoomAPI
      * Change room mods.
      */
     @JvmStatic
-    fun setRoomMods(
-        mods: String?,
-        speedMultiplier: Float,
-        flFollowDelay: Float,
-        customAR: Float? = null,
-        customOD: Float? = null,
-        customCS: Float? = null,
-        customHP: Float? = null
-    )
+    fun setRoomMods(mods: String?)
     {
-        val json = JSONObject().apply {
-
-            put("mods", mods)
-            put("speedMultiplier", speedMultiplier)
-            put("flFollowDelay", flFollowDelay)
-            put("customAR", customAR)
-            put("customOD", customOD)
-            put("customCS", customCS)
-            put("customHP", customHP)
-
-        }
-        socket?.emit("roomModsChanged", json) ?: run {
+        socket?.emit("roomModsChanged", mods) ?: run {
 			Multiplayer.log("WARNING: Tried to emit event 'roomModsChanged' while socket is null.")
 			return
 		}
-        Multiplayer.log("EMITTED: roomModsChanged -> $json")
+        Multiplayer.log("EMITTED: roomModsChanged -> $mods")
     }
 
     /**
@@ -605,34 +586,14 @@ object RoomAPI
      * Change player mods.
      */
     @JvmStatic
-    @JvmOverloads
-    fun setPlayerMods(
-        mods: String?,
-        speedMultiplier: Float,
-        flFollowDelay: Float,
-        customAR: Float? = null,
-        customOD: Float? = null,
-        customCS: Float? = null,
-        customHP: Float? = null
-    )
+    fun setPlayerMods(mods: String?)
     {
-        val json = JSONObject().apply {
-
-            put("mods", mods)
-            put("speedMultiplier", speedMultiplier)
-            put("flFollowDelay", flFollowDelay)
-
-            put("customAR", customAR)
-            put("customOD", customOD)
-            put("customCS", customCS)
-            put("customHP", customHP)
-        }
-        socket?.emit("playerModsChanged", json) ?: run {
+        socket?.emit("playerModsChanged", mods) ?: run {
 			Multiplayer.log("WARNING: Tried to emit event 'playerModsChanged' while socket is null.")
 			return
 		}
 
-        Multiplayer.log("EMITTED: playerModsChanged -> $json")
+        Multiplayer.log("EMITTED: playerModsChanged -> $mods")
     }
 
     /**

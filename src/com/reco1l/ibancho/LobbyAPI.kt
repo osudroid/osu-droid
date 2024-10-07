@@ -4,11 +4,11 @@ import com.reco1l.framework.net.JsonArrayRequest
 import com.reco1l.framework.net.JsonObjectRequest
 import com.reco1l.ibancho.data.Room
 import com.reco1l.ibancho.data.RoomBeatmap
+import com.reco1l.ibancho.data.RoomMods
 import com.reco1l.ibancho.data.RoomStatus
 import com.reco1l.ibancho.data.TeamMode
 import com.reco1l.ibancho.data.WinCondition
 import com.reco1l.ibancho.data.parseGameplaySettings
-import com.reco1l.ibancho.data.parseMods
 import com.reco1l.toolkt.data.putObject
 
 object LobbyAPI
@@ -59,7 +59,7 @@ object LobbyAPI
                         name = json.getString("name"),
                         isLocked = json.getBoolean("isLocked"),
                         maxPlayers = json.getInt("maxPlayers"),
-                        mods = parseMods(json.getJSONObject("mods")),
+                        mods = RoomMods(json.getString("mods")),
                         gameplaySettings = parseGameplaySettings(json.getJSONObject("gameplaySettings")),
                         teamMode = TeamMode.from(json.getInt("teamMode")),
                         winCondition = WinCondition.from(json.getInt("winCondition")),

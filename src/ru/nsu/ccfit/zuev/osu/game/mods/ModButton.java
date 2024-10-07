@@ -1,5 +1,7 @@
 package ru.nsu.ccfit.zuev.osu.game.mods;
 
+import com.rian.osu.mods.IModUserSelectable;
+
 import org.anddev.andengine.entity.sprite.Sprite;
 import org.anddev.andengine.input.touch.TouchEvent;
 
@@ -7,32 +9,31 @@ import ru.nsu.ccfit.zuev.osu.ResourceManager;
 import ru.nsu.ccfit.zuev.osu.Utils;
 
 public class ModButton extends Sprite {
-    private static final float initalScale = 1.4f;
+    private static final float unselectedScale = 1.4f;
     private static final float selectedScale = 1.8f;
-    private static final float initalRotate = 0f;
-    private static final float selectedRotate = 5f;
+    private static final float unselectedRotation = 0f;
+    private static final float selectedRotation = 5f;
 
-    private GameMod mod;
-    private IModSwitcher switcher = null;
+    private final IModUserSelectable mod;
+    private final IModSwitcher switcher;
 
-    public ModButton(float pX, float pY, String texture, GameMod mod) {
-        super(Utils.toRes(pX), Utils.toRes(pY), ResourceManager.getInstance().getTexture(texture));
+    public ModButton(float pX, float pY, IModUserSelectable mod, IModSwitcher switcher) {
+        super(Utils.toRes(pX), Utils.toRes(pY), ResourceManager.getInstance().getTexture(mod.getTextureName()));
+
         this.mod = mod;
-        setScale(initalScale);
-    }
-
-    public void setSwitcher(IModSwitcher switcher) {
         this.switcher = switcher;
+
+        setScale(unselectedScale);
     }
 
-    public void setModEnabled(boolean enabled) {
+    public void setEnabled(boolean enabled) {
         if (enabled) {
             setScale(selectedScale);
-            setRotation(selectedRotate);
+            setRotation(selectedRotation);
             setColor(1, 1, 1);
         } else {
-            setScale(initalScale);
-            setRotation(initalRotate);
+            setScale(unselectedScale);
+            setRotation(unselectedRotation);
             setColor(0.7f, 0.7f, 0.7f);
         }
     }
@@ -42,7 +43,7 @@ public class ModButton extends Sprite {
     public boolean onAreaTouched(TouchEvent pSceneTouchEvent,
                                  float pTouchAreaLocalX, float pTouchAreaLocalY) {
         if (pSceneTouchEvent.isActionDown() && switcher != null) {
-            setModEnabled(switcher.switchMod(mod));
+            setEnabled(switcher.switchMod(mod));
             return true;
         }
 

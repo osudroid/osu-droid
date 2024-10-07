@@ -15,11 +15,10 @@ import com.edlplan.ui.EasingHelper
 import com.reco1l.osu.mainThread
 import com.reco1l.osu.multiplayer.Multiplayer
 import com.reco1l.toolkt.android.dp
+import com.rian.osu.mods.ModFlashlight
 import org.anddev.andengine.input.touch.TouchEvent
 import ru.nsu.ccfit.zuev.osu.Config
 import ru.nsu.ccfit.zuev.osu.GlobalManager
-import ru.nsu.ccfit.zuev.osu.game.cursor.flashlight.FlashLightEntity
-import ru.nsu.ccfit.zuev.osu.game.mods.GameMod
 import ru.nsu.ccfit.zuev.osu.menu.ModMenu
 import ru.nsu.ccfit.zuev.osuplus.R
 import java.util.Locale
@@ -174,7 +173,7 @@ class InGameSettingMenu : BaseFragment() {
                 ModMenu.getInstance().changeSpeed = 1f
                 speedModifyBar.progress = 10
                 speedModifyText.text = String.format(Locale.getDefault(), "%.2fx", ModMenu.getInstance().changeSpeed)
-                ModMenu.getInstance().updateMultiplierText()
+                ModMenu.getInstance().changeMultiplierText()
             }
         }
 
@@ -230,7 +229,7 @@ class InGameSettingMenu : BaseFragment() {
                         val p = 0.5f + 0.05f * progress
                         speedModifyText.text = String.format(Locale.getDefault(), "%.2fx", p)
                         ModMenu.getInstance().changeSpeed = p
-                        ModMenu.getInstance().updateMultiplierText()
+                        ModMenu.getInstance().changeMultiplierText()
                     }
                 }
             )
@@ -253,13 +252,12 @@ class InGameSettingMenu : BaseFragment() {
                 ) {
                     if (!containsFlashlight) return
 
-                    ModMenu.getInstance().fLfollowDelay =
-                        ((progress * ModMenu.DEFAULT_FL_FOLLOW_DELAY).roundToInt()).toFloat() // (progress * 1200f / (10f * 1000f)).roundToInt().toFloat()
-                    followDelayText.text = "${progress * FlashLightEntity.defaultMoveDelayMS}ms"
+                    ModMenu.getInstance().flFollowDelay = (progress * ModFlashlight.DEFAULT_FOLLOW_DELAY).roundToInt().toFloat()
+                    followDelayText.text = "${progress * ModFlashlight.DEFAULT_FOLLOW_DELAY * 1000}ms"
                 }
 
                 override fun onStartTrackingTouch(seekBar: SeekBar?) {
-                    containsFlashlight = ModMenu.getInstance().mod.contains(GameMod.MOD_FLASHLIGHT)
+                    containsFlashlight = ModMenu.getInstance().enabledMods.contains(ModFlashlight::class)
                 }
 
                 override fun onStopTrackingTouch(seekBar: SeekBar?) {
@@ -268,7 +266,7 @@ class InGameSettingMenu : BaseFragment() {
                     seekBar!!.progress = 0
                     ModMenu.getInstance().resetFLFollowDelay()
                     followDelayText.text =
-                        "${(ModMenu.getInstance().fLfollowDelay * 1000f).toInt()}ms"
+                        "${(ModMenu.getInstance().flFollowDelay * 1000f).toInt()}ms"
                 }
             }
         )
@@ -332,7 +330,7 @@ class InGameSettingMenu : BaseFragment() {
                 override fun onStartTrackingTouch(seekBar: SeekBar?) {}
 
                 override fun onStopTrackingTouch(seekBar: SeekBar?) {
-                    ModMenu.getInstance().updateMultiplierText()
+                    ModMenu.getInstance().changeMultiplierText()
                 }
             }
         )
@@ -351,7 +349,7 @@ class InGameSettingMenu : BaseFragment() {
                 override fun onStartTrackingTouch(seekBar: SeekBar?) {}
 
                 override fun onStopTrackingTouch(seekBar: SeekBar?) {
-                    ModMenu.getInstance().updateMultiplierText()
+                    ModMenu.getInstance().changeMultiplierText()
                 }
             }
         )
@@ -370,7 +368,7 @@ class InGameSettingMenu : BaseFragment() {
                 override fun onStartTrackingTouch(seekBar: SeekBar?) {}
 
                 override fun onStopTrackingTouch(seekBar: SeekBar?) {
-                    ModMenu.getInstance().updateMultiplierText()
+                    ModMenu.getInstance().changeMultiplierText()
                 }
             }
         )
@@ -389,7 +387,7 @@ class InGameSettingMenu : BaseFragment() {
                 override fun onStartTrackingTouch(seekBar: SeekBar?) {}
 
                 override fun onStopTrackingTouch(seekBar: SeekBar?) {
-                    ModMenu.getInstance().updateMultiplierText()
+                    ModMenu.getInstance().changeMultiplierText()
                 }
             }
         )
@@ -433,7 +431,7 @@ class InGameSettingMenu : BaseFragment() {
         customHPBar.progress = (((customHP ?: beatmapInfo?.hpDrainRate) ?: 10f) * 10).toInt()
         customHPText.text = "${customHPBar.progress / 10f}"
 
-        ModMenu.getInstance().updateMultiplierText()
+        ModMenu.getInstance().changeMultiplierText()
     }
 
     override fun dismiss() {
@@ -447,11 +445,11 @@ class InGameSettingMenu : BaseFragment() {
     }
 
     private fun updateVisibility() {
-        val flFollowDelay = ModMenu.getInstance().fLfollowDelay
+        val flFollowDelay = ModMenu.getInstance().flFollowDelay
+
         followDelayRow.visibility =
-            if (ModMenu.getInstance().mod.contains(GameMod.MOD_FLASHLIGHT)) View.VISIBLE else View.GONE
-        followDelayBar.progress =
-            (flFollowDelay * 1000f / FlashLightEntity.defaultMoveDelayMS).toInt()
+            if (ModMenu.getInstance().enabledMods.contains(ModFlashlight::class)) View.VISIBLE else View.GONE
+        followDelayBar.progress = (flFollowDelay  / ModFlashlight.DEFAULT_FOLLOW_DELAY).toInt()
         followDelayText.text = "${(flFollowDelay * 1000f).toInt()}ms"
 
         if (Multiplayer.isMultiplayer) {

@@ -1,6 +1,5 @@
 package com.reco1l.ibancho.data
 
-import com.reco1l.osu.multiplayer.stringToMods
 import org.json.JSONArray
 import org.json.JSONObject
 
@@ -14,7 +13,7 @@ internal fun parsePlayer(o: JSONObject): RoomPlayer
             name = o.getString("username"),
             status = PlayerStatus.from(o.getInt("status")),
             team = if (o.isNull("team")) null else o.getInt("team").let { n -> RoomTeam.from(n) },
-            mods = parseMods(o.getJSONObject("mods"))
+            mods = RoomMods(o.getString("mods"))
     )
 }
 
@@ -46,23 +45,6 @@ internal fun parseBeatmap(o: JSONObject?): RoomBeatmap?
         if (!o.isNull("beatmapSetId"))
             parentSetID = o.getString("beatmapSetId").toLong()
     }
-}
-
-/**
- * Parse a [JSONObject] of mods to [RoomMods]
- */
-internal fun parseMods(o: JSONObject): RoomMods
-{
-    return RoomMods(
-        set = stringToMods(if (!o.isNull("mods")) o.getString("mods") else ""),
-        speedMultiplier = o.getDouble("speedMultiplier").toFloat(),
-        flFollowDelay = o.getDouble("flFollowDelay").toFloat(),
-
-        customAR = if (!o.isNull("customAR")) o.getDouble("customAR").toFloat() else null,
-        customOD = if (!o.isNull("customOD")) o.getDouble("customOD").toFloat() else null,
-        customCS = if (!o.isNull("customCS")) o.getDouble("customCS").toFloat() else null,
-        customHP = if (!o.isNull("customHP")) o.getDouble("customHP").toFloat() else null
-    )
 }
 
 /**

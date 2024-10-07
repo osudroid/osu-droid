@@ -21,9 +21,10 @@ import com.rian.osu.GameMode;
 import com.rian.osu.beatmap.DroidHitWindow;
 import com.rian.osu.beatmap.PreciseDroidHitWindow;
 import com.rian.osu.beatmap.parser.BeatmapParser;
-import com.rian.osu.beatmap.sections.BeatmapDifficulty;
 import com.rian.osu.difficulty.BeatmapDifficultyCalculator;
 import com.rian.osu.math.Precision;
+import com.rian.osu.mods.ModDifficultyAdjust;
+import com.rian.osu.mods.ModPrecise;
 import com.rian.osu.ui.DifficultyAlgorithmSwitcher;
 import com.rian.osu.utils.LRUCache;
 import com.rian.osu.utils.ModUtils;
@@ -64,13 +65,11 @@ import ru.nsu.ccfit.zuev.osu.ToastLogger;
 import ru.nsu.ccfit.zuev.osu.Utils;
 import ru.nsu.ccfit.zuev.osu.game.GameHelper;
 import ru.nsu.ccfit.zuev.osu.game.GameScene;
-import ru.nsu.ccfit.zuev.osu.game.mods.GameMod;
 import ru.nsu.ccfit.zuev.osu.helper.StringTable;
 import ru.nsu.ccfit.zuev.osu.online.OnlineManager;
 import ru.nsu.ccfit.zuev.osu.online.OnlineManager.OnlineManagerException;
 import ru.nsu.ccfit.zuev.osu.online.OnlinePanel;
 import ru.nsu.ccfit.zuev.osu.online.OnlineScoring;
-import ru.nsu.ccfit.zuev.osu.scoring.Replay;
 import ru.nsu.ccfit.zuev.osu.scoring.ScoringScene;
 import ru.nsu.ccfit.zuev.osu.scoring.StatisticV2;
 import ru.nsu.ccfit.zuev.osuplus.R;
@@ -880,28 +879,13 @@ public class SongMenu implements IUpdateHandler, MenuItemListener,
             return;
         }
 
-        var modMenu = ModMenu.getInstance();
-        var convertedMods = ModUtils.convertLegacyMods(
-            modMenu.getMod(),
-            modMenu.isCustomCS() ? modMenu.getCustomCS() : null,
-            modMenu.isCustomAR() ? modMenu.getCustomAR() : null,
-            modMenu.isCustomOD() ? modMenu.getCustomOD() : null,
-            modMenu.isCustomHP() ? modMenu.getCustomHP() : null,
-            modMenu.getChangeSpeed()
-        );
+        var mods = ModMenu.getInstance().getEnabledMods();
+        boolean isPreciseMod = mods.contains(ModPrecise.class);
+        float totalSpeedMultiplier = ModUtils.calculateRateWithMods(mods);
 
-        boolean isPreciseMod = modMenu.getMod().contains(GameMod.MOD_PRECISE);
-        float customSpeedMultiplier = modMenu.getChangeSpeed();
-        float totalSpeedMultiplier = ModUtils.calculateRateWithMods(convertedMods) * customSpeedMultiplier;
+        var difficulty = beatmapInfo.getBeatmapDifficulty();
 
-        var difficulty = new BeatmapDifficulty(
-            beatmapInfo.getCircleSize(),
-            beatmapInfo.getApproachRate(),
-            beatmapInfo.getOverallDifficulty(),
-            beatmapInfo.getHpDrainRate()
-        );
-
-        ModUtils.applyModsToBeatmapDifficulty(difficulty, GameMode.Droid, convertedMods);
+        ModUtils.applyModsToBeatmapDifficulty(difficulty, GameMode.Droid, mods);
 
         if (isPreciseMod) {
             // Special case for OD. The Precise mod changes the hit window and not the OD itself, but we must
@@ -929,7 +913,7 @@ public class SongMenu implements IUpdateHandler, MenuItemListener,
         beatmapDifficultyText.setColor(1, 1, 1);
         beatmapLengthText.setColor(1, 1, 1);
 
-        if (modMenu.isCustomCS() || modMenu.isCustomAR() || modMenu.isCustomOD() || modMenu.isCustomHP()) {
+        if (mods.contains(ModDifficultyAdjust.class)) {
             if (isPreciseMod) {
                 beatmapDifficultyText.setColor(1, 120 / 255f, 0);
             } else {
@@ -1036,20 +1020,12 @@ public class SongMenu implements IUpdateHandler, MenuItemListener,
 
                 changeDimensionInfo(beatmapInfo);
 
-                var modMenu = ModMenu.getInstance();
-                var convertedMods = ModUtils.convertLegacyMods(
-                    modMenu.getMod(),
-                    modMenu.isCustomCS() ? modMenu.getCustomCS() : null,
-                    modMenu.isCustomAR() ? modMenu.getCustomAR() : null,
-                    modMenu.isCustomOD() ? modMenu.getCustomOD() : null,
-                    modMenu.isCustomHP() ? modMenu.getCustomHP() : null,
-                    modMenu.getChangeSpeed()
-                );
+                var mods = ModMenu.getInstance().getEnabledMods();
 
                 switch (Config.getDifficultyAlgorithm()) {
                     case droid -> {
                         var attributes = BeatmapDifficultyCalculator.calculateDroidDifficulty(
-                            data, convertedMods, scope
+                            data, mods, scope
                         );
 
                         setStarsDisplay(GameHelper.Round(attributes.starRating, 2));
@@ -1057,7 +1033,7 @@ public class SongMenu implements IUpdateHandler, MenuItemListener,
 
                     case standard -> {
                         var attributes = BeatmapDifficultyCalculator.calculateStandardDifficulty(
-                            data, convertedMods, scope
+                            data, mods, scope
                         );
 
                         setStarsDisplay(GameHelper.Round(attributes.starRating, 2));
@@ -1096,17 +1072,7 @@ public class SongMenu implements IUpdateHandler, MenuItemListener,
             }
             stopMusic();
 
-            Replay.oldMod = ModMenu.getInstance().getMod();
-            Replay.oldChangeSpeed = ModMenu.getInstance().getChangeSpeed();
-
-            Replay.oldCustomAR = ModMenu.getInstance().getCustomAR();
-            Replay.oldCustomOD = ModMenu.getInstance().getCustomOD();
-            Replay.oldCustomCS = ModMenu.getInstance().getCustomCS();
-            Replay.oldCustomHP = ModMenu.getInstance().getCustomHP();
-
-            Replay.oldFLFollowDelay = ModMenu.getInstance().getFLfollowDelay();
-
-            game.startGame(beatmapInfo, null);
+            game.startGame(beatmapInfo, null, ModMenu.getInstance().getEnabledMods());
             unload();
             return;
         }
@@ -1202,6 +1168,8 @@ public class SongMenu implements IUpdateHandler, MenuItemListener,
     }
 
     public void openScore(final int id, boolean showOnline, final String playerName) {
+        var difficulty = selectedBeatmap.getBeatmapDifficulty();
+
         if (showOnline) {
             engine.setScene(new LoadingScreen().getScene());
             ToastLogger.showTextId(com.edlplan.osudroidresource.R.string.online_loadrecord, false);
@@ -1216,10 +1184,7 @@ public class SongMenu implements IUpdateHandler, MenuItemListener,
 
                     if (params.length < 11) return;
 
-                    StatisticV2 stat = new StatisticV2(params);
-                    if (stat.isLegacySC()) {
-                        stat.processLegacySC(selectedBeatmap);
-                    }
+                    StatisticV2 stat = new StatisticV2(params, difficulty);
 
                     stat.setPlayerName(playerName);
                     scoreScene.load(stat, null, null, OnlineManager.getReplayURL(id), null, selectedBeatmap);
@@ -1232,12 +1197,7 @@ public class SongMenu implements IUpdateHandler, MenuItemListener,
             return;
         }
 
-
-        var stat = DatabaseManager.getScoreInfoTable().getScore(id).toStatisticV2();
-
-        if (stat.isLegacySC()) {
-            stat.processLegacySC(selectedBeatmap);
-        }
+        var stat = DatabaseManager.getScoreInfoTable().getScore(id).toStatisticV2(difficulty);
 
         scoreScene.load(stat, null, null, Config.getScorePath() + stat.getReplayFilename(), null, selectedBeatmap);
         engine.setScene(scoreScene.getScene());

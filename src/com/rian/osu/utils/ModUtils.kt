@@ -6,61 +6,108 @@ import com.rian.osu.beatmap.PreciseDroidHitWindow
 import com.rian.osu.beatmap.hitobject.HitObject
 import com.rian.osu.beatmap.sections.BeatmapDifficulty
 import com.rian.osu.mods.*
+import kotlin.reflect.KClass
+import kotlin.reflect.full.createInstance
 import ru.nsu.ccfit.zuev.osu.game.mods.GameMod
 
 /**
  * A set of utilities to handle [Mod] combinations.
  */
 object ModUtils {
-    private val modMap = mutableMapOf<GameMod, Mod>().apply {
-        put(GameMod.MOD_AUTO, ModAuto())
-        put(GameMod.MOD_AUTOPILOT, ModAutopilot())
-        put(GameMod.MOD_DOUBLETIME, ModDoubleTime())
-        put(GameMod.MOD_EASY, ModEasy())
-        put(GameMod.MOD_FLASHLIGHT, ModFlashlight())
-        put(GameMod.MOD_HALFTIME, ModHalfTime())
-        put(GameMod.MOD_HARDROCK, ModHardRock())
-        put(GameMod.MOD_HIDDEN, ModHidden())
-        put(GameMod.MOD_NIGHTCORE, ModNightCore())
-        put(GameMod.MOD_NOFAIL, ModNoFail())
-        put(GameMod.MOD_PERFECT, ModPerfect())
-        put(GameMod.MOD_PRECISE, ModPrecise())
-        put(GameMod.MOD_REALLYEASY, ModReallyEasy())
-        put(GameMod.MOD_RELAX, ModRelax())
-        put(GameMod.MOD_SCOREV2, ModScoreV2())
-        put(GameMod.MOD_SUDDENDEATH, ModSuddenDeath())
+    private val gameModMap = mutableMapOf<GameMod, KClass<out Mod>>().also {
+        it[GameMod.MOD_AUTO] = ModAuto::class
+        it[GameMod.MOD_AUTOPILOT] = ModAutopilot::class
+        it[GameMod.MOD_DOUBLETIME] = ModDoubleTime::class
+        it[GameMod.MOD_EASY] = ModEasy::class
+        it[GameMod.MOD_FLASHLIGHT] = ModFlashlight::class
+        it[GameMod.MOD_HALFTIME] = ModHalfTime::class
+        it[GameMod.MOD_HARDROCK] = ModHardRock::class
+        it[GameMod.MOD_HIDDEN] = ModHidden::class
+        it[GameMod.MOD_NIGHTCORE] = ModNightCore::class
+        it[GameMod.MOD_NOFAIL] = ModNoFail::class
+        it[GameMod.MOD_PERFECT] = ModPerfect::class
+        it[GameMod.MOD_PRECISE] = ModPrecise::class
+        it[GameMod.MOD_REALLYEASY] = ModReallyEasy::class
+        it[GameMod.MOD_RELAX] = ModRelax::class
+        it[GameMod.MOD_SCOREV2] = ModScoreV2::class
+        it[GameMod.MOD_SMALLCIRCLE] = ModSmallCircle::class
+        it[GameMod.MOD_SPEEDUP] = ModSpeedUp::class
+        it[GameMod.MOD_SUDDENDEATH] = ModSuddenDeath::class
+    }.toMap()
+
+    /**
+     * All [Mod]s that are considered legacy.
+     */
+    private val legacyMods = mutableMapOf<Char, ILegacyMod>().also {
+        val legacyMods = arrayOf(ModSmallCircle(), ModSpeedUp())
+
+        for (mod in legacyMods) {
+            it[mod.droidChar] = mod
+        }
+    }.toMap()
+
+    /**
+     * All [Mod]s that can be selected by the user.
+     */
+    private val playableMods = mutableMapOf<Char, KClass<out Mod>>().also {
+        val playableMods = arrayOf(
+            ModAuto(), ModAutopilot(), ModDoubleTime(), ModEasy(), ModFlashlight(), ModHalfTime(),
+            ModHardRock(), ModHidden(), ModNightCore(), ModNoFail(), ModPerfect(), ModPrecise(),
+            ModReallyEasy(), ModRelax(), ModScoreV2(), ModSuddenDeath()
+        )
+
+        for (mod in playableMods) {
+            it[mod.droidChar] = mod::class
+        }
     }.toMap()
 
     /**
      * Converts "legacy" [GameMod]s to new [Mod]s.
      *
      * @param mods The [GameMod]s to convert.
-     * @param forceCS The circle size to enforce.
-     * @param forceAR The approach rate to enforce.
-     * @param forceOD The overall difficulty to enforce.
-     * @param forceHP The health drain to enforce.
-     * @param customSpeedMultiplier The custom speed multiplier to use.
-     * @return A [MutableSet] containing the new [Mod]s.
+     * @param extraModString The extra mod string to parse.
+     * @param difficulty The [BeatmapDifficulty] to use for [ILegacyMod] migrations. When `null`, [ILegacyMod]s will not be added and migrated.
      */
     @JvmStatic
     @JvmOverloads
-    fun convertLegacyMods(mods: Iterable<GameMod>, forceCS: Float? = null, forceAR: Float? = null,
-                          forceOD: Float? = null, forceHP: Float? = null,
-                          customSpeedMultiplier: Float = 1f) = ModHashSet().apply {
-        mods.forEach {
-            val convertedMod = modMap[it] ?:
-            throw IllegalArgumentException("Cannot find the conversion of mod with short name \"${it.shortName}\"")
+    fun convertLegacyMods(mods: Iterable<GameMod>, extraModString: String, difficulty: BeatmapDifficulty? = null) =
+        ModHashSet().apply {
+            mods.forEach {
+                val convertedMod = gameModMap[it] ?:
+                throw IllegalArgumentException("Cannot find the conversion of mod with short name \"${it.shortName}\"")
 
-            add(convertedMod)
+                val mod = convertedMod.createInstance()
+
+                if (mod is ILegacyMod && difficulty != null) {
+                    add(mod.migrate(difficulty))
+                } else {
+                    add(mod)
+                }
+            }
+
+            parseExtraModString(this, extraModString)
         }
 
-        if (forceCS != null || forceAR != null || forceOD != null || forceHP != null) {
-            add(ModDifficultyAdjust(forceCS, forceAR, forceOD, forceHP))
+    /**
+     * Converts a mod string to a [ModHashSet].
+     *
+     * @param str The mod string to convert. A `null` would return an empty [ModHashSet].
+     * @param difficulty The [BeatmapDifficulty] to use for [ILegacyMod] migrations. When `null`, [ILegacyMod]s will not be added and migrated.
+     * @return A [ModHashSet] containing the [Mod]s.
+     */
+    @JvmStatic
+    @JvmOverloads
+    fun convertModString(str: String?, difficulty: BeatmapDifficulty? = null) = ModHashSet().also {
+        if (str.isNullOrEmpty()) return@also
+
+        val data = str.split('|', limit = 2)
+
+        for (c in data.getOrNull(0) ?: return@also) when {
+            c in playableMods -> it.add(playableMods[c]!!.createInstance())
+            difficulty != null && c in legacyMods -> it.add(legacyMods[c]!!.migrate(difficulty))
         }
 
-        if (customSpeedMultiplier != 1f) {
-            add(ModCustomSpeed(customSpeedMultiplier))
-        }
+        parseExtraModString(it, data.getOrNull(1) ?: "")
     }
 
     /**
@@ -108,5 +155,38 @@ object ModUtils {
         difficulty.od =
             if (isPreciseMod) PreciseDroidHitWindow.hitWindow300ToOverallDifficulty(greatWindow)
             else DroidHitWindow.hitWindow300ToOverallDifficulty(greatWindow)
+    }
+
+    private fun parseExtraModString(existingMods: ModHashSet, str: String) = existingMods.let {
+        var customCS: Float? = null
+        var customAR: Float? = null
+        var customOD: Float? = null
+        var customHP: Float? = null
+
+        for (s in str.split('|')) {
+            when {
+                s.startsWith('x') && s.length == 5 -> it.add(ModCustomSpeed(s.substring(1).toFloat()))
+
+                s.startsWith("CS") -> customCS = s.substring(2).toFloat()
+                s.startsWith("AR") -> customAR = s.substring(2).toFloat()
+                s.startsWith("OD") -> customOD = s.substring(2).toFloat()
+                s.startsWith("HP") -> customHP = s.substring(2).toFloat()
+
+                s.startsWith("FLD") -> {
+                    val followDelay = s.substring(3).toFloat()
+                    val flashlightMod = it.find { m -> m is ModFlashlight } as ModFlashlight?
+
+                    if (flashlightMod != null) {
+                        flashlightMod.followDelay = followDelay
+                    } else {
+                        it.add(ModFlashlight().also { m -> m.followDelay = followDelay })
+                    }
+                }
+            }
+        }
+
+        if (customCS != null || customAR != null || customOD != null || customHP != null) {
+            it.add(ModDifficultyAdjust(customCS, customAR, customOD, customHP))
+        }
     }
 }

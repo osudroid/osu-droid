@@ -20,9 +20,6 @@ public class FlashLightEntity extends Entity  {
     private float nextPX;
     private float nextPY;
 
-    public static final int defaultMoveDelayMS = 120;
-    public static final float defaultMoveDelayS = 0.12f;
-
     public FlashLightEntity() {
         super(Config.getRES_WIDTH() / 2f, Config.getRES_HEIGHT() / 2f);
 
@@ -38,7 +35,7 @@ public class FlashLightEntity extends Entity  {
     }
 
     public void onMouseMove(float pX, float pY) {
-        float flFollowDelay = ModMenu.getInstance().getFLfollowDelay();
+        float flFollowDelay = ModMenu.getInstance().getFLFollowDelay();
 
         if (nextPX != 0 && nextPY != 0 && currentModifier != null && this.getX() != nextPX && this.getY() != nextPY) {
             unregisterEntityModifier(currentModifier);

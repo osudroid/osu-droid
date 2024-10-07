@@ -1,30 +1,19 @@
 package com.reco1l.ibancho.data
 
 import com.reco1l.osu.multiplayer.Multiplayer
-import com.reco1l.osu.multiplayer.modsToReadable
-import ru.nsu.ccfit.zuev.osu.game.mods.GameMod
-import ru.nsu.ccfit.zuev.osu.game.mods.GameMod.*
-import java.util.*
+import com.rian.osu.mods.ModCustomSpeed
+import com.rian.osu.mods.ModDifficultyAdjust
+import com.rian.osu.mods.ModDoubleTime
+import com.rian.osu.mods.ModHalfTime
+import com.rian.osu.mods.ModNightCore
+import com.rian.osu.utils.ModHashSet
+import com.rian.osu.utils.ModUtils
 
-data class RoomMods(
-
-    var set: EnumSet<GameMod>,
-
-    var speedMultiplier: Float,
-
-    var flFollowDelay: Float,
-
-    var customAR: Float?,
-
-    var customOD: Float?,
-
-    var customCS: Float?,
-
-    var customHP: Float?
-)
+data class RoomMods(@JvmField val set: ModHashSet)
 {
+    constructor(modString: String) : this(ModUtils.convertModString(modString))
 
-    override fun toString() = modsToReadable(set, speedMultiplier, flFollowDelay, customAR, customOD, customCS, customHP)
+    override fun toString() = set.toReadable()
 
     fun toString(room: Room): String
     {
@@ -45,14 +34,19 @@ data class RoomMods(
 
             append("Free mods, ")
 
-            if (MOD_DOUBLETIME in set || MOD_NIGHTCORE in set)
-                append("DT, ")
+            val doubleTime = ModDoubleTime()
+            val halfTime = ModHalfTime()
 
-            if (MOD_HALFTIME in set)
-                append("HT, ")
+            if (doubleTime in set || ModNightCore() in set)
+                append("${doubleTime.acronym}, ")
 
-            if (speedMultiplier != 1f)
-                append("%.2fx, ".format(speedMultiplier))
+            if (halfTime in set)
+                append("${halfTime.acronym}, ")
+
+            val customSpeed = set.find { it is ModCustomSpeed } as? ModCustomSpeed
+
+            if (customSpeed != null)
+                append("%.2fx, ".format(customSpeed.trackRateMultiplier))
 
             if (room.gameplaySettings.allowForceDifficultyStatistics)
                 append("Force diffstat, ")
@@ -68,36 +62,22 @@ data class RoomMods(
         if (other !is RoomMods)
             return false
 
-        val sameMods = Multiplayer.room?.gameplaySettings?.isFreeMod == true
+        val gameplaySettings = Multiplayer.room?.gameplaySettings
 
-                // DoubleTime and NightCore, comparing them as one.
-                && (MOD_DOUBLETIME in set || MOD_NIGHTCORE in set) == (MOD_DOUBLETIME in other.set || MOD_NIGHTCORE in other.set)
-                // HalfTime
-                && MOD_HALFTIME in set == MOD_HALFTIME in other.set
-                // ScoreV2
-                && MOD_SCOREV2 in set == MOD_SCOREV2 in other.set
+        if (gameplaySettings?.isFreeMod == true) {
+            // Under free mods, force difficulty statistics is still not allowed unless the setting is explicitly set.
+            if (!gameplaySettings.allowForceDifficultyStatistics && set.firstOrNull { it is ModDifficultyAdjust } != other.set.firstOrNull { it is ModDifficultyAdjust })
+                return false
 
-                || set == other.set
+            val requiredMods = set.filter { !it.isValidForMultiplayerAsFreeMod }
+            val otherRequiredMods = other.set.filter { !it.isValidForMultiplayerAsFreeMod }
 
-        return sameMods
-                && speedMultiplier == other.speedMultiplier
-                && flFollowDelay == other.flFollowDelay
-                && customAR == other.customAR
-                && customOD == other.customOD
-                && customCS == other.customCS
-                && customHP == other.customHP
+            return requiredMods.size == otherRequiredMods.size && requiredMods.containsAll(otherRequiredMods)
+        }
+
+        return set == other.set
     }
 
     // Auto-generated this will help to check instance equality aka ===
-    override fun hashCode(): Int
-    {
-        var result = set.hashCode()
-        result = 31 * result + speedMultiplier.hashCode()
-        result = 31 * result + flFollowDelay.hashCode()
-        result = 31 * result + (customAR?.hashCode() ?: 0)
-        result = 31 * result + (customOD?.hashCode() ?: 0)
-        result = 31 * result + (customCS?.hashCode() ?: 0)
-        result = 31 * result + (customHP?.hashCode() ?: 0)
-        return result
-    }
+    override fun hashCode() = set.hashCode()
 }
