@@ -2,7 +2,9 @@ package com.rian.osu.utils
 
 import com.reco1l.toolkt.kotlin.fastForEach
 import com.rian.osu.mods.*
+import java.util.EnumSet
 import kotlin.reflect.KClass
+import ru.nsu.ccfit.zuev.osu.game.mods.GameMod
 
 /**
  * A [HashSet] of [Mod]s that has additional utilities specifically for [Mod]s.
@@ -72,6 +74,35 @@ class ModHashSet : HashSet<Mod> {
     operator fun contains(mod: Class<out Mod>) = mod in classSet
 
     /**
+     * Gets a [Mod] of the specified type from this [ModHashSet].
+     *
+     * @param mod The [Mod] type to get.
+     * @return The [Mod] of the specified type, or `null` if no such [Mod] exists.
+     */
+    operator fun <T : Mod> get(mod: KClass<out T>) = this[mod.java]
+
+    /**
+     * Gets a [Mod] of the specified type from this [ModHashSet].
+     *
+     * @param mod The [Mod] type to get.
+     * @return The [Mod] of the specified type, or `null` if no such [Mod] exists.
+     */
+    operator fun <T : Mod> get(mod: Class<out T>): T? {
+        if (mod !in classSet) {
+            return null
+        }
+
+        for (m in this) {
+            if (mod.isInstance(m)) {
+                @Suppress("UNCHECKED_CAST")
+                return m as T
+            }
+        }
+
+        return null
+    }
+
+    /**
      * Removes a [Mod] of the specified type from this [ModHashSet].
      *
      * @param mod The [Mod] type to remove.
@@ -107,6 +138,11 @@ class ModHashSet : HashSet<Mod> {
         }
 
         return removed
+    }
+
+    override fun clear() {
+        super.clear()
+        classSet.clear()
     }
 
     /**
@@ -152,27 +188,21 @@ class ModHashSet : HashSet<Mod> {
         }.substringBeforeLast(',')
     }
 
-    override fun equals(other: Any?): Boolean {
-        if (other === this) {
-            return true
-        }
-
-        if (other !is ModHashSet) {
-            return false
-        }
-
-        return size == other.size && containsAll(other)
-    }
-
-    override fun hashCode() = fold(0) { acc, mod -> 31 * acc + mod.hashCode() }
-
-    override fun toString() = buildString {
-        modStringOrder.fastForEach {
-            if (it::class.java in classSet) {
-                append((it as IModUserSelectable).droidChar)
+    /**
+     * Converts this [ModHashSet] to a [EnumSet] of [GameMod]s.
+     */
+    fun toGameModSet(): EnumSet<GameMod> = EnumSet.noneOf(GameMod::class.java).also {
+        for (m in this) {
+            if (m is IModUserSelectable) {
+                it.add(m.enum)
             }
         }
+    }
 
+    /**
+     * Converts the container [Mod]s in this [ModHashSet] to their [String] representative.
+     */
+    fun getContainerModString() = buildString {
         var difficultyAdjust: ModDifficultyAdjust? = null
         var customSpeed: ModCustomSpeed? = null
         var flashlight: ModFlashlight? = null
@@ -190,16 +220,10 @@ class ModHashSet : HashSet<Mod> {
             }
         }
 
-        append('|')
-
         if (difficultyAdjust == null && customSpeed == null && flashlight == null) {
-            // Append another pipe character so that the substringBeforeLast call below takes that pipe into account.
-            // This is weird, but it is the behavior of the original implementation.
-            append('|')
             return@buildString
         }
 
-        // Convert container mods
         if (customSpeed != null) {
             append(String.format("x%.2f|", customSpeed.trackRateMultiplier))
         }
@@ -226,6 +250,31 @@ class ModHashSet : HashSet<Mod> {
             append(String.format("FLD%.2f|", flashlight.followDelay))
         }
     }.substringBeforeLast('|')
+
+    override fun equals(other: Any?): Boolean {
+        if (other === this) {
+            return true
+        }
+
+        if (other !is ModHashSet) {
+            return false
+        }
+
+        return size == other.size && containsAll(other)
+    }
+
+    override fun hashCode() = fold(0) { acc, mod -> 31 * acc + mod.hashCode() }
+
+    override fun toString() = buildString {
+        modStringOrder.fastForEach {
+            if (it::class.java in classSet) {
+                append((it as IModUserSelectable).droidChar)
+            }
+        }
+
+        append('|')
+        append(getContainerModString())
+    }
 
     companion object {
         /**
