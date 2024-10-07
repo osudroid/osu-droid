@@ -17,8 +17,8 @@ class ModHashSet : HashSet<Mod> {
     constructor(initialCapacity: Int) : super(initialCapacity)
     constructor(initialCapacity: Int, loadFactor: Float) : super(initialCapacity, loadFactor)
 
-    constructor(mods: Iterable<Mod>) : super() {
-        for (m in mods) {
+    constructor(mods: Iterable<Mod>?) : super() {
+        for (m in mods ?: return) {
             add(m)
             classSet.add(m::class.java)
         }
