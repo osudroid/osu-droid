@@ -55,6 +55,9 @@ abstract class Mod {
     override fun hashCode(): Int {
         var result = isRanked.hashCode()
 
+        result = 31 * result + isRelevant.hashCode()
+        result = 31 * result + isValidForMultiplayer.hashCode()
+        result = 31 * result + isValidForMultiplayerAsFreeMod.hashCode()
         result = 31 * result + incompatibleMods.contentHashCode()
 
         if (this is IModUserSelectable) {
