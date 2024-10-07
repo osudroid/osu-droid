@@ -351,6 +351,7 @@
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:layout_columnSpan="2"
+                        android:max="10"
                         android:paddingVertical="12dp"
                         android:saveEnabled="false"
                         tools:progress="50" />
