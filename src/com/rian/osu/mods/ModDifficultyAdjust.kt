@@ -35,6 +35,9 @@ class ModDifficultyAdjust(
     @JvmField
     var hp: Float? = null
 ) : Mod(), IModApplicableToDifficultyWithSettings, IModApplicableToHitObjectWithSettings {
+    override val isRelevant
+        get() = cs != null || ar != null || od != null || hp != null
+
     override fun calculateScoreMultiplier(difficulty: BeatmapDifficulty): Float {
         // Graph: https://www.desmos.com/calculator/yrggkhrkzz
         var multiplier = 1f

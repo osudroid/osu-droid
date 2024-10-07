@@ -13,6 +13,11 @@ abstract class Mod {
     open val isRanked = false
 
     /**
+     * Whether adding this [Mod] will affect gameplay.
+     */
+    open val isRelevant = true
+
+    /**
      * Whether this [Mod] can be specified as a "required" [Mod] in multiplayer context.
      */
     open val isValidForMultiplayer = true
