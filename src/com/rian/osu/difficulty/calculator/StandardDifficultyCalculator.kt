@@ -32,7 +32,7 @@ class StandardDifficultyCalculator : DifficultyCalculator<StandardPlayableBeatma
         skills: Array<Skill<StandardDifficultyHitObject>>,
         objects: Array<StandardDifficultyHitObject>
     ) = StandardDifficultyAttributes().apply {
-        mods = beatmap.mods?.toSet() ?: mods
+        mods = beatmap.mods.toSet()
 
         aimDifficulty = calculateRating(skills[0])
         speedDifficulty = calculateRating(skills[2])
@@ -80,16 +80,12 @@ class StandardDifficultyCalculator : DifficultyCalculator<StandardPlayableBeatma
         spinnerCount = beatmap.hitObjects.spinnerCount
     }
 
-    override fun createSkills(beatmap: StandardPlayableBeatmap): Array<Skill<StandardDifficultyHitObject>> {
-        val mods = beatmap.mods?.toList() ?: emptyList()
-
-        return arrayOf(
-            StandardAim(mods, true),
-            StandardAim(mods, false),
-            StandardSpeed(mods),
-            StandardFlashlight(mods)
-        )
-    }
+    override fun createSkills(beatmap: StandardPlayableBeatmap) = arrayOf<Skill<StandardDifficultyHitObject>>(
+        StandardAim(beatmap.mods, true),
+        StandardAim(beatmap.mods, false),
+        StandardSpeed(beatmap.mods),
+        StandardFlashlight(beatmap.mods)
+    )
 
     @Suppress("UNCHECKED_CAST")
     override fun createDifficultyHitObjects(beatmap: StandardPlayableBeatmap, scope: CoroutineScope?): Array<StandardDifficultyHitObject> {

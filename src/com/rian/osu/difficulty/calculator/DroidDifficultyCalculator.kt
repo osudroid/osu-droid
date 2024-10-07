@@ -33,7 +33,7 @@ class DroidDifficultyCalculator : DifficultyCalculator<DroidPlayableBeatmap, Dro
         skills: Array<Skill<DroidDifficultyHitObject>>,
         objects: Array<DroidDifficultyHitObject>,
     ) = DroidDifficultyAttributes().apply {
-        mods = beatmap.mods?.toSet() ?: mods
+        mods = beatmap.mods.toSet()
         clockRate = beatmap.speedMultiplier.toDouble()
 
         maxCombo = beatmap.maxCombo
@@ -203,29 +203,25 @@ class DroidDifficultyCalculator : DifficultyCalculator<DroidPlayableBeatmap, Dro
         ).toDouble()
     }
 
-    override fun createSkills(beatmap: DroidPlayableBeatmap): Array<Skill<DroidDifficultyHitObject>> {
-        val mods = beatmap.mods?.toList() ?: emptyList()
-
-        return arrayOf(
-            DroidAim(mods, true),
-            DroidAim(mods, false),
-            // Tap and visual skills depend on rhythm skill, so we put it first
-            DroidRhythm(mods),
-            DroidTap(mods, true),
-            DroidTap(mods, false),
-            DroidFlashlight(mods, true),
-            DroidFlashlight(mods, false),
-            DroidVisual(mods, true),
-            DroidVisual(mods, false)
-        )
-    }
+    override fun createSkills(beatmap: DroidPlayableBeatmap) = arrayOf<Skill<DroidDifficultyHitObject>>(
+        DroidAim(beatmap.mods, true),
+        DroidAim(beatmap.mods, false),
+        // Tap and visual skills depend on rhythm skill, so we put it first
+        DroidRhythm(beatmap.mods),
+        DroidTap(beatmap.mods, true),
+        DroidTap(beatmap.mods, false),
+        DroidFlashlight(beatmap.mods, true),
+        DroidFlashlight(beatmap.mods, false),
+        DroidVisual(beatmap.mods, true),
+        DroidVisual(beatmap.mods, false)
+    )
 
     @Suppress("UNCHECKED_CAST")
     override fun createDifficultyHitObjects(beatmap: DroidPlayableBeatmap, scope: CoroutineScope?): Array<DroidDifficultyHitObject> {
         val clockRate = beatmap.speedMultiplier.toDouble()
 
         val greatWindow = (
-            if (beatmap.mods?.any { it is ModPrecise } == true) PreciseDroidHitWindow(beatmap.difficulty.od)
+            if (beatmap.mods.contains(ModPrecise::class)) PreciseDroidHitWindow(beatmap.difficulty.od)
             else DroidHitWindow(beatmap.difficulty.od)
         ).greatWindow.toDouble() / clockRate
 
