@@ -319,13 +319,12 @@ class UniversalModifier @JvmOverloads constructor(private val pool: Pool<Univers
 
 
     override fun isFinished(): Boolean {
-        if (type == Sequence || type == Parallel) {
+        if (type.usesNestedModifiers) {
             for (modifier in modifiers ?: return true) {
                 if (!modifier.isFinished) {
                     return false
                 }
             }
-            return true
         }
         return elapsedSec >= duration
     }
