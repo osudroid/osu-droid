@@ -235,8 +235,7 @@ class InGameSettingMenu : BaseFragment() {
             )
         }
 
-        speedModifyText.text =
-            String.format(Locale.getDefault(), "%.2fx", ModMenu.getInstance().changeSpeed)
+        speedModifyText.text = String.format(Locale.getDefault(), "%.2fx", ModMenu.getInstance().changeSpeed)
 
         followDelayText = findViewById(R.id.flashlightFollowDelayText)!!
         followDelayBar = findViewById(R.id.flashlightFollowDelayBar)!!
@@ -253,7 +252,7 @@ class InGameSettingMenu : BaseFragment() {
                     if (!containsFlashlight) return
 
                     ModMenu.getInstance().flFollowDelay = (progress * ModFlashlight.DEFAULT_FOLLOW_DELAY).roundToInt().toFloat()
-                    followDelayText.text = "${progress * ModFlashlight.DEFAULT_FOLLOW_DELAY * 1000}ms"
+                    followDelayText.text = "${(progress * ModFlashlight.DEFAULT_FOLLOW_DELAY * 1000).roundToInt()}ms"
                 }
 
                 override fun onStartTrackingTouch(seekBar: SeekBar?) {
