@@ -5,6 +5,7 @@ import com.reco1l.andengine.container.*
 import com.reco1l.andengine.sprite.*
 import ru.nsu.ccfit.zuev.osu.*
 import ru.nsu.ccfit.zuev.osu.game.CircleNumber
+import ru.nsu.ccfit.zuev.skins.*
 
 open class CirclePiece(
 
@@ -55,7 +56,7 @@ class NumberedCirclePiece(circleTexture: String, overlayTexture: String) : Circl
 
 
     fun setNumberText(value: Int) {
-        number.setNumber(value)
+        number.setNumber(if (OsuSkin.get().isLimitComboTextLength) value % 10 else value)
     }
 
     fun setNumberScale(value: Float) {

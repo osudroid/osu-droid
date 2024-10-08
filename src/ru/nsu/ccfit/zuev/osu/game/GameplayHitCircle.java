@@ -75,12 +75,7 @@ public class GameplayHitCircle extends GameObject {
         circlePiece.setScale(scale);
         circlePiece.setAlpha(fadeInProgress);
         circlePiece.setPosition(this.position.x, this.position.y);
-
-        int comboNum = beatmapCircle.getIndexInCurrentCombo() + 1;
-        if (OsuSkin.get().isLimitComboTextLength()) {
-            comboNum %= 10;
-        }
-        circlePiece.setNumberText(comboNum);
+        circlePiece.setNumberText(beatmapCircle.getIndexInCurrentCombo() + 1);
         circlePiece.setNumberScale(OsuSkin.get().getComboTextScale());
 
         approachCircle.setColor(comboColor.r(), comboColor.g(), comboColor.b());

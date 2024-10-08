@@ -191,11 +191,7 @@ public class GameplaySlider extends GameObject {
         headCirclePiece.setCircleColor(comboColor.r(), comboColor.g(), comboColor.b());
         headCirclePiece.setAlpha(0);
         headCirclePiece.setPosition(this.position.x, this.position.y);
-        int comboNum = beatmapSlider.getIndexInCurrentCombo() + 1;
-        if (OsuSkin.get().isLimitComboTextLength()) {
-            comboNum %= 10;
-        }
-        headCirclePiece.setNumberText(comboNum);
+        headCirclePiece.setNumberText(beatmapSlider.getIndexInCurrentCombo() + 1);
         headCirclePiece.setNumberScale(OsuSkin.get().getComboTextScale());
 
         approachCircle.setColor(comboColor.r(), comboColor.g(), comboColor.b());
