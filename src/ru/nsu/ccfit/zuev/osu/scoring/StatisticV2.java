@@ -14,7 +14,7 @@ import com.rian.osu.beatmap.sections.BeatmapDifficulty;
 import com.rian.osu.mods.ILegacyMod;
 import com.rian.osu.mods.ModFlashlight;
 import com.rian.osu.mods.ModHidden;
-import com.rian.osu.utils.ModHashSet;
+import com.rian.osu.utils.ModHashMap;
 import com.rian.osu.utils.ModUtils;
 
 import org.json.JSONObject;
@@ -42,7 +42,7 @@ public class StatisticV2 implements Serializable {
     private int realScore = 0;
     private float hp = 1;
     private float diffModifier = 1;
-    private ModHashSet mod = new ModHashSet();
+    private ModHashMap mod = new ModHashMap();
     private String playerName = Config.getOnlineUsername();
     private String replayFilename = "";
     private int forcedScore = -1;
@@ -442,11 +442,11 @@ public class StatisticV2 implements Serializable {
         this.time = time;
     }
 
-    public ModHashSet getMod() {
+    public ModHashMap getMod() {
         return mod;
     }
 
-    public void setMod(final ModHashSet mod) {
+    public void setMod(final ModHashMap mod) {
         this.mod = mod;
     }
 
@@ -632,16 +632,16 @@ public class StatisticV2 implements Serializable {
     public void calculateModScoreMultiplier(final BeatmapDifficulty originalDifficulty) {
         modScoreMultiplier = 1;
 
-        for (var m : mod) {
+        for (var m : mod.values()) {
             modScoreMultiplier *= m.calculateScoreMultiplier(originalDifficulty);
         }
     }
 
     public void migrateLegacyMods(final BeatmapDifficulty originalDifficulty) {
-        for (var m : mod) {
+        for (var m : mod.values()) {
             if (m instanceof ILegacyMod legacyMod) {
                 mod.remove(m);
-                mod.add(legacyMod.migrate(originalDifficulty));
+                mod.put(legacyMod.migrate(originalDifficulty));
             }
         }
     }

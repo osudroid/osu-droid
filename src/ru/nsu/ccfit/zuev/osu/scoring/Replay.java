@@ -5,7 +5,7 @@ import android.graphics.PointF;
 import androidx.annotation.NonNull;
 
 import com.rian.osu.mods.ModHardRock;
-import com.rian.osu.utils.ModHashSet;
+import com.rian.osu.utils.ModHashMap;
 import com.rian.osu.utils.ModUtils;
 
 import org.anddev.andengine.util.Debug;
@@ -451,7 +451,7 @@ public class Replay {
         }
 
         @NonNull
-        public static MoveArray readFrom(@NonNull ObjectInputStream is, Replay replay, ModHashSet mods) throws IOException {
+        public static MoveArray readFrom(@NonNull ObjectInputStream is, Replay replay, ModHashMap mods) throws IOException {
             boolean isHardRock = mods.contains(ModHardRock.class);
             int size = is.readInt();
             MoveArray array = new MoveArray(size);

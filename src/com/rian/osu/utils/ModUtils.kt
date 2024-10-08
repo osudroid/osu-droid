@@ -67,11 +67,12 @@ object ModUtils {
      * @param mods The [GameMod]s to convert.
      * @param extraModString The extra mod string to parse.
      * @param difficulty The [BeatmapDifficulty] to use for [ILegacyMod] migrations. When `null`, [ILegacyMod]s will not be added and migrated.
+     * @return A [ModHashMap] containing the converted [Mod]s.
      */
     @JvmStatic
     @JvmOverloads
     fun convertLegacyMods(mods: Iterable<GameMod>, extraModString: String, difficulty: BeatmapDifficulty? = null) =
-        ModHashSet().apply {
+        ModHashMap().apply {
             mods.forEach {
                 val convertedMod = gameModMap[it] ?:
                 throw IllegalArgumentException("Cannot find the conversion of mod with short name \"${it.shortName}\"")
@@ -79,9 +80,9 @@ object ModUtils {
                 val mod = convertedMod.createInstance()
 
                 if (mod is ILegacyMod && difficulty != null) {
-                    add(mod.migrate(difficulty))
+                    put(mod.migrate(difficulty))
                 } else {
-                    add(mod)
+                    put(mod)
                 }
             }
 
@@ -89,22 +90,22 @@ object ModUtils {
         }
 
     /**
-     * Converts a mod string to a [ModHashSet].
+     * Converts a mod string to a [ModHashMap].
      *
-     * @param str The mod string to convert. A `null` would return an empty [ModHashSet].
+     * @param str The mod string to convert. A `null` would return an empty [ModHashMap].
      * @param difficulty The [BeatmapDifficulty] to use for [ILegacyMod] migrations. When `null`, [ILegacyMod]s will not be added and migrated.
-     * @return A [ModHashSet] containing the [Mod]s.
+     * @return A [ModHashMap] containing the [Mod]s.
      */
     @JvmStatic
     @JvmOverloads
-    fun convertModString(str: String?, difficulty: BeatmapDifficulty? = null) = ModHashSet().also {
+    fun convertModString(str: String?, difficulty: BeatmapDifficulty? = null) = ModHashMap().also {
         if (str.isNullOrEmpty()) return@also
 
         val data = str.split('|', limit = 2)
 
         for (c in data.getOrNull(0) ?: return@also) when {
-            c in playableMods -> it.add(playableMods[c]!!.createInstance())
-            difficulty != null && c in legacyMods -> it.add(legacyMods[c]!!.migrate(difficulty))
+            c in playableMods -> it.put(playableMods[c]!!.createInstance())
+            difficulty != null && c in legacyMods -> it.put(legacyMods[c]!!.migrate(difficulty))
         }
 
         parseExtraModString(it, data.getOrNull(1) ?: "")
@@ -157,7 +158,7 @@ object ModUtils {
             else DroidHitWindow.hitWindow300ToOverallDifficulty(greatWindow)
     }
 
-    private fun parseExtraModString(existingMods: ModHashSet, str: String) = existingMods.let {
+    private fun parseExtraModString(existingMods: ModHashMap, str: String) = existingMods.let {
         var customCS: Float? = null
         var customAR: Float? = null
         var customOD: Float? = null
@@ -165,7 +166,7 @@ object ModUtils {
 
         for (s in str.split('|')) {
             when {
-                s.startsWith('x') && s.length == 5 -> it.add(ModCustomSpeed(s.substring(1).toFloat()))
+                s.startsWith('x') && s.length == 5 -> it.put(ModCustomSpeed(s.substring(1).toFloat()))
 
                 s.startsWith("CS") -> customCS = s.substring(2).toFloat()
                 s.startsWith("AR") -> customAR = s.substring(2).toFloat()
@@ -174,19 +175,19 @@ object ModUtils {
 
                 s.startsWith("FLD") -> {
                     val followDelay = s.substring(3).toFloat()
-                    val flashlightMod = it.find { m -> m is ModFlashlight } as ModFlashlight?
+                    val flashlight = it.ofType<ModFlashlight>()
 
-                    if (flashlightMod != null) {
-                        flashlightMod.followDelay = followDelay
+                    if (flashlight != null) {
+                        flashlight.followDelay = followDelay
                     } else {
-                        it.add(ModFlashlight().also { m -> m.followDelay = followDelay })
+                        it.put(ModFlashlight().also { m -> m.followDelay = followDelay })
                     }
                 }
             }
         }
 
         if (customCS != null || customAR != null || customOD != null || customHP != null) {
-            it.add(ModDifficultyAdjust(customCS, customAR, customOD, customHP))
+            it.put(ModDifficultyAdjust(customCS, customAR, customOD, customHP))
         }
     }
 }

@@ -33,7 +33,7 @@ class DroidDifficultyCalculator : DifficultyCalculator<DroidPlayableBeatmap, Dro
         skills: Array<Skill<DroidDifficultyHitObject>>,
         objects: Array<DroidDifficultyHitObject>,
     ) = DroidDifficultyAttributes().apply {
-        mods = beatmap.mods.toSet()
+        mods = beatmap.mods.values.toSet()
         clockRate = beatmap.speedMultiplier.toDouble()
 
         maxCombo = beatmap.maxCombo
@@ -204,16 +204,16 @@ class DroidDifficultyCalculator : DifficultyCalculator<DroidPlayableBeatmap, Dro
     }
 
     override fun createSkills(beatmap: DroidPlayableBeatmap) = arrayOf<Skill<DroidDifficultyHitObject>>(
-        DroidAim(beatmap.mods, true),
-        DroidAim(beatmap.mods, false),
+        DroidAim(beatmap.mods.values, true),
+        DroidAim(beatmap.mods.values, false),
         // Tap and visual skills depend on rhythm skill, so we put it first
-        DroidRhythm(beatmap.mods),
-        DroidTap(beatmap.mods, true),
-        DroidTap(beatmap.mods, false),
-        DroidFlashlight(beatmap.mods, true),
-        DroidFlashlight(beatmap.mods, false),
-        DroidVisual(beatmap.mods, true),
-        DroidVisual(beatmap.mods, false)
+        DroidRhythm(beatmap.mods.values),
+        DroidTap(beatmap.mods.values, true),
+        DroidTap(beatmap.mods.values, false),
+        DroidFlashlight(beatmap.mods.values, true),
+        DroidFlashlight(beatmap.mods.values, false),
+        DroidVisual(beatmap.mods.values, true),
+        DroidVisual(beatmap.mods.values, false)
     )
 
     @Suppress("UNCHECKED_CAST")

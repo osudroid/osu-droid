@@ -32,7 +32,7 @@ class StandardDifficultyCalculator : DifficultyCalculator<StandardPlayableBeatma
         skills: Array<Skill<StandardDifficultyHitObject>>,
         objects: Array<StandardDifficultyHitObject>
     ) = StandardDifficultyAttributes().apply {
-        mods = beatmap.mods.toSet()
+        mods = beatmap.mods.values.toSet()
 
         aimDifficulty = calculateRating(skills[0])
         speedDifficulty = calculateRating(skills[2])
@@ -81,10 +81,10 @@ class StandardDifficultyCalculator : DifficultyCalculator<StandardPlayableBeatma
     }
 
     override fun createSkills(beatmap: StandardPlayableBeatmap) = arrayOf<Skill<StandardDifficultyHitObject>>(
-        StandardAim(beatmap.mods, true),
-        StandardAim(beatmap.mods, false),
-        StandardSpeed(beatmap.mods),
-        StandardFlashlight(beatmap.mods)
+        StandardAim(beatmap.mods.values, true),
+        StandardAim(beatmap.mods.values, false),
+        StandardSpeed(beatmap.mods.values),
+        StandardFlashlight(beatmap.mods.values)
     )
 
     @Suppress("UNCHECKED_CAST")

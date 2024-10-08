@@ -12,7 +12,7 @@ import com.rian.osu.GameMode;
 import com.rian.osu.beatmap.parser.BeatmapParser;
 import com.rian.osu.difficulty.BeatmapDifficultyCalculator;
 import com.rian.osu.mods.*;
-import com.rian.osu.utils.ModHashSet;
+import com.rian.osu.utils.ModHashMap;
 
 import org.anddev.andengine.entity.primitive.Rectangle;
 import org.anddev.andengine.entity.scene.Scene;
@@ -39,7 +39,7 @@ import ru.nsu.ccfit.zuev.osuplus.R;
 public class ModMenu implements IModSwitcher {
     private static final ModMenu instance = new ModMenu();
     private Scene scene = null, parent;
-    private ModHashSet enabledMods;
+    private ModHashMap enabledMods;
     private ChangeableText multiplierText;
     private BeatmapInfo selectedBeatmap;
     private final Map<Mod, ModButton> modButtons = new HashMap<>();
@@ -59,7 +59,7 @@ public class ModMenu implements IModSwitcher {
     }
 
     public void reload() {
-        enabledMods = new ModHashSet();
+        enabledMods = new ModHashMap();
         init();
     }
 
@@ -93,28 +93,28 @@ public class ModMenu implements IModSwitcher {
 
     public void setMods(RoomMods mods, boolean isFreeMods, boolean allowForceDifficultyStatistics)
     {
-        var modSet = mods.set;
+        var modMap = mods.map;
 
         if (isFreeMods) {
-            for (var mod : modSet) {
+            for (var mod : modMap.values()) {
                 if (!mod.isValidForMultiplayerAsFreeMod()) {
-                    enabledMods.add(mod);
+                    enabledMods.put(mod);
                 }
             }
         } else {
-            enabledMods = modSet;
+            enabledMods = modMap;
         }
 
         if (!isFreeMods || !allowForceDifficultyStatistics) {
-            enabledMods.add(difficultyAdjust);
+            enabledMods.put(difficultyAdjust);
         }
 
-        if (!Multiplayer.isRoomHost() && (modSet.contains(ModDoubleTime.class) || modSet.contains(ModNightCore.class))) {
+        if (!Multiplayer.isRoomHost() && (modMap.contains(ModDoubleTime.class) || modMap.contains(ModNightCore.class))) {
             var doubleTime = new ModDoubleTime();
             var nightCore = new ModNightCore();
 
             enabledMods.remove(Config.isUseNightcoreOnMultiplayer() ? doubleTime : nightCore);
-            enabledMods.add(Config.isUseNightcoreOnMultiplayer() ? nightCore : doubleTime);
+            enabledMods.put(Config.isUseNightcoreOnMultiplayer() ? nightCore : doubleTime);
         }
 
         update();
@@ -300,7 +300,7 @@ public class ModMenu implements IModSwitcher {
                             switch (Config.getDifficultyAlgorithm()) {
                                 case droid -> {
                                     var attributes = BeatmapDifficultyCalculator.calculateDroidDifficulty(
-                                        beatmap, enabledMods, scope
+                                        beatmap, enabledMods.values(), scope
                                     );
 
                                     GlobalManager.getInstance().getSongMenu().setStarsDisplay(
@@ -311,7 +311,7 @@ public class ModMenu implements IModSwitcher {
 
                                 case standard -> {
                                     var attributes = BeatmapDifficultyCalculator.calculateStandardDifficulty(
-                                        beatmap, enabledMods, scope
+                                        beatmap, enabledMods.values(), scope
                                     );
 
                                     GlobalManager.getInstance().getSongMenu().setStarsDisplay(
@@ -348,7 +348,7 @@ public class ModMenu implements IModSwitcher {
         return scene;
     }
 
-    public ModHashSet getEnabledMods() {
+    public ModHashMap getEnabledMods() {
         return enabledMods;
     }
 
@@ -360,7 +360,7 @@ public class ModMenu implements IModSwitcher {
         if (selectedBeatmap != null) {
             var difficulty = selectedBeatmap.getBeatmapDifficulty();
 
-            for (var mod : enabledMods) {
+            for (var mod : enabledMods.values()) {
                 multiplier *= mod.calculateScoreMultiplier(difficulty);
             }
         }
@@ -387,7 +387,7 @@ public class ModMenu implements IModSwitcher {
             enabledMods.remove(mod);
             returnValue = false;
         } else {
-            enabledMods.add(mod);
+            enabledMods.put(mod);
         }
 
         update();
@@ -410,7 +410,7 @@ public class ModMenu implements IModSwitcher {
         customSpeed.setTrackRateMultiplier(speed);
 
         if (customSpeed.isRelevant()) {
-            enabledMods.add(customSpeed);
+            enabledMods.put(customSpeed);
         } else {
             enabledMods.remove(customSpeed);
         }
@@ -444,7 +444,7 @@ public class ModMenu implements IModSwitcher {
 
     private void handleForceDifficultyStatisticsChange() {
         if (difficultyAdjust.isRelevant()) {
-            enabledMods.add(difficultyAdjust);
+            enabledMods.put(difficultyAdjust);
         } else {
             enabledMods.remove(difficultyAdjust);
         }

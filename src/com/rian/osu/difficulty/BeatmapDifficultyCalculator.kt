@@ -12,7 +12,7 @@ import com.rian.osu.replay.SliderCheeseChecker
 import com.rian.osu.replay.ThreeFingerChecker
 import com.rian.osu.replay.createCursorGroups
 import com.rian.osu.utils.LRUCache
-import com.rian.osu.utils.ModHashSet
+import com.rian.osu.utils.ModHashMap
 import ru.nsu.ccfit.zuev.osu.scoring.Replay.MoveArray
 import ru.nsu.ccfit.zuev.osu.scoring.Replay.ReplayObjectData
 import ru.nsu.ccfit.zuev.osu.scoring.StatisticV2
@@ -90,7 +90,7 @@ object BeatmapDifficultyCalculator {
     @JvmStatic
     @JvmOverloads
     fun calculateDroidDifficulty(beatmap: DroidPlayableBeatmap, scope: CoroutineScope? = null) =
-        difficultyCacheManager[beatmap.md5]?.getDroidDifficultyCache(beatmap.mods) ?:
+        difficultyCacheManager[beatmap.md5]?.getDroidDifficultyCache(beatmap.mods.values) ?:
         droidDifficultyCalculator.calculate(beatmap, scope).also { addCache(beatmap, it) }
 
     /**
@@ -120,7 +120,7 @@ object BeatmapDifficultyCalculator {
     @JvmStatic
     @JvmOverloads
     fun calculateDroidTimedDifficulty(beatmap: DroidPlayableBeatmap, scope: CoroutineScope? = null) =
-        difficultyCacheManager[beatmap.md5]?.getDroidTimedDifficultyCache(beatmap.mods) ?:
+        difficultyCacheManager[beatmap.md5]?.getDroidTimedDifficultyCache(beatmap.mods.values) ?:
         droidDifficultyCalculator.calculateTimed(beatmap, scope).also { addCache(beatmap, it) }
 
     /**
@@ -145,7 +145,7 @@ object BeatmapDifficultyCalculator {
     @JvmStatic
     @JvmOverloads
     fun calculateStandardDifficulty(beatmap: StandardPlayableBeatmap, scope: CoroutineScope? = null) =
-        difficultyCacheManager[beatmap.md5]?.getStandardDifficultyCache(beatmap.mods) ?:
+        difficultyCacheManager[beatmap.md5]?.getStandardDifficultyCache(beatmap.mods.values) ?:
         standardDifficultyCalculator.calculate(beatmap, scope).also { addCache(beatmap, it) }
 
     /**
@@ -175,7 +175,7 @@ object BeatmapDifficultyCalculator {
     @JvmStatic
     @JvmOverloads
     fun calculateStandardTimedDifficulty(beatmap: StandardPlayableBeatmap, scope: CoroutineScope? = null) =
-        difficultyCacheManager[beatmap.md5]?.getStandardTimedDifficultyCache(beatmap.mods) ?:
+        difficultyCacheManager[beatmap.md5]?.getStandardTimedDifficultyCache(beatmap.mods.values) ?:
         standardDifficultyCalculator.calculateTimed(beatmap, scope).also { addCache(beatmap, it) }
 
     /**
@@ -410,13 +410,13 @@ object BeatmapDifficultyCalculator {
  */
 private class BeatmapDifficultyCacheManager {
     private val droidAttributeCache =
-        LRUCache<ModHashSet, BeatmapDifficultyCache<DroidDifficultyAttributes>>(5)
+        LRUCache<Set<Mod>, BeatmapDifficultyCache<DroidDifficultyAttributes>>(5)
     private val droidTimedAttributeCache =
-        LRUCache<ModHashSet, BeatmapDifficultyCache<Array<TimedDifficultyAttributes<DroidDifficultyAttributes>>>>(3)
+        LRUCache<Set<Mod>, BeatmapDifficultyCache<Array<TimedDifficultyAttributes<DroidDifficultyAttributes>>>>(3)
     private val standardAttributeCache =
-        LRUCache<ModHashSet, BeatmapDifficultyCache<StandardDifficultyAttributes>>(5)
+        LRUCache<Set<Mod>, BeatmapDifficultyCache<StandardDifficultyAttributes>>(5)
     private val standardTimedAttributeCache =
-        LRUCache<ModHashSet, BeatmapDifficultyCache<Array<TimedDifficultyAttributes<StandardDifficultyAttributes>>>>(3)
+        LRUCache<Set<Mod>, BeatmapDifficultyCache<Array<TimedDifficultyAttributes<StandardDifficultyAttributes>>>>(3)
 
     /**
      * Adds a [DroidDifficultyAttributes] cache to this [BeatmapDifficultyCacheManager].
@@ -515,7 +515,7 @@ private class BeatmapDifficultyCacheManager {
      */
     private fun <T> invalidateExpiredCache(
         currentTime: Long,
-        cacheMap: HashMap<ModHashSet, BeatmapDifficultyCache<T>>
+        cacheMap: HashMap<Set<Mod>, BeatmapDifficultyCache<T>>
     ) = cacheMap.iterator().run {
             for ((_, value) in this) {
                 if (value.isExpired(currentTime)) {
@@ -527,24 +527,24 @@ private class BeatmapDifficultyCacheManager {
     /**
      * Adds a difficulty attributes cache to a cache map.
      *
-     * @param mods The [Mod]s to cache for.
+     * @param mods The [ModHashMap] to cache for.
      * @param mode The [GameMode] to get for.
      * @param cache The difficulty attributes cache to add.
      * @param cacheMap The map to add the cache to.
      * @param timeToLive The duration at which this cache is allowed to live, in milliseconds.
      */
     private fun <T> addCache(
-        mods: Iterable<Mod>, mode: GameMode, cache: T,
-        cacheMap: HashMap<ModHashSet, BeatmapDifficultyCache<T>>,
+        mods: Iterable<Mod>?, mode: GameMode, cache: T,
+        cacheMap: HashMap<Set<Mod>, BeatmapDifficultyCache<T>>,
         timeToLive: Long
     ) {
         cacheMap[processMods(mods, mode)] = BeatmapDifficultyCache(cache, timeToLive)
     }
 
     /**
-     * Gets the cache of difficulty attributes of a set of [Mod]s.
+     * Gets the cache of difficulty attributes of a [ModHashMap].
      *
-     * @param mods The set of [Mod]s to retrieve.
+     * @param mods The [ModHashMap] to retrieve.
      * @param mode The [GameMode] to get for.
      * @param cacheMap The map containing the cache to lookup for.
      * @return The difficulty attributes, `null` if not found.
@@ -552,7 +552,7 @@ private class BeatmapDifficultyCacheManager {
     </T> */
     private fun <T> getCache(
         mods: Iterable<Mod>?, mode: GameMode,
-        cacheMap: HashMap<ModHashSet, BeatmapDifficultyCache<T>>
+        cacheMap: HashMap<Set<Mod>, BeatmapDifficultyCache<T>>
     ) = cacheMap[processMods(mods, mode)]?.let {
         it.refresh()
         it.cache
@@ -565,12 +565,12 @@ private class BeatmapDifficultyCacheManager {
      * @param mode The [GameMode] to process for.
      * @return A new set of [Mod]s that can be used as a cache.
      */
-    private fun processMods(mods: Iterable<Mod>?, mode: GameMode) = ModHashSet(mods).also {
+    private fun processMods(mods: Iterable<Mod>?, mode: GameMode) = mods?.toMutableSet()?.also {
         when (mode) {
             GameMode.Droid -> droidDifficultyCalculator.retainDifficultyAdjustmentMods(it)
             GameMode.Standard -> standardDifficultyCalculator.retainDifficultyAdjustmentMods(it)
         }
-    }
+    } ?: emptySet()
 }
 
 /**

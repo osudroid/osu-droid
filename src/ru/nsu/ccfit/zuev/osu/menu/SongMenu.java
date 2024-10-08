@@ -881,11 +881,11 @@ public class SongMenu implements IUpdateHandler, MenuItemListener,
 
         var mods = ModMenu.getInstance().getEnabledMods();
         boolean isPreciseMod = mods.contains(ModPrecise.class);
-        float totalSpeedMultiplier = ModUtils.calculateRateWithMods(mods);
+        float totalSpeedMultiplier = ModUtils.calculateRateWithMods(mods.values());
 
         var difficulty = beatmapInfo.getBeatmapDifficulty();
 
-        ModUtils.applyModsToBeatmapDifficulty(difficulty, GameMode.Droid, mods);
+        ModUtils.applyModsToBeatmapDifficulty(difficulty, GameMode.Droid, mods.values());
 
         if (isPreciseMod) {
             // Special case for OD. The Precise mod changes the hit window and not the OD itself, but we must
@@ -1025,7 +1025,7 @@ public class SongMenu implements IUpdateHandler, MenuItemListener,
                 switch (Config.getDifficultyAlgorithm()) {
                     case droid -> {
                         var attributes = BeatmapDifficultyCalculator.calculateDroidDifficulty(
-                            data, mods, scope
+                            data, mods.values(), scope
                         );
 
                         setStarsDisplay(GameHelper.Round(attributes.starRating, 2));
@@ -1033,7 +1033,7 @@ public class SongMenu implements IUpdateHandler, MenuItemListener,
 
                     case standard -> {
                         var attributes = BeatmapDifficultyCalculator.calculateStandardDifficulty(
-                            data, mods, scope
+                            data, mods.values(), scope
                         );
 
                         setStarsDisplay(GameHelper.Round(attributes.starRating, 2));

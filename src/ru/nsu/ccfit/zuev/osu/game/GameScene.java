@@ -49,7 +49,7 @@ import com.rian.osu.difficulty.attributes.DroidDifficultyAttributes;
 import com.rian.osu.difficulty.attributes.StandardDifficultyAttributes;
 import com.rian.osu.difficulty.attributes.TimedDifficultyAttributes;
 import com.rian.osu.mods.*;
-import com.rian.osu.utils.ModHashSet;
+import com.rian.osu.utils.ModHashMap;
 
 import org.anddev.andengine.engine.Engine;
 import org.anddev.andengine.engine.camera.SmoothCamera;
@@ -182,7 +182,7 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
 
     private DifficultyHelper difficultyHelper = DifficultyHelper.StdDifficulty;
 
-    private ModHashSet lastMods;
+    private ModHashMap lastMods;
     private TimedDifficultyAttributes<DroidDifficultyAttributes>[] droidTimedDifficultyAttributes;
     private TimedDifficultyAttributes<StandardDifficultyAttributes>[] standardTimedDifficultyAttributes;
 
@@ -344,7 +344,7 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
         }
     }
 
-    private boolean loadGame(final BeatmapInfo beatmapInfo, final String rFile, final ModHashSet mods) {
+    private boolean loadGame(final BeatmapInfo beatmapInfo, final String rFile, final ModHashMap mods) {
         if (!SecurityUtils.verifyFileIntegrity(GlobalManager.getInstance().getMainActivity())) {
             ToastLogger.showTextId(R.string.file_integrity_tampered, true);
             return false;
@@ -387,7 +387,7 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
             return false;
         }
 
-        playableBeatmap = parsedBeatmap.createDroidPlayableBeatmap(mods);
+        playableBeatmap = parsedBeatmap.createDroidPlayableBeatmap(mods.values());
 
         // TODO skin manager
         SkinManager.getInstance().loadBeatmapSkin(playableBeatmap.getBeatmapsetPath());
@@ -535,7 +535,7 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
                 case standard -> {
                     if (standardTimedDifficultyAttributes == null || mods != lastMods) {
                         standardTimedDifficultyAttributes = BeatmapDifficultyCalculator.calculateStandardTimedDifficulty(
-                            parsedBeatmap, mods
+                            parsedBeatmap, mods.values()
                         );
                     }
                 }
@@ -568,7 +568,7 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
         startGame(null, null, null);
     }
 
-    public void startGame(final BeatmapInfo beatmapInfo, final String replayFile, final ModHashSet mods) {
+    public void startGame(final BeatmapInfo beatmapInfo, final String replayFile, final ModHashMap mods) {
         scene = new ExtendedScene();
         if (Config.isEnableStoryboard()) {
             if (storyboardSprite == null || storyboardOverlayProxy == null) {
@@ -601,7 +601,7 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
 
         final String rfile = beatmapInfo != null ? replayFile : this.replayFilePath;
         // Clone the mods to avoid concurrent modification
-        final ModHashSet modsToUse = mods != null ? new ModHashSet(mods) : lastMods;
+        final ModHashMap modsToUse = mods != null ? new ModHashMap(mods) : lastMods;
 
         Execution.async(() -> {
 
@@ -834,7 +834,7 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
             var position = new PointF(Config.getRES_WIDTH() - 130, 130);
             float timeOffset = 0;
 
-            for (var mod : lastMods) {
+            for (var mod : lastMods.values()) {
                 if (!(mod instanceof IModUserSelectable selectableMod)) {
                     continue;
                 }
@@ -867,7 +867,7 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
         unranked.setVisible(false);
         fgScene.attachChild(unranked);
 
-        boolean hasUnrankedMod = SmartIterator.wrap(lastMods.iterator()).applyFilter(m -> !m.isRanked()).hasNext();
+        boolean hasUnrankedMod = SmartIterator.wrap(lastMods.values().iterator()).applyFilter(m -> !m.isRanked()).hasNext();
         if (hasUnrankedMod || Config.isRemoveSliderLock()) {
             unranked.setVisible(true);
         }

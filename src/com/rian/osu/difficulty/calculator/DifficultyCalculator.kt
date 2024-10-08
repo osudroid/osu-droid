@@ -195,7 +195,7 @@ abstract class DifficultyCalculator<TBeatmap : PlayableBeatmap, TObject : Diffic
  */
 private class ProgressiveCalculationBeatmap(
     baseBeatmap: PlayableBeatmap
-) : PlayableBeatmap(baseBeatmap, baseBeatmap.mode, baseBeatmap.mods) {
+) : PlayableBeatmap(baseBeatmap, baseBeatmap.mode, baseBeatmap.mods.values) {
     override var maxCombo = 0
         private set
 

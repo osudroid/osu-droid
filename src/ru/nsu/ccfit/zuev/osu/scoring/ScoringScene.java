@@ -322,7 +322,7 @@ public class ScoringScene {
 
         var modX = mark.getX() - 30;
         var modY = mark.getY() + mark.getHeight() * 2 / 3;
-        for (var mod : mods) {
+        for (var mod : mods.values()) {
             if (!(mod instanceof IModUserSelectable selectableMod)) {
                 continue;
             }
@@ -340,11 +340,11 @@ public class ScoringScene {
         playerStr += String.format("  %s(%s)", BuildConfig.VERSION_NAME, BuildConfig.BUILD_TYPE);
         if (mods.contains(ModCustomSpeed.class) ||
             mods.contains(ModDifficultyAdjust.class) ||
-            (mods.contains(ModFlashlight.class) && mods.get(ModFlashlight.class).getFollowDelay() != ModFlashlight.DEFAULT_FOLLOW_DELAY)) {
+            (mods.contains(ModFlashlight.class) && mods.ofType(ModFlashlight.class).getFollowDelay() != ModFlashlight.DEFAULT_FOLLOW_DELAY)) {
 
-            var customSpeed = mods.get(ModCustomSpeed.class);
-            var difficultyAdjust = mods.get(ModDifficultyAdjust.class);
-            var flashlight = mods.get(ModFlashlight.class);
+            var customSpeed = mods.ofType(ModCustomSpeed.class);
+            var difficultyAdjust = mods.ofType(ModDifficultyAdjust.class);
+            var flashlight = mods.ofType(ModFlashlight.class);
 
             mapperStr += " [";
             if (customSpeed != null && customSpeed.getTrackRateMultiplier() != 1f) {
@@ -402,7 +402,7 @@ public class ScoringScene {
             if (beatmapData != null) {
                 switch (Config.getDifficultyAlgorithm()) {
                     case droid -> {
-                        var playableBeatmap = beatmapData.createDroidPlayableBeatmap(mods);
+                        var playableBeatmap = beatmapData.createDroidPlayableBeatmap(mods.values());
                         var difficultyAttributes = BeatmapDifficultyCalculator.calculateDroidDifficulty(playableBeatmap);
 
                         DroidPerformanceAttributes performanceAttributes;
@@ -430,7 +430,7 @@ public class ScoringScene {
                         ppinfo.append(String.format(Locale.ENGLISH, "%.2f★ | %.2f/%.2fdpp", difficultyAttributes.starRating, performanceAttributes.total, maxPerformanceAttributes.total));
                     }
                     case standard -> {
-                        var difficultyAttributes = BeatmapDifficultyCalculator.calculateStandardDifficulty(beatmapData, mods);
+                        var difficultyAttributes = BeatmapDifficultyCalculator.calculateStandardDifficulty(beatmapData, mods.values());
                         var performanceAttributes = BeatmapDifficultyCalculator.calculateStandardPerformance(difficultyAttributes, stat);
                         var maxPerformanceAttributes = BeatmapDifficultyCalculator.calculateStandardPerformance(difficultyAttributes);
 
@@ -497,7 +497,7 @@ public class ScoringScene {
                         (Multiplayer.isMultiplayer && !Config.isSubmitScoreOnMultiplayer()))
                     return;
 
-                boolean hasUnrankedMod = SmartIterator.wrap(stat.getMod().iterator()).applyFilter(m -> !m.isRanked()).hasNext();
+                boolean hasUnrankedMod = SmartIterator.wrap(mods.values().iterator()).applyFilter(m -> !m.isRanked()).hasNext();
                 if (hasUnrankedMod || Config.isRemoveSliderLock()) {
                     return;
                 }
