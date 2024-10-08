@@ -69,8 +69,8 @@ interface IModifierChain {
 
     fun translateTo(value: Float, durationSec: Float = 0f): UniversalModifier {
         return beginParallelChain {
-            translateTo(value, durationSec)
-            translateTo(value, durationSec)
+            translateToX(value, durationSec)
+            translateToY(value, durationSec)
         }
     }
 
@@ -95,8 +95,8 @@ interface IModifierChain {
 
     fun moveTo(value: Float, durationSec: Float = 0f): UniversalModifier {
         return beginParallelChain {
-            moveTo(value, durationSec)
-            moveTo(value, durationSec)
+            moveToX(value, durationSec)
+            moveToY(value, durationSec)
         }
     }
 
