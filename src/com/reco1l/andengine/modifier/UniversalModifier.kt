@@ -48,12 +48,22 @@ class UniversalModifier @JvmOverloads constructor(private val pool: Pool<Univers
     var modifiers: Array<UniversalModifier>? = null
         set(value) {
 
-            when (type) {
+            if (value != null && type.usesNestedModifiers) {
+                duration = 0f
 
-                Parallel -> duration = value?.maxOf { it.duration } ?: 0f
-                Sequence -> duration = value?.sumOf { it.duration } ?: 0f
+                for (i in value.indices) {
 
-                else -> Unit
+                    val modifier = value[i]
+
+                    // Ensuring this has been set.
+                    modifier.parent = this
+
+                    if (type == Sequence) {
+                        duration += modifier.duration
+                    } else {
+                        duration = max(duration, modifier.duration)
+                    }
+                }
             }
 
             field = value
