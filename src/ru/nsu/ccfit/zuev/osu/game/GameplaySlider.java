@@ -300,6 +300,7 @@ public class GameplaySlider extends GameObject {
             superPath = superPath.fitToLinePath();
             superPath.measure();
 
+            sliderBody.setAlpha(0f);
             sliderBody.setPath(superPath, Config.isSnakingInSliders());
             sliderBody.setBackgroundWidth(OsuSkin.get().getSliderBodyWidth() * scale);
             sliderBody.setBackgroundColor(bodyColor.r(), bodyColor.g(), bodyColor.b(), OsuSkin.get().getSliderBodyBaseAlpha());
@@ -319,6 +320,15 @@ public class GameplaySlider extends GameObject {
                 }
             } else {
                 sliderBody.setHintVisible(false);
+            }
+
+            if (GameHelper.isHidden()) {
+                // New duration from completed fade in to end (before fading out)
+                float fadeOutDuration = (float) this.beatmapSlider.getDuration() / 1000 + timePreempt - fadeInDuration;
+
+                sliderBody.fadeIn(fadeInDuration).fadeOut(fadeOutDuration).eased(Easing.OutQuad);
+            } else {
+                sliderBody.fadeIn(fadeInDuration);
             }
 
             scene.attachChild(sliderBody, 0);
@@ -344,18 +354,6 @@ public class GameplaySlider extends GameObject {
 
             tickContainer.setColor(colorDim, colorDim, colorDim);
             tickContainer.delay(dimDelaySec).colorTo(1f, 1f, 1f, 0.1f);
-        }
-
-        if (GameHelper.isHidden()) {
-            // New duration from completed fade in to end (before fading out)
-            float fadeOutDuration = (float) this.beatmapSlider.getDuration() / 1000 + timePreempt - fadeInDuration;
-
-            sliderBody.beginSequenceChain(s -> {
-                s.fadeIn(fadeInDuration);
-                s.fadeOut(fadeOutDuration).eased(Easing.OutQuad);
-            });
-        } else {
-            sliderBody.fadeIn(fadeInDuration);
         }
     }
 
