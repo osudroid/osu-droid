@@ -1,6 +1,5 @@
 package com.reco1l.andengine.modifier
 
-import com.reco1l.andengine.*
 import com.reco1l.andengine.modifier.ModifierType.*
 
 
@@ -19,16 +18,6 @@ fun interface IModifierChainBlock {
 interface IModifierChain {
 
 
-    private val target: ExtendedEntity
-        get() = when(this) {
-
-            is ExtendedEntity -> this
-            is UniversalModifier -> entity ?: throw IllegalStateException("The target entity of an UniversalModifier cannot be null.")
-
-            else -> throw IllegalStateException("IModifierChain only works with current implementations (ExtendedEntity and UniversalModifier), you must not use this interface.")
-        }
-
-
     /**
      * Obtains a modifier from the modifier pool or creates a new one.
      *
@@ -42,23 +31,11 @@ interface IModifierChain {
     // Nested chains
 
     /**
-     * Begins a delayed chain.
-     * In a [ExtendedEntity] this should be called instead of [delay].
-     */
-    fun beginDelayedChain(durationSec: Float, builder: IModifierChainBlock): UniversalModifier {
-        return applyModifier {
-            it.type = NONE
-            it.duration = durationSec
-            builder.apply { it.build() }
-        }
-    }
-
-    /**
      * Begins a sequential chain of modifiers.
      */
     fun beginSequenceChain(builder: IModifierChainBlock): UniversalModifier {
         return applyModifier {
-            it.type = SEQUENCE
+            it.type = Sequence
             builder.apply { it.build() }
         }
     }
@@ -68,7 +45,7 @@ interface IModifierChain {
      */
     fun beginParallelChain(builder: IModifierChainBlock): UniversalModifier {
         return applyModifier {
-            it.type = PARALLEL
+            it.type = Parallel
             builder.apply { it.build() }
         }
     }
@@ -76,111 +53,111 @@ interface IModifierChain {
 
     // Delay
 
+    /**
+     * Delays the execution of the next modifier in the chain.
+     */
     fun delay(durationSec: Float): UniversalModifier {
-        return apply(NONE, durationSec)
+        return applyModifier {
+            it.type = Delay
+            it.duration = durationSec
+            it.finalValue = 0f
+        }
     }
 
 
     // Translate
 
     fun translateTo(value: Float, durationSec: Float = 0f): UniversalModifier {
-        return apply(TRANSLATE, durationSec,
-            target.translationX, value,
-            target.translationY, value
-        )
-    }
-
-    fun translateTo(axes: Axes = Axes.Both, value: Float, durationSec: Float = 0f): UniversalModifier {
-        return when (axes) {
-
-            Axes.Both -> apply(TRANSLATE, durationSec,
-                target.translationX, value,
-                target.translationY, value
-            )
-
-            Axes.X -> apply(TRANSLATE_X, durationSec, target.translationX, value)
-            Axes.Y -> apply(TRANSLATE_Y, durationSec, target.translationY, value)
-
-            Axes.None -> throw IllegalArgumentException("Cannot translate to none axes.")
+        return beginParallelChain {
+            translateTo(value, durationSec)
+            translateTo(value, durationSec)
         }
     }
 
-    fun translateTo(x: Float, y: Float, durationSec: Float = 0f): UniversalModifier {
-        return apply(TRANSLATE, durationSec,
-            target.translationX, x,
-            target.translationY, y
-        )
+    fun translateToX(value: Float, durationSec: Float = 0f): UniversalModifier {
+        return applyModifier {
+            it.type = TranslateX
+            it.duration = durationSec
+            it.finalValue = value
+        }
+    }
+
+    fun translateToY(value: Float, durationSec: Float = 0f): UniversalModifier {
+        return applyModifier {
+            it.type = TranslateY
+            it.duration = durationSec
+            it.finalValue = value
+        }
     }
 
 
     // Move
 
     fun moveTo(value: Float, durationSec: Float = 0f): UniversalModifier {
-        return apply(MOVE, durationSec,
-            target.x, value,
-            target.y, value
-        )
-    }
-
-    fun moveTo(axes: Axes = Axes.Both, x: Float, y: Float, durationSec: Float = 0f): UniversalModifier {
-        return when (axes) {
-
-            Axes.Both -> apply(MOVE, durationSec,
-                target.x, x,
-                target.y, y
-            )
-
-            Axes.X -> apply(MOVE_X, durationSec, target.x, x)
-            Axes.Y -> apply(MOVE_Y, durationSec, target.y, y)
-
-            Axes.None -> throw IllegalArgumentException("Cannot move to none axes.")
+        return beginParallelChain {
+            moveTo(value, durationSec)
+            moveTo(value, durationSec)
         }
     }
 
-    fun moveTo(x: Float, y: Float, durationSec: Float = 0f): UniversalModifier {
-        return apply(MOVE, durationSec,
-            target.x, x,
-            target.y, y
-        )
+    fun moveTo(valueX: Float, valueY: Float, durationSec: Float = 0f): UniversalModifier {
+        return beginParallelChain {
+            moveToX(valueX, durationSec)
+            moveToY(valueY, durationSec)
+        }
+    }
+
+    fun moveToX(value: Float, durationSec: Float = 0f): UniversalModifier {
+        return applyModifier {
+            it.type = MoveX
+            it.duration = durationSec
+            it.finalValue = value
+        }
+    }
+
+    fun moveToY(value: Float, durationSec: Float = 0f): UniversalModifier {
+        return applyModifier {
+            it.type = MoveY
+            it.duration = durationSec
+            it.finalValue = value
+        }
     }
 
 
     // Scale
 
     fun scaleTo(value: Float, durationSec: Float = 0f): UniversalModifier {
-        return apply(SCALE, durationSec,
-            target.scaleX, value,
-            target.scaleY, value
-        )
-    }
-
-    fun scaleTo(axes: Axes = Axes.Both, value: Float, durationSec: Float = 0f): UniversalModifier {
-        return when (axes) {
-
-            Axes.Both -> apply(SCALE, durationSec,
-                target.scaleX, value,
-                target.scaleY, value
-            )
-
-            Axes.X -> apply(SCALE_X, durationSec, target.scaleX, value)
-            Axes.Y -> apply(SCALE_Y, durationSec, target.scaleY, value)
-
-            Axes.None -> throw IllegalArgumentException("Cannot scale to none axes.")
+        return beginParallelChain {
+            scaleToX(value, durationSec)
+            scaleToY(value, durationSec)
         }
     }
 
-    fun scaleTo(x: Float, y: Float, durationSec: Float = 0f): UniversalModifier {
-        return apply(SCALE, durationSec,
-            target.scaleX, x,
-            target.scaleY, y
-        )
+    fun scaleToX(value: Float, durationSec: Float = 0f): UniversalModifier {
+        return applyModifier {
+            it.type = ScaleX
+            it.duration = durationSec
+            it.finalValue = value
+        }
+    }
+
+    fun scaleToY(value: Float, durationSec: Float = 0f): UniversalModifier {
+        return applyModifier {
+            it.type = ScaleY
+            it.duration = durationSec
+            it.finalValue = value
+        }
     }
 
 
     // Coloring
 
     fun fadeTo(value: Float, durationSec: Float = 0f): UniversalModifier {
-        return apply(ALPHA, durationSec, target.alpha, value)
+        return applyModifier {
+            it.type = Alpha
+            it.duration = durationSec
+            it.finalValue = value
+        }
     }
 
     fun fadeIn(durationSec: Float = 0f): UniversalModifier {
@@ -192,36 +169,45 @@ interface IModifierChain {
     }
 
     fun colorTo(red: Float, green: Float, blue: Float, durationSec: Float = 0f): UniversalModifier {
-        return apply(COLOR, durationSec,
-            target.red, red,
-            target.green, green,
-            target.blue, blue
-        )
+        return beginParallelChain {
+            colorToRed(red, durationSec)
+            colorToGreen(green, durationSec)
+            colorToBlue(blue, durationSec)
+        }
     }
 
-    fun colorTo(value: Float, durationSec: Float = 0f): UniversalModifier {
-        return apply(COLOR, durationSec,
-            target.red, value,
-            target.green, value,
-            target.blue, value
-        )
+    fun colorToRed(value: Float, durationSec: Float = 0f): UniversalModifier {
+        return applyModifier {
+            it.type = ColorRed
+            it.duration = durationSec
+            it.finalValue = value
+        }
+    }
+
+    fun colorToGreen(value: Float, durationSec: Float = 0f): UniversalModifier {
+        return applyModifier {
+            it.type = ColorGreen
+            it.duration = durationSec
+            it.finalValue = value
+        }
+    }
+
+    fun colorToBlue(value: Float, durationSec: Float = 0f): UniversalModifier {
+        return applyModifier {
+            it.type = ColorBlue
+            it.duration = durationSec
+            it.finalValue = value
+        }
     }
 
 
     // Rotation
 
     fun rotateTo(value: Float, durationSec: Float = 0f): UniversalModifier {
-        return apply(ROTATION, durationSec, target.rotation, value)
-    }
-
-
-    // Private
-
-    private fun apply(type: ModifierType, durationSec: Float, vararg values: Float): UniversalModifier {
         return applyModifier {
-            it.type = type
-            it.values = values
+            it.type = Rotation
             it.duration = durationSec
+            it.finalValue = value
         }
     }
 

@@ -2,7 +2,6 @@ package com.reco1l.andengine.modifier
 
 import android.util.*
 import com.edlplan.framework.easing.Easing
-import com.reco1l.andengine.*
 import com.reco1l.andengine.modifier.ModifierType.*
 import com.reco1l.framework.*
 import com.reco1l.toolkt.kotlin.*
@@ -19,44 +18,22 @@ import kotlin.math.*
  * @see ModifierType
  * @author Reco1l
  */
-class UniversalModifier @JvmOverloads constructor(private val pool: Pool<UniversalModifier>? = null) : IEntityModifier, IModifierChain {
-
-    @JvmOverloads
-    constructor(type: ModifierType, duration: Float, from: Float, to: Float, listener: OnModifierFinished? = null, easeFunction: Easing = Easing.None) : this(null) {
-        this.type = type
-        this.duration = duration
-        this.values = floatArrayOf(from, to)
-        this.onFinished = listener
-        this.easing = easeFunction
-    }
-
-    @JvmOverloads
-    constructor(type: ModifierType, listener: OnModifierFinished? = null, vararg modifiers: UniversalModifier) : this(null) {
-        this.type = type
-        this.onFinished = listener
-        this.modifiers = arrayOf(*modifiers)
-    }
-
-
-    var entity: ExtendedEntity? = null
+class UniversalModifier @JvmOverloads constructor(private val pool: Pool<UniversalModifier>? = GlobalPool) : IEntityModifier, IModifierChain {
 
 
     /**
      * The type of the modifier.
      * @see ModifierType
      */
-    var type = NONE
+    var type = Delay
         set(value) {
             if (field != value) {
 
-                if (value != SEQUENCE && value != PARALLEL) {
+                if (value != Sequence && value != Parallel) {
                     clearNestedModifiers()
                 }
 
                 field = value
-
-                values.fill(0f)
-                calculateDuration()
             }
         }
 
@@ -66,51 +43,53 @@ class UniversalModifier @JvmOverloads constructor(private val pool: Pool<Univers
     var onFinished: OnModifierFinished? = null
 
     /**
-     * Inner modifiers for [SEQUENCE] or [PARALLEL] modifier types.
+     * Inner modifiers for [Sequence] or [Parallel] modifier types.
      */
     var modifiers: Array<UniversalModifier>? = null
         set(value) {
 
-            if (value != null && type != SEQUENCE && type != PARALLEL) {
-                Log.w("UniversalModifier", "Inner modifiers can only be set for sequence or parallel modifiers, ignoring.")
-                return
-            }
+            when (type) {
 
-            if (type == PARALLEL) {
-                // Sorting to reduce iterations, obviously sequential modifiers cannot be sorted.
-                value?.sortBy { it.duration }
+                Parallel -> {
+                    // Sorting to reduce iterations when updating them by placing the shortest duration first.
+                    value?.sortBy { it.duration }
+
+                    duration = value?.maxOf { it.duration } ?: 0f
+                }
+
+                Sequence -> {
+                    duration = value?.sumOf { it.duration } ?: 0f
+                }
+
+                else -> Unit
             }
 
             field = value
-            calculateDuration()
         }
 
     /**
      * Easing function to be used.
      */
-    var easing: Easing = Easing.None
+    var easing = Easing.None
+
+    /**
+     * The final values for the modifier.
+     */
+    var finalValue = 0f
 
 
-    private var values = FloatArray(2)
-
-    private var removeWhenFinished = true
+    private var duration = 0f
 
     private var elapsedSec = -1f
 
-    private var duration = 0f
+    private var initialValue = 0f
+
+    private var parent: UniversalModifier? = null
 
 
     private fun clearNestedModifiers() {
         modifiers?.forEach { it.onUnregister() }
         modifiers = null
-    }
-
-    private fun calculateDuration() {
-        duration = when(type) {
-            SEQUENCE -> modifiers?.sumOf { it.duration } ?: 0f
-            PARALLEL -> modifiers?.maxOf { it.duration } ?: 0f
-            else -> duration
-        }
     }
 
 
@@ -123,11 +102,13 @@ class UniversalModifier @JvmOverloads constructor(private val pool: Pool<Univers
         // We use negative elapsed time to know whether the modifier has started or not yet.
         if (elapsedSec < 0) {
             elapsedSec = 0f
+
+            initialValue = type.getCurrentValue(entity)
         }
 
         var consumedTimeSec = 0f
 
-        if (type == SEQUENCE || type == PARALLEL) {
+        if (type.usesNestedModifiers) {
 
             var remainingTimeSec = deltaTimeSec
             var isAllModifiersFinished = false
@@ -137,7 +118,7 @@ class UniversalModifier @JvmOverloads constructor(private val pool: Pool<Univers
                 // In parallel modifiers the consumed time is equal to the maximum consumed
                 // time of the inner modifiers so we need to reset it to 0, at this point
                 // remainingTimeSec should have the previous consumed time subtracted.
-                if (type == PARALLEL) {
+                if (type == Parallel) {
                     consumedTimeSec = 0f
                 }
 
@@ -151,7 +132,7 @@ class UniversalModifier @JvmOverloads constructor(private val pool: Pool<Univers
                     }
                     isAllModifiersFinished = false
 
-                    if (type == SEQUENCE) {
+                    if (type == Sequence) {
                         // In a sequence the delta time is subtracted with the consumed time of the first
                         // non-finished modifier until it reaches 0.
                         // We break the loop because only the first non-finished modifier should be updated.
@@ -165,7 +146,7 @@ class UniversalModifier @JvmOverloads constructor(private val pool: Pool<Univers
 
                 // In a parallel modifier since the consumed time is the maximum consumed time
                 // between all inner modifiers, we subtract it after all modifiers are updated.
-                if (type == PARALLEL) {
+                if (type == Parallel) {
                     remainingTimeSec -= consumedTimeSec
                 }
             }
@@ -182,7 +163,7 @@ class UniversalModifier @JvmOverloads constructor(private val pool: Pool<Univers
             // we have to assume the percentage is 1 to avoid division by zero.
             val percentage = if (duration > 0) easing.interpolate(elapsedSec / duration) else 1f
 
-            type.onApply?.invoke(entity, values, percentage)
+            type.setValue(entity, initialValue + (finalValue - initialValue) * percentage)
         }
 
         if (isFinished) {
@@ -210,43 +191,21 @@ class UniversalModifier @JvmOverloads constructor(private val pool: Pool<Univers
 
     override fun applyModifier(block: (UniversalModifier) -> Unit): UniversalModifier {
 
-        // When this happens it means that this was called from a chained call.
-        // If the type of modifier is not a sequence or parallel, we should apply
-        // the modifier to the target directly.
-        if (type != SEQUENCE && type != PARALLEL) {
-
-            // If the type is delay, we should convert it to a sequence modifier with the delay first,
-            // so the next chained modifiers will be applied after the delay.
-            if (type == NONE) {
-
-                // We preserve the duration because it will be reset when changing the type.
-                val delay = duration
-
-                // Changing type to sequence, at this point shouldn't be needed to
-                // call setToDefault() since this is supposed to be a delay modifier.
-                type = SEQUENCE
-
-                applyModifier { it.duration = delay }
-                applyModifier(block)
-                return this
-            }
-
-            // If it's not a sequence or parallel modifier, we should apply the modifier directly
-            // to the target entity assuming it's not null.
-            if (entity == null) {
-                throw IllegalStateException("The target entity of an UniversalModifier cannot be null.")
-            }
-
-            return entity!!.applyModifier(block)
+        // Nested modified can only be applied to sequence or parallel modifiers so in case this modifier
+        // it's not one of them then we create a new sequence modifier and add the current modifier to it.
+        // If the parent is set and it's a sequence or parallel modifier we can just add the nested
+        // modifier to it.
+        if (!type.usesNestedModifiers && (parent == null || !parent!!.type.usesNestedModifiers)) {
+            return then().applyModifier(block)
         }
 
-        val modifier = pool?.obtain() ?: UniversalModifier()
-        modifier.setToDefault()
-        modifier.entity = entity
-        block(modifier)
+        val nestedModifier = pool?.obtain() ?: UniversalModifier()
+        nestedModifier.setToDefault()
+        nestedModifier.parent = this
+        block(nestedModifier)
 
-        modifiers = modifiers?.plus(modifier) ?: arrayOf(modifier)
-        return modifier
+        modifiers = modifiers?.plus(nestedModifier) ?: arrayOf(nestedModifier)
+        return nestedModifier
     }
 
     /**
@@ -270,35 +229,48 @@ class UniversalModifier @JvmOverloads constructor(private val pool: Pool<Univers
      */
     fun then(): UniversalModifier {
 
-        if (type == SEQUENCE) {
-            return this
+        // If the parent is a sequence we can just add the following modifiers to it.
+        if (parent?.type == Sequence) {
+            return parent!!
         }
 
-        if (entity == null) {
-            throw IllegalStateException("The target entity of an UniversalModifier cannot be null.")
+        // A "new" sequence will be created containing this modifier as well the following modifiers in the chain will be added to it.
+        if (type != Sequence) {
+
+            val thisCopy = pool?.obtain() ?: UniversalModifier()
+            thisCopy.setToDefault()
+            thisCopy.setFrom(this)
+            thisCopy.parent = this
+
+            // Setting modifiers to null so setToDefault() doesn't pool them back.
+            modifiers = null
+
+            setToDefault()
+
+            type = Sequence
+            modifiers = arrayOf(thisCopy)
         }
 
-        return entity!!.applyModifier {
-            it.type = NONE
-            it.duration = duration
-        }
+        return this
     }
 
 
     /**
      * Sets the modifier to its default state.
      *
-     * This will remove all the inner modifiers, the listener, reset the elapsed time, and set the type to [NONE].
+     * This will remove all the inner modifiers, the listener, reset the elapsed time, and set the type to [Delay].
      */
     fun setToDefault() {
 
-        type = NONE
-        entity = null
-        duration = 0f
-        onFinished = null
-        easing = Easing.None
+        type = Delay
 
-        values.fill(0f)
+        duration = 0f
+        finalValue = 0f
+        initialValue = 0f
+
+        parent = null
+        easing = Easing.None
+        onFinished = null
 
         clearNestedModifiers()
         reset()
@@ -306,48 +278,28 @@ class UniversalModifier @JvmOverloads constructor(private val pool: Pool<Univers
 
 
     /**
-     * Sets the transformation values for the modifier.
-     *
-     * The values are stored in an array of spans of 2 elements where the first element is the `from` value and the second is the
-     * `to` values, the amount of spans needed depends on the type of the modifier.
-     */
-    fun setValues(vararg newValues: Float) {
-
-        if (values.size < newValues.size) {
-            values = values.copyOf(newValues.size)
-        }
-
-        for (i in newValues.indices) {
-            values[i] = newValues[i]
-        }
-    }
-
-    /**
      * Seeks the modifier to a specific time.
      */
-    @JvmOverloads
-    fun setTime(seconds: Float, target: IEntity? = entity) {
-        onUpdate(seconds - elapsedSec, target ?: return)
+    fun setTime(seconds: Float, target: IEntity) {
+        onUpdate(seconds - elapsedSec, target)
     }
 
     /**
      * Sets the progress of the modifier.
      */
-    @JvmOverloads
-    fun setProgress(progress: Float, target: IEntity? = entity) {
-        onUpdate(progress * duration, target ?: return)
+    fun setProgress(progress: Float, target: IEntity) {
+        onUpdate(progress * duration, target)
     }
-
 
     /**
      * Sets the duration of the modifier.
      *
-     * If the modifier is a [SEQUENCE] or [PARALLEL] modifier, this method will do nothing.
+     * If the modifier is a [Sequence] or [Parallel] modifier, this method will do nothing.
      */
     fun setDuration(value: Float) {
 
-        if (type == SEQUENCE || type == PARALLEL) {
-            Log.w("UniversalModifier", "Cannot set duration for sequence or parallel modifiers, ignoring.")
+        if (type == Sequence || type == Parallel) {
+            Log.w("UniversalModifier", "Cannot manually set duration for sequence or parallel modifiers, ignoring.")
             return
         }
 
@@ -365,7 +317,7 @@ class UniversalModifier @JvmOverloads constructor(private val pool: Pool<Univers
 
 
     override fun isFinished(): Boolean {
-        if (type == SEQUENCE || type == PARALLEL) {
+        if (type == Sequence || type == Parallel) {
             for (modifier in modifiers ?: return true) {
                 if (!modifier.isFinished) {
                     return false
@@ -378,11 +330,11 @@ class UniversalModifier @JvmOverloads constructor(private val pool: Pool<Univers
 
 
     override fun isRemoveWhenFinished(): Boolean {
-        return removeWhenFinished
+        return true
     }
 
     override fun setRemoveWhenFinished(value: Boolean) {
-        removeWhenFinished = value
+        Log.w("UniversalModifier", "Remove when finished is always true for UniversalModifier, ignoring.")
     }
 
 
@@ -396,14 +348,35 @@ class UniversalModifier @JvmOverloads constructor(private val pool: Pool<Univers
 
 
     override fun deepCopy(): UniversalModifier = UniversalModifier(pool).also { modifier ->
+        modifier.finalValue = finalValue
+        modifier.initialValue = initialValue
         modifier.type = type
         modifier.easing = easing
-        modifier.values = values.copyOf()
         modifier.duration = duration
         modifier.modifiers = modifiers?.map { it.deepCopy() }?.toTypedArray()
         modifier.onFinished = onFinished
     }
 
+    fun setFrom(other: UniversalModifier) {
+        type = other.type
+        easing = other.easing
+        duration = other.duration
+        modifiers = other.modifiers
+        onFinished = other.onFinished
+        finalValue = other.finalValue
+        initialValue = other.initialValue
+    }
+
+
+    companion object {
+
+        /**
+         * The global pool for universal modifiers.
+         */
+        @JvmField
+        val GlobalPool = Pool { UniversalModifier(it) }
+
+    }
 
 }
 

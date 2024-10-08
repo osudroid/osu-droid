@@ -1,154 +1,103 @@
 package com.reco1l.andengine.modifier
 
+import android.graphics.Color.*
 import com.reco1l.andengine.*
-import org.anddev.andengine.entity.IEntity
-
-
-private operator fun FloatArray.get(index: Int, percentage: Float): Float {
-    val from = this[2 * index]
-    val to = this[2 * index + 1]
-    return from + (to - from) * percentage
-}
-
-private val FloatArray.spanCount
-    get() = size / 2
+import com.reco1l.framework.*
+import org.anddev.andengine.entity.*
 
 
 /**
  * The type of the modifier.
  */
-enum class ModifierType(val onApply: ((entity: IEntity, values: FloatArray, percentage: Float) -> Unit)? = null) {
-
-    /**
-     * Modifies the entity's alpha value.
-     */
-    ALPHA({ entity, values, percentage ->
-        entity.alpha = values[0, percentage]
-    }),
-
-    /**
-     * Modifies the entity's scale values for both axis.
-     */
-    SCALE({ entity, values, percentage ->
-        if (values.spanCount == 1) {
-            entity.scaleX = values[0, percentage]
-            entity.scaleY = values[0, percentage]
-        } else {
-            entity.scaleX = values[0, percentage]
-            entity.scaleY = values[1, percentage]
-        }
-    }),
+enum class ModifierType(val getCurrentValue: IEntity.() -> Float = { 0f }, val setValue: IEntity.(Float) -> Unit = {}) {
 
     /**
      * Modifies the entity's X scale value.
      */
-    SCALE_X({ entity, values, percentage ->
-        entity.scaleX = values[0, percentage]
-    }),
+    ScaleX(IEntity::getScaleX, IEntity::setScaleX),
 
     /**
      * Modifies the entity's Y scale value.
      */
-    SCALE_Y({ entity, values, percentage ->
-        entity.scaleY = values[0, percentage]
-    }),
+    ScaleY(IEntity::getScaleY, IEntity::setScaleY),
 
     /**
-     * Modifies the entity's color values.
+     * Modifies the entity's alpha value.
      */
-    COLOR({ entity, values, percentage ->
-        when (values.spanCount) {
-            1 -> entity.setColor(values[0, percentage], values[0, percentage], values[0, percentage])
-            3 -> entity.setColor(values[0, percentage], values[1, percentage], values[2, percentage])
-
-            else -> throw IllegalArgumentException("Color modifier must have 1 or 3 values.")
-        }
-    }),
+    Alpha(IEntity::getAlpha, IEntity::setAlpha),
 
     /**
-     * Modifies the entity's position in both axis.
+     * Modifies the entity's red color value.
      */
-    MOVE({ entity, values, percentage ->
-        if (values.spanCount == 1) {
-            entity.setPosition(values[0, percentage], values[0, percentage])
-        } else {
-            entity.setPosition(values[0, percentage], values[1, percentage])
-        }
+    ColorRed(IEntity::getRed, { setColor(it, green, blue) }),
+
+    /**
+     * Modifies the entity's green color value.
+     */
+    ColorGreen(IEntity::getGreen, { setColor(red, it, blue) }),
+
+    /**
+     * Modifies the entity's blue color value.
+     */
+    ColorBlue(IEntity::getBlue, { setColor(red, green, it) }),
+
+    /**
+     * Modifies the entity's color value.
+     */
+    ColorRGB({ Colors.toPackedFloat(red, green, blue) }, {
+        val hex = it.toRawBits()
+        setColor(red(hex) / 255f, green(hex) / 255f, blue(hex) / 255f)
     }),
 
     /**
      * Modifies the entity's X position.
      */
-    MOVE_X({ entity, values, percentage ->
-        entity.setPosition(values[0, percentage], entity.y)
-    }),
+    MoveX(IEntity::getX, { setPosition(it, y) }),
 
     /**
      * Modifies the entity's Y position.
      */
-    MOVE_Y({ entity, values, percentage ->
-        entity.setPosition(entity.x, values[0, percentage])
-    }),
-
-    /**
-     * Modifies the entity's translation in both axis.
-     *
-     * Note: This is only available for [ExtendedEntity] instances.
-     */
-    TRANSLATE({ entity, values, percentage ->
-        if (entity is ExtendedEntity) {
-            if (values.spanCount == 1) {
-                entity.translationX = values[0, percentage]
-                entity.translationY = values[0, percentage]
-            } else {
-                entity.translationX = values[0, percentage]
-                entity.translationY = values[1, percentage]
-            }
-        }
-    }),
+    MoveY(IEntity::getY, { setPosition(x, it) }),
 
     /**
      * Modifies the entity's X translation.
      *
      * Note: This is only available for [ExtendedEntity] instances.
      */
-    TRANSLATE_X({ entity, values, percentage ->
-        if (entity is ExtendedEntity) {
-            entity.translationX = values[0, percentage]
-        }
-    }),
+    TranslateX({ (this as ExtendedEntity).translationX }, { (this as ExtendedEntity).translationX = it }),
 
     /**
      * Modifies the entity's Y translation.
      *
      * Note: This is only available for [ExtendedEntity] instances.
      */
-    TRANSLATE_Y({ entity, values, percentage ->
-        if (entity is ExtendedEntity) {
-            entity.translationY = values[0, percentage]
-        }
-    }),
+    TranslateY({ (this as ExtendedEntity).translationY }, { (this as ExtendedEntity).translationY = it }),
 
     /**
      * Modifies the entity's rotation.
      */
-    ROTATION({ entity, values, percentage ->
-        entity.rotation = values[0, percentage]
-    }),
+    Rotation(IEntity::getRotation, IEntity::setRotation),
 
     /**
      * Modifies the entity's with inner modifiers in sequence.
      */
-    SEQUENCE,
+    Sequence,
 
     /**
      * Modifies the entity's with inner modifiers in parallel.
      */
-    PARALLEL,
+    Parallel,
 
     /**
      * Does nothing, used as a delay modifier.
      */
-    NONE
+    Delay;
+
+
+    /**
+     * Whether this modifier type uses nested modifiers.
+     */
+    val usesNestedModifiers
+        get() = this == Sequence || this == Parallel
 
 }
