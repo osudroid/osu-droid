@@ -50,16 +50,8 @@ class UniversalModifier @JvmOverloads constructor(private val pool: Pool<Univers
 
             when (type) {
 
-                Parallel -> {
-                    // Sorting to reduce iterations when updating them by placing the shortest duration first.
-                    value?.sortBy { it.duration }
-
-                    duration = value?.maxOf { it.duration } ?: 0f
-                }
-
-                Sequence -> {
-                    duration = value?.sumOf { it.duration } ?: 0f
-                }
+                Parallel -> duration = value?.maxOf { it.duration } ?: 0f
+                Sequence -> duration = value?.sumOf { it.duration } ?: 0f
 
                 else -> Unit
             }
