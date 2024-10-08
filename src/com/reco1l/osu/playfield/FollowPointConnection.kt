@@ -99,19 +99,12 @@ object FollowPointConnection {
             fp.rotation = rotation
             fp.alpha = 0f
 
-            fp.registerEntityModifier(
-                Modifiers.sequence(expire,
-                Modifiers.delay(fadeInTime - secPassed),
-                Modifiers.parallel(null,
-                    Modifiers.fadeIn(endFadeInTime),
-                    Modifiers.scale(endFadeInTime, 1.5f * scale, scale, null, Easing.OutQuad),
-                    Modifiers.move(endFadeInTime, pointStartX, pointEndX, pointStartY, pointEndY, null, Easing.OutQuad),
-                    Modifiers.sequence(null,
-                        Modifiers.delay(fadeOutTime - fadeInTime),
-                        Modifiers.fadeOut(endFadeInTime)
-                    )
-                )
-            ))
+            fp.delay(fadeInTime - secPassed).beginParallelChain {
+                fadeIn(endFadeInTime)
+                scaleTo(scale, endFadeInTime).eased(Easing.OutQuad)
+                moveTo(pointEndX, pointEndY, endFadeInTime).eased(Easing.OutQuad)
+                delay(fadeOutTime - fadeInTime).fadeOut(endFadeInTime)
+            }.then(expire)
 
             scene.attachChild(fp, 0)
             d += SPACING

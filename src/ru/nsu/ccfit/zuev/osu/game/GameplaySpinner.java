@@ -2,16 +2,14 @@ package ru.nsu.ccfit.zuev.osu.game;
 
 import android.graphics.PointF;
 
-import com.reco1l.osu.Execution;
+import com.reco1l.andengine.Axes;
 import com.reco1l.andengine.sprite.ExtendedSprite;
-import com.reco1l.osu.Modifiers;
 import com.reco1l.andengine.Anchor;
 import com.rian.osu.beatmap.hitobject.BankHitSampleInfo;
 import com.rian.osu.beatmap.hitobject.HitSampleInfo;
 import com.rian.osu.beatmap.hitobject.Spinner;
 
 import org.anddev.andengine.entity.scene.Scene;
-import org.anddev.andengine.entity.sprite.Sprite;
 import org.anddev.andengine.opengl.texture.region.TextureRegion;
 import org.anddev.andengine.util.MathUtils;
 
@@ -27,7 +25,7 @@ public class GameplaySpinner extends GameObject {
     public final PointF center;
     private final ExtendedSprite circle;
     private final ExtendedSprite approachCircle;
-    private final Sprite metre;
+    private final ExtendedSprite metre;
     private final ExtendedSprite spinText;
     private final TextureRegion metreRegion;
     private final ExtendedSprite clearText;
@@ -68,7 +66,9 @@ public class GameplaySpinner extends GameObject {
 
         metreRegion = ResourceManager.getInstance().getTexture("spinner-metre").deepCopy();
 
-        metre = new Sprite(center.x - (float) Config.getRES_WIDTH() / 2, Config.getRES_HEIGHT(), metreRegion);
+        metre = new ExtendedSprite(metreRegion);
+        metre.setPosition(center.x - (float) Config.getRES_WIDTH() / 2, Config.getRES_HEIGHT());
+        metre.setAutoSizeAxes(Axes.None);
         metre.setWidth(Config.getRES_WIDTH());
         metre.setHeight(background.getHeightScaled());
 
@@ -115,44 +115,34 @@ public class GameplaySpinner extends GameObject {
         float timePreempt = (float) beatmapSpinner.timePreempt / 1000f;
 
         background.setAlpha(0);
-        background.registerEntityModifier(Modifiers.sequence(
-            Modifiers.delay(timePreempt * 0.75f),
-            Modifiers.fadeIn(timePreempt * 0.25f)
-        ));
+        background.delay(timePreempt * 0.75f).fadeIn(timePreempt * 0.25f);
 
         circle.setAlpha(0);
-        circle.registerEntityModifier(Modifiers.sequence(
-            Modifiers.delay(timePreempt * 0.75f),
-            Modifiers.fadeIn(timePreempt * 0.25f)
-        ));
+        circle.delay(timePreempt * 0.75f).fadeIn(timePreempt * 0.25f);
 
         metreY = (Config.getRES_HEIGHT() - background.getHeightScaled()) / 2;
         metre.setAlpha(0);
-        metre.registerEntityModifier(Modifiers.sequence(
-            Modifiers.delay(timePreempt * 0.75f),
-            Modifiers.fadeIn(timePreempt * 0.25f)
-        ));
+        metre.delay(timePreempt * 0.75f).fadeIn(timePreempt * 0.25f);
+
         metreRegion.setTexturePosition(0, (int) metre.getHeightScaled());
 
-        approachCircle.setAlpha(0);
         if (GameHelper.isHidden()) {
             approachCircle.setVisible(false);
         }
-        approachCircle.registerEntityModifier(Modifiers.sequence(e -> Execution.updateThread(this::removeFromScene),
-            Modifiers.delay(timePreempt),
-            Modifiers.parallel(
-                Modifiers.alpha(duration, 0.75f, 1),
-                Modifiers.scale(duration, 2.0f, 0)
-            )
-        ));
+
+        approachCircle.setAlpha(0.75f);
+        approachCircle.setScale(2f);
+
+        approachCircle.delay(timePreempt).beginParallelChain(s -> {
+            s.fadeIn(timePreempt * 0.25f);
+            s.scaleTo(0f, timePreempt * 0.25f);
+        });
 
         spinText.setAlpha(0);
-        spinText.registerEntityModifier(Modifiers.sequence(
-            Modifiers.delay(timePreempt * 0.75f),
-            Modifiers.fadeIn(timePreempt * 0.25f),
-            Modifiers.delay(timePreempt / 2),
-            Modifiers.fadeOut(timePreempt * 0.25f)
-        ));
+        spinText.delay(timePreempt * 0.75f)
+            .fadeIn(timePreempt * 0.25f)
+            .delay(timePreempt / 2)
+            .fadeOut(timePreempt * 0.25f);
 
         scene.attachChild(spinText, 0);
         scene.attachChild(approachCircle, 0);
@@ -284,8 +274,12 @@ public class GameplaySpinner extends GameObject {
         if (percentfill > 1 || clear) {
             percentfill = 1;
             if (!clear) {
-                clearText.registerEntityModifier(Modifiers.fadeIn(0.25f));
-                clearText.registerEntityModifier(Modifiers.scale(0.25f, 1.5f, 1));
+                clearText.setScale(1.5f);
+                clearText.setAlpha(0);
+
+                clearText.fadeIn(0.25f);
+                clearText.scaleTo(1f, 0.25f);
+
                 scene.attachChild(clearText);
                 clear = true;
             } else if (Math.abs(rotations) > 1) {

@@ -9,7 +9,6 @@ import com.edlplan.osu.support.slider.SliderBody;
 import com.reco1l.osu.Execution;
 import com.reco1l.andengine.sprite.AnimatedSprite;
 import com.reco1l.andengine.sprite.ExtendedSprite;
-import com.reco1l.osu.Modifiers;
 import com.reco1l.andengine.Anchor;
 import com.reco1l.osu.playfield.CirclePiece;
 import com.reco1l.osu.playfield.NumberedCirclePiece;
@@ -31,9 +30,10 @@ import ru.nsu.ccfit.zuev.skins.OsuSkin;
 
 import java.util.BitSet;
 
+import javax.annotation.Nullable;
+
 public class GameplaySlider extends GameObject {
 
-    private final ExtendedSprite approachCircle;
     private final ExtendedSprite startArrow, endArrow;
     private Slider beatmapSlider;
     private final PointF curveEndPos = new PointF();
@@ -74,6 +74,11 @@ public class GameplaySlider extends GameObject {
 
     private final SliderBody sliderBody;
 
+    /**
+     * The approach circle sprite.
+     */
+    @Nullable
+    private ExtendedSprite approachCircle;
 
     /**
      * The slider ball sprite.
@@ -115,10 +120,6 @@ public class GameplaySlider extends GameObject {
 
         headCirclePiece = new NumberedCirclePiece("sliderstartcircle", "sliderstartcircleoverlay");
         tailCirclePiece = new CirclePiece("sliderendcircle", "sliderendcircleoverlay");
-
-        approachCircle = new ExtendedSprite();
-        approachCircle.setOrigin(Anchor.Center);
-        approachCircle.setTextureRegion(ResourceManager.getInstance().getTexture("approachcircle"));
 
         startArrow = new ExtendedSprite();
         startArrow.setOrigin(Anchor.Center);
@@ -194,15 +195,6 @@ public class GameplaySlider extends GameObject {
         headCirclePiece.setNumberText(beatmapSlider.getIndexInCurrentCombo() + 1);
         headCirclePiece.setNumberScale(OsuSkin.get().getComboTextScale());
 
-        approachCircle.setColor(comboColor.r(), comboColor.g(), comboColor.b());
-        approachCircle.setScale(scale * 3);
-        approachCircle.setAlpha(0);
-        approachCircle.setPosition(this.position.x, this.position.y);
-
-        if (GameHelper.isHidden()) {
-            approachCircle.setVisible(Config.isShowFirstApproachCircle() && beatmapSlider.isFirstNote());
-        }
-
         // End circle
         curveEndPos.x = path.getX(path.pointCount - 1);
         curveEndPos.y = path.getY(path.pointCount - 1);
@@ -234,28 +226,42 @@ public class GameplaySlider extends GameObject {
         if (GameHelper.isHidden()) {
             float fadeOutDuration = timePreempt * (float) ModHidden.FADE_OUT_DURATION_MULTIPLIER;
 
-            headCirclePiece.registerEntityModifier(Modifiers.sequence(
-                Modifiers.fadeIn(fadeInDuration),
-                Modifiers.fadeOut(fadeOutDuration)
-            ));
+            headCirclePiece.beginSequenceChain(s -> {
+                s.fadeIn(fadeInDuration);
+                s.fadeOut(fadeOutDuration);
+            });
 
-            tailCirclePiece.registerEntityModifier(Modifiers.sequence(
-                Modifiers.fadeIn(fadeInDuration),
-                Modifiers.fadeOut(fadeOutDuration)
-            ));
+            tailCirclePiece.beginSequenceChain(s -> {
+                s.fadeIn(fadeInDuration);
+                s.fadeOut(fadeOutDuration);
+            });
 
         } else {
-            headCirclePiece.registerEntityModifier(Modifiers.fadeIn(fadeInDuration));
-            tailCirclePiece.registerEntityModifier(Modifiers.fadeIn(fadeInDuration));
-        }
-
-        if (approachCircle.isVisible()) {
-            approachCircle.registerEntityModifier(Modifiers.alpha(Math.min(fadeInDuration * 2, timePreempt), 0, 0.9f));
-            approachCircle.registerEntityModifier(Modifiers.scale(timePreempt, scale * 3, scale));
+            headCirclePiece.fadeIn(fadeInDuration);
+            tailCirclePiece.fadeIn(fadeInDuration);
         }
 
         scene.attachChild(headCirclePiece, 0);
-        scene.attachChild(approachCircle);
+
+        if (!GameHelper.isHidden() || Config.isShowFirstApproachCircle() && beatmapSlider.isFirstNote()) {
+
+            if (approachCircle == null) {
+                approachCircle = new ExtendedSprite();
+                approachCircle.setOrigin(Anchor.Center);
+                approachCircle.setTextureRegion(ResourceManager.getInstance().getTexture("approachcircle"));
+            }
+
+            approachCircle.setPosition(this.position.x, this.position.y);
+            approachCircle.setColor(comboColor.r(), comboColor.g(), comboColor.b());
+            approachCircle.setScale(scale * 3);
+            approachCircle.setAlpha(0f);
+
+            approachCircle.fadeTo(0.9f, fadeInDuration);
+            approachCircle.scaleTo(scale, timePreempt);
+
+            scene.attachChild(approachCircle);
+        }
+
         // Repeat arrow at end
         if (spanCount > 1) {
             endArrow.setAlpha(0);
@@ -325,57 +331,32 @@ public class GameplaySlider extends GameObject {
             var colorDim = 195f / 255f;
 
             headCirclePiece.setColor(colorDim, colorDim, colorDim);
-            headCirclePiece.registerEntityModifier(Modifiers.sequence(
-                Modifiers.delay(dimDelaySec),
-                Modifiers.color(0.1f,
-                    headCirclePiece.getRed(), 1f,
-                    headCirclePiece.getGreen(), 1f,
-                    headCirclePiece.getBlue(), 1f
-                )
-            ));
+            headCirclePiece.delay(dimDelaySec).colorTo(1f, 1f, 1f, 0.1f);
 
             tailCirclePiece.setColor(colorDim, colorDim, colorDim);
-            tailCirclePiece.registerEntityModifier(Modifiers.sequence(
-                Modifiers.delay(dimDelaySec),
-                Modifiers.color(0.1f,
-                    tailCirclePiece.getRed(), 1f,
-                    tailCirclePiece.getGreen(), 1f,
-                    tailCirclePiece.getBlue(), 1f
-                )
-            ));
+            tailCirclePiece.delay(dimDelaySec).colorTo(1f, 1f, 1f, 0.1f);
 
             endArrow.setColor(colorDim, colorDim, colorDim);
-            endArrow.registerEntityModifier(Modifiers.sequence(
-                Modifiers.delay(dimDelaySec),
-                Modifiers.color(0.1f,
-                    endArrow.getRed(), 1f,
-                    endArrow.getGreen(), 1f,
-                    endArrow.getBlue(), 1f
-                )
-            ));
+            endArrow.delay(dimDelaySec).colorTo(1f, 1f, 1f, 0.1f);
 
             sliderBody.setColor(colorDim, colorDim, colorDim);
-            sliderBody.registerEntityModifier(Modifiers.sequence(
-                Modifiers.delay(dimDelaySec),
-                Modifiers.color(0.1f,
-                    sliderBody.getRed(), 1f,
-                    sliderBody.getGreen(), 1f,
-                    sliderBody.getBlue(), 1f
-                )
-            ));
+            sliderBody.delay(dimDelaySec).colorTo(1f, 1f, 1f, 0.1f);
 
             tickContainer.setColor(colorDim, colorDim, colorDim);
-            tickContainer.registerEntityModifier(Modifiers.sequence(
-                Modifiers.delay(dimDelaySec),
-                Modifiers.color(0.1f,
-                    tickContainer.getRed(), 1f,
-                    tickContainer.getGreen(), 1f,
-                    tickContainer.getBlue(), 1f
-                )
-            ));
+            tickContainer.delay(dimDelaySec).colorTo(1f, 1f, 1f, 0.1f);
         }
 
-        applyBodyFadeAdjustments(fadeInDuration);
+        if (GameHelper.isHidden()) {
+            // New duration from completed fade in to end (before fading out)
+            float fadeOutDuration = (float) this.beatmapSlider.getDuration() / 1000 + timePreempt - fadeInDuration;
+
+            sliderBody.beginSequenceChain(s -> {
+                s.fadeIn(fadeInDuration);
+                s.fadeOut(fadeOutDuration).eased(Easing.OutQuad);
+            });
+        } else {
+            sliderBody.fadeIn(fadeInDuration);
+        }
     }
 
     private PointF getPositionAt(final float percentage, final boolean updateBallAngle, final boolean updateEndArrowRotation) {
@@ -460,7 +441,7 @@ public class GameplaySlider extends GameObject {
                 poolObject();
             }
         } else {
-            sliderBody.registerEntityModifier(Modifiers.fadeOut(0.24f, e -> {
+            sliderBody.fadeOut(0.24f).then(e -> {
                 Execution.updateThread(() -> {
                     sliderBody.detachSelf();
 
@@ -468,21 +449,22 @@ public class GameplaySlider extends GameObject {
                     // The slider body is the last object to finish animating.
                     poolObject();
                 });
-            }));
+            });
         }
 
-        ball.registerEntityModifier(Modifiers.fadeOut(0.1f, e -> {
-            Execution.updateThread(ball::detachSelf);
-        }));
+        ball.fadeOut(0.1f).then(e -> Execution.updateThread(ball::detachSelf));
 
         // Follow circle might still be animating when the slider is removed from the scene.
         if (!Config.isAnimateFollowCircle() || !isFollowCircleAnimating) {
             followCircle.detachSelf();
         }
 
+        if (approachCircle != null) {
+            approachCircle.detachSelf();
+        }
+
         headCirclePiece.detachSelf();
         tailCirclePiece.detachSelf();
-        approachCircle.detachSelf();
         startArrow.detachSelf();
         endArrow.detachSelf();
         tickContainer.detachSelf();
@@ -494,12 +476,15 @@ public class GameplaySlider extends GameObject {
 
     public void poolObject() {
 
+        if (approachCircle != null) {
+            approachCircle.clearEntityModifiers();
+        }
+
         headCirclePiece.clearEntityModifiers();
         tailCirclePiece.clearEntityModifiers();
 
         startArrow.clearEntityModifiers();
         endArrow.clearEntityModifiers();
-        approachCircle.clearEntityModifiers();
         followCircle.clearEntityModifiers();
         ball.clearEntityModifiers();
         sliderBody.clearEntityModifiers();
@@ -631,8 +616,9 @@ public class GameplaySlider extends GameObject {
             isFollowCircleAnimating = true;
 
             followCircle.clearEntityModifiers();
-            followCircle.registerEntityModifier(Modifiers.scale(0.2f, followCircle.getScaleX(), followCircle.getScaleX() * 0.8f, null, Easing.OutQuad));
-            followCircle.registerEntityModifier(Modifiers.alpha(0.2f, followCircle.getAlpha(), 0f, e -> {
+
+            followCircle.scaleTo(beatmapSlider.getGameplayScale() * 0.8f, 0.2f).eased(Easing.OutQuad);
+            followCircle.fadeOut(0.2f).then(e -> {
                 Execution.updateThread(() -> {
                     followCircle.detachSelf();
 
@@ -642,7 +628,7 @@ public class GameplaySlider extends GameObject {
                     }
                 });
                 isFollowCircleAnimating = false;
-            }));
+            });
         }
 
         removeFromScene();
@@ -738,7 +724,7 @@ public class GameplaySlider extends GameObject {
 
         if (passedTime < 0) // we at approach time
         {
-            if (startHit) {
+            if (startHit && approachCircle != null) {
                 // Hide the approach circle if the slider is already hit.
                 approachCircle.clearEntityModifiers();
                 approachCircle.setAlpha(0);
@@ -803,13 +789,15 @@ public class GameplaySlider extends GameObject {
         float scale = beatmapSlider.getGameplayScale();
 
         if (!ball.hasParent()) {
-            approachCircle.clearEntityModifiers();
-            approachCircle.setAlpha(0);
+            if (approachCircle != null) {
+                approachCircle.clearEntityModifiers();
+                approachCircle.setAlpha(0);
+            }
 
             ball.setFps((float) beatmapSlider.getVelocity() * Slider.BASE_SCORING_DISTANCE * scale);
             ball.setScale(scale);
             ball.setFlippedHorizontal(false);
-            ball.registerEntityModifier(Modifiers.fadeIn(0.1f));
+            ball.fadeIn(0.1f);
 
             followCircle.setAlpha(0);
             if (!Config.isAnimateFollowCircle()) {
@@ -855,27 +843,31 @@ public class GameplaySlider extends GameObject {
                 isFollowCircleAnimating = true;
                 playSlidingSamples();
 
+                followCircle.clearEntityModifiers();
+
                 // If alpha doesn't equal 0 means that it has been into an animation before
                 float initialScale = followCircle.getAlpha() == 0 ? scale * 0.5f : followCircle.getScaleX();
+                followCircle.setScale(initialScale);
 
-                followCircle.clearEntityModifiers();
-                followCircle.registerEntityModifier(Modifiers.alpha(Math.min(remainTime, 0.06f), followCircle.getAlpha(), 1f));
-                followCircle.registerEntityModifier(Modifiers.scale(Math.min(remainTime, 0.18f), initialScale, scale, e -> {
-                    isFollowCircleAnimating = false;
-                }, Easing.OutQuad));
+                followCircle.fadeIn(Math.min(remainTime, 0.06f));
+                followCircle.scaleTo(scale, Math.min(remainTime, 0.18f))
+                        .eased(Easing.OutQuad)
+                        .then(e -> isFollowCircleAnimating = false);
+
             } else if (!inRadius && isInRadius) {
                 isInRadius = false;
                 isFollowCircleAnimating = true;
                 stopSlidingSamples();
 
                 followCircle.clearEntityModifiers();
-                followCircle.registerEntityModifier(Modifiers.scale(0.1f, followCircle.getScaleX(), scale * 2f));
-                followCircle.registerEntityModifier(Modifiers.alpha(0.1f, followCircle.getAlpha(), 0f, e -> {
+
+                followCircle.scaleTo(scale * 2f, 0.1f);
+                followCircle.fadeOut(0.1f).then(e -> {
                     if (isOver) {
                         Execution.updateThread(e::detachSelf);
                     }
                     isFollowCircleAnimating = false;
-                }));
+                });
             }
         } else {
             if (inRadius && !isInRadius) {
@@ -937,7 +929,7 @@ public class GameplaySlider extends GameObject {
             if (isTracking) {
                 if (Config.isAnimateFollowCircle() && !isFollowCircleAnimating) {
                     followCircle.clearEntityModifiers();
-                    followCircle.registerEntityModifier(Modifiers.scale((float) Math.min(tickInterval, 0.2f), scale * 1.1f, scale, null, Easing.OutQuad));
+                    followCircle.scaleTo(scale, (float) Math.min(tickInterval, 0.2f)).eased(Easing.OutQuad);
                 }
 
                 playCurrentNestedObjectHitSound();
@@ -956,21 +948,6 @@ public class GameplaySlider extends GameObject {
             } else if (!reverse && currentTickSpriteIndex < tickContainer.getChildCount() - 1) {
                 currentTickSpriteIndex++;
             }
-        }
-    }
-
-    private void applyBodyFadeAdjustments(float fadeInDuration) {
-
-        if (GameHelper.isHidden()) {
-            // New duration from completed fade in to end (before fading out)
-            float fadeOutDuration = (float) beatmapSlider.getDuration() / 1000 + timePreempt - fadeInDuration;
-
-            sliderBody.registerEntityModifier(Modifiers.sequence(
-                Modifiers.fadeIn(fadeInDuration),
-                Modifiers.fadeOut(fadeOutDuration, null, Easing.OutQuad)
-            ));
-        } else {
-            sliderBody.registerEntityModifier(Modifiers.fadeIn(fadeInDuration));
         }
     }
 
@@ -1029,7 +1006,7 @@ public class GameplaySlider extends GameObject {
             currentNestedObjectIndex++;
         }
 
-        if (passedTime < 0 && startHit) {
+        if (passedTime < 0 && startHit && approachCircle != null) {
             approachCircle.clearEntityModifiers();
             approachCircle.setAlpha(0);
         }

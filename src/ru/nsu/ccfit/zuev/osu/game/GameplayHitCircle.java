@@ -1,13 +1,14 @@
 package ru.nsu.ccfit.zuev.osu.game;
 
 import com.reco1l.andengine.sprite.ExtendedSprite;
-import com.reco1l.osu.Modifiers;
 import com.reco1l.andengine.Anchor;
 import com.reco1l.osu.playfield.NumberedCirclePiece;
 import com.rian.osu.beatmap.hitobject.HitCircle;
 import com.rian.osu.mods.ModHidden;
 
 import org.anddev.andengine.entity.scene.Scene;
+
+import javax.annotation.Nullable;
 
 import ru.nsu.ccfit.zuev.osu.Config;
 import ru.nsu.ccfit.zuev.osu.RGBColor;
@@ -18,7 +19,6 @@ import ru.nsu.ccfit.zuev.skins.OsuSkin;
 
 public class GameplayHitCircle extends GameObject {
 
-    private final ExtendedSprite approachCircle;
     private final RGBColor comboColor = new RGBColor();
     private HitCircle beatmapCircle;
     private GameObjectListener listener;
@@ -33,12 +33,15 @@ public class GameplayHitCircle extends GameObject {
      */
     private final NumberedCirclePiece circlePiece;
 
+    /**
+     * The approach circle that appears before the hit circle.
+     */
+    @Nullable
+    private ExtendedSprite approachCircle;
+
 
     public GameplayHitCircle() {
         circlePiece = new NumberedCirclePiece("hitcircle", "hitcircleoverlay");
-        approachCircle = new ExtendedSprite();
-        approachCircle.setOrigin(Anchor.Center);
-        approachCircle.setTextureRegion(ResourceManager.getInstance().getTexture("approachcircle"));
     }
 
     public void init(final GameObjectListener listener, final Scene pScene,
@@ -66,75 +69,56 @@ public class GameplayHitCircle extends GameObject {
         radiusSquared = (float) beatmapCircle.getGameplayRadius();
         radiusSquared *= radiusSquared;
 
-        float actualFadeInDuration = (float) beatmapCircle.timeFadeIn / 1000f;
-        float remainingFadeInDuration = Math.max(0, actualFadeInDuration - passedTime);
-        float fadeInProgress = 1 - remainingFadeInDuration / actualFadeInDuration;
-
         // Initializing sprites
         circlePiece.setCircleColor(comboColor.r(), comboColor.g(), comboColor.b());
         circlePiece.setScale(scale);
-        circlePiece.setAlpha(fadeInProgress);
+        circlePiece.setAlpha(0f);
         circlePiece.setPosition(this.position.x, this.position.y);
         circlePiece.setNumberText(beatmapCircle.getIndexInCurrentCombo() + 1);
         circlePiece.setNumberScale(OsuSkin.get().getComboTextScale());
 
-        approachCircle.setColor(comboColor.r(), comboColor.g(), comboColor.b());
-        approachCircle.setScale(scale * (3 - 2 * fadeInProgress));
-        approachCircle.setAlpha(0.9f * fadeInProgress);
-        approachCircle.setPosition(this.position.x, this.position.y);
+        float fadeInDuration = (float) beatmapCircle.timeFadeIn / 1000f;
 
         if (GameHelper.isHidden()) {
-            approachCircle.setVisible(Config.isShowFirstApproachCircle() && beatmapCircle.isFirstNote());
+            float fadeOutDuration = timePreempt * (float) ModHidden.FADE_OUT_DURATION_MULTIPLIER;
 
-            float actualFadeOutDuration = timePreempt * (float) ModHidden.FADE_OUT_DURATION_MULTIPLIER;
-            float remainingFadeOutDuration = Math.min(
-                actualFadeOutDuration,
-                Math.max(0, actualFadeOutDuration + remainingFadeInDuration - passedTime)
-            );
-            float fadeOutProgress = remainingFadeOutDuration / actualFadeOutDuration;
-
-            circlePiece.registerEntityModifier(Modifiers.sequence(
-                    Modifiers.alpha(remainingFadeInDuration, fadeInProgress, 1),
-                    Modifiers.alpha(remainingFadeOutDuration, fadeOutProgress, 0)
-            ));
+            circlePiece.beginSequenceChain(s -> {
+                s.fadeTo(1f, fadeInDuration);
+                s.fadeTo(0f, fadeOutDuration);
+            });
         } else {
-            circlePiece.registerEntityModifier(Modifiers.alpha(remainingFadeInDuration, fadeInProgress, 1));
-        }
-
-        if (approachCircle.isVisible()) {
-            approachCircle.registerEntityModifier(
-                Modifiers.alpha(
-                    Math.min(
-                        Math.min(actualFadeInDuration * 2, remainingFadeInDuration),
-                        timePreempt
-                    ),
-                    0.9f * fadeInProgress,
-                    0.9f
-                )
-            );
-
-            approachCircle.registerEntityModifier(Modifiers.scale(Math.max(0, timePreempt - passedTime), approachCircle.getScaleX(), scale));
+            circlePiece.fadeTo(1f, fadeInDuration);
         }
 
         if (Config.isDimHitObjects()) {
-
             // Source: https://github.com/peppy/osu/blob/60271fb0f7e091afb754455f93180094c63fc3fb/osu.Game.Rulesets.Osu/Objects/Drawables/DrawableOsuHitObject.cs#L101
             var dimDelaySec = timePreempt - objectHittableRange;
             var colorDim = 195f / 255f;
 
             circlePiece.setColor(colorDim, colorDim, colorDim);
-            circlePiece.registerEntityModifier(Modifiers.sequence(
-                Modifiers.delay(dimDelaySec),
-                Modifiers.color(0.1f,
-                    circlePiece.getRed(), 1f,
-                    circlePiece.getGreen(), 1f,
-                    circlePiece.getBlue(), 1f
-                )
-            ));
+            circlePiece.delay(dimDelaySec).colorTo(1f, 1f, 1f, 0.1f);
         }
 
         scene.attachChild(circlePiece, 0);
-        scene.attachChild(approachCircle);
+
+        if (!GameHelper.isHidden() || Config.isShowFirstApproachCircle() && beatmapCircle.isFirstNote()) {
+
+            if (approachCircle == null) {
+                approachCircle = new ExtendedSprite();
+                approachCircle.setOrigin(Anchor.Center);
+                approachCircle.setTextureRegion(ResourceManager.getInstance().getTexture("approachcircle"));
+            }
+
+            approachCircle.setPosition(this.position.x, this.position.y);
+            approachCircle.setColor(comboColor.r(), comboColor.g(), comboColor.b());
+            approachCircle.setScale(scale * 3);
+            approachCircle.setAlpha(0f);
+
+            approachCircle.fadeTo(0.9f, fadeInDuration);
+            approachCircle.scaleTo(scale, timePreempt);
+
+            scene.attachChild(approachCircle);
+        }
     }
 
     private void playSound() {
@@ -147,11 +131,14 @@ public class GameplayHitCircle extends GameObject {
         }
 
         circlePiece.clearEntityModifiers();
-        approachCircle.clearEntityModifiers();
+
+        if (approachCircle != null) {
+            approachCircle.clearEntityModifiers();
+            approachCircle.detachSelf();
+        }
 
         // Detach all objects
         circlePiece.detachSelf();
-        approachCircle.detachSelf();
         listener.removeObject(this);
         GameObjectPool.getInstance().putCircle(this);
         scene = null;
@@ -265,8 +252,10 @@ public class GameplayHitCircle extends GameObject {
             listener.onCircleHit(id, 0, position, endsCombo, ResultType.HIT300.getId(), comboColor);
             removeFromScene();
         } else {
-            approachCircle.clearEntityModifiers();
-            approachCircle.setAlpha(0);
+            if (approachCircle != null) {
+                approachCircle.clearEntityModifiers();
+                approachCircle.setAlpha(0);
+            }
 
             // If passed too much time, counting it as miss
             if (passedTime > timePreempt + GameHelper.getDifficultyHelper().hitWindowFor50(GameHelper.getOverallDifficulty())) {

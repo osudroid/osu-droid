@@ -13,6 +13,7 @@ import com.edlplan.framework.math.FMath;
 import com.edlplan.framework.support.ProxySprite;
 import com.edlplan.framework.support.osb.StoryboardSprite;
 import com.edlplan.framework.utils.functionality.SmartIterator;
+import com.reco1l.andengine.modifier.UniversalModifier;
 import com.reco1l.ibancho.RoomAPI;
 import com.reco1l.osu.DifficultyCalculationManager;
 import com.reco1l.osu.data.BeatmapInfo;
@@ -21,7 +22,6 @@ import com.reco1l.osu.data.DatabaseManager;
 import com.reco1l.andengine.sprite.AnimatedSprite;
 import com.reco1l.andengine.texture.BlankTextureRegion;
 import com.reco1l.andengine.sprite.ExtendedSprite;
-import com.reco1l.osu.Modifiers;
 import com.reco1l.andengine.Anchor;
 import com.reco1l.andengine.sprite.VideoSprite;
 import com.reco1l.andengine.ExtendedScene;
@@ -486,7 +486,7 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
 
         FollowPointConnection.getPool().renew(16);
         SliderTickSprite.getPool().renew(16);
-        Modifiers.getPool().renew(16);
+        UniversalModifier.GlobalPool.renew(24);
 
         // TODO replay
         offsetSum = 0;
@@ -861,15 +861,15 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
             for (var mod : mods) {
 
                 var effect = GameObjectPool.getInstance().getEffect(GameMod.getTextureName(mod));
-
-                effect.init(fgScene, position, scale, Modifiers.sequence(
-                    Modifiers.scale(0.25f, 1.2f, 1f),
-                    Modifiers.delay(2f - timeOffset),
-                    Modifiers.parallel(
-                        Modifiers.fadeOut(0.5f),
-                        Modifiers.scale(0.5f, 1f, 1.5f)
-                    )
-                ));
+                effect.init(fgScene, position, scale * 1.2f, 1f,
+                    effect.hit
+                        .scaleTo(1f, 0.25f)
+                        .delay(2f - timeOffset)
+                        .beginParallelChain(p -> {
+                            p.fadeOut(0.5f);
+                            p.scaleTo(1.5f, 0.5f);
+                        })
+                );
 
                 position.x -= 25f;
                 timeOffset += 0.25f;
@@ -1908,17 +1908,12 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
                 (float) Config.getRES_HEIGHT() / 2);
 
         if (score == 0) {
-            final GameEffect effect = GameObjectPool.getInstance().getEffect(
-                    "hit0");
-            effect.init(
-                    scene,
-                    pos,
-                    scale,
-                    Modifiers.sequence(
-                        Modifiers.fadeIn(0.15f),
-                        Modifiers.delay(0.35f),
-                        Modifiers.fadeOut(0.25f)
-                    )
+            final GameEffect effect = GameObjectPool.getInstance().getEffect("hit0");
+            effect.init(scene, pos, scale, 0f,
+                effect.hit
+                    .fadeIn(0.15f)
+                    .delay(0.35f)
+                    .fadeOut(0.25f)
             );
             registerHit(id, 0, endCombo);
             return;
@@ -2283,27 +2278,19 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
         var fadeOutLength = 0.6f;
         var fadeOutDelay = 0.5f;
 
-        var fadeSequence = Modifiers.sequence(
-            Modifiers.fadeIn(fadeInLength),
-            Modifiers.delay(fadeOutDelay),
-            Modifiers.fadeOut(fadeOutLength)
-        );
-
         if (name.equals("hit0")) {
 
             var rotation = (float) Random.Default.nextDouble(8.6 * 2) - 8.6f;
 
-            effect.init(
-                mgScene,
-                pos,
-                scale * 1.6f,
-                fadeSequence,
-                Modifiers.scale(0.1f, scale * 1.6f, scale, null, Easing.InQuad),
-                Modifiers.translateY(fadeOutDelay + fadeOutLength, -5f, 80f, null, Easing.InQuad),
-                Modifiers.sequence(
-                    Modifiers.rotation(fadeInLength, 0, rotation),
-                    Modifiers.rotation(fadeOutDelay + fadeOutLength - fadeInLength, rotation, rotation * 2, null, Easing.InQuad)
-                )
+            effect.init(mgScene, pos, scale * 1.6f, 1f,
+                effect.hit.beginParallelChain(p -> {
+                    p.fadeIn(fadeInLength).delay(fadeOutDelay).fadeOut(fadeOutLength);
+
+                    p.scaleTo(scale, 0.1f).eased(Easing.InQuad);
+                    p.moveToY(pos.y - 5f, 0f).moveToY(pos.y + 80f, fadeOutDelay + fadeOutLength).eased(Easing.InQuad);
+
+                    p.rotateTo(rotation, fadeInLength).rotateTo(rotation * 2f, fadeOutDelay + fadeOutLength - fadeInLength).eased(Easing.InQuad);
+                })
             );
 
             return;
@@ -2316,34 +2303,27 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
             var light = GameObjectPool.getInstance().getEffect("lighting");
             light.setBlendFunction(GL10.GL_SRC_ALPHA, GL10.GL_DST_ALPHA);
             light.setColor(color);
-            light.init(
-                bgScene,
-                pos,
-                scale * 0.8f,
-                Modifiers.scale(0.6f, scale * 0.8f, scale * 1.2f, null, Easing.OutQuad),
-                Modifiers.sequence(
-                    Modifiers.fadeIn(0.2f),
-                    Modifiers.delay(0.2f),
-                    Modifiers.fadeOut(1f)
-                )
+            light.init(bgScene, pos, scale * 0.8f, 1f,
+                light.hit.beginParallelChain(p -> {
+                    p.fadeIn(fadeInLength).delay(fadeOutDelay).fadeOut(fadeOutLength);
+                    p.scaleTo(scale * 1.2f, 0.6f).eased(Easing.OutQuad);
+                })
             );
         }
 
-        effect.init(
-            mgScene,
-            pos,
-            scale * 0.6f,
-            fadeSequence,
-            Modifiers.sequence(
-                Modifiers.scale(fadeInLength * 0.8f, scale * 0.6f, scale * 1.1f),
-                Modifiers.delay(fadeInLength * 0.2f),
-                Modifiers.scale(fadeInLength * 0.2f, scale * 1.1f, scale * 0.9f),
+        effect.init(mgScene, pos, scale * 0.6f, 1f,
+            effect.hit.beginParallelChain(p -> {
+                p.fadeIn(fadeInLength).delay(fadeOutDelay).fadeOut(fadeOutLength);
 
-                // stable dictates scale of 0.9->1 over time 1.0 to 1.4, but we are already at 1.2.
-                // so we need to force the current value to be correct at 1.2 (0.95) then complete the
-                // second half of the transform.
-                Modifiers.scale(fadeInLength * 0.2f, scale * 0.95f, scale)
-            )
+                p.scaleTo(scale * 1.1f, fadeInLength * 0.8f)
+                    .delay(fadeInLength * 0.2f)
+                    .scaleTo(scale * 0.9f, fadeInLength * 0.2f)
+
+                    // stable dictates scale of 0.9->1 over time 1.0 to 1.4, but we are already at 1.2.
+                    // so we need to force the current value to be correct at 1.2 (0.95) then complete the
+                    // second half of the transform.
+                    .scaleTo(scale * 0.95f, 0f).scaleTo(scale, fadeInLength * 0.2f);
+            })
         );
     }
 
@@ -2353,9 +2333,11 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
 
         var fadeDuration = 0.24f;
 
-        effect.init(mgScene, pos, scale,
-            Modifiers.scale(fadeDuration, scale, scale * 1.4f, null, Easing.OutQuad),
-            Modifiers.fadeOut(fadeDuration)
+        effect.init(mgScene, pos, scale, 1f,
+            effect.hit.beginParallelChain(p -> {
+                p.scaleTo(scale * 1.4f, fadeDuration).eased(Easing.OutQuad);
+                p.fadeOut(fadeDuration);
+            })
         );
     }
 

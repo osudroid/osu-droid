@@ -4,7 +4,6 @@ import android.graphics.PointF;
 
 import com.reco1l.osu.Execution;
 import com.reco1l.andengine.sprite.ExtendedSprite;
-import com.reco1l.osu.Modifiers;
 import com.reco1l.andengine.Anchor;
 import com.rian.osu.beatmap.hitobject.Spinner;
 
@@ -121,16 +120,12 @@ public class GameplayModernSpinner extends GameplaySpinner {
 
         float timePreempt = (float) beatmapSpinner.timePreempt / 1000f;
 
-        top.registerEntityModifier(Modifiers.sequence(
-            Modifiers.fadeIn(timePreempt, e -> {
-                    spinnable = true;
-            }),
-            Modifiers.delay(duration, e -> Execution.updateThread(this::removeFromScene))
-        ));
+        top.fadeIn(timePreempt).then(e -> spinnable = true)
+            .delay(duration).then(e -> Execution.updateThread(this::removeFromScene));
 
-        bottom.registerEntityModifier(Modifiers.fadeIn(timePreempt));
-        middle.registerEntityModifier(Modifiers.fadeIn(timePreempt));
-        middle2.registerEntityModifier(Modifiers.fadeIn(timePreempt));
+        bottom.fadeIn(timePreempt);
+        middle.fadeIn(timePreempt);
+        middle2.fadeIn(timePreempt);
     }
 
     @Override
@@ -220,12 +215,11 @@ public class GameplayModernSpinner extends GameplaySpinner {
                 score++;
                 scene.attachChild(bonusScore);
                 playSpinnerBonusSound();
-                glow.registerEntityModifier(
-                    Modifiers.sequence(
-                        Modifiers.color(0.1f, 0f, 1f, 0.8f, 1f, 1f, 1f),
-                        Modifiers.color(0.1f, 1f, 0f, 1f, 0.8f, 1f, 1f)
-                    )
-                );
+                glow.setColor(0f, 0.8f, 1f);
+                glow.beginSequenceChain(s -> {
+                   s.colorTo(1f, 1f, 1f, 0.1f);
+                   s.colorTo(0f, 0.8f, 1f, 0.1f);
+                });
                 float rate = 0.375f;
                 if (GameHelper.getHealthDrain() > 0) {
                     rate = 1 + (GameHelper.getHealthDrain() / 4f);
