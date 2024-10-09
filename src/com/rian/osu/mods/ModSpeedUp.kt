@@ -14,5 +14,8 @@ class ModSpeedUp : ModClockRateAdjust(), ILegacyMod {
     override val trackRateMultiplier = 1.25f
 
     override fun migrate(difficulty: BeatmapDifficulty) = ModCustomSpeed(trackRateMultiplier)
+
+    override fun equals(other: Any?) = other === this || other is ModSpeedUp
+    override fun hashCode() = super.hashCode()
     override fun deepCopy() = ModSpeedUp()
 }
