@@ -93,13 +93,6 @@ interface IModifierChain {
 
     // Move
 
-    fun moveTo(value: Float, durationSec: Float = 0f): UniversalModifier {
-        return beginParallelChain {
-            moveToX(value, durationSec)
-            moveToY(value, durationSec)
-        }
-    }
-
     fun moveTo(valueX: Float, valueY: Float, durationSec: Float = 0f): UniversalModifier {
         return beginParallelChain {
             moveToX(valueX, durationSec)
