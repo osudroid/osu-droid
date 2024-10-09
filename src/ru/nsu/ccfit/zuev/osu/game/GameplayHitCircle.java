@@ -114,7 +114,7 @@ public class GameplayHitCircle extends GameObject {
             approachCircle.setScale(scale * 3);
             approachCircle.setAlpha(0f);
 
-            approachCircle.fadeTo(0.9f, fadeInDuration);
+            approachCircle.fadeTo(0.9f, Math.min(fadeInDuration * 2, timePreempt));
             approachCircle.scaleTo(scale, timePreempt);
 
             scene.attachChild(approachCircle);
