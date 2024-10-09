@@ -78,7 +78,8 @@ object BeatmapDifficultyCalculator {
     @JvmStatic
     @JvmOverloads
     fun calculateDroidDifficulty(beatmap: Beatmap, mods: Iterable<Mod>? = null, scope: CoroutineScope? = null) =
-        calculateDroidDifficulty(beatmap.createDroidPlayableBeatmap(mods, scope), scope)
+        difficultyCacheManager[beatmap.md5]?.getDroidDifficultyCache(mods) ?:
+        droidDifficultyCalculator.calculate(beatmap, mods, scope).also { addCache(beatmap, it) }
 
     /**
      * Calculates the difficulty of a [DroidPlayableBeatmap].
@@ -106,7 +107,8 @@ object BeatmapDifficultyCalculator {
     @JvmStatic
     @JvmOverloads
     fun calculateDroidTimedDifficulty(beatmap: Beatmap, mods: Iterable<Mod>? = null, scope: CoroutineScope? = null) =
-        calculateDroidTimedDifficulty(beatmap.createDroidPlayableBeatmap(mods, scope), scope)
+        difficultyCacheManager[beatmap.md5]?.getDroidTimedDifficultyCache(mods) ?:
+        droidDifficultyCalculator.calculateTimed(beatmap, mods, scope).also { addCache(beatmap, it) }
 
     /**
      * Calculates the difficulty of a [DroidPlayableBeatmap], returning a set of [TimedDifficultyAttributes]
@@ -133,7 +135,8 @@ object BeatmapDifficultyCalculator {
     @JvmStatic
     @JvmOverloads
     fun calculateStandardDifficulty(beatmap: Beatmap, mods: Iterable<Mod>? = null, scope: CoroutineScope? = null) =
-        calculateStandardDifficulty(beatmap.createStandardPlayableBeatmap(mods, scope), scope)
+        difficultyCacheManager[beatmap.md5]?.getStandardDifficultyCache(mods) ?:
+        standardDifficultyCalculator.calculate(beatmap, mods, scope).also { addCache(beatmap, it) }
 
     /**
      * Calculates the difficulty of a [StandardPlayableBeatmap].
