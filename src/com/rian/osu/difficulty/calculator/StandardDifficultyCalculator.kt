@@ -41,7 +41,7 @@ class StandardDifficultyCalculator : DifficultyCalculator<StandardPlayableBeatma
 
         aimSliderFactor = if (aimDifficulty > 0) calculateRating(skills[1]) / aimDifficulty else 1.0
 
-        if (mods.any { it is ModRelax }) {
+        if (ModRelax::class in beatmap.mods) {
             aimDifficulty *= 0.9
             speedDifficulty = 0.0
             flashlightDifficulty *= 0.7
@@ -49,7 +49,7 @@ class StandardDifficultyCalculator : DifficultyCalculator<StandardPlayableBeatma
 
         val baseAimPerformance = (5 * max(1.0, aimDifficulty / 0.0675) - 4).pow(3) / 100000
         val baseSpeedPerformance = (5 * max(1.0, speedDifficulty / 0.0675) - 4).pow(3) / 100000
-        val baseFlashlightPerformance = if (mods.any { it is ModFlashlight }) flashlightDifficulty.pow(2) * 25 else 0.0
+        val baseFlashlightPerformance = if (ModFlashlight::class in beatmap.mods) flashlightDifficulty.pow(2) * 25 else 0.0
 
         val basePerformance = (
                 baseAimPerformance.pow(1.1) +

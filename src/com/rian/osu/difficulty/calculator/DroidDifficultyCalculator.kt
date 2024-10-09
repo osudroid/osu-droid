@@ -161,7 +161,7 @@ class DroidDifficultyCalculator : DifficultyCalculator<DroidPlayableBeatmap, Dro
 
         visualSliderFactor = if (visualDifficulty > 0) calculateRating(skills[8]) / visualDifficulty else 1.0
 
-        if (mods.any { it is ModRelax }) {
+        if (ModRelax::class in beatmap.mods) {
             aimDifficulty *= 0.9
             tapDifficulty = 0.0
             rhythmDifficulty = 0.0
@@ -169,7 +169,7 @@ class DroidDifficultyCalculator : DifficultyCalculator<DroidPlayableBeatmap, Dro
             visualDifficulty = 0.0
         }
 
-        if (mods.any { it is ModAutopilot }) {
+        if (ModAutopilot::class in beatmap.mods) {
             aimDifficulty = 0.0
             flashlightDifficulty *= 0.3
             visualDifficulty *= 0.8
@@ -177,7 +177,7 @@ class DroidDifficultyCalculator : DifficultyCalculator<DroidPlayableBeatmap, Dro
 
         val baseAimPerformance = (5 * max(1.0, aimDifficulty.pow(0.8) / 0.0675) - 4).pow(3) / 100000
         val baseTapPerformance = (5 * max(1.0, tapDifficulty / 0.0675) - 4).pow(3) / 100000
-        val baseFlashlightPerformance = if (mods.any { it is ModFlashlight }) flashlightDifficulty.pow(1.6) * 25 else 0.0
+        val baseFlashlightPerformance = if (ModFlashlight::class in beatmap.mods) flashlightDifficulty.pow(1.6) * 25 else 0.0
         val baseVisualPerformance = visualDifficulty.pow(1.6) * 22.5
 
         val basePerformance = (
@@ -194,7 +194,7 @@ class DroidDifficultyCalculator : DifficultyCalculator<DroidPlayableBeatmap, Dro
             else 0.0
 
         val od = beatmap.difficulty.od
-        val isPrecise = mods.any { it is ModPrecise }
+        val isPrecise = ModPrecise::class in beatmap.mods
         val greatWindow = (if (isPrecise) PreciseDroidHitWindow(od) else DroidHitWindow(od)).greatWindow.toDouble() / clockRate
 
         overallDifficulty = (
@@ -221,7 +221,7 @@ class DroidDifficultyCalculator : DifficultyCalculator<DroidPlayableBeatmap, Dro
         val clockRate = beatmap.speedMultiplier.toDouble()
 
         val greatWindow = (
-            if (beatmap.mods.contains(ModPrecise::class)) PreciseDroidHitWindow(beatmap.difficulty.od)
+            if (ModPrecise::class in beatmap.mods) PreciseDroidHitWindow(beatmap.difficulty.od)
             else DroidHitWindow(beatmap.difficulty.od)
         ).greatWindow.toDouble() / clockRate
 
