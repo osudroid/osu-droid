@@ -27,57 +27,32 @@ class UniversalModifier @JvmOverloads constructor(private val pool: Pool<Univers
      */
     var type = Delay
         set(value) {
-            if (field != value) {
+            field = value
 
-                if (value != Sequence && value != Parallel) {
-                    clearNestedModifiers()
-                }
-
-                field = value
+            if (!value.usesNestedModifiers) {
+                clearNestedModifiers()
             }
         }
-
-    /**
-     * Callback to be called when the modifier finishes.
-     */
-    var onFinished: OnModifierFinished? = null
 
     /**
      * Inner modifiers for [Sequence] or [Parallel] modifier types.
      */
     var modifiers: Array<UniversalModifier>? = null
         set(value) {
-
-            if (value != null && type.usesNestedModifiers) {
-                duration = 0f
-
-                for (i in value.indices) {
-
-                    val modifier = value[i]
-
-                    // Ensuring this has been set.
-                    modifier.parent = this
-
-                    if (type == Sequence) {
-                        duration += modifier.duration
-                    } else {
-                        duration = max(duration, modifier.duration)
-                    }
-                }
+            if (value == null || type.usesNestedModifiers) {
+                field = value
             }
-
-            field = value
         }
-
-    /**
-     * Easing function to be used.
-     */
-    var easing = Easing.None
 
     /**
      * The final values for the modifier.
      */
     var finalValue = 0f
+
+    /**
+     * Callback to be called when the modifier finishes.
+     */
+    var onFinished: OnModifierFinished? = null
 
 
     private var duration = 0f
@@ -85,6 +60,8 @@ class UniversalModifier @JvmOverloads constructor(private val pool: Pool<Univers
     private var elapsedSec = -1f
 
     private var initialValue = 0f
+
+    private var easing = Easing.None
 
     private var parent: UniversalModifier? = null
 
@@ -142,7 +119,7 @@ class UniversalModifier @JvmOverloads constructor(private val pool: Pool<Univers
                         break
                     } else {
                         // In parallel the consumed time is the maximum consumed time of all inner modifiers.
-                        consumedTimeSec = max(consumedTimeSec, modifier.onUpdate(remainingTimeSec, entity))
+                        consumedTimeSec = max(consumedTimeSec, modifier.onUpdate(deltaTimeSec, entity))
                     }
                 }
 
@@ -193,11 +170,7 @@ class UniversalModifier @JvmOverloads constructor(private val pool: Pool<Univers
 
     override fun applyModifier(block: (UniversalModifier) -> Unit): UniversalModifier {
 
-        // Nested modified can only be applied to sequence or parallel modifiers so in case this modifier
-        // it's not one of them then we create a new sequence modifier and add the current modifier to it.
-        // If the parent is set and it's a sequence or parallel modifier we can just add the nested
-        // modifier to it.
-        if (!type.usesNestedModifiers && (parent == null || !parent!!.type.usesNestedModifiers)) {
+        if (!type.usesNestedModifiers && (parent == null || parent!!.type != Sequence)) {
             return then().applyModifier(block)
         }
 
@@ -212,9 +185,17 @@ class UniversalModifier @JvmOverloads constructor(private val pool: Pool<Univers
 
     /**
      * Sets the easing function to be used.
+     *
+     * If the modifier is a [Sequence] or [Parallel] modifier, this method will set the easing for all the inner modifiers.
      */
-    fun eased(easing: Easing): UniversalModifier {
-        this.easing = easing
+    fun eased(value: Easing): UniversalModifier {
+
+        if (type.usesNestedModifiers) {
+            modifiers?.fastForEach { it.eased(value) }
+        } else {
+            easing = value
+        }
+
         return this
     }
 
@@ -309,8 +290,12 @@ class UniversalModifier @JvmOverloads constructor(private val pool: Pool<Univers
     }
 
 
-    override fun getDuration(): Float {
-        return duration
+    override fun getDuration(): Float = when (type) {
+
+        Sequence -> modifiers?.sumOf { it.getDuration() } ?: 0f
+        Parallel -> modifiers?.maxOf { it.getDuration() } ?: 0f
+
+        else -> duration
     }
 
     override fun getSecondsElapsed(): Float {
