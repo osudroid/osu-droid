@@ -238,8 +238,9 @@ class DroidDifficultyCalculator : DifficultyCalculator<DroidPlayableBeatmap, Dro
                 clockRate,
                 arr as Array<DroidDifficultyHitObject>,
                 i - 1,
-                greatWindow
-            ).also { d -> d.computeProperties(clockRate, objects) }
+                greatWindow,
+                objects
+            )
         }
 
         return arr as Array<DroidDifficultyHitObject>

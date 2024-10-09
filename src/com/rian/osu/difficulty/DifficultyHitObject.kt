@@ -138,12 +138,7 @@ abstract class DifficultyHitObject(
     protected open val maximumSliderRadius = NORMALIZED_RADIUS * 2.4f
     private val assumedSliderRadius = NORMALIZED_RADIUS * 1.8f
 
-    /**
-     * Computes the properties of this [DifficultyHitObject].
-     *
-     * @param clockRate The clock rate to compute,
-     */
-    open fun computeProperties(clockRate: Double, objects: List<HitObject>) = setDistances(clockRate)
+    init { setDistances(clockRate) }
 
     /**
      * Gets the [DifficultyHitObject] at a specific index with respect to the current
