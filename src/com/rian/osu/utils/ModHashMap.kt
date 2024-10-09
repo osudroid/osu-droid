@@ -271,6 +271,15 @@ class ModHashMap : HashMap<Class<out Mod>, Mod> {
         append(getContainerModString())
     }
 
+    /**
+     * Creates a deep copy of this [ModHashMap] and all [Mod]s inside of this [ModHashMap].
+     */
+    fun deepCopy() = ModHashMap().also {
+        for ((k, v) in this) {
+            it[k] = v.deepCopy()
+        }
+    }
+
     companion object {
         /**
          * The order in which mods should be displayed.
