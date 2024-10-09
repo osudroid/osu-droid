@@ -83,11 +83,11 @@ public class GameplayHitCircle extends GameObject {
             float fadeOutDuration = timePreempt * (float) ModHidden.FADE_OUT_DURATION_MULTIPLIER;
 
             circlePiece.beginSequenceChain(s -> {
-                s.fadeTo(1f, fadeInDuration);
-                s.fadeTo(0f, fadeOutDuration);
+                s.fadeIn(fadeInDuration);
+                s.fadeOut(fadeOutDuration);
             });
         } else {
-            circlePiece.fadeTo(1f, fadeInDuration);
+            circlePiece.fadeIn(fadeInDuration);
         }
 
         if (Config.isDimHitObjects()) {

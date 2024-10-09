@@ -324,7 +324,7 @@ public class GameplaySlider extends GameObject {
 
             if (GameHelper.isHidden()) {
                 // New duration from completed fade in to end (before fading out)
-                float fadeOutDuration = (float) this.beatmapSlider.getDuration() / 1000 + timePreempt - fadeInDuration;
+                float fadeOutDuration = (float) beatmapSlider.getDuration() / 1000 + timePreempt - fadeInDuration;
 
                 sliderBody.fadeIn(fadeInDuration).fadeOut(fadeOutDuration).eased(Easing.OutQuad);
             } else {
