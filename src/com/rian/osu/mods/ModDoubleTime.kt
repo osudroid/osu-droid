@@ -19,4 +19,5 @@ class ModDoubleTime : ModClockRateAdjust(), IModUserSelectable {
 
     override fun equals(other: Any?) = other === this || other is ModDoubleTime
     override fun hashCode() = super.hashCode()
+    override fun deepCopy() = ModDoubleTime()
 }

@@ -19,4 +19,5 @@ class ModRelax : Mod(), IModUserSelectable {
 
     override fun equals(other: Any?) = other === this || other is ModRelax
     override fun hashCode() = super.hashCode()
+    override fun deepCopy() = ModRelax()
 }

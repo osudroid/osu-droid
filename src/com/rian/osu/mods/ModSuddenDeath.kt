@@ -17,4 +17,5 @@ class ModSuddenDeath : Mod(), IModUserSelectable {
 
     override fun equals(other: Any?) = other === this || other is ModSuddenDeath
     override fun hashCode() = super.hashCode()
+    override fun deepCopy() = ModSuddenDeath()
 }

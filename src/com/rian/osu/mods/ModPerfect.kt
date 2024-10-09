@@ -17,4 +17,5 @@ class ModPerfect : Mod(), IModUserSelectable {
 
     override fun equals(other: Any?) = other === this || other is ModPerfect
     override fun hashCode() = super.hashCode()
+    override fun deepCopy() = ModPerfect()
 }

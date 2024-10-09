@@ -77,6 +77,7 @@ class ModHardRock : Mod(), IModUserSelectable, IModApplicableToDifficulty, IModA
 
     override fun equals(other: Any?) = other === this || other is ModHardRock
     override fun hashCode() = super.hashCode()
+    override fun deepCopy() = ModHardRock()
 
     companion object {
         private const val ADJUST_RATIO = 1.4f

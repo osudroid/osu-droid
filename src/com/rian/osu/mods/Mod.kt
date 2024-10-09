@@ -69,4 +69,11 @@ abstract class Mod {
 
         return result
     }
+
+    /**
+     * Creates a deep copy of this [Mod].
+     *
+     * @return A deep copy of this [Mod].
+     */
+    abstract fun deepCopy(): Mod
 }

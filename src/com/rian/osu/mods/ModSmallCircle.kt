@@ -13,4 +13,5 @@ class ModSmallCircle : Mod(), ILegacyMod {
     override val enum = GameMod.MOD_SMALLCIRCLE
 
     override fun migrate(difficulty: BeatmapDifficulty) = ModDifficultyAdjust(cs = difficulty.gameplayCS + 4)
+    override fun deepCopy() = ModSmallCircle()
 }

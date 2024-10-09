@@ -65,6 +65,7 @@ class ModReallyEasy : Mod(), IModUserSelectable, IModApplicableToDifficultyWithS
 
     override fun equals(other: Any?) = other === this || other is ModReallyEasy
     override fun hashCode() = super.hashCode()
+    override fun deepCopy() = ModReallyEasy()
 
     companion object {
         private const val ADJUST_RATIO = 0.5f

@@ -19,4 +19,5 @@ class ModCustomSpeed(override var trackRateMultiplier: Float) : ModClockRateAdju
     }
 
     override fun hashCode() = super.hashCode()
+    override fun deepCopy() = ModCustomSpeed(trackRateMultiplier)
 }

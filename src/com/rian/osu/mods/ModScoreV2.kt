@@ -14,4 +14,5 @@ class ModScoreV2 : Mod(), IModUserSelectable {
 
     override fun equals(other: Any?) = other === this || other is ModScoreV2
     override fun hashCode() = super.hashCode()
+    override fun deepCopy() = ModScoreV2()
 }

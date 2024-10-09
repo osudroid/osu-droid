@@ -114,4 +114,6 @@ class ModDifficultyAdjust(
 
         return result
     }
+
+    override fun deepCopy() = ModDifficultyAdjust(cs, ar, od, hp)
 }

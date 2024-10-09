@@ -46,6 +46,7 @@ class ModEasy : Mod(), IModUserSelectable, IModApplicableToDifficulty {
 
     override fun equals(other: Any?) = other === this || other is ModEasy
     override fun hashCode() = super.hashCode()
+    override fun deepCopy() = ModEasy()
 
     companion object {
         private const val ADJUST_RATIO = 0.5f

@@ -32,6 +32,7 @@ class ModHidden : Mod(), IModUserSelectable, IModApplicableToBeatmap {
 
     override fun equals(other: Any?) = other === this || other is ModHidden
     override fun hashCode() = super.hashCode()
+    override fun deepCopy() = ModHidden()
 
     companion object {
         const val FADE_IN_DURATION_MULTIPLIER = 0.4

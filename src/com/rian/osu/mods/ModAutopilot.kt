@@ -19,4 +19,5 @@ class ModAutopilot : Mod(), IModUserSelectable {
 
     override fun equals(other: Any?) = other === this || other is ModAutopilot
     override fun hashCode() = super.hashCode()
+    override fun deepCopy() = ModAutopilot()
 }

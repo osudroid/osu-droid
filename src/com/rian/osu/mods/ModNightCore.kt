@@ -19,4 +19,5 @@ class ModNightCore : ModClockRateAdjust(), IModUserSelectable {
 
     override fun equals(other: Any?) = other === this || other is ModNightCore
     override fun hashCode() = super.hashCode()
+    override fun deepCopy() = ModNightCore()
 }

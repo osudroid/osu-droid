@@ -20,7 +20,6 @@ class ModFlashlight : Mod(), IModUserSelectable {
     var followDelay = DEFAULT_FOLLOW_DELAY
 
     override fun calculateScoreMultiplier(difficulty: BeatmapDifficulty) = 1.12f
-
     override fun equals(other: Any?) = other === this || other is ModFlashlight
 
     override fun hashCode(): Int {
@@ -30,6 +29,8 @@ class ModFlashlight : Mod(), IModUserSelectable {
 
         return result
     }
+
+    override fun deepCopy() = ModFlashlight().also { it.followDelay = followDelay }
 
     companion object {
         /**
