@@ -297,10 +297,13 @@ public class ModMenu implements IModSwitcher {
                                 return;
                             }
 
+                            // Copy the mods to avoid concurrent modification
+                            var mods = enabledMods.deepCopy().values();
+
                             switch (Config.getDifficultyAlgorithm()) {
                                 case droid -> {
                                     var attributes = BeatmapDifficultyCalculator.calculateDroidDifficulty(
-                                        beatmap, enabledMods.values(), scope
+                                        beatmap, mods, scope
                                     );
 
                                     GlobalManager.getInstance().getSongMenu().setStarsDisplay(
@@ -311,7 +314,7 @@ public class ModMenu implements IModSwitcher {
 
                                 case standard -> {
                                     var attributes = BeatmapDifficultyCalculator.calculateStandardDifficulty(
-                                        beatmap, enabledMods.values(), scope
+                                        beatmap, mods, scope
                                     );
 
                                     GlobalManager.getInstance().getSongMenu().setStarsDisplay(

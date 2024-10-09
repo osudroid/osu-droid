@@ -601,7 +601,7 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
 
         final String rfile = beatmapInfo != null ? replayFile : this.replayFilePath;
         // Clone the mods to avoid concurrent modification
-        final ModHashMap modsToUse = mods != null ? new ModHashMap(mods) : lastMods;
+        final ModHashMap modsToUse = mods != null ? mods.deepCopy() : lastMods;
 
         Execution.async(() -> {
 

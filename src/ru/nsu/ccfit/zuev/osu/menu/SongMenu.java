@@ -1020,12 +1020,13 @@ public class SongMenu implements IUpdateHandler, MenuItemListener,
 
                 changeDimensionInfo(beatmapInfo);
 
-                var mods = ModMenu.getInstance().getEnabledMods();
+                // Copy the mods to avoid concurrent modification
+                var mods = ModMenu.getInstance().getEnabledMods().deepCopy().values();
 
                 switch (Config.getDifficultyAlgorithm()) {
                     case droid -> {
                         var attributes = BeatmapDifficultyCalculator.calculateDroidDifficulty(
-                            data, mods.values(), scope
+                            data, mods, scope
                         );
 
                         setStarsDisplay(GameHelper.Round(attributes.starRating, 2));
@@ -1033,7 +1034,7 @@ public class SongMenu implements IUpdateHandler, MenuItemListener,
 
                     case standard -> {
                         var attributes = BeatmapDifficultyCalculator.calculateStandardDifficulty(
-                            data, mods.values(), scope
+                            data, mods, scope
                         );
 
                         setStarsDisplay(GameHelper.Round(attributes.starRating, 2));
