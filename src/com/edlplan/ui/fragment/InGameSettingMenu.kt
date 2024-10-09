@@ -172,7 +172,7 @@ class InGameSettingMenu : BaseFragment() {
             if (!isChecked) {
                 ModMenu.getInstance().changeSpeed = 1f
                 speedModifyBar.progress = 10
-                speedModifyText.text = String.format(Locale.getDefault(), "%.2fx", ModMenu.getInstance().changeSpeed)
+                speedModifyText.text = "%.2fx".format(Locale.getDefault(), ModMenu.getInstance().changeSpeed)
                 ModMenu.getInstance().changeMultiplierText()
             }
         }
@@ -227,7 +227,7 @@ class InGameSettingMenu : BaseFragment() {
 
                     private fun update(progress: Int) {
                         val p = 0.5f + 0.05f * progress
-                        speedModifyText.text = String.format(Locale.getDefault(), "%.2fx", p)
+                        speedModifyText.text = "%.2fx".format(Locale.getDefault(), p)
                         ModMenu.getInstance().changeSpeed = p
                         ModMenu.getInstance().changeMultiplierText()
                     }
@@ -235,7 +235,7 @@ class InGameSettingMenu : BaseFragment() {
             )
         }
 
-        speedModifyText.text = String.format(Locale.getDefault(), "%.2fx", ModMenu.getInstance().changeSpeed)
+        speedModifyText.text = "%.2fx".format(Locale.getDefault(), ModMenu.getInstance().changeSpeed)
 
         followDelayText = findViewById(R.id.flashlightFollowDelayText)!!
         followDelayBar = findViewById(R.id.flashlightFollowDelayBar)!!

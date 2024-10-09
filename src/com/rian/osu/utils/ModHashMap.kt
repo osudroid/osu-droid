@@ -202,29 +202,29 @@ class ModHashMap : HashMap<Class<out Mod>, Mod> {
         }
 
         if (customSpeed != null) {
-            append(String.format("x%.2f|", customSpeed.trackRateMultiplier))
+            append("x%.2f|".format(customSpeed.trackRateMultiplier))
         }
 
         difficultyAdjust?.let {
             if (it.ar != null) {
-                append(String.format("AR%.1f|", it.ar))
+                append("AR%.1f|".format(it.ar))
             }
 
             if (it.od != null) {
-                append(String.format("OD%.1f|", it.od))
+                append("OD%.1f|".format(it.od))
             }
 
             if (it.cs != null) {
-                append(String.format("CS%.1f|", it.cs))
+                append("CS%.1f|".format(it.cs))
             }
 
             if (it.hp != null) {
-                append(String.format("HP%.1f|", it.hp))
+                append("HP%.1f|".format(it.hp))
             }
         }
 
         if (flashlight != null && flashlight.followDelay != ModFlashlight.DEFAULT_FOLLOW_DELAY) {
-            append(String.format("FLD%.2f|", flashlight.followDelay))
+            append("FLD%.2f|".format(flashlight.followDelay))
         }
     }.substringBeforeLast('|')
 
