@@ -300,7 +300,7 @@ class Slider(
         // Invalidate the end position in case there are timing changes.
         invalidateEndPositions()
 
-        createNestedHitObjects(mode)
+        createNestedHitObjects(mode, controlPoints)
 
         nestedHitObjects.forEach { it.applyDefaults(controlPoints, difficulty, mode) }
     }
@@ -360,7 +360,7 @@ class Slider(
      */
     fun spanAt(progress: Double) = (progress * spanCount).toInt()
 
-    private fun createNestedHitObjects(mode: GameMode) {
+    private fun createNestedHitObjects(mode: GameMode, controlPoints: BeatmapControlPoints) {
         nestedHitObjects.clear()
 
         head = SliderHead(startTime, position)
@@ -453,7 +453,7 @@ class Slider(
             sortBy { it.startTime }
         }
 
-        updateNestedSamples()
+        updateNestedSamples(controlPoints)
     }
 
     private fun updateNestedPositions() {
@@ -470,7 +470,7 @@ class Slider(
         gameplayStackedEndPositionCache.invalidate()
     }
 
-    private fun updateNestedSamples() {
+    private fun updateNestedSamples(controlPoints: BeatmapControlPoints) {
         val bankSamples = samples.filterIsInstance<BankHitSampleInfo>()
         val normalSample = bankSamples.find { it.name == BankHitSampleInfo.HIT_NORMAL }
         val sliderTickSamples = mutableListOf<HitSampleInfo>().also {
@@ -489,7 +489,12 @@ class Slider(
                     is SliderHead -> getSample(0)
                     is SliderRepeat -> getSample(it.spanIndex + 1)
                     is SliderTail -> getSample(spanCount)
-                    else -> sliderTickSamples
+                    else -> {
+                        val time = it.startTime + CONTROL_POINT_LENIENCY
+                        val nodeSamplePoint = controlPoints.sample.controlPointAt(time)
+
+                        sliderTickSamples.map { s -> nodeSamplePoint.applyTo(s) }
+                    }
                 }
             )
         }
