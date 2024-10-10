@@ -493,6 +493,7 @@ class Slider(
         fun getSample(index: Int) = nodeSamples.getOrNull(index) ?: samples
 
         nestedHitObjects.forEach {
+            it.samples.clear()
             it.samples.addAll(
                 when (it) {
                     is SliderHead -> getSample(0)
