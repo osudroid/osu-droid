@@ -4,13 +4,6 @@ import com.reco1l.andengine.modifier.ModifierType.*
 
 
 /**
- * A block to execute when a modifier chain is built.
- */
-fun interface IModifierChainBlock {
-    fun UniversalModifier.build()
-}
-
-/**
  * A chain of modifiers that can be applied to an entity.
  *
  * An entity is the first node in the chain, and each modifier is a node that follows it.
@@ -25,7 +18,7 @@ interface IModifierChain {
      * as well register the modifier as nested to the current chain and use the [block]
      * callback on it.
      */
-    fun applyModifier(block: (UniversalModifier) -> Unit): UniversalModifier
+    fun applyModifier(block: UniversalModifier.() -> Unit): UniversalModifier
 
 
     // Nested chains
@@ -33,20 +26,20 @@ interface IModifierChain {
     /**
      * Begins a sequential chain of modifiers.
      */
-    fun beginSequenceChain(builder: IModifierChainBlock): UniversalModifier {
-        return applyModifier {
-            it.type = Sequence
-            builder.apply { it.build() }
+    fun beginSequenceChain(block: IModifierChain.() -> Unit) {
+        applyModifier {
+            type = Sequence
+            block()
         }
     }
 
     /**
      * Begins a parallel chain of modifiers.
      */
-    fun beginParallelChain(builder: IModifierChainBlock): UniversalModifier {
-        return applyModifier {
-            it.type = Parallel
-            builder.apply { it.build() }
+    fun beginParallelChain(block: IModifierChain.() -> Unit) {
+        applyModifier {
+            type = Parallel
+            block()
         }
     }
 
@@ -58,35 +51,35 @@ interface IModifierChain {
      */
     fun delay(durationSec: Float): UniversalModifier {
         return applyModifier {
-            it.type = Delay
-            it.duration = durationSec
-            it.finalValue = 0f
+            type = Delay
+            duration = durationSec
         }
     }
 
 
     // Translate
 
-    fun translateTo(value: Float, durationSec: Float = 0f): UniversalModifier {
-        return beginParallelChain {
-            translateToX(value, durationSec)
-            translateToY(value, durationSec)
+    fun translateTo(valueX: Float, valueY: Float, durationSec: Float = 0f): UniversalModifier {
+        return applyModifier {
+            type = TranslateXY
+            duration = durationSec
+            finalValues = floatArrayOf(valueX, valueY)
         }
     }
 
     fun translateToX(value: Float, durationSec: Float = 0f): UniversalModifier {
         return applyModifier {
-            it.type = TranslateX
-            it.duration = durationSec
-            it.finalValue = value
+            type = TranslateX
+            duration = durationSec
+            finalValues = floatArrayOf(value)
         }
     }
 
     fun translateToY(value: Float, durationSec: Float = 0f): UniversalModifier {
         return applyModifier {
-            it.type = TranslateY
-            it.duration = durationSec
-            it.finalValue = value
+            type = TranslateY
+            duration = durationSec
+            finalValues = floatArrayOf(value)
         }
     }
 
@@ -94,25 +87,26 @@ interface IModifierChain {
     // Move
 
     fun moveTo(valueX: Float, valueY: Float, durationSec: Float = 0f): UniversalModifier {
-        return beginParallelChain {
-            moveToX(valueX, durationSec)
-            moveToY(valueY, durationSec)
+        return applyModifier {
+            type = MoveXY
+            duration = durationSec
+            finalValues = floatArrayOf(valueX, valueY)
         }
     }
 
     fun moveToX(value: Float, durationSec: Float = 0f): UniversalModifier {
         return applyModifier {
-            it.type = MoveX
-            it.duration = durationSec
-            it.finalValue = value
+            type = MoveX
+            duration = durationSec
+            finalValues = floatArrayOf(value)
         }
     }
 
     fun moveToY(value: Float, durationSec: Float = 0f): UniversalModifier {
         return applyModifier {
-            it.type = MoveY
-            it.duration = durationSec
-            it.finalValue = value
+            type = MoveY
+            duration = durationSec
+            finalValues = floatArrayOf(value)
         }
     }
 
@@ -120,25 +114,26 @@ interface IModifierChain {
     // Scale
 
     fun scaleTo(value: Float, durationSec: Float = 0f): UniversalModifier {
-        return beginParallelChain {
-            scaleToX(value, durationSec)
-            scaleToY(value, durationSec)
+        return applyModifier {
+            type = ScaleXY
+            duration = durationSec
+            finalValues = floatArrayOf(value, value)
         }
     }
 
     fun scaleToX(value: Float, durationSec: Float = 0f): UniversalModifier {
         return applyModifier {
-            it.type = ScaleX
-            it.duration = durationSec
-            it.finalValue = value
+            type = ScaleX
+            duration = durationSec
+            finalValues = floatArrayOf(value)
         }
     }
 
     fun scaleToY(value: Float, durationSec: Float = 0f): UniversalModifier {
         return applyModifier {
-            it.type = ScaleY
-            it.duration = durationSec
-            it.finalValue = value
+            type = ScaleY
+            duration = durationSec
+            finalValues = floatArrayOf(value)
         }
     }
 
@@ -147,9 +142,9 @@ interface IModifierChain {
 
     fun fadeTo(value: Float, durationSec: Float = 0f): UniversalModifier {
         return applyModifier {
-            it.type = Alpha
-            it.duration = durationSec
-            it.finalValue = value
+            type = Alpha
+            duration = durationSec
+            finalValues = floatArrayOf(value)
         }
     }
 
@@ -162,34 +157,10 @@ interface IModifierChain {
     }
 
     fun colorTo(red: Float, green: Float, blue: Float, durationSec: Float = 0f): UniversalModifier {
-        return beginParallelChain {
-            colorToRed(red, durationSec)
-            colorToGreen(green, durationSec)
-            colorToBlue(blue, durationSec)
-        }
-    }
-
-    fun colorToRed(value: Float, durationSec: Float = 0f): UniversalModifier {
         return applyModifier {
-            it.type = ColorRed
-            it.duration = durationSec
-            it.finalValue = value
-        }
-    }
-
-    fun colorToGreen(value: Float, durationSec: Float = 0f): UniversalModifier {
-        return applyModifier {
-            it.type = ColorGreen
-            it.duration = durationSec
-            it.finalValue = value
-        }
-    }
-
-    fun colorToBlue(value: Float, durationSec: Float = 0f): UniversalModifier {
-        return applyModifier {
-            it.type = ColorBlue
-            it.duration = durationSec
-            it.finalValue = value
+            type = Color
+            duration = durationSec
+            finalValues = floatArrayOf(red, green, blue)
         }
     }
 
@@ -198,9 +169,9 @@ interface IModifierChain {
 
     fun rotateTo(value: Float, durationSec: Float = 0f): UniversalModifier {
         return applyModifier {
-            it.type = Rotation
-            it.duration = durationSec
-            it.finalValue = value
+            type = Rotation
+            duration = durationSec
+            finalValues = floatArrayOf(value)
         }
     }
 

@@ -136,6 +136,7 @@ public class GameplaySpinner extends GameObject {
         approachCircle.delay(timePreempt).beginParallelChain(s -> {
             s.fadeIn(timePreempt * 0.25f);
             s.scaleTo(0f, timePreempt * 0.25f);
+            return null;
         });
 
         spinText.setAlpha(0);

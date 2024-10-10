@@ -20,6 +20,10 @@ import kotlin.math.*
  */
 class UniversalModifier @JvmOverloads constructor(private val pool: Pool<UniversalModifier>? = GlobalPool) : IEntityModifier, IModifierChain {
 
+    /**
+     * The parent of this modifier.
+     */
+    var parent: IModifierChain? = null
 
     /**
      * The type of the modifier.
@@ -45,9 +49,14 @@ class UniversalModifier @JvmOverloads constructor(private val pool: Pool<Univers
         }
 
     /**
+     * The initial values for the modifier.
+     */
+    var initialValues: FloatArray? = null
+
+    /**
      * The final values for the modifier.
      */
-    var finalValue = 0f
+    var finalValues: FloatArray? = null
 
     /**
      * Callback to be called when the modifier finishes.
@@ -59,11 +68,7 @@ class UniversalModifier @JvmOverloads constructor(private val pool: Pool<Univers
 
     private var elapsedSec = -1f
 
-    private var initialValue = 0f
-
     private var easing = Easing.None
-
-    private var parent: UniversalModifier? = null
 
 
     private fun clearNestedModifiers() {
@@ -82,7 +87,9 @@ class UniversalModifier @JvmOverloads constructor(private val pool: Pool<Univers
         if (elapsedSec < 0) {
             elapsedSec = 0f
 
-            initialValue = type.getCurrentValue(entity)
+            if (initialValues == null) {
+                initialValues = type.getInitialValues(entity)
+            }
         }
 
         var consumedTimeSec = 0f
@@ -142,7 +149,9 @@ class UniversalModifier @JvmOverloads constructor(private val pool: Pool<Univers
             // we have to assume the percentage is 1 to avoid division by zero.
             val percentage = if (duration > 0) easing.interpolate(elapsedSec / duration) else 1f
 
-            type.setValue(entity, initialValue + (finalValue - initialValue) * percentage)
+            if (initialValues != null && finalValues == null) {
+                type.setValues(entity, initialValues!!, finalValues!!, percentage)
+            }
         }
 
         if (isFinished) {
@@ -168,16 +177,39 @@ class UniversalModifier @JvmOverloads constructor(private val pool: Pool<Univers
     }
 
 
-    override fun applyModifier(block: (UniversalModifier) -> Unit): UniversalModifier {
+    override fun applyModifier(block: UniversalModifier.() -> Unit): UniversalModifier {
 
-        if (!type.usesNestedModifiers && (parent == null || parent!!.type != Sequence)) {
-            return then().applyModifier(block)
+        // This condition will be false in chained calls mostly, in that case
+        // we wrap all the modifiers in the same call chain into a sequence.
+        if (!type.usesNestedModifiers) {
+
+            // If the parent is a sequence modifier, we add this modifier to it directly.
+            if ((parent as? UniversalModifier)?.type == Sequence) {
+                return parent!!.applyModifier(block)
+            }
+
+            if (type != Sequence) {
+
+                val thisCopy = pool?.obtain() ?: UniversalModifier()
+                thisCopy.setToDefault()
+                thisCopy.setFrom(this)
+                thisCopy.parent = this
+
+                // Setting modifiers to null so setToDefault() doesn't pool them back.
+                modifiers = null
+                setToDefault()
+
+                type = Sequence
+                modifiers = arrayOf(thisCopy)
+            }
+
+            return applyModifier(block)
         }
 
         val nestedModifier = pool?.obtain() ?: UniversalModifier()
         nestedModifier.setToDefault()
         nestedModifier.parent = this
-        block(nestedModifier)
+        nestedModifier.block()
 
         modifiers = modifiers?.plus(nestedModifier) ?: arrayOf(nestedModifier)
         return nestedModifier
@@ -207,36 +239,6 @@ class UniversalModifier @JvmOverloads constructor(private val pool: Pool<Univers
         return this
     }
 
-    /**
-     * Delays the next modifier with the duration of this modifier.
-     */
-    fun then(): UniversalModifier {
-
-        // If the parent is a sequence we can just add the following modifiers to it.
-        if (parent?.type == Sequence) {
-            return parent!!
-        }
-
-        // A "new" sequence will be created containing this modifier as well the following modifiers in the chain will be added to it.
-        if (type != Sequence) {
-
-            val thisCopy = pool?.obtain() ?: UniversalModifier()
-            thisCopy.setToDefault()
-            thisCopy.setFrom(this)
-            thisCopy.parent = this
-
-            // Setting modifiers to null so setToDefault() doesn't pool them back.
-            modifiers = null
-
-            setToDefault()
-
-            type = Sequence
-            modifiers = arrayOf(thisCopy)
-        }
-
-        return this
-    }
-
 
     /**
      * Sets the modifier to its default state.
@@ -248,8 +250,8 @@ class UniversalModifier @JvmOverloads constructor(private val pool: Pool<Univers
         type = Delay
 
         duration = 0f
-        finalValue = 0f
-        initialValue = 0f
+        finalValues = null
+        initialValues = null
 
         parent = null
         easing = Easing.None
@@ -281,7 +283,7 @@ class UniversalModifier @JvmOverloads constructor(private val pool: Pool<Univers
      */
     fun setDuration(value: Float) {
 
-        if (type == Sequence || type == Parallel) {
+        if (type.usesNestedModifiers) {
             Log.w("UniversalModifier", "Cannot manually set duration for sequence or parallel modifiers, ignoring.")
             return
         }
@@ -334,8 +336,8 @@ class UniversalModifier @JvmOverloads constructor(private val pool: Pool<Univers
 
 
     override fun deepCopy(): UniversalModifier = UniversalModifier(pool).also { modifier ->
-        modifier.finalValue = finalValue
-        modifier.initialValue = initialValue
+        modifier.finalValues = finalValues?.copyOf()
+        modifier.initialValues = initialValues?.copyOf()
         modifier.type = type
         modifier.easing = easing
         modifier.duration = duration
@@ -345,12 +347,13 @@ class UniversalModifier @JvmOverloads constructor(private val pool: Pool<Univers
 
     fun setFrom(other: UniversalModifier) {
         type = other.type
+        parent = other.parent
         easing = other.easing
         duration = other.duration
         modifiers = other.modifiers
         onFinished = other.onFinished
-        finalValue = other.finalValue
-        initialValue = other.initialValue
+        finalValues = other.finalValues
+        initialValues = other.initialValues
     }
 
 

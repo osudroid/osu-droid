@@ -229,11 +229,13 @@ public class GameplaySlider extends GameObject {
             headCirclePiece.beginSequenceChain(s -> {
                 s.fadeIn(fadeInDuration);
                 s.fadeOut(fadeOutDuration);
+                return null;
             });
 
             tailCirclePiece.beginSequenceChain(s -> {
                 s.fadeIn(fadeInDuration);
                 s.fadeOut(fadeOutDuration);
+                return null;
             });
 
         } else {

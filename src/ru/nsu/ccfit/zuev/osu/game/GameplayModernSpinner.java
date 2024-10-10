@@ -219,6 +219,7 @@ public class GameplayModernSpinner extends GameplaySpinner {
                 glow.beginSequenceChain(s -> {
                    s.colorTo(1f, 1f, 1f, 0.1f);
                    s.colorTo(0f, 0.8f, 1f, 0.1f);
+                   return null;
                 });
                 float rate = 0.375f;
                 if (GameHelper.getHealthDrain() > 0) {

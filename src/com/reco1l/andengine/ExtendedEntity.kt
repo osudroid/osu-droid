@@ -417,10 +417,11 @@ abstract class ExtendedEntity(
         super.setBlendFunction(pSourceBlendFunction, pDestinationBlendFunction)
     }
 
-    override fun applyModifier(block: (UniversalModifier) -> Unit): UniversalModifier {
+    override fun applyModifier(block: UniversalModifier.() -> Unit): UniversalModifier {
 
         val modifier = UniversalModifier.GlobalPool.obtain()
         modifier.setToDefault()
+        modifier.parent = this
         block(modifier)
 
         registerEntityModifier(modifier)

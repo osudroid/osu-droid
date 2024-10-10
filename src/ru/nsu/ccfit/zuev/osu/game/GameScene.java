@@ -868,6 +868,7 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
                         .beginParallelChain(p -> {
                             p.fadeOut(0.5f);
                             p.scaleTo(1.5f, 0.5f);
+                            return null;
                         })
                 );
 
@@ -2290,6 +2291,7 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
                     p.moveToY(pos.y - 5f, 0f).moveToY(pos.y + 80f, fadeOutDelay + fadeOutLength).eased(Easing.InQuad);
 
                     p.rotateTo(rotation, fadeInLength).rotateTo(rotation * 2f, fadeOutDelay + fadeOutLength - fadeInLength).eased(Easing.InQuad);
+                    return null;
                 })
             );
 
@@ -2307,6 +2309,7 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
                 light.hit.beginParallelChain(p -> {
                     p.fadeIn(fadeInLength).delay(fadeOutDelay).fadeOut(fadeOutLength);
                     p.scaleTo(scale * 1.2f, 0.6f).eased(Easing.OutQuad);
+                    return null;
                 })
             );
         }
@@ -2323,6 +2326,7 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
                     // so we need to force the current value to be correct at 1.2 (0.95) then complete the
                     // second half of the transform.
                     .scaleTo(scale * 0.95f, 0f).scaleTo(scale, fadeInLength * 0.2f);
+                return null;
             })
         );
     }
@@ -2337,6 +2341,7 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
             effect.hit.beginParallelChain(p -> {
                 p.scaleTo(scale * 1.4f, fadeDuration).eased(Easing.OutQuad);
                 p.fadeOut(fadeDuration);
+                return null;
             })
         );
     }

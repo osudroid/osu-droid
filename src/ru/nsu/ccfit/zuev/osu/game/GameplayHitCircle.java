@@ -85,6 +85,7 @@ public class GameplayHitCircle extends GameObject {
             circlePiece.beginSequenceChain(s -> {
                 s.fadeIn(fadeInDuration);
                 s.fadeOut(fadeOutDuration);
+                return null;
             });
         } else {
             circlePiece.fadeIn(fadeInDuration);
