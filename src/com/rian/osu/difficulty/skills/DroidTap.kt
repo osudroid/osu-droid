@@ -27,9 +27,6 @@ class DroidTap(
 ) : DroidStrainSkill(mods) {
     override val starsPerDouble = 1.1
 
-    override val objectStrain: Double
-        get() = currentStrain * currentRhythm
-
     private var currentStrain = 0.0
     private var currentRhythm = 0.0
 
@@ -82,9 +79,12 @@ class DroidTap(
 
         currentRhythm = current.rhythmMultiplier
 
+        val totalStrain = currentStrain * currentRhythm
+
+        objectStrains.add(totalStrain)
         objectDeltaTimes.add(current.deltaTime)
 
-        return currentStrain * currentRhythm
+        return totalStrain
     }
 
     override fun calculateInitialStrain(time: Double, current: DroidDifficultyHitObject) =

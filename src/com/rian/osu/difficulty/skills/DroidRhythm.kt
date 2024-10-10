@@ -17,9 +17,6 @@ class DroidRhythm(
     override val reducedSectionCount = 5
     override val starsPerDouble = 1.75
 
-    override val objectStrain: Double
-        get() = currentStrain
-
     private var currentStrain = 0.0
     private val strainDecayBase = 0.3
 
