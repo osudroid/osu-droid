@@ -309,24 +309,14 @@ class Slider(
         val sampleControlPoint = controlPoints.sample.controlPointAt(startTime + CONTROL_POINT_LENIENCY + 1)
         samples = samples.map { sampleControlPoint.applyTo(it) }.toMutableList()
 
-        // Create sliding samples
-        auxiliarySamples.clear()
-        val bankSamples = samples.filterIsInstance<BankHitSampleInfo>()
-
-        bankSamples.find { it.name == BankHitSampleInfo.HIT_NORMAL }?.let {
-            auxiliarySamples.add(it.copy(name = "sliderslide"))
-        }
-
-        bankSamples.find { it.name == BankHitSampleInfo.HIT_WHISTLE }?.let {
-            auxiliarySamples.add(it.copy(name = "sliderwhistle"))
-        }
-
         nodeSamples.forEachIndexed { i, sampleList ->
             val time = startTime + i * spanDuration + CONTROL_POINT_LENIENCY
             val nodeSamplePoint = controlPoints.sample.controlPointAt(time)
 
             nodeSamples[i] = sampleList.map { nodeSamplePoint.applyTo(it) }.toMutableList()
         }
+
+        createSlidingSamples()
     }
 
     /**
@@ -469,6 +459,19 @@ class Slider(
         difficultyStackedEndPositionCache.invalidate()
         gameplayEndPositionCache.invalidate()
         gameplayStackedEndPositionCache.invalidate()
+    }
+
+    private fun createSlidingSamples() {
+        auxiliarySamples.clear()
+        val bankSamples = samples.filterIsInstance<BankHitSampleInfo>()
+
+        bankSamples.find { it.name == BankHitSampleInfo.HIT_NORMAL }?.let {
+            auxiliarySamples.add(it.copy(name = "sliderslide"))
+        }
+
+        bankSamples.find { it.name == BankHitSampleInfo.HIT_WHISTLE }?.let {
+            auxiliarySamples.add(it.copy(name = "sliderwhistle"))
+        }
     }
 
     private fun updateNestedSamples(controlPoints: BeatmapControlPoints) {
