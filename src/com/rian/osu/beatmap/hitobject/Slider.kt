@@ -306,7 +306,8 @@ class Slider(
     }
 
     override fun applySamples(controlPoints: BeatmapControlPoints) {
-        super.applySamples(controlPoints)
+        val sampleControlPoint = controlPoints.sample.controlPointAt(startTime + CONTROL_POINT_LENIENCY + 1)
+        samples = samples.map { sampleControlPoint.applyTo(it) }.toMutableList()
 
         // Create sliding samples
         auxiliarySamples.clear()
