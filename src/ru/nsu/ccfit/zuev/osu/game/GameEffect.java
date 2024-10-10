@@ -4,14 +4,12 @@ import android.graphics.PointF;
 
 
 import com.reco1l.andengine.Anchor;
+import com.reco1l.andengine.modifier.UniversalModifier;
 import com.reco1l.osu.Execution;
 import com.reco1l.andengine.sprite.AnimatedSprite;
 import com.reco1l.andengine.sprite.ExtendedSprite;
-import com.reco1l.osu.Modifiers;
-import com.reco1l.andengine.modifier.UniversalModifier;
 
 import org.anddev.andengine.entity.scene.Scene;
-import org.anddev.andengine.entity.shape.Shape;
 
 import java.util.Arrays;
 import java.util.HashSet;
@@ -53,24 +51,23 @@ public class GameEffect extends GameObject {
         }
     }
 
-    public void init(final Scene scene, final PointF pos, final float scale,
-                     final UniversalModifier... entityModifiers) {
+    public void init(Scene scene, PointF position, float initialScale, float initialAlpha, UniversalModifier modifier) {
         if (hit instanceof AnimatedSprite animatedHit) {
             animatedHit.setElapsedSec(0f);
         }
-        hit.setPosition(pos.x, pos.y);
+        hit.setPosition(position.x, position.y);
         hit.setOrigin(Anchor.Center);
-        hit.registerEntityModifier(Modifiers.parallel(entity -> {
-            Execution.updateThread(() -> {
-                hit.detachSelf();
-                hit.clearEntityModifiers();
-                GameObjectPool.getInstance().putEffect(GameEffect.this);
-            });
-        }, entityModifiers));
-        hit.setScale(scale);
-        hit.setAlpha(1);
+        hit.setScale(initialScale);
+        hit.setAlpha(initialAlpha);
+        hit.setRotation(0f);
         hit.detachSelf();
-        hit.setBlendFunction(Shape.BLENDFUNCTION_SOURCE_DEFAULT, Shape.BLENDFUNCTION_DESTINATION_DEFAULT);
+
+        modifier.then(e -> Execution.updateThread(() -> {
+            hit.detachSelf();
+            hit.clearEntityModifiers();
+            GameObjectPool.getInstance().putEffect(GameEffect.this);
+        }));
+
         scene.attachChild(hit);
     }
 

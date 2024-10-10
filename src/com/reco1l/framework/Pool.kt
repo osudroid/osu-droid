@@ -1,10 +1,11 @@
 package com.reco1l.framework
 
+import java.util.LinkedList
+
 /**
  * A simple object pool implementation.
  *
  * @param T The type of object to pool.
- * @param initialSize The initial size of the pool, by default 0.
  * @param maxSize The maximum size of the pool, by default -1 (no limit).
  * @param factory The factory to use to create new objects.
  * @author Reco1l
@@ -18,7 +19,7 @@ class Pool<T : Any> @JvmOverloads constructor(
 ) {
 
 
-    private val objects = mutableListOf<T>()
+    private val objects = LinkedList<T>()
 
 
     /**
@@ -32,7 +33,7 @@ class Pool<T : Any> @JvmOverloads constructor(
      * Obtain an object from the pool. If the pool is empty, a new object is created using the
      * factory and its arguments.
      */
-    fun obtain() = objects.removeFirstOrNull() ?: factory(this)
+    fun obtain() = objects.poll() ?: factory(this)
 
     /**
      * Return an object to the pool.

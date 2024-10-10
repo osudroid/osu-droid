@@ -106,6 +106,21 @@ object Colors {
         )
     }
 
+    /**
+     * Packs the color into an integer.
+     */
+    fun toPackedInt(red: Float, green: Float, blue: Float): Int {
+        return ((red * 255f).toInt() shl 16) or ((green * 255f).toInt() shl 8) or (blue * 255f).toInt()
+    }
+
+    /**
+     * Packs the color into a float.
+     */
+    fun toPackedFloat(red: Float, green: Float, blue: Float): Float {
+        return Float.fromBits(toPackedInt(red, green, blue) and 0xFFFFFF)
+    }
+
+
 }
 
 
