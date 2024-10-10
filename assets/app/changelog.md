@@ -137,10 +137,10 @@ The following gameplay elements' display has been updated to match osu!stable:
 
 # Removals
 
-- Removed the "Calculate slider path" setting. This setting is now enabled by default thanks to the aforementioned
-performance improvements
+- Removed the "Calculate slider path" setting. It is now enabled by default thanks to the aforementioned performance improvements
 - Removed internal volume adjustment of normal, whistle, and clap hitsounds, where normal and whistle hitsounds' volume
 were reduced by 20% and clap hitsounds' volume were reduced by 15%
+- Removed the "Player Name" setting. It is now combined with the "Username" option
 
 # Bug fixes
 
