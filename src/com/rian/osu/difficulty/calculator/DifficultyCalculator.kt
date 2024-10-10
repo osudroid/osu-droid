@@ -1,6 +1,5 @@
 package com.rian.osu.difficulty.calculator
 
-import com.rian.osu.GameMode
 import com.rian.osu.beatmap.Beatmap
 import com.rian.osu.beatmap.IBeatmap
 import com.rian.osu.beatmap.PlayableBeatmap
