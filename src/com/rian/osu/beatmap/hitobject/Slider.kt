@@ -471,6 +471,11 @@ class Slider(
     }
 
     private fun updateNestedSamples(controlPoints: BeatmapControlPoints) {
+        // Ensure that the list of node samples is at least as long as the number of nodes
+        while (nodeSamples.size < repeatCount + 2) {
+            nodeSamples.add(samples.map { it.copy() }.toMutableList())
+        }
+
         val bankSamples = samples.filterIsInstance<BankHitSampleInfo>()
         val normalSample = bankSamples.find { it.name == BankHitSampleInfo.HIT_NORMAL }
         val sliderTickSamples = mutableListOf<HitSampleInfo>().also {
