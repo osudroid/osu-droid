@@ -3,6 +3,7 @@ package com.rian.osu.mods
 import com.rian.osu.GameMode
 import com.rian.osu.beatmap.sections.BeatmapDifficulty
 import com.rian.osu.utils.CircleSizeCalculator
+import com.rian.osu.utils.ModUtils
 
 /**
  * Represents the Really Easy mod.
@@ -12,7 +13,7 @@ class ModReallyEasy : Mod(), IModApplicableToDifficultyWithSettings {
 
     override fun applyToDifficulty(mode: GameMode, difficulty: BeatmapDifficulty, mods: Iterable<Mod>, customSpeedMultiplier: Float) =
         difficulty.run {
-            val difficultyAdjustMod = mods.find { it is ModDifficultyAdjust } as ModDifficultyAdjust?
+            val difficultyAdjustMod = mods.find { it is ModDifficultyAdjust } as? ModDifficultyAdjust
 
             if (difficultyAdjustMod?.ar == null) {
                 if (mods.any { it is ModEasy }) {
@@ -20,8 +21,10 @@ class ModReallyEasy : Mod(), IModApplicableToDifficultyWithSettings {
                     ar -= 0.5f
                 }
 
+                val trackRate = ModUtils.calculateRateWithMods(mods) * customSpeedMultiplier
+
                 ar -= 0.5f
-                ar -= customSpeedMultiplier - 1
+                ar -= trackRate - 1
             }
 
             if (difficultyAdjustMod?.cs == null) {
