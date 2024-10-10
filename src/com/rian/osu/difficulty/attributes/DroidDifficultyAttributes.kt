@@ -38,12 +38,6 @@ class DroidDifficultyAttributes : DifficultyAttributes() {
     var visualDifficulty = 0.0
 
     /**
-     * The amount of strains that are considered difficult with respect to the aim skill.
-     */
-    @JvmField
-    var aimDifficultStrainCount = 0.0
-
-    /**
      * The amount of strains that are considered difficult with respect to the tap skill.
      */
     @JvmField

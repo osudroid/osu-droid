@@ -211,6 +211,6 @@ class DroidDifficultyHitObject(
         overlappingFactor += max(
             0.0,
             1 - distance / (2.5 * obj.difficultyRadius)
-        ) * 7.5 / (1 + exp(0.15 * (max(deltaTime, MIN_DELTA_TIME) - 75)))
+        ) * 7.5 / (1 + exp(0.15 * (max(deltaTime, MIN_DELTA_TIME.toDouble()) - 75)))
     }
 }

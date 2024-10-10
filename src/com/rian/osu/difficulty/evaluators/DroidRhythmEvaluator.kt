@@ -25,7 +25,7 @@ object DroidRhythmEvaluator {
         }
 
         val averageDelta by lazy {
-            if (deltas.isNotEmpty()) max(deltas.average(), DifficultyHitObject.MIN_DELTA_TIME)
+            if (deltas.isNotEmpty()) max(deltas.average(), DifficultyHitObject.MIN_DELTA_TIME.toDouble())
             else 0.0
         }
 

@@ -16,15 +16,12 @@ class StandardSpeed(
      */
     mods: List<Mod>
 ) : StandardStrainSkill(mods) {
-    override val difficultyMultiplier = 1.04
     override val reducedSectionCount = 5
 
     private var currentStrain = 0.0
     private var currentRhythm = 0.0
-    private val skillMultiplier = 1375.0
+    private val skillMultiplier = 1.43
     private val strainDecayBase = 0.3
-
-    private val objectStrains = mutableListOf<Double>()
 
     /**
      * Calculates the number of clickable objects weighted by difficulty.

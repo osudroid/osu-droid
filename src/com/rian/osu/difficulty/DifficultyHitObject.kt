@@ -79,7 +79,7 @@ abstract class DifficultyHitObject(
     /**
      * The time taken to travel through [minimumJumpDistance], with a minimum value of 25ms.
      */
-    var minimumJumpTime = MIN_DELTA_TIME
+    var minimumJumpTime = MIN_DELTA_TIME.toDouble()
 
     /**
      * The normalized distance between the start and end position of this hit object.
@@ -91,7 +91,7 @@ abstract class DifficultyHitObject(
      * The time taken to travel through [travelDistance], with a minimum value of 25ms for sliders.
      */
     @JvmField
-    var travelTime = MIN_DELTA_TIME
+    var travelTime = MIN_DELTA_TIME.toDouble()
 
     /**
      * Angle the player has to take to hit this hit object.
@@ -112,7 +112,7 @@ abstract class DifficultyHitObject(
      */
     // Capped to 25ms to prevent difficulty calculation breaking from simultaneous objects.
     @JvmField
-    val strainTime = if (lastObj != null) max(deltaTime, MIN_DELTA_TIME) else 0.0
+    val strainTime = if (lastObj != null) max(deltaTime, MIN_DELTA_TIME.toDouble()) else 0.0
 
     /**
      * Adjusted start time of the hit object, taking speed multiplier into account.
@@ -229,7 +229,7 @@ abstract class DifficultyHitObject(
                 GameMode.Standard -> (1 + obj.repeatCount / 2.5).pow(1 / 2.5)
             }
 
-            travelTime = max(obj.lazyTravelTime / clockRate, MIN_DELTA_TIME)
+            travelTime = max(obj.lazyTravelTime / clockRate, MIN_DELTA_TIME.toDouble())
         }
 
         // We don't need to calculate either angle or distance when one of the last->curr objects
@@ -245,9 +245,9 @@ abstract class DifficultyHitObject(
         minimumJumpDistance = lazyJumpDistance
 
         if (lastObj is Slider) {
-            val lastTravelTime = max(lastObj.lazyTravelTime / clockRate, MIN_DELTA_TIME)
+            val lastTravelTime = max(lastObj.lazyTravelTime / clockRate, MIN_DELTA_TIME.toDouble())
 
-            minimumJumpTime = max(strainTime - lastTravelTime, MIN_DELTA_TIME)
+            minimumJumpTime = max(strainTime - lastTravelTime, MIN_DELTA_TIME.toDouble())
 
             // There are two types of slider-to-object patterns to consider in order to better approximate the real movement a player will take to jump between the hit objects.
             //
@@ -388,6 +388,6 @@ abstract class DifficultyHitObject(
          * The minimum delta time between hit objects.
          */
         @JvmStatic
-        val MIN_DELTA_TIME = 25.0
+        val MIN_DELTA_TIME = 25
     }
 }

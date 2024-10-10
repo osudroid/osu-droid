@@ -20,13 +20,14 @@ class StandardAim(
     private val withSliders: Boolean
 ) : StandardStrainSkill(mods) {
     private var currentStrain = 0.0
-    private val skillMultiplier = 23.55
+    private val skillMultiplier = 25.18
     private val strainDecayBase = 0.15
 
     override fun strainValueAt(current: StandardDifficultyHitObject): Double {
         currentStrain *= strainDecay(current.deltaTime)
         currentStrain += evaluateDifficultyOf(current, withSliders) * skillMultiplier
 
+        objectStrains.add(currentStrain)
         return currentStrain
     }
 

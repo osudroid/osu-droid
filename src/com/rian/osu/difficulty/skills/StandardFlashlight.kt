@@ -20,7 +20,7 @@ class StandardFlashlight(
     override val decayWeight = 1.0
 
     private var currentStrain = 0.0
-    private val skillMultiplier = 0.052
+    private val skillMultiplier = 0.05512
     private val strainDecayBase = 0.15
     private val hasHidden = mods.any { it is ModHidden }
 
@@ -33,6 +33,8 @@ class StandardFlashlight(
 
     override fun calculateInitialStrain(time: Double, current: StandardDifficultyHitObject) =
         currentStrain * strainDecay(time - current.previous(0)!!.startTime)
+
+    override fun difficultyValue() = currentStrainPeaks.sum()
 
     private fun strainDecay(ms: Double) = strainDecayBase.pow(ms / 1000)
 }

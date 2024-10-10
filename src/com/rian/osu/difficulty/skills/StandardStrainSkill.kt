@@ -15,11 +15,6 @@ abstract class StandardStrainSkill(
     mods: List<Mod>
 ) : StrainSkill<StandardDifficultyHitObject>(mods) {
     /**
-     * The final multiplier to be applied to the final difficulty value after all other calculations.
-     */
-    protected open val difficultyMultiplier = 1.06
-
-    /**
      * The weight by which each strain value decays.
      */
     protected open val decayWeight = 0.9
@@ -32,7 +27,7 @@ abstract class StandardStrainSkill(
         // We're sorting from highest to lowest strain.
         sortDescending()
 
-        var difficulty = 0.0
+        difficulty = 0.0
         var weight = 1.0
 
         for (strain in this) {
@@ -40,6 +35,6 @@ abstract class StandardStrainSkill(
             weight *= decayWeight
         }
 
-        difficulty * difficultyMultiplier
+        difficulty
     }
 }

@@ -40,6 +40,9 @@ class StandardDifficultyCalculator : DifficultyCalculator<StandardPlayableBeatma
 
         aimSliderFactor = if (aimDifficulty > 0) calculateRating(skills[1]) / aimDifficulty else 1.0
 
+        aimDifficultStrainCount = (skills[0] as StandardAim).countDifficultStrains()
+        speedDifficultStrainCount = (skills[2] as StandardSpeed).countDifficultStrains()
+
         if (mods.any { it is ModRelax }) {
             aimDifficulty *= 0.9
             speedDifficulty = 0.0
