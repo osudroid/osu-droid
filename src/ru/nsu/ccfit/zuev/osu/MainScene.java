@@ -868,8 +868,8 @@ public class MainScene implements IUpdateHandler {
             var beatmap = parser.parse(false);
 
             if (beatmap != null) {
-                timingControlPoints = new LinkedList<>(beatmap.getControlPoints().timing.getControlPoints());
-                effectControlPoints = new LinkedList<>(beatmap.getControlPoints().effect.getControlPoints());
+                timingControlPoints = new LinkedList<>(beatmap.getControlPoints().timing.controlPoints);
+                effectControlPoints = new LinkedList<>(beatmap.getControlPoints().effect.controlPoints);
 
                 // Getting the first timing point is not always accurate - case in point is when the music is not reloaded.
                 int position = GlobalManager.getInstance().getSongService() != null ?

@@ -303,7 +303,7 @@ fun BeatmapInfo(data: Beatmap, lastModified: Long, calculateDifficulty: Boolean,
     var bpmMax = 0f
 
     // Timing points
-    data.controlPoints.timing.getControlPoints().fastForEach {
+    data.controlPoints.timing.controlPoints.fastForEach {
         scope?.ensureActive()
 
         val bpm = it.bpm.toFloat()

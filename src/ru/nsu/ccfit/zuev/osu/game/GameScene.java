@@ -479,8 +479,8 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
 
         lastActiveObjectHitTime = 0;
 
-        timingControlPoints = new LinkedList<>(playableBeatmap.getControlPoints().timing.getControlPoints());
-        effectControlPoints = new LinkedList<>(playableBeatmap.getControlPoints().effect.getControlPoints());
+        timingControlPoints = new LinkedList<>(playableBeatmap.getControlPoints().timing.controlPoints);
+        effectControlPoints = new LinkedList<>(playableBeatmap.getControlPoints().effect.controlPoints);
 
         activeTimingPoint = timingControlPoints.poll();
         activeEffectPoint = effectControlPoints.poll();

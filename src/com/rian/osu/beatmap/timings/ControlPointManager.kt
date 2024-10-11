@@ -19,7 +19,7 @@ abstract class ControlPointManager<T : ControlPoint>(
      * The control points in this manager.
      */
     @JvmField
-    protected var controlPoints = mutableListOf<T>()
+    val controlPoints = mutableListOf<T>()
 
     /**
      * Finds the control point that is active at a given time.
@@ -83,11 +83,6 @@ abstract class ControlPointManager<T : ControlPoint>(
      * Clears all control points in this manager.
      */
     fun clear() = controlPoints.clear()
-
-    /**
-     * Gets the control points in this manager.
-     */
-    fun getControlPoints() = controlPoints.toList()
 
     /**
      * Binary searches one of the control point lists to find the active control point at the given time.
