@@ -43,7 +43,7 @@ object BeatmapHitObjectsParser : BeatmapSectionParser() {
                 parseInt(it[1]).toFloat()
             )
 
-            val soundType = HitSoundType.parse(parseInt(it[4]))
+            val soundType = parseInt(it[4])
             val bankInfo = SampleBankInfo()
 
             scope?.ensureActive()
@@ -76,7 +76,7 @@ object BeatmapHitObjectsParser : BeatmapSectionParser() {
         ).also { readCustomSampleBanks(bankInfo, pars.getOrNull(5), scope = scope) }
 
     @Throws(UnsupportedOperationException::class)
-    private fun createSlider(pars: List<String>, beatmap: Beatmap, time: Double, startPosition: Vector2, isNewCombo: Boolean, comboOffset: Int, soundType: HitSoundType, bankInfo: SampleBankInfo, scope: CoroutineScope?): Slider {
+    private fun createSlider(pars: List<String>, beatmap: Beatmap, time: Double, startPosition: Vector2, isNewCombo: Boolean, comboOffset: Int, soundType: Int, bankInfo: SampleBankInfo, scope: CoroutineScope?): Slider {
         if (pars.size < 8) {
             throw UnsupportedOperationException("Malformed slider")
         }
@@ -166,7 +166,7 @@ object BeatmapHitObjectsParser : BeatmapSectionParser() {
             }
         }
 
-        val nodeSoundTypes = mutableListOf<HitSoundType>().apply {
+        val nodeSoundTypes = mutableListOf<Int>().apply {
             // Populate node sound types with the default hit object sound type
             for (i in 0 until nodes) {
                 add(soundType)
@@ -178,7 +178,7 @@ object BeatmapHitObjectsParser : BeatmapSectionParser() {
             val adds = pars.getOrNull(8)?.split(pipePropertyRegex)
             if (adds != null) {
                 for (i in 0 until min(adds.size, nodes)) {
-                    set(i, HitSoundType.parse(parseInt(adds[i])))
+                    set(i, parseInt(adds[i]))
                 }
             }
         }
@@ -226,11 +226,11 @@ object BeatmapHitObjectsParser : BeatmapSectionParser() {
     /**
      * Converts the sound type of hit object to hit samples.
      *
-     * @param type The sound type.
+     * @param soundType The sound type.
      * @param bankInfo The sample bank info of the hit object.
      * @return A list of [HitSampleInfo] representing the hit samples of the hit object.
      */
-    private fun convertSoundType(type: HitSoundType, bankInfo: SampleBankInfo) = mutableListOf<HitSampleInfo>().apply {
+    private fun convertSoundType(soundType: Int, bankInfo: SampleBankInfo) = mutableListOf<HitSampleInfo>().apply {
         if (bankInfo.filename.isNotEmpty()) {
             add(FileHitSampleInfo(bankInfo.filename, bankInfo.volume))
         } else {
@@ -238,22 +238,22 @@ object BeatmapHitObjectsParser : BeatmapSectionParser() {
                 BankHitSampleInfo(BankHitSampleInfo.HIT_NORMAL, bankInfo.normal, bankInfo.customSampleBank, bankInfo.volume,
                     // If the sound type doesn't have the Normal flag set, attach it anyway as a layered sample.
                     // None also counts as a normal non-layered sample: https://osu.ppy.sh/help/wiki/osu!_File_Formats/Osu_(file_format)#hitsounds
-                    type != HitSoundType.None && type.bit and HitSoundType.Normal.bit == 0
+                    soundType != HitSoundType.None.bit && HitSoundType.Normal !in soundType
                 )
             )
         }
 
         fun addBankSample(name: String) = add(BankHitSampleInfo(name, bankInfo.add, bankInfo.customSampleBank, bankInfo.volume))
 
-        if (type.bit and HitSoundType.Finish.bit != 0) {
+        if (HitSoundType.Finish in soundType) {
             addBankSample(BankHitSampleInfo.HIT_FINISH)
         }
 
-        if (type.bit and HitSoundType.Whistle.bit != 0) {
+        if (HitSoundType.Whistle in soundType) {
             addBankSample(BankHitSampleInfo.HIT_WHISTLE)
         }
 
-        if (type.bit and HitSoundType.Clap.bit != 0) {
+        if (HitSoundType.Clap in soundType) {
             addBankSample(BankHitSampleInfo.HIT_CLAP)
         }
     }
@@ -293,78 +293,62 @@ object BeatmapHitObjectsParser : BeatmapSectionParser() {
             bankInfo.filename = s[4]
         }
     }
-
-    /**
-     * Represents a hit object specific sample bank.
-     */
-    private data class SampleBankInfo(
-        /**
-         * The name of the sample bank file, if this sample bank uses custom samples.
-         */
-        @JvmField
-        var filename: String = "",
-
-        /**
-         * The main sample bank.
-         */
-        @JvmField
-        var normal: SampleBank = SampleBank.None,
-
-        /**
-         * The addition sample bank.
-         */
-        @JvmField
-        var add: SampleBank = SampleBank.None,
-
-        /**
-         * The volume at which the sample bank is played.
-         *
-         * If this is 0, the underlying control point's volume should be used instead.
-         */
-        @JvmField
-        var volume: Int = 0,
-
-        /**
-         * The index of the sample bank, if this sample bank uses custom samples.
-         *
-         * If this is 0, the underlying control point's sample index should be used instead.
-         */
-        @JvmField
-        var customSampleBank: Int = 0
-    )
-
-    /**
-     * Hit sound types that are provided by the game.
-     */
-    private enum class HitSoundType(
-        /**
-         * The bit of this hit sound.
-         */
-        @JvmField
-        val bit: Int
-    ) {
-        None(0),
-        Normal(1),
-        Whistle(1 shl 1),
-        Finish(1 shl 2),
-        Clap(1 shl 3);
-
-        companion object {
-            /**
-             * Converts an integer value to its hitsound type counterpart.
-             *
-             * @param value The value to convert.
-             * @return The hitsound type counterpart of the given value.
-             */
-            @JvmStatic
-            fun parse(value: Int) =
-                when (value) {
-                    1 -> Normal
-                    1 shl 1 -> Whistle
-                    1 shl 2 -> Finish
-                    1 shl 3 -> Clap
-                    else -> None
-                }
-        }
-    }
 }
+
+/**
+ * Represents a hit object specific sample bank.
+ */
+private data class SampleBankInfo(
+    /**
+     * The name of the sample bank file, if this sample bank uses custom samples.
+     */
+    @JvmField
+    var filename: String = "",
+
+    /**
+     * The main sample bank.
+     */
+    @JvmField
+    var normal: SampleBank = SampleBank.None,
+
+    /**
+     * The addition sample bank.
+     */
+    @JvmField
+    var add: SampleBank = SampleBank.None,
+
+    /**
+     * The volume at which the sample bank is played.
+     *
+     * If this is 0, the underlying control point's volume should be used instead.
+     */
+    @JvmField
+    var volume: Int = 0,
+
+    /**
+     * The index of the sample bank, if this sample bank uses custom samples.
+     *
+     * If this is 0, the underlying control point's sample index should be used instead.
+     */
+    @JvmField
+    var customSampleBank: Int = 0
+)
+
+/**
+ * Hit sound types that are provided by the game.
+ */
+private enum class HitSoundType(
+    /**
+     * The bit of this hit sound.
+     */
+    @JvmField
+    val bit: Int
+) {
+    None(0),
+    Normal(1),
+    Whistle(1 shl 1),
+    Finish(1 shl 2),
+    Clap(1 shl 3)
+}
+
+private operator fun Int.contains(type: HitSoundType) = this and type.bit != 0
