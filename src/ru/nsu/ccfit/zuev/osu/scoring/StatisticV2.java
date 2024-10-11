@@ -220,6 +220,8 @@ public class StatisticV2 implements Serializable {
                     scoreMaxCombo = currentCombo;
                 }
                 currentCombo = 0;
+                // Still add score to update ScoreV2 value.
+                addScore(0, false);
                 break;
         }
     }
