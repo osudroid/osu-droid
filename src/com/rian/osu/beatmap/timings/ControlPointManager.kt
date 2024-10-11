@@ -7,14 +7,9 @@ abstract class ControlPointManager<T : ControlPoint>(
     /**
      * The default control point for this type.
      */
-    defaultControlPoint: T
+    @JvmField
+    var defaultControlPoint: T
 ) {
-    /**
-     * The default control point for this type.
-     */
-    var defaultControlPoint = defaultControlPoint
-        private set
-
     /**
      * The control points in this manager.
      */

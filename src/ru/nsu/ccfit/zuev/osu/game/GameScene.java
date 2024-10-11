@@ -486,11 +486,11 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
         activeEffectPoint = effectControlPoints.poll();
 
         if (activeTimingPoint == null) {
-            activeTimingPoint = playableBeatmap.getControlPoints().timing.getDefaultControlPoint();
+            activeTimingPoint = playableBeatmap.getControlPoints().timing.defaultControlPoint;
         }
 
         if (activeEffectPoint == null) {
-            activeEffectPoint = playableBeatmap.getControlPoints().effect.getDefaultControlPoint();
+            activeEffectPoint = playableBeatmap.getControlPoints().effect.defaultControlPoint;
         }
 
         GameHelper.setBeatLength(activeTimingPoint.msPerBeat / 1000);
