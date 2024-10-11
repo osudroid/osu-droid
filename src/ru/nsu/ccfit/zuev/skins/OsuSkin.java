@@ -31,6 +31,7 @@ public class OsuSkin {
     protected final BooleanSkinData useNewLayout = new BooleanSkinData("useNewLayout");
     protected final BooleanSkinData forceOverrideComboColor = new BooleanSkinData("forceOverride");
     protected final BooleanSkinData rotateCursor = new BooleanSkinData("rotateCursor", true);
+    protected final BooleanSkinData layeredHitSounds = new BooleanSkinData("layeredHitSounds", true);
 
     protected final String DEFAULT_COLOR_HEX = "#FFFFFF";
     protected final ArrayList<RGBColor> comboColor = new ArrayList<>();
@@ -166,6 +167,9 @@ public class OsuSkin {
         return animationFramerate.getCurrentValue();
     }
 
+    public boolean isLayeredHitSounds() {
+        return layeredHitSounds.getCurrentValue();
+    }
 
     public void reset() {
         layoutData.clear();

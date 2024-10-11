@@ -37,6 +37,7 @@ import com.rian.osu.GameMode;
 import com.rian.osu.beatmap.Beatmap;
 import com.rian.osu.beatmap.DroidPlayableBeatmap;
 import com.rian.osu.beatmap.constants.BeatmapCountdown;
+import com.rian.osu.beatmap.hitobject.BankHitSampleInfo;
 import com.rian.osu.beatmap.hitobject.HitCircle;
 import com.rian.osu.beatmap.hitobject.HitObject;
 import com.rian.osu.beatmap.hitobject.HitSampleInfo;
@@ -1963,7 +1964,13 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
 
     @Override
     public void playSamples(final HitObject obj) {
+        var playLayeredHitSamples = OsuSkin.get().isLayeredHitSounds();
+
         for (var sample : obj.getSamples()) {
+            if (!playLayeredHitSamples && sample instanceof BankHitSampleInfo bankSample && bankSample.isLayered) {
+                continue;
+            }
+
             playSample(sample, false);
         }
     }
