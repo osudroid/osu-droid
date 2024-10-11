@@ -100,6 +100,7 @@ data class ScoreInfo @JvmOverloads constructor(
     /**
      * The accuracy.
      */
+    // TODO: remove in next database version
     val accuracy: Float,
 
     /**
@@ -151,7 +152,7 @@ data class ScoreInfo @JvmOverloads constructor(
         it.replayFilename = replayFilename
         it.setModFromString(mods)
         it.setForcedScore(score)
-        it.maxCombo = maxCombo
+        it.scoreMaxCombo = maxCombo
         it.mark = mark
         it.hit300k = hit300k
         it.hit300 = hit300
@@ -159,7 +160,6 @@ data class ScoreInfo @JvmOverloads constructor(
         it.hit100 = hit100
         it.hit50 = hit50
         it.misses = misses
-        it.accuracy = accuracy
         it.time = time
         it.isPerfect = isPerfect
 

@@ -155,14 +155,12 @@ fun jsonToStatistic(json: JSONObject) = StatisticV2().apply {
     setForcedScore(json.getInt("score"))
     time = System.currentTimeMillis()
     setModFromString(if (json.isNull("modstring")) "" else json.getString("modstring"))
-    maxCombo = json.optInt("maxCombo")
+    scoreMaxCombo = json.optInt("maxCombo")
     hit300k = json.optInt("geki")
     hit300 = json.optInt("perfect")
     hit100k = json.optInt("katu")
     hit100 = json.optInt("good")
     hit50 = json.optInt("bad")
     misses = json.optInt("miss")
-    notes = hit300 + hit100 + hit50 + misses
-    accuracy = (hit300 * 6f + hit100 * 2f + hit50) / ((hit300 + hit100 + hit50 + misses) * 6f)
     isAlive = json.getBoolean("isAlive")
 }

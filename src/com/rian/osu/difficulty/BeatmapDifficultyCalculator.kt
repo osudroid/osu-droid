@@ -75,7 +75,7 @@ object BeatmapDifficultyCalculator {
     @JvmStatic
     fun constructDroidPerformanceParameters(stat: StatisticV2?) = stat?.run {
         DroidPerformanceCalculationParameters().also {
-            it.maxCombo = getMaxCombo()
+            it.maxCombo = getScoreMaxCombo()
             it.countGreat = hit300
             it.countOk = hit100
             it.countMeh = hit50
@@ -93,7 +93,7 @@ object BeatmapDifficultyCalculator {
     @JvmStatic
     fun constructStandardPerformanceParameters(stat: StatisticV2?) = stat?.run {
         PerformanceCalculationParameters().also {
-            it.maxCombo = getMaxCombo()
+            it.maxCombo = getScoreMaxCombo()
             it.countGreat = hit300
             it.countOk = hit100
             it.countMeh = hit50

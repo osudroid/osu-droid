@@ -194,7 +194,7 @@ public class ScoringScene {
                 ResourceManager.getInstance().getTexture("ranking-accuracy"));
         scene.attachChild(accText);
         final ScoreNumber maxCombo = new ScoreNumber(Utils.toRes(20 + x),
-                Utils.toRes(maxComboText.getY() + 38), stat.getMaxCombo() + "x", 1,
+                Utils.toRes(maxComboText.getY() + 38), stat.getScoreMaxCombo() + "x", 1,
                 false);
         maxCombo.attachToScene(scene);
         final String accStr = String
@@ -315,7 +315,7 @@ public class ScoringScene {
             };
         }
 
-        if (stat.accuracy == 1 || stat.getMaxCombo() == beatmapInfo.getMaxCombo() || stat.isPerfect()) {
+        if (stat.getAccuracy() == 1 || stat.getScoreMaxCombo() == beatmapInfo.getMaxCombo() || stat.isPerfect()) {
             final Sprite perfect = new Sprite(0, 0, ResourceManager
                     .getInstance().getTexture("ranking-perfect"));
             perfect.setPosition(0, accuracy.getY() + accuracy.getHeight() + 10);
