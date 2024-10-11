@@ -86,6 +86,15 @@ for preventing accidental touches.
       }
     }
     ```
+- Added support for `skin.ini`'s `LayeredHitSounds` setting in `skin.json`
+  - To use in `skin.json`, add the following entry to your `skin.json`:
+    ```json
+    {
+      "Utils": {
+        "LayeredHitSounds": true
+      }
+    }
+    ```
 
 # Changes
 
