@@ -1373,7 +1373,7 @@ public class SongMenu implements IUpdateHandler, MenuItemListener,
                     if (previewTime >= 0) {
                         GlobalManager.getInstance().getSongService().seekTo(previewTime);
                     } else {
-                        GlobalManager.getInstance().getSongService().seekTo(GlobalManager.getInstance().getSongService().getLength() / 2);
+                        GlobalManager.getInstance().getSongService().seekTo((int) (GlobalManager.getInstance().getSongService().getLength() * 0.4f));
                     }
                 } catch (final Exception e) {
                     if (e instanceof CancellationException) {
