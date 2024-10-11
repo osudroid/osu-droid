@@ -8,6 +8,7 @@ import com.rian.osu.math.Vector2
 import com.rian.osu.utils.Cached
 import com.rian.osu.utils.CircleSizeCalculator
 import kotlin.math.min
+import kotlinx.coroutines.CoroutineScope
 import ru.nsu.ccfit.zuev.osu.Config
 import ru.nsu.ccfit.zuev.osu.Constants
 
@@ -304,8 +305,10 @@ abstract class HitObject(
      * @param controlPoints The control points.
      * @param difficulty The difficulty settings to use.
      * @param mode The [GameMode] to use.
+     * @param scope The [CoroutineScope] to use for coroutines.
      */
-    open fun applyDefaults(controlPoints: BeatmapControlPoints, difficulty: BeatmapDifficulty, mode: GameMode) {
+    @JvmOverloads
+    open fun applyDefaults(controlPoints: BeatmapControlPoints, difficulty: BeatmapDifficulty, mode: GameMode, scope: CoroutineScope? = null) {
         kiai = controlPoints.effect.controlPointAt(startTime + CONTROL_POINT_LENIENCY).isKiai
 
         timePreempt = BeatmapDifficulty.difficultyRange(difficulty.ar.toDouble(), PREEMPT_MAX, PREEMPT_MID, PREEMPT_MIN)

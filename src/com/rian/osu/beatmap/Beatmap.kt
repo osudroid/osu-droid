@@ -101,7 +101,7 @@ open class Beatmap(
         // Compute default values for hit objects, including creating nested hit objects in-case they're needed
         converted.hitObjects.objects.forEach {
             scope?.ensureActive()
-            it.applyDefaults(converted.controlPoints, converted.difficulty, mode)
+            it.applyDefaults(converted.controlPoints, converted.difficulty, mode, scope)
         }
 
         mods?.filterIsInstance<IModApplicableToHitObject>()?.forEach {

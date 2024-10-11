@@ -219,7 +219,7 @@ class BeatmapParser : Closeable {
             hitObjects.objects.forEach {
                 scope?.ensureActive()
 
-                it.applyDefaults(controlPoints, difficulty, mode)
+                it.applyDefaults(controlPoints, difficulty, mode, scope)
                 it.applySamples(controlPoints)
             }
 

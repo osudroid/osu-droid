@@ -8,6 +8,8 @@ import com.rian.osu.math.Vector2
 import com.rian.osu.utils.Cached
 import kotlin.math.max
 import kotlin.math.min
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.ensureActive
 
 /**
  * Represents a slider.
@@ -274,8 +276,8 @@ class Slider(
             nestedHitObjects.forEach { it.gameplayScale = value }
         }
 
-    override fun applyDefaults(controlPoints: BeatmapControlPoints, difficulty: BeatmapDifficulty, mode: GameMode) {
-        super.applyDefaults(controlPoints, difficulty, mode)
+    override fun applyDefaults(controlPoints: BeatmapControlPoints, difficulty: BeatmapDifficulty, mode: GameMode, scope: CoroutineScope?) {
+        super.applyDefaults(controlPoints, difficulty, mode, scope)
 
         val timingPoint = controlPoints.timing.controlPointAt(startTime)
         val difficultyPoint = controlPoints.difficulty.controlPointAt(startTime)
@@ -300,9 +302,9 @@ class Slider(
         // Invalidate the end position in case there are timing changes.
         invalidateEndPositions()
 
-        createNestedHitObjects(mode, controlPoints)
+        createNestedHitObjects(mode, controlPoints, scope)
 
-        nestedHitObjects.forEach { it.applyDefaults(controlPoints, difficulty, mode) }
+        nestedHitObjects.forEach { it.applyDefaults(controlPoints, difficulty, mode, scope) }
     }
 
     override fun applySamples(controlPoints: BeatmapControlPoints) {
@@ -351,7 +353,7 @@ class Slider(
      */
     fun spanAt(progress: Double) = (progress * spanCount).toInt()
 
-    private fun createNestedHitObjects(mode: GameMode, controlPoints: BeatmapControlPoints) {
+    private fun createNestedHitObjects(mode: GameMode, controlPoints: BeatmapControlPoints, scope: CoroutineScope?) {
         nestedHitObjects.clear()
 
         head = SliderHead(startTime, position)
@@ -367,12 +369,16 @@ class Slider(
             val minDistanceFromEnd = velocity * 10
 
             for (span in 0 until spanCount) {
+                scope?.ensureActive()
+
                 val spanStartTime = startTime + span * spanDuration
                 val reversed = span % 2 == 1
-                val sliderTicks: ArrayList<SliderTick> = ArrayList()
+                val sliderTicks = mutableListOf<SliderTick>()
 
                 var d = tickDistance
                 while (d <= length) {
+                    scope?.ensureActive()
+
                     if (d >= length - minDistanceFromEnd) {
                         break
                     }
@@ -444,7 +450,7 @@ class Slider(
             sortBy { it.startTime }
         }
 
-        updateNestedSamples(controlPoints)
+        updateNestedSamples(controlPoints, scope)
     }
 
     private fun updateNestedPositions() {
@@ -474,13 +480,17 @@ class Slider(
         }
     }
 
-    private fun updateNestedSamples(controlPoints: BeatmapControlPoints) {
+    private fun updateNestedSamples(controlPoints: BeatmapControlPoints, scope: CoroutineScope?) {
         // Ensure that the list of node samples is at least as long as the number of nodes
         while (nodeSamples.size < repeatCount + 2) {
+            scope?.ensureActive()
+
             nodeSamples.add(samples.map { it.copy() }.toMutableList())
         }
 
         nestedHitObjects.forEach {
+            scope?.ensureActive()
+
             it.samples.clear()
 
             when (it) {
