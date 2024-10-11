@@ -179,3 +179,5 @@ were reduced by 20% and clap hitsounds' volume were reduced by 15%
 - Fixed animatable textures not being unloaded properly when changing skins
 - Fixed old (non-skin.json) button layouts using fixed height for offset rather than texture-based height
 - Fixed beatmap background and video paths potentially being parsed incorrectly
+- Fixed music preview time defaulting at 50% music length instead of 40%
+- Fixed ScoreV2 value not updating after misses
