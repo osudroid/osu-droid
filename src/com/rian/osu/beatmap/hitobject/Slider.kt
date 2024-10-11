@@ -480,33 +480,20 @@ class Slider(
             nodeSamples.add(samples.map { it.copy() }.toMutableList())
         }
 
-        val bankSamples = samples.filterIsInstance<BankHitSampleInfo>()
-        val normalSample = bankSamples.find { it.name == BankHitSampleInfo.HIT_NORMAL }
-        val sliderTickSamples = mutableListOf<HitSampleInfo>().also {
-            val sample = normalSample ?: bankSamples.firstOrNull()
-
-            if (sample != null) {
-                it.add(sample.copy(name = "slidertick"))
-            }
-        }
-
-        fun getSample(index: Int) = nodeSamples.getOrNull(index) ?: samples
-
         nestedHitObjects.forEach {
             it.samples.clear()
-            it.samples.addAll(
-                when (it) {
-                    is SliderHead -> getSample(0)
-                    is SliderRepeat -> getSample(it.spanIndex + 1)
-                    is SliderTail -> getSample(spanCount)
-                    else -> {
-                        val time = it.startTime + CONTROL_POINT_LENIENCY
-                        val nodeSamplePoint = controlPoints.sample.controlPointAt(time)
 
-                        sliderTickSamples.map { s -> nodeSamplePoint.applyTo(s) }
-                    }
+            when (it) {
+                is SliderHead -> it.samples.addAll(nodeSamples[0])
+                is SliderRepeat -> it.samples.addAll(nodeSamples[it.spanIndex + 1])
+                is SliderTail -> it.samples.addAll(nodeSamples[spanCount])
+                else -> {
+                    val time = it.startTime + CONTROL_POINT_LENIENCY
+                    val tickSamplePoint = controlPoints.sample.controlPointAt(time)
+
+                    it.samples.add(tickSamplePoint.applyTo(baseTickSample))
                 }
-            )
+            }
         }
     }
 
@@ -517,5 +504,7 @@ class Slider(
          * Scoring distance with a speed-adjusted beat length of 1 second (i.e. the speed slider balls move through their track).
          */
         const val BASE_SCORING_DISTANCE = 100f
+
+        private val baseTickSample = BankHitSampleInfo("slidertick")
     }
 }
