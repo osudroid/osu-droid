@@ -108,13 +108,6 @@ public class BassAudioFunc {
         setSpeed(speed);
         setAdjustPitch(adjustPitch);
 
-//        if (adjustPitch) {
-//            BASS.BASS_ChannelGetInfo(channel, channelInfo);
-//            BASS.BASS_ChannelSetAttribute(channel, BASS_FX.BASS_ATTRIB_TEMPO_FREQ, channelInfo.freq * speed);
-//        } else {
-//            BASS.BASS_ChannelSetAttribute(channel, BASS_FX.BASS_ATTRIB_TEMPO, (speed - 1) * 100);
-//        }
-
         // Use smaller buffer length on focus for smaller latency.
         BASS.BASS_ChannelSetAttribute(channel, BASS.BASS_ATTRIB_BUFFER, onFocus ? onFocusBufferLength : offFocusBufferLength);
 
