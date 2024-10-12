@@ -100,7 +100,7 @@ class BeatmapButton : Sprite(0f, 0f, getResources().getTexture("menu-button-back
         }
 
 
-        // If the room beatmap has set a 'parentSetID' it means that the beatmap can be downloaded trough Chimu.moe
+        // If the room beatmap has set a 'parentSetID' it means that the beatmap can be downloaded
         if (getGlobal().selectedBeatmap == null) Multiplayer.room!!.beatmap?.apply {
 
             // If it's null the beatmap isn't available on Chimu servers.
