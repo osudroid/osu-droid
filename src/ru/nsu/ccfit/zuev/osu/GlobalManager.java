@@ -63,7 +63,6 @@ public class GlobalManager {
         setLoadingProgress(40);
         getSongMenu().init(mainActivity, getEngine(), getGameScene());
         getSongMenu().load();
-        ModMenu.getInstance().init();
         setScoring(new ScoringScene(getEngine(), getGameScene(), getSongMenu()));
         getSongMenu().setScoringScene(getScoring());
         getGameScene().setScoringScene(getScoring());
