@@ -44,13 +44,11 @@ class GameplaySequenceHitSampleInfo {
      */
     @JvmOverloads
     fun play(looped: Boolean = false) {
-        this.looped = looped
-
-        // Prevent playing the sample if it's already playing or if it can't be played.
-        if (!canPlay || (looped && isPlaying)) {
+        if (!canPlay || isPlaying) {
             return
         }
 
+        this.looped = looped
         listener!!.playSample(sampleInfo!![index].second, looped)
         isPlaying = true
     }
