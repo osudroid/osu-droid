@@ -26,7 +26,7 @@ public class SongService extends Service {
     // private boolean isSettingMenu = false;
     private NotifyPlayer notify;
 
-    public void initBASS() {
+    public static void initBASS() {
         // This likely doesn't help, but also doesn't seem to cause any issues or any CPU increase.
         BASS.BASS_SetConfig(BASS.BASS_CONFIG_UPDATEPERIOD, 5);
 
