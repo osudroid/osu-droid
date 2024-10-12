@@ -1623,10 +1623,8 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
         standardTimedDifficultyAttributes = null;
 
         if (GlobalManager.getInstance().getSongService() != null) {
-            GlobalManager.getInstance().getSongService().stop();
-            GlobalManager.getInstance().getSongService().preLoad(audioFilePath);
+            // Resume playback
             GlobalManager.getInstance().getSongService().play();
-            GlobalManager.getInstance().getSongService().setVolume(Config.getBgmVolume());
         }
 
         if (replaying) {

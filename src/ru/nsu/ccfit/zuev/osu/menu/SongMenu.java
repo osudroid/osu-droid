@@ -1268,6 +1268,7 @@ public class SongMenu implements IUpdateHandler, MenuItemListener,
             return;
         }
 
+        resetMusicEffects();
         GlobalManager.getInstance().getMainScene().show();
     }
 
@@ -1365,6 +1366,7 @@ public class SongMenu implements IUpdateHandler, MenuItemListener,
                     JobKt.ensureActive(scope.getCoroutineContext());
 
                     GlobalManager.getInstance().getSongService().preLoad(filePath);
+                    updateMusicEffects();
 
                     JobKt.ensureActive(scope.getCoroutineContext());
 
@@ -1384,6 +1386,30 @@ public class SongMenu implements IUpdateHandler, MenuItemListener,
                 }
             }
         });
+    }
+
+    public void updateMusicEffects() {
+        var songService = GlobalManager.getInstance().getSongService();
+        if (songService == null) {
+            return;
+        }
+
+        var modMenu = ModMenu.getInstance();
+        float speed = modMenu.getSpeed();
+        boolean adjustPitch = modMenu.isEnableNCWhenSpeedChange() || modMenu.getMod().contains(GameMod.MOD_NIGHTCORE);
+
+        songService.setSpeed(speed);
+        songService.setAdjustPitch(adjustPitch);
+    }
+
+    public void resetMusicEffects() {
+        var songService = GlobalManager.getInstance().getSongService();
+        if (songService == null) {
+            return;
+        }
+
+        songService.setSpeed(1);
+        songService.setAdjustPitch(false);
     }
 
     public boolean isSelectAllowed() {

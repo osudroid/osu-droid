@@ -222,6 +222,18 @@ public class SongService extends Service {
         }
     }
 
+    public void setSpeed(float speed) {
+        if (audioFunc != null) {
+            audioFunc.setSpeed(speed);
+        }
+    }
+
+    public void setAdjustPitch(boolean adjustPitch) {
+        if (audioFunc != null) {
+            audioFunc.setAdjustPitch(adjustPitch);
+        }
+    }
+
     public void showNotification() {
         if (this.isGaming) {
             Log.w("SongService", "NOT SHOW THE NOTIFY CUZ IS GAMING");

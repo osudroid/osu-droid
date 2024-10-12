@@ -303,6 +303,7 @@ public class ModMenu implements IModSwitcher {
                                          final float pTouchAreaLocalX, final float pTouchAreaLocalY) {
                 if (pSceneTouchEvent.isActionUp()) {
                     mod.clear();
+                    reloadMusicEffects();
                     changeMultiplierText();
                     for (ModButton btn : modButtons.values()) {
                         btn.setModEnabled(false);
@@ -514,6 +515,10 @@ public class ModMenu implements IModSwitcher {
             }
         }
 
+        if (flag == GameMod.MOD_DOUBLETIME || flag == GameMod.MOD_NIGHTCORE || flag == GameMod.MOD_HALFTIME) {
+            reloadMusicEffects();
+        }
+
         changeMultiplierText();
 
         return returnValue;
@@ -524,6 +529,10 @@ public class ModMenu implements IModSwitcher {
         if (selectedBeatmap != null) {
             changeMultiplierText();
         }
+    }
+
+    private void reloadMusicEffects() {
+        GlobalManager.getInstance().getSongMenu().updateMusicEffects();
     }
 
     public float getSpeed(){
@@ -547,6 +556,8 @@ public class ModMenu implements IModSwitcher {
 
     public void setChangeSpeed(float speed){
         changeSpeed = speed;
+
+        GlobalManager.getInstance().getSongMenu().updateMusicEffects();
     }
 
     public boolean isDefaultFLFollowDelay() {
@@ -563,6 +574,8 @@ public class ModMenu implements IModSwitcher {
 
     public void setEnableNCWhenSpeedChange(boolean t){
         enableNCWhenSpeedChange = t;
+
+        GlobalManager.getInstance().getSongMenu().updateMusicEffects();
     }
 
     public void updateMultiplierText(){

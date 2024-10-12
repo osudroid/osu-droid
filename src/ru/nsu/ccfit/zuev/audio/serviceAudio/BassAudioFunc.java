@@ -21,6 +21,9 @@ public class BassAudioFunc {
 
     private int channel = 0;
     private float speed = 1f;
+    private boolean adjustPitch;
+    private final BASS.BASS_CHANNELINFO channelInfo = new BASS.BASS_CHANNELINFO();
+
     private ByteBuffer buffer = null;
     private int playFlag = BASS.BASS_STREAM_PRESCAN;
     private boolean isGaming = false;
@@ -90,21 +93,27 @@ public class BassAudioFunc {
 
     public boolean preLoad(String filePath, float speed, boolean adjustPitch) {
         doClear();
-        this.speed = speed;
+
         channel = BASS.BASS_StreamCreateFile(filePath, 0, 0, playFlag | BASS.BASS_STREAM_DECODE);
         channel = BASS_FX.BASS_FX_TempoCreate(channel, BASS.BASS_STREAM_AUTOFREE);
 
         if (channel == 0) {
+            this.speed = 1;
+            this.adjustPitch = false;
+
             return false;
         }
 
-        if (adjustPitch) {
-            var fx = new BASS.BASS_CHANNELINFO();
-            BASS.BASS_ChannelGetInfo(channel, fx);
-            BASS.BASS_ChannelSetAttribute(channel, BASS_FX.BASS_ATTRIB_TEMPO_FREQ, fx.freq * speed);
-        } else {
-            BASS.BASS_ChannelSetAttribute(channel, BASS_FX.BASS_ATTRIB_TEMPO, (speed - 1) * 100);
-        }
+        BASS.BASS_ChannelGetInfo(channel, channelInfo);
+        setSpeed(speed);
+        setAdjustPitch(adjustPitch);
+
+//        if (adjustPitch) {
+//            BASS.BASS_ChannelGetInfo(channel, channelInfo);
+//            BASS.BASS_ChannelSetAttribute(channel, BASS_FX.BASS_ATTRIB_TEMPO_FREQ, channelInfo.freq * speed);
+//        } else {
+//            BASS.BASS_ChannelSetAttribute(channel, BASS_FX.BASS_ATTRIB_TEMPO, (speed - 1) * 100);
+//        }
 
         // Use smaller buffer length on focus for smaller latency.
         BASS.BASS_ChannelSetAttribute(channel, BASS.BASS_ATTRIB_BUFFER, onFocus ? onFocusBufferLength : offFocusBufferLength);
@@ -206,6 +215,16 @@ public class BassAudioFunc {
         }
     }
 
+    public void setSpeed(float speed) {
+        this.speed = speed;
+        onAudioEffectChange();
+    }
+
+    public void setAdjustPitch(boolean adjustPitch) {
+        this.adjustPitch = adjustPitch;
+        onAudioEffectChange();
+    }
+
     public float getVolume() {
         BASS.FloatValue volume = new BASS.FloatValue();
         if (channel != 0) {
@@ -249,5 +268,19 @@ public class BassAudioFunc {
                 stop();
             }
         }, 0);
+    }
+
+    private void onAudioEffectChange() {
+        if (channel == 0) {
+            return;
+        }
+
+        if (adjustPitch) {
+            BASS.BASS_ChannelSetAttribute(channel, BASS_FX.BASS_ATTRIB_TEMPO_FREQ, channelInfo.freq * speed);
+            BASS.BASS_ChannelSetAttribute(channel, BASS_FX.BASS_ATTRIB_TEMPO, 0);
+        } else {
+            BASS.BASS_ChannelSetAttribute(channel, BASS_FX.BASS_ATTRIB_TEMPO_FREQ, channelInfo.freq);
+            BASS.BASS_ChannelSetAttribute(channel, BASS_FX.BASS_ATTRIB_TEMPO, (speed - 1) * 100);
+        }
     }
 }
