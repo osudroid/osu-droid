@@ -202,9 +202,9 @@ public class BassAudioFunc {
 
     public void setLoop(boolean isLoop) {
         if (isLoop) {
-            this.playFlag = BASS.BASS_SAMPLE_LOOP | BASS.BASS_STREAM_PRESCAN;
+            playFlag |= BASS.BASS_SAMPLE_LOOP;
         } else {
-            this.playFlag = BASS.BASS_STREAM_PRESCAN;
+            playFlag ^= BASS.BASS_SAMPLE_LOOP;
         }
     }
 
