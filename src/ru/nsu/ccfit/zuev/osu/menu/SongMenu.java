@@ -199,6 +199,7 @@ public class SongMenu implements IUpdateHandler, MenuItemListener,
         bgLoaded = true;
         SongMenuPool.getInstance().init();
         loadFilterFragment();
+        updateMusicEffects();
 
         scene.attachChild(backLayer);
         scene.attachChild(frontLayer);
@@ -653,11 +654,6 @@ public class SongMenu implements IUpdateHandler, MenuItemListener,
             scoringSwitcher.setPosition(10, 10);
             scene.registerTouchArea(scoringSwitcher);
             frontLayer.attachChild(scoringSwitcher);
-        }
-
-        // Preventing ModMenu to reload mod set
-        if (!Multiplayer.isMultiplayer) {
-            ModMenu.getInstance().reload();
         }
     }
 

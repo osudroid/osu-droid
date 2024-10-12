@@ -79,11 +79,6 @@ public class ModMenu implements IModSwitcher {
         return instance;
     }
 
-    public void reload() {
-        mod = EnumSet.noneOf(GameMod.class);
-        init();
-    }
-
     public void show(Scene scene, BeatmapInfo selectedBeatmap) {
         parent = scene;
         setSelectedTrack(selectedBeatmap);
@@ -395,6 +390,8 @@ public class ModMenu implements IModSwitcher {
         scene.registerTouchArea(back);
 
         scene.setTouchAreaBindingEnabled(true);
+
+        update();
     }
 
     public Scene getScene() {
