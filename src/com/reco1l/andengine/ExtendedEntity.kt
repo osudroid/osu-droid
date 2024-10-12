@@ -1,14 +1,12 @@
 package com.reco1l.andengine
 
+import android.graphics.PointF
 import android.util.*
-import androidx.annotation.*
 import com.reco1l.andengine.container.*
 import com.reco1l.andengine.modifier.*
 import com.reco1l.framework.*
-import com.reco1l.toolkt.kotlin.*
 import org.anddev.andengine.collision.*
 import org.anddev.andengine.engine.camera.*
-import org.anddev.andengine.entity.*
 import org.anddev.andengine.entity.primitive.*
 import org.anddev.andengine.entity.shape.*
 import org.anddev.andengine.opengl.util.*
@@ -30,12 +28,6 @@ abstract class ExtendedEntity(
     private var vertexBuffer: VertexBuffer? = null
 
 ) : Shape(0f, 0f), IModifierChain {
-
-
-    /**
-     * The modifier pool for the scene this entity is attached to.
-     */
-    var modifierPool: Pool<UniversalModifier>? = null
 
     /**
      * Determines which axes the entity should automatically adjust its size to.
@@ -150,6 +142,10 @@ abstract class ExtendedEntity(
         mScaleCenterY = origin.factorY
     }
 
+    fun setPosition(position: PointF) {
+        setPosition(position.x, position.y)
+    }
+
     override fun setPosition(pX: Float, pY: Float) {
         if (mX != pX || mY != pY) {
             super.setPosition(pX, pY)
@@ -167,20 +163,6 @@ abstract class ExtendedEntity(
         if (mY != value) {
             setPosition(mX, value)
         }
-    }
-
-
-    // Attachment
-
-    @CallSuper
-    override fun onDetached() {
-        modifierPool = null
-    }
-
-    @CallSuper
-    override fun onAttached() {
-        // Finding the modifier pool from the parent scene if it's set.
-        modifierPool = findHierarchically(IEntity::getParent) { (it as? ExtendedScene)?.modifierPool }
     }
 
 
@@ -440,16 +422,11 @@ abstract class ExtendedEntity(
         super.setBlendFunction(pSourceBlendFunction, pDestinationBlendFunction)
     }
 
-    override fun delay(durationSec: Float): UniversalModifier {
-        throw IllegalStateException("Cannot call this directly to an entity. Use beginDelayChain() instead.")
-    }
+    override fun applyModifier(block: UniversalModifier.() -> Unit): UniversalModifier {
 
-    override fun applyModifier(block: (UniversalModifier) -> Unit): UniversalModifier {
-
-        val modifier = modifierPool?.obtain() ?: UniversalModifier()
+        val modifier = UniversalModifier.GlobalPool.obtain()
         modifier.setToDefault()
-        modifier.entity = this
-        block(modifier)
+        modifier.block()
 
         registerEntityModifier(modifier)
         return modifier

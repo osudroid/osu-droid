@@ -7,10 +7,13 @@ import android.util.Log;
 
 import kotlin.random.Random;
 import ru.nsu.ccfit.zuev.osu.SecurityUtils;
+
+import com.edlplan.framework.easing.Easing;
 import com.edlplan.framework.math.FMath;
 import com.edlplan.framework.support.ProxySprite;
 import com.edlplan.framework.support.osb.StoryboardSprite;
 import com.edlplan.framework.utils.functionality.SmartIterator;
+import com.reco1l.andengine.modifier.UniversalModifier;
 import com.reco1l.ibancho.RoomAPI;
 import com.reco1l.osu.DifficultyCalculationManager;
 import com.reco1l.osu.data.BeatmapInfo;
@@ -68,8 +71,6 @@ import org.anddev.andengine.entity.text.ChangeableText;
 import org.anddev.andengine.entity.util.FPSCounter;
 import org.anddev.andengine.input.touch.TouchEvent;
 import org.anddev.andengine.util.Debug;
-import org.anddev.andengine.util.modifier.ease.EaseQuadIn;
-import org.anddev.andengine.util.modifier.ease.EaseQuadOut;
 
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -501,7 +502,7 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
 
         FollowPointConnection.getPool().renew(16);
         SliderTickSprite.getPool().renew(16);
-        Modifiers.getPool().renew(16);
+        UniversalModifier.GlobalPool.renew(24);
 
         // TODO replay
         offsetSum = 0;
@@ -2331,11 +2332,11 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
                 pos,
                 scale * 1.6f,
                 fadeSequence,
-                Modifiers.scale(0.1f, scale * 1.6f, scale, null, EaseQuadIn.getInstance()),
-                Modifiers.translateY(fadeOutDelay + fadeOutLength, -5f, 80f, null, EaseQuadIn.getInstance()),
+                Modifiers.scale(0.1f, scale * 1.6f, scale, null, Easing.InQuad),
+                Modifiers.translateY(fadeOutDelay + fadeOutLength, -5f, 80f, null, Easing.InQuad),
                 Modifiers.sequence(
                     Modifiers.rotation(fadeInLength, 0, rotation),
-                    Modifiers.rotation(fadeOutDelay + fadeOutLength - fadeInLength, rotation, rotation * 2, null, EaseQuadIn.getInstance())
+                    Modifiers.rotation(fadeOutDelay + fadeOutLength - fadeInLength, rotation, rotation * 2, null, Easing.InQuad)
                 )
             );
 
@@ -2353,7 +2354,7 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
                 bgScene,
                 pos,
                 scale * 0.8f,
-                Modifiers.scale(0.6f, scale * 0.8f, scale * 1.2f, null, EaseQuadOut.getInstance()),
+                Modifiers.scale(0.6f, scale * 0.8f, scale * 1.2f, null, Easing.OutQuad),
                 Modifiers.sequence(
                     Modifiers.fadeIn(0.2f),
                     Modifiers.delay(0.2f),
@@ -2387,7 +2388,7 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
         var fadeDuration = 0.24f;
 
         effect.init(mgScene, pos, scale,
-            Modifiers.scale(fadeDuration, scale, scale * 1.4f, null, EaseQuadOut.getInstance()),
+            Modifiers.scale(fadeDuration, scale, scale * 1.4f, null, Easing.OutQuad),
             Modifiers.fadeOut(fadeDuration)
         );
     }

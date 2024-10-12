@@ -1,154 +1,184 @@
 package com.reco1l.andengine.modifier
 
 import com.reco1l.andengine.*
-import org.anddev.andengine.entity.IEntity
-
-
-private operator fun FloatArray.get(index: Int, percentage: Float): Float {
-    val from = this[2 * index]
-    val to = this[2 * index + 1]
-    return from + (to - from) * percentage
-}
-
-private val FloatArray.spanCount
-    get() = size / 2
+import org.anddev.andengine.entity.*
 
 
 /**
  * The type of the modifier.
  */
-enum class ModifierType(val onApply: ((entity: IEntity, values: FloatArray, percentage: Float) -> Unit)? = null) {
-
-    /**
-     * Modifies the entity's alpha value.
-     */
-    ALPHA({ entity, values, percentage ->
-        entity.alpha = values[0, percentage]
-    }),
-
-    /**
-     * Modifies the entity's scale values for both axis.
-     */
-    SCALE({ entity, values, percentage ->
-        if (values.spanCount == 1) {
-            entity.scaleX = values[0, percentage]
-            entity.scaleY = values[0, percentage]
-        } else {
-            entity.scaleX = values[0, percentage]
-            entity.scaleY = values[1, percentage]
-        }
-    }),
+enum class ModifierType {
 
     /**
      * Modifies the entity's X scale value.
      */
-    SCALE_X({ entity, values, percentage ->
-        entity.scaleX = values[0, percentage]
-    }),
+    ScaleX,
 
     /**
      * Modifies the entity's Y scale value.
      */
-    SCALE_Y({ entity, values, percentage ->
-        entity.scaleY = values[0, percentage]
-    }),
+    ScaleY,
 
     /**
-     * Modifies the entity's color values.
+     * Modifies the entity's X and Y scale values.
      */
-    COLOR({ entity, values, percentage ->
-        when (values.spanCount) {
-            1 -> entity.setColor(values[0, percentage], values[0, percentage], values[0, percentage])
-            3 -> entity.setColor(values[0, percentage], values[1, percentage], values[2, percentage])
-
-            else -> throw IllegalArgumentException("Color modifier must have 1 or 3 values.")
-        }
-    }),
+    ScaleXY,
 
     /**
-     * Modifies the entity's position in both axis.
+     * Modifies the entity's alpha value.
      */
-    MOVE({ entity, values, percentage ->
-        if (values.spanCount == 1) {
-            entity.setPosition(values[0, percentage], values[0, percentage])
-        } else {
-            entity.setPosition(values[0, percentage], values[1, percentage])
-        }
-    }),
+    Alpha,
+
+    /**
+     * Modifies the entity's color value.
+     */
+    Color,
 
     /**
      * Modifies the entity's X position.
      */
-    MOVE_X({ entity, values, percentage ->
-        entity.setPosition(values[0, percentage], entity.y)
-    }),
+    MoveX,
 
     /**
      * Modifies the entity's Y position.
      */
-    MOVE_Y({ entity, values, percentage ->
-        entity.setPosition(entity.x, values[0, percentage])
-    }),
+    MoveY,
 
     /**
-     * Modifies the entity's translation in both axis.
-     *
-     * Note: This is only available for [ExtendedEntity] instances.
+     * Modifies the entity's X and Y position.
      */
-    TRANSLATE({ entity, values, percentage ->
-        if (entity is ExtendedEntity) {
-            if (values.spanCount == 1) {
-                entity.translationX = values[0, percentage]
-                entity.translationY = values[0, percentage]
-            } else {
-                entity.translationX = values[0, percentage]
-                entity.translationY = values[1, percentage]
-            }
-        }
-    }),
+    MoveXY,
 
     /**
      * Modifies the entity's X translation.
      *
      * Note: This is only available for [ExtendedEntity] instances.
      */
-    TRANSLATE_X({ entity, values, percentage ->
-        if (entity is ExtendedEntity) {
-            entity.translationX = values[0, percentage]
-        }
-    }),
+    TranslateX,
 
     /**
      * Modifies the entity's Y translation.
      *
      * Note: This is only available for [ExtendedEntity] instances.
      */
-    TRANSLATE_Y({ entity, values, percentage ->
-        if (entity is ExtendedEntity) {
-            entity.translationY = values[0, percentage]
-        }
-    }),
+    TranslateY,
+
+    /**
+     * Modifies the entity's X and Y translation.
+     *
+     * Note: This is only available for [ExtendedEntity] instances.
+     */
+    TranslateXY,
 
     /**
      * Modifies the entity's rotation.
      */
-    ROTATION({ entity, values, percentage ->
-        entity.rotation = values[0, percentage]
-    }),
+    Rotation,
 
     /**
      * Modifies the entity's with inner modifiers in sequence.
      */
-    SEQUENCE,
+    Sequence,
 
     /**
      * Modifies the entity's with inner modifiers in parallel.
      */
-    PARALLEL,
+    Parallel,
 
     /**
      * Does nothing, used as a delay modifier.
      */
-    NONE
+    Delay;
+
+
+    /**
+     * Whether this modifier type uses nested modifiers.
+     */
+    val isCompoundModifier
+        get() = this == Sequence || this == Parallel
+
+
+    fun getInitialValues(entity: IEntity): FloatArray? = when (this) {
+
+        ScaleX -> floatArrayOf(entity.scaleX)
+        ScaleY -> floatArrayOf(entity.scaleY)
+        ScaleXY -> floatArrayOf(entity.scaleX, entity.scaleY)
+
+        Alpha -> floatArrayOf(entity.alpha)
+        Color -> floatArrayOf(entity.red, entity.green, entity.blue)
+
+        MoveX -> floatArrayOf(entity.x)
+        MoveY -> floatArrayOf(entity.y)
+        MoveXY -> floatArrayOf(entity.x, entity.y)
+
+        TranslateX -> {
+            entity as? ExtendedEntity ?: throw IllegalArgumentException("TranslateX is only available for ExtendedEntity instances.")
+            floatArrayOf(entity.translationX)
+        }
+
+        TranslateY -> {
+            entity as? ExtendedEntity ?: throw IllegalArgumentException("TranslateX is only available for ExtendedEntity instances.")
+            floatArrayOf(entity.translationY)
+        }
+
+        TranslateXY -> {
+            entity as? ExtendedEntity ?: throw IllegalArgumentException("TranslateX is only available for ExtendedEntity instances.")
+            floatArrayOf(entity.translationX, entity.translationY)
+        }
+
+        Rotation -> floatArrayOf(entity.rotation)
+
+        else -> null
+    }
+
+    fun setValues(entity: IEntity, initialValues: FloatArray, finalValues: FloatArray, percentage: Float) {
+
+        fun valueAt(index: Int): Float {
+            var i = index
+
+            // This is a workaround for the case when the value count doesn't fit the type requirements.
+            // `initialValues` shouldn't be settable as they should be calculated from the entity but since
+            // we're supporting `Modifiers.kt` yet we need to handle this case.
+            i %= initialValues.size
+            i %= finalValues.size
+
+            return initialValues[i] + percentage * (finalValues[i] - initialValues[i])
+        }
+
+        when (this) {
+
+            ScaleX -> entity.scaleX = valueAt(0)
+            ScaleY -> entity.scaleY = valueAt(0)
+            ScaleXY -> entity.setScale(valueAt(0), valueAt(1))
+
+            Alpha -> entity.alpha = valueAt(0)
+            Color -> entity.setColor(valueAt(0), valueAt(1), valueAt(2))
+
+            MoveX -> entity.setPosition(valueAt(0), entity.y)
+            MoveY -> entity.setPosition(entity.x, valueAt(0))
+            MoveXY -> entity.setPosition(valueAt(0), valueAt(1))
+
+            TranslateX -> {
+                entity as? ExtendedEntity ?: throw IllegalArgumentException("TranslateX is only available for ExtendedEntity instances.")
+                entity.translationX = valueAt(0)
+            }
+
+            TranslateY -> {
+                entity as? ExtendedEntity ?: throw IllegalArgumentException("TranslateY is only available for ExtendedEntity instances.")
+                entity.translationY = valueAt(0)
+            }
+
+            TranslateXY -> {
+                entity as? ExtendedEntity ?: throw IllegalArgumentException("TranslateXY is only available for ExtendedEntity instances.")
+                entity.translationX = valueAt(0)
+                entity.translationY = valueAt(1)
+            }
+
+            Rotation -> entity.rotation = valueAt(0)
+
+            else -> Unit
+        }
+    }
+
 
 }

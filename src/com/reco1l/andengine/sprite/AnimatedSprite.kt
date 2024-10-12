@@ -85,6 +85,7 @@ open class AnimatedSprite(frames: Array<TextureRegion?>) : ExtendedSprite() {
 
 
     init {
+        @Suppress("LeakingThis")
         textureRegion = frames.firstOrNull()
     }
 
