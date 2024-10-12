@@ -133,7 +133,17 @@ enum class ModifierType {
 
     fun setValues(entity: IEntity, initialValues: FloatArray, finalValues: FloatArray, percentage: Float) {
 
-        fun valueAt(index: Int) = initialValues[index] + percentage * (finalValues[index] - initialValues[index])
+        fun valueAt(index: Int): Float {
+            var i = index
+
+            // This is a workaround for the case when the value count doesn't fit the type requirements.
+            // `initialValues` shouldn't be settable as they should be calculated from the entity but since
+            // we're supporting `Modifiers.kt` yet we need to handle this case.
+            i %= initialValues.size
+            i %= finalValues.size
+
+            return initialValues[i] + percentage * (finalValues[i] - initialValues[i])
+        }
 
         when (this) {
 

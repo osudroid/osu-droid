@@ -1,5 +1,6 @@
 package com.reco1l.osu
 
+import com.edlplan.framework.easing.Easing
 import com.reco1l.andengine.modifier.*
 import com.reco1l.andengine.modifier.ModifierType.*
 import com.reco1l.andengine.modifier.UniversalModifier.Companion.GlobalPool
@@ -18,34 +19,34 @@ object Modifiers {
 
     @JvmStatic
     @JvmOverloads
-    fun alpha(duration: Float, from: Float, to: Float, listener: OnModifierFinished? = null, easeFunction: IEaseFunction = DefaultEaseFunction) = GlobalPool.obtain().also {
+    fun alpha(duration: Float, from: Float, to: Float, listener: OnModifierFinished? = null, easing: Easing = Easing.None) = GlobalPool.obtain().also {
         it.setToDefault()
         it.type = Alpha
         it.duration = duration
         it.initialValues = floatArrayOf(from)
         it.finalValues = floatArrayOf(to)
         it.onFinished = listener
-        it.easeFunction = easeFunction
+        it.eased(easing)
     }
 
     @JvmStatic
     @JvmOverloads
-    fun fadeIn(duration: Float, listener: OnModifierFinished? = null, easeFunction: IEaseFunction = DefaultEaseFunction) = alpha(duration, 0f, 1f, listener, easeFunction)
+    fun fadeIn(duration: Float, listener: OnModifierFinished? = null, easing: Easing = Easing.None) = alpha(duration, 0f, 1f, listener, easing)
 
     @JvmStatic
     @JvmOverloads
-    fun fadeOut(duration: Float, listener: OnModifierFinished? = null, easeFunction: IEaseFunction = DefaultEaseFunction) = alpha(duration, 1f, 0f, listener, easeFunction)
+    fun fadeOut(duration: Float, listener: OnModifierFinished? = null, easing: Easing = Easing.None) = alpha(duration, 1f, 0f, listener, easing)
 
     @JvmStatic
     @JvmOverloads
-    fun scale(duration: Float, from: Float, to: Float, listener: OnModifierFinished? = null, easeFunction: IEaseFunction = DefaultEaseFunction) = GlobalPool.obtain().also {
+    fun scale(duration: Float, from: Float, to: Float, listener: OnModifierFinished? = null, easing: Easing = Easing.None) = GlobalPool.obtain().also {
         it.setToDefault()
         it.type = ScaleXY
         it.duration = duration
         it.initialValues = floatArrayOf(from)
         it.finalValues = floatArrayOf(to)
-        it.easeFunction = easeFunction
         it.onFinished = listener
+        it.eased(easing)
     }
 
     @JvmStatic
@@ -59,7 +60,7 @@ object Modifiers {
         fromBlue: Float,
         toBlue: Float,
         listener: OnModifierFinished? = null,
-        easeFunction: IEaseFunction = DefaultEaseFunction
+        easing: Easing = Easing.None
     ) = GlobalPool.obtain().also {
         it.setToDefault()
         it.type = Color
@@ -67,7 +68,7 @@ object Modifiers {
         it.onFinished = listener
         it.initialValues = floatArrayOf(fromRed, fromGreen, fromBlue)
         it.finalValues = floatArrayOf(toRed, toGreen, toBlue)
-        it.easeFunction = easeFunction
+        it.eased(easing)
     }
 
     @JvmStatic
@@ -99,19 +100,19 @@ object Modifiers {
 
     @JvmStatic
     @JvmOverloads
-    fun translateY(duration: Float, from: Float, to: Float, listener: OnModifierFinished? = null, easeFunction: IEaseFunction = DefaultEaseFunction) = GlobalPool.obtain().also {
+    fun translateY(duration: Float, from: Float, to: Float, listener: OnModifierFinished? = null, easing: Easing = Easing.None) = GlobalPool.obtain().also {
         it.setToDefault()
         it.type = TranslateY
         it.duration = duration
         it.initialValues = floatArrayOf(from)
         it.finalValues = floatArrayOf(to)
         it.onFinished = listener
-        it.easeFunction = easeFunction
+        it.eased(easing)
     }
 
     @JvmStatic
     @JvmOverloads
-    fun move(duration: Float, fromX: Float, toX: Float, fromY: Float, toY: Float, listener: OnModifierFinished? = null, easeFunction: IEaseFunction = DefaultEaseFunction) =
+    fun move(duration: Float, fromX: Float, toX: Float, fromY: Float, toY: Float, listener: OnModifierFinished? = null, easing: Easing = Easing.None) =
         GlobalPool.obtain().also {
             it.setToDefault()
             it.type = MoveXY
@@ -119,19 +120,19 @@ object Modifiers {
             it.initialValues = floatArrayOf(fromX, fromY)
             it.finalValues = floatArrayOf(toX, toY)
             it.onFinished = listener
-            it.easeFunction = easeFunction
+            it.eased(easing)
         }
 
     @JvmStatic
     @JvmOverloads
-    fun rotation(duration: Float, from: Float, to: Float, listener: OnModifierFinished? = null, easeFunction: IEaseFunction = DefaultEaseFunction) = GlobalPool.obtain().also {
+    fun rotation(duration: Float, from: Float, to: Float, listener: OnModifierFinished? = null, easing: Easing = Easing.None) = GlobalPool.obtain().also {
         it.setToDefault()
         it.type = Rotation
         it.duration = duration
         it.initialValues = floatArrayOf(from)
         it.finalValues = floatArrayOf(to)
         it.onFinished = listener
-        it.easeFunction = easeFunction
+        it.eased(easing)
     }
 
 }

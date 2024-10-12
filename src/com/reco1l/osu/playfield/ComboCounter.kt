@@ -86,10 +86,9 @@ class ComboCounter : Container() {
 
         displayedCountTextSprite.setScale(1f)
 
-        displayedCountTextSprite.beginSequenceChain {
-            scaleTo(1.1f, SMALL_POP_OUT_DURATION / 2f).eased(Easing.In)
-            scaleTo(1f, SMALL_POP_OUT_DURATION / 2f).eased(Easing.Out)
-        }
+        displayedCountTextSprite
+            .scaleTo(1.1f, SMALL_POP_OUT_DURATION / 2f).eased(Easing.In)
+            .scaleTo(1f, SMALL_POP_OUT_DURATION / 2f).eased(Easing.Out)
     }
 
 

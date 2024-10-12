@@ -1,5 +1,6 @@
 package com.reco1l.osu.playfield
 
+import com.edlplan.framework.easing.*
 import com.reco1l.andengine.*
 import com.reco1l.andengine.modifier.*
 import com.reco1l.andengine.sprite.*
@@ -104,8 +105,8 @@ object FollowPointConnection {
                 Modifiers.delay(fadeInTime - secPassed),
                 Modifiers.parallel(null,
                     Modifiers.fadeIn(endFadeInTime),
-                    Modifiers.scale(endFadeInTime, 1.5f * scale, scale, null, EaseQuadOut.getInstance()),
-                    Modifiers.move(endFadeInTime, pointStartX, pointEndX, pointStartY, pointEndY, null, EaseQuadOut.getInstance()),
+                    Modifiers.scale(endFadeInTime, 1.5f * scale, scale, null, Easing.OutQuad),
+                    Modifiers.move(endFadeInTime, pointStartX, pointEndX, pointStartY, pointEndY, null, Easing.OutQuad),
                     Modifiers.sequence(null,
                         Modifiers.delay(fadeOutTime - fadeInTime),
                         Modifiers.fadeOut(endFadeInTime)

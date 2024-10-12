@@ -2,6 +2,7 @@ package ru.nsu.ccfit.zuev.osu.game;
 
 import android.graphics.PointF;
 
+import com.edlplan.framework.easing.Easing;
 import com.edlplan.framework.math.Vec2;
 import com.edlplan.framework.math.line.LinePath;
 import com.edlplan.osu.support.slider.SliderBody;
@@ -635,7 +636,7 @@ public class GameplaySlider extends GameObject {
             isFollowCircleAnimating = true;
 
             followCircle.clearEntityModifiers();
-            followCircle.registerEntityModifier(Modifiers.scale(0.2f, followCircle.getScaleX(), followCircle.getScaleX() * 0.8f, null, EaseQuadOut.getInstance()));
+            followCircle.registerEntityModifier(Modifiers.scale(0.2f, followCircle.getScaleX(), followCircle.getScaleX() * 0.8f, null, Easing.OutQuad));
             followCircle.registerEntityModifier(Modifiers.alpha(0.2f, followCircle.getAlpha(), 0f, e -> {
                 Execution.updateThread(() -> {
                     followCircle.detachSelf();
@@ -866,7 +867,7 @@ public class GameplaySlider extends GameObject {
                 followCircle.registerEntityModifier(Modifiers.alpha(Math.min(remainTime, 0.06f), followCircle.getAlpha(), 1f));
                 followCircle.registerEntityModifier(Modifiers.scale(Math.min(remainTime, 0.18f), initialScale, scale, e -> {
                     isFollowCircleAnimating = false;
-                }, EaseQuadOut.getInstance()));
+                }, Easing.OutQuad));
             } else if (!inRadius && isInRadius) {
                 isInRadius = false;
                 isFollowCircleAnimating = true;
@@ -941,7 +942,7 @@ public class GameplaySlider extends GameObject {
             if (isTracking) {
                 if (Config.isAnimateFollowCircle() && !isFollowCircleAnimating) {
                     followCircle.clearEntityModifiers();
-                    followCircle.registerEntityModifier(Modifiers.scale((float) Math.min(tickInterval, 0.2f), scale * 1.1f, scale, null, EaseQuadOut.getInstance()));
+                    followCircle.registerEntityModifier(Modifiers.scale((float) Math.min(tickInterval, 0.2f), scale * 1.1f, scale, null, Easing.OutQuad));
                 }
 
                 playCurrentNestedObjectHitSound();
@@ -971,7 +972,7 @@ public class GameplaySlider extends GameObject {
 
             sliderBody.registerEntityModifier(Modifiers.sequence(
                 Modifiers.fadeIn(fadeInDuration),
-                Modifiers.fadeOut(fadeOutDuration, null, EaseQuadOut.getInstance())
+                Modifiers.fadeOut(fadeOutDuration, null, Easing.OutQuad)
             ));
         } else {
             sliderBody.registerEntityModifier(Modifiers.fadeIn(fadeInDuration));
