@@ -71,8 +71,6 @@ import org.anddev.andengine.entity.text.ChangeableText;
 import org.anddev.andengine.entity.util.FPSCounter;
 import org.anddev.andengine.input.touch.TouchEvent;
 import org.anddev.andengine.util.Debug;
-import org.anddev.andengine.util.modifier.ease.EaseQuadIn;
-import org.anddev.andengine.util.modifier.ease.EaseQuadOut;
 
 import java.io.File;
 import java.io.FileNotFoundException;
