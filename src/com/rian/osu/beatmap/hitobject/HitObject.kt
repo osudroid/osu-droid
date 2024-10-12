@@ -20,7 +20,7 @@ abstract class HitObject(
      * The time at which this [HitObject] starts, in milliseconds.
      */
     @JvmField
-    var startTime: Double,
+    val startTime: Double,
 
     /**
      * The position of this [HitObject] in osu!pixels.
@@ -123,7 +123,7 @@ abstract class HitObject(
     /**
      * Any samples which may be used by this [HitObject] that are non-standard.
      */
-    var auxiliarySamples = mutableListOf<HitSampleInfo>()
+    var auxiliarySamples = mutableListOf<SequenceHitSampleInfo>()
 
     /**
      * Whether this [HitObject] is in kiai time.

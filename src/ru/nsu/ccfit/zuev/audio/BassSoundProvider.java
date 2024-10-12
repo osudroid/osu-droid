@@ -15,11 +15,14 @@ public class BassSoundProvider {
 
     private int sample = 0;
     private int channel = 0;
+    private boolean looping;
+    private final BASS.BASS_SAMPLE sampleInfo = new BASS.BASS_SAMPLE();
 
     public boolean prepare(final String fileName) {
         free();
         if (fileName != null && fileName.length() > 0) {
             sample = BASS.BASS_SampleLoad(fileName, 0, 0, SIMULTANEOUS_PLAYBACKS, BASS.BASS_SAMPLE_OVER_POS);
+            handleSampleLooping();
         }
         return sample != 0;
     }
@@ -29,6 +32,7 @@ public class BassSoundProvider {
         if (manager != null && assetName != null && assetName.length() > 0) {
             BASS.Asset asset = new BASS.Asset(manager, assetName);
             sample = BASS.BASS_SampleLoad(asset, 0, 0, SIMULTANEOUS_PLAYBACKS, BASS.BASS_SAMPLE_OVER_POS);
+            handleSampleLooping();
         }
         return sample != 0;
     }
@@ -59,6 +63,42 @@ public class BassSoundProvider {
     }
 
     public void setLooping(boolean looping) {
-        // not impl
+        // Prevent redundant processing when state is already correct.
+        if (this.looping == looping) {
+            return;
+        }
+
+        this.looping = looping;
+
+        handleSampleLooping();
+        handleChannelLooping();
+    }
+
+    private void handleSampleLooping() {
+        if (sample == 0) {
+            return;
+        }
+
+        BASS.BASS_SampleGetInfo(sample, sampleInfo);
+
+        if (looping) {
+            sampleInfo.flags |= BASS.BASS_SAMPLE_LOOP;
+        } else {
+            sampleInfo.flags &= ~BASS.BASS_SAMPLE_LOOP;
+        }
+
+        BASS.BASS_SampleSetInfo(sample, sampleInfo);
+    }
+
+    private void handleChannelLooping() {
+        if (channel == 0) {
+            return;
+        }
+
+        if (looping) {
+            BASS.BASS_ChannelFlags(channel, BASS.BASS_SAMPLE_LOOP, BASS.BASS_SAMPLE_LOOP);
+        } else {
+            BASS.BASS_ChannelFlags(channel, 0, BASS.BASS_SAMPLE_LOOP);
+        }
     }
 }

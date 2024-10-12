@@ -49,6 +49,7 @@ public class GlobalManager {
         DatabaseManager.load(mainActivity);
         saveServiceObject = (SaveServiceObject) mainActivity.getApplication();
         songService = saveServiceObject.getSongService();
+        songService.initBASS();
         setLoadingProgress(10);
         setMainScene(new MainScene());
         getMainScene().load(mainActivity);

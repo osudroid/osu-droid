@@ -7,8 +7,8 @@ import com.reco1l.andengine.sprite.ExtendedSprite;
 import com.reco1l.osu.Modifiers;
 import com.reco1l.andengine.Anchor;
 import com.rian.osu.beatmap.hitobject.BankHitSampleInfo;
-import com.rian.osu.beatmap.hitobject.HitSampleInfo;
 import com.rian.osu.beatmap.hitobject.Spinner;
+import com.rian.osu.beatmap.hitobject.GameplaySequenceHitSampleInfo;
 
 import org.anddev.andengine.entity.scene.Scene;
 import org.anddev.andengine.entity.sprite.Sprite;
@@ -44,11 +44,11 @@ public class GameplaySpinner extends GameObject {
     private float metreY;
     private StatisticV2 stat;
     private float duration;
-    protected HitSampleInfo spinnerSpinSample;
-    protected HitSampleInfo spinnerBonusSample;
+
+    private final GameplaySequenceHitSampleInfo spinnerSpinSample;
+    private final GameplaySequenceHitSampleInfo spinnerBonusSample;
 
     private final PointF currMouse = new PointF();
-
 
     public GameplaySpinner() {
         ResourceManager.getInstance().checkSpinnerTextures();
@@ -88,6 +88,9 @@ public class GameplaySpinner extends GameObject {
         clearText.setTextureRegion(ResourceManager.getInstance().getTexture("spinner-clear"));
 
         bonusScore = new ScoreNumber(center.x, center.y + 100, "", 1.1f, true);
+
+        spinnerSpinSample = new GameplaySequenceHitSampleInfo();
+        spinnerBonusSample = new GameplaySequenceHitSampleInfo();
     }
 
     public void init(final GameObjectListener listener, final Scene scene,
@@ -110,6 +113,7 @@ public class GameplaySpinner extends GameObject {
         clear = duration <= 0f;
         score = 1;
 
+        reloadHitSounds();
         ResourceManager.getInstance().checkSpinnerTextures();
 
         float timePreempt = (float) beatmapSpinner.timePreempt / 1000f;
@@ -215,6 +219,7 @@ public class GameplaySpinner extends GameObject {
                 default -> score;
             };
         }
+        stopAuxiliarySamples();
         listener.onSpinnerHit(id, score, endsCombo, this.score + fullRotations - 1);
         if (score > 0) {
             listener.playSamples(beatmapSpinner);
@@ -227,6 +232,8 @@ public class GameplaySpinner extends GameObject {
         if (circle.getAlpha() == 0) {
             return;
         }
+
+        updateSamples(dt);
         PointF mouse = null;
 
         for (int i = 0, count = listener.getCursorsCount(); i < count; ++i) {
@@ -276,6 +283,8 @@ public class GameplaySpinner extends GameObject {
 
         if (dfill > 0) {
             playSpinnerSpinSound();
+        } else {
+            stopSpinnerSpinSound();
         }
 
         rotations += dfill / 4f;
@@ -325,46 +334,50 @@ public class GameplaySpinner extends GameObject {
     }
 
     protected void reloadHitSounds() {
-        spinnerBonusSample = null;
-        spinnerSpinSample = null;
+        spinnerSpinSample.reset();
+        spinnerBonusSample.reset();
 
-        for (var sample : beatmapSpinner.getAuxiliarySamples()) {
-            if (spinnerBonusSample != null && spinnerSpinSample != null) {
-                break;
+        float startTime = (float) beatmapSpinner.startTime;
+
+        for (int i = 0, size = beatmapSpinner.getAuxiliarySamples().size(); i < size; ++i) {
+            if (spinnerSpinSample.isInitialized() && spinnerBonusSample.isInitialized()) {
+                return;
             }
 
-            if (!(sample instanceof BankHitSampleInfo bankSample)) {
+            var auxiliarySample = beatmapSpinner.getAuxiliarySamples().get(i);
+            var firstSample = auxiliarySample.get(0).getSecond();
+
+            if (!(firstSample instanceof BankHitSampleInfo bankSample)) {
                 continue;
             }
 
             if (bankSample.name.equals("spinnerbonus")) {
-                spinnerBonusSample = bankSample;
+                spinnerBonusSample.init(listener, startTime, auxiliarySample);
             } else if (bankSample.name.equals("spinnerspin")) {
-                spinnerSpinSample = bankSample;
+                spinnerSpinSample.init(listener, startTime, auxiliarySample);
             }
         }
     }
 
     @Override
     public void stopAuxiliarySamples() {
-        if (spinnerBonusSample != null) {
-            listener.stopSample(spinnerBonusSample);
-        }
-
-        if (spinnerSpinSample != null) {
-            listener.stopSample(spinnerSpinSample);
-        }
+        stopSpinnerSpinSound();
     }
 
     protected void playSpinnerBonusSound() {
-        if (spinnerBonusSample != null) {
-            listener.playSample(spinnerBonusSample, false);
-        }
+        spinnerBonusSample.play();
     }
 
     protected void playSpinnerSpinSound() {
-        if (spinnerSpinSample != null) {
-            listener.playSample(spinnerSpinSample, false);
-        }
+        spinnerSpinSample.play(true);
+    }
+
+    protected void stopSpinnerSpinSound() {
+        spinnerSpinSample.stop();
+    }
+
+    protected void updateSamples(float dt) {
+        spinnerSpinSample.update(dt);
+        spinnerBonusSample.update(dt);
     }
 }

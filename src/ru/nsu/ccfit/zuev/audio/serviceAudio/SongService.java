@@ -11,6 +11,9 @@ import android.util.Log;
 import java.io.File;
 
 import androidx.core.app.NotificationManagerCompat;
+
+import com.un4seen.bass.BASS;
+
 import ru.nsu.ccfit.zuev.audio.Status;
 import ru.nsu.ccfit.zuev.osu.GlobalManager;
 import ru.nsu.ccfit.zuev.osu.MainActivity;
@@ -22,6 +25,27 @@ public class SongService extends Service {
     private boolean isGaming = false;
     // private boolean isSettingMenu = false;
     private NotifyPlayer notify;
+
+    public void initBASS() {
+        // This likely doesn't help, but also doesn't seem to cause any issues or any CPU increase.
+        BASS.BASS_SetConfig(BASS.BASS_CONFIG_UPDATEPERIOD, 5);
+
+        // Reduce latency to a known sane minimum.
+        BASS.BASS_SetConfig(BASS.BASS_CONFIG_DEV_PERIOD, 5);
+        BASS.BASS_SetConfig(BASS.BASS_CONFIG_DEV_BUFFER, 10);
+
+        // Ensure there are no brief delays on audio operations (causing stream stalls etc.) after periods of silence.
+        BASS.BASS_SetConfig(BASS.BASS_CONFIG_DEV_NONSTOP, 1);
+
+        BASS.BASS_Init(-1, 44100, BASS.BASS_DEVICE_LATENCY);
+
+        Log.i("BASS-Config", "BASS initialized");
+        Log.i("BASS-Config", "Update period:          " + BASS.BASS_GetConfig(BASS.BASS_CONFIG_UPDATEPERIOD));
+        Log.i("BASS-Config", "Device period:          " + BASS.BASS_GetConfig(BASS.BASS_CONFIG_DEV_PERIOD));
+        Log.i("BASS-Config", "Device buffer length:   " + BASS.BASS_GetConfig(BASS.BASS_CONFIG_DEV_BUFFER));
+        Log.i("BASS-Config", "Playback buffer length: " + BASS.BASS_GetConfig(BASS.BASS_CONFIG_BUFFER));
+        Log.i("BASS-Config", "Device nonstop:         " + BASS.BASS_GetConfig(BASS.BASS_CONFIG_DEV_NONSTOP));
+    }
 
     @Override
     public IBinder onBind(Intent intent) {
@@ -73,39 +97,24 @@ public class SongService extends Service {
         System.out.println("onReBind");
     }
 
-    public boolean preLoad(String filePath, PlayMode mode, boolean isLoop) {
-        if (checkFileExist(filePath)) {
-            if (audioFunc == null) return false;
-            if (isLoop) {
-                audioFunc.setLoop(true);
-            }
-            return audioFunc.preLoad(filePath, mode);
-        }
-        return false;
-    }
-
     public boolean preLoad(String filePath) {
-        return preLoad(filePath, PlayMode.MODE_NONE, false);
-    }
-
-    public boolean preLoad(String filePath, PlayMode mode) {
-        return preLoad(filePath, mode, false);
+        return preLoad(filePath, 1, false, false);
     }
 
     public boolean preLoad(String filePath, float speed, boolean enableNC) {
+        return preLoad(filePath, speed, enableNC, false);
+    }
+
+    public boolean preLoad(String filePath, float speed, boolean enableNC, boolean isLoop) {
         if (checkFileExist(filePath)) {
             if (audioFunc == null) {
                 return false;
             }
 
-            audioFunc.setLoop(false);
+            audioFunc.setLoop(isLoop);
             return audioFunc.preLoad(filePath, speed, enableNC);
         }
         return false;
-    }
-
-    public boolean preLoadWithLoop(String filePath) {
-        return preLoad(filePath, PlayMode.MODE_NONE, true);
     }
 
     public void play() {

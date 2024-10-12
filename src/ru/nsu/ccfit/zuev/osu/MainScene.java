@@ -97,8 +97,6 @@ public class MainScene implements IUpdateHandler {
 
     private final ParticleSystem[] particleSystem = new ParticleSystem[2];
 
-    //private BassAudioPlayer music;
-
     private boolean musicStarted;
     private BassSoundProvider hitsound;
 

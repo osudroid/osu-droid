@@ -24,11 +24,7 @@ public interface GameObjectListener {
 
     void playSamples(HitObject obj);
 
-    void playAuxiliarySamples(HitObject obj);
-
     void playSample(HitSampleInfo sample, boolean loop);
-
-    void stopAuxiliarySamples(HitObject obj);
 
     void stopSample(HitSampleInfo sample);
 

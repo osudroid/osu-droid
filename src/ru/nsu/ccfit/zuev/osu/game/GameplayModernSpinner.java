@@ -140,6 +140,7 @@ public class GameplayModernSpinner extends GameplaySpinner {
             return;
         }
 
+        updateSamples(dt);
         PointF mouse = null;
 
         for (int i = 0, count = listener.getCursorsCount(); i < count; ++i) {
@@ -192,6 +193,8 @@ public class GameplayModernSpinner extends GameplaySpinner {
 
         if (dFill > 0) {
             playSpinnerSpinSound();
+        } else {
+            stopSpinnerSpinSound();
         }
 
         rotations += dFill / 4f;
@@ -292,6 +295,7 @@ public class GameplayModernSpinner extends GameplaySpinner {
                 default -> score;
             };
         }
+        stopAuxiliarySamples();
         listener.onSpinnerHit(id, score, endsCombo, this.score + fullRotations - 1);
         if (score > 0) {
             listener.playSamples(beatmapSpinner);

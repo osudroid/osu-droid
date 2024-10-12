@@ -14,10 +14,12 @@ import com.reco1l.andengine.Anchor;
 import com.reco1l.osu.playfield.CirclePiece;
 import com.reco1l.osu.playfield.NumberedCirclePiece;
 import com.reco1l.osu.playfield.SliderTickContainer;
+import com.rian.osu.beatmap.hitobject.BankHitSampleInfo;
 import com.rian.osu.beatmap.hitobject.Slider;
 import com.rian.osu.beatmap.sections.BeatmapControlPoints;
 import com.rian.osu.math.Interpolation;
 import com.rian.osu.mods.ModHidden;
+import com.rian.osu.beatmap.hitobject.GameplaySequenceHitSampleInfo;
 
 import org.anddev.andengine.entity.scene.Scene;
 import org.anddev.andengine.util.MathUtils;
@@ -45,7 +47,9 @@ public class GameplaySlider extends GameObject {
     private double spanDuration;
     private int completedSpanCount;
     private boolean reverse;
-    private boolean slidingSamplesPlaying;
+
+    private final GameplaySequenceHitSampleInfo sliderSlideSample;
+    private final GameplaySequenceHitSampleInfo sliderWhistleSample;
 
     private int currentNestedObjectIndex;
     private int ticksGot;
@@ -142,6 +146,9 @@ public class GameplaySlider extends GameObject {
 
         sliderBody = new SliderBody(OsuSkin.get().isSliderHintEnable());
         tickContainer = new SliderTickContainer();
+
+        sliderSlideSample = new GameplaySequenceHitSampleInfo();
+        sliderWhistleSample = new GameplaySequenceHitSampleInfo();
     }
 
     public void init(final GameObjectListener listener, final Scene scene,
@@ -158,8 +165,9 @@ public class GameplaySlider extends GameObject {
         endsCombo = beatmapSlider.isLastInCombo();
         passedTime = secPassed - (float) beatmapSlider.startTime / 1000;
         spanDuration = beatmapSlider.getSpanDuration() / 1000;
-        slidingSamplesPlaying = false;
         path = sliderPath;
+
+        reloadHitSounds();
 
         float scale = beatmapSlider.getGameplayScale();
 
@@ -802,6 +810,8 @@ public class GameplaySlider extends GameObject {
             return;
         }
 
+        sliderSlideSample.update(dt);
+        sliderWhistleSample.update(dt);
         headCirclePiece.setAlpha(0f);
 
         float scale = beatmapSlider.getGameplayScale();
@@ -978,6 +988,30 @@ public class GameplaySlider extends GameObject {
         }
     }
 
+    private void reloadHitSounds() {
+        sliderSlideSample.reset();
+        sliderWhistleSample.reset();
+
+        for (int i = 0, size = beatmapSlider.getAuxiliarySamples().size(); i < size; ++i) {
+            if (sliderSlideSample.isInitialized() && sliderWhistleSample.isInitialized()) {
+                break;
+            }
+
+            var auxiliarySample = beatmapSlider.getAuxiliarySamples().get(i);
+            var firstSample = auxiliarySample.get(0).getSecond();
+
+            if (!(firstSample instanceof BankHitSampleInfo bankSample)) {
+                continue;
+            }
+
+            if (bankSample.name.equals("sliderslide")) {
+                sliderSlideSample.init(listener, (float) beatmapSlider.startTime, auxiliarySample);
+            } else if (bankSample.name.equals("sliderwhistle")) {
+                sliderWhistleSample.init(listener, (float) beatmapSlider.startTime, auxiliarySample);
+            }
+        }
+    }
+
     private void playCurrentNestedObjectHitSound() {
         listener.playSamples(beatmapSlider.getNestedHitObjects().get(currentNestedObjectIndex));
     }
@@ -988,21 +1022,13 @@ public class GameplaySlider extends GameObject {
     }
 
     private void playSlidingSamples() {
-        if (slidingSamplesPlaying) {
-            return;
-        }
-
-        slidingSamplesPlaying = true;
-        listener.playAuxiliarySamples(beatmapSlider);
+        sliderSlideSample.play(true);
+        sliderWhistleSample.play(true);
     }
 
     private void stopSlidingSamples() {
-        if (!slidingSamplesPlaying) {
-            return;
-        }
-
-        slidingSamplesPlaying = false;
-        listener.stopAuxiliarySamples(beatmapSlider);
+        sliderSlideSample.stop();
+        sliderWhistleSample.stop();
     }
 
     private boolean isTracking() {

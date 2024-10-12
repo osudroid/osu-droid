@@ -1967,7 +1967,9 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
     public void playSamples(final HitObject obj) {
         var playLayeredHitSamples = OsuSkin.get().isLayeredHitSounds();
 
-        for (var sample : obj.getSamples()) {
+        for (int i = 0, size = obj.getSamples().size(); i < size; ++i) {
+            var sample = obj.getSamples().get(i);
+
             if (!playLayeredHitSamples && sample instanceof BankHitSampleInfo bankSample && bankSample.isLayered) {
                 continue;
             }
@@ -1977,19 +1979,12 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
     }
 
     @Override
-    public void playAuxiliarySamples(final HitObject obj) {
-        for (var sample : obj.getAuxiliarySamples()) {
-            playSample(sample, true);
-        }
-    }
-
-    @Override
     public void playSample(HitSampleInfo sample, boolean loop) {
         var resourceManager = ResourceManager.getInstance();
         BassSoundProvider snd = null;
 
-        for (var name : sample.getLookupNames()) {
-            snd = resourceManager.getCustomSound(name, false);
+        for (int i = 0, size = sample.getLookupNames().size(); i < size; ++i) {
+            snd = resourceManager.getCustomSound(sample.getLookupNames().get(i), false);
 
             if (snd != null) {
                 break;
@@ -2005,18 +2000,11 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
     }
 
     @Override
-    public void stopAuxiliarySamples(final HitObject obj) {
-        for (var sample : obj.getAuxiliarySamples()) {
-            stopSample(sample);
-        }
-    }
-
-    @Override
     public void stopSample(HitSampleInfo sample) {
         var resourceManager = ResourceManager.getInstance();
 
-        for (var name : sample.getLookupNames()) {
-            var snd = resourceManager.getCustomSound(name, false);
+        for (int i = 0, size = sample.getLookupNames().size(); i < size; ++i) {
+            var snd = resourceManager.getCustomSound(sample.getLookupNames().get(i), false);
 
             if (snd != null) {
                 snd.stop();

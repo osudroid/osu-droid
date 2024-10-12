@@ -318,7 +318,7 @@ class Slider(
             nodeSamples[i] = sampleList.map { nodeSamplePoint.applyTo(it) }.toMutableList()
         }
 
-        createSlidingSamples()
+        createSlidingSamples(controlPoints)
     }
 
     /**
@@ -467,16 +467,25 @@ class Slider(
         gameplayStackedEndPositionCache.invalidate()
     }
 
-    private fun createSlidingSamples() {
+    private fun createSlidingSamples(controlPoints: BeatmapControlPoints) {
         auxiliarySamples.clear()
-        val bankSamples = samples.filterIsInstance<BankHitSampleInfo>()
 
-        bankSamples.find { it.name == BankHitSampleInfo.HIT_NORMAL }?.let {
-            auxiliarySamples.add(it.copy(name = "sliderslide"))
+        val bankSamples = samples.filterIsInstance<BankHitSampleInfo>()
+        val normalSlide = bankSamples.find { it.name == BankHitSampleInfo.HIT_NORMAL }
+        val whistleSlide = bankSamples.find { it.name == BankHitSampleInfo.HIT_WHISTLE }
+
+        if (normalSlide == null && whistleSlide == null) {
+            return
         }
 
-        bankSamples.find { it.name == BankHitSampleInfo.HIT_WHISTLE }?.let {
-            auxiliarySamples.add(it.copy(name = "sliderwhistle"))
+        val samplePoints = controlPoints.sample.between(startTime + CONTROL_POINT_LENIENCY, endTime + CONTROL_POINT_LENIENCY)
+
+        if (normalSlide != null) {
+            auxiliarySamples.add(SequenceHitSampleInfo(samplePoints.map { it.time to it.applyTo(baseNormalSlideSample) }))
+        }
+
+        if (whistleSlide != null) {
+            auxiliarySamples.add(SequenceHitSampleInfo(samplePoints.map { it.time to it.applyTo(baseWhistleSlideSample) }))
         }
     }
 
@@ -515,6 +524,8 @@ class Slider(
          */
         const val BASE_SCORING_DISTANCE = 100f
 
+        private val baseNormalSlideSample = BankHitSampleInfo("sliderslide")
+        private val baseWhistleSlideSample = BankHitSampleInfo("sliderwhistle")
         private val baseTickSample = BankHitSampleInfo("slidertick")
     }
 }

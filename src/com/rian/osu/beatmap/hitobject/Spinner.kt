@@ -28,12 +28,15 @@ class Spinner(
     override fun applySamples(controlPoints: BeatmapControlPoints) {
         super.applySamples(controlPoints)
 
+        val samplePoints = controlPoints.sample.between(startTime + CONTROL_POINT_LENIENCY, endTime + CONTROL_POINT_LENIENCY)
+
         auxiliarySamples.clear()
+        auxiliarySamples.add(SequenceHitSampleInfo(samplePoints.map { it.time to it.applyTo(baseSpinnerSpinSample) }))
+        auxiliarySamples.add(SequenceHitSampleInfo(samplePoints.map { it.time to it.applyTo(baseSpinnerBonusSample) }))
+    }
 
-        samples.filterIsInstance<BankHitSampleInfo>().firstOrNull()?.let {
-            auxiliarySamples.add(it.copy(name = "spinnerspin"))
-        }
-
-        auxiliarySamples.add(createHitSampleInfo("spinnerbonus"))
+    companion object {
+        private val baseSpinnerSpinSample = BankHitSampleInfo("spinnerspin")
+        private val baseSpinnerBonusSample = BankHitSampleInfo("spinnerbonus")
     }
 }
