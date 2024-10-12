@@ -28,6 +28,8 @@ class BlockAreaFragment : BaseFragment() {
 
     private val blockAreaItems = mutableListOf<BlockAreaItem>()
 
+    private lateinit var resetButton: View
+
 
     private var isEditing = true
 
@@ -85,9 +87,12 @@ class BlockAreaFragment : BaseFragment() {
             )
             blockArea.id = DatabaseManager.blockAreaTable.insert(blockArea)
             blockAreaItems.add(BlockAreaItem(blockArea, true))
+            resetButton.isEnabled = true
         }
 
-        findViewById<View>(R.id.reset)!!.setOnClickListener {
+        resetButton = findViewById<View>(R.id.reset)!!
+        resetButton.isEnabled = blockAreaItems.isNotEmpty()
+        resetButton.setOnClickListener {
             MessageDialog()
                 .setTitle("Reset Block Areas")
                 .setMessage("Are you sure you want to reset all block areas?")
@@ -98,6 +103,7 @@ class BlockAreaFragment : BaseFragment() {
                         it.itemView.removeSelf()
                     }
 
+                    resetButton.isEnabled = false
                     dialog.dismiss()
                 }
                 .addButton("No") { dialog -> dialog.dismiss() }
@@ -179,6 +185,8 @@ class BlockAreaFragment : BaseFragment() {
                 remove.setOnClickListener {
                     itemView.removeSelf()
                     DatabaseManager.blockAreaTable.delete(data)
+                    blockAreaItems.remove(this)
+                    resetButton.isEnabled = blockAreaItems.isNotEmpty()
                 }
 
                 resize.setOnTouchListener { _, event ->
