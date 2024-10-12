@@ -1825,7 +1825,10 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
 
         createBurstEffect(pos, color);
         createHitEffect(pos, scoreName, color);
-        healthDisplay.flash();
+
+        if (healthDisplay != null) {
+            healthDisplay.flash();
+        }
     }
 
     public void onSliderReverse(PointF pos, float ang, RGBColor color) {
@@ -1903,7 +1906,10 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
         }
 
         createHitEffect(judgementPos, scoreName, color);
-        healthDisplay.flash();
+
+        if (healthDisplay != null) {
+            healthDisplay.flash();
+        }
     }
 
 
@@ -1957,7 +1963,10 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
         };
 
         createHitEffect(pos, scoreName, null);
-        healthDisplay.flash();
+
+        if (healthDisplay != null) {
+            healthDisplay.flash();
+        }
     }
 
     @Override
