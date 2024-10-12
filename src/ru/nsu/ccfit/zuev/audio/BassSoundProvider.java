@@ -84,7 +84,7 @@ public class BassSoundProvider {
         if (looping) {
             sampleInfo.flags |= BASS.BASS_SAMPLE_LOOP;
         } else {
-            sampleInfo.flags &= ~BASS.BASS_SAMPLE_LOOP;
+            sampleInfo.flags ^= BASS.BASS_SAMPLE_LOOP;
         }
 
         BASS.BASS_SampleSetInfo(sample, sampleInfo);
