@@ -209,10 +209,10 @@ public class ModMenu implements IModSwitcher {
         menu = null;
     }
 
-    private void addButton(int x, int y, String texture, GameMod mod) {
+    private void addButton(int x, int y, GameMod mod) {
         ModButton mButton;
 
-        mButton = new ModButton(x, y, texture, mod);
+        mButton = new ModButton(x, y, mod);
         mButton.setModEnabled(this.mod.contains(mod));
         mButton.setSwitcher(this);
         scene.attachChild(mButton);
@@ -247,47 +247,47 @@ public class ModMenu implements IModSwitcher {
         final TextureRegion button = ResourceManager.getInstance().getTexture("selection-mod-easy");
 
         //line 1
-        addButton(offset, Config.getRES_HEIGHT() / 2 - button.getHeight() * 3, "selection-mod-easy", GameMod.MOD_EASY);
+        addButton(offset, Config.getRES_HEIGHT() / 2 - button.getHeight() * 3, GameMod.MOD_EASY);
 
         // Used to define the X offset of each button according to its visibility
         int factor = 1;
 
-        addButton(offset + offsetGrowth * factor++, Config.getRES_HEIGHT() / 2 - button.getHeight() * 3, "selection-mod-nofail", GameMod.MOD_NOFAIL);
+        addButton(offset + offsetGrowth * factor++, Config.getRES_HEIGHT() / 2 - button.getHeight() * 3, GameMod.MOD_NOFAIL);
 
         if (!Multiplayer.isMultiplayer || Multiplayer.isRoomHost())
-            addButton(offset + offsetGrowth * factor++, Config.getRES_HEIGHT() / 2 - button.getHeight() * 3, "selection-mod-halftime", GameMod.MOD_HALFTIME);
+            addButton(offset + offsetGrowth * factor++, Config.getRES_HEIGHT() / 2 - button.getHeight() * 3, GameMod.MOD_HALFTIME);
 
-        addButton(offset + offsetGrowth * factor, Config.getRES_HEIGHT() / 2 - button.getHeight() * 3, "selection-mod-reallyeasy", GameMod.MOD_REALLYEASY);
+        addButton(offset + offsetGrowth * factor, Config.getRES_HEIGHT() / 2 - button.getHeight() * 3, GameMod.MOD_REALLYEASY);
 
         factor = 1;
 
         //line 2
-        addButton(offset, Config.getRES_HEIGHT() / 2 - button.getHeight() / 2, "selection-mod-hardrock", GameMod.MOD_HARDROCK);
+        addButton(offset, Config.getRES_HEIGHT() / 2 - button.getHeight() / 2, GameMod.MOD_HARDROCK);
 
         if (!Multiplayer.isMultiplayer || Multiplayer.isRoomHost())
-            addButton(offset + offsetGrowth * factor++, Config.getRES_HEIGHT() / 2 - button.getHeight() / 2, "selection-mod-doubletime", GameMod.MOD_DOUBLETIME);
+            addButton(offset + offsetGrowth * factor++, Config.getRES_HEIGHT() / 2 - button.getHeight() / 2, GameMod.MOD_DOUBLETIME);
 
         if (!Multiplayer.isMultiplayer || Multiplayer.isRoomHost())
-            addButton(offset + offsetGrowth * factor++, Config.getRES_HEIGHT() / 2 - button.getHeight() / 2, "selection-mod-nightcore", GameMod.MOD_NIGHTCORE);
+            addButton(offset + offsetGrowth * factor++, Config.getRES_HEIGHT() / 2 - button.getHeight() / 2, GameMod.MOD_NIGHTCORE);
 
-        addButton(offset + offsetGrowth * factor++, Config.getRES_HEIGHT() / 2 - button.getHeight() / 2, "selection-mod-hidden", GameMod.MOD_HIDDEN);
-        addButton(offset + offsetGrowth * factor++, Config.getRES_HEIGHT() / 2 - button.getHeight() / 2, "selection-mod-flashlight", GameMod.MOD_FLASHLIGHT);
-        addButton(offset + offsetGrowth * factor++, Config.getRES_HEIGHT() / 2 - button.getHeight() / 2, "selection-mod-suddendeath", GameMod.MOD_SUDDENDEATH);
-        addButton(offset + offsetGrowth * factor, Config.getRES_HEIGHT() / 2 - button.getHeight() / 2, "selection-mod-perfect", GameMod.MOD_PERFECT);
+        addButton(offset + offsetGrowth * factor++, Config.getRES_HEIGHT() / 2 - button.getHeight() / 2, GameMod.MOD_HIDDEN);
+        addButton(offset + offsetGrowth * factor++, Config.getRES_HEIGHT() / 2 - button.getHeight() / 2, GameMod.MOD_FLASHLIGHT);
+        addButton(offset + offsetGrowth * factor++, Config.getRES_HEIGHT() / 2 - button.getHeight() / 2, GameMod.MOD_SUDDENDEATH);
+        addButton(offset + offsetGrowth * factor, Config.getRES_HEIGHT() / 2 - button.getHeight() / 2, GameMod.MOD_PERFECT);
 
         factor = 1;
 
         //line 3
-        addButton(offset, Config.getRES_HEIGHT() / 2 + button.getHeight() * 2, "selection-mod-relax", GameMod.MOD_RELAX);
-        addButton(offset + offsetGrowth * factor++, Config.getRES_HEIGHT() / 2 + button.getHeight() * 2, "selection-mod-relax2", GameMod.MOD_AUTOPILOT);
+        addButton(offset, Config.getRES_HEIGHT() / 2 + button.getHeight() * 2, GameMod.MOD_RELAX);
+        addButton(offset + offsetGrowth * factor++, Config.getRES_HEIGHT() / 2 + button.getHeight() * 2, GameMod.MOD_AUTOPILOT);
 
         if (!Multiplayer.isMultiplayer)
-            addButton(offset + offsetGrowth * factor++, Config.getRES_HEIGHT() / 2 + button.getHeight() * 2, "selection-mod-autoplay", GameMod.MOD_AUTO);
+            addButton(offset + offsetGrowth * factor++, Config.getRES_HEIGHT() / 2 + button.getHeight() * 2, GameMod.MOD_AUTO);
 
         if (!Multiplayer.isMultiplayer)
-            addButton(offset + offsetGrowth * factor++, Config.getRES_HEIGHT() / 2 + button.getHeight() * 2, "selection-mod-scorev2", GameMod.MOD_SCOREV2);
+            addButton(offset + offsetGrowth * factor++, Config.getRES_HEIGHT() / 2 + button.getHeight() * 2, GameMod.MOD_SCOREV2);
 
-        addButton(offset + offsetGrowth * factor, Config.getRES_HEIGHT() / 2 + button.getHeight() * 2, "selection-mod-precise", GameMod.MOD_PRECISE);
+        addButton(offset + offsetGrowth * factor, Config.getRES_HEIGHT() / 2 + button.getHeight() * 2, GameMod.MOD_PRECISE);
 
         final TextButton resetText = new TextButton(ResourceManager
                 .getInstance().getFont("CaptionFont"),
