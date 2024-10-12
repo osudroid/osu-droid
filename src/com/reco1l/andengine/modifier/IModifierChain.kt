@@ -30,7 +30,6 @@ interface IModifierChain {
      * Begins a parallel chain of modifiers.
      */
     fun beginParallel(block: UniversalModifier.() -> Unit): UniversalModifier {
-        // 'returnModifier' is set to 'false' to prevent following modifiers in the chain outside the block from being applied to the parallel.
         return applyModifier {
             type = Parallel
             allowNesting = true
@@ -146,6 +145,15 @@ interface IModifierChain {
 
     fun fadeIn(durationSec: Float = 0f): UniversalModifier {
         return fadeTo(1f, durationSec)
+    }
+
+    fun fadeInFromZero(durationSec: Float = 0f): UniversalModifier {
+        return applyModifier {
+            type = Alpha
+            duration = durationSec
+            initialValues = floatArrayOf(0f)
+            finalValues = floatArrayOf(1f)
+        }
     }
 
     fun fadeOut(durationSec: Float = 0f): UniversalModifier {
