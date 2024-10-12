@@ -17,6 +17,9 @@ interface IModifierChain {
      * Implementations should override this method to support their own modifier pools
      * as well register the modifier as nested to the current chain and use the [block]
      * callback on it.
+     *
+     * @param returnModifier Whether this function should return the newly created modifier or the parent chain.
+     * @param block The block of code to execute on the newly created modifier.
      */
     fun applyModifier(block: UniversalModifier.() -> Unit): UniversalModifier
 
@@ -24,22 +27,15 @@ interface IModifierChain {
     // Nested chains
 
     /**
-     * Begins a sequential chain of modifiers.
-     */
-    fun beginSequenceChain(block: IModifierChain.() -> Unit) {
-        applyModifier {
-            type = Sequence
-            block()
-        }
-    }
-
-    /**
      * Begins a parallel chain of modifiers.
      */
-    fun beginParallelChain(block: IModifierChain.() -> Unit) {
-        applyModifier {
+    fun beginParallel(block: UniversalModifier.() -> Unit): UniversalModifier {
+        // 'returnModifier' is set to 'false' to prevent following modifiers in the chain outside the block from being applied to the parallel.
+        return applyModifier {
             type = Parallel
+            allowNesting = true
             block()
+            allowNesting = false
         }
     }
 

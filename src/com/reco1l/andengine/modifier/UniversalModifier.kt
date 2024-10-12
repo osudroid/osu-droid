@@ -21,11 +21,6 @@ import kotlin.math.*
 class UniversalModifier @JvmOverloads constructor(private val pool: Pool<UniversalModifier>? = GlobalPool) : IEntityModifier, IModifierChain {
 
     /**
-     * The parent of this modifier.
-     */
-    var parent: IModifierChain? = null
-
-    /**
      * The type of the modifier.
      * @see ModifierType
      */
@@ -33,7 +28,7 @@ class UniversalModifier @JvmOverloads constructor(private val pool: Pool<Univers
         set(value) {
             field = value
 
-            if (!value.usesNestedModifiers) {
+            if (!value.isCompoundModifier) {
                 clearNestedModifiers()
             }
         }
@@ -42,11 +37,6 @@ class UniversalModifier @JvmOverloads constructor(private val pool: Pool<Univers
      * Inner modifiers for [Sequence] or [Parallel] modifier types.
      */
     var modifiers: Array<UniversalModifier>? = null
-        set(value) {
-            if (value == null || type.usesNestedModifiers) {
-                field = value
-            }
-        }
 
     /**
      * The initial values for the modifier.
@@ -63,19 +53,28 @@ class UniversalModifier @JvmOverloads constructor(private val pool: Pool<Univers
      */
     var onFinished: OnModifierFinished? = null
 
+    /**
+     * Whether to allow nested modifiers.
+     *
+     * Used to prevent chained calls of modifiers from being
+     * applied to this compound modifier, only modifiers inside the block should be applied.
+     */
+    var allowNesting = true
+
+
+    private var parent: UniversalModifier? = null
+
+    private var easing = Easing.None
 
     private var duration = 0f
 
     private var elapsedSec = -1f
-
-    private var easing = Easing.None
 
 
     private fun clearNestedModifiers() {
         modifiers?.forEach { it.onUnregister() }
         modifiers = null
     }
-
 
     override fun onUpdate(deltaTimeSec: Float, entity: IEntity): Float {
 
@@ -94,7 +93,7 @@ class UniversalModifier @JvmOverloads constructor(private val pool: Pool<Univers
 
         var consumedTimeSec = 0f
 
-        if (type.usesNestedModifiers) {
+        if (type.isCompoundModifier) {
 
             var remainingTimeSec = deltaTimeSec
             var isAllModifiersFinished = false
@@ -149,7 +148,7 @@ class UniversalModifier @JvmOverloads constructor(private val pool: Pool<Univers
             // we have to assume the percentage is 1 to avoid division by zero.
             val percentage = if (duration > 0) easing.interpolate(elapsedSec / duration) else 1f
 
-            if (initialValues != null && finalValues == null) {
+            if (initialValues != null && finalValues != null) {
                 type.setValues(entity, initialValues!!, finalValues!!, percentage)
             }
         }
@@ -179,50 +178,54 @@ class UniversalModifier @JvmOverloads constructor(private val pool: Pool<Univers
 
     override fun applyModifier(block: UniversalModifier.() -> Unit): UniversalModifier {
 
-        // This condition will be false in chained calls mostly, in that case
-        // we wrap all the modifiers in the same call chain into a sequence.
-        if (!type.usesNestedModifiers) {
+        if (type.isCompoundModifier && allowNesting) {
 
-            // If the parent is a sequence modifier, we add this modifier to it directly.
-            if ((parent as? UniversalModifier)?.type == Sequence) {
-                return parent!!.applyModifier(block)
-            }
+            val nested = pool?.obtain() ?: UniversalModifier()
+            nested.setToDefault()
+            nested.parent = this
+            nested.block()
 
-            if (type != Sequence) {
-
-                val thisCopy = pool?.obtain() ?: UniversalModifier()
-                thisCopy.setToDefault()
-                thisCopy.setFrom(this)
-                thisCopy.parent = this
-
-                // Setting modifiers to null so setToDefault() doesn't pool them back.
-                modifiers = null
-                setToDefault()
-
-                type = Sequence
-                modifiers = arrayOf(thisCopy)
-            }
-
-            return applyModifier(block)
+            modifiers = modifiers?.plus(nested) ?: arrayOf(nested)
+            return nested
         }
 
-        val nestedModifier = pool?.obtain() ?: UniversalModifier()
-        nestedModifier.setToDefault()
-        nestedModifier.parent = this
-        nestedModifier.block()
+        if (parent?.type == Sequence) {
+            return parent!!.applyModifier(block)
+        }
 
-        modifiers = modifiers?.plus(nestedModifier) ?: arrayOf(nestedModifier)
-        return nestedModifier
+        if (type != Sequence || !allowNesting) {
+
+            val copy = pool?.obtain() ?: UniversalModifier()
+            copy.setToDefault()
+            copy.parent = this
+
+            copy.type = type
+            copy.easing = easing
+            copy.duration = duration
+            copy.modifiers = modifiers
+            copy.onFinished = onFinished
+            copy.finalValues = finalValues
+            copy.initialValues = initialValues
+
+            modifiers = null // Preventing modifiers of the copy from being pooled.
+            setToDefault()
+
+            type = Sequence
+            modifiers = arrayOf(copy)
+        }
+
+        return applyModifier(block)
     }
+
 
     /**
      * Sets the easing function to be used.
      *
-     * If the modifier is a [Sequence] or [Parallel] modifier, this method will set the easing for all the inner modifiers.
+     * If the modifier is a [Sequence] or [Parallel] modifier, this method will set the easing for all the nested modifiers.
      */
     fun eased(value: Easing): UniversalModifier {
 
-        if (type.usesNestedModifiers) {
+        if (type.isCompoundModifier) {
             modifiers?.fastForEach { it.eased(value) }
         } else {
             easing = value
@@ -248,14 +251,15 @@ class UniversalModifier @JvmOverloads constructor(private val pool: Pool<Univers
     fun setToDefault() {
 
         type = Delay
+        easing = Easing.None
 
         duration = 0f
-        finalValues = null
-        initialValues = null
 
         parent = null
-        easing = Easing.None
         onFinished = null
+        finalValues = null
+        allowNesting = true
+        initialValues = null
 
         clearNestedModifiers()
         reset()
@@ -283,7 +287,7 @@ class UniversalModifier @JvmOverloads constructor(private val pool: Pool<Univers
      */
     fun setDuration(value: Float) {
 
-        if (type.usesNestedModifiers) {
+        if (type.isCompoundModifier) {
             Log.w("UniversalModifier", "Cannot manually set duration for sequence or parallel modifiers, ignoring.")
             return
         }
@@ -306,7 +310,7 @@ class UniversalModifier @JvmOverloads constructor(private val pool: Pool<Univers
 
 
     override fun isFinished(): Boolean {
-        if (type.usesNestedModifiers) {
+        if (type.isCompoundModifier) {
             for (modifier in modifiers ?: return true) {
                 if (!modifier.isFinished) {
                     return false
@@ -343,17 +347,6 @@ class UniversalModifier @JvmOverloads constructor(private val pool: Pool<Univers
         modifier.duration = duration
         modifier.modifiers = modifiers?.map { it.deepCopy() }?.toTypedArray()
         modifier.onFinished = onFinished
-    }
-
-    fun setFrom(other: UniversalModifier) {
-        type = other.type
-        parent = other.parent
-        easing = other.easing
-        duration = other.duration
-        modifiers = other.modifiers
-        onFinished = other.onFinished
-        finalValues = other.finalValues
-        initialValues = other.initialValues
     }
 
 

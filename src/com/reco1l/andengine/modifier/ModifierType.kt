@@ -1,8 +1,6 @@
 package com.reco1l.andengine.modifier
 
-import android.graphics.Color.*
 import com.reco1l.andengine.*
-import com.reco1l.framework.*
 import org.anddev.andengine.entity.*
 
 
@@ -96,7 +94,7 @@ enum class ModifierType {
     /**
      * Whether this modifier type uses nested modifiers.
      */
-    val usesNestedModifiers
+    val isCompoundModifier
         get() = this == Sequence || this == Parallel
 
 
@@ -135,40 +133,38 @@ enum class ModifierType {
 
     fun setValues(entity: IEntity, initialValues: FloatArray, finalValues: FloatArray, percentage: Float) {
 
-        fun getValueAt(index: Int): Float {
-            return initialValues[index] + (finalValues[index] - initialValues[index]) * percentage
-        }
+        fun valueAt(index: Int) = initialValues[index] + percentage * (finalValues[index] - initialValues[index])
 
         when (this) {
 
-            ScaleX -> entity.scaleX = getValueAt(0)
-            ScaleY -> entity.scaleY = getValueAt(0)
-            ScaleXY -> entity.setScale(getValueAt(0), getValueAt(1))
+            ScaleX -> entity.scaleX = valueAt(0)
+            ScaleY -> entity.scaleY = valueAt(0)
+            ScaleXY -> entity.setScale(valueAt(0), valueAt(1))
 
-            Alpha -> entity.alpha = getValueAt(0)
-            Color -> entity.setColor(getValueAt(0), getValueAt(1), getValueAt(2))
+            Alpha -> entity.alpha = valueAt(0)
+            Color -> entity.setColor(valueAt(0), valueAt(1), valueAt(2))
 
-            MoveX -> entity.setPosition(getValueAt(0), entity.y)
-            MoveY -> entity.setPosition(entity.x, getValueAt(0))
-            MoveXY -> entity.setPosition(getValueAt(0), getValueAt(1))
+            MoveX -> entity.setPosition(valueAt(0), entity.y)
+            MoveY -> entity.setPosition(entity.x, valueAt(0))
+            MoveXY -> entity.setPosition(valueAt(0), valueAt(1))
 
             TranslateX -> {
                 entity as? ExtendedEntity ?: throw IllegalArgumentException("TranslateX is only available for ExtendedEntity instances.")
-                entity.translationX = getValueAt(0)
+                entity.translationX = valueAt(0)
             }
 
             TranslateY -> {
                 entity as? ExtendedEntity ?: throw IllegalArgumentException("TranslateY is only available for ExtendedEntity instances.")
-                entity.translationY = getValueAt(0)
+                entity.translationY = valueAt(0)
             }
 
             TranslateXY -> {
                 entity as? ExtendedEntity ?: throw IllegalArgumentException("TranslateXY is only available for ExtendedEntity instances.")
-                entity.translationX = getValueAt(0)
-                entity.translationY = getValueAt(1)
+                entity.translationX = valueAt(0)
+                entity.translationY = valueAt(1)
             }
 
-            Rotation -> entity.rotation = getValueAt(0)
+            Rotation -> entity.rotation = valueAt(0)
 
             else -> Unit
         }
