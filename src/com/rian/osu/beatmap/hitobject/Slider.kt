@@ -307,18 +307,30 @@ class Slider(
         nestedHitObjects.forEach { it.applyDefaults(controlPoints, difficulty, mode, scope) }
     }
 
-    override fun applySamples(controlPoints: BeatmapControlPoints) {
+    override fun applySamples(controlPoints: BeatmapControlPoints, scope: CoroutineScope?) {
         val sampleControlPoint = controlPoints.sample.controlPointAt(startTime + CONTROL_POINT_LENIENCY + 1)
-        samples = samples.map { sampleControlPoint.applyTo(it) }.toMutableList()
+
+        samples = samples.map {
+            scope?.ensureActive()
+
+            sampleControlPoint.applyTo(it)
+        }.toMutableList()
 
         nodeSamples.forEachIndexed { i, sampleList ->
+            scope?.ensureActive()
+
             val time = startTime + i * spanDuration + CONTROL_POINT_LENIENCY
             val nodeSamplePoint = controlPoints.sample.controlPointAt(time)
 
-            nodeSamples[i] = sampleList.map { nodeSamplePoint.applyTo(it) }.toMutableList()
+            nodeSamples[i] = sampleList.map {
+                scope?.ensureActive()
+
+                nodeSamplePoint.applyTo(it)
+            }.toMutableList()
         }
 
-        createSlidingSamples(controlPoints)
+        createSlidingSamples(controlPoints, scope)
+        updateNestedSamples(controlPoints, scope)
     }
 
     /**
@@ -467,7 +479,7 @@ class Slider(
         gameplayStackedEndPositionCache.invalidate()
     }
 
-    private fun createSlidingSamples(controlPoints: BeatmapControlPoints) {
+    private fun createSlidingSamples(controlPoints: BeatmapControlPoints, scope: CoroutineScope?) {
         auxiliarySamples.clear()
 
         val bankSamples = samples.filterIsInstance<BankHitSampleInfo>()
@@ -481,11 +493,23 @@ class Slider(
         val samplePoints = controlPoints.sample.between(startTime + CONTROL_POINT_LENIENCY, endTime + CONTROL_POINT_LENIENCY)
 
         if (normalSlide != null) {
-            auxiliarySamples.add(SequenceHitSampleInfo(samplePoints.map { it.time to it.applyTo(baseNormalSlideSample) }))
+            auxiliarySamples.add(SequenceHitSampleInfo(
+                samplePoints.map {
+                    scope?.ensureActive()
+
+                    it.time to it.applyTo(baseNormalSlideSample)
+                }
+            ))
         }
 
         if (whistleSlide != null) {
-            auxiliarySamples.add(SequenceHitSampleInfo(samplePoints.map { it.time to it.applyTo(baseWhistleSlideSample) }))
+            auxiliarySamples.add(SequenceHitSampleInfo(
+                samplePoints.map {
+                    scope?.ensureActive()
+
+                    it.time to it.applyTo(baseWhistleSlideSample)
+                }
+            ))
         }
     }
 

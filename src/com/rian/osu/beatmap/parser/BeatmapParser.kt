@@ -220,7 +220,7 @@ class BeatmapParser : Closeable {
                 scope?.ensureActive()
 
                 it.applyDefaults(controlPoints, difficulty, mode, scope)
-                it.applySamples(controlPoints)
+                it.applySamples(controlPoints, scope)
             }
 
             BeatmapProcessor(this, scope).also {

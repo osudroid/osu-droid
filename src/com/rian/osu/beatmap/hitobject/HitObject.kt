@@ -9,6 +9,7 @@ import com.rian.osu.utils.Cached
 import com.rian.osu.utils.CircleSizeCalculator
 import kotlin.math.min
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.ensureActive
 import ru.nsu.ccfit.zuev.osu.Config
 import ru.nsu.ccfit.zuev.osu.Constants
 
@@ -346,11 +347,16 @@ abstract class HitObject(
      * Applies samples to this [HitObject].
      *
      * @param controlPoints The control points.
+     * @param scope The [CoroutineScope] to use for coroutines.
      */
-    open fun applySamples(controlPoints: BeatmapControlPoints) {
+    open fun applySamples(controlPoints: BeatmapControlPoints, scope: CoroutineScope?) {
         val sampleControlPoint = controlPoints.sample.controlPointAt(endTime + CONTROL_POINT_LENIENCY)
 
-        samples = samples.map { sampleControlPoint.applyTo(it) }.toMutableList()
+        samples = samples.map {
+            scope?.ensureActive()
+
+            sampleControlPoint.applyTo(it)
+        }.toMutableList()
     }
 
     /**
