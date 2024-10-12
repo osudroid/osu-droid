@@ -101,18 +101,18 @@ public class SongService extends Service {
         return preLoad(filePath, 1, false, false);
     }
 
-    public boolean preLoad(String filePath, float speed, boolean enableNC) {
-        return preLoad(filePath, speed, enableNC, false);
+    public boolean preLoad(String filePath, float speed, boolean adjustPitch) {
+        return preLoad(filePath, speed, adjustPitch, false);
     }
 
-    public boolean preLoad(String filePath, float speed, boolean enableNC, boolean isLoop) {
+    public boolean preLoad(String filePath, float speed, boolean adjustPitch, boolean isLoop) {
         if (checkFileExist(filePath)) {
             if (audioFunc == null) {
                 return false;
             }
 
             audioFunc.setLoop(isLoop);
-            return audioFunc.preLoad(filePath, speed, enableNC);
+            return audioFunc.preLoad(filePath, speed, adjustPitch);
         }
         return false;
     }

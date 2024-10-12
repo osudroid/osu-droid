@@ -155,7 +155,6 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
     public StatisticV2 stat;
     private boolean gameStarted;
     private float totalOffset;
-    //private IMusicPlayer music = null;
     private int totalLength = Integer.MAX_VALUE;
     private boolean paused;
     private ExtendedSprite skipBtn;
