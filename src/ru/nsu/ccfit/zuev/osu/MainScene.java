@@ -873,11 +873,27 @@ public class MainScene implements IUpdateHandler {
                 int position = GlobalManager.getInstance().getSongService() != null ?
                         GlobalManager.getInstance().getSongService().getPosition() : 0;
 
-                currentTimingPoint = beatmap.getControlPoints().timing.controlPointAt(position);
+                currentTimingPoint = null;
+                currentEffectPoint = null;
+
+                while (!timingControlPoints.isEmpty() && position > timingControlPoints.peek().time) {
+                    currentTimingPoint = timingControlPoints.pop();
+                }
+
+                while (!effectControlPoints.isEmpty() && position > effectControlPoints.peek().time) {
+                    currentEffectPoint = effectControlPoints.pop();
+                }
+
+                if (currentTimingPoint == null) {
+                    currentTimingPoint = beatmap.getControlPoints().timing.defaultControlPoint;
+                }
+
+                if (currentEffectPoint == null) {
+                    currentEffectPoint = beatmap.getControlPoints().effect.defaultControlPoint;
+                }
+
                 bpmLength = currentTimingPoint.msPerBeat;
                 beatPassTime = (position - currentTimingPoint.time) % bpmLength;
-
-                currentEffectPoint = beatmap.getControlPoints().effect.controlPointAt(position);
             }
         }
     }
