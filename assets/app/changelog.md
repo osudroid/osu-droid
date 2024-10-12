@@ -143,6 +143,7 @@ The following gameplay elements' display has been updated to match osu!stable:
 - Optimized beatmap switching operation in song selection menu
 - The `x` and `y` properties in `skin.json`'s `Layout` configuration now affects a button's position
 - CS and OD conversions in song selection menu are now displayed using osu!droid metrics rather than osu!standard
+- Music in song selection menu now adjusts based on selected mods and settings
 
 # Removals
 
