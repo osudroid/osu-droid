@@ -1,14 +1,10 @@
 package com.reco1l.osu
 
 import com.reco1l.andengine.modifier.*
-import com.reco1l.framework.Pool
 import com.reco1l.andengine.modifier.ModifierType.*
-import org.anddev.andengine.entity.IEntity
+import com.reco1l.andengine.modifier.UniversalModifier.Companion.GlobalPool
 import org.anddev.andengine.util.modifier.IModifier.*
-import org.anddev.andengine.util.modifier.ease.EaseSineInOut
-import org.anddev.andengine.util.modifier.ease.EaseSineOut
 import org.anddev.andengine.util.modifier.ease.IEaseFunction
-import org.anddev.andengine.util.modifier.ease.EaseSineIn
 import org.anddev.andengine.util.modifier.ease.IEaseFunction.DEFAULT as DefaultEaseFunction
 
 /**
@@ -21,18 +17,15 @@ import org.anddev.andengine.util.modifier.ease.IEaseFunction.DEFAULT as DefaultE
 object Modifiers {
 
     @JvmStatic
-    val pool = Pool(50, ::UniversalModifier)
-
-
-    @JvmStatic
     @JvmOverloads
-    fun alpha(duration: Float, from: Float, to: Float, listener: OnModifierFinished? = null, easeFunction: IEaseFunction = DefaultEaseFunction) = pool.obtain().also {
+    fun alpha(duration: Float, from: Float, to: Float, listener: OnModifierFinished? = null, easeFunction: IEaseFunction = DefaultEaseFunction) = GlobalPool.obtain().also {
         it.setToDefault()
-        it.type = ALPHA
+        it.type = Alpha
         it.duration = duration
-        it.values = floatArrayOf(from, to)
-        it.easeFunction = easeFunction
+        it.initialValues = floatArrayOf(from)
+        it.finalValues = floatArrayOf(to)
         it.onFinished = listener
+        it.easeFunction = easeFunction
     }
 
     @JvmStatic
@@ -45,11 +38,12 @@ object Modifiers {
 
     @JvmStatic
     @JvmOverloads
-    fun scale(duration: Float, from: Float, to: Float, listener: OnModifierFinished? = null, easeFunction: IEaseFunction = DefaultEaseFunction) = pool.obtain().also {
+    fun scale(duration: Float, from: Float, to: Float, listener: OnModifierFinished? = null, easeFunction: IEaseFunction = DefaultEaseFunction) = GlobalPool.obtain().also {
         it.setToDefault()
-        it.type = SCALE
+        it.type = ScaleXY
         it.duration = duration
-        it.values = floatArrayOf(from, to)
+        it.initialValues = floatArrayOf(from)
+        it.finalValues = floatArrayOf(to)
         it.easeFunction = easeFunction
         it.onFinished = listener
     }
@@ -66,120 +60,78 @@ object Modifiers {
         toBlue: Float,
         listener: OnModifierFinished? = null,
         easeFunction: IEaseFunction = DefaultEaseFunction
-    ) = pool.obtain().also {
+    ) = GlobalPool.obtain().also {
         it.setToDefault()
-        it.type = COLOR
+        it.type = Color
         it.duration = duration
         it.onFinished = listener
-
+        it.initialValues = floatArrayOf(fromRed, fromGreen, fromBlue)
+        it.finalValues = floatArrayOf(toRed, toGreen, toBlue)
         it.easeFunction = easeFunction
-        it.values = floatArrayOf(
-            fromRed, toRed,
-            fromGreen, toGreen,
-            fromBlue, toBlue
-        )
     }
 
     @JvmStatic
     @JvmOverloads
-    fun sequence(listener: OnModifierFinished? = null, vararg modifiers: UniversalModifier) = pool.obtain().also {
+    fun sequence(listener: OnModifierFinished? = null, vararg modifiers: UniversalModifier) = GlobalPool.obtain().also {
         it.setToDefault()
-        it.type = SEQUENCE
+        it.type = Sequence
         it.modifiers = arrayOf(*modifiers)
         it.onFinished = listener
-
     }
 
     @JvmStatic
     @JvmOverloads
-    fun parallel(listener: OnModifierFinished? = null, vararg modifiers: UniversalModifier) = pool.obtain().also {
+    fun parallel(listener: OnModifierFinished? = null, vararg modifiers: UniversalModifier) = GlobalPool.obtain().also {
         it.setToDefault()
-        it.type = PARALLEL
+        it.type = Parallel
         it.modifiers = arrayOf(*modifiers)
         it.onFinished = listener
-
     }
 
     @JvmStatic
     @JvmOverloads
-    fun delay(duration: Float, listener: OnModifierFinished? = null) = pool.obtain().also {
+    fun delay(duration: Float, listener: OnModifierFinished? = null) = GlobalPool.obtain().also {
         it.setToDefault()
-        it.type = NONE
+        it.type = Delay
         it.duration = duration
         it.onFinished = listener
-
     }
 
     @JvmStatic
     @JvmOverloads
-    fun translateX(duration: Float, from: Float, to: Float, listener: OnModifierFinished? = null, easeFunction: IEaseFunction = DefaultEaseFunction) = pool.obtain().also {
+    fun translateY(duration: Float, from: Float, to: Float, listener: OnModifierFinished? = null, easeFunction: IEaseFunction = DefaultEaseFunction) = GlobalPool.obtain().also {
         it.setToDefault()
-        it.type = TRANSLATE_X
+        it.type = TranslateY
         it.duration = duration
-        it.values = floatArrayOf(from, to)
+        it.initialValues = floatArrayOf(from)
+        it.finalValues = floatArrayOf(to)
+        it.onFinished = listener
         it.easeFunction = easeFunction
-        it.onFinished = listener
-
-    }
-
-    @JvmStatic
-    @JvmOverloads
-    fun translateY(duration: Float, from: Float, to: Float, listener: OnModifierFinished? = null, easeFunction: IEaseFunction = DefaultEaseFunction) = pool.obtain().also {
-        it.setToDefault()
-        it.type = TRANSLATE_Y
-        it.duration = duration
-        it.values = floatArrayOf(from, to)
-        it.easeFunction = easeFunction
-        it.onFinished = listener
-
     }
 
     @JvmStatic
     @JvmOverloads
     fun move(duration: Float, fromX: Float, toX: Float, fromY: Float, toY: Float, listener: OnModifierFinished? = null, easeFunction: IEaseFunction = DefaultEaseFunction) =
-        pool.obtain().also {
+        GlobalPool.obtain().also {
             it.setToDefault()
-            it.type = MOVE
+            it.type = MoveXY
             it.duration = duration
-            it.values = floatArrayOf(
-                fromX, toX,
-                fromY, toY
-            )
-            it.easeFunction = easeFunction
+            it.initialValues = floatArrayOf(fromX, fromY)
+            it.finalValues = floatArrayOf(toX, toY)
             it.onFinished = listener
-
+            it.easeFunction = easeFunction
         }
 
     @JvmStatic
     @JvmOverloads
-    fun rotation(duration: Float, from: Float, to: Float, listener: OnModifierFinished? = null, easeFunction: IEaseFunction = DefaultEaseFunction) = pool.obtain().also {
+    fun rotation(duration: Float, from: Float, to: Float, listener: OnModifierFinished? = null, easeFunction: IEaseFunction = DefaultEaseFunction) = GlobalPool.obtain().also {
         it.setToDefault()
-        it.type = ROTATION
+        it.type = Rotation
         it.duration = duration
-        it.values = floatArrayOf(from, to)
+        it.initialValues = floatArrayOf(from)
+        it.finalValues = floatArrayOf(to)
+        it.onFinished = listener
         it.easeFunction = easeFunction
-        it.onFinished = listener
-
-    }
-
-    @JvmStatic
-    @JvmOverloads
-    fun shakeHorizontal(duration: Float, magnitude: Float, listener: OnModifierFinished? = null) = pool.obtain().also {
-
-        // Based on osu!lazer's shake effect: https://github.com/ppy/osu/blob/5341a335a6165ceef4d91e910fa2ea5aecbfd025/osu.Game/Extensions/DrawableExtensions.cs#L19-L37
-
-        it.setToDefault()
-        it.type = SEQUENCE
-        it.modifiers = arrayOf(
-            translateX(duration / 8f, 0f, magnitude, easeFunction = EaseSineOut.getInstance()),
-            translateX(duration / 4f, magnitude, -magnitude, easeFunction = EaseSineInOut.getInstance()),
-            translateX(duration / 4f, -magnitude, magnitude, easeFunction = EaseSineInOut.getInstance()),
-            translateX(duration / 4f, magnitude, -magnitude, easeFunction = EaseSineInOut.getInstance()),
-            translateX(duration / 8f, -magnitude, 0f, easeFunction = EaseSineIn.getInstance()),
-        )
-        it.onFinished = listener
-
-
     }
 
 }
