@@ -38,7 +38,7 @@ public class BassSoundProvider {
     }
 
     public void play() {
-        play(Config.getSoundVolume());
+        play(1);
     }
 
     public void play(float volume) {
