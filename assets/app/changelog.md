@@ -69,6 +69,7 @@ for preventing accidental touches.
     }
     ```
 - Added support for `sliderslide` and `sliderwhistle` hitsounds
+- Added support for `check-off`, `check-on`, `click-short`, and `click-short-confirm` skin samples
 - Added support for `scorebar-marker` texture
 - Added support for custom file hitsounds
 - Added an animation to slider end arrow rotation when snaking animation is enabled

@@ -328,6 +328,8 @@ public class SongMenu implements IUpdateHandler, MenuItemListener,
                 ResourceManager.getInstance().getFont("smallFont"), "dimensionInfo", 1024);
         frontLayer.attachChild(beatmapDifficultyText);
 
+        var clickShortSound = ResourceManager.getInstance().getSound("click-short");
+        var clickShortConfirmSound = ResourceManager.getInstance().getSound("click-short-confirm");
 
         SkinLayout layoutBackButton = OsuSkin.get().getLayout("BackButton");
         SkinLayout layoutMods = null;
@@ -414,6 +416,9 @@ public class SongMenu implements IUpdateHandler, MenuItemListener,
                         setTextureRegion(ResourceManager.getInstance().getTextureIfLoaded("selection-mods"));
                         if (!moved) {
                             velocityY = 0;
+                            if (clickShortConfirmSound != null) {
+                                clickShortConfirmSound.play();
+                            }
                             ModMenu.getInstance().show(scene, selectedBeatmap);
                         }
                         return true;
@@ -422,6 +427,10 @@ public class SongMenu implements IUpdateHandler, MenuItemListener,
                             || pSceneTouchEvent.isActionMove()
                             && (MathUtils.distance(dx, dy, pTouchAreaLocalX,
                             pTouchAreaLocalY) > 50)) {
+                        if (!moved && clickShortSound != null) {
+                            clickShortSound.play();
+                        }
+
                         moved = true;
                         setTextureRegion(ResourceManager.getInstance().getTextureIfLoaded("selection-mods"));
                     }
@@ -452,6 +461,9 @@ public class SongMenu implements IUpdateHandler, MenuItemListener,
                     setTextureRegion(ResourceManager.getInstance().getTextureIfLoaded("selection-options"));
                     if (!moved) {
                         velocityY = 0;
+                        if (clickShortConfirmSound != null) {
+                            clickShortConfirmSound.play();
+                        }
 
                         if (filterMenu == null) loadFilterFragment();
 
@@ -463,6 +475,10 @@ public class SongMenu implements IUpdateHandler, MenuItemListener,
                         || pSceneTouchEvent.isActionMove()
                         && (MathUtils.distance(dx, dy, pTouchAreaLocalX,
                         pTouchAreaLocalY) > 50)) {
+                    if (!moved && clickShortSound != null) {
+                        clickShortSound.play();
+                    }
+
                     moved = true;
                     setTextureRegion(ResourceManager.getInstance().getTextureIfLoaded("selection-options"));
                 }
@@ -512,7 +528,10 @@ public class SongMenu implements IUpdateHandler, MenuItemListener,
 
                             previousSelectionPerformed = true;
 
-                            ResourceManager.getInstance().getSound("menuclick").play();
+                            if (clickShortConfirmSound != null) {
+                                clickShortConfirmSound.play();
+                            }
+
                             previousItem.select();
                         }
 
@@ -559,7 +578,9 @@ public class SongMenu implements IUpdateHandler, MenuItemListener,
                         if (selectedItem == items.get(index)) {
                             return true;
                         }
-                        ResourceManager.getInstance().getSound("menuclick").play();
+                        if (clickShortConfirmSound != null) {
+                            clickShortConfirmSound.play();
+                        }
                         items.get(index).select();
                     }
 
@@ -570,6 +591,10 @@ public class SongMenu implements IUpdateHandler, MenuItemListener,
                         || pSceneTouchEvent.isActionMove()
                         && (MathUtils.distance(dx, dy, pTouchAreaLocalX,
                         pTouchAreaLocalY) > 50)) {
+                    if (!moved && clickShortSound != null) {
+                        clickShortSound.play();
+                    }
+
                     moved = true;
                     setTextureRegion(ResourceManager.getInstance().getTextureIfLoaded("selection-random"));
 

@@ -26,6 +26,7 @@ import java.util.Map;
 import java.util.TreeMap;
 import java.util.concurrent.CancellationException;
 
+import org.anddev.andengine.util.MathUtils;
 import org.jetbrains.annotations.Nullable;
 
 import kotlinx.coroutines.Job;
@@ -246,6 +247,9 @@ public class ModMenu implements IModSwitcher {
         final int offsetGrowth = 130;
         final TextureRegion button = ResourceManager.getInstance().getTexture("selection-mod-easy");
 
+        var clickShortSound = ResourceManager.getInstance().getSound("click-short");
+        var clickShortConfirmSound = ResourceManager.getInstance().getSound("click-short-confirm");
+
         //line 1
         addButton(offset, Config.getRES_HEIGHT() / 2 - button.getHeight() * 3, GameMod.MOD_EASY);
 
@@ -293,18 +297,47 @@ public class ModMenu implements IModSwitcher {
                 .getInstance().getFont("CaptionFont"),
                 StringTable.get(R.string.menu_mod_reset)) {
 
+            boolean moved = false;
+            private float dx = 0, dy = 0;
+
             @Override
             public boolean onAreaTouched(final TouchEvent pSceneTouchEvent,
                                          final float pTouchAreaLocalX, final float pTouchAreaLocalY) {
-                if (pSceneTouchEvent.isActionUp()) {
-                    mod.clear();
-                    reloadMusicEffects();
-                    changeMultiplierText();
-                    for (ModButton btn : modButtons.values()) {
-                        btn.setModEnabled(false);
-                    }
+                if (pSceneTouchEvent.isActionDown()) {
+                    moved = false;
+                    dx = pTouchAreaLocalX;
+                    dy = pTouchAreaLocalY;
                     return true;
                 }
+
+                if (pSceneTouchEvent.isActionUp()) {
+                    if (!moved) {
+                        if (clickShortConfirmSound != null) {
+                            clickShortConfirmSound.play();
+                        }
+
+                        mod.clear();
+                        reloadMusicEffects();
+                        changeMultiplierText();
+                        for (ModButton btn : modButtons.values()) {
+                            btn.setModEnabled(false);
+                        }
+                    }
+
+                    return true;
+                }
+
+                if (pSceneTouchEvent.isActionOutside()
+                        || pSceneTouchEvent.isActionMove()
+                        && (MathUtils.distance(dx, dy, pTouchAreaLocalX,
+                        pTouchAreaLocalY) > 50)) {
+                    if (!moved && clickShortSound != null) {
+                        clickShortSound.play();
+                    }
+
+                    moved = true;
+                }
+
                 return false;
             }
         };
@@ -319,10 +352,24 @@ public class ModMenu implements IModSwitcher {
                 .getInstance().getFont("CaptionFont"),
                 StringTable.get(R.string.menu_mod_back)) {
 
+            boolean moved = false;
+            private float dx = 0, dy = 0;
+
             @Override
             public boolean onAreaTouched(final TouchEvent pSceneTouchEvent,
                                          final float pTouchAreaLocalX, final float pTouchAreaLocalY) {
-                if (pSceneTouchEvent.isActionUp()) {
+                if (pSceneTouchEvent.isActionDown()) {
+                    moved = false;
+                    dx = pTouchAreaLocalX;
+                    dy = pTouchAreaLocalY;
+                    return true;
+                }
+
+                if (pSceneTouchEvent.isActionUp() && !moved) {
+                    if (clickShortConfirmSound != null) {
+                        clickShortConfirmSound.play();
+                    }
+
                     cancelCalculationJob();
 
                     calculationJob = Execution.async(scope -> {
@@ -375,6 +422,17 @@ public class ModMenu implements IModSwitcher {
                     hide();
                     return true;
                 }
+
+                if (pSceneTouchEvent.isActionOutside()
+                        || pSceneTouchEvent.isActionMove()
+                        && (MathUtils.distance(dx, dy, pTouchAreaLocalX,
+                        pTouchAreaLocalY) > 50)) {
+                    if (!moved && clickShortSound != null) {
+                        clickShortSound.play();
+                    }
+                    moved = true;
+                }
+
                 return false;
             }
         };
@@ -479,6 +537,9 @@ public class ModMenu implements IModSwitcher {
     public boolean switchMod(GameMod flag) {
         boolean returnValue = true;
 
+        var checkOffSound = ResourceManager.getInstance().getSound("check-off");
+        var checkOnSound = ResourceManager.getInstance().getSound("check-on");
+
         if (mod.contains(flag)) {
             mod.remove(flag);
 
@@ -490,6 +551,9 @@ public class ModMenu implements IModSwitcher {
             mod.add(flag);
 
             if (handleCustomDifficultyStatisticsFlags()) {
+                if (checkOffSound != null) {
+                    checkOffSound.play();
+                }
                 return false;
             }
 
@@ -514,6 +578,16 @@ public class ModMenu implements IModSwitcher {
 
         if (flag == GameMod.MOD_DOUBLETIME || flag == GameMod.MOD_NIGHTCORE || flag == GameMod.MOD_HALFTIME) {
             reloadMusicEffects();
+        }
+
+        if (returnValue) {
+            if (checkOnSound != null) {
+                checkOnSound.play();
+            }
+        } else {
+            if (checkOffSound != null) {
+                checkOffSound.play();
+            }
         }
 
         changeMultiplierText();

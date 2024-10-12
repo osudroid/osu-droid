@@ -7,8 +7,8 @@ import org.anddev.andengine.input.touch.TouchEvent
 import org.anddev.andengine.util.MathUtils
 import ru.nsu.ccfit.zuev.osu.Config
 import ru.nsu.ccfit.zuev.osu.DifficultyAlgorithm
-import ru.nsu.ccfit.zuev.osu.ResourceManager
 import ru.nsu.ccfit.zuev.osu.GlobalManager.getInstance as getGlobal
+import ru.nsu.ccfit.zuev.osu.ResourceManager.getInstance as getResources
 
 class DifficultyAlgorithmSwitcher : ExtendedSprite() {
     private var moved = false
@@ -16,10 +16,10 @@ class DifficultyAlgorithmSwitcher : ExtendedSprite() {
     private var initialY: Float? = null
 
     private val textures = arrayOf(
-        ResourceManager.getInstance().getTextureIfLoaded("selection-difficulty-droid"),
-        ResourceManager.getInstance().getTextureIfLoaded("selection-difficulty-droid-over"),
-        ResourceManager.getInstance().getTextureIfLoaded("selection-difficulty-standard"),
-        ResourceManager.getInstance().getTextureIfLoaded("selection-difficulty-standard-over")
+        getResources().getTextureIfLoaded("selection-difficulty-droid"),
+        getResources().getTextureIfLoaded("selection-difficulty-droid-over"),
+        getResources().getTextureIfLoaded("selection-difficulty-standard"),
+        getResources().getTextureIfLoaded("selection-difficulty-standard-over")
     )
 
     init {
@@ -37,6 +37,10 @@ class DifficultyAlgorithmSwitcher : ExtendedSprite() {
 
         if (event.isActionOutside || initialX == null || initialY == null ||
             event.isActionMove && MathUtils.distance(initialX!!, initialY!!, localX, localY) > 30) {
+            if (!moved) {
+                getResources().getSound("click-short")?.play()
+            }
+
             moved = true
 
             onDeselect()
@@ -45,6 +49,8 @@ class DifficultyAlgorithmSwitcher : ExtendedSprite() {
         if (moved || !event.isActionUp) {
             return true
         }
+
+        getResources().getSound("click-short-confirm")?.play()
 
         Config.setDifficultyAlgorithm(
             if (Config.getDifficultyAlgorithm() == DifficultyAlgorithm.standard) DifficultyAlgorithm.droid
