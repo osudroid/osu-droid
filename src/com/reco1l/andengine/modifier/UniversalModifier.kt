@@ -37,6 +37,14 @@ class UniversalModifier @JvmOverloads constructor(private val pool: Pool<Univers
      * Inner modifiers for [Sequence] or [Parallel] modifier types.
      */
     var modifiers: Array<UniversalModifier>? = null
+        set(value) {
+            if (value != null && !type.isCompoundModifier) {
+                Log.w("UniversalModifier", "Cannot set inner modifiers for non-compound modifiers.")
+                return
+            }
+            value?.fastForEach { it.parent = this }
+            field = value
+        }
 
     /**
      * The initial values for the modifier.
