@@ -1,5 +1,6 @@
 package com.reco1l.andengine
 
+import android.graphics.PointF
 import android.util.*
 import androidx.annotation.*
 import com.reco1l.andengine.container.*
@@ -148,6 +149,10 @@ abstract class ExtendedEntity(
         mRotationCenterY = origin.factorY
         mScaleCenterX = origin.factorX
         mScaleCenterY = origin.factorY
+    }
+
+    fun setPosition(position: PointF) {
+        setPosition(position.x, position.y)
     }
 
     override fun setPosition(pX: Float, pY: Float) {
