@@ -66,6 +66,21 @@ class GameplaySequenceHitSampleInfo {
     }
 
     /**
+     * Forcefully stops all [HitSampleInfo]s in this [GameplaySequenceHitSampleInfo].
+     */
+    fun stopAll() {
+        if (!canPlay) {
+            return
+        }
+
+        isPlaying = false
+
+        for (i in sampleInfo!!.samples.indices) {
+            listener!!.stopSample(sampleInfo!![i].second)
+        }
+    }
+
+    /**
      * Updates the state of this [GameplaySequenceHitSampleInfo].
      *
      * @param deltaTime The time that has passed since the last update, in milliseconds.

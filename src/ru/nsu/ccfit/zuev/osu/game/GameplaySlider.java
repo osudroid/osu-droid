@@ -1018,7 +1018,8 @@ public class GameplaySlider extends GameObject {
 
     @Override
     public void stopAuxiliarySamples() {
-        stopSlidingSamples();
+        sliderSlideSample.stopAll();
+        sliderWhistleSample.stopAll();
     }
 
     private void playSlidingSamples() {

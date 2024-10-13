@@ -361,7 +361,7 @@ public class GameplaySpinner extends GameObject {
 
     @Override
     public void stopAuxiliarySamples() {
-        stopSpinnerSpinSound();
+        spinnerSpinSample.stopAll();
     }
 
     protected void playSpinnerBonusSound() {
