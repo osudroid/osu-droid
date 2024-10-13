@@ -73,6 +73,9 @@ public class GameplayModernSpinner extends GameplaySpinner {
         glow.setTextureRegion(ResourceManager.getInstance().getTexture("spinner-glow"));
 
         bonusScore = new ScoreNumber(center.x, center.y + 100, "", 1.1f, true);
+
+        // Spinners always end combo.
+        endsCombo = true;
     }
 
     @Override
@@ -92,7 +95,6 @@ public class GameplayModernSpinner extends GameplaySpinner {
         clear = duration <= 0f;
         fullRotations = 0;
         rotations = 0;
-        endsCombo = beatmapSpinner.isLastInCombo();
         spinnable = false;
 
         reloadHitSounds();

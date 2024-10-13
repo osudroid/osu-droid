@@ -93,6 +93,9 @@ public class GameplaySpinner extends GameObject {
 
         spinnerSpinSample = new GameplaySequenceHitSampleInfo();
         spinnerBonusSample = new GameplaySequenceHitSampleInfo();
+
+        // Spinners always end combo.
+        endsCombo = true;
     }
 
     public void init(final GameObjectListener listener, final Scene scene,
@@ -102,7 +105,6 @@ public class GameplaySpinner extends GameObject {
         this.scene = scene;
         this.duration = (float) beatmapSpinner.getDuration() / 1000f;
         this.beatmapSpinner = beatmapSpinner;
-        endsCombo = beatmapSpinner.isLastInCombo();
 
         needRotations = rps * duration;
         if (duration < 0.05f) {
