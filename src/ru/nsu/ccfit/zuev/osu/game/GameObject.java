@@ -59,5 +59,5 @@ public abstract class GameObject {
         return position;
     }
 
-    public void stopAuxiliarySamples() {}
+    public void stopLoopingSamples() {}
 }

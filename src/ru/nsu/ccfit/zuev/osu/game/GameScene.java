@@ -40,10 +40,8 @@ import com.rian.osu.GameMode;
 import com.rian.osu.beatmap.Beatmap;
 import com.rian.osu.beatmap.DroidPlayableBeatmap;
 import com.rian.osu.beatmap.constants.BeatmapCountdown;
-import com.rian.osu.beatmap.hitobject.BankHitSampleInfo;
 import com.rian.osu.beatmap.hitobject.HitCircle;
 import com.rian.osu.beatmap.hitobject.HitObject;
-import com.rian.osu.beatmap.hitobject.HitSampleInfo;
 import com.rian.osu.beatmap.hitobject.Spinner;
 import com.rian.osu.beatmap.parser.BeatmapParser;
 import com.rian.osu.beatmap.timings.EffectControlPoint;
@@ -78,7 +76,6 @@ import java.util.*;
 
 import javax.microedition.khronos.opengles.GL10;
 
-import ru.nsu.ccfit.zuev.audio.BassSoundProvider;
 import ru.nsu.ccfit.zuev.audio.Status;
 import ru.nsu.ccfit.zuev.audio.effect.Metronome;
 import ru.nsu.ccfit.zuev.osu.Config;
@@ -1595,7 +1592,7 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
         SkinManager.setSkinEnabled(false);
         GameObjectPool.getInstance().purge();
         GameHelper.purgeSliderPathPool();
-        stopAllAuxiliarySamples();
+        stopLoopingSamples();
         if (activeObjects != null) {
             activeObjects.clear();
         }
@@ -1977,58 +1974,9 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
         }
     }
 
-    @Override
-    public void playSamples(final HitObject obj) {
-        var playLayeredHitSamples = OsuSkin.get().isLayeredHitSounds();
-
-        for (int i = 0, size = obj.getSamples().size(); i < size; ++i) {
-            var sample = obj.getSamples().get(i);
-
-            if (!playLayeredHitSamples && sample instanceof BankHitSampleInfo bankSample && bankSample.isLayered) {
-                continue;
-            }
-
-            playSample(sample, false);
-        }
-    }
-
-    @Override
-    public void playSample(HitSampleInfo sample, boolean loop) {
-        var resourceManager = ResourceManager.getInstance();
-        BassSoundProvider snd = null;
-
-        for (int i = 0, size = sample.getLookupNames().size(); i < size; ++i) {
-            snd = resourceManager.getCustomSound(sample.getLookupNames().get(i), false);
-
-            if (snd != null) {
-                break;
-            }
-        }
-
-        if (snd == null) {
-            return;
-        }
-
-        snd.setLooping(loop);
-        snd.play(sample.volume / 100f);
-    }
-
-    @Override
-    public void stopSample(HitSampleInfo sample) {
-        var resourceManager = ResourceManager.getInstance();
-
-        for (int i = 0, size = sample.getLookupNames().size(); i < size; ++i) {
-            var snd = resourceManager.getCustomSound(sample.getLookupNames().get(i), false);
-
-            if (snd != null) {
-                snd.stop();
-            }
-        }
-    }
-
-    private void stopAllAuxiliarySamples() {
+    private void stopLoopingSamples() {
         for (int i = 0, size = activeObjects.size(); i < size; i++) {
-            activeObjects.get(i).stopAuxiliarySamples();
+            activeObjects.get(i).stopLoopingSamples();
         }
     }
 
@@ -2200,7 +2148,7 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
             video.getTexture().pause();
         }
 
-        stopAllAuxiliarySamples();
+        stopLoopingSamples();
 
         // Release all pressed cursors to avoid getting stuck at resume.
         if (!GameHelper.isAuto() && !GameHelper.isAutopilotMod() && !replaying) {
@@ -2251,7 +2199,7 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
             blockAreaFragment = null;
         }
 
-        stopAllAuxiliarySamples();
+        stopLoopingSamples();
         ResourceManager.getInstance().getSound("failsound").play();
         final PauseMenu menu = new PauseMenu(engine, this, true);
         gameStarted = false;

@@ -1380,7 +1380,6 @@ public class SongMenu implements IUpdateHandler, MenuItemListener,
 
     public void stopMusic() {
         synchronized (musicMutex) {
-            allowAutomaticPlaybackRestart = false;
             if (GlobalManager.getInstance().getSongService() != null) {
                 GlobalManager.getInstance().getSongService().stop();
             }

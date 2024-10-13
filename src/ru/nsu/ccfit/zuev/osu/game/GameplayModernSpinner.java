@@ -191,15 +191,16 @@ public class GameplayModernSpinner extends GameplaySpinner {
             // bottom.setRotation(-degree);
         }
 
-        if (dFill > 0) {
-            playSpinnerSpinSound();
-        } else {
-            stopSpinnerSpinSound();
-        }
-
         rotations += dFill / 4f;
         float percentFilled = (Math.abs(rotations) + fullRotations) / needRotations;
         float percent = Math.min(percentFilled, 1);
+
+        if (dFill > 0) {
+            spinnerSpinSample.setFrequency(0.5f + percent);
+            spinnerSpinSample.play();
+        } else {
+            spinnerSpinSample.stop();
+        }
 
         middle.setColor(1, 1 - percent, 1 - percent);
         top.setScale(0.9f + percent * 0.1f);
@@ -222,7 +223,7 @@ public class GameplayModernSpinner extends GameplaySpinner {
                 listener.onSpinnerHit(id, 1000, false, 0);
                 score++;
                 scene.attachChild(bonusScore);
-                playSpinnerBonusSound();
+                spinnerBonusSample.play();
                 glow.registerEntityModifier(
                     Modifiers.sequence(
                         Modifiers.color(0.1f, 0f, 1f, 0.8f, 1f, 1f, 1f),
@@ -295,10 +296,8 @@ public class GameplayModernSpinner extends GameplaySpinner {
                 default -> score;
             };
         }
-        stopAuxiliarySamples();
+        stopLoopingSamples();
         listener.onSpinnerHit(id, score, endsCombo, this.score + fullRotations - 1);
-        if (score > 0) {
-            listener.playSamples(beatmapSpinner);
-        }
+        playAndFreeHitSamples(score);
     }
 }

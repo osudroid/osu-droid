@@ -5,6 +5,7 @@ import com.reco1l.osu.Modifiers;
 import com.reco1l.andengine.Anchor;
 import com.reco1l.osu.playfield.NumberedCirclePiece;
 import com.rian.osu.beatmap.hitobject.HitCircle;
+import com.rian.osu.gameplay.GameplayHitSampleInfo;
 import com.rian.osu.mods.ModHidden;
 
 import org.anddev.andengine.entity.scene.Scene;
@@ -20,13 +21,13 @@ public class GameplayHitCircle extends GameObject {
 
     private final ExtendedSprite approachCircle;
     private final RGBColor comboColor = new RGBColor();
-    private HitCircle beatmapCircle;
     private GameObjectListener listener;
     private Scene scene;
     private float radiusSquared;
     private float passedTime;
     private float timePreempt;
     private boolean kiai;
+    private GameplayHitSampleInfo[] hitSamples;
 
     /**
      * The circle piece that represents the circle body and overlay.
@@ -46,7 +47,6 @@ public class GameplayHitCircle extends GameObject {
                      final RGBColor comboColor) {
         // Storing parameters into fields
         replayObjectData = null;
-        this.beatmapCircle = beatmapCircle;
 
         var stackedPosition = beatmapCircle.getGameplayStackedPosition();
         position.set(stackedPosition.x, stackedPosition.y);
@@ -138,18 +138,32 @@ public class GameplayHitCircle extends GameObject {
             ));
         }
 
+        // Initialize samples
+        var parsedSamples = beatmapCircle.getSamples();
+        hitSamples = new GameplayHitSampleInfo[parsedSamples.size()];
+
+        for (int i = 0, size = parsedSamples.size(); i < size; i++) {
+            var gameplaySample = GameplayHitSampleInfo.pool.obtain();
+            gameplaySample.init(parsedSamples.get(i));
+
+            hitSamples[i] = gameplaySample;
+        }
+
         scene.attachChild(circlePiece, 0);
         scene.attachChild(approachCircle);
-    }
-
-    private void playSound() {
-        listener.playSamples(beatmapCircle);
     }
 
     private void removeFromScene() {
         if (scene == null) {
             return;
         }
+
+        for (int i = 0; i < hitSamples.length; ++i) {
+            hitSamples[i].reset();
+            GameplayHitSampleInfo.pool.free(hitSamples[i]);
+        }
+
+        hitSamples = null;
 
         circlePiece.clearEntityModifiers();
         approachCircle.clearEntityModifiers();
@@ -203,6 +217,11 @@ public class GameplayHitCircle extends GameObject {
         return 0;
     }
 
+    private void playHitSamples() {
+        for (int i = 0; i < hitSamples.length; ++i) {
+            hitSamples[i].play();
+        }
+    }
 
     @Override
     public void update(final float dt) {
@@ -216,7 +235,7 @@ public class GameplayHitCircle extends GameObject {
             if (passedTime - timePreempt + dt / 2 > replayObjectData.accuracy / 1000f) {
                 final float acc = Math.abs(replayObjectData.accuracy / 1000f);
                 if (acc <= GameHelper.getDifficultyHelper().hitWindowFor50(GameHelper.getOverallDifficulty())) {
-                    playSound();
+                    playHitSamples();
                 }
                 listener.registerAccuracy(replayObjectData.accuracy / 1000f);
                 passedTime = -1;
@@ -232,7 +251,7 @@ public class GameplayHitCircle extends GameObject {
             }
             final float acc = Math.abs(signAcc);
             if (acc <= GameHelper.getDifficultyHelper().hitWindowFor50(GameHelper.getOverallDifficulty())) {
-                playSound();
+                playHitSamples();
             }
             listener.registerAccuracy(signAcc);
             passedTime = -1;
@@ -264,7 +283,7 @@ public class GameplayHitCircle extends GameObject {
         }
 
         if (autoPlay) {
-            playSound();
+            playHitSamples();
             passedTime = -1;
             // Remove circle and register hit in update thread
             listener.onCircleHit(id, 0, position, endsCombo, ResultType.HIT300.getId(), comboColor);
@@ -293,7 +312,7 @@ public class GameplayHitCircle extends GameObject {
             }
             final float acc = Math.abs(signAcc);
             if (acc <= GameHelper.getDifficultyHelper().hitWindowFor50(GameHelper.getOverallDifficulty())) {
-                playSound();
+                playHitSamples();
             }
             listener.registerAccuracy(signAcc);
             passedTime = -1;

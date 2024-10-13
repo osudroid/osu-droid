@@ -8,7 +8,8 @@ import com.reco1l.osu.Modifiers;
 import com.reco1l.andengine.Anchor;
 import com.rian.osu.beatmap.hitobject.BankHitSampleInfo;
 import com.rian.osu.beatmap.hitobject.Spinner;
-import com.rian.osu.beatmap.hitobject.GameplaySequenceHitSampleInfo;
+import com.rian.osu.gameplay.GameplayHitSampleInfo;
+import com.rian.osu.gameplay.GameplaySequenceHitSampleInfo;
 
 import org.anddev.andengine.entity.scene.Scene;
 import org.anddev.andengine.entity.sprite.Sprite;
@@ -45,14 +46,15 @@ public class GameplaySpinner extends GameObject {
     private StatisticV2 stat;
     private float duration;
 
-    private final GameplaySequenceHitSampleInfo spinnerSpinSample;
-    private final GameplaySequenceHitSampleInfo spinnerBonusSample;
+    protected GameplayHitSampleInfo[] hitSamples;
+    protected final GameplaySequenceHitSampleInfo spinnerSpinSample;
+    protected final GameplaySequenceHitSampleInfo spinnerBonusSample;
 
     private final PointF currMouse = new PointF();
 
     public GameplaySpinner() {
         ResourceManager.getInstance().checkSpinnerTextures();
-        this.position = new PointF((float) Constants.MAP_WIDTH / 2, (float) Constants.MAP_HEIGHT / 2);
+        position = new PointF(Constants.MAP_WIDTH / 2f, Constants.MAP_HEIGHT / 2f);
         center = Utils.trackToRealCoords(position);
 
         background = new ExtendedSprite();
@@ -68,7 +70,7 @@ public class GameplaySpinner extends GameObject {
 
         metreRegion = ResourceManager.getInstance().getTexture("spinner-metre").deepCopy();
 
-        metre = new Sprite(center.x - (float) Config.getRES_WIDTH() / 2, Config.getRES_HEIGHT(), metreRegion);
+        metre = new Sprite(center.x - Config.getRES_WIDTH() / 2f, Config.getRES_HEIGHT(), metreRegion);
         metre.setWidth(Config.getRES_WIDTH());
         metre.setHeight(background.getHeightScaled());
 
@@ -219,11 +221,9 @@ public class GameplaySpinner extends GameObject {
                 default -> score;
             };
         }
-        stopAuxiliarySamples();
+        stopLoopingSamples();
         listener.onSpinnerHit(id, score, endsCombo, this.score + fullRotations - 1);
-        if (score > 0) {
-            listener.playSamples(beatmapSpinner);
-        }
+        playAndFreeHitSamples(score);
     }
 
 
@@ -281,14 +281,15 @@ public class GameplaySpinner extends GameObject {
             }
         }
 
-        if (dfill > 0) {
-            playSpinnerSpinSound();
-        } else {
-            stopSpinnerSpinSound();
-        }
-
         rotations += dfill / 4f;
         float percentfill = (Math.abs(rotations) + fullRotations) / needRotations;
+
+        if (dfill > 0) {
+            spinnerSpinSample.setFrequency(0.5f + Math.min(percentfill, 1));
+            spinnerSpinSample.play();
+        } else {
+            spinnerSpinSample.stop();
+        }
 
         if (percentfill > 1 || clear) {
             percentfill = 1;
@@ -306,7 +307,7 @@ public class GameplaySpinner extends GameObject {
                 listener.onSpinnerHit(id, 1000, false, 0);
                 score++;
                 scene.attachChild(bonusScore);
-                playSpinnerBonusSound();
+                spinnerBonusSample.play();
                 float rate = 0.375f;
                 if (GameHelper.getHealthDrain() > 0) {
                     rate = 1 + (GameHelper.getHealthDrain() / 4f);
@@ -334,7 +335,19 @@ public class GameplaySpinner extends GameObject {
     }
 
     protected void reloadHitSounds() {
+        var parsedSamples = beatmapSpinner.getSamples();
+        hitSamples = new GameplayHitSampleInfo[parsedSamples.size()];
+
+        for (int i = 0; i < hitSamples.length; ++i) {
+            var gameplaySample = GameplayHitSampleInfo.pool.obtain();
+            gameplaySample.init(parsedSamples.get(i));
+
+            hitSamples[i] = gameplaySample;
+        }
+
         spinnerSpinSample.reset();
+        spinnerSpinSample.setLooping(true);
+
         spinnerBonusSample.reset();
 
         float startTime = (float) beatmapSpinner.startTime;
@@ -352,28 +365,31 @@ public class GameplaySpinner extends GameObject {
             }
 
             if (bankSample.name.equals("spinnerbonus")) {
-                spinnerBonusSample.init(listener, startTime, auxiliarySample);
+                spinnerBonusSample.init(startTime, auxiliarySample);
             } else if (bankSample.name.equals("spinnerspin")) {
-                spinnerSpinSample.init(listener, startTime, auxiliarySample);
+                spinnerSpinSample.init(startTime, auxiliarySample);
             }
         }
     }
 
+    protected void playAndFreeHitSamples(int obtainedScore) {
+        for (int i = 0; i < hitSamples.length; ++i) {
+            var sample = hitSamples[i];
+
+            if (obtainedScore > 0) {
+                sample.play();
+            }
+
+            sample.reset();
+            GameplayHitSampleInfo.pool.free(sample);
+        }
+
+        hitSamples = null;
+    }
+
     @Override
-    public void stopAuxiliarySamples() {
+    public void stopLoopingSamples() {
         spinnerSpinSample.stopAll();
-    }
-
-    protected void playSpinnerBonusSound() {
-        spinnerBonusSample.play();
-    }
-
-    protected void playSpinnerSpinSound() {
-        spinnerSpinSample.play(true);
-    }
-
-    protected void stopSpinnerSpinSound() {
-        spinnerSpinSample.stop();
     }
 
     protected void updateSamples(float dt) {
