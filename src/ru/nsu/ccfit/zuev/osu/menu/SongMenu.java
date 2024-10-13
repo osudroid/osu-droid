@@ -112,6 +112,7 @@ public class SongMenu implements IUpdateHandler, MenuItemListener,
     private float secPassed = 0, tapTime;
     private ExtendedSprite backButton = null;
     private ScrollBar scrollbar;
+    private boolean allowAutomaticPlaybackRestart;
 
     private Job calculationJob,
                 musicLoadingJob,
@@ -801,6 +802,21 @@ public class SongMenu implements IUpdateHandler, MenuItemListener,
         increaseVolume();
         increaseBackgroundLuminance(pSecondsElapsed);
 
+        if (Config.isPlayMusicPreview()) {
+            var songService = GlobalManager.getInstance().getSongService();
+            if (allowAutomaticPlaybackRestart && songService != null) {
+                int length = songService.getLength();
+
+                // We want to restart playback.
+                // Checking for 0 length here sounds counterintuitive, but BASS returns -1 for streams with finished
+                // playback, even without automatic freeing flag. Weird...
+                if (selectedBeatmap != null && length == 0) {
+                    allowAutomaticPlaybackRestart = false;
+                    playMusic(selectedBeatmap.getAudioPath(), selectedBeatmap.getPreviewTime());
+                }
+            }
+        }
+
         float oy = -camY;
         for (final BeatmapSetItem item : items) {
             final float cy = oy + Config.getRES_HEIGHT() / 2f + item.getHeight()
@@ -1364,6 +1380,7 @@ public class SongMenu implements IUpdateHandler, MenuItemListener,
 
     public void stopMusic() {
         synchronized (musicMutex) {
+            allowAutomaticPlaybackRestart = false;
             if (GlobalManager.getInstance().getSongService() != null) {
                 GlobalManager.getInstance().getSongService().stop();
             }
@@ -1379,6 +1396,7 @@ public class SongMenu implements IUpdateHandler, MenuItemListener,
             musicLoadingJob.cancel(new CancellationException("Music loading has been cancelled."));
         }
 
+        allowAutomaticPlaybackRestart = false;
         musicLoadingJob = Execution.async(scope -> {
             synchronized (musicMutex) {
                 if (GlobalManager.getInstance().getSongService() != null) {
@@ -1400,6 +1418,8 @@ public class SongMenu implements IUpdateHandler, MenuItemListener,
                     } else {
                         GlobalManager.getInstance().getSongService().seekTo((int) (GlobalManager.getInstance().getSongService().getLength() * 0.4f));
                     }
+
+                    allowAutomaticPlaybackRestart = true;
                 } catch (final Exception e) {
                     if (e instanceof CancellationException) {
                         throw e;
