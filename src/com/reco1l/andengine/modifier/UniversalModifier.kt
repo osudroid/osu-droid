@@ -42,8 +42,21 @@ class UniversalModifier @JvmOverloads constructor(private val pool: Pool<Univers
                 Log.w("UniversalModifier", "Cannot set inner modifiers for non-compound modifiers.")
                 return
             }
-            value?.fastForEach { it.parent = this }
+
+            var totalDuration = 0f
+
+            value?.fastForEach {
+                it.parent = this
+
+                if (type == Sequence) {
+                    totalDuration += it.duration
+                } else {
+                    totalDuration = max(totalDuration, it.duration)
+                }
+            }
+
             field = value
+            duration = totalDuration
         }
 
     /**
@@ -80,13 +93,13 @@ class UniversalModifier @JvmOverloads constructor(private val pool: Pool<Univers
 
 
     private fun clearNestedModifiers() {
-        modifiers?.forEach { it.onUnregister() }
+        modifiers?.fastForEach { it.onUnregister() }
         modifiers = null
     }
 
-    override fun onUpdate(deltaTimeSec: Float, entity: IEntity): Float {
+    override fun onUpdate(deltaSec: Float, entity: IEntity): Float {
 
-        if (isFinished) {
+        if (elapsedSec >= duration || deltaSec == 0f) {
             return 0f
         }
 
@@ -94,79 +107,88 @@ class UniversalModifier @JvmOverloads constructor(private val pool: Pool<Univers
         if (elapsedSec < 0) {
             elapsedSec = 0f
 
-            if (initialValues == null) {
+            if (!type.isCompoundModifier && initialValues == null) {
                 initialValues = type.getInitialValues(entity)
             }
         }
 
-        var consumedTimeSec = 0f
+        val consumedDeltaSec: Float
 
         if (type.isCompoundModifier) {
 
-            var remainingTimeSec = deltaTimeSec
-            var isAllModifiersFinished = false
+            var remainingDeltaSec = deltaSec
 
-            while (remainingTimeSec > 0 && !isAllModifiersFinished) {
+            while (remainingDeltaSec > 0f && modifiers != null && !isFinished) {
 
-                // In parallel modifiers the consumed time is equal to the maximum consumed
-                // time of the inner modifiers so we need to reset it to 0, at this point
-                // remainingTimeSec should have the previous consumed time subtracted.
+                var allModifiersFinished = true
+
                 if (type == Parallel) {
-                    consumedTimeSec = 0f
+
+                    var maxConsumedDeltaSec = 0f
+
+                    for (modifier in modifiers!!) {
+                        if (!modifier.isFinished) {
+                            allModifiersFinished = false
+                            maxConsumedDeltaSec = max(maxConsumedDeltaSec, modifier.onUpdate(remainingDeltaSec, entity))
+                        }
+                    }
+
+                    remainingDeltaSec -= maxConsumedDeltaSec
+                    elapsedSec += maxConsumedDeltaSec
+
+                } else if (type == Sequence) {
+
+                    var currentConsumedDeltaSec = 0f
+
+                    for (modifier in modifiers!!) {
+                        if (!modifier.isFinished) {
+                            allModifiersFinished = false
+                            currentConsumedDeltaSec = modifier.onUpdate(remainingDeltaSec, entity)
+                            break
+                        }
+                    }
+
+                    remainingDeltaSec -= currentConsumedDeltaSec
+                    elapsedSec += currentConsumedDeltaSec
+
                 }
 
-                // Assuming all modifiers are finished until proven otherwise.
-                isAllModifiersFinished = true
-
-                for (modifier in modifiers!!) {
-
-                    if (modifier.isFinished) {
-                        continue
-                    }
-                    isAllModifiersFinished = false
-
-                    if (type == Sequence) {
-                        // In a sequence the delta time is subtracted with the consumed time of the first
-                        // non-finished modifier until it reaches 0.
-                        // We break the loop because only the first non-finished modifier should be updated.
-                        remainingTimeSec -= modifier.onUpdate(remainingTimeSec, entity)
-                        break
-                    } else {
-                        // In parallel the consumed time is the maximum consumed time of all inner modifiers.
-                        consumedTimeSec = max(consumedTimeSec, modifier.onUpdate(deltaTimeSec, entity))
-                    }
-                }
-
-                // In a parallel modifier since the consumed time is the maximum consumed time
-                // between all inner modifiers, we subtract it after all modifiers are updated.
-                if (type == Parallel) {
-                    remainingTimeSec -= consumedTimeSec
+                // This is a workaround for an issue that seems to be caused by floating point precision where in some cases the
+                // elapsed time never reaches the duration even if all nested modifiers are finished causing a deadlock.
+                // The "while" loop (which is based on "remainingDeltaSec") will loop infinitely because the remaining time will
+                // never reach 0 due to all modifiers being finished and the consumed time they'll give is always 0.
+                // In order to prevent this, we'll manually set the elapsed time to the duration if all modifiers are finished,
+                // as well the consumed time will be set to the difference between the duration and the elapsed time.
+                if (allModifiersFinished && !isFinished) {
+                    remainingDeltaSec -= duration - elapsedSec
+                    elapsedSec = duration
                 }
             }
 
-            consumedTimeSec = deltaTimeSec - remainingTimeSec
-            elapsedSec += consumedTimeSec
+            consumedDeltaSec = deltaSec - max(0f, remainingDeltaSec)
 
         } else {
 
-            consumedTimeSec = min(duration - elapsedSec, deltaTimeSec)
-            elapsedSec += consumedTimeSec
+            consumedDeltaSec = min(duration - elapsedSec, deltaSec)
+            elapsedSec += consumedDeltaSec
 
-            // The consumed time is already fully calculated here, if the duration is 0
-            // we have to assume the percentage is 1 to avoid division by zero.
-            val percentage = if (duration > 0) easing.interpolate(elapsedSec / duration) else 1f
+            if (type != Delay) {
 
-            if (initialValues != null && finalValues != null) {
-                type.setValues(entity, initialValues!!, finalValues!!, percentage)
+                // Assuming the percentage is 1 if the duration is 0 to prevent division by zero.
+                val percentage = if (duration > 0f) easing.interpolate(elapsedSec / duration) else 1f
+
+                if (initialValues != null && finalValues != null) {
+                    type.setValues(entity, initialValues!!, finalValues!!, percentage)
+                }
             }
         }
 
-        if (isFinished) {
+        if (elapsedSec >= duration) {
             elapsedSec = duration
             onFinished?.invoke(entity)
         }
 
-        return consumedTimeSec
+        return max(0f, consumedDeltaSec)
     }
 
     override fun onUnregister() {
@@ -180,7 +202,7 @@ class UniversalModifier @JvmOverloads constructor(private val pool: Pool<Univers
      */
     override fun reset() {
         elapsedSec = -1f
-        modifiers?.forEach { it.reset() }
+        modifiers?.fastForEach { it.reset() }
     }
 
 
@@ -300,16 +322,12 @@ class UniversalModifier @JvmOverloads constructor(private val pool: Pool<Univers
             return
         }
 
-        duration = value
+        duration = max(0f, value)
     }
 
 
-    override fun getDuration(): Float = when (type) {
-
-        Sequence -> modifiers?.sumOf { it.getDuration() } ?: 0f
-        Parallel -> modifiers?.maxOf { it.getDuration() } ?: 0f
-
-        else -> duration
+    override fun getDuration(): Float {
+        return duration
     }
 
     override fun getSecondsElapsed(): Float {
@@ -318,13 +336,6 @@ class UniversalModifier @JvmOverloads constructor(private val pool: Pool<Univers
 
 
     override fun isFinished(): Boolean {
-        if (type.isCompoundModifier) {
-            for (modifier in modifiers ?: return true) {
-                if (!modifier.isFinished) {
-                    return false
-                }
-            }
-        }
         return elapsedSec >= duration
     }
 
