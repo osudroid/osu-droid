@@ -33,6 +33,7 @@ public class GameHelper {
     private static boolean auto = false;
     private static double beatLength = 0;
     private static double currentBeatTime = 0;
+    private static boolean samplesMatchPlaybackRate;
     private static final Queue<SliderPath> pathPool = new LinkedList<>();
 
     private static DifficultyHelper difficultyHelper = DifficultyHelper.StdDifficulty;
@@ -274,6 +275,14 @@ public class GameHelper {
         } else {
             return value > 0 ? Float.POSITIVE_INFINITY : Float.NEGATIVE_INFINITY;
         }
+    }
+
+    public static boolean isSamplesMatchPlaybackRate() {
+        return samplesMatchPlaybackRate;
+    }
+
+    public static void setSamplesMatchPlaybackRate(boolean samplesMatchPlaybackRate) {
+        GameHelper.samplesMatchPlaybackRate = samplesMatchPlaybackRate;
     }
 
     public static double ar2ms(double ar) {

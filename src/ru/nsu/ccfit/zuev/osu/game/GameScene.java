@@ -493,6 +493,7 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
         GameHelper.setBeatLength(activeTimingPoint.msPerBeat / 1000);
         GameHelper.setKiai(activeEffectPoint.isKiai);
         GameHelper.setCurrentBeatTime(0);
+        GameHelper.setSamplesMatchPlaybackRate(playableBeatmap.getGeneral().samplesMatchPlaybackRate);
 
         GameObjectPool.getInstance().purge();
 

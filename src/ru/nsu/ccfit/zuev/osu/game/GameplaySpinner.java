@@ -2,6 +2,7 @@ package ru.nsu.ccfit.zuev.osu.game;
 
 import android.graphics.PointF;
 
+import com.edlplan.framework.math.FMath;
 import com.reco1l.osu.Execution;
 import com.reco1l.andengine.sprite.ExtendedSprite;
 import com.reco1l.osu.Modifiers;
@@ -290,10 +291,7 @@ public class GameplaySpinner extends GameObject {
         float percentfill = (Math.abs(rotations) + fullRotations) / needRotations;
 
         if (dfill > 0) {
-            if (isSpinnerFrequencyModulate) {
-                spinnerSpinSample.setFrequency(0.5f + Math.min(percentfill, 1));
-            }
-
+            updateSpinSampleFrequency(percentfill);
             spinnerSpinSample.play();
         } else {
             spinnerSpinSample.stop();
@@ -350,6 +348,10 @@ public class GameplaySpinner extends GameObject {
             var gameplaySample = GameplayHitSampleInfo.pool.obtain();
             gameplaySample.init(parsedSamples.get(i));
 
+            if (GameHelper.isSamplesMatchPlaybackRate()) {
+                gameplaySample.setFrequency(GameHelper.getSpeedMultiplier());
+            }
+
             hitSamples[i] = gameplaySample;
         }
 
@@ -403,5 +405,23 @@ public class GameplaySpinner extends GameObject {
     protected void updateSamples(float dt) {
         spinnerSpinSample.update(dt);
         spinnerBonusSample.update(dt);
+    }
+
+    protected void updateSpinSampleFrequency(float progress) {
+        boolean applyTrackRate = GameHelper.isSamplesMatchPlaybackRate();
+
+        if (isSpinnerFrequencyModulate) {
+            float frequency = 0.5f + FMath.clamp(progress, 0, 1);
+
+            if (applyTrackRate) {
+                frequency *= GameHelper.getSpeedMultiplier();
+            }
+
+            spinnerSpinSample.setFrequency(frequency);
+        } else if (applyTrackRate) {
+            spinnerSpinSample.setFrequency(GameHelper.getSpeedMultiplier());
+        } else {
+            spinnerSpinSample.setFrequency(1);
+        }
     }
 }

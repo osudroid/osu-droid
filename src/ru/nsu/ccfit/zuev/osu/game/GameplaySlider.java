@@ -1016,6 +1016,10 @@ public class GameplaySlider extends GameObject {
                 var gameplaySample = GameplayHitSampleInfo.pool.obtain();
                 gameplaySample.init(nestedObjectSamples.get(j));
 
+                if (GameHelper.isSamplesMatchPlaybackRate()) {
+                    gameplaySample.setFrequency(GameHelper.getSpeedMultiplier());
+                }
+
                 nestedHitSamples[i][j] = gameplaySample;
             }
         }
@@ -1045,6 +1049,11 @@ public class GameplaySlider extends GameObject {
             } else if (bankSample.name.equals("sliderwhistle")) {
                 sliderWhistleSample.init(startTime, auxiliarySample);
             }
+        }
+
+        if (GameHelper.isSamplesMatchPlaybackRate()) {
+            sliderSlideSample.setFrequency(GameHelper.getSpeedMultiplier());
+            sliderWhistleSample.setFrequency(GameHelper.getSpeedMultiplier());
         }
     }
 

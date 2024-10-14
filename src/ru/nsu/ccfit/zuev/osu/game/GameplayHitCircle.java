@@ -146,6 +146,10 @@ public class GameplayHitCircle extends GameObject {
             var gameplaySample = GameplayHitSampleInfo.pool.obtain();
             gameplaySample.init(parsedSamples.get(i));
 
+            if (GameHelper.isSamplesMatchPlaybackRate()) {
+                gameplaySample.setFrequency(GameHelper.getSpeedMultiplier());
+            }
+
             hitSamples[i] = gameplaySample;
         }
 

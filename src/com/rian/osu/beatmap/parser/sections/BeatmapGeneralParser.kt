@@ -20,6 +20,7 @@ object BeatmapGeneralParser : BeatmapKeyValueSectionParser() {
             "StackLeniency" -> beatmap.general.stackLeniency = parseFloat(it.second)
             "LetterboxInBreaks" -> beatmap.general.letterboxInBreaks = it.second == "1"
             "Mode" -> beatmap.general.mode = parseInt(it.second)
+            "SamplesMatchPlaybackRate" -> beatmap.general.samplesMatchPlaybackRate = it.second == "1"
         }
     } ?: throw UnsupportedOperationException("Malformed general property: $line")
 }
