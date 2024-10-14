@@ -73,9 +73,6 @@ public class GameplayModernSpinner extends GameplaySpinner {
         glow.setTextureRegion(ResourceManager.getInstance().getTexture("spinner-glow"));
 
         bonusScore = new ScoreNumber(center.x, center.y + 100, "", 1.1f, true);
-
-        // Spinners always end combo.
-        endsCombo = true;
     }
 
     @Override
@@ -198,7 +195,10 @@ public class GameplayModernSpinner extends GameplaySpinner {
         float percent = Math.min(percentFilled, 1);
 
         if (dFill > 0) {
-            spinnerSpinSample.setFrequency(0.5f + percent);
+            if (isSpinnerFrequencyModulate) {
+                spinnerSpinSample.setFrequency(0.5f + percent);
+            }
+
             spinnerSpinSample.play();
         } else {
             spinnerSpinSample.stop();

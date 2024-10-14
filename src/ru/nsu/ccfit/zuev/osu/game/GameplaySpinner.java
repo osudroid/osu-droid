@@ -22,6 +22,7 @@ import ru.nsu.ccfit.zuev.osu.ResourceManager;
 import ru.nsu.ccfit.zuev.osu.Utils;
 import ru.nsu.ccfit.zuev.osu.scoring.ScoreNumber;
 import ru.nsu.ccfit.zuev.osu.scoring.StatisticV2;
+import ru.nsu.ccfit.zuev.skins.OsuSkin;
 
 public class GameplaySpinner extends GameObject {
     private final ExtendedSprite background;
@@ -46,6 +47,7 @@ public class GameplaySpinner extends GameObject {
     private StatisticV2 stat;
     private float duration;
 
+    protected final boolean isSpinnerFrequencyModulate;
     protected GameplayHitSampleInfo[] hitSamples;
     protected final GameplaySequenceHitSampleInfo spinnerSpinSample;
     protected final GameplaySequenceHitSampleInfo spinnerBonusSample;
@@ -91,6 +93,7 @@ public class GameplaySpinner extends GameObject {
 
         bonusScore = new ScoreNumber(center.x, center.y + 100, "", 1.1f, true);
 
+        isSpinnerFrequencyModulate = OsuSkin.get().isSpinnerFrequencyModulate();
         spinnerSpinSample = new GameplaySequenceHitSampleInfo();
         spinnerBonusSample = new GameplaySequenceHitSampleInfo();
 
@@ -287,7 +290,10 @@ public class GameplaySpinner extends GameObject {
         float percentfill = (Math.abs(rotations) + fullRotations) / needRotations;
 
         if (dfill > 0) {
-            spinnerSpinSample.setFrequency(0.5f + Math.min(percentfill, 1));
+            if (isSpinnerFrequencyModulate) {
+                spinnerSpinSample.setFrequency(0.5f + Math.min(percentfill, 1));
+            }
+
             spinnerSpinSample.play();
         } else {
             spinnerSpinSample.stop();

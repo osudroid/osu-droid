@@ -32,6 +32,7 @@ public class OsuSkin {
     protected final BooleanSkinData forceOverrideComboColor = new BooleanSkinData("forceOverride");
     protected final BooleanSkinData rotateCursor = new BooleanSkinData("rotateCursor", true);
     protected final BooleanSkinData layeredHitSounds = new BooleanSkinData("layeredHitSounds", true);
+    protected final BooleanSkinData spinnerFrequencyModulate = new BooleanSkinData("spinnerFrequencyModulate", true);
 
     protected final String DEFAULT_COLOR_HEX = "#FFFFFF";
     protected final ArrayList<RGBColor> comboColor = new ArrayList<>();
@@ -169,6 +170,10 @@ public class OsuSkin {
 
     public boolean isLayeredHitSounds() {
         return layeredHitSounds.getCurrentValue();
+    }
+
+    public boolean isSpinnerFrequencyModulate() {
+        return spinnerFrequencyModulate.getCurrentValue();
     }
 
     public void reset() {
