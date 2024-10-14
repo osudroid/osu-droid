@@ -136,7 +136,7 @@ class UniversalModifier @JvmOverloads constructor(private val pool: Pool<Univers
                     remainingDeltaSec -= maxConsumedDeltaSec
                     elapsedSec += maxConsumedDeltaSec
 
-                } else {
+                } else if (type == Sequence) {
 
                     var currentConsumedDeltaSec = 0f
 
