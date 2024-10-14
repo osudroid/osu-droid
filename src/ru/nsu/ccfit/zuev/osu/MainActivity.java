@@ -154,7 +154,6 @@ public class MainActivity extends BaseGameActivity implements
 
         GlobalManager.getInstance().setCamera(mCamera);
         GlobalManager.getInstance().setEngine(engine);
-        GlobalManager.getInstance().setMainActivity(this);
         return GlobalManager.getInstance().getEngine();
     }
 
@@ -524,6 +523,10 @@ public class MainActivity extends BaseGameActivity implements
 
     @Override
     protected void onCreate(Bundle pSavedInstanceState) {
+        // Some components may already start using this class when onCreate is called. An example
+        // is when the game is restoring after being killed by system due to low system memory.
+        GlobalManager.getInstance().setMainActivity(this);
+
         super.onCreate(pSavedInstanceState);
 
         try {
