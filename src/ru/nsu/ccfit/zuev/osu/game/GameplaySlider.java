@@ -48,6 +48,7 @@ public class GameplaySlider extends GameObject {
     private double spanDuration;
     private int completedSpanCount;
     private boolean reverse;
+    private final boolean isSliderBallFlip;
 
     private GameplayHitSampleInfo[][] nestedHitSamples;
     private final GameplaySequenceHitSampleInfo sliderSlideSample;
@@ -148,6 +149,7 @@ public class GameplaySlider extends GameObject {
 
         sliderBody = new SliderBody(OsuSkin.get().isSliderHintEnable());
         tickContainer = new SliderTickContainer();
+        isSliderBallFlip = OsuSkin.get().isSliderBallFlip();
 
         sliderSlideSample = new GameplaySequenceHitSampleInfo();
         sliderWhistleSample = new GameplaySequenceHitSampleInfo();
@@ -570,7 +572,10 @@ public class GameplaySlider extends GameObject {
                 tickTime += tickInterval - spanDuration % tickInterval;
             }
 
-            ball.setFlippedHorizontal(reverse);
+            if (isSliderBallFlip) {
+                ball.setFlippedHorizontal(reverse);
+            }
+
             // Restore ticks
             for (int i = 0, size = tickContainer.getChildCount(); i < size; i++) {
                 tickContainer.getChild(i).setAlpha(1f);
