@@ -172,12 +172,14 @@ class UniversalModifier @JvmOverloads constructor(private val pool: Pool<Univers
             consumedDeltaSec = min(duration - elapsedSec, deltaSec)
             elapsedSec += consumedDeltaSec
 
-            // The consumed time is already fully calculated here, if the duration is 0
-            // we have to assume the percentage is 1 to avoid division by zero.
-            val percentage = if (duration > 0f) easing.interpolate(elapsedSec / duration) else 1f
+            if (type != Delay) {
 
-            if (initialValues != null && finalValues != null) {
-                type.setValues(entity, initialValues!!, finalValues!!, percentage)
+                // Assuming the percentage is 1 if the duration is 0 to prevent division by zero.
+                val percentage = if (duration > 0f) easing.interpolate(elapsedSec / duration) else 1f
+
+                if (initialValues != null && finalValues != null) {
+                    type.setValues(entity, initialValues!!, finalValues!!, percentage)
+                }
             }
         }
 
