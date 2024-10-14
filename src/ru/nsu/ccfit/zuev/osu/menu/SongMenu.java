@@ -112,7 +112,7 @@ public class SongMenu implements IUpdateHandler, MenuItemListener,
     private float secPassed = 0, tapTime;
     private ExtendedSprite backButton = null;
     private ScrollBar scrollbar;
-    private boolean allowAutomaticPlaybackRestart;
+    private boolean allowAutomaticPlaybackRestart = true;
 
     private Job calculationJob,
                 musicLoadingJob,
