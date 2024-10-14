@@ -90,7 +90,7 @@ abstract class HitObject(
         private set
 
     /**
-     * The index of this [HitObject]'s combo in relation to the beatmap, with all aggregate s applied.
+     * The index of this [HitObject]'s combo in relation to the beatmap, with all aggregates applied.
      */
     var comboIndexWithOffsets = 0
         private set
@@ -367,15 +367,14 @@ abstract class HitObject(
         comboIndexWithOffsets = lastObj?.comboIndexWithOffsets ?: 0
         indexInCurrentCombo = if (lastObj != null) lastObj.indexInCurrentCombo + 1 else 0
 
-        if (this is Spinner) {
-            // For the purpose of combo colors, spinners never start a new combo even if they are flagged as doing so.
-            return
-        }
-
         if (isNewCombo || lastObj == null || lastObj is Spinner) {
             indexInCurrentCombo = 0
             ++comboIndex
-            comboIndexWithOffsets += comboOffset + 1
+
+            if (this !is Spinner) {
+                // Spinners do not affect combo color offsets.
+                comboIndexWithOffsets += comboOffset + 1
+            }
 
             if (lastObj != null) {
                 lastObj.isLastInCombo = true
