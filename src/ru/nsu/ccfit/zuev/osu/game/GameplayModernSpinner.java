@@ -194,7 +194,7 @@ public class GameplayModernSpinner extends GameplaySpinner {
         float percentFilled = (Math.abs(rotations) + fullRotations) / needRotations;
         float percent = Math.min(percentFilled, 1);
 
-        if (dFill > 0) {
+        if (dFill != 0) {
             updateSpinSampleFrequency(percent);
             spinnerSpinSample.play();
         } else {

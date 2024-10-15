@@ -290,7 +290,7 @@ public class GameplaySpinner extends GameObject {
         rotations += dfill / 4f;
         float percentfill = (Math.abs(rotations) + fullRotations) / needRotations;
 
-        if (dfill > 0) {
+        if (dfill != 0) {
             updateSpinSampleFrequency(percentfill);
             spinnerSpinSample.play();
         } else {
