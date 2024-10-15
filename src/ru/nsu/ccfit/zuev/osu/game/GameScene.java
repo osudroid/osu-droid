@@ -1622,15 +1622,16 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
 
         // osu!stable restarts the song back to preview time when the player is in the last 10 seconds *or* 2% of the beatmap.
         float mSecPassed = secPassed * 1000;
+        var songMenu = GlobalManager.getInstance().getSongMenu();
         if (totalLength - mSecPassed > 10000 && mSecPassed / totalLength < 0.98f) {
             var songService = GlobalManager.getInstance().getSongService();
 
             if (songService != null) {
                 songService.play();
-                songService.setVolume(Config.getBgmVolume() / 3);
+                songMenu.startMusicVolumeAnimation(0.3f);
             }
         } else {
-            GlobalManager.getInstance().getSongMenu().playMusic(lastBeatmapInfo.getAudioPath(), lastBeatmapInfo.getPreviewTime());
+            songMenu.playMusic(lastBeatmapInfo.getAudioPath(), lastBeatmapInfo.getPreviewTime());
         }
 
         if (replaying) {
