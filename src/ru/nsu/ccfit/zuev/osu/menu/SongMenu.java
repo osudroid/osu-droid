@@ -57,6 +57,7 @@ import org.jetbrains.annotations.Nullable;
 import kotlinx.coroutines.Job;
 import kotlinx.coroutines.JobKt;
 import ru.nsu.ccfit.zuev.audio.BassSoundProvider;
+import ru.nsu.ccfit.zuev.audio.Status;
 import ru.nsu.ccfit.zuev.osu.Config;
 import ru.nsu.ccfit.zuev.osu.DifficultyAlgorithm;
 import ru.nsu.ccfit.zuev.osu.GlobalManager;
@@ -1379,7 +1380,13 @@ public class SongMenu implements IUpdateHandler, MenuItemListener,
 
     public void startMusicVolumeAnimation(float initialVolume, float endVolume) {
         stopMusicVolumeAnimation();
-        GlobalManager.getInstance().getSongService().setVolume(initialVolume * Config.getBgmVolume());
+
+        var songService = GlobalManager.getInstance().getSongService();
+        if (songService == null || songService.getStatus() == Status.STOPPED) {
+            return;
+        }
+
+        songService.setVolume(initialVolume * Config.getBgmVolume());
 
         if (initialVolume == endVolume) {
             return;
@@ -1394,10 +1401,17 @@ public class SongMenu implements IUpdateHandler, MenuItemListener,
             musicVolumeAnimator.setInterpolator(input -> EasingKt.interpolate(Easing.Out, input));
             musicVolumeAnimator.addUpdateListener(animation -> {
                 synchronized (musicMutex) {
-                    var songService = GlobalManager.getInstance().getSongService();
-                    if (songService != null) {
-                        songService.setVolume(animation.getAnimatedFraction() * Config.getBgmVolume());
+                    var animatorSongService = GlobalManager.getInstance().getSongService();
+                    if (animatorSongService == null) {
+                        return;
                     }
+
+                    if (animatorSongService.getStatus() == Status.STOPPED) {
+                        musicVolumeAnimator.cancel();
+                        return;
+                    }
+
+                    animatorSongService.setVolume(animation.getAnimatedFraction() * Config.getBgmVolume());
                 }
             });
 
