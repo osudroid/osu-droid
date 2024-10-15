@@ -410,6 +410,7 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
         if (props != null) {
             totalOffset += props.getOffset();
         }
+        totalOffset /= 1000;
 
         try {
             var musicFile = new File(beatmapInfo.getAudioPath());
@@ -773,6 +774,9 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
             secPassed = Math.min(videoOffset, secPassed);
         }
 
+        // Ensure user-defined offset has time to be applied.
+        secPassed = Math.min(secPassed, firstObjStartTime - objectTimePreempt - totalOffset);
+
         metronome = null;
         if ((Config.getMetronomeSwitch() == 1 && GameHelper.isNightCore())
                 || Config.getMetronomeSwitch() == 2) {
@@ -985,18 +989,17 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
         float dt = pSecondsElapsed;
         if (GlobalManager.getInstance().getSongService().getStatus() == Status.PLAYING) {
             //处理时间差过于庞大的情况
-            final float offset = totalOffset / 1000f;
             final float realsecPassed = //Config.isSyncMusic() ?
                     GlobalManager.getInstance().getSongService().getPosition() / 1000.0f;// : realTime;
             final float criticalError = Config.isSyncMusic() ? 0.1f : 0.5f;
             final float normalError = Config.isSyncMusic() ? dt : 0.05f;
 
-            if (secPassed - offset - realsecPassed > criticalError) {
+            if (secPassed - totalOffset - realsecPassed > criticalError) {
                 return;
             }
 
-            if (Math.abs(secPassed - offset - realsecPassed) > normalError) {
-                if (secPassed - offset > realsecPassed) {
+            if (Math.abs(secPassed - totalOffset - realsecPassed) > normalError) {
+                if (secPassed - totalOffset > realsecPassed) {
                     dt /= 2f;
                 } else {
                     dt *= 2f;
@@ -1292,12 +1295,12 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
                 video.setAlpha(Math.min(video.getAlpha() + 0.03f, 1.0f));
         }
 
-        if (secPassed >= 0 && !musicStarted) {
+        if (secPassed >= totalOffset && !musicStarted) {
             GlobalManager.getInstance().getSongService().play();
             GlobalManager.getInstance().getSongService().setVolume(Config.getBgmVolume());
             totalLength = GlobalManager.getInstance().getSongService().getLength();
             musicStarted = true;
-            secPassed = 0;
+            secPassed = totalOffset;
             return;
         }
 
