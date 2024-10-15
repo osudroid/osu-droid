@@ -167,7 +167,7 @@ public class GameplaySlider extends GameObject {
         position.set(stackedPosition.x, stackedPosition.y);
 
         endsCombo = beatmapSlider.isLastInCombo();
-        passedTime = secPassed - (float) beatmapSlider.startTime / 1000;
+        passedTime = secPassed - beatmapSlider.startTime / 1000;
         spanDuration = beatmapSlider.getSpanDuration() / 1000;
         path = sliderPath;
 
