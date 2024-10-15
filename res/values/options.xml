@@ -114,7 +114,7 @@
     <string name="opt_bgm_volume_summary">Volume of the background music</string>
 
     <string name="opt_offset_title">Global offset</string>
-    <string name="opt_offset_summary">Music offset in ms (positive values mean earlier)</string>
+    <string name="opt_offset_summary">Music offset in ms (positive values mean objects appear earlier)</string>
 
     <string name="opt_special">Special</string>
     <string name="opt_taiko_title">Load T-Aiko! songs</string>

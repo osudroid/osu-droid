@@ -775,9 +775,9 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
             metronome = new Metronome();
         }
 
-        secPassed -= Config.getOffset() / 1000f;
-        if (secPassed > 0) {
-            skipTime -= secPassed;
+        secPassed += Config.getOffset() / 1000f;
+        if (secPassed < 0) {
+            skipTime += secPassed;
             secPassed = 0;
         }
         distToNextObject = 0;
@@ -992,12 +992,12 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
             final float criticalError = Config.isSyncMusic() ? 0.1f : 0.5f;
             final float normalError = Config.isSyncMusic() ? dt : 0.05f;
 
-            if (secPassed + offset - realsecPassed > criticalError) {
+            if (secPassed - offset - realsecPassed > criticalError) {
                 return;
             }
 
-            if (Math.abs(secPassed + offset - realsecPassed) > normalError) {
-                if (secPassed + offset > realsecPassed) {
+            if (Math.abs(secPassed - offset - realsecPassed) > normalError) {
+                if (secPassed - offset > realsecPassed) {
                     dt /= 2f;
                 } else {
                     dt *= 2f;
