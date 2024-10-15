@@ -506,6 +506,7 @@ public class GameplaySlider extends GameObject {
         }
 
         nestedHitSamples = null;
+        path = null;
         scene = null;
     }
 
@@ -522,7 +523,6 @@ public class GameplaySlider extends GameObject {
         sliderBody.clearEntityModifiers();
         tickContainer.clearEntityModifiers();
 
-        GameHelper.putPath(path);
         GameObjectPool.getInstance().putSlider(this);
     }
 
