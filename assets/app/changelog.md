@@ -146,6 +146,10 @@ The following gameplay elements' display has been updated to match osu!stable:
 - CS and OD conversions in song selection menu are now displayed using osu!droid metrics rather than osu!standard
 - Background music in song selection menu now adjusts based on selected mods and settings
 - Changed "chimu.moe" mention to beatmap downloader when there are no songs
+- Reversed the way offsets are applied - positive values now mean objects appear earlier
+- Background music now reduces its sound when going from song selection menu to main menu
+- Increased the speed of background music volume ramp up after selecting a beatmapset in song selection menu
+- Matched skip time behavior with osu!stable
 
 # Removals
 
@@ -186,3 +190,5 @@ were reduced by 20% and clap hitsounds' volume were reduced by 15%
 - Fixed ScoreV2 value not updating after misses
 - Fixed sound volume setting being doubly applied in some situations
 - Fixed current mods state not being saved when going out from song selection menu
+- Fixed background music volume not ramping upon leaving song selection menu
+- Fixed object starting point potentially being screwed up
