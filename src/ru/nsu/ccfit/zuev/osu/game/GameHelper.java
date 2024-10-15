@@ -14,7 +14,6 @@ import ru.nsu.ccfit.zuev.osu.helper.DifficultyHelper;
 
 public class GameHelper {
     private static float overallDifficulty = 1;
-    private static float objectTimePreempt = 1;
     private static float healthDrain = 0;
     private static float speedMultiplier = 0;
     private static boolean hidden = false;
@@ -102,14 +101,6 @@ public class GameHelper {
      */
     public static void purgeSliderPathPool() {
         pathPool.clear();
-    }
-
-    public static float getObjectTimePreempt() {
-        return objectTimePreempt;
-    }
-
-    public static void setObjectTimePreempt(float objectTimePreempt) {
-        GameHelper.objectTimePreempt = objectTimePreempt;
     }
 
     /**

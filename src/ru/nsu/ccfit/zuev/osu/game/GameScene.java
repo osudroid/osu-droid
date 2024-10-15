@@ -439,7 +439,6 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
 
         GameHelper.setOverallDifficulty(playableBeatmap.getDifficulty().od);
         GameHelper.setHealthDrain(playableBeatmap.getDifficulty().hp);
-        GameHelper.setObjectTimePreempt(objectTimePreempt);
         GameHelper.setSpeedMultiplier(modMenu.getSpeed());
         scene.setTimeMultiplier(GameHelper.getSpeedMultiplier());
 
