@@ -754,20 +754,24 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
 
         comboWas100 = false;
         comboWasMissed = false;
-
-        final int leadIn = playableBeatmap.getGeneral().audioLeadIn;
         previousFrameTime = 0;
-        secPassed = -leadIn / 1000f;
-        if (secPassed > -1) {
-            secPassed = -1;
-        }
-
-        if (video != null && videoOffset < 0) {
-            secPassed = Math.min(videoOffset, secPassed);
-        }
 
         float firstObjStartTime = (float) objects.peek().startTime / 1000;
-        skipTime = firstObjStartTime - objectTimePreempt - 1f;
+        float skipTargetTime = firstObjStartTime - Math.max(2f, objectTimePreempt);
+
+        secPassed = Math.min(0, skipTargetTime);
+        skipTime = skipTargetTime - 1;
+
+        // Some beatmaps specify a current lead-in time, which overrides the default lead-in time above.
+        float leadIn = playableBeatmap.getGeneral().audioLeadIn / 1000f;
+        if (leadIn > 0) {
+            secPassed = Math.min(secPassed, firstObjStartTime - leadIn);
+        }
+
+        // Ensure the video has time to start.
+        if (video != null) {
+            secPassed = Math.min(videoOffset, secPassed);
+        }
 
         metronome = null;
         if ((Config.getMetronomeSwitch() == 1 && GameHelper.isNightCore())
@@ -775,11 +779,6 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
             metronome = new Metronome();
         }
 
-        secPassed += Config.getOffset() / 1000f;
-        if (secPassed < 0) {
-            skipTime += secPassed;
-            secPassed = 0;
-        }
         distToNextObject = 0;
 
         // TODO passive objects
@@ -1566,9 +1565,9 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
             musicStarted = true;
         }
         ResourceManager.getInstance().getSound("menuhit").play();
-        float difference = skipTime - 0.5f - secPassed;
+        float difference = skipTime - secPassed;
 
-        secPassed = skipTime - 0.5f;
+        secPassed = skipTime;
         int seekTime = (int) Math.ceil(secPassed * 1000);
         int videoSeekTime = seekTime - (int) (videoOffset * 1000);
 
