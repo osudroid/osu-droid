@@ -1300,6 +1300,7 @@ public class SongMenu implements IUpdateHandler, MenuItemListener,
         }
 
         resetMusicEffects();
+        startMusicVolumeAnimation(0.3f);
         GlobalManager.getInstance().getMainScene().show();
     }
 
