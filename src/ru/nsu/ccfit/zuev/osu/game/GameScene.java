@@ -427,8 +427,9 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
             return false;
         }
 
-        scale = playableBeatmap.getHitObjects().objects.get(0).getGameplayScale();
-        objectTimePreempt = (float) GameHelper.ar2ms(playableBeatmap.getDifficulty().getAr()) / 1000f;
+        var firstObject = playableBeatmap.getHitObjects().objects.get(0);
+        scale = firstObject.getGameplayScale();
+        objectTimePreempt = (float) firstObject.timePreempt / 1000f;
 
         difficultyStatisticsScoreMultiplier = 1 +
             Math.min(parsedBeatmap.getDifficulty().od, 10) / 10f + Math.min(parsedBeatmap.getDifficulty().hp, 10) / 10f;

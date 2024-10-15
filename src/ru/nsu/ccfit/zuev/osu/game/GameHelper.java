@@ -285,22 +285,6 @@ public class GameHelper {
         GameHelper.samplesMatchPlaybackRate = samplesMatchPlaybackRate;
     }
 
-    public static double ar2ms(double ar) {
-        return Round((ar <= 5) ? (1800 - 120 * ar) : (1950 - 150 * ar), 0);
-    }
-
-    public static double ms2ar(double ms) {
-        return (ms <= 1200) ? ((1200 - ms) / 150.0 + 5) : (1800 - ms) / 120.0;
-    }
-
-    public static double ms2od(double ms) {
-        return (80 - ms) / 6.0;
-    }
-
-    public static double od2ms(double od) {
-        return Round(80 - od * 6, 1);
-    }
-
     public static class SliderPath {
 
         private static final int strip = 3;
