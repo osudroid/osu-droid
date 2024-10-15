@@ -20,6 +20,7 @@ import ru.nsu.ccfit.zuev.osu.MainActivity;
 
 
 public class SongService extends Service {
+    public static int defaultFrequency = 44100;
 
     private BassAudioFunc audioFunc;
     private boolean isGaming = false;
@@ -37,7 +38,7 @@ public class SongService extends Service {
         // Ensure there are no brief delays on audio operations (causing stream stalls etc.) after periods of silence.
         BASS.BASS_SetConfig(BASS.BASS_CONFIG_DEV_NONSTOP, 1);
 
-        BASS.BASS_Init(-1, 44100, BASS.BASS_DEVICE_LATENCY);
+        BASS.BASS_Init(-1, defaultFrequency, BASS.BASS_DEVICE_LATENCY);
 
         Log.i("BASS-Config", "BASS initialized");
         Log.i("BASS-Config", "Update period:          " + BASS.BASS_GetConfig(BASS.BASS_CONFIG_UPDATEPERIOD));
