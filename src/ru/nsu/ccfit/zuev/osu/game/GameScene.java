@@ -1361,7 +1361,7 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
                 final var gameplaySlider = GameObjectPool.getInstance().getSlider();
 
                 gameplaySlider.init(this, mgScene, parsedSlider, secPassed,
-                    comboColor, sliderBorderColor, (float) playableBeatmap.getDifficulty().sliderTickRate, playableBeatmap.getControlPoints(),
+                    comboColor, sliderBorderColor, playableBeatmap.getDifficulty().sliderTickRate, playableBeatmap.getControlPoints(),
                     getSliderPath(sliderIndex++));
 
                 addObject(gameplaySlider);

@@ -157,7 +157,7 @@ public class GameplaySlider extends GameObject {
 
     public void init(final GameObjectListener listener, final Scene scene,
                      final Slider beatmapSlider, final float secPassed, final RGBColor comboColor,
-                     final RGBColor borderColor, final float tickRate, final BeatmapControlPoints controlPoints,
+                     final RGBColor borderColor, final double tickRate, final BeatmapControlPoints controlPoints,
                      final SliderPath sliderPath) {
         this.listener = listener;
         this.scene = scene;
