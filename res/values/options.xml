@@ -362,12 +362,12 @@
 
     <!--Score counter-->
     <string name="opt_score_counter_title">Score counter metric</string>
-    <string name="opt_score_counter_summary">Choose the metric to show in score counter. Score, PP, DPP.</string>
+    <string name="opt_score_counter_summary">Choose the metric to show in score counter</string>
 
     <!-- Score counter -->
     <string-array name="opt_score_counter_names">
         <item>Score</item>
-        <item>PP/DPP</item>
+        <item>Performance Points</item>
     </string-array>
     <string-array name="opt_score_counter_values">
         <item>0</item>
