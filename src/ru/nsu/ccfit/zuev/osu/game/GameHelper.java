@@ -2,11 +2,11 @@ package ru.nsu.ccfit.zuev.osu.game;
 
 import android.graphics.PointF;
 
+import com.rian.osu.beatmap.hitobject.Slider;
+
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.util.Arrays;
-import java.util.LinkedList;
-import java.util.Queue;
 
 import ru.nsu.ccfit.zuev.skins.OsuSkin;
 import ru.nsu.ccfit.zuev.osu.Utils;
@@ -14,7 +14,6 @@ import ru.nsu.ccfit.zuev.osu.helper.DifficultyHelper;
 
 public class GameHelper {
     private static float overallDifficulty = 1;
-    private static float objectTimePreempt = 1;
     private static float healthDrain = 0;
     private static float speedMultiplier = 0;
     private static boolean hidden = false;
@@ -34,7 +33,6 @@ public class GameHelper {
     private static double beatLength = 0;
     private static double currentBeatTime = 0;
     private static boolean samplesMatchPlaybackRate;
-    private static final Queue<SliderPath> pathPool = new LinkedList<>();
 
     private static DifficultyHelper difficultyHelper = DifficultyHelper.StdDifficulty;
 
@@ -63,19 +61,17 @@ public class GameHelper {
     }
 
     /**
-     * Converts a difficulty-calculated slider path of a {@link com.rian.osu.beatmap.hitobject.Slider} to one that can be used in gameplay.
+     * Converts an osu!pixels-based path of a {@link Slider} to one that can be used in gameplay.
      *
      * @return The converted {@link SliderPath}.
      */
-    public static SliderPath convertSliderPath(final com.rian.osu.beatmap.hitobject.Slider slider) {
-        var path = newPath();
+    public static SliderPath convertSliderPath(final Slider slider) {
         var startPosition = slider.getPosition().plus(slider.getGameplayStackOffset());
 
         var calculatedPath = slider.getPath().getCalculatedPath();
         var cumulativeLength = slider.getPath().getCumulativeLength();
 
-        path.allocate(calculatedPath.size());
-
+        var path = new SliderPath(calculatedPath.size());
         var tmpPoint = new PointF();
 
         for (var i = 0; i < calculatedPath.size(); i++) {
@@ -88,28 +84,13 @@ public class GameHelper {
             path.setPoint(i, tmpPoint.x, tmpPoint.y);
 
             if (i < cumulativeLength.size()) {
-                path.setLength(i, (float) (double) cumulativeLength.get(i));
+                path.setLength(i, cumulativeLength.get(i).floatValue());
             } else {
                 path.setLength(i, -1f);
             }
         }
 
         return path;
-    }
-
-    /**
-     * Purges the {@link SliderPath} pool.
-     */
-    public static void purgeSliderPathPool() {
-        pathPool.clear();
-    }
-
-    public static float getObjectTimePreempt() {
-        return objectTimePreempt;
-    }
-
-    public static void setObjectTimePreempt(float objectTimePreempt) {
-        GameHelper.objectTimePreempt = objectTimePreempt;
     }
 
     /**
@@ -124,18 +105,6 @@ public class GameHelper {
      */
     public static void setSpeedMultiplier(float speedMultiplier) {
         GameHelper.speedMultiplier = speedMultiplier;
-    }
-
-    public static void putPath(final SliderPath path) {
-        path.allocate(0);
-        pathPool.add(path);
-    }
-
-    private static SliderPath newPath() {
-        if (pathPool.isEmpty()) {
-            return new SliderPath();
-        }
-        return pathPool.poll();
     }
 
     public static boolean isEasy() {
@@ -285,22 +254,6 @@ public class GameHelper {
         GameHelper.samplesMatchPlaybackRate = samplesMatchPlaybackRate;
     }
 
-    public static double ar2ms(double ar) {
-        return Round((ar <= 5) ? (1800 - 120 * ar) : (1950 - 150 * ar), 0);
-    }
-
-    public static double ms2ar(double ms) {
-        return (ms <= 1200) ? ((1200 - ms) / 150.0 + 5) : (1800 - ms) / 120.0;
-    }
-
-    public static double ms2od(double ms) {
-        return (80 - ms) / 6.0;
-    }
-
-    public static double od2ms(double od) {
-        return Round(80 - od * 6, 1);
-    }
-
     public static class SliderPath {
 
         private static final int strip = 3;
@@ -308,18 +261,14 @@ public class GameHelper {
         private static final int offsetY = 1;
         private static final int offsetLength = 2;
 
-        private float[] data = new float[0];
+        private float[] data;
 
-        public int lengthCount;
-        public int pointCount;
+        public int lengthCount = 0;
+        public int pointCount = 0;
 
-
-        public void allocate(int size) {
-            data = new float[size * strip];
-            pointCount = 0;
-            lengthCount = 0;
+        public SliderPath(int anchorPointCount) {
+            data = new float[anchorPointCount * strip];
         }
-
 
         public void setPoint(int index, float x, float y) {
             data[index * strip + offsetX] = x;
@@ -332,7 +281,7 @@ public class GameHelper {
             var targetIndex = index * strip + offsetLength;
 
             // This condition can be triggered if there's a mismatch between the number of points
-            // and the number of lengths. Should never happen in practice but it's better to be safe.
+            // and the number of lengths. Should never happen in practice, but it's better to be safe.
             if (targetIndex >= data.length) {
                 data = Arrays.copyOf(data, data.length + strip);
             }

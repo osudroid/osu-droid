@@ -1,11 +1,14 @@
 package ru.nsu.ccfit.zuev.osu.menu;
 
+import android.animation.ValueAnimator;
 import android.annotation.SuppressLint;
 import android.app.Activity;
 
+import com.edlplan.framework.easing.Easing;
 import com.edlplan.ui.fragment.FilterMenuFragment;
 import com.edlplan.ui.fragment.PropsMenuFragment;
 import com.edlplan.ui.fragment.ScoreMenuFragment;
+import com.reco1l.framework.EasingKt;
 import com.reco1l.ibancho.RoomAPI;
 import com.reco1l.osu.data.BeatmapInfo;
 import com.reco1l.osu.data.BeatmapSetInfo;
@@ -113,6 +116,7 @@ public class SongMenu implements IUpdateHandler, MenuItemListener,
     private ExtendedSprite backButton = null;
     private ScrollBar scrollbar;
     private boolean allowAutomaticPlaybackRestart = true;
+    private ValueAnimator musicVolumeAnimator;
 
     private Job calculationJob,
                 musicLoadingJob,
@@ -799,7 +803,6 @@ public class SongMenu implements IUpdateHandler, MenuItemListener,
 
     public void onUpdate(final float pSecondsElapsed) {
         secPassed += pSecondsElapsed;
-        increaseVolume();
         increaseBackgroundLuminance(pSecondsElapsed);
 
         if (Config.isPlayMusicPreview()) {
@@ -845,17 +848,6 @@ public class SongMenu implements IUpdateHandler, MenuItemListener,
         expandSelectedItem(pSecondsElapsed);
 
         updateScrollbar(camY + Config.getRES_HEIGHT() / 2f, oy);
-    }
-
-    public void increaseVolume() {
-        if (GlobalManager.getInstance().getSongService() != null) {
-            synchronized (musicMutex) {
-                if (GlobalManager.getInstance().getSongService() != null && GlobalManager.getInstance().getSongService().getStatus() == Status.PLAYING && GlobalManager.getInstance().getSongService().getVolume() < Config.getBgmVolume()) {
-                    float vol = Math.min(1, GlobalManager.getInstance().getSongService().getVolume() + 0.01f);
-                    GlobalManager.getInstance().getSongService().setVolume(vol);
-                }
-            }
-        }
     }
 
     public void increaseBackgroundLuminance(final float pSecondsElapsed) {
@@ -1308,6 +1300,7 @@ public class SongMenu implements IUpdateHandler, MenuItemListener,
         }
 
         resetMusicEffects();
+        startMusicVolumeAnimation(0.5f);
         GlobalManager.getInstance().getMainScene().show();
     }
 
@@ -1378,7 +1371,66 @@ public class SongMenu implements IUpdateHandler, MenuItemListener,
         camY = y;
     }
 
+    public void startMusicVolumeAnimation() {
+        startMusicVolumeAnimation(0, 1);
+    }
+
+    public void startMusicVolumeAnimation(float initialVolume) {
+        startMusicVolumeAnimation(initialVolume, 1);
+    }
+
+    public void startMusicVolumeAnimation(float initialVolume, float endVolume) {
+        stopMusicVolumeAnimation();
+
+        var songService = GlobalManager.getInstance().getSongService();
+        if (songService == null || songService.getStatus() == Status.STOPPED) {
+            return;
+        }
+
+        songService.setVolume(initialVolume * Config.getBgmVolume());
+
+        if (initialVolume == endVolume) {
+            return;
+        }
+
+        Execution.mainThread(() -> {
+            musicVolumeAnimator = ValueAnimator.ofFloat(initialVolume, endVolume);
+            // See https://github.com/ppy/osu/blob/790f863e0654fd563b57ab699d6be86895e756ab/osu.Game/Overlays/MusicController.cs#L529-L535
+            // for the duration. Since SongService only supports one BASS channel at a time, we cannot apply part of the animation
+            // to the previous song.
+            musicVolumeAnimator.setDuration((long) (800 * Math.abs(endVolume - initialVolume)));
+            musicVolumeAnimator.setInterpolator(input -> EasingKt.interpolate(Easing.Out, input));
+            musicVolumeAnimator.addUpdateListener(animation -> {
+                synchronized (musicMutex) {
+                    var animatorSongService = GlobalManager.getInstance().getSongService();
+                    if (animatorSongService == null) {
+                        return;
+                    }
+
+                    if (animatorSongService.getStatus() == Status.STOPPED) {
+                        musicVolumeAnimator.cancel();
+                        return;
+                    }
+
+                    animatorSongService.setVolume(animation.getAnimatedFraction() * Config.getBgmVolume());
+                }
+            });
+
+            musicVolumeAnimator.start();
+        });
+    }
+
+    public void stopMusicVolumeAnimation() {
+        Execution.mainThread(() -> {
+            if (musicVolumeAnimator != null) {
+                musicVolumeAnimator.cancel();
+            }
+        });
+    }
+
     public void stopMusic() {
+        stopMusicVolumeAnimation();
+
         synchronized (musicMutex) {
             if (GlobalManager.getInstance().getSongService() != null) {
                 GlobalManager.getInstance().getSongService().stop();
@@ -1395,27 +1447,28 @@ public class SongMenu implements IUpdateHandler, MenuItemListener,
             musicLoadingJob.cancel(new CancellationException("Music loading has been cancelled."));
         }
 
+        stopMusicVolumeAnimation();
         allowAutomaticPlaybackRestart = false;
         musicLoadingJob = Execution.async(scope -> {
             synchronized (musicMutex) {
-                if (GlobalManager.getInstance().getSongService() != null) {
-                    GlobalManager.getInstance().getSongService().stop();
+                var songService = GlobalManager.getInstance().getSongService();
+                if (songService != null) {
+                    songService.stop();
                 }
 
                 try {
                     JobKt.ensureActive(scope.getCoroutineContext());
 
-                    GlobalManager.getInstance().getSongService().preLoad(filePath);
+                    songService.preLoad(filePath);
                     updateMusicEffects();
 
                     JobKt.ensureActive(scope.getCoroutineContext());
-
-                    GlobalManager.getInstance().getSongService().play();
-                    GlobalManager.getInstance().getSongService().setVolume(0);
+                    songService.play();
+                    startMusicVolumeAnimation();
                     if (previewTime >= 0) {
-                        GlobalManager.getInstance().getSongService().seekTo(previewTime);
+                        songService.seekTo(previewTime);
                     } else {
-                        GlobalManager.getInstance().getSongService().seekTo((int) (GlobalManager.getInstance().getSongService().getLength() * 0.4f));
+                        songService.seekTo((int) (songService.getLength() * 0.4f));
                     }
 
                     allowAutomaticPlaybackRestart = true;

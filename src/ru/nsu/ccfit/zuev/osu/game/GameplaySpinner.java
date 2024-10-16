@@ -2,7 +2,6 @@ package ru.nsu.ccfit.zuev.osu.game;
 
 import android.graphics.PointF;
 
-import com.edlplan.framework.math.FMath;
 import com.reco1l.osu.Execution;
 import com.reco1l.andengine.sprite.ExtendedSprite;
 import com.reco1l.osu.Modifiers;
@@ -17,6 +16,7 @@ import org.anddev.andengine.entity.sprite.Sprite;
 import org.anddev.andengine.opengl.texture.region.TextureRegion;
 import org.anddev.andengine.util.MathUtils;
 
+import ru.nsu.ccfit.zuev.audio.serviceAudio.SongService;
 import ru.nsu.ccfit.zuev.osu.Config;
 import ru.nsu.ccfit.zuev.osu.Constants;
 import ru.nsu.ccfit.zuev.osu.ResourceManager;
@@ -290,7 +290,7 @@ public class GameplaySpinner extends GameObject {
         rotations += dfill / 4f;
         float percentfill = (Math.abs(rotations) + fullRotations) / needRotations;
 
-        if (dfill > 0) {
+        if (dfill != 0) {
             updateSpinSampleFrequency(percentfill);
             spinnerSpinSample.play();
         } else {
@@ -411,7 +411,9 @@ public class GameplaySpinner extends GameObject {
         boolean applyTrackRate = GameHelper.isSamplesMatchPlaybackRate();
 
         if (isSpinnerFrequencyModulate) {
-            float frequency = 0.5f + FMath.clamp(progress, 0, 1);
+            // Note that osu!stable sets the frequency directly at BassSoundProvider level.
+            // This implementation tries to closely follow that behavior with the default frequency in mind.
+            float frequency = Math.min(100000, 20000 + 40000 * progress) / SongService.defaultFrequency;
 
             if (applyTrackRate) {
                 frequency *= GameHelper.getSpeedMultiplier();

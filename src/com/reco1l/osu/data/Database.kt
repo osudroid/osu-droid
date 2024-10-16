@@ -97,7 +97,8 @@ object DatabaseManager {
                             beatmapOptions += BeatmapOptions(
                                 setDirectory = FilenameUtils.getName(FilenameUtils.normalizeNoEndSeparator(path)),
                                 isFavorite = properties.favorite,
-                                offset = properties.offset
+                                // Offset is flipped in version 1.8, so we need to negate it.
+                                offset = -properties.offset
                             )
                         }
 

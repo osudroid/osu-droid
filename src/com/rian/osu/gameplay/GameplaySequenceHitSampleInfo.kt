@@ -35,7 +35,7 @@ class GameplaySequenceHitSampleInfo : IGameplayHitSampleInfo {
         get() = samples != null
 
     private val sampleNeedsUpdating
-        get() = isInitialized && index < samples!!.size - 1 && samples!![index + 1].first > elapsedTime
+        get() = isInitialized && index < samples!!.size - 1 && elapsedTime >= samples!![index + 1].first
 
     /**
      * Initializes this [GameplaySequenceHitSampleInfo].

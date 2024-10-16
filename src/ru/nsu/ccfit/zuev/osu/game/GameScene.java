@@ -404,6 +404,7 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
         if (props != null) {
             totalOffset += props.getOffset();
         }
+        totalOffset /= 1000;
 
         try {
             var musicFile = new File(beatmapInfo.getAudioPath());
@@ -420,8 +421,9 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
             return false;
         }
 
-        scale = playableBeatmap.getHitObjects().objects.get(0).getGameplayScale();
-        objectTimePreempt = (float) GameHelper.ar2ms(playableBeatmap.getDifficulty().getAr()) / 1000f;
+        var firstObject = playableBeatmap.getHitObjects().objects.get(0);
+        scale = firstObject.getGameplayScale();
+        objectTimePreempt = (float) firstObject.timePreempt / 1000f;
 
         difficultyStatisticsScoreMultiplier = 1 +
             Math.min(parsedBeatmap.getDifficulty().od, 10) / 10f + Math.min(parsedBeatmap.getDifficulty().hp, 10) / 10f;
@@ -431,7 +433,6 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
 
         GameHelper.setOverallDifficulty(playableBeatmap.getDifficulty().od);
         GameHelper.setHealthDrain(playableBeatmap.getDifficulty().hp);
-        GameHelper.setObjectTimePreempt(objectTimePreempt);
         GameHelper.setSpeedMultiplier(modMenu.getSpeed());
         scene.setTimeMultiplier(GameHelper.getSpeedMultiplier());
 
@@ -758,20 +759,27 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
 
         comboWas100 = false;
         comboWasMissed = false;
-
-        final int leadIn = playableBeatmap.getGeneral().audioLeadIn;
         previousFrameTime = 0;
-        secPassed = -leadIn / 1000f;
-        if (secPassed > -1) {
-            secPassed = -1;
+
+        float firstObjStartTime = (float) objects.peek().startTime / 1000;
+        float skipTargetTime = firstObjStartTime - Math.max(2f, objectTimePreempt);
+
+        secPassed = Math.min(0, skipTargetTime);
+        skipTime = skipTargetTime - 1;
+
+        // Some beatmaps specify a current lead-in time, which overrides the default lead-in time above.
+        float leadIn = playableBeatmap.getGeneral().audioLeadIn / 1000f;
+        if (leadIn > 0) {
+            secPassed = Math.min(secPassed, firstObjStartTime - leadIn);
         }
 
-        if (video != null && videoOffset < 0) {
+        // Ensure the video has time to start.
+        if (video != null) {
             secPassed = Math.min(videoOffset, secPassed);
         }
 
-        float firstObjStartTime = (float) objects.peek().startTime / 1000;
-        skipTime = firstObjStartTime - objectTimePreempt - 1f;
+        // Ensure user-defined offset has time to be applied.
+        secPassed = Math.min(secPassed, firstObjStartTime - objectTimePreempt - totalOffset);
 
         metronome = null;
         if ((Config.getMetronomeSwitch() == 1 && GameHelper.isNightCore())
@@ -779,11 +787,6 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
             metronome = new Metronome();
         }
 
-        secPassed -= Config.getOffset() / 1000f;
-        if (secPassed > 0) {
-            skipTime -= secPassed;
-            secPassed = 0;
-        }
         distToNextObject = 0;
 
         // TODO passive objects
@@ -966,18 +969,17 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
         float dt = pSecondsElapsed;
         if (GlobalManager.getInstance().getSongService().getStatus() == Status.PLAYING) {
             //处理时间差过于庞大的情况
-            final float offset = totalOffset / 1000f;
             final float realsecPassed = //Config.isSyncMusic() ?
                     GlobalManager.getInstance().getSongService().getPosition() / 1000.0f;// : realTime;
             final float criticalError = Config.isSyncMusic() ? 0.1f : 0.5f;
             final float normalError = Config.isSyncMusic() ? dt : 0.05f;
 
-            if (secPassed + offset - realsecPassed > criticalError) {
+            if (secPassed - totalOffset - realsecPassed > criticalError) {
                 return;
             }
 
-            if (Math.abs(secPassed + offset - realsecPassed) > normalError) {
-                if (secPassed + offset > realsecPassed) {
+            if (Math.abs(secPassed - totalOffset - realsecPassed) > normalError) {
+                if (secPassed - totalOffset > realsecPassed) {
                     dt /= 2f;
                 } else {
                     dt *= 2f;
@@ -1253,12 +1255,12 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
                 video.setAlpha(Math.min(video.getAlpha() + 0.03f, 1.0f));
         }
 
-        if (secPassed >= 0 && !musicStarted) {
+        if (secPassed >= totalOffset && !musicStarted) {
             GlobalManager.getInstance().getSongService().play();
             GlobalManager.getInstance().getSongService().setVolume(Config.getBgmVolume());
             totalLength = GlobalManager.getInstance().getSongService().getLength();
             musicStarted = true;
-            secPassed = 0;
+            secPassed = totalOffset;
             return;
         }
 
@@ -1321,8 +1323,7 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
                 final var gameplaySlider = GameObjectPool.getInstance().getSlider();
 
                 gameplaySlider.init(this, mgScene, parsedSlider, secPassed,
-                    comboColor, sliderBorderColor, (float) playableBeatmap.getDifficulty().sliderTickRate, playableBeatmap.getControlPoints(),
-                    getSliderPath(sliderIndex++));
+                    comboColor, sliderBorderColor, getSliderPath(sliderIndex++));
 
                 addObject(gameplaySlider);
 
@@ -1527,9 +1528,9 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
             musicStarted = true;
         }
         ResourceManager.getInstance().getSound("menuhit").play();
-        float difference = skipTime - 0.5f - secPassed;
+        float difference = skipTime - secPassed;
 
-        secPassed = skipTime - 0.5f;
+        secPassed = skipTime;
         int seekTime = (int) Math.ceil(secPassed * 1000);
         int videoSeekTime = seekTime - (int) (videoOffset * 1000);
 
@@ -1553,7 +1554,6 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
 
         SkinManager.setSkinEnabled(false);
         GameObjectPool.getInstance().purge();
-        GameHelper.purgeSliderPathPool();
         stopLoopingSamples();
         if (activeObjects != null) {
             activeObjects.clear();
@@ -1583,15 +1583,16 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
 
         // osu!stable restarts the song back to preview time when the player is in the last 10 seconds *or* 2% of the beatmap.
         float mSecPassed = secPassed * 1000;
+        var songMenu = GlobalManager.getInstance().getSongMenu();
         if (totalLength - mSecPassed > 10000 && mSecPassed / totalLength < 0.98f) {
             var songService = GlobalManager.getInstance().getSongService();
 
             if (songService != null) {
                 songService.play();
-                songService.setVolume(Config.getBgmVolume() / 3);
+                songMenu.startMusicVolumeAnimation(0.3f);
             }
         } else {
-            GlobalManager.getInstance().getSongMenu().playMusic(lastBeatmapInfo.getAudioPath(), lastBeatmapInfo.getPreviewTime());
+            songMenu.playMusic(lastBeatmapInfo.getAudioPath(), lastBeatmapInfo.getPreviewTime());
         }
 
         if (replaying) {
