@@ -2,7 +2,6 @@ package com.reco1l.osu.playfield
 
 import com.reco1l.andengine.*
 import org.anddev.andengine.engine.camera.hud.*
-import ru.nsu.ccfit.zuev.osu.GlobalManager
 import ru.nsu.ccfit.zuev.osu.scoring.*
 import ru.nsu.ccfit.zuev.skins.*
 

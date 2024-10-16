@@ -711,9 +711,7 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
                 hud.registerUpdateHandler(new FPSCounter() {
                     @Override
                     public void onUpdate(float pSecondsElapsed) {
-                        // Cancelling the speed multiplier for the FPS counter.
-                        super.onUpdate(pSecondsElapsed / GameHelper.getSpeedMultiplier());
-
+                        super.onUpdate(pSecondsElapsed);
                         fpsText.setText(Math.round(getFPS()) + " FPS");
                     }
                 });
@@ -891,7 +889,7 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
 
         ChangeableText replayText = null;
 
-        if (!Config.isHideInGameUI()) {
+        if (!Config.isHideInGameUI() && !Config.isHideReplayMarquee()) {
             replayText = new ChangeableText(0, 0, ResourceManager.getInstance().getFont("font"), "", 1000);
             replayText.setVisible(false);
             replayText.setPosition(0, 140);
@@ -905,12 +903,8 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
             playname = replaying ? GlobalManager.getInstance().getScoring().getReplayStat().getPlayerName() : "osu!";
 
             if (replayText != null) {
-                // We're cancelling the speed multiplier here because we don't want the replay text to move too fast or slow.
-                var translationDuration = 40f * GameHelper.getSpeedMultiplier();
-
                 replayText.setText("Watching " + playname + " play " + metadata.artist + " - " + metadata.title + " [" + metadata.version + "]");
-                replayText.registerEntityModifier(new LoopEntityModifier(new MoveXModifier(translationDuration, Config.getRES_WIDTH() + 5, -replayText.getWidth() - 5)));
-                replayText.setVisible(!Config.isHideReplayMarquee());
+                replayText.registerEntityModifier(new LoopEntityModifier(new MoveXModifier(40f, Config.getRES_WIDTH() + 5, -replayText.getWidth() - 5)));
             }
 
         } else if (Multiplayer.room != null && Multiplayer.room.isTeamVersus()) {
