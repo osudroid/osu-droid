@@ -70,18 +70,6 @@ class Circle(segments: Int = DEFAULT_CIRCLE_SEGMENTS) : ExtendedEntity(vertexBuf
     }
 
 
-    private var port = 0f
-
-    override fun onManagedUpdate(pSecondsElapsed: Float) {
-
-        port += pSecondsElapsed * 0.05f
-        port %= 1f
-        setPortion(port)
-
-        super.onManagedUpdate(pSecondsElapsed)
-    }
-
-
     override fun onUpdateVertexBuffer() {
         (vertexBuffer as CircleVertexBuffer).update(width, height, startAngle, endAngle)
     }
