@@ -126,6 +126,7 @@ abstract class ExtendedEntity(
         }
 
 
+    private var isVertexBufferDirty = true
 
 
     // Positions
@@ -274,12 +275,19 @@ abstract class ExtendedEntity(
     }
 
     override fun onManagedDraw(pGL: GL10, pCamera: Camera) {
-        camera = pCamera
+
+        if (isVertexBufferDirty) {
+            isVertexBufferDirty = false
+            onUpdateVertexBuffer()
+        }
+
         super.onManagedDraw(pGL, pCamera)
     }
 
     override fun onInitDraw(pGL: GL10) {
-        GLHelper.enableVertexArray(pGL)
+        if (vertexBuffer != null) {
+            GLHelper.enableVertexArray(pGL)
+        }
     }
 
     override fun drawVertices(pGL: GL10, pCamera: Camera) {
@@ -292,6 +300,26 @@ abstract class ExtendedEntity(
         if (vertexBuffer != null) {
             super.onApplyVertices(pGL)
         }
+    }
+
+
+    // Vertex buffer
+
+    override fun updateVertexBuffer() {
+        isVertexBufferDirty = true
+    }
+
+
+    /**
+     * Sets the vertex buffer of the entity.
+     *
+     * Note: This will unload the previous buffer from the active buffer object manager if it's managed.
+     * If it's not managed you will have to manually unload it otherwise it will cause a memory leak.
+     */
+    fun setVertexBuffer(buffer: VertexBuffer) {
+        vertexBuffer?.unloadFromActiveBufferObjectManager()
+        vertexBuffer = buffer
+        updateVertexBuffer()
     }
 
     override fun getVertexBuffer(): VertexBuffer? {
