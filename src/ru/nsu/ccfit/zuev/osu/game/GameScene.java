@@ -27,10 +27,8 @@ import com.reco1l.andengine.Anchor;
 import com.reco1l.andengine.sprite.VideoSprite;
 import com.reco1l.andengine.ExtendedScene;
 import com.reco1l.osu.playfield.FollowPointConnection;
-import com.reco1l.osu.playfield.ComboCounter;
 import com.reco1l.osu.playfield.GameplayHUD;
-import com.reco1l.osu.playfield.HealthDisplay;
-import com.reco1l.osu.playfield.ScoreText;
+import com.reco1l.osu.playfield.ScoreCounterMetric;
 import com.reco1l.osu.playfield.SliderTickSprite;
 import com.reco1l.osu.ui.BlockAreaFragment;
 import com.reco1l.osu.ui.entity.GameplayLeaderboard;
@@ -188,7 +186,6 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
     private ChangeableText fpsText;
     private ChangeableText avgOffsetText;
     private ChangeableText urText;
-    private ChangeableText ppText;
     private ChangeableText memText;
 
     // UI
@@ -526,8 +523,7 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
 
         GameObjectPool.getInstance().preload();
 
-        ppText = null;
-        if (Config.isDisplayRealTimePPCounter()) {
+        if (Config.getScoreCounterMetric() == ScoreCounterMetric.PP) {
             // Calculate timed difficulty attributes
             var parameters = new DifficultyCalculationParameters();
 
@@ -725,12 +721,6 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
             if (Config.isShowAverageOffset()) {
                 avgOffsetText = new ChangeableText(720, 440, counterTextFont, "Avg offset: 0ms     ");
                 counterTexts.add(avgOffsetText);
-            }
-
-            if (Config.isDisplayRealTimePPCounter()) {
-                ppText = new ChangeableText(720, 400, counterTextFont,
-                        Config.getDifficultyAlgorithm() == DifficultyAlgorithm.droid ? "0.00dpp" : "0.00pp", 15);
-                counterTexts.add(ppText);
             }
 
             if (BuildConfig.DEBUG) {
@@ -2533,13 +2523,13 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
     }
 
     private void updatePPCounter(int objectId) {
-        if (ppText == null) {
+        if (hud == null || Config.getScoreCounterMetric() == ScoreCounterMetric.SCORE) {
             return;
         }
 
         switch (Config.getDifficultyAlgorithm()) {
-            case droid -> ppText.setText(String.format(Locale.ENGLISH, "%.2fdpp", getDroidPPAt(objectId)));
-            case standard -> ppText.setText(String.format(Locale.ENGLISH, "%.2fpp", getStandardPPAt(objectId)));
+            case droid -> hud.getScoreText().setText(String.format(Locale.ENGLISH, "%.2f", getDroidPPAt(objectId)));
+            case standard -> hud.getScoreText().setText(String.format(Locale.ENGLISH, "%.2f", getStandardPPAt(objectId)));
         }
     }
 

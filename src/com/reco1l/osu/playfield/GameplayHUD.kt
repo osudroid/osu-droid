@@ -1,7 +1,11 @@
 package com.reco1l.osu.playfield
 
+import androidx.annotation.*
 import com.reco1l.andengine.*
+import com.reco1l.osu.playfield.ScoreCounterMetric.Companion.PP
+import com.reco1l.osu.playfield.ScoreCounterMetric.Companion.SCORE
 import org.anddev.andengine.engine.camera.hud.*
+import ru.nsu.ccfit.zuev.osu.*
 import ru.nsu.ccfit.zuev.osu.scoring.*
 import ru.nsu.ccfit.zuev.skins.*
 
@@ -18,7 +22,11 @@ class GameplayHUD(private val stat: StatisticV2) : HUD() {
         it.setAnchor(Anchor.TopRight)
         it.setOrigin(Anchor.TopRight)
         it.setScale(0.96f)
-        it.text = "0000000000"
+        it.text = when(Config.getScoreCounterMetric()) {
+            SCORE -> "00000000"
+            PP -> "0.00"
+            else -> ""
+        }
         it.x = -10f
 
         attachChild(it)
@@ -67,14 +75,28 @@ class GameplayHUD(private val stat: StatisticV2) : HUD() {
         accuracyText.text = strBuilder.toString()
 
         // Score
-        strBuilder.setLength(0)
-        strBuilder.append(stat.getTotalScoreWithMultiplier())
-        while (strBuilder.length < 8) {
-            strBuilder.insert(0, '0')
+        if (Config.getScoreCounterMetric() == SCORE) {
+            strBuilder.setLength(0)
+            strBuilder.append(stat.getTotalScoreWithMultiplier())
+            while (strBuilder.length < 8) {
+                strBuilder.insert(0, '0')
+            }
+            scoreText.text = strBuilder.toString()
         }
-        scoreText.text = strBuilder.toString()
 
         super.onManagedUpdate(pSecondsElapsed)
     }
 
+}
+
+
+/**
+ * Defines the metric to be used by the score counter.
+ */
+@IntDef(SCORE, PP)
+annotation class ScoreCounterMetric {
+    companion object {
+        const val SCORE = 0
+        const val PP = 1
+    }
 }
