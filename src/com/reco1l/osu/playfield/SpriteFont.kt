@@ -7,7 +7,7 @@ import ru.nsu.ccfit.zuev.osu.*
 import ru.nsu.ccfit.zuev.skins.*
 
 
-class ScoreText(private val texturePrefix: StringSkinData) : LinearContainer() {
+open class SpriteFont(private val texturePrefix: StringSkinData) : LinearContainer() {
 
     /**
      * The text to display.

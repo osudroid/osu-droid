@@ -26,10 +26,10 @@ import com.reco1l.osu.Modifiers;
 import com.reco1l.andengine.Anchor;
 import com.reco1l.andengine.sprite.VideoSprite;
 import com.reco1l.andengine.ExtendedScene;
-import com.reco1l.osu.playfield.FollowPointConnection;
+import com.reco1l.osu.hitobjects.FollowPointConnection;
 import com.reco1l.osu.playfield.GameplayHUD;
 import com.reco1l.osu.playfield.ScoreCounterMetric;
-import com.reco1l.osu.playfield.SliderTickSprite;
+import com.reco1l.osu.hitobjects.SliderTickSprite;
 import com.reco1l.osu.ui.BlockAreaFragment;
 import com.reco1l.osu.ui.entity.GameplayLeaderboard;
 import com.reco1l.osu.multiplayer.Multiplayer;
@@ -79,7 +79,6 @@ import ru.nsu.ccfit.zuev.audio.Status;
 import ru.nsu.ccfit.zuev.audio.effect.Metronome;
 import ru.nsu.ccfit.zuev.osu.Config;
 import ru.nsu.ccfit.zuev.osu.Constants;
-import ru.nsu.ccfit.zuev.osu.DifficultyAlgorithm;
 import ru.nsu.ccfit.zuev.osu.GlobalManager;
 import ru.nsu.ccfit.zuev.osu.RGBColor;
 import ru.nsu.ccfit.zuev.osu.ResourceManager;
@@ -1126,7 +1125,7 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
                     RoomScene.INSTANCE.getChat().show();
 
                 if (hud != null) {
-                    hud.getHealthDisplay().setVisible(false);
+                    hud.getHealthBar().setVisible(false);
                 }
 
                 breakPeriods.poll();
@@ -1140,7 +1139,7 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
             gameStarted = true;
 
             if (hud != null) {
-                hud.getHealthDisplay().setVisible(true);
+                hud.getHealthBar().setVisible(true);
             }
 
             if(GameHelper.isFlashLight()){
@@ -1780,7 +1779,7 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
         createHitEffect(pos, scoreName, color);
 
         if (hud != null) {
-            hud.getHealthDisplay().flash();
+            hud.getHealthBar().flash();
         }
     }
 
@@ -1861,7 +1860,7 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
         createHitEffect(judgementPos, scoreName, color);
 
         if (hud != null) {
-            hud.getHealthDisplay().flash();
+            hud.getHealthBar().flash();
         }
     }
 
@@ -1918,7 +1917,7 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
         createHitEffect(pos, scoreName, null);
 
         if (hud != null) {
-            hud.getHealthDisplay().flash();
+            hud.getHealthBar().flash();
         }
     }
 
@@ -2528,8 +2527,8 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
         }
 
         switch (Config.getDifficultyAlgorithm()) {
-            case droid -> hud.getScoreText().setText(String.format(Locale.ENGLISH, "%.2f", getDroidPPAt(objectId)));
-            case standard -> hud.getScoreText().setText(String.format(Locale.ENGLISH, "%.2f", getStandardPPAt(objectId)));
+            case droid -> hud.getScoreCounter().setValue(getDroidPPAt(objectId));
+            case standard -> hud.getScoreCounter().setValue(getStandardPPAt(objectId));
         }
     }
 

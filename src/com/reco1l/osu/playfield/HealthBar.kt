@@ -17,7 +17,7 @@ import ru.nsu.ccfit.zuev.skins.*
 import javax.microedition.khronos.opengles.*
 
 
-class HealthDisplay(private val statistics: StatisticV2) : Container() {
+class HealthBar(private val statistics: StatisticV2) : Container() {
 
 
     private val fill: AnimatedSpriteWithDepthTest
@@ -161,45 +161,44 @@ class HealthDisplay(private val statistics: StatisticV2) : Container() {
         else -> ColorARGB.White
     }
 
-
-    private inner class DepthClearRectangle : ExtendedEntity(vertexBuffer = RectangleVertexBuffer(GL11.GL_STATIC_DRAW, true)) {
-
-        init {
-            color = ColorARGB.Transparent
-        }
-
-        override fun onInitDraw(pGL: GL10) {
-            super.onInitDraw(pGL)
-            pGL.glClear(GL10.GL_DEPTH_BUFFER_BIT)
-        }
-
-        override fun drawVertices(pGL: GL10, pCamera: Camera) {
-            GLHelper.enableDepthTest(pGL)
-            super.drawVertices(pGL, pCamera)
-            GLHelper.disableDepthTest(pGL)
-        }
-
-        override fun onUpdateVertexBuffer() {
-            (vertexBuffer as RectangleVertexBuffer).update(width, height)
-        }
-
-    }
-
-    private inner class AnimatedSpriteWithDepthTest(textureName: String, withHyphen: Boolean, fps: Float) : AnimatedSprite(textureName, withHyphen, fps) {
-
-        override fun drawVertices(pGL: GL10, pCamera: Camera) {
-            GLHelper.enableDepthTest(pGL)
-            super.drawVertices(pGL, pCamera)
-            GLHelper.disableDepthTest(pGL)
-        }
-
-    }
-
-
     companion object {
 
         const val EPIC_CUTOFF = 0.5f
 
+    }
+
+}
+
+
+private class DepthClearRectangle : ExtendedEntity(vertexBuffer = RectangleVertexBuffer(GL11.GL_STATIC_DRAW, true)) {
+
+    init {
+        color = ColorARGB.Transparent
+    }
+
+    override fun onInitDraw(pGL: GL10) {
+        super.onInitDraw(pGL)
+        pGL.glClear(GL10.GL_DEPTH_BUFFER_BIT)
+    }
+
+    override fun drawVertices(pGL: GL10, pCamera: Camera) {
+        GLHelper.enableDepthTest(pGL)
+        super.drawVertices(pGL, pCamera)
+        GLHelper.disableDepthTest(pGL)
+    }
+
+    override fun onUpdateVertexBuffer() {
+        (vertexBuffer as RectangleVertexBuffer).update(width, height)
+    }
+
+}
+
+private class AnimatedSpriteWithDepthTest(textureName: String, withHyphen: Boolean, fps: Float) : AnimatedSprite(textureName, withHyphen, fps) {
+
+    override fun drawVertices(pGL: GL10, pCamera: Camera) {
+        GLHelper.enableDepthTest(pGL)
+        super.drawVertices(pGL, pCamera)
+        GLHelper.disableDepthTest(pGL)
     }
 
 }
