@@ -126,7 +126,6 @@ abstract class ExtendedEntity(
         }
 
 
-    private lateinit var camera: Camera
 
 
     // Positions
@@ -171,7 +170,7 @@ abstract class ExtendedEntity(
 
     // Drawing
 
-    override fun applyTranslation(pGL: GL10) {
+    override fun applyTranslation(pGL: GL10, camera: Camera) {
 
         val parent = parent
         if (parent is Container) {
@@ -266,8 +265,8 @@ abstract class ExtendedEntity(
         }
     }
 
-    override fun onApplyTransformations(pGL: GL10) {
-        applyTranslation(pGL)
+    override fun onApplyTransformations(pGL: GL10, camera: Camera) {
+        applyTranslation(pGL, camera)
         applyRotation(pGL)
         applyScale(pGL)
         applyColor(pGL)
