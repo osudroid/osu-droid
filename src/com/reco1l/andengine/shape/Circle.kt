@@ -6,7 +6,8 @@ import com.reco1l.andengine.*
 import com.reco1l.andengine.shape.CircleVertexBuffer.Companion.DEFAULT_CIRCLE_SEGMENTS
 import com.reco1l.toolkt.*
 import org.anddev.andengine.engine.camera.*
-import org.anddev.andengine.opengl.vertex.VertexBuffer
+import org.anddev.andengine.opengl.util.*
+import org.anddev.andengine.opengl.vertex.*
 import javax.microedition.khronos.opengles.*
 import kotlin.math.*
 
@@ -31,7 +32,7 @@ class Circle(segments: Int = DEFAULT_CIRCLE_SEGMENTS) : ExtendedEntity(vertexBuf
      * is done too often.
      */
     var segments = segments
-        set(@IntRange(from = 8) value) {
+        set(@IntRange(from = 1) value) {
             if (field != value) {
                 field = value
                 setVertexBuffer(CircleVertexBuffer(value))
@@ -50,9 +51,9 @@ class Circle(segments: Int = DEFAULT_CIRCLE_SEGMENTS) : ExtendedEntity(vertexBuf
         }
 
     /**
-     * The angle where the circle ends to draw in degrees. By default, it is 360 degrees (a full circle).
+     * The angle where the circle ends to draw in degrees. By default, it is 270 degrees.
      */
-    var endAngle = 360f
+    var endAngle = 270f
         set(@FloatRange(0.0, 360.0) value) {
             if (field != value) {
                 field = value
@@ -63,12 +64,21 @@ class Circle(segments: Int = DEFAULT_CIRCLE_SEGMENTS) : ExtendedEntity(vertexBuf
 
     /**
      * Sets the portion of the circle to be drawn starting from the start angle.
+     *
+     * Positive values will draw the circle clockwise and negative values will draw it counter-clockwise.
      */
     fun setPortion(value: Float) {
-        endAngle = startAngle - 360f * value
+        endAngle = startAngle + 360f * value.coerceIn(-1f, 1f)
         updateVertexBuffer()
     }
 
+
+    override fun onInitDraw(pGL: GL10) {
+        super.onInitDraw(pGL)
+
+        GLHelper.disableTextures(pGL)
+        GLHelper.disableTexCoordArray(pGL)
+    }
 
     override fun onUpdateVertexBuffer() {
         (vertexBuffer as CircleVertexBuffer).update(width, height, startAngle, endAngle)
@@ -81,7 +91,7 @@ class Circle(segments: Int = DEFAULT_CIRCLE_SEGMENTS) : ExtendedEntity(vertexBuf
 }
 
 
-class CircleVertexBuffer(@IntRange(from = 8) val segments: Int) : VertexBuffer(
+class CircleVertexBuffer(@IntRange(from = 1) val segments: Int) : VertexBuffer(
 
     // Explanation: Segments + 2 because the first vertex that is the center of the circle is not included in the segment
     // count and we add it twice so that the last vertex connects to the first one.
@@ -94,8 +104,6 @@ class CircleVertexBuffer(@IntRange(from = 8) val segments: Int) : VertexBuffer(
     fun update(width: Float, height: Float, startAngle: Float, endAngle: Float) {
 
         val buffer = floatBuffer
-
-        buffer.position(0)
 
         val ratioX = width / 2f
         val ratioY = height / 2f
@@ -116,8 +124,6 @@ class CircleVertexBuffer(@IntRange(from = 8) val segments: Int) : VertexBuffer(
             buffer.put((i + 1) * 2 + 1, ratioY + ratioY * sin(angle))
         }
 
-        buffer.position(0)
-
         setHardwareBufferNeedsUpdate()
     }
 
@@ -128,7 +134,7 @@ class CircleVertexBuffer(@IntRange(from = 8) val segments: Int) : VertexBuffer(
 
     companion object {
 
-        const val DEFAULT_CIRCLE_SEGMENTS = 32
+        const val DEFAULT_CIRCLE_SEGMENTS = 16
 
     }
 

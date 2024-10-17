@@ -2,6 +2,7 @@ package com.reco1l.andengine.container
 
 import com.reco1l.andengine.*
 import com.reco1l.toolkt.kotlin.*
+import org.anddev.andengine.engine.camera.*
 import org.anddev.andengine.entity.*
 import org.anddev.andengine.entity.IEntity.*
 import org.anddev.andengine.entity.shape.IShape
@@ -156,8 +157,8 @@ open class Container : ExtendedEntity() {
     }
 
 
-
     override fun onUpdateVertexBuffer() {}
+    override fun drawVertices(pGL: GL10?, pCamera: Camera?) {}
 
 }
 

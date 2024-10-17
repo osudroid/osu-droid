@@ -16,7 +16,7 @@ open class SpriteFont(private val texturePrefix: StringSkinData) : LinearContain
         set(value) {
             if (field != value) {
                 field = value
-                isTextInvalid = true
+                isTextDirty = true
             }
         }
 
@@ -37,35 +37,45 @@ open class SpriteFont(private val texturePrefix: StringSkinData) : LinearContain
     }.toMap()
 
 
-    private var isTextInvalid = true
+    private var isTextDirty = true
 
 
-    private fun allocateSprites(count: Int) {
-        if (count > childCount) {
-            for (i in childCount until count) {
+    /**
+     * Called when the text needs to be updated.
+     *
+     * This method is called automatically when the text is changed on the update thread.
+     * You can also call it manually if needed to force an update.
+     */
+    fun onUpdateText() {
+        isTextDirty = false
+
+        if (text.length > childCount) {
+            for (i in childCount until text.length) {
                 attachChild(ExtendedSprite())
             }
         } else {
-            for (i in childCount - 1 downTo count) {
+            for (i in childCount - 1 downTo text.length) {
                 detachChild(getChild(i))
             }
         }
+
+        for (i in text.indices) {
+
+            val char = text[i]
+            val sprite = getChild(i) as? ExtendedSprite ?: continue
+
+            sprite.textureRegion = characters[char]
+        }
+
+        onMeasureSize()
     }
+
 
     override fun onManagedUpdate(pSecondsElapsed: Float) {
 
-        if (isTextInvalid) {
-            isTextInvalid = false
-
-            allocateSprites(text.length)
-
-            for (i in text.indices) {
-
-                val char = text[i]
-                val sprite = getChild(i) as? ExtendedSprite ?: continue
-
-                sprite.textureRegion = characters[char]
-            }
+        if (isTextDirty) {
+            isTextDirty = false
+            onUpdateText()
         }
 
         super.onManagedUpdate(pSecondsElapsed)

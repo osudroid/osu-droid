@@ -12,6 +12,7 @@ import org.anddev.andengine.entity.shape.*
 import org.anddev.andengine.opengl.util.*
 import org.anddev.andengine.opengl.vertex.*
 import javax.microedition.khronos.opengles.*
+import javax.microedition.khronos.opengles.GL10.*
 
 
 /**
@@ -33,6 +34,27 @@ abstract class ExtendedEntity(
      * Determines which axes the entity should automatically adjust its size to.
      */
     open var autoSizeAxes = Axes.None
+
+    /**
+     * The raw X position of the entity.
+     * This is the position without taking into account the origin, anchor, or translation.
+     */
+    open var rawX
+        get() = mX + translationX - width * originX
+        set(value) {
+            setPosition(value + width * originX, mY)
+        }
+
+    /**
+     * The raw Y position of the entity.
+     * This is the position without taking into account the origin, anchor, or translation.
+     */
+    open var rawY
+        get() = mY + translationY - height * originY
+        set(value) {
+            setPosition(mX, value + height * originY)
+        }
+
 
     /**
      * The origin factor of the entity in the X axis.
@@ -74,6 +96,21 @@ abstract class ExtendedEntity(
      * Whether the color should be inherited from all the parents in the hierarchy.
      */
     open var inheritColor = true
+
+    /**
+     * Whether the depth buffer should be cleared before drawing the entity.
+     * This is useful when the entity is drawn on top of other entities by overlapping them.
+     *
+     * It will only take effect if the entities on the front have the depth buffer test enabled.
+     *
+     * @see [testWithDepthBuffer]
+     */
+    open var clearDepthBufferBeforeDraw = false
+
+    /**
+     * Whether the entity should be tested with the depth buffer.
+     */
+    open var testWithDepthBuffer = false
 
     /**
      * The color of the entity boxed in a [ColorARGB] object.
@@ -285,21 +322,31 @@ abstract class ExtendedEntity(
     }
 
     override fun onInitDraw(pGL: GL10) {
+
         if (vertexBuffer != null) {
             GLHelper.enableVertexArray(pGL)
         }
-    }
 
-    override fun drawVertices(pGL: GL10, pCamera: Camera) {
-        if (vertexBuffer != null) {
-            pGL.glDrawArrays(GL10.GL_TRIANGLE_STRIP, 0, 4)
+        if (clearDepthBufferBeforeDraw) {
+            pGL.glClear(GL_DEPTH_BUFFER_BIT)
         }
     }
 
     override fun onApplyVertices(pGL: GL10) {
+
         if (vertexBuffer != null) {
             super.onApplyVertices(pGL)
         }
+
+    }
+
+    override fun doDraw(pGL: GL10, pCamera: Camera) {
+
+        GLHelper.setDepthTest(pGL, testWithDepthBuffer)
+
+        super.doDraw(pGL, pCamera)
+
+        GLHelper.setDepthTest(pGL, false)
     }
 
 
@@ -307,6 +354,11 @@ abstract class ExtendedEntity(
 
     override fun updateVertexBuffer() {
         isVertexBufferDirty = true
+    }
+
+    fun updateVertexBufferNow() {
+        isVertexBufferDirty = false
+        onUpdateVertexBuffer()
     }
 
 

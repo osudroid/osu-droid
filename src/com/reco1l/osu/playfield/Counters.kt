@@ -62,21 +62,15 @@ annotation class ScoreCounterMetric {
 class AccuracyCounter : SpriteFont(OsuSkin.get().scorePrefix) {
 
 
-    private val format = NumberFormat.getPercentInstance(Locale.US).also {
-        it.maximumFractionDigits = 2
-    }
+    private val format = DecimalFormat("0.00%")
 
 
     init {
         setAnchor(Anchor.TopRight)
         setOrigin(Anchor.TopRight)
         setScale(0.6f * 0.96f)
-        setPosition(-17f, characters['0']!!.height + 9f)
-
-        x = -17f
-        y = characters['0']!!.height + 9f
-
-        text = "000.00%"
+        setPosition(-17f, 9f)
+        text = "100.00%"
     }
 
 
