@@ -25,7 +25,7 @@ class Circle(segments: Int = DEFAULT_CIRCLE_SEGMENTS) : ExtendedEntity(vertexBuf
      * The amount of segments that make up the circle.
      * Higher values result in a smoother circle but may impact performance.
      *
-     * The minimum value is 8. By default, the value is [DEFAULT_CIRCLE_SEGMENTS].
+     * By default, the value is [DEFAULT_CIRCLE_SEGMENTS].
      *
      * It is recommended to not update this value frequently, internally it will
      * recreate the vertex buffer which can lead to performance degradation if it
