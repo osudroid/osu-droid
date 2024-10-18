@@ -20,7 +20,7 @@ class SongProgress : Container() {
 
         Circle().also { clear ->
 
-            clear.setSize(31f, 31f)
+            clear.setSize(30f, 30f)
             clear.setAnchor(Anchor.Center)
             clear.setOrigin(Anchor.Center)
             clear.color = ColorARGB.Transparent
@@ -43,7 +43,7 @@ class SongProgress : Container() {
 
         circularProgress = Circle().also { progress ->
 
-            progress.setSize(31f, 31f)
+            progress.setSize(30f, 30f)
             progress.setAnchor(Anchor.Center)
             progress.setOrigin(Anchor.Center)
             progress.alpha = 0.6f
