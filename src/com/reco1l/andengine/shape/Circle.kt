@@ -76,6 +76,7 @@ class Circle(segments: Int = DEFAULT_CIRCLE_SEGMENTS) : ExtendedEntity(vertexBuf
     override fun onInitDraw(pGL: GL10) {
         super.onInitDraw(pGL)
 
+        GLHelper.disableCulling(pGL)
         GLHelper.disableTextures(pGL)
         GLHelper.disableTexCoordArray(pGL)
     }
