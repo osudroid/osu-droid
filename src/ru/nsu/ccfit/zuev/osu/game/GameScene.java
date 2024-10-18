@@ -26,11 +26,10 @@ import com.reco1l.osu.Modifiers;
 import com.reco1l.andengine.Anchor;
 import com.reco1l.andengine.sprite.VideoSprite;
 import com.reco1l.andengine.ExtendedScene;
-import com.reco1l.osu.playfield.FollowPointConnection;
-import com.reco1l.osu.playfield.ComboCounter;
-import com.reco1l.osu.playfield.HealthDisplay;
-import com.reco1l.osu.playfield.ScoreText;
-import com.reco1l.osu.playfield.SliderTickSprite;
+import com.reco1l.osu.hitobjects.FollowPointConnection;
+import com.reco1l.osu.playfield.GameplayHUD;
+import com.reco1l.osu.playfield.ScoreCounterMetric;
+import com.reco1l.osu.hitobjects.SliderTickSprite;
 import com.reco1l.osu.ui.BlockAreaFragment;
 import com.reco1l.osu.ui.entity.GameplayLeaderboard;
 import com.reco1l.osu.multiplayer.Multiplayer;
@@ -80,7 +79,6 @@ import ru.nsu.ccfit.zuev.audio.Status;
 import ru.nsu.ccfit.zuev.audio.effect.Metronome;
 import ru.nsu.ccfit.zuev.osu.Config;
 import ru.nsu.ccfit.zuev.osu.Constants;
-import ru.nsu.ccfit.zuev.osu.DifficultyAlgorithm;
 import ru.nsu.ccfit.zuev.osu.GlobalManager;
 import ru.nsu.ccfit.zuev.osu.RGBColor;
 import ru.nsu.ccfit.zuev.osu.ResourceManager;
@@ -117,7 +115,6 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
     private final Engine engine;
     private final Cursor[] cursors = new Cursor[CursorCount];
     private final boolean[] cursorIIsDown = new boolean[CursorCount];
-    private final StringBuilder strBuilder = new StringBuilder();
     public String audioFilePath = null;
     private ExtendedScene scene;
     private ExtendedScene bgScene, mgScene, fgScene;
@@ -131,7 +128,6 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
     private TimingControlPoint activeTimingPoint;
     private EffectControlPoint activeEffectPoint;
     private int lastObjectId = -1;
-    private float secPassed = 0;
     private float leadOut = 0;
     private LinkedList<HitObject> objects;
     private ArrayList<RGBColor> comboColors;
@@ -140,7 +136,6 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
     private LinkedList<GameObject> activeObjects;
     private LinkedList<GameObject> passiveObjects;
     private LinkedList<GameObject> expiredObjects;
-    private ScoreText accuracyText, scoreText;  //显示的文字  连击数  ACC  分数
     private Queue<BreakPeriod> breakPeriods = new LinkedList<>();
     private BreakAnimator breakAnimator;
     public GameplayLeaderboard scoreBoard;
@@ -189,20 +184,14 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
     private ChangeableText fpsText;
     private ChangeableText avgOffsetText;
     private ChangeableText urText;
-    private ChangeableText ppText;
     private ChangeableText memText;
 
-    // HUD
+    // UI
 
     /**
-     * The combo counter text.
+     * The gameplay HUD
      */
-    private ComboCounter comboText;
-
-    /**
-     * The health display.
-     */
-    private HealthDisplay healthDisplay;
+    private GameplayHUD hud;
 
 
     // Timing
@@ -213,6 +202,21 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
      * If 0, a frame has not been rendered yet.
      */
     private long previousFrameTime;
+
+    /**
+     * The start time of the first object in seconds.
+     */
+    public float firstObjectStartTime;
+
+    /**
+     * The end time of the last object in seconds.
+     */
+    public float lastObjectEndTime;
+
+    /**
+     * The time passed in seconds since the game has started in seconds.
+     */
+    public float elapsedTime = 0;
 
 
     // Video support
@@ -532,8 +536,7 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
 
         GameObjectPool.getInstance().preload();
 
-        ppText = null;
-        if (Config.isDisplayRealTimePPCounter()) {
+        if (Config.getScoreCounterMetric() == ScoreCounterMetric.PP) {
             // Calculate timed difficulty attributes
             var parameters = new DifficultyCalculationParameters(convertedMods, modMenu.getChangeSpeed());
             var sameParameters = lastDifficultyCalculationParameters != null &&
@@ -571,6 +574,11 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
         lastScoreSent = null;
 
         paused = false;
+        if (hud != null) {
+            hud.setVisible(true);
+            hud.setIgnoreUpdate(false);
+        }
+
         gameStarted = false;
         return true;
     }
@@ -650,57 +658,6 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
         }
         setBackground();
 
-        // Set up counter texts
-        for (var text : counterTexts) {
-            text.detachSelf();
-        }
-
-        counterTexts.clear();
-        var counterTextFont = ResourceManager.getInstance().getFont("smallFont");
-
-        if (Config.isShowFPS()) {
-            fpsText = new ChangeableText(790, 520, counterTextFont, "00.00 FPS");
-            counterTexts.add(fpsText);
-
-            fgScene.registerUpdateHandler(new FPSCounter() {
-                @Override
-                public void onUpdate(float pSecondsElapsed) {
-                    // Cancelling the speed multiplier for the FPS counter.
-                    super.onUpdate(pSecondsElapsed / GameHelper.getSpeedMultiplier());
-
-                    fpsText.setText(Math.round(getFPS()) + " FPS");
-                }
-            });
-        }
-
-        if (Config.isShowUnstableRate()) {
-            urText = new ChangeableText(720, 480, counterTextFont, "00.00 UR    ");
-            counterTexts.add(urText);
-        }
-
-        if (Config.isShowAverageOffset()) {
-            avgOffsetText = new ChangeableText(720, 440, counterTextFont, "Avg offset: 0ms     ");
-            counterTexts.add(avgOffsetText);
-        }
-
-        if (Config.isDisplayRealTimePPCounter()) {
-            ppText = new ChangeableText(720, 400, counterTextFont,
-                    Config.getDifficultyAlgorithm() == DifficultyAlgorithm.droid ? "0.00dpp" : "0.00pp", 15);
-            counterTexts.add(ppText);
-        }
-
-        if (BuildConfig.DEBUG) {
-            memText = new ChangeableText(780, 520, counterTextFont, "0/0 MB    ");
-            counterTexts.add(memText);
-        }
-
-        updateCounterTexts();
-
-        // Attach the counter texts
-        for (var text : counterTexts) {
-            fgScene.attachChild(text);
-        }
-
         stat = new StatisticV2();
         stat.setMod(ModMenu.getInstance().getMod());
         stat.canFail = !stat.getMod().contains(GameMod.MOD_NOFAIL)
@@ -740,6 +697,54 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
                 DifficultyHelper.HighDifficulty : DifficultyHelper.StdDifficulty;
         GameHelper.setDifficultyHelper(difficultyHelper);
 
+        // Set up counter texts
+        for (var text : counterTexts) {
+            text.detachSelf();
+        }
+        counterTexts.clear();
+
+        if (!Config.isHideInGameUI()) {
+            hud = new GameplayHUD(stat, this);
+            engine.getCamera().setHUD(hud);
+
+            var counterTextFont = ResourceManager.getInstance().getFont("smallFont");
+
+            if (Config.isShowFPS()) {
+                fpsText = new ChangeableText(790, 520, counterTextFont, "00.00 FPS");
+                counterTexts.add(fpsText);
+
+                hud.registerUpdateHandler(new FPSCounter() {
+                    @Override
+                    public void onUpdate(float pSecondsElapsed) {
+                        super.onUpdate(pSecondsElapsed);
+                        fpsText.setText(Math.round(getFPS()) + " FPS");
+                    }
+                });
+            }
+
+            if (Config.isShowUnstableRate()) {
+                urText = new ChangeableText(720, 480, counterTextFont, "00.00 UR    ");
+                counterTexts.add(urText);
+            }
+
+            if (Config.isShowAverageOffset()) {
+                avgOffsetText = new ChangeableText(720, 440, counterTextFont, "Avg offset: 0ms     ");
+                counterTexts.add(avgOffsetText);
+            }
+
+            if (BuildConfig.DEBUG) {
+                memText = new ChangeableText(780, 520, counterTextFont, "0/0 MB    ");
+                counterTexts.add(memText);
+            }
+
+            updateCounterTexts();
+
+            // Attach the counter texts
+            for (var text : counterTexts) {
+                hud.attachChild(text);
+            }
+        }
+
         for (int i = 0; i < CursorCount; i++) {
             cursors[i] = new Cursor();
             cursors[i].mouseDown = false;
@@ -753,25 +758,27 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
         comboWasMissed = false;
         previousFrameTime = 0;
 
-        float firstObjStartTime = (float) objects.peek().startTime / 1000;
-        float skipTargetTime = firstObjStartTime - Math.max(2f, objectTimePreempt);
+        firstObjectStartTime = (float) objects.peek().startTime / 1000;
+        lastObjectEndTime = (float) objects.getLast().getEndTime() / 1000;
 
-        secPassed = Math.min(0, skipTargetTime);
+        float skipTargetTime = firstObjectStartTime - Math.max(2f, objectTimePreempt);
+
+        elapsedTime = Math.min(0, skipTargetTime);
         skipTime = skipTargetTime - 1;
 
         // Some beatmaps specify a current lead-in time, which overrides the default lead-in time above.
         float leadIn = playableBeatmap.getGeneral().audioLeadIn / 1000f;
         if (leadIn > 0) {
-            secPassed = Math.min(secPassed, firstObjStartTime - leadIn);
+            elapsedTime = Math.min(elapsedTime, firstObjectStartTime - leadIn);
         }
 
         // Ensure the video has time to start.
         if (video != null) {
-            secPassed = Math.min(videoOffset, secPassed);
+            elapsedTime = Math.min(videoOffset, elapsedTime);
         }
 
         // Ensure user-defined offset has time to be applied.
-        secPassed = Math.min(secPassed, firstObjStartTime - objectTimePreempt - totalOffset);
+        elapsedTime = Math.min(elapsedTime, firstObjectStartTime - objectTimePreempt - totalOffset);
 
         metronome = null;
         if ((Config.getMetronomeSwitch() == 1 && GameHelper.isNightCore())
@@ -801,27 +808,15 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
         if (Config.isCorovans() && countdown != BeatmapCountdown.NoCountdown) {
             float cdSpeed = countdown.speed;
             skipTime -= cdSpeed * Countdown.COUNTDOWN_LENGTH;
-            if (cdSpeed != 0 && firstObjStartTime - secPassed >= cdSpeed * Countdown.COUNTDOWN_LENGTH) {
-                addPassiveObject(new Countdown(this, bgScene, cdSpeed, 0, firstObjStartTime - secPassed));
+            if (cdSpeed != 0 && firstObjectStartTime - elapsedTime >= cdSpeed * Countdown.COUNTDOWN_LENGTH) {
+                addPassiveObject(new Countdown(this, bgScene, cdSpeed, 0, firstObjectStartTime - elapsedTime));
             }
         }
 
         if (!Config.isHideInGameUI()) {
-            SongProgressBar progressBar = new SongProgressBar(this, fgScene,
-                (float) objects.getLast().getEndTime() / 1000, firstObjStartTime,
-                new PointF(0, Config.getRES_HEIGHT() - 7), Config.getRES_WIDTH(), 7);
-
-            progressBar.setProgressRectColor(new RGBColor(153f / 255f, 204f / 255f, 51f / 255f));
-            progressBar.setProgressRectAlpha(0.4f);
-        }
-
-        if (Config.getErrorMeter() == 1 || (Config.getErrorMeter() == 2 && replaying)) {
-            hitErrorMeter = new HitErrorMeter(
-                fgScene,
-                new PointF(Config.getRES_WIDTH() / 2f, Config.getRES_HEIGHT() - 20),
-                playableBeatmap.getDifficulty().od,
-                12,
-                difficultyHelper);
+            if (Config.getErrorMeter() == 1 || (Config.getErrorMeter() == 2 && replaying)) {
+                hitErrorMeter = new HitErrorMeter(hud, new PointF(Config.getRES_WIDTH() / 2f, Config.getRES_HEIGHT() - 20), playableBeatmap.getDifficulty().od, 12, difficultyHelper);
+            }
         }
 
         skipBtn = null;
@@ -835,29 +830,6 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
 
         breakAnimator = new BreakAnimator(this, fgScene, stat, playableBeatmap.getGeneral().letterboxInBreaks, dimRectangle);
         if (!Config.isHideInGameUI()) {
-            healthDisplay = new HealthDisplay(stat);
-            fgScene.attachChild(healthDisplay);
-
-            scoreText = new ScoreText(OsuSkin.get().getScorePrefix());
-            scoreText.setAnchor(Anchor.TopRight);
-            scoreText.setOrigin(Anchor.TopRight);
-            scoreText.setText("0000000000");
-            scoreText.setScale(0.96f);
-            scoreText.setX(-10f);
-
-            accuracyText = new ScoreText(OsuSkin.get().getScorePrefix());
-            accuracyText.setAnchor(Anchor.TopRight);
-            accuracyText.setOrigin(Anchor.TopRight);
-            accuracyText.setScale(0.6f * 0.96f);
-            accuracyText.setText("000.00%");
-            //noinspection DataFlowIssue
-            accuracyText.setPosition(-17f, scoreText.getCharacters().get('0').getHeight() + 9f);
-
-            comboText = new ComboCounter();
-
-            fgScene.attachChild(comboText);
-            fgScene.attachChild(accuracyText);
-            fgScene.attachChild(scoreText);
 
             if (Config.isComboburst()) {
                 comboBurst = new ComboBurst(Config.getRES_WIDTH(), Config.getRES_HEIGHT());
@@ -912,31 +884,34 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
 
         String playname = Config.getOnlineUsername();
 
-        ChangeableText replayText = new ChangeableText(0, 0, ResourceManager.getInstance().getFont("font"), "", 1000);
-        replayText.setVisible(false);
-        replayText.setPosition(0, 140);
-        replayText.setAlpha(0.7f);
-        fgScene.attachChild(replayText, 0);
+        ChangeableText replayText = null;
+
+        if (!Config.isHideInGameUI() && !Config.isHideReplayMarquee()) {
+            replayText = new ChangeableText(0, 0, ResourceManager.getInstance().getFont("font"), "", 1000);
+            replayText.setVisible(false);
+            replayText.setPosition(0, 140);
+            replayText.setAlpha(0.7f);
+            hud.attachChild(replayText, 0);
+        }
+
+
         if (stat.getMod().contains(GameMod.MOD_AUTO) || replaying) {
             var metadata = playableBeatmap.getMetadata();
             playname = replaying ? GlobalManager.getInstance().getScoring().getReplayStat().getPlayerName() : "osu!";
-            replayText.setText("Watching " + playname + " play " + metadata.artist + " - " + metadata.title + " [" + metadata.version + "]");
 
-            // We're cancelling the speed multiplier here because we don't want the replay text to move too fast or slow.
-            var translationDuration = 40f * GameHelper.getSpeedMultiplier();
+            if (replayText != null) {
+                replayText.setText("Watching " + playname + " play " + metadata.artist + " - " + metadata.title + " [" + metadata.version + "]");
+                replayText.registerEntityModifier(new LoopEntityModifier(new MoveXModifier(40f, Config.getRES_WIDTH() + 5, -replayText.getWidth() - 5)));
+            }
 
-            replayText.registerEntityModifier(new LoopEntityModifier(new MoveXModifier(translationDuration, Config.getRES_WIDTH() + 5, -replayText.getWidth() - 5)));
-            replayText.setVisible(!Config.isHideReplayMarquee());
         } else if (Multiplayer.room != null && Multiplayer.room.isTeamVersus()) {
-
             //noinspection DataFlowIssue
             playname = Multiplayer.player.getTeam().toString();
-
         }
 
-        if (Config.isShowScoreboard()) {
+        if (!Config.isHideInGameUI() && Config.isShowScoreboard()) {
             scoreBoard = new GameplayLeaderboard(playname, stat);
-            fgScene.attachChild(scoreBoard);
+            hud.attachChild(scoreBoard);
         }
 
         if (GameHelper.isFlashLight()){
@@ -990,18 +965,18 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
             final float criticalError = Config.isSyncMusic() ? 0.1f : 0.5f;
             final float normalError = Config.isSyncMusic() ? dt : 0.05f;
 
-            if (secPassed - totalOffset - realsecPassed > criticalError) {
+            if (elapsedTime - totalOffset - realsecPassed > criticalError) {
                 return;
             }
 
-            if (Math.abs(secPassed - totalOffset - realsecPassed) > normalError) {
-                if (secPassed - totalOffset > realsecPassed) {
+            if (Math.abs(elapsedTime - totalOffset - realsecPassed) > normalError) {
+                if (elapsedTime - totalOffset > realsecPassed) {
                     dt /= 2f;
                 } else {
                     dt *= 2f;
                 }
             }
-            secPassed += dt;
+            elapsedTime += dt;
         }
 
         updateCounterTexts();
@@ -1030,7 +1005,7 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
             }
         }
 
-        final float mSecPassed = secPassed * 1000;
+        final float mSecPassed = elapsedTime * 1000;
 
         if (Config.isEnableStoryboard()) {
             if (storyboardSprite != null) {
@@ -1051,7 +1026,7 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
                 // Emulating moves
                 while (
                         cIndex < replay.cursorMoves.get(i).size &&
-                        (movement = replay.cursorMoves.get(i).movements[cIndex]).getTime() <= (secPassed + dt / 4) * 1000
+                        (movement = replay.cursorMoves.get(i).movements[cIndex]).getTime() <= (elapsedTime + dt / 4) * 1000
                 ) {
                     float mx = movement.getPoint().x;
                     float my = movement.getPoint().y;
@@ -1078,7 +1053,7 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
                 if (movement != null && movement.getTouchType() == TouchType.MOVE && replay.lastMoveIndex[i] >= 0) {
                     final int lIndex = replay.lastMoveIndex[i];
                     final Replay.ReplayMovement lastMovement = replay.cursorMoves.get(i).movements[lIndex];
-                    float t = (secPassed * 1000 - movement.getTime()) / (lastMovement.getTime() - movement.getTime());
+                    float t = (elapsedTime * 1000 - movement.getTime()) / (lastMovement.getTime() - movement.getTime());
                     cursors[i].mousePos.x = lastMovement.getPoint().x * t + movement.getPoint().x * (1 - t);
                     cursors[i].mousePos.y = lastMovement.getPoint().y * t + movement.getPoint().y * (1 - t);
                 }
@@ -1143,11 +1118,11 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
 
         GameHelper.setBeatLength(activeTimingPoint.msPerBeat / 1000);
         GameHelper.setKiai(activeEffectPoint.isKiai);
-        GameHelper.setCurrentBeatTime(Math.max(0, secPassed - activeTimingPoint.time / 1000) % GameHelper.getBeatLength());
+        GameHelper.setCurrentBeatTime(Math.max(0, elapsedTime - activeTimingPoint.time / 1000) % GameHelper.getBeatLength());
 
         if (!breakPeriods.isEmpty()) {
             if (!breakAnimator.isBreak()
-                    && breakPeriods.peek().getStart() <= secPassed) {
+                    && breakPeriods.peek().getStart() <= elapsedTime) {
                 gameStarted = false;
                 breakAnimator.init(breakPeriods.peek().getLength());
                 if(GameHelper.isFlashLight()){
@@ -1157,7 +1132,10 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
                 if (Multiplayer.isConnected())
                     RoomScene.INSTANCE.getChat().show();
 
-                if(healthDisplay != null) healthDisplay.setVisible(false);
+                if (hud != null) {
+                    hud.getHealthBar().setVisible(false);
+                }
+
                 breakPeriods.poll();
             }
         }
@@ -1167,7 +1145,11 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
             RoomScene.INSTANCE.getChat().dismiss();
 
             gameStarted = true;
-            if(healthDisplay != null) healthDisplay.setVisible(true);
+
+            if (hud != null) {
+                hud.getHealthBar().setVisible(true);
+            }
+
             if(GameHelper.isFlashLight()){
                 flashlightSprite.onBreak(false);
             }
@@ -1208,33 +1190,6 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
             hitErrorMeter.update(dt);
         }
 
-        if(!Config.isHideInGameUI()) {
-            comboText.setCombo(stat.getCombo());
-
-            strBuilder.setLength(0);
-            float rawAccuracy = stat.getAccuracy() * 100f;
-            strBuilder.append((int) rawAccuracy);
-            if ((int) rawAccuracy < 10) {
-                strBuilder.insert(0, '0');
-            }
-            strBuilder.append('.');
-            rawAccuracy -= (int) rawAccuracy;
-            rawAccuracy *= 100;
-            if ((int) rawAccuracy < 10) {
-                strBuilder.append('0');
-            }
-            strBuilder.append((int) rawAccuracy);
-            strBuilder.append('%');
-            accuracyText.setText(strBuilder.toString());
-            strBuilder.setLength(0);
-            strBuilder.append(stat.getTotalScoreWithMultiplier());
-            while (strBuilder.length() < 8) {
-                strBuilder.insert(0, '0');
-            }
-
-            scoreText.setText(strBuilder.toString());
-        }
-
         if (comboBurst != null) {
             if (stat.getCombo() == 0) {
                 comboBurst.breakCombo();
@@ -1259,7 +1214,7 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
         updateActiveObjects(dt);
 
         if (GameHelper.isAuto() || GameHelper.isAutopilotMod()) {
-            autoCursor.moveToObject(activeObjects.peek(), secPassed, this);
+            autoCursor.moveToObject(activeObjects.peek(), elapsedTime, this);
         }
 
         if (Config.isRemoveSliderLock()) {
@@ -1279,7 +1234,7 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
             tryHitActiveObjects(dt);
         }
 
-        if (video != null && secPassed >= videoOffset)
+        if (video != null && elapsedTime >= videoOffset)
         {
             if (!videoStarted) {
                 video.getTexture().play();
@@ -1291,19 +1246,19 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
                 video.setAlpha(Math.min(video.getAlpha() + 0.03f, 1.0f));
         }
 
-        if (secPassed >= totalOffset && !musicStarted) {
+        if (elapsedTime >= totalOffset && !musicStarted) {
             GlobalManager.getInstance().getSongService().play();
             GlobalManager.getInstance().getSongService().setVolume(Config.getBgmVolume());
             totalLength = GlobalManager.getInstance().getSongService().getLength();
             musicStarted = true;
-            secPassed = totalOffset;
+            elapsedTime = totalOffset;
             return;
         }
 
         boolean shouldBePunished = false;
 
         while (!objects.isEmpty()
-                && secPassed + objectTimePreempt > (float) objects.peek().startTime / 1000) {
+                && elapsedTime + objectTimePreempt > (float) objects.peek().startTime / 1000) {
             gameStarted = true;
             final var obj = objects.poll();
 
@@ -1325,7 +1280,7 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
             if (obj instanceof HitCircle parsedCircle) {
                 final var gameplayCircle = GameObjectPool.getInstance().getCircle();
 
-                gameplayCircle.init(this, mgScene, parsedCircle, secPassed, comboColor);
+                gameplayCircle.init(this, mgScene, parsedCircle, elapsedTime, comboColor);
                 addObject(gameplayCircle);
 
                 if (GameHelper.isAuto()) {
@@ -1358,7 +1313,7 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
             } else if (obj instanceof com.rian.osu.beatmap.hitobject.Slider parsedSlider) {
                 final var gameplaySlider = GameObjectPool.getInstance().getSlider();
 
-                gameplaySlider.init(this, mgScene, parsedSlider, secPassed,
+                gameplaySlider.init(this, mgScene, parsedSlider, elapsedTime,
                     comboColor, sliderBorderColor, getSliderPath(sliderIndex++));
 
                 addObject(gameplaySlider);
@@ -1376,24 +1331,25 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
             }
 
             if (!(obj instanceof Spinner) && nextObj != null && !(nextObj instanceof Spinner) && !obj.isLastInCombo()) {
-                FollowPointConnection.addConnection(bgScene, secPassed, obj, nextObj);
+                FollowPointConnection.addConnection(bgScene, elapsedTime, obj, nextObj);
             }
         }
 
         // 节拍器
         if (metronome != null) {
-            metronome.update(secPassed, activeTimingPoint);
+            metronome.update(elapsedTime, activeTimingPoint);
         }
 
         //Status playerStatus = music.getStatus();
         Status playerStatus = GlobalManager.getInstance().getSongService().getStatus();
 
         if (playerStatus != Status.PLAYING) {
-            secPassed += dt;
+            elapsedTime += dt;
         }
 
         if (shouldBePunished || (objects.isEmpty() && activeObjects.isEmpty() && leadOut > 2)) {
             scene = new ExtendedScene();
+            engine.getCamera().setHUD(null);
             SkinManager.setSkinEnabled(false);
             GameObjectPool.getInstance().purge();
             timingControlPoints.clear();
@@ -1486,7 +1442,7 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
             leadOut += dt;
         }
 
-        if (secPassed > skipTime - 1f && skipBtn != null) {
+        if (elapsedTime > skipTime - 1f && skipBtn != null) {
             RoomScene.INSTANCE.getChat().dismiss();
             skipBtn.detachSelf();
             skipBtn = null;
@@ -1553,7 +1509,7 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
     {
         RoomScene.INSTANCE.getChat().dismiss();
 
-        if (secPassed > skipTime - 1f)
+        if (elapsedTime > skipTime - 1f)
             return;
 
         if (GlobalManager.getInstance().getSongService().getStatus() != Status.PLAYING) {
@@ -1563,10 +1519,10 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
             musicStarted = true;
         }
         ResourceManager.getInstance().getSound("menuhit").play();
-        float difference = skipTime - secPassed;
+        float difference = skipTime - elapsedTime;
 
-        secPassed = skipTime;
-        int seekTime = (int) Math.ceil(secPassed * 1000);
+        elapsedTime = skipTime;
+        int seekTime = (int) Math.ceil(elapsedTime * 1000);
         int videoSeekTime = seekTime - (int) (videoOffset * 1000);
 
         Execution.updateThread(() -> {
@@ -1617,7 +1573,7 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
         standardTimedDifficultyAttributes = null;
 
         // osu!stable restarts the song back to preview time when the player is in the last 10 seconds *or* 2% of the beatmap.
-        float mSecPassed = secPassed * 1000;
+        float mSecPassed = elapsedTime * 1000;
         var songMenu = GlobalManager.getInstance().getSongMenu();
         if (totalLength - mSecPassed > 10000 && mSecPassed / totalLength < 0.98f) {
             var songService = GlobalManager.getInstance().getSongService();
@@ -1678,6 +1634,7 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
             }
         }
         scene = new ExtendedScene();
+        engine.getCamera().setHUD(null);
 
         if (Multiplayer.isMultiplayer)
         {
@@ -1829,8 +1786,8 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
         createBurstEffect(pos, color);
         createHitEffect(pos, scoreName, color);
 
-        if (healthDisplay != null) {
-            healthDisplay.flash();
+        if (hud != null) {
+            hud.getHealthBar().flash();
         }
     }
 
@@ -1910,8 +1867,8 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
 
         createHitEffect(judgementPos, scoreName, color);
 
-        if (healthDisplay != null) {
-            healthDisplay.flash();
+        if (hud != null) {
+            hud.getHealthBar().flash();
         }
     }
 
@@ -1967,8 +1924,8 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
 
         createHitEffect(pos, scoreName, null);
 
-        if (healthDisplay != null) {
-            healthDisplay.flash();
+        if (hud != null) {
+            hud.getHealthBar().flash();
         }
     }
 
@@ -2070,7 +2027,7 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
         }
 
         var frameOffset = previousFrameTime > 0 ? (event.getMotionEvent().getEventTime() - previousFrameTime) * GameHelper.getSpeedMultiplier() : 0;
-        var eventTime = (int) (secPassed * 1000 + frameOffset);
+        var eventTime = (int) (elapsedTime * 1000 + frameOffset);
 
         if (event.isActionDown()) {
 
@@ -2151,7 +2108,7 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
         // Release all pressed cursors to avoid getting stuck at resume.
         if (!GameHelper.isAuto() && !GameHelper.isAutopilotMod() && !replaying) {
             var frameOffset = previousFrameTime > 0 ? (SystemClock.uptimeMillis() - previousFrameTime) * GameHelper.getSpeedMultiplier() : 0;
-            var time = (int) (secPassed * 1000 + frameOffset);
+            var time = (int) (elapsedTime * 1000 + frameOffset);
 
             for (int i = 0; i < CursorCount; ++i) {
                 var cursor = cursors[i];
@@ -2175,6 +2132,10 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
             GlobalManager.getInstance().getSongService().pause();
         }
         paused = true;
+        if (hud != null) {
+            hud.setVisible(false);
+            hud.setIgnoreUpdate(true);
+        }
 
         final PauseMenu menu = new PauseMenu(engine, this, false);
         scene.setChildScene(menu.getScene(), false, true, true);
@@ -2210,6 +2171,11 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
             GlobalManager.getInstance().getSongService().pause();
         }
         paused = true;
+        if (hud != null) {
+            hud.setVisible(false);
+            hud.setIgnoreUpdate(true);
+        }
+
         scene.setChildScene(menu.getScene(), false, true, true);
     }
 
@@ -2225,6 +2191,11 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
 
         scene.getChildScene().back();
         paused = false;
+        if (hud != null) {
+            hud.setVisible(true);
+            hud.setIgnoreUpdate(false);
+        }
+
         if (stat.getHp() <= 0 && !stat.getMod().contains(GameMod.MOD_NOFAIL)) {
             quit();
             return;
@@ -2234,7 +2205,7 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
             video.getTexture().play();
         }
 
-        if (GlobalManager.getInstance().getSongService() != null && GlobalManager.getInstance().getSongService().getStatus() != Status.PLAYING && secPassed > 0) {
+        if (GlobalManager.getInstance().getSongService() != null && GlobalManager.getInstance().getSongService().getStatus() != Status.PLAYING && elapsedTime > 0) {
             GlobalManager.getInstance().getSongService().play();
             GlobalManager.getInstance().getSongService().setVolume(Config.getBgmVolume());
             totalLength = GlobalManager.getInstance().getSongService().getLength();
@@ -2579,13 +2550,13 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
     }
 
     private void updatePPCounter(int objectId) {
-        if (ppText == null) {
+        if (hud == null || Config.getScoreCounterMetric() == ScoreCounterMetric.SCORE) {
             return;
         }
 
         switch (Config.getDifficultyAlgorithm()) {
-            case droid -> ppText.setText(String.format(Locale.ENGLISH, "%.2fdpp", getDroidPPAt(objectId)));
-            case standard -> ppText.setText(String.format(Locale.ENGLISH, "%.2fpp", getStandardPPAt(objectId)));
+            case droid -> hud.getScoreCounter().setValue(getDroidPPAt(objectId));
+            case standard -> hud.getScoreCounter().setValue(getStandardPPAt(objectId));
         }
     }
 

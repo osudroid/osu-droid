@@ -1,4 +1,4 @@
-package com.reco1l.osu.playfield
+package com.reco1l.osu.hitobjects
 
 import com.edlplan.framework.easing.*
 import com.reco1l.andengine.*
@@ -45,6 +45,7 @@ object FollowPointConnection {
 
     @JvmStatic
     fun addConnection(scene: Scene, secPassed: Float, start: HitObject, end: HitObject) {
+
         // Reference: https://github.com/ppy/osu/blob/7bc8908ca9c026fed1d831eb6e58df7624a8d614/osu.Game.Rulesets.Osu/Objects/Drawables/Connections/FollowPointConnection.cs
 
         val scale = start.gameplayScale
@@ -71,10 +72,7 @@ object FollowPointConnection {
         val osuPixelsStartPosition = start.difficultyStackedEndPosition
         val osuPixelsEndPosition = end.difficultyStackedPosition
 
-        val osuPixelsDistance = hypot(
-            osuPixelsEndPosition.x - osuPixelsStartPosition.x,
-            osuPixelsEndPosition.y - osuPixelsStartPosition.y
-        ).toInt()
+        val osuPixelsDistance = hypot(osuPixelsEndPosition.x - osuPixelsStartPosition.x, osuPixelsEndPosition.y - osuPixelsStartPosition.y).toInt()
 
         var d = (SPACING * 1.5f).toInt()
         while (d < osuPixelsDistance - SPACING) {
@@ -100,7 +98,8 @@ object FollowPointConnection {
             fp.alpha = 0f
 
             fp.registerEntityModifier(
-                Modifiers.sequence(expire,
+                Modifiers.sequence(
+                    expire,
                 Modifiers.delay(fadeInTime - secPassed),
                 Modifiers.parallel(null,
                     Modifiers.fadeIn(endFadeInTime),
