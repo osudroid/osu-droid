@@ -96,7 +96,7 @@ open class Beatmap(
 
         mods?.filterIsInstance<IModApplicableToDifficultyWithSettings>()?.forEach {
             scope?.ensureActive()
-            it.applyToDifficulty(mode, converted.difficulty, mods, customSpeedMultiplier)
+            it.applyToDifficulty(mode, converted.difficulty, mods, customSpeedMultiplier, oldStatistics)
         }
 
         val processor = BeatmapProcessor(converted, scope)
@@ -119,7 +119,7 @@ open class Beatmap(
         mods?.filterIsInstance<IModApplicableToHitObjectWithSettings>()?.forEach {
             for (obj in converted.hitObjects.objects) {
                 scope?.ensureActive()
-                it.applyToHitObject(mode, obj, mods, customSpeedMultiplier)
+                it.applyToHitObject(mode, obj, mods, customSpeedMultiplier, oldStatistics)
             }
         }
 

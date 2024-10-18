@@ -103,7 +103,7 @@ object ModUtils {
 
         for (mod in mods) {
             if (mod is IModApplicableToDifficultyWithSettings) {
-                mod.applyToDifficulty(mode, difficulty, mods, customSpeedMultiplier)
+                mod.applyToDifficulty(mode, difficulty, mods, customSpeedMultiplier, oldStatistics)
             }
         }
 
