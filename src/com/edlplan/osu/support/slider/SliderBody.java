@@ -37,18 +37,18 @@ public class SliderBody extends Container {
         if (allowHint) {
             hint = new TriangleMesh();
             hint.setVisible(false);
-            hint.setDepthTest(true);
-            hint.setClearDepth(true);
+            hint.setTestWithDepthBuffer(true);
+            hint.setClearDepthBufferBeforeDraw(true);
         } else {
             hint = null;
         }
 
         border = new TriangleMesh();
-        border.setDepthTest(true);
+        border.setTestWithDepthBuffer(true);
         attachChild(border, 0);
 
         background = new TriangleMesh();
-        background.setDepthTest(true);
+        background.setTestWithDepthBuffer(true);
         attachChild(background, 0);
 
         if (hint != null) {
@@ -88,9 +88,9 @@ public class SliderBody extends Container {
     public void setHintVisible(boolean visible) {
         if (hint != null) {
             hint.setVisible(visible);
-            background.setClearDepth(!visible);
+            background.setClearDepthBufferBeforeDraw(!visible);
         } else {
-            background.setClearDepth(true);
+            background.setClearDepthBufferBeforeDraw(true);
         }
     }
 

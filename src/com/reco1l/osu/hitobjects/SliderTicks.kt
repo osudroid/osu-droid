@@ -1,4 +1,4 @@
-package com.reco1l.osu.playfield
+package com.reco1l.osu.hitobjects
 
 import com.reco1l.andengine.container.*
 import com.reco1l.andengine.sprite.*
