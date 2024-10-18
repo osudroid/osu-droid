@@ -68,6 +68,12 @@ public class Text extends RectangularShape {
 	}
 
 	protected void updateText(final String pText) {
+		// BEGIN osu!droid modified - prevent unnecessary updates
+		if (this.mText != null && this.mText.equals(pText)) {
+			return;
+		}
+		// END osu!droid modified
+
 		this.mText = pText;
 		final Font font = this.mFont;
 
