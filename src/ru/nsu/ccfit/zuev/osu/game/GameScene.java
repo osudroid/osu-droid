@@ -535,11 +535,7 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
         ppText = null;
         if (Config.isDisplayRealTimePPCounter()) {
             // Calculate timed difficulty attributes
-            var parameters = new DifficultyCalculationParameters();
-
-            parameters.setMods(convertedMods);
-            parameters.setCustomSpeedMultiplier(modMenu.getChangeSpeed());
-
+            var parameters = new DifficultyCalculationParameters(convertedMods, modMenu.getChangeSpeed());
             var sameParameters = lastDifficultyCalculationParameters != null &&
                 lastDifficultyCalculationParameters.equals(parameters);
 

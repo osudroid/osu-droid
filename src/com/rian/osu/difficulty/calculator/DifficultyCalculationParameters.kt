@@ -1,38 +1,41 @@
 package com.rian.osu.difficulty.calculator
 
 import com.rian.osu.mods.Mod
-import com.rian.osu.utils.ModUtils
+import com.rian.osu.mods.ModNightCore
 
 /**
  * A class for specifying parameters for difficulty calculation.
  */
-class DifficultyCalculationParameters {
+class DifficultyCalculationParameters @JvmOverloads constructor(
     /**
      * The mods to calculate for.
      */
-    var mods = mutableListOf<Mod>()
+    @JvmField
+    var mods: MutableList<Mod> = mutableListOf(),
 
     /**
      * The custom speed multiplier to calculate for.
      */
-    var customSpeedMultiplier = 1f
+    @JvmField
+    var customSpeedMultiplier: Float = 1f,
 
     /**
-     * The overall speed multiplier to calculate for.
-     */
-    val totalSpeedMultiplier by lazy {
-        ModUtils.calculateRateWithMods(mods) * customSpeedMultiplier
-    }
-
-    /**
-     * Copies this instance to another instance.
+     * Whether to enforce old statistics.
      *
-     * @return The copied instance.
+     * Some [Mod]s behave differently with this flag. For example, [ModNightCore] will apply a 1.39 rate multiplier
+     * instead of 1.5 when this is `true`. **Never set this flag to `true` unless you know what you are doing.**
      */
-    fun copy() = DifficultyCalculationParameters().also {
-        it.mods.addAll(mods)
-        it.customSpeedMultiplier = customSpeedMultiplier
-    }
+    @JvmField
+    var oldStatistics: Boolean = false
+) {
+    /**
+     * Copies this [DifficultyCalculationParameters] to another [DifficultyCalculationParameters].
+     *
+     * @return The copied [DifficultyCalculationParameters].
+     */
+    fun copy() = DifficultyCalculationParameters(
+        customSpeedMultiplier = customSpeedMultiplier, oldStatistics = oldStatistics
+    ).also { it.mods.addAll(mods) }
 
     override fun equals(other: Any?): Boolean {
         if (other === this) {
@@ -43,7 +46,7 @@ class DifficultyCalculationParameters {
             return false
         }
 
-        if (customSpeedMultiplier != other.customSpeedMultiplier) {
+        if (customSpeedMultiplier != other.customSpeedMultiplier || oldStatistics != other.oldStatistics) {
             return false
         }
 
@@ -52,7 +55,9 @@ class DifficultyCalculationParameters {
 
     override fun hashCode(): Int {
         var result = mods.hashCode()
+
         result = 31 * result + customSpeedMultiplier.hashCode()
+        result = 31 * result + oldStatistics.hashCode()
 
         return result
     }

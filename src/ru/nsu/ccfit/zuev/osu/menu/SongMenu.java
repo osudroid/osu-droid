@@ -1067,16 +1067,16 @@ public class SongMenu implements IUpdateHandler, MenuItemListener,
 
                 changeDimensionInfo(beatmapInfo);
 
-                var parameters = new DifficultyCalculationParameters();
                 var modMenu = ModMenu.getInstance();
-
-                parameters.setMods(ModUtils.convertLegacyMods(
-                    modMenu.getMod(),
-                    modMenu.isCustomCS() ? modMenu.getCustomCS() : null,
-                    modMenu.isCustomAR() ? modMenu.getCustomAR() : null,
-                    modMenu.isCustomOD() ? modMenu.getCustomOD() : null
-                ));
-                parameters.setCustomSpeedMultiplier(modMenu.getChangeSpeed());
+                var parameters = new DifficultyCalculationParameters(
+                    ModUtils.convertLegacyMods(
+                        modMenu.getMod(),
+                        modMenu.isCustomCS() ? modMenu.getCustomCS() : null,
+                        modMenu.isCustomAR() ? modMenu.getCustomAR() : null,
+                        modMenu.isCustomOD() ? modMenu.getCustomOD() : null
+                    ),
+                    modMenu.getChangeSpeed()
+                );
 
                 switch (Config.getDifficultyAlgorithm()) {
                     case droid -> {
