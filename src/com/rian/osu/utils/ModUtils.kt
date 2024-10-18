@@ -62,11 +62,15 @@ object ModUtils {
      * Calculates the rate for the track with the selected [Mod]s.
      *
      * @param mods The list of selected [Mod]s.
+     * @param oldStatistics Whether to enforce old statistics. Some [Mod]s behave differently with this flag. For
+     * example, [ModNightCore] will apply a 1.39 rate multiplier instead of 1.5 when this is `true`.
+     * **Never set this flag to `true` unless you know what you are doing.**
      * @return The rate with [Mod]s.
      */
     @JvmStatic
-    fun calculateRateWithMods(mods: Iterable<Mod>) = mods.fold(1f) {
-        rate, mod -> rate * (if (mod is IModApplicableToTrackRate) mod.trackRateMultiplier else 1f)
+    @JvmOverloads
+    fun calculateRateWithMods(mods: Iterable<Mod>, oldStatistics: Boolean = false) = mods.fold(1f) {
+        rate, mod -> (mod as? IModApplicableToTrackRate)?.applyToRate(rate, oldStatistics) ?: rate
     }
 
     /**
@@ -76,10 +80,21 @@ object ModUtils {
      * @param mode The [GameMode] to apply the [Mod]s for.
      * @param mods The selected [Mod]s.
      * @param customSpeedMultiplier The custom speed multiplier to apply.
+     * @param withRateChange Whether to apply rate changes.
+     * @param oldStatistics Whether to enforce old statistics. Some [Mod]s behave differently with this flag. For
+     * example, [ModNightCore] will apply a 1.39 rate multiplier instead of 1.5 when this is `true`.
+     * **Never set this flag to `true` unless you know what you are doing.**
      */
     @JvmStatic
     @JvmOverloads
-    fun applyModsToBeatmapDifficulty(difficulty: BeatmapDifficulty, mode: GameMode, mods: Iterable<Mod>, customSpeedMultiplier: Float = 1f) {
+    fun applyModsToBeatmapDifficulty(
+        difficulty: BeatmapDifficulty,
+        mode: GameMode,
+        mods: Iterable<Mod>,
+        customSpeedMultiplier: Float = 1f,
+        withRateChange: Boolean = false,
+        oldStatistics: Boolean = false
+    ) {
         for (mod in mods) {
             if (mod is IModApplicableToDifficulty) {
                 mod.applyToDifficulty(mode, difficulty)
@@ -92,8 +107,12 @@ object ModUtils {
             }
         }
 
+        if (!withRateChange) {
+            return
+        }
+
         // Apply rate adjustments
-        val totalSpeedMultiplier = calculateRateWithMods(mods) * customSpeedMultiplier
+        val totalSpeedMultiplier = calculateRateWithMods(mods, oldStatistics) * customSpeedMultiplier
 
         val preempt = BeatmapDifficulty.difficultyRange(difficulty.ar.toDouble(), HitObject.PREEMPT_MAX, HitObject.PREEMPT_MID, HitObject.PREEMPT_MIN) / totalSpeedMultiplier
         difficulty.ar = BeatmapDifficulty.inverseDifficultyRange(preempt, HitObject.PREEMPT_MAX, HitObject.PREEMPT_MID, HitObject.PREEMPT_MIN).toFloat()

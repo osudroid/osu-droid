@@ -932,7 +932,7 @@ public class SongMenu implements IUpdateHandler, MenuItemListener,
             beatmapInfo.getHpDrainRate()
         );
 
-        ModUtils.applyModsToBeatmapDifficulty(difficulty, GameMode.Droid, convertedMods, customSpeedMultiplier);
+        ModUtils.applyModsToBeatmapDifficulty(difficulty, GameMode.Droid, convertedMods, customSpeedMultiplier, true);
 
         if (isPreciseMod) {
             // Special case for OD. The Precise mod changes the hit window and not the OD itself, but we must
