@@ -183,8 +183,7 @@ public class OnlineManager {
         Debug.i("Starting play...");
         playID = null;
 
-        File beatmapFile = new File(beatmapInfo.getAudioPath());
-        beatmapFile.getParentFile().getName();
+        File beatmapFile = new File(beatmapInfo.getPath());
         String osuID = beatmapFile.getParentFile().getName();
         Debug.i("osuid = " + osuID);
         if (osuID.matches("^[0-9]+ .*"))
