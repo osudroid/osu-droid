@@ -7,6 +7,7 @@ import androidx.annotation.NonNull;
 import org.anddev.andengine.util.Debug;
 
 import java.io.EOFException;
+import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
@@ -204,10 +205,10 @@ public class Replay {
     }
 
     @SuppressWarnings("unchecked")
-    public boolean loadInfo(final String filename) {
+    public boolean loadInfo(final String replayFilePath) {
         ObjectInputStream os;
         try {
-            final ZipInputStream zip = new ZipInputStream(new FileInputStream(filename));
+            final ZipInputStream zip = new ZipInputStream(new FileInputStream(replayFilePath));
             zip.getNextEntry();
             os = new ObjectInputStream(zip);
             // zip.close();
@@ -216,7 +217,7 @@ public class Replay {
             return false;
         }
 
-        Debug.i("Loading replay " + filename);
+        Debug.i("Loading replay " + replayFilePath);
 
         cursorMoves.clear();
         int version = 0;
@@ -240,6 +241,8 @@ public class Replay {
 
             if (version >= 3) {
                 stat = new StatisticV2();
+                stat.setReplayFilename(new File(replayFilePath).getName());
+                stat.setBeatmap(mapName, mapFile);
                 stat.setTime(os.readLong());
                 stat.setHit300k(os.readInt());
                 stat.setHit300(os.readInt());
@@ -275,10 +278,10 @@ public class Replay {
     }
 
     @SuppressWarnings("unchecked")
-    public boolean load(final String filename) {
+    public boolean load(final String replayFilePath) {
         ObjectInputStream os;
         try {
-            final ZipInputStream zip = new ZipInputStream(new FileInputStream(filename));
+            final ZipInputStream zip = new ZipInputStream(new FileInputStream(replayFilePath));
             zip.getNextEntry();
             os = new ObjectInputStream(zip);
             // zip.close();
@@ -287,7 +290,7 @@ public class Replay {
             return false;
         }
 
-        Debug.i("Loading replay " + filename);
+        Debug.i("Loading replay " + replayFilePath);
 
         cursorMoves.clear();
         int version = 0;
@@ -318,6 +321,8 @@ public class Replay {
 
             if (version >= 3) {
                 stat = new StatisticV2();
+                stat.setReplayFilename(new File(replayFilePath).getName());
+                stat.setBeatmap(mapName, mapFile);
                 stat.setTime(os.readLong());
                 stat.setHit300k(os.readInt());
                 stat.setHit300(os.readInt());
