@@ -45,7 +45,7 @@
     <PreferenceCategory android:title="Storage">
 
         <Preference
-            android:key="clear"
+            android:key="clear_beatmap_cache"
             android:summary="@string/opt_clear_summary"
             android:title="@string/opt_clear_title" />
 
