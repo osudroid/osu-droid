@@ -141,7 +141,7 @@ data class ScoreInfo @JvmOverloads constructor(
         put("misses", misses)
         put("accuracy", accuracy)
         put("time", time)
-        put("isPerfect", if (isPerfect) 1 else 0)
+        put("perfect", if (isPerfect) 1 else 0)
 
     }
 
@@ -193,7 +193,7 @@ fun ScoreInfo(json: JSONObject): ScoreInfo {
         misses = json.getInt("misses"),
         accuracy = json.getDouble("accuracy").toFloat(),
         time = json.getLong("time"),
-        isPerfect = json.getInt("isPerfect") == 1
+        isPerfect = json.getInt("perfect") == 1
     )
 }
 
