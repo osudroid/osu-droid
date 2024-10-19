@@ -2,9 +2,9 @@ package com.reco1l.osu
 
 import android.content.Intent
 import android.content.Intent.*
+import android.net.Uri
 import androidx.core.content.FileProvider
 import androidx.preference.PreferenceManager
-import com.edlplan.ui.fragment.MarkdownFragment
 import com.google.android.material.snackbar.BaseTransientBottomBar.LENGTH_INDEFINITE
 import com.google.android.material.snackbar.BaseTransientBottomBar.LENGTH_SHORT
 import com.google.android.material.snackbar.Snackbar
@@ -17,7 +17,6 @@ import ru.nsu.ccfit.zuev.osu.helper.StringTable
 import ru.nsu.ccfit.zuev.osu.online.OnlineManager
 import ru.nsu.ccfit.zuev.osu.online.OnlineManager.updateEndpoint
 import ru.nsu.ccfit.zuev.osuplus.BuildConfig.APPLICATION_ID
-import ru.nsu.ccfit.zuev.osuplus.R.string.changelog_title
 import ru.nsu.ccfit.zuev.osuplus.R.string.beatmap_downloader_cancel
 import ru.nsu.ccfit.zuev.osuplus.R.string.update_dialog_button_changelog
 import ru.nsu.ccfit.zuev.osuplus.R.string.update_dialog_button_update
@@ -56,9 +55,9 @@ object UpdateManager: IDownloaderObserver
         preferences.apply {
 
             val latestUpdate = getLong("latestVersionCode", mainActivity.versionCode)
-            val pendingChangelog = getString("pendingChangelog", null)
+            val changelogLink = getString("changelogLink", null)
 
-            if (!pendingChangelog.isNullOrEmpty()) {
+            if (!changelogLink.isNullOrEmpty()) {
                 if (latestUpdate > mainActivity.versionCode) {
                     snackBar.apply {
 
@@ -67,19 +66,14 @@ object UpdateManager: IDownloaderObserver
 
                         // Show changelog button.
                         setAction(update_dialog_button_changelog) {
-
-                            MarkdownFragment().apply {
-                                setTitle(changelog_title)
-                                setMarkdown(pendingChangelog)
-                                show()
-                            }
+                            context.startActivity(Intent(ACTION_VIEW, Uri.parse(changelogLink)))
                         }
                         setText(update_info_updated)
                         show()
                     }
                 }
                 // Now we're removing the cached changelog.
-                edit().putString("pendingChangelog", null).apply()
+                edit().putString("changelogLink", null).apply()
             }
         }
 
@@ -149,7 +143,7 @@ object UpdateManager: IDownloaderObserver
                 OnlineManager.client.newCall(request).execute().use {
 
                     val response = JSONObject(it.body!!.string())
-                    val changelogUrl = response.getString("changelog")
+                    val changelogLink = response.getString("changelog")
 
                     downloadURL = response.getString("link")
                     newVersionCode = response.getLong("version_code")
@@ -163,7 +157,7 @@ object UpdateManager: IDownloaderObserver
 
                     // Storing change log link to show once the user update to next version.
                     preferences.apply {
-                        edit().putString("pendingChangelog", changelogUrl).apply()
+                        edit().putString("changelogLink", changelogLink).apply()
                     }
 
                     onFoundNewUpdate(silently)
