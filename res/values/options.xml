@@ -362,4 +362,8 @@
 
     <string name="opt_video_title">Background Video</string>
     <string name="opt_video_summary">Display video playback during gameplay. Only supports .3gp, .mp4, .mkv, and .webm video formats</string>
+
+    <!-- Replay import -->
+    <string name="opt_import_replay_title">Import replay via directory</string>
+    <string name="opt_import_replay_summary">Import a replay file (.odr) or an exported replay file (.edr). Only .odr files from osu!droid version 1.6.7 onwards are supported</string>
 </resources>

@@ -26,8 +26,13 @@
             android:defaultValue="true"
             android:key="deleteUnsupportedVideos"
             android:summary="@string/opt_delete_unsupported_videos_summary"
-            android:title="@string/opt_delete_unsupported_videos_title"
-            app:layout="@layout/settings_preference_checkbox_bottom" />
+            android:title="@string/opt_delete_unsupported_videos_title" />
+
+        <com.reco1l.osu.ui.InputPreference
+            android:key="importReplay"
+            android:title="@string/opt_import_replay_title"
+            android:summary="@string/opt_import_replay_summary"
+            app:layout="@layout/settings_preference_input_bottom" />
 
     </PreferenceCategory>
 

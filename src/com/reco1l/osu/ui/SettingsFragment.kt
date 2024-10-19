@@ -38,6 +38,7 @@ import com.reco1l.toolkt.android.dp
 import com.reco1l.toolkt.android.drawableLeft
 import com.reco1l.toolkt.android.layoutWidth
 import com.reco1l.toolkt.android.topMargin
+import com.rian.osu.replay.ReplayImporter
 import ru.nsu.ccfit.zuev.osu.Config
 import ru.nsu.ccfit.zuev.osu.GlobalManager
 import ru.nsu.ccfit.zuev.osu.LibraryManager
@@ -259,6 +260,38 @@ class SettingsFragment : com.edlplan.ui.fragment.SettingsFragment() {
 
         findPreference<Preference>("clear_properties")!!.setOnPreferenceClickListener {
             DatabaseManager.beatmapOptionsTable.deleteAll()
+            true
+        }
+
+        findPreference<InputPreference>("importReplay")!!.setOnPreferenceChangeListener { it, newValue ->
+            it as InputPreference
+
+            if (newValue.toString().trim { it <= ' ' }.isEmpty()) {
+                return@setOnPreferenceChangeListener false
+            }
+
+            val loading = LoadingFragment()
+            loading.show()
+
+            async {
+                try {
+                    val success = ReplayImporter.import(newValue.toString())
+                    val textId = if (success) R.string.replay_import_success else R.string.replay_import_failed
+
+                    mainThread {
+                        loading.dismiss()
+                        Snackbar.make(requireActivity().window.decorView, textId, 3000).show()
+                    }
+                } catch (e: Exception) {
+                    val str = StringTable.format(R.string.replay_import_failed_with_reason, e.message)
+
+                    mainThread {
+                        loading.dismiss()
+                        Snackbar.make(requireActivity().window.decorView, str, 3000).show()
+                    }
+                }
+            }
+
             true
         }
     }

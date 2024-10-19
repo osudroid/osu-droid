@@ -224,4 +224,9 @@
 	<string name="setting_dim_hit_objects_title">Enable hit objects dim</string>
 	<string name="setting_dim_hit_objects_summary">Dim hit objects when they are ready to be hit.</string>
 
+	<!-- Replay import -->
+	<string name="replay_import_success">Replay imported successfully!</string>
+	<string name="replay_import_failed">Replay import failed</string>
+	<string name="replay_import_failed_with_reason">Replay import failed: %s</string>
+
 </resources>
