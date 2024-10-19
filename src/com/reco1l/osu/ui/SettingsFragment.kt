@@ -17,7 +17,6 @@ import androidx.annotation.XmlRes
 import androidx.core.content.getSystemService
 import androidx.core.view.forEach
 import androidx.core.view.get
-import androidx.datastore.preferences.core.*
 import androidx.preference.CheckBoxPreference
 import androidx.preference.Preference
 import com.edlplan.ui.fragment.LoadingFragment
