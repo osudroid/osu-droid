@@ -7,7 +7,6 @@ import java.io.FileInputStream
 import java.io.FileOutputStream
 import java.util.zip.ZipEntry
 import java.util.zip.ZipInputStream
-import ru.nsu.ccfit.zuev.osu.Config
 import ru.nsu.ccfit.zuev.osu.scoring.Replay
 
 /**
@@ -104,7 +103,7 @@ object ReplayImporter {
             throw Exception("Failed to insert score to score database")
         }
 
-        val replayFile = File(Config.getScorePath() + file.name)
+        val replayFile = File(scoreInfo.replayPath)
 
         if (file.canonicalFile != replayFile.canonicalFile) {
             file.copyTo(replayFile, true)
