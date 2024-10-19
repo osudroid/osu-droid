@@ -46,6 +46,7 @@ for preventing accidental touches.
 
 - Added support for pp-based global beatmap leaderboard in song selection menu
 - Added video setting summary regarding supported video formats
+- Added a setting to import a replay file (`.odr`) or exported replay file (`.edr`)
 - Added a new button in song selection menu to switch difficulty algorithm between osu!droid and osu!standard
   - The button can be skinned with the following skin element names:
     - `selection-difficulty-droid`
