@@ -226,7 +226,6 @@
 
 	<!-- Replay import -->
 	<string name="replay_import_success">Replay imported successfully!</string>
-	<string name="replay_import_failed">Replay import failed</string>
-	<string name="replay_import_failed_with_reason">Replay import failed: %s</string>
+	<string name="replay_import_failed">Replay import failed: %s</string>
 
 </resources>

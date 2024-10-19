@@ -13,6 +13,7 @@ import android.view.ContextThemeWrapper
 import android.view.View
 import android.widget.LinearLayout
 import android.widget.TextView
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.annotation.XmlRes
 import androidx.core.content.getSystemService
 import androidx.core.view.forEach
@@ -50,6 +51,7 @@ import ru.nsu.ccfit.zuev.osu.online.OnlineManager
 import ru.nsu.ccfit.zuev.osuplus.R
 import ru.nsu.ccfit.zuev.skins.SkinManager
 import java.io.File
+import java.io.FileOutputStream
 
 
 enum class Section(@XmlRes val xml: Int) {
@@ -81,6 +83,47 @@ class SettingsFragment : com.edlplan.ui.fragment.SettingsFragment() {
         Multiplayer.isMultiplayer -> Section.Player
 
         else -> Section.General
+    }
+
+
+    private val replayFilePicker = registerForActivityResult(ActivityResultContracts.GetContent()) { uri ->
+        if (uri == null) {
+            return@registerForActivityResult
+        }
+
+        val loading = LoadingFragment()
+        loading.show()
+
+        async {
+            val context = requireContext()
+            var tempFile: File? = null
+
+            try {
+                tempFile = File.createTempFile("importedReplay", null, context.externalCacheDir)
+
+                context.contentResolver.openInputStream(uri)!!.use { input ->
+                    FileOutputStream(tempFile).use { output ->
+                        input.copyTo(output)
+                    }
+                }
+
+                ReplayImporter.import(tempFile)
+
+                mainThread {
+                    loading.dismiss()
+                    Snackbar.make(requireActivity().window.decorView, R.string.replay_import_success, 3000).show()
+                }
+            } catch (e: Exception) {
+                val str = StringTable.format(R.string.replay_import_failed, e.message)
+
+                mainThread {
+                    loading.dismiss()
+                    Snackbar.make(requireActivity().window.decorView, str, 3000).show()
+                }
+            } finally {
+                tempFile?.delete()
+            }
+        }
     }
 
 
@@ -263,34 +306,8 @@ class SettingsFragment : com.edlplan.ui.fragment.SettingsFragment() {
             true
         }
 
-        findPreference<InputPreference>("importReplay")!!.setOnPreferenceChangeListener { it, newValue ->
-            it as InputPreference
-
-            if (newValue.toString().trim { it <= ' ' }.isEmpty()) {
-                return@setOnPreferenceChangeListener false
-            }
-
-            val loading = LoadingFragment()
-            loading.show()
-
-            async {
-                try {
-                    val success = ReplayImporter.import(newValue.toString())
-                    val textId = if (success) R.string.replay_import_success else R.string.replay_import_failed
-
-                    mainThread {
-                        loading.dismiss()
-                        Snackbar.make(requireActivity().window.decorView, textId, 3000).show()
-                    }
-                } catch (e: Exception) {
-                    val str = StringTable.format(R.string.replay_import_failed_with_reason, e.message)
-
-                    mainThread {
-                        loading.dismiss()
-                        Snackbar.make(requireActivity().window.decorView, str, 3000).show()
-                    }
-                }
-            }
+        findPreference<Preference>("importReplay")!!.setOnPreferenceClickListener {
+            replayFilePicker.launch("application/octet-stream")
 
             true
         }
