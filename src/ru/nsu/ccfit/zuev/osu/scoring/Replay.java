@@ -207,11 +207,12 @@ public class Replay {
     @SuppressWarnings("unchecked")
     public boolean loadInfo(final String replayFilePath) {
         ObjectInputStream os;
+        ZipInputStream zip;
+
         try {
-            final ZipInputStream zip = new ZipInputStream(new FileInputStream(replayFilePath));
+            zip = new ZipInputStream(new FileInputStream(replayFilePath));
             zip.getNextEntry();
             os = new ObjectInputStream(zip);
-            // zip.close();
         } catch (final Exception e) {
             Debug.e("Cannot load replay: " + e.getMessage(), e);
             return false;
@@ -274,17 +275,26 @@ public class Replay {
             return false;
         }
 
+        try {
+            os.close();
+            zip.closeEntry();
+            zip.close();
+        } catch (final IOException e) {
+            Debug.e("IOException: " + e.getMessage(), e);
+        }
+
         return true;
     }
 
     @SuppressWarnings("unchecked")
     public boolean load(final String replayFilePath) {
         ObjectInputStream os;
+        ZipInputStream zip;
+
         try {
-            final ZipInputStream zip = new ZipInputStream(new FileInputStream(replayFilePath));
+            zip = new ZipInputStream(new FileInputStream(replayFilePath));
             zip.getNextEntry();
             os = new ObjectInputStream(zip);
-            // zip.close();
         } catch (final Exception e) {
             Debug.e("Cannot load replay: " + e.getMessage(), e);
             return false;
@@ -378,6 +388,14 @@ public class Replay {
             ToastLogger.showTextId(R.string.replay_corrupted, true);
             Debug.e("Cannot load replay: " + e.getMessage(), e);
             return false;
+        }
+
+        try {
+            os.close();
+            zip.closeEntry();
+            zip.close();
+        } catch (final IOException e) {
+            Debug.e("IOException: " + e.getMessage(), e);
         }
 
         for (int i = 0; i < cursorMoves.size(); i++)
