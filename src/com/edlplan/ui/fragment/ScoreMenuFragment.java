@@ -88,6 +88,7 @@ public class ScoreMenuFragment extends BaseFragment {
                 .addButton("Yes", dialog -> {
 
                     try {
+                        dialog.dismiss();
                         ScoreMenuFragment.this.dismiss();
 
                         if (DatabaseManager.getScoreInfoTable().deleteScore(scoreId) != 0) {
