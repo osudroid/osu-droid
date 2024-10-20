@@ -1,11 +1,13 @@
 package com.rian.osu.ui
 
+import android.content.Context
+import android.view.WindowManager
 import com.reco1l.framework.ColorARGB
 import com.rian.osu.math.Interpolation.dampContinuously
-import kotlin.math.max
 import kotlin.math.roundToInt
 import org.anddev.andengine.engine.handler.IUpdateHandler
 import org.anddev.andengine.entity.text.ChangeableText
+import ru.nsu.ccfit.zuev.osu.GlobalManager.getInstance as getGlobal
 
 /**
  * A class that counts frames per second.
@@ -18,9 +20,11 @@ import org.anddev.andengine.entity.text.ChangeableText
  * @param displayText A [ChangeableText] that will be used to display the current frame rate.
  */
 open class FPSCounter(private val displayText: ChangeableText) : IUpdateHandler {
+    @Suppress("DEPRECATION")
+    private val display = (getGlobal().mainActivity.getSystemService(Context.WINDOW_SERVICE) as WindowManager).defaultDisplay
+
     private var fps = 0f
     private var frameTime = 0f
-    private var maximumFps = 0f
 
     private var elapsedTime = 0f
     private var frameCount = 0
@@ -48,7 +52,6 @@ open class FPSCounter(private val displayText: ChangeableText) : IUpdateHandler 
 
         // Show spike time using raw delta time to account for average frame rate not showing spike frames.
         fps = if (hasSpike) 1 / deltaTime else dampContinuously(fps, averageFps, dampTime, deltaTime)
-        maximumFps = max(maximumFps, fps)
 
         if (elapsedTime - lastDisplayUpdateTime > minTimeBetweenUpdates) {
             updateDisplayText()
@@ -66,7 +69,7 @@ open class FPSCounter(private val displayText: ChangeableText) : IUpdateHandler 
         lastDisplayedFps = displayedFps
         displayText.text = "$displayedFps FPS"
 
-        val performanceRatio = if (maximumFps > 0) fps / maximumFps else 0f
+        val performanceRatio = fps / display.refreshRate
 
         val red: Float
         val green: Float
@@ -79,7 +82,7 @@ open class FPSCounter(private val displayText: ChangeableText) : IUpdateHandler 
             green = minimumTextColor.green + t * (middleTextColor.green - minimumTextColor.green)
             blue = minimumTextColor.blue + t * (middleTextColor.blue - minimumTextColor.blue)
         } else {
-            val t = (performanceRatio - 0.5f) / 0.4f
+            val t = ((performanceRatio - 0.5f) / 0.4f).coerceIn(0f, 1f)
 
             red = middleTextColor.red + t * (maximumTextColor.red - middleTextColor.red)
             green = middleTextColor.green + t * (maximumTextColor.green - middleTextColor.green)
@@ -94,7 +97,6 @@ open class FPSCounter(private val displayText: ChangeableText) : IUpdateHandler 
         frameCount = 0
         frameTime = 0f
         fps = 0f
-        maximumFps = 0f
         lastDisplayUpdateTime = 0f
         lastDisplayedFps = 0
     }
