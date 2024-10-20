@@ -34,9 +34,9 @@ open class FPSCounter(private val displayText: ChangeableText) : IUpdateHandler 
     private val dampTime = 0.1f
     private val minTimeBetweenUpdates = 0.01f
 
-    private val minimumTextColor = ColorARGB(15536417)
-    private val middleTextColor = ColorARGB(15450695)
-    private val maximumTextColor = ColorARGB(13434777)
+    private val minimumTextColor = ColorARGB(0xed1121)
+    private val middleTextColor = ColorARGB(0xebc247)
+    private val maximumTextColor = ColorARGB(0xccff99)
 
     override fun onUpdate(deltaTime: Float) {
         elapsedTime += deltaTime
