@@ -51,6 +51,7 @@ import com.rian.osu.difficulty.attributes.DroidDifficultyAttributes;
 import com.rian.osu.difficulty.attributes.StandardDifficultyAttributes;
 import com.rian.osu.difficulty.attributes.TimedDifficultyAttributes;
 import com.rian.osu.difficulty.calculator.DifficultyCalculationParameters;
+import com.rian.osu.ui.FPSCounter;
 import com.rian.osu.utils.ModUtils;
 
 import org.anddev.andengine.engine.Engine;
@@ -66,7 +67,6 @@ import org.anddev.andengine.entity.scene.background.ColorBackground;
 import org.anddev.andengine.entity.scene.background.SpriteBackground;
 import org.anddev.andengine.entity.sprite.Sprite;
 import org.anddev.andengine.entity.text.ChangeableText;
-import org.anddev.andengine.entity.util.FPSCounter;
 import org.anddev.andengine.input.touch.TouchEvent;
 import org.anddev.andengine.util.Debug;
 
@@ -662,13 +662,11 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
             fpsText = new ChangeableText(790, 520, counterTextFont, "00.00 FPS");
             counterTexts.add(fpsText);
 
-            fgScene.registerUpdateHandler(new FPSCounter() {
+            fgScene.registerUpdateHandler(new FPSCounter(fpsText) {
                 @Override
                 public void onUpdate(float pSecondsElapsed) {
                     // Cancelling the speed multiplier for the FPS counter.
                     super.onUpdate(pSecondsElapsed / GameHelper.getSpeedMultiplier());
-
-                    fpsText.setText(Math.round(getFPS()) + " FPS");
                 }
             });
         }
