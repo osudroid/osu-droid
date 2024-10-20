@@ -11,8 +11,13 @@ import com.rian.osu.utils.ModUtils
 class ModReallyEasy : Mod(), IModApplicableToDifficultyWithSettings {
     override val droidString = "l"
 
-    override fun applyToDifficulty(mode: GameMode, difficulty: BeatmapDifficulty, mods: Iterable<Mod>, customSpeedMultiplier: Float) =
-        difficulty.run {
+    override fun applyToDifficulty(
+        mode: GameMode,
+        difficulty: BeatmapDifficulty,
+        mods: Iterable<Mod>,
+        customSpeedMultiplier: Float,
+        oldStatistics: Boolean
+    ) = difficulty.run {
             val difficultyAdjustMod = mods.find { it is ModDifficultyAdjust } as? ModDifficultyAdjust
 
             if (difficultyAdjustMod?.ar == null) {

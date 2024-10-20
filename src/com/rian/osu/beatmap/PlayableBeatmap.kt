@@ -2,6 +2,7 @@ package com.rian.osu.beatmap
 
 import com.rian.osu.GameMode
 import com.rian.osu.mods.Mod
+import com.rian.osu.mods.ModNightCore
 import com.rian.osu.utils.ModUtils
 
 /**
@@ -26,7 +27,16 @@ abstract class PlayableBeatmap @JvmOverloads constructor(
      * The custom speed multiplier that was applied to this [PlayableBeatmap].
      */
     @JvmField
-    val customSpeedMultiplier: Float = 1f
+    val customSpeedMultiplier: Float = 1f,
+
+    /**
+     * Whether to enforce old statistics.
+     *
+     * Some [Mod]s behave differently with this flag. For example, [ModNightCore] will apply a 1.39 rate multiplier
+     * instead of 1.5 when this is `true`. **Never set this flag to `true` unless you know what you are doing.**
+     */
+    @JvmField
+    val oldStatistics: Boolean = false
 ) : IBeatmap {
     override val formatVersion = baseBeatmap.formatVersion
     override val general = baseBeatmap.general
@@ -44,5 +54,6 @@ abstract class PlayableBeatmap @JvmOverloads constructor(
      * The overall speed multiplier that was applied to this [PlayableBeatmap].
      */
     @JvmField
-    val overallSpeedMultiplier = customSpeedMultiplier * if (mods != null) ModUtils.calculateRateWithMods(mods) else 1f
+    val overallSpeedMultiplier =
+        customSpeedMultiplier * if (mods != null) ModUtils.calculateRateWithMods(mods, oldStatistics) else 1f
 }

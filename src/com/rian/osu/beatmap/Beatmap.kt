@@ -10,6 +10,7 @@ import com.rian.osu.mods.IModApplicableToDifficultyWithSettings
 import com.rian.osu.mods.IModApplicableToHitObject
 import com.rian.osu.mods.IModApplicableToHitObjectWithSettings
 import com.rian.osu.mods.Mod
+import com.rian.osu.mods.ModNightCore
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.ensureActive
 
@@ -46,6 +47,9 @@ open class Beatmap(
      *
      * @param mods The [Mod]s to apply to the [Beatmap]. Defaults to No Mod.
      * @param customSpeedMultiplier The custom speed multiplier to apply to the [Beatmap]. Defaults to 1.
+     * @param oldStatistics Whether to enforce old statistics. Some [Mod]s behave differently with this flag. For
+     * example, [ModNightCore] will apply a 1.39 rate multiplier instead of 1.5 when this is `true`.
+     * **Never set this flag to `true` unless you know what you are doing.**
      * @param scope The [CoroutineScope] to use for coroutines.
      * @return The [DroidPlayableBeatmap].
      */
@@ -53,8 +57,9 @@ open class Beatmap(
     fun createDroidPlayableBeatmap(
         mods: Iterable<Mod>? = null,
         customSpeedMultiplier: Float = 1f,
+        oldStatistics: Boolean = false,
         scope: CoroutineScope? = null
-    ) = DroidPlayableBeatmap(createPlayableBeatmap(GameMode.Droid, mods, customSpeedMultiplier, scope), mods, customSpeedMultiplier)
+    ) = DroidPlayableBeatmap(createPlayableBeatmap(GameMode.Droid, mods, customSpeedMultiplier, oldStatistics, scope), mods, customSpeedMultiplier)
 
     /**
      * Constructs a [StandardPlayableBeatmap] from this [Beatmap], where all [HitObject] and [BeatmapDifficulty]
@@ -70,9 +75,9 @@ open class Beatmap(
         mods: Iterable<Mod>? = null,
         customSpeedMultiplier: Float = 1f,
         scope: CoroutineScope? = null
-    ) = StandardPlayableBeatmap(createPlayableBeatmap(GameMode.Standard, mods, customSpeedMultiplier, scope), mods, customSpeedMultiplier)
+    ) = StandardPlayableBeatmap(createPlayableBeatmap(GameMode.Standard, mods, customSpeedMultiplier, false, scope), mods, customSpeedMultiplier)
 
-    private fun createPlayableBeatmap(mode: GameMode, mods: Iterable<Mod>?, customSpeedMultiplier: Float, scope: CoroutineScope?): Beatmap {
+    private fun createPlayableBeatmap(mode: GameMode, mods: Iterable<Mod>?, customSpeedMultiplier: Float, oldStatistics: Boolean, scope: CoroutineScope?): Beatmap {
         if (this.mode == mode && (mods?.firstOrNull() == null) && customSpeedMultiplier == 1f) {
             // Beatmap is already playable as is.
             return this
@@ -91,7 +96,7 @@ open class Beatmap(
 
         mods?.filterIsInstance<IModApplicableToDifficultyWithSettings>()?.forEach {
             scope?.ensureActive()
-            it.applyToDifficulty(mode, converted.difficulty, mods, customSpeedMultiplier)
+            it.applyToDifficulty(mode, converted.difficulty, mods, customSpeedMultiplier, oldStatistics)
         }
 
         val processor = BeatmapProcessor(converted, scope)
@@ -114,7 +119,7 @@ open class Beatmap(
         mods?.filterIsInstance<IModApplicableToHitObjectWithSettings>()?.forEach {
             for (obj in converted.hitObjects.objects) {
                 scope?.ensureActive()
-                it.applyToHitObject(mode, obj, mods, customSpeedMultiplier)
+                it.applyToHitObject(mode, obj, mods, customSpeedMultiplier, oldStatistics)
             }
         }
 

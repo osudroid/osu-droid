@@ -50,6 +50,7 @@ import com.rian.osu.difficulty.attributes.DroidDifficultyAttributes;
 import com.rian.osu.difficulty.attributes.StandardDifficultyAttributes;
 import com.rian.osu.difficulty.attributes.TimedDifficultyAttributes;
 import com.rian.osu.difficulty.calculator.DifficultyCalculationParameters;
+import com.rian.osu.ui.FPSCounter;
 import com.rian.osu.utils.ModUtils;
 
 import org.anddev.andengine.engine.Engine;
@@ -65,7 +66,6 @@ import org.anddev.andengine.entity.scene.background.ColorBackground;
 import org.anddev.andengine.entity.scene.background.SpriteBackground;
 import org.anddev.andengine.entity.sprite.Sprite;
 import org.anddev.andengine.entity.text.ChangeableText;
-import org.anddev.andengine.entity.util.FPSCounter;
 import org.anddev.andengine.input.touch.TouchEvent;
 import org.anddev.andengine.util.Debug;
 
@@ -279,7 +279,7 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
                 videoStarted = false;
                 videoOffset = playableBeatmap.getEvents().videoStartTime / 1000f;
 
-                video = new VideoSprite(lastBeatmapInfo.getSetDirectory() + "/" + playableBeatmap.getEvents().videoFilename, engine);
+                video = new VideoSprite(lastBeatmapInfo.getAbsoluteSetDirectory() + "/" + playableBeatmap.getEvents().videoFilename, engine);
                 video.setAlpha(0f);
 
                 bgSprite = video;
@@ -525,11 +525,7 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
 
         if (Config.getScoreCounterMetric() == ScoreCounterMetric.PP) {
             // Calculate timed difficulty attributes
-            var parameters = new DifficultyCalculationParameters();
-
-            parameters.setMods(convertedMods);
-            parameters.setCustomSpeedMultiplier(modMenu.getChangeSpeed());
-
+            var parameters = new DifficultyCalculationParameters(convertedMods, modMenu.getChangeSpeed());
             var sameParameters = lastDifficultyCalculationParameters != null &&
                 lastDifficultyCalculationParameters.equals(parameters);
 
@@ -704,13 +700,7 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
                 fpsText = new ChangeableText(790, 520, counterTextFont, "00.00 FPS");
                 counterTexts.add(fpsText);
 
-                hud.registerUpdateHandler(new FPSCounter() {
-                    @Override
-                    public void onUpdate(float pSecondsElapsed) {
-                        super.onUpdate(pSecondsElapsed);
-                        fpsText.setText(Math.round(getFPS()) + " FPS");
-                    }
-                });
+                hud.registerUpdateHandler(new FPSCounter(fpsText));
             }
 
             if (Config.isShowUnstableRate()) {
@@ -2222,6 +2212,7 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
     private void createHitEffect(final PointF pos, final String name, RGBColor color) {
 
         var effect = GameObjectPool.getInstance().getEffect(name);
+        var isAnimated = effect.hit instanceof AnimatedSprite animatedHit && animatedHit.getFrames().length > 1;
 
         // Reference https://github.com/ppy/osu/blob/ebf637bd3c33f1c886f6bfc81aa9ea2132c9e0d2/osu.Game/Skinning/LegacyJudgementPieceOld.cs
 
@@ -2236,21 +2227,30 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
         );
 
         if (name.equals("hit0")) {
-
             var rotation = (float) Random.Default.nextDouble(8.6 * 2) - 8.6f;
 
-            effect.init(
-                mgScene,
-                pos,
-                scale * 1.6f,
-                fadeSequence,
-                Modifiers.scale(0.1f, scale * 1.6f, scale, null, Easing.InQuad),
-                Modifiers.translateY(fadeOutDelay + fadeOutLength, -5f, 80f, null, Easing.InQuad),
-                Modifiers.sequence(
-                    Modifiers.rotation(fadeInLength, 0, rotation),
-                    Modifiers.rotation(fadeOutDelay + fadeOutLength - fadeInLength, rotation, rotation * 2, null, Easing.InQuad)
-                )
-            );
+            if (isAnimated) {
+                // Legacy judgements don't play any transforms if they are an animation.
+                effect.init(
+                    mgScene,
+                    pos,
+                    scale,
+                    fadeSequence
+                );
+            } else {
+                effect.init(
+                    mgScene,
+                    pos,
+                    scale * 1.6f,
+                    fadeSequence,
+                    Modifiers.scale(0.1f, scale * 1.6f, scale, null, Easing.InQuad),
+                    Modifiers.translateY(fadeOutDelay + fadeOutLength, -5f, 80f, null, Easing.InQuad),
+                    Modifiers.sequence(
+                        Modifiers.rotation(fadeInLength, 0, rotation),
+                        Modifiers.rotation(fadeOutDelay + fadeOutLength - fadeInLength, rotation, rotation * 2, null, Easing.InQuad)
+                    )
+                );
+            }
 
             return;
         }
@@ -2275,22 +2275,32 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
             );
         }
 
-        effect.init(
-            mgScene,
-            pos,
-            scale * 0.6f,
-            fadeSequence,
-            Modifiers.sequence(
-                Modifiers.scale(fadeInLength * 0.8f, scale * 0.6f, scale * 1.1f),
-                Modifiers.delay(fadeInLength * 0.2f),
-                Modifiers.scale(fadeInLength * 0.2f, scale * 1.1f, scale * 0.9f),
+        // Legacy judgements don't play any transforms if they are an animation.
+        if (isAnimated) {
+            effect.init(
+                mgScene,
+                pos,
+                scale,
+                fadeSequence
+            );
+        } else {
+            effect.init(
+                mgScene,
+                pos,
+                scale * 0.6f,
+                fadeSequence,
+                Modifiers.sequence(
+                    Modifiers.scale(fadeInLength * 0.8f, scale * 0.6f, scale * 1.1f),
+                    Modifiers.delay(fadeInLength * 0.2f),
+                    Modifiers.scale(fadeInLength * 0.2f, scale * 1.1f, scale * 0.9f),
 
-                // stable dictates scale of 0.9->1 over time 1.0 to 1.4, but we are already at 1.2.
-                // so we need to force the current value to be correct at 1.2 (0.95) then complete the
-                // second half of the transform.
-                Modifiers.scale(fadeInLength * 0.2f, scale * 0.95f, scale)
-            )
-        );
+                    // stable dictates scale of 0.9->1 over time 1.0 to 1.4, but we are already at 1.2.
+                    // so we need to force the current value to be correct at 1.2 (0.95) then complete the
+                    // second half of the transform.
+                    Modifiers.scale(fadeInLength * 0.2f, scale * 0.95f, scale)
+                )
+            );
+        }
     }
 
     private void applyBurstEffect(GameEffect effect, PointF pos) {

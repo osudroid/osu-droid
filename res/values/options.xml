@@ -153,7 +153,7 @@
     <string name="opt_nativeplayer_summary">Use built-in player for more accurate timing (doesn\'t support .ogg files)</string>
 
     <string name="opt_metronome_switch_title">Metronome switch</string>
-    <string name="opt_metronome_switch_summary">Enable metronome sound effect (only Nightcore mod)</string>
+    <string name="opt_metronome_switch_summary">Enable metronome sound effect</string>
 
     <!-- <string name="opt_vbroffset_title">VBR offset</string>
     <string name="opt_vbroffset_summary">Offset for mp3\'s encoded with variable bitrate (built-in player only)</string> -->
@@ -359,6 +359,10 @@
 
     <string name="opt_video_title">Background Video</string>
     <string name="opt_video_summary">Display video playback during gameplay. Only supports .3gp, .mp4, .mkv, and .webm video formats</string>
+
+    <!-- Replay import -->
+    <string name="opt_import_replay_title">Import replay</string>
+    <string name="opt_import_replay_summary">Import a replay file (.odr) or an exported replay file (.edr). Only .odr files from osu!droid version 1.6.7 onwards are supported</string>
 
     <!--Score counter-->
     <string name="opt_score_counter_title">Score counter metric</string>
