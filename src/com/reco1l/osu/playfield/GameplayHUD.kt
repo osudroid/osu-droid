@@ -1,5 +1,8 @@
 package com.reco1l.osu.playfield
 
+import androidx.annotation.*
+import com.reco1l.osu.playfield.ProgressIndicatorType.Companion.TOP_RIGHT_PIE
+import com.reco1l.osu.playfield.ProgressIndicatorType.Companion.BOTTOM_LONG
 import com.reco1l.osu.playfield.ScoreCounterMetric.Companion.SCORE
 import org.anddev.andengine.engine.camera.hud.*
 import ru.nsu.ccfit.zuev.osu.*
@@ -59,23 +62,25 @@ class GameplayHUD(private val stat: StatisticV2, private val game: GameScene, pr
 
         if (withStatistics) {
             comboCounter!!.setCombo(stat.combo)
-
             accuracyCounter!!.setAccuracy(stat.accuracy)
-
-            songProgress!!.x = accuracyCounter.x - accuracyCounter.widthScaled - 18f
-            songProgress.y = accuracyCounter.y + accuracyCounter.heightScaled / 2f
 
             // PP is updated in `GameScene` class.
             if (Config.getScoreCounterMetric() == SCORE) {
                 scoreCounter!!.setValue(stat.totalScoreWithMultiplier)
             }
 
-            if (game.elapsedTime < game.firstObjectStartTime) {
-                songProgress.setProgress(game.elapsedTime / game.firstObjectStartTime, true)
-            } else {
-                songProgress.setProgress((game.elapsedTime - game.firstObjectStartTime) / (game.lastObjectEndTime - game.firstObjectStartTime), false)
+            if (Config.getProgressIndicatorType() == TOP_RIGHT_PIE) {
+                songProgress!!.x = accuracyCounter.x - accuracyCounter.widthScaled - 18f
+                songProgress.y = accuracyCounter.y + accuracyCounter.heightScaled / 2f
+
+                if (game.elapsedTime < game.firstObjectStartTime) {
+                    songProgress.setProgress(game.elapsedTime / game.firstObjectStartTime, true)
+                } else {
+                    songProgress.setProgress((game.elapsedTime - game.firstObjectStartTime) / (game.lastObjectEndTime - game.firstObjectStartTime), false)
+                }
             }
         }
+
 
         super.onManagedUpdate(pSecondsElapsed)
     }
@@ -93,6 +98,15 @@ class GameplayHUD(private val stat: StatisticV2, private val game: GameScene, pr
         scoreCounter?.text = score
     }
 
+}
+
+
+@IntDef(TOP_RIGHT_PIE, BOTTOM_LONG)
+annotation class ProgressIndicatorType {
+    companion object {
+        const val TOP_RIGHT_PIE = 0
+        const val BOTTOM_LONG = 1
+    }
 }
 
 

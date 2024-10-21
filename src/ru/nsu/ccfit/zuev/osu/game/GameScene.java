@@ -28,6 +28,7 @@ import com.reco1l.andengine.sprite.VideoSprite;
 import com.reco1l.andengine.ExtendedScene;
 import com.reco1l.osu.hitobjects.FollowPointConnection;
 import com.reco1l.osu.playfield.GameplayHUD;
+import com.reco1l.osu.playfield.ProgressIndicatorType;
 import com.reco1l.osu.playfield.ScoreCounterMetric;
 import com.reco1l.osu.hitobjects.SliderTickSprite;
 import com.reco1l.osu.ui.BlockAreaFragment;
@@ -831,6 +832,13 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
         }
 
         if (!Config.isHideInGameUI()) {
+
+            if (Config.getProgressIndicatorType() == ProgressIndicatorType.BOTTOM_LONG) {
+                var progressBar = new SongProgressBar(this, hud, (float) objects.getLast().getEndTime() / 1000, firstObjectStartTime, new PointF(0, Config.getRES_HEIGHT() - 7), Config.getRES_WIDTH(), 7);
+                progressBar.setProgressRectColor(new RGBColor(153f / 255f, 204f / 255f, 51f / 255f));
+                progressBar.setProgressRectAlpha(0.4f);
+            }
+
             if (Config.getErrorMeter() == 1 || (Config.getErrorMeter() == 2 && replaying)) {
                 hitErrorMeter = new HitErrorMeter(hud, new PointF(Config.getRES_WIDTH() / 2f, Config.getRES_HEIGHT() - 20), playableBeatmap.getDifficulty().od, 12, difficultyHelper);
             }

@@ -18,6 +18,7 @@ import java.util.Map;
 import java.util.UUID;
 
 import com.reco1l.osu.multiplayer.Multiplayer;
+import com.reco1l.osu.playfield.ProgressIndicatorType;
 import com.reco1l.osu.playfield.ScoreCounterMetric;
 
 import net.margaritov.preference.colorpicker.ColorPickerPreference;
@@ -89,7 +90,8 @@ public class Config {
         errorMeter,
         spinnerStyle,
         metronomeSwitch,
-        scoreCounterMetric;
+        scoreCounterMetric,
+        progressIndicatorType;
     
     private static float soundVolume,
         bgmVolume,
@@ -131,6 +133,7 @@ public class Config {
         noChangeDimInBreaks = prefs.getBoolean("noChangeDimInBreaks", false);
         dimHitObjects = prefs.getBoolean("dimHitObjects", true);
         scoreCounterMetric = Integer.parseInt(prefs.getString("scoreCounterMetric", "0"));
+        progressIndicatorType = Integer.parseInt(prefs.getString("progressIndicatorType", "0"));
 
         setSize();
         setPlayfieldSize(prefs.getInt("playfieldSize", 100) / 100f);
@@ -805,5 +808,10 @@ public class Config {
     @ScoreCounterMetric
     public static int getScoreCounterMetric() {
         return scoreCounterMetric;
+    }
+
+    @ProgressIndicatorType
+    public static int getProgressIndicatorType() {
+        return progressIndicatorType;
     }
 }
