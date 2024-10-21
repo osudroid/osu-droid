@@ -1,6 +1,5 @@
 package com.rian.osu.ui
 
-import com.rian.osu.math.Interpolation.dampContinuously
 import org.anddev.andengine.entity.text.ChangeableText
 
 /**
@@ -16,25 +15,11 @@ import org.anddev.andengine.entity.text.ChangeableText
  */
 class UpdateFPSCounter(displayText: ChangeableText, private val speedMultiplier: Float) : FPSCounter(displayText) {
     override val tag = "Update"
-    private var frameTime = 0f
 
-    override fun onUpdate(pSecondsElapsed: Float) {
+    override fun onUpdate(deltaTime: Float) {
         // Cancel the effect of speed multiplier on frame time.
-        updateFps(pSecondsElapsed / speedMultiplier)
-        updateDisplayText()
-    }
+        updateFps(deltaTime / speedMultiplier)
 
-    override fun calculateUpdatedFps(deltaTime: Float): Float {
-        val hasSpike = frameTime < spikeTime && deltaTime > spikeTime
-
-        frameTime = dampContinuously(frameTime, deltaTime, if (hasSpike) 0f else dampTime, deltaTime)
-
-        return 1 / frameTime
-    }
-
-    override fun reset() {
-        super.reset()
-
-        frameTime = 0f
+        super.onUpdate(deltaTime)
     }
 }
