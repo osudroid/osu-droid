@@ -126,6 +126,9 @@ abstract class ExtendedEntity(
         }
 
 
+    private lateinit var camera: Camera
+
+
     // Positions
 
     open fun setAnchor(anchor: Anchor) {
@@ -179,8 +182,8 @@ abstract class ExtendedEntity(
         val originOffsetX = width * originX
         val originOffsetY = height * originY
 
-        val anchorOffsetX = if (parent is IShape) parent.width * anchorX else 0f
-        val anchorOffsetY = if (parent is IShape) parent.height * anchorY else 0f
+        val anchorOffsetX = (if (parent is IShape) parent.width else camera.widthRaw) * anchorX
+        val anchorOffsetY = (if (parent is IShape) parent.height else camera.heightRaw) * anchorY
 
         val finalX = x - originOffsetX + anchorOffsetX + translationX
         val finalY = y - originOffsetY + anchorOffsetY + translationY
@@ -269,6 +272,11 @@ abstract class ExtendedEntity(
         applyScale(pGL)
         applyColor(pGL)
         applyBlending(pGL)
+    }
+
+    override fun onManagedDraw(pGL: GL10, pCamera: Camera) {
+        camera = pCamera
+        super.onManagedDraw(pGL, pCamera)
     }
 
     override fun onInitDraw(pGL: GL10) {

@@ -151,7 +151,11 @@ public class Camera implements IUpdateHandler {
 
 	public void setHUD(final HUD pHUD) {
 		this.mHUD = pHUD;
-		pHUD.setCamera(this);
+		// BEGIN osu!droid modified: Handle nullability
+		if (pHUD != null) {
+			pHUD.setCamera(this);
+		}
+		// END osu!droid modified
 	}
 
 	public boolean hasHUD() {
