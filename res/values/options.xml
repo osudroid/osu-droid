@@ -138,10 +138,10 @@
     <string name="opt_fps_summary">Display (frames per second) during gameplay</string>
 
     <string name="opt_averageoffset_title">Average offset</string>
-    <string name="opt_averageoffset_summary">Display average offset of hits during gameplay. Higher value means hits are more offset</string>
+    <string name="opt_averageoffset_summary">Display average offset of hits during gameplay. Higher value means hits are more offset. Will not display when Auto mod is enabled</string>
 
     <string name="opt_unstablerate_title">Unstable rate</string>
-    <string name="opt_unstablerate_summary">Display unstable rate during gameplay. Higher value means hits are more inconsistent</string>
+    <string name="opt_unstablerate_summary">Display unstable rate during gameplay. Higher value means hits are more inconsistent. Will not display when Auto mod is enabled</string>
 
     <!-- <string name="opt_skipoffset_title">Skip offset</string>
     <string name="opt_skipoffset_summary">This offset will be added when you press the &quot;Skip&quot; button. Enter -1 for auto offset</string> -->

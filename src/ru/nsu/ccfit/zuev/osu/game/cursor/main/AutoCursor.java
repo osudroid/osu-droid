@@ -1,8 +1,7 @@
 package ru.nsu.ccfit.zuev.osu.game.cursor.main;
 
-import org.anddev.andengine.entity.modifier.MoveModifier;
-import org.anddev.andengine.util.modifier.ease.EaseQuadOut;
-import org.anddev.andengine.util.modifier.ease.IEaseFunction;
+import com.edlplan.framework.easing.Easing;
+import com.reco1l.osu.Modifiers;
 
 import ru.nsu.ccfit.zuev.osu.Config;
 import ru.nsu.ccfit.zuev.osu.game.GameObject;
@@ -11,16 +10,10 @@ import ru.nsu.ccfit.zuev.osu.game.ISliderListener;
 import ru.nsu.ccfit.zuev.osu.game.GameplaySpinner;
 
 public class AutoCursor extends CursorEntity implements ISliderListener {
-    private MoveModifier currentModifier;
     /**
      * The ID of the object that the cursor is currently active on.
      */
     private int currentObjectId = -1;
-
-    /**
-     * The Easing function to be used on the cursor.
-     */
-    private final IEaseFunction easeFunction = EaseQuadOut.getInstance();
 
     public AutoCursor() {
         super();
@@ -29,9 +22,8 @@ public class AutoCursor extends CursorEntity implements ISliderListener {
     }
 
     private void doEasingAutoMove(float pX, float pY, float durationS) {
-        unregisterEntityModifier(currentModifier);
-        currentModifier = new MoveModifier(durationS, getX(), pX, getY(), pY, easeFunction);
-        registerEntityModifier(currentModifier);
+        clearEntityModifiers();
+        registerEntityModifier(Modifiers.move(durationS, getX(), pX, getY(), pY, null, Easing.Out));
     }
 
     private void doAutoMove(float pX, float pY, float durationS, GameObjectListener listener) {

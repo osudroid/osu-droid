@@ -51,7 +51,6 @@ import ru.nsu.ccfit.zuev.osu.online.OnlineManager
 import ru.nsu.ccfit.zuev.osuplus.R
 import ru.nsu.ccfit.zuev.skins.SkinManager
 import java.io.File
-import java.io.FileOutputStream
 
 
 enum class Section(@XmlRes val xml: Int) {
@@ -102,7 +101,7 @@ class SettingsFragment : com.edlplan.ui.fragment.SettingsFragment() {
                 tempFile = File.createTempFile("importedReplay", null, context.externalCacheDir)
 
                 context.contentResolver.openInputStream(uri)!!.use { input ->
-                    FileOutputStream(tempFile).use { output ->
+                    tempFile.outputStream().use { output ->
                         input.copyTo(output)
                     }
                 }
