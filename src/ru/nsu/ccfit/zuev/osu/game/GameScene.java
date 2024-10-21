@@ -725,8 +725,8 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
         var counterTextFont = ResourceManager.getInstance().getFont("smallFont");
 
         if (Config.isShowFPS()) {
-            drawFpsCounter = new DrawFPSCounter(new ChangeableText(790, 520, counterTextFont, "Draw: 0 FPS", 15));
-            var updateFpsCounter = new UpdateFPSCounter(new ChangeableText(790, 480, counterTextFont, "Update: 0 FPS", 15), GameHelper.getSpeedMultiplier());
+            drawFpsCounter = new DrawFPSCounter(new ChangeableText(790, 520, counterTextFont, "Draw: 999/999 FPS"));
+            var updateFpsCounter = new UpdateFPSCounter(new ChangeableText(790, 480, counterTextFont, "Update: 999/999 FPS"), GameHelper.getSpeedMultiplier());
 
             counterTexts.add(drawFpsCounter.displayText);
             counterTexts.add(updateFpsCounter.displayText);
