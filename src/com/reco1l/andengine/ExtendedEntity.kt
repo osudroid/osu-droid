@@ -242,10 +242,6 @@ abstract class ExtendedEntity(
     open fun setOrigin(origin: Anchor) {
         originX = origin.factorX
         originY = origin.factorY
-        mRotationCenterX = origin.factorX
-        mRotationCenterY = origin.factorY
-        mScaleCenterX = origin.factorX
-        mScaleCenterY = origin.factorY
     }
 
     fun setPosition(position: PointF) {
@@ -296,30 +292,24 @@ abstract class ExtendedEntity(
 
     override fun applyRotation(pGL: GL10) {
 
-        if (rotation == 0f) {
-            return
+        // This will ensure getSceneCenterCoordinates() applies the correct transformation.
+        mRotationCenterX = width * originX
+        mRotationCenterY = height * originY
+
+        if (rotation != 0f) {
+            pGL.glRotatef(rotation, 0f, 0f, 1f)
         }
-
-        val offsetX = width * rotationCenterX
-        val offsetY = height * rotationCenterY
-
-        pGL.glTranslatef(offsetX, offsetY, 0f)
-        pGL.glRotatef(rotation, 0f, 0f, 1f)
-        pGL.glTranslatef(-offsetX, -offsetY, 0f)
     }
 
     override fun applyScale(pGL: GL10) {
 
-        if (scaleX == 1f && scaleY == 1f) {
-            return
+        // This will ensure getSceneCenterCoordinates() applies the correct transformation.
+        mScaleCenterX = width * originX
+        mScaleCenterY = height * originY
+
+        if (scaleX != 1f || scaleY != 1f) {
+            pGL.glScalef(scaleX, scaleY, 1f)
         }
-
-        val offsetX = width * scaleCenterX
-        val offsetY = height * scaleCenterY
-
-        pGL.glTranslatef(offsetX, offsetY, 0f)
-        pGL.glScalef(scaleX, scaleY, 1f)
-        pGL.glTranslatef(-offsetX, -offsetY, 0f)
     }
 
     protected open fun applyColor(pGL: GL10) {
@@ -369,8 +359,14 @@ abstract class ExtendedEntity(
 
     override fun onApplyTransformations(pGL: GL10, camera: Camera) {
         applyTranslation(pGL, camera)
-        applyRotation(pGL)
-        applyScale(pGL)
+
+        if (rotation != 0f || scaleX != 1f || scaleY != 1f) {
+            pGL.glTranslatef(-originOffsetX, -originOffsetY, 0f)
+            applyRotation(pGL)
+            applyScale(pGL)
+            pGL.glTranslatef(originOffsetX, originOffsetY, 0f)
+        }
+
         applyColor(pGL)
         applyBlending(pGL)
     }
