@@ -353,9 +353,6 @@
     <string name="opt_safe_beatmap_bg_title">Safe beatmap background</string>
     <string name="opt_safe_beatmap_bg_summary">Change all of the beatmaps\' background to the menu-background image from your skin</string>
 
-    <string name="opt_display_realtime_pp_counter_title">Display real-time PP counter</string>
-    <string name="opt_display_realtime_pp_counter_summary">Displays a real-time PP counter during gameplay. May increase loading time significantly, especially in long beatmaps</string>
-
     <!--Video support-->
     <string name="opt_delete_unsupported_videos_title">Delete unsupported videos</string>
     <string name="opt_delete_unsupported_videos_summary">Delete videos with unsupported formats (.avi and .flv)</string>
@@ -366,4 +363,19 @@
     <!-- Replay import -->
     <string name="opt_import_replay_title">Import replay</string>
     <string name="opt_import_replay_summary">Import a replay file (.odr) or an exported replay file (.edr). Only .odr files from osu!droid version 1.6.7 onwards are supported</string>
+
+    <!--Score counter-->
+    <string name="opt_score_counter_title">Score counter metric</string>
+    <string name="opt_score_counter_summary">Choose the metric to show in score counter</string>
+
+    <!-- Score counter -->
+    <string-array name="opt_score_counter_names">
+        <item>Score</item>
+        <item>Performance Points</item>
+    </string-array>
+    <string-array name="opt_score_counter_values">
+        <item>0</item>
+        <item>1</item>
+    </string-array>
+
 </resources>
