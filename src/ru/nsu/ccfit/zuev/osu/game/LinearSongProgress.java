@@ -14,6 +14,7 @@ public class LinearSongProgress extends GameObject {
     private float time;
     private float startTime;
     private float passedTime;
+    private float initialPassedTime;
 
     public LinearSongProgress(final GameObjectListener listener,
                               final Scene scene, final float time, final float startTime, final PointF pos) {
@@ -46,7 +47,7 @@ public class LinearSongProgress extends GameObject {
                     / (time - startTime));
         } else {
             passedTime = Math.min(startTime, passedTime + dt);
-            progressRect.setWidth(bgRect.getWidth() * passedTime / startTime);
+            progressRect.setWidth(bgRect.getWidth() * (passedTime - initialPassedTime) / (startTime - initialPassedTime));
             if (passedTime >= startTime) {
                 progressRect.setColor(1, 1, 150f / 255f);
             }
@@ -63,6 +64,10 @@ public class LinearSongProgress extends GameObject {
 
     public void setPassedTime(float passedTime) {
         this.passedTime = passedTime;
+    }
+
+    public void setInitialPassedTime(float initialPassedTime) {
+        this.initialPassedTime = initialPassedTime;
     }
 
     public void setProgressRectColor(RGBColor color) {

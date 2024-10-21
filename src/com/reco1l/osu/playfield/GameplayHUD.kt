@@ -74,7 +74,7 @@ class GameplayHUD(private val stat: StatisticV2, private val game: GameScene, pr
                 songProgress.y = accuracyCounter.y + accuracyCounter.heightScaled / 2f
 
                 if (game.elapsedTime < game.firstObjectStartTime) {
-                    songProgress.setProgress(game.elapsedTime / game.firstObjectStartTime, true)
+                    songProgress.setProgress((game.elapsedTime - game.initialElapsedTime) / (game.firstObjectStartTime - game.initialElapsedTime), true)
                 } else {
                     songProgress.setProgress((game.elapsedTime - game.firstObjectStartTime) / (game.lastObjectEndTime - game.firstObjectStartTime), false)
                 }
