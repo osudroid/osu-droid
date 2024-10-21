@@ -7,7 +7,9 @@ import com.reco1l.andengine.modifier.*
 import com.reco1l.framework.*
 import org.anddev.andengine.collision.*
 import org.anddev.andengine.engine.camera.*
+import org.anddev.andengine.entity.*
 import org.anddev.andengine.entity.primitive.*
+import org.anddev.andengine.entity.scene.Scene
 import org.anddev.andengine.entity.shape.*
 import org.anddev.andengine.opengl.util.*
 import org.anddev.andengine.opengl.vertex.*
@@ -207,6 +209,15 @@ abstract class ExtendedEntity(
     private var height = 0f
 
     private var isVertexBufferDirty = true
+
+
+    // Attachment
+
+    override fun setParent(pEntity: IEntity?) {
+        (parent as? Scene)?.unregisterTouchArea(this)
+        super.setParent(pEntity)
+        (pEntity as? Scene)?.registerTouchArea(this)
+    }
 
 
     // Positions
