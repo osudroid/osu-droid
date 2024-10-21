@@ -7,11 +7,15 @@ import com.reco1l.andengine.modifier.*
 import com.reco1l.framework.*
 import org.anddev.andengine.collision.*
 import org.anddev.andengine.engine.camera.*
+import org.anddev.andengine.entity.*
 import org.anddev.andengine.entity.primitive.*
+import org.anddev.andengine.entity.scene.CameraScene
+import org.anddev.andengine.entity.scene.Scene
 import org.anddev.andengine.entity.shape.*
 import org.anddev.andengine.opengl.util.*
 import org.anddev.andengine.opengl.vertex.*
 import javax.microedition.khronos.opengles.*
+import javax.microedition.khronos.opengles.GL10.*
 
 
 /**
@@ -21,10 +25,6 @@ import javax.microedition.khronos.opengles.*
  */
 abstract class ExtendedEntity(
 
-    private var width: Float = 0f,
-
-    private var height: Float = 0f,
-
     private var vertexBuffer: VertexBuffer? = null
 
 ) : Shape(0f, 0f), IModifierChain {
@@ -33,6 +33,12 @@ abstract class ExtendedEntity(
      * Determines which axes the entity should automatically adjust its size to.
      */
     open var autoSizeAxes = Axes.None
+        set(value) {
+            if (field != value) {
+                field = value
+                onContentSizeMeasured()
+            }
+        }
 
     /**
      * The origin factor of the entity in the X axis.
@@ -76,6 +82,21 @@ abstract class ExtendedEntity(
     open var inheritColor = true
 
     /**
+     * Whether the depth buffer should be cleared before drawing the entity.
+     * This is useful when the entity is drawn on top of other entities by overlapping them.
+     *
+     * It will only take effect if the entities on the front have the depth buffer test enabled.
+     *
+     * @see [testWithDepthBuffer]
+     */
+    open var clearDepthBufferBeforeDraw = false
+
+    /**
+     * Whether the entity should be tested with the depth buffer.
+     */
+    open var testWithDepthBuffer = false
+
+    /**
      * The color of the entity boxed in a [ColorARGB] object.
      */
     open var color: ColorARGB
@@ -104,26 +125,110 @@ abstract class ExtendedEntity(
 
 
     /**
-     * Intended for internal use only.
-     *
-     * Despite [setWidth] this will ignore [autoSizeAxes] and force the width to be set, as well the buffer will not be updated.
+     * The width of the content inside the entity.
      */
-    protected var internalWidth
-        get() = width
-        set(value) {
-            width = value
+    open var contentWidth = 0f
+        protected set(value) {
+            if (field != value) {
+                field = value
+                onContentSizeMeasured()
+            }
         }
 
     /**
-     * Intended for internal use only.
-     *
-     * Despite [setHeight] this will ignore [autoSizeAxes] and force the height to be set, as well the buffer will not be updated.
+     * The height of the content inside the entity.
      */
-    protected var internalHeight
-        get() = height
-        set(value) {
-            height = value
+    open var contentHeight = 0f
+        protected set(value) {
+            if (field != value) {
+                field = value
+                onContentSizeMeasured()
+            }
         }
+
+    /**
+     * The raw X position of the entity.
+     * This is the position without taking into account the origin, anchor, or translation.
+     */
+    open val drawX: Float
+        get() {
+            if (parent is Container) {
+                return (parent as Container).getChildDrawX(this)
+            }
+            return x + totalOffsetX
+        }
+
+    /**
+     * The raw Y position of the entity.
+     * This is the position without taking into account the origin, anchor, or translation.
+     */
+    open val drawY: Float
+        get() {
+            if (parent is Container) {
+                return (parent as Container).getChildDrawY(this)
+            }
+            return y + totalOffsetY
+        }
+
+    /**
+     * The offset applied to the X axis according to the origin factor.
+     */
+    open val originOffsetX: Float
+        get() = -(width * originX)
+
+    /**
+     * The offset applied to the Y axis according to the origin factor.
+     */
+    open val originOffsetY: Float
+        get() = -(height * originY)
+
+    /**
+     * The offset applied to the X axis according to the anchor factor.
+     */
+    open val anchorOffsetX: Float
+        get() = when (parent) {
+            is IShape -> (parent as IShape).width * anchorX
+            is CameraScene -> ((parent as CameraScene).camera?.widthRaw ?: 0f) * anchorX
+            else -> 0f
+        }
+
+    /**
+     * The offset applied to the Y axis according to the anchor factor.
+     */
+    open val anchorOffsetY: Float
+        get() = when (parent) {
+            is IShape -> (parent as IShape).height * anchorY
+            is CameraScene -> ((parent as CameraScene).camera?.heightRaw ?: 0f) * anchorY
+            else -> 0f
+        }
+
+    /**
+     * The total offset applied to the X axis.
+     */
+    open val totalOffsetX
+        get() = originOffsetX + anchorOffsetX + translationX
+
+    /**
+     * The total offset applied to the Y axis.
+     */
+    open val totalOffsetY
+        get() = originOffsetY + anchorOffsetY + translationY
+
+
+    private var width = 0f
+
+    private var height = 0f
+
+    private var isVertexBufferDirty = true
+
+
+    // Attachment
+
+    override fun setParent(pEntity: IEntity?) {
+        (parent as? Scene)?.unregisterTouchArea(this)
+        super.setParent(pEntity)
+        (pEntity as? ExtendedScene)?.registerTouchArea(this)
+    }
 
 
     // Positions
@@ -136,10 +241,6 @@ abstract class ExtendedEntity(
     open fun setOrigin(origin: Anchor) {
         originX = origin.factorX
         originY = origin.factorY
-        mRotationCenterX = origin.factorX
-        mRotationCenterY = origin.factorY
-        mScaleCenterX = origin.factorX
-        mScaleCenterY = origin.factorY
     }
 
     fun setPosition(position: PointF) {
@@ -168,54 +269,46 @@ abstract class ExtendedEntity(
 
     // Drawing
 
-    override fun applyTranslation(pGL: GL10) {
+    override fun applyTranslation(pGL: GL10, camera: Camera) {
+
+        val drawX: Float
+        val drawY: Float
 
         val parent = parent
+
         if (parent is Container) {
-            parent.onApplyChildTranslation(pGL, this)
-            return
+            drawX = parent.getChildDrawX(this)
+            drawY = parent.getChildDrawY(this)
+        } else {
+            drawX = this.drawX
+            drawY = this.drawY
         }
 
-        val originOffsetX = width * originX
-        val originOffsetY = height * originY
-
-        val anchorOffsetX = if (parent is IShape) parent.width * anchorX else 0f
-        val anchorOffsetY = if (parent is IShape) parent.height * anchorY else 0f
-
-        val finalX = x - originOffsetX + anchorOffsetX + translationX
-        val finalY = y - originOffsetY + anchorOffsetY + translationY
-
-        if (finalX != 0f || finalY != 0f) {
-            pGL.glTranslatef(finalX, finalY, 0f)
+        if (drawX != 0f || drawY != 0f) {
+            pGL.glTranslatef(drawX, drawY, 0f)
         }
     }
 
     override fun applyRotation(pGL: GL10) {
 
-        if (rotation == 0f) {
-            return
+        // This will ensure getSceneCenterCoordinates() applies the correct transformation.
+        mRotationCenterX = width * originX
+        mRotationCenterY = height * originY
+
+        if (rotation != 0f) {
+            pGL.glRotatef(rotation, 0f, 0f, 1f)
         }
-
-        val offsetX = width * rotationCenterX
-        val offsetY = height * rotationCenterY
-
-        pGL.glTranslatef(offsetX, offsetY, 0f)
-        pGL.glRotatef(rotation, 0f, 0f, 1f)
-        pGL.glTranslatef(-offsetX, -offsetY, 0f)
     }
 
     override fun applyScale(pGL: GL10) {
 
-        if (scaleX == 1f && scaleY == 1f) {
-            return
+        // This will ensure getSceneCenterCoordinates() applies the correct transformation.
+        mScaleCenterX = width * originX
+        mScaleCenterY = height * originY
+
+        if (scaleX != 1f || scaleY != 1f) {
+            pGL.glScalef(scaleX, scaleY, 1f)
         }
-
-        val offsetX = width * scaleCenterX
-        val offsetY = height * scaleCenterY
-
-        pGL.glTranslatef(offsetX, offsetY, 0f)
-        pGL.glScalef(scaleX, scaleY, 1f)
-        pGL.glTranslatef(-offsetX, -offsetY, 0f)
     }
 
     protected open fun applyColor(pGL: GL10) {
@@ -263,28 +356,82 @@ abstract class ExtendedEntity(
         }
     }
 
-    override fun onApplyTransformations(pGL: GL10) {
-        applyTranslation(pGL)
-        applyRotation(pGL)
-        applyScale(pGL)
+    override fun onApplyTransformations(pGL: GL10, camera: Camera) {
+        applyTranslation(pGL, camera)
+
+        if (rotation != 0f || scaleX != 1f || scaleY != 1f) {
+            pGL.glTranslatef(-originOffsetX, -originOffsetY, 0f)
+            applyRotation(pGL)
+            applyScale(pGL)
+            pGL.glTranslatef(originOffsetX, originOffsetY, 0f)
+        }
+
         applyColor(pGL)
         applyBlending(pGL)
     }
 
-    override fun onInitDraw(pGL: GL10) {
-        GLHelper.enableVertexArray(pGL)
+
+    override fun onManagedUpdate(pSecondsElapsed: Float) {
+
+        if (isVertexBufferDirty) {
+            isVertexBufferDirty = false
+            onUpdateVertexBuffer()
+        }
+
+        super.onManagedUpdate(pSecondsElapsed)
     }
 
-    override fun drawVertices(pGL: GL10, pCamera: Camera) {
+    override fun onInitDraw(pGL: GL10) {
+
         if (vertexBuffer != null) {
-            pGL.glDrawArrays(GL10.GL_TRIANGLE_STRIP, 0, 4)
+            GLHelper.enableVertexArray(pGL)
+        }
+
+        if (clearDepthBufferBeforeDraw) {
+            pGL.glClear(GL_DEPTH_BUFFER_BIT)
         }
     }
 
     override fun onApplyVertices(pGL: GL10) {
+
         if (vertexBuffer != null) {
             super.onApplyVertices(pGL)
         }
+
+    }
+
+    override fun doDraw(pGL: GL10, pCamera: Camera) {
+
+        GLHelper.setDepthTest(pGL, testWithDepthBuffer)
+
+        super.doDraw(pGL, pCamera)
+
+        GLHelper.setDepthTest(pGL, false)
+    }
+
+
+    // Vertex buffer
+
+    override fun updateVertexBuffer() {
+        isVertexBufferDirty = true
+    }
+
+    fun updateVertexBufferNow() {
+        isVertexBufferDirty = false
+        onUpdateVertexBuffer()
+    }
+
+
+    /**
+     * Sets the vertex buffer of the entity.
+     *
+     * Note: This will unload the previous buffer from the active buffer object manager if it's managed.
+     * If it's not managed you will have to manually unload it otherwise it will cause a memory leak.
+     */
+    fun setVertexBuffer(buffer: VertexBuffer) {
+        vertexBuffer?.unloadFromActiveBufferObjectManager()
+        vertexBuffer = buffer
+        updateVertexBuffer()
     }
 
     override fun getVertexBuffer(): VertexBuffer? {
@@ -295,54 +442,62 @@ abstract class ExtendedEntity(
     // Size
 
     /**
-     * Applies the size of the entity.
+     * Called when the content size is measured.
      *
-     * Despite [setSize] this is intended to be used internally to report a new
-     * size for when [autoSizeAxes] allows it for one or both axes.
+     * @return Whether the size of the entity was changed or not, this depends on the [autoSizeAxes] property.
      */
-    protected fun onApplyInternalSize(width: Float, height: Float) {
+    protected open fun onContentSizeMeasured(): Boolean {
 
         if (autoSizeAxes == Axes.None) {
-            return
+            return false
         }
 
-        if (internalWidth != width || internalHeight != height) {
+        if (contentWidth != width || contentHeight != height) {
 
             if (autoSizeAxes == Axes.X || autoSizeAxes == Axes.Both) {
-                internalWidth = width
+                width = contentWidth
             }
 
             if (autoSizeAxes == Axes.Y || autoSizeAxes == Axes.Both) {
-                internalHeight = height
+                height = contentHeight
             }
 
             updateVertexBuffer()
 
             (parent as? Container)?.onChildSizeChanged(this)
+            return true
         }
+        return false
     }
 
-    open fun setSize(weight: Float, height: Float) {
+    /**
+     * Sets the size of the entity.
+     *
+     * @return Whether the size of the entity was changed or not, this depends on the [autoSizeAxes] property.
+     */
+    open fun setSize(newWidth: Float, newHeight: Float): Boolean {
 
         if (autoSizeAxes == Axes.Both) {
             Log.w("ExtendedEntity", "Cannot set size when autoSizeAxes is set to Both.")
-            return
+            return false
         }
 
-        if (internalWidth != weight || internalHeight != height) {
+        if (width != newWidth || height != newHeight) {
 
             if (autoSizeAxes == Axes.None || autoSizeAxes == Axes.Y) {
-                internalWidth = weight
+                width = newWidth
             }
 
             if (autoSizeAxes == Axes.None || autoSizeAxes == Axes.X) {
-                internalHeight = height
+                height = newHeight
             }
 
             updateVertexBuffer()
 
             (parent as? Container)?.onChildSizeChanged(this)
+            return true
         }
+        return false
     }
 
     open fun setWidth(value: Float) {
@@ -399,15 +554,13 @@ abstract class ExtendedEntity(
         else -> false
     }
 
-    override fun contains(pX: Float, pY: Float): Boolean {
-        return RectangularShapeCollisionChecker.checkContains(this, pX, pY)
+    override fun contains(x: Float, y: Float): Boolean {
+        return RectangularShapeCollisionChecker.checkContains(this, x + totalOffsetX, y + totalOffsetY)
     }
 
     override fun isCulled(pCamera: Camera): Boolean {
-        return mX > pCamera.maxX
-            || mY > pCamera.maxY
-            || mX + this.width < pCamera.minX
-            || mY + this.height < pCamera.minY
+        return drawX > pCamera.maxX || drawX + width < pCamera.minX
+            || drawY > pCamera.maxY || drawY + height < pCamera.minY
     }
 
     override fun getSceneCenterCoordinates(): FloatArray {

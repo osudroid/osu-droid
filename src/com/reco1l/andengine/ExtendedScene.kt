@@ -1,11 +1,7 @@
 package com.reco1l.andengine
 
 import android.util.*
-import com.reco1l.andengine.modifier.*
-import com.reco1l.framework.*
-import com.reco1l.toolkt.kotlin.*
 import org.anddev.andengine.engine.camera.*
-import org.anddev.andengine.entity.IEntity
 import org.anddev.andengine.entity.scene.*
 import org.anddev.andengine.entity.shape.IShape
 import org.anddev.andengine.input.touch.*
@@ -15,7 +11,7 @@ import javax.microedition.khronos.opengles.*
 /**
  * Scene with extended functionality.
  */
-class ExtendedScene : Scene(), IShape {
+open class ExtendedScene : Scene(), IShape {
 
     /**
      * The time multiplier for the scene.
@@ -55,6 +51,11 @@ class ExtendedScene : Scene(), IShape {
         return false
     }
 
+
+    override fun setColor(pRed: Float, pGreen: Float, pBlue: Float) {
+        Log.w("ExtendedScene", "Color is not supported for scenes.")
+    }
+
     override fun setCullingEnabled(pCullingEnabled: Boolean) {
         Log.w("ExtendedScene", "Culling is not supported for scenes.")
     }
@@ -80,5 +81,5 @@ class ExtendedScene : Scene(), IShape {
 
     override fun getHeightScaled(): Float = cameraHeight * scaleY
 
-    override fun isCullingEnabled(): Boolean = isCullingEnabled
+    override fun isCullingEnabled(): Boolean = false
 }

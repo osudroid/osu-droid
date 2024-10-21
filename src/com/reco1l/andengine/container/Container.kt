@@ -1,10 +1,14 @@
 package com.reco1l.andengine.container
 
+import android.util.*
 import com.reco1l.andengine.*
 import com.reco1l.toolkt.kotlin.*
+import org.anddev.andengine.engine.camera.*
 import org.anddev.andengine.entity.*
 import org.anddev.andengine.entity.IEntity.*
+import org.anddev.andengine.entity.scene.Scene.ITouchArea
 import org.anddev.andengine.entity.shape.IShape
+import org.anddev.andengine.input.touch.*
 import org.anddev.andengine.util.*
 import javax.microedition.khronos.opengles.GL10
 import kotlin.math.*
@@ -28,7 +32,7 @@ open class Container : ExtendedEntity() {
 
         if (shouldMeasureSize) {
             shouldMeasureSize = false
-            onMeasureSize()
+            onMeasureContentSize()
         }
 
         super.onManagedUpdate(pSecondsElapsed)
@@ -57,20 +61,12 @@ open class Container : ExtendedEntity() {
     }
 
 
-    open fun onApplyChildTranslation(gl: GL10, child: ExtendedEntity) {
+    open fun getChildDrawX(child: ExtendedEntity): Float {
+        return child.x + child.totalOffsetX
+    }
 
-        val originOffsetX = child.width * child.originX
-        val originOffsetY = child.height * child.originY
-
-        val anchorOffsetX = width * child.anchorX
-        val anchorOffsetY = height * child.anchorY
-
-        val finalX = anchorOffsetX + child.x - originOffsetX + child.translationX
-        val finalY = anchorOffsetY + child.y - originOffsetY + child.translationY
-
-        if (finalX != 0f || finalY != 0f) {
-            gl.glTranslatef(finalX, finalY, 0f)
-        }
+    open fun getChildDrawY(child: ExtendedEntity): Float {
+        return child.y + child.totalOffsetY
     }
 
 
@@ -80,10 +76,10 @@ open class Container : ExtendedEntity() {
      * The default implementation of this method will take the farthest child's
      * position and size as the width and height respectively.
      */
-    protected open fun onMeasureSize() {
+    protected open fun onMeasureContentSize() {
 
-        var maxWidth = 0f
-        var maxHeight = 0f
+        contentWidth = 0f
+        contentHeight = 0f
 
         if (mChildren != null) {
             for (i in mChildren.indices) {
@@ -91,13 +87,13 @@ open class Container : ExtendedEntity() {
                 val child = mChildren.getOrNull(i) ?: continue
 
                 if (child is IShape) {
-                    maxWidth = max(maxWidth, child.x + child.width)
-                    maxHeight = max(maxHeight, child.y + child.height)
+                    contentWidth = max(contentWidth, child.x + child.width)
+                    contentHeight = max(contentHeight, child.y + child.height)
                 }
             }
         }
 
-        onApplyInternalSize(maxWidth, maxHeight)
+        onContentSizeMeasured()
     }
 
 
@@ -156,8 +152,29 @@ open class Container : ExtendedEntity() {
     }
 
 
-
     override fun onUpdateVertexBuffer() {}
+    override fun drawVertices(pGL: GL10, pCamera: Camera) {}
 
+
+    // Input
+
+    override fun onAreaTouched(event: TouchEvent, localX: Float, localY: Float): Boolean {
+
+        if (mChildren != null) {
+            try {
+                mChildren.fastForEach {
+                    if (it is ITouchArea) {
+                        if (it.contains(localX, localY)) {
+                            return it.onAreaTouched(event, localX, localY)
+                        }
+                    }
+                }
+            } catch (e: IndexOutOfBoundsException) {
+                Log.e("Container", "A child entity was removed during touch event propagation.")
+            }
+        }
+
+        return false
+    }
 }
 

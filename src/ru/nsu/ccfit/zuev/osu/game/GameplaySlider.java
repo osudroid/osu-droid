@@ -13,7 +13,7 @@ import com.reco1l.osu.Modifiers;
 import com.reco1l.andengine.Anchor;
 import com.reco1l.osu.playfield.CirclePiece;
 import com.reco1l.osu.playfield.NumberedCirclePiece;
-import com.reco1l.osu.playfield.SliderTickContainer;
+import com.reco1l.osu.hitobjects.SliderTickContainer;
 import com.rian.osu.beatmap.hitobject.BankHitSampleInfo;
 import com.rian.osu.beatmap.hitobject.Slider;
 import com.rian.osu.beatmap.hitobject.sliderobject.SliderTick;

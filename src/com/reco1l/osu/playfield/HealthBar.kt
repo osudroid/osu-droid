@@ -4,25 +4,22 @@ import com.edlplan.framework.easing.*
 import com.reco1l.andengine.*
 import com.reco1l.andengine.Anchor
 import com.reco1l.andengine.container.*
+import com.reco1l.andengine.shape.*
 import com.reco1l.andengine.sprite.*
 import com.reco1l.andengine.texture.*
 import com.reco1l.framework.*
-import org.anddev.andengine.engine.camera.*
 import org.anddev.andengine.opengl.texture.region.*
-import org.anddev.andengine.opengl.util.*
-import org.anddev.andengine.opengl.vertex.RectangleVertexBuffer
 import ru.nsu.ccfit.zuev.osu.*
 import ru.nsu.ccfit.zuev.osu.scoring.*
 import ru.nsu.ccfit.zuev.skins.*
-import javax.microedition.khronos.opengles.*
 
 
-class HealthDisplay(private val statistics: StatisticV2) : Container() {
+class HealthBar(private val statistics: StatisticV2) : Container() {
 
 
-    private val fill: AnimatedSpriteWithDepthTest
+    private val fill: AnimatedSprite
 
-    private val fillClear: DepthClearRectangle
+    private val fillClear: Box
 
     private val marker: ExtendedSprite
 
@@ -51,11 +48,15 @@ class HealthDisplay(private val statistics: StatisticV2) : Container() {
         // background implementation is the same for both versions.
         attachChild(ExtendedSprite().apply { textureRegion = backgroundTexture })
 
-        fillClear = DepthClearRectangle()
+        fillClear = Box()
         fillClear.setOrigin(Anchor.TopRight)
+        fillClear.clearDepthBufferBeforeDraw = true
+        fillClear.testWithDepthBuffer = true
+        fillClear.alpha = 0f
         attachChild(fillClear)
 
-        fill = AnimatedSpriteWithDepthTest("scorebar-colour", true, OsuSkin.get().animationFramerate)
+        fill = AnimatedSprite("scorebar-colour", true, OsuSkin.get().animationFramerate)
+        fill.testWithDepthBuffer = true
         fill.autoSizeAxes = Axes.None // Preserve the first frame width.
         attachChild(fill)
 
@@ -160,41 +161,6 @@ class HealthDisplay(private val statistics: StatisticV2) : Container() {
 
         else -> ColorARGB.White
     }
-
-
-    private inner class DepthClearRectangle : ExtendedEntity(vertexBuffer = RectangleVertexBuffer(GL11.GL_STATIC_DRAW, true)) {
-
-        init {
-            color = ColorARGB.Transparent
-        }
-
-        override fun onInitDraw(pGL: GL10) {
-            super.onInitDraw(pGL)
-            pGL.glClear(GL10.GL_DEPTH_BUFFER_BIT)
-        }
-
-        override fun drawVertices(pGL: GL10, pCamera: Camera) {
-            GLHelper.enableDepthTest(pGL)
-            super.drawVertices(pGL, pCamera)
-            GLHelper.disableDepthTest(pGL)
-        }
-
-        override fun onUpdateVertexBuffer() {
-            (vertexBuffer as RectangleVertexBuffer).update(width, height)
-        }
-
-    }
-
-    private inner class AnimatedSpriteWithDepthTest(textureName: String, withHyphen: Boolean, fps: Float) : AnimatedSprite(textureName, withHyphen, fps) {
-
-        override fun drawVertices(pGL: GL10, pCamera: Camera) {
-            GLHelper.enableDepthTest(pGL)
-            super.drawVertices(pGL, pCamera)
-            GLHelper.disableDepthTest(pGL)
-        }
-
-    }
-
 
     companion object {
 

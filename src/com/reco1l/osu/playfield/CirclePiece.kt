@@ -4,7 +4,7 @@ import com.reco1l.andengine.*
 import com.reco1l.andengine.container.*
 import com.reco1l.andengine.sprite.*
 import ru.nsu.ccfit.zuev.osu.*
-import ru.nsu.ccfit.zuev.osu.game.CircleNumber
+import ru.nsu.ccfit.zuev.skins.*
 
 open class CirclePiece(
 
@@ -46,16 +46,18 @@ open class CirclePiece(
 class NumberedCirclePiece(circleTexture: String, overlayTexture: String) : CirclePiece(circleTexture, overlayTexture) {
 
 
-    private val number = CircleNumber().also {
+    private val number = SpriteFont(OsuSkin.get().hitCirclePrefix).also {
 
         it.setOrigin(Anchor.Center)
         it.setAnchor(Anchor.Center)
+        it.spacing = -OsuSkin.get().hitCircleOverlap
+
         attachChild(it)
     }
 
 
     fun setNumberText(value: Int) {
-        number.setNumber(value)
+        number.text = value.toString()
     }
 
     fun setNumberScale(value: Float) {
