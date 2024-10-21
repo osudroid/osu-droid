@@ -22,10 +22,6 @@ import javax.microedition.khronos.opengles.GL10.*
  */
 abstract class ExtendedEntity(
 
-    private var width: Float = 0f,
-
-    private var height: Float = 0f,
-
     private var vertexBuffer: VertexBuffer? = null
 
 ) : Shape(0f, 0f), IModifierChain {
@@ -144,6 +140,27 @@ abstract class ExtendedEntity(
      * Intended for internal use only.
      *
      * Despite [setWidth] this will ignore [autoSizeAxes] and force the width to be set, as well the buffer will not be updated.
+     * The width of the content inside the entity.
+     */
+    open var contentWidth = 0f
+        protected set(value) {
+            if (field != value) {
+                field = value
+                onContentSizeMeasured()
+            }
+        }
+
+    /**
+     * The height of the content inside the entity.
+     */
+    open var contentHeight = 0f
+        protected set(value) {
+            if (field != value) {
+                field = value
+                onContentSizeMeasured()
+            }
+        }
+
      */
     protected var internalWidth
         get() = width
@@ -162,6 +179,11 @@ abstract class ExtendedEntity(
             height = value
         }
 
+
+
+    private var width = 0f
+
+    private var height = 0f
 
     private var isVertexBufferDirty = true
 
@@ -382,54 +404,62 @@ abstract class ExtendedEntity(
     // Size
 
     /**
-     * Applies the size of the entity.
+     * Called when the content size is measured.
      *
-     * Despite [setSize] this is intended to be used internally to report a new
-     * size for when [autoSizeAxes] allows it for one or both axes.
+     * @return Whether the size of the entity was changed or not, this depends on the [autoSizeAxes] property.
      */
-    protected fun onApplyInternalSize(width: Float, height: Float) {
+    protected open fun onContentSizeMeasured(): Boolean {
 
         if (autoSizeAxes == Axes.None) {
-            return
+            return false
         }
 
-        if (internalWidth != width || internalHeight != height) {
+        if (contentWidth != width || contentHeight != height) {
 
             if (autoSizeAxes == Axes.X || autoSizeAxes == Axes.Both) {
-                internalWidth = width
+                width = contentWidth
             }
 
             if (autoSizeAxes == Axes.Y || autoSizeAxes == Axes.Both) {
-                internalHeight = height
+                height = contentHeight
             }
 
             updateVertexBuffer()
 
             (parent as? Container)?.onChildSizeChanged(this)
+            return true
         }
+        return false
     }
 
-    open fun setSize(weight: Float, height: Float) {
+    /**
+     * Sets the size of the entity.
+     *
+     * @return Whether the size of the entity was changed or not, this depends on the [autoSizeAxes] property.
+     */
+    open fun setSize(newWidth: Float, newHeight: Float): Boolean {
 
         if (autoSizeAxes == Axes.Both) {
             Log.w("ExtendedEntity", "Cannot set size when autoSizeAxes is set to Both.")
-            return
+            return false
         }
 
-        if (internalWidth != weight || internalHeight != height) {
+        if (width != newWidth || height != newHeight) {
 
             if (autoSizeAxes == Axes.None || autoSizeAxes == Axes.Y) {
-                internalWidth = weight
+                width = newWidth
             }
 
             if (autoSizeAxes == Axes.None || autoSizeAxes == Axes.X) {
-                internalHeight = height
+                height = newHeight
             }
 
             updateVertexBuffer()
 
             (parent as? Container)?.onChildSizeChanged(this)
+            return true
         }
+        return false
     }
 
     open fun setWidth(value: Float) {

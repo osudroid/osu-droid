@@ -14,15 +14,17 @@ open class ExtendedSprite(textureRegion: TextureRegion? = null) : Rectangle() {
 
 
     override var autoSizeAxes = Axes.Both
-        set(value) {
-            if (field != value) {
-                field = value
 
-                onApplyInternalSize(
-                    textureRegion?.width?.toFloat() ?: 0f,
-                    textureRegion?.height?.toFloat() ?: 0f
-                )
-            }
+    override var contentWidth: Float
+        get() = textureRegion?.width?.toFloat() ?: 0f
+        set(_) {
+            Log.w("ExtendedSprite", "contentWidth is read-only for ExtendedSprite")
+        }
+
+    override var contentHeight: Float
+        get() = textureRegion?.height?.toFloat() ?: 0f
+        set(_) {
+            Log.w("ExtendedSprite", "contentHeight is read-only for ExtendedSprite")
         }
 
 
@@ -64,10 +66,7 @@ open class ExtendedSprite(textureRegion: TextureRegion? = null) : Rectangle() {
             value?.isFlippedVertical = flippedVertical
             value?.isFlippedHorizontal = flippedHorizontal
 
-            onApplyInternalSize(
-                value?.width?.toFloat() ?: 0f,
-                value?.height?.toFloat() ?: 0f
-            )
+            onContentSizeMeasured()
         }
 
     /**

@@ -62,7 +62,7 @@ class SongProgress : Container() {
             attachChild(dot)
         }
 
-        onMeasureSize()
+        onMeasureContentSize()
 
         setAnchor(Anchor.TopRight)
         setOrigin(Anchor.CenterRight)

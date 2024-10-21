@@ -29,7 +29,7 @@ open class Container : ExtendedEntity() {
 
         if (shouldMeasureSize) {
             shouldMeasureSize = false
-            onMeasureSize()
+            onMeasureContentSize()
         }
 
         super.onManagedUpdate(pSecondsElapsed)
@@ -81,10 +81,10 @@ open class Container : ExtendedEntity() {
      * The default implementation of this method will take the farthest child's
      * position and size as the width and height respectively.
      */
-    protected open fun onMeasureSize() {
+    protected open fun onMeasureContentSize() {
 
-        var maxWidth = 0f
-        var maxHeight = 0f
+        contentWidth = 0f
+        contentHeight = 0f
 
         if (mChildren != null) {
             for (i in mChildren.indices) {
@@ -92,13 +92,13 @@ open class Container : ExtendedEntity() {
                 val child = mChildren.getOrNull(i) ?: continue
 
                 if (child is IShape) {
-                    maxWidth = max(maxWidth, child.x + child.width)
-                    maxHeight = max(maxHeight, child.y + child.height)
+                    contentWidth = max(contentWidth, child.x + child.width)
+                    contentHeight = max(contentHeight, child.y + child.height)
                 }
             }
         }
 
-        onApplyInternalSize(maxWidth, maxHeight)
+        onContentSizeMeasured()
     }
 
 

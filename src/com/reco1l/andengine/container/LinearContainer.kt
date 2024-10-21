@@ -35,11 +35,11 @@ open class LinearContainer : Container() {
     private var lastChildY = 0f
 
 
-    override fun onMeasureSize() {
+    override fun onMeasureContentSize() {
         shouldMeasureSize = false
 
-        var cumulativeWidth = 0f
-        var cumulativeHeight = 0f
+        contentWidth = 0f
+        contentHeight = 0f
         var countedChildren = 0
 
         if (mChildren != null) {
@@ -56,20 +56,20 @@ open class LinearContainer : Container() {
                 when (orientation) {
 
                     Horizontal -> {
-                        cumulativeWidth += child.width
-                        cumulativeHeight = max(cumulativeHeight, child.height)
+                        contentWidth += child.width
+                        contentHeight = max(contentHeight, child.height)
                     }
 
                     Vertical -> {
-                        cumulativeWidth = max(cumulativeWidth, child.width)
-                        cumulativeHeight += child.height
+                        contentWidth = max(contentWidth, child.width)
+                        contentHeight += child.height
                     }
                 }
 
                 if (i > 0) {
                     when(orientation) {
-                        Horizontal -> cumulativeWidth += spacing
-                        Vertical -> cumulativeHeight += spacing
+                        Horizontal -> contentWidth += spacing
+                        Vertical -> contentHeight += spacing
                     }
                 }
             }
@@ -78,12 +78,12 @@ open class LinearContainer : Container() {
         // Subtract the last children spacing.
         if (countedChildren > 1) {
             when (orientation) {
-                Horizontal -> cumulativeWidth -= spacing
-                Vertical -> cumulativeHeight -= spacing
+                Horizontal -> contentWidth -= spacing
+                Vertical -> contentHeight -= spacing
             }
         }
 
-        onApplyInternalSize(cumulativeWidth, cumulativeHeight)
+        onContentSizeMeasured()
     }
 
 
