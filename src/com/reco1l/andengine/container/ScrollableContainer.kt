@@ -157,11 +157,11 @@ open class ScrollableContainer : Container() {
             velocityX *= deceleration
             velocityY *= deceleration
 
-            if (abs(velocityX) < 0.01f) {
+            if (abs(velocityX) < INSIGNIFICANT_DISTANCE) {
                 velocityX = 0f
             }
 
-            if (abs(velocityY) < 0.01f) {
+            if (abs(velocityY) < INSIGNIFICANT_DISTANCE) {
                 velocityY = 0f
             }
         }
@@ -175,7 +175,7 @@ open class ScrollableContainer : Container() {
                 val deltaX = scrollX - maxScrollX
                 scrollX -= deltaX * 0.1f
 
-                if (abs(deltaX) < 0.01f) {
+                if (abs(deltaX) < INSIGNIFICANT_DISTANCE) {
                     scrollX = maxScrollX
                 }
             }
@@ -186,7 +186,7 @@ open class ScrollableContainer : Container() {
                 val deltaY = scrollY - maxScrollY
                 scrollY -= deltaY * 0.1f
 
-                if (abs(deltaY) < 0.01f) {
+                if (abs(deltaY) < INSIGNIFICANT_DISTANCE) {
                     scrollY = maxScrollY
                 }
             }
@@ -195,7 +195,7 @@ open class ScrollableContainer : Container() {
                 velocityY = 0f
                 scrollY += (-scrollY) * 0.1f
 
-                if (abs(scrollY) < 0.01f) {
+                if (abs(scrollY) < INSIGNIFICANT_DISTANCE) {
                     scrollY = 0f
                 }
             }
@@ -204,7 +204,7 @@ open class ScrollableContainer : Container() {
                 velocityX = 0f
                 scrollX += (-scrollX) * 0.1f
 
-                if (abs(scrollX) < 0.01f) {
+                if (abs(scrollX) < INSIGNIFICANT_DISTANCE) {
                     scrollX = 0f
                 }
             }
@@ -322,12 +322,11 @@ open class ScrollableContainer : Container() {
                     deltaY *= if (length <= 0) 0f else length.pow(0.7f) / length
                 }
 
-                // Preventing possible NaN values.
-                if (deltaX.isNaN()) {
+                if (deltaX.isNaN() || abs(deltaX) < INSIGNIFICANT_DISTANCE) {
                     deltaX = 0f
                 }
 
-                if (deltaY.isNaN()) {
+                if (deltaY.isNaN() || abs(deltaY) < INSIGNIFICANT_DISTANCE) {
                     deltaY = 0f
                 }
 
@@ -376,6 +375,8 @@ open class ScrollableContainer : Container() {
     companion object {
 
         const val DEFAULT_DECELERATION = 0.98f
+
+        const val INSIGNIFICANT_DISTANCE = 0.05f
 
     }
 }
