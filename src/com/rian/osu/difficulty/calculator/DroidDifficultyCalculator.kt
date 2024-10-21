@@ -254,7 +254,12 @@ class DroidDifficultyCalculator : DifficultyCalculator<DroidPlayableBeatmap, Dro
         beatmap: Beatmap,
         parameters: DifficultyCalculationParameters?,
         scope: CoroutineScope?
-    ) = beatmap.createDroidPlayableBeatmap(parameters?.mods, parameters?.customSpeedMultiplier ?: 1f, scope)
+    ) = beatmap.createDroidPlayableBeatmap(
+            parameters?.mods,
+            parameters?.customSpeedMultiplier ?: 1f,
+            parameters?.oldStatistics ?: false,
+            scope
+        )
 
     private fun calculateThreeFingerSummedStrain(strains: List<Double>) =
         strains.fold(0.0) { acc, d -> acc + d / threeFingerStrainThreshold }.pow(0.75)

@@ -387,14 +387,15 @@ public class ModMenu implements IModSwitcher {
                                 return;
                             }
 
-                            var parameters = new DifficultyCalculationParameters();
-                            parameters.setMods(ModUtils.convertLegacyMods(
-                                mod,
-                                isCustomCS() ? customCS : null,
-                                isCustomAR() ? customAR : null,
-                                isCustomOD() ? customOD : null
-                            ));
-                            parameters.setCustomSpeedMultiplier(changeSpeed);
+                            var parameters = new DifficultyCalculationParameters(
+                                ModUtils.convertLegacyMods(
+                                    mod,
+                                    isCustomCS() ? customCS : null,
+                                    isCustomAR() ? customAR : null,
+                                    isCustomOD() ? customOD : null
+                                ),
+                                changeSpeed
+                            );
 
                             switch (Config.getDifficultyAlgorithm()) {
                                 case droid -> {

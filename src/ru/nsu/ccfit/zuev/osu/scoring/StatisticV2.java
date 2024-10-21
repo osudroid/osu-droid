@@ -65,6 +65,9 @@ public class StatisticV2 implements Serializable {
     private Float customHP;
     private int life = 1;
 
+    // Used to indicate that the score was done before version 1.6.8. Used in difficulty calculation.
+    private boolean isOldScore;
+
     private boolean isLegacySC = false;
 
     /**
@@ -101,6 +104,7 @@ public class StatisticV2 implements Serializable {
         if (params.length < 6) return;
 
         setModFromString(params[0]);
+        isOldScore = !params[0].contains("|");
         setForcedScore(Integer.parseInt(params[1]));
         scoreMaxCombo = Integer.parseInt(params[2]);
         mark = params[3];
@@ -428,6 +432,10 @@ public class StatisticV2 implements Serializable {
         this.mod = mod.clone();
 
         computeModScoreMultiplier();
+    }
+
+    public boolean isOldScore() {
+        return isOldScore;
     }
 
     public float getDiffModifier() {

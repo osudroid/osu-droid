@@ -58,6 +58,19 @@ class GameplayHUD(private val stat: StatisticV2, private val game: GameScene) : 
         super.onManagedUpdate(pSecondsElapsed)
     }
 
+
+    fun setHealthBarVisibility(visible: Boolean) {
+        healthDisplay?.isVisible = visible
+    }
+
+    fun flashHealthBar() {
+        healthDisplay?.flash()
+    }
+
+    fun setScoreCounterText(score: String) {
+        scoreText?.text = score
+    }
+
 }
 
 

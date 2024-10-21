@@ -415,7 +415,8 @@ public class ScoringScene {
                                 stat.isCustomOD() ? stat.getCustomOD() : null,
                                 stat.isCustomHP() ? stat.getCustomHP() : null
                             ),
-                            stat.getChangeSpeed()
+                            stat.getChangeSpeed(),
+                            stat.isOldScore()
                         );
 
                         var difficultyAttributes = BeatmapDifficultyCalculator.calculateDroidDifficulty(playableBeatmap);
@@ -425,13 +426,13 @@ public class ScoringScene {
                         // Don't try to load online replay
                         if (replayPath != null && beatmapToReplay != null && !replayPath.startsWith("https://")) {
                             var beatmapFile = new File(beatmapToReplay.getPath());
-                            var replayLoad = new Replay();
-                            replayLoad.setObjectCount(beatmapToReplay.getTotalHitObjectCount());
-                            replayLoad.setMap(beatmapFile.getParentFile().getName(), beatmapFile.getName(), mapMD5);
+                            var replay = new Replay();
+                            replay.setObjectCount(beatmapToReplay.getTotalHitObjectCount());
+                            replay.setMap(beatmapFile.getParentFile().getName(), beatmapFile.getName(), mapMD5);
 
-                            if (replayLoad.load(replayPath)) {
+                            if (replay.load(replayPath)) {
                                 performanceAttributes = BeatmapDifficultyCalculator.calculateDroidPerformanceWithReplayStat(
-                                    playableBeatmap, difficultyAttributes, replayLoad.cursorMoves, replayLoad.objectData, stat
+                                    playableBeatmap, difficultyAttributes, replay.cursorMoves, replay.objectData, stat
                                 );
                             } else {
                                 performanceAttributes = BeatmapDifficultyCalculator.calculateDroidPerformance(difficultyAttributes, stat);
