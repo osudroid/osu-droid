@@ -15,7 +15,7 @@ import javax.microedition.khronos.opengles.*
 /**
  * Scene with extended functionality.
  */
-class ExtendedScene : Scene(), IShape {
+open class ExtendedScene : Scene(), IShape {
 
     /**
      * The time multiplier for the scene.
