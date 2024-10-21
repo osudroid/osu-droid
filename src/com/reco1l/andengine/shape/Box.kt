@@ -44,7 +44,7 @@ open class RoundedBox(segmentsPerArc: Int = 10) : ExtendedEntity(RoundedBoxVerte
     var cornerRadius = 0f
         set(value) {
             if (field != value) {
-                field = value.coerceIn(0f, min(width, height) / 2f)
+                field = value
                 updateVertexBuffer()
             }
         }
@@ -105,7 +105,7 @@ open class RoundedBox(segmentsPerArc: Int = 10) : ExtendedEntity(RoundedBoxVerte
         GL11.GL_STATIC_DRAW, true
     ) {
 
-        fun update(width: Float, height: Float, cornerRadius: Float) {
+        fun update(width: Float, height: Float, rawCornerRadius: Float) {
 
             val buffer = floatBuffer
 
@@ -125,6 +125,8 @@ open class RoundedBox(segmentsPerArc: Int = 10) : ExtendedEntity(RoundedBoxVerte
                 buffer.put(index++, toX)
                 buffer.put(index++, toY)
             }
+
+            val cornerRadius = rawCornerRadius.coerceIn(0f, min(width, height) / 2f)
 
             // Quads:
             //     [1]
