@@ -39,19 +39,6 @@ class Circle : ExtendedEntity() {
             }
         }
 
-    /**
-     * The detail factor of the circle segmentation.
-     *
-     * Lower values result in a smoother circle but may impact performance.
-     */
-    var detailFactor = 8f
-        set(value) {
-            if (field != value) {
-                field = value
-                shouldRebuildVertexBuffer = true
-            }
-        }
-
 
     private var shouldRebuildVertexBuffer = true
 
@@ -98,7 +85,7 @@ class Circle : ExtendedEntity() {
             shouldRebuildVertexBuffer = false
 
             val radio = max(width / 2f, height / 2f)
-            val segments = (MathF.PI * radio / detailFactor).toInt().coerceAtLeast(1)
+            val segments = max(1f, MathF.PI * radio).toInt()
 
             setVertexBuffer(CircleVertexBuffer(segments))
         }

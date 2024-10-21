@@ -49,22 +49,8 @@ open class RoundedBox(segmentsPerArc: Int = 10) : ExtendedEntity(RoundedBoxVerte
             }
         }
 
-    /**
-     * The detail factor of the arcs segmentation.
-     *
-     * Lower values result in a smoother circle but may impact performance.
-     */
-    var detailFactor = 8f
-        set(value) {
-            if (field != value) {
-                field = value
-                shouldRebuildVertexBuffer = true
-            }
-        }
-
 
     private var shouldRebuildVertexBuffer = true
-
 
 
     override fun setSize(newWidth: Float, newHeight: Float): Boolean {
@@ -98,7 +84,7 @@ open class RoundedBox(segmentsPerArc: Int = 10) : ExtendedEntity(RoundedBoxVerte
             shouldRebuildVertexBuffer = false
 
             val radio = max(width / 2f, height / 2f)
-            val segments = (MathF.PI * radio / detailFactor).toInt().coerceAtLeast(1)
+            val segments = max(1f, MathF.PI * radio).toInt()
 
             setVertexBuffer(RoundedBoxVertexBuffer(segments))
         }
