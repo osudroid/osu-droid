@@ -9,6 +9,7 @@ import org.anddev.andengine.collision.*
 import org.anddev.andengine.engine.camera.*
 import org.anddev.andengine.entity.*
 import org.anddev.andengine.entity.primitive.*
+import org.anddev.andengine.entity.scene.CameraScene
 import org.anddev.andengine.entity.scene.Scene
 import org.anddev.andengine.entity.shape.*
 import org.anddev.andengine.opengl.util.*
@@ -185,22 +186,20 @@ abstract class ExtendedEntity(
      * The offset applied to the X axis according to the anchor factor.
      */
     open val anchorOffsetX: Float
-        get() {
-            if (parent is IShape) {
-                return (parent as IShape).width * anchorX
-            }
-            return 0f
+        get() = when (parent) {
+            is IShape -> (parent as IShape).width * anchorX
+            is CameraScene -> ((parent as CameraScene).camera?.widthRaw ?: 0f) * anchorX
+            else -> 0f
         }
 
     /**
      * The offset applied to the Y axis according to the anchor factor.
      */
     open val anchorOffsetY: Float
-        get() {
-            if (parent is IShape) {
-                return (parent as IShape).height * anchorY
-            }
-            return 0f
+        get() = when (parent) {
+            is IShape -> (parent as IShape).height * anchorY
+            is CameraScene -> ((parent as CameraScene).camera?.heightRaw ?: 0f) * anchorY
+            else -> 0f
         }
 
     /**
