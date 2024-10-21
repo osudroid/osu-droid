@@ -16,7 +16,7 @@ class GameplayHUD(private val stat: StatisticV2, private val game: GameScene, pr
 
     private val scoreCounter: ScoreCounter?
 
-    private val songProgress: SongProgress?
+    private val songProgress: CircularSongProgress?
 
     private val comboCounter: ComboCounter?
 
@@ -37,7 +37,7 @@ class GameplayHUD(private val stat: StatisticV2, private val game: GameScene, pr
             accuracyCounter = AccuracyCounter()
             attachChild(accuracyCounter)
 
-            songProgress = SongProgress()
+            songProgress = CircularSongProgress()
             attachChild(songProgress)
 
             scoreCounter.metric = Config.getScoreCounterMetric()

@@ -8,20 +8,20 @@ import org.anddev.andengine.entity.scene.Scene;
 import ru.nsu.ccfit.zuev.osu.RGBColor;
 import ru.nsu.ccfit.zuev.osu.Utils;
 
-public class SongProgressBar extends GameObject {
+public class LinearSongProgress extends GameObject {
     private final Rectangle progressRect;
     private final Rectangle bgRect;
     private float time;
     private float startTime;
     private float passedTime;
 
-    public SongProgressBar(final GameObjectListener listener,
-                           final Scene scene, final float time, final float startTime, final PointF pos) {
+    public LinearSongProgress(final GameObjectListener listener,
+                              final Scene scene, final float time, final float startTime, final PointF pos) {
         this(listener, scene, time, startTime, pos, Utils.toRes(300), Utils.toRes(7));
     }
 
-    public SongProgressBar(final GameObjectListener listener,
-                           final Scene scene, final float time, final float startTime, final PointF pos, float width, float height) {
+    public LinearSongProgress(final GameObjectListener listener,
+                              final Scene scene, final float time, final float startTime, final PointF pos, float width, float height) {
         this.time = time;
         this.startTime = startTime;
         if (listener != null)
