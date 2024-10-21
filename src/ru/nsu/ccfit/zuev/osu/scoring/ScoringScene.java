@@ -595,6 +595,7 @@ public class ScoringScene {
             songService.stop();
 //            songService.preLoadWithLoop(game.filePath);
             songService.preLoad(beatmapInfo.getAudioPath());
+            menu.updateMusicEffects();
             songService.play();
         }
     }
