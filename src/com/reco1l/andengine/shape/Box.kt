@@ -84,7 +84,7 @@ open class RoundedBox(segmentsPerArc: Int = 10) : ExtendedEntity(RoundedBoxVerte
             shouldRebuildVertexBuffer = false
 
             val radio = max(width / 2f, height / 2f)
-            val segments = max(1f, MathF.PI * radio).toInt()
+            val segments = max(1f, radio / MathF.PI).toInt()
 
             setVertexBuffer(RoundedBoxVertexBuffer(segments))
         }

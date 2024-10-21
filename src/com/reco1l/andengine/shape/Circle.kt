@@ -85,7 +85,7 @@ class Circle : ExtendedEntity() {
             shouldRebuildVertexBuffer = false
 
             val radio = max(width / 2f, height / 2f)
-            val segments = max(1f, MathF.PI * radio).toInt()
+            val segments = max(1f, radio / MathF.PI).toInt()
 
             setVertexBuffer(CircleVertexBuffer(segments))
         }
