@@ -217,6 +217,14 @@ open class ScrollableContainer : Container() {
             it.isVisible = scrollAxes == Axes.Both || scrollAxes == Axes.Y
             it.y = scrollY * (height / scrollableContentHeight)
 
+            if (it.alpha > 0f && velocityY == 0f) {
+                it.alpha -= deltaTimeSec * 0.5f
+
+                if (it.alpha < 0f) {
+                    it.alpha = 0f
+                }
+            }
+
             if (it.isVisible) {
                 it.onUpdate(deltaTimeSec)
             }
@@ -228,6 +236,14 @@ open class ScrollableContainer : Container() {
 
             it.x = scrollX * (width / scrollableContentWidth)
             it.y = height - it.height
+
+            if (it.alpha > 0f && velocityX == 0f) {
+                it.alpha -= deltaTimeSec * 0.5f
+
+                if (it.alpha < 0f) {
+                    it.alpha = 0f
+                }
+            }
 
             if (it.isVisible) {
                 it.onUpdate(deltaTimeSec)
@@ -313,6 +329,11 @@ open class ScrollableContainer : Container() {
 
                 if (deltaY.isNaN()) {
                     deltaY = 0f
+                }
+
+                if (deltaX != 0f || deltaY != 0f) {
+                    indicatorX?.alpha = 0.5f
+                    indicatorY?.alpha = 0.5f
                 }
 
                 scrollX -= deltaX
