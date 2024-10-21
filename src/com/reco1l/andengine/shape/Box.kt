@@ -13,7 +13,7 @@ import kotlin.math.*
 /**
  * A rectangle shape based on [ExtendedEntity].
  */
-open class Box : ExtendedEntity(vertexBuffer = RectangleVertexBuffer(GL11.GL_STATIC_DRAW, true)) {
+open class Box : ExtendedEntity(vertexBuffer = BoxVertexBuffer()) {
 
 
     override fun onInitDraw(pGL: GL10) {
@@ -26,11 +26,32 @@ open class Box : ExtendedEntity(vertexBuffer = RectangleVertexBuffer(GL11.GL_STA
 
 
     override fun onUpdateVertexBuffer() {
-        (vertexBuffer as RectangleVertexBuffer).update(width, height)
+        (vertexBuffer as BoxVertexBuffer).update(width, height)
     }
 
     override fun drawVertices(gl: GL10, camera: Camera) {
         gl.glDrawArrays(GL_TRIANGLE_STRIP, 0, 4)
+    }
+
+
+    class BoxVertexBuffer : VertexBuffer(4 * 2, GL11.GL_STATIC_DRAW, true) {
+
+        fun update(width: Float, height: Float) {
+            floatBuffer.apply {
+                put(0, 0f)
+                put(1, 0f)
+
+                put(2, 0f)
+                put(3, height)
+
+                put(4, width)
+                put(5, 0f)
+
+                put(6, width)
+                put(7, height)
+            }
+        }
+
     }
 
 }
@@ -95,7 +116,6 @@ open class RoundedBox(segmentsPerArc: Int = 10) : ExtendedEntity(RoundedBoxVerte
     override fun drawVertices(pGL: GL10, pCamera: Camera) {
         (vertexBuffer as RoundedBoxVertexBuffer).draw(pGL)
     }
-
 
 
     class RoundedBoxVertexBuffer(private val segmentsPerArc: Int) : VertexBuffer(

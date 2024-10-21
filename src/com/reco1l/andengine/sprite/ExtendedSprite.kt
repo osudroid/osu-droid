@@ -108,10 +108,6 @@ open class ExtendedSprite(textureRegion: TextureRegion? = null) : Box() {
     }
 
 
-    override fun onUpdateVertexBuffer() {
-        (vertexBuffer as RectangleVertexBuffer).update(width, height)
-    }
-
     override fun onInitDraw(pGL: GL10) {
         super.onInitDraw(pGL)
         GLHelper.enableTextures(pGL)
