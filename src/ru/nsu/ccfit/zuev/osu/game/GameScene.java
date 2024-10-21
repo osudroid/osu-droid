@@ -561,10 +561,6 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
         lastScoreSent = null;
 
         paused = false;
-        if (hud != null) {
-            hud.setVisible(true);
-            hud.setIgnoreUpdate(false);
-        }
 
         gameStarted = false;
         return true;
@@ -690,40 +686,38 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
         }
         counterTexts.clear();
 
-        if (!Config.isHideInGameUI()) {
-            hud = new GameplayHUD(stat);
-            engine.getCamera().setHUD(hud);
+        hud = new GameplayHUD(stat, !Config.isHideInGameUI());
+        engine.getCamera().setHUD(hud);
 
-            var counterTextFont = ResourceManager.getInstance().getFont("smallFont");
+        var counterTextFont = ResourceManager.getInstance().getFont("smallFont");
 
-            if (Config.isShowFPS()) {
-                fpsText = new ChangeableText(790, 520, counterTextFont, "00.00 FPS");
-                counterTexts.add(fpsText);
+        if (Config.isShowFPS()) {
+            fpsText = new ChangeableText(790, 520, counterTextFont, "00.00 FPS");
+            counterTexts.add(fpsText);
 
-                hud.registerUpdateHandler(new FPSCounter(fpsText));
-            }
+            hud.registerUpdateHandler(new FPSCounter(fpsText));
+        }
 
-            if (Config.isShowUnstableRate()) {
-                urText = new ChangeableText(720, 480, counterTextFont, "00.00 UR    ");
-                counterTexts.add(urText);
-            }
+        if (Config.isShowUnstableRate()) {
+            urText = new ChangeableText(720, 480, counterTextFont, "00.00 UR    ");
+            counterTexts.add(urText);
+        }
 
-            if (Config.isShowAverageOffset()) {
-                avgOffsetText = new ChangeableText(720, 440, counterTextFont, "Avg offset: 0ms     ");
-                counterTexts.add(avgOffsetText);
-            }
+        if (Config.isShowAverageOffset()) {
+            avgOffsetText = new ChangeableText(720, 440, counterTextFont, "Avg offset: 0ms     ");
+            counterTexts.add(avgOffsetText);
+        }
 
-            if (BuildConfig.DEBUG) {
-                memText = new ChangeableText(780, 520, counterTextFont, "0/0 MB    ");
-                counterTexts.add(memText);
-            }
+        if (BuildConfig.DEBUG) {
+            memText = new ChangeableText(780, 520, counterTextFont, "0/0 MB    ");
+            counterTexts.add(memText);
+        }
 
-            updateCounterTexts();
+        updateCounterTexts();
 
-            // Attach the counter texts
-            for (var text : counterTexts) {
-                hud.attachChild(text);
-            }
+        // Attach the counter texts
+        for (var text : counterTexts) {
+            hud.attachChild(text);
         }
 
         for (int i = 0; i < CursorCount; i++) {
@@ -1115,10 +1109,7 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
                 if (Multiplayer.isConnected())
                     RoomScene.INSTANCE.getChat().show();
 
-                if (hud != null) {
-                    hud.getHealthDisplay().setVisible(false);
-                }
-
+                hud.setHealthBarVisibility(false);
                 breakPeriods.poll();
             }
         }
@@ -1128,10 +1119,7 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
             RoomScene.INSTANCE.getChat().dismiss();
 
             gameStarted = true;
-
-            if (hud != null) {
-                hud.getHealthDisplay().setVisible(true);
-            }
+            hud.setHealthBarVisibility(true);
 
             if(GameHelper.isFlashLight()){
                 flashlightSprite.onBreak(false);
@@ -1769,9 +1757,7 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
         createBurstEffect(pos, color);
         createHitEffect(pos, scoreName, color);
 
-        if (hud != null) {
-            hud.getHealthDisplay().flash();
-        }
+        hud.flashHealthBar();
     }
 
     public void onSliderReverse(PointF pos, float ang, RGBColor color) {
@@ -1850,9 +1836,7 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
 
         createHitEffect(judgementPos, scoreName, color);
 
-        if (hud != null) {
-            hud.getHealthDisplay().flash();
-        }
+        hud.flashHealthBar();
     }
 
 
@@ -1907,9 +1891,7 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
 
         createHitEffect(pos, scoreName, null);
 
-        if (hud != null) {
-            hud.getHealthDisplay().flash();
-        }
+        hud.flashHealthBar();
     }
 
     private void stopLoopingSamples() {
@@ -2115,13 +2097,10 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
             GlobalManager.getInstance().getSongService().pause();
         }
         paused = true;
-        if (hud != null) {
-            hud.setVisible(false);
-            hud.setIgnoreUpdate(true);
-        }
+        scene.setIgnoreUpdate(true);
 
         final PauseMenu menu = new PauseMenu(engine, this, false);
-        scene.setChildScene(menu.getScene(), false, true, true);
+        hud.setChildScene(menu.getScene(), false, true, true);
     }
 
     public void gameover() {
@@ -2154,12 +2133,9 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
             GlobalManager.getInstance().getSongService().pause();
         }
         paused = true;
-        if (hud != null) {
-            hud.setVisible(false);
-            hud.setIgnoreUpdate(true);
-        }
 
-        scene.setChildScene(menu.getScene(), false, true, true);
+        scene.setIgnoreUpdate(true);
+        hud.setChildScene(menu.getScene(), false, true, true);
     }
 
     public void resume() {
@@ -2172,12 +2148,9 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
         }
         blockAreaFragment.show();
 
-        scene.getChildScene().back();
+        scene.setIgnoreUpdate(false);
+        hud.getChildScene().back();
         paused = false;
-        if (hud != null) {
-            hud.setVisible(true);
-            hud.setIgnoreUpdate(false);
-        }
 
         if (stat.getHp() <= 0 && !stat.getMod().contains(GameMod.MOD_NOFAIL)) {
             quit();
@@ -2533,13 +2506,13 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
     }
 
     private void updatePPCounter(int objectId) {
-        if (hud == null || Config.getScoreCounterMetric() == ScoreCounterMetric.SCORE) {
+        if (Config.isHideInGameUI() || Config.getScoreCounterMetric() == ScoreCounterMetric.SCORE) {
             return;
         }
 
         switch (Config.getDifficultyAlgorithm()) {
-            case droid -> hud.getScoreText().setText(String.format(Locale.ENGLISH, "%.2f", getDroidPPAt(objectId)));
-            case standard -> hud.getScoreText().setText(String.format(Locale.ENGLISH, "%.2f", getStandardPPAt(objectId)));
+            case droid -> hud.setScoreCounterText(String.format(Locale.ENGLISH, "%.2f", getDroidPPAt(objectId)));
+            case standard -> hud.setScoreCounterText(String.format(Locale.ENGLISH, "%.2f", getStandardPPAt(objectId)));
         }
     }
 
