@@ -77,10 +77,11 @@ abstract class FPSCounter(@JvmField val displayText: ChangeableText) : IUpdateHa
             return
         }
 
+        val maxFps = display.refreshRate
         lastDisplayedFps = displayedFps
-        displayText.text = "$tag: $displayedFps FPS"
+        displayText.text = "$tag: $displayedFps/${maxFps.roundToInt()} FPS"
 
-        val performanceRatio = currentFps / display.refreshRate
+        val performanceRatio = currentFps / maxFps
 
         val red: Float
         val green: Float
