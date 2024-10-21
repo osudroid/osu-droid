@@ -228,7 +228,7 @@ abstract class ExtendedEntity(
     override fun setParent(pEntity: IEntity?) {
         (parent as? Scene)?.unregisterTouchArea(this)
         super.setParent(pEntity)
-        (pEntity as? Scene)?.registerTouchArea(this)
+        (pEntity as? ExtendedScene)?.registerTouchArea(this)
     }
 
 
