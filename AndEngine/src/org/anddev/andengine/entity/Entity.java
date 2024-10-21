@@ -25,6 +25,8 @@ import org.anddev.andengine.util.modifier.IModifier;
  * @author Nicolas Gramlich
  * @since 12:00:48 - 08.03.2010
  */
+// osu!droid modified:
+// - The functions onApplyTransformations() and applyTranslation() now requires the Camera as second parameter.
 public class Entity implements IEntity {
 	// ===========================================================
 	// Constants
@@ -1037,9 +1039,9 @@ public class Entity implements IEntity {
 		this.mUpdateHandlers = new UpdateHandlerList(Entity.UPDATEHANDLERS_CAPACITY_DEFAULT);
 	}
 
-	protected void onApplyTransformations(final GL10 pGL) {
+	protected void onApplyTransformations(final GL10 pGL, Camera pCamera) {
 		/* Translation. */
-		this.applyTranslation(pGL);
+		this.applyTranslation(pGL, pCamera);
 
 		/* Rotation. */
 		this.applyRotation(pGL);
@@ -1048,7 +1050,7 @@ public class Entity implements IEntity {
 		this.applyScale(pGL);
 	}
 
-	protected void applyTranslation(final GL10 pGL) {
+	protected void applyTranslation(final GL10 pGL, final Camera pCamera) {
 		pGL.glTranslatef(this.mX, this.mY, 0);
 	}
 
@@ -1086,7 +1088,7 @@ public class Entity implements IEntity {
 	protected void onManagedDraw(final GL10 pGL, final Camera pCamera) {
 		pGL.glPushMatrix();
 		{
-			this.onApplyTransformations(pGL);
+			this.onApplyTransformations(pGL, pCamera);
 
 			this.doDraw(pGL, pCamera);
 

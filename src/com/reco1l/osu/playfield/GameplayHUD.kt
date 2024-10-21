@@ -1,63 +1,62 @@
 package com.reco1l.osu.playfield
 
 import androidx.annotation.*
-import com.reco1l.andengine.*
-import com.reco1l.osu.playfield.ScoreCounterMetric.Companion.PP
+import com.reco1l.osu.playfield.ProgressIndicatorType.Companion.TOP_RIGHT_PIE
+import com.reco1l.osu.playfield.ProgressIndicatorType.Companion.BOTTOM_LONG
 import com.reco1l.osu.playfield.ScoreCounterMetric.Companion.SCORE
 import org.anddev.andengine.engine.camera.hud.*
 import ru.nsu.ccfit.zuev.osu.*
+import ru.nsu.ccfit.zuev.osu.game.GameScene
 import ru.nsu.ccfit.zuev.osu.scoring.*
-import ru.nsu.ccfit.zuev.skins.*
 
-class GameplayHUD(private val stat: StatisticV2, showStatistics: Boolean) : HUD() {
+class GameplayHUD(private val stat: StatisticV2, private val game: GameScene, private val withStatistics: Boolean) : HUD() {
 
 
-    private val healthDisplay: HealthDisplay?
+    private val healthBar: HealthBar?
+
+    private val scoreCounter: ScoreCounter?
+
+    private val songProgress: CircularSongProgress?
 
     private val comboCounter: ComboCounter?
 
-    private val accuracyText: ScoreText?
-
-    private val scoreText: ScoreText?
-
-    private val strBuilder = StringBuilder(16)
+    private val accuracyCounter: AccuracyCounter?
 
 
     init {
+        if (withStatistics) {
+            healthBar = HealthBar(stat)
+            attachChild(healthBar)
 
-
-        if (showStatistics) {
-            healthDisplay = HealthDisplay(stat)
-            attachChild(healthDisplay)
-
-            scoreText = ScoreText(OsuSkin.get().scorePrefix)
-            scoreText.setAnchor(Anchor.TopRight)
-            scoreText.setOrigin(Anchor.TopRight)
-            scoreText.setScale(0.96f)
-            scoreText.text = when(Config.getScoreCounterMetric()) {
-                SCORE -> "00000000"
-                PP -> "0.00"
-                else -> ""
-            }
-            scoreText.x = -10f
-            attachChild(scoreText)
-
-            accuracyText = ScoreText(OsuSkin.get().scorePrefix)
-            accuracyText.setAnchor(Anchor.TopRight)
-            accuracyText.setOrigin(Anchor.TopRight)
-            accuracyText.setScale(0.6f * 0.96f)
-            accuracyText.setPosition(-17f, scoreText.characters['0']!!.height + 9f)
-            accuracyText.text = "000.00%"
-            attachChild(accuracyText)
+            scoreCounter = ScoreCounter()
+            attachChild(scoreCounter)
 
             comboCounter = ComboCounter()
             attachChild(comboCounter)
 
+            accuracyCounter = AccuracyCounter()
+            attachChild(accuracyCounter)
+
+            if (Config.getProgressIndicatorType() == TOP_RIGHT_PIE) {
+                songProgress = CircularSongProgress()
+                attachChild(songProgress)
+            } else {
+                songProgress = null
+            }
+
+            scoreCounter.metric = Config.getScoreCounterMetric()
+            scoreCounter.setValue(0)
+            scoreCounter.onUpdateText()
+
+            accuracyCounter.y += scoreCounter.y + scoreCounter.height
+            accuracyCounter.onUpdateText()
+
         } else {
-            healthDisplay = null
-            accuracyText = null
+            healthBar = null
+            scoreCounter = null
             comboCounter = null
-            scoreText = null
+            accuracyCounter = null
+            songProgress = null
         }
 
     }
@@ -65,65 +64,53 @@ class GameplayHUD(private val stat: StatisticV2, showStatistics: Boolean) : HUD(
 
     override fun onManagedUpdate(pSecondsElapsed: Float) {
 
-        // Combo
-        comboCounter?.setCombo(stat.combo)
+        if (withStatistics) {
+            comboCounter!!.setCombo(stat.combo)
+            accuracyCounter!!.setAccuracy(stat.accuracy)
 
-        // Accuracy
-        if (accuracyText != null) {
-            strBuilder.setLength(0)
-            var rawAccuracy = stat.accuracy * 100f
-            strBuilder.append(rawAccuracy.toInt())
-            if (rawAccuracy.toInt() < 10) {
-                strBuilder.insert(0, '0')
+            // PP is updated in `GameScene` class.
+            if (Config.getScoreCounterMetric() == SCORE) {
+                scoreCounter!!.setValue(stat.totalScoreWithMultiplier)
             }
-            strBuilder.append('.')
-            rawAccuracy -= rawAccuracy.toInt().toFloat()
-            rawAccuracy *= 100f
-            if (rawAccuracy.toInt() < 10) {
-                strBuilder.append('0')
+
+            if (Config.getProgressIndicatorType() == TOP_RIGHT_PIE) {
+                songProgress!!.x = accuracyCounter.x - accuracyCounter.widthScaled - 18f
+                songProgress.y = accuracyCounter.y + accuracyCounter.heightScaled / 2f
+
+                if (game.elapsedTime < game.firstObjectStartTime) {
+                    songProgress.setProgress((game.elapsedTime - game.initialElapsedTime) / (game.firstObjectStartTime - game.initialElapsedTime), true)
+                } else {
+                    songProgress.setProgress((game.elapsedTime - game.firstObjectStartTime) / (game.lastObjectEndTime - game.firstObjectStartTime), false)
+                }
             }
-            strBuilder.append(rawAccuracy.toInt())
-            strBuilder.append('%')
-            accuracyText.text = strBuilder.toString()
         }
 
-
-        // Score
-        if (scoreText != null && Config.getScoreCounterMetric() == SCORE) {
-            strBuilder.setLength(0)
-            strBuilder.append(stat.getTotalScoreWithMultiplier())
-            while (strBuilder.length < 8) {
-                strBuilder.insert(0, '0')
-            }
-            scoreText.text = strBuilder.toString()
-        }
 
         super.onManagedUpdate(pSecondsElapsed)
     }
 
 
     fun setHealthBarVisibility(visible: Boolean) {
-        healthDisplay?.isVisible = visible
+        healthBar?.isVisible = visible
     }
 
     fun flashHealthBar() {
-        healthDisplay?.flash()
+        healthBar?.flash()
     }
 
     fun setScoreCounterText(score: String) {
-        scoreText?.text = score
+        scoreCounter?.text = score
     }
 
 }
 
 
-/**
- * Defines the metric to be used by the score counter.
- */
-@IntDef(SCORE, PP)
-annotation class ScoreCounterMetric {
+@IntDef(TOP_RIGHT_PIE, BOTTOM_LONG)
+annotation class ProgressIndicatorType {
     companion object {
-        const val SCORE = 0
-        const val PP = 1
+        const val TOP_RIGHT_PIE = 0
+        const val BOTTOM_LONG = 1
     }
 }
+
+

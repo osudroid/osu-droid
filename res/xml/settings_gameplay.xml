@@ -76,6 +76,14 @@
             android:summary="@string/opt_score_counter_summary"
             android:title="@string/opt_score_counter_title" />
 
+        <com.reco1l.osu.ui.SelectPreference
+            android:defaultValue="0"
+            android:entries="@array/opt_progress_indicator_names"
+            android:entryValues="@array/opt_progress_indicator_values"
+            android:key="progressIndicatorType"
+            android:summary="@string/opt_progress_indicator_summary"
+            android:title="@string/opt_progress_indicator_title" />
+
         <CheckBoxPreference
             android:defaultValue="false"
             android:key="hideInGameUI"

@@ -155,8 +155,8 @@ public class Text extends RectangularShape {
 	}
 
 	@Override
-	protected void onApplyTransformations(final GL10 pGL) {
-		super.onApplyTransformations(pGL);
+	protected void onApplyTransformations(final GL10 pGL, final Camera pCamera) {
+		super.onApplyTransformations(pGL, pCamera);
 		this.applyTexture(pGL);
 	}
 

@@ -1,16 +1,90 @@
 package com.reco1l.osu.playfield
 
-import com.edlplan.framework.easing.Easing
+import androidx.annotation.*
+import com.edlplan.framework.easing.*
 import com.reco1l.andengine.*
 import com.reco1l.andengine.container.*
-import com.reco1l.andengine.modifier.*
+import com.reco1l.andengine.modifier.OnModifierFinished
+import com.reco1l.osu.playfield.ScoreCounterMetric.Companion.PP
+import com.reco1l.osu.playfield.ScoreCounterMetric.Companion.SCORE
 import ru.nsu.ccfit.zuev.osu.*
 import ru.nsu.ccfit.zuev.skins.*
+import java.text.*
+import java.util.*
+
+class ScoreCounter : SpriteFont(OsuSkin.get().scorePrefix) {
+
+    @ScoreCounterMetric
+    var metric = SCORE
+        set(value) {
+
+            format = when (value) {
+                SCORE -> DecimalFormat("00000000")
+                PP -> DecimalFormat("0.00")
+
+                else -> throw IllegalArgumentException("Invalid metric: $value")
+            }
+
+            field = value
+        }
+
+
+    private var format = DecimalFormat()
+
+
+    init {
+        setAnchor(Anchor.TopRight)
+        setOrigin(Anchor.TopRight)
+        setScale(0.96f)
+
+        x = -10f
+    }
+
+
+    fun setValue(value: Any) {
+        text = format.format(value)
+    }
+
+}
+
+/**
+ * Defines the metric to be used by the score counter.
+ */
+@IntDef(SCORE, PP)
+annotation class ScoreCounterMetric {
+    companion object {
+        const val SCORE = 0
+        const val PP = 1
+    }
+}
+
+
+class AccuracyCounter : SpriteFont(OsuSkin.get().scorePrefix) {
+
+
+    private val format = DecimalFormat("0.00%")
+
+
+    init {
+        setAnchor(Anchor.TopRight)
+        setOrigin(Anchor.TopRight)
+        setScale(0.6f * 0.96f)
+        setPosition(-17f, 9f)
+        text = "100.00%"
+    }
+
+
+    fun setAccuracy(value: Float) {
+        text = format.format(value)
+    }
+
+}
+
 
 class ComboCounter : Container() {
 
 
-    private val popOutCount = if (Config.isAnimateComboText()) ScoreText(OsuSkin.get().comboPrefix).also {
+    private val popOutCount = if (Config.isAnimateComboText()) SpriteFont(OsuSkin.get().comboPrefix).also {
 
         it.alpha = 0f
         it.text = "0x"
@@ -27,7 +101,7 @@ class ComboCounter : Container() {
 
     } else null
 
-    private val displayedCountTextSprite = ScoreText(OsuSkin.get().comboPrefix).also {
+    private val displayedCountTextSprite = SpriteFont(OsuSkin.get().comboPrefix).also {
 
         it.text = "0x"
         it.setAnchor(Anchor.BottomLeft)
@@ -43,8 +117,8 @@ class ComboCounter : Container() {
     private val updateDisplayedCount = OnModifierFinished {
         displayedCountTextSprite.text = "${current}x"
     }
-    
-    
+
+
     private var current = 0
 
 

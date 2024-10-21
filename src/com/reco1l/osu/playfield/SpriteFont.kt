@@ -7,7 +7,7 @@ import ru.nsu.ccfit.zuev.osu.*
 import ru.nsu.ccfit.zuev.skins.*
 
 
-class ScoreText(private val texturePrefix: StringSkinData) : LinearContainer() {
+open class SpriteFont(private val texturePrefix: StringSkinData) : LinearContainer() {
 
     /**
      * The text to display.
@@ -16,7 +16,7 @@ class ScoreText(private val texturePrefix: StringSkinData) : LinearContainer() {
         set(value) {
             if (field != value) {
                 field = value
-                isTextInvalid = true
+                isTextDirty = true
             }
         }
 
@@ -37,35 +37,45 @@ class ScoreText(private val texturePrefix: StringSkinData) : LinearContainer() {
     }.toMap()
 
 
-    private var isTextInvalid = true
+    private var isTextDirty = true
 
 
-    private fun allocateSprites(count: Int) {
-        if (count > childCount) {
-            for (i in childCount until count) {
+    /**
+     * Called when the text needs to be updated.
+     *
+     * This method is called automatically when the text is changed on the update thread.
+     * You can also call it manually if needed to force an update.
+     */
+    fun onUpdateText() {
+        isTextDirty = false
+
+        if (text.length > childCount) {
+            for (i in childCount until text.length) {
                 attachChild(ExtendedSprite())
             }
         } else {
-            for (i in childCount - 1 downTo count) {
+            for (i in childCount - 1 downTo text.length) {
                 detachChild(getChild(i))
             }
         }
+
+        for (i in text.indices) {
+
+            val char = text[i]
+            val sprite = getChild(i) as? ExtendedSprite ?: continue
+
+            sprite.textureRegion = characters[char]
+        }
+
+        onMeasureSize()
     }
+
 
     override fun onManagedUpdate(pSecondsElapsed: Float) {
 
-        if (isTextInvalid) {
-            isTextInvalid = false
-
-            allocateSprites(text.length)
-
-            for (i in text.indices) {
-
-                val char = text[i]
-                val sprite = getChild(i) as? ExtendedSprite ?: continue
-
-                sprite.textureRegion = characters[char]
-            }
+        if (isTextDirty) {
+            isTextDirty = false
+            onUpdateText()
         }
 
         super.onManagedUpdate(pSecondsElapsed)

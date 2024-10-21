@@ -1,6 +1,7 @@
 package com.reco1l.andengine.sprite
 
 import com.reco1l.andengine.*
+import com.reco1l.andengine.shape.*
 import org.anddev.andengine.opengl.texture.region.*
 import org.anddev.andengine.opengl.util.*
 import org.anddev.andengine.opengl.vertex.*
@@ -9,7 +10,7 @@ import javax.microedition.khronos.opengles.*
 /**
  * Sprite that allows to change texture once created.
  */
-open class ExtendedSprite(textureRegion: TextureRegion? = null) : ExtendedEntity(vertexBuffer = RectangleVertexBuffer(GL11.GL_STATIC_DRAW, true)) {
+open class ExtendedSprite(textureRegion: TextureRegion? = null) : Rectangle() {
 
 
     override var autoSizeAxes = Axes.Both

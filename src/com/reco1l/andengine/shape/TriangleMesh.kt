@@ -15,18 +15,6 @@ class TriangleMesh : ExtendedEntity(vertexBuffer = null) {
      */
     val vertices = FloatArraySlice()
 
-
-    /**
-     * Whether to clear the depth buffer before drawing.
-     */
-    var clearDepth = false
-
-    /**
-     * Whether to enable depth testing.
-     */
-    var depthTest = false
-
-
     init {
         isCullingEnabled = false
         vertices.ary = FloatArray(0)
@@ -40,10 +28,6 @@ class TriangleMesh : ExtendedEntity(vertexBuffer = null) {
         GLHelper.disableCulling(pGL)
         GLHelper.disableTextures(pGL)
         GLHelper.disableTexCoordArray(pGL)
-
-        if (clearDepth) {
-            pGL.glClear(GL10.GL_DEPTH_BUFFER_BIT)
-        }
     }
 
 
@@ -58,10 +42,7 @@ class TriangleMesh : ExtendedEntity(vertexBuffer = null) {
             return
         }
 
-        val wasDepthTest = GLHelper.isEnableDepthTest()
-        GLHelper.setDepthTest(pGL, depthTest)
         TriangleRenderer.get().renderTriangles(vertices, pGL)
-        GLHelper.setDepthTest(pGL, wasDepthTest)
     }
 
 }

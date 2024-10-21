@@ -36,6 +36,7 @@ open class LinearContainer : Container() {
 
 
     override fun onMeasureSize() {
+        shouldMeasureSize = false
 
         var cumulativeWidth = 0f
         var cumulativeHeight = 0f
