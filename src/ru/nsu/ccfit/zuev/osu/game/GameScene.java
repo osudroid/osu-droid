@@ -834,7 +834,7 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
         if (!Config.isHideInGameUI()) {
 
             if (Config.getProgressIndicatorType() == ProgressIndicatorType.BOTTOM_LONG) {
-                var progressBar = new SongProgressBar(this, hud, (float) objects.getLast().getEndTime() / 1000, firstObjectStartTime, new PointF(0, Config.getRES_HEIGHT() - 7), Config.getRES_WIDTH(), 7);
+                var progressBar = new SongProgressBar(this, hud, lastObjectEndTime, firstObjectStartTime, new PointF(0, Config.getRES_HEIGHT() - 7), Config.getRES_WIDTH(), 7);
                 progressBar.setProgressRectColor(new RGBColor(153f / 255f, 204f / 255f, 51f / 255f));
                 progressBar.setProgressRectAlpha(0.4f);
             }
