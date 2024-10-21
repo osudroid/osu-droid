@@ -51,13 +51,16 @@ import com.rian.osu.difficulty.attributes.DroidDifficultyAttributes;
 import com.rian.osu.difficulty.attributes.StandardDifficultyAttributes;
 import com.rian.osu.difficulty.attributes.TimedDifficultyAttributes;
 import com.rian.osu.difficulty.calculator.DifficultyCalculationParameters;
-import com.rian.osu.ui.FPSCounter;
+import com.rian.osu.ui.DrawFPSCounter;
+import com.rian.osu.ui.UpdateFPSCounter;
 import com.rian.osu.utils.ModUtils;
 
 import org.anddev.andengine.engine.Engine;
+import org.anddev.andengine.engine.camera.Camera;
 import org.anddev.andengine.engine.camera.SmoothCamera;
 import org.anddev.andengine.engine.handler.IUpdateHandler;
 import org.anddev.andengine.engine.options.TouchOptions;
+import org.anddev.andengine.entity.Entity;
 import org.anddev.andengine.entity.modifier.LoopEntityModifier;
 import org.anddev.andengine.entity.modifier.MoveXModifier;
 import org.anddev.andengine.entity.primitive.Rectangle;
@@ -185,8 +188,9 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
     private TimedDifficultyAttributes<DroidDifficultyAttributes>[] droidTimedDifficultyAttributes;
     private TimedDifficultyAttributes<StandardDifficultyAttributes>[] standardTimedDifficultyAttributes;
 
+    private DrawFPSCounter drawFpsCounter;
+
     private final List<ChangeableText> counterTexts = new ArrayList<>(5);
-    private ChangeableText fpsText;
     private ChangeableText avgOffsetText;
     private ChangeableText urText;
     private ChangeableText ppText;
@@ -616,6 +620,27 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
 
         final String rfile = beatmapInfo != null ? replayFile : this.replayFilePath;
 
+        // Attach a dummy entity for computing draw FPS, as its frame rate is tied to the draw thread and not
+        // the update thread.
+        var drawFpsDummyEntity = new Entity() {
+            private long previousDrawTime;
+
+            @Override
+            protected void onManagedDraw(GL10 pGL, Camera pCamera) {
+                super.onManagedDraw(pGL, pCamera);
+
+                long currentDrawTime = SystemClock.uptimeMillis();
+
+                if (drawFpsCounter != null) {
+                    drawFpsCounter.updateFps((currentDrawTime - previousDrawTime) / 1000f);
+                }
+
+                previousDrawTime = currentDrawTime;
+            }
+        };
+
+        scene.attachChild(drawFpsDummyEntity);
+
         Execution.async(() -> {
 
             DifficultyCalculationManager.stopCalculation();
@@ -656,33 +681,33 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
         }
 
         counterTexts.clear();
+        drawFpsCounter = null;
+
         var counterTextFont = ResourceManager.getInstance().getFont("smallFont");
 
         if (Config.isShowFPS()) {
-            fpsText = new ChangeableText(790, 520, counterTextFont, "00.00 FPS");
-            counterTexts.add(fpsText);
+            drawFpsCounter = new DrawFPSCounter(new ChangeableText(790, 520, counterTextFont, "Draw: 0 FPS", 15));
+            var updateFpsCounter = new UpdateFPSCounter(new ChangeableText(790, 480, counterTextFont, "Update: 0 FPS", 15), GameHelper.getSpeedMultiplier());
 
-            fgScene.registerUpdateHandler(new FPSCounter(fpsText) {
-                @Override
-                public void onUpdate(float pSecondsElapsed) {
-                    // Cancelling the speed multiplier for the FPS counter.
-                    super.onUpdate(pSecondsElapsed / GameHelper.getSpeedMultiplier());
-                }
-            });
+            counterTexts.add(drawFpsCounter.displayText);
+            counterTexts.add(updateFpsCounter.displayText);
+
+            fgScene.registerUpdateHandler(updateFpsCounter);
+            fgScene.registerUpdateHandler(drawFpsCounter);
         }
 
         if (Config.isShowUnstableRate()) {
-            urText = new ChangeableText(720, 480, counterTextFont, "00.00 UR    ");
+            urText = new ChangeableText(720, 440, counterTextFont, "00.00 UR    ");
             counterTexts.add(urText);
         }
 
         if (Config.isShowAverageOffset()) {
-            avgOffsetText = new ChangeableText(720, 440, counterTextFont, "Avg offset: 0ms     ");
+            avgOffsetText = new ChangeableText(720, 400, counterTextFont, "Avg offset: 0ms     ");
             counterTexts.add(avgOffsetText);
         }
 
         if (Config.isDisplayRealTimePPCounter()) {
-            ppText = new ChangeableText(720, 400, counterTextFont,
+            ppText = new ChangeableText(720, 360, counterTextFont,
                     Config.getDifficultyAlgorithm() == DifficultyAlgorithm.droid ? "0.00dpp" : "0.00pp", 15);
             counterTexts.add(ppText);
         }
@@ -2572,7 +2597,7 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
         for (int i = 0; i < counterTexts.size(); ++i) {
             var text = counterTexts.get(i);
 
-            text.setPosition(Config.getRES_WIDTH() - text.getWidth() - 5, Config.getRES_HEIGHT() - text.getHeight() - 10 - i * text.getHeight());
+            text.setPosition(Config.getRES_WIDTH() - text.getWidthScaled() - 5, Config.getRES_HEIGHT() - text.getHeightScaled() - 10 - i * text.getHeightScaled());
         }
     }
 
