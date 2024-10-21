@@ -1,5 +1,6 @@
 package com.reco1l.andengine.sprite
 
+import android.util.*
 import com.reco1l.andengine.*
 import com.reco1l.andengine.shape.*
 import org.anddev.andengine.opengl.texture.region.*
@@ -10,7 +11,7 @@ import javax.microedition.khronos.opengles.*
 /**
  * Sprite that allows to change texture once created.
  */
-open class ExtendedSprite(textureRegion: TextureRegion? = null) : Rectangle() {
+open class ExtendedSprite(textureRegion: TextureRegion? = null) : Box() {
 
 
     override var autoSizeAxes = Axes.Both
