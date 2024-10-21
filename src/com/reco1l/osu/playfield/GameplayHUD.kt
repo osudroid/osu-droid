@@ -6,53 +6,75 @@ import ru.nsu.ccfit.zuev.osu.*
 import ru.nsu.ccfit.zuev.osu.game.GameScene
 import ru.nsu.ccfit.zuev.osu.scoring.*
 
-class GameplayHUD(private val stat: StatisticV2, private val game: GameScene) : HUD() {
+class GameplayHUD(private val stat: StatisticV2, private val game: GameScene, private val withStatistics: Boolean) : HUD() {
 
 
-    val healthBar = HealthBar(stat)
+    private val healthBar: HealthBar?
 
-    val scoreCounter = ScoreCounter()
+    private val scoreCounter: ScoreCounter?
 
-    val comboCounter = ComboCounter()
+    private val songProgress: SongProgress?
 
-    val accuracyCounter = AccuracyCounter()
+    private val comboCounter: ComboCounter?
 
-    val songProgress = SongProgress()
+    private val accuracyCounter: AccuracyCounter?
 
 
     init {
-        attachChild(healthBar)
-        attachChild(scoreCounter)
-        attachChild(accuracyCounter)
-        attachChild(comboCounter)
-        attachChild(songProgress)
+        if (withStatistics) {
+            healthBar = HealthBar(stat)
+            attachChild(healthBar)
 
-        scoreCounter.metric = Config.getScoreCounterMetric()
-        scoreCounter.setValue(0)
-        scoreCounter.onUpdateText()
+            scoreCounter = ScoreCounter()
+            attachChild(scoreCounter)
 
-        accuracyCounter.y += scoreCounter.y + scoreCounter.height
-        accuracyCounter.onUpdateText()
+            comboCounter = ComboCounter()
+            attachChild(comboCounter)
+
+            accuracyCounter = AccuracyCounter()
+            attachChild(accuracyCounter)
+
+            songProgress = SongProgress()
+            attachChild(songProgress)
+
+            scoreCounter.metric = Config.getScoreCounterMetric()
+            scoreCounter.setValue(0)
+            scoreCounter.onUpdateText()
+
+            accuracyCounter.y += scoreCounter.y + scoreCounter.height
+            accuracyCounter.onUpdateText()
+
+        } else {
+            healthBar = null
+            scoreCounter = null
+            comboCounter = null
+            accuracyCounter = null
+            songProgress = null
+        }
+
     }
 
 
     override fun onManagedUpdate(pSecondsElapsed: Float) {
 
-        comboCounter.setCombo(stat.combo)
-        accuracyCounter.setAccuracy(stat.accuracy)
+        if (withStatistics) {
+            comboCounter!!.setCombo(stat.combo)
 
-        songProgress.x = accuracyCounter.x - accuracyCounter.widthScaled - 18f
-        songProgress.y = accuracyCounter.y + accuracyCounter.heightScaled / 2f
+            accuracyCounter!!.setAccuracy(stat.accuracy)
 
-        // PP is updated in `GameScene` class.
-        if (Config.getScoreCounterMetric() == SCORE) {
-            scoreCounter.setValue(stat.totalScoreWithMultiplier)
-        }
+            songProgress!!.x = accuracyCounter.x - accuracyCounter.widthScaled - 18f
+            songProgress.y = accuracyCounter.y + accuracyCounter.heightScaled / 2f
 
-        if (game.elapsedTime < game.firstObjectStartTime) {
-            songProgress.setProgress(game.elapsedTime / game.firstObjectStartTime, true)
-        } else {
-            songProgress.setProgress((game.elapsedTime - game.firstObjectStartTime) / (game.lastObjectEndTime - game.firstObjectStartTime), false)
+            // PP is updated in `GameScene` class.
+            if (Config.getScoreCounterMetric() == SCORE) {
+                scoreCounter!!.setValue(stat.totalScoreWithMultiplier)
+            }
+
+            if (game.elapsedTime < game.firstObjectStartTime) {
+                songProgress.setProgress(game.elapsedTime / game.firstObjectStartTime, true)
+            } else {
+                songProgress.setProgress((game.elapsedTime - game.firstObjectStartTime) / (game.lastObjectEndTime - game.firstObjectStartTime), false)
+            }
         }
 
         super.onManagedUpdate(pSecondsElapsed)
@@ -60,15 +82,15 @@ class GameplayHUD(private val stat: StatisticV2, private val game: GameScene) : 
 
 
     fun setHealthBarVisibility(visible: Boolean) {
-        healthDisplay?.isVisible = visible
+        healthBar?.isVisible = visible
     }
 
     fun flashHealthBar() {
-        healthDisplay?.flash()
+        healthBar?.flash()
     }
 
     fun setScoreCounterText(score: String) {
-        scoreText?.text = score
+        scoreCounter?.text = score
     }
 
 }
