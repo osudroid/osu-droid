@@ -154,7 +154,7 @@ abstract class ExtendedEntity(
             if (parent is Container) {
                 return (parent as Container).getChildDrawX(this)
             }
-            return x + originOffsetX + anchorOffsetX + translationX
+            return x + totalOffsetX
         }
 
     /**
@@ -166,7 +166,7 @@ abstract class ExtendedEntity(
             if (parent is Container) {
                 return (parent as Container).getChildDrawY(this)
             }
-            return y + originOffsetY + anchorOffsetY + translationY
+            return y + totalOffsetY
         }
 
     /**
@@ -202,6 +202,18 @@ abstract class ExtendedEntity(
             }
             return 0f
         }
+
+    /**
+     * The total offset applied to the X axis.
+     */
+    open val totalOffsetX
+        get() = originOffsetX + anchorOffsetX + translationX
+
+    /**
+     * The total offset applied to the Y axis.
+     */
+    open val totalOffsetY
+        get() = originOffsetY + anchorOffsetY + translationY
 
 
     private var width = 0f
@@ -546,8 +558,8 @@ abstract class ExtendedEntity(
         else -> false
     }
 
-    override fun contains(pX: Float, pY: Float): Boolean {
-        return RectangularShapeCollisionChecker.checkContains(this, pX, pY)
+    override fun contains(x: Float, y: Float): Boolean {
+        return RectangularShapeCollisionChecker.checkContains(this, x + totalOffsetX, y + totalOffsetY)
     }
 
     override fun isCulled(pCamera: Camera): Boolean {
