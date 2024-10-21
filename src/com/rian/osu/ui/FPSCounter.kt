@@ -33,6 +33,7 @@ abstract class FPSCounter(@JvmField val displayText: ChangeableText) : IUpdateHa
 
     private var elapsedTime = 0f
     private var currentFps = 0f
+    private var maximumFps = 0f
     private var lastDisplayedFps = 0
     private var lastDisplayUpdateTime = 0f
     private var frameTime = 0f
@@ -62,26 +63,32 @@ abstract class FPSCounter(@JvmField val displayText: ChangeableText) : IUpdateHa
     override fun onUpdate(deltaTime: Float) {
         elapsedTime += deltaTime
 
-        updateDisplayText()
+        val refreshRate = display.refreshRate
+
+        if (maximumFps != refreshRate) {
+            maximumFps = refreshRate
+            updateDisplayText(true)
+        } else {
+            updateDisplayText()
+        }
     }
 
-    private fun updateDisplayText() {
-        if (elapsedTime - lastDisplayUpdateTime <= minTimeBetweenUpdates) {
+    private fun updateDisplayText(force: Boolean = false) {
+        if (!force && elapsedTime - lastDisplayUpdateTime <= minTimeBetweenUpdates) {
             return
         }
 
         lastDisplayUpdateTime = elapsedTime
         val displayedFps = currentFps.roundToInt()
 
-        if (displayedFps == lastDisplayedFps) {
+        if (!force && displayedFps == lastDisplayedFps) {
             return
         }
 
-        val maxFps = display.refreshRate
         lastDisplayedFps = displayedFps
-        displayText.text = "$tag: $displayedFps/${maxFps.roundToInt()} FPS"
+        displayText.text = "$tag: $displayedFps/${maximumFps.roundToInt()} FPS"
 
-        val performanceRatio = currentFps / maxFps
+        val performanceRatio = currentFps / maximumFps
 
         val red: Float
         val green: Float
