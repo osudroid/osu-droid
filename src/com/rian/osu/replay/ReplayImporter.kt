@@ -3,8 +3,6 @@ package com.rian.osu.replay
 import com.edlplan.replay.OsuDroidReplayPack
 import com.reco1l.osu.data.DatabaseManager.scoreInfoTable
 import java.io.File
-import java.io.FileInputStream
-import java.io.FileOutputStream
 import java.util.zip.ZipEntry
 import java.util.zip.ZipInputStream
 import ru.nsu.ccfit.zuev.osu.scoring.Replay
@@ -43,7 +41,7 @@ object ReplayImporter {
         // Both odr and edr files are application/octet-stream files. Differentiating them is quite tricky.
         // Here, we use the fact that odr files only contain 1 entry called "data" and edr files contain 2 entries
         // called "entry.json" and the replay file itself. This is not a foolproof way, but works for proper files.
-        return ZipInputStream(FileInputStream(file)).use { zip ->
+        return ZipInputStream(file.inputStream()).use { zip ->
             val zipEntryNames = mutableListOf<String>()
             var zipEntry: ZipEntry?
 
@@ -111,7 +109,7 @@ object ReplayImporter {
     }
 
     private fun importEdr(file: File) {
-        val entry = OsuDroidReplayPack.unpack(FileInputStream(file)).apply {
+        val entry = OsuDroidReplayPack.unpack(file.inputStream()).apply {
             // Ensure the replay file does not conflict existing replays.
             scoreInfo.replayFilename = scoreInfo.replayFilename.substringBeforeLast('.') + System.currentTimeMillis() + ".odr"
         }
@@ -122,7 +120,7 @@ object ReplayImporter {
             throw FileSystemException(replayFile, reason = "Failed to create move replay file")
         }
 
-        FileOutputStream(replayFile).use {
+        replayFile.outputStream().use {
             it.write(entry.replayFile)
         }
 
