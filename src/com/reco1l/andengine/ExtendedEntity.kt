@@ -370,14 +370,15 @@ abstract class ExtendedEntity(
         applyBlending(pGL)
     }
 
-    override fun onManagedDraw(pGL: GL10, pCamera: Camera) {
+
+    override fun onManagedUpdate(pSecondsElapsed: Float) {
 
         if (isVertexBufferDirty) {
             isVertexBufferDirty = false
             onUpdateVertexBuffer()
         }
 
-        super.onManagedDraw(pGL, pCamera)
+        super.onManagedUpdate(pSecondsElapsed)
     }
 
     override fun onInitDraw(pGL: GL10) {
