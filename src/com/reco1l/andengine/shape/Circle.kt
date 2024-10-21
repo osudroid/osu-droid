@@ -94,7 +94,7 @@ class Circle : ExtendedEntity() {
     }
 
     override fun drawVertices(pGL: GL10, pCamera: Camera) {
-        (vertexBuffer as CircleVertexBuffer).draw(pGL)
+        (vertexBuffer as? CircleVertexBuffer)?.draw(pGL)
     }
 
 }

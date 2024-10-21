@@ -1,8 +1,12 @@
 package com.reco1l.andengine.container
 
 import com.reco1l.andengine.*
+import com.reco1l.andengine.shape.*
+import com.reco1l.framework.*
+import org.anddev.andengine.engine.camera.*
 import org.anddev.andengine.input.touch.*
 import org.anddev.andengine.input.touch.TouchEvent.*
+import javax.microedition.khronos.opengles.*
 import kotlin.math.*
 
 open class ScrollableContainer : Container() {
@@ -73,6 +77,26 @@ open class ScrollableContainer : Container() {
             }
         }
 
+    /**
+     * The scroll indicator for the x-axis that shows the current scroll position.
+     */
+    var indicatorX: ExtendedEntity? = RoundedBox().also {
+        it.color = ColorARGB.White
+        it.height = 10f
+        it.alpha = 0.5f
+        it.cornerRadius = 5f
+    }
+
+    /**
+     * The scroll indicator for the y-axis that shows the current scroll position.
+     */
+    var indicatorY: ExtendedEntity? = RoundedBox().also {
+        it.color = ColorARGB.White
+        it.width = 10f
+        it.alpha = 0.5f
+        it.cornerRadius = 5f
+    }
+
 
     /**
      * The maximum scroll position on the x-axis.
@@ -80,7 +104,7 @@ open class ScrollableContainer : Container() {
      * This does not take into account the overscroll.
      */
     val maxScrollX
-        get() = contentWidth - width
+        get() = max(0f, scrollableContentWidth - width)
 
     /**
      * The maximum scroll position on the y-axis.
@@ -88,8 +112,21 @@ open class ScrollableContainer : Container() {
      * This does not take into account the overscroll.
      */
     val maxScrollY
-        get() = contentHeight - height
+        get() = max(0f, scrollableContentHeight - height)
 
+    /**
+     * The width of the content that can be scrolled. That is [contentWidth] minus
+     * the width of the vertical indicator.
+     */
+    val scrollableContentWidth
+        get() = max(0f, contentWidth - (indicatorY?.width ?: 0f))
+
+    /**
+     * The height of the content that can be scrolled. That is [contentHeight] minus
+     * the height of the horizontal indicator.
+     */
+    val scrollableContentHeight
+        get() = max(0f, contentHeight - (indicatorX?.height ?: 0f))
 
 
     private var initialX = 0f
@@ -174,7 +211,61 @@ open class ScrollableContainer : Container() {
 
         }
 
+        // Updating progress indicators
+        indicatorY?.let {
+
+            it.isVisible = scrollAxes == Axes.Both || scrollAxes == Axes.Y
+            it.y = scrollY * (height / scrollableContentHeight)
+
+            if (it.isVisible) {
+                it.onUpdate(deltaTimeSec)
+            }
+        }
+
+        indicatorX?.let {
+
+            it.isVisible = scrollAxes == Axes.Both || scrollAxes == Axes.X
+
+            it.x = scrollX * (width / scrollableContentWidth)
+            it.y = height - it.height
+
+            if (it.isVisible) {
+                it.onUpdate(deltaTimeSec)
+            }
+        }
+
         elapsedTimeSec += deltaTimeSec
+    }
+
+
+    override fun onMeasureContentSize() {
+        super.onMeasureContentSize()
+
+        indicatorY?.let {
+            it.height = height * (height / scrollableContentHeight)
+            it.x = contentWidth + 5f
+
+            contentWidth += it.width + 5f
+        }
+
+        indicatorX?.let {
+            it.width = width * (width / scrollableContentWidth)
+            it.y = contentHeight + 5f
+
+            contentHeight += it.height + 5f
+        }
+
+        if (indicatorX != null || indicatorY != null) {
+            onContentSizeMeasured()
+        }
+    }
+
+
+    override fun onDrawChildren(pGL: GL10, pCamera: Camera) {
+        super.onDrawChildren(pGL, pCamera)
+
+        indicatorX?.onDraw(pGL, pCamera)
+        indicatorY?.onDraw(pGL, pCamera)
     }
 
     override fun onAreaTouched(event: TouchEvent, localX: Float, localY: Float): Boolean {
@@ -243,15 +334,21 @@ open class ScrollableContainer : Container() {
 
 
     override fun getChildDrawX(child: ExtendedEntity): Float {
-        val originOffsetX = child.width * child.originX
 
-        return -scrollX + child.x - originOffsetX + child.translationX
+        if (child == indicatorX || child == indicatorY) {
+            return super.getChildDrawX(child)
+        }
+
+        return -scrollX + child.x - child.originOffsetX + child.translationX
     }
 
     override fun getChildDrawY(child: ExtendedEntity): Float {
-        val originOffsetY = child.height * child.originY
 
-        return -scrollY + child.y - originOffsetY + child.translationY
+        if (child == indicatorX || child == indicatorY) {
+            return super.getChildDrawY(child)
+        }
+
+        return -scrollY + child.y - child.originOffsetY + child.translationY
     }
 
 
