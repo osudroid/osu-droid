@@ -1,11 +1,7 @@
 package com.reco1l.andengine
 
 import android.util.*
-import com.reco1l.andengine.modifier.*
-import com.reco1l.framework.*
-import com.reco1l.toolkt.kotlin.*
 import org.anddev.andengine.engine.camera.*
-import org.anddev.andengine.entity.IEntity
 import org.anddev.andengine.entity.scene.*
 import org.anddev.andengine.entity.shape.IShape
 import org.anddev.andengine.input.touch.*
@@ -85,5 +81,5 @@ open class ExtendedScene : Scene(), IShape {
 
     override fun getHeightScaled(): Float = cameraHeight * scaleY
 
-    override fun isCullingEnabled(): Boolean = isCullingEnabled
+    override fun isCullingEnabled(): Boolean = false
 }
