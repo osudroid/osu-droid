@@ -46,6 +46,9 @@ for preventing accidental touches.
 
 - Added support for pp-based global beatmap leaderboard in song selection menu
 - Added video setting summary regarding supported video formats
+- Added support for manually importing replay files in options
+  - Can be accessed under the "Library" section
+  - Both `.odr` and `.edr` files are supported. However, only `.odr` files from osu!droid version 1.6.7 onwards are supported
 - Added a new button in song selection menu to switch difficulty algorithm between osu!droid and osu!standard
   - The button can be skinned with the following skin element names:
     - `selection-difficulty-droid`
@@ -70,14 +73,13 @@ for preventing accidental touches.
     ```
 - Added support for `sliderslide` and `sliderwhistle` hitsounds
 - Added support for `check-off`, `check-on`, `click-short`, and `click-short-confirm` skin samples
+- Added support for `SamplesMatchPlaybackRate` beatmap configuration
 - Added support for `scorebar-marker` texture
 - Added support for custom file hitsounds
 - Added an animation to slider end arrow rotation when snaking animation is enabled
 - Added a slight dim to hitobjects that cannot be hit yet in gameplay
 - Added a rotation effect to miss hit judgement effects in gameplay
-- Added `animationFramerate` entry to `skin.json` to specify the frame rate of animated skin elements
-  - Can be set to a negative number to use the amount of skin elements as an animation's frame rate
-  - Some skin elements are unaffected by this setting, such as the `sliderb` skin element
+- Added support for `skin.ini`'s `AnimationFramerate` setting in `skin.json`
   - The default value is `-1` when converting a `skin.ini` to `skin.json`, and `60` otherwise
   - To use in `skin.json`, add the following entry to your `skin.json`:
     ```json
@@ -92,7 +94,25 @@ for preventing accidental touches.
     ```json
     {
       "Utils": {
-        "LayeredHitSounds": true
+        "layeredHitSounds": true
+      }
+    }
+    ```
+- Added support for `skin.ini`'s `SpinnerFrequencyModulate` setting in `skin.json`
+  - To use in `skin.json`, add the following entry to your `skin.json`:
+    ```json
+    {
+      "Utils": {
+        "spinnerFrequencyModulate": true
+      }
+    }
+    ```
+- Added support for `skin.ini`'s `SliderBallFlip` setting in `skin.json`
+  - To use in `skin.json`, add the following entry to your `skin.json`:
+    ```json
+    {
+      "Utils": {
+        "sliderBallFlip": true
       }
     }
     ```
@@ -131,7 +151,7 @@ The following gameplay elements' display has been updated to match osu!stable:
 - Circles and sliders can now be hit as early as 400ms before the circle's start time
   - Previously, circles could immediately be hit after the approach circle has progressed halfway.
   - Consequently, sliders could be hit only after its slider head enters the meh hit window, preventing the player from
-    slider breaking for hitting a slider's head too early
+    slider breaking for hitting a slider's head too early.
 - More significant performance improvements in gameplay than version 1.7.2
 - Separated average offset and unstable rate displays in gameplay into separate settings
 - Miss hit judgement effect only plays in a slider's tail rather than its head and tail
@@ -147,7 +167,7 @@ The following gameplay elements' display has been updated to match osu!stable:
 - Background music in song selection menu now adjusts based on selected mods and settings
 - Changed "chimu.moe" mention to beatmap downloader when there are no songs
 - Reversed the way offsets are applied - positive values now mean objects appear earlier
-- Background music now reduces its sound when going from song selection menu to main menu
+- Background music now reduces its volume when going from song selection menu to main menu
 - Increased the speed of background music volume ramp up after selecting a beatmapset in song selection menu
 - Matched skip time behavior with osu!stable
 
@@ -190,5 +210,9 @@ were reduced by 20% and clap hitsounds' volume were reduced by 15%
 - Fixed ScoreV2 value not updating after misses
 - Fixed sound volume setting being doubly applied in some situations
 - Fixed current mods state not being saved when going out from song selection menu
-- Fixed background music volume not ramping upon leaving song selection menu
+- Fixed background music volume not ramping up upon leaving song selection menu
 - Fixed object starting point potentially being screwed up
+- Fixed object approach rate being rounded up (making it off by at most 0.5ms in real time)
+- Fixed memory leak when reading replays
+- Fixed misleading metronome effect setting description, denoting that it is only applied to the NightCore mod
+- Fixed crash when attempting to restore game state after the system kills the game due to low memory

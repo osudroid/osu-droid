@@ -40,6 +40,7 @@ import kotlinx.coroutines.CoroutineExceptionHandler
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
+import kotlinx.coroutines.ensureActive
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.SupervisorJob
 import ru.nsu.ccfit.zuev.audio.Status
@@ -51,6 +52,7 @@ import ru.nsu.ccfit.zuev.osuplus.R
 import java.net.URL
 import java.text.SimpleDateFormat
 import java.util.TimeZone
+import kotlinx.coroutines.CancellationException
 
 
 class BeatmapListing : BaseFragment(),
@@ -190,6 +192,8 @@ class BeatmapListing : BaseFragment(),
                 mainThread { adapter.notifyItemRangeRemoved(0, itemCount) }
             }
 
+            ensureActive()
+
             JsonArrayRequest(mirror.search.endpoint).use { request ->
 
                 request.buildUrl {
@@ -201,7 +205,12 @@ class BeatmapListing : BaseFragment(),
 
                 request.buildRequest { header("User-Agent", "Chrome/Android") }
 
+                ensureActive()
+
                 val beatmapSets = mirror.search.mapResponse(request.execute().json)
+
+                ensureActive()
+
                 adapter.data.addAll(beatmapSets)
 
                 mainThread {
@@ -554,15 +563,21 @@ class BeatmapSetViewHolder(itemView: View, private val mediaScope: CoroutineScop
 
                 try {
                     URL(beatmapSet.thumbnail).openStream().use {
+                        ensureActive()
+
                         val bitmap = BitmapFactory.decodeStream(it)
 
                         mainThread { cover.setImageBitmap(bitmap) }
                     }
 
                 } catch (e: Exception) {
-                    Log.e("BeatmapDownloader", "Failed to load cover.", e)
-
                     mainThread { cover.setImageDrawable(null) }
+
+                    if (e is CancellationException) {
+                        throw e
+                    }
+
+                    Log.e("BeatmapDownloader", "Failed to load cover.", e)
                 }
 
                 coverJob = null
@@ -600,12 +615,11 @@ class BeatmapSetViewHolder(itemView: View, private val mediaScope: CoroutineScop
             return
         }
 
+        BeatmapListing.current!!.stopPreviews(true)
+
         previewJob = mediaScope.launch {
 
-            BeatmapListing.current!!.stopPreviews(true)
-
             try {
-
                 previewStream = URLBassStream(BeatmapListing.mirror.previewEndpoint(beatmapSet.beatmaps[0].id)) {
                     stopPreview(true)
 
@@ -613,6 +627,8 @@ class BeatmapSetViewHolder(itemView: View, private val mediaScope: CoroutineScop
                         GlobalManager.getInstance().mainScene.musicControl(MusicOption.PLAY)
                     }
                 }
+
+                ensureActive()
 
                 GlobalManager.getInstance().mainScene.musicControl(MusicOption.PAUSE)
 
@@ -628,6 +644,10 @@ class BeatmapSetViewHolder(itemView: View, private val mediaScope: CoroutineScop
                 }
 
             } catch (e: Exception) {
+                if (e is CancellationException) {
+                    throw e
+                }
+
                 Log.e("BeatmapListing", "Failed to load preview", e)
             }
 

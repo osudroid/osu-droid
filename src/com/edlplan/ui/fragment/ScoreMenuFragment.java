@@ -88,11 +88,17 @@ public class ScoreMenuFragment extends BaseFragment {
                 .addButton("Yes", dialog -> {
 
                     try {
+                        dialog.dismiss();
                         ScoreMenuFragment.this.dismiss();
 
-                        if (DatabaseManager.getScoreInfoTable().deleteScore(scoreId) != 0) {
+                        var scoreInfoTable = DatabaseManager.getScoreInfoTable();
+                        var scoreInfo = scoreInfoTable.getScore(scoreId);
+
+                        if (scoreInfo != null && scoreInfoTable.deleteScore(scoreId) != 0) {
                             Snackbar.make(v, R.string.menu_deletescore_delete_success, 1500).show();
                             GlobalManager.getInstance().getSongMenu().reloadScoreboard();
+
+                            new File(scoreInfo.getReplayPath()).delete();
                         } else {
                             Snackbar.make(v, "Failed to delete replay!", 1500).show();
                         }

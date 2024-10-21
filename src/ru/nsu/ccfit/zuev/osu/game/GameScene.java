@@ -50,12 +50,16 @@ import com.rian.osu.difficulty.attributes.DroidDifficultyAttributes;
 import com.rian.osu.difficulty.attributes.StandardDifficultyAttributes;
 import com.rian.osu.difficulty.attributes.TimedDifficultyAttributes;
 import com.rian.osu.difficulty.calculator.DifficultyCalculationParameters;
+import com.rian.osu.ui.DrawFPSCounter;
+import com.rian.osu.ui.UpdateFPSCounter;
 import com.rian.osu.utils.ModUtils;
 
 import org.anddev.andengine.engine.Engine;
+import org.anddev.andengine.engine.camera.Camera;
 import org.anddev.andengine.engine.camera.SmoothCamera;
 import org.anddev.andengine.engine.handler.IUpdateHandler;
 import org.anddev.andengine.engine.options.TouchOptions;
+import org.anddev.andengine.entity.Entity;
 import org.anddev.andengine.entity.modifier.LoopEntityModifier;
 import org.anddev.andengine.entity.modifier.MoveXModifier;
 import org.anddev.andengine.entity.primitive.Rectangle;
@@ -65,7 +69,6 @@ import org.anddev.andengine.entity.scene.background.ColorBackground;
 import org.anddev.andengine.entity.scene.background.SpriteBackground;
 import org.anddev.andengine.entity.sprite.Sprite;
 import org.anddev.andengine.entity.text.ChangeableText;
-import org.anddev.andengine.entity.util.FPSCounter;
 import org.anddev.andengine.input.touch.TouchEvent;
 import org.anddev.andengine.util.Debug;
 
@@ -180,8 +183,9 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
     private TimedDifficultyAttributes<DroidDifficultyAttributes>[] droidTimedDifficultyAttributes;
     private TimedDifficultyAttributes<StandardDifficultyAttributes>[] standardTimedDifficultyAttributes;
 
+    private DrawFPSCounter drawFpsCounter;
+
     private final List<ChangeableText> counterTexts = new ArrayList<>(5);
-    private ChangeableText fpsText;
     private ChangeableText avgOffsetText;
     private ChangeableText urText;
     private ChangeableText memText;
@@ -292,7 +296,7 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
                 videoStarted = false;
                 videoOffset = playableBeatmap.getEvents().videoStartTime / 1000f;
 
-                video = new VideoSprite(lastBeatmapInfo.getSetDirectory() + "/" + playableBeatmap.getEvents().videoFilename, engine);
+                video = new VideoSprite(lastBeatmapInfo.getAbsoluteSetDirectory() + "/" + playableBeatmap.getEvents().videoFilename, engine);
                 video.setAlpha(0f);
 
                 bgSprite = video;
@@ -538,11 +542,7 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
 
         if (Config.getScoreCounterMetric() == ScoreCounterMetric.PP) {
             // Calculate timed difficulty attributes
-            var parameters = new DifficultyCalculationParameters();
-
-            parameters.setMods(convertedMods);
-            parameters.setCustomSpeedMultiplier(modMenu.getChangeSpeed());
-
+            var parameters = new DifficultyCalculationParameters(convertedMods, modMenu.getChangeSpeed());
             var sameParameters = lastDifficultyCalculationParameters != null &&
                 lastDifficultyCalculationParameters.equals(parameters);
 
@@ -578,11 +578,6 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
         lastScoreSent = null;
 
         paused = false;
-        if (hud != null) {
-            hud.setVisible(true);
-            hud.setIgnoreUpdate(false);
-        }
-
         gameStarted = false;
         return true;
     }
@@ -627,6 +622,27 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
         engine.setScene(screen.getScene());
 
         final String rfile = beatmapInfo != null ? replayFile : this.replayFilePath;
+
+        // Attach a dummy entity for computing draw FPS, as its frame rate is tied to the draw thread and not
+        // the update thread.
+        var drawFpsDummyEntity = new Entity() {
+            private long previousDrawTime;
+
+            @Override
+            protected void onManagedDraw(GL10 pGL, Camera pCamera) {
+                super.onManagedDraw(pGL, pCamera);
+
+                long currentDrawTime = SystemClock.uptimeMillis();
+
+                if (drawFpsCounter != null) {
+                    drawFpsCounter.updateFps((currentDrawTime - previousDrawTime) / 1000f);
+                }
+
+                previousDrawTime = currentDrawTime;
+            }
+        };
+
+        scene.attachChild(drawFpsDummyEntity);
 
         Execution.async(() -> {
 
@@ -706,47 +722,44 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
             text.detachSelf();
         }
         counterTexts.clear();
+        drawFpsCounter = null;
 
-        if (!Config.isHideInGameUI()) {
-            hud = new GameplayHUD(stat, this);
-            engine.getCamera().setHUD(hud);
+        hud = new GameplayHUD(stat, this, !Config.isHideInGameUI());
+        engine.getCamera().setHUD(hud);
 
-            var counterTextFont = ResourceManager.getInstance().getFont("smallFont");
+        var counterTextFont = ResourceManager.getInstance().getFont("smallFont");
 
-            if (Config.isShowFPS()) {
-                fpsText = new ChangeableText(790, 520, counterTextFont, "00.00 FPS");
-                counterTexts.add(fpsText);
+        if (Config.isShowFPS()) {
+            drawFpsCounter = new DrawFPSCounter(new ChangeableText(790, 520, counterTextFont, "Draw: 999/999 FPS"));
+            var updateFpsCounter = new UpdateFPSCounter(new ChangeableText(790, 480, counterTextFont, "Update: 999/999 FPS"), GameHelper.getSpeedMultiplier());
 
-                hud.registerUpdateHandler(new FPSCounter() {
-                    @Override
-                    public void onUpdate(float pSecondsElapsed) {
-                        super.onUpdate(pSecondsElapsed);
-                        fpsText.setText(Math.round(getFPS()) + " FPS");
-                    }
-                });
-            }
+            counterTexts.add(drawFpsCounter.displayText);
+            counterTexts.add(updateFpsCounter.displayText);
 
-            if (Config.isShowUnstableRate()) {
-                urText = new ChangeableText(720, 480, counterTextFont, "00.00 UR    ");
-                counterTexts.add(urText);
-            }
+            hud.registerUpdateHandler(updateFpsCounter);
+            hud.registerUpdateHandler(drawFpsCounter);
+        }
 
-            if (Config.isShowAverageOffset()) {
-                avgOffsetText = new ChangeableText(720, 440, counterTextFont, "Avg offset: 0ms     ");
-                counterTexts.add(avgOffsetText);
-            }
+        if (Config.isShowUnstableRate() && !GameHelper.isAuto()) {
+            urText = new ChangeableText(720, 480, counterTextFont, "00.00 UR    ");
+            counterTexts.add(urText);
+        }
 
-            if (BuildConfig.DEBUG) {
-                memText = new ChangeableText(780, 520, counterTextFont, "0/0 MB    ");
-                counterTexts.add(memText);
-            }
+        if (Config.isShowAverageOffset() && !GameHelper.isAuto()) {
+            avgOffsetText = new ChangeableText(720, 440, counterTextFont, "Avg offset: 0ms     ");
+            counterTexts.add(avgOffsetText);
+        }
 
-            updateCounterTexts();
+        if (BuildConfig.DEBUG) {
+            memText = new ChangeableText(780, 520, counterTextFont, "0/0 MB    ");
+            counterTexts.add(memText);
+        }
 
-            // Attach the counter texts
-            for (var text : counterTexts) {
-                hud.attachChild(text);
-            }
+        updateCounterTexts();
+
+        // Attach the counter texts
+        for (var text : counterTexts) {
+            hud.attachChild(text);
         }
 
         for (int i = 0; i < CursorCount; i++) {
@@ -1136,10 +1149,7 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
                 if (Multiplayer.isConnected())
                     RoomScene.INSTANCE.getChat().show();
 
-                if (hud != null) {
-                    hud.getHealthBar().setVisible(false);
-                }
-
+                hud.setHealthBarVisibility(false);
                 breakPeriods.poll();
             }
         }
@@ -1149,10 +1159,7 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
             RoomScene.INSTANCE.getChat().dismiss();
 
             gameStarted = true;
-
-            if (hud != null) {
-                hud.getHealthBar().setVisible(true);
-            }
+            hud.setHealthBarVisibility(true);
 
             if(GameHelper.isFlashLight()){
                 flashlightSprite.onBreak(false);
@@ -1790,9 +1797,7 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
         createBurstEffect(pos, color);
         createHitEffect(pos, scoreName, color);
 
-        if (hud != null) {
-            hud.getHealthBar().flash();
-        }
+        hud.flashHealthBar();
     }
 
     public void onSliderReverse(PointF pos, float ang, RGBColor color) {
@@ -1871,9 +1876,7 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
 
         createHitEffect(judgementPos, scoreName, color);
 
-        if (hud != null) {
-            hud.getHealthBar().flash();
-        }
+        hud.flashHealthBar();
     }
 
 
@@ -1928,9 +1931,7 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
 
         createHitEffect(pos, scoreName, null);
 
-        if (hud != null) {
-            hud.getHealthBar().flash();
-        }
+        hud.flashHealthBar();
     }
 
     private void stopLoopingSamples() {
@@ -2136,13 +2137,10 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
             GlobalManager.getInstance().getSongService().pause();
         }
         paused = true;
-        if (hud != null) {
-            hud.setVisible(false);
-            hud.setIgnoreUpdate(true);
-        }
+        scene.setIgnoreUpdate(true);
 
         final PauseMenu menu = new PauseMenu(engine, this, false);
-        scene.setChildScene(menu.getScene(), false, true, true);
+        hud.setChildScene(menu.getScene(), false, true, true);
     }
 
     public void gameover() {
@@ -2175,12 +2173,9 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
             GlobalManager.getInstance().getSongService().pause();
         }
         paused = true;
-        if (hud != null) {
-            hud.setVisible(false);
-            hud.setIgnoreUpdate(true);
-        }
 
-        scene.setChildScene(menu.getScene(), false, true, true);
+        scene.setIgnoreUpdate(true);
+        hud.setChildScene(menu.getScene(), false, true, true);
     }
 
     public void resume() {
@@ -2193,12 +2188,9 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
         }
         blockAreaFragment.show();
 
-        scene.getChildScene().back();
+        scene.setIgnoreUpdate(false);
+        hud.getChildScene().back();
         paused = false;
-        if (hud != null) {
-            hud.setVisible(true);
-            hud.setIgnoreUpdate(false);
-        }
 
         if (stat.getHp() <= 0 && !stat.getMod().contains(GameMod.MOD_NOFAIL)) {
             quit();
@@ -2233,6 +2225,7 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
     private void createHitEffect(final PointF pos, final String name, RGBColor color) {
 
         var effect = GameObjectPool.getInstance().getEffect(name);
+        var isAnimated = effect.hit instanceof AnimatedSprite animatedHit && animatedHit.getFrames().length > 1;
 
         // Reference https://github.com/ppy/osu/blob/ebf637bd3c33f1c886f6bfc81aa9ea2132c9e0d2/osu.Game/Skinning/LegacyJudgementPieceOld.cs
 
@@ -2247,21 +2240,30 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
         );
 
         if (name.equals("hit0")) {
-
             var rotation = (float) Random.Default.nextDouble(8.6 * 2) - 8.6f;
 
-            effect.init(
-                mgScene,
-                pos,
-                scale * 1.6f,
-                fadeSequence,
-                Modifiers.scale(0.1f, scale * 1.6f, scale, null, Easing.InQuad),
-                Modifiers.translateY(fadeOutDelay + fadeOutLength, -5f, 80f, null, Easing.InQuad),
-                Modifiers.sequence(
-                    Modifiers.rotation(fadeInLength, 0, rotation),
-                    Modifiers.rotation(fadeOutDelay + fadeOutLength - fadeInLength, rotation, rotation * 2, null, Easing.InQuad)
-                )
-            );
+            if (isAnimated) {
+                // Legacy judgements don't play any transforms if they are an animation.
+                effect.init(
+                    mgScene,
+                    pos,
+                    scale,
+                    fadeSequence
+                );
+            } else {
+                effect.init(
+                    mgScene,
+                    pos,
+                    scale * 1.6f,
+                    fadeSequence,
+                    Modifiers.scale(0.1f, scale * 1.6f, scale, null, Easing.InQuad),
+                    Modifiers.translateY(fadeOutDelay + fadeOutLength, -5f, 80f, null, Easing.InQuad),
+                    Modifiers.sequence(
+                        Modifiers.rotation(fadeInLength, 0, rotation),
+                        Modifiers.rotation(fadeOutDelay + fadeOutLength - fadeInLength, rotation, rotation * 2, null, Easing.InQuad)
+                    )
+                );
+            }
 
             return;
         }
@@ -2286,22 +2288,32 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
             );
         }
 
-        effect.init(
-            mgScene,
-            pos,
-            scale * 0.6f,
-            fadeSequence,
-            Modifiers.sequence(
-                Modifiers.scale(fadeInLength * 0.8f, scale * 0.6f, scale * 1.1f),
-                Modifiers.delay(fadeInLength * 0.2f),
-                Modifiers.scale(fadeInLength * 0.2f, scale * 1.1f, scale * 0.9f),
+        // Legacy judgements don't play any transforms if they are an animation.
+        if (isAnimated) {
+            effect.init(
+                mgScene,
+                pos,
+                scale,
+                fadeSequence
+            );
+        } else {
+            effect.init(
+                mgScene,
+                pos,
+                scale * 0.6f,
+                fadeSequence,
+                Modifiers.sequence(
+                    Modifiers.scale(fadeInLength * 0.8f, scale * 0.6f, scale * 1.1f),
+                    Modifiers.delay(fadeInLength * 0.2f),
+                    Modifiers.scale(fadeInLength * 0.2f, scale * 1.1f, scale * 0.9f),
 
-                // stable dictates scale of 0.9->1 over time 1.0 to 1.4, but we are already at 1.2.
-                // so we need to force the current value to be correct at 1.2 (0.95) then complete the
-                // second half of the transform.
-                Modifiers.scale(fadeInLength * 0.2f, scale * 0.95f, scale)
-            )
-        );
+                    // stable dictates scale of 0.9->1 over time 1.0 to 1.4, but we are already at 1.2.
+                    // so we need to force the current value to be correct at 1.2 (0.95) then complete the
+                    // second half of the transform.
+                    Modifiers.scale(fadeInLength * 0.2f, scale * 0.95f, scale)
+                )
+            );
+        }
     }
 
     private void applyBurstEffect(GameEffect effect, PointF pos) {
@@ -2529,18 +2541,18 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
         for (int i = 0; i < counterTexts.size(); ++i) {
             var text = counterTexts.get(i);
 
-            text.setPosition(Config.getRES_WIDTH() - text.getWidth() - 5, Config.getRES_HEIGHT() - text.getHeight() - 10 - i * text.getHeight());
+            text.setPosition(Config.getRES_WIDTH() - text.getWidthScaled() - 5, Config.getRES_HEIGHT() - text.getHeightScaled() - 10 - i * text.getHeightScaled());
         }
     }
 
     private void updatePPCounter(int objectId) {
-        if (hud == null || Config.getScoreCounterMetric() == ScoreCounterMetric.SCORE) {
+        if (Config.isHideInGameUI() || Config.getScoreCounterMetric() == ScoreCounterMetric.SCORE) {
             return;
         }
 
         switch (Config.getDifficultyAlgorithm()) {
-            case droid -> hud.getScoreCounter().setValue(getDroidPPAt(objectId));
-            case standard -> hud.getScoreCounter().setValue(getStandardPPAt(objectId));
+            case droid -> hud.setScoreCounterText(String.format(Locale.ENGLISH, "%.2f", getDroidPPAt(objectId)));
+            case standard -> hud.setScoreCounterText(String.format(Locale.ENGLISH, "%.2f", getStandardPPAt(objectId)));
         }
     }
 

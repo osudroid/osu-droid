@@ -5,5 +5,6 @@ package com.rian.osu.mods
  */
 class ModDoubleTime : Mod(), IModApplicableToTrackRate {
     override val droidString = "d"
-    override val trackRateMultiplier = 1.5f
+
+    override fun applyToRate(rate: Float, oldStatistics: Boolean) = rate * 1.5f
 }

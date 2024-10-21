@@ -7,6 +7,7 @@ import androidx.annotation.NonNull;
 import org.anddev.andengine.util.Debug;
 
 import java.io.EOFException;
+import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
@@ -204,19 +205,20 @@ public class Replay {
     }
 
     @SuppressWarnings("unchecked")
-    public boolean loadInfo(final String filename) {
+    public boolean loadInfo(final String replayFilePath) {
         ObjectInputStream os;
+        ZipInputStream zip;
+
         try {
-            final ZipInputStream zip = new ZipInputStream(new FileInputStream(filename));
+            zip = new ZipInputStream(new FileInputStream(replayFilePath));
             zip.getNextEntry();
             os = new ObjectInputStream(zip);
-            // zip.close();
         } catch (final Exception e) {
             Debug.e("Cannot load replay: " + e.getMessage(), e);
             return false;
         }
 
-        Debug.i("Loading replay " + filename);
+        Debug.i("Loading replay " + replayFilePath);
 
         cursorMoves.clear();
         int version = 0;
@@ -240,6 +242,8 @@ public class Replay {
 
             if (version >= 3) {
                 stat = new StatisticV2();
+                stat.setReplayFilename(new File(replayFilePath).getName());
+                stat.setBeatmap(mapName, mapFile);
                 stat.setTime(os.readLong());
                 stat.setHit300k(os.readInt());
                 stat.setHit300(os.readInt());
@@ -271,23 +275,32 @@ public class Replay {
             return false;
         }
 
+        try {
+            os.close();
+            zip.closeEntry();
+            zip.close();
+        } catch (final IOException e) {
+            Debug.e("IOException: " + e.getMessage(), e);
+        }
+
         return true;
     }
 
     @SuppressWarnings("unchecked")
-    public boolean load(final String filename) {
+    public boolean load(final String replayFilePath) {
         ObjectInputStream os;
+        ZipInputStream zip;
+
         try {
-            final ZipInputStream zip = new ZipInputStream(new FileInputStream(filename));
+            zip = new ZipInputStream(new FileInputStream(replayFilePath));
             zip.getNextEntry();
             os = new ObjectInputStream(zip);
-            // zip.close();
         } catch (final Exception e) {
             Debug.e("Cannot load replay: " + e.getMessage(), e);
             return false;
         }
 
-        Debug.i("Loading replay " + filename);
+        Debug.i("Loading replay " + replayFilePath);
 
         cursorMoves.clear();
         int version = 0;
@@ -318,6 +331,8 @@ public class Replay {
 
             if (version >= 3) {
                 stat = new StatisticV2();
+                stat.setReplayFilename(new File(replayFilePath).getName());
+                stat.setBeatmap(mapName, mapFile);
                 stat.setTime(os.readLong());
                 stat.setHit300k(os.readInt());
                 stat.setHit300(os.readInt());
@@ -373,6 +388,14 @@ public class Replay {
             ToastLogger.showTextId(R.string.replay_corrupted, true);
             Debug.e("Cannot load replay: " + e.getMessage(), e);
             return false;
+        }
+
+        try {
+            os.close();
+            zip.closeEntry();
+            zip.close();
+        } catch (final IOException e) {
+            Debug.e("IOException: " + e.getMessage(), e);
         }
 
         for (int i = 0; i < cursorMoves.size(); i++)

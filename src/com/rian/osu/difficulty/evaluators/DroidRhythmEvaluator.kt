@@ -2,7 +2,6 @@ package com.rian.osu.difficulty.evaluators
 
 import com.rian.osu.beatmap.hitobject.Slider
 import com.rian.osu.beatmap.hitobject.Spinner
-import com.rian.osu.difficulty.DifficultyHitObject
 import com.rian.osu.difficulty.DroidDifficultyHitObject
 import kotlin.math.*
 
@@ -10,41 +9,10 @@ import kotlin.math.*
  * An evaluator for calculating osu!droid rhythm difficulty.
  */
 object DroidRhythmEvaluator {
-    private class Island(epsilon: Double) {
-        val deltas = mutableListOf<Int>()
-        private val deltaDifferenceEpsilon = epsilon
-
-        constructor(firstDelta: Int, epsilon: Double) : this(epsilon) {
-            addDelta(firstDelta)
-        }
-
-        fun addDelta(delta: Int) {
-            val existingDelta = deltas.firstOrNull { abs(it - delta) >= deltaDifferenceEpsilon }
-
-            deltas.add(existingDelta ?: delta)
-        }
-
-        val averageDelta by lazy {
-            if (deltas.isNotEmpty()) max(deltas.average(), DifficultyHitObject.MIN_DELTA_TIME.toDouble())
-            else 0.0
-        }
-
-        fun isSimilarPolarity(other: Island) =
-            // Consider islands to be of similar polarity only if they're having the same average delta
-            // (we don't want to consider 3 singletaps similar to a triple).
-            abs(averageDelta - other.averageDelta) < deltaDifferenceEpsilon && deltas.size % 2 == other.deltas.size % 2
-
-        override fun hashCode() =
-            // We need to compare all deltas, and they must be in the exact same order we added them
-            deltas.joinToString(separator = "").hashCode()
-
-        override fun equals(other: Any?) = other?.hashCode() == hashCode()
-    }
-
-    private const val RHYTHM_MULTIPLIER = 1.2
-    private const val MAX_ISLAND_SIZE = 7
-    private const val HISTORY_OBJECTS_MAX = 24
-    private const val HISTORY_TIME_MAX = 4000 // 4 seconds of calculateRhythmBonus max.
+    private const val HISTORY_TIME_MAX = 5 * 1000 // 5 seconds of calculateRhythmBonus max.
+    private const val HISTORY_OBJECTS_MAX = 32
+    private const val RHYTHM_OVERALL_MULTIPLIER = 0.95
+    private const val RHYTHM_RATIO_MULTIPLIER = 12.0
 
     /**
      * Calculates a rhythm multiplier for the difficulty of the tap associated
@@ -100,60 +68,63 @@ object DroidRhythmEvaluator {
             val lastObject = current.previous(i + 1)!!
 
             // Scale note 0 to 1 from history to now.
-            var currentHistoricalDecay =
-                (HISTORY_TIME_MAX - (current.startTime - currentObject.startTime)) / HISTORY_TIME_MAX
+            // Scale note 0 to 1 from history to now.
+            val timeDecay = (HISTORY_TIME_MAX - (current.startTime - currentObject.startTime)) / HISTORY_TIME_MAX
+            val noteDecay = (historicalNoteCount - i).toDouble() / historicalNoteCount
 
             // Either we're limited by time or limited by object count.
-            currentHistoricalDecay =
-                min(currentHistoricalDecay, (historicalNoteCount - i).toDouble() / historicalNoteCount)
+            val currentHistoricalDecay = min(noteDecay, timeDecay)
 
             val currentDelta = currentObject.strainTime
             val prevDelta = prevObject.strainTime
             val lastDelta = lastObject.strainTime
 
-            val currentRatio = 1 + 10 * min(
-                0.5,
-                sin(Math.PI / (min(prevDelta, currentDelta) / max(prevDelta, currentDelta))).pow(2)
-            )
+            // Calculate how much current delta difference deserves a rhythm bonus
+            // This function is meant to reduce rhythm bonus for deltas that are multiples of each other (i.e. 100 and 200)
+            val deltaDifferenceRatio = min(prevDelta, currentDelta) / max(prevDelta, currentDelta)
+
+            val currentRatio = 1 + RHYTHM_RATIO_MULTIPLIER * min(0.5, sin(Math.PI / deltaDifferenceRatio).pow(2))
+
+            // Reduce ratio bonus if delta difference is too big
+            val fraction = max(prevDelta / currentDelta, currentDelta / prevDelta)
+            val fractionMultiplier = (2 - fraction / 8).coerceIn(0.0, 1.0)
 
             val windowPenalty =
                 ((abs(prevDelta - currentDelta) - deltaDifferenceEpsilon) / deltaDifferenceEpsilon).coerceIn(0.0, 1.0)
 
-            var effectiveRatio = windowPenalty * currentRatio
+            var effectiveRatio = windowPenalty * currentRatio * fractionMultiplier
 
             if (firstDeltaSwitch) {
-                if (abs(prevDelta - currentDelta) <= deltaDifferenceEpsilon) {
-                    if (island.deltas.size < MAX_ISLAND_SIZE) {
-                        // Island is still progressing.
-                        island.addDelta(currentDelta.toInt())
-                    }
+                if (abs(prevDelta - currentDelta) < deltaDifferenceEpsilon) {
+                    // Island is still progressing, count size.
+                    island.addDelta(currentDelta.toInt())
                 } else {
+                    // BPM change is into slider, this is easy acc window.
                     if (currentObject.obj is Slider) {
-                        // BPM change is into slider, this is easy acc window.
                         effectiveRatio /= 8
                     }
 
-                    // BPM change was from a slider, this is typically easier than circle -> circle.
-                    // Unintentional side effect is that bursts with kick-sliders at the ends might
-                    // have lower difficulty than bursts without sliders.
+                    // Bpm change was from a slider, this is easier typically than circle -> circle
+                    // Unintentional side effect is that bursts with kicksliders at the ends might have lower difficulty
+                    // than bursts without sliders
                     if (prevObject.obj is Slider) {
-                        effectiveRatio /= 4
+                        effectiveRatio *= 0.3
                     }
 
-                    // Repeated island polarity (2 -> 4, 3 -> 5).
+                    // Repeated island polarity (2 -> 4, 3 -> 5)
                     if (island.isSimilarPolarity(previousIsland)) {
-                        effectiveRatio *= 0.3
+                        effectiveRatio /= 2
                     }
 
                     // Previous increase happened a note ago.
                     // Albeit this is a 1/1 -> 1/2-1/4 type of transition, we don't want to buff this.
-                    if (lastDelta > prevDelta + deltaDifferenceEpsilon &&
-                        prevDelta > currentDelta + deltaDifferenceEpsilon) {
+                    if (lastDelta > prevDelta + deltaDifferenceEpsilon && prevDelta > currentDelta + deltaDifferenceEpsilon) {
                         effectiveRatio /= 8
                     }
 
-                    // Singletaps are easier to control.
-                    if (island.deltas.size == 1) {
+                    // Repeated island size (ex: triplet -> triplet)
+                    // TODO: remove this nerf since its staying here only for balancing purposes because of the flawed ratio calculation
+                    if (previousIsland.deltaCount == island.deltaCount) {
                         effectiveRatio /= 2
                     }
 
@@ -163,11 +134,10 @@ object DroidRhythmEvaluator {
                             islandCounts[island] = islandCounts[island]!! + 1
                         }
 
-                        // Repeated island (ex: triplet -> triplet).
-                        // Graph: https://www.desmos.com/calculator/pj7an56zwf
+                        // Repeated island (ex: triplet -> triplet)
                         effectiveRatio *= min(
-                            1.0 / islandCounts[island]!!,
-                            (1.0 / islandCounts[island]!!).pow(4 / (1 + exp(10 - 0.165 * island.averageDelta)))
+                            3.0 / islandCounts[island]!!,
+                            (1.0 / islandCounts[island]!!).pow(2.75 / (1 + exp(14 - 0.24 * island.delta)))
                         )
                     } else {
                         islandCounts[island] = 1
@@ -189,24 +159,27 @@ object DroidRhythmEvaluator {
 
                     island = Island(currentDelta.toInt(), deltaDifferenceEpsilon)
                 }
-            } else if (prevDelta > deltaDifferenceEpsilon + currentDelta) {
-                // We're speeding up.
+            } else if (prevDelta > currentDelta + deltaDifferenceEpsilon) {
+                // We are speeding up.
                 // Begin counting island until we change speed again.
                 firstDeltaSwitch = true
 
-                // Reduce ratio if we're starting after a slider.
-                if (prevObject.obj is Slider) {
-                    effectiveRatio *= 0.3
-                }
+                // BPM change is into slider, this is easy acc window
+                if (currentObject.obj is Slider)
+                    effectiveRatio *= 0.6
+
+                // BPM change was from a slider, this is easier typically than circle -> circle
+                // Unintentional side effect is that bursts with kicksliders at the ends might have lower difficulty
+                // than bursts without sliders
+                if (prevObject.obj is Slider)
+                    effectiveRatio *= 0.6
 
                 startRatio = effectiveRatio
+
                 island = Island(currentDelta.toInt(), deltaDifferenceEpsilon)
             }
         }
 
-        // Nerf doubles that can be tapped at the same time to get Great hit results.
-        val doubletapness = 1 - current.doubletapness
-
-        return sqrt(4 + rhythmComplexitySum * RHYTHM_MULTIPLIER * doubletapness) / 2
+        return sqrt(4 + rhythmComplexitySum * RHYTHM_OVERALL_MULTIPLIER) / 2
     }
 }
