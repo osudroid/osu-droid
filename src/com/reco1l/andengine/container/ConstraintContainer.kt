@@ -3,8 +3,6 @@ package com.reco1l.andengine.container
 import com.reco1l.andengine.*
 import org.anddev.andengine.entity.*
 import org.anddev.andengine.entity.shape.*
-import org.anddev.andengine.util.ParameterCallable
-import javax.microedition.khronos.opengles.*
 
 /**
  * Container that allows to constrain nested entities to other entities in the same container.
@@ -17,28 +15,20 @@ class ConstraintContainer : Container() {
     private val constraints = mutableMapOf<ExtendedEntity, IShape>()
 
 
-    override fun onApplyChildTranslation(gl: GL10, child: ExtendedEntity) {
+    override fun getChildDrawX(child: ExtendedEntity): Float {
 
         val constraint = constraints[child] ?: this
-
-        val originOffsetX = child.width * child.originX
-        val originOffsetY = child.height * child.originY
-
         val anchorOffsetX = constraint.width * child.anchorX
+
+        return child.x - child.originOffsetX + anchorOffsetX + child.translationX
+    }
+
+    override fun getChildDrawY(child: ExtendedEntity): Float {
+
+        val constraint = constraints[child] ?: this
         val anchorOffsetY = constraint.height * child.anchorY
 
-        var finalX = anchorOffsetX + child.x - originOffsetX + child.translationX
-        var finalY = anchorOffsetY + child.y - originOffsetY + child.translationY
-
-        // Apply the constraint's if it's not the container itself.
-        if (constraint != this)  {
-            finalX += constraint.x
-            finalY += constraint.y
-        }
-
-        if (finalX != 0f || finalY != 0f) {
-            gl.glTranslatef(finalX, finalY, 0f)
-        }
+        return child.y - child.originOffsetY + anchorOffsetY + child.translationY
     }
 
 

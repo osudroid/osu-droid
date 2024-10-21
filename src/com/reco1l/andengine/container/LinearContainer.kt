@@ -93,33 +93,29 @@ open class LinearContainer : Container() {
         super.onManagedDrawChildren(pGL, pCamera)
     }
 
-    override fun onApplyChildTranslation(gl: GL10, child: ExtendedEntity) {
 
-        val originOffsetX = child.width * child.originX
-        val originOffsetY = child.height * child.originY
+    override fun getChildDrawX(child: ExtendedEntity): Float {
 
-        val anchorOffsetX = width * child.anchorX
-        val anchorOffsetY = height * child.anchorY
+        var drawX = super.getChildDrawX(child)
 
-        var finalX = anchorOffsetX - originOffsetX + child.translationX
-        var finalY = anchorOffsetY - originOffsetY + child.translationY
-
-        when (orientation) {
-
-            Horizontal -> {
-                finalX += lastChildX
-                lastChildX += child.width + spacing
-            }
-
-            Vertical -> {
-                finalY += lastChildY
-                lastChildY += child.height + spacing
-            }
+        if (orientation == Horizontal) {
+            drawX += lastChildX
+            lastChildX += child.width + spacing
         }
 
-        if (finalX != 0f || finalY != 0f) {
-            gl.glTranslatef(finalX, finalY, 0f)
+        return drawX
+    }
+
+    override fun getChildDrawY(child: ExtendedEntity): Float {
+
+        var drawY = super.getChildDrawY(child)
+
+        if (orientation == Vertical) {
+            drawY += lastChildY
+            lastChildY += child.height + spacing
         }
+
+        return drawY
     }
 
 }

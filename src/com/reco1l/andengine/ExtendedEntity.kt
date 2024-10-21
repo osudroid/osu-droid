@@ -30,27 +30,12 @@ abstract class ExtendedEntity(
      * Determines which axes the entity should automatically adjust its size to.
      */
     open var autoSizeAxes = Axes.None
-
-    /**
-     * The raw X position of the entity.
-     * This is the position without taking into account the origin, anchor, or translation.
-     */
-    open var rawX
-        get() = mX + translationX - width * originX
         set(value) {
-            setPosition(value + width * originX, mY)
+            if (field != value) {
+                field = value
+                onContentSizeMeasured()
+            }
         }
-
-    /**
-     * The raw Y position of the entity.
-     * This is the position without taking into account the origin, anchor, or translation.
-     */
-    open var rawY
-        get() = mY + translationY - height * originY
-        set(value) {
-            setPosition(mX, value + height * originY)
-        }
-
 
     /**
      * The origin factor of the entity in the X axis.
@@ -137,9 +122,6 @@ abstract class ExtendedEntity(
 
 
     /**
-     * Intended for internal use only.
-     *
-     * Despite [setWidth] this will ignore [autoSizeAxes] and force the width to be set, as well the buffer will not be updated.
      * The width of the content inside the entity.
      */
     open var contentWidth = 0f
@@ -161,24 +143,63 @@ abstract class ExtendedEntity(
             }
         }
 
+    /**
+     * The raw X position of the entity.
+     * This is the position without taking into account the origin, anchor, or translation.
      */
-    protected var internalWidth
-        get() = width
-        set(value) {
-            width = value
+    open val drawX: Float
+        get() {
+            if (parent is Container) {
+                return (parent as Container).getChildDrawX(this)
+            }
+            return x - originOffsetX + anchorOffsetX + translationX
         }
 
     /**
-     * Intended for internal use only.
-     *
-     * Despite [setHeight] this will ignore [autoSizeAxes] and force the height to be set, as well the buffer will not be updated.
+     * The raw Y position of the entity.
+     * This is the position without taking into account the origin, anchor, or translation.
      */
-    protected var internalHeight
-        get() = height
-        set(value) {
-            height = value
+    open val drawY: Float
+        get() {
+            if (parent is Container) {
+                return (parent as Container).getChildDrawY(this)
+            }
+            return y - originOffsetY + anchorOffsetY + translationY
         }
 
+    /**
+     * The offset applied to the X axis according to the origin factor.
+     */
+    open val originOffsetX: Float
+        get() = width * originX
+
+    /**
+     * The offset applied to the Y axis according to the origin factor.
+     */
+    open val originOffsetY: Float
+        get() = height * originY
+
+    /**
+     * The offset applied to the X axis according to the anchor factor.
+     */
+    open val anchorOffsetX: Float
+        get() {
+            if (parent is IShape) {
+                return (parent as IShape).width * anchorX
+            }
+            return 0f
+        }
+
+    /**
+     * The offset applied to the Y axis according to the anchor factor.
+     */
+    open val anchorOffsetY: Float
+        get() {
+            if (parent is IShape) {
+                return (parent as IShape).height * anchorY
+            }
+            return 0f
+        }
 
 
     private var width = 0f
@@ -232,23 +253,21 @@ abstract class ExtendedEntity(
 
     override fun applyTranslation(pGL: GL10, camera: Camera) {
 
+        val drawX: Float
+        val drawY: Float
+
         val parent = parent
+
         if (parent is Container) {
-            parent.onApplyChildTranslation(pGL, this)
-            return
+            drawX = parent.getChildDrawX(this)
+            drawY = parent.getChildDrawY(this)
+        } else {
+            drawX = this.drawX
+            drawY = this.drawY
         }
 
-        val originOffsetX = width * originX
-        val originOffsetY = height * originY
-
-        val anchorOffsetX = (if (parent is IShape) parent.width else camera.widthRaw) * anchorX
-        val anchorOffsetY = (if (parent is IShape) parent.height else camera.heightRaw) * anchorY
-
-        val finalX = x - originOffsetX + anchorOffsetX + translationX
-        val finalY = y - originOffsetY + anchorOffsetY + translationY
-
-        if (finalX != 0f || finalY != 0f) {
-            pGL.glTranslatef(finalX, finalY, 0f)
+        if (drawX != 0f || drawY != 0f) {
+            pGL.glTranslatef(drawX, drawY, 0f)
         }
     }
 
@@ -521,10 +540,8 @@ abstract class ExtendedEntity(
     }
 
     override fun isCulled(pCamera: Camera): Boolean {
-        return mX > pCamera.maxX
-            || mY > pCamera.maxY
-            || mX + this.width < pCamera.minX
-            || mY + this.height < pCamera.minY
+        return drawX > pCamera.maxX || drawX + width < pCamera.minX
+            || drawY > pCamera.maxY || drawY + height < pCamera.minY
     }
 
     override fun getSceneCenterCoordinates(): FloatArray {

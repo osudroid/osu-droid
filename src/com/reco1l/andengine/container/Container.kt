@@ -1,11 +1,14 @@
 package com.reco1l.andengine.container
 
+import android.util.*
 import com.reco1l.andengine.*
 import com.reco1l.toolkt.kotlin.*
 import org.anddev.andengine.engine.camera.*
 import org.anddev.andengine.entity.*
 import org.anddev.andengine.entity.IEntity.*
+import org.anddev.andengine.entity.scene.Scene.ITouchArea
 import org.anddev.andengine.entity.shape.IShape
+import org.anddev.andengine.input.touch.*
 import org.anddev.andengine.util.*
 import javax.microedition.khronos.opengles.GL10
 import kotlin.math.*
@@ -58,20 +61,12 @@ open class Container : ExtendedEntity() {
     }
 
 
-    open fun onApplyChildTranslation(gl: GL10, child: ExtendedEntity) {
+    open fun getChildDrawX(child: ExtendedEntity): Float {
+        return child.x - child.originOffsetX + child.anchorOffsetX + child.translationX
+    }
 
-        val originOffsetX = child.width * child.originX
-        val originOffsetY = child.height * child.originY
-
-        val anchorOffsetX = width * child.anchorX
-        val anchorOffsetY = height * child.anchorY
-
-        val finalX = anchorOffsetX + child.x - originOffsetX + child.translationX
-        val finalY = anchorOffsetY + child.y - originOffsetY + child.translationY
-
-        if (finalX != 0f || finalY != 0f) {
-            gl.glTranslatef(finalX, finalY, 0f)
-        }
+    open fun getChildDrawY(child: ExtendedEntity): Float {
+        return child.y - child.originOffsetY + child.anchorOffsetY + child.translationY
     }
 
 
