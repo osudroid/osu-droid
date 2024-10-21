@@ -675,55 +675,6 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
         }
         setBackground();
 
-        // Set up counter texts
-        for (var text : counterTexts) {
-            text.detachSelf();
-        }
-
-        counterTexts.clear();
-        drawFpsCounter = null;
-
-        var counterTextFont = ResourceManager.getInstance().getFont("smallFont");
-
-        if (Config.isShowFPS()) {
-            drawFpsCounter = new DrawFPSCounter(new ChangeableText(790, 520, counterTextFont, "Draw: 0 FPS", 15));
-            var updateFpsCounter = new UpdateFPSCounter(new ChangeableText(790, 480, counterTextFont, "Update: 0 FPS", 15), GameHelper.getSpeedMultiplier());
-
-            counterTexts.add(drawFpsCounter.displayText);
-            counterTexts.add(updateFpsCounter.displayText);
-
-            fgScene.registerUpdateHandler(updateFpsCounter);
-            fgScene.registerUpdateHandler(drawFpsCounter);
-        }
-
-        if (Config.isShowUnstableRate()) {
-            urText = new ChangeableText(720, 440, counterTextFont, "00.00 UR    ");
-            counterTexts.add(urText);
-        }
-
-        if (Config.isShowAverageOffset()) {
-            avgOffsetText = new ChangeableText(720, 400, counterTextFont, "Avg offset: 0ms     ");
-            counterTexts.add(avgOffsetText);
-        }
-
-        if (Config.isDisplayRealTimePPCounter()) {
-            ppText = new ChangeableText(720, 360, counterTextFont,
-                    Config.getDifficultyAlgorithm() == DifficultyAlgorithm.droid ? "0.00dpp" : "0.00pp", 15);
-            counterTexts.add(ppText);
-        }
-
-        if (BuildConfig.DEBUG) {
-            memText = new ChangeableText(780, 520, counterTextFont, "0/0 MB    ");
-            counterTexts.add(memText);
-        }
-
-        updateCounterTexts();
-
-        // Attach the counter texts
-        for (var text : counterTexts) {
-            fgScene.attachChild(text);
-        }
-
         stat = new StatisticV2();
         stat.setMod(ModMenu.getInstance().getMod());
         stat.canFail = !stat.getMod().contains(GameMod.MOD_NOFAIL)
@@ -762,6 +713,55 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
         difficultyHelper = stat.getMod().contains(GameMod.MOD_PRECISE) ?
                 DifficultyHelper.HighDifficulty : DifficultyHelper.StdDifficulty;
         GameHelper.setDifficultyHelper(difficultyHelper);
+
+        // Set up counter texts
+        for (var text : counterTexts) {
+            text.detachSelf();
+        }
+
+        counterTexts.clear();
+        drawFpsCounter = null;
+
+        var counterTextFont = ResourceManager.getInstance().getFont("smallFont");
+
+        if (Config.isShowFPS()) {
+            drawFpsCounter = new DrawFPSCounter(new ChangeableText(790, 520, counterTextFont, "Draw: 0 FPS", 15));
+            var updateFpsCounter = new UpdateFPSCounter(new ChangeableText(790, 480, counterTextFont, "Update: 0 FPS", 15), GameHelper.getSpeedMultiplier());
+
+            counterTexts.add(drawFpsCounter.displayText);
+            counterTexts.add(updateFpsCounter.displayText);
+
+            fgScene.registerUpdateHandler(updateFpsCounter);
+            fgScene.registerUpdateHandler(drawFpsCounter);
+        }
+
+        if (Config.isShowUnstableRate() && !GameHelper.isAuto()) {
+            urText = new ChangeableText(720, 440, counterTextFont, "00.00 UR    ");
+            counterTexts.add(urText);
+        }
+
+        if (Config.isShowAverageOffset() && !GameHelper.isAuto()) {
+            avgOffsetText = new ChangeableText(720, 400, counterTextFont, "Avg offset: 0ms     ");
+            counterTexts.add(avgOffsetText);
+        }
+
+        if (Config.isDisplayRealTimePPCounter()) {
+            ppText = new ChangeableText(720, 360, counterTextFont,
+                    Config.getDifficultyAlgorithm() == DifficultyAlgorithm.droid ? "0.00dpp" : "0.00pp", 15);
+            counterTexts.add(ppText);
+        }
+
+        if (BuildConfig.DEBUG) {
+            memText = new ChangeableText(780, 520, counterTextFont, "0/0 MB    ");
+            counterTexts.add(memText);
+        }
+
+        updateCounterTexts();
+
+        // Attach the counter texts
+        for (var text : counterTexts) {
+            fgScene.attachChild(text);
+        }
 
         for (int i = 0; i < CursorCount; i++) {
             cursors[i] = new Cursor();
