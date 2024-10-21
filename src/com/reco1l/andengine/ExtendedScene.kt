@@ -55,6 +55,11 @@ class ExtendedScene : Scene(), IShape {
         return false
     }
 
+
+    override fun setColor(pRed: Float, pGreen: Float, pBlue: Float) {
+        Log.w("ExtendedScene", "Color is not supported for scenes.")
+    }
+
     override fun setCullingEnabled(pCullingEnabled: Boolean) {
         Log.w("ExtendedScene", "Culling is not supported for scenes.")
     }
