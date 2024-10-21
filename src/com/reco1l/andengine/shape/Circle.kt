@@ -21,7 +21,7 @@ class Circle : ExtendedEntity() {
      * The angle where the circle starts to draw in degrees. By default, it is -90 degrees.
      */
     var startAngle = -90f
-        set(@FloatRange(0.0, 360.0) value) {
+        set(@FloatRange(-360.0, 360.0) value) {
             if (field != value) {
                 field = value
                 updateVertexBuffer()
@@ -32,7 +32,7 @@ class Circle : ExtendedEntity() {
      * The angle where the circle ends to draw in degrees. By default, it is 270 degrees.
      */
     var endAngle = 270f
-        set(@FloatRange(0.0, 360.0) value) {
+        set(@FloatRange(-360.0, 360.0) value) {
             if (field != value) {
                 field = value
                 updateVertexBuffer()
