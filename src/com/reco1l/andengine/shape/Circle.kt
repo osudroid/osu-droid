@@ -3,7 +3,6 @@ package com.reco1l.andengine.shape
 import androidx.annotation.*
 import androidx.annotation.IntRange
 import com.reco1l.andengine.*
-import com.reco1l.andengine.shape.CircleVertexBuffer.Companion.DEFAULT_CIRCLE_SEGMENTS
 import com.reco1l.toolkt.*
 import org.anddev.andengine.engine.camera.*
 import org.anddev.andengine.opengl.util.*
@@ -14,30 +13,9 @@ import kotlin.math.*
 /**
  * A circle shape.
  *
- * @param segments The amount of segments that make up the circle.
- *                 Higher values result in a smoother circle but may impact performance.
  * @author Reco1l
  */
-class Circle(segments: Int = DEFAULT_CIRCLE_SEGMENTS) : ExtendedEntity(vertexBuffer = CircleVertexBuffer(segments)) {
-
-
-    /**
-     * The amount of segments that make up the circle.
-     * Higher values result in a smoother circle but may impact performance.
-     *
-     * By default, the value is [DEFAULT_CIRCLE_SEGMENTS].
-     *
-     * It is recommended to not update this value frequently, internally it will
-     * recreate the vertex buffer which can lead to performance degradation if it
-     * is done too often.
-     */
-    var segments = segments
-        set(@IntRange(from = 1) value) {
-            if (field != value) {
-                field = value
-                setVertexBuffer(CircleVertexBuffer(value))
-            }
-        }
+class Circle : ExtendedEntity() {
 
     /**
      * The angle where the circle starts to draw in degrees. By default, it is -90 degrees.
@@ -61,6 +39,22 @@ class Circle(segments: Int = DEFAULT_CIRCLE_SEGMENTS) : ExtendedEntity(vertexBuf
             }
         }
 
+    /**
+     * The detail factor of the circle segmentation.
+     *
+     * Lower values result in a smoother circle but may impact performance.
+     */
+    var detailFactor = 8f
+        set(value) {
+            if (field != value) {
+                field = value
+                shouldRebuildVertexBuffer = true
+            }
+        }
+
+
+    private var shouldRebuildVertexBuffer = true
+
 
     /**
      * Sets the portion of the circle to be drawn starting from the start angle.
@@ -73,6 +67,23 @@ class Circle(segments: Int = DEFAULT_CIRCLE_SEGMENTS) : ExtendedEntity(vertexBuf
     }
 
 
+    override fun setSize(newWidth: Float, newHeight: Float): Boolean {
+        if (super.setSize(newWidth, newHeight)) {
+            shouldRebuildVertexBuffer = true
+            return true
+        }
+        return false
+    }
+
+    override fun onContentSizeMeasured(): Boolean {
+        if (super.onContentSizeMeasured()) {
+            shouldRebuildVertexBuffer = true
+            return true
+        }
+        return false
+    }
+
+
     override fun onInitDraw(pGL: GL10) {
         super.onInitDraw(pGL)
 
@@ -82,6 +93,16 @@ class Circle(segments: Int = DEFAULT_CIRCLE_SEGMENTS) : ExtendedEntity(vertexBuf
     }
 
     override fun onUpdateVertexBuffer() {
+
+        if (shouldRebuildVertexBuffer) {
+            shouldRebuildVertexBuffer = false
+
+            val radio = max(width / 2f, height / 2f)
+            val segments = (MathF.PI * radio / detailFactor).toInt().coerceAtLeast(1)
+
+            setVertexBuffer(CircleVertexBuffer(segments))
+        }
+
         (vertexBuffer as CircleVertexBuffer).update(width, height, startAngle, endAngle)
     }
 
@@ -106,23 +127,27 @@ class CircleVertexBuffer(@IntRange(from = 1) val segments: Int) : VertexBuffer(
 
         val buffer = floatBuffer
 
-        val ratioX = width / 2f
-        val ratioY = height / 2f
+        val centerX = width / 2f
+        val centerY = height / 2f
 
-        buffer.put(0, ratioX)
-        buffer.put(1, ratioY)
+        buffer.put(0, centerX)
+        buffer.put(1, centerY)
 
         val startRadians = startAngle.toRadians()
         val endRadians = endAngle.toRadians()
 
         val deltaAngle = (endRadians - startRadians) / segments
 
-        for (i in 0..segments) {
+        // The first vertex is the center of the circle.
+        for (i in 1..segments + 1) {
 
-            val angle = startRadians + i * deltaAngle
+            val angle = startRadians + (i - 1) * deltaAngle
 
-            buffer.put((i + 1) * 2, ratioX + ratioX * cos(angle))
-            buffer.put((i + 1) * 2 + 1, ratioY + ratioY * sin(angle))
+            val x = centerX + centerX * cos(angle)
+            val y = centerY + centerY * sin(angle)
+
+            buffer.put(i * 2 + 0, x)
+            buffer.put(i * 2 + 1, y)
         }
 
         setHardwareBufferNeedsUpdate()
@@ -130,13 +155,6 @@ class CircleVertexBuffer(@IntRange(from = 1) val segments: Int) : VertexBuffer(
 
     fun draw(pGL: GL10) {
         pGL.glDrawArrays(GL11.GL_TRIANGLE_FAN, 0, segments + 2)
-    }
-
-
-    companion object {
-
-        const val DEFAULT_CIRCLE_SEGMENTS = 16
-
     }
 
 }
