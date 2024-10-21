@@ -154,7 +154,7 @@ abstract class ExtendedEntity(
             if (parent is Container) {
                 return (parent as Container).getChildDrawX(this)
             }
-            return x - originOffsetX + anchorOffsetX + translationX
+            return x + originOffsetX + anchorOffsetX + translationX
         }
 
     /**
@@ -166,20 +166,20 @@ abstract class ExtendedEntity(
             if (parent is Container) {
                 return (parent as Container).getChildDrawY(this)
             }
-            return y - originOffsetY + anchorOffsetY + translationY
+            return y + originOffsetY + anchorOffsetY + translationY
         }
 
     /**
      * The offset applied to the X axis according to the origin factor.
      */
     open val originOffsetX: Float
-        get() = width * originX
+        get() = -(width * originX)
 
     /**
      * The offset applied to the Y axis according to the origin factor.
      */
     open val originOffsetY: Float
-        get() = height * originY
+        get() = -(height * originY)
 
     /**
      * The offset applied to the X axis according to the anchor factor.

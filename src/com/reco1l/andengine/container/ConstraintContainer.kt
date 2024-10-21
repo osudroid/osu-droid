@@ -20,7 +20,7 @@ class ConstraintContainer : Container() {
         val constraint = constraints[child] ?: this
         val anchorOffsetX = constraint.width * child.anchorX
 
-        return child.x - child.originOffsetX + anchorOffsetX + child.translationX
+        return child.x + child.originOffsetX + anchorOffsetX + child.translationX
     }
 
     override fun getChildDrawY(child: ExtendedEntity): Float {
@@ -28,7 +28,7 @@ class ConstraintContainer : Container() {
         val constraint = constraints[child] ?: this
         val anchorOffsetY = constraint.height * child.anchorY
 
-        return child.y - child.originOffsetY + anchorOffsetY + child.translationY
+        return child.y + child.originOffsetY + anchorOffsetY + child.translationY
     }
 
 

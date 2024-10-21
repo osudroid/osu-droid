@@ -62,11 +62,11 @@ open class Container : ExtendedEntity() {
 
 
     open fun getChildDrawX(child: ExtendedEntity): Float {
-        return child.x - child.originOffsetX + child.anchorOffsetX + child.translationX
+        return child.x + child.originOffsetX + child.anchorOffsetX + child.translationX
     }
 
     open fun getChildDrawY(child: ExtendedEntity): Float {
-        return child.y - child.originOffsetY + child.anchorOffsetY + child.translationY
+        return child.y + child.originOffsetY + child.anchorOffsetY + child.translationY
     }
 
 
