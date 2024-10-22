@@ -223,6 +223,10 @@ class DroidDifficultyCalculator : DifficultyCalculator<DroidPlayableBeatmap, Dro
 
     @Suppress("UNCHECKED_CAST")
     override fun createDifficultyHitObjects(beatmap: DroidPlayableBeatmap, scope: CoroutineScope?): Array<DroidDifficultyHitObject> {
+        if (beatmap.hitObjects.objects.isEmpty()) {
+            return emptyArray()
+        }
+
         val clockRate = beatmap.overallSpeedMultiplier.toDouble()
 
         val greatWindow = (

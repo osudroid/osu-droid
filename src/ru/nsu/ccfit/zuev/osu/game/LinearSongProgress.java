@@ -8,20 +8,21 @@ import org.anddev.andengine.entity.scene.Scene;
 import ru.nsu.ccfit.zuev.osu.RGBColor;
 import ru.nsu.ccfit.zuev.osu.Utils;
 
-public class SongProgressBar extends GameObject {
+public class LinearSongProgress extends GameObject {
     private final Rectangle progressRect;
     private final Rectangle bgRect;
     private float time;
     private float startTime;
     private float passedTime;
+    private float initialPassedTime;
 
-    public SongProgressBar(final GameObjectListener listener,
-                           final Scene scene, final float time, final float startTime, final PointF pos) {
+    public LinearSongProgress(final GameObjectListener listener,
+                              final Scene scene, final float time, final float startTime, final PointF pos) {
         this(listener, scene, time, startTime, pos, Utils.toRes(300), Utils.toRes(7));
     }
 
-    public SongProgressBar(final GameObjectListener listener,
-                           final Scene scene, final float time, final float startTime, final PointF pos, float width, float height) {
+    public LinearSongProgress(final GameObjectListener listener,
+                              final Scene scene, final float time, final float startTime, final PointF pos, float width, float height) {
         this.time = time;
         this.startTime = startTime;
         if (listener != null)
@@ -46,7 +47,7 @@ public class SongProgressBar extends GameObject {
                     / (time - startTime));
         } else {
             passedTime = Math.min(startTime, passedTime + dt);
-            progressRect.setWidth(bgRect.getWidth() * passedTime / startTime);
+            progressRect.setWidth(bgRect.getWidth() * (passedTime - initialPassedTime) / (startTime - initialPassedTime));
             if (passedTime >= startTime) {
                 progressRect.setColor(1, 1, 150f / 255f);
             }
@@ -63,6 +64,10 @@ public class SongProgressBar extends GameObject {
 
     public void setPassedTime(float passedTime) {
         this.passedTime = passedTime;
+    }
+
+    public void setInitialPassedTime(float initialPassedTime) {
+        this.initialPassedTime = initialPassedTime;
     }
 
     public void setProgressRectColor(RGBColor color) {

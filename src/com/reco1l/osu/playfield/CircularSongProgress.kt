@@ -6,7 +6,7 @@ import com.reco1l.andengine.shape.*
 import com.reco1l.framework.*
 
 
-class SongProgress : Container() {
+class CircularSongProgress : Container() {
 
 
     override var autoSizeAxes = Axes.Both

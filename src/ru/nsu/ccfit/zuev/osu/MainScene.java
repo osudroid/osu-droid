@@ -61,7 +61,7 @@ import javax.microedition.khronos.opengles.GL10;
 
 import ru.nsu.ccfit.zuev.audio.BassSoundProvider;
 import ru.nsu.ccfit.zuev.audio.Status;
-import ru.nsu.ccfit.zuev.osu.game.SongProgressBar;
+import ru.nsu.ccfit.zuev.osu.game.LinearSongProgress;
 import ru.nsu.ccfit.zuev.osu.online.OnlineManager;
 import ru.nsu.ccfit.zuev.osu.online.OnlinePanel;
 import ru.nsu.ccfit.zuev.osu.online.OnlineScoring;
@@ -75,7 +75,7 @@ import ru.nsu.ccfit.zuev.osuplus.R;
  * Created by Fuuko on 2015/4/24.
  */
 public class MainScene implements IUpdateHandler {
-    public SongProgressBar progressBar;
+    public LinearSongProgress progressBar;
     public BeatmapInfo beatmapInfo;
     private Context context;
     private Sprite logo, logoOverlay, background, lastBackground;
@@ -486,7 +486,7 @@ public class MainScene implements IUpdateHandler {
         scene.registerTouchArea(music_next);
         scene.setTouchAreaBindingEnabled(true);
 
-        progressBar = new SongProgressBar(null, scene, 0, 0, new PointF(Utils.toRes(Config.getRES_WIDTH() - 320), Utils.toRes(100)));
+        progressBar = new LinearSongProgress(null, scene, 0, 0, new PointF(Utils.toRes(Config.getRES_WIDTH() - 320), Utils.toRes(100)));
         progressBar.setProgressRectColor(new RGBColor(0.9f, 0.9f, 0.9f));
         progressBar.setProgressRectAlpha(0.8f);
 

@@ -170,6 +170,7 @@ The following gameplay elements' display has been updated to match osu!stable:
 - Background music now reduces its volume when going from song selection menu to main menu
 - Increased the speed of background music volume ramp up after selecting a beatmapset in song selection menu
 - Matched skip time behavior with osu!stable
+- Revamped FPS counter
 
 # Removals
 

@@ -219,7 +219,12 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
     public float lastObjectEndTime;
 
     /**
-     * The time passed in seconds since the game has started in seconds.
+     * The initial {@link #elapsedTime} value when the game started, in seconds.
+     */
+    public float initialElapsedTime = 0;
+
+    /**
+     * The time passed since the game has started, in seconds.
      */
     public float elapsedTime = 0;
 
@@ -797,6 +802,7 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
 
         // Ensure user-defined offset has time to be applied.
         elapsedTime = Math.min(elapsedTime, firstObjectStartTime - objectTimePreempt - totalOffset);
+        initialElapsedTime = elapsedTime;
 
         metronome = null;
         if ((Config.getMetronomeSwitch() == 1 && GameHelper.isNightCore())
@@ -834,9 +840,10 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
         if (!Config.isHideInGameUI()) {
 
             if (Config.getProgressIndicatorType() == ProgressIndicatorType.BAR) {
-                var progressBar = new SongProgressBar(this, hud, (float) objects.getLast().getEndTime() / 1000, firstObjectStartTime, new PointF(0, Config.getRES_HEIGHT() - 7), Config.getRES_WIDTH(), 7);
+                var progressBar = new LinearSongProgress(this, hud, lastObjectEndTime, firstObjectStartTime, new PointF(0, Config.getRES_HEIGHT() - 7), Config.getRES_WIDTH(), 7);
                 progressBar.setProgressRectColor(new RGBColor(153f / 255f, 204f / 255f, 51f / 255f));
                 progressBar.setProgressRectAlpha(0.4f);
+                progressBar.setInitialPassedTime(initialElapsedTime);
             }
 
             if (Config.getErrorMeter() == 1 || (Config.getErrorMeter() == 2 && replaying)) {

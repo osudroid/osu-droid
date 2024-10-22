@@ -16,7 +16,7 @@ class GameplayHUD(private val stat: StatisticV2, private val game: GameScene, pr
 
     private val scoreCounter: ScoreCounter?
 
-    private val songProgress: SongProgress?
+    private val songProgress: CircularSongProgress?
 
     private val comboCounter: ComboCounter?
 
@@ -37,8 +37,12 @@ class GameplayHUD(private val stat: StatisticV2, private val game: GameScene, pr
             accuracyCounter = AccuracyCounter()
             attachChild(accuracyCounter)
 
-            songProgress = SongProgress()
-            attachChild(songProgress)
+            if (Config.getProgressIndicatorType() == TOP_RIGHT_PIE) {
+                songProgress = CircularSongProgress()
+                attachChild(songProgress)
+            } else {
+                songProgress = null
+            }
 
             scoreCounter.metric = Config.getScoreCounterMetric()
             scoreCounter.setValue(0)
@@ -74,7 +78,7 @@ class GameplayHUD(private val stat: StatisticV2, private val game: GameScene, pr
                 songProgress.y = accuracyCounter.y + accuracyCounter.heightScaled / 2f
 
                 if (game.elapsedTime < game.firstObjectStartTime) {
-                    songProgress.setProgress(game.elapsedTime / game.firstObjectStartTime, true)
+                    songProgress.setProgress((game.elapsedTime - game.initialElapsedTime) / (game.firstObjectStartTime - game.initialElapsedTime), true)
                 } else {
                     songProgress.setProgress((game.elapsedTime - game.firstObjectStartTime) / (game.lastObjectEndTime - game.firstObjectStartTime), false)
                 }
