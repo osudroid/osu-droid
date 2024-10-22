@@ -1,5 +1,6 @@
 package com.reco1l.andengine.sprite
 
+import android.util.*
 import com.reco1l.andengine.*
 import com.reco1l.andengine.shape.*
 import org.anddev.andengine.opengl.texture.region.*
@@ -10,19 +11,21 @@ import javax.microedition.khronos.opengles.*
 /**
  * Sprite that allows to change texture once created.
  */
-open class ExtendedSprite(textureRegion: TextureRegion? = null) : Rectangle() {
+open class ExtendedSprite(textureRegion: TextureRegion? = null) : Box() {
 
 
     override var autoSizeAxes = Axes.Both
-        set(value) {
-            if (field != value) {
-                field = value
 
-                onApplyInternalSize(
-                    textureRegion?.width?.toFloat() ?: 0f,
-                    textureRegion?.height?.toFloat() ?: 0f
-                )
-            }
+    override var contentWidth: Float
+        get() = textureRegion?.width?.toFloat() ?: 0f
+        set(_) {
+            Log.w("ExtendedSprite", "contentWidth is read-only for ExtendedSprite")
+        }
+
+    override var contentHeight: Float
+        get() = textureRegion?.height?.toFloat() ?: 0f
+        set(_) {
+            Log.w("ExtendedSprite", "contentHeight is read-only for ExtendedSprite")
         }
 
 
@@ -64,10 +67,7 @@ open class ExtendedSprite(textureRegion: TextureRegion? = null) : Rectangle() {
             value?.isFlippedVertical = flippedVertical
             value?.isFlippedHorizontal = flippedHorizontal
 
-            onApplyInternalSize(
-                value?.width?.toFloat() ?: 0f,
-                value?.height?.toFloat() ?: 0f
-            )
+            onContentSizeMeasured()
         }
 
     /**
@@ -107,10 +107,6 @@ open class ExtendedSprite(textureRegion: TextureRegion? = null) : Rectangle() {
         }
     }
 
-
-    override fun onUpdateVertexBuffer() {
-        (vertexBuffer as RectangleVertexBuffer).update(width, height)
-    }
 
     override fun onInitDraw(pGL: GL10) {
         super.onInitDraw(pGL)

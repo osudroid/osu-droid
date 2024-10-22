@@ -1,8 +1,8 @@
 package com.reco1l.osu.playfield
 
 import androidx.annotation.*
-import com.reco1l.osu.playfield.ProgressIndicatorType.Companion.TOP_RIGHT_PIE
-import com.reco1l.osu.playfield.ProgressIndicatorType.Companion.BOTTOM_LONG
+import com.reco1l.osu.playfield.ProgressIndicatorType.Companion.PIE
+import com.reco1l.osu.playfield.ProgressIndicatorType.Companion.BAR
 import com.reco1l.osu.playfield.ScoreCounterMetric.Companion.SCORE
 import org.anddev.andengine.engine.camera.hud.*
 import ru.nsu.ccfit.zuev.osu.*
@@ -37,7 +37,7 @@ class GameplayHUD(private val stat: StatisticV2, private val game: GameScene, pr
             accuracyCounter = AccuracyCounter()
             attachChild(accuracyCounter)
 
-            if (Config.getProgressIndicatorType() == TOP_RIGHT_PIE) {
+            if (Config.getProgressIndicatorType() == PIE) {
                 songProgress = CircularSongProgress()
                 attachChild(songProgress)
             } else {
@@ -73,7 +73,7 @@ class GameplayHUD(private val stat: StatisticV2, private val game: GameScene, pr
                 scoreCounter!!.setValue(stat.totalScoreWithMultiplier)
             }
 
-            if (Config.getProgressIndicatorType() == TOP_RIGHT_PIE) {
+            if (Config.getProgressIndicatorType() == PIE) {
                 songProgress!!.x = accuracyCounter.x - accuracyCounter.widthScaled - 18f
                 songProgress.y = accuracyCounter.y + accuracyCounter.heightScaled / 2f
 
@@ -105,11 +105,11 @@ class GameplayHUD(private val stat: StatisticV2, private val game: GameScene, pr
 }
 
 
-@IntDef(TOP_RIGHT_PIE, BOTTOM_LONG)
+@IntDef(PIE, BAR)
 annotation class ProgressIndicatorType {
     companion object {
-        const val TOP_RIGHT_PIE = 0
-        const val BOTTOM_LONG = 1
+        const val PIE = 0
+        const val BAR = 1
     }
 }
 

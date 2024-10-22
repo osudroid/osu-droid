@@ -67,7 +67,7 @@ open class SpriteFont(private val texturePrefix: StringSkinData) : LinearContain
             sprite.textureRegion = characters[char]
         }
 
-        onMeasureSize()
+        onMeasureContentSize()
     }
 
 
