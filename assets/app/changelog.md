@@ -76,6 +76,7 @@ for preventing accidental touches.
 - Added support for `SamplesMatchPlaybackRate` beatmap configuration
 - Added support for `scorebar-marker` texture
 - Added support for custom file hitsounds
+- Added support for circular song progress indicator in gameplay
 - Added an animation to slider end arrow rotation when snaking animation is enabled
 - Added a slight dim to hitobjects that cannot be hit yet in gameplay
 - Added a rotation effect to miss hit judgement effects in gameplay
@@ -171,6 +172,10 @@ The following gameplay elements' display has been updated to match osu!stable:
 - Increased the speed of background music volume ramp up after selecting a beatmapset in song selection menu
 - Matched skip time behavior with osu!stable
 - Revamped FPS counter
+  - Maximum FPS is now displayed
+  - Now displays two FPS counters: update FPS and draw FPS. The previous FPS counter only displays update FPS
+  - Changes color based on current FPS compared to maximum FPS
+- Gameplay HUD now ignores playfield size setting
 
 # Removals
 
@@ -178,6 +183,7 @@ The following gameplay elements' display has been updated to match osu!stable:
 - Removed internal volume adjustment of normal, whistle, and clap hitsounds, where normal and whistle hitsounds' volume
 were reduced by 20% and clap hitsounds' volume were reduced by 15%
 - Removed the "Player Name" setting. It is now combined with the "Username" option
+- Removed the "Display real-time PP counter" setting. It has been replaced with the "Score counter metric" setting under Gameplay section
 
 # Bug fixes
 
