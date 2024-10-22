@@ -37,7 +37,7 @@ class GameplayHUD(private val stat: StatisticV2, private val game: GameScene, pr
             accuracyCounter = AccuracyCounter()
             attachChild(accuracyCounter)
 
-            if (Config.getProgressIndicatorType() == TOP_RIGHT_PIE) {
+            if (Config.getProgressIndicatorType() == PIE) {
                 songProgress = CircularSongProgress()
                 attachChild(songProgress)
             } else {
