@@ -1,5 +1,6 @@
 package com.reco1l.andengine.shape
 
+import android.util.*
 import androidx.annotation.*
 import androidx.annotation.IntRange
 import com.reco1l.andengine.*
@@ -9,6 +10,7 @@ import org.anddev.andengine.opengl.util.*
 import org.anddev.andengine.opengl.vertex.*
 import javax.microedition.khronos.opengles.*
 import kotlin.math.*
+
 
 /**
  * A circle shape.
@@ -84,8 +86,7 @@ class Circle : ExtendedEntity() {
         if (shouldRebuildVertexBuffer) {
             shouldRebuildVertexBuffer = false
 
-            val radio = max(width / 2f, height / 2f)
-            val segments = max(1f, radio / MathF.PI).toInt()
+            val segments = approximateSegments(width, height, startAngle, endAngle)
 
             setVertexBuffer(CircleVertexBuffer(segments))
         }
@@ -95,6 +96,31 @@ class Circle : ExtendedEntity() {
 
     override fun drawVertices(pGL: GL10, pCamera: Camera) {
         (vertexBuffer as? CircleVertexBuffer)?.draw(pGL)
+    }
+
+
+    companion object {
+
+        fun approximateSegments(width: Float, height: Float, startAngle: Float, endAngle: Float): Int {
+
+            val averageRadius = (width + height) / 4f
+            val angleRange = abs(endAngle - startAngle)
+
+            var minSegmentAngle = 360f / averageRadius.toRadians()
+
+            if (minSegmentAngle > 10f) {
+                minSegmentAngle = 10f
+            }
+
+            val segments = angleRange / minSegmentAngle
+
+            if (segments < 3) {
+                return 3
+            }
+
+            return segments.toInt()
+        }
+
     }
 
 }

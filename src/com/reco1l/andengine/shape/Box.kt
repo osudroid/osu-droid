@@ -101,13 +101,15 @@ open class RoundedBox(segmentsPerArc: Int = 10) : ExtendedEntity(RoundedBoxVerte
 
     override fun onUpdateVertexBuffer() {
 
+        val cornerRadius = cornerRadius.coerceIn(0f, min(width, height) / 2f)
+
         if (shouldRebuildVertexBuffer) {
             shouldRebuildVertexBuffer = false
 
-            val radio = max(width / 2f, height / 2f)
-            val segments = max(1f, radio / MathF.PI).toInt()
+            // In this case for all 4 arcs the angle range is 90°.
+            val segmentsPerArc = Circle.approximateSegments(cornerRadius, cornerRadius, 0f, 90f)
 
-            setVertexBuffer(RoundedBoxVertexBuffer(segments))
+            setVertexBuffer(RoundedBoxVertexBuffer(segmentsPerArc))
         }
 
         (vertexBuffer as RoundedBoxVertexBuffer).update(width, height, cornerRadius)
@@ -125,7 +127,7 @@ open class RoundedBox(segmentsPerArc: Int = 10) : ExtendedEntity(RoundedBoxVerte
         GL11.GL_STATIC_DRAW, false
     ) {
 
-        fun update(width: Float, height: Float, rawCornerRadius: Float) {
+        fun update(width: Float, height: Float, cornerRadius: Float) {
 
             val buffer = floatBuffer
 
@@ -145,8 +147,6 @@ open class RoundedBox(segmentsPerArc: Int = 10) : ExtendedEntity(RoundedBoxVerte
                 buffer.put(index++, toX)
                 buffer.put(index++, toY)
             }
-
-            val cornerRadius = rawCornerRadius.coerceIn(0f, min(width, height) / 2f)
 
             // Quads:
             //     [1]
