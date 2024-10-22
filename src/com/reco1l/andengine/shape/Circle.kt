@@ -106,7 +106,7 @@ class CircleVertexBuffer(@IntRange(from = 1) val segments: Int) : VertexBuffer(
     // count and we add it twice so that the last vertex connects to the first one.
     (segments + 2) * 2,
 
-    GL11.GL_STATIC_DRAW, true
+    GL11.GL_STATIC_DRAW, false
 ) {
 
 

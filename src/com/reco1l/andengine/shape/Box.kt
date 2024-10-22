@@ -34,7 +34,7 @@ open class Box : ExtendedEntity(vertexBuffer = BoxVertexBuffer()) {
     }
 
 
-    class BoxVertexBuffer : VertexBuffer(4 * 2, GL11.GL_STATIC_DRAW, true) {
+    class BoxVertexBuffer : VertexBuffer(4 * 2, GL11.GL_STATIC_DRAW, false) {
 
         fun update(width: Float, height: Float) {
             floatBuffer.apply {
@@ -122,7 +122,7 @@ open class RoundedBox(segmentsPerArc: Int = 10) : ExtendedEntity(RoundedBoxVerte
 
         (5 /*Quads*/ * 4 + (segmentsPerArc + 2) /*Arcs*/ * 4) * 2,
 
-        GL11.GL_STATIC_DRAW, true
+        GL11.GL_STATIC_DRAW, false
     ) {
 
         fun update(width: Float, height: Float, rawCornerRadius: Float) {
