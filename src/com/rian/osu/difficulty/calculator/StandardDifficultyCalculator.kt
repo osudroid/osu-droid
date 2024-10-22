@@ -95,6 +95,10 @@ class StandardDifficultyCalculator : DifficultyCalculator<StandardPlayableBeatma
 
     @Suppress("UNCHECKED_CAST")
     override fun createDifficultyHitObjects(beatmap: StandardPlayableBeatmap, scope: CoroutineScope?): Array<StandardDifficultyHitObject> {
+        if (beatmap.hitObjects.objects.isEmpty()) {
+            return emptyArray()
+        }
+
         val clockRate = beatmap.overallSpeedMultiplier.toDouble()
         val greatWindow = StandardHitWindow(beatmap.difficulty.od).greatWindow.toDouble() / clockRate
 
