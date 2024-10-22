@@ -48,7 +48,7 @@ open class ScrollableContainer : Container() {
         private set
 
     /**
-     * The maximum velocity in px/s on the x-axis
+     * The maximum velocity in px/s on the x-axis.
      */
     var maxVelocityX = 10000f
 
@@ -311,7 +311,7 @@ open class ScrollableContainer : Container() {
                 var deltaX = (event.x - initialX).coerceAtMost(width)
                 var deltaY = (event.y - initialY).coerceAtMost(height)
 
-                val length = sqrt(deltaX * deltaX + deltaY * deltaY)
+                val length = hypot(deltaX, deltaY)
 
                 // Slow down the scroll when reaching the bounds.
                 if (scrollX + deltaX < 0 || scrollX + deltaX > maxScrollX) {

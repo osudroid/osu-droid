@@ -163,10 +163,8 @@ open class Container : ExtendedEntity() {
         if (mChildren != null) {
             try {
                 mChildren.fastForEach {
-                    if (it is ITouchArea) {
-                        if (it.contains(localX, localY)) {
-                            return it.onAreaTouched(event, localX, localY)
-                        }
+                    if (it is ITouchArea && it.contains(localX, localY)) {
+                        return it.onAreaTouched(event, localX, localY)
                     }
                 }
             } catch (e: IndexOutOfBoundsException) {

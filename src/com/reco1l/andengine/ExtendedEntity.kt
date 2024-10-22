@@ -271,18 +271,8 @@ abstract class ExtendedEntity(
 
     override fun applyTranslation(pGL: GL10, camera: Camera) {
 
-        val drawX: Float
-        val drawY: Float
-
-        val parent = parent
-
-        if (parent is Container) {
-            drawX = parent.getChildDrawX(this)
-            drawY = parent.getChildDrawY(this)
-        } else {
-            drawX = this.drawX
-            drawY = this.drawY
-        }
+        val drawX = this.drawX
+        val drawY = this.drawY
 
         if (drawX != 0f || drawY != 0f) {
             pGL.glTranslatef(drawX, drawY, 0f)

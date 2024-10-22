@@ -1,6 +1,5 @@
 package com.reco1l.andengine.shape
 
-import android.util.*
 import androidx.annotation.*
 import androidx.annotation.IntRange
 import com.reco1l.andengine.*
@@ -105,20 +104,9 @@ class Circle : ExtendedEntity() {
 
             val averageRadius = (width + height) / 4f
             val angleRange = abs(endAngle - startAngle)
+            val minSegmentAngle = min(10f, 360f / averageRadius.toRadians())
 
-            var minSegmentAngle = 360f / averageRadius.toRadians()
-
-            if (minSegmentAngle > 10f) {
-                minSegmentAngle = 10f
-            }
-
-            val segments = angleRange / minSegmentAngle
-
-            if (segments < 3) {
-                return 3
-            }
-
-            return segments.toInt()
+            return max(3, (angleRange / minSegmentAngle).toInt())
         }
 
     }
