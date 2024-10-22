@@ -555,7 +555,7 @@ abstract class ExtendedEntity(
     }
 
     override fun contains(x: Float, y: Float): Boolean {
-        return RectangularShapeCollisionChecker.checkContains(this, x + totalOffsetX, y + totalOffsetY)
+        return RectangularShapeCollisionChecker.checkContains(this, x - totalOffsetX, y - totalOffsetY)
     }
 
     override fun isCulled(pCamera: Camera): Boolean {
