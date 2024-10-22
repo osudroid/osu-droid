@@ -193,7 +193,7 @@ open class ScrollableContainer : Container() {
 
             if (scrollY < 0) {
                 velocityY = 0f
-                scrollY += (-scrollY) * 0.1f
+                scrollY += -scrollY * 0.1f
 
                 if (abs(scrollY) < INSIGNIFICANT_DISTANCE) {
                     scrollY = 0f
@@ -202,7 +202,7 @@ open class ScrollableContainer : Container() {
 
             if (scrollX < 0) {
                 velocityX = 0f
-                scrollX += (-scrollX) * 0.1f
+                scrollX += -scrollX * 0.1f
 
                 if (abs(scrollX) < INSIGNIFICANT_DISTANCE) {
                     scrollX = 0f
