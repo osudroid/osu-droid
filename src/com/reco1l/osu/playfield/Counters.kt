@@ -7,6 +7,7 @@ import com.reco1l.andengine.modifier.OnModifierFinished
 import ru.nsu.ccfit.zuev.osu.*
 import ru.nsu.ccfit.zuev.skins.*
 import java.text.*
+import kotlin.math.roundToInt
 
 class ScoreCounter : SpriteFont(OsuSkin.get().scorePrefix) {
 
@@ -29,24 +30,19 @@ class ScoreCounter : SpriteFont(OsuSkin.get().scorePrefix) {
 
 }
 
-class PPCounter(algorithm: DifficultyAlgorithm) : SpriteFont(OsuSkin.get().scorePrefix) {
-
-    private val format = DecimalFormat("0.00'${if (algorithm == DifficultyAlgorithm.droid) "dpp" else "pp"}'")
-
+class PPCounter(private val algorithm: DifficultyAlgorithm) : SpriteFont(OsuSkin.get().scorePrefix) {
 
     init {
         setAnchor(Anchor.TopRight)
         setOrigin(Anchor.TopRight)
         setScale(0.6f * 0.96f)
-
-        text = format.format(0.0)
+        setValue(0.0)
     }
 
 
     fun setValue(value: Double) {
-        text = format.format(value)
+        text = "${value.roundToInt()}${if (algorithm == DifficultyAlgorithm.droid) "dpp" else "pp"}"
     }
-
 }
 
 
