@@ -76,7 +76,6 @@ open class AnimatedSprite(frames: Array<TextureRegion?>) : ExtendedSprite() {
      */
     var elapsedSec = 0f
 
-
     /**
      * The current frame index.
      */
@@ -135,6 +134,8 @@ open class AnimatedSprite(frames: Array<TextureRegion?>) : ExtendedSprite() {
     override fun reset() {
         super.reset()
         elapsedSec = 0f
+        frameIndex = 0
+        isPlaying = true
     }
 
 
