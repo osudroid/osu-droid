@@ -624,6 +624,7 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
         failcount = 0;
         mainCursorId = -1;
         final LoadingScreen screen = new LoadingScreen();
+        engine.getCamera().setHUD(null);
         engine.setScene(screen.getScene());
 
         final String rfile = beatmapInfo != null ? replayFile : this.replayFilePath;
