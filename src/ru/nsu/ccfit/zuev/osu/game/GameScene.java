@@ -2537,7 +2537,7 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
         if (avgOffsetText != null) {
             float avgOffset = offsetRegs > 0 ? offsetSum / offsetRegs : 0;
 
-            avgOffsetText.setText("Avg offset: " + (int) (avgOffset * 1000f) + "ms");
+            avgOffsetText.setText("Avg offset: " + Math.round(avgOffset * 1000) + "ms");
         }
 
         if (urText != null) {
