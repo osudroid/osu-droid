@@ -91,11 +91,9 @@ class GameplayHUD(private val stat: StatisticV2, private val game: GameScene, pr
                 } else {
                     pieSongProgress.setProgress((game.elapsedTime - game.firstObjectStartTime) / (game.lastObjectEndTime - game.firstObjectStartTime), false)
                 }
-            } else {
-                if (Config.isDisplayRealTimePPCounter()) {
-                    ppCounter!!.x = accuracyCounter.x - accuracyCounter.widthScaled - 18f
-                    ppCounter.y = accuracyCounter.drawY
-                }
+            } else if (Config.isDisplayRealTimePPCounter()) {
+                ppCounter!!.x = accuracyCounter.x - accuracyCounter.widthScaled - 18f
+                ppCounter.y = accuracyCounter.drawY
             }
         }
 
