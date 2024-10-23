@@ -2541,7 +2541,7 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
         }
 
         if (urText != null) {
-            urText.setText(String.format(Locale.ENGLISH, "%.2f UR    ", stat != null ? stat.getUnstableRate() : 0));
+            urText.setText(Math.round(stat != null ? stat.getUnstableRate() : 0) + " UR");
         }
 
         if (BuildConfig.DEBUG) {
