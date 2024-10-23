@@ -82,7 +82,7 @@ for preventing accidental touches.
 - Added a rotation effect to miss hit judgement effects in gameplay
 - Added support for `skin.ini`'s `AnimationFramerate` setting in `skin.json`
   - The default value is `-1` when converting a `skin.ini` to `skin.json`, and `60` otherwise
-  - To use in `skin.json`, add the following entry to your `skin.json`:
+  - To use in `skin.json`, add the following entry:
     ```json
     {
       "Utils": {
@@ -91,7 +91,7 @@ for preventing accidental touches.
     }
     ```
 - Added support for `skin.ini`'s `LayeredHitSounds` setting in `skin.json`
-  - To use in `skin.json`, add the following entry to your `skin.json`:
+  - To use in `skin.json`, add the following entry:
     ```json
     {
       "Utils": {
@@ -100,7 +100,7 @@ for preventing accidental touches.
     }
     ```
 - Added support for `skin.ini`'s `SpinnerFrequencyModulate` setting in `skin.json`
-  - To use in `skin.json`, add the following entry to your `skin.json`:
+  - To use in `skin.json`, add the following entry:
     ```json
     {
       "Utils": {
@@ -109,7 +109,7 @@ for preventing accidental touches.
     }
     ```
 - Added support for `skin.ini`'s `SliderBallFlip` setting in `skin.json`
-  - To use in `skin.json`, add the following entry to your `skin.json`:
+  - To use in `skin.json`, add the following entry:
     ```json
     {
       "Utils": {
@@ -176,6 +176,7 @@ The following gameplay elements' display has been updated to match osu!stable:
   - Now displays two FPS counters: update FPS and draw FPS. The previous FPS counter only displays update FPS
   - Changes color based on current FPS compared to maximum FPS
 - Gameplay HUD now ignores playfield size setting
+- The real-time PP counter has been moved next to circular song progress or accuracy counter
 
 # Removals
 
@@ -183,7 +184,7 @@ The following gameplay elements' display has been updated to match osu!stable:
 - Removed internal volume adjustment of normal, whistle, and clap hitsounds, where normal and whistle hitsounds' volume
 were reduced by 20% and clap hitsounds' volume were reduced by 15%
 - Removed the "Player Name" setting. It is now combined with the "Username" option
-- Removed the "Display real-time PP counter" setting. It has been replaced with the "Score counter metric" setting under Gameplay section
+- Removed fractional part of real-time PP and unstable rate counters
 
 # Bug fixes
 
