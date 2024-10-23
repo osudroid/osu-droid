@@ -629,26 +629,7 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
 
         final String rfile = beatmapInfo != null ? replayFile : this.replayFilePath;
 
-        // Attach a dummy entity for computing draw FPS, as its frame rate is tied to the draw thread and not
-        // the update thread.
-        var drawFpsDummyEntity = new Entity() {
-            private long previousDrawTime;
 
-            @Override
-            protected void onManagedDraw(GL10 pGL, Camera pCamera) {
-                super.onManagedDraw(pGL, pCamera);
-
-                long currentDrawTime = SystemClock.uptimeMillis();
-
-                if (drawFpsCounter != null) {
-                    drawFpsCounter.updateFps((currentDrawTime - previousDrawTime) / 1000f);
-                }
-
-                previousDrawTime = currentDrawTime;
-            }
-        };
-
-        scene.attachChild(drawFpsDummyEntity);
 
         Execution.async(() -> {
 
@@ -737,6 +718,22 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
 
         if (Config.isShowFPS()) {
             drawFpsCounter = new DrawFPSCounter(new ChangeableText(790, 520, counterTextFont, "Draw: 999/999 FPS"));
+
+            // Attach a dummy entity for computing draw FPS, as its frame rate is tied to the draw thread and not
+            // the update thread.
+            hud.attachChild(new Entity() {
+                private long previousDrawTime;
+
+                @Override
+                protected void onManagedDraw(GL10 pGL, Camera pCamera) {
+                    long currentDrawTime = SystemClock.uptimeMillis();
+
+                    drawFpsCounter.updateFps((currentDrawTime - previousDrawTime) / 1000f);
+
+                    previousDrawTime = currentDrawTime;
+                }
+            });
+
             var updateFpsCounter = new UpdateFPSCounter(new ChangeableText(790, 480, counterTextFont, "Update: 999/999 FPS"), GameHelper.getSpeedMultiplier());
 
             counterTexts.add(drawFpsCounter.displayText);
