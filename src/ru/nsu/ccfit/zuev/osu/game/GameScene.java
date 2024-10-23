@@ -2564,10 +2564,12 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
             return;
         }
 
-        switch (Config.getDifficultyAlgorithm()) {
-            case droid -> hud.setPPCounterValue(getDroidPPAt(objectId));
-            case standard -> hud.setPPCounterValue(getStandardPPAt(objectId));
-        }
+        double pp = switch (Config.getDifficultyAlgorithm()) {
+            case droid -> getDroidPPAt(objectId);
+            case standard -> getStandardPPAt(objectId);
+        };
+
+        hud.setPPCounterValue(!Double.isNaN(pp) ? pp : 0);
     }
 
     private double getDroidPPAt(int objectId) {
