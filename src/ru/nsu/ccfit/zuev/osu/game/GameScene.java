@@ -29,7 +29,6 @@ import com.reco1l.andengine.ExtendedScene;
 import com.reco1l.osu.hitobjects.FollowPointConnection;
 import com.reco1l.osu.playfield.GameplayHUD;
 import com.reco1l.osu.playfield.ProgressIndicatorType;
-import com.reco1l.osu.playfield.ScoreCounterMetric;
 import com.reco1l.osu.hitobjects.SliderTickSprite;
 import com.reco1l.osu.ui.BlockAreaFragment;
 import com.reco1l.osu.ui.entity.GameplayLeaderboard;
@@ -546,7 +545,7 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
 
         GameObjectPool.getInstance().preload();
 
-        if (Config.getScoreCounterMetric() == ScoreCounterMetric.PP) {
+        if (Config.isDisplayRealTimePPCounter()) {
             // Calculate timed difficulty attributes
             var parameters = new DifficultyCalculationParameters(convertedMods, modMenu.getChangeSpeed());
             var sameParameters = lastDifficultyCalculationParameters != null &&
@@ -2561,13 +2560,13 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
     }
 
     private void updatePPCounter(int objectId) {
-        if (Config.isHideInGameUI() || Config.getScoreCounterMetric() == ScoreCounterMetric.SCORE) {
+        if (Config.isHideInGameUI() || !Config.isDisplayRealTimePPCounter()) {
             return;
         }
 
         switch (Config.getDifficultyAlgorithm()) {
-            case droid -> hud.setScoreCounterText(String.format(Locale.ENGLISH, "%.2f", getDroidPPAt(objectId)));
-            case standard -> hud.setScoreCounterText(String.format(Locale.ENGLISH, "%.2f", getStandardPPAt(objectId)));
+            case droid -> hud.setPPCounterValue(getDroidPPAt(objectId));
+            case standard -> hud.setPPCounterValue(getStandardPPAt(objectId));
         }
     }
 

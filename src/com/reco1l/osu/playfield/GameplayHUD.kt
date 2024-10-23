@@ -3,7 +3,6 @@ package com.reco1l.osu.playfield
 import androidx.annotation.*
 import com.reco1l.osu.playfield.ProgressIndicatorType.Companion.PIE
 import com.reco1l.osu.playfield.ProgressIndicatorType.Companion.BAR
-import com.reco1l.osu.playfield.ScoreCounterMetric.Companion.SCORE
 import org.anddev.andengine.engine.camera.hud.*
 import ru.nsu.ccfit.zuev.osu.*
 import ru.nsu.ccfit.zuev.osu.game.GameScene
@@ -14,11 +13,13 @@ class GameplayHUD(private val stat: StatisticV2, private val game: GameScene, pr
 
     private val healthBar: HealthBar?
 
+    private val ppCounter: PPCounter?
+
     private val scoreCounter: ScoreCounter?
 
-    private val songProgress: CircularSongProgress?
-
     private val comboCounter: ComboCounter?
+
+    private val pieSongProgress: CircularSongProgress?
 
     private val accuracyCounter: AccuracyCounter?
 
@@ -38,14 +39,20 @@ class GameplayHUD(private val stat: StatisticV2, private val game: GameScene, pr
             attachChild(accuracyCounter)
 
             if (Config.getProgressIndicatorType() == PIE) {
-                songProgress = CircularSongProgress()
-                attachChild(songProgress)
+                pieSongProgress = CircularSongProgress()
+                attachChild(pieSongProgress)
             } else {
-                songProgress = null
+                pieSongProgress = null
             }
 
-            scoreCounter.metric = Config.getScoreCounterMetric()
-            scoreCounter.setValue(0)
+            if (Config.isDisplayRealTimePPCounter()) {
+                ppCounter = PPCounter(Config.getDifficultyAlgorithm())
+                attachChild(ppCounter)
+            } else {
+                ppCounter = null
+            }
+
+            scoreCounter.setScore(0)
             scoreCounter.onUpdateText()
 
             accuracyCounter.y += scoreCounter.y + scoreCounter.height
@@ -53,10 +60,11 @@ class GameplayHUD(private val stat: StatisticV2, private val game: GameScene, pr
 
         } else {
             healthBar = null
+            ppCounter = null
             scoreCounter = null
             comboCounter = null
             accuracyCounter = null
-            songProgress = null
+            pieSongProgress = null
         }
 
     }
@@ -66,25 +74,28 @@ class GameplayHUD(private val stat: StatisticV2, private val game: GameScene, pr
 
         if (withStatistics) {
             comboCounter!!.setCombo(stat.combo)
+            scoreCounter!!.setScore(stat.totalScoreWithMultiplier)
             accuracyCounter!!.setAccuracy(stat.accuracy)
 
-            // PP is updated in `GameScene` class.
-            if (Config.getScoreCounterMetric() == SCORE) {
-                scoreCounter!!.setValue(stat.totalScoreWithMultiplier)
-            }
-
             if (Config.getProgressIndicatorType() == PIE) {
-                songProgress!!.x = accuracyCounter.x - accuracyCounter.widthScaled - 18f
-                songProgress.y = accuracyCounter.y + accuracyCounter.heightScaled / 2f
+                pieSongProgress!!.x = accuracyCounter.x - accuracyCounter.widthScaled - 18f
+                pieSongProgress.y = accuracyCounter.y + accuracyCounter.heightScaled / 2f
+
+                if (Config.isDisplayRealTimePPCounter()) {
+                    ppCounter!!.x = pieSongProgress.x - pieSongProgress.widthScaled - 18f
+                    ppCounter.y = pieSongProgress.drawY
+                }
 
                 if (game.elapsedTime < game.firstObjectStartTime) {
-                    songProgress.setProgress((game.elapsedTime - game.initialElapsedTime) / (game.firstObjectStartTime - game.initialElapsedTime), true)
+                    pieSongProgress.setProgress((game.elapsedTime - game.initialElapsedTime) / (game.firstObjectStartTime - game.initialElapsedTime), true)
                 } else {
-                    songProgress.setProgress((game.elapsedTime - game.firstObjectStartTime) / (game.lastObjectEndTime - game.firstObjectStartTime), false)
+                    pieSongProgress.setProgress((game.elapsedTime - game.firstObjectStartTime) / (game.lastObjectEndTime - game.firstObjectStartTime), false)
                 }
+            } else if (Config.isDisplayRealTimePPCounter()) {
+                ppCounter!!.x = accuracyCounter.x - accuracyCounter.widthScaled - 18f
+                ppCounter.y = accuracyCounter.drawY
             }
         }
-
 
         super.onManagedUpdate(pSecondsElapsed)
     }
@@ -98,8 +109,8 @@ class GameplayHUD(private val stat: StatisticV2, private val game: GameScene, pr
         healthBar?.flash()
     }
 
-    fun setScoreCounterText(score: String) {
-        scoreCounter?.text = score
+    fun setPPCounterValue(pp: Double) {
+        ppCounter?.setValue(pp)
     }
 
 }

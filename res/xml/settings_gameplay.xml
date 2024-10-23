@@ -70,14 +70,6 @@
 
         <com.reco1l.osu.ui.SelectPreference
             android:defaultValue="0"
-            android:entries="@array/opt_score_counter_names"
-            android:entryValues="@array/opt_score_counter_values"
-            android:key="scoreCounterMetric"
-            android:summary="@string/opt_score_counter_summary"
-            android:title="@string/opt_score_counter_title" />
-
-        <com.reco1l.osu.ui.SelectPreference
-            android:defaultValue="0"
             android:entries="@array/opt_progress_indicator_names"
             android:entryValues="@array/opt_progress_indicator_values"
             android:key="progressIndicatorType"
@@ -134,8 +126,15 @@
             android:defaultValue="true"
             android:key="displayScoreStatistics"
             android:summary="@string/opt_display_score_statistics_summary"
-            android:title="@string/opt_display_score_statistics_title"
+            android:title="@string/opt_display_score_statistics_title" />
+
+        <CheckBoxPreference
+            android:defaultValue="false"
+            android:key="displayRealTimePPCounter"
+            android:summary="@string/opt_display_realtime_pp_counter_summary"
+            android:title="@string/opt_display_realtime_pp_counter_title"
             app:layout="@layout/settings_preference_checkbox_bottom" />
+
 
     </PreferenceCategory>
 
