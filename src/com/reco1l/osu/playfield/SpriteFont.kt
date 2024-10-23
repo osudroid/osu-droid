@@ -24,15 +24,21 @@ open class SpriteFont(private val texturePrefix: StringSkinData) : LinearContain
     /**
      * The characters to display.
      */
-    val characters: Map<Char, TextureRegion> = mutableMapOf<Char, TextureRegion>().also {
+    val characters = mutableMapOf<Char, TextureRegion>().also {
 
-        for (i in 0..9) {
-            it['0' + i] = ResourceManager.getInstance().getTextureWithPrefix(texturePrefix, i.toString())
+        fun addChar(char: Char, textureName: String) {
+            it[char] = ResourceManager.getInstance().getTextureWithPrefix(texturePrefix, textureName)
         }
 
-        it['.'] = ResourceManager.getInstance().getTextureWithPrefix(texturePrefix, "comma")
-        it['%'] = ResourceManager.getInstance().getTextureWithPrefix(texturePrefix, "percent")
-        it['x'] = ResourceManager.getInstance().getTextureWithPrefix(texturePrefix, "x")
+        for (i in 0..9) {
+            addChar('0' + i, i.toString())
+        }
+
+        addChar('.', "comma")
+        addChar('%', "percent")
+        addChar('x', "x")
+        addChar('d', "d")
+        addChar('p', "p")
 
     }.toMap()
 

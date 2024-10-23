@@ -19,7 +19,6 @@ import java.util.UUID;
 
 import com.reco1l.osu.multiplayer.Multiplayer;
 import com.reco1l.osu.playfield.ProgressIndicatorType;
-import com.reco1l.osu.playfield.ScoreCounterMetric;
 
 import net.margaritov.preference.colorpicker.ColorPickerPreference;
 
@@ -77,6 +76,7 @@ public class Config {
         receiveAnnouncements,
         enableStoryboard,
         safeBeatmapBg,
+        displayRealTimePPCounter,
         useNightcoreOnMultiplayer,
         videoEnabled,
         deleteUnsupportedVideos,
@@ -90,7 +90,6 @@ public class Config {
         errorMeter,
         spinnerStyle,
         metronomeSwitch,
-        scoreCounterMetric,
         progressIndicatorType;
     
     private static float soundVolume,
@@ -132,7 +131,6 @@ public class Config {
         keepBackgroundAspectRatio = prefs.getBoolean("keepBackgroundAspectRatio", false);
         noChangeDimInBreaks = prefs.getBoolean("noChangeDimInBreaks", false);
         dimHitObjects = prefs.getBoolean("dimHitObjects", true);
-        scoreCounterMetric = Integer.parseInt(prefs.getString("scoreCounterMetric", "0"));
         progressIndicatorType = Integer.parseInt(prefs.getString("progressIndicatorType", "0"));
 
         setSize();
@@ -226,6 +224,7 @@ public class Config {
         hideInGameUI = prefs.getBoolean("hideInGameUI", false);
         receiveAnnouncements = prefs.getBoolean("receiveAnnouncements", true);
         safeBeatmapBg = prefs.getBoolean("safebeatmapbg", false);
+        displayRealTimePPCounter = prefs.getBoolean("displayRealTimePPCounter", false);
         difficultyAlgorithm = DifficultyAlgorithm.droid;
 
         // Multiplayer
@@ -299,6 +298,10 @@ public class Config {
 
     public static boolean isDisplayScoreStatistics() {
         return displayScoreStatistics;
+    }
+
+    public static boolean isDisplayRealTimePPCounter() {
+        return displayRealTimePPCounter;
     }
 
     public static DifficultyAlgorithm getDifficultyAlgorithm() {
@@ -803,11 +806,6 @@ public class Config {
 
     public static boolean isDimHitObjects() {
         return dimHitObjects;
-    }
-
-    @ScoreCounterMetric
-    public static int getScoreCounterMetric() {
-        return scoreCounterMetric;
     }
 
     @ProgressIndicatorType
