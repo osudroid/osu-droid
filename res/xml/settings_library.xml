@@ -2,7 +2,7 @@
 <androidx.preference.PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto">
 
-    <PreferenceCategory android:title="Import">
+    <PreferenceCategory android:title="@string/opt_category_import">
 
         <CheckBoxPreference
             android:defaultValue="true"
@@ -36,7 +36,7 @@
 
     </PreferenceCategory>
 
-    <PreferenceCategory android:title="Metadata">
+    <PreferenceCategory android:title="@string/opt_category_metadata">
 
         <CheckBoxPreference
             android:defaultValue="false"
@@ -47,7 +47,7 @@
 
     </PreferenceCategory>
 
-    <PreferenceCategory android:title="Storage">
+    <PreferenceCategory android:title="@string/opt_category_storage">
 
         <Preference
             android:key="clear_beatmap_cache"

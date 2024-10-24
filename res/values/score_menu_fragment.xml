@@ -1,9 +1,0 @@
-<?xml version="1.0" encoding="utf-8"?>
-<resources>
-    <!-- after 1.6.7(beta1) -->
-    <string name="frg_score_menu_title">Score</string>
-    <string name="frg_score_menu_export_score">Export Score</string>
-    <string name="frg_score_menu_export_failed">Failed to export replay!</string>
-    <string name="frg_score_menu_export_succeed" formatted="true">Replay is saved to %s</string>
-
-</resources>
