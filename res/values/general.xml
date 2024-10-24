@@ -18,12 +18,12 @@
     <string name="app_run_code_error">Fatal error encountered</string>
 
     <!-- Errors -->
-    <string name="network_not_connected">网络连接失败，请检查网络设置</string>
-    <string name="xml_parser_failed">数据解析异常</string>
-    <string name="io_exception_error">文件流异常</string>
-    <string name="http_status_code_error">网络异常，错误码：%d</string>
-    <string name="http_exception_error">网络异常，请求超时</string>
-    <string name="socket_exception_error">网络异常，读取数据超时</string>
+    <string name="network_not_connected">Network connection failed, please check network settings</string>
+    <string name="xml_parser_failed">Data parsing failed</string>
+    <string name="io_exception_error">File Stream Exception</string>
+    <string name="http_status_code_error">Network exception, error code: %d</string>
+    <string name="http_exception_error">Network exception, request timeout</string>
+    <string name="socket_exception_error">Network exception, read data timeout</string>
 
 
     <!-- Accessibility -->
