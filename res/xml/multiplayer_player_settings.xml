@@ -2,30 +2,30 @@
 <PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto">
 
-    <PreferenceCategory android:title="Team">
+    <PreferenceCategory android:title="@string/mp_room_category_teams">
 
         <com.reco1l.osu.ui.SelectPreference
-            android:entries="@array/team_names"
-            android:entryValues="@array/team_values"
+            android:entries="@array/mp_team_names"
+            android:entryValues="@array/mp_team_values"
             android:key="player_team"
-            android:summary="Change team"
-            android:title="Team"
+            android:summary="@string/mp_room_category_teams_summary"
+            android:title="@string/mp_room_category_teams_title"
             app:layout="@layout/settings_preference_bottom" />
 
     </PreferenceCategory>
 
-    <PreferenceCategory android:title="In-game">
+    <PreferenceCategory android:title="@string/mp_room_category_in_game">
 
         <CheckBoxPreference
             android:defaultValue="true"
             android:key="player_submitScore"
-            android:summary="Submit your score at the end of the round if you did not fail"
-            android:title="Enable score submission" />
+            android:summary="@string/mp_room_enable_score_submission_summary"
+            android:title="@string/mp_room_enable_score_submission_title" />
 
         <CheckBoxPreference
             android:key="player_nightcore"
-            android:summary="Enable NightCore mod instead when DoubleTime is enabled"
-            android:title="Use NightCore"
+            android:summary="@string/mp_room_nightcore_summary"
+            android:title="@string/mp_room_nightcore_title"
             app:layout="@layout/settings_preference_checkbox_bottom" />
 
     </PreferenceCategory>

@@ -19,7 +19,6 @@ import ru.nsu.ccfit.zuev.osu.online.OnlineManager.updateEndpoint
 import ru.nsu.ccfit.zuev.osuplus.BuildConfig.APPLICATION_ID
 import ru.nsu.ccfit.zuev.osuplus.R.string.changelog_title
 import ru.nsu.ccfit.zuev.osuplus.R.string.beatmap_downloader_cancel
-import ru.nsu.ccfit.zuev.osuplus.R.string.update_dialog_button_changelog
 import ru.nsu.ccfit.zuev.osuplus.R.string.update_dialog_button_update
 import ru.nsu.ccfit.zuev.osuplus.R.string.update_dialog_message
 import ru.nsu.ccfit.zuev.osuplus.R.string.update_info_download_canceled
@@ -66,7 +65,7 @@ object UpdateManager: IDownloaderObserver
                         duration = LENGTH_INDEFINITE
 
                         // Show changelog button.
-                        setAction(update_dialog_button_changelog) {
+                        setAction(changelog_title) {
 
                             MarkdownFragment().apply {
                                 setTitle(changelog_title)

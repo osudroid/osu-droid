@@ -296,7 +296,7 @@ class SettingsFragment : com.edlplan.ui.fragment.SettingsFragment() {
     private fun handleLibrarySectionPreferences() {
         findPreference<Preference>("clear_beatmap_cache")!!.setOnPreferenceClickListener {
             LibraryManager.clearDatabase()
-            ToastLogger.showText(StringTable.get(R.string.message_lib_cleared), true)
+            ToastLogger.showText(StringTable.get(R.string.library_cleared), true)
             true
         }
 

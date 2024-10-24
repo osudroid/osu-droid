@@ -4,7 +4,7 @@
 
     <PreferenceCategory
         android:key="onlineOption_normal"
-        android:title="Online">
+        android:title="@string/opt_category_online">
 
         <CheckBoxPreference
             android:defaultValue="false"
@@ -32,7 +32,7 @@
 
     <PreferenceCategory
         android:key="onlineOption_user"
-        android:title="Account">
+        android:title="@string/opt_category_account">
 
         <com.reco1l.osu.ui.InputPreference
             android:key="onlineUsername"
@@ -53,7 +53,7 @@
 
     </PreferenceCategory>
 
-    <PreferenceCategory android:title="Community">
+    <PreferenceCategory android:title="@string/opt_category_community">
 
         <CheckBoxPreference
             android:defaultValue="true"
@@ -64,7 +64,7 @@
 
     </PreferenceCategory>
 
-    <PreferenceCategory android:title="Updates">
+    <PreferenceCategory android:title="@string/opt_category_updates">
 
         <Preference
             android:key="update"
