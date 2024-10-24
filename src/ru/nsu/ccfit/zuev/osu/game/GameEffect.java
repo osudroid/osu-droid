@@ -56,7 +56,7 @@ public class GameEffect extends GameObject {
     public void init(final Scene scene, final PointF pos, final float scale,
                      final UniversalModifier... entityModifiers) {
         if (hit instanceof AnimatedSprite animatedHit) {
-            animatedHit.setElapsedSec(0f);
+            animatedHit.reset();
         }
         hit.setPosition(pos.x, pos.y);
         hit.setOrigin(Anchor.Center);
