@@ -13,7 +13,7 @@ import kotlin.random.*
  * Converts the bitmap to a safe for work version where the content is black and the bounds are red.
  */
 @JvmOverloads
-fun Bitmap?.paintBitmap(boundSize: Int = 1, boundColor: Int = Random.nextColor(), fillColor: Int = 0x33000000, preserveShape: Boolean = keepTexturesShapeInNoTexturesMode): Bitmap? {
+fun Bitmap?.paintBitmap(boundSize: Int = if (keepTexturesShapeInNoTexturesMode) 1 else 3, boundColor: Int = Random.nextColor(), fillColor: Int = 0x33000000, preserveShape: Boolean = keepTexturesShapeInNoTexturesMode): Bitmap? {
 
     if (this == null) {
         return null
