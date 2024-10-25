@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-<!-- these strings are in the same order as game settings! -->
+<!--NOTE: these strings are in the same order as game settings! -->
 
     <string-array name="placeholder_array">
         <item>placeholder</item>
@@ -294,5 +294,7 @@
     <!-- Miscellaneous -->
     <string name="opt_safe_beatmap_bg_title">Safe beatmap background</string>
     <string name="opt_safe_beatmap_bg_summary">Change all of the beatmaps\' background to the menu-background image from your skin</string>
+
+<!-- All new strings should present below for better managing locals... -->
 
 </resources>

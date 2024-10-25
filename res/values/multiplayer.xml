@@ -76,4 +76,7 @@
     <string name="mp_room_nightcore_title">Use NightCore</string>
     <string name="mp_room_nightcore_summary">Enable NightCore mod instead when DoubleTime is enabled</string>
 
+
+<!-- All new strings should present below for better managing locals... -->
+
 </resources>

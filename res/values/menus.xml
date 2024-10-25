@@ -61,4 +61,6 @@
     <string name="force_diffstat_mod_unpickable">Some mods have been disabled as all forced difficulty statistics are enabled.</string>
 
 
+<!-- All new strings should present below for better managing locals... -->
+
 </resources>

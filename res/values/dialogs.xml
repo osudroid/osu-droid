@@ -9,4 +9,6 @@
     <string name="dialog_visit_osudroid_profile_page">Do you want to visit your profile page?</string>
     <string name="dialog_visit_osudroid_website">Do you want to visit the official osu!droid website?</string>
 
+<!-- All new strings should present below for better managing locals... -->
+
 </resources>

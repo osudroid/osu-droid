@@ -19,4 +19,6 @@
     <string name="replay_wrongmap">Replay doesn\'t match the map</string>
     <string name="replay_corrupted">Replay file is corrupted</string>
 
+<!-- All new strings should present below for better managing locals... -->
+
 </resources>

@@ -83,4 +83,6 @@
     <string name="update_info_updated">Update successfully installed!</string>
     <string name="update_info_latest">No new updates available</string>
 
+<!-- All new strings should present below for better managing locals... -->
+
 </resources>
