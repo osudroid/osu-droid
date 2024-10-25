@@ -274,6 +274,7 @@ public class ResourceManager {
                         unloadTexture(textureName);
                     } else {
                         loadTexture(textureName, "gfx/" + assetName, false);
+                        parseFrameIndex(textureName, false);
                     }
                 }
             }
