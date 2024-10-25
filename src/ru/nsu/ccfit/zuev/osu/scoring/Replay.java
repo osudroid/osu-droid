@@ -43,8 +43,8 @@ public class Replay {
     public int replayVersion;
     public StatisticV2 stat = null;
     private String md5 = "";
-    private String mapFile = "";
-    private String mapName = "";
+    private String beatmapName = "";
+    private String beatmapsetName = "";
     private boolean isSaving;
     public static float oldChangeSpeed = 1.0f;
     public static float oldFLFollowDelay = FlashLightEntity.defaultMoveDelayS;
@@ -68,10 +68,10 @@ public class Replay {
         }
     }
 
-    public void setMap(String mapName, String file, String md5) {
-        this.mapName = mapName;
+    public void setBeatmap(String beatmapsetName, String beatmapName, String md5) {
+        this.beatmapsetName = beatmapsetName;
         this.md5 = md5;
-        this.mapFile = file;
+        this.beatmapName = beatmapName;
     }
 
     public void setObjectCount(int count) {
@@ -140,8 +140,8 @@ public class Replay {
 
         try {
             os.writeObject(new ReplayVersion());
-            os.writeObject(mapName);
-            os.writeObject(mapFile);
+            os.writeObject(beatmapsetName);
+            os.writeObject(beatmapName);
             os.writeObject(md5);
 
             if (stat != null) {
@@ -229,21 +229,21 @@ public class Replay {
                 Debug.i("Other replay version");
                 version = ((ReplayVersion) firstObject).version;
                 replayVersion = version;
-                mapName = (String) os.readObject();
+                beatmapsetName = (String) os.readObject();
             } else {
-                mapName = (String) firstObject;
+                beatmapsetName = (String) firstObject;
             }
-            mapFile = (String) os.readObject();
+            beatmapName = (String) os.readObject();
             md5 = (String) os.readObject();
 
-            Debug.i(mapName);
-            Debug.i(mapFile);
+            Debug.i(beatmapsetName);
+            Debug.i(beatmapName);
             Debug.i(md5);
 
             if (version >= 3) {
                 stat = new StatisticV2();
                 stat.setReplayFilename(new File(replayFilePath).getName());
-                stat.setBeatmap(mapName, mapFile);
+                stat.setBeatmap(beatmapsetName, beatmapName);
                 stat.setTime(os.readLong());
                 stat.setHit300k(os.readInt());
                 stat.setHit300(os.readInt());
@@ -319,10 +319,10 @@ public class Replay {
             String mFile = (String) os.readObject();
             String mmd5 = (String) os.readObject();
 
-            if (!mName.equals(mapName) && !mFile.equals(mapFile)) {
+            if (!mName.equals(beatmapsetName) && !mFile.equals(beatmapName)) {
                 Debug.i("Replay doesn't match the map!");
-                Debug.i(mapName + " ::: " + mName);
-                Debug.i(mapFile + " ::: " + mFile);
+                Debug.i(beatmapsetName + " ::: " + mName);
+                Debug.i(beatmapName + " ::: " + mFile);
                 Debug.i(md5 + " ::: " + mmd5);
                 ToastLogger.showTextId(R.string.replay_wrongmap, true);
                 os.close();
@@ -332,7 +332,7 @@ public class Replay {
             if (version >= 3) {
                 stat = new StatisticV2();
                 stat.setReplayFilename(new File(replayFilePath).getName());
-                stat.setBeatmap(mapName, mapFile);
+                stat.setBeatmap(beatmapsetName, beatmapName);
                 stat.setTime(os.readLong());
                 stat.setHit300k(os.readInt());
                 stat.setHit300(os.readInt());
@@ -416,12 +416,12 @@ public class Replay {
         return md5;
     }
 
-    public String getMapFile() {
-        return mapFile;
+    public String getBeatmapName() {
+        return beatmapName;
     }
 
-    public String getMapName() {
-        return mapName;
+    public String getBeatmapsetName() {
+        return beatmapsetName;
     }
 
     /*
