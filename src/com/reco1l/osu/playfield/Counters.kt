@@ -21,6 +21,7 @@ class ScoreCounter : SpriteFont(OsuSkin.get().scorePrefix) {
         setScale(0.96f)
 
         x = -10f
+        spacing = -OsuSkin.get().scoreOverlap
     }
 
 
@@ -83,6 +84,7 @@ class ComboCounter : Container() {
         it.translationY = -(FONT_HEIGHT_RATIO * it.height + VERTICAL_OFFSET)
 
         it.y = -(1 - FONT_HEIGHT_RATIO) * it.height + VERTICAL_OFFSET
+        it.spacing = -OsuSkin.get().comboOverlap
 
         attachChild(it)
 
@@ -97,6 +99,7 @@ class ComboCounter : Container() {
         it.translationY = -(FONT_HEIGHT_RATIO * it.height + VERTICAL_OFFSET)
 
         it.y = -(1 - FONT_HEIGHT_RATIO) * it.height + VERTICAL_OFFSET
+        it.spacing = -OsuSkin.get().comboOverlap
 
         attachChild(it)
     }

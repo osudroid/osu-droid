@@ -44,7 +44,9 @@ public class OsuSkin {
 
     protected final StringSkinData hitCirclePrefix = new StringSkinData("hitCirclePrefix", "default");
     protected final StringSkinData scorePrefix = new StringSkinData("scorePrefix", "score");
+    protected final FloatSkinData scoreOverlap = new FloatSkinData("scoreOverlap", 0);
     protected final StringSkinData comboPrefix = new StringSkinData("comboPrefix", "score");
+    protected final FloatSkinData comboOverlap = new FloatSkinData("comboOverlap", 0);
 
     protected final HashMap<String, SkinLayout> layoutData = new HashMap<>();
     protected final HashMap<String, RGBColor> colorData = new HashMap<>();
@@ -157,8 +159,16 @@ public class OsuSkin {
         return scorePrefix;
     }
 
+    public float getScoreOverlap() {
+        return scoreOverlap.getCurrentValue();
+    }
+
     public StringSkinData getComboPrefix() {
         return comboPrefix;
+    }
+
+    public float getComboOverlap() {
+        return comboOverlap.getCurrentValue();
     }
 
     public float getHitCircleOverlap() {
