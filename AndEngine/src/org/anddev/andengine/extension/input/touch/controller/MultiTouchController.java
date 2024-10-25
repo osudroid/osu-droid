@@ -24,12 +24,14 @@ public class MultiTouchController extends BaseTouchController {
 	// ===========================================================
 	// Constructors
 	// ===========================================================
-	
-	public MultiTouchController() throws MultiTouchException {
-		if(MultiTouch.isSupportedByAndroidVersion() == false) {
+
+	// BEGIN osu!droid modified - Remove Android version check.
+	public MultiTouchController() /*throws MultiTouchException*/ {
+		/*if(MultiTouch.isSupportedByAndroidVersion() == false) {
 			throw new MultiTouchException();
-		}
+		}*/
 	}
+	// END osu!droid modified
 
 	// ===========================================================
 	// Getter & Setter

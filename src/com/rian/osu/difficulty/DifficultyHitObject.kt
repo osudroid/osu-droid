@@ -4,7 +4,6 @@ import com.rian.osu.GameMode
 import com.rian.osu.beatmap.hitobject.HitObject
 import com.rian.osu.beatmap.hitobject.Slider
 import com.rian.osu.beatmap.hitobject.Spinner
-import com.rian.osu.beatmap.hitobject.getEndTime
 import com.rian.osu.beatmap.hitobject.sliderobject.SliderRepeat
 import com.rian.osu.math.Precision.almostEquals
 import com.rian.osu.math.Vector2
@@ -39,7 +38,7 @@ abstract class DifficultyHitObject(
     /**
      * Other hit objects in the beatmap, including this hit object.
      */
-    protected val difficultyHitObjects: MutableList<out DifficultyHitObject>,
+    protected val difficultyHitObjects: Array<out DifficultyHitObject>,
 
     /**
      * The index of this hit object in the list of all hit objects.
@@ -47,7 +46,12 @@ abstract class DifficultyHitObject(
      * This is one less than the actual index of the hit object in the beatmap.
      */
     @JvmField
-    val index: Int
+    val index: Int,
+
+    /**
+     * The great window of the hit object.
+     */
+    greatWindow: Double
 ) {
     /**
      * The normalized distance from the "lazy" end position of the previous hit object to the start position of this hit object.
@@ -75,7 +79,7 @@ abstract class DifficultyHitObject(
     /**
      * The time taken to travel through [minimumJumpDistance], with a minimum value of 25ms.
      */
-    var minimumJumpTime = MIN_DELTA_TIME
+    var minimumJumpTime = MIN_DELTA_TIME.toDouble()
 
     /**
      * The normalized distance between the start and end position of this hit object.
@@ -87,7 +91,7 @@ abstract class DifficultyHitObject(
      * The time taken to travel through [travelDistance], with a minimum value of 25ms for sliders.
      */
     @JvmField
-    var travelTime = MIN_DELTA_TIME
+    var travelTime = MIN_DELTA_TIME.toDouble()
 
     /**
      * Angle the player has to take to hit this hit object.
@@ -108,7 +112,7 @@ abstract class DifficultyHitObject(
      */
     // Capped to 25ms to prevent difficulty calculation breaking from simultaneous objects.
     @JvmField
-    val strainTime = if (lastObj != null) max(deltaTime, MIN_DELTA_TIME) else 0.0
+    val strainTime = if (lastObj != null) max(deltaTime, MIN_DELTA_TIME.toDouble()) else 0.0
 
     /**
      * Adjusted start time of the hit object, taking speed multiplier into account.
@@ -120,7 +124,13 @@ abstract class DifficultyHitObject(
      * Adjusted end time of the hit object, taking speed multiplier into account.
      */
     @JvmField
-    val endTime = obj.getEndTime() / clockRate
+    val endTime = obj.endTime / clockRate
+
+    /**
+     * The full great window of the hit object.
+     */
+    @JvmField
+    val fullGreatWindow = greatWindow * 2
 
     protected abstract val mode: GameMode
     protected abstract val scalingFactor: Float
@@ -145,7 +155,7 @@ abstract class DifficultyHitObject(
      * @return The [DifficultyHitObject] at the index with respect to the current
      * [DifficultyHitObject]'s index, or `null` if the index is out of range.
      */
-    open fun previous(backwardsIndex: Int) = difficultyHitObjects.getOrNull(index - (backwardsIndex + 1))
+    open fun previous(backwardsIndex: Int) = if (index - (backwardsIndex + 1) >= 0) difficultyHitObjects[index - (backwardsIndex + 1)] else null
 
     /**
      * Gets the [DifficultyHitObject] at a specific index with respect to the current
@@ -157,7 +167,7 @@ abstract class DifficultyHitObject(
      * @return The [DifficultyHitObject] at the index with respect to the current
      * [DifficultyHitObject]'s index, or `null` if the index is out of range.
      */
-    open fun next(forwardsIndex: Int) = difficultyHitObjects.getOrNull(index + forwardsIndex + 1)
+    open fun next(forwardsIndex: Int) = if (index + forwardsIndex + 1 < difficultyHitObjects.size) difficultyHitObjects[index + forwardsIndex + 1] else null
 
     /**
      * Calculates the opacity of the hit object at a given time.
@@ -188,6 +198,26 @@ abstract class DifficultyHitObject(
         return nonHiddenOpacity
     }
 
+    /**
+     * How possible is it to doubletap this object together with the next one and get perfect
+     * judgement in range from 0 to 1.
+     *
+     * A value closer to 1 indicates a higher possibility.
+     */
+    val doubletapness: Double
+        get() {
+            val next = next(0) ?: return 1.0
+
+            val currentDeltaTime = max(1.0, deltaTime)
+            val nextDeltaTime = max(1.0, next.deltaTime)
+            val deltaDifference = abs(nextDeltaTime - currentDeltaTime)
+
+            val speedRatio = currentDeltaTime / max(currentDeltaTime, deltaDifference)
+            val windowRatio = min(1.0, currentDeltaTime / fullGreatWindow).pow(2)
+
+            return 1 - speedRatio.pow(1 - windowRatio)
+        }
+
     private fun setDistances(clockRate: Double) {
         if (obj is Slider) {
             computeSliderCursorPosition(obj)
@@ -199,7 +229,7 @@ abstract class DifficultyHitObject(
                 GameMode.Standard -> (1 + obj.repeatCount / 2.5).pow(1 / 2.5)
             }
 
-            travelTime = max(obj.lazyTravelTime / clockRate, MIN_DELTA_TIME)
+            travelTime = max(obj.lazyTravelTime / clockRate, MIN_DELTA_TIME.toDouble())
         }
 
         // We don't need to calculate either angle or distance when one of the last->curr objects
@@ -210,14 +240,14 @@ abstract class DifficultyHitObject(
 
         val lastCursorPosition = getEndCursorPosition(lastObj)
 
-        lazyJumpDistance = (obj.getStackedPosition(mode) * scalingFactor - lastCursorPosition * scalingFactor).length.toDouble()
+        lazyJumpDistance = (obj.difficultyStackedPosition * scalingFactor - lastCursorPosition * scalingFactor).length.toDouble()
         minimumJumpTime = strainTime
         minimumJumpDistance = lazyJumpDistance
 
         if (lastObj is Slider) {
-            val lastTravelTime = max(lastObj.lazyTravelTime / clockRate, MIN_DELTA_TIME)
+            val lastTravelTime = max(lastObj.lazyTravelTime / clockRate, MIN_DELTA_TIME.toDouble())
 
-            minimumJumpTime = max(strainTime - lastTravelTime, MIN_DELTA_TIME)
+            minimumJumpTime = max(strainTime - lastTravelTime, MIN_DELTA_TIME.toDouble())
 
             // There are two types of slider-to-object patterns to consider in order to better approximate the real movement a player will take to jump between the hit objects.
             //
@@ -238,7 +268,7 @@ abstract class DifficultyHitObject(
             // In this case the most natural jump path is better approximated by a new distance called "tailJumpDistance" - the distance between the slider's tail and the next hit object.
             //
             // Thus, the player is assumed to jump the minimum of these two distances in all cases.
-            val tailJumpDistance = (lastObj.tail.getStackedPosition(mode) - obj.getStackedPosition(mode)).length * scalingFactor
+            val tailJumpDistance = (lastObj.tail.difficultyStackedPosition - obj.difficultyStackedPosition).length * scalingFactor
 
             minimumJumpDistance = max(
                 0.0,
@@ -251,8 +281,8 @@ abstract class DifficultyHitObject(
 
         if (lastLastObj != null && lastLastObj !is Spinner) {
             val lastLastCursorPosition = getEndCursorPosition(lastLastObj)
-            val v1 = lastLastCursorPosition - lastObj.getStackedPosition(mode)
-            val v2 = obj.getStackedPosition(mode) - lastCursorPosition
+            val v1 = lastLastCursorPosition - lastObj.difficultyStackedPosition
+            val v2 = obj.difficultyStackedPosition - lastCursorPosition
 
             val dot = v1.dot(v2)
             val det = v1.x * v2.y - v1.y * v2.x
@@ -268,7 +298,7 @@ abstract class DifficultyHitObject(
 
         if (mode == GameMode.Droid) {
             // Temporary lazy end position until a real result can be derived.
-            slider.lazyEndPosition = slider.getStackedPosition(mode)
+            slider.lazyEndPosition = slider.difficultyStackedPosition
 
             // Stop here if the slider has very short duration, allowing the player to essentially
             // complete the slider without movement, making travel distance and time irrelevant.
@@ -277,7 +307,7 @@ abstract class DifficultyHitObject(
             }
         }
 
-        slider.lazyTravelTime = slider.nestedHitObjects.last().startTime - slider.startTime
+        slider.lazyTravelTime = slider.nestedHitObjects[slider.nestedHitObjects.size - 1].startTime - slider.startTime
 
         var endTimeMin = slider.lazyTravelTime / slider.spanDuration
         if (endTimeMin % 2 >= 1) {
@@ -287,14 +317,14 @@ abstract class DifficultyHitObject(
         }
 
         // Temporary lazy end position until a real result can be derived.
-        slider.lazyEndPosition = slider.getStackedPosition(mode) + slider.path.positionAt(endTimeMin)
+        slider.lazyEndPosition = slider.difficultyStackedPosition + slider.path.positionAt(endTimeMin)
 
-        var currentCursorPosition = slider.getStackedPosition(mode)
-        val scalingFactor = NORMALIZED_RADIUS / slider.radius
+        var currentCursorPosition = slider.difficultyStackedPosition
+        val scalingFactor = NORMALIZED_RADIUS / slider.difficultyRadius
 
         for (i in 1 until slider.nestedHitObjects.size) {
             val currentMovementObject = slider.nestedHitObjects[i]
-            var currentMovement = currentMovementObject.getStackedPosition(mode) - currentCursorPosition
+            var currentMovement = currentMovementObject.difficultyStackedPosition - currentCursorPosition
             var currentMovementLength = scalingFactor * currentMovement.length
 
             // The amount of movement required so that the cursor position needs to be updated.
@@ -337,7 +367,7 @@ abstract class DifficultyHitObject(
     }
 
     private fun getEndCursorPosition(obj: HitObject): Vector2 {
-        var pos = obj.getStackedPosition(mode)
+        var pos = obj.difficultyStackedPosition
 
         if (obj is Slider) {
             computeSliderCursorPosition(obj)
@@ -354,7 +384,10 @@ abstract class DifficultyHitObject(
         @JvmStatic
         protected val NORMALIZED_RADIUS = 50f
 
+        /**
+         * The minimum delta time between hit objects.
+         */
         @JvmStatic
-        protected val MIN_DELTA_TIME = 25.0
+        val MIN_DELTA_TIME = 25
     }
 }

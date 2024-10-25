@@ -1,9 +1,9 @@
 package ru.nsu.ccfit.zuev.osu.game;
 
-import android.graphics.PointF;
-
-import com.reco1l.legacy.Multiplayer;
-import com.reco1l.legacy.ui.multiplayer.RoomScene;
+import com.reco1l.andengine.sprite.ExtendedSprite;
+import com.reco1l.andengine.Anchor;
+import com.reco1l.osu.multiplayer.Multiplayer;
+import com.reco1l.osu.multiplayer.RoomScene;
 import org.anddev.andengine.entity.modifier.*;
 import org.anddev.andengine.entity.primitive.Rectangle;
 import org.anddev.andengine.entity.scene.Scene;
@@ -22,7 +22,7 @@ public class BreakAnimator extends GameObject {
     private final Sprite[] arrows = new Sprite[4];
     private float length = 0;
     private float time;
-    private Sprite passfail;
+    private ExtendedSprite passfail;
     private String ending;
     private Sprite mark = null;
     private boolean showMark = false;
@@ -82,10 +82,12 @@ public class BreakAnimator extends GameObject {
         this.length = length;
         time = 0;
         ending = stat.getHp() > 0.5f ? "pass" : "fail";
-        final PointF center = new PointF((float) Config.getRES_WIDTH() / 2,
-                (float) Config.getRES_HEIGHT() / 2);
-        passfail = SpritePool.getInstance().getCenteredSprite(
-                "section-" + ending, center);
+
+        passfail = new ExtendedSprite();
+        passfail.setOrigin(Anchor.Center);
+        passfail.setPosition(Config.getRES_WIDTH() / 2f, Config.getRES_HEIGHT() / 2f);
+        passfail.setTextureRegion(ResourceManager.getInstance().getTexture("section-" + ending));
+
         scene.attachChild(passfail, 0);
         passfail.setVisible(false);
 
@@ -166,8 +168,6 @@ public class BreakAnimator extends GameObject {
                 sp.detachSelf();
             }
             passfail.detachSelf();
-            SpritePool.getInstance().putSprite("section-" + ending,
-                    passfail);
         }
     }
 

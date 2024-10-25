@@ -1,15 +1,15 @@
 package ru.nsu.ccfit.zuev.osu;
 
-import android.util.DisplayMetrics;
-
+import com.reco1l.osu.data.BeatmapInfo;
+import com.reco1l.osu.data.DatabaseManager;
 import org.anddev.andengine.engine.Engine;
 import org.anddev.andengine.engine.camera.Camera;
 
 import ru.nsu.ccfit.zuev.audio.serviceAudio.SaveServiceObject;
 import ru.nsu.ccfit.zuev.audio.serviceAudio.SongService;
 import ru.nsu.ccfit.zuev.osu.game.GameScene;
+import ru.nsu.ccfit.zuev.osu.menu.ModMenu;
 import ru.nsu.ccfit.zuev.osu.menu.SongMenu;
-import ru.nsu.ccfit.zuev.osu.scoring.ScoreLibrary;
 import ru.nsu.ccfit.zuev.osu.scoring.ScoringScene;
 
 /**
@@ -27,7 +27,7 @@ public class GlobalManager {
     private int loadingProgress;
     private String info;
     private SongService songService;
-    private TrackInfo selectedTrack;
+    private BeatmapInfo selectedBeatmap;
     private SaveServiceObject saveServiceObject;
     private String skinNow;
 
@@ -38,26 +38,25 @@ public class GlobalManager {
         return instance;
     }
 
-    public TrackInfo getSelectedTrack() {
-        return selectedTrack;
+    public BeatmapInfo getSelectedBeatmap() {
+        return selectedBeatmap;
     }
 
-    public void setSelectedTrack(TrackInfo selectedTrack) {
-        this.selectedTrack = selectedTrack;
+    public void setSelectedBeatmap(BeatmapInfo selectedBeatmap) {
+        this.selectedBeatmap = selectedBeatmap;
     }
 
     public void init() {
+        DatabaseManager.load(mainActivity);
         saveServiceObject = (SaveServiceObject) mainActivity.getApplication();
         songService = saveServiceObject.getSongService();
+        SongService.initBASS();
         setLoadingProgress(10);
         setMainScene(new MainScene());
         getMainScene().load(mainActivity);
         setInfo("Loading skin...");
         skinNow = Config.getSkinPath();
         ResourceManager.getInstance().loadSkin(skinNow);
-        ScoreLibrary.getInstance().load(mainActivity);
-        setLoadingProgress(20);
-        PropertiesLibrary.getInstance().load(mainActivity);
         setLoadingProgress(30);
         setGameScene(new GameScene(getEngine()));
         setSongMenu(new SongMenu());
@@ -170,9 +169,4 @@ public class GlobalManager {
         this.saveServiceObject = saveServiceObject;
     }
 
-    public DisplayMetrics getDisplayMetrics() {
-        final DisplayMetrics dm = new DisplayMetrics();
-        mainActivity.getWindowManager().getDefaultDisplay().getMetrics(dm);
-        return dm;
-    }
 }

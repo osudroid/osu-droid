@@ -1,24 +1,26 @@
 package com.rian.osu.ui
 
-import com.reco1l.legacy.Multiplayer
-import com.reco1l.legacy.ui.multiplayer.RoomScene
+import com.reco1l.andengine.sprite.*
+import com.reco1l.osu.multiplayer.Multiplayer
+import com.reco1l.osu.multiplayer.RoomScene
 import org.anddev.andengine.input.touch.TouchEvent
 import org.anddev.andengine.util.MathUtils
 import ru.nsu.ccfit.zuev.osu.Config
 import ru.nsu.ccfit.zuev.osu.DifficultyAlgorithm
-import ru.nsu.ccfit.zuev.osu.helper.AnimSprite
 import ru.nsu.ccfit.zuev.osu.GlobalManager.getInstance as getGlobal
+import ru.nsu.ccfit.zuev.osu.ResourceManager.getInstance as getResources
 
-class DifficultyAlgorithmSwitcher : AnimSprite(
-    0f, 0f, 0f,
-    "selection-difficulty-droid",
-    "selection-difficulty-droid-over",
-    "selection-difficulty-standard",
-    "selection-difficulty-standard-over"
-) {
+class DifficultyAlgorithmSwitcher : ExtendedSprite() {
     private var moved = false
     private var initialX: Float? = null
     private var initialY: Float? = null
+
+    private val textures = arrayOf(
+        getResources().getTextureIfLoaded("selection-difficulty-droid"),
+        getResources().getTextureIfLoaded("selection-difficulty-droid-over"),
+        getResources().getTextureIfLoaded("selection-difficulty-standard"),
+        getResources().getTextureIfLoaded("selection-difficulty-standard-over")
+    )
 
     init {
         onDeselect()
@@ -35,6 +37,10 @@ class DifficultyAlgorithmSwitcher : AnimSprite(
 
         if (event.isActionOutside || initialX == null || initialY == null ||
             event.isActionMove && MathUtils.distance(initialX!!, initialY!!, localX, localY) > 30) {
+            if (!moved) {
+                getResources().getSound("click-short")?.play()
+            }
+
             moved = true
 
             onDeselect()
@@ -44,6 +50,8 @@ class DifficultyAlgorithmSwitcher : AnimSprite(
             return true
         }
 
+        getResources().getSound("click-short-confirm")?.play()
+
         Config.setDifficultyAlgorithm(
             if (Config.getDifficultyAlgorithm() == DifficultyAlgorithm.standard) DifficultyAlgorithm.droid
             else DifficultyAlgorithm.standard
@@ -52,7 +60,7 @@ class DifficultyAlgorithmSwitcher : AnimSprite(
         if (Multiplayer.isConnected) {
             RoomScene.switchDifficultyAlgorithm()
         } else {
-            getGlobal().songMenu.switchDifficultyAlgorithm()
+            getGlobal().songMenu.reloadCurrentSelection()
         }
 
         onDeselect()
@@ -61,10 +69,10 @@ class DifficultyAlgorithmSwitcher : AnimSprite(
     }
 
     private fun onSelect() {
-        frame = if (Config.getDifficultyAlgorithm() == DifficultyAlgorithm.standard) 3 else 1
+        textureRegion = textures[if (Config.getDifficultyAlgorithm() == DifficultyAlgorithm.standard) 3 else 1]
     }
 
     private fun onDeselect() {
-        frame = if (Config.getDifficultyAlgorithm() == DifficultyAlgorithm.standard) 2 else 0
+        textureRegion = textures[if (Config.getDifficultyAlgorithm() == DifficultyAlgorithm.standard) 2 else 0]
     }
 }

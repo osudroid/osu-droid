@@ -15,8 +15,8 @@ public class ModButton extends Sprite {
     private GameMod mod;
     private IModSwitcher switcher = null;
 
-    public ModButton(float pX, float pY, String texture, GameMod mod) {
-        super(Utils.toRes(pX), Utils.toRes(pY), ResourceManager.getInstance().getTexture(texture));
+    public ModButton(float pX, float pY, GameMod mod) {
+        super(Utils.toRes(pX), Utils.toRes(pY), ResourceManager.getInstance().getTexture(GameMod.getTextureName(mod)));
         this.mod = mod;
         setScale(initalScale);
     }

@@ -22,24 +22,21 @@ class DroidFlashlight(
 ) : DroidStrainSkill(mods) {
     override val starsPerDouble = 1.06
 
-    override val objectStrain: Double
-        get() = currentStrain
-
     override val reducedSectionCount = 0
     override val reducedSectionBaseline = 1.0
 
     private var currentStrain = 0.0
-    private val skillMultiplier = 0.052
+    private val skillMultiplier = 0.02
     private val strainDecayBase = 0.15
     private val isHidden = mods.any { it is ModHidden }
 
-    override fun difficultyValue() =
-        (currentStrainPeaks.sum() * starsPerDouble).pow(0.8)
+    override fun difficultyValue() = currentStrainPeaks.sum() * starsPerDouble
 
     override fun strainValueAt(current: DroidDifficultyHitObject): Double {
         currentStrain *= strainDecay(current.deltaTime)
         currentStrain += DroidFlashlightEvaluator.evaluateDifficultyOf(current, isHidden, withSliders) * skillMultiplier
 
+        objectStrains.add(currentStrain)
         return currentStrain
     }
 

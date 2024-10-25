@@ -1,9 +1,15 @@
 package ru.nsu.ccfit.zuev.osu;
 
-import android.os.Build;
-import com.reco1l.legacy.engine.VideoTexture;
+import static com.reco1l.osu.data.BeatmapsKt.BeatmapInfo;
+
+import android.util.Log;
+
+import com.reco1l.osu.DifficultyCalculationManager;
+import com.reco1l.osu.data.BeatmapSetInfo;
+import com.reco1l.osu.data.DatabaseManager;
+import com.reco1l.andengine.texture.VideoTexture;
 import com.rian.osu.beatmap.parser.BeatmapParser;
-import org.anddev.andengine.util.Debug;
+import kotlin.io.FilesKt;
 import org.jetbrains.annotations.Nullable;
 import ru.nsu.ccfit.zuev.osu.helper.FileUtils;
 import ru.nsu.ccfit.zuev.osu.helper.StringTable;
@@ -14,597 +20,333 @@ import java.util.*;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
-import java.util.stream.Collectors;
 
-public enum LibraryManager {
-    INSTANCE;
-    private static final String VERSION = "library4.3";
-    private static final List<BeatmapInfo> library = Collections.synchronizedList(new ArrayList<>());
-    private Integer fileCount = 0;
-    private int currentIndex = 0;
+import com.reco1l.osu.data.BeatmapInfo;
+
+
+public class LibraryManager {
+
+
+    private static List<BeatmapSetInfo> library = new ArrayList<>();
+
+    private static int currentIndex = 0;
 
     private static boolean isCaching = true;
 
-    public File getLibraryCacheFile() {
-        return new File(GlobalManager.getInstance().getMainActivity().getFilesDir(), String.format("library.%s.dat", VERSION));
+
+    private static final ArrayList<BeatmapInfo> pendingBeatmaps = new ArrayList<>();
+
+    private static final Object mutex = new Object();
+
+
+    private LibraryManager() {
     }
 
-    @SuppressWarnings("unchecked")
-    public boolean loadLibraryCache(boolean forceUpdate) {
-        synchronized (library) {
-            library.clear();
-        }
 
-        if (!FileUtils.canUseSD()) {
-            return true;
-        }
+    private static boolean checkDirectory(String path) {
 
-        final File replayDir = new File(Config.getScorePath());
-        if (!replayDir.exists()) {
-            if (!replayDir.mkdir()) {
-                ToastLogger.showText(StringTable.format(
-                        R.string.message_error_createdir, replayDir.getPath()), true);
+        var directory = new File(path);
+
+        if (!directory.exists()) {
+
+            if (!directory.mkdir()) {
+                ToastLogger.showText(StringTable.format(R.string.message_error_createdir, directory.getPath()), true);
                 return false;
             }
-            createNoMediaFile(replayDir);
-        }
 
-        final File lib = getLibraryCacheFile();
-        final File dir = new File(Config.getBeatmapPath());
-        if (!dir.exists()) {
-            return false;
-        }
-        try {
-            if (lib.createNewFile()) {
-                Debug.i("LibraryManager: create library cache file");
-            } else {
-                Debug.i("LibraryManager: library cache file already exists");
-            }
-        } catch (final IOException e) {
-            Debug.e("LibraryManager: " + e.getMessage(), e);
-        }
-
-        try (final ObjectInputStream istream = new ObjectInputStream(new FileInputStream(lib))) {
-            Object obj = istream.readObject();
-            if (obj instanceof String) {
-                if (!obj.equals(VERSION)) {
-                    return false;
-                }
-
-                obj = istream.readObject();
-                if (obj instanceof Integer) {
-                    fileCount = (Integer) obj;
-
-                    obj = istream.readObject();
-                    if (obj instanceof Collection<?>) {
-                        synchronized (library) {
-                            library.addAll((Collection<? extends BeatmapInfo>) obj);
-                        }
-
-                        if (forceUpdate) {
-                            checkLibrary();
-                        }
-                        return true;
-                    }
-                }
-            }
-        } catch (final IOException | ClassNotFoundException | ClassCastException e) {
-            Debug.e("LibraryManager: " + e.getMessage(), e);
-        }
-        return false;
-    }
-
-    private void checkLibrary() {
-        final File dir = new File(Config.getBeatmapPath());
-        final File[] files = FileUtils.listFiles(dir);
-        if (files.length == fileCount) {
-            return;
-        }
-
-        ToastLogger.showText(StringTable.get(R.string.message_lib_update), true);
-
-        final int fileCount = files.length;
-        LibraryCacheManager manager = new LibraryCacheManager(fileCount, files);
-        manager.addUncachedBeatmaps();
-
-        while (isCaching) {
             try {
-                this.wait();
-            } catch (final InterruptedException e) {
-                Thread.currentThread().interrupt();
-                Debug.e("LibraryManager: " + e.getMessage(), e);
+                //noinspection ResultOfMethodCallIgnored
+                new File(directory, ".nomedia").createNewFile();
+
+            } catch (IOException e) {
+                Log.e("LibraryManager", "Failed to create .nomedia file", e);
             }
         }
-        isCaching = true;
 
-        this.fileCount = files.length;
-        saveToCache();
+        return true;
     }
 
-    public synchronized void scanLibrary() {
-        library.clear();
 
-        final File dir = new File(Config.getBeatmapPath());
-        // Creating Osu directory if it doesn't exist
-        if (!dir.exists()) {
-            if (!dir.mkdirs()) {
-                ToastLogger.showText(StringTable.format(
-                        R.string.message_error_createdir, dir.getPath()), true);
-                return;
-            }
-            createNoMediaFile(dir);
+    public static void loadLibrary() {
+
+        library = new ArrayList<>();
+
+        if (!FileUtils.canUseSD() || !checkDirectory(Config.getScorePath()) && !checkDirectory(Config.getBeatmapPath())) {
             return;
         }
-        // Getting all files
-        final File[] filelist = FileUtils.listFiles(dir);
 
-        // Here we go!
-        this.fileCount = filelist.length;
+        currentIndex = 0;
+        library = DatabaseManager.getBeatmapInfoTable().getBeatmapSetList();
 
-        Debug.i("LibraryManager: Operating in multithreaded mode");
-        LibraryCacheManager manager = new LibraryCacheManager(fileCount, filelist);
-        manager.start();
+        DifficultyCalculationManager.calculateDifficulties();
+    }
+
+    /**
+     * Scan the beatmap directory to find differences between the database and the file system.
+     */
+    public static void scanDirectory() {
+
+        if (!checkDirectory(Config.getBeatmapPath())) {
+            return;
+        }
+
+        var directories = new File(Config.getBeatmapPath()).listFiles(File::isDirectory);
+
+        if (directories == null) {
+            return;
+        }
+
+        new LibraryDatabaseManager(directories).start();
 
         // Wait for all threads to finish
         while (isCaching) {
-            try {
-                this.wait();
-            } catch (final InterruptedException e) {
-                Thread.currentThread().interrupt();
-                Debug.e("LibraryManager: " + e.getMessage(), e);
+            synchronized (mutex) {
+                try {
+                    mutex.wait();
+                } catch (InterruptedException e) {
+                    Log.e("LibraryManager", "Failed to wait for thread termination", e);
+                }
             }
         }
+
         isCaching = true;
-
-        saveToCache();
-        ToastLogger.showText(
-                StringTable.format(R.string.message_lib_complete, manager.getTotalMaps()),
-                true);
     }
 
-    private void createNoMediaFile(File dir) {
-        final File nomedia = new File(dir.getParentFile(), ".nomedia");
-        try {
-            if (nomedia.createNewFile()) {
-                Debug.i("LibraryManager: create .nomedia file");
-            } else {
-                Debug.i("LibraryManager: .nomedia file already exists");
-            }
-        } catch (final IOException e) {
-            Debug.e("LibraryManager: " + e.getMessage(), e);
-        }
-    }
 
-    public static void deleteDir(final File dir) {
-        if (dir.exists() && dir.isDirectory()) {
-            final File[] files = FileUtils.listFiles(dir);
-            if (files == null) {
-                return;
-            }
-            for (final File f : files) {
-                if (f.isDirectory()) {
-                    deleteDir(f);
-                } else if (f.delete()) {
-                    Debug.i(f.getPath() + " deleted");
-                }
-            }
-            if (dir.delete()) {
-                Debug.i(dir.getPath() + " deleted");
-            }
-        }
-    }
-
-    public void deleteMap(final BeatmapInfo info) {
-        final File dir = new File(info.getPath());
-        deleteDir(dir);
-
-        synchronized (library) {
-            library.remove(info);
-        }
-    }
-
-    public void saveToCache() {
-        if (library.isEmpty()) {
-            return;
-        }
-        final File lib = getLibraryCacheFile();
-        try (final ObjectOutputStream ostream = new ObjectOutputStream(
-                new FileOutputStream(lib))) {
-            lib.createNewFile();
-            ostream.writeObject(VERSION);
-            ostream.writeObject(fileCount);
-
-            synchronized (library) {
-                ostream.writeObject(library);
-            }
-        } catch (final IOException e) {
-            ToastLogger.showText(
-                    StringTable.format(R.string.message_error, e.getMessage()),
-                    false);
-            Debug.e("LibraryManager: " + e.getMessage(), e);
-        }
-        shuffleLibrary();
+    public static void clearDatabase() {
+        DatabaseManager.getBeatmapInfoTable().deleteAll();
+        loadLibrary();
         currentIndex = 0;
     }
 
-    public void clearCache() {
-        final File lib = getLibraryCacheFile();
-        if (lib.exists()) {
-            lib.delete();
-            ToastLogger.showText(StringTable.get(R.string.message_lib_cleared),
-                    false);
-        }
-        currentIndex = 0;
+    public static void deleteBeatmapSet(BeatmapSetInfo beatmapSet) {
+        FilesKt.deleteRecursively(new File(beatmapSet.getPath()));
+        DatabaseManager.getBeatmapInfoTable().deleteBeatmapSet(beatmapSet.getDirectory());
+        loadLibrary();
     }
 
-    private static void fillEmptyFields(BeatmapInfo info) {
-        info.setCreator(info.getTrack(0).getCreator());
-        if (info.getTitle().isEmpty()) {
-            info.setTitle("unknown");
-        }
-        if (info.getArtist().isEmpty()) {
-            info.setArtist("unknown");
-        }
-        if (info.getCreator().isEmpty()) {
-            info.setCreator("unknown");
-        }
-    }
+    private static void scanBeatmapSetFolder(File directory) {
 
-    private static void scanFolder(final BeatmapInfo info) {
-        final File dir = new File(info.getPath());
-        info.setDate(dir.lastModified());
-        File[] filelist = FileUtils.listFiles(dir, ".osu");
+        var osuFiles = directory.listFiles((dir, name) -> name.endsWith(".osu"));
 
-        if (filelist == null) {
+        if (osuFiles == null) {
+            if (Config.isDeleteUnimportedBeatmaps()) {
+                FilesKt.deleteRecursively(directory);
+            }
             return;
         }
-        for (final File file : filelist) {
-            try (var parser = new BeatmapParser(file)) {
-                if (!parser.openFile()) {
+
+        var beatmapsFound = 0;
+
+        for (var osuFile : osuFiles) {
+
+            try (var parser = new BeatmapParser(osuFile)) {
+
+                var data = parser.parse(false);
+
+                if (data == null) {
                     if (Config.isDeleteUnimportedBeatmaps()) {
-                        file.delete();
+                        //noinspection ResultOfMethodCallIgnored
+                        osuFile.delete();
                     }
                     continue;
                 }
 
-                final TrackInfo track = new TrackInfo(info);
-                track.setFilename(file.getPath());
-                track.setCreator("unknown");
+                var beatmapInfo = BeatmapInfo(data, directory.lastModified(), false);
 
-                var beatmap = parser.parse(true);
-                if (beatmap == null || !info.populate(beatmap) || !track.populate(beatmap)) {
-                    if (Config.isDeleteUnimportedBeatmaps()) {
-                        file.delete();
-                    }
-                    continue;
-                }
-
-                if (beatmap.events.videoFilename != null && Config.isDeleteUnsupportedVideos()) {
+                if (data.getEvents().videoFilename != null && Config.isDeleteUnsupportedVideos()) {
                     try {
-                        var videoFile = new File(info.getPath(), beatmap.events.videoFilename);
+                        var videoFile = new File(beatmapInfo.getSetDirectory(), data.getEvents().videoFilename);
 
                         if (!VideoTexture.Companion.isSupportedVideo(videoFile)) {
                             //noinspection ResultOfMethodCallIgnored
                             videoFile.delete();
                         }
                     } catch (Exception e) {
-                        e.printStackTrace();
+                        Log.e("LibraryManager", "Failed to delete video file", e);
                     }
                 }
-                info.addTrack(track);
+
+                pendingBeatmaps.add(beatmapInfo);
+                beatmapsFound++;
             }
         }
 
-        if (Config.isDeleteUnimportedBeatmaps() && info.getCount() == 0) {
-            deleteDir(dir);
-        }
-
-        Collections.sort(info.getTracks(), (object1, object2) -> Float.compare(object1.getDroidDifficulty(), object2.getDroidDifficulty()));
-    }
-
-    public List<BeatmapInfo> getLibrary() {
-        synchronized (library) {
-            return library;
+        if (Config.isDeleteUnimportedBeatmaps() && beatmapsFound == 0) {
+            FilesKt.deleteRecursively(directory);
         }
     }
 
-    public void shuffleLibrary() {
-        synchronized (library) {
-            Collections.shuffle(library);
+
+    public static List<BeatmapSetInfo> getLibrary() {
+        return library;
+    }
+
+    public static void shuffleLibrary() {
+        Collections.shuffle(library);
+        currentIndex = 0;
+    }
+
+    public static int getSizeOfBeatmaps() {
+        return library.size();
+    }
+
+
+    public static BeatmapSetInfo getCurrentBeatmapSet() {
+        return library.get(currentIndex);
+    }
+
+    public static BeatmapSetInfo selectNextBeatmapSet() {
+
+        if (library.isEmpty()) {
+            currentIndex = 0;
+            return null;
         }
+
+        currentIndex = ++currentIndex % library.size();
+        return library.get(currentIndex);
     }
 
-    public int getSizeOfBeatmaps() {
-        synchronized (library) {
-            return library.size();
+    public static BeatmapSetInfo selectPreviousBeatmapSet() {
+
+        if (library.isEmpty()) {
+            currentIndex = 0;
+            return null;
         }
+
+        currentIndex = currentIndex == 0 ? library.size() - 1 : --currentIndex;
+        return library.get(currentIndex);
     }
 
-    public BeatmapInfo getBeatmap() {
-        return getBeatmapByIndex(currentIndex);
-    }
 
-    public BeatmapInfo getNextBeatmap() {
-        return getBeatmapByIndex(++currentIndex);
-    }
+    public static void findBeatmapSetIndex(BeatmapInfo info) {
 
-    public BeatmapInfo getPrevBeatmap() {
-        return getBeatmapByIndex(--currentIndex);
-    }
+        for (int i = 0; i < library.size(); i++) {
 
-    public BeatmapInfo getBeatmapByIndex(int index) {
-        synchronized (library) {
-            Debug.i("Music Changing Info: Require index :" + index + "/" + library.size());
-            if (library.size() == 0) return null;
-            if (index < 0 || index >= library.size()) {
-                shuffleLibrary();
-                currentIndex = 0;
-                return library.get(0);
-            } else {
-                currentIndex = index;
-                return library.get(index);
+            if (library.get(i).getDirectory().equals(info.getSetDirectory())) {
+                currentIndex = i;
+                return;
             }
         }
+
+        currentIndex = 0;
     }
 
-    public int findBeatmap(BeatmapInfo info) {
-        synchronized (library) {
-            for (int i = 0; i < library.size(); i++) {
-                if (library.get(i).equals(info)) {
-                    return currentIndex = i;
-                }
-            }
-        }
-        return currentIndex = 0;
-    }
 
     @Nullable
-    public TrackInfo findTrackByMD5(String md5) {
-        if (md5 == null)
+    public static BeatmapInfo findBeatmapByMD5(String md5) {
+
+        if (md5 == null) {
             return null;
+        }
 
-        synchronized (library) {
-            int i = library.size() - 1;
+        for (int i = library.size() - 1; i >= 0; i--) {
+            var beatmaps = library.get(i).getBeatmaps();
 
-            while (i >= 0) {
-                var tracks = library.get(i).getTracks();
+            for (int j = beatmaps.size() - 1; j >= 0; j--) {
+                var beatmap = beatmaps.get(j);
 
-                int j = tracks.size() - 1;
-                while (j >= 0) {
-                    var track = tracks.get(j);
-
-                    if (md5.equals(track.getMD5()))
-                        return track;
-                    --j;
+                if (md5.equals(beatmap.getMD5())) {
+                    return beatmap;
                 }
-                --i;
             }
         }
+
         return null;
     }
 
-    public int findBeatmapById(int mapSetId) {
-        synchronized (library) {
-            for (int i = 0; i < library.size(); i++) {
-                if (library.get(i).getTrack(0).getBeatmapSetID() == mapSetId) {
-                    return currentIndex = i;
-                }
-            }
-        }
-        return currentIndex = 0;
-    }
 
-    public int getCurrentIndex() {
-        return this.currentIndex;
-    }
+    private static final class LibraryDatabaseManager {
 
-    public void setCurrentIndex(int index) {
-        this.currentIndex = index;
-    }
 
-    public TrackInfo findTrackByFileNameAndMD5(String fileName, String md5) {
-        synchronized (library) {
-            for (BeatmapInfo info : library) {
-                for (int j = 0; j < info.getCount(); j++) {
-                    TrackInfo track = info.getTrack(j);
-                    File trackFile = new File(track.getFilename());
-                    if (fileName.equals(trackFile.getName())) {
-                        String trackMD5 = FileUtils.getMD5Checksum(trackFile);
-                        if (md5.equals(trackMD5)) {
-                            return track;
-                        }
-                    }
-                }
-            }
-        }
-        return null;
-    }
+        private final File[] directories;
 
-    public void updateLibrary(boolean force) {
-        if (!loadLibraryCache(force)) {
-            scanLibrary();
-        }
-        saveToCache();
-    }
-
-    private static final class LibraryCacheManager {
-        private final int fileCount;
         private final ExecutorService executors;
-        private final List<File> files;
-        private volatile int fileCached = 0;
-        private volatile int totalMaps = 0;
 
-        private LibraryCacheManager(final int fileCount, final File[] files) {
-            this.fileCount = fileCount;
-            this.files = Arrays.asList(files);
+
+        private int directoryCount;
+
+        private int fileCached = 0;
+
+
+        private LibraryDatabaseManager(File[] directories) {
+
+            this.directories = directories;
+            this.directoryCount = directories.length;
             this.executors = Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors());
         }
 
+
         public void start() {
-            int optimalChunkSize = (int) Math.ceil((double) fileCount / Runtime.getRuntime().availableProcessors());
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
-                // Split list into chunks of N elements per M sublist, N being number of files and M being number of processors
-                List<List<File>> sub_files = new ArrayList<>(files.stream()
-                        .collect(Collectors.groupingBy(s -> files.indexOf(s) / optimalChunkSize))
-                        .values());
-                sub_files.parallelStream().forEach(this::submitToExecutor);
-            } else {
-                // Android versions below N don't support streams, so we have to do it the old-fashioned way
-                for (int i = 0; i < files.size(); i += optimalChunkSize) {
-                    submitToExecutor(files.subList(i, Math.min(i + optimalChunkSize, files.size())));
-                }
-            }
 
-            executors.shutdown();
-            try {
-                if (executors.awaitTermination(1, TimeUnit.HOURS)) {
-                    Debug.i("Library Cache: " + totalMaps + " maps loaded");
-                    isCaching = false;
+            int optimalChunkSize = (int) Math.ceil((double) directoryCount / Runtime.getRuntime().availableProcessors());
 
-                    synchronized (LibraryManager.class) {
-                        LibraryManager.class.notify();
-                    }
-                } else {
-                    Debug.e("Library Cache: Timeout");
-                }
-            } catch (InterruptedException e) {
-                Debug.e(e);
-            }
-        }
+            for (int i = 0; i < directories.length; i += optimalChunkSize) {
 
-        public void addUncachedBeatmaps() {
-            int optimalChunkSize = (int) Math.ceil((double) fileCount / Runtime.getRuntime().availableProcessors());
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
-                List<List<File>> sub_files = new ArrayList<>(files.stream()
-                        .collect(Collectors.groupingBy(s -> files.indexOf(s) / optimalChunkSize))
-                        .values());
-                sub_files.parallelStream().forEach(this::submitToExecutorCheckCached);
-            } else {
-                for (int i = 0; i < files.size(); i += optimalChunkSize) {
-                    submitToExecutorCheckCached(files.subList(i, Math.min(i + optimalChunkSize, files.size())));
-                }
-            }
+                var directoriesSlice = Arrays.copyOfRange(directories, i, Math.min(i + optimalChunkSize, directories.length));
 
-            executors.shutdown();
-            try {
-                if (executors.awaitTermination(1, TimeUnit.HOURS)) {
-                    Debug.i("Library Cache Updated");
-                    isCaching = false;
+                executors.submit(() -> {
 
-                    synchronized (LibraryManager.class) {
-                        LibraryManager.class.notify();
-                    }
-                } else {
-                    Debug.e("Library Cache: Timeout");
-                }
-            } catch (InterruptedException e) {
-                Debug.e(e);
-            }
+                    for (int i1 = directoriesSlice.length - 1; i1 >= 0; i1--) {
 
-            // Remove all beatmaps that are no longer in the library
-            synchronized (library) {
-                var iterator = library.iterator();
+                        var directory = directoriesSlice[i1];
 
-                while (iterator.hasNext()) {
-                    var beatmap = iterator.next();
-
-                    if (!files.contains(new File(beatmap.getPath()))) {
-                        iterator.remove();
-                    }
-                }
-            }
-        }
-
-        private void submitToExecutorCheckCached(List<File> files) {
-            executors.submit(() -> {
-                for (final File file : files) {
-                    GlobalManager.getInstance().setLoadingProgress(50 + 50 * fileCached / fileCount);
-                    ToastLogger.setPercentage(fileCached * 100f / fileCount);
-
-                    synchronized (this) {
-                        fileCached++;
-                    }
-
-                    if (!file.isDirectory()) {
-                        continue;
-                    }
-
-                    final BeatmapInfo info = new BeatmapInfo();
-                    info.setPath(file.getPath());
-
-                    synchronized (library) {
-                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
-                            if (library.stream().anyMatch(i -> i.getPath().equals(info.getPath()))) {
-                                continue;
-                            }
-                        } else {
-                            boolean found = false;
-                            for (final BeatmapInfo i : library) {
-                                if (i.getPath().equals(info.getPath())) {
-                                    found = true;
-                                    break;
-                                }
-                            }
-
-                            if (found) {
-                                continue;
-                            }
+                        if (DatabaseManager.getBeatmapInfoTable().isBeatmapSetImported(directory.getName())) {
+                            directoryCount--;
+                            continue;
                         }
-                    }
 
-                    GlobalManager.getInstance().setInfo("Loading " + file.getName() + " ...");
+                        GlobalManager.getInstance().setLoadingProgress(50 + 50 * fileCached / directoryCount);
+                        GlobalManager.getInstance().setInfo("Loading " + directory.getName() + "...");
 
-                    scanFolder(info);
-                    if (info.getCount() < 1) {
-                        continue;
-                    }
-
-                    fillEmptyFields(info);
-
-                    synchronized (library) {
-                        library.add(info);
-                    }
-                }
-            });
-        }
-
-        private void submitToExecutor(List<File> files) {
-            executors.submit(() -> {
-                for (File file : files) {
-                    GlobalManager.getInstance().setLoadingProgress(50 + 50 * fileCached / fileCount);
-                    ToastLogger.setPercentage(fileCached * 100f / fileCount);
-
-                    synchronized (this) {
+                        ToastLogger.setPercentage(fileCached * 100f / directoryCount);
                         fileCached++;
+
+                        scanBeatmapSetFolder(directory);
+                    }
+                });
+            }
+
+            executors.shutdown();
+
+            try {
+                if (executors.awaitTermination(1, TimeUnit.HOURS)) {
+
+                    isCaching = false;
+
+                    synchronized (mutex) {
+                        mutex.notify();
                     }
 
-                    if (!file.isDirectory()) {
-                        continue;
-                    }
-
-                    GlobalManager.getInstance().setInfo("Loading " + file.getName() + "...");
-                    final BeatmapInfo info = new BeatmapInfo();
-                    info.setPath(file.getPath());
-                    scanFolder(info);
-                    if (info.getCount() < 1) {
-                        continue;
-                    }
-
-                    fillEmptyFields(info);
-
-                    synchronized (library) {
-                        library.add(info);
-                    }
-
-                    synchronized (this) {
-                        totalMaps += info.getCount();
-                    }
+                } else {
+                    Log.e("LibraryManager", "Timeout while waiting for executor termination.");
                 }
-            });
+
+            } catch (InterruptedException e) {
+                Log.e("LibraryManager", "Failed while waiting for executor termination.", e);
+            }
+
+            try {
+                DatabaseManager.getBeatmapInfoTable().insertAll(pendingBeatmaps);
+                pendingBeatmaps.clear();
+            } catch (Exception e) {
+                Log.e("LibraryManager", "Failed to insert beatmaps into database.", e);
+                return;
+            }
+
+            var missingDirectories = new ArrayList<>(DatabaseManager.getBeatmapInfoTable().getBeatmapSetPaths());
+
+            for (var i = missingDirectories.size() - 1; i >= 0; i--) {
+
+                if (new File(Config.getBeatmapPath(), missingDirectories.get(i)).exists()) {
+                    missingDirectories.remove(i);
+                }
+            }
+
+            if (!missingDirectories.isEmpty()) {
+                DatabaseManager.getBeatmapInfoTable().deleteAllBeatmapSets(missingDirectories);
+            }
         }
 
-        public synchronized int getTotalMaps() {
-            return totalMaps;
-        }
     }
 }

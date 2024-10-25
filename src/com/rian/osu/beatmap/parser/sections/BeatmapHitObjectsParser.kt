@@ -8,17 +8,21 @@ import com.rian.osu.math.Precision.almostEquals
 import com.rian.osu.math.Vector2
 import kotlin.math.max
 import kotlin.math.min
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.ensureActive
 
 /**
  * A parser for parsing a beatmap's hit objects section.
  */
-class BeatmapHitObjectsParser : BeatmapSectionParser() {
-    private var extraComboColorOffset = 0
-    private var forceNewCombo = false
+object BeatmapHitObjectsParser : BeatmapSectionParser() {
+    private val pipePropertyRegex = "[|]".toRegex()
 
-    override fun parse(beatmap: Beatmap, line: String) = line
-        .split(",".toRegex())
-        .dropLastWhile { it.isEmpty() }
+    override fun parse(beatmap: Beatmap, line: String, scope: CoroutineScope?) = line
+        .split(COMMA_PROPERTY_REGEX)
+        .dropLastWhile {
+            scope?.ensureActive()
+            it.isEmpty()
+        }
         .let {
             if (it.size < 4) {
                 throw UnsupportedOperationException("Malformed hit object")
@@ -29,7 +33,7 @@ class BeatmapHitObjectsParser : BeatmapSectionParser() {
 
             var tempType = type
 
-            val comboColorOffset = tempType and HitObjectType.ComboColorOffset.value shr 4
+            val comboOffset = tempType and HitObjectType.ComboColorOffset.value shr 4
             tempType = tempType and HitObjectType.ComboColorOffset.value.inv()
 
             val isNewCombo = tempType and HitObjectType.NewCombo.value != 0
@@ -39,45 +43,40 @@ class BeatmapHitObjectsParser : BeatmapSectionParser() {
                 parseInt(it[1]).toFloat()
             )
 
-            val soundType = HitSoundType.parse(parseInt(it[4]))
+            val soundType = parseInt(it[4])
             val bankInfo = SampleBankInfo()
+
+            scope?.ensureActive()
 
             val obj = when (HitObjectType.valueOf(type % 16)) {
                 HitObjectType.Normal, HitObjectType.NormalNewCombo ->
-                    createCircle(it, time, position, beatmap.hitObjects.objects.isEmpty() || isNewCombo, comboColorOffset, bankInfo)
+                    createCircle(it, beatmap, time, position, beatmap.hitObjects.objects.isEmpty() || isNewCombo, comboOffset, bankInfo, scope)
 
                 HitObjectType.Slider, HitObjectType.SliderNewCombo ->
-                    createSlider(it, beatmap, time, position, beatmap.hitObjects.objects.isEmpty() || isNewCombo, comboColorOffset, soundType, bankInfo)
+                    createSlider(it, beatmap, time, position, beatmap.hitObjects.objects.isEmpty() || isNewCombo, comboOffset, soundType, bankInfo, scope)
 
                 HitObjectType.Spinner ->
-                    createSpinner(it, beatmap, time, isNewCombo, comboColorOffset, bankInfo)
+                    createSpinner(it, beatmap, time, isNewCombo, bankInfo, scope)
 
                 else -> throw UnsupportedOperationException("Malformed hit object")
-            }.apply {
-                samples.addAll(convertSoundType(soundType, bankInfo))
-            }
+            }.also { h -> h.samples.addAll(convertSoundType(soundType, bankInfo)) }
 
-            beatmap.rawHitObjects.add(line)
             beatmap.hitObjects.add(obj)
         }
 
-    override fun reset() {
-        super.reset()
-
-        forceNewCombo = false
-        extraComboColorOffset = 0
-    }
-
-    private fun createCircle(pars: List<String>, time: Double, position: Vector2, isNewCombo: Boolean, comboColorOffset: Int, bankInfo: SampleBankInfo) =
-        HitCircle(time, position, isNewCombo || forceNewCombo, comboColorOffset + extraComboColorOffset).also {
-            readCustomSampleBanks(bankInfo, pars.getOrNull(5))
-
-            forceNewCombo = false
-            extraComboColorOffset = 0
-        }
+    private fun createCircle(pars: List<String>, beatmap: Beatmap, time: Double, position: Vector2, isNewCombo: Boolean, comboOffset: Int, bankInfo: SampleBankInfo, scope: CoroutineScope?) =
+        HitCircle(
+            time,
+            position,
+            // First object
+            beatmap.hitObjects.objects.isEmpty() ||
+                // The last object was a spinner
+                beatmap.hitObjects.objects.lastOrNull() is Spinner || isNewCombo,
+            comboOffset
+        ).also { readCustomSampleBanks(bankInfo, pars.getOrNull(5), scope = scope) }
 
     @Throws(UnsupportedOperationException::class)
-    private fun createSlider(pars: List<String>, beatmap: Beatmap, time: Double, startPosition: Vector2, isNewCombo: Boolean, comboColorOffset: Int, soundType: HitSoundType, bankInfo: SampleBankInfo): Slider {
+    private fun createSlider(pars: List<String>, beatmap: Beatmap, time: Double, startPosition: Vector2, isNewCombo: Boolean, comboOffset: Int, soundType: Int, bankInfo: SampleBankInfo, scope: CoroutineScope?): Slider {
         if (pars.size < 8) {
             throw UnsupportedOperationException("Malformed slider")
         }
@@ -92,14 +91,23 @@ class BeatmapHitObjectsParser : BeatmapSectionParser() {
         // osu!stable treated the first span of the slider as a repeat, but no repeats are happening
         repeatCount = max(0, repeatCount - 1)
 
-        val curvePointsData = pars[5].split("[|]".toRegex()).dropLastWhile { it.isEmpty() }
-        var sliderType = SliderPathType.parse(curvePointsData[0][0])
+        val curvePointsData = pars[5].split(pipePropertyRegex).dropLastWhile {
+            scope?.ensureActive()
+            it.isEmpty()
+        }
 
+        var sliderType = SliderPathType.parse(curvePointsData[0][0])
         val curvePoints = mutableListOf<Vector2>().apply { add(Vector2(0f)) }
 
-        curvePointsData.run {
-            for (i in 1 until size) {
-                this[i].split(":".toRegex()).dropLastWhile { it.isEmpty() }.let {
+        for (i in 1 until curvePointsData.size) {
+            scope?.ensureActive()
+
+            curvePointsData[i]
+                .split(COLON_PROPERTY_REGEX)
+                .dropLastWhile {
+                    scope?.ensureActive()
+                    it.isEmpty()
+                }.let {
                     val curvePointPosition = Vector2(
                         parseInt(it[0]).toFloat(),
                         parseInt(it[1]).toFloat()
@@ -107,7 +115,6 @@ class BeatmapHitObjectsParser : BeatmapSectionParser() {
 
                     curvePoints.add(curvePointPosition - startPosition)
                 }
-            }
         }
 
         curvePoints.let {
@@ -133,9 +140,11 @@ class BeatmapHitObjectsParser : BeatmapSectionParser() {
             }
         }
 
+        scope?.ensureActive()
+
         val path = SliderPath(sliderType, curvePoints, rawLength)
 
-        readCustomSampleBanks(bankInfo, pars.getOrNull(10), true)
+        readCustomSampleBanks(bankInfo, pars.getOrNull(10), true, scope)
 
         // One node for each repeat + the start and end nodes
         val nodes = repeatCount + 2
@@ -146,8 +155,10 @@ class BeatmapHitObjectsParser : BeatmapSectionParser() {
                 add(bankInfo.copy())
             }
 
+            scope?.ensureActive()
+
             // Read any per-node sample banks
-            val sets = pars.getOrNull(9)?.split("\\|".toRegex())
+            val sets = pars.getOrNull(9)?.split(pipePropertyRegex)
             if (sets != null) {
                 for (i in 0 until min(sets.size, nodes)) {
                     readCustomSampleBanks(this[i], sets[i])
@@ -155,17 +166,19 @@ class BeatmapHitObjectsParser : BeatmapSectionParser() {
             }
         }
 
-        val nodeSoundTypes = mutableListOf<HitSoundType>().apply {
+        val nodeSoundTypes = mutableListOf<Int>().apply {
             // Populate node sound types with the default hit object sound type
             for (i in 0 until nodes) {
                 add(soundType)
             }
 
+            scope?.ensureActive()
+
             // Read any per-node sound types
-            val adds = pars.getOrNull(8)?.split("\\|".toRegex())
+            val adds = pars.getOrNull(8)?.split(pipePropertyRegex)
             if (adds != null) {
                 for (i in 0 until min(adds.size, nodes)) {
-                    set(i, HitSoundType.parse(parseInt(adds[i])))
+                    set(i, parseInt(adds[i]))
                 }
             }
         }
@@ -177,18 +190,20 @@ class BeatmapHitObjectsParser : BeatmapSectionParser() {
             }
         }
 
-        forceNewCombo = false
-        extraComboColorOffset = 0
-
         val difficultyControlPoint = beatmap.controlPoints.difficulty.controlPointAt(time)
+
+        scope?.ensureActive()
 
         return Slider(
             time,
             startPosition,
             repeatCount,
             path,
-            isNewCombo || forceNewCombo,
-            comboColorOffset + extraComboColorOffset,
+            // First object
+            beatmap.hitObjects.objects.isEmpty() ||
+                // The last object was a spinner
+                beatmap.hitObjects.objects.lastOrNull() is Spinner || isNewCombo,
+            comboOffset,
             nodeSamples
         ).also {
             it.tickDistanceMultiplier = when {
@@ -203,24 +218,19 @@ class BeatmapHitObjectsParser : BeatmapSectionParser() {
         }
     }
 
-    private fun createSpinner(pars: List<String>, beatmap: Beatmap, time: Double, isNewCombo: Boolean, comboColorOffset: Int, bankInfo: SampleBankInfo) =
-        Spinner(time, beatmap.getOffsetTime(parseInt(pars[5])).toDouble()).also {
-            readCustomSampleBanks(bankInfo, pars.getOrNull(6))
-
-            // Spinners don't create the new combo themselves, but force the next non-spinner hit object to create a new combo.
-            // Their combo offset is still added to that next hit object's combo index.
-            forceNewCombo = forceNewCombo || beatmap.formatVersion <= 8 || isNewCombo
-            extraComboColorOffset += comboColorOffset
+    private fun createSpinner(pars: List<String>, beatmap: Beatmap, time: Double, isNewCombo: Boolean, bankInfo: SampleBankInfo, scope: CoroutineScope?) =
+        Spinner(time, beatmap.getOffsetTime(parseInt(pars[5])).toDouble(), isNewCombo).also {
+            readCustomSampleBanks(bankInfo, pars.getOrNull(6), scope = scope)
         }
 
     /**
      * Converts the sound type of hit object to hit samples.
      *
-     * @param type The sound type.
+     * @param soundType The sound type.
      * @param bankInfo The sample bank info of the hit object.
      * @return A list of [HitSampleInfo] representing the hit samples of the hit object.
      */
-    private fun convertSoundType(type: HitSoundType, bankInfo: SampleBankInfo) = mutableListOf<HitSampleInfo>().apply {
+    private fun convertSoundType(soundType: Int, bankInfo: SampleBankInfo) = mutableListOf<HitSampleInfo>().apply {
         if (bankInfo.filename.isNotEmpty()) {
             add(FileHitSampleInfo(bankInfo.filename, bankInfo.volume))
         } else {
@@ -228,22 +238,22 @@ class BeatmapHitObjectsParser : BeatmapSectionParser() {
                 BankHitSampleInfo(BankHitSampleInfo.HIT_NORMAL, bankInfo.normal, bankInfo.customSampleBank, bankInfo.volume,
                     // If the sound type doesn't have the Normal flag set, attach it anyway as a layered sample.
                     // None also counts as a normal non-layered sample: https://osu.ppy.sh/help/wiki/osu!_File_Formats/Osu_(file_format)#hitsounds
-                    type != HitSoundType.None && type.bit and HitSoundType.Normal.bit == 0
+                    soundType != HitSoundType.None.bit && HitSoundType.Normal !in soundType
                 )
             )
         }
 
         fun addBankSample(name: String) = add(BankHitSampleInfo(name, bankInfo.add, bankInfo.customSampleBank, bankInfo.volume))
 
-        if (type.bit and HitSoundType.Finish.bit != 0) {
+        if (HitSoundType.Finish in soundType) {
             addBankSample(BankHitSampleInfo.HIT_FINISH)
         }
 
-        if (type.bit and HitSoundType.Whistle.bit != 0) {
+        if (HitSoundType.Whistle in soundType) {
             addBankSample(BankHitSampleInfo.HIT_WHISTLE)
         }
 
-        if (type.bit and HitSoundType.Clap.bit != 0) {
+        if (HitSoundType.Clap in soundType) {
             addBankSample(BankHitSampleInfo.HIT_CLAP)
         }
     }
@@ -255,12 +265,14 @@ class BeatmapHitObjectsParser : BeatmapSectionParser() {
      * @param str The information.
      * @param banksOnly Whether to only convert banks.
      */
-    private fun readCustomSampleBanks(bankInfo: SampleBankInfo, str: String?, banksOnly: Boolean = false) {
+    private fun readCustomSampleBanks(bankInfo: SampleBankInfo, str: String?, banksOnly: Boolean = false, scope: CoroutineScope? = null) {
         if (str.isNullOrEmpty()) {
             return
         }
 
-        val s = str.split(":".toRegex())
+        scope?.ensureActive()
+
+        val s = str.split(COLON_PROPERTY_REGEX)
 
         bankInfo.normal = SampleBank.parse(parseInt(s[0]))
         bankInfo.add = SampleBank.parse(parseInt(s[1])).takeIf { it != SampleBank.Normal } ?: bankInfo.normal
@@ -281,78 +293,62 @@ class BeatmapHitObjectsParser : BeatmapSectionParser() {
             bankInfo.filename = s[4]
         }
     }
-
-    /**
-     * Represents a hit object specific sample bank.
-     */
-    private data class SampleBankInfo(
-        /**
-         * The name of the sample bank file, if this sample bank uses custom samples.
-         */
-        @JvmField
-        var filename: String = "",
-
-        /**
-         * The main sample bank.
-         */
-        @JvmField
-        var normal: SampleBank = SampleBank.None,
-
-        /**
-         * The addition sample bank.
-         */
-        @JvmField
-        var add: SampleBank = SampleBank.None,
-
-        /**
-         * The volume at which the sample bank is played.
-         *
-         * If this is 0, the underlying control point's volume should be used instead.
-         */
-        @JvmField
-        var volume: Int = 0,
-
-        /**
-         * The index of the sample bank, if this sample bank uses custom samples.
-         *
-         * If this is 0, the underlying control point's sample index should be used instead.
-         */
-        @JvmField
-        var customSampleBank: Int = 0
-    )
-
-    /**
-     * Hit sound types that are provided by the game.
-     */
-    private enum class HitSoundType(
-        /**
-         * The bit of this hit sound.
-         */
-        @JvmField
-        val bit: Int
-    ) {
-        None(0),
-        Normal(1),
-        Whistle(1 shl 1),
-        Finish(1 shl 2),
-        Clap(1 shl 3);
-
-        companion object {
-            /**
-             * Converts an integer value to its hitsound type counterpart.
-             *
-             * @param value The value to convert.
-             * @return The hitsound type counterpart of the given value.
-             */
-            @JvmStatic
-            fun parse(value: Int) =
-                when (value) {
-                    1 -> Normal
-                    1 shl 1 -> Whistle
-                    1 shl 2 -> Finish
-                    1 shl 3 -> Clap
-                    else -> None
-                }
-        }
-    }
 }
+
+/**
+ * Represents a hit object specific sample bank.
+ */
+private data class SampleBankInfo(
+    /**
+     * The name of the sample bank file, if this sample bank uses custom samples.
+     */
+    @JvmField
+    var filename: String = "",
+
+    /**
+     * The main sample bank.
+     */
+    @JvmField
+    var normal: SampleBank = SampleBank.None,
+
+    /**
+     * The addition sample bank.
+     */
+    @JvmField
+    var add: SampleBank = SampleBank.None,
+
+    /**
+     * The volume at which the sample bank is played.
+     *
+     * If this is 0, the underlying control point's volume should be used instead.
+     */
+    @JvmField
+    var volume: Int = 0,
+
+    /**
+     * The index of the sample bank, if this sample bank uses custom samples.
+     *
+     * If this is 0, the underlying control point's sample index should be used instead.
+     */
+    @JvmField
+    var customSampleBank: Int = 0
+)
+
+/**
+ * Hit sound types that are provided by the game.
+ */
+private enum class HitSoundType(
+    /**
+     * The bit of this hit sound.
+     */
+    @JvmField
+    val bit: Int
+) {
+    None(0),
+    Normal(1),
+    Whistle(1 shl 1),
+    Finish(1 shl 2),
+    Clap(1 shl 3)
+}
+
+private operator fun Int.contains(type: HitSoundType) = this and type.bit != 0

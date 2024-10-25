@@ -1,9 +1,9 @@
 package com.edlplan.ui.fragment;
 
 import android.animation.Animator;
-import android.graphics.Color;
+
 import androidx.annotation.NonNull;
-import androidx.recyclerview.widget.GridLayoutManager;
+import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -11,17 +11,20 @@ import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.TextView;
 
-import com.edlplan.favorite.FavoriteLibrary;
 import com.edlplan.framework.easing.Easing;
 import com.edlplan.ui.BaseAnimationListener;
 import com.edlplan.ui.EasingHelper;
-import com.edlplan.ui.InputDialog;
+import com.reco1l.osu.data.DatabaseManager;
+import com.reco1l.osu.ui.MessageDialog;
+import com.reco1l.osu.ui.PromptDialog;
+import com.reco1l.toolkt.android.Dimensions;
+import com.reco1l.toolkt.android.Texts;
+import com.reco1l.toolkt.android.Views;
 
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-import ru.nsu.ccfit.zuev.osu.ToastLogger;
 import ru.nsu.ccfit.zuev.osu.helper.StringTable;
 import ru.nsu.ccfit.zuev.osuplus.R;
 
@@ -35,26 +38,44 @@ public class FavoriteManagerFragment extends BaseFragment {
 
     @Override
     protected int getLayoutID() {
-        return R.layout.favorite_manager_dialog;
+        return R.layout.collections_fragment;
     }
 
     @Override
     protected void onLoadView() {
         setDismissOnBackgroundClick(true);
-        GridLayoutManager layoutManager = new GridLayoutManager(getContext(), 2);
-        ((RecyclerView) findViewById(R.id.main_recycler_view)).setLayoutManager(layoutManager);
+
+        var layoutManager = new LinearLayoutManager(getContext());
         layoutManager.setOrientation(RecyclerView.VERTICAL);
 
-        Button newFolder = findViewById(R.id.new_folder);
-        newFolder.setOnClickListener(v -> {
-            InputDialog dialog = new InputDialog(getContext());
-            dialog.showForResult(s -> {
-                if (s.isEmpty()) return;
-                if (FavoriteLibrary.get().getMaps(s) == null && !s.equals(StringTable.get(R.string.favorite_default))) {
-                    FavoriteLibrary.get().addFolder(s);
-                    adapter.add(s);
-                }
-            });
+        ((RecyclerView) findViewById(R.id.main_recycler_view)).setLayoutManager(layoutManager);
+
+        findViewById(R.id.new_folder).setOnClickListener(v -> {
+
+            new PromptDialog()
+                .setTitle("New folder")
+                .addButton("Create", dialog -> {
+
+                    var input = ((PromptDialog) dialog).getInput();
+                    if (input == null || input.isEmpty()) {
+                        dialog.dismiss();
+                        return null;
+                    }
+
+                    if (!DatabaseManager.getBeatmapCollectionsTable().collectionExists(input) && !input.equals(StringTable.get(R.string.favorite_default))) {
+                        DatabaseManager.getBeatmapCollectionsTable().insertCollection(input);
+                        adapter.add(input);
+                    }
+
+                    dialog.dismiss();
+                    return null;
+                })
+                .addButton("Cancel", dialog -> {
+                    dialog.dismiss();
+                    return null;
+                })
+                .show();
+
         });
 
         if (onLoadViewFunc != null) {
@@ -62,6 +83,7 @@ public class FavoriteManagerFragment extends BaseFragment {
         }
 
         playOnLoadAnim();
+        Views.setCornerRadius(findViewById(R.id.frg_body), Dimensions.getDp(14f));
     }
 
     private void playOnLoadAnim() {
@@ -128,6 +150,8 @@ public class FavoriteManagerFragment extends BaseFragment {
 
         public TextView folderName;
 
+        public TextView folderCount;
+
         public Button button1;
 
         public Button button2;
@@ -138,12 +162,13 @@ public class FavoriteManagerFragment extends BaseFragment {
             super(itemView);
             mainBody = itemView.findViewById(R.id.mainBody);
             folderName = itemView.findViewById(R.id.folder_name);
+            folderCount = itemView.findViewById(R.id.folder_count);
             button1 = itemView.findViewById(R.id.button);
             button2 = itemView.findViewById(R.id.button2);
         }
     }
 
-    public abstract static class FMAdapter extends RecyclerView.Adapter<VH> {
+    public abstract class FMAdapter extends RecyclerView.Adapter<VH> {
 
         protected List<String> folders;
 
@@ -152,27 +177,27 @@ public class FavoriteManagerFragment extends BaseFragment {
         }
 
         public void add(String folder) {
-            ArrayList<String> tmp = new ArrayList<>(folders);
-            folders = new ArrayList<>();
-            folders.add(tmp.get(0));
-            folders.add(folder);
-            tmp.remove(tmp.get(0));
-            folders.addAll(tmp);
+            folders.add(includeDefaultFolder() ? 1 : 0, folder);
             notifyDataSetChanged();
         }
 
+
+        protected abstract boolean includeDefaultFolder();
+
+
         protected void load() {
-            ArrayList<String> tmp = new ArrayList<>(FavoriteLibrary.get().getFolders());
-            Collections.sort(tmp);
-            folders = new ArrayList<>();
-            folders.add(StringTable.get(R.string.favorite_default));
-            folders.addAll(tmp);
+            folders = new ArrayList<>(DatabaseManager.getBeatmapCollectionsTable().getCollections());
+            Collections.sort(folders);
+
+            if (includeDefaultFolder()) {
+                folders.add(0, StringTable.get(R.string.favorite_default));
+            }
         }
 
         @NonNull
         @Override
         public VH onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-            return new VH(LayoutInflater.from(parent.getContext()).inflate(R.layout.favorite_folder_item, parent, false));
+            return new VH(LayoutInflater.from(parent.getContext()).inflate(R.layout.collections_item, parent, false));
         }
 
         @Override
@@ -180,6 +205,54 @@ public class FavoriteManagerFragment extends BaseFragment {
             return folders.size();
         }
 
+        @Override
+        public void onBindViewHolder(@NonNull VH holder, int position) {
+
+            // User cannot delete or remove beatmaps from default folder which will always be at first position.
+            var isDefaultFolder = includeDefaultFolder() && position == 0;
+            var folder = folders.get(position);
+
+            updateFolderNameText(holder, folder);
+
+            Texts.setDrawableLeft(holder.button1, getContext().getDrawable(R.drawable.delete_24px));
+            Texts.getDrawableLeft(holder.button1).setTint(0xFFFFBFBF);
+            holder.button1.setVisibility(isDefaultFolder ? View.GONE : View.VISIBLE);
+
+            holder.button1.setOnClickListener(v -> {
+
+                new MessageDialog()
+                    .setTitle("Remove collection")
+                    .setMessage(getContext().getString(R.string.favorite_ensure))
+                    .addButton("Yes", dialog -> {
+
+                        DatabaseManager.getBeatmapCollectionsTable().clearCollection(folder);
+                        DatabaseManager.getBeatmapCollectionsTable().deleteCollection(folder);
+
+                        load();
+                        notifyDataSetChanged();
+                        dialog.dismiss();
+                        return null;
+                    })
+                    .addButton("No", dialog -> {
+                        dialog.dismiss();
+                        return null;
+                    })
+                    .show();
+            });
+        }
+
+        protected void updateFolderNameText(VH holder, String name) {
+            var maps = DatabaseManager.getBeatmapCollectionsTable().getBeatmaps(name);
+
+            holder.folderName.setText(name);
+
+            if (maps == null) {
+                holder.folderCount.setVisibility(View.GONE);
+            } else {
+                holder.folderCount.setVisibility(View.VISIBLE);
+                holder.folderCount.setText("· " + maps.size() + " beatmaps");
+            }
+        }
     }
 
     public class AddAdapter extends FMAdapter {
@@ -191,63 +264,36 @@ public class FavoriteManagerFragment extends BaseFragment {
         }
 
         @Override
+        protected boolean includeDefaultFolder() {
+            return false;
+        }
+
+        @Override
         public void onBindViewHolder(@NonNull VH holder, int position) {
-            final String f = folders.get(position);
-            holder.folderName.setText(String.format("%s (%s)",
-                    f, FavoriteLibrary.get().getMaps(f) == null ? "*" : (String.valueOf(FavoriteLibrary.get().getMaps(f).size()))));
-            holder.button1.setText(R.string.favorite_delete);
-            if (position == 0) {
-                holder.button2.setText("( • ̀ω•́ )✧");
-            } else {
-                holder.button2.setText(FavoriteLibrary.get().inFolder(f, track) ? R.string.favorite_remove : R.string.favorite_add);
-            }
 
-            holder.button1.setOnClickListener(new View.OnClickListener() {
-                boolean clicked = false;
-                boolean deleted = false;
+            super.onBindViewHolder(holder, position);
 
-                @Override
-                public void onClick(View v) {
-                    if (clicked) {
-                        FavoriteLibrary.get().remove(f);
-                        deleted = true;
-                        holder.button1.setTextColor(Color.argb(255, 255, 255, 255));
-                        load();
-                        notifyDataSetChanged();
-                    } else {
-                        clicked = true;
-                        holder.button1.setText(R.string.favorite_ensure);
-                        holder.button1.setTextColor(Color.argb(255, 255, 0, 0));
-                        findViewById(R.id.main_recycler_view).postDelayed(() -> {
-                            if (!deleted) {
-                                clicked = false;
-                                holder.button1.setTextColor(Color.argb(255, 0, 0, 0));
-                                holder.button1.setText(R.string.favorite_delete);
-                            }
-                        }, 2000);
-                    }
-                }
-            });
+            var folder = folders.get(position);
 
+            Texts.setDrawableLeft(holder.button2, getContext().getDrawable(
+                DatabaseManager.getBeatmapCollectionsTable().inCollection(folder, track)
+                    ? R.drawable.remove_24px
+                    : R.drawable.add_24px
+                )
+            );
             holder.button2.setOnClickListener(view -> {
-                if (FavoriteLibrary.get().inFolder(f, track)) {
-                    FavoriteLibrary.get().remove(f, track);
-                    holder.folderName.setText(String.format("%s (%s)",
-                            f, FavoriteLibrary.get().getMaps(f) == null ? "*" : (String.valueOf(FavoriteLibrary.get().getMaps(f).size()))));
-                    holder.button2.setText(R.string.favorite_add);
+
+                if (DatabaseManager.getBeatmapCollectionsTable().inCollection(folder, track)) {
+                    DatabaseManager.getBeatmapCollectionsTable().removeBeatmap(folder, track);
+                    Texts.setDrawableLeft(holder.button2, getContext().getDrawable(R.drawable.add_24px));
                 } else {
-                    FavoriteLibrary.get().add(f, track);
-                    holder.folderName.setText(String.format("%s (%s)",
-                            f, FavoriteLibrary.get().getMaps(f) == null ? "*" : (String.valueOf(FavoriteLibrary.get().getMaps(f).size()))));
-                    holder.button2.setText(R.string.favorite_remove);
+                    DatabaseManager.getBeatmapCollectionsTable().addBeatmap(folder, track);
+                    Texts.setDrawableLeft(holder.button2, getContext().getDrawable(R.drawable.remove_24px));
                 }
+
+                updateFolderNameText(holder, folder);
             });
 
-            if (position == 0) {
-                holder.button1.setOnClickListener(view -> ToastLogger.showText(StringTable.get(R.string.favorite_warning_on_delete_default), false));
-                holder.button2.setOnClickListener(view -> {
-                });
-            }
         }
     }
 
@@ -260,61 +306,24 @@ public class FavoriteManagerFragment extends BaseFragment {
         }
 
         @Override
+        protected boolean includeDefaultFolder() {
+            return true;
+        }
+
+        @Override
         public void onBindViewHolder(@NonNull VH holder, int position) {
-            final String f = folders.get(position);
-            holder.folderName.setText(String.format("%s (%s)",
-                    f, FavoriteLibrary.get().getMaps(f) == null ? "*" : (String.valueOf(FavoriteLibrary.get().getMaps(f).size()))));
-            holder.button1.setText(R.string.favorite_delete);
-            holder.button2.setText(R.string.favorite_select);
 
-            View.OnClickListener mainClick;
-            if (position != 0) {
-                mainClick = view -> {
-                    selected = folders.get(position);
-                    dismiss();
-                    onSelectListener.onSelect(selected);
-                };
-            } else {
-                mainClick = view -> {
-                    selected = folders.get(position);
-                    dismiss();
-                    onSelectListener.onSelect(null);
-                };
-            }
+            super.onBindViewHolder(holder, position);
 
-            holder.button2.setOnClickListener(mainClick);
-            holder.mainBody.setOnClickListener(mainClick);
+            // The button isn't needed here.
+            holder.button2.setVisibility(View.GONE);
 
-            holder.button1.setOnClickListener(new View.OnClickListener() {
-                boolean clicked = false;
-                boolean deleted = false;
-
-                @Override
-                public void onClick(View v) {
-                    if (clicked) {
-                        FavoriteLibrary.get().remove(f);
-                        deleted = true;
-                        holder.button1.setTextColor(Color.argb(255, 255, 255, 255));
-                        load();
-                        notifyDataSetChanged();
-                    } else {
-                        clicked = true;
-                        holder.button1.setText(R.string.favorite_ensure);
-                        holder.button1.setTextColor(Color.argb(255, 255, 0, 0));
-                        findViewById(R.id.main_recycler_view).postDelayed(() -> {
-                            if (!deleted) {
-                                clicked = false;
-                                holder.button1.setTextColor(Color.argb(255, 255, 255, 255));
-                                holder.button1.setText(R.string.favorite_delete);
-                            }
-                        }, 2000);
-                    }
-                }
+            holder.mainBody.setOnClickListener(v -> {
+                selected = folders.get(position);
+                dismiss();
+                onSelectListener.onSelect(position == 0 ? null : selected);
             });
 
-            if (position == 0) {
-                holder.button1.setOnClickListener(view -> ToastLogger.showText(StringTable.get(R.string.favorite_warning_on_delete_default), false));
-            }
         }
     }
 }

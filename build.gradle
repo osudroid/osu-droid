@@ -1,6 +1,7 @@
 buildscript {
-    ext{
-        kotlin_version = '1.9.22'
+    ext {
+        kotlin_version = '2.0.10'
+        room_version = '2.6.1'
     }
     repositories {
         google()
@@ -10,7 +11,12 @@ buildscript {
     dependencies {
         classpath 'com.android.tools.build:gradle:8.2.2'
         classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version"
+        classpath "androidx.room:room-gradle-plugin:$room_version"
     }
+}
+
+plugins {
+    id 'com.google.devtools.ksp' version '2.0.10-1.0.24'
 }
 
 allprojects {
@@ -28,7 +34,7 @@ def getReleaseVersionCode() {
 }
 
 def getReleaseVersionName() {
-    def baseline = '1.7.2-tournament'
+    def baseline = '1.8-tournament'
     def versionName = baseline + new Date().format('(yyMMdd)')
     println('versionName: ' + versionName)
     return versionName
@@ -42,6 +48,7 @@ if (localPropertiesFile.exists()) {
 
 apply plugin: 'com.android.application'
 apply plugin: 'kotlin-android'
+apply plugin: 'androidx.room'
 
 android {
     namespace 'ru.nsu.ccfit.zuev.osuplus'
@@ -53,6 +60,7 @@ android {
         targetSdkVersion 29
         versionCode getReleaseVersionCode()
         versionName getReleaseVersionName()
+        multiDexEnabled true
         ndk {
             abiFilters 'x86', 'x86_64', 'armeabi-v7a', 'arm64-v8a'
         }
@@ -63,6 +71,9 @@ android {
         }
     }
 
+    room {
+        schemaDirectory "$projectDir/schemas"
+    }
 
     signingConfigs {
         debug {
@@ -148,32 +159,35 @@ android {
 
 dependencies {
     implementation project(':AndEngine')
+    implementation project(':LibBASS')
     implementation project(':andnext_markdown')
     implementation 'androidx.legacy:legacy-support-v4:1.0.0'
     implementation 'androidx.preference:preference:1.2.1'
     implementation 'com.google.android.material:material:1.11.0'
 
-    // implementation 'io.reactivex.rxjava2:rxandroid:2.1.1'
-    // implementation 'io.reactivex.rxjava2:rxjava:2.2.21'
     implementation 'com.squareup.okhttp3:okhttp:4.12.0'
-    // implementation 'com.squareup.retrofit2:adapter-rxjava2:2.9.0'
     implementation 'com.google.code.gson:gson:2.10.1'
-    //implementation 'com.github.tbruyelle:rxpermissions:0.12'
     implementation 'pub.devrel:easypermissions:3.0.0'
     implementation 'net.lingala.zip4j:zip4j:2.11.5'
 
     implementation 'com.github.EdrowsLuo:osudroidstrings:bd9507b289'
     implementation 'com.github.EdrowsLuo.EdlGameFramework:EdlJavaExt:d91c53fcff'
     implementation 'com.github.EdrowsLuo.EdlGameFramework:EdlOsbSupport:d91c53fcff'
-    implementation project(path: ':LibBASS')
 
+    // Tools
+    implementation 'com.github.Reco1I:Toolkt:1.0.23'
     implementation 'commons-io:commons-io:2.15.1'
-    implementation 'com.github.delight-im:Android-AdvancedWebView:v3.2.1'
 
     // Multiplayer
-    implementation('org.jetbrains.kotlinx:kotlinx-coroutines-core:1.7.3')
-    implementation 'org.jetbrains.kotlin:kotlin-reflect:1.9.22'
+    implementation 'org.jetbrains.kotlinx:kotlinx-coroutines-core:1.7.3'
+    implementation "org.jetbrains.kotlin:kotlin-reflect:$kotlin_version"
     implementation ('io.socket:socket.io-client:2.1.0') {
         exclude group: 'org.json', module: 'json'
     }
+
+    // Room
+    implementation "androidx.room:room-runtime:$room_version"
+    annotationProcessor "androidx.room:room-compiler:$room_version"
+    ksp "androidx.room:room-compiler:$room_version"
+    implementation "androidx.room:room-ktx:$room_version"
 }

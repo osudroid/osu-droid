@@ -1,6 +1,6 @@
 package org.anddev.andengine.opengl.vertex;
 
-import org.anddev.andengine.opengl.util.FastFloatBuffer;
+import java.nio.FloatBuffer;
 
 /**
  * (c) 2010 Nicolas Gramlich 
@@ -41,18 +41,17 @@ public class LineVertexBuffer extends VertexBuffer {
 	// ===========================================================
 
 	public synchronized void update(final float pX1, final float pY1, final float pX2, final float pY2) {
-		final int[] bufferData = this.mBufferData;
+		final FloatBuffer floatBuffer = this.mFloatBuffer;
 
-		bufferData[0]  = Float.floatToRawIntBits(pX1);
-		bufferData[1]  = Float.floatToRawIntBits(pY1);
+		floatBuffer.position(0);
 
-		bufferData[2]  = Float.floatToRawIntBits(pX2);
-		bufferData[3]  = Float.floatToRawIntBits(pY2);
+		floatBuffer.put(0, pX1);
+		floatBuffer.put(1, pY1);
 
-		final FastFloatBuffer buffer = this.mFloatBuffer;
-		buffer.position(0);
-		buffer.put(bufferData);
-		buffer.position(0);
+		floatBuffer.put(2, pX2);
+		floatBuffer.put(3, pY2);
+
+		floatBuffer.position(0);
 
 		super.setHardwareBufferNeedsUpdate();
 	}

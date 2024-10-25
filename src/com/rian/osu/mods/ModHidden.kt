@@ -7,7 +7,7 @@ import com.rian.osu.beatmap.hitobject.Slider
 /**
  * Represents the Hidden mod.
  */
-class ModHidden : Mod(), IApplicableToBeatmap {
+class ModHidden : Mod(), IModApplicableToBeatmap {
     override val droidString = "h"
 
     override fun applyToBeatmap(beatmap: Beatmap) {

@@ -1,0 +1,118 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/frg_background"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="#80000000"
+    android:orientation="vertical">
+
+    <LinearLayout
+        android:id="@+id/fullLayout"
+        android:layout_width="320dp"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        android:layout_centerHorizontal="true"
+        android:layout_marginBottom="20dp"
+        android:background="@drawable/rounded_rect"
+        android:backgroundTint="#1E1E2E"
+        android:divider="@drawable/divider"
+        android:orientation="vertical"
+        android:showDividers="middle">
+
+        <TextView
+            style="@style/settings_tab_divider"
+            android:paddingVertical="12dp"
+            android:text="@string/menu_properties_title" />
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:divider="@drawable/divider"
+            android:orientation="horizontal"
+            android:showDividers="middle">
+
+            <Button
+                android:id="@+id/offset_minus"
+                style="@style/button_borderless"
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent"
+                android:drawableLeft="@drawable/remove_24px"
+                android:drawablePadding="0dp"
+                android:paddingHorizontal="24dp" />
+
+            <LinearLayout
+                android:layout_width="0px"
+                android:layout_height="match_parent"
+                android:layout_weight="1"
+                android:orientation="vertical">
+
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:gravity="center"
+                    android:paddingTop="4dp"
+                    android:text="@string/menu_properties_offset"
+                    android:textColor="@color/textview"
+                    android:textSize="10sp" />
+
+                <EditText
+                    android:id="@+id/offsetBox"
+                    style="@style/button_borderless"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:ems="5"
+                    android:gravity="center"
+                    android:inputType="numberSigned"
+                    android:padding="0dp"
+                    android:text="0"
+                    android:textColor="@color/textview" />
+
+            </LinearLayout>
+
+            <Button
+                android:id="@+id/offset_plus"
+                style="@style/button_borderless"
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent"
+                android:drawableLeft="@drawable/add_24px"
+                android:drawablePadding="0dp"
+                android:paddingHorizontal="24dp" />
+
+        </LinearLayout>
+
+        <CheckBox
+            android:id="@+id/addToFav"
+            style="@style/button_borderless"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:button="@null"
+            android:drawableLeft="@drawable/search_favorite_checkbox"
+            android:text="@string/menu_properties_tofavs"
+            app:drawableTint="@color/checkbox"
+            tools:checked="true" />
+
+        <Button
+            android:id="@+id/manageFavButton"
+            style="@style/button_borderless"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:drawableLeft="@drawable/folder_24px"
+            android:text="@string/favorite_manage" />
+
+        <Button
+            android:id="@+id/deleteBeatmap"
+            style="@style/button_borderless"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:drawableLeft="@drawable/delete_24px"
+            android:text="@string/menu_properties_delete"
+            android:textColor="#FFBFBF"
+            app:drawableTint="#FFBFBF" />
+
+    </LinearLayout>
+
+
+</RelativeLayout>

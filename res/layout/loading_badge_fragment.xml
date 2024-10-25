@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:gravity="center|bottom">
+
+    <LinearLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:background="@drawable/rounded_rect"
+        android:backgroundTint="#80000000"
+        android:paddingHorizontal="6dp"
+        android:paddingVertical="4dp"
+        android:gravity="center"
+        android:layout_margin="6dp">
+
+        <com.google.android.material.progressindicator.CircularProgressIndicator
+            android:id="@+id/progress"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_centerInParent="true"
+            android:indeterminate="true"
+            app:indicatorColor="@color/colorAccent"
+            app:indicatorSize="12dp"
+            app:trackThickness="2dp"
+            app:trackCornerRadius="12dp"
+            android:layout_marginRight="4dp"/>
+
+        <TextView
+            android:id="@+id/text"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_centerInParent="true"
+            android:gravity="center"
+            android:text="Loading..."
+            android:textColor="#FFF" />
+
+    </LinearLayout>
+
+
+
+</RelativeLayout>

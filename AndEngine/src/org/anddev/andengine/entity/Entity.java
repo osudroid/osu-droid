@@ -15,6 +15,7 @@ import org.anddev.andengine.util.ParameterCallable;
 import org.anddev.andengine.util.SmartList;
 import org.anddev.andengine.util.Transformation;
 import org.anddev.andengine.util.constants.Constants;
+import org.anddev.andengine.util.modifier.IModifier;
 
 
 /**
@@ -24,6 +25,8 @@ import org.anddev.andengine.util.constants.Constants;
  * @author Nicolas Gramlich
  * @since 12:00:48 - 08.03.2010
  */
+// osu!droid modified:
+// - The functions onApplyTransformations() and applyTranslation() now requires the Camera as second parameter.
 public class Entity implements IEntity {
 	// ===========================================================
 	// Constants
@@ -88,11 +91,11 @@ public class Entity implements IEntity {
 	private boolean mLocalToParentTransformationDirty = true;
 	private boolean mParentToLocalTransformationDirty = true;
 
-	private final Transformation mLocalToParentTransformation = new Transformation();
-	private final Transformation mParentToLocalTransformation = new Transformation();
+	private Transformation mLocalToParentTransformation;
+	private Transformation mParentToLocalTransformation;
 
-	private final Transformation mLocalToSceneTransformation = new Transformation();
-	private final Transformation mSceneToLocalTransformation = new Transformation();
+	private Transformation mLocalToSceneTransformation;
+	private Transformation mSceneToLocalTransformation;
 
 	private Object mUserData;
 
@@ -681,6 +684,11 @@ public class Entity implements IEntity {
 		if(this.mEntityModifiers == null) {
 			return false;
 		}
+
+		// BEGIN osu!droid modified
+		pEntityModifier.onUnregister();
+		// END osu!droid modified
+
 		return this.mEntityModifiers.remove(pEntityModifier);
 	}
 
@@ -689,6 +697,16 @@ public class Entity implements IEntity {
 		if(this.mEntityModifiers == null) {
 			return false;
 		}
+
+		// BEGIN osu!droid modified
+		for (int i = this.mEntityModifiers.size() - 1; i >= 0; i--) {
+			IModifier<IEntity> modifier = this.mEntityModifiers.get(i);
+			if (pEntityModifierMatcher.matches(modifier)) {
+				modifier.onUnregister();
+			}
+		}
+		// END osu!droid modified
+
 		return this.mEntityModifiers.removeAll(pEntityModifierMatcher);
 	}
 
@@ -697,6 +715,13 @@ public class Entity implements IEntity {
 		if(this.mEntityModifiers == null) {
 			return;
 		}
+
+		// BEGIN osu!droid modified
+		for (int i = this.mEntityModifiers.size() - 1; i >= 0; i--) {
+			this.mEntityModifiers.get(i).onUnregister();
+		}
+		// END osu!droid modified
+
 		this.mEntityModifiers.clear();
 	}
 
@@ -706,6 +731,13 @@ public class Entity implements IEntity {
 	}
 
 	public Transformation getLocalToParentTransformation() {
+
+		// BEGIN osu!droid modified
+		if (this.mLocalToParentTransformation == null) {
+			this.mLocalToParentTransformation = new Transformation();
+		}
+		// END osu!droid modified
+
 		final Transformation localToParentTransformation = this.mLocalToParentTransformation;
 		if(this.mLocalToParentTransformationDirty) {
 			localToParentTransformation.setToIdentity();
@@ -748,6 +780,13 @@ public class Entity implements IEntity {
 	}
 
 	public Transformation getParentToLocalTransformation() {
+
+		// BEGIN osu!droid modified
+		if (this.mParentToLocalTransformation == null) {
+			this.mParentToLocalTransformation = new Transformation();
+		}
+		// END osu!droid modified
+
 		final Transformation parentToLocalTransformation = this.mParentToLocalTransformation;
 		if(this.mParentToLocalTransformationDirty) {
 			parentToLocalTransformation.setToIdentity();
@@ -788,6 +827,13 @@ public class Entity implements IEntity {
 
 	@Override
 	public Transformation getLocalToSceneTransformation() {
+
+		// BEGIN osu!droid modified
+		if (this.mLocalToSceneTransformation == null) {
+			this.mLocalToSceneTransformation = new Transformation();
+		}
+		// END osu!droid modified
+
 		// TODO Cache if parent(recursive) not dirty.
 		final Transformation localToSceneTransformation = this.mLocalToSceneTransformation;
 		localToSceneTransformation.setTo(this.getLocalToParentTransformation());
@@ -802,6 +848,13 @@ public class Entity implements IEntity {
 
 	@Override
 	public Transformation getSceneToLocalTransformation() {
+
+		// BEGIN osu!droid modified
+		if (this.mSceneToLocalTransformation == null) {
+			this.mSceneToLocalTransformation = new Transformation();
+		}
+		// END osu!droid modified
+
 		// TODO Cache if parent(recursive) not dirty.
 		final Transformation sceneToLocalTransformation = this.mSceneToLocalTransformation;
 		sceneToLocalTransformation.setTo(this.getParentToLocalTransformation());
@@ -986,9 +1039,9 @@ public class Entity implements IEntity {
 		this.mUpdateHandlers = new UpdateHandlerList(Entity.UPDATEHANDLERS_CAPACITY_DEFAULT);
 	}
 
-	protected void onApplyTransformations(final GL10 pGL) {
+	protected void onApplyTransformations(final GL10 pGL, Camera pCamera) {
 		/* Translation. */
-		this.applyTranslation(pGL);
+		this.applyTranslation(pGL, pCamera);
 
 		/* Rotation. */
 		this.applyRotation(pGL);
@@ -997,7 +1050,7 @@ public class Entity implements IEntity {
 		this.applyScale(pGL);
 	}
 
-	protected void applyTranslation(final GL10 pGL) {
+	protected void applyTranslation(final GL10 pGL, final Camera pCamera) {
 		pGL.glTranslatef(this.mX, this.mY, 0);
 	}
 
@@ -1035,7 +1088,7 @@ public class Entity implements IEntity {
 	protected void onManagedDraw(final GL10 pGL, final Camera pCamera) {
 		pGL.glPushMatrix();
 		{
-			this.onApplyTransformations(pGL);
+			this.onApplyTransformations(pGL, pCamera);
 
 			this.doDraw(pGL, pCamera);
 

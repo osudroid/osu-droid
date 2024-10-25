@@ -1,215 +1,65 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:orientation="vertical"
-                android:background="@color/frgDialogStyleBackground"
-                android:id="@+id/frg_background">
-
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/frg_background"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="#80000000"
+    android:orientation="vertical">
 
     <LinearLayout
-            android:id="@+id/fullLayout"
+        android:id="@+id/fullLayout"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        android:layout_centerHorizontal="true"
+        android:layout_marginBottom="20dp"
+        android:background="@drawable/rounded_rect"
+        android:backgroundTint="#1E1E2E"
+        android:divider="@drawable/divider"
+        android:minWidth="250dp"
+        android:orientation="vertical"
+        android:showDividers="middle">
+
+        <TextView
+            android:id="@+id/room_player"
+            style="@style/settings_tab_divider"
+            android:paddingVertical="12dp"
+            android:text="Player" />
+
+        <Button
+            android:id="@+id/room_profile"
+            style="@style/button_borderless"
             android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:layout_marginHorizontal="170dp"
-            android:layout_marginTop="60dp"
-            android:layout_alignParentBottom="true"
-            android:gravity="center"
-            android:orientation="vertical">
+            android:layout_height="wrap_content"
+            android:drawableLeft="@drawable/account_box_24px"
+            android:text="Visit profile" />
 
+        <Button
+            android:id="@+id/room_mute"
+            style="@style/button_borderless"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:drawableLeft="@drawable/volume_off_24px"
+            android:text="Mute" />
 
-        <RelativeLayout
-                android:layout_width="match_parent"
-                android:layout_height="40dp">
+        <Button
+            android:id="@+id/room_host"
+            style="@style/button_borderless"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:drawableLeft="@drawable/crown_24px"
+            android:text="Make room host" />
 
-            <View
-                    android:layout_width="match_parent"
-                    android:layout_height="20dp"
-                    android:layout_alignParentBottom="true"
-                    android:background="@drawable/shadow"
-                    android:rotation="180"/>
-
-            <View
-                    android:layout_width="match_parent"
-                    android:layout_height="10dp"
-                    android:layout_alignParentBottom="true"
-                    android:background="@drawable/shadow"
-                    android:rotation="180"/>
-
-            <RelativeLayout
-                    android:id="@+id/showMoreButton"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_alignParentBottom="true"
-                    android:layout_centerHorizontal="true">
-
-                <View
-                        android:layout_width="200dp"
-                        android:layout_height="25dp"
-                        android:background="#99E63E8C"/>
-
-                <com.edlplan.ui.TriangleEffectView
-                        android:layout_width="200dp"
-                        android:layout_height="25dp"
-                        android:alpha="0.5"/>
-
-                <TextView
-                        android:id="@+id/room_player"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="Player"
-                        android:textColor="#FFFFFFFF"
-                        android:textSize="15sp"
-                        android:textStyle="bold" android:layout_centerInParent="true"/>
-
-            </RelativeLayout>
-        </RelativeLayout>
-
-
-        <LinearLayout
-                android:id="@+id/optionBody"
-                android:gravity="center"
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:background="@color/frgBodyBackgroundLight"
-                android:clickable="true"
-                android:orientation="vertical">
-
-            <RelativeLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content">
-
-                <View
-                        android:layout_width="match_parent"
-                        android:layout_height="5dp"
-                        android:background="@color/triangleBackground"/>
-
-                <com.edlplan.ui.TriangleEffectView
-                        android:layout_width="match_parent"
-                        android:layout_height="5dp"/>
-            </RelativeLayout>
-
-
-            <LinearLayout
-                    android:layout_width="wrap_content"
-                    android:layout_height="match_parent"
-                    android:gravity="center|top"
-                    android:orientation="vertical"
-                    android:layout_marginTop="20dp" android:layout_marginStart="20dp"
-                    android:layout_marginEnd="20dp" android:layout_marginBottom="20dp">
-
-                <RelativeLayout
-                        android:id="@+id/room_profile"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:layout_marginTop="12dp">
-
-                    <com.edlplan.ui.TriangleEffectView
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:layout_alignBottom="@id/text3"
-                            android:layout_alignTop="@id/text3"
-                            android:layout_alignRight="@id/text3"
-                            android:layout_alignLeft="@id/text3"
-                            android:alpha="0.5"/>
-
-                    <TextView
-                            android:id="@+id/text3"
-                            android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
-                            android:text="Visit profile"
-                            android:textColor="#FFFFFFFF"
-                            android:background="#99E63E8C"
-                            android:textStyle="bold"
-                            android:gravity="center"
-                            android:paddingVertical="8dp"
-                            android:elevation="1dp"
-                            android:paddingHorizontal="40dp"/>
-
-                </RelativeLayout>
-
-                <RelativeLayout
-                        android:id="@+id/room_mute"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:layout_marginTop="12dp">
-
-                    <com.edlplan.ui.TriangleEffectView
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:layout_alignBottom="@id/mute_text"
-                            android:layout_alignTop="@id/mute_text"
-                            android:layout_alignRight="@id/mute_text"
-                            android:layout_alignLeft="@id/mute_text"
-                            android:alpha="0.5"/>
-
-                    <TextView
-                            android:id="@+id/mute_text"
-                            android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
-                            android:text="Mute"
-                            android:textColor="#FFFFFFFF"
-                            android:background="#99E63E8C"
-                            android:textStyle="bold"
-                            android:gravity="center"
-                            android:paddingVertical="8dp"
-                            android:elevation="1dp"
-                            android:paddingHorizontal="40dp"/>
-
-                </RelativeLayout>
-
-                <RelativeLayout
-                        android:id="@+id/room_host"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_marginTop="12dp">
-
-                    <com.edlplan.ui.TriangleEffectView
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:layout_alignBottom="@id/text"
-                            android:layout_alignTop="@id/text"
-                            android:layout_alignRight="@id/text"
-                            android:layout_alignLeft="@id/text"
-                            android:alpha="0.5"/>
-
-                    <TextView
-                            android:id="@+id/text"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:text="Make room host"
-                            android:textColor="#FFFFFFFF"
-                            android:background="#99E63E8C"
-                            android:textStyle="bold"
-                            android:paddingVertical="8dp"
-                            android:elevation="1dp"
-                            android:paddingHorizontal="40dp"/>
-
-                </RelativeLayout>
-
-                <RelativeLayout
-                        android:id="@+id/room_kick"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:layout_marginTop="12dp">
-
-                    <TextView
-                            android:id="@+id/text2"
-                            android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
-                            android:text="Kick"
-                            android:textColor="#FFFFFFFF"
-                            android:textStyle="bold"
-                            android:gravity="center"
-                            android:background="#FF0000"
-                            android:paddingVertical="8dp"
-                            android:paddingHorizontal="40dp"/>
-
-                </RelativeLayout>
-
-            </LinearLayout>
-
-        </LinearLayout>
+        <Button
+            android:id="@+id/room_kick"
+            style="@style/button_borderless"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:drawableLeft="@drawable/person_remove_24px"
+            app:drawableTint="#FFBFBF"
+            android:text="Kick"
+            android:textColor="#FFBFBF" />
 
     </LinearLayout>
 

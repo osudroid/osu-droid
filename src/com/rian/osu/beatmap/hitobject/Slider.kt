@@ -8,6 +8,8 @@ import com.rian.osu.math.Vector2
 import com.rian.osu.utils.Cached
 import kotlin.math.max
 import kotlin.math.min
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.ensureActive
 
 /**
  * Represents a slider.
@@ -31,18 +33,22 @@ class Slider(
     /**
      * The path of this [Slider].
      */
-    @JvmField
-    var path: SliderPath,
+    path: SliderPath,
 
     /**
      * Whether this [Slider] starts a new combo.
      */
-    isNewCombo: Boolean = false,
+    isNewCombo: Boolean,
 
     /**
-     * How many combo colors to skip, if this [Slider] starts a new combo.
+     * When starting a new combo, the offset of the new combo relative to the current one.
+     *
+     * This is generally a setting provided by a beatmap creator to choreograph interesting color patterns
+     * which can only be achieved by skipping combo colors with per-[HitObject] level.
+     *
+     * It is exposed via [HitObject.comboIndexWithOffsets].
      */
-    comboColorOffset: Int = 0,
+    comboOffset: Int,
 
     /**
      * The samples to be played when each node of this [Slider] is hit.
@@ -56,19 +62,31 @@ class Slider(
      */
     @JvmField
     var nodeSamples: MutableList<MutableList<HitSampleInfo>>
-) : HitObject(startTime, position, isNewCombo, comboColorOffset), IHasDuration {
-    override val endTime: Double
+) : HitObject(startTime, position, isNewCombo, comboOffset) {
+    override val endTime
         get() = startTime + spanCount * path.expectedDistance / velocity
 
-    override val duration: Double
-        get() = endTime - startTime
+    /**
+     * The path of this [Slider].
+     */
+    var path = path
+        set(value) {
+            field = value
+
+            updateNestedPositions()
+        }
+
+    override var position
+        get() = super.position
+        set(value) {
+            super.position = value
+
+            updateNestedPositions()
+        }
 
     private val endPositionCache = Cached(position)
 
-    /**
-     * The end position of this [Slider].
-     */
-    val endPosition: Vector2
+    override val endPosition: Vector2
         get() {
             if (!endPositionCache.isValid) {
                 endPositionCache.value = position + curvePositionAt(1.0)
@@ -78,17 +96,9 @@ class Slider(
         }
 
     /**
-     * Gets the stacked end position of this [Slider].
-     *
-     * @param mode The [GameMode] to calculate for.
-     * @return The stacked end position.
-     */
-    fun getStackedEndPosition(mode: GameMode) = evaluateStackedPosition(endPosition, mode)
-
-    /**
      * The distance of this [Slider].
      */
-    val distance: Double
+    val distance
         get() = path.expectedDistance
 
     /**
@@ -97,13 +107,14 @@ class Slider(
     var repeatCount = repeatCount
         set(value) {
             field = value.coerceAtLeast(0)
+
             updateNestedPositions()
         }
 
     /**
      * The amount of times the length of this [Slider] spans.
      */
-    val spanCount: Int
+    val spanCount
         get() = repeatCount + 1
 
     /**
@@ -172,40 +183,101 @@ class Slider(
     var lazyTravelTime = 0.0
 
     /**
-     * The duration of one span of this [Slider].
+     * The duration of one span of this [Slider] in milliseconds.
      */
-    val spanDuration: Double
+    val spanDuration
         get() = duration / spanCount
 
-    override var stackHeight = super.stackHeight
+    override var stackOffsetMultiplier
+        get() = super.stackOffsetMultiplier
         set(value) {
-            field = value
+            super.stackOffsetMultiplier = value
 
-            nestedHitObjects.forEach { it.stackHeight = value }
+            difficultyStackedEndPositionCache.invalidate()
+            gameplayStackedEndPositionCache.invalidate()
+
+            nestedHitObjects.forEach { it.stackOffsetMultiplier = value }
         }
 
-    override var scale = super.scale
-        set(value) {
-            field = value
+    // Difficulty calculation object positions
 
-            nestedHitObjects.forEach { it.scale = value }
-        }
+    private val difficultyStackedEndPositionCache = Cached(position)
 
-    init {
-        // Create sliding samples
-        samples.filterIsInstance<BankHitSampleInfo>().apply {
-            find { it.name == BankHitSampleInfo.HIT_NORMAL }?.let {
-                auxiliarySamples.add(it.copy(name = "sliderslide"))
+    override val difficultyStackedEndPosition: Vector2
+        get() {
+            if (!difficultyStackedEndPositionCache.isValid) {
+                difficultyStackedEndPositionCache.value = endPosition + difficultyStackOffset
             }
 
-            find { it.name == BankHitSampleInfo.HIT_WHISTLE }?.let {
-                auxiliarySamples.add(it.copy(name = "sliderwhistle"))
-            }
+            return difficultyStackedEndPositionCache.value
         }
-    }
 
-    override fun applyDefaults(controlPoints: BeatmapControlPoints, difficulty: BeatmapDifficulty, mode: GameMode) {
-        super.applyDefaults(controlPoints, difficulty, mode)
+    override var difficultyStackHeight
+        get() = super.difficultyStackHeight
+        set(value) {
+            super.difficultyStackHeight = value
+
+            difficultyStackedEndPositionCache.invalidate()
+
+            nestedHitObjects.forEach { it.difficultyStackHeight = value }
+        }
+
+    override var difficultyScale
+        get() = super.difficultyScale
+        set(value) {
+            super.difficultyScale = value
+
+            difficultyStackedEndPositionCache.invalidate()
+
+            nestedHitObjects.forEach { it.difficultyScale = value }
+        }
+
+    // Gameplay object positions
+
+    private val gameplayEndPositionCache = Cached(gameplayPosition)
+
+    override val gameplayEndPosition: Vector2
+        get() {
+            if (!gameplayEndPositionCache.isValid) {
+                gameplayEndPositionCache.value = convertPositionToRealCoordinates(endPosition)
+            }
+
+            return gameplayEndPositionCache.value
+        }
+
+    private val gameplayStackedEndPositionCache = Cached(gameplayEndPosition)
+
+    override val gameplayStackedEndPosition: Vector2
+        get() {
+            if (!gameplayStackedEndPositionCache.isValid) {
+                gameplayStackedEndPositionCache.value = gameplayEndPosition + gameplayStackOffset
+            }
+
+            return gameplayStackedEndPositionCache.value
+        }
+
+    override var gameplayStackHeight
+        get() = super.gameplayStackHeight
+        set(value) {
+            super.gameplayStackHeight = value
+
+            gameplayStackedEndPositionCache.invalidate()
+
+            nestedHitObjects.forEach { it.gameplayStackHeight = value }
+        }
+
+    override var gameplayScale
+        get() = super.gameplayScale
+        set(value) {
+            super.gameplayScale = value
+
+            gameplayStackedEndPositionCache.invalidate()
+
+            nestedHitObjects.forEach { it.gameplayScale = value }
+        }
+
+    override fun applyDefaults(controlPoints: BeatmapControlPoints, difficulty: BeatmapDifficulty, mode: GameMode, scope: CoroutineScope?) {
+        super.applyDefaults(controlPoints, difficulty, mode, scope)
 
         val timingPoint = controlPoints.timing.controlPointAt(startTime)
         val difficultyPoint = controlPoints.difficulty.controlPointAt(startTime)
@@ -228,26 +300,41 @@ class Slider(
             else Double.POSITIVE_INFINITY
 
         // Invalidate the end position in case there are timing changes.
-        endPositionCache.invalidate()
+        invalidateEndPositions()
 
-        createNestedHitObjects(mode)
+        createNestedHitObjects(mode, controlPoints, scope)
 
-        nestedHitObjects.forEach { it.applyDefaults(controlPoints, difficulty, mode) }
+        nestedHitObjects.forEach { it.applyDefaults(controlPoints, difficulty, mode, scope) }
     }
 
-    override fun applySamples(controlPoints: BeatmapControlPoints) {
-        super.applySamples(controlPoints)
+    override fun applySamples(controlPoints: BeatmapControlPoints, scope: CoroutineScope?) {
+        val sampleControlPoint = controlPoints.sample.controlPointAt(startTime + CONTROL_POINT_LENIENCY + 1)
+
+        samples = samples.map {
+            scope?.ensureActive()
+
+            sampleControlPoint.applyTo(it)
+        }.toMutableList()
 
         nodeSamples.forEachIndexed { i, sampleList ->
+            scope?.ensureActive()
+
             val time = startTime + i * spanDuration + CONTROL_POINT_LENIENCY
             val nodeSamplePoint = controlPoints.sample.controlPointAt(time)
 
-            nodeSamples[i] = sampleList.map { nodeSamplePoint.applyTo(it) }.toMutableList()
+            nodeSamples[i] = sampleList.map {
+                scope?.ensureActive()
+
+                nodeSamplePoint.applyTo(it)
+            }.toMutableList()
         }
+
+        createSlidingSamples(controlPoints, scope)
+        updateNestedSamples(controlPoints, scope)
     }
 
     /**
-     * Computes the position on this [Slider] relative to how much of this [Slider] has been completed.
+     * Computes the position on this [Slider] relative to how much of this [Slider] has been completed in osu!pixels.
      *
      * @param progress `[0. 1]` where 0 is the start time of this [Slider] and 1 is the end time of this [Slider].
      * @return The position on the [Slider].
@@ -278,7 +365,7 @@ class Slider(
      */
     fun spanAt(progress: Double) = (progress * spanCount).toInt()
 
-    private fun createNestedHitObjects(mode: GameMode) {
+    private fun createNestedHitObjects(mode: GameMode, controlPoints: BeatmapControlPoints, scope: CoroutineScope?) {
         nestedHitObjects.clear()
 
         head = SliderHead(startTime, position)
@@ -294,12 +381,16 @@ class Slider(
             val minDistanceFromEnd = velocity * 10
 
             for (span in 0 until spanCount) {
+                scope?.ensureActive()
+
                 val spanStartTime = startTime + span * spanDuration
                 val reversed = span % 2 == 1
-                val sliderTicks: ArrayList<SliderTick> = ArrayList()
+                val sliderTicks = mutableListOf<SliderTick>()
 
                 var d = tickDistance
                 while (d <= length) {
+                    scope?.ensureActive()
+
                     if (d >= length - minDistanceFromEnd) {
                         break
                     }
@@ -371,41 +462,94 @@ class Slider(
             sortBy { it.startTime }
         }
 
-        updateNestedSamples()
+        updateNestedSamples(controlPoints, scope)
     }
 
     private fun updateNestedPositions() {
-        endPositionCache.invalidate()
+        invalidateEndPositions()
 
         head.position = position
         tail.position = endPosition
     }
 
-    private fun updateNestedSamples() {
+    private fun invalidateEndPositions() {
+        endPositionCache.invalidate()
+        difficultyStackedEndPositionCache.invalidate()
+        gameplayEndPositionCache.invalidate()
+        gameplayStackedEndPositionCache.invalidate()
+    }
+
+    private fun createSlidingSamples(controlPoints: BeatmapControlPoints, scope: CoroutineScope?) {
+        auxiliarySamples.clear()
+
         val bankSamples = samples.filterIsInstance<BankHitSampleInfo>()
-        val normalSample = bankSamples.find { it.name == BankHitSampleInfo.HIT_NORMAL }
-        val sampleList = mutableListOf<HitSampleInfo>().apply {
-            (normalSample ?: bankSamples.firstOrNull())?.let {
-                add(it.copy(name = "slidertick"))
-            }
+        val normalSlide = bankSamples.find { it.name == BankHitSampleInfo.HIT_NORMAL }
+        val whistleSlide = bankSamples.find { it.name == BankHitSampleInfo.HIT_WHISTLE }
+
+        if (normalSlide == null && whistleSlide == null) {
+            return
         }
 
-        fun getSample(index: Int) = nodeSamples.getOrNull(index) ?: samples
+        val samplePoints = controlPoints.sample.between(startTime + CONTROL_POINT_LENIENCY, endTime + CONTROL_POINT_LENIENCY)
 
-        nestedHitObjects.onEach {
-            it.samples.addAll(
-                when (it) {
-                    is SliderHead -> getSample(0)
-                    is SliderRepeat -> getSample(it.spanIndex + 1)
-                    is SliderTail -> getSample(spanCount)
-                    else -> sampleList
+        if (normalSlide != null) {
+            auxiliarySamples.add(SequenceHitSampleInfo(
+                samplePoints.map {
+                    scope?.ensureActive()
+
+                    it.time to it.applyTo(baseNormalSlideSample)
                 }
-            )
+            ))
+        }
+
+        if (whistleSlide != null) {
+            auxiliarySamples.add(SequenceHitSampleInfo(
+                samplePoints.map {
+                    scope?.ensureActive()
+
+                    it.time to it.applyTo(baseWhistleSlideSample)
+                }
+            ))
+        }
+    }
+
+    private fun updateNestedSamples(controlPoints: BeatmapControlPoints, scope: CoroutineScope?) {
+        // Ensure that the list of node samples is at least as long as the number of nodes
+        while (nodeSamples.size < repeatCount + 2) {
+            scope?.ensureActive()
+
+            nodeSamples.add(samples.map { it.copy() }.toMutableList())
+        }
+
+        nestedHitObjects.forEach {
+            scope?.ensureActive()
+
+            it.samples.clear()
+
+            when (it) {
+                is SliderHead -> it.samples.addAll(nodeSamples[0])
+                is SliderRepeat -> it.samples.addAll(nodeSamples[it.spanIndex + 1])
+                is SliderTail -> it.samples.addAll(nodeSamples[spanCount])
+                else -> {
+                    val time = it.startTime + CONTROL_POINT_LENIENCY
+                    val tickSamplePoint = controlPoints.sample.controlPointAt(time)
+
+                    it.samples.add(tickSamplePoint.applyTo(baseTickSample))
+                }
+            }
         }
     }
 
     companion object {
         const val LEGACY_LAST_TICK_OFFSET = 36.0
-        private const val BASE_SCORING_DISTANCE = 100f
+
+        /**
+         * Scoring distance with a speed-adjusted beat length of 1 second (i.e. the speed slider balls move through their track).
+         */
+        const val BASE_SCORING_DISTANCE = 100f
+
+        private val baseNormalSlideSample = BankHitSampleInfo("sliderslide")
+        private val baseWhistleSlideSample = BankHitSampleInfo("sliderwhistle")
+        private val baseTickSample = BankHitSampleInfo("slidertick")
     }
 }

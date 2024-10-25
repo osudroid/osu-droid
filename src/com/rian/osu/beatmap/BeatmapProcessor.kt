@@ -4,17 +4,24 @@ import com.rian.osu.GameMode
 import com.rian.osu.beatmap.hitobject.*
 import com.rian.osu.mods.Mod
 import com.rian.osu.utils.CircleSizeCalculator
-import kotlin.math.sqrt
+import kotlin.math.pow
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.ensureActive
 
 /**
  * Provides functionality to alter a [Beatmap] after it has been converted.
  */
-class BeatmapProcessor(
+class BeatmapProcessor @JvmOverloads constructor(
     /**
      * The [Beatmap] to process. This should already be converted to the applicable mode.
      */
     @JvmField
-    val beatmap: Beatmap
+    val beatmap: Beatmap,
+
+    /**
+     * The [CoroutineScope] to use for coroutines.
+     */
+    private val scope: CoroutineScope? = null
 ) {
     /**
      * Processes the converted [Beatmap] prior to [HitObject.applyDefaults] being invoked.
@@ -24,7 +31,22 @@ class BeatmapProcessor(
      *
      * This can only be used to add alterations to [HitObject]s generated directly through the conversion process.
      */
-    fun preProcess() = Unit
+    fun preProcess() {
+        var lastObj: HitObject? = null
+
+        beatmap.hitObjects.objects.forEach {
+            scope?.ensureActive()
+            it.updateComboInformation(lastObj)
+            lastObj = it
+        }
+
+        scope?.ensureActive()
+
+        // Mark the last object in the beatmap as last in combo.
+        if (lastObj != null) {
+            lastObj!!.isLastInCombo = true
+        }
+    }
 
     /**
      * Processes the converted [Beatmap] after [HitObject.applyDefaults] has been invoked.
@@ -33,18 +55,21 @@ class BeatmapProcessor(
      * and [Mod]s will have been applied to all [HitObject]s.
      *
      * This should be used to add alterations to [HitObject]s while they are in their most playable state.
-     *
-     * @param mode The [GameMode] to add alterations for.
      */
-    fun postProcess(mode: GameMode) = beatmap.hitObjects.objects.run {
+    fun postProcess() = beatmap.hitObjects.objects.run {
         if (isEmpty()) {
             return@run
         }
 
         // Reset stacking
-        forEach { it.stackHeight = 0 }
+        forEach {
+            scope?.ensureActive()
 
-        when (mode) {
+            it.difficultyStackHeight = 0
+            it.gameplayStackHeight = 0
+        }
+
+        when (beatmap.mode) {
             GameMode.Droid -> applyDroidStacking()
             GameMode.Standard -> if (beatmap.formatVersion >= 6) applyStandardStacking() else applyStandardStackingOld()
         }
@@ -55,16 +80,25 @@ class BeatmapProcessor(
             return@run
         }
 
-        val droidScale = CircleSizeCalculator.standardScaleToDroidScale(this[0].scale)
+        val droidDifficultyScale = CircleSizeCalculator.standardScaleToDroidDifficultyScale(this[0].difficultyScale, true)
+        val maxDeltaTime = 2000 * beatmap.general.stackLeniency
 
         for (i in 0 until size - 1) {
+            scope?.ensureActive()
+
             val current = this[i]
             val next = this[i + 1]
 
-            if (next.startTime - current.startTime < 2000 * beatmap.general.stackLeniency &&
-                next.position.getDistance(current.position) < sqrt(droidScale)
-            ) {
-                next.stackHeight = current.stackHeight + 1
+            if (current is HitCircle && next.startTime - current.startTime < maxDeltaTime) {
+                val distanceSquared = next.position.getDistance(current.position).pow(2)
+
+                if (distanceSquared < droidDifficultyScale) {
+                    next.difficultyStackHeight = current.difficultyStackHeight + 1
+                }
+
+                if (distanceSquared < current.gameplayScale) {
+                    next.gameplayStackHeight = current.gameplayStackHeight + 1
+                }
             }
         }
     }
@@ -76,11 +110,17 @@ class BeatmapProcessor(
         var extendedEndIndex = endIndex
 
         if (endIndex < objects.size - 1) {
+            scope?.ensureActive()
+
             // Extend the end index to include objects they are stacked on
             for (i in endIndex downTo startIndex) {
+                scope?.ensureActive()
+
                 var stackBaseIndex = i
 
                 for (n in stackBaseIndex + 1 until objects.size) {
+                    scope?.ensureActive()
+
                     val stackBaseObject = objects[stackBaseIndex]
                     if (stackBaseObject is Spinner) {
                         break
@@ -91,7 +131,7 @@ class BeatmapProcessor(
                         continue
                     }
 
-                    val endTime = stackBaseObject.getEndTime()
+                    val endTime = stackBaseObject.endTime
                     val stackThreshold = objectN.timePreempt * beatmap.general.stackLeniency
 
                     if (objectN.startTime - endTime > stackThreshold) {
@@ -105,7 +145,8 @@ class BeatmapProcessor(
                         stackBaseIndex = n
 
                         // HitObjects after the specified update range haven't been reset yet
-                        objectN.stackHeight = 0
+                        objectN.difficultyStackHeight = 0
+                        objectN.gameplayStackHeight = 0
                     }
                 }
 
@@ -121,6 +162,8 @@ class BeatmapProcessor(
 
         // Reverse pass for stack calculation.
         for (i in extendedEndIndex downTo startIndex + 1) {
+            scope?.ensureActive()
+
             var n = i
 
             // We should check every note which has not yet got a stack.
@@ -133,7 +176,7 @@ class BeatmapProcessor(
             // then we come backwards on the i-th loop iteration until we reach 3 and handle 1.
             // 2 and 1 will be ignored in the i-th loop because they already have a stack value.
             var objectI = objects[i]
-            if (objectI.stackHeight != 0 || objectI is Spinner) {
+            if (objectI.difficultyStackHeight != 0 || objectI is Spinner) {
                 continue
             }
 
@@ -144,32 +187,38 @@ class BeatmapProcessor(
             // Any other case is handled by the "is Slider" code below this.
             if (objectI is HitCircle) {
                 while (--n >= 0) {
+                    scope?.ensureActive()
+
                     val objectN = objects[n]
                     if (objectN is Spinner) {
                         continue
                     }
 
-                    if (objectI.startTime - objectN.getEndTime() > stackThreshold) {
+                    if (objectI.startTime - objectN.endTime > stackThreshold) {
                         // We are no longer within stacking range of the previous object.
                         break
                     }
 
                     // Hit objects before the specified update range haven't been reset yet
-                    objectN.stackHeight = 0
+                    objectN.difficultyStackHeight = 0
+                    objectN.gameplayStackHeight = 0
 
                     // This is a special case where hit circles are moved DOWN and RIGHT (negative stacking) if they are under the *last* slider in a stacked pattern.
                     // o==o <- slider is at original location
                     //     o <- hitCircle has stack of -1
                     //      o <- hitCircle has stack of -2
                     if (objectN is Slider && objectN.endPosition.getDistance(objectI.position) < STACK_DISTANCE) {
-                        val offset = objectI.stackHeight - objectN.stackHeight + 1
+                        val offset = objectI.difficultyStackHeight - objectN.difficultyStackHeight + 1
 
                         for (j in n + 1..i) {
+                            scope?.ensureActive()
+
                             // For each object which was declared under this slider, we will offset it to appear *below* the slider end (rather than above).
                             val objectJ = objects[j]
 
                             if (objectN.endPosition.getDistance(objectJ.position) < STACK_DISTANCE) {
-                                objectJ.stackHeight -= offset
+                                objectJ.difficultyStackHeight -= offset
+                                objectJ.gameplayStackHeight -= offset
                             }
                         }
 
@@ -181,7 +230,8 @@ class BeatmapProcessor(
                     if (objectN.position.getDistance(objectI.position) < STACK_DISTANCE) {
                         // Keep processing as if there are no sliders. If we come across a slider, this gets cancelled out.
                         // NOTE: Sliders with start positions stacking are a special case that is also handled here.
-                        objectN.stackHeight = objectI.stackHeight + 1
+                        objectN.difficultyStackHeight = objectI.difficultyStackHeight + 1
+                        objectN.gameplayStackHeight = objectI.gameplayStackHeight + 1
                         objectI = objectN
                     }
                 }
@@ -189,6 +239,8 @@ class BeatmapProcessor(
                 // We have hit the first slider in a possible stack.
                 // From this point on, we ALWAYS stack positive regardless.
                 while (--n >= startIndex) {
+                    scope?.ensureActive()
+
                     val objectN = objects[n]
                     if (objectN is Spinner) {
                         continue
@@ -199,8 +251,9 @@ class BeatmapProcessor(
                         break
                     }
 
-                    if (objectN.getEndPosition().getDistance(objectI.position) < STACK_DISTANCE) {
-                        objectN.stackHeight = objectI.stackHeight + 1
+                    if (objectN.endPosition.getDistance(objectI.position) < STACK_DISTANCE) {
+                        objectN.difficultyStackHeight = objectI.difficultyStackHeight + 1
+                        objectN.gameplayStackHeight = objectI.gameplayStackHeight + 1
                         objectI = objectN
                     }
                 }
@@ -212,16 +265,20 @@ class BeatmapProcessor(
         val objects = beatmap.hitObjects.objects
 
         for (i in objects.indices) {
+            scope?.ensureActive()
+
             val currentObject = objects[i]
-            if (currentObject.stackHeight != 0 && currentObject !is Slider) {
+            if (currentObject.difficultyStackHeight != 0 && currentObject !is Slider) {
                 continue
             }
 
             var sliderStack = 0
-            var startTime = currentObject.getEndTime()
+            var startTime = currentObject.endTime
             val stackThreshold = currentObject.timePreempt * beatmap.general.stackLeniency
 
             for (j in i + 1 until objects.size) {
+                scope?.ensureActive()
+
                 if (objects[j].startTime - stackThreshold > startTime) {
                     break
                 }
@@ -235,11 +292,14 @@ class BeatmapProcessor(
                 //
                 // Reference: https://github.com/ppy/osu/pull/24188
                 if (objects[j].position.getDistance(currentObject.position) < STACK_DISTANCE) {
-                    ++currentObject.stackHeight
+                    ++currentObject.difficultyStackHeight
+                    ++currentObject.gameplayStackHeight
                     startTime = objects[j].startTime
-                } else if (objects[j].position.getDistance(currentObject.getEndPosition()) < STACK_DISTANCE) {
+                } else if (objects[j].position.getDistance(currentObject.endPosition) < STACK_DISTANCE) {
                     // Case for sliders - bump notes down and right, rather than up and left.
-                    objects[j].stackHeight -= ++sliderStack
+                    ++sliderStack
+                    objects[j].difficultyStackHeight -= sliderStack
+                    objects[j].gameplayStackHeight -= sliderStack
                     startTime = objects[j].startTime
                 }
             }

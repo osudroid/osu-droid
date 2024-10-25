@@ -4,19 +4,23 @@ import android.animation.Animator;
 import android.content.Intent;
 import android.os.Environment;
 import com.google.android.material.snackbar.Snackbar;
+
 import androidx.core.content.FileProvider;
+
+import android.util.Log;
 import android.view.View;
 import android.widget.Toast;
 
 import com.edlplan.framework.easing.Easing;
-import com.edlplan.replay.OdrDatabase;
-import com.edlplan.replay.OsuDroidReplay;
 import com.edlplan.replay.OsuDroidReplayPack;
 import com.edlplan.ui.BaseAnimationListener;
 import com.edlplan.ui.EasingHelper;
+import com.reco1l.osu.data.DatabaseManager;
+import com.reco1l.osu.ui.MessageDialog;
+import com.reco1l.toolkt.android.Dimensions;
+import com.reco1l.toolkt.android.Views;
 
 import java.io.File;
-import java.util.List;
 import java.util.Locale;
 
 import ru.nsu.ccfit.zuev.osu.GlobalManager;
@@ -33,27 +37,30 @@ public class ScoreMenuFragment extends BaseFragment {
 
     @Override
     protected int getLayoutID() {
-        return R.layout.fragment_score_menu;
+        return R.layout.score_options_fragment;
     }
 
     @Override
     protected void onLoadView() {
         findViewById(R.id.exportReplay).setOnClickListener(v -> {
-            List<OsuDroidReplay> replays = OdrDatabase.get().getReplayById(scoreId);
-            if (replays.size() > 0) {
+
+            var scoreInfo = DatabaseManager.getScoreInfoTable().getScore(scoreId);
+
+            if (scoreInfo != null) {
                 try {
-                    OsuDroidReplay replay = replays.get(0);
+                    String beatmapFilename = scoreInfo.getBeatmapFilename();
+
                     final File file = new File(
                             new File(Environment.getExternalStorageDirectory(), "osu!droid/export"),
                             String.format(Locale.getDefault(), "%s [%s]-%d.edr",
-                                    replay.getFileName().subSequence(replay.getFileName().indexOf('/') + 1, replay.getFileName().lastIndexOf('.')),
-                                    replay.getPlayerName(),
-                                    replay.getTime())
+                                    beatmapFilename.subSequence(0, beatmapFilename.lastIndexOf('.')),
+                                    scoreInfo.getPlayerName(),
+                                    scoreInfo.getTime())
                     );
                     if (!file.getParentFile().exists()) {
                         file.getParentFile().mkdirs();
                     }
-                    OsuDroidReplayPack.packTo(file, replay);
+                    OsuDroidReplayPack.packTo(file, scoreInfo);
 
                     Snackbar.make(v, String.format(getResources().getString(R.string.frg_score_menu_export_succeed), file.getAbsolutePath()), 2750).setAction("Share", new View.OnClickListener() {
                         @Override
@@ -74,30 +81,43 @@ public class ScoreMenuFragment extends BaseFragment {
                 }
             }
         });
+
         findViewById(R.id.deleteReplay).setOnClickListener(v -> {
-            ConfirmDialogFragment confirm = new ConfirmDialogFragment();
-            confirm.showForResult(isAccepted -> {
-                if (isAccepted) {
-                    List<OsuDroidReplay> replays = OdrDatabase.get().getReplayById(scoreId);
-                    if (replays.size() > 0) {
-                        try {
-                            if (OdrDatabase.get().deleteReplay(scoreId) == 0) {
-                                Snackbar.make(v, "Failed to delete replay!", 1500)
-                                        .show();
-                            } else {
-                                Snackbar.make(v, R.string.menu_deletescore_delete_success, 1500)
-                                        .show();
-                            }
-                            ScoreMenuFragment.this.dismiss();
-                        } catch (Exception e) {
-                            e.printStackTrace();
-                            Toast.makeText(v.getContext(), "Failed to delete replay!", Toast.LENGTH_SHORT).show();
+            new MessageDialog()
+                .setTitle("Delete replay").setMessage("Are you sure?")
+                .addButton("Yes", dialog -> {
+
+                    try {
+                        dialog.dismiss();
+                        ScoreMenuFragment.this.dismiss();
+
+                        var scoreInfoTable = DatabaseManager.getScoreInfoTable();
+                        var scoreInfo = scoreInfoTable.getScore(scoreId);
+
+                        if (scoreInfo != null && scoreInfoTable.deleteScore(scoreId) != 0) {
+                            Snackbar.make(v, R.string.menu_deletescore_delete_success, 1500).show();
+                            GlobalManager.getInstance().getSongMenu().reloadScoreboard();
+
+                            new File(scoreInfo.getReplayPath()).delete();
+                        } else {
+                            Snackbar.make(v, "Failed to delete replay!", 1500).show();
                         }
+                    } catch (Exception e) {
+                        Log.e("ScoreMenuFragment", "Failed to delete replay", e);
+                        Toast.makeText(v.getContext(), "Failed to delete replay!", Toast.LENGTH_SHORT).show();
                     }
-                }
-            });
+
+                    return null;
+                })
+                .addButton("Cancel", dialog -> {
+                    dialog.dismiss();
+                    return null;
+                })
+                .show();
         });
+
         playOnLoadAnim();
+        Views.setCornerRadius(findViewById(R.id.fullLayout), Dimensions.getDp(14f));
     }
 
     @Override

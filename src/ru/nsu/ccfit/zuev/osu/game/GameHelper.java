@@ -2,32 +2,20 @@ package ru.nsu.ccfit.zuev.osu.game;
 
 import android.graphics.PointF;
 
-import com.edlplan.osu.support.timing.controlpoint.ControlPoints;
+import com.rian.osu.beatmap.hitobject.Slider;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
-import java.util.ArrayList;
-import java.util.LinkedList;
-import java.util.Queue;
-import java.util.Random;
+import java.util.Arrays;
 
-import ru.nsu.ccfit.zuev.osu.RGBColor;
 import ru.nsu.ccfit.zuev.skins.OsuSkin;
 import ru.nsu.ccfit.zuev.osu.Utils;
 import ru.nsu.ccfit.zuev.osu.helper.DifficultyHelper;
-import ru.nsu.ccfit.zuev.osu.polygon.Spline;
 
 public class GameHelper {
-    public static ControlPoints controlPoints;
-    private static double tickRate = 1;
-    private static float scale = 1;
-    private static double speed = 1;
-    private static float difficulty = 1;
-    private static float approachRate = 1;
-    private static float drain = 0;
-    private static float stackLeniency = 0;
-    private static float timeMultiplier = 0;
-    private static RGBColor sliderColor = new RGBColor();
+    private static float overallDifficulty = 1;
+    private static float healthDrain = 0;
+    private static float speedMultiplier = 0;
     private static boolean hidden = false;
     private static boolean flashLight = false;
     private static boolean hardrock = false;
@@ -40,18 +28,11 @@ public class GameHelper {
     private static boolean perfect = false;
     private static boolean scoreV2;
     private static boolean isEasy;
-    private static boolean useReplay;
     private static boolean isKiai = false;
     private static boolean auto = false;
     private static double beatLength = 0;
-    private static double timingOffset = 0;
-    private static int timeSignature = 4;
-    private static double initalBeatLength = 0;
-    private static double globalTime = 0;
-    private static Spline.CurveTypes curveType;
-    private static int gameid = 0;
-    private static final Queue<SliderPath> pathPool = new LinkedList<>();
-    private static final Queue<PointF> pointPool = new LinkedList<>();
+    private static double currentBeatTime = 0;
+    private static boolean samplesMatchPlaybackRate;
 
     private static DifficultyHelper difficultyHelper = DifficultyHelper.StdDifficulty;
 
@@ -63,198 +44,67 @@ public class GameHelper {
         GameHelper.difficultyHelper = difficultyHelper;
     }
 
-    public static float getDrain() {
-        return drain;
+    public static float getHealthDrain() {
+        return healthDrain;
     }
 
-    public static void setDrain(final float drain) {
-        GameHelper.drain = drain;
+    public static void setHealthDrain(final float healthDrain) {
+        GameHelper.healthDrain = healthDrain;
     }
 
-    public static float getDifficulty() {
-        return difficulty;
+    public static float getOverallDifficulty() {
+        return overallDifficulty;
     }
 
-    public static void setDifficulty(final float difficulty) {
-        GameHelper.difficulty = difficulty;
+    public static void setOverallDifficulty(final float overallDifficulty) {
+        GameHelper.overallDifficulty = overallDifficulty;
     }
 
-    public static double getTickRate() {
-        return tickRate;
-    }
+    /**
+     * Converts an osu!pixels-based path of a {@link Slider} to one that can be used in gameplay.
+     *
+     * @return The converted {@link SliderPath}.
+     */
+    public static SliderPath convertSliderPath(final Slider slider) {
+        var startPosition = slider.getPosition().plus(slider.getGameplayStackOffset());
 
-    public static void setTickRate(final double tickRate) {
-        GameHelper.tickRate = tickRate;
-    }
+        var calculatedPath = slider.getPath().getCalculatedPath();
+        var cumulativeLength = slider.getPath().getCumulativeLength();
 
-    public static int getGameid() {
-        return gameid;
-    }
+        var path = new SliderPath(calculatedPath.size());
+        var tmpPoint = new PointF();
 
-    public static void updateGameid() {
-        gameid = (new Random().nextInt(233333333) + 1);
-    }
+        for (var i = 0; i < calculatedPath.size(); i++) {
 
-    public static SliderPath calculatePath(final PointF pos,
-                                           final String[] data, final float maxLength, final float offset) {
-        final ArrayList<ArrayList<PointF>> points = new ArrayList<>();
-        points.add(new ArrayList<>());
-        int lastIndex = 0;
-        points.get(lastIndex).add(pos);
+            var p = calculatedPath.get(i);
+            tmpPoint.set(startPosition.x + p.x, startPosition.y + p.y);
 
-        final SliderPath path = newPath();
+            // The path is already flipped when the library applies the Hard Rock mod, so we don't need to do it here.
+            Utils.trackToRealCoords(tmpPoint);
+            path.setPoint(i, tmpPoint.x, tmpPoint.y);
 
-        for (final String s : data) {
-            if (s.equals(data[0])) {
-                curveType = Spline.getCurveType(s.charAt(0));
-
-                if (curveType == Spline.CurveTypes.PerfectCurve && data.length != 3) {
-                    // A perfect circle curve must have exactly 3 control points: the initial position, and 2 other control points.
-                    // Fallback to a Bézier curve if there are more or less control points.
-                    curveType = Spline.CurveTypes.Bezier;
-                }
-
-                continue;
+            if (i < cumulativeLength.size()) {
+                path.setLength(i, cumulativeLength.get(i).floatValue());
+            } else {
+                path.setLength(i, -1f);
             }
-            final String[] nums = s.split(":");
-            final PointF point = newPointF();
-            point.set(Integer.parseInt(nums[0]), Integer.parseInt(nums[1]));
-            point.x += offset;
-            point.y += offset;
-            final PointF ppoint = points.get(lastIndex).get(
-                    points.get(lastIndex).size() - 1);
-            if (point.x == ppoint.x && point.y == ppoint.y
-                    || data[0].equals("C")) {
-                if (data[0].equals("C")) {
-                    points.get(lastIndex).add(point);
-                }
-                points.add(new ArrayList<>());
-                lastIndex++;
-            }
-            points.get(lastIndex).add(point);
-        }
-
-        ArrayList<PointF> section;
-        int pind = -1;
-        float trackLength = 0;
-        final PointF vec = newPointF();
-
-        MainCycle:
-        for (final ArrayList<PointF> plist : points) {
-            final Spline spline = Spline.getInstance();
-            spline.setControlPoints(plist);
-            spline.setType(curveType);
-            spline.Refresh();
-            section = spline.getPoints();
-
-            // If for some reason a circular arc could not be fit to the 3 given points, fall back to a numerically stable Bézier approximation.
-            if (curveType == Spline.CurveTypes.PerfectCurve && section.isEmpty()) {
-                spline.setType(Spline.CurveTypes.Bezier);
-                spline.Refresh();
-                section = spline.getPoints();
-            }
-
-            // Debug.i("section size=" + section.size());
-            for (final PointF p : section) {
-                if (pind < 0
-                        || Math.abs(p.x - path.points.get(pind).x)
-                        + Math.abs(p.y - path.points.get(pind).y) > 1f) {
-                    if (!path.points.isEmpty()) {
-                        vec.set(p.x - path.points.get(path.points.size() - 1).x,
-                                p.y - path.points.get(path.points.size() - 1).y);
-                        trackLength += Utils.length(vec);
-                        path.length.add(trackLength);
-                    }
-                    path.points.add(p);
-                    pind++;
-
-                    if (trackLength >= maxLength) {
-                        break MainCycle;
-                    }
-                }
-            }
-        }
-
-        for (int i = 0; i < path.points.size(); i++) {
-            path.points.set(i, Utils.trackToRealCoords(path.points.get(i)));
-        }
-
-        if (path.points.size() == 1) {
-            path.points.add(new PointF(path.points.get(0).x,
-                    path.points.get(0).y));
-            path.length.add(0f);
         }
 
         return path;
     }
 
-    public static float getScale() {
-        return scale;
+    /**
+     * Gets the rate at which gameplay progresses in terms of time.
+     */
+    public static float getSpeedMultiplier() {
+        return speedMultiplier;
     }
 
-    public static void setScale(final float scale) {
-        GameHelper.scale = scale;
-    }
-
-    public static float getApproachRate() {
-        return approachRate;
-    }
-
-    public static void setApproachRate(float approachRate) {
-        GameHelper.approachRate = approachRate;
-    }
-
-    public static float getTimeMultiplier() {
-        return timeMultiplier;
-    }
-
-    public static void setTimeMultiplier(float timeMultiplier) {
-        GameHelper.timeMultiplier = timeMultiplier;
-    }
-
-    public static double getSpeed() {
-        return speed;
-    }
-
-    public static void setSpeed(final double speed) {
-        GameHelper.speed = speed;
-    }
-
-    public static void putPath(final SliderPath path) {
-        pointPool.addAll(path.points);
-        path.points.clear();
-        path.length.clear();
-        pathPool.add(path);
-    }
-
-    private static SliderPath newPath() {
-        if (pathPool.isEmpty()) {
-            return new SliderPath();
-        }
-        return pathPool.poll();
-    }
-
-    private static PointF newPointF() {
-        if (pointPool.isEmpty()) {
-            return new PointF();
-        }
-        return pointPool.poll();
-    }
-
-    public static float getStackLeniency() {
-        return stackLeniency;
-    }
-
-    public static void setStackLeniency(final float stackLeniency) {
-        GameHelper.stackLeniency = stackLeniency;
-    }
-
-    public static RGBColor getSliderColor() {
-        return sliderColor;
-    }
-
-    public static void setSliderColor(final RGBColor sliderColor) {
-        GameHelper.sliderColor = sliderColor;
+    /**
+     * Sets the rate at which gameplay progresses in terms of time.
+     */
+    public static void setSpeedMultiplier(float speedMultiplier) {
+        GameHelper.speedMultiplier = speedMultiplier;
     }
 
     public static boolean isEasy() {
@@ -288,6 +138,7 @@ public class GameHelper {
     public static void setFlashLight(final boolean flashLight) {
         GameHelper.flashLight = flashLight;
     }
+
     public static boolean isHalfTime() {
         return halfTime;
     }
@@ -336,14 +187,6 @@ public class GameHelper {
         GameHelper.scoreV2 = scoreV2;
     }
 
-    public static boolean isUseReplay() {
-        return useReplay;
-    }
-
-    public static void setUseReplay(final boolean useReplay) {
-        GameHelper.useReplay = useReplay;
-    }
-
     public static boolean isKiai() {
         return !OsuSkin.get().isDisableKiai() && isKiai;
     }
@@ -352,12 +195,12 @@ public class GameHelper {
         GameHelper.isKiai = isKiai;
     }
 
-    public static double getGlobalTime() {
-        return globalTime;
+    public static double getCurrentBeatTime() {
+        return currentBeatTime;
     }
 
-    public static void setGlobalTime(final double globalTime) {
-        GameHelper.globalTime = globalTime;
+    public static void setCurrentBeatTime(final double currentBeatTime) {
+        GameHelper.currentBeatTime = currentBeatTime;
     }
 
     public static double getBeatLength() {
@@ -366,38 +209,6 @@ public class GameHelper {
 
     public static void setBeatLength(final double beatLength) {
         GameHelper.beatLength = beatLength;
-    }
-
-    public static double getTimingOffset() {
-        return timingOffset;
-    }
-
-    public static void setTimingOffset(double timingOffset) {
-        GameHelper.timingOffset = timingOffset;
-    }
-
-    public static int getTimeSignature() {
-        return timeSignature;
-    }
-
-    public static void setTimeSignature(int timeSignature) {
-        GameHelper.timeSignature = timeSignature;
-    }
-
-    public static double getInitalBeatLength() {
-        return initalBeatLength;
-    }
-
-    public static void setInitalBeatLength(double initalBeatLength) {
-        GameHelper.initalBeatLength = initalBeatLength;
-    }
-
-    public static double getSliderTickLength() {
-        return 100f * initalBeatLength / speed;
-    }
-
-    public static double getKiaiTickLength() {
-        return initalBeatLength;
     }
 
     public static boolean isRelaxMod() {
@@ -435,24 +246,62 @@ public class GameHelper {
         }
     }
 
-    public static double ar2ms(double ar) {
-        return Round((ar <= 5) ? (1800 - 120 * ar) : (1950 - 150 * ar), 0);
+    public static boolean isSamplesMatchPlaybackRate() {
+        return samplesMatchPlaybackRate;
     }
 
-    public static double ms2ar(double ms) {
-        return (ms <= 1200) ? ((1200 - ms) / 150.0 + 5) : (1800 - ms) / 120.0;
-    }
-
-    public static double ms2od(double ms) {
-        return (80 - ms) / 6.0;
-    }
-
-    public static double od2ms(double od) {
-        return Round(80 - od * 6, 1);
+    public static void setSamplesMatchPlaybackRate(boolean samplesMatchPlaybackRate) {
+        GameHelper.samplesMatchPlaybackRate = samplesMatchPlaybackRate;
     }
 
     public static class SliderPath {
-        public ArrayList<PointF> points = new ArrayList<>();
-        public ArrayList<Float> length = new ArrayList<>();
+
+        private static final int strip = 3;
+        private static final int offsetX = 0;
+        private static final int offsetY = 1;
+        private static final int offsetLength = 2;
+
+        private float[] data;
+
+        public int lengthCount = 0;
+        public int pointCount = 0;
+
+        public SliderPath(int anchorPointCount) {
+            data = new float[anchorPointCount * strip];
+        }
+
+        public void setPoint(int index, float x, float y) {
+            data[index * strip + offsetX] = x;
+            data[index * strip + offsetY] = y;
+            pointCount++;
+        }
+
+        public void setLength(int index, float length) {
+
+            var targetIndex = index * strip + offsetLength;
+
+            // This condition can be triggered if there's a mismatch between the number of points
+            // and the number of lengths. Should never happen in practice, but it's better to be safe.
+            if (targetIndex >= data.length) {
+                data = Arrays.copyOf(data, data.length + strip);
+            }
+
+            data[targetIndex] = length;
+            lengthCount++;
+        }
+
+
+        public float getX(int index) {
+            return data[index * strip + offsetX];
+        }
+
+        public float getY(int index) {
+            return data[index * strip + offsetY];
+        }
+
+        public float getLength(int index) {
+            return data[index * strip + offsetLength];
+        }
+
     }
 }

@@ -19,7 +19,7 @@ public class MenuItemBackground extends Sprite {
     private final RGBColor onTouchColor = OsuSkin.get().getColor("MenuItemOnTouchColor", ON_TOUCH_COLOR);
     private boolean moved = false;
     private float dx = 0, dy = 0;
-    private MenuItem item;
+    private BeatmapSetItem item;
 
     public MenuItemBackground() {
         super(0, 0, ResourceManager.getInstance().getTexture(
@@ -43,7 +43,7 @@ public class MenuItemBackground extends Sprite {
         defColor.apply(this);
     }
 
-    public void setItem(final MenuItem it) {
+    public void setItem(final BeatmapSetItem it) {
         item = it;
     }
 
@@ -75,7 +75,7 @@ public class MenuItemBackground extends Sprite {
             ResourceManager.getInstance().getSound("menuclick").play();
             defColor.apply(this);
             if (item != null) {
-                item.select(true, true);
+                item.select();
             }
             return true;
         } else if (pSceneTouchEvent.isActionOutside()

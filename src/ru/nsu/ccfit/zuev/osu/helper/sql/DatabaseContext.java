@@ -11,11 +11,13 @@ import org.anddev.andengine.util.FileUtils;
 import java.io.File;
 import java.io.IOException;
 
+import kotlin.Deprecated;
 import ru.nsu.ccfit.zuev.osu.Config;
 
 /**
  * Created by Fuuko on 2015/2/27.
  */
+@Deprecated(message = "This class is used to do legacy migration, should not be used and will be removed in future releases.")
 public class DatabaseContext extends ContextWrapper {
 
     private static final String DEBUG_CONTEXT = "DatabaseContext";

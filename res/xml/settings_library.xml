@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.preference.PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+
+    <PreferenceCategory android:title="Import">
+
+        <CheckBoxPreference
+            android:defaultValue="true"
+            android:key="deleteosz"
+            android:summary="@string/opt_deleteosz_summary"
+            android:title="@string/opt_deleteosz_title" />
+
+        <CheckBoxPreference
+            android:defaultValue="false"
+            android:key="scandownload"
+            android:summary="@string/opt_scandownload_summary"
+            android:title="@string/opt_scandownload_title" />
+
+        <CheckBoxPreference
+            android:defaultValue="false"
+            android:key="deleteUnimportedBeatmaps"
+            android:summary="@string/opt_deleteUnimportedBeatmaps_summary"
+            android:title="@string/opt_deleteUnimportedBeatmaps_title" />
+
+        <CheckBoxPreference
+            android:defaultValue="true"
+            android:key="deleteUnsupportedVideos"
+            android:summary="@string/opt_delete_unsupported_videos_summary"
+            android:title="@string/opt_delete_unsupported_videos_title" />
+
+        <Preference
+            android:key="importReplay"
+            android:title="@string/opt_import_replay_title"
+            android:summary="@string/opt_import_replay_summary"
+            app:layout="@layout/settings_preference_bottom" />
+
+    </PreferenceCategory>
+
+    <PreferenceCategory android:title="Metadata">
+
+        <CheckBoxPreference
+            android:defaultValue="false"
+            android:key="forceromanized"
+            android:summary="@string/force_romanized_summary"
+            android:title="@string/force_romanized"
+            app:layout="@layout/settings_preference_checkbox_bottom" />
+
+    </PreferenceCategory>
+
+    <PreferenceCategory android:title="Storage">
+
+        <Preference
+            android:key="clear_beatmap_cache"
+            android:summary="@string/opt_clear_summary"
+            android:title="@string/opt_clear_title" />
+
+        <Preference
+            android:key="clear_properties"
+            android:summary="@string/opt_clearprops_summary"
+            android:title="@string/opt_clearprops_title"
+            app:layout="@layout/settings_preference_bottom" />
+
+    </PreferenceCategory>
+
+</androidx.preference.PreferenceScreen>

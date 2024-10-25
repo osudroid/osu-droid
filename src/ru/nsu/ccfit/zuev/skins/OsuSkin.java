@@ -14,6 +14,7 @@ import java.util.HashMap;
 public class OsuSkin {
     private static final OsuSkin skinJson = new OsuSkin();
 
+    protected final FloatSkinData animationFramerate = new FloatSkinData("animationFramerate", 60);
     protected final FloatSkinData comboTextScale = new FloatSkinData("comboTextScale", 1f);
     protected final FloatSkinData sliderHintWidth = new FloatSkinData("sliderHintWidth", 3f);
     protected final FloatSkinData sliderBodyWidth = new FloatSkinData("sliderBodyWidth", 61f);
@@ -30,6 +31,9 @@ public class OsuSkin {
     protected final BooleanSkinData useNewLayout = new BooleanSkinData("useNewLayout");
     protected final BooleanSkinData forceOverrideComboColor = new BooleanSkinData("forceOverride");
     protected final BooleanSkinData rotateCursor = new BooleanSkinData("rotateCursor", true);
+    protected final BooleanSkinData layeredHitSounds = new BooleanSkinData("layeredHitSounds", true);
+    protected final BooleanSkinData sliderBallFlip = new BooleanSkinData("sliderBallFlip", true);
+    protected final BooleanSkinData spinnerFrequencyModulate = new BooleanSkinData("spinnerFrequencyModulate", true);
 
     protected final String DEFAULT_COLOR_HEX = "#FFFFFF";
     protected final ArrayList<RGBColor> comboColor = new ArrayList<>();
@@ -159,6 +163,22 @@ public class OsuSkin {
 
     public float getHitCircleOverlap() {
         return hitCircleOverlap.getCurrentValue();
+    }
+
+    public float getAnimationFramerate() {
+        return animationFramerate.getCurrentValue();
+    }
+
+    public boolean isLayeredHitSounds() {
+        return layeredHitSounds.getCurrentValue();
+    }
+
+    public boolean isSliderBallFlip() {
+        return sliderBallFlip.getCurrentValue();
+    }
+
+    public boolean isSpinnerFrequencyModulate() {
+        return spinnerFrequencyModulate.getCurrentValue();
     }
 
     public void reset() {

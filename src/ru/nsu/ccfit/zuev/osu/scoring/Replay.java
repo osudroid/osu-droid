@@ -7,6 +7,7 @@ import androidx.annotation.NonNull;
 import org.anddev.andengine.util.Debug;
 
 import java.io.EOFException;
+import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
@@ -28,6 +29,7 @@ import ru.nsu.ccfit.zuev.osu.Utils;
 import ru.nsu.ccfit.zuev.osu.game.GameScene;
 import ru.nsu.ccfit.zuev.osu.game.cursor.flashlight.FlashLightEntity;
 import ru.nsu.ccfit.zuev.osu.game.mods.GameMod;
+import ru.nsu.ccfit.zuev.osu.menu.ModMenu;
 import ru.nsu.ccfit.zuev.osuplus.R;
 
 public class Replay {
@@ -96,22 +98,19 @@ public class Replay {
         objectData[id].result = score.getId();
     }
 
-    public void addPress(final float time, final PointF pos, final int pid) {
+    public void addPress(final int timeMs, final PointF pos, final int pid) {
         if (pid > GameScene.getCursorCount() || isSaving) return;
-        int itime = Math.max(0, (int) (time * 1000));
-        cursorMoves.get(pid).pushBack(this, itime, pos.x, pos.y, TouchType.DOWN);
+        cursorMoves.get(pid).pushBack(this, timeMs, pos.x, pos.y, TouchType.DOWN);
     }
 
-    public void addMove(final float time, final PointF pos, final int pid) {
+    public void addMove(final int timeMs, final PointF pos, final int pid) {
         if (pid > GameScene.getCursorCount() || isSaving) return;
-        int itime = Math.max(0, (int) (time * 1000));
-        cursorMoves.get(pid).pushBack(this, itime, pos.x, pos.y, TouchType.MOVE);
+        cursorMoves.get(pid).pushBack(this, timeMs, pos.x, pos.y, TouchType.MOVE);
     }
 
-    public void addUp(final float time, final int pid) {
-        if (pid > GameScene.getCursorCount() || isSaving) return;
-        int itime = Math.max(0, (int) (time * 1000));
-        cursorMoves.get(pid).pushBack(itime, TouchType.UP);
+    public void addUp(final int timeMs, final int pid) {
+        if (pid > GameScene.GameScene.getCursorCount() || isSaving) return;
+        cursorMoves.get(pid).pushBack(timeMs, TouchType.UP);
     }
 
     public void save(final String filename) {
@@ -154,7 +153,8 @@ public class Replay {
                 os.writeInt(stat.getHit50());
                 os.writeInt(stat.getMisses());
                 os.writeInt(stat.getTotalScoreWithMultiplier());
-                os.writeInt(stat.getMaxCombo());
+                os.writeInt(stat.getScoreMaxCombo());
+                // TODO: remove accuracy writing in replay v6
                 os.writeFloat(stat.getAccuracy());
                 os.writeBoolean(stat.isPerfect());
                 os.writeObject(stat.getPlayerName());
@@ -205,19 +205,20 @@ public class Replay {
     }
 
     @SuppressWarnings("unchecked")
-    public boolean loadInfo(final String filename) {
+    public boolean loadInfo(final String replayFilePath) {
         ObjectInputStream os;
+        ZipInputStream zip;
+
         try {
-            final ZipInputStream zip = new ZipInputStream(new FileInputStream(filename));
+            zip = new ZipInputStream(new FileInputStream(replayFilePath));
             zip.getNextEntry();
             os = new ObjectInputStream(zip);
-            // zip.close();
         } catch (final Exception e) {
             Debug.e("Cannot load replay: " + e.getMessage(), e);
             return false;
         }
 
-        Debug.i("Loading replay " + filename);
+        Debug.i("Loading replay " + replayFilePath);
 
         cursorMoves.clear();
         int version = 0;
@@ -241,6 +242,8 @@ public class Replay {
 
             if (version >= 3) {
                 stat = new StatisticV2();
+                stat.setReplayFilename(new File(replayFilePath).getName());
+                stat.setBeatmap(mapName, mapFile);
                 stat.setTime(os.readLong());
                 stat.setHit300k(os.readInt());
                 stat.setHit300(os.readInt());
@@ -249,8 +252,9 @@ public class Replay {
                 stat.setHit50(os.readInt());
                 stat.setMisses(os.readInt());
                 stat.setForcedScore(os.readInt());
-                stat.setMaxCombo(os.readInt());
-                stat.setAccuracy(os.readFloat());
+                stat.setScoreMaxCombo(os.readInt());
+                // TODO: The call below is for accuracy, but StatisticV2 does not use it anymore. Remove in replay v6.
+                os.readFloat();
                 stat.setPerfect(os.readBoolean());
                 stat.setPlayerName((String) os.readObject());
                 stat.setMod((EnumSet<GameMod>) os.readObject());
@@ -271,23 +275,32 @@ public class Replay {
             return false;
         }
 
+        try {
+            os.close();
+            zip.closeEntry();
+            zip.close();
+        } catch (final IOException e) {
+            Debug.e("IOException: " + e.getMessage(), e);
+        }
+
         return true;
     }
 
     @SuppressWarnings("unchecked")
-    public boolean load(final String filename) {
+    public boolean load(final String replayFilePath) {
         ObjectInputStream os;
+        ZipInputStream zip;
+
         try {
-            final ZipInputStream zip = new ZipInputStream(new FileInputStream(filename));
+            zip = new ZipInputStream(new FileInputStream(replayFilePath));
             zip.getNextEntry();
             os = new ObjectInputStream(zip);
-            // zip.close();
         } catch (final Exception e) {
             Debug.e("Cannot load replay: " + e.getMessage(), e);
             return false;
         }
 
-        Debug.i("Loading replay " + filename);
+        Debug.i("Loading replay " + replayFilePath);
 
         cursorMoves.clear();
         int version = 0;
@@ -318,6 +331,8 @@ public class Replay {
 
             if (version >= 3) {
                 stat = new StatisticV2();
+                stat.setReplayFilename(new File(replayFilePath).getName());
+                stat.setBeatmap(mapName, mapFile);
                 stat.setTime(os.readLong());
                 stat.setHit300k(os.readInt());
                 stat.setHit300(os.readInt());
@@ -326,8 +341,9 @@ public class Replay {
                 stat.setHit50(os.readInt());
                 stat.setMisses(os.readInt());
                 stat.setForcedScore(os.readInt());
-                stat.setMaxCombo(os.readInt());
-                stat.setAccuracy(os.readFloat());
+                stat.setScoreMaxCombo(os.readInt());
+                // TODO: The call below is for accuracy, but StatisticV2 does not use it anymore. Remove in replay v6.
+                os.readFloat();
                 stat.setPerfect(os.readBoolean());
                 stat.setPlayerName((String) os.readObject());
                 stat.setMod((EnumSet<GameMod>) os.readObject());
@@ -374,13 +390,18 @@ public class Replay {
             return false;
         }
 
+        try {
+            os.close();
+            zip.closeEntry();
+            zip.close();
+        } catch (final IOException e) {
+            Debug.e("IOException: " + e.getMessage(), e);
+        }
+
         for (int i = 0; i < cursorMoves.size(); i++)
             Debug.i("Loaded " + cursorMoves.get(i).size + " moves for finger " + i);
         Debug.i("Loaded " + objectData.length + " objects");
         return true;
-    }
-
-    public void countMarks(float difficulty) {
     }
 
     public StatisticV2 getStat() {
@@ -454,6 +475,7 @@ public class Replay {
 
         @NonNull
         public static MoveArray readFrom(@NonNull ObjectInputStream is, Replay replay) throws IOException {
+            boolean isHardRock = ModMenu.getInstance().getMod().contains(GameMod.MOD_HARDROCK);
             int size = is.readInt();
             MoveArray array = new MoveArray(size);
             array.size = size;
@@ -471,10 +493,11 @@ public class Replay {
                             baseY / Config.getTextureQuality()
                     );
                     PointF realPoint = replay.replayVersion > 1 ?
-                            Utils.trackToRealCoords(gamePoint) :
-                            Utils.trackToRealCoords(
-                                    Utils.realToTrackCoords(gamePoint, 1024, 600, true)
-                            );
+                        Utils.trackToRealCoords(gamePoint, isHardRock) :
+                        Utils.trackToRealCoords(
+                            Utils.realToTrackCoords(gamePoint, 1024, 600, true),
+                            isHardRock
+                        );
                     movement.point.set(realPoint);
                 }
             }

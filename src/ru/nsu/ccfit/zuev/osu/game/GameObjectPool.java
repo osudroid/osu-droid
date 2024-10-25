@@ -8,12 +8,10 @@ import ru.nsu.ccfit.zuev.osu.Config;
 
 public class GameObjectPool {
     public static GameObjectPool instance = new GameObjectPool();
-    public LinkedList<HitCircle> circles = new LinkedList<>();
-    public Map<Integer, LinkedList<CircleNumber>> numbers = new HashMap<>();
+    public LinkedList<GameplayHitCircle> circles = new LinkedList<>();
     public Map<String, LinkedList<GameEffect>> effects = new HashMap<>();
-    public LinkedList<Slider> sliders = new LinkedList<>();
-    public LinkedList<FollowTrack> tracks = new LinkedList<>();
-    public LinkedList<Spinner> spinners = new LinkedList<>();
+    public LinkedList<GameplaySlider> sliders = new LinkedList<>();
+    public LinkedList<GameplaySpinner> spinners = new LinkedList<>();
     private int objectsCreated = 0;
     private GameObjectPool() {
     }
@@ -22,55 +20,35 @@ public class GameObjectPool {
         return instance;
     }
 
-    public HitCircle getCircle() {
-        if (circles.isEmpty() == false) {
+    public GameplayHitCircle getCircle() {
+        if (!circles.isEmpty()) {
             return circles.poll();
         }
 
         objectsCreated++;
-        return new HitCircle();
+        return new GameplayHitCircle();
     }
 
-    public void putCircle(final HitCircle circle) {
+    public void putCircle(final GameplayHitCircle circle) {
         circles.add(circle);
     }
 
-    public Spinner getSpinner() {
-        if (spinners.isEmpty() == false) {
+    public GameplaySpinner getSpinner() {
+        if (!spinners.isEmpty()) {
             return spinners.poll();
         }
 
         objectsCreated++;
-        if (Config.getSpinnerStyle() == 1) {
-            return new ModernSpinner();
-        } else {
-            return new Spinner();
-        }
+
+        return Config.getSpinnerStyle() == 1 ? new GameplayModernSpinner() : new GameplaySpinner();
     }
 
-    public void putSpinner(final Spinner spinner) {
+    public void putSpinner(final GameplaySpinner spinner) {
         spinners.add(spinner);
     }
 
-    public CircleNumber getNumber(final int num) {
-        if (numbers.containsKey(num) && numbers.get(num).isEmpty() == false) {
-            return numbers.get(num).poll();
-        }
-
-        objectsCreated++;
-        return new CircleNumber(num);
-    }
-
-    public void putNumber(final CircleNumber number) {
-        if (numbers.containsKey(number.getNum()) == false) {
-            numbers.put(number.getNum(), new LinkedList<>());
-        }
-        numbers.get(number.getNum()).add(number);
-    }
-
     public GameEffect getEffect(final String texname) {
-        if (effects.containsKey(texname)
-                && effects.get(texname).isEmpty() == false) {
+        if (effects.containsKey(texname) && !effects.get(texname).isEmpty()) {
             return effects.get(texname).poll();
         }
 
@@ -79,36 +57,24 @@ public class GameObjectPool {
     }
 
     public void putEffect(final GameEffect effect) {
-        if (effects.containsKey(effect.getTexname()) == false) {
+        if (!effects.containsKey(effect.getTexname())) {
             effects.put(effect.getTexname(), new LinkedList<>());
         }
+
         effects.get(effect.getTexname()).add(effect);
     }
 
-    public Slider getSlider() {
-        if (sliders.isEmpty() == false) {
+    public GameplaySlider getSlider() {
+        if (!sliders.isEmpty()) {
             return sliders.poll();
         }
 
         objectsCreated++;
-        return new Slider();
+        return new GameplaySlider();
     }
 
-    public void putSlider(final Slider slider) {
+    public void putSlider(final GameplaySlider slider) {
         sliders.add(slider);
-    }
-
-    public FollowTrack getTrack() {
-        if (tracks.isEmpty() == false) {
-            return tracks.poll();
-        }
-
-        objectsCreated++;
-        return new FollowTrack();
-    }
-
-    public void putTrac(final FollowTrack track) {
-        tracks.add(track);
     }
 
     public int getObjectsCreated() {
@@ -118,22 +84,23 @@ public class GameObjectPool {
     public void purge() {
         effects.clear();
         circles.clear();
-        numbers.clear();
         sliders.clear();
-        tracks.clear();
+        spinners.clear();
+
         objectsCreated = 0;
     }
 
     public void preload() {
         for (int i = 0; i < 10; i++) {
-            putCircle(new HitCircle());
-            putNumber(new CircleNumber(i + 1));
+            putCircle(new GameplayHitCircle());
         }
         for (int i = 0; i < 5; i++) {
-            putSlider(new Slider());
-            putTrac(new FollowTrack());
+            putSlider(new GameplaySlider());
         }
-        new Spinner();
-        objectsCreated = 31;
+        for (int i = 0; i < 3; i++) {
+            putSpinner(Config.getSpinnerStyle() == 1 ? new GameplayModernSpinner() : new GameplaySpinner());
+        }
+
+        objectsCreated = circles.size() + sliders.size() + spinners.size();
     }
 }

@@ -1,9 +1,12 @@
 package ru.nsu.ccfit.zuev.osu.menu;
 
-import android.database.Cursor;
+import android.util.Log;
 
-import com.reco1l.framework.lang.Execution;
-import com.reco1l.legacy.Multiplayer;
+import com.reco1l.osu.data.BeatmapInfo;
+import com.reco1l.osu.Execution;
+import com.reco1l.osu.data.DatabaseManager;
+import com.reco1l.osu.multiplayer.Multiplayer;
+
 import org.anddev.andengine.entity.Entity;
 import org.anddev.andengine.entity.scene.Scene;
 import org.anddev.andengine.entity.sprite.Sprite;
@@ -13,14 +16,13 @@ import org.anddev.andengine.input.touch.TouchEvent;
 import org.anddev.andengine.input.touch.detector.ScrollDetector;
 import org.anddev.andengine.input.touch.detector.SurfaceScrollDetector;
 import org.anddev.andengine.opengl.texture.region.TextureRegion;
-import org.anddev.andengine.util.Debug;
 import org.anddev.andengine.util.MathUtils;
 import org.jetbrains.annotations.Nullable;
 import ru.nsu.ccfit.zuev.osu.*;
 import ru.nsu.ccfit.zuev.osu.game.GameHelper;
 import ru.nsu.ccfit.zuev.osu.helper.StringTable;
 import ru.nsu.ccfit.zuev.osu.online.OnlineManager;
-import ru.nsu.ccfit.zuev.osu.scoring.ScoreLibrary;
+import ru.nsu.ccfit.zuev.osu.scoring.BeatmapLeaderboardScoringMode;
 import ru.nsu.ccfit.zuev.osuplus.R;
 
 import java.util.*;
@@ -34,7 +36,7 @@ public class ScoreBoard extends Entity implements ScrollDetector.IScrollDetector
     private final ChangeableText loadingText;
     private float percentShow = -1;
     private boolean showOnlineScores = false;
-    private TrackInfo lastTrack;
+    private BeatmapInfo lastBeatmapInfo;
     private boolean wasOnline = false;
     private boolean isScroll = false;
 
@@ -76,8 +78,8 @@ public class ScoreBoard extends Entity implements ScrollDetector.IScrollDetector
     public static String convertModString(StringBuilder sb, String s) {
         // Account for SC being removed.
         // Too dirty of a solution, but no other clean way :/
-        var track = GlobalManager.getInstance().getSelectedTrack();
-        var cs = track.getCircleSize();
+        var beatmapInfo = GlobalManager.getInstance().getSelectedBeatmap();
+        var cs = beatmapInfo.getCircleSize();
         var hasLegacySC = false;
 
         sb.setLength(0);
@@ -188,90 +190,118 @@ public class ScoreBoard extends Entity implements ScrollDetector.IScrollDetector
         return sb.toString();
     }
 
-    private void initFromOnline(final TrackInfo track) {
+    private String formatPP(StringBuilder sb, int pp) {
+        sb.setLength(0);
+        sb.append(pp);
+        return sb.toString();
+    }
+
+    private void initFromOnline(BeatmapInfo beatmapInfo) {
         loadingText.setText("Loading scores...");
 
         currentTask = new LoadTask(true) {
 
             @Override
             public void run() {
+
+                File beatmapFile = new File(beatmapInfo.getFilename());
                 List<String> scores;
 
                 try {
-                    scores = OnlineManager.getInstance().getTop(track.getMD5());
+                    scores = OnlineManager.getInstance().getTop(beatmapInfo.getMD5());
                 } catch (OnlineManager.OnlineManagerException e) {
-                    Debug.e("Cannot load scores " + e.getMessage());
+                    Log.e("Scoreboard", "Failed to load scores from online.", e);
 
-                    if (isActive())
+                    if (isActive()) {
                         loadingText.setText("Cannot load scores");
+                    }
                     return;
                 }
 
-                if (!isActive())
+                if (!isActive()) {
                     return;
+                }
 
                 loadingText.setText(OnlineManager.getInstance().getFailMessage());
 
+                boolean isPPScoringMode = Config.getBeatmapLeaderboardScoringMode() == BeatmapLeaderboardScoringMode.PP;
+                var username = OnlineManager.getInstance().getUsername();
                 var items = new ArrayList<ScoreBoardItem>(scores.size());
                 var sb = new StringBuilder();
 
-                int nextTotalScore = 0;
+                float nextTotal = 0;
 
                 for (int i = 0; i < scores.size() && isActive(); ++i) {
-                    Debug.i(scores.get(i));
 
-                    String[] data = scores.get(i).split("\\s+");
+                    var data = scores.get(i).split("\\s+");
 
-                    if (data.length < 8 || data.length > 9) {
+                    if (data.length < 9 || data.length > 10) {
                         continue;
                     }
 
-                    final int scoreID = Integer.parseInt(data[0]);
+                    var isInLeaderboard = data.length == 9;
+                    var isPersonalBest = data.length == 10 || data[1].equals(username);
 
-                    var isInLeaderboard = data.length == 8;
-                    var isPersonalBest = data.length == 9 || data[1].equals(OnlineManager.getInstance().getUsername());
+                    var scoreID = Integer.parseInt(data[0]);
+                    var playerName = isPersonalBest ? username : data[1];
+                    var score = Integer.parseInt(data[2]);
+                    var pp = Float.parseFloat(data[3]);
+                    var combo = Integer.parseInt(data[4]);
+                    var mark = data[5];
+                    var mods = data[6];
+                    var accuracy = Float.parseFloat(data[7]);
+                    var avatarURL = data[8];
+                    var beatmapRank = isPersonalBest && !isInLeaderboard ? Integer.parseInt(data[9]) : (i + 1);
 
-                    var playerName = isPersonalBest ? OnlineManager.getInstance().getUsername() : data[1];
-                    var currentTotalScore = Integer.parseInt(data[2]);
-                    var combo = Integer.parseInt(data[3]);
-                    var mark = data[4];
-                    var modString = data[5];
-                    var accuracy = GameHelper.Round(Float.parseFloat(data[6]) * 100, 2);
-                    var avatarURL = data[7];
-                    var beatmapRank = isPersonalBest && !isInLeaderboard ? Integer.parseInt(data[8]) : (i + 1);
+                    sb.setLength(0);
+                    var scoreStr = isPPScoringMode ?
+                        // For display purposes, we round the pp.
+                        formatPP(sb, Math.round(pp)) :
+                        formatScore(sb, score);
 
-                    final String titleStr = "#"
-                            + beatmapRank
-                            + " "
-                            + playerName + "\n"
-                            + StringTable.format(R.string.menu_score, formatScore(sb, currentTotalScore), combo);
+                    sb.setLength(0);
+                    var titleStr = sb.append('#').append(beatmapRank).append(' ').append(playerName)
+                            .append('\n')
+                            .append(StringTable.format(
+                                isPPScoringMode ? R.string.menu_performance : R.string.menu_score, scoreStr, combo))
+                            .toString();
 
                     if (i < scores.size() - 1) {
                         String[] nextData = scores.get(i + 1).split("\\s+");
 
-                        if (nextData.length == 8 || nextData.length == 9) {
-                            nextTotalScore = Integer.parseInt(nextData[2]);
+                        if (nextData.length == 9 || nextData.length == 10) {
+                            nextTotal = isPPScoringMode ? Float.parseFloat(nextData[3]) : Integer.parseInt(nextData[2]);
                         }
                     } else {
-                        nextTotalScore = 0;
+                        nextTotal = 0;
                     }
 
-                    final int diffTotalScore = currentTotalScore - nextTotalScore;
-                    final String accStr = convertModString(sb, modString) + "\n" + String.format(Locale.ENGLISH, "%.2f", accuracy) + "%" + "\n"
-                            + (nextTotalScore == 0 ? "-" : ((diffTotalScore != 0 ? "+" : "") + diffTotalScore));
+                    sb.setLength(0);
+                    var modString = convertModString(sb, mods);
+                    var currentTotal = isPPScoringMode ? pp : score;
+                    var diffTotal = Math.round(currentTotal) - Math.round(nextTotal);
 
-                    if (!isActive())
+                    sb.setLength(0);
+                    var accStr = sb.append(modString)
+                            .append('\n')
+                            .append(StringTable.format("%.2f", GameHelper.Round(accuracy * 100, 2))).append('%')
+                            .append('\n')
+                            .append(nextTotal == 0 ? "-" : ((diffTotal != 0 ? "+" : "") + diffTotal))
+                            .toString();
+
+                    if (!isActive()) {
                         return;
+                    }
 
-                    if (isPersonalBest)
-                        attachChild(new ScoreItem(avatarExecutor, titleStr, accStr, mark, true, scoreID, avatarURL, playerName, track.getMD5(), true), 0);
+                    if (isPersonalBest) {
+                        attachChild(new ScoreItem(avatarExecutor, titleStr, accStr, mark, true, scoreID, avatarURL, playerName, beatmapInfo.getMD5(), true), 0);
+                    }
 
                     if (isInLeaderboard) {
-                        attachChild(new ScoreItem(avatarExecutor, titleStr, accStr, mark, true, scoreID, avatarURL, playerName, track.getMD5(), false));
+                        attachChild(new ScoreItem(avatarExecutor, titleStr, accStr, mark, true, scoreID, avatarURL, playerName, beatmapInfo.getMD5(), false));
 
-                        ScoreBoardItem item = new ScoreBoardItem();
-                        item.set(beatmapRank, playerName, combo, currentTotalScore, scoreID);
-
+                        var item = new ScoreBoardItem();
+                        item.set(beatmapRank, playerName, combo, score, scoreID);
                         items.add(item);
                     }
                 }
@@ -282,74 +312,80 @@ public class ScoreBoard extends Entity implements ScrollDetector.IScrollDetector
         loadExecutor.submit(currentTask);
     }
 
-    private void initFromLocal(TrackInfo track) {
+    private void initFromLocal(BeatmapInfo beatmap) {
 
         currentTask = new LoadTask(false) {
 
             @Override
             public void run() {
-                String[] columns = { "id", "playername", "score", "combo", "mark", "accuracy", "mode" };
-                try (Cursor scoreSet = ScoreLibrary.getInstance().getMapScores(columns, track.getFilename())) {
-                    if (scoreSet == null || scoreSet.getCount() == 0 || !isActive()) {
+                var scores = DatabaseManager.getScoreInfoTable().getBeatmapScores(beatmap.getSetDirectory(), beatmap.getFilename());
 
-                        // This allows the in-game leaderboard to show even if the local database is empty, it'll append
-                        // the player score (because the in-game leaderboard assumes that the board finished loading only
-                        // if the scores list isn't null).
-                        if (isActive())
-                            scoreItems = new ArrayList<>();
+                if (scores.isEmpty() || !isActive()) {
+
+                    // This allows the in-game leaderboard to show even if the local database is empty, it'll append
+                    // the player score (because the in-game leaderboard assumes that the board finished loading only
+                    // if the scores list isn't null).
+                    if (isActive()) {
+                        scoreItems = new ArrayList<>();
+                    }
+                    return;
+                }
+
+                var items = new ArrayList<ScoreBoardItem>(scores.size());
+                var sb = new StringBuilder();
+
+                int nextTotalScore;
+
+                for (int i = 0; i < scores.size() && isActive(); ++i) {
+
+                    var score = scores.get(i);
+
+                    sb.setLength(0);
+                    var totalScore = formatScore(sb, score.getScore());
+
+                    sb.setLength(0);
+                    var titleStr = sb.append('#').append(i + 1).append(' ').append(score.getPlayerName())
+                            .append('\n')
+                            .append(StringTable.format(R.string.menu_score, totalScore, score.getMaxCombo()))
+                            .toString();
+
+                    if (i < scores.size() - 1) {
+                        nextTotalScore = scores.get(i + 1).getScore();
+                    } else {
+                        nextTotalScore = 0;
+                    }
+
+                    sb.setLength(0);
+                    var modString = convertModString(sb, score.getMods());
+                    var diffTotalScore = score.getScore() - nextTotalScore;
+
+                    sb.setLength(0);
+                    var accStr = sb.append(modString)
+                            .append('\n')
+                            .append(StringTable.format("%.2f", GameHelper.Round(score.getAccuracy() * 100, 2))).append('%')
+                            .append('\n')
+                            .append(nextTotalScore == 0 ? "-" : ((diffTotalScore != 0 ? "+" : "") + diffTotalScore))
+                            .toString();
+
+                    if (!isActive()) {
                         return;
                     }
 
-                    var items = new ArrayList<ScoreBoardItem>(scoreSet.getCount());
-                    var sb = new StringBuilder();
+                    attachChild(new ScoreItem(avatarExecutor, titleStr, accStr, score.getMark(), false, (int) score.getId(), null, null, beatmap.getMD5(), false));
 
-                    int nextTotalScore;
-
-                    for (int i = 0; i < scoreSet.getCount() && isActive(); ++i) {
-                        scoreSet.moveToPosition(i);
-                        final int scoreID = scoreSet.getInt(0);
-
-                        final int currTotalScore = scoreSet.getInt(scoreSet.getColumnIndexOrThrow("score"));
-                        final String totalScore = formatScore(sb, currTotalScore);
-                        final String titleStr = "#"
-                                + (i + 1)
-                                + " "
-                                + scoreSet.getString(scoreSet.getColumnIndexOrThrow("playername"))
-                                + "\n"
-                                + StringTable.format(R.string.menu_score, totalScore, scoreSet.getInt(scoreSet.getColumnIndexOrThrow("combo")));
-
-                        if (i < scoreSet.getCount() - 1) {
-                            scoreSet.moveToPosition(i + 1);
-                            nextTotalScore = scoreSet.getInt(scoreSet.getColumnIndexOrThrow("score"));
-                            scoreSet.moveToPosition(i);
-                        } else {
-                            nextTotalScore = 0;
-                        }
-
-                        final long diffTotalScore = currTotalScore - nextTotalScore;
-                        final String accStr = convertModString(sb, scoreSet.getString(scoreSet.getColumnIndexOrThrow("mode"))) + "\n"
-                                + String.format(Locale.ENGLISH, "%.2f", GameHelper.Round(scoreSet.getFloat(scoreSet.getColumnIndexOrThrow("accuracy")) * 100, 2)) + "%" + "\n"
-                                + (nextTotalScore == 0 ? "-" : ((diffTotalScore != 0 ? "+" : "") + diffTotalScore));
-
-                        if (!isActive())
-                            return;
-
-                        attachChild(new ScoreItem(avatarExecutor, titleStr, accStr, scoreSet.getString(scoreSet.getColumnIndexOrThrow("mark")), false, scoreID, null, null, track.getMD5(), false));
-
-                        var item = new ScoreBoardItem();
-                        item.set(i + 1, scoreSet.getString(scoreSet.getColumnIndexOrThrow("playername")), scoreSet.getInt(scoreSet.getColumnIndexOrThrow("combo")), scoreSet.getInt(scoreSet.getColumnIndexOrThrow("score")), scoreID);
-                        items.add(item);
-                    }
-                    scoreItems = items;
-                    percentShow = 0;
+                    var item = new ScoreBoardItem();
+                    item.set(i + 1, score.getPlayerName(), score.getMaxCombo(), score.getScore(), (int) score.getId());
+                    items.add(item);
                 }
+                scoreItems = items;
+                percentShow = 0;
             }
         };
         loadExecutor.submit(currentTask);
     }
 
-    public synchronized void init(final TrackInfo track) {
-        if (lastTrack == track && showOnlineScores == wasOnline && wasOnline) {
+    public synchronized void init(final BeatmapInfo beatmapInfo) {
+        if (lastBeatmapInfo == beatmapInfo && showOnlineScores == wasOnline && wasOnline) {
             return;
         }
 
@@ -357,7 +393,7 @@ public class ScoreBoard extends Entity implements ScrollDetector.IScrollDetector
             currentTask.avatarExecutor.shutdownNow();
 
         loadingText.setText("");
-        lastTrack = track;
+        lastBeatmapInfo = beatmapInfo;
         wasOnline = showOnlineScores;
         scoreItems = null;
 
@@ -367,15 +403,15 @@ public class ScoreBoard extends Entity implements ScrollDetector.IScrollDetector
             currentAvatarTask = null;
             attachChild(loadingText);
 
-            if (track == null)
+            if (beatmapInfo == null)
                 return;
 
             if (OnlineManager.getInstance().isStayOnline() && showOnlineScores) {
-                initFromOnline(track);
+                initFromOnline(beatmapInfo);
                 return;
             }
 
-            initFromLocal(track);
+            initFromLocal(beatmapInfo);
         });
     }
 
@@ -662,7 +698,9 @@ public class ScoreBoard extends Entity implements ScrollDetector.IScrollDetector
         public void onDetached()
         {
             if (avatarTexture != null)
-                ResourceManager.getInstance().unloadTexture(avatarTexture);
+                // Ensure texture unloading happens in the next tick of the
+                // update thread to prevent concurrency problems.
+                Execution.updateThread(() -> ResourceManager.getInstance().unloadTexture(avatarTexture));
 
             mainScene.unregisterTouchArea(this);
         }

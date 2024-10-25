@@ -31,21 +31,26 @@ class StandardDifficultyHitObject(
     /**
      * Other hit objects in the beatmap, including this hit object.
      */
-    difficultyHitObjects: MutableList<StandardDifficultyHitObject>,
+    difficultyHitObjects: Array<StandardDifficultyHitObject>,
 
     /**
      * The index of this hit object in the list of all hit objects.
      *
      * This is one less than the actual index of the hit object in the beatmap.
      */
-    index: Int
-) : DifficultyHitObject(obj, lastObj, lastLastObj, clockRate, difficultyHitObjects, index) {
+    index: Int,
+
+    /**
+     * The full great window of the hit object.
+     */
+    greatWindow: Double
+) : DifficultyHitObject(obj, lastObj, lastLastObj, clockRate, difficultyHitObjects, index, greatWindow) {
     override val mode = GameMode.Standard
 
     override val scalingFactor: Float
         get() {
             // We will scale distances by this factor, so we can assume a uniform CircleSize among beatmaps.
-            val radius = obj.radius.toFloat()
+            val radius = obj.difficultyRadius.toFloat()
             var scalingFactor = NORMALIZED_RADIUS / radius
 
             // High circle size (small CS) bonus

@@ -2,7 +2,6 @@ package ru.nsu.ccfit.zuev.osu;
 
 import android.Manifest;
 import android.annotation.SuppressLint;
-import android.app.AlertDialog;
 import android.content.ComponentName;
 import android.content.ContentResolver;
 import android.content.Context;
@@ -29,7 +28,6 @@ import android.view.KeyEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.WindowManager;
-import android.widget.EditText;
 import android.widget.FrameLayout;
 import android.widget.RelativeLayout;
 import android.widget.Toast;
@@ -39,13 +37,13 @@ import androidx.core.content.PermissionChecker;
 import androidx.preference.PreferenceManager;
 
 import com.edlplan.ui.ActivityOverlay;
-
-import com.reco1l.api.ibancho.LobbyAPI;
-import com.reco1l.framework.lang.Execution;
-import com.reco1l.legacy.AccessibilityDetector;
-import com.reco1l.legacy.Multiplayer;
-import com.reco1l.legacy.ui.multiplayer.LobbyScene;
-import com.reco1l.legacy.ui.multiplayer.RoomScene;
+import com.reco1l.ibancho.LobbyAPI;
+import com.reco1l.osu.AccessibilityDetector;
+import com.reco1l.osu.data.BeatmapInfo;
+import com.reco1l.osu.Execution;
+import com.reco1l.osu.multiplayer.Multiplayer;
+import com.reco1l.osu.multiplayer.LobbyScene;
+import com.reco1l.osu.multiplayer.RoomScene;
 
 import com.rian.osu.difficulty.BeatmapDifficultyCalculator;
 import net.lingala.zip4j.ZipFile;
@@ -58,7 +56,6 @@ import org.anddev.andengine.engine.options.resolutionpolicy.RatioResolutionPolic
 import org.anddev.andengine.entity.scene.Scene;
 import org.anddev.andengine.extension.input.touch.controller.MultiTouch;
 import org.anddev.andengine.extension.input.touch.controller.MultiTouchController;
-import org.anddev.andengine.extension.input.touch.exception.MultiTouchException;
 import org.anddev.andengine.input.touch.TouchEvent;
 import org.anddev.andengine.opengl.view.RenderSurfaceView;
 import org.anddev.andengine.sensor.accelerometer.AccelerometerData;
@@ -71,15 +68,12 @@ import java.io.IOException;
 import java.math.RoundingMode;
 import java.text.DecimalFormat;
 import java.util.ArrayList;
-import java.util.Objects;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
-import ru.nsu.ccfit.zuev.audio.BassAudioPlayer;
 import ru.nsu.ccfit.zuev.audio.serviceAudio.SaveServiceObject;
 import ru.nsu.ccfit.zuev.audio.serviceAudio.SongService;
-import ru.nsu.ccfit.zuev.osu.game.SpritePool;
 import ru.nsu.ccfit.zuev.osu.helper.FileUtils;
 import ru.nsu.ccfit.zuev.osu.helper.InputManager;
 import ru.nsu.ccfit.zuev.osu.helper.StringTable;
@@ -143,22 +137,15 @@ public class MainActivity extends BaseGameActivity implements
         opt.getRenderOptions().disableExtensionVertexBufferObjects();
         opt.getTouchOptions().enableRunOnUpdateThread();
         final Engine engine = new Engine(opt);
-        try {
-            if (MultiTouch.isSupported(this)) {
-                engine.setTouchController(new MultiTouchController());
-            } else {
-                ToastLogger.showText(
-                        StringTable.get(R.string.message_error_multitouch),
-                        false);
-            }
-        } catch (final MultiTouchException e) {
-            ToastLogger.showText(
-                    StringTable.get(R.string.message_error_multitouch),
-                    false);
+
+        if (!MultiTouch.isSupported(this)) {
+            // Warning player that they will have to single tap forever.
+            ToastLogger.showText(StringTable.get(R.string.message_error_multitouch), false);
         }
+        engine.setTouchController(new MultiTouchController());
+
         GlobalManager.getInstance().setCamera(mCamera);
         GlobalManager.getInstance().setEngine(engine);
-        GlobalManager.getInstance().setMainActivity(this);
         return GlobalManager.getInstance().getEngine();
     }
 
@@ -201,33 +188,6 @@ public class MainActivity extends BaseGameActivity implements
         final SharedPreferences prefs = PreferenceManager
                 .getDefaultSharedPreferences(this);
 
-        if (Objects.equals(prefs.getString("playername", ""), "")) {
-            final SharedPreferences.Editor editor = prefs.edit();
-            editor.putString("playername", "Guest");
-            editor.commit();
-
-            Execution.mainThread(() -> {
-                final AlertDialog.Builder alert = new AlertDialog.Builder(this);
-
-                alert.setTitle(StringTable.get(R.string.dialog_playername_title));
-                alert.setMessage(StringTable
-                        .get(R.string.dialog_playername_message));
-
-                final EditText input = new EditText(this);
-                input.setText("Guest");
-                alert.setView(input);
-
-                alert.setPositiveButton(StringTable.get(R.string.dialog_ok),
-                        (dialog, whichButton) -> {
-                            final String value = input.getText().toString();
-                            editor.putString("playername", value);
-                            editor.commit();
-                        });
-
-                alert.show();
-            });
-        }
-
         if (!prefs.getBoolean("qualitySet", false)) {
             final SharedPreferences.Editor editor = prefs.edit();
             editor.putBoolean("qualitySet", true);
@@ -268,7 +228,7 @@ public class MainActivity extends BaseGameActivity implements
         ResourceManager.getInstance().loadHighQualityAsset("multi", "multi.png");
         ResourceManager.getInstance().loadHighQualityAsset("back", "back.png");
         ResourceManager.getInstance().loadHighQualityAsset("exit", "exit.png");
-        ResourceManager.getInstance().loadHighQualityAsset("chimu", "chimu.png");
+        ResourceManager.getInstance().loadHighQualityAsset("beatmap_downloader", "beatmap_downloader.png");
         ResourceManager.getInstance().loadHighQualityAsset("options", "options.png");
         ResourceManager.getInstance().loadHighQualityAsset("offline-avatar", "offline-avatar.png");
         ResourceManager.getInstance().loadHighQualityAsset("star", "gfx/star.png");
@@ -312,16 +272,11 @@ public class MainActivity extends BaseGameActivity implements
         RoomScene.INSTANCE.init();
 
         Execution.async(() -> {
-            BassAudioPlayer.initDevice();
             GlobalManager.getInstance().init();
             GlobalManager.getInstance().setLoadingProgress(50);
             checkNewSkins();
             Config.loadSkins();
-            checkNewBeatmaps();
-
-            if (!LibraryManager.INSTANCE.loadLibraryCache(true)) {
-                LibraryManager.INSTANCE.scanLibrary();
-            }
+            loadBeatmapLibrary();
 
             SplashScene.INSTANCE.playWelcomeAnimation();
 
@@ -368,7 +323,7 @@ public class MainActivity extends BaseGameActivity implements
         availableMemory = (double) stat.getAvailableBytes();
         String toastMessage = String.format(StringTable.get(R.string.message_low_storage_space), df.format(availableMemory / minMem));
         if (availableMemory < 0.5 * minMem) { //I set 512MiB as a minimum
-            Toast.makeText(this, toastMessage, Toast.LENGTH_SHORT).show();
+            Execution.mainThread(() -> Toast.makeText(this, toastMessage, Toast.LENGTH_LONG).show());
         }
         Debug.i("Free Space: " + df.format(availableMemory / minMem));
     }
@@ -377,12 +332,8 @@ public class MainActivity extends BaseGameActivity implements
     @Override
     protected void onSetContentView() {
         this.mRenderSurfaceView = new RenderSurfaceView(this);
-        if (Config.isUseDither()) {
-            this.mRenderSurfaceView.setEGLConfigChooser(8, 8, 8, 8, 24, 0);
-            this.mRenderSurfaceView.getHolder().setFormat(PixelFormat.RGBA_8888);
-        } else {
-            this.mRenderSurfaceView.setEGLConfigChooser(true);
-        }
+        this.mRenderSurfaceView.setEGLConfigChooser(8, 8, 8, 8, 24, 0);
+        this.mRenderSurfaceView.getHolder().setFormat(PixelFormat.RGBA_8888);
         this.mRenderSurfaceView.setRenderer(this.mEngine);
 
         RelativeLayout layout = new RelativeLayout(this);
@@ -412,7 +363,7 @@ public class MainActivity extends BaseGameActivity implements
         ActivityOverlay.initial(this, frameLayout.getId());
     }
 
-    public void checkNewBeatmaps() {
+    public void loadBeatmapLibrary() {
         GlobalManager.getInstance().setInfo("Checking for new maps...");
         final File mainDir = new File(Config.getCorePath());
         if (beatmapToAdd != null) {
@@ -424,7 +375,6 @@ public class MainActivity extends BaseGameActivity implements
 
                 FileUtils.extractZip(beatmapToAdd, Config.getBeatmapPath());
                 // LibraryManager.INSTANCE.sort();
-                LibraryManager.INSTANCE.saveToCache();
             } else if (file.getName().endsWith(".odr")) {
                 willReplay = true;
             }
@@ -481,9 +431,11 @@ public class MainActivity extends BaseGameActivity implements
                 // Config.setDELETE_OSZ(deleteOsz);
 
                 // LibraryManager.INSTANCE.sort();
-                LibraryManager.INSTANCE.saveToCache();
             }
         }
+
+        LibraryManager.scanDirectory();
+        LibraryManager.loadLibrary();
     }
 
     public void checkNewSkins() {
@@ -557,6 +509,10 @@ public class MainActivity extends BaseGameActivity implements
 
     @Override
     protected void onCreate(Bundle pSavedInstanceState) {
+        // Some components may already start using this class when onCreate is called. An example
+        // is when the game is restoring after being killed by system due to low system memory.
+        GlobalManager.getInstance().setMainActivity(this);
+
         super.onCreate(pSavedInstanceState);
 
         try {
@@ -658,7 +614,6 @@ public class MainActivity extends BaseGameActivity implements
         }
         if (GlobalManager.getInstance().getEngine() != null && GlobalManager.getInstance().getGameScene() != null
                 && GlobalManager.getInstance().getEngine().getScene() == GlobalManager.getInstance().getGameScene().getScene()) {
-            SpritePool.getInstance().purge();
 
             if (Multiplayer.isMultiplayer) {
                 ToastLogger.showText("You've left the match.", true);
@@ -710,7 +665,7 @@ public class MainActivity extends BaseGameActivity implements
             if (Multiplayer.isConnected()
                     && (getEngine().getScene() == RoomScene.INSTANCE
                     || getEngine().getScene() == GlobalManager.getInstance().getSongMenu().getScene())) {
-                Execution.asyncIgnoreExceptions(RoomScene.INSTANCE::invalidateStatus);
+                Execution.async(() -> Execution.runSafe(RoomScene.INSTANCE::invalidateStatus));
             }
         }
 

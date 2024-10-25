@@ -146,14 +146,15 @@ class SendingPanel(
         scoreColumn.height = columnMaxHeight
         ppColumn.height = columnMaxHeight
 
-        val rowContainerWidth = ppColumn.x + ppColumn.width - mapRankColumn.x
+        rowContainer.let {
+            it.width = ppColumn.x + ppColumn.width - mapRankColumn.x
+            it.height = columnMaxHeight
+        }
 
-        width = max(minWidth, max(overallCaptionText.width, rowContainerWidth))
-        height = max(minHeight, minHeight / 5 + overallCaptionText.height + columnMaxHeight + 10)
+        width = max(minWidth, max(overallCaptionText.width, rowContainer.width) + 20)
+        height = max(minHeight, minHeight / 5 + overallCaptionText.height + rowContainer.height + 10)
 
         rowContainer.let {
-            it.width = rowContainerWidth
-            it.height = columnMaxHeight
             it.setPosition((width - it.width) / 2, height - it.height - 10)
         }
 

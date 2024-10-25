@@ -2,16 +2,23 @@ package org.anddev.andengine.opengl.buffer;
 
 import javax.microedition.khronos.opengles.GL11;
 
-import org.anddev.andengine.opengl.util.FastFloatBuffer;
 import org.anddev.andengine.opengl.util.GLHelper;
 
+import java.nio.ByteBuffer;
+import java.nio.ByteOrder;
+import java.nio.FloatBuffer;
+
 /**
- * (c) 2010 Nicolas Gramlich 
+ * (c) 2010 Nicolas Gramlich
  * (c) 2011 Zynga Inc.
- * 
+ *
  * @author Nicolas Gramlich
  * @since 14:22:56 - 07.04.2010
  */
+// osu!droid modified:
+// - Using FloatBuffer instead of FastFloatBuffer, this was an optimization for Android 2.2 and below,
+// nowadays it's not necessary and worsen the performance. As well inherited BufferObject types will
+// update the buffer data directly instead of using a separated float array.
 public abstract class BufferObject {
 	// ===========================================================
 	// Constants
@@ -23,11 +30,9 @@ public abstract class BufferObject {
 	// Fields
 	// ===========================================================
 
-	protected final int[] mBufferData;
-
 	private final int mDrawType;
 
-	protected final FastFloatBuffer mFloatBuffer;
+	protected final FloatBuffer mFloatBuffer;
 
 	private int mHardwareBufferID = -1;
 	private boolean mLoadedToHardware;
@@ -47,8 +52,11 @@ public abstract class BufferObject {
 	public BufferObject(final int pCapacity, final int pDrawType, final boolean pManaged) {
 		this.mDrawType = pDrawType;
 		this.mManaged = pManaged;
-		this.mBufferData = new int[pCapacity];
-		this.mFloatBuffer = new FastFloatBuffer(pCapacity);
+
+		ByteBuffer byteBuffer = ByteBuffer.allocateDirect(pCapacity * Float.BYTES);
+		byteBuffer.order(ByteOrder.nativeOrder());
+
+		this.mFloatBuffer = byteBuffer.asFloatBuffer();
 
 		if(pManaged) {
 			this.loadToActiveBufferObjectManager();
@@ -67,7 +75,7 @@ public abstract class BufferObject {
 		this.mManaged = pManaged;
 	}
 
-	public FastFloatBuffer getFloatBuffer() {
+	public FloatBuffer getFloatBuffer() {
 		return this.mFloatBuffer;
 	}
 
@@ -106,7 +114,7 @@ public abstract class BufferObject {
 		if(this.mHardwareBufferNeedsUpdate) {
 			this.mHardwareBufferNeedsUpdate = false;
 			synchronized(this) {
-				GLHelper.bufferData(pGL11, this.mFloatBuffer.mByteBuffer, this.mDrawType);
+				GLHelper.bufferData(pGL11, this.mFloatBuffer, this.mDrawType);
 			}
 		}
 	}

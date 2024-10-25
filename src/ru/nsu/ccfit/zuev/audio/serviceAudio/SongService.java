@@ -11,17 +11,42 @@ import android.util.Log;
 import java.io.File;
 
 import androidx.core.app.NotificationManagerCompat;
+
+import com.un4seen.bass.BASS;
+
 import ru.nsu.ccfit.zuev.audio.Status;
 import ru.nsu.ccfit.zuev.osu.GlobalManager;
 import ru.nsu.ccfit.zuev.osu.MainActivity;
 
 
 public class SongService extends Service {
+    public static int defaultFrequency = 44100;
 
     private BassAudioFunc audioFunc;
     private boolean isGaming = false;
     // private boolean isSettingMenu = false;
     private NotifyPlayer notify;
+
+    public static void initBASS() {
+        // This likely doesn't help, but also doesn't seem to cause any issues or any CPU increase.
+        BASS.BASS_SetConfig(BASS.BASS_CONFIG_UPDATEPERIOD, 5);
+
+        // Reduce latency to a known sane minimum.
+        BASS.BASS_SetConfig(BASS.BASS_CONFIG_DEV_PERIOD, 5);
+        BASS.BASS_SetConfig(BASS.BASS_CONFIG_DEV_BUFFER, 10);
+
+        // Ensure there are no brief delays on audio operations (causing stream stalls etc.) after periods of silence.
+        BASS.BASS_SetConfig(BASS.BASS_CONFIG_DEV_NONSTOP, 1);
+
+        BASS.BASS_Init(-1, defaultFrequency, BASS.BASS_DEVICE_LATENCY);
+
+        Log.i("BASS-Config", "BASS initialized");
+        Log.i("BASS-Config", "Update period:          " + BASS.BASS_GetConfig(BASS.BASS_CONFIG_UPDATEPERIOD));
+        Log.i("BASS-Config", "Device period:          " + BASS.BASS_GetConfig(BASS.BASS_CONFIG_DEV_PERIOD));
+        Log.i("BASS-Config", "Device buffer length:   " + BASS.BASS_GetConfig(BASS.BASS_CONFIG_DEV_BUFFER));
+        Log.i("BASS-Config", "Playback buffer length: " + BASS.BASS_GetConfig(BASS.BASS_CONFIG_BUFFER));
+        Log.i("BASS-Config", "Device nonstop:         " + BASS.BASS_GetConfig(BASS.BASS_CONFIG_DEV_NONSTOP));
+    }
 
     @Override
     public IBinder onBind(Intent intent) {
@@ -73,39 +98,24 @@ public class SongService extends Service {
         System.out.println("onReBind");
     }
 
-    public boolean preLoad(String filePath, PlayMode mode, boolean isLoop) {
-        if (checkFileExist(filePath)) {
-            if (audioFunc == null) return false;
-            if (isLoop) {
-                audioFunc.setLoop(true);
-            }
-            return audioFunc.preLoad(filePath, mode);
-        }
-        return false;
-    }
-
     public boolean preLoad(String filePath) {
-        return preLoad(filePath, PlayMode.MODE_NONE, false);
+        return preLoad(filePath, 1, false, false);
     }
 
-    public boolean preLoad(String filePath, PlayMode mode) {
-        return preLoad(filePath, mode, false);
+    public boolean preLoad(String filePath, float speed, boolean adjustPitch) {
+        return preLoad(filePath, speed, adjustPitch, false);
     }
 
-    public boolean preLoad(String filePath, float speed, boolean enableNC) {
+    public boolean preLoad(String filePath, float speed, boolean adjustPitch, boolean isLoop) {
         if (checkFileExist(filePath)) {
             if (audioFunc == null) {
                 return false;
             }
 
-            audioFunc.setLoop(false);
-            return audioFunc.preLoad(filePath, speed, enableNC);
+            audioFunc.setLoop(isLoop);
+            return audioFunc.preLoad(filePath, speed, adjustPitch);
         }
         return false;
-    }
-
-    public boolean preLoadWithLoop(String filePath) {
-        return preLoad(filePath, PlayMode.MODE_NONE, true);
     }
 
     public void play() {
@@ -210,6 +220,18 @@ public class SongService extends Service {
     public void setVolume(float volume) {
         if (audioFunc != null) {
             audioFunc.setVolume(volume);
+        }
+    }
+
+    public void setSpeed(float speed) {
+        if (audioFunc != null) {
+            audioFunc.setSpeed(speed);
+        }
+    }
+
+    public void setAdjustPitch(boolean adjustPitch) {
+        if (audioFunc != null) {
+            audioFunc.setAdjustPitch(adjustPitch);
         }
     }
 

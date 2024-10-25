@@ -10,8 +10,6 @@ import com.edlplan.framework.easing.Easing;
 import com.edlplan.ui.BaseAnimationListener;
 import com.edlplan.ui.EasingHelper;
 
-import java.io.InputStream;
-
 import club.andnext.markdown.MarkdownWebView;
 import ru.nsu.ccfit.zuev.osuplus.R;
 
@@ -29,7 +27,7 @@ public class MarkdownFragment extends BaseFragment {
 
     @Override
     protected int getLayoutID() {
-        return R.layout.fragment_markdown;
+        return R.layout.markdown_fragment;
     }
 
     @Override

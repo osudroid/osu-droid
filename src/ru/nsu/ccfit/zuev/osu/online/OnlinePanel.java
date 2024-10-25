@@ -1,7 +1,9 @@
 package ru.nsu.ccfit.zuev.osu.online;
 
-import com.edlplan.ui.fragment.ConfirmDialogFragment;
+
 import com.edlplan.ui.fragment.WebViewFragment;
+import com.reco1l.osu.ui.MessageDialog;
+
 import org.anddev.andengine.entity.Entity;
 import org.anddev.andengine.entity.primitive.Rectangle;
 import org.anddev.andengine.entity.sprite.Sprite;
@@ -11,9 +13,12 @@ import org.anddev.andengine.opengl.texture.region.TextureRegion;
 import org.anddev.andengine.util.Debug;
 import org.anddev.andengine.util.HorizontalAlign;
 import org.anddev.andengine.util.MathUtils;
-import ru.nsu.ccfit.zuev.osu.GlobalManager;
+
 import ru.nsu.ccfit.zuev.osu.ResourceManager;
+import ru.nsu.ccfit.zuev.osu.helper.StringTable;
 import ru.nsu.ccfit.zuev.osuplus.R;
+
+import java.util.Locale;
 
 public class OnlinePanel extends Entity {
     private final Entity onlineLayer = new Entity();
@@ -42,14 +47,20 @@ public class OnlinePanel extends Entity {
                 }
                 if (pSceneTouchEvent.isActionUp()) {
                     this.setColor(0.2f, 0.2f, 0.2f, 0.5f);
-                    if (!moved) {
-                        if(OnlineManager.getInstance().isStayOnline()) {
-                            new ConfirmDialogFragment()
-                                .setMessage(R.string.dialog_visit_profile_page)
-                                .showForResult(isAccepted -> GlobalManager.getInstance().getMainActivity().runOnUiThread(() -> new WebViewFragment().setURL(
-                                        WebViewFragment.PROFILE_URL + OnlineManager.getInstance().getUserId())
-                                    .show()));
-                        }
+                    if (!moved && OnlineManager.getInstance().isStayOnline()) {
+
+                        new MessageDialog()
+                            .setMessage(StringTable.get(R.string.dialog_visit_profile_page))
+                            .addButton("Yes", dialog -> {
+                                new WebViewFragment().setURL(WebViewFragment.PROFILE_URL + OnlineManager.getInstance().getUserId()).show();
+                                dialog.dismiss();
+                                return null;
+                            })
+                            .addButton("No", dialog -> {
+                                dialog.dismiss();
+                                return null;
+                            })
+                            .show();
                     }
                     return true;
                 }
@@ -123,7 +134,7 @@ public class OnlinePanel extends Entity {
     public void setInfo() {
         nameText.setText(OnlineManager.getInstance().getUsername());
 
-        ppText.setText(String.format("Performance: %dpp", Math.round(OnlineManager.getInstance().getPP())));
+        ppText.setText(String.format(Locale.US, "Performance: %,dpp", Math.round(OnlineManager.getInstance().getPP())));
 
         accText.setText(String.format("Accuracy: %.2f%%",
                 OnlineManager.getInstance().getAccuracy() * 100f));

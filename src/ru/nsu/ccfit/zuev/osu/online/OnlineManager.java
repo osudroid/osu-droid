@@ -5,23 +5,33 @@ import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 
 import com.dgsrz.bancho.security.SecurityUtils;
+import com.google.firebase.analytics.FirebaseAnalytics;
+
+import com.reco1l.osu.data.BeatmapInfo;
 import okhttp3.MediaType;
 import okhttp3.OkHttpClient;
 
+import okhttp3.Request;
 import okhttp3.RequestBody;
 import org.anddev.andengine.util.Debug;
 
 import java.io.File;
 import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
+import java.io.IOException;
 import java.util.ArrayList;
 
 import ru.nsu.ccfit.zuev.osu.Config;
 import ru.nsu.ccfit.zuev.osu.ResourceManager;
+import ru.nsu.ccfit.zuev.osu.helper.FileUtils;
+import org.json.JSONException;
+import org.json.JSONObject;
+import ru.nsu.ccfit.zuev.osu.*;
 import ru.nsu.ccfit.zuev.osu.game.mods.GameMod;
 import ru.nsu.ccfit.zuev.osu.helper.MD5Calculator;
 import ru.nsu.ccfit.zuev.osu.online.PostBuilder.RequestException;
 import ru.nsu.ccfit.zuev.osu.scoring.StatisticV2;
+import ru.nsu.ccfit.zuev.osu.scoring.BeatmapLeaderboardScoringMode;
 
 public class OnlineManager {
     public static final String hostname = "droidpp.osudroid.moe";
@@ -107,19 +117,6 @@ public class OnlineManager {
         return response;
     }
 
-    public boolean register(final String username, final String password, final String email)
-            throws OnlineManagerException {
-        PostBuilder post = new URLEncodedPostBuilder();
-        post.addParam("username", username);
-        post.addParam("password", sha256(password + "taikotaiko"));
-        post.addParam("email", email);
-        post.addParam("version", onlineVersion);
-
-        ArrayList<String> response = sendRequest(post, endpoint + "register");
-
-        return response != null;
-    }
-
     public boolean logIn() throws OnlineManagerException {
         return logIn(username, password);
     }
@@ -136,7 +133,7 @@ public class OnlineManager {
         post.addParam("username", username);
         post.addParam(
                 "password",
-                sha256(
+                MD5Calculator.getStringMD5(
                         escapeHTMLSpecialCharacters(addSlashes(String.valueOf(password).trim())) + "taikotaiko"
                 ));
         post.addParam("version", onlineVersion);
@@ -268,6 +265,26 @@ public class OnlineManager {
         response.remove(0);
 
         return response;
+    }
+
+    public RankedStatus getBeatmapStatus(String md5) throws OnlineManagerException {
+        var builder = new Request.Builder().url("https://osu.direct/api/v2/md5/" + md5);
+        var request = builder.build();
+
+        try (var response = client.newCall(request).execute()) {
+            if (response.isSuccessful() && response.body() != null) {
+                var json = new JSONObject(response.body().string());
+                return RankedStatus.valueOf(json.optInt("ranked"));
+            }
+        } catch (final IOException e) {
+            Debug.e("getBeatmapStatus IOException " + e.getMessage(), e);
+        } catch (final JSONException e) {
+            Debug.e("getBeatmapStatus JSONException " + e.getMessage(), e);
+        } catch (final IllegalArgumentException e) {
+            Debug.e("getBeatmapStatus IllegalArgumentException " + e.getMessage(), e);
+        }
+
+        return null;
     }
 
     public boolean loadAvatarToTextureManager() {
@@ -432,22 +449,5 @@ public class OnlineManager {
                 .replace("'", "\\'")
                 .replace("\"", "\\\"")
                 .replace("\\", "\\\\");
-    }
-
-    private static String sha256(final String base) {
-        try{
-            final MessageDigest digest = MessageDigest.getInstance("SHA-256");
-            final byte[] hash = digest.digest(base.getBytes(StandardCharsets.UTF_8));
-            final StringBuilder hexString = new StringBuilder();
-            for (byte b : hash) {
-                final String hex = Integer.toHexString(0xff & b);
-                if (hex.length() == 1)
-                    hexString.append('0');
-                hexString.append(hex);
-            }
-            return hexString.toString();
-        } catch(Exception ex){
-            throw new RuntimeException(ex);
-        }
     }
 }

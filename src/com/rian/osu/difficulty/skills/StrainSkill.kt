@@ -1,9 +1,13 @@
 package com.rian.osu.difficulty.skills
 
 import com.rian.osu.difficulty.DifficultyHitObject
+import com.rian.osu.math.Interpolation
 import com.rian.osu.mods.Mod
 import kotlin.math.ceil
+import kotlin.math.exp
+import kotlin.math.log10
 import kotlin.math.max
+import kotlin.math.min
 
 /**
  * Used to processes strain values of [DifficultyHitObject]s, keep track of strain levels caused by
@@ -28,6 +32,13 @@ abstract class StrainSkill<in TObject : DifficultyHitObject>(
      */
     protected open val reducedSectionBaseline = 0.75
 
+    /**
+     * All [DifficultyHitObject] strains.
+     */
+    val objectStrains = mutableListOf<Double>()
+
+    protected var difficulty = 0.0
+
     private val strainPeaks = mutableListOf<Double>()
     private var currentSectionPeak = 0.0
     private var currentSectionEnd = 0.0
@@ -48,12 +59,84 @@ abstract class StrainSkill<in TObject : DifficultyHitObject>(
         currentSectionPeak = max(strainValueAt(current), currentSectionPeak)
     }
 
-    val currentStrainPeaks: MutableList<Double>
-        /**
-         * Returns a list of the peak strains for each [sectionLength] section of the beatmap,
-         * including the peak of the current section.
-         */
+    /**
+     * Returns a list of the peak strains for each [sectionLength] section of the beatmap,
+     * including the peak of the current section.
+     */
+    val currentStrainPeaks
         get() = strainPeaks.toMutableList().apply { add(currentSectionPeak) }
+
+    /**
+     * Returns the number of strains weighed against the top strain.
+     *
+     * The result is scaled by clock rate as it affects the total number of strains.
+     */
+    fun countDifficultStrains(): Double {
+        if (difficulty == 0.0) {
+            return 0.0
+        }
+
+        // This is what the top strain is if all strain values were identical.
+        val consistentTopStrain = difficulty / 10
+
+        // Use a weighted sum of all strains.
+        return objectStrains.fold(0.0) { acc, strain ->
+            acc + 1.1 / (1 + exp(-10 * (strain / consistentTopStrain - 0.88)))
+        }
+    }
+
+    /**
+     * Reduces the highest strain peaks to account for extreme difficulty spikes based on
+     * [reducedSectionCount] and [reducedSectionBaseline].
+     *
+     * @param strainPeaks The list of strain peaks to reduce.
+     */
+    protected fun reduceHighestStrainPeaks(strainPeaks: MutableList<Double>) {
+        // To avoid sorting operation (which is generally expensive, especially in real-time difficulty
+        // calculation), we perform a linear scan to get the highest strain peaks and reduce them that way.
+        val highestStrainPeakIndices = IntArray(min(strainPeaks.size, reducedSectionCount)) { -1 }
+
+        if (highestStrainPeakIndices.isEmpty()) {
+            return
+        }
+
+        for (i in strainPeaks.indices) {
+            val strain = strainPeaks[i]
+
+            // Check if the strain fits into the current top strains
+            val lowestStrainIndex = highestStrainPeakIndices[highestStrainPeakIndices.size - 1]
+            val lowestStrain = if (lowestStrainIndex > -1) strainPeaks[lowestStrainIndex] else 0.0
+
+            if (strain <= lowestStrain) {
+                continue
+            }
+
+            // Obtain the insertion index of the current strain
+            val insertionIndex = highestStrainPeakIndices.indexOfFirst { strain > if (it > -1) strainPeaks[it] else 0.0 }
+
+            // Shift the indices to the right
+            for (j in (highestStrainPeakIndices.size - 1) downTo insertionIndex + 1) {
+                highestStrainPeakIndices[j] = highestStrainPeakIndices[j - 1]
+            }
+
+            // Insert the current strain
+            highestStrainPeakIndices[insertionIndex] = i
+        }
+
+        for (i in highestStrainPeakIndices.indices) {
+            val index = highestStrainPeakIndices[i]
+
+            if (index == -1) {
+                continue
+            }
+
+            val scale = log10(
+                Interpolation.linear(1.0, 10.0, i.toDouble() / reducedSectionCount)
+            )
+
+            strainPeaks[index] *= Interpolation.linear(reducedSectionBaseline, 1.0, scale)
+        }
+    }
 
     /**
      * Calculates the starting time of a strain section at an object.

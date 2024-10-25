@@ -1,208 +1,154 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:orientation="vertical"
-                android:background="@color/frgDialogStyleBackground"
-                android:id="@+id/frg_background">
-
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/frg_background"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="#80000000"
+    android:elevation="1dp">
 
     <LinearLayout
-            android:id="@+id/fullLayout"
+        android:id="@+id/frg_body"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_centerInParent="true"
+        android:layout_marginVertical="12dp"
+        android:background="@drawable/rounded_rect"
+        android:backgroundTint="#1E1E2E"
+        android:divider="@drawable/divider"
+        android:gravity="center"
+        android:minWidth="300dp"
+        android:orientation="vertical"
+        android:showDividers="middle">
+
+        <TextView
+            style="@style/settings_tab_divider"
+            android:paddingVertical="12dp"
+            android:text="Create room" />
+
+        <ScrollView
+            android:id="@+id/scroll"
             android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:layout_marginTop="50dp"
-            android:layout_marginHorizontal="140dp"
-            android:layout_alignParentBottom="true"
-            android:gravity="center"
-            android:orientation="vertical">
+            android:layout_height="0px"
+            android:layout_weight="1"
+            android:layout_marginBottom="12dp">
 
-
-        <RelativeLayout
+            <GridLayout
                 android:layout_width="match_parent"
-                android:layout_height="40dp">
-
-            <View
-                    android:layout_width="match_parent"
-                    android:layout_height="20dp"
-                    android:layout_alignParentBottom="true"
-                    android:background="@drawable/shadow"
-                    android:rotation="180"/>
-
-            <View
-                    android:layout_width="match_parent"
-                    android:layout_height="10dp"
-                    android:layout_alignParentBottom="true"
-                    android:background="@drawable/shadow"
-                    android:rotation="180"/>
-
-            <RelativeLayout
-                    android:id="@+id/showMoreButton"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_alignParentBottom="true"
-                    android:layout_centerHorizontal="true">
-
-                <View
-                        android:layout_width="150dp"
-                        android:layout_height="25dp"
-                        android:background="#99E63E8C"/>
-
-                <com.edlplan.ui.TriangleEffectView
-                        android:layout_width="150dp"
-                        android:layout_height="25dp"
-                        android:alpha="0.5"/>
+                android:layout_height="wrap_content"
+                android:layout_columnSpan="2"
+                android:columnCount="2"
+                android:paddingHorizontal="12dp">
 
                 <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_centerInParent="true"
-                        android:text="Create room"
-                        android:textColor="#FFFFFFFF"
-                        android:textSize="15sp"
-                        android:textStyle="bold"/>
-
-            </RelativeLayout>
-        </RelativeLayout>
-
-
-        <LinearLayout
-                android:id="@+id/optionBody"
-                android:gravity="center"
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:background="@color/frgBodyBackgroundLight"
-                android:clickable="true"
-                android:orientation="vertical">
-
-            <RelativeLayout
+                    android:id="@+id/room_error_text"
                     android:layout_width="match_parent"
-                    android:layout_height="wrap_content">
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="12dp"
+                    android:layout_columnSpan="2"
+                    android:gravity="center"
+                    android:padding="8dp"
+                    android:text="Name cannot be empty!"
+                    android:textColor="#FFBFBF"
+                    android:visibility="gone"
+                    tools:visibility="visible" />
 
-                <View
-                        android:layout_width="match_parent"
-                        android:layout_height="5dp"
-                        android:background="@color/triangleBackground"/>
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_columnSpan="2"
+                    android:layout_marginTop="12dp"
+                    android:padding="8dp"
+                    android:text="Name"
+                    android:textColor="#FFF"
+                    android:textSize="12sp" />
 
-                <com.edlplan.ui.TriangleEffectView
-                        android:layout_width="match_parent"
-                        android:layout_height="5dp"/>
-            </RelativeLayout>
+                <EditText
+                    android:id="@+id/room_name"
+                    style="@style/editText"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_columnSpan="2"
+                    android:layout_marginTop="6dp"
+                    android:ems="16"
+                    android:hint="Type room name"
+                    android:maxLength="32"
+                    android:minWidth="400dp"
+                    android:singleLine="true"
+                    android:textSize="14sp" />
 
-            <ScrollView android:layout_width="wrap_content" android:layout_height="match_parent">
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_columnSpan="2"
+                    android:layout_marginTop="12dp"
+                    android:padding="8dp"
+                    android:text="Password"
+                    android:textColor="#FFF"
+                    android:textSize="12sp" />
 
+                <EditText
+                    android:id="@+id/room_password"
+                    style="@style/editText"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_columnSpan="2"
+                    android:layout_marginTop="6dp"
+                    android:ems="16"
+                    android:hint="Type room password or leave empty"
+                    android:imeOptions="actionDone"
+                    android:inputType="textPassword"
+                    android:maxLength="32"
+                    android:minWidth="400dp"
+                    android:singleLine="true" />
 
-                <LinearLayout
-                        android:layout_width="wrap_content"
-                        android:layout_height="match_parent"
-                        android:gravity="center|top"
-                        android:orientation="vertical"
-                        android:layout_marginTop="20dp" android:layout_marginStart="20dp"
-                        android:layout_marginEnd="20dp" android:layout_marginBottom="20dp">
+                <TextView
+                    android:layout_width="0px"
+                    android:layout_height="wrap_content"
+                    android:layout_columnWeight="10"
+                    android:layout_marginTop="12dp"
+                    android:padding="8dp"
+                    android:saveEnabled="false"
+                    android:text="Max players"
+                    android:textColor="@color/textview"
+                    android:textSize="12sp" />
 
-                    <TextView
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:text="Name:"/>
+                <TextView
+                    android:id="@+id/room_max_text"
+                    style="@style/settings_row_title"
+                    android:layout_width="wrap_content"
+                    android:layout_marginTop="12dp"
+                    android:padding="8dp"
+                    android:text="8"
+                    android:textSize="12sp" />
 
-                    <EditText
-                            android:id="@+id/room_name"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:background="#D3D3D3"
-                            android:layout_marginTop="12dp"
-                            android:singleLine="true"
-                            android:padding="8dp"
-                            android:textSize="14sp"
-                            android:maxLength="32"
-                            android:ems="16"
-                    />
+                <SeekBar
+                    android:id="@+id/room_max_bar"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_columnSpan="2"
+                    android:layout_marginTop="6dp"
+                    android:paddingVertical="12dp"
+                    android:saveEnabled="false"
+                    android:min="2"
+                    android:progress="8"
+                    android:max="16" />
 
-                    <TextView
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:layout_marginTop="12dp"
-                            android:text="Password:"/>
+            </GridLayout>
 
-                    <EditText
-                            android:id="@+id/room_password"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:background="#D3D3D3"
-                            android:layout_marginTop="12dp"
-                            android:padding="8dp"
-                            android:textSize="14sp"
-                            android:singleLine="true"
-                            android:maxLength="32"
-                            android:imeOptions="actionDone"
-                            android:hint="Leave empty to no password"
-                            android:ems="16"
-                            android:inputType="textPassword"/>
+        </ScrollView>
 
-                    <TextView
-                            android:id="@+id/room_max_text"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:layout_marginTop="12dp"
-                            android:text="Max players: 8"/>
-
-                    <SeekBar
-                            android:id="@+id/room_max_bar"
-                            android:layout_width="260dp"
-                            android:layout_height="wrap_content"
-                            android:layout_marginTop="12dp"
-                            android:layout_marginBottom="12dp"
-                            android:progress="8"
-                            android:min="2"
-                            android:max="16"
-                    />
-
-                    <TextView
-                            android:id="@+id/room_error_text"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:layout_marginTop="12dp"
-                            android:layout_marginLeft="2dp"
-                            android:visibility="gone"
-                            android:layout_marginRight="5dp"
-                            android:textColor="#FF0000"
-                            android:text="Name cannot be empty!"/>
-
-                    <RelativeLayout
-                            android:id="@+id/room_create"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:layout_marginTop="12dp"
-                            android:layout_marginBottom="100dp">
-
-                        <com.edlplan.ui.TriangleEffectView
-                                android:layout_width="wrap_content"
-                                android:layout_height="wrap_content"
-                                android:layout_alignBottom="@id/text"
-                                android:layout_alignTop="@id/text"
-                                android:layout_alignRight="@id/text"
-                                android:layout_alignLeft="@id/text"
-                                android:alpha="0.5"/>
-
-                        <TextView
-                                android:id="@+id/text"
-                                android:layout_width="wrap_content"
-                                android:layout_height="wrap_content"
-                                android:text="Create"
-                                android:textColor="#FFFFFFFF"
-                                android:background="#99E63E8C"
-                                android:textStyle="bold"
-                                android:elevation="1dp"
-                                android:paddingVertical="8dp"
-                                android:paddingHorizontal="40dp"/>
-
-                    </RelativeLayout>
-
-                </LinearLayout>
-
-            </ScrollView>
-
-        </LinearLayout>
+        <Button
+            android:id="@+id/room_create"
+            style="@style/button_borderless"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:drawablePadding="0dp"
+            android:gravity="center"
+            android:minWidth="300dp"
+            android:text="Create"
+            android:textColor="#FFBFBF"
+            tools:visibility="visible" />
 
     </LinearLayout>
 

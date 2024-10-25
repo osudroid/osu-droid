@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    style="@style/settings_row"
+    android:focusableInTouchMode="true"
+    android:orientation="vertical">
+
+    <TextView
+        style="@style/settings_row_title"
+        tools:text="Title" />
+
+    <TextView
+        style="@style/settings_row_summary"
+        tools:text="Summary" />
+
+    <com.reco1l.osu.ui.InputView
+        android:id="@+id/input"
+        style="@style/editText"
+        android:layout_width="match_parent"
+        android:layout_marginTop="8dp"
+        android:layout_height="wrap_content" />
+
+</LinearLayout>

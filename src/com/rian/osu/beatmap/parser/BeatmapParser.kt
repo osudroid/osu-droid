@@ -1,7 +1,7 @@
 package com.rian.osu.beatmap.parser
 
 import android.util.Log
-import com.reco1l.framework.extensions.ignoreException
+import com.reco1l.toolkt.kotlin.runSafe
 import com.rian.osu.GameMode
 import com.rian.osu.beatmap.Beatmap
 import com.rian.osu.beatmap.BeatmapProcessor
@@ -18,6 +18,9 @@ import java.io.Closeable
 import java.io.File
 import java.io.IOException
 import java.util.regex.Pattern
+import kotlinx.coroutines.CancellationException
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.ensureActive
 
 /**
  * A parser for parsing `.osu` files.
@@ -39,18 +42,26 @@ class BeatmapParser : Closeable {
     private var beatmapFormatVersion = 14
 
     /**
-     * @param file The `.osu` file.
+     * The [CoroutineScope] to use for coroutines.
      */
-    constructor(file: File) {
+    private val scope: CoroutineScope?
+
+    /**
+     * @param file The `.osu` file.
+     * @param scope The [CoroutineScope] to use for coroutines.
+     */
+    @JvmOverloads
+    constructor(file: File, scope: CoroutineScope? = null) {
         this.file = file
+        this.scope = scope
     }
 
     /**
      * @param path The path to the `.osu` file.
+     * @param scope The [CoroutineScope] to use for coroutines.
      */
-    constructor(path: String) {
-        file = File(path)
-    }
+    @JvmOverloads
+    constructor(path: String, scope: CoroutineScope? = null) : this(File(path), scope)
 
     /**
      * Attempts to open the beatmap file.
@@ -59,6 +70,8 @@ class BeatmapParser : Closeable {
      */
     fun openFile(): Boolean {
         try {
+            scope?.ensureActive()
+
             source = file.source().buffer()
         } catch (e: IOException) {
             Log.e("BeatmapParser.openFile", e.message!!)
@@ -67,7 +80,11 @@ class BeatmapParser : Closeable {
         }
 
         try {
+            scope?.ensureActive()
+
             val head = source!!.readUtf8Line() ?: return false
+
+            scope?.ensureActive()
 
             val pattern = Pattern.compile("osu file format v(\\d+)")
             val matcher = pattern.matcher(head)
@@ -80,6 +97,10 @@ class BeatmapParser : Closeable {
 
             beatmapFormatVersion = head.substring(formatPos + 13).toIntOrNull() ?: beatmapFormatVersion
         } catch (e: Exception) {
+            if (e is CancellationException) {
+                throw e
+            }
+
             Log.e("BeatmapParser.openFile", e.message!!)
         }
 
@@ -96,6 +117,8 @@ class BeatmapParser : Closeable {
      */
     @JvmOverloads
     fun parse(withHitObjects: Boolean, mode: GameMode = GameMode.Standard): Beatmap? {
+        scope?.ensureActive()
+
         if (source == null && !openFile()) {
             ToastLogger.showText(
                 StringTable.format(R.string.beatmap_parser_cannot_open_file, file.nameWithoutExtension),
@@ -105,19 +128,20 @@ class BeatmapParser : Closeable {
             return null
         }
 
+        scope?.ensureActive()
+
         var currentLine: String?
         var currentSection: BeatmapSection? = null
-        val beatmap = Beatmap().apply {
-            md5 = FileUtils.getMD5Checksum(file)
-            folder = file.parent
-            filename = file.path
-            formatVersion = beatmapFormatVersion
+        val beatmap = Beatmap(mode).also {
+            it.md5 = FileUtils.getMD5Checksum(file)
+            it.filePath = file.path
+            it.formatVersion = beatmapFormatVersion
         }
-
-        val hitObjectsParser = if (withHitObjects) BeatmapHitObjectsParser() else null
 
         try {
             while (source!!.readUtf8Line().also { currentLine = it } != null) {
+                scope?.ensureActive()
+
                 // Check if beatmap is not an osu!standard beatmap
                 if (beatmap.general.mode != 0) {
                     // Silently ignore (do not log anything to the user)
@@ -149,33 +173,41 @@ class BeatmapParser : Closeable {
                     continue
                 }
 
+                scope?.ensureActive()
+
                 try {
                     when (currentSection) {
                         BeatmapSection.General ->
-                            BeatmapGeneralParser.parse(beatmap, line)
+                            BeatmapGeneralParser.parse(beatmap, line, scope)
 
                         BeatmapSection.Metadata ->
-                            BeatmapMetadataParser.parse(beatmap, line)
+                            BeatmapMetadataParser.parse(beatmap, line, scope)
 
                         BeatmapSection.Difficulty ->
-                            BeatmapDifficultyParser.parse(beatmap, line)
+                            BeatmapDifficultyParser.parse(beatmap, line, scope)
 
                         BeatmapSection.Events ->
-                            BeatmapEventsParser.parse(beatmap, line)
+                            BeatmapEventsParser.parse(beatmap, line, scope)
 
                         BeatmapSection.TimingPoints ->
-                            BeatmapControlPointsParser.parse(beatmap, line)
+                            BeatmapControlPointsParser.parse(beatmap, line, scope)
 
                         BeatmapSection.Colors ->
-                            BeatmapColorParser.parse(beatmap, line)
+                            BeatmapColorParser.parse(beatmap, line, scope)
 
                         BeatmapSection.HitObjects ->
-                            hitObjectsParser?.parse(beatmap, line)
+                            if (withHitObjects) {
+                                BeatmapHitObjectsParser.parse(beatmap, line, scope)
+                            }
 
                         else -> continue
                     }
                 } catch (e: Exception) {
-                    Log.e("BeatmapParser.parse", "Unable to parse line $line", e)
+                    if (e is CancellationException) {
+                        throw e
+                    }
+
+                    Log.e("BeatmapParser.parse", "Unable to parse line", e)
                 }
             }
         } catch (e: IOException) {
@@ -185,16 +217,21 @@ class BeatmapParser : Closeable {
 
         return beatmap.apply {
             hitObjects.objects.forEach {
-                it.applyDefaults(controlPoints, difficulty, mode)
-                it.applySamples(controlPoints)
+                scope?.ensureActive()
+
+                it.applyDefaults(controlPoints, difficulty, mode, scope)
+                it.applySamples(controlPoints, scope)
             }
 
-            BeatmapProcessor(this).postProcess(mode)
+            BeatmapProcessor(this, scope).also {
+                it.preProcess()
+                it.postProcess()
+            }
         }
     }
 
     override fun close() {
-        ignoreException { source?.close() }
+        runSafe { source?.close() }
 
         source = null
     }

@@ -10,13 +10,14 @@ import android.view.View
 import android.widget.Button
 import android.widget.CheckBox
 import android.widget.EditText
-import android.widget.TextView
 import androidx.preference.PreferenceManager
 import com.edlplan.framework.easing.Easing
 import com.edlplan.framework.support.util.Updater
 import com.edlplan.ui.BaseAnimationListener
 import com.edlplan.ui.EasingHelper
-import com.reco1l.framework.lang.mainThread
+import com.reco1l.osu.mainThread
+import com.reco1l.toolkt.android.cornerRadius
+import com.reco1l.toolkt.android.dp
 import org.anddev.andengine.engine.handler.IUpdateHandler
 import org.anddev.andengine.entity.scene.Scene
 import ru.nsu.ccfit.zuev.osu.helper.InputManager
@@ -35,7 +36,7 @@ class FilterMenuFragment : BaseFragment(), IUpdateHandler, IFilterMenu {
     private lateinit var filter: EditText
     private var menu: SongMenu? = null
     private lateinit var favoritesOnly: CheckBox
-    private lateinit var favoriteFolder: TextView
+    private lateinit var favoriteFolder: Button
     private lateinit var sortButton: Button
     private var updater: Updater? = null
 
@@ -44,7 +45,7 @@ class FilterMenuFragment : BaseFragment(), IUpdateHandler, IFilterMenu {
     }
 
     override val layoutID: Int
-        get() = R.layout.fragment_filtermenu
+        get() = R.layout.search_fragment
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -57,6 +58,8 @@ class FilterMenuFragment : BaseFragment(), IUpdateHandler, IFilterMenu {
     override fun onLoadView() {
         reloadViewData()
         playOnLoadAnim()
+
+        findViewById<View>(R.id.frg_body)!!.cornerRadius = 14f.dp
     }
 
     override fun getFilter(): String {
@@ -127,7 +130,6 @@ class FilterMenuFragment : BaseFragment(), IUpdateHandler, IFilterMenu {
             favoriteFolder = findViewById(R.id.favFolder)!!
 
             favoritesOnly.setOnCheckedChangeListener { _, isChecked ->
-                updateFavChecked()
                 updateUpdater()
                 savedFavOnly = isChecked
             }
@@ -138,7 +140,7 @@ class FilterMenuFragment : BaseFragment(), IUpdateHandler, IFilterMenu {
                 updateUpdater()
             }
 
-            findViewById<View>(R.id.favFolderLayout)!!.setOnClickListener {
+            favoriteFolder.setOnClickListener {
                 val favoriteManagerFragment = FavoriteManagerFragment()
                 favoriteManagerFragment.showToSelectFolder {
                     savedFolder = it
@@ -187,7 +189,6 @@ class FilterMenuFragment : BaseFragment(), IUpdateHandler, IFilterMenu {
             }
 
             updateOrderButton()
-            updateFavChecked()
             updateFavFolderText()
         }
     }
@@ -195,11 +196,11 @@ class FilterMenuFragment : BaseFragment(), IUpdateHandler, IFilterMenu {
     private fun playOnLoadAnim() {
         val body = findViewById<View>(R.id.frg_body)!!
         body.alpha = 0f
-        body.translationX = 400f
+        body.translationY = -400f
         body.animate().cancel()
         body.animate()
             .alpha(1f)
-            .translationX(0f)
+            .translationY(0f)
             .setInterpolator(EasingHelper.asInterpolator(Easing.InOutQuad))
             .setDuration(300)
             .start()
@@ -211,7 +212,7 @@ class FilterMenuFragment : BaseFragment(), IUpdateHandler, IFilterMenu {
         body.animate().cancel()
         body.animate()
             .alpha(0f)
-            .translationX(400f)
+            .translationY(-400f)
             .setInterpolator(EasingHelper.asInterpolator(Easing.InOutQuad))
             .setDuration(300)
             .setListener(
@@ -223,13 +224,6 @@ class FilterMenuFragment : BaseFragment(), IUpdateHandler, IFilterMenu {
             )
             .start()
         playBackgroundHideOutAnim(150)
-    }
-
-    private fun updateFavChecked() {
-        favoritesOnly.text =
-            if (favoritesOnly.isChecked) getString(R.string.menu_search_favsenabled) else getString(
-                R.string.menu_search_favsdisabled
-            )
     }
 
     private fun updateOrderButton() {

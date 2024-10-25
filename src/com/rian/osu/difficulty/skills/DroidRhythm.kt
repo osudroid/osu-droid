@@ -12,25 +12,19 @@ class DroidRhythm(
     /**
      * The [Mod]s that this skill processes.
      */
-    mods: List<Mod>,
-
-    /**
-     * The 300 hit window.
-     */
-    private val greatWindow: Double
+    mods: List<Mod>
 ) : DroidStrainSkill(mods) {
     override val reducedSectionCount = 5
     override val starsPerDouble = 1.75
-
-    override val objectStrain: Double
-        get() = currentStrain
 
     private var currentStrain = 0.0
     private val strainDecayBase = 0.3
 
     override fun strainValueAt(current: DroidDifficultyHitObject): Double {
+        current.rhythmMultiplier = DroidRhythmEvaluator.evaluateDifficultyOf(current)
+
         currentStrain *= strainDecay(current.deltaTime)
-        currentStrain += DroidRhythmEvaluator.evaluateDifficultyOf(current, greatWindow) - 1
+        currentStrain += current.rhythmMultiplier - 1
 
         return currentStrain
     }

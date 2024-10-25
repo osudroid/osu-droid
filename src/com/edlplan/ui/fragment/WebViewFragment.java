@@ -10,9 +10,6 @@ import android.webkit.WebView;
 import android.webkit.WebResourceRequest;
 import android.webkit.WebSettings;
 import android.webkit.WebViewClient;
-import android.widget.ImageButton;
-
-import androidx.annotation.StringRes;
 
 import com.edlplan.framework.easing.Easing;
 import com.edlplan.ui.BaseAnimationListener;
@@ -36,7 +33,7 @@ public class WebViewFragment extends BaseFragment {
 
     @Override
     protected int getLayoutID() {
-        return R.layout.fragment_webview;
+        return R.layout.webview_fragment;
     }
 
     @Override
@@ -46,7 +43,7 @@ public class WebViewFragment extends BaseFragment {
         webSettings.setJavaScriptEnabled(true);
         webSettings.setUserAgentString("osudroid");
 
-        findViewById(R.id.close_button).setOnClickListener(v -> dismiss());
+        findViewById(R.id.close).setOnClickListener(v -> callDismissOnBackPress());
 
         webview.setWebViewClient(new WebViewClient() {
             @Override

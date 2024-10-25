@@ -2,6 +2,9 @@ package ru.nsu.ccfit.zuev.osu.game;
 
 import android.graphics.PointF;
 
+import com.reco1l.andengine.sprite.ExtendedSprite;
+import com.reco1l.andengine.Anchor;
+
 import org.anddev.andengine.entity.modifier.DelayModifier;
 import org.anddev.andengine.entity.modifier.FadeInModifier;
 import org.anddev.andengine.entity.modifier.FadeOutModifier;
@@ -16,13 +19,12 @@ import ru.nsu.ccfit.zuev.osu.Config;
 import ru.nsu.ccfit.zuev.osu.Constants;
 import ru.nsu.ccfit.zuev.osu.ResourceManager;
 import ru.nsu.ccfit.zuev.osu.Utils;
-import ru.nsu.ccfit.zuev.osu.helper.CentredSprite;
 
 public class Countdown extends GameObject {
     public static final float COUNTDOWN_LENGTH = 3f;
-    private final Sprite ready;
+    private final ExtendedSprite ready;
     private final Sprite count1, count2, count3;
-    private final Sprite go;
+    private final ExtendedSprite go;
     private final GameObjectListener listener;
     private final float speed;
     private float timepassed;
@@ -34,10 +36,13 @@ public class Countdown extends GameObject {
         this.speed = speed;
         this.scene = scene;
         timepassed = -time + COUNTDOWN_LENGTH * speed;
-        final PointF center = Utils.trackToRealCoords(new PointF(
-                (float) Constants.MAP_WIDTH / 2, (float) Constants.MAP_HEIGHT / 2));
-        ready = new CentredSprite(center.x, center.y, ResourceManager
-                .getInstance().getTexture("ready"));
+        final PointF center = Utils.trackToRealCoords(new PointF((float) Constants.MAP_WIDTH / 2, (float) Constants.MAP_HEIGHT / 2));
+
+        ready = new ExtendedSprite();
+        ready.setOrigin(Anchor.Center);
+        ready.setPosition(center.x, center.y);
+        ready.setTextureRegion(ResourceManager.getInstance().getTexture("ready"));
+
         ready.registerEntityModifier(new SequenceEntityModifier(
                 new ParallelEntityModifier(new FadeInModifier(COUNTDOWN_LENGTH
                         * speed / 9), new RotationModifier(COUNTDOWN_LENGTH
@@ -82,8 +87,11 @@ public class Countdown extends GameObject {
                 new DelayModifier(COUNTDOWN_LENGTH * speed * 2 / 18),
                 new FadeOutModifier(COUNTDOWN_LENGTH * speed / 18)));
 
-        go = new CentredSprite(center.x, center.y, ResourceManager
-                .getInstance().getTexture("go"));
+        go = new ExtendedSprite();
+        go.setOrigin(Anchor.Center);
+        go.setPosition(center.x, center.y);
+        go.setTextureRegion(ResourceManager.getInstance().getTexture("go"));
+
         go.registerEntityModifier(new SequenceEntityModifier(
                 new ParallelEntityModifier(new FadeInModifier(COUNTDOWN_LENGTH
                         * speed / 18), new RotationModifier(COUNTDOWN_LENGTH

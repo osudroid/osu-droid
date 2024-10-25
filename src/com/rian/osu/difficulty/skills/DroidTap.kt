@@ -1,7 +1,6 @@
 package com.rian.osu.difficulty.skills
 
 import com.rian.osu.difficulty.DroidDifficultyHitObject
-import com.rian.osu.difficulty.evaluators.DroidRhythmEvaluator
 import com.rian.osu.difficulty.evaluators.DroidTapEvaluator
 import com.rian.osu.mods.Mod
 import kotlin.math.exp
@@ -17,11 +16,6 @@ class DroidTap(
     mods: List<Mod>,
 
     /**
-     * The 300 hit window.
-     */
-    private val greatWindow: Double,
-
-    /**
      * Whether to consider cheesability.
      */
     private val considerCheesability: Boolean,
@@ -32,9 +26,6 @@ class DroidTap(
     private val strainTimeCap: Double? = null
 ) : DroidStrainSkill(mods) {
     override val starsPerDouble = 1.1
-
-    override val objectStrain: Double
-        get() = currentStrain * currentRhythm
 
     private var currentStrain = 0.0
     private var currentRhythm = 0.0
@@ -83,14 +74,17 @@ class DroidTap(
     override fun strainValueAt(current: DroidDifficultyHitObject): Double {
         currentStrain *= strainDecay(current.strainTime)
         currentStrain += DroidTapEvaluator.evaluateDifficultyOf(
-            current, greatWindow, considerCheesability, strainTimeCap
+            current, considerCheesability, strainTimeCap
         ) * skillMultiplier
 
-        currentRhythm = DroidRhythmEvaluator.evaluateDifficultyOf(current, greatWindow)
+        currentRhythm = current.rhythmMultiplier
 
+        val totalStrain = currentStrain * currentRhythm
+
+        objectStrains.add(totalStrain)
         objectDeltaTimes.add(current.deltaTime)
 
-        return currentStrain * currentRhythm
+        return totalStrain
     }
 
     override fun calculateInitialStrain(time: Double, current: DroidDifficultyHitObject) =

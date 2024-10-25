@@ -1,31 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string-array name="bg_quality_names">
-        <item>High</item>
-        <item>Medium</item>
-        <item>Low</item>
-        <item>Disabled</item>
-    </string-array>
-    <string-array name="bg_quality_values">
-        <item>1</item>
-        <item>2</item>
-        <item>4</item>
-        <item>0</item>
-    </string-array>
-    <!-- <string-array name="bg_brightness_names">
-        <item>100%</item>
-        <item>75%</item>
-        <item>50%</item>
-        <item>25%</item>
-        <item>0%</item>
-    </string-array>
-    <string-array name="bg_brightness_values">
-        <item>100</item>
-        <item>75</item>
-        <item>50</item>
-        <item>25</item>
-        <item>0</item>
-    </string-array> -->
+
     <string-array name="error_meter_display_names">
         <item>Always</item>
         <item>Replay Only</item>
@@ -93,6 +68,14 @@
         <item>1</item>
         <item>2</item>
     </string-array>
+    <string-array name="global_beatmap_leaderboard_scoring_mode_names">
+        <item>Score</item>
+        <item>Performance Points</item>
+    </string-array>
+    <string-array name="global_beatmap_leaderboard_scoring_mode_values">
+        <item>0</item>
+        <item>1</item>
+    </string-array>
     <string-array name="placeholder_array">
         <item>placeholder</item>
     </string-array>
@@ -131,7 +114,7 @@
     <string name="opt_bgm_volume_summary">Volume of the background music</string>
 
     <string name="opt_offset_title">Global offset</string>
-    <string name="opt_offset_summary">Music offset in ms (positive values mean earlier)</string>
+    <string name="opt_offset_summary">Music offset in ms (positive values mean objects appear earlier)</string>
 
     <string name="opt_special">Special</string>
     <string name="opt_taiko_title">Load T-Aiko! songs</string>
@@ -154,6 +137,12 @@
     <string name="opt_fps_title">FPS</string>
     <string name="opt_fps_summary">Display (frames per second) during gameplay</string>
 
+    <string name="opt_averageoffset_title">Average offset</string>
+    <string name="opt_averageoffset_summary">Display average offset of hits during gameplay. Higher value means hits are more offset. Will not display when Auto mod is enabled</string>
+
+    <string name="opt_unstablerate_title">Unstable rate</string>
+    <string name="opt_unstablerate_summary">Display unstable rate during gameplay. Higher value means hits are more inconsistent. Will not display when Auto mod is enabled</string>
+
     <!-- <string name="opt_skipoffset_title">Skip offset</string>
     <string name="opt_skipoffset_summary">This offset will be added when you press the &quot;Skip&quot; button. Enter -1 for auto offset</string> -->
 
@@ -164,7 +153,7 @@
     <string name="opt_nativeplayer_summary">Use built-in player for more accurate timing (doesn\'t support .ogg files)</string>
 
     <string name="opt_metronome_switch_title">Metronome switch</string>
-    <string name="opt_metronome_switch_summary">Enable metronome sound effect (only Nightcore mod)</string>
+    <string name="opt_metronome_switch_summary">Enable metronome sound effect</string>
 
     <!-- <string name="opt_vbroffset_title">VBR offset</string>
     <string name="opt_vbroffset_summary">Offset for mp3\'s encoded with variable bitrate (built-in player only)</string> -->
@@ -225,6 +214,9 @@
 
     <string name="opt_loadavatar_title">Load Avatar</string>
     <string name="opt_loadavatar_summary">Load avatar in online leaderboard</string>
+
+    <string name="opt_global_beatmap_leaderboard_scoring_mode_title">Global beatmap leaderboard scoring mode</string>
+    <string name="opt_global_beatmap_leaderboard_scoring_mode_summary">Choose the scoring mode for global beatmap leaderboards</string>
 
 
     <string name="opt_error_meter_display_title">Hit error meter</string>
@@ -330,12 +322,12 @@
     <string name="opt_flashlight_follow_delay_title">FL Follow delay</string>
     <string name="opt_changespeed_title">Speed Modify</string>
     <string name="opt_forcear_title">Force AR</string>
+    <string name="opt_forceod_title">Force OD</string>
+    <string name="opt_forcehp_title">Force HP</string>
+    <string name="opt_forcecs_title">Force CS</string>
     <string name="opt_enablenc_whenspeedchange_title">Enable pitch shift in speed modify</string>
     <string name="opt_enablespeedchange_title">Enable speed modify</string>
     <string name="opt_enableforcear_title">Enable force AR</string>
-	
-	<string name="opt_calculate_slider_path_in_game_start_title">Calculate sliderpaths in game start</string>
-	<string name="opt_calculate_slider_path_in_game_start_summary">Increases performance in beatmaps where complex sliders are present, but increases beatmap load time</string>
 
     <string name="opt_display_score_statistics_title">Display score statistics</string>
     <string name="opt_display_score_statistics_summary">Displays score statistics (star rating, PP, and more) in result screen</string>
@@ -370,5 +362,26 @@
     <!--Video support-->
     <string name="opt_delete_unsupported_videos_title">Delete unsupported videos</string>
     <string name="opt_delete_unsupported_videos_summary">Delete videos with unsupported formats (.avi and .flv)</string>
+
+    <string name="opt_video_title">Background Video</string>
+    <string name="opt_video_summary">Display video playback during gameplay. Only supports .3gp, .mp4, .mkv, and .webm video formats</string>
+
+    <!-- Replay import -->
+    <string name="opt_import_replay_title">Import replay</string>
+    <string name="opt_import_replay_summary">Import a replay file (.odr) or an exported replay file (.edr). Only .odr files from osu!droid version 1.6.7 onwards are supported</string>
+
+    <!--Progress indicator-->
+    <string name="opt_progress_indicator_title">Progress display</string>
+    <string name="opt_progress_indicator_summary">Choose the progress indicator type</string>
+
+    <!-- Progress indicator -->
+    <string-array name="opt_progress_indicator_names">
+        <item>Top-right (Pie)</item>
+        <item>Bottom (Long)</item>
+    </string-array>
+    <string-array name="opt_progress_indicator_values">
+        <item>0</item>
+        <item>1</item>
+    </string-array>
 
 </resources>
