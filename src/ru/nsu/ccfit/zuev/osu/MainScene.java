@@ -498,7 +498,7 @@ public class MainScene implements IUpdateHandler {
 
     private void createOnlinePanel(Scene scene) {
         Config.loadOnlineConfig(context);
-        OnlineManager.getInstance().Init(context);
+        OnlineManager.getInstance().init();
 
         if (OnlineManager.getInstance().isStayOnline()) {
             Debug.i("Stay online, creating panel");

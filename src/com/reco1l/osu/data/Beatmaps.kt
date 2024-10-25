@@ -251,6 +251,36 @@ data class BeatmapInfo(
     val needsDifficultyCalculation
         get() = droidStarRating == null || standardStarRating == null
 
+    /**
+     * The full name of the beatmapset containing this beatmap without taking romanization into account.
+     */
+    val fullBeatmapsetName
+        get() = buildString {
+            if (setId != null && setId != -1) {
+                append(setId)
+                append(' ')
+            }
+
+            append(artist.takeUnless { it.isEmpty() } ?: "Unknown Artist")
+            append(" - ")
+            append(title.takeUnless { it.isEmpty() } ?: "Unknown Title")
+        }
+
+    /**
+     * The full name of the beatmap without taking romanization into account.
+     */
+    val fullBeatmapName
+        get() = buildString {
+            append(artist.takeUnless { it.isEmpty() } ?: "Unknown Artist")
+            append(" - ")
+            append(title.takeUnless { it.isEmpty() } ?: "Unknown Title")
+            append(" (")
+            append(creator.takeUnless { it.isEmpty() } ?: "Unknown Creator")
+            append(") [")
+            append(version.takeUnless { it.isEmpty() } ?: "Unknown Version")
+            append(']')
+        }
+
 
     /**
      * Returns the star rating based on the current algorithm configuration, whether droid or standard.

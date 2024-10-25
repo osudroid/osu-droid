@@ -100,15 +100,17 @@ fun convertToJson(ini: IniReader) = JSONObject().apply {
         put("hitCirclePrefix", ini["Fonts", "HitCirclePrefix"] ?: "default")
         put("hitCircleOverlap", ini["Fonts", "HitCircleOverlap"] ?: -2)
         put("scorePrefix", ini["Fonts", "ScorePrefix"] ?: "score")
+        put("scoreOverlap", ini["Fonts", "ScoreOverlap"] ?: 0)
         put("comboPrefix", ini["Fonts", "ComboPrefix"] ?: "score")
+        put("comboOverlap", ini["Fonts", "ComboOverlap"] ?: 0)
     }
 
     putObject("Utils") {
         put("comboTextScale", 0.8f)
         put("animationFramerate", ini["General", "AnimationFramerate"] ?: -1f)
-        put("layeredHitSounds", ini.get<Boolean>("General", "LayeredHitSounds") ?: true)
-        put("SliderBallFlip", ini.get<Boolean>("General", "SliderBallFlip") ?: true)
-        put("spinnerFrequencyModulate", ini.get<Boolean>("General", "SpinnerFrequencyModulate") ?: true)
+        put("layeredHitSounds", ini.get<Boolean>("General", "LayeredHitSounds") != false)
+        put("SliderBallFlip", ini.get<Boolean>("General", "SliderBallFlip") != false)
+        put("spinnerFrequencyModulate", ini.get<Boolean>("General", "SpinnerFrequencyModulate") != false)
     }
 
     putObject("Layout") {

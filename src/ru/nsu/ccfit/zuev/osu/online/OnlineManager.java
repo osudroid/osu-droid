@@ -1,6 +1,5 @@
 package ru.nsu.ccfit.zuev.osu.online;
 
-import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.os.Bundle;
@@ -8,6 +7,7 @@ import android.os.Bundle;
 import com.google.firebase.analytics.FirebaseAnalytics;
 
 import com.reco1l.osu.data.BeatmapInfo;
+import com.reco1l.toolkt.kotlin.StringsKt;
 import okhttp3.MediaType;
 import okhttp3.OkHttpClient;
 
@@ -40,7 +40,6 @@ public class OnlineManager {
     public static final OkHttpClient client = new OkHttpClient();
 
     private static OnlineManager instance = null;
-    private Context context;
     private String failMessage = "";
 
     private boolean stayOnline = true;
@@ -69,12 +68,11 @@ public class OnlineManager {
         return endpoint + "upload/" + playID + ".odr";
     }
 
-    public void Init(Context context) {
+    public void init() {
         this.stayOnline = Config.isStayOnline();
         this.username = Config.getOnlineUsername();
         this.password = Config.getOnlinePassword();
         this.deviceID = Config.getOnlineDeviceID();
-        this.context = context;
     }
 
     private ArrayList<String> sendRequest(PostBuilder post, String url) throws OnlineManagerException {
@@ -183,24 +181,19 @@ public class OnlineManager {
         Debug.i("Starting play...");
         playID = null;
 
-        File beatmapFile = new File(beatmapInfo.getPath());
-        String osuID = beatmapFile.getParentFile().getName();
-        Debug.i("osuid = " + osuID);
-        if (osuID.matches("^[0-9]+ .*"))
-            osuID = osuID.substring(0, osuID.indexOf(' '));
-        else
-            osuID = null;
-
         PostBuilder post = new URLEncodedPostBuilder();
         post.addParam("userID", String.valueOf(userId));
         post.addParam("ssid", ssid);
-        post.addParam("filename", beatmapFile.getName());
+        post.addParam("filename", StringsKt.replaceAlphanumeric(beatmapInfo.getFullBeatmapName(), "_"));
         post.addParam("hash", hash);
         post.addParam("songTitle", beatmapInfo.getTitle());
         post.addParam("songArtist", beatmapInfo.getArtist());
         post.addParam("songCreator", beatmapInfo.getCreator());
-        if (osuID != null)
-            post.addParam("songID", osuID);
+
+        Long beatmapId = beatmapInfo.getId();
+        if (beatmapId != null && beatmapId != -1) {
+            post.addParam("songID", String.valueOf(beatmapId));
+        }
 
         ArrayList<String> response = sendRequest(post, endpoint + "submit.php");
 
@@ -287,9 +280,8 @@ public class OnlineManager {
         return true;
     }
 
-    public ArrayList<String> getTop(final File beatmapFile, final String hash) throws OnlineManagerException {
+    public ArrayList<String> getTop(final String hash) throws OnlineManagerException {
         PostBuilder post = new URLEncodedPostBuilder();
-        post.addParam("filename", beatmapFile.getName());
         post.addParam("hash", hash);
         post.addParam("uid", String.valueOf(userId));
 

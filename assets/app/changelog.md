@@ -117,6 +117,24 @@ for preventing accidental touches.
       }
     }
     ```
+- Added support for `skin.ini`'s `ScoreOverlap` setting in `skin.json`
+  - To use in `skin.json`, add the following entry:
+    ```json
+    {
+      "Fonts": {
+        "scoreOverlap": 0
+      }
+    }
+    ```
+- Added support for `skin.ini`'s `ComboOverlap` setting in `skin.json`
+  - To use in `skin.json`, add the following entry:
+    ```json
+    {
+      "Fonts": {
+        "comboOverlap": 0
+      }
+    }
+    ```
 
 # Changes
 

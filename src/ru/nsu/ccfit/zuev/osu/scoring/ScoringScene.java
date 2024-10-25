@@ -425,10 +425,9 @@ public class ScoringScene {
 
                         // Don't try to load online replay
                         if (replayPath != null && beatmapToReplay != null && !replayPath.startsWith("https://")) {
-                            var beatmapFile = new File(beatmapToReplay.getPath());
                             var replay = new Replay();
                             replay.setObjectCount(beatmapToReplay.getTotalHitObjectCount());
-                            replay.setMap(beatmapFile.getParentFile().getName(), beatmapFile.getName(), mapMD5);
+                            replay.setBeatmap(beatmapToReplay.getFullBeatmapsetName(), beatmapToReplay.getFullBeatmapName(), mapMD5);
 
                             if (replay.load(replayPath)) {
                                 performanceAttributes = BeatmapDifficultyCalculator.calculateDroidPerformanceWithReplayStat(

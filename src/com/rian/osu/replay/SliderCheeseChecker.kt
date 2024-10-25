@@ -94,7 +94,7 @@ class SliderCheeseChecker(
             val objData = objectData[difficultSlider.index]
 
             // If a miss or slider break occurs, we disregard the check for that slider.
-            if (objData.result == ResultType.MISS.id || objData.accuracy == (mehWindow + 13).toInt().toShort()) {
+            if (objData.tickSet == null || objData.result == ResultType.MISS.id || objData.accuracy == (mehWindow + 13).toInt().toShort()) {
                 continue
             }
 

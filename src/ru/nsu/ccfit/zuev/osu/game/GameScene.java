@@ -519,11 +519,10 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
         offsetSum = 0;
         offsetRegs = 0;
 
-        File beatmapFile = new File(beatmapInfo.getPath());
         replaying = false;
         replay = new Replay();
         replay.setObjectCount(objects.size());
-        replay.setMap(beatmapFile.getParentFile().getName(), beatmapFile.getName(), parsedBeatmap.getMd5());
+        replay.setBeatmap(beatmapInfo.getFullBeatmapsetName(), beatmapInfo.getFullBeatmapName(), parsedBeatmap.getMd5());
 
         if (replayFilePath != null) {
             replaying = replay.load(replayFilePath);
@@ -734,7 +733,7 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
                 }
             });
 
-            var updateFpsCounter = new UpdateFPSCounter(new ChangeableText(790, 480, counterTextFont, "Update: 999/999 FPS"), GameHelper.getSpeedMultiplier());
+            var updateFpsCounter = new UpdateFPSCounter(new ChangeableText(790, 480, counterTextFont, "Update: 999/999 FPS"));
 
             counterTexts.add(drawFpsCounter.displayText);
             counterTexts.add(updateFpsCounter.displayText);

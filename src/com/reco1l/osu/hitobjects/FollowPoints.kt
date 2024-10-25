@@ -35,9 +35,7 @@ object FollowPointConnection {
     private val expire = OnModifierFinished { fp ->
         updateThread {
             fp.detachSelf()
-            if (fp is AnimatedSprite) {
-                fp.elapsedSec = 0f
-            }
+            fp.reset()
             pool.free(fp as ExtendedSprite)
         }
     }
