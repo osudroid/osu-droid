@@ -20,6 +20,7 @@ import androidx.core.view.forEach
 import androidx.core.view.get
 import androidx.preference.CheckBoxPreference
 import androidx.preference.Preference
+import com.edlplan.osudroidresource.R.*
 import com.edlplan.ui.fragment.LoadingFragment
 import com.google.android.material.snackbar.Snackbar
 import com.reco1l.ibancho.LobbyAPI
@@ -110,10 +111,10 @@ class SettingsFragment : com.edlplan.ui.fragment.SettingsFragment() {
 
                 mainThread {
                     loading.dismiss()
-                    Snackbar.make(requireActivity().window.decorView, R.string.replay_import_success, 3000).show()
+                    Snackbar.make(requireActivity().window.decorView, string.replay_import_success, 3000).show()
                 }
             } catch (e: Exception) {
-                val str = StringTable.format(R.string.replay_import_failed, e.message)
+                val str = StringTable.format(string.replay_import_failed, e.message)
 
                 mainThread {
                     loading.dismiss()
@@ -284,7 +285,7 @@ class SettingsFragment : com.edlplan.ui.fragment.SettingsFragment() {
                     mainThread {
                         loading.dismiss()
                         context.startActivity(Intent(context, MainActivity::class.java))
-                        Snackbar.make(requireActivity().window.decorView, R.string.message_loaded_skin, 1500).show()
+                        Snackbar.make(requireActivity().window.decorView, string.message_loaded_skin, 1500).show()
                     }
                 }
                 true
@@ -296,7 +297,7 @@ class SettingsFragment : com.edlplan.ui.fragment.SettingsFragment() {
     private fun handleLibrarySectionPreferences() {
         findPreference<Preference>("clear_beatmap_cache")!!.setOnPreferenceClickListener {
             LibraryManager.clearDatabase()
-            ToastLogger.showText(StringTable.get(R.string.library_cleared), true)
+            ToastLogger.showText(StringTable.get(string.library_cleared), true)
             true
         }
 
@@ -327,7 +328,7 @@ class SettingsFragment : com.edlplan.ui.fragment.SettingsFragment() {
             val file = File(newValue.toString())
 
             if (!file.exists() && !file.mkdirs()) {
-                ToastLogger.showText(StringTable.get(R.string.message_error_dir_not_found), true)
+                ToastLogger.showText(StringTable.get(string.message_error_dir_not_found), true)
                 return@setOnPreferenceChangeListener false
             }
 

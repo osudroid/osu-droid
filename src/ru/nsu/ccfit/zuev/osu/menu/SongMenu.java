@@ -1002,13 +1002,13 @@ public class SongMenu implements IUpdateHandler, MenuItemListener,
 
         @SuppressLint("SimpleDateFormat") SimpleDateFormat sdf = new SimpleDateFormat("mm:ss");
         sdf.setTimeZone(TimeZone.getTimeZone("GMT+0"));
-        String binfoStr = String.format(StringTable.get(R.string.binfoStr1), sdf.format(length),
+        String binfoStr = String.format(StringTable.get(com.edlplan.osudroidresource.R.string.binfoStr1), sdf.format(length),
                 (bpm_min == bpm_max ? GameHelper.Round(bpm_min, 1) : GameHelper.Round(bpm_min, 1) + "-" + GameHelper.Round(bpm_max, 1)),
                 beatmapInfo.getMaxCombo());
         if (length > 3600 * 1000) {
             sdf = new SimpleDateFormat("HH:mm:ss");
             sdf.setTimeZone(TimeZone.getTimeZone("GMT+0"));
-            binfoStr = String.format(StringTable.get(R.string.binfoStr1), sdf.format(length),
+            binfoStr = String.format(StringTable.get(com.edlplan.osudroidresource.R.string.binfoStr1), sdf.format(length),
                     (bpm_min == bpm_max ? GameHelper.Round(bpm_min, 1) : GameHelper.Round(bpm_min, 1) + "-" + GameHelper.Round(bpm_max, 1)),
                     beatmapInfo.getMaxCombo());
         }
@@ -1039,7 +1039,7 @@ public class SongMenu implements IUpdateHandler, MenuItemListener,
 
         String tinfoStr = beatmapInfo.getArtistText() + " - " + beatmapInfo.getTitleText() + " [" + beatmapInfo.getVersion() + "]";
         String mapperStr = "Beatmap by " + beatmapInfo.getCreator();
-        String binfoStr2 = String.format(StringTable.get(R.string.binfoStr2),
+        String binfoStr2 = String.format(StringTable.get(com.edlplan.osudroidresource.R.string.binfoStr2),
                 beatmapInfo.getHitCircleCount(), beatmapInfo.getSliderCount(), beatmapInfo.getSpinnerCount(), beatmapInfo.getSetId());
         beatmapMetadataText.setText(tinfoStr);
         beatmapCreatorText.setText(mapperStr);
@@ -1236,7 +1236,7 @@ public class SongMenu implements IUpdateHandler, MenuItemListener,
     public void openScore(final int id, boolean showOnline, final String playerName) {
         if (showOnline) {
             engine.setScene(new LoadingScreen().getScene());
-            ToastLogger.showTextId(R.string.online_loadrecord, false);
+            ToastLogger.showTextId(com.edlplan.osudroidresource.R.string.online_loadrecord, false);
 
             cancelCalculationJobs();
             cancelMapStatusLoadingJob();

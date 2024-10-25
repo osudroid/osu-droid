@@ -50,7 +50,7 @@ public class LibraryManager {
         if (!directory.exists()) {
 
             if (!directory.mkdir()) {
-                ToastLogger.showText(StringTable.format(R.string.message_error_createdir, directory.getPath()), true);
+                ToastLogger.showText(StringTable.format(com.edlplan.osudroidresource.R.string.message_error_createdir, directory.getPath()), true);
                 return false;
             }
 

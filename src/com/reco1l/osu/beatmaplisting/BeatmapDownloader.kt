@@ -2,6 +2,7 @@ package com.reco1l.osu.beatmaplisting
 
 import android.os.Environment.DIRECTORY_DOWNLOADS
 import android.view.View
+import com.edlplan.osudroidresource.R.*
 import com.reco1l.framework.net.FileRequest
 import com.reco1l.framework.net.IDownloaderObserver
 import com.reco1l.osu.mainThread
@@ -62,10 +63,10 @@ object BeatmapDownloader : IDownloaderObserver {
         fragment.setDownloader(downloader) {
 
             fragment.text.visibility = View.VISIBLE
-            fragment.text.text = context.getString(R.string.beatmap_downloader_connecting)
+            fragment.text.text = context.getString(string.beatmap_downloader_connecting)
 
             fragment.button.visibility = View.VISIBLE
-            fragment.button.text = context.getString(R.string.beatmap_downloader_cancel)
+            fragment.button.text = context.getString(string.beatmap_downloader_cancel)
 
             downloader.observer = this@BeatmapDownloader
 
@@ -73,7 +74,7 @@ object BeatmapDownloader : IDownloaderObserver {
                 downloader.execute()
 
                 mainThread {
-                    fragment.text.text = StringTable.format(R.string.beatmap_downloader_downloading, currentFilename)
+                    fragment.text.text = StringTable.format(string.beatmap_downloader_downloading, currentFilename)
                 }
             }
 
@@ -91,7 +92,7 @@ object BeatmapDownloader : IDownloaderObserver {
             fragment.progressBar.isIndeterminate = true
             fragment.progressBar.visibility = View.VISIBLE
 
-            fragment.text.text = StringTable.format(R.string.beatmap_downloader_importing, currentFilename)
+            fragment.text.text = StringTable.format(string.beatmap_downloader_importing, currentFilename)
             fragment.button.visibility = View.GONE
         }
 
@@ -137,7 +138,7 @@ object BeatmapDownloader : IDownloaderObserver {
         val info = "\n%.3f kb/s (%d%%)".format(downloader.speedKbps / 1024, downloader.progress.toInt())
 
         mainThread {
-            fragment.text.text = context.getString(R.string.beatmap_downloader_downloading).format(
+            fragment.text.text = context.getString(string.beatmap_downloader_downloading).format(
                 currentFilename
             ) + info
             fragment.progressBar.isIndeterminate = false
