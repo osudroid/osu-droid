@@ -523,7 +523,8 @@ public class ScoringScene {
                             OnlineManager.getInstance().getPP());
                     scene.registerTouchArea(sendingPanel.getDismissTouchArea());
                     scene.attachChild(sendingPanel);
-                    ScoreLibrary.getInstance().sendScoreOnline(stat, mapMD5, replay, sendingPanel);
+
+                    OnlineScoring.getInstance().sendRecord(stat, mapMD5, sendingPanel, replayPath);
                 }
             }
         }

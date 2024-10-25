@@ -27,7 +27,6 @@ import com.reco1l.ibancho.RoomAPI
 import com.reco1l.ibancho.data.RoomTeam
 import com.reco1l.ibancho.data.TeamMode
 import com.reco1l.ibancho.data.WinCondition
-import com.reco1l.osu.UpdateManager
 import com.reco1l.osu.async
 import com.reco1l.osu.data.DatabaseManager
 import com.reco1l.osu.mainThread
@@ -253,11 +252,6 @@ class SettingsFragment : com.edlplan.ui.fragment.SettingsFragment() {
             startActivity(Intent(Intent.ACTION_VIEW, Uri.parse(REGISTER_URL)))
             true
         }
-
-        findPreference<Preference>("update")!!.setOnPreferenceClickListener {
-            UpdateManager.checkNewUpdates(false)
-            true
-        }
     }
 
 
@@ -417,6 +411,15 @@ class SettingsFragment : com.edlplan.ui.fragment.SettingsFragment() {
 
             setOnPreferenceChangeListener { _, newValue ->
                 RoomAPI.setRoomAllowForceDifficultyStatistics(newValue as Boolean)
+                true
+            }
+        }
+
+        findPreference<CheckBoxPreference>("room_allowMoreThanThreeCursors")!!.apply {
+            isChecked = Multiplayer.room!!.gameplaySettings.allowMoreThanThreeCursors
+
+            setOnPreferenceChangeListener { _, newValue ->
+                RoomAPI.setRoomAllowMoreThanThreeCursors(newValue as Boolean)
                 true
             }
         }

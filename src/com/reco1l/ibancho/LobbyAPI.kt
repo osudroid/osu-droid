@@ -16,12 +16,12 @@ object LobbyAPI
     /**
      * The hostname.
      */
-    const val HOST = "https://multi.osudroid.moe"
+    const val HOST = "https://droidpp.osudroid.moe/api/tournament"
 
     /**
      * The invite link host.
      */
-    const val INVITE_HOST = "https://odmp"
+    const val INVITE_HOST = "https://tournament.odmp"
 
     /**
      * Endpoint to get a rooms list.

@@ -4,7 +4,6 @@ import android.content.Intent;
 import android.net.Uri;
 
 import com.google.android.material.snackbar.Snackbar;
-import com.reco1l.osu.data.BeatmapInfo;
 import com.reco1l.osu.Execution;
 import com.reco1l.osu.multiplayer.LobbyScene;
 import com.reco1l.osu.multiplayer.RoomScene;
@@ -132,31 +131,8 @@ public class OnlineScoring {
         });
     }
 
-    public void sendRecord(final StatisticV2 record, final SendingPanel panel, final String mapMD5, final String replay) {
+    public void sendRecord(final StatisticV2 record, final String mapMD5, final SendingPanel panel, final String replay) {
         if (!OnlineManager.getInstance().isStayOnline())
-            return;
-
-        Execution.async(() -> {
-            synchronized (onlineMutex) {
-                for (int i = 0; i < attemptCount; i++) {
-                    try {
-                        OnlineManager.getInstance().startPlay(beatmapInfo, hash);
-                    } catch (OnlineManager.OnlineManagerException e) {
-                        Debug.e("Login error: " + e.getMessage());
-                        continue;
-                    }
-                    break;
-                }
-
-                if (OnlineManager.getInstance().getFailMessage().length() > 0) {
-                    ToastLogger.showText(OnlineManager.getInstance().getFailMessage(), true);
-                }
-            }
-        });
-    }
-
-    public void sendRecord(final StatisticV2 record, final SendingPanel panel, final String replay) {
-        if (!OnlineManager.getInstance().isStayOnline() || !OnlineManager.getInstance().isReadyToSend())
             return;
 
         Debug.i("Sending score");

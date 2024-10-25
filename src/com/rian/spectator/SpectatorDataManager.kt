@@ -1,9 +1,8 @@
 package com.rian.spectator
 
 import android.util.Log
-import com.reco1l.api.ibancho.RoomAPI
+import com.reco1l.ibancho.RoomAPI
 import com.rian.osu.beatmap.hitobject.HitCircle
-import com.rian.osu.beatmap.hitobject.getEndTime
 import ru.nsu.ccfit.zuev.osu.Config
 import ru.nsu.ccfit.zuev.osu.game.GameScene
 import ru.nsu.ccfit.zuev.osu.online.OnlineManager.OnlineManagerException
@@ -14,6 +13,7 @@ import java.io.ByteArrayOutputStream
 import java.io.DataOutputStream
 import java.io.IOException
 import java.util.*
+import ru.nsu.ccfit.zuev.osu.game.GameHelper
 
 /**
  * Holds spectator data that will be sent to the server periodically.
@@ -41,7 +41,7 @@ class SpectatorDataManager(
 
     private val task = object : TimerTask() {
         override fun run() {
-            val secPassed = gameScene.secPassed
+            val secPassed = gameScene.elapsedTime
             val gameHasEnded = gameEnded
             val byteArrayOutputStream = ByteArrayOutputStream()
 
@@ -172,12 +172,12 @@ class SpectatorDataManager(
         val obj = gameScene.beatmap.hitObjects.objects[objectId]
         val replayData = replay.objectData[objectId]
 
-        var time = obj.getEndTime()
+        var time = obj.endTime
         if (obj is HitCircle) {
             // Special handling for circles that are not tapped.
             time += (
                 if (replayData.accuracy == 10000.toShort())
-                    gameScene.difficultyHelper.hitWindowFor50(gameScene.overallDifficulty) * 1000
+                    GameHelper.getDifficultyHelper().hitWindowFor50(GameHelper.getOverallDifficulty()) * 1000
                 else replayData.accuracy
             ).toDouble()
         }
@@ -203,7 +203,7 @@ class SpectatorDataManager(
      * Adds a spectator event.
      */
     fun addEvent() =
-        events.add(SpectatorEvent(gameScene.secPassed * 1000, stat.totalScoreWithMultiplier, stat.combo, stat.accuracy))
+        events.add(SpectatorEvent(gameScene.elapsedTime * 1000, stat.totalScoreWithMultiplier, stat.combo, stat.accuracy))
 
     /**
      * Pauses the timer.

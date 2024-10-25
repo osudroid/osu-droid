@@ -122,8 +122,8 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
     }
 
     private final Engine engine;
-    private final Cursor[] cursors;
-    private final boolean[] cursorIIsDown;
+    private Cursor[] cursors;
+    private boolean[] cursorIIsDown;
     public String audioFilePath = null;
     private ExtendedScene scene;
     private ExtendedScene bgScene, mgScene, fgScene;
@@ -152,7 +152,6 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
     private Metronome metronome;
     private float scale;
     private float objectTimePreempt;
-    private float difficultyStatisticsScoreMultiplier;
     public StatisticV2 stat;
     private boolean gameStarted;
     private float totalOffset;
@@ -452,12 +451,6 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
         scale = firstObject.getGameplayScale();
         objectTimePreempt = (float) firstObject.timePreempt / 1000f;
 
-        difficultyStatisticsScoreMultiplier = 1 +
-            Math.min(parsedBeatmap.getDifficulty().od, 10) / 10f + Math.min(parsedBeatmap.getDifficulty().hp, 10) / 10f;
-
-        // The maximum CS of osu!droid mapped to osu!standard is ~17.62.
-        difficultyStatisticsScoreMultiplier += (Math.min(parsedBeatmap.getDifficulty().gameplayCS, 17.62f) - 3) / 4f;
-
         GameHelper.setOverallDifficulty(playableBeatmap.getDifficulty().od);
         GameHelper.setHealthDrain(playableBeatmap.getDifficulty().hp);
         GameHelper.setSpeedMultiplier(modMenu.getSpeed());
@@ -584,14 +577,15 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
                 && !stat.getMod().contains(GameMod.MOD_AUTOPILOT)
                 && !stat.getMod().contains(GameMod.MOD_AUTO);
 
-        float multiplier = 1 + Math.min(rawDifficulty, 10) / 10f + Math.min(rawDrain, 10) / 10f;
+        var rawDifficulty = parsedBeatmap.getDifficulty();
+        float multiplier = 1 + Math.min(rawDifficulty.od, 10) / 10f + Math.min(rawDifficulty.hp, 10) / 10f;
 
         // The maximum CS of osu!droid mapped to osu!standard is ~17.62.
-        multiplier += (Math.min(beatmap.difficulty.cs, 17.62f) - 3) / 4f;
+        multiplier += (Math.min(rawDifficulty.gameplayCS, 17.62f) - 3) / 4f;
 
         stat.setDiffModifier(multiplier);
-        stat.setMaxObjectsCount(lastTrack.getTotalHitObjectCount());
-        stat.setMaxHighestCombo(lastTrack.getMaxCombo());
+        stat.setBeatmapNoteCount(beatmapInfo.getTotalHitObjectCount());
+        stat.setBeatmapMaxCombo(beatmapInfo.getMaxCombo());
 
         stat.setCustomAR(ModMenu.getInstance().getCustomAR());
         stat.setCustomOD(ModMenu.getInstance().getCustomOD());
@@ -605,7 +599,7 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
             ArrayList<String> response = null;
 
             try {
-                response = OnlineManager.getInstance().sendPlaySettings(stat, trackMD5);
+                response = OnlineManager.getInstance().sendPlaySettings(stat, parsedBeatmap.getMd5());
             } catch (OnlineManager.OnlineManagerException e) {
                 e.printStackTrace();
             }
@@ -2262,7 +2256,7 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
         }
 
         if (spectatorDataManager != null) {
-            spectatorDataManager.resumeTimer((long) (secPassed % 5) * 1000);
+            spectatorDataManager.resumeTimer((long) (elapsedTime % 5) * 1000);
         }
 
         if (video != null && videoStarted) {
@@ -2646,20 +2640,8 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
         return BeatmapDifficultyCalculator.calculateStandardPerformance(timedAttributes.attributes, stat).total;
     }
 
-    public float getSecPassed() {
-        return secPassed;
-    }
-
-    public Beatmap getBeatmap() {
-        return beatmap;
-    }
-
-    public DifficultyHelper getDifficultyHelper() {
-        return difficultyHelper;
-    }
-
-    public float getOverallDifficulty() {
-        return overallDifficulty;
+    public DroidPlayableBeatmap getBeatmap() {
+        return playableBeatmap;
     }
 
     public void stopSpectatorDataSubmission() {

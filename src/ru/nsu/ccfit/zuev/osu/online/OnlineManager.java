@@ -4,10 +4,6 @@ import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 
-import com.dgsrz.bancho.security.SecurityUtils;
-import com.google.firebase.analytics.FirebaseAnalytics;
-
-import com.reco1l.osu.data.BeatmapInfo;
 import okhttp3.MediaType;
 import okhttp3.OkHttpClient;
 
@@ -16,14 +12,11 @@ import okhttp3.RequestBody;
 import org.anddev.andengine.util.Debug;
 
 import java.io.File;
-import java.nio.charset.StandardCharsets;
-import java.security.MessageDigest;
 import java.io.IOException;
 import java.util.ArrayList;
 
 import ru.nsu.ccfit.zuev.osu.Config;
 import ru.nsu.ccfit.zuev.osu.ResourceManager;
-import ru.nsu.ccfit.zuev.osu.helper.FileUtils;
 import org.json.JSONException;
 import org.json.JSONObject;
 import ru.nsu.ccfit.zuev.osu.*;
@@ -31,7 +24,6 @@ import ru.nsu.ccfit.zuev.osu.game.mods.GameMod;
 import ru.nsu.ccfit.zuev.osu.helper.MD5Calculator;
 import ru.nsu.ccfit.zuev.osu.online.PostBuilder.RequestException;
 import ru.nsu.ccfit.zuev.osu.scoring.StatisticV2;
-import ru.nsu.ccfit.zuev.osu.scoring.BeatmapLeaderboardScoringMode;
 
 public class OnlineManager {
     public static final String hostname = "droidpp.osudroid.moe";

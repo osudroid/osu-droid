@@ -64,14 +64,4 @@
 
     </PreferenceCategory>
 
-    <PreferenceCategory android:title="Updates">
-
-        <Preference
-            android:key="update"
-            android:summary="@string/opt_update_summary"
-            android:title="@string/opt_update_title"
-            app:layout="@layout/settings_preference_bottom"/>
-
-    </PreferenceCategory>
-
 </androidx.preference.PreferenceScreen>

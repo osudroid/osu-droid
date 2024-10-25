@@ -36,6 +36,12 @@
             android:summary="Allow players to use forced difficulty statistics in free mod"
             android:title="Allow force difficulty statistics in free mod" />
 
+        <CheckBoxPreference
+            android:key="allowMoreThanThreeCursors"
+            android:title="@string/opt_allow_more_than_three_fingers_title"
+            android:summary="@string/opt_allow_more_than_three_fingers_summary"
+            android:defaultValue="true" />
+
         <com.reco1l.osu.ui.SelectPreference
             android:entries="@array/team_versus_names"
             android:entryValues="@array/team_versus_values"

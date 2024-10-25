@@ -109,7 +109,7 @@ public class Replay {
     }
 
     public void addUp(final int timeMs, final int pid) {
-        if (pid > GameScene.GameScene.getCursorCount() || isSaving) return;
+        if (pid > GameScene.getCursorCount() || isSaving) return;
         cursorMoves.get(pid).pushBack(timeMs, TouchType.UP);
     }
 

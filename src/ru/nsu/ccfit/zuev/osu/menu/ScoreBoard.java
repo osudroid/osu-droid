@@ -203,8 +203,6 @@ public class ScoreBoard extends Entity implements ScrollDetector.IScrollDetector
 
             @Override
             public void run() {
-
-                File beatmapFile = new File(beatmapInfo.getFilename());
                 List<String> scores;
 
                 try {
