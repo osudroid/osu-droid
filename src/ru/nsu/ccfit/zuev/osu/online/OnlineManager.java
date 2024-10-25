@@ -171,23 +171,11 @@ public class OnlineManager {
             return false;
         }
 
-        var sb = new StringBuilder();
-        sb.append(userId);
-        sb.append('_');
-        sb.append(data);
-        sb.append('_');
-        sb.append(mapMD5);
-        sb.append('_');
-        sb.append(sessionId);
-
-        var signature = SecurityUtils.signRequest(sb.toString());
-
         var post = new FormDataPostBuilder();
         post.addParam("userID", String.valueOf(userId));
         post.addParam("data", data);
         post.addParam("hash", mapMD5);
         post.addParam("sessionId", sessionId);
-        post.addParam("sign", signature);
 
         MediaType replayMime = MediaType.parse("application/octet-stream");
         RequestBody replayFileBody = RequestBody.create(replayFile, replayMime);
