@@ -3,7 +3,6 @@ package com.edlplan.replay;
 import static com.reco1l.osu.data.Scores.ScoreInfo;
 
 import com.reco1l.osu.data.ScoreInfo;
-import com.reco1l.osu.data.Scores;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -19,8 +18,6 @@ import java.util.Map;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 import java.util.zip.ZipOutputStream;
-
-import ru.nsu.ccfit.zuev.osu.Config;
 
 public class OsuDroidReplayPack {
 
