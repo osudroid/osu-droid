@@ -733,7 +733,7 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
                 }
             });
 
-            var updateFpsCounter = new UpdateFPSCounter(new ChangeableText(790, 480, counterTextFont, "Update: 999/999 FPS"), GameHelper.getSpeedMultiplier());
+            var updateFpsCounter = new UpdateFPSCounter(new ChangeableText(790, 480, counterTextFont, "Update: 999/999 FPS"));
 
             counterTexts.add(drawFpsCounter.displayText);
             counterTexts.add(updateFpsCounter.displayText);
