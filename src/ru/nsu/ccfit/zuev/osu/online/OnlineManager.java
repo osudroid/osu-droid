@@ -7,6 +7,7 @@ import android.os.Bundle;
 import com.google.firebase.analytics.FirebaseAnalytics;
 
 import com.reco1l.osu.data.BeatmapInfo;
+import com.reco1l.toolkt.kotlin.StringsKt;
 import okhttp3.MediaType;
 import okhttp3.OkHttpClient;
 
@@ -183,7 +184,7 @@ public class OnlineManager {
         PostBuilder post = new URLEncodedPostBuilder();
         post.addParam("userID", String.valueOf(userId));
         post.addParam("ssid", ssid);
-        post.addParam("filename", beatmapInfo.getFullBeatmapName());
+        post.addParam("filename", StringsKt.replaceAlphanumeric(beatmapInfo.getFullBeatmapName(), "_"));
         post.addParam("hash", hash);
         post.addParam("songTitle", beatmapInfo.getTitle());
         post.addParam("songArtist", beatmapInfo.getArtist());
