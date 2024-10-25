@@ -108,7 +108,6 @@ import ru.nsu.ccfit.zuev.osu.scoring.ScoringScene;
 import ru.nsu.ccfit.zuev.osu.scoring.StatisticV2;
 import ru.nsu.ccfit.zuev.osu.scoring.TouchType;
 import ru.nsu.ccfit.zuev.osuplus.BuildConfig;
-import ru.nsu.ccfit.zuev.osuplus.R;
 import ru.nsu.ccfit.zuev.skins.OsuSkin;
 import ru.nsu.ccfit.zuev.skins.SkinManager;
 
@@ -358,7 +357,7 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
 
     private boolean loadGame(final BeatmapInfo beatmapInfo, final String rFile) {
         if (!SecurityUtils.verifyFileIntegrity(GlobalManager.getInstance().getMainActivity())) {
-            ToastLogger.showTextId(R.string.file_integrity_tampered, true);
+            ToastLogger.showTextId(com.edlplan.osudroidresource.R.string.file_integrity_tampered, true);
             return false;
         }
 
@@ -367,7 +366,7 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
                     MD5Calculator.getStringMD5(rFile) + ".odr";
             Debug.i("ReplayFile = " + replayFilePath);
             if (!OnlineFileOperator.downloadFile(rFile, this.replayFilePath)) {
-                ToastLogger.showTextId(R.string.replay_cantdownload, true);
+                ToastLogger.showTextId(com.edlplan.osudroidresource.R.string.replay_cantdownload, true);
                 return false;
             }
         } else
@@ -379,7 +378,7 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
                     parsedBeatmap = parser.parse(true, GameMode.Droid);
                 } else {
                     Debug.e("startGame: cannot open file");
-                    ToastLogger.showText(StringTable.format(R.string.message_error_open, beatmapInfo.getFilename()), true);
+                    ToastLogger.showText(StringTable.format(com.edlplan.osudroidresource.R.string.message_error_open, beatmapInfo.getFilename()), true);
                     return false;
                 }
             }
@@ -390,7 +389,7 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
         }
 
         if (!parsedBeatmap.getMd5().equals(beatmapInfo.getMD5())) {
-            ToastLogger.showTextId(R.string.file_integrity_tampered, true);
+            ToastLogger.showTextId(com.edlplan.osudroidresource.R.string.file_integrity_tampered, true);
             return false;
         }
 
@@ -527,7 +526,7 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
         if (replayFilePath != null) {
             replaying = replay.load(replayFilePath);
             if (!replaying) {
-                ToastLogger.showTextId(R.string.replay_invalid, true);
+                ToastLogger.showTextId(com.edlplan.osudroidresource.R.string.replay_invalid, true);
                 return false;
             }
         } else if (modMenu.getMod().contains(GameMod.MOD_AUTO)) {
@@ -2518,12 +2517,12 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
                 }
             }
 
-            ToastLogger.showText(StringTable.get(R.string.message_save_replay_successful), true);
+            ToastLogger.showText(StringTable.get(com.edlplan.osudroidresource.R.string.message_save_replay_successful), true);
             replayFilePath = null;
             return true;
         }
         else{
-            ToastLogger.showText(StringTable.get(R.string.message_save_replay_failed), true);
+            ToastLogger.showText(StringTable.get(com.edlplan.osudroidresource.R.string.message_save_replay_failed), true);
             return false;
         }
     }
