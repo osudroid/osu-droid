@@ -16,7 +16,6 @@ import org.anddev.andengine.util.MathUtils;
 
 import ru.nsu.ccfit.zuev.osu.ResourceManager;
 import ru.nsu.ccfit.zuev.osu.helper.StringTable;
-import ru.nsu.ccfit.zuev.osuplus.R;
 
 import java.util.Locale;
 

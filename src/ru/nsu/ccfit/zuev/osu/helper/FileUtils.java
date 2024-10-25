@@ -27,7 +27,6 @@ import okio.Okio;
 import okio.Source;
 import ru.nsu.ccfit.zuev.osu.Config;
 import ru.nsu.ccfit.zuev.osu.ToastLogger;
-import ru.nsu.ccfit.zuev.osuplus.R;
 
 public class FileUtils {
 

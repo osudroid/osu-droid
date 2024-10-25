@@ -30,7 +30,6 @@ import ru.nsu.ccfit.zuev.osu.game.GameScene;
 import ru.nsu.ccfit.zuev.osu.game.cursor.flashlight.FlashLightEntity;
 import ru.nsu.ccfit.zuev.osu.game.mods.GameMod;
 import ru.nsu.ccfit.zuev.osu.menu.ModMenu;
-import ru.nsu.ccfit.zuev.osuplus.R;
 
 public class Replay {
     public static EnumSet<GameMod> mod = EnumSet.noneOf(GameMod.class);

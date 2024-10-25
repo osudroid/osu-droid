@@ -16,11 +16,9 @@ import net.lingala.zip4j.ZipFile
 import org.apache.commons.io.FilenameUtils
 import ru.nsu.ccfit.zuev.osu.Config
 import ru.nsu.ccfit.zuev.osu.GlobalManager
-import ru.nsu.ccfit.zuev.osu.LibraryManager
 import ru.nsu.ccfit.zuev.osu.ToastLogger
 import ru.nsu.ccfit.zuev.osu.helper.FileUtils
 import ru.nsu.ccfit.zuev.osu.helper.StringTable
-import ru.nsu.ccfit.zuev.osuplus.R
 import java.io.IOException
 
 object BeatmapDownloader : IDownloaderObserver {

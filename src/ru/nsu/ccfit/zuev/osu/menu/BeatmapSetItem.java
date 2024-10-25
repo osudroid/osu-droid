@@ -20,7 +20,6 @@ import com.reco1l.osu.data.DatabaseManager;
 import ru.nsu.ccfit.zuev.osu.Utils;
 import ru.nsu.ccfit.zuev.osu.DifficultyAlgorithm;
 import ru.nsu.ccfit.zuev.osu.helper.StringTable;
-import ru.nsu.ccfit.zuev.osuplus.R;
 
 public class BeatmapSetItem {
     private final BeatmapItem[] beatmapItems;

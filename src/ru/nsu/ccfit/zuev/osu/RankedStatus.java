@@ -2,7 +2,6 @@ package ru.nsu.ccfit.zuev.osu;
 
 import androidx.annotation.StringRes;
 
-import ru.nsu.ccfit.zuev.osuplus.R;
 
 public enum RankedStatus {
 

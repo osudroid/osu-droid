@@ -1,6 +1,5 @@
 package com.edlplan.ui.fragment;
 
-import static com.edlplan.osudroidresource.R.*;
 
 import android.animation.Animator;
 

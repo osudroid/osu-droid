@@ -23,7 +23,6 @@ import ru.nsu.ccfit.zuev.osu.game.GameHelper;
 import ru.nsu.ccfit.zuev.osu.helper.StringTable;
 import ru.nsu.ccfit.zuev.osu.online.OnlineManager;
 import ru.nsu.ccfit.zuev.osu.scoring.BeatmapLeaderboardScoringMode;
-import ru.nsu.ccfit.zuev.osuplus.R;
 
 import java.io.File;
 import java.util.*;

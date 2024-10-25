@@ -30,7 +30,6 @@ import java.util.Date;
 
 import ru.nsu.ccfit.zuev.audio.serviceAudio.SaveServiceObject;
 import ru.nsu.ccfit.zuev.osu.helper.StringTable;
-import ru.nsu.ccfit.zuev.osuplus.R;
 
 /**
  * 应用程序异常类：用于捕获异常和提示错误信息

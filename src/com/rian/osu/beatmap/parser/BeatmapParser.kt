@@ -14,7 +14,6 @@ import okio.source
 import ru.nsu.ccfit.zuev.osu.ToastLogger
 import ru.nsu.ccfit.zuev.osu.helper.FileUtils
 import ru.nsu.ccfit.zuev.osu.helper.StringTable
-import ru.nsu.ccfit.zuev.osuplus.R
 import java.io.Closeable
 import java.io.File
 import java.io.IOException
