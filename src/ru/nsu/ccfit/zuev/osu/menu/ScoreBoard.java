@@ -25,7 +25,6 @@ import ru.nsu.ccfit.zuev.osu.online.OnlineManager;
 import ru.nsu.ccfit.zuev.osu.scoring.BeatmapLeaderboardScoringMode;
 import ru.nsu.ccfit.zuev.osuplus.R;
 
-import java.io.File;
 import java.util.*;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -205,11 +204,10 @@ public class ScoreBoard extends Entity implements ScrollDetector.IScrollDetector
             @Override
             public void run() {
 
-                File beatmapFile = new File(beatmapInfo.getFilename());
                 List<String> scores;
 
                 try {
-                    scores = OnlineManager.getInstance().getTop(beatmapFile, beatmapInfo.getMD5());
+                    scores = OnlineManager.getInstance().getTop(beatmapInfo.getMD5());
                 } catch (OnlineManager.OnlineManagerException e) {
                     Log.e("Scoreboard", "Failed to load scores from online.", e);
 

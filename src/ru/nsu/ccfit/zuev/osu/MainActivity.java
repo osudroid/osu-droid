@@ -119,7 +119,7 @@ public class MainActivity extends BaseGameActivity implements
         StringTable.setContext(this);
         ToastLogger.init(this);
         InputManager.setContext(this);
-        OnlineManager.getInstance().Init(getApplicationContext());
+        OnlineManager.getInstance().init();
         crashlytics.setUserId(Config.getOnlineDeviceID());
 
         final DisplayMetrics dm = new DisplayMetrics();
