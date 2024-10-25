@@ -22,7 +22,6 @@ import ru.nsu.ccfit.zuev.osu.*;
 import ru.nsu.ccfit.zuev.osu.game.GameHelper;
 import ru.nsu.ccfit.zuev.osu.helper.StringTable;
 import ru.nsu.ccfit.zuev.osu.online.OnlineManager;
-import ru.nsu.ccfit.zuev.osu.scoring.BeatmapLeaderboardScoringMode;
 import ru.nsu.ccfit.zuev.osuplus.R;
 
 import java.util.*;
@@ -190,12 +189,6 @@ public class ScoreBoard extends Entity implements ScrollDetector.IScrollDetector
         return sb.toString();
     }
 
-    private String formatPP(StringBuilder sb, int pp) {
-        sb.setLength(0);
-        sb.append(pp);
-        return sb.toString();
-    }
-
     private void initFromOnline(BeatmapInfo beatmapInfo) {
         loadingText.setText("Loading scores...");
 
@@ -222,7 +215,6 @@ public class ScoreBoard extends Entity implements ScrollDetector.IScrollDetector
 
                 loadingText.setText(OnlineManager.getInstance().getFailMessage());
 
-                boolean isPPScoringMode = Config.getBeatmapLeaderboardScoringMode() == BeatmapLeaderboardScoringMode.PP;
                 var username = OnlineManager.getInstance().getUsername();
                 var items = new ArrayList<ScoreBoardItem>(scores.size());
                 var sb = new StringBuilder();
@@ -233,42 +225,37 @@ public class ScoreBoard extends Entity implements ScrollDetector.IScrollDetector
 
                     var data = scores.get(i).split("\\s+");
 
-                    if (data.length < 9 || data.length > 10) {
+                    if (data.length < 8 || data.length > 9) {
                         continue;
                     }
 
-                    var isInLeaderboard = data.length == 9;
-                    var isPersonalBest = data.length == 10 || data[1].equals(username);
+                    var isInLeaderboard = data.length == 8;
+                    var isPersonalBest = data.length == 9 || data[1].equals(username);
 
                     var scoreID = Integer.parseInt(data[0]);
                     var playerName = isPersonalBest ? username : data[1];
                     var score = Integer.parseInt(data[2]);
-                    var pp = Float.parseFloat(data[3]);
-                    var combo = Integer.parseInt(data[4]);
-                    var mark = data[5];
-                    var mods = data[6];
-                    var accuracy = Float.parseFloat(data[7]);
-                    var avatarURL = data[8];
-                    var beatmapRank = isPersonalBest && !isInLeaderboard ? Integer.parseInt(data[9]) : (i + 1);
+                    var combo = Integer.parseInt(data[3]);
+                    var mark = data[4];
+                    var mods = data[5];
+                    var accuracy = Float.parseFloat(data[6]);
+                    var avatarURL = data[7];
+                    var beatmapRank = isPersonalBest && !isInLeaderboard ? Integer.parseInt(data[8]) : (i + 1);
 
                     sb.setLength(0);
-                    var scoreStr = isPPScoringMode ?
-                        // For display purposes, we round the pp.
-                        formatPP(sb, Math.round(pp)) :
-                        formatScore(sb, score);
+                    var scoreStr = formatScore(sb, score);
 
                     sb.setLength(0);
                     var titleStr = sb.append('#').append(beatmapRank).append(' ').append(playerName)
                             .append('\n')
-                            .append(StringTable.format(
-                                isPPScoringMode ? R.string.menu_performance : R.string.menu_score, scoreStr, combo))
+                            .append(StringTable.format(R.string.menu_score, scoreStr, combo))
                             .toString();
 
                     if (i < scores.size() - 1) {
                         String[] nextData = scores.get(i + 1).split("\\s+");
 
                         if (nextData.length == 9 || nextData.length == 10) {
-                            nextTotal = isPPScoringMode ? Float.parseFloat(nextData[3]) : Integer.parseInt(nextData[2]);
+                            nextTotal = Integer.parseInt(nextData[2]);
                         }
                     } else {
                         nextTotal = 0;
@@ -276,8 +263,7 @@ public class ScoreBoard extends Entity implements ScrollDetector.IScrollDetector
 
                     sb.setLength(0);
                     var modString = convertModString(sb, mods);
-                    var currentTotal = isPPScoringMode ? pp : score;
-                    var diffTotal = Math.round(currentTotal) - Math.round(nextTotal);
+                    var diffTotal = score - Math.round(nextTotal);
 
                     sb.setLength(0);
                     var accStr = sb.append(modString)

@@ -28,7 +28,6 @@ import ru.nsu.ccfit.zuev.osu.scoring.StatisticV2;
 public class OnlineManager {
     public static final String hostname = "droidpp.osudroid.moe";
     public static final String endpoint = "https://" + hostname + "/api/droid/";
-    public static final String updateEndpoint = endpoint + "update";
     public static final String defaultAvatarURL = "https://osudroid.moe/user/avatar/0.png";
     private static final String onlineVersion = "38";
 
@@ -161,14 +160,6 @@ public class OnlineManager {
         return true;
     }
 
-    boolean tryToLogIn() throws OnlineManagerException {
-        if (logIn(username, password) == false) {
-            stayOnline = false;
-            return false;
-        }
-        return true;
-    }
-
     public boolean sendRecord(String data, String mapMD5, String replayFilename) throws OnlineManagerException {
 
         Debug.i("Sending record...");
@@ -203,7 +194,7 @@ public class OnlineManager {
 
         post.addParam("uploadedFile", replayFile.getName(), replayFileBody);
 
-        ArrayList<String> response = sendRequest(post, endpoint + "submit.php");
+        ArrayList<String> response = sendRequest(post, endpoint + "submit");
 
         if (response == null) {
             return false;

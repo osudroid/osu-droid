@@ -625,8 +625,6 @@ public class StatisticV2 implements Serializable {
         builder.append(' ');
         builder.append(getUnstableRate());
         builder.append(' ');
-        builder.append(getAccuracy());
-        builder.append(' ');
         builder.append(Config.isRemoveSliderLock() ? '1' : '0');
         builder.append(' ');
         builder.append(mod.contains(GameMod.MOD_SCOREV2) ? '1' : '0');

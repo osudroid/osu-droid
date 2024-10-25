@@ -215,9 +215,6 @@
     <string name="opt_loadavatar_title">Load Avatar</string>
     <string name="opt_loadavatar_summary">Load avatar in online leaderboard</string>
 
-    <string name="opt_global_beatmap_leaderboard_scoring_mode_title">Global beatmap leaderboard scoring mode</string>
-    <string name="opt_global_beatmap_leaderboard_scoring_mode_summary">Choose the scoring mode for global beatmap leaderboards</string>
-
 
     <string name="opt_error_meter_display_title">Hit error meter</string>
     <string name="opt_error_meter_display_summary">Display hit error meter</string>
