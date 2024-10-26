@@ -41,6 +41,7 @@ import com.google.firebase.analytics.FirebaseAnalytics;
 import com.google.firebase.crashlytics.FirebaseCrashlytics;
 import com.reco1l.ibancho.LobbyAPI;
 import com.reco1l.osu.AccessibilityDetector;
+import com.reco1l.osu.DifficultyCalculationManager;
 import com.reco1l.osu.data.BeatmapInfo;
 import com.reco1l.osu.Execution;
 import com.reco1l.osu.multiplayer.Multiplayer;
@@ -285,6 +286,7 @@ public class MainActivity extends BaseGameActivity implements
             GlobalManager.getInstance().setLoadingProgress(50);
             checkNewSkins();
             Config.loadSkins();
+            DifficultyCalculationManager.checkForOutdatedStarRatings();
             loadBeatmapLibrary();
 
             SplashScene.INSTANCE.playWelcomeAnimation();

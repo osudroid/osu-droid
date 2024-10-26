@@ -198,6 +198,13 @@ abstract class DifficultyCalculator<TBeatmap : PlayableBeatmap, TObject : Diffic
      * @return The [PlayableBeatmap].
      */
     protected abstract fun createPlayableBeatmap(beatmap: Beatmap, parameters: DifficultyCalculationParameters?, scope: CoroutineScope?): TBeatmap
+
+    companion object {
+        /**
+         * The epoch time of the last change to the difficulty calculator, in milliseconds.
+         */
+        const val VERSION = 1729985821000
+    }
 }
 
 /**
@@ -209,7 +216,6 @@ private class ProgressiveCalculationBeatmap(
     baseBeatmap, baseBeatmap.mode, baseBeatmap.mods, baseBeatmap.customSpeedMultiplier, baseBeatmap.oldStatistics
 ) {
     override var maxCombo = 0
-        private set
 
     override val hitObjects = object : BeatmapHitObjects() {
         override fun add(obj: HitObject) {

@@ -2,12 +2,14 @@ package com.reco1l.osu
 
 import android.util.Log
 import android.widget.TextView
+import androidx.preference.PreferenceManager
 import com.edlplan.ui.fragment.BaseFragment
 import com.google.android.material.progressindicator.CircularProgressIndicator
 import com.reco1l.osu.data.BeatmapInfo
 import com.reco1l.osu.data.DatabaseManager
 import com.reco1l.toolkt.kotlin.fastForEach
 import com.rian.osu.beatmap.parser.BeatmapParser
+import com.rian.osu.difficulty.calculator.DifficultyCalculator
 import ru.nsu.ccfit.zuev.osu.GlobalManager
 import ru.nsu.ccfit.zuev.osu.LibraryManager
 import ru.nsu.ccfit.zuev.osu.ToastLogger
@@ -21,9 +23,29 @@ import kotlinx.coroutines.*
 object DifficultyCalculationManager {
 
 
+    private val mainActivity = GlobalManager.getInstance().mainActivity
+
+    private val preferences
+        get() = PreferenceManager.getDefaultSharedPreferences(mainActivity)
+
     private var job: Job? = null
 
     private var badge: LoadingBadgeFragment? = null
+
+
+    @JvmStatic
+    fun checkForOutdatedStarRatings() {
+        stopCalculation()
+
+        preferences.apply {
+            if (getLong("starRatingVersion", 0) >= DifficultyCalculator.VERSION) {
+                return
+            }
+
+            DatabaseManager.beatmapInfoTable.resetStarRatings()
+            edit().putLong("starRatingVersion", DifficultyCalculator.VERSION).apply()
+        }
+    }
 
 
     @JvmStatic
