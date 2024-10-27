@@ -108,11 +108,6 @@ data class ScoreInfo @JvmOverloads constructor(
      */
     val time: Long,
 
-    /**
-     * Whether the score is perfect.
-     */
-    val isPerfect: Boolean
-
 ) {
 
     /**
@@ -141,7 +136,6 @@ data class ScoreInfo @JvmOverloads constructor(
         put("misses", misses)
         put("accuracy", accuracy)
         put("time", time)
-        put("perfect", if (isPerfect) 1 else 0)
 
     }
 
@@ -161,7 +155,6 @@ data class ScoreInfo @JvmOverloads constructor(
         it.hit50 = hit50
         it.misses = misses
         it.time = time
-        it.isPerfect = isPerfect
 
     }
 
@@ -193,7 +186,6 @@ fun ScoreInfo(json: JSONObject): ScoreInfo {
         misses = json.getInt("misses"),
         accuracy = json.getDouble("accuracy").toFloat(),
         time = json.getLong("time"),
-        isPerfect = json.getInt("perfect") == 1
     )
 }
 

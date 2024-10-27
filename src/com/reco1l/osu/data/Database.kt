@@ -185,7 +185,6 @@ object DatabaseManager {
                                     misses = it.getInt(it.getColumnIndexOrThrow("misses")),
                                     accuracy = it.getFloat(it.getColumnIndexOrThrow("accuracy")),
                                     time = it.getLong(it.getColumnIndexOrThrow("time")),
-                                    isPerfect = it.getInt(it.getColumnIndexOrThrow("perfect")) == 1
 
                                 )
 

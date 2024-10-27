@@ -1853,11 +1853,9 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
                 break;
             case 100:
                 scoreName = registerHit(id, 100, endCombo, incrementCombo);
-                stat.setPerfect(false);
                 break;
             case 50:
                 scoreName = registerHit(id, 50, endCombo, incrementCombo);
-                stat.setPerfect(false);
                 break;
             case 30:
                 scoreName = "sliderpoint30";

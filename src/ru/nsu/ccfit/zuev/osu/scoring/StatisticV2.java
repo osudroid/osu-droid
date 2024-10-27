@@ -34,7 +34,6 @@ public class StatisticV2 implements Serializable {
     int misses = 0;
     int scoreMaxCombo = 0;
     long time = 0;
-    private boolean perfect = false;
     private int currentCombo = 0;
     private int scoreHash = 0;
     private int totalScore;
@@ -116,9 +115,6 @@ public class StatisticV2 implements Serializable {
         misses = Integer.parseInt(params[9]);
         if (params.length >= 11) {
             time = Long.parseLong(params[10]);
-        }
-        if (params.length >= 12) {
-            perfect = Integer.parseInt(params[11]) != 0;
         }
         if (params.length >= 13) {
             playerName = params[12];
@@ -219,7 +215,6 @@ public class StatisticV2 implements Serializable {
             default:
                 changeHp(-(5 + GameHelper.getHealthDrain()) / 100f);
                 misses++;
-                perfect = false;
                 if (currentCombo > scoreMaxCombo) {
                     scoreMaxCombo = currentCombo;
                 }
@@ -401,11 +396,7 @@ public class StatisticV2 implements Serializable {
     }
 
     public boolean isPerfect() {
-        return perfect;
-    }
-
-    public void setPerfect(boolean perfect) {
-        this.perfect = perfect;
+        return getAccuracy() == 1f;
     }
 
     public int getCombo() {

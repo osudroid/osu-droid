@@ -314,9 +314,8 @@ public class ScoringScene {
             };
         }
 
-        if (stat.getAccuracy() == 1 || stat.getScoreMaxCombo() == beatmapInfo.getMaxCombo() || stat.isPerfect()) {
-            final Sprite perfect = new Sprite(0, 0, ResourceManager
-                    .getInstance().getTexture("ranking-perfect"));
+        if (stat.isPerfect()) {
+            final Sprite perfect = new Sprite(0, 0, ResourceManager.getInstance().getTexture("ranking-perfect"));
             perfect.setPosition(0, accuracy.getY() + accuracy.getHeight() + 10);
             scene.attachChild(perfect);
         }

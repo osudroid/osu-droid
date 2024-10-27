@@ -153,9 +153,13 @@ public class Replay {
                 os.writeInt(stat.getMisses());
                 os.writeInt(stat.getTotalScoreWithMultiplier());
                 os.writeInt(stat.getScoreMaxCombo());
+
                 // TODO: remove accuracy writing in replay v6
                 os.writeFloat(stat.getAccuracy());
+
+                // TODO: remove perfect writing in replay v6
                 os.writeBoolean(stat.isPerfect());
+
                 os.writeObject(stat.getPlayerName());
                 os.writeObject(stat.getMod());
                 //Add in replay version 4
@@ -252,9 +256,13 @@ public class Replay {
                 stat.setMisses(os.readInt());
                 stat.setForcedScore(os.readInt());
                 stat.setScoreMaxCombo(os.readInt());
+
                 // TODO: The call below is for accuracy, but StatisticV2 does not use it anymore. Remove in replay v6.
                 os.readFloat();
-                stat.setPerfect(os.readBoolean());
+
+                // TODO: The call below is for perfect, but StatisticV2 does not use it anymore. Remove in replay v6.
+                os.readBoolean();
+
                 stat.setPlayerName((String) os.readObject());
                 stat.setMod((EnumSet<GameMod>) os.readObject());
             }
@@ -341,9 +349,13 @@ public class Replay {
                 stat.setMisses(os.readInt());
                 stat.setForcedScore(os.readInt());
                 stat.setScoreMaxCombo(os.readInt());
+
                 // TODO: The call below is for accuracy, but StatisticV2 does not use it anymore. Remove in replay v6.
                 os.readFloat();
-                stat.setPerfect(os.readBoolean());
+
+                // TODO: The call below is for perfect, but StatisticV2 does not use it anymore. Remove in replay v6.
+                os.readBoolean();
+
                 stat.setPlayerName((String) os.readObject());
                 stat.setMod((EnumSet<GameMod>) os.readObject());
             }
