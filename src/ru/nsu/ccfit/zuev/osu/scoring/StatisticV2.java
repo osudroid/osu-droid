@@ -888,7 +888,6 @@ public class StatisticV2 implements Serializable {
             hit100,
             hit50,
             misses,
-            getAccuracy(),
             time
         );
     }
