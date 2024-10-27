@@ -110,7 +110,7 @@ import ru.nsu.ccfit.zuev.osu.scoring.TouchType;
 import ru.nsu.ccfit.zuev.osuplus.BuildConfig;
 import ru.nsu.ccfit.zuev.osuplus.R;
 import ru.nsu.ccfit.zuev.skins.OsuSkin;
-import ru.nsu.ccfit.zuev.skins.SkinManager;
+import ru.nsu.ccfit.zuev.skins.BeatmapSkinManager;
 
 public class GameScene implements IUpdateHandler, GameObjectListener,
         IOnSceneTouchListener {
@@ -411,7 +411,7 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
         playableBeatmap = parsedBeatmap.createDroidPlayableBeatmap(convertedMods, modMenu.getChangeSpeed());
 
         // TODO skin manager
-        SkinManager.getInstance().loadBeatmapSkin(playableBeatmap.getBeatmapsetPath());
+        BeatmapSkinManager.getInstance().loadBeatmapSkin(playableBeatmap.getBeatmapsetPath());
 
         breakPeriods = new LinkedList<>();
         for (var period : playableBeatmap.getEvents().breaks) {
@@ -465,7 +465,7 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
         expiredObjects = new LinkedList<>();
         lastObjectId = -1;
 
-        sliderBorderColor = SkinManager.getInstance().getSliderColor();
+        sliderBorderColor = BeatmapSkinManager.getInstance().getSliderColor();
         if (playableBeatmap.getColors().sliderBorderColor != null) {
             sliderBorderColor = playableBeatmap.getColors().sliderBorderColor;
         }
@@ -1372,7 +1372,7 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
         if (shouldBePunished || (objects.isEmpty() && activeObjects.isEmpty() && leadOut > 2)) {
             scene = new ExtendedScene();
             engine.getCamera().setHUD(null);
-            SkinManager.setSkinEnabled(false);
+            BeatmapSkinManager.setSkinEnabled(false);
             GameObjectPool.getInstance().purge();
             timingControlPoints.clear();
             effectControlPoints.clear();
@@ -1565,7 +1565,7 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
 
     private void onExit() {
 
-        SkinManager.setSkinEnabled(false);
+        BeatmapSkinManager.setSkinEnabled(false);
         GameObjectPool.getInstance().purge();
         stopLoopingSamples();
         if (activeObjects != null) {

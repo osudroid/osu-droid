@@ -45,7 +45,7 @@ import ru.nsu.ccfit.zuev.osu.online.OnlineManager;
 import ru.nsu.ccfit.zuev.osuplus.BuildConfig;
 import ru.nsu.ccfit.zuev.skins.OsuSkin;
 import ru.nsu.ccfit.zuev.skins.SkinJsonReader;
-import ru.nsu.ccfit.zuev.skins.SkinManager;
+import ru.nsu.ccfit.zuev.skins.BeatmapSkinManager;
 import ru.nsu.ccfit.zuev.skins.StringSkinData;
 
 public class ResourceManager {
@@ -601,7 +601,7 @@ public class ResourceManager {
     public TextureRegion getTextureWithPrefix(StringSkinData prefix, String name)
     {
         var defaultName = prefix.getDefaultValue() + "-" + name;
-        if (SkinManager.isSkinEnabled() && customTextures.containsKey(defaultName)) {
+        if (BeatmapSkinManager.isSkinEnabled() && customTextures.containsKey(defaultName)) {
             return customTextures.get(defaultName);
         }
 
@@ -618,7 +618,7 @@ public class ResourceManager {
     }
 
     public TextureRegion getTexture(final String resname) {
-        if (SkinManager.isSkinEnabled() && customTextures.containsKey(resname)) {
+        if (BeatmapSkinManager.isSkinEnabled() && customTextures.containsKey(resname)) {
             return customTextures.get(resname);
         }
         if (!textures.containsKey(resname)) {
@@ -731,7 +731,7 @@ public class ResourceManager {
     }
 
     public BassSoundProvider getCustomSound(final String name, final boolean defaultToEmpty) {
-        if (SkinManager.isSkinEnabled() && customSounds.containsKey(name)) {
+        if (BeatmapSkinManager.isSkinEnabled() && customSounds.containsKey(name)) {
             return customSounds.get(name);
         }
 
@@ -739,7 +739,7 @@ public class ResourceManager {
     }
 
     public BassSoundProvider getCustomSound(final String resname, final int set) {
-        if (!SkinManager.isSkinEnabled()) {
+        if (!BeatmapSkinManager.isSkinEnabled()) {
             return getSound(resname);
         }
         if (set >= 2) {
@@ -861,7 +861,7 @@ public class ResourceManager {
 
     public int getFrameCount(final String texname) {
 
-        boolean isCustom = SkinManager.isSkinEnabled() && customFrameCount.containsKey(texname);
+        boolean isCustom = BeatmapSkinManager.isSkinEnabled() && customFrameCount.containsKey(texname);
 
         if (isCustom) {
             //noinspection DataFlowIssue
