@@ -96,19 +96,19 @@ object FollowPointConnection {
             fp.alpha = 0f
 
             fp.registerEntityModifier(
-                Modifiers.sequence(
-                    expire,
-                Modifiers.delay(fadeInTime - secPassed),
-                Modifiers.parallel(null,
-                    Modifiers.fadeIn(endFadeInTime),
-                    Modifiers.scale(endFadeInTime, 1.5f * scale, scale, null, Easing.OutQuad),
-                    Modifiers.move(endFadeInTime, pointStartX, pointEndX, pointStartY, pointEndY, null, Easing.OutQuad),
-                    Modifiers.sequence(null,
-                        Modifiers.delay(fadeOutTime - fadeInTime),
-                        Modifiers.fadeOut(endFadeInTime)
+                Modifiers.sequence(expire,
+                    Modifiers.delay(fadeInTime - secPassed),
+                    Modifiers.parallel(null,
+                        Modifiers.fadeIn(endFadeInTime),
+                        Modifiers.scale(endFadeInTime, 1.5f * scale, scale, null, Easing.OutQuad),
+                        Modifiers.move(endFadeInTime, pointStartX, pointEndX, pointStartY, pointEndY, null, Easing.OutQuad),
+                        Modifiers.sequence(null,
+                            Modifiers.delay(fadeOutTime - fadeInTime),
+                            Modifiers.fadeOut(endFadeInTime)
+                        )
                     )
                 )
-            ))
+            )
 
             scene.attachChild(fp, 0)
             d += SPACING
