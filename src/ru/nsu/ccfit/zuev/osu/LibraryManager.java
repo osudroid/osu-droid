@@ -13,7 +13,6 @@ import kotlin.io.FilesKt;
 import org.jetbrains.annotations.Nullable;
 import ru.nsu.ccfit.zuev.osu.helper.FileUtils;
 import ru.nsu.ccfit.zuev.osu.helper.StringTable;
-import ru.nsu.ccfit.zuev.osuplus.R;
 
 import java.io.*;
 import java.util.*;
@@ -50,7 +49,7 @@ public class LibraryManager {
         if (!directory.exists()) {
 
             if (!directory.mkdir()) {
-                ToastLogger.showText(StringTable.format(R.string.message_error_createdir, directory.getPath()), true);
+                ToastLogger.showText(StringTable.format(com.edlplan.osudroidresource.R.string.message_error_createdir, directory.getPath()), true);
                 return false;
             }
 

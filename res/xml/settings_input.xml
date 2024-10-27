@@ -2,7 +2,7 @@
 <androidx.preference.PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto">
 
-    <PreferenceCategory android:title="Playfield">
+    <PreferenceCategory android:title="@string/opt_category_playfield">
 
         <SeekBarPreference
             android:defaultValue="100"
@@ -27,7 +27,7 @@
 
     </PreferenceCategory>
 
-    <PreferenceCategory android:title="Gameplay">
+    <PreferenceCategory android:title="@string/opt_category_gameplay">
 
         <CheckBoxPreference
             android:defaultValue="false"
@@ -38,7 +38,7 @@
 
     </PreferenceCategory>
 
-    <PreferenceCategory android:title="Synchronization">
+    <PreferenceCategory android:title="@string/opt_category_synchronization">
 
         <CheckBoxPreference
             android:defaultValue="true"

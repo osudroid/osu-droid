@@ -30,7 +30,6 @@ import ru.nsu.ccfit.zuev.osu.game.GameScene;
 import ru.nsu.ccfit.zuev.osu.game.cursor.flashlight.FlashLightEntity;
 import ru.nsu.ccfit.zuev.osu.game.mods.GameMod;
 import ru.nsu.ccfit.zuev.osu.menu.ModMenu;
-import ru.nsu.ccfit.zuev.osuplus.R;
 
 public class Replay {
     public static EnumSet<GameMod> mod = EnumSet.noneOf(GameMod.class);
@@ -266,11 +265,11 @@ public class Replay {
 
         } catch (EOFException e) {
             Debug.e("O_o eof...");
-            ToastLogger.showTextId(R.string.replay_corrupted, true);
+            ToastLogger.showTextId(com.edlplan.osudroidresource.R.string.replay_corrupted, true);
             return false;
 
         } catch (Exception e) {
-            ToastLogger.showTextId(R.string.replay_corrupted, true);
+            ToastLogger.showTextId(com.edlplan.osudroidresource.R.string.replay_corrupted, true);
             Debug.e("Cannot load replay: " + e.getMessage(), e);
             return false;
         }
@@ -324,7 +323,7 @@ public class Replay {
                 Debug.i(beatmapsetName + " ::: " + mName);
                 Debug.i(beatmapName + " ::: " + mFile);
                 Debug.i(md5 + " ::: " + mmd5);
-                ToastLogger.showTextId(R.string.replay_wrongmap, true);
+                ToastLogger.showTextId(com.edlplan.osudroidresource.R.string.replay_wrongmap, true);
                 os.close();
                 return false;
             }
@@ -381,11 +380,11 @@ public class Replay {
         } catch (EOFException e) {
             Debug.e("O_o eof...");
             Debug.e(e);
-            ToastLogger.showTextId(R.string.replay_corrupted, true);
+            ToastLogger.showTextId(com.edlplan.osudroidresource.R.string.replay_corrupted, true);
             return false;
 
         } catch (Exception e) {
-            ToastLogger.showTextId(R.string.replay_corrupted, true);
+            ToastLogger.showTextId(com.edlplan.osudroidresource.R.string.replay_corrupted, true);
             Debug.e("Cannot load replay: " + e.getMessage(), e);
             return false;
         }

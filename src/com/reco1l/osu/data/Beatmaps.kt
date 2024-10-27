@@ -413,6 +413,9 @@ fun BeatmapInfo(data: Beatmap, lastModified: Long, calculateDifficulty: Boolean,
     @Update(onConflict = OnConflictStrategy.REPLACE)
     fun update(beatmapInfo: BeatmapInfo)
 
+    @Query("UPDATE BeatmapInfo SET droidStarRating = null, standardStarRating = null")
+    fun resetStarRatings()
+
     @Query("DELETE FROM BeatmapInfo WHERE setDirectory = :directory")
     fun deleteBeatmapSet(directory: String)
 

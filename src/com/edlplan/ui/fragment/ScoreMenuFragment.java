@@ -62,7 +62,7 @@ public class ScoreMenuFragment extends BaseFragment {
                     }
                     OsuDroidReplayPack.packTo(file, scoreInfo);
 
-                    Snackbar.make(v, String.format(getResources().getString(R.string.frg_score_menu_export_succeed), file.getAbsolutePath()), 2750).setAction("Share", new View.OnClickListener() {
+                    Snackbar.make(v, String.format(getResources().getString(com.edlplan.osudroidresource.R.string.frg_score_menu_export_succeed), file.getAbsolutePath()), 2750).setAction("Share", new View.OnClickListener() {
                         @Override
                         public void onClick(View v) {
                             Intent intent = new Intent();
@@ -77,7 +77,7 @@ public class ScoreMenuFragment extends BaseFragment {
                     }).show();
                 } catch (Exception e) {
                     e.printStackTrace();
-                    Toast.makeText(v.getContext(), R.string.frg_score_menu_export_failed, Toast.LENGTH_SHORT).show();
+                    Toast.makeText(v.getContext(), com.edlplan.osudroidresource.R.string.frg_score_menu_export_failed, Toast.LENGTH_SHORT).show();
                 }
             }
         });
@@ -95,7 +95,7 @@ public class ScoreMenuFragment extends BaseFragment {
                         var scoreInfo = scoreInfoTable.getScore(scoreId);
 
                         if (scoreInfo != null && scoreInfoTable.deleteScore(scoreId) != 0) {
-                            Snackbar.make(v, R.string.menu_deletescore_delete_success, 1500).show();
+                            Snackbar.make(v, com.edlplan.osudroidresource.R.string.menu_deletescore_delete_success, 1500).show();
                             GlobalManager.getInstance().getSongMenu().reloadScoreboard();
 
                             new File(scoreInfo.getReplayPath()).delete();

@@ -1,5 +1,6 @@
 package com.reco1l.osu.ui.entity
 
+import com.edlplan.osudroidresource.R.*
 import com.reco1l.andengine.sprite.*
 import com.reco1l.osu.async
 import com.reco1l.osu.multiplayer.LobbyScene
@@ -15,7 +16,6 @@ import ru.nsu.ccfit.zuev.osu.MainScene.MusicOption
 import ru.nsu.ccfit.zuev.osu.ToastLogger
 import ru.nsu.ccfit.zuev.osu.helper.StringTable
 import ru.nsu.ccfit.zuev.osu.menu.LoadingScreen
-import ru.nsu.ccfit.zuev.osuplus.R
 import ru.nsu.ccfit.zuev.osu.GlobalManager.getInstance as getGlobal
 import ru.nsu.ccfit.zuev.osu.ResourceManager.getInstance as getResources
 import ru.nsu.ccfit.zuev.osu.online.OnlineManager.getInstance as getOnline
@@ -125,7 +125,7 @@ class MainMenu(val main: MainScene) {
                 }
 
                 if (!getOnline().isStayOnline) {
-                    ToastLogger.showText(StringTable.format(R.string.multiplayer_not_online), true)
+                    ToastLogger.showText(StringTable.format(string.multiplayer_not_online), true)
                     return true
                 }
 

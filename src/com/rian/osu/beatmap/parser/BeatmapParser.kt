@@ -1,6 +1,7 @@
 package com.rian.osu.beatmap.parser
 
 import android.util.Log
+import com.edlplan.osudroidresource.R.*
 import com.reco1l.toolkt.kotlin.runSafe
 import com.rian.osu.GameMode
 import com.rian.osu.beatmap.Beatmap
@@ -13,7 +14,6 @@ import okio.source
 import ru.nsu.ccfit.zuev.osu.ToastLogger
 import ru.nsu.ccfit.zuev.osu.helper.FileUtils
 import ru.nsu.ccfit.zuev.osu.helper.StringTable
-import ru.nsu.ccfit.zuev.osuplus.R
 import java.io.Closeable
 import java.io.File
 import java.io.IOException
@@ -121,7 +121,7 @@ class BeatmapParser : Closeable {
 
         if (source == null && !openFile()) {
             ToastLogger.showText(
-                StringTable.format(R.string.beatmap_parser_cannot_open_file, file.nameWithoutExtension),
+                StringTable.format(string.beatmap_parser_cannot_open_file, file.nameWithoutExtension),
                 true
             )
 
