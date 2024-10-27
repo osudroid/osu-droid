@@ -183,9 +183,7 @@ object DatabaseManager {
                                     hit100 = it.getInt(it.getColumnIndexOrThrow("h100")),
                                     hit50 = it.getInt(it.getColumnIndexOrThrow("h50")),
                                     misses = it.getInt(it.getColumnIndexOrThrow("misses")),
-                                    accuracy = it.getFloat(it.getColumnIndexOrThrow("accuracy")),
                                     time = it.getLong(it.getColumnIndexOrThrow("time")),
-
                                 )
 
                                 pendingScores--
