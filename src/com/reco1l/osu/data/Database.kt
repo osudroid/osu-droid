@@ -73,7 +73,7 @@ object DatabaseManager {
             .allowMainThreadQueries()
             .build()
 
-        loadLegacyMigrations(context)
+//        loadLegacyMigrations(context)
     }
 
     @Suppress("UNCHECKED_CAST")
@@ -175,8 +175,6 @@ object DatabaseManager {
                                     pendingScores--
                                     continue
                                 }
-
-                                val beatmapPath = FilenameUtils.normalizeNoEndSeparator(it.getString(it.getColumnIndexOrThrow("filename")))
 
                                 scoreInfos += ScoreInfo(
                                     id = id,
