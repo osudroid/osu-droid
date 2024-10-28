@@ -99,7 +99,7 @@ public class OsuDroidReplayPack {
                     throw new IOException("Failed to load replay");
                 }
 
-                replayData.put("md5", replay.getMd5());
+                replayData.put("beatmapMD5", replay.getMd5());
             }
         }
 

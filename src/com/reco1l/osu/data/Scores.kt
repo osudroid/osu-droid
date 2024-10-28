@@ -124,7 +124,7 @@ data class ScoreInfo @JvmOverloads constructor(
         put("id", id)
         put("playername", playerName)
         put("replayfile", replayFilename)
-        put("md5", beatmapMD5)
+        put("beatmapMD5", beatmapMD5)
         put("mod", mods)
         put("score", score)
         put("combo", maxCombo)
@@ -165,7 +165,7 @@ data class ScoreInfo @JvmOverloads constructor(
 fun ScoreInfo(json: JSONObject) =
     ScoreInfo(
 
-        beatmapMD5 = json.getString("md5"),
+        beatmapMD5 = json.getString("beatmapMD5"),
         replayFilename = FilenameUtils.getName(json.getString("replayfile")),
 
         // The keys don't correspond to the table columns in order to keep compatibility with the old replays.
