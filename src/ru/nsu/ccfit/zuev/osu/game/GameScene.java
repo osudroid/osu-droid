@@ -915,7 +915,6 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
 
         if (!Config.isHideInGameUI() && !Config.isHideReplayMarquee()) {
             replayText = new ChangeableText(0, 0, ResourceManager.getInstance().getFont("font"), "", 1000);
-            replayText.setVisible(false);
             replayText.setPosition(0, 140);
             replayText.setAlpha(0.7f);
             hud.attachChild(replayText, 0);
