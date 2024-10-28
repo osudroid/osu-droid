@@ -50,7 +50,7 @@ import ru.nsu.ccfit.zuev.osu.ToastLogger
 import ru.nsu.ccfit.zuev.osu.helper.StringTable
 import ru.nsu.ccfit.zuev.osu.online.OnlineManager
 import ru.nsu.ccfit.zuev.osuplus.R
-import ru.nsu.ccfit.zuev.skins.SkinManager
+import ru.nsu.ccfit.zuev.skins.BeatmapSkinManager
 import java.io.File
 
 
@@ -278,7 +278,7 @@ class SettingsFragment : com.edlplan.ui.fragment.SettingsFragment() {
 
                 async {
                     GlobalManager.getInstance().skinNow = Config.getSkinPath()
-                    SkinManager.getInstance().clearSkin()
+                    BeatmapSkinManager.getInstance().clearSkin()
                     ResourceManager.getInstance().loadSkin(newValue.toString())
                     GlobalManager.getInstance().engine.textureManager.reloadTextures()
 

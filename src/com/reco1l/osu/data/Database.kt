@@ -8,6 +8,7 @@ import org.apache.commons.io.FilenameUtils
 import org.json.JSONObject
 import ru.nsu.ccfit.zuev.osu.*
 import ru.nsu.ccfit.zuev.osu.helper.sql.DBOpenHelper
+import ru.nsu.ccfit.zuev.osuplus.BuildConfig
 import java.io.File
 import java.io.IOException
 import java.io.ObjectInputStream
@@ -63,7 +64,7 @@ object DatabaseManager {
     fun load(context: Context) {
 
         // Be careful when changing the database name, it may cause data loss.
-        database = Room.databaseBuilder(context, DroidDatabase::class.java, "${Config.getCorePath()}databases/room.db")
+        database = Room.databaseBuilder(context, DroidDatabase::class.java, "${Config.getCorePath()}databases/room-${BuildConfig.BUILD_TYPE}.db")
             // Is preferable to support migrations, otherwise destructive migration will run forcing
             // tables to recreate (in case of beatmaps table it'll re-import all beatmaps).
             // See https://developer.android.com/training/data-storage/room/migrating-db-versions.
@@ -183,10 +184,7 @@ object DatabaseManager {
                                     hit100 = it.getInt(it.getColumnIndexOrThrow("h100")),
                                     hit50 = it.getInt(it.getColumnIndexOrThrow("h50")),
                                     misses = it.getInt(it.getColumnIndexOrThrow("misses")),
-                                    accuracy = it.getFloat(it.getColumnIndexOrThrow("accuracy")),
                                     time = it.getLong(it.getColumnIndexOrThrow("time")),
-                                    isPerfect = it.getInt(it.getColumnIndexOrThrow("perfect")) == 1
-
                                 )
 
                                 pendingScores--

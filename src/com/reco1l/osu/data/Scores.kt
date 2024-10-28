@@ -98,20 +98,9 @@ data class ScoreInfo @JvmOverloads constructor(
     val misses: Int,
 
     /**
-     * The accuracy.
-     */
-    // TODO: remove in next database version
-    val accuracy: Float,
-
-    /**
      * The score date.
      */
     val time: Long,
-
-    /**
-     * Whether the score is perfect.
-     */
-    val isPerfect: Boolean
 
 ) {
 
@@ -120,6 +109,18 @@ data class ScoreInfo @JvmOverloads constructor(
      */
     val replayPath
         get() = "${Config.getScorePath()}/$replayFilename"
+
+    /**
+     * The number of notes hit.
+     */
+    val notesHit
+        get() = hit300 + hit100 + hit50 + misses
+
+    /**
+     * The accuracy.
+     */
+    val accuracy
+        get() = if (notesHit == 0) 1f else (hit300 * 6f + hit100 * 2f + hit50) / (6f * notesHit)
 
 
     fun toJSON() = JSONObject().apply {
@@ -141,7 +142,6 @@ data class ScoreInfo @JvmOverloads constructor(
         put("misses", misses)
         put("accuracy", accuracy)
         put("time", time)
-        put("perfect", if (isPerfect) 1 else 0)
 
     }
 
@@ -161,7 +161,6 @@ data class ScoreInfo @JvmOverloads constructor(
         it.hit50 = hit50
         it.misses = misses
         it.time = time
-        it.isPerfect = isPerfect
 
     }
 
@@ -191,9 +190,7 @@ fun ScoreInfo(json: JSONObject): ScoreInfo {
         hit100 = json.getInt("h100"),
         hit50 = json.getInt("h50"),
         misses = json.getInt("misses"),
-        accuracy = json.getDouble("accuracy").toFloat(),
         time = json.getLong("time"),
-        isPerfect = json.getInt("perfect") == 1
     )
 }
 

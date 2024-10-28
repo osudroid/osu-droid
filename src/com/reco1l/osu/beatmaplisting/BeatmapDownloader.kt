@@ -10,10 +10,7 @@ import com.reco1l.osu.multiplayer.Multiplayer
 import com.reco1l.osu.multiplayer.RoomScene
 import com.reco1l.osu.ui.DownloadFragment
 import com.reco1l.toolkt.kotlin.async
-import com.reco1l.toolkt.kotlin.decodeAsURL
-import com.reco1l.toolkt.kotlin.replaceAlphanumeric
 import net.lingala.zip4j.ZipFile
-import org.apache.commons.io.FilenameUtils
 import ru.nsu.ccfit.zuev.osu.Config
 import ru.nsu.ccfit.zuev.osu.GlobalManager
 import ru.nsu.ccfit.zuev.osu.ToastLogger
@@ -41,18 +38,9 @@ object BeatmapDownloader : IDownloaderObserver {
         }
         isDownloading = true
 
-        val name = suggestedFilename.decodeAsURL()
-        val filename = name.replaceAlphanumeric(with = "_")
+        currentFilename = suggestedFilename
 
-        if (!filename.endsWith(".osz")) {
-            ToastLogger.showText("Failed to start download. Invalid file extension", true)
-            return
-        }
-
-        currentFilename = FilenameUtils.removeExtension(filename)
-
-        val directory = context.getExternalFilesDir(DIRECTORY_DOWNLOADS)
-        val file = directory?.resolve("$filename.osz")!!
+        val file = context.getExternalFilesDir(DIRECTORY_DOWNLOADS)!!.resolve("$suggestedFilename.osz")
 
         val downloader = FileRequest(file, url)
         downloader.buildRequest { header("User-Agent", "Chrome/Android") }

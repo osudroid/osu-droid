@@ -1028,22 +1028,18 @@ public class SongMenu implements IUpdateHandler, MenuItemListener,
             beatmapLengthText.setColor(46 / 255f, 139 / 255f, 87 / 255f);
         }
 
-        float bpm_min = beatmapInfo.getBpmMin() * totalSpeedMultiplier;
-        float bpm_max = beatmapInfo.getBpmMax() * totalSpeedMultiplier;
+        int minBpm = Math.round(beatmapInfo.getBpmMin() * totalSpeedMultiplier);
+        int maxBpm = Math.round(beatmapInfo.getBpmMax() * totalSpeedMultiplier);
+        int commonBpm = Math.round(beatmapInfo.getMostCommonBPM() * totalSpeedMultiplier);
         long length = (long) (beatmapInfo.getLength() / totalSpeedMultiplier);
 
-        @SuppressLint("SimpleDateFormat") SimpleDateFormat sdf = new SimpleDateFormat("mm:ss");
+        @SuppressLint("SimpleDateFormat")
+        SimpleDateFormat sdf = new SimpleDateFormat(length > 3600 * 1000 ? "HH:mm:ss" : "mm:ss");
         sdf.setTimeZone(TimeZone.getTimeZone("GMT+0"));
         String binfoStr = String.format(StringTable.get(com.edlplan.osudroidresource.R.string.binfoStr1), sdf.format(length),
-                (bpm_min == bpm_max ? GameHelper.Round(bpm_min, 1) : GameHelper.Round(bpm_min, 1) + "-" + GameHelper.Round(bpm_max, 1)),
+                (minBpm == maxBpm ? commonBpm : minBpm + "-" + maxBpm + " (" + commonBpm + ")"),
                 beatmapInfo.getMaxCombo());
-        if (length > 3600 * 1000) {
-            sdf = new SimpleDateFormat("HH:mm:ss");
-            sdf.setTimeZone(TimeZone.getTimeZone("GMT+0"));
-            binfoStr = String.format(StringTable.get(com.edlplan.osudroidresource.R.string.binfoStr1), sdf.format(length),
-                    (bpm_min == bpm_max ? GameHelper.Round(bpm_min, 1) : GameHelper.Round(bpm_min, 1) + "-" + GameHelper.Round(bpm_max, 1)),
-                    beatmapInfo.getMaxCombo());
-        }
+
         beatmapLengthText.setText(binfoStr);
 
         String dimensionString =

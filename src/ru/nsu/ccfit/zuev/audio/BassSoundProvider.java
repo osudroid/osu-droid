@@ -11,6 +11,8 @@ import com.un4seen.bass.BASS;
  */
 public class BassSoundProvider {
 
+    public static final BassSoundProvider EMPTY = new BassSoundProvider();
+
     private static final int SIMULTANEOUS_PLAYBACKS = 8;
 
     private int sample = 0;
