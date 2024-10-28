@@ -113,7 +113,7 @@ for preventing accidental touches.
   - To use in `skin.json`, add the following entry:
     ```json
     {
-      "Utils": {
+      "Slider": {
         "sliderBallFlip": true
       }
     }

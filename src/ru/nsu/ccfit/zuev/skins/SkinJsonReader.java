@@ -106,6 +106,7 @@ public class SkinJsonReader extends SkinReader {
         skin.sliderHintWidth.setFromJson(data);
         skin.sliderHintShowMinLength.setFromJson(data);
         skin.sliderHintAlpha.setFromJson(data);
+        skin.sliderBallFlip.setFromJson(data);
         skin.sliderFollowComboColor.setFromJson(data);
         skin.sliderHintEnable.setFromJson(data);
         skin.sliderBodyColor.setFromJson(data);
@@ -122,7 +123,6 @@ public class SkinJsonReader extends SkinReader {
         skin.comboTextScale.setFromJson(data);
         skin.animationFramerate.setFromJson(data);
         skin.layeredHitSounds.setFromJson(data);
-        skin.sliderBallFlip.setFromJson(data);
         skin.spinnerFrequencyModulate.setFromJson(data);
     }
 
