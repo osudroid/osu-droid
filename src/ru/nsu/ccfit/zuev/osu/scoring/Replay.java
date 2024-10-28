@@ -206,9 +206,9 @@ public class Replay {
             } catch (final IOException e) {
                 Debug.e("IOException: " + e.getMessage(), e);
             }
-        }
 
-        isSaving = false;
+            isSaving = false;
+        }
     }
 
     public boolean load(final String replayFilePath, boolean withGameplayData) {
