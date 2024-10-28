@@ -121,9 +121,11 @@ fun convertToJson(ini: IniReader) = JSONObject().apply {
             put("scaleWhenHold", false)
         }
 
-        // In osu!droid's default skin, these buttons are cut in the bottom, which makes them smaller.
+        // In osu!droid's default skin, these buttons are cut in the bottom, which makes them smaller
+        // (see https://github.com/osudroid/osu-droid/commit/7bc5040ce426760c2f3ea04b7209e4ded8e78524).
         // To account for this behavior in osu! skins, we need to offset by them 16 pixels downwards.
-        // A negative value is used as the origin and anchor of these buttons are in the bottom-left corner.
+        // A negative value is used as the origin and anchor of these buttons are in the bottom-left
+        // corner (see SkinLayout).
         putObject("ModsButton") {
             put("y", -16)
         }
