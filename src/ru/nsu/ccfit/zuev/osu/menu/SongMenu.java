@@ -652,33 +652,38 @@ public class SongMenu implements IUpdateHandler, MenuItemListener,
         randomMap.setScale(1.5f);
         difficultySwitcher.setScale(1.5f);
 
-        if (OsuSkin.get().isUseNewLayout()) {
-            if (layoutBackButton != null) {
-                layoutBackButton.apply(backButton);
-            }
-            if (layoutMods != null && modSelection != null) {
-                layoutMods.apply(modSelection, backButton);
-            }
-            if (layoutOptions != null) {
-                layoutOptions.apply(optionSelection, modSelection != null ? modSelection : backButton);
-            }
-            if (layoutRandom != null) {
-                layoutRandom.apply(randomMap, optionSelection);
-            }
-            if (layoutDifficultySwitcher != null) {
-                layoutDifficultySwitcher.apply(difficultySwitcher, randomMap);
-            }
+        var isNewLayout = OsuSkin.get().isUseNewLayout();
+
+        if (isNewLayout && layoutBackButton != null) {
+            layoutBackButton.apply(backButton);
         } else {
             backButton.setPosition(0, Config.getRES_HEIGHT() - backButton.getHeightScaled());
+        }
 
-            if (modSelection != null) {
-                modSelection.setPosition(backButton.getX() + backButton.getWidthScaled(), Config.getRES_HEIGHT() - modSelection.getHeightScaled());
-                optionSelection.setPosition(modSelection.getX() + modSelection.getWidthScaled(), Config.getRES_HEIGHT() - optionSelection.getHeightScaled());
+        if (modSelection != null) {
+            if (isNewLayout && layoutMods != null) {
+                layoutMods.apply(modSelection, backButton);
             } else {
-                optionSelection.setPosition(backButton.getX() + backButton.getWidthScaled(), Config.getRES_HEIGHT() - optionSelection.getHeightScaled());
+                modSelection.setPosition(backButton.getX() + backButton.getWidthScaled(), Config.getRES_HEIGHT() - modSelection.getHeightScaled());
             }
+        }
 
+        if (isNewLayout && layoutOptions != null) {
+            layoutOptions.apply(optionSelection, modSelection != null ? modSelection : backButton);
+        } else {
+            var prevButton = modSelection != null ? modSelection : backButton;
+            optionSelection.setPosition(prevButton.getX() + prevButton.getWidthScaled(), Config.getRES_HEIGHT() - optionSelection.getHeightScaled());
+        }
+
+        if (isNewLayout && layoutRandom != null) {
+            layoutRandom.apply(randomMap, optionSelection);
+        } else {
             randomMap.setPosition(optionSelection.getX() + optionSelection.getWidthScaled(), Config.getRES_HEIGHT() - randomMap.getHeightScaled());
+        }
+
+        if (isNewLayout && layoutDifficultySwitcher != null) {
+            layoutDifficultySwitcher.apply(difficultySwitcher, randomMap);
+        } else {
             difficultySwitcher.setPosition(randomMap.getX() + randomMap.getWidthScaled(), Config.getRES_HEIGHT() - difficultySwitcher.getHeightScaled());
         }
 
