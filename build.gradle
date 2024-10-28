@@ -184,7 +184,7 @@ dependencies {
     implementation 'net.lingala.zip4j:zip4j:2.11.5'
 
     // Localizations
-    implementation 'com.github.osudroid:language-pack:1.0.3'
+    implementation 'com.github.osudroid:language-pack:1.0.4'
 
     implementation 'com.github.EdrowsLuo.EdlGameFramework:EdlJavaExt:d91c53fcff'
     implementation 'com.github.EdrowsLuo.EdlGameFramework:EdlOsbSupport:d91c53fcff'
