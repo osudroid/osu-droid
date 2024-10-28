@@ -318,13 +318,6 @@ public class ScoringScene {
             perfect.setPosition(0, accuracy.getY() + accuracy.getHeight() + 10);
             scene.attachChild(perfect);
         }
-        if (beatmap != null && retryBtn != null) {
-            retryBtn.setPosition(Config.getRES_WIDTH() - backBtn.getWidth() - 10, backBtn.getY() - retryBtn.getHeight() - 10);
-            scene.attachChild(retryBtn);
-        } else if (replayPath != null && replayBtn != null) {
-            replayBtn.setPosition(Config.getRES_WIDTH() - backBtn.getWidth() - 10, backBtn.getY() - replayBtn.getHeight() - 10);
-            scene.attachChild(replayBtn);
-        }
 
         scene.setTouchAreaBindingEnabled(true);
         if (beatmap != null && retryBtn != null) {
@@ -334,6 +327,14 @@ public class ScoringScene {
         }
         scene.registerTouchArea(backBtn);
         scene.attachChild(mark);
+
+        if (beatmap != null && retryBtn != null) {
+            retryBtn.setPosition(Config.getRES_WIDTH() - backBtn.getWidth() - 10, backBtn.getY() - retryBtn.getHeight() - 10);
+            scene.attachChild(retryBtn);
+        } else if (replayPath != null && replayBtn != null) {
+            replayBtn.setPosition(Config.getRES_WIDTH() - backBtn.getWidth() - 10, backBtn.getY() - replayBtn.getHeight() - 10);
+            scene.attachChild(replayBtn);
+        }
 
         var modX = mark.getX() - 30;
         var modY = mark.getY() + mark.getHeight() * 2 / 3;
