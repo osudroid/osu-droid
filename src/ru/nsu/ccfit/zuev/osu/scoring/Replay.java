@@ -9,7 +9,6 @@ import org.anddev.andengine.util.Debug;
 import java.io.EOFException;
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -127,25 +126,17 @@ public class Replay {
             Debug.i("Replay contains " + cursorMoves.get(i).size + " moves for finger " + i);
         Debug.i("Skipped " + pointsSkipped + " points");
         Debug.i("Replay contains " + objectData.length + " objects");
-        ObjectOutputStream os;
-        ZipOutputStream zip;
+
+        ObjectOutputStream os = null;
+        ZipOutputStream zip = null;
+
         try {
             zip = new ZipOutputStream(new FileOutputStream(filename));
             zip.setMethod(ZipOutputStream.DEFLATED);
             zip.setLevel(Deflater.DEFAULT_COMPRESSION);
             zip.putNextEntry(new ZipEntry("data"));
-            os = new ObjectOutputStream(zip);
-        } catch (final FileNotFoundException e) {
-            Debug.e("File not found " + filename, e);
-            isSaving = false;
-            return;
-        } catch (final IOException e) {
-            Debug.e("IOException: " + e.getMessage(), e);
-            isSaving = false;
-            return;
-        }
 
-        try {
+            os = new ObjectOutputStream(zip);
             os.writeObject(new ReplayVersion());
             os.writeObject(beatmapsetName);
             os.writeObject(beatmapName);
@@ -183,7 +174,7 @@ public class Replay {
             for (ReplayObjectData data : objectData) {
                 if (data == null) data = new ReplayObjectData();
                 os.writeShort(data.accuracy);
-                if (data.tickSet == null || data.tickSet.length() == 0) {
+                if (data.tickSet == null || data.tickSet.isEmpty()) {
                     os.writeByte(0);
                 } else {
                     byte[] bytes = new byte[(data.tickSet.length() + 7) / 8];
@@ -199,17 +190,22 @@ public class Replay {
             }
         } catch (final IOException e) {
             Debug.e("IOException: " + e.getMessage(), e);
-            isSaving = false;
-            return;
-        }
+        } finally {
+            try {
+                if (os != null) {
+                    os.flush();
+                    os.close();
+                }
 
-        try {
-            os.flush();
-            zip.flush();
-            zip.closeEntry();
-            zip.flush();
-        } catch (final IOException e) {
-            Debug.e("IOException: " + e.getMessage(), e);
+                if (zip != null) {
+                    zip.flush();
+                    zip.closeEntry();
+                    zip.flush();
+                    zip.close();
+                }
+            } catch (final IOException e) {
+                Debug.e("IOException: " + e.getMessage(), e);
+            }
         }
 
         isSaving = false;
