@@ -244,7 +244,7 @@ were reduced by 20% and clap hitsounds' volume were reduced by 15%
 - Fixed background music volume not ramping up upon leaving song selection menu
 - Fixed object starting point potentially being screwed up
 - Fixed object approach rate being rounded up (making it off by at most 0.5ms in real time)
-- Fixed memory leak when reading replays
+- Fixed memory leak when reading and saving replays
 - Fixed misleading metronome effect setting description, denoting that it is only applied to the NightCore mod
 - Fixed crash when attempting to restore game state after the system kills the game due to low memory
 - Fixed cancel button in beatmap downloader not working properly
