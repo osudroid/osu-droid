@@ -1509,6 +1509,11 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
     }
 
     private void tryHitActiveObjects(float deltaTime) {
+        // When replaying, judgements are processed when updating the objects' state.
+        if (replaying) {
+            return;
+        }
+
         for (int i = 0, size = activeObjects.size(); i < size; i++) {
             activeObjects.get(i).tryHit(deltaTime);
         }
