@@ -20,18 +20,34 @@ class VideoSprite(source: String, private val engine: Engine) : Sprite(0f, 0f, V
     private val texture = textureRegion.texture as VideoTexture
 
 
+    private var isMaliGPU: Boolean? = null
+
+
     init {
         engine.textureManager.loadTexture(texture)
     }
 
 
     override fun onInitDraw(pGL: GL10) {
+
+        if (isMaliGPU == null) {
+            isMaliGPU = pGL.glGetString(GL10.GL_RENDERER).contains("Mali", true)
+        }
+
         super.onInitDraw(pGL)
+
+        // Apparently there is either a bug or unintended behavior in Mali GPUs' OpenGL ES implementation.
+        // Causes the wrong texture to be displayed when GL_TEXTURE_2D is enabled before enabling GL_TEXTURE_EXTERNAL_OES.
+        if (isMaliGPU!!) {
+            GLHelper.disableTextures(pGL)
+        }
+
         pGL.glEnable(GL_TEXTURE_EXTERNAL_OES)
     }
 
     override fun drawVertices(gl: GL10, camera: Camera) {
         super.drawVertices(gl, camera)
+
         gl.glDisable(GL_TEXTURE_EXTERNAL_OES)
     }
 
