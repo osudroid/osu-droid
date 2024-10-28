@@ -86,14 +86,9 @@ public class StatisticV2 implements Serializable {
     private float modScoreMultiplier = 1;
 
     /**
-     * The directory of the beatmap set.
+     * The MD5 hash of the beatmap.
      */
-    private String beatmapSetDirectory = "";
-
-    /**
-     * The filename of the beatmap.
-     */
-    private String beatmapFilename = "";
+    private String beatmapMD5 = "";
 
 
     public StatisticV2() {}
@@ -580,9 +575,8 @@ public class StatisticV2 implements Serializable {
         totalScore = forcedScore;
     }
 
-    public void setBeatmap(String beatmapSetDirectory, String beatmapFilename) {
-        this.beatmapSetDirectory = beatmapSetDirectory;
-        this.beatmapFilename = beatmapFilename;
+    public void setBeatmapMD5(String beatmapMD5) {
+        this.beatmapMD5 = beatmapMD5;
     }
 
     public final boolean isScoreValid() {
@@ -874,8 +868,7 @@ public class StatisticV2 implements Serializable {
      */
     public ScoreInfo toScoreInfo() {
         return new ScoreInfo(
-            beatmapFilename,
-            beatmapSetDirectory,
+            beatmapMD5,
             playerName,
             replayFilename,
             getModString(),

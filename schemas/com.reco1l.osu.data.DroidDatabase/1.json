@@ -2,7 +2,7 @@
   "formatVersion": 1,
   "database": {
     "version": 1,
-    "identityHash": "1f4b2f2358a9efc2bfef64bd9d0e3a33",
+    "identityHash": "4c8cbbe0214619c365058bec4f53da6a",
     "entities": [
       {
         "tableName": "BeatmapInfo",
@@ -274,7 +274,7 @@
       },
       {
         "tableName": "ScoreInfo",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `beatmapFilename` TEXT NOT NULL, `beatmapSetDirectory` TEXT NOT NULL, `playerName` TEXT NOT NULL, `replayFilename` TEXT NOT NULL, `mods` TEXT NOT NULL, `score` INTEGER NOT NULL, `maxCombo` INTEGER NOT NULL, `mark` TEXT NOT NULL, `hit300k` INTEGER NOT NULL, `hit300` INTEGER NOT NULL, `hit100k` INTEGER NOT NULL, `hit100` INTEGER NOT NULL, `hit50` INTEGER NOT NULL, `misses` INTEGER NOT NULL, `time` INTEGER NOT NULL)",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `beatmapMD5` TEXT NOT NULL, `playerName` TEXT NOT NULL, `replayFilename` TEXT NOT NULL, `mods` TEXT NOT NULL, `score` INTEGER NOT NULL, `maxCombo` INTEGER NOT NULL, `mark` TEXT NOT NULL, `hit300k` INTEGER NOT NULL, `hit300` INTEGER NOT NULL, `hit100k` INTEGER NOT NULL, `hit100` INTEGER NOT NULL, `hit50` INTEGER NOT NULL, `misses` INTEGER NOT NULL, `time` INTEGER NOT NULL)",
         "fields": [
           {
             "fieldPath": "id",
@@ -283,14 +283,8 @@
             "notNull": true
           },
           {
-            "fieldPath": "beatmapFilename",
-            "columnName": "beatmapFilename",
-            "affinity": "TEXT",
-            "notNull": true
-          },
-          {
-            "fieldPath": "beatmapSetDirectory",
-            "columnName": "beatmapSetDirectory",
+            "fieldPath": "beatmapMD5",
+            "columnName": "beatmapMD5",
             "affinity": "TEXT",
             "notNull": true
           },
@@ -384,11 +378,10 @@
             "name": "beatmapIdx",
             "unique": false,
             "columnNames": [
-              "beatmapFilename",
-              "beatmapSetDirectory"
+              "beatmapMD5"
             ],
             "orders": [],
-            "createSql": "CREATE INDEX IF NOT EXISTS `beatmapIdx` ON `${TABLE_NAME}` (`beatmapFilename`, `beatmapSetDirectory`)"
+            "createSql": "CREATE INDEX IF NOT EXISTS `beatmapIdx` ON `${TABLE_NAME}` (`beatmapMD5`)"
           }
         ],
         "foreignKeys": []
@@ -488,7 +481,7 @@
     "views": [],
     "setupQueries": [
       "CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY,identity_hash TEXT)",
-      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '1f4b2f2358a9efc2bfef64bd9d0e3a33')"
+      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '4c8cbbe0214619c365058bec4f53da6a')"
     ]
   }
 }

@@ -987,7 +987,7 @@ public class MainScene implements IUpdateHandler {
 
     public void watchReplay(String replayFile) {
         Replay replay = new Replay();
-        if (replay.loadInfo(replayFile)) {
+        if (replay.load(replayFile, false)) {
             if (replay.replayVersion >= 3) {
                 //replay
                 ScoringScene scorescene = GlobalManager.getInstance().getScoring();

@@ -519,12 +519,12 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
         offsetRegs = 0;
 
         replaying = false;
-        replay = new Replay();
+        replay = new Replay(true);
         replay.setObjectCount(objects.size());
         replay.setBeatmap(beatmapInfo.getFullBeatmapsetName(), beatmapInfo.getFullBeatmapName(), parsedBeatmap.getMd5());
 
         if (replayFilePath != null) {
-            replaying = replay.load(replayFilePath);
+            replaying = replay.load(replayFilePath, true);
             if (!replaying) {
                 ToastLogger.showTextId(com.edlplan.osudroidresource.R.string.replay_invalid, true);
                 return false;
@@ -915,7 +915,6 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
 
         if (!Config.isHideInGameUI() && !Config.isHideReplayMarquee()) {
             replayText = new ChangeableText(0, 0, ResourceManager.getInstance().getFont("font"), "", 1000);
-            replayText.setVisible(false);
             replayText.setPosition(0, 140);
             replayText.setAlpha(0.7f);
             hud.attachChild(replayText, 0);
@@ -1509,6 +1508,11 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
     }
 
     private void tryHitActiveObjects(float deltaTime) {
+        // When replaying, judgements are processed when updating the objects' state.
+        if (replaying) {
+            return;
+        }
+
         for (int i = 0, size = activeObjects.size(); i < size; i++) {
             activeObjects.get(i).tryHit(deltaTime);
         }
@@ -2500,13 +2504,13 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
             var currentTime = String.valueOf(System.currentTimeMillis());
             var odrFilename = MD5Calculator.getStringMD5(lastBeatmapInfo.getFilename() + currentTime) + currentTime.substring(0, Math.min(3, currentTime.length())) + ".odr";
 
-            replayFilePath = Config.getCorePath() + "Scores/" + odrFilename;
+            replayFilePath = Config.getScorePath() + odrFilename;
             replay.setStat(stat);
             replay.save(replayFilePath);
 
             if (stat.getTotalScoreWithMultiplier() > 0 && !stat.getMod().contains(GameMod.MOD_AUTO)) {
                 stat.setReplayFilename(odrFilename);
-                stat.setBeatmap(lastBeatmapInfo.getSetDirectory(), lastBeatmapInfo.getFilename());
+                stat.setBeatmapMD5(lastBeatmapInfo.getMD5());
 
                 try {
                     DatabaseManager.getScoreInfoTable().insertScore(stat.toScoreInfo());
