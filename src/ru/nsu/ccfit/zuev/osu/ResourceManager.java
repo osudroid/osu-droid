@@ -124,10 +124,11 @@ public class ResourceManager {
         fonts.clear();
         textures.clear();
         sounds.clear();
+        frameCount.clear();
 
         customSounds.clear();
         customTextures.clear();
-        frameCount.clear();
+        customFrameCount.clear();
 
         initSecurityUtils();
     }
@@ -381,34 +382,20 @@ public class ResourceManager {
             frameIndex = Integer.parseInt(values.get(2));
         }
 
-        if (isBeatmapSkin) {
-            if (result == null || checkFirstFrameExists
-                    && !customTextures.containsKey(textureName)
-                    && !customTextures.containsKey(textureName + "-0")
-                    && !customTextures.containsKey(textureName + "0")) {
-                customFrameCount.remove(textureName);
-                return -1;
-            }
-        } else {
-            if (result == null || checkFirstFrameExists
-                    && !textures.containsKey(textureName)
-                    && !textures.containsKey(textureName + "-0")
-                    && !textures.containsKey(textureName + "0")) {
-                frameCount.remove(textureName);
-                return -1;
-            }
+        var skinTextures = isBeatmapSkin ? customTextures : textures;
+        var skinFrameCount = isBeatmapSkin ? customFrameCount : frameCount;
+
+        if (result == null || checkFirstFrameExists
+                && !skinTextures.containsKey(textureName)
+                && !skinTextures.containsKey(textureName + "-0")
+                && !skinTextures.containsKey(textureName + "0")) {
+            skinFrameCount.remove(textureName);
+            return -1;
         }
 
-        if (isBeatmapSkin) {
-            //noinspection DataFlowIssue
-            if (!customFrameCount.containsKey(textureName) || customFrameCount.get(textureName) < frameIndex + 1) {
-                customFrameCount.put(textureName, frameIndex + 1);
-            }
-        } else {
-            //noinspection DataFlowIssue
-            if (!frameCount.containsKey(textureName) || frameCount.get(textureName) < frameIndex + 1) {
-                frameCount.put(textureName, frameIndex + 1);
-            }
+        //noinspection DataFlowIssue
+        if (!skinFrameCount.containsKey(textureName) || skinFrameCount.get(textureName) < frameIndex + 1) {
+            skinFrameCount.put(textureName, frameIndex + 1);
         }
 
         if (BuildConfig.DEBUG) {
