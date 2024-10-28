@@ -428,7 +428,8 @@ public class GameplaySlider extends GameObject {
             }
         }
 
-        int index = left - 1;
+        // In theory, this max is not needed, but turns out the game can potentially crash at this point due to negative index..?
+        int index = Math.max(0, left - 1);
         float lengthProgress = (currentLength - path.getLength(index)) / (path.getLength(index + 1) - path.getLength(index));
 
         var currentPointX = path.getX(index);
