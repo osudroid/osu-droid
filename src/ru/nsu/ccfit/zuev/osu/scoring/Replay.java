@@ -320,9 +320,14 @@ public class Replay {
             return false;
         } finally {
             try {
-                os.close();
-                zip.closeEntry();
-                zip.close();
+                if (os != null) {
+                    os.close();
+                }
+
+                if (zip != null) {
+                    zip.closeEntry();
+                    zip.close();
+                }
             } catch (final IOException e) {
                 Debug.e("IOException: " + e.getMessage(), e);
             }
