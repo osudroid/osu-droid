@@ -16,7 +16,7 @@ import ru.nsu.ccfit.zuev.osu.scoring.StatisticV2
 
 @Entity(
     indices = [
-        Index(name = "beatmapIdx", value = ["beatmapFilename", "beatmapSetDirectory"]),
+        Index(name = "beatmapIdx", value = ["beatmapMD5"]),
     ]
 )
 data class ScoreInfo @JvmOverloads constructor(
@@ -28,14 +28,9 @@ data class ScoreInfo @JvmOverloads constructor(
     val id: Long = 0,
 
     /**
-     * The beatmap filename.
+     * The MD5 hash of the beatmap.
      */
-    val beatmapFilename: String,
-
-    /**
-     * The beatmap set directory.
-     */
-    val beatmapSetDirectory: String,
+    val beatmapMD5: String,
 
     /**
      * The player name.
@@ -127,9 +122,9 @@ data class ScoreInfo @JvmOverloads constructor(
 
         // The keys don't correspond to the table columns in order to keep compatibility with the old replays.
         put("id", id)
-        put("filename", "$beatmapSetDirectory/$beatmapFilename")
         put("playername", playerName)
         put("replayfile", replayFilename)
+        put("md5", beatmapMD5)
         put("mod", mods)
         put("score", score)
         put("combo", maxCombo)
@@ -148,7 +143,7 @@ data class ScoreInfo @JvmOverloads constructor(
     fun toStatisticV2() = StatisticV2().also {
 
         it.playerName = playerName
-        it.setBeatmap(beatmapSetDirectory, beatmapFilename)
+        it.setBeatmapMD5(beatmapMD5)
         it.replayFilename = replayFilename
         it.setModFromString(mods)
         it.setForcedScore(score)
@@ -167,14 +162,10 @@ data class ScoreInfo @JvmOverloads constructor(
 
 }
 
-fun ScoreInfo(json: JSONObject): ScoreInfo {
+fun ScoreInfo(json: JSONObject) =
+    ScoreInfo(
 
-    val beatmapPath = FilenameUtils.normalizeNoEndSeparator(json.getString("filename"))
-
-    return ScoreInfo(
-
-        beatmapFilename = FilenameUtils.getName(beatmapPath),
-        beatmapSetDirectory = FilenameUtils.getName(beatmapPath.substringBeforeLast('/')),
+        beatmapMD5 = json.getString("md5"),
         replayFilename = FilenameUtils.getName(json.getString("replayfile")),
 
         // The keys don't correspond to the table columns in order to keep compatibility with the old replays.
@@ -192,20 +183,18 @@ fun ScoreInfo(json: JSONObject): ScoreInfo {
         misses = json.getInt("misses"),
         time = json.getLong("time"),
     )
-}
-
 
 @Dao
 interface IScoreInfoDAO {
 
-    @Query("SELECT * FROM ScoreInfo WHERE beatmapSetDirectory = :beatmapSetDirectory AND beatmapFilename = :beatmapFilename ORDER BY score DESC")
-    fun getBeatmapScores(beatmapSetDirectory: String, beatmapFilename: String): List<ScoreInfo>
+    @Query("SELECT * FROM ScoreInfo WHERE beatmapMD5 = :beatmapMD5 ORDER BY score DESC")
+    fun getBeatmapScores(beatmapMD5: String): List<ScoreInfo>
 
     @Query("SELECT * FROM ScoreInfo WHERE id = :id")
     fun getScore(id: Int): ScoreInfo?
 
-    @Query("SELECT mark FROM ScoreInfo WHERE beatmapSetDirectory = :beatmapSetDirectory AND beatmapFilename = :beatmapFilename ORDER BY score DESC LIMIT 1")
-    fun getBestMark(beatmapSetDirectory: String, beatmapFilename: String): String?
+    @Query("SELECT mark FROM ScoreInfo WHERE beatmapMD5 = :beatmapMD5 ORDER BY score DESC LIMIT 1")
+    fun getBestMark(beatmapMD5: String): String?
 
     @Insert(onConflict = OnConflictStrategy.ABORT)
     fun insertScore(score: ScoreInfo): Long

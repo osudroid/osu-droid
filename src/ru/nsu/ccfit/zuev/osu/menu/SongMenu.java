@@ -1546,7 +1546,7 @@ public class SongMenu implements IUpdateHandler, MenuItemListener,
     }
 
     public void showDeleteScoreMenu(int scoreId) {
-        (new ScoreMenuFragment()).show(scoreId);
+        (new ScoreMenuFragment()).show(selectedBeatmap, scoreId);
     }
 
     public void select() {

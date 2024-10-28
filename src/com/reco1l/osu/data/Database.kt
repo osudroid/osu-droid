@@ -12,6 +12,7 @@ import ru.nsu.ccfit.zuev.osuplus.BuildConfig
 import java.io.File
 import java.io.IOException
 import java.io.ObjectInputStream
+import ru.nsu.ccfit.zuev.osu.scoring.Replay
 
 
 // Ported from rimu! project
@@ -72,7 +73,7 @@ object DatabaseManager {
             .allowMainThreadQueries()
             .build()
 
-        loadLegacyMigrations(context)
+//        loadLegacyMigrations(context)
     }
 
     @Suppress("UNCHECKED_CAST")
@@ -166,14 +167,22 @@ object DatabaseManager {
                                     continue
                                 }
 
+                                val replayFilePath = it.getString(it.getColumnIndexOrThrow("replayfile"))
+                                val replay = Replay()
+
+                                if (!replay.load(replayFilePath, false)) {
+                                    Log.e("ScoreLibrary", "Failed to import score from old database. Replay file not found.")
+                                    pendingScores--
+                                    continue
+                                }
+
                                 val beatmapPath = FilenameUtils.normalizeNoEndSeparator(it.getString(it.getColumnIndexOrThrow("filename")))
 
                                 scoreInfos += ScoreInfo(
                                     id = id,
-                                    beatmapFilename = FilenameUtils.getName(beatmapPath),
-                                    beatmapSetDirectory = FilenameUtils.getName(beatmapPath.substringBeforeLast('/')),
+                                    beatmapMD5 = replay.md5,
                                     playerName = it.getString(it.getColumnIndexOrThrow("playername")),
-                                    replayFilename = FilenameUtils.getName(it.getString(it.getColumnIndexOrThrow("replayfile"))),
+                                    replayFilename = FilenameUtils.getName(replayFilePath),
                                     mods = it.getString(it.getColumnIndexOrThrow("mode")),
                                     score = it.getInt(it.getColumnIndexOrThrow("score")),
                                     maxCombo = it.getInt(it.getColumnIndexOrThrow("combo")),

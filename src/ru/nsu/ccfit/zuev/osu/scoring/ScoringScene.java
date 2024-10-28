@@ -29,7 +29,6 @@ import org.anddev.andengine.opengl.texture.region.TextureRegion;
 import org.anddev.andengine.util.Debug;
 import org.apache.commons.io.FilenameUtils;
 
-import java.io.File;
 import java.util.Locale;
 
 import ru.nsu.ccfit.zuev.audio.serviceAudio.SongService;
@@ -427,7 +426,7 @@ public class ScoringScene {
                             replay.setObjectCount(beatmapToReplay.getTotalHitObjectCount());
                             replay.setBeatmap(beatmapToReplay.getFullBeatmapsetName(), beatmapToReplay.getFullBeatmapName(), mapMD5);
 
-                            if (replay.load(replayPath)) {
+                            if (replay.load(replayPath, true)) {
                                 performanceAttributes = BeatmapDifficultyCalculator.calculateDroidPerformanceWithReplayStat(
                                     playableBeatmap, difficultyAttributes, replay.cursorMoves, replay.objectData, stat
                                 );
@@ -494,7 +493,7 @@ public class ScoringScene {
             if ((!Multiplayer.isMultiplayer || !GlobalManager.getInstance().getGameScene().hasFailed) &&
                     stat.getTotalScoreWithMultiplier() > 0 && !stat.getMod().contains(GameMod.MOD_AUTO)) {
                 stat.setReplayFilename(FilenameUtils.getName(replayPath));
-                stat.setBeatmap(beatmap.getSetDirectory(), beatmap.getFilename());
+                stat.setBeatmapMD5(beatmap.getMD5());
 
                 try {
                     DatabaseManager.getScoreInfoTable().insertScore(stat.toScoreInfo());

@@ -519,12 +519,12 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
         offsetRegs = 0;
 
         replaying = false;
-        replay = new Replay();
+        replay = new Replay(true);
         replay.setObjectCount(objects.size());
         replay.setBeatmap(beatmapInfo.getFullBeatmapsetName(), beatmapInfo.getFullBeatmapName(), parsedBeatmap.getMd5());
 
         if (replayFilePath != null) {
-            replaying = replay.load(replayFilePath);
+            replaying = replay.load(replayFilePath, true);
             if (!replaying) {
                 ToastLogger.showTextId(com.edlplan.osudroidresource.R.string.replay_invalid, true);
                 return false;
@@ -2510,7 +2510,7 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
 
             if (stat.getTotalScoreWithMultiplier() > 0 && !stat.getMod().contains(GameMod.MOD_AUTO)) {
                 stat.setReplayFilename(odrFilename);
-                stat.setBeatmap(lastBeatmapInfo.getSetDirectory(), lastBeatmapInfo.getFilename());
+                stat.setBeatmapMD5(lastBeatmapInfo.getMD5());
 
                 try {
                     DatabaseManager.getScoreInfoTable().insertScore(stat.toScoreInfo());
