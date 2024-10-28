@@ -2507,7 +2507,7 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
             var currentTime = String.valueOf(System.currentTimeMillis());
             var odrFilename = MD5Calculator.getStringMD5(lastBeatmapInfo.getFilename() + currentTime) + currentTime.substring(0, Math.min(3, currentTime.length())) + ".odr";
 
-            replayFilePath = Config.getCorePath() + "Scores/" + odrFilename;
+            replayFilePath = Config.getScorePath() + odrFilename;
             replay.setStat(stat);
             replay.save(replayFilePath);
 
