@@ -65,7 +65,7 @@ object DatabaseManager {
     fun load(context: Context) {
 
         // Be careful when changing the database name, it may cause data loss.
-        database = Room.databaseBuilder(context, DroidDatabase::class.java, "${Config.getCorePath()}databases/room-${BuildConfig.BUILD_TYPE}.db")
+        database = Room.databaseBuilder(context, DroidDatabase::class.java, "${Config.getCorePath()}databases/room-tournament-${BuildConfig.BUILD_TYPE}.db")
             // Is preferable to support migrations, otherwise destructive migration will run forcing
             // tables to recreate (in case of beatmaps table it'll re-import all beatmaps).
             // See https://developer.android.com/training/data-storage/room/migrating-db-versions.
