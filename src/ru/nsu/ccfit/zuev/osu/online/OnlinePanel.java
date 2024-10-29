@@ -49,7 +49,7 @@ public class OnlinePanel extends Entity {
                     if (!moved && OnlineManager.getInstance().isStayOnline()) {
 
                         new MessageDialog()
-                            .setMessage(StringTable.get(com.edlplan.osudroidresource.R.string.dialog_visit_osudroid_profile_page))
+                            .setMessage(StringTable.get(com.osudroid.resources.R.string.dialog_visit_osudroid_profile_page))
                             .addButton("Yes", dialog -> {
                                 new WebViewFragment().setURL(WebViewFragment.PROFILE_URL + OnlineManager.getInstance().getUserId()).show();
                                 dialog.dismiss();

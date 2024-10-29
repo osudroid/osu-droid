@@ -7,7 +7,7 @@ import android.content.Context.ACCESSIBILITY_SERVICE
 import android.content.Intent
 import android.provider.Settings
 import android.view.accessibility.AccessibilityManager
-import com.edlplan.osudroidresource.R
+import com.osudroid.resources.R
 import com.reco1l.osu.ui.MessageDialog
 import ru.nsu.ccfit.zuev.osu.MainActivity
 

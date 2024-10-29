@@ -261,7 +261,7 @@ public class ScoreBoard extends Entity implements ScrollDetector.IScrollDetector
                     var titleStr = sb.append('#').append(beatmapRank).append(' ').append(playerName)
                             .append('\n')
                             .append(StringTable.format(
-                                isPPScoringMode ? com.edlplan.osudroidresource.R.string.menu_performance : com.edlplan.osudroidresource.R.string.menu_score, scoreStr, combo))
+                                isPPScoringMode ? com.osudroid.resources.R.string.menu_performance : com.osudroid.resources.R.string.menu_score, scoreStr, combo))
                             .toString();
 
                     if (i < scores.size() - 1) {
@@ -344,7 +344,7 @@ public class ScoreBoard extends Entity implements ScrollDetector.IScrollDetector
                     sb.setLength(0);
                     var titleStr = sb.append('#').append(i + 1).append(' ').append(score.getPlayerName())
                             .append('\n')
-                            .append(StringTable.format(com.edlplan.osudroidresource.R.string.menu_score, totalScore, score.getMaxCombo()))
+                            .append(StringTable.format(com.osudroid.resources.R.string.menu_score, totalScore, score.getMaxCombo()))
                             .toString();
 
                     if (i < scores.size() - 1) {

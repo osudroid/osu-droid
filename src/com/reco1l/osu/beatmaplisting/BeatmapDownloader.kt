@@ -2,7 +2,7 @@ package com.reco1l.osu.beatmaplisting
 
 import android.os.Environment.DIRECTORY_DOWNLOADS
 import android.view.View
-import com.edlplan.osudroidresource.R.*
+import com.osudroid.resources.R.*
 import com.reco1l.framework.net.FileRequest
 import com.reco1l.framework.net.IDownloaderObserver
 import com.reco1l.osu.mainThread

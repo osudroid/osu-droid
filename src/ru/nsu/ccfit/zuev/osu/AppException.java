@@ -154,26 +154,26 @@ public class AppException extends Exception implements Thread.UncaughtExceptionH
     public void makeToast(Context ctx) {
         switch (this.getType()) {
             case TYPE_HTTP_CODE:
-                String err = ctx.getString(com.edlplan.osudroidresource.R.string.http_status_code_error, this.getCode());
+                String err = ctx.getString(com.osudroid.resources.R.string.http_status_code_error, this.getCode());
                 Toast.makeText(ctx, err, Toast.LENGTH_SHORT).show();
                 break;
             case TYPE_HTTP_ERROR:
-                Toast.makeText(ctx, com.edlplan.osudroidresource.R.string.http_exception_error, Toast.LENGTH_SHORT).show();
+                Toast.makeText(ctx, com.osudroid.resources.R.string.http_exception_error, Toast.LENGTH_SHORT).show();
                 break;
             case TYPE_SOCKET:
-                Toast.makeText(ctx, com.edlplan.osudroidresource.R.string.socket_exception_error, Toast.LENGTH_SHORT).show();
+                Toast.makeText(ctx, com.osudroid.resources.R.string.socket_exception_error, Toast.LENGTH_SHORT).show();
                 break;
             case TYPE_NETWORK:
-                Toast.makeText(ctx, com.edlplan.osudroidresource.R.string.network_not_connected, Toast.LENGTH_SHORT).show();
+                Toast.makeText(ctx, com.osudroid.resources.R.string.network_not_connected, Toast.LENGTH_SHORT).show();
                 break;
             case TYPE_XML:
-                Toast.makeText(ctx, com.edlplan.osudroidresource.R.string.xml_parser_failed, Toast.LENGTH_SHORT).show();
+                Toast.makeText(ctx, com.osudroid.resources.R.string.xml_parser_failed, Toast.LENGTH_SHORT).show();
                 break;
             case TYPE_IO:
-                Toast.makeText(ctx, com.edlplan.osudroidresource.R.string.io_exception_error, Toast.LENGTH_SHORT).show();
+                Toast.makeText(ctx, com.osudroid.resources.R.string.io_exception_error, Toast.LENGTH_SHORT).show();
                 break;
             case TYPE_RUN:
-                Toast.makeText(ctx, com.edlplan.osudroidresource.R.string.app_run_code_error, Toast.LENGTH_SHORT).show();
+                Toast.makeText(ctx, com.osudroid.resources.R.string.app_run_code_error, Toast.LENGTH_SHORT).show();
                 break;
         }
     }
@@ -288,7 +288,7 @@ public class AppException extends Exception implements Thread.UncaughtExceptionH
         new Thread() {
             public void run() {
                 Looper.prepare();
-                Toast.makeText(context, StringTable.get(com.edlplan.osudroidresource.R.string.crash), Toast.LENGTH_SHORT).show();
+                Toast.makeText(context, StringTable.get(com.osudroid.resources.R.string.crash), Toast.LENGTH_SHORT).show();
                 Looper.loop();
             }
 

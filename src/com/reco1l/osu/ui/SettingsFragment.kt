@@ -20,7 +20,7 @@ import androidx.core.view.forEach
 import androidx.core.view.get
 import androidx.preference.CheckBoxPreference
 import androidx.preference.Preference
-import com.edlplan.osudroidresource.R.*
+import com.osudroid.resources.R.*
 import com.edlplan.ui.fragment.LoadingFragment
 import com.google.android.material.snackbar.Snackbar
 import com.reco1l.ibancho.LobbyAPI

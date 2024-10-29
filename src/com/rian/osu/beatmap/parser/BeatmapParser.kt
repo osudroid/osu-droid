@@ -1,7 +1,7 @@
 package com.rian.osu.beatmap.parser
 
 import android.util.Log
-import com.edlplan.osudroidresource.R.*
+import com.osudroid.resources.R.*
 import com.reco1l.toolkt.kotlin.runSafe
 import com.rian.osu.GameMode
 import com.rian.osu.beatmap.Beatmap
