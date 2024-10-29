@@ -1,26 +1,24 @@
 package ru.nsu.ccfit.zuev.skins;
 
 import java.io.File;
-import java.util.HashMap;
-import java.util.Map;
 
 import ru.nsu.ccfit.zuev.osu.Config;
 import ru.nsu.ccfit.zuev.osu.RGBColor;
 import ru.nsu.ccfit.zuev.osu.ResourceManager;
 import ru.nsu.ccfit.zuev.osu.helper.FileUtils;
 
-public class SkinManager {
-    private static SkinManager instance = new SkinManager();
+public class BeatmapSkinManager {
+    private static BeatmapSkinManager instance = new BeatmapSkinManager();
     private static boolean skinEnabled = true;
 
     private final RGBColor sliderColor = new RGBColor(1, 1, 1);
     private String skinname = "";
 
-    private SkinManager() {
+    private BeatmapSkinManager() {
 
     }
 
-    public static SkinManager getInstance() {
+    public static BeatmapSkinManager getInstance() {
         return instance;
     }
 
@@ -29,7 +27,7 @@ public class SkinManager {
     }
 
     public static void setSkinEnabled(final boolean skinEnabled) {
-        SkinManager.skinEnabled = skinEnabled;
+        BeatmapSkinManager.skinEnabled = skinEnabled;
     }
 
     public RGBColor getSliderColor() {

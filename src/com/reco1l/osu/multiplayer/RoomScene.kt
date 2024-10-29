@@ -304,8 +304,10 @@ object RoomScene : Scene(), IRoomEventListener, IPlayerEventListener
         }
 
         // Buttons code copied from legacy code but improved, don't blame on me.
+        val isNewLayout = OsuSkin.get().isUseNewLayout
         val layoutBackButton = OsuSkin.get().getLayout("BackButton")
         val layoutMods = OsuSkin.get().getLayout("ModsButton")
+        val layoutDifficultySwitcher = OsuSkin.get().getLayout("DifficultySwitcher")
 
         backButton = object : AnimatedSprite("menu-back", true, OsuSkin.get().animationFramerate)
         {
@@ -348,12 +350,11 @@ object RoomScene : Scene(), IRoomEventListener, IPlayerEventListener
                 return false
             }
         }.also {
-
-            if (OsuSkin.get().isUseNewLayout)
-            {
-                layoutBackButton?.apply(it) ?: it.setPosition(0f, Config.getRES_HEIGHT() - it.heightScaled)
+            if (isNewLayout && layoutBackButton != null) {
+                layoutBackButton.apply(it)
+            } else {
+                it.setPosition(0f, Config.getRES_HEIGHT() - it.heightScaled)
             }
-            else it.setPosition(0f, Config.getRES_HEIGHT() - it.heightScaled)
 
             registerTouchArea(it)
             attachChild(it)
@@ -388,12 +389,18 @@ object RoomScene : Scene(), IRoomEventListener, IPlayerEventListener
                 if (event.isActionUp)
                 {
                     textureRegion = getResources().getTextureIfLoaded("selection-mods")
-                    if (!moved)
+                    if (!moved) {
+                        getResources().getSound("click-short-confirm")?.play()
                         getModMenu().show(this@RoomScene, getGlobal().selectedBeatmap)
+                    }
                     return true
                 }
                 if (event.isActionOutside || event.isActionMove && MathUtils.distance(dx, dy, localX, localY) > 50)
                 {
+                    if (!moved) {
+                        getResources().getSound("click-short")?.play()
+                    }
+
                     textureRegion = getResources().getTextureIfLoaded("selection-mods")
                     moved = true
                 }
@@ -404,20 +411,25 @@ object RoomScene : Scene(), IRoomEventListener, IPlayerEventListener
             it.isVisible = false
             it.setScale(1.5f)
 
+            if (isNewLayout && layoutMods != null) {
+                layoutMods.apply(it, backButton)
+            } else {
+                it.setPosition(backButton!!.x + backButton!!.widthScaled, Config.getRES_HEIGHT() - it.heightScaled)
+            }
+
             registerTouchArea(it)
             attachChild(it)
-
-            if (OsuSkin.get().isUseNewLayout)
-            {
-                layoutMods?.apply(it) ?: it.setPosition(backButton!!.x + backButton!!.width, Config.getRES_HEIGHT() - it.heightScaled)
-            }
-            else it.setPosition(backButton!!.x + backButton!!.width, Config.getRES_HEIGHT() - 90f)
         }
 
         // Difficulty switcher
         difficultySwitcher = DifficultyAlgorithmSwitcher().also {
+            it.setScale(1.5f)
 
-            it.setPosition(modsButton!!.x + modsButton!!.widthScaled, Config.getRES_HEIGHT() - it.heightScaled)
+            if (isNewLayout && layoutDifficultySwitcher != null) {
+                layoutDifficultySwitcher.apply(it, modsButton)
+            } else {
+                it.setPosition(modsButton!!.x + modsButton!!.widthScaled, Config.getRES_HEIGHT() - it.heightScaled)
+            }
 
             registerTouchArea(it)
             attachChild(it)

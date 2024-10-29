@@ -20,7 +20,6 @@ import com.reco1l.osu.data.DatabaseManager;
 import ru.nsu.ccfit.zuev.osu.Utils;
 import ru.nsu.ccfit.zuev.osu.DifficultyAlgorithm;
 import ru.nsu.ccfit.zuev.osu.helper.StringTable;
-import ru.nsu.ccfit.zuev.osuplus.R;
 
 public class BeatmapSetItem {
     private final BeatmapItem[] beatmapItems;
@@ -54,7 +53,7 @@ public class BeatmapSetItem {
 
         titleStr = beatmapInfo.getArtistText() + " - " + beatmapInfo.getTitleText();
 
-        creatorStr = StringTable.format(R.string.menu_creator,
+        creatorStr = StringTable.format(com.edlplan.osudroidresource.R.string.menu_creator,
                 beatmapInfo.getCreator());
         beatmapItems = new BeatmapItem[beatmapSetInfo.getCount()];
 
@@ -76,7 +75,7 @@ public class BeatmapSetItem {
 
         titleStr = beatmapInfo.getArtistText() + " - " + beatmapInfo.getTitleText();
 
-        creatorStr = StringTable.format(R.string.menu_creator, beatmapInfo.getCreator());
+        creatorStr = StringTable.format(com.edlplan.osudroidresource.R.string.menu_creator, beatmapInfo.getCreator());
         beatmapItems = new BeatmapItem[1];
         beatmapId = id;
 

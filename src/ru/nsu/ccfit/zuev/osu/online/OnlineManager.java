@@ -1,6 +1,5 @@
 package ru.nsu.ccfit.zuev.osu.online;
 
-import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 
@@ -34,7 +33,6 @@ public class OnlineManager {
     public static final OkHttpClient client = new OkHttpClient();
 
     private static OnlineManager instance = null;
-    private Context context;
     private String failMessage = "";
 
     private boolean stayOnline = true;
@@ -62,12 +60,11 @@ public class OnlineManager {
         return endpoint + "getReplay?userID=" + userID + "&hash=" + hash;
     }
 
-    public void Init(Context context) {
+    public void init() {
         this.stayOnline = Config.isStayOnline();
         this.username = Config.getOnlineUsername();
         this.password = Config.getOnlinePassword();
         this.deviceID = Config.getOnlineDeviceID();
-        this.context = context;
     }
 
     private ArrayList<String> sendRequest(PostBuilder post, String url) throws OnlineManagerException {

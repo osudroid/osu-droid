@@ -2,11 +2,11 @@
   "formatVersion": 1,
   "database": {
     "version": 1,
-    "identityHash": "49e3a368b321869b51790d730406bd5d",
+    "identityHash": "4c8cbbe0214619c365058bec4f53da6a",
     "entities": [
       {
         "tableName": "BeatmapInfo",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`filename` TEXT NOT NULL, `md5` TEXT NOT NULL, `id` INTEGER, `audioFilename` TEXT NOT NULL, `backgroundFilename` TEXT, `status` INTEGER, `setDirectory` TEXT NOT NULL, `setId` INTEGER, `title` TEXT NOT NULL, `titleUnicode` TEXT NOT NULL, `artist` TEXT NOT NULL, `artistUnicode` TEXT NOT NULL, `creator` TEXT NOT NULL, `version` TEXT NOT NULL, `tags` TEXT NOT NULL, `source` TEXT NOT NULL, `dateImported` INTEGER NOT NULL, `approachRate` REAL NOT NULL, `overallDifficulty` REAL NOT NULL, `circleSize` REAL NOT NULL, `hpDrainRate` REAL NOT NULL, `droidStarRating` REAL, `standardStarRating` REAL, `bpmMax` REAL NOT NULL, `bpmMin` REAL NOT NULL, `length` INTEGER NOT NULL, `previewTime` INTEGER NOT NULL, `hitCircleCount` INTEGER NOT NULL, `spinnerCount` INTEGER NOT NULL, `sliderCount` INTEGER NOT NULL, `maxCombo` INTEGER NOT NULL, PRIMARY KEY(`filename`, `setDirectory`))",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`filename` TEXT NOT NULL, `md5` TEXT NOT NULL, `id` INTEGER, `audioFilename` TEXT NOT NULL, `backgroundFilename` TEXT, `status` INTEGER, `setDirectory` TEXT NOT NULL, `setId` INTEGER, `title` TEXT NOT NULL, `titleUnicode` TEXT NOT NULL, `artist` TEXT NOT NULL, `artistUnicode` TEXT NOT NULL, `creator` TEXT NOT NULL, `version` TEXT NOT NULL, `tags` TEXT NOT NULL, `source` TEXT NOT NULL, `dateImported` INTEGER NOT NULL, `approachRate` REAL NOT NULL, `overallDifficulty` REAL NOT NULL, `circleSize` REAL NOT NULL, `hpDrainRate` REAL NOT NULL, `droidStarRating` REAL, `standardStarRating` REAL, `bpmMax` REAL NOT NULL, `bpmMin` REAL NOT NULL, `mostCommonBPM` REAL NOT NULL, `length` INTEGER NOT NULL, `previewTime` INTEGER NOT NULL, `hitCircleCount` INTEGER NOT NULL, `spinnerCount` INTEGER NOT NULL, `sliderCount` INTEGER NOT NULL, `maxCombo` INTEGER NOT NULL, PRIMARY KEY(`filename`, `setDirectory`))",
         "fields": [
           {
             "fieldPath": "filename",
@@ -159,6 +159,12 @@
             "notNull": true
           },
           {
+            "fieldPath": "mostCommonBPM",
+            "columnName": "mostCommonBPM",
+            "affinity": "REAL",
+            "notNull": true
+          },
+          {
             "fieldPath": "length",
             "columnName": "length",
             "affinity": "INTEGER",
@@ -268,7 +274,7 @@
       },
       {
         "tableName": "ScoreInfo",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `beatmapFilename` TEXT NOT NULL, `beatmapSetDirectory` TEXT NOT NULL, `playerName` TEXT NOT NULL, `replayFilename` TEXT NOT NULL, `mods` TEXT NOT NULL, `score` INTEGER NOT NULL, `maxCombo` INTEGER NOT NULL, `mark` TEXT NOT NULL, `hit300k` INTEGER NOT NULL, `hit300` INTEGER NOT NULL, `hit100k` INTEGER NOT NULL, `hit100` INTEGER NOT NULL, `hit50` INTEGER NOT NULL, `misses` INTEGER NOT NULL, `accuracy` REAL NOT NULL, `time` INTEGER NOT NULL, `isPerfect` INTEGER NOT NULL)",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `beatmapMD5` TEXT NOT NULL, `playerName` TEXT NOT NULL, `replayFilename` TEXT NOT NULL, `mods` TEXT NOT NULL, `score` INTEGER NOT NULL, `maxCombo` INTEGER NOT NULL, `mark` TEXT NOT NULL, `hit300k` INTEGER NOT NULL, `hit300` INTEGER NOT NULL, `hit100k` INTEGER NOT NULL, `hit100` INTEGER NOT NULL, `hit50` INTEGER NOT NULL, `misses` INTEGER NOT NULL, `time` INTEGER NOT NULL)",
         "fields": [
           {
             "fieldPath": "id",
@@ -277,14 +283,8 @@
             "notNull": true
           },
           {
-            "fieldPath": "beatmapFilename",
-            "columnName": "beatmapFilename",
-            "affinity": "TEXT",
-            "notNull": true
-          },
-          {
-            "fieldPath": "beatmapSetDirectory",
-            "columnName": "beatmapSetDirectory",
+            "fieldPath": "beatmapMD5",
+            "columnName": "beatmapMD5",
             "affinity": "TEXT",
             "notNull": true
           },
@@ -361,20 +361,8 @@
             "notNull": true
           },
           {
-            "fieldPath": "accuracy",
-            "columnName": "accuracy",
-            "affinity": "REAL",
-            "notNull": true
-          },
-          {
             "fieldPath": "time",
             "columnName": "time",
-            "affinity": "INTEGER",
-            "notNull": true
-          },
-          {
-            "fieldPath": "isPerfect",
-            "columnName": "isPerfect",
             "affinity": "INTEGER",
             "notNull": true
           }
@@ -390,11 +378,10 @@
             "name": "beatmapIdx",
             "unique": false,
             "columnNames": [
-              "beatmapFilename",
-              "beatmapSetDirectory"
+              "beatmapMD5"
             ],
             "orders": [],
-            "createSql": "CREATE INDEX IF NOT EXISTS `beatmapIdx` ON `${TABLE_NAME}` (`beatmapFilename`, `beatmapSetDirectory`)"
+            "createSql": "CREATE INDEX IF NOT EXISTS `beatmapIdx` ON `${TABLE_NAME}` (`beatmapMD5`)"
           }
         ],
         "foreignKeys": []
@@ -494,7 +481,7 @@
     "views": [],
     "setupQueries": [
       "CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY,identity_hash TEXT)",
-      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '49e3a368b321869b51790d730406bd5d')"
+      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '4c8cbbe0214619c365058bec4f53da6a')"
     ]
   }
 }

@@ -15,7 +15,6 @@ import ru.nsu.ccfit.zuev.osu.ResourceManager;
 import ru.nsu.ccfit.zuev.osu.ToastLogger;
 import ru.nsu.ccfit.zuev.osu.game.GameHelper;
 import ru.nsu.ccfit.zuev.osu.game.GameScene;
-import ru.nsu.ccfit.zuev.osuplus.R;
 
 public class PauseMenu implements IOnMenuItemClickListener {
     static final int ITEM_SAVE_REPLAY = 0;
@@ -94,7 +93,7 @@ public class PauseMenu implements IOnMenuItemClickListener {
         switch (pMenuItem.getID()) {
             case ITEM_SAVE_REPLAY:
                 if(fail && !replaySaved && !game.getReplaying() && game.saveFailedReplay()){
-                    ToastLogger.showTextId(R.string.message_save_replay_successful, true);
+                    ToastLogger.showTextId(com.edlplan.osudroidresource.R.string.message_save_replay_successful, true);
                     replaySaved = true;
                 }
                 return true;

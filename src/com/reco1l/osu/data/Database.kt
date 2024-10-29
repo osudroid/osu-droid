@@ -8,9 +8,11 @@ import org.apache.commons.io.FilenameUtils
 import org.json.JSONObject
 import ru.nsu.ccfit.zuev.osu.*
 import ru.nsu.ccfit.zuev.osu.helper.sql.DBOpenHelper
+import ru.nsu.ccfit.zuev.osuplus.BuildConfig
 import java.io.File
 import java.io.IOException
 import java.io.ObjectInputStream
+import ru.nsu.ccfit.zuev.osu.scoring.Replay
 
 
 // Ported from rimu! project
@@ -63,7 +65,7 @@ object DatabaseManager {
     fun load(context: Context) {
 
         // Be careful when changing the database name, it may cause data loss.
-        database = Room.databaseBuilder(context, DroidDatabase::class.java, "${Config.getCorePath()}databases/room.db")
+        database = Room.databaseBuilder(context, DroidDatabase::class.java, "${Config.getCorePath()}databases/room-${BuildConfig.BUILD_TYPE}.db")
             // Is preferable to support migrations, otherwise destructive migration will run forcing
             // tables to recreate (in case of beatmaps table it'll re-import all beatmaps).
             // See https://developer.android.com/training/data-storage/room/migrating-db-versions.
@@ -165,14 +167,20 @@ object DatabaseManager {
                                     continue
                                 }
 
-                                val beatmapPath = FilenameUtils.normalizeNoEndSeparator(it.getString(it.getColumnIndexOrThrow("filename")))
+                                val replayFilePath = it.getString(it.getColumnIndexOrThrow("replayfile"))
+                                val replay = Replay()
+
+                                if (!replay.load(replayFilePath, false)) {
+                                    Log.e("ScoreLibrary", "Failed to import score from old database. Replay file not found.")
+                                    pendingScores--
+                                    continue
+                                }
 
                                 scoreInfos += ScoreInfo(
                                     id = id,
-                                    beatmapFilename = FilenameUtils.getName(beatmapPath),
-                                    beatmapSetDirectory = FilenameUtils.getName(beatmapPath.substringBeforeLast('/')),
+                                    beatmapMD5 = replay.md5,
                                     playerName = it.getString(it.getColumnIndexOrThrow("playername")),
-                                    replayFilename = FilenameUtils.getName(it.getString(it.getColumnIndexOrThrow("replayfile"))),
+                                    replayFilename = FilenameUtils.getName(replayFilePath),
                                     mods = it.getString(it.getColumnIndexOrThrow("mode")),
                                     score = it.getInt(it.getColumnIndexOrThrow("score")),
                                     maxCombo = it.getInt(it.getColumnIndexOrThrow("combo")),
@@ -183,10 +191,7 @@ object DatabaseManager {
                                     hit100 = it.getInt(it.getColumnIndexOrThrow("h100")),
                                     hit50 = it.getInt(it.getColumnIndexOrThrow("h50")),
                                     misses = it.getInt(it.getColumnIndexOrThrow("misses")),
-                                    accuracy = it.getFloat(it.getColumnIndexOrThrow("accuracy")),
                                     time = it.getLong(it.getColumnIndexOrThrow("time")),
-                                    isPerfect = it.getInt(it.getColumnIndexOrThrow("perfect")) == 1
-
                                 )
 
                                 pendingScores--

@@ -132,7 +132,7 @@ public class GameplaySlider extends GameObject {
         endArrow.setOrigin(Anchor.Center);
         endArrow.setTextureRegion(ResourceManager.getInstance().getTexture("reversearrow"));
 
-        ball = new AnimatedSprite("sliderb", false);
+        ball = new AnimatedSprite("sliderb", false, 60f);
         ball.setOrigin(Anchor.Center);
 
         // Avoid to use AnimatedSprite if not necessary.
@@ -387,7 +387,7 @@ public class GameplaySlider extends GameObject {
     }
 
     private PointF getPositionAt(final float percentage, final boolean updateBallAngle, final boolean updateEndArrowRotation) {
-        if (path.pointCount == 0) {
+        if (path.pointCount < 2) {
             tmpPoint.set(position);
             return tmpPoint;
         }
@@ -396,14 +396,12 @@ public class GameplaySlider extends GameObject {
             tmpPoint.set(curveEndPos);
             return tmpPoint;
         } else if (percentage <= 0) {
-            if (path.pointCount >= 2) {
-                if (updateBallAngle) {
-                    ballAngle = MathUtils.radToDeg(Utils.direction(path.getX(1), path.getY(1), position.x, position.y));
-                }
+            if (updateBallAngle) {
+                ballAngle = MathUtils.radToDeg(Utils.direction(path.getX(1), path.getY(1), position.x, position.y));
+            }
 
-                if (updateEndArrowRotation) {
-                    endArrow.setRotation(MathUtils.radToDeg(Utils.direction(position.x, position.y, path.getX(1), path.getY(1))));
-                }
+            if (updateEndArrowRotation) {
+                endArrow.setRotation(MathUtils.radToDeg(Utils.direction(position.x, position.y, path.getX(1), path.getY(1))));
             }
 
             tmpPoint.set(position);
@@ -696,7 +694,7 @@ public class GameplaySlider extends GameObject {
         if (!startHit) // If we didn't get start hit(click)
         {
             // If it's too late, mark this hit missing
-            if (elapsedSpanTime > Math.min((float) spanDuration, GameHelper.getDifficultyHelper().hitWindowFor50(GameHelper.getOverallDifficulty()))) {
+            if (!autoPlay && elapsedSpanTime > Math.min((float) spanDuration, GameHelper.getDifficultyHelper().hitWindowFor50(GameHelper.getOverallDifficulty()))) {
                 startHit = true;
                 currentNestedObjectIndex++;
                 listener.onSliderHit(id, -1, position, false, bodyColor, GameObjectListener.SLIDER_START, false);
@@ -800,9 +798,11 @@ public class GameplaySlider extends GameObject {
                         preStageFinish = true;
                     }
 
-                    endArrow.setRotation(
-                        MathUtils.radToDeg(Utils.direction(curveEndPos.x, curveEndPos.y, path.getX(path.pointCount - 2), path.getY(path.pointCount - 2)))
-                    );
+                    if (path.pointCount >= 2) {
+                        endArrow.setRotation(
+                            MathUtils.radToDeg(Utils.direction(curveEndPos.x, curveEndPos.y, path.getX(path.pointCount - 2), path.getY(path.pointCount - 2)))
+                        );
+                    }
 
                     tailCirclePiece.setPosition(curveEndPos.x, curveEndPos.y);
                     endArrow.setPosition(curveEndPos.x, curveEndPos.y);
@@ -821,7 +821,7 @@ public class GameplaySlider extends GameObject {
             approachCircle.clearEntityModifiers();
             approachCircle.setAlpha(0);
 
-            ball.setFps((float) beatmapSlider.getVelocity() * Slider.BASE_SCORING_DISTANCE * scale);
+            ball.setFrameTime(1f / ((float) beatmapSlider.getVelocity() * Slider.BASE_SCORING_DISTANCE * scale));
             ball.setScale(scale);
             ball.setFlippedHorizontal(false);
             ball.registerEntityModifier(Modifiers.fadeIn(0.1f));

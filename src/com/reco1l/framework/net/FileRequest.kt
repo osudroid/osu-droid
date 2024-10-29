@@ -99,16 +99,10 @@ class FileRequest(val file: File, url: HttpUrl): WebRequest(url) {
     }
 
 
-    /**
-     * Cancels the current download.
-     *
-     * If [execute] wasn't called at this point or the download has finished, this will not have any
-     * effect.
-     */
-    fun cancel() {
+    override fun cancel() {
         isDownloading = false
+        super.cancel()
     }
-
 
     override fun execute(): FileRequest {
         try {

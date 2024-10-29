@@ -80,6 +80,7 @@ for preventing accidental touches.
 - Added an animation to slider end arrow rotation when snaking animation is enabled
 - Added a slight dim to hitobjects that cannot be hit yet in gameplay
 - Added a rotation effect to miss hit judgement effects in gameplay
+- Added most common BPM metric to beatmap information in song selection menu
 - Added support for `skin.ini`'s `AnimationFramerate` setting in `skin.json`
   - The default value is `-1` when converting a `skin.ini` to `skin.json`, and `60` otherwise
   - To use in `skin.json`, add the following entry:
@@ -112,8 +113,26 @@ for preventing accidental touches.
   - To use in `skin.json`, add the following entry:
     ```json
     {
-      "Utils": {
+      "Slider": {
         "sliderBallFlip": true
+      }
+    }
+    ```
+- Added support for `skin.ini`'s `ScoreOverlap` setting in `skin.json`
+  - To use in `skin.json`, add the following entry:
+    ```json
+    {
+      "Fonts": {
+        "scoreOverlap": 0
+      }
+    }
+    ```
+- Added support for `skin.ini`'s `ComboOverlap` setting in `skin.json`
+  - To use in `skin.json`, add the following entry:
+    ```json
+    {
+      "Fonts": {
+        "comboOverlap": 0
       }
     }
     ```
@@ -123,8 +142,9 @@ for preventing accidental touches.
 ## Storage migration
 
 This update migrates the storage location of local scores, beatmap collections, and beatmap options into an integrated
-database. Doing this increases the import time of beatmaps and fixes the problem of duplicated beatmapsets in song
-selection menu.
+database. Doing this increases the import time of beatmaps and fixes a few problems, namely:
+- Duplicated beatmapsets in song selection menu
+- Scores in local leaderboard potentially not showing in its beatmap
 
 ## Background difficulty calculation
 
@@ -178,6 +198,7 @@ The following gameplay elements' display has been updated to match osu!stable:
 - Gameplay HUD now ignores playfield size setting
 - The real-time PP counter has been moved next to circular song progress or accuracy counter
 - Average offset and unstable rate counters are now hidden during autoplay
+- Updated Korean and Japanese translations
 
 # Removals
 
@@ -186,6 +207,7 @@ The following gameplay elements' display has been updated to match osu!stable:
 were reduced by 20% and clap hitsounds' volume were reduced by 15%
 - Removed the "Player Name" setting. It is now combined with the "Username" option
 - Removed fractional part of real-time PP and unstable rate counters
+- Removed fractional part of beatmap BPM displays in song selection menu
 
 # Bug fixes
 
@@ -222,6 +244,8 @@ were reduced by 20% and clap hitsounds' volume were reduced by 15%
 - Fixed background music volume not ramping up upon leaving song selection menu
 - Fixed object starting point potentially being screwed up
 - Fixed object approach rate being rounded up (making it off by at most 0.5ms in real time)
-- Fixed memory leak when reading replays
+- Fixed memory leak when reading and saving replays
 - Fixed misleading metronome effect setting description, denoting that it is only applied to the NightCore mod
 - Fixed crash when attempting to restore game state after the system kills the game due to low memory
+- Fixed cancel button in beatmap downloader not working properly
+- Fixed object judgement relying on non-replay judgement processing when replaying in gameplay

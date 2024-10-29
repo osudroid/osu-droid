@@ -302,7 +302,7 @@ public class ScoreBoard extends Entity implements ScrollDetector.IScrollDetector
 
             @Override
             public void run() {
-                var scores = DatabaseManager.getScoreInfoTable().getBeatmapScores(beatmap.getSetDirectory(), beatmap.getFilename());
+                var scores = DatabaseManager.getScoreInfoTable().getBeatmapScores(beatmap.getMD5());
 
                 if (scores.isEmpty() || !isActive()) {
 
@@ -330,7 +330,7 @@ public class ScoreBoard extends Entity implements ScrollDetector.IScrollDetector
                     sb.setLength(0);
                     var titleStr = sb.append('#').append(i + 1).append(' ').append(score.getPlayerName())
                             .append('\n')
-                            .append(StringTable.format(R.string.menu_score, totalScore, score.getMaxCombo()))
+                            .append(StringTable.format(com.edlplan.osudroidresource.R.string.menu_score, totalScore, score.getMaxCombo()))
                             .toString();
 
                     if (i < scores.size() - 1) {

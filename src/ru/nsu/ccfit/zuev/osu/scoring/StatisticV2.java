@@ -34,7 +34,6 @@ public class StatisticV2 implements Serializable {
     int misses = 0;
     int scoreMaxCombo = 0;
     long time = 0;
-    private boolean perfect = false;
     private int currentCombo = 0;
     private int scoreHash = 0;
     private int totalScore;
@@ -87,14 +86,9 @@ public class StatisticV2 implements Serializable {
     private float modScoreMultiplier = 1;
 
     /**
-     * The directory of the beatmap set.
+     * The MD5 hash of the beatmap.
      */
-    private String beatmapSetDirectory = "";
-
-    /**
-     * The filename of the beatmap.
-     */
-    private String beatmapFilename = "";
+    private String beatmapMD5 = "";
 
 
     public StatisticV2() {}
@@ -116,9 +110,6 @@ public class StatisticV2 implements Serializable {
         misses = Integer.parseInt(params[9]);
         if (params.length >= 11) {
             time = Long.parseLong(params[10]);
-        }
-        if (params.length >= 12) {
-            perfect = Integer.parseInt(params[11]) != 0;
         }
         if (params.length >= 13) {
             playerName = params[12];
@@ -219,7 +210,6 @@ public class StatisticV2 implements Serializable {
             default:
                 changeHp(-(5 + GameHelper.getHealthDrain()) / 100f);
                 misses++;
-                perfect = false;
                 if (currentCombo > scoreMaxCombo) {
                     scoreMaxCombo = currentCombo;
                 }
@@ -401,11 +391,7 @@ public class StatisticV2 implements Serializable {
     }
 
     public boolean isPerfect() {
-        return perfect;
-    }
-
-    public void setPerfect(boolean perfect) {
-        this.perfect = perfect;
+        return getAccuracy() == 1f;
     }
 
     public int getCombo() {
@@ -589,9 +575,8 @@ public class StatisticV2 implements Serializable {
         totalScore = forcedScore;
     }
 
-    public void setBeatmap(String beatmapSetDirectory, String beatmapFilename) {
-        this.beatmapSetDirectory = beatmapSetDirectory;
-        this.beatmapFilename = beatmapFilename;
+    public void setBeatmapMD5(String beatmapMD5) {
+        this.beatmapMD5 = beatmapMD5;
     }
 
     public final boolean isScoreValid() {
@@ -883,8 +868,7 @@ public class StatisticV2 implements Serializable {
      */
     public ScoreInfo toScoreInfo() {
         return new ScoreInfo(
-            beatmapFilename,
-            beatmapSetDirectory,
+            beatmapMD5,
             playerName,
             replayFilename,
             getModString(),
@@ -897,9 +881,7 @@ public class StatisticV2 implements Serializable {
             hit100,
             hit50,
             misses,
-            getAccuracy(),
-            time,
-            isPerfect()
+            time
         );
     }
 

@@ -428,9 +428,9 @@ class DroidPerformanceCalculator(
         val nonGreatRatio = 1 - (exp(sqrt(greatWindow)) + 1.0).pow(1 - speedNoteRatio) / exp(sqrt(greatWindow))
 
         val relevantCountGreat = max(0.0, speedNoteCount - nonGreatCount * nonGreatRatio)
-        val relevantCountOk = countOk * nonGreatRatio
-        val relevantCountMeh = countMeh * nonGreatRatio
-        val relevantCountMiss = countMiss * nonGreatRatio
+        val relevantCountOk = max(0.0, countOk * nonGreatRatio)
+        val relevantCountMeh = max(0.0, countMeh * nonGreatRatio)
+        val relevantCountMiss = max(0.0, countMiss * nonGreatRatio)
 
         // Assume 100s, 50s, and misses happen on circles. If there are less non-300s on circles than 300s,
         // compute the deviation on circles.

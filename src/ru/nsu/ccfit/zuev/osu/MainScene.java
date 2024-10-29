@@ -69,7 +69,6 @@ import ru.nsu.ccfit.zuev.osu.scoring.Replay;
 import ru.nsu.ccfit.zuev.osu.scoring.ScoringScene;
 import ru.nsu.ccfit.zuev.osu.scoring.StatisticV2;
 import ru.nsu.ccfit.zuev.osuplus.BuildConfig;
-import ru.nsu.ccfit.zuev.osuplus.R;
 
 /**
  * Created by Fuuko on 2015/4/24.
@@ -187,7 +186,7 @@ public class MainScene implements IUpdateHandler {
                 if (pSceneTouchEvent.isActionDown()) {
 
                     new MessageDialog()
-                        .setMessage(context.getString(R.string.dialog_visit_osu_website_message))
+                        .setMessage(context.getString(com.edlplan.osudroidresource.R.string.dialog_visit_osu_website))
                         .addButton("Yes", dialog -> {
                             Intent browserIntent = new Intent(Intent.ACTION_VIEW, Uri.parse("https://osu.ppy.sh"));
                             GlobalManager.getInstance().getMainActivity().startActivity(browserIntent);
@@ -216,7 +215,7 @@ public class MainScene implements IUpdateHandler {
                 if (pSceneTouchEvent.isActionDown()) {
 
                     new MessageDialog()
-                        .setMessage(context.getString(R.string.dialog_visit_osudroid_website_message))
+                        .setMessage(context.getString(com.edlplan.osudroidresource.R.string.dialog_visit_osudroid_website))
                         .addButton("Yes", dialog -> {
                             Intent browserIntent = new Intent(Intent.ACTION_VIEW, Uri.parse("https://" + OnlineManager.hostname));
                             GlobalManager.getInstance().getMainActivity().startActivity(browserIntent);
@@ -500,7 +499,7 @@ public class MainScene implements IUpdateHandler {
 
     private void createOnlinePanel(Scene scene) {
         Config.loadOnlineConfig(context);
-        OnlineManager.getInstance().Init(context);
+        OnlineManager.getInstance().init();
 
         if (OnlineManager.getInstance().isStayOnline()) {
             Debug.i("Stay online, creating panel");
@@ -904,7 +903,7 @@ public class MainScene implements IUpdateHandler {
 
         new MessageDialog()
             .setTitle("Exit")
-            .setMessage(context.getString(R.string.dialog_exit_message))
+            .setMessage(context.getString(com.edlplan.osudroidresource.R.string.dialog_exit_message))
             .addButton("Yes", dialog -> {
                 dialog.dismiss();
                 exit();
@@ -990,7 +989,7 @@ public class MainScene implements IUpdateHandler {
 
     public void watchReplay(String replayFile) {
         Replay replay = new Replay();
-        if (replay.loadInfo(replayFile)) {
+        if (replay.load(replayFile, false)) {
             if (replay.replayVersion >= 3) {
                 //replay
                 ScoringScene scorescene = GlobalManager.getInstance().getScoring();

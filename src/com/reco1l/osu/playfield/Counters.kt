@@ -7,12 +7,13 @@ import com.reco1l.andengine.modifier.OnModifierFinished
 import ru.nsu.ccfit.zuev.osu.*
 import ru.nsu.ccfit.zuev.skins.*
 import java.text.*
+import java.util.*
 import kotlin.math.roundToInt
 
 class ScoreCounter : SpriteFont(OsuSkin.get().scorePrefix) {
 
 
-    private val format = DecimalFormat("00000000")
+    private val format = DecimalFormat("00000000", DecimalFormatSymbols(Locale.US))
 
 
     init {
@@ -21,6 +22,7 @@ class ScoreCounter : SpriteFont(OsuSkin.get().scorePrefix) {
         setScale(0.96f)
 
         x = -10f
+        spacing = -OsuSkin.get().scoreOverlap
     }
 
 
@@ -49,7 +51,7 @@ class PPCounter(private val algorithm: DifficultyAlgorithm) : SpriteFont(OsuSkin
 class AccuracyCounter : SpriteFont(OsuSkin.get().scorePrefix) {
 
 
-    private val format = DecimalFormat("0.00%")
+    private val format = DecimalFormat("0.00%", DecimalFormatSymbols(Locale.US))
 
 
     init {
@@ -83,6 +85,7 @@ class ComboCounter : Container() {
         it.translationY = -(FONT_HEIGHT_RATIO * it.height + VERTICAL_OFFSET)
 
         it.y = -(1 - FONT_HEIGHT_RATIO) * it.height + VERTICAL_OFFSET
+        it.spacing = -OsuSkin.get().comboOverlap
 
         attachChild(it)
 
@@ -97,6 +100,7 @@ class ComboCounter : Container() {
         it.translationY = -(FONT_HEIGHT_RATIO * it.height + VERTICAL_OFFSET)
 
         it.y = -(1 - FONT_HEIGHT_RATIO) * it.height + VERTICAL_OFFSET
+        it.spacing = -OsuSkin.get().comboOverlap
 
         attachChild(it)
     }

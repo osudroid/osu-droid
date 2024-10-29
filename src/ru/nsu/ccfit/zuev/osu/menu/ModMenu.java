@@ -38,7 +38,6 @@ import ru.nsu.ccfit.zuev.osu.game.mods.ModButton;
 import ru.nsu.ccfit.zuev.osu.helper.StringTable;
 import ru.nsu.ccfit.zuev.osu.helper.TextButton;
 import ru.nsu.ccfit.zuev.osu.scoring.StatisticV2;
-import ru.nsu.ccfit.zuev.osuplus.R;
 
 
 public class ModMenu implements IModSwitcher {
@@ -235,7 +234,7 @@ public class ModMenu implements IModSwitcher {
 
         multiplierText = new ChangeableText(0, Utils.toRes(50),
                 ResourceManager.getInstance().getFont("CaptionFont"),
-                StringTable.format(R.string.menu_mod_multiplier, 1f));
+                StringTable.format(com.edlplan.osudroidresource.R.string.menu_mod_multiplier, 1f));
         multiplierText.setScale(1.2f);
         scene.attachChild(multiplierText);
 
@@ -296,7 +295,7 @@ public class ModMenu implements IModSwitcher {
 
         final TextButton resetText = new TextButton(ResourceManager
                 .getInstance().getFont("CaptionFont"),
-                StringTable.get(R.string.menu_mod_reset)) {
+                StringTable.get(com.edlplan.osudroidresource.R.string.menu_mod_reset)) {
 
             boolean moved = false;
             private float dx = 0, dy = 0;
@@ -351,7 +350,7 @@ public class ModMenu implements IModSwitcher {
 
         final TextButton back = new TextButton(ResourceManager
                 .getInstance().getFont("CaptionFont"),
-                StringTable.get(R.string.menu_mod_back)) {
+                StringTable.get(com.edlplan.osudroidresource.R.string.menu_mod_back)) {
 
             boolean moved = false;
             private float dx = 0, dy = 0;
@@ -489,7 +488,7 @@ public class ModMenu implements IModSwitcher {
             }
         }
 
-        multiplierText.setText(StringTable.format(R.string.menu_mod_multiplier,
+        multiplierText.setText(StringTable.format(com.edlplan.osudroidresource.R.string.menu_mod_multiplier,
                 mult));
         multiplierText.setPosition(
                 Config.getRES_WIDTH() / 2f - multiplierText.getWidth() / 2,
@@ -530,7 +529,7 @@ public class ModMenu implements IModSwitcher {
         }
 
         if (modsRemoved) {
-            ToastLogger.showTextId(R.string.force_diffstat_mod_unpickable, false);
+            ToastLogger.showTextId(com.edlplan.osudroidresource.R.string.force_diffstat_mod_unpickable, false);
         }
 
         return modsRemoved;

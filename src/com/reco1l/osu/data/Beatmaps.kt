@@ -1,7 +1,7 @@
 package com.reco1l.osu.data
 
 import androidx.room.*
-import com.reco1l.toolkt.kotlin.fastForEach
+import com.reco1l.toolkt.kotlin.*
 import com.rian.osu.difficulty.BeatmapDifficultyCalculator
 import ru.nsu.ccfit.zuev.osu.Config
 import ru.nsu.ccfit.zuev.osu.DifficultyAlgorithm
@@ -170,6 +170,11 @@ data class BeatmapInfo(
     var bpmMin: Float,
 
     /**
+     * The most common BPM.
+     */
+    var mostCommonBPM: Float,
+
+    /**
      * The total length of the beatmap.
      */
     var length: Long,
@@ -251,6 +256,36 @@ data class BeatmapInfo(
     val needsDifficultyCalculation
         get() = droidStarRating == null || standardStarRating == null
 
+    /**
+     * The full name of the beatmapset containing this beatmap without taking romanization into account.
+     */
+    val fullBeatmapsetName
+        get() = buildString {
+            if (setId != null && setId != -1) {
+                append(setId)
+                append(' ')
+            }
+
+            append(artist.takeUnless { it.isEmpty() } ?: "Unknown Artist")
+            append(" - ")
+            append(title.takeUnless { it.isEmpty() } ?: "Unknown Title")
+        }
+
+    /**
+     * The full name of the beatmap without taking romanization into account.
+     */
+    val fullBeatmapName
+        get() = buildString {
+            append(artist.takeUnless { it.isEmpty() } ?: "Unknown Artist")
+            append(" - ")
+            append(title.takeUnless { it.isEmpty() } ?: "Unknown Title")
+            append(" (")
+            append(creator.takeUnless { it.isEmpty() } ?: "Unknown Creator")
+            append(") [")
+            append(version.takeUnless { it.isEmpty() } ?: "Unknown Version")
+            append(']')
+        }
+
 
     /**
      * Returns the star rating based on the current algorithm configuration, whether droid or standard.
@@ -307,15 +342,48 @@ fun BeatmapInfo(data: Beatmap, lastModified: Long, calculateDifficulty: Boolean,
 
     var bpmMin = Float.MAX_VALUE
     var bpmMax = 0f
+    var bpmOverall = 0f
+    var bpmOverallDuration = 0.0
 
-    // Timing points
-    data.controlPoints.timing.controlPoints.fastForEach {
+    val timingPoints = data.controlPoints.timing.controlPoints
+
+    // The last playable time in the beatmap - the last timing point extends to this time.
+    // Note: This is more accurate and may present different results because osu!stable didn't
+    // have the ability to calculate slider durations in this context.
+    val lastTime = data.hitObjects.objects.lastOrNull()?.endTime ?: timingPoints.lastOrNull()?.time ?: 0.0
+
+
+    timingPoints.fastForEachIndexed { i, t ->
         scope?.ensureActive()
 
-        val bpm = it.bpm.toFloat()
+        val bpm = t.bpm.toFloat()
 
         bpmMin = if (bpmMin != Float.MAX_VALUE) min(bpmMin, bpm) else bpm
         bpmMax = if (bpmMax != 0f) max(bpmMax, bpm) else bpm
+
+        if (t.time > lastTime) {
+            if (bpmOverall == 0f) {
+                bpmOverall = bpm
+                bpmOverallDuration = 0.0
+            }
+
+            return@fastForEachIndexed
+        }
+
+        // osu!stable forced the first control point to start at 0.
+        val currentTime = if (i == 0) 0.0 else t.time
+        val nextTime = if (i == timingPoints.size - 1) lastTime else timingPoints[i + 1].time
+        val duration = nextTime - currentTime
+
+        if (bpmOverall == 0f || bpmOverallDuration < duration) {
+            bpmOverall = bpm
+            bpmOverallDuration = duration
+        }
+    }
+
+    if (bpmOverall == 0f) {
+        bpmOverall = 60f
+        bpmOverallDuration = 0.0
     }
 
     var droidStarRating: Float? = null
@@ -366,6 +434,7 @@ fun BeatmapInfo(data: Beatmap, lastModified: Long, calculateDifficulty: Boolean,
         standardStarRating = standardStarRating,
         bpmMin = bpmMin,
         bpmMax = bpmMax,
+        mostCommonBPM = bpmOverall,
         length = data.duration.toLong(),
         previewTime = data.general.previewTime,
         hitCircleCount = data.hitObjects.circleCount,
@@ -382,6 +451,9 @@ fun BeatmapInfo(data: Beatmap, lastModified: Long, calculateDifficulty: Boolean,
 
     @Update(onConflict = OnConflictStrategy.REPLACE)
     fun update(beatmapInfo: BeatmapInfo)
+
+    @Query("UPDATE BeatmapInfo SET droidStarRating = null, standardStarRating = null")
+    fun resetStarRatings()
 
     @Query("DELETE FROM BeatmapInfo WHERE setDirectory = :directory")
     fun deleteBeatmapSet(directory: String)

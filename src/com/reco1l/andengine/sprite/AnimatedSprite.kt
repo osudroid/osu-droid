@@ -2,6 +2,9 @@ package com.reco1l.andengine.sprite
 
 import org.anddev.andengine.opengl.texture.region.*
 import ru.nsu.ccfit.zuev.osu.*
+import kotlin.math.*
+
+
 
 
 open class AnimatedSprite(frames: Array<TextureRegion?>) : ExtendedSprite() {
@@ -11,17 +14,11 @@ open class AnimatedSprite(frames: Array<TextureRegion?>) : ExtendedSprite() {
      *
      * @param textureName The base name of the texture (do not include the frame number or the hyphen if it has).
      * @param withHyphen Whether the texture name has a hyphen before the frame number.
-     * @param fps The frame rate of the animation.
+     * @param framePerSecond The frame rate of the animation, or 0 to use the amount of frames as the frame rate.
      */
-    @JvmOverloads
-    constructor(textureName: String, withHyphen: Boolean, fps: Float = DEFAULT_FPS) : this(mutableListOf<TextureRegion?>().also { frames ->
+    constructor(textureName: String, withHyphen: Boolean, framePerSecond: Float): this(mutableListOf<TextureRegion?>().also { frames ->
 
-        var frameCount = if (fps < 0) ResourceManager.getInstance().getFrameCount(textureName) else fps.toInt()
-
-        // ResourceManager can return -1 if the textures are not present.
-        if (frameCount < 0) {
-            frameCount = DEFAULT_FPS.toInt()
-        }
+        val frameCount = ResourceManager.getInstance().getFrameCount(textureName)
 
         for (i in 0 until frameCount) {
             val frameName = textureName + (if (withHyphen) "-" else "") + i
@@ -34,8 +31,16 @@ open class AnimatedSprite(frames: Array<TextureRegion?>) : ExtendedSprite() {
         if (frames.isEmpty()) {
             frames.add(ResourceManager.getInstance().getTexture(textureName))
         }
+
     }.toTypedArray()) {
-        this.fps = fps
+
+        // When the frame rate is 0, use the amount of frames as the frame rate.
+        // If there are no frames, use the default frame rate which is 60 FPS.
+        val fps = if (framePerSecond > 0) framePerSecond else frames.size.toFloat()
+
+        if (fps > 0) {
+            frameTime = 1f / fps
+        }
     }
 
 
@@ -46,25 +51,17 @@ open class AnimatedSprite(frames: Array<TextureRegion?>) : ExtendedSprite() {
      */
     var frames = frames
         set(value) {
-            stop()
-            textureRegion = value.firstOrNull()
-            field = value
+            if (!field.contentEquals(value)) {
+                stop()
+                field = value
+                textureRegion = value.firstOrNull()
+            }
         }
 
     /**
-     * The current state of the animation.
-     *
-     * Negative values will set the frame count as the frame rate.
+     * The duration of each frame in seconds.
      */
-    var fps = -1f
-
-    /**
-     * Whether the animation is playing.
-     *
-     * Setting this value to false will pause the animation and vice-versa.
-     * To stop the animation, use the [stop] method.
-     */
-    var isPlaying = true
+    var frameTime = DEFAULT_FRAME_TIME
 
     /**
      * Whether the animation should loop.
@@ -77,42 +74,60 @@ open class AnimatedSprite(frames: Array<TextureRegion?>) : ExtendedSprite() {
     var elapsedSec = 0f
 
     /**
+     * Whether the animation is playing.
+     */
+    var isPlaying = true
+        private set
+
+    /**
      * The current frame index.
      */
     var frameIndex = 0
-        private set
+        private set(value) {
+            if (field != value) {
+                field = value
+                textureRegion = frames[value]
+            }
+        }
+
+
+    /**
+     * The duration of the animation in seconds.
+     */
+    val duration
+        get() = frames.size * frameTime
 
 
     init {
-        @Suppress("LeakingThis")
-        textureRegion = frames.firstOrNull()
+        if (frames.isNotEmpty()) {
+            @Suppress("LeakingThis")
+            textureRegion = frames[0]
+        }
     }
 
 
-    override fun onManagedUpdate(pSecondsElapsed: Float) {
+    override fun onManagedUpdate(deltaTimeSec: Float) {
 
-        val frameCount = frames.size
+        if (frames.isNotEmpty()) {
 
-        if (frameCount > 0 && isPlaying) {
+            if (isPlaying) {
+                elapsedSec += deltaTimeSec
 
-            elapsedSec += pSecondsElapsed
+                if (elapsedSec >= duration) {
 
-            val framePerSec = if (fps < 0) frameCount.toFloat() else fps
-            val frameTime = (elapsedSec * framePerSec).toInt()
-
-            if (isLoop) {
-                frameIndex = frameTime % frameCount
-            } else if (frameTime >= frameCount) {
-                frameIndex = frameCount - 1
-                stop()
+                    if (isLoop) {
+                        elapsedSec %= duration
+                    } else {
+                        elapsedSec = duration
+                        isPlaying = false
+                    }
+                }
             }
 
-            textureRegion = frames[frameIndex]
-        } else if (isPlaying) {
-            isPlaying = false
+            frameIndex = min(frames.size - 1, (elapsedSec / frameTime).toInt())
         }
 
-        super.onManagedUpdate(pSecondsElapsed)
+        super.onManagedUpdate(deltaTimeSec)
     }
 
 
@@ -132,16 +147,15 @@ open class AnimatedSprite(frames: Array<TextureRegion?>) : ExtendedSprite() {
 
 
     override fun reset() {
-        super.reset()
-        elapsedSec = 0f
-        frameIndex = 0
+        stop()
         isPlaying = true
+        super.reset()
     }
 
 
     companion object {
 
-        const val DEFAULT_FPS = 60f
+        const val DEFAULT_FRAME_TIME = 1f / 60f
 
     }
 

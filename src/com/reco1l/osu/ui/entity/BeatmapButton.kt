@@ -111,7 +111,7 @@ class BeatmapButton : Sprite(0f, 0f, getResources().getTexture("menu-button-back
 
             async {
                 try {
-                    BeatmapDownloader.download(url, "$parentSetID $artist - $title.osz")
+                    BeatmapDownloader.download(url, "$parentSetID $artist - $title")
                 } catch (e: Exception) {
                     ToastLogger.showText("Unable to download beatmap: ${e.message}", true)
                     e.printStackTrace()

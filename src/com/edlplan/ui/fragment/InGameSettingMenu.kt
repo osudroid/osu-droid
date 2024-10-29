@@ -168,8 +168,10 @@ class InGameSettingMenu : BaseFragment() {
 
         speedModifyToggle = findViewById(R.id.enableSpeedChange)!!
         speedModifyToggle.isChecked = ModMenu.getInstance().changeSpeed != 1f
+        speedModifyToggle.isEnabled = speedModifyToggle.isChecked
         speedModifyToggle.setOnCheckedChangeListener { _, isChecked ->
-            speedModifyBar.isEnabled = isChecked
+            speedModifyToggle.isEnabled = isChecked
+
             if (!isChecked) {
                 ModMenu.getInstance().changeSpeed = 1f
                 speedModifyBar.progress = 10
@@ -212,7 +214,6 @@ class InGameSettingMenu : BaseFragment() {
         speedModifyBar = findViewById(R.id.changeSpeedBar)!!
         speedModifyBar.apply {
             progress = (ModMenu.getInstance().changeSpeed * 20 - 10).toInt()
-            isEnabled = speedModifyToggle.isChecked
 
             setOnSeekBarChangeListener(
                 object : OnSeekBarChangeListener {
@@ -229,6 +230,7 @@ class InGameSettingMenu : BaseFragment() {
                     private fun update(progress: Int) {
                         val p = 0.5f + 0.05f * progress
                         speedModifyText.text = String.format(Locale.getDefault(), "%.2fx", p)
+                        speedModifyToggle.isChecked = p != 1f
                         ModMenu.getInstance().changeSpeed = p
                         ModMenu.getInstance().updateMultiplierText()
                     }

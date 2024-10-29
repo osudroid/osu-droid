@@ -3,6 +3,7 @@ package ru.nsu.ccfit.zuev.osu.menu;
 import android.animation.ValueAnimator;
 import android.annotation.SuppressLint;
 import android.app.Activity;
+import android.os.SystemClock;
 
 import com.edlplan.framework.easing.Easing;
 import com.edlplan.ui.fragment.FilterMenuFragment;
@@ -77,7 +78,6 @@ import ru.nsu.ccfit.zuev.osu.online.OnlineScoring;
 import ru.nsu.ccfit.zuev.osu.scoring.Replay;
 import ru.nsu.ccfit.zuev.osu.scoring.ScoringScene;
 import ru.nsu.ccfit.zuev.osu.scoring.StatisticV2;
-import ru.nsu.ccfit.zuev.osuplus.R;
 import ru.nsu.ccfit.zuev.skins.OsuSkin;
 import ru.nsu.ccfit.zuev.skins.SkinLayout;
 
@@ -113,7 +113,6 @@ public class SongMenu implements IUpdateHandler, MenuItemListener,
     private int pointerId = -1;
     private float initalY = -1;
     private float secPassed = 0, tapTime;
-    private ExtendedSprite backButton = null;
     private ScrollBar scrollbar;
     private boolean allowAutomaticPlaybackRestart = true;
     private ValueAnimator musicVolumeAnimator;
@@ -131,11 +130,13 @@ public class SongMenu implements IUpdateHandler, MenuItemListener,
             beatmapDifficultyText;
 
     private boolean isSelectComplete = true;
+    private ExtendedSprite currentPressedButton;
     private ExtendedSprite scoringSwitcher = null;
     private FilterMenuFragment filterMenu = null;
     private GroupType groupType = GroupType.MapSet;
 
     private Timer previousSelectionTimer;
+    private long lastSelectionTime;
     private final long previousSelectionInterval = 1000;
     private boolean previousSelectionPerformed;
     private final LinkedList<BeatmapSetItem> previousSelectedItems = new LinkedList<>();
@@ -346,7 +347,7 @@ public class SongMenu implements IUpdateHandler, MenuItemListener,
         SkinLayout layoutRandom = OsuSkin.get().getLayout("RandomButton");
         SkinLayout layoutDifficultySwitcher = OsuSkin.get().getLayout("DifficultySwitcher");
 
-        backButton = new AnimatedSprite("menu-back", true, OsuSkin.get().getAnimationFramerate()) {
+        var backButton = new AnimatedSprite("menu-back", true, OsuSkin.get().getAnimationFramerate()) {
             boolean moved = false;
             float dx = 0, dy = 0;
             boolean scaleWhenHold = true;
@@ -363,32 +364,36 @@ public class SongMenu implements IUpdateHandler, MenuItemListener,
             public boolean onAreaTouched(final TouchEvent pSceneTouchEvent,
                                          final float pTouchAreaLocalX, final float pTouchAreaLocalY) {
                 if (pSceneTouchEvent.isActionDown()) {
-                    if (scaleWhenHold) backButton.setScale(1.25f);
-                    moved = false;
-                    dx = pTouchAreaLocalX;
-                    dy = pTouchAreaLocalY;
-                    BassSoundProvider playSnd = ResourceManager.getInstance().getSound("menuback");
-                    if (playSnd != null) {
-                        playSnd.play();
+                    if (currentPressedButton == null) {
+                        currentPressedButton = this;
+                        if (scaleWhenHold) setScale(1.25f);
+                        moved = false;
+                        dx = pTouchAreaLocalX;
+                        dy = pTouchAreaLocalY;
+                        BassSoundProvider playSnd = ResourceManager.getInstance().getSound("menuback");
+                        if (playSnd != null) {
+                            playSnd.play();
+                        }
                     }
                     return true;
                 }
                 if (pSceneTouchEvent.isActionUp()) {
-                    // back
-                    if (selectedBeatmap == null) {
-                        return true;
-                    }
-                    if (!moved) {
-                        backButton.setScale(1f);
-                        back();
+                    if (currentPressedButton == this) {
+                        currentPressedButton = null;
+
+                        if (selectedBeatmap != null && !moved) {
+                            setScale(1f);
+                            back();
+                        }
                     }
                     return true;
                 }
                 if (pSceneTouchEvent.isActionOutside()
                         || pSceneTouchEvent.isActionMove()
                         && (MathUtils.distance(dx, dy, pTouchAreaLocalX,
-                        pTouchAreaLocalY) > 50)) {
-                    backButton.setScale(1f);
+                        pTouchAreaLocalY) > 50) && currentPressedButton == this) {
+                    currentPressedButton = null;
+                    setScale(1f);
                     moved = true;
                 }
                 return false;
@@ -411,31 +416,39 @@ public class SongMenu implements IUpdateHandler, MenuItemListener,
                 public boolean onAreaTouched(final TouchEvent pSceneTouchEvent,
                                              final float pTouchAreaLocalX, final float pTouchAreaLocalY) {
                     if (pSceneTouchEvent.isActionDown()) {
-                        setTextureRegion(ResourceManager.getInstance().getTextureIfLoaded("selection-mods-over"));
-                        moved = false;
-                        dx = pTouchAreaLocalX;
-                        dy = pTouchAreaLocalY;
+                        if (currentPressedButton == null) {
+                            currentPressedButton = this;
+                            setTextureRegion(ResourceManager.getInstance().getTextureIfLoaded("selection-mods-over"));
+                            moved = false;
+                            dx = pTouchAreaLocalX;
+                            dy = pTouchAreaLocalY;
+                        }
                         return true;
                     }
                     if (pSceneTouchEvent.isActionUp()) {
-                        setTextureRegion(ResourceManager.getInstance().getTextureIfLoaded("selection-mods"));
-                        if (!moved) {
-                            velocityY = 0;
-                            if (clickShortConfirmSound != null) {
-                                clickShortConfirmSound.play();
+                        if (currentPressedButton == this) {
+                            currentPressedButton = null;
+
+                            if (!moved) {
+                                setTextureRegion(ResourceManager.getInstance().getTextureIfLoaded("selection-mods"));
+                                velocityY = 0;
+                                if (clickShortConfirmSound != null) {
+                                    clickShortConfirmSound.play();
+                                }
+                                ModMenu.getInstance().show(scene, selectedBeatmap);
                             }
-                            ModMenu.getInstance().show(scene, selectedBeatmap);
                         }
                         return true;
                     }
                     if (pSceneTouchEvent.isActionOutside()
                             || pSceneTouchEvent.isActionMove()
                             && (MathUtils.distance(dx, dy, pTouchAreaLocalX,
-                            pTouchAreaLocalY) > 50)) {
+                            pTouchAreaLocalY) > 50) && currentPressedButton == this) {
                         if (!moved && clickShortSound != null) {
                             clickShortSound.play();
                         }
 
+                        currentPressedButton = null;
                         moved = true;
                         setTextureRegion(ResourceManager.getInstance().getTextureIfLoaded("selection-mods"));
                     }
@@ -456,34 +469,42 @@ public class SongMenu implements IUpdateHandler, MenuItemListener,
             public boolean onAreaTouched(final TouchEvent pSceneTouchEvent,
                                          final float pTouchAreaLocalX, final float pTouchAreaLocalY) {
                 if (pSceneTouchEvent.isActionDown()) {
-                    setTextureRegion(ResourceManager.getInstance().getTextureIfLoaded("selection-options-over"));
-                    moved = false;
-                    dx = pTouchAreaLocalX;
-                    dy = pTouchAreaLocalY;
+                    if (currentPressedButton == null) {
+                        currentPressedButton = this;
+                        setTextureRegion(ResourceManager.getInstance().getTextureIfLoaded("selection-options-over"));
+                        moved = false;
+                        dx = pTouchAreaLocalX;
+                        dy = pTouchAreaLocalY;
+                    }
                     return true;
                 }
                 if (pSceneTouchEvent.isActionUp()) {
-                    setTextureRegion(ResourceManager.getInstance().getTextureIfLoaded("selection-options"));
-                    if (!moved) {
-                        velocityY = 0;
-                        if (clickShortConfirmSound != null) {
-                            clickShortConfirmSound.play();
+                    if (currentPressedButton == this) {
+                        currentPressedButton = null;
+
+                        if (!moved) {
+                            setTextureRegion(ResourceManager.getInstance().getTextureIfLoaded("selection-options"));
+                            velocityY = 0;
+                            if (clickShortConfirmSound != null) {
+                                clickShortConfirmSound.play();
+                            }
+
+                            if (filterMenu == null) loadFilterFragment();
+
+                            filterMenu.showMenu(SongMenu.this);
                         }
-
-                        if (filterMenu == null) loadFilterFragment();
-
-                        filterMenu.showMenu(SongMenu.this);
                     }
                     return true;
                 }
                 if (pSceneTouchEvent.isActionOutside()
                         || pSceneTouchEvent.isActionMove()
                         && (MathUtils.distance(dx, dy, pTouchAreaLocalX,
-                        pTouchAreaLocalY) > 50)) {
+                        pTouchAreaLocalY) > 50) && currentPressedButton == this) {
                     if (!moved && clickShortSound != null) {
                         clickShortSound.play();
                     }
 
+                    currentPressedButton = null;
                     moved = true;
                     setTextureRegion(ResourceManager.getInstance().getTextureIfLoaded("selection-options"));
                 }
@@ -504,102 +525,113 @@ public class SongMenu implements IUpdateHandler, MenuItemListener,
             public boolean onAreaTouched(final TouchEvent pSceneTouchEvent,
                                          final float pTouchAreaLocalX, final float pTouchAreaLocalY) {
                 if (pSceneTouchEvent.isActionDown()) {
-                    setTextureRegion(ResourceManager.getInstance().getTextureIfLoaded("selection-random-over"));
-                    moved = false;
-                    dx = pTouchAreaLocalX;
-                    dy = pTouchAreaLocalY;
+                    if (currentPressedButton == null && SystemClock.uptimeMillis() - lastSelectionTime > previousSelectionInterval / 4) {
+                        currentPressedButton = this;
 
-                    if (previousSelectionTimer != null) {
-                        previousSelectionTimer.cancel();
+                        setTextureRegion(ResourceManager.getInstance().getTextureIfLoaded("selection-random-over"));
+                        moved = false;
+                        dx = pTouchAreaLocalX;
+                        dy = pTouchAreaLocalY;
+
+                        if (previousSelectionTimer != null) {
+                            previousSelectionTimer.cancel();
+                        }
+
+                        previousSelectionTimer = new Timer();
+                        previousSelectionTimer.scheduleAtFixedRate(new TimerTask() {
+                            @Override
+                            public void run() {
+                                if (!isSelectComplete) {
+                                    return;
+                                }
+
+                                BeatmapSetItem previousItem = previousSelectedItems.pollLast();
+                                while (previousItem != null && previousItem.isDeleted()) {
+                                    previousItem = previousSelectedItems.pollLast();
+                                }
+
+                                if (previousItem == null) {
+                                    cancel();
+                                    return;
+                                }
+
+                                previousSelectionPerformed = true;
+
+                                if (clickShortConfirmSound != null) {
+                                    clickShortConfirmSound.play();
+                                }
+
+                                previousItem.select();
+                            }
+
+                            @Override
+                            public boolean cancel() {
+                                previousSelectionTimer = null;
+                                return super.cancel();
+                            }
+                        }, previousSelectionInterval, previousSelectionInterval);
+
+                        previousSelectionPerformed = false;
                     }
-
-                    previousSelectionTimer = new Timer();
-                    previousSelectionTimer.scheduleAtFixedRate(new TimerTask() {
-                        @Override
-                        public void run() {
-                            if (!isSelectComplete) {
-                                return;
-                            }
-
-                            BeatmapSetItem previousItem = previousSelectedItems.pollLast();
-                            while (previousItem != null && previousItem.isDeleted()) {
-                                previousItem = previousSelectedItems.pollLast();
-                            }
-
-                            if (previousItem == null) {
-                                cancel();
-                                return;
-                            }
-
-                            previousSelectionPerformed = true;
-
-                            if (clickShortConfirmSound != null) {
-                                clickShortConfirmSound.play();
-                            }
-
-                            previousItem.select();
-                        }
-
-                        @Override
-                        public boolean cancel() {
-                            previousSelectionTimer = null;
-                            return super.cancel();
-                        }
-                    }, previousSelectionInterval, previousSelectionInterval);
-
-                    previousSelectionPerformed = false;
                     return true;
                 }
                 if (pSceneTouchEvent.isActionUp()) {
-                    setTextureRegion(ResourceManager.getInstance().getTextureIfLoaded("selection-random"));
+                    if (currentPressedButton == this) {
+                        currentPressedButton = null;
 
-                    if (previousSelectionTimer != null) {
-                        previousSelectionTimer.cancel();
-                    }
+                        setTextureRegion(ResourceManager.getInstance().getTextureIfLoaded("selection-random"));
 
-                    if (!isSelectComplete) {
-                        return true;
-                    }
+                        lastSelectionTime = SystemClock.uptimeMillis();
+                        if (previousSelectionTimer != null) {
+                            previousSelectionTimer.cancel();
+                        }
 
-                    if (!moved && !previousSelectionPerformed) {
-                        velocityY = 0;
-                        if (items.size() <= 1) {
+                        if (!isSelectComplete) {
                             return true;
                         }
-                        int rnd = MathUtils.random(0, items.size() - 1);
-                        int index = 0;
-                        while (rnd > 0) {
-                            rnd--;
-                            int oldIndex = index;
-                            do {
-                                index = (index + 1) % items.size();
-                                if (index == oldIndex)
-                                    return true;
-                            } while (!items.get(index).isVisible());
+
+                        if (!moved && !previousSelectionPerformed) {
+                            velocityY = 0;
+                            if (items.size() <= 1) {
+                                return true;
+                            }
+                            int rnd = MathUtils.random(0, items.size() - 1);
+                            int index = 0;
+                            while (rnd > 0) {
+                                rnd--;
+                                int oldIndex = index;
+                                do {
+                                    index = (index + 1) % items.size();
+                                    if (index == oldIndex)
+                                        return true;
+                                } while (!items.get(index).isVisible());
+                            }
+                            if (!items.get(index).isVisible()) {
+                                return true;
+                            }
+                            if (selectedItem == items.get(index)) {
+                                return true;
+                            }
+                            if (clickShortConfirmSound != null) {
+                                clickShortConfirmSound.play();
+                            }
+                            items.get(index).select();
                         }
-                        if (!items.get(index).isVisible()) {
-                            return true;
-                        }
-                        if (selectedItem == items.get(index)) {
-                            return true;
-                        }
-                        if (clickShortConfirmSound != null) {
-                            clickShortConfirmSound.play();
-                        }
-                        items.get(index).select();
+
+                        previousSelectionPerformed = false;
                     }
 
-                    previousSelectionPerformed = false;
                     return true;
                 }
                 if (pSceneTouchEvent.isActionOutside()
                         || pSceneTouchEvent.isActionMove()
                         && (MathUtils.distance(dx, dy, pTouchAreaLocalX,
-                        pTouchAreaLocalY) > 50)) {
+                        pTouchAreaLocalY) > 50) && currentPressedButton == this) {
                     if (!moved && clickShortSound != null) {
                         clickShortSound.play();
                     }
 
+                    currentPressedButton = null;
                     moved = true;
                     setTextureRegion(ResourceManager.getInstance().getTextureIfLoaded("selection-random"));
 
@@ -620,33 +652,38 @@ public class SongMenu implements IUpdateHandler, MenuItemListener,
         randomMap.setScale(1.5f);
         difficultySwitcher.setScale(1.5f);
 
-        if (OsuSkin.get().isUseNewLayout()) {
-            if (layoutBackButton != null) {
-                layoutBackButton.apply(backButton);
-            }
-            if (layoutMods != null && modSelection != null) {
-                layoutMods.apply(modSelection, backButton);
-            }
-            if (layoutOptions != null) {
-                layoutOptions.apply(optionSelection, modSelection != null ? modSelection : backButton);
-            }
-            if (layoutRandom != null) {
-                layoutRandom.apply(randomMap, optionSelection);
-            }
-            if (layoutDifficultySwitcher != null) {
-                layoutDifficultySwitcher.apply(difficultySwitcher, randomMap);
-            }
+        var isNewLayout = OsuSkin.get().isUseNewLayout();
+
+        if (isNewLayout && layoutBackButton != null) {
+            layoutBackButton.apply(backButton);
         } else {
             backButton.setPosition(0, Config.getRES_HEIGHT() - backButton.getHeightScaled());
+        }
 
-            if (modSelection != null) {
-                modSelection.setPosition(backButton.getX() + backButton.getWidthScaled(), Config.getRES_HEIGHT() - modSelection.getHeightScaled());
-                optionSelection.setPosition(modSelection.getX() + modSelection.getWidthScaled(), Config.getRES_HEIGHT() - optionSelection.getHeightScaled());
+        if (modSelection != null) {
+            if (isNewLayout && layoutMods != null) {
+                layoutMods.apply(modSelection, backButton);
             } else {
-                optionSelection.setPosition(backButton.getX() + backButton.getWidthScaled(), Config.getRES_HEIGHT() - optionSelection.getHeightScaled());
+                modSelection.setPosition(backButton.getX() + backButton.getWidthScaled(), Config.getRES_HEIGHT() - modSelection.getHeightScaled());
             }
+        }
 
+        if (isNewLayout && layoutOptions != null) {
+            layoutOptions.apply(optionSelection, modSelection != null ? modSelection : backButton);
+        } else {
+            var prevButton = modSelection != null ? modSelection : backButton;
+            optionSelection.setPosition(prevButton.getX() + prevButton.getWidthScaled(), Config.getRES_HEIGHT() - optionSelection.getHeightScaled());
+        }
+
+        if (isNewLayout && layoutRandom != null) {
+            layoutRandom.apply(randomMap, optionSelection);
+        } else {
             randomMap.setPosition(optionSelection.getX() + optionSelection.getWidthScaled(), Config.getRES_HEIGHT() - randomMap.getHeightScaled());
+        }
+
+        if (isNewLayout && layoutDifficultySwitcher != null) {
+            layoutDifficultySwitcher.apply(difficultySwitcher, randomMap);
+        } else {
             difficultySwitcher.setPosition(randomMap.getX() + randomMap.getWidthScaled(), Config.getRES_HEIGHT() - difficultySwitcher.getHeightScaled());
         }
 
@@ -996,22 +1033,18 @@ public class SongMenu implements IUpdateHandler, MenuItemListener,
             beatmapLengthText.setColor(46 / 255f, 139 / 255f, 87 / 255f);
         }
 
-        float bpm_min = beatmapInfo.getBpmMin() * totalSpeedMultiplier;
-        float bpm_max = beatmapInfo.getBpmMax() * totalSpeedMultiplier;
+        int minBpm = Math.round(beatmapInfo.getBpmMin() * totalSpeedMultiplier);
+        int maxBpm = Math.round(beatmapInfo.getBpmMax() * totalSpeedMultiplier);
+        int commonBpm = Math.round(beatmapInfo.getMostCommonBPM() * totalSpeedMultiplier);
         long length = (long) (beatmapInfo.getLength() / totalSpeedMultiplier);
 
-        @SuppressLint("SimpleDateFormat") SimpleDateFormat sdf = new SimpleDateFormat("mm:ss");
+        @SuppressLint("SimpleDateFormat")
+        SimpleDateFormat sdf = new SimpleDateFormat(length > 3600 * 1000 ? "HH:mm:ss" : "mm:ss");
         sdf.setTimeZone(TimeZone.getTimeZone("GMT+0"));
-        String binfoStr = String.format(StringTable.get(R.string.binfoStr1), sdf.format(length),
-                (bpm_min == bpm_max ? GameHelper.Round(bpm_min, 1) : GameHelper.Round(bpm_min, 1) + "-" + GameHelper.Round(bpm_max, 1)),
+        String binfoStr = String.format(StringTable.get(com.edlplan.osudroidresource.R.string.binfoStr1), sdf.format(length),
+                (minBpm == maxBpm ? commonBpm : minBpm + "-" + maxBpm + " (" + commonBpm + ")"),
                 beatmapInfo.getMaxCombo());
-        if (length > 3600 * 1000) {
-            sdf = new SimpleDateFormat("HH:mm:ss");
-            sdf.setTimeZone(TimeZone.getTimeZone("GMT+0"));
-            binfoStr = String.format(StringTable.get(R.string.binfoStr1), sdf.format(length),
-                    (bpm_min == bpm_max ? GameHelper.Round(bpm_min, 1) : GameHelper.Round(bpm_min, 1) + "-" + GameHelper.Round(bpm_max, 1)),
-                    beatmapInfo.getMaxCombo());
-        }
+
         beatmapLengthText.setText(binfoStr);
 
         String dimensionString =
@@ -1039,7 +1072,7 @@ public class SongMenu implements IUpdateHandler, MenuItemListener,
 
         String tinfoStr = beatmapInfo.getArtistText() + " - " + beatmapInfo.getTitleText() + " [" + beatmapInfo.getVersion() + "]";
         String mapperStr = "Beatmap by " + beatmapInfo.getCreator();
-        String binfoStr2 = String.format(StringTable.get(R.string.binfoStr2),
+        String binfoStr2 = String.format(StringTable.get(com.edlplan.osudroidresource.R.string.binfoStr2),
                 beatmapInfo.getHitCircleCount(), beatmapInfo.getSliderCount(), beatmapInfo.getSpinnerCount(), beatmapInfo.getSetId());
         beatmapMetadataText.setText(tinfoStr);
         beatmapCreatorText.setText(mapperStr);
@@ -1139,7 +1172,6 @@ public class SongMenu implements IUpdateHandler, MenuItemListener,
             Replay.oldFLFollowDelay = ModMenu.getInstance().getFLfollowDelay();
 
             game.startGame(beatmapInfo, null);
-            unload();
             return;
         }
         isSelectComplete = false;
@@ -1279,9 +1311,6 @@ public class SongMenu implements IUpdateHandler, MenuItemListener,
     public void onScroll(final float where) {
         velocityY = 0;
         camY = where - Config.getRES_HEIGHT() / 2f;
-    }
-
-    public void unload() {
     }
 
     public void back() {
@@ -1522,7 +1551,7 @@ public class SongMenu implements IUpdateHandler, MenuItemListener,
     }
 
     public void showDeleteScoreMenu(int scoreId) {
-        (new ScoreMenuFragment()).show(scoreId);
+        (new ScoreMenuFragment()).show(selectedBeatmap, scoreId);
     }
 
     public void select() {

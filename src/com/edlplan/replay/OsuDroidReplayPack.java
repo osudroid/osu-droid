@@ -2,12 +2,14 @@ package com.edlplan.replay;
 
 import static com.reco1l.osu.data.Scores.ScoreInfo;
 
+import com.reco1l.osu.data.BeatmapInfo;
 import com.reco1l.osu.data.ScoreInfo;
-import com.reco1l.osu.data.Scores;
 
+import org.apache.commons.io.FilenameUtils;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
@@ -20,27 +22,32 @@ import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 import java.util.zip.ZipOutputStream;
 
-import ru.nsu.ccfit.zuev.osu.Config;
+import ru.nsu.ccfit.zuev.osu.scoring.Replay;
 
 public class OsuDroidReplayPack {
 
-    public static void packTo(File file, ScoreInfo scoreInfo) throws Exception {
+    public static void packTo(File file, BeatmapInfo beatmapInfo, ScoreInfo scoreInfo) throws Exception {
         if (!file.exists()) {
             file.createNewFile();
         }
         FileOutputStream outputStream = new FileOutputStream(file);
-        outputStream.write(pack(scoreInfo));
+        outputStream.write(pack(beatmapInfo, scoreInfo));
         outputStream.close();
     }
 
-    public static byte[] pack(ScoreInfo scoreInfo) throws Exception {
+    public static byte[] pack(BeatmapInfo beatmapInfo, ScoreInfo scoreInfo) throws Exception {
         try (ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
              ZipOutputStream outputStream = new ZipOutputStream(byteArrayOutputStream)){
             outputStream.putNextEntry(new ZipEntry("entry.json"));
 
             JSONObject entryJson = new JSONObject();
-            entryJson.put("version", 1);
-            entryJson.put("replaydata", scoreInfo.toJSON());
+            JSONObject replayData = scoreInfo.toJSON();
+
+            // ScoreInfo does not contain beatmap info
+            replayData.put("filename", beatmapInfo.getFullBeatmapsetName() + '/' + beatmapInfo.getFullBeatmapName());
+
+            entryJson.put("version", 2);
+            entryJson.put("replaydata", replayData);
 
             outputStream.write(entryJson.toString(2).getBytes());
 
@@ -77,8 +84,27 @@ public class OsuDroidReplayPack {
         }
         inputStream.close();
 
-        entry.scoreInfo = ScoreInfo(new JSONObject(new String(zipEntryMap.get("entry.json"))).getJSONObject("replaydata"));
-        entry.replayFile = zipEntryMap.get(entry.scoreInfo.getReplayFilename());
+        var json = new JSONObject(new String(zipEntryMap.get("entry.json")));
+        int version = json.getInt("version");
+        var replayData = json.getJSONObject("replaydata");
+        var replayFilename = FilenameUtils.getName(replayData.getString("replayfile"));
+        var replayFile = zipEntryMap.get(replayFilename);
+
+        if (version < 2) {
+            // Exported replay v1 does not contain MD5 hash, so we need to obtain it from the odr file.
+            try (var byteArrayInputStream = new ByteArrayInputStream(replayFile)) {
+                var replay = new Replay(false);
+
+                if (!replay.load(byteArrayInputStream, replayFilename, false)) {
+                    throw new IOException("Failed to load replay");
+                }
+
+                replayData.put("beatmapMD5", replay.getMd5());
+            }
+        }
+
+        entry.scoreInfo = ScoreInfo(replayData);
+        entry.replayFile = replayFile;
 
         return entry;
     }

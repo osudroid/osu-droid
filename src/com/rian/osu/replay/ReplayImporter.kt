@@ -81,7 +81,7 @@ object ReplayImporter {
     private fun importOdr(file: File) {
         val replay = Replay()
 
-        if (!replay.loadInfo(file.path)) {
+        if (!replay.load(file.path, false)) {
             throw Exception("Failed to load replay info")
         }
 
@@ -93,7 +93,7 @@ object ReplayImporter {
             // For temporary replays, we need to change the extension of the replay to odr.
             // While we are at it, rename the replay file into something meaningful and not conflict other replays.
             if (replayFilename.startsWith("importedReplay") && replayFilename.endsWith(".tmp")) {
-                replayFilename = playerName + "_" + beatmapFilename + "_" + System.currentTimeMillis() + ".odr"
+                replayFilename = playerName + "_" + replay.beatmapsetName + "_" + replay.beatmapName + "_" + System.currentTimeMillis() + ".odr"
             }
         }
 
