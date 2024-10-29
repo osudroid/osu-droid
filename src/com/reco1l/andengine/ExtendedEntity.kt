@@ -380,6 +380,8 @@ abstract class ExtendedEntity(
         if (clearDepthBufferBeforeDraw) {
             pGL.glClear(GL_DEPTH_BUFFER_BIT)
         }
+
+        GLHelper.setDepthTest(pGL, testWithDepthBuffer)
     }
 
     override fun onApplyVertices(pGL: GL10) {
@@ -390,14 +392,6 @@ abstract class ExtendedEntity(
 
     }
 
-    override fun doDraw(pGL: GL10, pCamera: Camera) {
-
-        GLHelper.setDepthTest(pGL, testWithDepthBuffer)
-
-        super.doDraw(pGL, pCamera)
-
-        GLHelper.setDepthTest(pGL, false)
-    }
 
 
     // Vertex buffer

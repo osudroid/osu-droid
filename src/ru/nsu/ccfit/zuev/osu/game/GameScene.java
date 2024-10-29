@@ -1257,8 +1257,8 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
         if (video != null && elapsedTime >= videoOffset)
         {
             if (!videoStarted) {
-                video.getTexture().play();
-                video.getTexture().setPlaybackSpeed(GameHelper.getSpeedMultiplier());
+                video.play();
+                video.setPlaybackSpeed(GameHelper.getSpeedMultiplier());
                 videoStarted = true;
             }
 
@@ -1556,7 +1556,7 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
 
             GlobalManager.getInstance().getSongService().seekTo(seekTime);
             if (video != null) {
-                video.getTexture().seekTo(videoSeekTime);
+                video.seekTo(videoSeekTime);
             }
 
             if (skipBtn != null) {
@@ -2117,7 +2117,7 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
         }
 
         if (video != null && videoStarted) {
-            video.getTexture().pause();
+            video.pause();
         }
 
         stopLoopingSamples();
@@ -2178,7 +2178,7 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
         gameStarted = false;
 
         if (video != null) {
-            video.getTexture().pause();
+            video.pause();
         }
 
         if (GlobalManager.getInstance().getSongService() != null && GlobalManager.getInstance().getSongService().getStatus() == Status.PLAYING) {
@@ -2210,7 +2210,7 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
         }
 
         if (video != null && videoStarted) {
-            video.getTexture().play();
+            video.play();
         }
 
         if (GlobalManager.getInstance().getSongService() != null && GlobalManager.getInstance().getSongService().getStatus() != Status.PLAYING && elapsedTime > 0) {

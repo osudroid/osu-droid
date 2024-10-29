@@ -73,7 +73,9 @@ object DatabaseManager {
             .allowMainThreadQueries()
             .build()
 
-        loadLegacyMigrations(context)
+        if (!BuildConfig.DEBUG) {
+            loadLegacyMigrations(context)
+        }
     }
 
     @Suppress("UNCHECKED_CAST")
