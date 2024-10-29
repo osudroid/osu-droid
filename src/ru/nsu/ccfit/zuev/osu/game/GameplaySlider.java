@@ -387,7 +387,7 @@ public class GameplaySlider extends GameObject {
     }
 
     private PointF getPositionAt(final float percentage, final boolean updateBallAngle, final boolean updateEndArrowRotation) {
-        if (path.pointCount == 0) {
+        if (path.pointCount < 2) {
             tmpPoint.set(position);
             return tmpPoint;
         }
@@ -396,14 +396,12 @@ public class GameplaySlider extends GameObject {
             tmpPoint.set(curveEndPos);
             return tmpPoint;
         } else if (percentage <= 0) {
-            if (path.pointCount >= 2) {
-                if (updateBallAngle) {
-                    ballAngle = MathUtils.radToDeg(Utils.direction(path.getX(1), path.getY(1), position.x, position.y));
-                }
+            if (updateBallAngle) {
+                ballAngle = MathUtils.radToDeg(Utils.direction(path.getX(1), path.getY(1), position.x, position.y));
+            }
 
-                if (updateEndArrowRotation) {
-                    endArrow.setRotation(MathUtils.radToDeg(Utils.direction(position.x, position.y, path.getX(1), path.getY(1))));
-                }
+            if (updateEndArrowRotation) {
+                endArrow.setRotation(MathUtils.radToDeg(Utils.direction(position.x, position.y, path.getX(1), path.getY(1))));
             }
 
             tmpPoint.set(position);
@@ -801,9 +799,11 @@ public class GameplaySlider extends GameObject {
                         preStageFinish = true;
                     }
 
-                    endArrow.setRotation(
-                        MathUtils.radToDeg(Utils.direction(curveEndPos.x, curveEndPos.y, path.getX(path.pointCount - 2), path.getY(path.pointCount - 2)))
-                    );
+                    if (path.pointCount >= 2) {
+                        endArrow.setRotation(
+                            MathUtils.radToDeg(Utils.direction(curveEndPos.x, curveEndPos.y, path.getX(path.pointCount - 2), path.getY(path.pointCount - 2)))
+                        );
+                    }
 
                     tailCirclePiece.setPosition(curveEndPos.x, curveEndPos.y);
                     endArrow.setPosition(curveEndPos.x, curveEndPos.y);
