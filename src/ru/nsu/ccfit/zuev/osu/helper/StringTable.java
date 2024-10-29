@@ -1,15 +1,20 @@
 package ru.nsu.ccfit.zuev.osu.helper;
 
 import android.content.Context;
+
+import androidx.annotation.NonNull;
 import androidx.annotation.StringRes;
 
 import java.util.Formatter;
 
 public class StringTable {
-    static Context context;
+
+    private static Context context;
 
     private static StringBuilder sb;
+
     private static Formatter f;
+
 
     public static void setContext(final Context context) {
         StringTable.context = context;
@@ -25,6 +30,7 @@ public class StringTable {
         return str;
     }
 
+
     private static void allocateFormatter() {
         if (sb == null)
             sb = new StringBuilder();
@@ -33,13 +39,15 @@ public class StringTable {
             f = new Formatter(sb);
     }
 
-    public static String format(final int resid, final Object... objects) {
+    @NonNull
+    synchronized public static String format(final int resid, final Object... objects) {
         allocateFormatter();
         f.format(get(resid), objects);
         return sb.toString();
     }
 
-    public static String format(final String format, final Object... objects) {
+    @NonNull
+    synchronized public static String format(final String format, final Object... objects) {
         allocateFormatter();
         f.format(format, objects);
         return sb.toString();
