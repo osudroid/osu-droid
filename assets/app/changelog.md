@@ -139,6 +139,10 @@ for preventing accidental touches.
 
 # Changes
 
+## Minimum Android version requirement
+
+osu!droid version 1.8 has an increased minimum Android version of 7, effectively removing support for Android 5, 5.1, and 6.
+
 ## Storage migration
 
 This update migrates the storage location of local scores, beatmap collections, and beatmap options into an integrated
