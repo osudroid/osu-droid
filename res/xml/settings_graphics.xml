@@ -57,7 +57,7 @@
         <CheckBoxPreference
             android:defaultValue="true"
             android:key="animateComboText"
-            android:summary="@string/opt_animate_follow_circle_summary"
+            android:summary="@string/opt_animate_combo_text_summary"
             android:title="@string/opt_animate_combo_text_title" />
 
         <CheckBoxPreference
