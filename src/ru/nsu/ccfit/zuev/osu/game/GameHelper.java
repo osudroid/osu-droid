@@ -30,6 +30,7 @@ public class GameHelper {
     private static boolean isEasy;
     private static boolean isKiai = false;
     private static boolean auto = false;
+    private static boolean precise = false;
     private static double beatLength = 0;
     private static double currentBeatTime = 0;
     private static boolean samplesMatchPlaybackRate;
@@ -233,6 +234,14 @@ public class GameHelper {
 
     public static void setAuto(boolean auto) {
         GameHelper.auto = auto;
+    }
+
+    public static boolean isPrecise() {
+        return precise;
+    }
+
+    public static void setPrecise(boolean precise) {
+        GameHelper.precise = precise;
     }
 
     public static float Round(double value, int digits) throws NumberFormatException {

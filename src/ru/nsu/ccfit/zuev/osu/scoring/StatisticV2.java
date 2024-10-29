@@ -26,8 +26,6 @@ public class StatisticV2 implements Serializable {
     private static final long serialVersionUID = 8339570462000129479L;
     private static final Random random = new Random();
     private static final int scoreV2MaxScore = 1000000;
-    private static final float scoreV2AccPortion = 0.3f;
-    private static final float scoreV2ComboPortion = 0.7f;
 
     int hit300 = 0, hit100 = 0, hit50 = 0;
     int hit300k = 0, hit100k = 0;
@@ -36,7 +34,6 @@ public class StatisticV2 implements Serializable {
     long time = 0;
     private int currentCombo = 0;
     private int scoreHash = 0;
-    private int totalScore;
     private float hp = 1;
     private float diffModifier = 1;
     private EnumSet<GameMod> mod = EnumSet.noneOf(GameMod.class);
@@ -46,8 +43,10 @@ public class StatisticV2 implements Serializable {
     private String mark = null;
     private float changeSpeed = 1.0f;
     private int beatmapNoteCount = 0;
-    private int beatmapMaxCombo = 0;
     private int bonusScore = 0;
+    private int v1Score = 0;
+    private int v2Score = 0;
+    private int v1MaxScore = 0;
     private float flFollowDelay = FlashLightEntity.defaultMoveDelayS;
     private int positiveTotalOffsetSum;
     private double positiveHitOffsetSum;
@@ -137,15 +136,15 @@ public class StatisticV2 implements Serializable {
         }
     }
 
-    public int getTotalScore() {
-        return totalScore;
-    }
-
     public int getTotalScoreWithMultiplier() {
         if (forcedScore > 0)
             return forcedScore;
 
-        return (int) (totalScore * modScoreMultiplier);
+        if (GameHelper.isScoreV2()) {
+            return (int) (v2Score * modScoreMultiplier);
+        } else {
+            return (int) (v1Score * modScoreMultiplier);
+        }
     }
 
     public void registerSpinnerHit() {
@@ -235,41 +234,51 @@ public class StatisticV2 implements Serializable {
             scoreHash = random.nextInt(1313) | 3455;
             return;
         }
-        //如果使用scorev2
+
+        if (amount == 1000) {
+            bonusScore += amount;
+        }
+
+        int addition = amount + (int) (amount * currentCombo * diffModifier / 25);
+
+        // It is possible for score addition to be a negative number due to
+        // difficulty modifier, hence the prior check.
+        //
+        // In that case, just skip score addition to ensure score is always positive.
+        if (addition > 0) {
+            if (v1Score + addition < 0) {
+                v1Score = Integer.MAX_VALUE;
+            } else {
+                v1Score += amount;
+
+                if (combo) {
+                    v1Score += (int) ((amount * currentCombo * diffModifier) / 25);
+                }
+            }
+        }
+
+        // Calculate ScoreV2
         if (GameHelper.isScoreV2()) {
             if (amount == 1000) {
                 bonusScore += amount;
             }
 
-            int currentMaxCombo = getScoreMaxCombo();
-            // At this point, the combo increment in registerHit has not happened, but it is necessary for ScoreV2
-            // calculation, so we do it locally here.
-            if (currentCombo == currentMaxCombo) {
-                currentMaxCombo++;
+            double scorePortion;
+            double accuracyPortion;
+
+            if (GameHelper.isPrecise()) {
+                scorePortion = 0.3f * Math.sqrt((double) v1Score / v1MaxScore);
+                accuracyPortion = 0.7f * Math.pow(getAccuracy(), 2);
+            } else {
+                scorePortion = 0.4f * Math.sqrt((double) v1Score / v1MaxScore);
+                accuracyPortion = 0.6f * Math.pow(getAccuracy(), 8);
             }
 
-            double comboPortion = scoreV2ComboPortion * currentMaxCombo / beatmapMaxCombo;
-            double accuracyPortion = scoreV2AccPortion * Math.pow(getAccuracy(), 8) * getNotesHit() / beatmapNoteCount;
-
-            totalScore = (int) (scoreV2MaxScore * (comboPortion + accuracyPortion)) + bonusScore;
-        } else if (amount + amount * currentCombo * diffModifier / 25 > 0) {
-            // It is possible for score addition to be a negative number due to
-            // difficulty modifier, hence the prior check.
-            //
-            // In that case, just skip score addition to ensure score is always positive.
-
-            //如果分数溢出或分数满了
-            if (totalScore + (amount * currentCombo * diffModifier) / 25 + amount < 0 || totalScore == Integer.MAX_VALUE){
-                totalScore = Integer.MAX_VALUE;
-            }
-            else{
-                totalScore += amount;
-                if (combo) {
-                    totalScore += (int) ((amount * currentCombo * diffModifier) / 25);
-                }
-            }
+            float progress = getNotesHit() / (float) beatmapNoteCount;
+            v2Score = (int) (scoreV2MaxScore * (scorePortion + accuracyPortion * progress)) + bonusScore;
         }
-        scoreHash = SecurityUtils.getHigh16Bits(totalScore);
+
+        scoreHash = SecurityUtils.getHigh16Bits(v1Score);
     }
 
     public String getMark() {
@@ -320,10 +329,6 @@ public class StatisticV2 implements Serializable {
 
     public void setMark(String mark) {
         this.mark = mark;
-    }
-
-    public void setTotalScore(int totalScore) {
-        this.totalScore = totalScore;
     }
 
     public int getScoreMaxCombo() {
@@ -572,7 +577,11 @@ public class StatisticV2 implements Serializable {
 
     public void setForcedScore(int forcedScore) {
         this.forcedScore = forcedScore;
-        totalScore = forcedScore;
+        v1Score = forcedScore;
+    }
+
+    public void setV1MaxScore(int v1MaxScore) {
+        this.v1MaxScore = v1MaxScore;
     }
 
     public void setBeatmapMD5(String beatmapMD5) {
@@ -580,7 +589,7 @@ public class StatisticV2 implements Serializable {
     }
 
     public final boolean isScoreValid() {
-        return SecurityUtils.getHigh16Bits(totalScore) == scoreHash;
+        return SecurityUtils.getHigh16Bits(v1Score) == scoreHash;
     }
 
     public String compile() {
@@ -620,9 +629,6 @@ public class StatisticV2 implements Serializable {
 
     public void setBeatmapNoteCount(int count){
         beatmapNoteCount = count;
-    }
-    public void setBeatmapMaxCombo(int count){
-        beatmapMaxCombo = count;
     }
 
     public float getChangeSpeed(){

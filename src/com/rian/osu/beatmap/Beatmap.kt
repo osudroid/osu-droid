@@ -3,6 +3,7 @@ package com.rian.osu.beatmap
 import com.rian.osu.GameMode
 import com.rian.osu.beatmap.hitobject.HitObject
 import com.rian.osu.beatmap.hitobject.Slider
+import com.rian.osu.beatmap.hitobject.sliderobject.*
 import com.rian.osu.beatmap.sections.*
 import com.rian.osu.mods.IModApplicableToBeatmap
 import com.rian.osu.mods.IModApplicableToDifficulty
@@ -39,6 +40,37 @@ open class Beatmap(
         hitObjects.objects.sumOf {
             if (it is Slider) it.nestedHitObjects.size else 1
         }
+    }
+
+    /**
+     * The maximum score of this [Beatmap].
+     */
+    val maxScore by lazy {
+        var score = 0
+        var combo = 0
+
+        val difficultyMultiplier = 1 + difficulty.od / 10 + difficulty.hp / 10 + (difficulty.gameplayCS - 3) / 4
+
+        for (obj in hitObjects.objects) {
+            if (obj !is Slider) {
+                score += (300 + (300 * combo * difficultyMultiplier) / 25).toInt()
+                combo++
+                continue
+            }
+
+            for (nested in obj.nestedHitObjects) {
+                score += when (nested) {
+                    is SliderHead, is SliderRepeat -> 30
+                    is SliderTick -> 10
+                    is SliderTail -> 300 + (300 * combo * difficultyMultiplier / 25).toInt()
+                    else -> 0
+                }
+
+                combo++
+            }
+        }
+
+        score
     }
 
     /**

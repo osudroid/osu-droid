@@ -583,9 +583,9 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
 
         stat.setDiffModifier(multiplier);
         stat.setBeatmapNoteCount(beatmapInfo.getTotalHitObjectCount());
-        stat.setBeatmapMaxCombo(beatmapInfo.getMaxCombo());
         stat.setBeatmapCS(rawDifficulty.gameplayCS);
         stat.setBeatmapOD(rawDifficulty.od);
+        stat.setV1MaxScore(parsedBeatmap.getMaxScore());
 
         stat.setCustomAR(ModMenu.getInstance().getCustomAR());
         stat.setCustomOD(ModMenu.getInstance().getCustomOD());
@@ -723,6 +723,7 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
         GameHelper.setRelaxMod(stat.getMod().contains(GameMod.MOD_RELAX));
         GameHelper.setAutopilotMod(stat.getMod().contains(GameMod.MOD_AUTOPILOT));
         GameHelper.setAuto(stat.getMod().contains(GameMod.MOD_AUTO));
+        GameHelper.setPrecise(stat.getMod().contains(GameMod.MOD_PRECISE));
         GameHelper.setSuddenDeath(stat.getMod().contains(GameMod.MOD_SUDDENDEATH));
         GameHelper.setPerfect(stat.getMod().contains(GameMod.MOD_PERFECT));
         GameHelper.setScoreV2(stat.getMod().contains(GameMod.MOD_SCOREV2));
