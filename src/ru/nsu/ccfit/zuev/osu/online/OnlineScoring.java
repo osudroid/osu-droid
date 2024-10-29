@@ -120,15 +120,18 @@ public class OnlineScoring {
                     OnlineManager.getInstance().setStayOnline(false);
 
                     if (OnlineManager.getInstance().getFailMessage().equals("Cannot connect to server")) {
-                        snackbar.setText("Cannot connect to server. Please check the following article for troubleshooting.");
+                        Execution.mainThread(() -> {
+                            snackbar.dismiss();
+                            snackbar.setText("Cannot connect to server. Please check the following article for troubleshooting.");
 
-                        snackbar.setAction("Check", (v) -> {
-                            var intent = new Intent(Intent.ACTION_VIEW, Uri.parse("https://neroyuki.github.io/osudroid-guide/help/login_fail"));
+                            snackbar.setAction("Check", (v) -> {
+                                var intent = new Intent(Intent.ACTION_VIEW, Uri.parse("https://neroyuki.github.io/osudroid-guide/help/login_fail"));
 
-                            GlobalManager.getInstance().getMainActivity().startActivity(intent);
+                                GlobalManager.getInstance().getMainActivity().startActivity(intent);
+                            });
+
+                            snackbar.show();
                         });
-
-                        snackbar.show();
                     }
                 }
             }
