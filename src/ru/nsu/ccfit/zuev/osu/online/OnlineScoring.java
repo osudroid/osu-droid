@@ -30,7 +30,8 @@ public class OnlineScoring {
     private final Snackbar snackbar = Snackbar.make(
             GlobalManager.getInstance().getMainActivity().getWindow().getDecorView(),
             "", 10000);
-    private Job loginJob;
+
+    private Job loginJob, avatarJob;
 
     public static OnlineScoring getInstance() {
         if (instance == null)
@@ -222,9 +223,14 @@ public class OnlineScoring {
         if (avatarUrl == null || avatarUrl.length() == 0)
             return;
 
-        Execution.async(() -> {
+        if (avatarJob != null) {
+            avatarJob.cancel(new CancellationException("Avatar loading cancelled"));
+        }
+
+        avatarJob = Execution.async((scope) -> {
             synchronized (onlineMutex) {
                 avatarLoaded = OnlineManager.getInstance().loadAvatarToTextureManager();
+                JobKt.ensureActive(scope.getCoroutineContext());
                 if (both)
                     updatePanelAvatars();
                 else if (secondPanel != null)
