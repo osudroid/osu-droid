@@ -61,7 +61,7 @@ public class Replay {
         if (allocateMoves) {
             cursorMoves.add(new MoveArray(200));
             cursorMoves.add(new MoveArray(50));
-            for (int i = 2; i < GameScene.CursorCount; i++) {
+            for (int i = 2; i < GameScene.getCursorCount(); i++) {
                 cursorMoves.add(new MoveArray(15));
             }
         }
