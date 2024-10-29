@@ -147,28 +147,28 @@ class GameplayLeaderboard(var playerName: String, private val stats: StatisticV2
             {
                 // Computing the bound from player position towards the limit of sprites that can be shown.
                 val minBound: Int = playerPosition - maxAllowed + 1
-                val showRange = minBound + 1 until playerPosition
 
                 var i = 0
                 while (i < spriteCount)
                 {
                     val sprite = getChild(i)
+                    val isInBounds = i in minBound..<playerPosition
 
                     // Showing only sprites that are between the bound index exclusive up to player position inclusive, the
                     // first sprite will always be shown so that's why the bound index is exclusive.
-                    sprite.isVisible = i == 0 || i == playerPosition || i in showRange
+                    sprite.isVisible = i == 0 || i == playerPosition || isInBounds
 
-                    sprite.setPosition(0f, when (i) {
+                    sprite.setPosition(0f, when {
 
                         // First always on top
-                        0 -> VERTICAL_PADDING
+                        i == 0 -> VERTICAL_PADDING
 
                         // Player always on bottom
-                        playerPosition -> maxY
+                        i == playerPosition -> maxY
 
                         // Sprites outside the bounds will be placed at its respective limit, at this point this sprite
                         // shouldn't be visible.
-                        !in showRange -> if (i < minBound) VERTICAL_PADDING else maxY
+                        !isInBounds -> if (i < minBound) VERTICAL_PADDING else maxY
 
                         // Placing sprites respectively from maxY accounting for first sprite
                         else -> maxY - SPRITE_HEIGHT * (playerPosition - i)
