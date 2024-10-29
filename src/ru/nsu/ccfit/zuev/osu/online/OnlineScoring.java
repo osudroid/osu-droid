@@ -12,9 +12,10 @@ import com.rian.osu.ui.SendingPanel;
 
 import org.anddev.andengine.util.Debug;
 
-import java.io.File;
-import java.util.ArrayList;
+import java.util.concurrent.CancellationException;
 
+import kotlinx.coroutines.Job;
+import kotlinx.coroutines.JobKt;
 import ru.nsu.ccfit.zuev.osu.GlobalManager;
 import ru.nsu.ccfit.zuev.osu.ToastLogger;
 import ru.nsu.ccfit.zuev.osu.scoring.StatisticV2;
@@ -29,6 +30,7 @@ public class OnlineScoring {
     private final Snackbar snackbar = Snackbar.make(
             GlobalManager.getInstance().getMainActivity().getWindow().getDecorView(),
             "", 10000);
+    private Job loginJob;
 
     public static OnlineScoring getInstance() {
         if (instance == null)
@@ -89,7 +91,11 @@ public class OnlineScoring {
             return;
         avatarLoaded = false;
 
-        Execution.async(() -> {
+        if (loginJob != null) {
+            loginJob.cancel(new CancellationException("Login cancelled"));
+        }
+
+        loginJob = Execution.async((scope) -> {
             synchronized (onlineMutex) {
                 boolean success = false;
 
@@ -98,6 +104,7 @@ public class OnlineScoring {
                     setPanelMessage("Logging in...", "");
 
                     try {
+                        JobKt.ensureActive(scope.getCoroutineContext());
                         success = OnlineManager.getInstance().logIn();
                     } catch (OnlineManager.OnlineManagerException e) {
                         Debug.e("Login error: " + e.getMessage());
