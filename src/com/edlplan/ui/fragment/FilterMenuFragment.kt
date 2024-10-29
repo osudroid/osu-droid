@@ -13,7 +13,7 @@ import android.widget.EditText
 import androidx.preference.PreferenceManager
 import com.edlplan.framework.easing.Easing
 import com.edlplan.framework.support.util.Updater
-import com.edlplan.osudroidresource.R.*
+import com.osudroid.resources.R.*
 import com.edlplan.ui.BaseAnimationListener
 import com.edlplan.ui.EasingHelper
 import com.reco1l.osu.mainThread

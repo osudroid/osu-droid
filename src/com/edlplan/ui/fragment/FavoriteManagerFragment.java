@@ -63,7 +63,7 @@ public class FavoriteManagerFragment extends BaseFragment {
                         return null;
                     }
 
-                    if (!DatabaseManager.getBeatmapCollectionsTable().collectionExists(input) && !input.equals(StringTable.get(com.edlplan.osudroidresource.R.string.favorite_default))) {
+                    if (!DatabaseManager.getBeatmapCollectionsTable().collectionExists(input) && !input.equals(StringTable.get(com.osudroid.resources.R.string.favorite_default))) {
                         DatabaseManager.getBeatmapCollectionsTable().insertCollection(input);
                         adapter.add(input);
                     }
@@ -191,7 +191,7 @@ public class FavoriteManagerFragment extends BaseFragment {
             Collections.sort(folders);
 
             if (includeDefaultFolder()) {
-                folders.add(0, StringTable.get(com.edlplan.osudroidresource.R.string.favorite_default));
+                folders.add(0, StringTable.get(com.osudroid.resources.R.string.favorite_default));
             }
         }
 
@@ -223,7 +223,7 @@ public class FavoriteManagerFragment extends BaseFragment {
 
                 new MessageDialog()
                     .setTitle("Remove collection")
-                    .setMessage(getContext().getString(com.edlplan.osudroidresource.R.string.favorite_ensure))
+                    .setMessage(getContext().getString(com.osudroid.resources.R.string.favorite_ensure))
                     .addButton("Yes", dialog -> {
 
                         DatabaseManager.getBeatmapCollectionsTable().clearCollection(folder);

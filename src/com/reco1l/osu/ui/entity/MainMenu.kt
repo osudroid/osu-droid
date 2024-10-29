@@ -1,6 +1,6 @@
 package com.reco1l.osu.ui.entity
 
-import com.edlplan.osudroidresource.R.*
+import com.osudroid.resources.R.*
 import com.reco1l.andengine.sprite.*
 import com.reco1l.osu.async
 import com.reco1l.osu.multiplayer.LobbyScene

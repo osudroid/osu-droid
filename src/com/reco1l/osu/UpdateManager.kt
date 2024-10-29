@@ -4,7 +4,7 @@ import android.content.Intent
 import android.content.Intent.*
 import androidx.core.content.FileProvider
 import androidx.preference.PreferenceManager
-import com.edlplan.osudroidresource.R
+import com.osudroid.resources.R
 import com.edlplan.ui.fragment.MarkdownFragment
 import com.google.android.material.snackbar.BaseTransientBottomBar.LENGTH_INDEFINITE
 import com.google.android.material.snackbar.BaseTransientBottomBar.LENGTH_SHORT

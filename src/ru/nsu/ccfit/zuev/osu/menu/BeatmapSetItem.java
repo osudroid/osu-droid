@@ -53,7 +53,7 @@ public class BeatmapSetItem {
 
         titleStr = beatmapInfo.getArtistText() + " - " + beatmapInfo.getTitleText();
 
-        creatorStr = StringTable.format(com.edlplan.osudroidresource.R.string.menu_creator,
+        creatorStr = StringTable.format(com.osudroid.resources.R.string.menu_creator,
                 beatmapInfo.getCreator());
         beatmapItems = new BeatmapItem[beatmapSetInfo.getCount()];
 
@@ -75,7 +75,7 @@ public class BeatmapSetItem {
 
         titleStr = beatmapInfo.getArtistText() + " - " + beatmapInfo.getTitleText();
 
-        creatorStr = StringTable.format(com.edlplan.osudroidresource.R.string.menu_creator, beatmapInfo.getCreator());
+        creatorStr = StringTable.format(com.osudroid.resources.R.string.menu_creator, beatmapInfo.getCreator());
         beatmapItems = new BeatmapItem[1];
         beatmapId = id;
 

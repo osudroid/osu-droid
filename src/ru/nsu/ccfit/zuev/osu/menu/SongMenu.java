@@ -1041,7 +1041,7 @@ public class SongMenu implements IUpdateHandler, MenuItemListener,
         @SuppressLint("SimpleDateFormat")
         SimpleDateFormat sdf = new SimpleDateFormat(length > 3600 * 1000 ? "HH:mm:ss" : "mm:ss");
         sdf.setTimeZone(TimeZone.getTimeZone("GMT+0"));
-        String binfoStr = String.format(StringTable.get(com.edlplan.osudroidresource.R.string.binfoStr1), sdf.format(length),
+        String binfoStr = String.format(StringTable.get(com.osudroid.resources.R.string.binfoStr1), sdf.format(length),
                 (minBpm == maxBpm ? commonBpm : minBpm + "-" + maxBpm + " (" + commonBpm + ")"),
                 beatmapInfo.getMaxCombo());
 
@@ -1072,8 +1072,12 @@ public class SongMenu implements IUpdateHandler, MenuItemListener,
 
         String tinfoStr = beatmapInfo.getArtistText() + " - " + beatmapInfo.getTitleText() + " [" + beatmapInfo.getVersion() + "]";
         String mapperStr = "Beatmap by " + beatmapInfo.getCreator();
-        String binfoStr2 = String.format(StringTable.get(com.edlplan.osudroidresource.R.string.binfoStr2),
-                beatmapInfo.getHitCircleCount(), beatmapInfo.getSliderCount(), beatmapInfo.getSpinnerCount(), beatmapInfo.getSetId());
+        String binfoStr2 = StringTable.format(com.osudroid.resources.R.string.binfoStr2,
+                beatmapInfo.getHitCircleCount(),
+                beatmapInfo.getSliderCount(),
+                beatmapInfo.getSpinnerCount(),
+                beatmapInfo.getSetId()
+        );
         beatmapMetadataText.setText(tinfoStr);
         beatmapCreatorText.setText(mapperStr);
         beatmapHitObjectsText.setText(binfoStr2);
@@ -1268,7 +1272,7 @@ public class SongMenu implements IUpdateHandler, MenuItemListener,
     public void openScore(final int id, boolean showOnline, final String playerName) {
         if (showOnline) {
             engine.setScene(new LoadingScreen().getScene());
-            ToastLogger.showTextId(com.edlplan.osudroidresource.R.string.online_loadrecord, false);
+            ToastLogger.showTextId(com.osudroid.resources.R.string.online_loadrecord, false);
 
             cancelCalculationJobs();
             cancelMapStatusLoadingJob();

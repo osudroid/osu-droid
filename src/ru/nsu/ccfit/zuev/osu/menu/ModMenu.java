@@ -234,7 +234,7 @@ public class ModMenu implements IModSwitcher {
 
         multiplierText = new ChangeableText(0, Utils.toRes(50),
                 ResourceManager.getInstance().getFont("CaptionFont"),
-                StringTable.format(com.edlplan.osudroidresource.R.string.menu_mod_multiplier, 1f));
+                StringTable.format(com.osudroid.resources.R.string.menu_mod_multiplier, 1f));
         multiplierText.setScale(1.2f);
         scene.attachChild(multiplierText);
 
@@ -294,7 +294,7 @@ public class ModMenu implements IModSwitcher {
 
         final TextButton resetText = new TextButton(ResourceManager
                 .getInstance().getFont("CaptionFont"),
-                StringTable.get(com.edlplan.osudroidresource.R.string.menu_mod_reset)) {
+                StringTable.get(com.osudroid.resources.R.string.menu_mod_reset)) {
 
             boolean moved = false;
             private float dx = 0, dy = 0;
@@ -349,7 +349,7 @@ public class ModMenu implements IModSwitcher {
 
         final TextButton back = new TextButton(ResourceManager
                 .getInstance().getFont("CaptionFont"),
-                StringTable.get(com.edlplan.osudroidresource.R.string.menu_mod_back)) {
+                StringTable.get(com.osudroid.resources.R.string.menu_mod_back)) {
 
             boolean moved = false;
             private float dx = 0, dy = 0;
@@ -487,7 +487,7 @@ public class ModMenu implements IModSwitcher {
             }
         }
 
-        multiplierText.setText(StringTable.format(com.edlplan.osudroidresource.R.string.menu_mod_multiplier,
+        multiplierText.setText(StringTable.format(com.osudroid.resources.R.string.menu_mod_multiplier,
                 mult));
         multiplierText.setPosition(
                 Config.getRES_WIDTH() / 2f - multiplierText.getWidth() / 2,
@@ -528,7 +528,7 @@ public class ModMenu implements IModSwitcher {
         }
 
         if (modsRemoved) {
-            ToastLogger.showTextId(com.edlplan.osudroidresource.R.string.force_diffstat_mod_unpickable, false);
+            ToastLogger.showTextId(com.osudroid.resources.R.string.force_diffstat_mod_unpickable, false);
         }
 
         return modsRemoved;
