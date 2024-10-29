@@ -157,21 +157,10 @@ public class FileUtils {
     }
 
     public static File[] listFiles(File directory, String[] endsWithExtensions) {
-        if(Build.VERSION.SDK_INT < Build.VERSION_CODES.N) {
-            return listFiles(directory, file -> {
-                for(String extension : endsWithExtensions) {
-                    if(file.getName().toLowerCase().endsWith(extension)) {
-                        return true;
-                    }
-                }
-                return false;
-            });
-        }else {
-            return listFiles(directory, file -> {
-                String filename = file.getName().toLowerCase();
-                return Arrays.stream(endsWithExtensions).anyMatch(filename::endsWith);
-            });
-        }
+        return listFiles(directory, file -> {
+            String filename = file.getName().toLowerCase();
+            return Arrays.stream(endsWithExtensions).anyMatch(filename::endsWith);
+        });
     }
 
     public static File[] listFiles(File directory, FileFilter filter) {

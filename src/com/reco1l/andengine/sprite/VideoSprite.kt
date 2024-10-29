@@ -3,8 +3,6 @@ package com.reco1l.andengine.sprite
 import android.media.*
 import android.opengl.GLES11Ext.GL_TEXTURE_EXTERNAL_OES
 import android.os.*
-import com.reco1l.andengine.*
-import com.reco1l.andengine.shape.*
 import com.reco1l.andengine.texture.*
 import org.anddev.andengine.engine.Engine
 import org.anddev.andengine.engine.camera.Camera
@@ -75,9 +73,7 @@ class VideoSprite(source: String, private val engine: Engine) : Sprite(0f, 0f, V
     }
 
     fun setPlaybackSpeed(speed: Float) {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-            texture.player.playbackParams = texture.player.playbackParams.setSpeed(speed)
-        }
+        texture.player.playbackParams = texture.player.playbackParams.setSpeed(speed)
     }
 
 

@@ -607,17 +607,13 @@ public class MainActivity extends BaseGameActivity implements
                 && GlobalManager.getInstance().getEngine().getScene() == GlobalManager.getInstance().getGameScene().getScene()) {
             GlobalManager.getInstance().getEngine().getTextureManager().reloadTextures();
         }
-        if (GlobalManager.getInstance().getMainScene() != null) {
-            if (songService != null && Build.VERSION.SDK_INT > 10) {
-                if (songService.hideNotification()) {
-                    if (wakeLock != null && wakeLock.isHeld()) wakeLock.release();
-                    GlobalManager.getInstance().getMainScene().loadBeatmapInfo();
-                    GlobalManager.getInstance().getMainScene().loadTimingPoints(false);
-                    GlobalManager.getInstance().getMainScene().progressBar.setTime(songService.getLength());
-                    GlobalManager.getInstance().getMainScene().progressBar.setPassedTime(songService.getPosition());
-                    GlobalManager.getInstance().getMainScene().musicControl(MainScene.MusicOption.SYNC);
-                }
-            }
+        if (GlobalManager.getInstance().getMainScene() != null && songService != null && songService.hideNotification()) {
+            if (wakeLock != null && wakeLock.isHeld()) wakeLock.release();
+            GlobalManager.getInstance().getMainScene().loadBeatmapInfo();
+            GlobalManager.getInstance().getMainScene().loadTimingPoints(false);
+            GlobalManager.getInstance().getMainScene().progressBar.setTime(songService.getLength());
+            GlobalManager.getInstance().getMainScene().progressBar.setPassedTime(songService.getPosition());
+            GlobalManager.getInstance().getMainScene().musicControl(MainScene.MusicOption.SYNC);
         }
     }
 
@@ -685,7 +681,7 @@ public class MainActivity extends BaseGameActivity implements
             }
         }
 
-        if (hasFocus && Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT && Config.isHideNaviBar()) {
+        if (hasFocus && Config.isHideNaviBar()) {
             getWindow().getDecorView().setSystemUiVisibility(
                     View.SYSTEM_UI_FLAG_LAYOUT_STABLE
                             | View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION

@@ -292,10 +292,7 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
 
         Sprite bgSprite = null;
 
-        if (Config.isVideoEnabled() && playableBeatmap.getEvents().videoFilename != null
-                // Unfortunately MediaPlayer API doesn't allow to change playback speed on APIs < 23, so in that case
-                // the video will not be shown.
-                && (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M || GameHelper.getSpeedMultiplier() == 1.0f)) {
+        if (Config.isVideoEnabled() && playableBeatmap.getEvents().videoFilename != null) {
             try {
                 videoStarted = false;
                 videoOffset = playableBeatmap.getEvents().videoStartTime / 1000f;
