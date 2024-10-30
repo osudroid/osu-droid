@@ -20,7 +20,8 @@ class RoomPlayerList(val room: Room) : ScrollableList(), IScrollDetectorListener
 
     val menu = RoomPlayerMenu()
 
-    var isValid = false
+
+    private var isValid = false
 
 
     init {
