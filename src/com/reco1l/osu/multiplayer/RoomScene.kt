@@ -33,9 +33,7 @@ import org.anddev.andengine.entity.text.ChangeableText
 import org.anddev.andengine.input.touch.TouchEvent
 import org.anddev.andengine.util.MathUtils
 import org.json.JSONArray
-import ru.nsu.ccfit.zuev.osu.Config
-import ru.nsu.ccfit.zuev.osu.LibraryManager
-import ru.nsu.ccfit.zuev.osu.ToastLogger
+import ru.nsu.ccfit.zuev.osu.*
 import ru.nsu.ccfit.zuev.osu.game.mods.GameMod.MOD_SCOREV2
 import ru.nsu.ccfit.zuev.osu.helper.TextButton
 import ru.nsu.ccfit.zuev.osu.menu.LoadingScreen.LoadingScene
@@ -44,8 +42,6 @@ import ru.nsu.ccfit.zuev.osu.scoring.Replay
 import ru.nsu.ccfit.zuev.skins.OsuSkin
 import java.text.SimpleDateFormat
 import java.util.*
-import ru.nsu.ccfit.zuev.osu.GlobalManager
-import ru.nsu.ccfit.zuev.osu.ResourceManager
 import ru.nsu.ccfit.zuev.osu.menu.ModMenu
 import ru.nsu.ccfit.zuev.osu.online.OnlineManager
 
@@ -183,7 +179,7 @@ object RoomScene : Scene(), IRoomEventListener, IPlayerEventListener {
             attachChild(beatmapInfoRectangle)
         }
 
-        OsuSkin.get().getColor("MenuItemDefaultTextColor", BeatmapButton.DEFAULT_TEXT_COLOR).apply(beatmapInfoText)
+        OsuSkin.get().getColor("MenuItemDefaultTextColor", RGBColor(1f, 1f, 1f)).apply(beatmapInfoText)
 
 
         readyButton = object : TextButton(ResourceManager.getInstance().getFont("CaptionFont"), "Ready") {

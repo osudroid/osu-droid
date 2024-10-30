@@ -11,8 +11,7 @@ import com.osudroid.resources.R
 import com.reco1l.osu.ui.MessageDialog
 import ru.nsu.ccfit.zuev.osu.MainActivity
 
-object AccessibilityDetector
-{
+object AccessibilityDetector {
 
 
     /**
@@ -44,8 +43,7 @@ object AccessibilityDetector
 
         context.runOnUiThread {
 
-            if (isIllegalServiceDetected)
-            {
+            if (isIllegalServiceDetected) {
                 if (alert == null)
                     alert = showAlert(context, illegalServices)
 

@@ -10,32 +10,32 @@ import com.reco1l.osu.mainThread
 import com.reco1l.osu.multiplayer.RoomScene
 import com.reco1l.osu.ui.SettingsFragment
 import org.anddev.andengine.input.touch.TouchEvent
+import ru.nsu.ccfit.zuev.osu.GlobalManager
 import ru.nsu.ccfit.zuev.osu.LibraryManager
 import ru.nsu.ccfit.zuev.osu.MainScene
 import ru.nsu.ccfit.zuev.osu.MainScene.MusicOption
+import ru.nsu.ccfit.zuev.osu.ResourceManager
 import ru.nsu.ccfit.zuev.osu.ToastLogger
 import ru.nsu.ccfit.zuev.osu.helper.StringTable
 import ru.nsu.ccfit.zuev.osu.menu.LoadingScreen
-import ru.nsu.ccfit.zuev.osu.GlobalManager.getInstance as getGlobal
-import ru.nsu.ccfit.zuev.osu.ResourceManager.getInstance as getResources
-import ru.nsu.ccfit.zuev.osu.online.OnlineManager.getInstance as getOnline
+import ru.nsu.ccfit.zuev.osu.online.OnlineManager
 
 class MainMenu(val main: MainScene) {
 
 
-    private val playSound = getResources().loadSound("menuhit", "sfx/menuhit.ogg", false)
+    private val playSound = ResourceManager.getInstance().loadSound("menuhit", "sfx/menuhit.ogg", false)
 
-    private val playTexture = getResources().getTexture("play")
+    private val playTexture = ResourceManager.getInstance().getTexture("play")
 
-    private val soloTexture = getResources().getTexture("solo")
+    private val soloTexture = ResourceManager.getInstance().getTexture("solo")
 
-    private val optionsTexture = getResources().getTexture("options")
+    private val optionsTexture = ResourceManager.getInstance().getTexture("options")
 
-    private val multiTexture = getResources().getTexture("multi")
+    private val multiTexture = ResourceManager.getInstance().getTexture("multi")
 
-    private val exitTexture = getResources().getTexture("exit")
+    private val exitTexture = ResourceManager.getInstance().getTexture("exit")
 
-    private val backTexture = getResources().getTexture("back")
+    private val backTexture = ResourceManager.getInstance().getTexture("back")
 
 
     /**
@@ -67,25 +67,25 @@ class MainMenu(val main: MainScene) {
                     return true
                 }
 
-                getGlobal().songService.isGaming = true
+                GlobalManager.getInstance().songService.isGaming = true
 
                 async {
                     LoadingScreen().show()
 
-                    getGlobal().mainActivity.checkNewSkins()
-                    getGlobal().mainActivity.loadBeatmapLibrary()
+                    GlobalManager.getInstance().mainActivity.checkNewSkins()
+                    GlobalManager.getInstance().mainActivity.loadBeatmapLibrary()
 
                     if (LibraryManager.getLibrary().isEmpty()) {
-                        getGlobal().songService.isGaming = false
-                        getGlobal().engine.scene = main.scene
+                        GlobalManager.getInstance().songService.isGaming = false
+                        GlobalManager.getInstance().engine.scene = main.scene
 
                         BeatmapListing().show()
                     } else {
                         main.musicControl(MusicOption.PLAY)
 
-                        getGlobal().songMenu.reload()
-                        getGlobal().songMenu.show()
-                        getGlobal().songMenu.select()
+                        GlobalManager.getInstance().songMenu.reload()
+                        GlobalManager.getInstance().songMenu.show()
+                        GlobalManager.getInstance().songMenu.select()
                     }
                 }
 
@@ -119,26 +119,26 @@ class MainMenu(val main: MainScene) {
                 }
 
                 if (textureRegion == optionsTexture) {
-                    getGlobal().songService.isGaming = true
+                    GlobalManager.getInstance().songService.isGaming = true
                     mainThread { SettingsFragment().show() }
                     return true
                 }
 
-                if (!getOnline().isStayOnline) {
+                if (!OnlineManager.getInstance().isStayOnline) {
                     ToastLogger.showText(StringTable.format(string.multiplayer_not_online), true)
                     return true
                 }
 
-                getGlobal().songService.isGaming = true
+                GlobalManager.getInstance().songService.isGaming = true
                 Multiplayer.isMultiplayer = true
 
                 async {
                     LoadingScreen().show()
 
-                    getGlobal().mainActivity.checkNewSkins()
-                    getGlobal().mainActivity.loadBeatmapLibrary()
+                    GlobalManager.getInstance().mainActivity.checkNewSkins()
+                    GlobalManager.getInstance().mainActivity.loadBeatmapLibrary()
 
-                    getGlobal().songMenu.reload()
+                    GlobalManager.getInstance().songMenu.reload()
 
                     RoomScene.load()
                     LobbyScene.load()
