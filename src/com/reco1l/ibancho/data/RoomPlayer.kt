@@ -35,5 +35,7 @@ data class RoomPlayer(
     var isMuted = false
 
 
-    override fun equals(other: Any?) = other === this || other is RoomPlayer && other.id == id
+    override fun equals(other: Any?): Boolean {
+        return other === this || other is RoomPlayer && other.id == id
+    }
 }
