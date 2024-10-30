@@ -1,7 +1,6 @@
 package ru.nsu.ccfit.zuev.osu.game;
 
 import android.graphics.PointF;
-import android.os.Build;
 import android.os.SystemClock;
 import android.util.Log;
 
@@ -22,7 +21,7 @@ import com.reco1l.osu.data.DatabaseManager;
 import com.reco1l.andengine.sprite.AnimatedSprite;
 import com.reco1l.andengine.texture.BlankTextureRegion;
 import com.reco1l.andengine.sprite.ExtendedSprite;
-import com.reco1l.osu.Modifiers;
+import com.reco1l.andengine.Modifiers;
 import com.reco1l.andengine.Anchor;
 import com.reco1l.andengine.sprite.VideoSprite;
 import com.reco1l.andengine.ExtendedScene;
