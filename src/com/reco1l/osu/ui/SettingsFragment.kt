@@ -356,7 +356,7 @@ class SettingsFragment : com.edlplan.ui.fragment.SettingsFragment() {
 
     private fun handlePlayerSectionPreferences() {
         findPreference<SelectPreference>("player_team")!!.apply {
-            isEnabled = Multiplayer.room!!.teamMode == TeamMode.TEAM_VS_TEAM
+            isEnabled = Multiplayer.room!!.teamMode == TeamMode.TeamVersus
             value = Multiplayer.player!!.team?.ordinal?.toString()
 
             setOnPreferenceChangeListener { _, newValue ->

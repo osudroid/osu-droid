@@ -8,12 +8,12 @@ enum class TeamMode {
     /**
      * Players are playing individually head-to-head.
      */
-    HEAD_TO_HEAD,
+    HeadToHead,
 
     /**
      * Players are playing in teams.
      */
-    TEAM_VS_TEAM;
+    TeamVersus;
 
 
     companion object {

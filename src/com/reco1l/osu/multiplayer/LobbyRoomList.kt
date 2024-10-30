@@ -4,8 +4,8 @@ import android.view.inputmethod.EditorInfo
 import com.reco1l.ibancho.RoomAPI
 import com.reco1l.ibancho.data.Room
 import com.reco1l.ibancho.data.RoomStatus.*
-import com.reco1l.ibancho.data.TeamMode.HEAD_TO_HEAD
-import com.reco1l.ibancho.data.TeamMode.TEAM_VS_TEAM
+import com.reco1l.ibancho.data.TeamMode.HeadToHead
+import com.reco1l.ibancho.data.TeamMode.TeamVersus
 import com.reco1l.ibancho.data.WinCondition.*
 import com.reco1l.osu.mainThread
 import com.reco1l.osu.ui.PromptDialog
@@ -138,8 +138,8 @@ class LobbyRoomList : ScrollableList()
         // Icon
         val texName = when (room.teamMode)
         {
-            HEAD_TO_HEAD -> "head_head"
-            TEAM_VS_TEAM -> "team_vs"
+            HeadToHead -> "head_head"
+            TeamVersus -> "team_vs"
         }
 
         val icon = Sprite(10f, 0f, getResources().getTexture(texName)).also {
@@ -160,17 +160,17 @@ class LobbyRoomList : ScrollableList()
 
         val status = when (room.status)
         {
-            CHANGING_BEATMAP -> "Changing beatmap"
-            PLAYING -> "Playing a match"
+            ChangingBeatmap -> "Changing beatmap"
+            Playing -> "Playing a match"
             else -> "Idle"
         }
 
         val winCondition = when (room.winCondition)
         {
-            SCORE_V1 -> "Score V1"
-            ACCURACY -> "Accuracy"
-            MAX_COMBO -> "Combo"
-            SCORE_V2 -> "Score V2"
+            ScoreV1 -> "Score V1"
+            HighestAccuracy -> "Accuracy"
+            MaximumCombo -> "Combo"
+            ScoreV2 -> "Score V2"
         }
 
         val infoText = """

@@ -1,7 +1,7 @@
 package com.reco1l.osu.ui.entity
 
 import com.reco1l.ibancho.RoomAPI
-import com.reco1l.ibancho.data.PlayerStatus.READY
+import com.reco1l.ibancho.data.PlayerStatus.Ready
 import com.reco1l.ibancho.data.RoomBeatmap
 import com.reco1l.osu.async
 import com.reco1l.osu.multiplayer.Multiplayer
@@ -12,8 +12,6 @@ import org.anddev.andengine.entity.sprite.Sprite
 import org.anddev.andengine.entity.text.ChangeableText
 import org.anddev.andengine.input.touch.TouchEvent
 import org.anddev.andengine.util.MathUtils
-import ru.nsu.ccfit.zuev.osu.Config
-import ru.nsu.ccfit.zuev.osu.DifficultyAlgorithm
 import ru.nsu.ccfit.zuev.osu.LibraryManager
 import ru.nsu.ccfit.zuev.osu.RGBColor
 import ru.nsu.ccfit.zuev.osu.ToastLogger
@@ -73,7 +71,7 @@ class BeatmapButton : Sprite(0f, 0f, getResources().getTexture("menu-button-back
             moved = true
         }
 
-        if (moved || !event.isActionUp || Multiplayer.player!!.status == READY || RoomScene.awaitBeatmapChange || RoomScene.awaitStatusChange)
+        if (moved || !event.isActionUp || Multiplayer.player!!.status == Ready || RoomScene.awaitBeatmapChange || RoomScene.awaitStatusChange)
             return true
 
         getResources().getSound("menuclick")?.play()

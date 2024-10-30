@@ -8,17 +8,17 @@ enum class RoomTeam {
     /**
      * The red team.
      */
-    RED,
+    Red,
 
     /**
      * The blue team.
      */
-    BLUE;
+    Blue;
 
 
     override fun toString() = when (this) {
-        RED -> "Red Team"
-        BLUE -> "Blue Team"
+        Red -> "Red Team"
+        Blue -> "Blue Team"
     }
 
 

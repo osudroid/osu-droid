@@ -124,12 +124,12 @@ class RoomPlayerList(val room: Room) : ScrollableList(), IScrollDetectorListener
             text.isVisible = true
             text.text = "${player!!.name}\n${player!!.mods}"
 
-            if (room!!.teamMode == TeamMode.TEAM_VS_TEAM)
+            if (room!!.teamMode == TeamMode.TeamVersus)
             {
                 when (player!!.team)
                 {
-                    RED -> setColor(1f, 0.2f, 0.2f, 0.15f)
-                    BLUE -> setColor(0.2f, 0.2f, 1f, 0.15f)
+                    Red -> setColor(1f, 0.2f, 0.2f, 0.15f)
+                    Blue -> setColor(0.2f, 0.2f, 1f, 0.15f)
                     else -> setColor(1f, 1f, 1f, 0.15f)
                 }
             }
@@ -145,7 +145,7 @@ class RoomPlayerList(val room: Room) : ScrollableList(), IScrollDetectorListener
 
             when (player!!.status)
             {
-                MISSING_BEATMAP ->
+                MissingBeatmap ->
                 {
                     val icon = getResources().getTexture("missing")
 
@@ -155,9 +155,9 @@ class RoomPlayerList(val room: Room) : ScrollableList(), IScrollDetectorListener
                     state.setColor(1f, 0.1f, 0.1f)
                 }
 
-                NOT_READY -> state.setColor(1f, 0.1f, 0.1f)
-                READY -> state.setColor(0.1f, 1f, 0.1f)
-                PLAYING -> state.setColor(0.1f, 0.1f, 1f)
+                NotReady -> state.setColor(1f, 0.1f, 0.1f)
+                Ready -> state.setColor(0.1f, 1f, 0.1f)
+                Playing -> state.setColor(0.1f, 0.1f, 1f)
             }
         }
 

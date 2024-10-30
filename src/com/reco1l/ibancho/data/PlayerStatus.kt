@@ -8,22 +8,22 @@ enum class PlayerStatus {
     /**
      * The player is not ready.
      */
-    NOT_READY,
+    NotReady,
 
     /**
      * The player is ready.
      */
-    READY,
+    Ready,
 
     /**
      * The player does not have the selected beatmap.
      */
-    MISSING_BEATMAP,
+    MissingBeatmap,
 
     /**
      * The player is playing... Duh
      */
-    PLAYING;
+    Playing;
 
 
     companion object {

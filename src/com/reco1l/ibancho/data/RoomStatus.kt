@@ -8,17 +8,17 @@ enum class RoomStatus {
     /**
      * The room is idle (not playing).
      */
-    IDLE,
+    Idle,
 
     /**
      * The room is in the process of changing the beatmap.
      */
-    CHANGING_BEATMAP,
+    ChangingBeatmap,
 
     /**
      * The room is playing.
      */
-    PLAYING;
+    Playing;
 
 
     companion object {

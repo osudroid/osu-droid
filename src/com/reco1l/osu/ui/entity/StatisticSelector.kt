@@ -1,7 +1,7 @@
 package com.reco1l.osu.ui.entity
 
 import android.opengl.GLES20
-import com.reco1l.ibancho.data.WinCondition.ACCURACY
+import com.reco1l.ibancho.data.WinCondition.HighestAccuracy
 import com.reco1l.osu.multiplayer.Multiplayer
 import org.anddev.andengine.entity.scene.Scene.ITouchArea
 import org.anddev.andengine.entity.sprite.Sprite
@@ -98,7 +98,7 @@ class StatisticSelector(stats: Array<StatisticV2>?) : ScrollableList(), ITouchAr
                 ${getNumberInstance(US).format(stats.totalScoreWithMultiplier)}
                 ${when (Multiplayer.room!!.winCondition)
                     {
-                        ACCURACY -> "%2.2f%%".format(ENGLISH, stats.accuracy * 100f)
+                        HighestAccuracy -> "%2.2f%%".format(ENGLISH, stats.accuracy * 100f)
                         else -> "${getNumberInstance(US).format(stats.scoreMaxCombo)}x"
                     }
                 }

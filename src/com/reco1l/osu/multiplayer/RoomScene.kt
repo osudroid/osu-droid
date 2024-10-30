@@ -7,10 +7,10 @@ import com.reco1l.ibancho.IRoomEventListener
 import com.reco1l.ibancho.RoomAPI
 import com.reco1l.ibancho.data.*
 import com.reco1l.ibancho.data.PlayerStatus.*
-import com.reco1l.ibancho.data.RoomTeam.BLUE
-import com.reco1l.ibancho.data.RoomTeam.RED
-import com.reco1l.ibancho.data.TeamMode.HEAD_TO_HEAD
-import com.reco1l.ibancho.data.TeamMode.TEAM_VS_TEAM
+import com.reco1l.ibancho.data.RoomTeam.Blue
+import com.reco1l.ibancho.data.RoomTeam.Red
+import com.reco1l.ibancho.data.TeamMode.HeadToHead
+import com.reco1l.ibancho.data.TeamMode.TeamVersus
 import com.reco1l.ibancho.data.WinCondition.*
 import com.reco1l.osu.mainThread
 import com.reco1l.osu.multiplayer.Multiplayer.isConnected
@@ -200,7 +200,7 @@ object RoomScene : Scene(), IRoomEventListener, IPlayerEventListener
                 // Switching status
                 when (player!!.status)
                 {
-                    NOT_READY ->
+                    NotReady ->
                     {
                         if (room!!.beatmap == null)
                         {
@@ -209,17 +209,17 @@ object RoomScene : Scene(), IRoomEventListener, IPlayerEventListener
                             return true
                         }
 
-                        if (room!!.teamMode == TEAM_VS_TEAM && player!!.team == null)
+                        if (room!!.teamMode == TeamVersus && player!!.team == null)
                         {
                             ToastLogger.showText("You must select a team first!", true)
                             awaitStatusChange = false
                             return true
                         }
-                        RoomAPI.setPlayerStatus(READY)
+                        RoomAPI.setPlayerStatus(Ready)
                     }
 
-                    READY -> invalidateStatus()
-                    MISSING_BEATMAP ->
+                    Ready -> invalidateStatus()
+                    MissingBeatmap ->
                     {
                         ToastLogger.showText("Beatmap is missing, cannot ready.", true)
                         awaitStatusChange = false
@@ -248,7 +248,7 @@ object RoomScene : Scene(), IRoomEventListener, IPlayerEventListener
                 if (!event.isActionUp || awaitStatusChange)
                     return false
 
-                if (player!!.status == READY)
+                if (player!!.status == Ready)
                 {
                     // Button shouldn't be visible at this point so ignoring input
                     if (!isRoomHost)
@@ -262,11 +262,11 @@ object RoomScene : Scene(), IRoomEventListener, IPlayerEventListener
                     }
 
                     // If it's team vs team we check if there's at least one per team
-                    if (room!!.teamMode == TEAM_VS_TEAM)
+                    if (room!!.teamMode == TeamVersus)
                     {
                         val team = room!!.teamMap
 
-                        if (team[RED].isNullOrEmpty() || team[BLUE].isNullOrEmpty())
+                        if (team[Red].isNullOrEmpty() || team[Blue].isNullOrEmpty())
                         {
                             ToastLogger.showText("At least 1 player per team is needed to start a match!", true)
                             return true
@@ -274,7 +274,7 @@ object RoomScene : Scene(), IRoomEventListener, IPlayerEventListener
                     }
 
                     // Filtering players that can start the match, we ignore players that doesn't have the beatmap
-                    val players = room!!.activePlayers.filter { it.status != MISSING_BEATMAP }
+                    val players = room!!.activePlayers.filter { it.status != MissingBeatmap }
 
                     // Checking if there's at least 2 players
                     if (players.size <= 1)
@@ -374,7 +374,7 @@ object RoomScene : Scene(), IRoomEventListener, IPlayerEventListener
 
             override fun onAreaTouched(event: TouchEvent, localX: Float, localY: Float): Boolean
             {
-                if (!isRoomHost && !room!!.gameplaySettings.isFreeMod || awaitModsChange || awaitStatusChange || player!!.status == READY)
+                if (!isRoomHost && !room!!.gameplaySettings.isFreeMod || awaitModsChange || awaitStatusChange || player!!.status == Ready)
                     return true
 
                 if (event.isActionDown)
@@ -489,12 +489,12 @@ object RoomScene : Scene(), IRoomEventListener, IPlayerEventListener
             append(room!!.readyPlayers.size).append(" ready")
 
             // Showing the amount of players per team if it's team vs team mode.
-            if (room!!.teamMode == TEAM_VS_TEAM)
+            if (room!!.teamMode == TeamVersus)
             {
                 val team = room!!.teamMap
 
                 append(" - ")
-                append("Red Team: ").append(team[RED]?.size ?: 0).append(" vs Blue Team: ").append(team[BLUE]?.size ?: 0)
+                append("Red Team: ").append(team[Red]?.size ?: 0).append(" vs Blue Team: ").append(team[Blue]?.size ?: 0)
             }
         }
 
@@ -502,14 +502,14 @@ object RoomScene : Scene(), IRoomEventListener, IPlayerEventListener
         infoText.text = """
             Mods: ${room!!.modsToReadableString()}
             Slider Lock: ${if (room!!.gameplaySettings.isRemoveSliderLock) "Enabled" else "Disabled" }
-            Team mode: ${if (room!!.teamMode == HEAD_TO_HEAD) "Head-to-head" else "Team VS"}
+            Team mode: ${if (room!!.teamMode == HeadToHead) "Head-to-head" else "Team VS"}
             Win condition: ${
                 when (room!!.winCondition)
                 {
-                    SCORE_V1 -> "Score V1"
-                    ACCURACY -> "Accuracy"
-                    MAX_COMBO -> "Max combo"
-                    SCORE_V2 -> "Score V2"
+                    ScoreV1 -> "Score V1"
+                    HighestAccuracy -> "Accuracy"
+                    MaximumCombo -> "Max combo"
+                    ScoreV2 -> "Score V2"
                 }
             }
         """.trimIndent()
@@ -517,7 +517,7 @@ object RoomScene : Scene(), IRoomEventListener, IPlayerEventListener
 
     private fun updateButtons()
     {
-        if (player!!.status == READY)
+        if (player!!.status == Ready)
         {
             readyButton!!.setText("Not ready")
             readyButton!!.setColor(0.9f, 0.2f, 0.2f)
@@ -530,7 +530,7 @@ object RoomScene : Scene(), IRoomEventListener, IPlayerEventListener
             if (isRoomHost)
             {
                 room!!.activePlayers.run {
-                    val playersReady = filter { it.status == READY }
+                    val playersReady = filter { it.status == Ready }
 
                     secondaryButton!!.setText(
                         if (playersReady.size == size) "Start Game!"
@@ -604,10 +604,10 @@ object RoomScene : Scene(), IRoomEventListener, IPlayerEventListener
 
         awaitStatusChange = true
 
-        var newStatus = NOT_READY
+        var newStatus = NotReady
 
         if (room!!.beatmap != null && getGlobal().selectedBeatmap == null)
-            newStatus = MISSING_BEATMAP
+            newStatus = MissingBeatmap
 
         if (player!!.status != newStatus)
             RoomAPI.setPlayerStatus(newStatus)
@@ -754,7 +754,7 @@ object RoomScene : Scene(), IRoomEventListener, IPlayerEventListener
 
             // If the status returned by server is PLAYING then it means the match was forced to start while the player
             // was disconnected.
-            if (player!!.status == PLAYING)
+            if (player!!.status == Playing)
             {
                 // Handling special case when the beatmap could have been changed and match was started while player was
                 // disconnected.
@@ -971,7 +971,7 @@ object RoomScene : Scene(), IRoomEventListener, IPlayerEventListener
             // If win condition is Score V2 we add the mod.
             val roomMods = room!!.mods.set.apply {
 
-                if (winCondition == SCORE_V2)
+                if (winCondition == ScoreV2)
                     add(MOD_SCOREV2)
                 else
                     remove(MOD_SCOREV2)
@@ -1001,7 +1001,7 @@ object RoomScene : Scene(), IRoomEventListener, IPlayerEventListener
 
     override fun onRoomMatchPlay()
     {
-        if (player!!.status != MISSING_BEATMAP && getGlobal().engine.scene != getGlobal().gameScene.scene)
+        if (player!!.status != MissingBeatmap && getGlobal().engine.scene != getGlobal().gameScene.scene)
         {
             if (getGlobal().selectedBeatmap == null)
             {

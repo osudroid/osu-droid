@@ -106,7 +106,7 @@ data class Room(
      * Returns an array of all players that are in READY status.
      */
     val readyPlayers
-        get() = activePlayers.filter { it.status == PlayerStatus.READY }
+        get() = activePlayers.filter { it.status == PlayerStatus.Ready }
 
     /**
      * Get the players list in map format using UIDs as keys.
@@ -124,7 +124,7 @@ data class Room(
      * Determines if the room team mode is team vs team.
      */
     val isTeamVersus
-        get() = teamMode == TeamMode.TEAM_VS_TEAM
+        get() = teamMode == TeamMode.TeamVersus
 
 
     /**
