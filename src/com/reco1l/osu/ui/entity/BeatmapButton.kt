@@ -71,7 +71,7 @@ class BeatmapButton : Sprite(0f, 0f, getResources().getTexture("menu-button-back
             moved = true
         }
 
-        if (moved || !event.isActionUp || Multiplayer.player!!.status == Ready || RoomScene.awaitBeatmapChange || RoomScene.awaitStatusChange)
+        if (moved || !event.isActionUp || Multiplayer.player!!.status == Ready || RoomScene.isWaitingForBeatmapChange || RoomScene.isWaitingForStatusChange)
             return true
 
         getResources().getSound("menuclick")?.play()

@@ -170,13 +170,13 @@ object RoomAPI {
             playerCount = activePlayers.size,
             playerNames = activePlayers.joinToString(separator = ", ") { p -> p.name },
             sessionID = json.getString("sessionId")
-        ).apply {
-            this.players = players
-            host = json.getJSONObject("host").getString("uid").toLong()
-            beatmap = parseBeatmap(json.optJSONObject("beatmap"))
-            status = RoomStatus[json.getInt("status")]
+        )
 
-        }
+        room.players = players
+        room.host = json.getJSONObject("host").getString("uid").toLong()
+        room.beatmap = parseBeatmap(json.optJSONObject("beatmap"))
+        room.status = RoomStatus[json.getInt("status")]
+
 
         roomEventListener?.onRoomConnect(room)
 

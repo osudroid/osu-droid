@@ -21,72 +21,81 @@ fun modsToReadable(
     customOD: Float?,
     customCS: Float?,
     customHP: Float?,
-): String
-{
+): String {
+
     if (mods.isNullOrEmpty()
         && speedMultiplier == 1f
         && flFollowDelay == ModMenu.DEFAULT_FL_FOLLOW_DELAY
         && customAR == null
         && customOD == null
         && customCS == null
-        && customHP == null)
+        && customHP == null
+    )
         return "None"
 
     return buildString {
 
-        if (!mods.isNullOrEmpty()) for (m in mods) when (m)
-        {
-            MOD_AUTO -> append("AU, ")
-            MOD_RELAX -> append("RX, ")
-            MOD_AUTOPILOT -> append("AP, ")
-            MOD_EASY -> append("EZ, ")
-            MOD_NOFAIL -> append("NF, ")
-            MOD_HARDROCK -> append("HR, ")
-            MOD_HIDDEN -> append("HD, ")
-            MOD_FLASHLIGHT ->
-            {
-                if (flFollowDelay == ModMenu.DEFAULT_FL_FOLLOW_DELAY)
-                    append("FL, ")
-                else
-                    append("FL ${(flFollowDelay * 1000).toInt()}ms, ")
+        if (!mods.isNullOrEmpty()) {
+            for (m in mods) when (m) {
+                MOD_AUTO -> append("AU, ")
+                MOD_RELAX -> append("RX, ")
+                MOD_AUTOPILOT -> append("AP, ")
+                MOD_EASY -> append("EZ, ")
+                MOD_NOFAIL -> append("NF, ")
+                MOD_HARDROCK -> append("HR, ")
+                MOD_HIDDEN -> append("HD, ")
+                MOD_FLASHLIGHT -> {
+                    if (flFollowDelay == ModMenu.DEFAULT_FL_FOLLOW_DELAY) {
+                        append("FL, ")
+                    } else {
+                        append("FL ${(flFollowDelay * 1000).toInt()}ms, ")
+                    }
+                }
+
+                MOD_DOUBLETIME -> append("DT, ")
+                MOD_NIGHTCORE -> append("NC, ")
+                MOD_HALFTIME -> append("HT, ")
+                MOD_PRECISE -> append("PR, ")
+                MOD_REALLYEASY -> append("REZ, ")
+                MOD_PERFECT -> append("PF, ")
+                MOD_SUDDENDEATH -> append("SD, ")
+                MOD_SCOREV2 -> append("SV2, ")
+                else -> Unit
             }
-            MOD_DOUBLETIME -> append("DT, ")
-            MOD_NIGHTCORE -> append("NC, ")
-            MOD_HALFTIME -> append("HT, ")
-            MOD_PRECISE -> append("PR, ")
-            MOD_REALLYEASY -> append("REZ, ")
-            MOD_PERFECT -> append("PF, ")
-            MOD_SUDDENDEATH -> append("SD, ")
-            MOD_SCOREV2 -> append("SV2, ")
-            else -> Unit
         }
 
-        if (speedMultiplier != 1f)
+        if (speedMultiplier != 1f) {
             append("%.2fx, ".format(speedMultiplier))
+        }
 
-        if (customAR != null)
+        if (customAR != null) {
             append("AR $customAR, ")
+        }
 
-        if (customOD != null)
+        if (customOD != null) {
             append("OD $customOD, ")
+        }
 
-        if (customCS != null)
+        if (customCS != null) {
             append("CS $customCS, ")
+        }
 
-        if (customHP != null)
+        if (customHP != null) {
             append("HP $customHP, ")
+        }
 
     }.substringBeforeLast(',')
 }
 
-fun stringToMods(data: String?): EnumSet<GameMod>
-{
+fun stringToMods(data: String?): EnumSet<GameMod> {
+
     val mod = EnumSet.noneOf(GameMod::class.java)
 
-    if (data.isNullOrEmpty()) return mod
+    if (data.isNullOrEmpty()) {
+        return mod
+    }
 
-    for (c in data) when (c)
-    {
+    for (c in data) when (c) {
         'a' -> mod += MOD_AUTO
         'x' -> mod += MOD_RELAX
         'p' -> mod += MOD_AUTOPILOT
@@ -109,8 +118,7 @@ fun stringToMods(data: String?): EnumSet<GameMod>
 
 fun modsToString(mod: EnumSet<GameMod>) = buildString {
 
-    for (m in mod) when (m)
-    {
+    for (m in mod) when (m) {
         MOD_AUTO -> append('a')
         MOD_RELAX -> append('x')
         MOD_AUTOPILOT -> append('p')

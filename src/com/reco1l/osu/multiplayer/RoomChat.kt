@@ -32,11 +32,11 @@ import com.reco1l.toolkt.android.drawableRight
 import com.reco1l.toolkt.android.fontColor
 import com.reco1l.toolkt.kotlin.async
 import org.anddev.andengine.input.touch.TouchEvent
+import ru.nsu.ccfit.zuev.osu.GlobalManager
 import ru.nsu.ccfit.zuev.osu.RGBColor
 import ru.nsu.ccfit.zuev.osu.ResourceManager
 import ru.nsu.ccfit.zuev.osuplus.R
 import kotlin.math.abs
-import ru.nsu.ccfit.zuev.osu.GlobalManager.getInstance as getGlobal
 
 
 /**
@@ -119,7 +119,7 @@ class RoomChat : BaseFragment(), OnEditorActionListener, OnKeyListener
 
     private fun prependMessage(message: Message) {
 
-        if (getGlobal().engine.scene != getGlobal().gameScene.scene) {
+        if (GlobalManager.getInstance().engine.scene != GlobalManager.getInstance().gameScene.scene) {
             ResourceManager.getInstance().getSound("heartbeat")?.play(0.75f)
         }
 
@@ -129,11 +129,11 @@ class RoomChat : BaseFragment(), OnEditorActionListener, OnKeyListener
 
     private fun showPreview(content: String, contentColor: String? = null, tag: String? = null, tagColor: String? = null) {
 
-        RGBColor.hex2Rgb(tagColor ?: "#FFFFFF").apply(RoomScene.chatPreview.tag)
-        RGBColor.hex2Rgb(contentColor ?: "#FFFFFF").apply(RoomScene.chatPreview.content)
+        RGBColor.hex2Rgb(tagColor ?: "#FFFFFF").apply(RoomScene.chatPreviewText.tag)
+        RGBColor.hex2Rgb(contentColor ?: "#FFFFFF").apply(RoomScene.chatPreviewText.content)
 
-        RoomScene.chatPreview.setTagText(tag ?: "")
-        RoomScene.chatPreview.setContentText(content)
+        RoomScene.chatPreviewText.setTagText(tag ?: "")
+        RoomScene.chatPreviewText.setContentText(content)
     }
 
     private fun hideKeyboard() {
@@ -282,8 +282,8 @@ class RoomChat : BaseFragment(), OnEditorActionListener, OnKeyListener
             return
         }
 
-        if (getGlobal().engine.scene == getGlobal().gameScene.scene) {
-            getGlobal().gameScene.pause()
+        if (GlobalManager.getInstance().engine.scene == GlobalManager.getInstance().gameScene.scene) {
+            GlobalManager.getInstance().gameScene.pause()
             return
         }
 
