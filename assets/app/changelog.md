@@ -81,6 +81,8 @@ for preventing accidental touches.
 - Added a slight dim to hitobjects that cannot be hit yet in gameplay
 - Added a rotation effect to miss hit judgement effects in gameplay
 - Added most common BPM metric to beatmap information in song selection menu
+- Added force maximum refresh rate setting
+  - This may not work as the system may prevent the game from setting its own refresh rate 
 - Added support for `skin.ini`'s `AnimationFramerate` setting in `skin.json`
   - The default value is `-1` when converting a `skin.ini` to `skin.json`, and `60` otherwise
   - To use in `skin.json`, add the following entry:
