@@ -83,7 +83,8 @@ public class Config {
         submitScoreOnMultiplayer,
         keepBackgroundAspectRatio,
         noChangeDimInBreaks,
-        dimHitObjects;
+        dimHitObjects,
+        forceMaxRefreshRate;
 
     private static int RES_WIDTH,
         RES_HEIGHT,
@@ -131,6 +132,7 @@ public class Config {
         keepBackgroundAspectRatio = prefs.getBoolean("keepBackgroundAspectRatio", false);
         noChangeDimInBreaks = prefs.getBoolean("noChangeDimInBreaks", false);
         dimHitObjects = prefs.getBoolean("dimHitObjects", true);
+        forceMaxRefreshRate = prefs.getBoolean("forceMaxRefreshRate", false);
         progressIndicatorType = Integer.parseInt(prefs.getString("progressIndicatorType", "0"));
 
         setSize();
@@ -806,6 +808,10 @@ public class Config {
 
     public static boolean isDimHitObjects() {
         return dimHitObjects;
+    }
+
+    public static boolean isForceMaxRefreshRate() {
+        return forceMaxRefreshRate;
     }
 
     @ProgressIndicatorType

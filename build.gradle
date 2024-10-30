@@ -187,7 +187,7 @@ dependencies {
     implementation 'com.github.EdrowsLuo.EdlGameFramework:EdlOsbSupport:d91c53fcff'
 
     // Localizations
-    implementation 'com.github.osudroid:language-pack:1.0.6'
+    implementation 'com.github.osudroid:language-pack:1.0.7'
 
     // Tools
     implementation 'com.github.Reco1I:Toolkt:1.0.23'

@@ -23,11 +23,13 @@ import android.os.Looper;
 import android.os.PowerManager;
 import android.os.StatFs;
 import android.util.DisplayMetrics;
+import android.util.Log;
+import android.view.Display;
 import android.view.Gravity;
 import android.view.KeyEvent;
+import android.view.Surface;
 import android.view.View;
 import android.view.ViewGroup;
-import android.view.WindowManager;
 import android.widget.FrameLayout;
 import android.widget.RelativeLayout;
 import android.widget.Toast;
@@ -103,6 +105,8 @@ public class MainActivity extends BaseGameActivity implements
     private boolean willReplay = false;
     private static boolean activityVisible = true;
     private static final ScheduledExecutorService scheduledExecutor = Executors.newSingleThreadScheduledExecutor();
+    private Display display;
+    private float maxRefreshRate = 60;
 
     // Multiplayer
     private Uri roomInviteLink;
@@ -124,7 +128,17 @@ public class MainActivity extends BaseGameActivity implements
         crashlytics.setUserId(Config.getOnlineDeviceID());
 
         final DisplayMetrics dm = new DisplayMetrics();
-        getWindowManager().getDefaultDisplay().getMetrics(dm);
+        display = getWindowManager().getDefaultDisplay();
+        display.getMetrics(dm);
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+            for (var mode : display.getSupportedModes()) {
+                for (float rate : mode.getAlternativeRefreshRates()) {
+                    maxRefreshRate = Math.max(maxRefreshRate, rate);
+                }
+            }
+        }
+
 /*        final double screenSize = Math.sqrt(Utils.sqr(dm.widthPixels / dm.xdpi)
                 + Utils.sqr(dm.heightPixels / dm.ydpi));*/
         double screenInches = Math.sqrt(Math.pow(dm.heightPixels, 2) + Math.pow(dm.widthPixels, 2)) / (dm.density * 160.0f);
@@ -303,6 +317,14 @@ public class MainActivity extends BaseGameActivity implements
                 availableInternalMemory();
 
                 scheduledExecutor.scheduleAtFixedRate(() -> {
+                    if (Config.isForceMaxRefreshRate() && Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+                        float refreshRate = getRefreshRate();
+
+                        if (refreshRate != maxRefreshRate) {
+                            mRenderSurfaceView.getHolder().getSurface().setFrameRate(maxRefreshRate, Surface.FRAME_RATE_COMPATIBILITY_DEFAULT);
+                        }
+                    }
+
                     AccessibilityDetector.check(MainActivity.this);
                     BeatmapDifficultyCalculator.invalidateExpiredCache();
                 }, 0, 100, TimeUnit.MILLISECONDS);
@@ -838,9 +860,7 @@ public class MainActivity extends BaseGameActivity implements
     }
 
     public float getRefreshRate() {
-        return ((WindowManager) getSystemService(Context.WINDOW_SERVICE))
-                .getDefaultDisplay()
-                .getRefreshRate();
+        return display.getRefreshRate();
     }
 
     private boolean checkPermissions() {

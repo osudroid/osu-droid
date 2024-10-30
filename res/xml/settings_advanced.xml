@@ -28,6 +28,13 @@
 
         <CheckBoxPreference
             android:defaultValue="false"
+            android:key="forceMaxRefreshRate"
+            android:summary="@string/opt_force_max_refresh_rate_summary"
+            android:title="@string/opt_force_max_refresh_rate_title"
+            app:layout="@layout/settings_preference_checkbox" />
+
+        <CheckBoxPreference
+            android:defaultValue="false"
             android:key="safebeatmapbg"
             android:summary="@string/opt_safe_beatmap_bg_summary"
             android:title="@string/opt_safe_beatmap_bg_title"

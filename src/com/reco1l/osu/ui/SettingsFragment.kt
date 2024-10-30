@@ -6,6 +6,7 @@ import android.content.ClipboardManager
 import android.content.Intent
 import android.graphics.Color
 import android.net.Uri
+import android.os.Build
 import android.os.Bundle
 import android.text.InputType.TYPE_CLASS_TEXT
 import android.text.InputType.TYPE_TEXT_VARIATION_PASSWORD
@@ -315,6 +316,12 @@ class SettingsFragment : com.edlplan.ui.fragment.SettingsFragment() {
 
 
     private fun handleAdvancedSectionPreferences() {
+        findPreference<CheckBoxPreference>("forceMaxRefreshRate")!!.apply {
+            // Obtaining supported refresh rates is only available on Android 12 and above.
+            // See https://developer.android.com/reference/android/view/Display.Mode#getAlternativeRefreshRates().
+            isVisible = Build.VERSION.SDK_INT >= Build.VERSION_CODES.S
+        }
+
         findPreference<InputPreference>("skinTopPath")!!.setOnPreferenceChangeListener { it, newValue ->
 
             it as InputPreference
