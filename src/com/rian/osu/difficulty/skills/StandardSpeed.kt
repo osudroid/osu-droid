@@ -14,22 +14,14 @@ class StandardSpeed(
     /**
      * The [Mod]s that this skill processes.
      */
-    mods: List<Mod>,
-
-    /**
-     * The 300 hit window.
-     */
-    private val greatWindow: Double
+    mods: List<Mod>
 ) : StandardStrainSkill(mods) {
-    override val difficultyMultiplier = 1.04
     override val reducedSectionCount = 5
 
     private var currentStrain = 0.0
     private var currentRhythm = 0.0
-    private val skillMultiplier = 1375.0
+    private val skillMultiplier = 1.43
     private val strainDecayBase = 0.3
-
-    private val objectStrains = mutableListOf<Double>()
 
     /**
      * Calculates the number of clickable objects weighted by difficulty.
@@ -49,9 +41,9 @@ class StandardSpeed(
 
     override fun strainValueAt(current: StandardDifficultyHitObject): Double {
         currentStrain *= strainDecay(current.strainTime)
-        currentStrain += StandardSpeedEvaluator.evaluateDifficultyOf(current, greatWindow) * skillMultiplier
+        currentStrain += StandardSpeedEvaluator.evaluateDifficultyOf(current) * skillMultiplier
 
-        currentRhythm = StandardRhythmEvaluator.evaluateDifficultyOf(current, greatWindow)
+        currentRhythm = StandardRhythmEvaluator.evaluateDifficultyOf(current)
         val totalStrain = currentStrain * currentRhythm
 
         objectStrains.add(totalStrain)

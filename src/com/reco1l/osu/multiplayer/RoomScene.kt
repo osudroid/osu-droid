@@ -1,5 +1,7 @@
 package com.reco1l.osu.multiplayer
 
+import com.reco1l.andengine.*
+import com.reco1l.andengine.sprite.*
 import com.reco1l.ibancho.IPlayerEventListener
 import com.reco1l.ibancho.IRoomEventListener
 import com.reco1l.ibancho.RoomAPI
@@ -32,11 +34,9 @@ import org.anddev.andengine.input.touch.TouchEvent
 import org.anddev.andengine.util.MathUtils
 import org.json.JSONArray
 import ru.nsu.ccfit.zuev.osu.Config
-import ru.nsu.ccfit.zuev.osu.DifficultyAlgorithm
 import ru.nsu.ccfit.zuev.osu.LibraryManager
 import ru.nsu.ccfit.zuev.osu.ToastLogger
 import ru.nsu.ccfit.zuev.osu.game.mods.GameMod.MOD_SCOREV2
-import ru.nsu.ccfit.zuev.osu.helper.AnimSprite
 import ru.nsu.ccfit.zuev.osu.helper.TextButton
 import ru.nsu.ccfit.zuev.osu.menu.LoadingScreen.LoadingScene
 import ru.nsu.ccfit.zuev.osu.online.OnlinePanel
@@ -94,7 +94,7 @@ object RoomScene : Scene(), IRoomEventListener, IPlayerEventListener
     }
 
 
-    private var backButton: Sprite? = null
+    private var backButton: AnimatedSprite? = null
 
     private var readyButton: TextButton? = null
 
@@ -102,7 +102,7 @@ object RoomScene : Scene(), IRoomEventListener, IPlayerEventListener
 
     private var trackButton: BeatmapButton? = null
 
-    private var modsButton: AnimSprite? = null
+    private var modsButton: ExtendedSprite? = null
 
     private var difficultySwitcher: DifficultyAlgorithmSwitcher? = null
 
@@ -304,25 +304,22 @@ object RoomScene : Scene(), IRoomEventListener, IPlayerEventListener
         }
 
         // Buttons code copied from legacy code but improved, don't blame on me.
+        val isNewLayout = OsuSkin.get().isUseNewLayout
         val layoutBackButton = OsuSkin.get().getLayout("BackButton")
         val layoutMods = OsuSkin.get().getLayout("ModsButton")
+        val layoutDifficultySwitcher = OsuSkin.get().getLayout("DifficultySwitcher")
 
-        val loadedBackTextures = mutableListOf<String>()
-
-        if (getResources().isTextureLoaded("menu-back-0"))
-        {
-            for (i in 0..59)
-                if (getResources().isTextureLoaded("menu-back-$i")) loadedBackTextures.add("menu-back-$i")
-        }
-        else loadedBackTextures.add("menu-back")
-
-        backButton = object : AnimSprite(0f, 0f, loadedBackTextures.size.toFloat(), *loadedBackTextures.toTypedArray<String>())
+        backButton = object : AnimatedSprite("menu-back", true, OsuSkin.get().animationFramerate)
         {
             var scaleWhenHold = layoutBackButton?.property?.optBoolean("scaleWhenHold", true) ?: false
 
             var moved = false
             var dx = 0f
             var dy = 0f
+
+            init {
+                autoSizeAxes = Axes.None
+            }
 
             override fun onAreaTouched(event: TouchEvent, localX: Float, localY: Float): Boolean
             {
@@ -353,24 +350,27 @@ object RoomScene : Scene(), IRoomEventListener, IPlayerEventListener
                 return false
             }
         }.also {
-
-            if (OsuSkin.get().isUseNewLayout)
-            {
-                layoutBackButton?.baseApply(it)
+            if (isNewLayout && layoutBackButton != null) {
+                layoutBackButton.apply(it)
+            } else {
                 it.setPosition(0f, Config.getRES_HEIGHT() - it.heightScaled)
             }
-            else it.setPosition(0f, Config.getRES_HEIGHT() - it.height)
 
             registerTouchArea(it)
             attachChild(it)
         }
 
         // Mods button, shown only if free mods or if the player it's the host
-        modsButton = object : AnimSprite(0f, 0f, 0f, "selection-mods", "selection-mods-over")
+        modsButton = object : ExtendedSprite()
         {
             var moved = false
             var dx = 0f
             var dy = 0f
+
+            init {
+                textureRegion = getResources().getTextureIfLoaded("selection-mods")
+                autoSizeAxes = Axes.None
+            }
 
             override fun onAreaTouched(event: TouchEvent, localX: Float, localY: Float): Boolean
             {
@@ -383,19 +383,25 @@ object RoomScene : Scene(), IRoomEventListener, IPlayerEventListener
                     dx = localX
                     dy = localY
 
-                    frame = 1
+                    textureRegion = getResources().getTextureIfLoaded("selection-mods-over")
                     return true
                 }
                 if (event.isActionUp)
                 {
-                    frame = 0
-                    if (!moved)
+                    textureRegion = getResources().getTextureIfLoaded("selection-mods")
+                    if (!moved) {
+                        getResources().getSound("click-short-confirm")?.play()
                         getModMenu().show(this@RoomScene, getGlobal().selectedBeatmap)
+                    }
                     return true
                 }
                 if (event.isActionOutside || event.isActionMove && MathUtils.distance(dx, dy, localX, localY) > 50)
                 {
-                    frame = 0
+                    if (!moved) {
+                        getResources().getSound("click-short")?.play()
+                    }
+
+                    textureRegion = getResources().getTextureIfLoaded("selection-mods")
                     moved = true
                 }
                 return false
@@ -405,21 +411,25 @@ object RoomScene : Scene(), IRoomEventListener, IPlayerEventListener
             it.isVisible = false
             it.setScale(1.5f)
 
+            if (isNewLayout && layoutMods != null) {
+                layoutMods.apply(it, backButton)
+            } else {
+                it.setPosition(backButton!!.x + backButton!!.widthScaled, Config.getRES_HEIGHT() - it.heightScaled)
+            }
+
             registerTouchArea(it)
             attachChild(it)
-
-            if (OsuSkin.get().isUseNewLayout)
-            {
-                layoutMods?.baseApply(it)
-                it.setPosition(backButton!!.x + backButton!!.width, Config.getRES_HEIGHT() - it.heightScaled)
-            }
-            else it.setPosition(backButton!!.x + backButton!!.width, Config.getRES_HEIGHT() - 90f)
         }
 
         // Difficulty switcher
         difficultySwitcher = DifficultyAlgorithmSwitcher().also {
+            it.setScale(1.5f)
 
-            it.setPosition(modsButton!!.x + modsButton!!.widthScaled, Config.getRES_HEIGHT() - it.heightScaled)
+            if (isNewLayout && layoutDifficultySwitcher != null) {
+                layoutDifficultySwitcher.apply(it, modsButton)
+            } else {
+                it.setPosition(modsButton!!.x + modsButton!!.widthScaled, Config.getRES_HEIGHT() - it.heightScaled)
+            }
 
             registerTouchArea(it)
             attachChild(it)
@@ -563,10 +573,7 @@ object RoomScene : Scene(), IRoomEventListener, IPlayerEventListener
                     else 
                         "%.1f-%.1f".format(beatmapInfo.bpmMin, beatmapInfo.bpmMax)
                 } 
-                CS: ${beatmapInfo.circleSize} AR: ${beatmapInfo.approachRate} OD: ${beatmapInfo.overallDifficulty} HP: ${beatmapInfo.hpDrainRate} Star Rating: ${
-                    if (Config.getDifficultyAlgorithm() == DifficultyAlgorithm.standard) beatmapInfo.standardStarRating
-                    else beatmapInfo.droidStarRating
-                }
+                CS: ${beatmapInfo.circleSize} AR: ${beatmapInfo.approachRate} OD: ${beatmapInfo.overallDifficulty} HP: ${beatmapInfo.hpDrainRate} Star Rating: ${beatmapInfo.getStarRating()}
             """.trimIndent()
 
             true
@@ -718,8 +725,8 @@ object RoomScene : Scene(), IRoomEventListener, IPlayerEventListener
 
         // Reloading mod menu, we set player mods first in case the scene was reloaded (due to skin change).
         clearChildScene()
-        getModMenu().setMods(player!!.mods, false, true)
         getModMenu().init()
+        getModMenu().setMods(player!!.mods, false, true)
         getModMenu().setMods(newRoom.mods, newRoom.gameplaySettings.isFreeMod, newRoom.gameplaySettings.allowForceDifficultyStatistics)
 
         // Updating player mods for other clients
@@ -827,7 +834,7 @@ object RoomScene : Scene(), IRoomEventListener, IPlayerEventListener
         invalidateStatus()
 
         // Updating background
-        updateBackground(getGlobal().selectedBeatmap?.background)
+        updateBackground(getGlobal().selectedBeatmap?.backgroundPath)
         updateBeatmapInfo()
 
         // Releasing await lock
@@ -839,7 +846,7 @@ object RoomScene : Scene(), IRoomEventListener, IPlayerEventListener
             return
         }
 
-        getGlobal().songService.preLoad(getGlobal().selectedBeatmap!!.audio)
+        getGlobal().songService.preLoad(getGlobal().selectedBeatmap!!.audioPath)
         getGlobal().songService.play()
     }
 

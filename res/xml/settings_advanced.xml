@@ -3,7 +3,7 @@
     xmlns:app="http://schemas.android.com/apk/res-auto">
 
 
-    <PreferenceCategory android:title="Directories">
+    <PreferenceCategory android:title="@string/opt_category_directories">
 
         <com.reco1l.osu.ui.InputPreference
             android:key="corePath"
@@ -24,7 +24,14 @@
 
     </PreferenceCategory>
 
-    <PreferenceCategory android:title="Miscellaneous">
+    <PreferenceCategory android:title="@string/opt_category_miscellaneous">
+
+        <CheckBoxPreference
+            android:defaultValue="false"
+            android:key="forceMaxRefreshRate"
+            android:summary="@string/opt_force_max_refresh_rate_summary"
+            android:title="@string/opt_force_max_refresh_rate_title"
+            app:layout="@layout/settings_preference_checkbox" />
 
         <CheckBoxPreference
             android:defaultValue="false"

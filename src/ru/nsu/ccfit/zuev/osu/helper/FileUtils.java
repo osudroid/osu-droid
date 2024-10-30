@@ -27,7 +27,6 @@ import okio.Okio;
 import okio.Source;
 import ru.nsu.ccfit.zuev.osu.Config;
 import ru.nsu.ccfit.zuev.osu.ToastLogger;
-import ru.nsu.ccfit.zuev.osuplus.R;
 
 public class FileUtils {
 
@@ -64,7 +63,7 @@ public class FileUtils {
         try (ZipFile zip = new ZipFile(file)) {
             if(!zip.isValidZipFile()) {
                 ToastLogger.showText(
-                        StringTable.format(R.string.message_error, "Invalid file"),
+                        StringTable.format(com.osudroid.resources.R.string.message_error, "Invalid file"),
                         false);
                 Debug.e("FileUtils.extractZip: " + file.getName() + " is invalid");
                 file.renameTo(new File(file.getParentFile(), sourceFileName + ".badzip"));
@@ -129,11 +128,11 @@ public class FileUtils {
             if (Environment.getExternalStorageState().equals(
                     Environment.MEDIA_MOUNTED_READ_ONLY)) {
                 ToastLogger.showText(
-                        StringTable.get(R.string.message_error_sdcardread),
+                        StringTable.get(com.osudroid.resources.R.string.message_error_sdcardread),
                         false);
             } else {
                 ToastLogger.showText(
-                        StringTable.get(R.string.message_error_sdcard), false);
+                        StringTable.get(com.osudroid.resources.R.string.message_error_sdcard), false);
             }
         }
 
@@ -158,21 +157,10 @@ public class FileUtils {
     }
 
     public static File[] listFiles(File directory, String[] endsWithExtensions) {
-        if(Build.VERSION.SDK_INT < Build.VERSION_CODES.N) {
-            return listFiles(directory, file -> {
-                for(String extension : endsWithExtensions) {
-                    if(file.getName().toLowerCase().endsWith(extension)) {
-                        return true;
-                    }
-                }
-                return false;
-            });
-        }else {
-            return listFiles(directory, file -> {
-                String filename = file.getName().toLowerCase();
-                return Arrays.stream(endsWithExtensions).anyMatch(filename::endsWith);
-            });
-        }
+        return listFiles(directory, file -> {
+            String filename = file.getName().toLowerCase();
+            return Arrays.stream(endsWithExtensions).anyMatch(filename::endsWith);
+        });
     }
 
     public static File[] listFiles(File directory, FileFilter filter) {

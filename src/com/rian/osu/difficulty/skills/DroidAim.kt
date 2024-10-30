@@ -22,9 +22,6 @@ class DroidAim(
 ) : DroidStrainSkill(mods) {
     override val starsPerDouble = 1.05
 
-    override val objectStrain: Double
-        get() = currentStrain
-
     val sliderVelocities = mutableListOf<DifficultSlider>()
 
     private var currentStrain = 0.0
@@ -41,6 +38,7 @@ class DroidAim(
             sliderVelocities.add(DifficultSlider(current.index + 1, velocity))
         }
 
+        objectStrains.add(currentStrain)
         return currentStrain
     }
 

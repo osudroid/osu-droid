@@ -6,6 +6,7 @@ import android.content.ClipboardManager
 import android.content.Intent
 import android.graphics.Color
 import android.net.Uri
+import android.os.Build
 import android.os.Bundle
 import android.text.InputType.TYPE_CLASS_TEXT
 import android.text.InputType.TYPE_TEXT_VARIATION_PASSWORD
@@ -13,12 +14,14 @@ import android.view.ContextThemeWrapper
 import android.view.View
 import android.widget.LinearLayout
 import android.widget.TextView
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.annotation.XmlRes
 import androidx.core.content.getSystemService
 import androidx.core.view.forEach
 import androidx.core.view.get
 import androidx.preference.CheckBoxPreference
 import androidx.preference.Preference
+import com.osudroid.resources.R.*
 import com.edlplan.ui.fragment.LoadingFragment
 import com.google.android.material.snackbar.Snackbar
 import com.reco1l.ibancho.LobbyAPI
@@ -38,6 +41,7 @@ import com.reco1l.toolkt.android.dp
 import com.reco1l.toolkt.android.drawableLeft
 import com.reco1l.toolkt.android.layoutWidth
 import com.reco1l.toolkt.android.topMargin
+import com.rian.osu.replay.ReplayImporter
 import ru.nsu.ccfit.zuev.osu.Config
 import ru.nsu.ccfit.zuev.osu.GlobalManager
 import ru.nsu.ccfit.zuev.osu.LibraryManager
@@ -47,7 +51,7 @@ import ru.nsu.ccfit.zuev.osu.ToastLogger
 import ru.nsu.ccfit.zuev.osu.helper.StringTable
 import ru.nsu.ccfit.zuev.osu.online.OnlineManager
 import ru.nsu.ccfit.zuev.osuplus.R
-import ru.nsu.ccfit.zuev.skins.SkinManager
+import ru.nsu.ccfit.zuev.skins.BeatmapSkinManager
 import java.io.File
 
 
@@ -83,6 +87,47 @@ class SettingsFragment : com.edlplan.ui.fragment.SettingsFragment() {
     }
 
 
+    private val replayFilePicker = registerForActivityResult(ActivityResultContracts.GetContent()) { uri ->
+        if (uri == null) {
+            return@registerForActivityResult
+        }
+
+        val loading = LoadingFragment()
+        loading.show()
+
+        async {
+            val context = requireContext()
+            var tempFile: File? = null
+
+            try {
+                tempFile = File.createTempFile("importedReplay", null, context.externalCacheDir)
+
+                context.contentResolver.openInputStream(uri)!!.use { input ->
+                    tempFile.outputStream().use { output ->
+                        input.copyTo(output)
+                    }
+                }
+
+                ReplayImporter.import(tempFile)
+
+                mainThread {
+                    loading.dismiss()
+                    Snackbar.make(requireActivity().window.decorView, string.replay_import_success, 3000).show()
+                }
+            } catch (e: Exception) {
+                val str = StringTable.format(string.replay_import_failed, e.message)
+
+                mainThread {
+                    loading.dismiss()
+                    Snackbar.make(requireActivity().window.decorView, str, 3000).show()
+                }
+            } finally {
+                tempFile?.delete()
+            }
+        }
+    }
+
+
     override fun onLoadView() {
 
         sectionSelector = findViewById(R.id.section_selector)!!
@@ -109,6 +154,10 @@ class SettingsFragment : com.edlplan.ui.fragment.SettingsFragment() {
                 }
 
                 this.section = section
+
+                // Older SDKs may potentially throw an IllegalStateException when trying to change
+                // preference screen, so we need to remove all views first to prevent that.
+                listView.removeAllViews()
                 setPreferencesFromResource(section.xml, null)
             }
 
@@ -170,199 +219,15 @@ class SettingsFragment : com.edlplan.ui.fragment.SettingsFragment() {
     @SuppressLint("RestrictedApi")
     override fun onBindPreferences() = when(section) {
 
-        Section.General -> {
-            findPreference<InputPreference>("onlinePassword")!!.setOnTextInputBind {
-                inputType = TYPE_CLASS_TEXT or TYPE_TEXT_VARIATION_PASSWORD
-            }
+        Section.General -> handleGeneralSectionPreferences()
+        Section.Gameplay -> handleGameplaySectionPreferences()
+        Section.Library -> handleLibrarySectionPreferences()
+        Section.Advanced -> handleAdvancedSectionPreferences()
+        Section.Input -> handleInputSectionPreferences()
+        Section.Player -> handlePlayerSectionPreferences()
+        Section.Room -> handleRoomSectionPreferences()
 
-            findPreference<Preference>("registerAcc")!!.setOnPreferenceClickListener {
-                startActivity(Intent(Intent.ACTION_VIEW, Uri.parse(REGISTER_URL)))
-                true
-            }
-
-            findPreference<Preference>("update")!!.setOnPreferenceClickListener {
-                UpdateManager.checkNewUpdates(false)
-                true
-            }
-        }
-
-        Section.Gameplay -> {
-            findPreference<SelectPreference>("skinPath")!!.apply {
-
-                val skinMain = File(Config.getSkinTopPath())
-                val skins = Config.getSkins().map { Option(it.key, it.value) }.toMutableList()
-                skins.add(0, Option(skinMain.name + " (Default)", skinMain.path))
-
-                options = skins
-
-                setOnPreferenceChangeListener { _, newValue ->
-
-                    val loading = LoadingFragment()
-                    loading.show()
-
-                    async {
-                        GlobalManager.getInstance().skinNow = Config.getSkinPath()
-                        SkinManager.getInstance().clearSkin()
-                        ResourceManager.getInstance().loadSkin(newValue.toString())
-                        GlobalManager.getInstance().engine.textureManager.reloadTextures()
-
-                        mainThread {
-                            loading.dismiss()
-                            context.startActivity(Intent(context, MainActivity::class.java))
-                            Snackbar.make(requireActivity().window.decorView, R.string.message_loaded_skin, 1500).show()
-                        }
-                    }
-                    true
-                }
-            }
-            Unit
-        }
-
-        Section.Library -> {
-            findPreference<Preference>("clear")!!.setOnPreferenceClickListener {
-                LibraryManager.clearDatabase()
-                true
-            }
-
-            findPreference<Preference>("clear_properties")!!.setOnPreferenceClickListener {
-                DatabaseManager.beatmapOptionsTable.clearOptions()
-                true
-            }
-        }
-
-        Section.Advanced -> {
-            findPreference<InputPreference>("skinTopPath")!!.setOnPreferenceChangeListener { it, newValue ->
-
-                it as InputPreference
-
-                if (newValue.toString().trim { it <= ' ' }.isEmpty()) {
-                    it.setText(Config.getCorePath() + "Skin/")
-                    Config.loadConfig(requireActivity())
-                    return@setOnPreferenceChangeListener false
-                }
-
-                val file = File(newValue.toString())
-
-                if (!file.exists() && !file.mkdirs()) {
-                    ToastLogger.showText(StringTable.get(R.string.message_error_dir_not_found), true)
-                    return@setOnPreferenceChangeListener false
-                }
-
-                it.setText(newValue.toString())
-                Config.loadConfig(requireActivity())
-                false
-            }
-        }
-
-        Section.Graphics -> Unit
-        Section.Audio -> Unit
-        Section.Input -> Unit
-
-        Section.Player -> {
-
-            findPreference<SelectPreference>("player_team")!!.apply {
-                isEnabled = Multiplayer.room!!.teamMode == TeamMode.TEAM_VS_TEAM
-                value = Multiplayer.player!!.team?.ordinal?.toString()
-
-                setOnPreferenceChangeListener { _, newValue ->
-                    RoomAPI.setPlayerTeam(RoomTeam[(newValue as String).toInt()])
-                    true
-                }
-            }
-
-            findPreference<CheckBoxPreference>("player_nightcore")!!.apply {
-
-                setOnPreferenceChangeListener { _, newValue ->
-                    Config.setUseNightcoreOnMultiplayer(newValue as Boolean)
-                    RoomScene.onRoomModsChange(Multiplayer.room!!.mods)
-                    true
-                }
-            }
-            Unit
-        }
-
-        Section.Room -> {
-
-            findPreference<Preference>("room_link")!!.setOnPreferenceClickListener {
-
-                requireContext().getSystemService<ClipboardManager>()!!.apply {
-
-                    setPrimaryClip(ClipData.newPlainText(Multiplayer.room!!.name, "${LobbyAPI.INVITE_HOST}/${Multiplayer.room!!.id}/"))
-                }
-
-                ToastLogger.showText("Link copied to clipboard. If the room has a password, you can write it at the end of the link.", false)
-                true
-            }
-
-            findPreference<InputPreference>("room_name")!!.apply {
-
-                setText(Multiplayer.room!!.name)
-                setOnPreferenceChangeListener { _, newValue ->
-
-                    val newName = newValue as String
-
-                    if (newName.isEmpty())
-                        return@setOnPreferenceChangeListener false
-
-                    RoomAPI.setRoomName(newName)
-                    true
-                }
-            }
-
-            findPreference<InputPreference>("room_password")!!.apply {
-                setText(null)
-                setOnPreferenceChangeListener { _, newValue ->
-                    RoomAPI.setRoomPassword(newValue as String)
-                    true
-                }
-            }
-
-            findPreference<CheckBoxPreference>("room_free_mods")!!.apply {
-                isChecked = Multiplayer.room!!.gameplaySettings.isFreeMod
-
-                setOnPreferenceChangeListener { _, newValue ->
-                    RoomAPI.setRoomFreeMods(newValue as Boolean)
-                    true
-                }
-            }
-
-            findPreference<CheckBoxPreference>("room_allowForceDifficultyStatistics")!!.apply {
-                isChecked = Multiplayer.room!!.gameplaySettings.allowForceDifficultyStatistics
-
-                setOnPreferenceChangeListener { _, newValue ->
-                    RoomAPI.setRoomAllowForceDifficultyStatistics(newValue as Boolean)
-                    true
-                }
-            }
-
-            findPreference<SelectPreference>("room_versus_mode")!!.apply {
-                value = Multiplayer.room!!.teamMode.ordinal.toString()
-
-                setOnPreferenceChangeListener { _, newValue ->
-                    RoomAPI.setRoomTeamMode(TeamMode[(newValue as String).toInt()])
-                    true
-                }
-            }
-
-            findPreference<SelectPreference>("room_win_condition")!!.apply {
-                value = Multiplayer.room!!.winCondition.ordinal.toString()
-
-                setOnPreferenceChangeListener { _, newValue ->
-                    RoomAPI.setRoomWinCondition(WinCondition.from((newValue as String).toInt()))
-                    true
-                }
-            }
-
-            findPreference<CheckBoxPreference>("room_removeSliderLock")!!.apply {
-                isChecked = Multiplayer.room!!.gameplaySettings.isRemoveSliderLock
-
-                setOnPreferenceChangeListener { _, newValue ->
-                    RoomAPI.setRoomRemoveSliderLock(newValue as Boolean)
-                    true
-                }
-            }
-            Unit
-        }
+        else -> Unit
 
     }
 
@@ -378,6 +243,218 @@ class SettingsFragment : com.edlplan.ui.fragment.SettingsFragment() {
 
         GlobalManager.getInstance().songService.volume = Config.getBgmVolume()
         super.dismiss()
+    }
+
+
+    private fun handleGeneralSectionPreferences() {
+        findPreference<InputPreference>("onlinePassword")!!.setOnTextInputBind {
+            inputType = TYPE_CLASS_TEXT or TYPE_TEXT_VARIATION_PASSWORD
+        }
+
+        findPreference<Preference>("registerAcc")!!.setOnPreferenceClickListener {
+            startActivity(Intent(Intent.ACTION_VIEW, Uri.parse(REGISTER_URL)))
+            true
+        }
+
+        findPreference<Preference>("update")!!.setOnPreferenceClickListener {
+            UpdateManager.checkNewUpdates(false)
+            true
+        }
+    }
+
+
+    private fun handleGameplaySectionPreferences() {
+        findPreference<SelectPreference>("skinPath")!!.apply {
+
+            val skinMain = File(Config.getSkinTopPath())
+            val skins = Config.getSkins().map { Option(it.key, it.value) }.toMutableList()
+            skins.add(0, Option(skinMain.name + " (Default)", skinMain.path))
+
+            options = skins
+
+            setOnPreferenceChangeListener { _, newValue ->
+
+                val loading = LoadingFragment()
+                loading.show()
+
+                async {
+                    GlobalManager.getInstance().skinNow = Config.getSkinPath()
+                    BeatmapSkinManager.getInstance().clearSkin()
+                    ResourceManager.getInstance().loadSkin(newValue.toString())
+                    GlobalManager.getInstance().engine.textureManager.reloadTextures()
+
+                    mainThread {
+                        loading.dismiss()
+                        context.startActivity(Intent(context, MainActivity::class.java))
+                        Snackbar.make(requireActivity().window.decorView, string.message_loaded_skin, 1500).show()
+                    }
+                }
+                true
+            }
+        }
+    }
+
+
+    private fun handleLibrarySectionPreferences() {
+        findPreference<Preference>("clear_beatmap_cache")!!.setOnPreferenceClickListener {
+            LibraryManager.clearDatabase()
+            ToastLogger.showText(StringTable.get(string.library_cleared), true)
+            true
+        }
+
+        findPreference<Preference>("clear_properties")!!.setOnPreferenceClickListener {
+            DatabaseManager.beatmapOptionsTable.deleteAll()
+            true
+        }
+
+        findPreference<Preference>("importReplay")!!.setOnPreferenceClickListener {
+            replayFilePicker.launch("application/octet-stream")
+
+            true
+        }
+    }
+
+
+    private fun handleAdvancedSectionPreferences() {
+        findPreference<CheckBoxPreference>("forceMaxRefreshRate")!!.apply {
+            // Obtaining supported refresh rates is only available on Android 12 and above.
+            // See https://developer.android.com/reference/android/view/Display.Mode#getAlternativeRefreshRates().
+            isVisible = Build.VERSION.SDK_INT >= Build.VERSION_CODES.S
+        }
+
+        findPreference<InputPreference>("skinTopPath")!!.setOnPreferenceChangeListener { it, newValue ->
+
+            it as InputPreference
+
+            if (newValue.toString().trim { it <= ' ' }.isEmpty()) {
+                it.setText(Config.getCorePath() + "Skin/")
+                Config.loadConfig(requireActivity())
+                return@setOnPreferenceChangeListener false
+            }
+
+            val file = File(newValue.toString())
+
+            if (!file.exists() && !file.mkdirs()) {
+                ToastLogger.showText(StringTable.get(string.message_error_dir_not_found), true)
+                return@setOnPreferenceChangeListener false
+            }
+
+            it.setText(newValue.toString())
+            Config.loadConfig(requireActivity())
+            false
+        }
+    }
+
+
+    private fun handleInputSectionPreferences() {
+        findPreference<Preference>("block_areas")!!.setOnPreferenceClickListener {
+            BlockAreaFragment().show(true)
+            true
+        }
+    }
+
+
+    private fun handlePlayerSectionPreferences() {
+        findPreference<SelectPreference>("player_team")!!.apply {
+            isEnabled = Multiplayer.room!!.teamMode == TeamMode.TEAM_VS_TEAM
+            value = Multiplayer.player!!.team?.ordinal?.toString()
+
+            setOnPreferenceChangeListener { _, newValue ->
+                RoomAPI.setPlayerTeam(RoomTeam[(newValue as String).toInt()])
+                true
+            }
+        }
+
+        findPreference<CheckBoxPreference>("player_nightcore")!!.apply {
+
+            setOnPreferenceChangeListener { _, newValue ->
+                Config.setUseNightcoreOnMultiplayer(newValue as Boolean)
+                RoomScene.onRoomModsChange(Multiplayer.room!!.mods)
+                true
+            }
+        }
+    }
+
+
+    private fun handleRoomSectionPreferences() {
+        findPreference<Preference>("room_link")!!.setOnPreferenceClickListener {
+
+            requireContext().getSystemService<ClipboardManager>()!!.apply {
+
+                setPrimaryClip(ClipData.newPlainText(Multiplayer.room!!.name, "${LobbyAPI.INVITE_HOST}/${Multiplayer.room!!.id}/"))
+            }
+
+            ToastLogger.showText("Link copied to clipboard. If the room has a password, you can write it at the end of the link.", false)
+            true
+        }
+
+        findPreference<InputPreference>("room_name")!!.apply {
+
+            setText(Multiplayer.room!!.name)
+            setOnPreferenceChangeListener { _, newValue ->
+
+                val newName = newValue as String
+
+                if (newName.isEmpty())
+                    return@setOnPreferenceChangeListener false
+
+                RoomAPI.setRoomName(newName)
+                true
+            }
+        }
+
+        findPreference<InputPreference>("room_password")!!.apply {
+            setText(null)
+            setOnPreferenceChangeListener { _, newValue ->
+                RoomAPI.setRoomPassword(newValue as String)
+                true
+            }
+        }
+
+        findPreference<CheckBoxPreference>("room_free_mods")!!.apply {
+            isChecked = Multiplayer.room!!.gameplaySettings.isFreeMod
+
+            setOnPreferenceChangeListener { _, newValue ->
+                RoomAPI.setRoomFreeMods(newValue as Boolean)
+                true
+            }
+        }
+
+        findPreference<CheckBoxPreference>("room_allowForceDifficultyStatistics")!!.apply {
+            isChecked = Multiplayer.room!!.gameplaySettings.allowForceDifficultyStatistics
+
+            setOnPreferenceChangeListener { _, newValue ->
+                RoomAPI.setRoomAllowForceDifficultyStatistics(newValue as Boolean)
+                true
+            }
+        }
+
+        findPreference<SelectPreference>("room_versus_mode")!!.apply {
+            value = Multiplayer.room!!.teamMode.ordinal.toString()
+
+            setOnPreferenceChangeListener { _, newValue ->
+                RoomAPI.setRoomTeamMode(TeamMode[(newValue as String).toInt()])
+                true
+            }
+        }
+
+        findPreference<SelectPreference>("room_win_condition")!!.apply {
+            value = Multiplayer.room!!.winCondition.ordinal.toString()
+
+            setOnPreferenceChangeListener { _, newValue ->
+                RoomAPI.setRoomWinCondition(WinCondition.from((newValue as String).toInt()))
+                true
+            }
+        }
+
+        findPreference<CheckBoxPreference>("room_removeSliderLock")!!.apply {
+            isChecked = Multiplayer.room!!.gameplaySettings.isRemoveSliderLock
+
+            setOnPreferenceChangeListener { _, newValue ->
+                RoomAPI.setRoomRemoveSliderLock(newValue as Boolean)
+                true
+            }
+        }
     }
 
 

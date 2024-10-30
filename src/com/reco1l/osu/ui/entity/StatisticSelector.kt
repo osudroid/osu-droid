@@ -98,8 +98,8 @@ class StatisticSelector(stats: Array<StatisticV2>?) : ScrollableList(), ITouchAr
                 ${getNumberInstance(US).format(stats.totalScoreWithMultiplier)}
                 ${when (Multiplayer.room!!.winCondition)
                     {
-                        ACCURACY -> "%2.2f%%".format(ENGLISH, stats.accuracyForServer * 100f)
-                        else -> "${getNumberInstance(US).format(stats.maxCombo)}x"
+                        ACCURACY -> "%2.2f%%".format(ENGLISH, stats.accuracy * 100f)
+                        else -> "${getNumberInstance(US).format(stats.scoreMaxCombo)}x"
                     }
                 }
             """.trimIndent()

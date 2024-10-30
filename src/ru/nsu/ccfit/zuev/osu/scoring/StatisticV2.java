@@ -2,6 +2,7 @@ package ru.nsu.ccfit.zuev.osu.scoring;
 
 import ru.nsu.ccfit.zuev.osu.SecurityUtils;
 
+import java.io.Serial;
 import java.io.Serializable;
 import java.util.EnumSet;
 import java.util.Locale;
@@ -21,36 +22,31 @@ import ru.nsu.ccfit.zuev.osu.game.mods.GameMod;
 import ru.nsu.ccfit.zuev.osu.menu.ScoreBoardItem;
 
 public class StatisticV2 implements Serializable {
+    @Serial
     private static final long serialVersionUID = 8339570462000129479L;
     private static final Random random = new Random();
+    private static final int scoreV2MaxScore = 1000000;
+    private static final float scoreV2AccPortion = 0.3f;
+    private static final float scoreV2ComboPortion = 0.7f;
 
     int hit300 = 0, hit100 = 0, hit50 = 0;
     int hit300k = 0, hit100k = 0;
     int misses = 0;
-    int maxCombo = 0;
-    float accuracy = -1;
+    int scoreMaxCombo = 0;
     long time = 0;
-    private int notes = 0;
-    private boolean perfect = false;
     private int currentCombo = 0;
     private int scoreHash = 0;
     private int totalScore;
-    private int possibleScore = 0;
-    private int realScore = 0;
     private float hp = 1;
     private float diffModifier = 1;
     private EnumSet<GameMod> mod = EnumSet.noneOf(GameMod.class);
     private String playerName = Config.getOnlineUsername();
-    private String fileName = "";
-    private String replayName = "";
+    private String replayFilename = "";
     private int forcedScore = -1;
     private String mark = null;
     private float changeSpeed = 1.0f;
-    private final int MAX_SCORE = 1000000;
-    private final float ACC_PORTION = 0.3f;
-    private final float COMBO_PORTION = 0.7f;
-    private int maxObjectsCount = 0;
-    private int maxHighestCombo = 0;
+    private int beatmapNoteCount = 0;
+    private int beatmapMaxCombo = 0;
     private int bonusScore = 0;
     private float flFollowDelay = FlashLightEntity.defaultMoveDelayS;
     private int positiveTotalOffsetSum;
@@ -66,6 +62,10 @@ public class StatisticV2 implements Serializable {
     private Float customOD;
     private Float customCS;
     private Float customHP;
+    private int life = 1;
+
+    // Used to indicate that the score was done before version 1.6.8. Used in difficulty calculation.
+    private boolean isOldScore;
 
     private boolean isLegacySC = false;
 
@@ -85,41 +85,22 @@ public class StatisticV2 implements Serializable {
      */
     private float modScoreMultiplier = 1;
 
-    private int life = 1;
+    /**
+     * The MD5 hash of the beatmap.
+     */
+    private String beatmapMD5 = "";
+
 
     public StatisticV2() {}
-
-    public StatisticV2(final Statistic stat) {
-        notes = stat.notes;
-        hit300 = stat.hit300;
-        hit100 = stat.hit100;
-        hit50 = stat.hit50;
-        hit300k = stat.hit300k;
-        hit100k = stat.hit100k;
-        misses = stat.misses;
-        maxCombo = stat.maxCombo;
-        currentCombo = stat.currentCombo;
-        totalScore = stat.totalScore;
-        possibleScore = stat.possibleScore;
-        realScore = stat.realScore;
-        hp = stat.hp;
-        diffModifier = stat.diffModifier;
-        mod = stat.mod.clone();
-        if (stat.mod.contains(GameMod.MOD_EASY)) {
-            life = 3;
-        }
-
-        setPlayerName(Config.getOnlineUsername());
-        computeModScoreMultiplier();
-    }
 
     public StatisticV2(final String[] params) {
         playerName = "";
         if (params.length < 6) return;
 
         setModFromString(params[0]);
+        isOldScore = !params[0].contains("|");
         setForcedScore(Integer.parseInt(params[1]));
-        maxCombo = Integer.parseInt(params[2]);
+        scoreMaxCombo = Integer.parseInt(params[2]);
         mark = params[3];
         hit300k = Integer.parseInt(params[4]);
         hit300 = Integer.parseInt(params[5]);
@@ -127,15 +108,11 @@ public class StatisticV2 implements Serializable {
         hit100 = Integer.parseInt(params[7]);
         hit50 = Integer.parseInt(params[8]);
         misses = Integer.parseInt(params[9]);
-        accuracy = Integer.parseInt(params[10]) / 100000f;
-        if (params.length >= 12) {
-            time = Long.parseLong(params[11]);
+        if (params.length >= 11) {
+            time = Long.parseLong(params[10]);
         }
         if (params.length >= 13) {
-            perfect = Integer.parseInt(params[12]) != 0;
-        }
-        if (params.length >= 14) {
-            playerName = params[13];
+            playerName = params[12];
         }
         computeModScoreMultiplier();
     }
@@ -176,6 +153,10 @@ public class StatisticV2 implements Serializable {
     }
 
     public void registerHit(final int score, final boolean k, final boolean g) {
+        registerHit(score, k, g, true);
+    }
+
+    public void registerHit(final int score, final boolean k, final boolean g, final boolean incrementCombo) {
         if (score == 1000) {
             addScore(score, false);
             return;
@@ -186,17 +167,14 @@ public class StatisticV2 implements Serializable {
             currentCombo++;
             return;
         }
-        if (score == 0 && k == true) {
+        if (score == 0 && k) {
             changeHp(-(5 + GameHelper.getHealthDrain()) / 100f);
-            if (currentCombo > maxCombo) {
-                maxCombo = currentCombo;
+            if (currentCombo > scoreMaxCombo) {
+                scoreMaxCombo = currentCombo;
             }
             currentCombo = 0;
             return;
         }
-
-        notes++;
-        possibleScore += 300;
 
         switch (score) {
             case 300:
@@ -206,8 +184,9 @@ public class StatisticV2 implements Serializable {
                 }
                 hit300++;
                 addScore(300, true);
-                realScore += 300;
-                currentCombo++;
+                if (incrementCombo) {
+                    currentCombo++;
+                }
                 break;
             case 100:
                 changeHp(k ? 0.15f : 0.05f);
@@ -216,49 +195,39 @@ public class StatisticV2 implements Serializable {
                 }
                 hit100++;
                 addScore(100, true);
-                realScore += 100;
-                currentCombo++;
+                if (incrementCombo) {
+                    currentCombo++;
+                }
                 break;
             case 50:
                 changeHp(0.05f);
                 hit50++;
                 addScore(50, true);
-                realScore += 50;
-                currentCombo++;
+                if (incrementCombo) {
+                    currentCombo++;
+                }
                 break;
             default:
                 changeHp(-(5 + GameHelper.getHealthDrain()) / 100f);
                 misses++;
-                perfect = false;
-                if (currentCombo > maxCombo) {
-                    maxCombo = currentCombo;
+                if (currentCombo > scoreMaxCombo) {
+                    scoreMaxCombo = currentCombo;
                 }
                 currentCombo = 0;
+                // Still add score to update ScoreV2 value.
+                addScore(0, false);
                 break;
         }
     }
 
-    public float getAccuracyForServer() {
-
-        var value = (hit300 * 6f + hit100 * 2f + hit50) / ((hit300 + hit100 + hit50 + misses) * 6f);
-
-        if (Double.isNaN(value) || Double.isInfinite(value))
-            value = 0;
-
-        return value;
-    }
-
     public float getAccuracy() {
-        if (accuracy >= 0)
-            return accuracy;
-        if (possibleScore == 0) {
-            return 0;
-        }
-        return realScore / (float) possibleScore;
-    }
+        int notesHit = getNotesHit();
 
-    public void setAccuracy(float accuracy) {
-        this.accuracy = accuracy;
+        if (notesHit == 0) {
+            return 1;
+        }
+
+        return (hit300 * 6f + hit100 * 2 + hit50) / (6 * notesHit);
     }
 
     private void addScore(final int amount, final boolean combo) {
@@ -271,30 +240,18 @@ public class StatisticV2 implements Serializable {
             if (amount == 1000) {
                 bonusScore += amount;
             }
-            float percentage = (float)(notes) / maxObjectsCount;
-            //get real maxcb
-            int maxcb = getMaxCombo();
-            if (currentCombo == maxcb)maxcb++;
-            //get real acc
-            float acc = 0;
-            if (possibleScore > 0){
-                switch (amount) {
-                    case 300:
-                        acc = (realScore + 300) / (float) possibleScore;
-                        break;
-                    case 100:
-                        acc = (realScore + 100) / (float) possibleScore;
-                        break;
-                    case 50:
-                        acc = (realScore + 50) / (float) possibleScore;
-                        break;
-                    default:
-                        acc = realScore / (float) possibleScore;
-                        break;
-                }
+
+            int currentMaxCombo = getScoreMaxCombo();
+            // At this point, the combo increment in registerHit has not happened, but it is necessary for ScoreV2
+            // calculation, so we do it locally here.
+            if (currentCombo == currentMaxCombo) {
+                currentMaxCombo++;
             }
-            totalScore = (int)(MAX_SCORE * (ACC_PORTION * Math.pow(acc , 10) * percentage
-                    + COMBO_PORTION * maxcb / maxHighestCombo) + bonusScore);
+
+            double comboPortion = scoreV2ComboPortion * currentMaxCombo / beatmapMaxCombo;
+            double accuracyPortion = scoreV2AccPortion * Math.pow(getAccuracy(), 10) * getNotesHit() / beatmapNoteCount;
+
+            totalScore = (int) (scoreV2MaxScore * (comboPortion + accuracyPortion)) + bonusScore;
         } else if (amount + amount * currentCombo * diffModifier / 25 > 0) {
             // It is possible for score addition to be a negative number due to
             // difficulty modifier, hence the prior check.
@@ -308,7 +265,7 @@ public class StatisticV2 implements Serializable {
             else{
                 totalScore += amount;
                 if (combo) {
-                    totalScore += (amount * currentCombo * diffModifier) / 25;
+                    totalScore += (int) ((amount * currentCombo * diffModifier) / 25);
                 }
             }
         }
@@ -319,6 +276,7 @@ public class StatisticV2 implements Serializable {
         if (mark != null)
             return mark;
         boolean isH = false;
+
         forcycle:
         for (final GameMod m : mod) {
             switch (m) {
@@ -331,28 +289,30 @@ public class StatisticV2 implements Serializable {
             }
         }
 
+        int notesHit = getNotesHit();
+
         if (hit100 == 0 && hit50 == 0 && misses == 0) {
             if (isH) {
                 return "XH";
             }
             return "X";
         }
-        if ((hit300) / (float) notes > 0.9f && misses == 0
-                && hit50 / (float) notes < 0.01f) {
+        if (hit300 / (float) notesHit > 0.9f && misses == 0
+                && hit50 / (float) notesHit < 0.01f) {
             if (isH) {
                 return "SH";
             }
             return "S";
         }
-        if ((hit300) / (float) notes > 0.8f && misses == 0
-                || (hit300) / (float) notes > 0.9f) {
+        if (hit300 / (float) notesHit > 0.8f && misses == 0
+                || hit300 / (float) notesHit > 0.9f) {
             return "A";
         }
-        if ((hit300) / (float) notes > 0.7f && misses == 0
-                || (hit300) / (float) notes > 0.8f) {
+        if (hit300 / (float) notesHit > 0.7f && misses == 0
+                || hit300 / (float) notesHit > 0.8f) {
             return "B";
         }
-        if ((hit300) / (float) notes > 0.6f) {
+        if (hit300 / (float) notesHit > 0.6f) {
             return "C";
         }
         return "D";
@@ -366,23 +326,20 @@ public class StatisticV2 implements Serializable {
         this.totalScore = totalScore;
     }
 
-    public int getMaxCombo() {
-        if (currentCombo > maxCombo) {
-            maxCombo = currentCombo;
+    public int getScoreMaxCombo() {
+        if (currentCombo > scoreMaxCombo) {
+            scoreMaxCombo = currentCombo;
         }
-        return maxCombo;
+
+        return scoreMaxCombo;
     }
 
-    public void setMaxCombo(int maxCombo) {
-        this.maxCombo = maxCombo;
+    public void setScoreMaxCombo(int maxCombo) {
+        scoreMaxCombo = maxCombo;
     }
 
-    public int getNotes() {
-        return notes;
-    }
-
-    public void setNotes(int notes) {
-        this.notes = notes;
+    public int getNotesHit() {
+        return hit300 + hit100 + hit50 + misses;
     }
 
     public int getHit300() {
@@ -434,11 +391,7 @@ public class StatisticV2 implements Serializable {
     }
 
     public boolean isPerfect() {
-        return perfect;
-    }
-
-    public void setPerfect(boolean perfect) {
-        this.perfect = perfect;
+        return getAccuracy() == 1f;
     }
 
     public int getCombo() {
@@ -465,6 +418,10 @@ public class StatisticV2 implements Serializable {
         this.mod = mod.clone();
 
         computeModScoreMultiplier();
+    }
+
+    public boolean isOldScore() {
+        return isOldScore;
     }
 
     public float getDiffModifier() {
@@ -605,12 +562,12 @@ public class StatisticV2 implements Serializable {
         computeModScoreMultiplier();
     }
 
-    public String getReplayName() {
-        return replayName;
+    public String getReplayFilename() {
+        return replayFilename;
     }
 
-    public void setReplayName(String replayName) {
-        this.replayName = replayName;
+    public void setReplayFilename(String replayName) {
+        this.replayFilename = replayName;
     }
 
     public void setForcedScore(int forcedScore) {
@@ -618,12 +575,8 @@ public class StatisticV2 implements Serializable {
         totalScore = forcedScore;
     }
 
-    public String getFileName() {
-        return fileName;
-    }
-
-    public void setFileName(String fileName) {
-        this.fileName = fileName;
+    public void setBeatmapMD5(String beatmapMD5) {
+        this.beatmapMD5 = beatmapMD5;
     }
 
     public final boolean isScoreValid() {
@@ -633,13 +586,13 @@ public class StatisticV2 implements Serializable {
     public String compile() {
         StringBuilder builder = new StringBuilder();
         String mstring = getModString();
-        if (mstring.length() == 0)
+        if (mstring.isEmpty())
             mstring = "-";
         builder.append(mstring);
         builder.append(' ');
         builder.append(getTotalScoreWithMultiplier());
         builder.append(' ');
-        builder.append(getMaxCombo());
+        builder.append(getScoreMaxCombo());
         builder.append(' ');
         builder.append(getMark());
         builder.append(' ');
@@ -665,11 +618,11 @@ public class StatisticV2 implements Serializable {
         return builder.toString();
     }
 
-    public void setMaxObjectsCount(int count){
-        maxObjectsCount = count;
+    public void setBeatmapNoteCount(int count){
+        beatmapNoteCount = count;
     }
-    public void setMaxHighestCombo(int count){
-        maxHighestCombo = count;
+    public void setBeatmapMaxCombo(int count){
+        beatmapMaxCombo = count;
     }
 
     public float getChangeSpeed(){
@@ -881,11 +834,11 @@ public class StatisticV2 implements Serializable {
     public JSONObject toJson(){
         return new JSONObject() {{
             try {
-                put("accuracy", getAccuracyForServer());
+                put("accuracy", getAccuracy());
                 put("score", getTotalScoreWithMultiplier());
                 put("username", playerName);
                 put("modstring", getModString());
-                put("maxCombo", maxCombo);
+                put("maxCombo", scoreMaxCombo);
                 put("geki", hit300k);
                 put("perfect", hit300);
                 put("katu", hit100k);
@@ -905,9 +858,9 @@ public class StatisticV2 implements Serializable {
     public ScoreBoardItem toBoardItem() {
 
         //noinspection DataFlowIssue
-        var combo = !Multiplayer.isConnected() || Multiplayer.room.getWinCondition() != WinCondition.MAX_COMBO ? currentCombo : maxCombo;
+        var combo = !Multiplayer.isConnected() || Multiplayer.room.getWinCondition() != WinCondition.MAX_COMBO ? currentCombo : scoreMaxCombo;
 
-        return new ScoreBoardItem(playerName, getTotalScoreWithMultiplier(), combo, getAccuracyForServer(), isAlive);
+        return new ScoreBoardItem(playerName, getTotalScoreWithMultiplier(), combo, getAccuracy(), isAlive);
     }
 
     /**
@@ -915,12 +868,12 @@ public class StatisticV2 implements Serializable {
      */
     public ScoreInfo toScoreInfo() {
         return new ScoreInfo(
-            fileName,
+            beatmapMD5,
             playerName,
-            replayName,
+            replayFilename,
             getModString(),
             getTotalScoreWithMultiplier(),
-            maxCombo,
+            scoreMaxCombo,
             getMark(),
             hit300k,
             hit300,
@@ -928,9 +881,7 @@ public class StatisticV2 implements Serializable {
             hit100,
             hit50,
             misses,
-            getAccuracy(),
-            time,
-            isPerfect()
+            time
         );
     }
 

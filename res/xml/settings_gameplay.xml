@@ -2,7 +2,7 @@
 <androidx.preference.PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto">
 
-    <PreferenceCategory android:title="Skin">
+    <PreferenceCategory android:title="@string/opt_category_skin">
 
         <com.reco1l.osu.ui.SelectPreference
             android:entries="@array/placeholder_array"
@@ -28,7 +28,7 @@
 
     </PreferenceCategory>
 
-    <PreferenceCategory android:title="Hit objects">
+    <PreferenceCategory android:title="@string/opt_category_hit_objects">
 
         <CheckBoxPreference
             android:defaultValue="false"
@@ -39,7 +39,7 @@
 
     </PreferenceCategory>
 
-    <PreferenceCategory android:title="Background">
+    <PreferenceCategory android:title="@string/opt_category_background">
 
         <SeekBarPreference
             android:defaultValue="25"
@@ -51,8 +51,8 @@
         <CheckBoxPreference
             android:defaultValue="false"
             android:key="keepBackgroundAspectRatio"
-            android:summary="When enabled, the background (and storyboard) will not be scaled to fill screen bounds during gameplay"
-            android:title="Keep background aspect ratio" />
+            android:summary="@string/opt_keep_background_aspect_ratio_summary"
+            android:title="@string/opt_keep_background_aspect_ratio_title" />
 
         <CheckBoxPreference
             android:key="enableStoryboard"
@@ -66,7 +66,15 @@
 
     </PreferenceCategory>
 
-    <PreferenceCategory android:title="HUD">
+    <PreferenceCategory android:title="@string/opt_category_hud">
+
+        <com.reco1l.osu.ui.SelectPreference
+            android:defaultValue="0"
+            android:entries="@array/opt_progress_indicator_names"
+            android:entryValues="@array/opt_progress_indicator_values"
+            android:key="progressIndicatorType"
+            android:summary="@string/opt_progress_indicator_summary"
+            android:title="@string/opt_progress_indicator_title" />
 
         <CheckBoxPreference
             android:defaultValue="false"
@@ -82,8 +90,8 @@
 
         <CheckBoxPreference
             android:key="showscoreboard"
-            android:summary="Show live leaderboard while playing"
-            android:title="Show leaderboard" />
+            android:summary="@string/opt_show_leaderboard_summary"
+            android:title="@string/opt_show_leaderboard_title" />
 
         <com.reco1l.osu.ui.SelectPreference
             android:defaultValue="0"
@@ -126,6 +134,7 @@
             android:summary="@string/opt_display_realtime_pp_counter_summary"
             android:title="@string/opt_display_realtime_pp_counter_title"
             app:layout="@layout/settings_preference_checkbox_bottom" />
+
 
     </PreferenceCategory>
 

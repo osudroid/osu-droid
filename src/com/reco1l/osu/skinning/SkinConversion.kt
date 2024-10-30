@@ -100,17 +100,42 @@ fun convertToJson(ini: IniReader) = JSONObject().apply {
         put("hitCirclePrefix", ini["Fonts", "HitCirclePrefix"] ?: "default")
         put("hitCircleOverlap", ini["Fonts", "HitCircleOverlap"] ?: -2)
         put("scorePrefix", ini["Fonts", "ScorePrefix"] ?: "score")
+        put("scoreOverlap", ini["Fonts", "ScoreOverlap"] ?: 0)
         put("comboPrefix", ini["Fonts", "ComboPrefix"] ?: "score")
+        put("comboOverlap", ini["Fonts", "ComboOverlap"] ?: 0)
     }
 
     putObject("Utils") {
         put("comboTextScale", 0.8f)
+        put("animationFramerate", ini["General", "AnimationFramerate"] ?: -1f)
+        put("layeredHitSounds", ini.get<Boolean>("General", "LayeredHitSounds") != false)
+        put("sliderBallFlip", ini.get<Boolean>("General", "SliderBallFlip") != false)
+        put("spinnerFrequencyModulate", ini.get<Boolean>("General", "SpinnerFrequencyModulate") != false)
     }
 
     putObject("Layout") {
 
+        put("useNewLayout", true)
+
         putObject("BackButton") {
             put("scaleWhenHold", false)
+        }
+
+        // In osu!droid's default skin, these buttons are cut in the bottom, which makes them smaller
+        // (see https://github.com/osudroid/osu-droid/commit/7bc5040ce426760c2f3ea04b7209e4ded8e78524).
+        // To account for this behavior in osu! skins, we need to offset by them 16 pixels downwards.
+        // A negative value is used as the origin and anchor of these buttons are in the bottom-left
+        // corner (see SkinLayout).
+        putObject("ModsButton") {
+            put("y", -16)
+        }
+
+        putObject("OptionsButton") {
+            put("y", -16)
+        }
+
+        putObject("RandomButton") {
+            put("y", -16)
         }
     }
 }

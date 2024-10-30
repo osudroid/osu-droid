@@ -8,13 +8,15 @@ import androidx.room.Insert
 import androidx.room.OnConflictStrategy
 import androidx.room.PrimaryKey
 import androidx.room.Query
+import org.apache.commons.io.FilenameUtils
 import org.json.JSONObject
+import ru.nsu.ccfit.zuev.osu.Config
 import ru.nsu.ccfit.zuev.osu.scoring.StatisticV2
 
 
 @Entity(
     indices = [
-        Index(name = "beatmapPathIdx", value = ["beatmapPath"])
+        Index(name = "beatmapIdx", value = ["beatmapMD5"]),
     ]
 )
 data class ScoreInfo @JvmOverloads constructor(
@@ -26,10 +28,9 @@ data class ScoreInfo @JvmOverloads constructor(
     val id: Long = 0,
 
     /**
-     * The beatmap path.
-     * This is the relative path to [Config.getBeatmapPath()].
+     * The MD5 hash of the beatmap.
      */
-    val beatmapPath: String,
+    val beatmapMD5: String,
 
     /**
      * The player name.
@@ -39,7 +40,7 @@ data class ScoreInfo @JvmOverloads constructor(
     /**
      * The replay file path.
      */
-    var replayPath: String,
+    var replayFilename: String,
 
     /**
      * The mods used.
@@ -92,30 +93,38 @@ data class ScoreInfo @JvmOverloads constructor(
     val misses: Int,
 
     /**
-     * The accuracy.
-     */
-    val accuracy: Float,
-
-    /**
      * The score date.
      */
     val time: Long,
 
-    /**
-     * Whether the score is perfect.
-     */
-    val isPerfect: Boolean
-
 ) {
+
+    /**
+     * The replay file path.
+     */
+    val replayPath
+        get() = "${Config.getScorePath()}/$replayFilename"
+
+    /**
+     * The number of notes hit.
+     */
+    val notesHit
+        get() = hit300 + hit100 + hit50 + misses
+
+    /**
+     * The accuracy.
+     */
+    val accuracy
+        get() = if (notesHit == 0) 1f else (hit300 * 6f + hit100 * 2f + hit50) / (6f * notesHit)
+
 
     fun toJSON() = JSONObject().apply {
 
-        // The keys doesn't correspond to the table columns in order to keep compatibility with the old replays.
-
+        // The keys don't correspond to the table columns in order to keep compatibility with the old replays.
         put("id", id)
-        put("filename", beatmapPath)
         put("playername", playerName)
-        put("replayfile", replayPath)
+        put("replayfile", replayFilename)
+        put("beatmapMD5", beatmapMD5)
         put("mod", mods)
         put("score", score)
         put("combo", maxCombo)
@@ -128,18 +137,17 @@ data class ScoreInfo @JvmOverloads constructor(
         put("misses", misses)
         put("accuracy", accuracy)
         put("time", time)
-        put("isPerfect", if (isPerfect) 1 else 0)
 
     }
 
     fun toStatisticV2() = StatisticV2().also {
 
         it.playerName = playerName
-        it.fileName = beatmapPath
-        it.replayName = replayPath
+        it.setBeatmapMD5(beatmapMD5)
+        it.replayFilename = replayFilename
         it.setModFromString(mods)
         it.setForcedScore(score)
-        it.maxCombo = maxCombo
+        it.scoreMaxCombo = maxCombo
         it.mark = mark
         it.hit300k = hit300k
         it.hit300 = hit300
@@ -147,58 +155,57 @@ data class ScoreInfo @JvmOverloads constructor(
         it.hit100 = hit100
         it.hit50 = hit50
         it.misses = misses
-        it.accuracy = accuracy
         it.time = time
-        it.isPerfect = isPerfect
 
     }
 
 
 }
 
-fun ScoreInfo(json: JSONObject) = ScoreInfo(
+fun ScoreInfo(json: JSONObject) =
+    ScoreInfo(
 
-    // The keys doesn't correspond to the table columns in order to keep compatibility with the old replays.
+        beatmapMD5 = json.getString("beatmapMD5"),
+        replayFilename = FilenameUtils.getName(json.getString("replayfile")),
 
-    id = json.optLong("id", 0),
-    beatmapPath = json.getString("filename"),
-    playerName = json.getString("playername"),
-    replayPath = json.getString("replayfile"),
-    mods = json.getString("mod"),
-    score = json.getInt("score"),
-    maxCombo = json.getInt("combo"),
-    mark = json.getString("mark"),
-    hit300k = json.getInt("h300k"),
-    hit300 = json.getInt("h300"),
-    hit100k = json.getInt("h100k"),
-    hit100 = json.getInt("h100"),
-    hit50 = json.getInt("h50"),
-    misses = json.getInt("misses"),
-    accuracy = json.getDouble("accuracy").toFloat(),
-    time = json.getLong("time"),
-    isPerfect = json.getInt("isPerfect") == 1
-)
-
+        // The keys don't correspond to the table columns in order to keep compatibility with the old replays.
+        id = json.optLong("id", 0),
+        playerName = json.getString("playername"),
+        mods = json.getString("mod"),
+        score = json.getInt("score"),
+        maxCombo = json.getInt("combo"),
+        mark = json.getString("mark"),
+        hit300k = json.getInt("h300k"),
+        hit300 = json.getInt("h300"),
+        hit100k = json.getInt("h100k"),
+        hit100 = json.getInt("h100"),
+        hit50 = json.getInt("h50"),
+        misses = json.getInt("misses"),
+        time = json.getLong("time"),
+    )
 
 @Dao
 interface IScoreInfoDAO {
 
-    @Query("SELECT * FROM ScoreInfo WHERE beatmapPath = :relativePath")
-    fun getBeatmapScores(relativePath: String): List<ScoreInfo>
+    @Query("SELECT * FROM ScoreInfo WHERE beatmapMD5 = :beatmapMD5 ORDER BY score DESC")
+    fun getBeatmapScores(beatmapMD5: String): List<ScoreInfo>
 
     @Query("SELECT * FROM ScoreInfo WHERE id = :id")
     fun getScore(id: Int): ScoreInfo?
 
-    @Query("SELECT mark FROM ScoreInfo WHERE beatmapPath = :relativePath ORDER BY score DESC LIMIT 1")
-    fun getBestMark(relativePath: String): String?
+    @Query("SELECT mark FROM ScoreInfo WHERE beatmapMD5 = :beatmapMD5 ORDER BY score DESC LIMIT 1")
+    fun getBestMark(beatmapMD5: String): String?
 
     @Insert(onConflict = OnConflictStrategy.ABORT)
     fun insertScore(score: ScoreInfo): Long
 
+    @Insert(onConflict = OnConflictStrategy.ABORT)
+    fun insertScores(scores: List<ScoreInfo>)
+
     @Query("DELETE FROM ScoreInfo WHERE id = :id")
     fun deleteScore(id: Int): Int
 
-    @Query("SELECT id FROM ScoreInfo WHERE beatmapPath = :beatmapPath ORDER BY score DESC LIMIT 1")
-    fun getBestScoreId(beatmapPath: String): Int?
+    @Query("SELECT EXISTS(SELECT 1 FROM ScoreInfo WHERE id = :id)")
+    fun scoreExists(id: Long): Boolean
 
 }

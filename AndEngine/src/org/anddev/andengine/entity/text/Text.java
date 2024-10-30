@@ -68,6 +68,12 @@ public class Text extends RectangularShape {
 	}
 
 	protected void updateText(final String pText) {
+		// BEGIN osu!droid modified - prevent unnecessary updates
+		if (this.mText != null && this.mText.equals(pText)) {
+			return;
+		}
+		// END osu!droid modified
+
 		this.mText = pText;
 		final Font font = this.mFont;
 
@@ -149,8 +155,8 @@ public class Text extends RectangularShape {
 	}
 
 	@Override
-	protected void onApplyTransformations(final GL10 pGL) {
-		super.onApplyTransformations(pGL);
+	protected void onApplyTransformations(final GL10 pGL, final Camera pCamera) {
+		super.onApplyTransformations(pGL, pCamera);
 		this.applyTexture(pGL);
 	}
 

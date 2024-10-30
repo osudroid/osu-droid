@@ -6,7 +6,6 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import androidx.localbroadcastmanager.content.LocalBroadcastManager;
-import android.util.Log;
 
 import com.un4seen.bass.BASS;
 import com.un4seen.bass.BASS_FX;
@@ -21,10 +20,12 @@ public class BassAudioFunc {
     public static final int WINDOW_FFT = 1024;
 
     private int channel = 0;
-    private PlayMode mode;
-    private long skipPosition;
+    private float speed = 1f;
+    private boolean adjustPitch;
+    private final BASS.BASS_CHANNELINFO channelInfo = new BASS.BASS_CHANNELINFO();
+
     private ByteBuffer buffer = null;
-    private int playflag = BASS.BASS_STREAM_PRESCAN;
+    private int playFlag = BASS.BASS_STREAM_PRESCAN;
     private boolean isGaming = false;
     private BroadcastReceiver receiver;
     private LocalBroadcastManager broadcastManager;
@@ -90,102 +91,33 @@ public class BassAudioFunc {
         return false;
     }
 
-    public boolean preLoad(String filePath, PlayMode mode) {
-        Log.w("BassAudioFunc", "preLoad File: " + filePath);
-        BASS.BASS_CHANNELINFO fx = new BASS.BASS_CHANNELINFO();
+    public boolean preLoad(String filePath, float speed, boolean adjustPitch) {
         doClear();
-        this.mode = mode;
-        switch (mode) {
-            case MODE_NONE: //None
-                channel = BASS.BASS_StreamCreateFile(filePath, 0, 0, playflag);
-                // BASS.BASS_ChannelSetAttribute(channel, BASS.BASS_ATTRIB_NOBUFFER, 1);
-                break;
-            case MODE_HT: //HT
-                channel = BASS.BASS_StreamCreateFile(filePath, 0, 0, BASS.BASS_STREAM_DECODE | BASS.BASS_STREAM_PRESCAN);
-                channel = BASS_FX.BASS_FX_TempoCreate(channel, BASS.BASS_STREAM_AUTOFREE);
-                // BASS.BASS_ChannelSetAttribute(channel, BASS.BASS_ATTRIB_NOBUFFER, 1);
-                BASS.BASS_ChannelSetAttribute(channel, BASS_FX.BASS_ATTRIB_TEMPO, -25.0f);
-                break;
-            case MODE_DT: //DT
-                channel = BASS.BASS_StreamCreateFile(filePath, 0, 0, BASS.BASS_STREAM_DECODE | BASS.BASS_STREAM_PRESCAN);
-                channel = BASS_FX.BASS_FX_TempoCreate(channel, BASS.BASS_STREAM_AUTOFREE);
-                // BASS.BASS_ChannelSetAttribute(channel, BASS.BASS_ATTRIB_NOBUFFER, 1);
-                BASS.BASS_ChannelSetAttribute(channel, BASS_FX.BASS_ATTRIB_TEMPO, 50.0f);
-                break;
-            case MODE_NC: //NC
-                channel = BASS.BASS_StreamCreateFile(filePath, 0, 0, BASS.BASS_STREAM_DECODE | BASS.BASS_STREAM_PRESCAN);
-                channel = BASS_FX.BASS_FX_TempoCreate(channel, BASS.BASS_STREAM_AUTOFREE);
-                // BASS.BASS_ChannelSetAttribute(channel, BASS.BASS_ATTRIB_NOBUFFER, 1);
 
-                BASS.BASS_ChannelGetInfo(channel, fx);
-                BASS.BASS_ChannelSetAttribute(channel, BASS.BASS_ATTRIB_FREQ, (int) (fx.freq * 1.5));
-                BASS.BASS_ChannelSetAttribute(channel, BASS_FX.BASS_ATTRIB_TEMPO, 0.0f);
-                break;
-            case MODE_SU: //SU
-                channel = BASS.BASS_StreamCreateFile(filePath, 0, 0, BASS.BASS_STREAM_DECODE | BASS.BASS_STREAM_PRESCAN);
-                channel = BASS_FX.BASS_FX_TempoCreate(channel, BASS.BASS_STREAM_AUTOFREE);
-                // BASS.BASS_ChannelSetAttribute(channel, BASS.BASS_ATTRIB_NOBUFFER, 1);
-                BASS.BASS_ChannelSetAttribute(channel, BASS_FX.BASS_ATTRIB_TEMPO, 25.0f);
-                break;
-        }
-
-        if (channel != 0) {
-            // Use smaller buffer length on focus for smaller latency.
-            BASS.BASS_ChannelSetAttribute(channel, BASS.BASS_ATTRIB_BUFFER, onFocus ? onFocusBufferLength : offFocusBufferLength);
-        }
-
-        return channel != 0;
-    }
-
-    public boolean preLoad(String filePath, float speed, boolean enableNC) {
-        if (speed == 1.0f) {
-            return preLoad(filePath, PlayMode.MODE_NONE);
-        }
-        Log.w("BassAudioFunc", "preLoad File: " + filePath);
-        BASS.BASS_CHANNELINFO fx = new BASS.BASS_CHANNELINFO();
-        doClear();
-        this.mode = PlayMode.MODE_SC;
-        channel = BASS.BASS_StreamCreateFile(filePath, 0, 0, BASS.BASS_STREAM_DECODE | BASS.BASS_STREAM_PRESCAN);
+        channel = BASS.BASS_StreamCreateFile(filePath, 0, 0, playFlag | BASS.BASS_STREAM_DECODE);
         channel = BASS_FX.BASS_FX_TempoCreate(channel, BASS.BASS_STREAM_AUTOFREE);
-        if (enableNC) {
-            BASS.BASS_ChannelGetInfo(channel, fx);
-            if (speed > 1.5){
-                BASS.BASS_ChannelSetAttribute(channel, BASS.BASS_ATTRIB_FREQ, (int) (fx.freq * 1.5f));
-                BASS.BASS_ChannelSetAttribute(channel, BASS_FX.BASS_ATTRIB_TEMPO, (speed / 1.5f - 1.0f) * 100);
-            }
-            else if (speed < 0.75){
-                BASS.BASS_ChannelSetAttribute(channel, BASS.BASS_ATTRIB_FREQ, (int) (fx.freq * 0.75f));
-                BASS.BASS_ChannelSetAttribute(channel, BASS_FX.BASS_ATTRIB_TEMPO, (speed / 0.75f - 1.0f) * 100);
-            }
-            else {
-                BASS.BASS_ChannelSetAttribute(channel, BASS.BASS_ATTRIB_FREQ, (int) (fx.freq * speed));
-                BASS.BASS_ChannelSetAttribute(channel, BASS_FX.BASS_ATTRIB_TEMPO, 0.0f);
-            }
-        }
-        else{
-            BASS.BASS_ChannelSetAttribute(channel, BASS_FX.BASS_ATTRIB_TEMPO, (speed - 1.0f) * 100);
+
+        if (channel == 0) {
+            this.speed = 1;
+            this.adjustPitch = false;
+
+            return false;
         }
 
-        if (channel != 0) {
-            // Use smaller buffer length on focus for smaller latency.
-            BASS.BASS_ChannelSetAttribute(channel, BASS.BASS_ATTRIB_BUFFER, onFocus ? onFocusBufferLength : offFocusBufferLength);
-        }
+        BASS.BASS_ChannelGetInfo(channel, channelInfo);
+        setSpeed(speed);
+        setAdjustPitch(adjustPitch);
 
-        return channel != 0;
+        // Use smaller buffer length on focus for smaller latency.
+        BASS.BASS_ChannelSetAttribute(channel, BASS.BASS_ATTRIB_BUFFER, onFocus ? onFocusBufferLength : offFocusBufferLength);
+
+        return true;
     }
 
     public boolean play() {
         if (channel != 0 && BASS.BASS_ChannelIsActive(channel) == BASS.BASS_ACTIVE_PAUSED) {
             return resume();
         } else if (channel != 0) {
-            /*if(!isGaming){
-                BASS.BASS_ChannelSetSync(channel, BASS.BASS_SYNC_END, 0, new BASS.SYNCPROC() {
-                    @Override
-                    public void SYNCPROC(int handle, int channel, int data, Object user) {
-                        broadcastManager.sendBroadcast(new Intent("Notify_next"));
-                    }
-                },0);
-            }*/
             setEndSync();
             if (BASS.BASS_ChannelPlay(channel, true))
             {
@@ -206,28 +138,24 @@ public class BassAudioFunc {
 
     public boolean jump(int ms) {
         if (channel != 0 && ms > 0) {
-            if (skipPosition == 0 || skipPosition == -1)
-                skipPosition = BASS.BASS_ChannelSeconds2Bytes(channel, ms / 1000.0);
-            if (mode == PlayMode.MODE_NONE)
-                return BASS.BASS_ChannelSetPosition(channel, skipPosition, BASS.BASS_POS_BYTE);
-            else return BASS.BASS_ChannelSetPosition(channel, skipPosition, BASS.BASS_POS_DECODE);
+            long skipPosition = BASS.BASS_ChannelSeconds2Bytes(channel, ms / 1000.0);
+
+            return BASS.BASS_ChannelSetPosition(channel, skipPosition,
+                    speed == 1f ? BASS.BASS_POS_BYTE : BASS.BASS_POS_DECODE);
         }
+
         return false;
     }
 
     public Status getStatus() {
         if (channel == 0) return Status.STOPPED;
 
-        switch (BASS.BASS_ChannelIsActive(channel)) {
-            case BASS.BASS_ACTIVE_STOPPED:
-                return Status.STOPPED;
-            case BASS.BASS_ACTIVE_PAUSED:
-                return Status.PAUSED;
-            case BASS.BASS_ACTIVE_PLAYING:
-                return Status.PLAYING;
-        }
-
-        return Status.STALLED;
+        return switch (BASS.BASS_ChannelIsActive(channel)) {
+            case BASS.BASS_ACTIVE_STOPPED -> Status.STOPPED;
+            case BASS.BASS_ACTIVE_PAUSED -> Status.PAUSED;
+            case BASS.BASS_ACTIVE_PLAYING -> Status.PLAYING;
+            default -> Status.STALLED;
+        };
     }
 
     public int getPosition() {
@@ -270,15 +198,24 @@ public class BassAudioFunc {
             BASS.BASS_ChannelStop(channel);
         }
         BASS.BASS_StreamFree(channel);
-        skipPosition = 0;
     }
 
     public void setLoop(boolean isLoop) {
         if (isLoop) {
-            this.playflag = BASS.BASS_SAMPLE_LOOP | BASS.BASS_STREAM_PRESCAN;
+            playFlag |= BASS.BASS_SAMPLE_LOOP;
         } else {
-            this.playflag = BASS.BASS_STREAM_PRESCAN;
+            playFlag ^= BASS.BASS_SAMPLE_LOOP;
         }
+    }
+
+    public void setSpeed(float speed) {
+        this.speed = speed;
+        onAudioEffectChange();
+    }
+
+    public void setAdjustPitch(boolean adjustPitch) {
+        this.adjustPitch = adjustPitch;
+        onAudioEffectChange();
     }
 
     public float getVolume() {
@@ -324,5 +261,19 @@ public class BassAudioFunc {
                 stop();
             }
         }, 0);
+    }
+
+    private void onAudioEffectChange() {
+        if (channel == 0) {
+            return;
+        }
+
+        if (adjustPitch) {
+            BASS.BASS_ChannelSetAttribute(channel, BASS_FX.BASS_ATTRIB_TEMPO_FREQ, channelInfo.freq * speed);
+            BASS.BASS_ChannelSetAttribute(channel, BASS_FX.BASS_ATTRIB_TEMPO, 0);
+        } else {
+            BASS.BASS_ChannelSetAttribute(channel, BASS_FX.BASS_ATTRIB_TEMPO_FREQ, channelInfo.freq);
+            BASS.BASS_ChannelSetAttribute(channel, BASS_FX.BASS_ATTRIB_TEMPO, (speed - 1) * 100);
+        }
     }
 }

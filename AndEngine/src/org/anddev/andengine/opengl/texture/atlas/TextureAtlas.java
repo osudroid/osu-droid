@@ -34,10 +34,12 @@ public abstract class TextureAtlas<T extends ITextureAtlasSource> extends Textur
 
 	public TextureAtlas(final int pWidth, final int pHeight, final PixelFormat pPixelFormat, final TextureOptions pTextureOptions, final ITextureAtlasStateListener<T> pTextureAtlasStateListener) {
 		super(pPixelFormat, pTextureOptions, pTextureAtlasStateListener);
-		
-		if(!MathUtils.isPowerOfTwo(pWidth) || !MathUtils.isPowerOfTwo(pHeight)) { // TODO GLHelper.EXTENSIONS_NON_POWER_OF_TWO
+
+		// BEGIN osu!droid modified: No needed nowadays, current devices support NPOT textures.
+		/*if(!MathUtils.isPowerOfTwo(pWidth) || !MathUtils.isPowerOfTwo(pHeight)) { // TODO GLHelper.EXTENSIONS_NON_POWER_OF_TWO
 			throw new IllegalArgumentException("pWidth and pHeight must be a power of 2!");
-		}
+		}*/
+		// END osu!droid modified
 		this.mWidth = pWidth;
 		this.mHeight = pHeight;
 	}

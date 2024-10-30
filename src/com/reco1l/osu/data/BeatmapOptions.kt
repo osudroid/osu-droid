@@ -12,10 +12,10 @@ import androidx.room.Update
 data class BeatmapOptions(
 
     /**
-     * The beatmap path.
+     * The beatmap set directory.
      */
     @PrimaryKey
-    val parentPath: String,
+    val setDirectory: String,
 
     /**
      * Whether the beatmap is marked as favorite.
@@ -25,22 +25,26 @@ data class BeatmapOptions(
     /**
      * The beatmap offset.
      */
-    var offset: Int = 0,
+    var offset: Int = 0
 
 )
 
 @Dao interface IBeatmapOptionsDAO {
 
-    @Query("SELECT * FROM BeatmapOptions WHERE parentPath = :path")
-    fun getOptions(path: String): BeatmapOptions?
+    @Query("SELECT * FROM BeatmapOptions WHERE setDirectory = :setDirectory")
+    fun getOptions(setDirectory: String): BeatmapOptions?
 
-    @Update
-    fun setOptions(options: BeatmapOptions)
+    @Insert(onConflict = OnConflictStrategy.IGNORE)
+    fun insert(options: BeatmapOptions)
 
-    @Insert(onConflict = OnConflictStrategy.REPLACE)
-    fun addAll(options: List<BeatmapOptions>)
+    @Insert(onConflict = OnConflictStrategy.IGNORE)
+    fun insertAll(options: List<BeatmapOptions>)
+
+    @Update(onConflict = OnConflictStrategy.REPLACE)
+    fun update(options: BeatmapOptions)
 
     @Query("DELETE FROM BeatmapOptions")
-    fun clearOptions()
+    fun deleteAll()
 
 }
+

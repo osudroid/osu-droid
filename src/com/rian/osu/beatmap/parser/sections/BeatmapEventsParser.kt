@@ -4,6 +4,8 @@ import com.rian.osu.beatmap.Beatmap
 import com.rian.osu.beatmap.timings.BreakPeriod
 import ru.nsu.ccfit.zuev.osu.RGBColor
 import kotlin.math.max
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.ensureActive
 
 /**
  * A parser for parsing a beatmap's events section.
@@ -11,13 +13,16 @@ import kotlin.math.max
 object BeatmapEventsParser : BeatmapSectionParser() {
     private val splitRegex = "\\s*,\\s*".toRegex()
 
-    override fun parse(beatmap: Beatmap, line: String) = line
+    override fun parse(beatmap: Beatmap, line: String, scope: CoroutineScope?) = line
         .split(splitRegex)
-        .dropLastWhile { it.isEmpty() }
+        .dropLastWhile {
+            scope?.ensureActive()
+            it.isEmpty()
+        }
         .let {
             if (it.size >= 3) {
                 if (line.startsWith("0,0")) {
-                    beatmap.events.backgroundFilename = it[2].substring(1, it[2].length - 1)
+                    beatmap.events.backgroundFilename = cleanFilename(it[2])
                 }
 
                 if (line.startsWith("2") || line.startsWith("Break")) {
@@ -29,7 +34,7 @@ object BeatmapEventsParser : BeatmapSectionParser() {
 
                 if (line.startsWith("1") || line.startsWith("Video")) {
                     beatmap.events.videoStartTime = parseInt(it[1])
-                    beatmap.events.videoFilename = it[2].substring(1, it[2].length - 1)
+                    beatmap.events.videoFilename = cleanFilename(it[2])
                 }
             }
     
@@ -41,4 +46,6 @@ object BeatmapEventsParser : BeatmapSectionParser() {
                 )
             }
         }
+
+    private fun cleanFilename(path: String) = path.replace("\\\\", "\\").trim { it == '"' }
 }

@@ -24,8 +24,8 @@ class TimingControlPoint(
     /**
      * The BPM at this [TimingControlPoint].
      */
-    val bpm: Double
-        get() = 60000 / msPerBeat
+    @JvmField
+    val bpm = 60000 / msPerBeat
 
     // Timing points are never redundant as they can change the time signature.
     override fun isRedundant(existing: ControlPoint) = false

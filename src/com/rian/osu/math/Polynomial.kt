@@ -23,13 +23,13 @@ object Polynomial {
             return 0.0
         }
 
-        var sum = coefficients.last()
+        var sum = coefficients[coefficients.size - 1]
 
         for (i in coefficients.size - 2 downTo 0) {
-            sum *= z;
-            sum += coefficients[i];
+            sum *= z
+            sum += coefficients[i]
         }
 
-        return sum;
+        return sum
     }
 }

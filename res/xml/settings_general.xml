@@ -4,7 +4,7 @@
 
     <PreferenceCategory
         android:key="onlineOption_normal"
-        android:title="Online">
+        android:title="@string/opt_category_online">
 
         <CheckBoxPreference
             android:defaultValue="false"
@@ -17,13 +17,22 @@
             android:key="loadAvatar"
             android:summary="@string/opt_loadavatar_summary"
             android:title="@string/opt_loadavatar_title"
-            app:layout="@layout/settings_preference_checkbox_bottom" />
+            app:layout="@layout/settings_preference_checkbox" />
+
+        <com.reco1l.osu.ui.SelectPreference
+            android:defaultValue="0"
+            android:entries="@array/global_beatmap_leaderboard_scoring_mode_names"
+            android:entryValues="@array/global_beatmap_leaderboard_scoring_mode_values"
+            android:key="beatmapLeaderboardScoringMode"
+            android:summary="@string/opt_global_beatmap_leaderboard_scoring_mode_summary"
+            android:title="@string/opt_global_beatmap_leaderboard_scoring_mode_title"
+            app:layout="@layout/settings_preference_bottom" />
 
     </PreferenceCategory>
 
     <PreferenceCategory
         android:key="onlineOption_user"
-        android:title="Account">
+        android:title="@string/opt_category_account">
 
         <com.reco1l.osu.ui.InputPreference
             android:key="onlineUsername"
@@ -44,7 +53,7 @@
 
     </PreferenceCategory>
 
-    <PreferenceCategory android:title="Community">
+    <PreferenceCategory android:title="@string/opt_category_community">
 
         <CheckBoxPreference
             android:defaultValue="true"
@@ -55,7 +64,7 @@
 
     </PreferenceCategory>
 
-    <PreferenceCategory android:title="Updates">
+    <PreferenceCategory android:title="@string/opt_category_updates">
 
         <Preference
             android:key="update"

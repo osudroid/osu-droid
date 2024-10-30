@@ -1,7 +1,7 @@
 package com.edlplan.ui.fragment;
 
+
 import android.animation.Animator;
-import android.app.AlertDialog;
 
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.LinearLayoutManager;
@@ -12,10 +12,10 @@ import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.TextView;
 
-import com.edlplan.favorite.FavoriteLibrary;
 import com.edlplan.framework.easing.Easing;
 import com.edlplan.ui.BaseAnimationListener;
 import com.edlplan.ui.EasingHelper;
+import com.reco1l.osu.data.DatabaseManager;
 import com.reco1l.osu.ui.MessageDialog;
 import com.reco1l.osu.ui.PromptDialog;
 import com.reco1l.toolkt.android.Dimensions;
@@ -63,8 +63,8 @@ public class FavoriteManagerFragment extends BaseFragment {
                         return null;
                     }
 
-                    if (FavoriteLibrary.get().getMaps(input) == null && !input.equals(StringTable.get(R.string.favorite_default))) {
-                        FavoriteLibrary.get().addFolder(input);
+                    if (!DatabaseManager.getBeatmapCollectionsTable().collectionExists(input) && !input.equals(StringTable.get(com.osudroid.resources.R.string.favorite_default))) {
+                        DatabaseManager.getBeatmapCollectionsTable().insertCollection(input);
                         adapter.add(input);
                     }
 
@@ -187,11 +187,11 @@ public class FavoriteManagerFragment extends BaseFragment {
 
 
         protected void load() {
-            folders = new ArrayList<>(FavoriteLibrary.get().getFolders());
+            folders = new ArrayList<>(DatabaseManager.getBeatmapCollectionsTable().getCollections());
             Collections.sort(folders);
 
             if (includeDefaultFolder()) {
-                folders.add(0, StringTable.get(R.string.favorite_default));
+                folders.add(0, StringTable.get(com.osudroid.resources.R.string.favorite_default));
             }
         }
 
@@ -223,9 +223,12 @@ public class FavoriteManagerFragment extends BaseFragment {
 
                 new MessageDialog()
                     .setTitle("Remove collection")
-                    .setMessage(getContext().getString(R.string.favorite_ensure))
+                    .setMessage(getContext().getString(com.osudroid.resources.R.string.favorite_ensure))
                     .addButton("Yes", dialog -> {
-                        FavoriteLibrary.get().remove(folder);
+
+                        DatabaseManager.getBeatmapCollectionsTable().clearCollection(folder);
+                        DatabaseManager.getBeatmapCollectionsTable().deleteCollection(folder);
+
                         load();
                         notifyDataSetChanged();
                         dialog.dismiss();
@@ -240,7 +243,7 @@ public class FavoriteManagerFragment extends BaseFragment {
         }
 
         protected void updateFolderNameText(VH holder, String name) {
-            var maps = FavoriteLibrary.get().getMaps(name);
+            var maps = DatabaseManager.getBeatmapCollectionsTable().getBeatmaps(name);
 
             holder.folderName.setText(name);
 
@@ -273,14 +276,19 @@ public class FavoriteManagerFragment extends BaseFragment {
 
             var folder = folders.get(position);
 
-            Texts.setDrawableLeft(holder.button2, getContext().getDrawable(FavoriteLibrary.get().inFolder(folder, track) ? R.drawable.remove_24px : R.drawable.add_24px));
+            Texts.setDrawableLeft(holder.button2, getContext().getDrawable(
+                DatabaseManager.getBeatmapCollectionsTable().inCollection(folder, track)
+                    ? R.drawable.remove_24px
+                    : R.drawable.add_24px
+                )
+            );
             holder.button2.setOnClickListener(view -> {
 
-                if (FavoriteLibrary.get().inFolder(folder, track)) {
-                    FavoriteLibrary.get().remove(folder, track);
+                if (DatabaseManager.getBeatmapCollectionsTable().inCollection(folder, track)) {
+                    DatabaseManager.getBeatmapCollectionsTable().removeBeatmap(folder, track);
                     Texts.setDrawableLeft(holder.button2, getContext().getDrawable(R.drawable.add_24px));
                 } else {
-                    FavoriteLibrary.get().add(folder, track);
+                    DatabaseManager.getBeatmapCollectionsTable().addBeatmap(folder, track);
                     Texts.setDrawableLeft(holder.button2, getContext().getDrawable(R.drawable.remove_24px));
                 }
 

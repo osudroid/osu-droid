@@ -4,6 +4,7 @@ import android.content.Intent
 import android.content.Intent.*
 import androidx.core.content.FileProvider
 import androidx.preference.PreferenceManager
+import com.osudroid.resources.R
 import com.edlplan.ui.fragment.MarkdownFragment
 import com.google.android.material.snackbar.BaseTransientBottomBar.LENGTH_INDEFINITE
 import com.google.android.material.snackbar.BaseTransientBottomBar.LENGTH_SHORT
@@ -17,18 +18,6 @@ import ru.nsu.ccfit.zuev.osu.helper.StringTable
 import ru.nsu.ccfit.zuev.osu.online.OnlineManager
 import ru.nsu.ccfit.zuev.osu.online.OnlineManager.updateEndpoint
 import ru.nsu.ccfit.zuev.osuplus.BuildConfig.APPLICATION_ID
-import ru.nsu.ccfit.zuev.osuplus.R.string.changelog_title
-import ru.nsu.ccfit.zuev.osuplus.R.string.beatmap_downloader_cancel
-import ru.nsu.ccfit.zuev.osuplus.R.string.update_dialog_button_changelog
-import ru.nsu.ccfit.zuev.osuplus.R.string.update_dialog_button_update
-import ru.nsu.ccfit.zuev.osuplus.R.string.update_dialog_message
-import ru.nsu.ccfit.zuev.osuplus.R.string.update_info_download_canceled
-import ru.nsu.ccfit.zuev.osuplus.R.string.update_info_updated
-import ru.nsu.ccfit.zuev.osuplus.R.string.update_info_checking
-import ru.nsu.ccfit.zuev.osuplus.R.string.update_info_check_failed
-import ru.nsu.ccfit.zuev.osuplus.R.string.update_info_downloading
-import ru.nsu.ccfit.zuev.osuplus.R.string.update_info_download_failed
-import ru.nsu.ccfit.zuev.osuplus.R.string.update_info_latest
 import java.io.File
 
 
@@ -66,15 +55,15 @@ object UpdateManager: IDownloaderObserver
                         duration = LENGTH_INDEFINITE
 
                         // Show changelog button.
-                        setAction(update_dialog_button_changelog) {
+                        setAction(R.string.changelog_title) {
 
                             MarkdownFragment().apply {
-                                setTitle(changelog_title)
+                                setTitle(R.string.changelog_title)
                                 setMarkdown(pendingChangelog)
                                 show()
                             }
                         }
-                        setText(update_info_updated)
+                        setText(R.string.update_info_updated)
                         show()
                     }
                 }
@@ -99,7 +88,7 @@ object UpdateManager: IDownloaderObserver
 
                 duration = LENGTH_INDEFINITE
 
-                setText(update_info_checking)
+                setText(R.string.update_info_checking)
                 setAction(null, null)
                 show()
             }
@@ -207,8 +196,8 @@ object UpdateManager: IDownloaderObserver
 
                     duration = LENGTH_INDEFINITE
 
-                    setText(StringTable.format(update_info_downloading, 0))
-                    setAction(beatmap_downloader_cancel) { downloader.cancel() }
+                    setText(StringTable.format(R.string.update_info_downloading, 0))
+                    setAction(R.string.beatmap_downloader_cancel) { downloader.cancel() }
                     show()
                 }
             }
@@ -232,8 +221,8 @@ object UpdateManager: IDownloaderObserver
 
             duration = 5000
 
-            setText(update_dialog_message)
-            setAction(update_dialog_button_update) {
+            setText(R.string.update_dialog_message)
+            setAction(R.string.update_dialog_button_update) {
 
                 val file = File(cacheDirectory, "$newVersionCode.apk")
                 
@@ -260,7 +249,7 @@ object UpdateManager: IDownloaderObserver
 
             duration = LENGTH_SHORT
 
-            setText(update_info_check_failed)
+            setText(R.string.update_info_check_failed)
             setAction(null, null)
             show()
         }
@@ -277,7 +266,7 @@ object UpdateManager: IDownloaderObserver
 
             duration = LENGTH_SHORT
 
-            setText(update_info_latest)
+            setText(R.string.update_info_latest)
             setAction(null, null)
             show()
         }
@@ -286,7 +275,7 @@ object UpdateManager: IDownloaderObserver
 
     override fun onDownloadUpdate(downloader: FileRequest) = mainThread {
 
-        snackBar.setText(StringTable.format(update_info_downloading, downloader.progress.toInt()))
+        snackBar.setText(StringTable.format(R.string.update_info_downloading, downloader.progress.toInt()))
     }
 
     override fun onDownloadEnd(downloader: FileRequest) {
@@ -303,7 +292,7 @@ object UpdateManager: IDownloaderObserver
 
                 duration = LENGTH_SHORT
 
-                setText(update_info_download_failed)
+                setText(R.string.update_info_download_failed)
                 setAction(null, null)
                 show()
             }
@@ -317,7 +306,7 @@ object UpdateManager: IDownloaderObserver
 
                 duration = LENGTH_SHORT
 
-                setText(update_info_download_canceled)
+                setText(R.string.update_info_download_canceled)
                 setAction(null, null)
                 show()
             }

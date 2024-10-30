@@ -100,7 +100,7 @@ class BeatmapButton : Sprite(0f, 0f, getResources().getTexture("menu-button-back
         }
 
 
-        // If the room beatmap has set a 'parentSetID' it means that the beatmap can be downloaded trough Chimu.moe
+        // If the room beatmap has set a 'parentSetID' it means that the beatmap can be downloaded
         if (getGlobal().selectedBeatmap == null) Multiplayer.room!!.beatmap?.apply {
 
             // If it's null the beatmap isn't available on Chimu servers.
@@ -111,7 +111,7 @@ class BeatmapButton : Sprite(0f, 0f, getResources().getTexture("menu-button-back
 
             async {
                 try {
-                    BeatmapDownloader.download(url, "$parentSetID $artist - $title.osz")
+                    BeatmapDownloader.download(url, "$parentSetID $artist - $title")
                 } catch (e: Exception) {
                     ToastLogger.showText("Unable to download beatmap: ${e.message}", true)
                     e.printStackTrace()
@@ -148,9 +148,7 @@ class BeatmapButton : Sprite(0f, 0f, getResources().getTexture("menu-button-back
             return
         }
 
-        val difficulty =
-            if (Config.getDifficultyAlgorithm() == DifficultyAlgorithm.standard) getGlobal().selectedBeatmap!!.standardStarRating
-            else getGlobal().selectedBeatmap!!.droidStarRating
+        val difficulty = getGlobal().selectedBeatmap!!.getStarRating()
 
         stars.forEachIndexed { i, it ->
             it.isVisible = difficulty >= i

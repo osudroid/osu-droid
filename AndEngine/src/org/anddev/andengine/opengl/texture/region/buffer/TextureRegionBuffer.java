@@ -4,7 +4,9 @@ import static org.anddev.andengine.opengl.vertex.RectangleVertexBuffer.VERTICES_
 
 import org.anddev.andengine.opengl.buffer.BufferObject;
 import org.anddev.andengine.opengl.texture.region.BaseTextureRegion;
-import org.anddev.andengine.opengl.util.FastFloatBuffer;
+
+import java.nio.FloatBuffer;
+
 
 /**
  * (c) 2010 Nicolas Gramlich 
@@ -76,71 +78,73 @@ public class TextureRegionBuffer extends BufferObject {
 	public synchronized void update() {
 		final BaseTextureRegion textureRegion = this.mTextureRegion;
 
-		final int x1 = Float.floatToRawIntBits(textureRegion.getTextureCoordinateX1());
-		final int y1 = Float.floatToRawIntBits(textureRegion.getTextureCoordinateY1());
-		final int x2 = Float.floatToRawIntBits(textureRegion.getTextureCoordinateX2());
-		final int y2 = Float.floatToRawIntBits(textureRegion.getTextureCoordinateY2());
+		final float x1 = textureRegion.getTextureCoordinateX1();
+		final float y1 = textureRegion.getTextureCoordinateY1();
+		final float x2 = textureRegion.getTextureCoordinateX2();
+		final float y2 = textureRegion.getTextureCoordinateY2();
 
-		final int[] bufferData = this.mBufferData;
+		final FloatBuffer floatBuffer = this.mFloatBuffer;
+
+		floatBuffer.position(0);
 
 		if(this.mFlippedVertical) {
 			if(this.mFlippedHorizontal) {
-				bufferData[0] = x2;
-				bufferData[1] = y2;
 
-				bufferData[2] = x2;
-				bufferData[3] = y1;
+				floatBuffer.put(0, x2);
+				floatBuffer.put(1, y2);
 
-				bufferData[4] = x1;
-				bufferData[5] = y2;
+				floatBuffer.put(2, x2);
+				floatBuffer.put(3, y1);
 
-				bufferData[6] = x1;
-				bufferData[7] = y1;
+				floatBuffer.put(4, x1);
+				floatBuffer.put(5, y2);
+
+				floatBuffer.put(6, x1);
+				floatBuffer.put(7, y1);
 			} else {
-				bufferData[0] = x1;
-				bufferData[1] = y2;
 
-				bufferData[2] = x1;
-				bufferData[3] = y1;
+				floatBuffer.put(0, x1);
+				floatBuffer.put(1, y2);
 
-				bufferData[4] = x2;
-				bufferData[5] = y2;
+				floatBuffer.put(2, x1);
+				floatBuffer.put(3, y1);
 
-				bufferData[6] = x2;
-				bufferData[7] = y1;
+				floatBuffer.put(4, x2);
+				floatBuffer.put(5, y2);
+
+				floatBuffer.put(6, x2);
+				floatBuffer.put(7, y1);
 			}
 		} else {
 			if(this.mFlippedHorizontal) {
-				bufferData[0] = x2;
-				bufferData[1] = y1;
 
-				bufferData[2] = x2;
-				bufferData[3] = y2;
+				floatBuffer.put(0, x2);
+				floatBuffer.put(1, y1);
 
-				bufferData[4] = x1;
-				bufferData[5] = y1;
+				floatBuffer.put(2, x2);
+				floatBuffer.put(3, y2);
 
-				bufferData[6] = x1;
-				bufferData[7] = y2;
+				floatBuffer.put(4, x1);
+				floatBuffer.put(5, y1);
+
+				floatBuffer.put(6, x1);
+				floatBuffer.put(7, y2);
 			} else {
-				bufferData[0] = x1;
-				bufferData[1] = y1;
+				floatBuffer.put(0, x1);
+				floatBuffer.put(1, y1);
 
-				bufferData[2] = x1;
-				bufferData[3] = y2;
+				floatBuffer.put(2, x1);
+				floatBuffer.put(3, y2);
 
-				bufferData[4] = x2;
-				bufferData[5] = y1;
+				floatBuffer.put(4, x2);
+				floatBuffer.put(5, y1);
 
-				bufferData[6] = x2;
-				bufferData[7] = y2;
+				floatBuffer.put(6, x2);
+				floatBuffer.put(7, y2);
 			}
 		}
 
-		final FastFloatBuffer buffer = this.mFloatBuffer;
-		buffer.position(0);
-		buffer.put(bufferData);
-		buffer.position(0);
+		floatBuffer.position(0);
 
 		super.setHardwareBufferNeedsUpdate();
 	}

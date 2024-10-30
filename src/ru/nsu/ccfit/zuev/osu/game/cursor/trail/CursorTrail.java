@@ -9,8 +9,7 @@ import org.anddev.andengine.opengl.texture.region.TextureRegion;
 
 import javax.microedition.khronos.opengles.GL10;
 
-import ru.nsu.ccfit.zuev.osu.Config;
-import ru.nsu.ccfit.zuev.osu.game.cursor.main.CursorSprite;
+import ru.nsu.ccfit.zuev.osu.game.GameHelper;
 
 public class CursorTrail extends ParticleSystem {
     public CursorTrail(
@@ -21,14 +20,13 @@ public class CursorTrail extends ParticleSystem {
     ) {
         super(emitter, spawnRate, spawnRate, spawnRate, pTextureRegion);
 
-        fadeOut();
+        // Cancelling the speed multiplier for the trail.
+        addParticleModifier(new ExpireModifier(0.1f * GameHelper.getSpeedMultiplier()));
+        addParticleModifier(new AlphaModifier(GameHelper.getSpeedMultiplier(), 0.0f, 0f, 0.10f));
+
         setBlendFunction(GL10.GL_SRC_ALPHA, GL10.GL_ONE_MINUS_SRC_ALPHA);
         addParticleInitializer(new ScaleInitializer(trailSize));
         setParticlesSpawnEnabled(false);
     }
 
-    private void fadeOut() {
-        addParticleModifier(new ExpireModifier(0.10f));
-        addParticleModifier(new AlphaModifier(1.0f, 0.0f, 0f, 0.10f));
-    }
 }

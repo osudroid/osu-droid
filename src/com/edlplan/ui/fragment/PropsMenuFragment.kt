@@ -28,7 +28,7 @@ class PropsMenuFragment : BaseFragment(), IPropsMenu {
 
     var menu: SongMenu? = null
     var item: BeatmapSetItem? = null
-    var props: BeatmapOptions? = null
+    var beatmapOptions: BeatmapOptions? = null
 
     private var offset: EditText? = null
     private var isFav: CheckBox? = null
@@ -46,11 +46,11 @@ class PropsMenuFragment : BaseFragment(), IPropsMenu {
         offset = findViewById<EditText>(R.id.offsetBox)
         isFav = findViewById<CheckBox>(R.id.addToFav)
 
-        offset!!.setText(props!!.offset.toString())
-        isFav!!.isChecked = props!!.isFavorite
+        offset!!.setText(beatmapOptions!!.offset.toString())
+        isFav!!.isChecked = beatmapOptions!!.isFavorite
 
         isFav!!.setOnCheckedChangeListener { buttonView: CompoundButton?, isChecked: Boolean ->
-            props!!.isFavorite = isChecked
+            beatmapOptions!!.isFavorite = isChecked
             saveProp()
         }
 
@@ -82,11 +82,11 @@ class PropsMenuFragment : BaseFragment(), IPropsMenu {
                         offset!!.setSelection(pos)
                         offset!!.addTextChangedListener(this)
                     }
-                    props!!.offset = o
+                    beatmapOptions!!.offset = o
                     saveProp()
                 } catch (e: NumberFormatException) {
                     if (s.length == 0) {
-                        props!!.offset = 0
+                        beatmapOptions!!.offset = 0
                         saveProp()
                     }
                 }
@@ -104,8 +104,7 @@ class PropsMenuFragment : BaseFragment(), IPropsMenu {
 
         findViewById<View>(R.id.manageFavButton)!!.setOnClickListener { v: View? ->
             val dialog = FavoriteManagerFragment()
-            //TODO : 铺面引用还是全局耦合的，需要分离
-            dialog.showToAddToFolder(GlobalManager.getInstance().selectedBeatmap!!.parentPath)
+            dialog.showToAddToFolder(GlobalManager.getInstance().selectedBeatmap!!.setDirectory)
         }
 
         findViewById<View>(R.id.deleteBeatmap)!!.setOnClickListener { v: View? ->
@@ -174,15 +173,16 @@ class PropsMenuFragment : BaseFragment(), IPropsMenu {
     override fun show(menu: SongMenu, item: BeatmapSetItem) {
         this.menu = menu
         this.item = item
-        props = DatabaseManager.beatmapOptionsTable.getOptions(item.beatmapSetInfo.path)
-        if (props == null) {
-            props = BeatmapOptions(item.beatmapSetInfo.path)
+        beatmapOptions = DatabaseManager.beatmapOptionsTable.getOptions(item.beatmapSetInfo.directory)
+        if (beatmapOptions == null) {
+            beatmapOptions = BeatmapOptions(item.beatmapSetInfo.directory)
+            DatabaseManager.beatmapOptionsTable.insert(beatmapOptions!!)
         }
         show()
     }
 
     fun saveProp() {
-        item!!.isFavorite = props!!.isFavorite
-        DatabaseManager.beatmapOptionsTable.setOptions(props!!)
+        item!!.isFavorite = beatmapOptions!!.isFavorite
+        DatabaseManager.beatmapOptionsTable.update(beatmapOptions!!)
     }
 }

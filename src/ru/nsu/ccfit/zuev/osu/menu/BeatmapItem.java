@@ -74,11 +74,7 @@ public class BeatmapItem extends Sprite {
         }
         halfStar.setVisible(false);
 
-        final float diff = Math.min(
-            Config.getDifficultyAlgorithm() == DifficultyAlgorithm.standard ?
-                beatmapInfo.getStandardStarRating() : beatmapInfo.getDroidStarRating(),
-            10
-        );
+        final float diff = Math.min(beatmapInfo.getStarRating(), 10);
 
         int fInt = (int) (diff);
         BigDecimal b1 = new BigDecimal(Float.toString(diff));
@@ -104,7 +100,7 @@ public class BeatmapItem extends Sprite {
         if (beatmapInfo == null) {
             return;
         }
-        var newmark = DatabaseManager.getScoreInfoTable().getBestMark(beatmapInfo.getPath());
+        var newmark = DatabaseManager.getScoreInfoTable().getBestMark(beatmapInfo.getMD5());
         if (currentMark != null && currentMark.equals(newmark)) {
             return;
         }

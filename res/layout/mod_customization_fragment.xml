@@ -12,12 +12,12 @@
         android:layout_height="match_parent"
         android:gravity="bottom"
         android:orientation="horizontal"
-        android:translationX="-350dp"
+        android:translationX="-450dp"
         tools:translationX="0dp">
 
         <ScrollView
             android:id="@+id/scrollView"
-            android:layout_width="350dp"
+            android:layout_width="450dp"
             android:layout_height="match_parent"
             android:background="#13131A"
             android:gravity="center|top"
@@ -57,7 +57,7 @@
                             android:text="Visuals" />
 
                         <TextView
-                            android:layout_width="0px"
+                            android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:layout_columnWeight="10"
                             android:padding="8dp"
@@ -87,27 +87,30 @@
 
                     <CheckBox
                         android:id="@+id/enableStoryboard"
-                        android:layout_width="0px"
+                        android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_columnWeight="1"
                         android:paddingVertical="12dp"
                         android:saveEnabled="false"
+                        android:layout_gravity="fill"
                         android:text="@string/opt_enableStoryboard_title"
                         tools:checked="true" />
 
                     <CheckBox
                         android:id="@+id/enableVideo"
-                        android:layout_width="0px"
+                        android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_columnWeight="1"
+                        android:layout_gravity="fill"
                         android:paddingVertical="12dp"
                         android:saveEnabled="false"
                         android:text="@string/opt_video_title" />
 
                     <CheckBox
                         android:id="@+id/showScoreboard"
-                        android:layout_width="0px"
+                        android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
+                        android:layout_gravity="fill"
                         android:layout_columnWeight="1"
                         android:paddingVertical="12dp"
                         android:saveEnabled="false"
@@ -139,7 +142,7 @@
 
                     <CheckBox
                         android:id="@+id/enableSpeedChange"
-                        android:layout_width="0px"
+                        android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_columnWeight="1"
                         android:saveEnabled="false"
@@ -198,7 +201,7 @@
                     <!--Force AR-->
                     <CheckBox
                         android:id="@+id/custom_ar_toggle"
-                        android:layout_width="0px"
+                        android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_columnWeight="1"
                         android:saveEnabled="false"
@@ -225,7 +228,7 @@
                     <!--Force OD-->
                     <CheckBox
                         android:id="@+id/custom_od_toggle"
-                        android:layout_width="0px"
+                        android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_columnWeight="10"
                         android:saveEnabled="false"
@@ -252,7 +255,7 @@
                     <!--Force CS-->
                     <CheckBox
                         android:id="@+id/custom_cs_toggle"
-                        android:layout_width="0px"
+                        android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_columnWeight="1"
                         android:saveEnabled="false"
@@ -279,7 +282,7 @@
                     <!--Force HP-->
                     <CheckBox
                         android:id="@+id/custom_hp_toggle"
-                        android:layout_width="0px"
+                        android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_columnWeight="1"
                         android:saveEnabled="false"
@@ -326,7 +329,7 @@
                         android:text="FL follow delay" />
 
                     <TextView
-                        android:layout_width="0px"
+                        android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_columnWeight="1"
                         android:padding="8dp"
@@ -348,6 +351,7 @@
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:layout_columnSpan="2"
+                        android:max="10"
                         android:paddingVertical="12dp"
                         android:saveEnabled="false"
                         tools:progress="50" />

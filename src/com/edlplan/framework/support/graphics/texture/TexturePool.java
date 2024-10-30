@@ -7,7 +7,6 @@ import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.PorterDuff;
 import android.graphics.PorterDuffXfermode;
-import android.os.Build;
 
 import com.edlplan.andengine.TextureHelper;
 import com.edlplan.framework.math.Vec2Int;
@@ -24,7 +23,6 @@ import org.anddev.andengine.opengl.util.GLHelper;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -39,9 +37,7 @@ public class TexturePool {
 
     int glMaxWidth;
     BitmapFactory.Options options = new BitmapFactory.Options() {{
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
-            inPremultiplied = true;
-        }
+        inPremultiplied = true;
     }};
     private File dir;
     private Set<ITexture> createdTextures = new HashSet<>();

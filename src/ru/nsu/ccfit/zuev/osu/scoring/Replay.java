@@ -7,10 +7,11 @@ import androidx.annotation.NonNull;
 import org.anddev.andengine.util.Debug;
 
 import java.io.EOFException;
+import java.io.File;
 import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.io.Serializable;
@@ -28,7 +29,7 @@ import ru.nsu.ccfit.zuev.osu.Utils;
 import ru.nsu.ccfit.zuev.osu.game.GameScene;
 import ru.nsu.ccfit.zuev.osu.game.cursor.flashlight.FlashLightEntity;
 import ru.nsu.ccfit.zuev.osu.game.mods.GameMod;
-import ru.nsu.ccfit.zuev.osuplus.R;
+import ru.nsu.ccfit.zuev.osu.menu.ModMenu;
 
 public class Replay {
     public static EnumSet<GameMod> mod = EnumSet.noneOf(GameMod.class);
@@ -41,8 +42,8 @@ public class Replay {
     public int replayVersion;
     public StatisticV2 stat = null;
     private String md5 = "";
-    private String mapFile = "";
-    private String mapName = "";
+    private String beatmapName = "";
+    private String beatmapsetName = "";
     private boolean isSaving;
     public static float oldChangeSpeed = 1.0f;
     public static float oldFLFollowDelay = FlashLightEntity.defaultMoveDelayS;
@@ -53,11 +54,18 @@ public class Replay {
     public static Float oldCustomHP;
 
     public Replay() {
-        cursorMoves.add(new MoveArray(200));
-        cursorMoves.add(new MoveArray(50));
-        for (int i = 2; i < GameScene.CursorCount; i++) {
-            cursorMoves.add(new MoveArray(15));
+        this(false);
+    }
+
+    public Replay(boolean allocateMoves) {
+        if (allocateMoves) {
+            cursorMoves.add(new MoveArray(200));
+            cursorMoves.add(new MoveArray(50));
+            for (int i = 2; i < GameScene.CursorCount; i++) {
+                cursorMoves.add(new MoveArray(15));
+            }
         }
+
         cursorIndex = new int[GameScene.CursorCount];
         lastMoveIndex = new int[GameScene.CursorCount];
         for (int i = 0; i < GameScene.CursorCount; i++) {
@@ -66,10 +74,10 @@ public class Replay {
         }
     }
 
-    public void setMap(String mapName, String file, String md5) {
-        this.mapName = mapName;
+    public void setBeatmap(String beatmapsetName, String beatmapName, String md5) {
+        this.beatmapsetName = beatmapsetName;
         this.md5 = md5;
-        this.mapFile = file;
+        this.beatmapName = beatmapName;
     }
 
     public void setObjectCount(int count) {
@@ -118,28 +126,20 @@ public class Replay {
             Debug.i("Replay contains " + cursorMoves.get(i).size + " moves for finger " + i);
         Debug.i("Skipped " + pointsSkipped + " points");
         Debug.i("Replay contains " + objectData.length + " objects");
-        ObjectOutputStream os;
-        ZipOutputStream zip;
+
+        ObjectOutputStream os = null;
+        ZipOutputStream zip = null;
+
         try {
             zip = new ZipOutputStream(new FileOutputStream(filename));
             zip.setMethod(ZipOutputStream.DEFLATED);
             zip.setLevel(Deflater.DEFAULT_COMPRESSION);
             zip.putNextEntry(new ZipEntry("data"));
-            os = new ObjectOutputStream(zip);
-        } catch (final FileNotFoundException e) {
-            Debug.e("File not found " + filename, e);
-            isSaving = false;
-            return;
-        } catch (final IOException e) {
-            Debug.e("IOException: " + e.getMessage(), e);
-            isSaving = false;
-            return;
-        }
 
-        try {
+            os = new ObjectOutputStream(zip);
             os.writeObject(new ReplayVersion());
-            os.writeObject(mapName);
-            os.writeObject(mapFile);
+            os.writeObject(beatmapsetName);
+            os.writeObject(beatmapName);
             os.writeObject(md5);
 
             if (stat != null) {
@@ -151,9 +151,14 @@ public class Replay {
                 os.writeInt(stat.getHit50());
                 os.writeInt(stat.getMisses());
                 os.writeInt(stat.getTotalScoreWithMultiplier());
-                os.writeInt(stat.getMaxCombo());
+                os.writeInt(stat.getScoreMaxCombo());
+
+                // TODO: remove accuracy writing in replay v6
                 os.writeFloat(stat.getAccuracy());
+
+                // TODO: remove perfect writing in replay v6
                 os.writeBoolean(stat.isPerfect());
+
                 os.writeObject(stat.getPlayerName());
                 os.writeObject(stat.getMod());
                 //Add in replay version 4
@@ -169,7 +174,7 @@ public class Replay {
             for (ReplayObjectData data : objectData) {
                 if (data == null) data = new ReplayObjectData();
                 os.writeShort(data.accuracy);
-                if (data.tickSet == null || data.tickSet.length() == 0) {
+                if (data.tickSet == null || data.tickSet.isEmpty()) {
                     os.writeByte(0);
                 } else {
                     byte[] bytes = new byte[(data.tickSet.length() + 7) / 8];
@@ -185,59 +190,70 @@ public class Replay {
             }
         } catch (final IOException e) {
             Debug.e("IOException: " + e.getMessage(), e);
+        } finally {
+            try {
+                if (os != null) {
+                    os.flush();
+                    os.close();
+                }
+
+                if (zip != null) {
+                    zip.flush();
+                    zip.closeEntry();
+                    zip.flush();
+                    zip.close();
+                }
+            } catch (final IOException e) {
+                Debug.e("IOException: " + e.getMessage(), e);
+            }
+
             isSaving = false;
-            return;
         }
-
-        try {
-            os.flush();
-            zip.flush();
-            zip.closeEntry();
-            zip.flush();
-        } catch (final IOException e) {
-            Debug.e("IOException: " + e.getMessage(), e);
-        }
-
-        isSaving = false;
     }
 
-    @SuppressWarnings("unchecked")
-    public boolean loadInfo(final String filename) {
-        ObjectInputStream os;
-        try {
-            final ZipInputStream zip = new ZipInputStream(new FileInputStream(filename));
-            zip.getNextEntry();
-            os = new ObjectInputStream(zip);
-            // zip.close();
-        } catch (final Exception e) {
+    public boolean load(final String replayFilePath, boolean withGameplayData) {
+        try (var stream = new FileInputStream(replayFilePath)) {
+            return load(stream, new File(replayFilePath).getName(), withGameplayData);
+        } catch (final IOException e) {
             Debug.e("Cannot load replay: " + e.getMessage(), e);
             return false;
         }
+    }
 
-        Debug.i("Loading replay " + filename);
+    public boolean load(InputStream inputStream, String replayFilename, boolean withGameplayData) {
+        ObjectInputStream os = null;
+        ZipInputStream zip = null;
 
-        cursorMoves.clear();
-        int version = 0;
         try {
+            zip = new ZipInputStream(inputStream);
+            zip.getNextEntry();
+            os = new ObjectInputStream(zip);
+
+            cursorMoves.clear();
+            int version = 0;
+
+            String mBeatmapsetName;
             Object firstObject = os.readObject();
-            Debug.i("Readed object: " + firstObject.getClass().getName());
+            Debug.i("Read object: " + firstObject.getClass().getName());
             if (firstObject.getClass().equals(ReplayVersion.class)) {
                 Debug.i("Other replay version");
                 version = ((ReplayVersion) firstObject).version;
                 replayVersion = version;
-                mapName = (String) os.readObject();
+                mBeatmapsetName = (String) os.readObject();
             } else {
-                mapName = (String) firstObject;
+                mBeatmapsetName = (String) firstObject;
             }
-            mapFile = (String) os.readObject();
-            md5 = (String) os.readObject();
+            String mBeatmapName = (String) os.readObject();
+            String mMD5 = (String) os.readObject();
 
-            Debug.i(mapName);
-            Debug.i(mapFile);
-            Debug.i(md5);
+            beatmapsetName = mBeatmapsetName;
+            beatmapName = mBeatmapName;
+            md5 = mMD5;
 
             if (version >= 3) {
                 stat = new StatisticV2();
+                stat.setReplayFilename(replayFilename);
+                stat.setBeatmapMD5(md5);
                 stat.setTime(os.readLong());
                 stat.setHit300k(os.readInt());
                 stat.setHit300(os.readInt());
@@ -246,9 +262,14 @@ public class Replay {
                 stat.setHit50(os.readInt());
                 stat.setMisses(os.readInt());
                 stat.setForcedScore(os.readInt());
-                stat.setMaxCombo(os.readInt());
-                stat.setAccuracy(os.readFloat());
-                stat.setPerfect(os.readBoolean());
+                stat.setScoreMaxCombo(os.readInt());
+
+                // TODO: The call below is for accuracy, but StatisticV2 does not use it anymore. Remove in replay v6.
+                os.readFloat();
+
+                // TODO: The call below is for perfect, but StatisticV2 does not use it anymore. Remove in replay v6.
+                os.readBoolean();
+
                 stat.setPlayerName((String) os.readObject());
                 stat.setMod((EnumSet<GameMod>) os.readObject());
             }
@@ -257,127 +278,64 @@ public class Replay {
                 stat.setExtraModFromString((String) os.readObject());
             }
 
-        } catch (EOFException e) {
-            Debug.e("O_o eof...");
-            ToastLogger.showTextId(R.string.replay_corrupted, true);
-            return false;
-
-        } catch (Exception e) {
-            ToastLogger.showTextId(R.string.replay_corrupted, true);
-            Debug.e("Cannot load replay: " + e.getMessage(), e);
-            return false;
-        }
-
-        return true;
-    }
-
-    @SuppressWarnings("unchecked")
-    public boolean load(final String filename) {
-        ObjectInputStream os;
-        try {
-            final ZipInputStream zip = new ZipInputStream(new FileInputStream(filename));
-            zip.getNextEntry();
-            os = new ObjectInputStream(zip);
-            // zip.close();
-        } catch (final Exception e) {
-            Debug.e("Cannot load replay: " + e.getMessage(), e);
-            return false;
-        }
-
-        Debug.i("Loading replay " + filename);
-
-        cursorMoves.clear();
-        int version = 0;
-        try {
-            String mName;
-            Object firstObject = os.readObject();
-            Debug.i("Read object: " + firstObject.getClass().getName());
-            if (firstObject.getClass().equals(ReplayVersion.class)) {
-                Debug.i("Other replay version");
-                version = ((ReplayVersion) firstObject).version;
-                replayVersion = version;
-                mName = (String) os.readObject();
-            } else {
-                mName = (String) firstObject;
-            }
-            String mFile = (String) os.readObject();
-            String mmd5 = (String) os.readObject();
-
-            if (!mName.equals(mapName) && !mFile.equals(mapFile)) {
-                Debug.i("Replay doesn't match the map!");
-                Debug.i(mapName + " ::: " + mName);
-                Debug.i(mapFile + " ::: " + mFile);
-                Debug.i(md5 + " ::: " + mmd5);
-                ToastLogger.showTextId(R.string.replay_wrongmap, true);
-                os.close();
-                return false;
-            }
-
-            if (version >= 3) {
-                stat = new StatisticV2();
-                stat.setTime(os.readLong());
-                stat.setHit300k(os.readInt());
-                stat.setHit300(os.readInt());
-                stat.setHit100k(os.readInt());
-                stat.setHit100(os.readInt());
-                stat.setHit50(os.readInt());
-                stat.setMisses(os.readInt());
-                stat.setForcedScore(os.readInt());
-                stat.setMaxCombo(os.readInt());
-                stat.setAccuracy(os.readFloat());
-                stat.setPerfect(os.readBoolean());
-                stat.setPlayerName((String) os.readObject());
-                stat.setMod((EnumSet<GameMod>) os.readObject());
-            }
-
-            if  (version >= 4) {
-                stat.setExtraModFromString((String) os.readObject());
-            }
-
-            int msize = os.readInt();
-            for (int i = 0; i < msize; i++) {
-                cursorMoves.add(MoveArray.readFrom(os, this));
-            }
-
-            os.readInt();
-            for (int i = 0; i < objectData.length; i++) {
-                ReplayObjectData data = new ReplayObjectData();
-                data.accuracy = os.readShort();
-                int len = os.readByte();
-                if (len > 0) {
-                    data.tickSet = new BitSet();
-                    byte[] bytes = new byte[len];
-                    if (os.read(bytes) > 0) {
-                        System.out.println("Read " + len + " bytes");
-                    }
-                    for (int j = 0; j < len * 8; j++) {
-                        data.tickSet.set(j, (bytes[len - j / 8 - 1] & 1 << (j % 8)) != 0);
-                    }
+            if (withGameplayData) {
+                int msize = os.readInt();
+                for (int i = 0; i < msize; i++) {
+                    cursorMoves.add(MoveArray.readFrom(os, this));
                 }
-                if (version >= 1) {
-                    data.result = os.readByte();
+
+                os.readInt();
+                for (int i = 0; i < objectData.length; i++) {
+                    ReplayObjectData data = new ReplayObjectData();
+                    data.accuracy = os.readShort();
+                    int len = os.readByte();
+                    if (len > 0) {
+                        data.tickSet = new BitSet();
+                        byte[] bytes = new byte[len];
+                        if (os.read(bytes) > 0) {
+                            System.out.println("Read " + len + " bytes");
+                        }
+                        for (int j = 0; j < len * 8; j++) {
+                            data.tickSet.set(j, (bytes[len - j / 8 - 1] & 1 << (j % 8)) != 0);
+                        }
+                    }
+                    if (version >= 1) {
+                        data.result = os.readByte();
+                    }
+                    objectData[i] = data;
                 }
-                objectData[i] = data;
             }
         } catch (EOFException e) {
             Debug.e("O_o eof...");
             Debug.e(e);
-            ToastLogger.showTextId(R.string.replay_corrupted, true);
+            ToastLogger.showTextId(com.osudroid.resources.R.string.replay_corrupted, true);
             return false;
-
         } catch (Exception e) {
-            ToastLogger.showTextId(R.string.replay_corrupted, true);
+            ToastLogger.showTextId(com.osudroid.resources.R.string.replay_corrupted, true);
             Debug.e("Cannot load replay: " + e.getMessage(), e);
             return false;
+        } finally {
+            try {
+                if (os != null) {
+                    os.close();
+                }
+
+                if (zip != null) {
+                    zip.closeEntry();
+                    zip.close();
+                }
+            } catch (final IOException e) {
+                Debug.e("IOException: " + e.getMessage(), e);
+            }
         }
 
-        for (int i = 0; i < cursorMoves.size(); i++)
-            Debug.i("Loaded " + cursorMoves.get(i).size + " moves for finger " + i);
-        Debug.i("Loaded " + objectData.length + " objects");
-        return true;
-    }
+        if (withGameplayData) {
+            for (int i = 0; i < cursorMoves.size(); i++)
+                Debug.i("Loaded " + cursorMoves.get(i).size + " moves for finger " + i);
+            Debug.i("Loaded " + objectData.length + " objects");
+        }
 
-    public void countMarks(float difficulty) {
+        return true;
     }
 
     public StatisticV2 getStat() {
@@ -392,12 +350,12 @@ public class Replay {
         return md5;
     }
 
-    public String getMapFile() {
-        return mapFile;
+    public String getBeatmapName() {
+        return beatmapName;
     }
 
-    public String getMapName() {
-        return mapName;
+    public String getBeatmapsetName() {
+        return beatmapsetName;
     }
 
     /*
@@ -451,6 +409,7 @@ public class Replay {
 
         @NonNull
         public static MoveArray readFrom(@NonNull ObjectInputStream is, Replay replay) throws IOException {
+            boolean isHardRock = ModMenu.getInstance().getMod().contains(GameMod.MOD_HARDROCK);
             int size = is.readInt();
             MoveArray array = new MoveArray(size);
             array.size = size;
@@ -468,10 +427,11 @@ public class Replay {
                             baseY / Config.getTextureQuality()
                     );
                     PointF realPoint = replay.replayVersion > 1 ?
-                            Utils.trackToRealCoords(gamePoint) :
-                            Utils.trackToRealCoords(
-                                    Utils.realToTrackCoords(gamePoint, 1024, 600, true)
-                            );
+                        Utils.trackToRealCoords(gamePoint, isHardRock) :
+                        Utils.trackToRealCoords(
+                            Utils.realToTrackCoords(gamePoint, 1024, 600, true),
+                            isHardRock
+                        );
                     movement.point.set(realPoint);
                 }
             }

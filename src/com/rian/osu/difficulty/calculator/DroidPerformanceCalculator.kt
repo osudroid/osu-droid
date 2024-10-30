@@ -124,7 +124,7 @@ class DroidPerformanceCalculator(
         aimValue *= sliderCheesePenalty.aim
 
         // Scale the aim value with deviation.
-        aimValue *= 1.05 * sqrt(ErrorFunction.erf(25 / (sqrt(2.0) * deviation)))
+        aimValue *= 1.025 * ErrorFunction.erf(25 / (sqrt(2.0) * deviation)).pow(0.475)
 
         // OD 7 SS stays the same.
         aimValue *= 0.98 + 7.0.pow(2) / 2500
@@ -138,8 +138,9 @@ class DroidPerformanceCalculator(
         tapValue *= calculateStrainBasedMissPenalty(tapDifficultStrainCount)
 
         // Scale the tap value with estimated full combo deviation.
-        // Require more objects to be present as object count can rack up easily in tap-oriented beatmaps.
-        tapValue *= calculateDeviationBasedLengthScaling(totalHits / 1.45)
+        // Consider notes that are difficult to tap with respect to other notes, but
+        // also cap the note count to prevent buffing filler patterns.
+        tapValue *= calculateDeviationBasedLengthScaling(min(speedNoteCount, totalHits / 1.45))
 
         // Normalize the deviation to 300 BPM.
         val normalizedDeviation = tapDeviation * max(1.0, 50 / averageSpeedDeltaTime)
@@ -152,7 +153,7 @@ class DroidPerformanceCalculator(
             (1 + 1 / (1 + exp(-(normalizedDeviation - 7500 / averageBPM) / (2 * 300 / averageBPM))))
 
         // Scale the tap value with tap deviation.
-        tapValue *= 1.1 * ErrorFunction.erf(20 / (sqrt(2.0) * adjustedDeviation)).pow(0.625)
+        tapValue *= 1.05 * ErrorFunction.erf(20 / (sqrt(2.0) * adjustedDeviation)).pow(0.6)
 
         // Additional scaling for tap value based on average BPM and how "vibroable" the beatmap is.
         // Higher BPMs require more precise tapping. When the deviation is too high,
@@ -175,7 +176,7 @@ class DroidPerformanceCalculator(
             return@run 0.0
         }
 
-        var accuracyValue = 800 * exp(-0.1 * deviation)
+        var accuracyValue = 650 * exp(-0.1 * deviation)
 
         val accuracyObjectCount =
             if (mods.any { it is ModScoreV2 }) totalHits - spinnerCount
@@ -230,7 +231,7 @@ class DroidPerformanceCalculator(
         visualValue *= sliderCheesePenalty.visual
 
         // Scale the visual value with deviation.
-        visualValue *= 1.065 * ErrorFunction.erf(25 / (sqrt(2.0) * deviation)).pow(0.8)
+        visualValue *= 1.05 * ErrorFunction.erf(25 / (sqrt(2.0) * deviation)).pow(0.775)
 
         // OD 5 SS stays the same.
         visualValue *= 0.98 + 5.0.pow(2) / 2500
@@ -240,7 +241,7 @@ class DroidPerformanceCalculator(
 
     private fun calculateStrainBasedMissPenalty(difficultStrainCount: Double) =
         if (effectiveMissCount == 0.0) 1.0
-        else 0.94 / (effectiveMissCount / (2 * sqrt(difficultStrainCount)) + 1)
+        else 0.96 / (effectiveMissCount / (4 * ln(difficultStrainCount).pow(0.94)) + 1)
 
     private val proportionalMissPenalty by lazy {
         if (effectiveMissCount == 0.0) {
@@ -266,6 +267,10 @@ class DroidPerformanceCalculator(
      */
     private fun calculateDeviationBasedLengthScaling(objectCount: Double = totalHits.toDouble(),
                                                      punishForMemorization: Boolean = false): Double {
+        if (objectCount == 0.0) {
+            return 0.0
+        }
+
         // Assume a sample proportion of hits for a full combo to be `(n - 0.5) / n` due to
         // continuity correction, where `n` is the object count.
         fun calculateProportion(notes: Double) = (notes - 0.5) / notes
@@ -304,9 +309,9 @@ class DroidPerformanceCalculator(
      * The estimation is consistent in that two SS scores on the same map
      * with the same settings will always return the same deviation.
      *
-     * Sliders are treated as circles with a 50 hit window.
+     * Under non-ScoreV2 scores, sliders are treated as circles with a 50 hit window.
      *
-     * Misses are ignored because they are usually due to misaiming, and 50s
+     * Misses are ignored because they are usually due to mis-aiming, and 50s
      * are grouped with 100s since they are usually due to misreading.
      *
      * Inaccuracies are capped to the number of circles in the map.
@@ -318,11 +323,7 @@ class DroidPerformanceCalculator(
 
         var od = overallDifficulty.toFloat()
         var hitWindow = if (isPrecise) PreciseDroidHitWindow(od) else DroidHitWindow(od)
-        var realGreatWindow = hitWindow.greatWindow
-
-        if (!forceOD) {
-            realGreatWindow *= clockRate.toFloat()
-        }
+        val realGreatWindow = hitWindow.greatWindow * clockRate.toFloat()
 
         // Obtain the good and meh hit window for osu!droid.
         od =
@@ -335,42 +336,51 @@ class DroidPerformanceCalculator(
         val okWindow = hitWindow.okWindow / clockRate
         val mehWindow = hitWindow.mehWindow / clockRate
 
-        val missCountCircles = min(countMiss, hitCircleCount)
-        val mehCountCircles = min(countMeh, hitCircleCount - missCountCircles)
-        val okCountCircles = min(countOk, hitCircleCount - missCountCircles - mehCountCircles)
-        val greatCountCircles = max(0, hitCircleCount - missCountCircles - mehCountCircles - okCountCircles)
+        // For non-ScoreV2 scores, assume 100s, 50s, and misses happen on circles.
+        // If there are less non-300s on circles than 300s, compute the deviation on circles.
+        val isScoreV2 = mods.any { it is ModScoreV2 }
+        val hitObjectWithAccuracyCount = hitCircleCount + if (isScoreV2) sliderCount else 0
 
-        // Assume 100s, 50s, and misses happen on circles. If there are less non-300s on circles than 300s,
-        // compute the deviation on circles.
-        if (greatCountCircles > 0) {
-            // The probability that a player hits a circle is unknown, but we can estimate it to be
+        val missCountAccuracyObjects = min(countMiss, hitObjectWithAccuracyCount)
+        val mehCountAccuracyObjects = min(countMeh, hitObjectWithAccuracyCount - missCountAccuracyObjects)
+        val okCountAccuracyObjects = min(countOk, hitObjectWithAccuracyCount - missCountAccuracyObjects - mehCountAccuracyObjects)
+        val greatCountAccuracyObjects = max(0, hitObjectWithAccuracyCount - missCountAccuracyObjects - mehCountAccuracyObjects - okCountAccuracyObjects)
+
+        if (greatCountAccuracyObjects > 0) {
+            // The probability that a player hits an accuracy object is unknown, but we can estimate it to be
             // the number of greats on circles divided by the number of circles, and then add one
             // to the number of circles as a bias correction / bayesian prior.
-            val greatProbabilityCircle =
-                greatCountCircles / (hitCircleCount - missCountCircles - mehCountCircles + 1.0)
+            val greatProbabilityAccuracyObjects =
+                greatCountAccuracyObjects / (hitObjectWithAccuracyCount - missCountAccuracyObjects - mehCountAccuracyObjects + 1.0)
 
             // Compute the deviation assuming 300s and 100s are normally distributed, and 50s are uniformly distributed.
             // Begin with the normal distribution first.
-            var deviationOnCircles = greatWindow / (sqrt(2.0) * ErrorFunction.erfInv(greatProbabilityCircle))
+            var deviationOnAccuracyObjects = greatWindow / (sqrt(2.0) * ErrorFunction.erfInv(greatProbabilityAccuracyObjects))
 
-            deviationOnCircles *=
-                sqrt(1 - sqrt(2 / PI) * okWindow * exp(-0.5 * (okWindow / deviationOnCircles).pow(2)) /
-                    (deviationOnCircles * ErrorFunction.erf(okWindow / (sqrt(2.0) * deviationOnCircles))))
+            deviationOnAccuracyObjects *=
+                sqrt(1 - sqrt(2 / PI) * okWindow * exp(-0.5 * (okWindow / deviationOnAccuracyObjects).pow(2)) /
+                    (deviationOnAccuracyObjects * ErrorFunction.erf(okWindow / (sqrt(2.0) * deviationOnAccuracyObjects))))
 
             // Then compute the variance for 50s.
             val mehVariance = (mehWindow.pow(2) + mehWindow * okWindow + okWindow.pow(2)) / 3
 
             // Find the total deviation.
             return@run sqrt(
-                ((greatCountCircles + okCountCircles) * deviationOnCircles.pow(2) + mehCountCircles * mehVariance) /
-                    (greatCountCircles + okCountCircles + mehCountCircles)
+                ((greatCountAccuracyObjects + okCountAccuracyObjects) * deviationOnAccuracyObjects.pow(2) + mehCountAccuracyObjects * mehVariance) /
+                    (greatCountAccuracyObjects + okCountAccuracyObjects + mehCountAccuracyObjects)
             )
         }
 
         // If there are more non-300s than there are circles, compute the deviation on sliders instead.
         // Here, all that matters is whether the slider was missed, since it is impossible
         // to get a 100 or 50 on a slider by mis-tapping it.
-        val missCountSliders = min(sliderCount, countMiss - missCountCircles)
+
+        // For ScoreV2 scores, sliders are already included as accuracy objects, so this part of the computation is invalid.
+        if (isScoreV2) {
+            return@run Double.POSITIVE_INFINITY
+        }
+
+        val missCountSliders = min(sliderCount, countMiss - missCountAccuracyObjects)
         val greatCountSliders = sliderCount - missCountSliders
 
         // We only get here if nothing was hit. In this case, there is no estimate for deviation.
@@ -397,11 +407,7 @@ class DroidPerformanceCalculator(
 
         var od = overallDifficulty.toFloat()
         var hitWindow = if (isPrecise) PreciseDroidHitWindow(od) else DroidHitWindow(od)
-        var realGreatWindow = hitWindow.greatWindow
-
-        if (!forceOD) {
-            realGreatWindow *= clockRate.toFloat()
-        }
+        val realGreatWindow = hitWindow.greatWindow * clockRate.toFloat()
 
         // Obtain the good and meh hit window for osu!droid.
         od =
@@ -422,9 +428,9 @@ class DroidPerformanceCalculator(
         val nonGreatRatio = 1 - (exp(sqrt(greatWindow)) + 1.0).pow(1 - speedNoteRatio) / exp(sqrt(greatWindow))
 
         val relevantCountGreat = max(0.0, speedNoteCount - nonGreatCount * nonGreatRatio)
-        val relevantCountOk = countOk * nonGreatRatio
-        val relevantCountMeh = countMeh * nonGreatRatio
-        val relevantCountMiss = countMiss * nonGreatRatio
+        val relevantCountOk = max(0.0, countOk * nonGreatRatio)
+        val relevantCountMeh = max(0.0, countMeh * nonGreatRatio)
+        val relevantCountMiss = max(0.0, countMiss * nonGreatRatio)
 
         // Assume 100s, 50s, and misses happen on circles. If there are less non-300s on circles than 300s,
         // compute the deviation on circles.

@@ -1,7 +1,6 @@
 package com.rian.osu.difficulty.skills
 
 import com.rian.osu.difficulty.DroidDifficultyHitObject
-import com.rian.osu.difficulty.evaluators.DroidRhythmEvaluator
 import com.rian.osu.difficulty.evaluators.DroidVisualEvaluator
 import com.rian.osu.mods.Mod
 import com.rian.osu.mods.ModHidden
@@ -17,19 +16,11 @@ class DroidVisual(
     mods: List<Mod>,
 
     /**
-     * The 300 hit window.
-     */
-    private val greatWindow: Double,
-
-    /**
      * Whether to consider sliders in the calculation.
      */
     private val withSliders: Boolean
 ) : DroidStrainSkill(mods) {
     override val starsPerDouble = 1.025
-
-    override val objectStrain: Double
-        get() = currentStrain * currentRhythm
 
     private var currentStrain = 0.0
     private var currentRhythm = 0.0
@@ -41,9 +32,12 @@ class DroidVisual(
         currentStrain *= strainDecay(current.deltaTime)
         currentStrain += DroidVisualEvaluator.evaluateDifficultyOf(current, isHidden, withSliders) * skillMultiplier
 
-        currentRhythm = DroidRhythmEvaluator.evaluateDifficultyOf(current, greatWindow)
+        currentRhythm = current.rhythmMultiplier
 
-        return currentStrain * currentRhythm
+        val totalStrain = currentStrain * currentRhythm
+        objectStrains.add(totalStrain)
+
+        return totalStrain
     }
 
     override fun calculateInitialStrain(time: Double, current: DroidDifficultyHitObject) =

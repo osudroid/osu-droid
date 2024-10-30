@@ -13,6 +13,7 @@ import android.widget.EditText
 import androidx.preference.PreferenceManager
 import com.edlplan.framework.easing.Easing
 import com.edlplan.framework.support.util.Updater
+import com.osudroid.resources.R.*
 import com.edlplan.ui.BaseAnimationListener
 import com.edlplan.ui.EasingHelper
 import com.reco1l.osu.mainThread
@@ -76,7 +77,7 @@ class FilterMenuFragment : BaseFragment(), IUpdateHandler, IFilterMenu {
     override fun isFavoritesOnly(): Boolean = favoritesOnly.isChecked
 
     override fun getFavoriteFolder(): String =
-        if (StringTable.get(R.string.favorite_default) == favoriteFolder.text) "" else favoriteFolder.text.toString()
+        if (StringTable.get(string.favorite_default) == favoriteFolder.text) "" else favoriteFolder.text.toString()
 
     override fun loadConfig(context: Context?) {
         configContext = context
@@ -144,7 +145,7 @@ class FilterMenuFragment : BaseFragment(), IUpdateHandler, IFilterMenu {
                 val favoriteManagerFragment = FavoriteManagerFragment()
                 favoriteManagerFragment.showToSelectFolder {
                     savedFolder = it
-                    favoriteFolder.text = it ?: StringTable.get(R.string.favorite_default)
+                    favoriteFolder.text = it ?: StringTable.get(string.favorite_default)
                     updateUpdater()
                 }
             }
@@ -228,14 +229,14 @@ class FilterMenuFragment : BaseFragment(), IUpdateHandler, IFilterMenu {
 
     private fun updateOrderButton() {
         val s = when (order) {
-            SongMenu.SortOrder.Title -> StringTable.get(R.string.menu_search_sort_title)
-            SongMenu.SortOrder.Artist -> StringTable.get(R.string.menu_search_sort_artist)
-            SongMenu.SortOrder.Creator -> StringTable.get(R.string.menu_search_sort_creator)
-            SongMenu.SortOrder.Date -> StringTable.get(R.string.menu_search_sort_date)
-            SongMenu.SortOrder.Bpm -> StringTable.get(R.string.menu_search_sort_bpm)
-            SongMenu.SortOrder.DroidStars -> StringTable.get(R.string.menu_search_sort_droid_stars)
-            SongMenu.SortOrder.StandardStars -> StringTable.get(R.string.menu_search_sort_standard_stars)
-            SongMenu.SortOrder.Length -> StringTable.get(R.string.menu_search_sort_length)
+            SongMenu.SortOrder.Title -> StringTable.get(string.menu_search_sort_title)
+            SongMenu.SortOrder.Artist -> StringTable.get(string.menu_search_sort_artist)
+            SongMenu.SortOrder.Creator -> StringTable.get(string.menu_search_sort_creator)
+            SongMenu.SortOrder.Date -> StringTable.get(string.menu_search_sort_date)
+            SongMenu.SortOrder.Bpm -> StringTable.get(string.menu_search_sort_bpm)
+            SongMenu.SortOrder.DroidStars -> StringTable.get(string.menu_search_sort_droid_stars)
+            SongMenu.SortOrder.StandardStars -> StringTable.get(string.menu_search_sort_standard_stars)
+            SongMenu.SortOrder.Length -> StringTable.get(string.menu_search_sort_length)
         }
 
         sortButton.text = s
@@ -243,7 +244,7 @@ class FilterMenuFragment : BaseFragment(), IUpdateHandler, IFilterMenu {
 
     private fun updateFavFolderText() {
         favoriteFolder.text =
-            savedFolder.orEmpty().ifEmpty { StringTable.get(R.string.favorite_default) }
+            savedFolder.orEmpty().ifEmpty { StringTable.get(string.favorite_default) }
     }
 
     private fun nextOrder() {

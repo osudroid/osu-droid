@@ -7,7 +7,7 @@ import org.anddev.andengine.entity.sprite.Sprite;
 
 import java.lang.ref.WeakReference;
 import java.util.Collections;
-import java.util.Set;
+import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -20,7 +20,6 @@ import com.reco1l.osu.data.DatabaseManager;
 import ru.nsu.ccfit.zuev.osu.Utils;
 import ru.nsu.ccfit.zuev.osu.DifficultyAlgorithm;
 import ru.nsu.ccfit.zuev.osu.helper.StringTable;
-import ru.nsu.ccfit.zuev.osuplus.R;
 
 public class BeatmapSetItem {
     private final BeatmapItem[] beatmapItems;
@@ -44,7 +43,7 @@ public class BeatmapSetItem {
     public BeatmapSetItem(final MenuItemListener listener, final BeatmapSetInfo beatmapSetInfo) {
         this.listener = new WeakReference<>(listener);
         this.beatmapSetInfo = beatmapSetInfo;
-        beatmapSetDir = beatmapSetInfo.getPath();
+        beatmapSetDir = beatmapSetInfo.getDirectory();
         bgHeight = ResourceManager.getInstance()
                 .getTexture("menu-button-background").getHeight()
                 - Utils.toRes(25);
@@ -54,11 +53,11 @@ public class BeatmapSetItem {
 
         titleStr = beatmapInfo.getArtistText() + " - " + beatmapInfo.getTitleText();
 
-        creatorStr = StringTable.format(R.string.menu_creator,
+        creatorStr = StringTable.format(com.osudroid.resources.R.string.menu_creator,
                 beatmapInfo.getCreator());
         beatmapItems = new BeatmapItem[beatmapSetInfo.getCount()];
 
-        var props = DatabaseManager.getBeatmapOptionsTable().getOptions(beatmapSetInfo.getPath());
+        var props = DatabaseManager.getBeatmapOptionsTable().getOptions(beatmapSetInfo.getDirectory());
         favorite = props != null && props.isFavorite();
 
     }
@@ -66,7 +65,7 @@ public class BeatmapSetItem {
     public BeatmapSetItem(final MenuItemListener listener, final BeatmapSetInfo beatmapSetInfo, int id) {
         this.listener = new WeakReference<>(listener);
         this.beatmapSetInfo = beatmapSetInfo;
-        beatmapSetDir = this.beatmapSetInfo.getPath();
+        beatmapSetDir = this.beatmapSetInfo.getDirectory();
         bgHeight = ResourceManager.getInstance()
                 .getTexture("menu-button-background").getHeight()
                 - Utils.toRes(25);
@@ -76,11 +75,11 @@ public class BeatmapSetItem {
 
         titleStr = beatmapInfo.getArtistText() + " - " + beatmapInfo.getTitleText();
 
-        creatorStr = StringTable.format(R.string.menu_creator, beatmapInfo.getCreator());
+        creatorStr = StringTable.format(com.osudroid.resources.R.string.menu_creator, beatmapInfo.getCreator());
         beatmapItems = new BeatmapItem[1];
         beatmapId = id;
 
-        var props = DatabaseManager.getBeatmapOptionsTable().getOptions(beatmapSetInfo.getPath());
+        var props = DatabaseManager.getBeatmapOptionsTable().getOptions(beatmapSetInfo.getDirectory());
         favorite = props != null && props.isFavorite();
 
     }
@@ -161,7 +160,7 @@ public class BeatmapSetItem {
         }
     }
 
-    public void select(boolean reloadMusic, boolean reloadBG) {
+    public void select() {
         if (!listener.get().isSelectAllowed() || scene == null) {
             return;
         }
@@ -172,14 +171,7 @@ public class BeatmapSetItem {
         initBeatmaps();
         percentAppeared = 0;
 
-        var beatmapInfo = beatmapSetInfo.getBeatmaps().get(0);
-
-        final String musicFileName = beatmapInfo.getAudio();
-        if (reloadMusic) {
-            listener.get().playMusic(musicFileName, beatmapInfo.getPreviewTime());
-        }
-
-        selectBeatmap(beatmapItems[0], reloadBG);
+        selectBeatmap(beatmapItems[0], true);
         beatmapItems[0].setSelectedColor();
     }
 
@@ -208,9 +200,9 @@ public class BeatmapSetItem {
         selectedBeatmapItem = null;
     }
 
-    public void applyFilter(final String filter, final boolean favs, Set<String> limit) {
+    public void applyFilter(final String filter, final boolean favs, List<String> limit) {
         if ((favs && !isFavorite())
-                || (limit != null && !limit.contains(beatmapSetDir))) {
+                || (limit != null && !limit.isEmpty() && !limit.contains(beatmapSetDir))) {
             //System.out.println(trackDir);
             if (selected) {
                 deselect();
@@ -292,21 +284,21 @@ public class BeatmapSetItem {
         visible = false;
     }
 
-    private boolean visibleBeatmap(BeatmapInfo beatmap, String key, String opt, String value) {
+    private boolean visibleBeatmap(BeatmapInfo beatmapInfo, String key, String opt, String value) {
         switch (key) {
             case "ar":
-                return calOpt(beatmap.getApproachRate(), Float.parseFloat(value), opt);
+                return calOpt(beatmapInfo.getApproachRate(), Float.parseFloat(value), opt);
             case "od":
-                return calOpt(beatmap.getOverallDifficulty(), Float.parseFloat(value), opt);
+                return calOpt(beatmapInfo.getOverallDifficulty(), Float.parseFloat(value), opt);
             case "cs":
-                return calOpt(beatmap.getCircleSize(), Float.parseFloat(value), opt);
+                return calOpt(beatmapInfo.getCircleSize(), Float.parseFloat(value), opt);
             case "hp":
-                return calOpt(beatmap.getHpDrainRate(), Float.parseFloat(value), opt);
+                return calOpt(beatmapInfo.getHpDrainRate(), Float.parseFloat(value), opt);
             case "droidstar":
-                return calOpt(beatmap.getDroidStarRating(), Float.parseFloat(value), opt);
+                return calOpt(beatmapInfo.getStarRating(DifficultyAlgorithm.droid), Float.parseFloat(value), opt);
             case "standardstar":
             case "star":
-                return calOpt(beatmap.getStandardStarRating(), Float.parseFloat(value), opt);
+                return calOpt(beatmapInfo.getStarRating(DifficultyAlgorithm.standard), Float.parseFloat(value), opt);
             default:
                 return false;
         }
@@ -401,11 +393,7 @@ public class BeatmapSetItem {
     public void reloadBeatmaps() {
         if (beatmapId == -1) {
             // Tracks are originally sorted by osu!droid difficulty, so for osu!standard difficulty they need to be sorted again.
-            if (Config.getDifficultyAlgorithm() == DifficultyAlgorithm.standard) {
-                Collections.sort(beatmapSetInfo.getBeatmaps(), (o1, o2) -> Float.compare(o1.getStandardStarRating(), o2.getStandardStarRating()));
-            } else {
-                Collections.sort(beatmapSetInfo.getBeatmaps(), (o1, o2) -> Float.compare(o1.getDroidStarRating(), o2.getDroidStarRating()));
-            }
+            Collections.sort(beatmapSetInfo.getBeatmaps(), (o1, o2) -> Float.compare(o1.getStarRating(), o2.getStarRating()));
 
             var selectedBeatmap = selectedBeatmapItem != null ? selectedBeatmapItem.getBeatmapInfo() : null;
 
@@ -428,11 +416,7 @@ public class BeatmapSetItem {
     private void initBeatmaps() {
         if (beatmapId == -1) {
             // Tracks are originally sorted by osu!droid difficulty, so for osu!standard difficulty they need to be sorted again.
-            if (Config.getDifficultyAlgorithm() == DifficultyAlgorithm.standard) {
-                Collections.sort(beatmapSetInfo.getBeatmaps(), (o1, o2) -> Float.compare(o1.getStandardStarRating(), o2.getStandardStarRating()));
-            } else {
-                Collections.sort(beatmapSetInfo.getBeatmaps(), (o1, o2) -> Float.compare(o1.getDroidStarRating(), o2.getDroidStarRating()));
-            }
+            Collections.sort(beatmapSetInfo.getBeatmaps(), (o1, o2) -> Float.compare(o1.getStarRating(), o2.getStarRating()));
 
             for (int i = 0; i < beatmapItems.length; i++) {
                 beatmapItems[i] = SongMenuPool.getInstance().newBeatmapItem();
@@ -495,14 +479,14 @@ public class BeatmapSetItem {
         scene = null;
     }
 
-    public int tryGetCorrespondingBeatmapId(String oldBeatmapPath){
+    public int tryGetCorrespondingBeatmapId(String beatmapFilename){
         if (beatmapId <= -1){
             for (var i = beatmapSetInfo.getCount() - 1; i >= 0; i--) {
-                if (beatmapSetInfo.getBeatmap(i).getPath().equals(oldBeatmapPath)){
+                if (beatmapSetInfo.getBeatmap(i).getFilename().equals(beatmapFilename)){
                     return i;
                 }
             }
-        } else if (beatmapSetInfo.getBeatmap(beatmapId).getPath().equals(oldBeatmapPath)){
+        } else if (beatmapSetInfo.getBeatmap(beatmapId).getFilename().equals(beatmapFilename)){
             return beatmapId;
         }
         return -1;

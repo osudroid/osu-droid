@@ -2,8 +2,9 @@ package org.anddev.andengine.opengl.vertex;
 
 import org.anddev.andengine.opengl.font.Font;
 import org.anddev.andengine.opengl.font.Letter;
-import org.anddev.andengine.opengl.util.FastFloatBuffer;
 import org.anddev.andengine.util.HorizontalAlign;
+
+import java.nio.FloatBuffer;
 
 /**
  * (c) 2010 Nicolas Gramlich 
@@ -48,16 +49,16 @@ public class TextVertexBuffer extends VertexBuffer {
 	// ===========================================================
 
 	public synchronized void update(final Font font, final int pMaximumLineWidth, final int[] pWidths, final String[] pLines) {
-		final int[] bufferData = this.mBufferData;
+		final FloatBuffer floatBuffer = this.mFloatBuffer;
 		int i = 0;
 
-		final int lineHeight = font.getLineHeight();
+		final float lineHeight = font.getLineHeight();
 
 		final int lineCount = pLines.length;
 		for (int lineIndex = 0; lineIndex < lineCount; lineIndex++) {
 			final String line = pLines[lineIndex];
 
-			int lineX;
+			float lineX;
 			switch(this.mHorizontalAlign) {
 				case RIGHT:
 					lineX = pMaximumLineWidth - pWidths[lineIndex];
@@ -70,46 +71,40 @@ public class TextVertexBuffer extends VertexBuffer {
 					lineX = 0;
 			}
 
-			final int lineY = lineIndex * (font.getLineHeight() + font.getLineGap());
-			final int lineYBits = Float.floatToRawIntBits(lineY);
+			final float lineY = lineIndex * (font.getLineHeight() + font.getLineGap());
 
-			final int lineLength = line.length();
+            final int lineLength = line.length();
 			for (int letterIndex = 0; letterIndex < lineLength; letterIndex++) {
 				final Letter letter = font.getLetter(line.charAt(letterIndex));
 
-				final int lineY2 = lineY + lineHeight;
-				final int lineX2 = lineX + letter.mWidth;
+				final float lineY2 = lineY + lineHeight;
+				final float lineX2 = lineX + letter.mWidth;
 
-				final int lineXBits = Float.floatToRawIntBits(lineX);
-				final int lineX2Bits = Float.floatToRawIntBits(lineX2);
-				final int lineY2Bits = Float.floatToRawIntBits(lineY2);
+				floatBuffer.position(0);
 
-				bufferData[i++] = lineXBits;
-				bufferData[i++] = lineYBits;
+                floatBuffer.put(i++, lineX);
+				floatBuffer.put(i++, lineY);
 
-				bufferData[i++] = lineXBits;
-				bufferData[i++] = lineY2Bits;
+				floatBuffer.put(i++, lineX);
+				floatBuffer.put(i++, lineY2);
 
-				bufferData[i++] = lineX2Bits;
-				bufferData[i++] = lineY2Bits;
+				floatBuffer.put(i++, lineX2);
+				floatBuffer.put(i++, lineY2);
 
-				bufferData[i++] = lineX2Bits;
-				bufferData[i++] = lineY2Bits;
+				floatBuffer.put(i++, lineX2);
+				floatBuffer.put(i++, lineY2);
 
-				bufferData[i++] = lineX2Bits;
-				bufferData[i++] = lineYBits;
+				floatBuffer.put(i++, lineX2);
+				floatBuffer.put(i++, lineY);
 
-				bufferData[i++] = lineXBits;
-				bufferData[i++] = lineYBits;
+				floatBuffer.put(i++, lineX);
+				floatBuffer.put(i++, lineY);
+
+				floatBuffer.position(0);
 
 				lineX += letter.mAdvance;
 			}
 		}
-
-		final FastFloatBuffer vertexFloatBuffer = this.mFloatBuffer;
-		vertexFloatBuffer.position(0);
-		vertexFloatBuffer.put(bufferData);
-		vertexFloatBuffer.position(0);
 
 		super.setHardwareBufferNeedsUpdate();
 	}

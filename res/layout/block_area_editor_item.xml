@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:clickable="true"
+    android:padding="0dp"
+    android:clipToPadding="false">
+
+    <View
+        android:id="@+id/block"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        tools:layout_width="128dp"
+        tools:layout_height="128dp"
+        android:background="@drawable/block_area_background" />
+
+    <ImageView
+        android:id="@+id/move"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:src="@drawable/open_with_24px"
+        android:scaleType="center"
+        android:layout_alignTop="@id/block"
+        android:layout_alignRight="@id/block"
+        android:layout_alignLeft="@id/block"
+        android:layout_alignBottom="@id/block"
+        android:alpha="0.25"/>
+
+
+    <ImageButton
+        style="@style/button"
+        android:id="@+id/remove"
+        android:layout_alignLeft="@id/block"
+        android:layout_alignTop="@id/block"
+        android:layout_marginLeft="0dp"
+        android:layout_marginTop="0dp"
+        android:layout_width="32dp"
+        android:layout_height="32dp"
+        android:backgroundTint="#3D2828"
+        app:tint="#FFBFBF"
+        android:tint="#FFBFBF"
+        android:padding="6dp"
+        android:src="@drawable/delete_24px"
+        android:scaleType="centerInside"
+        tools:ignore="UseAppTint" />
+
+    <ImageButton
+        style="@style/button"
+        android:id="@+id/resize"
+        android:layout_alignRight="@id/block"
+        android:layout_alignBottom="@id/block"
+        android:layout_marginRight="0dp"
+        android:layout_marginBottom="0dp"
+        android:layout_width="32dp"
+        android:layout_height="32dp"
+        android:padding="6dp"
+        android:src="@drawable/expand_content_24px"
+        android:scaleX="-1"
+        android:scaleType="centerInside"
+        app:tint="#FFF" />
+
+</RelativeLayout>

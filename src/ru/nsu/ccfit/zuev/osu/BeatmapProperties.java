@@ -2,7 +2,9 @@ package ru.nsu.ccfit.zuev.osu;
 
 import java.io.Serializable;
 
-@Deprecated // TODO To be removed in the future.
+import kotlin.Deprecated;
+
+@Deprecated(message = "This class is used to do legacy migration, should not be used and will be removed in future releases.")
 public class BeatmapProperties implements Serializable {
     private static final long serialVersionUID = -7229486402310659139L;
 

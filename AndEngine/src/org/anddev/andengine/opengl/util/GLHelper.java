@@ -3,6 +3,7 @@ package org.anddev.andengine.opengl.util;
 import java.nio.Buffer;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
+import java.nio.FloatBuffer;
 import java.nio.IntBuffer;
 
 import javax.microedition.khronos.opengles.GL10;
@@ -49,8 +50,8 @@ public class GLHelper {
 	private static int sCurrentSourceBlendMode = -1;
 	private static int sCurrentDestinationBlendMode = -1;
 
-	private static FastFloatBuffer sCurrentVertexFloatBuffer = null;
-	private static FastFloatBuffer sCurrentTextureFloatBuffer = null;
+	private static FloatBuffer sCurrentVertexFloatBuffer = null;
+	private static FloatBuffer sCurrentTextureFloatBuffer = null;
 
 	private static boolean sEnableDither = true;
 	private static boolean sEnableLightning = true;
@@ -352,10 +353,10 @@ public class GLHelper {
 		pGL.glDeleteTextures(1, GLHelper.HARDWARETEXTUREID_CONTAINER, 0);
 	}
 
-	public static void texCoordPointer(final GL10 pGL, final FastFloatBuffer pTextureFloatBuffer) {
+	public static void texCoordPointer(final GL10 pGL, final FloatBuffer pTextureFloatBuffer) {
 		if(GLHelper.sCurrentTextureFloatBuffer  != pTextureFloatBuffer) {
 			GLHelper.sCurrentTextureFloatBuffer = pTextureFloatBuffer;
-			pGL.glTexCoordPointer(2, GL10.GL_FLOAT, 0, pTextureFloatBuffer.mByteBuffer);
+			pGL.glTexCoordPointer(2, GL10.GL_FLOAT, 0, pTextureFloatBuffer);
 		}
 	}
 
@@ -363,10 +364,10 @@ public class GLHelper {
 		pGL11.glTexCoordPointer(2, GL10.GL_FLOAT, 0, 0);
 	}
 
-	public static void vertexPointer(final GL10 pGL, final FastFloatBuffer pVertexFloatBuffer) {
+	public static void vertexPointer(final GL10 pGL, final FloatBuffer pVertexFloatBuffer) {
 		if(GLHelper.sCurrentVertexFloatBuffer != pVertexFloatBuffer) {
 			GLHelper.sCurrentVertexFloatBuffer = pVertexFloatBuffer;
-			pGL.glVertexPointer(2, GL10.GL_FLOAT, 0, pVertexFloatBuffer.mByteBuffer);
+			pGL.glVertexPointer(2, GL10.GL_FLOAT, 0, pVertexFloatBuffer);
 		}
 	}
 
@@ -427,7 +428,7 @@ public class GLHelper {
 		pGL.glHint(GL10.GL_PERSPECTIVE_CORRECTION_HINT, GL10.GL_FASTEST);
 	}
 
-	public static void bufferData(final GL11 pGL11, final ByteBuffer pByteBuffer, final int pUsage) {
+	public static void bufferData(final GL11 pGL11, final FloatBuffer pByteBuffer, final int pUsage) {
 		pGL11.glBufferData(GL11.GL_ARRAY_BUFFER, pByteBuffer.capacity(), pByteBuffer, pUsage);
 	}
 

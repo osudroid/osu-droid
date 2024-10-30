@@ -2,7 +2,7 @@
 <androidx.preference.PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto">
 
-    <PreferenceCategory android:title="Playfield">
+    <PreferenceCategory android:title="@string/opt_category_playfield">
 
         <SeekBarPreference
             android:defaultValue="100"
@@ -17,13 +17,17 @@
             android:defaultValue="false"
             android:key="shrinkPlayfieldDownwards"
             android:summary="@string/opt_shrink_playfield_downwards_summary"
-            android:title="@string/opt_shrink_playfield_downwards_title"
-            app:layout="@layout/settings_preference_checkbox_bottom"/>
+            android:title="@string/opt_shrink_playfield_downwards_title" />
+
+        <Preference
+            android:key="block_areas"
+            android:title="@string/block_area_preference_title"
+            android:summary="@string/block_area_preference_summary"
+            app:layout="@layout/settings_preference_bottom" />
 
     </PreferenceCategory>
 
-
-    <PreferenceCategory android:title="Gameplay">
+    <PreferenceCategory android:title="@string/opt_category_gameplay">
 
         <CheckBoxPreference
             android:defaultValue="false"
@@ -34,7 +38,7 @@
 
     </PreferenceCategory>
 
-    <PreferenceCategory android:title="Synchronization">
+    <PreferenceCategory android:title="@string/opt_category_synchronization">
 
         <CheckBoxPreference
             android:defaultValue="true"

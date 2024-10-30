@@ -8,6 +8,8 @@ import com.rian.osu.math.Vector2
 import com.rian.osu.utils.Cached
 import com.rian.osu.utils.CircleSizeCalculator
 import kotlin.math.min
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.ensureActive
 import ru.nsu.ccfit.zuev.osu.Config
 import ru.nsu.ccfit.zuev.osu.Constants
 
@@ -19,7 +21,7 @@ abstract class HitObject(
      * The time at which this [HitObject] starts, in milliseconds.
      */
     @JvmField
-    var startTime: Double,
+    val startTime: Double,
 
     /**
      * The position of this [HitObject] in osu!pixels.
@@ -44,6 +46,18 @@ abstract class HitObject(
     val comboOffset: Int
 ) {
     /**
+     * The end time of this [HitObject].
+     */
+    open val endTime
+        get() = startTime
+
+    /**
+     * The duration of this [HitObject], in milliseconds.
+     */
+    val duration
+        get() = endTime - startTime
+
+    /**
      * The position of this [HitObject] in osu!pixels.
      */
     open var position = position
@@ -54,6 +68,12 @@ abstract class HitObject(
             gameplayPositionCache.invalidate()
             gameplayStackedPositionCache.invalidate()
         }
+
+    /**
+     * The end position of this [HitObject] in osu!pixels.
+     */
+    open val endPosition
+        get() = position
 
     /**
      * The index of this [HitObject] in the current combo.
@@ -70,7 +90,7 @@ abstract class HitObject(
         private set
 
     /**
-     * The index of this [HitObject]'s combo in relation to the beatmap, with all aggregate s applied.
+     * The index of this [HitObject]'s combo in relation to the beatmap, with all aggregates applied.
      */
     var comboIndexWithOffsets = 0
         private set
@@ -104,7 +124,7 @@ abstract class HitObject(
     /**
      * Any samples which may be used by this [HitObject] that are non-standard.
      */
-    var auxiliarySamples = mutableListOf<HitSampleInfo>()
+    var auxiliarySamples = mutableListOf<SequenceHitSampleInfo>()
 
     /**
      * Whether this [HitObject] is in kiai time.
@@ -116,7 +136,7 @@ abstract class HitObject(
      * Whether this [HitObject] is the first [HitObject] in the beatmap.
      */
     val isFirstNote
-        get() = comboIndex == 0 && indexInCurrentCombo == 0
+        get() = comboIndex == 1 && indexInCurrentCombo == 0
 
     /**
      * The multiplier used to calculate stack offset.
@@ -190,6 +210,12 @@ abstract class HitObject(
             return difficultyStackedPositionCache.value
         }
 
+    /**
+     * The stacked end position of this [HitObject] in difficulty calculation, in osu!pixels.
+     */
+    open val difficultyStackedEndPosition
+        get() = difficultyStackedPosition
+
     // Gameplay object positions
 
     /**
@@ -229,6 +255,12 @@ abstract class HitObject(
         }
 
     /**
+     * The end position of this [HitObject] in gameplay, in pixels.
+     */
+    open val gameplayEndPosition
+        get() = gameplayPosition
+
+    /**
      * The radius of this [HitObject] in gameplay, in pixels.
      */
     val gameplayRadius
@@ -263,13 +295,21 @@ abstract class HitObject(
         }
 
     /**
+     * The stacked end position of this [HitObject] in gameplay, in pixels.
+     */
+    open val gameplayStackedEndPosition
+        get() = gameplayStackedPosition
+
+    /**
      * Applies defaults to this [HitObject].
      *
      * @param controlPoints The control points.
      * @param difficulty The difficulty settings to use.
      * @param mode The [GameMode] to use.
+     * @param scope The [CoroutineScope] to use for coroutines.
      */
-    open fun applyDefaults(controlPoints: BeatmapControlPoints, difficulty: BeatmapDifficulty, mode: GameMode) {
+    @JvmOverloads
+    open fun applyDefaults(controlPoints: BeatmapControlPoints, difficulty: BeatmapDifficulty, mode: GameMode, scope: CoroutineScope? = null) {
         kiai = controlPoints.effect.controlPointAt(startTime + CONTROL_POINT_LENIENCY).isKiai
 
         timePreempt = BeatmapDifficulty.difficultyRange(difficulty.ar.toDouble(), PREEMPT_MAX, PREEMPT_MID, PREEMPT_MIN)
@@ -287,18 +327,18 @@ abstract class HitObject(
 
         difficultyScale = when (mode) {
             GameMode.Droid -> {
-                val droidScale = CircleSizeCalculator.droidCSToDroidDifficultyScale(difficulty.cs)
+                val droidScale = CircleSizeCalculator.droidCSToDroidDifficultyScale(difficulty.difficultyCS)
                 val radius = CircleSizeCalculator.droidScaleToStandardRadius(droidScale)
                 val standardCS = CircleSizeCalculator.standardRadiusToStandardCS(radius, true)
 
                 CircleSizeCalculator.standardCSToStandardScale(standardCS, true)
             }
 
-            GameMode.Standard -> CircleSizeCalculator.standardCSToStandardScale(difficulty.cs, true)
+            GameMode.Standard -> CircleSizeCalculator.standardCSToStandardScale(difficulty.gameplayCS, true)
         }
 
         gameplayScale = when (mode) {
-            GameMode.Droid -> CircleSizeCalculator.droidCSToDroidGameplayScale(difficulty.cs)
+            GameMode.Droid -> CircleSizeCalculator.droidCSToDroidGameplayScale(difficulty.gameplayCS)
             GameMode.Standard -> difficultyScale
         }
     }
@@ -307,11 +347,16 @@ abstract class HitObject(
      * Applies samples to this [HitObject].
      *
      * @param controlPoints The control points.
+     * @param scope The [CoroutineScope] to use for coroutines.
      */
-    open fun applySamples(controlPoints: BeatmapControlPoints) {
-        val sampleControlPoint = controlPoints.sample.controlPointAt(getEndTime() + CONTROL_POINT_LENIENCY)
+    open fun applySamples(controlPoints: BeatmapControlPoints, scope: CoroutineScope?) {
+        val sampleControlPoint = controlPoints.sample.controlPointAt(endTime + CONTROL_POINT_LENIENCY)
 
-        samples = samples.map { sampleControlPoint.applyTo(it) }.toMutableList()
+        samples = samples.map {
+            scope?.ensureActive()
+
+            sampleControlPoint.applyTo(it)
+        }.toMutableList()
     }
 
     /**
@@ -322,10 +367,14 @@ abstract class HitObject(
         comboIndexWithOffsets = lastObj?.comboIndexWithOffsets ?: 0
         indexInCurrentCombo = if (lastObj != null) lastObj.indexInCurrentCombo + 1 else 0
 
-        if (isNewCombo || lastObj == null) {
+        if (isNewCombo || lastObj == null || lastObj is Spinner) {
             indexInCurrentCombo = 0
             ++comboIndex
-            comboIndexWithOffsets += comboOffset + 1
+
+            if (this !is Spinner) {
+                // Spinners do not affect combo color offsets.
+                comboIndexWithOffsets += comboOffset + 1
+            }
 
             if (lastObj != null) {
                 lastObj.isLastInCombo = true

@@ -61,7 +61,7 @@ import javax.microedition.khronos.opengles.GL10;
 
 import ru.nsu.ccfit.zuev.audio.BassSoundProvider;
 import ru.nsu.ccfit.zuev.audio.Status;
-import ru.nsu.ccfit.zuev.osu.game.SongProgressBar;
+import ru.nsu.ccfit.zuev.osu.game.LinearSongProgress;
 import ru.nsu.ccfit.zuev.osu.online.OnlineManager;
 import ru.nsu.ccfit.zuev.osu.online.OnlinePanel;
 import ru.nsu.ccfit.zuev.osu.online.OnlineScoring;
@@ -69,13 +69,12 @@ import ru.nsu.ccfit.zuev.osu.scoring.Replay;
 import ru.nsu.ccfit.zuev.osu.scoring.ScoringScene;
 import ru.nsu.ccfit.zuev.osu.scoring.StatisticV2;
 import ru.nsu.ccfit.zuev.osuplus.BuildConfig;
-import ru.nsu.ccfit.zuev.osuplus.R;
 
 /**
  * Created by Fuuko on 2015/4/24.
  */
 public class MainScene implements IUpdateHandler {
-    public SongProgressBar progressBar;
+    public LinearSongProgress progressBar;
     public BeatmapInfo beatmapInfo;
     private Context context;
     private Sprite logo, logoOverlay, background, lastBackground;
@@ -96,8 +95,6 @@ public class MainScene implements IUpdateHandler {
     private boolean isContinuousKiai = false;
 
     private final ParticleSystem[] particleSystem = new ParticleSystem[2];
-
-    //private BassAudioPlayer music;
 
     private boolean musicStarted;
     private BassSoundProvider hitsound;
@@ -179,7 +176,7 @@ public class MainScene implements IUpdateHandler {
                 .getInstance().getFont("font"),
                 String.format(
                         Locale.getDefault(),
-                        "osu!droid %s\nby osu!droid Team\nosu! is © peppy 2007-2023",
+                        "osu!droid %s\nby osu!droid Team\nosu! is © peppy 2007-2024",
                         BuildConfig.VERSION_NAME + " (" + BuildConfig.BUILD_TYPE + ")"
                 )) {
 
@@ -189,7 +186,7 @@ public class MainScene implements IUpdateHandler {
                 if (pSceneTouchEvent.isActionDown()) {
 
                     new MessageDialog()
-                        .setMessage(context.getString(R.string.dialog_visit_osu_website_message))
+                        .setMessage(context.getString(com.osudroid.resources.R.string.dialog_visit_osu_website))
                         .addButton("Yes", dialog -> {
                             Intent browserIntent = new Intent(Intent.ACTION_VIEW, Uri.parse("https://osu.ppy.sh"));
                             GlobalManager.getInstance().getMainActivity().startActivity(browserIntent);
@@ -216,7 +213,7 @@ public class MainScene implements IUpdateHandler {
                 if (pSceneTouchEvent.isActionDown()) {
 
                     new MessageDialog()
-                        .setMessage(context.getString(R.string.dialog_visit_osudroid_website_message))
+                        .setMessage(context.getString(com.osudroid.resources.R.string.dialog_visit_osudroid_website))
                         .addButton("Yes", dialog -> {
                             Intent browserIntent = new Intent(Intent.ACTION_VIEW, Uri.parse("https://" + OnlineManager.hostname));
                             GlobalManager.getInstance().getMainActivity().startActivity(browserIntent);
@@ -452,9 +449,9 @@ public class MainScene implements IUpdateHandler {
         menu.getFirst().setScale(Config.getRES_WIDTH() / 1024f);
         menu.getThird().setScale(Config.getRES_WIDTH() / 1024f);
 
-        menu.getSecond().setPosition(logo.getX() + logo.getWidth() - Config.getRES_WIDTH() / 3f, (Config.getRES_HEIGHT() - menu.getSecond().getHeight()) / 2);
-        menu.getFirst().setPosition(logo.getX() + logo.getWidth() - Config.getRES_WIDTH() / 3f, menu.getSecond().getY() - menu.getFirst().getHeight() - 40 * Config.getRES_WIDTH() / 1024f);
-        menu.getThird().setPosition(logo.getX() + logo.getWidth() - Config.getRES_WIDTH() / 3f, menu.getSecond().getY() + menu.getSecond().getHeight() + 40 * Config.getRES_WIDTH() / 1024f);
+        menu.getSecond().setPosition(logo.getX() + logo.getWidth() - Config.getRES_WIDTH() / 2.5f, (Config.getRES_HEIGHT() - menu.getSecond().getHeight()) / 2);
+        menu.getFirst().setPosition(logo.getX() + logo.getWidth() - Config.getRES_WIDTH() / 2.5f, menu.getSecond().getY() - menu.getFirst().getHeight() - 40 * Config.getRES_WIDTH() / 1024f);
+        menu.getThird().setPosition(logo.getX() + logo.getWidth() - Config.getRES_WIDTH() / 2.5f, menu.getSecond().getY() + menu.getThird().getHeight() + 40 * Config.getRES_WIDTH() / 1024f);
 
         menuBarX = menu.getFirst().getX();
 
@@ -488,7 +485,7 @@ public class MainScene implements IUpdateHandler {
         scene.registerTouchArea(music_next);
         scene.setTouchAreaBindingEnabled(true);
 
-        progressBar = new SongProgressBar(null, scene, 0, 0, new PointF(Utils.toRes(Config.getRES_WIDTH() - 320), Utils.toRes(100)));
+        progressBar = new LinearSongProgress(null, scene, 0, 0, new PointF(Utils.toRes(Config.getRES_WIDTH() - 320), Utils.toRes(100)));
         progressBar.setProgressRectColor(new RGBColor(0.9f, 0.9f, 0.9f));
         progressBar.setProgressRectAlpha(0.8f);
 
@@ -500,7 +497,7 @@ public class MainScene implements IUpdateHandler {
 
     private void createOnlinePanel(Scene scene) {
         Config.loadOnlineConfig(context);
-        OnlineManager.getInstance().Init(context);
+        OnlineManager.getInstance().init();
 
         if (OnlineManager.getInstance().isStayOnline()) {
             Debug.i("Stay online, creating panel");
@@ -543,7 +540,7 @@ public class MainScene implements IUpdateHandler {
                 if (GlobalManager.getInstance().getSongService().getStatus() == Status.PAUSED || GlobalManager.getInstance().getSongService().getStatus() == Status.STOPPED) {
                     if (GlobalManager.getInstance().getSongService().getStatus() == Status.STOPPED) {
                         loadTimingPoints(false);
-                        GlobalManager.getInstance().getSongService().preLoad(beatmapInfo.getAudio());
+                        GlobalManager.getInstance().getSongService().preLoad(beatmapInfo.getAudioPath());
 
                         if (currentTimingPoint != null) {
                             bpmLength = currentTimingPoint.msPerBeat;
@@ -817,11 +814,11 @@ public class MainScene implements IUpdateHandler {
         }
         particleEnabled = false;
         GlobalManager.getInstance().setSelectedBeatmap(beatmapInfo);
-        if (beatmapInfo.getBackground() != null) {
+        if (beatmapInfo.getBackgroundFilename() != null) {
             try {
                 final TextureRegion tex = Config.isSafeBeatmapBg() ?
                         ResourceManager.getInstance().getTexture("menu-background") :
-                        ResourceManager.getInstance().loadBackground(beatmapInfo.getBackground());
+                        ResourceManager.getInstance().loadBackground(beatmapInfo.getBackgroundPath());
 
                 if (tex != null) {
                     float height = tex.getHeight();
@@ -853,7 +850,7 @@ public class MainScene implements IUpdateHandler {
 
         if (reloadMusic) {
             if (GlobalManager.getInstance().getSongService() != null) {
-                GlobalManager.getInstance().getSongService().preLoad(beatmapInfo.getAudio());
+                GlobalManager.getInstance().getSongService().preLoad(beatmapInfo.getAudioPath());
                 musicStarted = false;
             } else {
                 Log.w("nullpoint", "GlobalManager.getInstance().getSongService() is null while reload music (MainScene.loadTimeingPoints)");
@@ -868,18 +865,34 @@ public class MainScene implements IUpdateHandler {
             var beatmap = parser.parse(false);
 
             if (beatmap != null) {
-                timingControlPoints = new LinkedList<>(beatmap.controlPoints.timing.getControlPoints());
-                effectControlPoints = new LinkedList<>(beatmap.controlPoints.effect.getControlPoints());
+                timingControlPoints = new LinkedList<>(beatmap.getControlPoints().timing.controlPoints);
+                effectControlPoints = new LinkedList<>(beatmap.getControlPoints().effect.controlPoints);
 
                 // Getting the first timing point is not always accurate - case in point is when the music is not reloaded.
                 int position = GlobalManager.getInstance().getSongService() != null ?
                         GlobalManager.getInstance().getSongService().getPosition() : 0;
 
-                currentTimingPoint = beatmap.controlPoints.timing.controlPointAt(position);
+                currentTimingPoint = null;
+                currentEffectPoint = null;
+
+                while (!timingControlPoints.isEmpty() && position > timingControlPoints.peek().time) {
+                    currentTimingPoint = timingControlPoints.pop();
+                }
+
+                while (!effectControlPoints.isEmpty() && position > effectControlPoints.peek().time) {
+                    currentEffectPoint = effectControlPoints.pop();
+                }
+
+                if (currentTimingPoint == null) {
+                    currentTimingPoint = beatmap.getControlPoints().timing.defaultControlPoint;
+                }
+
+                if (currentEffectPoint == null) {
+                    currentEffectPoint = beatmap.getControlPoints().effect.defaultControlPoint;
+                }
+
                 bpmLength = currentTimingPoint.msPerBeat;
                 beatPassTime = (position - currentTimingPoint.time) % bpmLength;
-
-                currentEffectPoint = beatmap.controlPoints.effect.controlPointAt(position);
             }
         }
     }
@@ -888,7 +901,7 @@ public class MainScene implements IUpdateHandler {
 
         new MessageDialog()
             .setTitle("Exit")
-            .setMessage(context.getString(R.string.dialog_exit_message))
+            .setMessage(context.getString(com.osudroid.resources.R.string.dialog_exit_message))
             .addButton("Yes", dialog -> {
                 dialog.dismiss();
                 exit();
@@ -974,7 +987,7 @@ public class MainScene implements IUpdateHandler {
 
     public void watchReplay(String replayFile) {
         Replay replay = new Replay();
-        if (replay.loadInfo(replayFile)) {
+        if (replay.load(replayFile, false)) {
             if (replay.replayVersion >= 3) {
                 //replay
                 ScoringScene scorescene = GlobalManager.getInstance().getScoring();
@@ -983,8 +996,8 @@ public class MainScene implements IUpdateHandler {
                 if (beatmap != null) {
                     GlobalManager.getInstance().getMainScene().setBeatmap(beatmap);
                     GlobalManager.getInstance().getSongMenu().select();
-                    ResourceManager.getInstance().loadBackground(beatmap.getBackground());
-                    GlobalManager.getInstance().getSongService().preLoad(beatmap.getAudio());
+                    ResourceManager.getInstance().loadBackground(beatmap.getBackgroundPath());
+                    GlobalManager.getInstance().getSongService().preLoad(beatmap.getAudioPath());
                     GlobalManager.getInstance().getSongService().play();
                     scorescene.load(stat, null, GlobalManager.getInstance().getSongService(), replayFile, null, beatmap);
                     GlobalManager.getInstance().getEngine().setScene(scorescene.getScene());

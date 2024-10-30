@@ -1,11 +1,8 @@
 package com.rian.osu.difficulty.skills
 
 import com.rian.osu.difficulty.DroidDifficultyHitObject
-import com.rian.osu.math.Interpolation
 import com.rian.osu.mods.Mod
-import kotlin.math.log10
 import kotlin.math.log2
-import kotlin.math.min
 import kotlin.math.pow
 
 /**
@@ -24,62 +21,27 @@ abstract class DroidStrainSkill(
      */
     protected abstract val starsPerDouble: Double
 
-    /**
-     * The strain of the currently calculated [DroidDifficultyHitObject].
-     */
-    protected abstract val objectStrain: Double
-
-    /**
-     * All [DroidDifficultyHitObject]s strains.
-     */
-    val objectStrains = mutableListOf<Double>()
-
-    /**
-     * Returns the number of strains weighed against the top strain.
-     *
-     * The result is scaled by clock rate as it affects the total number of strains.
-     */
-    fun countDifficultStrains() = objectStrains.run {
-        if (isEmpty()) {
-            return@run 0.0
-        }
-
-        val maxStrain = max()
-        if (maxStrain == 0.0) {
-            return@run 0.0
-        }
-
-        fold(0.0) { acc, d -> acc + (d / maxStrain).pow(4) }
-    }
-
     override fun process(current: DroidDifficultyHitObject) {
         if (current.index < 0) {
             return
         }
 
         super.process(current)
-
-        objectStrains.add(objectStrain)
     }
 
     override fun difficultyValue() = currentStrainPeaks.run {
-        if (reducedSectionCount > 0) {
-            sortDescending()
-
-            // We are reducing the highest strains first to account for extreme difficulty spikes.
-            for (i in 0 until min(size, reducedSectionCount)) {
-                val scale = log10(
-                    Interpolation.linear(1.0, 10.0, i.toDouble() / reducedSectionCount)
-                )
-
-                this[i] *= Interpolation.linear(reducedSectionBaseline, 1.0, scale)
-            }
-        }
+        // We are reducing the highest strains first to account for extreme difficulty spikes.
+        reduceHighestStrainPeaks(this)
 
         // Math here preserves the property that two notes of equal difficulty x, we have their summed difficulty = x * starsPerDouble.
         // This also applies to two sets of notes with equal difficulty.
         val starsPerDoubleLog2 = log2(starsPerDouble)
-        fold(0.0) { acc, d -> acc + d.pow(1 / starsPerDoubleLog2) }.pow(starsPerDoubleLog2)
+
+        difficulty = fold(0.0) { acc, strain ->
+            acc + strain.pow(1 / starsPerDoubleLog2)
+        }.pow(starsPerDoubleLog2)
+
+        difficulty
     }
 
     override fun calculateCurrentSectionStart(current: DroidDifficultyHitObject) = current.startTime

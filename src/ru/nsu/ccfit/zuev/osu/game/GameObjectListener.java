@@ -2,9 +2,6 @@ package ru.nsu.ccfit.zuev.osu.game;
 
 import android.graphics.PointF;
 
-import com.rian.osu.beatmap.hitobject.HitObject;
-import com.rian.osu.beatmap.hitobject.HitSampleInfo;
-
 import java.util.BitSet;
 
 import ru.nsu.ccfit.zuev.osu.RGBColor;
@@ -15,22 +12,12 @@ public interface GameObjectListener {
 
     void onCircleHit(int id, float accuracy, PointF pos, boolean endCombo, byte forcedScore, RGBColor color);
 
-    void onSliderHit(int id, int score, PointF start, PointF end,
-                     boolean endCombo, RGBColor color, int type);
+    void onSliderHit(int id, int score, PointF judgementPos,
+                     boolean endCombo, RGBColor color, int type, boolean incrementCombo);
 
     void onSliderEnd(int id, int accuracy, BitSet tickSet);
 
     void onSpinnerHit(int id, int score, boolean endCombo, int totalScore);
-
-    void playSamples(HitObject obj);
-
-    void playAuxiliarySamples(HitObject obj);
-
-    void playSample(HitSampleInfo sample, boolean loop);
-
-    void stopAuxiliarySamples(HitObject obj);
-
-    void stopSample(HitSampleInfo sample);
 
     void addObject(GameObject object);
 

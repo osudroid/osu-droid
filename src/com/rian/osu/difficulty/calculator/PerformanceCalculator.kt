@@ -20,22 +20,11 @@ abstract class PerformanceCalculator<
     @JvmField
     val difficultyAttributes: TDiffAttributes
 ) {
-    @JvmField
     protected var scoreMaxCombo = 0
-
-    @JvmField
     protected var countGreat = 0
-
-    @JvmField
     protected var countOk = 0
-
-    @JvmField
     protected var countMeh = 0
-
-    @JvmField
     protected var countMiss = 0
-
-    @JvmField
     protected var effectiveMissCount = 0.0
 
     /**

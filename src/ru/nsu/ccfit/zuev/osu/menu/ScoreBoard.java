@@ -22,9 +22,8 @@ import ru.nsu.ccfit.zuev.osu.*;
 import ru.nsu.ccfit.zuev.osu.game.GameHelper;
 import ru.nsu.ccfit.zuev.osu.helper.StringTable;
 import ru.nsu.ccfit.zuev.osu.online.OnlineManager;
-import ru.nsu.ccfit.zuev.osuplus.R;
+import ru.nsu.ccfit.zuev.osu.scoring.BeatmapLeaderboardScoringMode;
 
-import java.io.File;
 import java.util.*;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -190,6 +189,12 @@ public class ScoreBoard extends Entity implements ScrollDetector.IScrollDetector
         return sb.toString();
     }
 
+    private String formatPP(StringBuilder sb, int pp) {
+        sb.setLength(0);
+        sb.append(pp);
+        return sb.toString();
+    }
+
     private void initFromOnline(BeatmapInfo beatmapInfo) {
         loadingText.setText("Loading scores...");
 
@@ -198,11 +203,10 @@ public class ScoreBoard extends Entity implements ScrollDetector.IScrollDetector
             @Override
             public void run() {
 
-                File beatmapFile = new File(beatmapInfo.getPath());
                 List<String> scores;
 
                 try {
-                    scores = OnlineManager.getInstance().getTop(beatmapFile, beatmapInfo.getMD5());
+                    scores = OnlineManager.getInstance().getTop(beatmapInfo.getMD5());
                 } catch (OnlineManager.OnlineManagerException e) {
                     Log.e("Scoreboard", "Failed to load scores from online.", e);
 
@@ -218,62 +222,69 @@ public class ScoreBoard extends Entity implements ScrollDetector.IScrollDetector
 
                 loadingText.setText(OnlineManager.getInstance().getFailMessage());
 
+                boolean isPPScoringMode = Config.getBeatmapLeaderboardScoringMode() == BeatmapLeaderboardScoringMode.PP;
                 var username = OnlineManager.getInstance().getUsername();
                 var items = new ArrayList<ScoreBoardItem>(scores.size());
                 var sb = new StringBuilder();
 
-                int nextTotalScore = 0;
+                float nextTotal = 0;
 
                 for (int i = 0; i < scores.size() && isActive(); ++i) {
 
                     var data = scores.get(i).split("\\s+");
 
-                    if (data.length < 8 || data.length > 9) {
+                    if (data.length < 9 || data.length > 10) {
                         continue;
                     }
 
-                    var isInLeaderboard = data.length == 8;
-                    var isPersonalBest = data.length == 9 || data[1].equals(username);
+                    var isInLeaderboard = data.length == 9;
+                    var isPersonalBest = data.length == 10 || data[1].equals(username);
 
                     var scoreID = Integer.parseInt(data[0]);
                     var playerName = isPersonalBest ? username : data[1];
-                    var currentTotalScore = Integer.parseInt(data[2]);
-                    var combo = Integer.parseInt(data[3]);
-                    var mark = data[4];
-                    var mods = data[5];
-                    var accuracy = GameHelper.Round(Float.parseFloat(data[6]) * 100, 2);
-                    var avatarURL = data[7];
-                    var beatmapRank = isPersonalBest && !isInLeaderboard ? Integer.parseInt(data[8]) : (i + 1);
+                    var score = Integer.parseInt(data[2]);
+                    var pp = Float.parseFloat(data[3]);
+                    var combo = Integer.parseInt(data[4]);
+                    var mark = data[5];
+                    var mods = data[6];
+                    var accuracy = Float.parseFloat(data[7]);
+                    var avatarURL = data[8];
+                    var beatmapRank = isPersonalBest && !isInLeaderboard ? Integer.parseInt(data[9]) : (i + 1);
 
                     sb.setLength(0);
-                    var totalScore = formatScore(sb, currentTotalScore);
+                    var scoreStr = isPPScoringMode ?
+                        // For display purposes, we round the pp.
+                        formatPP(sb, Math.round(pp)) :
+                        formatScore(sb, score);
 
                     sb.setLength(0);
                     var titleStr = sb.append('#').append(beatmapRank).append(' ').append(playerName)
                             .append('\n')
-                            .append(StringTable.format(R.string.menu_score, totalScore, combo))
+                            .append(StringTable.format(
+                                isPPScoringMode ? com.osudroid.resources.R.string.menu_performance : com.osudroid.resources.R.string.menu_score, scoreStr, combo))
                             .toString();
 
                     if (i < scores.size() - 1) {
                         String[] nextData = scores.get(i + 1).split("\\s+");
 
-                        if (nextData.length == 8 || nextData.length == 9) {
-                            nextTotalScore = Integer.parseInt(nextData[2]);
+                        if (nextData.length == 9 || nextData.length == 10) {
+                            nextTotal = isPPScoringMode ? Float.parseFloat(nextData[3]) : Integer.parseInt(nextData[2]);
                         }
                     } else {
-                        nextTotalScore = 0;
+                        nextTotal = 0;
                     }
 
                     sb.setLength(0);
                     var modString = convertModString(sb, mods);
-                    var diffTotalScore = currentTotalScore - nextTotalScore;
+                    var currentTotal = isPPScoringMode ? pp : score;
+                    var diffTotal = Math.round(currentTotal) - Math.round(nextTotal);
 
                     sb.setLength(0);
                     var accStr = sb.append(modString)
                             .append('\n')
                             .append(StringTable.format("%.2f", GameHelper.Round(accuracy * 100, 2))).append('%')
                             .append('\n')
-                            .append(nextTotalScore == 0 ? "-" : ((diffTotalScore != 0 ? "+" : "") + diffTotalScore))
+                            .append(nextTotal == 0 ? "-" : ((diffTotal != 0 ? "+" : "") + diffTotal))
                             .toString();
 
                     if (!isActive()) {
@@ -288,7 +299,7 @@ public class ScoreBoard extends Entity implements ScrollDetector.IScrollDetector
                         attachChild(new ScoreItem(avatarExecutor, titleStr, accStr, mark, true, scoreID, avatarURL, playerName, false));
 
                         var item = new ScoreBoardItem();
-                        item.set(beatmapRank, playerName, combo, currentTotalScore, scoreID);
+                        item.set(beatmapRank, playerName, combo, score, scoreID);
                         items.add(item);
                     }
                 }
@@ -305,7 +316,7 @@ public class ScoreBoard extends Entity implements ScrollDetector.IScrollDetector
 
             @Override
             public void run() {
-                var scores = DatabaseManager.getScoreInfoTable().getBeatmapScores(beatmap.getPath());
+                var scores = DatabaseManager.getScoreInfoTable().getBeatmapScores(beatmap.getMD5());
 
                 if (scores.isEmpty() || !isActive()) {
 
@@ -333,7 +344,7 @@ public class ScoreBoard extends Entity implements ScrollDetector.IScrollDetector
                     sb.setLength(0);
                     var titleStr = sb.append('#').append(i + 1).append(' ').append(score.getPlayerName())
                             .append('\n')
-                            .append(StringTable.format(R.string.menu_score, totalScore, score.getMaxCombo()))
+                            .append(StringTable.format(com.osudroid.resources.R.string.menu_score, totalScore, score.getMaxCombo()))
                             .toString();
 
                     if (i < scores.size() - 1) {

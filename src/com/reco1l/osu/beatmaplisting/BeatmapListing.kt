@@ -35,12 +35,12 @@ import com.google.android.material.progressindicator.CircularProgressIndicator
 import com.reco1l.framework.bass.URLBassStream
 import com.reco1l.framework.net.IDownloaderObserver
 import com.reco1l.framework.net.JsonArrayRequest
-import com.reco1l.osu.OsuColors
-import com.reco1l.osu.mainThread
+import com.reco1l.osu.*
 import kotlinx.coroutines.CoroutineExceptionHandler
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
+import kotlinx.coroutines.ensureActive
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.SupervisorJob
 import ru.nsu.ccfit.zuev.audio.Status
@@ -52,6 +52,7 @@ import ru.nsu.ccfit.zuev.osuplus.R
 import java.net.URL
 import java.text.SimpleDateFormat
 import java.util.TimeZone
+import kotlinx.coroutines.CancellationException
 
 
 class BeatmapListing : BaseFragment(),
@@ -191,6 +192,8 @@ class BeatmapListing : BaseFragment(),
                 mainThread { adapter.notifyItemRangeRemoved(0, itemCount) }
             }
 
+            ensureActive()
+
             JsonArrayRequest(mirror.search.endpoint).use { request ->
 
                 request.buildUrl {
@@ -202,7 +205,12 @@ class BeatmapListing : BaseFragment(),
 
                 request.buildRequest { header("User-Agent", "Chrome/Android") }
 
+                ensureActive()
+
                 val beatmapSets = mirror.search.mapResponse(request.execute().json)
+
+                ensureActive()
+
                 adapter.data.addAll(beatmapSets)
 
                 mainThread {
@@ -361,7 +369,7 @@ class BeatmapSetDetails(val beatmapSet: BeatmapSetModel, val holder: BeatmapSetV
             val button = TextView(ContextThemeWrapper(context, R.style.beatmap_difficulty_icon))
             difficulty.addView(button)
 
-            button.setTextColor(OsuColors.getStarRatingColor(beatmap.starRating))
+            button.setTextColor(OsuColors.getStarRatingColor(beatmap.starRating).toInt())
             button.setOnClickListener { selectDifficulty(button, beatmap) }
 
         }
@@ -385,7 +393,7 @@ class BeatmapSetDetails(val beatmapSet: BeatmapSetModel, val holder: BeatmapSetV
 
         downloadButton.setOnClickListener {
             val url = BeatmapListing.mirror.downloadEndpoint(beatmapSet.id)
-            BeatmapDownloader.download(url, "${beatmapSet.id} ${beatmapSet.artist} - ${beatmapSet.title}.osz")
+            BeatmapDownloader.download(url, "${beatmapSet.id} ${beatmapSet.artist} - ${beatmapSet.title}")
         }
 
         cover.setImageDrawable(holder.cover.drawable)
@@ -537,7 +545,7 @@ class BeatmapSetViewHolder(itemView: View, private val mediaScope: CoroutineScop
             for (i in beatmaps.indices) {
                 val beatmap = beatmaps[i]
 
-                color(OsuColors.getStarRatingColor(beatmap.starRating)) {
+                color(OsuColors.getStarRatingColor(beatmap.starRating).toInt()) {
                     append("⦿")
                 }
 
@@ -550,20 +558,26 @@ class BeatmapSetViewHolder(itemView: View, private val mediaScope: CoroutineScop
 
         coverJob?.cancel()
 
-        if (beatmapSet.thumbnail != null) {
+        if (beatmapSet.thumbnail != null && !noTexturesMode) {
             coverJob = mediaScope.launch {
 
                 try {
                     URL(beatmapSet.thumbnail).openStream().use {
+                        ensureActive()
+
                         val bitmap = BitmapFactory.decodeStream(it)
 
                         mainThread { cover.setImageBitmap(bitmap) }
                     }
 
                 } catch (e: Exception) {
-                    Log.e("BeatmapDownloader", "Failed to load cover.", e)
-
                     mainThread { cover.setImageDrawable(null) }
+
+                    if (e is CancellationException) {
+                        throw e
+                    }
+
+                    Log.e("BeatmapDownloader", "Failed to load cover.", e)
                 }
 
                 coverJob = null
@@ -584,7 +598,7 @@ class BeatmapSetViewHolder(itemView: View, private val mediaScope: CoroutineScop
 
         downloadButton.setOnClickListener {
             val url = BeatmapListing.mirror.downloadEndpoint(beatmapSet.id)
-            BeatmapDownloader.download(url, "${beatmapSet.id} ${beatmapSet.artist} - ${beatmapSet.title}.osz")
+            BeatmapDownloader.download(url, "${beatmapSet.id} ${beatmapSet.artist} - ${beatmapSet.title}")
         }
 
 
@@ -601,12 +615,11 @@ class BeatmapSetViewHolder(itemView: View, private val mediaScope: CoroutineScop
             return
         }
 
+        BeatmapListing.current!!.stopPreviews(true)
+
         previewJob = mediaScope.launch {
 
-            BeatmapListing.current!!.stopPreviews(true)
-
             try {
-
                 previewStream = URLBassStream(BeatmapListing.mirror.previewEndpoint(beatmapSet.beatmaps[0].id)) {
                     stopPreview(true)
 
@@ -614,6 +627,8 @@ class BeatmapSetViewHolder(itemView: View, private val mediaScope: CoroutineScop
                         GlobalManager.getInstance().mainScene.musicControl(MusicOption.PLAY)
                     }
                 }
+
+                ensureActive()
 
                 GlobalManager.getInstance().mainScene.musicControl(MusicOption.PAUSE)
 
@@ -629,6 +644,10 @@ class BeatmapSetViewHolder(itemView: View, private val mediaScope: CoroutineScop
                 }
 
             } catch (e: Exception) {
+                if (e is CancellationException) {
+                    throw e
+                }
+
                 Log.e("BeatmapListing", "Failed to load preview", e)
             }
 

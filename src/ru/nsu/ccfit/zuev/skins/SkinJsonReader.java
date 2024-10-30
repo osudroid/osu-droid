@@ -69,10 +69,14 @@ public class SkinJsonReader extends SkinReader {
     @Override
     protected void loadFonts()
     {
-        OsuSkin.get().hitCirclePrefix.setFromJson(currentFontsData);
-        OsuSkin.get().hitCircleOverlap.setFromJson(currentFontsData);
-        OsuSkin.get().scorePrefix.setFromJson(currentFontsData);
-        OsuSkin.get().comboPrefix.setFromJson(currentFontsData);
+        var skin = OsuSkin.get();
+
+        skin.hitCirclePrefix.setFromJson(currentFontsData);
+        skin.hitCircleOverlap.setFromJson(currentFontsData);
+        skin.scorePrefix.setFromJson(currentFontsData);
+        skin.scoreOverlap.setFromJson(currentFontsData);
+        skin.comboPrefix.setFromJson(currentFontsData);
+        skin.comboOverlap.setFromJson(currentFontsData);
     }
 
     @Override
@@ -102,6 +106,7 @@ public class SkinJsonReader extends SkinReader {
         skin.sliderHintWidth.setFromJson(data);
         skin.sliderHintShowMinLength.setFromJson(data);
         skin.sliderHintAlpha.setFromJson(data);
+        skin.sliderBallFlip.setFromJson(data);
         skin.sliderFollowComboColor.setFromJson(data);
         skin.sliderHintEnable.setFromJson(data);
         skin.sliderBodyColor.setFromJson(data);
@@ -116,6 +121,9 @@ public class SkinJsonReader extends SkinReader {
         skin.limitComboTextLength.setFromJson(data);
         skin.disableKiai.setFromJson(data);
         skin.comboTextScale.setFromJson(data);
+        skin.animationFramerate.setFromJson(data);
+        skin.layeredHitSounds.setFromJson(data);
+        skin.spinnerFrequencyModulate.setFromJson(data);
     }
 
     @Override

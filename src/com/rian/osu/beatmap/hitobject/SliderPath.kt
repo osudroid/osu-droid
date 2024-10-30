@@ -82,7 +82,7 @@ class SliderPath(
                 val spanEnd = i + 1
                 val cpSpan: List<Vector2> = controlPoints.subList(spanStart, spanEnd)
                 for (t in calculateSubPath(cpSpan)) {
-                    if (calculatedPath.isEmpty() || calculatedPath.last() != t) {
+                    if (calculatedPath.isEmpty() || calculatedPath[calculatedPath.size - 1] != t) {
                         calculatedPath.add(t)
                     }
                 }
@@ -110,7 +110,7 @@ class SliderPath(
             // In osu-stable, if the last two control points of a slider are equal, extension is not performed.
             if (
                 controlPoints.size >= 2 &&
-                controlPoints.last() == controlPoints[controlPoints.size - 2] &&
+                controlPoints[controlPoints.size - 1] == controlPoints[controlPoints.size - 2] &&
                 expectedDistance > calculatedLength
             ) {
                 return
@@ -122,7 +122,7 @@ class SliderPath(
 
             if (calculatedLength > expectedDistance) {
                 // The path will be shortened further, in which case we should trim any more unnecessary lengths and their associated path segments
-                while (cumulativeLength.size > 0 && cumulativeLength.last() >= expectedDistance) {
+                while (cumulativeLength.size > 0 && cumulativeLength[cumulativeLength.size - 1] >= expectedDistance) {
                     cumulativeLength.removeAt(cumulativeLength.size - 1)
                     calculatedPath.removeAt(pathEndIndex--)
                 }
@@ -138,7 +138,7 @@ class SliderPath(
             val dir = calculatedPath[pathEndIndex] - calculatedPath[pathEndIndex - 1]
             dir.normalize()
 
-            calculatedPath[pathEndIndex] = calculatedPath[pathEndIndex - 1] + dir * (expectedDistance - cumulativeLength.last()).toFloat()
+            calculatedPath[pathEndIndex] = calculatedPath[pathEndIndex - 1] + dir * (expectedDistance - cumulativeLength[cumulativeLength.size - 1]).toFloat()
             cumulativeLength.add(expectedDistance)
         }
     }
@@ -174,7 +174,7 @@ class SliderPath(
         }
 
         if (i >= calculatedPath.size) {
-            return calculatedPath.last()
+            return calculatedPath[calculatedPath.size - 1]
         }
 
         val p0 = calculatedPath[i - 1]
@@ -203,7 +203,7 @@ class SliderPath(
             return 0
         }
 
-        if (d >= cumulativeLength.last()) {
+        if (d >= cumulativeLength[cumulativeLength.size - 1]) {
             return cumulativeLength.size
         }
 

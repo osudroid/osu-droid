@@ -10,7 +10,7 @@ import ru.nsu.ccfit.zuev.osu.scoring.TouchType
  * @param moves The list of [MoveArray]s.
  * @return The list of [CursorGroup]s.
  */
-fun createCursorGroups(moves: List<MoveArray>) = mutableListOf<MutableList<CursorGroup>>().apply {
+fun createCursorGroups(moves: List<MoveArray>) = mutableListOf<List<CursorGroup>>().apply {
     for (move in moves) {
         val groups = mutableListOf<CursorGroup>()
         var downMovement: Replay.ReplayMovement? = null
@@ -39,4 +39,4 @@ fun createCursorGroups(moves: List<MoveArray>) = mutableListOf<MutableList<Curso
 
         add(groups)
     }
-}
+}.toList()

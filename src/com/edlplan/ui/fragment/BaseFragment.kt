@@ -22,6 +22,11 @@ abstract class BaseFragment : Fragment(), BackPressListener {
         private set
     var isDismissOnBackPress = true
 
+    /**
+     * If true, the fragment will intercept back press event when it's received.
+     */
+    var interceptBackPress = true
+
     @get:IdRes
     val backgroundId: Int
         get() = R.id.frg_background

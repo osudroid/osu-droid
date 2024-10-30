@@ -16,7 +16,7 @@ class BankHitSampleInfo(
      * The [SampleBank] to load the sample from.
      */
     @JvmField
-    val bank: SampleBank,
+    val bank: SampleBank = SampleBank.None,
 
     /**
      * The index of this [BankHitSampleInfo], if it uses custom samples.

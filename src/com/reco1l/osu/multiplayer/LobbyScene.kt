@@ -2,6 +2,7 @@ package com.reco1l.osu.multiplayer
 
 import android.net.Uri
 import android.util.Log
+import com.reco1l.andengine.sprite.*
 import ru.nsu.ccfit.zuev.osu.SecurityUtils
 import com.reco1l.ibancho.LobbyAPI
 import com.reco1l.ibancho.RoomAPI
@@ -17,7 +18,6 @@ import org.anddev.andengine.entity.text.ChangeableText
 import org.anddev.andengine.input.touch.TouchEvent
 import org.anddev.andengine.util.MathUtils
 import ru.nsu.ccfit.zuev.osu.*
-import ru.nsu.ccfit.zuev.osu.helper.AnimSprite
 import ru.nsu.ccfit.zuev.osu.helper.TextButton
 import ru.nsu.ccfit.zuev.osu.menu.LoadingScreen
 import ru.nsu.ccfit.zuev.osu.online.OnlinePanel
@@ -43,7 +43,7 @@ object LobbyScene : Scene()
         }
 
 
-    private var backButton: Sprite? = null
+    private var backButton: ExtendedSprite? = null
 
     private var createButton: TextButton? = null
 
@@ -103,19 +103,10 @@ object LobbyScene : Scene()
 
         // Back button code copy and paste from legacy code but improved, don't blame on me.
         val layoutBackButton = OsuSkin.get().getLayout("BackButton")
-        val loadedBackTextures = mutableListOf<String>()
 
-        if (getResources().isTextureLoaded("menu-back-0"))
-        {
-            for (i in 0..59)
-                if (getResources().isTextureLoaded("menu-back-$i")) loadedBackTextures.add("menu-back-$i")
-        }
-        else loadedBackTextures.add("menu-back")
+        backButton = object : AnimatedSprite("menu-back", true, OsuSkin.get().animationFramerate) {
 
-        backButton = object : AnimSprite(0f, 0f, loadedBackTextures.size.toFloat(), *loadedBackTextures.toTypedArray<String>())
-        {
             var scaleWhenHold = layoutBackButton?.property?.optBoolean("scaleWhenHold", true) ?: false
-
             var moved = false
             var dx = 0f
             var dy = 0f
@@ -152,10 +143,9 @@ object LobbyScene : Scene()
 
             if (OsuSkin.get().isUseNewLayout)
             {
-                layoutBackButton?.baseApply(it)
-                it.setPosition(0f, Config.getRES_HEIGHT() - it.heightScaled)
+                layoutBackButton?.apply(it) ?: it.setPosition(0f, Config.getRES_HEIGHT() - it.heightScaled)
             }
-            else it.setPosition(0f, Config.getRES_HEIGHT() - it.height)
+            else it.setPosition(0f, Config.getRES_HEIGHT() - it.heightScaled)
 
             attachChild(it)
             registerTouchArea(it)

@@ -8,16 +8,16 @@ import com.rian.osu.beatmap.hitobject.Slider
  */
 class DroidDifficultyAttributes : DifficultyAttributes() {
     /**
+     * The custom speed multiplier that was applied to the beatmap.
+     */
+    @JvmField
+    var customSpeedMultiplier = 1f
+
+    /**
      * The overall clock rate that was applied to the beatmap.
      */
     @JvmField
     var clockRate = 1.0
-
-    /**
-     * Whether force OD was used.
-     */
-    @JvmField
-    var forceOD = false
 
     /**
      * The difficulty corresponding to the tap skill.
@@ -36,12 +36,6 @@ class DroidDifficultyAttributes : DifficultyAttributes() {
      */
     @JvmField
     var visualDifficulty = 0.0
-
-    /**
-     * The amount of strains that are considered difficult with respect to the aim skill.
-     */
-    @JvmField
-    var aimDifficultStrainCount = 0.0
 
     /**
      * The amount of strains that are considered difficult with respect to the tap skill.

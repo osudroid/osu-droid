@@ -8,6 +8,8 @@ import com.rian.osu.math.Vector2
 import com.rian.osu.utils.Cached
 import kotlin.math.max
 import kotlin.math.min
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.ensureActive
 
 /**
  * Represents a slider.
@@ -60,13 +62,9 @@ class Slider(
      */
     @JvmField
     var nodeSamples: MutableList<MutableList<HitSampleInfo>>
-) : HitObject(startTime, position, isNewCombo, comboOffset),
-    IHasDuration {
+) : HitObject(startTime, position, isNewCombo, comboOffset) {
     override val endTime
         get() = startTime + spanCount * path.expectedDistance / velocity
-
-    override val duration
-        get() = endTime - startTime
 
     /**
      * The path of this [Slider].
@@ -88,10 +86,7 @@ class Slider(
 
     private val endPositionCache = Cached(position)
 
-    /**
-     * The end position of this [Slider] in osu!pixels.
-     */
-    val endPosition: Vector2
+    override val endPosition: Vector2
         get() {
             if (!endPositionCache.isValid) {
                 endPositionCache.value = position + curvePositionAt(1.0)
@@ -208,10 +203,7 @@ class Slider(
 
     private val difficultyStackedEndPositionCache = Cached(position)
 
-    /**
-     * The stacked end position of this [Slider] in difficulty calculation, in osu!pixels.
-     */
-    val difficultyStackedEndPosition: Vector2
+    override val difficultyStackedEndPosition: Vector2
         get() {
             if (!difficultyStackedEndPositionCache.isValid) {
                 difficultyStackedEndPositionCache.value = endPosition + difficultyStackOffset
@@ -242,12 +234,9 @@ class Slider(
 
     // Gameplay object positions
 
-    private val gameplayEndPositionCache = Cached(convertPositionToRealCoordinates(position))
+    private val gameplayEndPositionCache = Cached(gameplayPosition)
 
-    /**
-     * The end position of this [Slider] in gameplay, in pixels.
-     */
-    val gameplayEndPosition: Vector2
+    override val gameplayEndPosition: Vector2
         get() {
             if (!gameplayEndPositionCache.isValid) {
                 gameplayEndPositionCache.value = convertPositionToRealCoordinates(endPosition)
@@ -258,10 +247,7 @@ class Slider(
 
     private val gameplayStackedEndPositionCache = Cached(gameplayEndPosition)
 
-    /**
-     * The stacked end position of this [Slider] in gameplay, in pixels.
-     */
-    val gameplayStackedEndPosition: Vector2
+    override val gameplayStackedEndPosition: Vector2
         get() {
             if (!gameplayStackedEndPositionCache.isValid) {
                 gameplayStackedEndPositionCache.value = gameplayEndPosition + gameplayStackOffset
@@ -290,8 +276,8 @@ class Slider(
             nestedHitObjects.forEach { it.gameplayScale = value }
         }
 
-    override fun applyDefaults(controlPoints: BeatmapControlPoints, difficulty: BeatmapDifficulty, mode: GameMode) {
-        super.applyDefaults(controlPoints, difficulty, mode)
+    override fun applyDefaults(controlPoints: BeatmapControlPoints, difficulty: BeatmapDifficulty, mode: GameMode, scope: CoroutineScope?) {
+        super.applyDefaults(controlPoints, difficulty, mode, scope)
 
         val timingPoint = controlPoints.timing.controlPointAt(startTime)
         val difficultyPoint = controlPoints.difficulty.controlPointAt(startTime)
@@ -316,32 +302,35 @@ class Slider(
         // Invalidate the end position in case there are timing changes.
         invalidateEndPositions()
 
-        createNestedHitObjects(mode)
+        createNestedHitObjects(mode, controlPoints, scope)
 
-        nestedHitObjects.forEach { it.applyDefaults(controlPoints, difficulty, mode) }
+        nestedHitObjects.forEach { it.applyDefaults(controlPoints, difficulty, mode, scope) }
     }
 
-    override fun applySamples(controlPoints: BeatmapControlPoints) {
-        super.applySamples(controlPoints)
+    override fun applySamples(controlPoints: BeatmapControlPoints, scope: CoroutineScope?) {
+        val sampleControlPoint = controlPoints.sample.controlPointAt(startTime + CONTROL_POINT_LENIENCY + 1)
 
-        // Create sliding samples
-        auxiliarySamples.clear()
-        val bankSamples = samples.filterIsInstance<BankHitSampleInfo>()
+        samples = samples.map {
+            scope?.ensureActive()
 
-        bankSamples.find { it.name == BankHitSampleInfo.HIT_NORMAL }?.let {
-            auxiliarySamples.add(it.copy(name = "sliderslide"))
-        }
-
-        bankSamples.find { it.name == BankHitSampleInfo.HIT_WHISTLE }?.let {
-            auxiliarySamples.add(it.copy(name = "sliderwhistle"))
-        }
+            sampleControlPoint.applyTo(it)
+        }.toMutableList()
 
         nodeSamples.forEachIndexed { i, sampleList ->
+            scope?.ensureActive()
+
             val time = startTime + i * spanDuration + CONTROL_POINT_LENIENCY
             val nodeSamplePoint = controlPoints.sample.controlPointAt(time)
 
-            nodeSamples[i] = sampleList.map { nodeSamplePoint.applyTo(it) }.toMutableList()
+            nodeSamples[i] = sampleList.map {
+                scope?.ensureActive()
+
+                nodeSamplePoint.applyTo(it)
+            }.toMutableList()
         }
+
+        createSlidingSamples(controlPoints, scope)
+        updateNestedSamples(controlPoints, scope)
     }
 
     /**
@@ -376,7 +365,7 @@ class Slider(
      */
     fun spanAt(progress: Double) = (progress * spanCount).toInt()
 
-    private fun createNestedHitObjects(mode: GameMode) {
+    private fun createNestedHitObjects(mode: GameMode, controlPoints: BeatmapControlPoints, scope: CoroutineScope?) {
         nestedHitObjects.clear()
 
         head = SliderHead(startTime, position)
@@ -392,12 +381,16 @@ class Slider(
             val minDistanceFromEnd = velocity * 10
 
             for (span in 0 until spanCount) {
+                scope?.ensureActive()
+
                 val spanStartTime = startTime + span * spanDuration
                 val reversed = span % 2 == 1
-                val sliderTicks: ArrayList<SliderTick> = ArrayList()
+                val sliderTicks = mutableListOf<SliderTick>()
 
                 var d = tickDistance
                 while (d <= length) {
+                    scope?.ensureActive()
+
                     if (d >= length - minDistanceFromEnd) {
                         break
                     }
@@ -469,7 +462,7 @@ class Slider(
             sortBy { it.startTime }
         }
 
-        updateNestedSamples()
+        updateNestedSamples(controlPoints, scope)
     }
 
     private fun updateNestedPositions() {
@@ -486,33 +479,77 @@ class Slider(
         gameplayStackedEndPositionCache.invalidate()
     }
 
-    private fun updateNestedSamples() {
-        val bankSamples = samples.filterIsInstance<BankHitSampleInfo>()
-        val normalSample = bankSamples.find { it.name == BankHitSampleInfo.HIT_NORMAL }
-        val sliderTickSamples = mutableListOf<HitSampleInfo>().also {
-            val sample = normalSample ?: bankSamples.firstOrNull()
+    private fun createSlidingSamples(controlPoints: BeatmapControlPoints, scope: CoroutineScope?) {
+        auxiliarySamples.clear()
 
-            if (sample != null) {
-                it.add(sample.copy(name = "slidertick"))
-            }
+        val bankSamples = samples.filterIsInstance<BankHitSampleInfo>()
+        val normalSlide = bankSamples.find { it.name == BankHitSampleInfo.HIT_NORMAL }
+        val whistleSlide = bankSamples.find { it.name == BankHitSampleInfo.HIT_WHISTLE }
+
+        if (normalSlide == null && whistleSlide == null) {
+            return
         }
 
-        fun getSample(index: Int) = nodeSamples.getOrNull(index) ?: samples
+        val samplePoints = controlPoints.sample.between(startTime + CONTROL_POINT_LENIENCY, endTime + CONTROL_POINT_LENIENCY)
+
+        if (normalSlide != null) {
+            auxiliarySamples.add(SequenceHitSampleInfo(
+                samplePoints.map {
+                    scope?.ensureActive()
+
+                    it.time to it.applyTo(baseNormalSlideSample)
+                }
+            ))
+        }
+
+        if (whistleSlide != null) {
+            auxiliarySamples.add(SequenceHitSampleInfo(
+                samplePoints.map {
+                    scope?.ensureActive()
+
+                    it.time to it.applyTo(baseWhistleSlideSample)
+                }
+            ))
+        }
+    }
+
+    private fun updateNestedSamples(controlPoints: BeatmapControlPoints, scope: CoroutineScope?) {
+        // Ensure that the list of node samples is at least as long as the number of nodes
+        while (nodeSamples.size < repeatCount + 2) {
+            scope?.ensureActive()
+
+            nodeSamples.add(samples.map { it.copy() }.toMutableList())
+        }
 
         nestedHitObjects.forEach {
-            it.samples.addAll(
-                when (it) {
-                    is SliderHead -> getSample(0)
-                    is SliderRepeat -> getSample(it.spanIndex + 1)
-                    is SliderTail -> getSample(spanCount)
-                    else -> sliderTickSamples
+            scope?.ensureActive()
+
+            it.samples.clear()
+
+            when (it) {
+                is SliderHead -> it.samples.addAll(nodeSamples[0])
+                is SliderRepeat -> it.samples.addAll(nodeSamples[it.spanIndex + 1])
+                is SliderTail -> it.samples.addAll(nodeSamples[spanCount])
+                else -> {
+                    val time = it.startTime + CONTROL_POINT_LENIENCY
+                    val tickSamplePoint = controlPoints.sample.controlPointAt(time)
+
+                    it.samples.add(tickSamplePoint.applyTo(baseTickSample))
                 }
-            )
+            }
         }
     }
 
     companion object {
         const val LEGACY_LAST_TICK_OFFSET = 36.0
-        private const val BASE_SCORING_DISTANCE = 100f
+
+        /**
+         * Scoring distance with a speed-adjusted beat length of 1 second (i.e. the speed slider balls move through their track).
+         */
+        const val BASE_SCORING_DISTANCE = 100f
+
+        private val baseNormalSlideSample = BankHitSampleInfo("sliderslide")
+        private val baseWhistleSlideSample = BankHitSampleInfo("sliderwhistle")
+        private val baseTickSample = BankHitSampleInfo("slidertick")
     }
 }

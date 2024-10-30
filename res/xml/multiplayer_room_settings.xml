@@ -3,46 +3,46 @@
     xmlns:app="http://schemas.android.com/apk/res-auto">
 
 
-    <PreferenceCategory android:title="Details">
+    <PreferenceCategory android:title="@string/mp_room_category_details">
 
         <com.reco1l.osu.ui.InputPreference
             android:key="room_name"
-            android:summary="Change the room's name."
-            android:title="Room name" />
+            android:summary="@string/mp_room_name_summary"
+            android:title="@string/mp_room_name_title" />
 
         <com.reco1l.osu.ui.InputPreference
             android:key="room_password"
-            android:summary="Change the room's password. If empty, the room will be public."
-            android:title="Room password"
+            android:summary="@string/mp_room_password_summary"
+            android:title="@string/mp_room_password_title"
             app:layout="@layout/settings_preference_bottom" />
 
     </PreferenceCategory>
 
-    <PreferenceCategory android:title="Variables">
+    <PreferenceCategory android:title="@string/mp_room_category_variables">
 
         <CheckBoxPreference
             android:key="room_free_mods"
-            android:summary="Allow players to choose mods except speed-changing mods"
-            android:title="Enable free mods" />
+            android:summary="@string/mp_room_free_mods_summary"
+            android:title="@string/mp_room_free_mods_title" />
 
         <CheckBoxPreference
             android:key="room_allowForceDifficultyStatistics"
-            android:summary="Allow players to use forced difficulty statistics in free mod"
-            android:title="Allow force difficulty statistics in free mod" />
+            android:summary="@string/mp_room_allowForceDifficultyStatistics_summary"
+            android:title="@string/mp_room_allowForceDifficultyStatistics_title" />
 
         <com.reco1l.osu.ui.SelectPreference
-            android:entries="@array/team_versus_names"
-            android:entryValues="@array/team_versus_values"
+            android:entries="@array/mp_team_versus_names"
+            android:entryValues="@array/mp_team_versus_values"
             android:key="room_versus_mode"
-            android:summary="Change room versus mode"
-            android:title="Team mode" />
+            android:summary="@string/mp_room_versus_mode_summary"
+            android:title="@string/mp_room_versus_mode_title" />
 
         <com.reco1l.osu.ui.SelectPreference
-            android:entries="@array/win_condition_names"
-            android:entryValues="@array/win_condition_values"
+            android:entries="@array/mp_win_condition_names"
+            android:entryValues="@array/mp_win_condition_values"
             android:key="room_win_condition"
-            android:summary="Change room win condition"
-            android:title="Win condition" />
+            android:summary="@string/mp_room_win_condition_summary"
+            android:title="@string/mp_room_win_condition_title" />
 
         <CheckBoxPreference
             android:key="room_removeSliderLock"
@@ -52,12 +52,12 @@
 
     </PreferenceCategory>
 
-    <PreferenceCategory android:title="Share">
+    <PreferenceCategory android:title="@string/mp_room_category_share">
 
         <Preference
             android:key="room_link"
-            android:summary="Copy invite link to clipboard"
-            android:title="Get invite link"
+            android:summary="@string/mp_room_link_summary"
+            android:title="@string/mp_room_link_title"
             app:layout="@layout/settings_preference_bottom" />
 
     </PreferenceCategory>
