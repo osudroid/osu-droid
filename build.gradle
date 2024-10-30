@@ -191,12 +191,12 @@ dependencies {
 
     // Tools
     implementation 'com.github.Reco1I:Toolkt:1.0.23'
-    implementation 'commons-io:commons-io:2.15.1'
+    implementation 'commons-io:commons-io:2.16.1'
 
     // Multiplayer
-    implementation 'org.jetbrains.kotlinx:kotlinx-coroutines-core:1.7.3'
+    implementation 'org.jetbrains.kotlinx:kotlinx-coroutines-core:1.9.0'
     implementation "org.jetbrains.kotlin:kotlin-reflect:$kotlin_version"
-    implementation ('io.socket:socket.io-client:2.1.0') {
+    implementation ('io.socket:socket.io-client:2.1.1') {
         exclude group: 'org.json', module: 'json'
     }
 
