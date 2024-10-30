@@ -109,7 +109,7 @@ fun convertToJson(ini: IniReader) = JSONObject().apply {
         put("comboTextScale", 0.8f)
         put("animationFramerate", ini["General", "AnimationFramerate"] ?: -1f)
         put("layeredHitSounds", ini.get<Boolean>("General", "LayeredHitSounds") != false)
-        put("SliderBallFlip", ini.get<Boolean>("General", "SliderBallFlip") != false)
+        put("sliderBallFlip", ini.get<Boolean>("General", "SliderBallFlip") != false)
         put("spinnerFrequencyModulate", ini.get<Boolean>("General", "SpinnerFrequencyModulate") != false)
     }
 
