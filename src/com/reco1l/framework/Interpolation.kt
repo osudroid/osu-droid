@@ -17,7 +17,7 @@ object Interpolation {
             return start
         }
 
-        val t = EasingManager.apply(easing, (current / duration).toDouble()).toFloat().coerceIn(0f, 1f)
+        val t = easing.interpolate(current / duration).coerceIn(0f, 1f)
 
         return start + (t * (end - start)).toInt()
     }
@@ -36,7 +36,7 @@ object Interpolation {
             return start
         }
 
-        val t = EasingManager.apply(easing, (current / duration).toDouble()).toFloat().coerceIn(0f, 1f)
+        val t = easing.interpolate(current / duration).coerceIn(0f, 1f)
 
         return start + t * (end - start)
     }
