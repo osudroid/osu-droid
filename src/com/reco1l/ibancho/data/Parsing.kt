@@ -4,10 +4,11 @@ import com.reco1l.osu.multiplayer.stringToMods
 import org.json.JSONArray
 import org.json.JSONObject
 
+
 /**
  * Parse a [JSONObject] of player to [RoomPlayer]
  */
-internal fun parsePlayer(o: JSONObject) = RoomPlayer(
+fun parsePlayer(o: JSONObject) = RoomPlayer(
     id = o.getString("uid").toLong(),
     name = o.getString("username"),
     status = PlayerStatus[o.getInt("status")],
@@ -18,35 +19,38 @@ internal fun parsePlayer(o: JSONObject) = RoomPlayer(
 /**
  * Parse a [JSONArray] of players to [RoomPlayer]
  */
-internal fun parsePlayers(array: JSONArray?, size: Int) = Array(size) { i ->
+fun parsePlayers(array: JSONArray?, size: Int) = Array(size) { i ->
     parsePlayer(array?.optJSONObject(i) ?: return@Array null)
 }
 
 /**
  * Parse a [JSONObject] of `beatmap` to [RoomBeatmap]
  */
-internal fun parseBeatmap(o: JSONObject?): RoomBeatmap? {
+fun parseBeatmap(o: JSONObject?): RoomBeatmap? {
 
     if (o == null || !o.has("md5")) {
         return null
     }
 
-    return RoomBeatmap(
+    val beatmap = RoomBeatmap(
         md5 = o.getString("md5"),
         title = o.optString("title"),
         artist = o.optString("artist"),
         creator = o.optString("creator"),
         version = o.optString("version")
-    ).apply {
-        if (!o.isNull("beatmapSetId"))
-            parentSetID = o.getString("beatmapSetId").toLong()
+    )
+
+    if (!o.isNull("beatmapSetId")) {
+        beatmap.parentSetID = o.getString("beatmapSetId").toLong()
     }
+
+    return beatmap
 }
 
 /**
  * Parse a [JSONObject] of mods to [RoomMods]
  */
-internal fun parseMods(o: JSONObject) = RoomMods(
+fun parseMods(o: JSONObject) = RoomMods(
 
     set = stringToMods(if (!o.isNull("mods")) o.getString("mods") else ""),
     speedMultiplier = o.getDouble("speedMultiplier").toFloat(),
@@ -61,7 +65,7 @@ internal fun parseMods(o: JSONObject) = RoomMods(
 /**
  * Parse a [JSONObject] of gameplay settings to [RoomGameplaySettings].
  */
-internal fun parseGameplaySettings(o: JSONObject) = RoomGameplaySettings(
+fun parseGameplaySettings(o: JSONObject) = RoomGameplaySettings(
     isRemoveSliderLock = o.getBoolean("isRemoveSliderLock"),
     isFreeMod = o.getBoolean("isFreeMod"),
     allowForceDifficultyStatistics = o.getBoolean("allowForceDifficultyStatistics")
