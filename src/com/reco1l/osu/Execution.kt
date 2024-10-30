@@ -4,7 +4,7 @@ package com.reco1l.osu
 
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Runnable
-import ru.nsu.ccfit.zuev.osu.GlobalManager.getInstance as getGlobal
+import ru.nsu.ccfit.zuev.osu.GlobalManager
 
 /**
  * A [Runnable] intended specifically for Java interoperability with Kotlin coroutines.
@@ -51,7 +51,7 @@ fun delayed(time: Long, block: CoroutineScope.() -> Unit) = com.reco1l.toolkt.ko
 fun delayed(time: Long, block: CoroutineRunnable) = com.reco1l.toolkt.kotlin.delayed(time) { block(this) }
 
 
-fun mainThread(block: Runnable) = getGlobal().mainActivity.runOnUiThread(block)
+fun mainThread(block: Runnable) = GlobalManager.getInstance().mainActivity.runOnUiThread(block)
 
-fun updateThread(block: Runnable) = getGlobal().engine.runOnUpdateThread(block)
+fun updateThread(block: Runnable) = GlobalManager.getInstance().engine.runOnUpdateThread(block)
 
