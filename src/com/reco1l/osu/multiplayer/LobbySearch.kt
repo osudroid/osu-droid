@@ -17,8 +17,9 @@ import org.anddev.andengine.input.touch.TouchEvent
 import ru.nsu.ccfit.zuev.osuplus.R
 import kotlin.math.abs
 
-class LobbySearch : BaseFragment(), OnEditorActionListener, OnKeyListener
-{
+class LobbySearch : BaseFragment(), OnEditorActionListener, OnKeyListener {
+
+
     override val layoutID = R.layout.multiplayer_lobby_search
 
 
@@ -26,7 +27,7 @@ class LobbySearch : BaseFragment(), OnEditorActionListener, OnKeyListener
 
 
     private val isExtended: Boolean
-        get() = findViewById<View?>(R.id.fullLayout) != null && abs(findViewById<View>(R.id.fullLayout)!!.translationY) < 10
+        get() = findViewById<View?>(R.id.fullLayout)?.translationY?.let { it < 10 } ?: false
 
 
     init {
@@ -35,6 +36,7 @@ class LobbySearch : BaseFragment(), OnEditorActionListener, OnKeyListener
 
 
     override fun onLoadView() {
+
         reload()
 
         field = findViewById(R.id.search_field)!!
@@ -49,6 +51,7 @@ class LobbySearch : BaseFragment(), OnEditorActionListener, OnKeyListener
             LobbyScene.searchQuery = view?.text?.toString()
             return true
         }
+
         return false
     }
 
@@ -57,6 +60,7 @@ class LobbySearch : BaseFragment(), OnEditorActionListener, OnKeyListener
         if (keyCode == KeyEvent.KEYCODE_ENTER && v is EditText) {
             return onEditorAction(v, EditorInfo.IME_ACTION_SEND, event)
         }
+
         return false
     }
 
@@ -69,8 +73,8 @@ class LobbySearch : BaseFragment(), OnEditorActionListener, OnKeyListener
         imm?.hideSoftInputFromWindow(field.windowToken, 0)
     }
 
-    private fun reload()
-    {
+    private fun reload() {
+
         findViewById<View>(R.id.showMoreButton)?.setOnTouchListener { v: View, event: MotionEvent ->
 
             if (event.action == TouchEvent.ACTION_DOWN) {
@@ -88,6 +92,7 @@ class LobbySearch : BaseFragment(), OnEditorActionListener, OnKeyListener
 
                 return@setOnTouchListener true
             }
+
             false
         }
 
@@ -95,8 +100,8 @@ class LobbySearch : BaseFragment(), OnEditorActionListener, OnKeyListener
     }
 
     @SuppressLint("ClickableViewAccessibility")
-    private fun toggleVisibility()
-    {
+    private fun toggleVisibility() {
+
         field.clearFocus()
 
         if (isExtended) {

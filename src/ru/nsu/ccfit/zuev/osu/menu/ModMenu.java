@@ -169,7 +169,7 @@ public class ModMenu implements IModSwitcher {
 
         if (Multiplayer.isConnected())
         {
-            RoomScene.awaitModsChange = true;
+            RoomScene.isWaitingForModsChange = true;
 
             var string = MultiplayerConverter.modsToString(mod);
 
@@ -195,7 +195,7 @@ public class ModMenu implements IModSwitcher {
                         customHP
                 );
             } else {
-                RoomScene.awaitModsChange = false;
+                RoomScene.isWaitingForModsChange = false;
             }
         }
     }

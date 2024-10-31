@@ -1,7 +1,7 @@
 package ru.nsu.ccfit.zuev.osu.game;
 
 import com.reco1l.andengine.sprite.ExtendedSprite;
-import com.reco1l.osu.Modifiers;
+import com.reco1l.andengine.Modifiers;
 import com.reco1l.andengine.Anchor;
 import com.reco1l.osu.playfield.NumberedCirclePiece;
 import com.rian.osu.beatmap.hitobject.HitCircle;

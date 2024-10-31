@@ -1,6 +1,6 @@
 @file:JvmName("BuildUtils")
 
-package com.reco1l.osu
+package com.reco1l
 
 /**
  * Whether to use textures or not.

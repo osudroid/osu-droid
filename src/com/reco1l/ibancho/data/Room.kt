@@ -3,6 +3,7 @@ package com.reco1l.ibancho.data
 import com.reco1l.osu.multiplayer.Multiplayer
 
 data class Room(
+
     /**
      * The room ID.
      */
@@ -62,8 +63,7 @@ data class Room(
      * The unique session ID.
      */
     val sessionID: String? = null
-)
-{
+) {
     /**
      * The array containing the players, null values are empty slots. The array size correspond to [maxPlayers].
      */
@@ -73,8 +73,7 @@ data class Room(
      * The host/room owner UID.
      */
     var host: Long = -1
-        set(value)
-        {
+        set(value) {
             field = value
             sortPlayers()
         }
@@ -84,8 +83,9 @@ data class Room(
      */
     var beatmap: RoomBeatmap? = null
         set(value) {
-            if (field != null)
+            if (field != null) {
                 previousBeatmap = field
+            }
 
             field = value
         }
@@ -106,7 +106,7 @@ data class Room(
      * Returns an array of all players that are in READY status.
      */
     val readyPlayers
-        get() = activePlayers.filter { it.status == PlayerStatus.READY }
+        get() = activePlayers.filter { it.status == PlayerStatus.Ready }
 
     /**
      * Get the players list in map format using UIDs as keys.
@@ -124,7 +124,7 @@ data class Room(
      * Determines if the room team mode is team vs team.
      */
     val isTeamVersus
-        get() = teamMode == TeamMode.TEAM_VS_TEAM
+        get() = teamMode == TeamMode.TeamVersus
 
 
     /**
@@ -133,20 +133,19 @@ data class Room(
      * @return `true` if it was successfully added, `false` it if wasn't or if it was already in the array (this can
      * happen due to reconnection).
      */
-    fun addPlayer(player: RoomPlayer): Boolean
-    {
+    fun addPlayer(player: RoomPlayer): Boolean {
         /** @see [RoomPlayer.equals] */
         var index = players.indexOf(player)
         val wasAlready = index in players.indices
 
-        if (wasAlready)
+        if (wasAlready) {
             Multiplayer.log("WARNING: Tried to add player while it was already in the array.")
-        else
+        } else {
             index = players.indexOfFirst { it == null }
+        }
 
         // Handling invalid index
-        if (index !in players.indices)
-        {
+        if (index !in players.indices) {
             Multiplayer.log("WARNING: Tried to add player with invalid index: $index")
             return false
         }
@@ -161,17 +160,16 @@ data class Room(
      *
      * @return The removed player or `null` if it wasn't on the array.
      */
-    fun removePlayer(uid: Long): RoomPlayer?
-    {
+    fun removePlayer(uid: Long): RoomPlayer? {
         val index = players.indexOfFirst { it != null && it.id == uid }
         val removed = players.getOrNull(index)
 
-        if (removed != null)
-        {
+        if (removed != null) {
             players[index] = null
             sortPlayers()
+        } else {
+            Multiplayer.log("WARNING: Tried to remove a player with invalid index: $index")
         }
-        else Multiplayer.log("WARNING: Tried to remove a player with invalid index: $index")
 
         return removed
     }
@@ -180,11 +178,8 @@ data class Room(
     /**
      * Sort players array placing non-null first.
      */
-    private fun sortPlayers()
-    {
-        players = players
-                .sortedWith { a, b -> (a == null).compareTo(b == null) }
-                .toTypedArray()
+    private fun sortPlayers() {
+        players = players.sortedWith { a, b -> (a == null).compareTo(b == null) }.toTypedArray()
     }
 
 

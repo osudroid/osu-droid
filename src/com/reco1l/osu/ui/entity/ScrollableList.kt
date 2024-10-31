@@ -11,6 +11,7 @@ import ru.nsu.ccfit.zuev.osu.Utils
 import kotlin.math.abs
 import kotlin.math.sign
 
+@Deprecated("Use ScrollableContainer instead.")
 abstract class ScrollableList : Scene(), IScrollDetectorListener
 {
 

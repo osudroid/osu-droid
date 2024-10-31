@@ -18,10 +18,11 @@ import kotlin.math.min
 
 fun convertToJson(ini: IniReader) = JSONObject().apply {
 
-    fun convertToHex(ints: IntArray?): String?
-    {
-        if (ints == null || ints.isEmpty())
+    fun convertToHex(ints: IntArray?): String? {
+
+        if (ints == null || ints.isEmpty()) {
             return null
+        }
 
         return buildString {
 
@@ -35,8 +36,7 @@ fun convertToJson(ini: IniReader) = JSONObject().apply {
     fun parseComboColors(ini: IniReader) = mutableListOf<String>().also {
 
         // osu! skins supports up to 7 combo colors
-        for (i in 0 until 8)
-        {
+        for (i in 0 until 8) {
             val ints: IntArray = ini["Colours", "Combo${i + 1}"] ?: continue
 
             // At this point convertToHex() shouldn't return null, but we handle it anyway.
@@ -141,32 +141,34 @@ fun convertToJson(ini: IniReader) = JSONObject().apply {
 }
 
 
+fun ensureOptionalTexture(file: File) {
 
-fun ensureOptionalTexture(file: File)
-{
-    if (file.exists()) return
+    if (file.exists()) {
+        return
+    }
 
     val bitmap = Bitmap.createBitmap(1, 1, Config.ARGB_8888)
     bitmap.setHasAlpha(true)
     bitmap.setPixel(0, 0, Color.TRANSPARENT)
 
-    try
-    {
+    try {
         FileOutputStream(file).use {
             bitmap.compress(CompressFormat.PNG, 100, it)
         }
+    } catch (e: IOException) {
+        e.printStackTrace()
     }
-    catch (e: IOException) { e.printStackTrace() }
 }
 
-fun ensureTexture(file: File)
-{
-    if (!file.exists()) return
+fun ensureTexture(file: File) {
+
+    if (!file.exists()) {
+        return
+    }
 
     BitmapFactory.decodeFile(file.path)?.apply {
 
-        if (width <= 1 || height <= 1)
-        {
+        if (width <= 1 || height <= 1) {
             file.delete()
             return
         }
@@ -174,8 +176,7 @@ fun ensureTexture(file: File)
         val pixels = IntArray(width * height)
         getPixels(pixels, 0, width, 0, 0, width, height)
 
-        if (pixels.all { Color.alpha(it) == 0 })
-        {
+        if (pixels.all { Color.alpha(it) == 0 }) {
             file.delete()
         }
     }

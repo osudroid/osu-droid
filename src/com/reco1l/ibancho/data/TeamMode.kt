@@ -1,12 +1,22 @@
 package com.reco1l.ibancho.data
 
-enum class TeamMode
-{
-    HEAD_TO_HEAD,
-    TEAM_VS_TEAM;
+/**
+ * Represents the team mode of a room.
+ */
+enum class TeamMode {
 
-    companion object
-    {
-        fun from(ordinal: Int) = entries[ordinal]
+    /**
+     * Players are playing individually head-to-head.
+     */
+    HeadToHead,
+
+    /**
+     * Players are playing in teams.
+     */
+    TeamVersus;
+
+
+    companion object {
+        operator fun get(ordinal: Int) = entries[ordinal]
     }
 }

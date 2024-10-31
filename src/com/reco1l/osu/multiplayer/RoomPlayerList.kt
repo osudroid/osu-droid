@@ -13,20 +13,19 @@ import org.anddev.andengine.input.touch.TouchEvent
 import org.anddev.andengine.input.touch.detector.ScrollDetector.IScrollDetectorListener
 import org.anddev.andengine.util.MathUtils
 import ru.nsu.ccfit.zuev.osu.Config
-import ru.nsu.ccfit.zuev.osu.ResourceManager.getInstance as getResources
+import ru.nsu.ccfit.zuev.osu.ResourceManager
 
-class RoomPlayerList(val room: Room) : ScrollableList(), IScrollDetectorListener
-{
+class RoomPlayerList(val room: Room) : ScrollableList(), IScrollDetectorListener {
+
 
     val menu = RoomPlayerMenu()
 
-    var isValid = false
+
+    private var isValid = false
 
 
-    init
-    {
-        for (i in 0 until room.maxPlayers)
-        {
+    init {
+        for (i in 0 until room.maxPlayers) {
             camY = -146f
 
             val item = PlayerItem()
@@ -38,24 +37,22 @@ class RoomPlayerList(val room: Room) : ScrollableList(), IScrollDetectorListener
     }
 
 
-    fun invalidate()
-    {
+    fun invalidate() {
         isValid = false
     }
 
-    override fun detachSelf(): Boolean
-    {
-        for (i in 0 until childCount)
+    override fun detachSelf(): Boolean {
+
+        for (i in 0 until childCount) {
             RoomScene.unregisterTouchArea(getChild(i) as ITouchArea)
+        }
 
         return RoomScene.detachChild(this)
     }
 
 
-    override fun onManagedUpdate(secondsElapsed: Float)
-    {
-        if (!isValid)
-        {
+    override fun onManagedUpdate(secondsElapsed: Float) {
+        if (!isValid) {
             isValid = true
             room.players.forEachIndexed { i, player ->
 
@@ -73,8 +70,8 @@ class RoomPlayerList(val room: Room) : ScrollableList(), IScrollDetectorListener
     }
 
 
-    inner class PlayerItem : Rectangle(40f, 0f, Config.getRES_WIDTH() * 0.4f, 80f)
-    {
+    inner class PlayerItem : Rectangle(40f, 0f, Config.getRES_WIDTH() * 0.4f, 80f) {
+
 
         var room: Room? = null
 
@@ -83,9 +80,9 @@ class RoomPlayerList(val room: Room) : ScrollableList(), IScrollDetectorListener
         var isHost: Boolean = false
 
 
-        private val state = Rectangle(0f, 0f, 5f, height)
+        private val playerStatusRect = Rectangle(0f, 0f, 5f, height)
 
-        private val text = ChangeableText(20f, 16f, getResources().getFont("smallFont"), "", 64)
+        private val playerInfoText = ChangeableText(20f, 16f, ResourceManager.getInstance().getFont("smallFont"), "", 64)
 
         private var hostIcon: Sprite? = null
 
@@ -93,19 +90,19 @@ class RoomPlayerList(val room: Room) : ScrollableList(), IScrollDetectorListener
 
 
         private var moved = false
+
         private var dx = 0f
+
         private var dy = 0f
 
 
-        init
-        {
-            attachChild(state)
-            attachChild(text)
+        init {
+            attachChild(playerStatusRect)
+            attachChild(playerInfoText)
         }
 
 
-        fun load()
-        {
+        fun load() {
             setColor(1f, 1f, 1f, 0.15f)
 
             hostIcon?.detachSelf()
@@ -113,60 +110,53 @@ class RoomPlayerList(val room: Room) : ScrollableList(), IScrollDetectorListener
             hostIcon = null
             missingIcon = null
 
-            text.text = ""
-            text.isVisible = false
-            state.isVisible = false
+            playerInfoText.text = ""
+            playerInfoText.isVisible = false
+            playerStatusRect.isVisible = false
 
-            if (room == null || player == null)
-                return
+            if (room == null || player == null) return
 
-            state.isVisible = true
-            text.isVisible = true
-            text.text = "${player!!.name}\n${player!!.mods}"
+            playerStatusRect.isVisible = true
+            playerInfoText.isVisible = true
+            playerInfoText.text = "${player!!.name}\n${player!!.mods}"
 
-            if (room!!.teamMode == TeamMode.TEAM_VS_TEAM)
-            {
-                when (player!!.team)
-                {
-                    RED -> setColor(1f, 0.2f, 0.2f, 0.15f)
-                    BLUE -> setColor(0.2f, 0.2f, 1f, 0.15f)
+            if (room!!.teamMode == TeamMode.TeamVersus) {
+                when (player!!.team) {
+                    Red -> setColor(1f, 0.2f, 0.2f, 0.15f)
+                    Blue -> setColor(0.2f, 0.2f, 1f, 0.15f)
                     else -> setColor(1f, 1f, 1f, 0.15f)
                 }
+            } else {
+                setColor(1f, 1f, 1f, 0.15f)
             }
-            else setColor(1f, 1f, 1f, 0.15f)
 
-            if (isHost)
-            {
-                val icon = getResources().getTexture("crown")
+            if (isHost) {
+                val icon = ResourceManager.getInstance().getTexture("crown")
 
                 hostIcon = Sprite(width - icon.width - 15f, (height - icon.height) / 2f, icon)
                 attachChild(hostIcon)
             }
 
-            when (player!!.status)
-            {
-                MISSING_BEATMAP ->
-                {
-                    val icon = getResources().getTexture("missing")
+            when (player!!.status) {
+                MissingBeatmap -> {
+                    val icon = ResourceManager.getInstance().getTexture("missing")
 
                     missingIcon = Sprite(width - icon.width - 15f - (hostIcon?.let { it.width + 10f } ?: 0f), (height - icon.height) / 2f, icon)
                     attachChild(missingIcon)
 
-                    state.setColor(1f, 0.1f, 0.1f)
+                    playerStatusRect.setColor(1f, 0.1f, 0.1f)
                 }
 
-                NOT_READY -> state.setColor(1f, 0.1f, 0.1f)
-                READY -> state.setColor(0.1f, 1f, 0.1f)
-                PLAYING -> state.setColor(0.1f, 0.1f, 1f)
+                NotReady -> playerStatusRect.setColor(1f, 0.1f, 0.1f)
+                Ready -> playerStatusRect.setColor(0.1f, 1f, 0.1f)
+                Playing -> playerStatusRect.setColor(0.1f, 0.1f, 1f)
             }
         }
 
-        override fun onAreaTouched(event: TouchEvent, localX: Float, localY: Float): Boolean
-        {
+        override fun onAreaTouched(event: TouchEvent, localX: Float, localY: Float): Boolean {
             handleScrolling(event)
 
-            if (event.isActionDown)
-            {
+            if (event.isActionDown) {
                 moved = false
                 dx = localX
                 dy = localY
@@ -175,26 +165,22 @@ class RoomPlayerList(val room: Room) : ScrollableList(), IScrollDetectorListener
                 return true
             }
 
-            if (event.isActionUp)
-            {
+            if (event.isActionUp) {
                 velocityY = 0f
                 alpha = 0.15f
 
-                if (moved || isScroll)
-                    return true
+                if (moved || isScroll) return true
 
-                getResources().getSound("menuclick")?.play()
+                ResourceManager.getInstance().getSound("menuclick")?.play()
 
-                if (player != null && Multiplayer.player != player)
-                {
+                if (player != null && Multiplayer.player != player) {
                     menu.player = player
                     menu.show()
                 }
                 return true
             }
 
-            if (event.isActionOutside || event.isActionMove && MathUtils.distance(dx, dy, localX, localY) > 10)
-            {
+            if (event.isActionOutside || event.isActionMove && MathUtils.distance(dx, dy, localX, localY) > 10) {
                 moved = true
                 alpha = 0.15f
                 return true

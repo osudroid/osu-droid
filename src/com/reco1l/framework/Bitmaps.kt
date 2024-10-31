@@ -3,7 +3,7 @@
 package com.reco1l.framework
 
 import android.graphics.*
-import com.reco1l.osu.*
+import com.reco1l.*
 import kotlin.random.*
 
 
