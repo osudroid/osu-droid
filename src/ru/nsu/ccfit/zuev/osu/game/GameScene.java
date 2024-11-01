@@ -683,7 +683,8 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
     }
 
     public void cancelLoading() {
-        if (loadingJob != null) {
+        // Do not cancel loading in multiplayer.
+        if (!Multiplayer.isMultiplayer && loadingJob != null) {
             loadingJob.cancel(new CancellationException("Loading job cancelled"));
         }
     }
