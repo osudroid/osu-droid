@@ -746,14 +746,21 @@ public class MainActivity extends BaseGameActivity implements
             return true;
         }
 
-        if (GlobalManager.getInstance().getGameScene() != null
-                && (keyCode == KeyEvent.KEYCODE_BACK || keyCode == KeyEvent.KEYCODE_MENU)
-                && GlobalManager.getInstance().getEngine().getScene() == GlobalManager.getInstance().getGameScene().getScene()) {
-            if (GlobalManager.getInstance().getGameScene().isPaused()) {
-                GlobalManager.getInstance().getGameScene().resume();
-            } else {
-                GlobalManager.getInstance().getGameScene().pause();
+        var gameScene = GlobalManager.getInstance().getGameScene();
+
+        if (gameScene != null && (keyCode == KeyEvent.KEYCODE_BACK || keyCode == KeyEvent.KEYCODE_MENU)) {
+            if (gameScene.isLoading()) {
+                gameScene.cancelLoading();
             }
+
+            if (GlobalManager.getInstance().getEngine().getScene() == gameScene.getScene()) {
+                if (gameScene.isPaused()) {
+                    gameScene.resume();
+                } else {
+                    gameScene.pause();
+                }
+            }
+
             return true;
         }
         if (GlobalManager.getInstance().getScoring() != null && keyCode == KeyEvent.KEYCODE_BACK

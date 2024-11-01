@@ -77,6 +77,7 @@ for preventing accidental touches.
 - Added support for `scorebar-marker` texture
 - Added support for custom file hitsounds
 - Added support for circular song progress indicator in gameplay
+- Added support to cancel gameplay loading by pressing the back button
 - Added an animation to slider end arrow rotation when snaking animation is enabled
 - Added a slight dim to hitobjects that cannot be hit yet in gameplay
 - Added a rotation effect to miss hit judgement effects in gameplay

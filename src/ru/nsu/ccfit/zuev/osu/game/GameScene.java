@@ -5,6 +5,9 @@ import android.os.SystemClock;
 import android.util.Log;
 
 import kotlin.random.Random;
+import kotlinx.coroutines.CoroutineScope;
+import kotlinx.coroutines.Job;
+import kotlinx.coroutines.JobKt;
 import ru.nsu.ccfit.zuev.osu.SecurityUtils;
 
 import com.edlplan.framework.easing.Easing;
@@ -74,6 +77,7 @@ import org.anddev.andengine.util.Debug;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.util.*;
+import java.util.concurrent.CancellationException;
 
 import javax.microedition.khronos.opengles.GL10;
 
@@ -177,6 +181,7 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
 
     private DifficultyHelper difficultyHelper = DifficultyHelper.StdDifficulty;
 
+    private Job loadingJob;
     private DifficultyCalculationParameters lastDifficultyCalculationParameters;
     private TimedDifficultyAttributes<DroidDifficultyAttributes>[] droidTimedDifficultyAttributes;
     private TimedDifficultyAttributes<StandardDifficultyAttributes>[] standardTimedDifficultyAttributes;
@@ -351,11 +356,13 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
         }
     }
 
-    private boolean loadGame(final BeatmapInfo beatmapInfo, final String rFile) {
+    private boolean loadGame(final BeatmapInfo beatmapInfo, final String rFile, final CoroutineScope scope) {
         if (!SecurityUtils.verifyFileIntegrity(GlobalManager.getInstance().getMainActivity())) {
             ToastLogger.showTextId(com.osudroid.resources.R.string.file_integrity_tampered, true);
             return false;
         }
+
+        JobKt.ensureActive(scope.getCoroutineContext());
 
         if (rFile != null && rFile.startsWith("https://")) {
             this.replayFilePath = Config.getCachePath() + "/" +
@@ -368,8 +375,10 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
         } else
             this.replayFilePath = rFile;
 
+        JobKt.ensureActive(scope.getCoroutineContext());
+
         if (parsedBeatmap == null || !parsedBeatmap.getMd5().equals(beatmapInfo.getMD5())) {
-            try (var parser = new BeatmapParser(beatmapInfo.getPath())) {
+            try (var parser = new BeatmapParser(beatmapInfo.getPath(), scope)) {
                 if (parser.openFile()) {
                     parsedBeatmap = parser.parse(true, GameMode.Droid);
                 } else {
@@ -403,13 +412,14 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
             modMenu.isCustomHP() ? modMenu.getCustomHP() : null
         );
 
-        playableBeatmap = parsedBeatmap.createDroidPlayableBeatmap(convertedMods, modMenu.getChangeSpeed());
+        playableBeatmap = parsedBeatmap.createDroidPlayableBeatmap(convertedMods, modMenu.getChangeSpeed(), false, scope);
 
         // TODO skin manager
         BeatmapSkinManager.getInstance().loadBeatmapSkin(playableBeatmap.getBeatmapsetPath());
 
         breakPeriods = new LinkedList<>();
         for (var period : playableBeatmap.getEvents().breaks) {
+            JobKt.ensureActive(scope.getCoroutineContext());
             breakPeriods.add(new BreakPeriod(period.startTime / 1000f, period.endTime / 1000f));
         }
 
@@ -450,9 +460,13 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
         GameHelper.setSpeedMultiplier(modMenu.getSpeed());
         scene.setTimeMultiplier(GameHelper.getSpeedMultiplier());
 
+        JobKt.ensureActive(scope.getCoroutineContext());
+
         GlobalManager.getInstance().getSongService().preLoad(audioFilePath, GameHelper.getSpeedMultiplier(),
             GameHelper.getSpeedMultiplier() != 1f &&
                 (modMenu.isEnableNCWhenSpeedChange() || modMenu.getMod().contains(GameMod.MOD_NIGHTCORE)));
+
+        JobKt.ensureActive(scope.getCoroutineContext());
 
         objects = new LinkedList<>(playableBeatmap.getHitObjects().objects);
         activeObjects = new LinkedList<>();
@@ -471,6 +485,7 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
 
         comboColors = new ArrayList<>();
         for (RGBColor color : playableBeatmap.getColors().comboColors) {
+            JobKt.ensureActive(scope.getCoroutineContext());
             comboColors.add(new RGBColor(color.r() / 255, color.g() / 255, color.b() / 255));
         }
 
@@ -482,6 +497,8 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
             comboColors.clear();
             comboColors.addAll(OsuSkin.get().getComboColor());
         }
+
+        JobKt.ensureActive(scope.getCoroutineContext());
 
         lastActiveObjectHitTime = 0;
 
@@ -505,6 +522,8 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
         GameHelper.setSamplesMatchPlaybackRate(playableBeatmap.getGeneral().samplesMatchPlaybackRate);
 
         GameObjectPool.getInstance().purge();
+
+        JobKt.ensureActive(scope.getCoroutineContext());
 
         FollowPointConnection.getPool().renew(16);
         SliderTickSprite.getPool().renew(16);
@@ -537,6 +556,8 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
             storyboardSprite.loadStoryboard(beatmapInfo.getPath());
         }
 
+        JobKt.ensureActive(scope.getCoroutineContext());
+
         GameObjectPool.getInstance().preload();
 
         if (Config.isDisplayRealTimePPCounter()) {
@@ -548,14 +569,14 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
             switch (Config.getDifficultyAlgorithm()) {
                 case droid -> {
                     if (droidTimedDifficultyAttributes == null || !sameParameters) {
-                        droidTimedDifficultyAttributes = BeatmapDifficultyCalculator.calculateDroidTimedDifficulty(playableBeatmap);
+                        droidTimedDifficultyAttributes = BeatmapDifficultyCalculator.calculateDroidTimedDifficulty(playableBeatmap, scope);
                     }
                 }
 
                 case standard -> {
                     if (standardTimedDifficultyAttributes == null || !sameParameters) {
                         standardTimedDifficultyAttributes = BeatmapDifficultyCalculator.calculateStandardTimedDifficulty(
-                            parsedBeatmap, parameters
+                            parsedBeatmap, parameters, scope
                         );
                     }
                 }
@@ -565,7 +586,7 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
         }
 
         lastBeatmapInfo = beatmapInfo;
-        calculateAllSliderPaths();
+        calculateAllSliderPaths(scope);
 
         // Resetting variables before starting the game.
         Multiplayer.finalData = null;
@@ -623,29 +644,48 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
 
         final String rfile = beatmapInfo != null ? replayFile : this.replayFilePath;
 
+        cancelLoading();
 
-
-        Execution.async(() -> {
-
+        loadingJob = Execution.async((scope) -> {
             DifficultyCalculationManager.stopCalculation();
 
-            if (loadGame(beatmapInfo != null ? beatmapInfo : lastBeatmapInfo, rfile)) {
-                prepareScene();
-            } else {
-                ModMenu.getInstance().setMod(Replay.oldMod);
-                ModMenu.getInstance().setChangeSpeed(Replay.oldChangeSpeed);
-                ModMenu.getInstance().setFLfollowDelay(Replay.oldFLFollowDelay);
+            boolean succeeded = false;
 
-                ModMenu.getInstance().setCustomAR(Replay.oldCustomAR);
-                ModMenu.getInstance().setCustomOD(Replay.oldCustomOD);
-                ModMenu.getInstance().setCustomCS(Replay.oldCustomCS);
-                ModMenu.getInstance().setCustomHP(Replay.oldCustomHP);
+            try {
+                succeeded = loadGame(beatmapInfo != null ? beatmapInfo : lastBeatmapInfo, rfile, scope);
 
-                quit();
+                if (succeeded) {
+                    prepareScene();
+                }
+            } finally {
+                if (!succeeded) {
+                    ModMenu.getInstance().setMod(Replay.oldMod);
+                    ModMenu.getInstance().setChangeSpeed(Replay.oldChangeSpeed);
+                    ModMenu.getInstance().setFLfollowDelay(Replay.oldFLFollowDelay);
+
+                    ModMenu.getInstance().setCustomAR(Replay.oldCustomAR);
+                    ModMenu.getInstance().setCustomOD(Replay.oldCustomOD);
+                    ModMenu.getInstance().setCustomCS(Replay.oldCustomCS);
+                    ModMenu.getInstance().setCustomHP(Replay.oldCustomHP);
+
+                    quit();
+                }
+
+                loadingJob = null;
             }
         });
 
         ResourceManager.getInstance().getSound("failsound").stop();
+    }
+
+    public boolean isLoading() {
+        return loadingJob != null && !loadingJob.isCancelled();
+    }
+
+    public void cancelLoading() {
+        if (loadingJob != null) {
+            loadingJob.cancel(new CancellationException("Loading job cancelled"));
+        }
     }
 
     private void prepareScene() {
@@ -1943,6 +1983,10 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
     }
 
     private void stopLoopingSamples() {
+        if (activeObjects == null) {
+            return;
+        }
+
         for (int i = 0, size = activeObjects.size(); i < size; i++) {
             activeObjects.get(i).stopLoopingSamples();
         }
@@ -2451,7 +2495,7 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
         return id;
     }
 
-    private void calculateAllSliderPaths() {
+    private void calculateAllSliderPaths(final CoroutineScope scope) {
         if (playableBeatmap.getHitObjects().getSliderCount() == 0) {
             return;
         }
@@ -2460,6 +2504,8 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
         sliderIndex = 0;
 
         for (var obj : playableBeatmap.getHitObjects().objects) {
+            JobKt.ensureActive(scope.getCoroutineContext());
+
             if (!(obj instanceof com.rian.osu.beatmap.hitobject.Slider slider)) {
                 continue;
             }
