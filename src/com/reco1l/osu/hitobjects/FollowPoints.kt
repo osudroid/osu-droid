@@ -54,11 +54,10 @@ object FollowPointConnection {
         val newWidth = min(width, HitObject.OBJECT_RADIUS.toInt() * 2)
         val newHeight = min(height, HitObject.OBJECT_RADIUS.toInt() * 2)
 
-        val desiredX = width / 2 - newWidth / 2
-        val desiredY = height / 2 - newHeight / 2
+        if (width != newWidth || height != newHeight) {
 
-        if (texturePositionX != desiredX || texturePositionY != desiredY || width != newWidth || height != newHeight) {
-            setTexturePosition(desiredX, desiredY)
+            // Crop the texture from the center.
+            setTexturePosition(width / 2 - newWidth / 2, height / 2 - newHeight / 2)
 
             width = newWidth
             height = newHeight
