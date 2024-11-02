@@ -23,7 +23,6 @@ import android.os.Looper;
 import android.os.PowerManager;
 import android.os.StatFs;
 import android.util.DisplayMetrics;
-import android.util.Log;
 import android.view.Display;
 import android.view.Gravity;
 import android.view.KeyEvent;
@@ -751,6 +750,7 @@ public class MainActivity extends BaseGameActivity implements
         if (gameScene != null && (keyCode == KeyEvent.KEYCODE_BACK || keyCode == KeyEvent.KEYCODE_MENU)) {
             if (gameScene.isLoading()) {
                 gameScene.cancelLoading();
+                return true;
             }
 
             if (GlobalManager.getInstance().getEngine().getScene() == gameScene.getScene()) {
@@ -759,9 +759,8 @@ public class MainActivity extends BaseGameActivity implements
                 } else {
                     gameScene.pause();
                 }
+                return true;
             }
-
-            return true;
         }
         if (GlobalManager.getInstance().getScoring() != null && keyCode == KeyEvent.KEYCODE_BACK
                 && GlobalManager.getInstance().getEngine().getScene() == GlobalManager.getInstance().getScoring().getScene()) {
