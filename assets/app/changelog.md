@@ -206,7 +206,7 @@ The following gameplay elements' display has been updated to match osu!stable:
 - The real-time PP counter has been moved next to circular song progress or accuracy counter
   - Its `d` and `p` letters can be skinned with the `score-d` and `score-p` skin elements 
 - Average offset and unstable rate counters are now hidden during autoplay
-- Updated Korean and Japanese translations
+- Updated Korean, Japanese, and Russian translations
 
 # Removals
 
