@@ -1,11 +1,13 @@
 package ru.nsu.ccfit.zuev.osu.menu;
 
 import org.anddev.andengine.engine.Engine;
+import org.anddev.andengine.entity.scene.Scene;
 import org.anddev.andengine.entity.scene.menu.MenuScene;
 import org.anddev.andengine.entity.scene.menu.MenuScene.IOnMenuItemClickListener;
 import org.anddev.andengine.entity.scene.menu.item.IMenuItem;
 import org.anddev.andengine.entity.scene.menu.item.SpriteMenuItem;
 import org.anddev.andengine.entity.sprite.Sprite;
+import org.anddev.andengine.input.touch.TouchEvent;
 import org.anddev.andengine.opengl.texture.region.TextureRegion;
 
 import ru.nsu.ccfit.zuev.audio.BassSoundProvider;
@@ -36,6 +38,14 @@ public class PauseMenu implements IOnMenuItemClickListener {
             protected void onManagedUpdate(float pSecondsElapsed) {
                 // Cancel the effect of speed multiplier.
                 super.onManagedUpdate(pSecondsElapsed / GameHelper.getSpeedMultiplier());
+            }
+
+            @Override
+            public boolean onSceneTouchEvent(Scene pScene, TouchEvent pSceneTouchEvent) {
+                super.onSceneTouchEvent(pScene, pSceneTouchEvent);
+
+                // Intercept touch event to prevent it from being passed to the game scene during pause.
+                return true;
             }
         };
 

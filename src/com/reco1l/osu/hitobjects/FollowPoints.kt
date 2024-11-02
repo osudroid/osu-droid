@@ -6,8 +6,10 @@ import com.reco1l.andengine.modifier.*
 import com.reco1l.andengine.sprite.*
 import com.reco1l.framework.*
 import com.reco1l.osu.*
+import com.reco1l.toolkt.kotlin.*
 import com.rian.osu.beatmap.hitobject.*
 import org.anddev.andengine.entity.scene.*
+import org.anddev.andengine.opengl.texture.region.*
 import ru.nsu.ccfit.zuev.osu.*
 import ru.nsu.ccfit.zuev.skins.OsuSkin
 import kotlin.math.*
@@ -25,9 +27,15 @@ object FollowPointConnection {
 
         // For optimization, we avoid using AnimatedSprite if there's one frame.
         if (ResourceManager.getInstance().isTextureLoaded("followpoint-0")) {
-            AnimatedSprite("followpoint", true, OsuSkin.get().animationFramerate)
+            AnimatedSprite("followpoint", true, OsuSkin.get().animationFramerate).also { sprite ->
+                sprite.frames.fastForEach {
+                    it?.applyFollowPointMaxSize()
+                }
+            }
         } else {
-            ExtendedSprite(ResourceManager.getInstance().getTexture("followpoint"))
+            ExtendedSprite(ResourceManager.getInstance().getTexture("followpoint")).also {
+                it.textureRegion?.applyFollowPointMaxSize()
+            }
         }
     }
 
@@ -40,6 +48,21 @@ object FollowPointConnection {
         }
     }
 
+
+    private fun TextureRegion.applyFollowPointMaxSize() {
+        // Reference: https://github.com/ppy/osu/blob/0811de728e4205a45e485d53ccdaf19a937c6033/osu.Game.Rulesets.Osu/Skinning/Legacy/OsuLegacySkinTransformer.cs#L95-L97
+        val newWidth = min(width, HitObject.OBJECT_RADIUS.toInt() * 2)
+        val newHeight = min(height, HitObject.OBJECT_RADIUS.toInt())
+
+        if (width != newWidth || height != newHeight) {
+
+            // Crop the texture from the center.
+            setTexturePosition(width / 2 - newWidth / 2, height / 2 - newHeight / 2)
+
+            width = newWidth
+            height = newHeight
+        }
+    }
 
     @JvmStatic
     fun addConnection(scene: Scene, secPassed: Float, start: HitObject, end: HitObject) {
