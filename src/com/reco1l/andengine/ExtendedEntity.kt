@@ -430,7 +430,7 @@ abstract class ExtendedEntity(
      *
      * @return Whether the size of the entity was changed or not, this depends on the [autoSizeAxes] property.
      */
-    protected open fun onContentSizeMeasured(): Boolean {
+    open fun onContentSizeMeasured(): Boolean {
 
         if (autoSizeAxes == Axes.None) {
             return false

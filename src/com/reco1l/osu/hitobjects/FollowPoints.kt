@@ -31,10 +31,13 @@ object FollowPointConnection {
                 sprite.frames.fastForEach {
                     it?.applyFollowPointMaxSize()
                 }
+
+                sprite.onContentSizeMeasured()
             }
         } else {
             ExtendedSprite(ResourceManager.getInstance().getTexture("followpoint")).also {
                 it.textureRegion?.applyFollowPointMaxSize()
+                it.onContentSizeMeasured()
             }
         }
     }
