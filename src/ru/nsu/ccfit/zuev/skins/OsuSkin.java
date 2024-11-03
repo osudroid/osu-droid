@@ -14,7 +14,7 @@ import java.util.HashMap;
 public class OsuSkin {
     private static final OsuSkin skinJson = new OsuSkin();
 
-    protected final FloatSkinData animationFramerate = new FloatSkinData("animationFramerate", 60);
+    protected final FloatSkinData animationFramerate = new FloatSkinData("animationFramerate", -1);
     protected final FloatSkinData comboTextScale = new FloatSkinData("comboTextScale", 1f);
     protected final FloatSkinData sliderHintWidth = new FloatSkinData("sliderHintWidth", 3f);
     protected final FloatSkinData sliderBodyWidth = new FloatSkinData("sliderBodyWidth", 61f);
