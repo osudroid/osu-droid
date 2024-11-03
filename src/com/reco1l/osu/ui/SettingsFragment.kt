@@ -181,7 +181,10 @@ class SettingsFragment : com.edlplan.ui.fragment.SettingsFragment() {
 
             createDivider("Multiplayer")
             createSectionButton("Player", R.drawable.person_24px, Section.Player)
-            createSectionButton("Room", R.drawable.groups_24px, Section.Room)
+
+            if (Multiplayer.isRoomHost)
+                createSectionButton("Room", R.drawable.groups_24px, Section.Room)
+
             createDivider("Game")
 
         }
