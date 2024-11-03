@@ -541,9 +541,8 @@ object RoomScene : Scene(), IRoomEventListener, IPlayerEventListener {
 
         modsButton!!.isVisible = isRoomHost || room!!.gameplaySettings.isFreeMod
 
-        if (modsButton!!.isVisible) {
-            difficultySwitcher!!.setPosition(modsButton!!.x + modsButton!!.widthScaled, difficultySwitcher!!.y)
-        }
+        val difficultySwitcherX = modsButton!!.x + if (modsButton!!.isVisible) modsButton!!.widthScaled else 0f
+        difficultySwitcher!!.setPosition(difficultySwitcherX, difficultySwitcher!!.y)
     }
 
     private fun updateBeatmapInfo() {
