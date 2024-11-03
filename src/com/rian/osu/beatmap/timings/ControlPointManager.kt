@@ -84,7 +84,8 @@ abstract class ControlPointManager<T : ControlPoint>(
      *
      * @param start The start time, in milliseconds.
      * @param end The end time, in milliseconds.
-     * @return An array of control points between the two times.
+     * @return An array of control points between the two times. If [start] is greater than [end], the control point at
+     * [start] will be returned.
      */
     fun between(start: Double, end: Double): MutableList<T> {
         if (controlPoints.isEmpty()) {
@@ -92,7 +93,7 @@ abstract class ControlPointManager<T : ControlPoint>(
         }
 
         if (start > end) {
-            throw IllegalArgumentException("Start time must be less than or equal to end time.")
+            return mutableListOf(controlPointAt(start))
         }
 
         // Subtract 1 from start index as the binary search from findInsertionIndex would return the next control point
@@ -121,7 +122,7 @@ abstract class ControlPointManager<T : ControlPoint>(
      * @return The active control point at the given time, `null` if none found.
      */
     protected fun binarySearch(time: Double): T? {
-        if (controlPoints.size == 0 || time < controlPoints[0].time) {
+        if (controlPoints.isEmpty() || time < controlPoints[0].time) {
             return null
         }
 
@@ -154,7 +155,7 @@ abstract class ControlPointManager<T : ControlPoint>(
      * @param time The start time of the control point, in milliseconds.
      */
     private fun findInsertionIndex(time: Double): Int {
-        if (controlPoints.size == 0 || time < controlPoints[0].time) {
+        if (controlPoints.isEmpty() || time < controlPoints[0].time) {
             return 0
         }
 
