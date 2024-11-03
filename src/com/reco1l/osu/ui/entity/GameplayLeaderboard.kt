@@ -150,7 +150,7 @@ class GameplayLeaderboard(var playerName: String, private val stats: StatisticV2
                 while (i < spriteCount) {
 
                     val sprite = getChild(i)
-                    val isInBounds = i in minBound..<playerPosition
+                    val isInBounds = i in minBound + 1..<playerPosition
 
                     // Showing only sprites that are between the bound index exclusive up to player position inclusive, the
                     // first sprite will always be shown so that's why the bound index is exclusive.
