@@ -49,8 +49,7 @@ private val DEVELOPERS = longArrayOf(
 )
 
 
-class RoomChat : BaseFragment(), OnEditorActionListener, OnKeyListener
-{
+class RoomChat : BaseFragment(), OnEditorActionListener, OnKeyListener {
 
     override val layoutID = R.layout.multiplayer_room_chat
 
@@ -365,7 +364,7 @@ class MessageViewHolder(private val root: LinearLayout) : RecyclerView.ViewHolde
             val isRoomHost = msg.sender == Multiplayer.room!!.host
             val isDeveloper = msg.sender in DEVELOPERS
 
-            senderText.text = Multiplayer.room!!.playersMap[msg.sender]!!.name
+            senderText.text = Multiplayer.room?.playersMap?.get(msg.sender)?.name ?: "Disconnected player"
 
             val color = when {
                 isRoomHost -> 0xFF00FFEA.toInt()
