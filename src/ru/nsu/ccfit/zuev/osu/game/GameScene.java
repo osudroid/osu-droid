@@ -12,6 +12,7 @@ import ru.nsu.ccfit.zuev.osu.SecurityUtils;
 
 import com.edlplan.framework.easing.Easing;
 import com.edlplan.framework.math.FMath;
+import com.edlplan.framework.math.line.LinePath;
 import com.edlplan.framework.support.ProxySprite;
 import com.edlplan.framework.support.osb.StoryboardSprite;
 import com.edlplan.framework.utils.functionality.SmartIterator;
@@ -173,6 +174,7 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
     private RGBColor sliderBorderColor;
     private float lastActiveObjectHitTime = 0;
     private SliderPath[] sliderPaths = null;
+    private LinePath[] sliderRenderPaths = null;
     private int sliderIndex = 0;
 
     private StoryboardSprite storyboardSprite;
@@ -1371,8 +1373,9 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
                 final var gameplaySlider = GameObjectPool.getInstance().getSlider();
 
                 gameplaySlider.init(this, mgScene, parsedSlider, elapsedTime,
-                    comboColor, sliderBorderColor, getSliderPath(sliderIndex++));
+                    comboColor, sliderBorderColor, getSliderPath(sliderIndex), getSliderRenderPath(sliderIndex));
 
+                ++sliderIndex;
                 addObject(gameplaySlider);
 
                 if (GameHelper.isAuto()) {
@@ -2502,6 +2505,7 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
         }
 
         sliderPaths = new SliderPath[playableBeatmap.getHitObjects().getSliderCount()];
+        sliderRenderPaths = new LinePath[playableBeatmap.getHitObjects().getSliderCount()];
         sliderIndex = 0;
 
         for (var obj : playableBeatmap.getHitObjects().objects) {
@@ -2511,17 +2515,27 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
                 continue;
             }
 
-            sliderPaths[sliderIndex++] = GameHelper.convertSliderPath(slider);
+            sliderPaths[sliderIndex] = GameHelper.convertSliderPath(slider);
+            sliderRenderPaths[sliderIndex] = GameHelper.convertSliderPath(sliderPaths[sliderIndex]);
+            ++sliderIndex;
         }
 
         sliderIndex = 0;
     }
 
-    private SliderPath getSliderPath(int index){
+    private SliderPath getSliderPath(int index) {
         if (sliderPaths != null && index < sliderPaths.length && index >= 0){
             return sliderPaths[index];
         }
         else {
+            return null;
+        }
+    }
+
+    private LinePath getSliderRenderPath(int index) {
+        if (sliderRenderPaths != null && index < sliderRenderPaths.length && index >= 0) {
+            return sliderRenderPaths[index];
+        } else {
             return null;
         }
     }

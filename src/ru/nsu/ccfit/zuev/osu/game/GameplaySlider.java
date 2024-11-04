@@ -3,7 +3,6 @@ package ru.nsu.ccfit.zuev.osu.game;
 import android.graphics.PointF;
 
 import com.edlplan.framework.easing.Easing;
-import com.edlplan.framework.math.Vec2;
 import com.edlplan.framework.math.line.LinePath;
 import com.edlplan.osu.support.slider.SliderBody;
 import com.reco1l.osu.Execution;
@@ -154,7 +153,7 @@ public class GameplaySlider extends GameObject {
 
     public void init(final GameObjectListener listener, final Scene scene,
                      final Slider beatmapSlider, final float secPassed, final RGBColor comboColor,
-                     final RGBColor borderColor, final SliderPath sliderPath) {
+                     final RGBColor borderColor, final SliderPath sliderPath, final LinePath renderPath) {
         this.listener = listener;
         this.scene = scene;
         this.beatmapSlider = beatmapSlider;
@@ -287,44 +286,29 @@ public class GameplaySlider extends GameObject {
         scene.attachChild(tickContainer, 0);
 
         // Slider track
-        if (path.pointCount != 0) {
-            superPath = new LinePath();
+        superPath = renderPath;
+        sliderBody.setPath(superPath, Config.isSnakingInSliders());
+        sliderBody.setBackgroundWidth(OsuSkin.get().getSliderBodyWidth() * scale);
+        sliderBody.setBackgroundColor(bodyColor.r(), bodyColor.g(), bodyColor.b(), OsuSkin.get().getSliderBodyBaseAlpha());
 
-            for (int i = 0; i < path.pointCount; ++i) {
+        sliderBody.setBorderWidth(OsuSkin.get().getSliderBorderWidth() * scale);
+        sliderBody.setBorderColor(borderColor.r(), borderColor.g(), borderColor.b());
 
-                var x = path.getX(i);
-                var y = path.getY(i);
+        if (OsuSkin.get().isSliderHintEnable() && beatmapSlider.getDistance() > OsuSkin.get().getSliderHintShowMinLength()) {
+            sliderBody.setHintVisible(true);
+            sliderBody.setHintWidth(OsuSkin.get().getSliderHintWidth() * scale);
 
-                superPath.add(new Vec2(x, y));
-            }
-            superPath.measure();
-            superPath.bufferLength(path.getLength(path.lengthCount - 1));
-            superPath = superPath.fitToLinePath();
-            superPath.measure();
-
-            sliderBody.setPath(superPath, Config.isSnakingInSliders());
-            sliderBody.setBackgroundWidth(OsuSkin.get().getSliderBodyWidth() * scale);
-            sliderBody.setBackgroundColor(bodyColor.r(), bodyColor.g(), bodyColor.b(), OsuSkin.get().getSliderBodyBaseAlpha());
-
-            sliderBody.setBorderWidth(OsuSkin.get().getSliderBorderWidth() * scale);
-            sliderBody.setBorderColor(borderColor.r(), borderColor.g(), borderColor.b());
-
-            if (OsuSkin.get().isSliderHintEnable() && beatmapSlider.getDistance() > OsuSkin.get().getSliderHintShowMinLength()) {
-                sliderBody.setHintVisible(true);
-                sliderBody.setHintWidth(OsuSkin.get().getSliderHintWidth() * scale);
-
-                RGBColor hintColor = OsuSkin.get().getSliderHintColor();
-                if (hintColor != null) {
-                    sliderBody.setHintColor(hintColor.r(), hintColor.g(), hintColor.b(), OsuSkin.get().getSliderHintAlpha());
-                } else {
-                    sliderBody.setHintColor(bodyColor.r(), bodyColor.g(), bodyColor.b(), OsuSkin.get().getSliderHintAlpha());
-                }
+            RGBColor hintColor = OsuSkin.get().getSliderHintColor();
+            if (hintColor != null) {
+                sliderBody.setHintColor(hintColor.r(), hintColor.g(), hintColor.b(), OsuSkin.get().getSliderHintAlpha());
             } else {
-                sliderBody.setHintVisible(false);
+                sliderBody.setHintColor(bodyColor.r(), bodyColor.g(), bodyColor.b(), OsuSkin.get().getSliderHintAlpha());
             }
-
-            scene.attachChild(sliderBody, 0);
+        } else {
+            sliderBody.setHintVisible(false);
         }
+
+        scene.attachChild(sliderBody, 0);
 
         if (Config.isDimHitObjects()) {
 

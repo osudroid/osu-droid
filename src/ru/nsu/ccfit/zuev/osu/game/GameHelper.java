@@ -2,6 +2,8 @@ package ru.nsu.ccfit.zuev.osu.game;
 
 import android.graphics.PointF;
 
+import com.edlplan.framework.math.Vec2;
+import com.edlplan.framework.math.line.LinePath;
 import com.rian.osu.beatmap.hitobject.Slider;
 
 import java.math.BigDecimal;
@@ -58,6 +60,35 @@ public class GameHelper {
 
     public static void setOverallDifficulty(final float overallDifficulty) {
         GameHelper.overallDifficulty = overallDifficulty;
+    }
+
+    /**
+     * Converts a {@link SliderPath} to a {@link LinePath} that can be used to render the slider path.
+     *
+     * @param sliderPath The {@link SliderPath} to convert.
+     * @return The converted {@link LinePath}.
+     */
+    public static LinePath convertSliderPath(final SliderPath sliderPath) {
+        var renderPath = new LinePath();
+
+        if (sliderPath.pointCount == 0) {
+            return renderPath;
+        }
+
+        for (int i = 0; i < sliderPath.pointCount; ++i) {
+
+            var x = sliderPath.getX(i);
+            var y = sliderPath.getY(i);
+
+            renderPath.add(new Vec2(x, y));
+        }
+
+        renderPath.measure();
+        renderPath.bufferLength(sliderPath.getLength(sliderPath.lengthCount - 1));
+        renderPath = renderPath.fitToLinePath();
+        renderPath.measure();
+
+        return renderPath;
     }
 
     /**
