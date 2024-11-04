@@ -25,7 +25,7 @@ import ru.nsu.ccfit.zuev.osuplus.R
 import java.util.Locale
 import kotlin.math.roundToInt
 
-class InGameSettingMenu : BaseFragment() {
+class ModSettingsMenu : BaseFragment() {
 
     private lateinit var speedModifyRow: View
     private lateinit var speedModifyBar: SeekBar
@@ -55,10 +55,17 @@ class InGameSettingMenu : BaseFragment() {
     private lateinit var customHPBar: SeekBar
 
     override val layoutID: Int
-        get() = R.layout.mod_customization_fragment
+        get() = R.layout.mod_settings_fragment
 
     override fun onLoadView() {
         reload(load())
+
+        // This fragment is expensive to load in older devices, during the loading process the dismiss
+        // calls are ignored as a result it can remain visible on unexpected places. This is a workaround
+        // to ensure that the fragment is dismissed when the scene is changed.
+        if (GlobalManager.getInstance().engine.scene.childScene != ModMenu.getInstance().scene) {
+            dismiss()
+        }
     }
 
     override fun onSaveInstanceState(outState: Bundle) = outState.run {
