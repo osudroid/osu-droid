@@ -1424,6 +1424,8 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
             lastDifficultyCalculationParameters = null;
             droidTimedDifficultyAttributes = null;
             standardTimedDifficultyAttributes = null;
+            sliderPaths = null;
+            sliderRenderPaths = null;
             String replayPath = null;
             stat.setTime(System.currentTimeMillis());
             if (replay != null && !replaying) {
@@ -1636,6 +1638,8 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
         lastDifficultyCalculationParameters = null;
         droidTimedDifficultyAttributes = null;
         standardTimedDifficultyAttributes = null;
+        sliderPaths = null;
+        sliderRenderPaths = null;
 
         // osu!stable restarts the song back to preview time when the player is in the last 10 seconds *or* 2% of the beatmap.
         float mSecPassed = elapsedTime * 1000;
