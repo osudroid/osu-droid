@@ -1,43 +1,62 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:gravity="center|bottom">
+    android:gravity="bottom|right"
+    tools:background="#FFF">
 
     <LinearLayout
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:background="@drawable/rounded_rect"
+        android:layout_margin="4dp"
+        android:background="@drawable/rounded_rect_small"
         android:backgroundTint="#80000000"
-        android:paddingHorizontal="6dp"
-        android:paddingVertical="4dp"
-        android:gravity="center"
-        android:layout_margin="6dp">
+        android:orientation="vertical"
+        android:padding="8dp">
 
-        <com.google.android.material.progressindicator.CircularProgressIndicator
-            android:id="@+id/progress"
+        <LinearLayout
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_centerInParent="true"
-            android:indeterminate="true"
-            app:indicatorColor="@color/colorAccent"
-            app:indicatorSize="12dp"
-            app:trackThickness="2dp"
-            app:trackCornerRadius="12dp"
-            android:layout_marginRight="4dp"/>
+            android:gravity="center_vertical"
+            android:orientation="horizontal">
+
+            <com.google.android.material.progressindicator.CircularProgressIndicator
+                android:id="@+id/progress"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:indeterminate="true"
+                app:indicatorColor="@color/colorAccent"
+                app:indicatorSize="10dp"
+                app:trackCornerRadius="12dp"
+                app:trackThickness="2dp"
+                tools:indeterminate="false"
+                tools:progress="100" />
+
+            <TextView
+                android:id="@+id/text"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:padding="2dp"
+                android:text="Calculating beatmap difficulties... (100%)"
+                android:textColor="#FFF"
+                android:textSize="10sp" />
+
+        </LinearLayout>
 
         <TextView
-            android:id="@+id/text"
-            android:layout_width="wrap_content"
+            android:id="@+id/message"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_centerInParent="true"
-            android:gravity="center"
-            android:text="Loading..."
-            android:textColor="#FFF" />
+            android:layout_columnSpan="2"
+            android:layout_marginTop="2dp"
+            android:paddingHorizontal="4dp"
+            android:maxWidth="200dp"
+            android:text="During this process the game may experience some lag."
+            android:textColor="#BEFFFFFF"
+            android:textSize="9sp" />
 
     </LinearLayout>
-
-
 
 </RelativeLayout>
