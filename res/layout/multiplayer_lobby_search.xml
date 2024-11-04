@@ -36,7 +36,9 @@
         android:layout_height="wrap_content"
         android:layout_alignParentBottom="true"
         android:gravity="center"
-        android:orientation="vertical">
+        android:orientation="vertical"
+        android:translationY="70dp"
+        tools:translationY="0dp">
 
         <Button
             android:id="@+id/showMoreButton"
@@ -48,14 +50,13 @@
             android:minWidth="140dp"
             android:text="Search" />
 
-        <FrameLayout
+        <LinearLayout
             android:id="@+id/optionBody"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
+            android:layout_height="70dp"
+            android:gravity="center"
             android:background="@color/colorPrimary"
-            android:clickable="true"
-            android:visibility="gone"
-            tools:visibility="visible">
+            android:clickable="true">
 
             <EditText
                 android:id="@+id/search_field"
@@ -69,7 +70,7 @@
                 android:singleLine="true"
                 android:textColor="#000000" />
 
-        </FrameLayout>
+        </LinearLayout>
 
     </LinearLayout>
 
