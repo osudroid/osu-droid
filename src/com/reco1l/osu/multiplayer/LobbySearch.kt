@@ -11,7 +11,6 @@ import android.view.inputmethod.InputMethodManager
 import android.widget.EditText
 import android.widget.TextView
 import android.widget.TextView.OnEditorActionListener
-import androidx.core.view.isVisible
 import com.edlplan.framework.easing.Easing
 import com.edlplan.ui.fragment.BaseFragment
 import com.reco1l.framework.*
@@ -19,7 +18,6 @@ import com.reco1l.toolkt.android.*
 import com.reco1l.toolkt.animation.*
 import org.anddev.andengine.input.touch.TouchEvent
 import ru.nsu.ccfit.zuev.osuplus.R
-import kotlin.math.abs
 
 class LobbySearch : BaseFragment(), OnEditorActionListener, OnKeyListener {
 
@@ -32,8 +30,8 @@ class LobbySearch : BaseFragment(), OnEditorActionListener, OnKeyListener {
 
     private val isExtended: Boolean
         get() {
-            val body = findViewById<View?>(R.id.optionBody) ?: return false
-            return body.translationY == 0f
+            val layout = findViewById<View?>(R.id.fullLayout) ?: return false
+            return layout.translationY == 0f
         }
 
 
@@ -111,21 +109,21 @@ class LobbySearch : BaseFragment(), OnEditorActionListener, OnKeyListener {
 
         field.clearFocus()
 
-        val body = findViewById<View>(R.id.optionBody)!!
+        val layout = findViewById<View>(R.id.fullLayout)!!
         val background = findViewById<View>(R.id.frg_background)!!
 
         if (isExtended) {
 
-            body.clearAnimation()
-            body.toTranslationY(70f.dp, 200, ease = Easing.OutQuad.asTimeInterpolator())
+            layout.clearAnimation()
+            layout.toTranslationY(70f.dp, 200, ease = Easing.OutQuad.asTimeInterpolator())
 
             background.setOnTouchListener(null)
             background.isClickable = false
 
         } else {
 
-            body.clearAnimation()
-            body.toTranslationY(0f.dp, 200, ease = Easing.InQuad.asTimeInterpolator())
+            layout.clearAnimation()
+            layout.toTranslationY(0f.dp, 200, ease = Easing.InQuad.asTimeInterpolator())
 
             background.setOnTouchListener { _, event ->
                 if (event.action == TouchEvent.ACTION_DOWN) {
