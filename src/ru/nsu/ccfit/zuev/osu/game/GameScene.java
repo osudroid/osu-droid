@@ -379,7 +379,9 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
 
         JobKt.ensureActive(scope.getCoroutineContext());
 
-        if (parsedBeatmap == null || !parsedBeatmap.getMd5().equals(beatmapInfo.getMD5())) {
+        boolean shouldParseBeatmap = parsedBeatmap == null || !parsedBeatmap.getMd5().equals(beatmapInfo.getMD5());
+
+        if (shouldParseBeatmap) {
             try (var parser = new BeatmapParser(beatmapInfo.getPath(), scope)) {
                 if (parser.openFile()) {
                     parsedBeatmap = parser.parse(true, GameMode.Droid);
@@ -562,12 +564,12 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
 
         GameObjectPool.getInstance().preload();
 
-        if (Config.isDisplayRealTimePPCounter()) {
-            // Calculate timed difficulty attributes
-            var parameters = new DifficultyCalculationParameters(convertedMods, modMenu.getChangeSpeed());
-            var sameParameters = lastDifficultyCalculationParameters != null &&
+        var parameters = new DifficultyCalculationParameters(convertedMods, modMenu.getChangeSpeed());
+        var sameParameters = lastDifficultyCalculationParameters != null &&
                 lastDifficultyCalculationParameters.equals(parameters);
 
+        if (Config.isDisplayRealTimePPCounter()) {
+            // Calculate timed difficulty attributes
             switch (Config.getDifficultyAlgorithm()) {
                 case droid -> {
                     if (droidTimedDifficultyAttributes == null || !sameParameters) {
@@ -583,12 +585,17 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
                     }
                 }
             }
-
-            lastDifficultyCalculationParameters = parameters;
         }
 
+        sliderIndex = 0;
+
+        // Mod changes may require recalculating slider paths (i.e. Hard Rock)
+        if (shouldParseBeatmap && !sameParameters) {
+            calculateAllSliderPaths(scope);
+        }
+
+        lastDifficultyCalculationParameters = parameters;
         lastBeatmapInfo = beatmapInfo;
-        calculateAllSliderPaths(scope);
 
         // Resetting variables before starting the game.
         Multiplayer.finalData = null;
