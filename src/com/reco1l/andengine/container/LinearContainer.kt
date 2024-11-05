@@ -30,7 +30,7 @@ open class LinearContainer : Container() {
         }
 
 
-    private var cummulativeDrawOffset = 0f
+    private var lastDrawOffset = 0f
 
 
     override fun onMeasureContentSize() {
@@ -42,6 +42,7 @@ open class LinearContainer : Container() {
         if (mChildren != null) {
 
             for (i in mChildren.indices) {
+
                 val child = mChildren.getOrNull(i) ?: continue
 
                 // Non-shape children are ignored as they doesn't have a size there's nothing to do.
@@ -49,18 +50,18 @@ open class LinearContainer : Container() {
                     continue
                 }
 
-                val spacing = if (i == 0) 0f else spacing
+                val spacing = if (i == mChildren.size - 1) 0f else spacing
 
                 when (orientation) {
 
                     Horizontal -> {
-                        contentWidth += spacing + child.width
+                        contentWidth += child.width + spacing
                         contentHeight = max(contentHeight, child.height)
                     }
 
                     Vertical -> {
                         contentWidth = max(contentWidth, child.width)
-                        contentHeight += spacing + child.height
+                        contentHeight += child.height + spacing
                     }
                 }
             }
@@ -71,7 +72,7 @@ open class LinearContainer : Container() {
 
 
     override fun onManagedDrawChildren(pGL: GL10, pCamera: Camera) {
-        cummulativeDrawOffset = 0f
+        lastDrawOffset = 0f
         super.onManagedDrawChildren(pGL, pCamera)
     }
 
@@ -81,10 +82,8 @@ open class LinearContainer : Container() {
             return super.getChildDrawX(child)
         }
 
-        val spacing = if (getChild(0) == child) 0f else spacing
-        val drawX = cummulativeDrawOffset + super.getChildDrawX(child)
-
-        cummulativeDrawOffset += spacing + child.width
+        val drawX = lastDrawOffset + super.getChildDrawX(child)
+        lastDrawOffset += child.width + spacing
 
         return drawX
     }
@@ -95,10 +94,8 @@ open class LinearContainer : Container() {
             return super.getChildDrawY(child)
         }
 
-        val spacing = if (getChild(0) == child) 0f else spacing
-        val drawY = cummulativeDrawOffset + super.getChildDrawY(child)
-
-        cummulativeDrawOffset += spacing + child.height
+        val drawY = lastDrawOffset + super.getChildDrawY(child)
+        lastDrawOffset += child.height + spacing
 
         return drawY
     }
