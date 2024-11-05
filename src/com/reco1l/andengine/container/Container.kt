@@ -16,7 +16,7 @@ import kotlin.math.*
 open class Container : ExtendedEntity() {
 
 
-    override var autoSizeAxes = Axes.None
+    override var autoSizeAxes = Axes.Both
         set(value) {
             if (field != value) {
                 field = value
