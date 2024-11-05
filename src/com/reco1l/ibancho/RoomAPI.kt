@@ -168,9 +168,6 @@ object RoomAPI {
         room.beatmap = parseBeatmap(json.optJSONObject("beatmap"))
         room.status = RoomStatus[json.getInt("status")]
 
-
-        roomEventListener?.onRoomConnect(room)
-
         socket!!.apply {
             on("beatmapChanged", beatmapChanged)
             on("hostChanged", hostChanged)
@@ -192,6 +189,8 @@ object RoomAPI {
             on("allPlayersSkipRequested", allPlayersSkipRequested)
             on("allPlayersScoreSubmitted", allPlayersScoreSubmitted)
         }
+
+        roomEventListener?.onRoomConnect(room)
     }
 
     private val playerJoined = Listener {
@@ -301,7 +300,9 @@ object RoomAPI {
             // reconnection system (the socket.io Java client does not support connection
             // state recovery).
             it.reconnection = false
-        }).apply {
+        })
+
+        socket!!.apply {
 
             on("initialConnection", initialConnection)
             on("error", error)

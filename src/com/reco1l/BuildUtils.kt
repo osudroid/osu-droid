@@ -3,6 +3,7 @@
 package com.reco1l
 
 import com.reco1l.ibancho.data.*
+import com.reco1l.osu.multiplayer.*
 import com.reco1l.toolkt.data.*
 import com.reco1l.toolkt.kotlin.*
 import io.socket.client.Socket
@@ -83,6 +84,15 @@ class FakeSocket(private val uid: Long, private val username: String) : Socket(n
             "playerModsChanged" -> "playerModsChanged" to arrayOf(uid.toString(), args[0])
             "playerStatusChanged" -> "playerStatusChanged" to arrayOf(uid.toString(), args[0])
 
+            // These events requires special handling
+            "roomGameplaySettingsChanged" -> "roomGameplaySettingsChanged" to arrayOf((args[0] as JSONObject).apply {
+                Multiplayer.room!!.gameplaySettings.also {
+                    if (!has("isFreeMod")) put("isFreeMod", it.isFreeMod)
+                    if (!has("isRemoveSliderLock")) put("isRemoveSliderLock", it.isRemoveSliderLock)
+                    if (!has("allowForceDifficultyStatistics")) put("allowForceDifficultyStatistics", it.allowForceDifficultyStatistics)
+                }
+            })
+
             else -> event to args
         }
 
@@ -100,15 +110,24 @@ class FakeSocket(private val uid: Long, private val username: String) : Socket(n
     override fun connect(): Socket {
         emit(EVENT_CONNECT)
 
+        // This event is emmited by the server when the client connects.
         emit("initialConnection", JSONObject().apply {
 
             put("id", 1)
-            put("name", "Test Room")
+            put("name", "Test room")
             put("isLocked", false)
             put("maxPlayers", 8)
+            put("teamMode", TeamMode.HeadToHead.ordinal)
+            put("winCondition", WinCondition.ScoreV1.ordinal)
             put("playerCount", 1)
             put("playerNames", username)
-            put("sessionID", "ABC123")
+            put("sessionId", "")
+            put("status", RoomStatus.Idle.ordinal)
+            put("beatmap", null)
+
+            putObject("host") {
+                put("uid", uid)
+            }
 
             putObject("mods") {
                 put("mods", "")

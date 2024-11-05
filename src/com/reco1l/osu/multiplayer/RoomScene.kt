@@ -1,5 +1,6 @@
 package com.reco1l.osu.multiplayer
 
+import com.reco1l.*
 import com.reco1l.andengine.*
 import com.reco1l.andengine.sprite.*
 import com.reco1l.ibancho.IPlayerEventListener
@@ -253,20 +254,22 @@ object RoomScene : Scene(), IRoomEventListener, IPlayerEventListener {
                         return true
                     }
 
-                    if (room!!.teamMode == TeamVersus) {
-                        val team = room!!.teamMap
+                    if (!fakeMultiplayerMode) {
+                        if (room!!.teamMode == TeamVersus) {
+                            val team = room!!.teamMap
 
-                        if (team[Red].isNullOrEmpty() || team[Blue].isNullOrEmpty()) {
-                            ToastLogger.showText("At least 1 player per team is needed to start a match!", true)
+                            if (team[Red].isNullOrEmpty() || team[Blue].isNullOrEmpty()) {
+                                ToastLogger.showText("At least 1 player per team is needed to start a match!", true)
+                                return true
+                            }
+                        }
+
+                        val players = room!!.activePlayers.filter { it.status != MissingBeatmap }
+
+                        if (players.size <= 1) {
+                            ToastLogger.showText("At least 2 players need to have the beatmap!", true)
                             return true
                         }
-                    }
-
-                    val players = room!!.activePlayers.filter { it.status != MissingBeatmap }
-
-                    if (players.size <= 1) {
-                        ToastLogger.showText("At least 2 players need to have the beatmap!", true)
-                        return true
                     }
 
                     ResourceManager.getInstance().getSound("menuhit")?.play()
