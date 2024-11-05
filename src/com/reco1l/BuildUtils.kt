@@ -29,7 +29,7 @@ const val keepTexturesShapeInNoTexturesMode = false
 /**
  * Whether to use fake multiplayer mode or not.
  */
-const val fakeMultiplayerMode = true
+const val fakeMultiplayerMode = false
 
 
 // Fake multiplayer mode
