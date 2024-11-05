@@ -1,18 +1,9 @@
 package com.reco1l.ibancho
 
+import com.reco1l.*
+import com.reco1l.ibancho.data.*
 import ru.nsu.ccfit.zuev.osu.SecurityUtils
-import com.reco1l.ibancho.data.PlayerStatus
-import com.reco1l.ibancho.data.Room
-import com.reco1l.ibancho.data.RoomStatus
-import com.reco1l.ibancho.data.RoomTeam
-import com.reco1l.ibancho.data.TeamMode
-import com.reco1l.ibancho.data.WinCondition
-import com.reco1l.ibancho.data.parseBeatmap
-import com.reco1l.ibancho.data.parseGameplaySettings
-import com.reco1l.ibancho.data.parseMods
-import com.reco1l.ibancho.data.parsePlayer
-import com.reco1l.ibancho.data.parsePlayers
-import com.reco1l.osu.multiplayer.Multiplayer
+import com.reco1l.osu.multiplayer.*
 import io.socket.client.IO
 import io.socket.client.Socket
 import io.socket.emitter.Emitter.Listener
@@ -303,7 +294,7 @@ object RoomAPI {
 
         Multiplayer.log("Starting connection -> $roomId, $userId, $username")
 
-        socket = IO.socket(url, IO.Options().also {
+        socket = if (fakeMultiplayerMode) FakeSocket(userId, username) else IO.socket(url, IO.Options().also {
             it.auth = auth
 
             // Explicitly not allow the socket to reconnect as we are using our own
