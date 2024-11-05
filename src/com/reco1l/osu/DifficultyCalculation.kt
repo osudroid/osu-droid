@@ -77,7 +77,6 @@ object DifficultyCalculationManager {
             val threadPool = Executors.newFixedThreadPool(threadCount)
 
             var calculated = totalBeatmaps - pendingBeatmaps.size
-            var failedBeatmaps = 0
 
             pendingBeatmaps.chunked(max(pendingBeatmaps.size / threadCount, 1)).fastForEach { chunk ->
                 ensureActive()
@@ -119,7 +118,6 @@ object DifficultyCalculationManager {
                                 throw e
                             }
 
-                            failedBeatmaps++
                             Log.e("DifficultyCalculation", "Error while calculating difficulty.", e)
                         }
 
