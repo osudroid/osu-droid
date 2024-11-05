@@ -64,7 +64,7 @@ class FakeSocket(private val uid: Long, private val username: String) : Socket(n
 
     override fun emit(event: String?, vararg args: Any?): Emitter {
 
-        // Converting events
+        // Emulating the server response to the client's events.
         val responseEvent = when (event) {
 
             // In these events the client expects a JSONArray as a response.
