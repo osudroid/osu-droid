@@ -41,6 +41,7 @@
         tools:translationY="0dp">
 
         <Button
+            style="@style/button"
             android:id="@+id/showMoreButton"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
