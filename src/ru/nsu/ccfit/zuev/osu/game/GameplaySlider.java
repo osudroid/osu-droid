@@ -646,8 +646,11 @@ public class GameplaySlider extends GameObject {
         removeFromScene();
     }
 
-    private boolean canBeHit() {
-        return elapsedSpanTime >= -objectHittableRange;
+    private boolean canBeHit(float dt, float frameOffset) {
+        // At this point, the object's state is already in the next update tick.
+        // However, hit judgements require the object's state to be in the previous tick.
+        // Therefore, we subtract dt to get the object's state in the previous tick.
+        return elapsedSpanTime - dt + frameOffset >= -objectHittableRange;
     }
 
     private boolean isHit() {
@@ -667,6 +670,28 @@ public class GameplaySlider extends GameObject {
             }
         }
         return false;
+    }
+
+    private double hitOffsetToPreviousFrame() {
+        // Hit judgement is done in the update thread, but inputs are received in the main thread,
+        // the time when the player clicked in advance will affect judgement. This offset is used
+        // to offset the hit from the previous update tick.
+        float radius = Utils.sqr((float) beatmapSlider.getGameplayRadius());
+        for (int i = 0, count = listener.getCursorsCount(); i < count; i++) {
+
+            var inPosition = Utils.squaredDistance(position, listener.getMousePos(i)) <= radius;
+            if (GameHelper.isRelaxMod() && elapsedSpanTime >= 0 && inPosition) {
+                return 0;
+            }
+
+            var isPressed = listener.isMousePressed(this, i);
+            if (isPressed && inPosition) {
+                return listener.downFrameOffset(i);
+            } else if (GameHelper.isAutopilotMod() && isPressed) {
+                return 0;
+            }
+        }
+        return 0;
     }
 
 
@@ -710,22 +735,31 @@ public class GameplaySlider extends GameObject {
                 currentNestedObjectIndex++;
                 ticksGot++;
                 listener.onSliderHit(id, 30, position, false, bodyColor, GameObjectListener.SLIDER_START, true);
-            } else if (isHit() && canBeHit()) {
-                listener.registerAccuracy(elapsedSpanTime);
-                startHit = true;
-                firstHitAccuracy = (int) (elapsedSpanTime * 1000);
+            } else {
+                float frameOffset = (float) hitOffsetToPreviousFrame() / 1000;
 
-                if (Math.abs(elapsedSpanTime) <= GameHelper.getDifficultyHelper().hitWindowFor50(GameHelper.getOverallDifficulty())) {
-                    playCurrentNestedObjectHitSound();
-                    ticksGot++;
-                    listener.onSliderHit(id, 30, position,
-                            false, bodyColor, GameObjectListener.SLIDER_START, true);
-                } else {
-                    listener.onSliderHit(id, -1, position,
-                            false, bodyColor, GameObjectListener.SLIDER_START, false);
+                if (canBeHit(dt, frameOffset) && isHit()) {
+                    // At this point, the object's state is already in the next update tick.
+                    // However, hit judgements require the object's state to be in the previous tick.
+                    // Therefore, we subtract dt to get the object's state in the previous tick.
+                    double acc = elapsedSpanTime - dt + frameOffset;
+
+                    listener.registerAccuracy(acc);
+                    startHit = true;
+                    firstHitAccuracy = (int) (acc * 1000);
+
+                    if (Math.abs(acc) <= GameHelper.getDifficultyHelper().hitWindowFor50(GameHelper.getOverallDifficulty())) {
+                        playCurrentNestedObjectHitSound();
+                        ticksGot++;
+                        listener.onSliderHit(id, 30, position,
+                                false, bodyColor, GameObjectListener.SLIDER_START, true);
+                    } else {
+                        listener.onSliderHit(id, -1, position,
+                                false, bodyColor, GameObjectListener.SLIDER_START, false);
+                    }
+
+                    currentNestedObjectIndex++;
                 }
-
-                currentNestedObjectIndex++;
             }
         }
 
@@ -1073,12 +1107,19 @@ public class GameplaySlider extends GameObject {
             return;
         }
 
-        if (isHit() && canBeHit()) {
-            listener.registerAccuracy(elapsedSpanTime);
-            startHit = true;
-            firstHitAccuracy = (int) (elapsedSpanTime * 1000);
+        float frameOffset = (float) hitOffsetToPreviousFrame() / 1000;
 
-            if (Math.abs(elapsedSpanTime) <= GameHelper.getDifficultyHelper().hitWindowFor50(GameHelper.getOverallDifficulty())) {
+        if (canBeHit(dt, frameOffset) && isHit()) {
+            // At this point, the object's state is already in the next update tick.
+            // However, hit judgements require the object's state to be in the previous tick.
+            // Therefore, we subtract dt to get the object's state in the previous tick.
+            double acc = elapsedSpanTime - dt + frameOffset;
+
+            listener.registerAccuracy(acc);
+            startHit = true;
+            firstHitAccuracy = (int) (acc * 1000);
+
+            if (Math.abs(acc) <= GameHelper.getDifficultyHelper().hitWindowFor50(GameHelper.getOverallDifficulty())) {
                 playCurrentNestedObjectHitSound();
                 ticksGot++;
                 listener.onSliderHit(id, 30, position,
