@@ -390,6 +390,10 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
                     ToastLogger.showText(StringTable.format(com.osudroid.resources.R.string.message_error_open, beatmapInfo.getFilename()), true);
                     return false;
                 }
+            } catch (Exception e) {
+                Debug.e("startGame: " + e.getMessage());
+                ToastLogger.showText(e.getMessage(), true);
+                return false;
             }
         }
 
