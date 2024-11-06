@@ -24,7 +24,6 @@ import com.reco1l.osu.ui.entity.ComposedText
 import com.reco1l.osu.ui.SettingsFragment
 import com.reco1l.osu.updateThread
 import com.reco1l.toolkt.kotlin.runSafe
-import com.rian.osu.ui.DifficultyAlgorithmSwitcher
 import org.anddev.andengine.engine.camera.SmoothCamera
 import org.anddev.andengine.entity.primitive.Rectangle
 import org.anddev.andengine.entity.scene.Scene
@@ -108,8 +107,6 @@ object RoomScene : Scene(), IRoomEventListener, IPlayerEventListener {
     private var beatmapInfoButton: BeatmapButton? = null
 
     private var modsButton: ExtendedSprite? = null
-
-    private var difficultySwitcher: DifficultyAlgorithmSwitcher? = null
 
     private var playerList: RoomPlayerList? = null
 
@@ -298,7 +295,6 @@ object RoomScene : Scene(), IRoomEventListener, IPlayerEventListener {
         val isNewLayout = OsuSkin.get().isUseNewLayout
         val layoutBackButton = OsuSkin.get().getLayout("BackButton")
         val layoutMods = OsuSkin.get().getLayout("ModsButton")
-        val layoutDifficultySwitcher = OsuSkin.get().getLayout("DifficultySwitcher")
 
         backButton = object : AnimatedSprite("menu-back", true, OsuSkin.get().animationFramerate) {
 
@@ -421,19 +417,6 @@ object RoomScene : Scene(), IRoomEventListener, IPlayerEventListener {
             attachChild(modsButton)
         }
 
-        difficultySwitcher = DifficultyAlgorithmSwitcher().also { difficultySwitcher ->
-            difficultySwitcher.setScale(1.5f)
-
-            if (isNewLayout && layoutDifficultySwitcher != null) {
-                layoutDifficultySwitcher.apply(difficultySwitcher, modsButton)
-            } else {
-                difficultySwitcher.setPosition(modsButton!!.x + modsButton!!.widthScaled, Config.getRES_HEIGHT() - difficultySwitcher.heightScaled)
-            }
-
-            registerTouchArea(difficultySwitcher)
-            attachChild(difficultySwitcher)
-        }
-
         userCard.setPosition(Config.getRES_WIDTH() - 410f - 6f, 6f)
         attachChild(userCard)
 
@@ -515,8 +498,6 @@ object RoomScene : Scene(), IRoomEventListener, IPlayerEventListener {
             readyButton!!.setColor(0.9f, 0.2f, 0.2f)
 
             modsButton!!.isVisible = false
-            difficultySwitcher!!.setPosition(modsButton!!.x, difficultySwitcher!!.y)
-
             secondaryButton!!.isVisible = isRoomHost
 
             if (isRoomHost) {
@@ -543,9 +524,6 @@ object RoomScene : Scene(), IRoomEventListener, IPlayerEventListener {
         secondaryButton!!.setColor(0.2f, 0.2f, 0.2f)
 
         modsButton!!.isVisible = isRoomHost || room!!.gameplaySettings.isFreeMod
-
-        val difficultySwitcherX = modsButton!!.x + if (modsButton!!.isVisible) modsButton!!.widthScaled else 0f
-        difficultySwitcher!!.setPosition(difficultySwitcherX, difficultySwitcher!!.y)
     }
 
     private fun updateBeatmapInfo() {
@@ -879,7 +857,6 @@ object RoomScene : Scene(), IRoomEventListener, IPlayerEventListener {
         isWaitingForModsChange = true
 
         modsButton!!.isVisible = isRoomHost || settings.isFreeMod
-        difficultySwitcher!!.setPosition(modsButton!!.x + if (modsButton!!.isVisible) modsButton!!.widthScaled else 0f, difficultySwitcher!!.y)
 
         ModMenu.getInstance().hide(false)
         invalidateStatus()

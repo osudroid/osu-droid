@@ -3,4 +3,17 @@
 <!-- This file here is for new strings that will be temporary:-->
 <!-- Link to localizations pack: https://github.com/osudroid/language-pack-->
 
+    <!--Difficulty algorithm-->
+    <string name="difficulty_algorithm_title">Difficulty algorithm</string>
+    <string name="difficulty_algorithm_summary">Choose the algorithm used to calculate difficulty.</string>
+
+    <string-array name="difficulty_algorithm_names">
+        <item>osu!droid</item>
+        <item>osu!standard</item>
+    </string-array>
+    <string-array name="difficulty_algorithm_values">
+        <item>0</item>
+        <item>1</item>
+    </string-array>
+
 </resources>

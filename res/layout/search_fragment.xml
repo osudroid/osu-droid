@@ -6,17 +6,32 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
-    <LinearLayout
+    <EditText
         android:id="@+id/frg_body"
+        style="@style/editText"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_centerHorizontal="true"
+        android:layout_centerVertical="false"
         android:layout_marginHorizontal="60dp"
         android:layout_marginTop="8dp"
+        android:drawableRight="@drawable/search_24px"
+        android:drawableTint="#8C8CB4"
+        android:ems="10"
+        android:hint="@string/menu_search_filter"
+        android:imeOptions="actionDone|flagNoFullscreen"
+        android:paddingVertical="16dp" />
+
+    <LinearLayout
+        android:id="@+id/options"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/frg_body"
+        android:layout_alignLeft="@id/frg_body"
+        android:layout_marginTop="12dp"
         android:background="@drawable/rounded_rect"
         android:backgroundTint="@color/colorPrimary"
         android:divider="@drawable/divider"
-        android:gravity="center"
         android:orientation="horizontal"
         android:showDividers="middle">
 
@@ -24,32 +39,28 @@
             android:id="@+id/showFav"
             style="@style/button_borderless"
             android:layout_width="wrap_content"
-            android:layout_height="match_parent"
+            android:layout_height="wrap_content"
             android:button="@null"
             android:checked="false"
             android:drawableLeft="@drawable/search_favorite_checkbox"
             android:drawablePadding="0dp"
             app:drawableTint="@color/checkbox" />
 
-        <EditText
-            android:id="@+id/searchEditText"
-            style="@style/editText"
-            android:layout_width="0dp"
+        <Button
+            android:id="@+id/algorithm_button"
+            style="@style/button_borderless"
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginHorizontal="12dp"
-            android:layout_marginVertical="8dp"
-            android:layout_weight="1"
-            android:drawableRight="@drawable/search_24px"
-            android:drawableTint="#8C8CB4"
-            android:ems="10"
-            android:hint="@string/menu_search_filter"
-            android:imeOptions="actionDone|flagNoFullscreen|flagNoExtractUi" />
+            android:layout_weight="0"
+            android:drawableLeft="@drawable/star_24px"
+            tools:text="osu!standard" />
 
         <Button
             android:id="@+id/sortButton"
             style="@style/button_borderless"
             android:layout_width="wrap_content"
-            android:layout_height="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_weight="0"
             android:drawableLeft="@drawable/sort_24px"
             tools:text="Sort" />
 
@@ -57,8 +68,10 @@
             android:id="@+id/favFolder"
             style="@style/button_borderless"
             android:layout_width="wrap_content"
-            android:layout_height="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_weight="0"
             android:drawableLeft="@drawable/folder_24px"
+            android:paddingRight="24dp"
             tools:text="Folder" />
 
     </LinearLayout>

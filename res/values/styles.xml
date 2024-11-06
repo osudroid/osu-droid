@@ -67,7 +67,7 @@
     </style>
 
     <style name="button_borderless" parent="button">
-        <item name="android:minHeight">56dp</item>
+        <item name="android:minHeight">50dp</item>
         <item name="android:background">@drawable/ripple</item>
     </style>
 

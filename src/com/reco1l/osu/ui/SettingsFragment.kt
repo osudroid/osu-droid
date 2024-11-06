@@ -263,6 +263,15 @@ class SettingsFragment : com.edlplan.ui.fragment.SettingsFragment() {
             UpdateManager.checkNewUpdates(false)
             true
         }
+
+        findPreference<SelectPreference>("difficultyAlgorithm")!!.setOnPreferenceChangeListener { _, newValue ->
+            if (Multiplayer.isMultiplayer) {
+                // We need to manually update it before because the preference is updated after this listener.
+                Config.setString("difficultyAlgorithm", newValue as String)
+                RoomScene.switchDifficultyAlgorithm()
+            }
+            true
+        }
     }
 
 
