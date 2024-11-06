@@ -595,7 +595,7 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
         sliderIndex = 0;
 
         // Mod changes may require recalculating slider paths (i.e. Hard Rock)
-        if (shouldParseBeatmap && !sameParameters) {
+        if (sliderPaths == null || sliderRenderPaths == null || (shouldParseBeatmap && !sameParameters)) {
             calculateAllSliderPaths(scope);
         }
 
