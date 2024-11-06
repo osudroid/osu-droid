@@ -673,6 +673,10 @@ public class GameplaySlider extends GameObject {
     }
 
     private double hitOffsetToPreviousFrame() {
+        if (!Config.isFixFrameOffset()) {
+            return 0;
+        }
+
         // Hit judgement is done in the update thread, but inputs are received in the main thread,
         // the time when the player clicked in advance will affect judgement. This offset is used
         // to offset the hit from the previous update tick.

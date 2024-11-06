@@ -206,6 +206,10 @@ public class GameplayHitCircle extends GameObject {
     }
 
     private double hitOffsetToPreviousFrame() {
+        if (!Config.isFixFrameOffset()) {
+            return 0;
+        }
+
         // 因为这里是阻塞队列, 所以提前点的地方会影响判断
         for (int i = 0, count = listener.getCursorsCount(); i < count; i++) {
 
