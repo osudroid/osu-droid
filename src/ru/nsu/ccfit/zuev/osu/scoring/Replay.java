@@ -152,13 +152,6 @@ public class Replay {
                 os.writeInt(stat.getMisses());
                 os.writeInt(stat.getTotalScoreWithMultiplier());
                 os.writeInt(stat.getScoreMaxCombo());
-
-                // TODO: remove accuracy writing in replay v6
-                os.writeFloat(stat.getAccuracy());
-
-                // TODO: remove perfect writing in replay v6
-                os.writeBoolean(stat.isPerfect());
-
                 os.writeObject(stat.getPlayerName());
                 os.writeObject(stat.getMod());
                 //Add in replay version 4
@@ -264,11 +257,13 @@ public class Replay {
                 stat.setForcedScore(os.readInt());
                 stat.setScoreMaxCombo(os.readInt());
 
-                // TODO: The call below is for accuracy, but StatisticV2 does not use it anymore. Remove in replay v6.
-                os.readFloat();
+                if (version < 6) {
+                    // Consume `accuracy` in replays older than v6 (which is not used anymore as the result is derived from hit results)
+                    os.readFloat();
 
-                // TODO: The call below is for perfect, but StatisticV2 does not use it anymore. Remove in replay v6.
-                os.readBoolean();
+                    // Consume `perfect` in replays older than v6 (which is not used anymore as the result is derived from hit results)
+                    os.readBoolean();
+                }
 
                 stat.setPlayerName((String) os.readObject());
                 stat.setMod((EnumSet<GameMod>) os.readObject());
@@ -362,10 +357,11 @@ public class Replay {
         Object used to store data about current replay version for compatibility purposes.
         Version 4: Adds ExtraModString's save and load in save()/load()/loadInfo()
         Version 5: Changes coordinates to use the float primitive type
+        Version 6: Removed accuracy and perfect, slider ends no longer give combo when not hit
      */
     public static class ReplayVersion implements Serializable {
         private static final long serialVersionUID = 4643121693566795335L;
-        int version = 5;
+        int version = 6;
     }
 
     public static class ReplayObjectData {
