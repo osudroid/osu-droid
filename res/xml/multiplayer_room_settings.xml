@@ -14,7 +14,7 @@
             android:key="room_password"
             android:summary="@string/mp_room_password_summary"
             android:title="@string/mp_room_password_title"
-            app:layout="@layout/settings_preference_bottom" />
+            app:layout="@layout/settings_preference_input_bottom" />
 
     </PreferenceCategory>
 

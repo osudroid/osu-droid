@@ -21,6 +21,7 @@ import com.reco1l.toolkt.android.cornerRadius
 import com.reco1l.toolkt.android.dp
 import org.anddev.andengine.engine.handler.IUpdateHandler
 import org.anddev.andengine.entity.scene.Scene
+import ru.nsu.ccfit.zuev.osu.*
 import ru.nsu.ccfit.zuev.osu.helper.InputManager
 import ru.nsu.ccfit.zuev.osu.helper.StringTable
 import ru.nsu.ccfit.zuev.osu.menu.IFilterMenu
@@ -125,7 +126,7 @@ class FilterMenuFragment : BaseFragment(), IUpdateHandler, IFilterMenu {
 
     private fun reloadViewData() {
         if (isCreated) {
-            filter = findViewById(R.id.searchEditText)!!
+            filter = findViewById(R.id.frg_body)!!
             favoritesOnly = findViewById(R.id.showFav)!!
             sortButton = findViewById(R.id.sortButton)!!
             favoriteFolder = findViewById(R.id.favFolder)!!
@@ -191,10 +192,46 @@ class FilterMenuFragment : BaseFragment(), IUpdateHandler, IFilterMenu {
 
             updateOrderButton()
             updateFavFolderText()
+
+            val difficultyAlgorithmButton = findViewById<Button>(R.id.algorithm_button)!!
+
+            difficultyAlgorithmButton.setOnClickListener {
+
+                val currentAlgorithm = Config.getString("difficultyAlgorithm", "0").toInt()
+
+                if (currentAlgorithm == 0) {
+                    Config.setString("difficultyAlgorithm", "1")
+                    difficultyAlgorithmButton.text = "osu!standard"
+                } else {
+                    Config.setString("difficultyAlgorithm", "0")
+                    difficultyAlgorithmButton.text = "osu!droid"
+                }
+
+                getGlobal().songMenu.reloadCurrentSelection()
+            }
+
+            if (Config.getString("difficultyAlgorithm", "0").toInt() == 0) {
+                difficultyAlgorithmButton.text = "osu!droid"
+            } else {
+                difficultyAlgorithmButton.text = "osu!standard"
+            }
+
         }
     }
 
     private fun playOnLoadAnim() {
+
+        val options = findViewById<View>(R.id.options)!!
+        options.alpha = 0f
+        options.translationY = -400f
+        options.animate().cancel()
+        options.animate()
+            .alpha(1f)
+            .translationY(0f)
+            .setInterpolator(EasingHelper.asInterpolator(Easing.InOutQuad))
+            .setDuration(300)
+            .start()
+
         val body = findViewById<View>(R.id.frg_body)!!
         body.alpha = 0f
         body.translationY = -400f
@@ -205,10 +242,21 @@ class FilterMenuFragment : BaseFragment(), IUpdateHandler, IFilterMenu {
             .setInterpolator(EasingHelper.asInterpolator(Easing.InOutQuad))
             .setDuration(300)
             .start()
+
         playBackgroundHideInAnim(150)
     }
 
     private fun playEndAnim(action: () -> Unit) {
+
+        val options = findViewById<View>(R.id.options)!!
+        options.animate().cancel()
+        options.animate()
+            .alpha(0f)
+            .translationY(-400f)
+            .setInterpolator(EasingHelper.asInterpolator(Easing.InOutQuad))
+            .setDuration(300)
+            .start()
+
         val body = findViewById<View>(R.id.frg_body)!!
         body.animate().cancel()
         body.animate()

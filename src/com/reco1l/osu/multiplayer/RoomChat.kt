@@ -28,9 +28,7 @@ import com.edlplan.ui.fragment.BaseFragment
 import com.reco1l.ibancho.RoomAPI
 import com.reco1l.ibancho.data.RoomPlayer
 import com.reco1l.osu.mainThread
-import com.reco1l.toolkt.android.drawableLeft
-import com.reco1l.toolkt.android.drawableRight
-import com.reco1l.toolkt.android.fontColor
+import com.reco1l.toolkt.android.*
 import com.reco1l.toolkt.kotlin.async
 import org.anddev.andengine.input.touch.TouchEvent
 import ru.nsu.ccfit.zuev.osu.GlobalManager
@@ -322,9 +320,10 @@ class MessageAdapter : RecyclerView.Adapter<MessageViewHolder>() {
         val msg = data[position]
 
         // The sender label will be shown if the previous message is not from the same sender
-        val showSender = position == data.size - 1 || data[position + 1].sender != msg.sender
+        val showSender = msg.sender != null && (position == data.size - 1 || data[position + 1].sender != msg.sender)
+        val tintBackground = (data.size - position) % 2 == 0
 
-        holder.bind(msg, showSender)
+        holder.bind(msg, showSender, tintBackground)
     }
 
 }
@@ -337,28 +336,29 @@ class MessageViewHolder(private val root: LinearLayout) : RecyclerView.ViewHolde
     private lateinit var messageText: TextView
 
 
-    fun bind(msg: Message, showSender: Boolean) {
+    fun bind(msg: Message, showSender: Boolean, tintBackground: Boolean) {
 
         senderText = root.findViewById(R.id.sender_text)!!
         messageText = root.findViewById(R.id.message_text)!!
 
+        root.backgroundColor = if (tintBackground) 0xFF1A1A25.toInt() else Color.TRANSPARENT
+
+        messageText.gravity = Gravity.LEFT
+        messageText.fontColor = msg.color ?: Color.WHITE
+
+        senderText.visibility = if (showSender) View.VISIBLE else View.INVISIBLE
+
+        // For system messages
         if (msg.sender == null) {
-            messageText.isVisible = false
-            senderText.isVisible = true
-            senderText.text = msg.text
+            senderText.visibility = View.GONE
 
-            root.gravity = Gravity.CENTER
-
-            if (msg.color != null) {
-                senderText.fontColor = msg.color
-            }
+            messageText.text = msg.text
+            messageText.gravity = Gravity.CENTER
+            messageText.verticalPadding = 8.dp
             return
         }
 
-        val isOwnMessage = msg.sender == Multiplayer.player!!.id
-
-        messageText.isVisible = true
-        senderText.isVisible = showSender
+        messageText.verticalPadding = 0.dp
 
         if (showSender) {
 
@@ -379,18 +379,11 @@ class MessageViewHolder(private val root: LinearLayout) : RecyclerView.ViewHolde
                 else -> null
             }
 
-            if (isOwnMessage) {
-                senderText.drawableLeft = drawable
-            } else {
-                senderText.drawableRight = drawable
-            }
-
+            senderText.drawableRight = drawable
             drawable?.setTint(color)
 
             senderText.fontColor = color
         }
-
-        root.gravity = if (isOwnMessage) Gravity.RIGHT else Gravity.LEFT
 
         messageText.text = msg.text
     }

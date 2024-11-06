@@ -29,7 +29,6 @@ import com.rian.osu.beatmap.sections.BeatmapDifficulty;
 import com.rian.osu.difficulty.BeatmapDifficultyCalculator;
 import com.rian.osu.difficulty.calculator.DifficultyCalculationParameters;
 import com.rian.osu.math.Precision;
-import com.rian.osu.ui.DifficultyAlgorithmSwitcher;
 import com.rian.osu.utils.LRUCache;
 import com.rian.osu.utils.ModUtils;
 
@@ -345,7 +344,6 @@ public class SongMenu implements IUpdateHandler, MenuItemListener,
 
         SkinLayout layoutOptions = OsuSkin.get().getLayout("OptionsButton");
         SkinLayout layoutRandom = OsuSkin.get().getLayout("RandomButton");
-        SkinLayout layoutDifficultySwitcher = OsuSkin.get().getLayout("DifficultySwitcher");
 
         var backButton = new AnimatedSprite("menu-back", true, OsuSkin.get().getAnimationFramerate()) {
             boolean moved = false;
@@ -643,14 +641,11 @@ public class SongMenu implements IUpdateHandler, MenuItemListener,
             }
         };
 
-        final var difficultySwitcher = new DifficultyAlgorithmSwitcher();
-
         if (modSelection != null)
             modSelection.setScale(1.5f);
 
         optionSelection.setScale(1.5f);
         randomMap.setScale(1.5f);
-        difficultySwitcher.setScale(1.5f);
 
         var isNewLayout = OsuSkin.get().isUseNewLayout();
 
@@ -681,12 +676,6 @@ public class SongMenu implements IUpdateHandler, MenuItemListener,
             randomMap.setPosition(optionSelection.getX() + optionSelection.getWidthScaled(), Config.getRES_HEIGHT() - randomMap.getHeightScaled());
         }
 
-        if (isNewLayout && layoutDifficultySwitcher != null) {
-            layoutDifficultySwitcher.apply(difficultySwitcher, randomMap);
-        } else {
-            difficultySwitcher.setPosition(randomMap.getX() + randomMap.getWidthScaled(), Config.getRES_HEIGHT() - difficultySwitcher.getHeightScaled());
-        }
-
         frontLayer.attachChild(backButton);
         scene.registerTouchArea(backButton);
 
@@ -699,13 +688,11 @@ public class SongMenu implements IUpdateHandler, MenuItemListener,
         scene.registerTouchArea(optionSelection);
         frontLayer.attachChild(randomMap);
         scene.registerTouchArea(randomMap);
-        frontLayer.attachChild(difficultySwitcher);
-        scene.registerTouchArea(difficultySwitcher);
 
         if (OnlineScoring.getInstance().createSecondPanel() != null) {
             OnlinePanel panel = OnlineScoring.getInstance().getSecondPanel();
             panel.detachSelf();
-            panel.setPosition(difficultySwitcher.getX() + difficultySwitcher.getWidthScaled() + 20, Config.getRES_HEIGHT() - 110);
+            panel.setPosition(randomMap.getX() + randomMap.getWidthScaled() + 20, Config.getRES_HEIGHT() - 110);
             OnlineScoring.getInstance().loadAvatar(false);
             frontLayer.attachChild(panel);
 
