@@ -18,6 +18,7 @@ import ru.nsu.ccfit.zuev.osuplus.BuildConfig
 import ru.nsu.ccfit.zuev.osuplus.R
 import java.util.concurrent.Executors
 import java.util.concurrent.TimeUnit
+import kotlin.math.ceil
 import kotlin.math.max
 import kotlinx.coroutines.*
 
@@ -73,7 +74,7 @@ object DifficultyCalculationManager {
         }
 
         job = async {
-            val threadCount = Runtime.getRuntime().availableProcessors()
+            val threadCount = ceil(Runtime.getRuntime().availableProcessors() / 2f).toInt()
             val threadPool = Executors.newFixedThreadPool(threadCount)
 
             var calculated = totalBeatmaps - pendingBeatmaps.size
