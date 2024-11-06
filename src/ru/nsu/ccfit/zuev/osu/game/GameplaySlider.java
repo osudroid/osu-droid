@@ -712,7 +712,7 @@ public class GameplaySlider extends GameObject {
                 startHit = true;
                 firstHitAccuracy = (int) (elapsedSpanTime * 1000);
 
-                if (-elapsedSpanTime < GameHelper.getDifficultyHelper().hitWindowFor50(GameHelper.getOverallDifficulty())) {
+                if (Math.abs(elapsedSpanTime) <= GameHelper.getDifficultyHelper().hitWindowFor50(GameHelper.getOverallDifficulty())) {
                     playCurrentNestedObjectHitSound();
                     ticksGot++;
                     listener.onSliderHit(id, 30, position,
@@ -1075,7 +1075,7 @@ public class GameplaySlider extends GameObject {
             startHit = true;
             firstHitAccuracy = (int) (elapsedSpanTime * 1000);
 
-            if (-elapsedSpanTime < GameHelper.getDifficultyHelper().hitWindowFor50(GameHelper.getOverallDifficulty())) {
+            if (Math.abs(elapsedSpanTime) <= GameHelper.getDifficultyHelper().hitWindowFor50(GameHelper.getOverallDifficulty())) {
                 playCurrentNestedObjectHitSound();
                 ticksGot++;
                 listener.onSliderHit(id, 30, position,
