@@ -677,8 +677,18 @@ public class GameplaySlider extends GameObject {
 
         if (!startHit) // If we didn't get start hit(click)
         {
-            // If it's too late, mark this hit missing
-            if (!autoPlay && elapsedSpanTime > Math.min((float) spanDuration, GameHelper.getDifficultyHelper().hitWindowFor50(GameHelper.getOverallDifficulty()))) {
+            // If it's too late, mark this hit missing.
+            float lateHitThreshold = GameHelper.getDifficultyHelper().hitWindowFor50(GameHelper.getOverallDifficulty());
+
+            // Do note that not capping the threshold at the slider's span duration during replaying is intentional.
+            // In replays before version 1.8, a slider head's hit window is the 50 hit window regardless of the slider's span duration.
+            // The cap will cause hit offsets that are greater than the slider's span duration to break and lose combo.
+            // Replays in version 1.8 onwards will still work properly because their gameplay uses the proper threshold as below.
+            if (replayObjectData == null) {
+                lateHitThreshold = Math.min((float) spanDuration, lateHitThreshold);
+            }
+
+            if (!autoPlay && elapsedSpanTime > lateHitThreshold) {
                 startHit = true;
                 currentNestedObjectIndex++;
                 listener.onSliderHit(id, -1, position, false, bodyColor, GameObjectListener.SLIDER_START, false);
@@ -690,10 +700,7 @@ public class GameplaySlider extends GameObject {
                 ticksGot++;
                 listener.onSliderHit(id, 30, position, false, bodyColor, GameObjectListener.SLIDER_START, true);
             } else if (replayObjectData != null &&
-                    // Do note that not capping the hit time threshold at the slider's span duration here is intentional.
-                    // In old replays, a slider head's hit window is the 50 hit window regardless of the slider's span duration.
-                    // The cap will cause hit offsets that are greater than the slider's span duration to break and lose combo.
-                    Math.abs(replayObjectData.accuracy / 1000f) <= GameHelper.getDifficultyHelper().hitWindowFor50(GameHelper.getOverallDifficulty()) &&
+                    Math.abs(replayObjectData.accuracy / 1000f) <= lateHitThreshold &&
                     elapsedSpanTime + dt / 2 > replayObjectData.accuracy / 1000f) {
                 startHit = true;
                 playCurrentNestedObjectHitSound();
