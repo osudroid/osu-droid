@@ -223,11 +223,11 @@ class FilterMenuFragment : BaseFragment(), IUpdateHandler, IFilterMenu {
 
         val options = findViewById<View>(R.id.options)!!
         options.alpha = 0f
-        options.translationX = -400f
+        options.translationY = -400f
         options.animate().cancel()
         options.animate()
             .alpha(1f)
-            .translationX(0f)
+            .translationY(0f)
             .setInterpolator(EasingHelper.asInterpolator(Easing.InOutQuad))
             .setDuration(300)
             .start()
@@ -252,7 +252,7 @@ class FilterMenuFragment : BaseFragment(), IUpdateHandler, IFilterMenu {
         options.animate().cancel()
         options.animate()
             .alpha(0f)
-            .translationX(-400f)
+            .translationY(-400f)
             .setInterpolator(EasingHelper.asInterpolator(Easing.InOutQuad))
             .setDuration(300)
             .start()
