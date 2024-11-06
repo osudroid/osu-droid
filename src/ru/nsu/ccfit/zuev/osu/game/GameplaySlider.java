@@ -612,8 +612,11 @@ public class GameplaySlider extends GameObject {
             score = 300;
         }
 
+        // In replays older than version 6, slider ends always give combo even when not being tracked.
+        boolean awardCombo = isTracking || (replayObjectData != null && GameHelper.getReplayVersion() < 6);
+
         listener.onSliderHit(id, score, spanEndJudgementPosition, endsCombo, bodyColor,
-            GameObjectListener.SLIDER_END, isTracking);
+            GameObjectListener.SLIDER_END, awardCombo);
 
         if (!startHit) {
             firstHitAccuracy = (int) (GameHelper.getDifficultyHelper().hitWindowFor50(GameHelper.getOverallDifficulty()) * 1000 + 13);

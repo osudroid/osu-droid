@@ -552,6 +552,7 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
                 ToastLogger.showTextId(com.osudroid.resources.R.string.replay_invalid, true);
                 return false;
             }
+            GameHelper.setReplayVersion(replay.replayVersion);
         } else if (modMenu.getMod().contains(GameMod.MOD_AUTO)) {
             replay = null;
         }

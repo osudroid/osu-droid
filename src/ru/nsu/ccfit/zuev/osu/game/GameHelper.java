@@ -35,6 +35,7 @@ public class GameHelper {
     private static double beatLength = 0;
     private static double currentBeatTime = 0;
     private static boolean samplesMatchPlaybackRate;
+    private static int replayVersion;
 
     private static DifficultyHelper difficultyHelper = DifficultyHelper.StdDifficulty;
 
@@ -283,6 +284,14 @@ public class GameHelper {
 
     public static void setSamplesMatchPlaybackRate(boolean samplesMatchPlaybackRate) {
         GameHelper.samplesMatchPlaybackRate = samplesMatchPlaybackRate;
+    }
+
+    public static int getReplayVersion() {
+        return replayVersion;
+    }
+
+    public static void setReplayVersion(int replayVersion) {
+        GameHelper.replayVersion = replayVersion;
     }
 
     public static class SliderPath {
