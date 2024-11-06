@@ -190,7 +190,7 @@ dependencies {
     implementation 'com.github.osudroid:language-pack:1.0.9'
 
     // Tools
-    implementation 'com.github.Reco1I:Toolkt:1.0.23'
+    implementation 'com.github.Reco1I:Toolkt:1.0.24'
     implementation 'commons-io:commons-io:2.16.1'
 
     // Multiplayer

@@ -37,9 +37,13 @@ object ActivityOverlay {
     @Synchronized
     fun dismissOverlay(fragment: Fragment) {
         if (fragmentManager != null) {
+            fragmentManager!!.executePendingTransactions()
+
             if (displayingOverlay.contains(fragment)) {
                 displayingOverlay.remove(fragment)
-                fragmentManager!!.beginTransaction().remove(fragment).commitAllowingStateLoss()
+                fragmentManager!!.beginTransaction()
+                    .remove(fragment)
+                    .commitNowAllowingStateLoss()
             }
         }
     }
@@ -50,18 +54,20 @@ object ActivityOverlay {
             if (fragment.isAdded) {
                 return
             }
+            fragmentManager!!.executePendingTransactions()
+
             if (displayingOverlay.contains(fragment) || fragmentManager!!.findFragmentByTag(tag) != null) {
                 displayingOverlay.remove(fragment)
                 fragmentManager!!.beginTransaction()
                         .remove(fragment)
                         .add(containerId, fragment, tag)
-                        .commitAllowingStateLoss()
+                        .commitNowAllowingStateLoss()
                 return
             }
             displayingOverlay.add(fragment)
             fragmentManager!!.beginTransaction()
                     .add(containerId, fragment, tag)
-                    .commitAllowingStateLoss()
+                    .commitNowAllowingStateLoss()
         }
     }
 

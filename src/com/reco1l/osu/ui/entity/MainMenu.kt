@@ -1,6 +1,7 @@
 package com.reco1l.osu.ui.entity
 
 import com.osudroid.resources.R.*
+import com.reco1l.*
 import com.reco1l.andengine.sprite.*
 import com.reco1l.osu.async
 import com.reco1l.osu.multiplayer.LobbyScene
@@ -124,7 +125,7 @@ class MainMenu(val main: MainScene) {
                     return true
                 }
 
-                if (!OnlineManager.getInstance().isStayOnline) {
+                if (!OnlineManager.getInstance().isStayOnline && !fakeMultiplayerMode) {
                     ToastLogger.showText(StringTable.format(string.multiplayer_not_online), true)
                     return true
                 }

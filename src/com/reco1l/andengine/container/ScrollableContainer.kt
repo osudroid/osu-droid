@@ -14,7 +14,7 @@ open class ScrollableContainer : Container() {
     /**
      * Which axes the container can scroll on.
      */
-    var scrollAxes: Axes = Axes.Both
+    open var scrollAxes: Axes = Axes.Both
 
     /**
      * The scroll position on the x-axis.

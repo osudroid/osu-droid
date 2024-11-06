@@ -1,5 +1,6 @@
 package com.reco1l.framework
 
+import android.animation.TimeInterpolator
 import com.edlplan.framework.easing.*
 import com.edlplan.framework.easing.Easing.*
 import com.reco1l.toolkt.*
@@ -185,3 +186,9 @@ fun Easing.interpolate(value: Float): Float {
         else -> n
     }
 }
+
+
+/**
+ * Convert this easing type to an Android [TimeInterpolator].
+ */
+fun Easing.asTimeInterpolator() = TimeInterpolator { interpolate(it) }

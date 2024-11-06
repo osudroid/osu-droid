@@ -11,11 +11,13 @@ import android.view.inputmethod.InputMethodManager
 import android.widget.EditText
 import android.widget.TextView
 import android.widget.TextView.OnEditorActionListener
-import androidx.core.view.isVisible
+import com.edlplan.framework.easing.Easing
 import com.edlplan.ui.fragment.BaseFragment
+import com.reco1l.framework.*
+import com.reco1l.toolkt.android.*
+import com.reco1l.toolkt.animation.*
 import org.anddev.andengine.input.touch.TouchEvent
 import ru.nsu.ccfit.zuev.osuplus.R
-import kotlin.math.abs
 
 class LobbySearch : BaseFragment(), OnEditorActionListener, OnKeyListener {
 
@@ -27,7 +29,10 @@ class LobbySearch : BaseFragment(), OnEditorActionListener, OnKeyListener {
 
 
     private val isExtended: Boolean
-        get() = findViewById<View?>(R.id.fullLayout)?.translationY?.let { it < 10 } ?: false
+        get() {
+            val layout = findViewById<View?>(R.id.fullLayout) ?: return false
+            return layout.translationY == 0f
+        }
 
 
     init {
@@ -104,29 +109,32 @@ class LobbySearch : BaseFragment(), OnEditorActionListener, OnKeyListener {
 
         field.clearFocus()
 
+        val layout = findViewById<View>(R.id.fullLayout)!!
+        val background = findViewById<View>(R.id.frg_background)!!
+
         if (isExtended) {
 
-            findViewById<View>(R.id.optionBody)!!.isVisible = false
-            findViewById<View>(R.id.frg_background)!!.setOnTouchListener(null)
-            findViewById<View>(R.id.frg_background)!!.isClickable = false
+            layout.clearAnimation()
+            layout.toTranslationY(70f.dp, 200, ease = Easing.OutQuad.asTimeInterpolator())
+
+            background.setOnTouchListener(null)
+            background.isClickable = false
 
         } else {
 
-            findViewById<View>(R.id.optionBody)!!.isVisible = true
+            layout.clearAnimation()
+            layout.toTranslationY(0f.dp, 200, ease = Easing.InQuad.asTimeInterpolator())
 
-            findViewById<View>(R.id.frg_background)!!.setOnTouchListener { _, event ->
-
+            background.setOnTouchListener { _, event ->
                 if (event.action == TouchEvent.ACTION_DOWN) {
-
                     if (isExtended) {
                         toggleVisibility()
                         return@setOnTouchListener true
                     }
-
                 }
                 false
             }
-            findViewById<View>(R.id.frg_background)!!.isClickable = true
+            background.isClickable = true
         }
     }
 

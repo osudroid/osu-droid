@@ -10,6 +10,7 @@ import androidx.fragment.app.Fragment
 import com.edlplan.framework.easing.Easing
 import com.edlplan.ui.ActivityOverlay
 import com.edlplan.ui.EasingHelper
+import com.reco1l.osu.*
 import ru.nsu.ccfit.zuev.osuplus.R
 
 abstract class BaseFragment : Fragment(), BackPressListener {
@@ -70,12 +71,16 @@ abstract class BaseFragment : Fragment(), BackPressListener {
     }
 
     open fun show() {
-        ActivityOverlay.addOverlay(this, this.javaClass.name + "@" + this.hashCode())
+        mainThread {
+            ActivityOverlay.addOverlay(this, this.javaClass.name + "@" + this.hashCode())
+        }
     }
 
     open fun dismiss() {
-        ActivityOverlay.dismissOverlay(this)
-        onDismissListener?.OnDismiss()
+        mainThread {
+            ActivityOverlay.dismissOverlay(this)
+            onDismissListener?.OnDismiss()
+        }
     }
 
     fun save() {

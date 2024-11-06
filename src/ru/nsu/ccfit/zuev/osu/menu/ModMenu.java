@@ -1,6 +1,6 @@
 package ru.nsu.ccfit.zuev.osu.menu;
 
-import com.edlplan.ui.fragment.InGameSettingMenu;
+import com.edlplan.ui.fragment.ModSettingsMenu;
 import com.reco1l.ibancho.RoomAPI;
 import com.reco1l.osu.data.BeatmapInfo;
 import com.reco1l.osu.Execution;
@@ -61,7 +61,7 @@ public class ModMenu implements IModSwitcher {
     private Float customOD = null;
     private Float customHP = null;
     private Float customCS = null;
-    private InGameSettingMenu menu;
+    private ModSettingsMenu menu;
 
     private ModMenu() {
         mod = EnumSet.noneOf(GameMod.class);
@@ -84,7 +84,7 @@ public class ModMenu implements IModSwitcher {
         setSelectedTrack(selectedBeatmap);
         scene.setChildScene(getScene(), false, true, true);
         if (menu == null) {
-            menu = new InGameSettingMenu();
+            menu = new ModSettingsMenu();
         }
 
         Execution.mainThread(menu::show);
@@ -238,7 +238,7 @@ public class ModMenu implements IModSwitcher {
         multiplierText.setScale(1.2f);
         scene.attachChild(multiplierText);
 
-        menu = new InGameSettingMenu();
+        menu = new ModSettingsMenu();
 
         changeMultiplierText();
 
@@ -719,7 +719,7 @@ public class ModMenu implements IModSwitcher {
         handleCustomDifficultyStatisticsFlags();
     }
 
-    public InGameSettingMenu getMenu() {
+    public ModSettingsMenu getMenu() {
         return menu;
     }
 }

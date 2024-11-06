@@ -1,17 +1,21 @@
 package ru.nsu.ccfit.zuev.osu;
 
 import android.app.Activity;
+import android.app.AlertDialog;
 import android.content.Context;
+import android.content.Intent;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.PackageManager.NameNotFoundException;
+import android.graphics.Typeface;
 import android.os.Build;
 import android.os.Environment;
 import android.os.Looper;
 import android.text.format.DateFormat;
 import android.util.DisplayMetrics;
 import android.util.Log;
-import android.widget.Toast;
+import android.util.TypedValue;
+import android.widget.TextView;
 
 import com.reco1l.osu.multiplayer.Multiplayer;
 import org.apache.http.HttpException;
@@ -28,8 +32,6 @@ import java.net.SocketException;
 import java.net.UnknownHostException;
 import java.util.Date;
 
-import ru.nsu.ccfit.zuev.audio.serviceAudio.SaveServiceObject;
-import ru.nsu.ccfit.zuev.osu.helper.StringTable;
 
 /**
  * 应用程序异常类：用于捕获异常和提示错误信息
@@ -214,20 +216,6 @@ public class AppException extends Exception implements Thread.UncaughtExceptionH
         if (!handleException(ex) && mDefaultHandler != null) {
             //如果用户没有处理则让系统默认的异常处理器来处理
             mDefaultHandler.uncaughtException(thread, ex);
-        } else {
-            try {
-                Thread.sleep(5000);
-            } catch (InterruptedException e) {
-                e.printStackTrace();
-            }
-            if (Multiplayer.isMultiplayer)
-                Multiplayer.log("CRASH");
-
-            // 结束所有Activity
-            SaveServiceObject.finishAllActivities();
-            //退出程序
-            android.os.Process.killProcess(android.os.Process.myPid());
-            System.exit(1);
         }
     }
 
@@ -252,11 +240,28 @@ public class AppException extends Exception implements Thread.UncaughtExceptionH
             Multiplayer.log(ex);
 
         final String crashReport = getCrashReport(context, ex);
-        // 显示异常信息&发送报告
+
         new Thread() {
             public void run() {
                 Looper.prepare();
-                Toast.makeText(context, StringTable.get(com.osudroid.resources.R.string.crash), Toast.LENGTH_SHORT).show();
+
+                AlertDialog alert = new AlertDialog.Builder(context)
+                    .setTitle(com.osudroid.resources.R.string.crash)
+                    .setMessage(Log.getStackTraceString(ex))
+                    .setPositiveButton("Restart game", (dialog, which) -> {
+                        Intent intent = new Intent(context, MainActivity.class);
+                        intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+                        context.startActivity(intent);
+                        Runtime.getRuntime().exit(0);
+                    })
+                    .setCancelable(false)
+                    .show();
+
+                TextView textView = alert.findViewById(android.R.id.message);
+                textView.setTypeface(Typeface.MONOSPACE);
+                textView.setTextSize(TypedValue.COMPLEX_UNIT_SP, 11);
+                textView.setTextIsSelectable(true);
+
                 Looper.loop();
             }
 

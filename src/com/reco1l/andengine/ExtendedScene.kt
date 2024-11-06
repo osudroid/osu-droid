@@ -26,9 +26,19 @@ open class ExtendedScene : Scene(), IShape {
     private var cameraHeight = 0f
 
 
+    init {
+        super.setTouchAreaBindingEnabled(true)
+    }
+
+
+    // Update
+
     override fun onManagedUpdate(secElapsed: Float) {
         super.onManagedUpdate(secElapsed * timeMultiplier)
     }
+
+
+    // Drawing
 
     override fun onManagedDrawChildren(pGL: GL10, pCamera: Camera) {
         cameraWidth = pCamera.widthRaw
@@ -37,20 +47,29 @@ open class ExtendedScene : Scene(), IShape {
     }
 
 
-    override fun registerTouchArea(pTouchArea: ITouchArea) {
+    // Input
 
-        if (pTouchArea == this) {
+    override fun registerTouchArea(area: ITouchArea) {
+
+        if (area == this) {
             throw IllegalArgumentException("Cannot register an area to itself.")
         }
 
-        super.registerTouchArea(pTouchArea)
+        super.registerTouchArea(area)
+    }
+
+    override fun setTouchAreaBindingEnabled(pTouchAreaBindingEnabled: Boolean) {
+        Log.w("ExtendedScene", "Touch area binding is always enabled for ExtendedScene.")
+        super.setTouchAreaBindingEnabled(true)
+    }
+
+    override fun onAreaTouched(event: TouchEvent, localX: Float, localY: Float): Boolean {
+        // This should never be called, as the scene itself is not a touch area.
+        return true
     }
 
 
-    override fun onAreaTouched(pSceneTouchEvent: TouchEvent?, pTouchAreaLocalX: Float, pTouchAreaLocalY: Float): Boolean {
-        return false
-    }
-
+    // Unsupported methods
 
     override fun setColor(pRed: Float, pGreen: Float, pBlue: Float) {
         Log.w("ExtendedScene", "Color is not supported for scenes.")
@@ -65,21 +84,41 @@ open class ExtendedScene : Scene(), IShape {
     }
 
 
-    override fun contains(pX: Float, pY: Float): Boolean = true
+    // IShape interface
 
-    override fun getWidth(): Float = cameraWidth
+    override fun contains(pX: Float, pY: Float): Boolean {
+        return true
+    }
 
-    override fun getHeight(): Float = cameraHeight
+    override fun getWidth(): Float {
+        return cameraWidth
+    }
 
-    override fun collidesWith(shape: IShape): Boolean = false
+    override fun getHeight(): Float {
+        return cameraHeight
+    }
 
-    override fun getBaseWidth(): Float = cameraWidth
+    override fun collidesWith(shape: IShape): Boolean {
+        return false
+    }
 
-    override fun getBaseHeight(): Float = cameraHeight
+    override fun getBaseWidth(): Float {
+        return cameraWidth
+    }
 
-    override fun getWidthScaled(): Float = cameraWidth * scaleX
+    override fun getBaseHeight(): Float {
+        return cameraHeight
+    }
 
-    override fun getHeightScaled(): Float = cameraHeight * scaleY
+    override fun getWidthScaled(): Float {
+        return cameraWidth * scaleX
+    }
 
-    override fun isCullingEnabled(): Boolean = false
+    override fun getHeightScaled(): Float {
+        return cameraHeight * scaleY
+    }
+
+    override fun isCullingEnabled(): Boolean {
+        return false
+    }
 }

@@ -20,6 +20,7 @@ import android.widget.TextView.OnEditorActionListener
 import androidx.core.view.isVisible
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import androidx.recyclerview.widget.SimpleItemAnimator
 import com.edlplan.framework.easing.Easing
 import com.edlplan.ui.BaseAnimationListener
 import com.edlplan.ui.EasingHelper
@@ -49,8 +50,7 @@ private val DEVELOPERS = longArrayOf(
 )
 
 
-class RoomChat : BaseFragment(), OnEditorActionListener, OnKeyListener
-{
+class RoomChat : BaseFragment(), OnEditorActionListener, OnKeyListener {
 
     override val layoutID = R.layout.multiplayer_room_chat
 
@@ -81,6 +81,7 @@ class RoomChat : BaseFragment(), OnEditorActionListener, OnKeyListener
         recyclerView = findViewById(R.id.chat_text)!!
         recyclerView.layoutManager = LinearLayoutManager(context, RecyclerView.VERTICAL, true)
         recyclerView.adapter = adapter
+        recyclerView.itemAnimator = null
 
         findViewById<Button>(R.id.chat_send)!!.setOnClickListener {
             sendMessage()
@@ -99,8 +100,7 @@ class RoomChat : BaseFragment(), OnEditorActionListener, OnKeyListener
 
         prependMessage(Message(player.id, message))
 
-        val color = when(player.id)
-        {
+        val color = when(player.id) {
             Multiplayer.room!!.host -> "#00FFEA"
             in DEVELOPERS -> "#F280FF"
             else -> "#8282A8"
@@ -365,7 +365,7 @@ class MessageViewHolder(private val root: LinearLayout) : RecyclerView.ViewHolde
             val isRoomHost = msg.sender == Multiplayer.room!!.host
             val isDeveloper = msg.sender in DEVELOPERS
 
-            senderText.text = Multiplayer.room!!.playersMap[msg.sender]!!.name
+            senderText.text = Multiplayer.room?.playersMap?.get(msg.sender)?.name ?: "Disconnected player"
 
             val color = when {
                 isRoomHost -> 0xFF00FFEA.toInt()

@@ -370,7 +370,9 @@
             android:layout_marginBottom="12dp"
             android:background="@drawable/rounded_half_right"
             android:backgroundTint="#1E1E2E"
-            android:src="@drawable/tune_24px" />
+            android:tint="#FFF"
+            android:src="@drawable/tune_24px"
+            tools:ignore="UseAppTint" />
 
     </LinearLayout>
 
