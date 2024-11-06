@@ -3,38 +3,32 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:layout_marginHorizontal="12dp"
-    android:layout_marginBottom="4dp"
-    android:gravity="left"
-    android:orientation="vertical">
+    android:orientation="horizontal"
+    android:gravity="right"
+    android:paddingHorizontal="6dp">
 
     <TextView
         android:id="@+id/sender_text"
-        android:layout_width="wrap_content"
-        android:layout_height="match_parent"
-        android:layout_marginTop="8dp"
-        android:layout_marginBottom="4dp"
-        android:layout_marginHorizontal="8dp"
-        android:textColor="#8282A8"
-        android:textSize="12sp"
-        android:visibility="gone"
-        android:gravity="center"
-        android:drawableTint="#8282A8"
+        android:layout_width="160dp"
+        android:layout_height="wrap_content"
+        android:layout_marginRight="8dp"
         android:drawablePadding="4dp"
+        android:drawableTint="#8282A8"
+        android:gravity="right"
+        android:singleLine="true"
+        android:textColor="#8282A8"
+        android:textSize="14sp"
+        android:visibility="invisible"
         tools:text="Player name"
-        tools:visibility="visible" />
+        tools:visibility="visible"
+        tools:drawableRight="@drawable/crown_16px"/>
 
     <TextView
         android:id="@+id/message_text"
-        android:layout_width="wrap_content"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginBottom="1dp"
-        android:background="@drawable/rounded_rect"
-        android:backgroundTint="#28283D"
-        android:paddingHorizontal="8dp"
-        android:paddingVertical="2dp"
         android:textColor="#FFF"
-        android:textSize="12sp"
+        android:textSize="14sp"
         tools:text="Example message" />
 
 </LinearLayout>
