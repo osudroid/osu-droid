@@ -185,9 +185,6 @@ public class OnlineManager {
         post.addParam("ssid", ssid);
         post.addParam("filename", beatmapInfo.getFullBeatmapName().trim());
         post.addParam("hash", hash);
-        post.addParam("songTitle", beatmapInfo.getTitle());
-        post.addParam("songArtist", beatmapInfo.getArtist());
-        post.addParam("songCreator", beatmapInfo.getCreator());
 
         Long beatmapId = beatmapInfo.getId();
         if (beatmapId != null && beatmapId != -1) {
