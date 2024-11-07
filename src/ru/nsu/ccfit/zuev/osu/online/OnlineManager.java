@@ -186,11 +186,6 @@ public class OnlineManager {
         post.addParam("filename", beatmapInfo.getFullBeatmapName().trim());
         post.addParam("hash", hash);
 
-        Long beatmapId = beatmapInfo.getId();
-        if (beatmapId != null && beatmapId != -1) {
-            post.addParam("songID", String.valueOf(beatmapId));
-        }
-
         ArrayList<String> response = sendRequest(post, endpoint + "submit.php");
 
         if (response == null) {
