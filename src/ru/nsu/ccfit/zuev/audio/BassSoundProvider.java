@@ -48,6 +48,7 @@ public class BassSoundProvider {
             BASS.Asset asset = new BASS.Asset(manager, assetName);
             sample = BASS.BASS_SampleLoad(asset, 0, 0, SIMULTANEOUS_PLAYBACKS, BASS.BASS_SAMPLE_OVER_POS);
             BASS.BASS_SampleGetInfo(sample, sampleInfo);
+            BASS.BASS_SampleGetChannels(sample, channels);
             applyAudioEffectsToSample();
         } else {
             sample = 0;
