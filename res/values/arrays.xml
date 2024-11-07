@@ -1,0 +1,94 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <string-array name="mp_team_versus_names" translatable="false">
+        <item>@string/mp_room_versus_mode_head_to_head</item>
+        <item>@string/mp_room_versus_mode_team_vs_team</item>
+    </string-array>
+    <string-array name="mp_team_versus_values" translatable="false">
+        <item>0</item>
+        <item>1</item>
+    </string-array>
+
+    <string-array name="mp_team_names" translatable="false">
+        <item>@string/mp_team_names_red</item>
+        <item>@string/mp_team_names_blue</item>
+    </string-array>
+    <string-array name="mp_team_values" translatable="false">
+        <item>0</item>
+        <item>1</item>
+    </string-array>
+
+    <string-array name="mp_win_condition_names" translatable="false">
+        <item>@string/mp_room_win_condition_scoreV1</item>
+        <item>@string/mp_room_win_condition_accuracy</item>
+        <item>@string/mp_room_win_condition_maxCombo</item>
+        <item>@string/mp_room_win_condition_scoreV2</item>
+    </string-array>
+    <string-array name="mp_win_condition_values" translatable="false">
+        <item>0</item>
+        <item>1</item>
+        <item>2</item>
+        <item>3</item>
+    </string-array>
+
+    <string-array name="global_beatmap_leaderboard_scoring_mode_names" translatable="false">
+        <item>@string/opt_global_beatmap_leaderboard_scoring_mode_score</item>
+        <item>@string/opt_global_beatmap_leaderboard_scoring_mode_pp</item>
+    </string-array>
+    <string-array name="global_beatmap_leaderboard_scoring_mode_values" translatable="false">
+        <item>0</item>
+        <item>1</item>
+    </string-array>
+
+    <string-array name="difficulty_algorithm_names" translatable="false">
+        <item>@string/difficulty_algorithm_droid</item>
+        <item>@string/difficulty_algorithm_standard</item>
+    </string-array>
+    <string-array name="difficulty_algorithm_values" translatable="false">
+        <item>0</item>
+        <item>1</item>
+    </string-array>
+
+    <string-array name="spinner_style_names" translatable="false">
+        <item>@string/opt_spinner_style_modern</item>
+        <item>@string/opt_spinner_style_classical</item>
+    </string-array>
+    <string-array name="spinner_style_values" translatable="false">
+        <item>1</item>
+        <item>0</item>
+    </string-array>
+
+    <string-array name="opt_progress_indicator_names" translatable="false">
+        <item>@string/opt_progress_indicator_pie</item>
+        <item>@string/opt_progress_indicator_long</item>
+    </string-array>
+    <string-array name="opt_progress_indicator_values" translatable="false">
+        <item>0</item>
+        <item>1</item>
+    </string-array>
+
+    <string-array name="error_meter_display_names" translatable="false">
+        <item>@string/opt_error_meter_display_always</item>
+        <item>@string/opt_error_meter_display_replay</item>
+        <item>@string/opt_error_meter_display_disable</item>
+    </string-array>
+    <string-array name="error_meter_display_values" translatable="false">
+        <item>1</item>
+        <item>2</item>
+        <item>0</item>
+    </string-array>
+
+    <string-array name="metronome_switch_names" translatable="false">
+        <item>@string/opt_metronome_switch_off</item>
+        <item>@string/opt_metronome_switch_nightcore</item>
+        <item>@string/opt_metronome_switch_always</item>
+    </string-array>
+    <string-array name="metronome_switch_values" translatable="false">
+        <item>0</item>
+        <item>1</item>
+        <item>2</item>
+    </string-array>
+
+
+</resources>
