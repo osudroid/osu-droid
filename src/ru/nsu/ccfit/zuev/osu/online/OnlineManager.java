@@ -183,7 +183,7 @@ public class OnlineManager {
         PostBuilder post = new URLEncodedPostBuilder();
         post.addParam("userID", String.valueOf(userId));
         post.addParam("ssid", ssid);
-        post.addParam("filename", beatmapInfo.getFullBeatmapName());
+        post.addParam("filename", beatmapInfo.getFullBeatmapName().trim());
         post.addParam("hash", hash);
         post.addParam("songTitle", beatmapInfo.getTitle());
         post.addParam("songArtist", beatmapInfo.getArtist());
