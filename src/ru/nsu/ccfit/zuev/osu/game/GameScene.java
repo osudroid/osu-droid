@@ -559,7 +559,7 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
 
         //TODO online
         if (!replaying)
-            OnlineScoring.getInstance().startPlay(beatmapInfo, parsedBeatmap.getMd5());
+            OnlineScoring.getInstance().startPlay(beatmapInfo, parsedBeatmap.getMd5(), scope);
 
         if (Config.isEnableStoryboard()) {
             storyboardSprite.loadStoryboard(beatmapInfo.getPath());

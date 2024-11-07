@@ -14,6 +14,7 @@ import org.anddev.andengine.util.Debug;
 
 import java.util.concurrent.CancellationException;
 
+import kotlinx.coroutines.CoroutineScope;
 import kotlinx.coroutines.Job;
 import kotlinx.coroutines.JobKt;
 import ru.nsu.ccfit.zuev.osu.GlobalManager;
@@ -146,27 +147,26 @@ public class OnlineScoring {
         });
     }
 
-    public void startPlay(final BeatmapInfo beatmapInfo, final String hash) {
-        if (!OnlineManager.getInstance().isStayOnline())
+    public void startPlay(final BeatmapInfo beatmapInfo, final String hash, final CoroutineScope scope) {
+        if (!OnlineManager.getInstance().isStayOnline() || scope == null)
             return;
 
-        Execution.async(() -> {
-            synchronized (onlineMutex) {
-                for (int i = 0; i < attemptCount; i++) {
-                    try {
-                        OnlineManager.getInstance().startPlay(beatmapInfo, hash);
-                    } catch (OnlineManager.OnlineManagerException e) {
-                        Debug.e("Login error: " + e.getMessage());
-                        continue;
-                    }
-                    break;
+        synchronized (onlineMutex) {
+            for (int i = 0; i < attemptCount; i++) {
+                try {
+                    JobKt.ensureActive(scope.getCoroutineContext());
+                    OnlineManager.getInstance().startPlay(beatmapInfo, hash);
+                } catch (OnlineManager.OnlineManagerException e) {
+                    Debug.e("Login error: " + e.getMessage());
+                    continue;
                 }
-
-                if (OnlineManager.getInstance().getFailMessage().length() > 0) {
-                    ToastLogger.showText(OnlineManager.getInstance().getFailMessage(), true);
-                }
+                break;
             }
-        });
+
+            if (OnlineManager.getInstance().getFailMessage().length() > 0) {
+                ToastLogger.showText(OnlineManager.getInstance().getFailMessage(), true);
+            }
+        }
     }
 
     public void sendRecord(final StatisticV2 record, final SendingPanel panel, final String replay) {
