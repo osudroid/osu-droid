@@ -712,11 +712,11 @@ public class GameplaySlider extends GameObject {
             // If it's too late, mark this hit missing.
             float lateHitThreshold = GameHelper.getDifficultyHelper().hitWindowFor50(GameHelper.getOverallDifficulty());
 
-            // Do note that not capping the threshold at the slider's span duration during replaying is intentional.
-            // In replays before version 1.8, a slider head's hit window is the 50 hit window regardless of the slider's span duration.
-            // The cap will cause hit offsets that are greater than the slider's span duration to break and lose combo.
-            // Replays in version 1.8 onwards will still work properly because their gameplay uses the proper threshold as below.
-            if (replayObjectData == null) {
+            // Do note that not capping the threshold at the slider's span duration in replays older than version 6
+            // (before version 1.8) is intentional. In those replays, a slider head's hit window is the 50 hit window
+            // regardless of the slider's span duration. The cap will cause hit offsets that are greater than the
+            // slider's span duration to break and lose combo.
+            if (replayObjectData == null || GameHelper.getReplayVersion() >= 6) {
                 lateHitThreshold = Math.min((float) spanDuration, lateHitThreshold);
             }
 
