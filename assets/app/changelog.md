@@ -1,3 +1,37 @@
+Version 1.8 Patch 1
+===================
+
+# Changes
+
+- The `animationFramerate` setting of `skin.json` now defaults to -1
+- Reduced follow point persistence duration in higher approach rates
+- Revamped background difficulty calculation progress indicator
+  - It is now displayed in the bottom-right corner of the screen
+- Background difficulty calculation now only uses half of the available CPU cores
+  - This allows players to still navigate around the game at the expense of longer completion time
+- Optimized gameplay loading by only reprocessing slider paths when necessary
+
+# Removals
+
+- Removed difficulty switcher button from song selection menu's bottom-left button row. It is now accessible under
+  beatmap options or from main menu options under "General" category
+
+# Bug Fixes
+
+- Fixed device back button not working properly when used after playing a beatmap once
+- Fixed room settings being visible to non-hosts in multiplayer
+- Fixed crash when attempting to play a beatmap with negative duration hitobjects
+- Fixed stacked scores in gameplay leaderboard
+- Fixed positioning of combo, circle number, and score overlaps in gameplay when there are more than 2 number digits
+- Fixed a potential case where mod settings menu is not dismissed properly
+- Fixed multiplayer lobby search not showing
+- Fixed pie song progress potentially being drawn improperly
+- Fixed replays before version 1.8 not using old slider judgements
+- Fixed inputs being registered one frame late in gameplay
+- Fixed "fix frame offset" setting offsetting input time even further from the actual input time
+- Fixed "fix frame offset" setting not being applied to slider head judgements
+- Fixed beatmap collections not being migrated to the new storage location
+
 Version 1.8
 ===========
 
