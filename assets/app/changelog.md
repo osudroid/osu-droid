@@ -31,6 +31,7 @@ Version 1.8 Patch 1
 - Fixed "fix frame offset" setting offsetting input time even further from the actual input time
 - Fixed "fix frame offset" setting not being applied to slider head judgements
 - Fixed beatmap collections not being migrated to the new storage location
+- Fixed some gameplay hitsounds potentially not stopping after the hitobject's lifetime has finished or the game was paused
 
 Version 1.8
 ===========
