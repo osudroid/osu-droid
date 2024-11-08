@@ -41,10 +41,25 @@ public class OsuDroidReplayPack {
             outputStream.putNextEntry(new ZipEntry("entry.json"));
 
             JSONObject entryJson = new JSONObject();
-            JSONObject replayData = scoreInfo.toJSON();
+            JSONObject replayData = new JSONObject();
 
-            // ScoreInfo does not contain beatmap info
             replayData.put("filename", beatmapInfo.getFullBeatmapsetName() + '/' + beatmapInfo.getFullBeatmapName());
+            // The keys don't correspond to the score info table columns in order to keep compatibility with the old replays.
+            replayData.put("playername", scoreInfo.getPlayerName());
+            replayData.put("replayfile", scoreInfo.getReplayFilename());
+            replayData.put("beatmapMD5", scoreInfo.getBeatmapMD5());
+            replayData.put("mod", scoreInfo.getMods());
+            replayData.put("score", scoreInfo.getScore());
+            replayData.put("combo", scoreInfo.getMaxCombo());
+            replayData.put("mark", scoreInfo.getMark());
+            replayData.put("h300k", scoreInfo.getHit300k());
+            replayData.put("h300", scoreInfo.getHit300());
+            replayData.put("h100k", scoreInfo.getHit100k());
+            replayData.put("h100", scoreInfo.getHit100());
+            replayData.put("h50", scoreInfo.getHit50());
+            replayData.put("misses", scoreInfo.getMisses());
+            replayData.put("accuracy", scoreInfo.getAccuracy());
+            replayData.put("time", scoreInfo.getTime());
 
             entryJson.put("version", 2);
             entryJson.put("replaydata", replayData);
