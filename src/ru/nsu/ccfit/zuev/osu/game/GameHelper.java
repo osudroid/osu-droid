@@ -98,7 +98,8 @@ public class GameHelper {
      * @return The converted {@link SliderPath}.
      */
     public static SliderPath convertSliderPath(final Slider slider) {
-        var startPosition = slider.getPosition().plus(slider.getGameplayStackOffset());
+        var startPosition = slider.getPosition();
+        var gameplayStackOffset = slider.getGameplayStackOffset();
 
         var calculatedPath = slider.getPath().getCalculatedPath();
         var cumulativeLength = slider.getPath().getCumulativeLength();
@@ -113,7 +114,7 @@ public class GameHelper {
 
             // The path is already flipped when the library applies the Hard Rock mod, so we don't need to do it here.
             Utils.trackToRealCoords(tmpPoint);
-            path.setPoint(i, tmpPoint.x, tmpPoint.y);
+            path.setPoint(i, tmpPoint.x + gameplayStackOffset.x, tmpPoint.y + gameplayStackOffset.y);
 
             if (i < cumulativeLength.size()) {
                 path.setLength(i, cumulativeLength.get(i).floatValue());
