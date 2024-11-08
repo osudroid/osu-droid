@@ -141,8 +141,8 @@ object DatabaseManager {
                 oldFavoritesFile.renameTo(File(Config.getCorePath(), "json/favorite_old.json"))
             }
 
-        } catch (e: IOException) {
-            Log.e("DatabaseManager", "Failed to migrate legacy beatmap properties", e)
+        } catch (e: Exception) {
+            Log.e("DatabaseManager", "Failed to migrate legacy beatmap collections", e)
         }
 
         // ScoreInfo
