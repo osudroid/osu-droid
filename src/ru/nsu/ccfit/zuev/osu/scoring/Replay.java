@@ -127,79 +127,60 @@ public class Replay {
         Debug.i("Skipped " + pointsSkipped + " points");
         Debug.i("Replay contains " + objectData.length + " objects");
 
-        ObjectOutputStream os = null;
-        ZipOutputStream zip = null;
-
-        try {
-            zip = new ZipOutputStream(new FileOutputStream(filename));
+        try (var zip = new ZipOutputStream(new FileOutputStream(filename))) {
             zip.setMethod(ZipOutputStream.DEFLATED);
             zip.setLevel(Deflater.DEFAULT_COMPRESSION);
             zip.putNextEntry(new ZipEntry("data"));
 
-            os = new ObjectOutputStream(zip);
-            os.writeObject(new ReplayVersion());
-            os.writeObject(beatmapsetName);
-            os.writeObject(beatmapName);
-            os.writeObject(md5);
+            try (var os = new ObjectOutputStream(zip)) {
+                os.writeObject(new ReplayVersion());
+                os.writeObject(beatmapsetName);
+                os.writeObject(beatmapName);
+                os.writeObject(md5);
 
-            if (stat != null) {
-                os.writeLong(stat.getTime());
-                os.writeInt(stat.getHit300k());
-                os.writeInt(stat.getHit300());
-                os.writeInt(stat.getHit100k());
-                os.writeInt(stat.getHit100());
-                os.writeInt(stat.getHit50());
-                os.writeInt(stat.getMisses());
-                os.writeInt(stat.getTotalScoreWithMultiplier());
-                os.writeInt(stat.getScoreMaxCombo());
-                os.writeObject(stat.getPlayerName());
-                os.writeObject(stat.getMod());
-                //Add in replay version 4
-                os.writeObject(stat.getExtraModString());
-            }
-
-            os.writeInt(cursorMoves.size());
-            //Storing all moves
-            for (final MoveArray move : cursorMoves) {
-                move.writeTo(os);
-            }
-            os.writeInt(objectData.length);
-            for (ReplayObjectData data : objectData) {
-                if (data == null) data = new ReplayObjectData();
-                os.writeShort(data.accuracy);
-                if (data.tickSet == null || data.tickSet.isEmpty()) {
-                    os.writeByte(0);
-                } else {
-                    byte[] bytes = new byte[(data.tickSet.length() + 7) / 8];
-                    for (int i = 0; i < data.tickSet.length(); i++) {
-                        if (data.tickSet.get(i)) {
-                            bytes[bytes.length - i / 8 - 1] |= 1 << (i % 8);
-                        }
-                    }
-                    os.writeByte(bytes.length);
-                    os.write(bytes);
+                if (stat != null) {
+                    os.writeLong(stat.getTime());
+                    os.writeInt(stat.getHit300k());
+                    os.writeInt(stat.getHit300());
+                    os.writeInt(stat.getHit100k());
+                    os.writeInt(stat.getHit100());
+                    os.writeInt(stat.getHit50());
+                    os.writeInt(stat.getMisses());
+                    os.writeInt(stat.getTotalScoreWithMultiplier());
+                    os.writeInt(stat.getScoreMaxCombo());
+                    os.writeObject(stat.getPlayerName());
+                    os.writeObject(stat.getMod());
+                    //Add in replay version 4
+                    os.writeObject(stat.getExtraModString());
                 }
-                os.writeByte(data.result);
+
+                os.writeInt(cursorMoves.size());
+                //Storing all moves
+                for (final MoveArray move : cursorMoves) {
+                    move.writeTo(os);
+                }
+                os.writeInt(objectData.length);
+                for (ReplayObjectData data : objectData) {
+                    if (data == null) data = new ReplayObjectData();
+                    os.writeShort(data.accuracy);
+                    if (data.tickSet == null || data.tickSet.isEmpty()) {
+                        os.writeByte(0);
+                    } else {
+                        byte[] bytes = new byte[(data.tickSet.length() + 7) / 8];
+                        for (int i = 0; i < data.tickSet.length(); i++) {
+                            if (data.tickSet.get(i)) {
+                                bytes[bytes.length - i / 8 - 1] |= 1 << (i % 8);
+                            }
+                        }
+                        os.writeByte(bytes.length);
+                        os.write(bytes);
+                    }
+                    os.writeByte(data.result);
+                }
             }
         } catch (final IOException e) {
             Debug.e("IOException: " + e.getMessage(), e);
         } finally {
-            try {
-                if (os != null) {
-                    os.flush();
-                    os.close();
-                }
-
-                if (zip != null) {
-                    zip.flush();
-                    zip.closeEntry();
-                    zip.flush();
-                    zip.close();
-                }
-            } catch (final IOException e) {
-                Debug.e("IOException: " + e.getMessage(), e);
-            }
-
             isSaving = false;
         }
     }
@@ -214,90 +195,87 @@ public class Replay {
     }
 
     public boolean load(InputStream inputStream, String replayFilename, boolean withGameplayData) {
-        ObjectInputStream os = null;
-        ZipInputStream zip = null;
-
-        try {
-            zip = new ZipInputStream(inputStream);
+        try (var zip = new ZipInputStream(inputStream)) {
             zip.getNextEntry();
-            os = new ObjectInputStream(zip);
 
-            cursorMoves.clear();
-            int version = 0;
+            try (var os = new ObjectInputStream(zip)) {
+                cursorMoves.clear();
+                int version = 0;
 
-            String mBeatmapsetName;
-            Object firstObject = os.readObject();
-            Debug.i("Read object: " + firstObject.getClass().getName());
-            if (firstObject.getClass().equals(ReplayVersion.class)) {
-                Debug.i("Other replay version");
-                version = ((ReplayVersion) firstObject).version;
-                replayVersion = version;
-                mBeatmapsetName = (String) os.readObject();
-            } else {
-                mBeatmapsetName = (String) firstObject;
-            }
-            String mBeatmapName = (String) os.readObject();
-            String mMD5 = (String) os.readObject();
+                String mBeatmapsetName;
+                Object firstObject = os.readObject();
+                Debug.i("Read object: " + firstObject.getClass().getName());
+                if (firstObject.getClass().equals(ReplayVersion.class)) {
+                    Debug.i("Other replay version");
+                    version = ((ReplayVersion) firstObject).version;
+                    replayVersion = version;
+                    mBeatmapsetName = (String) os.readObject();
+                } else {
+                    mBeatmapsetName = (String) firstObject;
+                }
+                String mBeatmapName = (String) os.readObject();
+                String mMD5 = (String) os.readObject();
 
-            beatmapsetName = mBeatmapsetName;
-            beatmapName = mBeatmapName;
-            md5 = mMD5;
+                beatmapsetName = mBeatmapsetName;
+                beatmapName = mBeatmapName;
+                md5 = mMD5;
 
-            if (version >= 3) {
-                stat = new StatisticV2();
-                stat.setReplayFilename(replayFilename);
-                stat.setBeatmapMD5(md5);
-                stat.setTime(os.readLong());
-                stat.setHit300k(os.readInt());
-                stat.setHit300(os.readInt());
-                stat.setHit100k(os.readInt());
-                stat.setHit100(os.readInt());
-                stat.setHit50(os.readInt());
-                stat.setMisses(os.readInt());
-                stat.setForcedScore(os.readInt());
-                stat.setScoreMaxCombo(os.readInt());
+                if (version >= 3) {
+                    stat = new StatisticV2();
+                    stat.setReplayFilename(replayFilename);
+                    stat.setBeatmapMD5(md5);
+                    stat.setTime(os.readLong());
+                    stat.setHit300k(os.readInt());
+                    stat.setHit300(os.readInt());
+                    stat.setHit100k(os.readInt());
+                    stat.setHit100(os.readInt());
+                    stat.setHit50(os.readInt());
+                    stat.setMisses(os.readInt());
+                    stat.setForcedScore(os.readInt());
+                    stat.setScoreMaxCombo(os.readInt());
 
-                if (version < 6) {
-                    // Consume `accuracy` in replays older than v6 (which is not used anymore as the result is derived from hit results)
-                    os.readFloat();
+                    if (version < 6) {
+                        // Consume `accuracy` in replays older than v6 (which is not used anymore as the result is derived from hit results)
+                        os.readFloat();
 
-                    // Consume `perfect` in replays older than v6 (which is not used anymore as the result is derived from hit results)
-                    os.readBoolean();
+                        // Consume `perfect` in replays older than v6 (which is not used anymore as the result is derived from hit results)
+                        os.readBoolean();
+                    }
+
+                    stat.setPlayerName((String) os.readObject());
+                    stat.setMod((EnumSet<GameMod>) os.readObject());
                 }
 
-                stat.setPlayerName((String) os.readObject());
-                stat.setMod((EnumSet<GameMod>) os.readObject());
-            }
-
-            if (version >= 4) {
-                stat.setExtraModFromString((String) os.readObject());
-            }
-
-            if (withGameplayData) {
-                int msize = os.readInt();
-                for (int i = 0; i < msize; i++) {
-                    cursorMoves.add(MoveArray.readFrom(os, this));
+                if (version >= 4) {
+                    stat.setExtraModFromString((String) os.readObject());
                 }
 
-                os.readInt();
-                for (int i = 0; i < objectData.length; i++) {
-                    ReplayObjectData data = new ReplayObjectData();
-                    data.accuracy = os.readShort();
-                    int len = os.readByte();
-                    if (len > 0) {
-                        data.tickSet = new BitSet();
-                        byte[] bytes = new byte[len];
-                        if (os.read(bytes) > 0) {
-                            System.out.println("Read " + len + " bytes");
-                        }
-                        for (int j = 0; j < len * 8; j++) {
-                            data.tickSet.set(j, (bytes[len - j / 8 - 1] & 1 << (j % 8)) != 0);
-                        }
+                if (withGameplayData) {
+                    int msize = os.readInt();
+                    for (int i = 0; i < msize; i++) {
+                        cursorMoves.add(MoveArray.readFrom(os, this));
                     }
-                    if (version >= 1) {
-                        data.result = os.readByte();
+
+                    os.readInt();
+                    for (int i = 0; i < objectData.length; i++) {
+                        ReplayObjectData data = new ReplayObjectData();
+                        data.accuracy = os.readShort();
+                        int len = os.readByte();
+                        if (len > 0) {
+                            data.tickSet = new BitSet();
+                            byte[] bytes = new byte[len];
+                            if (os.read(bytes) > 0) {
+                                System.out.println("Read " + len + " bytes");
+                            }
+                            for (int j = 0; j < len * 8; j++) {
+                                data.tickSet.set(j, (bytes[len - j / 8 - 1] & 1 << (j % 8)) != 0);
+                            }
+                        }
+                        if (version >= 1) {
+                            data.result = os.readByte();
+                        }
+                        objectData[i] = data;
                     }
-                    objectData[i] = data;
                 }
             }
         } catch (EOFException e) {
@@ -309,19 +287,6 @@ public class Replay {
             ToastLogger.showTextId(com.osudroid.resources.R.string.replay_corrupted, true);
             Debug.e("Cannot load replay: " + e.getMessage(), e);
             return false;
-        } finally {
-            try {
-                if (os != null) {
-                    os.close();
-                }
-
-                if (zip != null) {
-                    zip.closeEntry();
-                    zip.close();
-                }
-            } catch (final IOException e) {
-                Debug.e("IOException: " + e.getMessage(), e);
-            }
         }
 
         if (withGameplayData) {
