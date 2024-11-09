@@ -503,8 +503,7 @@ public class ScoringScene {
                 }
             }
 
-            if (stat.getTotalScoreWithMultiplier() > 0 && OnlineManager.getInstance().isStayOnline() &&
-                    OnlineManager.getInstance().isReadyToSend()) {
+            if (stat.getTotalScoreWithMultiplier() > 0 && OnlineManager.getInstance().isStayOnline()) {
 
                 if (GlobalManager.getInstance().getGameScene().hasFailed ||
                         (Multiplayer.isMultiplayer && !Config.isSubmitScoreOnMultiplayer()))
@@ -528,7 +527,7 @@ public class ScoringScene {
                 scene.registerTouchArea(sendingPanel.getDismissTouchArea());
                 scene.attachChild(sendingPanel);
 
-                OnlineScoring.getInstance().sendRecord(stat, sendingPanel, replayPath);
+                OnlineScoring.getInstance().sendRecord(beatmap, stat, sendingPanel, replayPath);
             }
         }
     }

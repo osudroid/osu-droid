@@ -105,7 +105,6 @@ import ru.nsu.ccfit.zuev.osu.menu.ModMenu;
 import ru.nsu.ccfit.zuev.osu.menu.PauseMenu;
 import ru.nsu.ccfit.zuev.osu.menu.ScoreBoardItem;
 import ru.nsu.ccfit.zuev.osu.online.OnlineFileOperator;
-import ru.nsu.ccfit.zuev.osu.online.OnlineScoring;
 import ru.nsu.ccfit.zuev.osu.scoring.Replay;
 import ru.nsu.ccfit.zuev.osu.scoring.ResultType;
 import ru.nsu.ccfit.zuev.osu.scoring.ScoringScene;
@@ -556,10 +555,6 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
         } else if (modMenu.getMod().contains(GameMod.MOD_AUTO)) {
             replay = null;
         }
-
-        //TODO online
-        if (!replaying)
-            OnlineScoring.getInstance().startPlay(beatmapInfo, parsedBeatmap.getMd5(), scope);
 
         if (Config.isEnableStoryboard()) {
             storyboardSprite.loadStoryboard(beatmapInfo.getPath());
