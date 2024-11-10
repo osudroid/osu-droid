@@ -187,8 +187,6 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
     private TimedDifficultyAttributes<DroidDifficultyAttributes>[] droidTimedDifficultyAttributes;
     private TimedDifficultyAttributes<StandardDifficultyAttributes>[] standardTimedDifficultyAttributes;
 
-    private DrawFPSCounter drawFpsCounter;
-
     private final List<ChangeableText> counterTexts = new ArrayList<>(5);
     private ChangeableText avgOffsetText;
     private ChangeableText urText;
@@ -753,7 +751,6 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
             text.detachSelf();
         }
         counterTexts.clear();
-        drawFpsCounter = null;
 
         hud = new GameplayHUD(stat, this, !Config.isHideInGameUI());
         engine.getCamera().setHUD(hud);
@@ -761,7 +758,8 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
         var counterTextFont = ResourceManager.getInstance().getFont("smallFont");
 
         if (Config.isShowFPS()) {
-            drawFpsCounter = new DrawFPSCounter(new ChangeableText(790, 520, counterTextFont, "Draw: 999/999 FPS"));
+            var updateFpsCounter = new UpdateFPSCounter(new ChangeableText(790, 480, counterTextFont, "Update: 999/999 FPS"));
+            var drawFpsCounter = new DrawFPSCounter(new ChangeableText(790, 520, counterTextFont, "Draw: 999/999 FPS"));
 
             // Attach a dummy entity for computing draw FPS, as its frame rate is tied to the draw thread and not
             // the update thread.
@@ -777,8 +775,6 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
                     previousDrawTime = currentDrawTime;
                 }
             });
-
-            var updateFpsCounter = new UpdateFPSCounter(new ChangeableText(790, 480, counterTextFont, "Update: 999/999 FPS"));
 
             counterTexts.add(drawFpsCounter.displayText);
             counterTexts.add(updateFpsCounter.displayText);
