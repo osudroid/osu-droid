@@ -15,7 +15,6 @@ import ru.nsu.ccfit.zuev.osu.Config;
 import ru.nsu.ccfit.zuev.osu.GlobalManager;
 import ru.nsu.ccfit.zuev.osu.ResourceManager;
 import ru.nsu.ccfit.zuev.osu.ToastLogger;
-import ru.nsu.ccfit.zuev.osu.game.GameHelper;
 import ru.nsu.ccfit.zuev.osu.game.GameScene;
 
 public class PauseMenu implements IOnMenuItemClickListener {
@@ -34,12 +33,6 @@ public class PauseMenu implements IOnMenuItemClickListener {
         this.fail = fail;
         replaySaved = false;
         scene = new MenuScene(engine.getCamera()) {
-            @Override
-            protected void onManagedUpdate(float pSecondsElapsed) {
-                // Cancel the effect of speed multiplier.
-                super.onManagedUpdate(pSecondsElapsed / GameHelper.getSpeedMultiplier());
-            }
-
             @Override
             public boolean onSceneTouchEvent(Scene pScene, TouchEvent pSceneTouchEvent) {
                 super.onSceneTouchEvent(pScene, pSceneTouchEvent);
