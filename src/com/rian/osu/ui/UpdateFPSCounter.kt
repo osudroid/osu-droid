@@ -16,7 +16,6 @@ class UpdateFPSCounter(displayText: ChangeableText) : FPSCounter(displayText) {
     override val tag = "Update"
 
     override fun onUpdate(deltaTime: Float) {
-        // Cancel the effect of speed multiplier on frame time.
         updateFps(deltaTime)
 
         super.onUpdate(deltaTime)
