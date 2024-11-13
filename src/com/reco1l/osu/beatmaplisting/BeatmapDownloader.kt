@@ -33,14 +33,16 @@ object BeatmapDownloader : IDownloaderObserver {
 
 
     fun download(url: String, suggestedFilename: String) {
+
         if (isDownloading) {
             return
         }
         isDownloading = true
 
-        currentFilename = suggestedFilename
+        // Slash is the only character that is not allowed for filenames in the Android filesystem (which is just a Linux filesystem).
+        currentFilename = suggestedFilename.replace('/', ' ')
 
-        val file = context.getExternalFilesDir(DIRECTORY_DOWNLOADS)!!.resolve("$suggestedFilename.osz")
+        val file = context.getExternalFilesDir(DIRECTORY_DOWNLOADS)!!.resolve("$currentFilename.osz")
 
         val downloader = FileRequest(file, url)
         downloader.buildRequest { header("User-Agent", "Chrome/Android") }
