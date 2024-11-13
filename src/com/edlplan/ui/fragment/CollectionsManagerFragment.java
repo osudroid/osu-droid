@@ -29,7 +29,7 @@ import java.util.List;
 import ru.nsu.ccfit.zuev.osu.helper.StringTable;
 import ru.nsu.ccfit.zuev.osuplus.R;
 
-public class FavoriteManagerFragment extends BaseFragment {
+public class CollectionsManagerFragment extends BaseFragment {
 
     private String selected;
 
