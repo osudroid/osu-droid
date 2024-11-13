@@ -7,9 +7,11 @@ import android.text.Editable
 import android.text.TextWatcher
 import android.view.KeyEvent
 import android.view.View
+import android.view.inputmethod.*
 import android.widget.Button
 import android.widget.CheckBox
 import android.widget.EditText
+import androidx.core.content.*
 import androidx.preference.PreferenceManager
 import com.edlplan.framework.easing.Easing
 import com.edlplan.framework.support.util.Updater
@@ -143,6 +145,9 @@ class SearchBarFragment : BaseFragment(), IUpdateHandler, IFilterMenu {
             }
 
             favoriteFolder.setOnClickListener {
+                filter.clearFocus()
+                context?.getSystemService<InputMethodManager>()?.hideSoftInputFromWindow(filter.windowToken, 0)
+
                 val collectionsManagerFragment = CollectionsManagerFragment()
                 collectionsManagerFragment.showToSelectFolder {
                     savedFolder = it
