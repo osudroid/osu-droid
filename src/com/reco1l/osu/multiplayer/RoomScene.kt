@@ -594,10 +594,10 @@ object RoomScene : Scene(), IRoomEventListener, IPlayerEventListener {
         room = null
         player = null
 
-        chat.clear()
-        chat.dismiss()
-
         mainThread {
+            chat.clear()
+            chat.dismiss()
+
             playerList?.menu?.dismiss()
 
             updateThread {
