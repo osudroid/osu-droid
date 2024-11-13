@@ -752,7 +752,6 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
         counterTexts.clear();
 
         hud = new GameplayHUD(stat, this, !Config.isHideInGameUI());
-        engine.getCamera().setHUD(hud);
 
         var counterTextFont = ResourceManager.getInstance().getFont("smallFont");
 
@@ -1006,6 +1005,8 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
 
         engine.setScene(scene);
         scene.registerUpdateHandler(this);
+
+        engine.getCamera().setHUD(hud);
 
         blockAreaFragment = new BlockAreaFragment();
         blockAreaFragment.show(false);
