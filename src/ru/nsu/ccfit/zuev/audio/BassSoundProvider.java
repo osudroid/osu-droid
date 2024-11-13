@@ -66,7 +66,7 @@ public class BassSoundProvider {
             return;
         }
 
-        int channel = BASS.BASS_SampleGetChannel(sample, false);
+        int channel = BASS.BASS_SampleGetChannel(sample, BASS.BASS_SAMCHAN_NEW | BASS.BASS_STREAM_DECODE);
         applyAudioEffectsToChannel(channel);
         BASS.BASS_ChannelSetAttribute(channel, BASS.BASS_ATTRIB_NOBUFFER, 1);
         BASS.BASS_ChannelPlay(channel, false);
