@@ -16,6 +16,7 @@ import org.anddev.andengine.entity.sprite.Sprite;
 import org.anddev.andengine.opengl.texture.region.TextureRegion;
 import org.anddev.andengine.util.MathUtils;
 
+import ru.nsu.ccfit.zuev.audio.serviceAudio.SongService;
 import ru.nsu.ccfit.zuev.osu.Config;
 import ru.nsu.ccfit.zuev.osu.Constants;
 import ru.nsu.ccfit.zuev.osu.ResourceManager;
@@ -412,7 +413,7 @@ public class GameplaySpinner extends GameObject {
         if (isSpinnerFrequencyModulate) {
             // Note that osu!stable sets the frequency directly at BassSoundProvider level.
             // This implementation tries to closely follow that behavior with the default frequency in mind.
-            float frequency = 0.5f + progress;
+            float frequency = Math.min(100000, 20000 + 40000 * progress) / SongService.defaultFrequency;;
 
             if (applyTrackRate) {
                 frequency *= GameHelper.getSpeedMultiplier();
