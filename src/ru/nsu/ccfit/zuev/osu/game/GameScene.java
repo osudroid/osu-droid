@@ -53,8 +53,7 @@ import com.rian.osu.difficulty.attributes.DroidDifficultyAttributes;
 import com.rian.osu.difficulty.attributes.StandardDifficultyAttributes;
 import com.rian.osu.difficulty.attributes.TimedDifficultyAttributes;
 import com.rian.osu.difficulty.calculator.DifficultyCalculationParameters;
-import com.rian.osu.ui.DrawFPSCounter;
-import com.rian.osu.ui.UpdateFPSCounter;
+import com.rian.osu.ui.FPSCounter;
 import com.rian.osu.utils.ModUtils;
 
 import org.anddev.andengine.engine.Engine;
@@ -758,10 +757,9 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
         var counterTextFont = ResourceManager.getInstance().getFont("smallFont");
 
         if (Config.isShowFPS()) {
-            var updateFpsCounter = new UpdateFPSCounter(new ChangeableText(790, 480, counterTextFont, "Update: 999/999 FPS"));
-            var drawFpsCounter = new DrawFPSCounter(new ChangeableText(790, 520, counterTextFont, "Draw: 999/999 FPS"));
+            var fpsCounter = new FPSCounter(counterTextFont);
 
-            // Attach a dummy entity for computing draw FPS, as its frame rate is tied to the draw thread and not
+            // Attach a dummy entity for computing FPS, as its frame rate is tied to the draw thread and not
             // the update thread.
             hud.attachChild(new Entity() {
                 private long previousDrawTime;
@@ -770,17 +768,13 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
                 protected void onManagedDraw(GL10 pGL, Camera pCamera) {
                     long currentDrawTime = SystemClock.uptimeMillis();
 
-                    drawFpsCounter.updateFps((currentDrawTime - previousDrawTime) / 1000f);
+                    fpsCounter.updateFps((currentDrawTime - previousDrawTime) / 1000f);
 
                     previousDrawTime = currentDrawTime;
                 }
             });
 
-            counterTexts.add(drawFpsCounter.displayText);
-            counterTexts.add(updateFpsCounter.displayText);
-
-            hud.registerUpdateHandler(updateFpsCounter);
-            hud.registerUpdateHandler(drawFpsCounter);
+            counterTexts.add(fpsCounter);
         }
 
         if (Config.isShowUnstableRate() && !GameHelper.isAuto()) {
