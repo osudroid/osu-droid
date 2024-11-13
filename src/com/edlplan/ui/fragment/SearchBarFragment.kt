@@ -29,7 +29,7 @@ import ru.nsu.ccfit.zuev.osu.menu.SongMenu
 import ru.nsu.ccfit.zuev.osuplus.R
 import ru.nsu.ccfit.zuev.osu.GlobalManager.getInstance as getGlobal
 
-class FilterMenuFragment : BaseFragment(), IUpdateHandler, IFilterMenu {
+class SearchBarFragment : BaseFragment(), IUpdateHandler, IFilterMenu {
     private var configContext: Context? = null
     private var savedFolder: String? = null
     private var savedFavOnly = false
@@ -99,7 +99,7 @@ class FilterMenuFragment : BaseFragment(), IUpdateHandler, IFilterMenu {
         scene!!.isBackgroundEnabled = false
         updater = object : Updater() {
             override fun createEventRunnable(): Runnable =
-                Runnable { parent.loadFilter(this@FilterMenuFragment) }
+                Runnable { parent.loadFilter(this@SearchBarFragment) }
 
             override fun postEvent(r: Runnable?) = parent.scene.postRunnable(r)
         }
@@ -143,8 +143,8 @@ class FilterMenuFragment : BaseFragment(), IUpdateHandler, IFilterMenu {
             }
 
             favoriteFolder.setOnClickListener {
-                val favoriteManagerFragment = FavoriteManagerFragment()
-                favoriteManagerFragment.showToSelectFolder {
+                val collectionsManagerFragment = CollectionsManagerFragment()
+                collectionsManagerFragment.showToSelectFolder {
                     savedFolder = it
                     favoriteFolder.text = it ?: StringTable.get(string.favorite_default)
                     updateUpdater()

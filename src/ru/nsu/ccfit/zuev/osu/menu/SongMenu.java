@@ -6,8 +6,8 @@ import android.app.Activity;
 import android.os.SystemClock;
 
 import com.edlplan.framework.easing.Easing;
-import com.edlplan.ui.fragment.FilterMenuFragment;
-import com.edlplan.ui.fragment.PropsMenuFragment;
+import com.edlplan.ui.fragment.SearchBarFragment;
+import com.edlplan.ui.fragment.BeatmapPropertiesFragment;
 import com.edlplan.ui.fragment.ScoreMenuFragment;
 import com.reco1l.framework.EasingKt;
 import com.reco1l.ibancho.RoomAPI;
@@ -131,7 +131,7 @@ public class SongMenu implements IUpdateHandler, MenuItemListener,
     private boolean isSelectComplete = true;
     private ExtendedSprite currentPressedButton;
     private ExtendedSprite scoringSwitcher = null;
-    private FilterMenuFragment filterMenu = null;
+    private SearchBarFragment filterMenu = null;
     private GroupType groupType = GroupType.MapSet;
 
     private Timer previousSelectionTimer;
@@ -714,7 +714,7 @@ public class SongMenu implements IUpdateHandler, MenuItemListener,
     }
 
     public void loadFilterFragment() {
-        filterMenu = new FilterMenuFragment();
+        filterMenu = new SearchBarFragment();
         filterMenu.loadConfig(context);
     }
 
@@ -738,7 +738,7 @@ public class SongMenu implements IUpdateHandler, MenuItemListener,
     public Scene getScene() {
         return scene;
     }
-    public FilterMenuFragment getFilterMenu() { return filterMenu; }
+    public SearchBarFragment getFilterMenu() { return filterMenu; }
 
     public void show() {
         engine.setScene(scene);
@@ -1538,7 +1538,7 @@ public class SongMenu implements IUpdateHandler, MenuItemListener,
             }
             item = selectedItem;
         }
-        (new PropsMenuFragment()).show(SongMenu.this, item);
+        (new BeatmapPropertiesFragment()).show(SongMenu.this, item);
     }
 
     public void showDeleteScoreMenu(int scoreId) {
