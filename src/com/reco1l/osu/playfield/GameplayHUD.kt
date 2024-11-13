@@ -53,10 +53,7 @@ class GameplayHUD(private val stat: StatisticV2, private val game: GameScene, pr
             }
 
             scoreCounter.setScore(0)
-            scoreCounter.onUpdateText()
-
-            accuracyCounter.y += scoreCounter.y + scoreCounter.height
-            accuracyCounter.onUpdateText()
+            accuracyCounter.setAccuracy(100f)
 
         } else {
             healthBar = null
@@ -75,7 +72,9 @@ class GameplayHUD(private val stat: StatisticV2, private val game: GameScene, pr
         if (withStatistics) {
             comboCounter!!.setCombo(stat.combo)
             scoreCounter!!.setScore(stat.totalScoreWithMultiplier)
+
             accuracyCounter!!.setAccuracy(stat.accuracy)
+            accuracyCounter.y = 9f + scoreCounter.y + scoreCounter.height
 
             if (Config.getProgressIndicatorType() == PIE) {
                 pieSongProgress!!.x = accuracyCounter.x - accuracyCounter.widthScaled - 18f
