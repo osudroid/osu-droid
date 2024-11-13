@@ -355,8 +355,6 @@ public class GameplaySpinner extends GameObject {
         }
 
         spinnerSpinSample.reset();
-        spinnerSpinSample.setLooping(true);
-
         spinnerBonusSample.reset();
 
         float startTime = (float) beatmapSpinner.startTime;
@@ -379,6 +377,8 @@ public class GameplaySpinner extends GameObject {
                 spinnerSpinSample.init(startTime, auxiliarySample);
             }
         }
+
+        spinnerSpinSample.setLooping(true);
     }
 
     protected void playAndFreeHitSamples(int obtainedScore) {
