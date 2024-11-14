@@ -1,3 +1,36 @@
+Version 1.8 Patch 2
+===================
+
+# Changes
+
+- Revamped slider judgement (again)
+  - Should actually match osu!stable now, minus slider end leniency and expanded follow circle area.
+- Improved FPS counter accuracy
+- Improved gameplay loading time significantly
+- In-game leaderboard and hit error meter now remain visible even if gameplay UI is disabled, provided that their 
+  respective settings are enabled
+- Reduced update frequency of FPS counter
+
+# Removals
+
+- Removed update FPS counter
+- Removed random button press cooldown
+
+# Bug Fixes
+
+- Fixed note stacking not being applied properly to slider paths
+- Fixed another possible memory leak when loading and saving replays
+- Fixed a possible crash when migrating beatmap collections
+- Fixed pause menu animation being affected by speed multiplier
+- Fixed `spinnerspin` samples potentially sounding choppy
+- Fixed `sliderslide`, `sliderwhistle`, and `spinnerspin` samples not looping properly
+- Fixed beatmap import from osu.direct failing on beatmaps with a slash character in their artist or title
+- Fixed game window potentially scaling down when searching for a beatmap in song selection menu
+- Fixed a potential case where gameplay HUD remains visible when going back from gameplay to room lobby in multiplayer
+- Fixed beatmap star rating occasionally showing 0 when switching between beatmaps fast enough
+- Fixed previous selection not cancelling when random button selection is cancelled by dragging out of the button
+- Fixed a possible crash when leaving a multiplayer room
+
 Version 1.8 Patch 1
 ===================
 
