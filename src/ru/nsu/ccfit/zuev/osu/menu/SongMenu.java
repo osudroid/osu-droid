@@ -83,9 +83,6 @@ import static com.reco1l.osu.data.BeatmapsKt.BeatmapInfo;
 
 public class SongMenu implements IUpdateHandler, MenuItemListener,
         IScrollBarListener {
-    private final static Boolean musicMutex = true;
-    private final static Boolean bgMutex = true;
-    private final Boolean backgroundMutex = true;
     public Scene scene;
     public Entity frontLayer = new Entity();
     SortOrder sortOrder = SortOrder.Title;
@@ -100,7 +97,6 @@ public class SongMenu implements IUpdateHandler, MenuItemListener,
     private BeatmapSetItem selectedItem = null;
     private BeatmapInfo selectedBeatmap;
     private Sprite bg = null;
-    private Boolean bgLoaded = false;
     private String backgroundPath = "";
     private ScoreBoard board;
     private Float touchY = null;
@@ -127,7 +123,6 @@ public class SongMenu implements IUpdateHandler, MenuItemListener,
             beatmapHitObjectsText,
             beatmapDifficultyText;
 
-    private boolean isSelectComplete = true;
     private ExtendedSprite currentPressedButton;
     private ExtendedSprite scoringSwitcher = null;
     private SearchBarFragment filterMenu = null;
@@ -143,10 +138,10 @@ public class SongMenu implements IUpdateHandler, MenuItemListener,
     }
 
     public static void stopMusicStatic() {
-        synchronized (musicMutex) {
-            if (GlobalManager.getInstance().getSongService() != null) {
-                GlobalManager.getInstance().getSongService().stop();
-            }
+        var songService = GlobalManager.getInstance().getSongService();
+
+        if (songService != null) {
+            songService.stop();
         }
     }
 
@@ -199,7 +194,6 @@ public class SongMenu implements IUpdateHandler, MenuItemListener,
         selectedItem = null;
         items = new ArrayList<>();
         selectedBeatmap = null;
-        bgLoaded = true;
         SongMenuPool.getInstance().init();
         loadFilterFragment();
         updateMusicEffects();
@@ -537,10 +531,6 @@ public class SongMenu implements IUpdateHandler, MenuItemListener,
                         previousSelectionTimer.scheduleAtFixedRate(new TimerTask() {
                             @Override
                             public void run() {
-                                if (!isSelectComplete) {
-                                    return;
-                                }
-
                                 BeatmapSetItem previousItem = previousSelectedItems.pollLast();
                                 while (previousItem != null && previousItem.isDeleted()) {
                                     previousItem = previousSelectedItems.pollLast();
@@ -579,10 +569,6 @@ public class SongMenu implements IUpdateHandler, MenuItemListener,
 
                         if (previousSelectionTimer != null) {
                             previousSelectionTimer.cancel();
-                        }
-
-                        if (!isSelectComplete) {
-                            return true;
                         }
 
                         if (!moved && !previousSelectionPerformed) {
@@ -872,13 +858,9 @@ public class SongMenu implements IUpdateHandler, MenuItemListener,
     }
 
     public void increaseBackgroundLuminance(final float pSecondsElapsed) {
-        if (bg != null) {
-            synchronized (backgroundMutex) {
-                if (bg != null && bg.getRed() < 1) {
-                    final float col = Math.min(1, bg.getRed() + pSecondsElapsed);
-                    bg.setColor(col, col, col);
-                }
-            }
+        if (bg != null && bg.getRed() < 1) {
+            final float col = Math.min(1, bg.getRed() + pSecondsElapsed);
+            bg.setColor(col, col, col);
         }
     }
 
@@ -1131,12 +1113,6 @@ public class SongMenu implements IUpdateHandler, MenuItemListener,
         }
 
         if (selectedBeatmap != null && selectedBeatmap.getFilename().equals(beatmapInfo.getFilename())) {
-            synchronized (bgMutex) {
-                if (!bgLoaded) {
-                    return;
-                }
-            }
-
             ResourceManager.getInstance().getSound("menuhit").play();
             cancelCalculationJobs();
             cancelMapStatusLoadingJob();
@@ -1162,7 +1138,6 @@ public class SongMenu implements IUpdateHandler, MenuItemListener,
             game.startGame(beatmapInfo, null);
             return;
         }
-        isSelectComplete = false;
         selectedBeatmap = beatmapInfo;
         GlobalManager.getInstance().setSelectedBeatmap(beatmapInfo);
         cancelCalculationJobs();
@@ -1171,72 +1146,58 @@ public class SongMenu implements IUpdateHandler, MenuItemListener,
         updateScoringSwitcherStatus(false);
         board.init(beatmapInfo);
 
-        synchronized (backgroundMutex) {
-
-            if (!reloadBG && (beatmapInfo.getBackgroundFilename() == null || backgroundPath.equals(beatmapInfo.getBackgroundPath()))) {
-                isSelectComplete = true;
-                return;
-            }
-            backgroundPath = beatmapInfo.getBackgroundPath();
-            bg = null;
-            bgLoaded = false;
-            scene.setBackground(new ColorBackground(0, 0, 0));
+        if (!reloadBG && (beatmapInfo.getBackgroundFilename() == null || backgroundPath.equals(beatmapInfo.getBackgroundPath()))) {
+            return;
         }
+        backgroundPath = beatmapInfo.getBackgroundPath();
+        bg = null;
+        scene.setBackground(new ColorBackground(0, 0, 0));
 
         if (backgroundLoadingJob != null) {
             backgroundLoadingJob.cancel(new CancellationException("Background loading has been cancelled."));
         }
 
         backgroundLoadingJob = Execution.async(scope -> {
-            synchronized (backgroundMutex) {
-                JobKt.ensureActive(scope.getCoroutineContext());
+            JobKt.ensureActive(scope.getCoroutineContext());
 
-                TextureRegion tex = Config.isSafeBeatmapBg() || beatmapInfo.getBackgroundFilename() == null?
-                        ResourceManager.getInstance().getTexture("menu-background") :
-                        ResourceManager.getInstance().loadBackground(backgroundPath);
+            TextureRegion tex = Config.isSafeBeatmapBg() || beatmapInfo.getBackgroundFilename() == null?
+                    ResourceManager.getInstance().getTexture("menu-background") :
+                    ResourceManager.getInstance().loadBackground(backgroundPath);
 
-                if (tex != null) {
-                    float height = tex.getHeight();
-                    height *= Config.getRES_WIDTH()
-                            / (float) tex.getWidth();
-                    bg = new Sprite(0,
-                            (Config.getRES_HEIGHT() - height) / 2, Config
-                            .getRES_WIDTH(), height, tex);
-                    bg.setColor(0, 0, 0);
-                }
-
-                JobKt.ensureActive(scope.getCoroutineContext());
-
-                if (bg == null) {
-                    final TextureRegion tex1 = ResourceManager
-                            .getInstance().getTexture("menu-background");
-                    float height = tex1.getHeight();
-                    height *= Config.getRES_WIDTH()
-                            / (float) tex1.getWidth();
-                    bg = new Sprite(
-                            0,
-                            (Config.getRES_HEIGHT() - height) / 2,
-                            Config.getRES_WIDTH(), height, tex1);
-                    backgroundPath = "";
-                }
-
-                JobKt.ensureActive(scope.getCoroutineContext());
-
-                Execution.updateThread(() -> {
-                    synchronized (backgroundMutex) {
-                        if (selectedBeatmap != null && !selectedBeatmap.getFilename().equals(beatmapInfo.getFilename())) {
-                            return;
-                        }
-
-                        scene.setBackground(new SpriteBackground(bg));
-                        synchronized (bgMutex) {
-                            bgLoaded = true;
-                        }
-                    }
-                });
+            if (tex != null) {
+                float height = tex.getHeight();
+                height *= Config.getRES_WIDTH()
+                        / (float) tex.getWidth();
+                bg = new Sprite(0,
+                        (Config.getRES_HEIGHT() - height) / 2, Config
+                        .getRES_WIDTH(), height, tex);
+                bg.setColor(0, 0, 0);
             }
 
-            isSelectComplete = true;
+            JobKt.ensureActive(scope.getCoroutineContext());
+
+            if (bg == null) {
+                final TextureRegion tex1 = ResourceManager
+                        .getInstance().getTexture("menu-background");
+                float height = tex1.getHeight();
+                height *= Config.getRES_WIDTH()
+                        / (float) tex1.getWidth();
+                bg = new Sprite(
+                        0,
+                        (Config.getRES_HEIGHT() - height) / 2,
+                        Config.getRES_WIDTH(), height, tex1);
+                backgroundPath = "";
+            }
+
+            JobKt.ensureActive(scope.getCoroutineContext());
+
+            Execution.updateThread(() -> {
+                if (selectedBeatmap != null && !selectedBeatmap.getFilename().equals(beatmapInfo.getFilename())) {
+                    return;
+                }
+
+                scene.setBackground(new SpriteBackground(bg));
+            });
         });
     }
 
@@ -1418,19 +1379,17 @@ public class SongMenu implements IUpdateHandler, MenuItemListener,
             musicVolumeAnimator.setDuration((long) (800 * Math.abs(endVolume - initialVolume)));
             musicVolumeAnimator.setInterpolator(input -> EasingKt.interpolate(Easing.Out, input));
             musicVolumeAnimator.addUpdateListener(animation -> {
-                synchronized (musicMutex) {
-                    var animatorSongService = GlobalManager.getInstance().getSongService();
-                    if (animatorSongService == null) {
-                        return;
-                    }
-
-                    if (animatorSongService.getStatus() == Status.STOPPED) {
-                        musicVolumeAnimator.cancel();
-                        return;
-                    }
-
-                    animatorSongService.setVolume(animation.getAnimatedFraction() * Config.getBgmVolume());
+                var animatorSongService = GlobalManager.getInstance().getSongService();
+                if (animatorSongService == null) {
+                    return;
                 }
+
+                if (animatorSongService.getStatus() == Status.STOPPED) {
+                    musicVolumeAnimator.cancel();
+                    return;
+                }
+
+                animatorSongService.setVolume(animation.getAnimatedFraction() * Config.getBgmVolume());
             });
 
             musicVolumeAnimator.start();
@@ -1448,10 +1407,10 @@ public class SongMenu implements IUpdateHandler, MenuItemListener,
     public void stopMusic() {
         stopMusicVolumeAnimation();
 
-        synchronized (musicMutex) {
-            if (GlobalManager.getInstance().getSongService() != null) {
-                GlobalManager.getInstance().getSongService().stop();
-            }
+        var songService = GlobalManager.getInstance().getSongService();
+
+        if (songService != null) {
+            GlobalManager.getInstance().getSongService().stop();
         }
     }
 
@@ -1467,35 +1426,33 @@ public class SongMenu implements IUpdateHandler, MenuItemListener,
         stopMusicVolumeAnimation();
         allowAutomaticPlaybackRestart = false;
         musicLoadingJob = Execution.async(scope -> {
-            synchronized (musicMutex) {
-                var songService = GlobalManager.getInstance().getSongService();
-                if (songService != null) {
-                    songService.stop();
+            var songService = GlobalManager.getInstance().getSongService();
+            if (songService != null) {
+                songService.stop();
+            }
+
+            try {
+                JobKt.ensureActive(scope.getCoroutineContext());
+
+                songService.preLoad(filePath);
+                updateMusicEffects();
+
+                JobKt.ensureActive(scope.getCoroutineContext());
+                songService.play();
+                startMusicVolumeAnimation();
+                if (previewTime >= 0) {
+                    songService.seekTo(previewTime);
+                } else {
+                    songService.seekTo((int) (songService.getLength() * 0.4f));
                 }
 
-                try {
-                    JobKt.ensureActive(scope.getCoroutineContext());
-
-                    songService.preLoad(filePath);
-                    updateMusicEffects();
-
-                    JobKt.ensureActive(scope.getCoroutineContext());
-                    songService.play();
-                    startMusicVolumeAnimation();
-                    if (previewTime >= 0) {
-                        songService.seekTo(previewTime);
-                    } else {
-                        songService.seekTo((int) (songService.getLength() * 0.4f));
-                    }
-
-                    allowAutomaticPlaybackRestart = true;
-                } catch (final Exception e) {
-                    if (e instanceof CancellationException) {
-                        throw e;
-                    }
-
-                    Debug.e("LoadingMusic: " + e.getMessage(), e);
+                allowAutomaticPlaybackRestart = true;
+            } catch (final Exception e) {
+                if (e instanceof CancellationException) {
+                    throw e;
                 }
+
+                Debug.e("LoadingMusic: " + e.getMessage(), e);
             }
         });
     }
