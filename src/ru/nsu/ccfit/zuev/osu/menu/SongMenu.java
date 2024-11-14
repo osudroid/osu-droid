@@ -3,7 +3,6 @@ package ru.nsu.ccfit.zuev.osu.menu;
 import android.animation.ValueAnimator;
 import android.annotation.SuppressLint;
 import android.app.Activity;
-import android.os.SystemClock;
 
 import com.edlplan.framework.easing.Easing;
 import com.edlplan.ui.fragment.SearchBarFragment;
@@ -135,7 +134,6 @@ public class SongMenu implements IUpdateHandler, MenuItemListener,
     private GroupType groupType = GroupType.MapSet;
 
     private Timer previousSelectionTimer;
-    private long lastSelectionTime;
     private final long previousSelectionInterval = 1000;
     private boolean previousSelectionPerformed;
     private final LinkedList<BeatmapSetItem> previousSelectedItems = new LinkedList<>();
@@ -523,7 +521,7 @@ public class SongMenu implements IUpdateHandler, MenuItemListener,
             public boolean onAreaTouched(final TouchEvent pSceneTouchEvent,
                                          final float pTouchAreaLocalX, final float pTouchAreaLocalY) {
                 if (pSceneTouchEvent.isActionDown()) {
-                    if (currentPressedButton == null && SystemClock.uptimeMillis() - lastSelectionTime > previousSelectionInterval / 4) {
+                    if (currentPressedButton == null) {
                         currentPressedButton = this;
 
                         setTextureRegion(ResourceManager.getInstance().getTextureIfLoaded("selection-random-over"));
@@ -579,7 +577,6 @@ public class SongMenu implements IUpdateHandler, MenuItemListener,
 
                         setTextureRegion(ResourceManager.getInstance().getTextureIfLoaded("selection-random"));
 
-                        lastSelectionTime = SystemClock.uptimeMillis();
                         if (previousSelectionTimer != null) {
                             previousSelectionTimer.cancel();
                         }
