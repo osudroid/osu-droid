@@ -202,6 +202,9 @@ public class ScoreBoard extends Entity implements ScrollDetector.IScrollDetector
 
             @Override
             public void run() {
+                if (GlobalManager.getInstance().getSelectedBeatmap() != beatmapInfo) {
+                    return;
+                }
 
                 List<String> scores;
 
@@ -316,6 +319,10 @@ public class ScoreBoard extends Entity implements ScrollDetector.IScrollDetector
 
             @Override
             public void run() {
+                if (GlobalManager.getInstance().getSelectedBeatmap() != beatmap) {
+                    return;
+                }
+
                 var scores = DatabaseManager.getScoreInfoTable().getBeatmapScores(beatmap.getMD5());
 
                 if (scores.isEmpty() || !isActive()) {
