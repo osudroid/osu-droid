@@ -616,7 +616,7 @@ public class SongMenu implements IUpdateHandler, MenuItemListener,
                     moved = true;
                     setTextureRegion(ResourceManager.getInstance().getTextureIfLoaded("selection-random"));
 
-                    if (pSceneTouchEvent.isActionOutside() && previousSelectionTimer != null) {
+                    if (previousSelectionTimer != null) {
                         previousSelectionTimer.cancel();
                     }
                 }
