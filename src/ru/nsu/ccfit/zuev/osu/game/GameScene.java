@@ -752,7 +752,6 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
         counterTexts.clear();
 
         hud = new GameplayHUD(stat, this, !Config.isHideInGameUI());
-        engine.getCamera().setHUD(hud);
 
         var counterTextFont = ResourceManager.getInstance().getFont("smallFont");
 
@@ -869,17 +868,16 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
         }
 
         if (!Config.isHideInGameUI()) {
-
             if (Config.getProgressIndicatorType() == ProgressIndicatorType.BAR) {
                 var progressBar = new LinearSongProgress(this, hud, lastObjectEndTime, firstObjectStartTime, new PointF(0, Config.getRES_HEIGHT() - 7), Config.getRES_WIDTH(), 7);
                 progressBar.setProgressRectColor(new RGBColor(153f / 255f, 204f / 255f, 51f / 255f));
                 progressBar.setProgressRectAlpha(0.4f);
                 progressBar.setInitialPassedTime(initialElapsedTime);
             }
+        }
 
-            if (Config.getErrorMeter() == 1 || (Config.getErrorMeter() == 2 && replaying)) {
-                hitErrorMeter = new HitErrorMeter(hud, new PointF(Config.getRES_WIDTH() / 2f, Config.getRES_HEIGHT() - 20), playableBeatmap.getDifficulty().od, 12, difficultyHelper);
-            }
+        if (Config.getErrorMeter() == 1 || (Config.getErrorMeter() == 2 && replaying)) {
+            hitErrorMeter = new HitErrorMeter(hud, new PointF(Config.getRES_WIDTH() / 2f, Config.getRES_HEIGHT() - 20), playableBeatmap.getDifficulty().od, 12, difficultyHelper);
         }
 
         skipBtn = null;
@@ -892,35 +890,33 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
         }
 
         breakAnimator = new BreakAnimator(this, fgScene, stat, playableBeatmap.getGeneral().letterboxInBreaks, dimRectangle);
-        if (!Config.isHideInGameUI()) {
 
-            if (Config.isComboburst()) {
-                comboBurst = new ComboBurst(Config.getRES_WIDTH(), Config.getRES_HEIGHT());
-                comboBurst.attachAll(bgScene);
-            }
-
-            var mods = stat.getMod();
-            var position = new PointF(Config.getRES_WIDTH() - 130, 130);
-            float timeOffset = 0;
-
-            for (var mod : mods) {
-
-                var effect = GameObjectPool.getInstance().getEffect(GameMod.getTextureName(mod));
-
-                effect.init(fgScene, position, scale, Modifiers.sequence(
-                    Modifiers.scale(0.25f, 1.2f, 1f),
-                    Modifiers.delay(2f - timeOffset),
-                    Modifiers.parallel(
-                        Modifiers.fadeOut(0.5f),
-                        Modifiers.scale(0.5f, 1f, 1.5f)
-                    )
-                ));
-
-                position.x -= 25f;
-                timeOffset += 0.25f;
-            }
-
+        if (Config.isComboburst()) {
+            comboBurst = new ComboBurst(Config.getRES_WIDTH(), Config.getRES_HEIGHT());
+            comboBurst.attachAll(bgScene);
         }
+
+        var mods = stat.getMod();
+        var position = new PointF(Config.getRES_WIDTH() - 130, 130);
+        float timeOffset = 0;
+
+        for (var mod : mods) {
+
+            var effect = GameObjectPool.getInstance().getEffect(GameMod.getTextureName(mod));
+
+            effect.init(fgScene, position, scale, Modifiers.sequence(
+                Modifiers.scale(0.25f, 1.2f, 1f),
+                Modifiers.delay(2f - timeOffset),
+                Modifiers.parallel(
+                    Modifiers.fadeOut(0.5f),
+                    Modifiers.scale(0.5f, 1f, 1.5f)
+                )
+            ));
+
+            position.x -= 25f;
+            timeOffset += 0.25f;
+        }
+
 
         Rectangle kiaiRect = new Rectangle(0, 0, Config.getRES_WIDTH(),
                 Config.getRES_HEIGHT());
@@ -949,13 +945,12 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
 
         ChangeableText replayText = null;
 
-        if (!Config.isHideInGameUI() && !Config.isHideReplayMarquee()) {
+        if (!Config.isHideReplayMarquee()) {
             replayText = new ChangeableText(0, 0, ResourceManager.getInstance().getFont("font"), "", 1000);
             replayText.setPosition(0, 140);
             replayText.setAlpha(0.7f);
             hud.attachChild(replayText, 0);
         }
-
 
         if (stat.getMod().contains(GameMod.MOD_AUTO) || replaying) {
             var metadata = playableBeatmap.getMetadata();
@@ -971,7 +966,7 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
             playname = Multiplayer.player.getTeam().toString();
         }
 
-        if (!Config.isHideInGameUI() && Config.isShowScoreboard()) {
+        if (Config.isShowScoreboard()) {
             scoreBoard = new GameplayLeaderboard(playname, stat);
             hud.attachChild(scoreBoard);
         }
@@ -1006,6 +1001,8 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
 
         engine.setScene(scene);
         scene.registerUpdateHandler(this);
+
+        engine.getCamera().setHUD(hud);
 
         blockAreaFragment = new BlockAreaFragment();
         blockAreaFragment.show(false);

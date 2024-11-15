@@ -258,11 +258,9 @@ public class GameplayHitCircle extends GameObject {
         } else {
             float frameHitOffset = (float) hitOffsetToPreviousFrame() / 1000;
 
-            if (canBeHit(dt, frameHitOffset) && isHit()) {
-                // At this point, the object's state is already in the next update tick.
-                // However, hit judgements require the object's state to be in the previous tick.
-                // Therefore, we subtract dt to get the object's state in the previous tick.
-                float signAcc = passedTime - timePreempt - dt + frameHitOffset;
+            // dt is 0 here as the current time is updated *after* this judgement.
+            if (canBeHit(0, frameHitOffset) && isHit()) {
+                float signAcc = passedTime - timePreempt + frameHitOffset;
                 final float acc = Math.abs(signAcc);
                 if (acc <= GameHelper.getDifficultyHelper().hitWindowFor50(GameHelper.getOverallDifficulty())) {
                     playHitSamples();

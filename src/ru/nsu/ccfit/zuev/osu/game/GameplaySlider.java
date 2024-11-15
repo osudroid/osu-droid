@@ -1141,10 +1141,7 @@ public class GameplaySlider extends GameObject {
         }
 
         sliderSlideSample.reset();
-        sliderSlideSample.setLooping(true);
-
         sliderWhistleSample.reset();
-        sliderWhistleSample.setLooping(true);
 
         float startTime = (float) beatmapSlider.startTime;
 
@@ -1171,6 +1168,9 @@ public class GameplaySlider extends GameObject {
             sliderSlideSample.setFrequency(GameHelper.getSpeedMultiplier());
             sliderWhistleSample.setFrequency(GameHelper.getSpeedMultiplier());
         }
+
+        sliderSlideSample.setLooping(true);
+        sliderWhistleSample.setLooping(true);
     }
 
     private void playCurrentNestedObjectHitSound() {

@@ -23,12 +23,14 @@ class FPSCounter(font: Font) : ChangeableText(0f, 0f, font, "999/999 FPS") {
     /**
      * The current frame rate.
      */
+    @get:JvmName("getFPS")
     var fps = 0f
         private set
 
     /**
      * The maximum frame rate that can be displayed.
      */
+    @get:JvmName("getMaximumFPS")
     var maximumFps = 0f
         private set(value) {
             if (field == value) {
@@ -44,6 +46,7 @@ class FPSCounter(font: Font) : ChangeableText(0f, 0f, font, "999/999 FPS") {
     /**
      * The average frame rate.
      */
+    @get:JvmName("getAverageFPS")
     var averageFps = 0f
         private set
 
@@ -100,7 +103,7 @@ class FPSCounter(font: Font) : ChangeableText(0f, 0f, font, "999/999 FPS") {
     private var forceUpdate = false
 
     private var timeSinceLastUpdate = 0f
-    private val updateInterval = 0.01f
+    private val updateInterval = 0.1f
 
     private val minimumTextColor = ColorARGB(0xed1121)
     private val middleTextColor = ColorARGB(0xebc247)
@@ -172,6 +175,7 @@ class FPSCounter(font: Font) : ChangeableText(0f, 0f, font, "999/999 FPS") {
         framesSinceLastAverageFpsCalculation = 0
 
         fps = 0f
+        averageFps = 0f
         maximumFps = 0f
         lastDisplayedFps = 0
         forceUpdate = false
