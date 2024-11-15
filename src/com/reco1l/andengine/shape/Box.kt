@@ -50,6 +50,8 @@ open class Box : ExtendedEntity(vertexBuffer = BoxVertexBuffer()) {
                 put(6, width)
                 put(7, height)
             }
+
+            setHardwareBufferNeedsUpdate()
         }
 
     }
@@ -222,6 +224,8 @@ open class RoundedBox(segmentsPerArc: Int = 10) : ExtendedEntity(RoundedBoxVerte
 
             // Bottom left corner (90° to 180°)
             addArc(cornerRadius, height - cornerRadius, 90f, 180f)
+
+            setHardwareBufferNeedsUpdate()
         }
 
 
