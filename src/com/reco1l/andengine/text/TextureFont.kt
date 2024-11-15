@@ -93,6 +93,7 @@ open class TextureFont(private val characters: MutableMap<Char, TextureRegion>) 
             val textureWidth = texture.width.toFloat()
             val textureHeight = texture.height.toFloat()
 
+            gl.glPushMatrix()
             gl.glTranslatef(offsetX, 0f, 0f)
 
             vertexBuffer.update(textureWidth, textureHeight)
@@ -100,8 +101,7 @@ open class TextureFont(private val characters: MutableMap<Char, TextureRegion>) 
 
             onApplyVertices(gl)
             drawVertices(gl, camera)
-
-            gl.glTranslatef(-offsetX, 0f, 0f)
+            gl.glPopMatrix()
 
             offsetX += textureWidth + spacing
         }
