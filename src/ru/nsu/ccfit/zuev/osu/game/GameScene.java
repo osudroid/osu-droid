@@ -2275,7 +2275,7 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
                     }
 
                     float decreasedFrequency = Math.max(101, songService.getFrequency() - 300);
-                    float decreasedSpeed = GameHelper.getSpeedMultiplier() - GameHelper.getSpeedMultiplier() * ((initialFrequency - decreasedFrequency) / initialFrequency);
+                    float decreasedSpeed = GameHelper.getSpeedMultiplier() * (1 - (initialFrequency - decreasedFrequency) / initialFrequency);
 
                     scene.setTimeMultiplier(decreasedSpeed);
                     if (video != null) {
@@ -2288,8 +2288,8 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
                         video.pause();
                     }
 
-                    if (GlobalManager.getInstance().getSongService() != null && GlobalManager.getInstance().getSongService().getStatus() == Status.PLAYING) {
-                        GlobalManager.getInstance().getSongService().pause();
+                    if (songService.getStatus() == Status.PLAYING) {
+                        songService.pause();
                     }
                     paused = true;
 
