@@ -2239,8 +2239,22 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
         // Wind down animation for failing based on osu!stable behavior.
 
         engine.registerUpdateHandler(new IUpdateHandler() {
+            private float elapsedTime;
+
             @Override
             public void onUpdate(float pSecondsElapsed) {
+                elapsedTime += pSecondsElapsed;
+
+                // In osu!stable, the update is capped to 60 FPS. This means in higher framerates, the animations
+                // need to be slowed down to match 60 FPS.
+                float sixtyFPS = 1 / 60f;
+
+                if (elapsedTime < sixtyFPS) {
+                    return;
+                }
+
+                elapsedTime -= sixtyFPS;
+
                 if (songService.getFrequency() > 101) {
 
                     for (int i = 0; i < mgScene.getChildCount(); i++) {
