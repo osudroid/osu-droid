@@ -102,7 +102,7 @@ class ComboCounter : Container() {
         it.y = -(1 - FONT_HEIGHT_RATIO) * it.height + VERTICAL_OFFSET
         it.spacing = -OsuSkin.get().comboOverlap
 
-        attachChild(it)
+        attachChild(it, 0)
     }
 
     private val updateDisplayedCount = OnModifierFinished {
