@@ -8,6 +8,7 @@ import kotlin.random.Random;
 import kotlinx.coroutines.CoroutineScope;
 import kotlinx.coroutines.Job;
 import kotlinx.coroutines.JobKt;
+import ru.nsu.ccfit.zuev.audio.serviceAudio.SongService;
 import ru.nsu.ccfit.zuev.osu.SecurityUtils;
 
 import com.edlplan.framework.easing.Easing;
@@ -16,6 +17,7 @@ import com.edlplan.framework.math.line.LinePath;
 import com.edlplan.framework.support.ProxySprite;
 import com.edlplan.framework.support.osb.StoryboardSprite;
 import com.edlplan.framework.utils.functionality.SmartIterator;
+import com.edlplan.osu.support.slider.SliderBody;
 import com.reco1l.andengine.modifier.UniversalModifier;
 import com.reco1l.ibancho.RoomAPI;
 import com.reco1l.osu.DifficultyCalculationManager;
@@ -62,6 +64,7 @@ import org.anddev.andengine.engine.camera.SmoothCamera;
 import org.anddev.andengine.engine.handler.IUpdateHandler;
 import org.anddev.andengine.engine.options.TouchOptions;
 import org.anddev.andengine.entity.Entity;
+import org.anddev.andengine.entity.IEntity;
 import org.anddev.andengine.entity.modifier.LoopEntityModifier;
 import org.anddev.andengine.entity.modifier.MoveXModifier;
 import org.anddev.andengine.entity.primitive.Rectangle;
@@ -190,6 +193,14 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
     private ChangeableText avgOffsetText;
     private ChangeableText urText;
     private ChangeableText memText;
+
+    // Game
+
+    /**
+     * Whether the game is over.
+     */
+    private boolean isGameOver = false;
+
 
     // UI
 
@@ -602,6 +613,7 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
         realTimeElapsed = 0;
         statisticDataTimeElapsed = 0;
         lastScoreSent = null;
+        isGameOver = false;
 
         paused = false;
         gameStarted = false;
@@ -1223,13 +1235,11 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
                 if (GameHelper.isEasy() && failcount < 3) {
                     failcount++;
                     stat.changeHp(1f);
-                }
-                else {
-                    if (Multiplayer.isMultiplayer)
-                    {
-                        if (!hasFailed)
+                } else {
+                    if (Multiplayer.isMultiplayer) {
+                        if (!hasFailed) {
                             ToastLogger.showText("You failed but you can continue playing.", false);
-
+                        }
                         hasFailed = true;
                     } else {
                         gameover();
@@ -2198,10 +2208,14 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
     }
 
     public void gameover() {
-        if (Multiplayer.isMultiplayer)
-        {
-            if (Multiplayer.isConnected())
-            {
+
+        if (isGameOver) {
+            return;
+        }
+        isGameOver = true;
+
+        if (Multiplayer.isMultiplayer) {
+            if (Multiplayer.isConnected()) {
                 Multiplayer.log("Player has lost, moving to room scene.");
                 Execution.async(() -> Execution.runSafe(() -> RoomAPI.submitFinalScore(stat.toJson())));
             }
@@ -2219,17 +2233,77 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
         final PauseMenu menu = new PauseMenu(engine, this, true);
         gameStarted = false;
 
-        if (video != null) {
-            video.pause();
-        }
+        SongService songService = GlobalManager.getInstance().getSongService();
+        float initialFrequency = songService.getFrequency();
 
-        if (GlobalManager.getInstance().getSongService() != null && GlobalManager.getInstance().getSongService().getStatus() == Status.PLAYING) {
-            GlobalManager.getInstance().getSongService().pause();
-        }
-        paused = true;
+        // Wind down animation for failing based on osu!stable behavior.
 
-        scene.setIgnoreUpdate(true);
-        hud.setChildScene(menu.getScene(), false, true, true);
+        scene.registerUpdateHandler(new IUpdateHandler() {
+
+            @Override
+            public void onUpdate(float pSecondsElapsed) {
+                if (songService.getFrequency() > 101) {
+
+                    for (int i = 0; i < mgScene.getChildCount(); i++) {
+                        IEntity entity = mgScene.getChild(i);
+
+                        if (entity.getAlpha() > 0) {
+                            entity.setAlpha(Math.max(0, entity.getAlpha() - 0.007f));
+                        }
+
+                        if (entity instanceof SliderBody sliderBody) {
+                            // Slider body needs special handling since the entity's position doesn't represent the
+                            // actual position because it's real position is represented directly on the path vertices.
+                            float positionY = entity.getY() + sliderBody.gameplayPositionY;
+
+                            entity.setPosition(entity.getX(), positionY < 0f
+                                    ? (positionY * 0.6f) - sliderBody.gameplayPositionY
+                                    : (positionY * 1.01f) - sliderBody.gameplayPositionY
+                            );
+                        } else {
+                            entity.setPosition(entity.getX(), entity.getY() < 0f ? entity.getY() * 0.6f : entity.getY() * 1.01f);
+                        }
+
+
+                        if (entity.getRotation() == 0) {
+                            entity.setRotation(entity.getRotation() + (float) Random.Default.nextDouble(-0.02, 0.02));
+                        } else if (entity.getRotation() > 0) {
+                            entity.setRotation(entity.getRotation() + 0.01f);
+                        } else {
+                            entity.setRotation(entity.getRotation() - 0.01f);
+                        }
+                    }
+
+                    float decreasedFrequency = Math.max(101, songService.getFrequency() - 300);
+                    float decreasedSpeed = GameHelper.getSpeedMultiplier() - GameHelper.getSpeedMultiplier() * ((initialFrequency - decreasedFrequency) / initialFrequency);
+
+                    scene.setTimeMultiplier(decreasedSpeed);
+                    if (video != null) {
+                        video.setPlaybackSpeed(decreasedSpeed);
+                    }
+
+                    songService.setFrequencyForcefully(decreasedFrequency);
+                } else {
+                    if (video != null) {
+                        video.pause();
+                    }
+
+                    if (GlobalManager.getInstance().getSongService() != null && GlobalManager.getInstance().getSongService().getStatus() == Status.PLAYING) {
+                        GlobalManager.getInstance().getSongService().pause();
+                    }
+                    paused = true;
+
+                    scene.setIgnoreUpdate(true);
+                    scene.unregisterUpdateHandler(this);
+
+                    hud.setChildScene(menu.getScene(), false, true, true);
+                }
+            }
+
+            @Override
+            public void reset() {
+            }
+        });
     }
 
     public void resume() {

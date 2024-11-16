@@ -248,13 +248,13 @@ public class GameplaySlider extends GameObject {
             float fadeOutDuration = timePreempt * (float) ModHidden.FADE_OUT_DURATION_MULTIPLIER;
 
             headCirclePiece.registerEntityModifier(Modifiers.sequence(
-                Modifiers.fadeIn(fadeInDuration),
-                Modifiers.fadeOut(fadeOutDuration)
+                    Modifiers.fadeIn(fadeInDuration),
+                    Modifiers.fadeOut(fadeOutDuration)
             ));
 
             tailCirclePiece.registerEntityModifier(Modifiers.sequence(
-                Modifiers.fadeIn(fadeInDuration),
-                Modifiers.fadeOut(fadeOutDuration)
+                    Modifiers.fadeIn(fadeInDuration),
+                    Modifiers.fadeOut(fadeOutDuration)
             ));
 
         } else {
@@ -310,6 +310,12 @@ public class GameplaySlider extends GameObject {
         } else {
             sliderBody.setHintVisible(false);
         }
+
+        // Used exclusively for modifiers. The slider path already has this coordinates
+        // applied to its vertices (we should eventually change that) and because of that
+        // the slider body position will always be (0, 0) which is not accurate.
+        sliderBody.gameplayPositionX = position.x;
+        sliderBody.gameplayPositionY = position.y;
 
         scene.attachChild(sliderBody, 0);
 
