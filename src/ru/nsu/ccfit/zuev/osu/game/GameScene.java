@@ -2238,8 +2238,7 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
 
         // Wind down animation for failing based on osu!stable behavior.
 
-        scene.registerUpdateHandler(new IUpdateHandler() {
-
+        engine.registerUpdateHandler(new IUpdateHandler() {
             @Override
             public void onUpdate(float pSecondsElapsed) {
                 if (songService.getFrequency() > 101) {
@@ -2294,7 +2293,7 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
                     paused = true;
 
                     scene.setIgnoreUpdate(true);
-                    scene.unregisterUpdateHandler(this);
+                    engine.unregisterUpdateHandler(this);
 
                     hud.setChildScene(menu.getScene(), false, true, true);
                 }
