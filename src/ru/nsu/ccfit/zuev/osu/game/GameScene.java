@@ -2279,11 +2279,11 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
 
 
                         if (entity.getRotation() == 0) {
-                            entity.setRotation(entity.getRotation() + (float) Random.Default.nextDouble(-0.02, 0.02));
+                            entity.setRotation(entity.getRotation() + (float) Random.Default.nextDouble(-0.02, 0.02) * 180 / FMath.Pi);
                         } else if (entity.getRotation() > 0) {
-                            entity.setRotation(entity.getRotation() + 0.01f);
+                            entity.setRotation(entity.getRotation() + 0.01f * 180 / FMath.Pi);
                         } else {
-                            entity.setRotation(entity.getRotation() - 0.01f);
+                            entity.setRotation(entity.getRotation() - 0.01f * 180 / FMath.Pi);
                         }
                     }
 
