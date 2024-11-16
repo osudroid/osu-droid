@@ -95,9 +95,6 @@ public class PauseMenu implements IOnMenuItemClickListener {
                                      final IMenuItem pMenuItem, final float pMenuItemLocalX,
                                      final float pMenuItemLocalY) {
 
-        if (pMenuItem.getAlpha() < 0.75f) {
-            return false;
-        }
         BassSoundProvider playSnd;
         switch (pMenuItem.getID()) {
             case ITEM_SAVE_REPLAY:
