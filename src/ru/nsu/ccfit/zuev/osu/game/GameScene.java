@@ -2301,9 +2301,13 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
                         video.pause();
                     }
 
+                    // Ensure music frequency is reset back to what it was.
+                    songService.setFrequencyForcefully(initialFrequency);
+
                     if (songService.getStatus() == Status.PLAYING) {
                         songService.pause();
                     }
+
                     paused = true;
 
                     scene.setIgnoreUpdate(true);
