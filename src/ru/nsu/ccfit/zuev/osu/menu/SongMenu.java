@@ -1113,6 +1113,11 @@ public class SongMenu implements IUpdateHandler, MenuItemListener,
         }
 
         if (selectedBeatmap != null && selectedBeatmap.getFilename().equals(beatmapInfo.getFilename())) {
+            // Do not initiate gameplay if the player is still holding one of the menu buttons.
+            if (currentPressedButton != null) {
+                return;
+            }
+
             ResourceManager.getInstance().getSound("menuhit").play();
             cancelCalculationJobs();
             cancelMapStatusLoadingJob();
