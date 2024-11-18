@@ -266,6 +266,11 @@ abstract class ExtendedEntity(
         }
     }
 
+    open fun setTranslation(x: Float, y: Float) {
+        translationX = x
+        translationY = y
+    }
+
 
     // Drawing
 

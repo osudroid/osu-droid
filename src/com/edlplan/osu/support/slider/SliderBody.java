@@ -30,11 +30,6 @@ public class SliderBody extends Container {
     private float endLength = 0;
 
     private boolean shouldRebuildVertices = true;
-    
-    
-    public float gameplayPositionX;
-    
-    public float gameplayPositionY;
 
 
     public SliderBody(boolean allowHint) {

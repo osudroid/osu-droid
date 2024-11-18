@@ -17,7 +17,6 @@ import com.edlplan.framework.math.line.LinePath;
 import com.edlplan.framework.support.ProxySprite;
 import com.edlplan.framework.support.osb.StoryboardSprite;
 import com.edlplan.framework.utils.functionality.SmartIterator;
-import com.edlplan.osu.support.slider.SliderBody;
 import com.reco1l.andengine.modifier.UniversalModifier;
 import com.reco1l.ibancho.RoomAPI;
 import com.reco1l.osu.DifficultyCalculationManager;
@@ -2264,19 +2263,7 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
                             entity.setAlpha(Math.max(0, entity.getAlpha() - 0.007f));
                         }
 
-                        if (entity instanceof SliderBody sliderBody) {
-                            // Slider body needs special handling since the entity's position doesn't represent the
-                            // actual position because it's real position is represented directly on the path vertices.
-                            float positionY = entity.getY() + sliderBody.gameplayPositionY;
-
-                            entity.setPosition(entity.getX(), positionY < 0f
-                                    ? (positionY * 0.6f) - sliderBody.gameplayPositionY
-                                    : (positionY * 1.01f) - sliderBody.gameplayPositionY
-                            );
-                        } else {
-                            entity.setPosition(entity.getX(), entity.getY() < 0f ? entity.getY() * 0.6f : entity.getY() * 1.01f);
-                        }
-
+                        entity.setPosition(entity.getX(), entity.getY() < 0f ? entity.getY() * 0.6f : entity.getY() * 1.01f);
 
                         if (entity.getRotation() == 0) {
                             entity.setRotation(entity.getRotation() + (float) Random.Default.nextDouble(-0.02, 0.02) * 180 / FMath.Pi);
