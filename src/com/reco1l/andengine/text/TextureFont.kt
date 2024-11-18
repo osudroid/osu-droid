@@ -36,11 +36,39 @@ open class TextureFont(private val characters: MutableMap<Char, TextureRegion>) 
             }
         }
 
+    /**
+     * The scale of the textures on the x-axis.
+     */
+    var textureScaleX = 1f
+        set(value) {
+            if (field != value) {
+                field = value
+                isTextDirty = true
+            }
+        }
+
+    /**
+     * The scale of the textures on the y-axis.
+     */
+    var textureScaleY = 1f
+        set(value) {
+            if (field != value) {
+                field = value
+                isTextDirty = true
+            }
+        }
+
 
     private val textureRegions = mutableListOf<TextureRegion>()
 
 
     private var isTextDirty = true
+
+
+    fun setTextureScale(scale: Float) {
+        textureScaleX = scale
+        textureScaleY = scale
+    }
 
 
     override fun onManagedDraw(pGL: GL10, pCamera: Camera) {
@@ -64,11 +92,13 @@ open class TextureFont(private val characters: MutableMap<Char, TextureRegion>) 
         for (i in text.indices) {
 
             val textureRegion = characters[text[i]] ?: continue
+            val textureWidth = textureRegion.width * textureScaleX
+            val textureHeight = textureRegion.height * textureScaleY
 
             textureRegions.add(textureRegion)
 
-            contentWidth += textureRegion.width + spacing
-            contentHeight = max(contentHeight, textureRegion.height.toFloat())
+            contentWidth += textureWidth + spacing
+            contentHeight = max(contentHeight, textureHeight)
         }
 
         contentWidth -= spacing
@@ -90,8 +120,8 @@ open class TextureFont(private val characters: MutableMap<Char, TextureRegion>) 
         for (i in textureRegions.indices) {
 
             val texture = textureRegions[i]
-            val textureWidth = texture.width.toFloat()
-            val textureHeight = texture.height.toFloat()
+            val textureWidth = texture.width * textureScaleX
+            val textureHeight = texture.height * textureScaleY
 
             gl.glPushMatrix()
             gl.glTranslatef(offsetX, 0f, 0f)

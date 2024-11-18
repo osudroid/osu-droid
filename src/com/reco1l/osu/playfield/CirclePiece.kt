@@ -61,7 +61,7 @@ class NumberedCirclePiece(circleTexture: String, overlayTexture: String) : Circl
     }
 
     fun setNumberScale(value: Float) {
-        number.setScale(value)
+        number.setTextureScale(value)
     }
 
 }
