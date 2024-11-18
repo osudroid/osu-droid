@@ -2073,7 +2073,7 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
 
 
     public boolean onSceneTouchEvent(final Scene pScene, final TouchEvent event) {
-        if (replaying) {
+        if (replaying || isGameOver) {
             return false;
         }
 
@@ -2144,7 +2144,8 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
     }
 
     public void pause() {
-        if (paused) {
+
+        if (paused || isGameOver) {
             return;
         }
 
@@ -2212,6 +2213,13 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
             return;
         }
         isGameOver = true;
+
+        // Releasing all cursors visually. At this point touch events will no longer be processed.
+        for (int i = 0; i < CursorCount; ++i) {
+            if (cursorSprites != null) {
+                cursorSprites[i].setShowing(false);
+            }
+        }
 
         if (Multiplayer.isMultiplayer) {
             if (Multiplayer.isConnected()) {
