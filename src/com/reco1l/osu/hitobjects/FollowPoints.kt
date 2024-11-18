@@ -33,6 +33,7 @@ object FollowPointConnection {
                 }
 
                 sprite.onContentSizeMeasured()
+                sprite.isLoop = false
             }
         } else {
             ExtendedSprite(ResourceManager.getInstance().getTexture("followpoint")).also {
