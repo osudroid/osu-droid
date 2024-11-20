@@ -4,6 +4,7 @@ import com.edlplan.andengine.TriangleBuilder;
 import com.edlplan.framework.math.line.LinePath;
 import com.reco1l.andengine.shape.TriangleMesh;
 import com.reco1l.andengine.container.Container;
+import com.rian.osu.math.Vector2;
 
 
 public class SliderBody extends Container {
@@ -59,7 +60,7 @@ public class SliderBody extends Container {
     }
 
 
-    public void setPath(LinePath path, boolean beginEmpty) {
+    public void init(LinePath path, boolean beginEmpty, Vector2 position) {
 
         reset();
         this.path = path;
@@ -73,6 +74,7 @@ public class SliderBody extends Container {
         }
 
         shouldRebuildVertices = true;
+        setPosition(position.x, position.y);
     }
 
 
@@ -114,24 +116,32 @@ public class SliderBody extends Container {
     }
 
 
-    private void buildVertices(LinePath sub) {
+    private void buildVertices(LinePath subPath) {
+
+        TriangleBuilder builder = buildCache.triangleBuilder;
 
         if (hint != null && hint.isVisible()) {
             buildCache.drawLinePath
-                    .reset(sub, Math.min(hintWidth, backgroundWidth - borderWidth))
-                    .getTriangles(buildCache.triangleBuilder)
-                    .getVertex(hint.getVertices());
+                    .reset(subPath, Math.min(hintWidth, backgroundWidth - borderWidth))
+                    .computeTriangles(builder)
+                    .applyVertices(hint.getVertices());
+
+            hint.setContentSize(builder.maxX, builder.maxY);
         }
 
         buildCache.drawLinePath
-                .reset(sub, backgroundWidth - borderWidth)
-                .getTriangles(buildCache.triangleBuilder)
-                .getVertex(background.getVertices());
+                .reset(subPath, backgroundWidth - borderWidth)
+                .computeTriangles(builder)
+                .applyVertices(background.getVertices());
+
+        background.setContentSize(builder.maxX, builder.maxY);
 
         buildCache.drawLinePath
-                .reset(sub, backgroundWidth)
-                .getTriangles(buildCache.triangleBuilder)
-                .getVertex(border.getVertices());
+                .reset(subPath, backgroundWidth)
+                .computeTriangles(builder)
+                .applyVertices(border.getVertices());
+
+        border.setContentSize(builder.maxX, builder.maxY);
     }
 
 
