@@ -2238,11 +2238,21 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
         }
 
         stopLoopingSamples();
+        SongService songService = GlobalManager.getInstance().getSongService();
+
+        if (GameHelper.isPerfect()) {
+            if (video != null) {
+                video.pause();
+            }
+            songService.pause();
+            paused = true;
+            scene.setIgnoreUpdate(true);
+            return;
+        }
+
         ResourceManager.getInstance().getSound("failsound").play();
-        final PauseMenu menu = new PauseMenu(engine, this, true);
         gameStarted = false;
 
-        SongService songService = GlobalManager.getInstance().getSongService();
         float initialFrequency = songService.getFrequency();
 
         // Wind down animation for failing based on osu!stable behavior.
@@ -2315,6 +2325,7 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
                     scene.setIgnoreUpdate(true);
                     engine.unregisterUpdateHandler(this);
 
+                    PauseMenu menu = new PauseMenu(engine, GameScene.this, true);
                     hud.setChildScene(menu.getScene(), false, true, true);
                 }
             }
