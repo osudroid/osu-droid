@@ -1142,7 +1142,9 @@ public class SongMenu implements IUpdateHandler, MenuItemListener,
 
             Execution.mainThread(() -> {
                 ModMenu.getInstance().hide();
-                searchBar.dismiss();
+                if (searchBar != null) {
+                    searchBar.dismiss();
+                }
             });
 
             game.startGame(beatmapInfo, null);
