@@ -2264,12 +2264,12 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
 
                 if (songService.getFrequency() > 101) {
 
+                    if (mgScene.getAlpha() > 0) {
+                        mgScene.setAlpha(Math.max(0, mgScene.getAlpha() - 0.007f));
+                    }
+
                     for (int i = 0; i < mgScene.getChildCount(); i++) {
                         IEntity entity = mgScene.getChild(i);
-
-                        if (entity.getAlpha() > 0) {
-                            entity.setAlpha(Math.max(0, entity.getAlpha() - 0.007f));
-                        }
 
                         entity.setPosition(entity.getX(), entity.getY() < 0f ? entity.getY() * 0.6f : entity.getY() * 1.01f);
 
