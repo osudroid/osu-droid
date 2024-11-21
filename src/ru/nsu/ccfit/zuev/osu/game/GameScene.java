@@ -928,13 +928,6 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
             timeOffset += 0.25f;
         }
 
-
-        Rectangle kiaiRect = new Rectangle(0, 0, Config.getRES_WIDTH(),
-                Config.getRES_HEIGHT());
-        kiaiRect.setVisible(false);
-        kiaiRect.setColor(1, 1, 1);
-        bgScene.attachChild(kiaiRect, 0);
-
         Sprite unranked = new Sprite(0, 0, ResourceManager.getInstance().getTexture("play-unranked"));
         unranked.setPosition((float) Config.getRES_WIDTH() / 2 - unranked.getWidth() / 2, 80);
         unranked.setVisible(false);
