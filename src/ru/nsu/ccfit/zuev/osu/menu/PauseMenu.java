@@ -40,6 +40,12 @@ public class PauseMenu implements IOnMenuItemClickListener {
                 // Intercept touch event to prevent it from being passed to the game scene during pause.
                 return true;
             }
+
+            @Override
+            protected void onManagedUpdate(float pSecondsElapsed) {
+                // The fade in animation duration is 1 second. We want to speed it up.
+                super.onManagedUpdate(pSecondsElapsed * 2.5f);
+            }
         };
 
         final SpriteMenuItem saveFailedReplay = new SpriteMenuItem(ITEM_SAVE_REPLAY,
@@ -89,9 +95,6 @@ public class PauseMenu implements IOnMenuItemClickListener {
                                      final IMenuItem pMenuItem, final float pMenuItemLocalX,
                                      final float pMenuItemLocalY) {
 
-        if (pMenuItem.getAlpha() < 0.75f) {
-            return false;
-        }
         BassSoundProvider playSnd;
         switch (pMenuItem.getID()) {
             case ITEM_SAVE_REPLAY:

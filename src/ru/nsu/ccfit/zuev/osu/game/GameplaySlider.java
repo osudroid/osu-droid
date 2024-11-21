@@ -906,13 +906,16 @@ public class GameplaySlider extends GameObject {
 
         float distanceTrackingThresholdSquared = getTrackingDistanceThresholdSquared(true);
 
+        // Check whether the cursor is within the follow area.
+        boolean isTracking = isCursorInFollowArea(ballPos, true);
+
         double currentTime = getGameplayPassedTimeMilliseconds();
         boolean allTicksInRange = false;
 
         var nestedObjects = beatmapSlider.getNestedHitObjects();
 
         // Replays force their hit results per nested object, so we do not need to check for tracking here.
-        if (replayObjectData == null) {
+        if (isTracking && replayObjectData == null) {
             allTicksInRange = true;
 
             // Do not judge the slider end as it will be judged in onSpanFinish.
