@@ -2141,7 +2141,7 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
 
     public void pause() {
 
-        if (paused || isGameOver) {
+        if (paused) {
             return;
         }
 
@@ -2161,6 +2161,12 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
 
             lastBackPressTime = realTimeElapsed;
             ToastLogger.showText("Tap twice to exit to room.", false);
+            return;
+        }
+
+        if (isGameOver) {
+            // Finishing the game over animation now.
+            GlobalManager.getInstance().getSongService().setFrequencyForcefully(101);
             return;
         }
 
