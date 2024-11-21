@@ -2139,6 +2139,27 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
         return true;
     }
 
+    private void removeAllCursors() {
+        var frameOffset = previousFrameTime > 0 ? (SystemClock.uptimeMillis() - previousFrameTime) * GameHelper.getSpeedMultiplier() : 0;
+        var time = (int) (elapsedTime * 1000 + frameOffset);
+
+        for (int i = 0; i < CursorCount; ++i) {
+            var cursor = cursors[i];
+
+            if (cursor.mouseDown) {
+                cursor.mouseDown = false;
+
+                if (replay != null) {
+                    replay.addUp(time, i);
+                }
+            }
+
+            if (cursorSprites != null) {
+                cursorSprites[i].setShowing(false);
+            }
+        }
+    }
+
     public void pause() {
 
         if (paused) {
@@ -2176,23 +2197,8 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
 
         stopLoopingSamples();
 
-        // Release all pressed cursors to avoid getting stuck at resume.
         if (!GameHelper.isAuto() && !GameHelper.isAutopilotMod() && !replaying) {
-            var frameOffset = previousFrameTime > 0 ? (SystemClock.uptimeMillis() - previousFrameTime) * GameHelper.getSpeedMultiplier() : 0;
-            var time = (int) (elapsedTime * 1000 + frameOffset);
-
-            for (int i = 0; i < CursorCount; ++i) {
-                var cursor = cursors[i];
-
-                if (cursor.mouseDown) {
-                    cursor.mouseDown = false;
-
-                    if (replay != null)
-                        replay.addUp(time, i);
-                }
-                if (cursorSprites != null)
-                    cursorSprites[i].setShowing(false);
-            }
+            removeAllCursors();
         }
 
         if (blockAreaFragment != null) {
@@ -2216,11 +2222,8 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
         }
         isGameOver = true;
 
-        // Releasing all cursors visually. At this point touch events will no longer be processed.
-        for (int i = 0; i < CursorCount; ++i) {
-            if (cursorSprites != null) {
-                cursorSprites[i].setShowing(false);
-            }
+        if (!replaying) {
+            removeAllCursors();
         }
 
         if (Multiplayer.isMultiplayer) {
