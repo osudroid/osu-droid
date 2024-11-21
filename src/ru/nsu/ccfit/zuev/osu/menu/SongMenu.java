@@ -125,7 +125,7 @@ public class SongMenu implements IUpdateHandler, MenuItemListener,
 
     private ExtendedSprite currentPressedButton;
     private ExtendedSprite scoringSwitcher = null;
-    private SearchBarFragment filterMenu = null;
+    private SearchBarFragment searchBar = null;
     private GroupType groupType = GroupType.MapSet;
 
     private Timer previousSelectionTimer;
@@ -479,9 +479,9 @@ public class SongMenu implements IUpdateHandler, MenuItemListener,
                                 clickShortConfirmSound.play();
                             }
 
-                            if (filterMenu == null) loadFilterFragment();
+                            if (searchBar == null) loadFilterFragment();
 
-                            filterMenu.showMenu(SongMenu.this);
+                            searchBar.showMenu(SongMenu.this);
                         }
                     }
                     return true;
@@ -697,13 +697,13 @@ public class SongMenu implements IUpdateHandler, MenuItemListener,
     }
 
     public void loadFilterFragment() {
-        filterMenu = new SearchBarFragment();
-        filterMenu.loadConfig(context);
+        searchBar = new SearchBarFragment();
+        searchBar.loadConfig(context);
     }
 
     public void unloadFilterFragment() {
         scene.clearChildScene();
-        filterMenu = null;
+        searchBar = null;
     }
 
     public void toggleScoringSwitcher() {
@@ -721,7 +721,7 @@ public class SongMenu implements IUpdateHandler, MenuItemListener,
     public Scene getScene() {
         return scene;
     }
-    public SearchBarFragment getFilterMenu() { return filterMenu; }
+    public SearchBarFragment getSearchBar() { return searchBar; }
 
     public void show() {
         engine.setScene(scene);
@@ -764,8 +764,8 @@ public class SongMenu implements IUpdateHandler, MenuItemListener,
     }
 
     public void sort() {
-        if (!sortOrder.equals(filterMenu.getOrder())) {
-            sortOrder = filterMenu.getOrder();
+        if (!sortOrder.equals(searchBar.getOrder())) {
+            sortOrder = searchBar.getOrder();
         }
         Collections.sort(items, (i1, i2) -> {
             String s1;
@@ -1139,6 +1139,9 @@ public class SongMenu implements IUpdateHandler, MenuItemListener,
             Replay.oldCustomHP = ModMenu.getInstance().getCustomHP();
 
             Replay.oldFLFollowDelay = ModMenu.getInstance().getFLfollowDelay();
+
+            ModMenu.getInstance().hide();
+            searchBar.dismiss();
 
             game.startGame(beatmapInfo, null);
             return;
@@ -1569,10 +1572,10 @@ public class SongMenu implements IUpdateHandler, MenuItemListener,
                     }
                     break;
             }
-            final String lowerFilter = filterMenu.getFilter().toLowerCase();
-            final boolean favsOnly = filterMenu.isFavoritesOnly();
+            final String lowerFilter = searchBar.getFilter().toLowerCase();
+            final boolean favsOnly = searchBar.isFavoritesOnly();
 
-            var limit = DatabaseManager.getBeatmapCollectionsTable().getBeatmaps(filterMenu.getFavoriteFolder());
+            var limit = DatabaseManager.getBeatmapCollectionsTable().getBeatmaps(searchBar.getFavoriteFolder());
             for (final BeatmapSetItem item : items) {
                 item.applyFilter(lowerFilter, favsOnly, limit);
             }
