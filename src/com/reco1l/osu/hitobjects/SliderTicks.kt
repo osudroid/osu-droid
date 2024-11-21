@@ -13,21 +13,22 @@ class SliderTickContainer : Container() {
 
         detachChildren()
 
-        val scale = beatmapSlider.gameplayScale
+        val position = beatmapSlider.gameplayStackedPosition
 
         for (i in 1 until beatmapSlider.nestedHitObjects.size) {
 
-            val sliderTick = beatmapSlider.nestedHitObjects[i] as? SliderTick ?: break
-            val position = sliderTick.gameplayStackedPosition
-            val sprite = SliderTickSprite.pool.obtain()
+            val tick = beatmapSlider.nestedHitObjects[i] as? SliderTick ?: break
+            val tickPosition = tick.gameplayStackedPosition
 
-            sprite.setPosition(position.x, position.y)
-            sprite.setScale(scale)
+            val sprite = SliderTickSprite.pool.obtain()
             sprite.alpha = 0f
+
+            // We're substracting the position of the slider because the tick container is
+            // already at the position of the slider since it's a child of the slider's body.
+            sprite.setPosition(tickPosition.x - position.x, tickPosition.y - position.y)
 
             attachChild(sprite)
         }
-
     }
 
     override fun onDetached() {

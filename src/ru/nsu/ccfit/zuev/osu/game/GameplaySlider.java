@@ -292,11 +292,6 @@ public class GameplaySlider extends GameObject {
         }
         scene.attachChild(tailCirclePiece, 0);
 
-        tickContainer.init(beatmapSlider);
-        tickContainer.setPosition(position.x, position.y);
-        tickContainer.setTranslation(-position.x, -position.y);
-        scene.attachChild(tickContainer, 0);
-
         // Slider track
         superPath = renderPath;
         sliderBody.init(superPath, Config.isSnakingInSliders(), stackedPosition);
@@ -318,6 +313,9 @@ public class GameplaySlider extends GameObject {
         } else {
             sliderBody.setHintVisible(false);
         }
+
+        tickContainer.init(beatmapSlider);
+        sliderBody.attachChild(tickContainer);
 
         scene.attachChild(sliderBody, 0);
 
@@ -364,16 +362,6 @@ public class GameplaySlider extends GameObject {
                     sliderBody.getRed(), 1f,
                     sliderBody.getGreen(), 1f,
                     sliderBody.getBlue(), 1f
-                )
-            ));
-
-            tickContainer.setColor(colorDim, colorDim, colorDim);
-            tickContainer.registerEntityModifier(Modifiers.sequence(
-                Modifiers.delay(dimDelaySec),
-                Modifiers.color(0.1f,
-                    tickContainer.getRed(), 1f,
-                    tickContainer.getGreen(), 1f,
-                    tickContainer.getBlue(), 1f
                 )
             ));
         }
