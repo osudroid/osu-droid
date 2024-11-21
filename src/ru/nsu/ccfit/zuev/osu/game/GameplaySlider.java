@@ -372,7 +372,12 @@ public class GameplaySlider extends GameObject {
     private PointF getPositionAt(final float percentage, final boolean updateBallAngle, final boolean updateEndArrowRotation) {
         tmpPoint.set(position);
 
-        if (path.pointCount < 2 || percentage >= 1) {
+        if (path.pointCount < 2) {
+            return tmpPoint;
+        }
+
+        if (percentage >= 1) {
+            tmpPoint.set(pathEndPosition);
             return tmpPoint;
         }
 
