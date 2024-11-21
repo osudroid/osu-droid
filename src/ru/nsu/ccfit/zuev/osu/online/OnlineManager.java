@@ -34,7 +34,7 @@ public class OnlineManager {
     public static final String endpoint = "https://" + hostname + "/api/";
     public static final String updateEndpoint = endpoint + "update.php?lang=";
     public static final String defaultAvatarURL = "https://" + hostname + "/user/avatar/0.png";
-    private static final String onlineVersion = "42";
+    private static final String onlineVersion = "43";
 
     public static final OkHttpClient client = new OkHttpClient();
 
