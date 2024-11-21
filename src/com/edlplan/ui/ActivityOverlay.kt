@@ -6,8 +6,6 @@ import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentManager
 import com.edlplan.ui.fragment.BackPressListener
 import com.edlplan.ui.fragment.BaseFragment
-import com.reco1l.toolkt.kotlin.*
-import java.util.*
 
 object ActivityOverlay {
     private var fragmentManager: FragmentManager? = null
@@ -39,13 +37,11 @@ object ActivityOverlay {
     fun dismissOverlay(fragment: Fragment) {
         if (fragmentManager != null && fragment.isAdded) {
 
-            runSafe { fragmentManager!!.executePendingTransactions() }
-
             if (displayingOverlay.contains(fragment)) {
                 displayingOverlay.remove(fragment)
                 fragmentManager!!.beginTransaction()
                     .remove(fragment)
-                    .commitNowAllowingStateLoss()
+                    .commitAllowingStateLoss()
             }
         }
     }
@@ -54,20 +50,18 @@ object ActivityOverlay {
     fun addOverlay(fragment: Fragment, tag: String?) {
         if (fragmentManager != null && !fragment.isAdded) {
 
-            runSafe { fragmentManager!!.executePendingTransactions() }
-
             if (displayingOverlay.contains(fragment) || fragmentManager!!.findFragmentByTag(tag) != null) {
                 displayingOverlay.remove(fragment)
                 fragmentManager!!.beginTransaction()
                         .remove(fragment)
                         .add(containerId, fragment, tag)
-                        .commitNowAllowingStateLoss()
+                        .commitAllowingStateLoss()
                 return
             }
             displayingOverlay.add(fragment)
             fragmentManager!!.beginTransaction()
                     .add(containerId, fragment, tag)
-                    .commitNowAllowingStateLoss()
+                    .commitAllowingStateLoss()
         }
     }
 

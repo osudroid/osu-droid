@@ -773,11 +773,11 @@ public class MainActivity extends BaseGameActivity implements
                 && GlobalManager.getInstance().getEngine().getScene() == GlobalManager.getInstance().getSongMenu().getScene()
                 && GlobalManager.getInstance().getSongMenu().getScene().hasChildScene()) {
             if (GlobalManager.getInstance().getSongMenu().getScene().getChildScene() ==
-                    GlobalManager.getInstance().getSongMenu().getFilterMenu().getScene()) {
+                    GlobalManager.getInstance().getSongMenu().getSearchBar().getScene()) {
                 if (keyCode == KeyEvent.KEYCODE_ENTER) {
                     InputManager.getInstance().toggleKeyboard();
                 }
-                GlobalManager.getInstance().getSongMenu().getFilterMenu().hideMenu();
+                GlobalManager.getInstance().getSongMenu().getSearchBar().hideMenu();
             }
 
             if (GlobalManager.getInstance().getSongMenu().getScene().getChildScene() == ModMenu.getInstance().getScene()) {

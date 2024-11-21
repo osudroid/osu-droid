@@ -23,10 +23,17 @@ abstract class BaseFragment : Fragment(), BackPressListener {
         private set
     var isDismissOnBackPress = true
 
+
     /**
      * If true, the fragment will intercept back press event when it's received.
      */
     var interceptBackPress = true
+
+
+    private var isLoaded = false
+
+    private var isDismissCalled = false
+
 
     @get:IdRes
     val backgroundId: Int
@@ -71,13 +78,14 @@ abstract class BaseFragment : Fragment(), BackPressListener {
     }
 
     open fun show() {
-        mainThread {
-            ActivityOverlay.addOverlay(this, this.javaClass.name + "@" + this.hashCode())
-        }
+        ActivityOverlay.addOverlay(this, this.javaClass.name + "@" + this.hashCode())
     }
 
     open fun dismiss() {
-        mainThread {
+        isDismissCalled = true
+
+        if (isLoaded) {
+            isDismissCalled = false
             ActivityOverlay.dismissOverlay(this)
             onDismissListener?.OnDismiss()
         }
@@ -98,6 +106,7 @@ abstract class BaseFragment : Fragment(), BackPressListener {
     }
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
+        isLoaded = false
         isCreated = true
         root = inflater.inflate(layoutID, container, false)
         findViewById<View>(backgroundId)?.setOnClickListener {
@@ -105,7 +114,15 @@ abstract class BaseFragment : Fragment(), BackPressListener {
                 dismiss()
             }
         }
+
         onLoadView()
+        isLoaded = true
+
+        if (isDismissCalled) {
+            dismiss()
+            isDismissCalled = false
+        }
+
         return root
     }
 

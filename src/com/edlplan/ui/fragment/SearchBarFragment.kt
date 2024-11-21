@@ -253,31 +253,35 @@ class SearchBarFragment : BaseFragment(), IUpdateHandler, IFilterMenu {
 
     private fun playEndAnim(action: () -> Unit) {
 
-        val options = findViewById<View>(R.id.options)!!
-        options.animate().cancel()
-        options.animate()
-            .alpha(0f)
-            .translationY(-400f)
-            .setInterpolator(EasingHelper.asInterpolator(Easing.InOutQuad))
-            .setDuration(300)
-            .start()
+        if (isCreated) {
+            val options = findViewById<View>(R.id.options)!!
+            options.animate().cancel()
+            options.animate()
+                .alpha(0f)
+                .translationY(-400f)
+                .setInterpolator(EasingHelper.asInterpolator(Easing.InOutQuad))
+                .setDuration(300)
+                .start()
 
-        val body = findViewById<View>(R.id.frg_body)!!
-        body.animate().cancel()
-        body.animate()
-            .alpha(0f)
-            .translationY(-400f)
-            .setInterpolator(EasingHelper.asInterpolator(Easing.InOutQuad))
-            .setDuration(300)
-            .setListener(
-                object : BaseAnimationListener() {
-                    override fun onAnimationEnd(animation: Animator) {
-                        action()
+            val body = findViewById<View>(R.id.frg_body)!!
+            body.animate().cancel()
+            body.animate()
+                .alpha(0f)
+                .translationY(-400f)
+                .setInterpolator(EasingHelper.asInterpolator(Easing.InOutQuad))
+                .setDuration(300)
+                .setListener(
+                    object : BaseAnimationListener() {
+                        override fun onAnimationEnd(animation: Animator) {
+                            action()
+                        }
                     }
-                }
-            )
-            .start()
-        playBackgroundHideOutAnim(150)
+                )
+                .start()
+            playBackgroundHideOutAnim(150)
+        } else {
+            action()
+        }
     }
 
     private fun updateOrderButton() {
