@@ -15,9 +15,20 @@ class TriangleMesh : ExtendedEntity(vertexBuffer = null) {
      */
     val vertices = FloatArraySlice()
 
+
     init {
         isCullingEnabled = false
         vertices.ary = FloatArray(0)
+    }
+
+
+    /**
+     * Allows to set the content size of the mesh explicitly.
+     */
+    fun setContentSize(width: Float, height: Float) {
+        contentWidth = width
+        contentHeight = height
+        onContentSizeMeasured()
     }
 
 

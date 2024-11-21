@@ -235,6 +235,19 @@ public class SongService extends Service {
         }
     }
 
+    public void setFrequencyForcefully(float frequency) {
+        if (audioFunc != null) {
+            audioFunc.setFrequencyForcefully(frequency);
+        }
+    }
+
+    public float getFrequency() {
+        if (audioFunc != null) {
+            return audioFunc.getFrequency();
+        }
+        return 0f;
+    }
+
     public void showNotification() {
         if (this.isGaming) {
             Log.w("SongService", "NOT SHOW THE NOTIFY CUZ IS GAMING");

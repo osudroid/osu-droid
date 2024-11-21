@@ -266,6 +266,11 @@ abstract class ExtendedEntity(
         }
     }
 
+    open fun setTranslation(x: Float, y: Float) {
+        translationX = x
+        translationY = y
+    }
+
 
     // Drawing
 
@@ -317,6 +322,11 @@ abstract class ExtendedEntity(
                 green *= parent.green
                 blue *= parent.blue
                 alpha *= parent.alpha
+
+                // We'll assume at this point there's no need to keep multiplying.
+                if (red == 0f || green == 0f || blue == 0f || alpha == 0f) {
+                    break
+                }
 
                 parent = parent.parent
             }

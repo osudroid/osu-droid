@@ -39,7 +39,6 @@ public class GameplaySlider extends GameObject {
     private final ExtendedSprite approachCircle;
     private final ExtendedSprite startArrow, endArrow;
     private Slider beatmapSlider;
-    private final PointF curveEndPos = new PointF();
     private Scene scene;
     private GameObjectListener listener;
     private SliderPath path;
@@ -79,6 +78,11 @@ public class GameplaySlider extends GameObject {
 
     private final SliderBody sliderBody;
 
+    /**
+     * The absolute slider's path end position.
+     * This already takes into account the absolute object's position.
+     */
+    private final PointF pathEndPosition = new PointF();
 
     /**
      * The slider ball sprite.
@@ -217,8 +221,7 @@ public class GameplaySlider extends GameObject {
         }
 
         // End circle
-        curveEndPos.x = path.getX(path.pointCount - 1);
-        curveEndPos.y = path.getY(path.pointCount - 1);
+        pathEndPosition.set(getAbsolutePathPosition(path.pointCount - 1));
 
         tailCirclePiece.setScale(scale);
         tailCirclePiece.setCircleColor(comboColor.r(), comboColor.g(), comboColor.b());
@@ -227,7 +230,7 @@ public class GameplaySlider extends GameObject {
         if (Config.isSnakingInSliders()) {
             tailCirclePiece.setPosition(this.position.x, this.position.y);
         } else {
-            tailCirclePiece.setPosition(curveEndPos.x, curveEndPos.y);
+            tailCirclePiece.setPosition(pathEndPosition.x, pathEndPosition.y);
         }
 
         // Repeat arrow at start
@@ -235,8 +238,10 @@ public class GameplaySlider extends GameObject {
         if (spanCount > 2) {
             startArrow.setAlpha(0);
             startArrow.setScale(scale);
-            startArrow.setRotation(MathUtils.radToDeg(Utils.direction(this.position.x, this.position.y, path.getX(1), path.getY(1))));
             startArrow.setPosition(this.position.x, this.position.y);
+
+            PointF nextPoint = getAbsolutePathPosition(1);
+            startArrow.setRotation(MathUtils.radToDeg(Utils.direction(position.x, position.y, nextPoint.x, nextPoint.y)));
 
             scene.attachChild(startArrow, 0);
         }
@@ -248,13 +253,13 @@ public class GameplaySlider extends GameObject {
             float fadeOutDuration = timePreempt * (float) ModHidden.FADE_OUT_DURATION_MULTIPLIER;
 
             headCirclePiece.registerEntityModifier(Modifiers.sequence(
-                Modifiers.fadeIn(fadeInDuration),
-                Modifiers.fadeOut(fadeOutDuration)
+                    Modifiers.fadeIn(fadeInDuration),
+                    Modifiers.fadeOut(fadeOutDuration)
             ));
 
             tailCirclePiece.registerEntityModifier(Modifiers.sequence(
-                Modifiers.fadeIn(fadeInDuration),
-                Modifiers.fadeOut(fadeOutDuration)
+                    Modifiers.fadeIn(fadeInDuration),
+                    Modifiers.fadeOut(fadeOutDuration)
             ));
 
         } else {
@@ -273,27 +278,25 @@ public class GameplaySlider extends GameObject {
         if (spanCount > 1) {
             endArrow.setAlpha(0);
             endArrow.setScale(scale);
-            endArrow.setRotation(MathUtils.radToDeg(Utils.direction(curveEndPos.x, curveEndPos.y, path.getX(path.pointCount - 2), path.getY(path.pointCount - 2))));
+
+            PointF previousPoint = getAbsolutePathPosition(path.pointCount - 2);
+            endArrow.setRotation(MathUtils.radToDeg(Utils.direction(pathEndPosition.x, pathEndPosition.y, previousPoint.x, previousPoint.y)));
 
             if (Config.isSnakingInSliders()) {
                 endArrow.setPosition(this.position.x, this.position.y);
             } else {
-                endArrow.setPosition(curveEndPos.x, curveEndPos.y);
+                endArrow.setPosition(pathEndPosition.x, pathEndPosition.y);
             }
 
             scene.attachChild(endArrow, 0);
         }
         scene.attachChild(tailCirclePiece, 0);
 
-        tickContainer.init(beatmapSlider);
-        scene.attachChild(tickContainer, 0);
-
         // Slider track
         superPath = renderPath;
-        sliderBody.setPath(superPath, Config.isSnakingInSliders());
+        sliderBody.init(superPath, Config.isSnakingInSliders(), stackedPosition);
         sliderBody.setBackgroundWidth(OsuSkin.get().getSliderBodyWidth() * scale);
         sliderBody.setBackgroundColor(bodyColor.r(), bodyColor.g(), bodyColor.b(), OsuSkin.get().getSliderBodyBaseAlpha());
-
         sliderBody.setBorderWidth(OsuSkin.get().getSliderBorderWidth() * scale);
         sliderBody.setBorderColor(borderColor.r(), borderColor.g(), borderColor.b());
 
@@ -310,6 +313,9 @@ public class GameplaySlider extends GameObject {
         } else {
             sliderBody.setHintVisible(false);
         }
+
+        tickContainer.init(beatmapSlider);
+        sliderBody.attachChild(tickContainer);
 
         scene.attachChild(sliderBody, 0);
 
@@ -358,37 +364,32 @@ public class GameplaySlider extends GameObject {
                     sliderBody.getBlue(), 1f
                 )
             ));
-
-            tickContainer.setColor(colorDim, colorDim, colorDim);
-            tickContainer.registerEntityModifier(Modifiers.sequence(
-                Modifiers.delay(dimDelaySec),
-                Modifiers.color(0.1f,
-                    tickContainer.getRed(), 1f,
-                    tickContainer.getGreen(), 1f,
-                    tickContainer.getBlue(), 1f
-                )
-            ));
         }
 
         applyBodyFadeAdjustments(fadeInDuration);
     }
 
     private PointF getPositionAt(final float percentage, final boolean updateBallAngle, final boolean updateEndArrowRotation) {
+        tmpPoint.set(position);
+
         if (path.pointCount < 2) {
-            tmpPoint.set(position);
             return tmpPoint;
         }
 
         if (percentage >= 1) {
-            tmpPoint.set(curveEndPos);
+            tmpPoint.set(pathEndPosition);
             return tmpPoint;
-        } else if (percentage <= 0) {
+        }
+
+        if (percentage <= 0) {
+            PointF nextPoint = getAbsolutePathPosition(1);
+
             if (updateBallAngle) {
-                ballAngle = MathUtils.radToDeg(Utils.direction(path.getX(1), path.getY(1), position.x, position.y));
+                ballAngle = MathUtils.radToDeg(Utils.direction(nextPoint.x, nextPoint.y, position.x, position.y));
             }
 
             if (updateEndArrowRotation) {
-                endArrow.setRotation(MathUtils.radToDeg(Utils.direction(position.x, position.y, path.getX(1), path.getY(1))));
+                endArrow.setRotation(MathUtils.radToDeg(Utils.direction(position.x, position.y, nextPoint.x, nextPoint.y)));
             }
 
             tmpPoint.set(position);
@@ -416,15 +417,15 @@ public class GameplaySlider extends GameObject {
         int index = left - 1;
         float lengthProgress = (currentLength - path.getLength(index)) / (path.getLength(index + 1) - path.getLength(index));
 
-        var currentPointX = path.getX(index);
-        var currentPointY = path.getY(index);
+        PointF currentPoint = getAbsolutePathPosition(index);
+        var currentPointX = currentPoint.x;
+        var currentPointY = currentPoint.y;
 
-        var nextPointX = path.getX(index + 1);
-        var nextPointY = path.getY(index + 1);
+        PointF nextPoint = getAbsolutePathPosition(index + 1);
+        var nextPointX = nextPoint.x;
+        var nextPointY = nextPoint.y;
 
-        var p = tmpPoint;
-
-        p.set(
+        tmpPoint.set(
             Interpolation.linear(currentPointX, nextPointX, lengthProgress),
             Interpolation.linear(currentPointY, nextPointY, lengthProgress)
         );
@@ -437,7 +438,7 @@ public class GameplaySlider extends GameObject {
             endArrow.setRotation(MathUtils.radToDeg(Utils.direction(nextPointX, nextPointY, currentPointX, currentPointY)));
         }
 
-        return p;
+        return tmpPoint;
     }
 
     private void removeFromScene() {
@@ -520,7 +521,7 @@ public class GameplaySlider extends GameObject {
         boolean isTracking = isTracking();
 
         // If slider was in reverse mode, we should swap start and end points
-        var spanEndJudgementPosition = reverse ? position : curveEndPos;
+        var spanEndJudgementPosition = reverse ? position : pathEndPosition;
 
         // Do not judge slider repeats if the slider head has not been hit.
         if (startHit) {
@@ -798,13 +799,12 @@ public class GameplaySlider extends GameObject {
                     }
 
                     if (path.pointCount >= 2) {
-                        endArrow.setRotation(
-                            MathUtils.radToDeg(Utils.direction(curveEndPos.x, curveEndPos.y, path.getX(path.pointCount - 2), path.getY(path.pointCount - 2)))
-                        );
+                        PointF lastPoint = getAbsolutePathPosition(path.pointCount - 2);
+                        endArrow.setRotation(MathUtils.radToDeg(Utils.direction(pathEndPosition.x, pathEndPosition.y, lastPoint.x, lastPoint.y)));
                     }
 
-                    tailCirclePiece.setPosition(curveEndPos.x, curveEndPos.y);
-                    endArrow.setPosition(curveEndPos.x, curveEndPos.y);
+                    tailCirclePiece.setPosition(pathEndPosition.x, pathEndPosition.y);
+                    endArrow.setPosition(pathEndPosition.x, pathEndPosition.y);
                 }
             }
             return;
@@ -1223,6 +1223,18 @@ public class GameplaySlider extends GameObject {
             approachCircle.clearEntityModifiers();
             approachCircle.setAlpha(0);
         }
+    }
+
+
+    /**
+     * Gets the absolute position of a point on the path taking into account the slider's position.
+     */
+    private PointF getAbsolutePathPosition(int pathPointIndex) {
+        tmpPoint.set(
+            position.x + path.getX(pathPointIndex),
+            position.y + path.getY(pathPointIndex)
+        );
+        return tmpPoint;
     }
 
 }

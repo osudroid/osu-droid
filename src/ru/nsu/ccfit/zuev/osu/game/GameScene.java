@@ -8,6 +8,7 @@ import kotlin.random.Random;
 import kotlinx.coroutines.CoroutineScope;
 import kotlinx.coroutines.Job;
 import kotlinx.coroutines.JobKt;
+import ru.nsu.ccfit.zuev.audio.serviceAudio.SongService;
 import ru.nsu.ccfit.zuev.osu.SecurityUtils;
 
 import com.edlplan.framework.easing.Easing;
@@ -62,6 +63,7 @@ import org.anddev.andengine.engine.camera.SmoothCamera;
 import org.anddev.andengine.engine.handler.IUpdateHandler;
 import org.anddev.andengine.engine.options.TouchOptions;
 import org.anddev.andengine.entity.Entity;
+import org.anddev.andengine.entity.IEntity;
 import org.anddev.andengine.entity.modifier.LoopEntityModifier;
 import org.anddev.andengine.entity.modifier.MoveXModifier;
 import org.anddev.andengine.entity.primitive.Rectangle;
@@ -190,6 +192,14 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
     private ChangeableText avgOffsetText;
     private ChangeableText urText;
     private ChangeableText memText;
+
+    // Game
+
+    /**
+     * Whether the game is over.
+     */
+    private boolean isGameOver = false;
+
 
     // UI
 
@@ -602,6 +612,7 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
         realTimeElapsed = 0;
         statisticDataTimeElapsed = 0;
         lastScoreSent = null;
+        isGameOver = false;
 
         paused = false;
         gameStarted = false;
@@ -917,13 +928,6 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
             timeOffset += 0.25f;
         }
 
-
-        Rectangle kiaiRect = new Rectangle(0, 0, Config.getRES_WIDTH(),
-                Config.getRES_HEIGHT());
-        kiaiRect.setVisible(false);
-        kiaiRect.setColor(1, 1, 1);
-        bgScene.attachChild(kiaiRect, 0);
-
         Sprite unranked = new Sprite(0, 0, ResourceManager.getInstance().getTexture("play-unranked"));
         unranked.setPosition((float) Config.getRES_WIDTH() / 2 - unranked.getWidth() / 2, 80);
         unranked.setVisible(false);
@@ -1179,32 +1183,35 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
         GameHelper.setKiai(activeEffectPoint.isKiai);
         GameHelper.setCurrentBeatTime(Math.max(0, elapsedTime - activeTimingPoint.time / 1000) % GameHelper.getBeatLength());
 
-        if (!breakPeriods.isEmpty()) {
-            if (!breakAnimator.isBreak()
-                    && breakPeriods.peek().getStart() <= elapsedTime) {
-                gameStarted = false;
-                breakAnimator.init(breakPeriods.peek().getLength());
-                if(GameHelper.isFlashLight()){
-                    flashlightSprite.onBreak(true);
+        if (!isGameOver) {
+
+            if (!breakPeriods.isEmpty()) {
+                if (!breakAnimator.isBreak() && breakPeriods.peek().getStart() <= elapsedTime) {
+                    gameStarted = false;
+                    breakAnimator.init(breakPeriods.peek().getLength());
+                    if(GameHelper.isFlashLight()){
+                        flashlightSprite.onBreak(true);
+                    }
+
+                    if (Multiplayer.isConnected())
+                        RoomScene.INSTANCE.getChat().show();
+
+                    hud.setHealthBarVisibility(false);
+                    breakPeriods.poll();
                 }
-
-                if (Multiplayer.isConnected())
-                    RoomScene.INSTANCE.getChat().show();
-
-                hud.setHealthBarVisibility(false);
-                breakPeriods.poll();
             }
-        }
-        if (breakAnimator.isOver()) {
 
-            // Ensure the chat is dismissed if it's still shown
-            RoomScene.INSTANCE.getChat().dismiss();
+            if (breakAnimator.isOver()) {
 
-            gameStarted = true;
-            hud.setHealthBarVisibility(true);
+                // Ensure the chat is dismissed if it's still shown
+                RoomScene.INSTANCE.getChat().dismiss();
 
-            if(GameHelper.isFlashLight()){
-                flashlightSprite.onBreak(false);
+                gameStarted = true;
+                hud.setHealthBarVisibility(true);
+
+                if(GameHelper.isFlashLight()){
+                    flashlightSprite.onBreak(false);
+                }
             }
         }
 
@@ -1223,13 +1230,11 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
                 if (GameHelper.isEasy() && failcount < 3) {
                     failcount++;
                     stat.changeHp(1f);
-                }
-                else {
-                    if (Multiplayer.isMultiplayer)
-                    {
-                        if (!hasFailed)
+                } else {
+                    if (Multiplayer.isMultiplayer) {
+                        if (!hasFailed) {
                             ToastLogger.showText("You failed but you can continue playing.", false);
-
+                        }
                         hasFailed = true;
                     } else {
                         gameover();
@@ -2064,7 +2069,7 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
 
 
     public boolean onSceneTouchEvent(final Scene pScene, final TouchEvent event) {
-        if (replaying) {
+        if (replaying || isGameOver) {
             return false;
         }
 
@@ -2135,6 +2140,7 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
     }
 
     public void pause() {
+
         if (paused) {
             return;
         }
@@ -2155,6 +2161,12 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
 
             lastBackPressTime = realTimeElapsed;
             ToastLogger.showText("Tap twice to exit to room.", false);
+            return;
+        }
+
+        if (isGameOver) {
+            // Finishing the game over animation now.
+            GlobalManager.getInstance().getSongService().setFrequencyForcefully(101);
             return;
         }
 
@@ -2198,10 +2210,21 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
     }
 
     public void gameover() {
-        if (Multiplayer.isMultiplayer)
-        {
-            if (Multiplayer.isConnected())
-            {
+
+        if (isGameOver) {
+            return;
+        }
+        isGameOver = true;
+
+        // Releasing all cursors visually. At this point touch events will no longer be processed.
+        for (int i = 0; i < CursorCount; ++i) {
+            if (cursorSprites != null) {
+                cursorSprites[i].setShowing(false);
+            }
+        }
+
+        if (Multiplayer.isMultiplayer) {
+            if (Multiplayer.isConnected()) {
                 Multiplayer.log("Player has lost, moving to room scene.");
                 Execution.async(() -> Execution.runSafe(() -> RoomAPI.submitFinalScore(stat.toJson())));
             }
@@ -2219,17 +2242,87 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
         final PauseMenu menu = new PauseMenu(engine, this, true);
         gameStarted = false;
 
-        if (video != null) {
-            video.pause();
-        }
+        SongService songService = GlobalManager.getInstance().getSongService();
+        float initialFrequency = songService.getFrequency();
 
-        if (GlobalManager.getInstance().getSongService() != null && GlobalManager.getInstance().getSongService().getStatus() == Status.PLAYING) {
-            GlobalManager.getInstance().getSongService().pause();
-        }
-        paused = true;
+        // Wind down animation for failing based on osu!stable behavior.
 
-        scene.setIgnoreUpdate(true);
-        hud.setChildScene(menu.getScene(), false, true, true);
+        engine.registerUpdateHandler(new IUpdateHandler() {
+            private float elapsedTime;
+
+            private void applyEffectToScene(Scene scene) {
+                if (scene.getAlpha() > 0) {
+                    scene.setAlpha(Math.max(0, scene.getAlpha() - 0.007f));
+                }
+
+                for (int i = 0; i < scene.getChildCount(); i++) {
+                    IEntity entity = scene.getChild(i);
+
+                    entity.setPosition(entity.getX(), entity.getY() < 0f ? entity.getY() * 0.6f : entity.getY() * 1.01f);
+
+                    if (entity.getRotation() == 0) {
+                        entity.setRotation(entity.getRotation() + (float) Random.Default.nextDouble(-0.02, 0.02) * 180 / FMath.Pi);
+                    } else if (entity.getRotation() > 0) {
+                        entity.setRotation(entity.getRotation() + 0.01f * 180 / FMath.Pi);
+                    } else {
+                        entity.setRotation(entity.getRotation() - 0.01f * 180 / FMath.Pi);
+                    }
+                }
+            }
+
+            @Override
+            public void onUpdate(float pSecondsElapsed) {
+                elapsedTime += pSecondsElapsed;
+
+                // In osu!stable, the update is capped to 60 FPS. This means in higher framerates, the animations
+                // need to be slowed down to match 60 FPS.
+                float sixtyFPS = 1 / 60f;
+
+                if (elapsedTime < sixtyFPS) {
+                    return;
+                }
+
+                elapsedTime -= sixtyFPS;
+
+                if (songService.getFrequency() > 101) {
+
+                    applyEffectToScene(mgScene);
+                    applyEffectToScene(bgScene);
+
+                    float decreasedFrequency = Math.max(101, songService.getFrequency() - 300);
+                    float decreasedSpeed = GameHelper.getSpeedMultiplier() * (1 - (initialFrequency - decreasedFrequency) / initialFrequency);
+
+                    scene.setTimeMultiplier(decreasedSpeed);
+                    if (video != null) {
+                        video.setPlaybackSpeed(decreasedSpeed);
+                    }
+
+                    songService.setFrequencyForcefully(decreasedFrequency);
+                } else {
+                    if (video != null) {
+                        video.pause();
+                    }
+
+                    // Ensure music frequency is reset back to what it was.
+                    songService.setFrequencyForcefully(initialFrequency);
+
+                    if (songService.getStatus() == Status.PLAYING) {
+                        songService.pause();
+                    }
+
+                    paused = true;
+
+                    scene.setIgnoreUpdate(true);
+                    engine.unregisterUpdateHandler(this);
+
+                    hud.setChildScene(menu.getScene(), false, true, true);
+                }
+            }
+
+            @Override
+            public void reset() {
+            }
+        });
     }
 
     public void resume() {

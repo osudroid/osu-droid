@@ -31,6 +31,11 @@ public class BassAudioFunc {
     private LocalBroadcastManager broadcastManager;
 
     /**
+     * The channel's frequency, in Hz.
+     */
+    private float frequency;
+
+    /**
      * Whether the game is currently on focus.
      */
     private boolean onFocus;
@@ -105,6 +110,8 @@ public class BassAudioFunc {
         }
 
         BASS.BASS_ChannelGetInfo(channel, channelInfo);
+        frequency = channelInfo.freq;
+
         setSpeed(speed);
         setAdjustPitch(adjustPitch);
 
@@ -218,6 +225,19 @@ public class BassAudioFunc {
         onAudioEffectChange();
     }
 
+    public void setFrequencyForcefully(float frequency) {
+        if (channel == 0) {
+            return;
+        }
+        this.frequency = frequency;
+        BASS.BASS_ChannelSetAttribute(channel, BASS_FX.BASS_ATTRIB_TEMPO_FREQ, frequency);
+        BASS.BASS_ChannelSetAttribute(channel, BASS_FX.BASS_ATTRIB_TEMPO, 0);
+    }
+
+    public float getFrequency() {
+        return frequency;
+    }
+
     public float getVolume() {
         BASS.FloatValue volume = new BASS.FloatValue();
         if (channel != 0) {
@@ -268,11 +288,14 @@ public class BassAudioFunc {
             return;
         }
 
+
         if (adjustPitch) {
-            BASS.BASS_ChannelSetAttribute(channel, BASS_FX.BASS_ATTRIB_TEMPO_FREQ, channelInfo.freq * speed);
+            frequency = channelInfo.freq * speed;
+            BASS.BASS_ChannelSetAttribute(channel, BASS_FX.BASS_ATTRIB_TEMPO_FREQ, frequency);
             BASS.BASS_ChannelSetAttribute(channel, BASS_FX.BASS_ATTRIB_TEMPO, 0);
         } else {
-            BASS.BASS_ChannelSetAttribute(channel, BASS_FX.BASS_ATTRIB_TEMPO_FREQ, channelInfo.freq);
+            frequency = channelInfo.freq;
+            BASS.BASS_ChannelSetAttribute(channel, BASS_FX.BASS_ATTRIB_TEMPO_FREQ, frequency);
             BASS.BASS_ChannelSetAttribute(channel, BASS_FX.BASS_ATTRIB_TEMPO, (speed - 1) * 100);
         }
     }
