@@ -1726,6 +1726,11 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
     }
 
     private String registerHit(final int objectId, final int score, final boolean endCombo, final boolean incrementCombo) {
+
+        if (isGameOver) {
+            return "hit0";
+        }
+
         boolean writeReplay = objectId != -1 && replay != null && !replaying;
         if (score == 0) {
             if (stat.getCombo() > 30) {
