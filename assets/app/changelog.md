@@ -1,15 +1,21 @@
 Version 1.8 Patch 2
 ===================
 
+# Additions
+
+- Added osu!stable gameplay failing animation
+
 # Changes
 
 - Revamped slider judgement (again)
-  - Should actually match osu!stable now, minus slider end leniency and expanded follow circle area.
+  - Should actually match osu!stable now, minus slider end leniency (non-existent) and expanded follow circle area
+    (16.7% smaller than osu!stable).
 - Improved FPS counter accuracy
-- Improved gameplay loading time significantly
+- Improved gameplay loading time moderately
 - In-game leaderboard and hit error meter now remain visible even if gameplay UI is disabled, provided that their 
   respective settings are enabled
 - Reduced update frequency of FPS counter
+- Reduced pause menu fade in animation duration
 
 # Removals
 
@@ -27,9 +33,15 @@ Version 1.8 Patch 2
 - Fixed beatmap import from osu.direct failing on beatmaps with a slash character in their artist or title
 - Fixed game window potentially scaling down when searching for a beatmap in song selection menu
 - Fixed a potential case where gameplay HUD remains visible when going back from gameplay to room lobby in multiplayer
-- Fixed beatmap star rating occasionally showing 0 when switching between beatmaps fast enough
+- Fixed beatmap star rating occasionally showing 0 when switching beatmaps rapidly
 - Fixed previous selection not cancelling when random button selection is cancelled by dragging out of the button
 - Fixed a possible crash when leaving a multiplayer room
+- Fixed hit circle judgement potentially being behind by a frame
+- Fixed combo counter misplacement when pausing the game before the first hit object or during breaks
+- Fixed combo text scale from `skin.json` not being applied properly
+- Fixed unintended looping in follow point animation
+- Fixed beatmap global leaderboard taking too long to load when switching beatmaps rapidly
+- Fixed rapid beatmap switching in song selection menu potentially freezing the entire game
 
 Version 1.8 Patch 1
 ===================
