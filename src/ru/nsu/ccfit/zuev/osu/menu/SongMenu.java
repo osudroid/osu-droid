@@ -1140,8 +1140,10 @@ public class SongMenu implements IUpdateHandler, MenuItemListener,
 
             Replay.oldFLFollowDelay = ModMenu.getInstance().getFLfollowDelay();
 
-            ModMenu.getInstance().hide();
-            searchBar.dismiss();
+            Execution.mainThread(() -> {
+                ModMenu.getInstance().hide();
+                searchBar.dismiss();
+            });
 
             game.startGame(beatmapInfo, null);
             return;
