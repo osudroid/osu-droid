@@ -1183,32 +1183,35 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
         GameHelper.setKiai(activeEffectPoint.isKiai);
         GameHelper.setCurrentBeatTime(Math.max(0, elapsedTime - activeTimingPoint.time / 1000) % GameHelper.getBeatLength());
 
-        if (!breakPeriods.isEmpty()) {
-            if (!breakAnimator.isBreak()
-                    && breakPeriods.peek().getStart() <= elapsedTime) {
-                gameStarted = false;
-                breakAnimator.init(breakPeriods.peek().getLength());
-                if(GameHelper.isFlashLight()){
-                    flashlightSprite.onBreak(true);
+        if (!isGameOver) {
+
+            if (!breakPeriods.isEmpty()) {
+                if (!breakAnimator.isBreak() && breakPeriods.peek().getStart() <= elapsedTime) {
+                    gameStarted = false;
+                    breakAnimator.init(breakPeriods.peek().getLength());
+                    if(GameHelper.isFlashLight()){
+                        flashlightSprite.onBreak(true);
+                    }
+
+                    if (Multiplayer.isConnected())
+                        RoomScene.INSTANCE.getChat().show();
+
+                    hud.setHealthBarVisibility(false);
+                    breakPeriods.poll();
                 }
-
-                if (Multiplayer.isConnected())
-                    RoomScene.INSTANCE.getChat().show();
-
-                hud.setHealthBarVisibility(false);
-                breakPeriods.poll();
             }
-        }
-        if (breakAnimator.isOver()) {
 
-            // Ensure the chat is dismissed if it's still shown
-            RoomScene.INSTANCE.getChat().dismiss();
+            if (breakAnimator.isOver()) {
 
-            gameStarted = true;
-            hud.setHealthBarVisibility(true);
+                // Ensure the chat is dismissed if it's still shown
+                RoomScene.INSTANCE.getChat().dismiss();
 
-            if(GameHelper.isFlashLight()){
-                flashlightSprite.onBreak(false);
+                gameStarted = true;
+                hud.setHealthBarVisibility(true);
+
+                if(GameHelper.isFlashLight()){
+                    flashlightSprite.onBreak(false);
+                }
             }
         }
 
@@ -2241,6 +2244,26 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
         engine.registerUpdateHandler(new IUpdateHandler() {
             private float elapsedTime;
 
+            private void applyEffectToScene(Scene scene) {
+                if (scene.getAlpha() > 0) {
+                    scene.setAlpha(Math.max(0, scene.getAlpha() - 0.007f));
+                }
+
+                for (int i = 0; i < scene.getChildCount(); i++) {
+                    IEntity entity = scene.getChild(i);
+
+                    entity.setPosition(entity.getX(), entity.getY() < 0f ? entity.getY() * 0.6f : entity.getY() * 1.01f);
+
+                    if (entity.getRotation() == 0) {
+                        entity.setRotation(entity.getRotation() + (float) Random.Default.nextDouble(-0.02, 0.02) * 180 / FMath.Pi);
+                    } else if (entity.getRotation() > 0) {
+                        entity.setRotation(entity.getRotation() + 0.01f * 180 / FMath.Pi);
+                    } else {
+                        entity.setRotation(entity.getRotation() - 0.01f * 180 / FMath.Pi);
+                    }
+                }
+            }
+
             @Override
             public void onUpdate(float pSecondsElapsed) {
                 elapsedTime += pSecondsElapsed;
@@ -2257,23 +2280,8 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
 
                 if (songService.getFrequency() > 101) {
 
-                    if (mgScene.getAlpha() > 0) {
-                        mgScene.setAlpha(Math.max(0, mgScene.getAlpha() - 0.007f));
-                    }
-
-                    for (int i = 0; i < mgScene.getChildCount(); i++) {
-                        IEntity entity = mgScene.getChild(i);
-
-                        entity.setPosition(entity.getX(), entity.getY() < 0f ? entity.getY() * 0.6f : entity.getY() * 1.01f);
-
-                        if (entity.getRotation() == 0) {
-                            entity.setRotation(entity.getRotation() + (float) Random.Default.nextDouble(-0.02, 0.02) * 180 / FMath.Pi);
-                        } else if (entity.getRotation() > 0) {
-                            entity.setRotation(entity.getRotation() + 0.01f * 180 / FMath.Pi);
-                        } else {
-                            entity.setRotation(entity.getRotation() - 0.01f * 180 / FMath.Pi);
-                        }
-                    }
+                    applyEffectToScene(mgScene);
+                    applyEffectToScene(bgScene);
 
                     float decreasedFrequency = Math.max(101, songService.getFrequency() - 300);
                     float decreasedSpeed = GameHelper.getSpeedMultiplier() * (1 - (initialFrequency - decreasedFrequency) / initialFrequency);
