@@ -2263,8 +2263,12 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
 
         float initialFrequency = songService.getFrequency();
 
-        // Wind down animation for failing based on osu!stable behavior.
+        // Locally saving the scenes references to avoid unexpected behavior when the scene is changed.
+        ExtendedScene scene = this.scene;
+        ExtendedScene mgScene = this.mgScene;
+        ExtendedScene bgScene = this.bgScene;
 
+        // Wind down animation for failing based on osu!stable behavior.
         engine.registerUpdateHandler(new IUpdateHandler() {
             private float elapsedTime;
 
