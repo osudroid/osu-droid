@@ -2318,8 +2318,11 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
                     float decreasedSpeed = GameHelper.getSpeedMultiplier() * (1 - (initialFrequency - decreasedFrequency) / initialFrequency);
 
                     scene.setTimeMultiplier(decreasedSpeed);
+
                     if (video != null) {
-                        video.setPlaybackSpeed(decreasedSpeed);
+                        // Aparently MediaPlayer API doesn't support setting playback speed
+                        // below 0.01 causing an IllegalStateException.
+                        video.setPlaybackSpeed(Math.max(0.01f, decreasedSpeed));
                     }
 
                     songService.setFrequencyForcefully(decreasedFrequency);
