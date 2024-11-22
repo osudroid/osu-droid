@@ -2290,6 +2290,13 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
 
             @Override
             public void onUpdate(float pSecondsElapsed) {
+
+                // Ensure this update handler is removed under unexpected circumstances.
+                if (engine.getScene() != scene) {
+                    engine.unregisterUpdateHandler(this);
+                    return;
+                }
+
                 elapsedTime += pSecondsElapsed;
 
                 // In osu!stable, the update is capped to 60 FPS. This means in higher framerates, the animations
