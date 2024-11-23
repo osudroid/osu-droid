@@ -2263,8 +2263,12 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
 
         float initialFrequency = songService.getFrequency();
 
-        // Wind down animation for failing based on osu!stable behavior.
+        // Locally saving the scenes references to avoid unexpected behavior when the scene is changed.
+        ExtendedScene scene = this.scene;
+        ExtendedScene mgScene = this.mgScene;
+        ExtendedScene bgScene = this.bgScene;
 
+        // Wind down animation for failing based on osu!stable behavior.
         engine.registerUpdateHandler(new IUpdateHandler() {
             private float elapsedTime;
 
@@ -2290,6 +2294,13 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
 
             @Override
             public void onUpdate(float pSecondsElapsed) {
+
+                // Ensure this update handler is removed under unexpected circumstances.
+                if (engine.getScene() != scene) {
+                    engine.unregisterUpdateHandler(this);
+                    return;
+                }
+
                 elapsedTime += pSecondsElapsed;
 
                 // In osu!stable, the update is capped to 60 FPS. This means in higher framerates, the animations
@@ -2311,8 +2322,11 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
                     float decreasedSpeed = GameHelper.getSpeedMultiplier() * (1 - (initialFrequency - decreasedFrequency) / initialFrequency);
 
                     scene.setTimeMultiplier(decreasedSpeed);
+
                     if (video != null) {
-                        video.setPlaybackSpeed(decreasedSpeed);
+                        // Aparently MediaPlayer API doesn't support setting playback speed
+                        // below 0.01 causing an IllegalStateException.
+                        video.setPlaybackSpeed(Math.max(0.01f, decreasedSpeed));
                     }
 
                     songService.setFrequencyForcefully(decreasedFrequency);
