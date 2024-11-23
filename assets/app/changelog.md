@@ -1,3 +1,23 @@
+Version 1.8 Patch 3
+===================
+
+# Additions
+
+- Added support for `skin.ini`'s `CursorTrailRotate` setting in `skin.json`
+  - To use in `skin.json`, add the following entry:
+    ```json
+    {
+      "Cursor": {
+        "rotateCursorTrail": true
+      }
+    }
+    ```
+
+# Bug Fixes
+
+- Fixed fail animation still playing when the Perfect mod is enabled
+- Fixed a potential case where hitsounds may not be stopping until the game is restarted
+
 Version 1.8 Patch 2
 ===================
 
