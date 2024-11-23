@@ -31,6 +31,7 @@ public class OsuSkin {
     protected final BooleanSkinData useNewLayout = new BooleanSkinData("useNewLayout");
     protected final BooleanSkinData forceOverrideComboColor = new BooleanSkinData("forceOverride");
     protected final BooleanSkinData rotateCursor = new BooleanSkinData("rotateCursor", true);
+    protected final BooleanSkinData rotateCursorTrail = new BooleanSkinData("rotateCursorTrail", true);
     protected final BooleanSkinData layeredHitSounds = new BooleanSkinData("layeredHitSounds", true);
     protected final BooleanSkinData sliderBallFlip = new BooleanSkinData("sliderBallFlip", true);
     protected final BooleanSkinData spinnerFrequencyModulate = new BooleanSkinData("spinnerFrequencyModulate", true);
@@ -65,6 +66,10 @@ public class OsuSkin {
 
     public boolean isRotateCursor() {
         return rotateCursor.getCurrentValue();
+    }
+
+    public boolean isRotateCursorTrail() {
+        return rotateCursorTrail.getCurrentValue();
     }
 
     public float getComboTextScale() {
