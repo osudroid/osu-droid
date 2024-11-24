@@ -1,3 +1,10 @@
+Version 1.8 Patch 4
+===================
+
+# Bug Fixes
+
+- Fixed hitsounds resources not being cleared properly, resulting in excessive CPU and memory consumption
+
 Version 1.8 Patch 3
 ===================
 
