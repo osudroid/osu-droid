@@ -370,9 +370,8 @@ public class GameplaySlider extends GameObject {
     }
 
     private PointF getPositionAt(final float percentage, final boolean updateBallAngle, final boolean updateEndArrowRotation) {
-        tmpPoint.set(position);
-
         if (path.pointCount < 2) {
+            tmpPoint.set(position);
             return tmpPoint;
         }
 
@@ -415,6 +414,25 @@ public class GameplaySlider extends GameObject {
         }
 
         int index = left - 1;
+
+        // Theoretically, this case should never be reached as it means the percentage would be less than 0
+        // (which is already covered by the case above). However, people seem to be having IndexOutOfBoundsException
+        // crashes here, so we'll just return the first point in the path.
+        if (index < 0) {
+            var nextPoint = getAbsolutePathPosition(1);
+
+            if (updateBallAngle) {
+                ballAngle = MathUtils.radToDeg(Utils.direction(position.x, position.y, nextPoint.x, nextPoint.y));
+            }
+
+            if (updateEndArrowRotation) {
+                endArrow.setRotation(MathUtils.radToDeg(Utils.direction(nextPoint.x, nextPoint.y, position.x, position.y)));
+            }
+
+            tmpPoint.set(position);
+            return tmpPoint;
+        }
+
         float lengthProgress = (currentLength - path.getLength(index)) / (path.getLength(index + 1) - path.getLength(index));
 
         PointF currentPoint = getAbsolutePathPosition(index);
