@@ -201,11 +201,12 @@ public class OnlineManager {
             return false;
         }
 
-        rank = Integer.parseInt(resp[0]);
-        score = Long.parseLong(resp[1]);
-        accuracy = Float.parseFloat(resp[2]);
-        mapRank = Integer.parseInt(resp[3]);
+        userId = Long.parseLong(resp[0]);
+        sessionId = resp[1];
+        rank = Integer.parseInt(resp[2]);
+        score = Long.parseLong(resp[3]);
         pp = Math.round(Float.parseFloat(resp[4]));
+        accuracy = Float.parseFloat(resp[5]);
 
         return true;
     }

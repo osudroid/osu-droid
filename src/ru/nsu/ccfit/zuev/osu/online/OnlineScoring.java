@@ -5,6 +5,7 @@ import android.net.Uri;
 
 import com.google.android.material.snackbar.Snackbar;
 import com.reco1l.osu.Execution;
+import com.reco1l.osu.data.BeatmapInfo;
 import com.reco1l.osu.multiplayer.LobbyScene;
 import com.reco1l.osu.multiplayer.RoomScene;
 import com.rian.osu.ui.SendingPanel;

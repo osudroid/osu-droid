@@ -38,8 +38,8 @@
 
         <CheckBoxPreference
             android:key="allowMoreThanThreeCursors"
-            android:title="@string/opt_allow_more_than_three_fingers_title"
-            android:summary="@string/opt_allow_more_than_three_fingers_summary"
+            android:title="Allow more than three cursors"
+            android:summary="Allow players to put more than three active cursors at once during gameplay"
             android:defaultValue="true" />
 
         <com.reco1l.osu.ui.SelectPreference

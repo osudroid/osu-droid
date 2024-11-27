@@ -51,7 +51,8 @@ fun generateFakeRoom() = Room(
     gameplaySettings = RoomGameplaySettings(
         isFreeMod = true,
         isRemoveSliderLock = false,
-        allowForceDifficultyStatistics = true
+        allowForceDifficultyStatistics = true,
+        allowMoreThanThreeCursors = true
     ),
     teamMode = TeamMode.HeadToHead,
     winCondition = WinCondition.ScoreV1,

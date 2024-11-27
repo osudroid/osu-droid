@@ -99,8 +99,6 @@ public class Config {
         playfieldSize,
         cursorSize;
 
-    private static BeatmapLeaderboardScoringMode beatmapLeaderboardScoringMode;
-
     private static Map<String, String> skins;
 
     private static RGBColor[] comboColors;
