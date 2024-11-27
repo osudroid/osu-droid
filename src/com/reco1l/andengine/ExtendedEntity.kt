@@ -266,6 +266,11 @@ abstract class ExtendedEntity(
         }
     }
 
+    open fun setTranslation(x: Float, y: Float) {
+        translationX = x
+        translationY = y
+    }
+
 
     // Drawing
 
@@ -317,6 +322,11 @@ abstract class ExtendedEntity(
                 green *= parent.green
                 blue *= parent.blue
                 alpha *= parent.alpha
+
+                // We'll assume at this point there's no need to keep multiplying.
+                if (red == 0f && green == 0f && blue == 0f && alpha == 0f) {
+                    break
+                }
 
                 parent = parent.parent
             }
@@ -380,6 +390,8 @@ abstract class ExtendedEntity(
         if (clearDepthBufferBeforeDraw) {
             pGL.glClear(GL_DEPTH_BUFFER_BIT)
         }
+
+        GLHelper.setDepthTest(pGL, testWithDepthBuffer)
     }
 
     override fun onApplyVertices(pGL: GL10) {
@@ -390,14 +402,6 @@ abstract class ExtendedEntity(
 
     }
 
-    override fun doDraw(pGL: GL10, pCamera: Camera) {
-
-        GLHelper.setDepthTest(pGL, testWithDepthBuffer)
-
-        super.doDraw(pGL, pCamera)
-
-        GLHelper.setDepthTest(pGL, false)
-    }
 
 
     // Vertex buffer
@@ -436,7 +440,7 @@ abstract class ExtendedEntity(
      *
      * @return Whether the size of the entity was changed or not, this depends on the [autoSizeAxes] property.
      */
-    protected open fun onContentSizeMeasured(): Boolean {
+    open fun onContentSizeMeasured(): Boolean {
 
         if (autoSizeAxes == Axes.None) {
             return false

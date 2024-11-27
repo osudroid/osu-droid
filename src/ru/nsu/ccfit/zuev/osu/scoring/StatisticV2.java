@@ -864,7 +864,7 @@ public class StatisticV2 implements Serializable {
     public ScoreBoardItem toBoardItem() {
 
         //noinspection DataFlowIssue
-        var combo = !Multiplayer.isConnected() || Multiplayer.room.getWinCondition() != WinCondition.MAX_COMBO ? currentCombo : scoreMaxCombo;
+        var combo = !Multiplayer.isConnected() || Multiplayer.room.getWinCondition() != WinCondition.MaximumCombo ? currentCombo : scoreMaxCombo;
 
         return new ScoreBoardItem(playerName, getTotalScoreWithMultiplier(), combo, getAccuracy(), isAlive);
     }
@@ -939,7 +939,7 @@ public class StatisticV2 implements Serializable {
      * Whether the statistic corresponds to a team.
      */
     public boolean isTeamStatistic() {
-        return Multiplayer.isConnected() && (playerName.equals(RoomTeam.RED.toString()) || playerName.equals(RoomTeam.BLUE.toString()));
+        return Multiplayer.isConnected() && (playerName.equals(RoomTeam.Red.toString()) || playerName.equals(RoomTeam.Blue.toString()));
     }
 
     /**

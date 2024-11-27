@@ -50,6 +50,8 @@ open class Box : ExtendedEntity(vertexBuffer = BoxVertexBuffer()) {
                 put(6, width)
                 put(7, height)
             }
+
+            setHardwareBufferNeedsUpdate()
         }
 
     }
@@ -107,7 +109,7 @@ open class RoundedBox(segmentsPerArc: Int = 10) : ExtendedEntity(RoundedBoxVerte
             shouldRebuildVertexBuffer = false
 
             // In this case for all 4 arcs the angle range is 90°.
-            val segmentsPerArc = Circle.approximateSegments(cornerRadius, cornerRadius, 0f, 90f)
+            val segmentsPerArc = Circle.approximateSegments(cornerRadius, cornerRadius, 90f)
 
             setVertexBuffer(RoundedBoxVertexBuffer(segmentsPerArc))
         }
@@ -222,6 +224,8 @@ open class RoundedBox(segmentsPerArc: Int = 10) : ExtendedEntity(RoundedBoxVerte
 
             // Bottom left corner (90° to 180°)
             addArc(cornerRadius, height - cornerRadius, 90f, 180f)
+
+            setHardwareBufferNeedsUpdate()
         }
 
 

@@ -1,12 +1,9 @@
-package com.reco1l.osu
+package com.reco1l.andengine
 
 import com.edlplan.framework.easing.Easing
 import com.reco1l.andengine.modifier.*
 import com.reco1l.andengine.modifier.ModifierType.*
 import com.reco1l.andengine.modifier.UniversalModifier.Companion.GlobalPool
-import org.anddev.andengine.util.modifier.IModifier.*
-import org.anddev.andengine.util.modifier.ease.IEaseFunction
-import org.anddev.andengine.util.modifier.ease.IEaseFunction.DEFAULT as DefaultEaseFunction
 
 /**
  * A collection of static methods to create different types of modifiers.

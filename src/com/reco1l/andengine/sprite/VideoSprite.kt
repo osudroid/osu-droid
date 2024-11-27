@@ -1,60 +1,83 @@
 package com.reco1l.andengine.sprite
 
+import android.media.*
 import android.opengl.GLES11Ext.GL_TEXTURE_EXTERNAL_OES
+import android.os.*
 import com.reco1l.andengine.texture.*
 import org.anddev.andengine.engine.Engine
 import org.anddev.andengine.engine.camera.Camera
-import org.anddev.andengine.entity.sprite.Sprite
+import org.anddev.andengine.entity.sprite.*
+import org.anddev.andengine.opengl.texture.region.*
+import org.anddev.andengine.opengl.util.GLHelper
 import javax.microedition.khronos.opengles.GL10
 
-class VideoSprite(source: String, private val engine: Engine) : Sprite(0f, 0f, VideoTexture(source).toRegion())
-{
+class VideoSprite(source: String, private val engine: Engine) : Sprite(0f, 0f, VideoTexture(source).let {
+    TextureRegion(it, 0, 0, it.width, it.height)
+}) {
 
-    val texture = textureRegion.texture as VideoTexture
+    private val texture = textureRegion.texture as VideoTexture
 
-    private var isMali: Boolean? = null
 
-    init
-    {
+    private var isMaliGPU: Boolean? = null
+
+
+    init {
         engine.textureManager.loadTexture(texture)
     }
 
-    fun release()
-    {
-        texture.release()
-        engine.textureManager.unloadTexture(texture)
-    }
 
-    override fun doDraw(pGL: GL10, pCamera: Camera?)
-    {
-        if (isMali == null) {
-            isMali = pGL.glGetString(GL10.GL_RENDERER).contains("Mali", true)
+    override fun onInitDraw(pGL: GL10) {
+
+        if (isMaliGPU == null) {
+            isMaliGPU = pGL.glGetString(GL10.GL_RENDERER).contains("Mali", true)
         }
 
-        onInitDraw(pGL)
+        super.onInitDraw(pGL)
 
         // Apparently there is either a bug or unintended behavior in Mali GPUs' OpenGL ES implementation.
         // Causes the wrong texture to be displayed when GL_TEXTURE_2D is enabled before enabling GL_TEXTURE_EXTERNAL_OES.
-        if (isMali == true) {
-            pGL.glDisable(GL10.GL_TEXTURE_2D)
+        if (isMaliGPU!!) {
+            GLHelper.disableTextures(pGL)
         }
 
         pGL.glEnable(GL_TEXTURE_EXTERNAL_OES)
+    }
 
-        textureRegion.onApply(pGL)
+    override fun drawVertices(gl: GL10, camera: Camera) {
+        super.drawVertices(gl, camera)
 
-        onApplyVertices(pGL)
-        drawVertices(pGL, pCamera)
+        gl.glDisable(GL_TEXTURE_EXTERNAL_OES)
+    }
 
-        pGL.glDisable(GL_TEXTURE_EXTERNAL_OES)
 
-        if (isMali == true) {
-            pGL.glEnable(GL10.GL_TEXTURE_2D)
+    fun release() {
+        texture.player.release()
+        engine.textureManager.unloadTexture(texture)
+    }
+
+    fun play() {
+        texture.player.start()
+    }
+
+    fun pause() {
+        texture.player.pause()
+    }
+
+    fun seekTo(ms: Int) {
+        // Unfortunately in old versions we can't seek at closest frame from the desired position.
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            texture.player.seekTo(ms.toLong(), MediaPlayer.SEEK_CLOSEST)
+        } else {
+            texture.player.seekTo(ms)
         }
     }
 
-    override fun finalize()
-    {
+    fun setPlaybackSpeed(speed: Float) {
+        texture.player.playbackParams = texture.player.playbackParams.setSpeed(speed)
+    }
+
+
+    override fun finalize() {
         release()
         super.finalize()
     }

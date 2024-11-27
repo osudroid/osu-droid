@@ -5,13 +5,13 @@ import androidx.annotation.StringRes;
 
 public enum RankedStatus {
 
-    ranked(com.edlplan.osudroidresource.R.string.ranked_status_ranked),
-    approved(com.edlplan.osudroidresource.R.string.ranked_status_approved),
-    qualified(com.edlplan.osudroidresource.R.string.ranked_status_qualified),
-    loved(com.edlplan.osudroidresource.R.string.ranked_status_loved),
-    pending(com.edlplan.osudroidresource.R.string.ranked_status_pending),
-    workInProgress(com.edlplan.osudroidresource.R.string.ranked_status_wip),
-    graveyard(com.edlplan.osudroidresource.R.string.ranked_status_graveyard);
+    ranked(com.osudroid.resources.R.string.ranked_status_ranked),
+    approved(com.osudroid.resources.R.string.ranked_status_approved),
+    qualified(com.osudroid.resources.R.string.ranked_status_qualified),
+    loved(com.osudroid.resources.R.string.ranked_status_loved),
+    pending(com.osudroid.resources.R.string.ranked_status_pending),
+    workInProgress(com.osudroid.resources.R.string.ranked_status_wip),
+    graveyard(com.osudroid.resources.R.string.ranked_status_graveyard);
 
     /**
      * The string resource ID of the status name, recommended to use this rather than name().

@@ -2,12 +2,15 @@ package ru.nsu.ccfit.zuev.osu.game;
 
 import android.graphics.PointF;
 
+import com.edlplan.framework.math.Vec2;
+import com.edlplan.framework.math.line.LinePath;
 import com.rian.osu.beatmap.hitobject.Slider;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.util.Arrays;
 
+import ru.nsu.ccfit.zuev.osu.Constants;
 import ru.nsu.ccfit.zuev.skins.OsuSkin;
 import ru.nsu.ccfit.zuev.osu.Utils;
 import ru.nsu.ccfit.zuev.osu.helper.DifficultyHelper;
@@ -34,6 +37,7 @@ public class GameHelper {
     private static double beatLength = 0;
     private static double currentBeatTime = 0;
     private static boolean samplesMatchPlaybackRate;
+    private static int replayVersion;
 
     private static DifficultyHelper difficultyHelper = DifficultyHelper.StdDifficulty;
 
@@ -62,27 +66,52 @@ public class GameHelper {
     }
 
     /**
+     * Converts a {@link SliderPath} to a {@link LinePath} that can be used to render the slider path.
+     *
+     * @param sliderPath The {@link SliderPath} to convert.
+     * @return The converted {@link LinePath}.
+     */
+    public static LinePath convertSliderPath(final SliderPath sliderPath) {
+        var renderPath = new LinePath();
+
+        if (sliderPath.pointCount == 0) {
+            return renderPath;
+        }
+
+        for (int i = 0; i < sliderPath.pointCount; ++i) {
+
+            var x = sliderPath.getX(i);
+            var y = sliderPath.getY(i);
+
+            renderPath.add(new Vec2(x, y));
+        }
+
+        renderPath.measure();
+        renderPath.bufferLength(sliderPath.getLength(sliderPath.lengthCount - 1));
+        renderPath = renderPath.fitToLinePath();
+        renderPath.measure();
+
+        return renderPath;
+    }
+
+    /**
      * Converts an osu!pixels-based path of a {@link Slider} to one that can be used in gameplay.
      *
      * @return The converted {@link SliderPath}.
      */
     public static SliderPath convertSliderPath(final Slider slider) {
-        var startPosition = slider.getPosition().plus(slider.getGameplayStackOffset());
-
         var calculatedPath = slider.getPath().getCalculatedPath();
         var cumulativeLength = slider.getPath().getCumulativeLength();
 
         var path = new SliderPath(calculatedPath.size());
-        var tmpPoint = new PointF();
+
+        float realWidthScale = (float) Constants.MAP_ACTUAL_WIDTH / Constants.MAP_WIDTH;
+        float realHeightScale = (float) Constants.MAP_ACTUAL_HEIGHT / Constants.MAP_HEIGHT;
 
         for (var i = 0; i < calculatedPath.size(); i++) {
 
             var p = calculatedPath.get(i);
-            tmpPoint.set(startPosition.x + p.x, startPosition.y + p.y);
-
-            // The path is already flipped when the library applies the Hard Rock mod, so we don't need to do it here.
-            Utils.trackToRealCoords(tmpPoint);
-            path.setPoint(i, tmpPoint.x, tmpPoint.y);
+            path.setPoint(i, p.x * realWidthScale, p.y * realHeightScale);
 
             if (i < cumulativeLength.size()) {
                 path.setLength(i, cumulativeLength.get(i).floatValue());
@@ -261,6 +290,14 @@ public class GameHelper {
 
     public static void setSamplesMatchPlaybackRate(boolean samplesMatchPlaybackRate) {
         GameHelper.samplesMatchPlaybackRate = samplesMatchPlaybackRate;
+    }
+
+    public static int getReplayVersion() {
+        return replayVersion;
+    }
+
+    public static void setReplayVersion(int replayVersion) {
+        GameHelper.replayVersion = replayVersion;
     }
 
     public static class SliderPath {

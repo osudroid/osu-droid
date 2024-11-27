@@ -1,6 +1,6 @@
 package ru.nsu.ccfit.zuev.osu.menu;
 
-import com.edlplan.ui.fragment.InGameSettingMenu;
+import com.edlplan.ui.fragment.ModSettingsMenu;
 import com.reco1l.ibancho.RoomAPI;
 import com.reco1l.osu.data.BeatmapInfo;
 import com.reco1l.osu.Execution;
@@ -61,7 +61,7 @@ public class ModMenu implements IModSwitcher {
     private Float customOD = null;
     private Float customHP = null;
     private Float customCS = null;
-    private InGameSettingMenu menu;
+    private ModSettingsMenu menu;
 
     private ModMenu() {
         mod = EnumSet.noneOf(GameMod.class);
@@ -84,7 +84,7 @@ public class ModMenu implements IModSwitcher {
         setSelectedTrack(selectedBeatmap);
         scene.setChildScene(getScene(), false, true, true);
         if (menu == null) {
-            menu = new InGameSettingMenu();
+            menu = new ModSettingsMenu();
         }
 
         Execution.mainThread(menu::show);
@@ -169,7 +169,7 @@ public class ModMenu implements IModSwitcher {
 
         if (Multiplayer.isConnected())
         {
-            RoomScene.awaitModsChange = true;
+            RoomScene.isWaitingForModsChange = true;
 
             var string = MultiplayerConverter.modsToString(mod);
 
@@ -195,7 +195,7 @@ public class ModMenu implements IModSwitcher {
                         customHP
                 );
             } else {
-                RoomScene.awaitModsChange = false;
+                RoomScene.isWaitingForModsChange = false;
             }
         }
     }
@@ -234,11 +234,11 @@ public class ModMenu implements IModSwitcher {
 
         multiplierText = new ChangeableText(0, Utils.toRes(50),
                 ResourceManager.getInstance().getFont("CaptionFont"),
-                StringTable.format(com.edlplan.osudroidresource.R.string.menu_mod_multiplier, 1f));
+                StringTable.format(com.osudroid.resources.R.string.menu_mod_multiplier, 1f));
         multiplierText.setScale(1.2f);
         scene.attachChild(multiplierText);
 
-        menu = new InGameSettingMenu();
+        menu = new ModSettingsMenu();
 
         changeMultiplierText();
 
@@ -295,7 +295,7 @@ public class ModMenu implements IModSwitcher {
 
         final TextButton resetText = new TextButton(ResourceManager
                 .getInstance().getFont("CaptionFont"),
-                StringTable.get(com.edlplan.osudroidresource.R.string.menu_mod_reset)) {
+                StringTable.get(com.osudroid.resources.R.string.menu_mod_reset)) {
 
             boolean moved = false;
             private float dx = 0, dy = 0;
@@ -350,7 +350,7 @@ public class ModMenu implements IModSwitcher {
 
         final TextButton back = new TextButton(ResourceManager
                 .getInstance().getFont("CaptionFont"),
-                StringTable.get(com.edlplan.osudroidresource.R.string.menu_mod_back)) {
+                StringTable.get(com.osudroid.resources.R.string.menu_mod_back)) {
 
             boolean moved = false;
             private float dx = 0, dy = 0;
@@ -488,7 +488,7 @@ public class ModMenu implements IModSwitcher {
             }
         }
 
-        multiplierText.setText(StringTable.format(com.edlplan.osudroidresource.R.string.menu_mod_multiplier,
+        multiplierText.setText(StringTable.format(com.osudroid.resources.R.string.menu_mod_multiplier,
                 mult));
         multiplierText.setPosition(
                 Config.getRES_WIDTH() / 2f - multiplierText.getWidth() / 2,
@@ -529,7 +529,7 @@ public class ModMenu implements IModSwitcher {
         }
 
         if (modsRemoved) {
-            ToastLogger.showTextId(com.edlplan.osudroidresource.R.string.force_diffstat_mod_unpickable, false);
+            ToastLogger.showTextId(com.osudroid.resources.R.string.force_diffstat_mod_unpickable, false);
         }
 
         return modsRemoved;
@@ -720,7 +720,7 @@ public class ModMenu implements IModSwitcher {
         handleCustomDifficultyStatisticsFlags();
     }
 
-    public InGameSettingMenu getMenu() {
+    public ModSettingsMenu getMenu() {
         return menu;
     }
 }

@@ -186,7 +186,7 @@ public class MainScene implements IUpdateHandler {
                 if (pSceneTouchEvent.isActionDown()) {
 
                     new MessageDialog()
-                        .setMessage(context.getString(com.edlplan.osudroidresource.R.string.dialog_visit_osu_website))
+                        .setMessage(context.getString(com.osudroid.resources.R.string.dialog_visit_osu_website))
                         .addButton("Yes", dialog -> {
                             Intent browserIntent = new Intent(Intent.ACTION_VIEW, Uri.parse("https://osu.ppy.sh"));
                             GlobalManager.getInstance().getMainActivity().startActivity(browserIntent);
@@ -215,7 +215,7 @@ public class MainScene implements IUpdateHandler {
                 if (pSceneTouchEvent.isActionDown()) {
 
                     new MessageDialog()
-                        .setMessage(context.getString(com.edlplan.osudroidresource.R.string.dialog_visit_osudroid_website))
+                        .setMessage(context.getString(com.osudroid.resources.R.string.dialog_visit_osudroid_website))
                         .addButton("Yes", dialog -> {
                             Intent browserIntent = new Intent(Intent.ACTION_VIEW, Uri.parse("https://" + OnlineManager.hostname));
                             GlobalManager.getInstance().getMainActivity().startActivity(browserIntent);
@@ -903,7 +903,7 @@ public class MainScene implements IUpdateHandler {
 
         new MessageDialog()
             .setTitle("Exit")
-            .setMessage(context.getString(com.edlplan.osudroidresource.R.string.dialog_exit_message))
+            .setMessage(context.getString(com.osudroid.resources.R.string.dialog_exit_message))
             .addButton("Yes", dialog -> {
                 dialog.dismiss();
                 exit();

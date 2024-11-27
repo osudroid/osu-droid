@@ -28,7 +28,7 @@ public class ImportReplayActivity extends Activity {
             System.out.println("path: " + path);
             File file = new File(path);
             if ((!file.exists()) || file.isDirectory()) {
-                Toast.makeText(this, com.edlplan.osudroidresource.R.string.invalid_edr_file, Toast.LENGTH_SHORT).show();
+                Toast.makeText(this, com.osudroid.resources.R.string.invalid_edr_file, Toast.LENGTH_SHORT).show();
                 super.onStart();
                 finish();
                 return;
@@ -38,7 +38,7 @@ public class ImportReplayActivity extends Activity {
                 File rep = new File(entry.scoreInfo.getReplayPath());
                 if (!rep.exists()) {
                     if (!rep.createNewFile()) {
-                        Toast.makeText(this, com.edlplan.osudroidresource.R.string.failed_to_import_edr, Toast.LENGTH_SHORT).show();
+                        Toast.makeText(this, com.osudroid.resources.R.string.failed_to_import_edr, Toast.LENGTH_SHORT).show();
                         super.onStart();
                         finish();
                         return;
@@ -48,15 +48,15 @@ public class ImportReplayActivity extends Activity {
                 outputStream.write(entry.replayFile);
                 outputStream.close();
                 if (DatabaseManager.getScoreInfoTable().insertScore(entry.scoreInfo) >= 0) {
-                    Toast.makeText(this, com.edlplan.osudroidresource.R.string.import_edr_successfully, Toast.LENGTH_SHORT).show();
+                    Toast.makeText(this, com.osudroid.resources.R.string.import_edr_successfully, Toast.LENGTH_SHORT).show();
                     finish();
                 } else {
-                    Toast.makeText(this, com.edlplan.osudroidresource.R.string.failed_to_import_edr, Toast.LENGTH_SHORT).show();
+                    Toast.makeText(this, com.osudroid.resources.R.string.failed_to_import_edr, Toast.LENGTH_SHORT).show();
                     finish();
                 }
             } catch (Exception e) {
                 e.printStackTrace();
-                Toast.makeText(this, String.format(getResources().getString(com.edlplan.osudroidresource.R.string.failed_to_import_edr_with_err), e.toString()), Toast.LENGTH_SHORT).show();
+                Toast.makeText(this, String.format(getResources().getString(com.osudroid.resources.R.string.failed_to_import_edr_with_err), e.toString()), Toast.LENGTH_SHORT).show();
                 super.onStart();
                 finish();
                 return;

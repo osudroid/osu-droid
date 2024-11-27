@@ -487,7 +487,7 @@ public class ScoringScene {
             // Do not save and submit score if note count does not match, since it indicates a corrupted score
             // (potentially from bugging the gameplay by any unnecessary means).
             if (totalNotes != beatmap.getTotalHitObjectCount()) {
-                ToastLogger.showTextId(com.edlplan.osudroidresource.R.string.replay_corrupted, true);
+                ToastLogger.showTextId(com.osudroid.resources.R.string.replay_corrupted, true);
                 return;
             }
 
@@ -521,7 +521,7 @@ public class ScoringScene {
                     scene.registerTouchArea(sendingPanel.getDismissTouchArea());
                     scene.attachChild(sendingPanel);
 
-                    OnlineScoring.getInstance().sendRecord(stat, mapMD5, sendingPanel, replayPath);
+                    OnlineScoring.getInstance().sendRecord(beatmap, stat, sendingPanel, replayPath);
                 }
             }
         }

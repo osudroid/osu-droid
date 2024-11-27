@@ -17,7 +17,24 @@
             android:key="loadAvatar"
             android:summary="@string/opt_loadavatar_summary"
             android:title="@string/opt_loadavatar_title"
-            app:layout="@layout/settings_preference_checkbox_bottom" />
+            app:layout="@layout/settings_preference_checkbox" />
+
+        <com.reco1l.osu.ui.SelectPreference
+            android:defaultValue="0"
+            android:entries="@array/global_beatmap_leaderboard_scoring_mode_names"
+            android:entryValues="@array/global_beatmap_leaderboard_scoring_mode_values"
+            android:key="beatmapLeaderboardScoringMode"
+            android:summary="@string/opt_global_beatmap_leaderboard_scoring_mode_summary"
+            android:title="@string/opt_global_beatmap_leaderboard_scoring_mode_title" />
+
+        <com.reco1l.osu.ui.SelectPreference
+            android:defaultValue="0"
+            android:entries="@array/difficulty_algorithm_names"
+            android:entryValues="@array/difficulty_algorithm_values"
+            android:key="difficultyAlgorithm"
+            android:summary="@string/difficulty_algorithm_summary"
+            android:title="@string/difficulty_algorithm_title"
+            app:layout="@layout/settings_preference_bottom" />
 
     </PreferenceCategory>
 

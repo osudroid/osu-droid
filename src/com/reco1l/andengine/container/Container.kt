@@ -16,7 +16,7 @@ import kotlin.math.*
 open class Container : ExtendedEntity() {
 
 
-    override var autoSizeAxes = Axes.None
+    override var autoSizeAxes = Axes.Both
         set(value) {
             if (field != value) {
                 field = value
@@ -86,9 +86,20 @@ open class Container : ExtendedEntity() {
 
                 val child = mChildren.getOrNull(i) ?: continue
 
+                var offsetX = child.x
+                var offsetY = child.y
+
+                if (child is ExtendedEntity) {
+                    offsetX += child.originOffsetX
+                    offsetY += child.originOffsetY
+                }
+
+                offsetX = max(0f, offsetX)
+                offsetY = max(0f, offsetY)
+
                 if (child is IShape) {
-                    contentWidth = max(contentWidth, child.x + child.width)
-                    contentHeight = max(contentHeight, child.y + child.height)
+                    contentWidth = max(contentWidth, offsetX + child.width)
+                    contentHeight = max(contentHeight, offsetY + child.height)
                 }
             }
         }

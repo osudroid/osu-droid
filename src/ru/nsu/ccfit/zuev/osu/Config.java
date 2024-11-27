@@ -81,7 +81,8 @@ public class Config {
         keepBackgroundAspectRatio,
         noChangeDimInBreaks,
         dimHitObjects,
-        allowMoreThanThreeCursors;
+        allowMoreThanThreeCursors,
+        forceMaxRefreshRate;
 
     private static int RES_WIDTH,
         RES_HEIGHT,
@@ -98,17 +99,25 @@ public class Config {
         playfieldSize,
         cursorSize;
 
-    private static DifficultyAlgorithm difficultyAlgorithm;
+    private static BeatmapLeaderboardScoringMode beatmapLeaderboardScoringMode;
 
     private static Map<String, String> skins;
 
     private static RGBColor[] comboColors;
     private static Context context;
 
+
+    /**
+     * The shared preferences of the application.
+     */
+    private static SharedPreferences sharedPreferences;
+
+
     public static void loadConfig(final Context context) {
         Config.context = context;
-        final SharedPreferences prefs = PreferenceManager
-                .getDefaultSharedPreferences(context);
+        sharedPreferences = PreferenceManager.getDefaultSharedPreferences(context);
+
+        final SharedPreferences prefs = sharedPreferences;
         // graphics
         useCustomSkins = prefs.getBoolean("skin", false);
         useCustomSounds = prefs.getBoolean("beatmapSounds", true);
@@ -127,6 +136,7 @@ public class Config {
         keepBackgroundAspectRatio = prefs.getBoolean("keepBackgroundAspectRatio", false);
         noChangeDimInBreaks = prefs.getBoolean("noChangeDimInBreaks", false);
         dimHitObjects = prefs.getBoolean("dimHitObjects", true);
+        forceMaxRefreshRate = prefs.getBoolean("forceMaxRefreshRate", false);
         progressIndicatorType = Integer.parseInt(prefs.getString("progressIndicatorType", "0"));
 
         setSize();
@@ -221,7 +231,6 @@ public class Config {
         hideInGameUI = prefs.getBoolean("hideInGameUI", false);
         safeBeatmapBg = prefs.getBoolean("safebeatmapbg", false);
         displayRealTimePPCounter = prefs.getBoolean("displayRealTimePPCounter", false);
-        difficultyAlgorithm = DifficultyAlgorithm.droid;
 
         // Multiplayer
         useNightcoreOnMultiplayer = prefs.getBoolean("player_nightcore", false);
@@ -299,11 +308,9 @@ public class Config {
     }
 
     public static DifficultyAlgorithm getDifficultyAlgorithm() {
-        return difficultyAlgorithm;
-    }
-
-    public static void setDifficultyAlgorithm(DifficultyAlgorithm algorithm) {
-        Config.difficultyAlgorithm = algorithm;
+        return Config.getString("difficultyAlgorithm", "0").equals("1")
+                ? DifficultyAlgorithm.standard
+                : DifficultyAlgorithm.droid;
     }
 
     public static boolean isEnableExtension() {
@@ -790,8 +797,50 @@ public class Config {
         return dimHitObjects;
     }
 
+    public static boolean isForceMaxRefreshRate() {
+        return forceMaxRefreshRate;
+    }
+
     @ProgressIndicatorType
     public static int getProgressIndicatorType() {
         return progressIndicatorType;
     }
+
+
+    // Shared Preferences
+    // It's preferred to use these methods to access shared preferences instead of adding new fields to this class.
+    // If the option is expected to be accessed frequently consider storing it locally as a field where it's needed.
+
+    public static boolean getBoolean(String key, boolean defaultValue) {
+        return sharedPreferences.getBoolean(key, defaultValue);
+    }
+
+    public static void setBoolean(String key, boolean value) {
+        sharedPreferences.edit().putBoolean(key, value).commit();
+    }
+
+    public static int getInt(String key, int defaultValue) {
+        return sharedPreferences.getInt(key, defaultValue);
+    }
+
+    public static void setInt(String key, int value) {
+        sharedPreferences.edit().putInt(key, value).commit();
+    }
+
+    public static String getString(String key, String defaultValue) {
+        return sharedPreferences.getString(key, defaultValue);
+    }
+
+    public static void setString(String key, String value) {
+        sharedPreferences.edit().putString(key, value).commit();
+    }
+
+    public static float getFloat(String key, float defaultValue) {
+        return sharedPreferences.getFloat(key, defaultValue);
+    }
+
+    public static void setFloat(String key, float value) {
+        sharedPreferences.edit().putFloat(key, value).commit();
+    }
+
 }

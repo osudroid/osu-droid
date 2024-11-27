@@ -4,7 +4,7 @@ import android.graphics.PointF;
 
 import com.reco1l.osu.Execution;
 import com.reco1l.andengine.sprite.ExtendedSprite;
-import com.reco1l.osu.Modifiers;
+import com.reco1l.andengine.Modifiers;
 import com.reco1l.andengine.Anchor;
 import com.rian.osu.beatmap.hitobject.BankHitSampleInfo;
 import com.rian.osu.beatmap.hitobject.Spinner;
@@ -356,8 +356,6 @@ public class GameplaySpinner extends GameObject {
         }
 
         spinnerSpinSample.reset();
-        spinnerSpinSample.setLooping(true);
-
         spinnerBonusSample.reset();
 
         float startTime = (float) beatmapSpinner.startTime;
@@ -380,6 +378,8 @@ public class GameplaySpinner extends GameObject {
                 spinnerSpinSample.init(startTime, auxiliarySample);
             }
         }
+
+        spinnerSpinSample.setLooping(true);
     }
 
     protected void playAndFreeHitSamples(int obtainedScore) {

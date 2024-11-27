@@ -118,28 +118,6 @@ data class ScoreInfo @JvmOverloads constructor(
         get() = if (notesHit == 0) 1f else (hit300 * 6f + hit100 * 2f + hit50) / (6f * notesHit)
 
 
-    fun toJSON() = JSONObject().apply {
-
-        // The keys don't correspond to the table columns in order to keep compatibility with the old replays.
-        put("id", id)
-        put("playername", playerName)
-        put("replayfile", replayFilename)
-        put("beatmapMD5", beatmapMD5)
-        put("mod", mods)
-        put("score", score)
-        put("combo", maxCombo)
-        put("mark", mark)
-        put("h300k", hit300k)
-        put("h300", hit300)
-        put("h100k", hit100k)
-        put("h100", hit100)
-        put("h50", hit50)
-        put("misses", misses)
-        put("accuracy", accuracy)
-        put("time", time)
-
-    }
-
     fun toStatisticV2() = StatisticV2().also {
 
         it.playerName = playerName

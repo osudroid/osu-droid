@@ -3,6 +3,7 @@ package ru.nsu.ccfit.zuev.osu.online;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 
+import com.reco1l.osu.data.BeatmapInfo;
 import okhttp3.MediaType;
 import okhttp3.OkHttpClient;
 
@@ -20,6 +21,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 import ru.nsu.ccfit.zuev.osu.*;
 import ru.nsu.ccfit.zuev.osu.game.mods.GameMod;
+import ru.nsu.ccfit.zuev.osu.helper.FileUtils;
 import ru.nsu.ccfit.zuev.osu.helper.MD5Calculator;
 import ru.nsu.ccfit.zuev.osu.online.PostBuilder.RequestException;
 import ru.nsu.ccfit.zuev.osu.scoring.StatisticV2;
@@ -157,11 +159,10 @@ public class OnlineManager {
         return true;
     }
 
-    public boolean sendRecord(String data, String mapMD5, String replayFilename) throws OnlineManagerException {
-
+    public boolean sendRecord(BeatmapInfo beatmap, String scoreData, String replayPath) throws OnlineManagerException {
         Debug.i("Sending record...");
 
-        File replayFile = new File(replayFilename);
+        File replayFile = new File(replayPath);
         if (!replayFile.exists()) {
             failMessage = "Replay file not found";
             Debug.e("Replay file not found");
@@ -170,14 +171,16 @@ public class OnlineManager {
 
         var post = new FormDataPostBuilder();
         post.addParam("userID", String.valueOf(userId));
-        post.addParam("data", data);
-        post.addParam("hash", mapMD5);
         post.addParam("sessionId", sessionId);
+        post.addParam("filename", beatmap.getFullBeatmapName().trim());
+        post.addParam("hash", beatmap.getMD5());
+        post.addParam("data", scoreData);
 
         MediaType replayMime = MediaType.parse("application/octet-stream");
         RequestBody replayFileBody = RequestBody.create(replayFile, replayMime);
 
-        post.addParam("uploadedFile", replayFile.getName(), replayFileBody);
+        post.addParam("replayFile", replayFile.getName(), replayFileBody);
+        post.addParam("replayFileChecksum", FileUtils.getSHA256Checksum(replayFile));
 
         ArrayList<String> response = sendRequest(post, endpoint + "submit");
 

@@ -1,18 +1,13 @@
 package com.reco1l.ibancho
 
+import com.reco1l.*
 import com.reco1l.framework.net.JsonArrayRequest
 import com.reco1l.framework.net.JsonObjectRequest
-import com.reco1l.ibancho.data.Room
-import com.reco1l.ibancho.data.RoomBeatmap
-import com.reco1l.ibancho.data.RoomStatus
-import com.reco1l.ibancho.data.TeamMode
-import com.reco1l.ibancho.data.WinCondition
-import com.reco1l.ibancho.data.parseGameplaySettings
-import com.reco1l.ibancho.data.parseMods
+import com.reco1l.ibancho.data.*
 import com.reco1l.toolkt.data.putObject
 
-object LobbyAPI
-{
+object LobbyAPI {
+
     /**
      * The hostname.
      */
@@ -22,6 +17,7 @@ object LobbyAPI
      * The invite link host.
      */
     const val INVITE_HOST = "https://tournament.odmp"
+
 
     /**
      * Endpoint to get a rooms list.
@@ -37,8 +33,16 @@ object LobbyAPI
     /**
      * Get room list.
      */
-    fun getRooms(query: String?, sign: String?): List<Room>
-    {
+    fun getRooms(query: String?, sign: String?): List<Room> {
+
+        if (fakeMultiplayerMode) {
+            return listOf(
+                generateFakeRoom(),
+                generateFakeRoom(),
+                generateFakeRoom()
+            )
+        }
+
         JsonArrayRequest("$HOST$GET_ROOMS").use {
 
             if (sign != null || query != null) {
@@ -61,11 +65,11 @@ object LobbyAPI
                         maxPlayers = json.getInt("maxPlayers"),
                         mods = parseMods(json.getJSONObject("mods")),
                         gameplaySettings = parseGameplaySettings(json.getJSONObject("gameplaySettings")),
-                        teamMode = TeamMode.from(json.getInt("teamMode")),
+                        teamMode = TeamMode[json.getInt("teamMode")],
                         winCondition = WinCondition.from(json.getInt("winCondition")),
                         playerCount = json.getInt("playerCount"),
                         playerNames = json.getString("playerNames"),
-                        status = RoomStatus.from(json.getInt("status"))
+                        status = RoomStatus[json.getInt("status")]
                     )
 
                 } catch (e: Exception) {
@@ -79,8 +83,12 @@ object LobbyAPI
     /**
      * Create room and get the ID.
      */
-    fun createRoom(name: String, beatmap: RoomBeatmap?, hostUID: Long, hostUsername: String, sign: String?, password: String? = null, maxPlayers: Int = 8): Long
-    {
+    fun createRoom(name: String, beatmap: RoomBeatmap?, hostUID: Long, hostUsername: String, sign: String?, password: String? = null, maxPlayers: Int = 8): Long {
+
+        if (fakeMultiplayerMode) {
+            return 1
+        }
+
         JsonObjectRequest("$HOST$CREATE_ROOM").use { request ->
 
             request.buildRequestBody {
@@ -108,7 +116,6 @@ object LobbyAPI
                 }
 
                 put("sign", sign)
-
             }
 
             return request.execute().json.getString("id").toLong()

@@ -56,7 +56,7 @@ android {
     ndkVersion '22.1.7171670'
 
     defaultConfig {
-        minSdkVersion 21
+        minSdkVersion 24
         targetSdkVersion 29
         versionCode getReleaseVersionCode()
         versionName getReleaseVersionName()
@@ -170,20 +170,20 @@ dependencies {
     implementation 'pub.devrel:easypermissions:3.0.0'
     implementation 'net.lingala.zip4j:zip4j:2.11.5'
 
-    // Localizations
-    implementation 'com.github.osudroid:language-pack:1.0.4'
-
     implementation 'com.github.EdrowsLuo.EdlGameFramework:EdlJavaExt:d91c53fcff'
     implementation 'com.github.EdrowsLuo.EdlGameFramework:EdlOsbSupport:d91c53fcff'
 
+    // Localizations
+    implementation 'com.github.osudroid:language-pack:1.0.10'
+
     // Tools
-    implementation 'com.github.Reco1I:Toolkt:1.0.23'
-    implementation 'commons-io:commons-io:2.15.1'
+    implementation 'com.github.Reco1I:Toolkt:1.0.24'
+    implementation 'commons-io:commons-io:2.16.1'
 
     // Multiplayer
-    implementation 'org.jetbrains.kotlinx:kotlinx-coroutines-core:1.7.3'
+    implementation 'org.jetbrains.kotlinx:kotlinx-coroutines-core:1.9.0'
     implementation "org.jetbrains.kotlin:kotlin-reflect:$kotlin_version"
-    implementation ('io.socket:socket.io-client:2.1.0') {
+    implementation ('io.socket:socket.io-client:2.1.1') {
         exclude group: 'org.json', module: 'json'
     }
 

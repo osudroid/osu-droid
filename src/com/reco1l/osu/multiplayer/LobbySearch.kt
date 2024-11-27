@@ -11,14 +11,17 @@ import android.view.inputmethod.InputMethodManager
 import android.widget.EditText
 import android.widget.TextView
 import android.widget.TextView.OnEditorActionListener
-import androidx.core.view.isVisible
+import com.edlplan.framework.easing.Easing
 import com.edlplan.ui.fragment.BaseFragment
+import com.reco1l.framework.*
+import com.reco1l.toolkt.android.*
+import com.reco1l.toolkt.animation.*
 import org.anddev.andengine.input.touch.TouchEvent
 import ru.nsu.ccfit.zuev.osuplus.R
-import kotlin.math.abs
 
-class LobbySearch : BaseFragment(), OnEditorActionListener, OnKeyListener
-{
+class LobbySearch : BaseFragment(), OnEditorActionListener, OnKeyListener {
+
+
     override val layoutID = R.layout.multiplayer_lobby_search
 
 
@@ -26,7 +29,10 @@ class LobbySearch : BaseFragment(), OnEditorActionListener, OnKeyListener
 
 
     private val isExtended: Boolean
-        get() = findViewById<View?>(R.id.fullLayout) != null && abs(findViewById<View>(R.id.fullLayout)!!.translationY) < 10
+        get() {
+            val layout = findViewById<View?>(R.id.fullLayout) ?: return false
+            return layout.translationY == 0f
+        }
 
 
     init {
@@ -35,6 +41,7 @@ class LobbySearch : BaseFragment(), OnEditorActionListener, OnKeyListener
 
 
     override fun onLoadView() {
+
         reload()
 
         field = findViewById(R.id.search_field)!!
@@ -49,6 +56,7 @@ class LobbySearch : BaseFragment(), OnEditorActionListener, OnKeyListener
             LobbyScene.searchQuery = view?.text?.toString()
             return true
         }
+
         return false
     }
 
@@ -57,6 +65,7 @@ class LobbySearch : BaseFragment(), OnEditorActionListener, OnKeyListener
         if (keyCode == KeyEvent.KEYCODE_ENTER && v is EditText) {
             return onEditorAction(v, EditorInfo.IME_ACTION_SEND, event)
         }
+
         return false
     }
 
@@ -69,8 +78,8 @@ class LobbySearch : BaseFragment(), OnEditorActionListener, OnKeyListener
         imm?.hideSoftInputFromWindow(field.windowToken, 0)
     }
 
-    private fun reload()
-    {
+    private fun reload() {
+
         findViewById<View>(R.id.showMoreButton)?.setOnTouchListener { v: View, event: MotionEvent ->
 
             if (event.action == TouchEvent.ACTION_DOWN) {
@@ -88,6 +97,7 @@ class LobbySearch : BaseFragment(), OnEditorActionListener, OnKeyListener
 
                 return@setOnTouchListener true
             }
+
             false
         }
 
@@ -95,33 +105,36 @@ class LobbySearch : BaseFragment(), OnEditorActionListener, OnKeyListener
     }
 
     @SuppressLint("ClickableViewAccessibility")
-    private fun toggleVisibility()
-    {
+    private fun toggleVisibility() {
+
         field.clearFocus()
+
+        val layout = findViewById<View>(R.id.fullLayout)!!
+        val background = findViewById<View>(R.id.frg_background)!!
 
         if (isExtended) {
 
-            findViewById<View>(R.id.optionBody)!!.isVisible = false
-            findViewById<View>(R.id.frg_background)!!.setOnTouchListener(null)
-            findViewById<View>(R.id.frg_background)!!.isClickable = false
+            layout.clearAnimation()
+            layout.toTranslationY(70f.dp, 200, ease = Easing.OutQuad.asTimeInterpolator())
+
+            background.setOnTouchListener(null)
+            background.isClickable = false
 
         } else {
 
-            findViewById<View>(R.id.optionBody)!!.isVisible = true
+            layout.clearAnimation()
+            layout.toTranslationY(0f.dp, 200, ease = Easing.InQuad.asTimeInterpolator())
 
-            findViewById<View>(R.id.frg_background)!!.setOnTouchListener { _, event ->
-
+            background.setOnTouchListener { _, event ->
                 if (event.action == TouchEvent.ACTION_DOWN) {
-
                     if (isExtended) {
                         toggleVisibility()
                         return@setOnTouchListener true
                     }
-
                 }
                 false
             }
-            findViewById<View>(R.id.frg_background)!!.isClickable = true
+            background.isClickable = true
         }
     }
 

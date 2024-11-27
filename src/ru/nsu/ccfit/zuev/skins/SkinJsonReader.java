@@ -160,6 +160,7 @@ public class SkinJsonReader extends SkinReader {
         OsuSkin skin = OsuSkin.get();
         JSONObject data = currentCursorData;
         skin.rotateCursor.setFromJson(data);
+        skin.rotateCursorTrail.setFromJson(data);
     }
 
     public void load(String tag, @NonNull JSONObject data, Consumer<JSONObject> consumer) {

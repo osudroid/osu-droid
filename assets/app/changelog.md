@@ -1,3 +1,110 @@
+Version 1.8 Patch 4
+===================
+
+# Bug Fixes
+
+- Fixed hitsounds resources not being cleared properly, resulting in excessive CPU and memory consumption
+
+Version 1.8 Patch 3
+===================
+
+# Additions
+
+- Added support for `skin.ini`'s `CursorTrailRotate` setting in `skin.json`
+  - To use in `skin.json`, add the following entry:
+    ```json
+    {
+      "Cursor": {
+        "rotateCursorTrail": true
+      }
+    }
+    ```
+
+# Bug Fixes
+
+- Fixed fail animation still playing when the Perfect mod is enabled
+- Fixed a potential case where hitsounds may not be stopping until the game is restarted
+
+Version 1.8 Patch 2
+===================
+
+# Additions
+
+- Added osu!stable gameplay failing animation
+
+# Changes
+
+- Revamped slider judgement (again)
+  - Should actually match osu!stable now, minus slider end leniency (non-existent) and expanded follow circle area
+    (16.7% smaller than osu!stable).
+- Improved FPS counter accuracy
+- Improved gameplay loading time moderately
+- In-game leaderboard and hit error meter now remain visible even if gameplay UI is disabled, provided that their 
+  respective settings are enabled
+- Reduced update frequency of FPS counter
+- Reduced pause menu fade in animation duration
+
+# Removals
+
+- Removed update FPS counter
+- Removed random button press cooldown
+
+# Bug Fixes
+
+- Fixed note stacking not being applied properly to slider paths
+- Fixed another possible memory leak when loading and saving replays
+- Fixed a possible crash when migrating beatmap collections
+- Fixed pause menu animation being affected by speed multiplier
+- Fixed `spinnerspin` samples potentially sounding choppy
+- Fixed `sliderslide`, `sliderwhistle`, and `spinnerspin` samples not looping properly
+- Fixed beatmap import from osu.direct failing on beatmaps with a slash character in their artist or title
+- Fixed game window potentially scaling down when searching for a beatmap in song selection menu
+- Fixed a potential case where gameplay HUD remains visible when going back from gameplay to room lobby in multiplayer
+- Fixed beatmap star rating occasionally showing 0 when switching beatmaps rapidly
+- Fixed previous selection not cancelling when random button selection is cancelled by dragging out of the button
+- Fixed a possible crash when leaving a multiplayer room
+- Fixed hit circle judgement potentially being behind by a frame
+- Fixed combo counter misplacement when pausing the game before the first hit object or during breaks
+- Fixed combo text scale from `skin.json` not being applied properly
+- Fixed unintended looping in follow point animation
+- Fixed beatmap global leaderboard taking too long to load when switching beatmaps rapidly
+- Fixed rapid beatmap switching in song selection menu potentially freezing the entire game
+
+Version 1.8 Patch 1
+===================
+
+# Changes
+
+- The `animationFramerate` setting of `skin.json` now defaults to -1
+- Reduced follow point persistence duration in higher approach rates
+- Revamped background difficulty calculation progress indicator
+  - It is now displayed in the bottom-right corner of the screen
+- Background difficulty calculation now only uses half of the available CPU cores
+  - This allows players to still navigate around the game at the expense of longer completion time
+- Optimized gameplay loading by only reprocessing slider paths when necessary
+
+# Removals
+
+- Removed difficulty switcher button from song selection menu's bottom-left button row. It is now accessible under
+  beatmap options or from main menu options under "General" category
+
+# Bug Fixes
+
+- Fixed device back button not working properly when used after playing a beatmap once
+- Fixed room settings being visible to non-hosts in multiplayer
+- Fixed crash when attempting to play a beatmap with negative duration hitobjects
+- Fixed stacked scores in gameplay leaderboard
+- Fixed positioning of combo, circle number, and score overlaps in gameplay when there are more than 2 number digits
+- Fixed a potential case where mod settings menu is not dismissed properly
+- Fixed multiplayer lobby search not showing
+- Fixed pie song progress potentially being drawn improperly
+- Fixed replays before version 1.8 not using old slider judgements
+- Fixed inputs being registered one frame late in gameplay
+- Fixed "fix frame offset" setting offsetting input time even further from the actual input time
+- Fixed "fix frame offset" setting not being applied to slider head judgements
+- Fixed beatmap collections not being migrated to the new storage location
+- Fixed some gameplay hitsounds potentially not stopping after the hitobject's lifetime has finished or the game was paused
+
 Version 1.8
 ===========
 
@@ -77,10 +184,13 @@ for preventing accidental touches.
 - Added support for `scorebar-marker` texture
 - Added support for custom file hitsounds
 - Added support for circular song progress indicator in gameplay
+- Added support to cancel gameplay loading by pressing the back button
 - Added an animation to slider end arrow rotation when snaking animation is enabled
 - Added a slight dim to hitobjects that cannot be hit yet in gameplay
 - Added a rotation effect to miss hit judgement effects in gameplay
 - Added most common BPM metric to beatmap information in song selection menu
+- Added force maximum refresh rate setting
+  - This may not work as the system may prevent the game from setting its own refresh rate 
 - Added support for `skin.ini`'s `AnimationFramerate` setting in `skin.json`
   - The default value is `-1` when converting a `skin.ini` to `skin.json`, and `60` otherwise
   - To use in `skin.json`, add the following entry:
@@ -138,6 +248,10 @@ for preventing accidental touches.
     ```
 
 # Changes
+
+## Minimum Android version requirement
+
+osu!droid version 1.8 has an increased minimum Android version of 7, effectively removing support for Android 5, 5.1, and 6.
 
 ## Storage migration
 
@@ -197,8 +311,9 @@ The following gameplay elements' display has been updated to match osu!stable:
   - Changes color based on current FPS compared to maximum FPS
 - Gameplay HUD now ignores playfield size setting
 - The real-time PP counter has been moved next to circular song progress or accuracy counter
+  - Its `d` and `p` letters can be skinned with the `score-d` and `score-p` skin elements 
 - Average offset and unstable rate counters are now hidden during autoplay
-- Updated Korean and Japanese translations
+- Updated Korean, Japanese, and Russian translations
 
 # Removals
 

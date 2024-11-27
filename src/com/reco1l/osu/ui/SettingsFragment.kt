@@ -6,6 +6,7 @@ import android.content.ClipboardManager
 import android.content.Intent
 import android.graphics.Color
 import android.net.Uri
+import android.os.Build
 import android.os.Bundle
 import android.text.InputType.TYPE_CLASS_TEXT
 import android.text.InputType.TYPE_TEXT_VARIATION_PASSWORD
@@ -20,7 +21,7 @@ import androidx.core.view.forEach
 import androidx.core.view.get
 import androidx.preference.CheckBoxPreference
 import androidx.preference.Preference
-import com.edlplan.osudroidresource.R.*
+import com.osudroid.resources.R.*
 import com.edlplan.ui.fragment.LoadingFragment
 import com.google.android.material.snackbar.Snackbar
 import com.reco1l.ibancho.LobbyAPI
@@ -179,7 +180,10 @@ class SettingsFragment : com.edlplan.ui.fragment.SettingsFragment() {
 
             createDivider("Multiplayer")
             createSectionButton("Player", R.drawable.person_24px, Section.Player)
-            createSectionButton("Room", R.drawable.groups_24px, Section.Room)
+
+            if (Multiplayer.isRoomHost)
+                createSectionButton("Room", R.drawable.groups_24px, Section.Room)
+
             createDivider("Game")
 
         }
@@ -253,6 +257,15 @@ class SettingsFragment : com.edlplan.ui.fragment.SettingsFragment() {
             startActivity(Intent(Intent.ACTION_VIEW, Uri.parse(REGISTER_URL)))
             true
         }
+
+        findPreference<SelectPreference>("difficultyAlgorithm")!!.setOnPreferenceChangeListener { _, newValue ->
+            if (Multiplayer.isMultiplayer) {
+                // We need to manually update it before because the preference is updated after this listener.
+                Config.setString("difficultyAlgorithm", newValue as String)
+                RoomScene.switchDifficultyAlgorithm()
+            }
+            true
+        }
     }
 
 
@@ -309,6 +322,12 @@ class SettingsFragment : com.edlplan.ui.fragment.SettingsFragment() {
 
 
     private fun handleAdvancedSectionPreferences() {
+        findPreference<CheckBoxPreference>("forceMaxRefreshRate")!!.apply {
+            // Obtaining supported refresh rates is only available on Android 12 and above.
+            // See https://developer.android.com/reference/android/view/Display.Mode#getAlternativeRefreshRates().
+            isVisible = Build.VERSION.SDK_INT >= Build.VERSION_CODES.S
+        }
+
         findPreference<InputPreference>("skinTopPath")!!.setOnPreferenceChangeListener { it, newValue ->
 
             it as InputPreference
@@ -343,11 +362,11 @@ class SettingsFragment : com.edlplan.ui.fragment.SettingsFragment() {
 
     private fun handlePlayerSectionPreferences() {
         findPreference<SelectPreference>("player_team")!!.apply {
-            isEnabled = Multiplayer.room!!.teamMode == TeamMode.TEAM_VS_TEAM
+            isEnabled = Multiplayer.room!!.teamMode == TeamMode.TeamVersus
             value = Multiplayer.player!!.team?.ordinal?.toString()
 
             setOnPreferenceChangeListener { _, newValue ->
-                RoomAPI.setPlayerTeam(RoomTeam.from((newValue as String).toInt()))
+                RoomAPI.setPlayerTeam(RoomTeam[(newValue as String).toInt()])
                 true
             }
         }
@@ -429,7 +448,7 @@ class SettingsFragment : com.edlplan.ui.fragment.SettingsFragment() {
             value = Multiplayer.room!!.teamMode.ordinal.toString()
 
             setOnPreferenceChangeListener { _, newValue ->
-                RoomAPI.setRoomTeamMode(TeamMode.from((newValue as String).toInt()))
+                RoomAPI.setRoomTeamMode(TeamMode[(newValue as String).toInt()])
                 true
             }
         }

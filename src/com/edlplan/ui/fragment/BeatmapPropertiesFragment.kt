@@ -24,7 +24,7 @@ import ru.nsu.ccfit.zuev.osuplus.R
 import kotlin.math.abs
 
 /// Converted to Kotlin ///
-class PropsMenuFragment : BaseFragment(), IPropsMenu {
+class BeatmapPropertiesFragment : BaseFragment(), IPropsMenu {
 
     var menu: SongMenu? = null
     var item: BeatmapSetItem? = null
@@ -103,7 +103,7 @@ class PropsMenuFragment : BaseFragment(), IPropsMenu {
 
 
         findViewById<View>(R.id.manageFavButton)!!.setOnClickListener { v: View? ->
-            val dialog = FavoriteManagerFragment()
+            val dialog = CollectionsManagerFragment()
             dialog.showToAddToFolder(GlobalManager.getInstance().selectedBeatmap!!.setDirectory)
         }
 

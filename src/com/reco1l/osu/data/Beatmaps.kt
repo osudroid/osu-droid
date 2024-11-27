@@ -1,5 +1,6 @@
 package com.reco1l.osu.data
 
+import android.util.*
 import androidx.room.*
 import com.reco1l.toolkt.kotlin.*
 import com.rian.osu.difficulty.BeatmapDifficultyCalculator
@@ -10,6 +11,7 @@ import ru.nsu.ccfit.zuev.osu.game.GameHelper
 import kotlin.math.max
 import kotlin.math.min
 import com.rian.osu.beatmap.Beatmap
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.ensureActive
 
@@ -390,11 +392,22 @@ fun BeatmapInfo(data: Beatmap, lastModified: Long, calculateDifficulty: Boolean,
     var standardStarRating: Float? = null
 
     if (calculateDifficulty) {
-        val droidAttributes = BeatmapDifficultyCalculator.calculateDroidDifficulty(data, scope = scope)
-        val standardAttributes = BeatmapDifficultyCalculator.calculateStandardDifficulty(data, scope = scope)
+        try {
+            val droidAttributes = BeatmapDifficultyCalculator.calculateDroidDifficulty(data, scope = scope)
+            val standardAttributes = BeatmapDifficultyCalculator.calculateStandardDifficulty(data, scope = scope)
 
-        droidStarRating = GameHelper.Round(droidAttributes.starRating, 2)
-        standardStarRating = GameHelper.Round(standardAttributes.starRating, 2)
+            droidStarRating = GameHelper.Round(droidAttributes.starRating, 2)
+            standardStarRating = GameHelper.Round(standardAttributes.starRating, 2)
+        } catch (e: Exception) {
+            if (e is CancellationException) {
+                throw e
+            }
+
+            Log.e("BeatmapInfo", "Error while calculating difficulty.", e)
+
+            droidStarRating = 0f
+            standardStarRating = 0f
+        }
     }
 
     return BeatmapInfo(

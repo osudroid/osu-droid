@@ -25,7 +25,7 @@ import ru.nsu.ccfit.zuev.osuplus.R
 import java.util.Locale
 import kotlin.math.roundToInt
 
-class InGameSettingMenu : BaseFragment() {
+class ModSettingsMenu : BaseFragment() {
 
     private lateinit var speedModifyRow: View
     private lateinit var speedModifyBar: SeekBar
@@ -55,7 +55,7 @@ class InGameSettingMenu : BaseFragment() {
     private lateinit var customHPBar: SeekBar
 
     override val layoutID: Int
-        get() = R.layout.mod_customization_fragment
+        get() = R.layout.mod_settings_fragment
 
     override fun onLoadView() {
         reload(load())

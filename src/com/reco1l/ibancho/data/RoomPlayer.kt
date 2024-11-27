@@ -1,38 +1,41 @@
 package com.reco1l.ibancho.data
 
-data class RoomPlayer
-(
-    /**
-         * The user ID.
-         */
-        val id: Long,
+data class RoomPlayer(
 
     /**
-         * The username.
-         */
-        val name: String,
+     * The user ID.
+     */
+    val id: Long,
 
     /**
-         * The player status.
-         */
-        var status: PlayerStatus,
+     * The username.
+     */
+    val name: String,
 
     /**
-         * The player team if the mode is set to team versus.
-         */
-        var team: RoomTeam?,
+     * The player status.
+     */
+    var status: PlayerStatus,
 
     /**
-         * The player mods.
-         */
-        var mods: RoomMods
-)
-{
-        /**
-         * Locally used to indicate the player is muted.
-         */
-        var isMuted = false
+     * The player team if the mode is set to team versus.
+     */
+    var team: RoomTeam?,
+
+    /**
+     * The player mods.
+     */
+    var mods: RoomMods
+
+) {
+
+    /**
+     * Locally used to indicate the player is muted.
+     */
+    var isMuted = false
 
 
-        override fun equals(other: Any?) = other === this || other is RoomPlayer && other.id == id
+    override fun equals(other: Any?): Boolean {
+        return other === this || other is RoomPlayer && other.id == id
+    }
 }

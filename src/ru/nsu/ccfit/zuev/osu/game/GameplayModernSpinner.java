@@ -4,7 +4,7 @@ import android.graphics.PointF;
 
 import com.reco1l.osu.Execution;
 import com.reco1l.andengine.sprite.ExtendedSprite;
-import com.reco1l.osu.Modifiers;
+import com.reco1l.andengine.Modifiers;
 import com.reco1l.andengine.Anchor;
 import com.rian.osu.beatmap.hitobject.Spinner;
 
@@ -195,7 +195,7 @@ public class GameplayModernSpinner extends GameplaySpinner {
         float percent = Math.min(percentFilled, 1);
 
         if (dFill != 0) {
-            updateSpinSampleFrequency(percent);
+            updateSpinSampleFrequency(percentFilled);
             spinnerSpinSample.play();
         } else {
             spinnerSpinSample.stop();

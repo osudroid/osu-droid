@@ -7,13 +7,15 @@ import android.text.Editable
 import android.text.TextWatcher
 import android.view.KeyEvent
 import android.view.View
+import android.view.inputmethod.*
 import android.widget.Button
 import android.widget.CheckBox
 import android.widget.EditText
+import androidx.core.content.*
 import androidx.preference.PreferenceManager
 import com.edlplan.framework.easing.Easing
 import com.edlplan.framework.support.util.Updater
-import com.edlplan.osudroidresource.R.*
+import com.osudroid.resources.R.*
 import com.edlplan.ui.BaseAnimationListener
 import com.edlplan.ui.EasingHelper
 import com.reco1l.osu.mainThread
@@ -21,6 +23,7 @@ import com.reco1l.toolkt.android.cornerRadius
 import com.reco1l.toolkt.android.dp
 import org.anddev.andengine.engine.handler.IUpdateHandler
 import org.anddev.andengine.entity.scene.Scene
+import ru.nsu.ccfit.zuev.osu.*
 import ru.nsu.ccfit.zuev.osu.helper.InputManager
 import ru.nsu.ccfit.zuev.osu.helper.StringTable
 import ru.nsu.ccfit.zuev.osu.menu.IFilterMenu
@@ -28,7 +31,7 @@ import ru.nsu.ccfit.zuev.osu.menu.SongMenu
 import ru.nsu.ccfit.zuev.osuplus.R
 import ru.nsu.ccfit.zuev.osu.GlobalManager.getInstance as getGlobal
 
-class FilterMenuFragment : BaseFragment(), IUpdateHandler, IFilterMenu {
+class SearchBarFragment : BaseFragment(), IUpdateHandler, IFilterMenu {
     private var configContext: Context? = null
     private var savedFolder: String? = null
     private var savedFavOnly = false
@@ -98,7 +101,7 @@ class FilterMenuFragment : BaseFragment(), IUpdateHandler, IFilterMenu {
         scene!!.isBackgroundEnabled = false
         updater = object : Updater() {
             override fun createEventRunnable(): Runnable =
-                Runnable { parent.loadFilter(this@FilterMenuFragment) }
+                Runnable { parent.loadFilter(this@SearchBarFragment) }
 
             override fun postEvent(r: Runnable?) = parent.scene.postRunnable(r)
         }
@@ -125,7 +128,7 @@ class FilterMenuFragment : BaseFragment(), IUpdateHandler, IFilterMenu {
 
     private fun reloadViewData() {
         if (isCreated) {
-            filter = findViewById(R.id.searchEditText)!!
+            filter = findViewById(R.id.frg_body)!!
             favoritesOnly = findViewById(R.id.showFav)!!
             sortButton = findViewById(R.id.sortButton)!!
             favoriteFolder = findViewById(R.id.favFolder)!!
@@ -142,8 +145,11 @@ class FilterMenuFragment : BaseFragment(), IUpdateHandler, IFilterMenu {
             }
 
             favoriteFolder.setOnClickListener {
-                val favoriteManagerFragment = FavoriteManagerFragment()
-                favoriteManagerFragment.showToSelectFolder {
+                filter.clearFocus()
+                context?.getSystemService<InputMethodManager>()?.hideSoftInputFromWindow(filter.windowToken, 0)
+
+                val collectionsManagerFragment = CollectionsManagerFragment()
+                collectionsManagerFragment.showToSelectFolder {
                     savedFolder = it
                     favoriteFolder.text = it ?: StringTable.get(string.favorite_default)
                     updateUpdater()
@@ -191,10 +197,46 @@ class FilterMenuFragment : BaseFragment(), IUpdateHandler, IFilterMenu {
 
             updateOrderButton()
             updateFavFolderText()
+
+            val difficultyAlgorithmButton = findViewById<Button>(R.id.algorithm_button)!!
+
+            difficultyAlgorithmButton.setOnClickListener {
+
+                val currentAlgorithm = Config.getString("difficultyAlgorithm", "0").toInt()
+
+                if (currentAlgorithm == 0) {
+                    Config.setString("difficultyAlgorithm", "1")
+                    difficultyAlgorithmButton.text = "osu!standard"
+                } else {
+                    Config.setString("difficultyAlgorithm", "0")
+                    difficultyAlgorithmButton.text = "osu!droid"
+                }
+
+                getGlobal().songMenu.reloadCurrentSelection()
+            }
+
+            if (Config.getString("difficultyAlgorithm", "0").toInt() == 0) {
+                difficultyAlgorithmButton.text = "osu!droid"
+            } else {
+                difficultyAlgorithmButton.text = "osu!standard"
+            }
+
         }
     }
 
     private fun playOnLoadAnim() {
+
+        val options = findViewById<View>(R.id.options)!!
+        options.alpha = 0f
+        options.translationY = -400f
+        options.animate().cancel()
+        options.animate()
+            .alpha(1f)
+            .translationY(0f)
+            .setInterpolator(EasingHelper.asInterpolator(Easing.InOutQuad))
+            .setDuration(300)
+            .start()
+
         val body = findViewById<View>(R.id.frg_body)!!
         body.alpha = 0f
         body.translationY = -400f
@@ -205,26 +247,41 @@ class FilterMenuFragment : BaseFragment(), IUpdateHandler, IFilterMenu {
             .setInterpolator(EasingHelper.asInterpolator(Easing.InOutQuad))
             .setDuration(300)
             .start()
+
         playBackgroundHideInAnim(150)
     }
 
     private fun playEndAnim(action: () -> Unit) {
-        val body = findViewById<View>(R.id.frg_body)!!
-        body.animate().cancel()
-        body.animate()
-            .alpha(0f)
-            .translationY(-400f)
-            .setInterpolator(EasingHelper.asInterpolator(Easing.InOutQuad))
-            .setDuration(300)
-            .setListener(
-                object : BaseAnimationListener() {
-                    override fun onAnimationEnd(animation: Animator) {
-                        action()
+
+        if (isCreated) {
+            val options = findViewById<View>(R.id.options)!!
+            options.animate().cancel()
+            options.animate()
+                .alpha(0f)
+                .translationY(-400f)
+                .setInterpolator(EasingHelper.asInterpolator(Easing.InOutQuad))
+                .setDuration(300)
+                .start()
+
+            val body = findViewById<View>(R.id.frg_body)!!
+            body.animate().cancel()
+            body.animate()
+                .alpha(0f)
+                .translationY(-400f)
+                .setInterpolator(EasingHelper.asInterpolator(Easing.InOutQuad))
+                .setDuration(300)
+                .setListener(
+                    object : BaseAnimationListener() {
+                        override fun onAnimationEnd(animation: Animator) {
+                            action()
+                        }
                     }
-                }
-            )
-            .start()
-        playBackgroundHideOutAnim(150)
+                )
+                .start()
+            playBackgroundHideOutAnim(150)
+        } else {
+            action()
+        }
     }
 
     private fun updateOrderButton() {

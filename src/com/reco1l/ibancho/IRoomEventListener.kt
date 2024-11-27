@@ -8,8 +8,7 @@ import com.reco1l.ibancho.data.TeamMode
 import com.reco1l.ibancho.data.WinCondition
 import org.json.JSONArray
 
-interface IRoomEventListener
-{
+interface IRoomEventListener {
 
     // Connection related events
 

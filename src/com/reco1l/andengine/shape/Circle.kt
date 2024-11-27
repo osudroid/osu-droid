@@ -85,7 +85,7 @@ class Circle : ExtendedEntity() {
         if (shouldRebuildVertexBuffer) {
             shouldRebuildVertexBuffer = false
 
-            val segments = approximateSegments(width, height, startAngle, endAngle)
+            val segments = approximateSegments(width, height)
 
             setVertexBuffer(CircleVertexBuffer(segments))
         }
@@ -100,13 +100,12 @@ class Circle : ExtendedEntity() {
 
     companion object {
 
-        fun approximateSegments(width: Float, height: Float, startAngle: Float, endAngle: Float): Int {
+        fun approximateSegments(width: Float, height: Float, maximumAngle: Float = 360f): Int {
 
             val averageRadius = (width + height) / 4f
-            val angleRange = abs(endAngle - startAngle)
             val minSegmentAngle = min(10f, 360f / averageRadius.toRadians())
 
-            return max(3, (angleRange / minSegmentAngle).toInt())
+            return max(3, (maximumAngle / minSegmentAngle).toInt())
         }
 
     }

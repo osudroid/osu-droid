@@ -1,47 +1,41 @@
 package ru.nsu.ccfit.zuev.osu.helper;
 
 import android.content.Context;
+
+import androidx.annotation.NonNull;
 import androidx.annotation.StringRes;
 
 import java.util.Formatter;
 
 public class StringTable {
-    static Context context;
 
-    private static StringBuilder sb;
-    private static Formatter f;
+    private static Context context;
+
+    private static final StringBuilder stringBuilder = new StringBuilder();
+
+    private static final Formatter formatter = new Formatter(stringBuilder);
+
 
     public static void setContext(final Context context) {
         StringTable.context = context;
     }
 
     public static String get(@StringRes final int resid) {
-        String str;
-        try {
-            str = context.getString(resid);
-        } catch (final NullPointerException e) {
-            str = "<error>";
-        }
-        return str;
+        return context.getString(resid);
     }
 
-    private static void allocateFormatter() {
-        if (sb == null)
-            sb = new StringBuilder();
-        sb.setLength(0);
-        if (f == null)
-            f = new Formatter(sb);
+
+    @NonNull
+    synchronized public static String format(final int resid, final Object... objects) {
+        stringBuilder.setLength(0);
+        formatter.format(get(resid), objects);
+        return stringBuilder.toString();
     }
 
-    public static String format(final int resid, final Object... objects) {
-        allocateFormatter();
-        f.format(get(resid), objects);
-        return sb.toString();
-    }
-
-    public static String format(final String format, final Object... objects) {
-        allocateFormatter();
-        f.format(format, objects);
-        return sb.toString();
+    @NonNull
+    synchronized public static String format(final String format, final Object... objects) {
+        stringBuilder.setLength(0);
+        formatter.format(format, objects);
+        return stringBuilder.toString();
     }
 }

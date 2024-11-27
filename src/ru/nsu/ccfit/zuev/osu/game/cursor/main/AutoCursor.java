@@ -1,7 +1,7 @@
 package ru.nsu.ccfit.zuev.osu.game.cursor.main;
 
 import com.edlplan.framework.easing.Easing;
-import com.reco1l.osu.Modifiers;
+import com.reco1l.andengine.Modifiers;
 
 import ru.nsu.ccfit.zuev.osu.Config;
 import ru.nsu.ccfit.zuev.osu.game.GameObject;

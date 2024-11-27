@@ -73,7 +73,9 @@ object DatabaseManager {
             .allowMainThreadQueries()
             .build()
 
-        loadLegacyMigrations(context)
+        if (!BuildConfig.DEBUG) {
+            loadLegacyMigrations(context)
+        }
     }
 
     @Suppress("UNCHECKED_CAST")
@@ -117,7 +119,7 @@ object DatabaseManager {
 
         // BeatmapCollections
         try {
-            val oldFavoritesFile = File(Config.getCorePath(), "json/favorites.json")
+            val oldFavoritesFile = File(Config.getCorePath(), "json/favorite.json")
 
             if (oldFavoritesFile.exists()) {
                 GlobalManager.getInstance().info = "Migrating beatmap collections..."
@@ -136,11 +138,11 @@ object DatabaseManager {
                     }
                 }
 
-                oldFavoritesFile.renameTo(File(Config.getCorePath(), "json/favorites_old.json"))
+                oldFavoritesFile.renameTo(File(Config.getCorePath(), "json/favorite_old.json"))
             }
 
-        } catch (e: IOException) {
-            Log.e("DatabaseManager", "Failed to migrate legacy beatmap properties", e)
+        } catch (e: Exception) {
+            Log.e("DatabaseManager", "Failed to migrate legacy beatmap collections", e)
         }
 
         // ScoreInfo

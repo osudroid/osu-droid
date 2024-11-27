@@ -708,6 +708,7 @@ public class BASS
 	public static native boolean BASS_SampleGetInfo(int handle, BASS_SAMPLE info);
 	public static native boolean BASS_SampleSetInfo(int handle, BASS_SAMPLE info);
 	public static native int BASS_SampleGetChannel(int handle, boolean onlynew);
+	public static native int BASS_SampleGetChannel(int handle, int flags);
 	public static native int BASS_SampleGetChannels(int handle, int[] channels);
 	public static native boolean BASS_SampleStop(int handle);
 

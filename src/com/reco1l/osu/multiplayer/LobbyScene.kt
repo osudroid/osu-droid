@@ -20,26 +20,27 @@ import org.anddev.andengine.util.MathUtils
 import ru.nsu.ccfit.zuev.osu.*
 import ru.nsu.ccfit.zuev.osu.helper.TextButton
 import ru.nsu.ccfit.zuev.osu.menu.LoadingScreen
+import ru.nsu.ccfit.zuev.osu.online.OnlineManager
 import ru.nsu.ccfit.zuev.osu.online.OnlinePanel
 import ru.nsu.ccfit.zuev.skins.OsuSkin
-import ru.nsu.ccfit.zuev.osu.GlobalManager.getInstance as getGlobal
-import ru.nsu.ccfit.zuev.osu.ResourceManager.getInstance as getResources
-import ru.nsu.ccfit.zuev.osu.online.OnlineManager.getInstance as getOnline
 
-object LobbyScene : Scene()
-{
+object LobbyScene : Scene() {
 
-    /**The search fragment*/
+    /**
+     * The search fragment
+     */
     val search by lazy { LobbySearch() }
 
-    /**The search query*/
+    /**
+     * The search query
+     */
     var searchQuery: String? = null
-        set(value)
-        {
+        set(value) {
             field = value
 
-            if (!awaitList)
+            if (!isWaitingForList) {
                 updateList()
+            }
         }
 
 
@@ -50,56 +51,51 @@ object LobbyScene : Scene()
     private var refreshButton: TextButton? = null
 
 
-    private val roomList = LobbyRoomList()
+    private val roomsList = LobbyRoomList()
 
-    private val onlinePanel = OnlinePanel()
+    private val userCard = OnlinePanel()
 
-    private val titleText = ChangeableText(20f, 20f, getResources().getFont("bigFont"), "", 100)
+    private val titleText = ChangeableText(20f, 20f, ResourceManager.getInstance().getFont("bigFont"), "", 100)
 
-    private val infoText = ChangeableText(20f, 0f, getResources().getFont("smallFont"), "", 100)
+    private val informationText = ChangeableText(20f, 0f, ResourceManager.getInstance().getFont("smallFont"), "", 100)
 
-    private val loading = Sprite(0f, 0f, getResources().getTexture("loading_start"))
-
-
-    /**Await lock for the list refresh*/
-    private var awaitList = false
+    private val loadingIcon = Sprite(0f, 0f, ResourceManager.getInstance().getTexture("loading_start"))
 
 
-    fun load()
-    {
+    /**
+     * Whether the scene is waiting for the room list to be loaded.
+     */
+    private var isWaitingForList = false
+
+
+    fun load() {
         detachChildren()
         clearTouchAreas()
 
         isBackgroundEnabled = true
         updateBackground()
 
-        // Background dim
-        val dim = Rectangle(0f, 0f, Config.getRES_WIDTH().toFloat(), Config.getRES_HEIGHT().toFloat())
-        dim.setColor(0f, 0f, 0f, 0.5f)
-        attachChild(dim)
+        val dimRectangle = Rectangle(0f, 0f, Config.getRES_WIDTH().toFloat(), Config.getRES_HEIGHT().toFloat())
+        dimRectangle.setColor(0f, 0f, 0f, 0.5f)
+        attachChild(dimRectangle)
 
-        // Top bar
-        val top = Rectangle(0f, 0f, Config.getRES_WIDTH().toFloat(), 120f)
-        top.setColor(0f, 0f, 0f, 0.3f)
-        attachChild(top)
+        val topBarRectangle = Rectangle(0f, 0f, Config.getRES_WIDTH().toFloat(), 120f)
+        topBarRectangle.setColor(0f, 0f, 0f, 0.3f)
+        attachChild(topBarRectangle)
 
-        // Title
         titleText.text = "Multiplayer Lobby"
         attachChild(titleText)
 
-        // Info
-        infoText.setPosition(20f, titleText.y + titleText.height)
-        infoText.setColor(0.8f, 0.8f, 0.8f)
-        attachChild(infoText)
+        informationText.setPosition(20f, titleText.y + titleText.height)
+        informationText.setColor(0.8f, 0.8f, 0.8f)
+        attachChild(informationText)
 
-        // Room list
-        attachChild(roomList, 1)
+        attachChild(roomsList, 1)
 
-        // Loading
-        loading.setPosition((Config.getRES_WIDTH() - loading.width) / 2f, (Config.getRES_HEIGHT() - loading.height) / 2f)
-        loading.setRotationCenter(loading.width / 2f, loading.height / 2f)
-        loading.setScale(0.4f)
-        attachChild(loading)
+        loadingIcon.setPosition((Config.getRES_WIDTH() - loadingIcon.width) / 2f, (Config.getRES_HEIGHT() - loadingIcon.height) / 2f)
+        loadingIcon.setRotationCenter(loadingIcon.width / 2f, loadingIcon.height / 2f)
+        loadingIcon.setScale(0.4f)
+        attachChild(loadingIcon)
 
         // Back button code copy and paste from legacy code but improved, don't blame on me.
         val layoutBackButton = OsuSkin.get().getLayout("BackButton")
@@ -111,10 +107,9 @@ object LobbyScene : Scene()
             var dx = 0f
             var dy = 0f
 
-            override fun onAreaTouched(event: TouchEvent, localX: Float, localY: Float): Boolean
-            {
-                if (event.isActionDown)
-                {
+            override fun onAreaTouched(event: TouchEvent, localX: Float, localY: Float): Boolean {
+
+                if (event.isActionDown) {
                     if (scaleWhenHold) this.setScale(1.25f)
 
                     moved = false
@@ -124,16 +119,15 @@ object LobbyScene : Scene()
                     ResourceManager.getInstance().getSound("menuback")?.play()
                     return true
                 }
-                if (event.isActionUp)
-                {
+
+                if (event.isActionUp) {
                     this.setScale(1f)
 
-                    if (!moved)
-                        back()
+                    if (!moved) back()
                     return true
                 }
-                if (event.isActionOutside || event.isActionMove && MathUtils.distance(dx, dy, localX, localY) > 50)
-                {
+
+                if (event.isActionOutside || event.isActionMove && MathUtils.distance(dx, dy, localX, localY) > 50) {
                     this.setScale(1f)
                     moved = true
                 }
@@ -141,28 +135,24 @@ object LobbyScene : Scene()
             }
         }.also {
 
-            if (OsuSkin.get().isUseNewLayout)
-            {
+            if (OsuSkin.get().isUseNewLayout) {
                 layoutBackButton?.apply(it) ?: it.setPosition(0f, Config.getRES_HEIGHT() - it.heightScaled)
+            } else {
+                it.setPosition(0f, Config.getRES_HEIGHT() - it.heightScaled)
             }
-            else it.setPosition(0f, Config.getRES_HEIGHT() - it.heightScaled)
 
             attachChild(it)
             registerTouchArea(it)
         }
 
-        // Online panel
-        onlinePanel.setPosition(Config.getRES_WIDTH() - 410f - 6f, 6f)
-        attachChild(onlinePanel)
+        userCard.setPosition(Config.getRES_WIDTH() - 410f - 6f, 6f)
+        attachChild(userCard)
 
-        createButton = object : TextButton(getResources().getFont("CaptionFont"), "Create New Room")
-        {
-            override fun onAreaTouched(event: TouchEvent, localX: Float, localY: Float): Boolean
-            {
-                if (!event.isActionUp || awaitList)
-                    return false
+        createButton = object : TextButton(ResourceManager.getInstance().getFont("CaptionFont"), "Create New Room") {
+            override fun onAreaTouched(event: TouchEvent, localX: Float, localY: Float): Boolean {
+                if (!event.isActionUp || isWaitingForList) return false
 
-                getResources().getSound("menuclick")?.play()
+                ResourceManager.getInstance().getSound("menuclick")?.play()
                 LobbyCreateRoom().show()
                 return true
             }
@@ -175,14 +165,11 @@ object LobbyScene : Scene()
             registerTouchArea(it)
         }
 
-        refreshButton = object : TextButton(getResources().getFont("CaptionFont"), "Refresh")
-        {
-            override fun onAreaTouched(event: TouchEvent, localX: Float, localY: Float): Boolean
-            {
-                if (!event.isActionUp || awaitList)
-                    return false
+        refreshButton = object : TextButton(ResourceManager.getInstance().getFont("CaptionFont"), "Refresh") {
+            override fun onAreaTouched(event: TouchEvent, localX: Float, localY: Float): Boolean {
+                if (!event.isActionUp || isWaitingForList) return false
 
-                getResources().getSound("menuclick")?.play()
+                ResourceManager.getInstance().getSound("menuclick")?.play()
                 updateList()
                 return true
             }
@@ -197,14 +184,13 @@ object LobbyScene : Scene()
     }
 
 
-    // Connection
+    fun connectFromLink(link: Uri) {
 
-    fun connectFromLink(link: Uri)
-    {
-        if (Multiplayer.isConnected)
+        if (Multiplayer.isConnected) {
             return
+        }
 
-        getGlobal().songService.isGaming = true
+        GlobalManager.getInstance().songService.isGaming = true
         Multiplayer.isMultiplayer = true
 
         async {
@@ -212,8 +198,8 @@ object LobbyScene : Scene()
             try {
                 LoadingScreen().show()
 
-                getGlobal().mainActivity.checkNewSkins()
-                getGlobal().mainActivity.loadBeatmapLibrary()
+                GlobalManager.getInstance().mainActivity.checkNewSkins()
+                GlobalManager.getInstance().mainActivity.loadBeatmapLibrary()
 
                 RoomScene.load()
                 load()
@@ -221,7 +207,12 @@ object LobbyScene : Scene()
                 val roomID = link.pathSegments[0].toLong()
                 val password = if (link.pathSegments.size > 1) link.pathSegments[1] else null
 
-                RoomAPI.connectToRoom(roomID, getOnline().userId, getOnline().username, password)
+                RoomAPI.connectToRoom(
+                    roomId = roomID,
+                    userId = OnlineManager.getInstance().userId,
+                    username = OnlineManager.getInstance().username,
+                    roomPassword = password
+                )
 
             } catch (e: Exception) {
                 ToastLogger.showText("Failed to connect to the room: ${e.javaClass} - ${e.message}", true)
@@ -235,62 +226,54 @@ object LobbyScene : Scene()
 
     }
 
-    // Update events
 
     @JvmStatic
     fun updateOnlinePanel() = updateThread {
 
-        onlinePanel.setInfo()
-        onlinePanel.setAvatar()
+        userCard.setInfo()
+        userCard.setAvatar()
     }
 
-    fun updateList()
-    {
-        // Hiding buttons
+    fun updateList() {
+
         createButton?.isVisible = false
         refreshButton?.isVisible = false
 
-        // Updating info text
-        infoText.text = "Loading room list..."
+        informationText.text = "Loading room list..."
 
-        // Detaching list children
-        roomList.detachChildren()
+        roomsList.detachChildren()
 
-        // Showing loading icon
-        loading.isVisible = true
-        loading.registerEntityModifier(LoopEntityModifier(RotationByModifier(2f, 360f)))
+        loadingIcon.isVisible = true
+        loadingIcon.registerEntityModifier(LoopEntityModifier(RotationByModifier(2f, 360f)))
 
-        awaitList = true
+        isWaitingForList = true
+
         async {
 
             try {
                 val list = LobbyAPI.getRooms(searchQuery, SecurityUtils.signRequest(searchQuery ?: ""))
 
-                // Updating list
                 updateThread {
-                    roomList.setList(list)
-                    awaitList = false
-                    val roomCount = roomList.childCount
+                    roomsList.setList(list)
+                    isWaitingForList = false
+                    val roomCount = roomsList.childCount
 
-                    // Updating info text
-                    infoText.text = if (searchQuery.isNullOrEmpty())
-                    {
+                    informationText.text = if (searchQuery.isNullOrEmpty()) {
                         "Showing $roomCount ${if (roomCount == 1) "match" else "matches"}."
+                    } else {
+                        "Searching for \"$searchQuery\", showing $roomCount ${if (roomCount == 1) "result" else "results"}."
                     }
-                    else "Searching for \"$searchQuery\", showing $roomCount ${if (roomCount == 1) "result" else "results"}."
                 }
 
-                // Hiding loading icon
-                loading.isVisible = false
-                loading.clearEntityModifiers()
+                loadingIcon.isVisible = false
+                loadingIcon.clearEntityModifiers()
 
                 // Showing buttons
                 createButton?.isVisible = true
                 refreshButton?.isVisible = true
 
-
             } catch (e: Exception) {
-                awaitList = false
+                isWaitingForList = false
 
                 ToastLogger.showText("Multiplayer server is unavailable, try again later.", true)
                 Log.e("LobbyScene", "Failed to get room list", e)
@@ -302,12 +285,14 @@ object LobbyScene : Scene()
 
     }
 
-    private fun updateBackground()
-    {
-        var texture = getResources().getTexture("menu-background")
 
-        if (!Config.isSafeBeatmapBg())
-                texture = getResources().getTexture("::background") ?: texture
+    private fun updateBackground() {
+
+        var texture = ResourceManager.getInstance().getTexture("menu-background")
+
+        if (!Config.isSafeBeatmapBg()) {
+            texture = ResourceManager.getInstance().getTexture("::background") ?: texture
+        }
 
         texture?.also {
 
@@ -319,25 +304,24 @@ object LobbyScene : Scene()
     }
 
 
-    // Navigation
+    override fun back() {
 
-    override fun back()
-    {
-        if (awaitList)
+        if (isWaitingForList) {
             return
+        }
 
         search.dismiss()
 
         Multiplayer.isMultiplayer = false
-        getGlobal().songService.isGaming = false
+        GlobalManager.getInstance().songService.isGaming = false
 
-        getGlobal().mainScene.show()
+        GlobalManager.getInstance().mainScene.show()
     }
 
-    fun show()
-    {
+    fun show() {
+
         updateBackground()
-        getGlobal().engine.scene = this
+        GlobalManager.getInstance().engine.scene = this
         updateList()
 
         search.show()

@@ -12,15 +12,14 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import org.json.JSONArray
 import ru.nsu.ccfit.zuev.osu.Config
+import ru.nsu.ccfit.zuev.osu.GlobalManager
 import ru.nsu.ccfit.zuev.osu.MainActivity
 import ru.nsu.ccfit.zuev.osu.ToastLogger
+import ru.nsu.ccfit.zuev.osu.online.OnlineManager
 import ru.nsu.ccfit.zuev.osu.scoring.StatisticV2
 import java.io.File
-import ru.nsu.ccfit.zuev.osu.GlobalManager.getInstance as getGlobal
-import ru.nsu.ccfit.zuev.osu.online.OnlineManager.getInstance as getOnline
 
-object Multiplayer
-{
+object Multiplayer {
 
     /**
      * The current room, it can become `null` if socket disconnects.
@@ -75,8 +74,9 @@ object Multiplayer
 
         parentFile?.mkdirs()
 
-        if (!exists())
+        if (!exists()) {
             createNewFile()
+        }
     }
 
     private val reconnectionScope by lazy { CoroutineScope(Dispatchers.Default) }
@@ -91,94 +91,85 @@ object Multiplayer
     private var isWaitingAttemptResponse = false
 
 
-    init
-    {
-        val time = "yyyy/MM/dd hh:mm:ss".fromDate()
-        LOG_FILE.writeText("[$time] Client ${MainActivity.versionName} started.")
+    init {
+        LOG_FILE.writeText("[${"yyyy/MM/dd hh:mm:ss".fromDate()}] Client ${MainActivity.versionName} started.")
     }
 
 
     // Leaderboard
 
-    fun onLiveLeaderboard(array: JSONArray)
-    {
-        if (getGlobal().engine.scene != getGlobal().gameScene.scene)
-            return
+    fun onLiveLeaderboard(array: JSONArray) {
 
-        getGlobal().gameScene.scoreBoard?.nextItems = MutableList(array.length()) { i ->
+        if (GlobalManager.getInstance().engine.scene != GlobalManager.getInstance().gameScene.scene) {
+            return
+        }
+
+        GlobalManager.getInstance().gameScene.scoreBoard?.nextItems = MutableList(array.length()) { i ->
             val json = array.getJSONObject(i)
 
             jsonToScoreboardItem(json).apply { rank = i + 1 }
         }
     }
 
-    fun onFinalLeaderboard(array: JSONArray)
-    {
+    fun onFinalLeaderboard(array: JSONArray) {
+
         finalData = null
 
         // Avoiding data parsing if user left from ScoringScene
-        if (getGlobal().engine.scene == RoomScene || getGlobal().engine.scene == getGlobal().songMenu.scene)
+        if (GlobalManager.getInstance().engine.scene == RoomScene || GlobalManager.getInstance().engine.scene == GlobalManager.getInstance().songMenu.scene) {
             return
+        }
 
-        if (array.length() == 0)
-        {
+        if (array.length() == 0) {
             log("WARNING: Server provided empty final leaderboard.")
             return
         }
 
         val list = mutableListOf<StatisticV2>()
 
-        for (i in 0 until array.length())
-        {
+        for (i in 0 until array.length()) {
             val json = array.optJSONObject(i) ?: continue
             list.add(jsonToStatistic(json))
         }
 
-        if (list.isEmpty())
-            return
+        if (list.isEmpty()) return
 
         // Replacing server statistic with local
-        val ownScore = getGlobal().gameScene.stat
-        val ownScoreIndex = list.indexOfFirst { it.playerName == getOnline().username }.takeUnless { it == -1 }
+        val ownScore = GlobalManager.getInstance().gameScene.stat
+        val ownScoreIndex = list.indexOfFirst { it.playerName == OnlineManager.getInstance().username }.takeUnless { it == -1 }
 
-        if (ownScore != null)
-        {
+        if (ownScore != null) {
             // This should never happen
-            if (ownScoreIndex == null)
-            {
+            if (ownScoreIndex == null) {
                 list.add(ownScore)
                 log("WARNING: Player score wasn't found in final leaderboard.")
+            } else {
+                list[ownScoreIndex] = ownScore
             }
-            else list[ownScoreIndex] = ownScore
         }
 
         finalData = list.toTypedArray()
 
         // Reloading results screen
-        getGlobal().scoring.updateLeaderboard()
+        GlobalManager.getInstance().scoring.updateLeaderboard()
     }
 
 
     // Reconnection
 
-    fun onReconnectAttempt(success: Boolean)
-    {
+    fun onReconnectAttempt(success: Boolean) {
+
         lastAttemptResponseTimeMS = System.currentTimeMillis()
 
-        if (success)
-        {
+        if (success) {
             isReconnecting = false
 
             RoomScene.chat.onSystemChatMessage("Connection was successfully restored.", "#459FFF")
-        }
-        else if (attemptCount < 5)
-        {
+        } else if (attemptCount < 5) {
             attemptCount++
 
             RoomScene.chat.onSystemChatMessage("Failed to reconnect, trying again in 5 seconds...", "#FFBFBF")
-        }
-        else
-        {
+        } else {
             isReconnecting = false
 
             ToastLogger.showText("The connection to server has been lost, please check your internet connection.", true)
@@ -188,10 +179,8 @@ object Multiplayer
         isWaitingAttemptResponse = false
     }
 
-    fun onReconnect()
-    {
-        if (isReconnecting)
-        {
+    fun onReconnect() {
+        if (isReconnecting) {
             log("WARNING: onReconnect() called while already trying to reconnect.")
             return
         }
@@ -202,34 +191,28 @@ object Multiplayer
 
         reconnectionScope.launch {
 
-            while (isReconnecting)
-            {
+            while (isReconnecting) {
                 val currentTime = System.currentTimeMillis()
 
                 // Timeout to reconnect was exceed.
-                if (currentTime - reconnectionStartTimeMS >= 30000)
-                {
+                if (currentTime - reconnectionStartTimeMS >= 30000) {
                     ToastLogger.showText("The connection to server has been lost, please check your internet connection.", true)
                     RoomScene.back()
                     return@launch
                 }
 
-                if (currentTime - lastAttemptResponseTimeMS < 5000 || isWaitingAttemptResponse)
-                    continue
+                if (currentTime - lastAttemptResponseTimeMS < 5000 || isWaitingAttemptResponse) continue
 
-                try
-                {
+                try {
                     RoomAPI.connectToRoom(
                         roomId = room!!.id,
-                        userId = getOnline().userId,
-                        username = getOnline().username,
+                        userId = OnlineManager.getInstance().userId,
+                        username = OnlineManager.getInstance().username,
                         sessionID = room!!.sessionID
                     )
 
                     isWaitingAttemptResponse = true
-                }
-                catch (e: Exception)
-                {
+                } catch (e: Exception) {
                     log(e)
 
                     // In this case the client didn't even succeed while creating the socket.
@@ -244,8 +227,7 @@ object Multiplayer
     // Logging
 
     @JvmStatic
-    fun log(text: String)
-    {
+    fun log(text: String) {
         val timestamp = DateFormat.format("hh:mm:ss", System.currentTimeMillis())
 
         LOG_FILE.appendText("\n[$timestamp] $text")
@@ -253,8 +235,7 @@ object Multiplayer
     }
 
     @JvmStatic
-    fun log(e: Throwable)
-    {
+    fun log(e: Throwable) {
         val time = "hh:mm:ss".formatTimeMilliseconds(System.currentTimeMillis())
         val stacktrace = Log.getStackTraceString(e)
 

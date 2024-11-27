@@ -4,92 +4,144 @@ import android.content.Context
 import android.view.WindowManager
 import com.reco1l.framework.ColorARGB
 import com.rian.osu.math.Interpolation.dampContinuously
-import kotlin.math.max
 import kotlin.math.min
 import kotlin.math.roundToInt
-import org.anddev.andengine.engine.handler.IUpdateHandler
 import org.anddev.andengine.entity.text.ChangeableText
+import org.anddev.andengine.opengl.font.Font
 import ru.nsu.ccfit.zuev.osu.GlobalManager.getInstance as getGlobal
 
 /**
- * Base class for FPS counters.
+ * Represents an FPS counter.
  *
  * All time units are in seconds.
  *
- * @param displayText The [ChangeableText] that will be used to display the current frame rate.
+ * @param font The [Font] that will be used to display the current frame rate.
  */
-abstract class FPSCounter(@JvmField val displayText: ChangeableText) : IUpdateHandler {
+class FPSCounter(font: Font) : ChangeableText(0f, 0f, font, "999/999 FPS") {
+    //region Counting logic
+
     /**
-     * The tag used to identify the counter.
+     * The current frame rate.
      */
-    protected abstract val tag: String
+    @get:JvmName("getFPS")
+    var fps = 0f
+        private set
+
+    /**
+     * The maximum frame rate that can be displayed.
+     */
+    @get:JvmName("getMaximumFPS")
+    var maximumFps = 0f
+        private set(value) {
+            if (field == value) {
+                return
+            }
+
+            field = value
+
+            // Force update so that the new maximum frame rate is displayed.
+            forceUpdate = true
+        }
+
+    /**
+     * The average frame rate.
+     */
+    @get:JvmName("getAverageFPS")
+    var averageFps = 0f
+        private set
 
     @Suppress("DEPRECATION")
-    private val display = (getGlobal().mainActivity.getSystemService(Context.WINDOW_SERVICE) as WindowManager).defaultDisplay
+    private val deviceDisplay = (getGlobal().mainActivity.getSystemService(Context.WINDOW_SERVICE) as WindowManager).defaultDisplay
 
     private val spikeTime = 0.02f
     private val dampTime = 0.1f
-    private val minTimeBetweenUpdates = 0.01f
 
-    private var elapsedTime = 0f
-    private var currentFps = 0f
-    private var maximumFps = 0f
+    // Average FPS calculation
+    private var timeUntilNextAverageFpsCalculation = 0f
+    private var timeSinceLastAverageFpsCalculation = 0f
+    private var framesSinceLastAverageFpsCalculation = 0
+    private val averageFpsCalculationInterval = 0.25f
+
+    /**
+     * Updates the FPS of this [FPSCounter].
+     *
+     * @param deltaTime The time in seconds since the last update.
+     */
+    fun updateFps(deltaTime: Float) {
+        // Update average FPS
+        if (timeUntilNextAverageFpsCalculation <= 0) {
+            timeUntilNextAverageFpsCalculation += averageFpsCalculationInterval
+
+            averageFps =
+                if (framesSinceLastAverageFpsCalculation == 0) 0f
+                else framesSinceLastAverageFpsCalculation / timeSinceLastAverageFpsCalculation
+
+            timeSinceLastAverageFpsCalculation = 0f
+            framesSinceLastAverageFpsCalculation = 0
+
+            // This should not belong here, but let's do it anyway to prevent excessive locks.
+            maximumFps = deviceDisplay.refreshRate
+        }
+
+        framesSinceLastAverageFpsCalculation++
+        timeUntilNextAverageFpsCalculation -= deltaTime
+        timeSinceLastAverageFpsCalculation += deltaTime
+
+        // Use elapsed frame time rather than FPS to better catch stutter frames.
+        val hasSpike = fps > 1 / spikeTime && deltaTime > spikeTime
+
+        // Show spike time using raw elapsed value to account for average FPS being so averaged spike frames don't show.
+        fps = min(maximumFps, if (hasSpike) 1 / deltaTime else dampContinuously(fps, averageFps, dampTime, deltaTime))
+    }
+
+    //endregion
+
+    //region Display logic
+
     private var lastDisplayedFps = 0
-    private var lastDisplayUpdateTime = 0f
-    private var frameTime = 0f
+
+    private var forceUpdate = false
+
+    private var timeSinceLastUpdate = 0f
+    private val updateInterval = 0.1f
 
     private val minimumTextColor = ColorARGB(0xed1121)
     private val middleTextColor = ColorARGB(0xebc247)
     private val maximumTextColor = ColorARGB(0xccff99)
 
-    /**
-     * Updates the FPS of this [FPSCounter].
-     *
-     * Unlike [onUpdate], this can be called in any thread, as it does not update [displayText].
-     *
-     * @param deltaTime The time in seconds since the last update.
-     */
-    fun updateFps(deltaTime: Float) {
+    override fun onManagedUpdate(pSecondsElapsed: Float) {
+        super.onManagedUpdate(pSecondsElapsed)
+
         // If the game goes into a suspended state (i.e., debugger attached), we want to ignore really long periods of
         // no processing.
-        if (deltaTime > 10) {
+        if (pSecondsElapsed > 10) {
             return
         }
 
-        val refreshRate = display.refreshRate
-        currentFps = min(refreshRate, calculateUpdatedFps(max(1 / refreshRate, deltaTime)))
-    }
+        timeSinceLastUpdate += pSecondsElapsed
 
-    override fun onUpdate(deltaTime: Float) {
-        elapsedTime += deltaTime
-
-        val refreshRate = display.refreshRate
-
-        if (maximumFps != refreshRate) {
-            maximumFps = refreshRate
-            updateDisplayText(true)
-        } else {
-            updateDisplayText()
-        }
-    }
-
-    private fun updateDisplayText(force: Boolean = false) {
-        if (!force && elapsedTime - lastDisplayUpdateTime <= minTimeBetweenUpdates) {
+        if (!forceUpdate && timeSinceLastUpdate < updateInterval) {
             return
         }
 
-        lastDisplayUpdateTime = elapsedTime
-        val displayedFps = currentFps.roundToInt()
+        forceUpdate = false
+        timeSinceLastUpdate = 0f
 
-        if (!force && displayedFps == lastDisplayedFps) {
+        val displayedFps = fps.roundToInt()
+
+        if (!forceUpdate && displayedFps == lastDisplayedFps) {
             return
         }
 
         lastDisplayedFps = displayedFps
-        displayText.text = "$tag: $displayedFps/${maximumFps.roundToInt()} FPS"
 
-        val performanceRatio = currentFps / maximumFps
+        text = "$displayedFps/${maximumFps.roundToInt()} FPS"
 
+        updateColor()
+    }
+
+    private fun updateColor() {
+        val performanceRatio = fps / maximumFps
         val red: Float
         val green: Float
         val blue: Float
@@ -108,27 +160,27 @@ abstract class FPSCounter(@JvmField val displayText: ChangeableText) : IUpdateHa
             blue = middleTextColor.blue + t * (maximumTextColor.blue - middleTextColor.blue)
         }
 
-        displayText.setColor(red, green, blue)
+        setColor(red, green, blue)
     }
+
+    //endregion
+
+    //region Reset
 
     override fun reset() {
-        currentFps = 0f
-        elapsedTime = 0f
+        super.reset()
+
+        timeUntilNextAverageFpsCalculation = 0f
+        timeSinceLastAverageFpsCalculation = 0f
+        framesSinceLastAverageFpsCalculation = 0
+
+        fps = 0f
+        averageFps = 0f
+        maximumFps = 0f
         lastDisplayedFps = 0
-        lastDisplayUpdateTime = 0f
-        frameTime = 0f
+        forceUpdate = false
+        timeSinceLastUpdate = 0f
     }
 
-    /**
-     * Obtains the updated frames per second after [deltaTime] has passed.
-     *
-     * @param deltaTime The time in seconds since the last update.
-     */
-    private fun calculateUpdatedFps(deltaTime: Float): Float {
-        val hasSpike = frameTime < spikeTime && deltaTime > spikeTime
-
-        frameTime = dampContinuously(frameTime, deltaTime, if (hasSpike) 0f else dampTime, deltaTime)
-
-        return 1 / frameTime
-    }
+    //endregion
 }

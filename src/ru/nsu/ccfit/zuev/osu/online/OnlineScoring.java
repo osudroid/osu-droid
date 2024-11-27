@@ -11,6 +11,10 @@ import com.rian.osu.ui.SendingPanel;
 
 import org.anddev.andengine.util.Debug;
 
+import java.util.concurrent.CancellationException;
+
+import kotlinx.coroutines.Job;
+import kotlinx.coroutines.JobKt;
 import ru.nsu.ccfit.zuev.osu.GlobalManager;
 import ru.nsu.ccfit.zuev.osu.ToastLogger;
 import ru.nsu.ccfit.zuev.osu.scoring.StatisticV2;
@@ -25,6 +29,8 @@ public class OnlineScoring {
     private final Snackbar snackbar = Snackbar.make(
             GlobalManager.getInstance().getMainActivity().getWindow().getDecorView(),
             "", 10000);
+
+    private Job loginJob, avatarJob;
 
     public static OnlineScoring getInstance() {
         if (instance == null)
@@ -85,7 +91,11 @@ public class OnlineScoring {
             return;
         avatarLoaded = false;
 
-        Execution.async(() -> {
+        if (loginJob != null) {
+            loginJob.cancel(new CancellationException("Login cancelled"));
+        }
+
+        loginJob = Execution.async((scope) -> {
             synchronized (onlineMutex) {
                 boolean success = false;
 
@@ -94,6 +104,7 @@ public class OnlineScoring {
                     setPanelMessage("Logging in...", "");
 
                     try {
+                        JobKt.ensureActive(scope.getCoroutineContext());
                         success = OnlineManager.getInstance().logIn();
                     } catch (OnlineManager.OnlineManagerException e) {
                         Debug.e("Login error: " + e.getMessage());
@@ -116,22 +127,25 @@ public class OnlineScoring {
                     OnlineManager.getInstance().setStayOnline(false);
 
                     if (OnlineManager.getInstance().getFailMessage().equals("Cannot connect to server")) {
-                        snackbar.setText("Cannot connect to server. Please check the following article for troubleshooting.");
+                        Execution.mainThread(() -> {
+                            snackbar.dismiss();
+                            snackbar.setText("Cannot connect to server. Please check the following article for troubleshooting.");
 
-                        snackbar.setAction("Check", (v) -> {
-                            var intent = new Intent(Intent.ACTION_VIEW, Uri.parse("https://neroyuki.github.io/osudroid-guide/help/login_fail"));
+                            snackbar.setAction("Check", (v) -> {
+                                var intent = new Intent(Intent.ACTION_VIEW, Uri.parse("https://neroyuki.github.io/osudroid-guide/help/login_fail"));
 
-                            GlobalManager.getInstance().getMainActivity().startActivity(intent);
+                                GlobalManager.getInstance().getMainActivity().startActivity(intent);
+                            });
+
+                            snackbar.show();
                         });
-
-                        snackbar.show();
                     }
                 }
             }
         });
     }
 
-    public void sendRecord(final StatisticV2 record, final String mapMD5, final SendingPanel panel, final String replay) {
+    public void sendRecord(final BeatmapInfo beatmap, final StatisticV2 record, final SendingPanel panel, final String replayPath) {
         if (!OnlineManager.getInstance().isStayOnline())
             return;
 
@@ -148,12 +162,12 @@ public class OnlineScoring {
                         break;
                     }
 
-                        try {
-                            success = OnlineManager.getInstance().sendRecord(recordData, mapMD5, replay);
-                        } catch (OnlineManager.OnlineManagerException e) {
-                            Debug.e("Login error: " + e.getMessage());
-                            success = false;
-                        }
+                    try {
+                        success = OnlineManager.getInstance().sendRecord(beatmap, recordData, replayPath);
+                    } catch (OnlineManager.OnlineManagerException e) {
+                        Debug.e("Login error: " + e.getMessage());
+                        success = false;
+                    }
 
                         if (OnlineManager.getInstance().getFailMessage().length() > 0) {
                             ToastLogger.showText(OnlineManager.getInstance().getFailMessage(), true);
@@ -185,9 +199,14 @@ public class OnlineScoring {
         if (avatarUrl == null || avatarUrl.length() == 0)
             return;
 
-        Execution.async(() -> {
+        if (avatarJob != null) {
+            avatarJob.cancel(new CancellationException("Avatar loading cancelled"));
+        }
+
+        avatarJob = Execution.async((scope) -> {
             synchronized (onlineMutex) {
                 avatarLoaded = OnlineManager.getInstance().loadAvatarToTextureManager();
+                JobKt.ensureActive(scope.getCoroutineContext());
                 if (both)
                     updatePanelAvatars();
                 else if (secondPanel != null)

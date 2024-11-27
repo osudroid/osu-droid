@@ -10,6 +10,7 @@ import androidx.fragment.app.Fragment
 import com.edlplan.framework.easing.Easing
 import com.edlplan.ui.ActivityOverlay
 import com.edlplan.ui.EasingHelper
+import com.reco1l.osu.*
 import ru.nsu.ccfit.zuev.osuplus.R
 
 abstract class BaseFragment : Fragment(), BackPressListener {
@@ -22,10 +23,17 @@ abstract class BaseFragment : Fragment(), BackPressListener {
         private set
     var isDismissOnBackPress = true
 
+
     /**
      * If true, the fragment will intercept back press event when it's received.
      */
     var interceptBackPress = true
+
+
+    private var isLoaded = false
+
+    private var isDismissCalled = false
+
 
     @get:IdRes
     val backgroundId: Int
@@ -74,8 +82,13 @@ abstract class BaseFragment : Fragment(), BackPressListener {
     }
 
     open fun dismiss() {
-        ActivityOverlay.dismissOverlay(this)
-        onDismissListener?.OnDismiss()
+        isDismissCalled = true
+
+        if (isLoaded) {
+            isDismissCalled = false
+            ActivityOverlay.dismissOverlay(this)
+            onDismissListener?.OnDismiss()
+        }
     }
 
     fun save() {
@@ -93,6 +106,7 @@ abstract class BaseFragment : Fragment(), BackPressListener {
     }
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
+        isLoaded = false
         isCreated = true
         root = inflater.inflate(layoutID, container, false)
         findViewById<View>(backgroundId)?.setOnClickListener {
@@ -100,7 +114,15 @@ abstract class BaseFragment : Fragment(), BackPressListener {
                 dismiss()
             }
         }
+
         onLoadView()
+        isLoaded = true
+
+        if (isDismissCalled) {
+            dismiss()
+            isDismissCalled = false
+        }
+
         return root
     }
 

@@ -1,6 +1,7 @@
 package com.reco1l.osu
 
 import android.util.Log
+import android.view.*
 import android.widget.TextView
 import androidx.preference.PreferenceManager
 import com.edlplan.ui.fragment.BaseFragment
@@ -17,6 +18,7 @@ import ru.nsu.ccfit.zuev.osuplus.BuildConfig
 import ru.nsu.ccfit.zuev.osuplus.R
 import java.util.concurrent.Executors
 import java.util.concurrent.TimeUnit
+import kotlin.math.ceil
 import kotlin.math.max
 import kotlinx.coroutines.*
 
@@ -27,6 +29,7 @@ object DifficultyCalculationManager {
 
     private val preferences
         get() = PreferenceManager.getDefaultSharedPreferences(mainActivity)
+
 
     private var job: Job? = null
 
@@ -63,14 +66,15 @@ object DifficultyCalculationManager {
 
         mainThread {
             badge = LoadingBadgeFragment().apply {
-                text = "Calculating beatmap difficulties..."
+                header = "Calculating beatmap difficulties..."
+                message = "During this process, the game may suffer performance degradation."
                 isIndeterminate = true
                 show()
             }
         }
 
         job = async {
-            val threadCount = Runtime.getRuntime().availableProcessors()
+            val threadCount = ceil(Runtime.getRuntime().availableProcessors() / 2f).toInt()
             val threadPool = Executors.newFixedThreadPool(threadCount)
 
             var calculated = totalBeatmaps - pendingBeatmaps.size
@@ -106,7 +110,7 @@ object DifficultyCalculationManager {
                                 badge?.apply {
                                     isIndeterminate = false
                                     progress = calculated * 100 / totalBeatmaps
-                                    text = "Calculating beatmap difficulties... (${progress}%)"
+                                    header = "Calculating beatmap difficulties... (${progress}%)"
                                 }
                             }
 
@@ -124,18 +128,7 @@ object DifficultyCalculationManager {
 
             threadPool.shutdown()
             try {
-
-                val isTimeout = threadPool.awaitTermination(1, TimeUnit.HOURS)
-
-                if (isActive) {
-                    if (isTimeout) {
-                        ToastLogger.showText("Background difficulty calculation has finished.", true)
-                    } else {
-                        ToastLogger.showText("Something went wrong during background difficulty calculation.", true)
-                    }
-                } else {
-                    ToastLogger.showText("Difficulty calculation has been paused.", false)
-                }
+                threadPool.awaitTermination(1, TimeUnit.HOURS)
 
                 mainThread {
                     badge?.dismiss()
@@ -182,7 +175,7 @@ class LoadingBadgeFragment : BaseFragment() {
             }
         }
 
-    var text = "Loading..."
+    var header = "Loading..."
         set(value) {
             field = value
             if (::textView.isInitialized) {
@@ -190,19 +183,31 @@ class LoadingBadgeFragment : BaseFragment() {
             }
         }
 
+    var message = "Please wait..."
+        set(value) {
+            field = value
+            if (::messageView.isInitialized) {
+                messageView.text = value
+                messageView.visibility = if (value.isEmpty()) View.GONE else View.VISIBLE
+            }
+        }
 
-    private lateinit var progressView: CircularProgressIndicator
 
     private lateinit var textView: TextView
+
+    private lateinit var messageView: TextView
+
+    private lateinit var progressView: CircularProgressIndicator
 
 
     override fun onLoadView() {
         progressView = findViewById(R.id.progress)!!
+        messageView = findViewById(R.id.message)!!
         textView = findViewById(R.id.text)!!
 
         progressView.isIndeterminate = isIndeterminate
         progressView.progress = progress
-        textView.text = text
+        textView.text = header
     }
 
 }
