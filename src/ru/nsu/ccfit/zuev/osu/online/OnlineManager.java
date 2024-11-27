@@ -172,7 +172,6 @@ public class OnlineManager {
         var post = new FormDataPostBuilder();
         post.addParam("userID", String.valueOf(userId));
         post.addParam("sessionId", sessionId);
-        post.addParam("filename", beatmap.getFullBeatmapName().trim());
         post.addParam("hash", beatmap.getMD5());
         post.addParam("data", scoreData);
 
