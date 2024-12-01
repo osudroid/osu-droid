@@ -257,6 +257,9 @@ public class StatisticV2 implements Serializable {
         if (GameHelper.isScoreV2()) {
             if (amount == 1000) {
                 bonusScore += amount;
+
+                // Undo the ScoreV1 addition above.
+                v1Score -= amount;
             }
 
             double scorePortion;
