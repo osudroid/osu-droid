@@ -17,10 +17,9 @@
             app:layout="@layout/settings_preference_input_bottom" />
 
         <CheckBoxPreference
-                android:key="room_allowMoreThanThreeCursors"
-                android:title="Allow more than three cursors in gameplay"
-                android:summary="Allow players to put more than three active cursors at once during gameplay"
-        />
+            android:key="room_allowMoreThanThreeCursors"
+            android:title="Allow more than three cursors in gameplay"
+            android:summary="Allow players to put more than three active cursors at once during gameplay" />
 
     </PreferenceCategory>
 
@@ -35,12 +34,6 @@
             android:key="room_allowForceDifficultyStatistics"
             android:summary="@string/mp_room_allowForceDifficultyStatistics_summary"
             android:title="@string/mp_room_allowForceDifficultyStatistics_title" />
-
-        <CheckBoxPreference
-            android:key="allowMoreThanThreeCursors"
-            android:title="Allow more than three cursors"
-            android:summary="Allow players to put more than three active cursors at once during gameplay"
-            android:defaultValue="true" />
 
         <com.reco1l.osu.ui.SelectPreference
             android:entries="@array/mp_team_versus_names"
