@@ -235,10 +235,6 @@ public class StatisticV2 implements Serializable {
             return;
         }
 
-        if (amount == 1000) {
-            bonusScore += amount;
-        }
-
         int addition = amount + (int) (amount * currentCombo * diffModifier / 25);
 
         // It is possible for score addition to be a negative number due to
