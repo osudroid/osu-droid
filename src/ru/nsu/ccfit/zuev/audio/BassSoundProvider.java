@@ -62,7 +62,9 @@ public class BassSoundProvider {
             return;
         }
 
-        if (volume == 0) {
+        float finalVolume = volume * Config.getSoundVolume();
+
+        if (finalVolume == 0) {
             stop();
             return;
         }
@@ -86,7 +88,7 @@ public class BassSoundProvider {
         stop();
 
         BASS.BASS_ChannelPlay(channel, true);
-        BASS.BASS_ChannelSetAttribute(channel, BASS.BASS_ATTRIB_VOL, volume * Config.getSoundVolume());
+        BASS.BASS_ChannelSetAttribute(channel, BASS.BASS_ATTRIB_VOL, finalVolume);
     }
 
     public void stop() {
