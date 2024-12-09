@@ -16,17 +16,13 @@ public class LinearSongProgress extends GameObject {
     private float passedTime;
     private float initialPassedTime;
 
-    public LinearSongProgress(final GameObjectListener listener,
-                              final Scene scene, final float time, final float startTime, final PointF pos) {
-        this(listener, scene, time, startTime, pos, Utils.toRes(300), Utils.toRes(7));
+    public LinearSongProgress(final Scene scene, final float time, final float startTime, final PointF pos) {
+        this(scene, time, startTime, pos, Utils.toRes(300), Utils.toRes(7));
     }
 
-    public LinearSongProgress(final GameObjectListener listener,
-                              final Scene scene, final float time, final float startTime, final PointF pos, float width, float height) {
+    public LinearSongProgress(final Scene scene, final float time, final float startTime, final PointF pos, float width, float height) {
         this.time = time;
         this.startTime = startTime;
-        if (listener != null)
-            listener.addPassiveObject(this);
 
         bgRect = new Rectangle(pos.x, pos.y, width, height);
         bgRect.setColor(0, 0, 0, 0.3f);

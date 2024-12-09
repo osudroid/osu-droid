@@ -23,10 +23,6 @@ public interface GameObjectListener {
 
     void removeObject(GameObject object);
 
-    void addPassiveObject(GameObject object);
-
-    void removePassiveObject(GameObject object);
-
     PointF getMousePos(int index);
 
     boolean isMouseDown(int index);

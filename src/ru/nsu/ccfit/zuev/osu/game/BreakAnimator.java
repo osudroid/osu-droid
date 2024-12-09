@@ -30,14 +30,13 @@ public class BreakAnimator extends GameObject {
     private boolean over = false;
     private Rectangle dimRectangle = null;
 
-    public BreakAnimator(final GameObjectListener listener, final Scene scene,
+    public BreakAnimator(final Scene scene,
                          final StatisticV2 stat, final boolean showMark, Rectangle bgSprtie) {
         length = 0;
         this.showMark = showMark;
         this.scene = scene;
         this.stat = stat;
         this.dimRectangle = bgSprtie;
-        listener.addPassiveObject(this);
 
         for (int i = 0; i < 4; i++) {
             arrows[i] = new Sprite(0, 0, ResourceManager.getInstance()
