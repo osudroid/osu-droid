@@ -57,7 +57,7 @@ enum class BeatmapMirror(
     OSU_DIRECT(
         homeUrl = "https://osu.direct",
         description = "osu.direct",
-        logoResource = R.drawable.powered_by_osudirect,
+        logoResource = R.drawable.osudirect,
 
         search = BeatmapMirrorActionWithResponse(
             request = OsuDirectSearchRequestModel(),

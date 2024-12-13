@@ -1,8 +1,6 @@
 package com.reco1l.osu.beatmaplisting
 
-import android.content.Intent
 import android.graphics.BitmapFactory
-import android.net.Uri
 import android.util.Log
 import android.view.Choreographer
 import android.view.Choreographer.FrameCallback
@@ -37,6 +35,8 @@ import com.reco1l.framework.bass.URLBassStream
 import com.reco1l.framework.net.IDownloaderObserver
 import com.reco1l.framework.net.JsonArrayRequest
 import com.reco1l.osu.*
+import com.reco1l.osu.ui.Option
+import com.reco1l.osu.ui.SelectDialog
 import kotlinx.coroutines.CoroutineExceptionHandler
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -98,7 +98,7 @@ class BeatmapListing : BaseFragment(),
 
     private lateinit var searchBox: EditText
 
-    private lateinit var logoView: ImageView
+    private lateinit var logoView: Button
 
 
     init {
@@ -133,11 +133,26 @@ class BeatmapListing : BaseFragment(),
 
         logoView = findViewById(R.id.logo)!!
         logoView.setOnClickListener {
-            val url = "https://osu.direct/browse"
-            val i = Intent(Intent.ACTION_VIEW)
-
-            i.data = Uri.parse(url)
-            startActivity(i)
+            SelectDialog()
+                .setOptions(BeatmapMirror.entries.map { mirror ->
+                    Option(
+                        text = buildSpannedString {
+                            append(mirror.description)
+                            appendLine()
+                            color(0xBFFFFFFF.toInt()) { append(mirror.homeUrl) }
+                        },
+                        value = mirror.ordinal,
+                        icon = requireContext().getDrawable(mirror.logoResource)
+                    )
+                })
+                .setSelected(mirror.ordinal)
+                .setOnSelectListener {
+                    Config.setInt("beatmapMirror", it as Int)
+                    mirror = BeatmapMirror.entries[Config.getInt("beatmapMirror", 0)]
+                    search(false)
+                }
+                .setTitle("Select a beatmap mirror")
+                .show()
         }
 
         findViewById<ImageButton>(R.id.close)!!.setOnClickListener {
@@ -282,7 +297,7 @@ class BeatmapListing : BaseFragment(),
         /**
          * The current selected beatmap mirror.
          */
-        var mirror = BeatmapMirror.OSU_DIRECT
+        var mirror = BeatmapMirror.entries[Config.getInt("beatmapMirror", 0)]
 
         /**
          * Whether is a beatmap preview music playing or not.
