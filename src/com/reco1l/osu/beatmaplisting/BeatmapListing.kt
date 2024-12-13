@@ -195,21 +195,17 @@ class BeatmapListing : BaseFragment(),
 
             ensureActive()
 
-            JsonArrayRequest(mirror.search.endpoint).use { request ->
-
-                request.buildUrl {
-
-                    addQueryParameter("mode", "0")
-                    addQueryParameter("query", searchBox.text.toString())
-                    addQueryParameter("offset", offset.toString())
-                }
+            JsonArrayRequest(
+                mirror.search.request(
+                    query = searchBox.text.toString(),
+                    offset = offset
+                )
+            ).use { request ->
 
                 request.buildRequest { header("User-Agent", "Chrome/Android") }
-
                 ensureActive()
 
-                val beatmapSets = mirror.search.mapResponse(request.execute().json)
-
+                val beatmapSets = mirror.search.response(request.execute().json)
                 ensureActive()
 
                 adapter.data.addAll(beatmapSets)
@@ -393,8 +389,10 @@ class BeatmapSetDetails(val beatmapSet: BeatmapSetModel, val holder: BeatmapSetV
         }
 
         downloadButton.setOnClickListener {
-            val url = BeatmapListing.mirror.downloadEndpoint(beatmapSet.id)
-            BeatmapDownloader.download(url, "${beatmapSet.id} ${beatmapSet.artist} - ${beatmapSet.title}")
+            BeatmapDownloader.download(
+                url = BeatmapListing.mirror.download.request(beatmapSet.id).toString(),
+                suggestedFilename = "${beatmapSet.id} ${beatmapSet.artist} - ${beatmapSet.title}"
+            )
         }
 
         cover.setImageDrawable(holder.cover.drawable)
@@ -598,8 +596,10 @@ class BeatmapSetViewHolder(itemView: View, private val mediaScope: CoroutineScop
         }
 
         downloadButton.setOnClickListener {
-            val url = BeatmapListing.mirror.downloadEndpoint(beatmapSet.id)
-            BeatmapDownloader.download(url, "${beatmapSet.id} ${beatmapSet.artist} - ${beatmapSet.title}")
+            BeatmapDownloader.download(
+                url = BeatmapListing.mirror.download.request(beatmapSet.id).toString(),
+                suggestedFilename = "${beatmapSet.id} ${beatmapSet.artist} - ${beatmapSet.title}"
+            )
         }
 
 
@@ -621,7 +621,7 @@ class BeatmapSetViewHolder(itemView: View, private val mediaScope: CoroutineScop
         previewJob = mediaScope.launch {
 
             try {
-                previewStream = URLBassStream(BeatmapListing.mirror.previewEndpoint(beatmapSet.beatmaps[0].id)) {
+                previewStream = URLBassStream(BeatmapListing.mirror.preview.request(beatmapSet.beatmaps[0].id).toString()) {
                     stopPreview(true)
 
                     if (BeatmapListing.isPlayingMusic) {
