@@ -146,10 +146,13 @@ class BeatmapListing : BaseFragment(),
                     )
                 })
                 .setSelected(mirror.ordinal)
-                .setOnSelectListener {
-                    Config.setInt("beatmapMirror", it as Int)
-                    mirror = BeatmapMirror.entries[Config.getInt("beatmapMirror", 0)]
-                    search(false)
+                .setOnSelectListener { value ->
+                    value as Int
+                    if (value != mirror.ordinal) {
+                        Config.setInt("beatmapMirror", value)
+                        mirror = BeatmapMirror.entries[Config.getInt("beatmapMirror", 0)]
+                        search(false)
+                    }
                 }
                 .setTitle("Select a beatmap mirror")
                 .show()
