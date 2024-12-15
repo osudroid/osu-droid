@@ -266,13 +266,13 @@ public class MainActivity extends BaseGameActivity implements
         ResourceManager.getInstance().loadHighQualityAsset("music_next", "music_next.png");
         ResourceManager.getInstance().loadHighQualityAsset("music_prev", "music_prev.png");
         ResourceManager.getInstance().loadHighQualityAsset("music_np", "music_np.png");
+        ResourceManager.getInstance().loadHighQualityAsset("menu_snow", "menu_snow.png");
         ResourceManager.getInstance().loadHighQualityAsset("songselect-top", "songselect-top.png");
         File bg;
         if ((bg = new File(Config.getSkinPath() + "menu-background.png")).exists()
                 || (bg = new File(Config.getSkinPath() + "menu-background.jpg")).exists()) {
             ResourceManager.getInstance().loadHighQualityFile("menu-background", bg);
         }
-        // ResourceManager.getInstance().loadHighQualityAsset("exit", "exit.png");
         ResourceManager.getInstance().loadFont("font", null, 28, Color.WHITE);
         ResourceManager.getInstance().loadFont("smallFont", null, 21, Color.WHITE);
         ResourceManager.getInstance().loadStrokeFont("strokeFont", null, 36, Color.BLACK, Color.WHITE);

@@ -1,5 +1,7 @@
 package ru.nsu.ccfit.zuev.osu;
 
+import static com.acivev.EffectKt.addSnowfall;
+
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.PointF;
@@ -369,6 +371,8 @@ public class MainScene implements IUpdateHandler {
                 Math.max(author.getHeight(), yasonline.getHeight()) + Utils.toRes(15));
         bgbottomRect.setPosition(0, Config.getRES_HEIGHT() - bgbottomRect.getHeight());
         bgbottomRect.setColor(0, 0, 0, 0.3f);
+
+        addSnowfall(scene, context);
 
         for (int i = 0; i < 120; i++) {
             final float pX = (float) Config.getRES_WIDTH() / 2;
