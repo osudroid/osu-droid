@@ -18,8 +18,8 @@ import javax.microedition.khronos.opengles.GL10
 fun addSnowfall(scene: Scene, context: Context) {
     val snowflakeTexture = ResourceManager.getInstance().getTexture("menu-snow")
 
-    val isHighEndDevice = DevicePerformanceUtil.isLowEndDevice(context)
-    val maxParticles = if (isHighEndDevice) 15 else 75
+    val isLowEndDevice = DevicePerformanceUtil.isLowEndDevice(context)
+    val maxParticles = if (isLowEndDevice) 15 else 75
 
     val snowParticleSystem = ParticleSystem(
         PointParticleEmitter(Config.getRES_WIDTH() / 2f, 0f),  // Emitter at the top center
