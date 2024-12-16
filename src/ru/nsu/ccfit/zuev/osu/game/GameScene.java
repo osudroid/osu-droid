@@ -140,10 +140,8 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
     private boolean comboWasMissed = false;
     private boolean comboWas100 = false;
     private LinkedList<GameObject> activeObjects;
-    private LinkedList<GameObject> passiveObjects;
     private LinkedList<GameObject> expiredObjects;
     private Queue<BreakPeriod> breakPeriods = new LinkedList<>();
-    private BreakAnimator breakAnimator;
     public GameplayLeaderboard scoreBoard;
     private HitErrorMeter hitErrorMeter;
     private Metronome metronome;
@@ -200,6 +198,16 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
      */
     private boolean isGameOver = false;
 
+    /**
+     * The break time animator.
+     */
+    private BreakAnimator breakAnimator;
+
+    /**
+     * The countdown animator.
+     */
+    public Countdown countdownAnimator;
+
 
     // UI
 
@@ -207,6 +215,11 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
      * The gameplay HUD
      */
     private GameplayHUD hud;
+
+    /**
+     * The linear song progress bar.
+     */
+    private LinearSongProgress linearSongProgress;
 
 
     // Timing
@@ -484,7 +497,6 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
 
         objects = new LinkedList<>(playableBeatmap.getHitObjects().objects);
         activeObjects = new LinkedList<>();
-        passiveObjects = new LinkedList<>();
         expiredObjects = new LinkedList<>();
         lastObjectId = -1;
 
@@ -874,16 +886,18 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
             float cdSpeed = countdown.speed;
             skipTime -= cdSpeed * Countdown.COUNTDOWN_LENGTH;
             if (cdSpeed != 0 && firstObjectStartTime - elapsedTime >= cdSpeed * Countdown.COUNTDOWN_LENGTH) {
-                addPassiveObject(new Countdown(this, bgScene, cdSpeed, 0, firstObjectStartTime - elapsedTime));
+                countdownAnimator = new Countdown(bgScene, cdSpeed, 0, firstObjectStartTime - elapsedTime);
             }
         }
 
+        linearSongProgress = null;
+
         if (!Config.isHideInGameUI()) {
             if (Config.getProgressIndicatorType() == ProgressIndicatorType.BAR) {
-                var progressBar = new LinearSongProgress(this, hud, lastObjectEndTime, firstObjectStartTime, new PointF(0, Config.getRES_HEIGHT() - 7), Config.getRES_WIDTH(), 7);
-                progressBar.setProgressRectColor(new RGBColor(153f / 255f, 204f / 255f, 51f / 255f));
-                progressBar.setProgressRectAlpha(0.4f);
-                progressBar.setInitialPassedTime(initialElapsedTime);
+                linearSongProgress = new LinearSongProgress(hud, lastObjectEndTime, firstObjectStartTime, new PointF(0, Config.getRES_HEIGHT() - 7), Config.getRES_WIDTH(), 7);
+                linearSongProgress.setProgressRectColor(new RGBColor(153f / 255f, 204f / 255f, 51f / 255f));
+                linearSongProgress.setProgressRectAlpha(0.4f);
+                linearSongProgress.setInitialPassedTime(initialElapsedTime);
             }
         }
 
@@ -900,7 +914,7 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
             fgScene.attachChild(skipBtn);
         }
 
-        breakAnimator = new BreakAnimator(this, fgScene, stat, playableBeatmap.getGeneral().letterboxInBreaks, dimRectangle);
+        breakAnimator = new BreakAnimator(fgScene, stat, playableBeatmap.getGeneral().letterboxInBreaks, dimRectangle);
 
         if (Config.isComboburst()) {
             comboBurst = new ComboBurst(Config.getRES_WIDTH(), Config.getRES_HEIGHT());
@@ -1259,10 +1273,7 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
         // Clearing expired objects.
         while (!expiredObjects.isEmpty()) {
             var object = expiredObjects.poll();
-            // Since we're going to remove them and same objects aren't added to both list we can
-            // share the same list to remove them.
             activeObjects.remove(object);
-            passiveObjects.remove(object);
         }
 
         updatePassiveObjects(dt);
@@ -1415,7 +1426,6 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
             effectControlPoints.clear();
             objects.clear();
             activeObjects.clear();
-            passiveObjects.clear();
             expiredObjects.clear();
             breakPeriods.clear();
             cursorSprites = null;
@@ -1566,8 +1576,15 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
     }
 
     private void updatePassiveObjects(float deltaTime) {
-        for (int i = 0, size = passiveObjects.size(); i < size; i++) {
-            passiveObjects.get(i).update(deltaTime);
+
+        breakAnimator.update(deltaTime);
+
+        if (linearSongProgress != null) {
+            linearSongProgress.update(deltaTime);
+        }
+
+        if (countdownAnimator != null) {
+            countdownAnimator.update(deltaTime);
         }
     }
 
@@ -1614,9 +1631,6 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
         stopLoopingSamples();
         if (activeObjects != null) {
             activeObjects.clear();
-        }
-        if (passiveObjects != null) {
-            passiveObjects.clear();
         }
         if (expiredObjects != null) {
             expiredObjects.clear();
@@ -2390,16 +2404,6 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
 
     public boolean isPaused() {
         return paused;
-    }
-
-
-    public void addPassiveObject(final GameObject object) {
-        passiveObjects.add(object);
-    }
-
-
-    public void removePassiveObject(final GameObject object) {
-        expiredObjects.add(object);
     }
 
     private void createHitEffect(final PointF pos, final String name, RGBColor color) {
