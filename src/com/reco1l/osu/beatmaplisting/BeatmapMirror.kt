@@ -1,6 +1,10 @@
 package com.reco1l.osu.beatmaplisting
 
 import androidx.annotation.DrawableRes
+import com.reco1l.osu.beatmaplisting.mirrors.CatboyDownloadRequestModel
+import com.reco1l.osu.beatmaplisting.mirrors.CatboyPreviewRequestModel
+import com.reco1l.osu.beatmaplisting.mirrors.CatboySearchRequestModel
+import com.reco1l.osu.beatmaplisting.mirrors.CatboySearchResponseModel
 import com.reco1l.osu.beatmaplisting.mirrors.OsuDirectDownloadRequestModel
 import com.reco1l.osu.beatmaplisting.mirrors.OsuDirectPreviewRequestModel
 import com.reco1l.osu.beatmaplisting.mirrors.OsuDirectSearchRequestModel
@@ -65,6 +69,24 @@ enum class BeatmapMirror(
         ),
         download = BeatmapMirrorAction(OsuDirectDownloadRequestModel()),
         preview = BeatmapMirrorAction(OsuDirectPreviewRequestModel()),
+    ),
+
+    /**
+     * Catboy beatmap mirror.
+     *
+     * [See documentation](https://dev.catboy.best/docs)
+     */
+    CATBOY(
+        homeUrl = "https://catboy.best",
+        description = "Catboy",
+        logoResource = R.drawable.osudirect,
+
+        search = BeatmapMirrorActionWithResponse(
+            request = CatboySearchRequestModel(),
+            response = CatboySearchResponseModel(),
+        ),
+        download = BeatmapMirrorAction(CatboyDownloadRequestModel()),
+        preview = BeatmapMirrorAction(CatboyPreviewRequestModel()),
     )
 
 }
