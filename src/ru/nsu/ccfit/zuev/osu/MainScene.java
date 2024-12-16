@@ -5,7 +5,9 @@ import android.graphics.PointF;
 import android.os.PowerManager;
 import android.util.Log;
 
+import com.reco1l.andengine.Anchor;
 import com.reco1l.andengine.shape.RoundedBox;
+import com.reco1l.andengine.sprite.ExtendedSprite;
 import com.reco1l.osu.data.BeatmapInfo;
 import com.reco1l.osu.Execution;
 import com.reco1l.osu.ui.entity.MainMenu;
@@ -170,13 +172,30 @@ public class MainScene implements IUpdateHandler {
 
         menu = new MainMenu(this);
 
-        // Only show build type if it's not release
-        String versionString = BuildConfig.VERSION_NAME + String.format(" (%s)", BuildConfig.BUILD_TYPE).replace(" (release)", "");
+        if (BuildConfig.DEBUG) {
+            ResourceManager.getInstance().loadHighQualityAsset("dev-build-overlay", "dev-build-overlay.png");
+
+            ExtendedSprite debugOverlay = new ExtendedSprite(ResourceManager.getInstance().getTexture("dev-build-overlay"));
+            debugOverlay.setPosition(Config.getRES_WIDTH() / 2f, Config.getRES_HEIGHT());
+            debugOverlay.setOrigin(Anchor.BottomCenter);
+            scene.attachChild(debugOverlay);
+
+            Text debugText = new Text(0, 0, ResourceManager.getInstance().getFont("smallFont"), "DEVELOPMENT BUILD");
+            debugText.setColor(1f, 237f / 255f, 0f);
+            debugText.setPosition((Config.getRES_WIDTH() - debugText.getWidth()) / 2f, Config.getRES_HEIGHT() - debugOverlay.getHeight() - 1f - debugText.getHeight());
+
+            Text debugTextShadow = new Text(0, 0, ResourceManager.getInstance().getFont("smallFont"), "DEVELOPMENT BUILD");
+            debugTextShadow.setColor(0f, 0f, 0f, 0.5f);
+            debugTextShadow.setPosition((Config.getRES_WIDTH() - debugText.getWidth()) / 2f + 2f, Config.getRES_HEIGHT() - debugOverlay.getHeight() - 1f - debugText.getHeight() + 2f);
+
+            scene.attachChild(debugTextShadow);
+            scene.attachChild(debugText);
+        }
 
         RoundedBox box = new RoundedBox() {
 
             {
-                Text versionText = new Text(10f, 2f, ResourceManager.getInstance().getFont("font"), "osu!droid " + versionString);
+                Text versionText = new Text(10f, 2f, ResourceManager.getInstance().getFont("smallFont"), "osu!droid " + BuildConfig.VERSION_NAME);
                 attachChild(versionText);
 
                 setSize(versionText.getWidth() + 20f, versionText.getHeight() + 4f);
@@ -190,17 +209,17 @@ public class MainScene implements IUpdateHandler {
                     new MessageDialog()
                         .setTitle("About")
                         .setMessage(
-                            "<h1>osu!droid</h1>\n" +
-                            "<h5>Version " + versionString + "</h5>\n" +
-                            "<p>Made by osu!droid team<br>osu! is © peppy 2007-2024</p>\n" +
-                            "<br>\n" +
-                            "<a href=\"https://osu.ppy.sh\">Visit official osu! website ↗</a>\n" +
-                            "<br>\n" +
-                            "<br>\n" +
-                            "<a href=\"https://osudroid.moe\">Visit official osu!droid website ↗</a>\n" +
-                            "<br>\n" +
-                            "<br>\n" +
-                            "<a href=\"https://discord.gg/nyD92cE\">Join the official Discord server ↗</a>\n",
+                                "<h1>osu!droid</h1>\n" +
+                                "<h5>Version " + BuildConfig.VERSION_NAME + "</h5>\n" +
+                                "<p>Made by osu!droid team<br>osu! is © peppy 2007-2024</p>\n" +
+                                "<br>\n" +
+                                "<a href=\"https://osu.ppy.sh\">Visit official osu! website ↗</a>\n" +
+                                "<br>\n" +
+                                "<br>\n" +
+                                "<a href=\"https://osudroid.moe\">Visit official osu!droid website ↗</a>\n" +
+                                "<br>\n" +
+                                "<br>\n" +
+                                "<a href=\"https://discord.gg/nyD92cE\">Join the official Discord server ↗</a>\n",
                             true
                         )
                         .addButton("Close", dialog -> {
