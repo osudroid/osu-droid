@@ -890,12 +890,14 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
             }
         }
 
+        linearSongProgress = null;
+
         if (!Config.isHideInGameUI()) {
             if (Config.getProgressIndicatorType() == ProgressIndicatorType.BAR) {
-                var progressBar = new LinearSongProgress(hud, lastObjectEndTime, firstObjectStartTime, new PointF(0, Config.getRES_HEIGHT() - 7), Config.getRES_WIDTH(), 7);
-                progressBar.setProgressRectColor(new RGBColor(153f / 255f, 204f / 255f, 51f / 255f));
-                progressBar.setProgressRectAlpha(0.4f);
-                progressBar.setInitialPassedTime(initialElapsedTime);
+                linearSongProgress = new LinearSongProgress(hud, lastObjectEndTime, firstObjectStartTime, new PointF(0, Config.getRES_HEIGHT() - 7), Config.getRES_WIDTH(), 7);
+                linearSongProgress.setProgressRectColor(new RGBColor(153f / 255f, 204f / 255f, 51f / 255f));
+                linearSongProgress.setProgressRectAlpha(0.4f);
+                linearSongProgress.setInitialPassedTime(initialElapsedTime);
             }
         }
 
@@ -1576,7 +1578,10 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
     private void updatePassiveObjects(float deltaTime) {
 
         breakAnimator.update(deltaTime);
-        linearSongProgress.update(deltaTime);
+
+        if (linearSongProgress != null) {
+            linearSongProgress.update(deltaTime);
+        }
 
         if (countdownAnimator != null) {
             countdownAnimator.update(deltaTime);
