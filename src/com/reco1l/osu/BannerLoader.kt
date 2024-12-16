@@ -3,11 +3,10 @@ package com.reco1l.osu
 import android.content.Intent
 import android.net.Uri
 import android.util.Log
-import com.reco1l.andengine.Anchor
-import com.reco1l.andengine.sprite.ExtendedSprite
 import com.reco1l.framework.net.JsonObjectRequest
 import com.reco1l.framework.net.WebRequest
 import com.reco1l.toolkt.data.writeToFile
+import org.anddev.andengine.entity.modifier.AlphaModifier
 import org.anddev.andengine.entity.modifier.ScaleModifier
 import org.anddev.andengine.entity.scene.Scene
 import org.anddev.andengine.entity.sprite.Sprite
@@ -18,7 +17,7 @@ import ru.nsu.ccfit.zuev.osu.ResourceManager
 import ru.nsu.ccfit.zuev.osu.online.OnlineManager
 import java.io.File
 
-object BannerManager {
+object BannerLoader {
 
     @JvmStatic
     fun loadBanner(scene: Scene) {
@@ -48,6 +47,7 @@ object BannerManager {
                 }
 
             } catch (e: Exception) {
+                bannerFile.delete()
                 Log.e("BannerManager", "Failed to get banner while requesting server.", e)
             }
 
@@ -77,6 +77,8 @@ object BannerManager {
                 }
                 bannerSprite.setScaleCenter(bannerSprite.width / 2f, bannerSprite.height / 2f)
                 bannerSprite.setPosition(Config.getRES_WIDTH() - bannerSprite.width - 10f, Config.getRES_HEIGHT() - bannerSprite.height - 10f)
+                bannerSprite.alpha = 0f
+                bannerSprite.registerEntityModifier(AlphaModifier(0.2f, 0f, 1f))
 
                 scene.attachChild(bannerSprite)
                 scene.registerTouchArea(bannerSprite)

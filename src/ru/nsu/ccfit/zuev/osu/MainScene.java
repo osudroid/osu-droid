@@ -8,7 +8,7 @@ import android.util.Log;
 import com.reco1l.andengine.Anchor;
 import com.reco1l.andengine.shape.RoundedBox;
 import com.reco1l.andengine.sprite.ExtendedSprite;
-import com.reco1l.osu.BannerManager;
+import com.reco1l.osu.BannerLoader;
 import com.reco1l.osu.data.BeatmapInfo;
 import com.reco1l.osu.Execution;
 import com.reco1l.osu.ui.entity.MainMenu;
@@ -473,7 +473,9 @@ public class MainScene implements IUpdateHandler {
         scene.registerTouchArea(music_next);
         scene.setTouchAreaBindingEnabled(true);
 
-        BannerManager.loadBanner(scene);
+        if (Config.isStayOnline()) {
+            BannerLoader.loadBanner(scene);
+        }
 
         progressBar = new LinearSongProgress(null, scene, 0, 0, new PointF(Utils.toRes(Config.getRES_WIDTH() - 320), Utils.toRes(100)));
         progressBar.setProgressRectColor(new RGBColor(0.9f, 0.9f, 0.9f));
