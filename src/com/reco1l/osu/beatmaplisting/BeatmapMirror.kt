@@ -78,8 +78,8 @@ enum class BeatmapMirror(
      */
     CATBOY(
         homeUrl = "https://catboy.best",
-        description = "Catboy",
-        logoResource = R.drawable.osudirect,
+        description = "Mino",
+        logoResource = R.drawable.catboy,
 
         search = BeatmapMirrorActionWithResponse(
             request = CatboySearchRequestModel(),
