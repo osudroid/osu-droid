@@ -1,6 +1,8 @@
 package com.reco1l.osu.ui
 
 import android.graphics.Color
+import android.text.Html
+import android.text.method.LinkMovementMethod
 import android.view.ContextThemeWrapper
 import android.view.Gravity.*
 import android.view.View
@@ -8,6 +10,7 @@ import android.widget.Button
 import android.widget.EditText
 import android.widget.LinearLayout
 import android.widget.TextView
+import androidx.core.text.HtmlCompat
 import androidx.core.view.isVisible
 import androidx.core.widget.doOnTextChanged
 import com.edlplan.framework.easing.Easing
@@ -39,6 +42,8 @@ open class MessageDialog : BaseFragment() {
 
     protected var message: CharSequence = ""
 
+    protected var isHTMLMessage = false
+
     protected var allowDismiss = true
 
     protected var onDismiss: (() -> Unit)? = null
@@ -49,7 +54,16 @@ open class MessageDialog : BaseFragment() {
     override fun onLoadView() {
 
         findViewById<TextView>(R.id.title)!!.text = title
-        findViewById<TextView>(R.id.message)?.text = message
+
+        if (isHTMLMessage) {
+            findViewById<TextView>(R.id.message)?.apply {
+                text = HtmlCompat.fromHtml(message.toString(), HtmlCompat.FROM_HTML_MODE_LEGACY)
+                isClickable = true
+                movementMethod = LinkMovementMethod.getInstance()
+            }
+        } else {
+            findViewById<TextView>(R.id.message)?.text = message
+        }
 
         val buttonLayout = findViewById<LinearLayout>(R.id.button_layout)!!
 
@@ -97,8 +111,10 @@ open class MessageDialog : BaseFragment() {
     /**
      * The text to be show displayed in the dialog message.
      */
-    fun setMessage(text: String): MessageDialog {
+    @JvmOverloads
+    fun setMessage(text: String, isHTML: Boolean = false): MessageDialog {
         message = text
+        isHTMLMessage = isHTML
         return this
     }
 

@@ -1,12 +1,13 @@
 package ru.nsu.ccfit.zuev.osu;
 
 import android.content.Context;
-import android.content.Intent;
 import android.graphics.PointF;
-import android.net.Uri;
 import android.os.PowerManager;
 import android.util.Log;
 
+import com.reco1l.andengine.Anchor;
+import com.reco1l.andengine.shape.RoundedBox;
+import com.reco1l.andengine.sprite.ExtendedSprite;
 import com.reco1l.osu.data.BeatmapInfo;
 import com.reco1l.osu.Execution;
 import com.reco1l.osu.ui.entity.MainMenu;
@@ -51,7 +52,6 @@ import org.anddev.andengine.util.modifier.ease.EaseExponentialOut;
 
 import java.util.Arrays;
 import java.util.LinkedList;
-import java.util.Locale;
 import java.util.TimerTask;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
@@ -172,66 +172,66 @@ public class MainScene implements IUpdateHandler {
 
         menu = new MainMenu(this);
 
-        final Text author = new Text(10, 530, ResourceManager
-                .getInstance().getFont("font"),
-                String.format(
-                        Locale.getDefault(),
-                        "osu!droid %s\nby osu!droid Team\nosu! is © peppy 2007-2024",
-                        BuildConfig.VERSION_NAME + " (" + BuildConfig.BUILD_TYPE + ")"
-                )) {
+        if (BuildConfig.DEBUG) {
+            ResourceManager.getInstance().loadHighQualityAsset("dev-build-overlay", "dev-build-overlay.png");
 
+            ExtendedSprite debugOverlay = new ExtendedSprite(ResourceManager.getInstance().getTexture("dev-build-overlay"));
+            debugOverlay.setPosition(Config.getRES_WIDTH() / 2f, Config.getRES_HEIGHT());
+            debugOverlay.setOrigin(Anchor.BottomCenter);
+            scene.attachChild(debugOverlay);
 
-            @Override
-            public boolean onAreaTouched(final TouchEvent pSceneTouchEvent, final float pTouchAreaLocalX, final float pTouchAreaLocalY) {
-                if (pSceneTouchEvent.isActionDown()) {
+            Text debugText = new Text(0, 0, ResourceManager.getInstance().getFont("smallFont"), "DEVELOPMENT BUILD");
+            debugText.setColor(1f, 237f / 255f, 0f);
+            debugText.setPosition((Config.getRES_WIDTH() - debugText.getWidth()) / 2f, Config.getRES_HEIGHT() - debugOverlay.getHeight() - 1f - debugText.getHeight());
 
+            Text debugTextShadow = new Text(0, 0, ResourceManager.getInstance().getFont("smallFont"), "DEVELOPMENT BUILD");
+            debugTextShadow.setColor(0f, 0f, 0f, 0.5f);
+            debugTextShadow.setPosition((Config.getRES_WIDTH() - debugText.getWidth()) / 2f + 2f, Config.getRES_HEIGHT() - debugOverlay.getHeight() - 1f - debugText.getHeight() + 2f);
+
+            scene.attachChild(debugTextShadow);
+            scene.attachChild(debugText);
+        }
+
+        RoundedBox box = new RoundedBox() {
+
+            {
+                Text versionText = new Text(10f, 2f, ResourceManager.getInstance().getFont("smallFont"), "osu!droid " + BuildConfig.VERSION_NAME);
+                attachChild(versionText);
+
+                setSize(versionText.getWidth() + 20f, versionText.getHeight() + 4f);
+                setPosition(10f, Config.getRES_HEIGHT() - getHeight() - 10f);
+                setColor(0f, 0f, 0f, 0.5f); // Black
+                setCornerRadius(12f);
+            }
+
+            public boolean onAreaTouched(TouchEvent event, float localX, float localY) {
+                if (event.isActionUp()) {
                     new MessageDialog()
-                        .setMessage(context.getString(com.osudroid.resources.R.string.dialog_visit_osu_website))
-                        .addButton("Yes", dialog -> {
-                            Intent browserIntent = new Intent(Intent.ACTION_VIEW, Uri.parse("https://osu.ppy.sh"));
-                            GlobalManager.getInstance().getMainActivity().startActivity(browserIntent);
-                            dialog.dismiss();
-                            return null;
-                        })
-                        .addButton("No", dialog -> {
+                        .setTitle("About")
+                        .setMessage(
+                                "<h1>osu!droid</h1>\n" +
+                                "<h5>Version " + BuildConfig.VERSION_NAME + "</h5>\n" +
+                                "<p>Made by osu!droid team<br>osu! is © peppy 2007-2024</p>\n" +
+                                "<br>\n" +
+                                "<a href=\"https://osu.ppy.sh\">Visit official osu! website ↗</a>\n" +
+                                "<br>\n" +
+                                "<br>\n" +
+                                "<a href=\"https://osudroid.moe\">Visit official osu!droid website ↗</a>\n" +
+                                "<br>\n" +
+                                "<br>\n" +
+                                "<a href=\"https://discord.gg/nyD92cE\">Join the official Discord server ↗</a>\n",
+                            true
+                        )
+                        .addButton("Close", dialog -> {
                             dialog.dismiss();
                             return null;
                         })
                         .show();
-
-                    return true;
                 }
-                return false;
+                return true;
             }
         };
-        author.setPosition(10, Config.getRES_HEIGHT() - author.getHeight() - 10);
-
-        final Text yasonline = new Text(720, 530, ResourceManager.getInstance().getFont("font"), "            Global Ranking\n   Provided by iBancho") {
-
-            @Override
-            public boolean onAreaTouched(final TouchEvent pSceneTouchEvent, final float pTouchAreaLocalX, final float pTouchAreaLocalY) {
-                if (pSceneTouchEvent.isActionDown()) {
-
-                    new MessageDialog()
-                        .setMessage(context.getString(com.osudroid.resources.R.string.dialog_visit_osudroid_website))
-                        .addButton("Yes", dialog -> {
-                            Intent browserIntent = new Intent(Intent.ACTION_VIEW, Uri.parse("https://" + OnlineManager.hostname));
-                            GlobalManager.getInstance().getMainActivity().startActivity(browserIntent);
-                            dialog.dismiss();
-                            return null;
-                        })
-                        .addButton("No", dialog -> {
-                            dialog.dismiss();
-                            return null;
-                        })
-                        .show();
-
-                    return true;
-                }
-                return false;
-            }
-        };
-        yasonline.setPosition(Config.getRES_WIDTH() - yasonline.getWidth() - 40, Config.getRES_HEIGHT() - yasonline.getHeight() - 10);
+        scene.attachChild(box);
 
         final Sprite music_prev = new Sprite(Config.getRES_WIDTH() - 50 * 6 + 35,
                 47, 40, 40, ResourceManager.getInstance().getTexture(
@@ -362,14 +362,6 @@ public class MainScene implements IUpdateHandler {
         final TextureRegion nptex = ResourceManager.getInstance().getTexture("music_np");
         music_nowplay = new Sprite(Utils.toRes(Config.getRES_WIDTH() - 500), 0, (float) (40 * nptex.getWidth()) / nptex.getHeight(), 40, nptex);
 
-        final Rectangle bgTopRect = new Rectangle(0, 0, Config.getRES_WIDTH(), Utils.toRes(120));
-        bgTopRect.setColor(0, 0, 0, 0.3f);
-
-        final Rectangle bgbottomRect = new Rectangle(0, 0, Config.getRES_WIDTH(),
-                Math.max(author.getHeight(), yasonline.getHeight()) + Utils.toRes(15));
-        bgbottomRect.setPosition(0, Config.getRES_HEIGHT() - bgbottomRect.getHeight());
-        bgbottomRect.setColor(0, 0, 0, 0.3f);
-
         for (int i = 0; i < 120; i++) {
             final float pX = (float) Config.getRES_WIDTH() / 2;
             final float pY = (float) Config.getRES_HEIGHT() / 2;
@@ -456,10 +448,6 @@ public class MainScene implements IUpdateHandler {
         menuBarX = menu.getFirst().getX();
 
         scene.attachChild(lastBackground, 0);
-        scene.attachChild(bgTopRect);
-        scene.attachChild(bgbottomRect);
-        scene.attachChild(author);
-        scene.attachChild(yasonline);
 
         menu.attachButtons();
 
@@ -475,9 +463,8 @@ public class MainScene implements IUpdateHandler {
         scene.attachChild(beatmapDownloader);
 
         scene.registerTouchArea(logo);
-        scene.registerTouchArea(author);
+        scene.registerTouchArea(box);
         scene.registerTouchArea(beatmapDownloader);
-        scene.registerTouchArea(yasonline);
         scene.registerTouchArea(music_prev);
         scene.registerTouchArea(music_play);
         scene.registerTouchArea(music_pause);
