@@ -1626,33 +1626,35 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
 
     private void onExit() {
 
-        BeatmapSkinManager.setSkinEnabled(false);
-        GameObjectPool.getInstance().purge();
-        stopLoopingSamples();
-        if (activeObjects != null) {
-            activeObjects.clear();
-        }
-        if (expiredObjects != null) {
-            expiredObjects.clear();
-        }
-        if (objects != null) {
-            objects.clear();
-        }
-        if (timingControlPoints != null) {
-            timingControlPoints.clear();
-        }
-        if (effectControlPoints != null) {
-            effectControlPoints.clear();
-        }
-        breakPeriods.clear();
-        playableBeatmap = null;
-        cursorSprites = null;
-        scoreBoard = null;
-        lastDifficultyCalculationParameters = null;
-        droidTimedDifficultyAttributes = null;
-        standardTimedDifficultyAttributes = null;
-        sliderPaths = null;
-        sliderRenderPaths = null;
+        Execution.updateThread(() -> {
+            BeatmapSkinManager.setSkinEnabled(false);
+            GameObjectPool.getInstance().purge();
+            stopLoopingSamples();
+            if (activeObjects != null) {
+                activeObjects.clear();
+            }
+            if (expiredObjects != null) {
+                expiredObjects.clear();
+            }
+            if (objects != null) {
+                objects.clear();
+            }
+            if (timingControlPoints != null) {
+                timingControlPoints.clear();
+            }
+            if (effectControlPoints != null) {
+                effectControlPoints.clear();
+            }
+            breakPeriods.clear();
+            playableBeatmap = null;
+            cursorSprites = null;
+            scoreBoard = null;
+            lastDifficultyCalculationParameters = null;
+            droidTimedDifficultyAttributes = null;
+            standardTimedDifficultyAttributes = null;
+            sliderPaths = null;
+            sliderRenderPaths = null;
+        });
 
         // osu!stable restarts the song back to preview time when the player is in the last 10 seconds *or* 2% of the beatmap.
         float mSecPassed = elapsedTime * 1000;
