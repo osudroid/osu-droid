@@ -3,6 +3,9 @@ package com.reco1l.osu.beatmaplisting.mirrors
 import com.reco1l.osu.beatmaplisting.BeatmapMirrorDownloadRequestModel
 import com.reco1l.osu.beatmaplisting.BeatmapMirrorPreviewRequestModel
 import com.reco1l.osu.beatmaplisting.BeatmapMirrorSearchRequestModel
+import com.reco1l.osu.beatmaplisting.BeatmapMirrorSearchRequestModel.*
+import com.reco1l.osu.beatmaplisting.BeatmapMirrorSearchRequestModel.OrderType.*
+import com.reco1l.osu.beatmaplisting.BeatmapMirrorSearchRequestModel.SortType.*
 import com.reco1l.osu.beatmaplisting.BeatmapMirrorSearchResponseModel
 import com.reco1l.osu.beatmaplisting.BeatmapModel
 import com.reco1l.osu.beatmaplisting.BeatmapSetModel
@@ -13,9 +16,37 @@ import ru.nsu.ccfit.zuev.osu.RankedStatus
 
 
 class OsuDirectSearchRequestModel : BeatmapMirrorSearchRequestModel {
-    override fun invoke(query: String, offset: Int, limit: Int): HttpUrl {
+
+    private fun SortType.parseToApi() = when (this) {
+        Title -> "title"
+        Artist -> "artist"
+        BPM -> "beatmaps.bpm"
+        DifficultyRating -> "beatmaps.difficulty_rating"
+        HitLength -> "beatmaps.hit_length"
+        PassCount -> "beatmaps.passcount"
+        PlayCount -> "beatmaps.playcount"
+        TotalLength -> "beatmaps.total_length"
+        FavouriteCount -> "favourite_count"
+        LastUpdated -> "last_updated"
+        RankedDate -> "ranked_date"
+        SubmittedDate -> "submitted_date"
+    }
+
+    private fun OrderType.parseToApi() = when (this) {
+        Ascending -> "asc"
+        Descending -> "desc"
+    }
+
+    override fun invoke(query: String, offset: Int, limit: Int, sort: SortType, order: OrderType, status: RankedStatus?): HttpUrl {
+
         return "https://osu.direct/api/v2/search".toHttpUrl()
             .newBuilder()
+            .addQueryParameter("sort", "${sort.parseToApi()}:${order.parseToApi()}")
+            .apply {
+                if (status != null) {
+                    addQueryParameter("status", status.value.toString())
+                }
+            }
             .addQueryParameter("mode", "0")
             .addQueryParameter("query", query)
             .addQueryParameter("offset", offset.toString())

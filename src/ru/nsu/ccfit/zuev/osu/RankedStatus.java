@@ -23,6 +23,18 @@ public enum RankedStatus {
         this.stringId = stringId;
     }
 
+    public int getValue() {
+        return switch (this) {
+            case ranked -> 1;
+            case approved -> 2;
+            case qualified -> 3;
+            case loved -> 4;
+            case pending -> 0;
+            case workInProgress -> -1;
+            case graveyard -> -2;
+        };
+    }
+
 
     public static RankedStatus valueOf(int value) {
         return switch (value) {

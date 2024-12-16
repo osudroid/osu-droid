@@ -2,10 +2,11 @@ package com.reco1l.osu.ui
 
 import android.graphics.Color
 import android.graphics.drawable.Drawable
+import android.util.Log
 import android.view.LayoutInflater
+import android.view.View
 import android.view.ViewGroup
 import android.widget.TextView
-import androidx.annotation.DrawableRes
 import androidx.core.view.forEach
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
@@ -13,6 +14,8 @@ import com.reco1l.toolkt.android.cornerRadius
 import com.reco1l.toolkt.android.dp
 import com.reco1l.toolkt.android.drawableLeft
 import com.reco1l.toolkt.android.drawableRight
+import com.reco1l.toolkt.android.layoutHeight
+import com.reco1l.toolkt.android.layoutWidth
 import ru.nsu.ccfit.zuev.osuplus.R
 
 
@@ -29,7 +32,7 @@ data class Option(
     /**
      * The value to be returned when the option is selected.
      */
-    val value: Any,
+    val value: Any?,
 
     /**
      * The icon to be displayed in the option.
@@ -61,7 +64,7 @@ open class SelectDialog : MessageDialog() {
 
     protected var selected: Any? = null
 
-    protected var onSelect: ((Any) -> Unit)? = null
+    protected var onSelect: ((Any?) -> Unit)? = null
 
 
     private lateinit var recyclerView: RecyclerView
@@ -79,16 +82,26 @@ open class SelectDialog : MessageDialog() {
     }
 
 
-    fun setOptions(options: List<Option>): SelectDialog {
-        this.options = options.toMutableList()
+    /**
+     * Set the options to be displayed in the dialog.
+     *
+     * @param replace If true, the current options will be replaced with the new ones.
+     */
+    @JvmOverloads
+    fun setOptions(options: List<Option>, replace: Boolean = false): SelectDialog {
+        if (replace) {
+            this.options = options.toMutableList()
+        } else {
+            this.options.addAll(options)
+        }
         return this
     }
 
     /**
      * Add an option to the dialog.
      */
-    fun addOption(text: String, value: Any): SelectDialog {
-        options.add(Option(text, value))
+    fun addOption(option: Option): SelectDialog {
+        options.add(option)
         return this
     }
 
@@ -103,7 +116,7 @@ open class SelectDialog : MessageDialog() {
     /**
      * Set the function to be called when the option is selected.
      */
-    fun setOnSelectListener(onSelect: (Any) -> Unit): SelectDialog {
+    fun setOnSelectListener(onSelect: (Any?) -> Unit): SelectDialog {
         this.onSelect = onSelect
         return this
     }
@@ -176,4 +189,45 @@ open class SelectDialog : MessageDialog() {
         }
 
     }
+}
+
+/**
+ * A select dialog that opens below the caller view.
+ */
+open class SelectDropdown(private val caller: View) : SelectDialog() {
+
+
+    override val layoutID = R.layout.dropdown_fragment
+
+
+    override fun onLoadView() {
+        super.onLoadView()
+
+        val body = findViewById<View>(R.id.frg_body)!!
+        val callerLocation = IntArray(2).also(caller::getLocationInWindow)
+
+        body.x = callerLocation[0].toFloat()
+        body.y = callerLocation[1].toFloat()
+
+        body.post {
+
+            if (body.x + body.width > root!!.width) {
+                body.layoutWidth = root!!.width - body.x.toInt()
+            } else if (body.width < caller.width) {
+                body.layoutWidth = caller.width
+            }
+
+            if (body.y + body.height > root!!.height) {
+                body.layoutHeight = root!!.height - body.y.toInt()
+            }
+
+        }
+    }
+
+
+    override fun addButton(text: String, tint: Int, clickListener: (MessageDialog) -> Unit): SelectDropdown {
+        Log.e("SelectDropdown", "This dialog does not support buttons, ignoring.")
+        return this
+    }
+
 }
