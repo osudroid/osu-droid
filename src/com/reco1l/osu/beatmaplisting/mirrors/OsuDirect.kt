@@ -13,12 +13,13 @@ import ru.nsu.ccfit.zuev.osu.RankedStatus
 
 
 class OsuDirectSearchRequestModel : BeatmapMirrorSearchRequestModel {
-    override fun invoke(query: String, offset: Int): HttpUrl {
+    override fun invoke(query: String, offset: Int, limit: Int): HttpUrl {
         return "https://osu.direct/api/v2/search".toHttpUrl()
             .newBuilder()
             .addQueryParameter("mode", "0")
             .addQueryParameter("query", query)
             .addQueryParameter("offset", offset.toString())
+            .addQueryParameter("amount", limit.toString())
             .build()
     }
 }

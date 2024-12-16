@@ -216,7 +216,8 @@ class BeatmapListing : BaseFragment(),
             JsonArrayRequest(
                 mirror.search.request(
                     query = searchBox.text.toString(),
-                    offset = offset
+                    offset = offset,
+                    limit = 50
                 )
             ).use { request ->
 

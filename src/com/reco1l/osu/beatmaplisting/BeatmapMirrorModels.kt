@@ -10,7 +10,7 @@ fun interface BeatmapMirrorSearchRequestModel {
      * @param query The search query.
      * @param offset The search result offset.
      */
-    operator fun invoke(query: String, offset: Int): HttpUrl
+    operator fun invoke(query: String, offset: Int, limit: Int): HttpUrl
 }
 
 fun interface BeatmapMirrorDownloadRequestModel {
