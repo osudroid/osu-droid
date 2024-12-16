@@ -11,7 +11,7 @@
         android:layout_height="wrap_content"
         android:layout_alignParentTop="true"
         android:layout_centerHorizontal="true"
-        android:background="#27273D"
+        android:background="#212133"
         android:orientation="horizontal"
         android:padding="8dp">
 
