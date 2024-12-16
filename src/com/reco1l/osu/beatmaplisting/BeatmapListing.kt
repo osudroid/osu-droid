@@ -744,7 +744,7 @@ class BeatmapListingFiltersFragment(private val beatmapListing: BeatmapListing) 
     override val layoutID = R.layout.beatmap_downloader_filters
 
 
-    var sortType = SortType.SubmittedDate
+    var sortType = SortType.RankedDate
 
     var orderType = OrderType.Descending
 
