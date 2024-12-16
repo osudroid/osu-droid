@@ -110,7 +110,7 @@ class BeatmapButton : Sprite(0f, 0f, ResourceManager.getInstance().getTexture("m
             if (parentSetID == null)
                 return true
 
-            val url = BeatmapListing.mirror.downloadEndpoint(parentSetID!!)
+            val url = BeatmapListing.mirror.download.request(parentSetID!!).toString()
 
             async {
                 try {
