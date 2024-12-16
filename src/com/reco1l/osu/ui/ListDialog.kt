@@ -1,14 +1,17 @@
 package com.reco1l.osu.ui
 
 import android.graphics.Color
+import android.graphics.drawable.Drawable
 import android.view.LayoutInflater
 import android.view.ViewGroup
 import android.widget.TextView
+import androidx.annotation.DrawableRes
 import androidx.core.view.forEach
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.reco1l.toolkt.android.cornerRadius
 import com.reco1l.toolkt.android.dp
+import com.reco1l.toolkt.android.drawableLeft
 import com.reco1l.toolkt.android.drawableRight
 import ru.nsu.ccfit.zuev.osuplus.R
 
@@ -21,12 +24,17 @@ data class Option(
     /**
      * The text to be displayed in the option.
      */
-    val text: String,
+    val text: CharSequence,
 
     /**
      * The value to be returned when the option is selected.
      */
-    val value: Any
+    val value: Any,
+
+    /**
+     * The icon to be displayed in the option.
+     */
+    val icon: Drawable? = null
 )
 
 
@@ -71,8 +79,8 @@ open class SelectDialog : MessageDialog() {
     }
 
 
-    fun setOptions(options: MutableList<Option>): SelectDialog {
-        this.options = options
+    fun setOptions(options: List<Option>): SelectDialog {
+        this.options = options.toMutableList()
         return this
     }
 
@@ -134,6 +142,9 @@ open class SelectDialog : MessageDialog() {
 
         fun bind(option: Option) {
             text.text = option.text
+            text.drawableLeft = option.icon
+            text.compoundDrawablePadding = 12.dp
+
             text.setOnClickListener {
 
                 unselectAll()
