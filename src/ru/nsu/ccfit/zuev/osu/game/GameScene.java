@@ -2340,9 +2340,13 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
                     scene.setTimeMultiplier(decreasedSpeed);
 
                     if (video != null) {
-                        // Aparently MediaPlayer API doesn't support setting playback speed
-                        // below 0.01 causing an IllegalStateException.
-                        video.setPlaybackSpeed(Math.max(0.01f, decreasedSpeed));
+                        // In some devices this can throw an exception, unfortunately there's no
+                        // documentation that explains how to avoid that scenario. Thanks Google.
+                        try {
+                            video.setPlaybackSpeed(decreasedSpeed);
+                        } catch (Exception e) {
+                            Log.e("GameScene", "Failed to change video playback speed during game over animation.", e);
+                        }
                     }
 
                     songService.setFrequencyForcefully(decreasedFrequency);
