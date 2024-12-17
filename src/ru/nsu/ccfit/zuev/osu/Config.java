@@ -843,6 +843,14 @@ public class Config {
         sharedPreferences.edit().putInt(key, value).commit();
     }
 
+    public static long getLong(String key, long defaultValue) {
+        return sharedPreferences.getLong(key, defaultValue);
+    }
+
+    public static void setLong(String key, long value) {
+        sharedPreferences.edit().putLong(key, value).commit();
+    }
+
     public static String getString(String key, String defaultValue) {
         return sharedPreferences.getString(key, defaultValue);
     }
