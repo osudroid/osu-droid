@@ -304,7 +304,7 @@ public class MainActivity extends BaseGameActivity implements
 
             Execution.delayed(2500, () -> {
 
-                UpdateManager.INSTANCE.onActivityStart();
+                UpdateManager.onActivityStart(this);
                 GlobalManager.getInstance().setInfo("");
                 GlobalManager.getInstance().setLoadingProgress(100);
                 ResourceManager.getInstance().loadFont("font", null, 28, Color.WHITE);

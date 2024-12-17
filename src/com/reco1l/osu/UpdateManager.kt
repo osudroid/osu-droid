@@ -2,21 +2,20 @@ package com.reco1l.osu
 
 import android.content.Intent
 import android.content.Intent.*
+import android.util.Log
 import androidx.core.content.FileProvider
-import androidx.preference.PreferenceManager
 import com.osudroid.resources.R
 import com.edlplan.ui.fragment.MarkdownFragment
-import com.google.android.material.snackbar.BaseTransientBottomBar.LENGTH_INDEFINITE
-import com.google.android.material.snackbar.BaseTransientBottomBar.LENGTH_SHORT
-import com.google.android.material.snackbar.Snackbar
 import com.reco1l.framework.net.FileRequest
 import com.reco1l.framework.net.IDownloaderObserver
-import okhttp3.Request
-import org.json.JSONObject
+import com.reco1l.framework.net.JsonObjectRequest
+import com.reco1l.osu.ui.MessageDialog
+import com.reco1l.osu.ui.ProgressDialog
+import ru.nsu.ccfit.zuev.osu.Config
 import ru.nsu.ccfit.zuev.osu.GlobalManager
+import ru.nsu.ccfit.zuev.osu.MainActivity
+import ru.nsu.ccfit.zuev.osu.ToastLogger
 import ru.nsu.ccfit.zuev.osu.helper.StringTable
-import ru.nsu.ccfit.zuev.osu.online.OnlineManager
-import ru.nsu.ccfit.zuev.osu.online.OnlineManager.updateEndpoint
 import ru.nsu.ccfit.zuev.osuplus.BuildConfig.APPLICATION_ID
 import java.io.File
 
@@ -24,97 +23,82 @@ import java.io.File
 object UpdateManager: IDownloaderObserver
 {
 
-    private val mainActivity = GlobalManager.getInstance().mainActivity
+    private val updatesDirectory = File(Config.getCachePath(), "updates").apply(File::mkdirs)
 
-    private val preferences
-        get() = PreferenceManager.getDefaultSharedPreferences(mainActivity)
 
-    private val cacheDirectory = File(mainActivity.cacheDir, "updates").apply { mkdirs() }
-
-    private val snackBar = Snackbar.make(mainActivity.window.decorView, "", LENGTH_INDEFINITE)
-
-    
     private var downloadURL: String? = null
     
-    private var newVersionCode: Long = mainActivity.versionCode
-    
+    private var newVersionCode: Long = GlobalManager.getInstance().mainActivity.versionCode
 
-    fun onActivityStart() = mainThread {
+    private var progressDialog: ProgressDialog? = null
+
+
+    @JvmStatic
+    fun onActivityStart(activity: MainActivity) = mainThread {
+
         // Finding if there's a "pending changelog". This means the game was previously updated, we're
         // showing the changelog after update with a prompt asking user to show.
-        preferences.apply {
 
-            val latestUpdate = getLong("latestVersionCode", mainActivity.versionCode)
-            val pendingChangelog = getString("pendingChangelog", null)
+        val latestUpdate = Config.getLong("latestVersionCode", activity.versionCode)
+        val pendingChangelog = Config.getString("pendingChangelog", null)
 
-            if (!pendingChangelog.isNullOrEmpty()) {
-                if (latestUpdate > mainActivity.versionCode) {
-                    snackBar.apply {
+        if (!pendingChangelog.isNullOrEmpty()) {
 
-                        // Will only dismiss if user wants.
-                        duration = LENGTH_INDEFINITE
+            if (latestUpdate > activity.versionCode) {
 
-                        // Show changelog button.
-                        setAction(R.string.changelog_title) {
+                MessageDialog()
+                    .setTitle(activity.getString(R.string.update_info_updated))
+                    .setMessage("Game was updated to a newer version. Do you want to see the changelog?")
+                    .addButton("Yes") {
+                        MarkdownFragment()
+                            .setTitle(R.string.changelog_title)
+                            .setMarkdown(pendingChangelog)
+                            .show()
 
-                            MarkdownFragment().apply {
-                                setTitle(R.string.changelog_title)
-                                setMarkdown(pendingChangelog)
-                                show()
-                            }
-                        }
-                        setText(R.string.update_info_updated)
-                        show()
+                        it.dismiss()
                     }
-                }
-                // Now we're removing the cached changelog.
-                edit().putString("pendingChangelog", null).apply()
+                    .addButton("No") { it.dismiss() }
+                    .setOnDismiss { Config.setString("pendingChangelog", null) }
+                    .show()
             }
         }
 
         checkNewUpdates(true)
     }
 
-
     /**
      * Check for new game updates.
      * 
      * @param silently If `true` no prompt will be shown unless there's new updates.
      */
-    fun checkNewUpdates(silently: Boolean)
-    {
+    @JvmStatic
+    fun checkNewUpdates(silently: Boolean) {
+
+        val mainActivity = GlobalManager.getInstance().mainActivity
+
         if (!silently) {
-            snackBar.apply {
-
-                duration = LENGTH_INDEFINITE
-
-                setText(R.string.update_info_checking)
-                setAction(null, null)
-                show()
-            }
+            ToastLogger.showText(R.string.update_info_checking, false)
         }
 
         async {
-            // Cleaning update directory first, checking if there's a newer package downloaded and
-            // then installing it.
-            cacheDirectory.listFiles()?.also { list ->
 
-                var newestVersionDownloaded: Long = mainActivity.versionCode
+            // Cleaning update directory first, checking if there's a newer package downloaded already.
+            updatesDirectory.listFiles()?.also { list ->
+
+                var newestVersionDownloaded = mainActivity.versionCode
 
                 list.forEach {
 
                     val version = it.nameWithoutExtension.toLongOrNull() ?: return@forEach
-
-                    // Deleting the file corresponding to this version if still present.
-                    if (version == mainActivity.versionCode)
+                    if (version == mainActivity.versionCode) {
                         it.delete()
+                    }
 
-                    // Finding the newest package.
-                    if (version > newestVersionDownloaded)
+                    if (version > newestVersionDownloaded) {
                         newestVersionDownloaded = version
+                    }
                 }
 
-                // Directly navigate to installation if there's already a newer package.
                 if (newestVersionDownloaded > mainActivity.versionCode) {
                     newVersionCode = newestVersionDownloaded
                     onFoundNewUpdate(silently)
@@ -122,195 +106,131 @@ object UpdateManager: IDownloaderObserver
                 }
             }
                 
-            // Requesting to server asking for new updates.
             try {
                 
-                // Avoid new request if one was already done.
+                // Avoid new request if it was already done.
                 if (downloadURL != null) {
                     onFoundNewUpdate(silently)
                     return@async
                 }
-                
-                val request = Request.Builder()
-                    .url(updateEndpoint + mainActivity.resources.configuration.locale.language)
-                    .build()
 
-                OnlineManager.client.newCall(request).execute().use {
+                JsonObjectRequest(/*updateEndpoint*/ "http://localhost:80/update.php").use { request ->
 
-                    val response = JSONObject(it.body!!.string())
-                    val changelogUrl = response.getString("changelog")
+                    request.buildRequest { header("User-Agent", "Chrome/Android") }
+
+                    val response = request.execute().json
+                    val changelog = response.getString("changelog")
 
                     downloadURL = response.getString("link")
                     newVersionCode = response.getLong("version_code")
 
-                    // Previous implementation has this check, server returning an older version 
-                    // shouldn't happen.
+                    // Previous implementation has this check, server returning an older version shouldn't happen.
                     if (newVersionCode <= mainActivity.versionCode) {
-                        onAlreadyLatestVersion(silently)
+                        ToastLogger.showText(R.string.update_info_latest, false)
                         return@async
                     }
 
-                    // Storing change log link to show once the user update to next version.
-                    preferences.apply {
-                        edit().putString("pendingChangelog", changelogUrl).apply()
-                    }
-
+                    Config.setString("pendingChangelog", changelog)
                     onFoundNewUpdate(silently)
                 }
-            } catch (exception: Exception) {
 
-                exception.printStackTrace()
+            } catch (e: Exception) {
+                Log.e("UpdateManager", "Failed to check for updates.", e)
 
-                onUpdateCheckFailed(silently)
+                if (!silently) {
+                    ToastLogger.showText(R.string.update_info_check_failed, false)
+                }
             }
         }
     }
-    
-    
-    private fun onInstallNewUpdate(file: File) {
 
-        val intent = Intent(ACTION_VIEW).apply {
 
-            val uri = FileProvider.getUriForFile(mainActivity, "$APPLICATION_ID.fileProvider", file)
+    private fun onFoundNewUpdate(silently: Boolean) = mainThread {
 
-            setDataAndType(uri, "application/vnd.android.package-archive")
-            addFlags(FLAG_GRANT_READ_URI_PERMISSION)
+        val activity = GlobalManager.getInstance().mainActivity
+
+        if (newVersionCode <= activity.versionCode) {
+            if (!silently) {
+                ToastLogger.showText(R.string.update_info_latest, false)
+            }
+            return@mainThread
         }
-        mainActivity.startActivity(intent)
+
+        Config.setLong("latestVersionCode", newVersionCode)
+
+        MessageDialog()
+            .setTitle("New update available!")
+            .setMessage(activity.getString(R.string.update_dialog_message))
+            .addButton(activity.getString(R.string.update_dialog_button_update)) {
+
+                val file = File(updatesDirectory, "$newVersionCode.apk")
+
+                // Files is already downloaded, navigating to installation.
+                if (file.exists()) {
+                    installAPK(file)
+                    return@addButton
+                }
+
+                file.createNewFile()
+                downloadAPK(file)
+            }
+            .addButton("Update later") { it.dismiss() }
+            .show()
+    }
+
+
+    private fun installAPK(file: File) {
+
+        val uri = FileProvider.getUriForFile(GlobalManager.getInstance().mainActivity, "$APPLICATION_ID.fileProvider", file)
+
+        val intent = Intent(ACTION_VIEW)
+        intent.setDataAndType(uri, "application/vnd.android.package-archive")
+        intent.addFlags(FLAG_GRANT_READ_URI_PERMISSION)
+
+        GlobalManager.getInstance().mainActivity.startActivity(intent)
     }
     
-    private fun onDownloadNewUpdate(file: File) {
+    private fun downloadAPK(file: File) {
 
         // Empty string: At this point download URL shouldn't be null but if it is the case (which is weird) we set an
         // empty string so the downloader invokes onDownloadFail() and a prompt is shown to user rather than nothing.
         val url = downloadURL ?: ""
-        
-        val downloader = FileRequest(file, url)
-        downloader.observer = this
 
         async {
+            val downloader = FileRequest(file, url)
+            downloader.observer = this@UpdateManager
             downloader.execute()
 
             mainThread {
-                snackBar.apply {
-
-                    duration = LENGTH_INDEFINITE
-
-                    setText(StringTable.format(R.string.update_info_downloading, 0))
-                    setAction(R.string.beatmap_downloader_cancel) { downloader.cancel() }
+                progressDialog = ProgressDialog().apply {
+                    setIndeterminate(true)
+                    setTitle("Downloading update")
+                    setMessage(StringTable.format(R.string.update_info_downloading, 0))
                     show()
                 }
             }
-        }
-
-    }
-    
-    
-    private fun onFoundNewUpdate(silently: Boolean) = mainThread {
-
-        if (newVersionCode <= mainActivity.versionCode) {
-            onAlreadyLatestVersion(silently)
-            return@mainThread
-        }
-
-        preferences.apply {
-            edit().putLong("latestVersionCode", newVersionCode).apply()
-        }
-
-        snackBar.apply {
-
-            duration = 5000
-
-            setText(R.string.update_dialog_message)
-            setAction(R.string.update_dialog_button_update) {
-
-                val file = File(cacheDirectory, "$newVersionCode.apk")
-                
-                // Files is already downloaded, navigating to installation.
-                if (file.exists()) {
-                    onInstallNewUpdate(file)
-                    return@setAction
-                }                 
-
-                file.createNewFile()
-                onDownloadNewUpdate(file)
-            }
-            show()
-        }
-    }
-
-    private fun onUpdateCheckFailed(silently: Boolean) = mainThread {
-        if (silently) {
-            snackBar.dismiss()
-            return@mainThread
-        }
-
-        snackBar.apply {
-
-            duration = LENGTH_SHORT
-
-            setText(R.string.update_info_check_failed)
-            setAction(null, null)
-            show()
-        }
-    }
-
-    private fun onAlreadyLatestVersion(silently: Boolean) = mainThread {
-
-        if (silently) {
-            snackBar.dismiss()
-            return@mainThread
-        }
-
-        snackBar.apply {
-
-            duration = LENGTH_SHORT
-
-            setText(R.string.update_info_latest)
-            setAction(null, null)
-            show()
         }
     }
 
 
     override fun onDownloadUpdate(downloader: FileRequest) = mainThread {
-
-        snackBar.setText(StringTable.format(R.string.update_info_downloading, downloader.progress.toInt()))
+        progressDialog?.progress = downloader.progress.toInt()
+        progressDialog?.setMessage(StringTable.format(R.string.update_info_downloading, downloader.progress.toInt()))
     }
 
     override fun onDownloadEnd(downloader: FileRequest) {
-        mainThread(snackBar::dismiss)
-        onInstallNewUpdate(downloader.file)
+        progressDialog?.dismiss()
+        installAPK(downloader.file)
     }
 
     override fun onDownloadFail(downloader: FileRequest, exception: Exception) {
-
-        exception.printStackTrace()
-
-        mainThread {
-            snackBar.apply {
-
-                duration = LENGTH_SHORT
-
-                setText(R.string.update_info_download_failed)
-                setAction(null, null)
-                show()
-            }
-        }
+        Log.e("UpdateManager", "Failed to download update.", exception)
+        ToastLogger.showText(R.string.update_info_download_failed, false)
         downloader.file.delete()
     }
 
     override fun onDownloadCancel(downloader: FileRequest) {
-        mainThread {
-            snackBar.apply {
-
-                duration = LENGTH_SHORT
-
-                setText(R.string.update_info_download_canceled)
-                setAction(null, null)
-                show()
-            }
-        }
+        ToastLogger.showText(R.string.update_info_download_canceled, false)
         downloader.file.delete()
     }
 }
