@@ -43,10 +43,7 @@ class LobbyRoomList : ScrollableList() {
             setTitle(room.name)
             setMessage("Please enter the room password:")
             setAllowDismiss(false)
-
-            setOnTextInputBind {
-                it.inputType = EditorInfo.TYPE_TEXT_VARIATION_PASSWORD
-            }
+            setInputType(EditorInfo.TYPE_TEXT_VARIATION_PASSWORD)
 
             addButton("Join") {
                 val password = (it as PromptDialog).input

@@ -7,13 +7,10 @@ import android.view.ContextThemeWrapper
 import android.view.Gravity.*
 import android.view.View
 import android.widget.Button
-import android.widget.EditText
 import android.widget.LinearLayout
 import android.widget.TextView
 import androidx.core.text.HtmlCompat
 import androidx.core.text.HtmlCompat.FROM_HTML_MODE_LEGACY
-import androidx.core.view.isVisible
-import androidx.core.widget.doOnTextChanged
 import com.edlplan.framework.easing.Easing
 import com.edlplan.ui.EasingHelper
 import com.edlplan.ui.fragment.BaseFragment
@@ -53,7 +50,7 @@ open class MessageDialog : BaseFragment() {
     /**
      * The message to be displayed in the dialog.
      */
-    var message: CharSequence = ""
+    open var message: CharSequence = ""
         set(value) {
             field = value
             if (isCreated) {
@@ -183,6 +180,7 @@ open class MessageDialog : BaseFragment() {
     @JvmOverloads
     open fun addButton(text: String, tint: Int = Color.WHITE, clickListener: (MessageDialog) -> Unit): MessageDialog {
         buttons.add(DialogButton(text, tint, clickListener))
+        buttons = buttons
         return this
     }
 
@@ -197,101 +195,6 @@ open class MessageDialog : BaseFragment() {
         onDismiss?.invoke()
         super.dismiss()
     }
-}
-
-
-open class PromptDialog : MessageDialog() {
-
-    override val layoutID = R.layout.dialog_input_fragment
-
-
-    /**
-     * The text input by user.
-     */
-    var input: String? = null
-        set(value) {
-            field = value
-            if (isCreated) {
-                findViewById<EditText>(R.id.input)?.apply {
-                    if (text.toString() != value) {
-                        setText(value)
-                    }
-                }
-            }
-        }
-
-    /**
-     * The text to be show displayed in the input hint.
-     */
-    var hint: String? = null
-        set(value) {
-            field = value
-            if (isCreated) {
-                findViewById<EditText>(R.id.input)?.hint = value
-            }
-        }
-
-
-    private var onTextChanged: ((PromptDialog) -> Unit)? = null
-
-    private var onTextInputBind: ((EditText) -> Unit)? = null
-
-
-    override fun onLoadView() {
-
-        super.onLoadView()
-
-        findViewById<TextView>(R.id.message)!!.isVisible = message.isNotBlank()
-        findViewById<EditText>(R.id.input)!!.apply {
-
-            setText(input)
-
-            doOnTextChanged { text, _, _, _ ->
-                input = text.toString()
-                onTextChanged?.invoke(this@PromptDialog)
-            }
-
-            onTextInputBind?.invoke(this)
-        }
-
-    }
-
-
-    /**
-     * The text input by user.
-     */
-    fun setInput(text: String?): PromptDialog {
-        input = text
-        return this
-    }
-
-    /**
-     * The text to be show displayed in the input hint.
-     */
-    fun setHint(text: String): PromptDialog {
-        hint = text
-        return this
-    }
-
-    /**
-     * The function to be called when the text input is changed.
-     */
-    fun setOnTextChanged(action: (PromptDialog) -> Unit): PromptDialog {
-        onTextChanged = action
-        return this
-    }
-
-    /**
-     * The function to be called when the EditText is created.
-     */
-    fun setOnTextInputBind(action: (EditText) -> Unit): PromptDialog {
-        onTextInputBind = action
-        return this
-    }
-
-
-    override fun addButton(text: String, tint: Int, clickListener: (MessageDialog) -> Unit) = super.addButton(text, tint, clickListener) as PromptDialog
-
 }
 
 

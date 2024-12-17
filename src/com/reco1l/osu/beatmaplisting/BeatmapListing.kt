@@ -796,9 +796,13 @@ class BeatmapListingFiltersFragment(private val beatmapListing: BeatmapListing) 
 
             statusButton.setOnClickListener {
 
+                val options = RankedStatus.entries.map { status ->
+                    Option(requireContext().getString(status.stringId), status)
+                }.toMutableList()
+                options.add(0, Option("All", null))
+
                 SelectDropdown(statusButton)
-                    .addOption(Option("All", null))
-                    .setOptions(RankedStatus.entries.map { status -> Option(requireContext().getString(status.stringId), status) }, false)
+                    .setOptions(options)
                     .setSelected(rankedStatus)
                     .setOnSelectListener {
                         it as RankedStatus?
