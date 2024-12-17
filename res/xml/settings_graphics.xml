@@ -87,15 +87,4 @@
 
     </PreferenceCategory>
 
-    <PreferenceCategory android:title="@string/opt_category_display">
-
-        <CheckBoxPreference
-            android:defaultValue="false"
-            android:key="hidenavibar"
-            android:summary="@string/opt_hide_navibar_summary"
-            android:title="@string/opt_hide_navibar_title"
-            app:layout="@layout/settings_preference_checkbox_bottom" />
-
-    </PreferenceCategory>
-
 </androidx.preference.PreferenceScreen>

@@ -56,7 +56,6 @@ public class Config {
         playMusicPreview,
         showCursor,
         shrinkPlayfieldDownwards,
-        hideNaviBar,
         showScoreboard,
         enablePP,
         enableExtension,
@@ -223,7 +222,6 @@ public class Config {
         // other
         playMusicPreview = prefs.getBoolean("musicpreview", true);
         showCursor = prefs.getBoolean("showcursor", false);
-        hideNaviBar = prefs.getBoolean("hidenavibar", false);
         enablePP = false;//prefs.getBoolean("enablePP",true);
         fixFrameOffset = prefs.getBoolean("fixFrameOffset", true);
         removeSliderLock = prefs.getBoolean("removeSliderLock", false);
@@ -271,19 +269,27 @@ public class Config {
     }
 
     public static void setSize() {
-        final DisplayMetrics dm = new DisplayMetrics();
-        ((Activity) context).getWindowManager().getDefaultDisplay().getMetrics(dm);
 
-        int width = Math.max(dm.widthPixels, dm.heightPixels), height = Math.min(dm.widthPixels, dm.heightPixels);
-        //int width = dm.widthPixels, height =  dm.heightPixels;
-        setSize(width, height);
-        //ToastLogger.showText("width=" + dm.widthPixels + " height=" + dm.heightPixels, true);
-        Debug.i("width=" + dm.widthPixels + " height=" + dm.heightPixels);
-    }
+        DisplayMetrics displayMetrics = new DisplayMetrics();
 
-    public static void setSize(int width, int height) {
-        RES_WIDTH = 1280;
-        RES_HEIGHT = 1280 * height / width;
+        GlobalManager.getInstance().getMainActivity()
+                .getWindowManager()
+                .getDefaultDisplay()
+                .getRealMetrics(displayMetrics);
+
+        int deviceWidth = displayMetrics.widthPixels;
+        int deviceHeight = displayMetrics.heightPixels;
+
+        int fixedHeight = 720;
+        int fixedWidth = 1280;
+
+        float ratio = (float) deviceWidth / (float) deviceHeight;
+        if (ratio > 16f / 9f) {
+            fixedHeight = (int) (fixedWidth / ratio);
+        }
+
+        RES_WIDTH = fixedWidth;
+        RES_HEIGHT = fixedHeight;
     }
 
     public static boolean isEnableStoryboard() {
@@ -605,14 +611,6 @@ public class Config {
 
     public static void setSkinTopPath(String skinTopPath) {
         Config.skinTopPath = skinTopPath;
-    }
-
-    public static boolean isHideNaviBar() {
-        return hideNaviBar;
-    }
-
-    public static void setHideNaviBar(boolean hideNaviBar) {
-        Config.hideNaviBar = hideNaviBar;
     }
 
     public static boolean isEnablePP() {
