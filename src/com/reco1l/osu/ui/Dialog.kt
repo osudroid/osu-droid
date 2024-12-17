@@ -53,7 +53,7 @@ open class MessageDialog : BaseFragment() {
 
     override fun onLoadView() {
 
-        findViewById<TextView>(R.id.title)!!.text = title
+        findViewById<TextView>(R.id.title)?.text = title
 
         if (isHTMLMessage) {
             findViewById<TextView>(R.id.message)?.apply {
@@ -65,21 +65,22 @@ open class MessageDialog : BaseFragment() {
             findViewById<TextView>(R.id.message)?.text = message
         }
 
-        val buttonLayout = findViewById<LinearLayout>(R.id.button_layout)!!
+        findViewById<LinearLayout>(R.id.button_layout)?.also { buttonLayout ->
 
-        for (button in buttons) {
-            buttonLayout.addView(Button(ContextThemeWrapper(context, R.style.button_borderless)).apply {
+            for (button in buttons) {
+                buttonLayout.addView(Button(ContextThemeWrapper(context, R.style.button_borderless)).apply {
 
-                minWidth = 300.dp
-                minHeight = 56.dp
-                gravity = CENTER
-                background = context.getDrawable(R.drawable.ripple)
-                text = button.text
-                fontColor = button.tint
-                compoundDrawablePadding = 0
+                    minWidth = 300.dp
+                    minHeight = 56.dp
+                    gravity = CENTER
+                    background = context.getDrawable(R.drawable.ripple)
+                    text = button.text
+                    fontColor = button.tint
+                    compoundDrawablePadding = 0
 
-                setOnClickListener { button.clickListener(this@MessageDialog) }
-            })
+                    setOnClickListener { button.clickListener(this@MessageDialog) }
+                })
+            }
         }
 
         val background = findViewById<View>(R.id.frg_background)!!

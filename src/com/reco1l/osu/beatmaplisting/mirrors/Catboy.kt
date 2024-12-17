@@ -3,6 +3,21 @@ package com.reco1l.osu.beatmaplisting.mirrors
 import com.reco1l.osu.beatmaplisting.BeatmapMirrorDownloadRequestModel
 import com.reco1l.osu.beatmaplisting.BeatmapMirrorPreviewRequestModel
 import com.reco1l.osu.beatmaplisting.BeatmapMirrorSearchRequestModel
+import com.reco1l.osu.beatmaplisting.BeatmapMirrorSearchRequestModel.*
+import com.reco1l.osu.beatmaplisting.BeatmapMirrorSearchRequestModel.OrderType.Ascending
+import com.reco1l.osu.beatmaplisting.BeatmapMirrorSearchRequestModel.OrderType.Descending
+import com.reco1l.osu.beatmaplisting.BeatmapMirrorSearchRequestModel.SortType.Artist
+import com.reco1l.osu.beatmaplisting.BeatmapMirrorSearchRequestModel.SortType.BPM
+import com.reco1l.osu.beatmaplisting.BeatmapMirrorSearchRequestModel.SortType.DifficultyRating
+import com.reco1l.osu.beatmaplisting.BeatmapMirrorSearchRequestModel.SortType.FavouriteCount
+import com.reco1l.osu.beatmaplisting.BeatmapMirrorSearchRequestModel.SortType.HitLength
+import com.reco1l.osu.beatmaplisting.BeatmapMirrorSearchRequestModel.SortType.LastUpdated
+import com.reco1l.osu.beatmaplisting.BeatmapMirrorSearchRequestModel.SortType.PassCount
+import com.reco1l.osu.beatmaplisting.BeatmapMirrorSearchRequestModel.SortType.PlayCount
+import com.reco1l.osu.beatmaplisting.BeatmapMirrorSearchRequestModel.SortType.RankedDate
+import com.reco1l.osu.beatmaplisting.BeatmapMirrorSearchRequestModel.SortType.SubmittedDate
+import com.reco1l.osu.beatmaplisting.BeatmapMirrorSearchRequestModel.SortType.Title
+import com.reco1l.osu.beatmaplisting.BeatmapMirrorSearchRequestModel.SortType.TotalLength
 import com.reco1l.osu.beatmaplisting.BeatmapMirrorSearchResponseModel
 import com.reco1l.osu.beatmaplisting.BeatmapModel
 import com.reco1l.osu.beatmaplisting.BeatmapSetModel
@@ -15,9 +30,37 @@ import ru.nsu.ccfit.zuev.osu.RankedStatus
 
 
 class CatboySearchRequestModel : BeatmapMirrorSearchRequestModel {
-    override fun invoke(query: String, offset: Int, limit: Int): HttpUrl {
+
+    private fun SortType.parseToApi() = when (this) {
+        Title -> "title"
+        Artist -> "artist"
+        BPM -> "beatmaps.bpm"
+        DifficultyRating -> "beatmaps.difficulty_rating"
+        HitLength -> "beatmaps.hit_length"
+        PassCount -> "beatmaps.passcount"
+        PlayCount -> "beatmaps.playcount"
+        TotalLength -> "beatmaps.total_length"
+        FavouriteCount -> "favourite_count"
+        LastUpdated -> "last_updated"
+        RankedDate -> "ranked_date"
+        SubmittedDate -> "submitted_date"
+    }
+
+    private fun OrderType.parseToApi() = when (this) {
+        Ascending -> "asc"
+        Descending -> "desc"
+    }
+
+    override fun invoke(query: String, offset: Int, limit: Int, sort: SortType, order: OrderType, status: RankedStatus?): HttpUrl {
+
         return "https://catboy.best/api/v2/search".toHttpUrl()
             .newBuilder()
+            .addQueryParameter("sort", "${sort.parseToApi()}:${order.parseToApi()}")
+            .apply {
+                if (status != null) {
+                    addQueryParameter("status", status.value.toString())
+                }
+            }
             .addQueryParameter("mode", "0")
             .addQueryParameter("query", query)
             .addQueryParameter("limit", limit.toString())

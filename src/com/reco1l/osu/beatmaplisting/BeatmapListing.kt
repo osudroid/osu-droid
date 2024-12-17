@@ -1,6 +1,8 @@
 package com.reco1l.osu.beatmaplisting
 
 import android.graphics.BitmapFactory
+import android.graphics.Color
+import android.graphics.drawable.ColorDrawable
 import android.util.Log
 import android.view.Choreographer
 import android.view.Choreographer.FrameCallback
@@ -35,8 +37,14 @@ import com.reco1l.framework.bass.URLBassStream
 import com.reco1l.framework.net.IDownloaderObserver
 import com.reco1l.framework.net.JsonArrayRequest
 import com.reco1l.osu.*
+import com.reco1l.osu.beatmaplisting.BeatmapMirrorSearchRequestModel.OrderType
+import com.reco1l.osu.beatmaplisting.BeatmapMirrorSearchRequestModel.SortType
 import com.reco1l.osu.ui.Option
 import com.reco1l.osu.ui.SelectDialog
+import com.reco1l.osu.ui.SelectDropdown
+import com.reco1l.toolkt.android.backgroundColor
+import com.reco1l.toolkt.android.cornerRadius
+import com.reco1l.toolkt.android.dp
 import com.reco1l.toolkt.android.drawableLeft
 import kotlinx.coroutines.CoroutineExceptionHandler
 import kotlinx.coroutines.CoroutineScope
@@ -55,6 +63,7 @@ import java.net.URL
 import java.text.SimpleDateFormat
 import java.util.TimeZone
 import kotlinx.coroutines.CancellationException
+import ru.nsu.ccfit.zuev.osu.RankedStatus
 
 
 class BeatmapListing : BaseFragment(),
@@ -70,6 +79,8 @@ class BeatmapListing : BaseFragment(),
     private val adapter = BeatmapSetAdapter()
 
     private val searchScope = CoroutineScope(Dispatchers.IO + SupervisorJob())
+
+    private val filtersFragment = BeatmapListingFiltersFragment(this)
 
     private val scrollListener = object : OnScrollListener() {
 
@@ -169,6 +180,23 @@ class BeatmapListing : BaseFragment(),
             dismiss()
         }
 
+        findViewById<TextView>(R.id.filters)!!.also { filtersButton ->
+
+            filtersButton.setOnClickListener {
+
+                if (!filtersFragment.isAdded) {
+                    filtersButton.setBackgroundColor(0x29F27272)
+                    filtersButton.cornerRadius = 15f.dp
+                    filtersFragment.show()
+                } else {
+                    filtersButton.setBackgroundColor(Color.TRANSPARENT)
+                    filtersButton.cornerRadius = 0f
+                    filtersFragment.dismiss()
+                }
+            }
+        }
+
+
         search(false)
 
         previewPlayCount = 0
@@ -224,7 +252,10 @@ class BeatmapListing : BaseFragment(),
                 mirror.search.request(
                     query = searchBox.text.toString(),
                     offset = offset,
-                    limit = 50
+                    limit = 50,
+                    sort = filtersFragment.sortType,
+                    order = filtersFragment.orderType,
+                    status = filtersFragment.rankedStatus
                 )
             ).use { request ->
 
@@ -334,8 +365,7 @@ class BeatmapListing : BaseFragment(),
 
 // Information
 
-class BeatmapSetDetails(val beatmapSet: BeatmapSetModel, val holder: BeatmapSetViewHolder) :
-    BaseFragment() {
+class BeatmapSetDetails(val beatmapSet: BeatmapSetModel, val holder: BeatmapSetViewHolder) : BaseFragment() {
 
 
     override val layoutID = R.layout.beatmap_downloader_details
@@ -473,7 +503,6 @@ class BeatmapSetDetails(val beatmapSet: BeatmapSetModel, val holder: BeatmapSetV
 }
 
 
-
 // List
 
 class BeatmapSetAdapter : RecyclerView.Adapter<BeatmapSetViewHolder>() {
@@ -512,8 +541,7 @@ class BeatmapSetAdapter : RecyclerView.Adapter<BeatmapSetViewHolder>() {
 
 }
 
-class BeatmapSetViewHolder(itemView: View, private val mediaScope: CoroutineScope)
-    : RecyclerView.ViewHolder(itemView) {
+class BeatmapSetViewHolder(itemView: View, private val mediaScope: CoroutineScope) : RecyclerView.ViewHolder(itemView) {
 
 
     var detailsFragment: BeatmapSetDetails? = null
@@ -704,5 +732,101 @@ class BeatmapSetViewHolder(itemView: View, private val mediaScope: CoroutineScop
             GlobalManager.getInstance().mainScene.musicControl(MusicOption.PLAY)
         }
     }
+
+}
+
+
+// Filters
+
+class BeatmapListingFiltersFragment(private val beatmapListing: BeatmapListing) : BaseFragment() {
+
+
+    override val layoutID = R.layout.beatmap_downloader_filters
+
+
+    var sortType = SortType.RankedDate
+
+    var orderType = OrderType.Descending
+
+    var rankedStatus: RankedStatus? = null
+
+
+    override fun onLoadView() {
+
+        findViewById<View>(R.id.frg_body)!!.y = beatmapListing.findViewById<View>(R.id.bar)!!.height.toFloat()
+        findViewById<View>(R.id.frg_background)!!.setOnClickListener { callDismissOnBackPress() }
+
+        findViewById<Button>(R.id.sort)!!.also { sortButton ->
+
+            sortButton.text = sortType.description
+            sortButton.setOnClickListener {
+
+                SelectDropdown(sortButton)
+                    .setOptions(SortType.entries.map { type -> Option(type.description, type) })
+                    .setSelected(sortType)
+                    .setOnSelectListener {
+                        it as SortType
+                        if (it != sortType) {
+                            sortType = it
+                            sortButton.text = it.description
+                            beatmapListing.search(false)
+                        }
+                    }
+                    .show()
+            }
+        }
+
+        findViewById<Button>(R.id.order)!!.also { orderButton ->
+
+            orderButton.text = orderType.description
+            orderButton.setOnClickListener {
+                orderType = if (orderType == OrderType.Ascending) OrderType.Descending else OrderType.Ascending
+                orderButton.text = orderType.description
+                beatmapListing.search(false)
+            }
+        }
+
+        findViewById<Button>(R.id.status)!!.also { statusButton ->
+
+            if (rankedStatus == null) {
+                statusButton.text = "All"
+            } else {
+                statusButton.setText(rankedStatus!!.stringId)
+            }
+
+            statusButton.setOnClickListener {
+
+                SelectDropdown(statusButton)
+                    .addOption(Option("All", null))
+                    .setOptions(RankedStatus.entries.map { status -> Option(requireContext().getString(status.stringId), status) }, false)
+                    .setSelected(rankedStatus)
+                    .setOnSelectListener {
+                        it as RankedStatus?
+                        if (it != rankedStatus) {
+                            rankedStatus = it
+
+                            if (it == null) {
+                                statusButton.text = "All"
+                            } else {
+                                statusButton.setText(it.stringId)
+                            }
+
+                            beatmapListing.search(false)
+                        }
+                    }
+                    .show()
+            }
+        }
+
+    }
+
+    override fun dismiss() {
+        beatmapListing.findViewById<TextView>(R.id.filters)!!.also { filtersButton ->
+            filtersButton.setBackgroundColor(Color.TRANSPARENT)
+            filtersButton.cornerRadius = 0f
+        }
+        super.dismiss()
+    }
+
 
 }
