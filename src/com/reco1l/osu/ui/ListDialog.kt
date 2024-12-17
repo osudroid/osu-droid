@@ -56,29 +56,29 @@ open class SelectDialog : MessageDialog() {
 
             field = value
 
-            if (::recyclerView.isInitialized) {
-                recyclerView.adapter!!.notifyDataSetChanged()
+            if (isLoaded) {
+                findViewById<RecyclerView>(R.id.list)!!.adapter!!.notifyDataSetChanged()
             }
         }
 
 
     protected var selected: Any? = null
+        set(value) {
+            field = value
+            if (isLoaded) {
+                findViewById<RecyclerView>(R.id.list)!!.adapter!!.notifyDataSetChanged()
+            }
+        }
 
     protected var onSelect: ((Any?) -> Unit)? = null
-
-
-    private lateinit var recyclerView: RecyclerView
 
 
     override fun onLoadView() {
         super.onLoadView()
 
-        recyclerView = findViewById<RecyclerView>(R.id.list)!!.apply {
-
-            layoutManager = LinearLayoutManager(context)
-            adapter = Adapter()
-
-        }
+        val recyclerView = findViewById<RecyclerView>(R.id.list)!!
+        recyclerView.layoutManager = LinearLayoutManager(context)
+        recyclerView.adapter = Adapter()
     }
 
 
@@ -88,7 +88,7 @@ open class SelectDialog : MessageDialog() {
      * @param replace If true, the current options will be replaced with the new ones.
      */
     @JvmOverloads
-    fun setOptions(options: List<Option>, replace: Boolean = false): SelectDialog {
+    fun setOptions(options: List<Option>, replace: Boolean = true): SelectDialog {
         if (replace) {
             this.options = options.toMutableList()
         } else {
@@ -123,7 +123,9 @@ open class SelectDialog : MessageDialog() {
 
 
     private fun unselectAll() {
-        recyclerView.forEach { (recyclerView.getChildViewHolder(it) as ViewHolder).unselect() }
+        findViewById<RecyclerView>(R.id.list)!!.apply {
+            forEach { (getChildViewHolder(it) as ViewHolder).unselect() }
+        }
     }
 
 
