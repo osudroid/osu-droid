@@ -123,7 +123,7 @@ class CatboyDownloadRequestModel : BeatmapMirrorDownloadRequestModel {
 
 
 class CatboyPreviewRequestModel : BeatmapMirrorPreviewRequestModel {
-    override fun invoke(beatmapSetId: Long): HttpUrl {
-        return "https://catboy.best/preview/audio/$beatmapSetId?set=1".toHttpUrl()
+    override fun invoke(beatmapId: Long): HttpUrl {
+        return "https://catboy.best/preview/audio/$beatmapId".toHttpUrl()
     }
 }

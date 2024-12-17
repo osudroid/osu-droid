@@ -106,7 +106,7 @@ class OsuDirectDownloadRequestModel : BeatmapMirrorDownloadRequestModel {
 }
 
 class OsuDirectPreviewRequestModel : BeatmapMirrorPreviewRequestModel {
-    override fun invoke(beatmapSetId: Long): HttpUrl {
-        return "https://osu.direct/api/media/preview/$beatmapSetId".toHttpUrl()
+    override fun invoke(beatmapId: Long): HttpUrl {
+        return "https://osu.direct/api/media/preview/$beatmapId".toHttpUrl()
     }
 }
