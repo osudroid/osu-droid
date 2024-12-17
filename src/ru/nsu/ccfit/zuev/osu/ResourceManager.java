@@ -406,8 +406,7 @@ public class ResourceManager {
     }
 
     public Font loadFont(final String resname, final String file, int size, final int color) {
-        size /= Config.getTextureQuality();
-        final BitmapTextureAtlas texture = new BitmapTextureAtlas(1024, 1024, TextureOptions.DEFAULT);
+        BitmapTextureAtlas texture = new BitmapTextureAtlas(1024, 1024, TextureOptions.DEFAULT);
         Font font;
         if (file == null) {
             font = new Font(texture, Typeface.create(Typeface.DEFAULT, Typeface.NORMAL), size, true, color);
@@ -421,8 +420,7 @@ public class ResourceManager {
     }
 
     public StrokeFont loadStrokeFont(final String resname, final String file, int size, final int color1, final int color2) {
-        size /= Config.getTextureQuality();
-        final BitmapTextureAtlas texture = new BitmapTextureAtlas(1024, 1024, TextureOptions.DEFAULT);
+        BitmapTextureAtlas texture = new BitmapTextureAtlas(1024, 1024, TextureOptions.DEFAULT);
         StrokeFont font;
         if (file == null) {
             font = new StrokeFont(texture, Typeface.create(Typeface.DEFAULT, Typeface.NORMAL), size, true, color1, 2, color2);
