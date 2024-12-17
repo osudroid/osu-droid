@@ -37,6 +37,7 @@ import com.reco1l.framework.net.JsonArrayRequest
 import com.reco1l.osu.*
 import com.reco1l.osu.ui.Option
 import com.reco1l.osu.ui.SelectDialog
+import com.reco1l.toolkt.android.drawableLeft
 import kotlinx.coroutines.CoroutineExceptionHandler
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -132,6 +133,8 @@ class BeatmapListing : BaseFragment(),
         indicator = findViewById(R.id.indicator)!!
 
         logoView = findViewById(R.id.logo)!!
+        logoView.text = mirror.description
+        logoView.drawableLeft = requireContext().getDrawable(mirror.logoResource)
         logoView.setOnClickListener {
             SelectDialog()
                 .setOptions(BeatmapMirror.entries.map { mirror ->
@@ -151,6 +154,10 @@ class BeatmapListing : BaseFragment(),
                     if (value != mirror.ordinal) {
                         Config.setInt("beatmapMirror", value)
                         mirror = BeatmapMirror.entries[Config.getInt("beatmapMirror", 0)]
+
+                        logoView.text = mirror.description
+                        logoView.drawableLeft = requireContext().getDrawable(mirror.logoResource)
+
                         search(false)
                     }
                 }
@@ -216,7 +223,8 @@ class BeatmapListing : BaseFragment(),
             JsonArrayRequest(
                 mirror.search.request(
                     query = searchBox.text.toString(),
-                    offset = offset
+                    offset = offset,
+                    limit = 50
                 )
             ).use { request ->
 

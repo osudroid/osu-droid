@@ -11,25 +11,28 @@ import okhttp3.HttpUrl.Companion.toHttpUrl
 import org.json.JSONArray
 import ru.nsu.ccfit.zuev.osu.RankedStatus
 
+// API reference: https://dev.catboy.best/docs
 
-class OsuDirectSearchRequestModel : BeatmapMirrorSearchRequestModel {
+
+class CatboySearchRequestModel : BeatmapMirrorSearchRequestModel {
     override fun invoke(query: String, offset: Int, limit: Int): HttpUrl {
-        return "https://osu.direct/api/v2/search".toHttpUrl()
+        return "https://catboy.best/api/v2/search".toHttpUrl()
             .newBuilder()
             .addQueryParameter("mode", "0")
             .addQueryParameter("query", query)
+            .addQueryParameter("limit", limit.toString())
             .addQueryParameter("offset", offset.toString())
-            .addQueryParameter("amount", limit.toString())
             .build()
     }
 }
 
-class OsuDirectSearchResponseModel : BeatmapMirrorSearchResponseModel {
+
+class CatboySearchResponseModel : BeatmapMirrorSearchResponseModel {
     override fun invoke(response: Any): MutableList<BeatmapSetModel> {
         response as JSONArray
 
-        return MutableList(response.length()) { index ->
-            val json = response.getJSONObject(index)
+        return MutableList(response.length()) { i ->
+            val json = response.getJSONObject(i)
 
             BeatmapSetModel(
                 id = json.getLong("id"),
@@ -39,7 +42,7 @@ class OsuDirectSearchResponseModel : BeatmapMirrorSearchResponseModel {
                 artistUnicode = json.getString("artist_unicode"),
                 status = RankedStatus.valueOf(json.getInt("ranked")),
                 creator = json.getString("creator"),
-                thumbnail = json.optJSONObject("covers")?.optString("card"),
+                thumbnail = "https://assets.ppy.sh/beatmaps/${json.getLong("id")}/covers/card.jpg",
                 beatmaps = json.getJSONArray("beatmaps").let {
 
                     MutableList(it.length()) { i ->
@@ -68,14 +71,16 @@ class OsuDirectSearchResponseModel : BeatmapMirrorSearchResponseModel {
     }
 }
 
-class OsuDirectDownloadRequestModel : BeatmapMirrorDownloadRequestModel {
+
+class CatboyDownloadRequestModel : BeatmapMirrorDownloadRequestModel {
     override fun invoke(beatmapSetId: Long): HttpUrl {
-        return "https://osu.direct/api/d/$beatmapSetId".toHttpUrl()
+        return "https://catboy.best/d/$beatmapSetId".toHttpUrl()
     }
 }
 
-class OsuDirectPreviewRequestModel : BeatmapMirrorPreviewRequestModel {
+
+class CatboyPreviewRequestModel : BeatmapMirrorPreviewRequestModel {
     override fun invoke(beatmapSetId: Long): HttpUrl {
-        return "https://osu.direct/api/media/preview/$beatmapSetId".toHttpUrl()
+        return "https://catboy.best/preview/audio/$beatmapSetId?set=1".toHttpUrl()
     }
 }
