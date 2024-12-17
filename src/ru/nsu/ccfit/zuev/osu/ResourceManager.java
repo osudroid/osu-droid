@@ -405,18 +405,14 @@ public class ResourceManager {
         return frameIndex;
     }
 
-    public Font loadFont(final String resname, final String file, int size,
-                         final int color) {
+    public Font loadFont(final String resname, final String file, int size, final int color) {
         size /= Config.getTextureQuality();
-        final BitmapTextureAtlas texture = new BitmapTextureAtlas(512, 512,
-                TextureOptions.BILINEAR_PREMULTIPLYALPHA);
+        final BitmapTextureAtlas texture = new BitmapTextureAtlas(1024, 1024, TextureOptions.DEFAULT);
         Font font;
         if (file == null) {
-            font = new Font(texture, Typeface.create(Typeface.DEFAULT,
-                    Typeface.NORMAL), size, true, color);
+            font = new Font(texture, Typeface.create(Typeface.DEFAULT, Typeface.NORMAL), size, true, color);
         } else {
-            font = FontFactory.createFromAsset(texture, context, "fonts/"
-                    + file, size, true, color);
+            font = FontFactory.createFromAsset(texture, context, "fonts/" + file, size, true, color);
         }
         engine.getTextureManager().loadTexture(texture);
         engine.getFontManager().loadFont(font);
@@ -424,20 +420,14 @@ public class ResourceManager {
         return font;
     }
 
-    public StrokeFont loadStrokeFont(final String resname, final String file,
-                                     int size, final int color1, final int color2) {
+    public StrokeFont loadStrokeFont(final String resname, final String file, int size, final int color1, final int color2) {
         size /= Config.getTextureQuality();
-        final BitmapTextureAtlas texture = new BitmapTextureAtlas(512, 256,
-                TextureOptions.BILINEAR_PREMULTIPLYALPHA);
+        final BitmapTextureAtlas texture = new BitmapTextureAtlas(1024, 1024, TextureOptions.DEFAULT);
         StrokeFont font;
         if (file == null) {
-            font = new StrokeFont(texture, Typeface.create(Typeface.DEFAULT,
-                    Typeface.NORMAL), size, true, color1,
-                    Config.getTextureQuality() == 1 ? 2 : 0.75f, color2);
+            font = new StrokeFont(texture, Typeface.create(Typeface.DEFAULT, Typeface.NORMAL), size, true, color1, 2, color2);
         } else {
-            font = FontFactory.createStrokeFromAsset(texture, context, "fonts/"
-                            + file, size, true, color1, (float) 2 / Config.getTextureQuality(),
-                    color2);
+            font = FontFactory.createStrokeFromAsset(texture, context, "fonts/" + file, size, true, color1, (float) 2 / Config.getTextureQuality(), color2);
         }
         engine.getTextureManager().loadTexture(texture);
         engine.getFontManager().loadFont(font);
