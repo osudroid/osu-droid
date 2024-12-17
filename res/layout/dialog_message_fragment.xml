@@ -11,9 +11,8 @@
         android:id="@+id/frg_body"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_alignParentBottom="true"
-        android:layout_centerHorizontal="true"
         android:layout_marginBottom="20dp"
+        android:layout_marginTop="20dp"
         android:background="@drawable/rounded_rect"
         android:backgroundTint="#1E1E2E"
         android:divider="@drawable/divider"
@@ -28,17 +27,24 @@
             android:paddingVertical="12dp"
             tools:text="Title" />
 
-        <TextView
-            android:id="@+id/message"
+        <ScrollView
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:gravity="center"
-            android:maxWidth="500dp"
-            android:minWidth="300dp"
-            android:minHeight="100dp"
-            android:padding="16dp"
-            android:textColor="#FFF"
-            tools:text="Message" />
+            android:layout_height="0dp"
+            android:layout_weight="1">
+
+            <TextView
+                android:id="@+id/message"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:gravity="center"
+                android:maxWidth="500dp"
+                android:minWidth="300dp"
+                android:minHeight="100dp"
+                android:padding="16dp"
+                android:textColor="#FFF"
+                tools:text="Message" />
+
+        </ScrollView>
 
         <LinearLayout
             android:id="@+id/button_layout"
@@ -46,7 +52,7 @@
             android:layout_height="wrap_content"
             android:orientation="vertical"
             android:divider="@drawable/divider"
-            android:showDividers="middle" />
+            android:showDividers="middle"/>
 
     </LinearLayout>
 
