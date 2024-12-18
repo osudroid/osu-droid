@@ -1229,7 +1229,7 @@ public class SongMenu implements IUpdateHandler, MenuItemListener,
     public void openScore(final int id, boolean showOnline, final String playerName) {
         if (showOnline) {
             engine.setScene(new LoadingScreen().getScene());
-            ToastLogger.showTextId(com.osudroid.resources.R.string.online_loadrecord, false);
+            ToastLogger.showText(com.osudroid.resources.R.string.online_loadrecord, false);
 
             cancelCalculationJobs();
             cancelMapStatusLoadingJob();

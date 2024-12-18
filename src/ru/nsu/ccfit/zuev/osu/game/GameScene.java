@@ -379,7 +379,7 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
 
     private boolean loadGame(final BeatmapInfo beatmapInfo, final String rFile, final CoroutineScope scope) {
         if (!SecurityUtils.verifyFileIntegrity(GlobalManager.getInstance().getMainActivity())) {
-            ToastLogger.showTextId(com.osudroid.resources.R.string.file_integrity_tampered, true);
+            ToastLogger.showText(com.osudroid.resources.R.string.file_integrity_tampered, true);
             return false;
         }
 
@@ -390,7 +390,7 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
                     MD5Calculator.getStringMD5(rFile) + ".odr";
             Debug.i("ReplayFile = " + replayFilePath);
             if (!OnlineFileOperator.downloadFile(rFile, this.replayFilePath)) {
-                ToastLogger.showTextId(com.osudroid.resources.R.string.replay_cantdownload, true);
+                ToastLogger.showText(com.osudroid.resources.R.string.replay_cantdownload, true);
                 return false;
             }
         } else
@@ -421,7 +421,7 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
         }
 
         if (!parsedBeatmap.getMd5().equals(beatmapInfo.getMD5())) {
-            ToastLogger.showTextId(com.osudroid.resources.R.string.file_integrity_tampered, true);
+            ToastLogger.showText(com.osudroid.resources.R.string.file_integrity_tampered, true);
             return false;
         }
 
@@ -567,7 +567,7 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
         if (replayFilePath != null) {
             replaying = replay.load(replayFilePath, true);
             if (!replaying) {
-                ToastLogger.showTextId(com.osudroid.resources.R.string.replay_invalid, true);
+                ToastLogger.showText(com.osudroid.resources.R.string.replay_invalid, true);
                 return false;
             }
             GameHelper.setReplayVersion(replay.replayVersion);
@@ -2340,9 +2340,13 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
                     scene.setTimeMultiplier(decreasedSpeed);
 
                     if (video != null) {
-                        // Aparently MediaPlayer API doesn't support setting playback speed
-                        // below 0.01 causing an IllegalStateException.
-                        video.setPlaybackSpeed(Math.max(0.01f, decreasedSpeed));
+                        // In some devices this can throw an exception, unfortunately there's no
+                        // documentation that explains how to avoid that scenario. Thanks Google.
+                        try {
+                            video.setPlaybackSpeed(decreasedSpeed);
+                        } catch (Exception e) {
+                            Log.e("GameScene", "Failed to change video playback speed during game over animation.", e);
+                        }
                     }
 
                     songService.setFrequencyForcefully(decreasedFrequency);

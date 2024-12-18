@@ -47,7 +47,7 @@ public class MarkdownWebView extends WebView {
 
     @SuppressLint("SetJavaScriptEnabled")
     void init(Context context) {
-        this.setBackgroundColor(Color.TRANSPARENT);
+        this.setBackgroundColor(Color.WHITE);
 
         this.getSettings().setBlockNetworkLoads(true);
         this.getSettings().setLoadWithOverviewMode(true);
