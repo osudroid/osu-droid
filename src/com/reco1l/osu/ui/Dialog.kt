@@ -123,9 +123,15 @@ open class MessageDialog : BaseFragment() {
             }
         }
 
-    protected var allowDismiss = true
+    /**
+     * Whether the dialog is cancelable or not.
+     */
+    var allowDismiss = true
 
-    protected var onDismiss: (() -> Unit)? = null
+    /**
+     * The function to be called when the dialog is dismissed.
+     */
+    var onDismiss: (() -> Unit)? = null
 
 
     override fun onLoadView() {
