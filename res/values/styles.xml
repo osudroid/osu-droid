@@ -13,6 +13,7 @@
         <item name="windowNoTitle">true</item>
         <item name="android:windowFullscreen">true</item>
         <item name="android:windowBackground">#000</item>
+        <item name="android:windowIsTranslucent">true</item>
         <item name="android:forceDarkAllowed" tools:targetApi="q">false</item>
 
         <item name="checkboxStyle">@style/checkbox</item>
