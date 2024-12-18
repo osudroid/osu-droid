@@ -1,6 +1,5 @@
 package com.reco1l.andengine
 
-import android.graphics.PointF
 import android.util.*
 import com.reco1l.andengine.container.*
 import com.reco1l.andengine.modifier.*
@@ -54,11 +53,23 @@ abstract class ExtendedEntity(
      * The origin factor of the entity in the X axis.
      */
     open var originX = 0f
+        set(value) {
+            if (field != value) {
+                field = value
+                invalidateTransformations()
+            }
+        }
 
     /**
      * The origin factor of the entity in the Y axis.
      */
     open var originY = 0f
+        set(value) {
+            if (field != value) {
+                field = value
+                invalidateTransformations()
+            }
+        }
 
     /**
      * The anchor factor of the entity in the X axis.
@@ -67,6 +78,12 @@ abstract class ExtendedEntity(
      * Note: This will not take effect if the entity is not a child of a [Container].
      */
     open var anchorX = 0f
+        set(value) {
+            if (field != value) {
+                field = value
+                invalidateTransformations()
+            }
+        }
 
     /**
      * The anchor factor of the entity in the Y axis.
@@ -75,16 +92,34 @@ abstract class ExtendedEntity(
      * Note: This will not take effect if the entity is not a child of a [Container].
      */
     open var anchorY = 0f
+        set(value) {
+            if (field != value) {
+                field = value
+                invalidateTransformations()
+            }
+        }
 
     /**
      * The translation in the X axis.
      */
     open var translationX = 0f
+        set(value) {
+            if (field != value) {
+                field = value
+                invalidateTransformations()
+            }
+        }
 
     /**
      * The translation in the Y axis.
      */
     open var translationY = 0f
+        set(value) {
+            if (field != value) {
+                field = value
+                invalidateTransformations()
+            }
+        }
 
     /**
      * Whether the color should be inherited from all the parents in the hierarchy.
@@ -282,32 +317,42 @@ abstract class ExtendedEntity(
         originY = origin.factorY
     }
 
-    fun setPosition(position: PointF) {
-        setPosition(position.x, position.y)
-    }
-
-    override fun setPosition(pX: Float, pY: Float) {
-        if (mX != pX || mY != pY) {
-            super.setPosition(pX, pY)
+    override fun setPosition(x: Float, y: Float) {
+        if (mX != x || mY != y) {
+            mX = x
+            mY = y
+            invalidateTransformations()
             (parent as? Container)?.onChildPositionChanged(this)
         }
     }
 
     open fun setX(value: Float) {
         if (mX != value) {
-            setPosition(value, mY)
+            mX = value
+            invalidateTransformations()
+            (parent as? Container)?.onChildPositionChanged(this)
         }
     }
 
     open fun setY(value: Float) {
         if (mY != value) {
-            setPosition(mX, value)
+            mY = value
+            invalidateTransformations()
+            (parent as? Container)?.onChildPositionChanged(this)
         }
     }
 
     open fun setTranslation(x: Float, y: Float) {
-        translationX = x
-        translationY = y
+        if (translationX != x || translationY != y) {
+            translationX = x
+            translationY = y
+            invalidateTransformations()
+        }
+    }
+
+    open fun invalidateTransformations() {
+        mLocalToParentTransformationDirty = true
+        mParentToLocalTransformationDirty = true
     }
 
 
@@ -434,11 +479,9 @@ abstract class ExtendedEntity(
     }
 
     override fun onApplyVertices(pGL: GL10) {
-
         if (vertexBuffer != null) {
             super.onApplyVertices(pGL)
         }
-
     }
 
 
