@@ -85,12 +85,12 @@ class Circle : ExtendedEntity() {
         if (shouldRebuildVertexBuffer) {
             shouldRebuildVertexBuffer = false
 
-            val segments = approximateSegments(width, height)
+            val segments = approximateSegments(drawWidth, drawHeight)
 
             setVertexBuffer(CircleVertexBuffer(segments))
         }
 
-        (vertexBuffer as CircleVertexBuffer).update(width, height, startAngle, endAngle)
+        (vertexBuffer as CircleVertexBuffer).update(drawWidth, drawHeight, startAngle, endAngle)
     }
 
     override fun drawVertices(pGL: GL10, pCamera: Camera) {

@@ -83,7 +83,7 @@ open class LinearContainer : Container() {
         }
 
         val drawX = lastDrawOffset + super.getChildDrawX(child)
-        lastDrawOffset += child.width + spacing
+        lastDrawOffset += child.drawWidth + spacing
 
         return drawX
     }
@@ -95,7 +95,7 @@ open class LinearContainer : Container() {
         }
 
         val drawY = lastDrawOffset + super.getChildDrawY(child)
-        lastDrawOffset += child.height + spacing
+        lastDrawOffset += child.drawHeight + spacing
 
         return drawY
     }

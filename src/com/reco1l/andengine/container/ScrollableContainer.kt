@@ -104,7 +104,7 @@ open class ScrollableContainer : Container() {
      * This does not take into account the overscroll.
      */
     val maxScrollX
-        get() = max(0f, scrollableContentWidth - width)
+        get() = max(0f, scrollableContentWidth - drawWidth)
 
     /**
      * The maximum scroll position on the y-axis.
@@ -112,21 +112,21 @@ open class ScrollableContainer : Container() {
      * This does not take into account the overscroll.
      */
     val maxScrollY
-        get() = max(0f, scrollableContentHeight - height)
+        get() = max(0f, scrollableContentHeight - drawHeight)
 
     /**
      * The width of the content that can be scrolled. That is [contentWidth] minus
      * the width of the vertical indicator.
      */
     val scrollableContentWidth
-        get() = max(0f, contentWidth - (indicatorY?.width ?: 0f))
+        get() = max(0f, contentWidth - (indicatorY?.drawWidth ?: 0f))
 
     /**
      * The height of the content that can be scrolled. That is [contentHeight] minus
      * the height of the horizontal indicator.
      */
     val scrollableContentHeight
-        get() = max(0f, contentHeight - (indicatorX?.height ?: 0f))
+        get() = max(0f, contentHeight - (indicatorX?.drawHeight ?: 0f))
 
 
     private var initialX = 0f
@@ -215,7 +215,7 @@ open class ScrollableContainer : Container() {
         indicatorY?.let {
 
             it.isVisible = scrollAxes == Axes.Both || scrollAxes == Axes.Y
-            it.y = scrollY * (height / scrollableContentHeight)
+            it.y = scrollY * (drawHeight / scrollableContentHeight)
 
             if (it.alpha > 0f && velocityY == 0f) {
                 it.alpha -= deltaTimeSec * 0.5f
@@ -234,8 +234,8 @@ open class ScrollableContainer : Container() {
 
             it.isVisible = scrollAxes == Axes.Both || scrollAxes == Axes.X
 
-            it.x = scrollX * (width / scrollableContentWidth)
-            it.y = height - it.height
+            it.x = scrollX * (drawWidth / scrollableContentWidth)
+            it.y = drawHeight - it.drawHeight
 
             if (it.alpha > 0f && velocityX == 0f) {
                 it.alpha -= deltaTimeSec * 0.5f
@@ -258,17 +258,17 @@ open class ScrollableContainer : Container() {
         super.onMeasureContentSize()
 
         indicatorY?.let {
-            it.height = height * (height / scrollableContentHeight)
+            it.height = drawHeight * (drawHeight / scrollableContentHeight)
             it.x = contentWidth + 5f
 
-            contentWidth += it.width + 5f
+            contentWidth += it.drawWidth + 5f
         }
 
         indicatorX?.let {
-            it.width = width * (width / scrollableContentWidth)
+            it.width = drawWidth * (drawWidth / scrollableContentWidth)
             it.y = contentHeight + 5f
 
-            contentHeight += it.height + 5f
+            contentHeight += it.drawHeight + 5f
         }
 
         if (indicatorX != null || indicatorY != null) {
@@ -308,8 +308,8 @@ open class ScrollableContainer : Container() {
                 isDragging = true
 
                 // Coerce the delta values to the width and height of the container because the user can't scroll more than that.
-                var deltaX = (event.x - initialX).coerceAtMost(width)
-                var deltaY = (event.y - initialY).coerceAtMost(height)
+                var deltaX = (event.x - initialX).coerceAtMost(drawWidth)
+                var deltaY = (event.y - initialY).coerceAtMost(drawHeight)
 
                 val length = hypot(deltaX, deltaY)
 

@@ -41,6 +41,17 @@ abstract class ExtendedEntity(
         }
 
     /**
+     * Determines which axes the entity should adjust its size relative to its parent.
+     */
+    open var relativeSizeAxes = Axes.None
+        set(value) {
+            if (field != value) {
+                field = value
+                onContentSizeMeasured()
+            }
+        }
+
+    /**
      * The origin factor of the entity in the X axis.
      */
     open var originX = 0f
@@ -123,7 +134,6 @@ abstract class ExtendedEntity(
             }
         }
 
-
     /**
      * The width of the content inside the entity.
      */
@@ -144,6 +154,36 @@ abstract class ExtendedEntity(
                 field = value
                 onContentSizeMeasured()
             }
+        }
+
+    /**
+     * The real width of the entity in pixels.
+     *
+     * Due to compatibility reason, this doesn't take into account transformations like rotation or scaling.
+     * @see [getWidthScaled]
+     */
+    open val drawWidth: Float
+        get() {
+            val parent = parent
+            if (relativeSizeAxes.isHorizontal && parent is IShape) {
+                return parent.width * width
+            }
+            return width
+        }
+
+    /**
+     * The real height of the entity in pixels.
+     *
+     * Due to compatibility reason, this doesn't take into account transformations like rotation or scaling.
+     * @see [getHeightScaled]
+     */
+    open val drawHeight: Float
+        get() {
+            val parent = parent
+            if (relativeSizeAxes.isVertical && parent is IShape) {
+                return parent.height * height
+            }
+            return height
         }
 
     /**
@@ -403,7 +443,6 @@ abstract class ExtendedEntity(
     }
 
 
-
     // Vertex buffer
 
     override fun updateVertexBuffer() {
@@ -414,7 +453,6 @@ abstract class ExtendedEntity(
         isVertexBufferDirty = false
         onUpdateVertexBuffer()
     }
-
 
     /**
      * Sets the vertex buffer of the entity.
@@ -448,12 +486,22 @@ abstract class ExtendedEntity(
 
         if (contentWidth != width || contentHeight != height) {
 
-            if (autoSizeAxes == Axes.X || autoSizeAxes == Axes.Both) {
-                width = contentWidth
+            val parent = parent
+
+            if (autoSizeAxes.isHorizontal) {
+                width = if (relativeSizeAxes.isHorizontal && parent is IShape) {
+                    contentWidth / parent.width
+                } else {
+                    contentWidth
+                }
             }
 
-            if (autoSizeAxes == Axes.Y || autoSizeAxes == Axes.Both) {
-                height = contentHeight
+            if (autoSizeAxes.isVertical) {
+                height = if (relativeSizeAxes.isVertical && parent is IShape) {
+                    contentHeight / parent.height
+                } else {
+                    contentHeight
+                }
             }
 
             updateVertexBuffer()
@@ -478,16 +526,15 @@ abstract class ExtendedEntity(
 
         if (width != newWidth || height != newHeight) {
 
-            if (autoSizeAxes == Axes.None || autoSizeAxes == Axes.Y) {
+            if (!autoSizeAxes.isHorizontal) {
                 width = newWidth
             }
 
-            if (autoSizeAxes == Axes.None || autoSizeAxes == Axes.X) {
+            if (!autoSizeAxes.isVertical) {
                 height = newHeight
             }
 
             updateVertexBuffer()
-
             (parent as? Container)?.onChildSizeChanged(this)
             return true
         }
@@ -495,19 +542,47 @@ abstract class ExtendedEntity(
     }
 
     open fun setWidth(value: Float) {
-        setSize(value, height)
+        if (autoSizeAxes.isVertical) {
+            Log.w("ExtendedEntity", "Cannot set width when autoSizeAxes is set to Both or X.")
+            return
+        }
+
+        if (width != value) {
+            width = value
+
+            updateVertexBuffer()
+            (parent as? Container)?.onChildSizeChanged(this)
+        }
+    }
+
+    open fun setHeight(value: Float) {
+        if (autoSizeAxes.isHorizontal) {
+            Log.w("ExtendedEntity", "Cannot set height when autoSizeAxes is set to Both or Y.")
+            return
+        }
+
+        if (height != value) {
+            height = value
+
+            updateVertexBuffer()
+            (parent as? Container)?.onChildSizeChanged(this)
+        }
     }
 
     override fun getWidth(): Float {
         return width
     }
 
-    open fun setHeight(value: Float) {
-        setSize(width, value)
-    }
-
     override fun getHeight(): Float {
         return height
+    }
+
+    override fun getWidthScaled(): Float {
+        return drawWidth * scaleX
+    }
+
+    override fun getHeightScaled(): Float {
+        return drawHeight * scaleY
     }
 
 
