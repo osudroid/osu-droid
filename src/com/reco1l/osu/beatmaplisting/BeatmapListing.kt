@@ -2,7 +2,6 @@ package com.reco1l.osu.beatmaplisting
 
 import android.graphics.BitmapFactory
 import android.graphics.Color
-import android.graphics.drawable.ColorDrawable
 import android.util.Log
 import android.view.Choreographer
 import android.view.Choreographer.FrameCallback
@@ -34,7 +33,7 @@ import com.edlplan.ui.fragment.BaseFragment
 import com.google.android.material.progressindicator.CircularProgressIndicator
 import com.reco1l.*
 import com.reco1l.framework.bass.URLBassStream
-import com.reco1l.framework.net.IDownloaderObserver
+import com.reco1l.framework.net.IFileRequestObserver
 import com.reco1l.framework.net.JsonArrayRequest
 import com.reco1l.osu.*
 import com.reco1l.osu.beatmaplisting.BeatmapMirrorSearchRequestModel.OrderType
@@ -42,7 +41,6 @@ import com.reco1l.osu.beatmaplisting.BeatmapMirrorSearchRequestModel.SortType
 import com.reco1l.osu.ui.Option
 import com.reco1l.osu.ui.SelectDialog
 import com.reco1l.osu.ui.SelectDropdown
-import com.reco1l.toolkt.android.backgroundColor
 import com.reco1l.toolkt.android.cornerRadius
 import com.reco1l.toolkt.android.dp
 import com.reco1l.toolkt.android.drawableLeft
@@ -67,7 +65,7 @@ import ru.nsu.ccfit.zuev.osu.RankedStatus
 
 
 class BeatmapListing : BaseFragment(),
-    IDownloaderObserver,
+    IFileRequestObserver,
     OnEditorActionListener,
     OnKeyListener,
     FrameCallback {
