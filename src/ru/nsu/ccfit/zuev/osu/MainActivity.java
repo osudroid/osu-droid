@@ -304,7 +304,7 @@ public class MainActivity extends BaseGameActivity implements
 
             Execution.delayed(2500, () -> {
 
-                UpdateManager.onActivityStart(this);
+                UpdateManager.onActivityStart();
                 GlobalManager.getInstance().setInfo("");
                 GlobalManager.getInstance().setLoadingProgress(100);
                 ResourceManager.getInstance().loadFont("font", null, 28, Color.WHITE);
@@ -368,7 +368,7 @@ public class MainActivity extends BaseGameActivity implements
         this.mRenderSurfaceView.setRenderer(this.mEngine);
 
         RelativeLayout layout = new RelativeLayout(this);
-        layout.setBackgroundColor(Color.argb(255, 0, 0, 0));
+        layout.setBackgroundColor(Color.BLACK);
         layout.addView(
                 mRenderSurfaceView,
                 new RelativeLayout.LayoutParams(
@@ -378,12 +378,8 @@ public class MainActivity extends BaseGameActivity implements
                 }});
 
         FrameLayout frameLayout = new FrameLayout(this);
-        frameLayout.setId(0x28371);
+        frameLayout.setId(View.generateViewId());
         layout.addView(frameLayout, new RelativeLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT));
-
-        View c = new View(this);
-        c.setBackgroundColor(Color.argb(0, 0, 0, 0));
-        layout.addView(c, new RelativeLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT));
 
         this.setContentView(
                 layout,
