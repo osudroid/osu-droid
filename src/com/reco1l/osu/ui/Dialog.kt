@@ -24,12 +24,30 @@ import com.reco1l.toolkt.animation.toScaleY
 import ru.nsu.ccfit.zuev.osuplus.R
 
 
+/**
+ * A button to be displayed in a dialog.
+ */
 data class DialogButton(
+
+    /**
+     * The text to be displayed in the button.
+     */
     val text: String,
+
+    /**
+     * The color of the button text and icon.
+     */
     val tint: Int = Color.WHITE,
+
+    /**
+     * The function to be called when the button is clicked.
+     */
     val clickListener: (MessageDialog) -> Unit
 )
 
+/**
+ * A dialog that displays a message to the user.
+ */
 open class MessageDialog : BaseFragment() {
 
 

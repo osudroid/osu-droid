@@ -40,7 +40,9 @@ data class Option(
     val icon: Drawable? = null
 )
 
-
+/**
+ * A dialog that allows the user to select an option.
+ */
 open class SelectDialog : MessageDialog() {
 
 

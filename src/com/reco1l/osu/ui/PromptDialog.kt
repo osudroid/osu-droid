@@ -7,6 +7,9 @@ import androidx.core.view.isVisible
 import androidx.core.widget.doOnTextChanged
 import ru.nsu.ccfit.zuev.osuplus.R
 
+/**
+ * A dialog that prompts the user for input.
+ */
 open class PromptDialog : MessageDialog() {
 
 

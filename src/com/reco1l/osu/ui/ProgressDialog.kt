@@ -4,6 +4,9 @@ import com.google.android.material.progressindicator.CircularProgressIndicator
 import ru.nsu.ccfit.zuev.osuplus.R
 
 
+/**
+ * A dialog that shows a progress bar.
+ */
 class ProgressDialog : MessageDialog() {
 
 
