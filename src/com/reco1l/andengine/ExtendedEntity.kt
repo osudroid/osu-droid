@@ -5,15 +5,14 @@ import android.util.*
 import com.reco1l.andengine.container.*
 import com.reco1l.andengine.modifier.*
 import com.reco1l.framework.*
-import org.anddev.andengine.collision.*
 import org.anddev.andengine.engine.camera.*
 import org.anddev.andengine.entity.*
-import org.anddev.andengine.entity.primitive.*
 import org.anddev.andengine.entity.scene.CameraScene
 import org.anddev.andengine.entity.scene.Scene
 import org.anddev.andengine.entity.shape.*
 import org.anddev.andengine.opengl.util.*
 import org.anddev.andengine.opengl.vertex.*
+import org.anddev.andengine.util.Transformation
 import javax.microedition.khronos.opengles.*
 import javax.microedition.khronos.opengles.GL10.*
 
@@ -615,29 +614,83 @@ abstract class ExtendedEntity(
 
     // Collision
 
-    override fun collidesWith(shape: IShape): Boolean = when (shape) {
-
-        is RectangularShape -> RectangularShapeCollisionChecker.checkCollision(this, shape)
-        is Line -> RectangularShapeCollisionChecker.checkCollision(this, shape)
-
-        else -> false
+    override fun collidesWith(shape: IShape): Boolean {
+        Log.w("ExtendedEntity", "Collision detection is not supported in ExtendedEntity.")
+        return false
     }
 
     override fun contains(x: Float, y: Float): Boolean {
+
         if (width == 0f || height == 0f) {
             return false
         }
 
-        return RectangularShapeCollisionChecker.checkContains(this, x - totalOffsetX, y - totalOffsetY)
+        return EntityCollision.contains(this, x, y)
     }
 
     override fun isCulled(pCamera: Camera): Boolean {
-        return drawX > pCamera.maxX || drawX + width < pCamera.minX
-            || drawY > pCamera.maxY || drawY + height < pCamera.minY
+        return drawX > pCamera.maxX || drawX + drawWidth < pCamera.minX
+            || drawY > pCamera.maxY || drawY + drawHeight < pCamera.minY
     }
 
-    override fun getSceneCenterCoordinates(): FloatArray {
-        return this.convertLocalToSceneCoordinates(width * 0.5f, height * 0.5f)
+    override fun getLocalToParentTransformation(): Transformation {
+
+        if (mLocalToParentTransformation == null) {
+            mLocalToParentTransformation = Transformation()
+        }
+
+        if (mLocalToParentTransformationDirty) {
+            mLocalToParentTransformation.setToIdentity()
+
+            if (scaleX != 1f || scaleY != 1f || rotation != 0f) {
+                mLocalToParentTransformation.postTranslate(originOffsetX, originOffsetY)
+
+                if (scaleX != 1f || scaleY != 1f) {
+                    mLocalToParentTransformation.postScale(scaleX, scaleY)
+                }
+
+                if (rotation != 0f) {
+                    mLocalToParentTransformation.postRotate(rotation)
+                }
+
+                mLocalToParentTransformation.postTranslate(-originOffsetX, -originOffsetY)
+            }
+
+            mLocalToParentTransformation.postTranslate(drawX, drawY)
+            mLocalToParentTransformationDirty = false
+        }
+
+        return mLocalToParentTransformation
+    }
+
+    override fun getParentToLocalTransformation(): Transformation {
+
+        if (mParentToLocalTransformation == null) {
+            mParentToLocalTransformation = Transformation()
+        }
+
+        if (mParentToLocalTransformationDirty) {
+            mParentToLocalTransformation.setToIdentity()
+            mParentToLocalTransformation.postTranslate(-drawX, -drawY)
+
+            if (scaleX != 1f || scaleY != 1f || rotation != 0f) {
+                mParentToLocalTransformation.postTranslate(originOffsetX, originOffsetY)
+
+                if (rotation != 0f) {
+                    mParentToLocalTransformation.postRotate(-rotation)
+                }
+
+                if (scaleX != 1f || scaleY != 1f) {
+                    mParentToLocalTransformation.postScale(1 / scaleX, 1 / scaleY)
+                }
+
+                mParentToLocalTransformation.postTranslate(-originOffsetX, -originOffsetY)
+            }
+
+            mParentToLocalTransformationDirty = false
+        }
+
+        return mParentToLocalTransformation
     }
 
 
