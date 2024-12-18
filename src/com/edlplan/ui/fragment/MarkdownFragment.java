@@ -64,7 +64,7 @@ public class MarkdownFragment extends BaseFragment {
     }
 
     protected void playOnLoadAnim() {
-        View body = findViewById(R.id.frg_body);
+        View body = findViewById(R.id.fullLayout);
         body.setTranslationY(500);
         body.animate().cancel();
         body.animate()
@@ -76,7 +76,7 @@ public class MarkdownFragment extends BaseFragment {
     }
 
     protected void playOnDismissAnim(Runnable runnable) {
-        View body = findViewById(R.id.frg_body);
+        View body = findViewById(R.id.fullLayout);
         body.animate().cancel();
         body.animate()
                 .translationY(500)
