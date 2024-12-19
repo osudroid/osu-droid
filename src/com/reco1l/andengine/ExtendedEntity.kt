@@ -50,6 +50,17 @@ abstract class ExtendedEntity(
         }
 
     /**
+     * Determines which axes the entity should adjust its position relative to its parent.
+     */
+    open var relativePositionAxes = Axes.None
+        set(value) {
+            if (field != value) {
+                field = value
+                invalidateTransformations()
+            }
+        }
+
+    /**
      * The origin factor of the entity in the X axis.
      */
     open var originX = 0f
@@ -198,9 +209,8 @@ abstract class ExtendedEntity(
      */
     open val drawWidth: Float
         get() {
-            val parent = parent
-            if (relativeSizeAxes.isHorizontal && parent is IShape) {
-                return parent.width * width
+            if (relativeSizeAxes.isHorizontal) {
+                return getParentWidth() * width
             }
             return width
         }
@@ -213,9 +223,8 @@ abstract class ExtendedEntity(
      */
     open val drawHeight: Float
         get() {
-            val parent = parent
-            if (relativeSizeAxes.isVertical && parent is IShape) {
-                return parent.height * height
+            if (relativeSizeAxes.isVertical) {
+                return getParentHeight() * height
             }
             return height
         }
@@ -226,11 +235,18 @@ abstract class ExtendedEntity(
      */
     open val drawX: Float
         get() {
+            val parent = parent
             if (parent is Container) {
-                return (parent as Container).getChildDrawX(this)
+                return parent.getChildDrawX(this)
             }
+
+            if (relativePositionAxes.isHorizontal) {
+                return getParentWidth() * x + totalOffsetX
+            }
+
             return x + totalOffsetX
         }
+
 
     /**
      * The raw Y position of the entity.
@@ -238,9 +254,15 @@ abstract class ExtendedEntity(
      */
     open val drawY: Float
         get() {
+            val parent = parent
             if (parent is Container) {
-                return (parent as Container).getChildDrawY(this)
+                return parent.getChildDrawY(this)
             }
+
+            if (relativePositionAxes.isVertical) {
+                return getParentHeight() * y + totalOffsetY
+            }
+
             return y + totalOffsetY
         }
 
@@ -248,33 +270,25 @@ abstract class ExtendedEntity(
      * The offset applied to the X axis according to the origin factor.
      */
     open val originOffsetX: Float
-        get() = -(width * originX)
+        get() = -(drawWidth * originX)
 
     /**
      * The offset applied to the Y axis according to the origin factor.
      */
     open val originOffsetY: Float
-        get() = -(height * originY)
+        get() = -(drawWidth * originY)
 
     /**
      * The offset applied to the X axis according to the anchor factor.
      */
     open val anchorOffsetX: Float
-        get() = when (parent) {
-            is IShape -> (parent as IShape).width * anchorX
-            is CameraScene -> ((parent as CameraScene).camera?.widthRaw ?: 0f) * anchorX
-            else -> 0f
-        }
+        get() = getParentWidth() * anchorX
 
     /**
      * The offset applied to the Y axis according to the anchor factor.
      */
     open val anchorOffsetY: Float
-        get() = when (parent) {
-            is IShape -> (parent as IShape).height * anchorY
-            is CameraScene -> ((parent as CameraScene).camera?.heightRaw ?: 0f) * anchorY
-            else -> 0f
-        }
+        get() = getParentHeight() * anchorY
 
     /**
      * The total offset applied to the X axis.
@@ -371,8 +385,8 @@ abstract class ExtendedEntity(
     override fun applyRotation(pGL: GL10) {
 
         // This will ensure getSceneCenterCoordinates() applies the correct transformation.
-        mRotationCenterX = width * originX
-        mRotationCenterY = height * originY
+        mRotationCenterX = drawWidth * originX
+        mRotationCenterY = drawHeight * originY
 
         if (rotation != 0f) {
             pGL.glRotatef(rotation, 0f, 0f, 1f)
@@ -382,8 +396,8 @@ abstract class ExtendedEntity(
     override fun applyScale(pGL: GL10) {
 
         // This will ensure getSceneCenterCoordinates() applies the correct transformation.
-        mScaleCenterX = width * originX
-        mScaleCenterY = height * originY
+        mScaleCenterX = drawWidth * originX
+        mScaleCenterY = drawHeight * originY
 
         if (scaleX != 1f || scaleY != 1f) {
             pGL.glScalef(scaleX, scaleY, 1f)
@@ -528,22 +542,12 @@ abstract class ExtendedEntity(
 
         if (contentWidth != width || contentHeight != height) {
 
-            val parent = parent
-
             if (autoSizeAxes.isHorizontal) {
-                width = if (relativeSizeAxes.isHorizontal && parent is IShape) {
-                    contentWidth / parent.width
-                } else {
-                    contentWidth
-                }
+                width = if (relativeSizeAxes.isHorizontal) contentWidth / getParentWidth() else contentWidth
             }
 
             if (autoSizeAxes.isVertical) {
-                height = if (relativeSizeAxes.isVertical && parent is IShape) {
-                    contentHeight / parent.height
-                } else {
-                    contentHeight
-                }
+                height = if (relativeSizeAxes.isVertical) contentHeight / getParentHeight() else contentHeight
             }
 
             updateVertexBuffer()
@@ -562,8 +566,7 @@ abstract class ExtendedEntity(
     open fun setSize(newWidth: Float, newHeight: Float): Boolean {
 
         if (autoSizeAxes == Axes.Both) {
-            Log.w("ExtendedEntity", "Cannot set size when autoSizeAxes is set to Both.")
-            return false
+            throw IllegalArgumentException("Cannot set size when autoSizeAxes is set to Both.")
         }
 
         if (width != newWidth || height != newHeight) {
@@ -584,9 +587,9 @@ abstract class ExtendedEntity(
     }
 
     open fun setWidth(value: Float) {
-        if (autoSizeAxes.isVertical) {
-            Log.w("ExtendedEntity", "Cannot set width when autoSizeAxes is set to Both or X.")
-            return
+
+        if (autoSizeAxes.isHorizontal) {
+            throw IllegalArgumentException("Cannot set width when autoSizeAxes is set to Both or X.")
         }
 
         if (width != value) {
@@ -598,9 +601,9 @@ abstract class ExtendedEntity(
     }
 
     open fun setHeight(value: Float) {
-        if (autoSizeAxes.isHorizontal) {
-            Log.w("ExtendedEntity", "Cannot set height when autoSizeAxes is set to Both or Y.")
-            return
+
+        if (autoSizeAxes.isVertical) {
+            throw IllegalArgumentException("Cannot set height when autoSizeAxes is set to Both or Y.")
         }
 
         if (height != value) {
@@ -756,4 +759,60 @@ abstract class ExtendedEntity(
 
 }
 
+
+/**
+ * Returns the width of the parent entity.
+ */
+fun ExtendedEntity.getParentWidth() = when (val parent = parent) {
+    is ExtendedEntity -> parent.drawWidth
+    is CameraScene -> parent.camera.widthRaw
+    is IShape -> parent.width
+    else -> 0f
+}
+
+/**
+ * Returns the height of the parent entity.
+ */
+fun ExtendedEntity.getParentHeight() = when (val parent = parent) {
+    is ExtendedEntity -> parent.drawHeight
+    is CameraScene -> parent.camera.heightRaw
+    is IShape -> parent.height
+    else -> 0f
+}
+
+/**
+ * Returns the draw width of the entity.
+ */
+fun IEntity.getDrawWidth(): Float = when (this) {
+    is ExtendedEntity -> drawWidth
+    is IShape -> width
+    else -> 0f
+}
+
+/**
+ * Returns the draw height of the entity.
+ */
+fun IEntity.getDrawHeight(): Float = when (this) {
+    is ExtendedEntity -> drawHeight
+    is IShape -> height
+    else -> 0f
+}
+
+/**
+ * Returns the draw X position of the entity.
+ */
+fun IEntity.getDrawX(): Float = when (this) {
+    is ExtendedEntity -> drawX
+    is IShape -> x
+    else -> 0f
+}
+
+/**
+ * Returns the draw Y position of the entity.
+ */
+fun IEntity.getDrawY(): Float = when (this) {
+    is ExtendedEntity -> drawY
+    is IShape -> y
+    else -> 0f
+}
 
