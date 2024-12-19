@@ -394,6 +394,11 @@ abstract class ExtendedEntity(
         originY = origin.factorY
     }
 
+    fun setRelativePosition(x: Float, y: Float) {
+        relativePositionAxes = Axes.Both
+        setPosition(x, y)
+    }
+
     override fun setPosition(x: Float, y: Float) {
         if (mX != x || mY != y) {
             mX = x
@@ -655,6 +660,16 @@ abstract class ExtendedEntity(
             return true
         }
         return false
+    }
+
+
+    /**
+     * Sets a relative size for the entity.
+     * This will set the [relativeSizeAxes] property to [Axes.Both] automaticall.
+     */
+    fun setRelativeSize(width: Float, height: Float) {
+        relativeSizeAxes = Axes.Both
+        setSize(width, height)
     }
 
     /**
