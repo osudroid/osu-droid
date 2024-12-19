@@ -4,8 +4,6 @@ import android.util.*
 import com.reco1l.andengine.container.*
 import com.reco1l.andengine.modifier.*
 import com.reco1l.framework.*
-import com.reco1l.extendedEntityBoundsRectangle
-import com.reco1l.showExtendedEntityBounds
 import org.anddev.andengine.engine.camera.*
 import org.anddev.andengine.entity.*
 import org.anddev.andengine.entity.scene.CameraScene
@@ -40,6 +38,23 @@ abstract class ExtendedEntity(
         set(value) {
             if (field != value) {
                 field = value
+
+                // Setting the opposite value for relativeSizeAxes to avoid conflicts.
+                if (relativeSizeAxes != Axes.None) {
+
+                    if (value == Axes.Both) {
+                        relativeSizeAxes = Axes.None
+                    }
+
+                    if (value == Axes.X && relativeSizeAxes == Axes.Y) {
+                        relativeSizeAxes = Axes.Y
+                    }
+
+                    if (value == Axes.Y && relativeSizeAxes == Axes.X) {
+                        relativeSizeAxes = Axes.X
+                    }
+                }
+
                 onContentSizeMeasured()
             }
         }
@@ -64,11 +79,20 @@ abstract class ExtendedEntity(
             if (field != value) {
                 field = value
 
-                if (value.isHorizontal && autoSizeAxes.isHorizontal || value.isVertical && autoSizeAxes.isVertical) {
-                    Log.w(
-                        "ExtendedEntity", "relativeSizeAxes.${relativeSizeAxes.name} is incompatible" +
-                            " with autoSizeAxes.${autoSizeAxes.name} and it will be ignored."
-                    )
+                // Setting the opposite value for autoSizeAxes to avoid conflicts.
+                if (autoSizeAxes != Axes.None) {
+
+                    if (value == Axes.Both) {
+                        autoSizeAxes = Axes.None
+                    }
+
+                    if (value == Axes.X && autoSizeAxes == Axes.Y) {
+                        autoSizeAxes = Axes.Y
+                    }
+
+                    if (value == Axes.Y && autoSizeAxes == Axes.X) {
+                        autoSizeAxes = Axes.X
+                    }
                 }
 
                 onContentSizeMeasured()
