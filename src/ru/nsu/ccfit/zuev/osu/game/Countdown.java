@@ -17,6 +17,7 @@ import org.anddev.andengine.entity.sprite.Sprite;
 
 import ru.nsu.ccfit.zuev.osu.Config;
 import ru.nsu.ccfit.zuev.osu.Constants;
+import ru.nsu.ccfit.zuev.osu.GlobalManager;
 import ru.nsu.ccfit.zuev.osu.ResourceManager;
 import ru.nsu.ccfit.zuev.osu.Utils;
 
@@ -25,14 +26,12 @@ public class Countdown extends GameObject {
     private final ExtendedSprite ready;
     private final Sprite count1, count2, count3;
     private final ExtendedSprite go;
-    private final GameObjectListener listener;
     private final float speed;
     private float timepassed;
     private Scene scene;
 
-    public Countdown(final GameObjectListener listener, final Scene scene,
+    public Countdown(final Scene scene,
                      final float speed, final float offset, final float time) {
-        this.listener = listener;
         this.speed = speed;
         this.scene = scene;
         timepassed = -time + COUNTDOWN_LENGTH * speed;
@@ -159,7 +158,7 @@ public class Countdown extends GameObject {
         if (timepassed >= COUNTDOWN_LENGTH * speed
                 && timepassed - dt < COUNTDOWN_LENGTH * speed) {
             scene = null;
-            listener.removePassiveObject(Countdown.this);
+            GlobalManager.getInstance().getGameScene().countdownAnimator = null;
             ready.detachSelf();
             go.detachSelf();
             count1.detachSelf();

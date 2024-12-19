@@ -77,7 +77,6 @@ import java.util.concurrent.TimeUnit;
 import ru.nsu.ccfit.zuev.audio.serviceAudio.SaveServiceObject;
 import ru.nsu.ccfit.zuev.audio.serviceAudio.SongService;
 import ru.nsu.ccfit.zuev.osu.helper.FileUtils;
-import ru.nsu.ccfit.zuev.osu.helper.InputManager;
 import ru.nsu.ccfit.zuev.osu.helper.StringTable;
 import ru.nsu.ccfit.zuev.osu.menu.LoadingScreen;
 import ru.nsu.ccfit.zuev.osu.menu.ModMenu;
@@ -115,7 +114,6 @@ public class MainActivity extends BaseGameActivity implements
         //Debug.setDebugLevel(Debug.DebugLevel.NONE);
         StringTable.setContext(this);
         ToastLogger.init(this);
-        InputManager.setContext(this);
         OnlineManager.getInstance().init();
 
         final DisplayMetrics dm = new DisplayMetrics();
@@ -760,9 +758,6 @@ public class MainActivity extends BaseGameActivity implements
                 && GlobalManager.getInstance().getSongMenu().getScene().hasChildScene()) {
             if (GlobalManager.getInstance().getSongMenu().getScene().getChildScene() ==
                     GlobalManager.getInstance().getSongMenu().getSearchBar().getScene()) {
-                if (keyCode == KeyEvent.KEYCODE_ENTER) {
-                    InputManager.getInstance().toggleKeyboard();
-                }
                 GlobalManager.getInstance().getSongMenu().getSearchBar().hideMenu();
             }
 
@@ -814,16 +809,6 @@ public class MainActivity extends BaseGameActivity implements
             return true;
         }
 
-        if (InputManager.getInstance().isStarted()) {
-            if (keyCode == KeyEvent.KEYCODE_DEL) {
-                InputManager.getInstance().pop();
-            } else if (keyCode != KeyEvent.KEYCODE_ENTER) {
-                final char c = (char) event.getUnicodeChar();
-                if (c != 0) {
-                    InputManager.getInstance().append(c);
-                }
-            }
-        }
         return super.onKeyDown(keyCode, event);
     }
 

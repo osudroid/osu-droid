@@ -3,6 +3,7 @@ package com.rian.osu.gameplay
 import com.reco1l.framework.Pool
 import com.rian.osu.beatmap.hitobject.BankHitSampleInfo
 import com.rian.osu.beatmap.hitobject.HitSampleInfo
+import kotlin.math.max
 import ru.nsu.ccfit.zuev.audio.BassSoundProvider
 import ru.nsu.ccfit.zuev.skins.OsuSkin
 import ru.nsu.ccfit.zuev.osu.ResourceManager.getInstance as getResources
@@ -57,7 +58,7 @@ class GameplayHitSampleInfo : IGameplayHitSampleInfo {
             return
         }
 
-        soundProvider?.play(sampleInfo!!.volume / 100f)
+        soundProvider?.play(max(0.05f, sampleInfo!!.volume / 100f))
     }
 
     override fun stop() {
