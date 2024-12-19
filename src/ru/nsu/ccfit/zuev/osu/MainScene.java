@@ -461,25 +461,23 @@ public class MainScene implements IUpdateHandler {
             BannerLoader.loadBanner(scene);
         }
 
-        if (BuildConfig.DEBUG) {
-            ResourceManager.getInstance().loadHighQualityAsset("dev-build-overlay", "dev-build-overlay.png");
+        ResourceManager.getInstance().loadHighQualityAsset("dev-build-overlay", "dev-build-overlay.png");
 
-            ExtendedSprite debugOverlay = new ExtendedSprite(ResourceManager.getInstance().getTexture("dev-build-overlay"));
-            debugOverlay.setPosition(Config.getRES_WIDTH() / 2f, Config.getRES_HEIGHT());
-            debugOverlay.setOrigin(Anchor.BottomCenter);
-            scene.attachChild(debugOverlay);
+        ExtendedSprite tournamentOverlay = new ExtendedSprite(ResourceManager.getInstance().getTexture("dev-build-overlay"));
+        tournamentOverlay.setPosition(Config.getRES_WIDTH() / 2f, Config.getRES_HEIGHT());
+        tournamentOverlay.setOrigin(Anchor.BottomCenter);
+        scene.attachChild(tournamentOverlay);
 
-            Text debugText = new Text(0, 0, ResourceManager.getInstance().getFont("smallFont"), "DEVELOPMENT BUILD");
-            debugText.setColor(1f, 237f / 255f, 0f);
-            debugText.setPosition((Config.getRES_WIDTH() - debugText.getWidth()) / 2f, Config.getRES_HEIGHT() - debugOverlay.getHeight() - 1f - debugText.getHeight());
+        Text tournamentText = new Text(0, 0, ResourceManager.getInstance().getFont("smallFont"), "TOURNAMENT CLIENT");
+        tournamentText.setColor(1f, 237f / 255f, 0f);
+        tournamentText.setPosition((Config.getRES_WIDTH() - tournamentText.getWidth()) / 2f, Config.getRES_HEIGHT() - tournamentOverlay.getHeight() - 1f - tournamentText.getHeight());
 
-            Text debugTextShadow = new Text(0, 0, ResourceManager.getInstance().getFont("smallFont"), "DEVELOPMENT BUILD");
-            debugTextShadow.setColor(0f, 0f, 0f, 0.5f);
-            debugTextShadow.setPosition((Config.getRES_WIDTH() - debugText.getWidth()) / 2f + 2f, Config.getRES_HEIGHT() - debugOverlay.getHeight() - 1f - debugText.getHeight() + 2f);
+        Text tournamentTextShadow = new Text(0, 0, ResourceManager.getInstance().getFont("smallFont"), "TOURNAMENT CLIENT");
+        tournamentTextShadow.setColor(0f, 0f, 0f, 0.5f);
+        tournamentTextShadow.setPosition((Config.getRES_WIDTH() - tournamentText.getWidth()) / 2f + 2f, Config.getRES_HEIGHT() - tournamentOverlay.getHeight() - 1f - tournamentText.getHeight() + 2f);
 
-            scene.attachChild(debugTextShadow);
-            scene.attachChild(debugText);
-        }
+        scene.attachChild(tournamentTextShadow);
+        scene.attachChild(tournamentText);
 
         progressBar = new LinearSongProgress(scene, 0, 0, new PointF(Utils.toRes(Config.getRES_WIDTH() - 320), Utils.toRes(100)));
         progressBar.setProgressRectColor(new RGBColor(0.9f, 0.9f, 0.9f));
