@@ -310,7 +310,7 @@ abstract class ExtendedEntity(
      * The offset applied to the Y axis according to the origin factor.
      */
     open val originOffsetY: Float
-        get() = -(drawWidth * originY)
+        get() = -(drawHeight * originY)
 
     /**
      * The offset applied to the X axis according to the anchor factor.
