@@ -191,9 +191,9 @@ abstract class ExtendedEntity(
         }
 
     /**
-     * Whether the color should be inherited from all the parents in the hierarchy.
+     * Whether the entity should clip its children.
      */
-    open var inheritColor = true
+    open var clipChildren = false
 
     /**
      * Whether the depth buffer should be cleared before drawing the entity.
@@ -221,6 +221,11 @@ abstract class ExtendedEntity(
             mBlue = value.blue
             mAlpha = value.alpha
         }
+
+    /**
+     * Whether the color should be inherited from all the parents in the hierarchy.
+     */
+    open var inheritColor = true
 
     /**
      * The color blending function.
@@ -526,6 +531,42 @@ abstract class ExtendedEntity(
         applyBlending(pGL)
     }
 
+    override fun onManagedDraw(gl: GL10, camera: Camera) {
+
+        if (clipChildren) {
+            GLHelper.enableScissorTest(gl)
+
+            var (bottomLeftX, bottomLeftY) = camera.getScreenSpaceCoordinates(convertLocalToSceneCoordinates(0f, 0f))
+            var (topLeftX, topLeftY) = camera.getScreenSpaceCoordinates(convertLocalToSceneCoordinates(0f, drawHeight))
+            var (topRightX, topRightY) = camera.getScreenSpaceCoordinates(convertLocalToSceneCoordinates(drawWidth, drawHeight))
+            var (bottomRightX, bottomRightY) = camera.getScreenSpaceCoordinates(convertLocalToSceneCoordinates(drawWidth, 0f))
+
+            // Flip the Y axis to match the OpenGL coordinate system.
+            bottomLeftY = camera.surfaceHeight - bottomLeftY
+            topLeftY = camera.surfaceHeight - topLeftY
+            topRightY = camera.surfaceHeight - topRightY
+            bottomRightY = camera.surfaceHeight - bottomRightY
+
+            val minClippingX = minOf(bottomLeftX, topLeftX, topRightX, bottomRightX)
+            val minClippingY = minOf(bottomLeftY, topLeftY, topRightY, bottomRightY)
+
+            val maxClippingX = maxOf(bottomLeftX, topLeftX, topRightX, bottomRightX)
+            val maxClippingY = maxOf(bottomLeftY, topLeftY, topRightY, bottomRightY)
+
+            gl.glScissor(
+                minClippingX.toInt(),
+                minClippingY.toInt(),
+                (maxClippingX - minClippingX).toInt(),
+                (maxClippingY - minClippingY).toInt()
+            )
+        }
+
+        super.onManagedDraw(gl, camera)
+
+        if (clipChildren) {
+            GLHelper.disableScissorTest(gl)
+        }
+    }
 
     override fun onManagedUpdate(pSecondsElapsed: Float) {
 
