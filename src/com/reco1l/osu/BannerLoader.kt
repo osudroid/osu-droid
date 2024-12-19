@@ -14,7 +14,6 @@ import org.anddev.andengine.input.touch.TouchEvent
 import ru.nsu.ccfit.zuev.osu.Config
 import ru.nsu.ccfit.zuev.osu.GlobalManager
 import ru.nsu.ccfit.zuev.osu.ResourceManager
-import ru.nsu.ccfit.zuev.osu.online.OnlineManager
 import java.io.File
 
 object BannerLoader {
@@ -31,7 +30,7 @@ object BannerLoader {
             var bannerUrl = ""
 
             try {
-                JsonObjectRequest(OnlineManager.endpoint + "game/banner.php").use { request ->
+                JsonObjectRequest("https://osudroid.moe/api/game/banner.php").use { request ->
 
                     val response = request.execute().json
                     val imageLink = response.getString("ImageLink")
