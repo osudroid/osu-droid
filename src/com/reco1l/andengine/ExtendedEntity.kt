@@ -4,6 +4,8 @@ import android.util.*
 import com.reco1l.andengine.container.*
 import com.reco1l.andengine.modifier.*
 import com.reco1l.framework.*
+import com.reco1l.extendedEntityBoundsRectangle
+import com.reco1l.showExtendedEntityBounds
 import org.anddev.andengine.engine.camera.*
 import org.anddev.andengine.entity.*
 import org.anddev.andengine.entity.scene.CameraScene
@@ -29,6 +31,10 @@ abstract class ExtendedEntity(
 
     /**
      * Determines which axes the entity should automatically adjust its size to.
+     *
+     * In this case the size will equal to the content size of the entity. Some
+     * types of entities requieres the user to manually set the size, in those
+     * cases this property might be ignored.
      */
     open var autoSizeAxes = Axes.None
         set(value) {
@@ -40,17 +46,45 @@ abstract class ExtendedEntity(
 
     /**
      * Determines which axes the entity should adjust its size relative to its parent.
+     *
+     * Depending on the type, the entity's width and height will be taken as a multiplier
+     * for the parent's width and height in order to calculate the final size.
+     *
+     * Example:
+     *
+     * If relativeSizeAxes is set to [Axes.Both] and we set the size to 0.5, the entity's
+     * size will be half the size of the parent.
+     *
+     * Note: autoSizeAxes has priority over relativeSizeAxes. As for example if autoSizeAxes
+     * is set to [Axes.Both] and relativeSizeAxes is set to [Axes.Both], relativeSizeAxes
+     * will be ignored.
      */
     open var relativeSizeAxes = Axes.None
         set(value) {
             if (field != value) {
                 field = value
+
+                if (value.isHorizontal && autoSizeAxes.isHorizontal || value.isVertical && autoSizeAxes.isVertical) {
+                    Log.w(
+                        "ExtendedEntity", "relativeSizeAxes.${relativeSizeAxes.name} is incompatible" +
+                            " with autoSizeAxes.${autoSizeAxes.name} and it will be ignored."
+                    )
+                }
+
                 onContentSizeMeasured()
             }
         }
 
     /**
      * Determines which axes the entity should adjust its position relative to its parent.
+     *
+     * Depending on the type, the entity's position will be taken as a multiplier applied to
+     * the parent's width and height in order to calculate the final position.
+     *
+     * Example:
+     *
+     * If relativePositionAxes is set to [Axes.Both] and we set the position to 0.5 for both axes,
+     * the entity's position will be at the center of the parent.
      */
     open var relativePositionAxes = Axes.None
         set(value) {
