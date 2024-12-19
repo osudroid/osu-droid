@@ -192,9 +192,9 @@ public class MainScene implements IUpdateHandler {
                     new MessageDialog()
                         .setTitle("About")
                         .setMessage(
-                                "<h1>osu!droid</h1>\n" +
+                                "<h1>osu!droid Tournament Client</h1>\n" +
                                 "<h5>Version " + BuildConfig.VERSION_NAME + "</h5>\n" +
-                                "<p>Made by osu!droid team<br>osu! is © peppy 2007-2024</p>\n" +
+                                "<p>Made by Rian8337<br>osu! is © peppy 2007-2024</p>\n" +
                                 "<br>\n" +
                                 "<a href=\"https://osu.ppy.sh\">Visit official osu! website ↗</a>\n" +
                                 "<br>\n" +
