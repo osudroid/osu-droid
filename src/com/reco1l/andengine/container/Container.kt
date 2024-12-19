@@ -62,10 +62,20 @@ open class Container : ExtendedEntity() {
 
 
     open fun getChildDrawX(child: ExtendedEntity): Float {
+
+        if (child.relativePositionAxes.isHorizontal) {
+            return child.x * drawWidth + child.totalOffsetX
+        }
+
         return child.x + child.totalOffsetX
     }
 
     open fun getChildDrawY(child: ExtendedEntity): Float {
+
+        if (child.relativePositionAxes.isVertical) {
+            return child.y * drawHeight + child.totalOffsetY
+        }
+
         return child.y + child.totalOffsetY
     }
 
@@ -86,21 +96,11 @@ open class Container : ExtendedEntity() {
 
                 val child = mChildren.getOrNull(i) ?: continue
 
-                var offsetX = child.x
-                var offsetY = child.y
+                val x = max(0f, child.getDrawX())
+                val y = max(0f, child.getDrawY())
 
-                if (child is ExtendedEntity) {
-                    offsetX += child.originOffsetX
-                    offsetY += child.originOffsetY
-                }
-
-                offsetX = max(0f, offsetX)
-                offsetY = max(0f, offsetY)
-
-                if (child is IShape) {
-                    contentWidth = max(contentWidth, offsetX + child.width)
-                    contentHeight = max(contentHeight, offsetY + child.height)
-                }
+                contentWidth = max(contentWidth, x + child.getDrawWidth())
+                contentHeight = max(contentHeight, y + child.getDrawHeight())
             }
         }
 
@@ -187,3 +187,20 @@ open class Container : ExtendedEntity() {
     }
 }
 
+
+operator fun <T : IEntity> Container.get(index: Int): T {
+    @Suppress("UNCHECKED_CAST")
+    return getChild(index) as T
+}
+
+operator fun Container.set(index: Int, entity: IEntity) {
+    attachChild(entity, index)
+}
+
+operator fun Container.plusAssign(entity: IEntity) {
+    attachChild(entity)
+}
+
+operator fun Container.minusAssign(entity: IEntity) {
+    detachChild(entity)
+}
