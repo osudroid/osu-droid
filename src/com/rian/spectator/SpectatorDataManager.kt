@@ -55,11 +55,8 @@ class SpectatorDataManager(
                     endEventIndex = events.size
 
                     writeFloat(secPassed)
-                    writeInt(stat.totalScoreWithMultiplier)
-                    writeInt(stat.combo)
-                    writeFloat(stat.getAccuracy())
-
                     writeInt(replay.cursorMoves.size)
+
                     for (i in beginningCursorMoveIndexes.indices) {
                         val move = replay.cursorMoves[i]
                         val beginningIndex = beginningCursorMoveIndexes[i]
@@ -171,8 +168,8 @@ class SpectatorDataManager(
     fun addObjectData(objectId: Int) {
         val obj = gameScene.beatmap.hitObjects.objects[objectId]
         val replayData = replay.objectData[objectId]
-
         var time = obj.endTime
+
         if (obj is HitCircle) {
             // Special handling for circles that are not tapped.
             time += (
