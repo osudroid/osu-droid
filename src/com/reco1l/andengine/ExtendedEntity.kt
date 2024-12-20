@@ -675,26 +675,28 @@ abstract class ExtendedEntity(
     /**
      * Sets the size of the entity.
      *
+     * Note: This will change the [autoSizeAxes] property to [Axes.None] automatically.
+     *
      * @return Whether the size of the entity was changed or not, this depends on the [autoSizeAxes] property.
      */
     open fun setSize(newWidth: Float, newHeight: Float): Boolean {
 
-        if (autoSizeAxes == Axes.Both) {
-            throw IllegalArgumentException("Cannot set size when autoSizeAxes is set to Both.")
+        if (autoSizeAxes != Axes.None) {
+            Log.w("ExtendedEntity", "autoSizeAxes is set to ${autoSizeAxes.name} while changing the size manually.")
+            autoSizeAxes = Axes.None
         }
 
         if (width != newWidth || height != newHeight) {
-
-            if (!autoSizeAxes.isHorizontal) {
-                width = newWidth
-            }
-
-            if (!autoSizeAxes.isVertical) {
-                height = newHeight
-            }
+            width = newWidth
+            height = newHeight
 
             updateVertexBuffer()
-            (parent as? Container)?.onChildSizeChanged(this)
+
+            val parent = parent
+            if (parent is Container) {
+                parent.onChildSizeChanged(this)
+            }
+
             return true
         }
         return false
@@ -703,7 +705,8 @@ abstract class ExtendedEntity(
     open fun setWidth(value: Float) {
 
         if (autoSizeAxes.isHorizontal) {
-            throw IllegalArgumentException("Cannot set width when autoSizeAxes is set to Both or X.")
+            Log.w("ExtendedEntity", "autoSizeAxes is set to ${autoSizeAxes.name} while changing the width manually.")
+            autoSizeAxes = if (autoSizeAxes == Axes.Both) Axes.Y else Axes.None
         }
 
         if (width != value) {
@@ -717,7 +720,8 @@ abstract class ExtendedEntity(
     open fun setHeight(value: Float) {
 
         if (autoSizeAxes.isVertical) {
-            throw IllegalArgumentException("Cannot set height when autoSizeAxes is set to Both or Y.")
+            Log.w("ExtendedEntity", "autoSizeAxes is set to ${autoSizeAxes.name} while changing the height manually.")
+            autoSizeAxes = if (autoSizeAxes == Axes.Both) Axes.X else Axes.None
         }
 
         if (height != value) {
