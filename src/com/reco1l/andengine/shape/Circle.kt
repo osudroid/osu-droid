@@ -16,7 +16,7 @@ import kotlin.math.*
  *
  * @author Reco1l
  */
-class Circle : ExtendedEntity() {
+open class Circle : ExtendedEntity() {
 
     /**
      * The angle where the circle starts to draw in degrees. By default, it is -90 degrees.
@@ -86,15 +86,20 @@ class Circle : ExtendedEntity() {
             shouldRebuildVertexBuffer = false
 
             val segments = approximateSegments(drawWidth, drawHeight)
-
             setVertexBuffer(CircleVertexBuffer(segments))
         }
 
-        (vertexBuffer as CircleVertexBuffer).update(drawWidth, drawHeight, startAngle, endAngle)
+        val vertexBuffer = vertexBuffer
+        if (vertexBuffer is CircleVertexBuffer) {
+            vertexBuffer.update(drawWidth, drawHeight, startAngle, endAngle)
+        }
     }
 
     override fun drawVertices(pGL: GL10, pCamera: Camera) {
-        (vertexBuffer as? CircleVertexBuffer)?.draw(pGL)
+        val vertexBuffer = vertexBuffer
+        if (vertexBuffer is CircleVertexBuffer) {
+            vertexBuffer.draw(pGL)
+        }
     }
 
 
@@ -103,7 +108,7 @@ class Circle : ExtendedEntity() {
         fun approximateSegments(width: Float, height: Float, maximumAngle: Float = 360f): Int {
 
             val averageRadius = (width + height) / 4f
-            val minSegmentAngle = min(10f, 360f / averageRadius.toRadians())
+            val minSegmentAngle = min(5f, 360f / averageRadius.toRadians())
 
             return max(3, (maximumAngle / minSegmentAngle).toInt())
         }
@@ -113,7 +118,7 @@ class Circle : ExtendedEntity() {
 }
 
 
-class CircleVertexBuffer(@IntRange(from = 1) val segments: Int) : VertexBuffer(
+open class CircleVertexBuffer(@IntRange(from = 1) val segments: Int) : VertexBuffer(
 
     // Explanation: Segments + 2 because the first vertex that is the center of the circle is not included in the segment
     // count and we add it twice so that the last vertex connects to the first one.
@@ -153,7 +158,7 @@ class CircleVertexBuffer(@IntRange(from = 1) val segments: Int) : VertexBuffer(
         setHardwareBufferNeedsUpdate()
     }
 
-    fun draw(pGL: GL10) {
+    open fun draw(pGL: GL10) {
         pGL.glDrawArrays(GL11.GL_TRIANGLE_FAN, 0, segments + 2)
     }
 
