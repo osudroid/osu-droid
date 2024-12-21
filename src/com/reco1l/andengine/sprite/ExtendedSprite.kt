@@ -94,8 +94,13 @@ open class ExtendedSprite(textureRegion: TextureRegion? = null) : Box() {
 
 
     init {
-        @Suppress("LeakingThis")
-        this.textureRegion = textureRegion
+        run {
+            textureRegion?.setTexturePosition(textureX, textureY)
+            textureRegion?.isFlippedVertical = flippedVertical
+            textureRegion?.isFlippedHorizontal = flippedHorizontal
+
+            onContentSizeMeasured()
+        }
     }
 
 
