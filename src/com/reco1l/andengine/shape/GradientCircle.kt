@@ -3,12 +3,10 @@ package com.reco1l.andengine.shape
 import androidx.annotation.IntRange
 import com.reco1l.framework.ColorARGB
 import com.reco1l.framework.Colors
-import com.reco1l.toolkt.*
 import java.nio.ByteBuffer
 import java.nio.ByteOrder
 import java.nio.FloatBuffer
 import javax.microedition.khronos.opengles.*
-import kotlin.math.*
 
 
 /**
@@ -41,9 +39,15 @@ class GradientCircle : Circle() {
             }
         }
 
-
     private var shouldRebuildVertexBuffer = true
 
+
+    override fun setAlpha(pAlpha: Float) {
+        if (mAlpha != pAlpha) {
+            super.setAlpha(pAlpha)
+            updateVertexBuffer()
+        }
+    }
 
     override fun onUpdateVertexBuffer() {
 
@@ -54,16 +58,24 @@ class GradientCircle : Circle() {
             setVertexBuffer(GradientCircleVertexBuffer(segments))
         }
 
+        // Getting inherited alpha.
+        var alpha = mAlpha
+        var parent = parent
+        while (parent != null) {
+            alpha *= parent.alpha
+            parent = parent.parent
+        }
+
         (vertexBuffer as GradientCircleVertexBuffer).update(
             drawWidth,
             drawHeight,
             startAngle,
             endAngle,
             startColor,
-            endColor
+            endColor,
+            alpha
         )
     }
-
 }
 
 
@@ -83,14 +95,15 @@ class GradientCircleVertexBuffer(@IntRange(from = 1) segments: Int) : CircleVert
         startAngle: Float,
         endAngle: Float,
         startColor: ColorARGB,
-        endColor: ColorARGB
+        endColor: ColorARGB,
+        alpha: Float
     ) {
         super.update(width, height, startAngle, endAngle)
 
         colorBuffer.put(0, startColor.red)
         colorBuffer.put(1, startColor.green)
         colorBuffer.put(2, startColor.blue)
-        colorBuffer.put(3, 1f)
+        colorBuffer.put(3, alpha)
 
         val halfSegments = segments / 2
 
@@ -107,7 +120,7 @@ class GradientCircleVertexBuffer(@IntRange(from = 1) segments: Int) : CircleVert
             colorBuffer.put(i * 4 + 0, color.red)
             colorBuffer.put(i * 4 + 1, color.green)
             colorBuffer.put(i * 4 + 2, color.blue)
-            colorBuffer.put(i * 4 + 3, 1f)
+            colorBuffer.put(i * 4 + 3, alpha)
         }
 
         setHardwareBufferNeedsUpdate()
