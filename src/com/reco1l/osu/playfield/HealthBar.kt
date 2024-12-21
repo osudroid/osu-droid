@@ -50,13 +50,12 @@ class HealthBar(private val statistics: StatisticV2) : Container() {
 
         fillClear = Box()
         fillClear.setOrigin(Anchor.TopRight)
-        fillClear.clearDepthBufferBeforeDraw = true
-        fillClear.testWithDepthBuffer = true
+        fillClear.depthInfo = DepthInfo.Clear
         fillClear.alpha = 0f
         attachChild(fillClear)
 
         fill = AnimatedSprite("scorebar-colour", true, OsuSkin.get().animationFramerate)
-        fill.testWithDepthBuffer = true
+        fill.depthInfo = DepthInfo.Default
         fill.autoSizeAxes = Axes.None // Preserve the first frame width.
         attachChild(fill)
 

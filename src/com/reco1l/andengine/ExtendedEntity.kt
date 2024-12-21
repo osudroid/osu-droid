@@ -196,19 +196,9 @@ abstract class ExtendedEntity(
     open var clipChildren = false
 
     /**
-     * Whether the depth buffer should be cleared before drawing the entity.
-     * This is useful when the entity is drawn on top of other entities by overlapping them.
-     *
-     * It will only take effect if the entities on the front have the depth buffer test enabled.
-     *
-     * @see [testWithDepthBuffer]
+     * The depth information of the entity.
      */
-    open var clearDepthBufferBeforeDraw = false
-
-    /**
-     * Whether the entity should be tested with the depth buffer.
-     */
-    open var testWithDepthBuffer = false
+    open var depthInfo: DepthInfo? = null
 
     /**
      * The color of the entity boxed in a [ColorARGB] object.
@@ -589,11 +579,7 @@ abstract class ExtendedEntity(
             GLHelper.enableVertexArray(pGL)
         }
 
-        if (clearDepthBufferBeforeDraw) {
-            pGL.glClear(GL_DEPTH_BUFFER_BIT)
-        }
-
-        GLHelper.setDepthTest(pGL, testWithDepthBuffer)
+        depthInfo?.apply(pGL) ?: GLHelper.disableDepthTest(pGL)
     }
 
     override fun onApplyVertices(pGL: GL10) {
