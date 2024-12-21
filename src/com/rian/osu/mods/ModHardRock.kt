@@ -44,9 +44,6 @@ class ModHardRock : Mod(), IModApplicableToDifficulty, IModApplicableToHitObject
     }
 
     override fun applyToHitObject(mode: GameMode, hitObject: HitObject) {
-        fun reflectVector(vector: Vector2) = Vector2(vector.x, 384 - vector.y)
-        fun reflectControlPoint(vector: Vector2) = Vector2(vector.x, -vector.y)
-
         // Reflect the position of the hit object.
         hitObject.position = reflectVector(hitObject.position)
 
@@ -69,5 +66,8 @@ class ModHardRock : Mod(), IModApplicableToDifficulty, IModApplicableToHitObject
 
     companion object {
         private const val ADJUST_RATIO = 1.4f
+
+        private fun reflectVector(vector: Vector2) = Vector2(vector.x, 384 - vector.y)
+        private fun reflectControlPoint(vector: Vector2) = Vector2(vector.x, -vector.y)
     }
 }
