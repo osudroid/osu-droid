@@ -4,10 +4,13 @@ import android.graphics.Shader
 import android.graphics.Typeface
 import android.util.Log
 import com.reco1l.andengine.Axes
+import com.reco1l.andengine.getDrawHeight
+import com.reco1l.andengine.getDrawWidth
 import com.reco1l.andengine.sprite.ExtendedSprite
 import com.reco1l.framework.ColorARGB
 import org.anddev.andengine.opengl.texture.region.TextureRegion
 import ru.nsu.ccfit.zuev.osu.GlobalManager
+import kotlin.math.max
 
 /**
  * A sprite that displays text.
@@ -78,6 +81,23 @@ class TextSprite : ExtendedSprite() {
      * The size of the text in pixels.
      */
     var size = 12f
+        get() {
+            if (relativeSize && parent != null) {
+                return field * max(parent.getDrawWidth(), parent.getDrawHeight())
+            }
+            return field
+        }
+        set(value) {
+            if (field != value) {
+                field = value
+                updateVertexBuffer()
+            }
+        }
+
+    /**
+     * Whether the size of the text is relative to the size of the parent.
+     */
+    var relativeSize = false
         set(value) {
             if (field != value) {
                 field = value
@@ -119,9 +139,11 @@ class TextSprite : ExtendedSprite() {
         }
 
 
+    /**
+     * The width of the text line.
+     */
     val lineWidth
         get() = size * text.length
-
 
 
     private val texture = textureRegion!!.texture as TextTexture
@@ -133,8 +155,18 @@ class TextSprite : ExtendedSprite() {
 
 
     override fun onUpdateVertexBuffer() {
-        val typeface = Typeface.create(typeFace, typeStyle)
-        (textureRegion as TextTextureRegion).update(text, color, backgroundColor, strokeColor, strokeWidth, size, typeface, shader)
+
+        (textureRegion as TextTextureRegion).update(
+            text,
+            color,
+            backgroundColor,
+            strokeColor,
+            strokeWidth,
+            size,
+            Typeface.create(typeFace, typeStyle),
+            shader
+        )
+
         onContentSizeMeasured()
         super.onUpdateVertexBuffer()
     }
