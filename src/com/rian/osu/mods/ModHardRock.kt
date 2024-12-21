@@ -59,7 +59,11 @@ class ModHardRock : Mod(), IModApplicableToDifficulty, IModApplicableToHitObject
         )
 
         // Reflect the position of slider ticks and repeats.
-        hitObject.nestedHitObjects.forEach { it.position = reflectVector(it.position) }
+        for (i in 1 until hitObject.nestedHitObjects.size - 1) {
+            val obj = hitObject.nestedHitObjects[i]
+
+            obj.position = reflectVector(obj.position)
+        }
     }
 
     private fun applySetting(value: Float, ratio: Float = ADJUST_RATIO) = min(value * ratio, 10f)
