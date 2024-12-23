@@ -44,9 +44,6 @@ class ModHardRock : Mod(), IModApplicableToDifficulty, IModApplicableToHitObject
     }
 
     override fun applyToHitObject(mode: GameMode, hitObject: HitObject) {
-        fun reflectVector(vector: Vector2) = Vector2(vector.x, 384 - vector.y)
-        fun reflectControlPoint(vector: Vector2) = Vector2(vector.x, -vector.y)
-
         // Reflect the position of the hit object.
         hitObject.position = reflectVector(hitObject.position)
 
@@ -62,12 +59,19 @@ class ModHardRock : Mod(), IModApplicableToDifficulty, IModApplicableToHitObject
         )
 
         // Reflect the position of slider ticks and repeats.
-        hitObject.nestedHitObjects.forEach { it.position = reflectVector(it.position) }
+        for (i in 1 until hitObject.nestedHitObjects.size - 1) {
+            val obj = hitObject.nestedHitObjects[i]
+
+            obj.position = reflectVector(obj.position)
+        }
     }
 
     private fun applySetting(value: Float, ratio: Float = ADJUST_RATIO) = min(value * ratio, 10f)
 
     companion object {
         private const val ADJUST_RATIO = 1.4f
+
+        private fun reflectVector(vector: Vector2) = Vector2(vector.x, 384 - vector.y)
+        private fun reflectControlPoint(vector: Vector2) = Vector2(vector.x, -vector.y)
     }
 }
