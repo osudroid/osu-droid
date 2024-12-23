@@ -4,6 +4,7 @@ import android.graphics.Bitmap
 import android.graphics.Canvas
 import android.graphics.LinearGradient
 import android.graphics.Paint
+import android.graphics.RadialGradient
 import android.graphics.Rect
 import android.graphics.Shader
 import android.graphics.Shader.TileMode
@@ -175,7 +176,15 @@ class TextSprite : ExtendedSprite() {
      *
      * The gradient is defined by two points (x0, y0) and (x1, y1) in the range [0, 1] and two colors (startColor, endColor).
      */
-    fun setGradient(x0: Float, y0: Float, x1: Float, y1: Float, startColor: ColorARGB, endColor: ColorARGB, tileMode: TileMode = TileMode.MIRROR) {
+    fun setLinearGradient(x0: Float, y0: Float, x1: Float, y1: Float, startColor: ColorARGB, endColor: ColorARGB, tileMode: TileMode = TileMode.MIRROR) {
+        shader = RadialGradient(
+            x0 * drawWidth,
+            y0 * drawHeight,
+            max(drawWidth, drawHeight),
+            startColor.toInt(),
+            endColor.toInt(),
+            tileMode
+        )
         shader = LinearGradient(
             x0 * drawWidth,
             y0 * drawHeight,
