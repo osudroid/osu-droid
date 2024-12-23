@@ -13,7 +13,7 @@ class FileRequest(val file: File, url: HttpUrl): WebRequest(url) {
     /**
      * The download observer.
      */
-    var observer: IDownloaderObserver? = null
+    var observer: IFileRequestObserver? = null
 
     /**
      * Whether the download is in progress, this is set to true once [execute] is called.
@@ -116,13 +116,9 @@ class FileRequest(val file: File, url: HttpUrl): WebRequest(url) {
 }
 
 
-interface IDownloaderObserver
-{
-    fun onDownloadEnd(downloader: FileRequest) = Unit
-
-    fun onDownloadCancel(downloader: FileRequest) = Unit
-
-    fun onDownloadUpdate(downloader: FileRequest) = Unit
-
-    fun onDownloadFail(downloader: FileRequest, exception: Exception) = Unit
+interface IFileRequestObserver {
+    fun onDownloadEnd(request: FileRequest) = Unit
+    fun onDownloadCancel(request: FileRequest) = Unit
+    fun onDownloadUpdate(request: FileRequest) = Unit
+    fun onDownloadFail(request: FileRequest, exception: Exception) = Unit
 }

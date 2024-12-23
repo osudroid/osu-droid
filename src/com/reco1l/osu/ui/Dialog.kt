@@ -1,18 +1,16 @@
 package com.reco1l.osu.ui
 
 import android.graphics.Color
-import android.text.Html
 import android.text.method.LinkMovementMethod
+import android.util.Log
 import android.view.ContextThemeWrapper
 import android.view.Gravity.*
 import android.view.View
 import android.widget.Button
-import android.widget.EditText
 import android.widget.LinearLayout
 import android.widget.TextView
 import androidx.core.text.HtmlCompat
-import androidx.core.view.isVisible
-import androidx.core.widget.doOnTextChanged
+import androidx.core.text.HtmlCompat.FROM_HTML_MODE_LEGACY
 import com.edlplan.framework.easing.Easing
 import com.edlplan.ui.EasingHelper
 import com.edlplan.ui.fragment.BaseFragment
@@ -26,66 +24,131 @@ import com.reco1l.toolkt.animation.toScaleY
 import ru.nsu.ccfit.zuev.osuplus.R
 
 
+/**
+ * A button to be displayed in a dialog.
+ */
 data class DialogButton(
+
+    /**
+     * The text to be displayed in the button.
+     */
     val text: String,
+
+    /**
+     * The color of the button text and icon.
+     */
     val tint: Int = Color.WHITE,
+
+    /**
+     * The function to be called when the button is clicked.
+     */
     val clickListener: (MessageDialog) -> Unit
 )
 
+/**
+ * A dialog that displays a message to the user.
+ */
 open class MessageDialog : BaseFragment() {
 
 
     override val layoutID = R.layout.dialog_message_fragment
 
 
-    protected var title: CharSequence = "Alert"
+    /**
+     * The title to be displayed in the dialog.
+     */
+    var title: CharSequence = "Alert"
+        set(value) {
+            field = value
+            if (isCreated) {
+                findViewById<TextView>(R.id.title)?.text = value
+            }
+        }
 
-    protected var message: CharSequence = ""
+    /**
+     * The message to be displayed in the dialog.
+     */
+    open var message: CharSequence = ""
+        set(value) {
+            field = value
+            if (isCreated) {
+                findViewById<TextView>(R.id.message)?.text = (
+                    if (isHTMLMessage) HtmlCompat.fromHtml(value.toString(), FROM_HTML_MODE_LEGACY)
+                    else value
+                )
+            }
+        }
 
-    protected var isHTMLMessage = false
+    /**
+     * Whether the message is HTML formatted or not.
+     */
+    var isHTMLMessage = false
+        set(value) {
+            field = value
+            if (isCreated) {
+                message = message
+            }
+        }
 
-    protected var allowDismiss = true
+    /**
+     * The buttons to be displayed in the dialog.
+     */
+    var buttons = mutableListOf<DialogButton>()
+        set(value) {
+            field = value
+            if (isCreated) {
 
-    protected var onDismiss: (() -> Unit)? = null
+                val layout = findViewById<LinearLayout>(R.id.button_layout)
+                if (layout == null) {
+                    Log.e("MessageDialog", "Buttons layout not found.")
+                    return
+                }
 
-    protected var buttons = mutableListOf<DialogButton>()
+                layout.removeAllViews()
+
+                for (button in value) {
+
+                    val buttonView = Button(ContextThemeWrapper(context, R.style.button_borderless))
+                    buttonView.minWidth = 300.dp
+                    buttonView.minHeight = 56.dp
+                    buttonView.gravity = CENTER
+                    buttonView.background = requireContext().getDrawable(R.drawable.ripple)
+                    buttonView.text = button.text
+                    buttonView.fontColor = button.tint
+                    buttonView.compoundDrawablePadding = 0
+                    buttonView.setOnClickListener { button.clickListener(this@MessageDialog) }
+
+                    layout.addView(buttonView)
+                }
+            }
+        }
+
+    /**
+     * Whether the dialog is cancelable or not.
+     */
+    var allowDismiss = true
+
+    /**
+     * The function to be called when the dialog is dismissed.
+     */
+    var onDismiss: (() -> Unit)? = null
 
 
     override fun onLoadView() {
 
-        findViewById<TextView>(R.id.title)?.text = title
+        title = title
+        message = message
+        buttons = buttons
 
-        if (isHTMLMessage) {
-            findViewById<TextView>(R.id.message)?.apply {
-                text = HtmlCompat.fromHtml(message.toString(), HtmlCompat.FROM_HTML_MODE_LEGACY)
-                isClickable = true
-                movementMethod = LinkMovementMethod.getInstance()
-            }
-        } else {
-            findViewById<TextView>(R.id.message)?.text = message
+        findViewById<TextView>(R.id.message)?.apply {
+            isClickable = true
+            movementMethod = LinkMovementMethod.getInstance()
         }
 
-        findViewById<LinearLayout>(R.id.button_layout)?.also { buttonLayout ->
-
-            for (button in buttons) {
-                buttonLayout.addView(Button(ContextThemeWrapper(context, R.style.button_borderless)).apply {
-
-                    minWidth = 300.dp
-                    minHeight = 56.dp
-                    gravity = CENTER
-                    background = context.getDrawable(R.drawable.ripple)
-                    text = button.text
-                    fontColor = button.tint
-                    compoundDrawablePadding = 0
-
-                    setOnClickListener { button.clickListener(this@MessageDialog) }
-                })
-            }
-        }
 
         val background = findViewById<View>(R.id.frg_background)!!
-        background.setOnClickListener { callDismissOnBackPress() }
 
+        background.setOnClickListener { callDismissOnBackPress() }
         background.cancelAnimators()
             .toAlpha(0f)
             .toAlpha(1f, 200, ease = EasingHelper.asInterpolator(Easing.Out))
@@ -141,6 +204,7 @@ open class MessageDialog : BaseFragment() {
     @JvmOverloads
     open fun addButton(text: String, tint: Int = Color.WHITE, clickListener: (MessageDialog) -> Unit): MessageDialog {
         buttons.add(DialogButton(text, tint, clickListener))
+        buttons = buttons
         return this
     }
 
@@ -155,81 +219,6 @@ open class MessageDialog : BaseFragment() {
         onDismiss?.invoke()
         super.dismiss()
     }
-}
-
-
-open class PromptDialog : MessageDialog() {
-
-    override val layoutID = R.layout.dialog_input_fragment
-
-
-    /**
-     * The text input by user.
-     */
-    var input: String? = null
-        protected set
-
-
-    private var hint: String? = null
-
-    private var onTextChanged: ((PromptDialog) -> Unit)? = null
-
-    private var onTextInputBind: ((EditText) -> Unit)? = null
-
-
-    override fun onLoadView() {
-
-        super.onLoadView()
-
-        findViewById<TextView>(R.id.message)!!.isVisible = message.isNotBlank()
-        findViewById<EditText>(R.id.input)!!.apply {
-
-            setText(input)
-
-            doOnTextChanged { text, _, _, _ ->
-                input = text.toString()
-                onTextChanged?.invoke(this@PromptDialog)
-            }
-
-            onTextInputBind?.invoke(this)
-        }
-
-    }
-
-
-
-    fun setInput(text: String?): PromptDialog {
-        input = text
-        return this
-    }
-
-    /**
-     * The text to be show displayed in the input hint.
-     */
-    fun setHint(text: String): PromptDialog {
-        hint = text
-        return this
-    }
-
-    /**
-     * The function to be called when the text input is changed.
-     */
-    fun setOnTextChanged(action: (PromptDialog) -> Unit): PromptDialog {
-        onTextChanged = action
-        return this
-    }
-
-    /**
-     * The function to be called when the EditText is created.
-     */
-    fun setOnTextInputBind(action: (EditText) -> Unit): PromptDialog {
-        onTextInputBind = action
-        return this
-    }
-
-
-    override fun addButton(text: String, tint: Int, clickListener: (MessageDialog) -> Unit) = super.addButton(text, tint, clickListener) as PromptDialog
-
 }
 
 

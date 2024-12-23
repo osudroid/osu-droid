@@ -4,7 +4,7 @@ import android.os.Environment.DIRECTORY_DOWNLOADS
 import android.view.View
 import com.osudroid.resources.R.*
 import com.reco1l.framework.net.FileRequest
-import com.reco1l.framework.net.IDownloaderObserver
+import com.reco1l.framework.net.IFileRequestObserver
 import com.reco1l.osu.mainThread
 import com.reco1l.osu.multiplayer.Multiplayer
 import com.reco1l.osu.multiplayer.RoomScene
@@ -18,7 +18,7 @@ import ru.nsu.ccfit.zuev.osu.helper.FileUtils
 import ru.nsu.ccfit.zuev.osu.helper.StringTable
 import java.io.IOException
 
-object BeatmapDownloader : IDownloaderObserver {
+object BeatmapDownloader : IFileRequestObserver {
 
 
     private lateinit var fragment: DownloadFragment
