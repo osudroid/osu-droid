@@ -528,6 +528,11 @@ abstract class ExtendedEntity(
 
     override fun onManagedDraw(gl: GL10, camera: Camera) {
 
+        if (isVertexBufferDirty) {
+            isVertexBufferDirty = false
+            onUpdateVertexBuffer()
+        }
+
         if (clipChildren) {
             GLHelper.enableScissorTest(gl)
 
@@ -561,16 +566,6 @@ abstract class ExtendedEntity(
         if (clipChildren) {
             GLHelper.disableScissorTest(gl)
         }
-    }
-
-    override fun onManagedUpdate(pSecondsElapsed: Float) {
-
-        if (isVertexBufferDirty) {
-            isVertexBufferDirty = false
-            onUpdateVertexBuffer()
-        }
-
-        super.onManagedUpdate(pSecondsElapsed)
     }
 
     override fun onInitDraw(pGL: GL10) {
