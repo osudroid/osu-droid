@@ -40,13 +40,18 @@ data class Option(
     val icon: Drawable? = null
 )
 
-
+/**
+ * A dialog that allows the user to select an option.
+ */
 open class SelectDialog : MessageDialog() {
 
 
     override val layoutID = R.layout.dialog_select_fragment
 
 
+    /**
+     * The options to be displayed in the dialog.
+     */
     var options = mutableListOf<Option>()
         protected set(value) {
 
@@ -56,44 +61,42 @@ open class SelectDialog : MessageDialog() {
 
             field = value
 
-            if (::recyclerView.isInitialized) {
-                recyclerView.adapter!!.notifyDataSetChanged()
+            if (isLoaded) {
+                findViewById<RecyclerView>(R.id.list)!!.adapter!!.notifyDataSetChanged()
             }
         }
 
+    /**
+     * The selected value.
+     */
+    var selected: Any? = null
+        set(value) {
+            field = value
+            if (isLoaded) {
+                findViewById<RecyclerView>(R.id.list)!!.adapter!!.notifyDataSetChanged()
+            }
+        }
 
-    protected var selected: Any? = null
-
-    protected var onSelect: ((Any?) -> Unit)? = null
-
-
-    private lateinit var recyclerView: RecyclerView
+    /**
+     * The function to be called when an option is selected.
+     */
+    var onSelect: ((Any?) -> Unit)? = null
 
 
     override fun onLoadView() {
         super.onLoadView()
 
-        recyclerView = findViewById<RecyclerView>(R.id.list)!!.apply {
-
-            layoutManager = LinearLayoutManager(context)
-            adapter = Adapter()
-
-        }
+        val recyclerView = findViewById<RecyclerView>(R.id.list)!!
+        recyclerView.layoutManager = LinearLayoutManager(context)
+        recyclerView.adapter = Adapter()
     }
 
 
     /**
      * Set the options to be displayed in the dialog.
-     *
-     * @param replace If true, the current options will be replaced with the new ones.
      */
-    @JvmOverloads
-    fun setOptions(options: List<Option>, replace: Boolean = false): SelectDialog {
-        if (replace) {
-            this.options = options.toMutableList()
-        } else {
-            this.options.addAll(options)
-        }
+    fun setOptions(value: List<Option>): SelectDialog {
+        options = value.toMutableList()
         return this
     }
 
@@ -122,11 +125,6 @@ open class SelectDialog : MessageDialog() {
     }
 
 
-    private fun unselectAll() {
-        recyclerView.forEach { (recyclerView.getChildViewHolder(it) as ViewHolder).unselect() }
-    }
-
-
     private inner class Adapter : RecyclerView.Adapter<ViewHolder>() {
 
 
@@ -144,10 +142,13 @@ open class SelectDialog : MessageDialog() {
             holder.bind(options[position])
         }
 
+        override fun getItemCount(): Int {
+            return options.size
+        }
 
-        override fun getItemCount() = options.size
-
-        override fun getItemId(position: Int) = position.toLong()
+        override fun getItemId(position: Int): Long {
+            return position.toLong()
+        }
 
     }
 
@@ -160,7 +161,11 @@ open class SelectDialog : MessageDialog() {
 
             text.setOnClickListener {
 
-                unselectAll()
+                findViewById<RecyclerView>(R.id.list)!!.apply {
+                    forEach {
+                        (getChildViewHolder(it) as ViewHolder).unselect()
+                    }
+                }
 
                 selected = option.value
                 select()

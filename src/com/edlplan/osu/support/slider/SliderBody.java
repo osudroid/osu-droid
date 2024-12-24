@@ -2,6 +2,7 @@ package com.edlplan.osu.support.slider;
 
 import com.edlplan.andengine.TriangleBuilder;
 import com.edlplan.framework.math.line.LinePath;
+import com.reco1l.andengine.DepthInfo;
 import com.reco1l.andengine.shape.TriangleMesh;
 import com.reco1l.andengine.container.Container;
 import com.rian.osu.math.Vector2;
@@ -38,18 +39,17 @@ public class SliderBody extends Container {
         if (allowHint) {
             hint = new TriangleMesh();
             hint.setVisible(false);
-            hint.setTestWithDepthBuffer(true);
-            hint.setClearDepthBufferBeforeDraw(true);
+            hint.setDepthInfo(DepthInfo.Clear);
         } else {
             hint = null;
         }
 
         border = new TriangleMesh();
-        border.setTestWithDepthBuffer(true);
+        border.setDepthInfo(DepthInfo.Default);
         attachChild(border, 0);
 
         background = new TriangleMesh();
-        background.setTestWithDepthBuffer(true);
+        background.setDepthInfo(DepthInfo.Default);
         attachChild(background, 0);
 
         if (hint != null) {
@@ -90,9 +90,9 @@ public class SliderBody extends Container {
     public void setHintVisible(boolean visible) {
         if (hint != null) {
             hint.setVisible(visible);
-            background.setClearDepthBufferBeforeDraw(!visible);
+            background.setDepthInfo(visible ? DepthInfo.Default : DepthInfo.Clear);
         } else {
-            background.setClearDepthBufferBeforeDraw(true);
+            background.setDepthInfo(DepthInfo.Clear);
         }
     }
 

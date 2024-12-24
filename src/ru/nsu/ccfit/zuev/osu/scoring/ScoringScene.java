@@ -487,7 +487,7 @@ public class ScoringScene {
             // Do not save and submit score if note count does not match, since it indicates a corrupted score
             // (potentially from bugging the gameplay by any unnecessary means).
             if (totalNotes != beatmap.getTotalHitObjectCount()) {
-                ToastLogger.showTextId(com.osudroid.resources.R.string.replay_corrupted, true);
+                ToastLogger.showText(com.osudroid.resources.R.string.replay_corrupted, true);
                 return;
             }
 

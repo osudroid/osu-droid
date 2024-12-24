@@ -99,7 +99,7 @@ public class PauseMenu implements IOnMenuItemClickListener {
         switch (pMenuItem.getID()) {
             case ITEM_SAVE_REPLAY:
                 if(fail && !replaySaved && !game.getReplaying() && game.saveFailedReplay()){
-                    ToastLogger.showTextId(com.osudroid.resources.R.string.message_save_replay_successful, true);
+                    ToastLogger.showText(com.osudroid.resources.R.string.message_save_replay_successful, true);
                     replaySaved = true;
                 }
                 return true;
