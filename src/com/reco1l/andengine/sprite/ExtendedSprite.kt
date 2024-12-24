@@ -5,7 +5,6 @@ import com.reco1l.andengine.*
 import com.reco1l.andengine.shape.*
 import org.anddev.andengine.opengl.texture.region.*
 import org.anddev.andengine.opengl.util.*
-import org.anddev.andengine.opengl.vertex.*
 import javax.microedition.khronos.opengles.*
 
 /**
@@ -54,7 +53,7 @@ open class ExtendedSprite(textureRegion: TextureRegion? = null) : Box() {
     /**
      * The texture region of the sprite.
      */
-    open var textureRegion: TextureRegion? = null
+    open var textureRegion: TextureRegion? = textureRegion
         set(value) {
 
             if (field == value) {
