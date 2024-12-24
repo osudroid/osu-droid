@@ -494,11 +494,12 @@ public class MainScene implements IUpdateHandler {
             return;
         }
 
-        BannerSprite banners = BannerLoader.loadBannerSprite();
-        if (banners != null) {
-            banners.setPosition(Config.getRES_WIDTH() - 10f, Config.getRES_HEIGHT() - 10f);
-            banners.setOrigin(Anchor.BottomRight);
-            scene.attachChild(banners);
+        BannerSprite sprite = BannerLoader.loadBannerSprite();
+        if (sprite != null) {
+            sprite.setPosition(Config.getRES_WIDTH() - 10f, Config.getRES_HEIGHT() - 10f);
+            sprite.setOrigin(Anchor.BottomRight);
+            scene.attachChild(sprite);
+            scene.registerTouchArea(sprite);
         }
     }
 
