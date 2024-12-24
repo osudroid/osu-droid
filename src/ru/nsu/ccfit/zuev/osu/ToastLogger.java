@@ -33,7 +33,7 @@ public class ToastLogger {
                 showlong ? Toast.LENGTH_LONG : Toast.LENGTH_SHORT).show());
     }
 
-    public static void showTextId(@StringRes final int resID, final boolean showlong) {
+    public static void showText(@StringRes final int resID, final boolean showlong) {
         showText(StringTable.get(resID), showlong);
     }
 

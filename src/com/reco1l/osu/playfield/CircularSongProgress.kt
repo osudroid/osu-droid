@@ -24,8 +24,7 @@ class CircularSongProgress : Container() {
             clear.setAnchor(Anchor.Center)
             clear.setOrigin(Anchor.Center)
             clear.color = ColorARGB.Transparent
-            clear.testWithDepthBuffer = true
-            clear.clearDepthBufferBeforeDraw = true
+            clear.depthInfo = DepthInfo.Clear
 
             attachChild(clear)
         }
@@ -36,7 +35,7 @@ class CircularSongProgress : Container() {
             background.setAnchor(Anchor.Center)
             background.setOrigin(Anchor.Center)
             background.color = ColorARGB.White
-            background.testWithDepthBuffer = true
+            background.depthInfo = DepthInfo.Default
 
             attachChild(background)
         }

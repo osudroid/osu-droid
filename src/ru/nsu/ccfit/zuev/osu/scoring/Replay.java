@@ -281,10 +281,10 @@ public class Replay {
         } catch (EOFException e) {
             Debug.e("O_o eof...");
             Debug.e(e);
-            ToastLogger.showTextId(com.osudroid.resources.R.string.replay_corrupted, true);
+            ToastLogger.showText(com.osudroid.resources.R.string.replay_corrupted, true);
             return false;
         } catch (Exception e) {
-            ToastLogger.showTextId(com.osudroid.resources.R.string.replay_corrupted, true);
+            ToastLogger.showText(com.osudroid.resources.R.string.replay_corrupted, true);
             Debug.e("Cannot load replay: " + e.getMessage(), e);
             return false;
         }
