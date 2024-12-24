@@ -11,6 +11,7 @@ import com.reco1l.andengine.Anchor;
 import com.reco1l.andengine.shape.RoundedBox;
 import com.reco1l.andengine.sprite.ExtendedSprite;
 import com.reco1l.osu.BannerLoader;
+import com.reco1l.osu.BannerSprite;
 import com.reco1l.osu.data.BeatmapInfo;
 import com.reco1l.osu.Execution;
 import com.reco1l.osu.ui.entity.MainMenu;
@@ -457,10 +458,6 @@ public class MainScene implements IUpdateHandler {
         scene.registerTouchArea(music_next);
         scene.setTouchAreaBindingEnabled(true);
 
-        if (Config.isStayOnline()) {
-            BannerLoader.loadBanner(scene);
-        }
-
         if (BuildConfig.DEBUG) {
             ResourceManager.getInstance().loadHighQualityAsset("dev-build-overlay", "dev-build-overlay.png");
 
@@ -489,6 +486,20 @@ public class MainScene implements IUpdateHandler {
         scene.registerUpdateHandler(this);
 
         hitsound = ResourceManager.getInstance().loadSound("menuhit", "sfx/menuhit.ogg", false);
+    }
+
+    public void loadBannerSprite() {
+
+        if (!Config.isStayOnline()) {
+            return;
+        }
+
+        BannerSprite banners = BannerLoader.loadBannerSprite();
+        if (banners != null) {
+            banners.setPosition(Config.getRES_WIDTH() - 10f, Config.getRES_HEIGHT() - 10f);
+            banners.setOrigin(Anchor.BottomRight);
+            scene.attachChild(banners);
+        }
     }
 
     private void createOnlinePanel(Scene scene) {
