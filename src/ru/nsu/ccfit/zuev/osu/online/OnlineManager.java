@@ -49,7 +49,6 @@ public class OnlineManager {
     private float accuracy = 0;
     private float pp = 0;
     private String avatarURL = "";
-    private int mapRank;
 
     public static OnlineManager getInstance() {
         if (instance == null) {
@@ -386,10 +385,6 @@ public class OnlineManager {
 
     public void setStayOnline(boolean stayOnline) {
         this.stayOnline = stayOnline;
-    }
-
-    public int getMapRank() {
-        return mapRank;
     }
 
     public static class OnlineManagerException extends Exception {

@@ -177,7 +177,7 @@ public class OnlineScoring {
                         } else if (success) {
                             updatePanels();
                             OnlineManager mgr = OnlineManager.getInstance();
-                            panel.show(mgr.getMapRank(), mgr.getRank(), mgr.getScore(), mgr.getAccuracy(), mgr.getPP());
+                            panel.show(mgr.getRank(), mgr.getScore(), mgr.getAccuracy(), mgr.getPP());
                             break;
                         }
 
