@@ -3,12 +3,24 @@ package com.reco1l.andengine
 import org.anddev.andengine.opengl.util.GLHelper
 import javax.microedition.khronos.opengles.GL10
 
+/**
+ * Information about how to behave with the depth buffer.
+ */
 data class DepthInfo(
 
+    /**
+     * The depth function to use.
+     */
     val function: DepthFunction,
 
+    /**
+     * Whether to write to the depth buffer.
+     */
     val mask: Boolean,
 
+    /**
+     * Whether to clear the depth buffer.
+     */
     val clear: Boolean
 
 ) {
