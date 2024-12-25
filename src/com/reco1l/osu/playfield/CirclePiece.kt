@@ -3,6 +3,7 @@ package com.reco1l.osu.playfield
 import com.reco1l.andengine.*
 import com.reco1l.andengine.container.*
 import com.reco1l.andengine.sprite.*
+import com.rian.osu.math.Vector2
 import ru.nsu.ccfit.zuev.osu.*
 import ru.nsu.ccfit.zuev.skins.*
 
@@ -14,15 +15,13 @@ open class CirclePiece(
 ) : Container() {
 
 
-    override var originX = 0.5f
-
-    override var originY = 0.5f
+    override var origin = Anchor.Center
 
 
     private val circle = ExtendedSprite().also {
 
-        it.setOrigin(Anchor.Center)
-        it.setAnchor(Anchor.Center)
+        it.origin = Anchor.Center
+        it.anchor = Anchor.Center
         it.textureRegion = ResourceManager.getInstance().getTexture(circleTexture)
 
         attachChild(it)
@@ -30,8 +29,8 @@ open class CirclePiece(
 
     private val overlay = ExtendedSprite().also {
 
-        it.setOrigin(Anchor.Center)
-        it.setAnchor(Anchor.Center)
+        it.origin = Anchor.Center
+        it.anchor = Anchor.Center
         it.textureRegion = ResourceManager.getInstance().getTexture(overlayTexture)
 
         attachChild(it)
@@ -48,8 +47,8 @@ class NumberedCirclePiece(circleTexture: String, overlayTexture: String) : Circl
 
     private val number = SpriteFont(OsuSkin.get().hitCirclePrefix).also {
 
-        it.setOrigin(Anchor.Center)
-        it.setAnchor(Anchor.Center)
+        it.origin = Anchor.Center
+        it.anchor = Anchor.Center
         it.spacing = -OsuSkin.get().hitCircleOverlap
 
         attachChild(it)

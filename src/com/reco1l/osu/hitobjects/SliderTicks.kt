@@ -1,5 +1,6 @@
 package com.reco1l.osu.hitobjects
 
+import com.reco1l.andengine.Anchor
 import com.reco1l.andengine.container.*
 import com.reco1l.andengine.sprite.*
 import com.reco1l.framework.*
@@ -43,8 +44,7 @@ class SliderTickSprite : ExtendedSprite() {
 
     init {
         textureRegion = ResourceManager.getInstance().getTexture("sliderscorepoint")
-        originX = 0.5f
-        originY = 0.5f
+        origin = Anchor.Center
     }
 
     override fun onDetached() {

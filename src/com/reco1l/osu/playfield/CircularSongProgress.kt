@@ -21,8 +21,8 @@ class CircularSongProgress : Container() {
         Circle().also { clear ->
 
             clear.setSize(30f, 30f)
-            clear.setAnchor(Anchor.Center)
-            clear.setOrigin(Anchor.Center)
+            clear.anchor = Anchor.Center
+            clear.origin = Anchor.Center
             clear.color = ColorARGB.Transparent
             clear.depthInfo = DepthInfo.Clear
 
@@ -32,8 +32,8 @@ class CircularSongProgress : Container() {
         Circle().also { background ->
 
             background.setSize(33f, 33f)
-            background.setAnchor(Anchor.Center)
-            background.setOrigin(Anchor.Center)
+            background.anchor = Anchor.Center
+            background.origin = Anchor.Center
             background.color = ColorARGB.White
             background.depthInfo = DepthInfo.Default
 
@@ -43,8 +43,8 @@ class CircularSongProgress : Container() {
         circularProgress = Circle().also { progress ->
 
             progress.setSize(30f, 30f)
-            progress.setAnchor(Anchor.Center)
-            progress.setOrigin(Anchor.Center)
+            progress.anchor = Anchor.Center
+            progress.origin = Anchor.Center
             progress.alpha = 0.6f
 
             attachChild(progress)
@@ -54,8 +54,8 @@ class CircularSongProgress : Container() {
         Circle().also { dot ->
 
             dot.setSize(4f, 4f)
-            dot.setAnchor(Anchor.Center)
-            dot.setOrigin(Anchor.Center)
+            dot.anchor = Anchor.Center
+            dot.origin = Anchor.Center
             dot.color = ColorARGB.White
 
             attachChild(dot)
@@ -63,8 +63,8 @@ class CircularSongProgress : Container() {
 
         onMeasureContentSize()
 
-        setAnchor(Anchor.TopRight)
-        setOrigin(Anchor.CenterRight)
+        anchor = Anchor.TopRight
+        origin = Anchor.CenterRight
     }
 
 

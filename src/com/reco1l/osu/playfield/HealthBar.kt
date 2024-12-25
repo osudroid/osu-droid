@@ -49,7 +49,7 @@ class HealthBar(private val statistics: StatisticV2) : Container() {
         attachChild(ExtendedSprite().apply { textureRegion = backgroundTexture })
 
         fillClear = Box()
-        fillClear.setOrigin(Anchor.TopRight)
+        fillClear.origin = Anchor.TopRight
         fillClear.depthInfo = DepthInfo.Clear
         fillClear.alpha = 0f
         attachChild(fillClear)
@@ -60,11 +60,11 @@ class HealthBar(private val statistics: StatisticV2) : Container() {
         attachChild(fill)
 
         marker = ExtendedSprite()
-        marker.setOrigin(Anchor.Center)
+        marker.origin = Anchor.Center
         attachChild(marker)
 
         explode = ExtendedSprite()
-        explode.setOrigin(Anchor.Center)
+        explode.origin = Anchor.Center
         explode.blendingFunction = BlendingFunction.Additive
         explode.alpha = 0f
         attachChild(explode)

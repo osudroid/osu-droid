@@ -312,16 +312,6 @@ abstract class ExtendedEntity(
 
     // Positions
 
-    open fun setAnchor(value: Vector2): ExtendedEntity {
-        anchor = value
-        return this
-    }
-
-    open fun setOrigin(value: Vector2): ExtendedEntity {
-        origin = value
-        return this
-    }
-
     fun setRelativePosition(x: Float, y: Float) {
         relativePositionAxes = Axes.Both
         setPosition(x, y)
@@ -855,7 +845,7 @@ val ExtendedEntity.anchorOffsetY: Float
  * The offset applied to the X axis according to the origin factor.
  */
 val ExtendedEntity.originOffsetX: Float
-    get() = -(drawWidth * origin.y)
+    get() = -(drawWidth * origin.x)
 
 /**
  * The offset applied to the Y axis according to the origin factor.

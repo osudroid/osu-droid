@@ -20,7 +20,7 @@ class ConstraintContainer : Container() {
         val target = constraints[child] ?: this
 
         val targetX = target.getDrawX()
-        val anchorOffsetX = target.getDrawWidth() * child.anchorX
+        val anchorOffsetX = target.getDrawWidth() * child.anchor.x
 
         var childX = child.x
 
@@ -38,7 +38,7 @@ class ConstraintContainer : Container() {
         val target = constraints[child] ?: this
 
         val targetY = target.getDrawY()
-        val anchorOffsetY = target.getDrawHeight() * child.anchorY
+        val anchorOffsetY = target.getDrawHeight() * child.anchor.y
 
         var childY = child.y
 
