@@ -166,25 +166,6 @@ open class Container : ExtendedEntity() {
     override fun onUpdateVertexBuffer() {}
     override fun drawVertices(pGL: GL10, pCamera: Camera) {}
 
-
-    // Input
-
-    override fun onAreaTouched(event: TouchEvent, localX: Float, localY: Float): Boolean {
-
-        if (mChildren != null) {
-            try {
-                mChildren.fastForEach {
-                    if (it is ITouchArea && it.contains(localX, localY)) {
-                        return it.onAreaTouched(event, localX, localY)
-                    }
-                }
-            } catch (e: IndexOutOfBoundsException) {
-                Log.e("Container", "A child entity was removed during touch event propagation.")
-            }
-        }
-
-        return false
-    }
 }
 
 

@@ -856,6 +856,36 @@ abstract class ExtendedEntity(
         return modifier
     }
 
+
+    // Input
+
+    override fun onAreaTouched(
+        event: TouchEvent,
+        localX: Float,
+        localY: Float
+    ): Boolean {
+
+        try {
+            for (i in childCount - 1 downTo 0) {
+                val child = getChild(i)
+
+                val transformedX = localX - child.getDrawX()
+                val transformedY = localY - child.getDrawY()
+
+                if (child is ITouchArea && child.contains(transformedX, transformedY)) {
+
+                    if (child.onAreaTouched(event, transformedX, transformedY)) {
+                        return true
+                    }
+                }
+            }
+        } catch (e: IndexOutOfBoundsException) {
+            Log.e("ExtendedEntity", "A child entity was removed during touch event propagation.", e)
+        }
+
+        return false
+    }
+
 }
 
 
