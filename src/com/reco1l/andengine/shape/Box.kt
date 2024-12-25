@@ -59,7 +59,7 @@ open class Box : ExtendedEntity(vertexBuffer = BoxVertexBuffer()) {
 }
 
 
-open class RoundedBox(segmentsPerArc: Int = 10) : ExtendedEntity(RoundedBoxVertexBuffer(segmentsPerArc)) {
+open class RoundedBox : ExtendedEntity() {
 
     /**
      * The corner radius of the rectangle.
