@@ -4,16 +4,18 @@ import android.util.*
 import com.reco1l.andengine.container.*
 import com.reco1l.andengine.modifier.*
 import com.reco1l.framework.*
+import com.rian.osu.math.Vector2
 import org.anddev.andengine.engine.camera.*
 import org.anddev.andengine.entity.*
 import org.anddev.andengine.entity.scene.CameraScene
 import org.anddev.andengine.entity.scene.Scene
+import org.anddev.andengine.entity.scene.Scene.ITouchArea
 import org.anddev.andengine.entity.shape.*
+import org.anddev.andengine.input.touch.TouchEvent
 import org.anddev.andengine.opengl.util.*
 import org.anddev.andengine.opengl.vertex.*
 import org.anddev.andengine.util.Transformation
 import javax.microedition.khronos.opengles.*
-import javax.microedition.khronos.opengles.GL10.*
 
 
 /**
@@ -31,7 +33,7 @@ abstract class ExtendedEntity(
      * Determines which axes the entity should automatically adjust its size to.
      *
      * In this case the size will equal to the content size of the entity. Some
-     * types of entities requieres the user to manually set the size, in those
+     * types of entities requires the user to manually set the size, in those
      * cases this property might be ignored.
      */
     open var autoSizeAxes = Axes.None
@@ -119,9 +121,9 @@ abstract class ExtendedEntity(
         }
 
     /**
-     * The origin factor of the entity in the X axis.
+     * Where the entity should be anchored in the parent.
      */
-    open var originX = 0f
+    open var anchor = Anchor.TopLeft
         set(value) {
             if (field != value) {
                 field = value
@@ -130,37 +132,9 @@ abstract class ExtendedEntity(
         }
 
     /**
-     * The origin factor of the entity in the Y axis.
+     * Where the entity's origin should be.
      */
-    open var originY = 0f
-        set(value) {
-            if (field != value) {
-                field = value
-                invalidateTransformations()
-            }
-        }
-
-    /**
-     * The anchor factor of the entity in the X axis.
-     * This is used to determine the position of the entity in a container.
-     *
-     * Note: This will not take effect if the entity is not a child of a [Container].
-     */
-    open var anchorX = 0f
-        set(value) {
-            if (field != value) {
-                field = value
-                invalidateTransformations()
-            }
-        }
-
-    /**
-     * The anchor factor of the entity in the Y axis.
-     * This is used to determine the position of the entity in a container.
-     *
-     * Note: This will not take effect if the entity is not a child of a [Container].
-     */
-    open var anchorY = 0f
+    open var origin = Anchor.TopLeft
         set(value) {
             if (field != value) {
                 field = value
@@ -319,42 +293,6 @@ abstract class ExtendedEntity(
             return y + totalOffsetY
         }
 
-    /**
-     * The offset applied to the X axis according to the origin factor.
-     */
-    open val originOffsetX: Float
-        get() = -(drawWidth * originX)
-
-    /**
-     * The offset applied to the Y axis according to the origin factor.
-     */
-    open val originOffsetY: Float
-        get() = -(drawHeight * originY)
-
-    /**
-     * The offset applied to the X axis according to the anchor factor.
-     */
-    open val anchorOffsetX: Float
-        get() = getParentWidth() * anchorX
-
-    /**
-     * The offset applied to the Y axis according to the anchor factor.
-     */
-    open val anchorOffsetY: Float
-        get() = getParentHeight() * anchorY
-
-    /**
-     * The total offset applied to the X axis.
-     */
-    open val totalOffsetX
-        get() = originOffsetX + anchorOffsetX + translationX
-
-    /**
-     * The total offset applied to the Y axis.
-     */
-    open val totalOffsetY
-        get() = originOffsetY + anchorOffsetY + translationY
-
 
     private var width = 0f
 
@@ -374,14 +312,14 @@ abstract class ExtendedEntity(
 
     // Positions
 
-    open fun setAnchor(anchor: Anchor) {
-        anchorX = anchor.factorX
-        anchorY = anchor.factorY
+    open fun setAnchor(value: Vector2): ExtendedEntity {
+        anchor = value
+        return this
     }
 
-    open fun setOrigin(origin: Anchor) {
-        originX = origin.factorX
-        originY = origin.factorY
+    open fun setOrigin(value: Vector2): ExtendedEntity {
+        origin = value
+        return this
     }
 
     fun setRelativePosition(x: Float, y: Float) {
@@ -443,8 +381,8 @@ abstract class ExtendedEntity(
     override fun applyRotation(pGL: GL10) {
 
         // This will ensure getSceneCenterCoordinates() applies the correct transformation.
-        mRotationCenterX = drawWidth * originX
-        mRotationCenterY = drawHeight * originY
+        mRotationCenterX = -originOffsetX
+        mRotationCenterY = -originOffsetY
 
         if (rotation != 0f) {
             pGL.glRotatef(rotation, 0f, 0f, 1f)
@@ -454,8 +392,8 @@ abstract class ExtendedEntity(
     override fun applyScale(pGL: GL10) {
 
         // This will ensure getSceneCenterCoordinates() applies the correct transformation.
-        mScaleCenterX = drawWidth * originX
-        mScaleCenterY = drawHeight * originY
+        mScaleCenterX = -originOffsetX
+        mScaleCenterY = -originOffsetY
 
         if (scaleX != 1f || scaleY != 1f) {
             pGL.glScalef(scaleX, scaleY, 1f)
@@ -890,6 +828,42 @@ abstract class ExtendedEntity(
 
 
 /**
+ * The total offset applied to the X axis.
+ */
+val ExtendedEntity.totalOffsetX
+    get() = originOffsetX + anchorOffsetX + translationX
+
+/**
+ * The total offset applied to the Y axis.
+ */
+val ExtendedEntity.totalOffsetY
+    get() = originOffsetY + anchorOffsetY + translationY
+
+/**
+ * The offset applied to the X axis according to the anchor factor.
+ */
+val ExtendedEntity.anchorOffsetX: Float
+    get() = getParentWidth() * anchor.x
+
+/**
+ * The offset applied to the Y axis according to the anchor factor.
+ */
+val ExtendedEntity.anchorOffsetY: Float
+    get() = getParentHeight() * anchor.y
+
+/**
+ * The offset applied to the X axis according to the origin factor.
+ */
+val ExtendedEntity.originOffsetX: Float
+    get() = -(drawWidth * origin.y)
+
+/**
+ * The offset applied to the Y axis according to the origin factor.
+ */
+val ExtendedEntity.originOffsetY: Float
+    get() = -(drawHeight * origin.y)
+
+/**
  * Returns the width of the parent entity.
  */
 fun ExtendedEntity.getParentWidth() = when (val parent = parent) {
@@ -943,5 +917,13 @@ fun IEntity.getDrawY(): Float = when (this) {
     is ExtendedEntity -> drawY
     is IShape -> y
     else -> 0f
+}
+
+/**
+ * Attaches the entity to a parent.
+ */
+infix fun <T : IEntity> T.attachTo(parent: IEntity): T {
+    parent.attachChild(this)
+    return this
 }
 
