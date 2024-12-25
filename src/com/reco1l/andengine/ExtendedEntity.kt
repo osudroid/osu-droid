@@ -472,7 +472,7 @@ abstract class ExtendedEntity(
         if (inheritColor) {
 
             var parent = parent
-            while (parent != null) {
+            while (parent is ExtendedEntity && parent.inheritColor) {
 
                 red *= parent.red
                 green *= parent.green
