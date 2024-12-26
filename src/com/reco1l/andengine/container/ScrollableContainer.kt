@@ -294,7 +294,6 @@ open class ScrollableContainer : Container() {
             ACTION_MOVE -> {
                 isDragging = true
 
-                // Coerce the delta values to the width and height of the container because the user can't scroll more than that.
                 var deltaX = localX - initialX
                 var deltaY = localY - initialY
 

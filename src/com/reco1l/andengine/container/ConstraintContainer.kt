@@ -24,7 +24,7 @@ class ConstraintContainer : Container() {
 
         var childX = child.x
 
-        // Relative positions will be multiplied by the remaining space since the
+        // Relative positions will be multiplied by the remaining space from the
         // target's position to the edge of the container.
         if (child.relativePositionAxes.isHorizontal) {
             childX *= drawWidth - targetX
@@ -42,7 +42,7 @@ class ConstraintContainer : Container() {
 
         var childY = child.y
 
-        // Relative positions will be multiplied by the remaining space since the
+        // Relative positions will be multiplied by the remaining space from the
         // target's position to the edge of the container.
         if (child.relativePositionAxes.isVertical) {
             childY *= drawHeight - targetY
