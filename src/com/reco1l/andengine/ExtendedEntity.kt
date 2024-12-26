@@ -201,22 +201,6 @@ abstract class ExtendedEntity(
             mAlpha = value.alpha
         }
 
-
-    /**
-     * The color blending function.
-     */
-    open var blendingFunction: BlendingFunction? = null
-        set(value) {
-            if (field != value) {
-                field = value
-
-                if (value != null) {
-                    mSourceBlendFunction = value.source
-                    mDestinationBlendFunction = value.destination
-                }
-            }
-        }
-
     /**
      * The width of the content inside the entity.
      */
@@ -429,22 +413,13 @@ abstract class ExtendedEntity(
 
     protected open fun applyBlending(pGL: GL10) {
 
-        // If there's a blending function set, apply it instead of the engine's method.
-        val blendingFunction = blendingFunction
+        blendInfo?.apply(pGL) ?: GLHelper.blendFunction(pGL, mSourceBlendFunction, mDestinationBlendFunction)
 
-        if (blendingFunction != null) {
-
-            val parent = parent as? ExtendedEntity
-
-            // If the blending function is set to inherit, apply the parent's blending function.
-            if (blendingFunction == BlendingFunction.Inherit && parent != null) {
+        if (blendInfo?.function == BlendingFunction.Inherit) {
+            val parent = parent
+            if (parent is ExtendedEntity) {
                 GLHelper.blendFunction(pGL, parent.mSourceBlendFunction, parent.mDestinationBlendFunction)
-            } else {
-                GLHelper.blendFunction(pGL, blendingFunction.source, blendingFunction.destination)
             }
-
-        } else {
-            GLHelper.blendFunction(pGL, mSourceBlendFunction, mDestinationBlendFunction)
         }
     }
 
@@ -778,7 +753,9 @@ abstract class ExtendedEntity(
     // Transformation
 
     override fun setBlendFunction(pSourceBlendFunction: Int, pDestinationBlendFunction: Int) {
-        blendingFunction = null
+        if (blendInfo != null) {
+            Log.w("ExtendedEntity", "BlendInfo is set, use blendInfo property to change the blending function.")
+        }
         super.setBlendFunction(pSourceBlendFunction, pDestinationBlendFunction)
     }
 
