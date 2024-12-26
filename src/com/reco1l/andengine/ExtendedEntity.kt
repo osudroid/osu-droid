@@ -304,9 +304,17 @@ abstract class ExtendedEntity(
     // Attachment
 
     override fun setParent(pEntity: IEntity?) {
-        (parent as? Scene)?.unregisterTouchArea(this)
+
+        val parent = parent
+        if (parent is Scene) {
+            parent.unregisterTouchArea(this)
+        }
+
         super.setParent(pEntity)
-        (pEntity as? Scene)?.registerTouchArea(this)
+
+        if (pEntity is ExtendedScene) {
+            pEntity.registerTouchArea(this)
+        }
     }
 
 
