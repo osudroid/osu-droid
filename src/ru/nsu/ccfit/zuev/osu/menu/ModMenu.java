@@ -528,7 +528,7 @@ public class ModMenu implements IModSwitcher {
         }
 
         if (modsRemoved) {
-            ToastLogger.showTextId(com.osudroid.resources.R.string.force_diffstat_mod_unpickable, false);
+            ToastLogger.showText(com.osudroid.resources.R.string.force_diffstat_mod_unpickable, false);
         }
 
         return modsRemoved;

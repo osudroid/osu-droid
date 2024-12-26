@@ -10,27 +10,32 @@ import androidx.fragment.app.Fragment
 import com.edlplan.framework.easing.Easing
 import com.edlplan.ui.ActivityOverlay
 import com.edlplan.ui.EasingHelper
-import com.reco1l.osu.*
 import ru.nsu.ccfit.zuev.osuplus.R
 
 abstract class BaseFragment : Fragment(), BackPressListener {
     var root: View? = null
         private set
-    private var background: View? = null
     var onDismissListener: OnDismissListener? = null
     var isDismissOnBackgroundClick = false
-    var isCreated = false
-        private set
     var isDismissOnBackPress = true
 
+    /**
+     * Whether the fragment is created. This is set to true after [onCreateView] is called.
+     */
+    var isCreated = false
+        private set
 
     /**
      * If true, the fragment will intercept back press event when it's received.
      */
     var interceptBackPress = true
 
+    /**
+     * Whether the fragment is loaded. This is set to true after [onLoadView] is called.
+     */
+    var isLoaded = false
+        private set
 
-    private var isLoaded = false
 
     private var isDismissCalled = false
 
