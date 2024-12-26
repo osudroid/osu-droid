@@ -175,6 +175,21 @@ abstract class ExtendedEntity(
     open var depthInfo: DepthInfo? = null
 
     /**
+     * The blending information of the entity.
+     */
+    open var blendInfo: BlendInfo? = null
+        set(value) {
+            if (field != value) {
+                field = value
+
+                if (value != null) {
+                    mSourceBlendFunction = value.function.source
+                    mDestinationBlendFunction = value.function.destination
+                }
+            }
+        }
+
+    /**
      * The color of the entity boxed in a [ColorARGB] object.
      */
     open var color: ColorARGB
@@ -186,10 +201,6 @@ abstract class ExtendedEntity(
             mAlpha = value.alpha
         }
 
-    /**
-     * Whether the color should be inherited from all the parents in the hierarchy.
-     */
-    open var inheritColor = true
 
     /**
      * The color blending function.
@@ -397,23 +408,20 @@ abstract class ExtendedEntity(
         var blue = mBlue
         var alpha = mAlpha
 
-        if (inheritColor) {
+        var parent = parent
+        while (parent != null) {
 
-            var parent = parent
-            while (parent is ExtendedEntity && parent.inheritColor) {
+            red *= parent.red
+            green *= parent.green
+            blue *= parent.blue
+            alpha *= parent.alpha
 
-                red *= parent.red
-                green *= parent.green
-                blue *= parent.blue
-                alpha *= parent.alpha
-
-                // We'll assume at this point there's no need to keep multiplying.
-                if (red == 0f && green == 0f && blue == 0f && alpha == 0f) {
-                    break
-                }
-
-                parent = parent.parent
+            // We'll assume at this point there's no need to keep multiplying.
+            if (red == 0f && green == 0f && blue == 0f && alpha == 0f) {
+                break
             }
+
+            parent = parent.parent
         }
 
         GLHelper.setColor(pGL, red, green, blue, alpha)
