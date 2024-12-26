@@ -104,10 +104,10 @@ abstract class ExtendedEntity(
             if (field != value) {
                 field = value
 
-                mRotationCenterX = origin.x
-                mRotationCenterY = origin.y
-                mScaleCenterX = origin.x
-                mScaleCenterY = origin.y
+                mRotationCenterX = value.x
+                mRotationCenterY = value.y
+                mScaleCenterX = value.x
+                mScaleCenterY = value.y
 
                 invalidateTransformations()
             }
