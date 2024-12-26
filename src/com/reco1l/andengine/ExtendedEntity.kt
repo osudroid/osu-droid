@@ -4,7 +4,6 @@ import android.util.*
 import com.reco1l.andengine.container.*
 import com.reco1l.andengine.modifier.*
 import com.reco1l.framework.*
-import com.rian.osu.math.Vector2
 import org.anddev.andengine.engine.camera.*
 import org.anddev.andengine.entity.*
 import org.anddev.andengine.entity.scene.CameraScene
@@ -138,6 +137,12 @@ abstract class ExtendedEntity(
         set(value) {
             if (field != value) {
                 field = value
+
+                mRotationCenterX = origin.x
+                mRotationCenterY = origin.y
+                mScaleCenterX = origin.x
+                mScaleCenterY = origin.y
+
                 invalidateTransformations()
             }
         }
@@ -365,22 +370,36 @@ abstract class ExtendedEntity(
 
     override fun applyRotation(pGL: GL10) {
 
-        // This will ensure getSceneCenterCoordinates() applies the correct transformation.
-        mRotationCenterX = -originOffsetX
-        mRotationCenterY = -originOffsetY
+        if (rotation == 0f) {
+            return
+        }
 
-        if (rotation != 0f) {
+        val offsetX = drawWidth * mRotationCenterX
+        val offsetY = drawHeight * mRotationCenterY
+
+        if (offsetX > 0f || offsetY > 0f) {
+            pGL.glTranslatef(offsetX, offsetY, 0f)
+            pGL.glRotatef(rotation, 0f, 0f, 1f)
+            pGL.glTranslatef(-offsetX, -offsetY, 0f)
+        } else {
             pGL.glRotatef(rotation, 0f, 0f, 1f)
         }
     }
 
     override fun applyScale(pGL: GL10) {
 
-        // This will ensure getSceneCenterCoordinates() applies the correct transformation.
-        mScaleCenterX = -originOffsetX
-        mScaleCenterY = -originOffsetY
+        if (scaleX == 1f && scaleY == 1f) {
+            return
+        }
 
-        if (scaleX != 1f || scaleY != 1f) {
+        val offsetX = drawWidth * mScaleCenterX
+        val offsetY = drawHeight * mScaleCenterY
+
+        if (offsetX > 0f || offsetY > 0f) {
+            pGL.glTranslatef(offsetX, offsetY, 0f)
+            pGL.glScalef(scaleX, scaleY, 1f)
+            pGL.glTranslatef(-offsetX, -offsetY, 0f)
+        } else {
             pGL.glScalef(scaleX, scaleY, 1f)
         }
     }
@@ -425,14 +444,8 @@ abstract class ExtendedEntity(
 
     override fun onApplyTransformations(pGL: GL10, camera: Camera) {
         applyTranslation(pGL, camera)
-
-        if (rotation != 0f || scaleX != 1f || scaleY != 1f) {
-            pGL.glTranslatef(-originOffsetX, -originOffsetY, 0f)
-            applyRotation(pGL)
-            applyScale(pGL)
-            pGL.glTranslatef(originOffsetX, originOffsetY, 0f)
-        }
-
+        applyRotation(pGL)
+        applyScale(pGL)
         applyColor(pGL)
         applyBlending(pGL)
     }
@@ -649,24 +662,6 @@ abstract class ExtendedEntity(
     @Deprecated("Base height is not preserved in ExtendedEntity, use getHeight() instead.")
     override fun getBaseHeight() = height
 
-    @Deprecated("Rotation center is determined by the entity's origin, use setOrigin() instead.")
-    final override fun setRotationCenter(pRotationCenterX: Float, pRotationCenterY: Float) {}
-
-    @Deprecated("Rotation center is determined by the entity's origin, use setOrigin() instead.")
-    final override fun setRotationCenterX(pRotationCenterX: Float) {}
-
-    @Deprecated("Rotation center is determined by the entity's origin, use setOrigin() instead.")
-    final override fun setRotationCenterY(pRotationCenterY: Float) {}
-
-    @Deprecated("Scale center is determined by the entity's origin, use setOrigin() instead.")
-    final override fun setScaleCenter(pScaleCenterX: Float, pScaleCenterY: Float) {}
-
-    @Deprecated("Scale center is determined by the entity's origin, use setOrigin() instead.")
-    final override fun setScaleCenterX(pScaleCenterX: Float) {}
-
-    @Deprecated("Scale center is determined by the entity's origin, use setOrigin() instead.")
-    final override fun setScaleCenterY(pScaleCenterY: Float) {}
-
 
     // Collision
 
@@ -698,18 +693,22 @@ abstract class ExtendedEntity(
         if (mLocalToParentTransformationDirty) {
             mLocalToParentTransformation.setToIdentity()
 
-            if (scaleX != 1f || scaleY != 1f || rotation != 0f) {
-                mLocalToParentTransformation.postTranslate(originOffsetX, originOffsetY)
+            if (scaleX != 1f || scaleY != 1f) {
+                val offsetX = drawWidth * mScaleCenterX
+                val offsetY = drawHeight * mScaleCenterY
 
-                if (scaleX != 1f || scaleY != 1f) {
-                    mLocalToParentTransformation.postScale(scaleX, scaleY)
-                }
+                mLocalToParentTransformation.postTranslate(-offsetX, -offsetY)
+                mLocalToParentTransformation.postScale(scaleX, scaleY)
+                mLocalToParentTransformation.postTranslate(offsetX, offsetY)
+            }
 
-                if (rotation != 0f) {
-                    mLocalToParentTransformation.postRotate(rotation)
-                }
+            if (rotation != 0f) {
+                val offsetX = drawWidth * mRotationCenterX
+                val offsetY = drawHeight * mRotationCenterY
 
-                mLocalToParentTransformation.postTranslate(-originOffsetX, -originOffsetY)
+                mLocalToParentTransformation.postTranslate(-offsetX, -offsetY)
+                mLocalToParentTransformation.postRotate(rotation)
+                mLocalToParentTransformation.postTranslate(offsetX, offsetY)
             }
 
             mLocalToParentTransformation.postTranslate(drawX, drawY)
@@ -729,18 +728,22 @@ abstract class ExtendedEntity(
             mParentToLocalTransformation.setToIdentity()
             mParentToLocalTransformation.postTranslate(-drawX, -drawY)
 
-            if (scaleX != 1f || scaleY != 1f || rotation != 0f) {
-                mParentToLocalTransformation.postTranslate(originOffsetX, originOffsetY)
+            if (scaleX != 1f || scaleY != 1f) {
+                val offsetX = drawWidth * mScaleCenterX
+                val offsetY = drawHeight * mScaleCenterY
 
-                if (rotation != 0f) {
-                    mParentToLocalTransformation.postRotate(-rotation)
-                }
+                mParentToLocalTransformation.postTranslate(-offsetX, -offsetY)
+                mParentToLocalTransformation.postScale(1 / scaleX, 1 / scaleY)
+                mParentToLocalTransformation.postTranslate(offsetX, offsetY)
+            }
 
-                if (scaleX != 1f || scaleY != 1f) {
-                    mParentToLocalTransformation.postScale(1 / scaleX, 1 / scaleY)
-                }
+            if (rotation != 0f) {
+                val offsetX = drawWidth * mRotationCenterX
+                val offsetY = drawHeight * mRotationCenterY
 
-                mParentToLocalTransformation.postTranslate(-originOffsetX, -originOffsetY)
+                mParentToLocalTransformation.postTranslate(-offsetX, -offsetY)
+                mParentToLocalTransformation.postRotate(-rotation)
+                mParentToLocalTransformation.postTranslate(offsetX, offsetY)
             }
 
             mParentToLocalTransformationDirty = false
