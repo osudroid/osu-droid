@@ -39,23 +39,6 @@ abstract class ExtendedEntity(
         set(value) {
             if (field != value) {
                 field = value
-
-                // Setting the opposite value for relativeSizeAxes to avoid conflicts.
-                if (relativeSizeAxes != Axes.None) {
-
-                    if (value == Axes.Both) {
-                        relativeSizeAxes = Axes.None
-                    }
-
-                    if (value == Axes.X && relativeSizeAxes == Axes.Y) {
-                        relativeSizeAxes = Axes.Y
-                    }
-
-                    if (value == Axes.Y && relativeSizeAxes == Axes.X) {
-                        relativeSizeAxes = Axes.X
-                    }
-                }
-
                 onContentSizeMeasured()
             }
         }
@@ -79,23 +62,6 @@ abstract class ExtendedEntity(
         set(value) {
             if (field != value) {
                 field = value
-
-                // Setting the opposite value for autoSizeAxes to avoid conflicts.
-                if (autoSizeAxes != Axes.None) {
-
-                    if (value == Axes.Both) {
-                        autoSizeAxes = Axes.None
-                    }
-
-                    if (value == Axes.X && autoSizeAxes == Axes.Y) {
-                        autoSizeAxes = Axes.Y
-                    }
-
-                    if (value == Axes.Y && autoSizeAxes == Axes.X) {
-                        autoSizeAxes = Axes.X
-                    }
-                }
-
                 onContentSizeMeasured()
             }
         }
@@ -319,11 +285,6 @@ abstract class ExtendedEntity(
 
 
     // Positions
-
-    fun setRelativePosition(x: Float, y: Float) {
-        relativePositionAxes = Axes.Both
-        setPosition(x, y)
-    }
 
     override fun setPosition(x: Float, y: Float) {
         if (mX != x || mY != y) {
@@ -577,15 +538,6 @@ abstract class ExtendedEntity(
 
 
     /**
-     * Sets a relative size for the entity.
-     * This will set the [relativeSizeAxes] property to [Axes.Both] automatically.
-     */
-    fun setRelativeSize(width: Float, height: Float) {
-        relativeSizeAxes = Axes.Both
-        setSize(width, height)
-    }
-
-    /**
      * Sets the size of the entity.
      *
      * Note: This will change the [autoSizeAxes] property to [Axes.None] automatically.
@@ -595,8 +547,8 @@ abstract class ExtendedEntity(
     open fun setSize(newWidth: Float, newHeight: Float): Boolean {
 
         if (autoSizeAxes != Axes.None) {
-            Log.w("ExtendedEntity", "autoSizeAxes is set to ${autoSizeAxes.name} while changing the size manually.")
-            autoSizeAxes = Axes.None
+            Log.e("ExtendedEntity", "Cannot change the size manually while autoSizeAxes is set to ${autoSizeAxes.name}.")
+            return false
         }
 
         if (width != newWidth || height != newHeight) {
@@ -618,8 +570,8 @@ abstract class ExtendedEntity(
     open fun setWidth(value: Float) {
 
         if (autoSizeAxes.isHorizontal) {
-            Log.w("ExtendedEntity", "autoSizeAxes is set to ${autoSizeAxes.name} while changing the width manually.")
-            autoSizeAxes = if (autoSizeAxes == Axes.Both) Axes.Y else Axes.None
+            Log.e("ExtendedEntity", "Cannot change the width manually while autoSizeAxes is set to ${autoSizeAxes.name}.")
+            return
         }
 
         if (width != value) {
@@ -633,8 +585,8 @@ abstract class ExtendedEntity(
     open fun setHeight(value: Float) {
 
         if (autoSizeAxes.isVertical) {
-            Log.w("ExtendedEntity", "autoSizeAxes is set to ${autoSizeAxes.name} while changing the height manually.")
-            autoSizeAxes = if (autoSizeAxes == Axes.Both) Axes.X else Axes.None
+            Log.e("ExtendedEntity", "Cannot change the height manually while autoSizeAxes is set to ${autoSizeAxes.name}.")
+            return
         }
 
         if (height != value) {
