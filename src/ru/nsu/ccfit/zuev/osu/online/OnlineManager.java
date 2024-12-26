@@ -63,7 +63,10 @@ public class OnlineManager {
     }
 
     public static String getReplayURL(int playID) {
-        return endpoint + "upload/" + playID + ".odr";
+        return switch (Config.getBeatmapLeaderboardScoringMode()) {
+            case SCORE -> endpoint + "upload/" + playID + ".odr";
+            case PP -> endpoint + "bestpp/" + playID + ".odr";
+        };
     }
 
     public void init() {

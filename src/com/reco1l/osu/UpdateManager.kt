@@ -62,7 +62,7 @@ object UpdateManager: IFileRequestObserver
     /**
      * Check for new game updates.
      * 
-     * @param silently If `true` no announce will be shown unless there's new updates.
+     * @param silently If `true`, no prompts will be shown unless there's new updates.
      */
     @JvmStatic
     fun checkNewUpdates(silently: Boolean) {
