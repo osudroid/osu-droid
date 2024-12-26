@@ -15,7 +15,9 @@ open class CirclePiece(
 ) : Container() {
 
 
-    override var origin = Anchor.Center
+    init {
+        origin = Anchor.Center
+    }
 
 
     private val circle = ExtendedSprite().also {
