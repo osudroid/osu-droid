@@ -4,7 +4,7 @@ import android.util.*
 import com.reco1l.andengine.container.*
 import com.reco1l.andengine.modifier.*
 import com.reco1l.framework.*
-import com.reco1l.framework.math.Vector4
+import com.reco1l.framework.math.Vec4
 import org.anddev.andengine.engine.camera.*
 import org.anddev.andengine.entity.*
 import org.anddev.andengine.entity.scene.Scene
@@ -116,7 +116,7 @@ abstract class ExtendedEntity(
     /**
      * The padding of the entity.
      */
-    open var padding = Vector4.Zero
+    open var padding = Vec4.Zero
         set(value) {
             if (field != value) {
                 field = value

@@ -1,13 +1,13 @@
 package com.reco1l.andengine
 
-import com.reco1l.framework.math.Vector4
+import com.reco1l.framework.math.Vec4
 import org.anddev.andengine.entity.IEntity
 import org.anddev.andengine.entity.shape.IShape
 
 
 fun IEntity?.getPadding() = when (this) {
     is ExtendedEntity -> padding
-    else -> Vector4.Zero
+    else -> Vec4.Zero
 }
 
 fun IEntity?.getPaddedWidth() = when (this) {
