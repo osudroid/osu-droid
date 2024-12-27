@@ -4,9 +4,9 @@ import android.util.*
 import com.reco1l.andengine.container.*
 import com.reco1l.andengine.modifier.*
 import com.reco1l.framework.*
+import com.reco1l.framework.math.Vector4
 import org.anddev.andengine.engine.camera.*
 import org.anddev.andengine.entity.*
-import org.anddev.andengine.entity.scene.CameraScene
 import org.anddev.andengine.entity.scene.Scene
 import org.anddev.andengine.entity.scene.Scene.ITouchArea
 import org.anddev.andengine.entity.shape.*
@@ -114,6 +114,17 @@ abstract class ExtendedEntity(
         }
 
     /**
+     * The padding of the entity.
+     */
+    open var padding = Vector4.Zero
+        set(value) {
+            if (field != value) {
+                field = value
+                invalidateTransformations()
+            }
+        }
+
+    /**
      * The translation in the X axis.
      */
     open var translationX = 0f
@@ -203,7 +214,7 @@ abstract class ExtendedEntity(
     open val drawWidth: Float
         get() {
             if (relativeSizeAxes.isHorizontal) {
-                return getParentWidth() * width
+                return parent.getPaddedWidth() * width
             }
             return width
         }
@@ -217,7 +228,7 @@ abstract class ExtendedEntity(
     open val drawHeight: Float
         get() {
             if (relativeSizeAxes.isVertical) {
-                return getParentHeight() * height
+                return parent.getPaddedHeight() * height
             }
             return height
         }
@@ -233,11 +244,12 @@ abstract class ExtendedEntity(
                 return parent.getChildDrawX(this)
             }
 
+            var x = x
             if (relativePositionAxes.isHorizontal) {
-                return getParentWidth() * x + totalOffsetX
+                x *= parent.getPaddedWidth()
             }
 
-            return x + totalOffsetX
+            return parent.getPadding().left + x + totalOffsetX
         }
 
 
@@ -252,11 +264,12 @@ abstract class ExtendedEntity(
                 return parent.getChildDrawY(this)
             }
 
+            var y = y
             if (relativePositionAxes.isVertical) {
-                return getParentHeight() * y + totalOffsetY
+                y *= parent.getPaddedHeight()
             }
 
-            return y + totalOffsetY
+            return parent.getPadding().top + y + totalOffsetY
         }
 
 
@@ -521,11 +534,11 @@ abstract class ExtendedEntity(
         if (contentWidth != width || contentHeight != height) {
 
             if (autoSizeAxes.isHorizontal) {
-                width = if (relativeSizeAxes.isHorizontal) contentWidth / getParentWidth() else contentWidth
+                width = if (relativeSizeAxes.isHorizontal) contentWidth / parent.getPaddedWidth() else contentWidth
             }
 
             if (autoSizeAxes.isVertical) {
-                height = if (relativeSizeAxes.isVertical) contentHeight / getParentHeight() else contentHeight
+                height = if (relativeSizeAxes.isVertical) contentHeight / parent.getPaddedHeight() else contentHeight
             }
 
             updateVertexBuffer()
@@ -763,105 +776,3 @@ abstract class ExtendedEntity(
     }
 
 }
-
-
-/**
- * The total offset applied to the X axis.
- */
-val ExtendedEntity.totalOffsetX
-    get() = originOffsetX + anchorOffsetX + translationX
-
-/**
- * The total offset applied to the Y axis.
- */
-val ExtendedEntity.totalOffsetY
-    get() = originOffsetY + anchorOffsetY + translationY
-
-/**
- * The offset applied to the X axis according to the anchor factor.
- */
-val ExtendedEntity.anchorOffsetX: Float
-    get() = getParentWidth() * anchor.x
-
-/**
- * The offset applied to the Y axis according to the anchor factor.
- */
-val ExtendedEntity.anchorOffsetY: Float
-    get() = getParentHeight() * anchor.y
-
-/**
- * The offset applied to the X axis according to the origin factor.
- */
-val ExtendedEntity.originOffsetX: Float
-    get() = -(drawWidth * origin.x)
-
-/**
- * The offset applied to the Y axis according to the origin factor.
- */
-val ExtendedEntity.originOffsetY: Float
-    get() = -(drawHeight * origin.y)
-
-/**
- * Returns the width of the parent entity.
- */
-fun ExtendedEntity.getParentWidth() = when (val parent = parent) {
-    is ExtendedEntity -> parent.drawWidth
-    is CameraScene -> parent.camera.widthRaw
-    is IShape -> parent.width
-    else -> 0f
-}
-
-/**
- * Returns the height of the parent entity.
- */
-fun ExtendedEntity.getParentHeight() = when (val parent = parent) {
-    is ExtendedEntity -> parent.drawHeight
-    is CameraScene -> parent.camera.heightRaw
-    is IShape -> parent.height
-    else -> 0f
-}
-
-/**
- * Returns the draw width of the entity.
- */
-fun IEntity.getDrawWidth(): Float = when (this) {
-    is ExtendedEntity -> drawWidth
-    is IShape -> width
-    else -> 0f
-}
-
-/**
- * Returns the draw height of the entity.
- */
-fun IEntity.getDrawHeight(): Float = when (this) {
-    is ExtendedEntity -> drawHeight
-    is IShape -> height
-    else -> 0f
-}
-
-/**
- * Returns the draw X position of the entity.
- */
-fun IEntity.getDrawX(): Float = when (this) {
-    is ExtendedEntity -> drawX
-    is IShape -> x
-    else -> 0f
-}
-
-/**
- * Returns the draw Y position of the entity.
- */
-fun IEntity.getDrawY(): Float = when (this) {
-    is ExtendedEntity -> drawY
-    is IShape -> y
-    else -> 0f
-}
-
-/**
- * Attaches the entity to a parent.
- */
-infix fun <T : IEntity> T.attachTo(parent: IEntity): T {
-    parent.attachChild(this)
-    return this
-}
-

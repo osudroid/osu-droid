@@ -1,14 +1,10 @@
 package com.reco1l.andengine.container
 
-import android.util.*
 import com.reco1l.andengine.*
 import com.reco1l.toolkt.kotlin.*
 import org.anddev.andengine.engine.camera.*
 import org.anddev.andengine.entity.*
 import org.anddev.andengine.entity.IEntity.*
-import org.anddev.andengine.entity.scene.Scene.ITouchArea
-import org.anddev.andengine.entity.shape.IShape
-import org.anddev.andengine.input.touch.*
 import org.anddev.andengine.util.*
 import javax.microedition.khronos.opengles.GL10
 import kotlin.math.*
@@ -63,20 +59,22 @@ open class Container : ExtendedEntity() {
 
     open fun getChildDrawX(child: ExtendedEntity): Float {
 
+        var x = child.x
         if (child.relativePositionAxes.isHorizontal) {
-            return child.x * drawWidth + child.totalOffsetX
+            x *= getPaddedWidth()
         }
 
-        return child.x + child.totalOffsetX
+        return getPadding().left + x + child.totalOffsetX
     }
 
     open fun getChildDrawY(child: ExtendedEntity): Float {
 
+        var y = child.y
         if (child.relativePositionAxes.isVertical) {
-            return child.y * drawHeight + child.totalOffsetY
+            y *= getPaddedHeight()
         }
 
-        return child.y + child.totalOffsetY
+        return getPadding().top + y + child.totalOffsetY
     }
 
 
