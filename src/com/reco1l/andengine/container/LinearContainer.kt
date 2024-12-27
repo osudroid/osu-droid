@@ -30,9 +30,6 @@ open class LinearContainer : Container() {
         }
 
 
-    private var lastDrawOffset = 0f
-
-
     override fun onMeasureContentSize() {
         shouldMeasureSize = false
 
@@ -44,9 +41,7 @@ open class LinearContainer : Container() {
             for (i in mChildren.indices) {
 
                 val child = mChildren.getOrNull(i) ?: continue
-
-                // Non-shape children are ignored as they doesn't have a size there's nothing to do.
-                if (child !is IShape) {
+                if (child !is ExtendedEntity) {
                     continue
                 }
 
@@ -55,11 +50,13 @@ open class LinearContainer : Container() {
                 when (orientation) {
 
                     Horizontal -> {
+                        child.x = contentWidth
                         contentWidth += child.getDrawWidth() + spacing
                         contentHeight = max(contentHeight, child.getDrawHeight())
                     }
 
                     Vertical -> {
+                        child.y = contentHeight
                         contentWidth = max(contentWidth, child.getDrawWidth())
                         contentHeight += child.getDrawHeight() + spacing
                     }
@@ -71,33 +68,28 @@ open class LinearContainer : Container() {
     }
 
 
-    override fun onManagedDrawChildren(pGL: GL10, pCamera: Camera) {
-        lastDrawOffset = 0f
-        super.onManagedDrawChildren(pGL, pCamera)
-    }
-
     override fun getChildDrawX(child: ExtendedEntity): Float {
 
+        val drawX = super.getChildDrawX(child)
+
         if (orientation == Vertical) {
-            return super.getChildDrawX(child)
+            return drawX
         }
 
-        val drawX = lastDrawOffset + super.getChildDrawX(child)
-        lastDrawOffset += child.drawWidth + spacing
-
-        return drawX
+        // Subtract the anchor offset for the X axis because it should be ignored in this case.
+        return drawX - child.anchorOffsetX
     }
 
     override fun getChildDrawY(child: ExtendedEntity): Float {
 
+        val drawY = super.getChildDrawY(child)
+
         if (orientation == Horizontal) {
-            return super.getChildDrawY(child)
+            return drawY
         }
 
-        val drawY = lastDrawOffset + super.getChildDrawY(child)
-        lastDrawOffset += child.drawHeight + spacing
-
-        return drawY
+        // Subtract the anchor offset for the Y axis because it should be ignored in this case.
+        return drawY - child.anchorOffsetY
     }
 
 }

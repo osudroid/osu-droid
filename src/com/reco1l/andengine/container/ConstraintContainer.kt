@@ -3,6 +3,7 @@ package com.reco1l.andengine.container
 import com.reco1l.andengine.*
 import org.anddev.andengine.entity.*
 import org.anddev.andengine.entity.shape.*
+import kotlin.math.max
 
 /**
  * Container that allows to constrain nested entities to other entities in the same container.
@@ -19,10 +20,12 @@ class ConstraintContainer : Container() {
 
         val target = constraints[child] ?: this
 
-        val targetX = target.getDrawX()
-        val anchorOffsetX = target.getDrawWidth() * child.anchor.x
+        val targetX = if (target == this) 0f else target.getDrawX()
+        val targetWidth = if (target == this) getPaddedWidth() else target.getDrawWidth()
 
-        var childX = child.x
+        val anchorOffsetX = targetWidth * child.anchor.x
+
+        var childX = max(getPadding().left, child.x)
 
         // Relative positions will be multiplied by the remaining space from the
         // target's position to the edge of the container.
@@ -37,10 +40,12 @@ class ConstraintContainer : Container() {
 
         val target = constraints[child] ?: this
 
-        val targetY = target.getDrawY()
-        val anchorOffsetY = target.getDrawHeight() * child.anchor.y
+        val targetY = if (target == this) 0f else target.getDrawY()
+        val targetHeight = if (target == this) getPaddedHeight() else target.getDrawHeight()
 
-        var childY = child.y
+        val anchorOffsetY = targetHeight * child.anchor.y
+
+        var childY = max(getPadding().top, child.y)
 
         // Relative positions will be multiplied by the remaining space from the
         // target's position to the edge of the container.

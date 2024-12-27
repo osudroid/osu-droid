@@ -338,28 +338,26 @@ open class ScrollableContainer : Container() {
 
     override fun getChildDrawX(child: ExtendedEntity): Float {
 
-        if (child == indicatorX || child == indicatorY) {
+        if (child == indicatorX || child == indicatorY || !scrollAxes.isHorizontal) {
             return super.getChildDrawX(child)
         }
 
-        return -scrollX + child.x - child.originOffsetX + child.translationX
+        return -scrollX + max(getPadding().left, child.x) - child.originOffsetX + child.translationX
     }
 
     override fun getChildDrawY(child: ExtendedEntity): Float {
 
-        if (child == indicatorX || child == indicatorY) {
+        if (child == indicatorX || child == indicatorY || !scrollAxes.isVertical) {
             return super.getChildDrawY(child)
         }
 
-        return -scrollY + child.y - child.originOffsetY + child.translationY
+        return -scrollY + max(getPadding().top, child.y) - child.originOffsetY + child.translationY
     }
 
 
     companion object {
 
         const val DEFAULT_DECELERATION = 0.98f
-
-        const val INSIGNIFICANT_DISTANCE = 0.05f
 
     }
 }

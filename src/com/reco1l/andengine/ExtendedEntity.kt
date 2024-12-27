@@ -15,6 +15,7 @@ import org.anddev.andengine.opengl.util.*
 import org.anddev.andengine.opengl.vertex.*
 import org.anddev.andengine.util.Transformation
 import javax.microedition.khronos.opengles.*
+import kotlin.math.max
 
 
 /**
@@ -249,7 +250,7 @@ abstract class ExtendedEntity(
                 x *= parent.getPaddedWidth()
             }
 
-            return parent.getPadding().left + x + totalOffsetX
+            return max(parent.getPadding().left, x) + totalOffsetX
         }
 
 
@@ -269,7 +270,7 @@ abstract class ExtendedEntity(
                 y *= parent.getPaddedHeight()
             }
 
-            return parent.getPadding().top + y + totalOffsetY
+            return max(parent.getPadding().top, y) + totalOffsetY
         }
 
 
