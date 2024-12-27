@@ -560,8 +560,7 @@ abstract class ExtendedEntity(
     open fun setSize(newWidth: Float, newHeight: Float): Boolean {
 
         if (autoSizeAxes != Axes.None) {
-            Log.e("ExtendedEntity", "Cannot change the size manually while autoSizeAxes is set to ${autoSizeAxes.name}.")
-            return false
+            autoSizeAxes = Axes.None
         }
 
         if (width != newWidth || height != newHeight) {
@@ -583,8 +582,7 @@ abstract class ExtendedEntity(
     open fun setWidth(value: Float) {
 
         if (autoSizeAxes.isHorizontal) {
-            Log.e("ExtendedEntity", "Cannot change the width manually while autoSizeAxes is set to ${autoSizeAxes.name}.")
-            return
+            autoSizeAxes = if (autoSizeAxes == Axes.Both) Axes.Y else Axes.None
         }
 
         if (width != value) {
@@ -598,8 +596,7 @@ abstract class ExtendedEntity(
     open fun setHeight(value: Float) {
 
         if (autoSizeAxes.isVertical) {
-            Log.e("ExtendedEntity", "Cannot change the height manually while autoSizeAxes is set to ${autoSizeAxes.name}.")
-            return
+            autoSizeAxes = if (autoSizeAxes == Axes.Both) Axes.X else Axes.None
         }
 
         if (height != value) {
