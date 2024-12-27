@@ -121,12 +121,6 @@ open class ExtendedText : ExtendedEntity() {
             shouldRebuildTextureBuffer = false
 
             textureBuffer = TextTextureBuffer(2 * VERTICES_PER_CHARACTER * maximumSize, GL_STATIC_DRAW, true)
-
-            if (font!!.texture.textureOptions.mPreMultipyAlpha) {
-                setBlendFunction(BLENDFUNCTION_SOURCE_PREMULTIPLYALPHA_DEFAULT, BLENDFUNCTION_DESTINATION_PREMULTIPLYALPHA_DEFAULT)
-            } else {
-                setBlendFunction(BLENDFUNCTION_SOURCE_DEFAULT, BLENDFUNCTION_DESTINATION_DEFAULT)
-            }
         }
 
         val lines = text.split('\n').toTypedArray()
