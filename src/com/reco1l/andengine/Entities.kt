@@ -2,6 +2,7 @@ package com.reco1l.andengine
 
 import com.reco1l.framework.math.Vec4
 import org.anddev.andengine.entity.IEntity
+import org.anddev.andengine.entity.scene.CameraScene
 import org.anddev.andengine.entity.shape.IShape
 
 
@@ -12,12 +13,14 @@ fun IEntity?.getPadding() = when (this) {
 
 fun IEntity?.getPaddedWidth() = when (this) {
     is ExtendedEntity -> drawWidth - padding.horizontal
+    is CameraScene -> camera.widthRaw
     is IShape -> width
     else -> 0f
 }
 
 fun IEntity?.getPaddedHeight() = when (this) {
     is ExtendedEntity -> drawHeight - padding.vertical
+    is CameraScene -> camera.heightRaw
     is IShape -> height
     else -> 0f
 }
