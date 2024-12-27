@@ -36,29 +36,42 @@ open class LinearContainer : Container() {
         contentWidth = 0f
         contentHeight = 0f
 
-        if (mChildren != null) {
+        for (i in 0 until childCount) {
 
-            for (i in mChildren.indices) {
+            val child = getChild(i) ?: continue
+            if (child !is ExtendedEntity) {
+                continue
+            }
 
-                val child = mChildren.getOrNull(i) ?: continue
-                if (child !is ExtendedEntity) {
-                    continue
-                }
+            when (orientation) {
 
-                val spacing = if (i == mChildren.size - 1) 0f else spacing
+                Horizontal -> {
+                    child.x = contentWidth
 
-                when (orientation) {
+                    contentWidth += child.getDrawWidth()
+                    contentHeight = max(contentHeight, child.getDrawHeight())
 
-                    Horizontal -> {
-                        child.x = contentWidth
-                        contentWidth += child.getDrawWidth() + spacing
-                        contentHeight = max(contentHeight, child.getDrawHeight())
+                    if (i == 0) {
+                        contentWidth += getPadding().left
                     }
 
-                    Vertical -> {
-                        child.y = contentHeight
-                        contentWidth = max(contentWidth, child.getDrawWidth())
-                        contentHeight += child.getDrawHeight() + spacing
+                    if (i < childCount - 1) {
+                        contentWidth += spacing
+                    }
+                }
+
+                Vertical -> {
+                    child.y = contentHeight
+
+                    contentWidth = max(contentWidth, child.getDrawWidth())
+                    contentHeight += child.getDrawHeight()
+
+                    if (i == 0) {
+                        contentHeight += getPadding().top
+                    }
+
+                    if (i < childCount - 1) {
+                        contentHeight += spacing
                     }
                 }
             }
