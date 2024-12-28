@@ -3,14 +3,13 @@ package com.reco1l.andengine.container
 import com.reco1l.andengine.*
 import org.anddev.andengine.entity.*
 import org.anddev.andengine.entity.shape.*
-import kotlin.math.max
 
 /**
  * Container that allows to constrain nested entities to other entities in the same container.
  *
  * This is useful for creating complex layouts.
  */
-class ConstraintContainer : Container() {
+open class ConstraintContainer : Container() {
 
 
     private val constraints = mutableMapOf<ExtendedEntity, IShape>()
