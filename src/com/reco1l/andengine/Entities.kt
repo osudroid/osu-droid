@@ -4,6 +4,7 @@ import com.reco1l.framework.math.Vec4
 import org.anddev.andengine.entity.IEntity
 import org.anddev.andengine.entity.scene.CameraScene
 import org.anddev.andengine.entity.shape.IShape
+import kotlin.math.max
 
 
 fun IEntity?.getPadding() = when (this) {
@@ -24,6 +25,20 @@ fun IEntity?.getPaddedHeight() = when (this) {
     is IShape -> height
     else -> 0f
 }
+
+
+/**
+ * The size of the entity.
+ *
+ * When using the getter this will return the maximum value between the width and height or the same.
+ * When using the setter this will set the width and height to the same value.
+ */
+var ExtendedEntity.size
+    get() = max(width, height)
+    set(value) {
+        width = value
+        height = value
+    }
 
 
 /**
