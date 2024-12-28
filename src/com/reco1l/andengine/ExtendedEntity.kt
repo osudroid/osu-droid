@@ -4,7 +4,6 @@ import android.util.*
 import com.reco1l.andengine.container.*
 import com.reco1l.andengine.modifier.*
 import com.reco1l.framework.*
-import com.reco1l.framework.math.Vec2
 import com.reco1l.framework.math.Vec4
 import org.anddev.andengine.engine.camera.*
 import org.anddev.andengine.entity.*
@@ -312,6 +311,8 @@ abstract class ExtendedEntity(
     private var height = 0f
 
     private var isVertexBufferDirty = true
+
+    private var currentBoundEntity: ITouchArea? = null
 
 
     // Attachment
@@ -819,16 +820,34 @@ abstract class ExtendedEntity(
         localY: Float
     ): Boolean {
 
+        val boundEntity = currentBoundEntity
+        if (boundEntity != null) {
+            boundEntity as IEntity
+
+            val transformedX = localX - boundEntity.getDrawX()
+            val transformedY = localY - boundEntity.getDrawY()
+
+            boundEntity.onAreaTouched(event, transformedX, transformedY)
+
+            if (event.isActionUp || event.isActionOutside || event.isActionCancel) {
+                currentBoundEntity = null
+            }
+            return true
+        }
+
         try {
             for (i in childCount - 1 downTo 0) {
                 val child = getChild(i)
 
-                val transformedX = localX - child.getDrawX()
-                val transformedY = localY - child.getDrawY()
+                if (child is ITouchArea && child.contains(localX, localY)) {
 
-                if (child is ITouchArea && child.contains(transformedX, transformedY)) {
+                    val transformedX = localX - child.getDrawX()
+                    val transformedY = localY - child.getDrawY()
 
                     if (child.onAreaTouched(event, transformedX, transformedY)) {
+                        if (event.isActionDown) {
+                            currentBoundEntity = child
+                        }
                         return true
                     }
                 }

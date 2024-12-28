@@ -280,31 +280,33 @@ open class ScrollableContainer : Container() {
         when (event.action) {
 
             ACTION_DOWN -> {
-                isDragging = true
-
                 initialX = localX
                 initialY = localY
 
                 velocityX = 0f
                 velocityY = 0f
-
-                lastDragTimeSec = elapsedTimeSec
             }
 
             ACTION_MOVE -> {
-                isDragging = true
 
-                var deltaX = localX - initialX
-                var deltaY = localY - initialY
+                var deltaX = if (scrollAxes.isHorizontal) localX - initialX else 0f
+                var deltaY = if (scrollAxes.isVertical) localY - initialY else 0f
+
+                if (!isDragging) {
+                    isDragging = abs(deltaX) > 1f || abs(deltaY) > 1f
+
+                    if (!isDragging) {
+                        return super.onAreaTouched(event, localX, localY)
+                    }
+                }
 
                 val length = hypot(deltaX, deltaY)
 
-                // Slow down the scroll when reaching the bounds.
-                if (scrollX + deltaX < 0 || scrollX + deltaX > maxScrollX) {
+                if (scrollX - deltaX < 0 || scrollX - deltaX > maxScrollX) {
                     deltaX *= if (length <= 0) 0f else length.pow(0.7f) / length
                 }
 
-                if (scrollY + deltaY < 0 || scrollY + deltaY > maxScrollY) {
+                if (scrollY - deltaY < 0 || scrollY - deltaY > maxScrollY) {
                     deltaY *= if (length <= 0) 0f else length.pow(0.7f) / length
                 }
 
@@ -313,18 +315,16 @@ open class ScrollableContainer : Container() {
                 if (abs(deltaX) > 0.1f) {
                     scrollX -= deltaX
                     velocityX = abs(deltaX / dragTimeSec) * sign(deltaX)
-
                     initialX = localX
-                    lastDragTimeSec = elapsedTimeSec
                 }
 
                 if (abs(deltaY) > 0.1f) {
                     scrollY -= deltaY
                     velocityY = abs(deltaY / dragTimeSec) * sign(deltaY)
-
                     initialY = localY
-                    lastDragTimeSec = elapsedTimeSec
                 }
+
+                lastDragTimeSec = elapsedTimeSec
             }
 
             else -> {
@@ -332,7 +332,7 @@ open class ScrollableContainer : Container() {
             }
         }
 
-        return super.onAreaTouched(event, localX, localY)
+        return isDragging || super.onAreaTouched(event, localX, localY)
     }
 
 
