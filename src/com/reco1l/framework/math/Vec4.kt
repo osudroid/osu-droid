@@ -2,12 +2,17 @@ package com.reco1l.framework.math
 
 data class Vec4(
 
-    val x: Float = 0f,
-    val y: Float = 0f,
-    val z: Float = 0f,
-    val w: Float = 0f,
+    val x: Float,
+    val y: Float,
+    val z: Float,
+    val w: Float,
 
 ) {
+
+    constructor(value: Float = 0f) : this(value, value, value, value)
+
+    constructor(xz: Float, yw: Float) : this(xz, yw, xz, yw)
+
 
     val left: Float
         get() = x

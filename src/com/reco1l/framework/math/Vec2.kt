@@ -2,11 +2,14 @@ package com.reco1l.framework.math
 
 data class Vec2(
 
-    val x: Float = 0f,
+    val x: Float,
 
-    val y: Float = 0f,
+    val y: Float,
 
 ) {
+
+    constructor(value: Float = 0f) : this(value, value)
+
 
     val total
         get() = x + y
