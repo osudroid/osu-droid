@@ -124,7 +124,7 @@ open class RoundedBox : ExtendedEntity() {
 
     class RoundedBoxVertexBuffer(private val segmentsPerArc: Int) : VertexBuffer(
 
-        (5 /*Quads*/ * 4 + (segmentsPerArc + 2) /*Arcs*/ * 4) * 2,
+        (3 /*Quads*/ * 4 + (segmentsPerArc + 2) /*Arcs*/ * 4) * 2,
 
         GL11.GL_STATIC_DRAW, false
     ) {
@@ -151,40 +151,27 @@ open class RoundedBox : ExtendedEntity() {
             }
 
             // Quads:
-            //     [1]
-            // [4] [5] [2]
-            //     [3]
+            //     [ ]
+            // [1] [2] [3]
+            //     [ ]
 
             // [1]
-            addQuad(
-                fromX = cornerRadius, fromY = 0f,
-                toX = width - cornerRadius, toY = cornerRadius
-            )
-
-            // [2]
-            addQuad(
-                fromX = width - cornerRadius, fromY = cornerRadius,
-                toX = width, toY = height - cornerRadius
-            )
-
-            // [3]
-            addQuad(
-                fromX = cornerRadius, fromY = height - cornerRadius,
-                toX = width - cornerRadius, toY = height
-            )
-
-            // [4]
             addQuad(
                 fromX = 0f, fromY = cornerRadius,
                 toX = cornerRadius, toY = height - cornerRadius
             )
 
-            // [5]
+            // [2]
             addQuad(
-                fromX = cornerRadius, fromY = cornerRadius,
-                toX = width - cornerRadius, toY = height - cornerRadius
+                fromX = cornerRadius, fromY = 0f,
+                toX = width - cornerRadius, toY = height
             )
 
+            // [3]
+            addQuad(
+                fromX = width - cornerRadius, fromY = cornerRadius,
+                toX = width, toY = height - cornerRadius
+            )
 
             // Arcs
 
@@ -234,7 +221,7 @@ open class RoundedBox : ExtendedEntity() {
             var offset = 0
 
             // Quads
-            for (i in 0 until 5) {
+            for (i in 0 until 3) {
                 gl.glDrawArrays(GL_TRIANGLE_STRIP, offset, 4)
                 offset += 4
             }
