@@ -51,10 +51,6 @@ open class LinearContainer : Container() {
                     contentWidth += child.getDrawWidth()
                     contentHeight = max(contentHeight, child.getDrawHeight())
 
-                    if (i == 0) {
-                        contentWidth += getPadding().left
-                    }
-
                     if (i < childCount - 1) {
                         contentWidth += spacing
                     }
@@ -65,10 +61,6 @@ open class LinearContainer : Container() {
 
                     contentWidth = max(contentWidth, child.getDrawWidth())
                     contentHeight += child.getDrawHeight()
-
-                    if (i == 0) {
-                        contentHeight += getPadding().top
-                    }
 
                     if (i < childCount - 1) {
                         contentHeight += spacing

@@ -342,7 +342,7 @@ open class ScrollableContainer : Container() {
             return super.getChildDrawX(child)
         }
 
-        return -scrollX + max(getPadding().left, child.x) - child.originOffsetX + child.translationX
+        return -scrollX + child.x - child.originOffsetX + child.translationX
     }
 
     override fun getChildDrawY(child: ExtendedEntity): Float {
@@ -351,7 +351,7 @@ open class ScrollableContainer : Container() {
             return super.getChildDrawY(child)
         }
 
-        return -scrollY + max(getPadding().top, child.y) - child.originOffsetY + child.translationY
+        return -scrollY + child.y - child.originOffsetY + child.translationY
     }
 
 

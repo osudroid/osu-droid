@@ -20,18 +20,22 @@ class ConstraintContainer : Container() {
 
         val target = constraints[child] ?: this
 
-        val targetX = if (target == this) 0f else target.getDrawX()
-        val targetWidth = if (target == this) getPaddedWidth() else target.getDrawWidth()
+        var targetX = target.getDrawX()
+        var targetWidth = target.getDrawWidth()
 
-        val paddingLeft = if (target == this) getPadding().left else 0f
+        if (target == this) {
+            targetX = 0f
+            targetWidth = getPaddedWidth()
+        }
+
         val anchorOffsetX = targetWidth * child.anchor.x
 
-        var childX = max(paddingLeft, child.x)
-
-        // Relative positions will be multiplied by the remaining space from the
-        // target's position to the edge of the container.
+        var childX = child.x
         if (child.relativePositionAxes.isHorizontal) {
-            childX *= drawWidth - targetX
+
+            // Relative positions will be multiplied by the remaining space from the
+            // target's position to the edge of the container.
+            childX *= getPaddedWidth() - targetX
         }
 
         return targetX + childX + child.originOffsetX + anchorOffsetX + child.translationX
@@ -41,18 +45,22 @@ class ConstraintContainer : Container() {
 
         val target = constraints[child] ?: this
 
-        val targetY = if (target == this) 0f else target.getDrawY()
-        val targetHeight = if (target == this) getPaddedHeight() else target.getDrawHeight()
+        var targetY = target.getDrawY()
+        var targetHeight = target.getDrawHeight()
 
-        val paddingTop = if (target == this) getPadding().top else 0f
+        if (target == this) {
+            targetY = 0f
+            targetHeight = getPaddedHeight()
+        }
+
         val anchorOffsetY = targetHeight * child.anchor.y
 
-        var childY = max(paddingTop, child.y)
-
-        // Relative positions will be multiplied by the remaining space from the
-        // target's position to the edge of the container.
+        var childY = child.y
         if (child.relativePositionAxes.isVertical) {
-            childY *= drawHeight - targetY
+
+            // Relative positions will be multiplied by the remaining space from the
+            // target's position to the edge of the container.
+            childY *= getPaddedHeight() - targetY
         }
 
         return targetY + childY + child.originOffsetY + anchorOffsetY + child.translationY

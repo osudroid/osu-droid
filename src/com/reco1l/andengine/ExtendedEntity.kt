@@ -16,7 +16,6 @@ import org.anddev.andengine.opengl.util.*
 import org.anddev.andengine.opengl.vertex.*
 import org.anddev.andengine.util.Transformation
 import javax.microedition.khronos.opengles.*
-import kotlin.math.max
 
 
 /**
@@ -284,7 +283,7 @@ abstract class ExtendedEntity(
                 x *= parent.getPaddedWidth()
             }
 
-            return max(parent.getPadding().left, x) + totalOffsetX
+            return x + totalOffsetX
         }
 
 
@@ -304,7 +303,7 @@ abstract class ExtendedEntity(
                 y *= parent.getPaddedHeight()
             }
 
-            return max(parent.getPadding().top, y) + totalOffsetY
+            return y + totalOffsetY
         }
 
 
@@ -476,26 +475,20 @@ abstract class ExtendedEntity(
     }
 
     override fun onDrawChildren(gl: GL10, camera: Camera) {
-        super.onDrawChildren(gl, camera)
 
-        foreground?.setSize(drawWidth, drawHeight)
-        foreground?.onDraw(gl, camera)
-    }
+        val hasPaddingApplicable = padding.left > 0f || padding.top > 0f
 
-    override fun onManagedDraw(gl: GL10, camera: Camera) {
-
-        if (isVertexBufferDirty) {
-            isVertexBufferDirty = false
-            onUpdateVertexBuffer()
+        if (hasPaddingApplicable) {
+            gl.glTranslatef(padding.left, padding.top, 0f)
         }
 
         if (clipChildren) {
             GLHelper.enableScissorTest(gl)
 
             var (bottomLeftX, bottomLeftY) = camera.getScreenSpaceCoordinates(convertLocalToSceneCoordinates(0f, 0f))
-            var (topLeftX, topLeftY) = camera.getScreenSpaceCoordinates(convertLocalToSceneCoordinates(0f, drawHeight))
-            var (topRightX, topRightY) = camera.getScreenSpaceCoordinates(convertLocalToSceneCoordinates(drawWidth, drawHeight))
-            var (bottomRightX, bottomRightY) = camera.getScreenSpaceCoordinates(convertLocalToSceneCoordinates(drawWidth, 0f))
+            var (topLeftX, topLeftY) = camera.getScreenSpaceCoordinates(convertLocalToSceneCoordinates(0f, getPaddedHeight()))
+            var (topRightX, topRightY) = camera.getScreenSpaceCoordinates(convertLocalToSceneCoordinates(getPaddedWidth(), getPaddedHeight()))
+            var (bottomRightX, bottomRightY) = camera.getScreenSpaceCoordinates(convertLocalToSceneCoordinates(getPaddedWidth(), 0f))
 
             // Flip the Y axis to match the OpenGL coordinate system.
             bottomLeftY = camera.surfaceHeight - bottomLeftY
@@ -517,11 +510,28 @@ abstract class ExtendedEntity(
             )
         }
 
-        super.onManagedDraw(gl, camera)
+        super.onDrawChildren(gl, camera)
 
         if (clipChildren) {
             GLHelper.disableScissorTest(gl)
         }
+
+        if (hasPaddingApplicable) {
+            gl.glTranslatef(-padding.right, -padding.top, 0f)
+        }
+
+        foreground?.setSize(drawWidth, drawHeight)
+        foreground?.onDraw(gl, camera)
+    }
+
+    override fun onManagedDraw(gl: GL10, camera: Camera) {
+
+        if (isVertexBufferDirty) {
+            isVertexBufferDirty = false
+            onUpdateVertexBuffer()
+        }
+
+        super.onManagedDraw(gl, camera)
     }
 
     override fun onInitDraw(pGL: GL10) {
@@ -584,11 +594,19 @@ abstract class ExtendedEntity(
         if (contentWidth != width || contentHeight != height) {
 
             if (autoSizeAxes.isHorizontal) {
-                width = if (relativeSizeAxes.isHorizontal) contentWidth / parent.getPaddedWidth() else contentWidth
+                width = contentWidth + padding.horizontal
+
+                if (relativeSizeAxes.isHorizontal) {
+                    width /= parent.getPaddedWidth()
+                }
             }
 
             if (autoSizeAxes.isVertical) {
-                height = if (relativeSizeAxes.isVertical) contentHeight / parent.getPaddedHeight() else contentHeight
+                height = contentHeight + padding.vertical
+
+                if (relativeSizeAxes.isVertical) {
+                    height /= parent.getPaddedHeight()
+                }
             }
 
             updateVertexBuffer()

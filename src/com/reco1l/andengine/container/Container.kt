@@ -64,7 +64,7 @@ open class Container : ExtendedEntity() {
             x *= getPaddedWidth()
         }
 
-        return max(getPadding().left, x) + child.totalOffsetX
+        return x + child.totalOffsetX
     }
 
     open fun getChildDrawY(child: ExtendedEntity): Float {
@@ -74,7 +74,7 @@ open class Container : ExtendedEntity() {
             y *= getPaddedHeight()
         }
 
-        return max(getPadding().top, y) + child.totalOffsetY
+        return y + child.totalOffsetY
     }
 
 
