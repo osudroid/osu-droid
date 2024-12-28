@@ -103,7 +103,8 @@ open class RoundedBox : ExtendedEntity() {
 
     override fun onUpdateVertexBuffer() {
 
-        val cornerRadius = cornerRadius.coerceIn(0f, min(drawWidth, drawHeight) / 2f)
+        val smallerSide = min(drawWidth, drawHeight)
+        val cornerRadius = cornerRadius.coerceAtMost(smallerSide / 2f).coerceAtLeast(0f)
 
         if (shouldRebuildVertexBuffer) {
             shouldRebuildVertexBuffer = false
