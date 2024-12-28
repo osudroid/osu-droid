@@ -4,6 +4,7 @@ import android.util.*
 import com.reco1l.andengine.container.*
 import com.reco1l.andengine.modifier.*
 import com.reco1l.framework.*
+import com.reco1l.framework.math.Vec2
 import com.reco1l.framework.math.Vec4
 import org.anddev.andengine.engine.camera.*
 import org.anddev.andengine.entity.*
@@ -146,6 +147,39 @@ abstract class ExtendedEntity(
                 invalidateTransformations()
             }
         }
+
+    /**
+     * The background entity. This entity will be drawn before the entity children and will not be
+     * affected by padding.
+     */
+    open var background: ExtendedEntity? = null
+        set(value) {
+            if (field != value) {
+                if (value?.parent != null) {
+                    Log.e("ExtendedEntity", "The background entity is already attached to another entity.")
+                    return
+                }
+
+                field = value
+            }
+        }
+
+    /**
+     * The foreground entity. This entity will be drawn after the entity children and will not be
+     * affected by padding.
+     */
+    open var foreground: ExtendedEntity? = null
+        set(value) {
+            if (field != value) {
+                if (value?.parent != null) {
+                    Log.e("ExtendedEntity", "The foreground entity is already attached to another entity.")
+                    return
+                }
+
+                field = value
+            }
+        }
+
 
     /**
      * Whether the entity should clip its children.
@@ -431,6 +465,21 @@ abstract class ExtendedEntity(
         applyScale(pGL)
         applyColor(pGL)
         applyBlending(pGL)
+    }
+
+    override fun doDraw(gl: GL10, camera: Camera) {
+
+        background?.setSize(drawWidth, drawHeight)
+        background?.onDraw(gl, camera)
+
+        super.doDraw(gl, camera)
+    }
+
+    override fun onDrawChildren(gl: GL10, camera: Camera) {
+        super.onDrawChildren(gl, camera)
+
+        foreground?.setSize(drawWidth, drawHeight)
+        foreground?.onDraw(gl, camera)
     }
 
     override fun onManagedDraw(gl: GL10, camera: Camera) {
