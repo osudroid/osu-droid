@@ -23,9 +23,10 @@ class ConstraintContainer : Container() {
         val targetX = if (target == this) 0f else target.getDrawX()
         val targetWidth = if (target == this) getPaddedWidth() else target.getDrawWidth()
 
+        val paddingLeft = if (target == this) getPadding().left else 0f
         val anchorOffsetX = targetWidth * child.anchor.x
 
-        var childX = max(getPadding().left, child.x)
+        var childX = max(paddingLeft, child.x)
 
         // Relative positions will be multiplied by the remaining space from the
         // target's position to the edge of the container.
@@ -43,9 +44,10 @@ class ConstraintContainer : Container() {
         val targetY = if (target == this) 0f else target.getDrawY()
         val targetHeight = if (target == this) getPaddedHeight() else target.getDrawHeight()
 
+        val paddingTop = if (target == this) getPadding().top else 0f
         val anchorOffsetY = targetHeight * child.anchor.y
 
-        var childY = max(getPadding().top, child.y)
+        var childY = max(paddingTop, child.y)
 
         // Relative positions will be multiplied by the remaining space from the
         // target's position to the edge of the container.
