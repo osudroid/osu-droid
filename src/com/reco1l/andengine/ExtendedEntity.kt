@@ -551,6 +551,17 @@ abstract class ExtendedEntity(
     }
 
 
+    // Update
+
+    override fun onManagedUpdate(pSecondsElapsed: Float) {
+
+        background?.onManagedUpdate(pSecondsElapsed)
+        foreground?.onManagedUpdate(pSecondsElapsed)
+
+        super.onManagedUpdate(pSecondsElapsed)
+    }
+
+
     // Vertex buffer
 
     override fun updateVertexBuffer() {
@@ -611,6 +622,7 @@ abstract class ExtendedEntity(
             }
 
             updateVertexBuffer()
+            invalidateTransformations()
 
             (parent as? Container)?.onChildSizeChanged(this)
             return true
@@ -637,6 +649,7 @@ abstract class ExtendedEntity(
             height = newHeight
 
             updateVertexBuffer()
+            invalidateTransformations()
 
             val parent = parent
             if (parent is Container) {
@@ -658,6 +671,7 @@ abstract class ExtendedEntity(
             width = value
 
             updateVertexBuffer()
+            invalidateTransformations()
             (parent as? Container)?.onChildSizeChanged(this)
         }
     }
@@ -672,6 +686,7 @@ abstract class ExtendedEntity(
             height = value
 
             updateVertexBuffer()
+            invalidateTransformations()
             (parent as? Container)?.onChildSizeChanged(this)
         }
     }
@@ -715,7 +730,7 @@ abstract class ExtendedEntity(
             return false
         }
 
-        return EntityCollision.contains(this, x, y)
+        return EntityCollision.contains(this, x, y, parent is Scene)
     }
 
     override fun isCulled(pCamera: Camera): Boolean {
