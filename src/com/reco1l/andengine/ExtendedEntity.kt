@@ -711,7 +711,7 @@ abstract class ExtendedEntity(
 
     override fun contains(x: Float, y: Float): Boolean {
 
-        if (width == 0f || height == 0f) {
+        if (drawWidth == 0f || drawHeight == 0f) {
             return false
         }
 
