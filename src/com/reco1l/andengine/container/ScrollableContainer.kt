@@ -270,9 +270,10 @@ open class ScrollableContainer : Container() {
     }
 
     override fun onManagedDrawChildren(pGL: GL10, pCamera: Camera) {
+        super.onManagedDrawChildren(pGL, pCamera)
+
         indicatorX?.onDraw(pGL, pCamera)
         indicatorY?.onDraw(pGL, pCamera)
-        super.onManagedDrawChildren(pGL, pCamera)
     }
 
     override fun onAreaTouched(event: TouchEvent, localX: Float, localY: Float): Boolean {
