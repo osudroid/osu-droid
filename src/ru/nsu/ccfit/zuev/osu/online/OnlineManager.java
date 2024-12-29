@@ -214,6 +214,7 @@ public class OnlineManager {
         post.addParam("sessionId", sessionId);
         post.addParam("modstring", stat.getModString());
         post.addParam("hash", hash);
+        post.addParam("isAllowMoreThanThreeCursors", Config.isAllowMoreThanThreeCursors() ? "1" : "0");
         post.addParam("isSliderLock", Config.isRemoveSliderLock() ? "1" : "0");
         post.addParam("isSliderAccuracy", stat.getMod().contains(GameMod.MOD_SCOREV2) ? "1" : "0");
 
