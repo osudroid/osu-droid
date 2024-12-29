@@ -769,21 +769,21 @@ abstract class ExtendedEntity(
             mParentToLocalTransformation.setToIdentity()
             mParentToLocalTransformation.postTranslate(-drawX, -drawY)
 
-            if (scaleX != 1f || scaleY != 1f) {
-                val offsetX = drawWidth * mScaleCenterX
-                val offsetY = drawHeight * mScaleCenterY
-
-                mParentToLocalTransformation.postTranslate(-offsetX, -offsetY)
-                mParentToLocalTransformation.postScale(1 / scaleX, 1 / scaleY)
-                mParentToLocalTransformation.postTranslate(offsetX, offsetY)
-            }
-
             if (rotation != 0f) {
                 val offsetX = drawWidth * mRotationCenterX
                 val offsetY = drawHeight * mRotationCenterY
 
                 mParentToLocalTransformation.postTranslate(-offsetX, -offsetY)
                 mParentToLocalTransformation.postRotate(-rotation)
+                mParentToLocalTransformation.postTranslate(offsetX, offsetY)
+            }
+
+            if (scaleX != 1f || scaleY != 1f) {
+                val offsetX = drawWidth * mScaleCenterX
+                val offsetY = drawHeight * mScaleCenterY
+
+                mParentToLocalTransformation.postTranslate(-offsetX, -offsetY)
+                mParentToLocalTransformation.postScale(1 / scaleX, 1 / scaleY)
                 mParentToLocalTransformation.postTranslate(offsetX, offsetY)
             }
 
@@ -855,7 +855,6 @@ abstract class ExtendedEntity(
         } catch (e: IndexOutOfBoundsException) {
             Log.e("ExtendedEntity", "A child entity was removed during touch event propagation.", e)
         }
-
         return false
     }
 
