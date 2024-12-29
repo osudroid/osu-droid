@@ -332,7 +332,11 @@ open class ScrollableContainer : Container() {
             }
         }
 
-        return isDragging || super.onAreaTouched(event, localX, localY)
+        if (!isDragging) {
+            return super.onAreaTouched(event, localX, localY)
+        }
+
+        return true
     }
 
 
