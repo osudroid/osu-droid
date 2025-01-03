@@ -28,6 +28,7 @@ open class ExtendedScene : Scene(), IShape {
 
     init {
         super.setTouchAreaBindingEnabled(true)
+        super.setOnAreaTouchTraversalFrontToBack()
     }
 
 

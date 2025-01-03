@@ -74,7 +74,7 @@ class GameplayHUD(private val stat: StatisticV2, private val game: GameScene, pr
             scoreCounter!!.setScore(stat.totalScoreWithMultiplier)
 
             accuracyCounter!!.setAccuracy(stat.accuracy)
-            accuracyCounter.y = 9f + scoreCounter.y + scoreCounter.height
+            accuracyCounter.y = 9f + scoreCounter.y + scoreCounter.drawHeight
 
             if (Config.getProgressIndicatorType() == PIE) {
                 pieSongProgress!!.x = accuracyCounter.x - accuracyCounter.widthScaled - 18f

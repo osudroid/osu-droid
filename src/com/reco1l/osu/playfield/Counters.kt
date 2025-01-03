@@ -17,8 +17,8 @@ class ScoreCounter : SpriteFont(OsuSkin.get().scorePrefix) {
 
 
     init {
-        setAnchor(Anchor.TopRight)
-        setOrigin(Anchor.TopRight)
+        anchor = Anchor.TopRight
+        origin = Anchor.TopRight
         setScale(0.96f)
 
         x = -10f
@@ -35,8 +35,8 @@ class ScoreCounter : SpriteFont(OsuSkin.get().scorePrefix) {
 class PPCounter(private val algorithm: DifficultyAlgorithm) : SpriteFont(OsuSkin.get().scorePrefix) {
 
     init {
-        setAnchor(Anchor.TopRight)
-        setOrigin(Anchor.TopRight)
+        anchor = Anchor.TopRight
+        origin = Anchor.TopRight
         setScale(0.6f * 0.96f)
         setValue(0.0)
     }
@@ -55,8 +55,8 @@ class AccuracyCounter : SpriteFont(OsuSkin.get().scorePrefix) {
 
 
     init {
-        setAnchor(Anchor.TopRight)
-        setOrigin(Anchor.TopRight)
+        anchor = Anchor.TopRight
+        origin = Anchor.TopRight
         setScale(0.6f * 0.96f)
         setPosition(-17f, 9f)
         text = "100.00%"
@@ -77,14 +77,14 @@ class ComboCounter : Container() {
 
         it.alpha = 0f
         it.text = "0x"
-        it.setAnchor(Anchor.BottomLeft)
-        it.setOrigin(Anchor.BottomLeft)
+        it.anchor = Anchor.BottomLeft
+        it.origin = Anchor.BottomLeft
 
         // In stable, the bigger pop out scales a bit to the left
         it.translationX = -3f
-        it.translationY = -(FONT_HEIGHT_RATIO * it.height + VERTICAL_OFFSET)
+        it.translationY = -(FONT_HEIGHT_RATIO * it.drawHeight + VERTICAL_OFFSET)
 
-        it.y = -(1 - FONT_HEIGHT_RATIO) * it.height + VERTICAL_OFFSET
+        it.y = -(1 - FONT_HEIGHT_RATIO) * it.drawHeight + VERTICAL_OFFSET
         it.spacing = -OsuSkin.get().comboOverlap
 
         attachChild(it)
@@ -94,12 +94,12 @@ class ComboCounter : Container() {
     private val displayedCountTextSprite = SpriteFont(OsuSkin.get().comboPrefix).also {
 
         it.text = "0x"
-        it.setAnchor(Anchor.BottomLeft)
-        it.setOrigin(Anchor.BottomLeft)
+        it.anchor = Anchor.BottomLeft
+        it.origin = Anchor.BottomLeft
 
-        it.translationY = -(FONT_HEIGHT_RATIO * it.height + VERTICAL_OFFSET)
+        it.translationY = -(FONT_HEIGHT_RATIO * it.drawHeight + VERTICAL_OFFSET)
 
-        it.y = -(1 - FONT_HEIGHT_RATIO) * it.height + VERTICAL_OFFSET
+        it.y = -(1 - FONT_HEIGHT_RATIO) * it.drawHeight + VERTICAL_OFFSET
         it.spacing = -OsuSkin.get().comboOverlap
 
         attachChild(it, 0)
@@ -114,8 +114,8 @@ class ComboCounter : Container() {
 
 
     init {
-        setAnchor(Anchor.BottomLeft)
-        setOrigin(Anchor.BottomLeft)
+        anchor = Anchor.BottomLeft
+        origin = Anchor.BottomLeft
         setPosition(10f, -10f)
         setScale(1.28f)
     }
