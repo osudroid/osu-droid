@@ -244,7 +244,7 @@ public class StatisticV2 implements Serializable {
             int currentMaxCombo = getScoreMaxCombo();
             // At this point, the combo increment in registerHit has not happened, but it is necessary for ScoreV2
             // calculation, so we do it locally here.
-            if (currentCombo == currentMaxCombo) {
+            if (combo && currentCombo == currentMaxCombo) {
                 currentMaxCombo++;
             }
 
