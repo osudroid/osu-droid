@@ -82,9 +82,9 @@ class ComboCounter : Container() {
 
         // In stable, the bigger pop out scales a bit to the left
         it.translationX = -3f
-        it.translationY = -(FONT_HEIGHT_RATIO * it.height + VERTICAL_OFFSET)
+        it.translationY = -(FONT_HEIGHT_RATIO * it.drawHeight + VERTICAL_OFFSET)
 
-        it.y = -(1 - FONT_HEIGHT_RATIO) * it.height + VERTICAL_OFFSET
+        it.y = -(1 - FONT_HEIGHT_RATIO) * it.drawHeight + VERTICAL_OFFSET
         it.spacing = -OsuSkin.get().comboOverlap
 
         attachChild(it)
@@ -97,9 +97,9 @@ class ComboCounter : Container() {
         it.setAnchor(Anchor.BottomLeft)
         it.setOrigin(Anchor.BottomLeft)
 
-        it.translationY = -(FONT_HEIGHT_RATIO * it.height + VERTICAL_OFFSET)
+        it.translationY = -(FONT_HEIGHT_RATIO * it.drawHeight + VERTICAL_OFFSET)
 
-        it.y = -(1 - FONT_HEIGHT_RATIO) * it.height + VERTICAL_OFFSET
+        it.y = -(1 - FONT_HEIGHT_RATIO) * it.drawHeight + VERTICAL_OFFSET
         it.spacing = -OsuSkin.get().comboOverlap
 
         attachChild(it, 0)

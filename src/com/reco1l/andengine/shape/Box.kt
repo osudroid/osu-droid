@@ -26,7 +26,7 @@ open class Box : ExtendedEntity(vertexBuffer = BoxVertexBuffer()) {
 
 
     override fun onUpdateVertexBuffer() {
-        (vertexBuffer as BoxVertexBuffer).update(width, height)
+        (vertexBuffer as BoxVertexBuffer).update(drawWidth, drawHeight)
     }
 
     override fun drawVertices(gl: GL10, camera: Camera) {
@@ -103,7 +103,7 @@ open class RoundedBox(segmentsPerArc: Int = 10) : ExtendedEntity(RoundedBoxVerte
 
     override fun onUpdateVertexBuffer() {
 
-        val cornerRadius = cornerRadius.coerceIn(0f, min(width, height) / 2f)
+        val cornerRadius = cornerRadius.coerceIn(0f, min(drawWidth, drawHeight) / 2f)
 
         if (shouldRebuildVertexBuffer) {
             shouldRebuildVertexBuffer = false
@@ -114,7 +114,7 @@ open class RoundedBox(segmentsPerArc: Int = 10) : ExtendedEntity(RoundedBoxVerte
             setVertexBuffer(RoundedBoxVertexBuffer(segmentsPerArc))
         }
 
-        (vertexBuffer as RoundedBoxVertexBuffer).update(width, height, cornerRadius)
+        (vertexBuffer as RoundedBoxVertexBuffer).update(drawWidth, drawHeight, cornerRadius)
     }
 
     override fun drawVertices(pGL: GL10, pCamera: Camera) {

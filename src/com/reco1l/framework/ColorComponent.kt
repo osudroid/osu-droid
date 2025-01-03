@@ -5,6 +5,8 @@ import android.graphics.*
 @JvmInline
 value class ColorARGB(private val hex: Int) {
 
+    constructor(hex: Long): this(hex.toInt())
+
     @JvmOverloads
     constructor(red: Int, green: Int, blue: Int, alpha: Int = 255): this(Color.argb(alpha, red, green, blue))
 
