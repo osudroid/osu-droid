@@ -242,15 +242,13 @@ public class StatisticV2 implements Serializable {
         //
         // In that case, just skip score addition to ensure score is always positive.
         if (addition > 0) {
-            if (v1Score + addition < 0) {
-                v1Score = Integer.MAX_VALUE;
-            } else {
-                v1Score += amount;
+            v1Score += amount;
 
-                if (combo) {
-                    v1Score += (int) ((amount * currentCombo * diffModifier) / 25);
-                }
+            if (combo) {
+                v1Score += (int) ((amount * currentCombo * diffModifier) / 25);
             }
+
+            v1Score = Math.max(0, v1Score);
         }
 
         // Calculate ScoreV2
