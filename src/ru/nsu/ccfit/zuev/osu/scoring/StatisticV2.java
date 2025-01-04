@@ -257,7 +257,7 @@ public class StatisticV2 implements Serializable {
                 bonusScore += amount;
 
                 // Undo the ScoreV1 addition above.
-                v1Score -= amount;
+                v1Score = Math.max(0, v1Score - amount);
             }
 
             double scorePortion;
