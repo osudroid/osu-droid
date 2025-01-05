@@ -34,7 +34,14 @@
             android:key="removeSliderLock"
             android:summary="@string/opt_remove_sliderlock_spinnerlock_summary"
             android:title="@string/opt_remove_sliderlock_spinnerlock_title"
-            app:layout="@layout/settings_preference_checkbox_bottom"/>
+            app:layout="@layout/settings_preference_checkbox" />
+
+        <CheckBoxPreference
+            android:defaultValue="true"
+            android:key="allowMoreThanThreeCursors"
+            android:summary="Allow players to put more than three active cursors at once during gameplay"
+            android:title="Allow more than three cursors in gameplay"
+            app:layout="@layout/settings_preference_checkbox_bottom" />
 
     </PreferenceCategory>
 
