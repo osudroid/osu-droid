@@ -8,7 +8,7 @@ public enum GameMod {
     MOD_NOFAIL("nf", 0.5f),
     MOD_AUTO("auto", 1, true),
     MOD_EASY("es", 0.5f),
-    MOD_HARDROCK("hr", 1.06f),
+    MOD_HARDROCK("hr", 1.03f),
     MOD_HIDDEN("hd", 1.06f),
     MOD_RELAX("relax", 0.001f, true),
     MOD_AUTOPILOT("ap", 0.001f, true),
