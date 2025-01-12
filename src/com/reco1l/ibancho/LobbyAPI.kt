@@ -115,6 +115,7 @@ object LobbyAPI {
                     put("password", password)
                 }
 
+                put("version", RoomAPI.API_VERSION)
                 put("sign", sign)
             }
 
