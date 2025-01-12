@@ -28,6 +28,7 @@ import com.reco1l.ibancho.data.RoomPlayer
 import com.reco1l.osu.mainThread
 import com.reco1l.toolkt.android.*
 import com.reco1l.toolkt.kotlin.async
+import java.text.SimpleDateFormat
 import org.anddev.andengine.input.touch.TouchEvent
 import ru.nsu.ccfit.zuev.osu.GlobalManager
 import ru.nsu.ccfit.zuev.osu.RGBColor
@@ -290,6 +291,8 @@ class RoomChat : BaseFragment(), OnEditorActionListener, OnKeyListener {
 
 
 data class Message(val senderUid: Long?, val text: String, val color: Int? = null) {
+    val timestamp = System.currentTimeMillis()
+
     val senderUsername =
         if (senderUid == null) "System"
         else Multiplayer.room?.playersMap?.get(senderUid)?.name ?: "Unknown Player ($senderUid)"
@@ -333,18 +336,23 @@ class MessageAdapter : RecyclerView.Adapter<MessageViewHolder>() {
 class MessageViewHolder(private val root: LinearLayout) : RecyclerView.ViewHolder(root) {
 
 
+    private lateinit var timestampText: TextView
+
     private lateinit var senderText: TextView
 
     private lateinit var messageText: TextView
 
 
     fun bind(msg: Message, showSender: Boolean, tintBackground: Boolean) {
-
+        timestampText = root.findViewById(R.id.timestamp_text)!!
         senderText = root.findViewById(R.id.sender_text)!!
         messageText = root.findViewById(R.id.message_text)!!
 
         root.backgroundColor = if (tintBackground) 0xFF1A1A25.toInt() else Color.TRANSPARENT
 
+        timestampText.text = timestampFormatter.format(msg.timestamp)
+
+        messageText.verticalPadding = 0
         messageText.gravity = Gravity.LEFT
         messageText.fontColor = msg.color ?: Color.WHITE
 
@@ -359,8 +367,6 @@ class MessageViewHolder(private val root: LinearLayout) : RecyclerView.ViewHolde
             messageText.verticalPadding = 8.dp
             return
         }
-
-        messageText.verticalPadding = 0.dp
 
         if (showSender) {
 
@@ -390,4 +396,7 @@ class MessageViewHolder(private val root: LinearLayout) : RecyclerView.ViewHolde
         messageText.text = msg.text
     }
 
+    companion object {
+        private val timestampFormatter = SimpleDateFormat("HH:mm:ss")
+    }
 }
