@@ -15,7 +15,7 @@ object RoomAPI {
     /**
      * The API version.
      */
-    private const val API_VERSION = 7
+    private const val API_VERSION = 8
 
 
     /**
