@@ -16,7 +16,7 @@
         <item>1</item>
     </string-array>
 
-    <string name="mp_room_max_players_title">Max Players</string>
+    <string name="mp_room_max_players_title">Maximum Players</string>
     <string name="mp_room_max_players_summary">Set the maximum number of players allowed in the room</string>
 
 </resources>
