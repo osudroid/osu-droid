@@ -17,10 +17,8 @@ import android.widget.EditText
 import android.widget.LinearLayout
 import android.widget.TextView
 import android.widget.TextView.OnEditorActionListener
-import androidx.core.view.isVisible
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
-import androidx.recyclerview.widget.SimpleItemAnimator
 import com.edlplan.framework.easing.Easing
 import com.edlplan.ui.BaseAnimationListener
 import com.edlplan.ui.EasingHelper
@@ -291,7 +289,11 @@ class RoomChat : BaseFragment(), OnEditorActionListener, OnKeyListener {
 }
 
 
-data class Message(val sender: Long?, val text: String, val color: Int? = null)
+data class Message(val senderUid: Long?, val text: String, val color: Int? = null) {
+    val senderUsername =
+        if (senderUid == null) "System"
+        else Multiplayer.room?.playersMap?.get(senderUid)?.name ?: "Unknown Player ($senderUid)"
+}
 
 
 class MessageAdapter : RecyclerView.Adapter<MessageViewHolder>() {
@@ -320,7 +322,7 @@ class MessageAdapter : RecyclerView.Adapter<MessageViewHolder>() {
         val msg = data[position]
 
         // The sender label will be shown if the previous message is not from the same sender
-        val showSender = msg.sender != null && (position == data.size - 1 || data[position + 1].sender != msg.sender)
+        val showSender = msg.senderUid != null && (position == data.size - 1 || data[position + 1].senderUid != msg.senderUid)
         val tintBackground = (data.size - position) % 2 == 0
 
         holder.bind(msg, showSender, tintBackground)
@@ -349,7 +351,7 @@ class MessageViewHolder(private val root: LinearLayout) : RecyclerView.ViewHolde
         senderText.visibility = if (showSender) View.VISIBLE else View.INVISIBLE
 
         // For system messages
-        if (msg.sender == null) {
+        if (msg.senderUid == null) {
             senderText.visibility = View.GONE
 
             messageText.text = msg.text
@@ -362,10 +364,10 @@ class MessageViewHolder(private val root: LinearLayout) : RecyclerView.ViewHolde
 
         if (showSender) {
 
-            val isRoomHost = msg.sender == Multiplayer.room!!.host
-            val isDeveloper = msg.sender in DEVELOPERS
+            val isRoomHost = msg.senderUid == Multiplayer.room!!.host
+            val isDeveloper = msg.senderUid in DEVELOPERS
 
-            senderText.text = Multiplayer.room?.playersMap?.get(msg.sender)?.name ?: "Disconnected player"
+            senderText.text = msg.senderUsername
 
             val color = when {
                 isRoomHost -> 0xFF00FFEA.toInt()
