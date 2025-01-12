@@ -25,15 +25,7 @@ class RoomPlayerList(val room: Room) : ScrollableList(), IScrollDetectorListener
 
 
     init {
-        for (i in 0 until room.maxPlayers) {
-            camY = -146f
-
-            val item = PlayerItem()
-            attachChild(item)
-            RoomScene.registerTouchArea(item)
-
-            itemHeight = item.height
-        }
+        camY = -146f
     }
 
 
@@ -54,15 +46,30 @@ class RoomPlayerList(val room: Room) : ScrollableList(), IScrollDetectorListener
     override fun onManagedUpdate(secondsElapsed: Float) {
         if (!isValid) {
             isValid = true
-            room.players.forEachIndexed { i, player ->
 
-                val item = getChild(i) as PlayerItem
+            for (i in childCount - 1 downTo 0) {
+                val child = getChild(i)
 
-                item.room = room
-                item.player = player
-                item.isHost = player != null && player.id == room.host
+                RoomScene.unregisterTouchArea(child as ITouchArea)
+                detachChild(child)
+            }
 
-                item.load()
+            for (i in 0 until room.maxPlayers) {
+                val item = PlayerItem()
+                attachChild(item)
+                RoomScene.registerTouchArea(item)
+
+                itemHeight = item.height
+
+                if (i < room.players.size) {
+                    val player = room.players[i]
+
+                    item.room = room
+                    item.player = player
+                    item.isHost = player != null && player.id == room.host
+
+                    item.load()
+                }
             }
         }
 

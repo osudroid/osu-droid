@@ -22,7 +22,7 @@ data class Room(
     /**
      * The max amount of players.
      */
-    val maxPlayers: Int,
+    var maxPlayers: Int,
 
     /**
      * The active player count.

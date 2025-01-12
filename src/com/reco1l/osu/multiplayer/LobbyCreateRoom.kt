@@ -94,6 +94,7 @@ class LobbyCreateRoom : BaseFragment() {
                 if (password != null) {
                     signStr += "_${password}"
                 }
+                signStr += "_${RoomAPI.API_VERSION}"
 
                 try {
 

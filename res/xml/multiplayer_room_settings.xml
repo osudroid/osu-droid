@@ -14,7 +14,16 @@
             android:key="room_password"
             android:summary="@string/mp_room_password_summary"
             android:title="@string/mp_room_password_title"
-            app:layout="@layout/settings_preference_input_bottom" />
+            app:layout="@layout/settings_preference_input" />
+
+        <SeekBarPreference
+            android:key="room_max_players"
+            android:max="16"
+            android:min="2"
+            android:summary="@string/mp_room_max_players_summary"
+            android:title="@string/mp_room_max_players_title"
+            app:showSeekBarValue="true"
+            app:layout="@layout/settings_preference_seekbar_bottom" />
 
         <CheckBoxPreference
             android:key="room_allowMoreThanThreeCursors"
