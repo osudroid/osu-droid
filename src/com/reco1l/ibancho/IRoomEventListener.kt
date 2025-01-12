@@ -71,6 +71,11 @@ interface IRoomEventListener {
     fun onRoomNameChange(name: String)
 
     /**
+     * Emit when the host changes the maximum amount of players allowed in the room.
+     */
+    fun onRoomMaxPlayersChange(maxPlayers: Int)
+
+    /**
      * Emit when the host changes the beatmap.
      */
     fun onRoomBeatmapChange(beatmap: RoomBeatmap?)

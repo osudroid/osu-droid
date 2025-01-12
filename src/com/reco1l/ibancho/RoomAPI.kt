@@ -117,6 +117,12 @@ object RoomAPI {
         roomEventListener?.onRoomNameChange(it[0] as String)
     }
 
+    private val maxPlayersChanged = Listener {
+
+        Multiplayer.log("RECEIVED: maxPlayersChanged -> ${it.contentToString()}")
+        roomEventListener?.onRoomMaxPlayersChange((it[0] as String).toInt())
+    }
+
     private val playBeatmap = Listener {
 
         Multiplayer.log("RECEIVED: playBeatmap -> ${it.contentToString()}")
@@ -180,6 +186,7 @@ object RoomAPI {
             on("winConditionChanged", winConditionChanged)
             on("teamChanged", teamChanged)
             on("roomNameChanged", roomNameChanged)
+            on("maxPlayersChanged", maxPlayersChanged)
             on("playBeatmap", playBeatmap)
             on("chatMessage", chatMessage)
             on("liveScoreData", liveScoreData)
@@ -494,6 +501,17 @@ object RoomAPI {
             return
         }
         Multiplayer.log("EMITTED: roomNameChanged -> $name")
+    }
+
+    /**
+     * Change room max players.
+     */
+    fun setRoomMaxPlayers(maxPlayers: Int) {
+        socket?.emit("maxPlayersChanged", maxPlayers) ?: run {
+            Multiplayer.log("WARNING: Tried to emit event 'maxPlayersChanged' while socket is null.")
+            return
+        }
+        Multiplayer.log("EMITTED: maxPlayersChanged -> $maxPlayers")
     }
 
     /**
