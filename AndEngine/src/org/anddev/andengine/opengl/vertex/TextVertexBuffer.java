@@ -48,7 +48,13 @@ public class TextVertexBuffer extends VertexBuffer {
 	// Methods
 	// ===========================================================
 
+	// BEGIN osu!droid modified - Pass horizontal alignment through to update method.
 	public synchronized void update(final Font font, final int pMaximumLineWidth, final int[] pWidths, final String[] pLines) {
+		this.update(font, pMaximumLineWidth, pWidths, pLines, this.mHorizontalAlign);
+	}
+	// END osu!droid modified
+
+	public synchronized void update(final Font font, final int pMaximumLineWidth, final int[] pWidths, final String[] pLines, HorizontalAlign pHorizontalAlign) {
 		final FloatBuffer floatBuffer = this.mFloatBuffer;
 		int i = 0;
 
@@ -59,7 +65,7 @@ public class TextVertexBuffer extends VertexBuffer {
 			final String line = pLines[lineIndex];
 
 			float lineX;
-			switch(this.mHorizontalAlign) {
+			switch(pHorizontalAlign) {
 				case RIGHT:
 					lineX = pMaximumLineWidth - pWidths[lineIndex];
 					break;

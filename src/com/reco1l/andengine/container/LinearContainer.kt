@@ -55,13 +55,13 @@ open class LinearContainer : Container() {
                 when (orientation) {
 
                     Horizontal -> {
-                        contentWidth += child.width + spacing
-                        contentHeight = max(contentHeight, child.height)
+                        contentWidth += child.getDrawWidth() + spacing
+                        contentHeight = max(contentHeight, child.getDrawHeight())
                     }
 
                     Vertical -> {
-                        contentWidth = max(contentWidth, child.width)
-                        contentHeight += child.height + spacing
+                        contentWidth = max(contentWidth, child.getDrawWidth())
+                        contentHeight += child.getDrawHeight() + spacing
                     }
                 }
             }
@@ -83,7 +83,7 @@ open class LinearContainer : Container() {
         }
 
         val drawX = lastDrawOffset + super.getChildDrawX(child)
-        lastDrawOffset += child.width + spacing
+        lastDrawOffset += child.drawWidth + spacing
 
         return drawX
     }
@@ -95,7 +95,7 @@ open class LinearContainer : Container() {
         }
 
         val drawY = lastDrawOffset + super.getChildDrawY(child)
-        lastDrawOffset += child.height + spacing
+        lastDrawOffset += child.drawHeight + spacing
 
         return drawY
     }

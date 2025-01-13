@@ -88,14 +88,17 @@ public class Entity implements IEntity {
 	protected float mScaleCenterX = 0;
 	protected float mScaleCenterY = 0;
 
-	private boolean mLocalToParentTransformationDirty = true;
-	private boolean mParentToLocalTransformationDirty = true;
+	// BEGIN osu!droid modified: Make these fields protected
+	/*private*/ protected boolean mLocalToParentTransformationDirty = true;
+	/*private*/ protected boolean mParentToLocalTransformationDirty = true;
 
-	private Transformation mLocalToParentTransformation;
-	private Transformation mParentToLocalTransformation;
+	/*private*/ protected Transformation mLocalToParentTransformation;
+	/*private*/ protected Transformation mParentToLocalTransformation;
 
-	private Transformation mLocalToSceneTransformation;
-	private Transformation mSceneToLocalTransformation;
+	/*private*/ protected Transformation mLocalToSceneTransformation;
+	/*private*/ protected Transformation mSceneToLocalTransformation;
+	// END osu!droid modified
+
 
 	private Object mUserData;
 
