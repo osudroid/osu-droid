@@ -30,38 +30,40 @@ open class LinearContainer : Container() {
         }
 
 
-    private var lastDrawOffset = 0f
-
-
     override fun onMeasureContentSize() {
         shouldMeasureSize = false
 
         contentWidth = 0f
         contentHeight = 0f
 
-        if (mChildren != null) {
+        for (i in 0 until childCount) {
 
-            for (i in mChildren.indices) {
+            val child = getChild(i) ?: continue
+            if (child !is ExtendedEntity) {
+                continue
+            }
 
-                val child = mChildren.getOrNull(i) ?: continue
+            when (orientation) {
 
-                // Non-shape children are ignored as they doesn't have a size there's nothing to do.
-                if (child !is IShape) {
-                    continue
+                Horizontal -> {
+                    child.x = contentWidth
+
+                    contentWidth += child.getDrawWidth()
+                    contentHeight = max(contentHeight, child.getDrawHeight())
+
+                    if (i < childCount - 1) {
+                        contentWidth += spacing
+                    }
                 }
 
-                val spacing = if (i == mChildren.size - 1) 0f else spacing
+                Vertical -> {
+                    child.y = contentHeight
 
-                when (orientation) {
+                    contentWidth = max(contentWidth, child.getDrawWidth())
+                    contentHeight += child.getDrawHeight()
 
-                    Horizontal -> {
-                        contentWidth += child.width + spacing
-                        contentHeight = max(contentHeight, child.height)
-                    }
-
-                    Vertical -> {
-                        contentWidth = max(contentWidth, child.width)
-                        contentHeight += child.height + spacing
+                    if (i < childCount - 1) {
+                        contentHeight += spacing
                     }
                 }
             }
@@ -71,33 +73,28 @@ open class LinearContainer : Container() {
     }
 
 
-    override fun onManagedDrawChildren(pGL: GL10, pCamera: Camera) {
-        lastDrawOffset = 0f
-        super.onManagedDrawChildren(pGL, pCamera)
-    }
-
     override fun getChildDrawX(child: ExtendedEntity): Float {
 
+        val drawX = super.getChildDrawX(child)
+
         if (orientation == Vertical) {
-            return super.getChildDrawX(child)
+            return drawX
         }
 
-        val drawX = lastDrawOffset + super.getChildDrawX(child)
-        lastDrawOffset += child.width + spacing
-
-        return drawX
+        // Subtract the anchor offset for the X axis because it should be ignored in this case.
+        return drawX - child.anchorOffsetX
     }
 
     override fun getChildDrawY(child: ExtendedEntity): Float {
 
+        val drawY = super.getChildDrawY(child)
+
         if (orientation == Horizontal) {
-            return super.getChildDrawY(child)
+            return drawY
         }
 
-        val drawY = lastDrawOffset + super.getChildDrawY(child)
-        lastDrawOffset += child.height + spacing
-
-        return drawY
+        // Subtract the anchor offset for the Y axis because it should be ignored in this case.
+        return drawY - child.anchorOffsetY
     }
 
 }

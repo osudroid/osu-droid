@@ -117,8 +117,8 @@ object FollowPointConnection {
 
             fp.clearEntityModifiers()
             fp.setPosition(pointStartX, pointStartY)
-            fp.setOrigin(Anchor.Center)
             fp.setScale(1.5f * scale)
+            fp.origin = Anchor.Center
             fp.rotation = rotation
             fp.alpha = 0f
 
