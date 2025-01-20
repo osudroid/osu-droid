@@ -953,8 +953,9 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
                 || ModMenu.getInstance().isCustomHP()
                 || !ModMenu.getInstance().isDefaultFLFollowDelay()) {
             unrankedSprite = new ExtendedSprite(ResourceManager.getInstance().getTexture("play-unranked"));
-            unrankedSprite.setPosition(Config.getRES_WIDTH() / 2f, 80);
+            unrankedSprite.setAnchor(Anchor.TopCenter);
             unrankedSprite.setOrigin(Anchor.Center);
+            unrankedSprite.setPosition(0, 80);
             fgScene.attachChild(unrankedSprite);
         }
 
