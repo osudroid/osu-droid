@@ -1073,7 +1073,6 @@ public class GameplaySlider extends GameObject {
         }
 
         float scale = beatmapSlider.getGameplayScale();
-        boolean isTracking = isTracking();
 
         var nestedObjects = beatmapSlider.getNestedHitObjects();
         var nestedObjectToJudge = nestedObjects.get(currentNestedObjectIndex);
@@ -1083,6 +1082,8 @@ public class GameplaySlider extends GameObject {
         float followCircleExpandDuration = Math.min((float) spanDuration / (tickContainer.getChildCount() + 1), 0.2f);
 
         while (nestedObjectToJudge instanceof SliderTick && currentTime >= nestedObjectToJudge.startTime) {
+            boolean isTracking = isTracking();
+
             if (isTracking) {
                 if (Config.isAnimateFollowCircle() && !isFollowCircleAnimating) {
                     followCircle.clearEntityModifiers();
