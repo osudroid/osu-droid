@@ -314,7 +314,7 @@ public class GameplaySlider extends GameObject {
             sliderBody.setHintVisible(false);
         }
 
-        tickContainer.init(beatmapSlider);
+        tickContainer.init(secPassed, beatmapSlider);
         sliderBody.attachChild(tickContainer);
 
         scene.attachChild(sliderBody, 0);
@@ -569,10 +569,7 @@ public class GameplaySlider extends GameObject {
             }
 
             // Restore ticks
-            for (int i = 0, size = tickContainer.getChildCount(); i < size; i++) {
-                tickContainer.getChild(i).setAlpha(1f);
-            }
-
+            tickContainer.onNewSpan(getGameplayPassedTimeMilliseconds() / 1000, completedSpanCount);
             currentTickSpriteIndex = reverse ? tickContainer.getChildCount() - 1 : 0;
 
             // Setting visibility of repeat arrows
@@ -779,12 +776,6 @@ public class GameplaySlider extends GameObject {
                 // Following core doing a very cute show animation ^_^"
                 percentage = Math.min(1, percentage * 2);
 
-                for (int i = 0, size = tickContainer.getChildCount(); i < size; i++) {
-                    if (percentage > (float) (i + 1) / size) {
-                        tickContainer.getChild(i).setAlpha(1f);
-                    }
-                }
-
                 if (beatmapSlider.getSpanCount() > 1) {
                     endArrow.setAlpha(percentage);
                 }
@@ -802,11 +793,6 @@ public class GameplaySlider extends GameObject {
                     endArrow.setPosition(position.x, position.y);
                 }
             } else if (percentage - dt / timePreempt <= 0.5f) {
-
-                for (int i = 0, size = tickContainer.getChildCount(); i < size; i++) {
-                    tickContainer.getChild(i).setAlpha(1f);
-                }
-
                 if (beatmapSlider.getSpanCount() > 1) {
                     endArrow.setAlpha(1);
                 }
@@ -1115,7 +1101,10 @@ public class GameplaySlider extends GameObject {
             listener.onSliderHit(id, isTracking ? 10 : -1, tmpPoint, false, bodyColor, GameObjectListener.SLIDER_TICK, isTracking);
             currentNestedObjectIndex++;
 
-            tickContainer.getChild(currentTickSpriteIndex).setAlpha(0);
+            var tickSprite = tickContainer.getChild(currentTickSpriteIndex);
+            tickSprite.clearEntityModifiers();
+            tickSprite.setAlpha(0);
+
             if (reverse && currentTickSpriteIndex > 0) {
                 currentTickSpriteIndex--;
             } else if (!reverse && currentTickSpriteIndex < tickContainer.getChildCount() - 1) {
