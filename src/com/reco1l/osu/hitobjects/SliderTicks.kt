@@ -61,6 +61,18 @@ class SliderTickContainer : Container() {
         }
     }
 
+    fun onHit(sprite: SliderTickSprite, isHit: Boolean) {
+        sprite.apply {
+            clearEntityModifiers()
+
+            registerEntityModifier(Modifiers.fadeOut(animDuration, easing = Easing.OutQuint))
+
+            if (isHit) {
+                registerEntityModifier(Modifiers.scale(animDuration, 1.5f, 1f, easing = Easing.Out))
+            }
+        }
+    }
+
     private fun applyTickAnimation(currentTimeSec: Double, tick: SliderTick, sprite: SliderTickSprite) {
         val fadeInStartTime = (tick.startTime - tick.timePreempt) / 1000
 

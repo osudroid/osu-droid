@@ -11,6 +11,7 @@ import com.reco1l.andengine.sprite.AnimatedSprite;
 import com.reco1l.andengine.sprite.ExtendedSprite;
 import com.reco1l.andengine.Modifiers;
 import com.reco1l.andengine.Anchor;
+import com.reco1l.osu.hitobjects.SliderTickSprite;
 import com.reco1l.osu.playfield.CirclePiece;
 import com.reco1l.osu.playfield.NumberedCirclePiece;
 import com.reco1l.osu.hitobjects.SliderTickContainer;
@@ -1101,9 +1102,8 @@ public class GameplaySlider extends GameObject {
             listener.onSliderHit(id, isTracking ? 10 : -1, tmpPoint, false, bodyColor, GameObjectListener.SLIDER_TICK, isTracking);
             currentNestedObjectIndex++;
 
-            var tickSprite = tickContainer.getChild(currentTickSpriteIndex);
-            tickSprite.clearEntityModifiers();
-            tickSprite.setAlpha(0);
+            var tickSprite = (SliderTickSprite) tickContainer.getChild(currentTickSpriteIndex);
+            tickContainer.onHit(tickSprite, isTracking);
 
             if (reverse && currentTickSpriteIndex > 0) {
                 currentTickSpriteIndex--;
