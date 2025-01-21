@@ -112,7 +112,7 @@ class SliderTickSprite : ExtendedSprite() {
         registerEntityModifier(Modifiers.fadeOut(ANIM_DURATION, easing = Easing.OutQuint))
 
         if (isSuccessful) {
-            registerEntityModifier(Modifiers.scale(ANIM_DURATION, 1.5f, 1f, easing = Easing.Out))
+            registerEntityModifier(Modifiers.scale(ANIM_DURATION, 1f, 1.5f, easing = Easing.Out))
         }
     }
 
