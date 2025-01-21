@@ -19,10 +19,6 @@ class SliderRepeat(
     /**
      * The index of the span at which this [SliderRepeat] lies.
      */
-    spanIndex: Int,
-
-    /**
-     * The start time of the span at which this [SliderRepeat] lies, in milliseconds.
-     */
-    spanStartTime: Double
-) : SliderHitObject(startTime, position, spanIndex, spanStartTime)
+    @JvmField
+    val spanIndex: Int
+) : SliderHitObject(startTime, position)

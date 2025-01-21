@@ -14,15 +14,5 @@ class SliderTail(
     /**
      * The position of this [SliderTail] relative to the play field.
      */
-    position: Vector2,
-
-    /**
-     * The index of the span at which this [SliderTail] lies.
-     */
-    spanIndex: Int,
-
-    /**
-     * The start time of the span at which this [SliderTail] lies, in milliseconds.
-     */
-    spanStartTime: Double
-) : SliderHitObject(startTime, position, spanIndex, spanStartTime)
+    position: Vector2
+) : SliderHitObject(startTime, position)

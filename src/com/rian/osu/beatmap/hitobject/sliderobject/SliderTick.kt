@@ -19,10 +19,10 @@ class SliderTick(
     /**
      * The index of the span at which this [SliderTick] lies.
      */
-    spanIndex: Int,
+    private val spanIndex: Int,
 
     /**
      * The start time of the span at which this [SliderTick] lies, in milliseconds.
      */
-    spanStartTime: Double
-) : SliderHitObject(startTime, position, spanIndex, spanStartTime)
+    private val spanStartTime: Double
+) : SliderHitObject(startTime, position)
