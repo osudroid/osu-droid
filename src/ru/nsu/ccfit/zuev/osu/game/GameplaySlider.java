@@ -1104,7 +1104,7 @@ public class GameplaySlider extends GameObject {
             currentNestedObjectIndex++;
 
             var tickSprite = (SliderTickSprite) tickContainer.getChild(currentTickSpriteIndex);
-            tickContainer.onHit(tickSprite, isTracking);
+            tickSprite.onHit(isTracking);
 
             if (reverse && currentTickSpriteIndex > 0) {
                 currentTickSpriteIndex--;

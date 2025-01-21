@@ -1,6 +1,7 @@
 package com.reco1l.osu.hitobjects
 
 import com.edlplan.framework.easing.Easing
+import com.reco1l.andengine.Anchor
 import com.reco1l.andengine.Modifiers
 import com.reco1l.andengine.container.*
 import com.reco1l.andengine.sprite.*
@@ -11,7 +12,6 @@ import ru.nsu.ccfit.zuev.osu.*
 
 class SliderTickContainer : Container() {
     private var slider: Slider? = null
-    private val animDuration = 0.15f
 
     fun init(currentTimeSec: Double, beatmapSlider: Slider) {
         slider = beatmapSlider
@@ -30,9 +30,9 @@ class SliderTickContainer : Container() {
             // We're subtracting the position of the slider because the tick container is
             // already at the position of the slider since it's a child of the slider's body.
             sprite.setPosition(tickPosition.x - position.x, tickPosition.y - position.y)
+            sprite.init(currentTimeSec, tick)
 
             attachChild(sprite)
-            applyTickAnimation(currentTimeSec, tick, sprite)
         }
     }
 
@@ -57,41 +57,7 @@ class SliderTickContainer : Container() {
                 if (newSpanIndex % 2 != 0) childCount - (i - spanStartIndex) - 1 else i - spanStartIndex
             ) as? SliderTickSprite ?: break
 
-            applyTickAnimation(currentTimeSec, tick, sprite)
-        }
-    }
-
-    fun onHit(sprite: SliderTickSprite, isHit: Boolean) {
-        sprite.apply {
-            clearEntityModifiers()
-
-            registerEntityModifier(Modifiers.fadeOut(animDuration, easing = Easing.OutQuint))
-
-            if (isHit) {
-                registerEntityModifier(Modifiers.scale(animDuration, 1.5f, 1f, easing = Easing.Out))
-            }
-        }
-    }
-
-    private fun applyTickAnimation(currentTimeSec: Double, tick: SliderTick, sprite: SliderTickSprite) {
-        val fadeInStartTime = (tick.startTime - tick.timePreempt) / 1000
-
-        sprite.apply {
-            clearEntityModifiers()
-
-            alpha = 0f
-            setScale(0.5f)
-
-            registerEntityModifier(
-                Modifiers.sequence(null,
-                    // Delay up to fadeInStartTime
-                    Modifiers.delay((fadeInStartTime - currentTimeSec).toFloat()),
-                    Modifiers.parallel(null,
-                        Modifiers.scale(animDuration * 4, 0.5f, 1f, easing = Easing.OutElasticHalf),
-                        Modifiers.fadeIn(animDuration)
-                    )
-                )
-            )
+            sprite.init(currentTimeSec, tick)
         }
     }
 
@@ -107,8 +73,47 @@ class SliderTickSprite : ExtendedSprite() {
 
     init {
         textureRegion = ResourceManager.getInstance().getTexture("sliderscorepoint")
-        originX = 0.5f
-        originY = 0.5f
+        setOrigin(Anchor.Center)
+    }
+
+    /**
+     * Initializes this [SliderTickSprite] with the given [SliderTick].
+     *
+     * @param currentTimeSec The current time in seconds.
+     * @param tick The [SliderTick] represented by this [SliderTickSprite].
+     */
+    fun init(currentTimeSec: Double, tick: SliderTick) {
+        val fadeInStartTime = (tick.startTime - tick.timePreempt) / 1000
+
+        clearEntityModifiers()
+
+        alpha = 0f
+        setScale(0.5f)
+
+        registerEntityModifier(
+            Modifiers.sequence(null,
+                Modifiers.delay((fadeInStartTime - currentTimeSec).toFloat()),
+                Modifiers.parallel(null,
+                    Modifiers.scale(ANIM_DURATION * 4, 0.5f, 1f, easing = Easing.OutElasticHalf),
+                    Modifiers.fadeIn(ANIM_DURATION)
+                )
+            )
+        )
+    }
+
+    /**
+     * Called when the [SliderTick] that this [SliderTickSprite] represents is hit.
+     *
+     * @param isSuccessful Whether the hit resulted in a successful hit.
+     */
+    fun onHit(isSuccessful: Boolean) {
+        clearEntityModifiers()
+
+        registerEntityModifier(Modifiers.fadeOut(ANIM_DURATION, easing = Easing.OutQuint))
+
+        if (isSuccessful) {
+            registerEntityModifier(Modifiers.scale(ANIM_DURATION, 1.5f, 1f, easing = Easing.Out))
+        }
     }
 
     override fun onDetached() {
@@ -118,6 +123,7 @@ class SliderTickSprite : ExtendedSprite() {
     }
 
     companion object {
+        private const val ANIM_DURATION = 0.15f
 
         @JvmStatic
         val pool = Pool { SliderTickSprite() }
