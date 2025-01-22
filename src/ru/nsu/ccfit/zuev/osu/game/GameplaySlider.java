@@ -250,8 +250,12 @@ public class GameplaySlider extends GameObject {
         timePreempt = (float) beatmapSlider.timePreempt / 1000;
         float fadeInDuration = (float) beatmapSlider.timeFadeIn / 1000;
 
+        // When snaking in is enabled, the first repeat or tail needs to be delayed until the snaking completes.
+        float fadeInDelay = Config.isSnakingInSliders() ? timePreempt / 3 : 0;
+
         if (GameHelper.isHidden()) {
             float fadeOutDuration = timePreempt * (float) ModHidden.FADE_OUT_DURATION_MULTIPLIER;
+            float finalTailAlpha = (fadeInDuration - fadeInDelay) / fadeInDuration;
 
             headCirclePiece.registerEntityModifier(Modifiers.sequence(
                     Modifiers.fadeIn(fadeInDuration),
@@ -259,13 +263,18 @@ public class GameplaySlider extends GameObject {
             ));
 
             tailCirclePiece.registerEntityModifier(Modifiers.sequence(
-                    Modifiers.fadeIn(fadeInDuration),
-                    Modifiers.fadeOut(fadeOutDuration)
+                    Modifiers.delay(fadeInDelay),
+                    Modifiers.alpha(fadeInDuration - fadeInDelay, 0, finalTailAlpha),
+                    Modifiers.alpha(fadeOutDuration, finalTailAlpha, 0)
             ));
 
         } else {
             headCirclePiece.registerEntityModifier(Modifiers.fadeIn(fadeInDuration));
-            tailCirclePiece.registerEntityModifier(Modifiers.fadeIn(fadeInDuration));
+
+            tailCirclePiece.registerEntityModifier(Modifiers.sequence(
+                    Modifiers.delay(fadeInDelay),
+                    Modifiers.fadeIn(fadeInDuration)
+            ));
         }
 
         if (approachCircle.isVisible()) {
@@ -288,6 +297,11 @@ public class GameplaySlider extends GameObject {
             } else {
                 endArrow.setPosition(pathEndPosition.x, pathEndPosition.y);
             }
+
+            endArrow.registerEntityModifier(Modifiers.sequence(
+                    Modifiers.delay(fadeInDelay),
+                    Modifiers.fadeIn(fadeInDuration)
+            ));
 
             scene.attachChild(endArrow, 0);
         }
@@ -771,17 +785,10 @@ public class GameplaySlider extends GameObject {
                 approachCircle.setAlpha(0);
             }
 
-            float percentage = (float) (1 + elapsedSpanTime / timePreempt);
+            if (Config.isSnakingInSliders()) {
+                float percentage = FMath.clamp((float) (timePreempt + elapsedSpanTime) / (timePreempt / 3), 0, 1);
 
-            if (percentage <= 0.5f) {
-                // Following core doing a very cute show animation ^_^"
-                percentage = Math.min(1, percentage * 2);
-
-                if (beatmapSlider.getSpanCount() > 1) {
-                    endArrow.setAlpha(percentage);
-                }
-
-                if (Config.isSnakingInSliders()) {
+                if (percentage < 1) {
                     if (superPath != null && sliderBody != null) {
                         float l = superPath.getMeasurer().maxLength() * percentage;
 
@@ -792,12 +799,7 @@ public class GameplaySlider extends GameObject {
 
                     tailCirclePiece.setPosition(position.x, position.y);
                     endArrow.setPosition(position.x, position.y);
-                }
-            } else if (percentage - dt / timePreempt <= 0.5f) {
-                if (beatmapSlider.getSpanCount() > 1) {
-                    endArrow.setAlpha(1);
-                }
-                if (Config.isSnakingInSliders()) {
+                } else {
                     if (!preStageFinish && superPath != null && sliderBody != null) {
                         sliderBody.setEndLength(superPath.getMeasurer().maxLength());
                         preStageFinish = true;
