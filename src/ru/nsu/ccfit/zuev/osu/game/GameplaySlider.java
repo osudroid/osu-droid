@@ -330,8 +330,8 @@ public class GameplaySlider extends GameObject {
         }
 
         tickContainer.init(secPassed, beatmapSlider);
-        sliderBody.attachChild(tickContainer);
 
+        scene.attachChild(tickContainer, 0);
         scene.attachChild(sliderBody, 0);
 
         if (Config.isDimHitObjects()) {

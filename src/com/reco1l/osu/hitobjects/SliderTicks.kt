@@ -20,6 +20,8 @@ class SliderTickContainer : Container() {
 
         val position = beatmapSlider.gameplayStackedPosition
 
+        setPosition(position.x, position.y)
+
         for (i in 1 until beatmapSlider.nestedHitObjects.size) {
 
             val tick = beatmapSlider.nestedHitObjects[i] as? SliderTick ?: break
