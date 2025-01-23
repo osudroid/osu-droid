@@ -1,5 +1,12 @@
 Version 1.8.1
 =============
+# Changes
+
+- Updated Copyright Year
+- Remove Snowflake Effect from main menu
+
+Version 1.8.1
+=============
 
 # Additions
 
