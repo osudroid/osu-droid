@@ -8,7 +8,9 @@ import com.reco1l.andengine.sprite.*
 import com.reco1l.framework.*
 import com.rian.osu.beatmap.hitobject.*
 import com.rian.osu.beatmap.hitobject.sliderobject.*
+import kotlin.math.min
 import ru.nsu.ccfit.zuev.osu.*
+import ru.nsu.ccfit.zuev.osu.game.GameHelper
 
 class SliderTickContainer : Container() {
     private var slider: Slider? = null
@@ -85,7 +87,10 @@ class SliderTickSprite : ExtendedSprite() {
      * @param tick The [SliderTick] represented by this [SliderTickSprite].
      */
     fun init(currentTimeSec: Double, tick: SliderTick) {
-        val fadeInStartTime = (tick.startTime - tick.timePreempt) / 1000
+        val startTime = (tick.startTime / 1000).toFloat()
+        val timePreempt = (tick.timePreempt / 1000).toFloat()
+
+        val fadeInStartTime = startTime - timePreempt
 
         clearEntityModifiers()
 
@@ -94,13 +99,25 @@ class SliderTickSprite : ExtendedSprite() {
 
         registerEntityModifier(
             Modifiers.sequence(null,
-                Modifiers.delay((fadeInStartTime - currentTimeSec).toFloat()),
+                Modifiers.delay(fadeInStartTime - currentTimeSec.toFloat()),
                 Modifiers.parallel(null,
                     Modifiers.scale(ANIM_DURATION * 4, 0.5f, 1f, easing = Easing.OutElasticHalf),
                     Modifiers.fadeIn(ANIM_DURATION)
                 )
             )
         )
+
+        if (GameHelper.isHidden()) {
+            val fadeOutDuration = min(timePreempt - ANIM_DURATION, 1f)
+            val fadeOutStartTime = startTime - fadeOutDuration
+
+            registerEntityModifier(
+                Modifiers.sequence(null,
+                    Modifiers.delay(fadeOutStartTime - currentTimeSec.toFloat()),
+                    Modifiers.fadeOut(fadeOutDuration)
+                )
+            )
+        }
     }
 
     /**
@@ -111,7 +128,7 @@ class SliderTickSprite : ExtendedSprite() {
     fun onHit(isSuccessful: Boolean) {
         clearEntityModifiers()
 
-        registerEntityModifier(Modifiers.fadeOut(ANIM_DURATION, easing = Easing.OutQuint))
+        registerEntityModifier(Modifiers.alpha(ANIM_DURATION, alpha, 0f, easing = Easing.OutQuint))
 
         if (isSuccessful) {
             registerEntityModifier(Modifiers.scale(ANIM_DURATION, 1f, 1.5f, easing = Easing.Out))
