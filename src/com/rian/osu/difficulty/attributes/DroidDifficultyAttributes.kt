@@ -20,6 +20,12 @@ class DroidDifficultyAttributes : DifficultyAttributes() {
     var clockRate = 1.0
 
     /**
+     * The amount of sliders weighted by difficulty.
+     */
+    @JvmField
+    var aimDifficultSliderCount = 0.0
+
+    /**
      * The difficulty corresponding to the tap skill.
      */
     @JvmField

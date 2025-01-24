@@ -40,6 +40,12 @@ abstract class PerformanceCalculator<
         get() = difficultyAttributes.let { it.hitCircleCount + it.sliderCount + it.spinnerCount }
 
     /**
+     * The total imperfect hits that were done.
+     */
+    protected val totalImperfectHits
+        get() = countOk + countMeh + countMiss
+
+    /**
      * The total hits that were successfully done.
      */
     protected val totalSuccessfulHits: Int

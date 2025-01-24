@@ -107,17 +107,15 @@ class DroidPerformanceCalculator(
         // Scale the aim value with estimated full combo deviation.
         aimValue *= calculateDeviationBasedLengthScaling()
 
-        // We assume 15% of sliders in a map are difficult since there's no way to tell from the performance calculator.
-        val estimateDifficultSliders = sliderCount * 0.15
-        if (estimateDifficultSliders > 0) {
-            val estimateSliderEndsDropped =
-                min(
-                    countOk + countMeh + countMiss,
-                    maxCombo - scoreMaxCombo
-                ).toDouble().coerceIn(0.0, estimateDifficultSliders)
+        if (aimDifficultSliderCount > 0) {
+            // Consider all missing combo to be dropped difficult sliders.
+            val estimateImproperlyFollowedDifficultSliders =
+                min(totalImperfectHits, maxCombo - scoreMaxCombo).toDouble().coerceIn(0.0, aimDifficultSliderCount)
 
-            val sliderNerfFactor = (1 - aimSliderFactor) *
-                    (1 - estimateSliderEndsDropped / estimateDifficultSliders).pow(3) + aimSliderFactor
+            val sliderNerfFactor =
+                (1 - aimSliderFactor) *
+                (1 - estimateImproperlyFollowedDifficultSliders / aimDifficultSliderCount).pow(3) +
+                aimSliderFactor
 
             aimValue *= sliderNerfFactor
         }

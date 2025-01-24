@@ -45,6 +45,7 @@ class DroidDifficultyCalculator : DifficultyCalculator<DroidPlayableBeatmap, Dro
         (skills[0] as DroidAim).let {
             aimDifficulty = calculateRating(it)
             aimDifficultStrainCount = it.countDifficultStrains()
+            aimDifficultSliderCount = it.countDifficultSliders()
 
             val velocitySum = it.sliderVelocities.sumOf { s -> s.difficultyRating }
 
