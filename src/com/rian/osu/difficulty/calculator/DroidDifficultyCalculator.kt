@@ -72,15 +72,6 @@ class DroidDifficultyCalculator : DifficultyCalculator<DroidPlayableBeatmap, Dro
             tapDifficulty = calculateRating(it)
             tapDifficultStrainCount = it.countDifficultStrains()
             speedNoteCount = it.relevantNoteCount()
-            averageSpeedDeltaTime = it.relevantDeltaTime()
-
-            if (tapDifficulty > 0) {
-                val tapSkillVibro = DroidTap(mods, true, averageSpeedDeltaTime)
-
-                objects.forEach { o -> tapSkillVibro.process(o) }
-
-                vibroFactor = calculateRating(tapSkillVibro) / tapDifficulty
-            }
         }
 
         var firstObjectIndex = 0
@@ -262,7 +253,7 @@ class DroidDifficultyCalculator : DifficultyCalculator<DroidPlayableBeatmap, Dro
     ) = beatmap.createDroidPlayableBeatmap(
             parameters?.mods,
             parameters?.customSpeedMultiplier ?: 1f,
-            parameters?.oldStatistics ?: false,
+            parameters?.oldStatistics == true,
             scope
         )
 
