@@ -180,6 +180,7 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
     private SliderPath[] sliderPaths = null;
     private LinePath[] sliderRenderPaths = null;
     private int sliderIndex = 0;
+    private ExtendedSprite unrankedSprite;
 
     private StoryboardSprite storyboardSprite;
 
@@ -977,15 +978,14 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
             timeOffset += 0.25f;
         }
 
-        Sprite unranked = new Sprite(0, 0, ResourceManager.getInstance().getTexture("play-unranked"));
-        unranked.setPosition((float) Config.getRES_WIDTH() / 2 - unranked.getWidth() / 2, 80);
-        unranked.setVisible(false);
-        fgScene.attachChild(unranked);
-
         boolean hasUnrankedMod = SmartIterator.wrap(stat.getMod().iterator())
             .applyFilter(m -> m.unranked).hasNext();
         if (hasUnrankedMod) {
-            unranked.setVisible(true);
+            unrankedSprite = new ExtendedSprite(ResourceManager.getInstance().getTexture("play-unranked"));
+            unrankedSprite.setAnchor(Anchor.TopCenter);
+            unrankedSprite.setOrigin(Anchor.Center);
+            unrankedSprite.setPosition(0, 80);
+            fgScene.attachChild(unrankedSprite);
         }
 
         String playname = Config.getOnlineUsername();
@@ -1353,6 +1353,7 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
             totalLength = GlobalManager.getInstance().getSongService().getLength();
             musicStarted = true;
             elapsedTime = totalOffset;
+
             return;
         }
 
@@ -1362,6 +1363,21 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
                 && elapsedTime + objectTimePreempt > (float) objects.peek().startTime / 1000) {
             gameStarted = true;
             final var obj = objects.poll();
+
+            if (unrankedSprite != null) {
+                unrankedSprite.registerEntityModifier(
+                    Modifiers.sequence(IEntity::detachSelf,
+                        Modifiers.delay(1.5f - elapsedTime),
+                        Modifiers.parallel(
+                            Modifiers.scale(0.5f, 1, 1.5f),
+                            Modifiers.fadeOut(0.5f)
+                        )
+                    )
+                );
+
+                // Make it null to avoid multiple entity modifier registration
+                unrankedSprite = null;
+            }
 
             if (obj.startTime > totalLength) {
                 shouldBePunished = true;

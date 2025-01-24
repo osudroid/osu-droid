@@ -421,22 +421,13 @@ class Slider(
                 nestedHitObjects.addAll(sliderTicks)
 
                 if (span < spanCount - 1) {
-                    val repeatPosition = position + path.positionAt(((span + 1) % 2).toDouble())
-
-                    nestedHitObjects.add(
-                        SliderRepeat(
-                            spanStartTime + spanDuration,
-                            repeatPosition,
-                            span,
-                            spanStartTime
-                        )
-                    )
+                    nestedHitObjects.add(SliderRepeat(this, span))
                 }
             }
         }
 
         tail = when (mode) {
-            GameMode.Droid -> SliderTail(endTime, endPosition, repeatCount, startTime + repeatCount * spanDuration)
+            GameMode.Droid -> SliderTail(this)
 
             GameMode.Standard -> {
                 // Okay, I'll level with you. I made a mistake. It was 2007.
@@ -453,7 +444,7 @@ class Slider(
                     finalSpanStartTime + spanDuration - LEGACY_LAST_TICK_OFFSET
                 )
 
-                SliderTail(finalSpanEndTime, endPosition, finalSpanIndex, finalSpanStartTime)
+                SliderTail(this, finalSpanEndTime)
             }
         }
 

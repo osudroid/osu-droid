@@ -16,17 +16,5 @@ abstract class SliderHitObject(
     /**
      * The position of this [SliderHitObject] relative to the play field.
      */
-    position: Vector2,
-
-    /**
-     * The index of the span at which this [SliderHitObject] lies.
-     */
-    @JvmField
-    val spanIndex: Int,
-
-    /**
-     * The start time of the span at which this [SliderHitObject] lies, in milliseconds.
-     */
-    @JvmField
-    val spanStartTime: Double
+    position: Vector2
 ) : HitObject(startTime, position, false, 0)

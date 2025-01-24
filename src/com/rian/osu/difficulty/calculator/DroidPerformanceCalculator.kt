@@ -1,6 +1,7 @@
 package com.rian.osu.difficulty.calculator
 
 import com.rian.osu.beatmap.DroidHitWindow
+import com.rian.osu.beatmap.HitWindow
 import com.rian.osu.beatmap.PreciseDroidHitWindow
 import com.rian.osu.difficulty.attributes.DroidDifficultyAttributes
 import com.rian.osu.difficulty.attributes.DroidPerformanceAttributes
@@ -106,17 +107,15 @@ class DroidPerformanceCalculator(
         // Scale the aim value with estimated full combo deviation.
         aimValue *= calculateDeviationBasedLengthScaling()
 
-        // We assume 15% of sliders in a map are difficult since there's no way to tell from the performance calculator.
-        val estimateDifficultSliders = sliderCount * 0.15
-        if (estimateDifficultSliders > 0) {
-            val estimateSliderEndsDropped =
-                min(
-                    countOk + countMeh + countMiss,
-                    maxCombo - scoreMaxCombo
-                ).toDouble().coerceIn(0.0, estimateDifficultSliders)
+        if (aimDifficultSliderCount > 0) {
+            // Consider all missing combo to be dropped difficult sliders.
+            val estimateImproperlyFollowedDifficultSliders =
+                min(totalImperfectHits, maxCombo - scoreMaxCombo).toDouble().coerceIn(0.0, aimDifficultSliderCount)
 
-            val sliderNerfFactor = (1 - aimSliderFactor) *
-                    (1 - estimateSliderEndsDropped / estimateDifficultSliders).pow(3) + aimSliderFactor
+            val sliderNerfFactor =
+                (1 - aimSliderFactor) *
+                (1 - estimateImproperlyFollowedDifficultSliders / aimDifficultSliderCount).pow(3) +
+                aimSliderFactor
 
             aimValue *= sliderNerfFactor
         }
@@ -321,17 +320,7 @@ class DroidPerformanceCalculator(
             return@run Double.POSITIVE_INFINITY
         }
 
-        var od = overallDifficulty.toFloat()
-        var hitWindow = if (isPrecise) PreciseDroidHitWindow(od) else DroidHitWindow(od)
-        val realGreatWindow = hitWindow.greatWindow * clockRate.toFloat()
-
-        // Obtain the good and meh hit window for osu!droid.
-        od =
-            if (isPrecise) PreciseDroidHitWindow.hitWindow300ToOverallDifficulty(realGreatWindow)
-            else DroidHitWindow.hitWindow300ToOverallDifficulty(realGreatWindow)
-
-        hitWindow = if (isPrecise) PreciseDroidHitWindow(od) else DroidHitWindow(od)
-
+        val hitWindow = getConvertedHitWindow()
         val greatWindow = hitWindow.greatWindow / clockRate
         val okWindow = hitWindow.okWindow / clockRate
         val mehWindow = hitWindow.mehWindow / clockRate
@@ -405,17 +394,7 @@ class DroidPerformanceCalculator(
             return@run Double.POSITIVE_INFINITY
         }
 
-        var od = overallDifficulty.toFloat()
-        var hitWindow = if (isPrecise) PreciseDroidHitWindow(od) else DroidHitWindow(od)
-        val realGreatWindow = hitWindow.greatWindow * clockRate.toFloat()
-
-        // Obtain the good and meh hit window for osu!droid.
-        od =
-            if (isPrecise) PreciseDroidHitWindow.hitWindow300ToOverallDifficulty(realGreatWindow)
-            else DroidHitWindow.hitWindow300ToOverallDifficulty(realGreatWindow)
-
-        hitWindow = if (isPrecise) PreciseDroidHitWindow(od) else DroidHitWindow(od)
-
+        val hitWindow = getConvertedHitWindow()
         val greatWindow = hitWindow.greatWindow / clockRate
         val okWindow = hitWindow.okWindow / clockRate
         val mehWindow = hitWindow.mehWindow / clockRate
@@ -460,6 +439,19 @@ class DroidPerformanceCalculator(
         }
 
         Double.POSITIVE_INFINITY
+    }
+
+    private fun getConvertedHitWindow(): HitWindow {
+        var od = difficultyAttributes.overallDifficulty.toFloat()
+        var hitWindow = if (isPrecise) PreciseDroidHitWindow(od) else DroidHitWindow(od)
+        val realGreatWindow = hitWindow.greatWindow * difficultyAttributes.clockRate.toFloat()
+
+        // Obtain the good and meh hit window for osu!droid.
+        od =
+            if (isPrecise) PreciseDroidHitWindow.hitWindow300ToOverallDifficulty(realGreatWindow)
+            else DroidHitWindow.hitWindow300ToOverallDifficulty(realGreatWindow)
+
+        return if (isPrecise) PreciseDroidHitWindow(od) else DroidHitWindow(od)
     }
 
     companion object {

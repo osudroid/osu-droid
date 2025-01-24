@@ -159,11 +159,19 @@ public class SliderBody extends Container {
 
 
     public void setStartLength(float length) {
+        if (length == startLength) {
+            return;
+        }
+
         startLength = length;
         shouldRebuildVertices = true;
     }
 
     public void setEndLength(float length) {
+        if (length == endLength) {
+            return;
+        }
+
         endLength = length;
         shouldRebuildVertices = true;
     }
