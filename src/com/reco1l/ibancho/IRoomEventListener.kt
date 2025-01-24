@@ -99,6 +99,11 @@ interface IRoomEventListener {
      */
     fun onRoomMatchSkip()
 
+    /**
+     * Emitted when the host of the room aborts the gameplay.
+     */
+    fun onRoomMatchAbort()
+
 
     // Chat related events
 

@@ -129,6 +129,12 @@ object RoomAPI {
         roomEventListener?.onRoomMatchPlay()
     }
 
+    private val abortBeatmap = Listener {
+
+        Multiplayer.log("RECEIVED: abortBeatmap")
+        roomEventListener?.onRoomMatchAbort()
+    }
+
     private val chatMessage = Listener {
 
         //Multiplayer.log("RECEIVED: chatMessage -> ${it.contentToString()}")
@@ -188,6 +194,7 @@ object RoomAPI {
             on("roomNameChanged", roomNameChanged)
             on("maxPlayersChanged", maxPlayersChanged)
             on("playBeatmap", playBeatmap)
+            on("abortBeatmap", abortBeatmap)
             on("chatMessage", chatMessage)
             on("liveScoreData", liveScoreData)
             on("playerJoined", playerJoined)
