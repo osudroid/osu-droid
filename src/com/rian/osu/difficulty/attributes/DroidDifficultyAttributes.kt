@@ -62,6 +62,12 @@ class DroidDifficultyAttributes : DifficultyAttributes() {
     var visualDifficultStrainCount = 0.0
 
     /**
+     * The average delta time of speed objects.
+     */
+    @JvmField
+    var averageSpeedDeltaTime = 0.0
+
+    /**
      * Possible sections at which the player can use three fingers on.
      */
     @JvmField
@@ -92,4 +98,14 @@ class DroidDifficultyAttributes : DifficultyAttributes() {
      */
     @JvmField
     var visualSliderFactor = 1.0
+
+    /**
+     * Describes how much of tap difficulty is contributed by notes that are "vibroable".
+     *
+     * A value closer to 1 indicates most tap difficulty is contributed by notes that are not "vibroable".
+     *
+     * A value closer to 0 indicates most tap difficulty is contributed by notes that are "vibroable".
+     */
+    @JvmField
+    var vibroFactor = 1.0
 }
