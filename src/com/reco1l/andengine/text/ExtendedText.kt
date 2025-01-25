@@ -30,10 +30,12 @@ open class ExtendedText : ExtendedEntity() {
         set(value) {
             if (field != value) {
 				field = value
+
                 if (value.length > maximumSize) {
                     shouldRebuildVertexBuffer = true
                     shouldRebuildTextureBuffer = true
                 }
+
                 updateVertexBuffer()
 			}
         }
