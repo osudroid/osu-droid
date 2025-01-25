@@ -367,7 +367,7 @@ abstract class ExtendedEntity(
         }
     }
 
-    open fun invalidateTransformations() {
+    protected open fun invalidateTransformations() {
         mLocalToParentTransformationDirty = true
         mParentToLocalTransformationDirty = true
     }
