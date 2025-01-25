@@ -12,6 +12,7 @@ import com.rian.osu.difficulty.skills.Skill
 import com.rian.osu.difficulty.skills.StandardAim
 import com.rian.osu.difficulty.skills.StandardFlashlight
 import com.rian.osu.difficulty.skills.StandardSpeed
+import com.rian.osu.mods.ModAutopilot
 import com.rian.osu.mods.ModFlashlight
 import com.rian.osu.mods.ModRelax
 import kotlin.math.cbrt
@@ -32,6 +33,7 @@ class StandardDifficultyCalculator : DifficultyCalculator<StandardPlayableBeatma
         objects: Array<StandardDifficultyHitObject>
     ) = StandardDifficultyAttributes().apply {
         mods = beatmap.mods?.toList() ?: mods
+        clockRate = beatmap.overallSpeedMultiplier.toDouble()
 
         populateAimAttributes(skills)
         populateSpeedAttributes(skills)
@@ -41,6 +43,10 @@ class StandardDifficultyCalculator : DifficultyCalculator<StandardPlayableBeatma
             aimDifficulty *= 0.9
             speedDifficulty = 0.0
             flashlightDifficulty *= 0.7
+        } else if (mods.any { it is ModAutopilot }) {
+            aimDifficulty = 0.0
+            speedDifficulty *= 0.5
+            flashlightDifficulty *= 0.4
         }
 
         val baseAimPerformance = (5 * max(1.0, aimDifficulty / 0.0675) - 4).pow(3) / 100000
@@ -129,6 +135,7 @@ class StandardDifficultyCalculator : DifficultyCalculator<StandardPlayableBeatma
         val aim = skills.first { it is StandardAim && it.withSliders } as StandardAim
 
         aimDifficulty = calculateRating(aim)
+        aimDifficultSliderCount = aim.countDifficultSliders()
         aimDifficultStrainCount = aim.countDifficultStrains()
 
         if (aimDifficulty > 0) {

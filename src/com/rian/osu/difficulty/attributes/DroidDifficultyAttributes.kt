@@ -14,18 +14,6 @@ class DroidDifficultyAttributes : DifficultyAttributes() {
     var customSpeedMultiplier = 1f
 
     /**
-     * The overall clock rate that was applied to the beatmap.
-     */
-    @JvmField
-    var clockRate = 1.0
-
-    /**
-     * The amount of sliders weighted by difficulty.
-     */
-    @JvmField
-    var aimDifficultSliderCount = 0.0
-
-    /**
      * The difficulty corresponding to the tap skill.
      */
     @JvmField

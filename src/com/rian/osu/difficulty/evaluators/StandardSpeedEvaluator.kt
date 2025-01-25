@@ -2,6 +2,8 @@ package com.rian.osu.difficulty.evaluators
 
 import com.rian.osu.beatmap.hitobject.Spinner
 import com.rian.osu.difficulty.StandardDifficultyHitObject
+import com.rian.osu.mods.Mod
+import com.rian.osu.mods.ModAutopilot
 import kotlin.math.min
 import kotlin.math.pow
 
@@ -11,7 +13,7 @@ import kotlin.math.pow
 object StandardSpeedEvaluator {
     private const val SINGLE_SPACING_THRESHOLD = 125.0 // 1.25 circles distance between centers
     private const val MIN_SPEED_BONUS = 75.0 // 200 1/4 BPM
-    private const val DISTANCE_MULTIPLIER = 0.94
+    private const val DISTANCE_MULTIPLIER = 0.9
 
     /**
      * Evaluates the difficulty of tapping the current object, based on:
@@ -22,7 +24,7 @@ object StandardSpeedEvaluator {
      *
      * @param current The current object.
      */
-    fun evaluateDifficultyOf(current: StandardDifficultyHitObject): Double {
+    fun evaluateDifficultyOf(current: StandardDifficultyHitObject, mods: List<Mod>): Double {
         if (current.obj is Spinner) {
             return 0.0
         }
@@ -51,7 +53,9 @@ object StandardSpeedEvaluator {
         val distance = min(SINGLE_SPACING_THRESHOLD, travelDistance + current.minimumJumpDistance)
 
         // Max distance bonus is 1 * `distance_multiplier` at single_spacing_threshold
-        val distanceBonus = (distance / SINGLE_SPACING_THRESHOLD).pow(3.95) * DISTANCE_MULTIPLIER
+        val distanceBonus =
+            if (mods.any { it is ModAutopilot }) 0.0
+            else (distance / SINGLE_SPACING_THRESHOLD).pow(3.95) * DISTANCE_MULTIPLIER
 
         // Base difficulty with all bonuses
         val difficulty = (1 + speedBonus + distanceBonus) * 1000 / strainTime
