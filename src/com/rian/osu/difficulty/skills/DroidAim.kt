@@ -46,7 +46,7 @@ class DroidAim(
             return 0.0
         }
 
-        return sortedStrains.reduce { total, strain ->
+        return sortedStrains.fold(0.0) { total, strain ->
             total + 1 / (1 + exp(-((strain / maxStrain) * 12 - 6)))
         }
     }
