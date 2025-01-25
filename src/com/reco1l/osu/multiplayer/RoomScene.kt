@@ -964,7 +964,7 @@ object RoomScene : Scene(), IRoomEventListener, IPlayerEventListener {
         val global = GlobalManager.getInstance()
         val gameScene = global.gameScene
 
-        if (global.engine.scene != gameScene) {
+        if (global.engine.scene != gameScene.scene) {
             return
         }
 
