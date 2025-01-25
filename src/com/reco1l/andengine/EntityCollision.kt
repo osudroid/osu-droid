@@ -10,7 +10,7 @@ object EntityCollision {
     private val vertices = FloatArray(8)
 
 
-    fun contains(entity: ExtendedEntity, x: Float, y: Float): Boolean {
+    fun contains(entity: ExtendedEntity, x: Float, y: Float, fromScene: Boolean): Boolean {
 
         val left = 0f
         val top = 0f
@@ -29,7 +29,11 @@ object EntityCollision {
         vertices[6 + VERTEX_INDEX_X] = left
         vertices[6 + VERTEX_INDEX_Y] = bottom
 
-        entity.getLocalToSceneTransformation().transform(vertices)
+        if (fromScene) {
+            entity.localToSceneTransformation.transform(vertices)
+        } else {
+            entity.localToParentTransformation.transform(vertices)
+        }
 
         return ShapeCollisionChecker.checkContains(vertices, vertices.size, x, y)
     }

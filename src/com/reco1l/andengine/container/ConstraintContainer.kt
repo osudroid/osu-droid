@@ -9,7 +9,7 @@ import org.anddev.andengine.entity.shape.*
  *
  * This is useful for creating complex layouts.
  */
-class ConstraintContainer : Container() {
+open class ConstraintContainer : Container() {
 
 
     private val constraints = mutableMapOf<ExtendedEntity, IShape>()
@@ -19,15 +19,22 @@ class ConstraintContainer : Container() {
 
         val target = constraints[child] ?: this
 
-        val targetX = target.getDrawX()
-        val anchorOffsetX = target.getDrawWidth() * child.anchorX
+        var targetX = target.getDrawX()
+        var targetWidth = target.getDrawWidth()
+
+        if (target == this) {
+            targetX = 0f
+            targetWidth = getPaddedWidth()
+        }
+
+        val anchorOffsetX = targetWidth * child.anchor.x
 
         var childX = child.x
-
-        // Relative positions will be multiplied by the remaining space since the
-        // target's position to the edge of the container.
         if (child.relativePositionAxes.isHorizontal) {
-            childX *= drawWidth - targetX
+
+            // Relative positions will be multiplied by the remaining space from the
+            // target's position to the edge of the container.
+            childX *= getPaddedWidth() - targetX
         }
 
         return targetX + childX + child.originOffsetX + anchorOffsetX + child.translationX
@@ -37,15 +44,22 @@ class ConstraintContainer : Container() {
 
         val target = constraints[child] ?: this
 
-        val targetY = target.getDrawY()
-        val anchorOffsetY = target.getDrawHeight() * child.anchorY
+        var targetY = target.getDrawY()
+        var targetHeight = target.getDrawHeight()
+
+        if (target == this) {
+            targetY = 0f
+            targetHeight = getPaddedHeight()
+        }
+
+        val anchorOffsetY = targetHeight * child.anchor.y
 
         var childY = child.y
-
-        // Relative positions will be multiplied by the remaining space since the
-        // target's position to the edge of the container.
         if (child.relativePositionAxes.isVertical) {
-            childY *= drawHeight - targetY
+
+            // Relative positions will be multiplied by the remaining space from the
+            // target's position to the edge of the container.
+            childY *= getPaddedHeight() - targetY
         }
 
         return targetY + childY + child.originOffsetY + anchorOffsetY + child.translationY

@@ -195,7 +195,7 @@ public class MainScene implements IUpdateHandler {
                         .setMessage(
                                 "<h1>osu!droid</h1>\n" +
                                 "<h5>Version " + BuildConfig.VERSION_NAME + "</h5>\n" +
-                                "<p>Made by osu!droid team<br>osu! is © peppy 2007-2024</p>\n" +
+                                "<p>Made by osu!droid team<br>osu! is © peppy 2007-2025</p>\n" +
                                 "<br>\n" +
                                 "<a href=\"https://osu.ppy.sh\">Visit official osu! website ↗</a>\n" +
                                 "<br>\n" +
@@ -346,7 +346,7 @@ public class MainScene implements IUpdateHandler {
         final TextureRegion nptex = ResourceManager.getInstance().getTexture("music_np");
         music_nowplay = new Sprite(Utils.toRes(Config.getRES_WIDTH() - 500), 0, (float) (40 * nptex.getWidth()) / nptex.getHeight(), 40, nptex);
 
-        addSnowfall(scene, context);
+//        addSnowfall(scene, context);
 
         for (int i = 0; i < 120; i++) {
             final float pX = (float) Config.getRES_WIDTH() / 2;

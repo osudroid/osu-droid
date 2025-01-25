@@ -41,7 +41,7 @@ open class PromptDialog : MessageDialog() {
         }
 
     /**
-     * The text to be show displayed in the input hint.
+     * The text to display in the input hint.
      */
     var hint: String? = null
         set(value) {
@@ -52,7 +52,7 @@ open class PromptDialog : MessageDialog() {
         }
 
     /**
-     * The function to be called when the text input is changed.
+     * The function to call when the text input is changed.
      */
     var onTextChanged: ((PromptDialog) -> Unit)? = null
 
@@ -92,7 +92,7 @@ open class PromptDialog : MessageDialog() {
     }
 
     /**
-     * The text to be show displayed in the input hint.
+     * The text to display in the input hint.
      */
     fun setHint(text: String): PromptDialog {
         hint = text
@@ -100,7 +100,7 @@ open class PromptDialog : MessageDialog() {
     }
 
     /**
-     * The function to be called when the text input is changed.
+     * The function to call when the text input is changed.
      */
     fun setOnTextChanged(action: (PromptDialog) -> Unit): PromptDialog {
         onTextChanged = action

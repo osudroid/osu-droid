@@ -382,7 +382,13 @@ abstract class DifficultyHitObject(
          * A distance by which all distances should be scaled in order to assume a uniform circle size.
          */
         @JvmStatic
-        protected val NORMALIZED_RADIUS = 50f
+        val NORMALIZED_RADIUS = 50f
+
+        /**
+         * The normalized diameter of a circle.
+         */
+        @JvmStatic
+        val NORMALIZED_DIAMETER = NORMALIZED_RADIUS * 2
 
         /**
          * The minimum delta time between hit objects.

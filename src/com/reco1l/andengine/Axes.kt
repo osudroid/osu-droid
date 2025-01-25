@@ -27,7 +27,7 @@ enum class Axes {
 
 
     /**
-     * Whether this axis [Y] or [Both].
+     * Whether this axis is [Y] or [Both].
      */
     val isVertical: Boolean
         get() = this == Y || this == Both

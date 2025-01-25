@@ -29,13 +29,15 @@ open class ExtendedText : ExtendedEntity() {
     var text: String = ""
         set(value) {
             if (field != value) {
-				field = value
+                field = value
+
                 if (value.length > maximumSize) {
                     shouldRebuildVertexBuffer = true
                     shouldRebuildTextureBuffer = true
                 }
+
                 updateVertexBuffer()
-			}
+            }
         }
 
     /**
@@ -45,17 +47,17 @@ open class ExtendedText : ExtendedEntity() {
     var font: Font? = null
         set(value) {
             if (field != value) {
-				field = value
+                field = value
                 shouldRebuildTextureBuffer = true
                 updateVertexBuffer()
-			}
+            }
         }
 
     /**
      * The horizontal alignment of the text.
      */
     var horizontalAlign = HorizontalAlign.LEFT
-		set(value) {
+        set(value) {
             if (field != value) {
                 field = value
                 updateVertexBuffer()
@@ -106,8 +108,8 @@ open class ExtendedText : ExtendedEntity() {
         currentSize = text.length
 
         if (text.length > maximumSize) {
-			shouldRebuildVertexBuffer = true
-			shouldRebuildTextureBuffer = true
+            shouldRebuildVertexBuffer = true
+            shouldRebuildTextureBuffer = true
             maximumSize = text.length
         }
 
@@ -121,12 +123,6 @@ open class ExtendedText : ExtendedEntity() {
             shouldRebuildTextureBuffer = false
 
             textureBuffer = TextTextureBuffer(2 * VERTICES_PER_CHARACTER * maximumSize, GL_STATIC_DRAW, true)
-
-            if (font!!.texture.textureOptions.mPreMultipyAlpha) {
-                setBlendFunction(BLENDFUNCTION_SOURCE_PREMULTIPLYALPHA_DEFAULT, BLENDFUNCTION_DESTINATION_PREMULTIPLYALPHA_DEFAULT)
-            } else {
-                setBlendFunction(BLENDFUNCTION_SOURCE_DEFAULT, BLENDFUNCTION_DESTINATION_DEFAULT)
-            }
         }
 
         val lines = text.split('\n').toTypedArray()

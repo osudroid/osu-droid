@@ -1,9 +1,10 @@
 package com.rian.osu.beatmap.hitobject.sliderobject
 
+import com.rian.osu.beatmap.hitobject.Slider
 import com.rian.osu.math.Vector2
 
 /**
- * Represents the head of a slider.
+ * Represents the head of a [Slider].
  */
 class SliderHead(
     /**
@@ -15,4 +16,4 @@ class SliderHead(
      * The position of this [SliderHead] relative to the play field.
      */
     position: Vector2
-) : SliderHitObject(startTime, position, 0, startTime)
+) : SliderHitObject(startTime, position)

@@ -10,7 +10,9 @@ import javax.microedition.khronos.opengles.*
 
 
 /**
- * A circle shape.
+ * A circle that supports gradients.
+ *
+ * The gradient is applied from [startAngle] to [endAngle].
  *
  * @author Reco1l
  */

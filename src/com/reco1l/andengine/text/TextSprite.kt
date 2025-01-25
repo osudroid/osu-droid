@@ -26,8 +26,8 @@ import kotlin.math.max
 /**
  * A sprite that displays text.
  *
- * Differently from the original [Text] class, this is a sprite that pre-renders the entire text
- * to a texture, it is not as efficient as the original [Text] class, but it is more flexible and
+ * Unlike [org.anddev.andengine.entity.text.Text], this is a sprite that pre-renders the entire text to a texture.
+ * It is not as efficient as [org.anddev.andengine.entity.text.Text], but it is more flexible and
  * allows for more customization.
  *
  * It is not recommended to use this on places where the text changes frequently, as it will

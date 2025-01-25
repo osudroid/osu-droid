@@ -270,9 +270,10 @@ open class ScrollableContainer : Container() {
     }
 
     override fun onManagedDrawChildren(pGL: GL10, pCamera: Camera) {
+        super.onManagedDrawChildren(pGL, pCamera)
+
         indicatorX?.onDraw(pGL, pCamera)
         indicatorY?.onDraw(pGL, pCamera)
-        super.onManagedDrawChildren(pGL, pCamera)
     }
 
     override fun onAreaTouched(event: TouchEvent, localX: Float, localY: Float): Boolean {
@@ -280,32 +281,33 @@ open class ScrollableContainer : Container() {
         when (event.action) {
 
             ACTION_DOWN -> {
-                isDragging = true
-
                 initialX = localX
                 initialY = localY
 
                 velocityX = 0f
                 velocityY = 0f
-
-                lastDragTimeSec = elapsedTimeSec
             }
 
             ACTION_MOVE -> {
-                isDragging = true
 
-                // Coerce the delta values to the width and height of the container because the user can't scroll more than that.
-                var deltaX = localX - initialX
-                var deltaY = localY - initialY
+                var deltaX = if (scrollAxes.isHorizontal) localX - initialX else 0f
+                var deltaY = if (scrollAxes.isVertical) localY - initialY else 0f
+
+                if (!isDragging) {
+                    isDragging = abs(deltaX) > 1f || abs(deltaY) > 1f
+
+                    if (!isDragging) {
+                        return super.onAreaTouched(event, localX, localY)
+                    }
+                }
 
                 val length = hypot(deltaX, deltaY)
 
-                // Slow down the scroll when reaching the bounds.
-                if (scrollX + deltaX < 0 || scrollX + deltaX > maxScrollX) {
+                if (scrollX - deltaX < 0 || scrollX - deltaX > maxScrollX) {
                     deltaX *= if (length <= 0) 0f else length.pow(0.7f) / length
                 }
 
-                if (scrollY + deltaY < 0 || scrollY + deltaY > maxScrollY) {
+                if (scrollY - deltaY < 0 || scrollY - deltaY > maxScrollY) {
                     deltaY *= if (length <= 0) 0f else length.pow(0.7f) / length
                 }
 
@@ -314,18 +316,16 @@ open class ScrollableContainer : Container() {
                 if (abs(deltaX) > 0.1f) {
                     scrollX -= deltaX
                     velocityX = abs(deltaX / dragTimeSec) * sign(deltaX)
-
                     initialX = localX
-                    lastDragTimeSec = elapsedTimeSec
                 }
 
                 if (abs(deltaY) > 0.1f) {
                     scrollY -= deltaY
                     velocityY = abs(deltaY / dragTimeSec) * sign(deltaY)
-
                     initialY = localY
-                    lastDragTimeSec = elapsedTimeSec
                 }
+
+                lastDragTimeSec = elapsedTimeSec
             }
 
             else -> {
@@ -333,13 +333,17 @@ open class ScrollableContainer : Container() {
             }
         }
 
-        return super.onAreaTouched(event, localX, localY)
+        if (!isDragging) {
+            return super.onAreaTouched(event, localX, localY)
+        }
+
+        return true
     }
 
 
     override fun getChildDrawX(child: ExtendedEntity): Float {
 
-        if (child == indicatorX || child == indicatorY) {
+        if (child == indicatorX || child == indicatorY || !scrollAxes.isHorizontal) {
             return super.getChildDrawX(child)
         }
 
@@ -348,7 +352,7 @@ open class ScrollableContainer : Container() {
 
     override fun getChildDrawY(child: ExtendedEntity): Float {
 
-        if (child == indicatorX || child == indicatorY) {
+        if (child == indicatorX || child == indicatorY || !scrollAxes.isVertical) {
             return super.getChildDrawY(child)
         }
 
@@ -359,8 +363,6 @@ open class ScrollableContainer : Container() {
     companion object {
 
         const val DEFAULT_DECELERATION = 0.98f
-
-        const val INSIGNIFICANT_DISTANCE = 0.05f
 
     }
 }

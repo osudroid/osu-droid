@@ -84,7 +84,10 @@ class FakeSocket(private val uid: Long, private val username: String) : Socket(n
             "playerModsChanged" -> "playerModsChanged" to arrayOf(uid.toString(), args[0])
             "playerStatusChanged" -> "playerStatusChanged" to arrayOf(uid.toString(), args[0])
 
-            // These events requires special handling
+            // In these events, the client expects to receive an integer as the first argument.
+            "maxPlayersChanged" -> "maxPlayersChanged" to arrayOf(args[0].toString())
+
+            // These events require special handling
             "roomGameplaySettingsChanged" -> "roomGameplaySettingsChanged" to arrayOf((args[0] as JSONObject).apply {
                 Multiplayer.room!!.gameplaySettings.also {
                     if (!has("isFreeMod")) put("isFreeMod", it.isFreeMod)
