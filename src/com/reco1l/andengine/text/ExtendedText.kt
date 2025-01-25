@@ -29,7 +29,7 @@ open class ExtendedText : ExtendedEntity() {
     var text: String = ""
         set(value) {
             if (field != value) {
-				field = value
+                field = value
 
                 if (value.length > maximumSize) {
                     shouldRebuildVertexBuffer = true
@@ -37,7 +37,7 @@ open class ExtendedText : ExtendedEntity() {
                 }
 
                 updateVertexBuffer()
-			}
+            }
         }
 
     /**
@@ -47,17 +47,17 @@ open class ExtendedText : ExtendedEntity() {
     var font: Font? = null
         set(value) {
             if (field != value) {
-				field = value
+                field = value
                 shouldRebuildTextureBuffer = true
                 updateVertexBuffer()
-			}
+            }
         }
 
     /**
      * The horizontal alignment of the text.
      */
     var horizontalAlign = HorizontalAlign.LEFT
-		set(value) {
+        set(value) {
             if (field != value) {
                 field = value
                 updateVertexBuffer()
@@ -108,8 +108,8 @@ open class ExtendedText : ExtendedEntity() {
         currentSize = text.length
 
         if (text.length > maximumSize) {
-			shouldRebuildVertexBuffer = true
-			shouldRebuildTextureBuffer = true
+            shouldRebuildVertexBuffer = true
+            shouldRebuildTextureBuffer = true
             maximumSize = text.length
         }
 
