@@ -12,6 +12,7 @@ import com.rian.osu.difficulty.skills.Skill
 import com.rian.osu.difficulty.skills.StandardAim
 import com.rian.osu.difficulty.skills.StandardFlashlight
 import com.rian.osu.difficulty.skills.StandardSpeed
+import com.rian.osu.mods.ModAutopilot
 import com.rian.osu.mods.ModFlashlight
 import com.rian.osu.mods.ModRelax
 import kotlin.math.cbrt
@@ -32,32 +33,31 @@ class StandardDifficultyCalculator : DifficultyCalculator<StandardPlayableBeatma
         objects: Array<StandardDifficultyHitObject>
     ) = StandardDifficultyAttributes().apply {
         mods = beatmap.mods?.toList() ?: mods
+        clockRate = beatmap.overallSpeedMultiplier.toDouble()
 
-        aimDifficulty = calculateRating(skills[0])
-        speedDifficulty = calculateRating(skills[2])
-        speedNoteCount = (skills[2] as StandardSpeed).relevantNoteCount()
-        flashlightDifficulty = calculateRating(skills[3])
-
-        aimSliderFactor = if (aimDifficulty > 0) calculateRating(skills[1]) / aimDifficulty else 1.0
-
-        aimDifficultStrainCount = (skills[0] as StandardAim).countDifficultStrains()
-        speedDifficultStrainCount = (skills[2] as StandardSpeed).countDifficultStrains()
+        populateAimAttributes(skills)
+        populateSpeedAttributes(skills)
+        populateFlashlightAttributes(skills)
 
         if (mods.any { it is ModRelax }) {
             aimDifficulty *= 0.9
             speedDifficulty = 0.0
             flashlightDifficulty *= 0.7
+        } else if (mods.any { it is ModAutopilot }) {
+            aimDifficulty = 0.0
+            speedDifficulty *= 0.5
+            flashlightDifficulty *= 0.4
         }
 
         val baseAimPerformance = (5 * max(1.0, aimDifficulty / 0.0675) - 4).pow(3) / 100000
         val baseSpeedPerformance = (5 * max(1.0, speedDifficulty / 0.0675) - 4).pow(3) / 100000
-        val baseFlashlightPerformance = if (mods.any { it is ModFlashlight }) flashlightDifficulty.pow(2) * 25 else 0.0
+        val baseFlashlightPerformance = flashlightDifficulty.pow(2) * 25
 
         val basePerformance = (
-                baseAimPerformance.pow(1.1) +
-                        baseSpeedPerformance.pow(1.1) +
-                        baseFlashlightPerformance.pow(1.1)
-                ).pow(1 / 1.1)
+            baseAimPerformance.pow(1.1) +
+            baseSpeedPerformance.pow(1.1) +
+            baseFlashlightPerformance.pow(1.1)
+        ).pow(1 / 1.1)
 
         // Document for formula derivation:
         // https://docs.google.com/document/d/10DZGYYSsT_yjz2Mtp6yIJld0Rqx4E-vVHupCqiM4TNI/edit
@@ -85,12 +85,15 @@ class StandardDifficultyCalculator : DifficultyCalculator<StandardPlayableBeatma
     override fun createSkills(beatmap: StandardPlayableBeatmap): Array<Skill<StandardDifficultyHitObject>> {
         val mods = beatmap.mods?.toList() ?: emptyList()
 
-        return arrayOf(
-            StandardAim(mods, true),
-            StandardAim(mods, false),
-            StandardSpeed(mods),
-            StandardFlashlight(mods)
-        )
+        val aim = StandardAim(mods, true)
+        val aimNoSlider = StandardAim(mods, false)
+        val speed = StandardSpeed(mods)
+
+        if (mods.any { it is ModFlashlight }) {
+            return arrayOf(aim, aimNoSlider, speed, StandardFlashlight(mods))
+        }
+
+        return arrayOf(aim, aimNoSlider, speed)
     }
 
     @Suppress("UNCHECKED_CAST")
@@ -127,4 +130,34 @@ class StandardDifficultyCalculator : DifficultyCalculator<StandardPlayableBeatma
         parameters: DifficultyCalculationParameters?,
         scope: CoroutineScope?
     ) = beatmap.createStandardPlayableBeatmap(parameters?.mods, parameters?.customSpeedMultiplier ?: 1f, scope)
+
+    private fun StandardDifficultyAttributes.populateAimAttributes(skills: Array<Skill<StandardDifficultyHitObject>>) {
+        val aim = skills.first { it is StandardAim && it.withSliders } as StandardAim
+
+        aimDifficulty = calculateRating(aim)
+        aimDifficultSliderCount = aim.countDifficultSliders()
+        aimDifficultStrainCount = aim.countDifficultStrains()
+
+        if (aimDifficulty > 0) {
+            val aimNoSlider = skills.first { it is StandardAim && !it.withSliders } as StandardAim
+
+            aimSliderFactor = calculateRating(aimNoSlider) / aimDifficulty
+        } else {
+            aimSliderFactor = 1.0
+        }
+    }
+
+    private fun StandardDifficultyAttributes.populateSpeedAttributes(skills: Array<Skill<StandardDifficultyHitObject>>) {
+        val speed = skills.first { it is StandardSpeed } as StandardSpeed
+
+        speedDifficulty = calculateRating(speed)
+        speedNoteCount = speed.relevantNoteCount()
+        speedDifficultStrainCount = speed.countDifficultStrains()
+    }
+
+    private fun StandardDifficultyAttributes.populateFlashlightAttributes(skills: Array<Skill<StandardDifficultyHitObject>>) {
+        val flashlight = skills.firstOrNull { it is StandardFlashlight } as? StandardFlashlight ?: return
+
+        flashlightDifficulty = calculateRating(flashlight)
+    }
 }

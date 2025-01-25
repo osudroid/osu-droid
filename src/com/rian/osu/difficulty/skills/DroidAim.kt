@@ -20,7 +20,7 @@ class DroidAim(
     /**
      * Whether to consider sliders in the calculation.
      */
-    private val withSliders: Boolean
+    val withSliders: Boolean
 ) : DroidStrainSkill(mods) {
     override val starsPerDouble = 1.05
 
@@ -46,7 +46,7 @@ class DroidAim(
             return 0.0
         }
 
-        return sortedStrains.reduce { total, strain ->
+        return sortedStrains.fold(0.0) { total, strain ->
             total + 1 / (1 + exp(-((strain / maxStrain) * 12 - 6)))
         }
     }
