@@ -328,13 +328,12 @@ public class MainActivity extends BaseGameActivity implements
 
                 if (roomInviteLink != null) {
                     LobbyScene.INSTANCE.connectFromLink(roomInviteLink);
-                    return;
-                }
-
-                if (willReplay) {
+                } else if (willReplay) {
                     GlobalManager.getInstance().getMainScene().watchReplay(beatmapToAdd);
                     willReplay = false;
                 }
+
+                GlobalManager.getInstance().getMainScene().loadBannerSprite();
             });
         });
     }
