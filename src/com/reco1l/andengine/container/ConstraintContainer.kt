@@ -9,7 +9,7 @@ import org.anddev.andengine.entity.shape.*
  *
  * This is useful for creating complex layouts.
  */
-class ConstraintContainer : Container() {
+open class ConstraintContainer : Container() {
 
 
     private val constraints = mutableMapOf<ExtendedEntity, IShape>()
@@ -17,18 +17,52 @@ class ConstraintContainer : Container() {
 
     override fun getChildDrawX(child: ExtendedEntity): Float {
 
-        val constraint = constraints[child] ?: this
-        val anchorOffsetX = constraint.width * child.anchorX
+        val target = constraints[child] ?: this
 
-        return child.x + child.originOffsetX + anchorOffsetX + child.translationX
+        var targetX = target.getDrawX()
+        var targetWidth = target.getDrawWidth()
+
+        if (target == this) {
+            targetX = 0f
+            targetWidth = getPaddedWidth()
+        }
+
+        val anchorOffsetX = targetWidth * child.anchor.x
+
+        var childX = child.x
+        if (child.relativePositionAxes.isHorizontal) {
+
+            // Relative positions will be multiplied by the remaining space from the
+            // target's position to the edge of the container.
+            childX *= getPaddedWidth() - targetX
+        }
+
+        return targetX + childX + child.originOffsetX + anchorOffsetX + child.translationX
     }
 
     override fun getChildDrawY(child: ExtendedEntity): Float {
 
-        val constraint = constraints[child] ?: this
-        val anchorOffsetY = constraint.height * child.anchorY
+        val target = constraints[child] ?: this
 
-        return child.y + child.originOffsetY + anchorOffsetY + child.translationY
+        var targetY = target.getDrawY()
+        var targetHeight = target.getDrawHeight()
+
+        if (target == this) {
+            targetY = 0f
+            targetHeight = getPaddedHeight()
+        }
+
+        val anchorOffsetY = targetHeight * child.anchor.y
+
+        var childY = child.y
+        if (child.relativePositionAxes.isVertical) {
+
+            // Relative positions will be multiplied by the remaining space from the
+            // target's position to the edge of the container.
+            childY *= getPaddedHeight() - targetY
+        }
+
+        return targetY + childY + child.originOffsetY + anchorOffsetY + child.translationY
     }
 
 

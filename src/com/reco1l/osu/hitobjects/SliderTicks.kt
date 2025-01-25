@@ -77,7 +77,7 @@ class SliderTickSprite : ExtendedSprite() {
 
     init {
         textureRegion = ResourceManager.getInstance().getTexture("sliderscorepoint")
-        setOrigin(Anchor.Center)
+        origin = Anchor.Center
     }
 
     /**

@@ -1,14 +1,10 @@
 package com.reco1l.andengine.container
 
-import android.util.*
 import com.reco1l.andengine.*
 import com.reco1l.toolkt.kotlin.*
 import org.anddev.andengine.engine.camera.*
 import org.anddev.andengine.entity.*
 import org.anddev.andengine.entity.IEntity.*
-import org.anddev.andengine.entity.scene.Scene.ITouchArea
-import org.anddev.andengine.entity.shape.IShape
-import org.anddev.andengine.input.touch.*
 import org.anddev.andengine.util.*
 import javax.microedition.khronos.opengles.GL10
 import kotlin.math.*
@@ -62,11 +58,23 @@ open class Container : ExtendedEntity() {
 
 
     open fun getChildDrawX(child: ExtendedEntity): Float {
-        return child.x + child.totalOffsetX
+
+        var x = child.x
+        if (child.relativePositionAxes.isHorizontal) {
+            x *= getPaddedWidth()
+        }
+
+        return x + child.totalOffsetX
     }
 
     open fun getChildDrawY(child: ExtendedEntity): Float {
-        return child.y + child.totalOffsetY
+
+        var y = child.y
+        if (child.relativePositionAxes.isVertical) {
+            y *= getPaddedHeight()
+        }
+
+        return y + child.totalOffsetY
     }
 
 
@@ -86,21 +94,11 @@ open class Container : ExtendedEntity() {
 
                 val child = mChildren.getOrNull(i) ?: continue
 
-                var offsetX = child.x
-                var offsetY = child.y
+                val x = max(0f, child.getDrawX())
+                val y = max(0f, child.getDrawY())
 
-                if (child is ExtendedEntity) {
-                    offsetX += child.originOffsetX
-                    offsetY += child.originOffsetY
-                }
-
-                offsetX = max(0f, offsetX)
-                offsetY = max(0f, offsetY)
-
-                if (child is IShape) {
-                    contentWidth = max(contentWidth, offsetX + child.width)
-                    contentHeight = max(contentHeight, offsetY + child.height)
-                }
+                contentWidth = max(contentWidth, x + child.getDrawWidth())
+                contentHeight = max(contentHeight, y + child.getDrawHeight())
             }
         }
 
@@ -166,24 +164,22 @@ open class Container : ExtendedEntity() {
     override fun onUpdateVertexBuffer() {}
     override fun drawVertices(pGL: GL10, pCamera: Camera) {}
 
-
-    // Input
-
-    override fun onAreaTouched(event: TouchEvent, localX: Float, localY: Float): Boolean {
-
-        if (mChildren != null) {
-            try {
-                mChildren.fastForEach {
-                    if (it is ITouchArea && it.contains(localX, localY)) {
-                        return it.onAreaTouched(event, localX, localY)
-                    }
-                }
-            } catch (e: IndexOutOfBoundsException) {
-                Log.e("Container", "A child entity was removed during touch event propagation.")
-            }
-        }
-
-        return false
-    }
 }
 
+
+operator fun <T : IEntity> Container.get(index: Int): T {
+    @Suppress("UNCHECKED_CAST")
+    return getChild(index) as T
+}
+
+operator fun Container.set(index: Int, entity: IEntity) {
+    attachChild(entity, index)
+}
+
+operator fun Container.plusAssign(entity: IEntity) {
+    attachChild(entity)
+}
+
+operator fun Container.minusAssign(entity: IEntity) {
+    detachChild(entity)
+}
