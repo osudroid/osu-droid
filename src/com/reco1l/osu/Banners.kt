@@ -103,9 +103,9 @@ class BannerSprite(private val banners: List<Banner>) : ExtendedSprite() {
 
             val banner = banners[currentBannerIndex]
 
-            fadeOut(0.2f).then {
+            fadeOut(0.5f).then {
                 textureRegion = banner.image
-                fadeIn(0.2f)
+                fadeIn(0.5f)
             }
         }
         elapsedTimeSinceLastChange += pSecondsElapsed
@@ -141,7 +141,7 @@ class BannerSprite(private val banners: List<Banner>) : ExtendedSprite() {
 
     companion object {
 
-        private const val BANNER_DURATION = 8f // Seconds
+        private const val BANNER_DURATION = 10f // Seconds
 
     }
 
