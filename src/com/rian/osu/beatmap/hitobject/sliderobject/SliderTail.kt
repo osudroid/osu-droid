@@ -1,28 +1,20 @@
 package com.rian.osu.beatmap.hitobject.sliderobject
 
-import com.rian.osu.math.Vector2
+import com.rian.osu.beatmap.hitobject.Slider
 
 /**
  * Represents a slider tail.
  */
 class SliderTail(
     /**
-     * The time at which this [SliderTail] starts, in milliseconds.
+     * The [Slider] to which this [SliderTail] belongs.
      */
-    startTime: Double,
+    slider: Slider,
 
     /**
-     * The position of this [SliderTail] relative to the play field.
+     * An optional start time for this [SliderTail] to override this [SliderTail]'s [startTime].
+     *
+     * Used for osu!standard's legacy slider tail.
      */
-    position: Vector2,
-
-    /**
-     * The index of the span at which this [SliderTail] lies.
-     */
-    spanIndex: Int,
-
-    /**
-     * The start time of the span at which this [SliderTail] lies, in milliseconds.
-     */
-    spanStartTime: Double
-) : SliderHitObject(startTime, position, spanIndex, spanStartTime)
+    startTime: Double = slider.endTime
+) : SliderEndCircle(slider, slider.repeatCount, startTime)

@@ -768,6 +768,14 @@ object RoomScene : Scene(), IRoomEventListener, IPlayerEventListener {
         updateInformation()
     }
 
+    override fun onRoomMaxPlayersChange(maxPlayers: Int) {
+        room!!.maxPlayers = maxPlayers
+        room!!.players = room!!.players.copyOf(maxPlayers)
+
+        updateInformation()
+        playerList!!.invalidate()
+    }
+
     override fun onRoomBeatmapChange(beatmap: RoomBeatmap?) {
 
         room!!.beatmap = beatmap

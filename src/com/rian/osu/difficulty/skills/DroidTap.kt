@@ -18,7 +18,8 @@ class DroidTap(
     /**
      * Whether to consider cheesability.
      */
-    private val considerCheesability: Boolean,
+    @JvmField
+    val considerCheesability: Boolean,
 
     /**
      * The strain time to cap to.
@@ -30,7 +31,7 @@ class DroidTap(
     private var currentStrain = 0.0
     private var currentRhythm = 0.0
 
-    private val skillMultiplier = 1375.0
+    private val skillMultiplier = 1.375
     private val strainDecayBase = 0.3
 
     private val objectDeltaTimes = mutableListOf<Double>()

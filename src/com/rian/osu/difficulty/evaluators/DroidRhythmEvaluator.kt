@@ -3,6 +3,7 @@ package com.rian.osu.difficulty.evaluators
 import com.rian.osu.beatmap.hitobject.Slider
 import com.rian.osu.beatmap.hitobject.Spinner
 import com.rian.osu.difficulty.DroidDifficultyHitObject
+import com.rian.osu.difficulty.utils.DifficultyCalculationUtils
 import kotlin.math.*
 
 /**
@@ -137,7 +138,9 @@ object DroidRhythmEvaluator {
                         // Repeated island (ex: triplet -> triplet)
                         effectiveRatio *= min(
                             3.0 / islandCounts[island]!!,
-                            (1.0 / islandCounts[island]!!).pow(2.75 / (1 + exp(14 - 0.24 * island.delta)))
+                            (1.0 / islandCounts[island]!!).pow(
+                                DifficultyCalculationUtils.logistic(island.delta.toDouble(), 58.33, 0.24, 2.75)
+                            )
                         )
                     } else {
                         islandCounts[island] = 1

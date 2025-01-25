@@ -51,6 +51,6 @@ object DroidTapEvaluator {
             speedBonus += 0.75 * ErrorFunction.erf((MIN_SPEED_BONUS - strainTime) / 40).pow(2)
         }
 
-        return speedBonus * doubletapness.pow(1.5) / strainTime
+        return speedBonus * doubletapness.pow(1.5) * 1000 / strainTime
     }
 }

@@ -8,6 +8,18 @@
     android:paddingHorizontal="6dp">
 
     <TextView
+        android:id="@+id/timestamp_text"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginLeft="4dp"
+        android:gravity="right"
+        android:singleLine="true"
+        android:textColor="#ABABAB"
+        android:textSize="12sp"
+        tools:text="Timestamp"
+        tools:visibility="visible" />
+
+    <TextView
         android:id="@+id/sender_text"
         android:layout_width="160dp"
         android:layout_height="wrap_content"

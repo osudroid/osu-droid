@@ -20,7 +20,7 @@ class StandardSpeed(
 
     private var currentStrain = 0.0
     private var currentRhythm = 0.0
-    private val skillMultiplier = 1.43
+    private val skillMultiplier = 1.46
     private val strainDecayBase = 0.3
 
     /**
@@ -41,7 +41,7 @@ class StandardSpeed(
 
     override fun strainValueAt(current: StandardDifficultyHitObject): Double {
         currentStrain *= strainDecay(current.strainTime)
-        currentStrain += StandardSpeedEvaluator.evaluateDifficultyOf(current) * skillMultiplier
+        currentStrain += StandardSpeedEvaluator.evaluateDifficultyOf(current, mods) * skillMultiplier
 
         currentRhythm = StandardRhythmEvaluator.evaluateDifficultyOf(current)
         val totalStrain = currentStrain * currentRhythm

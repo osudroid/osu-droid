@@ -21,6 +21,7 @@ import androidx.core.view.forEach
 import androidx.core.view.get
 import androidx.preference.CheckBoxPreference
 import androidx.preference.Preference
+import androidx.preference.SeekBarPreference
 import com.osudroid.resources.R.*
 import com.edlplan.ui.fragment.LoadingFragment
 import com.google.android.material.snackbar.Snackbar
@@ -53,6 +54,7 @@ import ru.nsu.ccfit.zuev.osu.online.OnlineManager
 import ru.nsu.ccfit.zuev.osuplus.R
 import ru.nsu.ccfit.zuev.skins.BeatmapSkinManager
 import java.io.File
+import kotlin.math.max
 
 
 enum class Section(@XmlRes val xml: Int) {
@@ -419,6 +421,16 @@ class SettingsFragment : com.edlplan.ui.fragment.SettingsFragment() {
             setText(null)
             setOnPreferenceChangeListener { _, newValue ->
                 RoomAPI.setRoomPassword(newValue as String)
+                true
+            }
+        }
+
+        findPreference<SeekBarPreference>("room_max_players")!!.apply {
+            min = max(2, Multiplayer.room!!.activePlayers.size)
+            value = Multiplayer.room!!.maxPlayers
+
+            setOnPreferenceChangeListener { _, newValue ->
+                RoomAPI.setRoomMaxPlayers(newValue as Int)
                 true
             }
         }
