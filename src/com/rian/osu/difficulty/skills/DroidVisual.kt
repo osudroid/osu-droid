@@ -18,7 +18,8 @@ class DroidVisual(
     /**
      * Whether to consider sliders in the calculation.
      */
-    private val withSliders: Boolean
+    @JvmField
+    val withSliders: Boolean
 ) : DroidStrainSkill(mods) {
     override val starsPerDouble = 1.025
 

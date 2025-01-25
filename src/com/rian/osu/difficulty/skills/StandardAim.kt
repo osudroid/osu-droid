@@ -17,7 +17,8 @@ class StandardAim(
     /**
      * Whether to consider sliders in the calculation.
      */
-    private val withSliders: Boolean
+    @JvmField
+    val withSliders: Boolean
 ) : StandardStrainSkill(mods) {
     private var currentStrain = 0.0
     private val skillMultiplier = 25.18

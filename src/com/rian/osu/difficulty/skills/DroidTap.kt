@@ -18,7 +18,8 @@ class DroidTap(
     /**
      * Whether to consider cheesability.
      */
-    private val considerCheesability: Boolean,
+    @JvmField
+    val considerCheesability: Boolean,
 
     /**
      * The strain time to cap to.

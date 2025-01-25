@@ -20,7 +20,7 @@ class DroidAim(
     /**
      * Whether to consider sliders in the calculation.
      */
-    private val withSliders: Boolean
+    val withSliders: Boolean
 ) : DroidStrainSkill(mods) {
     override val starsPerDouble = 1.05
 
