@@ -30,7 +30,7 @@ object DifficultyCalculationUtils {
     @JvmStatic
     @JvmOverloads
     fun millisecondsToBPM(milliseconds: Double, @IntRange(from = 1, to = 4) delimiter: Int = 4) =
-        60000 / milliseconds * delimiter
+        60000 / (milliseconds * delimiter)
 
     /**
      * Calculates an S-shaped [logistic function](https://en.wikipedia.org/wiki/Logistic_function)
