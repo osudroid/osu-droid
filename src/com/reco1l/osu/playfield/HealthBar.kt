@@ -151,7 +151,7 @@ class HealthBar(private val statistics: StatisticV2) : Container() {
     private fun bulge() {
         marker.clearEntityModifiers()
         marker.setScale(1.4f)
-        marker.scaleTo(1f, 0.2f).eased(Easing.Out)
+        marker.scaleTo(1f, 0.2f, Easing.Out)
     }
 
     private fun getFillColor(hp: Float) = when {

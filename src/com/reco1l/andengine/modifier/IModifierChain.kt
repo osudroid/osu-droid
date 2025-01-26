@@ -1,5 +1,6 @@
 package com.reco1l.andengine.modifier
 
+import com.edlplan.framework.easing.Easing
 import com.reco1l.andengine.modifier.ModifierType.*
 
 
@@ -18,7 +19,6 @@ interface IModifierChain {
      * as well register the modifier as nested to the current chain and use the [block]
      * callback on it.
      *
-     * @param returnModifier Whether this function should return the newly created modifier or the parent chain.
      * @param block The block of code to execute on the newly created modifier.
      */
     fun applyModifier(block: UniversalModifier.() -> Unit): UniversalModifier
@@ -54,128 +54,141 @@ interface IModifierChain {
 
     // Translate
 
-    fun translateTo(valueX: Float, valueY: Float, durationSec: Float = 0f): UniversalModifier {
+    fun translateTo(valueX: Float, valueY: Float, durationSec: Float = 0f, easing: Easing = Easing.None): UniversalModifier {
         return applyModifier {
             type = TranslateXY
             duration = durationSec
             finalValues = floatArrayOf(valueX, valueY)
+            eased(easing)
         }
     }
 
-    fun translateToX(value: Float, durationSec: Float = 0f): UniversalModifier {
+    fun translateToX(value: Float, durationSec: Float = 0f, easing: Easing = Easing.None): UniversalModifier {
         return applyModifier {
             type = TranslateX
             duration = durationSec
             finalValues = floatArrayOf(value)
+            eased(easing)
         }
     }
 
-    fun translateToY(value: Float, durationSec: Float = 0f): UniversalModifier {
+    fun translateToY(value: Float, durationSec: Float = 0f, easing: Easing = Easing.None): UniversalModifier {
         return applyModifier {
             type = TranslateY
             duration = durationSec
             finalValues = floatArrayOf(value)
+            eased(easing)
         }
     }
 
 
     // Move
 
-    fun moveTo(valueX: Float, valueY: Float, durationSec: Float = 0f): UniversalModifier {
+    fun moveTo(valueX: Float, valueY: Float, durationSec: Float = 0f, easing: Easing = Easing.None): UniversalModifier {
         return applyModifier {
             type = MoveXY
             duration = durationSec
             finalValues = floatArrayOf(valueX, valueY)
+            eased(easing)
         }
     }
 
-    fun moveToX(value: Float, durationSec: Float = 0f): UniversalModifier {
+    fun moveToX(value: Float, durationSec: Float = 0f, easing: Easing = Easing.None): UniversalModifier {
         return applyModifier {
             type = MoveX
             duration = durationSec
             finalValues = floatArrayOf(value)
+            eased(easing)
         }
     }
 
-    fun moveToY(value: Float, durationSec: Float = 0f): UniversalModifier {
+    fun moveToY(value: Float, durationSec: Float = 0f, easing: Easing = Easing.None): UniversalModifier {
         return applyModifier {
             type = MoveY
             duration = durationSec
             finalValues = floatArrayOf(value)
+            eased(easing)
         }
     }
 
 
     // Scale
 
-    fun scaleTo(value: Float, durationSec: Float = 0f): UniversalModifier {
+    fun scaleTo(value: Float, durationSec: Float = 0f, easing: Easing = Easing.None): UniversalModifier {
         return applyModifier {
             type = ScaleXY
             duration = durationSec
             finalValues = floatArrayOf(value, value)
+            eased(easing)
         }
     }
 
-    fun scaleToX(value: Float, durationSec: Float = 0f): UniversalModifier {
+    fun scaleToX(value: Float, durationSec: Float = 0f, easing: Easing = Easing.None): UniversalModifier {
         return applyModifier {
             type = ScaleX
             duration = durationSec
             finalValues = floatArrayOf(value)
+            eased(easing)
         }
     }
 
-    fun scaleToY(value: Float, durationSec: Float = 0f): UniversalModifier {
+    fun scaleToY(value: Float, durationSec: Float = 0f, easing: Easing = Easing.None): UniversalModifier {
         return applyModifier {
             type = ScaleY
             duration = durationSec
             finalValues = floatArrayOf(value)
+            eased(easing)
         }
     }
 
 
     // Coloring
 
-    fun fadeTo(value: Float, durationSec: Float = 0f): UniversalModifier {
+    fun fadeTo(value: Float, durationSec: Float = 0f, easing: Easing = Easing.None): UniversalModifier {
         return applyModifier {
             type = Alpha
             duration = durationSec
             finalValues = floatArrayOf(value)
+            eased(easing)
         }
     }
 
-    fun fadeIn(durationSec: Float = 0f): UniversalModifier {
-        return fadeTo(1f, durationSec)
+    fun fadeIn(durationSec: Float = 0f, easing: Easing = Easing.None): UniversalModifier {
+        return fadeTo(1f, durationSec, easing)
     }
 
-    fun fadeInFromZero(durationSec: Float = 0f): UniversalModifier {
+    fun fadeInFromZero(durationSec: Float = 0f, easing: Easing = Easing.None): UniversalModifier {
         return applyModifier {
             type = Alpha
             duration = durationSec
             initialValues = floatArrayOf(0f)
             finalValues = floatArrayOf(1f)
+            eased(easing)
         }
     }
 
-    fun fadeOut(durationSec: Float = 0f): UniversalModifier {
-        return fadeTo(0f, durationSec)
+    fun fadeOut(durationSec: Float = 0f, easing: Easing = Easing.None): UniversalModifier {
+        return fadeTo(0f, durationSec, easing)
     }
 
-    fun colorTo(red: Float, green: Float, blue: Float, durationSec: Float = 0f): UniversalModifier {
+    fun colorTo(red: Float, green: Float, blue: Float, durationSec: Float = 0f, easing: Easing = Easing.None): UniversalModifier {
         return applyModifier {
             type = Color
             duration = durationSec
             finalValues = floatArrayOf(red, green, blue)
+            eased(easing)
         }
     }
 
 
     // Rotation
 
-    fun rotateTo(value: Float, durationSec: Float = 0f): UniversalModifier {
+    fun rotateTo(value: Float, durationSec: Float = 0f, easing: Easing = Easing.None): UniversalModifier {
         return applyModifier {
             type = Rotation
             duration = durationSec
             finalValues = floatArrayOf(value)
+            eased(easing)
         }
     }
 
