@@ -31,6 +31,6 @@ abstract class HitWindow @JvmOverloads constructor(
         /**
          * A fixed miss window regardless of difficulty settings.
          */
-        const val MISS_WINDOW = 400.0
+        const val MISS_WINDOW = 400f
     }
 }
