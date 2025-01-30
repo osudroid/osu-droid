@@ -41,13 +41,8 @@ class DroidDifficultyHitObject(
      *
      * This is one less than the actual index of the hit object in the beatmap.
      */
-    index: Int,
-
-    /**
-     * The full great window of the hit object.
-     */
-    greatWindow: Double
-) : DifficultyHitObject(obj, lastObj, lastLastObj, clockRate, difficultyHitObjects, index, greatWindow) {
+    index: Int
+) : DifficultyHitObject(obj, lastObj, lastLastObj, clockRate, difficultyHitObjects, index) {
     override val mode = GameMode.Droid
     override val maximumSliderRadius = NORMALIZED_RADIUS * 2
 
