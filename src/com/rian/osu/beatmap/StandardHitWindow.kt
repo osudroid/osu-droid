@@ -3,15 +3,22 @@ package com.rian.osu.beatmap
 /**
  * Represents the osu!standard hit window.
  */
-class StandardHitWindow(
+class StandardHitWindow @JvmOverloads constructor(
     /**
-     * The overall difficulty of this [StandardHitWindow].
+     * The overall difficulty of this [StandardHitWindow]. Defaults to 5.
      */
-    overallDifficulty: Float
+    overallDifficulty: Float = 5f
 ) : HitWindow(overallDifficulty) {
-    override val greatWindow = 80 - 6 * overallDifficulty
-    override val okWindow = 140 - 8 * overallDifficulty
-    override val mehWindow = 200 - 10 * overallDifficulty
+    constructor(overallDifficulty: Float?) : this(overallDifficulty ?: 5f)
+
+    override val greatWindow
+        get() = 80 - 6 * overallDifficulty
+
+    override val okWindow
+        get() = 140 - 8 * overallDifficulty
+
+    override val mehWindow
+        get() = 200 - 10 * overallDifficulty
 
     companion object {
         /**

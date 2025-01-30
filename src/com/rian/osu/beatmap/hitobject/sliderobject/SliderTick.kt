@@ -1,6 +1,7 @@
 package com.rian.osu.beatmap.hitobject.sliderobject
 
 import com.rian.osu.GameMode
+import com.rian.osu.beatmap.EmptyHitWindow
 import com.rian.osu.beatmap.sections.BeatmapControlPoints
 import com.rian.osu.beatmap.sections.BeatmapDifficulty
 import com.rian.osu.math.Vector2
@@ -44,4 +45,6 @@ class SliderTick(
 
         timePreempt = (startTime - spanStartTime) / 2 + offset
     }
+
+    override fun createHitWindow(mode: GameMode) = EmptyHitWindow()
 }

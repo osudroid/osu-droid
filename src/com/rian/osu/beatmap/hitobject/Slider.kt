@@ -1,6 +1,7 @@
 package com.rian.osu.beatmap.hitobject
 
 import com.rian.osu.GameMode
+import com.rian.osu.beatmap.EmptyHitWindow
 import com.rian.osu.beatmap.hitobject.sliderobject.*
 import com.rian.osu.beatmap.sections.BeatmapControlPoints
 import com.rian.osu.beatmap.sections.BeatmapDifficulty
@@ -364,6 +365,8 @@ class Slider(
      * @return `[0, [spanCount])` where 0 is the first run.
      */
     fun spanAt(progress: Double) = (progress * spanCount).toInt()
+
+    override fun createHitWindow(mode: GameMode) = EmptyHitWindow()
 
     private fun createNestedHitObjects(mode: GameMode, controlPoints: BeatmapControlPoints, scope: CoroutineScope?) {
         nestedHitObjects.clear()

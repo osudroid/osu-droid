@@ -1,6 +1,9 @@
 package com.rian.osu.beatmap.hitobject
 
 import com.rian.osu.GameMode
+import com.rian.osu.beatmap.DroidHitWindow
+import com.rian.osu.beatmap.HitWindow
+import com.rian.osu.beatmap.StandardHitWindow
 import com.rian.osu.beatmap.constants.SampleBank
 import com.rian.osu.beatmap.sections.BeatmapControlPoints
 import com.rian.osu.beatmap.sections.BeatmapDifficulty
@@ -131,6 +134,12 @@ abstract class HitObject(
      */
     @JvmField
     var kiai = false
+
+    /**
+     * The [HitWindow] of this [HitObject].
+     */
+    @JvmField
+    var hitWindow: HitWindow? = null
 
     /**
      * Whether this [HitObject] is the first [HitObject] in the beatmap.
@@ -312,6 +321,14 @@ abstract class HitObject(
     open fun applyDefaults(controlPoints: BeatmapControlPoints, difficulty: BeatmapDifficulty, mode: GameMode, scope: CoroutineScope? = null) {
         kiai = controlPoints.effect.controlPointAt(startTime + CONTROL_POINT_LENIENCY).isKiai
 
+        if (hitWindow == null) {
+            hitWindow = createHitWindow(mode)
+        }
+
+        if (hitWindow != null) {
+            hitWindow!!.overallDifficulty = difficulty.od
+        }
+
         timePreempt = BeatmapDifficulty.difficultyRange(difficulty.ar.toDouble(), PREEMPT_MAX, PREEMPT_MID, PREEMPT_MIN)
 
         // Preempt time can go below 450ms. Normally, this is achieved via the DT mod which uniformly speeds up all animations game wide regardless of AR.
@@ -407,6 +424,21 @@ abstract class HitObject(
     protected fun createHitSampleInfo(sampleName: String) =
         samples.filterIsInstance<BankHitSampleInfo>().find { it.name == BankHitSampleInfo.HIT_NORMAL }?.copy(name = sampleName) ?:
         BankHitSampleInfo(sampleName, SampleBank.Normal)
+
+    /**
+     * Creates the [HitWindow] of this [HitObject].
+     *
+     * A `null` return means that this [HitObject] has no [HitWindow] and timing errors should not be displayed to the user.
+     *
+     * This will only be called if this [HitObject]'s [HitWindow] has not been set externally.
+     *
+     * @param mode The [GameMode] to create the [HitWindow] for.
+     * @returns The created [HitWindow].
+     */
+    protected open fun createHitWindow(mode: GameMode): HitWindow? = when (mode) {
+        GameMode.Droid -> DroidHitWindow()
+        GameMode.Standard -> StandardHitWindow()
+    }
 
     companion object {
         /**

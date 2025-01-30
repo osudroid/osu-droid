@@ -3,15 +3,22 @@ package com.rian.osu.beatmap
 /**
  * Represents an osu!droid hit window.
  */
-class DroidHitWindow(
+class DroidHitWindow @JvmOverloads constructor(
     /**
-     * The overall difficulty of this [DroidHitWindow].
+     * The overall difficulty of this [DroidHitWindow]. Defaults to 5.
      */
-    overallDifficulty: Float
+    overallDifficulty: Float = 5f
 ) : HitWindow(overallDifficulty) {
-    override val greatWindow = 75 + 5 * (5 - overallDifficulty)
-    override val okWindow = 150 + 10 * (5 - overallDifficulty)
-    override val mehWindow = 250 + 10 * (5 - overallDifficulty)
+    constructor(overallDifficulty: Float?) : this(overallDifficulty ?: 5f)
+
+    override val greatWindow
+        get() = 75 + 5 * (5 - overallDifficulty)
+
+    override val okWindow
+        get() = 150 + 10 * (5 - overallDifficulty)
+
+    override val mehWindow
+        get() = 250 + 10 * (5 - overallDifficulty)
 
     companion object {
         /**
