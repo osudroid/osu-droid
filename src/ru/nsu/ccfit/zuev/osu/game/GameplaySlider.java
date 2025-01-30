@@ -546,6 +546,11 @@ public class GameplaySlider extends GameObject {
     }
 
     private void onSpanFinish() {
+        var hitWindow = beatmapSlider.getHead().hitWindow;
+        if (hitWindow == null) {
+            return;
+        }
+
         ++completedSpanCount;
 
         int totalSpanCount = beatmapSlider.getSpanCount();
@@ -621,7 +626,7 @@ public class GameplaySlider extends GameObject {
         if (!startHit) {
             // Slider head was never hit - miss the entire slider before the end.
             // Add 0.013s to maintain pre-version 1.8 behavior where the slider head is judged 13ms after the 50 hit window in this case.
-            onSliderHeadHit(GameHelper.getDifficultyHelper().hitWindowFor50(GameHelper.getOverallDifficulty()) + 0.013);
+            onSliderHeadHit(hitWindow.getMehWindow() / 1000 + 0.013);
         }
 
         // Calculating score
@@ -630,12 +635,9 @@ public class GameplaySlider extends GameObject {
             // If ScoreV2 is active, the accuracy of hitting the slider head is additionally accounted for when judging the entire slider:
             // Getting a 300 for a slider requires getting a 300 judgement for the slider head.
             // Getting a 100 for a slider requires getting a 100 judgement or better for the slider head.
-            DifficultyHelper diffHelper = GameHelper.getDifficultyHelper();
-            float od = GameHelper.getOverallDifficulty();
-
-            if (Math.abs(firstHitAccuracy) <= diffHelper.hitWindowFor300(od) * 1000) {
+            if (Math.abs(firstHitAccuracy) <= hitWindow.getGreatWindow()) {
                 firstHitScore = 300;
-            } else if (Math.abs(firstHitAccuracy) <= diffHelper.hitWindowFor100(od) * 1000) {
+            } else if (Math.abs(firstHitAccuracy) <= hitWindow.getOkWindow()) {
                 firstHitScore = 100;
             }
         }
@@ -881,16 +883,16 @@ public class GameplaySlider extends GameObject {
     private void onSliderHeadHit(double hitOffset) {
         // Reference: https://github.com/ppy/osu/blob/bca42e9d24f1b8e433f63db8dbf5d36d8b811b36/osu.Game.Rulesets.Osu/Objects/Drawables/SliderInputManager.cs#L78
         // The reference does not fully represent the cases below as they are mixed with replay handling.
-        if (startHit) {
+        var hitWindow = beatmapSlider.getHead().hitWindow;
+
+        if (startHit || hitWindow == null) {
             return;
         }
 
         startHit = true;
         firstHitAccuracy = (int) (hitOffset * 1000);
 
-        float mehWindow = GameHelper.getDifficultyHelper().hitWindowFor50(GameHelper.getOverallDifficulty());
-
-        if (-mehWindow <= hitOffset && hitOffset <= getLateHitThreshold()) {
+        if (-hitWindow.getMehWindow() / 1000 <= hitOffset && hitOffset <= getLateHitThreshold()) {
             listener.registerAccuracy(hitOffset);
             playCurrentNestedObjectHitSound();
             ticksGot++;
@@ -1061,7 +1063,9 @@ public class GameplaySlider extends GameObject {
     }
 
     private float getLateHitThreshold() {
-        return Math.min(GameHelper.getDifficultyHelper().hitWindowFor50(GameHelper.getOverallDifficulty()), (float) duration);
+        var hitWindow = beatmapSlider.getHead().hitWindow;
+
+        return hitWindow != null ? Math.min(hitWindow.getMehWindow() / 1000, (float) duration) : 0;
     }
 
     private double getGameplayPassedTimeMilliseconds() {

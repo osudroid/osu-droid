@@ -1,7 +1,5 @@
 package ru.nsu.ccfit.zuev.osu.game;
 
-import android.graphics.PointF;
-
 import com.edlplan.framework.math.Vec2;
 import com.edlplan.framework.math.line.LinePath;
 import com.rian.osu.beatmap.hitobject.Slider;
@@ -12,8 +10,6 @@ import java.util.Arrays;
 
 import ru.nsu.ccfit.zuev.osu.Constants;
 import ru.nsu.ccfit.zuev.skins.OsuSkin;
-import ru.nsu.ccfit.zuev.osu.Utils;
-import ru.nsu.ccfit.zuev.osu.helper.DifficultyHelper;
 
 public class GameHelper {
     private static float overallDifficulty = 1;
@@ -37,16 +33,6 @@ public class GameHelper {
     private static double currentBeatTime = 0;
     private static boolean samplesMatchPlaybackRate;
     private static int replayVersion;
-
-    private static DifficultyHelper difficultyHelper = DifficultyHelper.StdDifficulty;
-
-    public static DifficultyHelper getDifficultyHelper() {
-        return difficultyHelper;
-    }
-
-    public static void setDifficultyHelper(DifficultyHelper difficultyHelper) {
-        GameHelper.difficultyHelper = difficultyHelper;
-    }
 
     public static float getHealthDrain() {
         return healthDrain;

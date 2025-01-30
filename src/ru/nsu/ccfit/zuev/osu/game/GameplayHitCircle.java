@@ -23,6 +23,7 @@ public class GameplayHitCircle extends GameObject {
     private final RGBColor comboColor = new RGBColor();
     private GameObjectListener listener;
     private Scene scene;
+    private HitCircle beatmapCircle;
     private float radiusSquared;
     private float passedTime;
     private float timePreempt;
@@ -46,6 +47,7 @@ public class GameplayHitCircle extends GameObject {
                      final HitCircle beatmapCircle, final float secPassed,
                      final RGBColor comboColor) {
         // Storing parameters into fields
+        this.beatmapCircle = beatmapCircle;
         replayObjectData = null;
 
         var stackedPosition = beatmapCircle.getGameplayStackedPosition();
@@ -236,16 +238,24 @@ public class GameplayHitCircle extends GameObject {
 
     @Override
     public void update(final float dt) {
+        if (beatmapCircle.hitWindow == null) {
+            // Circle somehow does not have a judgement window - abandon.
+            return;
+        }
+
         // PassedTime < 0 means circle logic is over
         if (passedTime < 0) {
             removeFromScene();
             return;
         }
+
+        float mehWindow = beatmapCircle.hitWindow.getMehWindow() / 1000;
+
         // If we have clicked circle
         if (replayObjectData != null) {
             if (passedTime - timePreempt + dt / 2 > replayObjectData.accuracy / 1000f) {
                 final float acc = Math.abs(replayObjectData.accuracy / 1000f);
-                if (acc <= GameHelper.getDifficultyHelper().hitWindowFor50(GameHelper.getOverallDifficulty())) {
+                if (acc <= mehWindow) {
                     playHitSamples();
                 }
                 listener.registerAccuracy(replayObjectData.accuracy / 1000f);
@@ -262,7 +272,7 @@ public class GameplayHitCircle extends GameObject {
             if (canBeHit(0, frameHitOffset) && isHit()) {
                 float signAcc = passedTime - timePreempt + frameHitOffset;
                 final float acc = Math.abs(signAcc);
-                if (acc <= GameHelper.getDifficultyHelper().hitWindowFor50(GameHelper.getOverallDifficulty())) {
+                if (acc <= mehWindow) {
                     playHitSamples();
                 }
                 listener.registerAccuracy(signAcc);
@@ -305,7 +315,7 @@ public class GameplayHitCircle extends GameObject {
             approachCircle.setAlpha(0);
 
             // If passed too much time, counting it as miss
-            if (passedTime > timePreempt + GameHelper.getDifficultyHelper().hitWindowFor50(GameHelper.getOverallDifficulty())) {
+            if (passedTime > timePreempt + mehWindow) {
                 passedTime = -1;
                 final byte forcedScore = (replayObjectData == null) ? 0 : replayObjectData.result;
 
@@ -317,6 +327,10 @@ public class GameplayHitCircle extends GameObject {
 
     @Override
     public void tryHit(final float dt) {
+        if (beatmapCircle.hitWindow == null) {
+            return;
+        }
+
         float frameHitOffset = (float) hitOffsetToPreviousFrame() / 1000;
 
         if (canBeHit(dt, frameHitOffset) && isHit()) {
@@ -325,7 +339,7 @@ public class GameplayHitCircle extends GameObject {
             // Therefore, we subtract dt to get the object's state in the previous tick.
             float signAcc = passedTime - timePreempt - dt + frameHitOffset;
             final float acc = Math.abs(signAcc);
-            if (acc <= GameHelper.getDifficultyHelper().hitWindowFor50(GameHelper.getOverallDifficulty())) {
+            if (acc <= beatmapCircle.hitWindow.getMehWindow() / 1000) {
                 playHitSamples();
             }
             listener.registerAccuracy(signAcc);
