@@ -122,12 +122,6 @@ class DroidDifficultyCalculator : DifficultyCalculator<DroidPlayableBeatmap, Dro
         }
 
         val clockRate = beatmap.overallSpeedMultiplier.toDouble()
-
-        val greatWindow = (
-            if (beatmap.mods?.any { it is ModPrecise } == true) PreciseDroidHitWindow(beatmap.difficulty.od)
-            else DroidHitWindow(beatmap.difficulty.od)
-        ).greatWindow.toDouble() / clockRate
-
         val objects = beatmap.hitObjects.objects
         val arr = arrayOfNulls<DroidDifficultyHitObject>(objects.size)
 
@@ -140,8 +134,7 @@ class DroidDifficultyCalculator : DifficultyCalculator<DroidPlayableBeatmap, Dro
                 if (i > 1) objects[i - 2] else null,
                 clockRate,
                 arr as Array<DroidDifficultyHitObject>,
-                i - 1,
-                greatWindow
+                i - 1
             ).also { it.computeProperties(clockRate, objects) }
         }
 

@@ -103,8 +103,6 @@ class StandardDifficultyCalculator : DifficultyCalculator<StandardPlayableBeatma
         }
 
         val clockRate = beatmap.overallSpeedMultiplier.toDouble()
-        val greatWindow = StandardHitWindow(beatmap.difficulty.od).greatWindow.toDouble() / clockRate
-
         val objects = beatmap.hitObjects.objects
         val arr = arrayOfNulls<StandardDifficultyHitObject>(objects.size - 1)
 
@@ -117,8 +115,7 @@ class StandardDifficultyCalculator : DifficultyCalculator<StandardPlayableBeatma
                 if (i > 1) objects[i - 2] else null,
                 clockRate,
                 arr as Array<StandardDifficultyHitObject>,
-                i - 1,
-                greatWindow
+                i - 1
             ).also { it.computeProperties(clockRate, objects) }
         }
 
