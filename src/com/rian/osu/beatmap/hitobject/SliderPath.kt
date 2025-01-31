@@ -16,7 +16,7 @@ class SliderPath(
     /**
      * The control points (anchor points) of this [SliderPath].
      */
-    controlPoints: MutableList<Vector2>,
+    controlPoints: List<Vector2>,
 
     /**
      * The distance that is expected when calculating [SliderPath].
@@ -122,7 +122,7 @@ class SliderPath(
 
             if (calculatedLength > expectedDistance) {
                 // The path will be shortened further, in which case we should trim any more unnecessary lengths and their associated path segments
-                while (cumulativeLength.size > 0 && cumulativeLength[cumulativeLength.size - 1] >= expectedDistance) {
+                while (cumulativeLength.isNotEmpty() && cumulativeLength[cumulativeLength.size - 1] >= expectedDistance) {
                     cumulativeLength.removeAt(cumulativeLength.size - 1)
                     calculatedPath.removeAt(pathEndIndex--)
                 }

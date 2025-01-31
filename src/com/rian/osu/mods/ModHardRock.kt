@@ -54,7 +54,7 @@ class ModHardRock : Mod(), IModApplicableToDifficulty, IModApplicableToHitObject
         // Reflect the control points of the slider. This will reflect the positions of head and tail circles.
         hitObject.path = SliderPath(
             hitObject.path.pathType,
-            hitObject.path.controlPoints.map { reflectControlPoint(it) }.toMutableList(),
+            hitObject.path.controlPoints.map { reflectControlPoint(it) },
             hitObject.path.expectedDistance
         )
 
