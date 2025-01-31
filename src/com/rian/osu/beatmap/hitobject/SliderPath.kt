@@ -26,7 +26,7 @@ class SliderPath(
     /**
      * The path type of the [Slider].
      */
-    var pathType: SliderPathType = type
+    var pathType = type
         private set
 
     /**
@@ -72,20 +72,25 @@ class SliderPath(
      */
     private fun calculatePath() {
         calculatedPath.clear()
+
         if (controlPoints.isEmpty()) {
             return
         }
+
         calculatedPath.add(controlPoints[0])
         var spanStart = 0
+
         for (i in controlPoints.indices) {
             if (i == controlPoints.size - 1 || controlPoints[i] == controlPoints[i + 1]) {
                 val spanEnd = i + 1
-                val cpSpan: List<Vector2> = controlPoints.subList(spanStart, spanEnd)
+                val cpSpan = controlPoints.subList(spanStart, spanEnd)
+
                 for (t in calculateSubPath(cpSpan)) {
                     if (calculatedPath.isEmpty() || calculatedPath[calculatedPath.size - 1] != t) {
                         calculatedPath.add(t)
                     }
                 }
+
                 spanStart = spanEnd
             }
         }
