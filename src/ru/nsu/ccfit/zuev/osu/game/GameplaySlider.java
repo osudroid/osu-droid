@@ -221,7 +221,7 @@ public class GameplaySlider extends GameObject {
         }
 
         // End circle
-        pathEndPosition.set(getAbsolutePathPosition(path.pointCount - 1));
+        pathEndPosition.set(getAbsolutePathPosition(path.anchorCount - 1));
 
         tailCirclePiece.setScale(scale);
         tailCirclePiece.setCircleColor(comboColor.r(), comboColor.g(), comboColor.b());
@@ -288,7 +288,7 @@ public class GameplaySlider extends GameObject {
             endArrow.setAlpha(0);
             endArrow.setScale(scale);
 
-            PointF previousPoint = getAbsolutePathPosition(path.pointCount - 2);
+            PointF previousPoint = getAbsolutePathPosition(path.anchorCount - 2);
             endArrow.setRotation(MathUtils.radToDeg(Utils.direction(pathEndPosition.x, pathEndPosition.y, previousPoint.x, previousPoint.y)));
 
             if (Config.isSnakingInSliders()) {
@@ -384,7 +384,7 @@ public class GameplaySlider extends GameObject {
     }
 
     private PointF getPositionAt(final float percentage, final boolean updateBallAngle, final boolean updateEndArrowRotation) {
-        if (path.pointCount < 2) {
+        if (path.anchorCount < 2) {
             tmpPoint.set(position);
             return tmpPoint;
         }
@@ -411,8 +411,8 @@ public class GameplaySlider extends GameObject {
 
         // Directly taken from library-owned SliderPath
         int left = 0;
-        int right = path.lengthCount - 2;
-        float currentLength = percentage * path.getLength(path.lengthCount - 1);
+        int right = path.anchorCount - 2;
+        float currentLength = percentage * path.getLength(path.anchorCount - 1);
 
         while (left <= right) {
             int pivot = left + ((right - left) >> 1);
@@ -806,8 +806,8 @@ public class GameplaySlider extends GameObject {
                         preStageFinish = true;
                     }
 
-                    if (path.pointCount >= 2) {
-                        PointF lastPoint = getAbsolutePathPosition(path.pointCount - 2);
+                    if (path.anchorCount >= 2) {
+                        PointF lastPoint = getAbsolutePathPosition(path.anchorCount - 2);
                         endArrow.setRotation(MathUtils.radToDeg(Utils.direction(pathEndPosition.x, pathEndPosition.y, lastPoint.x, lastPoint.y)));
                     }
 

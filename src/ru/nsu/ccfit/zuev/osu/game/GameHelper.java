@@ -6,7 +6,6 @@ import com.rian.osu.beatmap.hitobject.Slider;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
-import java.util.Arrays;
 
 import ru.nsu.ccfit.zuev.osu.Constants;
 import ru.nsu.ccfit.zuev.skins.OsuSkin;
@@ -59,11 +58,11 @@ public class GameHelper {
     public static LinePath convertSliderPath(final SliderPath sliderPath) {
         var renderPath = new LinePath();
 
-        if (sliderPath.pointCount == 0) {
+        if (sliderPath.anchorCount == 0) {
             return renderPath;
         }
 
-        for (int i = 0; i < sliderPath.pointCount; ++i) {
+        for (int i = 0; i < sliderPath.anchorCount; ++i) {
 
             var x = sliderPath.getX(i);
             var y = sliderPath.getY(i);
@@ -72,7 +71,7 @@ public class GameHelper {
         }
 
         renderPath.measure();
-        renderPath.bufferLength(sliderPath.getLength(sliderPath.lengthCount - 1));
+        renderPath.bufferLength(sliderPath.getLength(sliderPath.anchorCount - 1));
         renderPath = renderPath.fitToLinePath();
         renderPath.measure();
 
@@ -93,16 +92,10 @@ public class GameHelper {
         float realWidthScale = (float) Constants.MAP_ACTUAL_WIDTH / Constants.MAP_WIDTH;
         float realHeightScale = (float) Constants.MAP_ACTUAL_HEIGHT / Constants.MAP_HEIGHT;
 
-        for (var i = 0; i < calculatedPath.size(); i++) {
-
+        for (int i = 0; i < calculatedPath.size(); i++) {
             var p = calculatedPath.get(i);
-            path.setPoint(i, p.x * realWidthScale, p.y * realHeightScale);
 
-            if (i < cumulativeLength.size()) {
-                path.setLength(i, cumulativeLength.get(i).floatValue());
-            } else {
-                path.setLength(i, -1f);
-            }
+            path.set(i, p.x * realWidthScale, p.y * realHeightScale, cumulativeLength.get(i).floatValue());
         }
 
         return path;
@@ -284,35 +277,19 @@ public class GameHelper {
         private static final int offsetY = 1;
         private static final int offsetLength = 2;
 
-        private float[] data;
-
-        public int lengthCount = 0;
-        public int pointCount = 0;
+        private final float[] data;
+        public int anchorCount = 0;
 
         public SliderPath(int anchorPointCount) {
             data = new float[anchorPointCount * strip];
         }
 
-        public void setPoint(int index, float x, float y) {
+        public void set(int index, float x, float y, float length) {
             data[index * strip + offsetX] = x;
             data[index * strip + offsetY] = y;
-            pointCount++;
+            data[index * strip + offsetLength] = length;
+            anchorCount++;
         }
-
-        public void setLength(int index, float length) {
-
-            var targetIndex = index * strip + offsetLength;
-
-            // This condition can be triggered if there's a mismatch between the number of points
-            // and the number of lengths. Should never happen in practice, but it's better to be safe.
-            if (targetIndex >= data.length) {
-                data = Arrays.copyOf(data, data.length + strip);
-            }
-
-            data[targetIndex] = length;
-            lengthCount++;
-        }
-
 
         public float getX(int index) {
             return data[index * strip + offsetX];
