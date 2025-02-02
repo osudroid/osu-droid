@@ -3,6 +3,8 @@ package ru.nsu.ccfit.zuev.osu.game;
 import com.edlplan.framework.math.Vec2;
 import com.edlplan.framework.math.line.LinePath;
 import com.rian.osu.beatmap.hitobject.Slider;
+import com.rian.osu.beatmap.hitobject.SliderPathType;
+import com.rian.osu.utils.PathApproximation;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
@@ -62,17 +64,46 @@ public class GameHelper {
             return renderPath;
         }
 
-        for (int i = 0; i < sliderPath.anchorCount; ++i) {
+        // osu!stable optimizes gameplay path rendering by only including points that are 6 osu!pixels apart.
+        // In linear paths, the distance threshold is further extended to 32 osu!pixels.
+        int distanceThreshold = sliderPath.pathType == SliderPathType.Linear ? 32 : 6;
 
+        // Invert the scale to convert from osu!pixels to screen pixels.
+        var invertedScale = new Vec2(
+        (float) Constants.MAP_WIDTH / Constants.MAP_ACTUAL_WIDTH,
+        (float) Constants.MAP_HEIGHT / Constants.MAP_ACTUAL_HEIGHT
+        );
+
+        // Additional consideration for Catmull sliders that form "bulbs" around points with identical positions.
+        boolean isCatmull = sliderPath.pathType == SliderPathType.Catmull;
+        int catmullSegmentLength = PathApproximation.CATMULL_DETAIL * 2;
+
+        Vec2 lastStart = null;
+
+        for (int i = 0; i < sliderPath.anchorCount; ++i) {
             var x = sliderPath.getX(i);
             var y = sliderPath.getY(i);
+            var vec = new Vec2(x, y);
 
-            renderPath.add(new Vec2(x, y));
+            if (lastStart == null) {
+                renderPath.add(vec);
+                lastStart = vec;
+                continue;
+            }
+
+            float distanceFromStart = vec.copy().minus(lastStart).multiple(invertedScale).length();
+
+            if (distanceFromStart > distanceThreshold || i == sliderPath.anchorCount - 1 ||
+                    (isCatmull && (i + 1) % catmullSegmentLength == 0)) {
+                renderPath.add(vec);
+                lastStart = null;
+            }
         }
 
-        renderPath.measure();
-        renderPath.bufferLength(sliderPath.getLength(sliderPath.anchorCount - 1));
-        renderPath = renderPath.fitToLinePath();
+        // The render path may under-measure the true length of the slider due to the optimization.
+        // Normally, the path would need to be extended to account for the true length of the slider.
+        // However, in this case we simply let it be as the path is still rendered correctly (its points
+        // are still in the correct positions).
         renderPath.measure();
 
         return renderPath;
@@ -86,16 +117,15 @@ public class GameHelper {
     public static SliderPath convertSliderPath(final Slider slider) {
         var calculatedPath = slider.getPath().getCalculatedPath();
         var cumulativeLength = slider.getPath().getCumulativeLength();
+        var path = new SliderPath(slider.getPath().getPathType(), calculatedPath.size());
 
-        var path = new SliderPath(calculatedPath.size());
-
-        float realWidthScale = (float) Constants.MAP_ACTUAL_WIDTH / Constants.MAP_WIDTH;
-        float realHeightScale = (float) Constants.MAP_ACTUAL_HEIGHT / Constants.MAP_HEIGHT;
+        float widthScale = (float) Constants.MAP_ACTUAL_WIDTH / Constants.MAP_WIDTH;
+        float heightScale = (float) Constants.MAP_ACTUAL_HEIGHT / Constants.MAP_HEIGHT;
 
         for (int i = 0; i < calculatedPath.size(); i++) {
             var p = calculatedPath.get(i);
 
-            path.set(i, p.x * realWidthScale, p.y * realHeightScale, cumulativeLength.get(i).floatValue());
+            path.set(i, p.x * widthScale, p.y * heightScale, cumulativeLength.get(i).floatValue());
         }
 
         return path;
@@ -278,9 +308,12 @@ public class GameHelper {
         private static final int offsetLength = 2;
 
         private final float[] data;
+
+        public final SliderPathType pathType;
         public int anchorCount = 0;
 
-        public SliderPath(int anchorPointCount) {
+        public SliderPath(SliderPathType pathType, int anchorPointCount) {
+            this.pathType = pathType;
             data = new float[anchorPointCount * strip];
         }
 
