@@ -379,13 +379,12 @@ class Slider(
         val maxLength = 100000.0
         val length = min(maxLength, path.expectedDistance)
         val tickDistance = tickDistance.coerceIn(0.0, length)
+        val minDistanceFromEnd = velocity * 10
 
-        if (tickDistance != 0.0 && generateTicks) {
-            val minDistanceFromEnd = velocity * 10
+        for (span in 0 until spanCount) {
+            scope?.ensureActive()
 
-            for (span in 0 until spanCount) {
-                scope?.ensureActive()
-
+            if (tickDistance != 0.0) {
                 val spanStartTime = startTime + span * spanDuration
                 val reversed = span % 2 == 1
                 val sliderTicks = mutableListOf<SliderTick>()
@@ -422,10 +421,10 @@ class Slider(
                 }
 
                 nestedHitObjects.addAll(sliderTicks)
+            }
 
-                if (span < spanCount - 1) {
-                    nestedHitObjects.add(SliderRepeat(this, span))
-                }
+            if (span < spanCount - 1) {
+                nestedHitObjects.add(SliderRepeat(this, span))
             }
         }
 
