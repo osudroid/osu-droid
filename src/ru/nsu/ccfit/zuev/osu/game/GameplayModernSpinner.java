@@ -82,7 +82,7 @@ public class GameplayModernSpinner extends GameplaySpinner {
         this.beatmapSpinner = beatmapSpinner;
         this.listener = listener;
         this.stat = stat;
-        duration = (float) beatmapSpinner.getDuration() / 1000f;
+        duration = Math.max((float) beatmapSpinner.getDuration() / 1000f, 0);
         needRotations = rps * duration;
 
         if (duration < 0.05f) {

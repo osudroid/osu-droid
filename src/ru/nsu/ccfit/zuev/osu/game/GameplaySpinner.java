@@ -107,7 +107,7 @@ public class GameplaySpinner extends GameObject {
         fullRotations = 0;
         rotations = 0;
         this.scene = scene;
-        this.duration = (float) beatmapSpinner.getDuration() / 1000f;
+        this.duration = Math.max((float) beatmapSpinner.getDuration() / 1000f, 0);
         this.beatmapSpinner = beatmapSpinner;
 
         needRotations = rps * duration;
