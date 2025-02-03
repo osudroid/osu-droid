@@ -1,5 +1,7 @@
 package ru.nsu.ccfit.zuev.osu;
 
+import static android.view.ViewGroup.LayoutParams.MATCH_PARENT;
+
 import android.Manifest;
 import android.annotation.SuppressLint;
 import android.content.ComponentName;
@@ -31,6 +33,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.FrameLayout;
 import android.widget.RelativeLayout;
+import android.widget.RelativeLayout.LayoutParams;
 import android.widget.Toast;
 
 import androidx.core.app.NotificationManagerCompat;
@@ -366,26 +369,21 @@ public class MainActivity extends BaseGameActivity implements
         this.mRenderSurfaceView.getHolder().setFormat(PixelFormat.RGBA_8888);
         this.mRenderSurfaceView.setRenderer(this.mEngine);
 
-        RelativeLayout layout = new RelativeLayout(this);
-        layout.setBackgroundColor(Color.BLACK);
-        layout.addView(
-                mRenderSurfaceView,
-                new RelativeLayout.LayoutParams(
-                        ViewGroup.LayoutParams.MATCH_PARENT,
-                        ViewGroup.LayoutParams.MATCH_PARENT) {{
-                    addRule(RelativeLayout.CENTER_IN_PARENT);
-                }});
+        RelativeLayout mainLayout = new RelativeLayout(this);
+        mainLayout.setBackgroundColor(Color.BLACK);
+        mainLayout.addView(mRenderSurfaceView, new LayoutParams(MATCH_PARENT, MATCH_PARENT));
 
         FrameLayout frameLayout = new FrameLayout(this);
         frameLayout.setId(View.generateViewId());
-        layout.addView(frameLayout, new RelativeLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT));
 
-        this.setContentView(
-                layout,
-                new FrameLayout.LayoutParams(FrameLayout.LayoutParams.MATCH_PARENT, FrameLayout.LayoutParams.MATCH_PARENT) {{
-                    gravity = Gravity.CENTER;
-                }});
+        mainLayout.addView(frameLayout, new LayoutParams(MATCH_PARENT, MATCH_PARENT));
 
+        // Adding a dummy View somehow fixes an issue with Android layout system where the layouts
+        // in the frame layout (where fragments are attached, see ActivityOverlay) are not properly
+        // displayed on the screen.
+        mainLayout.addView(new View(this), new LayoutParams(MATCH_PARENT, MATCH_PARENT));
+
+        setContentView(mainLayout, new FrameLayout.LayoutParams(MATCH_PARENT, MATCH_PARENT));
         ActivityOverlay.initial(this, frameLayout.getId());
     }
 
