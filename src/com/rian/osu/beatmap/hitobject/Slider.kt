@@ -452,7 +452,12 @@ class Slider(
 
         nestedHitObjects.apply {
             add(tail)
-            sortBy { it.startTime }
+
+            sortBy {
+                scope?.ensureActive()
+
+                it.startTime
+            }
         }
 
         updateNestedSamples(controlPoints, scope)
