@@ -57,7 +57,7 @@ public class GameplaySpinner extends GameObject {
 
     public GameplaySpinner() {
         ResourceManager.getInstance().checkSpinnerTextures();
-        position = new PointF(Constants.MAP_WIDTH / 2f, Constants.MAP_HEIGHT / 2f);
+        position.set(Constants.MAP_WIDTH / 2f, Constants.MAP_HEIGHT / 2f);
         center = Utils.trackToRealCoords(position);
 
         background = new ExtendedSprite();

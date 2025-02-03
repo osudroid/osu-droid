@@ -45,7 +45,8 @@ public class GameplayModernSpinner extends GameplaySpinner {
 
     public GameplayModernSpinner() {
         ResourceManager.getInstance().checkEvoSpinnerTextures();
-        center = Utils.trackToRealCoords(new PointF((float) Constants.MAP_WIDTH / 2, (float) Constants.MAP_HEIGHT / 2));
+        position.set(Constants.MAP_WIDTH / 2f, Constants.MAP_HEIGHT / 2f);
+        center = Utils.trackToRealCoords(position);
 
         middle = new ExtendedSprite();
         middle.setOrigin(Anchor.Center);
