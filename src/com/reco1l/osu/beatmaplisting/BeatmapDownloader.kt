@@ -123,7 +123,7 @@ object BeatmapDownloader : IFileRequestObserver {
 
     override fun onDownloadUpdate(downloader: FileRequest) {
 
-        val info = "\n%.3f kb/s (%d%%)".format(downloader.speedKbps / 1024, downloader.progress.toInt())
+        val info = "\n%.3f mb/s (%d%%)".format(downloader.speedKbps / 1024, downloader.progress.toInt())
 
         mainThread {
             fragment.text.text = context.getString(string.beatmap_downloader_downloading).format(
