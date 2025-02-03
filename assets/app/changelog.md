@@ -26,3 +26,4 @@ Version 1.8.2
 - Fixed in-game updater no longer working if the last downloaded update failed to install
 - Fixed slider ticks potentially being judged incorrectly in replay
 - Fixed ScoreV2 combo portion calculation applying `n+1` combo rather than `n` combo
+- Fixed slider repeats not generating when slider tick generation is disabled
