@@ -41,8 +41,10 @@ import com.reco1l.osu.multiplayer.RoomScene;
 
 import com.rian.osu.GameMode;
 import com.rian.osu.beatmap.Beatmap;
+import com.rian.osu.beatmap.DroidHitWindow;
 import com.rian.osu.beatmap.DroidPlayableBeatmap;
 import com.rian.osu.beatmap.HitWindow;
+import com.rian.osu.beatmap.PreciseDroidHitWindow;
 import com.rian.osu.beatmap.constants.BeatmapCountdown;
 import com.rian.osu.beatmap.hitobject.HitCircle;
 import com.rian.osu.beatmap.hitobject.HitObject;
@@ -833,9 +835,9 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
         comboWasMissed = false;
         previousFrameTime = 0;
 
-        var firstObject = Objects.requireNonNull(objects.peek());
-        hitWindow = (firstObject instanceof Slider slider ? slider.getHead() : firstObject).hitWindow;
-        firstObjectStartTime = (float) firstObject.startTime / 1000;
+        float od = parsedBeatmap.getDifficulty().od;
+        hitWindow = stat.getMod().contains(GameMod.MOD_PRECISE) ? new PreciseDroidHitWindow(od) : new DroidHitWindow(od);
+        firstObjectStartTime = (float) objects.peek().startTime / 1000;
         lastObjectEndTime = (float) objects.getLast().getEndTime() / 1000;
 
         float skipTargetTime = firstObjectStartTime - Math.max(2f, objectTimePreempt);
