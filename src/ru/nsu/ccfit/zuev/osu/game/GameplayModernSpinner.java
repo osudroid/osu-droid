@@ -2,7 +2,6 @@ package ru.nsu.ccfit.zuev.osu.game;
 
 import android.graphics.PointF;
 
-import com.reco1l.osu.Execution;
 import com.reco1l.andengine.sprite.ExtendedSprite;
 import com.reco1l.andengine.Modifiers;
 import com.reco1l.andengine.Anchor;
@@ -21,59 +20,43 @@ import ru.nsu.ccfit.zuev.osu.scoring.StatisticV2;
  * Created by dgsrz on 15/10/19.
  */
 public class GameplayModernSpinner extends GameplaySpinner {
-
     private final ExtendedSprite middle;
     private final ExtendedSprite middle2;
     private final ExtendedSprite bottom;
     private final ExtendedSprite top;
     private final ExtendedSprite glow;
-    private final ScoreNumber bonusScore;
-
-    private Scene scene;
-    public PointF center;
-    private float needRotations;
-    private int fullRotations = 0;
-    private float rotations = 0;
-    private boolean clear;
-    private int score = 1;
-    private StatisticV2 stat;
-    private PointF oldMouse;
-    private float duration;
-    private boolean spinnable;
-
-    private final PointF currMouse = new PointF();
 
     public GameplayModernSpinner() {
         ResourceManager.getInstance().checkEvoSpinnerTextures();
         position.set(Constants.MAP_WIDTH / 2f, Constants.MAP_HEIGHT / 2f);
-        center = Utils.trackToRealCoords(position);
+        Utils.trackToRealCoords(position);
 
         middle = new ExtendedSprite();
         middle.setOrigin(Anchor.Center);
-        middle.setPosition(center.x, center.y);
+        middle.setPosition(position.x, position.y);
         middle.setTextureRegion(ResourceManager.getInstance().getTexture("spinner-middle"));
 
         middle2 = new ExtendedSprite();
         middle2.setOrigin(Anchor.Center);
-        middle2.setPosition(center.x, center.y);
+        middle2.setPosition(position.x, position.y);
         middle2.setTextureRegion(ResourceManager.getInstance().getTexture("spinner-middle2"));
 
         bottom = new ExtendedSprite();
         bottom.setOrigin(Anchor.Center);
-        bottom.setPosition(center.x, center.y);
+        bottom.setPosition(position.x, position.y);
         bottom.setTextureRegion(ResourceManager.getInstance().getTexture("spinner-bottom"));
 
         top = new ExtendedSprite();
         top.setOrigin(Anchor.Center);
-        top.setPosition(center.x, center.y);
+        top.setPosition(position.x, position.y);
         top.setTextureRegion(ResourceManager.getInstance().getTexture("spinner-top"));
 
         glow = new ExtendedSprite();
         glow.setOrigin(Anchor.Center);
-        glow.setPosition(center.x, center.y);
+        glow.setPosition(position.x, position.y);
         glow.setTextureRegion(ResourceManager.getInstance().getTexture("spinner-glow"));
 
-        bonusScore = new ScoreNumber(center.x, center.y + 100, "", 1.1f, true);
+        bonusScore = new ScoreNumber(position.x, position.y + 100, "", 1.1f, true);
 
         // Spinners always end combo.
         endsCombo = true;
@@ -96,7 +79,9 @@ public class GameplayModernSpinner extends GameplaySpinner {
         clear = duration <= 0f;
         fullRotations = 0;
         rotations = 0;
-        spinnable = false;
+
+        float timePreempt = (float) beatmapSpinner.timePreempt / 1000f;
+        passedTime = -timePreempt;
 
         reloadHitSounds();
 
@@ -122,15 +107,7 @@ public class GameplayModernSpinner extends GameplaySpinner {
         scene.attachChild(middle);
         scene.attachChild(middle2);
 
-        float timePreempt = (float) beatmapSpinner.timePreempt / 1000f;
-
-        top.registerEntityModifier(Modifiers.sequence(
-            Modifiers.fadeIn(timePreempt, e -> {
-                    spinnable = true;
-            }),
-            Modifiers.delay(duration, e -> Execution.updateThread(this::removeFromScene))
-        ));
-
+        top.registerEntityModifier(Modifiers.fadeIn(timePreempt));
         bottom.registerEntityModifier(Modifiers.fadeIn(timePreempt));
         middle.registerEntityModifier(Modifiers.fadeIn(timePreempt));
         middle2.registerEntityModifier(Modifiers.fadeIn(timePreempt));
@@ -138,8 +115,10 @@ public class GameplayModernSpinner extends GameplaySpinner {
 
     @Override
     public void update(float dt) {
-        // Allow the spinner to fully fade in first before receiving spins.
-        if (!spinnable) {
+        passedTime += dt;
+
+        // Spinner is still in approach time.
+        if (passedTime < 0) {
             return;
         }
 
@@ -149,13 +128,13 @@ public class GameplayModernSpinner extends GameplaySpinner {
         for (int i = 0, count = listener.getCursorsCount(); i < count; ++i) {
             if (mouse == null) {
                 if (autoPlay) {
-                    mouse = center;
+                    mouse = position;
                 } else if (listener.isMouseDown(i)) {
                     mouse = listener.getMousePos(i);
                 } else {
                     continue;
                 }
-                currMouse.set(mouse.x - center.x, mouse.y - center.y);
+                currMouse.set(mouse.x - position.x, mouse.y - position.y);
             }
 
             if (oldMouse == null || listener.isMousePressed(this, i)) {
@@ -187,8 +166,8 @@ public class GameplayModernSpinner extends GameplaySpinner {
             top.setRotation(degree);
             //auto时，FL光圈绕中心旋转
             if (GameHelper.isAutopilotMod() || GameHelper.isAuto()) {
-                float pX = center.x + 50 * (float) Math.sin(degree);
-                float pY = center.y + 50 * (float) Math.cos(degree);
+                float pX = position.x + 50 * (float) Math.sin(degree);
+                float pY = position.y + 50 * (float) Math.cos(degree);
                 listener.updateAutoBasedPos(pX, pY);
             }
             // bottom.setRotation(-degree);
@@ -253,8 +232,13 @@ public class GameplayModernSpinner extends GameplaySpinner {
         }
 
         oldMouse.set(currMouse);
+
+        if (passedTime >= duration) {
+            removeFromScene();
+        }
     }
 
+    @Override
     public void removeFromScene() {
         glow.clearEntityModifiers();
         scene.detachChild(middle);
