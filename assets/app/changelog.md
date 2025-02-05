@@ -13,9 +13,9 @@ Version 1.8.2
 - Make unranked text in gameplay not persist permanently <span style="font-size: 0.75em">by [Rian8337](https://github.com/Rian8337)</span>
 - Matched slider snaking in speed with osu!stable <span style="font-size: 0.75em">by [Rian8337](https://github.com/Rian8337)</span>
 - Updated osu!droid and osu!standard difficulty and performance calculations to match upcoming changes <span style="font-size: 0.75em">by [Rian8337](https://github.com/Rian8337)</span>
+  - This change does not trigger a recalculation of all beatmaps in your library. A triggered recalculation will be done in the next update.
 - Only render slider path points that are further apart by a certain distance <span style="font-size: 0.75em">by [Rian8337](https://github.com/Rian8337)</span>
-  - Improves memory usage and performance during gameplay, especially in complex Bézier sliders, without
-    sacrificing important details.
+  - Improves memory usage and performance during gameplay, especially in complex Bézier sliders, without sacrificing important details.
 
 # Bug Fixes
 
@@ -29,3 +29,4 @@ Version 1.8.2
 - Fixed slider repeats not generating when slider tick generation is disabled <span style="font-size: 0.75em">by [Rian8337](https://github.com/Rian8337)</span>
 - Fixed negative duration spinners persisting indefinitely <span style="font-size: 0.75em">by [Rian8337](https://github.com/Rian8337)</span>
 - Fixed wrong download speed unit in beatmap downloader <span style="font-size: 0.75em">by [SweetIceLolly](https://github.com/SweetIceLolly)</span>
+- Fixed OpenGL stack underflow when exiting gameplay <span style="font-size: 0.75em">by [ammarasyad](https://github.com/ammarasyad)</span>
