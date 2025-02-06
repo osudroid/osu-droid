@@ -30,3 +30,8 @@ Version 1.8.2
 - Fixed negative duration spinners persisting indefinitely <span style="font-size: 0.75em">by [Rian8337](https://github.com/Rian8337)</span>
 - Fixed wrong download speed unit in beatmap downloader <span style="font-size: 0.75em">by [SweetIceLolly](https://github.com/SweetIceLolly)</span>
 - Fixed OpenGL stack underflow when exiting gameplay <span style="font-size: 0.75em">by [ammarasyad](https://github.com/ammarasyad)</span>
+- Fixed slider heads not being "ignored" in replays from before version 1.8 <span style="font-size: 0.75em">by [Rian8337](https://github.com/Rian8337)</span>
+  - In replays before version 1.8, the slider head is considered to *not* exist when the hit is late. It is a very weird
+    behavior, but that's what actually happened.
+- Fixed a few cases where replay data is not used when judging slider heads in replays <span style="font-size: 0.75em">by [Rian8337](https://github.com/Rian8337)</span>
+  - This caused combo and (potentially) accuracy to not match with a replay's results when it is played back.
