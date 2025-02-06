@@ -240,12 +240,21 @@ public class GameplayModernSpinner extends GameplaySpinner {
 
     @Override
     public void removeFromScene() {
-        glow.clearEntityModifiers();
+        middle.clearEntityModifiers();
         scene.detachChild(middle);
+
+        middle2.clearEntityModifiers();
         scene.detachChild(middle2);
+
+        bottom.clearEntityModifiers();
         scene.detachChild(bottom);
+
+        top.clearEntityModifiers();
         scene.detachChild(top);
+
+        glow.clearEntityModifiers();
         scene.detachChild(glow);
+
         scene.detachChild(bonusScore);
 
         listener.removeObject(GameplayModernSpinner.this);

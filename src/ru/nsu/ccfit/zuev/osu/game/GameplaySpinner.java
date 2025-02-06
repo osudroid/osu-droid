@@ -181,12 +181,25 @@ public class GameplaySpinner extends GameObject {
     }
 
     void removeFromScene() {
+        clearText.clearEntityModifiers();
         scene.detachChild(clearText);
+
+        spinText.clearEntityModifiers();
         scene.detachChild(spinText);
+
+        background.clearEntityModifiers();
         scene.detachChild(background);
+
+        approachCircle.clearEntityModifiers();
         approachCircle.detachSelf();
+
+        circle.clearEntityModifiers();
         scene.detachChild(circle);
+
+        metre.clearEntityModifiers();
         scene.detachChild(metre);
+
+
         scene.detachChild(bonusScore);
 
         listener.removeObject(GameplaySpinner.this);
