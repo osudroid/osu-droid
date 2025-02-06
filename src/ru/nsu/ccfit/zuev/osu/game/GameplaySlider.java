@@ -30,6 +30,7 @@ import ru.nsu.ccfit.zuev.osu.RGBColor;
 import ru.nsu.ccfit.zuev.osu.ResourceManager;
 import ru.nsu.ccfit.zuev.osu.Utils;
 import ru.nsu.ccfit.zuev.osu.game.GameHelper.SliderPath;
+import ru.nsu.ccfit.zuev.osu.scoring.ResultType;
 import ru.nsu.ccfit.zuev.skins.OsuSkin;
 
 import java.util.BitSet;
@@ -629,31 +630,41 @@ public class GameplaySlider extends GameObject {
         }
 
         // Calculating score
-        int firstHitScore = 0;
-        if (GameHelper.isScoreV2()) {
-            // If ScoreV2 is active, the accuracy of hitting the slider head is additionally accounted for when judging the entire slider:
-            // Getting a 300 for a slider requires getting a 300 judgement for the slider head.
-            // Getting a 100 for a slider requires getting a 100 judgement or better for the slider head.
-            if (Math.abs(firstHitAccuracy) <= hitWindow.getGreatWindow()) {
-                firstHitScore = 300;
-            } else if (Math.abs(firstHitAccuracy) <= hitWindow.getOkWindow()) {
-                firstHitScore = 100;
-            }
-        }
-
-        int totalTicks = beatmapSlider.getNestedHitObjects().size();
         int score = 0;
 
-        if (ticksGot > 0) {
-            score = 50;
-        }
+        if (replayObjectData == null) {
+            int firstHitScore = 0;
 
-        if (ticksGot >= totalTicks / 2 && (!GameHelper.isScoreV2() || firstHitScore >= 100)) {
-            score = 100;
-        }
+            if (GameHelper.isScoreV2()) {
+                // If ScoreV2 is active, the accuracy of hitting the slider head is additionally accounted for when judging the entire slider:
+                // Getting a 300 for a slider requires getting a 300 judgement for the slider head.
+                // Getting a 100 for a slider requires getting a 100 judgement or better for the slider head.
+                if (Math.abs(firstHitAccuracy) <= hitWindow.getGreatWindow()) {
+                    firstHitScore = 300;
+                } else if (Math.abs(firstHitAccuracy) <= hitWindow.getOkWindow()) {
+                    firstHitScore = 100;
+                }
+            }
 
-        if (ticksGot >= totalTicks && (!GameHelper.isScoreV2() || firstHitScore == 300)) {
+            int totalTicks = beatmapSlider.getNestedHitObjects().size();
+
+            if (ticksGot > 0) {
+                score = 50;
+            }
+
+            if (ticksGot >= totalTicks / 2 && (!GameHelper.isScoreV2() || firstHitScore >= 100)) {
+                score = 100;
+            }
+
+            if (ticksGot >= totalTicks && (!GameHelper.isScoreV2() || firstHitScore == 300)) {
+                score = 300;
+            }
+        } else if (replayObjectData.result == ResultType.HIT300.getId()) {
             score = 300;
+        } else if (replayObjectData.result == ResultType.HIT100.getId()) {
+            score = 100;
+        } else if (replayObjectData.result == ResultType.HIT50.getId()) {
+            score = 50;
         }
 
         // In replays older than version 6, slider ends always give combo even when not being tracked.
