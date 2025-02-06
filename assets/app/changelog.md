@@ -16,6 +16,8 @@ Version 1.8.2
   - This change does not trigger a recalculation of all beatmaps in your library. A triggered recalculation will be done in the next update.
 - Only render slider path points that are further apart by a certain distance <span style="font-size: 0.75em">by [Rian8337](https://github.com/Rian8337)</span>
   - Improves memory usage and performance during gameplay, especially in complex Bézier sliders, without sacrificing important details.
+- Update Language Pack to 1.0.11
+  - Spanish Translation <span style="font-size: 0.75em">by [Aldair69](https://github.com/Aldair69)</span> <span style="font-size: 0.75em">by [75efb6](https://github.com/75efb6)</span>
 
 # Bug Fixes
 
