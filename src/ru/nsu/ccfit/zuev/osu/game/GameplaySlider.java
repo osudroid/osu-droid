@@ -30,6 +30,7 @@ import ru.nsu.ccfit.zuev.osu.RGBColor;
 import ru.nsu.ccfit.zuev.osu.ResourceManager;
 import ru.nsu.ccfit.zuev.osu.Utils;
 import ru.nsu.ccfit.zuev.osu.game.GameHelper.SliderPath;
+import ru.nsu.ccfit.zuev.osu.scoring.ResultType;
 import ru.nsu.ccfit.zuev.skins.OsuSkin;
 
 import java.util.BitSet;
@@ -629,31 +630,41 @@ public class GameplaySlider extends GameObject {
         }
 
         // Calculating score
-        int firstHitScore = 0;
-        if (GameHelper.isScoreV2()) {
-            // If ScoreV2 is active, the accuracy of hitting the slider head is additionally accounted for when judging the entire slider:
-            // Getting a 300 for a slider requires getting a 300 judgement for the slider head.
-            // Getting a 100 for a slider requires getting a 100 judgement or better for the slider head.
-            if (Math.abs(firstHitAccuracy) <= hitWindow.getGreatWindow()) {
-                firstHitScore = 300;
-            } else if (Math.abs(firstHitAccuracy) <= hitWindow.getOkWindow()) {
-                firstHitScore = 100;
-            }
-        }
-
-        int totalTicks = beatmapSlider.getNestedHitObjects().size();
         int score = 0;
 
-        if (ticksGot > 0) {
-            score = 50;
-        }
+        if (replayObjectData == null) {
+            int firstHitScore = 0;
 
-        if (ticksGot >= totalTicks / 2 && (!GameHelper.isScoreV2() || firstHitScore >= 100)) {
-            score = 100;
-        }
+            if (GameHelper.isScoreV2()) {
+                // If ScoreV2 is active, the accuracy of hitting the slider head is additionally accounted for when judging the entire slider:
+                // Getting a 300 for a slider requires getting a 300 judgement for the slider head.
+                // Getting a 100 for a slider requires getting a 100 judgement or better for the slider head.
+                if (Math.abs(firstHitAccuracy) <= hitWindow.getGreatWindow()) {
+                    firstHitScore = 300;
+                } else if (Math.abs(firstHitAccuracy) <= hitWindow.getOkWindow()) {
+                    firstHitScore = 100;
+                }
+            }
 
-        if (ticksGot >= totalTicks && (!GameHelper.isScoreV2() || firstHitScore == 300)) {
+            int totalTicks = beatmapSlider.getNestedHitObjects().size();
+
+            if (ticksGot > 0) {
+                score = 50;
+            }
+
+            if (ticksGot >= totalTicks / 2 && (!GameHelper.isScoreV2() || firstHitScore >= 100)) {
+                score = 100;
+            }
+
+            if (ticksGot >= totalTicks && (!GameHelper.isScoreV2() || firstHitScore == 300)) {
+                score = 300;
+            }
+        } else if (replayObjectData.result == ResultType.HIT300.getId()) {
             score = 300;
+        } else if (replayObjectData.result == ResultType.HIT100.getId()) {
+            score = 100;
+        } else if (replayObjectData.result == ResultType.HIT50.getId()) {
+            score = 50;
         }
 
         // In replays older than version 6, slider ends always give combo even when not being tracked.
@@ -889,17 +900,29 @@ public class GameplaySlider extends GameObject {
         }
 
         startHit = true;
-        firstHitAccuracy = (int) (hitOffset * 1000);
 
-        if (-hitWindow.getMehWindow() / 1000 <= hitOffset && hitOffset <= getLateHitThreshold()) {
+        // Override hit offset with replay data when available.
+        firstHitAccuracy = replayObjectData != null ? replayObjectData.accuracy : (int) (hitOffset * 1000);
+
+        if (replayObjectData == null || GameHelper.getReplayVersion() >= 6) {
+            if (-hitWindow.getMehWindow() / 1000 <= hitOffset && hitOffset <= getLateHitThreshold()) {
+                listener.registerAccuracy(hitOffset);
+                playCurrentNestedObjectHitSound();
+                ticksGot++;
+                listener.onSliderHit(id, 30, position,
+                        false, bodyColor, GameObjectListener.SLIDER_START, true);
+            } else {
+                listener.onSliderHit(id, -1, position,
+                        false, bodyColor, GameObjectListener.SLIDER_START, false);
+            }
+        } else if (hitOffset <= getLateHitThreshold()) {
+            // In replays older than version 6, the slider head is considered to *not* exist when the hit is late.
+            // It is a very weird behavior, but that's what it actually was...
             listener.registerAccuracy(hitOffset);
             playCurrentNestedObjectHitSound();
             ticksGot++;
             listener.onSliderHit(id, 30, position,
                     false, bodyColor, GameObjectListener.SLIDER_START, true);
-        } else {
-            listener.onSliderHit(id, -1, position,
-                    false, bodyColor, GameObjectListener.SLIDER_START, false);
         }
 
         currentNestedObjectIndex++;
