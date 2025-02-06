@@ -496,7 +496,7 @@ public class MainScene implements IUpdateHandler {
 
         BannerSprite sprite = BannerLoader.loadBannerSprite();
         if (sprite != null) {
-            sprite.setPosition(Config.getRES_WIDTH() - 10f, Config.getRES_HEIGHT() - 10f);
+            sprite.setPosition(Config.getRES_WIDTH(), Config.getRES_HEIGHT());
             sprite.setOrigin(Anchor.BottomRight);
             scene.attachChild(sprite);
             scene.registerTouchArea(sprite);
