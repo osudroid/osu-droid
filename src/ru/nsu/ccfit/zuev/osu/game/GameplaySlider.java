@@ -900,7 +900,9 @@ public class GameplaySlider extends GameObject {
         }
 
         startHit = true;
-        firstHitAccuracy = (int) (hitOffset * 1000);
+
+        // Override hit offset with replay data when available.
+        firstHitAccuracy = replayObjectData != null ? replayObjectData.accuracy : (int) (hitOffset * 1000);
 
         if (replayObjectData == null || GameHelper.getReplayVersion() >= 6) {
             if (-hitWindow.getMehWindow() / 1000 <= hitOffset && hitOffset <= getLateHitThreshold()) {
