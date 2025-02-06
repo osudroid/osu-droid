@@ -88,28 +88,30 @@ class BannerSprite(private val banners: List<Banner>) : ExtendedSprite() {
 
     init {
         textureRegion = banners[currentBannerIndex].image
-        alpha = 0f
-        fadeIn(0.75f)
+        if (banners.size > 1) {
+            alpha = 0f
+            fadeIn(0.75f)
+        }
     }
 
 
     override fun onManagedUpdate(pSecondsElapsed: Float) {
+        if (banners.size > 1) {
+            if (elapsedTimeSinceLastChange > BANNER_DURATION) {
+                elapsedTimeSinceLastChange %= BANNER_DURATION
 
-        if (elapsedTimeSinceLastChange > BANNER_DURATION) {
-            elapsedTimeSinceLastChange %= BANNER_DURATION
+                currentBannerIndex++
+                currentBannerIndex %= banners.size
 
-            currentBannerIndex++
-            currentBannerIndex %= banners.size
+                val banner = banners[currentBannerIndex]
 
-            val banner = banners[currentBannerIndex]
-
-            fadeOut(0.5f).then {
-                textureRegion = banner.image
-                fadeIn(0.5f)
+                fadeOut(0.5f).then {
+                    textureRegion = banner.image
+                    fadeIn(0.5f)
+                }
             }
+            elapsedTimeSinceLastChange += pSecondsElapsed
         }
-        elapsedTimeSinceLastChange += pSecondsElapsed
-
         super.onManagedUpdate(pSecondsElapsed)
     }
 
