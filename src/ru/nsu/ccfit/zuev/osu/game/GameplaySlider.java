@@ -891,15 +891,25 @@ public class GameplaySlider extends GameObject {
         startHit = true;
         firstHitAccuracy = (int) (hitOffset * 1000);
 
-        if (-hitWindow.getMehWindow() / 1000 <= hitOffset && hitOffset <= getLateHitThreshold()) {
+        if (replayObjectData == null || GameHelper.getReplayVersion() >= 6) {
+            if (-hitWindow.getMehWindow() / 1000 <= hitOffset && hitOffset <= getLateHitThreshold()) {
+                listener.registerAccuracy(hitOffset);
+                playCurrentNestedObjectHitSound();
+                ticksGot++;
+                listener.onSliderHit(id, 30, position,
+                        false, bodyColor, GameObjectListener.SLIDER_START, true);
+            } else {
+                listener.onSliderHit(id, -1, position,
+                        false, bodyColor, GameObjectListener.SLIDER_START, false);
+            }
+        } else if (hitOffset <= getLateHitThreshold()) {
+            // In replays older than version 6, the slider head is considered to *not* exist when the hit is late.
+            // It is a very weird behavior, but that's what it actually was...
             listener.registerAccuracy(hitOffset);
             playCurrentNestedObjectHitSound();
             ticksGot++;
             listener.onSliderHit(id, 30, position,
                     false, bodyColor, GameObjectListener.SLIDER_START, true);
-        } else {
-            listener.onSliderHit(id, -1, position,
-                    false, bodyColor, GameObjectListener.SLIDER_START, false);
         }
 
         currentNestedObjectIndex++;
