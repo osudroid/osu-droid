@@ -386,7 +386,7 @@ public class GameplaySpinner extends GameObject {
 
         for (int i = 0, size = beatmapSpinner.getAuxiliarySamples().size(); i < size; ++i) {
             if (spinnerSpinSample.isInitialized() && spinnerBonusSample.isInitialized()) {
-                return;
+                break;
             }
 
             var auxiliarySample = beatmapSpinner.getAuxiliarySamples().get(i);
