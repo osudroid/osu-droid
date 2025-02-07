@@ -63,8 +63,8 @@ public class GameplayModernSpinner extends GameplaySpinner {
     }
 
     @Override
-    public void init(final GameObjectListener listener, final Scene scene,
-                     final Spinner beatmapSpinner, final float rps, final StatisticV2 stat) {
+    public void init(final GameObjectListener listener, final Scene scene, final Spinner beatmapSpinner,
+                     final float secPassed, final float rps, final StatisticV2 stat) {
         this.scene = scene;
         this.beatmapSpinner = beatmapSpinner;
         this.listener = listener;
@@ -79,9 +79,7 @@ public class GameplayModernSpinner extends GameplaySpinner {
         clear = duration <= 0f;
         fullRotations = 0;
         rotations = 0;
-
-        float timePreempt = (float) beatmapSpinner.timePreempt / 1000f;
-        passedTime = -timePreempt;
+        passedTime = secPassed - (float) beatmapSpinner.startTime / 1000;
 
         reloadHitSounds();
 
@@ -107,6 +105,7 @@ public class GameplayModernSpinner extends GameplaySpinner {
         scene.attachChild(middle);
         scene.attachChild(middle2);
 
+        float timePreempt = (float) beatmapSpinner.timePreempt / 1000f;
         top.registerEntityModifier(Modifiers.fadeIn(timePreempt));
         bottom.registerEntityModifier(Modifiers.fadeIn(timePreempt));
         middle.registerEntityModifier(Modifiers.fadeIn(timePreempt));
