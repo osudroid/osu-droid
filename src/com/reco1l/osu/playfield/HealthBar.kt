@@ -61,12 +61,12 @@ class HealthBar(private val statistics: StatisticV2) : Container() {
 
         marker = ExtendedSprite()
         marker.origin = Anchor.Center
-        marker.blendInfo = BlendInfo(BlendingFunction.Additive)
+        marker.blendInfo = BlendInfo.Additive
         attachChild(marker)
 
         explode = ExtendedSprite()
         explode.origin = Anchor.Center
-        explode.blendInfo = BlendInfo(BlendingFunction.Additive)
+        explode.blendInfo = BlendInfo.Additive
         explode.alpha = 0f
         attachChild(explode)
 
@@ -117,7 +117,7 @@ class HealthBar(private val statistics: StatisticV2) : Container() {
 
             fill.color = color
             marker.color = color
-            marker.blendInfo?.function = if (statistics.hp < EPIC_CUTOFF) BlendingFunction.Inherit else BlendingFunction.Additive
+            marker.blendInfo = if (statistics.hp < EPIC_CUTOFF) BlendInfo.Inherit else BlendInfo.Additive
 
         } else {
 
@@ -140,7 +140,7 @@ class HealthBar(private val statistics: StatisticV2) : Container() {
         bulge()
 
         explode.clearEntityModifiers()
-        explode.blendInfo?.function = if (isEpic) BlendingFunction.Additive else BlendingFunction.Inherit
+        explode.blendInfo = if (isEpic) BlendInfo.Additive else BlendInfo.Inherit
         explode.alpha = 1f
         explode.setScale(1f)
 
