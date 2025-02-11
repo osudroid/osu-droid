@@ -44,7 +44,7 @@ public class GameplaySpinner extends GameObject {
     protected float rotations = 0;
     protected float needRotations;
     protected boolean clear = false;
-    protected int score = 1;
+    protected int bonusScoreCounter = 1;
     protected StatisticV2 stat;
     protected float duration;
 
@@ -119,7 +119,7 @@ public class GameplaySpinner extends GameObject {
         this.stat = stat;
         startHit = true;
         clear = duration <= 0f;
-        score = 1;
+        bonusScoreCounter = 1;
 
         reloadHitSounds();
         ResourceManager.getInstance().checkSpinnerTextures();
@@ -209,7 +209,7 @@ public class GameplaySpinner extends GameObject {
             //}
 
             //if (rotations count < the rotations in replay), let rotations count = the rotations in replay
-            while (fullRotations + this.score < replayObjectData.accuracy / 4 + 1){
+            while (fullRotations + this.bonusScoreCounter < replayObjectData.accuracy / 4 + 1){
                 fullRotations++;
                 listener.onSpinnerHit(id, 1000, false, 0);
             }
@@ -240,7 +240,7 @@ public class GameplaySpinner extends GameObject {
             };
         }
         stopLoopingSamples();
-        listener.onSpinnerHit(id, score, endsCombo, this.score + fullRotations - 1);
+        listener.onSpinnerHit(id, score, endsCombo, this.bonusScoreCounter + fullRotations - 1);
         playAndFreeHitSamples(score);
     }
 
@@ -321,9 +321,9 @@ public class GameplaySpinner extends GameObject {
                     scene.detachChild(bonusScore);
                 }
                 rotations -= 1 * Math.signum(rotations);
-                bonusScore.setText(String.valueOf(score * 1000));
+                bonusScore.setText(String.valueOf(bonusScoreCounter * 1000));
                 listener.onSpinnerHit(id, 1000, false, 0);
-                score++;
+                bonusScoreCounter++;
                 scene.attachChild(bonusScore);
                 spinnerBonusSample.play();
                 float rate = 0.375f;

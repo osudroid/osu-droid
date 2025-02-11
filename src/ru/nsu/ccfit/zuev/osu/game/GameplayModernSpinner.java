@@ -210,9 +210,9 @@ public class GameplayModernSpinner extends GameplaySpinner {
                     scene.detachChild(bonusScore);
                 }
                 rotations -= 1 * Math.signum(rotations);
-                bonusScore.setText(String.valueOf(score * 1000));
+                bonusScore.setText(String.valueOf(bonusScoreCounter * 1000));
                 listener.onSpinnerHit(id, 1000, false, 0);
-                score++;
+                bonusScoreCounter++;
                 scene.attachChild(bonusScore);
                 spinnerBonusSample.play();
                 glow.registerEntityModifier(
@@ -297,7 +297,7 @@ public class GameplayModernSpinner extends GameplaySpinner {
             };
         }
         stopLoopingSamples();
-        listener.onSpinnerHit(id, score, endsCombo, this.score + fullRotations - 1);
+        listener.onSpinnerHit(id, score, endsCombo, this.bonusScoreCounter + fullRotations - 1);
         playAndFreeHitSamples(score);
     }
 }
