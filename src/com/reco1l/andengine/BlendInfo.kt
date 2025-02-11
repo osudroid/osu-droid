@@ -7,32 +7,32 @@ data class BlendInfo(
     /**
      * The blending function to use.
      */
-    var function: BlendingFunction,
+    val function: BlendingFunction,
 
     /**
      * Whether to mask the red channel.
      */
-    var redMask: Boolean = true,
+    val redMask: Boolean = true,
 
     /**
      * Whether to mask the green channel.
      */
-    var greenMask: Boolean = true,
+    val greenMask: Boolean = true,
 
     /**
      * Whether to mask the blue channel.
      */
-    var blueMask: Boolean = true,
+    val blueMask: Boolean = true,
 
     /**
      * Whether to mask the alpha channel.
      */
-    var alphaMask: Boolean = true,
+    val alphaMask: Boolean = true,
 
     /**
      * Whether to clear the color buffer.
      */
-    var clear: Boolean = false
+    val clear: Boolean = false
 
 ) {
 
@@ -53,6 +53,10 @@ data class BlendInfo(
     companion object {
 
         val Inherit = BlendInfo(BlendingFunction.Inherit)
+
+        val Additive = BlendInfo(BlendingFunction.Additive)
+
+        val Default = BlendInfo(BlendingFunction.Mixture)
 
     }
 

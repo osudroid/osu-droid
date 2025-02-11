@@ -192,15 +192,14 @@ abstract class ExtendedEntity(
     /**
      * The blending information of the entity.
      */
-    open var blendInfo: BlendInfo? = null
+    open var blendInfo: BlendInfo? = BlendInfo.Default
         set(value) {
             if (field != value) {
-                field = value
-
                 if (value != null) {
                     mSourceBlendFunction = value.function.source
                     mDestinationBlendFunction = value.function.destination
                 }
+                field = value
             }
         }
 
@@ -449,14 +448,14 @@ abstract class ExtendedEntity(
 
     protected open fun applyBlending(pGL: GL10) {
 
-        blendInfo?.apply(pGL) ?: GLHelper.blendFunction(pGL, mSourceBlendFunction, mDestinationBlendFunction)
+        val blendInfo = blendInfo
 
-        if (blendInfo?.function == BlendingFunction.Inherit) {
-            val parent = parent
-            if (parent is ExtendedEntity) {
-                GLHelper.blendFunction(pGL, parent.mSourceBlendFunction, parent.mDestinationBlendFunction)
-            }
+        if (blendInfo == null) {
+            GLHelper.blendFunction(pGL, mSourceBlendFunction, mDestinationBlendFunction)
+            return
         }
+
+        blendInfo.apply(pGL)
     }
 
     override fun onApplyTransformations(pGL: GL10, camera: Camera) {
@@ -810,8 +809,9 @@ abstract class ExtendedEntity(
 
 
     override fun setBlendFunction(pSourceBlendFunction: Int, pDestinationBlendFunction: Int) {
+        // We have to nullify the blend info to prevent these values from being overridden.
         if (blendInfo != null) {
-            Log.w("ExtendedEntity", "BlendInfo is set, use blendInfo property to change the blending function.")
+            blendInfo = null
         }
         super.setBlendFunction(pSourceBlendFunction, pDestinationBlendFunction)
     }
