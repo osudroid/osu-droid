@@ -29,18 +29,7 @@ public class GameplayModernSpinner extends GameplaySpinner {
     private final ExtendedSprite glow;
     private final ScoreNumber bonusScore;
 
-    private Scene scene;
-    private float needRotations;
-    private int fullRotations = 0;
-    private float rotations = 0;
-    private boolean clear;
-    private int score = 1;
-    private StatisticV2 stat;
-    private PointF oldMouse;
-    private float duration;
     private boolean spinnable;
-
-    private final PointF currMouse = new PointF();
 
     public GameplayModernSpinner() {
         ResourceManager.getInstance().checkEvoSpinnerTextures();

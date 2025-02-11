@@ -30,29 +30,30 @@ public class GameplaySpinner extends GameObject {
     private final ExtendedSprite circle;
     private final ExtendedSprite approachCircle;
     private final Sprite metre;
+    private float metreY;
     private final ExtendedSprite spinText;
     private final TextureRegion metreRegion;
     private final ExtendedSprite clearText;
     private final ScoreNumber bonusScore;
-    protected com.rian.osu.beatmap.hitobject.Spinner beatmapSpinner;
-    private PointF oldMouse;
+
+    protected Spinner beatmapSpinner;
+    protected PointF oldMouse;
     protected GameObjectListener listener;
-    private Scene scene;
-    private int fullRotations = 0;
-    private float rotations = 0;
-    private float needRotations;
-    private boolean clear = false;
-    private int score = 1;
-    private float metreY;
-    private StatisticV2 stat;
-    private float duration;
+    protected Scene scene;
+    protected int fullRotations = 0;
+    protected float rotations = 0;
+    protected float needRotations;
+    protected boolean clear = false;
+    protected int score = 1;
+    protected StatisticV2 stat;
+    protected float duration;
 
     protected final boolean isSpinnerFrequencyModulate;
     protected GameplayHitSampleInfo[] hitSamples;
     protected final GameplaySequenceHitSampleInfo spinnerSpinSample;
     protected final GameplaySequenceHitSampleInfo spinnerBonusSample;
 
-    private final PointF currMouse = new PointF();
+    protected final PointF currMouse = new PointF();
 
     public GameplaySpinner() {
         ResourceManager.getInstance().checkSpinnerTextures();
@@ -193,7 +194,6 @@ public class GameplaySpinner extends GameObject {
 
         metre.clearEntityModifiers();
         scene.detachChild(metre);
-
 
         scene.detachChild(bonusScore);
 
