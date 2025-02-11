@@ -1,3 +1,13 @@
+Version 1.8.2 Patch 1
+=====================
+
+# Bug Fixes
+
+- Fixed wrong blending application in gameplay under certain conditions <span style="font-size: 0.75em">by [Reco1I](https://github.com/Reco1I)</span>
+- Fixed spinner judgement ending later than it should <span style="font-size: 0.75em">by [Rian8337](https://github.com/Rian8337)</span>
+- Fixed modern spinners not resetting bonus score counter <span style="font-size: 0.75em">by [Rian8337](https://github.com/Rian8337)</span>
+- Fixed `spinnerspin` samples potentially not looping <span style="font-size: 0.75em">by [Rian8337](https://github.com/Rian8337)</span>
+
 Version 1.8.2
 =============
 
