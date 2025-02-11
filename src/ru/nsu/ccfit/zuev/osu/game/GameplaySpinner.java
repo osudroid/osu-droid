@@ -2,6 +2,7 @@ package ru.nsu.ccfit.zuev.osu.game;
 
 import android.graphics.PointF;
 
+import com.reco1l.osu.Execution;
 import com.reco1l.andengine.sprite.ExtendedSprite;
 import com.reco1l.andengine.Modifiers;
 import com.reco1l.andengine.Anchor;
@@ -25,76 +26,73 @@ import ru.nsu.ccfit.zuev.osu.scoring.StatisticV2;
 import ru.nsu.ccfit.zuev.skins.OsuSkin;
 
 public class GameplaySpinner extends GameObject {
-    protected Scene scene;
-    protected ScoreNumber bonusScore;
-    protected com.rian.osu.beatmap.hitobject.Spinner beatmapSpinner;
-    protected PointF oldMouse;
-    protected GameObjectListener listener;
-
-    protected int fullRotations = 0;
-    protected float rotations = 0;
-    protected float needRotations;
-    protected boolean clear = false;
-    protected int score = 1;
-
-    protected StatisticV2 stat;
-    protected float passedTime;
-    protected float duration;
-
-    protected final boolean isSpinnerFrequencyModulate;
-    protected GameplayHitSampleInfo[] hitSamples;
-    protected final GameplaySequenceHitSampleInfo spinnerSpinSample;
-    protected final GameplaySequenceHitSampleInfo spinnerBonusSample;
-
-    protected final PointF currMouse = new PointF();
-
     private final ExtendedSprite background;
+    public final PointF center;
     private final ExtendedSprite circle;
     private final ExtendedSprite approachCircle;
     private final Sprite metre;
     private final ExtendedSprite spinText;
     private final TextureRegion metreRegion;
     private final ExtendedSprite clearText;
+    private final ScoreNumber bonusScore;
+    protected com.rian.osu.beatmap.hitobject.Spinner beatmapSpinner;
+    private PointF oldMouse;
+    protected GameObjectListener listener;
+    private Scene scene;
+    private int fullRotations = 0;
+    private float rotations = 0;
+    private float needRotations;
+    private boolean clear = false;
+    private int score = 1;
     private float metreY;
+    private StatisticV2 stat;
+    private float duration;
+
+    protected final boolean isSpinnerFrequencyModulate;
+    protected GameplayHitSampleInfo[] hitSamples;
+    protected final GameplaySequenceHitSampleInfo spinnerSpinSample;
+    protected final GameplaySequenceHitSampleInfo spinnerBonusSample;
+
+    private final PointF currMouse = new PointF();
 
     public GameplaySpinner() {
         ResourceManager.getInstance().checkSpinnerTextures();
         position.set(Constants.MAP_WIDTH / 2f, Constants.MAP_HEIGHT / 2f);
-        Utils.trackToRealCoords(position);
+        center = Utils.trackToRealCoords(position);
 
         background = new ExtendedSprite();
         background.setOrigin(Anchor.Center);
-        background.setPosition(position.x, position.y);
+        background.setPosition(center.x, center.y);
         background.setTextureRegion(ResourceManager.getInstance().getTexture("spinner-background"));
         background.setScale(Config.getRES_WIDTH() / background.getDrawWidth());
 
         circle = new ExtendedSprite();
         circle.setOrigin(Anchor.Center);
-        circle.setPosition(position.x, position.y);
+        circle.setPosition(center.x, center.y);
         circle.setTextureRegion(ResourceManager.getInstance().getTexture("spinner-circle"));
 
         metreRegion = ResourceManager.getInstance().getTexture("spinner-metre").deepCopy();
 
-        metre = new Sprite(position.x - Config.getRES_WIDTH() / 2f, Config.getRES_HEIGHT(), metreRegion);
+        metre = new Sprite(center.x - Config.getRES_WIDTH() / 2f, Config.getRES_HEIGHT(), metreRegion);
         metre.setWidth(Config.getRES_WIDTH());
         metre.setHeight(background.getHeightScaled());
 
         approachCircle = new ExtendedSprite();
         approachCircle.setOrigin(Anchor.Center);
-        approachCircle.setPosition(position.x, position.y);
+        approachCircle.setPosition(center.x, center.y);
         approachCircle.setTextureRegion(ResourceManager.getInstance().getTexture("spinner-approachcircle"));
 
         spinText = new ExtendedSprite();
         spinText.setOrigin(Anchor.Center);
-        spinText.setPosition(position.x, position.y * 1.5f);
+        spinText.setPosition(center.x, center.y * 1.5f);
         spinText.setTextureRegion(ResourceManager.getInstance().getTexture("spinner-spin"));
 
         clearText = new ExtendedSprite();
         clearText.setOrigin(Anchor.Center);
-        clearText.setPosition(position.x, position.y * 0.5f);
+        clearText.setPosition(center.x, center.y * 0.5f);
         clearText.setTextureRegion(ResourceManager.getInstance().getTexture("spinner-clear"));
 
-        bonusScore = new ScoreNumber(position.x, position.y + 100, "", 1.1f, true);
+        bonusScore = new ScoreNumber(center.x, center.y + 100, "", 1.1f, true);
 
         isSpinnerFrequencyModulate = OsuSkin.get().isSpinnerFrequencyModulate();
         spinnerSpinSample = new GameplaySequenceHitSampleInfo();
@@ -109,7 +107,7 @@ public class GameplaySpinner extends GameObject {
         fullRotations = 0;
         rotations = 0;
         this.scene = scene;
-        duration = Math.max((float) beatmapSpinner.getDuration() / 1000f, 0);
+        this.duration = Math.max((float) beatmapSpinner.getDuration() / 1000f, 0);
         this.beatmapSpinner = beatmapSpinner;
 
         needRotations = rps * duration;
@@ -127,7 +125,6 @@ public class GameplaySpinner extends GameObject {
         ResourceManager.getInstance().checkSpinnerTextures();
 
         float timePreempt = (float) beatmapSpinner.timePreempt / 1000f;
-        passedTime = -timePreempt;
 
         background.setAlpha(0);
         background.registerEntityModifier(Modifiers.sequence(
@@ -150,17 +147,16 @@ public class GameplaySpinner extends GameObject {
         metreRegion.setTexturePosition(0, (int) metre.getHeightScaled());
 
         approachCircle.setAlpha(0);
-        approachCircle.setVisible(!GameHelper.isHidden());
-
-        if (approachCircle.isVisible()) {
-            approachCircle.registerEntityModifier(Modifiers.sequence(
-                Modifiers.delay(timePreempt),
-                Modifiers.parallel(
-                    Modifiers.alpha(duration, 0.75f, 1),
-                    Modifiers.scale(duration, 2.0f, 0)
-                )
-            ));
+        if (GameHelper.isHidden()) {
+            approachCircle.setVisible(false);
         }
+        approachCircle.registerEntityModifier(Modifiers.sequence(e -> Execution.updateThread(this::removeFromScene),
+            Modifiers.delay(timePreempt),
+            Modifiers.parallel(
+                Modifiers.alpha(duration, 0.75f, 1),
+                Modifiers.scale(duration, 2.0f, 0)
+            )
+        ));
 
         spinText.setAlpha(0);
         spinText.registerEntityModifier(Modifiers.sequence(
@@ -252,10 +248,7 @@ public class GameplaySpinner extends GameObject {
 
     @Override
     public void update(final float dt) {
-        passedTime += dt;
-
-        // Spinner is still in approach time.
-        if (passedTime < 0) {
+        if (circle.getAlpha() == 0) {
             return;
         }
 
@@ -265,13 +258,13 @@ public class GameplaySpinner extends GameObject {
         for (int i = 0, count = listener.getCursorsCount(); i < count; ++i) {
             if (mouse == null) {
                 if (autoPlay) {
-                    mouse = position;
+                    mouse = center;
                 } else if (listener.isMouseDown(i)) {
                     mouse = listener.getMousePos(i);
                 } else {
                     continue;
                 }
-                currMouse.set(mouse.x - position.x, mouse.y - position.y);
+                currMouse.set(mouse.x - center.x, mouse.y - center.y);
             }
 
             if (oldMouse == null || listener.isMousePressed(this, i)) {
@@ -301,8 +294,8 @@ public class GameplaySpinner extends GameObject {
             //auto时，FL光圈绕中心旋转
             if (GameHelper.isAuto() || GameHelper.isAutopilotMod()) {
                float angle = (rotations + dfill / 4f) * 360;
-               float pX = position.x + 50 * (float)Math.sin(angle);
-               float pY = position.y + 50 * (float)Math.cos(angle);
+               float pX = center.x + 50 * (float)Math.sin(angle);
+               float pY = center.y + 50 * (float)Math.cos(angle);
                listener.updateAutoBasedPos(pX, pY);
             }
         }
@@ -358,10 +351,6 @@ public class GameplaySpinner extends GameObject {
                 (int) (metre.getBaseHeight() * (1 - Math.abs(percentfill))));
 
         oldMouse.set(currMouse);
-
-        if (passedTime >= duration) {
-            removeFromScene();
-        }
     }
 
     protected void reloadHitSounds() {
