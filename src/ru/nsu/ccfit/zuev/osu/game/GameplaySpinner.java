@@ -104,8 +104,8 @@ public class GameplaySpinner extends GameObject {
         endsCombo = true;
     }
 
-    public void init(final GameObjectListener listener, final Scene scene, final Spinner beatmapSpinner,
-                     final float secPassed, final float rps, final StatisticV2 stat) {
+    public void init(final GameObjectListener listener, final Scene scene,
+                     final Spinner beatmapSpinner, final float rps, final StatisticV2 stat) {
         fullRotations = 0;
         rotations = 0;
         this.scene = scene;
@@ -126,8 +126,8 @@ public class GameplaySpinner extends GameObject {
         reloadHitSounds();
         ResourceManager.getInstance().checkSpinnerTextures();
 
-        passedTime = secPassed - (float) beatmapSpinner.startTime / 1000;
-        float timePreempt = (float) beatmapSpinner.timePreempt / 1000;
+        float timePreempt = (float) beatmapSpinner.timePreempt / 1000f;
+        passedTime = -timePreempt;
 
         background.setAlpha(0);
         background.registerEntityModifier(Modifiers.sequence(

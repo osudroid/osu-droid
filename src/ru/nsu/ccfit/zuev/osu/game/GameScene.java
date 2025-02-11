@@ -1385,7 +1385,7 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
                 final float rps = 2 + 2 * playableBeatmap.getDifficulty().od / 10f;
                 final var gameplaySpinner = GameObjectPool.getInstance().getSpinner();
 
-                gameplaySpinner.init(this, bgScene, parsedSpinner, elapsedTime, rps, stat);
+                gameplaySpinner.init(this, bgScene, parsedSpinner, rps, stat);
                 addObject(gameplaySpinner);
 
                 if (GameHelper.isAuto() || GameHelper.isAutopilotMod()) {
