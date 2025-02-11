@@ -2747,7 +2747,7 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
             urText.setText(Math.round(stat != null ? stat.getUnstableRate() : 0) + " UR");
         }
 
-        if (BuildConfig.DEBUG) {
+        if (memText != null) {
             var totalMemory = Runtime.getRuntime().totalMemory();
             var usedMemory = totalMemory - Runtime.getRuntime().freeMemory();
 
