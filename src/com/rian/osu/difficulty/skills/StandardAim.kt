@@ -36,14 +36,13 @@ class StandardAim(
             return 0.0
         }
 
-        val sortedStrains = sliderStrains.sortedDescending()
-        val maxStrain = sortedStrains[0]
+        val maxStrain = sliderStrains.max()
 
         if (maxStrain == 0.0) {
             return 0.0
         }
 
-        return sortedStrains.fold(0.0) { total, strain ->
+        return sliderStrains.fold(0.0) { total, strain ->
             total + 1 / (1 + exp(-((strain / maxStrain) * 12 - 6)))
         }
     }

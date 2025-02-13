@@ -13,7 +13,8 @@ object PathApproximation {
     /**
      * The amount of pieces to calculate for each control point quadruplet.
      */
-    private const val CATMULL_DETAIL = 50
+    const val CATMULL_DETAIL = 50
+
     private const val BEZIER_TOLERANCE = 0.25f
     private const val CIRCULAR_ARC_TOLERANCE = 0.1f
 

@@ -22,7 +22,8 @@ import kotlinx.coroutines.ensureActive
  */
 class DroidDifficultyCalculator : DifficultyCalculator<DroidPlayableBeatmap, DroidDifficultyHitObject, DroidDifficultyAttributes>() {
     override val difficultyMultiplier = 0.18
-    override val difficultyAdjustmentMods = super.difficultyAdjustmentMods + setOf(ModPrecise(), ModAutopilot())
+    override val difficultyAdjustmentMods = super.difficultyAdjustmentMods +
+        setOf(ModPrecise(), ModAutopilot(), ModScoreV2())
 
     private val maximumSectionDeltaTime = 2000
     private val minimumSectionObjectCount = 5
@@ -122,12 +123,6 @@ class DroidDifficultyCalculator : DifficultyCalculator<DroidPlayableBeatmap, Dro
         }
 
         val clockRate = beatmap.overallSpeedMultiplier.toDouble()
-
-        val greatWindow = (
-            if (beatmap.mods?.any { it is ModPrecise } == true) PreciseDroidHitWindow(beatmap.difficulty.od)
-            else DroidHitWindow(beatmap.difficulty.od)
-        ).greatWindow.toDouble() / clockRate
-
         val objects = beatmap.hitObjects.objects
         val arr = arrayOfNulls<DroidDifficultyHitObject>(objects.size)
 
@@ -140,8 +135,7 @@ class DroidDifficultyCalculator : DifficultyCalculator<DroidPlayableBeatmap, Dro
                 if (i > 1) objects[i - 2] else null,
                 clockRate,
                 arr as Array<DroidDifficultyHitObject>,
-                i - 1,
-                greatWindow
+                i - 1
             ).also { it.computeProperties(clockRate, objects) }
         }
 

@@ -46,12 +46,7 @@ abstract class DifficultyHitObject(
      * This is one less than the actual index of the hit object in the beatmap.
      */
     @JvmField
-    val index: Int,
-
-    /**
-     * The great window of the hit object.
-     */
-    greatWindow: Double
+    val index: Int
 ) {
     /**
      * The normalized distance from the "lazy" end position of the previous hit object to the start position of this hit object.
@@ -130,7 +125,7 @@ abstract class DifficultyHitObject(
      * The full great window of the hit object.
      */
     @JvmField
-    val fullGreatWindow = greatWindow * 2
+    val fullGreatWindow = ((if (obj is Slider) obj.head else obj).hitWindow?.greatWindow ?: 1200f) * 2 / clockRate
 
     protected abstract val mode: GameMode
     protected abstract val scalingFactor: Float

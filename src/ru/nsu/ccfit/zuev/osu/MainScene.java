@@ -1,7 +1,5 @@
 package ru.nsu.ccfit.zuev.osu;
 
-import static com.acivev.ui.EffectKt.addSnowfall;
-
 import android.content.Context;
 import android.graphics.PointF;
 import android.os.PowerManager;
@@ -11,6 +9,7 @@ import com.reco1l.andengine.Anchor;
 import com.reco1l.andengine.shape.RoundedBox;
 import com.reco1l.andengine.sprite.ExtendedSprite;
 import com.reco1l.osu.BannerLoader;
+import com.reco1l.osu.BannerSprite;
 import com.reco1l.osu.data.BeatmapInfo;
 import com.reco1l.osu.Execution;
 import com.reco1l.osu.ui.entity.MainMenu;
@@ -457,10 +456,6 @@ public class MainScene implements IUpdateHandler {
         scene.registerTouchArea(music_next);
         scene.setTouchAreaBindingEnabled(true);
 
-        if (Config.isStayOnline()) {
-            BannerLoader.loadBanner(scene);
-        }
-
         ResourceManager.getInstance().loadHighQualityAsset("dev-build-overlay", "dev-build-overlay.png");
 
         ExtendedSprite tournamentOverlay = new ExtendedSprite(ResourceManager.getInstance().getTexture("dev-build-overlay"));
@@ -487,6 +482,21 @@ public class MainScene implements IUpdateHandler {
         scene.registerUpdateHandler(this);
 
         hitsound = ResourceManager.getInstance().loadSound("menuhit", "sfx/menuhit.ogg", false);
+    }
+
+    public void loadBannerSprite() {
+
+        if (!Config.isStayOnline()) {
+            return;
+        }
+
+        BannerSprite sprite = BannerLoader.loadBannerSprite();
+        if (sprite != null) {
+            sprite.setPosition(Config.getRES_WIDTH(), Config.getRES_HEIGHT());
+            sprite.setOrigin(Anchor.BottomRight);
+            scene.attachChild(sprite);
+            scene.registerTouchArea(sprite);
+        }
     }
 
     private void createOnlinePanel(Scene scene) {

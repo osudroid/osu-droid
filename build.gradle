@@ -1,6 +1,6 @@
 buildscript {
     ext {
-        kotlin_version = '2.0.10'
+        kotlin_version = '2.1.10'
         room_version = '2.6.1'
     }
     repositories {
@@ -34,7 +34,7 @@ def getReleaseVersionCode() {
 }
 
 def getReleaseVersionName() {
-    def baseline = '1.8.1-tournament'
+    def baseline = '1.8.2.1-tournament'
     def versionName = baseline + new Date().format('(yyMMdd)')
     println('versionName: ' + versionName)
     return versionName
@@ -103,7 +103,6 @@ android {
 
         release {
             resValue "string", "app_name", "osu!droid-tournament"
-            zipAlignEnabled true
 //            minifyEnabled true
 //            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard.cfg', 'proguard-kotlin.pro'
             signingConfig signingConfigs.release
@@ -166,7 +165,7 @@ dependencies {
     implementation 'com.google.android.material:material:1.11.0'
 
     implementation 'com.squareup.okhttp3:okhttp:4.12.0'
-    implementation 'com.google.code.gson:gson:2.10.1'
+    implementation 'com.google.code.gson:gson:2.12.1'
     implementation 'pub.devrel:easypermissions:3.0.0'
     implementation 'net.lingala.zip4j:zip4j:2.11.5'
 
@@ -174,14 +173,14 @@ dependencies {
     implementation 'com.github.EdrowsLuo.EdlGameFramework:EdlOsbSupport:d91c53fcff'
 
     // Localizations
-    implementation 'com.github.osudroid:language-pack:1.0.10'
+    implementation 'com.github.osudroid:language-pack:1.0.11'
 
     // Tools
     implementation 'com.github.Reco1I:Toolkt:1.0.24'
-    implementation 'commons-io:commons-io:2.16.1'
+    implementation 'commons-io:commons-io:2.18.0'
 
     // Multiplayer
-    implementation 'org.jetbrains.kotlinx:kotlinx-coroutines-core:1.9.0'
+    implementation 'org.jetbrains.kotlinx:kotlinx-coroutines-core:1.10.1'
     implementation "org.jetbrains.kotlin:kotlin-reflect:$kotlin_version"
     implementation ('io.socket:socket.io-client:2.1.1') {
         exclude group: 'org.json', module: 'json'

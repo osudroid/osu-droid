@@ -41,10 +41,14 @@ import com.reco1l.osu.multiplayer.RoomScene;
 
 import com.rian.osu.GameMode;
 import com.rian.osu.beatmap.Beatmap;
+import com.rian.osu.beatmap.DroidHitWindow;
 import com.rian.osu.beatmap.DroidPlayableBeatmap;
+import com.rian.osu.beatmap.HitWindow;
+import com.rian.osu.beatmap.PreciseDroidHitWindow;
 import com.rian.osu.beatmap.constants.BeatmapCountdown;
 import com.rian.osu.beatmap.hitobject.HitCircle;
 import com.rian.osu.beatmap.hitobject.HitObject;
+import com.rian.osu.beatmap.hitobject.Slider;
 import com.rian.osu.beatmap.hitobject.Spinner;
 import com.rian.osu.beatmap.parser.BeatmapParser;
 import com.rian.osu.beatmap.timings.EffectControlPoint;
@@ -99,7 +103,6 @@ import ru.nsu.ccfit.zuev.osu.game.cursor.main.AutoCursor;
 import ru.nsu.ccfit.zuev.osu.game.cursor.main.Cursor;
 import ru.nsu.ccfit.zuev.osu.game.cursor.main.CursorEntity;
 import ru.nsu.ccfit.zuev.osu.game.mods.GameMod;
-import ru.nsu.ccfit.zuev.osu.helper.DifficultyHelper;
 import ru.nsu.ccfit.zuev.osu.helper.MD5Calculator;
 import ru.nsu.ccfit.zuev.osu.helper.StringTable;
 import ru.nsu.ccfit.zuev.osu.menu.LoadingScreen;
@@ -186,7 +189,7 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
 
     private ProxySprite storyboardOverlayProxy;
 
-    private DifficultyHelper difficultyHelper = DifficultyHelper.StdDifficulty;
+    private HitWindow hitWindow;
 
     private Job loadingJob;
     private DifficultyCalculationParameters lastDifficultyCalculationParameters;
@@ -800,9 +803,6 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
         GameHelper.setPerfect(stat.getMod().contains(GameMod.MOD_PERFECT));
         GameHelper.setScoreV2(stat.getMod().contains(GameMod.MOD_SCOREV2));
         GameHelper.setEasy(stat.getMod().contains(GameMod.MOD_EASY));
-        difficultyHelper = stat.getMod().contains(GameMod.MOD_PRECISE) ?
-                DifficultyHelper.HighDifficulty : DifficultyHelper.StdDifficulty;
-        GameHelper.setDifficultyHelper(difficultyHelper);
 
         // Set up counter texts
         for (var text : counterTexts) {
@@ -870,6 +870,8 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
         comboWasMissed = false;
         previousFrameTime = 0;
 
+        float od = parsedBeatmap.getDifficulty().od;
+        hitWindow = stat.getMod().contains(GameMod.MOD_PRECISE) ? new PreciseDroidHitWindow(od) : new DroidHitWindow(od);
         firstObjectStartTime = (float) objects.peek().startTime / 1000;
         lastObjectEndTime = (float) objects.getLast().getEndTime() / 1000;
 
@@ -938,7 +940,7 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
         }
 
         if (Config.getErrorMeter() == 1 || (Config.getErrorMeter() == 2 && replaying)) {
-            hitErrorMeter = new HitErrorMeter(hud, new PointF(Config.getRES_WIDTH() / 2f, Config.getRES_HEIGHT() - 20), playableBeatmap.getDifficulty().od, 12, difficultyHelper);
+            hitErrorMeter = new HitErrorMeter(hud, new PointF(Config.getRES_WIDTH() / 2f, Config.getRES_HEIGHT() - 20), 12, hitWindow);
         }
 
         skipBtn = null;
@@ -1427,7 +1429,7 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
                     gameplaySpinner.setReplayData(replay.objectData[gameplaySpinner.getId()]);
                 }
 
-            } else if (obj instanceof com.rian.osu.beatmap.hitobject.Slider parsedSlider) {
+            } else if (obj instanceof Slider parsedSlider) {
                 final var gameplaySlider = GameObjectPool.getInstance().getSlider();
 
                 gameplaySlider.init(this, mgScene, parsedSlider, elapsedTime,
@@ -1914,9 +1916,7 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
             }
         }
 
-        //(30 - overallDifficulty) / 100f
-        float overallDifficulty = playableBeatmap.getDifficulty().od;
-        if (accuracy > difficultyHelper.hitWindowFor50(overallDifficulty) || forcedScore == ResultType.MISS.getId()) {
+        if (accuracy > hitWindow.getMehWindow() / 1000 || forcedScore == ResultType.MISS.getId()) {
             createHitEffect(pos, "hit0", color);
             registerHit(id, 0, endCombo);
             return;
@@ -1924,12 +1924,10 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
 
         String scoreName;
         if (forcedScore == ResultType.HIT300.getId() ||
-                forcedScore == 0 && accuracy <= difficultyHelper.hitWindowFor300(overallDifficulty)) {
-            //(75 + 25 * (5 - overallDifficulty) / 5) / 1000)
+                forcedScore == 0 && accuracy <= hitWindow.getGreatWindow() / 1000) {
             scoreName = registerHit(id, 300, endCombo);
         } else if (forcedScore == ResultType.HIT100.getId() ||
-                forcedScore == 0 && accuracy <= difficultyHelper.hitWindowFor100(overallDifficulty)) {
-            //(150 + 50 * (5 - overallDifficulty) / 5) / 1000)
+                forcedScore == 0 && accuracy <= hitWindow.getOkWindow() / 1000) {
             scoreName = registerHit(id, 100, endCombo);
         } else {
             scoreName = registerHit(id, 50, endCombo);
@@ -2810,7 +2808,7 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
             urText.setText(Math.round(stat != null ? stat.getUnstableRate() : 0) + " UR");
         }
 
-        if (BuildConfig.DEBUG) {
+        if (memText != null) {
             var totalMemory = Runtime.getRuntime().totalMemory();
             var usedMemory = totalMemory - Runtime.getRuntime().freeMemory();
 

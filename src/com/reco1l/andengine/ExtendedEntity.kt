@@ -1,21 +1,20 @@
 package com.reco1l.andengine
 
-import android.graphics.PointF
 import android.util.*
 import com.reco1l.andengine.container.*
 import com.reco1l.andengine.modifier.*
 import com.reco1l.framework.*
-import org.anddev.andengine.collision.*
+import com.reco1l.framework.math.Vec4
 import org.anddev.andengine.engine.camera.*
 import org.anddev.andengine.entity.*
-import org.anddev.andengine.entity.primitive.*
-import org.anddev.andengine.entity.scene.CameraScene
 import org.anddev.andengine.entity.scene.Scene
+import org.anddev.andengine.entity.scene.Scene.ITouchArea
 import org.anddev.andengine.entity.shape.*
+import org.anddev.andengine.input.touch.TouchEvent
 import org.anddev.andengine.opengl.util.*
 import org.anddev.andengine.opengl.vertex.*
+import org.anddev.andengine.util.Transformation
 import javax.microedition.khronos.opengles.*
-import javax.microedition.khronos.opengles.GL10.*
 
 
 /**
@@ -31,6 +30,10 @@ abstract class ExtendedEntity(
 
     /**
      * Determines which axes the entity should automatically adjust its size to.
+     *
+     * In this case the size will equal to the content size of the entity. Some
+     * types of entities requires the user to manually set the size, in those
+     * cases this property might be ignored.
      */
     open var autoSizeAxes = Axes.None
         set(value) {
@@ -41,60 +44,164 @@ abstract class ExtendedEntity(
         }
 
     /**
-     * The origin factor of the entity in the X axis.
-     */
-    open var originX = 0f
-
-    /**
-     * The origin factor of the entity in the Y axis.
-     */
-    open var originY = 0f
-
-    /**
-     * The anchor factor of the entity in the X axis.
-     * This is used to determine the position of the entity in a container.
+     * Determines which axes the entity should adjust its size relative to its parent.
      *
-     * Note: This will not take effect if the entity is not a child of a [Container].
+     * Depending on the type, the entity's width and height will be taken as a multiplier
+     * for the parent's width and height in order to calculate the final size.
+     *
+     * Example:
+     *
+     * If [relativeSizeAxes] is set to [Axes.Both] and we set the size to 0.5, the entity's
+     * size will be half the size of the parent.
+     *
+     * Note: [autoSizeAxes] has priority over [relativeSizeAxes]. For example, if [autoSizeAxes]
+     * is set to [Axes.Both] and [relativeSizeAxes] is set to [Axes.Both], [relativeSizeAxes]
+     * will be ignored.
      */
-    open var anchorX = 0f
+    open var relativeSizeAxes = Axes.None
+        set(value) {
+            if (field != value) {
+                field = value
+                onContentSizeMeasured()
+            }
+        }
 
     /**
-     * The anchor factor of the entity in the Y axis.
-     * This is used to determine the position of the entity in a container.
+     * Determines which axes the entity should adjust its position relative to its parent.
      *
-     * Note: This will not take effect if the entity is not a child of a [Container].
+     * Depending on the type, the entity's position will be taken as a multiplier applied to
+     * the parent's width and height in order to calculate the final position.
+     *
+     * Example:
+     *
+     * If [relativePositionAxes] is set to [Axes.Both] and we set the position to 0.5 for both axes,
+     * the entity's position will be at the center of the parent.
      */
-    open var anchorY = 0f
+    open var relativePositionAxes = Axes.None
+        set(value) {
+            if (field != value) {
+                field = value
+                invalidateTransformations()
+            }
+        }
+
+    /**
+     * Where the entity should be anchored in the parent.
+     */
+    open var anchor = Anchor.TopLeft
+        set(value) {
+            if (field != value) {
+                field = value
+                invalidateTransformations()
+            }
+        }
+
+    /**
+     * Where the entity's origin should be.
+     */
+    open var origin = Anchor.TopLeft
+        set(value) {
+            if (field != value) {
+                field = value
+
+                mRotationCenterX = value.x
+                mRotationCenterY = value.y
+                mScaleCenterX = value.x
+                mScaleCenterY = value.y
+
+                invalidateTransformations()
+            }
+        }
+
+    /**
+     * The padding of the entity.
+     */
+    open var padding = Vec4.Zero
+        set(value) {
+            if (field != value) {
+                field = value
+                invalidateTransformations()
+            }
+        }
 
     /**
      * The translation in the X axis.
      */
     open var translationX = 0f
+        set(value) {
+            if (field != value) {
+                field = value
+                invalidateTransformations()
+            }
+        }
 
     /**
      * The translation in the Y axis.
      */
     open var translationY = 0f
+        set(value) {
+            if (field != value) {
+                field = value
+                invalidateTransformations()
+            }
+        }
 
     /**
-     * Whether the color should be inherited from all the parents in the hierarchy.
+     * The background entity. This entity will be drawn before the entity children and will not be
+     * affected by padding.
      */
-    open var inheritColor = true
+    open var background: ExtendedEntity? = null
+        set(value) {
+            if (field != value) {
+                if (value?.parent != null) {
+                    Log.e("ExtendedEntity", "The background entity is already attached to another entity.")
+                    return
+                }
+
+                field = value
+            }
+        }
 
     /**
-     * Whether the depth buffer should be cleared before drawing the entity.
-     * This is useful when the entity is drawn on top of other entities by overlapping them.
-     *
-     * It will only take effect if the entities on the front have the depth buffer test enabled.
-     *
-     * @see [testWithDepthBuffer]
+     * The foreground entity. This entity will be drawn after the entity children and will not be
+     * affected by padding.
      */
-    open var clearDepthBufferBeforeDraw = false
+    open var foreground: ExtendedEntity? = null
+        set(value) {
+            if (field != value) {
+                if (value?.parent != null) {
+                    Log.e("ExtendedEntity", "The foreground entity is already attached to another entity.")
+                    return
+                }
+
+                field = value
+            }
+        }
+
 
     /**
-     * Whether the entity should be tested with the depth buffer.
+     * Whether the entity should clip its children.
      */
-    open var testWithDepthBuffer = false
+    open var clipChildren = false
+
+    /**
+     * The depth information of the entity.
+     */
+    open var depthInfo: DepthInfo? = null
+
+    /**
+     * The blending information of the entity.
+     */
+    open var blendInfo: BlendInfo? = BlendInfo.Default
+        set(value) {
+            if (field != value) {
+                if (value != null) {
+                    mSourceBlendFunction = value.function.source
+                    mDestinationBlendFunction = value.function.destination
+                }
+                field = value
+            }
+        }
 
     /**
      * The color of the entity boxed in a [ColorARGB] object.
@@ -107,22 +214,6 @@ abstract class ExtendedEntity(
             mBlue = value.blue
             mAlpha = value.alpha
         }
-
-    /**
-     * The color blending function.
-     */
-    open var blendingFunction: BlendingFunction? = null
-        set(value) {
-            if (field != value) {
-                field = value
-
-                if (value != null) {
-                    mSourceBlendFunction = value.source
-                    mDestinationBlendFunction = value.destination
-                }
-            }
-        }
-
 
     /**
      * The width of the content inside the entity.
@@ -147,16 +238,52 @@ abstract class ExtendedEntity(
         }
 
     /**
+     * The real width of the entity in pixels.
+     *
+     * Due to compatibility reason, this doesn't take into account transformations like rotation or scaling.
+     * @see [getWidthScaled]
+     */
+    open val drawWidth: Float
+        get() {
+            if (relativeSizeAxes.isHorizontal) {
+                return parent.getPaddedWidth() * width
+            }
+            return width
+        }
+
+    /**
+     * The real height of the entity in pixels.
+     *
+     * Due to compatibility reason, this doesn't take into account transformations like rotation or scaling.
+     * @see [getHeightScaled]
+     */
+    open val drawHeight: Float
+        get() {
+            if (relativeSizeAxes.isVertical) {
+                return parent.getPaddedHeight() * height
+            }
+            return height
+        }
+
+    /**
      * The raw X position of the entity.
      * This is the position without taking into account the origin, anchor, or translation.
      */
     open val drawX: Float
         get() {
+            val parent = parent
             if (parent is Container) {
-                return (parent as Container).getChildDrawX(this)
+                return parent.getChildDrawX(this)
             }
+
+            var x = x
+            if (relativePositionAxes.isHorizontal) {
+                x *= parent.getPaddedWidth()
+            }
+
             return x + totalOffsetX
         }
+
 
     /**
      * The raw Y position of the entity.
@@ -164,55 +291,18 @@ abstract class ExtendedEntity(
      */
     open val drawY: Float
         get() {
+            val parent = parent
             if (parent is Container) {
-                return (parent as Container).getChildDrawY(this)
+                return parent.getChildDrawY(this)
             }
+
+            var y = y
+            if (relativePositionAxes.isVertical) {
+                y *= parent.getPaddedHeight()
+            }
+
             return y + totalOffsetY
         }
-
-    /**
-     * The offset applied to the X axis according to the origin factor.
-     */
-    open val originOffsetX: Float
-        get() = -(width * originX)
-
-    /**
-     * The offset applied to the Y axis according to the origin factor.
-     */
-    open val originOffsetY: Float
-        get() = -(height * originY)
-
-    /**
-     * The offset applied to the X axis according to the anchor factor.
-     */
-    open val anchorOffsetX: Float
-        get() = when (parent) {
-            is IShape -> (parent as IShape).width * anchorX
-            is CameraScene -> ((parent as CameraScene).camera?.widthRaw ?: 0f) * anchorX
-            else -> 0f
-        }
-
-    /**
-     * The offset applied to the Y axis according to the anchor factor.
-     */
-    open val anchorOffsetY: Float
-        get() = when (parent) {
-            is IShape -> (parent as IShape).height * anchorY
-            is CameraScene -> ((parent as CameraScene).camera?.heightRaw ?: 0f) * anchorY
-            else -> 0f
-        }
-
-    /**
-     * The total offset applied to the X axis.
-     */
-    open val totalOffsetX
-        get() = originOffsetX + anchorOffsetX + translationX
-
-    /**
-     * The total offset applied to the Y axis.
-     */
-    open val totalOffsetY
-        get() = originOffsetY + anchorOffsetY + translationY
 
 
     private var width = 0f
@@ -221,54 +311,64 @@ abstract class ExtendedEntity(
 
     private var isVertexBufferDirty = true
 
+    private var currentBoundEntity: ITouchArea? = null
+
 
     // Attachment
 
     override fun setParent(pEntity: IEntity?) {
-        (parent as? Scene)?.unregisterTouchArea(this)
+
+        val parent = parent
+        if (parent is Scene) {
+            parent.unregisterTouchArea(this)
+        }
+
         super.setParent(pEntity)
-        (pEntity as? ExtendedScene)?.registerTouchArea(this)
+
+        if (pEntity is ExtendedScene) {
+            pEntity.registerTouchArea(this)
+        }
     }
 
 
     // Positions
 
-    open fun setAnchor(anchor: Anchor) {
-        anchorX = anchor.factorX
-        anchorY = anchor.factorY
-    }
-
-    open fun setOrigin(origin: Anchor) {
-        originX = origin.factorX
-        originY = origin.factorY
-    }
-
-    fun setPosition(position: PointF) {
-        setPosition(position.x, position.y)
-    }
-
-    override fun setPosition(pX: Float, pY: Float) {
-        if (mX != pX || mY != pY) {
-            super.setPosition(pX, pY)
+    override fun setPosition(x: Float, y: Float) {
+        if (mX != x || mY != y) {
+            mX = x
+            mY = y
+            invalidateTransformations()
             (parent as? Container)?.onChildPositionChanged(this)
         }
     }
 
     open fun setX(value: Float) {
         if (mX != value) {
-            setPosition(value, mY)
+            mX = value
+            invalidateTransformations()
+            (parent as? Container)?.onChildPositionChanged(this)
         }
     }
 
     open fun setY(value: Float) {
         if (mY != value) {
-            setPosition(mX, value)
+            mY = value
+            invalidateTransformations()
+            (parent as? Container)?.onChildPositionChanged(this)
         }
     }
 
     open fun setTranslation(x: Float, y: Float) {
-        translationX = x
-        translationY = y
+        if (translationX != x || translationY != y) {
+            translationX = x
+            translationY = y
+            invalidateTransformations()
+        }
+    }
+
+    protected open fun invalidateTransformations() {
+        mLocalToParentTransformationDirty = true
+        mParentToLocalTransformationDirty = true
     }
 
 
@@ -286,22 +386,36 @@ abstract class ExtendedEntity(
 
     override fun applyRotation(pGL: GL10) {
 
-        // This will ensure getSceneCenterCoordinates() applies the correct transformation.
-        mRotationCenterX = width * originX
-        mRotationCenterY = height * originY
+        if (rotation == 0f) {
+            return
+        }
 
-        if (rotation != 0f) {
+        val offsetX = drawWidth * mRotationCenterX
+        val offsetY = drawHeight * mRotationCenterY
+
+        if (offsetX > 0f || offsetY > 0f) {
+            pGL.glTranslatef(offsetX, offsetY, 0f)
+            pGL.glRotatef(rotation, 0f, 0f, 1f)
+            pGL.glTranslatef(-offsetX, -offsetY, 0f)
+        } else {
             pGL.glRotatef(rotation, 0f, 0f, 1f)
         }
     }
 
     override fun applyScale(pGL: GL10) {
 
-        // This will ensure getSceneCenterCoordinates() applies the correct transformation.
-        mScaleCenterX = width * originX
-        mScaleCenterY = height * originY
+        if (scaleX == 1f && scaleY == 1f) {
+            return
+        }
 
-        if (scaleX != 1f || scaleY != 1f) {
+        val offsetX = drawWidth * mScaleCenterX
+        val offsetY = drawHeight * mScaleCenterY
+
+        if (offsetX > 0f || offsetY > 0f) {
+            pGL.glTranslatef(offsetX, offsetY, 0f)
+            pGL.glScalef(scaleX, scaleY, 1f)
+            pGL.glTranslatef(-offsetX, -offsetY, 0f)
+        } else {
             pGL.glScalef(scaleX, scaleY, 1f)
         }
     }
@@ -313,23 +427,20 @@ abstract class ExtendedEntity(
         var blue = mBlue
         var alpha = mAlpha
 
-        if (inheritColor) {
+        var parent = parent
+        while (parent != null) {
 
-            var parent = parent
-            while (parent != null) {
+            red *= parent.red
+            green *= parent.green
+            blue *= parent.blue
+            alpha *= parent.alpha
 
-                red *= parent.red
-                green *= parent.green
-                blue *= parent.blue
-                alpha *= parent.alpha
-
-                // We'll assume at this point there's no need to keep multiplying.
-                if (red == 0f && green == 0f && blue == 0f && alpha == 0f) {
-                    break
-                }
-
-                parent = parent.parent
+            // We'll assume at this point there's no need to keep multiplying.
+            if (red == 0f && green == 0f && blue == 0f && alpha == 0f) {
+                break
             }
+
+            parent = parent.parent
         }
 
         GLHelper.setColor(pGL, red, green, blue, alpha)
@@ -337,48 +448,90 @@ abstract class ExtendedEntity(
 
     protected open fun applyBlending(pGL: GL10) {
 
-        // If there's a blending function set, apply it instead of the engine's method.
-        val blendingFunction = blendingFunction
+        val blendInfo = blendInfo
 
-        if (blendingFunction != null) {
-
-            val parent = parent as? ExtendedEntity
-
-            // If the blending function is set to inherit, apply the parent's blending function.
-            if (blendingFunction == BlendingFunction.Inherit && parent != null) {
-                GLHelper.blendFunction(pGL, parent.mSourceBlendFunction, parent.mDestinationBlendFunction)
-            } else {
-                GLHelper.blendFunction(pGL, blendingFunction.source, blendingFunction.destination)
-            }
-
-        } else {
+        if (blendInfo == null) {
             GLHelper.blendFunction(pGL, mSourceBlendFunction, mDestinationBlendFunction)
+            return
         }
+
+        blendInfo.apply(pGL)
     }
 
     override fun onApplyTransformations(pGL: GL10, camera: Camera) {
         applyTranslation(pGL, camera)
-
-        if (rotation != 0f || scaleX != 1f || scaleY != 1f) {
-            pGL.glTranslatef(-originOffsetX, -originOffsetY, 0f)
-            applyRotation(pGL)
-            applyScale(pGL)
-            pGL.glTranslatef(originOffsetX, originOffsetY, 0f)
-        }
-
+        applyRotation(pGL)
+        applyScale(pGL)
         applyColor(pGL)
         applyBlending(pGL)
     }
 
+    override fun doDraw(gl: GL10, camera: Camera) {
 
-    override fun onManagedUpdate(pSecondsElapsed: Float) {
+        background?.setSize(drawWidth, drawHeight)
+        background?.onDraw(gl, camera)
+
+        super.doDraw(gl, camera)
+    }
+
+    override fun onDrawChildren(gl: GL10, camera: Camera) {
+
+        val hasPaddingApplicable = padding.left > 0f || padding.top > 0f
+
+        if (hasPaddingApplicable) {
+            gl.glTranslatef(padding.left, padding.top, 0f)
+        }
+
+        if (clipChildren) {
+            GLHelper.enableScissorTest(gl)
+
+            var (bottomLeftX, bottomLeftY) = camera.getScreenSpaceCoordinates(convertLocalToSceneCoordinates(0f, 0f))
+            var (topLeftX, topLeftY) = camera.getScreenSpaceCoordinates(convertLocalToSceneCoordinates(0f, getPaddedHeight()))
+            var (topRightX, topRightY) = camera.getScreenSpaceCoordinates(convertLocalToSceneCoordinates(getPaddedWidth(), getPaddedHeight()))
+            var (bottomRightX, bottomRightY) = camera.getScreenSpaceCoordinates(convertLocalToSceneCoordinates(getPaddedWidth(), 0f))
+
+            // Flip the Y axis to match the OpenGL coordinate system.
+            bottomLeftY = camera.surfaceHeight - bottomLeftY
+            topLeftY = camera.surfaceHeight - topLeftY
+            topRightY = camera.surfaceHeight - topRightY
+            bottomRightY = camera.surfaceHeight - bottomRightY
+
+            val minClippingX = minOf(bottomLeftX, topLeftX, topRightX, bottomRightX)
+            val minClippingY = minOf(bottomLeftY, topLeftY, topRightY, bottomRightY)
+
+            val maxClippingX = maxOf(bottomLeftX, topLeftX, topRightX, bottomRightX)
+            val maxClippingY = maxOf(bottomLeftY, topLeftY, topRightY, bottomRightY)
+
+            gl.glScissor(
+                minClippingX.toInt(),
+                minClippingY.toInt(),
+                (maxClippingX - minClippingX).toInt(),
+                (maxClippingY - minClippingY).toInt()
+            )
+        }
+
+        super.onDrawChildren(gl, camera)
+
+        if (clipChildren) {
+            GLHelper.disableScissorTest(gl)
+        }
+
+        if (hasPaddingApplicable) {
+            gl.glTranslatef(-padding.right, -padding.top, 0f)
+        }
+
+        foreground?.setSize(drawWidth, drawHeight)
+        foreground?.onDraw(gl, camera)
+    }
+
+    override fun onManagedDraw(gl: GL10, camera: Camera) {
 
         if (isVertexBufferDirty) {
             isVertexBufferDirty = false
             onUpdateVertexBuffer()
         }
 
-        super.onManagedUpdate(pSecondsElapsed)
+        super.onManagedDraw(gl, camera)
     }
 
     override fun onInitDraw(pGL: GL10) {
@@ -387,21 +540,25 @@ abstract class ExtendedEntity(
             GLHelper.enableVertexArray(pGL)
         }
 
-        if (clearDepthBufferBeforeDraw) {
-            pGL.glClear(GL_DEPTH_BUFFER_BIT)
-        }
-
-        GLHelper.setDepthTest(pGL, testWithDepthBuffer)
+        depthInfo?.apply(pGL) ?: GLHelper.disableDepthTest(pGL)
     }
 
     override fun onApplyVertices(pGL: GL10) {
-
         if (vertexBuffer != null) {
             super.onApplyVertices(pGL)
         }
-
     }
 
+
+    // Update
+
+    override fun onManagedUpdate(pSecondsElapsed: Float) {
+
+        background?.onManagedUpdate(pSecondsElapsed)
+        foreground?.onManagedUpdate(pSecondsElapsed)
+
+        super.onManagedUpdate(pSecondsElapsed)
+    }
 
 
     // Vertex buffer
@@ -414,7 +571,6 @@ abstract class ExtendedEntity(
         isVertexBufferDirty = false
         onUpdateVertexBuffer()
     }
-
 
     /**
      * Sets the vertex buffer of the entity.
@@ -448,15 +604,24 @@ abstract class ExtendedEntity(
 
         if (contentWidth != width || contentHeight != height) {
 
-            if (autoSizeAxes == Axes.X || autoSizeAxes == Axes.Both) {
-                width = contentWidth
+            if (autoSizeAxes.isHorizontal) {
+                width = contentWidth + padding.horizontal
+
+                if (relativeSizeAxes.isHorizontal) {
+                    width /= parent.getPaddedWidth()
+                }
             }
 
-            if (autoSizeAxes == Axes.Y || autoSizeAxes == Axes.Both) {
-                height = contentHeight
+            if (autoSizeAxes.isVertical) {
+                height = contentHeight + padding.vertical
+
+                if (relativeSizeAxes.isVertical) {
+                    height /= parent.getPaddedHeight()
+                }
             }
 
             updateVertexBuffer()
+            invalidateTransformations()
 
             (parent as? Container)?.onChildSizeChanged(this)
             return true
@@ -464,50 +629,81 @@ abstract class ExtendedEntity(
         return false
     }
 
+
     /**
      * Sets the size of the entity.
      *
-     * @return Whether the size of the entity was changed or not, this depends on the [autoSizeAxes] property.
+     * Note: This will change the [autoSizeAxes] property to [Axes.None] automatically.
+     *
+     * @return Whether the size of the entity was changed or not.
      */
     open fun setSize(newWidth: Float, newHeight: Float): Boolean {
 
-        if (autoSizeAxes == Axes.Both) {
-            Log.w("ExtendedEntity", "Cannot set size when autoSizeAxes is set to Both.")
-            return false
+        if (autoSizeAxes != Axes.None) {
+            autoSizeAxes = Axes.None
         }
 
         if (width != newWidth || height != newHeight) {
-
-            if (autoSizeAxes == Axes.None || autoSizeAxes == Axes.Y) {
-                width = newWidth
-            }
-
-            if (autoSizeAxes == Axes.None || autoSizeAxes == Axes.X) {
-                height = newHeight
-            }
+            width = newWidth
+            height = newHeight
 
             updateVertexBuffer()
+            invalidateTransformations()
 
-            (parent as? Container)?.onChildSizeChanged(this)
+            val parent = parent
+            if (parent is Container) {
+                parent.onChildSizeChanged(this)
+            }
+
             return true
         }
         return false
     }
 
     open fun setWidth(value: Float) {
-        setSize(value, height)
+
+        if (autoSizeAxes.isHorizontal) {
+            autoSizeAxes = if (autoSizeAxes == Axes.Both) Axes.Y else Axes.None
+        }
+
+        if (width != value) {
+            width = value
+
+            updateVertexBuffer()
+            invalidateTransformations()
+            (parent as? Container)?.onChildSizeChanged(this)
+        }
+    }
+
+    open fun setHeight(value: Float) {
+
+        if (autoSizeAxes.isVertical) {
+            autoSizeAxes = if (autoSizeAxes == Axes.Both) Axes.X else Axes.None
+        }
+
+        if (height != value) {
+            height = value
+
+            updateVertexBuffer()
+            invalidateTransformations()
+            (parent as? Container)?.onChildSizeChanged(this)
+        }
     }
 
     override fun getWidth(): Float {
         return width
     }
 
-    open fun setHeight(value: Float) {
-        setSize(width, value)
-    }
-
     override fun getHeight(): Float {
         return height
+    }
+
+    override fun getWidthScaled(): Float {
+        return drawWidth * scaleX
+    }
+
+    override fun getHeightScaled(): Float {
+        return drawHeight * scaleY
     }
 
 
@@ -519,57 +715,104 @@ abstract class ExtendedEntity(
     @Deprecated("Base height is not preserved in ExtendedEntity, use getHeight() instead.")
     override fun getBaseHeight() = height
 
-    @Deprecated("Rotation center is determined by the entity's origin, use setOrigin() instead.")
-    final override fun setRotationCenter(pRotationCenterX: Float, pRotationCenterY: Float) {}
-
-    @Deprecated("Rotation center is determined by the entity's origin, use setOrigin() instead.")
-    final override fun setRotationCenterX(pRotationCenterX: Float) {}
-
-    @Deprecated("Rotation center is determined by the entity's origin, use setOrigin() instead.")
-    final override fun setRotationCenterY(pRotationCenterY: Float) {}
-
-    @Deprecated("Scale center is determined by the entity's origin, use setOrigin() instead.")
-    final override fun setScaleCenter(pScaleCenterX: Float, pScaleCenterY: Float) {}
-
-    @Deprecated("Scale center is determined by the entity's origin, use setOrigin() instead.")
-    final override fun setScaleCenterX(pScaleCenterX: Float) {}
-
-    @Deprecated("Scale center is determined by the entity's origin, use setOrigin() instead.")
-    final override fun setScaleCenterY(pScaleCenterY: Float) {}
-
 
     // Collision
 
-    override fun collidesWith(shape: IShape): Boolean = when (shape) {
-
-        is RectangularShape -> RectangularShapeCollisionChecker.checkCollision(this, shape)
-        is Line -> RectangularShapeCollisionChecker.checkCollision(this, shape)
-
-        else -> false
+    override fun collidesWith(shape: IShape): Boolean {
+        Log.w("ExtendedEntity", "Collision detection is not supported in ExtendedEntity.")
+        return false
     }
 
     override fun contains(x: Float, y: Float): Boolean {
-        if (width == 0f || height == 0f) {
+
+        if (drawWidth == 0f || drawHeight == 0f) {
             return false
         }
 
-        return RectangularShapeCollisionChecker.checkContains(this, x - totalOffsetX, y - totalOffsetY)
+        return EntityCollision.contains(this, x, y, parent is Scene)
     }
 
     override fun isCulled(pCamera: Camera): Boolean {
-        return drawX > pCamera.maxX || drawX + width < pCamera.minX
-            || drawY > pCamera.maxY || drawY + height < pCamera.minY
+        return drawX > pCamera.maxX || drawX + drawWidth < pCamera.minX
+            || drawY > pCamera.maxY || drawY + drawHeight < pCamera.minY
     }
-
-    override fun getSceneCenterCoordinates(): FloatArray {
-        return this.convertLocalToSceneCoordinates(width * 0.5f, height * 0.5f)
-    }
-
 
     // Transformation
 
+    override fun getLocalToParentTransformation(): Transformation {
+
+        if (mLocalToParentTransformation == null) {
+            mLocalToParentTransformation = Transformation()
+        }
+
+        if (mLocalToParentTransformationDirty) {
+            mLocalToParentTransformation.setToIdentity()
+
+            if (scaleX != 1f || scaleY != 1f) {
+                val offsetX = drawWidth * mScaleCenterX
+                val offsetY = drawHeight * mScaleCenterY
+
+                mLocalToParentTransformation.postTranslate(-offsetX, -offsetY)
+                mLocalToParentTransformation.postScale(scaleX, scaleY)
+                mLocalToParentTransformation.postTranslate(offsetX, offsetY)
+            }
+
+            if (rotation != 0f) {
+                val offsetX = drawWidth * mRotationCenterX
+                val offsetY = drawHeight * mRotationCenterY
+
+                mLocalToParentTransformation.postTranslate(-offsetX, -offsetY)
+                mLocalToParentTransformation.postRotate(rotation)
+                mLocalToParentTransformation.postTranslate(offsetX, offsetY)
+            }
+
+            mLocalToParentTransformation.postTranslate(drawX, drawY)
+            mLocalToParentTransformationDirty = false
+        }
+
+        return mLocalToParentTransformation
+    }
+
+    override fun getParentToLocalTransformation(): Transformation {
+
+        if (mParentToLocalTransformation == null) {
+            mParentToLocalTransformation = Transformation()
+        }
+
+        if (mParentToLocalTransformationDirty) {
+            mParentToLocalTransformation.setToIdentity()
+            mParentToLocalTransformation.postTranslate(-drawX, -drawY)
+
+            if (rotation != 0f) {
+                val offsetX = drawWidth * mRotationCenterX
+                val offsetY = drawHeight * mRotationCenterY
+
+                mParentToLocalTransformation.postTranslate(-offsetX, -offsetY)
+                mParentToLocalTransformation.postRotate(-rotation)
+                mParentToLocalTransformation.postTranslate(offsetX, offsetY)
+            }
+
+            if (scaleX != 1f || scaleY != 1f) {
+                val offsetX = drawWidth * mScaleCenterX
+                val offsetY = drawHeight * mScaleCenterY
+
+                mParentToLocalTransformation.postTranslate(-offsetX, -offsetY)
+                mParentToLocalTransformation.postScale(1 / scaleX, 1 / scaleY)
+                mParentToLocalTransformation.postTranslate(offsetX, offsetY)
+            }
+
+            mParentToLocalTransformationDirty = false
+        }
+
+        return mParentToLocalTransformation
+    }
+
+
     override fun setBlendFunction(pSourceBlendFunction: Int, pDestinationBlendFunction: Int) {
-        blendingFunction = null
+        // We have to nullify the blend info to prevent these values from being overridden.
+        if (blendInfo != null) {
+            blendInfo = null
+        }
         super.setBlendFunction(pSourceBlendFunction, pDestinationBlendFunction)
     }
 
@@ -583,6 +826,51 @@ abstract class ExtendedEntity(
         return modifier
     }
 
+
+    // Input
+
+    override fun onAreaTouched(
+        event: TouchEvent,
+        localX: Float,
+        localY: Float
+    ): Boolean {
+
+        val boundEntity = currentBoundEntity
+        if (boundEntity != null) {
+            boundEntity as IEntity
+
+            val transformedX = localX - boundEntity.getDrawX()
+            val transformedY = localY - boundEntity.getDrawY()
+
+            boundEntity.onAreaTouched(event, transformedX, transformedY)
+
+            if (event.isActionUp || event.isActionOutside || event.isActionCancel) {
+                currentBoundEntity = null
+            }
+            return true
+        }
+
+        try {
+            for (i in childCount - 1 downTo 0) {
+                val child = getChild(i)
+
+                if (child is ITouchArea && child.contains(localX, localY)) {
+
+                    val transformedX = localX - child.getDrawX()
+                    val transformedY = localY - child.getDrawY()
+
+                    if (child.onAreaTouched(event, transformedX, transformedY)) {
+                        if (event.isActionDown) {
+                            currentBoundEntity = child
+                        }
+                        return true
+                    }
+                }
+            }
+        } catch (e: IndexOutOfBoundsException) {
+            Log.e("ExtendedEntity", "A child entity was removed during touch event propagation.", e)
+        }
+        return false
+    }
+
 }
-
-

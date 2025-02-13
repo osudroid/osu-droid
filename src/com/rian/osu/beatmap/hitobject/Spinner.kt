@@ -1,5 +1,7 @@
 package com.rian.osu.beatmap.hitobject
 
+import com.rian.osu.GameMode
+import com.rian.osu.beatmap.EmptyHitWindow
 import com.rian.osu.beatmap.sections.BeatmapControlPoints
 import com.rian.osu.math.Vector2
 import kotlinx.coroutines.CoroutineScope
@@ -50,6 +52,8 @@ class Spinner(
             }
         ))
     }
+
+    override fun createHitWindow(mode: GameMode) = EmptyHitWindow()
 
     companion object {
         private val baseSpinnerSpinSample = BankHitSampleInfo("spinnerspin")

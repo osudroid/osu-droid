@@ -30,7 +30,7 @@ import ru.nsu.ccfit.zuev.osu.RGBColor;
 import ru.nsu.ccfit.zuev.osu.ResourceManager;
 import ru.nsu.ccfit.zuev.osu.Utils;
 import ru.nsu.ccfit.zuev.osu.game.GameHelper.SliderPath;
-import ru.nsu.ccfit.zuev.osu.helper.DifficultyHelper;
+import ru.nsu.ccfit.zuev.osu.scoring.ResultType;
 import ru.nsu.ccfit.zuev.skins.OsuSkin;
 
 import java.util.BitSet;
@@ -222,7 +222,7 @@ public class GameplaySlider extends GameObject {
         }
 
         // End circle
-        pathEndPosition.set(getAbsolutePathPosition(path.pointCount - 1));
+        pathEndPosition.set(getAbsolutePathPosition(path.anchorCount - 1));
 
         tailCirclePiece.setScale(scale);
         tailCirclePiece.setCircleColor(comboColor.r(), comboColor.g(), comboColor.b());
@@ -289,7 +289,7 @@ public class GameplaySlider extends GameObject {
             endArrow.setAlpha(0);
             endArrow.setScale(scale);
 
-            PointF previousPoint = getAbsolutePathPosition(path.pointCount - 2);
+            PointF previousPoint = getAbsolutePathPosition(path.anchorCount - 2);
             endArrow.setRotation(MathUtils.radToDeg(Utils.direction(pathEndPosition.x, pathEndPosition.y, previousPoint.x, previousPoint.y)));
 
             if (Config.isSnakingInSliders()) {
@@ -385,7 +385,7 @@ public class GameplaySlider extends GameObject {
     }
 
     private PointF getPositionAt(final float percentage, final boolean updateBallAngle, final boolean updateEndArrowRotation) {
-        if (path.pointCount < 2) {
+        if (path.anchorCount < 2) {
             tmpPoint.set(position);
             return tmpPoint;
         }
@@ -412,8 +412,8 @@ public class GameplaySlider extends GameObject {
 
         // Directly taken from library-owned SliderPath
         int left = 0;
-        int right = path.lengthCount - 2;
-        float currentLength = percentage * path.getLength(path.lengthCount - 1);
+        int right = path.anchorCount - 2;
+        float currentLength = percentage * path.getLength(path.anchorCount - 1);
 
         while (left <= right) {
             int pivot = left + ((right - left) >> 1);
@@ -546,6 +546,11 @@ public class GameplaySlider extends GameObject {
     }
 
     private void onSpanFinish() {
+        var hitWindow = beatmapSlider.getHead().hitWindow;
+        if (hitWindow == null) {
+            return;
+        }
+
         ++completedSpanCount;
 
         int totalSpanCount = beatmapSlider.getSpanCount();
@@ -621,38 +626,45 @@ public class GameplaySlider extends GameObject {
         if (!startHit) {
             // Slider head was never hit - miss the entire slider before the end.
             // Add 0.013s to maintain pre-version 1.8 behavior where the slider head is judged 13ms after the 50 hit window in this case.
-            onSliderHeadHit(GameHelper.getDifficultyHelper().hitWindowFor50(GameHelper.getOverallDifficulty()) + 0.013);
+            onSliderHeadHit(hitWindow.getMehWindow() / 1000 + 0.013);
         }
 
         // Calculating score
-        int firstHitScore = 0;
-        if (GameHelper.isScoreV2()) {
-            // If ScoreV2 is active, the accuracy of hitting the slider head is additionally accounted for when judging the entire slider:
-            // Getting a 300 for a slider requires getting a 300 judgement for the slider head.
-            // Getting a 100 for a slider requires getting a 100 judgement or better for the slider head.
-            DifficultyHelper diffHelper = GameHelper.getDifficultyHelper();
-            float od = GameHelper.getOverallDifficulty();
-
-            if (Math.abs(firstHitAccuracy) <= diffHelper.hitWindowFor300(od) * 1000) {
-                firstHitScore = 300;
-            } else if (Math.abs(firstHitAccuracy) <= diffHelper.hitWindowFor100(od) * 1000) {
-                firstHitScore = 100;
-            }
-        }
-
-        int totalTicks = beatmapSlider.getNestedHitObjects().size();
         int score = 0;
 
-        if (ticksGot > 0) {
-            score = 50;
-        }
+        if (replayObjectData == null) {
+            int firstHitScore = 0;
 
-        if (ticksGot >= totalTicks / 2 && (!GameHelper.isScoreV2() || firstHitScore >= 100)) {
-            score = 100;
-        }
+            if (GameHelper.isScoreV2()) {
+                // If ScoreV2 is active, the accuracy of hitting the slider head is additionally accounted for when judging the entire slider:
+                // Getting a 300 for a slider requires getting a 300 judgement for the slider head.
+                // Getting a 100 for a slider requires getting a 100 judgement or better for the slider head.
+                if (Math.abs(firstHitAccuracy) <= hitWindow.getGreatWindow()) {
+                    firstHitScore = 300;
+                } else if (Math.abs(firstHitAccuracy) <= hitWindow.getOkWindow()) {
+                    firstHitScore = 100;
+                }
+            }
 
-        if (ticksGot >= totalTicks && (!GameHelper.isScoreV2() || firstHitScore == 300)) {
+            int totalTicks = beatmapSlider.getNestedHitObjects().size();
+
+            if (ticksGot > 0) {
+                score = 50;
+            }
+
+            if (ticksGot >= totalTicks / 2 && (!GameHelper.isScoreV2() || firstHitScore >= 100)) {
+                score = 100;
+            }
+
+            if (ticksGot >= totalTicks && (!GameHelper.isScoreV2() || firstHitScore == 300)) {
+                score = 300;
+            }
+        } else if (replayObjectData.result == ResultType.HIT300.getId()) {
             score = 300;
+        } else if (replayObjectData.result == ResultType.HIT100.getId()) {
+            score = 100;
+        } else if (replayObjectData.result == ResultType.HIT50.getId()) {
+            score = 50;
         }
 
         // In replays older than version 6, slider ends always give combo even when not being tracked.
@@ -805,8 +817,8 @@ public class GameplaySlider extends GameObject {
                         preStageFinish = true;
                     }
 
-                    if (path.pointCount >= 2) {
-                        PointF lastPoint = getAbsolutePathPosition(path.pointCount - 2);
+                    if (path.anchorCount >= 2) {
+                        PointF lastPoint = getAbsolutePathPosition(path.anchorCount - 2);
                         endArrow.setRotation(MathUtils.radToDeg(Utils.direction(pathEndPosition.x, pathEndPosition.y, lastPoint.x, lastPoint.y)));
                     }
 
@@ -841,10 +853,22 @@ public class GameplaySlider extends GameObject {
             scene.attachChild(followCircle);
         }
 
-        // Ball position
-        final float percentage = (float) (elapsedSpanTime / spanDuration);
-        var ballPos = getPositionAt(reverse ? 1 - percentage : percentage, true, false);
+        final float percentage = FMath.clamp((float) (elapsedSpanTime / spanDuration), 0, 1);
+        final float bodyProgress = reverse ? 1 - percentage : percentage;
 
+        if (Config.isSnakingOutSliders() && completedSpanCount == beatmapSlider.getSpanCount() - 1) {
+            float length = bodyProgress * superPath.getMeasurer().maxLength();
+
+            if (reverse) {
+                // In reverse, the snaking out animation starts from the end node.
+                sliderBody.setEndLength(length);
+            } else {
+                sliderBody.setStartLength(length);
+            }
+        }
+
+        // Ball position
+        var ballPos = getPositionAt(bodyProgress, true, false);
         boolean isTracking = isCursorInFollowArea(ballPos, isInRadius);
         listener.onTrackingSliders(isTracking);
         updateTracking(isTracking);
@@ -881,24 +905,36 @@ public class GameplaySlider extends GameObject {
     private void onSliderHeadHit(double hitOffset) {
         // Reference: https://github.com/ppy/osu/blob/bca42e9d24f1b8e433f63db8dbf5d36d8b811b36/osu.Game.Rulesets.Osu/Objects/Drawables/SliderInputManager.cs#L78
         // The reference does not fully represent the cases below as they are mixed with replay handling.
-        if (startHit) {
+        var hitWindow = beatmapSlider.getHead().hitWindow;
+
+        if (startHit || hitWindow == null) {
             return;
         }
 
         startHit = true;
-        firstHitAccuracy = (int) (hitOffset * 1000);
 
-        float mehWindow = GameHelper.getDifficultyHelper().hitWindowFor50(GameHelper.getOverallDifficulty());
+        // Override hit offset with replay data when available.
+        firstHitAccuracy = replayObjectData != null ? replayObjectData.accuracy : (int) (hitOffset * 1000);
 
-        if (-mehWindow <= hitOffset && hitOffset <= getLateHitThreshold()) {
+        if (replayObjectData == null || GameHelper.getReplayVersion() >= 6) {
+            if (-hitWindow.getMehWindow() / 1000 <= hitOffset && hitOffset <= getLateHitThreshold()) {
+                listener.registerAccuracy(hitOffset);
+                playCurrentNestedObjectHitSound();
+                ticksGot++;
+                listener.onSliderHit(id, 30, position,
+                        false, bodyColor, GameObjectListener.SLIDER_START, true);
+            } else {
+                listener.onSliderHit(id, -1, position,
+                        false, bodyColor, GameObjectListener.SLIDER_START, false);
+            }
+        } else if (hitOffset <= getLateHitThreshold()) {
+            // In replays older than version 6, the slider head is considered to *not* exist when the hit is late.
+            // It is a very weird behavior, but that's what it actually was...
             listener.registerAccuracy(hitOffset);
             playCurrentNestedObjectHitSound();
             ticksGot++;
             listener.onSliderHit(id, 30, position,
                     false, bodyColor, GameObjectListener.SLIDER_START, true);
-        } else {
-            listener.onSliderHit(id, -1, position,
-                    false, bodyColor, GameObjectListener.SLIDER_START, false);
         }
 
         currentNestedObjectIndex++;
@@ -1061,7 +1097,9 @@ public class GameplaySlider extends GameObject {
     }
 
     private float getLateHitThreshold() {
-        return Math.min(GameHelper.getDifficultyHelper().hitWindowFor50(GameHelper.getOverallDifficulty()), (float) duration);
+        var hitWindow = beatmapSlider.getHead().hitWindow;
+
+        return hitWindow != null ? Math.min(hitWindow.getMehWindow() / 1000, (float) duration) : 0;
     }
 
     private double getGameplayPassedTimeMilliseconds() {

@@ -1,26 +1,34 @@
 package com.reco1l.andengine
 
-/**
- * The anchor points in the range of [0, 1].
- */
-enum class Anchor(val factorX: Float, val factorY: Float) {
+import com.reco1l.framework.math.Vec2
 
-    TopLeft(0f, 0f),
+object Anchor {
 
-    TopCenter(0.5f, 0f),
+    @JvmField
+    val TopLeft = Vec2(0f, 0f)
 
-    TopRight(1f, 0f),
+    @JvmField
+    val TopCenter = Vec2(0.5f, 0f)
 
-    CenterLeft(0f, 0.5f),
+    @JvmField
+    val TopRight = Vec2(1f, 0f)
 
-    Center(0.5f, 0.5f),
+    @JvmField
+    val CenterLeft = Vec2(0f, 0.5f)
 
-    CenterRight(1f, 0.5f),
+    @JvmField
+    val Center = Vec2(0.5f, 0.5f)
 
-    BottomLeft(0f, 1f),
+    @JvmField
+    val CenterRight = Vec2(1f, 0.5f)
 
-    BottomCenter(0.5f, 1f),
+    @JvmField
+    val BottomLeft = Vec2(0f, 1f)
 
-    BottomRight(1f, 1f)
+    @JvmField
+    val BottomCenter = Vec2(0.5f, 1f)
+
+    @JvmField
+    val BottomRight = Vec2(1f, 1f)
 
 }

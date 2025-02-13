@@ -1,36 +1,3 @@
-package com.reco1l.osu
-
-import android.content.Intent
-import android.net.Uri
-import android.util.Log
-import com.reco1l.framework.net.JsonObjectRequest
-import com.reco1l.framework.net.WebRequest
-import com.reco1l.toolkt.data.writeToFile
-import org.anddev.andengine.entity.modifier.AlphaModifier
-import org.anddev.andengine.entity.modifier.ScaleModifier
-import org.anddev.andengine.entity.scene.Scene
-import org.anddev.andengine.entity.sprite.Sprite
-import org.anddev.andengine.input.touch.TouchEvent
-import ru.nsu.ccfit.zuev.osu.Config
-import ru.nsu.ccfit.zuev.osu.GlobalManager
-import ru.nsu.ccfit.zuev.osu.ResourceManager
-import java.io.File
-
-object BannerLoader {
-
-    @JvmStatic
-    fun loadBanner(scene: Scene) {
-
-        async {
-            val bannerFile = File(Config.getCachePath(), "banner.png")
-            if (bannerFile.exists()) {
-                bannerFile.delete()
-            }
-
-            var bannerUrl = ""
-
-            try {
-                JsonObjectRequest("https://osudroid.moe/api/game/banner.php").use { request ->
 
                     val response = request.execute().json
                     val imageLink = response.getString("ImageLink")

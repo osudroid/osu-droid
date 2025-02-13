@@ -2,13 +2,13 @@ package ru.nsu.ccfit.zuev.osu.game;
 
 import android.graphics.PointF;
 
+import com.rian.osu.beatmap.HitWindow;
+
 import org.anddev.andengine.entity.primitive.Rectangle;
 import org.anddev.andengine.entity.scene.Scene;
 
 import java.util.LinkedList;
 import java.util.List;
-
-import ru.nsu.ccfit.zuev.osu.helper.DifficultyHelper;
 
 /**
  * Created by dgsrz on 15/10/18.
@@ -21,9 +21,8 @@ public class HitErrorMeter extends GameObject {
     private final float boundary;
     private final List<Rectangle> onDisplayIndicators;
     private final List<Rectangle> recycledIndicators;
-    private DifficultyHelper difficultyHelper;
 
-    public HitErrorMeter(Scene scene, PointF anchor, float difficulty, float height, DifficultyHelper difficultyHelper) {
+    public HitErrorMeter(Scene scene, PointF anchor, float height, HitWindow hitWindow) {
         barAnchor = anchor;
         barHeight = height;
         bgScene = scene;
@@ -31,9 +30,7 @@ public class HitErrorMeter extends GameObject {
         onDisplayIndicators = new LinkedList<>();
         recycledIndicators = new LinkedList<>();
 
-        this.difficultyHelper = difficultyHelper;
-
-        boundary = difficultyHelper.hitWindowFor50(difficulty);
+        boundary = hitWindow.getMehWindow() / 1000;
 
         float totalLen = boundary * 1500;
         Rectangle hitMeter = new Rectangle(anchor.x - totalLen / 2, anchor.y - height, totalLen, height * 2);
@@ -45,12 +42,12 @@ public class HitErrorMeter extends GameObject {
         hit50.setColor(200f / 255f, 180f / 255f, 110f / 255f, 0.8f);
         scene.attachChild(hit50);
 
-        float hit100Len = difficultyHelper.hitWindowFor100(difficulty) * 1500;
+        float hit100Len = hitWindow.getOkWindow() * 1.5f;
         Rectangle hit100 = new Rectangle(anchor.x - hit100Len / 2, anchor.y - height / 2, hit100Len, height);
         hit100.setColor(100f / 255f, 220f / 255f, 40f / 255f, 0.8f);
         scene.attachChild(hit100);
 
-        float hit300Len = difficultyHelper.hitWindowFor300(difficulty) * 1500;
+        float hit300Len = hitWindow.getGreatWindow() * 1.5f;
         Rectangle hit300 = new Rectangle(anchor.x - hit300Len / 2, anchor.y - height / 2, hit300Len, height);
         hit300.setColor(70f / 255f, 180f / 255f, 220f / 255f, 0.8f);
         scene.attachChild(hit300);

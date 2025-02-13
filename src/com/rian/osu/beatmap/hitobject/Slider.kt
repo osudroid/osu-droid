@@ -1,6 +1,7 @@
 package com.rian.osu.beatmap.hitobject
 
 import com.rian.osu.GameMode
+import com.rian.osu.beatmap.EmptyHitWindow
 import com.rian.osu.beatmap.hitobject.sliderobject.*
 import com.rian.osu.beatmap.sections.BeatmapControlPoints
 import com.rian.osu.beatmap.sections.BeatmapDifficulty
@@ -365,6 +366,8 @@ class Slider(
      */
     fun spanAt(progress: Double) = (progress * spanCount).toInt()
 
+    override fun createHitWindow(mode: GameMode) = EmptyHitWindow()
+
     private fun createNestedHitObjects(mode: GameMode, controlPoints: BeatmapControlPoints, scope: CoroutineScope?) {
         nestedHitObjects.clear()
 
@@ -376,13 +379,12 @@ class Slider(
         val maxLength = 100000.0
         val length = min(maxLength, path.expectedDistance)
         val tickDistance = tickDistance.coerceIn(0.0, length)
+        val minDistanceFromEnd = velocity * 10
 
-        if (tickDistance != 0.0 && generateTicks) {
-            val minDistanceFromEnd = velocity * 10
+        for (span in 0 until spanCount) {
+            scope?.ensureActive()
 
-            for (span in 0 until spanCount) {
-                scope?.ensureActive()
-
+            if (tickDistance != 0.0) {
                 val spanStartTime = startTime + span * spanDuration
                 val reversed = span % 2 == 1
                 val sliderTicks = mutableListOf<SliderTick>()
@@ -419,10 +421,10 @@ class Slider(
                 }
 
                 nestedHitObjects.addAll(sliderTicks)
+            }
 
-                if (span < spanCount - 1) {
-                    nestedHitObjects.add(SliderRepeat(this, span))
-                }
+            if (span < spanCount - 1) {
+                nestedHitObjects.add(SliderRepeat(this, span))
             }
         }
 
@@ -450,7 +452,12 @@ class Slider(
 
         nestedHitObjects.apply {
             add(tail)
-            sortBy { it.startTime }
+
+            sortBy {
+                scope?.ensureActive()
+
+                it.startTime
+            }
         }
 
         updateNestedSamples(controlPoints, scope)

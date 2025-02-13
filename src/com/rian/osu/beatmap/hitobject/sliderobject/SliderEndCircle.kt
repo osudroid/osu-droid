@@ -1,6 +1,7 @@
 package com.rian.osu.beatmap.hitobject.sliderobject
 
 import com.rian.osu.GameMode
+import com.rian.osu.beatmap.EmptyHitWindow
 import com.rian.osu.beatmap.hitobject.Slider
 import com.rian.osu.beatmap.sections.BeatmapControlPoints
 import com.rian.osu.beatmap.sections.BeatmapDifficulty
@@ -47,4 +48,6 @@ abstract class SliderEndCircle(
             timePreempt += startTime - slider.startTime
         }
     }
+
+    override fun createHitWindow(mode: GameMode) = EmptyHitWindow()
 }
