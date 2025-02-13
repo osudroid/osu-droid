@@ -3,6 +3,7 @@ package com.rian.spectator
 import android.util.Log
 import com.reco1l.ibancho.RoomAPI
 import com.rian.osu.beatmap.hitobject.HitCircle
+import com.rian.osu.beatmap.hitobject.Slider
 import ru.nsu.ccfit.zuev.osu.Config
 import ru.nsu.ccfit.zuev.osu.game.GameScene
 import ru.nsu.ccfit.zuev.osu.online.OnlineManager.OnlineManagerException
@@ -13,7 +14,6 @@ import java.io.ByteArrayOutputStream
 import java.io.DataOutputStream
 import java.io.IOException
 import java.util.*
-import ru.nsu.ccfit.zuev.osu.game.GameHelper
 
 /**
  * Holds spectator data that will be sent to the server periodically.
@@ -169,12 +169,16 @@ class SpectatorDataManager(
         val obj = gameScene.beatmap.hitObjects.objects[objectId]
         val replayData = replay.objectData[objectId]
         var time = obj.endTime
+        val hitWindow = if (obj is Slider) obj.head.hitWindow else obj.hitWindow
+
+        if (hitWindow == null) {
+            return
+        }
 
         if (obj is HitCircle) {
             // Special handling for circles that are not tapped.
             time += (
-                if (replayData.accuracy == 10000.toShort())
-                    GameHelper.getDifficultyHelper().hitWindowFor50(GameHelper.getOverallDifficulty()) * 1000
+                if (replayData.accuracy == 10000.toShort()) hitWindow.mehWindow
                 else replayData.accuracy
             ).toDouble()
         }
