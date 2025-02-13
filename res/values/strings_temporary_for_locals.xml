@@ -19,4 +19,7 @@
     <string name="mp_room_max_players_title">Maximum Players</string>
     <string name="mp_room_max_players_summary">Set the maximum number of players allowed in the room</string>
 
+    <string name="opt_snakingOutSliders_title">Use snaking out sliders</string>
+    <string name="opt_snakingOutSliders_summary">Enable sliders gradually snaking disappearing from one node</string>
+
 </resources>

@@ -853,10 +853,22 @@ public class GameplaySlider extends GameObject {
             scene.attachChild(followCircle);
         }
 
-        // Ball position
-        final float percentage = (float) (elapsedSpanTime / spanDuration);
-        var ballPos = getPositionAt(reverse ? 1 - percentage : percentage, true, false);
+        final float percentage = FMath.clamp((float) (elapsedSpanTime / spanDuration), 0, 1);
+        final float bodyProgress = reverse ? 1 - percentage : percentage;
 
+        if (Config.isSnakingOutSliders() && completedSpanCount == beatmapSlider.getSpanCount() - 1) {
+            float length = bodyProgress * superPath.getMeasurer().maxLength();
+
+            if (reverse) {
+                // In reverse, the snaking out animation starts from the end node.
+                sliderBody.setEndLength(length);
+            } else {
+                sliderBody.setStartLength(length);
+            }
+        }
+
+        // Ball position
+        var ballPos = getPositionAt(bodyProgress, true, false);
         boolean isTracking = isCursorInFollowArea(ballPos, isInRadius);
         listener.onTrackingSliders(isTracking);
         updateTracking(isTracking);

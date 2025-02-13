@@ -487,6 +487,10 @@ public class Config {
         return snakingInSliders;
     }
 
+    public static boolean isSnakingOutSliders() {
+        return getBoolean("snakingOutSliders", true);
+    }
+
     public static boolean isPlayMusicPreview() {
         return playMusicPreview;
     }
