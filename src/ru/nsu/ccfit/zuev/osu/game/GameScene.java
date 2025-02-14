@@ -31,8 +31,8 @@ import com.reco1l.andengine.Anchor;
 import com.reco1l.andengine.sprite.VideoSprite;
 import com.reco1l.andengine.ExtendedScene;
 import com.reco1l.osu.hitobjects.FollowPointConnection;
-import com.reco1l.osu.playfield.GameplayHUD;
-import com.reco1l.osu.playfield.ProgressIndicatorType;
+import com.reco1l.osu.hud.GameplayHUD;
+import com.reco1l.osu.hud.ProgressIndicatorType;
 import com.reco1l.osu.hitobjects.SliderTickSprite;
 import com.reco1l.osu.ui.BlockAreaFragment;
 import com.reco1l.osu.ui.entity.GameplayLeaderboard;
@@ -775,7 +775,7 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
         }
         counterTexts.clear();
 
-        hud = new GameplayHUD(stat, this, !Config.isHideInGameUI());
+        hud = new GameplayHUD(stat, this);
 
         var counterTextFont = ResourceManager.getInstance().getFont("smallFont");
 
@@ -897,7 +897,7 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
 
         if (!Config.isHideInGameUI()) {
             if (Config.getProgressIndicatorType() == ProgressIndicatorType.BAR) {
-                linearSongProgress = new LinearSongProgress(hud, lastObjectEndTime, firstObjectStartTime, new PointF(0, Config.getRES_HEIGHT() - 7), Config.getRES_WIDTH(), 7);
+                linearSongProgress = new LinearSongProgress(hud.getParent(), lastObjectEndTime, firstObjectStartTime, new PointF(0, Config.getRES_HEIGHT() - 7), Config.getRES_WIDTH(), 7);
                 linearSongProgress.setProgressRectColor(new RGBColor(153f / 255f, 204f / 255f, 51f / 255f));
                 linearSongProgress.setProgressRectAlpha(0.4f);
                 linearSongProgress.setInitialPassedTime(initialElapsedTime);
@@ -905,7 +905,7 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
         }
 
         if (Config.getErrorMeter() == 1 || (Config.getErrorMeter() == 2 && replaying)) {
-            hitErrorMeter = new HitErrorMeter(hud, new PointF(Config.getRES_WIDTH() / 2f, Config.getRES_HEIGHT() - 20), 12, hitWindow);
+            hitErrorMeter = new HitErrorMeter(hud.getParent(), new PointF(Config.getRES_WIDTH() / 2f, Config.getRES_HEIGHT() - 20), 12, hitWindow);
         }
 
         skipBtn = null;
@@ -1022,7 +1022,7 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
         engine.setScene(scene);
         scene.registerUpdateHandler(this);
 
-        engine.getCamera().setHUD(hud);
+        engine.getCamera().setHUD(hud.getParent());
 
         blockAreaFragment = new BlockAreaFragment();
         blockAreaFragment.show(false);
@@ -1212,7 +1212,7 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
                     if (Multiplayer.isConnected())
                         RoomScene.INSTANCE.getChat().show();
 
-                    hud.setHealthBarVisibility(false);
+                    hud.onBreakStateChange(true);
                     breakPeriods.poll();
                 }
             }
@@ -1223,7 +1223,7 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
                 RoomScene.INSTANCE.getChat().dismiss();
 
                 gameStarted = true;
-                hud.setHealthBarVisibility(true);
+                hud.onBreakStateChange(false);
 
                 if(GameHelper.isFlashLight()){
                     flashlightSprite.onBreak(false);
@@ -1889,7 +1889,7 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
         createBurstEffect(pos, color);
         createHitEffect(pos, scoreName, color);
 
-        hud.flashHealthBar();
+        hud.onNoteHit(stat);
     }
 
     public void onSliderReverse(PointF pos, float ang, RGBColor color) {
@@ -1966,7 +1966,7 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
 
         createHitEffect(judgementPos, scoreName, color);
 
-        hud.flashHealthBar();
+        hud.onNoteHit(stat);
     }
 
 
@@ -2021,7 +2021,7 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
 
         createHitEffect(pos, scoreName, null);
 
-        hud.flashHealthBar();
+        hud.onNoteHit(stat);
     }
 
     private void stopLoopingSamples() {
@@ -2247,7 +2247,7 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
         scene.setIgnoreUpdate(true);
 
         final PauseMenu menu = new PauseMenu(engine, this, false);
-        hud.setChildScene(menu.getScene(), false, true, true);
+        hud.getParent().setChildScene(menu.getScene(), false, true, true);
     }
 
     public void gameover() {
@@ -2382,7 +2382,7 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
                     engine.unregisterUpdateHandler(this);
 
                     PauseMenu menu = new PauseMenu(engine, GameScene.this, true);
-                    hud.setChildScene(menu.getScene(), false, true, true);
+                    hud.getParent().setChildScene(menu.getScene(), false, true, true);
                 }
             }
 
@@ -2403,7 +2403,7 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
         blockAreaFragment.show();
 
         scene.setIgnoreUpdate(false);
-        hud.getChildScene().back();
+        hud.getParent().getChildScene().back();
         paused = false;
 
         if (stat.getHp() <= 0 && !stat.getMod().contains(GameMod.MOD_NOFAIL)) {
@@ -2772,7 +2772,8 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
             case standard -> getStandardPPAt(objectId);
         };
 
-        hud.setPPCounterValue(!Double.isNaN(pp) ? pp : 0);
+        // TODO: Do PP counter stuff here
+        //hud.setPPCounterValue(!Double.isNaN(pp) ? pp : 0);
     }
 
     private double getDroidPPAt(int objectId) {

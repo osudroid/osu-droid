@@ -1,34 +1,28 @@
-package com.reco1l.osu.playfield
+package com.reco1l.osu.hud.elements
 
 import com.edlplan.framework.easing.*
 import com.reco1l.andengine.*
 import com.reco1l.andengine.Anchor
-import com.reco1l.andengine.container.*
 import com.reco1l.andengine.shape.*
 import com.reco1l.andengine.sprite.*
 import com.reco1l.andengine.texture.*
 import com.reco1l.framework.*
 import org.anddev.andengine.opengl.texture.region.*
 import ru.nsu.ccfit.zuev.osu.*
+import ru.nsu.ccfit.zuev.osu.game.GameScene
 import ru.nsu.ccfit.zuev.osu.scoring.*
 import ru.nsu.ccfit.zuev.skins.*
 
-
-class HealthBar(private val statistics: StatisticV2) : Container() {
-
+class HUDHealthBar : HUDElement(tag = "healthBar") {
 
     private val fill: AnimatedSprite
-
     private val fillClear: Box
 
     private val marker: ExtendedSprite
-
     private val explode: ExtendedSprite
 
     private val markerNormalTexture: TextureRegion?
-
     private val markerDangerTexture: TextureRegion?
-
     private val markerSuperDangerTexture: TextureRegion?
 
     private val isNewStyle: Boolean
@@ -96,9 +90,9 @@ class HealthBar(private val statistics: StatisticV2) : Container() {
     }
 
 
-    override fun onManagedUpdate(pSecondsElapsed: Float) {
+    override fun onGameplayUpdate(game: GameScene, statistics: StatisticV2, secondsElapsed: Float) {
 
-        fillClear.width = Interpolation.floatAt(pSecondsElapsed.coerceIn(0f, 0.2f), fillClear.drawWidth, (1f - statistics.hp) * fill.drawWidth, 0f, 0.2f, Easing.OutQuint)
+        fillClear.width = Interpolation.floatAt(secondsElapsed.coerceIn(0f, 0.2f), fillClear.drawWidth, (1f - statistics.hp) * fill.drawWidth, 0f, 0.2f, Easing.OutQuint)
 
         marker.x = fill.x + fill.drawWidth - fillClear.drawWidth
         marker.y = fill.y + (if (isNewStyle) fill.drawHeight / 2 else 0f)
@@ -128,14 +122,20 @@ class HealthBar(private val statistics: StatisticV2) : Container() {
             }
 
         }
+    }
 
-        super.onManagedUpdate(pSecondsElapsed)
+    override fun onNoteHit(statistics: StatisticV2) {
+        flash(statistics.hp)
+    }
+
+    override fun onBreakStateChange(isBreak: Boolean) {
+        isVisible = !isBreak
     }
 
 
-    fun flash() {
+    private fun flash(hp: Float) {
 
-        val isEpic = statistics.hp >= EPIC_CUTOFF
+        val isEpic = hp >= EPIC_CUTOFF
 
         bulge()
 

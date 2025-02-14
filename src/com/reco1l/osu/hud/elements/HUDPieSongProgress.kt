@@ -1,12 +1,13 @@
-package com.reco1l.osu.playfield
+package com.reco1l.osu.hud.elements
 
 import com.reco1l.andengine.*
-import com.reco1l.andengine.container.*
 import com.reco1l.andengine.shape.*
 import com.reco1l.framework.*
+import ru.nsu.ccfit.zuev.osu.game.GameScene
+import ru.nsu.ccfit.zuev.osu.scoring.StatisticV2
 
 
-class CircularSongProgress : Container() {
+class HUDPieSongProgress : HUDElement(tag = "pieSongProgress") {
 
 
     override var autoSizeAxes = Axes.Both
@@ -78,6 +79,14 @@ class CircularSongProgress : Container() {
             circularProgress.setPortion(progress)
         }
 
+    }
+
+    override fun onGameplayUpdate(game: GameScene, statistics: StatisticV2, secondsElapsed: Float) {
+        if (game.elapsedTime < game.firstObjectStartTime) {
+            setProgress((game.elapsedTime - game.initialElapsedTime) / (game.firstObjectStartTime - game.initialElapsedTime), true)
+        } else {
+            setProgress((game.elapsedTime - game.firstObjectStartTime) / (game.lastObjectEndTime - game.firstObjectStartTime), false)
+        }
     }
 
 }

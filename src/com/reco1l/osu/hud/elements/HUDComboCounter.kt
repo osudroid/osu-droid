@@ -1,76 +1,16 @@
-package com.reco1l.osu.playfield
+package com.reco1l.osu.hud.elements
 
 import com.edlplan.framework.easing.*
 import com.reco1l.andengine.*
-import com.reco1l.andengine.container.*
 import com.reco1l.andengine.modifier.OnModifierFinished
+import com.reco1l.osu.playfield.SpriteFont
 import ru.nsu.ccfit.zuev.osu.*
+import ru.nsu.ccfit.zuev.osu.game.GameScene
+import ru.nsu.ccfit.zuev.osu.scoring.StatisticV2
 import ru.nsu.ccfit.zuev.skins.*
-import java.text.*
-import java.util.*
-import kotlin.math.roundToInt
-
-class ScoreCounter : SpriteFont(OsuSkin.get().scorePrefix) {
 
 
-    private val format = DecimalFormat("00000000", DecimalFormatSymbols(Locale.US))
-
-
-    init {
-        anchor = Anchor.TopRight
-        origin = Anchor.TopRight
-        setScale(0.96f)
-
-        x = -10f
-        spacing = -OsuSkin.get().scoreOverlap
-    }
-
-
-    fun setScore(value: Int) {
-        text = format.format(value)
-    }
-
-}
-
-class PPCounter(private val algorithm: DifficultyAlgorithm) : SpriteFont(OsuSkin.get().scorePrefix) {
-
-    init {
-        anchor = Anchor.TopRight
-        origin = Anchor.TopRight
-        setScale(0.6f * 0.96f)
-        setValue(0.0)
-    }
-
-
-    fun setValue(value: Double) {
-        text = "${value.roundToInt()}${if (algorithm == DifficultyAlgorithm.droid) "dpp" else "pp"}"
-    }
-}
-
-
-class AccuracyCounter : SpriteFont(OsuSkin.get().scorePrefix) {
-
-
-    private val format = DecimalFormat("0.00%", DecimalFormatSymbols(Locale.US))
-
-
-    init {
-        anchor = Anchor.TopRight
-        origin = Anchor.TopRight
-        setScale(0.6f * 0.96f)
-        setPosition(-17f, 9f)
-        text = "100.00%"
-    }
-
-
-    fun setAccuracy(value: Float) {
-        text = format.format(value)
-    }
-
-}
-
-
-class ComboCounter : Container() {
+class HUDComboCounter : HUDElement(tag = "comboCounter") {
 
 
     private val popOutCount = if (Config.isAnimateComboText()) SpriteFont(OsuSkin.get().comboPrefix).also {
@@ -113,14 +53,6 @@ class ComboCounter : Container() {
     private var current = 0
 
 
-    init {
-        anchor = Anchor.BottomLeft
-        origin = Anchor.BottomLeft
-        setPosition(10f, -10f)
-        setScale(1.28f)
-    }
-
-
     fun setCombo(value: Int) {
 
         if (current == value) {
@@ -157,14 +89,16 @@ class ComboCounter : Container() {
     }
 
 
+    override fun onGameplayUpdate(game: GameScene, statistics: StatisticV2, secondsElapsed: Float) {
+        setCombo(statistics.combo)
+    }
+
+
     companion object {
 
         const val FONT_HEIGHT_RATIO = 0.625f
-
         const val VERTICAL_OFFSET = 9f
-
         const val BIG_POP_OUT_DURATION = 0.3f
-
         const val SMALL_POP_OUT_DURATION = 0.1f
 
     }

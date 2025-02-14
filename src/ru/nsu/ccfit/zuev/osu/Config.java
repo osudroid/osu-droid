@@ -18,7 +18,7 @@ import java.util.Map;
 import java.util.UUID;
 
 import com.reco1l.osu.multiplayer.Multiplayer;
-import com.reco1l.osu.playfield.ProgressIndicatorType;
+import com.reco1l.osu.hud.ProgressIndicatorType;
 
 import net.margaritov.preference.colorpicker.ColorPickerPreference;
 
