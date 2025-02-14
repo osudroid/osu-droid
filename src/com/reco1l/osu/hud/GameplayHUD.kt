@@ -2,6 +2,7 @@ package com.reco1l.osu.hud
 
 import com.reco1l.andengine.Anchor
 import com.reco1l.andengine.Axes
+import com.reco1l.andengine.attachTo
 import com.reco1l.andengine.container.Container
 import com.reco1l.andengine.shape.Line
 import com.reco1l.framework.ColorARGB
@@ -17,6 +18,7 @@ import com.reco1l.toolkt.kotlin.fastForEach
 import org.anddev.andengine.engine.camera.hud.*
 import org.anddev.andengine.entity.IEntity
 import org.anddev.andengine.input.touch.TouchEvent
+import ru.nsu.ccfit.zuev.osu.Config
 import ru.nsu.ccfit.zuev.osu.GlobalManager
 import ru.nsu.ccfit.zuev.osu.game.GameScene
 import ru.nsu.ccfit.zuev.osu.scoring.*
@@ -57,6 +59,11 @@ class GameplayHUD(private val stat: StatisticV2, private val game: GameScene) : 
         }
 
 
+    private var elementSelector: HUDElementSelector? = null
+
+    private var elementProperties: HUDElementProperties? = null
+
+
     init {
         // The engine we expect the HUD to be a effectively an instance of the AndEngine's HUD class.
         // Since we need Container features we set a HUD instance as the parent and we just need to
@@ -66,11 +73,17 @@ class GameplayHUD(private val stat: StatisticV2, private val game: GameScene) : 
         parent.registerTouchArea(this)
         parent.camera = GlobalManager.getInstance().engine.camera
 
-        relativeSizeAxes = Axes.Both
-        setSize(1f, 1f)
+        autoSizeAxes = Axes.None
+        setSize(Config.getRES_WIDTH().toFloat(), Config.getRES_HEIGHT().toFloat())
 
         onSkinDataChange(skinData)
         onEditModeChange(isInEditMode)
+
+        elementSelector = HUDElementSelector(this) attachTo parent
+        parent.registerTouchArea(elementSelector)
+
+        elementProperties = HUDElementProperties(this) attachTo parent
+        parent.registerTouchArea(elementProperties)
     }
 
 
@@ -173,6 +186,7 @@ class GameplayHUD(private val stat: StatisticV2, private val game: GameScene) : 
         mChildren?.fastForEach {
             (it as? HUDElement)?.onGameplayUpdate(game, stat, pSecondsElapsed)
         }
+        elementSelector?.onGameplayUpdate(game, stat, pSecondsElapsed)
         super.onManagedUpdate(pSecondsElapsed)
     }
 
@@ -190,12 +204,14 @@ class GameplayHUD(private val stat: StatisticV2, private val game: GameScene) : 
         mChildren?.fastForEach {
             (it as? HUDElement)?.onNoteHit(statistics)
         }
+        elementSelector?.onNoteHit(statistics)
     }
 
     fun onBreakStateChange(isBreak: Boolean) {
         mChildren?.fastForEach {
             (it as? HUDElement)?.onBreakStateChange(isBreak)
         }
+        elementSelector?.onBreakStateChange(isBreak)
     }
     //endregion
 

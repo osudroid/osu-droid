@@ -12,6 +12,8 @@ import kotlin.math.*
 
 open class ScrollableContainer : Container() {
 
+    override var autoSizeAxes = Axes.None
+
     /**
      * Which axes the container can scroll on.
      */
