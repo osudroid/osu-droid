@@ -131,7 +131,7 @@ class HUDHealthBar : HUDElement() {
     }
 
     override fun onBreakStateChange(isBreak: Boolean) {
-        isVisible = !isBreak
+        isChildrenVisible = !isBreak
     }
 
 
