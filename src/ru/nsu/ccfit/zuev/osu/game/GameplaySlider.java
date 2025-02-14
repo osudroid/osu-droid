@@ -596,6 +596,7 @@ public class GameplaySlider extends GameObject {
             if (reverse) {
                 if (remainingSpans <= 2) {
                     endArrow.setAlpha(0);
+                    tailCirclePiece.setAlpha(0);
                 }
 
                 if (remainingSpans > 1) {
@@ -603,6 +604,7 @@ public class GameplaySlider extends GameObject {
                 }
             } else if (remainingSpans <= 2) {
                 startArrow.setAlpha(0);
+                headCirclePiece.setAlpha(0);
             }
 
             ((GameScene) listener).onSliderReverse(
