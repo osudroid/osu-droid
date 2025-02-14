@@ -32,7 +32,7 @@ import com.reco1l.andengine.sprite.VideoSprite;
 import com.reco1l.andengine.ExtendedScene;
 import com.reco1l.osu.hitobjects.FollowPointConnection;
 import com.reco1l.osu.hud.GameplayHUD;
-import com.reco1l.osu.hud.ProgressIndicatorType;
+import com.reco1l.osu.hud.elements.ProgressIndicatorType;
 import com.reco1l.osu.hitobjects.SliderTickSprite;
 import com.reco1l.osu.ui.BlockAreaFragment;
 import com.reco1l.osu.ui.entity.GameplayLeaderboard;

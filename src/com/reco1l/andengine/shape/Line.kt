@@ -22,7 +22,7 @@ open class Line : ExtendedEntity(vertexBuffer = LineVertexBuffer()) {
         set(value) {
             if (field != value) {
                 field = value
-                onUpdateVertexBuffer()
+                updateVertexBuffer()
             }
         }
 
@@ -30,7 +30,7 @@ open class Line : ExtendedEntity(vertexBuffer = LineVertexBuffer()) {
         set(value) {
             if (field != value) {
                 field = value
-                onUpdateVertexBuffer()
+                updateVertexBuffer()
             }
         }
 
@@ -41,6 +41,7 @@ open class Line : ExtendedEntity(vertexBuffer = LineVertexBuffer()) {
         GLHelper.disableCulling(pGL)
         GLHelper.disableTextures(pGL)
         GLHelper.disableTexCoordArray(pGL)
+        pGL.glLineWidth(lineWidth)
     }
 
 
@@ -49,12 +50,11 @@ open class Line : ExtendedEntity(vertexBuffer = LineVertexBuffer()) {
     }
 
     override fun drawVertices(gl: GL10, camera: Camera) {
-        gl.glLineWidth(lineWidth)
         gl.glDrawArrays(GL_LINES, 0, 2)
     }
 
 
-    class LineVertexBuffer : VertexBuffer(2 * 2, GL11.GL_STATIC_DRAW, false) {
+    class LineVertexBuffer : VertexBuffer(2 * 2, GL11.GL_STATIC_DRAW, true) {
 
         fun update(fromPoint: Vec2, toPoint: Vec2) {
             floatBuffer.apply {
@@ -63,6 +63,7 @@ open class Line : ExtendedEntity(vertexBuffer = LineVertexBuffer()) {
                 put(fromPoint.y)
                 put(toPoint.x)
                 put(toPoint.y)
+                position(0)
             }
             setHardwareBufferNeedsUpdate()
         }

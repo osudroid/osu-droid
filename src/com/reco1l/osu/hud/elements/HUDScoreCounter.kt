@@ -8,7 +8,7 @@ import java.text.DecimalFormat
 import java.text.DecimalFormatSymbols
 import java.util.Locale
 
-class HUDScoreCounter : HUDElement(tag = "scoreCounter") {
+class HUDScoreCounter : HUDElement() {
 
     private val sprite = SpriteFont(OsuSkin.get().scorePrefix)
     private val format = DecimalFormat("00000000", DecimalFormatSymbols(Locale.US))
@@ -17,6 +17,8 @@ class HUDScoreCounter : HUDElement(tag = "scoreCounter") {
         sprite.spacing = -OsuSkin.get().scoreOverlap
         sprite.text = format.format(0)
         attachChild(sprite)
+
+        onMeasureContentSize()
     }
 
     override fun onGameplayUpdate(game: GameScene, statistics: StatisticV2, secondsElapsed: Float) {

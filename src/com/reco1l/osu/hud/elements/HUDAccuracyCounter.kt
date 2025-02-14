@@ -8,7 +8,7 @@ import java.text.DecimalFormat
 import java.text.DecimalFormatSymbols
 import java.util.Locale
 
-class HUDAccuracyCounter : HUDElement(tag = "accuracyCounter") {
+class HUDAccuracyCounter : HUDElement() {
 
     private val sprite = SpriteFont(OsuSkin.get().scorePrefix)
     private val format = DecimalFormat("0.00%", DecimalFormatSymbols(Locale.US))
@@ -16,6 +16,7 @@ class HUDAccuracyCounter : HUDElement(tag = "accuracyCounter") {
     init {
         sprite.text = "100.00%"
         attachChild(sprite)
+        onMeasureContentSize()
     }
 
     override fun onGameplayUpdate(game: GameScene, statistics: StatisticV2, secondsElapsed: Float) {

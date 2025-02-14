@@ -8,13 +8,14 @@ import ru.nsu.ccfit.zuev.osu.scoring.StatisticV2
 import ru.nsu.ccfit.zuev.skins.OsuSkin
 import kotlin.math.roundToInt
 
-class HUDPPCounter : HUDElement(tag = "ppCounter") {
+class HUDPPCounter : HUDElement() {
 
     private val sprite = SpriteFont(OsuSkin.get().scorePrefix)
 
     init {
         setValue(0.0)
         attachChild(sprite)
+        onMeasureContentSize()
     }
 
     fun setValue(value: Double) {

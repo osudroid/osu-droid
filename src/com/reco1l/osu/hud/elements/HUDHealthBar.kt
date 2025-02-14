@@ -13,7 +13,7 @@ import ru.nsu.ccfit.zuev.osu.game.GameScene
 import ru.nsu.ccfit.zuev.osu.scoring.*
 import ru.nsu.ccfit.zuev.skins.*
 
-class HUDHealthBar : HUDElement(tag = "healthBar") {
+class HUDHealthBar : HUDElement() {
 
     private val fill: AnimatedSprite
     private val fillClear: Box
@@ -87,6 +87,8 @@ class HUDHealthBar : HUDElement(tag = "healthBar") {
         fillClear.width = 0f
         fillClear.height = fill.drawHeight
         fillClear.setPosition(fill.x + fill.drawWidth, fill.y)
+
+        onMeasureContentSize()
     }
 
 

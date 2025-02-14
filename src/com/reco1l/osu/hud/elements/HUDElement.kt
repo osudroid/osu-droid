@@ -3,25 +3,38 @@ package com.reco1l.osu.hud.elements
 import com.reco1l.andengine.Anchor
 import com.reco1l.andengine.Axes
 import com.reco1l.andengine.container.Container
+import com.reco1l.andengine.shape.Line
 import com.reco1l.andengine.shape.RoundedBox
 import com.reco1l.andengine.text.ExtendedText
 import com.reco1l.framework.ColorARGB
+import com.reco1l.framework.math.Vec2
 import com.reco1l.osu.hud.GameplayHUD
-import com.reco1l.osu.hud.data.HUDElementData
-import com.reco1l.toolkt.kotlin.capitalize
+import com.reco1l.osu.hud.data.HUDElementSkinData
 import org.anddev.andengine.input.touch.TouchEvent
 import ru.nsu.ccfit.zuev.osu.ResourceManager
 import ru.nsu.ccfit.zuev.osu.game.GameScene
 import ru.nsu.ccfit.zuev.osu.scoring.StatisticV2
+import kotlin.math.abs
+import kotlin.reflect.KClass
 
-abstract class HUDElement(
+
+fun <T : HUDElement> KClass<T>.create(): T {
+    return constructors.first().call()
+}
+
+abstract class HUDElement : Container() {
 
     /**
-     * The tag of the element. This is used to identify the element in the HUD.
+     * The HUD element data for this element. This property can only be set once.
      */
-    val tag: String
-
-) : Container() {
+    var elementData: HUDElementSkinData? = null
+        set(value) {
+            if (field == null) {
+                field = value
+            } else {
+                throw IllegalStateException("The layout data for this element has already been set.")
+            }
+        }
 
     /**
      * Whether the element is in edit mode or not.
@@ -35,38 +48,75 @@ abstract class HUDElement(
         }
 
     /**
-     * Returns the tag with a readable manner.
+     * Whether the element is selected or not.
      */
-    val readableTag: String
-        get() = tag.replace("([a-z])([A-Z])".toRegex(), "$1 $2").lowercase().capitalize()
+    var isSelected = false
+        set(value) {
+            if (field != value) {
+                val background = background as HUDElementUnderlay
+
+                if (value) {
+                    background.select()
+                } else {
+                    background.unselect()
+                }
+                field = value
+            }
+        }
+
+    /**
+     * The line that connects this element to the parent's anchor
+     */
+    var nodeLine: Line? = null
+
+    /**
+     * Returns the name of this element.
+     */
+    val name: String
+        get() = this::class.simpleName!!.substring(3).replace("([a-z])([A-Z])".toRegex(), "$1 $2")
 
 
-    override fun getParent(): GameplayHUD? {
-        return super.getParent() as? GameplayHUD
-    }
+    private var initialX = 0f
+    private var initialY = 0f
 
 
     open fun onEditModeChange(value: Boolean) {
         background = if (value) HUDElementUnderlay(this) else null
     }
 
-    fun onElementDataChange(data: HUDElementData) {
 
-        parent!!.removeConstraint(this)
+    fun onApplyElementSkinData() {
 
-        if (data.constraintTo != null) {
-            parent!!.addConstraint(this, parent!!.getElementByTag(data.constraintTo)!!)
-        }
+        val layout = elementData?.layout ?: return
 
-        anchor = data.anchor
-        origin = data.origin
-        setScale(data.scale)
-        setPosition(data.constraintOffset.x, data.constraintOffset.y)
+        anchor = layout.anchor
+        origin = layout.origin
+
+        setScale(layout.scale)
+        setPosition(layout.position.x, layout.position.y)
     }
 
 
-    private var initialX = 0f
-    private var initialY = 0f
+    private fun calculateNearestAnchor(deltaX: Float, deltaY: Float) {
+
+        val anchors = floatArrayOf(0f, 0.5f, 1f)
+
+        val originX = drawX + drawWidth * origin.x + deltaX
+        val originY = drawY + drawHeight * origin.y + deltaY
+
+        val nearestX = anchors.minBy { abs(originX - parent!!.drawWidth * it) }
+        val nearestY = anchors.minBy { abs(originY - parent!!.drawHeight * it) }
+
+        if (nearestX != anchor.x) {
+            x = -x
+        }
+
+        if (nearestY != anchor.y) {
+            y = -y
+        }
+
+        anchor = Vec2(nearestX, nearestY)
+    }
 
     override fun onAreaTouched(event: TouchEvent, localX: Float, localY: Float): Boolean {
 
@@ -75,7 +125,7 @@ abstract class HUDElement(
             val parentLocalY = drawY + localY
 
             if (event.action == TouchEvent.ACTION_DOWN) {
-                //parent!!.onElementSelected(this)
+                parent!!.selected = this
                 initialX = parentLocalX
                 initialY = parentLocalY
                 return true
@@ -85,7 +135,18 @@ abstract class HUDElement(
                 val deltaX = parentLocalX - initialX
                 val deltaY = parentLocalY - initialY
 
+                calculateNearestAnchor(deltaX, deltaY)
                 setPosition(x + deltaX, y + deltaY)
+
+                nodeLine?.toPoint = Vec2(
+                    parent!!.drawWidth * anchor.x,
+                    parent!!.drawHeight * anchor.y
+                )
+
+                nodeLine?.fromPoint = Vec2(
+                    drawX + drawWidth * origin.x,
+                    drawY + drawHeight * origin.y
+                )
 
                 initialX = parentLocalX
                 initialY = parentLocalY
@@ -97,6 +158,7 @@ abstract class HUDElement(
     }
 
 
+    //region Gameplay Events
     open fun onGameplayUpdate(game: GameScene, statistics: StatisticV2, secondsElapsed: Float) {
         // Override this method to update the element with the latest gameplay data.
     }
@@ -108,25 +170,32 @@ abstract class HUDElement(
     open fun onBreakStateChange(isBreak: Boolean) {
         // Override this method to handle break state changes.
     }
+    //endregion
+
+
+    override fun getParent(): GameplayHUD? {
+        return super.getParent() as? GameplayHUD
+    }
 
 }
 
 
 class HUDElementUnderlay(private val element: HUDElement) : Container() {
 
-    private val tagText = ExtendedText()
+    private val nameText = ExtendedText()
 
 
     init {
-        tagText.font = ResourceManager.getInstance().getFont("smallFont")
-        tagText.color = ColorARGB.White
-        tagText.text = element.readableTag
-        attachChild(tagText)
+        nameText.font = ResourceManager.getInstance().getFont("smallFont")
+        nameText.color = ColorARGB(0xFFF27272)
+        nameText.text = element.name
+        nameText.isVisible = false
+        attachChild(nameText)
 
         autoSizeAxes = Axes.None
 
         background = RoundedBox().apply {
-            color = ColorARGB.Red
+            color = ColorARGB(0x29F27272)
             alpha = 0.25f
         }
     }
@@ -134,20 +203,31 @@ class HUDElementUnderlay(private val element: HUDElement) : Container() {
     override fun onManagedUpdate(pSecondsElapsed: Float) {
 
         if (element.drawY - drawHeight <= 0f) {
-            tagText.anchor = Anchor.BottomLeft
-            tagText.origin = Anchor.TopLeft
+            nameText.anchor = Anchor.BottomLeft
+            nameText.origin = Anchor.TopLeft
         } else {
-            tagText.anchor = Anchor.TopLeft
-            tagText.origin = Anchor.BottomLeft
+            nameText.anchor = Anchor.TopLeft
+            nameText.origin = Anchor.BottomLeft
         }
 
         // Cancel the scaling of the HUD element so the text is not affected by it, the same goes for the background.
-        tagText.setScale(1f / element.scaleX, 1f / element.scaleY)
+        nameText.setScale(1f / element.scaleX, 1f / element.scaleY)
 
         (background as RoundedBox).cornerRadius = 6f * (1f / element.scaleX)
     }
 
 
+    fun select() {
+        background!!.color = ColorARGB(0x80F27272)
+        nameText.isVisible = true
+        element.nodeLine?.isVisible = true
+    }
+
+    fun unselect() {
+        background!!.color = ColorARGB(0x29F27272)
+        nameText.isVisible = false
+        element.nodeLine?.isVisible = false
+    }
 
 
 }

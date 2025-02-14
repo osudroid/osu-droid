@@ -10,7 +10,7 @@ import ru.nsu.ccfit.zuev.osu.scoring.StatisticV2
 import ru.nsu.ccfit.zuev.skins.*
 
 
-class HUDComboCounter : HUDElement(tag = "comboCounter") {
+class HUDComboCounter : HUDElement() {
 
 
     private val popOutCount = if (Config.isAnimateComboText()) SpriteFont(OsuSkin.get().comboPrefix).also {
@@ -19,13 +19,10 @@ class HUDComboCounter : HUDElement(tag = "comboCounter") {
         it.text = "0x"
         it.anchor = Anchor.BottomLeft
         it.origin = Anchor.BottomLeft
+        it.spacing = -OsuSkin.get().comboOverlap
 
         // In stable, the bigger pop out scales a bit to the left
         it.translationX = -3f
-        it.translationY = -(FONT_HEIGHT_RATIO * it.drawHeight + VERTICAL_OFFSET)
-
-        it.y = -(1 - FONT_HEIGHT_RATIO) * it.drawHeight + VERTICAL_OFFSET
-        it.spacing = -OsuSkin.get().comboOverlap
 
         attachChild(it)
 
@@ -36,10 +33,6 @@ class HUDComboCounter : HUDElement(tag = "comboCounter") {
         it.text = "0x"
         it.anchor = Anchor.BottomLeft
         it.origin = Anchor.BottomLeft
-
-        it.translationY = -(FONT_HEIGHT_RATIO * it.drawHeight + VERTICAL_OFFSET)
-
-        it.y = -(1 - FONT_HEIGHT_RATIO) * it.drawHeight + VERTICAL_OFFSET
         it.spacing = -OsuSkin.get().comboOverlap
 
         attachChild(it, 0)
@@ -51,6 +44,11 @@ class HUDComboCounter : HUDElement(tag = "comboCounter") {
 
 
     private var current = 0
+
+
+    init {
+        onMeasureContentSize()
+    }
 
 
     fun setCombo(value: Int) {
@@ -95,12 +93,8 @@ class HUDComboCounter : HUDElement(tag = "comboCounter") {
 
 
     companion object {
-
-        const val FONT_HEIGHT_RATIO = 0.625f
-        const val VERTICAL_OFFSET = 9f
         const val BIG_POP_OUT_DURATION = 0.3f
         const val SMALL_POP_OUT_DURATION = 0.1f
-
     }
 
 }
