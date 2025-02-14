@@ -121,6 +121,7 @@ open class ConstraintContainer : Container() {
         constraints.forEach { (source, target) ->
             if (target == child) {
                 source.invalidateTransformations()
+                onChildPositionChanged(source)
             }
         }
         super.onChildPositionChanged(child)
