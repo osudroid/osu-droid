@@ -117,4 +117,13 @@ open class ConstraintContainer : Container() {
         removeConstraint(child as? ExtendedEntity)
     }
 
+    override fun onChildPositionChanged(child: IEntity) {
+        constraints.forEach { (source, target) ->
+            if (target == child) {
+                source.invalidateTransformations()
+            }
+        }
+        super.onChildPositionChanged(child)
+    }
+
 }
