@@ -366,7 +366,7 @@ abstract class ExtendedEntity(
         }
     }
 
-    protected open fun invalidateTransformations() {
+    open fun invalidateTransformations() {
         mLocalToParentTransformationDirty = true
         mParentToLocalTransformationDirty = true
     }
@@ -842,9 +842,7 @@ abstract class ExtendedEntity(
             val transformedX = localX - boundEntity.getDrawX()
             val transformedY = localY - boundEntity.getDrawY()
 
-            boundEntity.onAreaTouched(event, transformedX, transformedY)
-
-            if (event.isActionUp || event.isActionOutside || event.isActionCancel) {
+            if (!boundEntity.onAreaTouched(event, transformedX, transformedY)) {
                 currentBoundEntity = null
             }
             return true
@@ -860,9 +858,7 @@ abstract class ExtendedEntity(
                     val transformedY = localY - child.getDrawY()
 
                     if (child.onAreaTouched(event, transformedX, transformedY)) {
-                        if (event.isActionDown) {
-                            currentBoundEntity = child
-                        }
+                        currentBoundEntity = child
                         return true
                     }
                 }
