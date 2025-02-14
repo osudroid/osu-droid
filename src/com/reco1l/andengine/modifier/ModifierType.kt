@@ -85,6 +85,12 @@ enum class ModifierType {
      */
     Parallel,
 
+    SizeX,
+
+    SizeY,
+
+    SizeXY,
+
     /**
      * Does nothing, used as a delay modifier.
      */
@@ -110,6 +116,21 @@ enum class ModifierType {
         MoveX -> floatArrayOf(entity.x)
         MoveY -> floatArrayOf(entity.y)
         MoveXY -> floatArrayOf(entity.x, entity.y)
+
+        SizeX -> {
+            entity as? ExtendedEntity ?: throw IllegalArgumentException("SizeX is only available for ExtendedEntity instances.")
+            floatArrayOf(entity.width)
+        }
+
+        SizeY -> {
+            entity as? ExtendedEntity ?: throw IllegalArgumentException("SizeY is only available for ExtendedEntity instances.")
+            floatArrayOf(entity.height)
+        }
+
+        SizeXY -> {
+            entity as? ExtendedEntity ?: throw IllegalArgumentException("SizeXY is only available for ExtendedEntity instances.")
+            floatArrayOf(entity.width, entity.height)
+        }
 
         TranslateX -> {
             entity as? ExtendedEntity ?: throw IllegalArgumentException("TranslateX is only available for ExtendedEntity instances.")
@@ -172,6 +193,21 @@ enum class ModifierType {
                 entity as? ExtendedEntity ?: throw IllegalArgumentException("TranslateXY is only available for ExtendedEntity instances.")
                 entity.translationX = valueAt(0)
                 entity.translationY = valueAt(1)
+            }
+
+            SizeX -> {
+                entity as? ExtendedEntity ?: throw IllegalArgumentException("SizeX is only available for ExtendedEntity instances.")
+                entity.width = valueAt(0)
+            }
+
+            SizeY -> {
+                entity as? ExtendedEntity ?: throw IllegalArgumentException("SizeY is only available for ExtendedEntity instances.")
+                entity.height = valueAt(0)
+            }
+
+            SizeXY -> {
+                entity as? ExtendedEntity ?: throw IllegalArgumentException("SizeXY is only available for ExtendedEntity instances.")
+                entity.setSize(valueAt(0), valueAt(1))
             }
 
             Rotation -> entity.rotation = valueAt(0)
