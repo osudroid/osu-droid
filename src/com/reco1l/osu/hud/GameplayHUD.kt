@@ -7,6 +7,7 @@ import com.reco1l.andengine.container.Container
 import com.reco1l.andengine.shape.Line
 import com.reco1l.framework.ColorARGB
 import com.reco1l.framework.math.Vec2
+import com.reco1l.osu.hud.data.HUDElementSkinData
 import com.reco1l.osu.hud.data.HUDSkinData
 import com.reco1l.osu.hud.elements.HUDAccuracyCounter
 import com.reco1l.osu.hud.elements.HUDComboCounter
@@ -23,7 +24,10 @@ import ru.nsu.ccfit.zuev.osu.GlobalManager
 import ru.nsu.ccfit.zuev.osu.game.GameScene
 import ru.nsu.ccfit.zuev.osu.scoring.*
 
-class GameplayHUD(private val stat: StatisticV2, private val game: GameScene) : Container() {
+class GameplayHUD(
+    private val statistics: StatisticV2,
+    private val gameScene: GameScene
+) : Container() {
 
 
     /**
@@ -78,17 +82,43 @@ class GameplayHUD(private val stat: StatisticV2, private val game: GameScene) : 
 
         onSkinDataChange(skinData)
         onEditModeChange(isInEditMode)
+    }
 
-        elementSelector = HUDElementSelector(this) attachTo parent
-        parent.registerTouchArea(elementSelector)
 
-        elementProperties = HUDElementProperties(this) attachTo parent
-        parent.registerTouchArea(elementProperties)
+    fun addElement(data: HUDElementSkinData, inEditMode: Boolean = isInEditMode) {
+        val element = data.type.create()
+        element.elementData = data
+        attachChild(element)
+        addAnchorNodeLine(element)
+
+        element.isInEditMode = inEditMode
     }
 
 
     private fun onEditModeChange(value: Boolean) {
-        mChildren?.forEach { (it as? HUDElement)?.isInEditMode = value }
+
+        mChildren?.forEach {
+            (it as? HUDElement)?.isInEditMode = value
+        }
+
+        val parent = parent!!
+
+        if (value) {
+            elementSelector = HUDElementSelector(this) attachTo parent
+            elementProperties = HUDElementProperties(this) attachTo parent
+
+            parent.registerTouchArea(elementSelector)
+            parent.registerTouchArea(elementProperties)
+        } else {
+            parent.unregisterTouchArea(elementSelector)
+            parent.unregisterTouchArea(elementProperties)
+
+            elementSelector?.detachSelf()
+            elementSelector = null
+
+            elementProperties?.detachSelf()
+            elementProperties = null
+        }
     }
 
     private fun onSkinDataChange(layoutData: HUDSkinData) {
@@ -97,18 +127,12 @@ class GameplayHUD(private val stat: StatisticV2, private val game: GameScene) : 
 
         // First pass: We attach everything so that elements can reference between them when
         // applying default layout.
-        layoutData.elements.forEach { data ->
-            val element = data.type.create()
-            element.elementData = data
-            attachChild(element)
-        }
+        layoutData.elements.forEach { data -> addElement(data) }
 
         applyDefaultLayout()
 
         // Second pass: Apply custom element data that will override the default layout if any.
-        mChildren?.forEach { (it as? HUDElement)?.onApplyElementSkinData() }
-
-        addAnchorNodes()
+        mChildren?.forEach { (it as? HUDElement)?.onSkinDataChange(it.elementData) }
     }
 
     private fun applyDefaultLayout() {
@@ -148,45 +172,36 @@ class GameplayHUD(private val stat: StatisticV2, private val game: GameScene) : 
         comboCounter?.setScale(1.28f)
     }
 
-    private fun addAnchorNodes() {
+    private fun addAnchorNodeLine(element: HUDElement) {
 
-        fun addAnchorNodeLine(element: HUDElement) {
+        val pointOnParent = Vec2(
+            drawWidth * element.anchor.x,
+            drawHeight * element.anchor.y
+        )
 
-            val pointOnParent = Vec2(
-                drawWidth * element.anchor.x,
-                drawHeight * element.anchor.y
-            )
+        val pointFromChild = Vec2(
+            element.drawX + element.drawWidth * element.origin.x,
+            element.drawY + element.drawHeight * element.origin.y
+        )
 
-            val pointFromChild = Vec2(
-                element.drawX + element.drawWidth * element.origin.x,
-                element.drawY + element.drawHeight * element.origin.y
-            )
-
-            element.nodeLine = Line().apply {
-                fromPoint = pointFromChild
-                toPoint = pointOnParent
-                color = ColorARGB(0xFFF27272)
-                lineWidth = 10f
-                isVisible = false
-            }
-
-            attachChild(element.nodeLine!!)
+        element.nodeLine = Line().apply {
+            fromPoint = pointFromChild
+            toPoint = pointOnParent
+            color = ColorARGB(0xFFF27272)
+            lineWidth = 10f
+            isVisible = false
         }
 
-        mChildren?.filterIsInstance<Line>()?.forEach(IEntity::detachSelf)
-        mChildren?.toList()?.forEach {
-            if (it is HUDElement) {
-                addAnchorNodeLine(it)
-            }
-        }
+        attachChild(element.nodeLine!!)
     }
 
 
+    //region Entity events
     override fun onManagedUpdate(pSecondsElapsed: Float) {
         mChildren?.fastForEach {
-            (it as? HUDElement)?.onGameplayUpdate(game, stat, pSecondsElapsed)
+            (it as? HUDElement)?.onGameplayUpdate(gameScene, statistics, pSecondsElapsed)
         }
-        elementSelector?.onGameplayUpdate(game, stat, pSecondsElapsed)
+        elementSelector?.onGameplayUpdate(gameScene, statistics, pSecondsElapsed)
         super.onManagedUpdate(pSecondsElapsed)
     }
 
@@ -197,7 +212,7 @@ class GameplayHUD(private val stat: StatisticV2, private val game: GameScene) : 
         selected = null
         return false
     }
-
+    //endregion
 
     //region Gameplay Events
     fun onNoteHit(statistics: StatisticV2) {

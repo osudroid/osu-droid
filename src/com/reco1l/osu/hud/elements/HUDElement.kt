@@ -85,9 +85,9 @@ abstract class HUDElement : Container() {
     }
 
 
-    fun onApplyElementSkinData() {
+    open fun onSkinDataChange(data: HUDElementSkinData?) {
 
-        val layout = elementData?.layout ?: return
+        val layout = data?.layout ?: return
 
         anchor = layout.anchor
         origin = layout.origin

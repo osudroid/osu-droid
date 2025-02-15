@@ -1,8 +1,9 @@
 package com.reco1l.osu.hud.elements
 
 import com.edlplan.framework.easing.*
-import com.reco1l.andengine.*
 import com.reco1l.andengine.modifier.OnModifierFinished
+import com.reco1l.framework.math.Vec2
+import com.reco1l.osu.hud.data.HUDElementSkinData
 import com.reco1l.osu.playfield.SpriteFont
 import ru.nsu.ccfit.zuev.osu.*
 import ru.nsu.ccfit.zuev.osu.game.GameScene
@@ -12,13 +13,19 @@ import ru.nsu.ccfit.zuev.skins.*
 
 class HUDComboCounter : HUDElement() {
 
+    override var origin: Vec2
+        get() = super.origin
+        set(value) {
+            super.origin = value
+            popOutCount?.origin = value
+            displayedCountTextSprite.origin = value
+        }
+
 
     private val popOutCount = if (Config.isAnimateComboText()) SpriteFont(OsuSkin.get().comboPrefix).also {
 
         it.alpha = 0f
         it.text = "0x"
-        it.anchor = Anchor.BottomLeft
-        it.origin = Anchor.BottomLeft
         it.spacing = -OsuSkin.get().comboOverlap
 
         // In stable, the bigger pop out scales a bit to the left
@@ -31,8 +38,6 @@ class HUDComboCounter : HUDElement() {
     private val displayedCountTextSprite = SpriteFont(OsuSkin.get().comboPrefix).also {
 
         it.text = "0x"
-        it.anchor = Anchor.BottomLeft
-        it.origin = Anchor.BottomLeft
         it.spacing = -OsuSkin.get().comboOverlap
 
         attachChild(it, 0)
@@ -87,8 +92,18 @@ class HUDComboCounter : HUDElement() {
     }
 
 
+
     override fun onGameplayUpdate(game: GameScene, statistics: StatisticV2, secondsElapsed: Float) {
         setCombo(statistics.combo)
+    }
+
+    override fun onSkinDataChange(data: HUDElementSkinData?) {
+        super.onSkinDataChange(data)
+
+        displayedCountTextSprite.anchor = anchor
+        displayedCountTextSprite.origin = origin
+        popOutCount?.origin = origin
+        popOutCount?.anchor = anchor
     }
 
 

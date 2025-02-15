@@ -36,6 +36,7 @@ open class ScrollableContainer : Container() {
 
             indicatorX?.alpha = 0.5f
             field = value
+            invalidateTransformations()
         }
 
     /**
@@ -55,6 +56,7 @@ open class ScrollableContainer : Container() {
 
             indicatorY?.alpha = 0.5f
             field = value
+            invalidateTransformations()
         }
 
     /**
@@ -280,6 +282,11 @@ open class ScrollableContainer : Container() {
 
     override fun onAreaTouched(event: TouchEvent, localX: Float, localY: Float): Boolean {
 
+        if (super.onAreaTouched(event, localX, localY)) {
+            return false
+        }
+        invalidateInputBinding()
+
         when (event.action) {
 
             ACTION_DOWN -> {
@@ -288,6 +295,7 @@ open class ScrollableContainer : Container() {
 
                 velocityX = 0f
                 velocityY = 0f
+                return true
             }
 
             ACTION_MOVE -> {
@@ -295,12 +303,10 @@ open class ScrollableContainer : Container() {
                 var deltaX = if (scrollAxes.isHorizontal) localX - initialX else 0f
                 var deltaY = if (scrollAxes.isVertical) localY - initialY else 0f
 
-                if (!isDragging) {
-                    isDragging = abs(deltaX) > 1f || abs(deltaY) > 1f
+                isDragging = abs(deltaX) > 1f || abs(deltaY) > 1f
 
-                    if (!isDragging) {
-                        return super.onAreaTouched(event, localX, localY)
-                    }
+                if (!isDragging) {
+                    return super.onAreaTouched(event, localX, localY)
                 }
 
                 val length = hypot(deltaX, deltaY)
@@ -328,18 +334,17 @@ open class ScrollableContainer : Container() {
                 }
 
                 lastDragTimeSec = elapsedTimeSec
+                return true
             }
 
             else -> {
+                if (!isDragging) {
+                    return super.onAreaTouched(event, localX, localY)
+                }
                 isDragging = false
+                return false
             }
         }
-
-        if (!isDragging) {
-            return super.onAreaTouched(event, localX, localY)
-        }
-
-        return true
     }
 
 

@@ -14,7 +14,6 @@ import com.reco1l.andengine.shape.RoundedBox
 import com.reco1l.andengine.text.ExtendedText
 import com.reco1l.framework.ColorARGB
 import com.reco1l.framework.math.Vec4
-import com.reco1l.osu.hud.data.HUDElementLayoutData
 import com.reco1l.osu.hud.data.HUDElementSkinData
 import com.reco1l.osu.hud.elements.HUDAccuracyCounter
 import com.reco1l.osu.hud.elements.HUDComboCounter
@@ -29,6 +28,7 @@ import ru.nsu.ccfit.zuev.osu.Config
 import ru.nsu.ccfit.zuev.osu.ResourceManager
 import ru.nsu.ccfit.zuev.osu.game.GameScene
 import ru.nsu.ccfit.zuev.osu.scoring.StatisticV2
+import kotlin.math.abs
 
 class HUDElementSelector(private val hud: GameplayHUD) : Container() {
 
@@ -112,39 +112,7 @@ class HUDElementSelector(private val hud: GameplayHUD) : Container() {
             } attachTo this
 
             elements.forEach { element ->
-
-                val elementWrapper = Container().apply {
-                    relativeSizeAxes = Axes.X
-                    width = 1f
-                    height = 120f
-                    padding = Vec4(12f)
-                    background = RoundedBox().apply {
-                        color = ColorARGB(0xFF363653)
-                        cornerRadius = 12f
-                    }
-                } attachTo linearContainer
-
-                ExtendedText().apply {
-                    font = ResourceManager.getInstance().getFont("smallFont")
-                    anchor = Anchor.BottomLeft
-                    origin = Anchor.BottomLeft
-                    text = element.name
-                    color = ColorARGB.White
-                } attachTo elementWrapper
-
-                element.elementData = HUDElementSkinData(element::class, HUDElementLayoutData())
-                element attachTo elementWrapper
-                element.onApplyElementSkinData()
-
-                // Scaling the element inside the box
-
-                if (element.drawHeight > elementWrapper.getPaddedHeight()) {
-                    element.setScale(elementWrapper.getPaddedHeight() / element.drawHeight)
-                }
-
-                if (element.drawWidth > elementWrapper.getPaddedWidth()) {
-                    element.setScale(elementWrapper.getPaddedWidth() / element.drawWidth)
-                }
+                HUDElementPreview(element, hud) attachTo linearContainer
             }
 
         } attachTo this
@@ -195,5 +163,82 @@ class HUDElementSelector(private val hud: GameplayHUD) : Container() {
         }
 
     }
+
+}
+
+class HUDElementPreview(val element: HUDElement, val hud: GameplayHUD): Container() {
+
+
+    init {
+        width = HUDElementSelector.SELECTOR_WIDTH - 16f * 2
+        height = 120f
+        padding = Vec4(12f)
+        background = RoundedBox().apply {
+            color = ColorARGB(0xFF363653)
+            cornerRadius = 12f
+        }
+        scaleCenterX = 0.5f
+        scaleCenterY = 0.5f
+
+        ExtendedText().apply {
+            font = ResourceManager.getInstance().getFont("smallFont")
+            anchor = Anchor.BottomLeft
+            origin = Anchor.BottomLeft
+            text = element.name
+            color = ColorARGB.White
+        } attachTo this
+
+        element attachTo this
+        element.onSkinDataChange(HUDElementSkinData(element::class))
+
+        // Scaling the element inside the box
+
+        if (element.drawHeight > getPaddedHeight()) {
+            element.setScale(getPaddedHeight() / element.drawHeight)
+        }
+
+        if (element.drawWidth > getPaddedWidth()) {
+            element.setScale(getPaddedWidth() / element.drawWidth)
+        }
+    }
+
+    //region Input handling
+    private var initialX = 0f
+    private var initialY = 0f
+    private var initialTime = 0L
+    private var wasMoved = false
+
+    override fun onAreaTouched(event: TouchEvent, localX: Float, localY: Float): Boolean {
+
+        if (event.isActionDown) {
+            initialX = localX
+            initialY = localY
+            initialTime = System.currentTimeMillis()
+
+            clearEntityModifiers()
+            scaleTo(0.9f, 0.1f)
+            return true
+        }
+
+        if (event.isActionMove) {
+            clearEntityModifiers()
+            scaleTo(1f, 0.1f)
+        }
+
+        if (event.isActionUp) {
+            clearEntityModifiers()
+            scaleTo(1f, 0.1f)
+
+            wasMoved = abs(localX - initialX) > 1f && abs(localY - initialY) > 1f
+
+            if (!wasMoved && System.currentTimeMillis() - initialTime > 50) {
+                hud.addElement(HUDElementSkinData(element::class))
+                return false
+            }
+        }
+
+        return false
+    }
+    //endregion
 
 }

@@ -5,6 +5,7 @@ import com.reco1l.andengine.container.*
 import com.reco1l.andengine.modifier.*
 import com.reco1l.framework.*
 import com.reco1l.framework.math.Vec4
+import com.reco1l.toolkt.kotlin.fastForEach
 import org.anddev.andengine.engine.camera.*
 import org.anddev.andengine.entity.*
 import org.anddev.andengine.entity.scene.Scene
@@ -366,9 +367,15 @@ abstract class ExtendedEntity(
         }
     }
 
-    open fun invalidateTransformations() {
+    open fun invalidateTransformations(recursively: Boolean = true) {
         mLocalToParentTransformationDirty = true
         mParentToLocalTransformationDirty = true
+
+        if (recursively) {
+            mChildren?.fastForEach {
+                (it as? ExtendedEntity)?.invalidateTransformations()
+            }
+        }
     }
 
 
@@ -828,6 +835,16 @@ abstract class ExtendedEntity(
 
 
     // Input
+
+    open fun invalidateInputBinding(recursively: Boolean = true) {
+        currentBoundEntity = null
+
+        if (recursively) {
+            mChildren?.fastForEach {
+                (it as? ExtendedEntity)?.invalidateInputBinding()
+            }
+        }
+    }
 
     override fun onAreaTouched(
         event: TouchEvent,
