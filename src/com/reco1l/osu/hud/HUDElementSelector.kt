@@ -10,6 +10,7 @@ import com.reco1l.andengine.container.ScrollableContainer
 import com.reco1l.andengine.getPaddedHeight
 import com.reco1l.andengine.getPaddedWidth
 import com.reco1l.andengine.shape.Box
+import com.reco1l.andengine.shape.Circle
 import com.reco1l.andengine.shape.RoundedBox
 import com.reco1l.andengine.text.ExtendedText
 import com.reco1l.framework.ColorARGB
@@ -173,12 +174,13 @@ class HUDElementPreview(val element: HUDElement, val hud: GameplayHUD): Containe
         width = HUDElementSelector.SELECTOR_WIDTH - 16f * 2
         height = 120f
         padding = Vec4(12f)
+        scaleCenterX = 0.5f
+        scaleCenterY = 0.5f
+
         background = RoundedBox().apply {
             color = ColorARGB(0xFF363653)
             cornerRadius = 12f
         }
-        scaleCenterX = 0.5f
-        scaleCenterY = 0.5f
 
         ExtendedText().apply {
             font = ResourceManager.getInstance().getFont("smallFont")

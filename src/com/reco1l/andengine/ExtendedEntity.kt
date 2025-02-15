@@ -367,14 +367,12 @@ abstract class ExtendedEntity(
         }
     }
 
-    open fun invalidateTransformations(recursively: Boolean = true) {
+    open fun invalidateTransformations() {
         mLocalToParentTransformationDirty = true
         mParentToLocalTransformationDirty = true
 
-        if (recursively) {
-            mChildren?.fastForEach {
-                (it as? ExtendedEntity)?.invalidateTransformations()
-            }
+        mChildren?.fastForEach {
+            (it as? ExtendedEntity)?.invalidateTransformations()
         }
     }
 
@@ -473,14 +471,6 @@ abstract class ExtendedEntity(
         applyBlending(pGL)
     }
 
-    override fun doDraw(gl: GL10, camera: Camera) {
-
-        background?.setSize(drawWidth, drawHeight)
-        background?.onDraw(gl, camera)
-
-        super.doDraw(gl, camera)
-    }
-
     override fun onDrawChildren(gl: GL10, camera: Camera) {
 
         val hasPaddingApplicable = padding.left > 0f || padding.top > 0f
@@ -526,9 +516,6 @@ abstract class ExtendedEntity(
         if (hasPaddingApplicable) {
             gl.glTranslatef(-padding.right, -padding.top, 0f)
         }
-
-        foreground?.setSize(drawWidth, drawHeight)
-        foreground?.onDraw(gl, camera)
     }
 
     override fun onManagedDraw(gl: GL10, camera: Camera) {
@@ -538,7 +525,22 @@ abstract class ExtendedEntity(
             onUpdateVertexBuffer()
         }
 
-        super.onManagedDraw(gl, camera)
+        gl.glPushMatrix()
+
+        if (!isCullingEnabled || !isCulled(camera)) {
+            onApplyTransformations(gl, camera)
+
+            background?.setSize(drawWidth, drawHeight)
+            background?.onDraw(gl, camera)
+
+            doDraw(gl, camera)
+            onDrawChildren(gl, camera)
+
+            foreground?.setSize(drawWidth, drawHeight)
+            foreground?.onDraw(gl, camera)
+        }
+
+        gl.glPopMatrix()
     }
 
     override fun onInitDraw(pGL: GL10) {
