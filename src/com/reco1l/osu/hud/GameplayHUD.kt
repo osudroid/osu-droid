@@ -21,12 +21,10 @@ import ru.nsu.ccfit.zuev.osu.game.GameScene
 import ru.nsu.ccfit.zuev.osu.scoring.*
 import ru.nsu.ccfit.zuev.skins.OsuSkin
 import java.io.File
+import kotlin.reflect.KClass
 import kotlin.reflect.full.primaryConstructor
 
-class GameplayHUD(
-    private val statistics: StatisticV2,
-    private val gameScene: GameScene
-) : Container() {
+class GameplayHUD : Container(), IGameplayEvents {
 
     /**
      * The currently selected element.
@@ -163,6 +161,7 @@ class GameplayHUD(
         comboCounter?.setPosition(10f, -10f)
         comboCounter?.setScale(1.28f)
     }
+
     //endregion
 
     //region Elements events
@@ -195,30 +194,34 @@ class GameplayHUD(
     }
     //endregion
 
-    //region Entity events
-    override fun onManagedUpdate(pSecondsElapsed: Float) {
-        mChildren?.fastForEach {
-            (it as? HUDElement)?.onGameplayUpdate(gameScene, statistics, pSecondsElapsed)
-        }
-        elementSelector?.onGameplayUpdate(gameScene, statistics, pSecondsElapsed)
-        super.onManagedUpdate(pSecondsElapsed)
-    }
-    //endregion
-
     //region Gameplay Events
-    fun onNoteHit(statistics: StatisticV2) {
+
+    private fun forEachElement(action: (HUDElement) -> Unit) {
         mChildren?.fastForEach {
-            (it as? HUDElement)?.onNoteHit(statistics)
+            (it as? HUDElement)?.let(action)
         }
+    }
+
+    override fun onGameplayUpdate(gameScene: GameScene, statistics: StatisticV2, secondsElapsed: Float) {
+        forEachElement { it.onGameplayUpdate(gameScene, statistics, secondsElapsed) }
+        elementSelector?.onGameplayUpdate(gameScene, statistics, secondsElapsed)
+    }
+
+    override fun onNoteHit(statistics: StatisticV2) {
+        forEachElement { it.onNoteHit(statistics) }
         elementSelector?.onNoteHit(statistics)
     }
 
-    fun onBreakStateChange(isBreak: Boolean) {
-        mChildren?.fastForEach {
-            (it as? HUDElement)?.onBreakStateChange(isBreak)
-        }
+    override fun onBreakStateChange(isBreak: Boolean) {
+        forEachElement { it.onBreakStateChange(isBreak) }
         elementSelector?.onBreakStateChange(isBreak)
     }
+
+    override fun onAccuracyRegister(accuracy: Float) {
+        forEachElement { it.onAccuracyRegister(accuracy) }
+        elementSelector?.onAccuracyRegister(accuracy)
+    }
+
     //endregion
 
 

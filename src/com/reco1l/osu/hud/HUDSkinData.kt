@@ -13,6 +13,10 @@ import kotlin.reflect.KClass
 
 data class HUDSkinData(val elements: List<HUDElementSkinData>) {
 
+
+    fun hasElement(type: Class<out HUDElement>) = elements.any { it.type == type }
+
+
     companion object {
 
         /**

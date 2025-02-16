@@ -139,15 +139,6 @@ class ModSettingsMenu : BaseFragment() {
             }
         }
 
-        findViewById<CheckBox>(R.id.showScoreboard)!!.apply {
-            isChecked = Config.isShowScoreboard()
-            setOnCheckedChangeListener { _, isChecked ->
-                Config.setShowScoreboard(isChecked)
-                PreferenceManager.getDefaultSharedPreferences(context).edit()
-                    .putBoolean("showscoreboard", isChecked).commit()
-            }
-        }
-
         findViewById<CheckBox>(R.id.enableVideo)!!.apply {
             isChecked = Config.isVideoEnabled()
             setOnCheckedChangeListener { _, isChecked ->

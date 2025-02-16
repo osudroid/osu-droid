@@ -90,6 +90,11 @@ public class StatisticV2 implements Serializable {
      */
     private String beatmapMD5 = "";
 
+    /**
+     * The currnt performance points.
+     */
+    private double pp = 0f;
+
 
     public StatisticV2() {}
 
@@ -955,5 +960,13 @@ public class StatisticV2 implements Serializable {
         }
 
         customCS = cs + 4;
+    }
+
+    public void setPP(double value) {
+        pp = value;
+    }
+
+    public double getPP() {
+        return pp;
     }
 }

@@ -1,8 +1,8 @@
 package com.reco1l.osu.ui.entity
 
 import android.opengl.GLES20
+import com.reco1l.osu.hud.HUDElement
 import com.reco1l.osu.multiplayer.Multiplayer.isMultiplayer
-import org.anddev.andengine.entity.Entity
 import org.anddev.andengine.entity.sprite.Sprite
 import org.anddev.andengine.entity.text.ChangeableText
 import ru.nsu.ccfit.zuev.osu.Config
@@ -11,7 +11,10 @@ import ru.nsu.ccfit.zuev.osu.ResourceManager
 import ru.nsu.ccfit.zuev.osu.menu.ScoreBoardItem
 import ru.nsu.ccfit.zuev.osu.scoring.StatisticV2
 
-class GameplayLeaderboard(var playerName: String, private val stats: StatisticV2) : Entity(0f, 0f) {
+class GameplayLeaderboard : HUDElement() {
+
+
+    val stats: StatisticV2 = GlobalManager.getInstance().gameScene.stat
 
 
     var nextItems: List<ScoreBoardItem>? = null
@@ -32,12 +35,9 @@ class GameplayLeaderboard(var playerName: String, private val stats: StatisticV2
     private val isGlobalLeaderboard get() = GlobalManager.getInstance().songMenu.isBoardOnline
 
 
-    init {
-        isChildrenIgnoreUpdate = true
-    }
 
-
-    override fun onManagedUpdate(secondsElapsed: Float) {
+    override fun onManagedUpdate(pSecondsElapsed: Float) {
+        super.onManagedUpdate(pSecondsElapsed)
 
         if (!isMultiplayer) {
             val items = GlobalManager.getInstance().songMenu.board
@@ -186,7 +186,7 @@ class GameplayLeaderboard(var playerName: String, private val stats: StatisticV2
 
         fun appendNewItem() = ScoreBoardItem().apply {
 
-            userName = playerName
+            userName = stats.playerName
 
             // Setting the initial rank as the last rank, in local leaderboard it'll always be the last index because
             // it's based on the local database. In online the server database provides up to 50 scores, so we can't know
@@ -215,7 +215,7 @@ class GameplayLeaderboard(var playerName: String, private val stats: StatisticV2
             }
 
             // In multiplayer, we try to find the corresponding data according to the username.
-            isMultiplayer -> list.find { it.userName == playerName }
+            isMultiplayer -> list.find { it.userName == stats.playerName }
 
             // In solo we just append a new data.
             else -> {
@@ -309,7 +309,7 @@ class GameplayLeaderboard(var playerName: String, private val stats: StatisticV2
             a = 0.5f
 
             if (data.isAlive || !isMultiplayer) {
-                val isOwnScore = !isMultiplayer && isGlobalLeaderboard && data.userName == playerName
+                val isOwnScore = !isMultiplayer && isGlobalLeaderboard && data.userName == stats.playerName
 
                 info.setColor(0.9f, 0.9f, 0.9f)
                 rank.setColor(0.6f, 0.6f, 0.6f, 0.9f)
@@ -344,7 +344,6 @@ class GameplayLeaderboard(var playerName: String, private val stats: StatisticV2
 
     companion object {
         private const val SPRITE_HEIGHT = 83
-
         private const val VERTICAL_PADDING = SPRITE_HEIGHT.toFloat()
     }
 }

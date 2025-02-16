@@ -12,8 +12,8 @@ import com.reco1l.andengine.text.ExtendedText
 import com.reco1l.framework.ColorARGB
 import com.reco1l.framework.math.Vec4
 import com.reco1l.osu.hud.GameplayHUD
-import com.reco1l.osu.hud.HUDElement
 import com.reco1l.osu.hud.HUDElements
+import com.reco1l.osu.hud.IGameplayEvents
 import com.reco1l.toolkt.kotlin.fastForEach
 import org.anddev.andengine.input.touch.TouchEvent
 import ru.nsu.ccfit.zuev.osu.Config
@@ -22,7 +22,7 @@ import ru.nsu.ccfit.zuev.osu.game.GameScene
 import ru.nsu.ccfit.zuev.osu.scoring.StatisticV2
 import kotlin.reflect.full.primaryConstructor
 
-class HUDElementSelector(private val hud: GameplayHUD) : Container() {
+class HUDElementSelector(private val hud: GameplayHUD) : Container(), IGameplayEvents {
 
 
     private val elements = HUDElements.map { it.primaryConstructor!!.call() }
@@ -113,23 +113,23 @@ class HUDElementSelector(private val hud: GameplayHUD) : Container() {
 
 
     //region Gameplay Events
-    fun onNoteHit(statistics: StatisticV2) {
-        elements.fastForEach {
-            (it as? HUDElement)?.onNoteHit(statistics)
-        }
+
+    override fun onNoteHit(statistics: StatisticV2) {
+        elements.fastForEach { it.onNoteHit(statistics) }
     }
 
-    fun onBreakStateChange(isBreak: Boolean) {
-        elements.fastForEach {
-            (it as? HUDElement)?.onBreakStateChange(isBreak)
-        }
+    override fun onBreakStateChange(isBreak: Boolean) {
+        elements.fastForEach { it.onBreakStateChange(isBreak) }
     }
 
-    fun onGameplayUpdate(game: GameScene, statistics: StatisticV2, secondsElapsed: Float) {
-        elements.fastForEach {
-            (it as? HUDElement)?.onGameplayUpdate(game, statistics, secondsElapsed)
-        }
+    override fun onGameplayUpdate(gameScene: GameScene, statistics: StatisticV2, secondsElapsed: Float) {
+        elements.fastForEach { it.onGameplayUpdate(gameScene, statistics, secondsElapsed) }
     }
+
+    override fun onAccuracyRegister(accuracy: Float) {
+        elements.fastForEach { it.onAccuracyRegister(accuracy) }
+    }
+
     //endregion
 
 

@@ -11,11 +11,16 @@ import com.reco1l.framework.ColorARGB
 import com.reco1l.framework.math.Vec2
 import com.reco1l.osu.hud.editor.HUDElementToolbar
 import com.reco1l.osu.hud.elements.HUDAccuracyCounter
+import com.reco1l.osu.hud.elements.HUDAverageOffsetCounter
 import com.reco1l.osu.hud.elements.HUDComboCounter
 import com.reco1l.osu.hud.elements.HUDHealthBar
+import com.reco1l.osu.hud.elements.HUDHitErrorMeter
+import com.reco1l.osu.hud.elements.HUDLinearSongProgress
 import com.reco1l.osu.hud.elements.HUDPPCounter
 import com.reco1l.osu.hud.elements.HUDPieSongProgress
 import com.reco1l.osu.hud.elements.HUDScoreCounter
+import com.reco1l.osu.hud.elements.HUDUnstableRateCounter
+import com.reco1l.osu.ui.entity.GameplayLeaderboard
 import org.anddev.andengine.input.touch.TouchEvent
 import ru.nsu.ccfit.zuev.osu.ResourceManager
 import ru.nsu.ccfit.zuev.osu.game.GameScene
@@ -33,10 +38,15 @@ val HUDElements = listOf(
     HUDPieSongProgress::class,
     HUDPPCounter::class,
     HUDScoreCounter::class,
+    HUDUnstableRateCounter::class,
+    HUDAverageOffsetCounter::class,
+    HUDHitErrorMeter::class,
+    HUDLinearSongProgress::class,
+    GameplayLeaderboard::class
 )
 
 
-abstract class HUDElement : Container() {
+abstract class HUDElement : Container(), IGameplayEvents {
 
     /**
      * Returns the name of this element.
@@ -200,12 +210,6 @@ abstract class HUDElement : Container() {
 
     //endregion
 
-    //region Gameplay Events
-    open fun onGameplayUpdate(game: GameScene, statistics: StatisticV2, secondsElapsed: Float) = Unit
-    open fun onNoteHit(statistics: StatisticV2) = Unit
-    open fun onBreakStateChange(isBreak: Boolean) = Unit
-    //endregion
-
 
     override fun getParent(): GameplayHUD? {
         return super.getParent() as? GameplayHUD
@@ -213,6 +217,7 @@ abstract class HUDElement : Container() {
 
 
     //region Edit mode
+
     inner class HUDElementBackground : Container() {
 
 

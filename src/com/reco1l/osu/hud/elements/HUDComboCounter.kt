@@ -88,9 +88,10 @@ class HUDComboCounter : HUDElement() {
 
     override fun onManagedUpdate(pSecondsElapsed: Float) {
 
-        popOutCount?.origin = anchor
-        displayedCountTextSprite.origin = anchor
-
+        popOutCount?.scaleCenterX = anchor.x
+        popOutCount?.scaleCenterY = anchor.y
+        displayedCountTextSprite.scaleCenterX = anchor.x
+        displayedCountTextSprite.scaleCenterY = anchor.y
 
         super.onManagedUpdate(pSecondsElapsed)
     }

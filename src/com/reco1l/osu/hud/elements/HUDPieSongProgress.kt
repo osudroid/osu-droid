@@ -1,12 +1,9 @@
 package com.reco1l.osu.hud.elements
 
-import androidx.annotation.IntDef
 import com.reco1l.andengine.*
 import com.reco1l.andengine.shape.*
 import com.reco1l.framework.*
 import com.reco1l.osu.hud.HUDElement
-import com.reco1l.osu.hud.elements.ProgressIndicatorType.Companion.BAR
-import com.reco1l.osu.hud.elements.ProgressIndicatorType.Companion.PIE
 import ru.nsu.ccfit.zuev.osu.game.GameScene
 import ru.nsu.ccfit.zuev.osu.scoring.StatisticV2
 
@@ -90,12 +87,4 @@ class HUDPieSongProgress : HUDElement() {
         }
     }
 
-}
-
-@IntDef(PIE, BAR)
-annotation class ProgressIndicatorType {
-    companion object {
-        const val PIE = 0
-        const val BAR = 1
-    }
 }

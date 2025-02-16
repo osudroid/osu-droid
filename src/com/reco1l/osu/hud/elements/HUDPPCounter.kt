@@ -24,6 +24,6 @@ class HUDPPCounter : HUDElement() {
     }
 
     override fun onGameplayUpdate(game: GameScene, statistics: StatisticV2, secondsElapsed: Float) {
-        // TODO: Update PP
+        setValue(statistics.pp)
     }
 }
