@@ -1,71 +1,50 @@
 package com.reco1l.osu.hud
 
+import android.util.Log
 import com.reco1l.andengine.Anchor
 import com.reco1l.andengine.Axes
-import com.reco1l.andengine.attachTo
 import com.reco1l.andengine.container.Container
-import com.reco1l.andengine.shape.Line
-import com.reco1l.framework.ColorARGB
-import com.reco1l.framework.math.Vec2
-import com.reco1l.osu.hud.data.HUDElementSkinData
-import com.reco1l.osu.hud.data.HUDSkinData
+import com.reco1l.osu.hud.editor.HUDElementSelector
 import com.reco1l.osu.hud.elements.HUDAccuracyCounter
 import com.reco1l.osu.hud.elements.HUDComboCounter
-import com.reco1l.osu.hud.elements.HUDElement
 import com.reco1l.osu.hud.elements.HUDPieSongProgress
 import com.reco1l.osu.hud.elements.HUDScoreCounter
-import com.reco1l.osu.hud.elements.create
+import com.reco1l.osu.updateThread
 import com.reco1l.toolkt.kotlin.fastForEach
 import org.anddev.andengine.engine.camera.hud.*
 import org.anddev.andengine.entity.IEntity
-import org.anddev.andengine.input.touch.TouchEvent
+import org.json.JSONObject
 import ru.nsu.ccfit.zuev.osu.Config
 import ru.nsu.ccfit.zuev.osu.GlobalManager
+import ru.nsu.ccfit.zuev.osu.ResourceManager
 import ru.nsu.ccfit.zuev.osu.game.GameScene
 import ru.nsu.ccfit.zuev.osu.scoring.*
+import ru.nsu.ccfit.zuev.skins.OsuSkin
+import java.io.File
+import kotlin.reflect.full.primaryConstructor
 
 class GameplayHUD(
     private val statistics: StatisticV2,
     private val gameScene: GameScene
 ) : Container() {
 
-
     /**
-     * The layout data for the HUD.
+     * The currently selected element.
      */
-    var skinData: HUDSkinData = HUDSkinData.Default
-        set(value) {
-            if (field != value) {
-                onSkinDataChange(value)
-                field = value
-            }
-        }
-
-    /**
-     * Whether the HUD is in edit mode or not.
-     */
-    var isInEditMode = true
-        set(value) {
-            if (field != value) {
-                onEditModeChange(value)
-                field = value
-            }
-        }
-
     var selected: HUDElement? = null
         set(value) {
             if (field != value) {
                 field = value
                 mChildren?.fastForEach {
-                    (it as? HUDElement)?.isSelected = it == value
+                    (it as? HUDElement)?.onSelectionStateChange(it == value)
                 }
             }
         }
 
 
-    private var elementSelector: HUDElementSelector? = null
+    private var isInEditMode = false
 
-    private var elementProperties: HUDElementProperties? = null
+    private var elementSelector: HUDElementSelector? = null
 
 
     init {
@@ -79,49 +58,59 @@ class GameplayHUD(
 
         autoSizeAxes = Axes.None
         setSize(Config.getRES_WIDTH().toFloat(), Config.getRES_HEIGHT().toFloat())
-
-        onSkinDataChange(skinData)
-        onEditModeChange(isInEditMode)
     }
 
 
+    /**
+     * Adds an element to the HUD.
+     */
     fun addElement(data: HUDElementSkinData, inEditMode: Boolean = isInEditMode) {
-        val element = data.type.create()
-        element.elementData = data
+        val element = data.type.primaryConstructor!!.call()
         attachChild(element)
-        addAnchorNodeLine(element)
-
-        element.isInEditMode = inEditMode
+        element.setSkinData(data)
+        element.setEditMode(inEditMode)
     }
 
 
-    private fun onEditModeChange(value: Boolean) {
+    //region Skinning
 
-        mChildren?.forEach {
-            (it as? HUDElement)?.isInEditMode = value
-        }
+    fun saveToSkinJSON() {
 
-        val parent = parent!!
+        val data = getSkinData()
 
-        if (value) {
-            elementSelector = HUDElementSelector(this) attachTo parent
-            elementProperties = HUDElementProperties(this) attachTo parent
+        val jsonFile = File(GlobalManager.getInstance().skinNow, "skin.json")
+        val json: JSONObject
 
-            parent.registerTouchArea(elementSelector)
-            parent.registerTouchArea(elementProperties)
+        if (jsonFile.exists()) {
+            json = JSONObject(jsonFile.reader().readText())
         } else {
-            parent.unregisterTouchArea(elementSelector)
-            parent.unregisterTouchArea(elementProperties)
-
-            elementSelector?.detachSelf()
-            elementSelector = null
-
-            elementProperties?.detachSelf()
-            elementProperties = null
+            jsonFile.createNewFile()
+            json = JSONObject()
         }
+
+        json.put("HUD", HUDSkinData.writeToJSON(data))
+        jsonFile.writeText(json.toString())
+
+        OsuSkin.get().hudSkinData = data
     }
 
-    private fun onSkinDataChange(layoutData: HUDSkinData) {
+    /**
+     * Saves the skin data of the HUD.
+     */
+    fun getSkinData(): HUDSkinData {
+        return HUDSkinData(
+            elements = mChildren?.filterIsInstance<HUDElement>()
+                ?.map { it.getSkinData() }
+                ?: emptyList()
+        )
+    }
+
+    /**
+     * Sets the skin data of the HUD.
+     */
+    fun setSkinData(layoutData: HUDSkinData) {
+
+        Log.i("GameplayHUD", "Setting skin data: $layoutData<")
 
         mChildren?.filterIsInstance<HUDElement>()?.forEach(IEntity::detachSelf)
 
@@ -129,10 +118,13 @@ class GameplayHUD(
         // applying default layout.
         layoutData.elements.forEach { data -> addElement(data) }
 
-        applyDefaultLayout()
+        if (layoutData == HUDSkinData.Default) {
+            applyDefaultLayout()
+        }
+    }
 
-        // Second pass: Apply custom element data that will override the default layout if any.
-        mChildren?.forEach { (it as? HUDElement)?.onSkinDataChange(it.elementData) }
+    private inline fun <reified T : HUDElement>getFirstOf() : T? {
+        return mChildren?.firstOrNull { it is T } as? T
     }
 
     private fun applyDefaultLayout() {
@@ -171,30 +163,37 @@ class GameplayHUD(
         comboCounter?.setPosition(10f, -10f)
         comboCounter?.setScale(1.28f)
     }
+    //endregion
 
-    private fun addAnchorNodeLine(element: HUDElement) {
+    //region Elements events
+    fun setEditMode(value: Boolean) {
+        isInEditMode = value
 
-        val pointOnParent = Vec2(
-            drawWidth * element.anchor.x,
-            drawHeight * element.anchor.y
-        )
+        if (value) {
+            ResourceManager.getInstance().loadHighQualityAsset("delete", "delete.png")
+            ResourceManager.getInstance().loadHighQualityAsset("expand", "expand.png")
+            ResourceManager.getInstance().loadHighQualityAsset("rotate_left", "rotate_left.png")
+            ResourceManager.getInstance().loadHighQualityAsset("rotate_right", "rotate_right.png")
 
-        val pointFromChild = Vec2(
-            element.drawX + element.drawWidth * element.origin.x,
-            element.drawY + element.drawHeight * element.origin.y
-        )
+            elementSelector = HUDElementSelector(this)
 
-        element.nodeLine = Line().apply {
-            fromPoint = pointFromChild
-            toPoint = pointOnParent
-            color = ColorARGB(0xFFF27272)
-            lineWidth = 10f
-            isVisible = false
+            parent!!.attachChild(elementSelector)
+            parent!!.registerTouchArea(elementSelector)
+
+        } else {
+            updateThread {
+                parent!!.detachChild(elementSelector)
+                parent!!.unregisterTouchArea(elementSelector)
+
+                elementSelector = null
+            }
         }
 
-        attachChild(element.nodeLine!!)
+        updateThread {
+            mChildren?.filterIsInstance<HUDElement>()?.forEach { it.setEditMode(value) }
+        }
     }
-
+    //endregion
 
     //region Entity events
     override fun onManagedUpdate(pSecondsElapsed: Float) {
@@ -203,14 +202,6 @@ class GameplayHUD(
         }
         elementSelector?.onGameplayUpdate(gameScene, statistics, pSecondsElapsed)
         super.onManagedUpdate(pSecondsElapsed)
-    }
-
-    override fun onAreaTouched(event: TouchEvent, localX: Float, localY: Float): Boolean {
-        if (super.onAreaTouched(event, localX, localY)) {
-            return true
-        }
-        selected = null
-        return false
     }
     //endregion
 
@@ -229,11 +220,6 @@ class GameplayHUD(
         elementSelector?.onBreakStateChange(isBreak)
     }
     //endregion
-
-
-    private inline fun <reified T : HUDElement>getFirstOf() : T? {
-        return mChildren?.firstOrNull { it is T } as? T
-    }
 
 
     override fun getParent(): HUD? {

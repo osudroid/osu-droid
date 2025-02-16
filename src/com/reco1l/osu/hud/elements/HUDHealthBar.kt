@@ -7,6 +7,7 @@ import com.reco1l.andengine.shape.*
 import com.reco1l.andengine.sprite.*
 import com.reco1l.andengine.texture.*
 import com.reco1l.framework.*
+import com.reco1l.osu.hud.HUDElement
 import org.anddev.andengine.opengl.texture.region.*
 import ru.nsu.ccfit.zuev.osu.*
 import ru.nsu.ccfit.zuev.osu.game.GameScene

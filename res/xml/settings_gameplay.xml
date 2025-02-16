@@ -11,6 +11,12 @@
             android:summary="@string/opt_skinpath_summary"
             android:title="@string/opt_skinpath_title" />
 
+        <Preference
+            android:key="hud_editor"
+            android:summary="Edit the HUD layout as you like"
+            android:title="HUD editor"
+            app:layout="@layout/settings_preference"/>
+
         <com.reco1l.osu.ui.SelectPreference
             android:defaultValue="1"
             android:entries="@array/spinner_style_names"

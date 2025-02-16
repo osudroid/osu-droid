@@ -48,6 +48,13 @@ data class Vec2(
 
     override fun toString() = "Vector2($x, $y)"
 
+    override fun equals(other: Any?): Boolean {
+        if (this === other) return true
+        if (other !is Vec2) return false
+
+        return x == other.x && y == other.y
+    }
+
 
     companion object {
         val Zero = Vec2()

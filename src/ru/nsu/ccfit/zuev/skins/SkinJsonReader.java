@@ -3,7 +3,9 @@ package ru.nsu.ccfit.zuev.skins;
 import androidx.annotation.NonNull;
 
 import com.edlplan.framework.utils.interfaces.Consumer;
+import com.reco1l.osu.hud.HUDSkinData;
 
+import org.jetbrains.annotations.Nullable;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
@@ -63,6 +65,11 @@ public class SkinJsonReader extends SkinReader {
         load("Fonts", currentData, (c) -> {
             currentFontsData = c;
             loadFonts();
+        });
+        loadArray("HUD", currentData, (json) -> {
+            OsuSkin.get().hudSkinData = json == null
+                    ? HUDSkinData.Default
+                    : HUDSkinData.readFromJSON(json);
         });
     }
 
@@ -169,6 +176,10 @@ public class SkinJsonReader extends SkinReader {
             object = new JSONObject();
         }
         consumer.consume(object);
+    }
+
+    public void loadArray(String tag, @NonNull JSONObject data, Consumer<@Nullable JSONArray> consumer) {
+        consumer.consume(data.optJSONArray(tag));
     }
 }
 

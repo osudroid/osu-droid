@@ -225,6 +225,11 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
      */
     private LinearSongProgress linearSongProgress;
 
+    /**
+     * Whether the HUD editor mode is enabled.
+     */
+    private boolean isHUDEditorMode = false;
+
 
     // Timing
 
@@ -643,7 +648,15 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
         startGame(null, null);
     }
 
-    public void startGame(final BeatmapInfo beatmapInfo, final String replayFile) {
+
+    public void startGame(BeatmapInfo beatmapInfo, String replayFile) {
+        startGame(beatmapInfo, replayFile, false);
+    }
+
+    public void startGame(BeatmapInfo beatmapInfo, String replayFile, boolean isHUDEditor) {
+
+        isHUDEditorMode = isHUDEditor;
+
         scene = new ExtendedScene();
         if (Config.isEnableStoryboard()) {
             if (storyboardSprite == null || storyboardOverlayProxy == null) {
@@ -688,7 +701,7 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
                 succeeded = loadGame(beatmapInfo != null ? beatmapInfo : lastBeatmapInfo, rfile, scope);
 
                 if (succeeded) {
-                    prepareScene();
+                    prepareScene(isHUDEditor);
                 }
             } finally {
                 if (!succeeded) {
@@ -722,7 +735,7 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
         }
     }
 
-    private void prepareScene() {
+    private void prepareScene(boolean isHudEditor) {
         scene.setOnSceneTouchListener(this);
         if (GlobalManager.getInstance().getCamera() instanceof SmoothCamera) {
             SmoothCamera camera = (SmoothCamera) (GlobalManager.getInstance().getCamera());
@@ -776,6 +789,8 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
         counterTexts.clear();
 
         hud = new GameplayHUD(stat, this);
+        hud.setSkinData(OsuSkin.get().getHUDSkinData());
+        hud.setEditMode(isHudEditor);
 
         var counterTextFont = ResourceManager.getInstance().getFont("smallFont");
 
@@ -1026,6 +1041,10 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
 
         blockAreaFragment = new BlockAreaFragment();
         blockAreaFragment.show(false);
+
+        if (isHUDEditorMode) {
+            ToastLogger.showText("Press back to exit HUD editor mode and save.", false);
+        }
     }
 
     public RGBColor getComboColor(int num) {
@@ -2198,6 +2217,18 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
     public void pause() {
 
         if (paused) {
+            return;
+        }
+
+        if (isHUDEditorMode) {
+            hud.setEditMode(false);
+            isHUDEditorMode = false;
+            ToastLogger.showText("Saving HUD layout...", true);
+
+            Execution.async(() -> {
+                hud.saveToSkinJSON();
+                ToastLogger.showText("HUD layout saved successfully.", true);
+            });
             return;
         }
 

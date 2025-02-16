@@ -4,6 +4,7 @@ import androidx.annotation.IntDef
 import com.reco1l.andengine.*
 import com.reco1l.andengine.shape.*
 import com.reco1l.framework.*
+import com.reco1l.osu.hud.HUDElement
 import com.reco1l.osu.hud.elements.ProgressIndicatorType.Companion.BAR
 import com.reco1l.osu.hud.elements.ProgressIndicatorType.Companion.PIE
 import ru.nsu.ccfit.zuev.osu.game.GameScene
