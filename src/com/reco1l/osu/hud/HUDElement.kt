@@ -2,6 +2,8 @@ package com.reco1l.osu.hud
 
 import com.reco1l.andengine.Anchor
 import com.reco1l.andengine.container.Container
+import com.reco1l.andengine.getDrawHeight
+import com.reco1l.andengine.getDrawWidth
 import com.reco1l.andengine.originOffsetX
 import com.reco1l.andengine.originOffsetY
 import com.reco1l.andengine.shape.Line
@@ -132,7 +134,7 @@ abstract class HUDElement : Container(), IGameplayEvents {
             val parentLocalY = drawY + localY
 
             if (event.isActionDown) {
-                parent!!.selected = this
+                (parent as? GameplayHUD)?.selected = this
 
                 initialX = parentLocalX
                 initialY = parentLocalY
@@ -167,8 +169,8 @@ abstract class HUDElement : Container(), IGameplayEvents {
         val anchors = floatArrayOf(0f, 0.5f, 1f)
 
         val nearestAnchor = Vec2(
-            anchors.minBy { abs(drawX - originOffsetX - parent!!.drawWidth * it) },
-            anchors.minBy { abs(drawY - originOffsetY - parent!!.drawHeight * it) }
+            anchors.minBy { abs(drawX - originOffsetX - parent!!.getDrawWidth() * it) },
+            anchors.minBy { abs(drawY - originOffsetY - parent!!.getDrawHeight() * it) }
         )
 
         if (nearestAnchor.x != anchor.x) {
@@ -185,8 +187,8 @@ abstract class HUDElement : Container(), IGameplayEvents {
     private fun updateConnectionLine() {
 
         val pointOnParent = Vec2(
-            parent!!.drawWidth * anchor.x,
-            parent!!.drawHeight * anchor.y
+            parent!!.getDrawWidth() * anchor.x,
+            parent!!.getDrawHeight() * anchor.y
         )
 
         val pointOnChild = Vec2(
@@ -209,11 +211,6 @@ abstract class HUDElement : Container(), IGameplayEvents {
     }
 
     //endregion
-
-
-    override fun getParent(): GameplayHUD? {
-        return super.getParent() as? GameplayHUD
-    }
 
 
     //region Edit mode

@@ -8,6 +8,7 @@ import com.reco1l.andengine.sprite.*
 import com.reco1l.andengine.texture.*
 import com.reco1l.framework.*
 import com.reco1l.osu.hud.HUDElement
+import com.reco1l.osu.hud.editor.HUDElementPreview
 import org.anddev.andengine.opengl.texture.region.*
 import ru.nsu.ccfit.zuev.osu.*
 import ru.nsu.ccfit.zuev.osu.game.GameScene
@@ -90,6 +91,22 @@ class HUDHealthBar : HUDElement() {
         fillClear.setPosition(fill.x + fill.drawWidth, fill.y)
 
         onMeasureContentSize()
+
+
+    }
+
+
+    override fun onAttached() {
+
+        if (parent !is HUDElementPreview) {
+            // Some skins use the background texture as a playfield background/border with a fullscreen
+            // size texture, this will make the health bar take the entire screen in the HUD editor. We
+            // clamp the size to the fill size to avoid this.
+            width = width.coerceAtMost(fill.drawX + fill.width)
+            height = height.coerceAtMost(fill.drawY + fill.height)
+        }
+
+        super.onAttached()
     }
 
 

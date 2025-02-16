@@ -181,5 +181,9 @@ public class SkinJsonReader extends SkinReader {
     public void loadArray(String tag, @NonNull JSONObject data, Consumer<@Nullable JSONArray> consumer) {
         consumer.consume(data.optJSONArray(tag));
     }
+
+    public JSONObject getCurrentData() {
+        return currentData;
+    }
 }
 

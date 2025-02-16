@@ -20,6 +20,7 @@ import ru.nsu.ccfit.zuev.osu.ResourceManager
 import ru.nsu.ccfit.zuev.osu.game.GameScene
 import ru.nsu.ccfit.zuev.osu.scoring.*
 import ru.nsu.ccfit.zuev.skins.OsuSkin
+import ru.nsu.ccfit.zuev.skins.SkinJsonReader
 import java.io.File
 import kotlin.reflect.KClass
 import kotlin.reflect.full.primaryConstructor
@@ -83,7 +84,9 @@ class GameplayHUD : Container(), IGameplayEvents {
             json = JSONObject(jsonFile.reader().readText())
         } else {
             jsonFile.createNewFile()
-            json = JSONObject()
+
+            // We use the current skin data as a base to avoid losing any other skin data.
+            json = SkinJsonReader.getReader().currentData
         }
 
         json.put("HUD", HUDSkinData.writeToJSON(data))

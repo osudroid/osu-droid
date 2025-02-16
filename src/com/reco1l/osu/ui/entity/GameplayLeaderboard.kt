@@ -5,7 +5,6 @@ import com.reco1l.osu.hud.HUDElement
 import com.reco1l.osu.multiplayer.Multiplayer.isMultiplayer
 import org.anddev.andengine.entity.sprite.Sprite
 import org.anddev.andengine.entity.text.ChangeableText
-import ru.nsu.ccfit.zuev.osu.Config
 import ru.nsu.ccfit.zuev.osu.GlobalManager
 import ru.nsu.ccfit.zuev.osu.ResourceManager
 import ru.nsu.ccfit.zuev.osu.menu.ScoreBoardItem
@@ -13,8 +12,6 @@ import ru.nsu.ccfit.zuev.osu.scoring.StatisticV2
 
 class GameplayLeaderboard : HUDElement() {
 
-
-    val stats: StatisticV2 = GlobalManager.getInstance().gameScene.stat
 
 
     var nextItems: List<ScoreBoardItem>? = null
@@ -25,15 +22,13 @@ class GameplayLeaderboard : HUDElement() {
     private var lastTimeDataChange = 0L
 
 
-    // This determines the max amount of sprites that can be shown according to the user screen height.
-    private val maxAllowed = (Config.getRES_HEIGHT() - VERTICAL_PADDING * 2).toInt() / SPRITE_HEIGHT
+    private val stats: StatisticV2 = GlobalManager.getInstance().gameScene.stat
 
-    private val replayId get() = GlobalManager.getInstance().scoring.replayID
+    private val replayId = GlobalManager.getInstance().scoring.replayID
 
-    private val isReplaying get() = replayId != -1
+    private val isReplaying = replayId != -1
 
-    private val isGlobalLeaderboard get() = GlobalManager.getInstance().songMenu.isBoardOnline
-
+    private val isGlobalLeaderboard = GlobalManager.getInstance().songMenu.isBoardOnline
 
 
     override fun onManagedUpdate(pSecondsElapsed: Float) {
@@ -128,23 +123,23 @@ class GameplayLeaderboard : HUDElement() {
                 setChildIndex(player, playerPosition)
             }
 
-            val maxY = VERTICAL_PADDING + SPRITE_HEIGHT * (maxAllowed - 1)
+            val maxY = SPRITE_HEIGHT * (SCORE_COUNT - 1)
 
-            if (playerPosition < maxAllowed) {
+            if (playerPosition < SCORE_COUNT) {
 
                 var i = 0
                 while (i < spriteCount) {
                     val sprite = getChild(i)
 
-                    sprite.setPosition(0f, if (i >= maxAllowed) maxY else VERTICAL_PADDING + SPRITE_HEIGHT * i)
-                    sprite.isVisible = i < maxAllowed
+                    sprite.setPosition(0f, if (i >= SCORE_COUNT) maxY else SPRITE_HEIGHT * i)
+                    sprite.isVisible = i < SCORE_COUNT
                     ++i
                 }
 
             } else {
 
                 // Computing the bound from player position towards the limit of sprites that can be shown.
-                val minBound: Int = playerPosition - maxAllowed + 1
+                val minBound: Int = playerPosition - SCORE_COUNT + 1
 
                 var i = 0
                 while (i < spriteCount) {
@@ -159,14 +154,14 @@ class GameplayLeaderboard : HUDElement() {
                     sprite.setPosition(0f, when {
 
                         // First always on top
-                        i == 0 -> VERTICAL_PADDING
+                        i == 0 -> 0f
 
                         // Player always on bottom
                         i == playerPosition -> maxY
 
                         // Sprites outside the bounds will be placed at its respective limit, at this point this sprite
                         // shouldn't be visible.
-                        !isInBounds -> if (i < minBound) VERTICAL_PADDING else maxY
+                        !isInBounds -> if (i < minBound) 0f else maxY
 
                         // Placing sprites respectively from maxY accounting for first sprite
                         else -> maxY - SPRITE_HEIGHT * (playerPosition - i)
@@ -343,7 +338,7 @@ class GameplayLeaderboard : HUDElement() {
 
 
     companion object {
-        private const val SPRITE_HEIGHT = 83
-        private const val VERTICAL_PADDING = SPRITE_HEIGHT.toFloat()
+        private const val SPRITE_HEIGHT = 83f
+        private const val SCORE_COUNT = 5
     }
 }
