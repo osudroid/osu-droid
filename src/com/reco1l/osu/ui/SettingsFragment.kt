@@ -325,6 +325,7 @@ class SettingsFragment : com.edlplan.ui.fragment.SettingsFragment() {
                 } else {
                     dismiss()
                     ModMenu.getInstance().mod = EnumSet.of(GameMod.MOD_AUTO)
+                    GlobalManager.getInstance().gameScene.setOldScene(GlobalManager.getInstance().mainScene.scene)
                     GlobalManager.getInstance().gameScene.startGame(GlobalManager.getInstance().selectedBeatmap, null, true)
                 }
                 true

@@ -35,6 +35,7 @@ import com.reco1l.osu.hud.GameplayHUD;
 import com.reco1l.osu.hitobjects.SliderTickSprite;
 import com.reco1l.osu.hud.elements.HUDPPCounter;
 import com.reco1l.osu.ui.BlockAreaFragment;
+import com.reco1l.osu.ui.MessageDialog;
 import com.reco1l.osu.ui.entity.GameplayLeaderboard;
 import com.reco1l.osu.multiplayer.Multiplayer;
 import com.reco1l.osu.multiplayer.RoomScene;
@@ -220,7 +221,7 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
     /**
      * Whether the HUD editor mode is enabled.
      */
-    private boolean isHUDEditorMode = false;
+    public boolean isHUDEditorMode = false;
 
 
     // Timing
@@ -2175,14 +2176,7 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
         }
 
         if (isHUDEditorMode) {
-            hud.setEditMode(false);
-            isHUDEditorMode = false;
-            ToastLogger.showText("Saving HUD layout...", true);
-
-            Execution.async(() -> {
-                hud.saveToSkinJSON();
-                ToastLogger.showText("HUD layout saved successfully.", true);
-            });
+            hud.onBackPress();
             return;
         }
 

@@ -4,11 +4,14 @@ import android.util.Log
 import com.reco1l.andengine.Anchor
 import com.reco1l.andengine.Axes
 import com.reco1l.andengine.container.Container
+import com.reco1l.osu.async
 import com.reco1l.osu.hud.editor.HUDElementSelector
 import com.reco1l.osu.hud.elements.HUDAccuracyCounter
 import com.reco1l.osu.hud.elements.HUDComboCounter
 import com.reco1l.osu.hud.elements.HUDPieSongProgress
 import com.reco1l.osu.hud.elements.HUDScoreCounter
+import com.reco1l.osu.mainThread
+import com.reco1l.osu.ui.MessageDialog
 import com.reco1l.osu.updateThread
 import com.reco1l.toolkt.kotlin.fastForEach
 import org.anddev.andengine.engine.camera.hud.*
@@ -17,6 +20,7 @@ import org.json.JSONObject
 import ru.nsu.ccfit.zuev.osu.Config
 import ru.nsu.ccfit.zuev.osu.GlobalManager
 import ru.nsu.ccfit.zuev.osu.ResourceManager
+import ru.nsu.ccfit.zuev.osu.ToastLogger
 import ru.nsu.ccfit.zuev.osu.game.GameScene
 import ru.nsu.ccfit.zuev.osu.scoring.*
 import ru.nsu.ccfit.zuev.skins.OsuSkin
@@ -70,6 +74,31 @@ class GameplayHUD : Container(), IGameplayEvents {
         element.setEditMode(inEditMode)
     }
 
+    fun onBackPress() {
+        MessageDialog()
+            .setTitle("HUD Editor")
+            .setMessage("Do you want to save the changes?")
+            .addButton("Save") {
+                it.dismiss()
+                updateThread {
+                    setEditMode(false)
+                    ToastLogger.showText("Saving changes...", true)
+                    saveToSkinJSON()
+                    ToastLogger.showText("Changes saved!", true)
+                }
+            }
+            .addButton("Discard & Restore") {
+                it.dismiss()
+                updateThread {
+                    setEditMode(false)
+                    setSkinData(OsuSkin.get().hudSkinData)
+                    ToastLogger.showText("Changes discarded!", true)
+                }
+            }
+            .addButton("Cancel") { it.dismiss() }
+            .show()
+    }
+
 
     //region Skinning
 
@@ -110,9 +139,6 @@ class GameplayHUD : Container(), IGameplayEvents {
      * Sets the skin data of the HUD.
      */
     fun setSkinData(layoutData: HUDSkinData) {
-
-        Log.i("GameplayHUD", "Setting skin data: $layoutData<")
-
         mChildren?.filterIsInstance<HUDElement>()?.forEach(IEntity::detachSelf)
 
         // First pass: We attach everything so that elements can reference between them when
@@ -170,6 +196,7 @@ class GameplayHUD : Container(), IGameplayEvents {
     //region Elements events
     fun setEditMode(value: Boolean) {
         isInEditMode = value
+        GlobalManager.getInstance().gameScene.isHUDEditorMode = value
 
         if (value) {
             ResourceManager.getInstance().loadHighQualityAsset("delete", "delete.png")
@@ -183,17 +210,13 @@ class GameplayHUD : Container(), IGameplayEvents {
             parent!!.registerTouchArea(elementSelector)
 
         } else {
-            updateThread {
-                parent!!.detachChild(elementSelector)
-                parent!!.unregisterTouchArea(elementSelector)
+            parent!!.detachChild(elementSelector)
+            parent!!.unregisterTouchArea(elementSelector)
 
-                elementSelector = null
-            }
+            elementSelector = null
         }
 
-        updateThread {
-            mChildren?.filterIsInstance<HUDElement>()?.forEach { it.setEditMode(value) }
-        }
+        mChildren?.filterIsInstance<HUDElement>()?.forEach { it.setEditMode(value) }
     }
     //endregion
 

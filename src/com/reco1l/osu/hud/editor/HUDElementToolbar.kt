@@ -34,6 +34,7 @@ class HUDElementToolbar(private val element: HUDElement) : LinearContainer() {
             element.rotation += 90f
         })
 
+        onMeasureContentSize()
     }
 
     private fun createToolbarButton(texture: String, back: ColorARGB, action: () -> Unit) = object : Container() {
