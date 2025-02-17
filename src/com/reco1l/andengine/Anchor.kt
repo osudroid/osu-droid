@@ -32,8 +32,17 @@ object Anchor {
     val BottomRight = Vec2(1f, 1f)
 
 
-    val All = listOf(TopLeft, TopCenter, TopRight, CenterLeft, Center, CenterRight, BottomLeft, BottomCenter, BottomRight)
-
+    fun getAll() = listOf(
+        TopLeft,
+        TopCenter,
+        TopRight,
+        CenterLeft,
+        Center,
+        CenterRight,
+        BottomLeft,
+        BottomCenter,
+        BottomRight
+    )
 
     fun getName(anchor: Vec2): String {
         return when (anchor) {

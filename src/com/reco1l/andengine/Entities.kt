@@ -40,6 +40,34 @@ var ExtendedEntity.size
         height = value.y
     }
 
+/**
+ * The draw size of the entity.
+ */
+val ExtendedEntity.drawSize
+    get() = Vec2(drawWidth, drawHeight)
+
+/**
+ * The position of the entity.
+ */
+var ExtendedEntity.position
+    get() = Vec2(x, y)
+    set(value) {
+        x = value.x
+        y = value.y
+    }
+
+/**
+ * The draw position of the entity.
+ */
+val ExtendedEntity.drawPosition
+    get() = Vec2(drawX, drawY)
+
+
+/**
+ * The total offset applied to the entity.
+ */
+val ExtendedEntity.totalOffset
+    get() = Vec2(totalOffsetX, totalOffsetY)
 
 /**
  * The total offset applied to the X axis.
@@ -53,6 +81,13 @@ val ExtendedEntity.totalOffsetX
 val ExtendedEntity.totalOffsetY
     get() = originOffsetY + anchorOffsetY + translationY
 
+
+/**
+ * The offset applied to the entity according to the anchor factor.
+ */
+val ExtendedEntity.anchorOffset
+    get() = Vec2(anchorOffsetX, anchorOffsetY)
+
 /**
  * The offset applied to the X axis according to the anchor factor.
  */
@@ -64,6 +99,13 @@ val ExtendedEntity.anchorOffsetX: Float
  */
 val ExtendedEntity.anchorOffsetY: Float
     get() = parent.getPaddedHeight() * anchor.y
+
+
+/**
+ * The offset applied to the entity according to the origin factor.
+ */
+val ExtendedEntity.originOffset
+    get() = Vec2(originOffsetX, originOffsetY)
 
 /**
  * The offset applied to the X axis according to the origin factor.

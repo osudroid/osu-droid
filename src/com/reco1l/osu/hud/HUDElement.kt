@@ -1,13 +1,15 @@
 package com.reco1l.osu.hud
 
 import com.reco1l.andengine.Anchor
-import com.reco1l.andengine.anchorOffsetX
-import com.reco1l.andengine.anchorOffsetY
+import com.reco1l.andengine.ExtendedEntity
+import com.reco1l.andengine.anchorOffset
 import com.reco1l.andengine.container.Container
+import com.reco1l.andengine.drawPosition
+import com.reco1l.andengine.drawSize
 import com.reco1l.andengine.getDrawHeight
 import com.reco1l.andengine.getDrawWidth
-import com.reco1l.andengine.originOffsetX
-import com.reco1l.andengine.originOffsetY
+import com.reco1l.andengine.originOffset
+import com.reco1l.andengine.position
 import com.reco1l.andengine.shape.Line
 import com.reco1l.andengine.shape.RoundedBox
 import com.reco1l.andengine.text.ExtendedText
@@ -28,7 +30,7 @@ import com.reco1l.osu.ui.entity.GameplayLeaderboard
 import org.anddev.andengine.input.touch.TouchEvent
 import ru.nsu.ccfit.zuev.osu.ResourceManager
 import kotlin.math.abs
-import kotlin.math.roundToInt
+import kotlin.math.min
 
 
 /**
@@ -148,8 +150,9 @@ abstract class HUDElement : Container(), IGameplayEvents {
 
                 // Preventing from moving the element if it's not selected.
                 if ((parent as? GameplayHUD)?.selected == this) {
-
-                    setAbsolutePosition(deltaX, deltaY)
+                    applyClosestAnchorOrigin()
+                    x += deltaX
+                    y += deltaY
                     updateConnectionLine()
 
                     initialX = parentLocalX
@@ -169,33 +172,30 @@ abstract class HUDElement : Container(), IGameplayEvents {
     }
 
 
-    private fun setAbsolutePosition(deltaX: Float, deltaY: Float) {
+    private fun applyClosestAnchorOrigin() {
 
-        val anchors = Anchor.All
+        val drawSize = drawSize
+        val drawPosition = drawPosition
+        val parentDrawSize = (parent as ExtendedEntity).drawSize
 
-        val parentWidth = parent!!.getDrawWidth()
-        val parentHeight = parent!!.getDrawHeight()
+        val relativeTopLeftDrawPosition = drawPosition / parentDrawSize
+        val relativeBottomRightDrawPosition = (drawPosition + drawSize) / parentDrawSize
 
-        val nearestAnchor = anchors.minBy { anchor ->
-            val x = parentWidth * anchor.x - drawX + deltaX
-            val y = parentHeight * anchor.y - drawY + deltaY
-
-            return@minBy x * x + y * y
+        val closest = Anchor.getAll().minBy {
+            min(abs(relativeTopLeftDrawPosition.distance(it)), abs(relativeBottomRightDrawPosition.distance(it)))
         }
 
-        x += deltaX
-        y += deltaY
-
-        if (nearestAnchor.x != anchor.x) {
-            x = -x
+        if (anchor != closest) {
+            val previousAnchorOffset = anchorOffset
+            anchor = closest
+            position -= anchorOffset - previousAnchorOffset
         }
 
-        if (nearestAnchor.y != anchor.y) {
-            y = -y
+        if (origin != closest) {
+            val previousOriginOffset = originOffset
+            origin = closest
+            position -= originOffset - previousOriginOffset
         }
-
-        anchor = nearestAnchor
-        origin = nearestAnchor
     }
 
     private fun updateConnectionLine() {
