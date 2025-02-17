@@ -15,7 +15,7 @@ import com.reco1l.andengine.shape.RoundedBox
 import com.reco1l.andengine.text.ExtendedText
 import com.reco1l.framework.ColorARGB
 import com.reco1l.framework.math.Vec2
-import com.reco1l.osu.hud.editor.HUDElementToolbar
+import com.reco1l.osu.hud.editor.HUDElementOverlay
 import com.reco1l.osu.hud.elements.HUDAccuracyCounter
 import com.reco1l.osu.hud.elements.HUDAverageOffsetCounter
 import com.reco1l.osu.hud.elements.HUDComboCounter
@@ -60,7 +60,7 @@ abstract class HUDElement : Container(), IGameplayEvents {
         get() = this::class.simpleName!!.replace("HUD", "").replace("([a-z])([A-Z])".toRegex(), "$1 $2")
 
 
-    private var toolbar: HUDElementToolbar? = null
+    private var overlay: HUDElementOverlay? = null
 
     private var connectionLine: Line? = null
 
@@ -97,23 +97,23 @@ abstract class HUDElement : Container(), IGameplayEvents {
 
         if (value) {
             background = HUDElementBackground()
-            toolbar = HUDElementToolbar(this)
+            overlay = HUDElementOverlay(this)
 
-            parent!!.attachChild(toolbar!!)
+            parent!!.attachChild(overlay!!)
         } else {
             connectionLine?.detachSelf()
-            toolbar?.detachSelf()
+            overlay?.detachSelf()
 
             connectionLine = null
             background = null
-            toolbar = null
+            overlay = null
         }
     }
 
     open fun onSelectionStateChange(isSelected: Boolean) {
 
         (background as? HUDElementBackground)?.isSelected = isSelected
-        toolbar?.isVisible = isSelected
+        overlay?.isVisible = isSelected
 
         if (isSelected) {
             updateConnectionLine()
@@ -160,15 +160,14 @@ abstract class HUDElement : Container(), IGameplayEvents {
                     return true
                 }
             }
-
         }
+
         return false
     }
 
     override fun invalidateTransformations() {
         super.invalidateTransformations()
-
-        toolbar?.invalidateTransformations()
+        overlay?.invalidateTransformations()
     }
 
 
@@ -236,7 +235,7 @@ abstract class HUDElement : Container(), IGameplayEvents {
         detachSelf()
     }
 
-    inner class HUDElementBackground : Container() {
+    private inner class HUDElementBackground : Container() {
 
 
         var isSelected = false

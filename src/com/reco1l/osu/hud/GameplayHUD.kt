@@ -265,11 +265,11 @@ class GameplayHUD : Container(), IGameplayEvents {
     }
 
     override fun onAreaTouched(event: TouchEvent, localX: Float, localY: Float): Boolean {
-        if (!super.onAreaTouched(event, localX, localY)) {
+        val result = super.onAreaTouched(event, localX, localY)
+        if (event.isActionDown && !result) {
             selected = null
-            return false
         }
-        return true
+        return result
     }
 }
 

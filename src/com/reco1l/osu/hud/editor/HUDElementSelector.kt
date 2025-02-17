@@ -62,6 +62,10 @@ class HUDElementSelector(private val hud: GameplayHUD) : Container(), IGameplayE
 
             override fun onAreaTouched(event: TouchEvent, localX: Float, localY: Float): Boolean {
 
+                if (event.isActionDown) {
+                    return true
+                }
+
                 if (event.isActionUp) {
 
                     this@HUDElementSelector.clearEntityModifiers()
@@ -77,8 +81,8 @@ class HUDElementSelector(private val hud: GameplayHUD) : Container(), IGameplayE
                         hud.moveToX(0f, 0.2f)
                         hud.sizeToX(Config.getRES_WIDTH().toFloat(), 0.2f)
                     }
+                    return false
                 }
-
                 return false
             }
 

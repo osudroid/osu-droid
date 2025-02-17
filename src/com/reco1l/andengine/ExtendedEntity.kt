@@ -9,7 +9,6 @@ import com.reco1l.toolkt.kotlin.fastForEach
 import org.anddev.andengine.engine.camera.*
 import org.anddev.andengine.entity.*
 import org.anddev.andengine.entity.scene.Scene
-import org.anddev.andengine.entity.scene.Scene.ITouchArea
 import org.anddev.andengine.entity.shape.*
 import org.anddev.andengine.input.touch.TouchEvent
 import org.anddev.andengine.opengl.util.*
@@ -311,8 +310,6 @@ abstract class ExtendedEntity(
     private var height = 0f
 
     private var isVertexBufferDirty = true
-
-    private var currentBoundEntity: ITouchArea? = null
 
 
     // Attachment
@@ -843,47 +840,38 @@ abstract class ExtendedEntity(
     }
 
 
-    // Input
+    //region Input
 
-    open fun invalidateInputBinding(recursively: Boolean = true) {
-        currentBoundEntity = null
+    private val inputBindings = arrayOfNulls<ExtendedEntity>(10)
+
+
+    open fun invalidateInputBindings(recursively: Boolean = true) {
+        inputBindings.fill(null)
 
         if (recursively) {
             mChildren?.fastForEach {
-                (it as? ExtendedEntity)?.invalidateInputBinding()
+                (it as? ExtendedEntity)?.invalidateInputBindings()
             }
         }
     }
 
-    override fun onAreaTouched(
-        event: TouchEvent,
-        localX: Float,
-        localY: Float
-    ): Boolean {
+    override fun onAreaTouched(event: TouchEvent, localX: Float, localY: Float): Boolean {
 
-        val boundEntity = currentBoundEntity
-        if (boundEntity != null && (boundEntity as? IEntity)?.parent == this) {
+        val inputBinding = inputBindings.getOrNull(event.pointerID)
 
-            val transformedX = localX - boundEntity.getDrawX()
-            val transformedY = localY - boundEntity.getDrawY()
-
-            if (!boundEntity.onAreaTouched(event, transformedX, transformedY)) {
-                currentBoundEntity = null
+        if (inputBinding != null && inputBinding.parent == this) {
+            if (!inputBinding.onAreaTouched(event, localX - inputBinding.drawX, localY - inputBinding.drawY) || event.isActionUp) {
+                inputBindings[event.pointerID] = null
+                return false
             }
             return true
         }
 
         try {
-            for (i in childCount - 1 downTo 0) {
-                val child = getChild(i)
-
-                if (child is ITouchArea && child.contains(localX, localY)) {
-
-                    val transformedX = localX - child.getDrawX()
-                    val transformedY = localY - child.getDrawY()
-
-                    if (child.onAreaTouched(event, transformedX, transformedY)) {
-                        currentBoundEntity = child
+            mChildren?.fastForEach { child ->
+                if (child is ExtendedEntity && child.contains(localX, localY)) {
+                    if (child.onAreaTouched(event, localX - child.drawX, localY - child.drawY)) {
+                        inputBindings[event.pointerID] = child
                         return true
                     }
                 }
@@ -891,7 +879,10 @@ abstract class ExtendedEntity(
         } catch (e: IndexOutOfBoundsException) {
             Log.e("ExtendedEntity", "A child entity was removed during touch event propagation.", e)
         }
+
         return false
     }
+
+    //endregion
 
 }
