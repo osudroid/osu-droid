@@ -639,6 +639,13 @@ abstract class ExtendedEntity(
     }
 
 
+    override fun setRotation(pRotation: Float) {
+        if (mRotation != pRotation) {
+            mRotation = pRotation
+            invalidateTransformations()
+        }
+    }
+
     /**
      * Sets the size of the entity.
      *
@@ -855,8 +862,7 @@ abstract class ExtendedEntity(
     ): Boolean {
 
         val boundEntity = currentBoundEntity
-        if (boundEntity != null) {
-            boundEntity as IEntity
+        if (boundEntity != null && (boundEntity as? IEntity)?.parent == this) {
 
             val transformedX = localX - boundEntity.getDrawX()
             val transformedY = localY - boundEntity.getDrawY()

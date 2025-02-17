@@ -1,6 +1,8 @@
 package com.reco1l.osu.hud
 
 import com.reco1l.andengine.Anchor
+import com.reco1l.andengine.anchorOffsetX
+import com.reco1l.andengine.anchorOffsetY
 import com.reco1l.andengine.container.Container
 import com.reco1l.andengine.getDrawHeight
 import com.reco1l.andengine.getDrawWidth
@@ -25,9 +27,8 @@ import com.reco1l.osu.hud.elements.HUDUnstableRateCounter
 import com.reco1l.osu.ui.entity.GameplayLeaderboard
 import org.anddev.andengine.input.touch.TouchEvent
 import ru.nsu.ccfit.zuev.osu.ResourceManager
-import ru.nsu.ccfit.zuev.osu.game.GameScene
-import ru.nsu.ccfit.zuev.osu.scoring.StatisticV2
 import kotlin.math.abs
+import kotlin.math.roundToInt
 
 
 /**
@@ -109,7 +110,7 @@ abstract class HUDElement : Container(), IGameplayEvents {
 
     open fun onSelectionStateChange(isSelected: Boolean) {
 
-        (background as HUDElementBackground).isSelected = isSelected
+        (background as? HUDElementBackground)?.isSelected = isSelected
         toolbar?.isVisible = isSelected
 
         if (isSelected) {
@@ -145,13 +146,16 @@ abstract class HUDElement : Container(), IGameplayEvents {
                 val deltaX = parentLocalX - initialX
                 val deltaY = parentLocalY - initialY
 
-                setPosition(x + deltaX, y + deltaY)
-                findNearestAnchorPoint()
-                updateConnectionLine()
+                // Preventing from moving the element if it's not selected.
+                if ((parent as? GameplayHUD)?.selected == this) {
 
-                initialX = parentLocalX
-                initialY = parentLocalY
-                return true
+                    setAbsolutePosition(deltaX, deltaY)
+                    updateConnectionLine()
+
+                    initialX = parentLocalX
+                    initialY = parentLocalY
+                    return true
+                }
             }
 
         }
@@ -164,14 +168,23 @@ abstract class HUDElement : Container(), IGameplayEvents {
         toolbar?.invalidateTransformations()
     }
 
-    private fun findNearestAnchorPoint() {
 
-        val anchors = floatArrayOf(0f, 0.5f, 1f)
+    private fun setAbsolutePosition(deltaX: Float, deltaY: Float) {
 
-        val nearestAnchor = Vec2(
-            anchors.minBy { abs(drawX - originOffsetX - parent!!.getDrawWidth() * it) },
-            anchors.minBy { abs(drawY - originOffsetY - parent!!.getDrawHeight() * it) }
-        )
+        val anchors = Anchor.All
+
+        val parentWidth = parent!!.getDrawWidth()
+        val parentHeight = parent!!.getDrawHeight()
+
+        val nearestAnchor = anchors.minBy { anchor ->
+            val x = parentWidth * anchor.x - drawX + deltaX
+            val y = parentHeight * anchor.y - drawY + deltaY
+
+            return@minBy x * x + y * y
+        }
+
+        x += deltaX
+        y += deltaY
 
         if (nearestAnchor.x != anchor.x) {
             x = -x
@@ -182,6 +195,7 @@ abstract class HUDElement : Container(), IGameplayEvents {
         }
 
         anchor = nearestAnchor
+        origin = nearestAnchor
     }
 
     private fun updateConnectionLine() {
@@ -212,8 +226,15 @@ abstract class HUDElement : Container(), IGameplayEvents {
 
     //endregion
 
-
     //region Edit mode
+
+    /**
+     * Removes the element from the HUD.
+     */
+    fun remove() {
+        setEditMode(false)
+        detachSelf()
+    }
 
     inner class HUDElementBackground : Container() {
 

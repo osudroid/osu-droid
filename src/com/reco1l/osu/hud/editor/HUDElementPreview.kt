@@ -11,12 +11,23 @@ import com.reco1l.framework.math.Vec4
 import com.reco1l.osu.hud.GameplayHUD
 import com.reco1l.osu.hud.HUDElement
 import com.reco1l.osu.hud.HUDElementSkinData
+import org.anddev.andengine.engine.camera.Camera
 import org.anddev.andengine.input.touch.TouchEvent
 import ru.nsu.ccfit.zuev.osu.ResourceManager
+import javax.microedition.khronos.opengles.GL10
 import kotlin.math.abs
+import kotlin.math.min
 
-class HUDElementPreview(val element: HUDElement, val hud: GameplayHUD): Container() {
+class HUDElementPreview(private val element: HUDElement, val hud: GameplayHUD): Container() {
 
+
+    private val label = ExtendedText().apply {
+        font = ResourceManager.getInstance().getFont("smallFont")
+        anchor = Anchor.BottomLeft
+        origin = Anchor.BottomLeft
+        text = element.name
+        color = ColorARGB.White
+    }
 
     init {
         width = HUDElementSelector.SELECTOR_WIDTH - 16f * 2
@@ -30,26 +41,21 @@ class HUDElementPreview(val element: HUDElement, val hud: GameplayHUD): Containe
             cornerRadius = 12f
         }
 
-        attachChild(ExtendedText().apply {
-            font = ResourceManager.getInstance().getFont("smallFont")
-            anchor = Anchor.BottomLeft
-            origin = Anchor.BottomLeft
-            text = element.name
-            color = ColorARGB.White
-        })
-
         attachChild(element)
+        attachChild(label)
         element.setSkinData(HUDElementSkinData(element::class))
+    }
+
+    override fun onManagedDraw(gl: GL10, camera: Camera) {
 
         // Scaling the element inside the box
-
-        if (element.drawHeight > getPaddedHeight()) {
-            element.setScale(getPaddedHeight() / element.drawHeight)
+        if (element.drawWidth > element.drawHeight) {
+            element.setScale(min(1f, getPaddedWidth() / element.drawWidth))
+        } else {
+            element.setScale(min(1f, (getPaddedHeight() - label.drawHeight) / element.drawHeight))
         }
 
-        if (element.drawWidth > getPaddedWidth()) {
-            element.setScale(getPaddedWidth() / element.drawWidth)
-        }
+        super.onManagedDraw(gl, camera)
     }
 
     //region Input handling
@@ -71,6 +77,7 @@ class HUDElementPreview(val element: HUDElement, val hud: GameplayHUD): Containe
         }
 
         if (event.isActionMove) {
+            initialTime = System.currentTimeMillis()
             clearEntityModifiers()
             scaleTo(1f, 0.1f)
         }

@@ -20,24 +20,45 @@ class HUDElementToolbar(private val element: HUDElement) : LinearContainer() {
         isVisible = false
         spacing = 4f
 
-        attachChild(createToolbarButton("delete", ColorARGB(0xFF260000)) {
+        attachChild(Button("delete", ColorARGB(0xFF260000)) {
             updateThread {
-                element.parent?.detachChild(element)
+                element.remove()
             }
         })
 
-        attachChild(createToolbarButton("rotate_left", ColorARGB(0xFF181825)) {
+        attachChild(Button("rotate_left", ColorARGB(0xFF181825)) {
             element.rotation -= 90f
         })
 
-        attachChild(createToolbarButton("rotate_right", ColorARGB(0xFF181825)) {
+        attachChild(Button("rotate_right", ColorARGB(0xFF181825)) {
             element.rotation += 90f
         })
 
         onMeasureContentSize()
     }
 
-    private fun createToolbarButton(texture: String, back: ColorARGB, action: () -> Unit) = object : Container() {
+    override fun onAreaTouched(event: TouchEvent, localX: Float, localY: Float): Boolean {
+        if (!isVisible) {
+            return false
+        }
+        return super.onAreaTouched(event, localX, localY)
+    }
+
+    override fun onManagedUpdate(pSecondsElapsed: Float) {
+
+        x = element.drawX + element.drawWidth / 2 - drawWidth / 2
+
+        if (element.drawY < drawHeight) {
+            y = element.drawY + element.drawHeight + 4f
+        } else {
+            y = element.drawY - drawHeight - 4f
+        }
+
+        super.onManagedUpdate(pSecondsElapsed)
+    }
+
+
+    inner class Button(texture: String, back: ColorARGB, val action: () -> Unit) : Container() {
 
         init {
             setSize(46f, 46f)
@@ -52,7 +73,7 @@ class HUDElementToolbar(private val element: HUDElement) : LinearContainer() {
                 anchor = Anchor.Center
                 origin = Anchor.Center
                 relativeSizeAxes = Axes.Both
-                setSize(0.9f, 0.9f)
+                setSize(0.8f, 0.8f)
             })
 
         }
@@ -62,29 +83,13 @@ class HUDElementToolbar(private val element: HUDElement) : LinearContainer() {
                 action()
                 return true
             }
-            return false
-        }
 
-        override fun onManagedUpdate(pSecondsElapsed: Float) {
-
-            x = element.drawX + element.drawWidth / 2 - drawWidth / 2
-
-            if (element.drawY < drawHeight) {
-                y = element.drawY + element.drawHeight + 4f
-            } else {
-                y = element.drawY - drawHeight - 4f
+            if (event.isActionDown) {
+                return true
             }
 
-            super.onManagedUpdate(pSecondsElapsed)
-        }
-    }
-
-
-    override fun onAreaTouched(event: TouchEvent, localX: Float, localY: Float): Boolean {
-        if (!isVisible) {
             return false
         }
-        return super.onAreaTouched(event, localX, localY)
     }
 
 }

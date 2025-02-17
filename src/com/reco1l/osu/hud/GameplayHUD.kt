@@ -16,6 +16,7 @@ import com.reco1l.osu.updateThread
 import com.reco1l.toolkt.kotlin.fastForEach
 import org.anddev.andengine.engine.camera.hud.*
 import org.anddev.andengine.entity.IEntity
+import org.anddev.andengine.input.touch.TouchEvent
 import org.json.JSONObject
 import ru.nsu.ccfit.zuev.osu.Config
 import ru.nsu.ccfit.zuev.osu.GlobalManager
@@ -26,7 +27,6 @@ import ru.nsu.ccfit.zuev.osu.scoring.*
 import ru.nsu.ccfit.zuev.skins.OsuSkin
 import ru.nsu.ccfit.zuev.skins.SkinJsonReader
 import java.io.File
-import kotlin.reflect.KClass
 import kotlin.reflect.full.primaryConstructor
 
 class GameplayHUD : Container(), IGameplayEvents {
@@ -75,14 +75,21 @@ class GameplayHUD : Container(), IGameplayEvents {
     }
 
     fun onBackPress() {
+
+        fun restore() {
+            x = 0f
+            width = Config.getRES_WIDTH().toFloat()
+        }
+
         MessageDialog()
             .setTitle("HUD Editor")
             .setMessage("Do you want to save the changes?")
             .addButton("Save") {
                 it.dismiss()
                 updateThread {
-                    setEditMode(false)
                     ToastLogger.showText("Saving changes...", true)
+                    restore()
+                    setEditMode(false)
                     saveToSkinJSON()
                     ToastLogger.showText("Changes saved!", true)
                 }
@@ -90,6 +97,7 @@ class GameplayHUD : Container(), IGameplayEvents {
             .addButton("Discard & Restore") {
                 it.dismiss()
                 updateThread {
+                    restore()
                     setEditMode(false)
                     setSkinData(OsuSkin.get().hudSkinData)
                     ToastLogger.showText("Changes discarded!", true)
@@ -254,6 +262,14 @@ class GameplayHUD : Container(), IGameplayEvents {
     override fun getParent(): HUD? {
         // Nullable because during initialization the parent is not set yet.
         return super.getParent() as? HUD
+    }
+
+    override fun onAreaTouched(event: TouchEvent, localX: Float, localY: Float): Boolean {
+        if (!super.onAreaTouched(event, localX, localY)) {
+            selected = null
+            return false
+        }
+        return true
     }
 }
 
