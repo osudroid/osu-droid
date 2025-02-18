@@ -30,7 +30,6 @@ import com.reco1l.osu.ui.entity.GameplayLeaderboard
 import org.anddev.andengine.input.touch.TouchEvent
 import ru.nsu.ccfit.zuev.osu.ResourceManager
 import kotlin.math.abs
-import kotlin.math.min
 
 
 /**
