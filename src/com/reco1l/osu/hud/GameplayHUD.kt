@@ -48,8 +48,8 @@ class GameplayHUD : Container(), IGameplayEvents {
 
 
     init {
-        // The engine we expect the HUD to be a effectively an instance of the AndEngine's HUD class.
-        // Since we need Container features we set a HUD instance as the parent and we just need to
+        // The engine expects the HUD to be an instance of AndEngine's HUD class.
+        // Since we need Container features, we set an HUD instance as the parent, and we just need to
         // reference the parent of this container to set the engine's HUD.
         val parent = HUD()
         parent.attachChild(this)
