@@ -130,7 +130,7 @@ class GameplayHUD : Container(), IGameplayEvents {
     }
 
     /**
-     * Saves the skin data of the HUD.
+     * Obtains the skin data of the HUD.
      */
     fun getSkinData(): HUDSkinData {
         return HUDSkinData(
