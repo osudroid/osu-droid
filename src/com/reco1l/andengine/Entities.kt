@@ -36,8 +36,7 @@ fun IEntity?.getPaddedHeight() = when (this) {
 var ExtendedEntity.size
     get() = Vec2(width, height)
     set(value) {
-        width = value.x
-        height = value.y
+        setSize(value.x, value.y)
     }
 
 /**
@@ -52,8 +51,7 @@ val ExtendedEntity.drawSize
 var ExtendedEntity.position
     get() = Vec2(x, y)
     set(value) {
-        x = value.x
-        y = value.y
+        setPosition(value.x, value.y)
     }
 
 /**
@@ -154,12 +152,4 @@ fun IEntity?.getDrawY(): Float = when (this) {
     is ExtendedEntity -> drawY
     is IShape -> y
     else -> 0f
-}
-
-/**
- * Attaches the entity to a parent.
- */
-infix fun <T : IEntity> T.attachTo(parent: IEntity): T {
-    parent.attachChild(this)
-    return this
 }
