@@ -289,8 +289,8 @@ abstract class HUDElement : Container(), IGameplayEvents {
                 nameText.origin = Anchor.BottomLeft
             }
 
-            // The element might contain scale transformations. Those transformations are also applied
-            // to the background we might want to scale the text back to its original size.
+            // The element might contain scale transformations. Those transformations are also
+            // applied to the background, so we scale the text back to its original size.
             nameText.setScale(1f / this@HUDElement.scaleX, 1f / this@HUDElement.scaleY)
 
             // Same for the corner radius of the background.
