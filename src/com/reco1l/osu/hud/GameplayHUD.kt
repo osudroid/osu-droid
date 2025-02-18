@@ -91,7 +91,7 @@ class GameplayHUD : Container(), IGameplayEvents {
                     ToastLogger.showText("Changes saved!", true)
                 }
             }
-            .addButton("Discard & Restore") {
+            .addButton("Discard") {
                 it.dismiss()
                 updateThread {
                     restore()
