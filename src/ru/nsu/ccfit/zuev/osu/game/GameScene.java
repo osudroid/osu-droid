@@ -378,7 +378,7 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
         }
     }
 
-    private boolean loadGame(final BeatmapInfo beatmapInfo, final String rFile, final CoroutineScope scope, boolean isHudEditor) {
+    private boolean loadGame(final BeatmapInfo beatmapInfo, final String rFile, final CoroutineScope scope) {
         if (!SecurityUtils.verifyFileIntegrity(GlobalManager.getInstance().getMainActivity())) {
             ToastLogger.showText(com.osudroid.resources.R.string.file_integrity_tampered, true);
             return false;
@@ -689,7 +689,7 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
             boolean succeeded = false;
 
             try {
-                succeeded = loadGame(beatmapInfo != null ? beatmapInfo : lastBeatmapInfo, rfile, scope, isHUDEditor);
+                succeeded = loadGame(beatmapInfo != null ? beatmapInfo : lastBeatmapInfo, rfile, scope);
 
                 if (succeeded) {
                     prepareScene();
