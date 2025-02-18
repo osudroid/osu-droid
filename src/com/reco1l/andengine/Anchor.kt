@@ -31,4 +31,47 @@ object Anchor {
     @JvmField
     val BottomRight = Vec2(1f, 1f)
 
+
+    fun getAll() = listOf(
+        TopLeft,
+        TopCenter,
+        TopRight,
+        CenterLeft,
+        Center,
+        CenterRight,
+        BottomLeft,
+        BottomCenter,
+        BottomRight
+    )
+
+    fun getName(anchor: Vec2): String {
+        return when (anchor) {
+            TopLeft -> "TopLeft"
+            TopCenter -> "TopCenter"
+            TopRight -> "TopRight"
+            CenterLeft -> "CenterLeft"
+            Center -> "Center"
+            CenterRight -> "CenterRight"
+            BottomLeft -> "BottomLeft"
+            BottomCenter -> "BottomCenter"
+            BottomRight -> "BottomRight"
+            else -> throw IllegalArgumentException("Unknown anchor point: $anchor")
+        }
+    }
+
+    fun getFromName(name: String): Vec2 {
+        return when (name) {
+            "TopLeft" -> TopLeft
+            "TopCenter" -> TopCenter
+            "TopRight" -> TopRight
+            "CenterLeft" -> CenterLeft
+            "Center" -> Center
+            "CenterRight" -> CenterRight
+            "BottomLeft" -> BottomLeft
+            "BottomCenter" -> BottomCenter
+            "BottomRight" -> BottomRight
+            else -> throw IllegalArgumentException("Unknown anchor point: $name")
+        }
+    }
+
 }

@@ -18,7 +18,6 @@ import java.util.Map;
 import java.util.UUID;
 
 import com.reco1l.osu.multiplayer.Multiplayer;
-import com.reco1l.osu.playfield.ProgressIndicatorType;
 
 import net.margaritov.preference.colorpicker.ColorPickerPreference;
 
@@ -48,8 +47,6 @@ public class Config {
         useCustomSounds,
         corovans,
         showFPS,
-        showAverageOffset,
-        showUnstableRate,
         animateFollowCircle,
         animateComboText,
         snakingInSliders,
@@ -57,8 +54,6 @@ public class Config {
         showCursor,
         shrinkPlayfieldDownwards,
         hideNaviBar,
-        showScoreboard,
-        enablePP,
         enableExtension,
         loadAvatar,
         stayOnline,
@@ -76,7 +71,6 @@ public class Config {
         receiveAnnouncements,
         enableStoryboard,
         safeBeatmapBg,
-        displayRealTimePPCounter,
         useNightcoreOnMultiplayer,
         videoEnabled,
         deleteUnsupportedVideos,
@@ -88,11 +82,9 @@ public class Config {
 
     private static int RES_WIDTH,
         RES_HEIGHT,
-        errorMeter,
         spinnerStyle,
-        metronomeSwitch,
-        progressIndicatorType;
-    
+        metronomeSwitch;
+
     private static float soundVolume,
         bgmVolume,
         offset,
@@ -126,20 +118,15 @@ public class Config {
         comboburst = prefs.getBoolean("comboburst", false);
         corovans = prefs.getBoolean("images", false);
         showFPS = prefs.getBoolean("fps", true);
-        showAverageOffset = prefs.getBoolean("averageOffset", true);
-        showUnstableRate = prefs.getBoolean("unstableRate", true);
-        errorMeter = Integer.parseInt(prefs.getString("errormeter", "0"));
         spinnerStyle = Integer.parseInt(prefs.getString("spinnerstyle", "1"));
         showFirstApproachCircle = prefs.getBoolean("showfirstapproachcircle", false);
         metronomeSwitch = Integer.parseInt(prefs.getString("metronomeswitch", "1"));
-        showScoreboard = prefs.getBoolean("showscoreboard", true);
         enableStoryboard = prefs.getBoolean("enableStoryboard", false);
         videoEnabled = prefs.getBoolean("enableVideo", false);
         keepBackgroundAspectRatio = prefs.getBoolean("keepBackgroundAspectRatio", false);
         noChangeDimInBreaks = prefs.getBoolean("noChangeDimInBreaks", false);
         dimHitObjects = prefs.getBoolean("dimHitObjects", true);
         forceMaxRefreshRate = prefs.getBoolean("forceMaxRefreshRate", false);
-        progressIndicatorType = Integer.parseInt(prefs.getString("progressIndicatorType", "0"));
 
         setSize();
         setPlayfieldSize(prefs.getInt("playfieldSize", 100) / 100f);
@@ -224,7 +211,6 @@ public class Config {
         playMusicPreview = prefs.getBoolean("musicpreview", true);
         showCursor = prefs.getBoolean("showcursor", false);
         hideNaviBar = prefs.getBoolean("hidenavibar", false);
-        enablePP = false;//prefs.getBoolean("enablePP",true);
         fixFrameOffset = prefs.getBoolean("fixFrameOffset", true);
         removeSliderLock = prefs.getBoolean("removeSliderLock", false);
         displayScoreStatistics = prefs.getBoolean("displayScoreStatistics", false);
@@ -232,7 +218,6 @@ public class Config {
         hideInGameUI = prefs.getBoolean("hideInGameUI", false);
         receiveAnnouncements = prefs.getBoolean("receiveAnnouncements", true);
         safeBeatmapBg = prefs.getBoolean("safebeatmapbg", false);
-        displayRealTimePPCounter = prefs.getBoolean("displayRealTimePPCounter", false);
 
         // Multiplayer
         useNightcoreOnMultiplayer = prefs.getBoolean("player_nightcore", false);
@@ -307,10 +292,6 @@ public class Config {
         return displayScoreStatistics;
     }
 
-    public static boolean isDisplayRealTimePPCounter() {
-        return displayRealTimePPCounter;
-    }
-
     public static DifficultyAlgorithm getDifficultyAlgorithm() {
         return Config.getString("difficultyAlgorithm", "0").equals("1")
                 ? DifficultyAlgorithm.standard
@@ -331,30 +312,6 @@ public class Config {
 
     public static void setShowFPS(final boolean showFPS) {
         Config.showFPS = showFPS;
-    }
-
-    public static boolean isShowAverageOffset() {
-        return showAverageOffset;
-    }
-
-    public static void setShowAverageOffset(final boolean showAverageOffset) {
-        Config.showAverageOffset = showAverageOffset;
-    }
-
-    public static boolean isShowUnstableRate() {
-        return showUnstableRate;
-    }
-
-    public static void setShowUnstableRate(final boolean showUnstableRate) {
-        Config.showUnstableRate = showUnstableRate;
-    }
-
-    public static boolean isShowScoreboard() {
-        return showScoreboard;
-    }
-
-    public static void setShowScoreboard(final boolean showScoreboard) {
-        Config.showScoreboard = showScoreboard;
     }
 
     public static boolean isCorovans() {
@@ -619,14 +576,6 @@ public class Config {
         Config.hideNaviBar = hideNaviBar;
     }
 
-    public static boolean isEnablePP() {
-        return enablePP;
-    }
-
-    public static void setEnablePP(boolean enablePP) {
-        Config.enablePP = enablePP;
-    }
-
     public static String getScorePath() {
         return scorePath;
     }
@@ -645,14 +594,6 @@ public class Config {
 
     public static RGBColor[] getComboColors() {
         return comboColors;
-    }
-
-    public static int getErrorMeter() {
-        return errorMeter;
-    }
-
-    public static void setErrorMeter(int errorMeter) {
-        Config.errorMeter = errorMeter;
     }
 
     public static int getSpinnerStyle() {
@@ -819,11 +760,6 @@ public class Config {
 
     public static boolean isForceMaxRefreshRate() {
         return forceMaxRefreshRate;
-    }
-
-    @ProgressIndicatorType
-    public static int getProgressIndicatorType() {
-        return progressIndicatorType;
     }
 
 

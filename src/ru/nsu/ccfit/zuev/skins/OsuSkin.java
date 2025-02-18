@@ -2,6 +2,8 @@ package ru.nsu.ccfit.zuev.skins;
 
 import androidx.annotation.NonNull;
 
+import com.reco1l.osu.hud.HUDSkinData;
+
 import okio.BufferedSource;
 import okio.Okio;
 import ru.nsu.ccfit.zuev.osu.RGBColor;
@@ -10,6 +12,8 @@ import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
+
+import javax.annotation.Nullable;
 
 public class OsuSkin {
     private static final OsuSkin skinJson = new OsuSkin();
@@ -51,6 +55,9 @@ public class OsuSkin {
 
     protected final HashMap<String, SkinLayout> layoutData = new HashMap<>();
     protected final HashMap<String, RGBColor> colorData = new HashMap<>();
+
+    protected HUDSkinData hudSkinData = HUDSkinData.Default;
+
 
     public static OsuSkin get() {
         return skinJson;
@@ -199,5 +206,15 @@ public class OsuSkin {
     public void reset() {
         layoutData.clear();
         colorData.clear();
+        hudSkinData = HUDSkinData.Default;
+    }
+
+    @NonNull
+    public HUDSkinData getHUDSkinData() {
+        return hudSkinData;
+    }
+
+    public void setHUDSkinData(@NonNull HUDSkinData hudSkinData) {
+        this.hudSkinData = hudSkinData;
     }
 }

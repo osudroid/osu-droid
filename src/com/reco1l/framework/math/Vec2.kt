@@ -1,15 +1,12 @@
 package com.reco1l.framework.math
 
-data class Vec2(
+import com.reco1l.toolkt.toDegrees
+import kotlin.math.atan2
+import kotlin.math.hypot
 
-    val x: Float,
-
-    val y: Float,
-
-) {
+data class Vec2(val x: Float, val y: Float) {
 
     constructor(value: Float = 0f) : this(value, value)
-
 
     val total
         get() = x + y
@@ -21,37 +18,25 @@ data class Vec2(
         get() = x
 
 
-    operator fun plus(other: Vec2) = Vec2(
-        x + other.x,
-        y + other.y
-    )
+    operator fun plus(other: Vec2) = Vec2(x + other.x, y + other.y)
+    operator fun minus(other: Vec2) = Vec2(x - other.x, y - other.y)
+    operator fun times(other: Vec2) = Vec2(x * other.x, y * other.y)
+    operator fun div(other: Vec2) = Vec2(x / other.x, y / other.y)
 
-    operator fun minus(other: Vec2) = Vec2(
-        x - other.x,
-        y - other.y
-    )
+    operator fun times(scalar: Float) = Vec2(x * scalar, y * scalar)
+    operator fun div(scalar: Float) = Vec2(x / scalar, y / scalar)
 
-    operator fun times(scalar: Float) = Vec2(
-        x * scalar,
-        y * scalar,
-    )
+    operator fun unaryMinus() = Vec2(-x, -y)
 
-    operator fun div(scalar: Float) = Vec2(
-        x / scalar,
-        y / scalar
-    )
+    fun distance(other: Vec2) = hypot(x - other.x, y - other.y)
+    fun angleDeg(other: Vec2) = atan2(other.y - y, other.x - x).toDouble().toDegrees().toFloat()
 
-    operator fun unaryMinus() = Vec2(
-        -x,
-        -y
-    )
-
-    override fun toString() = "Vector2($x, $y)"
-
+    override fun equals(other: Any?): Boolean {
+        return this === other || other is Vec2 && x == other.x && y == other.y
+    }
 
     companion object {
         val Zero = Vec2()
         val One = Vec2(1f, 1f)
     }
-
 }
