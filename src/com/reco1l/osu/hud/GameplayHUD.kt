@@ -160,9 +160,9 @@ class GameplayHUD : Container(), IGameplayEvents {
     }
 
     private fun applyDefaultLayout() {
-        // Default layout is hardcoded to keep the original layout of the game before the HUD
-        // editor was implemented. As well there's no other way since the original layout was
-        // using cross references between elements that are not possible to be set in the editor.
+        // The default layout is hardcoded to keep the original layout before the HUD editor was
+        // implemented, as it used cross-references between elements that are not possible to be
+        // set in the editor.
 
         val scoreCounter = getFirstOf<HUDScoreCounter>()
         scoreCounter?.anchor = Anchor.TopRight
