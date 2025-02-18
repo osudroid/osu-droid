@@ -15,7 +15,7 @@ import com.reco1l.andengine.shape.RoundedBox
 import com.reco1l.andengine.text.ExtendedText
 import com.reco1l.framework.ColorARGB
 import com.reco1l.framework.math.Vec2
-import com.reco1l.osu.hud.editor.HUDElementOverlay
+import com.reco1l.osu.hud.editor.HUDElementEditorOverlay
 import com.reco1l.osu.hud.elements.HUDAccuracyCounter
 import com.reco1l.osu.hud.elements.HUDAverageOffsetCounter
 import com.reco1l.osu.hud.elements.HUDComboCounter
@@ -59,7 +59,7 @@ abstract class HUDElement : Container(), IGameplayEvents {
         get() = this::class.simpleName!!.replace("HUD", "").replace("([a-z])([A-Z])".toRegex(), "$1 $2")
 
 
-    private var overlay: HUDElementOverlay? = null
+    private var editorOverlay: HUDElementEditorOverlay? = null
 
     private var connectionLine: Line? = null
 
@@ -101,23 +101,23 @@ abstract class HUDElement : Container(), IGameplayEvents {
 
         if (value) {
             background = HUDElementBackground()
-            overlay = HUDElementOverlay(this)
+            editorOverlay = HUDElementEditorOverlay(this)
 
-            parent!!.attachChild(overlay!!)
+            parent!!.attachChild(editorOverlay!!)
         } else {
             connectionLine?.detachSelf()
-            overlay?.detachSelf()
+            editorOverlay?.detachSelf()
 
             connectionLine = null
             background = null
-            overlay = null
+            editorOverlay = null
         }
     }
 
     open fun onSelectionStateChange(isSelected: Boolean) {
 
         (background as? HUDElementBackground)?.isSelected = isSelected
-        overlay?.isVisible = isSelected
+        editorOverlay?.isVisible = isSelected
 
         if (isSelected) {
             updateConnectionLine()
@@ -175,7 +175,7 @@ abstract class HUDElement : Container(), IGameplayEvents {
 
     override fun invalidateTransformations() {
         super.invalidateTransformations()
-        overlay?.invalidateTransformations()
+        editorOverlay?.invalidateTransformations()
     }
 
 

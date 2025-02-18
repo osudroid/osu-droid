@@ -2,27 +2,22 @@ package com.reco1l.osu.hud.editor
 
 import com.reco1l.andengine.Anchor
 import com.reco1l.andengine.Axes
-import com.reco1l.andengine.anchorOffsetX
-import com.reco1l.andengine.anchorOffsetY
 import com.reco1l.andengine.container.ConstraintContainer
 import com.reco1l.andengine.container.Container
 import com.reco1l.andengine.container.LinearContainer
 import com.reco1l.andengine.container.Orientation
-import com.reco1l.andengine.drawPosition
 import com.reco1l.andengine.shape.Box
 import com.reco1l.andengine.shape.RoundedBox
 import com.reco1l.andengine.sprite.ExtendedSprite
 import com.reco1l.framework.ColorARGB
-import com.reco1l.framework.math.Vec2
 import com.reco1l.osu.hud.HUDElement
 import com.reco1l.osu.updateThread
 import org.anddev.andengine.input.touch.TouchEvent
 import ru.nsu.ccfit.zuev.osu.Config
 import ru.nsu.ccfit.zuev.osu.ResourceManager
-import kotlin.math.max
 import kotlin.math.min
 
-class HUDElementOverlay(private val element: HUDElement) : ConstraintContainer() {
+class HUDElementEditorOverlay(private val element: HUDElement) : ConstraintContainer() {
 
 
     private val elementProxy = Box().apply { color = ColorARGB.Transparent }
