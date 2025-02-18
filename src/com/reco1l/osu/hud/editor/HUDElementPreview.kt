@@ -61,36 +61,21 @@ class HUDElementPreview(private val element: HUDElement, val hud: GameplayHUD): 
     //region Input handling
     private var initialX = 0f
     private var initialY = 0f
-    private var initialTime = 0L
-    private var wasMoved = false
 
     override fun onAreaTouched(event: TouchEvent, localX: Float, localY: Float): Boolean {
 
         if (event.isActionDown) {
             initialX = localX
             initialY = localY
-            initialTime = System.currentTimeMillis()
-
-            clearEntityModifiers()
-            scaleTo(0.9f, 0.1f)
-            return true
-        }
-
-        if (event.isActionMove) {
-            initialTime = System.currentTimeMillis()
-            clearEntityModifiers()
-            scaleTo(1f, 0.1f)
         }
 
         if (event.isActionUp) {
-            clearEntityModifiers()
-            scaleTo(1f, 0.1f)
 
-            wasMoved = abs(localX - initialX) > 1f && abs(localY - initialY) > 1f
+            if (abs(localX - initialX) < 1f && abs(localY - initialY) < 1f) {
+                clearEntityModifiers()
+                scaleTo(0.9f, 0.1f).scaleTo(1f, 0.1f)
 
-            if (!wasMoved && System.currentTimeMillis() - initialTime > 50) {
                 hud.addElement(HUDElementSkinData(element::class))
-                return false
             }
         }
 

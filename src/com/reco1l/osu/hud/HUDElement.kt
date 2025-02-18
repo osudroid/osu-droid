@@ -73,7 +73,12 @@ abstract class HUDElement : Container(), IGameplayEvents {
         if (data != null) {
             anchor = data.anchor
             origin = data.origin
+
+            // We always expect to rotate around the center of the element.
+            rotationCenterX = 0.5f
+            rotationCenterY = 0.5f
             rotation = data.rotation
+
             setScale(data.scale)
             setPosition(data.position.x, data.position.y)
         }
@@ -159,6 +164,10 @@ abstract class HUDElement : Container(), IGameplayEvents {
                     initialY = parentLocalY
                     return true
                 }
+            }
+
+            if (event.isActionUp) {
+                return (parent as? GameplayHUD)?.selected == this
             }
         }
 

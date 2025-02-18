@@ -1,16 +1,13 @@
 package com.reco1l.osu.hud
 
-import android.util.Log
 import com.reco1l.andengine.Anchor
 import com.reco1l.andengine.Axes
 import com.reco1l.andengine.container.Container
-import com.reco1l.osu.async
 import com.reco1l.osu.hud.editor.HUDElementSelector
 import com.reco1l.osu.hud.elements.HUDAccuracyCounter
 import com.reco1l.osu.hud.elements.HUDComboCounter
 import com.reco1l.osu.hud.elements.HUDPieSongProgress
 import com.reco1l.osu.hud.elements.HUDScoreCounter
-import com.reco1l.osu.mainThread
 import com.reco1l.osu.ui.MessageDialog
 import com.reco1l.osu.updateThread
 import com.reco1l.toolkt.kotlin.fastForEach
@@ -208,7 +205,8 @@ class GameplayHUD : Container(), IGameplayEvents {
 
         if (value) {
             ResourceManager.getInstance().loadHighQualityAsset("delete", "delete.png")
-            ResourceManager.getInstance().loadHighQualityAsset("expand", "expand.png")
+            ResourceManager.getInstance().loadHighQualityAsset("scale", "scale.png")
+            ResourceManager.getInstance().loadHighQualityAsset("rotate", "rotate.png")
             ResourceManager.getInstance().loadHighQualityAsset("rotate_left", "rotate_left.png")
             ResourceManager.getInstance().loadHighQualityAsset("rotate_right", "rotate_right.png")
 
@@ -265,11 +263,13 @@ class GameplayHUD : Container(), IGameplayEvents {
     }
 
     override fun onAreaTouched(event: TouchEvent, localX: Float, localY: Float): Boolean {
-        val result = super.onAreaTouched(event, localX, localY)
-        if (event.isActionDown && !result) {
-            selected = null
+        if (!super.onAreaTouched(event, localX, localY)) {
+            if (event.isActionDown) {
+                selected = null
+            }
+            return false
         }
-        return result
+        return true
     }
 }
 
