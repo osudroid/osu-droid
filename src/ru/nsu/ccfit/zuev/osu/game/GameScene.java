@@ -35,7 +35,6 @@ import com.reco1l.osu.hud.GameplayHUD;
 import com.reco1l.osu.hitobjects.SliderTickSprite;
 import com.reco1l.osu.hud.elements.HUDPPCounter;
 import com.reco1l.osu.ui.BlockAreaFragment;
-import com.reco1l.osu.ui.MessageDialog;
 import com.reco1l.osu.ui.entity.GameplayLeaderboard;
 import com.reco1l.osu.multiplayer.Multiplayer;
 import com.reco1l.osu.multiplayer.RoomScene;
