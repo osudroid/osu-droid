@@ -2776,7 +2776,7 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
                 var songService = GlobalManager.getInstance().getSongService();
 
                 if (songService != null && songService.getStatus() == Status.PLAYING) {
-                    dt = songService.getPosition() / 1000f - elapsedTime - totalOffset;
+                    dt = songService.getPosition() / 1000f - (elapsedTime - totalOffset);
                 }
 
                 // BASS may report the wrong position. When that happens, `dt` will
