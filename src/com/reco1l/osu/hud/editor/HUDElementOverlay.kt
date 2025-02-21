@@ -17,7 +17,7 @@ import ru.nsu.ccfit.zuev.osu.Config
 import ru.nsu.ccfit.zuev.osu.ResourceManager
 import kotlin.math.min
 
-class HUDElementEditorOverlay(private val element: HUDElement) : ConstraintContainer() {
+class HUDElementOverlay(private val element: HUDElement) : ConstraintContainer() {
 
 
     private val elementProxy = Box().apply { color = ColorARGB.Transparent }
@@ -79,10 +79,10 @@ class HUDElementEditorOverlay(private val element: HUDElement) : ConstraintConta
 
     override fun onManagedUpdate(pSecondsElapsed: Float) {
 
-        elementProxy.anchor = element.anchor
-        elementProxy.origin = element.origin
-        elementProxy.x = element.x
-        elementProxy.y = element.y
+        // We need to cancel scale center
+        elementProxy.x = element.drawX + (element.drawWidth * element.scaleCenterX) * (1f - element.scaleX)
+        elementProxy.y = element.drawY + (element.drawHeight * element.scaleCenterY) * (1f - element.scaleY)
+
         elementProxy.width = element.drawWidth * element.scaleX
         elementProxy.height = element.drawHeight * element.scaleY
 

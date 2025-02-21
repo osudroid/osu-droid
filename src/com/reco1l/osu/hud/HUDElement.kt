@@ -6,8 +6,6 @@ import com.reco1l.andengine.anchorOffset
 import com.reco1l.andengine.container.Container
 import com.reco1l.andengine.drawPosition
 import com.reco1l.andengine.drawSize
-import com.reco1l.andengine.getDrawHeight
-import com.reco1l.andengine.getDrawWidth
 import com.reco1l.andengine.originOffset
 import com.reco1l.andengine.position
 import com.reco1l.andengine.shape.Line
@@ -15,7 +13,7 @@ import com.reco1l.andengine.shape.RoundedBox
 import com.reco1l.andengine.text.ExtendedText
 import com.reco1l.framework.ColorARGB
 import com.reco1l.framework.math.Vec2
-import com.reco1l.osu.hud.editor.HUDElementEditorOverlay
+import com.reco1l.osu.hud.editor.HUDElementOverlay
 import com.reco1l.osu.hud.elements.HUDAccuracyCounter
 import com.reco1l.osu.hud.elements.HUDAverageOffsetCounter
 import com.reco1l.osu.hud.elements.HUDComboCounter
@@ -68,7 +66,7 @@ abstract class HUDElement : Container(), IGameplayEvents {
         get() = HUDElements[this::class].name.replace('_', ' ').capitalize()
 
 
-    private var editorOverlay: HUDElementEditorOverlay? = null
+    private var editorOverlay: HUDElementOverlay? = null
 
     private var connectionLine: Line? = null
 
@@ -83,11 +81,12 @@ abstract class HUDElement : Container(), IGameplayEvents {
             origin = data.origin
 
             // We always expect to rotate around the center of the element.
-            rotationCenterX = 0.5f
-            rotationCenterY = 0.5f
+            setRotationCenter(0.5f, 0.5f)
             rotation = data.rotation
 
+            setScaleCenter(0.5f, 0.5f)
             setScale(data.scale)
+
             setPosition(data.position.x, data.position.y)
         }
     }
@@ -110,7 +109,7 @@ abstract class HUDElement : Container(), IGameplayEvents {
 
         if (value) {
             background = HUDElementBackground()
-            editorOverlay = HUDElementEditorOverlay(this)
+            editorOverlay = HUDElementOverlay(this)
 
             parent!!.attachChild(editorOverlay!!)
         } else {
@@ -219,6 +218,10 @@ abstract class HUDElement : Container(), IGameplayEvents {
             origin = closest
             position -= originOffset - previousOriginOffset
         }
+
+        // Restoring original scale/rotation center.
+        setRotationCenter(0.5f, 0.5f)
+        setScaleCenter(0.5f, 0.5f)
     }
 
     private fun updateConnectionLine() {
