@@ -25,7 +25,7 @@ import kotlin.reflect.full.primaryConstructor
 class HUDElementSelector(private val hud: GameplayHUD) : Container(), IGameplayEvents {
 
 
-    private val elements = HUDElements.map { it.primaryConstructor!!.call() }
+    private val elements = HUDElements.entries.map { it.type.primaryConstructor!!.call() }
 
 
     init {

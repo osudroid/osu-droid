@@ -27,27 +27,36 @@ import com.reco1l.osu.hud.elements.HUDPieSongProgress
 import com.reco1l.osu.hud.elements.HUDScoreCounter
 import com.reco1l.osu.hud.elements.HUDUnstableRateCounter
 import com.reco1l.osu.ui.entity.GameplayLeaderboard
+import com.reco1l.toolkt.kotlin.capitalize
 import org.anddev.andengine.input.touch.TouchEvent
 import ru.nsu.ccfit.zuev.osu.ResourceManager
 import kotlin.math.abs
+import kotlin.reflect.KClass
 
 
 /**
  * List all the elements that can be added to the HUD.
  */
-val HUDElements = listOf(
-    HUDAccuracyCounter::class,
-    HUDComboCounter::class,
-    HUDHealthBar::class,
-    HUDPieSongProgress::class,
-    HUDPPCounter::class,
-    HUDScoreCounter::class,
-    HUDUnstableRateCounter::class,
-    HUDAverageOffsetCounter::class,
-    HUDHitErrorMeter::class,
-    HUDLinearSongProgress::class,
-    GameplayLeaderboard::class
-)
+@Suppress("EnumEntryName")
+enum class HUDElements(val type: KClass<out HUDElement>) {
+
+    accuracy_counter(HUDAccuracyCounter::class),
+    combo_counter(HUDComboCounter::class),
+    health_bar(HUDHealthBar::class),
+    pie_song_progress(HUDPieSongProgress::class),
+    pp_counter(HUDPPCounter::class),
+    score_counter(HUDScoreCounter::class),
+    ur_counter(HUDUnstableRateCounter::class),
+    avg_offset_counter(HUDAverageOffsetCounter::class),
+    hit_error_meter(HUDHitErrorMeter::class),
+    linear_song_progress(HUDLinearSongProgress::class),
+    leaderboard(GameplayLeaderboard::class);
+
+    companion object {
+        operator fun get(type: KClass<out HUDElement>) = entries.first { it.type == type }
+        operator fun get(name: String) = valueOf(name)
+    }
+}
 
 
 abstract class HUDElement : Container(), IGameplayEvents {
@@ -56,7 +65,7 @@ abstract class HUDElement : Container(), IGameplayEvents {
      * Returns the name of this element.
      */
     val name: String
-        get() = this::class.simpleName!!.replace("HUD", "").replace("([a-z])([A-Z])".toRegex(), "$1 $2")
+        get() = HUDElements[this::class].name.replace('_', ' ').capitalize()
 
 
     private var editorOverlay: HUDElementEditorOverlay? = null

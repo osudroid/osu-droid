@@ -57,7 +57,7 @@ data class HUDSkinData(val elements: List<HUDElementSkinData>) {
                 val element = json.getJSONObject(i)
 
                 HUDElementSkinData(
-                    type = HUDElements.first { it.simpleName == element.getString("type") },
+                    type = HUDElements.valueOf(element.getString("type")).type,
                     position = Vec2(
                         element.optDouble("x", 0.0).toFloat(),
                         element.optDouble("y", 0.0).toFloat(),
