@@ -80,10 +80,6 @@ abstract class HUDElement : Container(), IGameplayEvents {
             anchor = data.anchor
             origin = data.origin
 
-            // We always expect to rotate around the center of the element.
-            setRotationCenter(0.5f, 0.5f)
-            rotation = data.rotation
-
             setScaleCenter(0.5f, 0.5f)
             setScale(data.scale)
 
@@ -96,8 +92,7 @@ abstract class HUDElement : Container(), IGameplayEvents {
         anchor = anchor,
         origin = origin,
         scale = scaleX, // Scale is uniform currently.
-        position = Vec2(x, y),
-        rotation = rotation
+        position = Vec2(x, y)
     )
 
     //endregion

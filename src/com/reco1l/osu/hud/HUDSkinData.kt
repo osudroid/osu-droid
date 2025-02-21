@@ -45,7 +45,6 @@ data class HUDSkinData(val elements: List<HUDElementSkinData>) {
                     put("anchor", Anchor.getName(it.anchor))
                     put("origin", Anchor.getName(it.origin))
                     put("scale", it.scale)
-                    put("rotation", it.rotation)
                 }
             }
         }
@@ -64,8 +63,7 @@ data class HUDSkinData(val elements: List<HUDElementSkinData>) {
                     ),
                     anchor = Anchor.getFromName(element.optString("anchor", "TopLeft")),
                     origin = Anchor.getFromName(element.optString("origin", "TopLeft")),
-                    scale = element.optDouble("scale", 1.0).toFloat(),
-                    rotation = element.optDouble("rotation", 1.0).toFloat()
+                    scale = element.optDouble("scale", 1.0).toFloat()
                 )
             }
 
@@ -101,10 +99,5 @@ data class HUDElementSkinData(
     /**
      * The scale applied to the element.
      */
-    val scale: Float = 1f,
-
-    /**
-     * The rotation of the element.
-     */
-    val rotation: Float = 0f
+    val scale: Float = 1f
 )

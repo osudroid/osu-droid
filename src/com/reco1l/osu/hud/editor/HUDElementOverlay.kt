@@ -15,7 +15,9 @@ import com.reco1l.osu.updateThread
 import org.anddev.andengine.input.touch.TouchEvent
 import ru.nsu.ccfit.zuev.osu.Config
 import ru.nsu.ccfit.zuev.osu.ResourceManager
+import kotlin.math.abs
 import kotlin.math.min
+import kotlin.math.sign
 
 class HUDElementOverlay(private val element: HUDElement) : ConstraintContainer() {
 
@@ -32,13 +34,15 @@ class HUDElementOverlay(private val element: HUDElement) : ConstraintContainer()
             }
         })
 
-        attachChild(Button("rotate_left", ColorARGB(0xFF181825)) {
-            element.rotation -= 90f
+        // Flip horizontally
+        attachChild(Button("flip", ColorARGB(0xFF181825)) {
+            element.scaleX = -element.scaleX
         })
 
-        attachChild(Button("rotate_right", ColorARGB(0xFF181825)) {
-            element.rotation += 90f
-        })
+        // Flip vertically
+        attachChild(Button("flip", ColorARGB(0xFF181825)) {
+            element.scaleY = -element.scaleY
+        }.apply { icon.rotation = -90f })
 
     }
 
@@ -46,8 +50,8 @@ class HUDElementOverlay(private val element: HUDElement) : ConstraintContainer()
 
         val scaleDelta = min(-deltaX, deltaY) / 100f
 
-        element.scaleX = (element.scaleX + scaleDelta).coerceIn(0.5f, 5f)
-        element.scaleY = (element.scaleY + scaleDelta).coerceIn(0.5f, 5f)
+        element.scaleX = (abs(element.scaleX) + scaleDelta).coerceIn(0.5f, 5f) * sign(element.scaleX)
+        element.scaleY = (abs(element.scaleY) + scaleDelta).coerceIn(0.5f, 5f) * sign(element.scaleY)
     }
 
 
@@ -80,11 +84,11 @@ class HUDElementOverlay(private val element: HUDElement) : ConstraintContainer()
     override fun onManagedUpdate(pSecondsElapsed: Float) {
 
         // We need to cancel scale center
-        elementProxy.x = element.drawX + (element.drawWidth * element.scaleCenterX) * (1f - element.scaleX)
-        elementProxy.y = element.drawY + (element.drawHeight * element.scaleCenterY) * (1f - element.scaleY)
+        elementProxy.x = element.drawX + (element.drawWidth * element.scaleCenterX) * (1f - abs(element.scaleX))
+        elementProxy.y = element.drawY + (element.drawHeight * element.scaleCenterY) * (1f - abs(element.scaleY))
 
-        elementProxy.width = element.drawWidth * element.scaleX
-        elementProxy.height = element.drawHeight * element.scaleY
+        elementProxy.width = element.drawWidth * abs(element.scaleX)
+        elementProxy.height = element.drawHeight * abs(element.scaleY)
 
         super.onManagedUpdate(pSecondsElapsed)
     }
@@ -132,6 +136,14 @@ class HUDElementOverlay(private val element: HUDElement) : ConstraintContainer()
 
     private inner class Button(texture: String, back: ColorARGB, val action: () -> Unit) : Container() {
 
+        val icon = ExtendedSprite().apply {
+            textureRegion = ResourceManager.getInstance().getTexture(texture)
+            anchor = Anchor.Center
+            origin = Anchor.Center
+            relativeSizeAxes = Axes.Both
+            setSize(0.8f, 0.8f)
+        }
+
         init {
             setSize(BUTTON_SIZE, BUTTON_SIZE)
 
@@ -140,13 +152,7 @@ class HUDElementOverlay(private val element: HUDElement) : ConstraintContainer()
                 color = back
             }
 
-            attachChild(ExtendedSprite().apply {
-                textureRegion = ResourceManager.getInstance().getTexture(texture)
-                anchor = Anchor.Center
-                origin = Anchor.Center
-                relativeSizeAxes = Axes.Both
-                setSize(0.8f, 0.8f)
-            })
+            attachChild(icon)
 
         }
 
