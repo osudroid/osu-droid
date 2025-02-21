@@ -150,8 +150,8 @@ open class ExtendedText : ExtendedEntity() {
 
 
     override fun finalize() {
-        if (textureBuffer!!.isManaged) {
-            textureBuffer!!.unloadFromActiveBufferObjectManager()
+        if (textureBuffer?.isManaged == true) {
+            textureBuffer?.unloadFromActiveBufferObjectManager()
         }
         super.finalize()
     }
