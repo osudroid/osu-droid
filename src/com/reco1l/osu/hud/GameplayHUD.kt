@@ -222,7 +222,7 @@ class GameplayHUD : Container(), IGameplayEvents {
             elementSelector = null
         }
 
-        mChildren?.filterIsInstance<HUDElement>()?.forEach { it.setEditMode(value) }
+        forEachElement { it.setEditMode(value) }
     }
     //endregion
 
