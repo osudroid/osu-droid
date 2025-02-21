@@ -31,9 +31,9 @@ import com.reco1l.andengine.Anchor;
 import com.reco1l.andengine.sprite.VideoSprite;
 import com.reco1l.andengine.ExtendedScene;
 import com.reco1l.osu.hitobjects.FollowPointConnection;
-import com.reco1l.osu.playfield.GameplayHUD;
-import com.reco1l.osu.playfield.ProgressIndicatorType;
+import com.reco1l.osu.hud.GameplayHUD;
 import com.reco1l.osu.hitobjects.SliderTickSprite;
+import com.reco1l.osu.hud.elements.HUDPPCounter;
 import com.reco1l.osu.ui.BlockAreaFragment;
 import com.reco1l.osu.ui.entity.GameplayLeaderboard;
 import com.reco1l.osu.multiplayer.Multiplayer;
@@ -146,7 +146,6 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
     private LinkedList<GameObject> expiredObjects;
     private Queue<BreakPeriod> breakPeriods = new LinkedList<>();
     public GameplayLeaderboard scoreBoard;
-    private HitErrorMeter hitErrorMeter;
     private Metronome metronome;
     private float scale;
     private float objectTimePreempt;
@@ -167,8 +166,8 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
     private Replay replay;
     private boolean replaying;
     private String replayFilePath;
-    private float offsetSum;
-    private int offsetRegs;
+    public float offsetSum;
+    public int offsetRegs;
     private Rectangle dimRectangle = null;
     private ComboBurst comboBurst;
     private int failcount = 0;
@@ -183,7 +182,7 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
 
     private ProxySprite storyboardOverlayProxy;
 
-    private HitWindow hitWindow;
+    public HitWindow hitWindow;
 
     private Job loadingJob;
     private DifficultyCalculationParameters lastDifficultyCalculationParameters;
@@ -191,8 +190,6 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
     private TimedDifficultyAttributes<StandardDifficultyAttributes>[] standardTimedDifficultyAttributes;
 
     private final List<ChangeableText> counterTexts = new ArrayList<>(5);
-    private ChangeableText avgOffsetText;
-    private ChangeableText urText;
     private ChangeableText memText;
 
     // Game
@@ -221,9 +218,9 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
     private GameplayHUD hud;
 
     /**
-     * The linear song progress bar.
+     * Whether the HUD editor mode is enabled.
      */
-    private LinearSongProgress linearSongProgress;
+    public boolean isHUDEditorMode = false;
 
 
     // Timing
@@ -591,7 +588,7 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
         var sameParameters = lastDifficultyCalculationParameters != null &&
                 lastDifficultyCalculationParameters.equals(parameters);
 
-        if (Config.isDisplayRealTimePPCounter()) {
+        if (!isHUDEditorMode && OsuSkin.get().getHUDSkinData().hasElement(HUDPPCounter.class)) {
             // Calculate timed difficulty attributes
             switch (Config.getDifficultyAlgorithm()) {
                 case droid -> {
@@ -643,7 +640,14 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
         startGame(null, null);
     }
 
-    public void startGame(final BeatmapInfo beatmapInfo, final String replayFile) {
+
+    public void startGame(BeatmapInfo beatmapInfo, String replayFile) {
+        startGame(beatmapInfo, replayFile, false);
+    }
+
+    public void startGame(BeatmapInfo beatmapInfo, String replayFile, boolean isHUDEditor) {
+        isHUDEditorMode = isHUDEditor;
+
         scene = new ExtendedScene();
         if (Config.isEnableStoryboard()) {
             if (storyboardSprite == null || storyboardOverlayProxy == null) {
@@ -769,59 +773,6 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
         GameHelper.setScoreV2(stat.getMod().contains(GameMod.MOD_SCOREV2));
         GameHelper.setEasy(stat.getMod().contains(GameMod.MOD_EASY));
 
-        // Set up counter texts
-        for (var text : counterTexts) {
-            text.detachSelf();
-        }
-        counterTexts.clear();
-
-        hud = new GameplayHUD(stat, this, !Config.isHideInGameUI());
-
-        var counterTextFont = ResourceManager.getInstance().getFont("smallFont");
-
-        if (Config.isShowFPS()) {
-            var fpsCounter = new FPSCounter(counterTextFont);
-
-            // Attach a dummy entity for computing FPS, as its frame rate is tied to the draw thread and not
-            // the update thread.
-            hud.attachChild(new Entity() {
-                private long previousDrawTime;
-
-                @Override
-                protected void onManagedDraw(GL10 pGL, Camera pCamera) {
-                    long currentDrawTime = SystemClock.uptimeMillis();
-
-                    fpsCounter.updateFps((currentDrawTime - previousDrawTime) / 1000f);
-
-                    previousDrawTime = currentDrawTime;
-                }
-            });
-
-            counterTexts.add(fpsCounter);
-        }
-
-        if (Config.isShowUnstableRate() && !GameHelper.isAuto()) {
-            urText = new ChangeableText(720, 480, counterTextFont, "00.00 UR    ");
-            counterTexts.add(urText);
-        }
-
-        if (Config.isShowAverageOffset() && !GameHelper.isAuto()) {
-            avgOffsetText = new ChangeableText(720, 440, counterTextFont, "Avg offset: 0ms     ");
-            counterTexts.add(avgOffsetText);
-        }
-
-        if (BuildConfig.DEBUG) {
-            memText = new ChangeableText(780, 520, counterTextFont, "0/0 MB    ");
-            counterTexts.add(memText);
-        }
-
-        updateCounterTexts();
-
-        // Attach the counter texts
-        for (var text : counterTexts) {
-            hud.attachChild(text);
-        }
-
         for (int i = 0; i < CursorCount; i++) {
             cursors[i] = new Cursor();
             cursors[i].mouseDown = false;
@@ -893,21 +844,6 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
             }
         }
 
-        linearSongProgress = null;
-
-        if (!Config.isHideInGameUI()) {
-            if (Config.getProgressIndicatorType() == ProgressIndicatorType.BAR) {
-                linearSongProgress = new LinearSongProgress(hud, lastObjectEndTime, firstObjectStartTime, new PointF(0, Config.getRES_HEIGHT() - 7), Config.getRES_WIDTH(), 7);
-                linearSongProgress.setProgressRectColor(new RGBColor(153f / 255f, 204f / 255f, 51f / 255f));
-                linearSongProgress.setProgressRectAlpha(0.4f);
-                linearSongProgress.setInitialPassedTime(initialElapsedTime);
-            }
-        }
-
-        if (Config.getErrorMeter() == 1 || (Config.getErrorMeter() == 2 && replaying)) {
-            hitErrorMeter = new HitErrorMeter(hud, new PointF(Config.getRES_WIDTH() / 2f, Config.getRES_HEIGHT() - 20), 12, hitWindow);
-        }
-
         skipBtn = null;
         if (skipTime > 1) {
             skipBtn = new AnimatedSprite("play-skip", true, OsuSkin.get().getAnimationFramerate());
@@ -961,8 +897,18 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
             fgScene.attachChild(unrankedSprite);
         }
 
-        String playname = Config.getOnlineUsername();
+        if (GameHelper.isFlashLight()){
+            flashlightSprite = new FlashLightEntity();
+            fgScene.attachChild(flashlightSprite, 0);
+        }
 
+        // HUD should be to the last so we ensure everything is initialized and ready to be used by
+        // the HUD elements in their constructors.
+        hud = new GameplayHUD();
+        hud.setSkinData(OsuSkin.get().getHUDSkinData());
+        hud.setEditMode(isHUDEditorMode);
+
+        String playname = Config.getOnlineUsername();
         ChangeableText replayText = null;
 
         if (!Config.isHideReplayMarquee()) {
@@ -985,24 +931,53 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
             //noinspection DataFlowIssue
             playname = Multiplayer.player.getTeam().toString();
         }
+        stat.setPlayerName(playname);
 
-        if (Config.isShowScoreboard()) {
-            scoreBoard = new GameplayLeaderboard(playname, stat);
-            hud.attachChild(scoreBoard);
+        for (var text : counterTexts) {
+            text.detachSelf();
+        }
+        counterTexts.clear();
+
+        var counterTextFont = ResourceManager.getInstance().getFont("smallFont");
+
+        if (Config.isShowFPS()) {
+            var fpsCounter = new FPSCounter(counterTextFont);
+
+            // Attach a dummy entity for computing FPS, as its frame rate is tied to the draw thread and not
+            // the update thread.
+            hud.attachChild(new Entity() {
+                private long previousDrawTime;
+
+                @Override
+                protected void onManagedDraw(GL10 pGL, Camera pCamera) {
+                    long currentDrawTime = SystemClock.uptimeMillis();
+
+                    fpsCounter.updateFps((currentDrawTime - previousDrawTime) / 1000f);
+
+                    previousDrawTime = currentDrawTime;
+                }
+            });
+
+            counterTexts.add(fpsCounter);
         }
 
-        if (GameHelper.isFlashLight()){
-            flashlightSprite = new FlashLightEntity();
-            fgScene.attachChild(flashlightSprite, 0);
+        if (BuildConfig.DEBUG) {
+            memText = new ChangeableText(780, 520, counterTextFont, "0/0 MB    ");
+            counterTexts.add(memText);
         }
 
-        // Returning here to avoid start the game instantly
-        if (Multiplayer.isMultiplayer)
-        {
+        updateCounterTexts();
+
+        // Attach the counter texts
+        for (var text : counterTexts) {
+            hud.attachChild(text);
+        }
+
+        if (!Multiplayer.isMultiplayer) {
+            start();
+        } else {
             RoomAPI.INSTANCE.notifyBeatmapLoaded();
-            return;
         }
-        start();
     }
 
     // This is used by the multiplayer system, is called once all players in the room completes beatmap loading.
@@ -1022,10 +997,14 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
         engine.setScene(scene);
         scene.registerUpdateHandler(this);
 
-        engine.getCamera().setHUD(hud);
+        engine.getCamera().setHUD(hud.getParent());
 
         blockAreaFragment = new BlockAreaFragment();
         blockAreaFragment.show(false);
+
+        if (isHUDEditorMode) {
+            ToastLogger.showText("Press back to exit HUD editor mode and save.", false);
+        }
     }
 
     public RGBColor getComboColor(int num) {
@@ -1212,7 +1191,7 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
                     if (Multiplayer.isConnected())
                         RoomScene.INSTANCE.getChat().show();
 
-                    hud.setHealthBarVisibility(false);
+                    hud.onBreakStateChange(true);
                     breakPeriods.poll();
                 }
             }
@@ -1223,7 +1202,7 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
                 RoomScene.INSTANCE.getChat().dismiss();
 
                 gameStarted = true;
-                hud.setHealthBarVisibility(true);
+                hud.onBreakStateChange(false);
 
                 if(GameHelper.isFlashLight()){
                     flashlightSprite.onBreak(false);
@@ -1258,10 +1237,6 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
                     }
                 }
             }
-        }
-
-        if (hitErrorMeter != null) {
-            hitErrorMeter.update(dt);
         }
 
         if (comboBurst != null) {
@@ -1595,11 +1570,9 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
 
     private void updatePassiveObjects(float deltaTime) {
 
-        breakAnimator.update(deltaTime);
+        hud.onGameplayUpdate(this, stat, deltaTime);
 
-        if (linearSongProgress != null) {
-            linearSongProgress.update(deltaTime);
-        }
+        breakAnimator.update(deltaTime);
 
         if (countdownAnimator != null) {
             countdownAnimator.update(deltaTime);
@@ -1889,7 +1862,7 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
         createBurstEffect(pos, color);
         createHitEffect(pos, scoreName, color);
 
-        hud.flashHealthBar();
+        hud.onNoteHit(stat);
     }
 
     public void onSliderReverse(PointF pos, float ang, RGBColor color) {
@@ -1966,7 +1939,7 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
 
         createHitEffect(judgementPos, scoreName, color);
 
-        hud.flashHealthBar();
+        hud.onNoteHit(stat);
     }
 
 
@@ -2021,7 +1994,7 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
 
         createHitEffect(pos, scoreName, null);
 
-        hud.flashHealthBar();
+        hud.onNoteHit(stat);
     }
 
     private void stopLoopingSamples() {
@@ -2201,6 +2174,11 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
             return;
         }
 
+        if (isHUDEditorMode) {
+            hud.onBackPress();
+            return;
+        }
+
         if (Multiplayer.isMultiplayer)
         {
             // Setting a delay of 300ms for the player to tap back button again.
@@ -2247,7 +2225,7 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
         scene.setIgnoreUpdate(true);
 
         final PauseMenu menu = new PauseMenu(engine, this, false);
-        hud.setChildScene(menu.getScene(), false, true, true);
+        hud.getParent().setChildScene(menu.getScene(), false, true, true);
     }
 
     public void gameover() {
@@ -2382,7 +2360,7 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
                     engine.unregisterUpdateHandler(this);
 
                     PauseMenu menu = new PauseMenu(engine, GameScene.this, true);
-                    hud.setChildScene(menu.getScene(), false, true, true);
+                    hud.getParent().setChildScene(menu.getScene(), false, true, true);
                 }
             }
 
@@ -2403,7 +2381,7 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
         blockAreaFragment.show();
 
         scene.setIgnoreUpdate(false);
-        hud.getChildScene().back();
+        hud.getParent().getChildScene().back();
         paused = false;
 
         if (stat.getHp() <= 0 && !stat.getMod().contains(GameMod.MOD_NOFAIL)) {
@@ -2583,9 +2561,6 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
 
 
     public void registerAccuracy(final double acc) {
-        if (hitErrorMeter != null) {
-            hitErrorMeter.putErrorResult((float) acc);
-        }
         offsetSum += (float) acc;
         offsetRegs++;
 
@@ -2594,6 +2569,8 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
         if (replaying) {
             scoringScene.getReplayStat().addHitOffset(acc);
         }
+
+        hud.onAccuracyRegister((float) acc);
     }
 
 
@@ -2735,18 +2712,6 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
     }
 
     private void updateCounterTexts() {
-        // We are not updating FPS text as it is handled by FPSCounter, as well
-        // as PP text as it is updated in updatePPCounter.
-        if (avgOffsetText != null) {
-            float avgOffset = offsetRegs > 0 ? offsetSum / offsetRegs : 0;
-
-            avgOffsetText.setText("Avg offset: " + Math.round(avgOffset * 1000) + "ms");
-        }
-
-        if (urText != null) {
-            urText.setText(Math.round(stat != null ? stat.getUnstableRate() : 0) + " UR");
-        }
-
         if (memText != null) {
             var totalMemory = Runtime.getRuntime().totalMemory();
             var usedMemory = totalMemory - Runtime.getRuntime().freeMemory();
@@ -2763,7 +2728,7 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
     }
 
     private void updatePPCounter(int objectId) {
-        if (Config.isHideInGameUI() || !Config.isDisplayRealTimePPCounter()) {
+        if (Config.isHideInGameUI() || !isHUDEditorMode && !OsuSkin.get().getHUDSkinData().hasElement(HUDPPCounter.class)) {
             return;
         }
 
@@ -2772,7 +2737,7 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
             case standard -> getStandardPPAt(objectId);
         };
 
-        hud.setPPCounterValue(!Double.isNaN(pp) ? pp : 0);
+        stat.setPP(pp);
     }
 
     private double getDroidPPAt(int objectId) {

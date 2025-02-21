@@ -12,6 +12,8 @@ import kotlin.math.*
 
 open class ScrollableContainer : Container() {
 
+    override var autoSizeAxes = Axes.None
+
     /**
      * Which axes the container can scroll on.
      */
@@ -34,6 +36,8 @@ open class ScrollableContainer : Container() {
 
             indicatorX?.alpha = 0.5f
             field = value
+            invalidateTransformations()
+            invalidateInputBindings()
         }
 
     /**
@@ -53,6 +57,8 @@ open class ScrollableContainer : Container() {
 
             indicatorY?.alpha = 0.5f
             field = value
+            invalidateTransformations()
+            invalidateInputBindings()
         }
 
     /**
@@ -293,39 +299,36 @@ open class ScrollableContainer : Container() {
                 var deltaX = if (scrollAxes.isHorizontal) localX - initialX else 0f
                 var deltaY = if (scrollAxes.isVertical) localY - initialY else 0f
 
-                if (!isDragging) {
-                    isDragging = abs(deltaX) > 1f || abs(deltaY) > 1f
+                isDragging = abs(deltaX) > 1f || abs(deltaY) > 1f
 
-                    if (!isDragging) {
-                        return super.onAreaTouched(event, localX, localY)
+                if (isDragging) {
+
+                    val length = hypot(deltaX, deltaY)
+
+                    if (scrollX - deltaX < 0 || scrollX - deltaX > maxScrollX) {
+                        deltaX *= if (length <= 0) 0f else length.pow(0.7f) / length
                     }
+
+                    if (scrollY - deltaY < 0 || scrollY - deltaY > maxScrollY) {
+                        deltaY *= if (length <= 0) 0f else length.pow(0.7f) / length
+                    }
+
+                    val dragTimeSec = elapsedTimeSec - lastDragTimeSec
+
+                    if (abs(deltaX) > 0.1f) {
+                        scrollX -= deltaX
+                        velocityX = abs(deltaX / dragTimeSec) * sign(deltaX)
+                        initialX = localX
+                    }
+
+                    if (abs(deltaY) > 0.1f) {
+                        scrollY -= deltaY
+                        velocityY = abs(deltaY / dragTimeSec) * sign(deltaY)
+                        initialY = localY
+                    }
+
+                    lastDragTimeSec = elapsedTimeSec
                 }
-
-                val length = hypot(deltaX, deltaY)
-
-                if (scrollX - deltaX < 0 || scrollX - deltaX > maxScrollX) {
-                    deltaX *= if (length <= 0) 0f else length.pow(0.7f) / length
-                }
-
-                if (scrollY - deltaY < 0 || scrollY - deltaY > maxScrollY) {
-                    deltaY *= if (length <= 0) 0f else length.pow(0.7f) / length
-                }
-
-                val dragTimeSec = elapsedTimeSec - lastDragTimeSec
-
-                if (abs(deltaX) > 0.1f) {
-                    scrollX -= deltaX
-                    velocityX = abs(deltaX / dragTimeSec) * sign(deltaX)
-                    initialX = localX
-                }
-
-                if (abs(deltaY) > 0.1f) {
-                    scrollY -= deltaY
-                    velocityY = abs(deltaY / dragTimeSec) * sign(deltaY)
-                    initialY = localY
-                }
-
-                lastDragTimeSec = elapsedTimeSec
             }
 
             else -> {
@@ -334,7 +337,7 @@ open class ScrollableContainer : Container() {
         }
 
         if (!isDragging) {
-            return super.onAreaTouched(event, localX, localY)
+            super.onAreaTouched(event, localX, localY)
         }
 
         return true

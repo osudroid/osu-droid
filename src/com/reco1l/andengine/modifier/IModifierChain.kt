@@ -192,4 +192,33 @@ interface IModifierChain {
         }
     }
 
+
+    // Size
+    fun sizeTo(width: Float, height: Float, durationSec: Float = 0f, easing: Easing = Easing.None): UniversalModifier {
+        return applyModifier {
+            type = SizeXY
+            duration = durationSec
+            finalValues = floatArrayOf(width, height)
+            eased(easing)
+        }
+    }
+
+    fun sizeToX(width: Float, durationSec: Float = 0f, easing: Easing = Easing.None): UniversalModifier {
+        return applyModifier {
+            type = SizeX
+            duration = durationSec
+            finalValues = floatArrayOf(width)
+            eased(easing)
+        }
+    }
+
+    fun sizeToY(height: Float, durationSec: Float = 0f, easing: Easing = Easing.None): UniversalModifier {
+        return applyModifier {
+            type = SizeY
+            duration = durationSec
+            finalValues = floatArrayOf(height)
+            eased(easing)
+        }
+    }
+
 }
