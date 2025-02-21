@@ -42,12 +42,6 @@
 
         <CheckBoxPreference
             android:defaultValue="true"
-            android:key="syncMusic"
-            android:summary="@string/opt_syncmusic_summary"
-            android:title="@string/opt_syncmusic_title" />
-
-        <CheckBoxPreference
-            android:defaultValue="true"
             android:key="fixFrameOffset"
             android:summary="@string/opt_fix_frame_offset_summary"
             android:title="@string/opt_fix_frame_offset_title"
