@@ -214,28 +214,16 @@ abstract class HUDElement : Container(), IGameplayEvents {
 
     private fun updateConnectionLine() {
 
-        val pointOnParent = Vec2(
-            parent!!.getDrawWidth() * anchor.x,
-            parent!!.getDrawHeight() * anchor.y
-        )
-
-        val pointOnChild = Vec2(
-            drawX + drawWidth * origin.x,
-            drawY + drawHeight * origin.y
-        )
-
         if (connectionLine == null) {
             connectionLine = Line().apply {
-                fromPoint = pointOnParent
-                toPoint = pointOnChild
                 color = ColorARGB(0xFFF27272)
                 lineWidth = 10f
             }
             parent!!.attachChild(connectionLine!!)
-        } else {
-            connectionLine!!.fromPoint = pointOnParent
-            connectionLine!!.toPoint = pointOnChild
         }
+
+        connectionLine!!.fromPoint = anchorOffset
+        connectionLine!!.toPoint = drawPosition - originOffset
     }
 
     //endregion
