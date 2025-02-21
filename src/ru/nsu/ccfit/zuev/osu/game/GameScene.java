@@ -293,7 +293,7 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
 
     public GameScene(final Engine engine) {
         this.engine = engine;
-        scene = new ExtendedScene();
+        scene = createMainScene();
         bgScene = new ExtendedScene();
         fgScene = new ExtendedScene();
         mgScene = new ExtendedScene();
@@ -642,27 +642,7 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
     }
 
     public void startGame(final BeatmapInfo beatmapInfo, final String replayFile) {
-        scene = new ExtendedScene() {
-            @Override
-            protected void onManagedUpdate(float secElapsed) {
-                float dt = secElapsed;
-                var songService = GlobalManager.getInstance().getSongService();
-
-                if (songService != null && songService.getStatus() == Status.PLAYING) {
-                    dt = songService.getPosition() / 1000f - elapsedTime;
-                }
-
-                // BASS may report the wrong position. When that happens, `dt` will
-                // be negative. In that case, we should ignore the update.
-                // See https://github.com/ppy/osu/issues/26879 for more information.
-                if (dt <= 0) {
-                    return;
-                }
-
-                update(dt);
-                super.onManagedUpdate(dt);
-            }
-        };
+        scene = createMainScene();
 
         if (Config.isEnableStoryboard()) {
             if (storyboardSprite == null || storyboardOverlayProxy == null) {
@@ -1431,7 +1411,7 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
         }
 
         if (shouldBePunished || (objects.isEmpty() && activeObjects.isEmpty() && leadOut > 2)) {
-            scene = new ExtendedScene();
+            scene = createMainScene();
             engine.getCamera().setHUD(null);
             BeatmapSkinManager.setSkinEnabled(false);
             GameObjectPool.getInstance().purge();
@@ -1730,7 +1710,7 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
                 camera.setCenterDirect((float) Config.getRES_WIDTH() / 2, (float) Config.getRES_HEIGHT() / 2);
             }
         }
-        scene = new ExtendedScene();
+        scene = createMainScene();
         engine.getCamera().setHUD(null);
 
         if (Multiplayer.isMultiplayer)
@@ -2786,5 +2766,29 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
         var timedAttributes = standardTimedDifficultyAttributes[objectId];
 
         return BeatmapDifficultyCalculator.calculateStandardPerformance(timedAttributes.attributes, stat).total;
+    }
+
+    private ExtendedScene createMainScene() {
+        return new ExtendedScene() {
+            @Override
+            protected void onManagedUpdate(float secElapsed) {
+                float dt = secElapsed;
+                var songService = GlobalManager.getInstance().getSongService();
+
+                if (songService != null && songService.getStatus() == Status.PLAYING) {
+                    dt = songService.getPosition() / 1000f - elapsedTime - totalOffset;
+                }
+
+                // BASS may report the wrong position. When that happens, `dt` will
+                // be negative. In that case, we should ignore the update.
+                // See https://github.com/ppy/osu/issues/26879 for more information.
+                if (dt <= 0) {
+                    return;
+                }
+
+                update(dt);
+                super.onManagedUpdate(dt);
+            }
+        };
     }
 }
