@@ -865,6 +865,8 @@ abstract class ExtendedEntity(
                 return false
             }
             return true
+        } else {
+            inputBindings[event.pointerID] = null
         }
 
         try {
