@@ -203,7 +203,6 @@ class GameplayHUD : Container(), IGameplayEvents {
 
         if (value) {
             ResourceManager.getInstance().loadHighQualityAsset("delete", "delete.png")
-            ResourceManager.getInstance().loadHighQualityAsset("scale", "scale.png")
             ResourceManager.getInstance().loadHighQualityAsset("flip", "flip.png")
 
             elementSelector = HUDElementSelector(this)
