@@ -90,10 +90,9 @@ class GameplayHUD : Container(), IGameplayEvents {
                     ToastLogger.showText("Changes saved!", true)
                 }
             }
-            .addButton("Discard") {
+            .addButton("Reset & Cancel") {
                 it.dismiss()
                 updateThread {
-                    setEditMode(false)
                     setSkinData(OsuSkin.get().hudSkinData)
                     ToastLogger.showText("Changes discarded!", true)
                 }
