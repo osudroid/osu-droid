@@ -218,7 +218,9 @@ class GameplayHUD : Container(), IGameplayEvents {
             elementSelector = null
         }
 
-        forEachElement { it.setEditMode(value) }
+
+        // Cannot use forEachElement {} because we're modifying the list.
+        mChildren?.filterIsInstance<HUDElement>()?.fastForEach { it.setEditMode(value) }
     }
     //endregion
 

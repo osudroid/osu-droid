@@ -969,4 +969,28 @@ public class StatisticV2 implements Serializable {
     public double getPP() {
         return pp;
     }
+
+    /**
+     * Resets the statistics to their initial values.
+     */
+    public void reset() {
+        hit300 = 0;
+        hit100 = 0;
+        hit50 = 0;
+        hit300k = 0;
+        hit100k = 0;
+        misses = 0;
+        scoreMaxCombo = 0;
+        currentCombo = 0;
+        totalScore = 0;
+        hp = 1;
+        mark = null;
+        bonusScore = 0;
+        positiveTotalOffsetSum = 0;
+        positiveHitOffsetSum = 0;
+        negativeTotalOffsetSum = 0;
+        negativeHitOffsetSum = 0;
+        unstableRate = 0;
+        pp = 0;
+    }
 }

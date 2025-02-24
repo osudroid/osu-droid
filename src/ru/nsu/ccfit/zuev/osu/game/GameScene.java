@@ -85,6 +85,7 @@ import java.io.FileNotFoundException;
 import java.util.*;
 import java.util.concurrent.CancellationException;
 
+import javax.annotation.Nullable;
 import javax.microedition.khronos.opengles.GL10;
 
 import ru.nsu.ccfit.zuev.audio.Status;
@@ -221,6 +222,11 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
      * Whether the HUD editor mode is enabled.
      */
     public boolean isHUDEditorMode = false;
+
+    /**
+     * Whether the game started in HUD editor mode.
+     */
+    public boolean startedFromHUDEditor = false;
 
 
     // Timing
@@ -378,13 +384,15 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
         }
     }
 
-    private boolean loadGame(final BeatmapInfo beatmapInfo, final String rFile, final CoroutineScope scope) {
+    private boolean loadGame(final BeatmapInfo beatmapInfo, final String rFile, @Nullable CoroutineScope scope) {
         if (!SecurityUtils.verifyFileIntegrity(GlobalManager.getInstance().getMainActivity())) {
             ToastLogger.showText(com.osudroid.resources.R.string.file_integrity_tampered, true);
             return false;
         }
 
-        JobKt.ensureActive(scope.getCoroutineContext());
+        if (scope != null) {
+            JobKt.ensureActive(scope.getCoroutineContext());
+        }
 
         if (rFile != null && rFile.startsWith("https://")) {
             this.replayFilePath = Config.getCachePath() + "/" +
@@ -397,7 +405,9 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
         } else
             this.replayFilePath = rFile;
 
-        JobKt.ensureActive(scope.getCoroutineContext());
+        if (scope != null) {
+            JobKt.ensureActive(scope.getCoroutineContext());
+        }
 
         boolean shouldParseBeatmap = parsedBeatmap == null || !parsedBeatmap.getMd5().equals(beatmapInfo.getMD5());
 
@@ -447,7 +457,9 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
 
         breakPeriods = new LinkedList<>();
         for (var period : playableBeatmap.getEvents().breaks) {
-            JobKt.ensureActive(scope.getCoroutineContext());
+            if (scope != null) {
+                JobKt.ensureActive(scope.getCoroutineContext());
+            }
             breakPeriods.add(new BreakPeriod(period.startTime / 1000f, period.endTime / 1000f));
         }
 
@@ -488,13 +500,17 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
         GameHelper.setSpeedMultiplier(modMenu.getSpeed());
         scene.setTimeMultiplier(GameHelper.getSpeedMultiplier());
 
-        JobKt.ensureActive(scope.getCoroutineContext());
+        if (scope != null) {
+            JobKt.ensureActive(scope.getCoroutineContext());
+        }
 
         GlobalManager.getInstance().getSongService().preLoad(audioFilePath, GameHelper.getSpeedMultiplier(),
             GameHelper.getSpeedMultiplier() != 1f &&
                 (modMenu.isEnableNCWhenSpeedChange() || modMenu.getMod().contains(GameMod.MOD_NIGHTCORE)));
 
-        JobKt.ensureActive(scope.getCoroutineContext());
+        if (scope != null) {
+            JobKt.ensureActive(scope.getCoroutineContext());
+        }
 
         objects = new LinkedList<>(playableBeatmap.getHitObjects().objects);
         activeObjects = new LinkedList<>();
@@ -512,7 +528,9 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
 
         comboColors = new ArrayList<>();
         for (RGBColor color : playableBeatmap.getColors().comboColors) {
-            JobKt.ensureActive(scope.getCoroutineContext());
+            if (scope != null) {
+                JobKt.ensureActive(scope.getCoroutineContext());
+            }
             comboColors.add(new RGBColor(color.r() / 255, color.g() / 255, color.b() / 255));
         }
 
@@ -525,7 +543,9 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
             comboColors.addAll(OsuSkin.get().getComboColor());
         }
 
-        JobKt.ensureActive(scope.getCoroutineContext());
+        if (scope != null) {
+            JobKt.ensureActive(scope.getCoroutineContext());
+        }
 
         lastActiveObjectHitTime = 0;
 
@@ -550,7 +570,9 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
 
         GameObjectPool.getInstance().purge();
 
-        JobKt.ensureActive(scope.getCoroutineContext());
+        if (scope != null) {
+            JobKt.ensureActive(scope.getCoroutineContext());
+        }
 
         FollowPointConnection.getPool().renew(16);
         SliderTickSprite.getPool().renew(16);
@@ -580,7 +602,9 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
             storyboardSprite.loadStoryboard(beatmapInfo.getPath());
         }
 
-        JobKt.ensureActive(scope.getCoroutineContext());
+        if (scope != null) {
+            JobKt.ensureActive(scope.getCoroutineContext());
+        }
 
         GameObjectPool.getInstance().preload();
 
@@ -647,6 +671,7 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
 
     public void startGame(BeatmapInfo beatmapInfo, String replayFile, boolean isHUDEditor) {
         isHUDEditorMode = isHUDEditor;
+        startedFromHUDEditor = isHUDEditor;
 
         scene = new ExtendedScene();
         if (Config.isEnableStoryboard()) {
@@ -1411,6 +1436,16 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
         }
 
         if (shouldBePunished || (objects.isEmpty() && activeObjects.isEmpty() && leadOut > 2)) {
+
+            // Reset the game to continue the HUD editor session.
+            if (startedFromHUDEditor && isHUDEditorMode) {
+                elapsedTime = initialElapsedTime;
+                loadGame(lastBeatmapInfo, null, null);
+                stat.reset();
+                skip();
+                return;
+            }
+
             scene = new ExtendedScene();
             engine.getCamera().setHUD(null);
             BeatmapSkinManager.setSkinEnabled(false);
@@ -1451,7 +1486,7 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
                 blockAreaFragment = null;
             }
 
-            if (scoringScene != null) {
+            if (scoringScene != null && !startedFromHUDEditor) {
                 if (replaying) {
                     ModMenu.getInstance().setMod(Replay.oldMod);
                     ModMenu.getInstance().setChangeSpeed(Replay.oldChangeSpeed);
