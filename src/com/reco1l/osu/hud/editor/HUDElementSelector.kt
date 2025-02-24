@@ -25,6 +25,13 @@ import kotlin.reflect.full.primaryConstructor
 class HUDElementSelector(private val hud: GameplayHUD) : Container(), IGameplayEvents {
 
 
+    /**
+     * Whether the element selector is expanded.
+     */
+    val isExpanded
+        get() = x >= 0f
+
+
     private val elements = HUDElements.entries.map { it.type.primaryConstructor!!.call() }
 
 
@@ -67,19 +74,10 @@ class HUDElementSelector(private val hud: GameplayHUD) : Container(), IGameplayE
                 }
 
                 if (event.isActionUp) {
-
-                    this@HUDElementSelector.clearEntityModifiers()
-
-                    if (this@HUDElementSelector.x < 0f) {
-                        this@HUDElementSelector.moveToX(0f, 0.2f)
-
-                        hud.moveToX(SELECTOR_WIDTH, 0.2f)
-                        hud.sizeToX(Config.getRES_WIDTH() - SELECTOR_WIDTH, 0.2f)
+                    if (isExpanded) {
+                        collapse()
                     } else {
-                        this@HUDElementSelector.moveToX(-SELECTOR_WIDTH, 0.2f)
-
-                        hud.moveToX(0f, 0.2f)
-                        hud.sizeToX(Config.getRES_WIDTH().toFloat(), 0.2f)
+                        expand()
                     }
                     return false
                 }
@@ -113,6 +111,32 @@ class HUDElementSelector(private val hud: GameplayHUD) : Container(), IGameplayE
             })
 
         })
+    }
+
+
+    fun expand() {
+        if (isExpanded) {
+            return
+        }
+        clearEntityModifiers()
+
+        isVisible = true
+        moveToX(0f, 0.2f)
+
+        hud.moveToX(SELECTOR_WIDTH, 0.2f)
+        hud.sizeToX(Config.getRES_WIDTH() - SELECTOR_WIDTH, 0.2f)
+    }
+
+    fun collapse() {
+        if (!isExpanded) {
+            return
+        }
+        clearEntityModifiers()
+
+        moveToX(-SELECTOR_WIDTH, 0.2f).then { isVisible = false }
+
+        hud.moveToX(0f, 0.2f)
+        hud.sizeToX(Config.getRES_WIDTH().toFloat(), 0.2f)
     }
 
 

@@ -1,8 +1,7 @@
 package com.reco1l.framework.math
 
 import com.reco1l.toolkt.toDegrees
-import kotlin.math.atan2
-import kotlin.math.hypot
+import kotlin.math.*
 
 data class Vec2(val x: Float, val y: Float) {
 
@@ -29,7 +28,7 @@ data class Vec2(val x: Float, val y: Float) {
     operator fun unaryMinus() = Vec2(-x, -y)
 
     fun distance(other: Vec2) = hypot(x - other.x, y - other.y)
-    fun angleDeg(other: Vec2) = atan2(other.y - y, other.x - x).toDouble().toDegrees().toFloat()
+    fun absolute() = Vec2(x.absoluteValue, y.absoluteValue)
 
     override fun equals(other: Any?): Boolean {
         return this === other || other is Vec2 && x == other.x && y == other.y

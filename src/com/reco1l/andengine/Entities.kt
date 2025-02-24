@@ -62,6 +62,34 @@ val ExtendedEntity.drawPosition
 
 
 /**
+ * The scale of the entity.
+ */
+var ExtendedEntity.scaleVec
+    get() = Vec2(scaleX, scaleY)
+    set(value) {
+        setScale(value.x, value.y)
+    }
+
+/**
+ * The center where the entity will scale from.
+ */
+var ExtendedEntity.scaleCenter
+    get() = Vec2(scaleCenterX, scaleCenterY)
+    set(value) {
+        setScaleCenter(value.x, value.y)
+    }
+
+/**
+ * The center where the entity will rotate from.
+ */
+var ExtendedEntity.rotationCenter
+    get() = Vec2(rotationCenterX, rotationCenterY)
+    set(value) {
+        setRotationCenter(value.x, value.y)
+    }
+
+
+/**
  * The total offset applied to the entity.
  */
 val ExtendedEntity.totalOffset

@@ -73,9 +73,9 @@ class GameplayHUD : Container(), IGameplayEvents {
 
     fun onBackPress() {
 
-        fun restore() {
-            x = 0f
-            width = Config.getRES_WIDTH().toFloat()
+        if (elementSelector?.isExpanded == true) {
+            elementSelector?.collapse()
+            return
         }
 
         MessageDialog()
@@ -85,7 +85,6 @@ class GameplayHUD : Container(), IGameplayEvents {
                 it.dismiss()
                 updateThread {
                     ToastLogger.showText("Saving changes...", true)
-                    restore()
                     setEditMode(false)
                     saveToSkinJSON()
                     ToastLogger.showText("Changes saved!", true)
@@ -94,7 +93,6 @@ class GameplayHUD : Container(), IGameplayEvents {
             .addButton("Discard") {
                 it.dismiss()
                 updateThread {
-                    restore()
                     setEditMode(false)
                     setSkinData(OsuSkin.get().hudSkinData)
                     ToastLogger.showText("Changes discarded!", true)

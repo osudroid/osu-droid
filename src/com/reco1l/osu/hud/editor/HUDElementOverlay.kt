@@ -6,25 +6,29 @@ import com.reco1l.andengine.container.ConstraintContainer
 import com.reco1l.andengine.container.Container
 import com.reco1l.andengine.container.LinearContainer
 import com.reco1l.andengine.container.Orientation
-import com.reco1l.andengine.shape.Box
-import com.reco1l.andengine.shape.RoundedBox
+import com.reco1l.andengine.shape.*
 import com.reco1l.andengine.sprite.ExtendedSprite
+import com.reco1l.andengine.text.*
 import com.reco1l.framework.ColorARGB
 import com.reco1l.osu.hud.HUDElement
 import com.reco1l.osu.updateThread
 import org.anddev.andengine.input.touch.TouchEvent
 import ru.nsu.ccfit.zuev.osu.Config
 import ru.nsu.ccfit.zuev.osu.ResourceManager
-import kotlin.math.abs
-import kotlin.math.min
-import kotlin.math.sign
+import kotlin.math.*
 
 class HUDElementOverlay(private val element: HUDElement) : ConstraintContainer() {
 
 
-    private val elementProxy = Box().apply { color = ColorARGB.Transparent }
+    val outline = OutlineBox().apply {
+        color = ColorARGB(0xFFF27272)
+        lineWidth = 8f
+    }
+
 
     private val toolbar = LinearContainer().apply {
+        anchor = Anchor.TopCenter
+        origin = Anchor.BottomCenter
         orientation = Orientation.Horizontal
         spacing = 4f
 
@@ -46,12 +50,12 @@ class HUDElementOverlay(private val element: HUDElement) : ConstraintContainer()
 
     }
 
-    private val scaleTip = Tip("scale") { deltaX, deltaY ->
-
-        val scaleDelta = min(-deltaX, deltaY) / 100f
-
-        element.scaleX = (abs(element.scaleX) + scaleDelta).coerceIn(0.5f, 5f) * sign(element.scaleX)
-        element.scaleY = (abs(element.scaleY) + scaleDelta).coerceIn(0.5f, 5f) * sign(element.scaleY)
+    private val nameText = ExtendedText().apply {
+        anchor = Anchor.BottomCenter
+        origin = Anchor.TopCenter
+        font = ResourceManager.getInstance().getFont("smallFont")
+        color = ColorARGB(0xFFF27272)
+        text = element.name
     }
 
 
@@ -59,57 +63,67 @@ class HUDElementOverlay(private val element: HUDElement) : ConstraintContainer()
         isVisible = false
         setSize(Config.getRES_WIDTH().toFloat(), Config.getRES_HEIGHT().toFloat())
 
-        attachChild(elementProxy)
+        attachChild(outline)
         attachChild(toolbar)
-        attachChild(scaleTip)
+        attachChild(nameText)
 
-        toolbar.anchor = Anchor.TopCenter
-        toolbar.origin = Anchor.BottomCenter
-        addConstraint(toolbar, elementProxy)
+        addConstraint(toolbar, outline)
+        addConstraint(nameText, outline)
 
-        scaleTip.anchor = Anchor.BottomLeft
-        scaleTip.origin = Anchor.BottomLeft
-        scaleTip.x = -(TIP_SIZE / 2)
-        scaleTip.y = TIP_SIZE / 2
-        addConstraint(scaleTip, elementProxy)
+        val topLeftTip = Tip().apply { anchor = Anchor.BottomLeft }
+        val topRightTip = Tip().apply { anchor = Anchor.BottomRight }
+        val bottomLeftTip = Tip().apply { anchor = Anchor.TopLeft }
+        val bottomRightTip = Tip().apply { anchor = Anchor.TopRight }
+
+        attachChild(topLeftTip)
+        attachChild(topRightTip)
+        attachChild(bottomLeftTip)
+        attachChild(bottomRightTip)
+
+        addConstraint(topLeftTip, outline)
+        addConstraint(topRightTip, outline)
+        addConstraint(bottomLeftTip, outline)
+        addConstraint(bottomRightTip, outline)
     }
 
     override fun onAreaTouched(event: TouchEvent, localX: Float, localY: Float): Boolean {
-        if (!isVisible) {
-            return false
+        if (isVisible) {
+            return super.onAreaTouched(event, localX, localY)
         }
-        return super.onAreaTouched(event, localX, localY)
+        return false
     }
 
     override fun onManagedUpdate(pSecondsElapsed: Float) {
 
         // We need to cancel scale center
-        elementProxy.x = element.drawX + (element.drawWidth * element.scaleCenterX) * (1f - abs(element.scaleX))
-        elementProxy.y = element.drawY + (element.drawHeight * element.scaleCenterY) * (1f - abs(element.scaleY))
+        outline.x = element.drawX + (element.drawWidth * element.scaleCenterX) * (1f - abs(element.scaleX))
+        outline.y = element.drawY + (element.drawHeight * element.scaleCenterY) * (1f - abs(element.scaleY))
 
-        elementProxy.width = element.drawWidth * abs(element.scaleX)
-        elementProxy.height = element.drawHeight * abs(element.scaleY)
+        outline.width = element.drawWidth * abs(element.scaleX)
+        outline.height = element.drawHeight * abs(element.scaleY)
 
         super.onManagedUpdate(pSecondsElapsed)
     }
 
 
-    private inner class Tip(texture: String, val onMove: (deltaX: Float, deltaY: Float) -> Unit) : Container() {
+
+    /**
+     * Represents a tip in the overlay toolbar.
+     */
+    private inner class Tip : Container() {
 
         init {
+            origin = Anchor.Center
             setSize(TIP_SIZE, TIP_SIZE)
 
-            background = RoundedBox().apply {
-                cornerRadius = TIP_SIZE / 2
-                color = ColorARGB(0xFF181825)
-            }
-
-            attachChild(ExtendedSprite().apply {
-                textureRegion = ResourceManager.getInstance().getTexture(texture)
+            // The tip container is bigger than the actual tip in order to make it easier to touch.
+            attachChild(RoundedBox().apply {
                 anchor = Anchor.Center
                 origin = Anchor.Center
+                color = ColorARGB(0xFFF27272)
+                cornerRadius = TIP_SIZE
                 relativeSizeAxes = Axes.Both
-                setSize(0.8f, 0.8f)
+                setSize(0.5f, 0.5f)
             })
         }
 
@@ -126,7 +140,22 @@ class HUDElementOverlay(private val element: HUDElement) : ConstraintContainer()
             }
 
             if (event.isActionMove) {
-                onMove(localX - initialX, localY - initialY)
+                var deltaX = localX - initialX
+                var deltaY = localY - initialY
+
+                if (anchor.x == 0f) {
+                    deltaX = -deltaX
+                }
+
+                if (anchor.y == 0f) {
+                    deltaY = -deltaY
+                }
+
+                val deltaScaleX = deltaX / 100f
+                val deltaScaleY = deltaY / 100f
+
+                element.scaleX = (abs(element.scaleX) + deltaScaleX).coerceIn(0.5f, 5f).withSign(element.scaleX)
+                element.scaleY = (abs(element.scaleY) + deltaScaleY).coerceIn(0.5f, 5f).withSign(element.scaleY)
                 return true
             }
 
@@ -134,6 +163,11 @@ class HUDElementOverlay(private val element: HUDElement) : ConstraintContainer()
         }
     }
 
+
+
+    /**
+     * Represents a button in the overlay toolbar.
+     */
     private inner class Button(texture: String, back: ColorARGB, val action: () -> Unit) : Container() {
 
         val icon = ExtendedSprite().apply {
@@ -159,6 +193,8 @@ class HUDElementOverlay(private val element: HUDElement) : ConstraintContainer()
         override fun onAreaTouched(event: TouchEvent, localX: Float, localY: Float): Boolean {
             if (event.isActionUp) {
                 action()
+                clearEntityModifiers()
+                scaleTo(0.9f, 0.1f).scaleTo(1f, 0.1f)
                 return true
             }
 
@@ -172,7 +208,7 @@ class HUDElementOverlay(private val element: HUDElement) : ConstraintContainer()
 
 
     companion object {
-        private const val TIP_SIZE = 32f
+        private const val TIP_SIZE = 36f
         private const val BUTTON_SIZE = 46f
     }
 

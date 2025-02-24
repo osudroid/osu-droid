@@ -1,16 +1,8 @@
 package com.reco1l.osu.hud
 
-import com.reco1l.andengine.Anchor
-import com.reco1l.andengine.ExtendedEntity
-import com.reco1l.andengine.anchorOffset
+import com.reco1l.andengine.*
 import com.reco1l.andengine.container.Container
-import com.reco1l.andengine.drawPosition
-import com.reco1l.andengine.drawSize
-import com.reco1l.andengine.originOffset
-import com.reco1l.andengine.position
-import com.reco1l.andengine.shape.Line
-import com.reco1l.andengine.shape.RoundedBox
-import com.reco1l.andengine.text.ExtendedText
+import com.reco1l.andengine.shape.*
 import com.reco1l.framework.ColorARGB
 import com.reco1l.framework.math.Vec2
 import com.reco1l.osu.hud.editor.HUDElementOverlay
@@ -27,7 +19,6 @@ import com.reco1l.osu.hud.elements.HUDUnstableRateCounter
 import com.reco1l.osu.ui.entity.GameplayLeaderboard
 import com.reco1l.toolkt.kotlin.capitalize
 import org.anddev.andengine.input.touch.TouchEvent
-import ru.nsu.ccfit.zuev.osu.ResourceManager
 import kotlin.math.abs
 import kotlin.reflect.KClass
 
@@ -81,7 +72,7 @@ abstract class HUDElement : Container(), IGameplayEvents {
             origin = data.origin
 
             setScaleCenter(0.5f, 0.5f)
-            setScale(data.scale)
+            setScale(data.scale.x, data.scale.y)
 
             setPosition(data.position.x, data.position.y)
         }
@@ -91,7 +82,7 @@ abstract class HUDElement : Container(), IGameplayEvents {
         type = this::class,
         anchor = anchor,
         origin = origin,
-        scale = scaleX, // Scale is uniform currently.
+        scale = scaleVec,
         position = Vec2(x, y)
     )
 
@@ -103,7 +94,10 @@ abstract class HUDElement : Container(), IGameplayEvents {
         isInEditMode = value
 
         if (value) {
-            background = HUDElementBackground()
+            background = Box().apply {
+                color = ColorARGB(0x29F27272)
+                alpha = 0.25f
+            }
             editorOverlay = HUDElementOverlay(this)
 
             parent!!.attachChild(editorOverlay!!)
@@ -119,7 +113,7 @@ abstract class HUDElement : Container(), IGameplayEvents {
 
     open fun onSelectionStateChange(isSelected: Boolean) {
 
-        (background as? HUDElementBackground)?.isSelected = isSelected
+        background?.alpha = if (isSelected) 0.5f else 0.15f
         editorOverlay?.isVisible = isSelected
 
         if (isSelected) {
@@ -157,10 +151,7 @@ abstract class HUDElement : Container(), IGameplayEvents {
 
                 // Preventing from moving the element if it's not selected.
                 if ((parent as? GameplayHUD)?.selected == this) {
-                    applyClosestAnchorOrigin()
-                    x += deltaX
-                    y += deltaY
-                    updateConnectionLine()
+                    move(deltaX, deltaY)
 
                     initialX = parentLocalX
                     initialY = parentLocalY
@@ -181,6 +172,9 @@ abstract class HUDElement : Container(), IGameplayEvents {
         editorOverlay?.invalidateTransformations()
     }
 
+    //endregion
+
+    //region Edit mode
 
     private fun applyClosestAnchorOrigin() {
 
@@ -214,8 +208,6 @@ abstract class HUDElement : Container(), IGameplayEvents {
             position -= originOffset - previousOriginOffset
         }
 
-        // Restoring original scale/rotation center.
-        setRotationCenter(0.5f, 0.5f)
         setScaleCenter(0.5f, 0.5f)
     }
 
@@ -225,17 +217,39 @@ abstract class HUDElement : Container(), IGameplayEvents {
             connectionLine = Line().apply {
                 color = ColorARGB(0xFFF27272)
                 lineWidth = 10f
+                isVisible = false
             }
             parent!!.attachChild(connectionLine!!)
         }
 
         connectionLine!!.fromPoint = anchorOffset
-        connectionLine!!.toPoint = drawPosition - originOffset
+        connectionLine!!.toPoint = (editorOverlay?.outline?.drawPosition ?: Vec2.Zero) + drawSize * scaleVec.absolute() * origin
     }
 
-    //endregion
+    override fun setScaleX(pScaleX: Float) {
+        super.setScaleX(pScaleX)
+        updateConnectionLine()
+    }
 
-    //region Edit mode
+    override fun setScaleY(pScaleY: Float) {
+        super.setScaleY(pScaleY)
+        updateConnectionLine()
+    }
+
+    override fun setScale(pScale: Float) {
+        super.setScale(pScale)
+        updateConnectionLine()
+    }
+
+    /**
+     * Moves the element by the specified delta.
+     */
+    fun move(deltaX: Float, deltaY: Float) {
+        applyClosestAnchorOrigin()
+        x += deltaX
+        y += deltaY
+        updateConnectionLine()
+    }
 
     /**
      * Removes the element from the HUD.
@@ -245,53 +259,5 @@ abstract class HUDElement : Container(), IGameplayEvents {
         detachSelf()
     }
 
-    private inner class HUDElementBackground : Container() {
-
-
-        var isSelected = false
-            set(value) {
-                background!!.alpha = if (value) 0.5f else 0.15f
-                nameText.isVisible = value
-                field = value
-            }
-
-
-        private val nameText = ExtendedText().apply {
-            font = ResourceManager.getInstance().getFont("smallFont")
-            color = ColorARGB(0xFFF27272)
-            text = this@HUDElement.name
-            isVisible = false
-        }
-
-
-        init {
-            attachChild(nameText)
-
-            background = RoundedBox().apply {
-                color = ColorARGB(0x29F27272)
-                alpha = 0.25f
-            }
-        }
-
-        override fun onManagedUpdate(pSecondsElapsed: Float) {
-
-            // Switch the text position according to the element's position.
-            if (this@HUDElement.drawY - drawHeight <= 0f) {
-                nameText.anchor = Anchor.BottomLeft
-                nameText.origin = Anchor.TopLeft
-            } else {
-                nameText.anchor = Anchor.TopLeft
-                nameText.origin = Anchor.BottomLeft
-            }
-
-            // The element might contain scale transformations. Those transformations are also
-            // applied to the background, so we scale the text back to its original size.
-            nameText.setScale(1f / this@HUDElement.scaleX, 1f / this@HUDElement.scaleY)
-
-            // Same for the corner radius of the background.
-            (background as RoundedBox).cornerRadius = 6f * (1f / this@HUDElement.scaleX)
-        }
-
-    }
     //endregion
 }

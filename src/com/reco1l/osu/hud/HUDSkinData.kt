@@ -44,7 +44,8 @@ data class HUDSkinData(val elements: List<HUDElementSkinData>) {
                     put("y", it.position.y)
                     put("anchor", Anchor.getName(it.anchor))
                     put("origin", Anchor.getName(it.origin))
-                    put("scale", it.scale)
+                    put("scaleX", it.scale.x)
+                    put("scaleY", it.scale.y)
                 }
             }
         }
@@ -63,7 +64,10 @@ data class HUDSkinData(val elements: List<HUDElementSkinData>) {
                     ),
                     anchor = Anchor.getFromName(element.optString("anchor", "TopLeft")),
                     origin = Anchor.getFromName(element.optString("origin", "TopLeft")),
-                    scale = element.optDouble("scale", 1.0).toFloat()
+                    scale = Vec2(
+                        element.optDouble("scaleX", 1.0).toFloat(),
+                        element.optDouble("scaleY", 1.0).toFloat()
+                    )
                 )
             }
 
@@ -99,5 +103,5 @@ data class HUDElementSkinData(
     /**
      * The scale applied to the element.
      */
-    val scale: Float = 1f
+    val scale: Vec2 = Vec2.One
 )
