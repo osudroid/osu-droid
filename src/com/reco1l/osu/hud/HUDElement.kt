@@ -187,7 +187,7 @@ abstract class HUDElement : Container(), IGameplayEvents {
         val relativeBottomRight = (drawPosition + drawSize) / parentDrawSize
         val relativeBottomLeft = (drawPosition + Vec2(0f, drawSize.y)) / parentDrawSize
 
-        val closest = Anchor.getAll().minBy {
+        val closest = Anchor.all.minBy {
             minOf(
                 abs(relativeTopLeft.distance(it)),
                 abs(relativeTopRight.distance(it)),
