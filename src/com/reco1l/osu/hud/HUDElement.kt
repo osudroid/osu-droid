@@ -178,8 +178,8 @@ abstract class HUDElement : Container(), IGameplayEvents {
 
     private fun applyClosestAnchorOrigin() {
 
-        val drawSize = drawSize
-        val drawPosition = drawPosition
+        val drawSize = drawSize * scaleVec
+        val drawPosition = anchorOffset + position - drawSize * origin
         val parentDrawSize = (parent as ExtendedEntity).drawSize
 
         val relativeTopLeft = drawPosition / parentDrawSize
@@ -245,9 +245,8 @@ abstract class HUDElement : Container(), IGameplayEvents {
      * Moves the element by the specified delta.
      */
     fun move(deltaX: Float, deltaY: Float) {
+        setPosition(x + deltaX, y + deltaY)
         applyClosestAnchorOrigin()
-        x += deltaX
-        y += deltaY
         updateConnectionLine()
     }
 
