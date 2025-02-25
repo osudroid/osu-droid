@@ -34,6 +34,32 @@ class HUDElementSelector(private val hud: GameplayHUD) : Container(), IGameplayE
 
     private val elements = HUDElements.entries.map { it.type.primaryConstructor!!.call() }
 
+    private val elementList = ScrollableContainer().apply {
+
+        scrollAxes = Axes.Y
+        relativeSizeAxes = Axes.Y
+        height = 1f
+        width = SELECTOR_WIDTH
+        indicatorY!!.width = 4f
+
+        background = Box().apply {
+            color = ColorARGB(0xFF1E1E2E)
+        }
+
+        attachChild(LinearContainer().apply {
+            relativeSizeAxes = Axes.X
+            width = 1f
+            padding = Vec4(16f)
+            spacing = 12f
+            orientation = Orientation.Vertical
+
+            elements.forEach { element ->
+                attachChild(HUDElementPreview(element, hud))
+            }
+        })
+
+    }
+
 
     init {
         relativeSizeAxes = Axes.Y
@@ -86,31 +112,7 @@ class HUDElementSelector(private val hud: GameplayHUD) : Container(), IGameplayE
 
         })
 
-        attachChild(ScrollableContainer().apply {
-
-            scrollAxes = Axes.Y
-            relativeSizeAxes = Axes.Y
-            height = 1f
-            width = SELECTOR_WIDTH
-            indicatorY!!.width = 4f
-
-            background = Box().apply {
-                color = ColorARGB(0xFF1E1E2E)
-            }
-
-            attachChild(LinearContainer().apply {
-                relativeSizeAxes = Axes.X
-                width = 1f
-                padding = Vec4(16f)
-                spacing = 12f
-                orientation = Orientation.Vertical
-
-                elements.forEach { element ->
-                    attachChild(HUDElementPreview(element, hud))
-                }
-            })
-
-        })
+        attachChild(elementList)
     }
 
 
@@ -120,7 +122,7 @@ class HUDElementSelector(private val hud: GameplayHUD) : Container(), IGameplayE
         }
         clearEntityModifiers()
 
-        isVisible = true
+        elementList.isVisible = true
         moveToX(0f, 0.2f)
 
         hud.moveToX(SELECTOR_WIDTH, 0.2f)
@@ -133,7 +135,7 @@ class HUDElementSelector(private val hud: GameplayHUD) : Container(), IGameplayE
         }
         clearEntityModifiers()
 
-        moveToX(-SELECTOR_WIDTH, 0.2f).then { isVisible = false }
+        moveToX(-SELECTOR_WIDTH, 0.2f).then { elementList.isVisible = false }
 
         hud.moveToX(0f, 0.2f)
         hud.sizeToX(Config.getRES_WIDTH().toFloat(), 0.2f)
