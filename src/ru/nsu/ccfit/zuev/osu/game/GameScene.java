@@ -1442,7 +1442,7 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
                 elapsedTime = initialElapsedTime;
                 loadGame(lastBeatmapInfo, null, null);
                 stat.reset();
-                skip();
+                skip(true);
                 return;
             }
 
@@ -1614,19 +1614,26 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
         }
     }
 
-    public void skip()
+    public void skip() {
+        skip(false);
+    }
+
+    public void skip(boolean force)
     {
         RoomScene.INSTANCE.getChat().dismiss();
 
-        if (elapsedTime > skipTime - 1f)
+        if (elapsedTime > skipTime - 1f && !force) {
             return;
+        }
 
-        if (GlobalManager.getInstance().getSongService().getStatus() != Status.PLAYING) {
-            GlobalManager.getInstance().getSongService().play();
-            GlobalManager.getInstance().getSongService().setVolume(Config.getBgmVolume());
-            totalLength = GlobalManager.getInstance().getSongService().getLength();
+        SongService songService = GlobalManager.getInstance().getSongService();
+        if (songService.getStatus() != Status.PLAYING) {
+            songService.play();
+            songService.setVolume(Config.getBgmVolume());
+            totalLength = songService.getLength();
             musicStarted = true;
         }
+
         ResourceManager.getInstance().getSound("menuhit").play();
         float difference = skipTime - elapsedTime;
 
@@ -1638,7 +1645,11 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
 
             updatePassiveObjects(difference);
 
-            GlobalManager.getInstance().getSongService().seekTo(seekTime);
+            songService.seekTo(seekTime);
+            if (songService.getStatus() != Status.PLAYING) {
+                songService.play();
+            }
+
             if (video != null) {
                 video.seekTo(videoSeekTime);
             }
@@ -2671,7 +2682,7 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
         for (var obj : playableBeatmap.getHitObjects().objects) {
             JobKt.ensureActive(scope.getCoroutineContext());
 
-            if (!(obj instanceof com.rian.osu.beatmap.hitobject.Slider slider)) {
+            if (!(obj instanceof Slider slider)) {
                 continue;
             }
 
