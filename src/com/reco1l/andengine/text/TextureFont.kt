@@ -8,7 +8,7 @@ import org.anddev.andengine.opengl.util.GLHelper
 import javax.microedition.khronos.opengles.*
 import kotlin.math.*
 
-open class TextureFont(private val characters: MutableMap<Char, TextureRegion>) : Box() {
+open class TextureFont(val characters: MutableMap<Char, TextureRegion>) : Box() {
 
 
     override var autoSizeAxes = Axes.Both
