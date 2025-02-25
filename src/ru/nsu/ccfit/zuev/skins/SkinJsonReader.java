@@ -185,5 +185,9 @@ public class SkinJsonReader extends SkinReader {
     public JSONObject getCurrentData() {
         return currentData;
     }
+
+    public JSONObject setCurrentData(JSONObject currentData) {
+        return this.currentData = currentData;
+    }
 }
 

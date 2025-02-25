@@ -124,6 +124,7 @@ class GameplayHUD : Container(), IGameplayEvents {
         json.put("HUD", HUDSkinData.writeToJSON(data))
         jsonFile.writeText(json.toString())
 
+        SkinJsonReader.getReader().currentData = json
         OsuSkin.get().hudSkinData = data
     }
 
