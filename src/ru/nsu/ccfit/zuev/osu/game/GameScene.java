@@ -1028,7 +1028,7 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
         blockAreaFragment.show(false);
 
         if (isHUDEditorMode) {
-            ToastLogger.showText("Press back to exit HUD editor mode and save.", false);
+            ToastLogger.showText("Press back to show HUD editor menu.", false);
         }
     }
 
