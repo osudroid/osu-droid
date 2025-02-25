@@ -121,9 +121,14 @@ abstract class HUDElement : Container(), IGameplayEvents {
 
     open fun onSelectionStateChange(isSelected: Boolean) {
 
-        background?.alpha = if (isSelected) 0.5f else 0.15f
-        editorOverlay?.isVisible = isSelected
-        connectionLine?.isVisible = isSelected
+        background?.clearEntityModifiers()
+        background?.fadeTo(if (isSelected) 0.5f else 0.15f, 0.1f)
+
+        editorOverlay?.clearEntityModifiers()
+        editorOverlay?.fadeTo(if (isSelected) 1f else 0f, 0.1f)
+
+        connectionLine?.clearEntityModifiers()
+        connectionLine?.fadeTo(if (isSelected) 1f else 0f, 0.1f)
 
         if (isSelected) {
             updateConnectionLine()
@@ -247,7 +252,7 @@ abstract class HUDElement : Container(), IGameplayEvents {
             connectionLine = Line().apply {
                 color = ColorARGB(0xFFF27272)
                 lineWidth = 10f
-                isVisible = false
+                alpha = 0f
             }
             parent!!.attachChild(connectionLine!!)
         }

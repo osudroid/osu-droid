@@ -60,7 +60,7 @@ class HUDElementOverlay(private val element: HUDElement) : ConstraintContainer()
 
 
     init {
-        isVisible = false
+        alpha = 0f
         setSize(Config.getRES_WIDTH().toFloat(), Config.getRES_HEIGHT().toFloat())
 
         attachChild(outline)
@@ -87,7 +87,7 @@ class HUDElementOverlay(private val element: HUDElement) : ConstraintContainer()
     }
 
     override fun onAreaTouched(event: TouchEvent, localX: Float, localY: Float): Boolean {
-        if (isVisible) {
+        if (alpha == 1f) {
             return super.onAreaTouched(event, localX, localY)
         }
         return false
@@ -181,13 +181,13 @@ class HUDElementOverlay(private val element: HUDElement) : ConstraintContainer()
         init {
             setSize(BUTTON_SIZE, BUTTON_SIZE)
 
-            background = RoundedBox().apply {
+            attachChild(RoundedBox().apply {
                 cornerRadius = 12f
                 color = back
-            }
-
+                relativeSizeAxes = Axes.Both
+                setSize(1f, 1f)
+            })
             attachChild(icon)
-
         }
 
         override fun onAreaTouched(event: TouchEvent, localX: Float, localY: Float): Boolean {
