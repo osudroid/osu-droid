@@ -39,7 +39,7 @@ data class HUDSkinData(val elements: List<HUDElementSkinData>) {
         fun writeToJSON(data: HUDSkinData) = JSONArray().apply {
             data.elements.forEach {
                 putObject {
-                    put("type", it.type.simpleName)
+                    put("type", HUDElements[it.type].name)
                     put("x", it.position.x)
                     put("y", it.position.y)
                     put("anchor", Anchor.getName(it.anchor))
