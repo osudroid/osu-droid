@@ -7,7 +7,7 @@ import com.reco1l.osu.hud.editor.HUDElementSelector
 import com.reco1l.osu.hud.elements.*
 import com.reco1l.osu.ui.MessageDialog
 import com.reco1l.osu.updateThread
-import com.reco1l.toolkt.kotlin.fastForEach
+import com.reco1l.toolkt.kotlin.*
 import org.anddev.andengine.engine.camera.hud.*
 import org.anddev.andengine.entity.IEntity
 import org.anddev.andengine.input.touch.TouchEvent

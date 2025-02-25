@@ -1,10 +1,12 @@
 package com.reco1l.osu.hud
 
+import android.view.*
 import com.reco1l.andengine.*
 import com.reco1l.andengine.container.Container
 import com.reco1l.andengine.shape.*
 import com.reco1l.framework.ColorARGB
 import com.reco1l.framework.math.Vec2
+import com.reco1l.osu.*
 import com.reco1l.osu.hud.editor.HUDElementOverlay
 import com.reco1l.osu.hud.elements.HUDAccuracyCounter
 import com.reco1l.osu.hud.elements.HUDAverageOffsetCounter
@@ -55,6 +57,12 @@ abstract class HUDElement : Container(), IGameplayEvents {
      */
     val name: String
         get() = HUDElements[this::class].name.replace('_', ' ').capitalize()
+
+    /**
+     * Indicates whether the element is selected.
+     */
+    val isSelected
+        get() = (parent as? GameplayHUD)?.selected == this
 
 
     private var editorOverlay: HUDElementOverlay? = null
@@ -115,12 +123,12 @@ abstract class HUDElement : Container(), IGameplayEvents {
 
         background?.alpha = if (isSelected) 0.5f else 0.15f
         editorOverlay?.isVisible = isSelected
+        connectionLine?.isVisible = isSelected
 
         if (isSelected) {
             updateConnectionLine()
-            connectionLine?.isVisible = true
         } else {
-            connectionLine?.isVisible = false
+            wasSelected = false
         }
     }
 
@@ -131,27 +139,37 @@ abstract class HUDElement : Container(), IGameplayEvents {
     private var initialX = 0f
     private var initialY = 0f
 
+    private var wasSelected = false
+    private var wasMoved = false
+
+
     override fun onAreaTouched(event: TouchEvent, localX: Float, localY: Float): Boolean {
 
         if (isInEditMode) {
+            val hud = parent as GameplayHUD
+
             val parentLocalX = drawX + localX
             val parentLocalY = drawY + localY
 
-            if (event.isActionDown) {
-                (parent as? GameplayHUD)?.selected = this
+            val deltaX = parentLocalX - initialX
+            val deltaY = parentLocalY - initialY
 
+            if (event.isActionDown) {
                 initialX = parentLocalX
                 initialY = parentLocalY
+
+                wasMoved = false
+                wasSelected = hud.selected == this
+
+                hud.selected = this
                 return true
             }
 
             if (event.isActionMove) {
-                val deltaX = parentLocalX - initialX
-                val deltaY = parentLocalY - initialY
-
                 // Preventing from moving the element if it's not selected.
-                if ((parent as? GameplayHUD)?.selected == this) {
+                if (isSelected) {
                     move(deltaX, deltaY)
+                    wasMoved = true
 
                     initialX = parentLocalX
                     initialY = parentLocalY
@@ -160,7 +178,19 @@ abstract class HUDElement : Container(), IGameplayEvents {
             }
 
             if (event.isActionUp) {
-                return (parent as? GameplayHUD)?.selected == this
+                if (wasSelected && isSelected && !wasMoved) {
+                    hud.forEachElement { element ->
+
+                        if (element != this && element.contains(parentLocalX, parentLocalY)) {
+                            hud.selected = element
+
+                            // Move to front so the next input event is handled by the selected element.
+                            hud.setChildIndex(element, 0)
+                            return@forEachElement
+                        }
+                    }
+                }
+                return true
             }
         }
 

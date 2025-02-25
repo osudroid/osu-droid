@@ -21,15 +21,6 @@ class HUDAccuracyCounter : HUDElement() {
         onMeasureContentSize()
     }
 
-    override fun setSkinData(data: HUDElementSkinData?) {
-        super.setSkinData(data)
-
-        // Some skins use a wider % character, so we need to adjust the width of the counter so it
-        // doesn't become too wide for the editor.
-        width = sprite.characters['0']!!.width * 7f
-        height = sprite.characters['0']!!.height.toFloat()
-    }
-
     override fun onGameplayUpdate(gameScene: GameScene, statistics: StatisticV2, secondsElapsed: Float) {
         sprite.text = format.format(statistics.accuracy)
     }
