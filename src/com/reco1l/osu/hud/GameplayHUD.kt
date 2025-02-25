@@ -80,8 +80,7 @@ class GameplayHUD : Container(), IGameplayEvents {
 
         MessageDialog()
             .setTitle("HUD Editor")
-            .setMessage("Do you want to save the changes?")
-            .addButton("Save") {
+            .addButton("Save changes") {
                 it.dismiss()
                 updateThread {
                     ToastLogger.showText("Saving changes...", true)
@@ -90,11 +89,18 @@ class GameplayHUD : Container(), IGameplayEvents {
                     ToastLogger.showText("Changes saved!", true)
                 }
             }
-            .addButton("Reset & Cancel") {
+            .addButton("Discard changes") {
                 it.dismiss()
                 updateThread {
                     setSkinData(OsuSkin.get().hudSkinData)
                     ToastLogger.showText("Changes discarded!", true)
+                }
+            }
+            .addButton("Reset to default") {
+                it.dismiss()
+                updateThread {
+                    setSkinData(HUDSkinData.Default)
+                    ToastLogger.showText("HUD set to default!", true)
                 }
             }
             .addButton("Cancel") { it.dismiss() }
