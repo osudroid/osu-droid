@@ -92,12 +92,12 @@ data class HUDElementSkinData(
     /**
      * The anchor of the element.
      */
-    val anchor: Vec2 = Anchor.TopLeft,
+    val anchor: Vec2 = Anchor.Center,
 
     /**
      * The origin of the element.
      */
-    val origin: Vec2 = Anchor.TopLeft,
+    val origin: Vec2 = Anchor.Center,
 
     /**
      * The scale applied to the element.

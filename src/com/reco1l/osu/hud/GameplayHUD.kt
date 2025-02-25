@@ -4,10 +4,7 @@ import com.reco1l.andengine.Anchor
 import com.reco1l.andengine.Axes
 import com.reco1l.andengine.container.Container
 import com.reco1l.osu.hud.editor.HUDElementSelector
-import com.reco1l.osu.hud.elements.HUDAccuracyCounter
-import com.reco1l.osu.hud.elements.HUDComboCounter
-import com.reco1l.osu.hud.elements.HUDPieSongProgress
-import com.reco1l.osu.hud.elements.HUDScoreCounter
+import com.reco1l.osu.hud.elements.*
 import com.reco1l.osu.ui.MessageDialog
 import com.reco1l.osu.updateThread
 import com.reco1l.toolkt.kotlin.fastForEach
@@ -166,6 +163,10 @@ class GameplayHUD : Container(), IGameplayEvents {
         // implemented, as it used cross-references between elements that are not possible to be
         // set in the editor.
 
+        val healthBar = getFirstOf<HUDHealthBar>()
+        healthBar?.anchor = Anchor.TopLeft
+        healthBar?.origin = Anchor.TopLeft
+
         val scoreCounter = getFirstOf<HUDScoreCounter>()
         scoreCounter?.anchor = Anchor.TopRight
         scoreCounter?.origin = Anchor.TopRight
@@ -229,7 +230,7 @@ class GameplayHUD : Container(), IGameplayEvents {
 
     //region Gameplay Events
 
-    private fun forEachElement(action: (HUDElement) -> Unit) {
+    fun forEachElement(action: (HUDElement) -> Unit) {
         mChildren?.fastForEach {
             (it as? HUDElement)?.let(action)
         }
