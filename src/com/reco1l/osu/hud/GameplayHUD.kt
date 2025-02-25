@@ -35,9 +35,7 @@ class GameplayHUD : Container(), IGameplayEvents {
         set(value) {
             if (field != value) {
                 field = value
-                mChildren?.fastForEach {
-                    (it as? HUDElement)?.onSelectionStateChange(it == value)
-                }
+                forEachElement { it.onSelectionStateChange(it == value) }
             }
         }
 
@@ -147,6 +145,7 @@ class GameplayHUD : Container(), IGameplayEvents {
      * Sets the skin data of the HUD.
      */
     fun setSkinData(layoutData: HUDSkinData) {
+        selected = null
         mChildren?.filterIsInstance<HUDElement>()?.forEach(IEntity::detachSelf)
 
         // First pass: We attach everything so that elements can reference between them when
