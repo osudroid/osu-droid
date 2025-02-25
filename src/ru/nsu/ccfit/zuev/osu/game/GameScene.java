@@ -612,7 +612,7 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
         var sameParameters = lastDifficultyCalculationParameters != null &&
                 lastDifficultyCalculationParameters.equals(parameters);
 
-        if (!isHUDEditorMode && OsuSkin.get().getHUDSkinData().hasElement(HUDPPCounter.class)) {
+        if (isHUDEditorMode || OsuSkin.get().getHUDSkinData().hasElement(HUDPPCounter.class)) {
             // Calculate timed difficulty attributes
             switch (Config.getDifficultyAlgorithm()) {
                 case droid -> {
