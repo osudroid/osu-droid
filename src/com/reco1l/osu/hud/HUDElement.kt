@@ -43,7 +43,7 @@ enum class HUDElements(val type: KClass<out HUDElement>) {
 
     companion object {
         operator fun get(type: KClass<out HUDElement>) = entries.first { it.type == type }
-        operator fun get(name: String) = valueOf(name)
+        operator fun get(name: String) = entries.find { it.name == name }
     }
 }
 

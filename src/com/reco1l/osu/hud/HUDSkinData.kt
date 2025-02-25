@@ -57,7 +57,7 @@ data class HUDSkinData(val elements: List<HUDElementSkinData>) {
                 val element = json.getJSONObject(i)
 
                 HUDElementSkinData(
-                    type = HUDElements.valueOf(element.getString("type")).type,
+                    type = HUDElements[element.getString("type")]?.type ?: return@MutableList null,
                     position = Vec2(
                         element.optDouble("x", 0.0).toFloat(),
                         element.optDouble("y", 0.0).toFloat(),
@@ -69,8 +69,7 @@ data class HUDSkinData(val elements: List<HUDElementSkinData>) {
                         element.optDouble("scaleY", 1.0).toFloat()
                     )
                 )
-            }
-
+            }.filterNotNull()
         )
 
 
