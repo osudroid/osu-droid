@@ -464,8 +464,8 @@ public class Replay {
                 ReplayMovement movement = movements[i];
                 os.writeInt((movement.time << 2) + movement.touchType.getId());
                 if (movement.touchType != TouchType.UP) {
-                    os.writeFloat(movement.x * Config.getTextureQuality());
-                    os.writeFloat(movement.y * Config.getTextureQuality());
+                    os.writeFloat(movement.x);
+                    os.writeFloat(movement.y);
                 }
             }
         }
