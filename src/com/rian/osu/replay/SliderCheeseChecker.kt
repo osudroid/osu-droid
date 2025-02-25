@@ -282,6 +282,6 @@ class SliderCheeseChecker(
     private fun computePenalty(factor: Double, ratingSum: Double) = max(factor, (1 - ratingSum * factor).pow(2))
 
     private fun getMovementPosition(movement: ReplayMovement) =
-        if (difficultyAttributes.mods.any { it is ModHardRock }) Vector2(movement.point.x, 512 - movement.point.y)
-        else Vector2(movement.point)
+        if (difficultyAttributes.mods.any { it is ModHardRock }) Vector2(movement.x, 512 - movement.y)
+        else Vector2(movement.x, movement.y)
 }
