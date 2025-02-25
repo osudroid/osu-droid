@@ -43,7 +43,13 @@ class HUDElementPreview(private val element: HUDElement, val hud: GameplayHUD): 
 
         attachChild(element)
         attachChild(label)
-        element.setSkinData(HUDElementSkinData(element::class))
+        element.setSkinData(
+            HUDElementSkinData(
+                type = element::class,
+                anchor = Anchor.TopLeft,
+                origin = Anchor.TopLeft,
+            )
+        )
     }
 
     override fun onManagedDraw(gl: GL10, camera: Camera) {
