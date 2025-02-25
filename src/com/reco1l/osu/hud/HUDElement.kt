@@ -275,20 +275,7 @@ abstract class HUDElement : Container(), IGameplayEvents {
      * Moves the element by the specified delta.
      */
     fun move(deltaX: Float, deltaY: Float) {
-
-        val delta = Vec2(deltaX, deltaY)
-        val screenSpaceSize = drawSize * scaleVec
-        val deltaScreenSpacePosition = anchorOffset + position - screenSpaceSize * origin + delta
-        val parentDrawSize = (parent as ExtendedEntity).drawSize
-
-        if (deltaScreenSpacePosition.x >= 0f && deltaScreenSpacePosition.x + screenSpaceSize.x <= parentDrawSize.x) {
-            x += deltaX
-        }
-
-        if (deltaScreenSpacePosition.y >= 0f && deltaScreenSpacePosition.y + screenSpaceSize.y <= parentDrawSize.y) {
-            y += deltaY
-        }
-
+        setPosition(x + deltaX, y + deltaY)
         applyClosestAnchorOrigin()
         updateConnectionLine()
     }
