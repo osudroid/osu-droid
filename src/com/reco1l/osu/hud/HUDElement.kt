@@ -1,12 +1,10 @@
 package com.reco1l.osu.hud
 
-import android.view.*
 import com.reco1l.andengine.*
 import com.reco1l.andengine.container.Container
 import com.reco1l.andengine.shape.*
 import com.reco1l.framework.ColorARGB
 import com.reco1l.framework.math.Vec2
-import com.reco1l.osu.*
 import com.reco1l.osu.hud.editor.HUDElementOverlay
 import com.reco1l.osu.hud.elements.HUDAccuracyCounter
 import com.reco1l.osu.hud.elements.HUDAverageOffsetCounter
