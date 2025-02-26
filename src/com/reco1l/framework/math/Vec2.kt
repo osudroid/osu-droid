@@ -1,6 +1,5 @@
 package com.reco1l.framework.math
 
-import com.reco1l.toolkt.toDegrees
 import kotlin.math.*
 
 data class Vec2(val x: Float, val y: Float) {
