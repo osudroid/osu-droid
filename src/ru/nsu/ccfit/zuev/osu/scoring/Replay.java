@@ -4,8 +4,6 @@ import android.graphics.PointF;
 
 import androidx.annotation.NonNull;
 
-import com.rian.osu.math.Vector2;
-
 import org.anddev.andengine.util.Debug;
 
 import java.io.EOFException;
