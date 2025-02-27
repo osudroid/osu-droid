@@ -25,7 +25,7 @@ public class CursorSprite extends Sprite implements ISliderListener {
         super(pX, pY, pTextureRegion);
         setScale(baseSize);
 
-        float clickAnimationTime = 0.5f / 2f;
+        float clickAnimationTime = 0.25f;
 
 
         clickInModifier = new ScaleModifier(clickAnimationTime, baseSize, baseSize * 1.25f);
