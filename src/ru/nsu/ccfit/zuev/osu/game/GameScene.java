@@ -2080,7 +2080,7 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
         }
 
         int eventTime = GlobalManager.getInstance().getSongService().getPosition();
-        float offset = eventTime / 1000f - elapsedTime;
+        float offset = Config.isFixFrameOffset() ? eventTime / 1000f - elapsedTime : 0;
 
         var cursor = cursors[id];
         var sprite = !GameHelper.isAuto() && !GameHelper.isAutopilotMod() && cursorSprites != null
