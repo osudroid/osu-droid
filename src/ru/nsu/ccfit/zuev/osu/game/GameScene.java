@@ -1028,7 +1028,7 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
 
         if (Multiplayer.isMultiplayer)
         {
-            long mSecElapsed = (long) (dt * 1000);
+            long mSecElapsed = (long) (dt / GameHelper.getSpeedMultiplier() * 1000);
             realTimeElapsed += mSecElapsed;
             statisticDataTimeElapsed += mSecElapsed;
 
