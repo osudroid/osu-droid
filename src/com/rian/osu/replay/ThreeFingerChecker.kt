@@ -390,8 +390,10 @@ class ThreeFingerChecker(
             return -1
         }
 
+        val mehWindow = hitWindow.mehWindow
+
         // Check for slider breaks and treat them as misses.
-        if (obj is Slider && objData.accuracy == (hitWindow.mehWindow + 13).toInt().toShort()) {
+        if (obj is Slider && (-mehWindow > objData.accuracy || objData.accuracy > min(mehWindow.toDouble(), obj.duration))) {
             return -1
         }
 
