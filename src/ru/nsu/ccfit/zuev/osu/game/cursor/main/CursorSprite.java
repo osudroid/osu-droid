@@ -1,11 +1,12 @@
 package ru.nsu.ccfit.zuev.osu.game.cursor.main;
 
-import org.anddev.andengine.entity.modifier.ParallelEntityModifier;
 import org.anddev.andengine.entity.modifier.RotationByModifier;
 import org.anddev.andengine.entity.modifier.ScaleModifier;
 import org.anddev.andengine.entity.modifier.SequenceEntityModifier;
 import org.anddev.andengine.entity.sprite.Sprite;
 import org.anddev.andengine.opengl.texture.region.TextureRegion;
+
+import javax.annotation.Nullable;
 
 import ru.nsu.ccfit.zuev.osu.Config;
 import ru.nsu.ccfit.zuev.osu.game.ISliderListener;
@@ -13,40 +14,37 @@ import ru.nsu.ccfit.zuev.skins.OsuSkin;
 
 public class CursorSprite extends Sprite implements ISliderListener {
     public final float baseSize = Config.getCursorSize() * 2;
-    private final float clickAnimationTime = 0.5f / 2f;
-    private ParallelEntityModifier previousClickModifier;
-    private RotationByModifier currentRotation;
-    private final boolean rotate = OsuSkin.get().isRotateCursor();
+
+    private final ScaleModifier clickInModifier;
+    private final ScaleModifier clickOutModifier;
+    private final SequenceEntityModifier clickModifier;
+    @Nullable private final RotationByModifier rotationModifier;
+
 
     public CursorSprite(float pX, float pY, TextureRegion pTextureRegion) {
         super(pX, pY, pTextureRegion);
         setScale(baseSize);
+
+        float clickAnimationTime = 0.25f;
+
+
+        clickInModifier = new ScaleModifier(clickAnimationTime, baseSize, baseSize * 1.25f);
+        clickOutModifier = new ScaleModifier(clickAnimationTime, baseSize * 1.25f, baseSize);
+        clickModifier = new SequenceEntityModifier(clickInModifier.deepCopy(), clickOutModifier.deepCopy());
+
+        if (OsuSkin.get().isRotateCursor()) {
+            rotationModifier = new RotationByModifier(14, 360);
+            registerEntityModifier(rotationModifier);
+        } else {
+            rotationModifier = null;
+        }
     }
 
-    public ScaleModifier clickInModifier() {
-        return new ScaleModifier(clickAnimationTime, getScaleX(), baseSize * 1.25f);
-    }
-
-    public ScaleModifier clickOutModifier() {
-        return new ScaleModifier(clickAnimationTime, getScaleX(), baseSize);
-    }
 
     public void handleClick() {
-        if (previousClickModifier != null) {
-            unregisterEntityModifier(previousClickModifier);
-            setScale(baseSize);
-        }
-        registerEntityModifier(
-                previousClickModifier = new ParallelEntityModifier(
-                        new SequenceEntityModifier(clickInModifier(), clickOutModifier())
-                )
-        );
-    }
-
-    private void rotateCursor() {
-        if (currentRotation == null || currentRotation.isFinished()) {
-            registerEntityModifier(currentRotation = new RotationByModifier(14, 360));
-        }
+        unregisterEntityModifiers(m -> m instanceof ScaleModifier);
+        clickModifier.reset();
+        registerEntityModifier(clickModifier);
     }
 
     public void update(float pSecondsElapsed) {
@@ -54,8 +52,8 @@ public class CursorSprite extends Sprite implements ISliderListener {
             setScale(Math.max(baseSize, this.getScaleX() - (baseSize * 0.75f) * pSecondsElapsed));
         }
 
-        if (rotate) {
-            rotateCursor();
+        if (rotationModifier != null && rotationModifier.isFinished()) {
+            rotationModifier.reset();
         }
     }
 
@@ -66,11 +64,15 @@ public class CursorSprite extends Sprite implements ISliderListener {
 
     @Override
     public void onSliderTracking() {
-        registerEntityModifier(clickInModifier());
+        unregisterEntityModifiers(m -> m instanceof ScaleModifier);
+        clickInModifier.reset();
+        registerEntityModifier(clickInModifier);
     }
 
     @Override
     public void onSliderEnd() {
-        registerEntityModifier(clickOutModifier());
+        unregisterEntityModifiers(m -> m instanceof ScaleModifier);
+        clickOutModifier.reset();
+        registerEntityModifier(clickOutModifier);
     }
 }

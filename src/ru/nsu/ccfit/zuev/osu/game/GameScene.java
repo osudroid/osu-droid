@@ -1107,8 +1107,8 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
                         cIndex < replay.cursorMoves.get(i).size &&
                         (movement = replay.cursorMoves.get(i).movements[cIndex]).getTime() <= (elapsedTime + dt / 4) * 1000
                 ) {
-                    float mx = movement.getPoint().x;
-                    float my = movement.getPoint().y;
+                    float mx = movement.getX();
+                    float my = movement.getY();
                     if (movement.getTouchType() == TouchType.DOWN) {
                         cursors[i].mouseDown = true;
                         for (int j = 0; j < replay.cursorIndex.length; j++) {
@@ -1133,8 +1133,8 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
                     final int lIndex = replay.lastMoveIndex[i];
                     final Replay.ReplayMovement lastMovement = replay.cursorMoves.get(i).movements[lIndex];
                     float t = (elapsedTime * 1000 - movement.getTime()) / (lastMovement.getTime() - movement.getTime());
-                    cursors[i].mousePos.x = lastMovement.getPoint().x * t + movement.getPoint().x * (1 - t);
-                    cursors[i].mousePos.y = lastMovement.getPoint().y * t + movement.getPoint().y * (1 - t);
+                    cursors[i].mousePos.x = lastMovement.getX() * t + movement.getX() * (1 - t);
+                    cursors[i].mousePos.y = lastMovement.getY() * t + movement.getY() * (1 - t);
                 }
             }
         }
