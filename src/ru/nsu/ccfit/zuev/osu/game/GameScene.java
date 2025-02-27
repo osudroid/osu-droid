@@ -228,13 +228,6 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
     // Timing
 
     /**
-     * The time at which the last frame was rendered with respect to {@link SystemClock#uptimeMillis()}.
-     * <br>
-     * If 0, a frame has not been rendered yet.
-     */
-    private long previousFrameTime;
-
-    /**
      * The start time of the first object in seconds.
      */
     public float firstObjectStartTime;
@@ -832,7 +825,6 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
 
         comboWas100 = false;
         comboWasMissed = false;
-        previousFrameTime = 0;
 
         float od = parsedBeatmap.getDifficulty().od;
         hitWindow = stat.getMod().contains(GameMod.MOD_PRECISE) ? new PreciseDroidHitWindow(od) : new DroidHitWindow(od);
@@ -1030,7 +1022,6 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
     }
 
     private void update(final float dt) {
-        previousFrameTime = SystemClock.uptimeMillis();
         elapsedTime += dt;
 
         updateCounterTexts();
@@ -2088,6 +2079,9 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
             return false;
         }
 
+        int eventTime = GlobalManager.getInstance().getSongService().getPosition();
+        float offset = eventTime / 1000f - elapsedTime;
+
         var cursor = cursors[id];
         var sprite = !GameHelper.isAuto() && !GameHelper.isAutopilotMod() && cursorSprites != null
                 ? cursorSprites[id]
@@ -2100,9 +2094,6 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
             sprite.setPosition(cursor.mousePos.x, cursor.mousePos.y);
         }
 
-        var frameOffset = previousFrameTime > 0 ? (event.getMotionEvent().getEventTime() - previousFrameTime) * GameHelper.getSpeedMultiplier() : 0;
-        var eventTime = (int) (elapsedTime * 1000 + frameOffset);
-
         if (event.isActionDown()) {
 
             if (sprite != null) {
@@ -2110,7 +2101,7 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
             }
 
             cursor.mouseDown = true;
-            cursor.mouseDownOffsetMS = frameOffset;
+            cursor.mouseDownOffsetMS = offset;
 
             for (var value : cursors)
                 value.mouseOldDown = false;
@@ -2150,8 +2141,7 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
     }
 
     private void removeAllCursors() {
-        var frameOffset = previousFrameTime > 0 ? (SystemClock.uptimeMillis() - previousFrameTime) * GameHelper.getSpeedMultiplier() : 0;
-        var time = (int) (elapsedTime * 1000 + frameOffset);
+        int time = GlobalManager.getInstance().getSongService().getPosition();
 
         for (int i = 0; i < CursorCount; ++i) {
             var cursor = cursors[i];
