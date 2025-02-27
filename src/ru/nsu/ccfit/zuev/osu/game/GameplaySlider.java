@@ -917,9 +917,10 @@ public class GameplaySlider extends GameObject {
 
         // Override hit offset with replay data when available.
         firstHitAccuracy = replayObjectData != null ? replayObjectData.accuracy : (int) (hitOffset * 1000);
+        float mehWindow = hitWindow.getMehWindow() / 1000;
 
-        if (replayObjectData == null || GameHelper.getReplayVersion() >= 6) {
-            if (-hitWindow.getMehWindow() / 1000 <= hitOffset && hitOffset <= getLateHitThreshold()) {
+        if (replayObjectData == null || GameHelper.getReplayVersion() >= 6 || mehWindow <= duration) {
+            if (-mehWindow <= hitOffset && hitOffset <= mehWindow) {
                 listener.registerAccuracy(hitOffset);
                 playCurrentNestedObjectHitSound();
                 ticksGot++;
@@ -929,8 +930,9 @@ public class GameplaySlider extends GameObject {
                 listener.onSliderHit(id, -1, position,
                         false, bodyColor, GameObjectListener.SLIDER_START, false);
             }
-        } else if (hitOffset <= getLateHitThreshold()) {
-            // In replays older than version 6, the slider head is considered to *not* exist when the hit is late.
+        } else if (hitOffset <= duration) {
+            // In replays older than version 6, when the 50 hit window is longer than the duration of the slider,
+            // the slider head is considered to *not* exist if it was not hit until the slider is over.
             // It is a very weird behavior, but that's what it actually was...
             listener.registerAccuracy(hitOffset);
             playCurrentNestedObjectHitSound();

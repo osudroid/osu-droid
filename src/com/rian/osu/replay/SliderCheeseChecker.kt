@@ -91,14 +91,15 @@ class SliderCheeseChecker(
                 continue
             }
 
+            val slider = objects[difficultSlider.index] as Slider
             val objData = objectData[difficultSlider.index]
 
             // If a miss or slider break occurs, we disregard the check for that slider.
-            if (objData.tickSet == null || objData.result == ResultType.MISS.id || objData.accuracy == (mehWindow + 13).toInt().toShort()) {
+            if (objData.tickSet == null || objData.result == ResultType.MISS.id ||
+                -mehWindow > objData.accuracy || objData.accuracy > min(mehWindow.toDouble(), slider.duration)) {
                 continue
             }
 
-            val slider = objects[difficultSlider.index] as Slider
             val sliderStartPosition = slider.difficultyStackedPosition
 
             // These time boundaries should consider the delta time between the previous and next
@@ -282,6 +283,6 @@ class SliderCheeseChecker(
     private fun computePenalty(factor: Double, ratingSum: Double) = max(factor, (1 - ratingSum * factor).pow(2))
 
     private fun getMovementPosition(movement: ReplayMovement) =
-        if (difficultyAttributes.mods.any { it is ModHardRock }) Vector2(movement.point.x, 512 - movement.point.y)
-        else Vector2(movement.point)
+        if (difficultyAttributes.mods.any { it is ModHardRock }) Vector2(movement.x, 512 - movement.y)
+        else Vector2(movement.x, movement.y)
 }

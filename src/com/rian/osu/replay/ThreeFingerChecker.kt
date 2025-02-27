@@ -13,6 +13,7 @@ import com.rian.osu.mods.Mod
 import com.rian.osu.mods.ModHardRock
 import com.rian.osu.mods.ModPrecise
 import kotlin.math.max
+import kotlin.math.min
 import kotlin.math.pow
 import ru.nsu.ccfit.zuev.osu.scoring.Replay.ReplayMovement
 import ru.nsu.ccfit.zuev.osu.scoring.Replay.ReplayObjectData
@@ -95,11 +96,7 @@ class ThreeFingerChecker(
         var penalty = 1.0
 
         for (section in beatmapSections) {
-            val threeFingerCursorCounts = mutableListOf<Int>()
-
-            for (i in 0 until cursorGroups.size - 2) {
-                threeFingerCursorCounts.add(0)
-            }
+            val threeFingerCursorCounts = MutableList<Int>(cursorGroups.size - 2) { 0 }
 
             for (obj in section.objects) {
                 if (obj.pressingCursorInstanceIndex == -1) {
@@ -296,7 +293,8 @@ class ThreeFingerChecker(
         }
 
         // Check for slider breaks and treat them as misses.
-        if (obj is Slider && objData.accuracy == (hitWindow.mehWindow + 13).toInt().toShort()) {
+        if (obj is Slider && (-hitWindow.mehWindow > objData.accuracy ||
+                objData.accuracy > min(hitWindow.mehWindow.toDouble(), obj.duration))) {
             return -1
         }
 
@@ -392,8 +390,10 @@ class ThreeFingerChecker(
             return -1
         }
 
+        val mehWindow = hitWindow.mehWindow
+
         // Check for slider breaks and treat them as misses.
-        if (obj is Slider && objData.accuracy == (hitWindow.mehWindow + 13).toInt().toShort()) {
+        if (obj is Slider && (-mehWindow > objData.accuracy || objData.accuracy > min(mehWindow.toDouble(), obj.duration))) {
             return -1
         }
 
@@ -427,6 +427,6 @@ class ThreeFingerChecker(
     }
 
     private fun getMovementPosition(movement: ReplayMovement) =
-        if (difficultyAttributes.mods.any { it is ModHardRock }) Vector2(movement.point.x, 512 - movement.point.y)
-        else Vector2(movement.point)
+        if (difficultyAttributes.mods.any { it is ModHardRock }) Vector2(movement.x, 512 - movement.y)
+        else Vector2(movement.x, movement.y)
 }
