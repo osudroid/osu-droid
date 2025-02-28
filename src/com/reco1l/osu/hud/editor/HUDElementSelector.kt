@@ -122,13 +122,10 @@ class HUDElementSelector(private val hud: GameplayHUD) : Container(), IGameplayE
         }
 
         hud.selected = null
-        clearEntityModifiers()
 
+        clearEntityModifiers()
         elementList.isVisible = true
         moveToX(0f, 0.2f)
-
-        hud.moveToX(SELECTOR_WIDTH, 0.2f)
-        hud.sizeToX(Config.getRES_WIDTH() - SELECTOR_WIDTH, 0.2f)
     }
 
     fun collapse() {
@@ -136,11 +133,7 @@ class HUDElementSelector(private val hud: GameplayHUD) : Container(), IGameplayE
             return
         }
         clearEntityModifiers()
-
         moveToX(-SELECTOR_WIDTH, 0.2f).then { elementList.isVisible = false }
-
-        hud.moveToX(0f, 0.2f)
-        hud.sizeToX(Config.getRES_WIDTH().toFloat(), 0.2f)
     }
 
 
