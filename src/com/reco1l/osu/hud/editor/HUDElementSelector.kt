@@ -120,6 +120,8 @@ class HUDElementSelector(private val hud: GameplayHUD) : Container(), IGameplayE
         if (isExpanded) {
             return
         }
+
+        hud.selected = null
         clearEntityModifiers()
 
         elementList.isVisible = true
