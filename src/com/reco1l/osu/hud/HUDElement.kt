@@ -102,7 +102,7 @@ abstract class HUDElement : Container(), IGameplayEvents {
         if (value) {
             background = Box().apply {
                 color = ColorARGB(0x29F27272)
-                alpha = 0.25f
+                alpha = 0.15f
             }
             editorOverlay = HUDElementOverlay(this)
 
