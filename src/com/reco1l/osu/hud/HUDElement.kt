@@ -125,14 +125,14 @@ abstract class HUDElement : Container(), IGameplayEvents {
         editorOverlay?.clearEntityModifiers()
         editorOverlay?.fadeTo(if (isSelected) 1f else 0f, 0.1f)
 
-        connectionLine?.clearEntityModifiers()
-        connectionLine?.fadeTo(if (isSelected) 1f else 0f, 0.1f)
-
         if (isSelected) {
             updateConnectionLine()
         } else {
             wasSelected = false
         }
+
+        connectionLine?.clearEntityModifiers()
+        connectionLine?.fadeTo(if (isSelected) 1f else 0f, 0.1f)
     }
 
     //endregion
