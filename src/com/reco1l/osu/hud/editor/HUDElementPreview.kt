@@ -85,6 +85,7 @@ class HUDElementPreview(private val element: HUDElement, val hud: GameplayHUD): 
                 scaleTo(0.9f, 0.1f).scaleTo(1f, 0.1f)
 
                 hud.addElement(HUDElementSkinData(element::class))
+                hud.elementSelector?.collapse()
             }
         }
 

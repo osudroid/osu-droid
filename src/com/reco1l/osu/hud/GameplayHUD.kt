@@ -36,10 +36,14 @@ class GameplayHUD : Container(), IGameplayEvents {
             }
         }
 
+    /**
+     * The element selector used in edit mode.
+     */
+    var elementSelector: HUDElementSelector? = null
+        private set
+
 
     private var isInEditMode = false
-
-    private var elementSelector: HUDElementSelector? = null
 
 
     init {
