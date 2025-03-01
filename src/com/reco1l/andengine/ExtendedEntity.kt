@@ -870,7 +870,8 @@ abstract class ExtendedEntity(
         }
 
         try {
-            mChildren?.fastForEach { child ->
+            for (i in childCount - 1 downTo 0) {
+                val child = getChild(i)
                 if (child is ExtendedEntity && child.contains(localX, localY)) {
                     if (child.onAreaTouched(event, localX - child.drawX, localY - child.drawY)) {
                         inputBindings[event.pointerID] = child
