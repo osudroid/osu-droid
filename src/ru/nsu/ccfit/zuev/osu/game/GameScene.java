@@ -944,7 +944,7 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
             playname = Multiplayer.player.getTeam().toString();
         }
         stat.setPlayerName(playname);
-9
+
         for (var text : counterTexts) {
             text.detachSelf();
         }
@@ -2091,6 +2091,9 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
         if (replaying || isGameOver) {
             return false;
         }
+
+        int eventTime = GlobalManager.getInstance().getSongService().getPosition();
+        float offset = eventTime / 1000f - elapsedTime;
 
         var id = event.getPointerID();
         if (id < 0 || id >= CursorCount) {
