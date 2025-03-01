@@ -41,10 +41,8 @@ import com.reco1l.osu.multiplayer.RoomScene;
 
 import com.rian.osu.GameMode;
 import com.rian.osu.beatmap.Beatmap;
-import com.rian.osu.beatmap.DroidHitWindow;
 import com.rian.osu.beatmap.DroidPlayableBeatmap;
 import com.rian.osu.beatmap.HitWindow;
-import com.rian.osu.beatmap.PreciseDroidHitWindow;
 import com.rian.osu.beatmap.constants.BeatmapCountdown;
 import com.rian.osu.beatmap.hitobject.HitCircle;
 import com.rian.osu.beatmap.hitobject.HitObject;
@@ -811,8 +809,7 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
         comboWasMissed = false;
         previousFrameTime = 0;
 
-        float od = parsedBeatmap.getDifficulty().od;
-        hitWindow = stat.getMod().contains(GameMod.MOD_PRECISE) ? new PreciseDroidHitWindow(od) : new DroidHitWindow(od);
+        hitWindow = playableBeatmap.getHitWindow();
         firstObjectStartTime = (float) objects.peek().startTime / 1000;
         lastObjectEndTime = (float) objects.getLast().getEndTime() / 1000;
 
@@ -1891,7 +1888,7 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
             }
         }
 
-        if (accuracy > hitWindow.getMehWindow() / 1000 || forcedScore == ResultType.MISS.getId()) {
+        if (accuracy > playableBeatmap.getHitWindow().getMehWindow() / 1000 || forcedScore == ResultType.MISS.getId()) {
             createHitEffect(pos, "hit0", color);
             registerHit(id, 0, endCombo);
             return;
@@ -1899,10 +1896,10 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
 
         String scoreName;
         if (forcedScore == ResultType.HIT300.getId() ||
-                forcedScore == 0 && accuracy <= hitWindow.getGreatWindow() / 1000) {
+                forcedScore == 0 && accuracy <= playableBeatmap.getHitWindow().getGreatWindow() / 1000) {
             scoreName = registerHit(id, 300, endCombo);
         } else if (forcedScore == ResultType.HIT100.getId() ||
-                forcedScore == 0 && accuracy <= hitWindow.getOkWindow() / 1000) {
+                forcedScore == 0 && accuracy <= playableBeatmap.getHitWindow().getOkWindow() / 1000) {
             scoreName = registerHit(id, 100, endCombo);
         } else {
             scoreName = registerHit(id, 50, endCombo);

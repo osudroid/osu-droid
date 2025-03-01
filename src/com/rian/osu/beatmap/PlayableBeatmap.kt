@@ -56,4 +56,14 @@ abstract class PlayableBeatmap @JvmOverloads constructor(
     @JvmField
     val overallSpeedMultiplier =
         customSpeedMultiplier * if (mods != null) ModUtils.calculateRateWithMods(mods, oldStatistics) else 1f
+
+    /**
+     * The [HitWindow] of this [PlayableBeatmap].
+     */
+    val hitWindow by lazy { createHitWindow() }
+
+    /**
+     * Creates the [HitWindow] of this [PlayableBeatmap].
+     */
+    protected abstract fun createHitWindow(): HitWindow
 }

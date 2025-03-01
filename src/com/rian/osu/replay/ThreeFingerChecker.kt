@@ -1,17 +1,15 @@
 package com.rian.osu.replay
 
-import com.rian.osu.beatmap.DroidHitWindow
 import com.rian.osu.beatmap.DroidPlayableBeatmap
-import com.rian.osu.beatmap.HitWindow
-import com.rian.osu.beatmap.PreciseDroidHitWindow
-import com.rian.osu.beatmap.hitobject.*
+import com.rian.osu.beatmap.hitobject.HitCircle
+import com.rian.osu.beatmap.hitobject.HitObject
+import com.rian.osu.beatmap.hitobject.Slider
+import com.rian.osu.beatmap.hitobject.Spinner
 import com.rian.osu.beatmap.timings.BreakPeriod
 import com.rian.osu.difficulty.attributes.DroidDifficultyAttributes
 import com.rian.osu.math.Interpolation
 import com.rian.osu.math.Vector2
-import com.rian.osu.mods.Mod
 import com.rian.osu.mods.ModHardRock
-import com.rian.osu.mods.ModPrecise
 import kotlin.math.max
 import kotlin.math.min
 import kotlin.math.pow
@@ -48,15 +46,6 @@ class ThreeFingerChecker(
      */
     private val objectData: Array<ReplayObjectData>
 ) {
-    /**
-     * The [HitWindow] of the [DroidPlayableBeatmap].
-     *
-     * Keep in mind that speed-changing [Mod]s do not change hit window length in game logic.
-     */
-    private val hitWindow =
-        if (difficultyAttributes.mods.any { it is ModPrecise }) PreciseDroidHitWindow(beatmap.difficulty.od)
-        else DroidHitWindow(beatmap.difficulty.od)
-
     /**
      * A reprocessed [BreakPeriod]s to match right on [HitObject] time.
      *
@@ -165,7 +154,7 @@ class ThreeFingerChecker(
             if (objectBefore is HitCircle) {
                 timeBefore +=
                     if (objectBeforeData.result != ResultType.MISS.id) objectBeforeData.accuracy.toFloat()
-                    else hitWindow.mehWindow
+                    else beatmap.hitWindow.mehWindow
             }
 
             val afterIndex = beforeIndex + 1
@@ -196,24 +185,24 @@ class ThreeFingerChecker(
         val lastObjectResult = objectData[objectData.size - 1]
 
         // For sliders, automatically set hit window length to be as lenient as possible.
-        var firstObjectHitWindow = hitWindow.mehWindow
+        var firstObjectHitWindow = beatmap.hitWindow.mehWindow
 
         if (firstObject is HitCircle) {
             firstObjectHitWindow = when (firstObjectResult.result) {
-                ResultType.HIT300.id -> hitWindow.greatWindow
-                ResultType.HIT100.id -> hitWindow.okWindow
-                else -> hitWindow.mehWindow
+                ResultType.HIT300.id -> beatmap.hitWindow.greatWindow
+                ResultType.HIT100.id -> beatmap.hitWindow.okWindow
+                else -> beatmap.hitWindow.mehWindow
             }
         }
 
         // For sliders, automatically set hit window length to be as lenient as possible.
-        var lastObjectHitWindow = hitWindow.mehWindow
+        var lastObjectHitWindow = beatmap.hitWindow.mehWindow
 
         if (lastObject is HitCircle) {
             lastObjectHitWindow = when (lastObjectResult.result) {
-                ResultType.HIT300.id -> hitWindow.greatWindow
-                ResultType.HIT100.id -> hitWindow.okWindow
-                else -> hitWindow.mehWindow
+                ResultType.HIT300.id -> beatmap.hitWindow.greatWindow
+                ResultType.HIT100.id -> beatmap.hitWindow.okWindow
+                else -> beatmap.hitWindow.mehWindow
             }
         } else if (lastObject is Slider) {
             lastObjectHitWindow = lastObjectHitWindow.coerceAtMost(lastObject.spanDuration.toFloat())
@@ -293,8 +282,8 @@ class ThreeFingerChecker(
         }
 
         // Check for slider breaks and treat them as misses.
-        if (obj is Slider && (-hitWindow.mehWindow > objData.accuracy ||
-                objData.accuracy > min(hitWindow.mehWindow.toDouble(), obj.duration))) {
+        if (obj is Slider && (-beatmap.hitWindow.mehWindow > objData.accuracy ||
+                objData.accuracy > min(beatmap.hitWindow.mehWindow.toDouble(), obj.duration))) {
             return -1
         }
 
@@ -390,7 +379,7 @@ class ThreeFingerChecker(
             return -1
         }
 
-        val mehWindow = hitWindow.mehWindow
+        val mehWindow = beatmap.hitWindow.mehWindow
 
         // Check for slider breaks and treat them as misses.
         if (obj is Slider && (-mehWindow > objData.accuracy || objData.accuracy > min(mehWindow.toDouble(), obj.duration))) {
