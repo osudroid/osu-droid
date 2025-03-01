@@ -11,6 +11,7 @@ import android.widget.LinearLayout
 import android.widget.TextView
 import androidx.core.text.HtmlCompat
 import androidx.core.text.HtmlCompat.FROM_HTML_MODE_LEGACY
+import androidx.core.view.isVisible
 import com.edlplan.framework.easing.Easing
 import com.edlplan.ui.EasingHelper
 import com.edlplan.ui.fragment.BaseFragment
@@ -72,10 +73,10 @@ open class MessageDialog : BaseFragment() {
         set(value) {
             field = value
             if (isCreated) {
-                findViewById<TextView>(R.id.message)?.text = (
-                    if (isHTMLMessage) HtmlCompat.fromHtml(value.toString(), FROM_HTML_MODE_LEGACY)
-                    else value
-                )
+                findViewById<TextView>(R.id.message)?.apply {
+                    (parent as View).isVisible = value.isNotBlank()
+                    text = if (isHTMLMessage) HtmlCompat.fromHtml(value.toString(), FROM_HTML_MODE_LEGACY) else value
+                }
             }
         }
 

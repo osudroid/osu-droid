@@ -211,7 +211,7 @@ abstract class DifficultyCalculator<TBeatmap : PlayableBeatmap, TObject : Diffic
  * An [IBeatmap] that is used for timed difficulty calculation.
  */
 private class ProgressiveCalculationBeatmap(
-    baseBeatmap: PlayableBeatmap
+    private val baseBeatmap: PlayableBeatmap
 ) : PlayableBeatmap(
     baseBeatmap, baseBeatmap.mode, baseBeatmap.mods, baseBeatmap.customSpeedMultiplier, baseBeatmap.oldStatistics
 ) {
@@ -244,4 +244,6 @@ private class ProgressiveCalculationBeatmap(
             return removed
         }
     }
+
+    override fun createHitWindow() = baseBeatmap.hitWindow
 }

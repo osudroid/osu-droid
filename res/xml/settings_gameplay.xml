@@ -11,6 +11,12 @@
             android:summary="@string/opt_skinpath_summary"
             android:title="@string/opt_skinpath_title" />
 
+        <Preference
+            android:key="hud_editor"
+            android:summary="@string/opt_hudEditor_summary"
+            android:title="@string/opt_hudEditor_title"
+            app:layout="@layout/settings_preference"/>
+
         <com.reco1l.osu.ui.SelectPreference
             android:defaultValue="1"
             android:entries="@array/spinner_style_names"
@@ -68,14 +74,6 @@
 
     <PreferenceCategory android:title="@string/opt_category_hud">
 
-        <com.reco1l.osu.ui.SelectPreference
-            android:defaultValue="0"
-            android:entries="@array/opt_progress_indicator_names"
-            android:entryValues="@array/opt_progress_indicator_values"
-            android:key="progressIndicatorType"
-            android:summary="@string/opt_progress_indicator_summary"
-            android:title="@string/opt_progress_indicator_title" />
-
         <CheckBoxPreference
             android:defaultValue="false"
             android:key="hideInGameUI"
@@ -89,19 +87,6 @@
             android:title="@string/opt_hide_replay_marquee_title" />
 
         <CheckBoxPreference
-            android:key="showscoreboard"
-            android:summary="@string/opt_show_leaderboard_summary"
-            android:title="@string/opt_show_leaderboard_title" />
-
-        <com.reco1l.osu.ui.SelectPreference
-            android:defaultValue="0"
-            android:entries="@array/error_meter_display_names"
-            android:entryValues="@array/error_meter_display_values"
-            android:key="errormeter"
-            android:summary="@string/opt_error_meter_display_summary"
-            android:title="@string/opt_error_meter_display_title" />
-
-        <CheckBoxPreference
             android:defaultValue="true"
             android:key="fps"
             android:summary="@string/opt_fps_summary"
@@ -110,31 +95,9 @@
 
         <CheckBoxPreference
             android:defaultValue="true"
-            android:key="averageOffset"
-            android:summary="@string/opt_averageoffset_summary"
-            android:title="@string/opt_averageoffset_title"
-            app:layout="@layout/settings_preference_checkbox" />
-
-        <CheckBoxPreference
-            android:defaultValue="true"
-            android:key="unstableRate"
-            android:summary="@string/opt_unstablerate_summary"
-            android:title="@string/opt_unstablerate_title"
-            app:layout="@layout/settings_preference_checkbox" />
-
-        <CheckBoxPreference
-            android:defaultValue="true"
             android:key="displayScoreStatistics"
             android:summary="@string/opt_display_score_statistics_summary"
             android:title="@string/opt_display_score_statistics_title" />
-
-        <CheckBoxPreference
-            android:defaultValue="false"
-            android:key="displayRealTimePPCounter"
-            android:summary="@string/opt_display_realtime_pp_counter_summary"
-            android:title="@string/opt_display_realtime_pp_counter_title"
-            app:layout="@layout/settings_preference_checkbox_bottom" />
-
 
     </PreferenceCategory>
 

@@ -5,10 +5,10 @@ import com.reco1l.andengine.container.*
 import com.reco1l.andengine.modifier.*
 import com.reco1l.framework.*
 import com.reco1l.framework.math.Vec4
+import com.reco1l.toolkt.kotlin.fastForEach
 import org.anddev.andengine.engine.camera.*
 import org.anddev.andengine.entity.*
 import org.anddev.andengine.entity.scene.Scene
-import org.anddev.andengine.entity.scene.Scene.ITouchArea
 import org.anddev.andengine.entity.shape.*
 import org.anddev.andengine.input.touch.TouchEvent
 import org.anddev.andengine.opengl.util.*
@@ -311,8 +311,6 @@ abstract class ExtendedEntity(
 
     private var isVertexBufferDirty = true
 
-    private var currentBoundEntity: ITouchArea? = null
-
 
     // Attachment
 
@@ -366,9 +364,13 @@ abstract class ExtendedEntity(
         }
     }
 
-    protected open fun invalidateTransformations() {
+    open fun invalidateTransformations() {
         mLocalToParentTransformationDirty = true
         mParentToLocalTransformationDirty = true
+
+        mChildren?.fastForEach {
+            (it as? ExtendedEntity)?.invalidateTransformations()
+        }
     }
 
 
@@ -466,14 +468,6 @@ abstract class ExtendedEntity(
         applyBlending(pGL)
     }
 
-    override fun doDraw(gl: GL10, camera: Camera) {
-
-        background?.setSize(drawWidth, drawHeight)
-        background?.onDraw(gl, camera)
-
-        super.doDraw(gl, camera)
-    }
-
     override fun onDrawChildren(gl: GL10, camera: Camera) {
 
         val hasPaddingApplicable = padding.left > 0f || padding.top > 0f
@@ -519,9 +513,6 @@ abstract class ExtendedEntity(
         if (hasPaddingApplicable) {
             gl.glTranslatef(-padding.right, -padding.top, 0f)
         }
-
-        foreground?.setSize(drawWidth, drawHeight)
-        foreground?.onDraw(gl, camera)
     }
 
     override fun onManagedDraw(gl: GL10, camera: Camera) {
@@ -531,7 +522,22 @@ abstract class ExtendedEntity(
             onUpdateVertexBuffer()
         }
 
-        super.onManagedDraw(gl, camera)
+        gl.glPushMatrix()
+
+        if (!isCullingEnabled || !isCulled(camera)) {
+            onApplyTransformations(gl, camera)
+
+            background?.setSize(drawWidth, drawHeight)
+            background?.onDraw(gl, camera)
+
+            doDraw(gl, camera)
+            onDrawChildren(gl, camera)
+
+            foreground?.setSize(drawWidth, drawHeight)
+            foreground?.onDraw(gl, camera)
+        }
+
+        gl.glPopMatrix()
     }
 
     override fun onInitDraw(pGL: GL10) {
@@ -629,6 +635,13 @@ abstract class ExtendedEntity(
         return false
     }
 
+
+    override fun setRotation(pRotation: Float) {
+        if (mRotation != pRotation) {
+            mRotation = pRotation
+            invalidateTransformations()
+        }
+    }
 
     /**
      * Sets the size of the entity.
@@ -827,42 +840,41 @@ abstract class ExtendedEntity(
     }
 
 
-    // Input
+    //region Input
 
-    override fun onAreaTouched(
-        event: TouchEvent,
-        localX: Float,
-        localY: Float
-    ): Boolean {
+    private val inputBindings = arrayOfNulls<ExtendedEntity>(10)
 
-        val boundEntity = currentBoundEntity
-        if (boundEntity != null) {
-            boundEntity as IEntity
 
-            val transformedX = localX - boundEntity.getDrawX()
-            val transformedY = localY - boundEntity.getDrawY()
+    open fun invalidateInputBindings(recursively: Boolean = true) {
+        inputBindings.fill(null)
 
-            boundEntity.onAreaTouched(event, transformedX, transformedY)
+        if (recursively) {
+            mChildren?.fastForEach {
+                (it as? ExtendedEntity)?.invalidateInputBindings()
+            }
+        }
+    }
 
-            if (event.isActionUp || event.isActionOutside || event.isActionCancel) {
-                currentBoundEntity = null
+    override fun onAreaTouched(event: TouchEvent, localX: Float, localY: Float): Boolean {
+
+        val inputBinding = inputBindings.getOrNull(event.pointerID)
+
+        if (inputBinding != null && inputBinding.parent == this) {
+            if (!inputBinding.onAreaTouched(event, localX - inputBinding.drawX, localY - inputBinding.drawY) || event.isActionUp) {
+                inputBindings[event.pointerID] = null
+                return false
             }
             return true
+        } else {
+            inputBindings[event.pointerID] = null
         }
 
         try {
             for (i in childCount - 1 downTo 0) {
                 val child = getChild(i)
-
-                if (child is ITouchArea && child.contains(localX, localY)) {
-
-                    val transformedX = localX - child.getDrawX()
-                    val transformedY = localY - child.getDrawY()
-
-                    if (child.onAreaTouched(event, transformedX, transformedY)) {
-                        if (event.isActionDown) {
-                            currentBoundEntity = child
-                        }
+                if (child is ExtendedEntity && child.contains(localX, localY)) {
+                    if (child.onAreaTouched(event, localX - child.drawX, localY - child.drawY)) {
+                        inputBindings[event.pointerID] = child
                         return true
                     }
                 }
@@ -870,7 +882,10 @@ abstract class ExtendedEntity(
         } catch (e: IndexOutOfBoundsException) {
             Log.e("ExtendedEntity", "A child entity was removed during touch event propagation.", e)
         }
+
         return false
     }
+
+    //endregion
 
 }

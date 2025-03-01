@@ -22,4 +22,20 @@
     <string name="opt_snakingOutSliders_title">Use snaking out sliders</string>
     <string name="opt_snakingOutSliders_summary">Enable sliders gradually snaking disappearing from one node</string>
 
+    <!-- HUD editor -->
+
+    <string name="opt_hudEditor_title">HUD Editor</string>
+    <string name="opt_hudEditor_summary">Edit the HUD layout as you like</string>
+
+    <string name="hudEditor_modal_title">HUD Editor</string>
+    <string name="hudEditor_modal_save">Exit and save changes</string>
+    <string name="hudEditor_modal_discard">Discard changes</string>
+    <string name="hudEditor_modal_reset">Reset to default</string>
+    <string name="hudEditor_modal_cancel">Cancel</string>
+
+    <string name="hudEditor_saving">Saving changes...</string>
+    <string name="hudEditor_saved">Changes saved!</string>
+    <string name="hudEditor_discarded">Changes discarded!</string>
+    <string name="hudEditor_reset">HUD set to default!</string>
+
 </resources>

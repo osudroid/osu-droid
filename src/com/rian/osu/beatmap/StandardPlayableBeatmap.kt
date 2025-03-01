@@ -10,4 +10,6 @@ class StandardPlayableBeatmap @JvmOverloads constructor(
     baseBeatmap: IBeatmap,
     mods: Iterable<Mod>? = null,
     customSpeedMultiplier: Float = 1f
-) : PlayableBeatmap(baseBeatmap, GameMode.Standard, mods, customSpeedMultiplier)
+) : PlayableBeatmap(baseBeatmap, GameMode.Standard, mods, customSpeedMultiplier) {
+    override fun createHitWindow() = StandardHitWindow(difficulty.od)
+}

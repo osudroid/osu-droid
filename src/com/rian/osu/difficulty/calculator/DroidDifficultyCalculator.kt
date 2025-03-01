@@ -81,9 +81,9 @@ class DroidDifficultyCalculator : DifficultyCalculator<DroidPlayableBeatmap, Dro
             if (basePerformance > 1e-5) 0.027 * (cbrt(100000 / 2.0.pow(1 / 1.1) * basePerformance) + 4)
             else 0.0
 
-        val od = beatmap.difficulty.od
         val isPrecise = mods.any { it is ModPrecise }
-        val greatWindow = (if (isPrecise) PreciseDroidHitWindow(od) else DroidHitWindow(od)).greatWindow.toDouble() / clockRate
+        // Weird cast of greatWindow, but necessary for difficulty calculation parity
+        val greatWindow = beatmap.hitWindow.greatWindow.toDouble() / clockRate
 
         overallDifficulty = (
             if (isPrecise) PreciseDroidHitWindow.hitWindow300ToOverallDifficulty(greatWindow.toFloat())
