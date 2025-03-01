@@ -192,6 +192,7 @@ class GameplayHUD : Container(), IGameplayEvents {
 
         if (value) {
             ResourceManager.getInstance().loadHighQualityAsset("delete", "delete.png")
+            ResourceManager.getInstance().loadHighQualityAsset("oneone", "one-one.png")
 
             elementSelector = HUDElementSelector(this)
 

@@ -1,6 +1,5 @@
 package com.reco1l.osu.hud.editor
 
-import android.util.*
 import com.reco1l.andengine.*
 import com.reco1l.andengine.container.ConstraintContainer
 import com.reco1l.andengine.container.Container
@@ -13,11 +12,9 @@ import com.reco1l.framework.ColorARGB
 import com.reco1l.osu.hud.HUDElement
 import com.reco1l.osu.updateThread
 import com.reco1l.toolkt.kotlin.*
-import com.rian.osu.math.*
 import org.anddev.andengine.input.touch.TouchEvent
 import ru.nsu.ccfit.zuev.osu.Config
 import ru.nsu.ccfit.zuev.osu.ResourceManager
-import kotlin.math.*
 
 class HUDElementOverlay(private val element: HUDElement) : ConstraintContainer() {
 
@@ -39,6 +36,10 @@ class HUDElementOverlay(private val element: HUDElement) : ConstraintContainer()
             updateThread {
                 element.remove()
             }
+        })
+
+        attachChild(Button("oneone", ColorARGB(0xFF002626)) {
+            element.setScale((element.scaleX + element.scaleY) / 2f)
         })
 
     }
