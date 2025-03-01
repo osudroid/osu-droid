@@ -62,8 +62,8 @@ data class HUDSkinData(val elements: List<HUDElementSkinData>) {
                         element.optDouble("x", 0.0).toFloat(),
                         element.optDouble("y", 0.0).toFloat(),
                     ),
-                    anchor = Anchor.getFromName(element.optString("anchor", "TopLeft")),
-                    origin = Anchor.getFromName(element.optString("origin", "TopLeft")),
+                    anchor = Anchor.getFromName(element.optString("anchor", "Center")),
+                    origin = Anchor.getFromName(element.optString("origin", "Center")),
                     scale = Vec2(
                         element.optDouble("scaleX", 1.0).toFloat(),
                         element.optDouble("scaleY", 1.0).toFloat()
