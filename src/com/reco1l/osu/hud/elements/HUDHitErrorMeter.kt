@@ -90,9 +90,8 @@ class HUDHitErrorMeter : HUDElement() {
             if (alpha <= 0f) {
                 alpha = 0f
 
-                if (expiredIndicators.size == 20) {
-                    updateThread { detachSelf() }
-                } else {
+                updateThread {
+                    detachSelf()
                     expiredIndicators.free(this)
                 }
             }
