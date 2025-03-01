@@ -26,11 +26,37 @@ data class HUDSkinData(val elements: List<HUDElementSkinData>) {
         @JvmField
         val Default = HUDSkinData(
             listOf(
-                HUDElementSkinData(type = HUDAccuracyCounter::class),
-                HUDElementSkinData(type = HUDComboCounter::class),
-                HUDElementSkinData(type = HUDPieSongProgress::class),
-                HUDElementSkinData(type = HUDHealthBar::class),
-                HUDElementSkinData(type = HUDScoreCounter::class)
+                HUDElementSkinData(
+                    type = HUDAccuracyCounter::class,
+                    anchor = Anchor.TopRight,
+                    origin = Anchor.TopRight,
+                    scale = Vec2(0.6f * 0.96f),
+                    position = Vec2(-17f, 9f)
+                ),
+                HUDElementSkinData(
+                    type = HUDComboCounter::class,
+                    anchor = Anchor.BottomLeft,
+                    origin = Anchor.BottomLeft,
+                    position = Vec2(10f, -10f),
+                    scale = Vec2(1.28f)
+                ),
+                HUDElementSkinData(
+                    type = HUDPieSongProgress::class,
+                    anchor = Anchor.TopRight,
+                    origin = Anchor.CenterRight
+                ),
+                HUDElementSkinData(
+                    type = HUDHealthBar::class,
+                    anchor = Anchor.TopLeft,
+                    origin = Anchor.TopLeft
+                ),
+                HUDElementSkinData(
+                    type = HUDScoreCounter::class,
+                    anchor = Anchor.TopRight,
+                    origin = Anchor.TopRight,
+                    scale = Vec2(0.96f),
+                    position = Vec2(-10f, 0f)
+                )
             )
         )
 

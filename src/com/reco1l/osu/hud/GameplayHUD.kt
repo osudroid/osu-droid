@@ -170,41 +170,14 @@ class GameplayHUD : Container(), IGameplayEvents {
         // The default layout is hardcoded to keep the original layout before the HUD editor was
         // implemented, as it used cross-references between elements that are not possible to be
         // set in the editor.
+        val scoreCounter = getFirstOf<HUDScoreCounter>()!!
+        val accuracyCounter = getFirstOf<HUDAccuracyCounter>()!!
+        val pieSongProgress = getFirstOf<HUDPieSongProgress>()!!
 
-        val healthBar = getFirstOf<HUDHealthBar>()
-        healthBar?.anchor = Anchor.TopLeft
-        healthBar?.origin = Anchor.TopLeft
+        accuracyCounter.y += scoreCounter.y + scoreCounter.drawHeight
 
-        val scoreCounter = getFirstOf<HUDScoreCounter>()
-        scoreCounter?.anchor = Anchor.TopRight
-        scoreCounter?.origin = Anchor.TopRight
-        scoreCounter?.setScale(0.96f)
-        scoreCounter?.x = -10f
-
-        val accuracyCounter = getFirstOf<HUDAccuracyCounter>()
-        accuracyCounter?.anchor = Anchor.TopRight
-        accuracyCounter?.origin = Anchor.TopRight
-        accuracyCounter?.setScale(0.6f * 0.96f)
-        accuracyCounter?.setPosition(-17f, 9f)
-
-        if (scoreCounter != null && accuracyCounter != null) {
-            accuracyCounter.y += scoreCounter.y + scoreCounter.drawHeight
-        }
-
-        val pieSongProgress = getFirstOf<HUDPieSongProgress>()
-        pieSongProgress?.anchor = Anchor.TopRight
-        pieSongProgress?.origin = Anchor.CenterRight
-
-        if (pieSongProgress != null && accuracyCounter != null) {
-            pieSongProgress.y = accuracyCounter.y + accuracyCounter.heightScaled / 2f
-            pieSongProgress.x = accuracyCounter.x - accuracyCounter.widthScaled - 18f
-        }
-
-        val comboCounter = getFirstOf<HUDComboCounter>()
-        comboCounter?.anchor = Anchor.BottomLeft
-        comboCounter?.origin = Anchor.BottomLeft
-        comboCounter?.setPosition(10f, -10f)
-        comboCounter?.setScale(1.28f)
+        pieSongProgress.y = accuracyCounter.y + accuracyCounter.heightScaled / 2f
+        pieSongProgress.x = accuracyCounter.x - accuracyCounter.widthScaled - 18f
     }
 
     //endregion
