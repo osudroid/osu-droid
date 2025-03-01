@@ -1635,9 +1635,12 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
         }
 
         ResourceManager.getInstance().getSound("menuhit").play();
-        float difference = skipTime - elapsedTime;
 
-        elapsedTime = skipTime;
+        float difference = Math.max(0, skipTime - elapsedTime);
+
+        // Skip time may be negative in forced skips, which will cause desynchronization between game time and
+        // audio time, so we cap it at 0.
+        elapsedTime = Math.max(0, skipTime);
         int seekTime = (int) Math.ceil(elapsedTime * 1000);
         int videoSeekTime = seekTime - (int) (videoOffset * 1000);
 
