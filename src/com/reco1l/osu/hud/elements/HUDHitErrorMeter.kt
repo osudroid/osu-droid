@@ -78,6 +78,8 @@ class HUDHitErrorMeter : HUDElement() {
             anchor = Anchor.Center
             origin = Anchor.Center
             cornerRadius = INDICATOR_WIDTH / 2
+            setColor(70f / 255f, 180f / 255f, 220f / 255f)
+            zIndex = 10
             setSize(INDICATOR_WIDTH, INDICATOR_HEIGHT - 2f)
         }
 
