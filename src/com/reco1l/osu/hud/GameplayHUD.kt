@@ -33,6 +33,9 @@ class GameplayHUD : Container(), IGameplayEvents {
             if (field != value) {
                 field = value
                 forEachElement { it.onSelectionStateChange(it == value) }
+
+                // Move to front
+                setChildIndex(value, mChildren.size - 1)
             }
         }
 

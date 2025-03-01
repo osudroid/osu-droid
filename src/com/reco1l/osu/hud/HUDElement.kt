@@ -186,9 +186,6 @@ abstract class HUDElement : Container(), IGameplayEvents {
 
                         if (element != this && element.contains(parentLocalX, parentLocalY)) {
                             hud.selected = element
-
-                            // Move to front so the next input event is handled by the selected element.
-                            hud.setChildIndex(element, 0)
                             return@forEachElement
                         }
                     }
