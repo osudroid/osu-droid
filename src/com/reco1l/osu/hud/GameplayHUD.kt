@@ -37,6 +37,7 @@ class GameplayHUD : Container(), IGameplayEvents {
                 // Move to front
                 if (value != null) {
                     setChildIndex(value, mChildren.size - 1)
+                    elementSelector?.collapse()
                 }
             }
         }
