@@ -1807,7 +1807,7 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
                 gameover();
             }
             if (objectId != -1) {
-                updatePPCounter(objectId);
+                updatePPValue(objectId);
             }
             return "hit0";
         }
@@ -1861,7 +1861,7 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
         }
 
         if (objectId != -1) {
-            updatePPCounter(objectId);
+            updatePPValue(objectId);
         }
 
         return scoreName;
@@ -2776,7 +2776,7 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
         }
     }
 
-    private void updatePPCounter(int objectId) {
+    private void updatePPValue(int objectId) {
         if (Config.isHideInGameUI() || !isHUDEditorMode && !OsuSkin.get().getHUDSkinData().hasElement(HUDPPCounter.class)) {
             return;
         }
