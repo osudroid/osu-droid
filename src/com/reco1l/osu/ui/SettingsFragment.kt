@@ -21,6 +21,7 @@ import androidx.core.view.forEach
 import androidx.core.view.get
 import androidx.preference.CheckBoxPreference
 import androidx.preference.Preference
+import androidx.preference.Preference.OnPreferenceClickListener
 import androidx.preference.SeekBarPreference
 import com.osudroid.resources.R.*
 import com.edlplan.ui.fragment.LoadingFragment
@@ -49,11 +50,14 @@ import ru.nsu.ccfit.zuev.osu.LibraryManager
 import ru.nsu.ccfit.zuev.osu.MainActivity
 import ru.nsu.ccfit.zuev.osu.ResourceManager
 import ru.nsu.ccfit.zuev.osu.ToastLogger
+import ru.nsu.ccfit.zuev.osu.game.mods.GameMod
 import ru.nsu.ccfit.zuev.osu.helper.StringTable
+import ru.nsu.ccfit.zuev.osu.menu.ModMenu
 import ru.nsu.ccfit.zuev.osu.online.OnlineManager
 import ru.nsu.ccfit.zuev.osuplus.R
 import ru.nsu.ccfit.zuev.skins.BeatmapSkinManager
 import java.io.File
+import java.util.EnumSet
 import kotlin.math.max
 
 
@@ -302,6 +306,27 @@ class SettingsFragment : com.edlplan.ui.fragment.SettingsFragment() {
                         context.startActivity(Intent(context, MainActivity::class.java))
                         Snackbar.make(requireActivity().window.decorView, string.message_loaded_skin, 1500).show()
                     }
+                }
+                true
+            }
+        }
+
+        findPreference<Preference>("hud_editor")!!.apply {
+
+            if (Multiplayer.isMultiplayer) {
+                isEnabled = false
+                return
+            }
+
+            setOnPreferenceClickListener {
+
+                if (LibraryManager.getSizeOfBeatmaps() == 0) {
+                    ToastLogger.showText("Cannot enter HUD editor with empty beatmap library!", true)
+                } else {
+                    dismiss()
+                    ModMenu.getInstance().mod = EnumSet.of(GameMod.MOD_AUTO)
+                    GlobalManager.getInstance().gameScene.setOldScene(GlobalManager.getInstance().mainScene.scene)
+                    GlobalManager.getInstance().gameScene.startGame(GlobalManager.getInstance().selectedBeatmap, null, true)
                 }
                 true
             }

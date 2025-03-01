@@ -36,10 +36,64 @@ fun IEntity?.getPaddedHeight() = when (this) {
 var ExtendedEntity.size
     get() = Vec2(width, height)
     set(value) {
-        width = value.x
-        height = value.y
+        setSize(value.x, value.y)
     }
 
+/**
+ * The draw size of the entity.
+ */
+val ExtendedEntity.drawSize
+    get() = Vec2(drawWidth, drawHeight)
+
+/**
+ * The position of the entity.
+ */
+var ExtendedEntity.position
+    get() = Vec2(x, y)
+    set(value) {
+        setPosition(value.x, value.y)
+    }
+
+/**
+ * The draw position of the entity.
+ */
+val ExtendedEntity.drawPosition
+    get() = Vec2(drawX, drawY)
+
+
+/**
+ * The scale of the entity.
+ */
+var ExtendedEntity.scale
+    get() = Vec2(scaleX, scaleY)
+    set(value) {
+        setScale(value.x, value.y)
+    }
+
+/**
+ * The center where the entity will scale from.
+ */
+var ExtendedEntity.scaleCenter
+    get() = Vec2(scaleCenterX, scaleCenterY)
+    set(value) {
+        setScaleCenter(value.x, value.y)
+    }
+
+/**
+ * The center where the entity will rotate from.
+ */
+var ExtendedEntity.rotationCenter
+    get() = Vec2(rotationCenterX, rotationCenterY)
+    set(value) {
+        setRotationCenter(value.x, value.y)
+    }
+
+
+/**
+ * The total offset applied to the entity.
+ */
+val ExtendedEntity.totalOffset
+    get() = Vec2(totalOffsetX, totalOffsetY)
 
 /**
  * The total offset applied to the X axis.
@@ -53,6 +107,13 @@ val ExtendedEntity.totalOffsetX
 val ExtendedEntity.totalOffsetY
     get() = originOffsetY + anchorOffsetY + translationY
 
+
+/**
+ * The offset applied to the entity according to the anchor factor.
+ */
+val ExtendedEntity.anchorOffset
+    get() = Vec2(anchorOffsetX, anchorOffsetY)
+
 /**
  * The offset applied to the X axis according to the anchor factor.
  */
@@ -64,6 +125,13 @@ val ExtendedEntity.anchorOffsetX: Float
  */
 val ExtendedEntity.anchorOffsetY: Float
     get() = parent.getPaddedHeight() * anchor.y
+
+
+/**
+ * The offset applied to the entity according to the origin factor.
+ */
+val ExtendedEntity.originOffset
+    get() = Vec2(originOffsetX, originOffsetY)
 
 /**
  * The offset applied to the X axis according to the origin factor.
@@ -112,12 +180,4 @@ fun IEntity?.getDrawY(): Float = when (this) {
     is ExtendedEntity -> drawY
     is IShape -> y
     else -> 0f
-}
-
-/**
- * Attaches the entity to a parent.
- */
-infix fun <T : IEntity> T.attachTo(parent: IEntity): T {
-    parent.attachChild(this)
-    return this
 }
