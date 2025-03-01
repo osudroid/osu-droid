@@ -53,8 +53,7 @@ abstract class HUDElement : Container(), IGameplayEvents {
     /**
      * Returns the name of this element.
      */
-    val name: String
-        get() = HUDElements[this::class].name.replace('_', ' ').capitalize()
+    open val name = HUDElements[this::class].name.replace('_', ' ').capitalize()
 
     /**
      * Indicates whether the element is selected.

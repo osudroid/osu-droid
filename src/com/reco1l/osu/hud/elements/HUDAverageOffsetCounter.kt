@@ -9,6 +9,8 @@ import kotlin.math.roundToInt
 
 class HUDAverageOffsetCounter : HUDElement() {
 
+    override val name = "Average offset counter"
+
     private val text = ExtendedText().apply {
         font = ResourceManager.getInstance().getFont("smallFont")
         text = "Avg offset: 0ms"

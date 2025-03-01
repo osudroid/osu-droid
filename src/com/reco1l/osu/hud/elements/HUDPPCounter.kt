@@ -11,6 +11,8 @@ import kotlin.math.roundToInt
 
 class HUDPPCounter : HUDElement() {
 
+    override val name = "PP counter"
+
     private val sprite = SpriteFont(OsuSkin.get().scorePrefix)
 
     init {

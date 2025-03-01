@@ -8,6 +8,8 @@ import ru.nsu.ccfit.zuev.osu.scoring.StatisticV2
 
 class HUDUnstableRateCounter : HUDElement() {
 
+    override val name = "Unstable rate counter"
+
     private val text = ExtendedText().apply {
         font = ResourceManager.getInstance().getFont("smallFont")
         text = "UR: 0.00"
