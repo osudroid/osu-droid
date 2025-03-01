@@ -76,10 +76,7 @@ abstract class HUDElement : Container(), IGameplayEvents {
         if (data != null) {
             anchor = data.anchor
             origin = data.origin
-
-            setScaleCenter(0.5f, 0.5f)
             setScale(data.scale.x, data.scale.y)
-
             setPosition(data.position.x, data.position.y)
         }
     }
@@ -88,7 +85,7 @@ abstract class HUDElement : Container(), IGameplayEvents {
         type = this::class,
         anchor = anchor,
         origin = origin,
-        scale = scaleVec,
+        scale = scale,
         position = Vec2(x, y)
     )
 
@@ -208,7 +205,7 @@ abstract class HUDElement : Container(), IGameplayEvents {
 
     private fun applyClosestAnchorOrigin() {
 
-        val drawSize = drawSize * scaleVec
+        val drawSize = drawSize * scale
         val drawPosition = anchorOffset + position - drawSize * origin
         val parentDrawSize = (parent as ExtendedEntity).drawSize
 
@@ -233,12 +230,11 @@ abstract class HUDElement : Container(), IGameplayEvents {
         }
 
         if (origin != closest) {
-            val previousOriginOffset = originOffset
+            val previousOriginOffset = -(size * scale * origin)
+            val originOffset = -(size * scale * closest)
             origin = closest
             position -= originOffset - previousOriginOffset
         }
-
-        setScaleCenter(0.5f, 0.5f)
     }
 
     private fun updateConnectionLine() {
@@ -253,7 +249,7 @@ abstract class HUDElement : Container(), IGameplayEvents {
         }
 
         connectionLine!!.fromPoint = anchorOffset
-        connectionLine!!.toPoint = (editorOverlay?.outline?.drawPosition ?: Vec2.Zero) + drawSize * scaleVec.absolute() * origin
+        connectionLine!!.toPoint = (editorOverlay?.outline?.drawPosition ?: Vec2.Zero) + drawSize * scale.absolute() * origin
     }
 
     override fun setScaleX(pScaleX: Float) {

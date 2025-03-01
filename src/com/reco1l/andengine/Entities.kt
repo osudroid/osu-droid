@@ -64,7 +64,7 @@ val ExtendedEntity.drawPosition
 /**
  * The scale of the entity.
  */
-var ExtendedEntity.scaleVec
+var ExtendedEntity.scale
     get() = Vec2(scaleX, scaleY)
     set(value) {
         setScale(value.x, value.y)

@@ -35,7 +35,9 @@ class GameplayHUD : Container(), IGameplayEvents {
                 forEachElement { it.onSelectionStateChange(it == value) }
 
                 // Move to front
-                setChildIndex(value, mChildren.size - 1)
+                if (value != null) {
+                    setChildIndex(value, mChildren.size - 1)
+                }
             }
         }
 
@@ -189,7 +191,6 @@ class GameplayHUD : Container(), IGameplayEvents {
 
         if (value) {
             ResourceManager.getInstance().loadHighQualityAsset("delete", "delete.png")
-            ResourceManager.getInstance().loadHighQualityAsset("flip", "flip.png")
 
             elementSelector = HUDElementSelector(this)
 

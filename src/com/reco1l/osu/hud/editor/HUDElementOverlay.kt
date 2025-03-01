@@ -1,7 +1,7 @@
 package com.reco1l.osu.hud.editor
 
-import com.reco1l.andengine.Anchor
-import com.reco1l.andengine.Axes
+import android.util.*
+import com.reco1l.andengine.*
 import com.reco1l.andengine.container.ConstraintContainer
 import com.reco1l.andengine.container.Container
 import com.reco1l.andengine.container.LinearContainer
@@ -12,6 +12,8 @@ import com.reco1l.andengine.text.*
 import com.reco1l.framework.ColorARGB
 import com.reco1l.osu.hud.HUDElement
 import com.reco1l.osu.updateThread
+import com.reco1l.toolkt.kotlin.*
+import com.rian.osu.math.*
 import org.anddev.andengine.input.touch.TouchEvent
 import ru.nsu.ccfit.zuev.osu.Config
 import ru.nsu.ccfit.zuev.osu.ResourceManager
@@ -31,22 +33,13 @@ class HUDElementOverlay(private val element: HUDElement) : ConstraintContainer()
         origin = Anchor.BottomCenter
         orientation = Orientation.Horizontal
         spacing = 4f
+        y = -10f
 
         attachChild(Button("delete", ColorARGB(0xFF260000)) {
             updateThread {
                 element.remove()
             }
         })
-
-        // Flip horizontally
-        attachChild(Button("flip", ColorARGB(0xFF181825)) {
-            element.scaleX = -element.scaleX
-        })
-
-        // Flip vertically
-        attachChild(Button("flip", ColorARGB(0xFF181825)) {
-            element.scaleY = -element.scaleY
-        }.apply { icon.rotation = -90f })
 
     }
 
@@ -96,11 +89,18 @@ class HUDElementOverlay(private val element: HUDElement) : ConstraintContainer()
     override fun onManagedUpdate(pSecondsElapsed: Float) {
 
         // We need to cancel scale center
-        outline.x = element.drawX + (element.drawWidth * element.scaleCenterX) * (1f - abs(element.scaleX))
-        outline.y = element.drawY + (element.drawHeight * element.scaleCenterY) * (1f - abs(element.scaleY))
+        outline.x = element.anchorOffsetX + element.x - (element.widthScaled * element.origin.x)
+        outline.y = element.anchorOffsetY + element.y - (element.heightScaled * element.origin.y)
 
-        outline.width = element.drawWidth * abs(element.scaleX)
-        outline.height = element.drawHeight * abs(element.scaleY)
+        outline.width = element.widthScaled
+        outline.height = element.heightScaled
+
+        // Show only the tips that are not at the origin.
+        mChildren?.fastForEach {
+            if (it is Tip) {
+                it.isVisible = it.anchor.x != element.origin.x && it.anchor.y != element.origin.y
+            }
+        }
 
         super.onManagedUpdate(pSecondsElapsed)
     }
@@ -151,11 +151,11 @@ class HUDElementOverlay(private val element: HUDElement) : ConstraintContainer()
                     deltaY = -deltaY
                 }
 
-                val deltaScaleX = deltaX / 100f
-                val deltaScaleY = deltaY / 100f
+                val deltaScaleX = deltaX / element.widthScaled
+                val deltaScaleY = deltaY / element.heightScaled
 
-                element.scaleX = (abs(element.scaleX) + deltaScaleX).coerceIn(0.5f, 5f).withSign(element.scaleX)
-                element.scaleY = (abs(element.scaleY) + deltaScaleY).coerceIn(0.5f, 5f).withSign(element.scaleY)
+                element.scaleX = (element.scaleX + deltaScaleX).coerceIn(0.5f, 5f)
+                element.scaleY = (element.scaleY + deltaScaleY).coerceIn(0.5f, 5f)
                 return true
             }
 
@@ -180,6 +180,7 @@ class HUDElementOverlay(private val element: HUDElement) : ConstraintContainer()
 
         init {
             setSize(BUTTON_SIZE, BUTTON_SIZE)
+            scaleCenter = Anchor.Center
 
             attachChild(RoundedBox().apply {
                 cornerRadius = 12f
