@@ -1326,7 +1326,7 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
         boolean shouldBePunished = false;
 
         while (!objects.isEmpty()
-                && elapsedTime > (float) (objects.peek().startTime - objects.peek().timePreempt) / 1000) {
+                && elapsedTime >= (float) (objects.peek().startTime - objects.peek().timePreempt) / 1000) {
             gameStarted = true;
             final var obj = objects.poll();
 
