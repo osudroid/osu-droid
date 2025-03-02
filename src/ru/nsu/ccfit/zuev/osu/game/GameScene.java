@@ -1390,13 +1390,6 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
             metronome.update(elapsedTime, activeTimingPoint);
         }
 
-        //Status playerStatus = music.getStatus();
-        Status playerStatus = GlobalManager.getInstance().getSongService().getStatus();
-
-        if (playerStatus != Status.PLAYING) {
-            elapsedTime += dt;
-        }
-
         if (shouldBePunished || (objects.isEmpty() && activeObjects.isEmpty() && leadOut > 2)) {
 
             // Reset the game to continue the HUD editor session.
