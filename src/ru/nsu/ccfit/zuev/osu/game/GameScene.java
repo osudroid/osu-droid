@@ -147,7 +147,6 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
     public GameplayLeaderboard scoreBoard;
     private Metronome metronome;
     private float scale;
-    private float objectTimePreempt;
     private float difficultyStatisticsScoreMultiplier;
     public StatisticV2 stat;
     private boolean gameStarted;
@@ -485,7 +484,6 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
 
         var firstObject = playableBeatmap.getHitObjects().objects.get(0);
         scale = firstObject.getGameplayScale();
-        objectTimePreempt = (float) firstObject.timePreempt / 1000f;
 
         difficultyStatisticsScoreMultiplier = 1 +
             Math.min(parsedBeatmap.getDifficulty().od, 10) / 10f + Math.min(parsedBeatmap.getDifficulty().hp, 10) / 10f;
@@ -810,9 +808,11 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
         previousFrameTime = 0;
 
         hitWindow = playableBeatmap.getHitWindow();
-        firstObjectStartTime = (float) objects.peek().startTime / 1000;
+        var firstObject = objects.peek();
+        firstObjectStartTime = (float) firstObject.startTime / 1000;
         lastObjectEndTime = (float) objects.getLast().getEndTime() / 1000;
 
+        float objectTimePreempt = (float) firstObject.timePreempt / 1000;
         float skipTargetTime = firstObjectStartTime - Math.max(2f, objectTimePreempt);
 
         elapsedTime = Math.min(0, skipTargetTime);
@@ -1327,7 +1327,7 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
         boolean shouldBePunished = false;
 
         while (!objects.isEmpty()
-                && elapsedTime + objectTimePreempt > (float) objects.peek().startTime / 1000) {
+                && elapsedTime > (float) (objects.peek().startTime - objects.peek().timePreempt) / 1000) {
             gameStarted = true;
             final var obj = objects.poll();
 
