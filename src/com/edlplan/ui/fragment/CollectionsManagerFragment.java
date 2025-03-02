@@ -243,7 +243,9 @@ public class CollectionsManagerFragment extends BaseFragment {
         }
 
         protected void updateFolderNameText(VH holder, String name) {
-            var maps = DatabaseManager.getBeatmapCollectionsTable().getBeatmaps(name);
+            var maps = name.equals(StringTable.get(com.osudroid.resources.R.string.favorite_default))
+                    ? null
+                    : DatabaseManager.getBeatmapCollectionsTable().getBeatmaps(name);
 
             holder.folderName.setText(name);
 
