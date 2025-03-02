@@ -168,8 +168,9 @@ public class GameplaySlider extends GameObject {
         var stackedPosition = beatmapSlider.getGameplayStackedPosition();
         position.set(stackedPosition.x, stackedPosition.y);
 
+        hitTime = (float) beatmapSlider.startTime / 1000;
         endsCombo = beatmapSlider.isLastInCombo();
-        elapsedSpanTime = secPassed - beatmapSlider.startTime / 1000;
+        elapsedSpanTime = secPassed - hitTime;
         duration = beatmapSlider.getDuration() / 1000;
         spanDuration = beatmapSlider.getSpanDuration() / 1000;
         path = sliderPath;

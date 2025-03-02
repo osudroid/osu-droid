@@ -1370,7 +1370,6 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
                     gameplayCircle.setAutoPlay();
                 }
 
-                gameplayCircle.setHitTime((float) obj.startTime / 1000);
                 gameplayCircle.setId(++lastObjectId);
 
                 if (replaying) {
@@ -1405,7 +1404,7 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
                 if (GameHelper.isAuto()) {
                     gameplaySlider.setAutoPlay();
                 }
-                gameplaySlider.setHitTime((float) obj.startTime / 1000);
+
                 gameplaySlider.setId(++lastObjectId);
                 if (replaying) {
                     gameplaySlider.setReplayData(replay.objectData[gameplaySlider.getId()]);

@@ -39,10 +39,6 @@ public abstract class GameObject {
         return hitTime;
     }
 
-    public void setHitTime(final float hitTime) {
-        this.hitTime = hitTime;
-    }
-
     public int getId() {
         return id;
     }

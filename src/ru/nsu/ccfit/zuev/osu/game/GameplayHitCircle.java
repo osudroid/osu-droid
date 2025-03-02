@@ -58,7 +58,8 @@ public class GameplayHitCircle extends GameObject {
         scene = pScene;
         timePreempt = (float) beatmapCircle.timePreempt / 1000;
 
-        passedTime = secPassed - ((float) beatmapCircle.startTime / 1000 - timePreempt);
+        hitTime = (float) beatmapCircle.startTime / 1000;
+        passedTime = secPassed - (hitTime - timePreempt);
         startHit = false;
         kiai = GameHelper.isKiai();
         this.comboColor.set(comboColor.r(), comboColor.g(), comboColor.b());
