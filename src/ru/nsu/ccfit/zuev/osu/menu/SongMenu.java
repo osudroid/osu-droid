@@ -102,7 +102,7 @@ public class SongMenu implements IUpdateHandler, MenuItemListener,
     private Float touchY = null;
     private String filterText = "";
     private boolean favsOnly = false;
-    private List<String> limitC;
+    @Nullable private List<String> limitC;
     private float maxY = 100500;
     private int pointerId = -1;
     private float initalY = -1;
@@ -174,7 +174,7 @@ public class SongMenu implements IUpdateHandler, MenuItemListener,
             filterMenu.getFilter(),
             filterMenu.getOrder(),
             filterMenu.isFavoritesOnly(),
-            filterMenu.getFavoriteFolder() == null ? null : DatabaseManager.getBeatmapCollectionsTable().getBeatmaps(filterMenu.getFavoriteFolder())
+            filterMenu.getFavoriteFolder().isEmpty() ? null : DatabaseManager.getBeatmapCollectionsTable().getBeatmaps(filterMenu.getFavoriteFolder())
         );
     }
 
@@ -728,7 +728,7 @@ public class SongMenu implements IUpdateHandler, MenuItemListener,
     }
 
     public void setFilter(final String filter, final SortOrder order,
-                          final boolean favsOnly, List<String> limit) {
+                          final boolean favsOnly, @Nullable List<String> limit) {
         String beatmapFilename = "";
         if (selectedBeatmap != null) {
             beatmapFilename = selectedBeatmap.getFilename();
