@@ -147,7 +147,6 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
     public GameplayLeaderboard scoreBoard;
     private Metronome metronome;
     private float scale;
-    private float difficultyStatisticsScoreMultiplier;
     public StatisticV2 stat;
     private boolean gameStarted;
     private float totalOffset;
@@ -485,12 +484,6 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
         var firstObject = playableBeatmap.getHitObjects().objects.get(0);
         scale = firstObject.getGameplayScale();
 
-        difficultyStatisticsScoreMultiplier = 1 +
-            Math.min(parsedBeatmap.getDifficulty().od, 10) / 10f + Math.min(parsedBeatmap.getDifficulty().hp, 10) / 10f;
-
-        // The maximum CS of osu!droid mapped to osu!standard is ~17.62.
-        difficultyStatisticsScoreMultiplier += (Math.min(parsedBeatmap.getDifficulty().gameplayCS, 17.62f) - 3) / 4f;
-
         GameHelper.setOverallDifficulty(playableBeatmap.getDifficulty().od);
         GameHelper.setHealthDrain(playableBeatmap.getDifficulty().hp);
         GameHelper.setSpeedMultiplier(modMenu.getSpeed());
@@ -765,7 +758,13 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
                 && !stat.getMod().contains(GameMod.MOD_AUTOPILOT)
                 && !stat.getMod().contains(GameMod.MOD_AUTO);
 
-        stat.setDiffModifier(difficultyStatisticsScoreMultiplier);
+        float difficultyScoreMultiplier = 1 + Math.min(parsedBeatmap.getDifficulty().od, 10) / 10f +
+                Math.min(parsedBeatmap.getDifficulty().hp, 10) / 10f;
+
+        // The maximum CS of osu!droid mapped to osu!standard is ~17.62.
+        difficultyScoreMultiplier += (Math.min(parsedBeatmap.getDifficulty().gameplayCS, 17.62f) - 3) / 4f;
+
+        stat.setDiffModifier(difficultyScoreMultiplier);
         stat.setBeatmapNoteCount(lastBeatmapInfo.getTotalHitObjectCount());
         stat.setBeatmapMaxCombo(lastBeatmapInfo.getMaxCombo());
 
