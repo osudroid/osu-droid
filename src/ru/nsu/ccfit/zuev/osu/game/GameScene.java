@@ -501,6 +501,7 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
             JobKt.ensureActive(scope.getCoroutineContext());
         }
 
+        totalLength = GlobalManager.getInstance().getSongService().getLength();
         objects = new LinkedList<>(playableBeatmap.getHitObjects().objects);
         activeObjects = new LinkedList<>();
         expiredObjects = new LinkedList<>();
@@ -1277,16 +1278,6 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
 
             if (video.getAlpha() < 1.0f)
                 video.setAlpha(Math.min(video.getAlpha() + 0.03f, 1.0f));
-        }
-
-        if (elapsedTime >= totalOffset && !musicStarted) {
-            GlobalManager.getInstance().getSongService().play();
-            GlobalManager.getInstance().getSongService().setVolume(Config.getBgmVolume());
-            totalLength = GlobalManager.getInstance().getSongService().getLength();
-            musicStarted = true;
-            elapsedTime = totalOffset;
-
-            return;
         }
 
         boolean shouldBePunished = false;
@@ -2780,6 +2771,14 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
                 } else if (!musicStarted) {
                     // Cap elapsed time at the music start time to prevent objects from progressing too far.
                     dt = Math.min(elapsedTime + dt, totalOffset) - elapsedTime;
+
+                    if (elapsedTime >= totalOffset && !musicStarted) {
+                        Execution.updateThread(() -> {
+                            songService.play();
+                            songService.setVolume(Config.getBgmVolume());
+                            musicStarted = true;
+                        });
+                    }
                 }
 
                 update(dt);
