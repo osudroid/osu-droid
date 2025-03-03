@@ -74,7 +74,10 @@ open class MessageDialog : BaseFragment() {
             field = value
             if (isCreated) {
                 findViewById<TextView>(R.id.message)?.apply {
-                    (parent as View).isVisible = value.isNotBlank()
+                    if (this::class == MessageDialog::class) {
+                        (parent as View).isVisible = value.isNotBlank()
+                    }
+
                     text = if (isHTMLMessage) HtmlCompat.fromHtml(value.toString(), FROM_HTML_MODE_LEGACY) else value
                 }
             }
