@@ -22,6 +22,8 @@
     <string name="opt_snakingOutSliders_title">Use snaking out sliders</string>
     <string name="opt_snakingOutSliders_summary">Enable sliders gradually snaking disappearing from one node</string>
 
+    <string name="message_video_custom_speed_unsupported">Custom video playback speed is not supported in this device</string>
+
     <!-- HUD editor -->
 
     <string name="opt_hudEditor_title">HUD Editor</string>

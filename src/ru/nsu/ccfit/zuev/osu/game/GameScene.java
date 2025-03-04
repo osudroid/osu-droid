@@ -114,6 +114,7 @@ import ru.nsu.ccfit.zuev.osu.scoring.ScoringScene;
 import ru.nsu.ccfit.zuev.osu.scoring.StatisticV2;
 import ru.nsu.ccfit.zuev.osu.scoring.TouchType;
 import ru.nsu.ccfit.zuev.osuplus.BuildConfig;
+import ru.nsu.ccfit.zuev.osuplus.R;
 import ru.nsu.ccfit.zuev.skins.OsuSkin;
 import ru.nsu.ccfit.zuev.skins.BeatmapSkinManager;
 
@@ -1305,7 +1306,13 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
         {
             if (!videoStarted) {
                 video.play();
-                video.setPlaybackSpeed(GameHelper.getSpeedMultiplier());
+                // Some devices do not support custom playback speed for whatever reason.
+                try {
+                    video.setPlaybackSpeed(GameHelper.getSpeedMultiplier());
+                } catch (Exception e) {
+                    Log.e("GameScene", "Failed to change video playback speed.", e);
+                    ToastLogger.showText(R.string.message_video_custom_speed_unsupported, false);
+                }
                 videoStarted = true;
             }
 
