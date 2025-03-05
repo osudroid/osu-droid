@@ -7,16 +7,7 @@ import com.reco1l.andengine.shape.*
 import com.reco1l.framework.ColorARGB
 import com.reco1l.framework.math.Vec2
 import com.reco1l.osu.hud.editor.HUDElementOverlay
-import com.reco1l.osu.hud.elements.HUDAccuracyCounter
-import com.reco1l.osu.hud.elements.HUDAverageOffsetCounter
-import com.reco1l.osu.hud.elements.HUDComboCounter
-import com.reco1l.osu.hud.elements.HUDHealthBar
-import com.reco1l.osu.hud.elements.HUDHitErrorMeter
-import com.reco1l.osu.hud.elements.HUDLinearSongProgress
-import com.reco1l.osu.hud.elements.HUDPPCounter
-import com.reco1l.osu.hud.elements.HUDPieSongProgress
-import com.reco1l.osu.hud.elements.HUDScoreCounter
-import com.reco1l.osu.hud.elements.HUDUnstableRateCounter
+import com.reco1l.osu.hud.elements.*
 import com.reco1l.osu.ui.entity.GameplayLeaderboard
 import com.reco1l.toolkt.kotlin.capitalize
 import org.anddev.andengine.input.touch.TouchEvent
@@ -40,6 +31,10 @@ enum class HUDElements(val type: KClass<out HUDElement>) {
     avg_offset_counter(HUDAverageOffsetCounter::class),
     hit_error_meter(HUDHitErrorMeter::class),
     linear_song_progress(HUDLinearSongProgress::class),
+    great_counter(HUDGreatCounter::class),
+    ok_counter(HUDOkCounter::class),
+    meh_counter(HUDMehCounter::class),
+    miss_counter(HUDMissCounter::class),
     leaderboard(GameplayLeaderboard::class);
 
     companion object {
