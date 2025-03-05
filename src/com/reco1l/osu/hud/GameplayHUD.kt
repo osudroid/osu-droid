@@ -189,6 +189,9 @@ class GameplayHUD : Container(), IGameplayEvents {
 
         pieSongProgress.y = accuracyCounter.y + accuracyCounter.heightScaled / 2f
         pieSongProgress.x = accuracyCounter.x - accuracyCounter.widthScaled - 18f
+
+        accuracyCounter.restoreData = accuracyCounter.getSkinData()
+        pieSongProgress.restoreData = pieSongProgress.getSkinData()
     }
 
     //endregion

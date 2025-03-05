@@ -82,11 +82,19 @@ abstract class HUDElement : Container(), IGameplayEvents {
      * Sets the skin data of the element.
      */
     open fun setSkinData(data: HUDElementSkinData?) {
-        if (data != null) {
-            anchor = data.anchor
-            origin = data.origin
-            setScale(data.scale.x, data.scale.y)
-            setPosition(data.position.x, data.position.y)
+        if (data == null) {
+            return
+        }
+
+        anchor = data.anchor
+        origin = data.origin
+        setScale(data.scale.x, data.scale.y)
+        setPosition(data.position.x, data.position.y)
+
+        // When the element is restored it's usually selected so we need to update the connection line.
+        if (isSelected) {
+            editorOverlay?.updateOutline()
+            updateConnectionLine()
         }
     }
 
@@ -278,7 +286,7 @@ abstract class HUDElement : Container(), IGameplayEvents {
         }
 
         connectionLine!!.fromPoint = anchorOffset
-        connectionLine!!.toPoint = (editorOverlay?.outline?.drawPosition ?: Vec2.Zero) + drawSize * scale.absolute() * origin
+        connectionLine!!.toPoint = (editorOverlay?.outlinePosition ?: Vec2.Zero) + drawSize * scale * origin
     }
 
     override fun setScaleX(pScaleX: Float) {
@@ -293,6 +301,11 @@ abstract class HUDElement : Container(), IGameplayEvents {
 
     override fun setScale(pScale: Float) {
         super.setScale(pScale)
+        updateConnectionLine()
+    }
+
+    override fun setScale(pScaleX: Float, pScaleY: Float) {
+        super.setScale(pScaleX, pScaleY)
         updateConnectionLine()
     }
 

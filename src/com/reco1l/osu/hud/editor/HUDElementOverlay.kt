@@ -19,11 +19,17 @@ import ru.nsu.ccfit.zuev.osu.ResourceManager
 class HUDElementOverlay(private val element: HUDElement) : ConstraintContainer() {
 
 
-    val outline = OutlineBox().apply {
+    /**
+     * The position of the outline box that represents the element.
+     */
+    val outlinePosition
+        get() = outline.drawPosition
+
+
+    private val outline = OutlineBox().apply {
         color = ColorARGB(0xFFF27272)
         lineWidth = 8f
     }
-
 
     private val toolbar = LinearContainer().apply {
         anchor = Anchor.TopCenter
@@ -86,6 +92,20 @@ class HUDElementOverlay(private val element: HUDElement) : ConstraintContainer()
         addConstraint(bottomRightTip, outline)
     }
 
+
+    /**
+     * Updates the outline box to match the element's position and size.
+     */
+    fun updateOutline() {
+        // We need to cancel scale center
+        outline.x = element.anchorOffsetX + element.x - (element.widthScaled * element.origin.x)
+        outline.y = element.anchorOffsetY + element.y - (element.heightScaled * element.origin.y)
+
+        outline.width = element.widthScaled
+        outline.height = element.heightScaled
+    }
+
+
     override fun onAreaTouched(event: TouchEvent, localX: Float, localY: Float): Boolean {
         if (alpha == 1f) {
             return super.onAreaTouched(event, localX, localY)
@@ -94,13 +114,7 @@ class HUDElementOverlay(private val element: HUDElement) : ConstraintContainer()
     }
 
     override fun onManagedUpdate(pSecondsElapsed: Float) {
-
-        // We need to cancel scale center
-        outline.x = element.anchorOffsetX + element.x - (element.widthScaled * element.origin.x)
-        outline.y = element.anchorOffsetY + element.y - (element.heightScaled * element.origin.y)
-
-        outline.width = element.widthScaled
-        outline.height = element.heightScaled
+        updateOutline()
 
         // Show only the tips that are not at the origin.
         mChildren?.fastForEach {
