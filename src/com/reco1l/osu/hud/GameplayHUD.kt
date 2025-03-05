@@ -214,7 +214,6 @@ class GameplayHUD : Container(), IGameplayEvents {
 
     private fun loadEditModeAssets() {
         ResourceManager.getInstance().loadHighQualityAsset("delete", "delete.png")
-        ResourceManager.getInstance().loadHighQualityAsset("oneone", "one-one.png")
         ResourceManager.getInstance().loadHighQualityAsset("restore", "restore.png")
     }
 

@@ -30,7 +30,7 @@ data class HUDSkinData(val elements: List<HUDElementSkinData>) {
                     type = HUDAccuracyCounter::class,
                     anchor = Anchor.TopRight,
                     origin = Anchor.TopRight,
-                    scale = Vec2(0.6f * 0.96f),
+                    scale = 0.6f * 0.96f,
                     position = Vec2(-17f, 9f)
                 ),
                 HUDElementSkinData(
@@ -38,7 +38,7 @@ data class HUDSkinData(val elements: List<HUDElementSkinData>) {
                     anchor = Anchor.BottomLeft,
                     origin = Anchor.BottomLeft,
                     position = Vec2(10f, -10f),
-                    scale = Vec2(1.28f)
+                    scale = 1.28f
                 ),
                 HUDElementSkinData(
                     type = HUDPieSongProgress::class,
@@ -54,7 +54,7 @@ data class HUDSkinData(val elements: List<HUDElementSkinData>) {
                     type = HUDScoreCounter::class,
                     anchor = Anchor.TopRight,
                     origin = Anchor.TopRight,
-                    scale = Vec2(0.96f),
+                    scale = 0.96f,
                     position = Vec2(-10f, 0f)
                 )
             )
@@ -70,8 +70,7 @@ data class HUDSkinData(val elements: List<HUDElementSkinData>) {
                     put("y", it.position.y)
                     put("anchor", Anchor.getName(it.anchor))
                     put("origin", Anchor.getName(it.origin))
-                    put("scaleX", it.scale.x)
-                    put("scaleY", it.scale.y)
+                    put("scale", it.scale)
                 }
             }
         }
@@ -90,10 +89,7 @@ data class HUDSkinData(val elements: List<HUDElementSkinData>) {
                     ),
                     anchor = Anchor.getFromName(element.optString("anchor", "Center")),
                     origin = Anchor.getFromName(element.optString("origin", "Center")),
-                    scale = Vec2(
-                        element.optDouble("scaleX", 1.0).toFloat(),
-                        element.optDouble("scaleY", 1.0).toFloat()
-                    )
+                    scale = element.optDouble("scale", 1.0).toFloat(),
                 )
             }.filterNotNull()
         )
@@ -128,5 +124,5 @@ data class HUDElementSkinData(
     /**
      * The scale applied to the element.
      */
-    val scale: Vec2 = Vec2.One
+    val scale: Float = 1f
 )

@@ -87,7 +87,7 @@ abstract class HUDElement : Container(), IGameplayEvents {
 
         anchor = data.anchor
         origin = data.origin
-        setScale(data.scale.x, data.scale.y)
+        setScale(data.scale)
         setPosition(data.position.x, data.position.y)
 
         // When the element is restored it's usually selected so we need to update the connection line.
@@ -104,7 +104,7 @@ abstract class HUDElement : Container(), IGameplayEvents {
         type = this::class,
         anchor = anchor,
         origin = origin,
-        scale = scale,
+        scale = (mScaleX + mScaleY) / 2f,
         position = Vec2(x, y)
     )
 

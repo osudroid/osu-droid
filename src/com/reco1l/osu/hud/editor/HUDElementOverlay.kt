@@ -46,10 +46,6 @@ class HUDElementOverlay(private val element: HUDElement) : ConstraintContainer()
             }
         })
 
-        attachChild(Button("oneone") {
-            element.setScale((element.scaleX + element.scaleY) / 2f)
-        })
-
         attachChild(Button("restore") {
             element.restore()
         })
@@ -181,8 +177,10 @@ class HUDElementOverlay(private val element: HUDElement) : ConstraintContainer()
                 val deltaScaleX = deltaX / element.widthScaled
                 val deltaScaleY = deltaY / element.heightScaled
 
-                element.scaleX = (element.scaleX + deltaScaleX).coerceIn(0.5f, 5f)
-                element.scaleY = (element.scaleY + deltaScaleY).coerceIn(0.5f, 5f)
+                val scaleX = (element.scaleX + deltaScaleX).coerceIn(0.5f, 5f)
+                val scaleY = (element.scaleY + deltaScaleY).coerceIn(0.5f, 5f)
+
+                element.setScale((scaleX + scaleY) / 2f)
                 return true
             }
 
