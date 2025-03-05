@@ -39,6 +39,12 @@ class GameplayHUD : Container(), IGameplayEvents {
                 // Move to front
                 if (value != null) {
                     setChildIndex(value, mChildren.size - 1)
+
+                    // Preserve overlay on top of the element.
+                    if (value.editorOverlay != null) {
+                        setChildIndex(value.editorOverlay, mChildren.size - 1)
+                    }
+
                     elementSelector?.collapse()
                 }
             }

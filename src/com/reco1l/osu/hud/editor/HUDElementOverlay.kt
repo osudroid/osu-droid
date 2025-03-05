@@ -116,6 +116,12 @@ class HUDElementOverlay(private val element: HUDElement) : ConstraintContainer()
     override fun onManagedUpdate(pSecondsElapsed: Float) {
         updateOutline()
 
+        if (outline.y - toolbar.drawHeight < 0f) {
+            toolbar.y = -(outline.y - toolbar.drawHeight)
+        } else {
+            toolbar.y = 0f
+        }
+
         // Show only the tips that are not at the origin.
         mChildren?.fastForEach {
             if (it is Tip) {

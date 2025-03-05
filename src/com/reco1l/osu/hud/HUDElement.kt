@@ -49,7 +49,8 @@ abstract class HUDElement : Container(), IGameplayEvents {
     /**
      * Returns the name of this element.
      */
-    open val name = HUDElements[this::class].name.replace('_', ' ').capitalize()
+    open val name
+        get() = HUDElements[this::class].name.replace('_', ' ').capitalize()
 
     /**
      * Indicates whether the element is selected.
@@ -59,12 +60,15 @@ abstract class HUDElement : Container(), IGameplayEvents {
 
 
     /**
+     * The overlay for this element to be used in edit mode.
+     */
+    var editorOverlay: HUDElementOverlay? = null
+
+    /**
      * The restore data of the element.
      */
-    lateinit var restoreData: HUDElementSkinData
+    var restoreData: HUDElementSkinData? = null
 
-
-    private var editorOverlay: HUDElementOverlay? = null
 
     private var connectionLine: Line? = null
 
@@ -108,11 +112,7 @@ abstract class HUDElement : Container(), IGameplayEvents {
      * Restores the element to its original state before any changes were made.
      */
     fun restore() {
-        if (::restoreData.isInitialized) {
-            setSkinData(restoreData)
-        } else {
-            Log.w("HUDElement", "Called restore() without setting restoreData.")
-        }
+        setSkinData(restoreData)
     }
 
     //endregion
