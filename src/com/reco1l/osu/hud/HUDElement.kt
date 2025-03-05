@@ -71,6 +71,9 @@ abstract class HUDElement : Container(), IGameplayEvents {
 
     //region Skinning
 
+    /**
+     * Sets the skin data of the element.
+     */
     open fun setSkinData(data: HUDElementSkinData?) {
         if (data != null) {
             anchor = data.anchor
@@ -80,6 +83,9 @@ abstract class HUDElement : Container(), IGameplayEvents {
         }
     }
 
+    /**
+     * Creates a [HUDElementSkinData] object with the current element's skin data.
+     */
     open fun getSkinData() = HUDElementSkinData(
         type = this::class,
         anchor = anchor,
@@ -92,6 +98,9 @@ abstract class HUDElement : Container(), IGameplayEvents {
 
     //region Element events
 
+    /**
+     * Sets the edit mode of the element.
+     */
     open fun setEditMode(value: Boolean) {
         isInEditMode = value
 
@@ -113,6 +122,9 @@ abstract class HUDElement : Container(), IGameplayEvents {
         }
     }
 
+    /**
+     * Called when the selection state of the element changes.
+     */
     open fun onSelectionStateChange(isSelected: Boolean) {
 
         background?.clearEntityModifiers()
