@@ -23,6 +23,7 @@ import java.io.File
 import kotlin.reflect.full.primaryConstructor
 import ru.nsu.ccfit.zuev.osu.helper.StringTable
 import ru.nsu.ccfit.zuev.osuplus.R
+import kotlin.reflect.*
 
 class GameplayHUD : Container(), IGameplayEvents {
 
@@ -66,6 +67,13 @@ class GameplayHUD : Container(), IGameplayEvents {
         setSize(Config.getRES_WIDTH().toFloat(), Config.getRES_HEIGHT().toFloat())
     }
 
+
+    /**
+     * Checks if the HUD has an element of the specified type.
+     */
+    fun hasElement(type: KClass<out HUDElement>): Boolean {
+        return mChildren?.any { type.isInstance(it) } ?: false
+    }
 
     /**
      * Adds an element to the HUD.

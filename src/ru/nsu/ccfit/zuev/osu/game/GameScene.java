@@ -35,7 +35,6 @@ import com.reco1l.osu.hud.GameplayHUD;
 import com.reco1l.osu.hitobjects.SliderTickSprite;
 import com.reco1l.osu.hud.elements.HUDPPCounter;
 import com.reco1l.osu.ui.BlockAreaFragment;
-import com.reco1l.osu.ui.entity.GameplayLeaderboard;
 import com.reco1l.osu.multiplayer.Multiplayer;
 import com.reco1l.osu.multiplayer.RoomScene;
 
@@ -145,7 +144,6 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
     private LinkedList<GameObject> activeObjects;
     private LinkedList<GameObject> expiredObjects;
     private Queue<BreakPeriod> breakPeriods = new LinkedList<>();
-    public GameplayLeaderboard scoreBoard;
     private Metronome metronome;
     private float scale;
     public StatisticV2 stat;
@@ -213,7 +211,7 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
     /**
      * The gameplay HUD
      */
-    private GameplayHUD hud;
+    public GameplayHUD hud;
 
     /**
      * Whether the HUD editor mode is enabled.
@@ -1690,7 +1688,6 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
             breakPeriods.clear();
             playableBeatmap = null;
             cursorSprites = null;
-            scoreBoard = null;
             lastDifficultyCalculationParameters = null;
             droidTimedDifficultyAttributes = null;
             standardTimedDifficultyAttributes = null;

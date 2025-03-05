@@ -5,6 +5,7 @@ import android.util.Log
 import com.reco1l.ibancho.RoomAPI
 import com.reco1l.ibancho.data.Room
 import com.reco1l.ibancho.data.RoomPlayer
+import com.reco1l.osu.ui.entity.*
 import com.reco1l.toolkt.kotlin.formatTimeMilliseconds
 import com.reco1l.toolkt.kotlin.fromDate
 import kotlinx.coroutines.CoroutineScope
@@ -104,10 +105,19 @@ object Multiplayer {
             return
         }
 
-        GlobalManager.getInstance().gameScene.scoreBoard?.nextItems = MutableList(array.length()) { i ->
-            val json = array.getJSONObject(i)
+        val hud = GlobalManager.getInstance().gameScene.hud ?: return
 
-            jsonToScoreboardItem(json).apply { rank = i + 1 }
+        if (hud.hasElement(GameplayLeaderboard::class)) {
+
+            val itemsList = MutableList(array.length()) { i ->
+                jsonToScoreboardItem(array.getJSONObject(i)).apply { rank = i + 1 }
+            }
+
+            hud.forEachElement { element ->
+                if (element is GameplayLeaderboard) {
+                    element.nextItems = itemsList
+                }
+            }
         }
     }
 
