@@ -31,6 +31,16 @@ class GameplayLeaderboard : HUDElement() {
     private val isGlobalLeaderboard = GlobalManager.getInstance().songMenu.isBoardOnline
 
 
+    override fun onContentSizeMeasured(): Boolean {
+
+        // Setting a minimum size for the leaderboard, this is used to prevent the leaderboard
+        // from being too small during HUD editor mode.
+        contentWidth = contentWidth.coerceAtLeast(SPRITE_WIDTH)
+        contentHeight = contentHeight.coerceAtLeast(SPRITE_HEIGHT)
+
+        return super.onContentSizeMeasured()
+    }
+
     override fun onManagedUpdate(pSecondsElapsed: Float) {
         super.onManagedUpdate(pSecondsElapsed)
 
@@ -265,8 +275,8 @@ class GameplayLeaderboard : HUDElement() {
 
         init {
             isVisible = false
-            height = 90f
-            width = 130f
+            height = SPRITE_HEIGHT
+            width = SPRITE_WIDTH
 
             info = ChangeableText(10f, 15f, ResourceManager.getInstance().getFont("font"), "", 100)
             info.setBlendFunction(GLES20.GL_SRC_ALPHA, GLES20.GL_ONE_MINUS_SRC_ALPHA)
@@ -338,7 +348,8 @@ class GameplayLeaderboard : HUDElement() {
 
 
     companion object {
-        private const val SPRITE_HEIGHT = 83f
+        private const val SPRITE_HEIGHT = 90f
+        private const val SPRITE_WIDTH = 130f
         private const val SCORE_COUNT = 5
     }
 }
