@@ -73,10 +73,14 @@ class GameplayHUD : Container(), IGameplayEvents {
     fun addElement(data: HUDElementSkinData, inEditMode: Boolean = isInEditMode) {
         val element = data.type.primaryConstructor!!.call()
         attachChild(element)
+        element.restoreData = data
         element.setSkinData(data)
         element.setEditMode(inEditMode)
     }
 
+    /**
+     * Called when the back button is pressed.
+     */
     fun onBackPress() {
 
         if (elementSelector?.isExpanded == true) {
@@ -116,6 +120,9 @@ class GameplayHUD : Container(), IGameplayEvents {
 
     //region Skinning
 
+    /**
+     * Saves the current HUD layout to the skin JSON file.
+     */
     fun saveToSkinJSON() {
 
         val data = getSkinData()
@@ -187,13 +194,22 @@ class GameplayHUD : Container(), IGameplayEvents {
     //endregion
 
     //region Elements events
+
+    private fun loadEditModeAssets() {
+        ResourceManager.getInstance().loadHighQualityAsset("delete", "delete.png")
+        ResourceManager.getInstance().loadHighQualityAsset("oneone", "one-one.png")
+        ResourceManager.getInstance().loadHighQualityAsset("restore", "restore.png")
+    }
+
+    /**
+     * Sets the editor mode of the HUD.
+     */
     fun setEditMode(value: Boolean) {
         isInEditMode = value
         GlobalManager.getInstance().gameScene.isHUDEditorMode = value
 
         if (value) {
-            ResourceManager.getInstance().loadHighQualityAsset("delete", "delete.png")
-            ResourceManager.getInstance().loadHighQualityAsset("oneone", "one-one.png")
+            loadEditModeAssets()
 
             elementSelector = HUDElementSelector(this)
 
@@ -215,6 +231,12 @@ class GameplayHUD : Container(), IGameplayEvents {
 
     //region Gameplay Events
 
+    /**
+     * Iterates over all the elements in the HUD.
+     *
+     * Note: If you need to remove elements you have to copy the list temporarily
+     * using another method such as `filterIsInstance<HUDElement>()`.
+     */
     fun forEachElement(action: (HUDElement) -> Unit) {
         mChildren?.fastForEach {
             (it as? HUDElement)?.let(action)

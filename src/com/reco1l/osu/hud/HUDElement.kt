@@ -1,5 +1,6 @@
 package com.reco1l.osu.hud
 
+import android.util.*
 import com.reco1l.andengine.*
 import com.reco1l.andengine.container.Container
 import com.reco1l.andengine.shape.*
@@ -62,6 +63,12 @@ abstract class HUDElement : Container(), IGameplayEvents {
         get() = (parent as? GameplayHUD)?.selected == this
 
 
+    /**
+     * The restore data of the element.
+     */
+    lateinit var restoreData: HUDElementSkinData
+
+
     private var editorOverlay: HUDElementOverlay? = null
 
     private var connectionLine: Line? = null
@@ -93,6 +100,17 @@ abstract class HUDElement : Container(), IGameplayEvents {
         scale = scale,
         position = Vec2(x, y)
     )
+
+    /**
+     * Restores the element to its original state before any changes were made.
+     */
+    fun restore() {
+        if (::restoreData.isInitialized) {
+            setSkinData(restoreData)
+        } else {
+            Log.w("HUDElement", "Called restore() without setting restoreData.")
+        }
+    }
 
     //endregion
 
