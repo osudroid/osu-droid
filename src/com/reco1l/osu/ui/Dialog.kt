@@ -74,7 +74,11 @@ open class MessageDialog : BaseFragment() {
             field = value
             if (isCreated) {
                 findViewById<TextView>(R.id.message)?.apply {
-                    if (this::class == MessageDialog::class) {
+
+                    // In some cases we only want to show a button list without a message.
+                    // To preserve the layout in other Dialog types we only hide the message
+                    // view in this class.
+                    if (this@MessageDialog::class == MessageDialog::class) {
                         (parent as View).isVisible = value.isNotBlank()
                     }
 
