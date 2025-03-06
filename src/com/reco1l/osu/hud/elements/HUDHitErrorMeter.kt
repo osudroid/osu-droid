@@ -30,9 +30,9 @@ class HUDHitErrorMeter : HUDElement() {
         val mehWindow = RoundedBox().apply {
             anchor = Anchor.Center
             origin = Anchor.Center
+            color = mehColor
             cornerRadius = BAR_HEIGHT / 2
             setSize(WIDTH, BAR_HEIGHT)
-            setColor(mehColor.red, mehColor.green, mehColor.blue)
 
             depthInfo = DepthInfo.Default
         }
@@ -40,8 +40,8 @@ class HUDHitErrorMeter : HUDElement() {
         val okWindow = Box().apply {
             anchor = Anchor.Center
             origin = Anchor.Center
+            color = okColor
             setSize(WIDTH * (hitWindow.okWindow / hitWindow.mehWindow), BAR_HEIGHT)
-            setColor(okColor.red, okColor.green, okColor.blue)
 
             depthInfo = DepthInfo.Default
         }
@@ -50,7 +50,7 @@ class HUDHitErrorMeter : HUDElement() {
             anchor = Anchor.Center
             origin = Anchor.Center
             setSize(WIDTH * (hitWindow.greatWindow / hitWindow.mehWindow), BAR_HEIGHT)
-            setColor(greatColor.red, greatColor.green, greatColor.blue)
+            color = greatColor
 
             depthInfo = DepthInfo.Clear
         }
@@ -85,14 +85,10 @@ class HUDHitErrorMeter : HUDElement() {
         indicator.x = (WIDTH / 2f) * (accuracyMs / hitWindow.mehWindow)
         indicator.alpha = 0.6f
 
-        when {
-            abs(accuracyMs) <= hitWindow.greatWindow ->
-                indicator.setColor(greatColor.red, greatColor.green, greatColor.blue)
-
-            abs(accuracyMs) <= hitWindow.okWindow ->
-                indicator.setColor(okColor.red, okColor.green, okColor.blue)
-
-            else -> indicator.setColor(mehColor.red, mehColor.green, mehColor.blue)
+        indicator.color = when {
+            abs(accuracyMs) <= hitWindow.greatWindow -> greatColor
+            abs(accuracyMs) <= hitWindow.okWindow -> okColor
+            else -> mehColor
         }
 
         if (indicator.parent == null) {
