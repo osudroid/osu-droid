@@ -16,6 +16,15 @@ class HUDBackButton : HUDElement() {
 
     private val requiredPressTimeMs = Config.getInt("back_button_press_time", 300).toFloat()
 
+    private val arrow = ExtendedSprite().apply {
+        textureRegion = ResourceManager.getInstance().getTexture("back-arrow")
+        anchor = Anchor.Center
+        origin = Anchor.Center
+
+        relativeSizeAxes = Axes.Both
+        setSize(0.6f, 0.6f)
+    }
+
     private val backCircle = Circle().apply {
         setPortion(0f)
         anchor = Anchor.Center
@@ -41,9 +50,12 @@ class HUDBackButton : HUDElement() {
     private var progress = 0f
         set(value) {
             field = value.coerceIn(0f, 1f)
+            val scale = 1f + field / 2f
+
             backCircle.setPortion(value)
-            backCircle.setScale(1f + field / 2f)
-            frontCircle.setScale(1f + field / 2f)
+            backCircle.setScale(scale)
+            frontCircle.setScale(scale)
+            arrow.setScale(scale)
         }
 
     private var isPressed = false
@@ -56,15 +68,7 @@ class HUDBackButton : HUDElement() {
 
         attachChild(frontCircle)
         attachChild(backCircle)
-
-        attachChild(ExtendedSprite().apply {
-            textureRegion = ResourceManager.getInstance().getTexture("back-arrow")
-            anchor = Anchor.Center
-            origin = Anchor.Center
-
-            relativeSizeAxes = Axes.Both
-            setSize(0.6f, 0.6f)
-        })
+        attachChild(arrow)
     }
 
 
