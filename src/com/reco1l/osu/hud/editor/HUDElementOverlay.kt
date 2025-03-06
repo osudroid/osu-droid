@@ -19,11 +19,17 @@ import ru.nsu.ccfit.zuev.osu.ResourceManager
 class HUDElementOverlay(private val element: HUDElement) : ConstraintContainer() {
 
 
-    val outline = OutlineBox().apply {
+    /**
+     * The position of the outline box that represents the element.
+     */
+    val outlinePosition
+        get() = outline.drawPosition
+
+
+    private val outline = OutlineBox().apply {
         color = ColorARGB(0xFFF27272)
         lineWidth = 8f
     }
-
 
     private val toolbar = LinearContainer().apply {
         anchor = Anchor.TopCenter
@@ -32,14 +38,16 @@ class HUDElementOverlay(private val element: HUDElement) : ConstraintContainer()
         spacing = 4f
         y = -10f
 
+        // Toolbar buttons:
+
         attachChild(Button("delete", ColorARGB(0xFF260000)) {
             updateThread {
                 element.remove()
             }
         })
 
-        attachChild(Button("oneone", ColorARGB(0xFF002626)) {
-            element.setScale((element.scaleX + element.scaleY) / 2f)
+        attachChild(Button("restore") {
+            element.restore()
         })
 
     }
@@ -80,6 +88,20 @@ class HUDElementOverlay(private val element: HUDElement) : ConstraintContainer()
         addConstraint(bottomRightTip, outline)
     }
 
+
+    /**
+     * Updates the outline box to match the element's position and size.
+     */
+    fun updateOutline() {
+        // We need to cancel scale center
+        outline.x = element.anchorOffsetX + element.x - (element.widthScaled * element.origin.x)
+        outline.y = element.anchorOffsetY + element.y - (element.heightScaled * element.origin.y)
+
+        outline.width = element.widthScaled
+        outline.height = element.heightScaled
+    }
+
+
     override fun onAreaTouched(event: TouchEvent, localX: Float, localY: Float): Boolean {
         if (alpha == 1f) {
             return super.onAreaTouched(event, localX, localY)
@@ -88,13 +110,13 @@ class HUDElementOverlay(private val element: HUDElement) : ConstraintContainer()
     }
 
     override fun onManagedUpdate(pSecondsElapsed: Float) {
+        updateOutline()
 
-        // We need to cancel scale center
-        outline.x = element.anchorOffsetX + element.x - (element.widthScaled * element.origin.x)
-        outline.y = element.anchorOffsetY + element.y - (element.heightScaled * element.origin.y)
-
-        outline.width = element.widthScaled
-        outline.height = element.heightScaled
+        if (outline.y - toolbar.drawHeight < 0f) {
+            toolbar.y = -(outline.y - toolbar.drawHeight)
+        } else {
+            toolbar.y = 0f
+        }
 
         // Show only the tips that are not at the origin.
         mChildren?.fastForEach {
@@ -155,8 +177,10 @@ class HUDElementOverlay(private val element: HUDElement) : ConstraintContainer()
                 val deltaScaleX = deltaX / element.widthScaled
                 val deltaScaleY = deltaY / element.heightScaled
 
-                element.scaleX = (element.scaleX + deltaScaleX).coerceIn(0.5f, 5f)
-                element.scaleY = (element.scaleY + deltaScaleY).coerceIn(0.5f, 5f)
+                val scaleX = (element.scaleX + deltaScaleX).coerceIn(0.5f, 5f)
+                val scaleY = (element.scaleY + deltaScaleY).coerceIn(0.5f, 5f)
+
+                element.setScale((scaleX + scaleY) / 2f)
                 return true
             }
 
@@ -169,15 +193,7 @@ class HUDElementOverlay(private val element: HUDElement) : ConstraintContainer()
     /**
      * Represents a button in the overlay toolbar.
      */
-    private inner class Button(texture: String, back: ColorARGB, val action: () -> Unit) : Container() {
-
-        val icon = ExtendedSprite().apply {
-            textureRegion = ResourceManager.getInstance().getTexture(texture)
-            anchor = Anchor.Center
-            origin = Anchor.Center
-            relativeSizeAxes = Axes.Both
-            setSize(0.8f, 0.8f)
-        }
+    private inner class Button(texture: String, back: ColorARGB = ColorARGB(0xFF002626), val action: () -> Unit) : Container() {
 
         init {
             setSize(BUTTON_SIZE, BUTTON_SIZE)
@@ -189,7 +205,14 @@ class HUDElementOverlay(private val element: HUDElement) : ConstraintContainer()
                 relativeSizeAxes = Axes.Both
                 setSize(1f, 1f)
             })
-            attachChild(icon)
+
+            attachChild(ExtendedSprite().apply {
+                textureRegion = ResourceManager.getInstance().getTexture(texture)
+                anchor = Anchor.Center
+                origin = Anchor.Center
+                relativeSizeAxes = Axes.Both
+                setSize(0.8f, 0.8f)
+            })
         }
 
         override fun onAreaTouched(event: TouchEvent, localX: Float, localY: Float): Boolean {

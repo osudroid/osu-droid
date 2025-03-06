@@ -23,6 +23,7 @@ import java.io.File
 import kotlin.reflect.full.primaryConstructor
 import ru.nsu.ccfit.zuev.osu.helper.StringTable
 import ru.nsu.ccfit.zuev.osuplus.R
+import kotlin.reflect.*
 
 class GameplayHUD : Container(), IGameplayEvents {
 
@@ -38,6 +39,12 @@ class GameplayHUD : Container(), IGameplayEvents {
                 // Move to front
                 if (value != null) {
                     setChildIndex(value, mChildren.size - 1)
+
+                    // Preserve overlay on top of the element.
+                    if (value.editorOverlay != null) {
+                        setChildIndex(value.editorOverlay, mChildren.size - 1)
+                    }
+
                     elementSelector?.collapse()
                 }
             }
@@ -68,15 +75,26 @@ class GameplayHUD : Container(), IGameplayEvents {
 
 
     /**
+     * Checks if the HUD has an element of the specified type.
+     */
+    fun hasElement(type: KClass<out HUDElement>): Boolean {
+        return mChildren?.any { type.isInstance(it) } ?: false
+    }
+
+    /**
      * Adds an element to the HUD.
      */
     fun addElement(data: HUDElementSkinData, inEditMode: Boolean = isInEditMode) {
         val element = data.type.primaryConstructor!!.call()
         attachChild(element)
+        element.restoreData = data
         element.setSkinData(data)
         element.setEditMode(inEditMode)
     }
 
+    /**
+     * Called when the back button is pressed.
+     */
     fun onBackPress() {
 
         if (elementSelector?.isExpanded == true) {
@@ -116,6 +134,9 @@ class GameplayHUD : Container(), IGameplayEvents {
 
     //region Skinning
 
+    /**
+     * Saves the current HUD layout to the skin JSON file.
+     */
     fun saveToSkinJSON() {
 
         val data = getSkinData()
@@ -133,7 +154,7 @@ class GameplayHUD : Container(), IGameplayEvents {
         }
 
         json.put("HUD", HUDSkinData.writeToJSON(data))
-        jsonFile.writeText(json.toString())
+        jsonFile.writeText(json.toString(4))
 
         SkinJsonReader.getReader().currentData = json
         OsuSkin.get().hudSkinData = data
@@ -182,18 +203,29 @@ class GameplayHUD : Container(), IGameplayEvents {
 
         pieSongProgress.y = accuracyCounter.y + accuracyCounter.heightScaled / 2f
         pieSongProgress.x = accuracyCounter.x - accuracyCounter.widthScaled - 18f
+
+        accuracyCounter.restoreData = accuracyCounter.getSkinData()
+        pieSongProgress.restoreData = pieSongProgress.getSkinData()
     }
 
     //endregion
 
     //region Elements events
+
+    private fun loadEditModeAssets() {
+        ResourceManager.getInstance().loadHighQualityAsset("delete", "delete.png")
+        ResourceManager.getInstance().loadHighQualityAsset("restore", "restore.png")
+    }
+
+    /**
+     * Sets the editor mode of the HUD.
+     */
     fun setEditMode(value: Boolean) {
         isInEditMode = value
         GlobalManager.getInstance().gameScene.isHUDEditorMode = value
 
         if (value) {
-            ResourceManager.getInstance().loadHighQualityAsset("delete", "delete.png")
-            ResourceManager.getInstance().loadHighQualityAsset("oneone", "one-one.png")
+            loadEditModeAssets()
 
             elementSelector = HUDElementSelector(this)
 
@@ -215,6 +247,12 @@ class GameplayHUD : Container(), IGameplayEvents {
 
     //region Gameplay Events
 
+    /**
+     * Iterates over all the elements in the HUD.
+     *
+     * Note: If you need to remove elements you have to copy the list temporarily
+     * using another method such as `filterIsInstance<HUDElement>()`.
+     */
     fun forEachElement(action: (HUDElement) -> Unit) {
         mChildren?.fastForEach {
             (it as? HUDElement)?.let(action)
