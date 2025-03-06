@@ -1,6 +1,5 @@
 package com.reco1l.osu.hud
 
-import android.util.*
 import com.reco1l.andengine.*
 import com.reco1l.andengine.container.Container
 import com.reco1l.andengine.shape.*
