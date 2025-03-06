@@ -65,6 +65,7 @@ import org.anddev.andengine.entity.scene.Scene;
 import org.anddev.andengine.extension.input.touch.controller.MultiTouch;
 import org.anddev.andengine.extension.input.touch.controller.MultiTouchController;
 import org.anddev.andengine.input.touch.TouchEvent;
+import org.anddev.andengine.opengl.view.GLSurfaceView;
 import org.anddev.andengine.opengl.view.RenderSurfaceView;
 import org.anddev.andengine.sensor.accelerometer.AccelerometerData;
 import org.anddev.andengine.sensor.accelerometer.IAccelerometerListener;
@@ -366,7 +367,7 @@ public class MainActivity extends BaseGameActivity implements
     protected void onSetContentView() {
         this.mRenderSurfaceView = new RenderSurfaceView(this);
         this.mRenderSurfaceView.setEGLConfigChooser(8, 8, 8, 8, 24, 0);
-        this.mRenderSurfaceView.getHolder().setFormat(PixelFormat.RGBA_8888);
+        this.mRenderSurfaceView.getHolder().setFormat(PixelFormat.RGB_888);
         this.mRenderSurfaceView.setRenderer(this.mEngine);
 
         RelativeLayout mainLayout = new RelativeLayout(this);
