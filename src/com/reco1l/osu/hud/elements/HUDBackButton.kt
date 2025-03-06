@@ -6,13 +6,11 @@ import com.reco1l.andengine.shape.Circle
 import com.reco1l.andengine.sprite.ExtendedSprite
 import com.reco1l.framework.ColorARGB
 import com.reco1l.framework.Interpolation
-import com.reco1l.osu.*
 import com.reco1l.osu.hud.HUDElement
 import org.anddev.andengine.input.touch.TouchEvent
 import ru.nsu.ccfit.zuev.osu.Config
 import ru.nsu.ccfit.zuev.osu.GlobalManager
 import ru.nsu.ccfit.zuev.osu.ResourceManager
-import ru.nsu.ccfit.zuev.osu.game.GameHelper
 
 class HUDBackButton : HUDElement() {
 
