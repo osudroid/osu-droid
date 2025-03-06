@@ -1,6 +1,6 @@
 package com.reco1l.osu.hud.elements
 
-import com.reco1l.andengine.Anchor
+import com.reco1l.andengine.*
 import com.reco1l.andengine.shape.Box
 import com.reco1l.andengine.shape.RoundedBox
 import com.reco1l.framework.Pool
@@ -12,7 +12,7 @@ import kotlin.math.abs
 class HUDHitErrorMeter : HUDElement() {
 
 
-    private val expiredIndicators = Pool<RoundedBox>(20) { Indicator() }
+    private val expiredIndicators = Pool<Box>(20) { Indicator() }
 
     private val hitWindow = GlobalManager.getInstance().gameScene.hitWindow
 
@@ -20,38 +20,48 @@ class HUDHitErrorMeter : HUDElement() {
     init {
         setSize(WIDTH, INDICATOR_HEIGHT)
 
-        // 50
-        attachChild(RoundedBox().apply {
+        val mehWindow = RoundedBox().apply {
             anchor = Anchor.Center
             origin = Anchor.Center
             cornerRadius = BAR_HEIGHT / 2
             setSize(WIDTH, BAR_HEIGHT)
             setColor(200f / 255f, 180f / 255f, 110f / 255f)
-        })
 
-        // 100
-        attachChild(Box().apply {
+            depthInfo = DepthInfo.Default
+        }
+
+        val okWindow = Box().apply {
             anchor = Anchor.Center
             origin = Anchor.Center
             setSize(WIDTH * (hitWindow.okWindow / hitWindow.mehWindow), BAR_HEIGHT)
             setColor(100f / 255f, 220f / 255f, 40f / 255f)
-        })
 
-        // 300
-        attachChild(Box().apply {
+            depthInfo = DepthInfo.Default
+        }
+
+        val greatWindow = Box().apply {
             anchor = Anchor.Center
             origin = Anchor.Center
             setSize(WIDTH * (hitWindow.greatWindow / hitWindow.mehWindow), BAR_HEIGHT)
             setColor(70f / 255f, 180f / 255f, 220f / 255f)
-        })
+
+            depthInfo = DepthInfo.Clear
+        }
+
+        attachChild(mehWindow)
+        attachChild(okWindow, 0)
+        attachChild(greatWindow, 0)
 
         // Indicator
-        attachChild(RoundedBox().apply {
+        attachChild(Box().apply {
             anchor = Anchor.Center
             origin = Anchor.Center
-            cornerRadius = INDICATOR_WIDTH / 2
-            setSize(INDICATOR_WIDTH, INDICATOR_HEIGHT)
+            setSize(INDICATOR_WIDTH / 2, INDICATOR_HEIGHT)
         })
+
+        mehWindow.alpha = 0.6f
+        okWindow.alpha = 0.6f
+        greatWindow.alpha = 0.6f
     }
 
 
@@ -72,14 +82,12 @@ class HUDHitErrorMeter : HUDElement() {
     }
 
 
-    inner class Indicator : RoundedBox() {
+    private inner class Indicator : Box() {
 
         init {
             anchor = Anchor.Center
             origin = Anchor.Center
-            cornerRadius = INDICATOR_WIDTH / 2
             setColor(70f / 255f, 180f / 255f, 220f / 255f)
-            zIndex = 10
             setSize(INDICATOR_WIDTH, INDICATOR_HEIGHT - 2f)
         }
 
