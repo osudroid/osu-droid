@@ -48,21 +48,18 @@ class HUDBackButton : HUDElement() {
     }
 
 
-    private var progress = 0f
-        set(value) {
-            field = value.coerceIn(0f, 1f)
-            val scale = 1f + field / 2f
-
-            alpha = 0.25f * (field + 1)
-            backCircle.setPortion(value)
-            backCircle.setScale(scale)
-            frontCircle.setScale(scale)
-            arrow.setScale(scale)
-        }
-
     private var holdDurationMs = 0f
         set(value) {
             field = value.coerceIn(0f, requiredPressTimeMs)
+
+            val progress = if (requiredPressTimeMs > 0) field / requiredPressTimeMs else 1f
+            val scale = 1f + progress / 2f
+
+            alpha = 0.25f * (progress + 1)
+            backCircle.setPortion(progress)
+            backCircle.setScale(scale)
+            frontCircle.setScale(scale)
+            arrow.setScale(scale)
         }
 
 
@@ -90,12 +87,10 @@ class HUDBackButton : HUDElement() {
                 holdDurationMs -= realMsElapsed
             }
 
-            progress = if (requiredPressTimeMs > 0) holdDurationMs / requiredPressTimeMs else 1f
-
-            if (progress >= 1f) {
+            if (holdDurationMs >= requiredPressTimeMs) {
                 isPressed = false
                 GlobalManager.getInstance().gameScene.pause()
-                progress = 0f
+                holdDurationMs = 0f
             }
         }
 
