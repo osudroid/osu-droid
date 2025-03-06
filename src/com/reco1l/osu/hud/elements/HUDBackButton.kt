@@ -78,7 +78,7 @@ class HUDBackButton : HUDElement() {
         if (!isInEditMode) {
             if (isPressed) {
                 val passedPressTimeMs = System.currentTimeMillis() - initialPressTimeMs
-                progress = passedPressTimeMs / requiredPressTimeMs
+                progress = if (requiredPressTimeMs > 0) passedPressTimeMs / requiredPressTimeMs else 1f
 
                 if (progress >= 1f) {
                     isPressed = false
