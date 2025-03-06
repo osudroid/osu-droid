@@ -54,7 +54,7 @@ class HUDBackButton : HUDElement() {
         set(value) {
             field = value.coerceIn(0f, requiredPressTimeMs)
 
-            val progress = if (requiredPressTimeMs > 0) field / requiredPressTimeMs else 1f
+            val progress = if (requiredPressTimeMs > 0) field / requiredPressTimeMs else 0f
             val scale = 1f + progress / 2f
 
             alpha = Interpolation.floatAt(holdDurationMs, 0.25f, 0.5f, 0f, requiredPressTimeMs, Easing.OutCubic)
