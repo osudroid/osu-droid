@@ -53,7 +53,6 @@ public class Config {
         playMusicPreview,
         showCursor,
         shrinkPlayfieldDownwards,
-        hideNaviBar,
         enableExtension,
         loadAvatar,
         stayOnline,
@@ -210,7 +209,6 @@ public class Config {
         // other
         playMusicPreview = prefs.getBoolean("musicpreview", true);
         showCursor = prefs.getBoolean("showcursor", false);
-        hideNaviBar = prefs.getBoolean("hidenavibar", false);
         fixFrameOffset = prefs.getBoolean("fixFrameOffset", true);
         removeSliderLock = prefs.getBoolean("removeSliderLock", false);
         displayScoreStatistics = prefs.getBoolean("displayScoreStatistics", false);
@@ -566,14 +564,6 @@ public class Config {
 
     public static void setSkinTopPath(String skinTopPath) {
         Config.skinTopPath = skinTopPath;
-    }
-
-    public static boolean isHideNaviBar() {
-        return hideNaviBar;
-    }
-
-    public static void setHideNaviBar(boolean hideNaviBar) {
-        Config.hideNaviBar = hideNaviBar;
     }
 
     public static String getScorePath() {
