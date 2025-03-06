@@ -11,6 +11,7 @@ import org.anddev.andengine.input.touch.TouchEvent
 import ru.nsu.ccfit.zuev.osu.Config
 import ru.nsu.ccfit.zuev.osu.GlobalManager
 import ru.nsu.ccfit.zuev.osu.ResourceManager
+import ru.nsu.ccfit.zuev.osu.game.GameHelper
 
 class HUDBackButton : HUDElement() {
 
@@ -59,8 +60,13 @@ class HUDBackButton : HUDElement() {
             arrow.setScale(scale)
         }
 
+    private var holdDurationMs = 0f
+        set(value) {
+            field = value.coerceIn(0f, requiredPressTimeMs)
+        }
+
+
     private var isPressed = false
-    private var initialPressTimeMs = 0L
 
 
     init {
@@ -76,22 +82,20 @@ class HUDBackButton : HUDElement() {
     override fun onManagedUpdate(pSecondsElapsed: Float) {
 
         if (!isInEditMode) {
+            val realMsElapsed = pSecondsElapsed * 1000 / GameHelper.getSpeedMultiplier()
+
             if (isPressed) {
-                val passedPressTimeMs = System.currentTimeMillis() - initialPressTimeMs
-                progress = if (requiredPressTimeMs > 0) passedPressTimeMs / requiredPressTimeMs else 1f
+                holdDurationMs += realMsElapsed
+            } else {
+                holdDurationMs -= realMsElapsed
+            }
 
-                if (progress >= 1f) {
-                    isPressed = false
-                    GlobalManager.getInstance().gameScene.pause()
-                    progress = 0f
-                }
+            progress = if (requiredPressTimeMs > 0) holdDurationMs / requiredPressTimeMs else 1f
 
-            } else if (progress > 0f) {
-                if (progress >= 0.01f) {
-                    progress -= 0.01f
-                } else {
-                    progress = 0f
-                }
+            if (progress >= 1f) {
+                isPressed = false
+                GlobalManager.getInstance().gameScene.pause()
+                progress = 0f
             }
         }
 
@@ -106,7 +110,6 @@ class HUDBackButton : HUDElement() {
 
         if (event.isActionDown) {
             isPressed = true
-            initialPressTimeMs = System.currentTimeMillis()
             return true
         }
 
