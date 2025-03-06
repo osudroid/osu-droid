@@ -4,6 +4,8 @@ import android.content.Intent
 import android.content.Intent.ACTION_VIEW
 import android.net.Uri
 import android.util.Log
+import com.reco1l.andengine.modifier.ModifierType
+import com.reco1l.andengine.modifier.UniversalModifier
 import com.reco1l.andengine.sprite.ExtendedSprite
 import com.reco1l.framework.net.JsonArrayRequest
 import com.reco1l.framework.net.WebRequest
@@ -88,15 +90,14 @@ class BannerSprite(private val banners: List<Banner>) : ExtendedSprite() {
 
     init {
         textureRegion = banners[currentBannerIndex].image
-        if (banners.size > 1) {
-            alpha = 0f
-            fadeIn(0.75f)
-        }
+        alpha = 0f
+        fadeIn(0.75f)
     }
 
 
     override fun onManagedUpdate(pSecondsElapsed: Float) {
         if (banners.size > 1) {
+
             if (elapsedTimeSinceLastChange > BANNER_DURATION) {
                 elapsedTimeSinceLastChange %= BANNER_DURATION
 
@@ -120,12 +121,12 @@ class BannerSprite(private val banners: List<Banner>) : ExtendedSprite() {
         elapsedTimeSinceLastChange = 0f
 
         if (event.isActionDown) {
-            clearEntityModifiers()
+            unregisterEntityModifiers { it is UniversalModifier && it.type == ModifierType.ScaleXY }
             scaleTo(0.95f, 0.1f)
         }
 
         if (event.isActionUp || event.isActionCancel || event.isActionOutside) {
-            clearEntityModifiers()
+            unregisterEntityModifiers { it is UniversalModifier && it.type == ModifierType.ScaleXY }
             scaleTo(1f, 0.1f)
 
             val banner = banners[currentBannerIndex]
