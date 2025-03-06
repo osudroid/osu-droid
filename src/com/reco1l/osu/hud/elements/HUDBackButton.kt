@@ -85,14 +85,14 @@ class HUDBackButton : HUDElement() {
 
             if (isPressed) {
                 holdDurationMs += realMsElapsed
+
+                if (holdDurationMs >= requiredPressTimeMs) {
+                    isPressed = false
+                    GlobalManager.getInstance().gameScene.pause()
+                    holdDurationMs = 0f
+                }
             } else {
                 holdDurationMs -= realMsElapsed
-            }
-
-            if (holdDurationMs >= requiredPressTimeMs) {
-                isPressed = false
-                GlobalManager.getInstance().gameScene.pause()
-                holdDurationMs = 0f
             }
         }
 
