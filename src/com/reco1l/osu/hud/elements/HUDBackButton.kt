@@ -1,11 +1,13 @@
 package com.reco1l.osu.hud.elements
 
+import com.edlplan.framework.easing.Easing
 import com.reco1l.andengine.Anchor
 import com.reco1l.andengine.Axes
 import com.reco1l.andengine.DepthInfo
 import com.reco1l.andengine.shape.Circle
 import com.reco1l.andengine.sprite.ExtendedSprite
 import com.reco1l.framework.ColorARGB
+import com.reco1l.framework.Interpolation
 import com.reco1l.osu.hud.HUDElement
 import org.anddev.andengine.input.touch.TouchEvent
 import ru.nsu.ccfit.zuev.osu.Config
@@ -55,7 +57,7 @@ class HUDBackButton : HUDElement() {
             val progress = if (requiredPressTimeMs > 0) field / requiredPressTimeMs else 1f
             val scale = 1f + progress / 2f
 
-            alpha = 0.25f * (progress + 1)
+            alpha = Interpolation.floatAt(holdDurationMs, 0.25f, 0.5f, 0f, requiredPressTimeMs, Easing.OutCubic)
             backCircle.setPortion(progress)
             backCircle.setScale(scale)
             frontCircle.setScale(scale)
