@@ -52,6 +52,7 @@ class HUDBackButton : HUDElement() {
             field = value.coerceIn(0f, 1f)
             val scale = 1f + field / 2f
 
+            alpha = 0.25f * (field + 1)
             backCircle.setPortion(value)
             backCircle.setScale(scale)
             frontCircle.setScale(scale)
@@ -64,7 +65,7 @@ class HUDBackButton : HUDElement() {
 
     init {
         setSize(SIZE, SIZE)
-        alpha = 0.5f
+        alpha = 0.25f
 
         attachChild(frontCircle)
         attachChild(backCircle)
