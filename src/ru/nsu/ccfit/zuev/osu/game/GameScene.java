@@ -1520,6 +1520,10 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
                 engine.setScene(scoringScene.getScene());
             } else {
                 engine.setScene(oldScene);
+
+                if (startedFromHUDEditor) {
+                    ModMenu.getInstance().setMod(EnumSet.noneOf(GameMod.class));
+                }
             }
 
             // Resume difficulty calculation.
