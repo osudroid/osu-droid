@@ -1,13 +1,12 @@
 package com.reco1l.osu.hud.elements
 
 import com.edlplan.framework.easing.Easing
-import com.reco1l.andengine.Anchor
-import com.reco1l.andengine.Axes
-import com.reco1l.andengine.DepthInfo
+import com.reco1l.andengine.*
 import com.reco1l.andengine.shape.Circle
 import com.reco1l.andengine.sprite.ExtendedSprite
 import com.reco1l.framework.ColorARGB
 import com.reco1l.framework.Interpolation
+import com.reco1l.osu.*
 import com.reco1l.osu.hud.HUDElement
 import org.anddev.andengine.input.touch.TouchEvent
 import ru.nsu.ccfit.zuev.osu.Config
@@ -81,7 +80,7 @@ class HUDBackButton : HUDElement() {
     override fun onManagedUpdate(pSecondsElapsed: Float) {
 
         if (!isInEditMode) {
-            val realMsElapsed = pSecondsElapsed * 1000 / GameHelper.getSpeedMultiplier()
+            val realMsElapsed = pSecondsElapsed * 1000
 
             if (isPressed) {
                 holdDurationMs += realMsElapsed
@@ -89,10 +88,10 @@ class HUDBackButton : HUDElement() {
                 if (holdDurationMs >= requiredPressTimeMs) {
                     isPressed = false
                     GlobalManager.getInstance().gameScene.pause()
-                    holdDurationMs = 0f
+                    (parent as ExtendedEntity).invalidateInputBindings()
                 }
             } else {
-                holdDurationMs -= realMsElapsed
+                holdDurationMs -= realMsElapsed * 2
             }
         }
 
