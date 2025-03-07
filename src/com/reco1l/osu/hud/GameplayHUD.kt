@@ -288,6 +288,12 @@ class GameplayHUD : Container(), IGameplayEvents {
     }
 
     override fun onAreaTouched(event: TouchEvent, localX: Float, localY: Float): Boolean {
+
+        // Ignoring touches on the element selector area when expanded.
+        if (elementSelector?.isExpanded == true && localX <= elementSelector!!.drawWidth) {
+            return false
+        }
+
         if (!super.onAreaTouched(event, localX, localY)) {
             if (event.isActionDown) {
                 selected = null
