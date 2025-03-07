@@ -51,6 +51,7 @@ class HUDBackButton : HUDElement() {
         set(value) {
             field = value.coerceIn(0f, requiredPressTimeMs)
 
+            // The progress is intentionally kept at 0 for 0 activation time to keep the button in its initial state.
             val progress = if (requiredPressTimeMs > 0) field / requiredPressTimeMs else 0f
             val scale = 1f + progress / 2f
 
