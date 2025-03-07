@@ -59,7 +59,7 @@ open class PromptDialog : MessageDialog() {
     /**
      * The input type of the EditText.
      */
-    var inputType: Int = InputType.TYPE_NULL
+    var inputType: Int = InputType.TYPE_CLASS_TEXT
         set(value) {
             field = value
             if (isCreated) {

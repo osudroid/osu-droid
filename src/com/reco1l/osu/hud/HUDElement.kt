@@ -6,16 +6,7 @@ import com.reco1l.andengine.shape.*
 import com.reco1l.framework.ColorARGB
 import com.reco1l.framework.math.Vec2
 import com.reco1l.osu.hud.editor.HUDElementOverlay
-import com.reco1l.osu.hud.elements.HUDAccuracyCounter
-import com.reco1l.osu.hud.elements.HUDAverageOffsetCounter
-import com.reco1l.osu.hud.elements.HUDComboCounter
-import com.reco1l.osu.hud.elements.HUDHealthBar
-import com.reco1l.osu.hud.elements.HUDHitErrorMeter
-import com.reco1l.osu.hud.elements.HUDLinearSongProgress
-import com.reco1l.osu.hud.elements.HUDPPCounter
-import com.reco1l.osu.hud.elements.HUDPieSongProgress
-import com.reco1l.osu.hud.elements.HUDScoreCounter
-import com.reco1l.osu.hud.elements.HUDUnstableRateCounter
+import com.reco1l.osu.hud.elements.*
 import com.reco1l.osu.ui.entity.GameplayLeaderboard
 import com.reco1l.toolkt.kotlin.capitalize
 import org.anddev.andengine.input.touch.TouchEvent
@@ -39,6 +30,11 @@ enum class HUDElements(val type: KClass<out HUDElement>) {
     avg_offset_counter(HUDAverageOffsetCounter::class),
     hit_error_meter(HUDHitErrorMeter::class),
     linear_song_progress(HUDLinearSongProgress::class),
+    great_counter(HUDGreatCounter::class),
+    ok_counter(HUDOkCounter::class),
+    meh_counter(HUDMehCounter::class),
+    miss_counter(HUDMissCounter::class),
+    back_button(HUDBackButton::class),
     leaderboard(GameplayLeaderboard::class);
 
     companion object {
@@ -53,7 +49,8 @@ abstract class HUDElement : Container(), IGameplayEvents {
     /**
      * Returns the name of this element.
      */
-    open val name = HUDElements[this::class].name.replace('_', ' ').capitalize()
+    open val name
+        get() = HUDElements[this::class].name.replace('_', ' ').capitalize()
 
     /**
      * Indicates whether the element is selected.
@@ -62,36 +59,71 @@ abstract class HUDElement : Container(), IGameplayEvents {
         get() = (parent as? GameplayHUD)?.selected == this
 
 
-    private var editorOverlay: HUDElementOverlay? = null
+    /**
+     * The overlay for this element to be used in edit mode.
+     */
+    var editorOverlay: HUDElementOverlay? = null
+
+    /**
+     * The restore data of the element.
+     */
+    var restoreData: HUDElementSkinData? = null
+
+
+    protected var isInEditMode = false
+        private set
+
 
     private var connectionLine: Line? = null
-
-    private var isInEditMode = false
 
 
     //region Skinning
 
+    /**
+     * Sets the skin data of the element.
+     */
     open fun setSkinData(data: HUDElementSkinData?) {
-        if (data != null) {
-            anchor = data.anchor
-            origin = data.origin
-            setScale(data.scale.x, data.scale.y)
-            setPosition(data.position.x, data.position.y)
+        if (data == null) {
+            return
+        }
+
+        anchor = data.anchor
+        origin = data.origin
+        setScale(data.scale)
+        setPosition(data.position.x, data.position.y)
+
+        // When the element is restored it's usually selected so we need to update the connection line.
+        if (isSelected) {
+            editorOverlay?.updateOutline()
+            updateConnectionLine()
         }
     }
 
+    /**
+     * Creates a [HUDElementSkinData] object with the current element's skin data.
+     */
     open fun getSkinData() = HUDElementSkinData(
         type = this::class,
         anchor = anchor,
         origin = origin,
-        scale = scale,
+        scale = (mScaleX + mScaleY) / 2f,
         position = Vec2(x, y)
     )
+
+    /**
+     * Restores the element to its original state before any changes were made.
+     */
+    fun restore() {
+        setSkinData(restoreData)
+    }
 
     //endregion
 
     //region Element events
 
+    /**
+     * Sets the edit mode of the element.
+     */
     open fun setEditMode(value: Boolean) {
         isInEditMode = value
 
@@ -113,6 +145,9 @@ abstract class HUDElement : Container(), IGameplayEvents {
         }
     }
 
+    /**
+     * Called when the selection state of the element changes.
+     */
     open fun onSelectionStateChange(isSelected: Boolean) {
 
         background?.clearEntityModifiers()
@@ -248,7 +283,7 @@ abstract class HUDElement : Container(), IGameplayEvents {
         }
 
         connectionLine!!.fromPoint = anchorOffset
-        connectionLine!!.toPoint = (editorOverlay?.outline?.drawPosition ?: Vec2.Zero) + drawSize * scale.absolute() * origin
+        connectionLine!!.toPoint = (editorOverlay?.outlinePosition ?: Vec2.Zero) + drawSize * scale * origin
     }
 
     override fun setScaleX(pScaleX: Float) {
@@ -263,6 +298,11 @@ abstract class HUDElement : Container(), IGameplayEvents {
 
     override fun setScale(pScale: Float) {
         super.setScale(pScale)
+        updateConnectionLine()
+    }
+
+    override fun setScale(pScaleX: Float, pScaleY: Float) {
+        super.setScale(pScaleX, pScaleY)
         updateConnectionLine()
     }
 

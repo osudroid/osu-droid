@@ -1,8 +1,9 @@
 package com.reco1l.osu.hud.elements
 
-import com.reco1l.andengine.Anchor
+import com.reco1l.andengine.*
 import com.reco1l.andengine.shape.Box
 import com.reco1l.andengine.shape.RoundedBox
+import com.reco1l.framework.ColorARGB
 import com.reco1l.framework.Pool
 import com.reco1l.osu.hud.HUDElement
 import com.reco1l.osu.updateThread
@@ -12,59 +13,83 @@ import kotlin.math.abs
 class HUDHitErrorMeter : HUDElement() {
 
 
-    private val expiredIndicators = Pool<RoundedBox>(20) { Indicator() }
+    private val expiredIndicators = Pool<Box>(20) { Indicator() }
 
     private val hitWindow = GlobalManager.getInstance().gameScene.hitWindow
+
+    private val greatColor = ColorARGB(70, 180, 220)
+
+    private val okColor = ColorARGB(100, 220, 40)
+
+    private val mehColor = ColorARGB(200, 180, 110)
 
 
     init {
         setSize(WIDTH, INDICATOR_HEIGHT)
 
-        // 50
-        attachChild(RoundedBox().apply {
+        val mehWindow = RoundedBox().apply {
             anchor = Anchor.Center
             origin = Anchor.Center
+            color = mehColor
             cornerRadius = BAR_HEIGHT / 2
             setSize(WIDTH, BAR_HEIGHT)
-            setColor(200f / 255f, 180f / 255f, 110f / 255f)
-        })
 
-        // 100
-        attachChild(Box().apply {
+            depthInfo = DepthInfo.Default
+        }
+
+        val okWindow = Box().apply {
             anchor = Anchor.Center
             origin = Anchor.Center
+            color = okColor
             setSize(WIDTH * (hitWindow.okWindow / hitWindow.mehWindow), BAR_HEIGHT)
-            setColor(100f / 255f, 220f / 255f, 40f / 255f)
-        })
 
-        // 300
-        attachChild(Box().apply {
+            depthInfo = DepthInfo.Default
+        }
+
+        val greatWindow = Box().apply {
             anchor = Anchor.Center
             origin = Anchor.Center
             setSize(WIDTH * (hitWindow.greatWindow / hitWindow.mehWindow), BAR_HEIGHT)
-            setColor(70f / 255f, 180f / 255f, 220f / 255f)
-        })
+            color = greatColor
+
+            depthInfo = DepthInfo.Clear
+        }
+
+        attachChild(mehWindow)
+        attachChild(okWindow, 0)
+        attachChild(greatWindow, 0)
 
         // Indicator
-        attachChild(RoundedBox().apply {
+        attachChild(Box().apply {
             anchor = Anchor.Center
             origin = Anchor.Center
-            cornerRadius = INDICATOR_WIDTH / 2
-            setSize(INDICATOR_WIDTH, INDICATOR_HEIGHT)
+            setSize(INDICATOR_WIDTH / 2, INDICATOR_HEIGHT)
         })
+
+        mehWindow.alpha = 0.6f
+        okWindow.alpha = 0.6f
+        greatWindow.alpha = 0.6f
     }
 
 
     override fun onAccuracyRegister(accuracy: Float) {
 
-        if (abs(accuracy * 1000) > hitWindow.mehWindow) {
+        val accuracyMs = accuracy * 1000
+
+        if (abs(accuracyMs) > hitWindow.mehWindow) {
             return
         }
 
         val indicator = expiredIndicators.obtain()
 
-        indicator.x = (WIDTH / 2f) * (accuracy * 1000 / hitWindow.mehWindow)
+        indicator.x = (WIDTH / 2f) * (accuracyMs / hitWindow.mehWindow)
         indicator.alpha = 0.6f
+
+        indicator.color = when {
+            abs(accuracyMs) <= hitWindow.greatWindow -> greatColor
+            abs(accuracyMs) <= hitWindow.okWindow -> okColor
+            else -> mehColor
+        }
 
         if (indicator.parent == null) {
             attachChild(indicator)
@@ -72,12 +97,11 @@ class HUDHitErrorMeter : HUDElement() {
     }
 
 
-    inner class Indicator : RoundedBox() {
+    private inner class Indicator : Box() {
 
         init {
             anchor = Anchor.Center
             origin = Anchor.Center
-            cornerRadius = INDICATOR_WIDTH / 2
             setSize(INDICATOR_WIDTH, INDICATOR_HEIGHT - 2f)
         }
 
@@ -90,9 +114,8 @@ class HUDHitErrorMeter : HUDElement() {
             if (alpha <= 0f) {
                 alpha = 0f
 
-                if (expiredIndicators.size == 20) {
-                    updateThread { detachSelf() }
-                } else {
+                updateThread {
+                    detachSelf()
                     expiredIndicators.free(this)
                 }
             }

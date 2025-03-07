@@ -35,7 +35,6 @@ import com.reco1l.osu.hud.GameplayHUD;
 import com.reco1l.osu.hitobjects.SliderTickSprite;
 import com.reco1l.osu.hud.elements.HUDPPCounter;
 import com.reco1l.osu.ui.BlockAreaFragment;
-import com.reco1l.osu.ui.entity.GameplayLeaderboard;
 import com.reco1l.osu.multiplayer.Multiplayer;
 import com.reco1l.osu.multiplayer.RoomScene;
 
@@ -114,6 +113,7 @@ import ru.nsu.ccfit.zuev.osu.scoring.ScoringScene;
 import ru.nsu.ccfit.zuev.osu.scoring.StatisticV2;
 import ru.nsu.ccfit.zuev.osu.scoring.TouchType;
 import ru.nsu.ccfit.zuev.osuplus.BuildConfig;
+import ru.nsu.ccfit.zuev.osuplus.R;
 import ru.nsu.ccfit.zuev.skins.OsuSkin;
 import ru.nsu.ccfit.zuev.skins.BeatmapSkinManager;
 
@@ -143,11 +143,8 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
     private LinkedList<GameObject> activeObjects;
     private LinkedList<GameObject> expiredObjects;
     private Queue<BreakPeriod> breakPeriods = new LinkedList<>();
-    public GameplayLeaderboard scoreBoard;
     private Metronome metronome;
     private float scale;
-    private float objectTimePreempt;
-    private float difficultyStatisticsScoreMultiplier;
     public StatisticV2 stat;
     private boolean gameStarted;
     private float totalOffset;
@@ -213,7 +210,7 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
     /**
      * The gameplay HUD
      */
-    private GameplayHUD hud;
+    public GameplayHUD hud;
 
     /**
      * Whether the HUD editor mode is enabled.
@@ -477,13 +474,6 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
 
         var firstObject = playableBeatmap.getHitObjects().objects.get(0);
         scale = firstObject.getGameplayScale();
-        objectTimePreempt = (float) firstObject.timePreempt / 1000f;
-
-        difficultyStatisticsScoreMultiplier = 1 +
-            Math.min(parsedBeatmap.getDifficulty().od, 10) / 10f + Math.min(parsedBeatmap.getDifficulty().hp, 10) / 10f;
-
-        // The maximum CS of osu!droid mapped to osu!standard is ~17.62.
-        difficultyStatisticsScoreMultiplier += (Math.min(parsedBeatmap.getDifficulty().gameplayCS, 17.62f) - 3) / 4f;
 
         GameHelper.setOverallDifficulty(playableBeatmap.getDifficulty().od);
         GameHelper.setHealthDrain(playableBeatmap.getDifficulty().hp);
@@ -759,7 +749,13 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
                 && !stat.getMod().contains(GameMod.MOD_AUTOPILOT)
                 && !stat.getMod().contains(GameMod.MOD_AUTO);
 
-        stat.setDiffModifier(difficultyStatisticsScoreMultiplier);
+        float difficultyScoreMultiplier = 1 + Math.min(parsedBeatmap.getDifficulty().od, 10) / 10f +
+                Math.min(parsedBeatmap.getDifficulty().hp, 10) / 10f;
+
+        // The maximum CS of osu!droid mapped to osu!standard is ~17.62.
+        difficultyScoreMultiplier += (Math.min(parsedBeatmap.getDifficulty().gameplayCS, 17.62f) - 3) / 4f;
+
+        stat.setDiffModifier(difficultyScoreMultiplier);
         stat.setBeatmapNoteCount(lastBeatmapInfo.getTotalHitObjectCount());
         stat.setBeatmapMaxCombo(lastBeatmapInfo.getMaxCombo());
 
@@ -801,9 +797,11 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
         comboWasMissed = false;
 
         hitWindow = playableBeatmap.getHitWindow();
-        firstObjectStartTime = (float) objects.peek().startTime / 1000;
+        var firstObject = objects.peek();
+        firstObjectStartTime = (float) firstObject.startTime / 1000;
         lastObjectEndTime = (float) objects.getLast().getEndTime() / 1000;
 
+        float objectTimePreempt = (float) firstObject.timePreempt / 1000;
         float skipTargetTime = firstObjectStartTime - Math.max(2f, objectTimePreempt);
 
         elapsedTime = Math.min(0, skipTargetTime);
@@ -1272,7 +1270,13 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
         {
             if (!videoStarted) {
                 video.play();
-                video.setPlaybackSpeed(GameHelper.getSpeedMultiplier());
+                // Some devices do not support custom playback speed for whatever reason.
+                try {
+                    video.setPlaybackSpeed(GameHelper.getSpeedMultiplier());
+                } catch (Exception e) {
+                    Log.e("GameScene", "Failed to change video playback speed.", e);
+                    ToastLogger.showText(R.string.message_video_custom_speed_unsupported, false);
+                }
                 videoStarted = true;
             }
 
@@ -1283,7 +1287,7 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
         boolean shouldBePunished = false;
 
         while (!objects.isEmpty()
-                && elapsedTime + objectTimePreempt > (float) objects.peek().startTime / 1000) {
+                && elapsedTime >= (float) (objects.peek().startTime - objects.peek().timePreempt) / 1000) {
             gameStarted = true;
             final var obj = objects.poll();
 
@@ -1327,7 +1331,6 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
                     gameplayCircle.setAutoPlay();
                 }
 
-                gameplayCircle.setHitTime((float) obj.startTime / 1000);
                 gameplayCircle.setId(++lastObjectId);
 
                 if (replaying) {
@@ -1362,7 +1365,7 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
                 if (GameHelper.isAuto()) {
                     gameplaySlider.setAutoPlay();
                 }
-                gameplaySlider.setHitTime((float) obj.startTime / 1000);
+
                 gameplaySlider.setId(++lastObjectId);
                 if (replaying) {
                     gameplaySlider.setReplayData(replay.objectData[gameplaySlider.getId()]);
@@ -1466,6 +1469,10 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
                 engine.setScene(scoringScene.getScene());
             } else {
                 engine.setScene(oldScene);
+
+                if (startedFromHUDEditor) {
+                    ModMenu.getInstance().setMod(EnumSet.noneOf(GameMod.class));
+                }
             }
 
             // Resume difficulty calculation.
@@ -1634,7 +1641,6 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
             breakPeriods.clear();
             playableBeatmap = null;
             cursorSprites = null;
-            scoreBoard = null;
             lastDifficultyCalculationParameters = null;
             droidTimedDifficultyAttributes = null;
             standardTimedDifficultyAttributes = null;

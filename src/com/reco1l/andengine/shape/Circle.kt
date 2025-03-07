@@ -51,7 +51,6 @@ open class Circle : ExtendedEntity() {
      */
     fun setPortion(value: Float) {
         endAngle = startAngle + 360f * value.coerceIn(-1f, 1f)
-        updateVertexBuffer()
     }
 
 
