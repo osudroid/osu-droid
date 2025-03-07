@@ -87,6 +87,7 @@ class HUDBackButton : HUDElement() {
                     isPressed = false
                     GlobalManager.getInstance().gameScene.pause()
                     (parent as ExtendedEntity).invalidateInputBindings()
+                    holdDurationMs = 0f
                 }
             } else {
                 holdDurationMs -= realMsElapsed * 2
