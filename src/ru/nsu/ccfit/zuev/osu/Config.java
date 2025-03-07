@@ -6,6 +6,7 @@ import android.content.SharedPreferences;
 import android.content.SharedPreferences.Editor;
 import android.os.Environment;
 import android.util.DisplayMetrics;
+import android.util.Log;
 
 import androidx.preference.PreferenceManager;
 
@@ -53,7 +54,6 @@ public class Config {
         playMusicPreview,
         showCursor,
         shrinkPlayfieldDownwards,
-        hideNaviBar,
         enableExtension,
         loadAvatar,
         stayOnline,
@@ -128,7 +128,7 @@ public class Config {
         dimHitObjects = prefs.getBoolean("dimHitObjects", true);
         forceMaxRefreshRate = prefs.getBoolean("forceMaxRefreshRate", false);
 
-        setSize();
+        measureDisplaySize();
         setPlayfieldSize(prefs.getInt("playfieldSize", 100) / 100f);
 
         shrinkPlayfieldDownwards = prefs.getBoolean("shrinkPlayfieldDownwards", true);
@@ -210,7 +210,6 @@ public class Config {
         // other
         playMusicPreview = prefs.getBoolean("musicpreview", true);
         showCursor = prefs.getBoolean("showcursor", false);
-        hideNaviBar = prefs.getBoolean("hidenavibar", false);
         fixFrameOffset = prefs.getBoolean("fixFrameOffset", true);
         removeSliderLock = prefs.getBoolean("removeSliderLock", false);
         displayScoreStatistics = prefs.getBoolean("displayScoreStatistics", false);
@@ -255,20 +254,22 @@ public class Config {
         beatmapLeaderboardScoringMode = BeatmapLeaderboardScoringMode.parse(Integer.parseInt(prefs.getString("beatmapLeaderboardScoringMode", "0")));
     }
 
-    public static void setSize() {
-        final DisplayMetrics dm = new DisplayMetrics();
-        ((Activity) context).getWindowManager().getDefaultDisplay().getMetrics(dm);
+    public static void measureDisplaySize() {
+        DisplayMetrics displayMetrics = new DisplayMetrics();
+        Activity activity = (Activity) context;
+        activity.getWindowManager().getDefaultDisplay().getRealMetrics(displayMetrics);
 
-        int width = Math.max(dm.widthPixels, dm.heightPixels), height = Math.min(dm.widthPixels, dm.heightPixels);
-        //int width = dm.widthPixels, height =  dm.heightPixels;
-        setSize(width, height);
-        //ToastLogger.showText("width=" + dm.widthPixels + " height=" + dm.heightPixels, true);
-        Debug.i("width=" + dm.widthPixels + " height=" + dm.heightPixels);
-    }
+        int width = displayMetrics.widthPixels;
+        int height = displayMetrics.heightPixels;
 
-    public static void setSize(int width, int height) {
-        RES_WIDTH = 1280;
-        RES_HEIGHT = 1280 * height / width;
+        // Tries to emulate the original behavior, the game was designed for 1280x720
+        // resolution, so we try to approximate the scale factor.
+        float ratio = 1280f / width;
+
+        RES_WIDTH = (int) (width * ratio);
+        RES_HEIGHT = (int) (height * ratio);
+
+        Log.v("Config", "Display size: " + width + "x" + height + "\nViewport size: " + RES_WIDTH + "x" + RES_HEIGHT);
     }
 
     public static boolean isEnableStoryboard() {
@@ -566,14 +567,6 @@ public class Config {
 
     public static void setSkinTopPath(String skinTopPath) {
         Config.skinTopPath = skinTopPath;
-    }
-
-    public static boolean isHideNaviBar() {
-        return hideNaviBar;
-    }
-
-    public static void setHideNaviBar(boolean hideNaviBar) {
-        Config.hideNaviBar = hideNaviBar;
     }
 
     public static String getScorePath() {

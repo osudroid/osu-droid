@@ -3,6 +3,7 @@ package com.reco1l.osu.hud
 import com.reco1l.andengine.Anchor
 import com.reco1l.framework.math.Vec2
 import com.reco1l.osu.hud.elements.HUDAccuracyCounter
+import com.reco1l.osu.hud.elements.HUDBackButton
 import com.reco1l.osu.hud.elements.HUDComboCounter
 import com.reco1l.osu.hud.elements.HUDHealthBar
 import com.reco1l.osu.hud.elements.HUDPieSongProgress
@@ -56,6 +57,12 @@ data class HUDSkinData(val elements: List<HUDElementSkinData>) {
                     origin = Anchor.TopRight,
                     scale = 0.96f,
                     position = Vec2(-10f, 0f)
+                ),
+                HUDElementSkinData(
+                    type = HUDBackButton::class,
+                    anchor = Anchor.CenterRight,
+                    origin = Anchor.CenterRight,
+                    position = Vec2(-20f, 0f)
                 )
             )
         )

@@ -29,6 +29,15 @@
 
     <PreferenceCategory android:title="@string/opt_category_gameplay">
 
+        <SeekBarPreference
+            android:defaultValue="300"
+            android:key="back_button_press_time"
+            android:summary="Required time in milliseconds to action the on-screen back button"
+            android:title="Back button press time"
+            app:min="0"
+            android:max="300"
+            app:showSeekBarValue="true" />
+
         <CheckBoxPreference
             android:defaultValue="false"
             android:key="removeSliderLock"

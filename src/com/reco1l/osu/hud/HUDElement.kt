@@ -34,6 +34,7 @@ enum class HUDElements(val type: KClass<out HUDElement>) {
     ok_counter(HUDOkCounter::class),
     meh_counter(HUDMehCounter::class),
     miss_counter(HUDMissCounter::class),
+    back_button(HUDBackButton::class),
     leaderboard(GameplayLeaderboard::class);
 
     companion object {
@@ -69,9 +70,11 @@ abstract class HUDElement : Container(), IGameplayEvents {
     var restoreData: HUDElementSkinData? = null
 
 
-    private var connectionLine: Line? = null
+    protected var isInEditMode = false
+        private set
 
-    private var isInEditMode = false
+
+    private var connectionLine: Line? = null
 
 
     //region Skinning
