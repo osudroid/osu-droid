@@ -5,6 +5,7 @@ import com.rian.osu.beatmap.hitobject.HitObject
 import com.rian.osu.beatmap.hitobject.Slider
 import com.rian.osu.beatmap.hitobject.Spinner
 import com.rian.osu.beatmap.hitobject.sliderobject.SliderRepeat
+import com.rian.osu.beatmap.hitobject.sliderobject.SliderTick
 import com.rian.osu.math.Precision.almostEquals
 import com.rian.osu.math.Vector2
 import com.rian.osu.mods.ModHidden
@@ -291,6 +292,49 @@ abstract class DifficultyHitObject(
             return
         }
 
+        var trackingEndTime = slider.endTime
+        var nestedObjects = slider.nestedHitObjects
+
+        if (mode == GameMode.Standard) {
+            trackingEndTime = max(
+                slider.endTime - Slider.LEGACY_LAST_TICK_OFFSET,
+                slider.startTime + slider.duration / 2
+            )
+
+            var lastRealTick: SliderTick? = null
+
+            for (i in nestedObjects.size - 2 downTo 1) {
+                val current = nestedObjects[i]
+
+                if (current is SliderTick) {
+                    lastRealTick = current
+                    break
+                }
+
+                if (current is SliderRepeat) {
+                    // A repeat means the slider does not have a slider tick.
+                    break
+                }
+            }
+
+            if (lastRealTick != null && lastRealTick.startTime > trackingEndTime) {
+                trackingEndTime = lastRealTick.startTime
+
+                // When the last tick falls after the tracking end time, we need to re-sort the nested objects
+                // based on time. This creates a somewhat weird ordering which is counter to how a user would
+                // understand the slider, but allows a zero-diff with known difficulty calculation output.
+                //
+                // To reiterate, this is definitely not correct from a difficulty calculation perspective
+                // and should be revisited at a later date.
+                val reordered = nestedObjects.toMutableList()
+
+                reordered.remove(lastRealTick)
+                reordered.add(lastRealTick)
+
+                nestedObjects = reordered
+            }
+        }
+
         if (mode == GameMode.Droid) {
             // Temporary lazy end position until a real result can be derived.
             slider.lazyEndPosition = slider.difficultyStackedPosition
@@ -302,7 +346,7 @@ abstract class DifficultyHitObject(
             }
         }
 
-        slider.lazyTravelTime = slider.nestedHitObjects[slider.nestedHitObjects.size - 1].startTime - slider.startTime
+        slider.lazyTravelTime = trackingEndTime - slider.startTime
 
         var endTimeMin = slider.lazyTravelTime / slider.spanDuration
         if (endTimeMin % 2 >= 1) {
@@ -317,15 +361,15 @@ abstract class DifficultyHitObject(
         var currentCursorPosition = slider.difficultyStackedPosition
         val scalingFactor = NORMALIZED_RADIUS / slider.difficultyRadius
 
-        for (i in 1 until slider.nestedHitObjects.size) {
-            val currentMovementObject = slider.nestedHitObjects[i]
+        for (i in 1 until nestedObjects.size) {
+            val currentMovementObject = nestedObjects[i]
             var currentMovement = currentMovementObject.difficultyStackedPosition - currentCursorPosition
             var currentMovementLength = scalingFactor * currentMovement.length
 
             // The amount of movement required so that the cursor position needs to be updated.
             var requiredMovement = assumedSliderRadius.toDouble()
 
-            if (i == slider.nestedHitObjects.size - 1) {
+            if (i == nestedObjects.size - 1) {
                 // The end of a slider has special aim rules due to the relaxed time constraint on position.
                 // There is both a lazy end position and the actual end slider position. We assume the player takes the simpler movement.
                 // For sliders that are circular, the lazy end position may actually be farther away than the sliders' true end.
@@ -355,7 +399,7 @@ abstract class DifficultyHitObject(
                 slider.lazyTravelDistance += currentMovementLength.toFloat()
             }
 
-            if (i == slider.nestedHitObjects.size - 1) {
+            if (i == nestedObjects.size - 1) {
                 slider.lazyEndPosition = currentCursorPosition
             }
         }
