@@ -3,11 +3,11 @@ package com.rian.osu.beatmap
 /**
  * Represents a hit window.
  */
-abstract class HitWindow(
+abstract class HitWindow @JvmOverloads constructor(
     /**
      * The overall difficulty of this [HitWindow]. Defaults to 5.
      */
-    overallDifficulty: Float?
+    overallDifficulty: Float? = 5f
 ) {
     /**
      * The overall difficulty of this [HitWindow].
