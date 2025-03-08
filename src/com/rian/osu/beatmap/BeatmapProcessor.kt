@@ -44,7 +44,7 @@ class BeatmapProcessor @JvmOverloads constructor(
 
         // Mark the last object in the beatmap as last in combo.
         if (lastObj != null) {
-            lastObj!!.isLastInCombo = true
+            lastObj.isLastInCombo = true
         }
     }
 
