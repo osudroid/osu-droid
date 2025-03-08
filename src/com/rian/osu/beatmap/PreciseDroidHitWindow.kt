@@ -5,14 +5,12 @@ import com.rian.osu.mods.ModPrecise
 /**
  * Represents an osu!droid hit window with the [ModPrecise] mod.
  */
-class PreciseDroidHitWindow @JvmOverloads constructor(
+class PreciseDroidHitWindow(
     /**
      * The overall difficulty of this [PreciseDroidHitWindow]. Defaults to 5.
      */
-    overallDifficulty: Float = 5f
+    overallDifficulty: Float?
 ) : HitWindow(overallDifficulty) {
-    constructor(overallDifficulty: Float?) : this(overallDifficulty ?: 5f)
-
     override val greatWindow
         get() = 55 + 6 * (5 - overallDifficulty)
 
