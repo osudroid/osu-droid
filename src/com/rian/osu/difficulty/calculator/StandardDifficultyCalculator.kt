@@ -84,16 +84,22 @@ class StandardDifficultyCalculator : DifficultyCalculator<StandardPlayableBeatma
 
     override fun createSkills(beatmap: StandardPlayableBeatmap): Array<Skill<StandardDifficultyHitObject>> {
         val mods = beatmap.mods?.toList() ?: emptyList()
+        val skills = mutableListOf<Skill<StandardDifficultyHitObject>>()
 
-        val aim = StandardAim(mods, true)
-        val aimNoSlider = StandardAim(mods, false)
-        val speed = StandardSpeed(mods)
-
-        if (mods.any { it is ModFlashlight }) {
-            return arrayOf(aim, aimNoSlider, speed, StandardFlashlight(mods))
+        if (mods.none { it is ModAutopilot }) {
+            skills.add(StandardAim(mods, true))
+            skills.add(StandardAim(mods, false))
         }
 
-        return arrayOf(aim, aimNoSlider, speed)
+        if (mods.none { it is ModRelax }) {
+            skills.add(StandardSpeed(mods))
+        }
+
+        if (mods.any { it is ModFlashlight }) {
+            skills.add(StandardFlashlight(mods))
+        }
+
+        return skills.toTypedArray()
     }
 
     @Suppress("UNCHECKED_CAST")
@@ -129,14 +135,14 @@ class StandardDifficultyCalculator : DifficultyCalculator<StandardPlayableBeatma
     ) = beatmap.createStandardPlayableBeatmap(parameters?.mods, parameters?.customSpeedMultiplier ?: 1f, scope)
 
     private fun StandardDifficultyAttributes.populateAimAttributes(skills: Array<Skill<StandardDifficultyHitObject>>) {
-        val aim = skills.first { it is StandardAim && it.withSliders } as StandardAim
+        val aim = skills.find<StandardAim> { it.withSliders } ?: return
 
         aimDifficulty = calculateRating(aim)
         aimDifficultSliderCount = aim.countDifficultSliders()
         aimDifficultStrainCount = aim.countDifficultStrains()
 
         if (aimDifficulty > 0) {
-            val aimNoSlider = skills.first { it is StandardAim && !it.withSliders } as StandardAim
+            val aimNoSlider = skills.find<StandardAim> { !it.withSliders }!!
 
             aimSliderFactor = calculateRating(aimNoSlider) / aimDifficulty
         } else {
@@ -145,7 +151,7 @@ class StandardDifficultyCalculator : DifficultyCalculator<StandardPlayableBeatma
     }
 
     private fun StandardDifficultyAttributes.populateSpeedAttributes(skills: Array<Skill<StandardDifficultyHitObject>>) {
-        val speed = skills.first { it is StandardSpeed } as StandardSpeed
+        val speed = skills.find<StandardSpeed>() ?: return
 
         speedDifficulty = calculateRating(speed)
         speedNoteCount = speed.relevantNoteCount()
@@ -153,7 +159,7 @@ class StandardDifficultyCalculator : DifficultyCalculator<StandardPlayableBeatma
     }
 
     private fun StandardDifficultyAttributes.populateFlashlightAttributes(skills: Array<Skill<StandardDifficultyHitObject>>) {
-        val flashlight = skills.firstOrNull { it is StandardFlashlight } as? StandardFlashlight ?: return
+        val flashlight = skills.find<StandardFlashlight>() ?: return
 
         flashlightDifficulty = calculateRating(flashlight)
     }
