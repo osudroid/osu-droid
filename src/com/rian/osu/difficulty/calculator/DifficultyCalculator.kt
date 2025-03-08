@@ -155,6 +155,15 @@ abstract class DifficultyCalculator<TBeatmap : PlayableBeatmap, TObject : Diffic
     }
 
     /**
+     * Retrieves a [Skill] of a specific type from an array of [Skill]s.
+     *
+     * @param predicate The predicate to filter the [Skill]s by, if any.
+     * @return The [Skill] of the specified type.
+     */
+    protected inline fun <reified T : Skill<TObject>> Array<Skill<TObject>>.find(predicate: (T) -> Boolean = { true }) =
+        firstOrNull { it is T && predicate(it) } as T?
+
+    /**
      * Creates the [Skill]s to calculate the difficulty of a [PlayableBeatmap].
      *
      * @param beatmap The [PlayableBeatmap] whose difficulty will be calculated.
