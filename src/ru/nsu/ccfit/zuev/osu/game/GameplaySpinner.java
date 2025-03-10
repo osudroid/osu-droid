@@ -47,6 +47,7 @@ public class GameplaySpinner extends GameObject {
     protected int bonusScoreCounter = 1;
     protected StatisticV2 stat;
     protected float duration;
+    protected boolean spinnable;
 
     protected final boolean isSpinnerFrequencyModulate;
     protected GameplayHitSampleInfo[] hitSamples;
@@ -120,6 +121,7 @@ public class GameplaySpinner extends GameObject {
         startHit = true;
         clear = duration <= 0f;
         bonusScoreCounter = 1;
+        spinnable = false;
 
         reloadHitSounds();
         ResourceManager.getInstance().checkSpinnerTextures();
@@ -151,7 +153,7 @@ public class GameplaySpinner extends GameObject {
             approachCircle.setVisible(false);
         }
         approachCircle.registerEntityModifier(Modifiers.sequence(e -> Execution.updateThread(this::removeFromScene),
-            Modifiers.delay(timePreempt),
+            Modifiers.delay(timePreempt, e -> spinnable = true),
             Modifiers.parallel(
                 Modifiers.alpha(duration, 0.75f, 1),
                 Modifiers.scale(duration, 2.0f, 0)
@@ -247,7 +249,8 @@ public class GameplaySpinner extends GameObject {
 
     @Override
     public void update(final float dt) {
-        if (circle.getAlpha() == 0) {
+        // Allow the spinner to fully fade in first before receiving spins.
+        if (!spinnable) {
             return;
         }
 

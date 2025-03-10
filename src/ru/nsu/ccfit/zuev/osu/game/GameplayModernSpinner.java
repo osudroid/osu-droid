@@ -29,8 +29,6 @@ public class GameplayModernSpinner extends GameplaySpinner {
     private final ExtendedSprite glow;
     private final ScoreNumber bonusScore;
 
-    private boolean spinnable;
-
     public GameplayModernSpinner() {
         ResourceManager.getInstance().checkEvoSpinnerTextures();
         position.set(Constants.MAP_WIDTH / 2f, Constants.MAP_HEIGHT / 2f);
