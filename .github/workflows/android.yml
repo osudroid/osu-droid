@@ -1,6 +1,7 @@
 name: Android CI
 
 on:
+  workflow_dispatch:
   push:
     branches: [ master ]
   pull_request:
@@ -25,3 +26,38 @@ jobs:
       uses: gradle/actions/setup-gradle@v3
       with:
         arguments: build
+          
+    - name: Setup environment variable
+      run: |
+        APK_VERSION="$(grep 'def baseline' build.gradle | sed -E "s/.+'(.+)'/\1/")"
+        APK_FULL_VERSION="$APK_VERSION($(date +%y%m%d))"
+        APK_BUILD_DATE="$(date +%Y-%m-%d)"
+        APK_DIR_PATH="./build/outputs/apk/debug"
+
+        echo "APK_VERSION=$APK_VERSION" >> $GITHUB_ENV
+        echo "APK_FULL_VERSION=$APK_FULL_VERSION" >> $GITHUB_ENV
+        echo "APK_BUILD_DATE=$APK_BUILD_DATE" >> $GITHUB_ENV
+        echo "APK_DIR_PATH=$APK_DIR_PATH" >> $GITHUB_ENV
+
+    - name: Generate sha256sum file
+      run: |
+        (cd "$APK_DIR_PATH"; sha256sum "osu!droid-$APK_FULL_VERSION-debug-$APK_BUILD_DATE.apk" > "osu!droid-$APK_FULL_VERSION-$APK_BUILD_DATE.sha256sum") || {
+          echo "Failed to generate sha256sum for 'osu!droid-$APK_FULL_VERSION-$APK_BUILD_DATE' APK."
+          exit 1
+        }
+
+    - name: Attach APK file
+      uses: actions/upload-artifact@v4
+      with:
+        name: osu!droid-${{ env.APK_FULL_VERSION }}-${{ env.APK_BUILD_DATE }}_apk
+        path: |
+          ${{ env.APK_DIR_PATH }}/osu!droid-${{ env.APK_FULL_VERSION }}-debug-${{ env.APK_BUILD_DATE }}.apk
+          ${{ env.APK_DIR_PATH }}/output-metadata.json
+
+    - name: Attach sha256sum file
+      uses: actions/upload-artifact@v4
+      with:
+        name: osu!droid-${{ env.APK_FULL_VERSION }}-${{ env.APK_BUILD_DATE }}_sha256sum
+        path: |
+          ${{ env.APK_DIR_PATH }}/osu!droid-${{ env.APK_FULL_VERSION }}-${{ env.APK_BUILD_DATE }}.sha256sum
+          ${{ env.APK_DIR_PATH }}/output-metadata.json
