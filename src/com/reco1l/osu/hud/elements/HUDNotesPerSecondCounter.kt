@@ -1,6 +1,5 @@
 package com.reco1l.osu.hud.elements
 
-import android.util.Log
 import com.reco1l.andengine.text.ExtendedText
 import com.reco1l.osu.hud.HUDElement
 import com.reco1l.osu.playfield.SpriteFont
@@ -31,7 +30,6 @@ class HUDNotesPerSecondCounter : HUDElement() {
     }
 
     override fun onHitObjectLifetimeStart(obj: HitObject) {
-        Log.i("HUDNotesPerSecondCounter", "onHitObjectLifetimeStart " + obj.startTime)
         startTimes.add(obj.startTime)
     }
 
