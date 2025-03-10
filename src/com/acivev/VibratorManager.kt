@@ -21,36 +21,49 @@ object VibratorManager {
     /**
      * Whether vibration for circles is enabled.
      */
-    var isCircleVibrationEnabled
-        get() = Config.getBoolean("vibrationCircle", false)
-        set(value) = Config.setBoolean("vibrationCircle", value)
+    var isCircleVibrationEnabled = false
+        set(value) {
+            field = value
+            Config.setBoolean("vibrationCircle", value)
+        }
 
     /**
      * Whether vibration for sliders is enabled.
      */
-    var isSliderVibrationEnabled
-        get() = Config.getBoolean("vibrationSlider", false)
-        set(value) = Config.setBoolean("vibrationSlider", value)
+    var isSliderVibrationEnabled = false
+        set(value) {
+            field = value
+            Config.setBoolean("vibrationSlider", value)
+        }
 
     /**
      * Whether vibration for spinners is enabled.
      */
-    var isSpinnerVibrationEnabled
-        get() = Config.getBoolean("vibrationSpinner", false)
-        set(value) = Config.setBoolean("vibrationSpinner", value)
+    var isSpinnerVibrationEnabled = false
+        set(value) {
+            field = value
+            Config.setBoolean("vibrationSpinner", value)
+        }
 
     /**
      * The intensity of the vibration.
      */
-    var intensity
-        get() = Config.getInt("seekBarVibrateIntensity", 127)
-        set(value) = Config.setInt("seekBarVibrateIntensity", value)
+    var intensity = 127
+        set(value) {
+            field = value
+            Config.setInt("seekBarVibrateIntensity", value)
+        }
 
     /**
      * Initializes the vibrator and checks supported vibration features.
      * MUST be called before using any vibration function.
      */
     fun init(context: Context) {
+        intensity = Config.getInt("seekBarVibrateIntensity", intensity)
+        isCircleVibrationEnabled = Config.getBoolean("vibrationCircle", isCircleVibrationEnabled)
+        isSliderVibrationEnabled = Config.getBoolean("vibrationSlider", isSliderVibrationEnabled)
+        isSpinnerVibrationEnabled = Config.getBoolean("vibrationSpinner", isSpinnerVibrationEnabled)
+
         vibrator = VibratorCheckUtils.getVibrator(context)
         hasVibrationSupport = VibratorCheckUtils.checkVibratorSupport(context) != VibrationSupport.NO_VIBRATION
     }
