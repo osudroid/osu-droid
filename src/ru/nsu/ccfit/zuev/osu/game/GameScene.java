@@ -1311,8 +1311,6 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
                 break;
             }
 
-            Log.i("GameScene", "Object " + (lastObjectId + 1) + " at " + obj.startTime + "ms spawns");
-
             // Next object from the polled one, this returns null if the list is empty. That's why every
             // usage of this is done if condition 'objects.isEmpty()' is false. Ignore IDE warnings.
             final var nextObj = objects.peek();
