@@ -22,7 +22,7 @@ class HUDNotesPerSecondCounter : HUDElement() {
         text = "0"
     }
 
-    private val startTimes = ArrayDeque<Double>()
+    private val objects = ArrayDeque<HitObject>()
 
     init {
         attachChild(label)
@@ -30,17 +30,17 @@ class HUDNotesPerSecondCounter : HUDElement() {
     }
 
     override fun onHitObjectLifetimeStart(obj: HitObject) {
-        startTimes.add(obj.startTime)
+        objects.add(obj)
     }
 
     override fun onManagedUpdate(pSecondsElapsed: Float) {
         val elapsedTimeMs = getGlobal().gameScene.elapsedTime * 1000
 
-        while (startTimes.isNotEmpty() && startTimes.first() + 1000 < elapsedTimeMs) {
-            startTimes.removeFirst()
+        while (objects.isNotEmpty() && objects.first().startTime + 1000 < elapsedTimeMs) {
+            objects.removeFirst()
         }
 
-        value.text = startTimes.size.toString()
+        value.text = objects.size.toString()
         value.y = label.drawHeight
 
         super.onManagedUpdate(pSecondsElapsed)
