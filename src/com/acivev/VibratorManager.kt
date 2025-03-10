@@ -74,6 +74,8 @@ object VibratorManager {
                 @Suppress("DEPRECATION")
                 vibrator?.vibrate(milliseconds)
             }
+        } else {
+            cancel()
         }
     }
 
