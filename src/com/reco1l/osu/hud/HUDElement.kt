@@ -174,6 +174,8 @@ abstract class HUDElement : Container(), IGameplayEvents {
 
     override fun onGameplayUpdate(gameScene: GameScene, statistics: StatisticV2, secondsElapsed: Float) {}
 
+    override fun onGameplayTouchDown(time: Float) {}
+
     override fun onNoteHit(statistics: StatisticV2) {}
 
     override fun onBreakStateChange(isBreak: Boolean) {}

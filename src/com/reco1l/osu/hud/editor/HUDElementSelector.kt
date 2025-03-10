@@ -150,6 +150,10 @@ class HUDElementSelector(private val hud: GameplayHUD) : Container(), IGameplayE
         elements.fastForEach { it.onGameplayUpdate(gameScene, statistics, secondsElapsed) }
     }
 
+    override fun onGameplayTouchDown(time: Float) {
+        elements.fastForEach { it.onGameplayTouchDown(time) }
+    }
+
     override fun onAccuracyRegister(accuracy: Float) {
         elements.fastForEach { it.onAccuracyRegister(accuracy) }
     }

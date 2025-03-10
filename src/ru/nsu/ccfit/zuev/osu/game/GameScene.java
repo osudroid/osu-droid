@@ -2159,6 +2159,10 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
                 sprite.setShowing(true);
             }
 
+            if (!GameHelper.isAuto() && !GameHelper.isAutopilotMod()) {
+                hud.onGameplayTouchDown(eventTime / 1000f);
+            }
+
             cursor.mouseDown = true;
             cursor.mouseDownOffsetMS = frameOffset;
 
