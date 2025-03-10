@@ -1117,6 +1117,7 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
                         cursors[i].mousePos.y = my;
 
                         replay.lastMoveIndex[i] = -1;
+                        hud.onGameplayTouchDown(movement.getTime() / 1000f);
                     } else if (movement.getTouchType() == TouchType.MOVE) {
                         cursors[i].mousePos.x = mx;
                         cursors[i].mousePos.y = my;
