@@ -69,7 +69,7 @@ object VibratorManager {
             if (!hasVibrationSupport || vibrator == null) return
 
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-                vibrator?.vibrate(VibrationEffect.createOneShot(milliseconds, intensity))
+                vibrator?.vibrate(VibrationEffect.createOneShot(milliseconds, intensity)) // Amplitudes based on intensity
             } else {
                 @Suppress("DEPRECATION")
                 vibrator?.vibrate(milliseconds)
@@ -109,9 +109,9 @@ object VibratorManager {
             if (!hasVibrationSupport || vibrator == null) return
 
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-                // Use custom vibration with intensity for newer APIs
-                vibrator?.vibrate(VibrationEffect.createOneShot(30, intensity))
+                vibrator?.vibrate(VibrationEffect.createOneShot(30, intensity)) // Amplitudes based on intensity
             } else {
+                // Fallback for older APIs
                 vibrateFor(50)
             }
         } else {
@@ -126,12 +126,13 @@ object VibratorManager {
         if (isSliderVibrationEnabled) {
             if (!hasVibrationSupport || vibrator == null) return
 
-            // Create a pattern with intensity control for older versions
             val pattern = longArrayOf(0, 30, 20, 50) // Time intervals
             val amplitudes = intArrayOf(0, intensity, 0, intensity) // Amplitudes based on intensity
+
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
                 vibrator?.vibrate(VibrationEffect.createWaveform(pattern, amplitudes, -1))
             } else {
+                // Fallback for older APIs
                 vibrateFor(pattern, -1)
             }
         } else {
@@ -144,9 +145,9 @@ object VibratorManager {
             if (!hasVibrationSupport || vibrator == null) return
 
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-                // Use custom vibration with intensity for newer APIs
-                val pattern = longArrayOf(0, 20, 10, 30) // Time intervals for spinner vibration
+                val pattern = longArrayOf(0, 20, 10, 30) // Time intervals
                 val amplitudes = intArrayOf(0, intensity, 0, intensity) // Amplitudes based on intensity
+
                 vibrator?.vibrate(VibrationEffect.createWaveform(pattern, amplitudes, -1))
             } else {
                 // Fallback for older APIs
