@@ -10,45 +10,36 @@ object VibratorCheckUtils {
 
     fun getVibrator(context: Context): Vibrator? {
         return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
-            val vibratorManager = context.getSystemService(VibratorManager::class.java)
-            vibratorManager?.defaultVibrator
+            context.getSystemService(VibratorManager::class.java)?.defaultVibrator
         } else {
             @Suppress("DEPRECATION")
             context.getSystemService(Context.VIBRATOR_SERVICE) as Vibrator?
         }
     }
 
-    fun hasVibrationSupport(context: Context): Boolean {
-        val vibrator = getVibrator(context)
-        return vibrator?.hasVibrator() ?: false
-    }
+    fun hasVibrationSupport(context: Context) = getVibrator(context)?.hasVibrator() == true
 
-    fun hasHapticSupport(context: Context): Boolean {
-        val vibrator = getVibrator(context)
-        return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            vibrator?.hasAmplitudeControl() ?: false
-        } else {
-            // Devices below API 26 cannot control vibration amplitude, assume no haptic feedback
-            false
-        }
-    }
+    fun hasHapticSupport(context: Context) =
+        // Devices below API 26 cannot control vibration amplitude, assume no haptic feedback
+        Build.VERSION.SDK_INT >= Build.VERSION_CODES.O && getVibrator(context)?.hasAmplitudeControl() == true
 
-    fun checkVibratorSupport(context: Context): VibrationSupport {
-        return when {
+    fun checkVibratorSupport(context: Context) =
+        when {
             hasVibrationSupport(context) -> {
                 Log.i("VibratorCheckUtils", "Device supports basic vibration but no haptic feedback.")
                 VibrationSupport.BASIC_VIBRATION
             }
+
             hasHapticSupport(context) -> {
                 Log.i("VibratorCheckUtils", "Device supports basic haptic feedback.")
                 VibrationSupport.ADVANCED_HAPTIC
             }
+
             else -> {
                 Log.w("VibratorCheckUtils", "Device does not support vibration or haptic feedback.")
                 VibrationSupport.NO_VIBRATION
             }
         }
-    }
 }
 
 enum class VibrationSupport {
