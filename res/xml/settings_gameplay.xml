@@ -101,6 +101,36 @@
 
     </PreferenceCategory>
 
+    <PreferenceCategory android:title="Vibration">
+
+        <CheckBoxPreference
+            android:defaultValue="false"
+            android:key="vibrationCircle"
+            android:summary=""
+            android:title="Circle"/>
+        <CheckBoxPreference
+            android:defaultValue="false"
+            android:key="vibrationSlider"
+            android:summary=""
+            android:title="Slider"/>
+        <CheckBoxPreference
+            android:defaultValue="false"
+            android:key="vibrationSpinner"
+            android:summary=""
+            android:title="Spinner"/>
+
+        <SeekBarPreference
+            android:defaultValue="127"
+            android:key="seekBarVibrateIntensity"
+            android:title="Set Intensity"
+            android:summary="Change the intensity of the vibration"
+            android:min="1"
+            android:max="255"
+            app:showSeekBarValue="true"
+            app:layout="@layout/settings_preference_seekbar_bottom"/>
+
+    </PreferenceCategory>
+
     <PreferenceCategory android:title="@string/opt_combo_colors_title">
 
         <CheckBoxPreference

@@ -11,6 +11,7 @@ import kotlinx.coroutines.JobKt;
 import ru.nsu.ccfit.zuev.audio.serviceAudio.SongService;
 import ru.nsu.ccfit.zuev.osu.SecurityUtils;
 
+import com.acivev.VibratorManager;
 import com.edlplan.framework.easing.Easing;
 import com.edlplan.framework.math.FMath;
 import com.edlplan.framework.math.line.LinePath;
@@ -1893,6 +1894,7 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
                );
             }
         }
+        VibratorManager.INSTANCE.circleVibration();
 
         if (accuracy > playableBeatmap.getHitWindow().getMehWindow() / 1000 || forcedScore == ResultType.MISS.getId()) {
             createHitEffect(pos, "hit0", color);
@@ -1933,6 +1935,8 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
                 );
             }
         }
+
+        VibratorManager.INSTANCE.sliderVibration();
 
         if (score == 0) {
             createHitEffect(judgementPos, "hit0", color);
@@ -2019,6 +2023,8 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
 
         final PointF pos = new PointF((float) Config.getRES_WIDTH() / 2,
                 (float) Config.getRES_HEIGHT() / 2);
+
+        VibratorManager.INSTANCE.spinnerVibration();
 
         if (score == 0) {
             final GameEffect effect = GameObjectPool.getInstance().getEffect(
