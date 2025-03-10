@@ -153,6 +153,9 @@ object VibratorManager {
         }
     }
 
+    /**
+     * Provides haptic vibration for a spinner using intensity.
+     */
     fun spinnerVibration() {
         if (isSpinnerVibrationEnabled) {
             if (!hasVibrationSupport || vibrator == null) return
