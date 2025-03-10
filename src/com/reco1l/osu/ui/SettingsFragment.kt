@@ -396,28 +396,28 @@ class SettingsFragment : com.edlplan.ui.fragment.SettingsFragment() {
             max = 255
             value = Config.getInt("seekBarVibrateIntensity", 127)
             setOnPreferenceChangeListener { _, newValue ->
-                VibratorManager.updateIntensity(newValue as Int)
+                VibratorManager.intensity = newValue as Int
                 true
             }
         }
 
         findPreference<CheckBoxPreference>("vibrationCircle")?.apply {
             setOnPreferenceChangeListener { _, newValue ->
-                VibratorManager.updateCircleVibration(newValue as Boolean)
+                VibratorManager.isCircleVibrationEnabled = newValue as Boolean
                 true
             }
         }
 
         findPreference<CheckBoxPreference>("vibrationSlider")?.apply {
             setOnPreferenceChangeListener { _, newValue ->
-                VibratorManager.updateSliderVibration(newValue as Boolean)
+                VibratorManager.isSliderVibrationEnabled = newValue as Boolean
                 true
             }
         }
 
         findPreference<CheckBoxPreference>("vibrationSpinner")?.apply {
             setOnPreferenceChangeListener { _, newValue ->
-                VibratorManager.updateSpinnerVibration(newValue as Boolean)
+                VibratorManager.isSpinnerVibrationEnabled = newValue as Boolean
                 true
             }
         }

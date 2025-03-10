@@ -16,25 +16,33 @@ import ru.nsu.ccfit.zuev.osu.Config
 object VibratorManager {
 
     private var vibrator: Vibrator? = null
-    private var hasVibrationSupport: Boolean = false
+    private var hasVibrationSupport = false
 
-    private var isCircleVibrationEnabled: Boolean
+    /**
+     * Whether vibration for circles is enabled.
+     */
+    var isCircleVibrationEnabled
         get() = Config.getBoolean("vibrationCircle", false)
         set(value) = Config.setBoolean("vibrationCircle", value)
 
-    private var isSliderVibrationEnabled: Boolean
+    /**
+     * Whether vibration for sliders is enabled.
+     */
+    var isSliderVibrationEnabled
         get() = Config.getBoolean("vibrationSlider", false)
         set(value) = Config.setBoolean("vibrationSlider", value)
 
-    private var isSpinnerVibrationEnabled: Boolean
+    /**
+     * Whether vibration for spinners is enabled.
+     */
+    var isSpinnerVibrationEnabled
         get() = Config.getBoolean("vibrationSpinner", false)
         set(value) = Config.setBoolean("vibrationSpinner", value)
 
     /**
-     * The current vibration intensity.
-     * @return The current vibration intensity.
+     * The intensity of the vibration.
      */
-    private var intensity: Int
+    var intensity
         get() = Config.getInt("seekBarVibrateIntensity", 127)
         set(value) = Config.setInt("seekBarVibrateIntensity", value)
 
@@ -51,14 +59,6 @@ object VibratorManager {
      * Cancels any ongoing vibration.
      */
     fun cancel() { vibrator?.cancel() }
-
-    /**
-     * Updates the vibration intensity, Circle, Slider, Spinner.
-     */
-    fun updateIntensity(newIntensity: Int) { intensity = newIntensity }
-    fun updateCircleVibration(enabled: Boolean) { isCircleVibrationEnabled = enabled }
-    fun updateSliderVibration(enabled: Boolean) { isSliderVibrationEnabled = enabled }
-    fun updateSpinnerVibration(enabled: Boolean) { isSpinnerVibrationEnabled = enabled }
 
     /**
      * Vibrates for a given duration with intensity.
