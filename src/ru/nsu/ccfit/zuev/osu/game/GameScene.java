@@ -783,6 +783,7 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
         GameHelper.setNightCore(stat.getMod().contains(GameMod.MOD_NIGHTCORE));
         GameHelper.setHalfTime(stat.getMod().contains(GameMod.MOD_HALFTIME));
         GameHelper.setHidden(stat.getMod().contains(GameMod.MOD_HIDDEN));
+        GameHelper.setTraceable(stat.getMod().contains(GameMod.MOD_TRACEABLE));
         GameHelper.setFlashLight(stat.getMod().contains(GameMod.MOD_FLASHLIGHT));
         GameHelper.setRelaxMod(stat.getMod().contains(GameMod.MOD_RELAX));
         GameHelper.setAutopilotMod(stat.getMod().contains(GameMod.MOD_AUTOPILOT));

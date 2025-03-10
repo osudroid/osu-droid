@@ -10,6 +10,7 @@ public enum GameMod {
     MOD_EASY("es", 0.5f),
     MOD_HARDROCK("hr", 1.06f),
     MOD_HIDDEN("hd", 1.06f),
+    MOD_TRACEABLE("tc", 1.06f, true),
     MOD_RELAX("relax", 0.001f, true),
     MOD_AUTOPILOT("ap", 0.001f, true),
     MOD_DOUBLETIME("dt", 1.12f),
@@ -47,6 +48,7 @@ public enum GameMod {
             case MOD_EASY -> "easy";
             case MOD_HARDROCK -> "hardrock";
             case MOD_HIDDEN -> "hidden";
+            case MOD_TRACEABLE -> "traceable";
             case MOD_RELAX -> "relax";
             case MOD_AUTOPILOT -> "relax2";
             case MOD_DOUBLETIME -> "doubletime";

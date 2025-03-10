@@ -469,6 +469,9 @@ public class StatisticV2 implements Serializable {
         if (mod.contains(GameMod.MOD_HIDDEN)) {
             s += "h";
         }
+        if (mod.contains(GameMod.MOD_TRACEABLE)) {
+            s += "b";
+        }
         if (mod.contains(GameMod.MOD_FLASHLIGHT)) {
             s += "i";
         }
@@ -527,6 +530,9 @@ public class StatisticV2 implements Serializable {
                     break;
                 case 'h':
                     mod.add(GameMod.MOD_HIDDEN);
+                    break;
+                case 'b':
+                    mod.add(GameMod.MOD_TRACEABLE);
                     break;
                 case 'i':
                     mod.add(GameMod.MOD_FLASHLIGHT);
