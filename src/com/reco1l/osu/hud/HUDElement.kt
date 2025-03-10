@@ -36,6 +36,7 @@ enum class HUDElements(val type: KClass<out HUDElement>) {
     ok_counter(HUDOkCounter::class),
     meh_counter(HUDMehCounter::class),
     miss_counter(HUDMissCounter::class),
+    taps_per_second_counter(HUDTapsPerSecondCounter::class),
     back_button(HUDBackButton::class),
     leaderboard(GameplayLeaderboard::class);
 
