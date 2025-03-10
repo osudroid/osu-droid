@@ -11,6 +11,7 @@ import com.rian.osu.beatmap.hitobject.Spinner;
 import org.anddev.andengine.entity.scene.Scene;
 import org.anddev.andengine.util.MathUtils;
 
+import ru.nsu.ccfit.zuev.osu.Config;
 import ru.nsu.ccfit.zuev.osu.Constants;
 import ru.nsu.ccfit.zuev.osu.ResourceManager;
 import ru.nsu.ccfit.zuev.osu.Utils;
@@ -91,11 +92,20 @@ public class GameplayModernSpinner extends GameplaySpinner {
         glow.setScale(0.9f);
         glow.setColor(0f, 0.8f, 1f);
 
-        middle.setAlpha(0f);
-        middle.setScale(0.9f);
+        boolean isBackgroundVisible = !GameHelper.isTraceable() ||
+            (Config.isShowFirstApproachCircle() && beatmapSpinner.isFirstNote());
 
-        middle2.setAlpha(0f);
-        middle2.setScale(0.9f);
+        middle.setVisible(isBackgroundVisible);
+        if (middle.isVisible()) {
+            middle.setAlpha(0f);
+            middle.setScale(0.9f);
+        }
+
+        middle2.setVisible(isBackgroundVisible);
+        if (middle2.isVisible()) {
+            middle2.setAlpha(0f);
+            middle2.setScale(0.9f);
+        }
 
         bottom.setAlpha(0f);
         bottom.setScale(0.9f);
@@ -195,8 +205,15 @@ public class GameplayModernSpinner extends GameplaySpinner {
         middle.setColor(1, 1 - percent, 1 - percent);
         top.setScale(0.9f + percent * 0.1f);
         bottom.setScale(0.9f + percent * 0.1f);
-        middle.setScale(0.9f + percent * 0.1f);
-        middle2.setScale(0.9f + percent * 0.1f);
+
+        if (middle.isVisible()) {
+            middle.setScale(0.9f + percent * 0.1f);
+        }
+
+        if (middle2.isVisible()) {
+            middle2.setScale(0.9f + percent * 0.1f);
+        }
+
         glow.setAlpha(percent * 0.8f);
         glow.setScale(0.9f + percent * 0.1f);
 
