@@ -1311,6 +1311,8 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
                 break;
             }
 
+            Log.i("GameScene", "Object " + (lastObjectId + 1) + " at " + obj.startTime + "ms spawns");
+
             // Next object from the polled one, this returns null if the list is empty. That's why every
             // usage of this is done if condition 'objects.isEmpty()' is false. Ignore IDE warnings.
             final var nextObj = objects.peek();
@@ -2762,7 +2764,7 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
         return new ExtendedScene() {
             @Override
             protected void onManagedUpdate(float secElapsed) {
-                float dt = secElapsed;
+                float dt = secElapsed * GameHelper.getSpeedMultiplier();
                 var songService = GlobalManager.getInstance().getSongService();
 
                 if (songService.getStatus() == Status.PLAYING) {
