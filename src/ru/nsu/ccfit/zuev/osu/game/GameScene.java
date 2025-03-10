@@ -1363,6 +1363,8 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
                 Math.max(nextObj.startTime - obj.startTime, activeTimingPoint.msPerBeat / 2) / 1000 :
                 0;
 
+            hud.onHitObjectLifetimeStart(obj);
+
             final RGBColor comboColor = getComboColor(obj.getComboIndexWithOffsets());
 
             if (obj instanceof HitCircle parsedCircle) {
