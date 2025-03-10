@@ -17,6 +17,8 @@ public interface GameObjectListener {
 
     void onSliderEnd(int id, int accuracy, BitSet tickSet);
 
+    void onSpinnerStart(int id);
+
     void onSpinnerHit(int id, int score, boolean endCombo, int totalScore);
 
     void addObject(GameObject object);

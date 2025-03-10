@@ -135,7 +135,7 @@ public class GameplaySpinner extends GameObject {
         ));
 
         circle.setAlpha(0);
-        circle.registerEntityModifier(Modifiers.sequence(
+        circle.registerEntityModifier(Modifiers.sequence(e -> listener.onSpinnerStart(id),
             Modifiers.delay(timePreempt * 0.75f),
             Modifiers.fadeIn(timePreempt * 0.25f)
         ));

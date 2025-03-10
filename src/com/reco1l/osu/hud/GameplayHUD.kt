@@ -264,6 +264,11 @@ class GameplayHUD : Container(), IGameplayEvents {
         elementSelector?.onGameplayUpdate(gameScene, statistics, secondsElapsed)
     }
 
+    override fun onGameplayTouchDown(time: Float) {
+        forEachElement { it.onGameplayTouchDown(time) }
+        elementSelector?.onGameplayTouchDown(time)
+    }
+
     override fun onNoteHit(statistics: StatisticV2) {
         forEachElement { it.onNoteHit(statistics) }
         elementSelector?.onNoteHit(statistics)

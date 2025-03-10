@@ -1117,6 +1117,7 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
                         cursors[i].mousePos.y = my;
 
                         replay.lastMoveIndex[i] = -1;
+                        hud.onGameplayTouchDown(movement.getTime() / 1000f);
                     } else if (movement.getTouchType() == TouchType.MOVE) {
                         cursors[i].mousePos.x = mx;
                         cursors[i].mousePos.y = my;
@@ -1875,6 +1876,7 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
                             final boolean endCombo, byte forcedScore, RGBColor color) {
         if (GameHelper.isAuto()) {
             autoCursor.click();
+            hud.onGameplayTouchDown((float) parsedBeatmap.getHitObjects().objects.get(id).startTime / 1000);
         }
 
         float accuracy = Math.abs(acc);
@@ -1978,6 +1980,9 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
             switch (type) {
                 case GameObjectListener.SLIDER_START:
                     createBurstEffectSliderStart(judgementPos, color);
+                    if (GameHelper.isAuto()) {
+                        hud.onGameplayTouchDown((float) parsedBeatmap.getHitObjects().objects.get(id).startTime / 1000);
+                    }
                     break;
                 case GameObjectListener.SLIDER_END:
                     createBurstEffectSliderEnd(judgementPos, color);
@@ -1994,6 +1999,13 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
         hud.onNoteHit(stat);
     }
 
+    @Override
+    public void onSpinnerStart(int id) {
+        if (GameHelper.isAuto()) {
+            autoCursor.click();
+            hud.onGameplayTouchDown((float) parsedBeatmap.getHitObjects().objects.get(id).startTime / 1000);
+        }
+    }
 
     public void onSpinnerHit(int id, final int score, final boolean endCombo, int totalScore) {
         if (score == 1000) {
@@ -2157,6 +2169,10 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
 
             if (sprite != null) {
                 sprite.setShowing(true);
+            }
+
+            if (!GameHelper.isAuto() && !GameHelper.isAutopilotMod()) {
+                hud.onGameplayTouchDown(eventTime / 1000f);
             }
 
             cursor.mouseDown = true;
