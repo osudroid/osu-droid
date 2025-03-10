@@ -12,6 +12,8 @@ import com.reco1l.toolkt.kotlin.capitalize
 import org.anddev.andengine.input.touch.TouchEvent
 import kotlin.math.abs
 import kotlin.reflect.KClass
+import ru.nsu.ccfit.zuev.osu.game.GameScene
+import ru.nsu.ccfit.zuev.osu.scoring.StatisticV2
 
 
 /**
@@ -165,6 +167,18 @@ abstract class HUDElement : Container(), IGameplayEvents {
         connectionLine?.clearEntityModifiers()
         connectionLine?.fadeTo(if (isSelected) 1f else 0f, 0.1f)
     }
+
+    //endregion
+
+    //region Gameplay events
+
+    override fun onGameplayUpdate(gameScene: GameScene, statistics: StatisticV2, secondsElapsed: Float) {}
+
+    override fun onNoteHit(statistics: StatisticV2) {}
+
+    override fun onBreakStateChange(isBreak: Boolean) {}
+
+    override fun onAccuracyRegister(accuracy: Float) {}
 
     //endregion
 
