@@ -3,6 +3,8 @@ package com.rian.osu.difficulty.evaluators
 import com.rian.osu.beatmap.hitobject.Slider
 import com.rian.osu.beatmap.hitobject.Spinner
 import com.rian.osu.difficulty.DroidDifficultyHitObject
+import com.rian.osu.mods.Mod
+import com.rian.osu.mods.ModHidden
 import kotlin.math.abs
 import kotlin.math.min
 import kotlin.math.pow
@@ -23,11 +25,11 @@ object DroidVisualEvaluator {
      * - and whether the Hidden mod is enabled.
      *
      * @param current The current object.
-     * @param isHiddenMod Whether the Hidden mod is enabled.
+     * @param mods The mods used.
      * @param withSliders Whether to take slider difficulty into account.
      */
     @JvmStatic
-    fun evaluateDifficultyOf(current: DroidDifficultyHitObject, isHiddenMod: Boolean, withSliders: Boolean): Double {
+    fun evaluateDifficultyOf(current: DroidDifficultyHitObject, mods: List<Mod>, withSliders: Boolean): Double {
         if (
             current.obj is Spinner ||
             // Exclude overlapping objects that can be tapped at once.
@@ -40,7 +42,7 @@ object DroidVisualEvaluator {
         // Start with base density and give global bonus for Hidden.
         // Add density caps for sanity.
         var strain =
-            if (isHiddenMod) min(30.0, current.noteDensity.pow(3))
+            if (mods.any { it is ModHidden }) min(30.0, current.noteDensity.pow(3))
             else min(20.0, current.noteDensity.pow(2))
 
         for (i in 0 until min(current.index, 10)) {
@@ -62,7 +64,7 @@ object DroidVisualEvaluator {
                 break
             }
 
-            strain += (1 - current.opacityAt(previous.obj.startTime, isHiddenMod)) / 4
+            strain += (1 - current.opacityAt(previous.obj.startTime, mods)) / 4
         }
 
         if (current.timePreempt < 400) {

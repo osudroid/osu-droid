@@ -3,6 +3,8 @@ package com.rian.osu.difficulty.evaluators
 import com.rian.osu.beatmap.hitobject.Slider
 import com.rian.osu.beatmap.hitobject.Spinner
 import com.rian.osu.difficulty.DroidDifficultyHitObject
+import com.rian.osu.mods.Mod
+import com.rian.osu.mods.ModHidden
 import kotlin.math.abs
 import kotlin.math.max
 import kotlin.math.min
@@ -28,11 +30,11 @@ object DroidFlashlightEvaluator {
      * * and whether Hidden mod is enabled.
      *
      * @param current The current object.
-     * @param isHiddenMod Whether the Hidden mod is enabled.
+     * @param mods The mods used.
      * @param withSliders Whether to take slider difficulty into account.
      */
     @JvmStatic
-    fun evaluateDifficultyOf(current: DroidDifficultyHitObject, isHiddenMod: Boolean, withSliders: Boolean): Double {
+    fun evaluateDifficultyOf(current: DroidDifficultyHitObject, mods: List<Mod>, withSliders: Boolean): Double {
         if (
             current.obj is Spinner ||
             // Exclude overlapping objects that can be tapped at once.
@@ -68,7 +70,7 @@ object DroidFlashlightEvaluator {
                 val stackNerf = min(1.0, currentObject.lazyJumpDistance / scalingFactor / 25)
 
                 // Bonus based on how visible the object is.
-                val opacityBonus = 1 + MAX_OPACITY_BONUS * (1 - current.opacityAt(currentObject.obj.startTime, isHiddenMod))
+                val opacityBonus = 1 + MAX_OPACITY_BONUS * (1 - current.opacityAt(currentObject.obj.startTime, mods))
                 result += stackNerf * opacityBonus * scalingFactor * jumpDistance / cumulativeStrainTime
 
                 // Objects further back in time should count less for the nerf.
@@ -84,8 +86,8 @@ object DroidFlashlightEvaluator {
         result = (smallDistNerf * result).pow(2)
 
         // Additional bonus for Hidden due to there being no approach circles.
-        if (isHiddenMod) {
-            result *= 1 + this.HIDDEN_BONUS
+        if (mods.any { it is ModHidden }) {
+            result *= 1 + HIDDEN_BONUS
         }
 
         // Nerf patterns with repeated angles.
