@@ -1,10 +1,12 @@
 package com.rian.osu.difficulty.evaluators
 
+import com.rian.osu.beatmap.hitobject.HitCircle
 import com.rian.osu.beatmap.hitobject.Slider
 import com.rian.osu.beatmap.hitobject.Spinner
 import com.rian.osu.difficulty.DroidDifficultyHitObject
 import com.rian.osu.mods.Mod
 import com.rian.osu.mods.ModHidden
+import com.rian.osu.mods.ModTraceable
 import kotlin.math.abs
 import kotlin.math.min
 import kotlin.math.pow
@@ -22,7 +24,8 @@ object DroidVisualEvaluator {
      * - the visual opacity of the current object,
      * - the velocity of the current object if it's a slider,
      * - past objects' velocity if they are sliders,
-     * - and whether the Hidden mod is enabled.
+     * - whether the Hidden mod is enabled,
+     * - and whether the Traceable mod is enabled.
      *
      * @param current The current object.
      * @param mods The mods used.
@@ -39,11 +42,18 @@ object DroidVisualEvaluator {
             return 0.0
         }
 
-        // Start with base density and give global bonus for Hidden.
+        // Start with base density and give global bonus for Hidden and Traceable.
         // Add density caps for sanity.
-        var strain =
-            if (mods.any { it is ModHidden }) min(30.0, current.noteDensity.pow(3))
-            else min(20.0, current.noteDensity.pow(2))
+        var strain = when {
+            mods.any { it is ModHidden } -> min(30.0, current.noteDensity.pow(3))
+
+            mods.any { it is ModTraceable } ->
+                // Give more bonus for hit circles due to there being no circle piece.
+                if (current.obj is HitCircle) min(25.0, current.noteDensity.pow(2.5))
+                else min(22.5, current.noteDensity.pow(2.25))
+
+            else -> min(20.0, current.noteDensity.pow(2))
+        }
 
         for (i in 0 until min(current.index, 10)) {
             val previous = (current.previous(i) ?: break) as DroidDifficultyHitObject
