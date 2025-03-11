@@ -3,27 +3,25 @@ package com.reco1l.andengine.texture
 import android.graphics.*
 import android.media.*
 import android.opengl.*
-import android.os.*
 import android.view.*
 import org.anddev.andengine.opengl.texture.*
-import org.anddev.andengine.opengl.texture.region.*
 import java.io.*
 import javax.microedition.khronos.opengles.*
+import javax.microedition.khronos.opengles.GL10.*
 
-class VideoTexture(val source: String)
-
-    : Texture(
+class VideoTexture(val source: String) : Texture(
     PixelFormat.UNDEFINED,
     TextureOptions(
-        GL10.GL_NEAREST,
-        GL10.GL_LINEAR,
-        GL10.GL_CLAMP_TO_EDGE,
-        GL10.GL_CLAMP_TO_EDGE,
+        GL_NEAREST,
+        GL_LINEAR,
+        GL_CLAMP_TO_EDGE,
+        GL_CLAMP_TO_EDGE,
         false
-    ), null)
-{
+    ),
+    null
+) {
 
-    private val player = MediaPlayer().apply {
+    val player = MediaPlayer().apply {
 
         setDataSource(source)
         setVolume(0f, 0f)
@@ -35,79 +33,60 @@ class VideoTexture(val source: String)
     private var surfaceTexture: SurfaceTexture? = null
 
 
-    override fun getWidth() = player.videoWidth
+    override fun writeTextureToHardware(pGL: GL10) {
+        // Nothing to write, the texture is handled externally by the SurfaceTexture.
+    }
 
-    override fun getHeight() = player.videoHeight
+    override fun bindTextureOnHardware(pGL: GL10) {
 
+        pGL.glBindTexture(GLES11Ext.GL_TEXTURE_EXTERNAL_OES, mHardwareTextureID)
 
-    override fun writeTextureToHardware(pGL: GL10) = Unit
+        surfaceTexture = SurfaceTexture(mHardwareTextureID)
 
-    override fun bindTextureOnHardware(pGL: GL10) = pGL.glBindTexture(GLES11Ext.GL_TEXTURE_EXTERNAL_OES, mHardwareTextureID)
+        val surface = Surface(surfaceTexture)
+        player.setSurface(surface)
+        surface.release()
+    }
 
-    override fun deleteTextureOnHardware(pGL: GL10?)
-    {
+    override fun deleteTextureOnHardware(pGL: GL10?) {
+
         surfaceTexture?.release()
         surfaceTexture = null
+
         super.deleteTextureOnHardware(pGL)
     }
 
 
-    override fun bind(pGL: GL10)
-    {
-        if (!isLoadedToHardware)
-            return
-
-        if (surfaceTexture == null)
-        {
-            surfaceTexture = SurfaceTexture(mHardwareTextureID)
-
-            val surface = Surface(surfaceTexture)
-            player.setSurface(surface)
-            surface.release()
-        }
-
-        try {
-            surfaceTexture?.updateTexImage()
-        } catch (_: Exception) {
-            isUpdateOnHardwareNeeded = true
-        }
-    }
-
-    fun play() = player.start()
-
-    fun pause() = player.pause()
-
-    fun release() = player.release()
-
-    fun seekTo(ms: Int)
-    {
-        // Unfortunately in old versions we can't seek at closest frame from the desired position.
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O)
-            player.seekTo(ms.toLong(), MediaPlayer.SEEK_CLOSEST)
-        else
-            player.seekTo(ms)
-    }
-
-    fun setPlaybackSpeed(speed: Float)
-    {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M)
-        {
-            val newParams = player.playbackParams.setSpeed(speed)
-            player.playbackParams = newParams
+    override fun bind(pGL: GL10) {
+        if (isLoadedToHardware) {
+            surfaceTexture!!.updateTexImage()
         }
     }
 
 
-    fun toRegion() = TextureRegion(this, 0, 0, width, height)
+    override fun getWidth(): Int {
+        return player.videoWidth
+    }
+
+    override fun getHeight(): Int {
+        return player.videoHeight
+    }
 
 
-    companion object
-    {
+    companion object {
+
         /**
          * See [MediaPlayer documentation](https://developer.android.com/guide/topics/media/platform/supported-formats)
          */
         private val SUPPORTED_VIDEO_FORMATS = arrayOf("3gp", "mp4", "mkv", "webm")
 
-        fun isSupportedVideo(file: File): Boolean = file.extension.lowercase() in SUPPORTED_VIDEO_FORMATS
+
+        /**
+         * Checks if the file is a supported video format.
+         */
+        fun isSupportedVideo(file: File): Boolean {
+            return file.extension.lowercase() in SUPPORTED_VIDEO_FORMATS
+        }
+
     }
 }

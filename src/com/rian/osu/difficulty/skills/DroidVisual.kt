@@ -18,12 +18,10 @@ class DroidVisual(
     /**
      * Whether to consider sliders in the calculation.
      */
-    private val withSliders: Boolean
+    @JvmField
+    val withSliders: Boolean
 ) : DroidStrainSkill(mods) {
     override val starsPerDouble = 1.025
-
-    override val objectStrain: Double
-        get() = currentStrain * currentRhythm
 
     private var currentStrain = 0.0
     private var currentRhythm = 0.0
@@ -37,7 +35,10 @@ class DroidVisual(
 
         currentRhythm = current.rhythmMultiplier
 
-        return currentStrain * currentRhythm
+        val totalStrain = currentStrain * currentRhythm
+        objectStrains.add(totalStrain)
+
+        return totalStrain
     }
 
     override fun calculateInitialStrain(time: Double, current: DroidDifficultyHitObject) =

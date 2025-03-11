@@ -8,8 +8,7 @@ import com.reco1l.ibancho.data.TeamMode
 import com.reco1l.ibancho.data.WinCondition
 import org.json.JSONArray
 
-interface IRoomEventListener
-{
+interface IRoomEventListener {
 
     // Connection related events
 
@@ -70,6 +69,11 @@ interface IRoomEventListener
      * Emit when the host changes the name of the room.
      */
     fun onRoomNameChange(name: String)
+
+    /**
+     * Emit when the host changes the maximum amount of players allowed in the room.
+     */
+    fun onRoomMaxPlayersChange(maxPlayers: Int)
 
     /**
      * Emit when the host changes the beatmap.

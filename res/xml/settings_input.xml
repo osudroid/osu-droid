@@ -2,7 +2,7 @@
 <androidx.preference.PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto">
 
-    <PreferenceCategory android:title="Playfield">
+    <PreferenceCategory android:title="@string/opt_category_playfield">
 
         <SeekBarPreference
             android:defaultValue="100"
@@ -27,7 +27,16 @@
 
     </PreferenceCategory>
 
-    <PreferenceCategory android:title="Gameplay">
+    <PreferenceCategory android:title="@string/opt_category_gameplay">
+
+        <SeekBarPreference
+            android:defaultValue="300"
+            android:key="back_button_press_time"
+            android:summary="Required time in milliseconds to action the on-screen back button"
+            android:title="Back button press time"
+            app:min="0"
+            android:max="300"
+            app:showSeekBarValue="true" />
 
         <CheckBoxPreference
             android:defaultValue="false"
@@ -38,7 +47,7 @@
 
     </PreferenceCategory>
 
-    <PreferenceCategory android:title="Synchronization">
+    <PreferenceCategory android:title="@string/opt_category_synchronization">
 
         <CheckBoxPreference
             android:defaultValue="true"

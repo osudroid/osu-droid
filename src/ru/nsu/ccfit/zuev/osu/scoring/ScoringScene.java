@@ -34,7 +34,6 @@ import org.anddev.andengine.opengl.texture.region.TextureRegion;
 import org.anddev.andengine.util.Debug;
 import org.apache.commons.io.FilenameUtils;
 
-import java.io.File;
 import java.util.Locale;
 
 import ru.nsu.ccfit.zuev.audio.serviceAudio.SongService;
@@ -51,7 +50,6 @@ import ru.nsu.ccfit.zuev.osu.menu.SongMenu;
 import ru.nsu.ccfit.zuev.osu.online.OnlineManager;
 import ru.nsu.ccfit.zuev.osu.online.OnlineScoring;
 import ru.nsu.ccfit.zuev.osuplus.BuildConfig;
-import ru.nsu.ccfit.zuev.osuplus.R;
 
 public class ScoringScene {
     private final Engine engine;
@@ -195,7 +193,7 @@ public class ScoringScene {
                 ResourceManager.getInstance().getTexture("ranking-accuracy"));
         scene.attachChild(accText);
         final ScoreNumber maxCombo = new ScoreNumber(Utils.toRes(20 + x),
-                Utils.toRes(maxComboText.getY() + 38), stat.getMaxCombo() + "x", 1,
+                Utils.toRes(maxComboText.getY() + 38), stat.getScoreMaxCombo() + "x", 1,
                 false);
         maxCombo.attachToScene(scene);
         final String accStr = String
@@ -297,18 +295,10 @@ public class ScoringScene {
             };
         }
 
-        if (stat.accuracy == 1 || stat.getMaxCombo() == beatmapInfo.getMaxCombo() || stat.isPerfect()) {
-            final Sprite perfect = new Sprite(0, 0, ResourceManager
-                    .getInstance().getTexture("ranking-perfect"));
+        if (stat.isPerfect()) {
+            final Sprite perfect = new Sprite(0, 0, ResourceManager.getInstance().getTexture("ranking-perfect"));
             perfect.setPosition(0, accuracy.getY() + accuracy.getHeight() + 10);
             scene.attachChild(perfect);
-        }
-        if (beatmap != null && retryBtn != null) {
-            retryBtn.setPosition(Config.getRES_WIDTH() - backBtn.getWidth() - 10, backBtn.getY() - retryBtn.getHeight() - 10);
-            scene.attachChild(retryBtn);
-        } else if (replayPath != null && replayBtn != null) {
-            replayBtn.setPosition(Config.getRES_WIDTH() - backBtn.getWidth() - 10, backBtn.getY() - replayBtn.getHeight() - 10);
-            scene.attachChild(replayBtn);
         }
 
         scene.setTouchAreaBindingEnabled(true);
@@ -319,6 +309,14 @@ public class ScoringScene {
         }
         scene.registerTouchArea(backBtn);
         scene.attachChild(mark);
+
+        if (beatmap != null && retryBtn != null) {
+            retryBtn.setPosition(Config.getRES_WIDTH() - backBtn.getWidth() - 10, backBtn.getY() - retryBtn.getHeight() - 10);
+            scene.attachChild(retryBtn);
+        } else if (replayPath != null && replayBtn != null) {
+            replayBtn.setPosition(Config.getRES_WIDTH() - backBtn.getWidth() - 10, backBtn.getY() - replayBtn.getHeight() - 10);
+            scene.attachChild(replayBtn);
+        }
 
         var modX = mark.getX() - 30;
         var modY = mark.getY() + mark.getHeight() * 2 / 3;
@@ -409,14 +407,13 @@ public class ScoringScene {
 
                         // Don't try to load online replay
                         if (replayPath != null && beatmapToReplay != null && !replayPath.startsWith("https://")) {
-                            var beatmapFile = new File(beatmapToReplay.getPath());
-                            var replayLoad = new Replay();
-                            replayLoad.setObjectCount(beatmapToReplay.getTotalHitObjectCount());
-                            replayLoad.setMap(beatmapFile.getParentFile().getName(), beatmapFile.getName(), mapMD5);
+                            var replay = new Replay();
+                            replay.setObjectCount(beatmapToReplay.getTotalHitObjectCount());
+                            replay.setBeatmap(beatmapToReplay.getFullBeatmapsetName(), beatmapToReplay.getFullBeatmapName(), mapMD5);
 
-                            if (replayLoad.load(replayPath)) {
+                            if (replay.load(replayPath, true)) {
                                 performanceAttributes = BeatmapDifficultyCalculator.calculateDroidPerformanceWithReplayStat(
-                                    playableBeatmap, difficultyAttributes, replayLoad.cursorMoves, replayLoad.objectData, stat
+                                    playableBeatmap, difficultyAttributes, replay.cursorMoves, replay.objectData, stat
                                 );
                             } else {
                                 performanceAttributes = BeatmapDifficultyCalculator.calculateDroidPerformance(difficultyAttributes, stat);
@@ -474,14 +471,14 @@ public class ScoringScene {
             // Do not save and submit score if note count does not match, since it indicates a corrupted score
             // (potentially from bugging the gameplay by any unnecessary means).
             if (totalNotes != beatmap.getTotalHitObjectCount()) {
-                ToastLogger.showTextId(R.string.replay_corrupted, true);
+                ToastLogger.showText(com.osudroid.resources.R.string.replay_corrupted, true);
                 return;
             }
 
             if ((!Multiplayer.isMultiplayer || !GlobalManager.getInstance().getGameScene().hasFailed) &&
                     stat.getTotalScoreWithMultiplier() > 0 && !mods.contains(ModAuto.class)) {
                 stat.setReplayFilename(FilenameUtils.getName(replayPath));
-                stat.setBeatmap(beatmap.getSetDirectory(), beatmap.getFilename());
+                stat.setBeatmapMD5(beatmap.getMD5());
 
                 try {
                     DatabaseManager.getScoreInfoTable().insertScore(stat.toScoreInfo());
@@ -490,8 +487,7 @@ public class ScoringScene {
                 }
             }
 
-            if (stat.getTotalScoreWithMultiplier() > 0 && OnlineManager.getInstance().isStayOnline() &&
-                    OnlineManager.getInstance().isReadyToSend()) {
+            if (stat.getTotalScoreWithMultiplier() > 0 && OnlineManager.getInstance().isStayOnline()) {
 
                 if (GlobalManager.getInstance().getGameScene().hasFailed ||
                         (Multiplayer.isMultiplayer && !Config.isSubmitScoreOnMultiplayer()))
@@ -508,7 +504,7 @@ public class ScoringScene {
                 scene.registerTouchArea(sendingPanel.getDismissTouchArea());
                 scene.attachChild(sendingPanel);
 
-                OnlineScoring.getInstance().sendRecord(stat, sendingPanel, replayPath);
+                OnlineScoring.getInstance().sendRecord(beatmap, stat, sendingPanel, replayPath);
             }
         }
     }
@@ -572,6 +568,7 @@ public class ScoringScene {
             songService.stop();
 //            songService.preLoadWithLoop(game.filePath);
             songService.preLoad(beatmapInfo.getAudioPath());
+            menu.updateMusicEffects();
             songService.play();
         }
     }

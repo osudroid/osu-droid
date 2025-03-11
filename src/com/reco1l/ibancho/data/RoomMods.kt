@@ -15,9 +15,8 @@ data class RoomMods(@JvmField val map: ModHashMap)
 
     override fun toString() = map.toReadable()
 
-    fun toString(room: Room): String
-    {
-        if (map.isEmpty())
+    fun toString(room: Room): String {
+        if (map.isEmpty()) {
             return buildString {
 
                 if (room.gameplaySettings.isFreeMod) {
@@ -29,6 +28,7 @@ data class RoomMods(@JvmField val map: ModHashMap)
                 } else append("None")
 
             }
+        }
 
         return if (room.gameplaySettings.isFreeMod) buildString {
 
@@ -39,31 +39,39 @@ data class RoomMods(@JvmField val map: ModHashMap)
             val halfTime = map.ofType<ModHalfTime>()
             val customSpeed = map.ofType<ModCustomSpeed>()
 
-            if (doubleTime != null)
+            if (doubleTime != null) {
                 append("${doubleTime.acronym}, ")
+            }
 
-            if (nightCore != null)
+            if (nightCore != null) {
                 append("${nightCore.acronym}, ")
+            }
 
-            if (halfTime != null)
+            if (halfTime != null) {
                 append("${halfTime.acronym}, ")
+            }
 
-            if (customSpeed != null)
+            if (customSpeed != null) {
                 append("%.2fx, ".format(customSpeed.trackRateMultiplier))
+            }
 
-            if (room.gameplaySettings.allowForceDifficultyStatistics)
+            if (room.gameplaySettings.allowForceDifficultyStatistics) {
                 append("Force diffstat, ")
+            }
 
         }.substringBeforeLast(',') else toString()
     }
 
-    override fun equals(other: Any?): Boolean
-    {
-        if (other === this)
-            return true
 
-        if (other !is RoomMods)
+    override fun equals(other: Any?): Boolean {
+
+        if (other === this) {
+            return true
+        }
+
+        if (other !is RoomMods) {
             return false
+        }
 
         val gameplaySettings = Multiplayer.room?.gameplaySettings
 

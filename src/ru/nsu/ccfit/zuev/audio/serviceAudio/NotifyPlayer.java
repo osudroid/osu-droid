@@ -167,7 +167,7 @@ public class NotifyPlayer {
     public void create() {
         String channelId = "ru.nsu.ccfit.zuev.audio";
 
-        if (Build.VERSION.SDK_INT >= 26) {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             NotificationChannel channel = new NotificationChannel(channelId,
                     "Beatmap music player for osu!droid",
                     NotificationManager.IMPORTANCE_LOW);

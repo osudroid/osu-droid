@@ -5,13 +5,15 @@ import android.graphics.*
 @JvmInline
 value class ColorARGB(private val hex: Int) {
 
+    constructor(hex: Long): this(hex.toInt())
+
     @JvmOverloads
     constructor(red: Int, green: Int, blue: Int, alpha: Int = 255): this(Color.argb(alpha, red, green, blue))
 
     @JvmOverloads
     constructor(red: Float, green: Float, blue: Float, alpha: Float = 1f) : this(
         // Color.argb() for 0-1 range values requires API level 26 and above so we inline the function.
-        ((alpha * 255.0f + 0.5f).toInt() shl 24) or ((red * 255.0f + 0.5f).toInt() shl 16) or ((green * 255.0f + 0.5f).toInt() shl 8) or (blue * 255.0f + 0.5f).toInt()
+        ((alpha * 255f + 0.5f).toInt() shl 24) or ((red * 255f + 0.5f).toInt() shl 16) or ((green * 255f + 0.5f).toInt() shl 8) or (blue * 255f + 0.5f).toInt()
     )
 
 

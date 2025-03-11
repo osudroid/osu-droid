@@ -2,6 +2,8 @@ package ru.nsu.ccfit.zuev.osu.game;
 
 import android.graphics.PointF;
 
+import com.rian.osu.beatmap.HitWindow;
+
 import ru.nsu.ccfit.zuev.osu.scoring.Replay;
 
 public abstract class GameObject {
@@ -9,7 +11,7 @@ public abstract class GameObject {
      * The maximum allowable time difference from the start time of an object
      * to its hit time to be considered a hit, in seconds.
      */
-    protected static final float objectHittableRange = 0.4f;
+    protected static final float objectHittableRange = HitWindow.MISS_WINDOW / 1000;
 
     protected boolean endsCombo;
     protected boolean autoPlay = false;
@@ -37,10 +39,6 @@ public abstract class GameObject {
         return hitTime;
     }
 
-    public void setHitTime(final float hitTime) {
-        this.hitTime = hitTime;
-    }
-
     public int getId() {
         return id;
     }
@@ -59,5 +57,5 @@ public abstract class GameObject {
         return position;
     }
 
-    public void stopAuxiliarySamples() {}
+    public void stopLoopingSamples() {}
 }

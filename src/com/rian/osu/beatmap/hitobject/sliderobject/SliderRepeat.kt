@@ -1,28 +1,18 @@
 package com.rian.osu.beatmap.hitobject.sliderobject
 
-import com.rian.osu.math.Vector2
+import com.rian.osu.beatmap.hitobject.Slider
 
 /**
  * Represents a slider repeat.
  */
 class SliderRepeat(
     /**
-     * The time at which this [SliderRepeat] starts, in milliseconds.
+     * The slider to which this [SliderRepeat] belongs.
      */
-    startTime: Double,
-
-    /**
-     * The position of this [SliderRepeat] relative to the play field.
-     */
-    position: Vector2,
+    slider: Slider,
 
     /**
      * The index of the span at which this [SliderRepeat] lies.
      */
-    spanIndex: Int,
-
-    /**
-     * The start time of the span at which this [SliderRepeat] lies, in milliseconds.
-     */
-    spanStartTime: Double
-) : SliderHitObject(startTime, position, spanIndex, spanStartTime)
+    spanIndex: Int
+) : SliderEndCircle(slider, spanIndex)

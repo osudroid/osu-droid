@@ -6,7 +6,6 @@ import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentManager
 import com.edlplan.ui.fragment.BackPressListener
 import com.edlplan.ui.fragment.BaseFragment
-import java.util.*
 
 object ActivityOverlay {
     private var fragmentManager: FragmentManager? = null
@@ -36,20 +35,21 @@ object ActivityOverlay {
 
     @Synchronized
     fun dismissOverlay(fragment: Fragment) {
-        if (fragmentManager != null) {
+        if (fragmentManager != null && fragment.isAdded) {
+
             if (displayingOverlay.contains(fragment)) {
                 displayingOverlay.remove(fragment)
-                fragmentManager!!.beginTransaction().remove(fragment).commitAllowingStateLoss()
+                fragmentManager!!.beginTransaction()
+                    .remove(fragment)
+                    .commitAllowingStateLoss()
             }
         }
     }
 
     @Synchronized
     fun addOverlay(fragment: Fragment, tag: String?) {
-        if (fragmentManager != null) {
-            if (fragment.isAdded) {
-                return
-            }
+        if (fragmentManager != null && !fragment.isAdded) {
+
             if (displayingOverlay.contains(fragment) || fragmentManager!!.findFragmentByTag(tag) != null) {
                 displayingOverlay.remove(fragment)
                 fragmentManager!!.beginTransaction()

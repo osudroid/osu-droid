@@ -2,7 +2,7 @@
 <androidx.preference.PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto">
 
-    <PreferenceCategory android:title="Import">
+    <PreferenceCategory android:title="@string/opt_category_import">
 
         <CheckBoxPreference
             android:defaultValue="true"
@@ -26,12 +26,17 @@
             android:defaultValue="true"
             android:key="deleteUnsupportedVideos"
             android:summary="@string/opt_delete_unsupported_videos_summary"
-            android:title="@string/opt_delete_unsupported_videos_title"
-            app:layout="@layout/settings_preference_checkbox_bottom" />
+            android:title="@string/opt_delete_unsupported_videos_title" />
+
+        <Preference
+            android:key="importReplay"
+            android:title="@string/opt_import_replay_title"
+            android:summary="@string/opt_import_replay_summary"
+            app:layout="@layout/settings_preference_bottom" />
 
     </PreferenceCategory>
 
-    <PreferenceCategory android:title="Metadata">
+    <PreferenceCategory android:title="@string/opt_category_metadata">
 
         <CheckBoxPreference
             android:defaultValue="false"
@@ -42,10 +47,10 @@
 
     </PreferenceCategory>
 
-    <PreferenceCategory android:title="Storage">
+    <PreferenceCategory android:title="@string/opt_category_storage">
 
         <Preference
-            android:key="clear"
+            android:key="clear_beatmap_cache"
             android:summary="@string/opt_clear_summary"
             android:title="@string/opt_clear_title" />
 

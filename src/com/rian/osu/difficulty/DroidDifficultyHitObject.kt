@@ -44,15 +44,10 @@ class DroidDifficultyHitObject(
     index: Int,
 
     /**
-     * The full great window of the hit object.
-     */
-    greatWindow: Double,
-
-    /**
      * The hit objects in the beatmap.
      */
     objects: List<HitObject>
-) : DifficultyHitObject(obj, lastObj, lastLastObj, clockRate, difficultyHitObjects, index, greatWindow) {
+) : DifficultyHitObject(obj, lastObj, lastLastObj, clockRate, difficultyHitObjects, index) {
     override val mode = GameMode.Droid
     override val maximumSliderRadius = NORMALIZED_RADIUS * 2
 
@@ -212,6 +207,6 @@ class DroidDifficultyHitObject(
         overlappingFactor += max(
             0.0,
             1 - distance / (2.5 * obj.difficultyRadius)
-        ) * 7.5 / (1 + exp(0.15 * (max(deltaTime, MIN_DELTA_TIME) - 75)))
+        ) * 7.5 / (1 + exp(0.15 * (max(deltaTime, MIN_DELTA_TIME.toDouble()) - 75)))
     }
 }

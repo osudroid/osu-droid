@@ -2,7 +2,7 @@
 <androidx.preference.PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto">
 
-    <PreferenceCategory android:title="Skin">
+    <PreferenceCategory android:title="@string/opt_category_skin">
 
         <com.reco1l.osu.ui.SelectPreference
             android:entries="@array/placeholder_array"
@@ -10,6 +10,12 @@
             android:key="skinPath"
             android:summary="@string/opt_skinpath_summary"
             android:title="@string/opt_skinpath_title" />
+
+        <Preference
+            android:key="hud_editor"
+            android:summary="@string/opt_hudEditor_summary"
+            android:title="@string/opt_hudEditor_title"
+            app:layout="@layout/settings_preference"/>
 
         <com.reco1l.osu.ui.SelectPreference
             android:defaultValue="1"
@@ -28,7 +34,7 @@
 
     </PreferenceCategory>
 
-    <PreferenceCategory android:title="Hit objects">
+    <PreferenceCategory android:title="@string/opt_category_hit_objects">
 
         <CheckBoxPreference
             android:defaultValue="false"
@@ -39,7 +45,7 @@
 
     </PreferenceCategory>
 
-    <PreferenceCategory android:title="Background">
+    <PreferenceCategory android:title="@string/opt_category_background">
 
         <SeekBarPreference
             android:defaultValue="25"
@@ -51,8 +57,8 @@
         <CheckBoxPreference
             android:defaultValue="false"
             android:key="keepBackgroundAspectRatio"
-            android:summary="When enabled, the background (and storyboard) will not be scaled to fill screen bounds during gameplay"
-            android:title="Keep background aspect ratio" />
+            android:summary="@string/opt_keep_background_aspect_ratio_summary"
+            android:title="@string/opt_keep_background_aspect_ratio_title" />
 
         <CheckBoxPreference
             android:key="enableStoryboard"
@@ -66,7 +72,7 @@
 
     </PreferenceCategory>
 
-    <PreferenceCategory android:title="HUD">
+    <PreferenceCategory android:title="@string/opt_category_hud">
 
         <CheckBoxPreference
             android:defaultValue="false"
@@ -81,19 +87,6 @@
             android:title="@string/opt_hide_replay_marquee_title" />
 
         <CheckBoxPreference
-            android:key="showscoreboard"
-            android:summary="Show live leaderboard while playing"
-            android:title="Show leaderboard" />
-
-        <com.reco1l.osu.ui.SelectPreference
-            android:defaultValue="0"
-            android:entries="@array/error_meter_display_names"
-            android:entryValues="@array/error_meter_display_values"
-            android:key="errormeter"
-            android:summary="@string/opt_error_meter_display_summary"
-            android:title="@string/opt_error_meter_display_title" />
-
-        <CheckBoxPreference
             android:defaultValue="true"
             android:key="fps"
             android:summary="@string/opt_fps_summary"
@@ -102,30 +95,9 @@
 
         <CheckBoxPreference
             android:defaultValue="true"
-            android:key="averageOffset"
-            android:summary="@string/opt_averageoffset_summary"
-            android:title="@string/opt_averageoffset_title"
-            app:layout="@layout/settings_preference_checkbox" />
-
-        <CheckBoxPreference
-            android:defaultValue="true"
-            android:key="unstableRate"
-            android:summary="@string/opt_unstablerate_summary"
-            android:title="@string/opt_unstablerate_title"
-            app:layout="@layout/settings_preference_checkbox" />
-
-        <CheckBoxPreference
-            android:defaultValue="true"
             android:key="displayScoreStatistics"
             android:summary="@string/opt_display_score_statistics_summary"
             android:title="@string/opt_display_score_statistics_title" />
-
-        <CheckBoxPreference
-            android:defaultValue="false"
-            android:key="displayRealTimePPCounter"
-            android:summary="@string/opt_display_realtime_pp_counter_summary"
-            android:title="@string/opt_display_realtime_pp_counter_title"
-            app:layout="@layout/settings_preference_checkbox_bottom" />
 
     </PreferenceCategory>
 

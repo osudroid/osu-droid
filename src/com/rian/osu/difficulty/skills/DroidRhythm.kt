@@ -3,6 +3,7 @@ package com.rian.osu.difficulty.skills
 import com.rian.osu.difficulty.DroidDifficultyHitObject
 import com.rian.osu.difficulty.evaluators.DroidRhythmEvaluator
 import com.rian.osu.mods.Mod
+import com.rian.osu.mods.ModScoreV2
 import kotlin.math.pow
 
 /**
@@ -17,14 +18,13 @@ class DroidRhythm(
     override val reducedSectionCount = 5
     override val starsPerDouble = 1.75
 
-    override val objectStrain: Double
-        get() = currentStrain
-
     private var currentStrain = 0.0
     private val strainDecayBase = 0.3
 
+    private val useSliderAccuracy = mods.any { it is ModScoreV2 }
+
     override fun strainValueAt(current: DroidDifficultyHitObject): Double {
-        current.rhythmMultiplier = DroidRhythmEvaluator.evaluateDifficultyOf(current)
+        current.rhythmMultiplier = DroidRhythmEvaluator.evaluateDifficultyOf(current, useSliderAccuracy)
 
         currentStrain *= strainDecay(current.deltaTime)
         currentStrain += current.rhythmMultiplier - 1

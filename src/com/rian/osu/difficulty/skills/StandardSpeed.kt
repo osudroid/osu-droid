@@ -16,15 +16,12 @@ class StandardSpeed(
      */
     mods: Iterable<Mod>
 ) : StandardStrainSkill(mods) {
-    override val difficultyMultiplier = 1.04
     override val reducedSectionCount = 5
 
     private var currentStrain = 0.0
     private var currentRhythm = 0.0
-    private val skillMultiplier = 1375.0
+    private val skillMultiplier = 1.46
     private val strainDecayBase = 0.3
-
-    private val objectStrains = mutableListOf<Double>()
 
     /**
      * Calculates the number of clickable objects weighted by difficulty.
@@ -44,7 +41,7 @@ class StandardSpeed(
 
     override fun strainValueAt(current: StandardDifficultyHitObject): Double {
         currentStrain *= strainDecay(current.strainTime)
-        currentStrain += StandardSpeedEvaluator.evaluateDifficultyOf(current) * skillMultiplier
+        currentStrain += StandardSpeedEvaluator.evaluateDifficultyOf(current, mods) * skillMultiplier
 
         currentRhythm = StandardRhythmEvaluator.evaluateDifficultyOf(current)
         val totalStrain = currentStrain * currentRhythm

@@ -1,11 +1,7 @@
 package com.reco1l.andengine
 
 import android.util.*
-import com.reco1l.andengine.modifier.*
-import com.reco1l.framework.*
-import com.reco1l.toolkt.kotlin.*
 import org.anddev.andengine.engine.camera.*
-import org.anddev.andengine.entity.IEntity
 import org.anddev.andengine.entity.scene.*
 import org.anddev.andengine.entity.shape.IShape
 import org.anddev.andengine.input.touch.*
@@ -15,7 +11,7 @@ import javax.microedition.khronos.opengles.*
 /**
  * Scene with extended functionality.
  */
-class ExtendedScene : Scene(), IShape {
+open class ExtendedScene : Scene(), IShape {
 
     /**
      * The time multiplier for the scene.
@@ -24,30 +20,26 @@ class ExtendedScene : Scene(), IShape {
      */
     var timeMultiplier = 1f
 
-    /**
-     * The pool of modifiers for the scene and its children.
-     */
-    var modifierPool = Pool { UniversalModifier(it) }
-        private set
-
 
     private var cameraWidth = 0f
 
     private var cameraHeight = 0f
 
 
-    override fun onAttached() {
-
-        val inheritedModifierPool = findHierarchically(IEntity::getParent) { (it as? ExtendedScene)?.modifierPool }
-        if (inheritedModifierPool != null) {
-            modifierPool = inheritedModifierPool
-        }
-
+    init {
+        super.setTouchAreaBindingEnabled(true)
+        super.setOnAreaTouchTraversalFrontToBack()
     }
+
+
+    // Update
 
     override fun onManagedUpdate(secElapsed: Float) {
         super.onManagedUpdate(secElapsed * timeMultiplier)
     }
+
+
+    // Drawing
 
     override fun onManagedDrawChildren(pGL: GL10, pCamera: Camera) {
         cameraWidth = pCamera.widthRaw
@@ -56,18 +48,32 @@ class ExtendedScene : Scene(), IShape {
     }
 
 
-    override fun registerTouchArea(pTouchArea: ITouchArea) {
+    // Input
 
-        if (pTouchArea == this) {
+    override fun registerTouchArea(area: ITouchArea) {
+
+        if (area == this) {
             throw IllegalArgumentException("Cannot register an area to itself.")
         }
 
-        super.registerTouchArea(pTouchArea)
+        super.registerTouchArea(area)
+    }
+
+    override fun setTouchAreaBindingEnabled(pTouchAreaBindingEnabled: Boolean) {
+        Log.w("ExtendedScene", "Touch area binding is always enabled for ExtendedScene.")
+        super.setTouchAreaBindingEnabled(true)
+    }
+
+    override fun onAreaTouched(event: TouchEvent, localX: Float, localY: Float): Boolean {
+        // This should never be called, as the scene itself is not a touch area.
+        return true
     }
 
 
-    override fun onAreaTouched(pSceneTouchEvent: TouchEvent?, pTouchAreaLocalX: Float, pTouchAreaLocalY: Float): Boolean {
-        return false
+    // Unsupported methods
+
+    override fun setColor(pRed: Float, pGreen: Float, pBlue: Float) {
+        Log.w("ExtendedScene", "Color is not supported for scenes.")
     }
 
     override fun setCullingEnabled(pCullingEnabled: Boolean) {
@@ -79,21 +85,41 @@ class ExtendedScene : Scene(), IShape {
     }
 
 
-    override fun contains(pX: Float, pY: Float): Boolean = true
+    // IShape interface
 
-    override fun getWidth(): Float = cameraWidth
+    override fun contains(pX: Float, pY: Float): Boolean {
+        return true
+    }
 
-    override fun getHeight(): Float = cameraHeight
+    override fun getWidth(): Float {
+        return cameraWidth
+    }
 
-    override fun collidesWith(shape: IShape): Boolean = false
+    override fun getHeight(): Float {
+        return cameraHeight
+    }
 
-    override fun getBaseWidth(): Float = cameraWidth
+    override fun collidesWith(shape: IShape): Boolean {
+        return false
+    }
 
-    override fun getBaseHeight(): Float = cameraHeight
+    override fun getBaseWidth(): Float {
+        return cameraWidth
+    }
 
-    override fun getWidthScaled(): Float = cameraWidth * scaleX
+    override fun getBaseHeight(): Float {
+        return cameraHeight
+    }
 
-    override fun getHeightScaled(): Float = cameraHeight * scaleY
+    override fun getWidthScaled(): Float {
+        return cameraWidth * scaleX
+    }
 
-    override fun isCullingEnabled(): Boolean = isCullingEnabled
+    override fun getHeightScaled(): Float {
+        return cameraHeight * scaleY
+    }
+
+    override fun isCullingEnabled(): Boolean {
+        return false
+    }
 }

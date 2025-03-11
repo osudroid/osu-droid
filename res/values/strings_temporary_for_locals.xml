@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+<!-- This file here is for new strings that will be temporary:-->
+<!-- Link to localizations pack: https://github.com/osudroid/language-pack-->
+
+    <!--Difficulty algorithm-->
+    <string name="difficulty_algorithm_title">Difficulty algorithm</string>
+    <string name="difficulty_algorithm_summary">Choose the algorithm used to calculate difficulty and performance points</string>
+
+    <string-array name="difficulty_algorithm_names">
+        <item>osu!droid</item>
+        <item>osu!standard</item>
+    </string-array>
+    <string-array name="difficulty_algorithm_values">
+        <item>0</item>
+        <item>1</item>
+    </string-array>
+
+    <string name="mp_room_max_players_title">Maximum Players</string>
+    <string name="mp_room_max_players_summary">Set the maximum number of players allowed in the room</string>
+
+    <string name="opt_snakingOutSliders_title">Use snaking out sliders</string>
+    <string name="opt_snakingOutSliders_summary">Enable sliders gradually snaking disappearing from one node</string>
+
+    <string name="message_video_custom_speed_unsupported">Custom video playback speed is not supported in this device</string>
+
+    <!-- HUD editor -->
+
+    <string name="opt_hudEditor_title">HUD Editor</string>
+    <string name="opt_hudEditor_summary">Edit the HUD layout as you like</string>
+
+    <string name="hudEditor_modal_title">HUD Editor</string>
+    <string name="hudEditor_modal_save">Exit and save changes</string>
+    <string name="hudEditor_modal_discard">Discard changes</string>
+    <string name="hudEditor_modal_reset">Reset to default</string>
+    <string name="hudEditor_modal_cancel">Cancel</string>
+
+    <string name="hudEditor_saving">Saving changes...</string>
+    <string name="hudEditor_saved">Changes saved!</string>
+    <string name="hudEditor_discarded">Changes discarded!</string>
+    <string name="hudEditor_reset">HUD set to default!</string>
+
+</resources>

@@ -3,7 +3,9 @@ package ru.nsu.ccfit.zuev.skins;
 import androidx.annotation.NonNull;
 
 import com.edlplan.framework.utils.interfaces.Consumer;
+import com.reco1l.osu.hud.HUDSkinData;
 
+import org.jetbrains.annotations.Nullable;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
@@ -64,15 +66,24 @@ public class SkinJsonReader extends SkinReader {
             currentFontsData = c;
             loadFonts();
         });
+        loadArray("HUD", currentData, (json) -> {
+            OsuSkin.get().hudSkinData = json == null
+                    ? HUDSkinData.Default
+                    : HUDSkinData.readFromJSON(json);
+        });
     }
 
     @Override
     protected void loadFonts()
     {
-        OsuSkin.get().hitCirclePrefix.setFromJson(currentFontsData);
-        OsuSkin.get().hitCircleOverlap.setFromJson(currentFontsData);
-        OsuSkin.get().scorePrefix.setFromJson(currentFontsData);
-        OsuSkin.get().comboPrefix.setFromJson(currentFontsData);
+        var skin = OsuSkin.get();
+
+        skin.hitCirclePrefix.setFromJson(currentFontsData);
+        skin.hitCircleOverlap.setFromJson(currentFontsData);
+        skin.scorePrefix.setFromJson(currentFontsData);
+        skin.scoreOverlap.setFromJson(currentFontsData);
+        skin.comboPrefix.setFromJson(currentFontsData);
+        skin.comboOverlap.setFromJson(currentFontsData);
     }
 
     @Override
@@ -102,6 +113,7 @@ public class SkinJsonReader extends SkinReader {
         skin.sliderHintWidth.setFromJson(data);
         skin.sliderHintShowMinLength.setFromJson(data);
         skin.sliderHintAlpha.setFromJson(data);
+        skin.sliderBallFlip.setFromJson(data);
         skin.sliderFollowComboColor.setFromJson(data);
         skin.sliderHintEnable.setFromJson(data);
         skin.sliderBodyColor.setFromJson(data);
@@ -117,6 +129,8 @@ public class SkinJsonReader extends SkinReader {
         skin.disableKiai.setFromJson(data);
         skin.comboTextScale.setFromJson(data);
         skin.animationFramerate.setFromJson(data);
+        skin.layeredHitSounds.setFromJson(data);
+        skin.spinnerFrequencyModulate.setFromJson(data);
     }
 
     @Override
@@ -153,6 +167,7 @@ public class SkinJsonReader extends SkinReader {
         OsuSkin skin = OsuSkin.get();
         JSONObject data = currentCursorData;
         skin.rotateCursor.setFromJson(data);
+        skin.rotateCursorTrail.setFromJson(data);
     }
 
     public void load(String tag, @NonNull JSONObject data, Consumer<JSONObject> consumer) {
@@ -161,6 +176,18 @@ public class SkinJsonReader extends SkinReader {
             object = new JSONObject();
         }
         consumer.consume(object);
+    }
+
+    public void loadArray(String tag, @NonNull JSONObject data, Consumer<@Nullable JSONArray> consumer) {
+        consumer.consume(data.optJSONArray(tag));
+    }
+
+    public JSONObject getCurrentData() {
+        return currentData;
+    }
+
+    public JSONObject setCurrentData(JSONObject currentData) {
+        return this.currentData = currentData;
     }
 }
 

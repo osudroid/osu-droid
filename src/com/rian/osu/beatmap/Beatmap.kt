@@ -10,6 +10,7 @@ import com.rian.osu.mods.IModApplicableToDifficultyWithSettings
 import com.rian.osu.mods.IModApplicableToHitObject
 import com.rian.osu.mods.IModApplicableToHitObjectWithSettings
 import com.rian.osu.mods.Mod
+import com.rian.osu.mods.ModNightCore
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.ensureActive
 
@@ -97,7 +98,7 @@ open class Beatmap(
         // Compute default values for hit objects, including creating nested hit objects in-case they're needed
         converted.hitObjects.objects.forEach {
             scope?.ensureActive()
-            it.applyDefaults(converted.controlPoints, converted.difficulty, mode)
+            it.applyDefaults(converted.controlPoints, converted.difficulty, mode, scope)
         }
 
         mods?.filterIsInstance<IModApplicableToHitObject>()?.forEach {

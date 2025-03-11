@@ -1,6 +1,9 @@
 package com.rian.osu.beatmap.hitobject
 
 import com.rian.osu.GameMode
+import com.rian.osu.beatmap.DroidHitWindow
+import com.rian.osu.beatmap.HitWindow
+import com.rian.osu.beatmap.StandardHitWindow
 import com.rian.osu.beatmap.constants.SampleBank
 import com.rian.osu.beatmap.sections.BeatmapControlPoints
 import com.rian.osu.beatmap.sections.BeatmapDifficulty
@@ -8,6 +11,8 @@ import com.rian.osu.math.Vector2
 import com.rian.osu.utils.Cached
 import com.rian.osu.utils.CircleSizeCalculator
 import kotlin.math.min
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.ensureActive
 import ru.nsu.ccfit.zuev.osu.Config
 import ru.nsu.ccfit.zuev.osu.Constants
 
@@ -19,7 +24,7 @@ abstract class HitObject(
      * The time at which this [HitObject] starts, in milliseconds.
      */
     @JvmField
-    var startTime: Double,
+    val startTime: Double,
 
     /**
      * The position of this [HitObject] in osu!pixels.
@@ -88,7 +93,7 @@ abstract class HitObject(
         private set
 
     /**
-     * The index of this [HitObject]'s combo in relation to the beatmap, with all aggregate s applied.
+     * The index of this [HitObject]'s combo in relation to the beatmap, with all aggregates applied.
      */
     var comboIndexWithOffsets = 0
         private set
@@ -122,13 +127,19 @@ abstract class HitObject(
     /**
      * Any samples which may be used by this [HitObject] that are non-standard.
      */
-    var auxiliarySamples = mutableListOf<HitSampleInfo>()
+    var auxiliarySamples = mutableListOf<SequenceHitSampleInfo>()
 
     /**
      * Whether this [HitObject] is in kiai time.
      */
     @JvmField
     var kiai = false
+
+    /**
+     * The [HitWindow] of this [HitObject].
+     */
+    @JvmField
+    var hitWindow: HitWindow? = null
 
     /**
      * Whether this [HitObject] is the first [HitObject] in the beatmap.
@@ -304,9 +315,19 @@ abstract class HitObject(
      * @param controlPoints The control points.
      * @param difficulty The difficulty settings to use.
      * @param mode The [GameMode] to use.
+     * @param scope The [CoroutineScope] to use for coroutines.
      */
-    open fun applyDefaults(controlPoints: BeatmapControlPoints, difficulty: BeatmapDifficulty, mode: GameMode) {
+    @JvmOverloads
+    open fun applyDefaults(controlPoints: BeatmapControlPoints, difficulty: BeatmapDifficulty, mode: GameMode, scope: CoroutineScope? = null) {
         kiai = controlPoints.effect.controlPointAt(startTime + CONTROL_POINT_LENIENCY).isKiai
+
+        if (hitWindow == null) {
+            hitWindow = createHitWindow(mode)
+        }
+
+        if (hitWindow != null) {
+            hitWindow!!.overallDifficulty = difficulty.od
+        }
 
         timePreempt = BeatmapDifficulty.difficultyRange(difficulty.ar.toDouble(), PREEMPT_MAX, PREEMPT_MID, PREEMPT_MIN)
 
@@ -343,11 +364,16 @@ abstract class HitObject(
      * Applies samples to this [HitObject].
      *
      * @param controlPoints The control points.
+     * @param scope The [CoroutineScope] to use for coroutines.
      */
-    open fun applySamples(controlPoints: BeatmapControlPoints) {
+    open fun applySamples(controlPoints: BeatmapControlPoints, scope: CoroutineScope?) {
         val sampleControlPoint = controlPoints.sample.controlPointAt(endTime + CONTROL_POINT_LENIENCY)
 
-        samples = samples.map { sampleControlPoint.applyTo(it) }.toMutableList()
+        samples = samples.map {
+            scope?.ensureActive()
+
+            sampleControlPoint.applyTo(it)
+        }.toMutableList()
     }
 
     /**
@@ -358,15 +384,14 @@ abstract class HitObject(
         comboIndexWithOffsets = lastObj?.comboIndexWithOffsets ?: 0
         indexInCurrentCombo = if (lastObj != null) lastObj.indexInCurrentCombo + 1 else 0
 
-        if (this is Spinner) {
-            // For the purpose of combo colors, spinners never start a new combo even if they are flagged as doing so.
-            return
-        }
-
         if (isNewCombo || lastObj == null || lastObj is Spinner) {
             indexInCurrentCombo = 0
             ++comboIndex
-            comboIndexWithOffsets += comboOffset + 1
+
+            if (this !is Spinner) {
+                // Spinners do not affect combo color offsets.
+                comboIndexWithOffsets += comboOffset + 1
+            }
 
             if (lastObj != null) {
                 lastObj.isLastInCombo = true
@@ -399,6 +424,21 @@ abstract class HitObject(
     protected fun createHitSampleInfo(sampleName: String) =
         samples.filterIsInstance<BankHitSampleInfo>().find { it.name == BankHitSampleInfo.HIT_NORMAL }?.copy(name = sampleName) ?:
         BankHitSampleInfo(sampleName, SampleBank.Normal)
+
+    /**
+     * Creates the [HitWindow] of this [HitObject].
+     *
+     * A `null` return means that this [HitObject] has no [HitWindow] and timing errors should not be displayed to the user.
+     *
+     * This will only be called if this [HitObject]'s [HitWindow] has not been set externally.
+     *
+     * @param mode The [GameMode] to create the [HitWindow] for.
+     * @returns The created [HitWindow].
+     */
+    protected open fun createHitWindow(mode: GameMode): HitWindow? = when (mode) {
+        GameMode.Droid -> DroidHitWindow()
+        GameMode.Standard -> StandardHitWindow()
+    }
 
     companion object {
         /**

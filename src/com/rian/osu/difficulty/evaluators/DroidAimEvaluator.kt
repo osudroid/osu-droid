@@ -2,17 +2,22 @@ package com.rian.osu.difficulty.evaluators
 
 import com.rian.osu.beatmap.hitobject.Slider
 import com.rian.osu.beatmap.hitobject.Spinner
+import com.rian.osu.difficulty.DifficultyHitObject
 import com.rian.osu.difficulty.DroidDifficultyHitObject
+import com.rian.osu.difficulty.utils.DifficultyCalculationUtils
+import com.rian.osu.math.Interpolation
+import com.rian.osu.math.toRadians
 import kotlin.math.*
 
 /**
  * An evaluator for calculating osu!droid aim difficulty.
  */
 object DroidAimEvaluator {
-    private const val WIDE_ANGLE_MULTIPLIER = 1.65
-    private const val ACUTE_ANGLE_MULTIPLIER = 1.95
-    private const val SLIDER_MULTIPLIER = 1.5
-    private const val VELOCITY_CHANGE_MULTIPLIER = 0.85
+    private const val WIDE_ANGLE_MULTIPLIER = 1.5
+    private const val ACUTE_ANGLE_MULTIPLIER = 2.6
+    private const val SLIDER_MULTIPLIER = 1.35
+    private const val VELOCITY_CHANGE_MULTIPLIER = 0.75
+    private const val WIGGLE_MULTIPLIER = 1.02
 
     private const val SINGLE_SPACING_THRESHOLD = 100.0
 
@@ -54,6 +59,9 @@ object DroidAimEvaluator {
         val last = current.previous(0)!!
         val lastLast = current.previous(1)!!
 
+        val radius = DifficultyHitObject.NORMALIZED_RADIUS
+        val diameter = DifficultyHitObject.NORMALIZED_DIAMETER
+
         // Calculate the velocity to the current hit object, which starts with a base distance / time assuming the last object is a circle.
         var currentVelocity = current.lazyJumpDistance / current.strainTime
 
@@ -71,6 +79,7 @@ object DroidAimEvaluator {
 
         // As above, do the same for the previous hit object.
         var prevVelocity = last.lazyJumpDistance / last.strainTime
+
         if (lastLast.obj is Slider && withSliders) {
             val travelVelocity = lastLast.travelDistance / lastLast.travelTime
             val movementVelocity = last.minimumJumpDistance / last.minimumJumpTime
@@ -82,6 +91,7 @@ object DroidAimEvaluator {
         var acuteAngleBonus = 0.0
         var sliderBonus = 0.0
         var velocityChangeBonus = 0.0
+        var wiggleBonus = 0.0
 
         // Start strain with regular velocity.
         var strain = currentVelocity
@@ -89,31 +99,38 @@ object DroidAimEvaluator {
         if (
         // If rhythms are the same.
             max(current.strainTime, last.strainTime) < 1.25 * min(current.strainTime, last.strainTime) &&
-            current.angle != null && last.angle != null && lastLast.angle != null
+            current.angle != null && last.angle != null
         ) {
             val currentAngle = current.angle!!
             val lastAngle = last.angle!!
-            val lastLastAngle = lastLast.angle!!
 
             // Rewarding angles, take the smaller velocity as base.
             val angleBonus = min(currentVelocity, prevVelocity)
             wideAngleBonus = calculateWideAngleBonus(currentAngle)
             acuteAngleBonus = calculateAcuteAngleBonus(currentAngle)
 
-            // Only buff deltaTime exceeding 300 BPM 1/2.
-            if (current.strainTime > 100) {
-                acuteAngleBonus = 0.0
-            } else {
-                acuteAngleBonus *=
-                    calculateAcuteAngleBonus(lastAngle) * min(angleBonus, 125 / current.strainTime) *
-                            sin(Math.PI / 2 * min(1.0, (100 - current.strainTime) / 25)).pow(2.0) *
-                            sin(Math.PI / 2 * current.lazyJumpDistance.coerceIn(50.0, 100.0) - 50 / 50).pow(2.0)
-            }
+            // Penalize angle repetition.
+            wideAngleBonus *= 1 - min(wideAngleBonus, calculateWideAngleBonus(lastAngle).pow(3))
+            acuteAngleBonus *= 0.08 + 0.92 * (1 - min(acuteAngleBonus, calculateAcuteAngleBonus(lastAngle).pow(3)))
 
-            // Penalize wide angles if they're repeated, reducing the penalty as last.angle gets more acute.
-            wideAngleBonus *= angleBonus * (1 - min(wideAngleBonus, calculateWideAngleBonus(lastAngle).pow(3.0)))
-            // Penalize acute angles if they're repeated, reducing the penalty as lastLast.angle gets more obtuse.
-            acuteAngleBonus *= 0.5 + 0.5 * (1 - min(acuteAngleBonus, calculateAcuteAngleBonus(lastLastAngle).pow(3.0)))
+            // Apply full wide angle bonus for distance more than one diameter.
+            wideAngleBonus *= angleBonus * DifficultyCalculationUtils.smootherstep(current.lazyJumpDistance, 0.0, diameter.toDouble())
+
+            // Apply acute angle bonus for BPM above 300 1/2 and distance more than one diameter
+            acuteAngleBonus *=
+                angleBonus *
+                DifficultyCalculationUtils.smootherstep(DifficultyCalculationUtils.millisecondsToBPM(current.strainTime, 2), 300.0, 400.0) *
+                DifficultyCalculationUtils.smootherstep(current.lazyJumpDistance, diameter.toDouble(), diameter * 2.0)
+
+            // Apply wiggle bonus for jumps that are [radius, 3*diameter] in distance, with < 110 angle
+            // https://www.desmos.com/calculator/dp0v0nvowc
+            wiggleBonus = angleBonus *
+                DifficultyCalculationUtils.smootherstep(current.lazyJumpDistance, radius.toDouble(), diameter.toDouble()) *
+                Interpolation.reverseLinear(current.lazyJumpDistance, diameter * 3.0, diameter.toDouble()).pow(1.8) *
+                DifficultyCalculationUtils.smootherstep(currentAngle, 110.0.toRadians(), 60.0.toRadians()) *
+                DifficultyCalculationUtils.smootherstep(last.lazyJumpDistance, radius.toDouble(), diameter.toDouble()) *
+                Interpolation.reverseLinear(last.lazyJumpDistance, diameter * 3.0, diameter.toDouble()).pow(1.8) *
+                DifficultyCalculationUtils.smootherstep(lastAngle, 110.0.toRadians(), 60.0.toRadians())
         }
 
         if (max(prevVelocity, currentVelocity) != 0.0) {
@@ -140,6 +157,8 @@ object DroidAimEvaluator {
             // Reward sliders based on velocity.
             sliderBonus = last.travelDistance / last.travelTime
         }
+
+        strain += wiggleBonus * WIGGLE_MULTIPLIER
 
         // Add in acute angle bonus or wide angle bonus + velocity change bonus, whichever is larger.
         strain += max(
@@ -178,10 +197,11 @@ object DroidAimEvaluator {
      * Calculates the bonus of wide angles.
      */
     private fun calculateWideAngleBonus(angle: Double) =
-        sin(3.0 / 4 * (angle.coerceIn(Math.PI / 6, 5.0 / 6 * Math.PI) - Math.PI / 6)).pow(2.0)
+        DifficultyCalculationUtils.smoothstep(angle, 40.0.toRadians(), 140.0.toRadians())
 
     /**
      * Calculates the bonus of acute angles.
      */
-    private fun calculateAcuteAngleBonus(angle: Double) = 1 - calculateWideAngleBonus(angle)
+    private fun calculateAcuteAngleBonus(angle: Double) =
+        DifficultyCalculationUtils.smoothstep(angle, 140.0.toRadians(), 40.0.toRadians())
 }

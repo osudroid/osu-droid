@@ -1,6 +1,6 @@
 package ru.nsu.ccfit.zuev.osu.menu;
 
-import com.edlplan.ui.fragment.InGameSettingMenu;
+import com.edlplan.ui.fragment.ModSettingsMenu;
 import com.reco1l.ibancho.RoomAPI;
 import com.reco1l.osu.data.BeatmapInfo;
 import com.reco1l.osu.Execution;
@@ -24,16 +24,18 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.CancellationException;
 
+import org.anddev.andengine.util.MathUtils;
 import org.jetbrains.annotations.Nullable;
 
 import kotlinx.coroutines.Job;
 import ru.nsu.ccfit.zuev.osu.*;
 import ru.nsu.ccfit.zuev.osu.game.GameHelper;
+import ru.nsu.ccfit.zuev.osu.game.mods.GameMod;
 import ru.nsu.ccfit.zuev.osu.game.mods.IModSwitcher;
 import ru.nsu.ccfit.zuev.osu.game.mods.ModButton;
 import ru.nsu.ccfit.zuev.osu.helper.StringTable;
 import ru.nsu.ccfit.zuev.osu.helper.TextButton;
-import ru.nsu.ccfit.zuev.osuplus.R;
+import ru.nsu.ccfit.zuev.osu.scoring.StatisticV2;
 
 
 public class ModMenu implements IModSwitcher {
@@ -46,7 +48,7 @@ public class ModMenu implements IModSwitcher {
     private boolean enableNCWhenSpeedChange = false;
     private Job calculationJob;
 
-    private InGameSettingMenu menu;
+    private ModSettingsMenu menu;
 
     private final ModCustomSpeed customSpeed = new ModCustomSpeed(1);
     private final ModDifficultyAdjust difficultyAdjust = new ModDifficultyAdjust();
@@ -58,17 +60,12 @@ public class ModMenu implements IModSwitcher {
         return instance;
     }
 
-    public void reload() {
-        enabledMods = new ModHashMap();
-        init();
-    }
-
     public void show(Scene scene, BeatmapInfo selectedBeatmap) {
         parent = scene;
         setSelectedTrack(selectedBeatmap);
         scene.setChildScene(getScene(), false, true, true);
         if (menu == null) {
-            menu = new InGameSettingMenu();
+            menu = new ModSettingsMenu();
         }
 
         Execution.mainThread(menu::show);
@@ -136,7 +133,7 @@ public class ModMenu implements IModSwitcher {
 
         if (Multiplayer.isConnected())
         {
-            RoomScene.awaitModsChange = true;
+            RoomScene.isWaitingForModsChange = true;
 
             var string = enabledMods.toString();
 
@@ -146,7 +143,7 @@ public class ModMenu implements IModSwitcher {
             } else if (updatePlayerMods) {
                 RoomAPI.setPlayerMods(string);
             } else {
-                RoomScene.awaitModsChange = false;
+                RoomScene.isWaitingForModsChange = false;
             }
         }
     }
@@ -188,17 +185,20 @@ public class ModMenu implements IModSwitcher {
 
         multiplierText = new ChangeableText(0, Utils.toRes(50),
                 ResourceManager.getInstance().getFont("CaptionFont"),
-                StringTable.format(R.string.menu_mod_multiplier, 1f));
+                StringTable.format(com.osudroid.resources.R.string.menu_mod_multiplier, 1f));
         multiplierText.setScale(1.2f);
         scene.attachChild(multiplierText);
 
-        menu = new InGameSettingMenu();
+        menu = new ModSettingsMenu();
 
         changeMultiplierText();
 
         final int offset = 100;
         final int offsetGrowth = 130;
         final TextureRegion button = ResourceManager.getInstance().getTexture("selection-mod-easy");
+
+        var clickShortSound = ResourceManager.getInstance().getSound("click-short");
+        var clickShortConfirmSound = ResourceManager.getInstance().getSound("click-short-confirm");
 
         //line 1
         addButton(offset, Config.getRES_HEIGHT() / 2 - button.getHeight() * 3, new ModEasy());
@@ -245,19 +245,49 @@ public class ModMenu implements IModSwitcher {
 
         final TextButton resetText = new TextButton(ResourceManager
                 .getInstance().getFont("CaptionFont"),
-                StringTable.get(R.string.menu_mod_reset)) {
+                StringTable.get(com.osudroid.resources.R.string.menu_mod_reset)) {
+
+            boolean moved = false;
+            private float dx = 0, dy = 0;
 
             @Override
             public boolean onAreaTouched(final TouchEvent pSceneTouchEvent,
                                          final float pTouchAreaLocalX, final float pTouchAreaLocalY) {
-                if (pSceneTouchEvent.isActionUp()) {
-                    enabledMods.clear();
-                    changeMultiplierText();
-                    for (ModButton btn : modButtons.values()) {
-                        btn.setEnabled(false);
-                    }
+                if (pSceneTouchEvent.isActionDown()) {
+                    moved = false;
+                    dx = pTouchAreaLocalX;
+                    dy = pTouchAreaLocalY;
                     return true;
                 }
+
+                if (pSceneTouchEvent.isActionUp()) {
+                    if (!moved) {
+                        if (clickShortConfirmSound != null) {
+                            clickShortConfirmSound.play();
+                        }
+
+                        enabledMods.clear();
+                        reloadMusicEffects();
+                        changeMultiplierText();
+                        for (ModButton btn : modButtons.values()) {
+                            btn.setEnabled(false);
+                        }
+                    }
+
+                    return true;
+                }
+
+                if (pSceneTouchEvent.isActionOutside()
+                        || pSceneTouchEvent.isActionMove()
+                        && (MathUtils.distance(dx, dy, pTouchAreaLocalX,
+                        pTouchAreaLocalY) > 50)) {
+                    if (!moved && clickShortSound != null) {
+                        clickShortSound.play();
+                    }
+
+                    moved = true;
+                }
+
                 return false;
             }
         };
@@ -270,15 +300,14 @@ public class ModMenu implements IModSwitcher {
 
         final TextButton back = new TextButton(ResourceManager
                 .getInstance().getFont("CaptionFont"),
-                StringTable.get(R.string.menu_mod_back)) {
+                StringTable.get(com.osudroid.resources.R.string.menu_mod_back)) {
+
+            boolean moved = false;
+            private float dx = 0, dy = 0;
 
             @Override
             public boolean onAreaTouched(final TouchEvent pSceneTouchEvent,
                                          final float pTouchAreaLocalX, final float pTouchAreaLocalY) {
-                if (!pSceneTouchEvent.isActionUp()) {
-                    return false;
-                }
-
                 if (pSceneTouchEvent.isActionUp()) {
                     cancelCalculationJob();
 
@@ -311,7 +340,6 @@ public class ModMenu implements IModSwitcher {
                                     );
                                 }
 
-
                                 case standard -> {
                                     var attributes = BeatmapDifficultyCalculator.calculateStandardDifficulty(
                                         beatmap, mods, scope
@@ -327,6 +355,17 @@ public class ModMenu implements IModSwitcher {
                     hide();
                     return true;
                 }
+
+                if (pSceneTouchEvent.isActionOutside()
+                        || pSceneTouchEvent.isActionMove()
+                        && (MathUtils.distance(dx, dy, pTouchAreaLocalX,
+                        pTouchAreaLocalY) > 50)) {
+                    if (!moved && clickShortSound != null) {
+                        clickShortSound.play();
+                    }
+                    moved = true;
+                }
+
                 return false;
             }
         };
@@ -342,6 +381,8 @@ public class ModMenu implements IModSwitcher {
         scene.registerTouchArea(back);
 
         scene.setTouchAreaBindingEnabled(true);
+
+        update();
     }
 
     public Scene getScene() {
@@ -386,11 +427,28 @@ public class ModMenu implements IModSwitcher {
         var mod = (Mod) selectableMod;
         boolean returnValue = true;
 
+        var checkOffSound = ResourceManager.getInstance().getSound("check-off");
+        var checkOnSound = ResourceManager.getInstance().getSound("check-on");
+
         if (enabledMods.contains(mod)) {
             enabledMods.remove(mod);
             returnValue = false;
         } else {
             enabledMods.put(mod);
+        }
+
+        if (returnValue) {
+            if (checkOnSound != null) {
+                checkOnSound.play();
+            }
+        } else {
+            if (checkOffSound != null) {
+                checkOffSound.play();
+            }
+        }
+
+        if (mod instanceof ModClockRateAdjust) {
+            reloadMusicEffects();
         }
 
         update();
@@ -403,6 +461,10 @@ public class ModMenu implements IModSwitcher {
         if (selectedBeatmap != null) {
             changeMultiplierText();
         }
+    }
+
+    private void reloadMusicEffects() {
+        GlobalManager.getInstance().getSongMenu().updateMusicEffects();
     }
 
     public float getChangeSpeed() {
@@ -437,6 +499,8 @@ public class ModMenu implements IModSwitcher {
 
     public void setEnableNCWhenSpeedChange(boolean t){
         enableNCWhenSpeedChange = t;
+
+        GlobalManager.getInstance().getSongMenu().updateMusicEffects();
     }
 
     public void cancelCalculationJob() {
@@ -489,7 +553,7 @@ public class ModMenu implements IModSwitcher {
         handleForceDifficultyStatisticsChange();
     }
 
-    public InGameSettingMenu getMenu() {
+    public ModSettingsMenu getMenu() {
         return menu;
     }
 }

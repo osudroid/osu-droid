@@ -2,9 +2,9 @@ package com.reco1l.andengine.container
 
 import com.reco1l.andengine.*
 import com.reco1l.toolkt.kotlin.*
+import org.anddev.andengine.engine.camera.*
 import org.anddev.andengine.entity.*
 import org.anddev.andengine.entity.IEntity.*
-import org.anddev.andengine.entity.shape.IShape
 import org.anddev.andengine.util.*
 import javax.microedition.khronos.opengles.GL10
 import kotlin.math.*
@@ -12,7 +12,7 @@ import kotlin.math.*
 open class Container : ExtendedEntity() {
 
 
-    override var autoSizeAxes = Axes.None
+    override var autoSizeAxes = Axes.Both
         set(value) {
             if (field != value) {
                 field = value
@@ -28,7 +28,7 @@ open class Container : ExtendedEntity() {
 
         if (shouldMeasureSize) {
             shouldMeasureSize = false
-            onMeasureSize()
+            onMeasureContentSize()
         }
 
         super.onManagedUpdate(pSecondsElapsed)
@@ -57,20 +57,24 @@ open class Container : ExtendedEntity() {
     }
 
 
-    open fun onApplyChildTranslation(gl: GL10, child: ExtendedEntity) {
+    open fun getChildDrawX(child: ExtendedEntity): Float {
 
-        val originOffsetX = child.width * child.originX
-        val originOffsetY = child.height * child.originY
-
-        val anchorOffsetX = width * child.anchorX
-        val anchorOffsetY = height * child.anchorY
-
-        val finalX = anchorOffsetX + child.x - originOffsetX + child.translationX
-        val finalY = anchorOffsetY + child.y - originOffsetY + child.translationY
-
-        if (finalX != 0f || finalY != 0f) {
-            gl.glTranslatef(finalX, finalY, 0f)
+        var x = child.x
+        if (child.relativePositionAxes.isHorizontal) {
+            x *= getPaddedWidth()
         }
+
+        return x + child.totalOffsetX
+    }
+
+    open fun getChildDrawY(child: ExtendedEntity): Float {
+
+        var y = child.y
+        if (child.relativePositionAxes.isVertical) {
+            y *= getPaddedHeight()
+        }
+
+        return y + child.totalOffsetY
     }
 
 
@@ -80,24 +84,25 @@ open class Container : ExtendedEntity() {
      * The default implementation of this method will take the farthest child's
      * position and size as the width and height respectively.
      */
-    protected open fun onMeasureSize() {
+    protected open fun onMeasureContentSize() {
 
-        var maxWidth = 0f
-        var maxHeight = 0f
+        contentWidth = 0f
+        contentHeight = 0f
 
         if (mChildren != null) {
             for (i in mChildren.indices) {
 
                 val child = mChildren.getOrNull(i) ?: continue
 
-                if (child is IShape) {
-                    maxWidth = max(maxWidth, child.x + child.width)
-                    maxHeight = max(maxHeight, child.y + child.height)
-                }
+                val x = max(0f, child.getDrawX())
+                val y = max(0f, child.getDrawY())
+
+                contentWidth = max(contentWidth, x + child.getDrawWidth())
+                contentHeight = max(contentHeight, y + child.getDrawHeight())
             }
         }
 
-        onApplyInternalSize(maxWidth, maxHeight)
+        onContentSizeMeasured()
     }
 
 
@@ -156,8 +161,25 @@ open class Container : ExtendedEntity() {
     }
 
 
-
     override fun onUpdateVertexBuffer() {}
+    override fun drawVertices(pGL: GL10, pCamera: Camera) {}
 
 }
 
+
+operator fun <T : IEntity> Container.get(index: Int): T {
+    @Suppress("UNCHECKED_CAST")
+    return getChild(index) as T
+}
+
+operator fun Container.set(index: Int, entity: IEntity) {
+    attachChild(entity, index)
+}
+
+operator fun Container.plusAssign(entity: IEntity) {
+    attachChild(entity)
+}
+
+operator fun Container.minusAssign(entity: IEntity) {
+    detachChild(entity)
+}

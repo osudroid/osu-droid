@@ -18,7 +18,7 @@ import ru.nsu.ccfit.zuev.osu.scoring.StatisticV2
 
 @Entity(
     indices = [
-        Index(name = "beatmapIdx", value = ["beatmapFilename", "beatmapSetDirectory"]),
+        Index(name = "beatmapIdx", value = ["beatmapMD5"]),
     ]
 )
 data class ScoreInfo @JvmOverloads constructor(
@@ -30,14 +30,9 @@ data class ScoreInfo @JvmOverloads constructor(
     val id: Long = 0,
 
     /**
-     * The beatmap filename.
+     * The MD5 hash of the beatmap.
      */
-    val beatmapFilename: String,
-
-    /**
-     * The beatmap set directory.
-     */
-    val beatmapSetDirectory: String,
+    val beatmapMD5: String,
 
     /**
      * The player name.
@@ -100,19 +95,9 @@ data class ScoreInfo @JvmOverloads constructor(
     val misses: Int,
 
     /**
-     * The accuracy.
-     */
-    val accuracy: Float,
-
-    /**
      * The score date.
      */
     val time: Long,
-
-    /**
-     * Whether the score is perfect.
-     */
-    val isPerfect: Boolean
 
 ) {
 
@@ -122,39 +107,28 @@ data class ScoreInfo @JvmOverloads constructor(
     val replayPath
         get() = "${Config.getScorePath()}/$replayFilename"
 
+    /**
+     * The number of notes hit.
+     */
+    val notesHit
+        get() = hit300 + hit100 + hit50 + misses
 
-    fun toJSON() = JSONObject().apply {
+    /**
+     * The accuracy.
+     */
+    val accuracy
+        get() = if (notesHit == 0) 1f else (hit300 * 6f + hit100 * 2f + hit50) / (6f * notesHit)
 
-        // The keys don't correspond to the table columns in order to keep compatibility with the old replays.
-        put("id", id)
-        put("filename", "$beatmapSetDirectory/$beatmapFilename")
-        put("playername", playerName)
-        put("replayfile", replayFilename)
-        put("mod", mods)
-        put("score", score)
-        put("combo", maxCombo)
-        put("mark", mark)
-        put("h300k", hit300k)
-        put("h300", hit300)
-        put("h100k", hit100k)
-        put("h100", hit100)
-        put("h50", hit50)
-        put("misses", misses)
-        put("accuracy", accuracy)
-        put("time", time)
-        put("isPerfect", if (isPerfect) 1 else 0)
-
-    }
 
     @JvmOverloads
     fun toStatisticV2(difficulty: BeatmapDifficulty? = null) = StatisticV2().also {
 
         it.playerName = playerName
-        it.setBeatmap(beatmapSetDirectory, beatmapFilename)
+        it.setBeatmapMD5(beatmapMD5)
         it.replayFilename = replayFilename
         it.mod = ModUtils.convertModString(mods)
         it.setForcedScore(score)
-        it.maxCombo = maxCombo
+        it.scoreMaxCombo = maxCombo
         it.mark = mark
         it.hit300k = hit300k
         it.hit300 = hit300
@@ -162,9 +136,7 @@ data class ScoreInfo @JvmOverloads constructor(
         it.hit100 = hit100
         it.hit50 = hit50
         it.misses = misses
-        it.accuracy = accuracy
         it.time = time
-        it.isPerfect = isPerfect
 
         if (difficulty != null) {
             it.migrateLegacyMods(difficulty)
@@ -176,14 +148,10 @@ data class ScoreInfo @JvmOverloads constructor(
 
 }
 
-fun ScoreInfo(json: JSONObject): ScoreInfo {
+fun ScoreInfo(json: JSONObject) =
+    ScoreInfo(
 
-    val beatmapPath = FilenameUtils.normalizeNoEndSeparator(json.getString("filename"))
-
-    return ScoreInfo(
-
-        beatmapFilename = FilenameUtils.getName(beatmapPath),
-        beatmapSetDirectory = FilenameUtils.getName(beatmapPath.substringBeforeLast('/')),
+        beatmapMD5 = json.getString("beatmapMD5"),
         replayFilename = FilenameUtils.getName(json.getString("replayfile")),
 
         // The keys don't correspond to the table columns in order to keep compatibility with the old replays.
@@ -199,24 +167,20 @@ fun ScoreInfo(json: JSONObject): ScoreInfo {
         hit100 = json.getInt("h100"),
         hit50 = json.getInt("h50"),
         misses = json.getInt("misses"),
-        accuracy = json.getDouble("accuracy").toFloat(),
         time = json.getLong("time"),
-        isPerfect = json.getInt("isPerfect") == 1
     )
-}
-
 
 @Dao
 interface IScoreInfoDAO {
 
-    @Query("SELECT * FROM ScoreInfo WHERE beatmapSetDirectory = :beatmapSetDirectory AND beatmapFilename = :beatmapFilename ORDER BY score DESC")
-    fun getBeatmapScores(beatmapSetDirectory: String, beatmapFilename: String): List<ScoreInfo>
+    @Query("SELECT * FROM ScoreInfo WHERE beatmapMD5 = :beatmapMD5 ORDER BY score DESC")
+    fun getBeatmapScores(beatmapMD5: String): List<ScoreInfo>
 
     @Query("SELECT * FROM ScoreInfo WHERE id = :id")
     fun getScore(id: Int): ScoreInfo?
 
-    @Query("SELECT mark FROM ScoreInfo WHERE beatmapSetDirectory = :beatmapSetDirectory AND beatmapFilename = :beatmapFilename ORDER BY score DESC LIMIT 1")
-    fun getBestMark(beatmapSetDirectory: String, beatmapFilename: String): String?
+    @Query("SELECT mark FROM ScoreInfo WHERE beatmapMD5 = :beatmapMD5 ORDER BY score DESC LIMIT 1")
+    fun getBestMark(beatmapMD5: String): String?
 
     @Insert(onConflict = OnConflictStrategy.ABORT)
     fun insertScore(score: ScoreInfo): Long

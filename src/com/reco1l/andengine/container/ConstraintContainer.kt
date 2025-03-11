@@ -3,42 +3,84 @@ package com.reco1l.andengine.container
 import com.reco1l.andengine.*
 import org.anddev.andengine.entity.*
 import org.anddev.andengine.entity.shape.*
-import org.anddev.andengine.util.ParameterCallable
-import javax.microedition.khronos.opengles.*
 
 /**
  * Container that allows to constrain nested entities to other entities in the same container.
  *
  * This is useful for creating complex layouts.
  */
-class ConstraintContainer : Container() {
+open class ConstraintContainer : Container() {
+
+
+    /**
+     * Whether the container should account for the scales of the children when calculating the draw position.
+     */
+    var accountForScaleAxes = Axes.Both
 
 
     private val constraints = mutableMapOf<ExtendedEntity, IShape>()
 
 
-    override fun onApplyChildTranslation(gl: GL10, child: ExtendedEntity) {
+    override fun getChildDrawX(child: ExtendedEntity): Float {
 
-        val constraint = constraints[child] ?: this
+        val target = constraints[child] ?: this
 
-        val originOffsetX = child.width * child.originX
-        val originOffsetY = child.height * child.originY
+        var targetX = target.getDrawX()
+        var targetWidth = target.getDrawWidth()
 
-        val anchorOffsetX = constraint.width * child.anchorX
-        val anchorOffsetY = constraint.height * child.anchorY
-
-        var finalX = anchorOffsetX + child.x - originOffsetX + child.translationX
-        var finalY = anchorOffsetY + child.y - originOffsetY + child.translationY
-
-        // Apply the constraint's if it's not the container itself.
-        if (constraint != this)  {
-            finalX += constraint.x
-            finalY += constraint.y
+        if (target == this) {
+            targetX = 0f
+            targetWidth = getPaddedWidth()
+        } else if (accountForScaleAxes.isHorizontal) {
+            targetWidth *= target.scaleX
         }
 
-        if (finalX != 0f || finalY != 0f) {
-            gl.glTranslatef(finalX, finalY, 0f)
+        val anchorOffsetX = targetWidth * child.anchor.x
+
+        var childX = child.x
+        if (child.relativePositionAxes.isHorizontal) {
+
+            // Relative positions will be multiplied by the remaining space from the
+            // target's position to the edge of the container.
+            childX *= getPaddedWidth() - targetX
         }
+
+        if (target != this && accountForScaleAxes.isHorizontal) {
+            childX += targetWidth * (1 - target.scaleX)
+        }
+
+        return targetX + childX + child.originOffsetX + anchorOffsetX + child.translationX
+    }
+
+    override fun getChildDrawY(child: ExtendedEntity): Float {
+
+        val target = constraints[child] ?: this
+
+        var targetY = target.getDrawY()
+        var targetHeight = target.getDrawHeight()
+
+        if (target == this) {
+            targetY = 0f
+            targetHeight = getPaddedHeight()
+        } else if (accountForScaleAxes.isVertical) {
+            targetHeight *= target.scaleY
+        }
+
+        val anchorOffsetY = targetHeight * child.anchor.y
+
+        var childY = child.y
+        if (child.relativePositionAxes.isVertical) {
+
+            // Relative positions will be multiplied by the remaining space from the
+            // target's position to the edge of the container.
+            childY *= getPaddedHeight() - targetY
+        }
+
+        if (target != this && accountForScaleAxes.isVertical) {
+            childY += targetHeight * (1 - target.scaleY)
+        }
+
+        return targetY + childY + child.originOffsetY + anchorOffsetY + child.translationY
     }
 
 
@@ -73,6 +115,16 @@ class ConstraintContainer : Container() {
     override fun onChildDetached(child: IEntity) {
         super.onChildDetached(child)
         removeConstraint(child as? ExtendedEntity)
+    }
+
+    override fun onChildPositionChanged(child: IEntity) {
+        constraints.forEach { (source, target) ->
+            if (target == child) {
+                source.invalidateTransformations()
+                onChildPositionChanged(source)
+            }
+        }
+        super.onChildPositionChanged(child)
     }
 
 }

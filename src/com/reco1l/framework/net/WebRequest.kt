@@ -29,6 +29,13 @@ open class WebRequest(private var url: HttpUrl) : AutoCloseable {
     lateinit var responseBody: ResponseBody
         protected set
 
+    /**
+     * The call object used to execute the request.
+     * It will be initialized upon [execute] call.
+     */
+    lateinit var call: Call
+        protected set
+
 
     /**
      * The client to be used for this request.
@@ -104,6 +111,20 @@ open class WebRequest(private var url: HttpUrl) : AutoCloseable {
             responseBody.close()
         }
 
+        if (::call.isInitialized) {
+            call.cancel()
+        }
+    }
+
+
+    /**
+     * Cancels the current request.
+     * This will have no effect if [execute] wasn't called or the request has already finished.
+     */
+    open fun cancel() {
+        if (::call.isInitialized) {
+            call.cancel()
+        }
     }
 
 
@@ -115,9 +136,8 @@ open class WebRequest(private var url: HttpUrl) : AutoCloseable {
     @Throws(Exception::class)
     open fun execute(): WebRequest {
 
-        val call = client.newCall(request)
-
         try {
+            call = client.newCall(request)
 
             if (BuildConfig.DEBUG) {
                 Log.i("WebRequest", "Request to: " + request.url)

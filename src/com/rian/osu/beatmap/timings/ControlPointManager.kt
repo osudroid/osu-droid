@@ -7,19 +7,14 @@ abstract class ControlPointManager<T : ControlPoint>(
     /**
      * The default control point for this type.
      */
-    defaultControlPoint: T
+    @JvmField
+    val defaultControlPoint: T
 ) {
-    /**
-     * The default control point for this type.
-     */
-    var defaultControlPoint = defaultControlPoint
-        private set
-
     /**
      * The control points in this manager.
      */
     @JvmField
-    protected var controlPoints = mutableListOf<T>()
+    val controlPoints = mutableListOf<T>()
 
     /**
      * Finds the control point that is active at a given time.
@@ -85,9 +80,29 @@ abstract class ControlPointManager<T : ControlPoint>(
     fun clear() = controlPoints.clear()
 
     /**
-     * Gets the control points in this manager.
+     * Gets all control points between two times.
+     *
+     * @param start The start time, in milliseconds.
+     * @param end The end time, in milliseconds.
+     * @return An array of control points between the two times. If [start] is greater than [end], the control point at
+     * [start] will be returned.
      */
-    fun getControlPoints() = controlPoints.toList()
+    fun between(start: Double, end: Double): MutableList<T> {
+        if (controlPoints.isEmpty()) {
+            return mutableListOf(defaultControlPoint)
+        }
+
+        if (start > end) {
+            return mutableListOf(controlPointAt(start))
+        }
+
+        // Subtract 1 from start index as the binary search from findInsertionIndex would return the next control point
+        val startIndex = (findInsertionIndex(start) - 1).coerceAtLeast(0)
+        // End index does not matter as subList range is exclusive
+        val endIndex = findInsertionIndex(end).coerceIn(startIndex + 1, controlPoints.size)
+
+        return controlPoints.subList(startIndex, endIndex)
+    }
 
     /**
      * Binary searches one of the control point lists to find the active control point at the given time.
@@ -107,7 +122,7 @@ abstract class ControlPointManager<T : ControlPoint>(
      * @return The active control point at the given time, `null` if none found.
      */
     protected fun binarySearch(time: Double): T? {
-        if (controlPoints.size == 0 || time < controlPoints[0].time) {
+        if (controlPoints.isEmpty() || time < controlPoints[0].time) {
             return null
         }
 
@@ -140,7 +155,7 @@ abstract class ControlPointManager<T : ControlPoint>(
      * @param time The start time of the control point, in milliseconds.
      */
     private fun findInsertionIndex(time: Double): Int {
-        if (controlPoints.size == 0 || time < controlPoints[0].time) {
+        if (controlPoints.isEmpty() || time < controlPoints[0].time) {
             return 0
         }
 
@@ -158,7 +173,9 @@ abstract class ControlPointManager<T : ControlPoint>(
             when {
                 controlPoint.time < time -> l = pivot + 1
                 controlPoint.time > time -> r = pivot - 1
-                else -> return pivot
+                // Normally, this should only return the pivot. However, we are searching for the insertion index here.
+                // If the time is equal to the control point's time, we want to insert the new control point after it.
+                else -> return pivot + 1
             }
         }
 

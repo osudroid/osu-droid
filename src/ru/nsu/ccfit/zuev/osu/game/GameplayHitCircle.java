@@ -1,10 +1,11 @@
 package ru.nsu.ccfit.zuev.osu.game;
 
 import com.reco1l.andengine.sprite.ExtendedSprite;
-import com.reco1l.osu.Modifiers;
+import com.reco1l.andengine.Modifiers;
 import com.reco1l.andengine.Anchor;
 import com.reco1l.osu.playfield.NumberedCirclePiece;
 import com.rian.osu.beatmap.hitobject.HitCircle;
+import com.rian.osu.gameplay.GameplayHitSampleInfo;
 import com.rian.osu.mods.ModHidden;
 
 import org.anddev.andengine.entity.scene.Scene;
@@ -20,13 +21,14 @@ public class GameplayHitCircle extends GameObject {
 
     private final ExtendedSprite approachCircle;
     private final RGBColor comboColor = new RGBColor();
-    private HitCircle beatmapCircle;
     private GameObjectListener listener;
     private Scene scene;
+    private HitCircle beatmapCircle;
     private float radiusSquared;
     private float passedTime;
     private float timePreempt;
     private boolean kiai;
+    private GameplayHitSampleInfo[] hitSamples;
 
     /**
      * The circle piece that represents the circle body and overlay.
@@ -45,8 +47,8 @@ public class GameplayHitCircle extends GameObject {
                      final HitCircle beatmapCircle, final float secPassed,
                      final RGBColor comboColor) {
         // Storing parameters into fields
-        replayObjectData = null;
         this.beatmapCircle = beatmapCircle;
+        replayObjectData = null;
 
         var stackedPosition = beatmapCircle.getGameplayStackedPosition();
         position.set(stackedPosition.x, stackedPosition.y);
@@ -56,7 +58,8 @@ public class GameplayHitCircle extends GameObject {
         scene = pScene;
         timePreempt = (float) beatmapCircle.timePreempt / 1000;
 
-        passedTime = secPassed - ((float) beatmapCircle.startTime / 1000 - timePreempt);
+        hitTime = (float) beatmapCircle.startTime / 1000;
+        passedTime = secPassed - (hitTime - timePreempt);
         startHit = false;
         kiai = GameHelper.isKiai();
         this.comboColor.set(comboColor.r(), comboColor.g(), comboColor.b());
@@ -138,18 +141,36 @@ public class GameplayHitCircle extends GameObject {
             ));
         }
 
+        // Initialize samples
+        var parsedSamples = beatmapCircle.getSamples();
+        hitSamples = new GameplayHitSampleInfo[parsedSamples.size()];
+
+        for (int i = 0, size = parsedSamples.size(); i < size; i++) {
+            var gameplaySample = GameplayHitSampleInfo.pool.obtain();
+            gameplaySample.init(parsedSamples.get(i));
+
+            if (GameHelper.isSamplesMatchPlaybackRate()) {
+                gameplaySample.setFrequency(GameHelper.getSpeedMultiplier());
+            }
+
+            hitSamples[i] = gameplaySample;
+        }
+
         scene.attachChild(circlePiece, 0);
         scene.attachChild(approachCircle);
-    }
-
-    private void playSound() {
-        listener.playSamples(beatmapCircle);
     }
 
     private void removeFromScene() {
         if (scene == null) {
             return;
         }
+
+        for (int i = 0; i < hitSamples.length; ++i) {
+            hitSamples[i].reset();
+            GameplayHitSampleInfo.pool.free(hitSamples[i]);
+        }
+
+        hitSamples = null;
 
         circlePiece.clearEntityModifiers();
         approachCircle.clearEntityModifiers();
@@ -162,8 +183,11 @@ public class GameplayHitCircle extends GameObject {
         scene = null;
     }
 
-    private boolean canBeHit() {
-        return passedTime >= Math.max(0, timePreempt - objectHittableRange);
+    private boolean canBeHit(float dt, float frameHitOffset) {
+        // At this point, the object's state is already in the next update tick.
+        // However, hit judgements require the object's state to be in the previous tick.
+        // Therefore, we subtract dt to get the object's state in the previous tick.
+        return passedTime - dt + frameHitOffset >= Math.max(0, timePreempt - objectHittableRange);
     }
 
     private boolean isHit() {
@@ -185,6 +209,10 @@ public class GameplayHitCircle extends GameObject {
     }
 
     private double hitOffsetToPreviousFrame() {
+        if (!Config.isFixFrameOffset()) {
+            return 0;
+        }
+
         // 因为这里是阻塞队列, 所以提前点的地方会影响判断
         for (int i = 0, count = listener.getCursorsCount(); i < count; i++) {
 
@@ -203,20 +231,33 @@ public class GameplayHitCircle extends GameObject {
         return 0;
     }
 
+    private void playHitSamples() {
+        for (int i = 0; i < hitSamples.length; ++i) {
+            hitSamples[i].play();
+        }
+    }
 
     @Override
     public void update(final float dt) {
+        if (beatmapCircle.hitWindow == null) {
+            // Circle somehow does not have a judgement window - abandon.
+            return;
+        }
+
         // PassedTime < 0 means circle logic is over
         if (passedTime < 0) {
             removeFromScene();
             return;
         }
+
+        float mehWindow = beatmapCircle.hitWindow.getMehWindow() / 1000;
+
         // If we have clicked circle
         if (replayObjectData != null) {
             if (passedTime - timePreempt + dt / 2 > replayObjectData.accuracy / 1000f) {
                 final float acc = Math.abs(replayObjectData.accuracy / 1000f);
-                if (acc <= GameHelper.getDifficultyHelper().hitWindowFor50(GameHelper.getOverallDifficulty())) {
-                    playSound();
+                if (acc <= mehWindow) {
+                    playHitSamples();
                 }
                 listener.registerAccuracy(replayObjectData.accuracy / 1000f);
                 passedTime = -1;
@@ -225,23 +266,24 @@ public class GameplayHitCircle extends GameObject {
                 removeFromScene();
                 return;
             }
-        } else if (isHit() && canBeHit()) {
-            float signAcc = passedTime - timePreempt;
-            if (Config.isFixFrameOffset()) {
-                signAcc += (float) hitOffsetToPreviousFrame() / 1000f;
+        } else {
+            float frameHitOffset = (float) hitOffsetToPreviousFrame() / 1000;
+
+            // dt is 0 here as the current time is updated *after* this judgement.
+            if (canBeHit(0, frameHitOffset) && isHit()) {
+                float signAcc = passedTime - timePreempt + frameHitOffset;
+                final float acc = Math.abs(signAcc);
+                if (acc <= mehWindow) {
+                    playHitSamples();
+                }
+                listener.registerAccuracy(signAcc);
+                passedTime = -1;
+                // Remove circle and register hit in update thread
+                startHit = true;
+                listener.onCircleHit(id, signAcc, position, endsCombo, (byte) 0, comboColor);
+                removeFromScene();
+                return;
             }
-            final float acc = Math.abs(signAcc);
-            if (acc <= GameHelper.getDifficultyHelper().hitWindowFor50(GameHelper.getOverallDifficulty())) {
-                playSound();
-            }
-            listener.registerAccuracy(signAcc);
-            passedTime = -1;
-            // Remove circle and register hit in update thread
-            float finalSignAcc = signAcc;
-            startHit = true;
-            listener.onCircleHit(id, finalSignAcc, position, endsCombo, (byte) 0, comboColor);
-            removeFromScene();
-            return;
         }
 
         if (GameHelper.isKiai()) {
@@ -264,7 +306,7 @@ public class GameplayHitCircle extends GameObject {
         }
 
         if (autoPlay) {
-            playSound();
+            playHitSamples();
             passedTime = -1;
             // Remove circle and register hit in update thread
             listener.onCircleHit(id, 0, position, endsCombo, ResultType.HIT300.getId(), comboColor);
@@ -274,7 +316,7 @@ public class GameplayHitCircle extends GameObject {
             approachCircle.setAlpha(0);
 
             // If passed too much time, counting it as miss
-            if (passedTime > timePreempt + GameHelper.getDifficultyHelper().hitWindowFor50(GameHelper.getOverallDifficulty())) {
+            if (passedTime > timePreempt + mehWindow) {
                 passedTime = -1;
                 final byte forcedScore = (replayObjectData == null) ? 0 : replayObjectData.result;
 
@@ -286,20 +328,25 @@ public class GameplayHitCircle extends GameObject {
 
     @Override
     public void tryHit(final float dt) {
-        if (isHit() && canBeHit()) {
-            float signAcc = passedTime - timePreempt;
-            if (Config.isFixFrameOffset()) {
-                signAcc += (float) hitOffsetToPreviousFrame() / 1000f;
-            }
+        if (beatmapCircle.hitWindow == null) {
+            return;
+        }
+
+        float frameHitOffset = (float) hitOffsetToPreviousFrame() / 1000;
+
+        if (canBeHit(dt, frameHitOffset) && isHit()) {
+            // At this point, the object's state is already in the next update tick.
+            // However, hit judgements require the object's state to be in the previous tick.
+            // Therefore, we subtract dt to get the object's state in the previous tick.
+            float signAcc = passedTime - timePreempt - dt + frameHitOffset;
             final float acc = Math.abs(signAcc);
-            if (acc <= GameHelper.getDifficultyHelper().hitWindowFor50(GameHelper.getOverallDifficulty())) {
-                playSound();
+            if (acc <= beatmapCircle.hitWindow.getMehWindow() / 1000) {
+                playHitSamples();
             }
             listener.registerAccuracy(signAcc);
             passedTime = -1;
             // Remove circle and register hit in update thread
-            float finalSignAcc = signAcc;
-            listener.onCircleHit(id, finalSignAcc, position, endsCombo, (byte) 0, comboColor);
+            listener.onCircleHit(id, signAcc, position, endsCombo, (byte) 0, comboColor);
             removeFromScene();
         }
     }

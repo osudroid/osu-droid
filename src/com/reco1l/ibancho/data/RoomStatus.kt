@@ -1,13 +1,27 @@
 package com.reco1l.ibancho.data
 
-enum class RoomStatus
-{
-    IDLE,
-    CHANGING_BEATMAP,
-    PLAYING;
+/**
+ * Represents the status of a room.
+ */
+enum class RoomStatus {
 
-    companion object
-    {
-        fun from(ordinal: Int) = entries[ordinal]
+    /**
+     * The room is idle (not playing).
+     */
+    Idle,
+
+    /**
+     * The room is in the process of changing the beatmap.
+     */
+    ChangingBeatmap,
+
+    /**
+     * The room is playing.
+     */
+    Playing;
+
+
+    companion object {
+        operator fun get(ordinal: Int) = entries[ordinal]
     }
 }

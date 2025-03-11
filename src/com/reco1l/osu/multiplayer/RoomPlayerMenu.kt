@@ -17,8 +17,8 @@ import com.reco1l.toolkt.android.cornerRadius
 import com.reco1l.toolkt.android.dp
 import ru.nsu.ccfit.zuev.osuplus.R
 
-class RoomPlayerMenu : BaseFragment()
-{
+class RoomPlayerMenu : BaseFragment() {
+
 
     override val layoutID = R.layout.multiplayer_room_player_menu
 
@@ -29,16 +29,14 @@ class RoomPlayerMenu : BaseFragment()
     private var webView: WebViewFragment? = null
 
 
-    init
-    {
+    init {
         isDismissOnBackgroundClick = true
     }
 
 
-    override fun onLoadView()
-    {
-        if (player == null)
-        {
+    override fun onLoadView() {
+
+        if (player == null) {
             dismiss()
             return
         }
@@ -65,8 +63,7 @@ class RoomPlayerMenu : BaseFragment()
         val kick = findViewById<View>(R.id.room_kick)!!
         val host = findViewById<View>(R.id.room_host)!!
 
-        if (!Multiplayer.isRoomHost)
-        {
+        if (!Multiplayer.isRoomHost) {
             kick.visibility = View.GONE
             host.visibility = View.GONE
         }
@@ -83,8 +80,7 @@ class RoomPlayerMenu : BaseFragment()
                     it.dismiss()
                     dismiss()
 
-                    if (Multiplayer.isConnected)
-                        RoomAPI.kickPlayer(player!!.id)
+                    if (Multiplayer.isConnected) RoomAPI.kickPlayer(player!!.id)
                 }
 
                 addButton("No") {
@@ -106,8 +102,7 @@ class RoomPlayerMenu : BaseFragment()
                     it.dismiss()
                     dismiss()
 
-                    if (Multiplayer.isConnected)
-                        RoomAPI.setRoomHost(player!!.id)
+                    if (Multiplayer.isConnected) RoomAPI.setRoomHost(player!!.id)
                 }
 
                 addButton("No") {
@@ -120,46 +115,47 @@ class RoomPlayerMenu : BaseFragment()
         playOnLoadAnim()
     }
 
-    // Code extracted from PropsMenuFragment class
 
-    private fun playOnLoadAnim()
-    {
+    private fun playOnLoadAnim() {
         val body = findViewById<View>(R.id.fullLayout) ?: return
         body.alpha = 0f
         body.translationY = 200f
+
         body.animate().cancel()
         body.animate()
-                .translationY(0f)
-                .alpha(1f)
-                .setInterpolator(EasingHelper.asInterpolator(Easing.InOutQuad))
-                .setDuration(150)
-                .start()
+            .translationY(0f)
+            .alpha(1f)
+            .setInterpolator(EasingHelper.asInterpolator(Easing.InOutQuad))
+            .setDuration(150)
+            .start()
+
         playBackgroundHideInAnim(150)
     }
 
-    private fun playEndAnim(action: Runnable?)
-    {
+    private fun playEndAnim(action: Runnable?) {
         val body = findViewById<View>(R.id.fullLayout) ?: return
+
         body.animate().cancel()
         body.animate()
-                .translationY(200f)
-                .alpha(0f)
-                .setDuration(200)
-                .setInterpolator(EasingHelper.asInterpolator(Easing.InOutQuad))
-                .setListener(object : BaseAnimationListener()
-                             {
-                                 override fun onAnimationEnd(animation: Animator)
-                                 {
-                                     action?.run()
-                                 }
-                             })
-                .start()
+            .translationY(200f)
+            .alpha(0f)
+            .setDuration(200)
+            .setInterpolator(EasingHelper.asInterpolator(Easing.InOutQuad))
+            .setListener(object : BaseAnimationListener() {
+                override fun onAnimationEnd(animation: Animator) {
+                    action?.run()
+                }
+            })
+            .start()
+
         playBackgroundHideOutAnim(200)
     }
 
-    override fun dismiss()
-    {
+
+    override fun dismiss() {
         webView?.dismiss()
-        playEndAnim { super.dismiss() }
+        playEndAnim {
+            super.dismiss()
+        }
     }
 }

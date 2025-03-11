@@ -6,6 +6,7 @@ import android.content.SharedPreferences;
 import android.content.SharedPreferences.Editor;
 import android.os.Environment;
 import android.util.DisplayMetrics;
+import android.util.Log;
 
 import androidx.preference.PreferenceManager;
 
@@ -18,6 +19,7 @@ import java.util.Map;
 import java.util.UUID;
 
 import com.reco1l.osu.multiplayer.Multiplayer;
+
 import net.margaritov.preference.colorpicker.ColorPickerPreference;
 
 import org.anddev.andengine.util.Debug;
@@ -46,17 +48,12 @@ public class Config {
         useCustomSounds,
         corovans,
         showFPS,
-        showAverageOffset,
-        showUnstableRate,
         animateFollowCircle,
         animateComboText,
         snakingInSliders,
         playMusicPreview,
         showCursor,
         shrinkPlayfieldDownwards,
-        hideNaviBar,
-        showScoreboard,
-        enablePP,
         enableExtension,
         loadAvatar,
         stayOnline,
@@ -74,21 +71,20 @@ public class Config {
         receiveAnnouncements,
         enableStoryboard,
         safeBeatmapBg,
-        displayRealTimePPCounter,
         useNightcoreOnMultiplayer,
         videoEnabled,
         deleteUnsupportedVideos,
         submitScoreOnMultiplayer,
         keepBackgroundAspectRatio,
         noChangeDimInBreaks,
-        dimHitObjects;
+        dimHitObjects,
+        forceMaxRefreshRate;
 
     private static int RES_WIDTH,
         RES_HEIGHT,
-        errorMeter,
         spinnerStyle,
         metronomeSwitch;
-    
+
     private static float soundVolume,
         bgmVolume,
         offset,
@@ -97,8 +93,6 @@ public class Config {
         playfieldSize,
         cursorSize;
 
-    private static DifficultyAlgorithm difficultyAlgorithm;
-
     private static BeatmapLeaderboardScoringMode beatmapLeaderboardScoringMode;
 
     private static Map<String, String> skins;
@@ -106,30 +100,35 @@ public class Config {
     private static RGBColor[] comboColors;
     private static Context context;
 
+
+    /**
+     * The shared preferences of the application.
+     */
+    private static SharedPreferences sharedPreferences;
+
+
     public static void loadConfig(final Context context) {
         Config.context = context;
-        final SharedPreferences prefs = PreferenceManager
-                .getDefaultSharedPreferences(context);
+        sharedPreferences = PreferenceManager.getDefaultSharedPreferences(context);
+
+        final SharedPreferences prefs = sharedPreferences;
         // graphics
         useCustomSkins = prefs.getBoolean("skin", false);
         useCustomSounds = prefs.getBoolean("beatmapSounds", true);
         comboburst = prefs.getBoolean("comboburst", false);
         corovans = prefs.getBoolean("images", false);
         showFPS = prefs.getBoolean("fps", true);
-        showAverageOffset = prefs.getBoolean("averageOffset", true);
-        showUnstableRate = prefs.getBoolean("unstableRate", true);
-        errorMeter = Integer.parseInt(prefs.getString("errormeter", "0"));
         spinnerStyle = Integer.parseInt(prefs.getString("spinnerstyle", "1"));
         showFirstApproachCircle = prefs.getBoolean("showfirstapproachcircle", false);
         metronomeSwitch = Integer.parseInt(prefs.getString("metronomeswitch", "1"));
-        showScoreboard = prefs.getBoolean("showscoreboard", true);
         enableStoryboard = prefs.getBoolean("enableStoryboard", false);
         videoEnabled = prefs.getBoolean("enableVideo", false);
         keepBackgroundAspectRatio = prefs.getBoolean("keepBackgroundAspectRatio", false);
         noChangeDimInBreaks = prefs.getBoolean("noChangeDimInBreaks", false);
         dimHitObjects = prefs.getBoolean("dimHitObjects", true);
+        forceMaxRefreshRate = prefs.getBoolean("forceMaxRefreshRate", false);
 
-        setSize();
+        measureDisplaySize();
         setPlayfieldSize(prefs.getInt("playfieldSize", 100) / 100f);
 
         shrinkPlayfieldDownwards = prefs.getBoolean("shrinkPlayfieldDownwards", true);
@@ -211,8 +210,6 @@ public class Config {
         // other
         playMusicPreview = prefs.getBoolean("musicpreview", true);
         showCursor = prefs.getBoolean("showcursor", false);
-        hideNaviBar = prefs.getBoolean("hidenavibar", false);
-        enablePP = false;//prefs.getBoolean("enablePP",true);
         fixFrameOffset = prefs.getBoolean("fixFrameOffset", true);
         removeSliderLock = prefs.getBoolean("removeSliderLock", false);
         displayScoreStatistics = prefs.getBoolean("displayScoreStatistics", false);
@@ -220,8 +217,6 @@ public class Config {
         hideInGameUI = prefs.getBoolean("hideInGameUI", false);
         receiveAnnouncements = prefs.getBoolean("receiveAnnouncements", true);
         safeBeatmapBg = prefs.getBoolean("safebeatmapbg", false);
-        displayRealTimePPCounter = prefs.getBoolean("displayRealTimePPCounter", false);
-        difficultyAlgorithm = DifficultyAlgorithm.droid;
 
         // Multiplayer
         useNightcoreOnMultiplayer = prefs.getBoolean("player_nightcore", false);
@@ -259,20 +254,22 @@ public class Config {
         beatmapLeaderboardScoringMode = BeatmapLeaderboardScoringMode.parse(Integer.parseInt(prefs.getString("beatmapLeaderboardScoringMode", "0")));
     }
 
-    public static void setSize() {
-        final DisplayMetrics dm = new DisplayMetrics();
-        ((Activity) context).getWindowManager().getDefaultDisplay().getMetrics(dm);
+    public static void measureDisplaySize() {
+        DisplayMetrics displayMetrics = new DisplayMetrics();
+        Activity activity = (Activity) context;
+        activity.getWindowManager().getDefaultDisplay().getRealMetrics(displayMetrics);
 
-        int width = Math.max(dm.widthPixels, dm.heightPixels), height = Math.min(dm.widthPixels, dm.heightPixels);
-        //int width = dm.widthPixels, height =  dm.heightPixels;
-        setSize(width, height);
-        //ToastLogger.showText("width=" + dm.widthPixels + " height=" + dm.heightPixels, true);
-        Debug.i("width=" + dm.widthPixels + " height=" + dm.heightPixels);
-    }
+        int width = displayMetrics.widthPixels;
+        int height = displayMetrics.heightPixels;
 
-    public static void setSize(int width, int height) {
-        RES_WIDTH = 1280;
-        RES_HEIGHT = 1280 * height / width;
+        // Tries to emulate the original behavior, the game was designed for 1280x720
+        // resolution, so we try to approximate the scale factor.
+        float ratio = 1280f / width;
+
+        RES_WIDTH = (int) (width * ratio);
+        RES_HEIGHT = (int) (height * ratio);
+
+        Log.v("Config", "Display size: " + width + "x" + height + "\nViewport size: " + RES_WIDTH + "x" + RES_HEIGHT);
     }
 
     public static boolean isEnableStoryboard() {
@@ -296,16 +293,10 @@ public class Config {
         return displayScoreStatistics;
     }
 
-    public static boolean isDisplayRealTimePPCounter() {
-        return displayRealTimePPCounter;
-    }
-
     public static DifficultyAlgorithm getDifficultyAlgorithm() {
-        return difficultyAlgorithm;
-    }
-
-    public static void setDifficultyAlgorithm(DifficultyAlgorithm algorithm) {
-        Config.difficultyAlgorithm = algorithm;
+        return Config.getString("difficultyAlgorithm", "0").equals("1")
+                ? DifficultyAlgorithm.standard
+                : DifficultyAlgorithm.droid;
     }
 
     public static boolean isEnableExtension() {
@@ -322,30 +313,6 @@ public class Config {
 
     public static void setShowFPS(final boolean showFPS) {
         Config.showFPS = showFPS;
-    }
-
-    public static boolean isShowAverageOffset() {
-        return showAverageOffset;
-    }
-
-    public static void setShowAverageOffset(final boolean showAverageOffset) {
-        Config.showAverageOffset = showAverageOffset;
-    }
-
-    public static boolean isShowUnstableRate() {
-        return showUnstableRate;
-    }
-
-    public static void setShowUnstableRate(final boolean showUnstableRate) {
-        Config.showUnstableRate = showUnstableRate;
-    }
-
-    public static boolean isShowScoreboard() {
-        return showScoreboard;
-    }
-
-    public static void setShowScoreboard(final boolean showScoreboard) {
-        Config.showScoreboard = showScoreboard;
     }
 
     public static boolean isCorovans() {
@@ -478,6 +445,10 @@ public class Config {
         return snakingInSliders;
     }
 
+    public static boolean isSnakingOutSliders() {
+        return getBoolean("snakingOutSliders", true);
+    }
+
     public static boolean isPlayMusicPreview() {
         return playMusicPreview;
     }
@@ -598,22 +569,6 @@ public class Config {
         Config.skinTopPath = skinTopPath;
     }
 
-    public static boolean isHideNaviBar() {
-        return hideNaviBar;
-    }
-
-    public static void setHideNaviBar(boolean hideNaviBar) {
-        Config.hideNaviBar = hideNaviBar;
-    }
-
-    public static boolean isEnablePP() {
-        return enablePP;
-    }
-
-    public static void setEnablePP(boolean enablePP) {
-        Config.enablePP = enablePP;
-    }
-
     public static String getScorePath() {
         return scorePath;
     }
@@ -632,14 +587,6 @@ public class Config {
 
     public static RGBColor[] getComboColors() {
         return comboColors;
-    }
-
-    public static int getErrorMeter() {
-        return errorMeter;
-    }
-
-    public static void setErrorMeter(int errorMeter) {
-        Config.errorMeter = errorMeter;
     }
 
     public static int getSpinnerStyle() {
@@ -803,4 +750,54 @@ public class Config {
     public static boolean isDimHitObjects() {
         return dimHitObjects;
     }
+
+    public static boolean isForceMaxRefreshRate() {
+        return forceMaxRefreshRate;
+    }
+
+
+    // Shared Preferences
+    // It's preferred to use these methods to access shared preferences instead of adding new fields to this class.
+    // If the option is expected to be accessed frequently consider storing it locally as a field where it's needed.
+
+    public static boolean getBoolean(String key, boolean defaultValue) {
+        return sharedPreferences.getBoolean(key, defaultValue);
+    }
+
+    public static void setBoolean(String key, boolean value) {
+        sharedPreferences.edit().putBoolean(key, value).commit();
+    }
+
+    public static int getInt(String key, int defaultValue) {
+        return sharedPreferences.getInt(key, defaultValue);
+    }
+
+    public static void setInt(String key, int value) {
+        sharedPreferences.edit().putInt(key, value).commit();
+    }
+
+    public static long getLong(String key, long defaultValue) {
+        return sharedPreferences.getLong(key, defaultValue);
+    }
+
+    public static void setLong(String key, long value) {
+        sharedPreferences.edit().putLong(key, value).commit();
+    }
+
+    public static String getString(String key, String defaultValue) {
+        return sharedPreferences.getString(key, defaultValue);
+    }
+
+    public static void setString(String key, String value) {
+        sharedPreferences.edit().putString(key, value).commit();
+    }
+
+    public static float getFloat(String key, float defaultValue) {
+        return sharedPreferences.getFloat(key, defaultValue);
+    }
+
+    public static void setFloat(String key, float value) {
+        sharedPreferences.edit().putFloat(key, value).commit();
+    }
+
 }

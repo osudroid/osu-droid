@@ -22,7 +22,8 @@ import kotlinx.coroutines.ensureActive
  */
 class DroidDifficultyCalculator : DifficultyCalculator<DroidPlayableBeatmap, DroidDifficultyHitObject, DroidDifficultyAttributes>() {
     override val difficultyMultiplier = 0.18
-    override val difficultyAdjustmentMods = super.difficultyAdjustmentMods + setOf(ModPrecise::class, ModAutopilot::class)
+    override val difficultyAdjustmentMods = super.difficultyAdjustmentMods +
+        setOf(ModPrecise::class, ModScoreV2::class)
 
     private val maximumSectionDeltaTime = 2000
     private val minimumSectionObjectCount = 5
@@ -41,125 +42,11 @@ class DroidDifficultyCalculator : DifficultyCalculator<DroidPlayableBeatmap, Dro
         sliderCount = beatmap.hitObjects.sliderCount
         spinnerCount = beatmap.hitObjects.spinnerCount
 
-        (skills[0] as DroidAim).let {
-            aimDifficulty = calculateRating(it)
-            aimDifficultStrainCount = it.countDifficultStrains()
-
-            val velocitySum = it.sliderVelocities.sumOf { s -> s.difficultyRating }
-
-            for (slider in it.sliderVelocities) {
-                val difficultyRating = slider.difficultyRating / velocitySum
-
-                // Only consider sliders that are fast enough.
-                if (difficultyRating > 0.02) {
-                    difficultSliders.add(slider.copy(difficultyRating = difficultyRating))
-                }
-            }
-
-            difficultSliders.sortByDescending { s -> s.difficultyRating }
-
-            // Take the top 15% most difficult sliders.
-            difficultSliders.dropLastWhile { difficultSliders.size > ceil(0.15 * sliderCount) }
-        }
-
-        aimSliderFactor = if (aimDifficulty > 0) calculateRating(skills[1]) / aimDifficulty else 1.0
-
-        rhythmDifficulty = calculateRating(skills[2])
-
-        (skills[3] as DroidTap).let {
-            tapDifficulty = calculateRating(it)
-            tapDifficultStrainCount = it.countDifficultStrains()
-            speedNoteCount = it.relevantNoteCount()
-            averageSpeedDeltaTime = it.relevantDeltaTime()
-
-            if (tapDifficulty > 0) {
-                val tapSkillVibro = DroidTap(mods, true, averageSpeedDeltaTime)
-
-                objects.forEach { o -> tapSkillVibro.process(o) }
-
-                vibroFactor = calculateRating(tapSkillVibro) / tapDifficulty
-            }
-        }
-
-        var firstObjectIndex = 0
-        val sectionBoundaries = mutableListOf<Pair<Int, Int>>()
-
-        for (i in 0 until objects.size - 1) {
-            val current = objects[i].obj
-            val next = objects[i + 1].obj
-            val deltaTime = next.startTime - current.endTime
-
-            if (deltaTime >= maximumSectionDeltaTime) {
-                // Ignore sections that do not meet object count requirement.
-                if (i - firstObjectIndex >= minimumSectionObjectCount) {
-                    sectionBoundaries.add(Pair(firstObjectIndex, i))
-                }
-
-                firstObjectIndex = i + 1
-            }
-        }
-
-        // Do not forget to manually add the last beatmap section, which would otherwise be ignored.
-        if (objects.size - firstObjectIndex >= minimumSectionObjectCount) {
-            sectionBoundaries.add(Pair(firstObjectIndex, objects.size - 1))
-        }
-
-        // Re-filter with tap strain in mind.
-        (skills[4] as DroidTap).objectStrains.let {
-            for (section in sectionBoundaries) {
-                var inSpeedSection = false
-                var newFirstObjectIndex = section.first
-
-                for (i in section.first until section.second) {
-                    val strain = it[i]
-
-                    if (!inSpeedSection && strain >= threeFingerStrainThreshold) {
-                        inSpeedSection = true
-                        newFirstObjectIndex = i
-                        continue
-                    }
-
-                    if (inSpeedSection && strain < threeFingerStrainThreshold) {
-                        inSpeedSection = false
-
-                        // Ignore sections that do not meet object count requirement.
-                        if (i - newFirstObjectIndex < minimumSectionObjectCount) {
-                            continue
-                        }
-
-                        possibleThreeFingeredSections.add(HighStrainSection(
-                            newFirstObjectIndex,
-                            i,
-                            calculateThreeFingerSummedStrain(it.subList(newFirstObjectIndex, i))
-                        ))
-                    }
-                }
-
-                // Do not forget to manually add the last beatmap section, which would otherwise be ignored.
-                // Ignore sections that don't meet object count requirement.
-                if (inSpeedSection && section.second - newFirstObjectIndex >= minimumSectionObjectCount) {
-                    possibleThreeFingeredSections.add(HighStrainSection(
-                        newFirstObjectIndex,
-                        section.second,
-                        calculateThreeFingerSummedStrain(it.subList(newFirstObjectIndex, section.second))
-                    ))
-                }
-            }
-        }
-
-        (skills[5] as DroidFlashlight).let {
-            flashlightDifficulty = calculateRating(it)
-            flashlightDifficultStrainCount = it.countDifficultStrains()
-        }
-
-        flashlightSliderFactor = if (flashlightDifficulty > 0) calculateRating(skills[6]) / flashlightDifficulty else 1.0
-
-        (skills[7] as DroidVisual).let {
-            visualDifficulty = calculateRating(it)
-            visualDifficultStrainCount = it.countDifficultStrains()
-        }
-
-        visualSliderFactor = if (visualDifficulty > 0) calculateRating(skills[8]) / visualDifficulty else 1.0
+        populateAimAttributes(skills)
+        populateTapAttributes(skills, objects)
+        populateRhythmAttributes(skills)
+        populateFlashlightAttributes(skills)
+        populateVisualAttributes(skills)
 
         if (ModRelax::class in beatmap.mods) {
             aimDifficulty *= 0.9
@@ -193,9 +80,9 @@ class DroidDifficultyCalculator : DifficultyCalculator<DroidPlayableBeatmap, Dro
             if (basePerformance > 1e-5) 0.027 * (cbrt(100000 / 2.0.pow(1 / 1.1) * basePerformance) + 4)
             else 0.0
 
-        val od = beatmap.difficulty.od
         val isPrecise = ModPrecise::class in beatmap.mods
-        val greatWindow = (if (isPrecise) PreciseDroidHitWindow(od) else DroidHitWindow(od)).greatWindow.toDouble() / clockRate
+        // Weird cast of greatWindow, but necessary for difficulty calculation parity
+        val greatWindow = beatmap.hitWindow.greatWindow.toDouble() / clockRate
 
         overallDifficulty = (
             if (isPrecise) PreciseDroidHitWindow.hitWindow300ToOverallDifficulty(greatWindow.toFloat())
@@ -203,28 +90,40 @@ class DroidDifficultyCalculator : DifficultyCalculator<DroidPlayableBeatmap, Dro
         ).toDouble()
     }
 
-    override fun createSkills(beatmap: DroidPlayableBeatmap) = arrayOf<Skill<DroidDifficultyHitObject>>(
-        DroidAim(beatmap.mods.values, true),
-        DroidAim(beatmap.mods.values, false),
-        // Tap and visual skills depend on rhythm skill, so we put it first
-        DroidRhythm(beatmap.mods.values),
-        DroidTap(beatmap.mods.values, true),
-        DroidTap(beatmap.mods.values, false),
-        DroidFlashlight(beatmap.mods.values, true),
-        DroidFlashlight(beatmap.mods.values, false),
-        DroidVisual(beatmap.mods.values, true),
-        DroidVisual(beatmap.mods.values, false)
-    )
+    override fun createSkills(beatmap: DroidPlayableBeatmap): Array<Skill<DroidDifficultyHitObject>> {
+        val skills = mutableListOf<Skill<DroidDifficultyHitObject>>()
+
+        if (ModAutopilot::class !in beatmap.mods) {
+            skills.add(DroidAim(beatmap.mods.values, true))
+            skills.add(DroidAim(beatmap.mods.values, false))
+        }
+
+        if (ModRelax::class !in beatmap.mods) {
+            // Tap and visual skills depend on rhythm skill, so we put it first
+            skills.add(DroidRhythm(beatmap.values.mods))
+
+            skills.add(DroidTap(beatmap.mods.values, true))
+            skills.add(DroidTap(beatmap.mods.values, false))
+
+            skills.add(DroidVisual(beatmap.mods.values, true))
+            skills.add(DroidVisual(beatmap.mods.values, false))
+        }
+
+        if (ModFlashlight::class in beatmap.mods) {
+            skills.add(DroidFlashlight(beatmap.mods.values, true))
+            skills.add(DroidFlashlight(beatmap.mods.values, false))
+        }
+
+        return skills.toTypedArray()
+    }
 
     @Suppress("UNCHECKED_CAST")
     override fun createDifficultyHitObjects(beatmap: DroidPlayableBeatmap, scope: CoroutineScope?): Array<DroidDifficultyHitObject> {
+        if (beatmap.hitObjects.objects.isEmpty()) {
+            return emptyArray()
+        }
+
         val clockRate = beatmap.speedMultiplier.toDouble()
-
-        val greatWindow = (
-            if (ModPrecise::class in beatmap.mods) PreciseDroidHitWindow(beatmap.difficulty.od)
-            else DroidHitWindow(beatmap.difficulty.od)
-        ).greatWindow.toDouble() / clockRate
-
         val objects = beatmap.hitObjects.objects
         val arr = arrayOfNulls<DroidDifficultyHitObject>(objects.size)
 
@@ -238,7 +137,6 @@ class DroidDifficultyCalculator : DifficultyCalculator<DroidPlayableBeatmap, Dro
                 clockRate,
                 arr as Array<DroidDifficultyHitObject>,
                 i - 1,
-                greatWindow,
                 objects
             )
         }
@@ -248,6 +146,160 @@ class DroidDifficultyCalculator : DifficultyCalculator<DroidPlayableBeatmap, Dro
 
     override fun createPlayableBeatmap(beatmap: Beatmap, mods: Iterable<Mod>?, scope: CoroutineScope?) =
         beatmap.createDroidPlayableBeatmap(mods, scope)
+
+    private fun DroidDifficultyAttributes.populateAimAttributes(skills: Array<Skill<DroidDifficultyHitObject>>) {
+        val aim = skills.find<DroidAim> { it.withSliders } ?: return
+
+        aimDifficulty = calculateRating(aim)
+        aimDifficultStrainCount = aim.countDifficultStrains()
+        aimDifficultSliderCount = aim.countDifficultSliders()
+
+        val velocitySum = aim.sliderVelocities.sumOf { s -> s.difficultyRating }
+
+        for (slider in aim.sliderVelocities) {
+            val difficultyRating = slider.difficultyRating / velocitySum
+
+            // Only consider sliders that are fast enough.
+            if (difficultyRating > 0.02) {
+                difficultSliders.add(slider.copy(difficultyRating = difficultyRating))
+            }
+        }
+
+        difficultSliders.sortByDescending { s -> s.difficultyRating }
+
+        // Take the top 15% most difficult sliders.
+        difficultSliders.dropLastWhile { difficultSliders.size > ceil(0.15 * sliderCount) }
+
+        if (aimDifficulty > 0) {
+            val aimNoSlider = skills.find<DroidAim> { !it.withSliders }!!
+
+            aimSliderFactor = calculateRating(aimNoSlider) / aimDifficulty
+        } else {
+            aimSliderFactor = 1.0
+        }
+    }
+
+    private fun DroidDifficultyAttributes.populateTapAttributes(
+        skills: Array<Skill<DroidDifficultyHitObject>>,
+        objects: Array<DroidDifficultyHitObject>
+    ) {
+        val tap = skills.find<DroidTap> { it.considerCheesability } ?: return
+
+        tapDifficulty = calculateRating(tap)
+        tapDifficultStrainCount = tap.countDifficultStrains()
+        speedNoteCount = tap.relevantNoteCount()
+        averageSpeedDeltaTime = tap.relevantDeltaTime()
+
+        if (tapDifficulty > 0) {
+            val tapSkillVibro = DroidTap(mods, true, averageSpeedDeltaTime)
+
+            objects.forEach { tapSkillVibro.process(it) }
+
+            vibroFactor = calculateRating(tapSkillVibro) / tapDifficulty
+        }
+
+        var firstObjectIndex = 0
+        val sectionBoundaries = mutableListOf<Pair<Int, Int>>()
+
+        for (i in 0 until objects.size - 1) {
+            val current = objects[i].obj
+            val next = objects[i + 1].obj
+            val deltaTime = next.startTime - current.endTime
+
+            if (deltaTime >= maximumSectionDeltaTime) {
+                // Ignore sections that do not meet object count requirement.
+                if (i - firstObjectIndex >= minimumSectionObjectCount) {
+                    sectionBoundaries.add(Pair(firstObjectIndex, i))
+                }
+
+                firstObjectIndex = i + 1
+            }
+        }
+
+        // Do not forget to manually add the last beatmap section, which would otherwise be ignored.
+        if (objects.size - firstObjectIndex >= minimumSectionObjectCount) {
+            sectionBoundaries.add(Pair(firstObjectIndex, objects.size - 1))
+        }
+
+        val tapNoCheese = skills.find<DroidTap> { !it.considerCheesability }!!
+
+        // Re-filter with tap strain in mind.
+        for (section in sectionBoundaries) {
+            var inSpeedSection = false
+            var newFirstObjectIndex = section.first
+
+            for (i in section.first until section.second) {
+                val strain = tapNoCheese.objectStrains[i]
+
+                if (!inSpeedSection && strain >= threeFingerStrainThreshold) {
+                    inSpeedSection = true
+                    newFirstObjectIndex = i
+                    continue
+                }
+
+                if (inSpeedSection && strain < threeFingerStrainThreshold) {
+                    inSpeedSection = false
+
+                    // Ignore sections that do not meet object count requirement.
+                    if (i - newFirstObjectIndex < minimumSectionObjectCount) {
+                        continue
+                    }
+
+                    possibleThreeFingeredSections.add(HighStrainSection(
+                        newFirstObjectIndex,
+                        i,
+                        calculateThreeFingerSummedStrain(tapNoCheese.objectStrains.subList(newFirstObjectIndex, i))
+                    ))
+                }
+            }
+
+            // Do not forget to manually add the last beatmap section, which would otherwise be ignored.
+            // Ignore sections that don't meet object count requirement.
+            if (inSpeedSection && section.second - newFirstObjectIndex >= minimumSectionObjectCount) {
+                possibleThreeFingeredSections.add(HighStrainSection(
+                    newFirstObjectIndex,
+                    section.second,
+                    calculateThreeFingerSummedStrain(tapNoCheese.objectStrains.subList(newFirstObjectIndex, section.second))
+                ))
+            }
+        }
+    }
+
+    private fun DroidDifficultyAttributes.populateRhythmAttributes(skills: Array<Skill<DroidDifficultyHitObject>>) {
+        val rhythm = skills.find<DroidRhythm>() ?: return
+
+        rhythmDifficulty = calculateRating(rhythm)
+    }
+
+    private fun DroidDifficultyAttributes.populateFlashlightAttributes(skills: Array<Skill<DroidDifficultyHitObject>>) {
+        val flashlight = skills.find<DroidFlashlight> { it.withSliders } ?: return
+
+        flashlightDifficulty = calculateRating(flashlight)
+        flashlightDifficultStrainCount = flashlight.countDifficultStrains()
+
+        if (flashlightDifficulty > 0) {
+            val flashlightNoSlider = skills.find<DroidFlashlight> { !it.withSliders }!!
+
+            flashlightSliderFactor = calculateRating(flashlightNoSlider) / flashlightDifficulty
+        } else {
+            flashlightSliderFactor = 1.0
+        }
+    }
+
+    private fun DroidDifficultyAttributes.populateVisualAttributes(skills: Array<Skill<DroidDifficultyHitObject>>) {
+        val visual = skills.find<DroidVisual> { it.withSliders } ?: return
+
+        visualDifficulty = calculateRating(visual)
+        visualDifficultStrainCount = visual.countDifficultStrains()
+
+        if (visualDifficulty > 0) {
+            val visualNoSlider = skills.find<DroidVisual> { !it.withSliders }!!
+
+            visualSliderFactor = calculateRating(visualNoSlider) / visualDifficulty
+        } else {
+            visualSliderFactor = 1.0
+        }
+    }
 
     private fun calculateThreeFingerSummedStrain(strains: List<Double>) =
         strains.fold(0.0) { acc, d -> acc + d / threeFingerStrainThreshold }.pow(0.75)

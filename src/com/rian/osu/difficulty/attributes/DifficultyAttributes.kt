@@ -10,6 +10,12 @@ import com.rian.osu.mods.Mod
  */
 abstract class DifficultyAttributes {
     /**
+     * The overall clock rate that was applied to the beatmap.
+     */
+    @JvmField
+    var clockRate = 1.0
+
+    /**
      * The mods which were applied to the beatmap.
      */
     @JvmField
@@ -56,6 +62,18 @@ abstract class DifficultyAttributes {
      */
     @JvmField
     var aimSliderFactor = 0.0
+
+    /**
+     * The amount of strains that are considered difficult with respect to the aim skill.
+     */
+    @JvmField
+    var aimDifficultStrainCount = 0.0
+
+    /**
+     * The amount of sliders weighted by difficulty.
+     */
+    @JvmField
+    var aimDifficultSliderCount = 0.0
 
     /**
      * The perceived overall difficulty inclusive of rate-adjusting [Mod]s (DT/HT/etc.).

@@ -1,7 +1,10 @@
 package com.reco1l.osu.ui
 
 import android.graphics.Color
+import android.graphics.drawable.Drawable
+import android.util.Log
 import android.view.LayoutInflater
+import android.view.View
 import android.view.ViewGroup
 import android.widget.TextView
 import androidx.core.view.forEach
@@ -9,7 +12,10 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.reco1l.toolkt.android.cornerRadius
 import com.reco1l.toolkt.android.dp
+import com.reco1l.toolkt.android.drawableLeft
 import com.reco1l.toolkt.android.drawableRight
+import com.reco1l.toolkt.android.layoutHeight
+import com.reco1l.toolkt.android.layoutWidth
 import ru.nsu.ccfit.zuev.osuplus.R
 
 
@@ -21,21 +27,31 @@ data class Option(
     /**
      * The text to be displayed in the option.
      */
-    val text: String,
+    val text: CharSequence,
 
     /**
      * The value to be returned when the option is selected.
      */
-    val value: Any
+    val value: Any?,
+
+    /**
+     * The icon to be displayed in the option.
+     */
+    val icon: Drawable? = null
 )
 
-
+/**
+ * A dialog that allows the user to select an option.
+ */
 open class SelectDialog : MessageDialog() {
 
 
     override val layoutID = R.layout.dialog_select_fragment
 
 
+    /**
+     * The options to be displayed in the dialog.
+     */
     var options = mutableListOf<Option>()
         protected set(value) {
 
@@ -45,42 +61,50 @@ open class SelectDialog : MessageDialog() {
 
             field = value
 
-            if (::recyclerView.isInitialized) {
-                recyclerView.adapter!!.notifyDataSetChanged()
+            if (isLoaded) {
+                findViewById<RecyclerView>(R.id.list)!!.adapter!!.notifyDataSetChanged()
             }
         }
 
+    /**
+     * The selected value.
+     */
+    var selected: Any? = null
+        set(value) {
+            field = value
+            if (isLoaded) {
+                findViewById<RecyclerView>(R.id.list)!!.adapter!!.notifyDataSetChanged()
+            }
+        }
 
-    protected var selected: Any? = null
-
-    protected var onSelect: ((Any) -> Unit)? = null
-
-
-    private lateinit var recyclerView: RecyclerView
+    /**
+     * The function to be called when an option is selected.
+     */
+    var onSelect: ((Any?) -> Unit)? = null
 
 
     override fun onLoadView() {
         super.onLoadView()
 
-        recyclerView = findViewById<RecyclerView>(R.id.list)!!.apply {
-
-            layoutManager = LinearLayoutManager(context)
-            adapter = Adapter()
-
-        }
+        val recyclerView = findViewById<RecyclerView>(R.id.list)!!
+        recyclerView.layoutManager = LinearLayoutManager(context)
+        recyclerView.adapter = Adapter()
     }
 
 
-    fun setOptions(options: MutableList<Option>): SelectDialog {
-        this.options = options
+    /**
+     * Set the options to be displayed in the dialog.
+     */
+    fun setOptions(value: List<Option>): SelectDialog {
+        options = value.toMutableList()
         return this
     }
 
     /**
      * Add an option to the dialog.
      */
-    fun addOption(text: String, value: Any): SelectDialog {
-        options.add(Option(text, value))
+    fun addOption(option: Option): SelectDialog {
+        options.add(option)
         return this
     }
 
@@ -95,14 +119,9 @@ open class SelectDialog : MessageDialog() {
     /**
      * Set the function to be called when the option is selected.
      */
-    fun setOnSelectListener(onSelect: (Any) -> Unit): SelectDialog {
+    fun setOnSelectListener(onSelect: (Any?) -> Unit): SelectDialog {
         this.onSelect = onSelect
         return this
-    }
-
-
-    private fun unselectAll() {
-        recyclerView.forEach { (recyclerView.getChildViewHolder(it) as ViewHolder).unselect() }
     }
 
 
@@ -123,10 +142,13 @@ open class SelectDialog : MessageDialog() {
             holder.bind(options[position])
         }
 
+        override fun getItemCount(): Int {
+            return options.size
+        }
 
-        override fun getItemCount() = options.size
-
-        override fun getItemId(position: Int) = position.toLong()
+        override fun getItemId(position: Int): Long {
+            return position.toLong()
+        }
 
     }
 
@@ -134,9 +156,16 @@ open class SelectDialog : MessageDialog() {
 
         fun bind(option: Option) {
             text.text = option.text
+            text.drawableLeft = option.icon
+            text.compoundDrawablePadding = 12.dp
+
             text.setOnClickListener {
 
-                unselectAll()
+                findViewById<RecyclerView>(R.id.list)!!.apply {
+                    forEach {
+                        (getChildViewHolder(it) as ViewHolder).unselect()
+                    }
+                }
 
                 selected = option.value
                 select()
@@ -165,4 +194,45 @@ open class SelectDialog : MessageDialog() {
         }
 
     }
+}
+
+/**
+ * A select dialog that opens below the caller view.
+ */
+open class SelectDropdown(private val caller: View) : SelectDialog() {
+
+
+    override val layoutID = R.layout.dropdown_fragment
+
+
+    override fun onLoadView() {
+        super.onLoadView()
+
+        val body = findViewById<View>(R.id.frg_body)!!
+        val callerLocation = IntArray(2).also(caller::getLocationInWindow)
+
+        body.x = callerLocation[0].toFloat()
+        body.y = callerLocation[1].toFloat()
+
+        body.post {
+
+            if (body.x + body.width > root!!.width) {
+                body.layoutWidth = root!!.width - body.x.toInt()
+            } else if (body.width < caller.width) {
+                body.layoutWidth = caller.width
+            }
+
+            if (body.y + body.height > root!!.height) {
+                body.layoutHeight = root!!.height - body.y.toInt()
+            }
+
+        }
+    }
+
+
+    override fun addButton(text: String, tint: Int, clickListener: (MessageDialog) -> Unit): SelectDropdown {
+        Log.e("SelectDropdown", "This dialog does not support buttons, ignoring.")
+        return this
+    }
+
 }

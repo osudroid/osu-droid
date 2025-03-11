@@ -18,6 +18,7 @@
         tools:translationY="0dp">
 
         <Button
+            style="@style/button"
             android:id="@+id/showMoreButton"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
@@ -67,6 +68,7 @@
                     android:textSize="14dp" />
 
                 <Button
+                    style="@style/button"
                     android:id="@+id/chat_send"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"

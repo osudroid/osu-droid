@@ -16,7 +16,7 @@ class SliderPath(
     /**
      * The control points (anchor points) of this [SliderPath].
      */
-    controlPoints: MutableList<Vector2>,
+    controlPoints: List<Vector2>,
 
     /**
      * The distance that is expected when calculating [SliderPath].
@@ -26,7 +26,7 @@ class SliderPath(
     /**
      * The path type of the [Slider].
      */
-    var pathType: SliderPathType = type
+    var pathType = type
         private set
 
     /**
@@ -72,20 +72,25 @@ class SliderPath(
      */
     private fun calculatePath() {
         calculatedPath.clear()
+
         if (controlPoints.isEmpty()) {
             return
         }
+
         calculatedPath.add(controlPoints[0])
         var spanStart = 0
+
         for (i in controlPoints.indices) {
             if (i == controlPoints.size - 1 || controlPoints[i] == controlPoints[i + 1]) {
                 val spanEnd = i + 1
-                val cpSpan: List<Vector2> = controlPoints.subList(spanStart, spanEnd)
+                val cpSpan = controlPoints.subList(spanStart, spanEnd)
+
                 for (t in calculateSubPath(cpSpan)) {
                     if (calculatedPath.isEmpty() || calculatedPath[calculatedPath.size - 1] != t) {
                         calculatedPath.add(t)
                     }
                 }
+
                 spanStart = spanEnd
             }
         }
@@ -122,7 +127,7 @@ class SliderPath(
 
             if (calculatedLength > expectedDistance) {
                 // The path will be shortened further, in which case we should trim any more unnecessary lengths and their associated path segments
-                while (cumulativeLength.size > 0 && cumulativeLength[cumulativeLength.size - 1] >= expectedDistance) {
+                while (cumulativeLength.isNotEmpty() && cumulativeLength[cumulativeLength.size - 1] >= expectedDistance) {
                     cumulativeLength.removeAt(cumulativeLength.size - 1)
                     calculatedPath.removeAt(pathEndIndex--)
                 }

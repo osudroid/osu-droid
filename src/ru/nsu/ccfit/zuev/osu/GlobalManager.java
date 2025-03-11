@@ -8,6 +8,7 @@ import org.anddev.andengine.engine.camera.Camera;
 import ru.nsu.ccfit.zuev.audio.serviceAudio.SaveServiceObject;
 import ru.nsu.ccfit.zuev.audio.serviceAudio.SongService;
 import ru.nsu.ccfit.zuev.osu.game.GameScene;
+import ru.nsu.ccfit.zuev.osu.menu.ModMenu;
 import ru.nsu.ccfit.zuev.osu.menu.SongMenu;
 import ru.nsu.ccfit.zuev.osu.scoring.ScoringScene;
 
@@ -49,6 +50,7 @@ public class GlobalManager {
         DatabaseManager.load(mainActivity);
         saveServiceObject = (SaveServiceObject) mainActivity.getApplication();
         songService = saveServiceObject.getSongService();
+        SongService.initBASS();
         setLoadingProgress(10);
         setMainScene(new MainScene());
         getMainScene().load(mainActivity);

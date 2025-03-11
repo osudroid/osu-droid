@@ -52,9 +52,6 @@ class ModHardRock : Mod(), IModUserSelectable, IModApplicableToDifficulty, IModA
     }
 
     override fun applyToHitObject(mode: GameMode, hitObject: HitObject) {
-        fun reflectVector(vector: Vector2) = Vector2(vector.x, 384 - vector.y)
-        fun reflectControlPoint(vector: Vector2) = Vector2(vector.x, -vector.y)
-
         // Reflect the position of the hit object.
         hitObject.position = reflectVector(hitObject.position)
 
@@ -65,12 +62,16 @@ class ModHardRock : Mod(), IModUserSelectable, IModApplicableToDifficulty, IModA
         // Reflect the control points of the slider. This will reflect the positions of head and tail circles.
         hitObject.path = SliderPath(
             hitObject.path.pathType,
-            hitObject.path.controlPoints.map { reflectControlPoint(it) }.toMutableList(),
+            hitObject.path.controlPoints.map { reflectControlPoint(it) },
             hitObject.path.expectedDistance
         )
 
         // Reflect the position of slider ticks and repeats.
-        hitObject.nestedHitObjects.forEach { it.position = reflectVector(it.position) }
+        for (i in 1 until hitObject.nestedHitObjects.size - 1) {
+            val obj = hitObject.nestedHitObjects[i]
+
+            obj.position = reflectVector(obj.position)
+        }
     }
 
     private fun applySetting(value: Float, ratio: Float = ADJUST_RATIO) = min(value * ratio, 10f)
@@ -81,5 +82,8 @@ class ModHardRock : Mod(), IModUserSelectable, IModApplicableToDifficulty, IModA
 
     companion object {
         private const val ADJUST_RATIO = 1.4f
+
+        private fun reflectVector(vector: Vector2) = Vector2(vector.x, 384 - vector.y)
+        private fun reflectControlPoint(vector: Vector2) = Vector2(vector.x, -vector.y)
     }
 }

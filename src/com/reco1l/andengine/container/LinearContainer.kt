@@ -30,95 +30,71 @@ open class LinearContainer : Container() {
         }
 
 
-    private var lastChildX = 0f
+    override fun onMeasureContentSize() {
+        shouldMeasureSize = false
 
-    private var lastChildY = 0f
+        contentWidth = 0f
+        contentHeight = 0f
 
+        for (i in 0 until childCount) {
 
-    override fun onMeasureSize() {
-
-        var cumulativeWidth = 0f
-        var cumulativeHeight = 0f
-        var countedChildren = 0
-
-        if (mChildren != null) {
-
-            for (i in mChildren.indices) {
-                val child = mChildren.getOrNull(i) ?: continue
-
-                // Non-shape children are ignored as they doesn't have a size there's nothing to do.
-                if (child !is IShape) {
-                    continue
-                }
-                countedChildren++
-
-                when (orientation) {
-
-                    Horizontal -> {
-                        cumulativeWidth += child.width
-                        cumulativeHeight = max(cumulativeHeight, child.height)
-                    }
-
-                    Vertical -> {
-                        cumulativeWidth = max(cumulativeWidth, child.width)
-                        cumulativeHeight += child.height
-                    }
-                }
-
-                if (i > 0) {
-                    when(orientation) {
-                        Horizontal -> cumulativeWidth += spacing
-                        Vertical -> cumulativeHeight += spacing
-                    }
-                }
+            val child = getChild(i) ?: continue
+            if (child !is ExtendedEntity) {
+                continue
             }
-        }
 
-        // Subtract the last children spacing.
-        if (countedChildren > 1) {
             when (orientation) {
-                Horizontal -> cumulativeWidth -= spacing
-                Vertical -> cumulativeHeight -= spacing
+
+                Horizontal -> {
+                    child.x = contentWidth
+
+                    contentWidth += child.getDrawWidth()
+                    contentHeight = max(contentHeight, child.getDrawHeight())
+
+                    if (i < childCount - 1) {
+                        contentWidth += spacing
+                    }
+                }
+
+                Vertical -> {
+                    child.y = contentHeight
+
+                    contentWidth = max(contentWidth, child.getDrawWidth())
+                    contentHeight += child.getDrawHeight()
+
+                    if (i < childCount - 1) {
+                        contentHeight += spacing
+                    }
+                }
             }
         }
 
-        onApplyInternalSize(cumulativeWidth, cumulativeHeight)
+        onContentSizeMeasured()
     }
 
 
-    override fun onManagedDrawChildren(pGL: GL10, pCamera: Camera) {
-        lastChildX = 0f
-        lastChildY = 0f
-        super.onManagedDrawChildren(pGL, pCamera)
+    override fun getChildDrawX(child: ExtendedEntity): Float {
+
+        val drawX = super.getChildDrawX(child)
+
+        if (orientation == Vertical) {
+            return drawX
+        }
+
+        // Subtract the anchor offset for the X axis because it should be ignored in this case.
+        return drawX - child.anchorOffsetX
     }
 
-    override fun onApplyChildTranslation(gl: GL10, child: ExtendedEntity) {
+    override fun getChildDrawY(child: ExtendedEntity): Float {
 
-        val originOffsetX = child.width * child.originX
-        val originOffsetY = child.height * child.originY
+        val drawY = super.getChildDrawY(child)
 
-        val anchorOffsetX = width * child.anchorX
-        val anchorOffsetY = height * child.anchorY
-
-        var finalX = anchorOffsetX - originOffsetX + child.translationX
-        var finalY = anchorOffsetY - originOffsetY + child.translationY
-
-        when (orientation) {
-
-            Horizontal -> {
-                finalX += lastChildX
-                lastChildX += child.width + spacing
-            }
-
-            Vertical -> {
-                finalY += lastChildY
-                lastChildY += child.height + spacing
-            }
+        if (orientation == Horizontal) {
+            return drawY
         }
 
-        if (finalX != 0f || finalY != 0f) {
-            gl.glTranslatef(finalX, finalY, 0f)
-        }
+        // Subtract the anchor offset for the Y axis because it should be ignored in this case.
+        return drawY - child.anchorOffsetY
     }
 
 }

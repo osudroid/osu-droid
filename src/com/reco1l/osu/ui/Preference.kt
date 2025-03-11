@@ -224,6 +224,7 @@ class InputPreference(context: Context, attrs: AttributeSet?, defStyleAttr: Int,
             notifyDependencyChange(isBlocking)
         }
 
+        onPreferenceChangeListener?.onPreferenceChange(this, value)
         notifyChanged()
     }
 

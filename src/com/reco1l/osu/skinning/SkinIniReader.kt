@@ -24,8 +24,9 @@ class IniReader(file: File) : Closeable {
 
 
     init {
-        if (file.extension.lowercase() != "ini")
+        if (file.extension.lowercase() != "ini") {
             throw IniException("Not an INI file.")
+        }
 
         read()
     }

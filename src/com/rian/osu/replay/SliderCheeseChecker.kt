@@ -1,22 +1,19 @@
 package com.rian.osu.replay
 
-import com.rian.osu.beatmap.DroidHitWindow
 import com.rian.osu.beatmap.DroidPlayableBeatmap
-import com.rian.osu.beatmap.PreciseDroidHitWindow
 import com.rian.osu.beatmap.hitobject.HitObject
 import com.rian.osu.beatmap.hitobject.Slider
 import com.rian.osu.difficulty.attributes.DroidDifficultyAttributes
 import com.rian.osu.math.Interpolation
 import com.rian.osu.math.Vector2
 import com.rian.osu.mods.ModHardRock
-import com.rian.osu.mods.ModPrecise
-import ru.nsu.ccfit.zuev.osu.scoring.Replay
-import ru.nsu.ccfit.zuev.osu.scoring.ResultType
-import ru.nsu.ccfit.zuev.osu.scoring.TouchType
 import kotlin.math.max
 import kotlin.math.min
 import kotlin.math.pow
+import ru.nsu.ccfit.zuev.osu.scoring.Replay
 import ru.nsu.ccfit.zuev.osu.scoring.Replay.ReplayMovement
+import ru.nsu.ccfit.zuev.osu.scoring.ResultType
+import ru.nsu.ccfit.zuev.osu.scoring.TouchType
 
 /**
  * Utility to check whether relevant [Slider]s in a [DroidPlayableBeatmap] are cheesed.
@@ -46,10 +43,7 @@ class SliderCheeseChecker(
      */
     private val objectData: Array<Replay.ReplayObjectData>
 ) {
-    private val mehWindow = (
-        if (difficultyAttributes.mods.any { it is ModPrecise }) PreciseDroidHitWindow(beatmap.difficulty.od)
-        else DroidHitWindow(beatmap.difficulty.od)
-    ).mehWindow
+    private val mehWindow = beatmap.hitWindow.mehWindow
 
     /**
      * Checks if relevant [Slider]s in the [DroidPlayableBeatmap] are cheesed and computes the penalties.
@@ -91,14 +85,15 @@ class SliderCheeseChecker(
                 continue
             }
 
+            val slider = objects[difficultSlider.index] as Slider
             val objData = objectData[difficultSlider.index]
 
             // If a miss or slider break occurs, we disregard the check for that slider.
-            if (objData.result == ResultType.MISS.id || objData.accuracy == (mehWindow + 13).toInt().toShort()) {
+            if (objData.tickSet == null || objData.result == ResultType.MISS.id ||
+                -mehWindow > objData.accuracy || objData.accuracy > min(mehWindow.toDouble(), slider.duration)) {
                 continue
             }
 
-            val slider = objects[difficultSlider.index] as Slider
             val sliderStartPosition = slider.difficultyStackedPosition
 
             // These time boundaries should consider the delta time between the previous and next
@@ -282,6 +277,6 @@ class SliderCheeseChecker(
     private fun computePenalty(factor: Double, ratingSum: Double) = max(factor, (1 - ratingSum * factor).pow(2))
 
     private fun getMovementPosition(movement: ReplayMovement) =
-        if (difficultyAttributes.mods.any { it is ModHardRock }) Vector2(movement.point.x, 512 - movement.point.y)
-        else Vector2(movement.point)
+        if (difficultyAttributes.mods.any { it is ModHardRock }) Vector2(movement.x, 512 - movement.y)
+        else Vector2(movement.x, movement.y)
 }

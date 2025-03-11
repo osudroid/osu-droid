@@ -70,7 +70,7 @@ public class ScoreBoardItem implements Cloneable {
         var text = userName + "\n" + NUMBER_FORMAT.format(playScore) + "\n";
 
         //noinspection DataFlowIssue
-        if (Multiplayer.isConnected() && Multiplayer.room.getWinCondition() == WinCondition.ACCURACY) {
+        if (Multiplayer.isConnected() && Multiplayer.room.getWinCondition() == WinCondition.HighestAccuracy) {
             accSb.setLength(0);
             text += DECIMAL_FORMAT.format("%2.2f%%", accuracy * 100f);
         } else

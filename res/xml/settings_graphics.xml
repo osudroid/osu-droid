@@ -2,7 +2,7 @@
 <androidx.preference.PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto">
 
-    <PreferenceCategory android:title="Cursor">
+    <PreferenceCategory android:title="@string/opt_category_cursor">
 
         <CheckBoxPreference
             android:defaultValue="false"
@@ -28,13 +28,13 @@
 
     </PreferenceCategory>
 
-    <PreferenceCategory android:title="Animations and effects">
+    <PreferenceCategory android:title="@string/opt_category_animations">
 
         <CheckBoxPreference
             android:defaultValue="true"
             android:key="dimHitObjects"
-            android:summary="@string/setting_dim_hit_objects_summary"
-            android:title="@string/setting_dim_hit_objects_title" />
+            android:summary="@string/opt_dim_hit_objects_summary"
+            android:title="@string/opt_dim_hit_objects_title" />
 
         <CheckBoxPreference
             android:defaultValue="false"
@@ -51,20 +51,26 @@
         <CheckBoxPreference
             android:defaultValue="true"
             android:key="animateFollowCircle"
-            android:summary="Enable slider follow circle animations when hitting/releasing follow circle."
-            android:title="Animate follow circle" />
+            android:summary="@string/opt_animate_follow_circle_summary"
+            android:title="@string/opt_animate_follow_circle_title" />
 
         <CheckBoxPreference
             android:defaultValue="true"
             android:key="animateComboText"
-            android:summary="Enable combo text shadow animation when increasing combo."
-            android:title="Animate combo text" />
+            android:summary="@string/opt_animate_combo_text_summary"
+            android:title="@string/opt_animate_combo_text_title" />
 
         <CheckBoxPreference
             android:defaultValue="true"
             android:key="snakingInSliders"
             android:summary="@string/opt_snakingInSliders_summary"
             android:title="@string/opt_snakingInSliders_title" />
+
+        <CheckBoxPreference
+            android:defaultValue="true"
+            android:key="snakingOutSliders"
+            android:summary="@string/opt_snakingOutSliders_summary"
+            android:title="@string/opt_snakingOutSliders_title" />
 
         <CheckBoxPreference
             android:defaultValue="false"
@@ -83,17 +89,6 @@
             android:key="hitlighting"
             android:summary="@string/opt_hitlighting_summary"
             android:title="@string/opt_hitlighting_title"
-            app:layout="@layout/settings_preference_checkbox_bottom" />
-
-    </PreferenceCategory>
-
-    <PreferenceCategory android:title="Display">
-
-        <CheckBoxPreference
-            android:defaultValue="false"
-            android:key="hidenavibar"
-            android:summary="@string/opt_hide_navibar_summary"
-            android:title="@string/opt_hide_navibar_title"
             app:layout="@layout/settings_preference_checkbox_bottom" />
 
     </PreferenceCategory>

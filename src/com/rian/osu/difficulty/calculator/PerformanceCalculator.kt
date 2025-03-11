@@ -20,22 +20,11 @@ abstract class PerformanceCalculator<
     @JvmField
     val difficultyAttributes: TDiffAttributes
 ) {
-    @JvmField
     protected var scoreMaxCombo = 0
-
-    @JvmField
     protected var countGreat = 0
-
-    @JvmField
     protected var countOk = 0
-
-    @JvmField
     protected var countMeh = 0
-
-    @JvmField
     protected var countMiss = 0
-
-    @JvmField
     protected var effectiveMissCount = 0.0
 
     /**
@@ -49,6 +38,12 @@ abstract class PerformanceCalculator<
      */
     protected val totalHits: Int
         get() = difficultyAttributes.let { it.hitCircleCount + it.sliderCount + it.spinnerCount }
+
+    /**
+     * The total imperfect hits that were done.
+     */
+    protected val totalImperfectHits
+        get() = countOk + countMeh + countMiss
 
     /**
      * The total hits that were successfully done.

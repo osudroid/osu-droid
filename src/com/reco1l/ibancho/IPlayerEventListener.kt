@@ -5,8 +5,7 @@ import com.reco1l.ibancho.data.RoomPlayer
 import com.reco1l.ibancho.data.RoomTeam
 import com.reco1l.ibancho.data.RoomMods
 
-interface IPlayerEventListener
-{
+interface IPlayerEventListener {
 
     /**
      * Emitted when a player joins the room. Gives the following structure as a parameter:

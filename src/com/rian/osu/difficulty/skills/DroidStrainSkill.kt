@@ -2,7 +2,6 @@ package com.rian.osu.difficulty.skills
 
 import com.rian.osu.difficulty.DroidDifficultyHitObject
 import com.rian.osu.mods.Mod
-import kotlin.math.exp
 import kotlin.math.log2
 import kotlin.math.pow
 
@@ -22,45 +21,12 @@ abstract class DroidStrainSkill(
      */
     protected abstract val starsPerDouble: Double
 
-    /**
-     * The strain of the currently calculated [DroidDifficultyHitObject].
-     */
-    protected abstract val objectStrain: Double
-
-    /**
-     * All [DroidDifficultyHitObject]s strains.
-     */
-    val objectStrains = mutableListOf<Double>()
-
-    private var difficulty = 0.0
-
-    /**
-     * Returns the number of strains weighed against the top strain.
-     *
-     * The result is scaled by clock rate as it affects the total number of strains.
-     */
-    fun countDifficultStrains(): Double {
-        if (difficulty == 0.0) {
-            return 0.0
-        }
-
-        // This is what the top strain is if all strain values were identical.
-        val consistentTopStrain = difficulty / 10
-
-        // Use a weighted sum of all strains.
-        return objectStrains.fold(0.0) { acc, strain ->
-            acc + 1.1 / (1 + exp(-10 * (strain / consistentTopStrain - 0.88)))
-        }
-    }
-
     override fun process(current: DroidDifficultyHitObject) {
         if (current.index < 0) {
             return
         }
 
         super.process(current)
-
-        objectStrains.add(objectStrain)
     }
 
     override fun difficultyValue() = currentStrainPeaks.run {

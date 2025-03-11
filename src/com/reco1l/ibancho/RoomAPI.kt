@@ -1,31 +1,22 @@
 package com.reco1l.ibancho
 
+import com.reco1l.*
+import com.reco1l.ibancho.data.*
 import ru.nsu.ccfit.zuev.osu.SecurityUtils
-import com.reco1l.ibancho.data.PlayerStatus
-import com.reco1l.ibancho.data.Room
-import com.reco1l.ibancho.data.RoomMods
-import com.reco1l.ibancho.data.RoomStatus
-import com.reco1l.ibancho.data.RoomTeam
-import com.reco1l.ibancho.data.TeamMode
-import com.reco1l.ibancho.data.WinCondition
-import com.reco1l.ibancho.data.parseBeatmap
-import com.reco1l.ibancho.data.parseGameplaySettings
-import com.reco1l.ibancho.data.parsePlayer
-import com.reco1l.ibancho.data.parsePlayers
-import com.reco1l.osu.multiplayer.Multiplayer
+import com.reco1l.osu.multiplayer.*
 import io.socket.client.IO
 import io.socket.client.Socket
 import io.socket.emitter.Emitter.Listener
 import org.json.JSONArray
 import org.json.JSONObject
 
-object RoomAPI
-{
+object RoomAPI {
 
     /**
      * The API version.
      */
-    private const val API_VERSION = 7
+    const val API_VERSION = 8
+
 
     /**
      * The listener for player events.
@@ -92,7 +83,7 @@ object RoomAPI
         //Multiplayer.log("RECEIVED: playerStatusChanged -> ${it.contentToString()}")
 
         val id = (it[0] as String).toLong()
-        val status = PlayerStatus.from(it[1] as Int)
+        val status = PlayerStatus[it[1] as Int]
 
         playerEventListener?.onPlayerStatusChange(id, status)
     }
@@ -100,7 +91,7 @@ object RoomAPI
     private val teamModeChanged = Listener {
         Multiplayer.log("RECEIVED: teamModeChanged -> ${it.contentToString()}")
 
-        val mode = TeamMode.from(it[0] as Int)
+        val mode = TeamMode[it[0] as Int]
         roomEventListener?.onRoomTeamModeChange(mode)
     }
 
@@ -115,7 +106,7 @@ object RoomAPI
         Multiplayer.log("RECEIVED: teamChanged -> ${it.contentToString()}")
 
         val id = (it[0] as String).toLong()
-        val team = if (it[1] == null) null else RoomTeam.from(it[1] as Int)
+        val team = if (it[1] == null) null else RoomTeam[it[1] as Int]
 
         playerEventListener?.onPlayerTeamChange(id, team)
     }
@@ -124,6 +115,12 @@ object RoomAPI
 
         Multiplayer.log("RECEIVED: roomNameChanged -> ${it.contentToString()}")
         roomEventListener?.onRoomNameChange(it[0] as String)
+    }
+
+    private val maxPlayersChanged = Listener {
+
+        Multiplayer.log("RECEIVED: maxPlayersChanged -> ${it.contentToString()}")
+        roomEventListener?.onRoomMaxPlayersChange((it[0] as String).toInt())
     }
 
     private val playBeatmap = Listener {
@@ -159,27 +156,23 @@ object RoomAPI
         val activePlayers = players.filterNotNull()
 
         val room = Room(
-                id = json.getString("id").toLong(),
-                name = json.getString("name"),
-                isLocked = json.getBoolean("isLocked"),
-                maxPlayers = json.getInt("maxPlayers"),
-                mods = RoomMods(json.getString("mods")),
-                gameplaySettings = parseGameplaySettings(json.getJSONObject("gameplaySettings")),
-                teamMode = TeamMode.from(json.getInt("teamMode")),
-                winCondition = WinCondition.from(json.getInt("winCondition")),
-                playerCount = activePlayers.size,
-                playerNames = activePlayers.joinToString(separator = ", ") { p -> p.name },
-                sessionID = json.getString("sessionId")
-        ).apply {
+            id = json.getString("id").toLong(),
+            name = json.getString("name"),
+            isLocked = json.getBoolean("isLocked"),
+            maxPlayers = json.getInt("maxPlayers"),
+            mods = RoomMods(json.getString("mods")),
+            gameplaySettings = parseGameplaySettings(json.getJSONObject("gameplaySettings")),
+            teamMode = TeamMode[json.getInt("teamMode")],
+            winCondition = WinCondition.from(json.getInt("winCondition")),
+            playerCount = activePlayers.size,
+            playerNames = activePlayers.joinToString(separator = ", ") { p -> p.name },
+            sessionID = json.getString("sessionId")
+        )
 
-            this.players = players
-            host = json.getJSONObject("host").getString("uid").toLong()
-            beatmap = parseBeatmap(json.optJSONObject("beatmap"))
-            status = RoomStatus.from(json.getInt("status"))
-
-        }
-
-        roomEventListener?.onRoomConnect(room)
+        room.players = players
+        room.host = json.getJSONObject("host").getString("uid").toLong()
+        room.beatmap = parseBeatmap(json.optJSONObject("beatmap"))
+        room.status = RoomStatus[json.getInt("status")]
 
         socket!!.apply {
             on("beatmapChanged", beatmapChanged)
@@ -193,6 +186,7 @@ object RoomAPI
             on("winConditionChanged", winConditionChanged)
             on("teamChanged", teamChanged)
             on("roomNameChanged", roomNameChanged)
+            on("maxPlayersChanged", maxPlayersChanged)
             on("playBeatmap", playBeatmap)
             on("chatMessage", chatMessage)
             on("liveScoreData", liveScoreData)
@@ -202,6 +196,8 @@ object RoomAPI
             on("allPlayersSkipRequested", allPlayersSkipRequested)
             on("allPlayersScoreSubmitted", allPlayersScoreSubmitted)
         }
+
+        roomEventListener?.onRoomConnect(room)
     }
 
     private val playerJoined = Listener {
@@ -276,14 +272,8 @@ object RoomAPI
      * Connect to the specified room, if success it'll call [IRoomEventListener.onRoomConnect] if not
      * [IRoomEventListener.onRoomConnectFail]
      */
-    fun connectToRoom(
-        roomId: Long,
-        userId: Long,
-        username: String,
-        roomPassword: String? = null,
-        sessionID: String? = null
-    )
-    {
+    fun connectToRoom(roomId: Long, userId: Long, username: String, roomPassword: String? = null, sessionID: String? = null) {
+
         // Clearing previous socket in case of reconnection.
         socket?.off()
         socket = null
@@ -296,25 +286,30 @@ object RoomAPI
         auth["username"] = username
         auth["version"] = API_VERSION.toString()
 
-        if (sessionID != null)
+        if (sessionID != null) {
             auth["sessionID"] = sessionID
+        }
 
-        if (sign != null)
+        if (sign != null) {
             auth["authSign"] = sign
+        }
 
-        if (!roomPassword.isNullOrBlank())
+        if (!roomPassword.isNullOrBlank()) {
             auth["password"] = roomPassword
+        }
 
         Multiplayer.log("Starting connection -> $roomId, $userId, $username")
 
-        socket = IO.socket(url, IO.Options().also {
+        socket = if (fakeMultiplayerMode) FakeSocket(userId, username) else IO.socket(url, IO.Options().also {
             it.auth = auth
 
             // Explicitly not allow the socket to reconnect as we are using our own
             // reconnection system (the socket.io Java client does not support connection
             // state recovery).
             it.reconnection = false
-        }).apply {
+        })
+
+        socket!!.apply {
 
             on("initialConnection", initialConnection)
             on("error", error)
@@ -328,10 +323,11 @@ object RoomAPI
     /**
      * Disconnect from socket.
      */
-    fun disconnect()
-    {
-        if (socket == null)
+    fun disconnect() {
+
+        if (socket == null) {
             return
+        }
 
         socket?.apply {
 
@@ -349,8 +345,8 @@ object RoomAPI
      */
     @JvmOverloads
     @JvmStatic
-    fun changeBeatmap(md5: String? = null, title: String? = null, artist: String? = null, version: String? = null, creator: String? = null)
-    {
+    fun changeBeatmap(md5: String? = null, title: String? = null, artist: String? = null, version: String? = null, creator: String? = null) {
+
         val json = JSONObject().apply {
 
             put("md5", md5)
@@ -362,29 +358,27 @@ object RoomAPI
         }
 
         socket?.emit("beatmapChanged", json) ?: run {
-			Multiplayer.log("WARNING: Tried to emit event 'beatmapChanged' while socket is null.")
-			return
-		}
+            Multiplayer.log("WARNING: Tried to emit event 'beatmapChanged' while socket is null.")
+            return
+        }
         Multiplayer.log("EMITTED: beatmapChanged -> $md5, $title, $artist, $version, $creator")
     }
 
     /**
      * Kick player from room.
      */
-    fun kickPlayer(uid: Long)
-    {
+    fun kickPlayer(uid: Long) {
         socket?.emit("playerKicked", uid.toString()) ?: run {
-			Multiplayer.log("WARNING: Tried to emit event 'playerKicked' while socket is null.")
-			return
-		}
+            Multiplayer.log("WARNING: Tried to emit event 'playerKicked' while socket is null.")
+            return
+        }
         Multiplayer.log("EMITTED: playerKicked -> $uid")
     }
 
     /**
      * Notify all clients to start loading beatmap.
      */
-    fun notifyMatchPlay()
-    {
+    fun notifyMatchPlay() {
         socket!!.emit("playBeatmap")
         Multiplayer.log("EMITTED: playBeatmap")
     }
@@ -392,12 +386,11 @@ object RoomAPI
     /**
      * Change room host.
      */
-    fun setRoomHost(uid: Long)
-    {
+    fun setRoomHost(uid: Long) {
         socket?.emit("hostChanged", uid.toString()) ?: run {
-			Multiplayer.log("WARNING: Tried to emit event 'hostChanged' while socket is null.")
-			return
-		}
+            Multiplayer.log("WARNING: Tried to emit event 'hostChanged' while socket is null.")
+            return
+        }
         Multiplayer.log("EMITTED: hostChanged -> $uid")
     }
 
@@ -405,8 +398,7 @@ object RoomAPI
      * Change room mods.
      */
     @JvmStatic
-    fun setRoomMods(mods: String?)
-    {
+    fun setRoomMods(mods: String?) {
         socket?.emit("roomModsChanged", mods) ?: run {
 			Multiplayer.log("WARNING: Tried to emit event 'roomModsChanged' while socket is null.")
 			return
@@ -423,17 +415,16 @@ object RoomAPI
         }
 
         socket?.emit("roomGameplaySettingsChanged", json) ?: run {
-			Multiplayer.log("WARNING: Tried to emit event 'roomGameplaySettingsChanged' while socket is null.")
-			return
-		}
+            Multiplayer.log("WARNING: Tried to emit event 'roomGameplaySettingsChanged' while socket is null.")
+            return
+        }
         Multiplayer.log("EMITTED: roomGameplaySettingsChanged -> $json")
     }
 
     /**
      * Change `free mods` condition.
      */
-    fun setRoomFreeMods(value: Boolean)
-    {
+    fun setRoomFreeMods(value: Boolean) {
         val json = JSONObject().apply {
             put("isFreeMod", value)
         }
@@ -448,8 +439,7 @@ object RoomAPI
     /**
      * Change `allow force difficulty statistics` condition.
      */
-    fun setRoomAllowForceDifficultyStatistics(value: Boolean)
-    {
+    fun setRoomAllowForceDifficultyStatistics(value: Boolean) {
         val json = JSONObject().apply {
             put("allowForceDifficultyStatistics", value)
         }
@@ -464,48 +454,55 @@ object RoomAPI
     /**
      * Change room team mode.
      */
-    fun setRoomTeamMode(mode: TeamMode)
-    {
+    fun setRoomTeamMode(mode: TeamMode) {
         socket?.emit("teamModeChanged", mode.ordinal) ?: run {
-			Multiplayer.log("WARNING: Tried to emit event 'teamModeChanged' while socket is null.")
-			return
-		}
+            Multiplayer.log("WARNING: Tried to emit event 'teamModeChanged' while socket is null.")
+            return
+        }
         Multiplayer.log("EMITTED: teamModeChanged -> $mode")
     }
 
     /**
      * Change room win condition.
      */
-    fun setRoomWinCondition(condition: WinCondition)
-    {
+    fun setRoomWinCondition(condition: WinCondition) {
         socket?.emit("winConditionChanged", condition.ordinal) ?: run {
-			Multiplayer.log("WARNING: Tried to emit event 'winConditionChanged' while socket is null.")
-			return
-		}
+            Multiplayer.log("WARNING: Tried to emit event 'winConditionChanged' while socket is null.")
+            return
+        }
         Multiplayer.log("EMITTED: winConditionChanged -> $condition")
     }
 
     /**
      * Change room name.
      */
-    fun setRoomName(name: String)
-    {
+    fun setRoomName(name: String) {
         socket?.emit("roomNameChanged", name) ?: run {
-			Multiplayer.log("WARNING: Tried to emit event 'roomNameChanged' while socket is null.")
-			return
-		}
+            Multiplayer.log("WARNING: Tried to emit event 'roomNameChanged' while socket is null.")
+            return
+        }
         Multiplayer.log("EMITTED: roomNameChanged -> $name")
+    }
+
+    /**
+     * Change room max players.
+     */
+    fun setRoomMaxPlayers(maxPlayers: Int) {
+        socket?.emit("maxPlayersChanged", maxPlayers) ?: run {
+            Multiplayer.log("WARNING: Tried to emit event 'maxPlayersChanged' while socket is null.")
+            return
+        }
+        Multiplayer.log("EMITTED: maxPlayersChanged -> $maxPlayers")
     }
 
     /**
      * Change room password.
      */
-    fun setRoomPassword(password: String)
-    {
+    fun setRoomPassword(password: String) {
         socket?.emit("roomPasswordChanged", password) ?: run {
-			Multiplayer.log("WARNING: Tried to emit event 'roomPasswordChanged' while socket is null.")
-			return
-		}
+            Multiplayer.log("WARNING: Tried to emit event 'roomPasswordChanged' while socket is null.")
+            return
+        }
         //Multiplayer.log("EMITTED: roomPasswordChanged -> $password")
     }
 
@@ -515,12 +512,11 @@ object RoomAPI
      * Submit the match score at the end of the game.
      */
     @JvmStatic
-    fun submitFinalScore(json: JSONObject?)
-    {
+    fun submitFinalScore(json: JSONObject?) {
         socket?.emit("scoreSubmission", json) ?: run {
-			Multiplayer.log("WARNING: Tried to emit event 'scoreSubmission' while socket is null.")
-			return
-		}
+            Multiplayer.log("WARNING: Tried to emit event 'scoreSubmission' while socket is null.")
+            return
+        }
         Multiplayer.log("EMITTED: scoreSubmission\n${json?.toString(2)}")
     }
 
@@ -528,12 +524,11 @@ object RoomAPI
      * Submit the match score at the end of the game.
      */
     @JvmStatic
-    fun submitLiveScore(json: JSONObject?)
-    {
+    fun submitLiveScore(json: JSONObject?) {
         socket?.emit("liveScoreData", json) ?: run {
-			//Multiplayer.log("WARNING: Tried to emit event 'liveScoreData' while socket is null.")
-			return
-		}
+            //Multiplayer.log("WARNING: Tried to emit event 'liveScoreData' while socket is null.")
+            return
+        }
 
         // We don't indent here to avoid spam
         Multiplayer.log("EMITTED: liveScoreData -> $json")
@@ -542,8 +537,7 @@ object RoomAPI
     /**
      * Notify beatmap finish load.
      */
-    fun notifyBeatmapLoaded()
-    {
+    fun notifyBeatmapLoaded() {
         socket!!.emit("beatmapLoadComplete")
         Multiplayer.log("EMITTED: beatmapLoadComplete")
     }
@@ -551,8 +545,7 @@ object RoomAPI
     /**
      * Request skip.
      */
-    fun requestSkip()
-    {
+    fun requestSkip() {
         socket!!.emit("skipRequested")
         Multiplayer.log("EMITTED: skipRequested")
     }
@@ -560,12 +553,11 @@ object RoomAPI
     /**
      * Send chat message.
      */
-    fun sendMessage(message: String)
-    {
+    fun sendMessage(message: String) {
         socket?.emit("chatMessage", message) ?: run {
-			Multiplayer.log("WARNING: Tried to emit event 'chatMessage' while socket is null.")
-			return
-		}
+            Multiplayer.log("WARNING: Tried to emit event 'chatMessage' while socket is null.")
+            return
+        }
         //Multiplayer.log("EMITTED: chatMessage -> $message")
     }
 
@@ -573,12 +565,11 @@ object RoomAPI
      * Change player status.
      */
     @JvmStatic
-    fun setPlayerStatus(status: PlayerStatus)
-    {
+    fun setPlayerStatus(status: PlayerStatus) {
         socket?.emit("playerStatusChanged", status.ordinal) ?: run {
-			Multiplayer.log("WARNING: Tried to emit event 'playerStatusChanged' while socket is null.")
-			return
-		}
+            Multiplayer.log("WARNING: Tried to emit event 'playerStatusChanged' while socket is null.")
+            return
+        }
         Multiplayer.log("EMITTED: playerStatusChanged -> $status")
     }
 
@@ -586,8 +577,7 @@ object RoomAPI
      * Change player mods.
      */
     @JvmStatic
-    fun setPlayerMods(mods: String?)
-    {
+    fun setPlayerMods(mods: String?) {
         socket?.emit("playerModsChanged", mods) ?: run {
 			Multiplayer.log("WARNING: Tried to emit event 'playerModsChanged' while socket is null.")
 			return
@@ -599,12 +589,11 @@ object RoomAPI
     /**
      * Change player team.
      */
-    fun setPlayerTeam(team: RoomTeam)
-    {
+    fun setPlayerTeam(team: RoomTeam) {
         socket?.emit("teamChanged", team.ordinal) ?: run {
-			Multiplayer.log("WARNING: Tried to emit event 'teamChanged' while socket is null.")
-			return
-		}
+            Multiplayer.log("WARNING: Tried to emit event 'teamChanged' while socket is null.")
+            return
+        }
         Multiplayer.log("EMITTED: teamChanged -> $team")
     }
 

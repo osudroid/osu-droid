@@ -1,11 +1,13 @@
 package ru.nsu.ccfit.zuev.osu.menu;
 
 import org.anddev.andengine.engine.Engine;
+import org.anddev.andengine.entity.scene.Scene;
 import org.anddev.andengine.entity.scene.menu.MenuScene;
 import org.anddev.andengine.entity.scene.menu.MenuScene.IOnMenuItemClickListener;
 import org.anddev.andengine.entity.scene.menu.item.IMenuItem;
 import org.anddev.andengine.entity.scene.menu.item.SpriteMenuItem;
 import org.anddev.andengine.entity.sprite.Sprite;
+import org.anddev.andengine.input.touch.TouchEvent;
 import org.anddev.andengine.opengl.texture.region.TextureRegion;
 
 import ru.nsu.ccfit.zuev.audio.BassSoundProvider;
@@ -13,9 +15,7 @@ import ru.nsu.ccfit.zuev.osu.Config;
 import ru.nsu.ccfit.zuev.osu.GlobalManager;
 import ru.nsu.ccfit.zuev.osu.ResourceManager;
 import ru.nsu.ccfit.zuev.osu.ToastLogger;
-import ru.nsu.ccfit.zuev.osu.game.GameHelper;
 import ru.nsu.ccfit.zuev.osu.game.GameScene;
-import ru.nsu.ccfit.zuev.osuplus.R;
 
 public class PauseMenu implements IOnMenuItemClickListener {
     static final int ITEM_SAVE_REPLAY = 0;
@@ -34,9 +34,17 @@ public class PauseMenu implements IOnMenuItemClickListener {
         replaySaved = false;
         scene = new MenuScene(engine.getCamera()) {
             @Override
+            public boolean onSceneTouchEvent(Scene pScene, TouchEvent pSceneTouchEvent) {
+                super.onSceneTouchEvent(pScene, pSceneTouchEvent);
+
+                // Intercept touch event to prevent it from being passed to the game scene during pause.
+                return true;
+            }
+
+            @Override
             protected void onManagedUpdate(float pSecondsElapsed) {
-                // Cancel the effect of speed multiplier.
-                super.onManagedUpdate(pSecondsElapsed / GameHelper.getSpeedMultiplier());
+                // The fade in animation duration is 1 second. We want to speed it up.
+                super.onManagedUpdate(pSecondsElapsed * 2.5f);
             }
         };
 
@@ -87,14 +95,11 @@ public class PauseMenu implements IOnMenuItemClickListener {
                                      final IMenuItem pMenuItem, final float pMenuItemLocalX,
                                      final float pMenuItemLocalY) {
 
-        if (pMenuItem.getAlpha() < 0.75f) {
-            return false;
-        }
         BassSoundProvider playSnd;
         switch (pMenuItem.getID()) {
             case ITEM_SAVE_REPLAY:
                 if(fail && !replaySaved && !game.getReplaying() && game.saveFailedReplay()){
-                    ToastLogger.showTextId(R.string.message_save_replay_successful, true);
+                    ToastLogger.showText(com.osudroid.resources.R.string.message_save_replay_successful, true);
                     replaySaved = true;
                 }
                 return true;

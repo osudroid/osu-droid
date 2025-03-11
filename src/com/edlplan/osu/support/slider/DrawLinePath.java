@@ -8,9 +8,6 @@ import com.edlplan.framework.math.line.AbstractPath;
 public class DrawLinePath {
     private static final int MAXRES = 24;
 
-    private static final float Z_MIDDLE = 99.0f;
-
-    private static final float Z_SIDE = -99.0f;
     public float alpha;
     public float width;
     Vec2 current, current2;
@@ -23,12 +20,6 @@ public class DrawLinePath {
     Vec2 oth_expand = new Vec2();
     private TriangleBuilder triangles;
     private AbstractPath path;
-
-    public DrawLinePath(AbstractPath p, float width) {
-        alpha = 1;
-        path = p;
-        this.width = width;
-    }
 
     public DrawLinePath() {
         alpha = 1;
@@ -44,21 +35,13 @@ public class DrawLinePath {
         return this;
     }
 
-    public TriangleBuilder getTriangles() {
-        if (triangles == null) {
-            triangles = new TriangleBuilder(path.size() * 6);
-            init();
-        }
-        return triangles;
-    }
-
-    public TriangleBuilder getTriangles(TriangleBuilder builder) {
+    public TriangleBuilder computeTriangles(TriangleBuilder builder) {
         TriangleBuilder cache = triangles;
         if (cache != null) {
-            cache.getVertex(builder);
+            cache.applyVertices(builder);
         } else {
             triangles = builder;
-            builder.length = 0;
+            builder.reset();
             init();
         }
         triangles = cache;
@@ -136,11 +119,8 @@ public class DrawLinePath {
             if (path.size() == 1) {
                 addLineCap(path.get(0), FMath.Pi, FMath.Pi);
                 addLineCap(path.get(0), 0, FMath.Pi);
-                return;
-            } else {
-                return;
-                //throw new RuntimeException("Path must has at least 1 point");
             }
+            return;
         }
 
         float theta = Vec2.calTheta(path.get(0), path.get(1));

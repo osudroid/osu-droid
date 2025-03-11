@@ -23,9 +23,7 @@ import ru.nsu.ccfit.zuev.osu.game.GameHelper;
 import ru.nsu.ccfit.zuev.osu.helper.StringTable;
 import ru.nsu.ccfit.zuev.osu.online.OnlineManager;
 import ru.nsu.ccfit.zuev.osu.scoring.BeatmapLeaderboardScoringMode;
-import ru.nsu.ccfit.zuev.osuplus.R;
 
-import java.io.File;
 import java.util.*;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -204,12 +202,14 @@ public class ScoreBoard extends Entity implements ScrollDetector.IScrollDetector
 
             @Override
             public void run() {
+                if (GlobalManager.getInstance().getSelectedBeatmap() != beatmapInfo) {
+                    return;
+                }
 
-                File beatmapFile = new File(beatmapInfo.getFilename());
                 List<String> scores;
 
                 try {
-                    scores = OnlineManager.getInstance().getTop(beatmapFile, beatmapInfo.getMD5());
+                    scores = OnlineManager.getInstance().getTop(beatmapInfo.getMD5());
                 } catch (OnlineManager.OnlineManagerException e) {
                     Log.e("Scoreboard", "Failed to load scores from online.", e);
 
@@ -264,7 +264,7 @@ public class ScoreBoard extends Entity implements ScrollDetector.IScrollDetector
                     var titleStr = sb.append('#').append(beatmapRank).append(' ').append(playerName)
                             .append('\n')
                             .append(StringTable.format(
-                                isPPScoringMode ? R.string.menu_performance : R.string.menu_score, scoreStr, combo))
+                                isPPScoringMode ? com.osudroid.resources.R.string.menu_performance : com.osudroid.resources.R.string.menu_score, scoreStr, combo))
                             .toString();
 
                     if (i < scores.size() - 1) {
@@ -319,7 +319,11 @@ public class ScoreBoard extends Entity implements ScrollDetector.IScrollDetector
 
             @Override
             public void run() {
-                var scores = DatabaseManager.getScoreInfoTable().getBeatmapScores(beatmap.getSetDirectory(), beatmap.getFilename());
+                if (GlobalManager.getInstance().getSelectedBeatmap() != beatmap) {
+                    return;
+                }
+
+                var scores = DatabaseManager.getScoreInfoTable().getBeatmapScores(beatmap.getMD5());
 
                 if (scores.isEmpty() || !isActive()) {
 
@@ -347,7 +351,7 @@ public class ScoreBoard extends Entity implements ScrollDetector.IScrollDetector
                     sb.setLength(0);
                     var titleStr = sb.append('#').append(i + 1).append(' ').append(score.getPlayerName())
                             .append('\n')
-                            .append(StringTable.format(R.string.menu_score, totalScore, score.getMaxCombo()))
+                            .append(StringTable.format(com.osudroid.resources.R.string.menu_score, totalScore, score.getMaxCombo()))
                             .toString();
 
                     if (i < scores.size() - 1) {

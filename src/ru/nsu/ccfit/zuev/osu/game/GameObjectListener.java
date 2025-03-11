@@ -2,9 +2,6 @@ package ru.nsu.ccfit.zuev.osu.game;
 
 import android.graphics.PointF;
 
-import com.rian.osu.beatmap.hitobject.HitObject;
-import com.rian.osu.beatmap.hitobject.HitSampleInfo;
-
 import java.util.BitSet;
 
 import ru.nsu.ccfit.zuev.osu.RGBColor;
@@ -22,23 +19,9 @@ public interface GameObjectListener {
 
     void onSpinnerHit(int id, int score, boolean endCombo, int totalScore);
 
-    void playSamples(HitObject obj);
-
-    void playAuxiliarySamples(HitObject obj);
-
-    void playSample(HitSampleInfo sample, boolean loop);
-
-    void stopAuxiliarySamples(HitObject obj);
-
-    void stopSample(HitSampleInfo sample);
-
     void addObject(GameObject object);
 
     void removeObject(GameObject object);
-
-    void addPassiveObject(GameObject object);
-
-    void removePassiveObject(GameObject object);
 
     PointF getMousePos(int index);
 

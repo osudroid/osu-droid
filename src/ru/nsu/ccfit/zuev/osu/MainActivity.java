@@ -1,5 +1,7 @@
 package ru.nsu.ccfit.zuev.osu;
 
+import static android.view.ViewGroup.LayoutParams.MATCH_PARENT;
+
 import android.Manifest;
 import android.annotation.SuppressLint;
 import android.content.ComponentName;
@@ -23,13 +25,13 @@ import android.os.Looper;
 import android.os.PowerManager;
 import android.os.StatFs;
 import android.util.DisplayMetrics;
-import android.view.Gravity;
+import android.view.Display;
 import android.view.KeyEvent;
+import android.view.Surface;
 import android.view.View;
-import android.view.ViewGroup;
-import android.view.WindowManager;
 import android.widget.FrameLayout;
 import android.widget.RelativeLayout;
+import android.widget.RelativeLayout.LayoutParams;
 import android.widget.Toast;
 
 import androidx.core.app.NotificationManagerCompat;
@@ -41,6 +43,7 @@ import com.google.firebase.analytics.FirebaseAnalytics;
 import com.google.firebase.crashlytics.FirebaseCrashlytics;
 import com.reco1l.ibancho.LobbyAPI;
 import com.reco1l.osu.AccessibilityDetector;
+import com.reco1l.osu.DifficultyCalculationManager;
 import com.reco1l.osu.data.BeatmapInfo;
 import com.reco1l.osu.Execution;
 import com.reco1l.osu.multiplayer.Multiplayer;
@@ -75,11 +78,9 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
-import ru.nsu.ccfit.zuev.audio.BassAudioPlayer;
 import ru.nsu.ccfit.zuev.audio.serviceAudio.SaveServiceObject;
 import ru.nsu.ccfit.zuev.audio.serviceAudio.SongService;
 import ru.nsu.ccfit.zuev.osu.helper.FileUtils;
-import ru.nsu.ccfit.zuev.osu.helper.InputManager;
 import ru.nsu.ccfit.zuev.osu.helper.StringTable;
 import ru.nsu.ccfit.zuev.osu.menu.LoadingScreen;
 import ru.nsu.ccfit.zuev.osu.menu.ModMenu;
@@ -103,6 +104,8 @@ public class MainActivity extends BaseGameActivity implements
     private boolean willReplay = false;
     private static boolean activityVisible = true;
     private static final ScheduledExecutorService scheduledExecutor = Executors.newSingleThreadScheduledExecutor();
+    private Display display;
+    private float maxRefreshRate = 60;
 
     // Multiplayer
     private Uri roomInviteLink;
@@ -119,12 +122,21 @@ public class MainActivity extends BaseGameActivity implements
         //Debug.setDebugLevel(Debug.DebugLevel.NONE);
         StringTable.setContext(this);
         ToastLogger.init(this);
-        InputManager.setContext(this);
-        OnlineManager.getInstance().Init(getApplicationContext());
+        OnlineManager.getInstance().init();
         crashlytics.setUserId(Config.getOnlineDeviceID());
 
         final DisplayMetrics dm = new DisplayMetrics();
-        getWindowManager().getDefaultDisplay().getMetrics(dm);
+        display = getWindowManager().getDefaultDisplay();
+        display.getMetrics(dm);
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+            for (var mode : display.getSupportedModes()) {
+                for (float rate : mode.getAlternativeRefreshRates()) {
+                    maxRefreshRate = Math.max(maxRefreshRate, rate);
+                }
+            }
+        }
+
 /*        final double screenSize = Math.sqrt(Utils.sqr(dm.widthPixels / dm.xdpi)
                 + Utils.sqr(dm.heightPixels / dm.ydpi));*/
         double screenInches = Math.sqrt(Math.pow(dm.heightPixels, 2) + Math.pow(dm.widthPixels, 2)) / (dm.density * 160.0f);
@@ -149,13 +161,12 @@ public class MainActivity extends BaseGameActivity implements
 
         if (!MultiTouch.isSupported(this)) {
             // Warning player that they will have to single tap forever.
-            ToastLogger.showText(StringTable.get(R.string.message_error_multitouch), false);
+            ToastLogger.showText(StringTable.get(com.osudroid.resources.R.string.message_info_multitouch), false);
         }
         engine.setTouchController(new MultiTouchController());
 
         GlobalManager.getInstance().setCamera(mCamera);
         GlobalManager.getInstance().setEngine(engine);
-        GlobalManager.getInstance().setMainActivity(this);
         return GlobalManager.getInstance().getEngine();
     }
 
@@ -168,7 +179,7 @@ public class MainActivity extends BaseGameActivity implements
                 dir = new File(Config.getBeatmapPath());
                 if (!(dir.exists() || dir.mkdirs())) {
                     ToastLogger.showText(StringTable.format(
-                                    R.string.message_error_createdir, dir.getPath()),
+                                    com.osudroid.resources.R.string.message_error_createdir, dir.getPath()),
                             true);
                 } else {
                     final SharedPreferences prefs = PreferenceManager
@@ -255,6 +266,8 @@ public class MainActivity extends BaseGameActivity implements
         ResourceManager.getInstance().loadHighQualityAsset("music_prev", "music_prev.png");
         ResourceManager.getInstance().loadHighQualityAsset("music_np", "music_np.png");
         ResourceManager.getInstance().loadHighQualityAsset("songselect-top", "songselect-top.png");
+        ResourceManager.getInstance().loadHighQualityAsset("back-arrow", "back-arrow.png");
+
         File bg;
         if ((bg = new File(Config.getSkinPath() + "menu-background.png")).exists()
                 || (bg = new File(Config.getSkinPath() + "menu-background.jpg")).exists()) {
@@ -282,19 +295,19 @@ public class MainActivity extends BaseGameActivity implements
         RoomScene.INSTANCE.init();
 
         Execution.async(() -> {
-            BassAudioPlayer.initDevice();
             GlobalManager.getInstance().init();
             analytics.logEvent(FirebaseAnalytics.Event.APP_OPEN, null);
             GlobalManager.getInstance().setLoadingProgress(50);
             checkNewSkins();
             Config.loadSkins();
+            DifficultyCalculationManager.checkForOutdatedStarRatings();
             loadBeatmapLibrary();
 
             SplashScene.INSTANCE.playWelcomeAnimation();
 
             Execution.delayed(2500, () -> {
 
-                UpdateManager.INSTANCE.onActivityStart();
+                UpdateManager.onActivityStart();
                 GlobalManager.getInstance().setInfo("");
                 GlobalManager.getInstance().setLoadingProgress(100);
                 ResourceManager.getInstance().loadFont("font", null, 28, Color.WHITE);
@@ -304,19 +317,26 @@ public class MainActivity extends BaseGameActivity implements
                 availableInternalMemory();
 
                 scheduledExecutor.scheduleAtFixedRate(() -> {
+                    if (Config.isForceMaxRefreshRate() && Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+                        float refreshRate = getRefreshRate();
+
+                        if (refreshRate != maxRefreshRate) {
+                            mRenderSurfaceView.getHolder().getSurface().setFrameRate(maxRefreshRate, Surface.FRAME_RATE_COMPATIBILITY_DEFAULT);
+                        }
+                    }
+
                     AccessibilityDetector.check(MainActivity.this);
                     BeatmapDifficultyCalculator.invalidateExpiredCache();
                 }, 0, 100, TimeUnit.MILLISECONDS);
 
                 if (roomInviteLink != null) {
                     LobbyScene.INSTANCE.connectFromLink(roomInviteLink);
-                    return;
-                }
-
-                if (willReplay) {
+                } else if (willReplay) {
                     GlobalManager.getInstance().getMainScene().watchReplay(beatmapToAdd);
                     willReplay = false;
                 }
+
+                GlobalManager.getInstance().getMainScene().loadBannerSprite();
             });
         });
     }
@@ -334,7 +354,7 @@ public class MainActivity extends BaseGameActivity implements
         File internal = Environment.getDataDirectory();
         StatFs stat = new StatFs(internal.getPath());
         availableMemory = (double) stat.getAvailableBytes();
-        String toastMessage = String.format(StringTable.get(R.string.message_low_storage_space), df.format(availableMemory / minMem));
+        String toastMessage = String.format(StringTable.get(com.osudroid.resources.R.string.message_low_storage_space), df.format(availableMemory / minMem));
         if (availableMemory < 0.5 * minMem) { //I set 512MiB as a minimum
             Execution.mainThread(() -> Toast.makeText(this, toastMessage, Toast.LENGTH_LONG).show());
         }
@@ -346,33 +366,24 @@ public class MainActivity extends BaseGameActivity implements
     protected void onSetContentView() {
         this.mRenderSurfaceView = new RenderSurfaceView(this);
         this.mRenderSurfaceView.setEGLConfigChooser(8, 8, 8, 8, 24, 0);
-        this.mRenderSurfaceView.getHolder().setFormat(PixelFormat.RGBA_8888);
+        this.mRenderSurfaceView.getHolder().setFormat(PixelFormat.RGB_888);
         this.mRenderSurfaceView.setRenderer(this.mEngine);
 
-        RelativeLayout layout = new RelativeLayout(this);
-        layout.setBackgroundColor(Color.argb(255, 0, 0, 0));
-        layout.addView(
-                mRenderSurfaceView,
-                new RelativeLayout.LayoutParams(
-                        ViewGroup.LayoutParams.MATCH_PARENT,
-                        ViewGroup.LayoutParams.MATCH_PARENT) {{
-                    addRule(RelativeLayout.CENTER_IN_PARENT);
-                }});
+        RelativeLayout mainLayout = new RelativeLayout(this);
+        mainLayout.setBackgroundColor(Color.BLACK);
+        mainLayout.addView(mRenderSurfaceView, new LayoutParams(MATCH_PARENT, MATCH_PARENT));
 
         FrameLayout frameLayout = new FrameLayout(this);
-        frameLayout.setId(0x28371);
-        layout.addView(frameLayout, new RelativeLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT));
+        frameLayout.setId(View.generateViewId());
 
-        View c = new View(this);
-        c.setBackgroundColor(Color.argb(0, 0, 0, 0));
-        layout.addView(c, new RelativeLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT));
+        mainLayout.addView(frameLayout, new LayoutParams(MATCH_PARENT, MATCH_PARENT));
 
-        this.setContentView(
-                layout,
-                new FrameLayout.LayoutParams(FrameLayout.LayoutParams.MATCH_PARENT, FrameLayout.LayoutParams.MATCH_PARENT) {{
-                    gravity = Gravity.CENTER;
-                }});
+        // Adding a dummy View somehow fixes an issue with Android layout system where the layouts
+        // in the frame layout (where fragments are attached, see ActivityOverlay) are not properly
+        // displayed on the screen.
+        mainLayout.addView(new View(this), new LayoutParams(MATCH_PARENT, MATCH_PARENT));
 
+        setContentView(mainLayout, new FrameLayout.LayoutParams(MATCH_PARENT, MATCH_PARENT));
         ActivityOverlay.initial(this, frameLayout.getId());
     }
 
@@ -383,7 +394,7 @@ public class MainActivity extends BaseGameActivity implements
             File file = new File(beatmapToAdd);
             if (file.getName().toLowerCase().endsWith(".osz")) {
                 ToastLogger.showText(
-                        StringTable.get(R.string.message_lib_importing),
+                        StringTable.get(com.osudroid.resources.R.string.library_importing),
                         false);
 
                 FileUtils.extractZip(beatmapToAdd, Config.getBeatmapPath());
@@ -436,7 +447,7 @@ public class MainActivity extends BaseGameActivity implements
                 // final boolean deleteOsz = Config.isDELETE_OSZ();
                 // Config.setDELETE_OSZ(true);
                 ToastLogger.showText(StringTable.format(
-                        R.string.message_lib_importing_several,
+                        com.osudroid.resources.R.string.library_importing_several,
                         beatmaps.size()), false);
                 for (final String beatmap : beatmaps) {
                     FileUtils.extractZip(beatmap, Config.getBeatmapPath());
@@ -492,7 +503,7 @@ public class MainActivity extends BaseGameActivity implements
 
         if (skins.size() > 0) {
             ToastLogger.showText(StringTable.format(
-                    R.string.message_skin_importing_several,
+                    com.osudroid.resources.R.string.library_skin_importing_several,
                     skins.size()), false);
 
             for (final String skin : skins) {
@@ -500,7 +511,7 @@ public class MainActivity extends BaseGameActivity implements
                     String folderName = skin.substring(0, skin.length() - 4);
                     // We have imported the skin!
                     ToastLogger.showText(
-                            StringTable.format(R.string.message_lib_imported, folderName),
+                            StringTable.format(com.osudroid.resources.R.string.library_imported, folderName),
                             true);
                     Config.addSkin(folderName.substring(folderName.lastIndexOf("/") + 1), skin);
                 }
@@ -526,6 +537,10 @@ public class MainActivity extends BaseGameActivity implements
 
     @Override
     protected void onCreate(Bundle pSavedInstanceState) {
+        // Some components may already start using this class when onCreate is called. An example
+        // is when the game is restoring after being killed by system due to low system memory.
+        GlobalManager.getInstance().setMainActivity(this);
+
         super.onCreate(pSavedInstanceState);
 
         try {
@@ -604,17 +619,13 @@ public class MainActivity extends BaseGameActivity implements
                 && GlobalManager.getInstance().getEngine().getScene() == GlobalManager.getInstance().getGameScene().getScene()) {
             GlobalManager.getInstance().getEngine().getTextureManager().reloadTextures();
         }
-        if (GlobalManager.getInstance().getMainScene() != null) {
-            if (songService != null && Build.VERSION.SDK_INT > 10) {
-                if (songService.hideNotification()) {
-                    if (wakeLock != null && wakeLock.isHeld()) wakeLock.release();
-                    GlobalManager.getInstance().getMainScene().loadBeatmapInfo();
-                    GlobalManager.getInstance().getMainScene().loadTimingPoints(false);
-                    GlobalManager.getInstance().getMainScene().progressBar.setTime(songService.getLength());
-                    GlobalManager.getInstance().getMainScene().progressBar.setPassedTime(songService.getPosition());
-                    GlobalManager.getInstance().getMainScene().musicControl(MainScene.MusicOption.SYNC);
-                }
-            }
+        if (GlobalManager.getInstance().getMainScene() != null && songService != null && songService.hideNotification()) {
+            if (wakeLock != null && wakeLock.isHeld()) wakeLock.release();
+            GlobalManager.getInstance().getMainScene().loadBeatmapInfo();
+            GlobalManager.getInstance().getMainScene().loadTimingPoints(false);
+            GlobalManager.getInstance().getMainScene().progressBar.setTime(songService.getLength());
+            GlobalManager.getInstance().getMainScene().progressBar.setPassedTime(songService.getPosition());
+            GlobalManager.getInstance().getMainScene().musicControl(MainScene.MusicOption.SYNC);
         }
     }
 
@@ -682,15 +693,13 @@ public class MainActivity extends BaseGameActivity implements
             }
         }
 
-        if (hasFocus && Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT && Config.isHideNaviBar()) {
-            getWindow().getDecorView().setSystemUiVisibility(
-                    View.SYSTEM_UI_FLAG_LAYOUT_STABLE
-                            | View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION
-                            | View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN
-                            | View.SYSTEM_UI_FLAG_HIDE_NAVIGATION
-                            | View.SYSTEM_UI_FLAG_FULLSCREEN
-                            | View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY);
-        }
+        getWindow().getDecorView().setSystemUiVisibility(
+                View.SYSTEM_UI_FLAG_LAYOUT_STABLE
+                        | View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION
+                        | View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN
+                        | View.SYSTEM_UI_FLAG_HIDE_NAVIGATION
+                        | View.SYSTEM_UI_FLAG_FULLSCREEN
+                        | View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY);
     }
 
     @Override
@@ -725,15 +734,22 @@ public class MainActivity extends BaseGameActivity implements
             return true;
         }
 
-        if (GlobalManager.getInstance().getGameScene() != null
-                && (keyCode == KeyEvent.KEYCODE_BACK || keyCode == KeyEvent.KEYCODE_MENU)
-                && GlobalManager.getInstance().getEngine().getScene() == GlobalManager.getInstance().getGameScene().getScene()) {
-            if (GlobalManager.getInstance().getGameScene().isPaused()) {
-                GlobalManager.getInstance().getGameScene().resume();
-            } else {
-                GlobalManager.getInstance().getGameScene().pause();
+        var gameScene = GlobalManager.getInstance().getGameScene();
+
+        if (gameScene != null && (keyCode == KeyEvent.KEYCODE_BACK || keyCode == KeyEvent.KEYCODE_MENU)) {
+            if (gameScene.isLoading()) {
+                gameScene.cancelLoading();
+                return true;
             }
-            return true;
+
+            if (GlobalManager.getInstance().getEngine().getScene() == gameScene.getScene()) {
+                if (gameScene.isPaused()) {
+                    gameScene.resume();
+                } else {
+                    gameScene.pause();
+                }
+                return true;
+            }
         }
         if (GlobalManager.getInstance().getScoring() != null && keyCode == KeyEvent.KEYCODE_BACK
                 && GlobalManager.getInstance().getEngine().getScene() == GlobalManager.getInstance().getScoring().getScene()) {
@@ -746,11 +762,8 @@ public class MainActivity extends BaseGameActivity implements
                 && GlobalManager.getInstance().getEngine().getScene() == GlobalManager.getInstance().getSongMenu().getScene()
                 && GlobalManager.getInstance().getSongMenu().getScene().hasChildScene()) {
             if (GlobalManager.getInstance().getSongMenu().getScene().getChildScene() ==
-                    GlobalManager.getInstance().getSongMenu().getFilterMenu().getScene()) {
-                if (keyCode == KeyEvent.KEYCODE_ENTER) {
-                    InputManager.getInstance().toggleKeyboard();
-                }
-                GlobalManager.getInstance().getSongMenu().getFilterMenu().hideMenu();
+                    GlobalManager.getInstance().getSongMenu().getSearchBar().getScene()) {
+                GlobalManager.getInstance().getSongMenu().getSearchBar().hideMenu();
             }
 
             if (GlobalManager.getInstance().getSongMenu().getScene().getChildScene() == ModMenu.getInstance().getScene()) {
@@ -801,16 +814,6 @@ public class MainActivity extends BaseGameActivity implements
             return true;
         }
 
-        if (InputManager.getInstance().isStarted()) {
-            if (keyCode == KeyEvent.KEYCODE_DEL) {
-                InputManager.getInstance().pop();
-            } else if (keyCode != KeyEvent.KEYCODE_ENTER) {
-                final char c = (char) event.getUnicodeChar();
-                if (c != 0) {
-                    InputManager.getInstance().append(c);
-                }
-            }
-        }
         return super.onKeyDown(keyCode, event);
     }
 
@@ -839,9 +842,7 @@ public class MainActivity extends BaseGameActivity implements
     }
 
     public float getRefreshRate() {
-        return ((WindowManager) getSystemService(Context.WINDOW_SERVICE))
-                .getDefaultDisplay()
-                .getRefreshRate();
+        return display.getRefreshRate();
     }
 
     private boolean checkPermissions() {

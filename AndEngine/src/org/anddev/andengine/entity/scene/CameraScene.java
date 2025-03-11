@@ -98,6 +98,7 @@ public class CameraScene extends Scene {
 
 				super.onManagedDraw(pGL, pCamera);
 
+				pGL.glMatrixMode(GL10.GL_MODELVIEW);
 				pGL.glPopMatrix();
 			}
 			pGL.glMatrixMode(GL10.GL_PROJECTION);

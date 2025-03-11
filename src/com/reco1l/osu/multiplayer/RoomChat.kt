@@ -17,7 +17,6 @@ import android.widget.EditText
 import android.widget.LinearLayout
 import android.widget.TextView
 import android.widget.TextView.OnEditorActionListener
-import androidx.core.view.isVisible
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.edlplan.framework.easing.Easing
@@ -27,16 +26,15 @@ import com.edlplan.ui.fragment.BaseFragment
 import com.reco1l.ibancho.RoomAPI
 import com.reco1l.ibancho.data.RoomPlayer
 import com.reco1l.osu.mainThread
-import com.reco1l.toolkt.android.drawableLeft
-import com.reco1l.toolkt.android.drawableRight
-import com.reco1l.toolkt.android.fontColor
+import com.reco1l.toolkt.android.*
 import com.reco1l.toolkt.kotlin.async
+import java.text.SimpleDateFormat
 import org.anddev.andengine.input.touch.TouchEvent
+import ru.nsu.ccfit.zuev.osu.GlobalManager
 import ru.nsu.ccfit.zuev.osu.RGBColor
 import ru.nsu.ccfit.zuev.osu.ResourceManager
 import ru.nsu.ccfit.zuev.osuplus.R
 import kotlin.math.abs
-import ru.nsu.ccfit.zuev.osu.GlobalManager.getInstance as getGlobal
 
 
 /**
@@ -49,8 +47,7 @@ private val DEVELOPERS = longArrayOf(
 )
 
 
-class RoomChat : BaseFragment(), OnEditorActionListener, OnKeyListener
-{
+class RoomChat : BaseFragment(), OnEditorActionListener, OnKeyListener {
 
     override val layoutID = R.layout.multiplayer_room_chat
 
@@ -81,6 +78,7 @@ class RoomChat : BaseFragment(), OnEditorActionListener, OnKeyListener
         recyclerView = findViewById(R.id.chat_text)!!
         recyclerView.layoutManager = LinearLayoutManager(context, RecyclerView.VERTICAL, true)
         recyclerView.adapter = adapter
+        recyclerView.itemAnimator = null
 
         findViewById<Button>(R.id.chat_send)!!.setOnClickListener {
             sendMessage()
@@ -99,8 +97,7 @@ class RoomChat : BaseFragment(), OnEditorActionListener, OnKeyListener
 
         prependMessage(Message(player.id, message))
 
-        val color = when(player.id)
-        {
+        val color = when(player.id) {
             Multiplayer.room!!.host -> "#00FFEA"
             in DEVELOPERS -> "#F280FF"
             else -> "#8282A8"
@@ -119,7 +116,7 @@ class RoomChat : BaseFragment(), OnEditorActionListener, OnKeyListener
 
     private fun prependMessage(message: Message) {
 
-        if (getGlobal().engine.scene != getGlobal().gameScene.scene) {
+        if (GlobalManager.getInstance().engine.scene != GlobalManager.getInstance().gameScene.scene) {
             ResourceManager.getInstance().getSound("heartbeat")?.play(0.75f)
         }
 
@@ -129,11 +126,11 @@ class RoomChat : BaseFragment(), OnEditorActionListener, OnKeyListener
 
     private fun showPreview(content: String, contentColor: String? = null, tag: String? = null, tagColor: String? = null) {
 
-        RGBColor.hex2Rgb(tagColor ?: "#FFFFFF").apply(RoomScene.chatPreview.tag)
-        RGBColor.hex2Rgb(contentColor ?: "#FFFFFF").apply(RoomScene.chatPreview.content)
+        RGBColor.hex2Rgb(tagColor ?: "#FFFFFF").apply(RoomScene.chatPreviewText.tag)
+        RGBColor.hex2Rgb(contentColor ?: "#FFFFFF").apply(RoomScene.chatPreviewText.content)
 
-        RoomScene.chatPreview.setTagText(tag ?: "")
-        RoomScene.chatPreview.setContentText(content)
+        RoomScene.chatPreviewText.setTagText(tag ?: "")
+        RoomScene.chatPreviewText.setContentText(content)
     }
 
     private fun hideKeyboard() {
@@ -282,8 +279,8 @@ class RoomChat : BaseFragment(), OnEditorActionListener, OnKeyListener
             return
         }
 
-        if (getGlobal().engine.scene == getGlobal().gameScene.scene) {
-            getGlobal().gameScene.pause()
+        if (GlobalManager.getInstance().engine.scene == GlobalManager.getInstance().gameScene.scene) {
+            GlobalManager.getInstance().gameScene.pause()
             return
         }
 
@@ -293,7 +290,13 @@ class RoomChat : BaseFragment(), OnEditorActionListener, OnKeyListener
 }
 
 
-data class Message(val sender: Long?, val text: String, val color: Int? = null)
+data class Message(val senderUid: Long?, val text: String, val color: Int? = null) {
+    val timestamp = System.currentTimeMillis()
+
+    val senderUsername =
+        if (senderUid == null) "System"
+        else Multiplayer.room?.playersMap?.get(senderUid)?.name ?: "Unknown Player ($senderUid)"
+}
 
 
 class MessageAdapter : RecyclerView.Adapter<MessageViewHolder>() {
@@ -322,9 +325,10 @@ class MessageAdapter : RecyclerView.Adapter<MessageViewHolder>() {
         val msg = data[position]
 
         // The sender label will be shown if the previous message is not from the same sender
-        val showSender = position == data.size - 1 || data[position + 1].sender != msg.sender
+        val showSender = msg.senderUid != null && (position == data.size - 1 || data[position + 1].senderUid != msg.senderUid)
+        val tintBackground = (data.size - position) % 2 == 0
 
-        holder.bind(msg, showSender)
+        holder.bind(msg, showSender, tintBackground)
     }
 
 }
@@ -332,40 +336,44 @@ class MessageAdapter : RecyclerView.Adapter<MessageViewHolder>() {
 class MessageViewHolder(private val root: LinearLayout) : RecyclerView.ViewHolder(root) {
 
 
+    private lateinit var timestampText: TextView
+
     private lateinit var senderText: TextView
 
     private lateinit var messageText: TextView
 
 
-    fun bind(msg: Message, showSender: Boolean) {
-
+    fun bind(msg: Message, showSender: Boolean, tintBackground: Boolean) {
+        timestampText = root.findViewById(R.id.timestamp_text)!!
         senderText = root.findViewById(R.id.sender_text)!!
         messageText = root.findViewById(R.id.message_text)!!
 
-        if (msg.sender == null) {
-            messageText.isVisible = false
-            senderText.isVisible = true
-            senderText.text = msg.text
+        root.backgroundColor = if (tintBackground) 0xFF1A1A25.toInt() else Color.TRANSPARENT
 
-            root.gravity = Gravity.CENTER
+        timestampText.text = timestampFormatter.format(msg.timestamp)
 
-            if (msg.color != null) {
-                senderText.fontColor = msg.color
-            }
+        messageText.verticalPadding = 0
+        messageText.gravity = Gravity.LEFT
+        messageText.fontColor = msg.color ?: Color.WHITE
+
+        senderText.visibility = if (showSender) View.VISIBLE else View.INVISIBLE
+
+        // For system messages
+        if (msg.senderUid == null) {
+            senderText.visibility = View.GONE
+
+            messageText.text = msg.text
+            messageText.gravity = Gravity.CENTER
+            messageText.verticalPadding = 8.dp
             return
         }
 
-        val isOwnMessage = msg.sender == Multiplayer.player!!.id
-
-        messageText.isVisible = true
-        senderText.isVisible = showSender
-
         if (showSender) {
 
-            val isRoomHost = msg.sender == Multiplayer.room!!.host
-            val isDeveloper = msg.sender in DEVELOPERS
+            val isRoomHost = msg.senderUid == Multiplayer.room!!.host
+            val isDeveloper = msg.senderUid in DEVELOPERS
 
-            senderText.text = Multiplayer.room!!.playersMap[msg.sender]!!.name
+            senderText.text = msg.senderUsername
 
             val color = when {
                 isRoomHost -> 0xFF00FFEA.toInt()
@@ -379,20 +387,16 @@ class MessageViewHolder(private val root: LinearLayout) : RecyclerView.ViewHolde
                 else -> null
             }
 
-            if (isOwnMessage) {
-                senderText.drawableLeft = drawable
-            } else {
-                senderText.drawableRight = drawable
-            }
-
+            senderText.drawableRight = drawable
             drawable?.setTint(color)
 
             senderText.fontColor = color
         }
 
-        root.gravity = if (isOwnMessage) Gravity.RIGHT else Gravity.LEFT
-
         messageText.text = msg.text
     }
 
+    companion object {
+        private val timestampFormatter = SimpleDateFormat("HH:mm:ss")
+    }
 }

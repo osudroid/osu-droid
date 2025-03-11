@@ -5,6 +5,7 @@ import com.rian.osu.beatmap.hitobject.HitObject
 import com.rian.osu.beatmap.hitobject.Slider
 import com.rian.osu.beatmap.hitobject.Spinner
 import com.rian.osu.beatmap.hitobject.sliderobject.SliderRepeat
+import com.rian.osu.beatmap.hitobject.sliderobject.SliderTick
 import com.rian.osu.math.Precision.almostEquals
 import com.rian.osu.math.Vector2
 import com.rian.osu.mods.ModHidden
@@ -46,12 +47,7 @@ abstract class DifficultyHitObject(
      * This is one less than the actual index of the hit object in the beatmap.
      */
     @JvmField
-    val index: Int,
-
-    /**
-     * The great window of the hit object.
-     */
-    greatWindow: Double
+    val index: Int
 ) {
     /**
      * The normalized distance from the "lazy" end position of the previous hit object to the start position of this hit object.
@@ -79,7 +75,7 @@ abstract class DifficultyHitObject(
     /**
      * The time taken to travel through [minimumJumpDistance], with a minimum value of 25ms.
      */
-    var minimumJumpTime = MIN_DELTA_TIME
+    var minimumJumpTime = MIN_DELTA_TIME.toDouble()
 
     /**
      * The normalized distance between the start and end position of this hit object.
@@ -91,7 +87,7 @@ abstract class DifficultyHitObject(
      * The time taken to travel through [travelDistance], with a minimum value of 25ms for sliders.
      */
     @JvmField
-    var travelTime = MIN_DELTA_TIME
+    var travelTime = MIN_DELTA_TIME.toDouble()
 
     /**
      * Angle the player has to take to hit this hit object.
@@ -112,7 +108,7 @@ abstract class DifficultyHitObject(
      */
     // Capped to 25ms to prevent difficulty calculation breaking from simultaneous objects.
     @JvmField
-    val strainTime = if (lastObj != null) max(deltaTime, MIN_DELTA_TIME) else 0.0
+    val strainTime = if (lastObj != null) max(deltaTime, MIN_DELTA_TIME.toDouble()) else 0.0
 
     /**
      * Adjusted start time of the hit object, taking speed multiplier into account.
@@ -130,7 +126,7 @@ abstract class DifficultyHitObject(
      * The full great window of the hit object.
      */
     @JvmField
-    val fullGreatWindow = greatWindow * 2
+    val fullGreatWindow = ((if (obj is Slider) obj.head else obj).hitWindow?.greatWindow ?: 1200f) * 2 / clockRate
 
     protected abstract val mode: GameMode
     protected abstract val scalingFactor: Float
@@ -224,7 +220,7 @@ abstract class DifficultyHitObject(
                 GameMode.Standard -> (1 + obj.repeatCount / 2.5).pow(1 / 2.5)
             }
 
-            travelTime = max(obj.lazyTravelTime / clockRate, MIN_DELTA_TIME)
+            travelTime = max(obj.lazyTravelTime / clockRate, MIN_DELTA_TIME.toDouble())
         }
 
         // We don't need to calculate either angle or distance when one of the last->curr objects
@@ -240,9 +236,9 @@ abstract class DifficultyHitObject(
         minimumJumpDistance = lazyJumpDistance
 
         if (lastObj is Slider) {
-            val lastTravelTime = max(lastObj.lazyTravelTime / clockRate, MIN_DELTA_TIME)
+            val lastTravelTime = max(lastObj.lazyTravelTime / clockRate, MIN_DELTA_TIME.toDouble())
 
-            minimumJumpTime = max(strainTime - lastTravelTime, MIN_DELTA_TIME)
+            minimumJumpTime = max(strainTime - lastTravelTime, MIN_DELTA_TIME.toDouble())
 
             // There are two types of slider-to-object patterns to consider in order to better approximate the real movement a player will take to jump between the hit objects.
             //
@@ -291,6 +287,49 @@ abstract class DifficultyHitObject(
             return
         }
 
+        var trackingEndTime = slider.endTime
+        var nestedObjects = slider.nestedHitObjects
+
+        if (mode == GameMode.Standard) {
+            trackingEndTime = max(
+                slider.endTime - Slider.LEGACY_LAST_TICK_OFFSET,
+                slider.startTime + slider.duration / 2
+            )
+
+            var lastRealTick: SliderTick? = null
+
+            for (i in nestedObjects.size - 2 downTo 1) {
+                val current = nestedObjects[i]
+
+                if (current is SliderTick) {
+                    lastRealTick = current
+                    break
+                }
+
+                if (current is SliderRepeat) {
+                    // A repeat means the slider does not have a slider tick.
+                    break
+                }
+            }
+
+            if (lastRealTick != null && lastRealTick.startTime > trackingEndTime) {
+                trackingEndTime = lastRealTick.startTime
+
+                // When the last tick falls after the tracking end time, we need to re-sort the nested objects
+                // based on time. This creates a somewhat weird ordering which is counter to how a user would
+                // understand the slider, but allows a zero-diff with known difficulty calculation output.
+                //
+                // To reiterate, this is definitely not correct from a difficulty calculation perspective
+                // and should be revisited at a later date.
+                val reordered = nestedObjects.toMutableList()
+
+                reordered.remove(lastRealTick)
+                reordered.add(lastRealTick)
+
+                nestedObjects = reordered
+            }
+        }
+
         if (mode == GameMode.Droid) {
             // Temporary lazy end position until a real result can be derived.
             slider.lazyEndPosition = slider.difficultyStackedPosition
@@ -302,7 +341,7 @@ abstract class DifficultyHitObject(
             }
         }
 
-        slider.lazyTravelTime = slider.nestedHitObjects[slider.nestedHitObjects.size - 1].startTime - slider.startTime
+        slider.lazyTravelTime = trackingEndTime - slider.startTime
 
         var endTimeMin = slider.lazyTravelTime / slider.spanDuration
         if (endTimeMin % 2 >= 1) {
@@ -317,15 +356,15 @@ abstract class DifficultyHitObject(
         var currentCursorPosition = slider.difficultyStackedPosition
         val scalingFactor = NORMALIZED_RADIUS / slider.difficultyRadius
 
-        for (i in 1 until slider.nestedHitObjects.size) {
-            val currentMovementObject = slider.nestedHitObjects[i]
+        for (i in 1 until nestedObjects.size) {
+            val currentMovementObject = nestedObjects[i]
             var currentMovement = currentMovementObject.difficultyStackedPosition - currentCursorPosition
             var currentMovementLength = scalingFactor * currentMovement.length
 
             // The amount of movement required so that the cursor position needs to be updated.
             var requiredMovement = assumedSliderRadius.toDouble()
 
-            if (i == slider.nestedHitObjects.size - 1) {
+            if (i == nestedObjects.size - 1) {
                 // The end of a slider has special aim rules due to the relaxed time constraint on position.
                 // There is both a lazy end position and the actual end slider position. We assume the player takes the simpler movement.
                 // For sliders that are circular, the lazy end position may actually be farther away than the sliders' true end.
@@ -355,7 +394,7 @@ abstract class DifficultyHitObject(
                 slider.lazyTravelDistance += currentMovementLength.toFloat()
             }
 
-            if (i == slider.nestedHitObjects.size - 1) {
+            if (i == nestedObjects.size - 1) {
                 slider.lazyEndPosition = currentCursorPosition
             }
         }
@@ -377,12 +416,18 @@ abstract class DifficultyHitObject(
          * A distance by which all distances should be scaled in order to assume a uniform circle size.
          */
         @JvmStatic
-        protected val NORMALIZED_RADIUS = 50f
+        val NORMALIZED_RADIUS = 50f
+
+        /**
+         * The normalized diameter of a circle.
+         */
+        @JvmStatic
+        val NORMALIZED_DIAMETER = NORMALIZED_RADIUS * 2
 
         /**
          * The minimum delta time between hit objects.
          */
         @JvmStatic
-        val MIN_DELTA_TIME = 25.0
+        val MIN_DELTA_TIME = 25
     }
 }

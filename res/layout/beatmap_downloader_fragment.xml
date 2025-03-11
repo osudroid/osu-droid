@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
@@ -10,6 +10,7 @@
     android:orientation="vertical">
 
     <RelativeLayout
+        android:id="@+id/bar"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:background="#1E1E2E">
@@ -26,10 +27,13 @@
 
         <EditText
             android:id="@+id/search"
-            android:layout_width="300dp"
+            android:layout_width="0px"
             android:layout_height="wrap_content"
             android:layout_centerHorizontal="true"
             android:layout_centerVertical="true"
+            android:layout_marginHorizontal="6dp"
+            android:layout_toLeftOf="@id/refresh"
+            android:layout_toRightOf="@id/indicator"
             android:background="@drawable/rounded_rect"
             android:backgroundTint="#363653"
             android:drawableRight="@drawable/search_24px"
@@ -43,25 +47,35 @@
             android:textColorHint="#8C8CB4"
             android:textSize="14dp" />
 
-        <ImageView
+        <Button
             android:id="@+id/logo"
-            android:layout_width="100dp"
-            android:layout_height="36dp"
-            android:layout_marginRight="12dp"
-            android:src="@drawable/powered_by_osudirect"
-            android:layout_centerVertical="true"
+            style="@style/button_borderless"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
             android:layout_alignParentRight="true"
-            android:background="@drawable/click_effect"
-            android:clickable="true"/>
+            android:layout_centerVertical="true"
+            android:layout_marginRight="12dp"
+            android:layout_toLeftOf="@id/logo"
+            android:drawableLeft="@drawable/osudirect"
+            android:drawableRight="@drawable/arrow_drop_down_24px"
+            android:drawablePadding="8dp"
+            android:gravity="center"
+            android:maxHeight="36dp"
+            android:paddingVertical="16dp"
+            android:paddingLeft="16dp"
+            android:paddingRight="2dp"
+            android:text="osu.direct"
+            android:textColor="#FFF" />
 
         <com.google.android.material.progressindicator.CircularProgressIndicator
             android:id="@+id/indicator"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_centerVertical="true"
-            android:layout_marginRight="12dp"
-            android:layout_toLeftOf="@id/refresh"
+            android:layout_marginLeft="6dp"
+            android:layout_toRightOf="@id/close"
             android:indeterminate="true"
+            android:padding="12dp"
             app:indicatorColor="#FFF"
             app:indicatorSize="20dp"
             app:trackCornerRadius="2dp"
@@ -73,29 +87,49 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_centerVertical="true"
-            android:layout_marginRight="12dp"
-            android:layout_toLeftOf="@id/logo"
+            android:layout_marginRight="6dp"
+            android:layout_toLeftOf="@id/filters"
             android:drawableLeft="@drawable/refresh_24px"
-            android:drawablePadding="8dp"
+            android:drawablePadding="0dp"
             android:drawableTint="#FFF"
-            android:padding="16dp"
-            android:text="Retry"
+            android:paddingHorizontal="16dp"
+            android:paddingVertical="12dp"
             android:textAllCaps="false"
             android:textColor="#FFF"
             android:visibility="gone"
             tools:visibility="visible" />
 
+        <TextView
+            android:id="@+id/filters"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_centerVertical="true"
+            android:layout_marginVertical="4dp"
+            android:layout_marginRight="6dp"
+            android:layout_toLeftOf="@id/logo"
+            android:drawableLeft="@drawable/tune_24px"
+            android:drawablePadding="8dp"
+            android:drawableTint="#FFF"
+            android:gravity="center"
+            android:paddingHorizontal="16dp"
+            android:paddingVertical="12dp"
+            android:text="Filters"
+            android:textAllCaps="false"
+            android:textColor="#FFF" />
+
     </RelativeLayout>
+
 
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/beatmap_list"
         android:layout_width="wrap_content"
         android:layout_height="match_parent"
+        android:layout_below="@id/bar"
+        android:layout_centerHorizontal="true"
         app:layoutManager="androidx.recyclerview.widget.GridLayoutManager"
         app:spanCount="2"
         tools:listitem="@layout/beatmap_downloader_set_item">
 
     </androidx.recyclerview.widget.RecyclerView>
 
-
-</LinearLayout>
+</RelativeLayout>

@@ -1,20 +1,19 @@
 package ru.nsu.ccfit.zuev.osu.game;
 
-import android.graphics.PointF;
+import com.edlplan.framework.math.Vec2;
+import com.edlplan.framework.math.line.LinePath;
+import com.rian.osu.beatmap.hitobject.Slider;
+import com.rian.osu.beatmap.hitobject.SliderPathType;
+import com.rian.osu.utils.PathApproximation;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
-import java.util.Arrays;
-import java.util.LinkedList;
-import java.util.Queue;
 
+import ru.nsu.ccfit.zuev.osu.Constants;
 import ru.nsu.ccfit.zuev.skins.OsuSkin;
-import ru.nsu.ccfit.zuev.osu.Utils;
-import ru.nsu.ccfit.zuev.osu.helper.DifficultyHelper;
 
 public class GameHelper {
     private static float overallDifficulty = 1;
-    private static float objectTimePreempt = 1;
     private static float healthDrain = 0;
     private static float speedMultiplier = 0;
     private static boolean hidden = false;
@@ -33,17 +32,8 @@ public class GameHelper {
     private static boolean auto = false;
     private static double beatLength = 0;
     private static double currentBeatTime = 0;
-    private static final Queue<SliderPath> pathPool = new LinkedList<>();
-
-    private static DifficultyHelper difficultyHelper = DifficultyHelper.StdDifficulty;
-
-    public static DifficultyHelper getDifficultyHelper() {
-        return difficultyHelper;
-    }
-
-    public static void setDifficultyHelper(DifficultyHelper difficultyHelper) {
-        GameHelper.difficultyHelper = difficultyHelper;
-    }
+    private static boolean samplesMatchPlaybackRate;
+    private static int replayVersion;
 
     public static float getHealthDrain() {
         return healthDrain;
@@ -62,53 +52,83 @@ public class GameHelper {
     }
 
     /**
-     * Converts a difficulty-calculated slider path of a {@link com.rian.osu.beatmap.hitobject.Slider} to one that can be used in gameplay.
+     * Converts a {@link SliderPath} to a {@link LinePath} that can be used to render the slider path.
      *
-     * @return The converted {@link SliderPath}.
+     * @param sliderPath The {@link SliderPath} to convert.
+     * @return The converted {@link LinePath}.
      */
-    public static SliderPath convertSliderPath(final com.rian.osu.beatmap.hitobject.Slider slider) {
-        var path = newPath();
-        var startPosition = slider.getPosition().plus(slider.getGameplayStackOffset());
+    public static LinePath convertSliderPath(final SliderPath sliderPath) {
+        var renderPath = new LinePath();
 
-        var calculatedPath = slider.getPath().getCalculatedPath();
-        var cumulativeLength = slider.getPath().getCumulativeLength();
+        if (sliderPath.anchorCount == 0) {
+            return renderPath;
+        }
 
-        path.allocate(calculatedPath.size());
+        // osu!stable optimizes gameplay path rendering by only including points that are 6 osu!pixels apart.
+        // In linear paths, the distance threshold is further extended to 32 osu!pixels.
+        int distanceThreshold = sliderPath.pathType == SliderPathType.Linear ? 32 : 6;
 
-        var tmpPoint = new PointF();
+        // Invert the scale to convert from osu!pixels to screen pixels.
+        var invertedScale = new Vec2(
+        (float) Constants.MAP_WIDTH / Constants.MAP_ACTUAL_WIDTH,
+        (float) Constants.MAP_HEIGHT / Constants.MAP_ACTUAL_HEIGHT
+        );
 
-        for (var i = 0; i < calculatedPath.size(); i++) {
+        // Additional consideration for Catmull sliders that form "bulbs" around points with identical positions.
+        boolean isCatmull = sliderPath.pathType == SliderPathType.Catmull;
+        int catmullSegmentLength = PathApproximation.CATMULL_DETAIL * 2;
 
-            var p = calculatedPath.get(i);
-            tmpPoint.set(startPosition.x + p.x, startPosition.y + p.y);
+        Vec2 lastStart = null;
 
-            // The path is already flipped when the library applies the Hard Rock mod, so we don't need to do it here.
-            Utils.trackToRealCoords(tmpPoint);
-            path.setPoint(i, tmpPoint.x, tmpPoint.y);
+        for (int i = 0; i < sliderPath.anchorCount; ++i) {
+            var x = sliderPath.getX(i);
+            var y = sliderPath.getY(i);
+            var vec = new Vec2(x, y);
 
-            if (i < cumulativeLength.size()) {
-                path.setLength(i, (float) (double) cumulativeLength.get(i));
-            } else {
-                path.setLength(i, -1f);
+            if (lastStart == null) {
+                renderPath.add(vec);
+                lastStart = vec;
+                continue;
+            }
+
+            float distanceFromStart = vec.copy().minus(lastStart).multiple(invertedScale).length();
+
+            if (distanceFromStart > distanceThreshold || i == sliderPath.anchorCount - 1 ||
+                    (isCatmull && (i + 1) % catmullSegmentLength == 0)) {
+                renderPath.add(vec);
+                lastStart = null;
             }
         }
 
-        return path;
+        // The render path may under-measure the true length of the slider due to the optimization.
+        // Normally, the path would need to be extended to account for the true length of the slider.
+        // However, in this case we simply let it be as the path is still rendered correctly (its points
+        // are still in the correct positions).
+        renderPath.measure();
+
+        return renderPath;
     }
 
     /**
-     * Purges the {@link SliderPath} pool.
+     * Converts an osu!pixels-based path of a {@link Slider} to one that can be used in gameplay.
+     *
+     * @return The converted {@link SliderPath}.
      */
-    public static void purgeSliderPathPool() {
-        pathPool.clear();
-    }
+    public static SliderPath convertSliderPath(final Slider slider) {
+        var calculatedPath = slider.getPath().getCalculatedPath();
+        var cumulativeLength = slider.getPath().getCumulativeLength();
+        var path = new SliderPath(slider.getPath().getPathType(), calculatedPath.size());
 
-    public static float getObjectTimePreempt() {
-        return objectTimePreempt;
-    }
+        float widthScale = (float) Constants.MAP_ACTUAL_WIDTH / Constants.MAP_WIDTH;
+        float heightScale = (float) Constants.MAP_ACTUAL_HEIGHT / Constants.MAP_HEIGHT;
 
-    public static void setObjectTimePreempt(float objectTimePreempt) {
-        GameHelper.objectTimePreempt = objectTimePreempt;
+        for (int i = 0; i < calculatedPath.size(); i++) {
+            var p = calculatedPath.get(i);
+
+            path.set(i, p.x * widthScale, p.y * heightScale, cumulativeLength.get(i).floatValue());
+        }
+
+        return path;
     }
 
     /**
@@ -123,18 +143,6 @@ public class GameHelper {
      */
     public static void setSpeedMultiplier(float speedMultiplier) {
         GameHelper.speedMultiplier = speedMultiplier;
-    }
-
-    public static void putPath(final SliderPath path) {
-        path.allocate(0);
-        pathPool.add(path);
-    }
-
-    private static SliderPath newPath() {
-        if (pathPool.isEmpty()) {
-            return new SliderPath();
-        }
-        return pathPool.poll();
     }
 
     public static boolean isEasy() {
@@ -276,20 +284,20 @@ public class GameHelper {
         }
     }
 
-    public static double ar2ms(double ar) {
-        return Round((ar <= 5) ? (1800 - 120 * ar) : (1950 - 150 * ar), 0);
+    public static boolean isSamplesMatchPlaybackRate() {
+        return samplesMatchPlaybackRate;
     }
 
-    public static double ms2ar(double ms) {
-        return (ms <= 1200) ? ((1200 - ms) / 150.0 + 5) : (1800 - ms) / 120.0;
+    public static void setSamplesMatchPlaybackRate(boolean samplesMatchPlaybackRate) {
+        GameHelper.samplesMatchPlaybackRate = samplesMatchPlaybackRate;
     }
 
-    public static double ms2od(double ms) {
-        return (80 - ms) / 6.0;
+    public static int getReplayVersion() {
+        return replayVersion;
     }
 
-    public static double od2ms(double od) {
-        return Round(80 - od * 6, 1);
+    public static void setReplayVersion(int replayVersion) {
+        GameHelper.replayVersion = replayVersion;
     }
 
     public static class SliderPath {
@@ -299,39 +307,22 @@ public class GameHelper {
         private static final int offsetY = 1;
         private static final int offsetLength = 2;
 
-        private float[] data = new float[0];
+        private final float[] data;
 
-        public int lengthCount;
-        public int pointCount;
+        public final SliderPathType pathType;
+        public int anchorCount = 0;
 
-
-        public void allocate(int size) {
-            data = new float[size * strip];
-            pointCount = 0;
-            lengthCount = 0;
+        public SliderPath(SliderPathType pathType, int anchorPointCount) {
+            this.pathType = pathType;
+            data = new float[anchorPointCount * strip];
         }
 
-
-        public void setPoint(int index, float x, float y) {
+        public void set(int index, float x, float y, float length) {
             data[index * strip + offsetX] = x;
             data[index * strip + offsetY] = y;
-            pointCount++;
+            data[index * strip + offsetLength] = length;
+            anchorCount++;
         }
-
-        public void setLength(int index, float length) {
-
-            var targetIndex = index * strip + offsetLength;
-
-            // This condition can be triggered if there's a mismatch between the number of points
-            // and the number of lengths. Should never happen in practice but it's better to be safe.
-            if (targetIndex >= data.length) {
-                data = Arrays.copyOf(data, data.length + strip);
-            }
-
-            data[targetIndex] = length;
-            lengthCount++;
-        }
-
 
         public float getX(int index) {
             return data[index * strip + offsetX];

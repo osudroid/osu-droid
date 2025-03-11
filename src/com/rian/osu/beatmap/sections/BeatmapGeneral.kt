@@ -62,5 +62,11 @@ data class BeatmapGeneral(
      * The game mode this beatmap represents.
      */
     @JvmField
-    var mode: Int = 0
+    var mode: Int = 0,
+
+    /**
+     * Whether sound samples will change rate when playing with rate-adjusting mods.
+     */
+    @JvmField
+    var samplesMatchPlaybackRate: Boolean = false
 )

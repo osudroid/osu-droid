@@ -15,17 +15,30 @@ import ru.nsu.ccfit.zuev.osuplus.R
 abstract class BaseFragment : Fragment(), BackPressListener {
     var root: View? = null
         private set
-    private var background: View? = null
     var onDismissListener: OnDismissListener? = null
     var isDismissOnBackgroundClick = false
+    var isDismissOnBackPress = true
+
+    /**
+     * Whether the fragment is created. This is set to true after [onCreateView] is called.
+     */
     var isCreated = false
         private set
-    var isDismissOnBackPress = true
 
     /**
      * If true, the fragment will intercept back press event when it's received.
      */
     var interceptBackPress = true
+
+    /**
+     * Whether the fragment is loaded. This is set to true after [onLoadView] is called.
+     */
+    var isLoaded = false
+        private set
+
+
+    private var isDismissCalled = false
+
 
     @get:IdRes
     val backgroundId: Int
@@ -74,8 +87,13 @@ abstract class BaseFragment : Fragment(), BackPressListener {
     }
 
     open fun dismiss() {
-        ActivityOverlay.dismissOverlay(this)
-        onDismissListener?.OnDismiss()
+        isDismissCalled = true
+
+        if (isLoaded) {
+            isDismissCalled = false
+            ActivityOverlay.dismissOverlay(this)
+            onDismissListener?.OnDismiss()
+        }
     }
 
     fun save() {
@@ -93,6 +111,7 @@ abstract class BaseFragment : Fragment(), BackPressListener {
     }
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
+        isLoaded = false
         isCreated = true
         root = inflater.inflate(layoutID, container, false)
         findViewById<View>(backgroundId)?.setOnClickListener {
@@ -100,7 +119,15 @@ abstract class BaseFragment : Fragment(), BackPressListener {
                 dismiss()
             }
         }
+
         onLoadView()
+        isLoaded = true
+
+        if (isDismissCalled) {
+            dismiss()
+            isDismissCalled = false
+        }
+
         return root
     }
 

@@ -25,7 +25,7 @@ abstract class DifficultyCalculator<TBeatmap : PlayableBeatmap, TObject : Diffic
      * [Mod]s that can alter the star rating when they are used in calculation with one or more [Mod]s.
      */
     protected open val difficultyAdjustmentMods = setOf(
-        ModRelax::class, ModEasy::class, ModReallyEasy::class,
+        ModRelax::class, ModAutopilot::class, ModEasy::class, ModReallyEasy::class,
         ModHardRock::class, ModHidden::class, ModFlashlight::class,
         ModDifficultyAdjust::class, ModClockRateAdjust::class
     )
@@ -145,6 +145,15 @@ abstract class DifficultyCalculator<TBeatmap : PlayableBeatmap, TObject : Diffic
     }
 
     /**
+     * Retrieves a [Skill] of a specific type from an array of [Skill]s.
+     *
+     * @param predicate The predicate to filter the [Skill]s by, if any.
+     * @return The [Skill] of the specified type.
+     */
+    protected inline fun <reified T : Skill<TObject>> Array<Skill<TObject>>.find(predicate: (T) -> Boolean = { true }) =
+        firstOrNull { it is T && predicate(it) } as T?
+
+    /**
      * Creates the [Skill]s to calculate the difficulty of a [PlayableBeatmap].
      *
      * @param beatmap The [PlayableBeatmap] whose difficulty will be calculated.
@@ -188,6 +197,13 @@ abstract class DifficultyCalculator<TBeatmap : PlayableBeatmap, TObject : Diffic
      * @return The [PlayableBeatmap].
      */
     protected abstract fun createPlayableBeatmap(beatmap: Beatmap, mods: Iterable<Mod>?, scope: CoroutineScope?): TBeatmap
+
+    companion object {
+        /**
+         * The epoch time of the last change to the difficulty calculator, in milliseconds.
+         */
+        const val VERSION = 1741359220000
+    }
 }
 
 /**
@@ -197,7 +213,6 @@ private class ProgressiveCalculationBeatmap(
     baseBeatmap: PlayableBeatmap
 ) : PlayableBeatmap(baseBeatmap, baseBeatmap.mode, baseBeatmap.mods.values) {
     override var maxCombo = 0
-        private set
 
     override val hitObjects = object : BeatmapHitObjects() {
         override fun add(obj: HitObject) {
@@ -226,4 +241,6 @@ private class ProgressiveCalculationBeatmap(
             return removed
         }
     }
+
+    override fun createHitWindow() = baseBeatmap.hitWindow
 }
