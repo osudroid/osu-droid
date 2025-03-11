@@ -173,7 +173,7 @@ abstract class DifficultyHitObject(
      * @param mods The mods used.
      * @return The opacity of the hit object at the given time.
      */
-    fun opacityAt(time: Double, mods: List<Mod>): Double {
+    open fun opacityAt(time: Double, mods: List<Mod>): Double {
         if (time > obj.startTime) {
             // Consider a hit object as being invisible when its start time is passed.
             // In reality the hit object will be visible beyond its start time up until its hittable window has passed,
