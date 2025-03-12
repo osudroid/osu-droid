@@ -2766,14 +2766,10 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
                 var songService = GlobalManager.getInstance().getSongService();
 
                 if (songService.getStatus() == Status.PLAYING) {
-                    dt = songService.getPosition() / 1000f - (elapsedTime - totalOffset);
-
                     // BASS may report the wrong position. When that happens, `dt` will
                     // be negative. In that case, we should ignore the update.
                     // See https://github.com/ppy/osu/issues/26879 for more information.
-                    if (dt <= 0) {
-                        return;
-                    }
+                    dt = Math.max(0, songService.getPosition() / 1000f - (elapsedTime - totalOffset));
                 } else if (!musicStarted) {
                     // Cap elapsed time at the music start time to prevent objects from progressing too far.
                     dt = Math.min(elapsedTime + dt, totalOffset) - elapsedTime;
