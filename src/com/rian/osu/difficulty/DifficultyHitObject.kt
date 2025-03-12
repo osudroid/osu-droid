@@ -8,6 +8,7 @@ import com.rian.osu.beatmap.hitobject.sliderobject.SliderRepeat
 import com.rian.osu.beatmap.hitobject.sliderobject.SliderTick
 import com.rian.osu.math.Precision.almostEquals
 import com.rian.osu.math.Vector2
+import com.rian.osu.mods.Mod
 import com.rian.osu.mods.ModHidden
 import kotlin.math.*
 
@@ -169,10 +170,10 @@ abstract class DifficultyHitObject(
      * Calculates the opacity of the hit object at a given time.
      *
      * @param time The time to calculate the hit object's opacity at.
-     * @param isHidden Whether Hidden mod is used.
+     * @param mods The mods used.
      * @return The opacity of the hit object at the given time.
      */
-    fun opacityAt(time: Double, isHidden: Boolean): Double {
+    open fun opacityAt(time: Double, mods: List<Mod>): Double {
         if (time > obj.startTime) {
             // Consider a hit object as being invisible when its start time is passed.
             // In reality the hit object will be visible beyond its start time up until its hittable window has passed,
@@ -184,7 +185,7 @@ abstract class DifficultyHitObject(
         val fadeInDuration = obj.timeFadeIn
         val nonHiddenOpacity = ((time - fadeInStartTime) / fadeInDuration).coerceIn(0.0, 1.0)
 
-        if (isHidden) {
+        if (mods.any { it is ModHidden }) {
             val fadeOutStartTime = fadeInStartTime + fadeInDuration
             val fadeOutDuration = obj.timePreempt * ModHidden.FADE_OUT_DURATION_MULTIPLIER
 

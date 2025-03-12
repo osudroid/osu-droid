@@ -3,6 +3,8 @@ package com.rian.osu.difficulty.evaluators
 import com.rian.osu.beatmap.hitobject.Slider
 import com.rian.osu.beatmap.hitobject.Spinner
 import com.rian.osu.difficulty.StandardDifficultyHitObject
+import com.rian.osu.mods.Mod
+import com.rian.osu.mods.ModHidden
 import kotlin.math.abs
 import kotlin.math.max
 import kotlin.math.min
@@ -22,10 +24,10 @@ object StandardFlashlightEvaluator {
      *  * and whether Hidden mod is enabled.
      *
      * @param current The current object.
-     * @param isHiddenMod Whether the Hidden mod is enabled.
+     * @param mods The mods used.
      */
     @JvmStatic
-    fun evaluateDifficultyOf(current: StandardDifficultyHitObject, isHiddenMod: Boolean): Double {
+    fun evaluateDifficultyOf(current: StandardDifficultyHitObject, mods: List<Mod>): Double {
         // Exclude overlapping objects that can be tapped at once.
         if (current.obj is Spinner) {
             return 0.0
@@ -58,7 +60,7 @@ object StandardFlashlightEvaluator {
 
                 // Bonus based on how visible the object is.
                 val opacityBonus =
-                    1 + 0.4 * (1 - current.opacityAt(currentObject.obj.startTime, isHiddenMod))
+                    1 + 0.4 * (1 - current.opacityAt(currentObject.obj.startTime, mods))
                 result += stackNerf * opacityBonus * scalingFactor * jumpDistance / cumulativeStrainTime
 
                 // Objects further back in time should count less for the nerf.
@@ -74,7 +76,7 @@ object StandardFlashlightEvaluator {
         result = (smallDistNerf * result).pow(2.0)
 
         // Additional bonus for Hidden due to there being no approach circles.
-        if (isHiddenMod) {
+        if (mods.any { it is ModHidden }) {
             val hiddenBonus = 0.2
             result *= 1 + hiddenBonus
         }
