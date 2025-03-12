@@ -212,6 +212,7 @@ public class GameplaySlider extends GameObject {
         }
         headCirclePiece.setNumberText(comboNum);
         headCirclePiece.setNumberScale(OsuSkin.get().getComboTextScale());
+        headCirclePiece.setVisible(!GameHelper.isTraceable() || (Config.isShowFirstApproachCircle() && beatmapSlider.isFirstNote()));
 
         approachCircle.setColor(comboColor.r(), comboColor.g(), comboColor.b());
         approachCircle.setScale(scale * 3);
@@ -228,6 +229,7 @@ public class GameplaySlider extends GameObject {
         tailCirclePiece.setScale(scale);
         tailCirclePiece.setCircleColor(comboColor.r(), comboColor.g(), comboColor.b());
         tailCirclePiece.setAlpha(0);
+        tailCirclePiece.setVisible(!GameHelper.isTraceable() || (Config.isShowFirstApproachCircle() && beatmapSlider.isFirstNote()));
 
         if (Config.isSnakingInSliders()) {
             tailCirclePiece.setPosition(this.position.x, this.position.y);
@@ -280,7 +282,7 @@ public class GameplaySlider extends GameObject {
 
         if (approachCircle.isVisible()) {
             approachCircle.registerEntityModifier(Modifiers.alpha(Math.min(fadeInDuration * 2, timePreempt), 0, 0.9f));
-            approachCircle.registerEntityModifier(Modifiers.scale(timePreempt, scale * 3, scale));
+            approachCircle.registerEntityModifier(Modifiers.scale(timePreempt, scale * 3, scale, e -> e.setAlpha(0)));
         }
 
         scene.attachChild(headCirclePiece, 0);
@@ -312,9 +314,15 @@ public class GameplaySlider extends GameObject {
         superPath = renderPath;
         sliderBody.init(superPath, Config.isSnakingInSliders(), stackedPosition);
         sliderBody.setBackgroundWidth(OsuSkin.get().getSliderBodyWidth() * scale);
-        sliderBody.setBackgroundColor(bodyColor.r(), bodyColor.g(), bodyColor.b(), OsuSkin.get().getSliderBodyBaseAlpha());
         sliderBody.setBorderWidth(OsuSkin.get().getSliderBorderWidth() * scale);
         sliderBody.setBorderColor(borderColor.r(), borderColor.g(), borderColor.b());
+
+        // Head circle not being visible means Traceable is applied to this slider
+        if (GameHelper.isTraceable() && !headCirclePiece.isVisible()) {
+            sliderBody.setBackgroundColor(0, 0, 0, 0);
+        } else {
+            sliderBody.setBackgroundColor(bodyColor.r(), bodyColor.g(), bodyColor.b(), OsuSkin.get().getSliderBodyBaseAlpha());
+        }
 
         if (OsuSkin.get().isSliderHintEnable() && beatmapSlider.getDistance() > OsuSkin.get().getSliderHintShowMinLength()) {
             sliderBody.setHintVisible(true);
@@ -341,25 +349,29 @@ public class GameplaySlider extends GameObject {
             var dimDelaySec = timePreempt - objectHittableRange;
             var colorDim = 195f / 255f;
 
-            headCirclePiece.setColor(colorDim, colorDim, colorDim);
-            headCirclePiece.registerEntityModifier(Modifiers.sequence(
-                Modifiers.delay(dimDelaySec),
-                Modifiers.color(0.1f,
-                    headCirclePiece.getRed(), 1f,
-                    headCirclePiece.getGreen(), 1f,
-                    headCirclePiece.getBlue(), 1f
-                )
-            ));
+            if (headCirclePiece.isVisible()) {
+                headCirclePiece.setColor(colorDim, colorDim, colorDim);
+                headCirclePiece.registerEntityModifier(Modifiers.sequence(
+                    Modifiers.delay(dimDelaySec),
+                    Modifiers.color(0.1f,
+                        headCirclePiece.getRed(), 1f,
+                        headCirclePiece.getGreen(), 1f,
+                        headCirclePiece.getBlue(), 1f
+                    )
+                ));
+            }
 
-            tailCirclePiece.setColor(colorDim, colorDim, colorDim);
-            tailCirclePiece.registerEntityModifier(Modifiers.sequence(
-                Modifiers.delay(dimDelaySec),
-                Modifiers.color(0.1f,
-                    tailCirclePiece.getRed(), 1f,
-                    tailCirclePiece.getGreen(), 1f,
-                    tailCirclePiece.getBlue(), 1f
-                )
-            ));
+            if (tailCirclePiece.isVisible()) {
+                tailCirclePiece.setColor(colorDim, colorDim, colorDim);
+                tailCirclePiece.registerEntityModifier(Modifiers.sequence(
+                    Modifiers.delay(dimDelaySec),
+                    Modifiers.color(0.1f,
+                        tailCirclePiece.getRed(), 1f,
+                        tailCirclePiece.getGreen(), 1f,
+                        tailCirclePiece.getBlue(), 1f
+                    )
+                ));
+            }
 
             endArrow.setColor(colorDim, colorDim, colorDim);
             endArrow.registerEntityModifier(Modifiers.sequence(
@@ -780,16 +792,18 @@ public class GameplaySlider extends GameObject {
             }
         }
 
-        if (GameHelper.isKiai()) {
-            var kiaiModifier = (float) Math.max(0, 1 - GameHelper.getCurrentBeatTime() / GameHelper.getBeatLength()) * 0.5f;
-            var r = Math.min(1, circleColor.r() + (1 - circleColor.r()) * kiaiModifier);
-            var g = Math.min(1, circleColor.g() + (1 - circleColor.g()) * kiaiModifier);
-            var b = Math.min(1, circleColor.b() + (1 - circleColor.b()) * kiaiModifier);
-            kiai = true;
-            headCirclePiece.setCircleColor(r, g, b);
-        } else if (kiai) {
-            headCirclePiece.setCircleColor(circleColor.r(), circleColor.g(), circleColor.b());
-            kiai = false;
+        if (headCirclePiece.isVisible()) {
+            if (GameHelper.isKiai()) {
+                var kiaiModifier = (float) Math.max(0, 1 - GameHelper.getCurrentBeatTime() / GameHelper.getBeatLength()) * 0.5f;
+                var r = Math.min(1, circleColor.r() + (1 - circleColor.r()) * kiaiModifier);
+                var g = Math.min(1, circleColor.g() + (1 - circleColor.g()) * kiaiModifier);
+                var b = Math.min(1, circleColor.b() + (1 - circleColor.b()) * kiaiModifier);
+                kiai = true;
+                headCirclePiece.setCircleColor(r, g, b);
+            } else if (kiai) {
+                headCirclePiece.setCircleColor(circleColor.r(), circleColor.g(), circleColor.b());
+                kiai = false;
+            }
         }
 
         if (elapsedSpanTime < 0) // we at approach time

@@ -85,6 +85,7 @@ public class GameplayHitCircle extends GameObject {
         }
         circlePiece.setNumberText(comboNum);
         circlePiece.setNumberScale(OsuSkin.get().getComboTextScale());
+        circlePiece.setVisible(!GameHelper.isTraceable() || (Config.isShowFirstApproachCircle() && beatmapCircle.isFirstNote()));
 
         approachCircle.setColor(comboColor.r(), comboColor.g(), comboColor.b());
         approachCircle.setScale(scale * (3 - 2 * fadeInProgress));
@@ -105,7 +106,7 @@ public class GameplayHitCircle extends GameObject {
                     Modifiers.alpha(remainingFadeInDuration, fadeInProgress, 1),
                     Modifiers.alpha(remainingFadeOutDuration, fadeOutProgress, 0)
             ));
-        } else {
+        } else if (circlePiece.isVisible()) {
             circlePiece.registerEntityModifier(Modifiers.alpha(remainingFadeInDuration, fadeInProgress, 1));
         }
 
@@ -121,10 +122,10 @@ public class GameplayHitCircle extends GameObject {
                 )
             );
 
-            approachCircle.registerEntityModifier(Modifiers.scale(Math.max(0, timePreempt - passedTime), approachCircle.getScaleX(), scale));
+            approachCircle.registerEntityModifier(Modifiers.scale(Math.max(0, timePreempt - passedTime), approachCircle.getScaleX(), scale, e -> e.setAlpha(0)));
         }
 
-        if (Config.isDimHitObjects()) {
+        if (Config.isDimHitObjects() && circlePiece.isVisible()) {
 
             // Source: https://github.com/peppy/osu/blob/60271fb0f7e091afb754455f93180094c63fc3fb/osu.Game.Rulesets.Osu/Objects/Drawables/DrawableOsuHitObject.cs#L101
             var dimDelaySec = timePreempt - objectHittableRange;
@@ -286,16 +287,18 @@ public class GameplayHitCircle extends GameObject {
             }
         }
 
-        if (GameHelper.isKiai()) {
-            var kiaiModifier = (float) Math.max(0, 1 - GameHelper.getCurrentBeatTime() / GameHelper.getBeatLength()) * 0.5f;
-            var r = Math.min(1, comboColor.r() + (1 - comboColor.r()) * kiaiModifier);
-            var g = Math.min(1, comboColor.g() + (1 - comboColor.g()) * kiaiModifier);
-            var b = Math.min(1, comboColor.b() + (1 - comboColor.b()) * kiaiModifier);
-            kiai = true;
-            circlePiece.setCircleColor(r, g, b);
-        } else if (kiai) {
-            circlePiece.setCircleColor(comboColor.r(), comboColor.g(), comboColor.b());
-            kiai = false;
+        if (circlePiece.isVisible()) {
+            if (GameHelper.isKiai()) {
+                var kiaiModifier = (float) Math.max(0, 1 - GameHelper.getCurrentBeatTime() / GameHelper.getBeatLength()) * 0.5f;
+                var r = Math.min(1, comboColor.r() + (1 - comboColor.r()) * kiaiModifier);
+                var g = Math.min(1, comboColor.g() + (1 - comboColor.g()) * kiaiModifier);
+                var b = Math.min(1, comboColor.b() + (1 - comboColor.b()) * kiaiModifier);
+                kiai = true;
+                circlePiece.setCircleColor(r, g, b);
+            } else if (kiai) {
+                circlePiece.setCircleColor(comboColor.r(), comboColor.g(), comboColor.b());
+                kiai = false;
+            }
         }
 
         passedTime += dt;

@@ -784,6 +784,7 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
         GameHelper.setNightCore(stat.getMod().contains(GameMod.MOD_NIGHTCORE));
         GameHelper.setHalfTime(stat.getMod().contains(GameMod.MOD_HALFTIME));
         GameHelper.setHidden(stat.getMod().contains(GameMod.MOD_HIDDEN));
+        GameHelper.setTraceable(stat.getMod().contains(GameMod.MOD_TRACEABLE));
         GameHelper.setFlashLight(stat.getMod().contains(GameMod.MOD_FLASHLIGHT));
         GameHelper.setRelaxMod(stat.getMod().contains(GameMod.MOD_RELAX));
         GameHelper.setAutopilotMod(stat.getMod().contains(GameMod.MOD_AUTOPILOT));
@@ -2587,7 +2588,7 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
     }
 
     private void createBurstEffect(final PointF pos, final RGBColor color) {
-        if (!Config.isBurstEffects() || GameHelper.isHidden())
+        if (!Config.isBurstEffects() || GameHelper.isHidden() || GameHelper.isTraceable())
             return;
 
         final GameEffect burst1 = GameObjectPool.getInstance().getEffect("hitcircle");
@@ -2599,7 +2600,7 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
     }
 
     private void createBurstEffectSliderStart(final PointF pos, final RGBColor color) {
-        if (!Config.isBurstEffects() || GameHelper.isHidden())
+        if (!Config.isBurstEffects() || GameHelper.isHidden() || GameHelper.isTraceable())
             return;
 
         final GameEffect burst1 = GameObjectPool.getInstance().getEffect("sliderstartcircle");
@@ -2611,7 +2612,7 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
     }
 
     private void createBurstEffectSliderEnd(final PointF pos, final RGBColor color) {
-        if (!Config.isBurstEffects() || GameHelper.isHidden())
+        if (!Config.isBurstEffects() || GameHelper.isHidden() || GameHelper.isTraceable())
             return;
 
         final GameEffect burst1 = GameObjectPool.getInstance().getEffect("sliderendcircle");
@@ -2623,7 +2624,7 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
     }
 
     private void createBurstEffectSliderReverse(final PointF pos, float ang, final RGBColor color) {
-        if (!Config.isBurstEffects() || GameHelper.isHidden())
+        if (!Config.isBurstEffects() || GameHelper.isHidden() || GameHelper.isTraceable())
             return;
 
         final GameEffect burst1 = GameObjectPool.getInstance().getEffect("reversearrow");
