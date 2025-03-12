@@ -10,7 +10,7 @@ import kotlin.math.pow
 /**
  * Represents the Difficulty Adjust mod. Serves as a container for forced difficulty statistics.
  */
-class ModDifficultyAdjust(
+class ModDifficultyAdjust @JvmOverloads constructor(
     /**
      * The circle size to enforce.
      */
