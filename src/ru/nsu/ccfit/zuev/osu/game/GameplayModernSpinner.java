@@ -124,6 +124,7 @@ public class GameplayModernSpinner extends GameplaySpinner {
         top.registerEntityModifier(Modifiers.sequence(
             Modifiers.fadeIn(timePreempt, e -> {
                     spinnable = true;
+                    listener.onSpinnerStart(id);
             }),
             Modifiers.delay(duration, e -> Execution.updateThread(this::removeFromScene))
         ));

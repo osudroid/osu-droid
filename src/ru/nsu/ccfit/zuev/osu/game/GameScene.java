@@ -11,6 +11,7 @@ import kotlinx.coroutines.JobKt;
 import ru.nsu.ccfit.zuev.audio.serviceAudio.SongService;
 import ru.nsu.ccfit.zuev.osu.SecurityUtils;
 
+import com.acivev.VibratorManager;
 import com.edlplan.framework.easing.Easing;
 import com.edlplan.framework.math.FMath;
 import com.edlplan.framework.math.line.LinePath;
@@ -1118,6 +1119,7 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
                         cursors[i].mousePos.y = my;
 
                         replay.lastMoveIndex[i] = -1;
+                        hud.onGameplayTouchDown(movement.getTime() / 1000f);
                     } else if (movement.getTouchType() == TouchType.MOVE) {
                         cursors[i].mousePos.x = mx;
                         cursors[i].mousePos.y = my;
@@ -1363,6 +1365,8 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
             distToNextObject = nextObj != null ?
                 Math.max(nextObj.startTime - obj.startTime, activeTimingPoint.msPerBeat / 2) / 1000 :
                 0;
+
+            hud.onHitObjectLifetimeStart(obj);
 
             final RGBColor comboColor = getComboColor(obj.getComboIndexWithOffsets());
 
@@ -1876,6 +1880,7 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
                             final boolean endCombo, byte forcedScore, RGBColor color) {
         if (GameHelper.isAuto()) {
             autoCursor.click();
+            hud.onGameplayTouchDown((float) parsedBeatmap.getHitObjects().objects.get(id).startTime / 1000);
         }
 
         float accuracy = Math.abs(acc);
@@ -1894,6 +1899,7 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
                );
             }
         }
+        VibratorManager.INSTANCE.circleVibration();
 
         if (accuracy > playableBeatmap.getHitWindow().getMehWindow() / 1000 || forcedScore == ResultType.MISS.getId()) {
             createHitEffect(pos, "hit0", color);
@@ -1934,6 +1940,8 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
                 );
             }
         }
+
+        VibratorManager.INSTANCE.sliderVibration();
 
         if (score == 0) {
             createHitEffect(judgementPos, "hit0", color);
@@ -1979,6 +1987,9 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
             switch (type) {
                 case GameObjectListener.SLIDER_START:
                     createBurstEffectSliderStart(judgementPos, color);
+                    if (GameHelper.isAuto()) {
+                        hud.onGameplayTouchDown((float) parsedBeatmap.getHitObjects().objects.get(id).startTime / 1000);
+                    }
                     break;
                 case GameObjectListener.SLIDER_END:
                     createBurstEffectSliderEnd(judgementPos, color);
@@ -1995,6 +2006,13 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
         hud.onNoteHit(stat);
     }
 
+    @Override
+    public void onSpinnerStart(int id) {
+        if (GameHelper.isAuto()) {
+            autoCursor.click();
+            hud.onGameplayTouchDown((float) parsedBeatmap.getHitObjects().objects.get(id).startTime / 1000);
+        }
+    }
 
     public void onSpinnerHit(int id, final int score, final boolean endCombo, int totalScore) {
         if (score == 1000) {
@@ -2020,6 +2038,8 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
 
         final PointF pos = new PointF((float) Config.getRES_WIDTH() / 2,
                 (float) Config.getRES_HEIGHT() / 2);
+
+        VibratorManager.INSTANCE.spinnerVibration();
 
         if (score == 0) {
             final GameEffect effect = GameObjectPool.getInstance().getEffect(
@@ -2158,6 +2178,10 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
 
             if (sprite != null) {
                 sprite.setShowing(true);
+            }
+
+            if (!GameHelper.isAuto() && !GameHelper.isAutopilotMod()) {
+                hud.onGameplayTouchDown(eventTime / 1000f);
             }
 
             cursor.mouseDown = true;

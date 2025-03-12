@@ -1,5 +1,6 @@
 package com.reco1l.osu.hud.elements
 
+import com.reco1l.andengine.*
 import com.reco1l.andengine.text.*
 import com.reco1l.framework.*
 import com.reco1l.osu.hud.HUDElement
@@ -12,17 +13,18 @@ import ru.nsu.ccfit.zuev.skins.*
 @Suppress("LeakingThis")
 sealed class HUDStatisticCounter(
     label: String,
-    valueColor: ColorARGB,
+    tint: ColorARGB,
     private val dataSupplier: StatisticV2.() -> String
 ) : HUDElement() {
 
     private val labelText = ExtendedText().apply {
         font = ResourceManager.getInstance().getFont("smallFont")
         text = label
+        color = tint
     }
 
     private val valueText = SpriteFont(OsuSkin.get().scorePrefix).apply {
-        color = valueColor
+        color = tint
     }
 
 
@@ -38,6 +40,18 @@ sealed class HUDStatisticCounter(
 
     override fun onManagedUpdate(pSecondsElapsed: Float) {
         valueText.y = labelText.drawHeight
+
+        val innerAnchor = when(anchor.x) {
+            0f -> Anchor.TopLeft
+            0.5f -> Anchor.TopCenter
+            else -> Anchor.TopRight
+        }
+
+        labelText.anchor = innerAnchor
+        labelText.origin = innerAnchor
+        valueText.anchor = innerAnchor
+        valueText.origin = innerAnchor
+
         super.onManagedUpdate(pSecondsElapsed)
     }
 }
