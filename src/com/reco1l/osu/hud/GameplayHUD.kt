@@ -265,6 +265,11 @@ class GameplayHUD : Container(), IGameplayEvents {
         elementSelector?.onGameplayUpdate(gameScene, statistics, secondsElapsed)
     }
 
+    override fun onGameplayTouchDown(time: Float) {
+        forEachElement { it.onGameplayTouchDown(time) }
+        elementSelector?.onGameplayTouchDown(time)
+    }
+
     override fun onHitObjectLifetimeStart(obj: HitObject) {
         forEachElement { it.onHitObjectLifetimeStart(obj) }
         elementSelector?.onHitObjectLifetimeStart(obj)

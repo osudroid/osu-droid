@@ -38,6 +38,7 @@ enum class HUDElements(val type: KClass<out HUDElement>) {
     meh_counter(HUDMehCounter::class),
     miss_counter(HUDMissCounter::class),
     notes_per_second_counter(HUDNotesPerSecondCounter::class),
+    taps_per_second_counter(HUDTapsPerSecondCounter::class),
     back_button(HUDBackButton::class),
     leaderboard(GameplayLeaderboard::class);
 
@@ -175,6 +176,8 @@ abstract class HUDElement : Container(), IGameplayEvents {
     //region Gameplay events
 
     override fun onGameplayUpdate(gameScene: GameScene, statistics: StatisticV2, secondsElapsed: Float) {}
+
+    override fun onGameplayTouchDown(time: Float) {}
 
     override fun onHitObjectLifetimeStart(obj: HitObject) {}
 
