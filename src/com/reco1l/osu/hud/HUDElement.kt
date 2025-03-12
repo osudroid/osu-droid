@@ -9,6 +9,7 @@ import com.reco1l.osu.hud.editor.HUDElementOverlay
 import com.reco1l.osu.hud.elements.*
 import com.reco1l.osu.ui.entity.GameplayLeaderboard
 import com.reco1l.toolkt.kotlin.capitalize
+import com.rian.osu.beatmap.hitobject.HitObject
 import org.anddev.andengine.input.touch.TouchEvent
 import kotlin.math.abs
 import kotlin.reflect.KClass
@@ -36,6 +37,7 @@ enum class HUDElements(val type: KClass<out HUDElement>) {
     ok_counter(HUDOkCounter::class),
     meh_counter(HUDMehCounter::class),
     miss_counter(HUDMissCounter::class),
+    notes_per_second_counter(HUDNotesPerSecondCounter::class),
     taps_per_second_counter(HUDTapsPerSecondCounter::class),
     back_button(HUDBackButton::class),
     leaderboard(GameplayLeaderboard::class);
@@ -176,6 +178,8 @@ abstract class HUDElement : Container(), IGameplayEvents {
     override fun onGameplayUpdate(gameScene: GameScene, statistics: StatisticV2, secondsElapsed: Float) {}
 
     override fun onGameplayTouchDown(time: Float) {}
+
+    override fun onHitObjectLifetimeStart(obj: HitObject) {}
 
     override fun onNoteHit(statistics: StatisticV2) {}
 

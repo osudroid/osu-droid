@@ -7,6 +7,7 @@ import com.reco1l.osu.hud.elements.*
 import com.reco1l.osu.ui.MessageDialog
 import com.reco1l.osu.updateThread
 import com.reco1l.toolkt.kotlin.*
+import com.rian.osu.beatmap.hitobject.HitObject
 import org.anddev.andengine.engine.camera.hud.*
 import org.anddev.andengine.entity.IEntity
 import org.anddev.andengine.input.touch.TouchEvent
@@ -267,6 +268,11 @@ class GameplayHUD : Container(), IGameplayEvents {
     override fun onGameplayTouchDown(time: Float) {
         forEachElement { it.onGameplayTouchDown(time) }
         elementSelector?.onGameplayTouchDown(time)
+    }
+
+    override fun onHitObjectLifetimeStart(obj: HitObject) {
+        forEachElement { it.onHitObjectLifetimeStart(obj) }
+        elementSelector?.onHitObjectLifetimeStart(obj)
     }
 
     override fun onNoteHit(statistics: StatisticV2) {
