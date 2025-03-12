@@ -13,8 +13,8 @@ import com.rian.osu.difficulty.skills.StandardAim
 import com.rian.osu.difficulty.skills.StandardFlashlight
 import com.rian.osu.difficulty.skills.StandardSpeed
 import com.rian.osu.mods.Mod
-import com.rian.osu.mods.ModAuto
 import com.rian.osu.mods.ModAutopilot
+import com.rian.osu.mods.ModFlashlight
 import com.rian.osu.mods.ModRelax
 import kotlin.math.cbrt
 import kotlin.math.max
@@ -83,7 +83,7 @@ class StandardDifficultyCalculator : DifficultyCalculator<StandardPlayableBeatma
     }
 
     override fun createSkills(beatmap: StandardPlayableBeatmap): Array<Skill<StandardDifficultyHitObject>> {
-        val mods = beatmap.mods
+        val mods = beatmap.mods.values
         val skills = mutableListOf<Skill<StandardDifficultyHitObject>>()
 
         if (ModAutopilot::class !in beatmap.mods) {
@@ -109,8 +109,6 @@ class StandardDifficultyCalculator : DifficultyCalculator<StandardPlayableBeatma
         }
 
         val clockRate = beatmap.speedMultiplier.toDouble()
-        val greatWindow = StandardHitWindow(beatmap.difficulty.od).greatWindow.toDouble() / clockRate
-
         val objects = beatmap.hitObjects.objects
         val arr = arrayOfNulls<StandardDifficultyHitObject>(objects.size - 1)
 

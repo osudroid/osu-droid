@@ -39,7 +39,7 @@ object ModUtils {
      * All [Mod]s that are considered legacy.
      */
     private val legacyMods = mutableMapOf<Char, ILegacyMod>().also {
-        val legacyMods = arrayOf(ModSmallCircle(), ModSpeedUp())
+        val legacyMods = arrayOf<ILegacyMod>(ModSmallCircle(), ModSpeedUp())
 
         for (mod in legacyMods) {
             it[mod.droidChar] = mod
@@ -50,14 +50,14 @@ object ModUtils {
      * All [Mod]s that can be selected by the user.
      */
     private val playableMods = mutableMapOf<Char, KClass<out Mod>>().also {
-        val playableMods = arrayOf(
+        val playableMods = arrayOf<Mod>(
             ModAuto(), ModAutopilot(), ModDoubleTime(), ModEasy(), ModFlashlight(), ModHalfTime(),
             ModHardRock(), ModHidden(), ModNightCore(), ModNoFail(), ModPerfect(), ModPrecise(),
             ModReallyEasy(), ModRelax(), ModScoreV2(), ModSuddenDeath()
         )
 
         for (mod in playableMods) {
-            it[mod.droidChar] = mod::class
+            it[(mod as IModUserSelectable).droidChar] = mod::class
         }
     }.toMap()
 
@@ -123,7 +123,7 @@ object ModUtils {
     @JvmStatic
     @JvmOverloads
     fun calculateRateWithMods(mods: Iterable<Mod>, oldStatistics: Boolean = false) = mods.fold(1f) {
-        rate, mod -> (mod as? IModApplicableToTrackRate)?.applyToRate(rate, oldStatistics) ?: rate
+        rate, mod -> rate * ((mod as? IModApplicableToTrackRate)?.trackRateMultiplier ?: 1f)
     }
 
     /**
@@ -132,9 +132,16 @@ object ModUtils {
      * @param difficulty The [BeatmapDifficulty] to apply the [Mod]s to.
      * @param mode The [GameMode] to apply the [Mod]s for.
      * @param mods The selected [Mod]s.
+     * @param withRateChange Whether to apply rate changes to the [BeatmapDifficulty].
      */
     @JvmStatic
-    fun applyModsToBeatmapDifficulty(difficulty: BeatmapDifficulty, mode: GameMode, mods: Iterable<Mod>) {
+    @JvmOverloads
+    fun applyModsToBeatmapDifficulty(
+        difficulty: BeatmapDifficulty,
+        mode: GameMode,
+        mods: Iterable<Mod>,
+        withRateChange: Boolean = false
+    ) {
         for (mod in mods) {
             if (mod is IModApplicableToDifficulty) {
                 mod.applyToDifficulty(mode, difficulty)

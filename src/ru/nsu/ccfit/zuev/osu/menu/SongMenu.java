@@ -27,6 +27,7 @@ import com.rian.osu.beatmap.parser.BeatmapParser;
 import com.rian.osu.difficulty.BeatmapDifficultyCalculator;
 import com.rian.osu.math.Precision;
 import com.rian.osu.mods.ModDifficultyAdjust;
+import com.rian.osu.mods.ModNightCore;
 import com.rian.osu.mods.ModPrecise;
 import com.rian.osu.utils.LRUCache;
 import com.rian.osu.utils.ModUtils;
@@ -919,7 +920,7 @@ public class SongMenu implements IUpdateHandler, MenuItemListener,
 
         var difficulty = beatmapInfo.getBeatmapDifficulty();
 
-        ModUtils.applyModsToBeatmapDifficulty(difficulty, GameMode.Droid, mods.values());
+        ModUtils.applyModsToBeatmapDifficulty(difficulty, GameMode.Droid, mods.values(), true);
 
         if (isPreciseMod) {
             // Special case for OD. The Precise mod changes the hit window and not the OD itself, but we must
@@ -1436,8 +1437,8 @@ public class SongMenu implements IUpdateHandler, MenuItemListener,
         }
 
         var modMenu = ModMenu.getInstance();
-        float speed = modMenu.getSpeed();
-        boolean adjustPitch = modMenu.isEnableNCWhenSpeedChange() || modMenu.getMod().contains(GameMod.MOD_NIGHTCORE);
+        float speed = ModUtils.calculateRateWithMods(modMenu.getEnabledMods().values());
+        boolean adjustPitch = modMenu.isEnableNCWhenSpeedChange() || modMenu.getEnabledMods().contains(ModNightCore.class);
 
         songService.setSpeed(speed);
         songService.setAdjustPitch(adjustPitch);

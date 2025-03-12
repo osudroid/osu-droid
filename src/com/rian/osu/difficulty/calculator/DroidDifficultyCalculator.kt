@@ -91,27 +91,28 @@ class DroidDifficultyCalculator : DifficultyCalculator<DroidPlayableBeatmap, Dro
     }
 
     override fun createSkills(beatmap: DroidPlayableBeatmap): Array<Skill<DroidDifficultyHitObject>> {
+        val mods = beatmap.mods.values
         val skills = mutableListOf<Skill<DroidDifficultyHitObject>>()
 
         if (ModAutopilot::class !in beatmap.mods) {
-            skills.add(DroidAim(beatmap.mods.values, true))
-            skills.add(DroidAim(beatmap.mods.values, false))
+            skills.add(DroidAim(mods, true))
+            skills.add(DroidAim(mods, false))
         }
 
         if (ModRelax::class !in beatmap.mods) {
             // Tap and visual skills depend on rhythm skill, so we put it first
-            skills.add(DroidRhythm(beatmap.values.mods))
+            skills.add(DroidRhythm(mods))
 
-            skills.add(DroidTap(beatmap.mods.values, true))
-            skills.add(DroidTap(beatmap.mods.values, false))
+            skills.add(DroidTap(mods, true))
+            skills.add(DroidTap(mods, false))
 
-            skills.add(DroidVisual(beatmap.mods.values, true))
-            skills.add(DroidVisual(beatmap.mods.values, false))
+            skills.add(DroidVisual(mods, true))
+            skills.add(DroidVisual(mods, false))
         }
 
         if (ModFlashlight::class in beatmap.mods) {
-            skills.add(DroidFlashlight(beatmap.mods.values, true))
-            skills.add(DroidFlashlight(beatmap.mods.values, false))
+            skills.add(DroidFlashlight(mods, true))
+            skills.add(DroidFlashlight(mods, false))
         }
 
         return skills.toTypedArray()

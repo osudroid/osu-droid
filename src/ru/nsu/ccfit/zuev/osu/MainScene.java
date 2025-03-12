@@ -996,7 +996,7 @@ public class MainScene implements IUpdateHandler {
     public void watchReplay(String replayFile) {
         Replay replay = new Replay();
 
-        if (!replay.loadInfo(replayFile, false) || replay.replayVersion < 3) {
+        if (!replay.load(replayFile, false) || replay.replayVersion < 3) {
             return;
         }
 

@@ -210,7 +210,7 @@ abstract class DifficultyCalculator<TBeatmap : PlayableBeatmap, TObject : Diffic
  * An [IBeatmap] that is used for timed difficulty calculation.
  */
 private class ProgressiveCalculationBeatmap(
-    baseBeatmap: PlayableBeatmap
+    private val baseBeatmap: PlayableBeatmap
 ) : PlayableBeatmap(baseBeatmap, baseBeatmap.mode, baseBeatmap.mods.values) {
     override var maxCombo = 0
 

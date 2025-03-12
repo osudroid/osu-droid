@@ -9,6 +9,6 @@ import com.rian.osu.mods.Mod
 class StandardPlayableBeatmap @JvmOverloads constructor(
     baseBeatmap: IBeatmap,
     mods: Iterable<Mod>? = null
-) : PlayableBeatmap(baseBeatmap, GameMode.Standard, mods, customSpeedMultiplier) {
+) : PlayableBeatmap(baseBeatmap, GameMode.Standard, mods) {
     override fun createHitWindow() = StandardHitWindow(difficulty.od)
 }

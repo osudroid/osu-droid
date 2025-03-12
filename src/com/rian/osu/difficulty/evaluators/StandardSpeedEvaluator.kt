@@ -24,7 +24,7 @@ object StandardSpeedEvaluator {
      *
      * @param current The current object.
      */
-    fun evaluateDifficultyOf(current: StandardDifficultyHitObject, mods: List<Mod>): Double {
+    fun evaluateDifficultyOf(current: StandardDifficultyHitObject, mods: Iterable<Mod>): Double {
         if (current.obj is Spinner) {
             return 0.0
         }

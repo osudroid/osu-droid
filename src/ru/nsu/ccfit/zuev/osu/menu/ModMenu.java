@@ -30,13 +30,10 @@ import org.jetbrains.annotations.Nullable;
 import kotlinx.coroutines.Job;
 import ru.nsu.ccfit.zuev.osu.*;
 import ru.nsu.ccfit.zuev.osu.game.GameHelper;
-import ru.nsu.ccfit.zuev.osu.game.mods.GameMod;
 import ru.nsu.ccfit.zuev.osu.game.mods.IModSwitcher;
 import ru.nsu.ccfit.zuev.osu.game.mods.ModButton;
 import ru.nsu.ccfit.zuev.osu.helper.StringTable;
 import ru.nsu.ccfit.zuev.osu.helper.TextButton;
-import ru.nsu.ccfit.zuev.osu.scoring.StatisticV2;
-
 
 public class ModMenu implements IModSwitcher {
     private static final ModMenu instance = new ModMenu();
@@ -409,7 +406,7 @@ public class ModMenu implements IModSwitcher {
             }
         }
 
-        multiplierText.setText(StringTable.format(R.string.menu_mod_multiplier, multiplier));
+        multiplierText.setText(StringTable.format(com.osudroid.resources.R.string.menu_mod_multiplier, multiplier));
         multiplierText.setPosition(
                 Config.getRES_WIDTH() / 2f - multiplierText.getWidth() / 2,
                 multiplierText.getY());

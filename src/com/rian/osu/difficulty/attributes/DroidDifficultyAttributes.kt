@@ -8,12 +8,6 @@ import com.rian.osu.beatmap.hitobject.Slider
  */
 class DroidDifficultyAttributes : DifficultyAttributes() {
     /**
-     * The overall clock rate that was applied to the beatmap.
-     */
-    @JvmField
-    var clockRate = 1.0
-
-    /**
      * The difficulty corresponding to the tap skill.
      */
     @JvmField

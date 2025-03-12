@@ -697,7 +697,7 @@ object RoomScene : Scene(), IRoomEventListener, IPlayerEventListener {
 
         isWaitingForModsChange = true
 
-        RoomAPI.setPlayerMods(getModMenu().enabledMods.toString())
+        RoomAPI.setPlayerMods(ModMenu.getInstance().enabledMods.toString())
 
         updateInformation()
         playerList!!.invalidate()
@@ -834,7 +834,7 @@ object RoomScene : Scene(), IRoomEventListener, IPlayerEventListener {
 
         isWaitingForModsChange = true
 
-        RoomAPI.setPlayerMods(getModMenu().enabledMods.toString())
+        RoomAPI.setPlayerMods(ModMenu.getInstance().enabledMods.toString())
 
         updateInformation()
     }
@@ -906,15 +906,17 @@ object RoomScene : Scene(), IRoomEventListener, IPlayerEventListener {
 
     override fun onRoomMatchPlay() {
 
-        if (player!!.status != MissingBeatmap && GlobalManager.getInstance().engine.scene != GlobalManager.getInstance().gameScene.scene) {
+        val global = GlobalManager.getInstance()
+
+        if (player!!.status != MissingBeatmap && global.engine.scene != global.gameScene.scene) {
 
             if (GlobalManager.getInstance().selectedBeatmap == null) {
                 Multiplayer.log("WARNING: Attempt to start match with null track.")
                 return
             }
 
-            getGlobal().songMenu.stopMusic()
-            getGlobal().gameScene.startGame(getGlobal().selectedBeatmap, null, getModMenu().enabledMods)
+            global.songMenu.stopMusic()
+            global.gameScene.startGame(global.selectedBeatmap, null, ModMenu.getInstance().enabledMods)
 
             mainThread {
                 playerList!!.menu.dismiss()

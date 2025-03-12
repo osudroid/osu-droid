@@ -21,7 +21,6 @@ import androidx.core.view.forEach
 import androidx.core.view.get
 import androidx.preference.CheckBoxPreference
 import androidx.preference.Preference
-import androidx.preference.Preference.OnPreferenceClickListener
 import androidx.preference.SeekBarPreference
 import com.osudroid.resources.R.*
 import com.edlplan.ui.fragment.LoadingFragment
@@ -43,21 +42,20 @@ import com.reco1l.toolkt.android.dp
 import com.reco1l.toolkt.android.drawableLeft
 import com.reco1l.toolkt.android.layoutWidth
 import com.reco1l.toolkt.android.topMargin
+import com.rian.osu.mods.ModAuto
 import com.rian.osu.replay.ReplayImporter
+import com.rian.osu.utils.ModHashMap
 import ru.nsu.ccfit.zuev.osu.Config
 import ru.nsu.ccfit.zuev.osu.GlobalManager
 import ru.nsu.ccfit.zuev.osu.LibraryManager
 import ru.nsu.ccfit.zuev.osu.MainActivity
 import ru.nsu.ccfit.zuev.osu.ResourceManager
 import ru.nsu.ccfit.zuev.osu.ToastLogger
-import ru.nsu.ccfit.zuev.osu.game.mods.GameMod
 import ru.nsu.ccfit.zuev.osu.helper.StringTable
-import ru.nsu.ccfit.zuev.osu.menu.ModMenu
 import ru.nsu.ccfit.zuev.osu.online.OnlineManager
 import ru.nsu.ccfit.zuev.osuplus.R
 import ru.nsu.ccfit.zuev.skins.BeatmapSkinManager
 import java.io.File
-import java.util.EnumSet
 import kotlin.math.max
 
 
@@ -324,9 +322,15 @@ class SettingsFragment : com.edlplan.ui.fragment.SettingsFragment() {
                     ToastLogger.showText("Cannot enter HUD editor with empty beatmap library!", true)
                 } else {
                     dismiss()
-                    ModMenu.getInstance().mod = EnumSet.of(GameMod.MOD_AUTO)
-                    GlobalManager.getInstance().gameScene.setOldScene(GlobalManager.getInstance().mainScene.scene)
-                    GlobalManager.getInstance().gameScene.startGame(GlobalManager.getInstance().selectedBeatmap, null, true)
+
+                    val modMap = ModHashMap().apply {
+                        put(ModAuto::class)
+                    }
+
+                    val global = GlobalManager.getInstance()
+
+                    global.gameScene.setOldScene(global.mainScene.scene)
+                    global.gameScene.startGame(global.selectedBeatmap, null, modMap, true)
                 }
                 true
             }
