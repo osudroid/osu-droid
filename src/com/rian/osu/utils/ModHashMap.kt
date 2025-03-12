@@ -4,6 +4,7 @@ import com.reco1l.toolkt.kotlin.fastForEach
 import com.rian.osu.mods.*
 import java.util.EnumSet
 import kotlin.reflect.KClass
+import kotlin.reflect.full.primaryConstructor
 import ru.nsu.ccfit.zuev.osu.game.mods.GameMod
 
 /**
@@ -28,6 +29,24 @@ class ModHashMap : HashMap<Class<out Mod>, Mod> {
      */
     @Suppress("UNCHECKED_CAST")
     fun <T : Mod> put(mod: T) = put(mod::class.java, mod) as? T
+
+    /**
+     * Inserts a new instance of the specified [Mod] type into this [ModHashMap].
+     *
+     * @param mod The [Mod] type to insert.
+     * @return The [Mod] instance that was previously in this [ModHashMap], or `null` if there was no such [Mod].
+     */
+    @Suppress("UNCHECKED_CAST")
+    fun <T : Mod> put(mod: KClass<out T>) = put(mod.java, mod.primaryConstructor!!.call()) as? T
+
+    /**
+     * Inserts a new instance of the specified [Mod] type into this [ModHashMap].
+     *
+     * @param mod The [Mod] type to insert.
+     * @return The [Mod] instance that was previously in this [ModHashMap], or `null` if there was no such [Mod].
+     */
+    @Suppress("UNCHECKED_CAST")
+    fun <T : Mod> put(mod: Class<out T>) = put(mod, mod.getDeclaredConstructor().newInstance()) as? T
 
     override fun put(key: Class<out Mod>, value: Mod): Mod? {
         // Ensure the mod class corresponds to the mod itself.
