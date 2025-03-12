@@ -36,7 +36,13 @@ class HUDNotesPerSecondCounter : HUDElement() {
     override fun onManagedUpdate(pSecondsElapsed: Float) {
         val elapsedTimeMs = getGlobal().gameScene.elapsedTime * 1000
 
-        while (objects.isNotEmpty() && objects.first().startTime + 1000 < elapsedTimeMs) {
+        while (objects.isNotEmpty()) {
+            val obj = objects.first()
+
+            if (obj.startTime - obj.timePreempt + 1000 >= elapsedTimeMs) {
+                break
+            }
+
             objects.removeFirst()
         }
 
