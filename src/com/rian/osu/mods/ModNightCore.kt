@@ -5,7 +5,7 @@ import ru.nsu.ccfit.zuev.osu.game.mods.GameMod
 /**
  * Represents the Night Core mod.
  */
-class ModNightCore : ModClockRateAdjust(), IModUserSelectable {
+open class ModNightCore : ModClockRateAdjust(), IModUserSelectable {
     override val droidChar = 'c'
     override val acronym = "NC"
     override val textureNameSuffix = "nightcore"

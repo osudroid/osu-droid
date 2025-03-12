@@ -13,12 +13,15 @@ import com.rian.osu.GameMode;
 import com.rian.osu.beatmap.Beatmap;
 import com.rian.osu.beatmap.parser.BeatmapParser;
 import com.rian.osu.difficulty.BeatmapDifficultyCalculator;
+import com.rian.osu.difficulty.attributes.DroidDifficultyAttributes;
 import com.rian.osu.difficulty.attributes.DroidPerformanceAttributes;
 import com.rian.osu.mods.IModUserSelectable;
 import com.rian.osu.mods.ModAuto;
 import com.rian.osu.mods.ModCustomSpeed;
 import com.rian.osu.mods.ModDifficultyAdjust;
 import com.rian.osu.mods.ModFlashlight;
+import com.rian.osu.mods.ModNightCore;
+import com.rian.osu.mods.ModOldNightCore;
 import com.rian.osu.ui.SendingPanel;
 import org.anddev.andengine.engine.Engine;
 import org.anddev.andengine.entity.modifier.FadeInModifier;
@@ -400,9 +403,7 @@ public class ScoringScene {
             if (beatmapData != null) {
                 switch (Config.getDifficultyAlgorithm()) {
                     case droid -> {
-                        var playableBeatmap = beatmapData.createDroidPlayableBeatmap(mods.values());
-                        var difficultyAttributes = BeatmapDifficultyCalculator.calculateDroidDifficulty(playableBeatmap);
-
+                        DroidDifficultyAttributes difficultyAttributes;
                         DroidPerformanceAttributes performanceAttributes;
 
                         // Don't try to load online replay
@@ -412,13 +413,30 @@ public class ScoringScene {
                             replay.setBeatmap(beatmapToReplay.getFullBeatmapsetName(), beatmapToReplay.getFullBeatmapName(), mapMD5);
 
                             if (replay.load(replayPath, true)) {
+                                var copiedMods = mods;
+
+                                if (mods.contains(ModNightCore.class) && replay.replayVersion <= 3) {
+                                    copiedMods = mods.deepCopy();
+                                    copiedMods.remove(ModNightCore.class);
+                                    copiedMods.put(ModOldNightCore.class);
+                                }
+
+                                var playableBeatmap = beatmapData.createDroidPlayableBeatmap(copiedMods.values());
+
+                                difficultyAttributes = BeatmapDifficultyCalculator.calculateDroidDifficulty(playableBeatmap);
                                 performanceAttributes = BeatmapDifficultyCalculator.calculateDroidPerformanceWithReplayStat(
                                     playableBeatmap, difficultyAttributes, replay.cursorMoves, replay.objectData, stat
                                 );
                             } else {
+                                var playableBeatmap = beatmapData.createDroidPlayableBeatmap(mods.values());
+
+                                difficultyAttributes = BeatmapDifficultyCalculator.calculateDroidDifficulty(playableBeatmap);
                                 performanceAttributes = BeatmapDifficultyCalculator.calculateDroidPerformance(difficultyAttributes, stat);
                             }
                         } else {
+                            var playableBeatmap = beatmapData.createDroidPlayableBeatmap(mods.values());
+
+                            difficultyAttributes = BeatmapDifficultyCalculator.calculateDroidDifficulty(playableBeatmap);
                             performanceAttributes = BeatmapDifficultyCalculator.calculateDroidPerformance(difficultyAttributes, stat);
                         }
 

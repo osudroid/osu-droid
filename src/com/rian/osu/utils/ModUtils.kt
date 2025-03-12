@@ -115,14 +115,10 @@ object ModUtils {
      * Calculates the rate for the track with the selected [Mod]s.
      *
      * @param mods The list of selected [Mod]s.
-     * @param oldStatistics Whether to enforce old statistics. Some [Mod]s behave differently with this flag. For
-     * example, [ModNightCore] will apply a 1.39 rate multiplier instead of 1.5 when this is `true`.
-     * **Never set this flag to `true` unless you know what you are doing.**
      * @return The rate with [Mod]s.
      */
     @JvmStatic
-    @JvmOverloads
-    fun calculateRateWithMods(mods: Iterable<Mod>, oldStatistics: Boolean = false) = mods.fold(1f) {
+    fun calculateRateWithMods(mods: Iterable<Mod>) = mods.fold(1f) {
         rate, mod -> rate * ((mod as? IModApplicableToTrackRate)?.trackRateMultiplier ?: 1f)
     }
 
