@@ -11,7 +11,8 @@ import com.rian.osu.utils.ModUtils
 
 data class RoomMods(@JvmField val map: ModHashMap)
 {
-    constructor(modString: String) : this(ModUtils.convertModString(modString))
+    @JvmOverloads
+    constructor(modString: String? = null) : this(ModUtils.convertModString(modString))
 
     override fun toString() = map.toReadable()
 
