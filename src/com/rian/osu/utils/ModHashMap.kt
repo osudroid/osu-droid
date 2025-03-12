@@ -4,7 +4,7 @@ import com.reco1l.toolkt.kotlin.fastForEach
 import com.rian.osu.mods.*
 import java.util.EnumSet
 import kotlin.reflect.KClass
-import kotlin.reflect.full.primaryConstructor
+import kotlin.reflect.full.createInstance
 import ru.nsu.ccfit.zuev.osu.game.mods.GameMod
 
 /**
@@ -37,7 +37,7 @@ class ModHashMap : HashMap<Class<out Mod>, Mod> {
      * @return The [Mod] instance that was previously in this [ModHashMap], or `null` if there was no such [Mod].
      */
     @Suppress("UNCHECKED_CAST")
-    fun <T : Mod> put(mod: KClass<out T>) = put(mod.java, mod.primaryConstructor!!.call()) as? T
+    fun <T : Mod> put(mod: KClass<out T>) = put(mod.java, mod.createInstance()) as? T
 
     /**
      * Inserts a new instance of the specified [Mod] type into this [ModHashMap].
