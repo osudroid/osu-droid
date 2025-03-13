@@ -8,7 +8,6 @@ import com.reco1l.andengine.sprite.*
 import com.reco1l.andengine.texture.*
 import com.reco1l.framework.*
 import com.reco1l.osu.hud.HUDElement
-import com.reco1l.osu.hud.editor.HUDElementPreview
 import org.anddev.andengine.opengl.texture.region.*
 import ru.nsu.ccfit.zuev.osu.*
 import ru.nsu.ccfit.zuev.osu.game.GameScene
@@ -94,34 +93,35 @@ class HUDHealthBar : HUDElement() {
     }
 
 
-    override fun onGameplayUpdate(game: GameScene, statistics: StatisticV2, secondsElapsed: Float) {
+    override fun onGameplayUpdate(game: GameScene, secondsElapsed: Float) {
+        val hp = game.stat.hp
 
-        fillClear.width = Interpolation.floatAt(secondsElapsed.coerceIn(0f, 0.2f), fillClear.drawWidth, (1f - statistics.hp) * fill.drawWidth, 0f, 0.2f, Easing.OutQuint)
+        fillClear.width = Interpolation.floatAt(secondsElapsed.coerceIn(0f, 0.2f), fillClear.drawWidth, (1f - hp) * fill.drawWidth, 0f, 0.2f, Easing.OutQuint)
 
         marker.x = fill.x + fill.drawWidth - fillClear.drawWidth
         marker.y = fill.y + (if (isNewStyle) fill.drawHeight / 2 else 0f)
 
         explode.setPosition(marker)
 
-        if (statistics.hp > lastHP) {
+        if (hp > lastHP) {
             bulge()
         }
 
-        lastHP = statistics.hp
+        lastHP = hp
 
         if (isNewStyle) {
 
-            val color = getFillColor(statistics.hp)
+            val color = getFillColor(hp)
 
             fill.color = color
             marker.color = color
-            marker.blendInfo = if (statistics.hp < EPIC_CUTOFF) BlendInfo.Inherit else BlendInfo.Additive
+            marker.blendInfo = if (hp < EPIC_CUTOFF) BlendInfo.Inherit else BlendInfo.Additive
 
         } else {
 
             marker.textureRegion = when {
-                statistics.hp < 0.2f -> markerSuperDangerTexture
-                statistics.hp < EPIC_CUTOFF -> markerDangerTexture
+                hp < 0.2f -> markerSuperDangerTexture
+                hp < EPIC_CUTOFF -> markerDangerTexture
                 else -> markerNormalTexture
             }
 

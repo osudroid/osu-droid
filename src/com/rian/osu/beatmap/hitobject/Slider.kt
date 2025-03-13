@@ -7,7 +7,6 @@ import com.rian.osu.beatmap.sections.BeatmapControlPoints
 import com.rian.osu.beatmap.sections.BeatmapDifficulty
 import com.rian.osu.math.Vector2
 import com.rian.osu.utils.Cached
-import kotlin.math.max
 import kotlin.math.min
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.ensureActive
@@ -303,7 +302,7 @@ class Slider(
         // Invalidate the end position in case there are timing changes.
         invalidateEndPositions()
 
-        createNestedHitObjects(mode, controlPoints, scope)
+        createNestedHitObjects(controlPoints, scope)
 
         nestedHitObjects.forEach { it.applyDefaults(controlPoints, difficulty, mode, scope) }
     }
@@ -368,7 +367,7 @@ class Slider(
 
     override fun createHitWindow(mode: GameMode) = EmptyHitWindow()
 
-    private fun createNestedHitObjects(mode: GameMode, controlPoints: BeatmapControlPoints, scope: CoroutineScope?) {
+    private fun createNestedHitObjects(controlPoints: BeatmapControlPoints, scope: CoroutineScope?) {
         nestedHitObjects.clear()
 
         head = SliderHead(startTime, position)
@@ -428,27 +427,7 @@ class Slider(
             }
         }
 
-        tail = when (mode) {
-            GameMode.Droid -> SliderTail(this)
-
-            GameMode.Standard -> {
-                // Okay, I'll level with you. I made a mistake. It was 2007.
-                // Times were simpler. osu! was but in its infancy and sliders were a new concept.
-                // A hack was made, which has unfortunately lived through until this day.
-                //
-                // This legacy tick is used for some calculations and judgements where audio output is not required.
-                // Generally we are keeping this around just for difficulty compatibility.
-                // Optimistically we do not want to ever use this for anything user-facing going forwards.
-                val finalSpanIndex = repeatCount
-                val finalSpanStartTime = startTime + finalSpanIndex * spanDuration
-                val finalSpanEndTime = max(
-                    startTime + duration / 2,
-                    finalSpanStartTime + spanDuration - LEGACY_LAST_TICK_OFFSET
-                )
-
-                SliderTail(this, finalSpanEndTime)
-            }
-        }
+        tail = SliderTail(this)
 
         nestedHitObjects.apply {
             add(tail)

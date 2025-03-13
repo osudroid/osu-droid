@@ -47,6 +47,7 @@ public class GameplaySpinner extends GameObject {
     protected int bonusScoreCounter = 1;
     protected StatisticV2 stat;
     protected float duration;
+    protected boolean spinnable;
 
     protected final boolean isSpinnerFrequencyModulate;
     protected GameplayHitSampleInfo[] hitSamples;
@@ -120,20 +121,27 @@ public class GameplaySpinner extends GameObject {
         startHit = true;
         clear = duration <= 0f;
         bonusScoreCounter = 1;
+        spinnable = false;
 
         reloadHitSounds();
         ResourceManager.getInstance().checkSpinnerTextures();
 
         float timePreempt = (float) beatmapSpinner.timePreempt / 1000f;
 
-        background.setAlpha(0);
-        background.registerEntityModifier(Modifiers.sequence(
-            Modifiers.delay(timePreempt * 0.75f),
-            Modifiers.fadeIn(timePreempt * 0.25f)
-        ));
+        // Technically, this is not right, as the configuration exclusivity should only apply to the first circle
+        // or slider. However, this is also the case for the Hidden mod, so we will leave it as is for the time being.
+        background.setVisible(!GameHelper.isTraceable() || (Config.isShowFirstApproachCircle() && beatmapSpinner.isFirstNote()));
+
+        if (background.isVisible()) {
+            background.setAlpha(0);
+            background.registerEntityModifier(Modifiers.sequence(
+                Modifiers.delay(timePreempt * 0.75f),
+                Modifiers.fadeIn(timePreempt * 0.25f)
+            ));
+        }
 
         circle.setAlpha(0);
-        circle.registerEntityModifier(Modifiers.sequence(
+        circle.registerEntityModifier(Modifiers.sequence(e -> listener.onSpinnerStart(id),
             Modifiers.delay(timePreempt * 0.75f),
             Modifiers.fadeIn(timePreempt * 0.25f)
         ));
@@ -151,7 +159,7 @@ public class GameplaySpinner extends GameObject {
             approachCircle.setVisible(false);
         }
         approachCircle.registerEntityModifier(Modifiers.sequence(e -> Execution.updateThread(this::removeFromScene),
-            Modifiers.delay(timePreempt),
+            Modifiers.delay(timePreempt, e -> spinnable = true),
             Modifiers.parallel(
                 Modifiers.alpha(duration, 0.75f, 1),
                 Modifiers.scale(duration, 2.0f, 0)
@@ -247,7 +255,8 @@ public class GameplaySpinner extends GameObject {
 
     @Override
     public void update(final float dt) {
-        if (circle.getAlpha() == 0) {
+        // Allow the spinner to fully fade in first before receiving spins.
+        if (!spinnable) {
             return;
         }
 

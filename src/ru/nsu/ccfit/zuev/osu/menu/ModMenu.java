@@ -274,6 +274,7 @@ public class ModMenu implements IModSwitcher {
             addButton(offset + offsetGrowth * factor++, Config.getRES_HEIGHT() / 2 - button.getHeight() / 2, GameMod.MOD_NIGHTCORE);
 
         addButton(offset + offsetGrowth * factor++, Config.getRES_HEIGHT() / 2 - button.getHeight() / 2, GameMod.MOD_HIDDEN);
+        addButton(offset + offsetGrowth * factor++, Config.getRES_HEIGHT() / 2 - button.getHeight() / 2, GameMod.MOD_TRACEABLE);
         addButton(offset + offsetGrowth * factor++, Config.getRES_HEIGHT() / 2 - button.getHeight() / 2, GameMod.MOD_FLASHLIGHT);
         addButton(offset + offsetGrowth * factor++, Config.getRES_HEIGHT() / 2 - button.getHeight() / 2, GameMod.MOD_SUDDENDEATH);
         addButton(offset + offsetGrowth * factor, Config.getRES_HEIGHT() / 2 - button.getHeight() / 2, GameMod.MOD_PERFECT);
@@ -562,6 +563,8 @@ public class ModMenu implements IModSwitcher {
             handleModFlags(flag, GameMod.MOD_AUTOPILOT, new GameMod[]{GameMod.MOD_RELAX, GameMod.MOD_AUTO, GameMod.MOD_NOFAIL});
             handleModFlags(flag, GameMod.MOD_AUTO, new GameMod[]{GameMod.MOD_RELAX, GameMod.MOD_AUTOPILOT, GameMod.MOD_PERFECT, GameMod.MOD_SUDDENDEATH});
             handleModFlags(flag, GameMod.MOD_RELAX, new GameMod[]{GameMod.MOD_AUTO, GameMod.MOD_NOFAIL, GameMod.MOD_AUTOPILOT});
+            handleModFlags(flag, GameMod.MOD_HIDDEN, new GameMod[]{GameMod.MOD_TRACEABLE});
+            handleModFlags(flag, GameMod.MOD_TRACEABLE, new GameMod[]{GameMod.MOD_HIDDEN});
             handleModFlags(flag, GameMod.MOD_DOUBLETIME, new GameMod[]{GameMod.MOD_NIGHTCORE, GameMod.MOD_HALFTIME});
             handleModFlags(flag, GameMod.MOD_NIGHTCORE, new GameMod[]{GameMod.MOD_DOUBLETIME, GameMod.MOD_HALFTIME});
             handleModFlags(flag, GameMod.MOD_HALFTIME, new GameMod[]{GameMod.MOD_DOUBLETIME, GameMod.MOD_NIGHTCORE});

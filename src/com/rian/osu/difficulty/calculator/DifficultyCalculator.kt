@@ -26,7 +26,7 @@ abstract class DifficultyCalculator<TBeatmap : PlayableBeatmap, TObject : Diffic
      */
     protected open val difficultyAdjustmentMods = setOf(
         ModDoubleTime(), ModHalfTime(), ModNightCore(),
-        ModRelax(), ModEasy(), ModReallyEasy(),
+        ModRelax(), ModAutopilot(), ModEasy(), ModReallyEasy(),
         ModHardRock(), ModHidden(), ModFlashlight(),
         ModDifficultyAdjust()
     )
@@ -155,6 +155,15 @@ abstract class DifficultyCalculator<TBeatmap : PlayableBeatmap, TObject : Diffic
     }
 
     /**
+     * Retrieves a [Skill] of a specific type from an array of [Skill]s.
+     *
+     * @param predicate The predicate to filter the [Skill]s by, if any.
+     * @return The [Skill] of the specified type.
+     */
+    protected inline fun <reified T : Skill<TObject>> Array<Skill<TObject>>.find(predicate: (T) -> Boolean = { true }) =
+        firstOrNull { it is T && predicate(it) } as T?
+
+    /**
      * Creates the [Skill]s to calculate the difficulty of a [PlayableBeatmap].
      *
      * @param beatmap The [PlayableBeatmap] whose difficulty will be calculated.
@@ -203,7 +212,7 @@ abstract class DifficultyCalculator<TBeatmap : PlayableBeatmap, TObject : Diffic
         /**
          * The epoch time of the last change to the difficulty calculator, in milliseconds.
          */
-        const val VERSION = 1729985821000
+        const val VERSION = 1741359220000
     }
 }
 

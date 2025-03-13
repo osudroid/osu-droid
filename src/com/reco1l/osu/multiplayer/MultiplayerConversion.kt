@@ -103,6 +103,7 @@ fun stringToMods(data: String?): EnumSet<GameMod> {
         'n' -> mod += MOD_NOFAIL
         'r' -> mod += MOD_HARDROCK
         'h' -> mod += MOD_HIDDEN
+        'b' -> mod += MOD_TRACEABLE
         'i' -> mod += MOD_FLASHLIGHT
         'd' -> mod += MOD_DOUBLETIME
         'c' -> mod += MOD_NIGHTCORE
@@ -126,6 +127,7 @@ fun modsToString(mod: EnumSet<GameMod>) = buildString {
         MOD_NOFAIL -> append('n')
         MOD_HARDROCK -> append('r')
         MOD_HIDDEN -> append('h')
+        MOD_TRACEABLE -> append('b')
         MOD_FLASHLIGHT -> append('i')
         MOD_DOUBLETIME -> append('d')
         MOD_NIGHTCORE -> append('c')

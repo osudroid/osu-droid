@@ -13,7 +13,7 @@ import ru.nsu.ccfit.zuev.osu.game.mods.GameMod
  * A set of utilities to handle [Mod] combinations.
  */
 object ModUtils {
-    private val modMap = mutableMapOf<GameMod, Mod>().apply {
+    private val modMap: Map<GameMod, Mod> = mutableMapOf<GameMod, Mod>().apply {
         put(GameMod.MOD_AUTO, ModAuto())
         put(GameMod.MOD_AUTOPILOT, ModAutopilot())
         put(GameMod.MOD_DOUBLETIME, ModDoubleTime())
@@ -22,6 +22,7 @@ object ModUtils {
         put(GameMod.MOD_HALFTIME, ModHalfTime())
         put(GameMod.MOD_HARDROCK, ModHardRock())
         put(GameMod.MOD_HIDDEN, ModHidden())
+        put(GameMod.MOD_TRACEABLE, ModTraceable())
         put(GameMod.MOD_NIGHTCORE, ModNightCore())
         put(GameMod.MOD_NOFAIL, ModNoFail())
         put(GameMod.MOD_PERFECT, ModPerfect())
@@ -30,7 +31,7 @@ object ModUtils {
         put(GameMod.MOD_RELAX, ModRelax())
         put(GameMod.MOD_SCOREV2, ModScoreV2())
         put(GameMod.MOD_SUDDENDEATH, ModSuddenDeath())
-    }.toMap()
+    }
 
     /**
      * Converts "legacy" [GameMod]s to new [Mod]s.

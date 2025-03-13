@@ -7,6 +7,7 @@ import com.reco1l.osu.hud.elements.*
 import com.reco1l.osu.ui.MessageDialog
 import com.reco1l.osu.updateThread
 import com.reco1l.toolkt.kotlin.*
+import com.rian.osu.beatmap.hitobject.HitObject
 import org.anddev.andengine.engine.camera.hud.*
 import org.anddev.andengine.entity.IEntity
 import org.anddev.andengine.input.touch.TouchEvent
@@ -259,9 +260,19 @@ class GameplayHUD : Container(), IGameplayEvents {
         }
     }
 
-    override fun onGameplayUpdate(gameScene: GameScene, statistics: StatisticV2, secondsElapsed: Float) {
-        forEachElement { it.onGameplayUpdate(gameScene, statistics, secondsElapsed) }
-        elementSelector?.onGameplayUpdate(gameScene, statistics, secondsElapsed)
+    override fun onGameplayUpdate(gameScene: GameScene, secondsElapsed: Float) {
+        forEachElement { it.onGameplayUpdate(gameScene, secondsElapsed) }
+        elementSelector?.onGameplayUpdate(gameScene, secondsElapsed)
+    }
+
+    override fun onGameplayTouchDown(time: Float) {
+        forEachElement { it.onGameplayTouchDown(time) }
+        elementSelector?.onGameplayTouchDown(time)
+    }
+
+    override fun onHitObjectLifetimeStart(obj: HitObject) {
+        forEachElement { it.onHitObjectLifetimeStart(obj) }
+        elementSelector?.onHitObjectLifetimeStart(obj)
     }
 
     override fun onNoteHit(statistics: StatisticV2) {
@@ -288,6 +299,12 @@ class GameplayHUD : Container(), IGameplayEvents {
     }
 
     override fun onAreaTouched(event: TouchEvent, localX: Float, localY: Float): Boolean {
+
+        // Ignoring touches on the element selector area when expanded.
+        if (elementSelector?.isExpanded == true && localX <= elementSelector!!.drawWidth) {
+            return false
+        }
+
         if (!super.onAreaTouched(event, localX, localY)) {
             if (event.isActionDown) {
                 selected = null

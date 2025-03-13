@@ -11,6 +11,7 @@ import com.rian.osu.mods.ModHidden
 import com.rian.osu.mods.ModNoFail
 import com.rian.osu.mods.ModRelax
 import com.rian.osu.mods.ModScoreV2
+import com.rian.osu.mods.ModTraceable
 import kotlin.math.exp
 import kotlin.math.ln
 import kotlin.math.log10
@@ -107,7 +108,7 @@ class StandardPerformanceCalculator(
             }
 
             // We want to give more reward for lower AR when it comes to aim and HD. This nerfs high AR and buffs lower AR.
-            if (mods.any { it is ModHidden }) {
+            if (mods.any { it is ModHidden || it is ModTraceable }) {
                 aimValue *= 1 + 0.04 * (12 - approachRate)
             }
 
@@ -153,7 +154,7 @@ class StandardPerformanceCalculator(
             speedValue *= 1 + 0.3 * (difficultyAttributes.approachRate - 10.33) * lengthBonus
         }
 
-        if (difficultyAttributes.mods.any { it is ModHidden }) {
+        if (difficultyAttributes.mods.any { it is ModHidden || it is ModTraceable }) {
             speedValue *= 1 + 0.04 * (12 - difficultyAttributes.approachRate)
         }
 
@@ -198,7 +199,7 @@ class StandardPerformanceCalculator(
         // Bonus for many hit circles - it's harder to keep good accuracy up for longer
         accuracyValue *= min(1.15, (hitObjectWithAccuracyCount / 1000.0).pow(0.3))
 
-        if (difficultyAttributes.mods.any { it is ModHidden }) {
+        if (difficultyAttributes.mods.any { it is ModHidden || it is ModTraceable }) {
             accuracyValue *= 1.08
         }
 

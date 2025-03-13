@@ -9,9 +9,12 @@ import com.reco1l.osu.hud.editor.HUDElementOverlay
 import com.reco1l.osu.hud.elements.*
 import com.reco1l.osu.ui.entity.GameplayLeaderboard
 import com.reco1l.toolkt.kotlin.capitalize
+import com.rian.osu.beatmap.hitobject.HitObject
 import org.anddev.andengine.input.touch.TouchEvent
 import kotlin.math.abs
 import kotlin.reflect.KClass
+import ru.nsu.ccfit.zuev.osu.game.GameScene
+import ru.nsu.ccfit.zuev.osu.scoring.StatisticV2
 
 
 /**
@@ -34,6 +37,8 @@ enum class HUDElements(val type: KClass<out HUDElement>) {
     ok_counter(HUDOkCounter::class),
     meh_counter(HUDMehCounter::class),
     miss_counter(HUDMissCounter::class),
+    notes_per_second_counter(HUDNotesPerSecondCounter::class),
+    taps_per_second_counter(HUDTapsPerSecondCounter::class),
     back_button(HUDBackButton::class),
     leaderboard(GameplayLeaderboard::class);
 
@@ -165,6 +170,22 @@ abstract class HUDElement : Container(), IGameplayEvents {
         connectionLine?.clearEntityModifiers()
         connectionLine?.fadeTo(if (isSelected) 1f else 0f, 0.1f)
     }
+
+    //endregion
+
+    //region Gameplay events
+
+    override fun onGameplayUpdate(gameScene: GameScene, secondsElapsed: Float) {}
+
+    override fun onGameplayTouchDown(time: Float) {}
+
+    override fun onHitObjectLifetimeStart(obj: HitObject) {}
+
+    override fun onNoteHit(statistics: StatisticV2) {}
+
+    override fun onBreakStateChange(isBreak: Boolean) {}
+
+    override fun onAccuracyRegister(accuracy: Float) {}
 
     //endregion
 
