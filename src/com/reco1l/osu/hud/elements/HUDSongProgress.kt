@@ -10,7 +10,7 @@ import com.reco1l.osu.hud.HUDElement
 import ru.nsu.ccfit.zuev.osu.Config
 import ru.nsu.ccfit.zuev.osu.game.GameScene
 
-abstract class HUDSongProgress : HUDElement() {
+sealed class HUDSongProgress : HUDElement() {
     abstract fun setProgress(progress: Float, isIntro: Boolean)
 
     override fun onGameplayUpdate(gameScene: GameScene, secondsElapsed: Float) {
@@ -23,6 +23,7 @@ abstract class HUDSongProgress : HUDElement() {
 }
 
 class HUDLinearSongProgress : HUDSongProgress() {
+
     private val backgroundRect = Box().apply {
 
         anchor = Anchor.BottomLeft
