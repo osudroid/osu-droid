@@ -57,7 +57,6 @@ public class Config {
         enableExtension,
         loadAvatar,
         stayOnline,
-        syncMusic,
         burstEffects,
         hitLighting,
         useParticles,
@@ -181,7 +180,6 @@ public class Config {
             skinTopPath += "/";
         }
 
-        syncMusic = prefs.getBoolean("syncMusic", syncMusic);
         enableExtension = false;// prefs.getBoolean("enableExtension", false);
         cachePath = context.getCacheDir().getPath();
         burstEffects = prefs.getBoolean("bursts", burstEffects);
@@ -511,14 +509,6 @@ public class Config {
 
     public static String getOnlineDeviceID() {
         return onlineDeviceID;
-    }
-
-    public static boolean isSyncMusic() {
-        return syncMusic;
-    }
-
-    public static void setSyncMusic(boolean syncMusic) {
-        Config.syncMusic = syncMusic;
     }
 
     public static String getCachePath() {
