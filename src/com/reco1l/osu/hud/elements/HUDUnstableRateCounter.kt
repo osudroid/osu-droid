@@ -4,7 +4,6 @@ import com.reco1l.andengine.text.ExtendedText
 import com.reco1l.osu.hud.HUDElement
 import ru.nsu.ccfit.zuev.osu.ResourceManager
 import ru.nsu.ccfit.zuev.osu.game.GameScene
-import ru.nsu.ccfit.zuev.osu.scoring.StatisticV2
 
 class HUDUnstableRateCounter : HUDElement() {
 
@@ -19,7 +18,7 @@ class HUDUnstableRateCounter : HUDElement() {
         attachChild(text)
     }
 
-    override fun onGameplayUpdate(game: GameScene, statistics: StatisticV2, secondsElapsed: Float) {
-        text.text = "UR: %.2f".format(statistics.unstableRate)
+    override fun onGameplayUpdate(game: GameScene, secondsElapsed: Float) {
+        text.text = "UR: %.2f".format(game.stat.unstableRate)
     }
 }

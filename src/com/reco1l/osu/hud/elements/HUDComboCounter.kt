@@ -6,7 +6,6 @@ import com.reco1l.osu.hud.HUDElement
 import com.reco1l.osu.playfield.SpriteFont
 import ru.nsu.ccfit.zuev.osu.*
 import ru.nsu.ccfit.zuev.osu.game.GameScene
-import ru.nsu.ccfit.zuev.osu.scoring.StatisticV2
 import ru.nsu.ccfit.zuev.skins.*
 
 
@@ -80,8 +79,8 @@ class HUDComboCounter : HUDElement() {
     }
 
 
-    override fun onGameplayUpdate(game: GameScene, statistics: StatisticV2, secondsElapsed: Float) {
-        setCombo(statistics.combo)
+    override fun onGameplayUpdate(game: GameScene, secondsElapsed: Float) {
+        setCombo(game.stat.combo)
     }
 
     override fun onManagedUpdate(pSecondsElapsed: Float) {

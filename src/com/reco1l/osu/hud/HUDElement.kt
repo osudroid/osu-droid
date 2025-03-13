@@ -175,7 +175,7 @@ abstract class HUDElement : Container(), IGameplayEvents {
 
     //region Gameplay events
 
-    override fun onGameplayUpdate(gameScene: GameScene, statistics: StatisticV2, secondsElapsed: Float) {}
+    override fun onGameplayUpdate(gameScene: GameScene, secondsElapsed: Float) {}
 
     override fun onGameplayTouchDown(time: Float) {}
 

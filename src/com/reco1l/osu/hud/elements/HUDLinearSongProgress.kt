@@ -6,7 +6,6 @@ import com.reco1l.framework.*
 import com.reco1l.osu.hud.HUDElement
 import ru.nsu.ccfit.zuev.osu.Config
 import ru.nsu.ccfit.zuev.osu.game.GameScene
-import ru.nsu.ccfit.zuev.osu.scoring.StatisticV2
 
 
 class HUDLinearSongProgress : HUDElement() {
@@ -52,7 +51,7 @@ class HUDLinearSongProgress : HUDElement() {
     }
 
 
-    override fun onGameplayUpdate(gameScene: GameScene, statistics: StatisticV2, secondsElapsed: Float) {
+    override fun onGameplayUpdate(gameScene: GameScene, secondsElapsed: Float) {
         if (gameScene.elapsedTime < gameScene.firstObjectStartTime) {
             setProgress((gameScene.elapsedTime - gameScene.initialElapsedTime) / (gameScene.firstObjectStartTime - gameScene.initialElapsedTime), true)
         } else {

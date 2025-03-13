@@ -5,7 +5,6 @@ import com.reco1l.osu.playfield.SpriteFont
 import ru.nsu.ccfit.zuev.osu.Config
 import ru.nsu.ccfit.zuev.osu.DifficultyAlgorithm
 import ru.nsu.ccfit.zuev.osu.game.GameScene
-import ru.nsu.ccfit.zuev.osu.scoring.StatisticV2
 import ru.nsu.ccfit.zuev.skins.OsuSkin
 import kotlin.math.roundToInt
 
@@ -25,7 +24,7 @@ class HUDPPCounter : HUDElement() {
         sprite.text = "${value.roundToInt()}${if (Config.getDifficultyAlgorithm() == DifficultyAlgorithm.droid) "dpp" else "pp"}"
     }
 
-    override fun onGameplayUpdate(game: GameScene, statistics: StatisticV2, secondsElapsed: Float) {
-        setValue(statistics.pp)
+    override fun onGameplayUpdate(game: GameScene, secondsElapsed: Float) {
+        setValue(game.stat.pp)
     }
 }

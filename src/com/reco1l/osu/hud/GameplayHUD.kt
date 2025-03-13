@@ -260,9 +260,9 @@ class GameplayHUD : Container(), IGameplayEvents {
         }
     }
 
-    override fun onGameplayUpdate(gameScene: GameScene, statistics: StatisticV2, secondsElapsed: Float) {
-        forEachElement { it.onGameplayUpdate(gameScene, statistics, secondsElapsed) }
-        elementSelector?.onGameplayUpdate(gameScene, statistics, secondsElapsed)
+    override fun onGameplayUpdate(gameScene: GameScene, secondsElapsed: Float) {
+        forEachElement { it.onGameplayUpdate(gameScene, secondsElapsed) }
+        elementSelector?.onGameplayUpdate(gameScene, secondsElapsed)
     }
 
     override fun onGameplayTouchDown(time: Float) {
