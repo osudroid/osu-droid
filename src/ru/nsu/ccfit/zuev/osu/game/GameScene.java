@@ -1614,7 +1614,7 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
 
     private void updatePassiveObjects(float deltaTime) {
 
-        hud.onGameplayUpdate(this, stat, deltaTime);
+        hud.onGameplayUpdate(this, deltaTime);
 
         breakAnimator.update(deltaTime);
 

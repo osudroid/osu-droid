@@ -7,7 +7,7 @@ import ru.nsu.ccfit.zuev.osu.scoring.StatisticV2
 
 interface IGameplayEvents {
 
-    fun onGameplayUpdate(gameScene: GameScene, statistics: StatisticV2, secondsElapsed: Float)
+    fun onGameplayUpdate(gameScene: GameScene, secondsElapsed: Float)
 
     /**
      * Called when a [MotionEvent.ACTION_DOWN] event occurs in gameplay.

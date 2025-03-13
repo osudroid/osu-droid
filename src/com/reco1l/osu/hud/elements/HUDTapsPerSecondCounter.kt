@@ -3,7 +3,6 @@ package com.reco1l.osu.hud.elements
 import com.reco1l.osu.updateThread
 import ru.nsu.ccfit.zuev.osu.game.GameHelper
 import ru.nsu.ccfit.zuev.osu.game.GameScene
-import ru.nsu.ccfit.zuev.osu.scoring.StatisticV2
 
 class HUDTapsPerSecondCounter : HUDStatisticCounter("Taps/sec") {
 
@@ -16,7 +15,7 @@ class HUDTapsPerSecondCounter : HUDStatisticCounter("Taps/sec") {
         updateThread { timestamps.add(time) }
     }
 
-    override fun onGameplayUpdate(gameScene: GameScene, statistics: StatisticV2, secondsElapsed: Float) {
+    override fun onGameplayUpdate(gameScene: GameScene, secondsElapsed: Float) {
         val earliestElapsedTime = gameScene.elapsedTime - GameHelper.getSpeedMultiplier()
 
         while (timestamps.isNotEmpty() && timestamps.first() < earliestElapsedTime) {

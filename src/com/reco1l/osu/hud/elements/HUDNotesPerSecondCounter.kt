@@ -1,7 +1,7 @@
 package com.reco1l.osu.hud.elements
 
 import com.rian.osu.beatmap.hitobject.HitObject
-import ru.nsu.ccfit.zuev.osu.GlobalManager.getInstance as getGlobal
+import ru.nsu.ccfit.zuev.osu.game.GameScene
 
 class HUDNotesPerSecondCounter : HUDStatisticCounter("Notes/sec") {
 
@@ -13,8 +13,8 @@ class HUDNotesPerSecondCounter : HUDStatisticCounter("Notes/sec") {
         objects.add(obj)
     }
 
-    override fun onManagedUpdate(pSecondsElapsed: Float) {
-        val elapsedTimeMs = getGlobal().gameScene.elapsedTime * 1000
+    override fun onGameplayUpdate(gameScene: GameScene, secondsElapsed: Float) {
+        val elapsedTimeMs = gameScene.elapsedTime * 1000
 
         while (objects.isNotEmpty()) {
             val obj = objects.first()
@@ -27,6 +27,5 @@ class HUDNotesPerSecondCounter : HUDStatisticCounter("Notes/sec") {
         }
 
         valueText.text = objects.size.toString()
-        super.onManagedUpdate(pSecondsElapsed)
     }
 }

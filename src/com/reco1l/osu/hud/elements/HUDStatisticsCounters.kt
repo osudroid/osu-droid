@@ -54,8 +54,8 @@ sealed class HUDHitStatisticCounter(
         valueText.color = tint
     }
 
-    override fun onGameplayUpdate(gameScene: GameScene, statistics: StatisticV2, secondsElapsed: Float) {
-        valueText.text = statistics.dataSupplier()
+    override fun onGameplayUpdate(game: GameScene, secondsElapsed: Float) {
+        valueText.text = game.stat.dataSupplier()
     }
 }
 
