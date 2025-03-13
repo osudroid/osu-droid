@@ -1287,7 +1287,10 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
         boolean shouldBePunished = false;
 
         while (!objects.isEmpty()
-                && elapsedTime >= (float) (objects.peek().startTime - objects.peek().timePreempt) / 1000) {
+                // This can be simplified, but it is necessary to prevent floating point errors (see how
+                // GameplayHitCircle and GameplaySlider track their passed time, where startTime and timePreempt
+                // are cast and converted to seconds individually).
+                && elapsedTime >= (float) objects.peek().startTime / 1000 - (float) objects.peek().timePreempt / 1000) {
             gameStarted = true;
             final var obj = objects.poll();
 
