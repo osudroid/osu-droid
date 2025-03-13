@@ -401,21 +401,21 @@ class SettingsFragment : com.edlplan.ui.fragment.SettingsFragment() {
             }
         }
 
-        findPreference<CheckBoxPreference>("vibrationCircle")?.apply {
+        findPreference<CheckBoxPreference>("vibrationCircle")!!.apply {
             setOnPreferenceChangeListener { _, newValue ->
                 VibratorManager.isCircleVibrationEnabled = newValue as Boolean
                 true
             }
         }
 
-        findPreference<CheckBoxPreference>("vibrationSlider")?.apply {
+        findPreference<CheckBoxPreference>("vibrationSlider")!!.apply {
             setOnPreferenceChangeListener { _, newValue ->
                 VibratorManager.isSliderVibrationEnabled = newValue as Boolean
                 true
             }
         }
 
-        findPreference<CheckBoxPreference>("vibrationSpinner")?.apply {
+        findPreference<CheckBoxPreference>("vibrationSpinner")!!.apply {
             setOnPreferenceChangeListener { _, newValue ->
                 VibratorManager.isSpinnerVibrationEnabled = newValue as Boolean
                 true
