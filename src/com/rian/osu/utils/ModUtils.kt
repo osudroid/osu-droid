@@ -112,14 +112,16 @@ object ModUtils {
     }
 
     /**
-     * Calculates the rate for the track with the selected [Mod]s.
+     * Calculates the playback rate for the track with the selected [Mod]s at [time].
      *
      * @param mods The list of selected [Mod]s.
+     * @param time The time at which the playback rate is queried. Defaults to 0.
      * @return The rate with [Mod]s.
      */
     @JvmStatic
-    fun calculateRateWithMods(mods: Iterable<Mod>) = mods.fold(1f) {
-        rate, mod -> rate * ((mod as? IModApplicableToTrackRate)?.applyToRate(0.0, rate) ?: 1f)
+    @JvmOverloads
+    fun calculateRateWithMods(mods: Iterable<Mod>, time: Double = 0.0) = mods.fold(1f) {
+        rate, mod -> rate * ((mod as? IModApplicableToTrackRate)?.applyToRate(time, rate) ?: 1f)
     }
 
     /**
