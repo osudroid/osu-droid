@@ -47,7 +47,6 @@ public class ModMenu implements IModSwitcher {
 
     private ModSettingsMenu menu;
 
-    private final ModCustomSpeed customSpeed = new ModCustomSpeed(1);
     private final ModDifficultyAdjust difficultyAdjust = new ModDifficultyAdjust();
 
     private ModMenu() {}
@@ -476,17 +475,25 @@ public class ModMenu implements IModSwitcher {
     }
 
     public float getChangeSpeed() {
-        return customSpeed.getTrackRateMultiplier();
+        var customSpeed = enabledMods.ofType(ModCustomSpeed.class);
+
+        return customSpeed != null ? customSpeed.getTrackRateMultiplier() : 1;
     }
 
     public void setChangeSpeed(float speed) {
-        customSpeed.setTrackRateMultiplier(speed);
-
-        if (customSpeed.isRelevant()) {
-            enabledMods.put(customSpeed);
-        } else {
-            enabledMods.remove(customSpeed);
+        if (speed == 1f) {
+            enabledMods.remove(ModCustomSpeed.class);
+            return;
         }
+
+        var customSpeed = enabledMods.ofType(ModCustomSpeed.class);
+
+        if (customSpeed == null) {
+            customSpeed = new ModCustomSpeed(speed);
+            enabledMods.put(customSpeed);
+        }
+
+        customSpeed.setTrackRateMultiplier(speed);
     }
 
     public float getFLFollowDelay() {
