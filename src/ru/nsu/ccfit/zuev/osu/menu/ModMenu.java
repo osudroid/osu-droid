@@ -305,7 +305,18 @@ public class ModMenu implements IModSwitcher {
             @Override
             public boolean onAreaTouched(final TouchEvent pSceneTouchEvent,
                                          final float pTouchAreaLocalX, final float pTouchAreaLocalY) {
-                if (pSceneTouchEvent.isActionUp()) {
+                if (pSceneTouchEvent.isActionDown()) {
+                    moved = false;
+                    dx = pTouchAreaLocalX;
+                    dy = pTouchAreaLocalY;
+                    return true;
+                }
+
+                if (pSceneTouchEvent.isActionUp() && !moved) {
+                    if (clickShortConfirmSound != null) {
+                        clickShortConfirmSound.play();
+                    }
+
                     cancelCalculationJob();
 
                     calculationJob = Execution.async(scope -> {
