@@ -309,8 +309,9 @@ class ModHashMap : HashMap<Class<out Mod>, Mod> {
          */
         private val modStringOrder = arrayOf<Mod>(
             ModAuto(), ModRelax(), ModAutopilot(), ModEasy(), ModNoFail(), ModHardRock(),
-            ModHidden(), ModFlashlight(), ModDoubleTime(), ModNightCore(), ModHalfTime(),
-            ModPrecise(), ModReallyEasy(), ModPerfect(), ModSuddenDeath(), ModScoreV2()
+            ModHidden(), ModTraceable(), ModFlashlight(), ModDoubleTime(), ModNightCore(),
+            ModHalfTime(), ModPrecise(), ModReallyEasy(), ModPerfect(), ModSuddenDeath(),
+            ModScoreV2()
         )
     }
 }
