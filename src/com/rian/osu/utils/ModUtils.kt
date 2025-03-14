@@ -53,7 +53,7 @@ object ModUtils {
         val playableMods = arrayOf<Mod>(
             ModAuto(), ModAutopilot(), ModDoubleTime(), ModEasy(), ModFlashlight(), ModHalfTime(),
             ModHardRock(), ModHidden(), ModNightCore(), ModNoFail(), ModPerfect(), ModPrecise(),
-            ModReallyEasy(), ModRelax(), ModScoreV2(), ModSuddenDeath()
+            ModReallyEasy(), ModRelax(), ModScoreV2(), ModSuddenDeath(), ModTraceable()
         )
 
         for (mod in playableMods) {
