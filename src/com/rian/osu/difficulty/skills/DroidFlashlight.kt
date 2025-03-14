@@ -3,7 +3,6 @@ package com.rian.osu.difficulty.skills
 import com.rian.osu.difficulty.DroidDifficultyHitObject
 import com.rian.osu.difficulty.evaluators.DroidFlashlightEvaluator
 import com.rian.osu.mods.Mod
-import com.rian.osu.mods.ModHidden
 import kotlin.math.pow
 
 /**
@@ -29,13 +28,12 @@ class DroidFlashlight(
     private var currentStrain = 0.0
     private val skillMultiplier = 0.02
     private val strainDecayBase = 0.15
-    private val isHidden = mods.any { it is ModHidden }
 
     override fun difficultyValue() = currentStrainPeaks.sum() * starsPerDouble
 
     override fun strainValueAt(current: DroidDifficultyHitObject): Double {
         currentStrain *= strainDecay(current.deltaTime)
-        currentStrain += DroidFlashlightEvaluator.evaluateDifficultyOf(current, isHidden, withSliders) * skillMultiplier
+        currentStrain += DroidFlashlightEvaluator.evaluateDifficultyOf(current, mods, withSliders) * skillMultiplier
 
         objectStrains.add(currentStrain)
         return currentStrain

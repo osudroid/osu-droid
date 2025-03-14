@@ -17,6 +17,7 @@ public class GameHelper {
     private static float healthDrain = 0;
     private static float speedMultiplier = 0;
     private static boolean hidden = false;
+    private static boolean traceable = false;
     private static boolean flashLight = false;
     private static boolean hardrock = false;
     private static boolean relaxMod = false;
@@ -167,6 +168,14 @@ public class GameHelper {
 
     public static void setHidden(final boolean hidden) {
         GameHelper.hidden = hidden;
+    }
+
+    public static boolean isTraceable() {
+        return traceable;
+    }
+
+    public static void setTraceable(boolean traceable) {
+        GameHelper.traceable = traceable;
     }
 
     public static boolean isFlashLight() {

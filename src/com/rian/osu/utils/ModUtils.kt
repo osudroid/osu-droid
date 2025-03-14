@@ -23,6 +23,7 @@ object ModUtils {
         it[GameMod.MOD_HALFTIME] = ModHalfTime::class
         it[GameMod.MOD_HARDROCK] = ModHardRock::class
         it[GameMod.MOD_HIDDEN] = ModHidden::class
+        it[GameMod.MOD_TRACEABLE] = ModTraceable::class
         it[GameMod.MOD_NIGHTCORE] = ModNightCore::class
         it[GameMod.MOD_NOFAIL] = ModNoFail::class
         it[GameMod.MOD_PERFECT] = ModPerfect::class
@@ -33,7 +34,7 @@ object ModUtils {
         it[GameMod.MOD_SMALLCIRCLE] = ModSmallCircle::class
         it[GameMod.MOD_SPEEDUP] = ModSpeedUp::class
         it[GameMod.MOD_SUDDENDEATH] = ModSuddenDeath::class
-    }.toMap()
+    }
 
     /**
      * All [Mod]s that are considered legacy.

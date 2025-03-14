@@ -15,6 +15,7 @@ import com.reco1l.osu.hud.GameplayHUD
 import com.reco1l.osu.hud.HUDElements
 import com.reco1l.osu.hud.IGameplayEvents
 import com.reco1l.toolkt.kotlin.fastForEach
+import com.rian.osu.beatmap.hitobject.HitObject
 import org.anddev.andengine.input.touch.TouchEvent
 import ru.nsu.ccfit.zuev.osu.ResourceManager
 import ru.nsu.ccfit.zuev.osu.game.GameScene
@@ -146,8 +147,16 @@ class HUDElementSelector(private val hud: GameplayHUD) : Container(), IGameplayE
         elements.fastForEach { it.onBreakStateChange(isBreak) }
     }
 
-    override fun onGameplayUpdate(gameScene: GameScene, statistics: StatisticV2, secondsElapsed: Float) {
-        elements.fastForEach { it.onGameplayUpdate(gameScene, statistics, secondsElapsed) }
+    override fun onGameplayUpdate(gameScene: GameScene, secondsElapsed: Float) {
+        elements.fastForEach { it.onGameplayUpdate(gameScene, secondsElapsed) }
+    }
+
+    override fun onGameplayTouchDown(time: Float) {
+        elements.fastForEach { it.onGameplayTouchDown(time) }
+    }
+
+    override fun onHitObjectLifetimeStart(obj: HitObject) {
+        elements.fastForEach { it.onHitObjectLifetimeStart(obj) }
     }
 
     override fun onAccuracyRegister(accuracy: Float) {

@@ -11,6 +11,7 @@ import kotlinx.coroutines.JobKt;
 import ru.nsu.ccfit.zuev.audio.serviceAudio.SongService;
 import ru.nsu.ccfit.zuev.osu.SecurityUtils;
 
+import com.acivev.VibratorManager;
 import com.edlplan.framework.easing.Easing;
 import com.edlplan.framework.math.FMath;
 import com.edlplan.framework.math.line.LinePath;
@@ -1084,6 +1085,7 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
                         cursors[i].mousePos.y = my;
 
                         replay.lastMoveIndex[i] = -1;
+                        hud.onGameplayTouchDown(movement.getTime() / 1000f);
                     } else if (movement.getTouchType() == TouchType.MOVE) {
                         cursors[i].mousePos.x = mx;
                         cursors[i].mousePos.y = my;
@@ -1330,6 +1332,8 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
                 Math.max(nextObj.startTime - obj.startTime, activeTimingPoint.msPerBeat / 2) / 1000 :
                 0;
 
+            hud.onHitObjectLifetimeStart(obj);
+
             final RGBColor comboColor = getComboColor(obj.getComboIndexWithOffsets());
 
             if (obj instanceof HitCircle parsedCircle) {
@@ -1565,7 +1569,7 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
 
     private void updatePassiveObjects(float deltaTime) {
 
-        hud.onGameplayUpdate(this, stat, deltaTime);
+        hud.onGameplayUpdate(this, deltaTime);
 
         breakAnimator.update(deltaTime);
 
@@ -1823,6 +1827,7 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
                             final boolean endCombo, byte forcedScore, RGBColor color) {
         if (GameHelper.isAuto()) {
             autoCursor.click();
+            hud.onGameplayTouchDown((float) parsedBeatmap.getHitObjects().objects.get(id).startTime / 1000);
         }
 
         float accuracy = Math.abs(acc);
@@ -1841,6 +1846,7 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
                );
             }
         }
+        VibratorManager.INSTANCE.circleVibration();
 
         if (accuracy > playableBeatmap.getHitWindow().getMehWindow() / 1000 || forcedScore == ResultType.MISS.getId()) {
             createHitEffect(pos, "hit0", color);
@@ -1881,6 +1887,8 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
                 );
             }
         }
+
+        VibratorManager.INSTANCE.sliderVibration();
 
         if (score == 0) {
             createHitEffect(judgementPos, "hit0", color);
@@ -1926,6 +1934,9 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
             switch (type) {
                 case GameObjectListener.SLIDER_START:
                     createBurstEffectSliderStart(judgementPos, color);
+                    if (GameHelper.isAuto()) {
+                        hud.onGameplayTouchDown((float) parsedBeatmap.getHitObjects().objects.get(id).startTime / 1000);
+                    }
                     break;
                 case GameObjectListener.SLIDER_END:
                     createBurstEffectSliderEnd(judgementPos, color);
@@ -1942,6 +1953,13 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
         hud.onNoteHit(stat);
     }
 
+    @Override
+    public void onSpinnerStart(int id) {
+        if (GameHelper.isAuto()) {
+            autoCursor.click();
+            hud.onGameplayTouchDown((float) parsedBeatmap.getHitObjects().objects.get(id).startTime / 1000);
+        }
+    }
 
     public void onSpinnerHit(int id, final int score, final boolean endCombo, int totalScore) {
         if (score == 1000) {
@@ -1967,6 +1985,8 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
 
         final PointF pos = new PointF((float) Config.getRES_WIDTH() / 2,
                 (float) Config.getRES_HEIGHT() / 2);
+
+        VibratorManager.INSTANCE.spinnerVibration();
 
         if (score == 0) {
             final GameEffect effect = GameObjectPool.getInstance().getEffect(
@@ -2105,6 +2125,10 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
 
             if (sprite != null) {
                 sprite.setShowing(true);
+            }
+
+            if (!GameHelper.isAuto() && !GameHelper.isAutopilotMod()) {
+                hud.onGameplayTouchDown(eventTime / 1000f);
             }
 
             cursor.mouseDown = true;
@@ -2511,7 +2535,7 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
     }
 
     private void createBurstEffect(final PointF pos, final RGBColor color) {
-        if (!Config.isBurstEffects() || GameHelper.isHidden())
+        if (!Config.isBurstEffects() || GameHelper.isHidden() || GameHelper.isTraceable())
             return;
 
         final GameEffect burst1 = GameObjectPool.getInstance().getEffect("hitcircle");
@@ -2523,7 +2547,7 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
     }
 
     private void createBurstEffectSliderStart(final PointF pos, final RGBColor color) {
-        if (!Config.isBurstEffects() || GameHelper.isHidden())
+        if (!Config.isBurstEffects() || GameHelper.isHidden() || GameHelper.isTraceable())
             return;
 
         final GameEffect burst1 = GameObjectPool.getInstance().getEffect("sliderstartcircle");
@@ -2535,7 +2559,7 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
     }
 
     private void createBurstEffectSliderEnd(final PointF pos, final RGBColor color) {
-        if (!Config.isBurstEffects() || GameHelper.isHidden())
+        if (!Config.isBurstEffects() || GameHelper.isHidden() || GameHelper.isTraceable())
             return;
 
         final GameEffect burst1 = GameObjectPool.getInstance().getEffect("sliderendcircle");
@@ -2547,7 +2571,7 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
     }
 
     private void createBurstEffectSliderReverse(final PointF pos, float ang, final RGBColor color) {
-        if (!Config.isBurstEffects() || GameHelper.isHidden())
+        if (!Config.isBurstEffects() || GameHelper.isHidden() || GameHelper.isTraceable())
             return;
 
         final GameEffect burst1 = GameObjectPool.getInstance().getEffect("reversearrow");

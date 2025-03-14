@@ -222,6 +222,7 @@ public class ModMenu implements IModSwitcher {
             addButton(offset + offsetGrowth * factor++, Config.getRES_HEIGHT() / 2 - button.getHeight() / 2, new ModNightCore());
 
         addButton(offset + offsetGrowth * factor++, Config.getRES_HEIGHT() / 2 - button.getHeight() / 2, new ModHidden());
+        addButton(offset + offsetGrowth * factor++, Config.getRES_HEIGHT() / 2 - button.getHeight() / 2, new ModTraceable());
         addButton(offset + offsetGrowth * factor++, Config.getRES_HEIGHT() / 2 - button.getHeight() / 2, flashlight);
         addButton(offset + offsetGrowth * factor++, Config.getRES_HEIGHT() / 2 - button.getHeight() / 2, new ModSuddenDeath());
         addButton(offset + offsetGrowth * factor, Config.getRES_HEIGHT() / 2 - button.getHeight() / 2, new ModPerfect());
@@ -339,7 +340,7 @@ public class ModMenu implements IModSwitcher {
 
                                 case standard -> {
                                     var attributes = BeatmapDifficultyCalculator.calculateStandardDifficulty(
-                                        beatmap, mods, scope
+                                        beatmap, parameters, scope
                                     );
 
                                     GlobalManager.getInstance().getSongMenu().setStarsDisplay(

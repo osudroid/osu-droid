@@ -22,9 +22,10 @@ import androidx.core.view.get
 import androidx.preference.CheckBoxPreference
 import androidx.preference.Preference
 import androidx.preference.SeekBarPreference
-import com.osudroid.resources.R.*
+import com.acivev.VibratorManager
 import com.edlplan.ui.fragment.LoadingFragment
 import com.google.android.material.snackbar.Snackbar
+import com.osudroid.resources.R.string
 import com.reco1l.ibancho.LobbyAPI
 import com.reco1l.ibancho.RoomAPI
 import com.reco1l.ibancho.data.RoomTeam
@@ -393,6 +394,37 @@ class SettingsFragment : com.edlplan.ui.fragment.SettingsFragment() {
         findPreference<Preference>("block_areas")!!.setOnPreferenceClickListener {
             BlockAreaFragment().show(true)
             true
+        }
+
+        findPreference<SeekBarPreference>("seekBarVibrateIntensity")!!.apply {
+            min = 1
+            max = 255
+            value = Config.getInt("seekBarVibrateIntensity", 127)
+            setOnPreferenceChangeListener { _, newValue ->
+                VibratorManager.intensity = newValue as Int
+                true
+            }
+        }
+
+        findPreference<CheckBoxPreference>("vibrationCircle")!!.apply {
+            setOnPreferenceChangeListener { _, newValue ->
+                VibratorManager.isCircleVibrationEnabled = newValue as Boolean
+                true
+            }
+        }
+
+        findPreference<CheckBoxPreference>("vibrationSlider")!!.apply {
+            setOnPreferenceChangeListener { _, newValue ->
+                VibratorManager.isSliderVibrationEnabled = newValue as Boolean
+                true
+            }
+        }
+
+        findPreference<CheckBoxPreference>("vibrationSpinner")!!.apply {
+            setOnPreferenceChangeListener { _, newValue ->
+                VibratorManager.isSpinnerVibrationEnabled = newValue as Boolean
+                true
+            }
         }
     }
 

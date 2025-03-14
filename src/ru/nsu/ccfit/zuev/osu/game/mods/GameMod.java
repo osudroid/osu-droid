@@ -6,6 +6,7 @@ public enum GameMod {
     MOD_EASY("es"),
     MOD_HARDROCK("hr"),
     MOD_HIDDEN("hd"),
+    MOD_TRACEABLE("tc"),
     MOD_RELAX("relax"),
     MOD_AUTOPILOT("ap"),
     MOD_DOUBLETIME("dt"),

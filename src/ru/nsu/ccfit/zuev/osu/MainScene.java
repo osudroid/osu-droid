@@ -7,6 +7,7 @@ import android.graphics.PointF;
 import android.os.PowerManager;
 import android.util.Log;
 
+import com.acivev.VibratorManager;
 import com.reco1l.andengine.Anchor;
 import com.reco1l.andengine.shape.RoundedBox;
 import com.reco1l.andengine.sprite.ExtendedSprite;
@@ -121,6 +122,7 @@ public class MainScene implements IUpdateHandler {
     public void load(Context context) {
         this.context = context;
         Debug.i("Load: mainMenuLoaded()");
+        VibratorManager.INSTANCE.init(context);
         scene = new Scene();
 
         final TextureRegion tex = ResourceManager.getInstance().getTexture("menu-background");

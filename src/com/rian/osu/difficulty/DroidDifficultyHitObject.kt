@@ -2,6 +2,8 @@ package com.rian.osu.difficulty
 
 import com.rian.osu.GameMode
 import com.rian.osu.beatmap.hitobject.*
+import com.rian.osu.mods.Mod
+import com.rian.osu.mods.ModTraceable
 import kotlin.math.exp
 import kotlin.math.max
 import kotlin.math.min
@@ -97,6 +99,15 @@ class DroidDifficultyHitObject(
     override fun previous(backwardsIndex: Int) = if (index - backwardsIndex >= 0) difficultyHitObjects[index - backwardsIndex] else null
 
     override fun next(forwardsIndex: Int) = if (index + forwardsIndex + 2 < difficultyHitObjects.size) difficultyHitObjects[index + forwardsIndex + 2] else null
+
+    override fun opacityAt(time: Double, mods: List<Mod>): Double {
+        // Traceable hides the primary piece of a hit circle (that is, its body), so consider it as fully invisible.
+        if (obj is HitCircle && mods.any { it is ModTraceable }) {
+            return 0.0
+        }
+
+        return super.opacityAt(time, mods)
+    }
 
     /**
      * Determines whether this [DroidDifficultyHitObject] is considered overlapping with the [DroidDifficultyHitObject]
