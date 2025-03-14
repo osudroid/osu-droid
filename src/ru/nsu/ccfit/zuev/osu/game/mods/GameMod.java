@@ -1,28 +1,22 @@
 package ru.nsu.ccfit.zuev.osu.game.mods;
 
 public enum GameMod {
-    MOD_NOFAIL("nf"),
-    MOD_AUTO("auto"),
-    MOD_EASY("es"),
-    MOD_HARDROCK("hr"),
-    MOD_HIDDEN("hd"),
-    MOD_TRACEABLE("tc"),
-    MOD_RELAX("relax"),
-    MOD_AUTOPILOT("ap"),
-    MOD_DOUBLETIME("dt"),
-    MOD_NIGHTCORE("nc"),
-    MOD_HALFTIME("ht"),
-    MOD_SUDDENDEATH("sd"),
-    MOD_PERFECT("pf"),
-    MOD_FLASHLIGHT("fl"),
-    MOD_PRECISE("pr"),
-    MOD_SMALLCIRCLE("sc"),
-    MOD_REALLYEASY("re"),
-    MOD_SCOREV2("v2");
-
-    public final String shortName;
-
-    GameMod(String shortName) {
-        this.shortName = shortName;
-    }
+    MOD_NOFAIL,
+    MOD_AUTO,
+    MOD_EASY,
+    MOD_HARDROCK,
+    MOD_HIDDEN,
+    MOD_TRACEABLE,
+    MOD_RELAX,
+    MOD_AUTOPILOT,
+    MOD_DOUBLETIME,
+    MOD_NIGHTCORE,
+    MOD_HALFTIME,
+    MOD_SUDDENDEATH,
+    MOD_PERFECT,
+    MOD_FLASHLIGHT,
+    MOD_PRECISE,
+    MOD_SMALLCIRCLE,
+    MOD_REALLYEASY,
+    MOD_SCOREV2
 }
