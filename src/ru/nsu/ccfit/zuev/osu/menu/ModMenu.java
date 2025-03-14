@@ -445,7 +445,7 @@ public class ModMenu implements IModSwitcher {
             }
         }
 
-        if (mod instanceof ModClockRateAdjust) {
+        if (mod instanceof ModRateAdjust) {
             reloadMusicEffects();
         }
 

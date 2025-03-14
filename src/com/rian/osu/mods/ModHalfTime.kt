@@ -5,7 +5,7 @@ import ru.nsu.ccfit.zuev.osu.game.mods.GameMod
 /**
  * Represents the Half Time mod.
  */
-class ModHalfTime : ModClockRateAdjust(0.75f), IModUserSelectable {
+class ModHalfTime : ModRateAdjust(0.75f), IModUserSelectable {
     override val droidChar = 't'
     override val acronym = "HT"
     override val textureNameSuffix = "halftime"

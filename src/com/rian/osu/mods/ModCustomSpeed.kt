@@ -5,7 +5,7 @@ package com.rian.osu.mods
  *
  * @param trackRateMultiplier The multiplier to apply to the track's playback rate.
  */
-class ModCustomSpeed(trackRateMultiplier: Float) : ModClockRateAdjust(trackRateMultiplier) {
+class ModCustomSpeed(trackRateMultiplier: Float) : ModRateAdjust(trackRateMultiplier) {
     override val isRanked = true
 
     override fun equals(other: Any?): Boolean {

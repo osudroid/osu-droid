@@ -27,7 +27,7 @@ abstract class DifficultyCalculator<TBeatmap : PlayableBeatmap, TObject : Diffic
     protected open val difficultyAdjustmentMods = setOf(
         ModRelax::class, ModAutopilot::class, ModEasy::class, ModReallyEasy::class,
         ModHardRock::class, ModHidden::class, ModFlashlight::class,
-        ModDifficultyAdjust::class, ModClockRateAdjust::class
+        ModDifficultyAdjust::class, ModRateAdjust::class
     )
 
     /**
