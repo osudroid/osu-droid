@@ -15,6 +15,7 @@ class ModHidden : Mod(), IModUserSelectable, IModApplicableToBeatmap {
     override val enum = GameMod.MOD_HIDDEN
     override val textureNameSuffix = "hidden"
     override val isRanked = true
+    override val incompatibleMods = super.incompatibleMods + ModTraceable::class
 
     override fun calculateScoreMultiplier(difficulty: BeatmapDifficulty) = 1.06f
 
