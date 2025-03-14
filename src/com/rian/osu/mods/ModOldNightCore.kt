@@ -12,7 +12,7 @@ import com.rian.osu.beatmap.sections.BeatmapDifficulty
  * represented by this mod.
  */
 class ModOldNightCore : ModNightCore() {
-    override val trackRateMultiplier = 1.39f
+    init { trackRateMultiplier = 1.39f }
 
     // Force the score multiplier to be 1.12x, as it was the value used in the old versions (due to 1.5x rate).
     override fun calculateScoreMultiplier(difficulty: BeatmapDifficulty) = 1.12f

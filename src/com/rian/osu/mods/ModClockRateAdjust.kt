@@ -4,9 +4,14 @@ import com.rian.osu.beatmap.sections.BeatmapDifficulty
 import kotlin.math.pow
 
 /**
- * Represents a [Mod] that adjusts the track's rate.
+ * Represents a [Mod] that adjusts the track's playback rate.
  */
-abstract class ModClockRateAdjust : Mod(), IModApplicableToTrackRate {
+abstract class ModClockRateAdjust(
+    /**
+     * The multiplier for the track's playback rate.
+     */
+    var trackRateMultiplier: Float
+) : Mod(), IModApplicableToTrackRate {
     override val isRelevant
         get() = trackRateMultiplier != 1f
 
@@ -15,6 +20,8 @@ abstract class ModClockRateAdjust : Mod(), IModApplicableToTrackRate {
     override fun calculateScoreMultiplier(difficulty: BeatmapDifficulty) =
         if (trackRateMultiplier > 1) 1 + (trackRateMultiplier - 1) * 0.24f
         else 0.3f.pow((1 - trackRateMultiplier) * 4)
+
+    override fun applyToRate(time: Double, rate: Float) = rate * trackRateMultiplier
 
     override fun equals(other: Any?): Boolean {
         if (other === this) {

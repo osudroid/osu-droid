@@ -5,17 +5,13 @@ import ru.nsu.ccfit.zuev.osu.game.mods.GameMod
 /**
  * Represents the Night Core mod.
  */
-open class ModNightCore : ModClockRateAdjust(), IModUserSelectable {
+open class ModNightCore : ModClockRateAdjust(1.5f), IModUserSelectable {
     override val droidChar = 'c'
     override val acronym = "NC"
     override val textureNameSuffix = "nightcore"
     override val enum = GameMod.MOD_NIGHTCORE
     override val isRanked = true
-    override val incompatibleMods = super.incompatibleMods + arrayOf(
-        ModDoubleTime::class, ModHalfTime::class
-    )
-
-    override val trackRateMultiplier = 1.5f
+    override val incompatibleMods = super.incompatibleMods + arrayOf(ModDoubleTime::class, ModHalfTime::class)
 
     override fun equals(other: Any?) = other === this || other is ModNightCore
     override fun hashCode() = super.hashCode()
