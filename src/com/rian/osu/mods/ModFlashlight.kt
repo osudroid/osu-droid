@@ -20,6 +20,7 @@ class ModFlashlight : Mod(), IModUserSelectable {
     var followDelay = DEFAULT_FOLLOW_DELAY
 
     override fun calculateScoreMultiplier(difficulty: BeatmapDifficulty) = 1.12f
+
     override fun equals(other: Any?): Boolean {
         if (other === this) {
             return true
