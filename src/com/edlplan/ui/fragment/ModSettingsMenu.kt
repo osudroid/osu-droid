@@ -249,7 +249,7 @@ class ModSettingsMenu : BaseFragment() {
                 }
 
                 override fun onStartTrackingTouch(seekBar: SeekBar?) {
-                    containsFlashlight = ModMenu.getInstance().enabledMods.contains(ModFlashlight::class)
+                    containsFlashlight = ModFlashlight::class in ModMenu.getInstance().enabledMods
                 }
 
                 override fun onStopTrackingTouch(seekBar: SeekBar?) {
@@ -440,7 +440,7 @@ class ModSettingsMenu : BaseFragment() {
         val flFollowDelay = ModMenu.getInstance().flFollowDelay
 
         followDelayRow.visibility =
-            if (ModMenu.getInstance().enabledMods.contains(ModFlashlight::class)) View.VISIBLE else View.GONE
+            if (ModFlashlight::class in ModMenu.getInstance().enabledMods) View.VISIBLE else View.GONE
         followDelayBar.progress = (flFollowDelay  / ModFlashlight.DEFAULT_FOLLOW_DELAY).toInt()
         followDelayText.text = "${(flFollowDelay * 1000f).toInt()}ms"
 
