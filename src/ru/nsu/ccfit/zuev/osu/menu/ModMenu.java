@@ -340,7 +340,7 @@ public class ModMenu implements IModSwitcher {
 
                                 case standard -> {
                                     var attributes = BeatmapDifficultyCalculator.calculateStandardDifficulty(
-                                        beatmap, parameters, scope
+                                        beatmap, mods, scope
                                     );
 
                                     GlobalManager.getInstance().getSongMenu().setStarsDisplay(
