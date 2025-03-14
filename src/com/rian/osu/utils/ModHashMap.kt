@@ -72,8 +72,10 @@ class ModHashMap : HashMap<Class<out Mod>, Mod> {
 
         // Check if there are any mods that are incompatible with the new mod.
         value.incompatibleMods.fastForEach {
-            if (it in this) {
-                remove(it)
+            for (mod in this) {
+                if (it.isInstance(mod.value)) {
+                    remove(mod.key)
+                }
             }
         }
 
