@@ -119,7 +119,7 @@ object ModUtils {
      */
     @JvmStatic
     fun calculateRateWithMods(mods: Iterable<Mod>) = mods.fold(1f) {
-        rate, mod -> rate * ((mod as? IModApplicableToTrackRate)?.trackRateMultiplier ?: 1f)
+        rate, mod -> rate * ((mod as? IModApplicableToTrackRate)?.applyToRate(0.0, rate) ?: 1f)
     }
 
     /**
