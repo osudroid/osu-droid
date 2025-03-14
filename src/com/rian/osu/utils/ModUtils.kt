@@ -32,7 +32,6 @@ object ModUtils {
         it[GameMod.MOD_RELAX] = ModRelax::class
         it[GameMod.MOD_SCOREV2] = ModScoreV2::class
         it[GameMod.MOD_SMALLCIRCLE] = ModSmallCircle::class
-        it[GameMod.MOD_SPEEDUP] = ModSpeedUp::class
         it[GameMod.MOD_SUDDENDEATH] = ModSuddenDeath::class
     }
 
@@ -40,12 +39,12 @@ object ModUtils {
      * All [Mod]s that are considered legacy.
      */
     private val legacyMods = mutableMapOf<Char, ILegacyMod>().also {
-        val legacyMods = arrayOf<ILegacyMod>(ModSmallCircle(), ModSpeedUp())
+        val legacyMods = arrayOf<ILegacyMod>(ModSmallCircle())
 
         for (mod in legacyMods) {
             it[mod.droidChar] = mod
         }
-    }.toMap()
+    }
 
     /**
      * All [Mod]s that can be selected by the user.
@@ -60,7 +59,7 @@ object ModUtils {
         for (mod in playableMods) {
             it[(mod as IModUserSelectable).droidChar] = mod::class
         }
-    }.toMap()
+    }
 
     /**
      * Converts "legacy" [GameMod]s to new [Mod]s.
