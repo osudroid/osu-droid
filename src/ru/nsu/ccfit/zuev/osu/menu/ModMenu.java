@@ -49,7 +49,6 @@ public class ModMenu implements IModSwitcher {
 
     private final ModCustomSpeed customSpeed = new ModCustomSpeed(1);
     private final ModDifficultyAdjust difficultyAdjust = new ModDifficultyAdjust();
-    private final ModFlashlight flashlight = new ModFlashlight();
 
     private ModMenu() {}
     
@@ -223,7 +222,7 @@ public class ModMenu implements IModSwitcher {
 
         addButton(offset + offsetGrowth * factor++, Config.getRES_HEIGHT() / 2 - button.getHeight() / 2, new ModHidden());
         addButton(offset + offsetGrowth * factor++, Config.getRES_HEIGHT() / 2 - button.getHeight() / 2, new ModTraceable());
-        addButton(offset + offsetGrowth * factor++, Config.getRES_HEIGHT() / 2 - button.getHeight() / 2, flashlight);
+        addButton(offset + offsetGrowth * factor++, Config.getRES_HEIGHT() / 2 - button.getHeight() / 2, new ModFlashlight());
         addButton(offset + offsetGrowth * factor++, Config.getRES_HEIGHT() / 2 - button.getHeight() / 2, new ModSuddenDeath());
         addButton(offset + offsetGrowth * factor, Config.getRES_HEIGHT() / 2 - button.getHeight() / 2, new ModPerfect());
 
@@ -480,15 +479,25 @@ public class ModMenu implements IModSwitcher {
     }
 
     public float getFLFollowDelay() {
-        return flashlight.getFollowDelay();
+        var flashlight = enabledMods.ofType(ModFlashlight.class);
+
+        return flashlight != null ? flashlight.getFollowDelay() : ModFlashlight.DEFAULT_FOLLOW_DELAY;
     }
 
     public void setFLFollowDelay(float FLFollowDelay) {
-        flashlight.setFollowDelay(FLFollowDelay);
+        var flashlight = enabledMods.ofType(ModFlashlight.class);
+
+        if (flashlight != null) {
+            flashlight.setFollowDelay(FLFollowDelay);
+        }
     }
 
     public void resetFLFollowDelay() {
-        flashlight.setFollowDelay(ModFlashlight.DEFAULT_FOLLOW_DELAY);
+        var flashlight = enabledMods.ofType(ModFlashlight.class);
+
+        if (flashlight != null) {
+            flashlight.setFollowDelay(ModFlashlight.DEFAULT_FOLLOW_DELAY);
+        }
     }
 
     public boolean isEnableNCWhenSpeedChange(){
