@@ -889,7 +889,7 @@ object RoomScene : Scene(), IRoomEventListener, IPlayerEventListener {
             val roomMods = room!!.mods.map.apply {
 
                 if (winCondition == ScoreV2)
-                    put(ModScoreV2())
+                    put(ModScoreV2::class)
                 else
                     remove(ModScoreV2::class)
             }
