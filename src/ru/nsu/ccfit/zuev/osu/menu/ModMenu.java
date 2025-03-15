@@ -38,7 +38,7 @@ import ru.nsu.ccfit.zuev.osu.helper.TextButton;
 public class ModMenu implements IModSwitcher {
     private static final ModMenu instance = new ModMenu();
     private Scene scene = null, parent;
-    private ModHashMap enabledMods;
+    private ModHashMap enabledMods = new ModHashMap();
     private ChangeableText multiplierText;
     private BeatmapInfo selectedBeatmap;
     private final Map<Mod, ModButton> modButtons = new HashMap<>();
