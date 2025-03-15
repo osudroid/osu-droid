@@ -12,7 +12,7 @@ class StandardFlashlight(
     /**
      * The [Mod]s that this skill processes.
      */
-    mods: List<Mod>
+    mods: Iterable<Mod>
 ) : StandardStrainSkill(mods) {
     override val reducedSectionCount = 0
     override val reducedSectionBaseline = 1.0

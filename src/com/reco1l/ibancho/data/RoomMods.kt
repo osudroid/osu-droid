@@ -1,58 +1,23 @@
 package com.reco1l.ibancho.data
 
 import com.reco1l.osu.multiplayer.Multiplayer
-import com.reco1l.osu.multiplayer.modsToReadable
-import ru.nsu.ccfit.zuev.osu.game.mods.GameMod
-import ru.nsu.ccfit.zuev.osu.game.mods.GameMod.*
-import java.util.*
+import com.rian.osu.mods.ModCustomSpeed
+import com.rian.osu.mods.ModDifficultyAdjust
+import com.rian.osu.mods.ModDoubleTime
+import com.rian.osu.mods.ModHalfTime
+import com.rian.osu.mods.ModNightCore
+import com.rian.osu.utils.ModHashMap
+import com.rian.osu.utils.ModUtils
 
-data class RoomMods(
+data class RoomMods(@JvmField val map: ModHashMap)
+{
+    @JvmOverloads
+    constructor(modString: String? = null) : this(ModUtils.convertModString(modString))
 
-    /**
-     * The mods set.
-     */
-    var set: EnumSet<GameMod>,
-
-    /**
-     * The speed multiplier.
-     */
-    var speedMultiplier: Float,
-
-    /**
-     * The flashlight follow delay time in seconds.
-     */
-    var flFollowDelay: Float,
-
-    /**
-     * The custom approach rate.
-     */
-    var customAR: Float?,
-
-    /**
-     * The custom overall difficulty.
-     */
-    var customOD: Float?,
-
-    /**
-     * The custom circle size.
-     */
-    var customCS: Float?,
-
-    /**
-     * The custom health points.
-     */
-    var customHP: Float?
-
-) {
-
-
-    override fun toString(): String {
-        return modsToReadable(set, speedMultiplier, flFollowDelay, customAR, customOD, customCS, customHP)
-    }
+    override fun toString() = map.toReadable()
 
     fun toString(room: Room): String {
-
-        if (set.isEmpty()) {
+        if (map.isEmpty()) {
             return buildString {
 
                 if (room.gameplaySettings.isFreeMod) {
@@ -70,16 +35,25 @@ data class RoomMods(
 
             append("Free mods, ")
 
-            if (MOD_DOUBLETIME in set || MOD_NIGHTCORE in set) {
-                append("DT, ")
+            val doubleTime = map.ofType<ModDoubleTime>()
+            val nightCore = map.ofType<ModNightCore>()
+            val halfTime = map.ofType<ModHalfTime>()
+            val customSpeed = map.ofType<ModCustomSpeed>()
+
+            if (doubleTime != null) {
+                append("${doubleTime.acronym}, ")
             }
 
-            if (MOD_HALFTIME in set) {
-                append("HT, ")
+            if (nightCore != null) {
+                append("${nightCore.acronym}, ")
             }
 
-            if (speedMultiplier != 1f) {
-                append("%.2fx, ".format(speedMultiplier))
+            if (halfTime != null) {
+                append("${halfTime.acronym}, ")
+            }
+
+            if (customSpeed != null) {
+                append("%.2fx, ".format(customSpeed.trackRateMultiplier))
             }
 
             if (room.gameplaySettings.allowForceDifficultyStatistics) {
@@ -100,35 +74,24 @@ data class RoomMods(
             return false
         }
 
-        val sameMods = Multiplayer.room?.gameplaySettings?.isFreeMod == true
+        val gameplaySettings = Multiplayer.room?.gameplaySettings
 
-            // DoubleTime and NightCore, comparing them as one.
-            && (MOD_DOUBLETIME in set || MOD_NIGHTCORE in set) == (MOD_DOUBLETIME in other.set || MOD_NIGHTCORE in other.set)
-            // HalfTime
-            && MOD_HALFTIME in set == MOD_HALFTIME in other.set
-            // ScoreV2
-            && MOD_SCOREV2 in set == MOD_SCOREV2 in other.set
+        if (gameplaySettings?.isFreeMod == true) {
+            // Under free mods, force difficulty statistics is still not allowed unless the setting is explicitly set.
+            if (!gameplaySettings.allowForceDifficultyStatistics &&
+                map.ofType<ModDifficultyAdjust>() != other.map.ofType<ModDifficultyAdjust>()) {
+                return false
+            }
 
-            || set == other.set
+            val requiredMods = map.filter { !it.value.isValidForMultiplayerAsFreeMod }
+            val otherRequiredMods = other.map.filter { !it.value.isValidForMultiplayerAsFreeMod }
 
-        return sameMods
-            && speedMultiplier == other.speedMultiplier
-            && flFollowDelay == other.flFollowDelay
-            && customAR == other.customAR
-            && customOD == other.customOD
-            && customCS == other.customCS
-            && customHP == other.customHP
+            return requiredMods.size == otherRequiredMods.size && requiredMods.values.containsAll(otherRequiredMods.values)
+        }
+
+        return map == other.map
     }
 
-    override fun hashCode(): Int {
-        var result = set.hashCode()
-        result = 31 * result + speedMultiplier.hashCode()
-        result = 31 * result + flFollowDelay.hashCode()
-        result = 31 * result + (customAR?.hashCode() ?: 0)
-        result = 31 * result + (customOD?.hashCode() ?: 0)
-        result = 31 * result + (customCS?.hashCode() ?: 0)
-        result = 31 * result + (customHP?.hashCode() ?: 0)
-        return result
-    }
-
+    // Auto-generated this will help to check instance equality aka ===
+    override fun hashCode() = map.hashCode()
 }

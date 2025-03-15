@@ -4,6 +4,10 @@ import android.graphics.PointF;
 
 import androidx.annotation.NonNull;
 
+import com.rian.osu.mods.ModHardRock;
+import com.rian.osu.utils.ModHashMap;
+import com.rian.osu.utils.ModUtils;
+
 import org.anddev.andengine.util.Debug;
 
 import java.io.EOFException;
@@ -27,13 +31,9 @@ import ru.nsu.ccfit.zuev.osu.Config;
 import ru.nsu.ccfit.zuev.osu.ToastLogger;
 import ru.nsu.ccfit.zuev.osu.Utils;
 import ru.nsu.ccfit.zuev.osu.game.GameScene;
-import ru.nsu.ccfit.zuev.osu.game.cursor.flashlight.FlashLightEntity;
 import ru.nsu.ccfit.zuev.osu.game.mods.GameMod;
-import ru.nsu.ccfit.zuev.osu.menu.ModMenu;
 
 public class Replay {
-    public static EnumSet<GameMod> mod = EnumSet.noneOf(GameMod.class);
-    public static EnumSet<GameMod> oldMod = EnumSet.noneOf(GameMod.class);
     protected int pointsSkipped = 0;
     public ArrayList<MoveArray> cursorMoves = new ArrayList<>();
     public int[] cursorIndex;
@@ -45,13 +45,6 @@ public class Replay {
     private String beatmapName = "";
     private String beatmapsetName = "";
     private boolean isSaving;
-    public static float oldChangeSpeed = 1.0f;
-    public static float oldFLFollowDelay = FlashLightEntity.defaultMoveDelayS;
-
-    public static Float oldCustomAR;
-    public static Float oldCustomOD;
-    public static Float oldCustomCS;
-    public static Float oldCustomHP;
 
     public Replay() {
         this(false);
@@ -149,9 +142,9 @@ public class Replay {
                     os.writeInt(stat.getTotalScoreWithMultiplier());
                     os.writeInt(stat.getScoreMaxCombo());
                     os.writeObject(stat.getPlayerName());
-                    os.writeObject(stat.getMod());
+                    os.writeObject(stat.getMod().toGameModSet());
                     //Add in replay version 4
-                    os.writeObject(stat.getExtraModString());
+                    os.writeObject(stat.getMod().getContainerModString());
                 }
 
                 os.writeInt(cursorMoves.size());
@@ -220,6 +213,9 @@ public class Replay {
                 beatmapName = mBeatmapName;
                 md5 = mMD5;
 
+                EnumSet<GameMod> mod = EnumSet.noneOf(GameMod.class);
+                String extraModString = "";
+
                 if (version >= 3) {
                     stat = new StatisticV2();
                     stat.setReplayFilename(replayFilename);
@@ -243,17 +239,19 @@ public class Replay {
                     }
 
                     stat.setPlayerName((String) os.readObject());
-                    stat.setMod((EnumSet<GameMod>) os.readObject());
+                    mod = (EnumSet<GameMod>) os.readObject();
                 }
 
                 if (version >= 4) {
-                    stat.setExtraModFromString((String) os.readObject());
+                    extraModString = (String) os.readObject();
                 }
+
+                stat.setMod(ModUtils.convertLegacyMods(mod, extraModString));
 
                 if (withGameplayData) {
                     int msize = os.readInt();
                     for (int i = 0; i < msize; i++) {
-                        cursorMoves.add(MoveArray.readFrom(os, this));
+                        cursorMoves.add(MoveArray.readFrom(os, this, stat.getMod()));
                     }
 
                     os.readInt();
@@ -374,8 +372,8 @@ public class Replay {
         }
 
         @NonNull
-        public static MoveArray readFrom(@NonNull ObjectInputStream is, Replay replay) throws IOException {
-            boolean isHardRock = ModMenu.getInstance().getMod().contains(GameMod.MOD_HARDROCK);
+        public static MoveArray readFrom(@NonNull ObjectInputStream is, Replay replay, ModHashMap mods) throws IOException {
+            boolean isHardRock = mods.contains(ModHardRock.class);
             int size = is.readInt();
             MoveArray array = new MoveArray(size);
             array.size = size;

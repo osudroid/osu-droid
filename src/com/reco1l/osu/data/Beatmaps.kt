@@ -11,6 +11,7 @@ import ru.nsu.ccfit.zuev.osu.game.GameHelper
 import kotlin.math.max
 import kotlin.math.min
 import com.rian.osu.beatmap.Beatmap
+import com.rian.osu.beatmap.sections.BeatmapDifficulty
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.ensureActive
@@ -288,6 +289,11 @@ data class BeatmapInfo(
             append(']')
         }
 
+
+    /**
+     * Returns a [BeatmapDifficulty] based on the beatmap's difficulty properties.
+     */
+    fun getBeatmapDifficulty() = BeatmapDifficulty(circleSize, approachRate, overallDifficulty, hpDrainRate)
 
     /**
      * Returns the star rating based on the current algorithm configuration, whether droid or standard.

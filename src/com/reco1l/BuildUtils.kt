@@ -10,9 +10,6 @@ import io.socket.client.Socket
 import io.socket.emitter.Emitter
 import org.json.JSONArray
 import org.json.JSONObject
-import ru.nsu.ccfit.zuev.osu.game.mods.*
-import ru.nsu.ccfit.zuev.osu.menu.*
-import java.util.*
 
 /**
  * Whether to use textures or not.
@@ -39,15 +36,7 @@ fun generateFakeRoom() = Room(
     name = "Test Room",
     isLocked = false,
     maxPlayers = 8,
-    mods = RoomMods(
-        set = EnumSet.noneOf(GameMod::class.java),
-        speedMultiplier = 1f,
-        flFollowDelay = ModMenu.DEFAULT_FL_FOLLOW_DELAY,
-        customAR = null,
-        customOD = null,
-        customCS = null,
-        customHP = null
-    ),
+    mods = RoomMods(),
     gameplaySettings = RoomGameplaySettings(
         isFreeMod = true,
         isRemoveSliderLock = false,
@@ -132,15 +121,7 @@ class FakeSocket(private val uid: Long, private val username: String) : Socket(n
                 put("uid", uid)
             }
 
-            putObject("mods") {
-                put("mods", "")
-                put("speedMultiplier", 1f)
-                put("flFollowDelay", ModMenu.DEFAULT_FL_FOLLOW_DELAY)
-                put("customAR", null)
-                put("customOD", null)
-                put("customCS", null)
-                put("customHP", null)
-            }
+            put("mods", "")
 
             putObject("gameplaySettings") {
                 put("isFreeMod", true)
@@ -155,15 +136,7 @@ class FakeSocket(private val uid: Long, private val username: String) : Socket(n
                     put("username", username)
                     put("status", PlayerStatus.NotReady.ordinal)
                     put("team", null)
-                    put("mods", JSONObject().apply {
-                        put("mods", "")
-                        put("speedMultiplier", 1f)
-                        put("flFollowDelay", ModMenu.DEFAULT_FL_FOLLOW_DELAY)
-                        put("customAR", null)
-                        put("customOD", null)
-                        put("customCS", null)
-                        put("customHP", null)
-                    })
+                    put("mods", "")
                 }
 
             }

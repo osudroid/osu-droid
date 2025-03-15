@@ -138,7 +138,8 @@ abstract class DifficultyHitObject(
     /**
      * Computes the properties of this [DifficultyHitObject].
      *
-     * @param clockRate The clock rate to compute,
+     * @param clockRate The clock rate to compute the properties with.
+     * @param objects The list of all [HitObject]s in the beatmap.
      */
     open fun computeProperties(clockRate: Double, objects: List<HitObject>) = setDistances(clockRate)
 
@@ -173,7 +174,7 @@ abstract class DifficultyHitObject(
      * @param mods The mods used.
      * @return The opacity of the hit object at the given time.
      */
-    open fun opacityAt(time: Double, mods: List<Mod>): Double {
+    open fun opacityAt(time: Double, mods: Iterable<Mod>): Double {
         if (time > obj.startTime) {
             // Consider a hit object as being invisible when its start time is passed.
             // In reality the hit object will be visible beyond its start time up until its hittable window has passed,
