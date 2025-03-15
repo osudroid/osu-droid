@@ -75,7 +75,7 @@ object ModUtils {
         ModHashMap().apply {
             mods.forEach {
                 val convertedMod = gameModMap[it] ?:
-                throw IllegalArgumentException("Cannot find the conversion of mod with short name \"${it.shortName}\"")
+                throw IllegalArgumentException("Cannot find respective mod class for $it.")
 
                 val mod = convertedMod.createInstance()
 
