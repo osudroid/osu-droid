@@ -568,12 +568,10 @@ private class BeatmapDifficultyCacheManager {
      * @param mode The [GameMode] to process for.
      * @return A new set of [Mod]s that can be used as a cache.
      */
-    private fun processMods(mods: Iterable<Mod>?, mode: GameMode) = mods?.toMutableSet()?.also {
-        when (mode) {
-            GameMode.Droid -> droidDifficultyCalculator.retainDifficultyAdjustmentMods(it)
-            GameMode.Standard -> standardDifficultyCalculator.retainDifficultyAdjustmentMods(it)
-        }
-    } ?: emptySet()
+    private fun processMods(mods: Iterable<Mod>?, mode: GameMode) = when (mode) {
+        GameMode.Droid -> droidDifficultyCalculator.retainDifficultyAdjustmentMods(mods)
+        GameMode.Standard -> standardDifficultyCalculator.retainDifficultyAdjustmentMods(mods)
+    }
 }
 
 /**

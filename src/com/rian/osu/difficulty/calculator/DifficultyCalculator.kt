@@ -34,14 +34,15 @@ abstract class DifficultyCalculator<TBeatmap : PlayableBeatmap, TObject : Diffic
      * Retains [Mod]s that change star rating within a collection of [Mod]s.
      *
      * @param mods The collection of [Mod]s to check.
+     * @return A set of [Mod]s that change star rating.
      */
-    fun retainDifficultyAdjustmentMods(mods: MutableCollection<Mod>) {
-        for (mod in mods) {
+    fun retainDifficultyAdjustmentMods(mods: Iterable<Mod>?) = mods?.toMutableSet()?.also { set ->
+        for (mod in set) {
             if (difficultyAdjustmentMods.none { it.isInstance(mod) }) {
-                mods.remove(mod)
+                set.remove(mod)
             }
         }
-    }
+    } ?: emptySet()
 
     /**
      * Calculates the difficulty of a [Beatmap] with specific [Mod]s.
