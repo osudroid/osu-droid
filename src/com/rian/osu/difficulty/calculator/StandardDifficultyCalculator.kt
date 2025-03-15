@@ -122,7 +122,7 @@ class StandardDifficultyCalculator : DifficultyCalculator<StandardPlayableBeatma
                 clockRate,
                 arr as Array<StandardDifficultyHitObject>,
                 i - 1
-            )
+            ).also { it.computeProperties(clockRate, objects) }
         }
 
         return arr as Array<StandardDifficultyHitObject>

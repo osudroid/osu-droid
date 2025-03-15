@@ -43,12 +43,7 @@ class DroidDifficultyHitObject(
      *
      * This is one less than the actual index of the hit object in the beatmap.
      */
-    index: Int,
-
-    /**
-     * The hit objects in the beatmap.
-     */
-    objects: List<HitObject>
+    index: Int
 ) : DifficultyHitObject(obj, lastObj, lastLastObj, clockRate, difficultyHitObjects, index) {
     override val mode = GameMode.Droid
     override val maximumSliderRadius = NORMALIZED_RADIUS * 2
@@ -94,7 +89,11 @@ class DroidDifficultyHitObject(
     @JvmField
     val timePreempt = obj.timePreempt / clockRate
 
-    init { setVisuals(clockRate, objects) }
+    override fun computeProperties(clockRate: Double, objects: List<HitObject>) {
+        super.computeProperties(clockRate, objects)
+
+        setVisuals(clockRate, objects)
+    }
 
     override fun previous(backwardsIndex: Int) = if (index - backwardsIndex >= 0) difficultyHitObjects[index - backwardsIndex] else null
 

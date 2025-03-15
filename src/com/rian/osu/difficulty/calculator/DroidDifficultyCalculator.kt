@@ -137,9 +137,8 @@ class DroidDifficultyCalculator : DifficultyCalculator<DroidPlayableBeatmap, Dro
                 if (i > 1) objects[i - 2] else null,
                 clockRate,
                 arr as Array<DroidDifficultyHitObject>,
-                i - 1,
-                objects
-            )
+                i - 1
+            ).also { it.computeProperties(clockRate, objects) }
         }
 
         return arr as Array<DroidDifficultyHitObject>
