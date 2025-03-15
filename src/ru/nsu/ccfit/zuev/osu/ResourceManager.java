@@ -146,7 +146,8 @@ public class ResourceManager {
 
         loadCustomSkin(folder);
 
-        loadTexture("ranking_enabled", "ranking_enabled.png", false);
+        loadTexture("ranking_enabled_score", "ranking_enabled_score.png", false);
+        loadTexture("ranking_enabled_pp", "ranking_enabled_pp.png", false);
         loadTexture("ranking_disabled", "ranking_disabled.png", false);
         loadTexture("flashlight_cursor", "flashlight_cursor.png", false, TextureOptions.BILINEAR_PREMULTIPLYALPHA);
 
@@ -342,7 +343,8 @@ public class ResourceManager {
         }
 
         loadTexture("ranking_button", "ranking_button.png", false);
-        loadTexture("ranking_enabled", "ranking_enabled.png", false);
+        loadTexture("ranking_enabled_score", "ranking_enabled_score.png", false);
+        loadTexture("ranking_enabled_pp", "ranking_enabled_pp.png", false);
         loadTexture("ranking_disabled", "ranking_disabled.png", false);
         loadTexture("selection-approved", "selection-approved.png", false);
         loadTexture("selection-loved", "selection-loved.png", false);
