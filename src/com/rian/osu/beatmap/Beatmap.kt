@@ -10,7 +10,6 @@ import com.rian.osu.mods.IModApplicableToDifficultyWithSettings
 import com.rian.osu.mods.IModApplicableToHitObject
 import com.rian.osu.mods.IModApplicableToHitObjectWithSettings
 import com.rian.osu.mods.Mod
-import com.rian.osu.mods.ModNightCore
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.ensureActive
 
@@ -70,7 +69,7 @@ open class Beatmap(
     ) = StandardPlayableBeatmap(createPlayableBeatmap(GameMode.Standard, mods, scope), mods)
 
     private fun createPlayableBeatmap(mode: GameMode, mods: Iterable<Mod>?, scope: CoroutineScope?): Beatmap {
-        if (this.mode == mode && (mods?.firstOrNull() == null)) {
+        if (this.mode == mode && mods?.firstOrNull() == null) {
             // Beatmap is already playable as is.
             return this
         }
