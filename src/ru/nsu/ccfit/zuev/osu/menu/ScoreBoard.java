@@ -54,7 +54,7 @@ public class ScoreBoard extends Entity implements ScrollDetector.IScrollDetector
     private int _scoreID = -1;
     private boolean moved = false;
     private ArrayList<ScoreBoardItem> scoreItems = null;
-
+    private BeatmapLeaderboardScoringMode currentScoringMode;
 
     private LoadTask currentTask;
 
@@ -197,6 +197,7 @@ public class ScoreBoard extends Entity implements ScrollDetector.IScrollDetector
 
     private void initFromOnline(BeatmapInfo beatmapInfo) {
         loadingText.setText("Loading scores...");
+        currentScoringMode = Config.getBeatmapLeaderboardScoringMode();
 
         currentTask = new LoadTask(true) {
 
@@ -225,7 +226,7 @@ public class ScoreBoard extends Entity implements ScrollDetector.IScrollDetector
 
                 loadingText.setText(OnlineManager.getInstance().getFailMessage());
 
-                boolean isPPScoringMode = Config.getBeatmapLeaderboardScoringMode() == BeatmapLeaderboardScoringMode.PP;
+                boolean isPPScoringMode = currentScoringMode == BeatmapLeaderboardScoringMode.PP;
                 var username = OnlineManager.getInstance().getUsername();
                 var items = new ArrayList<ScoreBoardItem>(scores.size());
                 var sb = new StringBuilder();
@@ -390,7 +391,8 @@ public class ScoreBoard extends Entity implements ScrollDetector.IScrollDetector
     }
 
     public synchronized void init(final BeatmapInfo beatmapInfo) {
-        if (lastBeatmapInfo == beatmapInfo && showOnlineScores == wasOnline && wasOnline) {
+        if (lastBeatmapInfo == beatmapInfo && showOnlineScores == wasOnline && wasOnline &&
+                Config.getBeatmapLeaderboardScoringMode() == currentScoringMode) {
             return;
         }
 
