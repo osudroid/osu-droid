@@ -73,6 +73,7 @@ import ru.nsu.ccfit.zuev.osu.online.OnlineManager;
 import ru.nsu.ccfit.zuev.osu.online.OnlineManager.OnlineManagerException;
 import ru.nsu.ccfit.zuev.osu.online.OnlinePanel;
 import ru.nsu.ccfit.zuev.osu.online.OnlineScoring;
+import ru.nsu.ccfit.zuev.osu.scoring.BeatmapLeaderboardScoringMode;
 import ru.nsu.ccfit.zuev.osu.scoring.Replay;
 import ru.nsu.ccfit.zuev.osu.scoring.ScoringScene;
 import ru.nsu.ccfit.zuev.osu.scoring.StatisticV2;
@@ -708,10 +709,15 @@ public class SongMenu implements IUpdateHandler, MenuItemListener,
 
     public void toggleScoringSwitcher() {
         if (board.isShowOnlineScores()) {
-            board.setShowOnlineScores(false);
+            switch (Config.getBeatmapLeaderboardScoringMode()) {
+                case SCORE -> Config.setBeatmapLeaderboardScoringMode(BeatmapLeaderboardScoringMode.PP);
+                case PP -> board.setShowOnlineScores(false);
+            }
+
             board.init(selectedBeatmap);
         } else if (OnlineManager.getInstance().isStayOnline()) {
             board.setShowOnlineScores(true);
+            Config.setBeatmapLeaderboardScoringMode(BeatmapLeaderboardScoringMode.SCORE);
             board.init(selectedBeatmap);
         }
 
