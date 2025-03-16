@@ -196,8 +196,13 @@ public class ScoreBoard extends Entity implements ScrollDetector.IScrollDetector
     }
 
     private void initFromOnline(BeatmapInfo beatmapInfo) {
-        loadingText.setText("Loading scores...");
         currentScoringMode = Config.getBeatmapLeaderboardScoringMode();
+
+        if (currentScoringMode == BeatmapLeaderboardScoringMode.SCORE) {
+            loadingText.setText("Loading score leaderboard...");
+        } else {
+            loadingText.setText("Loading pp leaderboard...");
+        }
 
         currentTask = new LoadTask(true) {
 
