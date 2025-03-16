@@ -1661,7 +1661,12 @@ public class SongMenu implements IUpdateHandler, MenuItemListener,
             return;
         }
 
-        scoringSwitcher.setTextureRegion(ResourceManager.getInstance().getTexture("ranking_enabled"));
+        var textureName = "ranking_enabled_" + switch (Config.getBeatmapLeaderboardScoringMode()) {
+            case SCORE -> "score";
+            case PP -> "pp";
+        };
+
+        scoringSwitcher.setTextureRegion(ResourceManager.getInstance().getTexture(textureName));
 
         cancelMapStatusLoadingJob();
 
@@ -1691,7 +1696,7 @@ public class SongMenu implements IUpdateHandler, MenuItemListener,
                 JobKt.ensureActive(scope.getCoroutineContext());
 
                 if (scoringSwitcher != null) {
-                    scoringSwitcher.setTextureRegion(ResourceManager.getInstance().getTexture("ranking_enabled"));
+                    scoringSwitcher.setTextureRegion(ResourceManager.getInstance().getTexture(textureName));
                 }
             }
         });
