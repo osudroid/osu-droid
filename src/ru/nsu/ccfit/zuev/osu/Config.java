@@ -93,8 +93,6 @@ public class Config {
         playfieldSize,
         cursorSize;
 
-    private static BeatmapLeaderboardScoringMode beatmapLeaderboardScoringMode;
-
     private static Map<String, String> skins;
 
     private static RGBColor[] comboColors;
@@ -251,7 +249,6 @@ public class Config {
         onlinePassword = prefs.getString("onlinePassword", null);
         stayOnline = prefs.getBoolean("stayOnline", false);
         loadAvatar = prefs.getBoolean("loadAvatar",false);
-        beatmapLeaderboardScoringMode = BeatmapLeaderboardScoringMode.parse(Integer.parseInt(prefs.getString("beatmapLeaderboardScoringMode", "0")));
     }
 
     public static void measureDisplaySize() {
@@ -498,7 +495,11 @@ public class Config {
     }
 
     public static BeatmapLeaderboardScoringMode getBeatmapLeaderboardScoringMode() {
-        return beatmapLeaderboardScoringMode;
+        return BeatmapLeaderboardScoringMode.parse(Integer.parseInt(getString("beatmapLeaderboardScoringMode", "0")));
+    }
+
+    public static void setBeatmapLeaderboardScoringMode(BeatmapLeaderboardScoringMode beatmapLeaderboardScoringMode) {
+        setString("beatmapLeaderboardScoringMode", String.valueOf(beatmapLeaderboardScoringMode.ordinal()));
     }
 
     public static boolean getLoadAvatar() {
