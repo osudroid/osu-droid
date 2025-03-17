@@ -328,6 +328,13 @@ abstract class HUDElement : Container(), IGameplayEvents {
         updateConnectionLine()
     }
 
+    override fun detachSelf(): Boolean {
+        editorOverlay?.detachSelf()
+        connectionLine?.detachSelf()
+
+        return super.detachSelf()
+    }
+
     /**
      * Moves the element by the specified delta.
      */
