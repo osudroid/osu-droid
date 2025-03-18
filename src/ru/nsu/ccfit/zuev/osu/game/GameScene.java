@@ -1312,7 +1312,7 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
                     video.setPlaybackSpeed(GameHelper.getSpeedMultiplier());
                 } catch (Exception e) {
                     Log.e("GameScene", "Failed to change video playback speed.", e);
-                    ToastLogger.showText(R.string.message_video_custom_speed_unsupported, false);
+                    ToastLogger.showText(com.osudroid.resources.R.string.message_video_custom_speed_unsupported, false);
                 }
                 videoStarted = true;
             }
