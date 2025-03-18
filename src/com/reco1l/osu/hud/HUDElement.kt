@@ -37,6 +37,7 @@ enum class HUDElements(val type: KClass<out HUDElement>) {
     ok_counter(HUDOkCounter::class),
     meh_counter(HUDMehCounter::class),
     miss_counter(HUDMissCounter::class),
+    bpm_counter(HUDBPMCounter::class),
     notes_per_second_counter(HUDNotesPerSecondCounter::class),
     taps_per_second_counter(HUDTapsPerSecondCounter::class),
     back_button(HUDBackButton::class),
@@ -325,6 +326,13 @@ abstract class HUDElement : Container(), IGameplayEvents {
     override fun setScale(pScaleX: Float, pScaleY: Float) {
         super.setScale(pScaleX, pScaleY)
         updateConnectionLine()
+    }
+
+    override fun detachSelf(): Boolean {
+        editorOverlay?.detachSelf()
+        connectionLine?.detachSelf()
+
+        return super.detachSelf()
     }
 
     /**

@@ -2691,6 +2691,10 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
         return replaying;
     }
 
+    public @Nullable DroidPlayableBeatmap getPlayableBeatmap() {
+        return playableBeatmap;
+    }
+
     public boolean saveFailedReplay() {
         stat.setTime(System.currentTimeMillis());
         if (replay != null && !replaying) {
