@@ -3,15 +3,15 @@ Version 1.8.3
 
 # Additions
 
-- Added snaking out sliders setting <span style="font-size: 0.75em">by [Rian8337](https://github.com/Rian8337)</span>
-- Added gameplay HUD editor <span style="font-size: 0.75em">by [Reco1I](https://github.com/Reco1I) and [Rian8337](https://github.com/Rian8337)</span> 
-  - For the time being, the editor only allows you to resize and rescale new/existing elements. More elements and
-    operations will be added in the future (divide and conquer, as they say).
+- Add snaking out sliders setting <span style="font-size: 0.75em">by [Rian8337](https://github.com/Rian8337)</span>
+- Add gameplay HUD editor <span style="font-size: 0.75em">by [Reco1I](https://github.com/Reco1I) and [Rian8337](https://github.com/Rian8337)</span> 
+  - For the time being, the editor only allows you to resize and rescale elements. More elements and operations will be
+    added in the future (divide and conquer, as they say).
   - The HUD settings are saved in `skin.json` under the `HUD` property.
-- Added hit judgement result specific colors to hit error meter indicators <span style="font-size: 0.75em">by [Rian8337](https://github.com/Rian8337)</span>
-- Added vibration feedback on hitobject hit <span style="font-size: 0.75em">by [Acivev](https://github.com/Acivev)</span>
+- Add hit judgement result specific colors to hit error meter indicators <span style="font-size: 0.75em">by [Rian8337](https://github.com/Rian8337)</span>
+- Add vibration feedback on hitobject hit <span style="font-size: 0.75em">by [Acivev](https://github.com/Acivev)</span>
   - This can be managed under the `Input` category in options
-- Added Traceable (TC) mod <span style="font-size: 0.75em">by [Rian8337](https://github.com/Rian8337)</span>
+- Add Traceable (TC) mod <span style="font-size: 0.75em">by [Rian8337](https://github.com/Rian8337)</span>
   - Only shows approach circles, slider body borders, slider ticks, and slider repeat arrows
   - Incompatible with the Hidden (HD) mod
   - Current score multiplier is 1.06
@@ -40,28 +40,28 @@ Version 1.8.3
 
 # Bug Fixes
 
-- Fixed beatmaps completely disappearing after selecting the default beatmap collection <span style="font-size: 0.75em">by [Rian8337](https://github.com/Rian8337)</span>
-- Fixed input dialogs being completely hidden <span style="font-size: 0.75em">by [Reco1I](https://github.com/Reco1I)</span>
-- Fixed another potential crash of video playback not supporting custom speed <span style="font-size: 0.75em">by [Rian8337](https://github.com/Rian8337)</span>
-- Fixed wallpaper blending into game surface in some devices <span style="font-size: 0.75em">by [Reco1I](https://github.com/Reco1I)</span>
-- Fixed periodic banner swapping breaking after clicking on the banner <span style="font-size: 0.75em">by [Reco1I](https://github.com/Reco1I)</span>
-- Fixed osu!standard slider tail generation using legacy last tick rather than actual slider tail <span style="font-size: 0.75em">by [Rian8337](https://github.com/Rian8337)</span>
+- Fix beatmaps completely disappearing after selecting the default beatmap collection <span style="font-size: 0.75em">by [Rian8337](https://github.com/Rian8337)</span>
+- Fix input dialogs being completely hidden <span style="font-size: 0.75em">by [Reco1I](https://github.com/Reco1I)</span>
+- Fix another potential crash of video playback not supporting custom speed <span style="font-size: 0.75em">by [Rian8337](https://github.com/Rian8337)</span>
+- Fix wallpaper blending into game surface in some devices <span style="font-size: 0.75em">by [Reco1I](https://github.com/Reco1I)</span>
+- Fix periodic banner swapping breaking after clicking on the banner <span style="font-size: 0.75em">by [Reco1I](https://github.com/Reco1I)</span>
+- Fix osu!standard slider tail generation using legacy last tick rather than actual slider tail <span style="font-size: 0.75em">by [Rian8337](https://github.com/Rian8337)</span>
   - Affects osu!standard difficulty calculation.
-- Fixed classical spinners being able to be spun at 3/4th preempt time <span style="font-size: 0.75em">by [Rian8337](https://github.com/Rian8337)</span>
-- Fixed faulty rhythm grouping comparison in rhythm difficulty calculation <span style="font-size: 0.75em">by [Rian8337](https://github.com/Rian8337)</span>
+- Fix classical spinners being able to be spun at 3/4th preempt time <span style="font-size: 0.75em">by [Rian8337](https://github.com/Rian8337)</span>
+- Fix faulty rhythm grouping comparison in rhythm difficulty calculation <span style="font-size: 0.75em">by [Rian8337](https://github.com/Rian8337)</span>
   - Affects both osu!droid and osu!standard difficulty calculation.
-- Fixed slider head judgement in replays set before version 1.8 if the 50 hit window is shorter than the slider's
+- Fix slider head judgement in replays set before version 1.8 if the 50 hit window is shorter than the slider's
   duration <span style="font-size: 0.75em">by [Rian8337](https://github.com/Rian8337)</span>
 
 # Removals
 
-- Removed the following settings as they have been merged with the HUD editor: <span style="font-size: 0.75em">(by [Reco1I](https://github.com/Reco1I))</span>
+- Remove the following settings as they have been merged with the HUD editor: <span style="font-size: 0.75em">(by [Reco1I](https://github.com/Reco1I))</span>
   - Progress indicator type
   - Hit error meter
   - Show average offset
   - Show unstable rate
   - Display real-time PP counter
-- Removed the `Hide navigation bar` setting <span style="font-size: 0.75em">by [Reco1I](https://github.com/Reco1I)</span>
+- Remove `Hide navigation bar` setting <span style="font-size: 0.75em">by [Reco1I](https://github.com/Reco1I)</span>
   - This is now enabled by default. 
-- Removed the `Global beatmap leaderboard scoring mode` setting <span style="font-size: 0.75em">by [Rian8337](https://github.com/Rian8337)</span>
+- Remove `Global beatmap leaderboard scoring mode` setting <span style="font-size: 0.75em">by [Rian8337](https://github.com/Rian8337)</span>
   - This has been moved to the leaderboard switcher button.
