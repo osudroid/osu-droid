@@ -1,5 +1,6 @@
 package com.reco1l.osu.hud
 
+import com.osudroid.resources.R.string
 import com.reco1l.andengine.Axes
 import com.reco1l.andengine.container.Container
 import com.reco1l.osu.hud.editor.HUDElementSelector
@@ -23,7 +24,6 @@ import ru.nsu.ccfit.zuev.skins.SkinJsonReader
 import java.io.File
 import kotlin.reflect.full.primaryConstructor
 import ru.nsu.ccfit.zuev.osu.helper.StringTable
-import ru.nsu.ccfit.zuev.osuplus.R
 import kotlin.reflect.*
 
 class GameplayHUD : Container(), IGameplayEvents {
@@ -104,31 +104,31 @@ class GameplayHUD : Container(), IGameplayEvents {
         }
 
         MessageDialog()
-            .setTitle(StringTable.get(R.string.hudEditor_modal_title))
-            .addButton(StringTable.get(R.string.hudEditor_modal_save)) {
+            .setTitle(StringTable.get(string.hudEditor_modal_title))
+            .addButton(StringTable.get(string.hudEditor_modal_save)) {
                 it.dismiss()
                 updateThread {
-                    ToastLogger.showText(R.string.hudEditor_saving, true)
+                    ToastLogger.showText(string.hudEditor_saving, true)
                     setEditMode(false)
                     saveToSkinJSON()
-                    ToastLogger.showText(R.string.hudEditor_saved, true)
+                    ToastLogger.showText(string.hudEditor_saved, true)
                 }
             }
-            .addButton(StringTable.get(R.string.hudEditor_modal_discard)) {
+            .addButton(StringTable.get(string.hudEditor_modal_discard)) {
                 it.dismiss()
                 updateThread {
                     setSkinData(OsuSkin.get().hudSkinData)
-                    ToastLogger.showText(R.string.hudEditor_discarded, true)
+                    ToastLogger.showText(string.hudEditor_discarded, true)
                 }
             }
-            .addButton(StringTable.get(R.string.hudEditor_modal_reset)) {
+            .addButton(StringTable.get(string.hudEditor_modal_reset)) {
                 it.dismiss()
                 updateThread {
                     setSkinData(HUDSkinData.Default)
-                    ToastLogger.showText(R.string.hudEditor_reset, true)
+                    ToastLogger.showText(string.hudEditor_reset, true)
                 }
             }
-            .addButton(StringTable.get(R.string.hudEditor_modal_cancel)) { it.dismiss() }
+            .addButton(StringTable.get(string.hudEditor_modal_cancel)) { it.dismiss() }
             .show()
     }
 

@@ -32,8 +32,8 @@
         <SeekBarPreference
             android:defaultValue="300"
             android:key="back_button_press_time"
-            android:summary="Required time in milliseconds to action the on-screen back button"
-            android:title="Back button press time"
+            android:summary="@string/opt_backButtonPressTime_summary"
+            android:title="@string/opt_backButtonPressTime_title"
             app:min="0"
             android:max="300"
             app:showSeekBarValue="true" />
@@ -68,8 +68,8 @@
         <SeekBarPreference
                 android:defaultValue="127"
                 android:key="seekBarVibrateIntensity"
-                android:title="Set Intensity"
-                android:summary="Change the intensity of the vibration"
+                android:title="@string/opt_seekBarVibrateIntensity_title"
+                android:summary="@string/opt_seekBarVibrateIntensity_summary"
                 android:min="1"
                 android:max="255"
                 app:showSeekBarValue="true"
@@ -78,12 +78,6 @@
     </PreferenceCategory>
 
     <PreferenceCategory android:title="@string/opt_category_synchronization">
-
-        <CheckBoxPreference
-            android:defaultValue="true"
-            android:key="syncMusic"
-            android:summary="@string/opt_syncmusic_summary"
-            android:title="@string/opt_syncmusic_title" />
 
         <CheckBoxPreference
             android:defaultValue="true"
