@@ -2,6 +2,7 @@ package com.rian.osu.mods
 
 import com.rian.osu.GameMode
 import com.rian.osu.beatmap.hitobject.HitObject
+import com.rian.osu.beatmap.hitobject.Slider
 import com.rian.osu.beatmap.sections.BeatmapDifficulty
 import com.rian.osu.utils.ModUtils
 
@@ -72,7 +73,13 @@ class ModDifficultyAdjust(
         }
 
         val trackRate = calculateTrackRate(mods, customSpeedMultiplier, oldStatistics)
+
+        // We are not applying to timePreempt here as HitObject.applyDefaults handles it.
         hitObject.timeFadeIn *= trackRate
+
+        if (hitObject is Slider) {
+            hitObject.nestedHitObjects.forEach { it.timeFadeIn *= trackRate }
+        }
     }
 
     private fun calculateTrackRate(mods: Iterable<Mod>, customSpeedMultiplier: Float, oldStatistics: Boolean) =
