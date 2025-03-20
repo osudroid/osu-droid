@@ -118,8 +118,7 @@ import ru.nsu.ccfit.zuev.osuplus.R;
 import ru.nsu.ccfit.zuev.skins.OsuSkin;
 import ru.nsu.ccfit.zuev.skins.BeatmapSkinManager;
 
-public class GameScene implements IUpdateHandler, GameObjectListener,
-        IOnSceneTouchListener {
+public class GameScene implements GameObjectListener, IOnSceneTouchListener {
     public static final int CursorCount = 10;
     private final Engine engine;
     private final Cursor[] cursors = new Cursor[CursorCount];
@@ -228,13 +227,6 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
     // Timing
 
     /**
-     * The time at which the last frame was rendered with respect to {@link SystemClock#uptimeMillis()}.
-     * <br>
-     * If 0, a frame has not been rendered yet.
-     */
-    private long previousFrameTime;
-
-    /**
      * The start time of the first object in seconds.
      */
     public float firstObjectStartTime;
@@ -293,7 +285,7 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
 
     public GameScene(final Engine engine) {
         this.engine = engine;
-        scene = new ExtendedScene();
+        scene = createMainScene();
         bgScene = new ExtendedScene();
         fgScene = new ExtendedScene();
         mgScene = new ExtendedScene();
@@ -487,7 +479,6 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
         GameHelper.setOverallDifficulty(playableBeatmap.getDifficulty().od);
         GameHelper.setHealthDrain(playableBeatmap.getDifficulty().hp);
         GameHelper.setSpeedMultiplier(modMenu.getSpeed());
-        scene.setTimeMultiplier(GameHelper.getSpeedMultiplier());
 
         if (scope != null) {
             JobKt.ensureActive(scope.getCoroutineContext());
@@ -501,6 +492,7 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
             JobKt.ensureActive(scope.getCoroutineContext());
         }
 
+        totalLength = GlobalManager.getInstance().getSongService().getLength();
         objects = new LinkedList<>(playableBeatmap.getHitObjects().objects);
         activeObjects = new LinkedList<>();
         expiredObjects = new LinkedList<>();
@@ -662,7 +654,7 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
         isHUDEditorMode = isHUDEditor;
         startedFromHUDEditor = isHUDEditor;
 
-        scene = new ExtendedScene();
+        scene = createMainScene();
         if (Config.isEnableStoryboard()) {
             if (storyboardSprite == null || storyboardOverlayProxy == null) {
                 storyboardSprite = new StoryboardSprite(Config.getRES_WIDTH(), Config.getRES_HEIGHT());
@@ -805,7 +797,6 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
 
         comboWas100 = false;
         comboWasMissed = false;
-        previousFrameTime = 0;
 
         hitWindow = playableBeatmap.getHitWindow();
         var firstObject = objects.peek();
@@ -1017,8 +1008,6 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
         engine.getTouchController().applyTouchOptions(touchOptions);
 
         engine.setScene(scene);
-        scene.registerUpdateHandler(this);
-
         engine.getCamera().setHUD(hud.getParent());
 
         blockAreaFragment = new BlockAreaFragment();
@@ -1033,37 +1022,14 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
         return comboColors.get(num % comboColors.size());
     }
 
-    @Override
-    public void onUpdate(final float pSecondsElapsed) {
-        previousFrameTime = SystemClock.uptimeMillis();
-
-        float dt = pSecondsElapsed;
-        if (GlobalManager.getInstance().getSongService().getStatus() == Status.PLAYING) {
-            //处理时间差过于庞大的情况
-            final float realsecPassed = //Config.isSyncMusic() ?
-                    GlobalManager.getInstance().getSongService().getPosition() / 1000.0f;// : realTime;
-            final float criticalError = Config.isSyncMusic() ? 0.1f : 0.5f;
-            final float normalError = Config.isSyncMusic() ? dt : 0.05f;
-
-            if (elapsedTime - totalOffset - realsecPassed > criticalError) {
-                return;
-            }
-
-            if (Math.abs(elapsedTime - totalOffset - realsecPassed) > normalError) {
-                if (elapsedTime - totalOffset > realsecPassed) {
-                    dt /= 2f;
-                } else {
-                    dt *= 2f;
-                }
-            }
-            elapsedTime += dt;
-        }
+    private void update(final float dt) {
+        elapsedTime += dt;
 
         updateCounterTexts();
 
         if (Multiplayer.isMultiplayer)
         {
-            long mSecElapsed = (long) (pSecondsElapsed * 1000);
+            long mSecElapsed = (long) (dt / GameHelper.getSpeedMultiplier() * 1000);
             realTimeElapsed += mSecElapsed;
             statisticDataTimeElapsed += mSecElapsed;
 
@@ -1321,20 +1287,13 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
                 video.setAlpha(Math.min(video.getAlpha() + 0.03f, 1.0f));
         }
 
-        if (elapsedTime >= totalOffset && !musicStarted) {
-            GlobalManager.getInstance().getSongService().play();
-            GlobalManager.getInstance().getSongService().setVolume(Config.getBgmVolume());
-            totalLength = GlobalManager.getInstance().getSongService().getLength();
-            musicStarted = true;
-            elapsedTime = totalOffset;
-
-            return;
-        }
-
         boolean shouldBePunished = false;
 
         while (!objects.isEmpty()
-                && elapsedTime >= (float) (objects.peek().startTime - objects.peek().timePreempt) / 1000) {
+                // This can be simplified, but it is necessary to prevent floating point errors (see how
+                // GameplayHitCircle and GameplaySlider track their passed time, where startTime and timePreempt
+                // are cast and converted to seconds individually).
+                && elapsedTime >= (float) objects.peek().startTime / 1000 - (float) objects.peek().timePreempt / 1000) {
             gameStarted = true;
             final var obj = objects.poll();
 
@@ -1433,13 +1392,6 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
             metronome.update(elapsedTime, activeTimingPoint);
         }
 
-        //Status playerStatus = music.getStatus();
-        Status playerStatus = GlobalManager.getInstance().getSongService().getStatus();
-
-        if (playerStatus != Status.PLAYING) {
-            elapsedTime += dt;
-        }
-
         if (shouldBePunished || (objects.isEmpty() && activeObjects.isEmpty() && leadOut > 2)) {
 
             // Reset the game to continue the HUD editor session.
@@ -1451,7 +1403,7 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
                 return;
             }
 
-            scene = new ExtendedScene();
+            scene = createMainScene();
             engine.getCamera().setHUD(null);
             BeatmapSkinManager.setSkinEnabled(false);
             GameObjectPool.getInstance().purge();
@@ -1765,7 +1717,7 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
                 camera.setCenterDirect((float) Config.getRES_WIDTH() / 2, (float) Config.getRES_HEIGHT() / 2);
             }
         }
-        scene = new ExtendedScene();
+        scene = createMainScene();
         engine.getCamera().setHUD(null);
 
         if (Multiplayer.isMultiplayer)
@@ -2154,6 +2106,9 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
             return false;
         }
 
+        int eventTime = GlobalManager.getInstance().getSongService().getPosition();
+        float offset = eventTime / 1000f - elapsedTime;
+
         var id = event.getPointerID();
         if (id < 0 || id >= CursorCount) {
             return false;
@@ -2171,9 +2126,6 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
             sprite.setPosition(cursor.mousePos.x, cursor.mousePos.y);
         }
 
-        var frameOffset = previousFrameTime > 0 ? (event.getMotionEvent().getEventTime() - previousFrameTime) * GameHelper.getSpeedMultiplier() : 0;
-        var eventTime = (int) (elapsedTime * 1000 + frameOffset);
-
         if (event.isActionDown()) {
 
             if (sprite != null) {
@@ -2185,7 +2137,7 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
             }
 
             cursor.mouseDown = true;
-            cursor.mouseDownOffsetMS = frameOffset;
+            cursor.mouseDownOffsetMS = offset;
 
             for (var value : cursors)
                 value.mouseOldDown = false;
@@ -2225,8 +2177,7 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
     }
 
     private void removeAllCursors() {
-        var frameOffset = previousFrameTime > 0 ? (SystemClock.uptimeMillis() - previousFrameTime) * GameHelper.getSpeedMultiplier() : 0;
-        var time = (int) (elapsedTime * 1000 + frameOffset);
+        int time = GlobalManager.getInstance().getSongService().getPosition();
 
         for (int i = 0; i < CursorCount; ++i) {
             var cursor = cursors[i];
@@ -2405,8 +2356,6 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
 
                     float decreasedFrequency = Math.max(101, songService.getFrequency() - 300);
                     float decreasedSpeed = GameHelper.getSpeedMultiplier() * (1 - (initialFrequency - decreasedFrequency) / initialFrequency);
-
-                    scene.setTimeMultiplier(decreasedSpeed);
 
                     if (video != null) {
                         // In some devices this can throw an exception, unfortunately there's no
@@ -2839,5 +2788,36 @@ public class GameScene implements IUpdateHandler, GameObjectListener,
         var timedAttributes = standardTimedDifficultyAttributes[objectId];
 
         return BeatmapDifficultyCalculator.calculateStandardPerformance(timedAttributes.attributes, stat).total;
+    }
+
+    private ExtendedScene createMainScene() {
+        return new ExtendedScene() {
+            @Override
+            protected void onManagedUpdate(float secElapsed) {
+                float dt = secElapsed * GameHelper.getSpeedMultiplier();
+                var songService = GlobalManager.getInstance().getSongService();
+
+                if (songService.getStatus() == Status.PLAYING) {
+                    // BASS may report the wrong position. When that happens, `dt` will
+                    // be negative. In that case, we should ignore the update.
+                    // See https://github.com/ppy/osu/issues/26879 for more information.
+                    dt = Math.max(0, songService.getPosition() / 1000f - (elapsedTime - totalOffset));
+                } else if (!musicStarted) {
+                    // Cap elapsed time at the music start time to prevent objects from progressing too far.
+                    dt = Math.min(elapsedTime + dt, totalOffset) - elapsedTime;
+
+                    if (elapsedTime >= totalOffset && !musicStarted) {
+                        Execution.updateThread(() -> {
+                            songService.play();
+                            songService.setVolume(Config.getBgmVolume());
+                            musicStarted = true;
+                        });
+                    }
+                }
+
+                update(dt);
+                super.onManagedUpdate(dt);
+            }
+        };
     }
 }
