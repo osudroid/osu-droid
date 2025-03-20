@@ -21,6 +21,10 @@ Version 1.8.3
 
 # Changes
 
+- Offset input time with audio time instead of frame time <span style="font-size: 0.75em">by [Rian8337](https://github.com/Rian8337)</span>
+  - This only applies when you have the `Fix frame offset` setting enabled. Theoretically, this setting should be
+    removed (and enabled by default) to enforce the proper offset in input time. However, due to numerous feedbacks,
+    this option has been kept.
 - Optimize cursor animation performance during gameplay <span style="font-size: 0.75em">by [Reco1I](https://github.com/Reco1I)</span>
 - Hide beatmap count of default beatmap collection <span style="font-size: 0.75em">by [Rian8337](https://github.com/Rian8337)</span>
 - Cycle between score online beatmap leaderboard - pp online beatmap leaderboard - local beatmap leaderboard in
@@ -52,9 +56,17 @@ Version 1.8.3
   - Affects both osu!droid and osu!standard difficulty calculation.
 - Fix slider head judgement in replays set before version 1.8 if the 50 hit window is shorter than the slider's
   duration <span style="font-size: 0.75em">by [Rian8337](https://github.com/Rian8337)</span>
+- Fix slider head, tick, repeat, and tail fade in durations being affected by force AR <span style="font-size: 0.75em">by [Rian8337](https://github.com/Rian8337)</span>
 
 # Removals
 
+- Remove offset minimalization between beatmap time and audio time <span style="font-size: 0.75em">by [Rian8337](https://github.com/Rian8337)</span>
+  - When beatmap time was offset from audio time by a certain duration, the game would attempt to match with audio time
+    by slowing down or speeding up gameplay. This happened due to differences in frame time and audio time progression.
+  - This has been removed and beatmap time is now equal to audio time.
+- Remove `Low-latency synchronization` setting <span style="font-size: 0.75em">by [Rian8337](https://github.com/Rian8337)</span>
+  - This setting influenced the operation above by reducing the maximum allowable offset when enabled. Since the
+    operation has been removed, this setting is now irrelevant.
 - Remove the following settings as they have been merged with the HUD editor: <span style="font-size: 0.75em">(by [Reco1I](https://github.com/Reco1I))</span>
   - Progress indicator type
   - Hit error meter
