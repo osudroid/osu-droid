@@ -140,7 +140,7 @@ class ModHashMap : HashMap<Class<out Mod>, Mod> {
      * @return The removed [Mod] instance, or `null` if the [Mod] does not exist in this [ModHashMap].
      */
     @Suppress("UNCHECKED_CAST")
-    fun <T : Mod> remove(key: Mod) = remove(key::class.java) as? T
+    fun <T : Mod> remove(key: T) = remove(key::class.java) as? T
 
     /**
      * Removes a [Mod] of the specified type from this [ModHashMap].
