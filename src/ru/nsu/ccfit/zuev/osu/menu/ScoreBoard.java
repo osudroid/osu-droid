@@ -139,7 +139,7 @@ public class ScoreBoard extends Entity implements ScrollDetector.IScrollDetector
                     sb.append("PF,");
                     break;
                 case 'b':
-                    sb.append("SU,");
+                    sb.append("TC,");
                     break;
                 case 'v':
                     sb.append("ScoreV2,");
