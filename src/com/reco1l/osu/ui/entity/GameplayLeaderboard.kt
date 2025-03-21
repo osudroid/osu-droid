@@ -5,6 +5,7 @@ import com.reco1l.osu.hud.HUDElement
 import com.reco1l.osu.multiplayer.Multiplayer.isMultiplayer
 import org.anddev.andengine.entity.sprite.Sprite
 import org.anddev.andengine.entity.text.ChangeableText
+import ru.nsu.ccfit.zuev.osu.Config
 import ru.nsu.ccfit.zuev.osu.GlobalManager
 import ru.nsu.ccfit.zuev.osu.ResourceManager
 import ru.nsu.ccfit.zuev.osu.menu.ScoreBoardItem
@@ -12,7 +13,7 @@ import ru.nsu.ccfit.zuev.osu.scoring.StatisticV2
 
 class GameplayLeaderboard : HUDElement() {
 
-
+    override val shouldBeShown = super.shouldBeShown && Config.isShowScoreboard()
 
     var nextItems: List<ScoreBoardItem>? = null
 
