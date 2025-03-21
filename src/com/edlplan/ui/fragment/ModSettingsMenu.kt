@@ -15,6 +15,7 @@ import com.edlplan.ui.EasingHelper
 import com.reco1l.osu.mainThread
 import com.reco1l.osu.multiplayer.Multiplayer
 import com.reco1l.toolkt.android.dp
+import com.rian.osu.mods.ModDifficultyAdjust
 import com.rian.osu.mods.ModFlashlight
 import org.anddev.andengine.input.touch.TouchEvent
 import ru.nsu.ccfit.zuev.osu.Config
@@ -400,29 +401,19 @@ class ModSettingsMenu : BaseFragment() {
 
         customDifficultySection.visibility = visibility
 
-        val customAR = ModMenu.getInstance().customAR
-        customARToggle.isChecked = customAR != null
-        customARBar.isEnabled = customAR != null
-        customARBar.progress = ((customAR ?: beatmapInfo?.approachRate ?: 10f) * 10).toInt()
-        customARText.text = "${customARBar.progress / 10f}"
+        fun updateDifficultyAdjustValue(value: Float?, default: Float?, toggle: CheckBox, bar: SeekBar, text: TextView) {
+            toggle.isChecked = value != null
+            bar.isEnabled = value != null
+            bar.progress = ((value ?: default ?: 10f) * 10).toInt()
+            text.text = "${bar.progress / 10f}"
+        }
 
-        val customOD = ModMenu.getInstance().customOD
-        customODToggle.isChecked = customOD != null
-        customODBar.isEnabled = customOD != null
-        customODBar.progress = ((customOD ?: beatmapInfo?.overallDifficulty ?: 10f) * 10).toInt()
-        customODText.text = "${customODBar.progress / 10f}"
+        val difficultyAdjust = ModMenu.getInstance().enabledMods.ofType<ModDifficultyAdjust>()
 
-        val customCS = ModMenu.getInstance().customCS
-        customCSToggle.isChecked = customCS != null
-        customCSBar.isEnabled = customCS != null
-        customCSBar.progress = ((customCS ?: beatmapInfo?.circleSize ?: 10f) * 10).toInt()
-        customCSText.text = "${customCSBar.progress / 10f}"
-
-        val customHP = ModMenu.getInstance().customHP
-        customHPToggle.isChecked = customHP != null
-        customHPBar.isEnabled = customHP != null
-        customHPBar.progress = ((customHP ?: beatmapInfo?.hpDrainRate ?: 10f) * 10).toInt()
-        customHPText.text = "${customHPBar.progress / 10f}"
+        updateDifficultyAdjustValue(difficultyAdjust?.ar, beatmapInfo?.approachRate, customARToggle, customARBar, customARText)
+        updateDifficultyAdjustValue(difficultyAdjust?.od, beatmapInfo?.overallDifficulty, customODToggle, customODBar, customODText)
+        updateDifficultyAdjustValue(difficultyAdjust?.cs, beatmapInfo?.circleSize, customCSToggle, customCSBar, customCSText)
+        updateDifficultyAdjustValue(difficultyAdjust?.hp, beatmapInfo?.hpDrainRate, customHPToggle, customHPBar, customHPText)
 
         ModMenu.getInstance().changeMultiplierText()
     }
