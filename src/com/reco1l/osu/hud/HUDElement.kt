@@ -66,9 +66,9 @@ abstract class HUDElement : Container(), IGameplayEvents {
         get() = (parent as? GameplayHUD)?.selected == this
 
     /**
-     * Whether this [HUDElement] should be shown regardless of [Config.hideInGameUI].
+     * Whether this [HUDElement] should be shown.
      */
-    open val isAlwaysShown = false
+    open val shouldBeShown = !Config.isHideInGameUI()
 
     /**
      * The overlay for this element to be used in edit mode.

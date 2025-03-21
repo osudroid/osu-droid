@@ -88,7 +88,8 @@ class GameplayHUD : Container(), IGameplayEvents {
     fun addElement(data: HUDElementSkinData, inEditMode: Boolean = isInEditMode) {
         val element = data.type.primaryConstructor!!.call()
 
-        if (Config.isHideInGameUI() && !inEditMode && !element.isAlwaysShown) {
+        // In edit mode, all elements should be shown.
+        if (!inEditMode && !element.shouldBeShown) {
             return
         }
 
