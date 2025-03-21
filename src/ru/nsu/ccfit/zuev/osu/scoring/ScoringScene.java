@@ -341,7 +341,7 @@ public class ScoringScene {
         playerStr += String.format("  %s(%s)", BuildConfig.VERSION_NAME, BuildConfig.BUILD_TYPE);
         if (mods.contains(ModCustomSpeed.class) ||
             mods.contains(ModDifficultyAdjust.class) ||
-            (mods.contains(ModFlashlight.class) && mods.ofType(ModFlashlight.class).getFollowDelay() != ModFlashlight.DEFAULT_FOLLOW_DELAY)) {
+            (mods.contains(ModFlashlight.class) && mods.ofType(ModFlashlight.class).followDelay != ModFlashlight.DEFAULT_FOLLOW_DELAY)) {
 
             var customSpeed = mods.ofType(ModCustomSpeed.class);
             var difficultyAdjust = mods.ofType(ModDifficultyAdjust.class);
@@ -370,8 +370,8 @@ public class ScoringScene {
                 }
             }
 
-            if (flashlight != null && flashlight.getFollowDelay() != ModFlashlight.DEFAULT_FOLLOW_DELAY) {
-                mapperStr += String.format(Locale.ENGLISH, "FLD%.2f,", flashlight.getFollowDelay());
+            if (flashlight != null && flashlight.followDelay != ModFlashlight.DEFAULT_FOLLOW_DELAY) {
+                mapperStr += String.format(Locale.ENGLISH, "FLD%.2f,", flashlight.followDelay);
             }
 
             if (mapperStr.endsWith(",")){
