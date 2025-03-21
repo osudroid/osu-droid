@@ -25,7 +25,6 @@ import java.util.Map;
 import java.util.concurrent.CancellationException;
 
 import org.anddev.andengine.util.MathUtils;
-import org.jetbrains.annotations.Nullable;
 
 import kotlinx.coroutines.Job;
 import ru.nsu.ccfit.zuev.osu.*;
@@ -516,34 +515,6 @@ public class ModMenu implements IModSwitcher {
         if (calculationJob != null) {
             calculationJob.cancel(new CancellationException("Difficulty calculation has been cancelled."));
         }
-    }
-
-    private void handleForceDifficultyStatisticsChange() {
-        if (difficultyAdjust.isRelevant()) {
-            enabledMods.put(difficultyAdjust);
-        } else {
-            enabledMods.remove(difficultyAdjust);
-        }
-    }
-
-    public void setCustomAR(@Nullable Float customAR) {
-        difficultyAdjust.ar = customAR;
-        handleForceDifficultyStatisticsChange();
-    }
-
-    public void setCustomOD(@Nullable Float customOD) {
-        difficultyAdjust.od = customOD;
-        handleForceDifficultyStatisticsChange();
-    }
-
-    public void setCustomHP(@Nullable Float customHP) {
-        difficultyAdjust.hp = customHP;
-        handleForceDifficultyStatisticsChange();
-    }
-
-    public void setCustomCS(@Nullable Float customCS) {
-        difficultyAdjust.cs = customCS;
-        handleForceDifficultyStatisticsChange();
     }
 
     public ModSettingsMenu getMenu() {
