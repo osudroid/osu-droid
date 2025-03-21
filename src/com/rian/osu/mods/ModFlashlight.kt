@@ -17,6 +17,7 @@ class ModFlashlight : Mod(), IModUserSelectable {
     /**
      * The amount of seconds until the flashlight reaches the cursor.
      */
+    @JvmField
     var followDelay = DEFAULT_FOLLOW_DELAY
 
     override fun calculateScoreMultiplier(difficulty: BeatmapDifficulty) = 1.12f
