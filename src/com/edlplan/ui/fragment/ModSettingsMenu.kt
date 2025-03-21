@@ -244,7 +244,9 @@ class ModSettingsMenu : BaseFragment() {
                 ) {
                     if (!containsFlashlight) return
 
-                    ModMenu.getInstance().flFollowDelay = (progress * ModFlashlight.DEFAULT_FOLLOW_DELAY).roundToInt().toFloat()
+                    val flashlight = ModMenu.getInstance().enabledMods.ofType<ModFlashlight>() ?: return
+
+                    flashlight.followDelay = (progress * ModFlashlight.DEFAULT_FOLLOW_DELAY).roundToInt().toFloat()
                     followDelayText.text = "${(progress * ModFlashlight.DEFAULT_FOLLOW_DELAY * 1000).roundToInt()}ms"
                 }
 
