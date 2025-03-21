@@ -282,109 +282,64 @@ class ModSettingsMenu : BaseFragment() {
 
         updateDifficultyAdjustValues()
 
-        customARToggle.setOnCheckedChangeListener { _, isChecked ->
-            ModMenu.getInstance().setCustomAR(if (isChecked) customARBar.progress / 10f else null)
-            customARBar.isEnabled = isChecked
+        fun updateCustomValue(value: Float?, difficultyAdjustInitializer: ModDifficultyAdjust.(Float?) -> Unit) {
+            val mods = ModMenu.getInstance().enabledMods
+            var difficultyAdjust = mods.ofType<ModDifficultyAdjust>()
 
-            updateDifficultyAdjustValues()
+            if (difficultyAdjust != null) {
+                difficultyAdjustInitializer(difficultyAdjust, value)
+            } else {
+                difficultyAdjust = ModDifficultyAdjust().apply { difficultyAdjustInitializer(value) }
+                mods.put(difficultyAdjust)
+            }
+
+            if (!difficultyAdjust.isRelevant) {
+                mods.remove(difficultyAdjust)
+            }
         }
 
-        customODToggle.setOnCheckedChangeListener { _, isChecked ->
-            ModMenu.getInstance().setCustomOD(if (isChecked) customODBar.progress / 10f else null)
-            customODBar.isEnabled = isChecked
+        fun initializeDifficultyAdjustView(
+            toggle: CheckBox,
+            bar: SeekBar,
+            text: TextView,
+            difficultyAdjustInitializer: ModDifficultyAdjust.(Float?) -> Unit
+        ) {
+            toggle.setOnCheckedChangeListener { _, isChecked ->
+                updateCustomValue(if (isChecked) bar.progress / 10f else null, difficultyAdjustInitializer)
+                bar.isEnabled = isChecked
 
-            updateDifficultyAdjustValues()
+                updateDifficultyAdjustValues()
+            }
+
+            bar.setOnSeekBarChangeListener(
+                object : OnSeekBarChangeListener {
+                    override fun onProgressChanged(
+                        seekBar: SeekBar?,
+                        progress: Int,
+                        fromUser: Boolean
+                    ) {
+                        val value = progress / 10f
+
+                        if (fromUser) {
+                            updateCustomValue(value, difficultyAdjustInitializer)
+                        }
+
+                        text.text = value.toString()
+                    }
+
+                    override fun onStartTrackingTouch(seekBar: SeekBar?) {}
+
+                    override fun onStopTrackingTouch(seekBar: SeekBar?) {
+                        ModMenu.getInstance().changeMultiplierText()
+                    }
+                }
+            )
         }
 
-        customCSToggle.setOnCheckedChangeListener { _, isChecked ->
-            ModMenu.getInstance().setCustomCS(if (isChecked) customCSBar.progress / 10f else null)
-            customCSBar.isEnabled = isChecked
-
-            updateDifficultyAdjustValues()
-        }
-
-        customHPToggle.setOnCheckedChangeListener { _, isChecked ->
-            ModMenu.getInstance().setCustomHP(if (isChecked) customHPBar.progress / 10f else null)
-            customHPBar.isEnabled = isChecked
-
-            updateDifficultyAdjustValues()
-        }
-
-        customARBar.setOnSeekBarChangeListener(
-            object : OnSeekBarChangeListener {
-                override fun onProgressChanged(
-                    seekBar: SeekBar?,
-                    progress: Int,
-                    fromUser: Boolean
-                ) {
-                    if (fromUser) ModMenu.getInstance().setCustomAR(progress / 10f)
-                    customARText.text = "${progress / 10f}"
-                }
-
-                override fun onStartTrackingTouch(seekBar: SeekBar?) {}
-
-                override fun onStopTrackingTouch(seekBar: SeekBar?) {
-                    ModMenu.getInstance().changeMultiplierText()
-                }
-            }
-        )
-
-        customODBar.setOnSeekBarChangeListener(
-            object : OnSeekBarChangeListener {
-                override fun onProgressChanged(
-                    seekBar: SeekBar?,
-                    progress: Int,
-                    fromUser: Boolean
-                ) {
-                    if (fromUser) ModMenu.getInstance().setCustomOD(progress / 10f)
-                    customODText.text = "${progress / 10f}"
-                }
-
-                override fun onStartTrackingTouch(seekBar: SeekBar?) {}
-
-                override fun onStopTrackingTouch(seekBar: SeekBar?) {
-                    ModMenu.getInstance().changeMultiplierText()
-                }
-            }
-        )
-
-        customCSBar.setOnSeekBarChangeListener(
-            object : OnSeekBarChangeListener {
-                override fun onProgressChanged(
-                    seekBar: SeekBar?,
-                    progress: Int,
-                    fromUser: Boolean
-                ) {
-                    if (fromUser) ModMenu.getInstance().setCustomCS(progress / 10f)
-                    customCSText.text = "${progress / 10f}"
-                }
-
-                override fun onStartTrackingTouch(seekBar: SeekBar?) {}
-
-                override fun onStopTrackingTouch(seekBar: SeekBar?) {
-                    ModMenu.getInstance().changeMultiplierText()
-                }
-            }
-        )
-
-        customHPBar.setOnSeekBarChangeListener(
-            object : OnSeekBarChangeListener {
-                override fun onProgressChanged(
-                    seekBar: SeekBar?,
-                    progress: Int,
-                    fromUser: Boolean
-                ) {
-                    if (fromUser) ModMenu.getInstance().setCustomHP(progress / 10f)
-                    customHPText.text = "${progress / 10f}"
-                }
-
-                override fun onStartTrackingTouch(seekBar: SeekBar?) {}
-
-                override fun onStopTrackingTouch(seekBar: SeekBar?) {
-                    ModMenu.getInstance().changeMultiplierText()
-                }
-            }
-        )
+        initializeDifficultyAdjustView(customARToggle, customARBar, customARText) { ar = it }
+        initializeDifficultyAdjustView(customODToggle, customODBar, customODText) { od = it }
+        initializeDifficultyAdjustView(customCSToggle, customCSBar, customCSText) { cs = it }
+        initializeDifficultyAdjustView(customHPToggle, customHPBar, customHPText) { hp = it }
     }
 
     private fun updateDifficultyAdjustValues() {
@@ -408,12 +363,17 @@ class ModSettingsMenu : BaseFragment() {
             text.text = "${bar.progress / 10f}"
         }
 
-        val difficultyAdjust = ModMenu.getInstance().enabledMods.ofType<ModDifficultyAdjust>()
+        val mods = ModMenu.getInstance().enabledMods
+        val difficultyAdjust = mods.ofType<ModDifficultyAdjust>()
 
         updateDifficultyAdjustValue(difficultyAdjust?.ar, beatmapInfo?.approachRate, customARToggle, customARBar, customARText)
         updateDifficultyAdjustValue(difficultyAdjust?.od, beatmapInfo?.overallDifficulty, customODToggle, customODBar, customODText)
         updateDifficultyAdjustValue(difficultyAdjust?.cs, beatmapInfo?.circleSize, customCSToggle, customCSBar, customCSText)
         updateDifficultyAdjustValue(difficultyAdjust?.hp, beatmapInfo?.hpDrainRate, customHPToggle, customHPBar, customHPText)
+
+        if (difficultyAdjust != null && !difficultyAdjust.isRelevant) {
+            mods.remove(difficultyAdjust)
+        }
 
         ModMenu.getInstance().changeMultiplierText()
     }
