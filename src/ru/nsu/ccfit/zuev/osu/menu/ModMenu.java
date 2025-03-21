@@ -502,14 +502,6 @@ public class ModMenu implements IModSwitcher {
         return flashlight != null ? flashlight.getFollowDelay() : ModFlashlight.DEFAULT_FOLLOW_DELAY;
     }
 
-    public void resetFLFollowDelay() {
-        var flashlight = enabledMods.ofType(ModFlashlight.class);
-
-        if (flashlight != null) {
-            flashlight.setFollowDelay(ModFlashlight.DEFAULT_FOLLOW_DELAY);
-        }
-    }
-
     public boolean isEnableNCWhenSpeedChange(){
         return enableNCWhenSpeedChange;
     }

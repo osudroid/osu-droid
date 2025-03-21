@@ -235,32 +235,31 @@ class ModSettingsMenu : BaseFragment() {
         followDelayBar.setOnSeekBarChangeListener(
             object : OnSeekBarChangeListener {
 
-                var containsFlashlight = false
+                private val flashlight
+                    get() = ModMenu.getInstance().enabledMods.ofType<ModFlashlight>()
 
                 override fun onProgressChanged(
                     seekBar: SeekBar?,
                     progress: Int,
                     fromUser: Boolean
                 ) {
-                    if (!containsFlashlight) return
-
-                    val flashlight = ModMenu.getInstance().enabledMods.ofType<ModFlashlight>() ?: return
+                    val flashlight = flashlight ?: return
 
                     flashlight.followDelay = (progress * ModFlashlight.DEFAULT_FOLLOW_DELAY).roundToInt().toFloat()
                     followDelayText.text = "${(progress * ModFlashlight.DEFAULT_FOLLOW_DELAY * 1000).roundToInt()}ms"
                 }
 
-                override fun onStartTrackingTouch(seekBar: SeekBar?) {
-                    containsFlashlight = ModFlashlight::class in ModMenu.getInstance().enabledMods
-                }
+                override fun onStartTrackingTouch(seekBar: SeekBar?) {}
 
                 override fun onStopTrackingTouch(seekBar: SeekBar?) {
-                    if (containsFlashlight) return
+                    val flashlight = flashlight
 
-                    seekBar!!.progress = 0
-                    ModMenu.getInstance().resetFLFollowDelay()
+                    if (flashlight == null) {
+                        seekBar!!.progress = 0
+                    }
+
                     followDelayText.text =
-                        "${(ModMenu.getInstance().flFollowDelay * 1000f).toInt()}ms"
+                        "${((flashlight?.followDelay ?: ModFlashlight.DEFAULT_FOLLOW_DELAY) * 1000f).toInt()}ms"
                 }
             }
         )
