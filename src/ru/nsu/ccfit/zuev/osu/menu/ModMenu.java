@@ -526,17 +526,9 @@ public class ModMenu implements IModSwitcher {
         }
     }
 
-    public Float getCustomAR() {
-        return difficultyAdjust.ar;
-    }
-
     public void setCustomAR(@Nullable Float customAR) {
         difficultyAdjust.ar = customAR;
         handleForceDifficultyStatisticsChange();
-    }
-
-    public Float getCustomOD() {
-        return difficultyAdjust.od;
     }
 
     public void setCustomOD(@Nullable Float customOD) {
@@ -544,17 +536,9 @@ public class ModMenu implements IModSwitcher {
         handleForceDifficultyStatisticsChange();
     }
 
-    public Float getCustomHP() {
-        return difficultyAdjust.hp;
-    }
-
     public void setCustomHP(@Nullable Float customHP) {
         difficultyAdjust.hp = customHP;
         handleForceDifficultyStatisticsChange();
-    }
-
-    public Float getCustomCS() {
-        return difficultyAdjust.cs;
     }
 
     public void setCustomCS(@Nullable Float customCS) {

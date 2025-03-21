@@ -283,28 +283,28 @@ class ModSettingsMenu : BaseFragment() {
         updateDifficultyAdjustValues()
 
         customARToggle.setOnCheckedChangeListener { _, isChecked ->
-            ModMenu.getInstance().customAR = if (isChecked) customARBar.progress / 10f else null
+            ModMenu.getInstance().setCustomAR(if (isChecked) customARBar.progress / 10f else null)
             customARBar.isEnabled = isChecked
 
             updateDifficultyAdjustValues()
         }
 
         customODToggle.setOnCheckedChangeListener { _, isChecked ->
-            ModMenu.getInstance().customOD = if (isChecked) customODBar.progress / 10f else null
+            ModMenu.getInstance().setCustomOD(if (isChecked) customODBar.progress / 10f else null)
             customODBar.isEnabled = isChecked
 
             updateDifficultyAdjustValues()
         }
 
         customCSToggle.setOnCheckedChangeListener { _, isChecked ->
-            ModMenu.getInstance().customCS = if (isChecked) customCSBar.progress / 10f else null
+            ModMenu.getInstance().setCustomCS(if (isChecked) customCSBar.progress / 10f else null)
             customCSBar.isEnabled = isChecked
 
             updateDifficultyAdjustValues()
         }
 
         customHPToggle.setOnCheckedChangeListener { _, isChecked ->
-            ModMenu.getInstance().customHP = if (isChecked) customHPBar.progress / 10f else null
+            ModMenu.getInstance().setCustomHP(if (isChecked) customHPBar.progress / 10f else null)
             customHPBar.isEnabled = isChecked
 
             updateDifficultyAdjustValues()
@@ -317,7 +317,7 @@ class ModSettingsMenu : BaseFragment() {
                     progress: Int,
                     fromUser: Boolean
                 ) {
-                    if (fromUser) ModMenu.getInstance().customAR = progress / 10f
+                    if (fromUser) ModMenu.getInstance().setCustomAR(progress / 10f)
                     customARText.text = "${progress / 10f}"
                 }
 
@@ -336,7 +336,7 @@ class ModSettingsMenu : BaseFragment() {
                     progress: Int,
                     fromUser: Boolean
                 ) {
-                    if (fromUser) ModMenu.getInstance().customOD = progress / 10f
+                    if (fromUser) ModMenu.getInstance().setCustomOD(progress / 10f)
                     customODText.text = "${progress / 10f}"
                 }
 
@@ -355,7 +355,7 @@ class ModSettingsMenu : BaseFragment() {
                     progress: Int,
                     fromUser: Boolean
                 ) {
-                    if (fromUser) ModMenu.getInstance().customCS = progress / 10f
+                    if (fromUser) ModMenu.getInstance().setCustomCS(progress / 10f)
                     customCSText.text = "${progress / 10f}"
                 }
 
@@ -374,7 +374,7 @@ class ModSettingsMenu : BaseFragment() {
                     progress: Int,
                     fromUser: Boolean
                 ) {
-                    if (fromUser) ModMenu.getInstance().customHP = progress / 10f
+                    if (fromUser) ModMenu.getInstance().setCustomHP(progress / 10f)
                     customHPText.text = "${progress / 10f}"
                 }
 
