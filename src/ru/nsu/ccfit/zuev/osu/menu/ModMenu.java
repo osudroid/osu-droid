@@ -474,28 +474,6 @@ public class ModMenu implements IModSwitcher {
         GlobalManager.getInstance().getSongMenu().updateMusicEffects();
     }
 
-    public float getChangeSpeed() {
-        var customSpeed = enabledMods.ofType(ModCustomSpeed.class);
-
-        return customSpeed != null ? customSpeed.getTrackRateMultiplier() : 1;
-    }
-
-    public void setChangeSpeed(float speed) {
-        if (speed == 1f) {
-            enabledMods.remove(ModCustomSpeed.class);
-            return;
-        }
-
-        var customSpeed = enabledMods.ofType(ModCustomSpeed.class);
-
-        if (customSpeed == null) {
-            customSpeed = new ModCustomSpeed(speed);
-            enabledMods.put(customSpeed);
-        }
-
-        customSpeed.setTrackRateMultiplier(speed);
-    }
-
     public boolean isEnableNCWhenSpeedChange(){
         return enableNCWhenSpeedChange;
     }
