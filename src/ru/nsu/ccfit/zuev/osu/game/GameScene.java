@@ -917,12 +917,8 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
         // HUD should be to the last so we ensure everything is initialized and ready to be used by
         // the HUD elements in their constructors.
         hud = new GameplayHUD();
-
-        if (!Config.isHideInGameUI() || isHUDEditorMode) {
-            hud.setSkinData(OsuSkin.get().getHUDSkinData());
-        }
-
         hud.setEditMode(isHUDEditorMode);
+        hud.setSkinData(OsuSkin.get().getHUDSkinData());
 
         String playname = Config.getOnlineUsername();
         ChangeableText replayText = null;

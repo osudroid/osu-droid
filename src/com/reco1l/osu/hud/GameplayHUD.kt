@@ -87,6 +87,11 @@ class GameplayHUD : Container(), IGameplayEvents {
      */
     fun addElement(data: HUDElementSkinData, inEditMode: Boolean = isInEditMode) {
         val element = data.type.primaryConstructor!!.call()
+
+        if (Config.isHideInGameUI() && !inEditMode && !element.isAlwaysShown) {
+            return
+        }
+
         attachChild(element)
         element.restoreData = data
         element.setSkinData(data)
