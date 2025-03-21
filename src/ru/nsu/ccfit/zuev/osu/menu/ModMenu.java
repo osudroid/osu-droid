@@ -43,10 +43,7 @@ public class ModMenu implements IModSwitcher {
     private final Map<Mod, ModButton> modButtons = new HashMap<>();
     private boolean enableNCWhenSpeedChange = false;
     private Job calculationJob;
-
     private ModSettingsMenu menu;
-
-    private final ModDifficultyAdjust difficultyAdjust = new ModDifficultyAdjust();
 
     private ModMenu() {}
     
@@ -97,7 +94,11 @@ public class ModMenu implements IModSwitcher {
         }
 
         if (!isFreeMods || !allowForceDifficultyStatistics) {
-            enabledMods.put(difficultyAdjust);
+            var difficultyAdjust = modMap.ofType(ModDifficultyAdjust.class);
+
+            if (difficultyAdjust != null) {
+                enabledMods.put(difficultyAdjust);
+            }
         }
 
         if (!Multiplayer.isRoomHost() && (modMap.contains(ModDoubleTime.class) || modMap.contains(ModNightCore.class))) {
