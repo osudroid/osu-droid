@@ -15,6 +15,7 @@ import com.edlplan.ui.EasingHelper
 import com.reco1l.osu.mainThread
 import com.reco1l.osu.multiplayer.Multiplayer
 import com.reco1l.toolkt.android.dp
+import com.rian.osu.mods.ModCustomSpeed
 import com.rian.osu.mods.ModDifficultyAdjust
 import com.rian.osu.mods.ModFlashlight
 import org.anddev.andengine.input.touch.TouchEvent
@@ -155,22 +156,6 @@ class ModSettingsMenu : BaseFragment() {
             }
         }
 
-        speedModifyText = findViewById(R.id.changeSpeedText)!!
-
-        speedModifyToggle = findViewById(R.id.enableSpeedChange)!!
-        speedModifyToggle.isChecked = ModMenu.getInstance().changeSpeed != 1f
-        speedModifyToggle.isEnabled = speedModifyToggle.isChecked
-        speedModifyToggle.setOnCheckedChangeListener { _, isChecked ->
-            speedModifyToggle.isEnabled = isChecked
-
-            if (!isChecked) {
-                ModMenu.getInstance().changeSpeed = 1f
-                speedModifyBar.progress = 10
-                speedModifyText.text = "%.2fx".format(Locale.getDefault(), ModMenu.getInstance().changeSpeed)
-                ModMenu.getInstance().changeMultiplierText()
-            }
-        }
-
         val backgroundBrightness = findViewById<SeekBar>(R.id.backgroundBrightnessBar)!!
         backgroundBrightness.progress = PreferenceManager.getDefaultSharedPreferences(requireContext())
             .getInt("bgbrightness", 25)
@@ -202,9 +187,28 @@ class ModSettingsMenu : BaseFragment() {
             PreferenceManager.getDefaultSharedPreferences(requireContext()).getInt("bgbrightness", 25)
         }%"
 
+        val mods = ModMenu.getInstance().enabledMods
+        val customSpeed = mods.ofType<ModCustomSpeed>()
+
+        speedModifyText = findViewById(R.id.changeSpeedText)!!
+
+        speedModifyToggle = findViewById(R.id.enableSpeedChange)!!
+        speedModifyToggle.isChecked = customSpeed != null && customSpeed.trackRateMultiplier != 1f
+        speedModifyToggle.isEnabled = speedModifyToggle.isChecked
+        speedModifyToggle.setOnCheckedChangeListener { _, isChecked ->
+            speedModifyToggle.isEnabled = isChecked
+
+            if (!isChecked) {
+                mods.remove(ModCustomSpeed::class)
+                speedModifyBar.progress = 10
+                speedModifyText.text = "%.2fx".format(Locale.getDefault(), 1f)
+                ModMenu.getInstance().changeMultiplierText()
+            }
+        }
+
         speedModifyBar = findViewById(R.id.changeSpeedBar)!!
         speedModifyBar.apply {
-            progress = (ModMenu.getInstance().changeSpeed * 20 - 10).toInt()
+            progress = ((customSpeed?.trackRateMultiplier ?: 1f) * 20 - 10).toInt()
 
             setOnSeekBarChangeListener(
                 object : OnSeekBarChangeListener {
@@ -220,16 +224,29 @@ class ModSettingsMenu : BaseFragment() {
 
                     private fun update(progress: Int) {
                         val p = 0.5f + 0.05f * progress
+
                         speedModifyText.text = String.format(Locale.getDefault(), "%.2fx", p)
                         speedModifyToggle.isChecked = p != 1f
-                        ModMenu.getInstance().changeSpeed = p
+
+                        if (speedModifyToggle.isChecked) {
+                            val customSpeed = mods.ofType<ModCustomSpeed>()
+
+                            if (customSpeed == null) {
+                                mods.put(ModCustomSpeed(p))
+                            } else {
+                                customSpeed.trackRateMultiplier = p
+                            }
+                        } else {
+                            mods.remove(ModCustomSpeed::class)
+                        }
+
                         ModMenu.getInstance().changeMultiplierText()
                     }
                 }
             )
         }
 
-        speedModifyText.text = "%.2fx".format(Locale.getDefault(), ModMenu.getInstance().changeSpeed)
+        speedModifyText.text = "%.2fx".format(Locale.getDefault(), customSpeed?.trackRateMultiplier ?: 1f)
 
         followDelayText = findViewById(R.id.flashlightFollowDelayText)!!
         followDelayBar = findViewById(R.id.flashlightFollowDelayBar)!!
@@ -237,7 +254,7 @@ class ModSettingsMenu : BaseFragment() {
             object : OnSeekBarChangeListener {
 
                 private val flashlight
-                    get() = ModMenu.getInstance().enabledMods.ofType<ModFlashlight>()
+                    get() = mods.ofType<ModFlashlight>()
 
                 override fun onProgressChanged(
                     seekBar: SeekBar?,
