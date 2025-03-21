@@ -496,12 +496,6 @@ public class ModMenu implements IModSwitcher {
         customSpeed.setTrackRateMultiplier(speed);
     }
 
-    public float getFLFollowDelay() {
-        var flashlight = enabledMods.ofType(ModFlashlight.class);
-
-        return flashlight != null ? flashlight.followDelay : ModFlashlight.DEFAULT_FOLLOW_DELAY;
-    }
-
     public boolean isEnableNCWhenSpeedChange(){
         return enableNCWhenSpeedChange;
     }
