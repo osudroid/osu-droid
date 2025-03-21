@@ -8,7 +8,6 @@ import org.anddev.andengine.entity.modifier.MoveModifier;
 import org.anddev.andengine.util.modifier.ease.EaseExponentialOut;
 
 import ru.nsu.ccfit.zuev.osu.Config;
-import ru.nsu.ccfit.zuev.osu.menu.ModMenu;
 
 
 public class FlashLightEntity extends Entity  {
@@ -16,13 +15,15 @@ public class FlashLightEntity extends Entity  {
     private final FlashLightDimLayerSprite dimLayer;
     private boolean isTrackingSliders = false;
 
+    private final float areaFollowDelay;
     private IEntityModifier currentModifier = null;
     private float nextPX;
     private float nextPY;
 
-    public FlashLightEntity() {
+    public FlashLightEntity(final float areaFollowDelay) {
         super(Config.getRES_WIDTH() / 2f, Config.getRES_HEIGHT() / 2f);
 
+        this.areaFollowDelay = areaFollowDelay;
         mainSprite = new MainFlashLightSprite();
         dimLayer = new FlashLightDimLayerSprite();
 
@@ -35,8 +36,6 @@ public class FlashLightEntity extends Entity  {
     }
 
     public void onMouseMove(float pX, float pY) {
-        float flFollowDelay = ModMenu.getInstance().getFLFollowDelay();
-
         if (nextPX != 0 && nextPY != 0 && currentModifier != null && this.getX() != nextPX && this.getY() != nextPY) {
             unregisterEntityModifier(currentModifier);
         }
@@ -44,12 +43,12 @@ public class FlashLightEntity extends Entity  {
         nextPX = FMath.clamp(pX, 0, Config.getRES_WIDTH());
         nextPY = FMath.clamp(pY, 0, Config.getRES_HEIGHT());
 
-        if (flFollowDelay == 0) {
+        if (areaFollowDelay == 0) {
             setPosition(nextPX, nextPY);
             return;
         }
 
-        currentModifier = new MoveModifier(flFollowDelay, this.getX(), nextPX, this.getY(), nextPY, EaseExponentialOut.getInstance());
+        currentModifier = new MoveModifier(areaFollowDelay, this.getX(), nextPX, this.getY(), nextPY, EaseExponentialOut.getInstance());
 
         registerEntityModifier(currentModifier);
     }
