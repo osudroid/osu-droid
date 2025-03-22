@@ -8,12 +8,20 @@ import com.rian.osu.beatmap.sections.BeatmapDifficulty
 import com.rian.osu.math.Vector2
 import com.rian.osu.utils.CircleSizeCalculator
 import kotlin.math.min
+import ru.nsu.ccfit.zuev.osu.game.mods.GameMod
 
 /**
  * Represents the Hard Rock mod.
  */
-class ModHardRock : Mod(), IModApplicableToDifficulty, IModApplicableToHitObject {
-    override val droidString = "r"
+class ModHardRock : Mod(), IModUserSelectable, IModApplicableToDifficulty, IModApplicableToHitObject {
+    override val droidChar = 'r'
+    override val acronym = "HR"
+    override val textureNameSuffix = "hardrock"
+    override val enum = GameMod.MOD_HARDROCK
+    override val isRanked = true
+    override val incompatibleMods = super.incompatibleMods + ModEasy::class
+
+    override fun calculateScoreMultiplier(difficulty: BeatmapDifficulty) = 1.06f
 
     override fun applyToDifficulty(mode: GameMode, difficulty: BeatmapDifficulty) = difficulty.run {
         difficultyCS = when (mode) {
@@ -67,6 +75,10 @@ class ModHardRock : Mod(), IModApplicableToDifficulty, IModApplicableToHitObject
     }
 
     private fun applySetting(value: Float, ratio: Float = ADJUST_RATIO) = min(value * ratio, 10f)
+
+    override fun equals(other: Any?) = other === this || other is ModHardRock
+    override fun hashCode() = super.hashCode()
+    override fun deepCopy() = ModHardRock()
 
     companion object {
         private const val ADJUST_RATIO = 1.4f

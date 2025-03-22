@@ -14,7 +14,7 @@ class StandardAim(
     /**
      * The [Mod]s that this skill processes.
      */
-    mods: List<Mod>,
+    mods: Iterable<Mod>,
 
     /**
      * Whether to consider sliders in the calculation.
@@ -43,7 +43,7 @@ class StandardAim(
         }
 
         return sliderStrains.fold(0.0) { total, strain ->
-            total + 1 / (1 + exp(-((strain / maxStrain) * 12 - 6)))
+            total + 1 / (1 + exp(-(strain / maxStrain * 12 - 6)))
         }
     }
 

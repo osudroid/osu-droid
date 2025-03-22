@@ -10,7 +10,7 @@ abstract class Skill<in TObject : DifficultyHitObject>(
     /**
      * The [Mod]s that this skill processes.
      */
-    protected val mods: List<Mod>
+    protected val mods: Iterable<Mod>
 ) {
     /**
      * Calculates the strain value of a hit object and stores the value in it.

@@ -12,7 +12,7 @@ abstract class StandardStrainSkill(
     /**
      * The [Mod]s that this skill processes.
      */
-    mods: List<Mod>
+    mods: Iterable<Mod>
 ) : StrainSkill<StandardDifficultyHitObject>(mods) {
     /**
      * The weight by which each strain value decays.

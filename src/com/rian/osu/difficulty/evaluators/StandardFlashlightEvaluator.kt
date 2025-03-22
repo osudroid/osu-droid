@@ -27,7 +27,7 @@ object StandardFlashlightEvaluator {
      * @param mods The mods used.
      */
     @JvmStatic
-    fun evaluateDifficultyOf(current: StandardDifficultyHitObject, mods: List<Mod>): Double {
+    fun evaluateDifficultyOf(current: StandardDifficultyHitObject, mods: Iterable<Mod>): Double {
         // Exclude overlapping objects that can be tapped at once.
         if (current.obj is Spinner) {
             return 0.0

@@ -39,7 +39,7 @@ object DroidFlashlightEvaluator {
      * @param withSliders Whether to take slider difficulty into account.
      */
     @JvmStatic
-    fun evaluateDifficultyOf(current: DroidDifficultyHitObject, mods: List<Mod>, withSliders: Boolean): Double {
+    fun evaluateDifficultyOf(current: DroidDifficultyHitObject, mods: Iterable<Mod>, withSliders: Boolean): Double {
         if (
             current.obj is Spinner ||
             // Exclude overlapping objects that can be tapped at once.

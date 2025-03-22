@@ -23,7 +23,7 @@ import kotlinx.coroutines.ensureActive
 class DroidDifficultyCalculator : DifficultyCalculator<DroidPlayableBeatmap, DroidDifficultyHitObject, DroidDifficultyAttributes>() {
     override val difficultyMultiplier = 0.18
     override val difficultyAdjustmentMods = super.difficultyAdjustmentMods +
-        setOf(ModPrecise(), ModScoreV2(), ModTraceable())
+        setOf(ModPrecise::class, ModScoreV2::class, ModTraceable::class)
 
     private val maximumSectionDeltaTime = 2000
     private val minimumSectionObjectCount = 5
@@ -34,9 +34,8 @@ class DroidDifficultyCalculator : DifficultyCalculator<DroidPlayableBeatmap, Dro
         skills: Array<Skill<DroidDifficultyHitObject>>,
         objects: Array<DroidDifficultyHitObject>,
     ) = DroidDifficultyAttributes().apply {
-        mods = beatmap.mods?.toList() ?: mods
-        customSpeedMultiplier = beatmap.customSpeedMultiplier
-        clockRate = beatmap.overallSpeedMultiplier.toDouble()
+        mods = beatmap.mods.values.toSet()
+        clockRate = beatmap.speedMultiplier.toDouble()
 
         maxCombo = beatmap.maxCombo
         hitCircleCount = beatmap.hitObjects.circleCount
@@ -49,7 +48,7 @@ class DroidDifficultyCalculator : DifficultyCalculator<DroidPlayableBeatmap, Dro
         populateFlashlightAttributes(skills)
         populateVisualAttributes(skills)
 
-        if (mods.any { it is ModRelax }) {
+        if (ModRelax::class in beatmap.mods) {
             aimDifficulty *= 0.9
             tapDifficulty = 0.0
             rhythmDifficulty = 0.0
@@ -57,7 +56,7 @@ class DroidDifficultyCalculator : DifficultyCalculator<DroidPlayableBeatmap, Dro
             visualDifficulty = 0.0
         }
 
-        if (mods.any { it is ModAutopilot }) {
+        if (ModAutopilot::class in beatmap.mods) {
             aimDifficulty = 0.0
             flashlightDifficulty *= 0.3
             visualDifficulty *= 0.8
@@ -65,7 +64,7 @@ class DroidDifficultyCalculator : DifficultyCalculator<DroidPlayableBeatmap, Dro
 
         val baseAimPerformance = (5 * max(1.0, aimDifficulty.pow(0.8) / 0.0675) - 4).pow(3) / 100000
         val baseTapPerformance = (5 * max(1.0, tapDifficulty / 0.0675) - 4).pow(3) / 100000
-        val baseFlashlightPerformance = flashlightDifficulty.pow(1.6) * 25
+        val baseFlashlightPerformance = if (ModFlashlight::class in beatmap.mods) flashlightDifficulty.pow(1.6) * 25 else 0.0
         val baseVisualPerformance = visualDifficulty.pow(1.6) * 22.5
 
         val basePerformance = (
@@ -81,7 +80,7 @@ class DroidDifficultyCalculator : DifficultyCalculator<DroidPlayableBeatmap, Dro
             if (basePerformance > 1e-5) 0.027 * (cbrt(100000 / 2.0.pow(1 / 1.1) * basePerformance) + 4)
             else 0.0
 
-        val isPrecise = mods.any { it is ModPrecise }
+        val isPrecise = ModPrecise::class in beatmap.mods
         // Weird cast of greatWindow, but necessary for difficulty calculation parity
         val greatWindow = beatmap.hitWindow.greatWindow.toDouble() / clockRate
 
@@ -92,15 +91,15 @@ class DroidDifficultyCalculator : DifficultyCalculator<DroidPlayableBeatmap, Dro
     }
 
     override fun createSkills(beatmap: DroidPlayableBeatmap): Array<Skill<DroidDifficultyHitObject>> {
-        val mods = beatmap.mods?.toList() ?: emptyList()
+        val mods = beatmap.mods.values
         val skills = mutableListOf<Skill<DroidDifficultyHitObject>>()
 
-        if (mods.none { it is ModAutopilot }) {
+        if (ModAutopilot::class !in beatmap.mods) {
             skills.add(DroidAim(mods, true))
             skills.add(DroidAim(mods, false))
         }
 
-        if (mods.none { it is ModRelax }) {
+        if (ModRelax::class !in beatmap.mods) {
             // Tap and visual skills depend on rhythm skill, so we put it first
             skills.add(DroidRhythm(mods))
 
@@ -111,7 +110,7 @@ class DroidDifficultyCalculator : DifficultyCalculator<DroidPlayableBeatmap, Dro
             skills.add(DroidVisual(mods, false))
         }
 
-        if (mods.any { it is ModFlashlight }) {
+        if (ModFlashlight::class in beatmap.mods) {
             skills.add(DroidFlashlight(mods, true))
             skills.add(DroidFlashlight(mods, false))
         }
@@ -125,7 +124,7 @@ class DroidDifficultyCalculator : DifficultyCalculator<DroidPlayableBeatmap, Dro
             return emptyArray()
         }
 
-        val clockRate = beatmap.overallSpeedMultiplier.toDouble()
+        val clockRate = beatmap.speedMultiplier.toDouble()
         val objects = beatmap.hitObjects.objects
         val arr = arrayOfNulls<DroidDifficultyHitObject>(objects.size)
 
@@ -145,16 +144,8 @@ class DroidDifficultyCalculator : DifficultyCalculator<DroidPlayableBeatmap, Dro
         return arr as Array<DroidDifficultyHitObject>
     }
 
-    override fun createPlayableBeatmap(
-        beatmap: Beatmap,
-        parameters: DifficultyCalculationParameters?,
-        scope: CoroutineScope?
-    ) = beatmap.createDroidPlayableBeatmap(
-            parameters?.mods,
-            parameters?.customSpeedMultiplier ?: 1f,
-            parameters?.oldStatistics == true,
-            scope
-        )
+    override fun createPlayableBeatmap(beatmap: Beatmap, mods: Iterable<Mod>?, scope: CoroutineScope?) =
+        beatmap.createDroidPlayableBeatmap(mods, scope)
 
     private fun DroidDifficultyAttributes.populateAimAttributes(skills: Array<Skill<DroidDifficultyHitObject>>) {
         val aim = skills.find<DroidAim> { it.withSliders } ?: return
