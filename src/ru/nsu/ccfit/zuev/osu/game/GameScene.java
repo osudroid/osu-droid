@@ -2113,7 +2113,7 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
                 sprite.setShowing(true);
             }
 
-            if (!GameHelper.isAuto() && !GameHelper.isAutopilotMod()) {
+            if (!GameHelper.isAuto()) {
                 hud.onGameplayTouchDown(eventTime / 1000f);
             }
 
