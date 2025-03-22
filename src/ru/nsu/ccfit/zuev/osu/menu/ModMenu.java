@@ -102,11 +102,8 @@ public class ModMenu implements IModSwitcher {
         }
 
         if (!Multiplayer.isRoomHost() && (modMap.contains(ModDoubleTime.class) || modMap.contains(ModNightCore.class))) {
-            var doubleTime = new ModDoubleTime();
-            var nightCore = new ModNightCore();
-
-            enabledMods.remove(Config.isUseNightcoreOnMultiplayer() ? doubleTime : nightCore);
-            enabledMods.put(Config.isUseNightcoreOnMultiplayer() ? nightCore : doubleTime);
+            enabledMods.remove(Config.isUseNightcoreOnMultiplayer() ? ModDoubleTime.class : ModNightCore.class);
+            enabledMods.put(Config.isUseNightcoreOnMultiplayer() ? ModNightCore.class : ModDoubleTime.class);
         }
 
         update();
