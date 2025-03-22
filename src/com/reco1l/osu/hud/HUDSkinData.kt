@@ -32,6 +32,12 @@ data class HUDSkinData(val elements: List<HUDElementSkinData>) {
                     position = Vec2(-17f, 9f)
                 ),
                 HUDElementSkinData(
+                    type = GameplayLeaderboard::class,
+                    anchor = Anchor.TopLeft,
+                    origin = Anchor.TopLeft,
+                    position = Vec2(0f, 83f)
+                ),
+                HUDElementSkinData(
                     type = HUDComboCounter::class,
                     anchor = Anchor.BottomLeft,
                     origin = Anchor.BottomLeft,
@@ -77,12 +83,6 @@ data class HUDSkinData(val elements: List<HUDElementSkinData>) {
                     type = HUDHitErrorMeter::class,
                     anchor = Anchor.BottomCenter,
                     origin = Anchor.BottomCenter
-                ),
-                HUDElementSkinData(
-                    type = GameplayLeaderboard::class,
-                    anchor = Anchor.TopLeft,
-                    origin = Anchor.TopLeft,
-                    position = Vec2(0f, 83f)
                 )
             )
         )
