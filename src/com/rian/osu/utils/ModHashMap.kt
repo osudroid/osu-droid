@@ -152,6 +152,15 @@ class ModHashMap : HashMap<Class<out Mod>, Mod> {
     fun <T : Mod> remove(key: KClass<out T>) = remove(key.java) as? T
 
     /**
+     * Removes a [Mod] of the specified type from this [ModHashMap].
+     *
+     * @param key The [Mod] type to remove.
+     * @return The removed [Mod] instance, or `null` if the [Mod] does not exist in this [ModHashMap].
+     */
+    @Suppress("UNCHECKED_CAST")
+    fun <T : Mod> remove(key: Class<out T>) = remove(key) as? T
+
+    /**
      * Converts this [ModHashMap] to a [String] that can be displayed to the player.
      */
     fun toReadable(): String {
