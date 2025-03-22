@@ -2766,7 +2766,7 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
                     // BASS may report the wrong position. When that happens, `dt` will
                     // be negative. In that case, we should ignore the update.
                     // See https://github.com/ppy/osu/issues/26879 for more information.
-                    dt = Math.max(0, songService.getPosition() / 1000f - (elapsedTime - totalOffset));
+                    dt = songService.getPosition() / 1000f - (elapsedTime - totalOffset);
                 } else if (!musicStarted) {
                     // Cap elapsed time at the music start time to prevent objects from progressing too far.
                     dt = Math.min(elapsedTime + dt, totalOffset) - elapsedTime;
@@ -2779,6 +2779,11 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
                         });
                     }
                 }
+
+                // BASS may report the wrong position. When that happens, `dt` will
+                // be negative. In that case, we should ignore the update.
+                // See https://github.com/ppy/osu/issues/26879 for more information.
+                dt = Math.max(0, dt);
 
                 update(dt);
                 super.onManagedUpdate(dt);
