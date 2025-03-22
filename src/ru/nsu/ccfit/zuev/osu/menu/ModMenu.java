@@ -477,8 +477,7 @@ public class ModMenu implements IModSwitcher {
 
     public void setEnableNCWhenSpeedChange(boolean t){
         enableNCWhenSpeedChange = t;
-
-        GlobalManager.getInstance().getSongMenu().updateMusicEffects();
+        reloadMusicEffects();
     }
 
     public void cancelCalculationJob() {
