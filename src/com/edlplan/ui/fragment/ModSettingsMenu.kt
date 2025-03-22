@@ -241,6 +241,7 @@ class ModSettingsMenu : BaseFragment() {
                         }
 
                         ModMenu.getInstance().changeMultiplierText()
+                        GlobalManager.getInstance().songMenu.updateMusicEffects()
                     }
                 }
             )
@@ -291,11 +292,6 @@ class ModSettingsMenu : BaseFragment() {
         customODBar.max = 110
         customCSBar.max = 150
         customHPBar.max = 110
-
-        customARToggle.setOnCheckedChangeListener(null)
-        customODToggle.setOnCheckedChangeListener(null)
-        customCSToggle.setOnCheckedChangeListener(null)
-        customHPToggle.setOnCheckedChangeListener(null)
 
         updateDifficultyAdjustValues()
 
