@@ -157,6 +157,7 @@ class ModHashMap : HashMap<Class<out Mod>, Mod> {
      * @param key The [Mod] type to remove.
      * @return The removed [Mod] instance, or `null` if the [Mod] does not exist in this [ModHashMap].
      */
+    @JvmName("removeOfType")
     @Suppress("UNCHECKED_CAST")
     fun <T : Mod> remove(key: Class<out T>) = remove(key) as? T
 

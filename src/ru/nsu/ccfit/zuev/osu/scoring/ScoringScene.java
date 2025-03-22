@@ -417,7 +417,7 @@ public class ScoringScene {
 
                                 if (mods.contains(ModNightCore.class) && replay.replayVersion <= 3) {
                                     copiedMods = mods.deepCopy();
-                                    copiedMods.remove(ModNightCore.class);
+                                    copiedMods.removeOfType(ModNightCore.class);
                                     copiedMods.put(ModOldNightCore.class);
                                 }
 
