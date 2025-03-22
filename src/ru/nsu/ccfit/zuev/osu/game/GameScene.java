@@ -113,7 +113,6 @@ import ru.nsu.ccfit.zuev.osu.scoring.ResultType;
 import ru.nsu.ccfit.zuev.osu.scoring.ScoringScene;
 import ru.nsu.ccfit.zuev.osu.scoring.StatisticV2;
 import ru.nsu.ccfit.zuev.osu.scoring.TouchType;
-import ru.nsu.ccfit.zuev.osuplus.BuildConfig;
 import ru.nsu.ccfit.zuev.skins.OsuSkin;
 import ru.nsu.ccfit.zuev.skins.BeatmapSkinManager;
 
@@ -183,9 +182,6 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
     private DifficultyCalculationParameters lastDifficultyCalculationParameters;
     private TimedDifficultyAttributes<DroidDifficultyAttributes>[] droidTimedDifficultyAttributes;
     private TimedDifficultyAttributes<StandardDifficultyAttributes>[] standardTimedDifficultyAttributes;
-
-    private final List<ChangeableText> counterTexts = new ArrayList<>(5);
-    private ChangeableText memText;
 
     // Game
 
@@ -945,11 +941,6 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
         }
         stat.setPlayerName(playname);
 
-        for (var text : counterTexts) {
-            text.detachSelf();
-        }
-        counterTexts.clear();
-
         var counterTextFont = ResourceManager.getInstance().getFont("smallFont");
 
         if (Config.isShowFPS()) {
@@ -970,19 +961,12 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
                 }
             });
 
-            counterTexts.add(fpsCounter);
-        }
+            fpsCounter.setPosition(
+                Config.getRES_WIDTH() - fpsCounter.getWidthScaled() - 5,
+                Config.getRES_HEIGHT() - fpsCounter.getHeightScaled() - 10
+            );
 
-        if (BuildConfig.DEBUG) {
-            memText = new ChangeableText(780, 520, counterTextFont, "0/0 MB    ");
-            counterTexts.add(memText);
-        }
-
-        updateCounterTexts();
-
-        // Attach the counter texts
-        for (var text : counterTexts) {
-            hud.attachChild(text);
+            hud.attachChild(fpsCounter);
         }
 
         if (!Multiplayer.isMultiplayer) {
@@ -1023,8 +1007,6 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
 
     private void update(final float dt) {
         elapsedTime += dt;
-
-        updateCounterTexts();
 
         if (Multiplayer.isMultiplayer)
         {
@@ -2737,22 +2719,6 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
         else{
             ToastLogger.showText(StringTable.get(com.osudroid.resources.R.string.message_save_replay_failed), true);
             return false;
-        }
-    }
-
-    private void updateCounterTexts() {
-        if (memText != null) {
-            var totalMemory = Runtime.getRuntime().totalMemory();
-            var usedMemory = totalMemory - Runtime.getRuntime().freeMemory();
-
-            memText.setText(usedMemory / 1024 / 1024 + "/" + totalMemory / 1024 / 1024 + " MB    ");
-        }
-
-        // Update counter text positions
-        for (int i = 0; i < counterTexts.size(); ++i) {
-            var text = counterTexts.get(i);
-
-            text.setPosition(Config.getRES_WIDTH() - text.getWidthScaled() - 5, Config.getRES_HEIGHT() - text.getHeightScaled() - 10 - i * text.getHeightScaled());
         }
     }
 
