@@ -1268,6 +1268,19 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
                 video.setAlpha(Math.min(video.getAlpha() + 0.03f, 1.0f));
         }
 
+        if (elapsedTime >= totalOffset && !musicStarted) {
+            musicStarted = true;
+
+            Execution.updateThread(() -> {
+                // Start the music in the next update tick to ensure the most minimum time difference between the music
+                // start and the game start.
+                var songService = GlobalManager.getInstance().getSongService();
+
+                songService.play();
+                songService.setVolume(Config.getBgmVolume());
+            });
+        }
+
         boolean shouldBePunished = false;
 
         while (!objects.isEmpty()
@@ -2770,14 +2783,6 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
                 } else if (!musicStarted) {
                     // Cap elapsed time at the music start time to prevent objects from progressing too far.
                     dt = Math.min(elapsedTime + dt, totalOffset) - elapsedTime;
-
-                    if (elapsedTime >= totalOffset && !musicStarted) {
-                        Execution.updateThread(() -> {
-                            songService.play();
-                            songService.setVolume(Config.getBgmVolume());
-                            musicStarted = true;
-                        });
-                    }
                 }
 
                 // BASS may report the wrong position. When that happens, `dt` will
