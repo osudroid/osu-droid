@@ -952,6 +952,14 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
                 private long previousDrawTime;
 
                 @Override
+                protected void onManagedUpdate(float pSecondsElapsed) {
+                    fpsCounter.setPosition(
+                        Config.getRES_WIDTH() - fpsCounter.getWidthScaled() - 5,
+                        Config.getRES_HEIGHT() - fpsCounter.getHeightScaled() - 10
+                    );
+                }
+
+                @Override
                 protected void onManagedDraw(GL10 pGL, Camera pCamera) {
                     long currentDrawTime = SystemClock.uptimeMillis();
 
