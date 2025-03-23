@@ -10,7 +10,7 @@ import ru.nsu.ccfit.zuev.osu.game.mods.GameMod
 /**
  * A [HashMap] of [Mod]s with additional functionalities.
  */
-class ModHashMap : HashMap<Class<out Mod>, Mod> {
+open class ModHashMap : HashMap<Class<out Mod>, Mod> {
     constructor() : super()
     constructor(map: Map<out Class<out Mod>, Mod>) : super(map)
     constructor(mods: Collection<Mod>) : this(mods as Iterable<Mod>)

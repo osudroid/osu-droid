@@ -81,16 +81,15 @@ public class ModMenu implements IModSwitcher {
 
     public void setMods(RoomMods mods, boolean isFreeMods, boolean allowForceDifficultyStatistics) {
         var currentMods = enabledMods;
-        var modMap = mods.map;
 
         if (isFreeMods) {
-            for (var mod : modMap.values()) {
+            for (var mod : mods.values()) {
                 if (!mod.isValidForMultiplayerAsFreeMod()) {
                     enabledMods.put(mod);
                 }
             }
         } else {
-            enabledMods = modMap;
+            enabledMods = mods;
         }
 
         if (allowForceDifficultyStatistics) {
@@ -103,7 +102,7 @@ public class ModMenu implements IModSwitcher {
             }
         }
 
-        if (!Multiplayer.isRoomHost() && (modMap.contains(ModDoubleTime.class) || modMap.contains(ModNightCore.class))) {
+        if (!Multiplayer.isRoomHost() && (mods.contains(ModDoubleTime.class) || mods.contains(ModNightCore.class))) {
             enabledMods.removeOfType(Config.isUseNightcoreOnMultiplayer() ? ModDoubleTime.class : ModNightCore.class);
             enabledMods.put(Config.isUseNightcoreOnMultiplayer() ? ModNightCore.class : ModDoubleTime.class);
         }

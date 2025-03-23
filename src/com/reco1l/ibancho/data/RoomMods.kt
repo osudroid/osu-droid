@@ -9,15 +9,10 @@ import com.rian.osu.mods.ModNightCore
 import com.rian.osu.utils.ModHashMap
 import com.rian.osu.utils.ModUtils
 
-data class RoomMods(@JvmField val map: ModHashMap)
-{
-    @JvmOverloads
-    constructor(modString: String? = null) : this(ModUtils.convertModString(modString))
-
-    override fun toString() = map.toReadable()
+class RoomMods @JvmOverloads constructor(modString: String? = null) : ModHashMap(ModUtils.convertModString(modString)) {
 
     fun toString(room: Room): String {
-        if (map.isEmpty()) {
+        if (isEmpty()) {
             return buildString {
 
                 if (room.gameplaySettings.isFreeMod) {
@@ -35,10 +30,10 @@ data class RoomMods(@JvmField val map: ModHashMap)
 
             append("Free mods, ")
 
-            val doubleTime = map.ofType<ModDoubleTime>()
-            val nightCore = map.ofType<ModNightCore>()
-            val halfTime = map.ofType<ModHalfTime>()
-            val customSpeed = map.ofType<ModCustomSpeed>()
+            val doubleTime = ofType<ModDoubleTime>()
+            val nightCore = ofType<ModNightCore>()
+            val halfTime = ofType<ModHalfTime>()
+            val customSpeed = ofType<ModCustomSpeed>()
 
             if (doubleTime != null) {
                 append("${doubleTime.acronym}, ")
@@ -79,19 +74,19 @@ data class RoomMods(@JvmField val map: ModHashMap)
         if (gameplaySettings?.isFreeMod == true) {
             // Under free mods, force difficulty statistics is still not allowed unless the setting is explicitly set.
             if (!gameplaySettings.allowForceDifficultyStatistics &&
-                map.ofType<ModDifficultyAdjust>() != other.map.ofType<ModDifficultyAdjust>()) {
+                ofType<ModDifficultyAdjust>() != other.ofType<ModDifficultyAdjust>()) {
                 return false
             }
 
-            val requiredMods = map.filter { !it.value.isValidForMultiplayerAsFreeMod }
-            val otherRequiredMods = other.map.filter { !it.value.isValidForMultiplayerAsFreeMod }
+            val requiredMods = filter { !it.value.isValidForMultiplayerAsFreeMod }
+            val otherRequiredMods = other.filter { !it.value.isValidForMultiplayerAsFreeMod }
 
             return requiredMods.size == otherRequiredMods.size && requiredMods.values.containsAll(otherRequiredMods.values)
         }
 
-        return map == other.map
+        return super.equals(other)
     }
 
     // Auto-generated this will help to check instance equality aka ===
-    override fun hashCode() = map.hashCode()
+    override fun hashCode() = super.hashCode()
 }

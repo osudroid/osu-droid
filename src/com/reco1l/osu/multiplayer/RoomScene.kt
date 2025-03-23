@@ -886,7 +886,7 @@ object RoomScene : Scene(), IRoomEventListener, IPlayerEventListener {
             isWaitingForModsChange = true
 
             // If win condition is Score V2 we add the mod.
-            val roomMods = room!!.mods.map.apply {
+            val roomMods = room!!.mods.apply {
 
                 if (winCondition == ScoreV2)
                     put(ModScoreV2::class)
