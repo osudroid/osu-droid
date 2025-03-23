@@ -99,6 +99,10 @@ class ModSettingsMenu : BaseFragment() {
         putInt("backgroundBrightness", findViewById<SeekBar>(R.id.backgroundBrightnessBar)!!.progress)
     }
 
+    fun reload() {
+        reload(null)
+    }
+
     private fun reload(state: SavedState?) {
         if (state != null) {
             this.setInitialSavedState(state)
