@@ -483,7 +483,8 @@ public class ScoringScene {
 
             // Save score
             if (stat.getTotalScoreWithMultiplier() <= 0 || stat.getMod().contains(GameMod.MOD_AUTO) ||
-                    (Multiplayer.isMultiplayer && game.hasFailed)) {
+                    (Multiplayer.isMultiplayer &&
+                        ((Multiplayer.room != null && Multiplayer.room.isTeamVersus()) || game.hasFailed))) {
                 return;
             }
 
