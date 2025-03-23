@@ -37,7 +37,7 @@ import ru.nsu.ccfit.zuev.osu.helper.TextButton;
 public class ModMenu implements IModSwitcher {
     private static final ModMenu instance = new ModMenu();
     private Scene scene = null, parent;
-    private ModHashMap enabledMods = new ModHashMap();
+    private final ModHashMap enabledMods = new ModHashMap();
     private ChangeableText multiplierText;
     private BeatmapInfo selectedBeatmap;
     private final Map<Mod, ModButton> modButtons = new HashMap<>();
@@ -80,7 +80,7 @@ public class ModMenu implements IModSwitcher {
     }
 
     public void setMods(RoomMods mods, boolean isFreeMods, boolean allowForceDifficultyStatistics) {
-        var currentMods = enabledMods;
+        var difficultyAdjust = enabledMods.ofType(ModDifficultyAdjust.class);
 
         if (isFreeMods) {
             for (var mod : mods.values()) {
@@ -89,17 +89,14 @@ public class ModMenu implements IModSwitcher {
                 }
             }
         } else {
-            enabledMods = mods;
+            enabledMods.clear();
+            enabledMods.putAll(mods);
         }
 
-        if (allowForceDifficultyStatistics) {
-            // If force difficulty statistics is enabled, preserve the player's force difficulty statistics instead
-            // of the room.
-            var difficultyAdjust = currentMods.ofType(ModDifficultyAdjust.class);
-
-            if (difficultyAdjust != null) {
-                enabledMods.put(difficultyAdjust);
-            }
+        // If force difficulty statistics is enabled, preserve the player's force difficulty statistics instead
+        // of the room.
+        if (allowForceDifficultyStatistics && difficultyAdjust != null) {
+            enabledMods.put(difficultyAdjust);
         }
 
         if (!Multiplayer.isRoomHost() && (mods.contains(ModDoubleTime.class) || mods.contains(ModNightCore.class))) {
