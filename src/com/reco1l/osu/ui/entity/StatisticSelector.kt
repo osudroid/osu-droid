@@ -14,7 +14,6 @@ import java.text.NumberFormat.getNumberInstance
 import java.util.Locale.ENGLISH
 import java.util.Locale.US
 import ru.nsu.ccfit.zuev.osu.GlobalManager.getInstance as getGlobal
-import ru.nsu.ccfit.zuev.osu.ResourceManager.getInstance as getResources
 
 /**
  * Scoreboard list used for multiplayer scores in results screen.
