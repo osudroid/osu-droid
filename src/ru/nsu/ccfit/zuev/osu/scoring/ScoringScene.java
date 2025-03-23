@@ -478,9 +478,14 @@ public class ScoringScene {
             updateLeaderboard();
         }
 
-        //save and upload score
         if (beatmap != null && beatmap.getMD5().equals(mapMD5)) {
             ResourceManager.getInstance().getSound("applause").play();
+
+            // Save score
+            if (stat.getTotalScoreWithMultiplier() <= 0 || stat.getMod().contains(GameMod.MOD_AUTO) ||
+                    (Multiplayer.isMultiplayer && game.hasFailed)) {
+                return;
+            }
 
             int totalNotes = stat.getHit300() + stat.getHit100() + stat.getHit50() + stat.getMisses();
 
@@ -491,44 +496,41 @@ public class ScoringScene {
                 return;
             }
 
-            if ((!Multiplayer.isMultiplayer || !GlobalManager.getInstance().getGameScene().hasFailed) &&
-                    stat.getTotalScoreWithMultiplier() > 0 && !stat.getMod().contains(GameMod.MOD_AUTO)) {
-                stat.setReplayFilename(FilenameUtils.getName(replayPath));
-                stat.setBeatmapMD5(beatmap.getMD5());
+            stat.setReplayFilename(FilenameUtils.getName(replayPath));
+            stat.setBeatmapMD5(beatmap.getMD5());
 
-                try {
-                    DatabaseManager.getScoreInfoTable().insertScore(stat.toScoreInfo());
-                } catch (Exception e) {
-                    Log.e("GameScene", "Failed to save score to database", e);
-                }
+            try {
+                DatabaseManager.getScoreInfoTable().insertScore(stat.toScoreInfo());
+            } catch (Exception e) {
+                Log.e("GameScene", "Failed to save score to database", e);
             }
 
-            if (stat.getTotalScoreWithMultiplier() > 0 && OnlineManager.getInstance().isStayOnline()) {
-
-                if (GlobalManager.getInstance().getGameScene().hasFailed ||
-                        (Multiplayer.isMultiplayer && !Config.isSubmitScoreOnMultiplayer()))
-                    return;
-
-                boolean hasUnrankedMod = SmartIterator.wrap(stat.getMod().iterator()).applyFilter(m -> m.unranked).hasNext();
-                if (hasUnrankedMod
-                    || Config.isRemoveSliderLock()
-                    || ModMenu.getInstance().isCustomAR()
-                    || ModMenu.getInstance().isCustomOD()
-                    || ModMenu.getInstance().isCustomCS()
-                    || ModMenu.getInstance().isCustomHP()
-                    || !ModMenu.getInstance().isDefaultFLFollowDelay()
-                    ) {
-                    return;
-                }
-
-                SendingPanel sendingPanel = new SendingPanel(OnlineManager.getInstance().getRank(),
-                        OnlineManager.getInstance().getScore(), OnlineManager.getInstance().getAccuracy(),
-                        OnlineManager.getInstance().getPP());
-                scene.registerTouchArea(sendingPanel.getDismissTouchArea());
-                scene.attachChild(sendingPanel);
-
-                OnlineScoring.getInstance().sendRecord(beatmap, stat, sendingPanel, replayPath);
+            // Upload score
+            if (!OnlineManager.getInstance().isStayOnline() ||
+                    (Multiplayer.isMultiplayer && !Config.isSubmitScoreOnMultiplayer())) {
+                return;
             }
+
+            boolean hasUnrankedMod = SmartIterator.wrap(stat.getMod().iterator()).applyFilter(m -> m.unranked).hasNext();
+
+            if (hasUnrankedMod
+                || Config.isRemoveSliderLock()
+                || ModMenu.getInstance().isCustomAR()
+                || ModMenu.getInstance().isCustomOD()
+                || ModMenu.getInstance().isCustomCS()
+                || ModMenu.getInstance().isCustomHP()
+                || !ModMenu.getInstance().isDefaultFLFollowDelay()) {
+                return;
+            }
+
+            var sendingPanel = new SendingPanel(OnlineManager.getInstance().getRank(),
+                    OnlineManager.getInstance().getScore(), OnlineManager.getInstance().getAccuracy(),
+                    OnlineManager.getInstance().getPP());
+
+            scene.registerTouchArea(sendingPanel.getDismissTouchArea());
+            scene.attachChild(sendingPanel);
+
+            OnlineScoring.getInstance().sendRecord(beatmap, stat, sendingPanel, replayPath);
         }
     }
 
