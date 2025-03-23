@@ -162,54 +162,6 @@ open class ModHashMap : HashMap<Class<out Mod>, Mod> {
     fun <T : Mod> remove(key: Class<out T>) = remove(key) as? T
 
     /**
-     * Converts this [ModHashMap] to a [String] that can be displayed to the player.
-     */
-    fun toReadable(): String {
-        if (isEmpty())
-            return "None"
-
-        return buildString {
-            val difficultyAdjust = ofType<ModDifficultyAdjust>()
-            val customSpeed = ofType<ModCustomSpeed>()
-
-            for ((_, m) in this@ModHashMap) when (m) {
-                is ModFlashlight -> {
-                    if (m.followDelay == ModFlashlight.DEFAULT_FOLLOW_DELAY)
-                        append("${m.acronym}, ")
-                    else
-                        append("${m.acronym} ${(m.followDelay * 1000).toInt()}ms, ")
-                }
-
-                is IModUserSelectable -> append("${m.acronym}, ")
-
-                else -> Unit
-            }
-
-            if (customSpeed != null) {
-                append("%.2fx, ".format(customSpeed.trackRateMultiplier))
-            }
-
-            if (difficultyAdjust != null) {
-                if (difficultyAdjust.ar != null) {
-                    append("AR%.1f, ".format(difficultyAdjust.ar))
-                }
-
-                if (difficultyAdjust.od != null) {
-                    append("OD%.1f, ".format(difficultyAdjust.od))
-                }
-
-                if (difficultyAdjust.cs != null) {
-                    append("CS%.1f, ".format(difficultyAdjust.cs))
-                }
-
-                if (difficultyAdjust.hp != null) {
-                    append("HP%.1f, ".format(difficultyAdjust.hp))
-                }
-            }
-        }.substringBeforeLast(',')
-    }
-
-    /**
      * Converts this [ModHashMap] to a [EnumSet] of [GameMod]s.
      */
     fun toGameModSet(): EnumSet<GameMod> = EnumSet.noneOf(GameMod::class.java).also {

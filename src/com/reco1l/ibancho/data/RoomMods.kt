@@ -1,15 +1,65 @@
 package com.reco1l.ibancho.data
 
 import com.reco1l.osu.multiplayer.Multiplayer
+import com.rian.osu.mods.IModUserSelectable
 import com.rian.osu.mods.ModCustomSpeed
 import com.rian.osu.mods.ModDifficultyAdjust
 import com.rian.osu.mods.ModDoubleTime
+import com.rian.osu.mods.ModFlashlight
 import com.rian.osu.mods.ModHalfTime
 import com.rian.osu.mods.ModNightCore
 import com.rian.osu.utils.ModHashMap
 import com.rian.osu.utils.ModUtils
 
 class RoomMods @JvmOverloads constructor(modString: String? = null) : ModHashMap(ModUtils.convertModString(modString)) {
+
+    /**
+     * Converts this [RoomMods] to a [String] that can be displayed to the player.
+     */
+    fun toReadable(): String {
+        if (isEmpty())
+            return "None"
+
+        return buildString {
+            val difficultyAdjust = ofType<ModDifficultyAdjust>()
+            val customSpeed = ofType<ModCustomSpeed>()
+
+            for ((_, m) in this@RoomMods) when (m) {
+                is ModFlashlight -> {
+                    if (m.followDelay == ModFlashlight.DEFAULT_FOLLOW_DELAY)
+                        append("${m.acronym}, ")
+                    else
+                        append("${m.acronym} ${(m.followDelay * 1000).toInt()}ms, ")
+                }
+
+                is IModUserSelectable -> append("${m.acronym}, ")
+
+                else -> Unit
+            }
+
+            if (customSpeed != null) {
+                append("%.2fx, ".format(customSpeed.trackRateMultiplier))
+            }
+
+            if (difficultyAdjust != null) {
+                if (difficultyAdjust.ar != null) {
+                    append("AR%.1f, ".format(difficultyAdjust.ar))
+                }
+
+                if (difficultyAdjust.od != null) {
+                    append("OD%.1f, ".format(difficultyAdjust.od))
+                }
+
+                if (difficultyAdjust.cs != null) {
+                    append("CS%.1f, ".format(difficultyAdjust.cs))
+                }
+
+                if (difficultyAdjust.hp != null) {
+                    append("HP%.1f, ".format(difficultyAdjust.hp))
+                }
+            }
+        }.substringBeforeLast(',')
+    }
 
     fun toString(room: Room): String {
         if (isEmpty()) {
