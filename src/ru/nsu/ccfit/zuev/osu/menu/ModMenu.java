@@ -79,8 +79,8 @@ public class ModMenu implements IModSwitcher {
         }
     }
 
-    public void setMods(RoomMods mods, boolean isFreeMods, boolean allowForceDifficultyStatistics)
-    {
+    public void setMods(RoomMods mods, boolean isFreeMods, boolean allowForceDifficultyStatistics) {
+        var currentMods = enabledMods;
         var modMap = mods.map;
 
         if (isFreeMods) {
@@ -93,8 +93,10 @@ public class ModMenu implements IModSwitcher {
             enabledMods = modMap;
         }
 
-        if (!isFreeMods || !allowForceDifficultyStatistics) {
-            var difficultyAdjust = modMap.ofType(ModDifficultyAdjust.class);
+        if (allowForceDifficultyStatistics) {
+            // If force difficulty statistics is enabled, preserve the player's force difficulty statistics instead
+            // of the room.
+            var difficultyAdjust = currentMods.ofType(ModDifficultyAdjust.class);
 
             if (difficultyAdjust != null) {
                 enabledMods.put(difficultyAdjust);
