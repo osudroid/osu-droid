@@ -87,6 +87,12 @@ class GameplayHUD : Container(), IGameplayEvents {
      */
     fun addElement(data: HUDElementSkinData, inEditMode: Boolean = isInEditMode) {
         val element = data.type.primaryConstructor!!.call()
+
+        // In edit mode, all elements should be shown.
+        if (!inEditMode && !element.shouldBeShown) {
+            return
+        }
+
         attachChild(element)
         element.restoreData = data
         element.setSkinData(data)
@@ -193,6 +199,11 @@ class GameplayHUD : Container(), IGameplayEvents {
     }
 
     private fun applyDefaultLayout() {
+        // When the HUD is hidden, nothing needs to be adjusted.
+        if (Config.isHideInGameUI()) {
+            return
+        }
+
         // The default layout is hardcoded to keep the original layout before the HUD editor was
         // implemented, as it used cross-references between elements that are not possible to be
         // set in the editor.

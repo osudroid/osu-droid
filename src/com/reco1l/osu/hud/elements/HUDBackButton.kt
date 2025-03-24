@@ -14,6 +14,8 @@ import ru.nsu.ccfit.zuev.osu.ResourceManager
 
 class HUDBackButton : HUDElement() {
 
+    override val shouldBeShown = true
+
     private val requiredPressTimeMs = Config.getInt("back_button_press_time", 300).toFloat()
 
     private val arrow = ExtendedSprite().apply {

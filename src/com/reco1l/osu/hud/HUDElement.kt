@@ -13,6 +13,7 @@ import com.rian.osu.beatmap.hitobject.HitObject
 import org.anddev.andengine.input.touch.TouchEvent
 import kotlin.math.abs
 import kotlin.reflect.KClass
+import ru.nsu.ccfit.zuev.osu.Config
 import ru.nsu.ccfit.zuev.osu.game.GameScene
 import ru.nsu.ccfit.zuev.osu.scoring.StatisticV2
 
@@ -64,6 +65,10 @@ abstract class HUDElement : Container(), IGameplayEvents {
     val isSelected
         get() = (parent as? GameplayHUD)?.selected == this
 
+    /**
+     * Whether this [HUDElement] should be shown.
+     */
+    open val shouldBeShown = !Config.isHideInGameUI()
 
     /**
      * The overlay for this element to be used in edit mode.

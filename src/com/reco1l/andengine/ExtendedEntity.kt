@@ -457,6 +457,13 @@ abstract class ExtendedEntity(
             return
         }
 
+        val parent = parent
+
+        if (blendInfo == BlendInfo.Inherit && parent is ExtendedEntity) {
+            GLHelper.blendFunction(pGL, parent.mSourceBlendFunction, parent.mDestinationBlendFunction)
+            return
+        }
+
         blendInfo.apply(pGL)
     }
 

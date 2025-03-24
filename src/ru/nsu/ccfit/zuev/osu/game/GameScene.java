@@ -112,8 +112,6 @@ import ru.nsu.ccfit.zuev.osu.scoring.ResultType;
 import ru.nsu.ccfit.zuev.osu.scoring.ScoringScene;
 import ru.nsu.ccfit.zuev.osu.scoring.StatisticV2;
 import ru.nsu.ccfit.zuev.osu.scoring.TouchType;
-import ru.nsu.ccfit.zuev.osuplus.BuildConfig;
-import ru.nsu.ccfit.zuev.osuplus.R;
 import ru.nsu.ccfit.zuev.skins.OsuSkin;
 import ru.nsu.ccfit.zuev.skins.BeatmapSkinManager;
 
@@ -183,9 +181,6 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
     private ModHashMap lastMods;
     private TimedDifficultyAttributes<DroidDifficultyAttributes>[] droidTimedDifficultyAttributes;
     private TimedDifficultyAttributes<StandardDifficultyAttributes>[] standardTimedDifficultyAttributes;
-
-    private final List<ChangeableText> counterTexts = new ArrayList<>(5);
-    private ChangeableText memText;
 
     // Game
 
@@ -885,8 +880,8 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
         // HUD should be to the last so we ensure everything is initialized and ready to be used by
         // the HUD elements in their constructors.
         hud = new GameplayHUD();
-        hud.setSkinData(OsuSkin.get().getHUDSkinData());
         hud.setEditMode(isHUDEditorMode);
+        hud.setSkinData(OsuSkin.get().getHUDSkinData());
 
         String playname = Config.getOnlineUsername();
         ChangeableText replayText = null;
@@ -913,11 +908,6 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
         }
         stat.setPlayerName(playname);
 
-        for (var text : counterTexts) {
-            text.detachSelf();
-        }
-        counterTexts.clear();
-
         var counterTextFont = ResourceManager.getInstance().getFont("smallFont");
 
         if (Config.isShowFPS()) {
@@ -929,6 +919,14 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
                 private long previousDrawTime;
 
                 @Override
+                protected void onManagedUpdate(float pSecondsElapsed) {
+                    fpsCounter.setPosition(
+                        Config.getRES_WIDTH() - fpsCounter.getWidthScaled() - 5,
+                        Config.getRES_HEIGHT() - fpsCounter.getHeightScaled() - 10
+                    );
+                }
+
+                @Override
                 protected void onManagedDraw(GL10 pGL, Camera pCamera) {
                     long currentDrawTime = SystemClock.uptimeMillis();
 
@@ -938,19 +936,12 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
                 }
             });
 
-            counterTexts.add(fpsCounter);
-        }
+            fpsCounter.setPosition(
+                Config.getRES_WIDTH() - fpsCounter.getWidthScaled() - 5,
+                Config.getRES_HEIGHT() - fpsCounter.getHeightScaled() - 10
+            );
 
-        if (BuildConfig.DEBUG) {
-            memText = new ChangeableText(780, 520, counterTextFont, "0/0 MB    ");
-            counterTexts.add(memText);
-        }
-
-        updateCounterTexts();
-
-        // Attach the counter texts
-        for (var text : counterTexts) {
-            hud.attachChild(text);
+            hud.attachChild(fpsCounter);
         }
 
         if (!Multiplayer.isMultiplayer) {
@@ -991,8 +982,6 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
 
     private void update(final float dt) {
         elapsedTime += dt;
-
-        updateCounterTexts();
 
         if (Multiplayer.isMultiplayer)
         {
@@ -1252,6 +1241,19 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
 
             if (video.getAlpha() < 1.0f)
                 video.setAlpha(Math.min(video.getAlpha() + 0.03f, 1.0f));
+        }
+
+        if (elapsedTime >= totalOffset && !musicStarted) {
+            musicStarted = true;
+
+            Execution.updateThread(() -> {
+                // Start the music in the next update tick to ensure the most minimum time difference between the music
+                // start and the game start.
+                var songService = GlobalManager.getInstance().getSongService();
+
+                songService.play();
+                songService.setVolume(Config.getBgmVolume());
+            });
         }
 
         boolean shouldBePunished = false;
@@ -2080,7 +2082,7 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
                 sprite.setShowing(true);
             }
 
-            if (!GameHelper.isAuto() && !GameHelper.isAutopilotMod()) {
+            if (!GameHelper.isAuto()) {
                 hud.onGameplayTouchDown(eventTime / 1000f);
             }
 
@@ -2689,22 +2691,6 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
         }
     }
 
-    private void updateCounterTexts() {
-        if (memText != null) {
-            var totalMemory = Runtime.getRuntime().totalMemory();
-            var usedMemory = totalMemory - Runtime.getRuntime().freeMemory();
-
-            memText.setText(usedMemory / 1024 / 1024 + "/" + totalMemory / 1024 / 1024 + " MB    ");
-        }
-
-        // Update counter text positions
-        for (int i = 0; i < counterTexts.size(); ++i) {
-            var text = counterTexts.get(i);
-
-            text.setPosition(Config.getRES_WIDTH() - text.getWidthScaled() - 5, Config.getRES_HEIGHT() - text.getHeightScaled() - 10 - i * text.getHeightScaled());
-        }
-    }
-
     private void updatePPValue(int objectId) {
         if (Config.isHideInGameUI() || !isHUDEditorMode && !OsuSkin.get().getHUDSkinData().hasElement(HUDPPCounter.class)) {
             return;
@@ -2749,19 +2735,16 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
                     // BASS may report the wrong position. When that happens, `dt` will
                     // be negative. In that case, we should ignore the update.
                     // See https://github.com/ppy/osu/issues/26879 for more information.
-                    dt = Math.max(0, songService.getPosition() / 1000f - (elapsedTime - totalOffset));
+                    dt = songService.getPosition() / 1000f - (elapsedTime - totalOffset);
                 } else if (!musicStarted) {
                     // Cap elapsed time at the music start time to prevent objects from progressing too far.
                     dt = Math.min(elapsedTime + dt, totalOffset) - elapsedTime;
-
-                    if (elapsedTime >= totalOffset && !musicStarted) {
-                        Execution.updateThread(() -> {
-                            songService.play();
-                            songService.setVolume(Config.getBgmVolume());
-                            musicStarted = true;
-                        });
-                    }
                 }
+
+                // BASS may report the wrong position. When that happens, `dt` will
+                // be negative. In that case, we should ignore the update.
+                // See https://github.com/ppy/osu/issues/26879 for more information.
+                dt = Math.max(0, dt);
 
                 update(dt);
                 super.onManagedUpdate(dt);

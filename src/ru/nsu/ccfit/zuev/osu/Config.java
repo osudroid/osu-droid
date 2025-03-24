@@ -310,6 +310,14 @@ public class Config {
         Config.showFPS = showFPS;
     }
 
+    public static boolean isShowScoreboard() {
+        return getBoolean("showscoreboard", true);
+    }
+
+    public static void setShowScoreboard(final boolean showScoreboard) {
+        setBoolean("showscoreboard", showScoreboard);
+    }
+
     public static boolean isCorovans() {
         return corovans;
     }

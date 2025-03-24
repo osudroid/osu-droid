@@ -2,12 +2,8 @@ package com.reco1l.osu.hud
 
 import com.reco1l.andengine.Anchor
 import com.reco1l.framework.math.Vec2
-import com.reco1l.osu.hud.elements.HUDAccuracyCounter
-import com.reco1l.osu.hud.elements.HUDBackButton
-import com.reco1l.osu.hud.elements.HUDComboCounter
-import com.reco1l.osu.hud.elements.HUDHealthBar
-import com.reco1l.osu.hud.elements.HUDPieSongProgress
-import com.reco1l.osu.hud.elements.HUDScoreCounter
+import com.reco1l.osu.hud.elements.*
+import com.reco1l.osu.ui.entity.GameplayLeaderboard
 import com.reco1l.toolkt.data.putObject
 import org.json.JSONArray
 import kotlin.reflect.KClass
@@ -22,7 +18,8 @@ data class HUDSkinData(val elements: List<HUDElementSkinData>) {
 
         /**
          * The default layout data for the HUD.
-         * Based on the default skin layout from osu!stable.
+         *
+         * Based on the default skin layout from osu!droid version 1.8.2.1.
          */
         @JvmField
         val Default = HUDSkinData(
@@ -33,6 +30,12 @@ data class HUDSkinData(val elements: List<HUDElementSkinData>) {
                     origin = Anchor.TopRight,
                     scale = 0.6f * 0.96f,
                     position = Vec2(-17f, 9f)
+                ),
+                HUDElementSkinData(
+                    type = GameplayLeaderboard::class,
+                    anchor = Anchor.TopLeft,
+                    origin = Anchor.TopLeft,
+                    position = Vec2(0f, 83f)
                 ),
                 HUDElementSkinData(
                     type = HUDComboCounter::class,
@@ -63,6 +66,23 @@ data class HUDSkinData(val elements: List<HUDElementSkinData>) {
                     anchor = Anchor.CenterRight,
                     origin = Anchor.CenterRight,
                     position = Vec2(-20f, 0f)
+                ),
+                HUDElementSkinData(
+                    type = HUDUnstableRateCounter::class,
+                    anchor = Anchor.BottomRight,
+                    origin = Anchor.BottomRight,
+                    position = Vec2(-10f, -32f)
+                ),
+                HUDElementSkinData(
+                    type = HUDAverageOffsetCounter::class,
+                    anchor = Anchor.BottomRight,
+                    origin = Anchor.BottomRight,
+                    position = Vec2(-10f, -59f)
+                ),
+                HUDElementSkinData(
+                    type = HUDHitErrorMeter::class,
+                    anchor = Anchor.BottomCenter,
+                    origin = Anchor.BottomCenter
                 )
             )
         )
