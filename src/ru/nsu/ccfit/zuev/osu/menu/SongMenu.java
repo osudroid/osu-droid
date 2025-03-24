@@ -922,7 +922,7 @@ public class SongMenu implements IUpdateHandler, MenuItemListener,
 
         var mods = ModMenu.getInstance().getEnabledMods();
         boolean isPreciseMod = mods.contains(ModPrecise.class);
-        float totalSpeedMultiplier = ModUtils.calculateRateWithMods(mods.values());
+        float totalSpeedMultiplier = ModUtils.calculateRateWithMods(mods.values(), Double.POSITIVE_INFINITY);
 
         var difficulty = beatmapInfo.getBeatmapDifficulty();
 
@@ -1443,7 +1443,7 @@ public class SongMenu implements IUpdateHandler, MenuItemListener,
         }
 
         var modMenu = ModMenu.getInstance();
-        float speed = ModUtils.calculateRateWithMods(modMenu.getEnabledMods().values());
+        float speed = ModUtils.calculateRateWithMods(modMenu.getEnabledMods().values(), Double.POSITIVE_INFINITY);
         boolean adjustPitch = modMenu.isEnableNCWhenSpeedChange() || modMenu.getEnabledMods().contains(ModNightCore.class);
 
         songService.setSpeed(speed);
