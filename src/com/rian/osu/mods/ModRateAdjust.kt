@@ -12,7 +12,7 @@ abstract class ModRateAdjust(
      */
     var trackRateMultiplier: Float
 ) : Mod(), IModApplicableToTrackRate {
-    override val isRelevant
+    final override val isRelevant
         get() = trackRateMultiplier != 1f
 
     final override val isValidForMultiplayerAsFreeMod = false
@@ -21,7 +21,7 @@ abstract class ModRateAdjust(
         if (trackRateMultiplier > 1) 1 + (trackRateMultiplier - 1) * 0.24f
         else 0.3f.pow((1 - trackRateMultiplier) * 4)
 
-    override fun applyToRate(time: Double, rate: Float) = rate * trackRateMultiplier
+    final override fun applyToRate(time: Double, rate: Float) = rate * trackRateMultiplier
 
     override fun equals(other: Any?): Boolean {
         if (other === this) {
