@@ -7,6 +7,7 @@ import ru.nsu.ccfit.zuev.osu.game.mods.GameMod
  */
 class ModHalfTime : ModRateAdjust(0.75f), IModUserSelectable {
     override val encodeChar = 't'
+    override val name = "Half Time"
     override val acronym = "HT"
     override val textureNameSuffix = "halftime"
     override val enum = GameMod.MOD_HALFTIME

@@ -8,6 +8,7 @@ import ru.nsu.ccfit.zuev.osu.game.mods.GameMod
  */
 class ModFlashlight : Mod(), IModUserSelectable {
     override val encodeChar = 'i'
+    override val name = "Flashlight"
     override val acronym = "FL"
     override val textureNameSuffix = "flashlight"
     override val enum = GameMod.MOD_FLASHLIGHT

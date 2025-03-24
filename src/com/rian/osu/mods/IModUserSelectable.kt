@@ -15,6 +15,11 @@ interface IModUserSelectable {
     val encodeChar: Char
 
     /**
+     * The name of this [Mod].
+     */
+    val name: String
+
+    /**
      * The acronym of this [Mod].
      */
     val acronym: String

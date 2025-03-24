@@ -8,6 +8,7 @@ import ru.nsu.ccfit.zuev.osu.game.mods.GameMod
  */
 class ModAutopilot : Mod(), IModUserSelectable {
     override val encodeChar = 'p'
+    override val name = "Autopilot"
     override val acronym = "AP"
     override val textureNameSuffix = "relax2"
     override val enum = GameMod.MOD_AUTOPILOT

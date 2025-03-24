@@ -8,6 +8,7 @@ import ru.nsu.ccfit.zuev.osu.game.mods.GameMod
  */
 class ModRelax : Mod(), IModUserSelectable {
     override val encodeChar = 'x'
+    override val name = "Relax"
     override val acronym = "RX"
     override val textureNameSuffix = "relax"
     override val enum = GameMod.MOD_RELAX
