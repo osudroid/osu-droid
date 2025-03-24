@@ -58,6 +58,7 @@ import com.rian.osu.difficulty.attributes.TimedDifficultyAttributes;
 import com.rian.osu.mods.*;
 import com.rian.osu.ui.FPSCounter;
 import com.rian.osu.utils.ModHashMap;
+import com.rian.osu.utils.ModUtils;
 
 import org.anddev.andengine.engine.Engine;
 import org.anddev.andengine.engine.camera.Camera;
@@ -170,6 +171,7 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
     private LinePath[] sliderRenderPaths = null;
     private int sliderIndex = 0;
     private ExtendedSprite unrankedSprite;
+    private final ArrayList<Mod> rateAdjustingMods = new ArrayList<>();
 
     private StoryboardSprite storyboardSprite;
 
@@ -424,6 +426,14 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
         }
 
         playableBeatmap = parsedBeatmap.createDroidPlayableBeatmap(mods.values());
+
+        rateAdjustingMods.clear();
+
+        for (var mod : mods.values()) {
+            if (mod instanceof IModApplicableToTrackRate) {
+                rateAdjustingMods.add(mod);
+            }
+        }
 
         // TODO skin manager
         BeatmapSkinManager.getInstance().loadBeatmapSkin(playableBeatmap.getBeatmapsetPath());
@@ -1008,6 +1018,12 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
         }
 
         final float mSecPassed = elapsedTime * 1000;
+
+        GameHelper.setSpeedMultiplier(ModUtils.calculateRateWithMods(rateAdjustingMods, mSecPassed));
+
+        if (musicStarted) {
+            GlobalManager.getInstance().getSongService().setSpeed(GameHelper.getSpeedMultiplier());
+        }
 
         if (Config.isEnableStoryboard()) {
             if (storyboardSprite != null) {
