@@ -99,10 +99,6 @@ class ModSettingsMenu : BaseFragment() {
         putInt("backgroundBrightness", findViewById<SeekBar>(R.id.backgroundBrightnessBar)!!.progress)
     }
 
-    fun reload() {
-        reload(null)
-    }
-
     private fun reload(state: SavedState?) {
         if (state != null) {
             this.setInitialSavedState(state)
@@ -199,13 +195,9 @@ class ModSettingsMenu : BaseFragment() {
         }%"
 
         val mods = ModMenu.getInstance().enabledMods
-        val customSpeed = mods.ofType<ModCustomSpeed>()
 
         speedModifyText = findViewById(R.id.changeSpeedText)!!
-
         speedModifyToggle = findViewById(R.id.enableSpeedChange)!!
-        speedModifyToggle.isChecked = customSpeed != null && customSpeed.trackRateMultiplier != 1f
-        speedModifyToggle.isEnabled = speedModifyToggle.isChecked
         speedModifyToggle.setOnCheckedChangeListener { _, isChecked ->
             speedModifyToggle.isEnabled = isChecked
 
@@ -219,8 +211,6 @@ class ModSettingsMenu : BaseFragment() {
 
         speedModifyBar = findViewById(R.id.changeSpeedBar)!!
         speedModifyBar.apply {
-            progress = ((customSpeed?.trackRateMultiplier ?: 1f) * 20 - 10).toInt()
-
             setOnSeekBarChangeListener(
                 object : OnSeekBarChangeListener {
                     override fun onProgressChanged(
@@ -257,8 +247,6 @@ class ModSettingsMenu : BaseFragment() {
                 }
             )
         }
-
-        speedModifyText.text = "%.2fx".format(Locale.getDefault(), customSpeed?.trackRateMultiplier ?: 1f)
 
         followDelayText = findViewById(R.id.flashlightFollowDelayText)!!
         followDelayBar = findViewById(R.id.flashlightFollowDelayBar)!!
@@ -413,7 +401,8 @@ class ModSettingsMenu : BaseFragment() {
     }
 
     private fun updateVisibility() {
-        val flashlight = ModMenu.getInstance().enabledMods.ofType<ModFlashlight>()
+        val mods = ModMenu.getInstance().enabledMods
+        val flashlight = mods.ofType<ModFlashlight>()
         val flFollowDelay = flashlight?.followDelay ?: ModFlashlight.DEFAULT_FOLLOW_DELAY
 
         followDelayRow.visibility = if (flashlight != null) View.VISIBLE else View.GONE
@@ -423,6 +412,13 @@ class ModSettingsMenu : BaseFragment() {
         if (Multiplayer.isMultiplayer) {
             speedModifyRow.visibility = if (Multiplayer.isRoomHost) View.VISIBLE else View.GONE
         }
+
+        val customSpeed = mods.ofType<ModCustomSpeed>()
+
+        speedModifyToggle.isChecked = customSpeed != null && customSpeed.trackRateMultiplier != 1f
+        speedModifyToggle.isEnabled = speedModifyToggle.isChecked
+        speedModifyText.text = "%.2fx".format(Locale.getDefault(), customSpeed?.trackRateMultiplier ?: 1f)
+        speedModifyBar.progress = ((customSpeed?.trackRateMultiplier ?: 1f) * 20 - 10).toInt()
     }
 
     private fun toggleSettingPanel() {

@@ -263,10 +263,6 @@ public class ModMenu implements IModSwitcher {
                         for (ModButton btn : modButtons.values()) {
                             btn.setEnabled(false);
                         }
-
-                        if (menu != null) {
-                            Execution.mainThread(menu::reload);
-                        }
                     }
 
                     return true;
