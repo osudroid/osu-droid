@@ -157,7 +157,7 @@ object ModUtils {
         }
 
         // Apply rate adjustments
-        val trackRate = calculateRateWithMods(mods)
+        val trackRate = calculateRateWithMods(mods, Double.POSITIVE_INFINITY)
 
         val preempt = BeatmapDifficulty.difficultyRange(difficulty.ar.toDouble(), HitObject.PREEMPT_MAX, HitObject.PREEMPT_MID, HitObject.PREEMPT_MIN) / trackRate
         difficulty.ar = BeatmapDifficulty.inverseDifficultyRange(preempt, HitObject.PREEMPT_MAX, HitObject.PREEMPT_MID, HitObject.PREEMPT_MIN).toFloat()
