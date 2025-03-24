@@ -7,7 +7,7 @@ import ru.nsu.ccfit.zuev.osu.game.mods.GameMod
  * Represents the Traceable mod.
  */
 class ModTraceable : Mod(), IModUserSelectable {
-    override val droidChar = 'b'
+    override val encodeChar = 'b'
     override val acronym = "TC"
     override val enum = GameMod.MOD_TRACEABLE
     override val textureNameSuffix = "traceable"

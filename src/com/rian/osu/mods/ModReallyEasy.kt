@@ -9,7 +9,7 @@ import ru.nsu.ccfit.zuev.osu.game.mods.GameMod
  * Represents the Really Easy mod.
  */
 class ModReallyEasy : Mod(), IModUserSelectable, IModApplicableToDifficultyWithSettings {
-    override val droidChar = 'l'
+    override val encodeChar = 'l'
     override val acronym = "RE"
     override val textureNameSuffix = "reallyeasy"
     override val enum = GameMod.MOD_REALLYEASY

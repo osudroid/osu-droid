@@ -7,7 +7,7 @@ import ru.nsu.ccfit.zuev.osu.game.mods.GameMod
  * Represents the No Fail mod.
  */
 class ModNoFail : Mod(), IModUserSelectable {
-    override val droidChar = 'n'
+    override val encodeChar = 'n'
     override val acronym = "NF"
     override val textureNameSuffix = "nofail"
     override val enum = GameMod.MOD_NOFAIL

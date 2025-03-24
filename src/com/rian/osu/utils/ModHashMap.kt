@@ -246,7 +246,7 @@ open class ModHashMap : HashMap<Class<out Mod>, Mod> {
     override fun toString() = buildString {
         modStringOrder.fastForEach {
             if (it::class in this@ModHashMap) {
-                append((it as IModUserSelectable).droidChar)
+                append((it as IModUserSelectable).encodeChar)
             }
         }
 

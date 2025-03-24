@@ -6,7 +6,7 @@ import ru.nsu.ccfit.zuev.osu.game.mods.GameMod
  * Represents the Auto mod.
  */
 class ModAuto : Mod(), IModUserSelectable {
-    override val droidChar = 'a'
+    override val encodeChar = 'a'
     override val acronym = "AT"
     override val textureNameSuffix = "autoplay"
     override val enum = GameMod.MOD_AUTO

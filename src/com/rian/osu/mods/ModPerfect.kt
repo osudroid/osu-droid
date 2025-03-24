@@ -6,7 +6,7 @@ import ru.nsu.ccfit.zuev.osu.game.mods.GameMod
  * Represents the Perfect mod.
  */
 class ModPerfect : Mod(), IModUserSelectable {
-    override val droidChar = 'f'
+    override val encodeChar = 'f'
     override val acronym = "PF"
     override val textureNameSuffix = "perfect"
     override val enum = GameMod.MOD_PERFECT

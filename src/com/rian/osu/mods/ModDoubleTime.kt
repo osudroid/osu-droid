@@ -6,7 +6,7 @@ import ru.nsu.ccfit.zuev.osu.game.mods.GameMod
  * Represents the Double Time mod.
  */
 class ModDoubleTime : ModRateAdjust(1.5f), IModUserSelectable {
-    override val droidChar = 'd'
+    override val encodeChar = 'd'
     override val acronym = "DT"
     override val textureNameSuffix = "doubletime"
     override val enum = GameMod.MOD_DOUBLETIME

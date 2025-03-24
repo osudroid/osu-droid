@@ -42,7 +42,7 @@ object ModUtils {
         val legacyMods = arrayOf<ILegacyMod>(ModSmallCircle())
 
         for (mod in legacyMods) {
-            it[mod.droidChar] = mod
+            it[mod.encodeChar] = mod
         }
     }
 
@@ -57,7 +57,7 @@ object ModUtils {
         )
 
         for (mod in playableMods) {
-            it[(mod as IModUserSelectable).droidChar] = mod::class
+            it[(mod as IModUserSelectable).encodeChar] = mod::class
         }
     }
 

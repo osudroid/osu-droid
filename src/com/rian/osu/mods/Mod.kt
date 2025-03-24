@@ -61,7 +61,7 @@ abstract class Mod {
         result = 31 * result + incompatibleMods.contentHashCode()
 
         if (this is IModUserSelectable) {
-            result = 31 * result + droidChar.hashCode()
+            result = 31 * result + encodeChar.hashCode()
             result = 31 * result + acronym.hashCode()
             result = 31 * result + textureNameSuffix.hashCode()
             result = 31 * result + enum.hashCode()

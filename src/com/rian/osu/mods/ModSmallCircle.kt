@@ -7,7 +7,7 @@ import ru.nsu.ccfit.zuev.osu.game.mods.GameMod
  * Represents the Small Circle mod.
  */
 class ModSmallCircle : Mod(), ILegacyMod {
-    override val droidChar = 'm'
+    override val encodeChar = 'm'
     override val acronym = "SC"
     override val textureNameSuffix = "smallcircle"
     override val enum = GameMod.MOD_SMALLCIRCLE

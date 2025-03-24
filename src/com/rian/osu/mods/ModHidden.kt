@@ -10,7 +10,7 @@ import ru.nsu.ccfit.zuev.osu.game.mods.GameMod
  * Represents the Hidden mod.
  */
 class ModHidden : Mod(), IModUserSelectable, IModApplicableToBeatmap {
-    override val droidChar = 'h'
+    override val encodeChar = 'h'
     override val acronym = "HD"
     override val enum = GameMod.MOD_HIDDEN
     override val textureNameSuffix = "hidden"

@@ -7,9 +7,12 @@ import ru.nsu.ccfit.zuev.osu.game.mods.GameMod
  */
 interface IModUserSelectable {
     /**
-     * The osu!droid character representation of this [Mod].
+     * The encoded character representation of this [Mod]. Used when submitting scores to the server.
+     *
+     * This **MUST** be unique for every [IModUserSelectable], including those that have been removed after a release
+     * to users to avoid [Mod] clashes.
      */
-    val droidChar: Char
+    val encodeChar: Char
 
     /**
      * The acronym of this [Mod].
