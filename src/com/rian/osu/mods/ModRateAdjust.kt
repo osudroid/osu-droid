@@ -15,7 +15,7 @@ abstract class ModRateAdjust(
     override val isRelevant
         get() = trackRateMultiplier != 1f
 
-    override val isValidForMultiplayerAsFreeMod = false
+    final override val isValidForMultiplayerAsFreeMod = false
 
     override fun calculateScoreMultiplier(difficulty: BeatmapDifficulty) =
         if (trackRateMultiplier > 1) 1 + (trackRateMultiplier - 1) * 0.24f
