@@ -18,12 +18,16 @@ abstract class Mod {
     open val isRelevant = true
 
     /**
-     * Whether this [Mod] can be specified as a "required" [Mod] in multiplayer context.
+     * Whether this [Mod] is valid for multiplayer matches.
+     *
+     * Should be `false` for [Mod]s that make gameplay duration different across players.
      */
     open val isValidForMultiplayer = true
 
     /**
-     * Whether this [Mod] can be specified as a "free" or "allowed" [Mod] in multiplayer context.
+     * Whether this [Mod] is valid as a free mod in multiplayer matches.
+     *
+     * Should be `false` for [Mod]s that affect gameplay duration (e.g., [ModRateAdjust]).
      */
     open val isValidForMultiplayerAsFreeMod = true
 
