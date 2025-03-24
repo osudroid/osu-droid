@@ -417,7 +417,7 @@ class ModSettingsMenu : BaseFragment() {
         val flFollowDelay = flashlight?.followDelay ?: ModFlashlight.DEFAULT_FOLLOW_DELAY
 
         followDelayRow.visibility = if (flashlight != null) View.VISIBLE else View.GONE
-        followDelayBar.progress = (flFollowDelay  / ModFlashlight.DEFAULT_FOLLOW_DELAY).toInt()
+        followDelayBar.progress = (flFollowDelay / ModFlashlight.DEFAULT_FOLLOW_DELAY).toInt()
         followDelayText.text = "${(flFollowDelay * 1000f).toInt()}ms"
 
         if (Multiplayer.isMultiplayer) {
