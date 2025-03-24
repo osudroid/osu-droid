@@ -188,13 +188,9 @@ object ModUtils {
 
                 s.startsWith("FLD") -> {
                     val followDelay = s.substring(3).toFloat()
-                    val flashlight = it.ofType<ModFlashlight>()
+                    val flashlight = it.ofType<ModFlashlight>() ?: ModFlashlight().also { m -> it.put(m) }
 
-                    if (flashlight != null) {
-                        flashlight.followDelay = followDelay
-                    } else {
-                        it.put(ModFlashlight().also { m -> m.followDelay = followDelay })
-                    }
+                    flashlight.followDelay = followDelay
                 }
             }
         }
