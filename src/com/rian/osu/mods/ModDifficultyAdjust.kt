@@ -87,14 +87,22 @@ class ModDifficultyAdjust @JvmOverloads constructor(
             return
         }
 
-        val trackRate = ModUtils.calculateRateWithMods(mods)
-
-        // We are not applying to timePreempt here as HitObject.applyDefaults handles it.
-        hitObject.timeFadeIn *= trackRate
+        applyFadeAdjustment(hitObject, mods)
 
         if (hitObject is Slider) {
-            hitObject.nestedHitObjects.forEach { it.timeFadeIn *= trackRate }
+            hitObject.nestedHitObjects.forEach { applyFadeAdjustment(it, mods) }
         }
+    }
+
+    private fun applyFadeAdjustment(hitObject: HitObject, mods: Iterable<Mod>) {
+        val initialTrackRate = ModUtils.calculateRateWithMods(mods)
+        val currentTrackRate = ModUtils.calculateRateWithMods(mods, hitObject.startTime)
+
+        // Cancel the rate that was initially applied to timePreempt (via applyToDifficulty above and
+        // HitObject.applyDefaults) and apply the current one.
+        hitObject.timePreempt *= currentTrackRate / initialTrackRate
+
+        hitObject.timeFadeIn *= currentTrackRate
     }
 
     private fun getValue(value: Float?, fallback: Float) = value ?: fallback
