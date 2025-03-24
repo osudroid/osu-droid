@@ -28,7 +28,7 @@ abstract class ModTimeRamp : Mod(), IModApplicableToBeatmap, IModApplicableToTra
 
         finalRateTime = Interpolation.linear(
             initialRateTime,
-            beatmap.hitObjects.objects.lastOrNull()?.startTime ?: 0.0,
+            beatmap.hitObjects.objects.lastOrNull()?.endTime ?: 0.0,
             FINAL_RATE_PROGRESS
         )
     }
