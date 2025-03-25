@@ -112,7 +112,7 @@ open class RoundedBox : ExtendedEntity() {
             // In this case for all 4 arcs the angle range is 90°.
             val segmentsPerArc = Circle.approximateSegments(cornerRadius, cornerRadius, 90f)
 
-            setVertexBuffer(RoundedBoxVertexBuffer(segmentsPerArc))
+            vertexBuffer = RoundedBoxVertexBuffer(segmentsPerArc)
         }
 
         (vertexBuffer as RoundedBoxVertexBuffer).update(drawWidth, drawHeight, cornerRadius)

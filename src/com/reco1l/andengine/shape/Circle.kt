@@ -85,7 +85,7 @@ open class Circle : ExtendedEntity() {
             shouldRebuildVertexBuffer = false
 
             val segments = approximateSegments(drawWidth, drawHeight)
-            setVertexBuffer(CircleVertexBuffer(segments))
+            vertexBuffer = CircleVertexBuffer(segments)
         }
 
         val vertexBuffer = vertexBuffer

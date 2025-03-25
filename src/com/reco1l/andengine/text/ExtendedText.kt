@@ -82,7 +82,7 @@ open class ExtendedText : ExtendedEntity() {
         GLHelper.enableTexCoordArray(pGL)
     }
 
-    override fun drawVertices(gl: GL10, pCamera: Camera?) {
+    override fun drawVertices(gl: GL10, pCamera: Camera) {
         val vertexBuffer = vertexBuffer
         if (vertexBuffer != null) {
             gl.glDrawArrays(GL10.GL_TRIANGLES, 0, currentSize * VERTICES_PER_CHARACTER)
@@ -116,7 +116,7 @@ open class ExtendedText : ExtendedEntity() {
         if (shouldRebuildVertexBuffer) {
             shouldRebuildVertexBuffer = false
 
-            setVertexBuffer(TextVertexBuffer(maximumSize, horizontalAlign, GL_STATIC_DRAW, true))
+            vertexBuffer = TextVertexBuffer(maximumSize, horizontalAlign, GL_STATIC_DRAW, true)
         }
 
         if (shouldRebuildTextureBuffer) {
@@ -140,12 +140,7 @@ open class ExtendedText : ExtendedEntity() {
         onContentSizeMeasured()
 
         textureBuffer!!.update(font!!, lines)
-        vertexBuffer!!.update(font!!, maximumLineWidth, linesWidth, lines, horizontalAlign)
-    }
-
-
-    override fun getVertexBuffer(): TextVertexBuffer? {
-        return super.getVertexBuffer() as TextVertexBuffer?
+        (vertexBuffer!! as TextVertexBuffer).update(font!!, maximumLineWidth, linesWidth, lines, horizontalAlign)
     }
 
 

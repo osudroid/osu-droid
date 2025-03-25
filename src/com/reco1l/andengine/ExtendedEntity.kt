@@ -4,16 +4,17 @@ import android.util.*
 import com.reco1l.andengine.container.*
 import com.reco1l.andengine.modifier.*
 import com.reco1l.framework.*
-import com.reco1l.framework.math.Vec4
-import com.reco1l.toolkt.kotlin.fastForEach
+import com.reco1l.framework.math.*
+import com.reco1l.toolkt.kotlin.*
 import org.anddev.andengine.engine.camera.*
 import org.anddev.andengine.entity.*
-import org.anddev.andengine.entity.scene.Scene
-import org.anddev.andengine.entity.shape.*
-import org.anddev.andengine.input.touch.TouchEvent
+import org.anddev.andengine.entity.scene.*
+import org.anddev.andengine.entity.scene.Scene.*
+import org.anddev.andengine.entity.shape.Shape.*
+import org.anddev.andengine.input.touch.*
 import org.anddev.andengine.opengl.util.*
 import org.anddev.andengine.opengl.vertex.*
-import org.anddev.andengine.util.Transformation
+import org.anddev.andengine.util.*
 import javax.microedition.khronos.opengles.*
 
 
@@ -24,9 +25,17 @@ import javax.microedition.khronos.opengles.*
  */
 abstract class ExtendedEntity(
 
-    private var vertexBuffer: VertexBuffer? = null
+    vertexBuffer: VertexBuffer? = null,
 
-) : Shape(0f, 0f), IModifierChain {
+) : Entity(0f, 0f), ITouchArea, IModifierChain {
+
+
+    open var vertexBuffer: VertexBuffer? = vertexBuffer
+        set(value) {
+            field?.unloadFromActiveBufferObjectManager()
+            field = value
+            updateVertexBuffer()
+        }
 
     /**
      * Determines which axes the entity should automatically adjust its size to.
@@ -244,9 +253,9 @@ abstract class ExtendedEntity(
     open val drawWidth: Float
         get() {
             if (relativeSizeAxes.isHorizontal) {
-                return parent.getPaddedWidth() * width
+                return parent.getPaddedWidth() * internalWidth
             }
-            return width
+            return internalWidth
         }
 
     /**
@@ -258,9 +267,9 @@ abstract class ExtendedEntity(
     open val drawHeight: Float
         get() {
             if (relativeSizeAxes.isVertical) {
-                return parent.getPaddedHeight() * height
+                return parent.getPaddedHeight() * internalHeight
             }
-            return height
+            return internalHeight
         }
 
     /**
@@ -302,10 +311,42 @@ abstract class ExtendedEntity(
             return y + totalOffsetY
         }
 
+    var width
+        get() = internalWidth
+        set(value) {
+            if (autoSizeAxes.isHorizontal) {
+                autoSizeAxes = if (autoSizeAxes == Axes.Both) Axes.Y else Axes.None
+            }
 
-    private var width = 0f
+            if (internalWidth != value) {
+                internalWidth = value
 
-    private var height = 0f
+                updateVertexBuffer()
+                invalidateTransformations()
+                (parent as? Container)?.onChildSizeChanged(this)
+            }
+        }
+
+    var height
+        get() = internalHeight
+        set(value) {
+            if (autoSizeAxes.isVertical) {
+                autoSizeAxes = if (autoSizeAxes == Axes.Both) Axes.X else Axes.None
+            }
+
+            if (internalHeight != value) {
+                internalHeight = value
+
+                updateVertexBuffer()
+                invalidateTransformations()
+                (parent as? Container)?.onChildSizeChanged(this)
+            }
+        }
+
+
+    var internalWidth = 0f
+
+    var internalHeight = 0f
 
     private var isVertexBufferDirty = true
 
@@ -531,23 +572,21 @@ abstract class ExtendedEntity(
 
         gl.glPushMatrix()
 
-        if (!isCullingEnabled || !isCulled(camera)) {
-            onApplyTransformations(gl, camera)
+        onApplyTransformations(gl, camera)
 
-            background?.setSize(drawWidth, drawHeight)
-            background?.onDraw(gl, camera)
+        background?.setSize(drawWidth, drawHeight)
+        background?.onDraw(gl, camera)
 
-            doDraw(gl, camera)
-            onDrawChildren(gl, camera)
+        doDraw(gl, camera)
+        onDrawChildren(gl, camera)
 
-            foreground?.setSize(drawWidth, drawHeight)
-            foreground?.onDraw(gl, camera)
-        }
+        foreground?.setSize(drawWidth, drawHeight)
+        foreground?.onDraw(gl, camera)
 
         gl.glPopMatrix()
     }
 
-    override fun onInitDraw(pGL: GL10) {
+    open fun onInitDraw(pGL: GL10) {
 
         if (vertexBuffer != null) {
             GLHelper.enableVertexArray(pGL)
@@ -573,10 +612,26 @@ abstract class ExtendedEntity(
         }
     }
 
-    override fun onApplyVertices(pGL: GL10) {
-        if (vertexBuffer != null) {
-            super.onApplyVertices(pGL)
+    open fun onApplyVertices(pGL: GL10) {
+        val vertexBuffer = vertexBuffer ?: return
+
+        if (GLHelper.EXTENSIONS_VERTEXBUFFEROBJECTS) {
+            pGL as GL11
+            vertexBuffer.selectOnHardware(pGL)
+            GLHelper.vertexZeroPointer(pGL)
+        } else {
+            GLHelper.vertexPointer(pGL, vertexBuffer.floatBuffer)
         }
+    }
+
+    abstract fun onUpdateVertexBuffer()
+
+    abstract fun drawVertices(pGL: GL10, pCamera: Camera)
+
+    override fun doDraw(pGL: GL10, pCamera: Camera) {
+        this.onInitDraw(pGL)
+        this.onApplyVertices(pGL)
+        this.drawVertices(pGL, pCamera)
     }
 
 
@@ -590,10 +645,23 @@ abstract class ExtendedEntity(
         super.onManagedUpdate(pSecondsElapsed)
     }
 
+    override fun reset() {
+        super.reset()
+        blendInfo = BlendInfo.Mixture
+    }
+
+    open fun finalize() {
+        val vertexBuffer = vertexBuffer ?: return
+
+        if (vertexBuffer.isManaged) {
+            vertexBuffer.unloadFromActiveBufferObjectManager()
+        }
+    }
+
 
     // Vertex buffer
 
-    override fun updateVertexBuffer() {
+    open fun updateVertexBuffer() {
         isVertexBufferDirty = true
     }
 
@@ -602,21 +670,6 @@ abstract class ExtendedEntity(
         onUpdateVertexBuffer()
     }
 
-    /**
-     * Sets the vertex buffer of the entity.
-     *
-     * Note: This will unload the previous buffer from the active buffer object manager if it's managed.
-     * If it's not managed you will have to manually unload it otherwise it will cause a memory leak.
-     */
-    fun setVertexBuffer(buffer: VertexBuffer) {
-        vertexBuffer?.unloadFromActiveBufferObjectManager()
-        vertexBuffer = buffer
-        updateVertexBuffer()
-    }
-
-    override fun getVertexBuffer(): VertexBuffer? {
-        return vertexBuffer
-    }
 
 
     // Size
@@ -632,21 +685,21 @@ abstract class ExtendedEntity(
             return false
         }
 
-        if (contentWidth != width || contentHeight != height) {
+        if (contentWidth != internalWidth || contentHeight != internalHeight) {
 
             if (autoSizeAxes.isHorizontal) {
-                width = contentWidth + padding.horizontal
+                internalWidth = contentWidth + padding.horizontal
 
                 if (relativeSizeAxes.isHorizontal) {
-                    width /= parent.getPaddedWidth()
+                    internalWidth /= parent.getPaddedWidth()
                 }
             }
 
             if (autoSizeAxes.isVertical) {
-                height = contentHeight + padding.vertical
+                internalHeight = contentHeight + padding.vertical
 
                 if (relativeSizeAxes.isVertical) {
-                    height /= parent.getPaddedHeight()
+                    internalHeight /= parent.getPaddedHeight()
                 }
             }
 
@@ -680,9 +733,9 @@ abstract class ExtendedEntity(
             autoSizeAxes = Axes.None
         }
 
-        if (width != newWidth || height != newHeight) {
-            width = newWidth
-            height = newHeight
+        if (internalWidth != newWidth || internalHeight != newHeight) {
+            internalWidth = newWidth
+            internalHeight = newHeight
 
             updateVertexBuffer()
             invalidateTransformations()
@@ -697,68 +750,16 @@ abstract class ExtendedEntity(
         return false
     }
 
-    open fun setWidth(value: Float) {
 
-        if (autoSizeAxes.isHorizontal) {
-            autoSizeAxes = if (autoSizeAxes == Axes.Both) Axes.Y else Axes.None
-        }
-
-        if (width != value) {
-            width = value
-
-            updateVertexBuffer()
-            invalidateTransformations()
-            (parent as? Container)?.onChildSizeChanged(this)
-        }
-    }
-
-    open fun setHeight(value: Float) {
-
-        if (autoSizeAxes.isVertical) {
-            autoSizeAxes = if (autoSizeAxes == Axes.Both) Axes.X else Axes.None
-        }
-
-        if (height != value) {
-            height = value
-
-            updateVertexBuffer()
-            invalidateTransformations()
-            (parent as? Container)?.onChildSizeChanged(this)
-        }
-    }
-
-    override fun getWidth(): Float {
-        return width
-    }
-
-    override fun getHeight(): Float {
-        return height
-    }
-
-    override fun getWidthScaled(): Float {
+    fun getWidthScaled(): Float {
         return drawWidth * scaleX
     }
 
-    override fun getHeightScaled(): Float {
+    fun getHeightScaled(): Float {
         return drawHeight * scaleY
     }
 
-
-    // Unsupported methods
-
-    @Deprecated("Base width is not preserved in ExtendedEntity, use getWidth() instead.")
-    override fun getBaseWidth() = width
-
-    @Deprecated("Base height is not preserved in ExtendedEntity, use getHeight() instead.")
-    override fun getBaseHeight() = height
-
-
     // Collision
-
-    override fun collidesWith(shape: IShape): Boolean {
-        Log.w("ExtendedEntity", "Collision detection is not supported in ExtendedEntity.")
-        return false
-    }
 
     override fun contains(x: Float, y: Float): Boolean {
 
@@ -767,11 +768,6 @@ abstract class ExtendedEntity(
         }
 
         return EntityCollision.contains(this, x, y, parent is Scene)
-    }
-
-    override fun isCulled(pCamera: Camera): Boolean {
-        return drawX > pCamera.maxX || drawX + drawWidth < pCamera.minX
-            || drawY > pCamera.maxY || drawY + drawHeight < pCamera.minY
     }
 
     // Transformation
@@ -845,7 +841,7 @@ abstract class ExtendedEntity(
     }
 
 
-    override fun setBlendFunction(pSourceBlendFunction: Int, pDestinationBlendFunction: Int) {
+    open fun setBlendFunction(pSourceBlendFunction: Int, pDestinationBlendFunction: Int) {
         blendInfo = BlendInfo(pSourceBlendFunction, pDestinationBlendFunction)
     }
 

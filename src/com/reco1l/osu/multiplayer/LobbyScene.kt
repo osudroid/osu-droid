@@ -2,6 +2,7 @@ package com.reco1l.osu.multiplayer
 
 import android.net.Uri
 import android.util.Log
+import com.reco1l.andengine.*
 import com.reco1l.andengine.sprite.*
 import ru.nsu.ccfit.zuev.osu.SecurityUtils
 import com.reco1l.ibancho.LobbyAPI
@@ -136,9 +137,9 @@ object LobbyScene : Scene() {
         }.also {
 
             if (OsuSkin.get().isUseNewLayout) {
-                layoutBackButton?.apply(it) ?: it.setPosition(0f, Config.getRES_HEIGHT() - it.heightScaled)
+                layoutBackButton?.apply(it) ?: it.setPosition(0f, Config.getRES_HEIGHT() - it.scaledHeight)
             } else {
-                it.setPosition(0f, Config.getRES_HEIGHT() - it.heightScaled)
+                it.setPosition(0f, Config.getRES_HEIGHT() - it.scaledHeight)
             }
 
             attachChild(it)

@@ -1,7 +1,7 @@
 package com.reco1l.osu.hud
 
 import com.osudroid.resources.R.string
-import com.reco1l.andengine.Axes
+import com.reco1l.andengine.*
 import com.reco1l.andengine.container.Container
 import com.reco1l.osu.hud.editor.HUDElementSelector
 import com.reco1l.osu.hud.elements.*
@@ -213,8 +213,8 @@ class GameplayHUD : Container(), IGameplayEvents {
 
         accuracyCounter.y += scoreCounter.y + scoreCounter.drawHeight
 
-        pieSongProgress.y = accuracyCounter.y + accuracyCounter.heightScaled / 2f
-        pieSongProgress.x = accuracyCounter.x - accuracyCounter.widthScaled - 18f
+        pieSongProgress.y = accuracyCounter.y + accuracyCounter.scaledHeight / 2f
+        pieSongProgress.x = accuracyCounter.x - accuracyCounter.scaledWidth - 18f
 
         accuracyCounter.restoreData = accuracyCounter.getSkinData()
         pieSongProgress.restoreData = pieSongProgress.getSkinData()

@@ -17,7 +17,6 @@ class TriangleMesh : ExtendedEntity(vertexBuffer = null) {
 
 
     init {
-        isCullingEnabled = false
         vertices.ary = FloatArray(0)
     }
 

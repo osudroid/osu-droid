@@ -111,7 +111,7 @@ open class TextureFont(val characters: MutableMap<Char, TextureRegion>) : Box() 
             gl.glPushMatrix()
             gl.glTranslatef(offsetX, 0f, 0f)
 
-            vertexBuffer.update(textureWidth, textureHeight)
+            (vertexBuffer as BoxVertexBuffer).update(textureWidth, textureHeight)
             texture.onApply(gl)
 
             onApplyVertices(gl)
@@ -120,11 +120,6 @@ open class TextureFont(val characters: MutableMap<Char, TextureRegion>) : Box() 
 
             offsetX += textureWidth + spacing
         }
-    }
-
-
-    override fun getVertexBuffer(): BoxVertexBuffer {
-        return super.getVertexBuffer() as BoxVertexBuffer
     }
 
 
