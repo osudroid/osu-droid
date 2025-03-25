@@ -1,63 +1,42 @@
 package com.reco1l.andengine
 
-import javax.microedition.khronos.opengles.GL10
+import javax.microedition.khronos.opengles.*
 
+/**
+ * Determines the blending function for the sprite.
+ */
 data class BlendInfo(
 
     /**
-     * The blending function to use.
+     * The source blending factor.
      */
-    val function: BlendingFunction,
+    val sourceFactor: Int,
 
     /**
-     * Whether to mask the red channel.
+     * The destination blending factor.
      */
-    val redMask: Boolean = true,
-
-    /**
-     * Whether to mask the green channel.
-     */
-    val greenMask: Boolean = true,
-
-    /**
-     * Whether to mask the blue channel.
-     */
-    val blueMask: Boolean = true,
-
-    /**
-     * Whether to mask the alpha channel.
-     */
-    val alphaMask: Boolean = true,
-
-    /**
-     * Whether to clear the color buffer.
-     */
-    val clear: Boolean = false
+    val destinationFactor: Int
 
 ) {
 
-    fun apply(gl: GL10) {
-
-        gl.glColorMask(redMask, greenMask, blueMask, alphaMask)
-
-        if (function != BlendingFunction.Inherit) {
-            gl.glBlendFunc(function.source, function.destination)
-        }
-
-        if (clear) {
-            gl.glClear(GL10.GL_COLOR_BUFFER_BIT)
-        }
-    }
-
-
     companion object {
 
-        val Inherit = BlendInfo(BlendingFunction.Inherit)
+        val None = BlendInfo(
+            GL10.GL_ONE,
+            GL10.GL_ZERO
+        )
 
-        val Additive = BlendInfo(BlendingFunction.Additive)
+        val Mixture = BlendInfo(
+            GL10.GL_SRC_ALPHA,
+            GL10.GL_ONE_MINUS_SRC_ALPHA
+        )
 
-        val Default = BlendInfo(BlendingFunction.Mixture)
+        val Additive = BlendInfo(
+            GL10.GL_SRC_ALPHA,
+            GL10.GL_ONE,
+        )
+
+        val Inherit = BlendInfo(-1, -1)
 
     }
-
 }

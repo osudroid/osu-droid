@@ -42,7 +42,8 @@ class HUDBackButton : HUDElement() {
         anchor = Anchor.Center
         origin = Anchor.Center
         color = ColorARGB(0xFF002626)
-        depthInfo = DepthInfo.Clear
+        clearInfo = ClearInfo.ClearDepthBuffer
+        depthInfo = DepthInfo.Less
 
         relativeSizeAxes = Axes.Both
         setSize(0.95f, 0.95f)

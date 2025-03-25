@@ -184,24 +184,22 @@ abstract class ExtendedEntity(
      */
     open var clipChildren = false
 
+
     /**
      * The depth information of the entity.
      */
-    open var depthInfo: DepthInfo? = null
+    open var depthInfo = DepthInfo.None
 
     /**
-     * The blending information of the entity.
+     * The clear information of the entity.
      */
-    open var blendInfo: BlendInfo? = BlendInfo.Default
-        set(value) {
-            if (field != value) {
-                if (value != null) {
-                    mSourceBlendFunction = value.function.source
-                    mDestinationBlendFunction = value.function.destination
-                }
-                field = value
-            }
-        }
+    open var clearInfo = ClearInfo.None
+
+    /**
+     * The blend information of the entity.
+     */
+    open var blendInfo = BlendInfo.Mixture
+
 
     /**
      * The color of the entity boxed in a [ColorARGB] object.
@@ -450,21 +448,23 @@ abstract class ExtendedEntity(
 
     protected open fun applyBlending(pGL: GL10) {
 
-        val blendInfo = blendInfo
+        var sourceFactor = BLENDFUNCTION_SOURCE_DEFAULT
+        var destinationFactor = BLENDFUNCTION_DESTINATION_DEFAULT
 
-        if (blendInfo == null) {
-            GLHelper.blendFunction(pGL, mSourceBlendFunction, mDestinationBlendFunction)
-            return
+        if (blendInfo == BlendInfo.Inherit) {
+            val parent = parent
+
+            if (parent is ExtendedEntity) {
+                sourceFactor = parent.blendInfo.sourceFactor
+                destinationFactor = parent.blendInfo.destinationFactor
+            }
+        } else {
+            sourceFactor = blendInfo.sourceFactor
+            destinationFactor = blendInfo.destinationFactor
         }
 
-        val parent = parent
-
-        if (blendInfo == BlendInfo.Inherit && parent is ExtendedEntity) {
-            GLHelper.blendFunction(pGL, parent.mSourceBlendFunction, parent.mDestinationBlendFunction)
-            return
-        }
-
-        blendInfo.apply(pGL)
+        GLHelper.enableBlend(pGL)
+        GLHelper.blendFunction(pGL, sourceFactor, destinationFactor)
     }
 
     override fun onApplyTransformations(pGL: GL10, camera: Camera) {
@@ -553,7 +553,24 @@ abstract class ExtendedEntity(
             GLHelper.enableVertexArray(pGL)
         }
 
-        depthInfo?.apply(pGL) ?: GLHelper.disableDepthTest(pGL)
+        var clearMask = 0
+
+        if (clearInfo.depthBuffer) clearMask = clearMask or GL10.GL_DEPTH_BUFFER_BIT
+        if (clearInfo.colorBuffer) clearMask = clearMask or GL10.GL_COLOR_BUFFER_BIT
+        if (clearInfo.stencilBuffer) clearMask = clearMask or GL10.GL_STENCIL_BUFFER_BIT
+
+        if (clearMask != 0) {
+            pGL.glClear(clearMask)
+        }
+
+        if (depthInfo.test) {
+            pGL.glDepthFunc(depthInfo.function)
+            pGL.glDepthMask(depthInfo.mask)
+
+            GLHelper.enableDepthTest(pGL)
+        } else {
+            GLHelper.disableDepthTest(pGL)
+        }
     }
 
     override fun onApplyVertices(pGL: GL10) {
@@ -829,11 +846,7 @@ abstract class ExtendedEntity(
 
 
     override fun setBlendFunction(pSourceBlendFunction: Int, pDestinationBlendFunction: Int) {
-        // We have to nullify the blend info to prevent these values from being overridden.
-        if (blendInfo != null) {
-            blendInfo = null
-        }
-        super.setBlendFunction(pSourceBlendFunction, pDestinationBlendFunction)
+        blendInfo = BlendInfo(pSourceBlendFunction, pDestinationBlendFunction)
     }
 
     override fun applyModifier(block: UniversalModifier.() -> Unit): UniversalModifier {
