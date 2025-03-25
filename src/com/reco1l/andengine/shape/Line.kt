@@ -35,8 +35,8 @@ open class Line : ExtendedEntity(vertexBuffer = LineVertexBuffer()) {
         }
 
 
-    override fun onInitDraw(pGL: GL10) {
-        super.onInitDraw(pGL)
+    override fun beginDraw(pGL: GL10) {
+        super.beginDraw(pGL)
 
         GLHelper.disableCulling(pGL)
         GLHelper.disableTextures(pGL)
@@ -49,7 +49,7 @@ open class Line : ExtendedEntity(vertexBuffer = LineVertexBuffer()) {
         (vertexBuffer as LineVertexBuffer).update(fromPoint, toPoint)
     }
 
-    override fun drawVertices(gl: GL10, camera: Camera) {
+    override fun onDrawBuffer(gl: GL10, camera: Camera) {
         gl.glDrawArrays(GL_LINES, 0, 2)
     }
 

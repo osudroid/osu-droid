@@ -113,14 +113,14 @@ open class ExtendedSprite(textureRegion: TextureRegion? = null) : Box() {
     }
 
 
-    override fun onInitDraw(pGL: GL10) {
-        super.onInitDraw(pGL)
+    override fun beginDraw(pGL: GL10) {
+        super.beginDraw(pGL)
         GLHelper.enableTextures(pGL)
         GLHelper.enableTexCoordArray(pGL)
     }
 
-    override fun onApplyVertices(pGL: GL10) {
-        super.onApplyVertices(pGL)
+    override fun onDeclarePointers(pGL: GL10) {
+        super.onDeclarePointers(pGL)
         textureRegion?.onApply(pGL)
     }
 

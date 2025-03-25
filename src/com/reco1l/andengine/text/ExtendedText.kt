@@ -76,20 +76,20 @@ open class ExtendedText : ExtendedEntity() {
     private var currentSize = 0
 
 
-    override fun onInitDraw(pGL: GL10) {
-        super.onInitDraw(pGL)
+    override fun beginDraw(pGL: GL10) {
+        super.beginDraw(pGL)
         GLHelper.enableTextures(pGL)
         GLHelper.enableTexCoordArray(pGL)
     }
 
-    override fun drawVertices(gl: GL10, pCamera: Camera) {
+    override fun onDrawBuffer(gl: GL10, pCamera: Camera) {
         val vertexBuffer = vertexBuffer
         if (vertexBuffer != null) {
             gl.glDrawArrays(GL10.GL_TRIANGLES, 0, currentSize * VERTICES_PER_CHARACTER)
         }
     }
 
-    override fun onApplyVertices(gl: GL10) {
+    override fun onDeclarePointers(gl: GL10) {
 
         val font = font
         val textureBuffer = textureBuffer
@@ -99,7 +99,7 @@ open class ExtendedText : ExtendedEntity() {
             GLHelper.texCoordPointer(gl, textureBuffer.floatBuffer)
         }
 
-        super.onApplyVertices(gl)
+        super.onDeclarePointers(gl)
     }
 
     override fun onUpdateVertexBuffer() {

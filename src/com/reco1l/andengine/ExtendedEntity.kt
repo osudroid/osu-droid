@@ -586,7 +586,7 @@ abstract class ExtendedEntity(
         gl.glPopMatrix()
     }
 
-    open fun onInitDraw(pGL: GL10) {
+    open fun beginDraw(pGL: GL10) {
 
         if (vertexBuffer != null) {
             GLHelper.enableVertexArray(pGL)
@@ -612,7 +612,7 @@ abstract class ExtendedEntity(
         }
     }
 
-    open fun onApplyVertices(pGL: GL10) {
+    open fun onDeclarePointers(pGL: GL10) {
         val vertexBuffer = vertexBuffer ?: return
 
         if (GLHelper.EXTENSIONS_VERTEXBUFFEROBJECTS) {
@@ -626,12 +626,12 @@ abstract class ExtendedEntity(
 
     abstract fun onUpdateVertexBuffer()
 
-    abstract fun drawVertices(pGL: GL10, pCamera: Camera)
+    abstract fun onDrawBuffer(pGL: GL10, pCamera: Camera)
 
     override fun doDraw(pGL: GL10, pCamera: Camera) {
-        this.onInitDraw(pGL)
-        this.onApplyVertices(pGL)
-        this.drawVertices(pGL, pCamera)
+        this.beginDraw(pGL)
+        this.onDeclarePointers(pGL)
+        this.onDrawBuffer(pGL, pCamera)
     }
 
 

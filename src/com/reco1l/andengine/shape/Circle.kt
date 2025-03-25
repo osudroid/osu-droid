@@ -71,8 +71,8 @@ open class Circle : ExtendedEntity() {
     }
 
 
-    override fun onInitDraw(pGL: GL10) {
-        super.onInitDraw(pGL)
+    override fun beginDraw(pGL: GL10) {
+        super.beginDraw(pGL)
 
         GLHelper.disableCulling(pGL)
         GLHelper.disableTextures(pGL)
@@ -94,7 +94,7 @@ open class Circle : ExtendedEntity() {
         }
     }
 
-    override fun drawVertices(pGL: GL10, pCamera: Camera) {
+    override fun onDrawBuffer(pGL: GL10, pCamera: Camera) {
         val vertexBuffer = vertexBuffer
         if (vertexBuffer is CircleVertexBuffer) {
             vertexBuffer.draw(pGL)

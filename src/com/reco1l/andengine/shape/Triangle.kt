@@ -13,8 +13,8 @@ import javax.microedition.khronos.opengles.GL10.*
 open class Triangle : ExtendedEntity(vertexBuffer = TriangleVertexBuffer()) {
 
 
-    override fun onInitDraw(pGL: GL10) {
-        super.onInitDraw(pGL)
+    override fun beginDraw(pGL: GL10) {
+        super.beginDraw(pGL)
 
         GLHelper.disableCulling(pGL)
         GLHelper.disableTextures(pGL)
@@ -26,7 +26,7 @@ open class Triangle : ExtendedEntity(vertexBuffer = TriangleVertexBuffer()) {
         (vertexBuffer as TriangleVertexBuffer).update(drawWidth, drawHeight)
     }
 
-    override fun drawVertices(gl: GL10, camera: Camera) {
+    override fun onDrawBuffer(gl: GL10, camera: Camera) {
         gl.glDrawArrays(GL_TRIANGLE_FAN, 0, 3)
     }
 

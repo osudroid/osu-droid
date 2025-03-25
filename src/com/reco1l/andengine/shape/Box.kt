@@ -4,7 +4,6 @@ import com.reco1l.andengine.*
 import com.reco1l.toolkt.*
 import org.anddev.andengine.engine.camera.*
 import org.anddev.andengine.opengl.util.GLHelper
-import org.anddev.andengine.opengl.vertex.RectangleVertexBuffer
 import org.anddev.andengine.opengl.vertex.VertexBuffer
 import javax.microedition.khronos.opengles.*
 import javax.microedition.khronos.opengles.GL10.*
@@ -16,8 +15,8 @@ import kotlin.math.*
 open class Box : ExtendedEntity(vertexBuffer = BoxVertexBuffer()) {
 
 
-    override fun onInitDraw(pGL: GL10) {
-        super.onInitDraw(pGL)
+    override fun beginDraw(pGL: GL10) {
+        super.beginDraw(pGL)
 
         GLHelper.disableCulling(pGL)
         GLHelper.disableTextures(pGL)
@@ -29,7 +28,7 @@ open class Box : ExtendedEntity(vertexBuffer = BoxVertexBuffer()) {
         (vertexBuffer as BoxVertexBuffer).update(drawWidth, drawHeight)
     }
 
-    override fun drawVertices(gl: GL10, camera: Camera) {
+    override fun onDrawBuffer(gl: GL10, camera: Camera) {
         gl.glDrawArrays(GL_TRIANGLE_STRIP, 0, 4)
     }
 
@@ -93,8 +92,8 @@ open class RoundedBox : ExtendedEntity() {
     }
 
 
-    override fun onInitDraw(pGL: GL10) {
-        super.onInitDraw(pGL)
+    override fun beginDraw(pGL: GL10) {
+        super.beginDraw(pGL)
 
         GLHelper.disableCulling(pGL)
         GLHelper.disableTextures(pGL)
@@ -118,7 +117,7 @@ open class RoundedBox : ExtendedEntity() {
         (vertexBuffer as RoundedBoxVertexBuffer).update(drawWidth, drawHeight, cornerRadius)
     }
 
-    override fun drawVertices(pGL: GL10, pCamera: Camera) {
+    override fun onDrawBuffer(pGL: GL10, pCamera: Camera) {
         (vertexBuffer as RoundedBoxVertexBuffer).draw(pGL)
     }
 

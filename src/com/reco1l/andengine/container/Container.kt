@@ -162,7 +162,7 @@ open class Container : ExtendedEntity() {
 
 
     override fun onUpdateVertexBuffer() {}
-    override fun drawVertices(pGL: GL10, pCamera: Camera) {}
+    override fun onDrawBuffer(pGL: GL10, pCamera: Camera) {}
 
 }
 

@@ -31,9 +31,9 @@ class TriangleMesh : ExtendedEntity(vertexBuffer = null) {
     }
 
 
-    override fun onInitDraw(pGL: GL10) {
+    override fun beginDraw(pGL: GL10) {
 
-        super.onInitDraw(pGL)
+        super.beginDraw(pGL)
 
         GLHelper.disableCulling(pGL)
         GLHelper.disableTextures(pGL)
@@ -46,7 +46,7 @@ class TriangleMesh : ExtendedEntity(vertexBuffer = null) {
     }
 
 
-    override fun drawVertices(pGL: GL10, pCamera: Camera) {
+    override fun onDrawBuffer(pGL: GL10, pCamera: Camera) {
 
         if (vertices.length == 0) {
             return

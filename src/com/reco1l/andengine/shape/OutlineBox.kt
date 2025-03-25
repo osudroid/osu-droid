@@ -15,8 +15,8 @@ open class OutlineBox : ExtendedEntity(vertexBuffer = OutlineBoxVertexBuffer()) 
     var lineWidth = 1f
 
 
-    override fun onInitDraw(pGL: GL10) {
-        super.onInitDraw(pGL)
+    override fun beginDraw(pGL: GL10) {
+        super.beginDraw(pGL)
 
         GLHelper.disableCulling(pGL)
         GLHelper.disableTextures(pGL)
@@ -30,7 +30,7 @@ open class OutlineBox : ExtendedEntity(vertexBuffer = OutlineBoxVertexBuffer()) 
         (vertexBuffer as OutlineBoxVertexBuffer).update(drawWidth, drawHeight)
     }
 
-    override fun drawVertices(gl: GL10, camera: Camera) {
+    override fun onDrawBuffer(gl: GL10, camera: Camera) {
         gl.glDrawArrays(GL_LINE_LOOP, 0, 4)
     }
 

@@ -90,15 +90,15 @@ open class TextureFont(val characters: MutableMap<Char, TextureRegion>) : Box() 
         onContentSizeMeasured()
     }
 
-    override fun onInitDraw(pGL: GL10) {
-        super.onInitDraw(pGL)
+    override fun beginDraw(pGL: GL10) {
+        super.beginDraw(pGL)
 
         GLHelper.enableTextures(pGL)
         GLHelper.enableTexCoordArray(pGL)
     }
 
     override fun doDraw(gl: GL10, camera: Camera) {
-        onInitDraw(gl)
+        beginDraw(gl)
 
         var offsetX = 0f
 
@@ -114,8 +114,8 @@ open class TextureFont(val characters: MutableMap<Char, TextureRegion>) : Box() 
             (vertexBuffer as BoxVertexBuffer).update(textureWidth, textureHeight)
             texture.onApply(gl)
 
-            onApplyVertices(gl)
-            drawVertices(gl, camera)
+            onDeclarePointers(gl)
+            onDrawBuffer(gl, camera)
             gl.glPopMatrix()
 
             offsetX += textureWidth + spacing
