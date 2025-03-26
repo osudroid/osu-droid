@@ -38,7 +38,9 @@ object BeatmapHitObjectsParser : BeatmapSectionParser() {
 
             val isNewCombo = tempType and HitObjectType.NewCombo.value != 0
 
-            val position = Vector2(parseFloat(it[0]), parseFloat(it[1]))
+            val position =
+                if (beatmap.formatVersion >= FIRST_LAZER_VERSION) Vector2(parseFloat(it[0]), parseFloat(it[1]))
+                else Vector2(parseFloat(it[0]).toInt(), parseFloat(it[1]).toInt())
 
             val soundType = parseInt(it[4])
             val bankInfo = SampleBankInfo()

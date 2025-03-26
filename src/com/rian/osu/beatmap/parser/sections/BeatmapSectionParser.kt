@@ -102,6 +102,7 @@ abstract class BeatmapSectionParser {
         @JvmStatic
         protected val COLON_PROPERTY_REGEX = ":".toRegex()
 
+        protected const val FIRST_LAZER_VERSION = 128
         private const val MAX_PARSE_LIMIT = Int.MAX_VALUE
     }
 }
