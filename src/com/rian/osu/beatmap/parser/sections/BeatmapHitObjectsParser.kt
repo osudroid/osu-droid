@@ -120,18 +120,21 @@ object BeatmapHitObjectsParser : BeatmapSectionParser() {
                 it.removeFirst()
             }
 
-            // Edge-case rules (to match stable).
+            // Edge-case rules (to match osu!stable).
             if (sliderType === SliderPathType.PerfectCurve) {
-                if (it.size != 3) {
-                    sliderType = SliderPathType.Bezier
-                } else if (almostEquals(
+                if (beatmap.formatVersion < FIRST_LAZER_VERSION) {
+                    if (it.size != 3) {
+                        sliderType = SliderPathType.Bezier
+                    } else if (almostEquals(
                         0f,
-                        (it[1].y - it[0].y) * (it[2].x - it[0].x) -
-                                (it[1].x - it[0].x) * (it[2].y - it[0].y)
-                    )
-                ) {
-                    // osu-stable special-cased co-linear perfect curves to a linear path
-                    sliderType = SliderPathType.Linear
+                        (it[1].y - it[0].y) * (it[2].x - it[0].x) - (it[1].x - it[0].x) * (it[2].y - it[0].y)
+                    )) {
+                        // osu!stable special-cased co-linear perfect curves to a linear path
+                        sliderType = SliderPathType.Linear
+                    }
+                } else if (it.size > 3) {
+                    // osu!lazer supports perfect curves with less than 3 points and co-linear points
+                    sliderType = SliderPathType.Bezier
                 }
             }
         }
