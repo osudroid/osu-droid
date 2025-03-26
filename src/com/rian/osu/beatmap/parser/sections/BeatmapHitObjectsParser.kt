@@ -108,10 +108,7 @@ object BeatmapHitObjectsParser : BeatmapSectionParser() {
                     scope?.ensureActive()
                     it.isEmpty()
                 }.let {
-                    val curvePointPosition = Vector2(
-                        parseInt(it[0]).toFloat(),
-                        parseInt(it[1]).toFloat()
-                    )
+                    val curvePointPosition = Vector2(parseFloat(it[0]), parseFloat(it[1]))
 
                     curvePoints.add(curvePointPosition - startPosition)
                 }
