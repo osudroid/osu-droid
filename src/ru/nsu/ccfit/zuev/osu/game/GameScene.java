@@ -171,7 +171,7 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
     private LinePath[] sliderRenderPaths = null;
     private int sliderIndex = 0;
     private ExtendedSprite unrankedSprite;
-    private final ArrayList<Mod> rateAdjustingMods = new ArrayList<>();
+    private final ArrayList<IModApplicableToTrackRate> rateAdjustingMods = new ArrayList<>();
 
     private StoryboardSprite storyboardSprite;
 
@@ -430,8 +430,8 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
         rateAdjustingMods.clear();
 
         for (var mod : mods.values()) {
-            if (mod instanceof IModApplicableToTrackRate) {
-                rateAdjustingMods.add(mod);
+            if (mod instanceof IModApplicableToTrackRate rateMod) {
+                rateAdjustingMods.add(rateMod);
             }
         }
 
