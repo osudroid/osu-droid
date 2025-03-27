@@ -146,38 +146,45 @@ object BeatmapHitObjectsParser : BeatmapSectionParser() {
         // One node for each repeat + the start and end nodes
         val nodes = repeatCount + 2
 
-        val nodeBankInfo = MutableList(nodes) { bankInfo.copy() }
-
-        scope?.ensureActive()
+        val nodeBankInfo = MutableList(nodes) {
+            scope?.ensureActive()
+            bankInfo.copy()
+        }
 
         // Read any per-node sample banks
         val sets = pars.getOrNull(9)?.split(pipePropertyRegex)
 
         if (sets != null) {
             for (i in 0 until min(sets.size, nodes)) {
+                scope?.ensureActive()
+
                 readCustomSampleBanks(nodeBankInfo[i], sets[i])
             }
         }
 
-        val nodeSoundTypes = MutableList(nodes) { soundType }
-
-        scope?.ensureActive()
+        val nodeSoundTypes = MutableList(nodes) {
+            scope?.ensureActive()
+            soundType
+        }
 
         // Read any per-node sound types
         val adds = pars.getOrNull(8)?.split(pipePropertyRegex)
 
         if (adds != null) {
             for (i in 0 until min(adds.size, nodes)) {
+                scope?.ensureActive()
                 nodeSoundTypes[i] = parseInt(adds[i])
             }
         }
 
         // Generate the final per-node samples
-        val nodeSamples = MutableList(nodes) { convertSoundType(nodeSoundTypes[it], nodeBankInfo[it]) }
+        val nodeSamples = MutableList(nodes) {
+            scope?.ensureActive()
+
+            convertSoundType(nodeSoundTypes[it], nodeBankInfo[it])
+        }
 
         val difficultyControlPoint = beatmap.controlPoints.difficulty.controlPointAt(time)
-
-        scope?.ensureActive()
 
         return Slider(
             time,
