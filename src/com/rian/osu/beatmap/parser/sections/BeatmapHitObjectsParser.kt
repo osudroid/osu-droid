@@ -288,7 +288,7 @@ object BeatmapHitObjectsParser : BeatmapSectionParser() {
 
     private fun parseCoordinates(formatVersion: Int, x: String, y: String) =
         if (formatVersion >= FIRST_LAZER_VERSION) Vector2(parseFloat(x), parseFloat(y))
-        else Vector2(parseFloat(y).toInt(), parseFloat(y).toInt())
+        else Vector2(parseFloat(x).toInt(), parseFloat(y).toInt())
 }
 
 /**
