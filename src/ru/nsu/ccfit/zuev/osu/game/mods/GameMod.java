@@ -1,5 +1,8 @@
 package ru.nsu.ccfit.zuev.osu.game.mods;
 
+import kotlin.Deprecated;
+
+@Deprecated(message = "This class is only kept for compatibility with the old mods system. Use com.rian.osu.mods.Mod instead")
 public enum GameMod {
     MOD_NOFAIL,
     MOD_AUTO,
