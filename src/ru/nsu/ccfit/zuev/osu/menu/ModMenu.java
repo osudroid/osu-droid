@@ -6,14 +6,13 @@ import com.reco1l.osu.data.BeatmapInfo;
 import com.reco1l.osu.Execution;
 import com.reco1l.osu.multiplayer.Multiplayer;
 import com.reco1l.ibancho.data.RoomMods;
-import com.reco1l.osu.multiplayer.MultiplayerConverter;
 import com.reco1l.osu.multiplayer.RoomScene;
 
 import com.rian.osu.GameMode;
 import com.rian.osu.beatmap.parser.BeatmapParser;
 import com.rian.osu.difficulty.BeatmapDifficultyCalculator;
-import com.rian.osu.difficulty.calculator.DifficultyCalculationParameters;
-import com.rian.osu.utils.ModUtils;
+import com.rian.osu.mods.*;
+import com.rian.osu.utils.ModHashMap;
 
 import org.anddev.andengine.entity.primitive.Rectangle;
 import org.anddev.andengine.entity.scene.Scene;
@@ -21,59 +20,32 @@ import org.anddev.andengine.entity.text.ChangeableText;
 import org.anddev.andengine.input.touch.TouchEvent;
 import org.anddev.andengine.opengl.texture.region.TextureRegion;
 
-import java.util.EnumSet;
+import java.util.HashMap;
 import java.util.Map;
-import java.util.TreeMap;
 import java.util.concurrent.CancellationException;
 
 import org.anddev.andengine.util.MathUtils;
-import org.jetbrains.annotations.Nullable;
 
 import kotlinx.coroutines.Job;
 import ru.nsu.ccfit.zuev.osu.*;
 import ru.nsu.ccfit.zuev.osu.game.GameHelper;
-import ru.nsu.ccfit.zuev.osu.game.mods.GameMod;
 import ru.nsu.ccfit.zuev.osu.game.mods.IModSwitcher;
 import ru.nsu.ccfit.zuev.osu.game.mods.ModButton;
 import ru.nsu.ccfit.zuev.osu.helper.StringTable;
 import ru.nsu.ccfit.zuev.osu.helper.TextButton;
-import ru.nsu.ccfit.zuev.osu.scoring.StatisticV2;
-
 
 public class ModMenu implements IModSwitcher {
-
-    public static final float DEFAULT_FL_FOLLOW_DELAY = 0.12f;
-
     private static final ModMenu instance = new ModMenu();
     private Scene scene = null, parent;
-    private EnumSet<GameMod> mod;
+    private final ModHashMap enabledMods = new ModHashMap();
     private ChangeableText multiplierText;
     private BeatmapInfo selectedBeatmap;
-    private final Map<GameMod, ModButton> modButtons = new TreeMap<>();
-    private float changeSpeed = 1.0f;
+    private final Map<Mod, ModButton> modButtons = new HashMap<>();
     private boolean enableNCWhenSpeedChange = false;
-    private boolean modsRemoved = false;
-    private float FLfollowDelay = DEFAULT_FL_FOLLOW_DELAY;
     private Job calculationJob;
-
-
-    private Float customAR = null;
-    private Float customOD = null;
-    private Float customHP = null;
-    private Float customCS = null;
     private ModSettingsMenu menu;
 
-    private ModMenu() {
-        mod = EnumSet.noneOf(GameMod.class);
-    }
-
-    public float getFLfollowDelay() {
-        return FLfollowDelay;
-    }
-
-    public void setFLfollowDelay(float newfLfollowDelay) {
-        FLfollowDelay = newfLfollowDelay;
-    }
+    private ModMenu() {}
     
     public static ModMenu getInstance() {
         return instance;
@@ -95,11 +67,11 @@ public class ModMenu implements IModSwitcher {
     {
         // Ensure selected mods are visually selected
         synchronized (modButtons) {
-            for (GameMod key : modButtons.keySet()) {
+            for (var key : modButtons.keySet()) {
                 var button = modButtons.get(key);
 
                 if (button != null)
-                    button.setModEnabled(mod.contains(key));
+                    button.setEnabled(enabledMods.contains(key));
             }
 
             // Updating multiplier text just in case
@@ -107,48 +79,30 @@ public class ModMenu implements IModSwitcher {
         }
     }
 
-    public void setMods(RoomMods mods, boolean isFreeMods, boolean allowForceDifficultyStatistics)
-    {
-        var modSet = mods.getSet();
+    public void setMods(RoomMods mods, boolean isFreeMods, boolean allowForceDifficultyStatistics) {
+        var difficultyAdjust = enabledMods.ofType(ModDifficultyAdjust.class);
 
-        if (!isFreeMods)
-        {
-            mod = modSet;
-
-            FLfollowDelay = mods.getFlFollowDelay();
-        }
-
-        if (!isFreeMods || !allowForceDifficultyStatistics) {
-            customAR = mods.getCustomAR();
-            customOD = mods.getCustomOD();
-            customCS = mods.getCustomCS();
-            customHP = mods.getCustomHP();
-        }
-
-        changeSpeed = mods.getSpeedMultiplier();
-
-        if (!Multiplayer.isRoomHost())
-        {
-            if (modSet.contains(GameMod.MOD_DOUBLETIME) || modSet.contains(GameMod.MOD_NIGHTCORE))
-            {
-                mod.remove(Config.isUseNightcoreOnMultiplayer() ? GameMod.MOD_DOUBLETIME : GameMod.MOD_NIGHTCORE);
-                mod.add(Config.isUseNightcoreOnMultiplayer() ? GameMod.MOD_NIGHTCORE : GameMod.MOD_DOUBLETIME);
+        if (isFreeMods) {
+            for (var mod : mods.values()) {
+                if (!mod.isValidForMultiplayerAsFreeMod()) {
+                    enabledMods.put(mod);
+                }
             }
-            else {
-                mod.remove(GameMod.MOD_NIGHTCORE);
-                mod.remove(GameMod.MOD_DOUBLETIME);
-            }
+        } else {
+            enabledMods.clear();
+            enabledMods.putAll(mods);
         }
 
-        if (modSet.contains(GameMod.MOD_SCOREV2))
-            mod.add(GameMod.MOD_SCOREV2);
-        else
-            mod.remove(GameMod.MOD_SCOREV2);
+        // If force difficulty statistics is enabled, preserve the player's force difficulty statistics instead
+        // of the room.
+        if (allowForceDifficultyStatistics && difficultyAdjust != null) {
+            enabledMods.put(difficultyAdjust);
+        }
 
-        if (modSet.contains(GameMod.MOD_HALFTIME))
-            mod.add(GameMod.MOD_HALFTIME);
-        else
-            mod.remove(GameMod.MOD_HALFTIME);
+        if (!Multiplayer.isRoomHost() && (mods.contains(ModDoubleTime.class) || mods.contains(ModNightCore.class))) {
+            enabledMods.removeOfType(Config.isUseNightcoreOnMultiplayer() ? ModDoubleTime.class : ModNightCore.class);
+            enabledMods.put(Config.isUseNightcoreOnMultiplayer() ? ModNightCore.class : ModDoubleTime.class);
+        }
 
         update();
     }
@@ -171,29 +125,13 @@ public class ModMenu implements IModSwitcher {
         {
             RoomScene.isWaitingForModsChange = true;
 
-            var string = MultiplayerConverter.modsToString(mod);
+            var string = enabledMods.toString();
 
             // The room mods are the same as the host mods
             if (Multiplayer.isRoomHost()) {
-                RoomAPI.setRoomMods(
-                        string,
-                        changeSpeed,
-                        FLfollowDelay,
-                        customAR,
-                        customOD,
-                        customCS,
-                        customHP
-                );
+                RoomAPI.setRoomMods(string);
             } else if (updatePlayerMods) {
-                RoomAPI.setPlayerMods(
-                        string,
-                        changeSpeed,
-                        FLfollowDelay,
-                        customAR,
-                        customOD,
-                        customCS,
-                        customHP
-                );
+                RoomAPI.setPlayerMods(string);
             } else {
                 RoomScene.isWaitingForModsChange = false;
             }
@@ -209,15 +147,18 @@ public class ModMenu implements IModSwitcher {
         menu = null;
     }
 
-    private void addButton(int x, int y, GameMod mod) {
-        ModButton mButton;
+    private void addButton(int x, int y, Mod mod) {
+        if (!(mod instanceof IModUserSelectable selectableMod)) {
+            throw new IllegalArgumentException("Mod must implement IModUserSelectable");
+        }
 
-        mButton = new ModButton(x, y, mod);
-        mButton.setModEnabled(this.mod.contains(mod));
-        mButton.setSwitcher(this);
-        scene.attachChild(mButton);
-        scene.registerTouchArea(mButton);
-        modButtons.put(mod, mButton);
+        var button = new ModButton(x, y, selectableMod, this);
+
+        button.setEnabled(this.enabledMods.contains(mod));
+        scene.attachChild(button);
+        scene.registerTouchArea(button);
+
+        modButtons.put(mod, button);
     }
 
     public void init() {
@@ -250,48 +191,48 @@ public class ModMenu implements IModSwitcher {
         var clickShortConfirmSound = ResourceManager.getInstance().getSound("click-short-confirm");
 
         //line 1
-        addButton(offset, Config.getRES_HEIGHT() / 2 - button.getHeight() * 3, GameMod.MOD_EASY);
+        addButton(offset, Config.getRES_HEIGHT() / 2 - button.getHeight() * 3, new ModEasy());
 
         // Used to define the X offset of each button according to its visibility
         int factor = 1;
 
-        addButton(offset + offsetGrowth * factor++, Config.getRES_HEIGHT() / 2 - button.getHeight() * 3, GameMod.MOD_NOFAIL);
+        addButton(offset + offsetGrowth * factor++, Config.getRES_HEIGHT() / 2 - button.getHeight() * 3, new ModNoFail());
 
         if (!Multiplayer.isMultiplayer || Multiplayer.isRoomHost())
-            addButton(offset + offsetGrowth * factor++, Config.getRES_HEIGHT() / 2 - button.getHeight() * 3, GameMod.MOD_HALFTIME);
+            addButton(offset + offsetGrowth * factor++, Config.getRES_HEIGHT() / 2 - button.getHeight() * 3, new ModHalfTime());
 
-        addButton(offset + offsetGrowth * factor, Config.getRES_HEIGHT() / 2 - button.getHeight() * 3, GameMod.MOD_REALLYEASY);
+        addButton(offset + offsetGrowth * factor, Config.getRES_HEIGHT() / 2 - button.getHeight() * 3, new ModReallyEasy());
 
         factor = 1;
 
         //line 2
-        addButton(offset, Config.getRES_HEIGHT() / 2 - button.getHeight() / 2, GameMod.MOD_HARDROCK);
+        addButton(offset, Config.getRES_HEIGHT() / 2 - button.getHeight() / 2, new ModHardRock());
 
         if (!Multiplayer.isMultiplayer || Multiplayer.isRoomHost())
-            addButton(offset + offsetGrowth * factor++, Config.getRES_HEIGHT() / 2 - button.getHeight() / 2, GameMod.MOD_DOUBLETIME);
+            addButton(offset + offsetGrowth * factor++, Config.getRES_HEIGHT() / 2 - button.getHeight() / 2, new ModDoubleTime());
 
         if (!Multiplayer.isMultiplayer || Multiplayer.isRoomHost())
-            addButton(offset + offsetGrowth * factor++, Config.getRES_HEIGHT() / 2 - button.getHeight() / 2, GameMod.MOD_NIGHTCORE);
+            addButton(offset + offsetGrowth * factor++, Config.getRES_HEIGHT() / 2 - button.getHeight() / 2, new ModNightCore());
 
-        addButton(offset + offsetGrowth * factor++, Config.getRES_HEIGHT() / 2 - button.getHeight() / 2, GameMod.MOD_HIDDEN);
-        addButton(offset + offsetGrowth * factor++, Config.getRES_HEIGHT() / 2 - button.getHeight() / 2, GameMod.MOD_TRACEABLE);
-        addButton(offset + offsetGrowth * factor++, Config.getRES_HEIGHT() / 2 - button.getHeight() / 2, GameMod.MOD_FLASHLIGHT);
-        addButton(offset + offsetGrowth * factor++, Config.getRES_HEIGHT() / 2 - button.getHeight() / 2, GameMod.MOD_SUDDENDEATH);
-        addButton(offset + offsetGrowth * factor, Config.getRES_HEIGHT() / 2 - button.getHeight() / 2, GameMod.MOD_PERFECT);
+        addButton(offset + offsetGrowth * factor++, Config.getRES_HEIGHT() / 2 - button.getHeight() / 2, new ModHidden());
+        addButton(offset + offsetGrowth * factor++, Config.getRES_HEIGHT() / 2 - button.getHeight() / 2, new ModTraceable());
+        addButton(offset + offsetGrowth * factor++, Config.getRES_HEIGHT() / 2 - button.getHeight() / 2, new ModFlashlight());
+        addButton(offset + offsetGrowth * factor++, Config.getRES_HEIGHT() / 2 - button.getHeight() / 2, new ModSuddenDeath());
+        addButton(offset + offsetGrowth * factor, Config.getRES_HEIGHT() / 2 - button.getHeight() / 2, new ModPerfect());
 
         factor = 1;
 
         //line 3
-        addButton(offset, Config.getRES_HEIGHT() / 2 + button.getHeight() * 2, GameMod.MOD_RELAX);
-        addButton(offset + offsetGrowth * factor++, Config.getRES_HEIGHT() / 2 + button.getHeight() * 2, GameMod.MOD_AUTOPILOT);
+        addButton(offset, Config.getRES_HEIGHT() / 2 + button.getHeight() * 2, new ModRelax());
+        addButton(offset + offsetGrowth * factor++, Config.getRES_HEIGHT() / 2 + button.getHeight() * 2, new ModAutopilot());
 
         if (!Multiplayer.isMultiplayer)
-            addButton(offset + offsetGrowth * factor++, Config.getRES_HEIGHT() / 2 + button.getHeight() * 2, GameMod.MOD_AUTO);
+            addButton(offset + offsetGrowth * factor++, Config.getRES_HEIGHT() / 2 + button.getHeight() * 2, new ModAuto());
 
         if (!Multiplayer.isMultiplayer)
-            addButton(offset + offsetGrowth * factor++, Config.getRES_HEIGHT() / 2 + button.getHeight() * 2, GameMod.MOD_SCOREV2);
+            addButton(offset + offsetGrowth * factor++, Config.getRES_HEIGHT() / 2 + button.getHeight() * 2, new ModScoreV2());
 
-        addButton(offset + offsetGrowth * factor, Config.getRES_HEIGHT() / 2 + button.getHeight() * 2, GameMod.MOD_PRECISE);
+        addButton(offset + offsetGrowth * factor, Config.getRES_HEIGHT() / 2 + button.getHeight() * 2, new ModPrecise());
 
         final TextButton resetText = new TextButton(ResourceManager
                 .getInstance().getFont("CaptionFont"),
@@ -316,11 +257,11 @@ public class ModMenu implements IModSwitcher {
                             clickShortConfirmSound.play();
                         }
 
-                        mod.clear();
+                        enabledMods.clear();
                         reloadMusicEffects();
                         changeMultiplierText();
                         for (ModButton btn : modButtons.values()) {
-                            btn.setModEnabled(false);
+                            btn.setEnabled(false);
                         }
                     }
 
@@ -387,20 +328,13 @@ public class ModMenu implements IModSwitcher {
                                 return;
                             }
 
-                            var parameters = new DifficultyCalculationParameters(
-                                ModUtils.convertLegacyMods(
-                                    mod,
-                                    isCustomCS() ? customCS : null,
-                                    isCustomAR() ? customAR : null,
-                                    isCustomOD() ? customOD : null
-                                ),
-                                changeSpeed
-                            );
+                            // Copy the mods to avoid concurrent modification
+                            var mods = enabledMods.deepCopy().values();
 
                             switch (Config.getDifficultyAlgorithm()) {
                                 case droid -> {
                                     var attributes = BeatmapDifficultyCalculator.calculateDroidDifficulty(
-                                        beatmap, parameters, scope
+                                        beatmap, mods, scope
                                     );
 
                                     GlobalManager.getInstance().getSongMenu().setStarsDisplay(
@@ -410,7 +344,7 @@ public class ModMenu implements IModSwitcher {
 
                                 case standard -> {
                                     var attributes = BeatmapDifficultyCalculator.calculateStandardDifficulty(
-                                        beatmap, parameters, scope
+                                        beatmap, mods, scope
                                     );
 
                                     GlobalManager.getInstance().getSongMenu().setStarsDisplay(
@@ -460,127 +394,49 @@ public class ModMenu implements IModSwitcher {
         return scene;
     }
 
-    public EnumSet<GameMod> getMod() {
-        return mod.clone();
+    public ModHashMap getEnabledMods() {
+        return enabledMods;
     }
 
-    public void setMod(EnumSet<GameMod> mod) {
-        this.mod = mod.clone();
-    }
-
-    private void changeMultiplierText() {
+    public void changeMultiplierText() {
         GlobalManager.getInstance().getSongMenu().changeDimensionInfo(selectedBeatmap);
-        //calculateAble = true;
-        float mult = 1;
-        for (GameMod m : mod) {
-            mult *= m.scoreMultiplier;
-        }
-        if (changeSpeed != 1.0f){
-            mult *= StatisticV2.getSpeedChangeScoreMultiplier(getSpeed(), mod);
-        }
+
+        float multiplier = 1;
+
         if (selectedBeatmap != null) {
-            if (isCustomCS()) {
-                mult *= StatisticV2.getCustomCSScoreMultiplier(selectedBeatmap.getCircleSize(), customCS);
-            }
+            var difficulty = selectedBeatmap.getBeatmapDifficulty();
 
-            if (isCustomOD()) {
-                mult *= StatisticV2.getCustomODScoreMultiplier(selectedBeatmap.getOverallDifficulty(), customOD);
+            for (var mod : enabledMods.values()) {
+                multiplier *= mod.calculateScoreMultiplier(difficulty);
             }
         }
 
-        multiplierText.setText(StringTable.format(com.osudroid.resources.R.string.menu_mod_multiplier,
-                mult));
+        multiplierText.setText(StringTable.format(com.osudroid.resources.R.string.menu_mod_multiplier, multiplier));
         multiplierText.setPosition(
                 Config.getRES_WIDTH() / 2f - multiplierText.getWidth() / 2,
                 multiplierText.getY());
-        if (mult == 1) {
+        if (multiplier == 1) {
             multiplierText.setColor(1, 1, 1);
-        } else if (mult < 1) {
+        } else if (multiplier < 1) {
             multiplierText.setColor(1, 150f / 255f, 0);
         } else {
             multiplierText.setColor(5 / 255f, 240 / 255f, 5 / 255f);
         }
     }
 
-    public void handleModFlags(GameMod flag, GameMod modToCheck, GameMod[] modsToRemove) {
-        if (flag.equals(modToCheck)) {
-            for (GameMod modToRemove: modsToRemove) {
-                mod.remove(modToRemove);
-                modsRemoved = true;
-            }
-        }
-    }
-
-    public boolean handleCustomDifficultyStatisticsFlags() {
-        if (!isCustomCS() || !isCustomAR() || !isCustomOD() || !isCustomHP()) {
-            return false;
-        }
-
-        var modsToRemove = new GameMod[] { GameMod.MOD_HARDROCK, GameMod.MOD_EASY, GameMod.MOD_REALLYEASY };
-        var modsRemoved = false;
-
-        for (var gameMod : modsToRemove) {
-            if (mod.contains(gameMod)) {
-                mod.remove(gameMod);
-                modButtons.get(gameMod).setModEnabled(false);
-
-                modsRemoved = true;
-            }
-        }
-
-        if (modsRemoved) {
-            ToastLogger.showText(com.osudroid.resources.R.string.force_diffstat_mod_unpickable, false);
-        }
-
-        return modsRemoved;
-    }
-
-    public boolean switchMod(GameMod flag) {
+    @Override
+    public boolean switchMod(IModUserSelectable selectableMod) {
+        var mod = (Mod) selectableMod;
         boolean returnValue = true;
 
         var checkOffSound = ResourceManager.getInstance().getSound("check-off");
         var checkOnSound = ResourceManager.getInstance().getSound("check-on");
 
-        if (mod.contains(flag)) {
-            mod.remove(flag);
-
-            if (flag == GameMod.MOD_FLASHLIGHT)
-                resetFLFollowDelay();
-
+        if (enabledMods.contains(mod)) {
+            enabledMods.remove(mod);
             returnValue = false;
         } else {
-            mod.add(flag);
-
-            if (handleCustomDifficultyStatisticsFlags()) {
-                if (checkOffSound != null) {
-                    checkOffSound.play();
-                }
-                return false;
-            }
-
-            handleModFlags(flag, GameMod.MOD_HARDROCK, new GameMod[]{GameMod.MOD_EASY});
-            handleModFlags(flag, GameMod.MOD_EASY, new GameMod[]{GameMod.MOD_HARDROCK});
-            handleModFlags(flag, GameMod.MOD_AUTOPILOT, new GameMod[]{GameMod.MOD_RELAX, GameMod.MOD_AUTO, GameMod.MOD_NOFAIL});
-            handleModFlags(flag, GameMod.MOD_AUTO, new GameMod[]{GameMod.MOD_RELAX, GameMod.MOD_AUTOPILOT, GameMod.MOD_PERFECT, GameMod.MOD_SUDDENDEATH});
-            handleModFlags(flag, GameMod.MOD_RELAX, new GameMod[]{GameMod.MOD_AUTO, GameMod.MOD_NOFAIL, GameMod.MOD_AUTOPILOT});
-            handleModFlags(flag, GameMod.MOD_HIDDEN, new GameMod[]{GameMod.MOD_TRACEABLE});
-            handleModFlags(flag, GameMod.MOD_TRACEABLE, new GameMod[]{GameMod.MOD_HIDDEN});
-            handleModFlags(flag, GameMod.MOD_DOUBLETIME, new GameMod[]{GameMod.MOD_NIGHTCORE, GameMod.MOD_HALFTIME});
-            handleModFlags(flag, GameMod.MOD_NIGHTCORE, new GameMod[]{GameMod.MOD_DOUBLETIME, GameMod.MOD_HALFTIME});
-            handleModFlags(flag, GameMod.MOD_HALFTIME, new GameMod[]{GameMod.MOD_DOUBLETIME, GameMod.MOD_NIGHTCORE});
-            handleModFlags(flag, GameMod.MOD_SUDDENDEATH, new GameMod[]{GameMod.MOD_NOFAIL, GameMod.MOD_PERFECT, GameMod.MOD_AUTO});
-            handleModFlags(flag, GameMod.MOD_PERFECT, new GameMod[]{GameMod.MOD_NOFAIL, GameMod.MOD_SUDDENDEATH, GameMod.MOD_AUTO});
-            handleModFlags(flag, GameMod.MOD_NOFAIL, new GameMod[]{GameMod.MOD_PERFECT, GameMod.MOD_SUDDENDEATH, GameMod.MOD_AUTOPILOT, GameMod.MOD_RELAX});
-
-            if (modsRemoved) {
-                for (GameMod gameMod : modButtons.keySet()) {
-                    modButtons.get(gameMod).setModEnabled(mod.contains(gameMod));
-                }
-            }
-        }
-
-        if (flag == GameMod.MOD_DOUBLETIME || flag == GameMod.MOD_NIGHTCORE || flag == GameMod.MOD_HALFTIME) {
-            reloadMusicEffects();
+            enabledMods.put(mod);
         }
 
         if (returnValue) {
@@ -593,7 +449,11 @@ public class ModMenu implements IModSwitcher {
             }
         }
 
-        changeMultiplierText();
+        if (mod instanceof ModRateAdjust) {
+            reloadMusicEffects();
+        }
+
+        update();
 
         return returnValue;
     }
@@ -609,117 +469,19 @@ public class ModMenu implements IModSwitcher {
         GlobalManager.getInstance().getSongMenu().updateMusicEffects();
     }
 
-    public float getSpeed(){
-        float speed = changeSpeed;
-        if (mod.contains(GameMod.MOD_DOUBLETIME) || mod.contains(GameMod.MOD_NIGHTCORE)){
-            speed *= 1.5f;
-        } else if (mod.contains(GameMod.MOD_HALFTIME)){
-            speed *= 0.75f;
-        }
-
-        return speed;
-    }
-
-    public boolean isChangeSpeed() {
-        return changeSpeed != 1.0;
-    }
-
-    public float getChangeSpeed(){
-        return changeSpeed;
-    }
-
-    public void setChangeSpeed(float speed){
-        changeSpeed = speed;
-
-        GlobalManager.getInstance().getSongMenu().updateMusicEffects();
-    }
-
-    public boolean isDefaultFLFollowDelay() {
-        return FLfollowDelay == DEFAULT_FL_FOLLOW_DELAY;
-    }
-
-    public void resetFLFollowDelay() {
-        FLfollowDelay = DEFAULT_FL_FOLLOW_DELAY;
-    }
-
     public boolean isEnableNCWhenSpeedChange(){
         return enableNCWhenSpeedChange;
     }
 
     public void setEnableNCWhenSpeedChange(boolean t){
         enableNCWhenSpeedChange = t;
-
-        GlobalManager.getInstance().getSongMenu().updateMusicEffects();
-    }
-
-    public void updateMultiplierText(){
-        changeMultiplierText();
+        reloadMusicEffects();
     }
 
     public void cancelCalculationJob() {
         if (calculationJob != null) {
             calculationJob.cancel(new CancellationException("Difficulty calculation has been cancelled."));
         }
-    }
-
-
-    public boolean isCustomAR() {
-        return customAR != null;
-    }
-
-    public Float getCustomAR() {
-        return customAR;
-    }
-
-    public void setCustomAR(@Nullable Float customAR) {
-        this.customAR = customAR;
-
-        handleCustomDifficultyStatisticsFlags();
-    }
-
-
-    public boolean isCustomOD() {
-        return customOD != null;
-    }
-
-    public Float getCustomOD() {
-        return customOD;
-    }
-
-    public void setCustomOD(@Nullable Float customOD) {
-        this.customOD = customOD;
-
-        handleCustomDifficultyStatisticsFlags();
-    }
-
-
-    public boolean isCustomHP() {
-        return customHP != null;
-    }
-
-    public Float getCustomHP() {
-        return customHP;
-    }
-
-    public void setCustomHP(@Nullable Float customHP) {
-        this.customHP = customHP;
-
-        handleCustomDifficultyStatisticsFlags();
-    }
-
-
-    public boolean isCustomCS() {
-        return customCS != null;
-    }
-
-    public Float getCustomCS() {
-        return customCS;
-    }
-
-    public void setCustomCS(@Nullable Float customCS) {
-        this.customCS = customCS;
-
-        handleCustomDifficultyStatisticsFlags();
     }
 
     public ModSettingsMenu getMenu() {

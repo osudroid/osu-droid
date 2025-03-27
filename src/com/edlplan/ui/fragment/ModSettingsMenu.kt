@@ -15,11 +15,12 @@ import com.edlplan.ui.EasingHelper
 import com.reco1l.osu.mainThread
 import com.reco1l.osu.multiplayer.Multiplayer
 import com.reco1l.toolkt.android.dp
+import com.rian.osu.mods.ModCustomSpeed
+import com.rian.osu.mods.ModDifficultyAdjust
+import com.rian.osu.mods.ModFlashlight
 import org.anddev.andengine.input.touch.TouchEvent
 import ru.nsu.ccfit.zuev.osu.Config
 import ru.nsu.ccfit.zuev.osu.GlobalManager
-import ru.nsu.ccfit.zuev.osu.game.cursor.flashlight.FlashLightEntity
-import ru.nsu.ccfit.zuev.osu.game.mods.GameMod
 import ru.nsu.ccfit.zuev.osu.menu.ModMenu
 import ru.nsu.ccfit.zuev.osuplus.R
 import java.util.Locale
@@ -162,22 +163,6 @@ class ModSettingsMenu : BaseFragment() {
             }
         }
 
-        speedModifyText = findViewById(R.id.changeSpeedText)!!
-
-        speedModifyToggle = findViewById(R.id.enableSpeedChange)!!
-        speedModifyToggle.isChecked = ModMenu.getInstance().changeSpeed != 1f
-        speedModifyToggle.isEnabled = speedModifyToggle.isChecked
-        speedModifyToggle.setOnCheckedChangeListener { _, isChecked ->
-            speedModifyToggle.isEnabled = isChecked
-
-            if (!isChecked) {
-                ModMenu.getInstance().changeSpeed = 1f
-                speedModifyBar.progress = 10
-                speedModifyText.text = String.format(Locale.getDefault(), "%.2fx", ModMenu.getInstance().changeSpeed)
-                ModMenu.getInstance().updateMultiplierText()
-            }
-        }
-
         val backgroundBrightness = findViewById<SeekBar>(R.id.backgroundBrightnessBar)!!
         backgroundBrightness.progress = PreferenceManager.getDefaultSharedPreferences(requireContext())
             .getInt("bgbrightness", 25)
@@ -209,10 +194,23 @@ class ModSettingsMenu : BaseFragment() {
             PreferenceManager.getDefaultSharedPreferences(requireContext()).getInt("bgbrightness", 25)
         }%"
 
+        val mods = ModMenu.getInstance().enabledMods
+
+        speedModifyText = findViewById(R.id.changeSpeedText)!!
+        speedModifyToggle = findViewById(R.id.enableSpeedChange)!!
+        speedModifyToggle.setOnCheckedChangeListener { _, isChecked ->
+            speedModifyToggle.isEnabled = isChecked
+
+            if (!isChecked) {
+                mods.remove(ModCustomSpeed::class)
+                speedModifyBar.progress = 10
+                speedModifyText.text = "%.2fx".format(Locale.getDefault(), 1f)
+                ModMenu.getInstance().changeMultiplierText()
+            }
+        }
+
         speedModifyBar = findViewById(R.id.changeSpeedBar)!!
         speedModifyBar.apply {
-            progress = (ModMenu.getInstance().changeSpeed * 20 - 10).toInt()
-
             setOnSeekBarChangeListener(
                 object : OnSeekBarChangeListener {
                     override fun onProgressChanged(
@@ -227,48 +225,59 @@ class ModSettingsMenu : BaseFragment() {
 
                     private fun update(progress: Int) {
                         val p = 0.5f + 0.05f * progress
+
                         speedModifyText.text = String.format(Locale.getDefault(), "%.2fx", p)
                         speedModifyToggle.isChecked = p != 1f
-                        ModMenu.getInstance().changeSpeed = p
-                        ModMenu.getInstance().updateMultiplierText()
+
+                        if (speedModifyToggle.isChecked) {
+                            val customSpeed = mods.ofType<ModCustomSpeed>()
+
+                            if (customSpeed == null) {
+                                mods.put(ModCustomSpeed(p))
+                            } else {
+                                customSpeed.trackRateMultiplier = p
+                            }
+                        } else {
+                            mods.remove(ModCustomSpeed::class)
+                        }
+
+                        ModMenu.getInstance().changeMultiplierText()
+                        GlobalManager.getInstance().songMenu.updateMusicEffects()
                     }
                 }
             )
         }
-
-        speedModifyText.text =
-            String.format(Locale.getDefault(), "%.2fx", ModMenu.getInstance().changeSpeed)
 
         followDelayText = findViewById(R.id.flashlightFollowDelayText)!!
         followDelayBar = findViewById(R.id.flashlightFollowDelayBar)!!
         followDelayBar.setOnSeekBarChangeListener(
             object : OnSeekBarChangeListener {
 
-                var containsFlashlight = false
+                private val flashlight
+                    get() = mods.ofType<ModFlashlight>()
 
                 override fun onProgressChanged(
                     seekBar: SeekBar?,
                     progress: Int,
                     fromUser: Boolean
                 ) {
-                    if (!containsFlashlight) return
+                    val flashlight = flashlight ?: return
 
-                    ModMenu.getInstance().fLfollowDelay =
-                        ((progress * ModMenu.DEFAULT_FL_FOLLOW_DELAY).roundToInt()).toFloat() // (progress * 1200f / (10f * 1000f)).roundToInt().toFloat()
-                    followDelayText.text = "${progress * FlashLightEntity.defaultMoveDelayMS}ms"
+                    flashlight.followDelay = (progress * ModFlashlight.DEFAULT_FOLLOW_DELAY).roundToInt().toFloat()
+                    followDelayText.text = "${(progress * ModFlashlight.DEFAULT_FOLLOW_DELAY * 1000).roundToInt()}ms"
                 }
 
-                override fun onStartTrackingTouch(seekBar: SeekBar?) {
-                    containsFlashlight = ModMenu.getInstance().mod.contains(GameMod.MOD_FLASHLIGHT)
-                }
+                override fun onStartTrackingTouch(seekBar: SeekBar?) {}
 
                 override fun onStopTrackingTouch(seekBar: SeekBar?) {
-                    if (containsFlashlight) return
+                    val flashlight = flashlight
 
-                    seekBar!!.progress = 0
-                    ModMenu.getInstance().resetFLFollowDelay()
+                    if (flashlight == null) {
+                        seekBar!!.progress = 0
+                    }
+
                     followDelayText.text =
-                        "${(ModMenu.getInstance().fLfollowDelay * 1000f).toInt()}ms"
+                        "${((flashlight?.followDelay ?: ModFlashlight.DEFAULT_FOLLOW_DELAY) * 1000f).toInt()}ms"
                 }
             }
         )
@@ -283,116 +292,66 @@ class ModSettingsMenu : BaseFragment() {
         customCSBar.max = 150
         customHPBar.max = 110
 
-        customARToggle.setOnCheckedChangeListener(null)
-        customODToggle.setOnCheckedChangeListener(null)
-        customCSToggle.setOnCheckedChangeListener(null)
-        customHPToggle.setOnCheckedChangeListener(null)
-
         updateDifficultyAdjustValues()
 
-        customARToggle.setOnCheckedChangeListener { _, isChecked ->
-            ModMenu.getInstance().customAR = if (isChecked) customARBar.progress / 10f else null
-            customARBar.isEnabled = isChecked
+        fun updateCustomValue(value: Float?, difficultyAdjustInitializer: ModDifficultyAdjust.(Float?) -> Unit) {
+            val mods = ModMenu.getInstance().enabledMods
+            var difficultyAdjust = mods.ofType<ModDifficultyAdjust>()
 
-            updateDifficultyAdjustValues()
+            if (difficultyAdjust != null) {
+                difficultyAdjustInitializer(difficultyAdjust, value)
+            } else {
+                difficultyAdjust = ModDifficultyAdjust().apply { difficultyAdjustInitializer(value) }
+                mods.put(difficultyAdjust)
+            }
+
+            if (!difficultyAdjust.isRelevant) {
+                mods.remove(difficultyAdjust)
+            }
         }
 
-        customODToggle.setOnCheckedChangeListener { _, isChecked ->
-            ModMenu.getInstance().customOD = if (isChecked) customODBar.progress / 10f else null
-            customODBar.isEnabled = isChecked
+        fun initializeDifficultyAdjustView(
+            toggle: CheckBox,
+            bar: SeekBar,
+            text: TextView,
+            difficultyAdjustInitializer: ModDifficultyAdjust.(Float?) -> Unit
+        ) {
+            toggle.setOnCheckedChangeListener { _, isChecked ->
+                updateCustomValue(if (isChecked) bar.progress / 10f else null, difficultyAdjustInitializer)
+                bar.isEnabled = isChecked
 
-            updateDifficultyAdjustValues()
+                updateDifficultyAdjustValues()
+            }
+
+            bar.setOnSeekBarChangeListener(
+                object : OnSeekBarChangeListener {
+                    override fun onProgressChanged(
+                        seekBar: SeekBar?,
+                        progress: Int,
+                        fromUser: Boolean
+                    ) {
+                        val value = progress / 10f
+
+                        if (fromUser) {
+                            updateCustomValue(value, difficultyAdjustInitializer)
+                        }
+
+                        text.text = value.toString()
+                    }
+
+                    override fun onStartTrackingTouch(seekBar: SeekBar?) {}
+
+                    override fun onStopTrackingTouch(seekBar: SeekBar?) {
+                        ModMenu.getInstance().changeMultiplierText()
+                    }
+                }
+            )
         }
 
-        customCSToggle.setOnCheckedChangeListener { _, isChecked ->
-            ModMenu.getInstance().customCS = if (isChecked) customCSBar.progress / 10f else null
-            customCSBar.isEnabled = isChecked
-
-            updateDifficultyAdjustValues()
-        }
-
-        customHPToggle.setOnCheckedChangeListener { _, isChecked ->
-            ModMenu.getInstance().customHP = if (isChecked) customHPBar.progress / 10f else null
-            customHPBar.isEnabled = isChecked
-
-            updateDifficultyAdjustValues()
-        }
-
-        customARBar.setOnSeekBarChangeListener(
-            object : OnSeekBarChangeListener {
-                override fun onProgressChanged(
-                    seekBar: SeekBar?,
-                    progress: Int,
-                    fromUser: Boolean
-                ) {
-                    if (fromUser) ModMenu.getInstance().customAR = progress / 10f
-                    customARText.text = "${progress / 10f}"
-                }
-
-                override fun onStartTrackingTouch(seekBar: SeekBar?) {}
-
-                override fun onStopTrackingTouch(seekBar: SeekBar?) {
-                    ModMenu.getInstance().updateMultiplierText()
-                }
-            }
-        )
-
-        customODBar.setOnSeekBarChangeListener(
-            object : OnSeekBarChangeListener {
-                override fun onProgressChanged(
-                    seekBar: SeekBar?,
-                    progress: Int,
-                    fromUser: Boolean
-                ) {
-                    if (fromUser) ModMenu.getInstance().customOD = progress / 10f
-                    customODText.text = "${progress / 10f}"
-                }
-
-                override fun onStartTrackingTouch(seekBar: SeekBar?) {}
-
-                override fun onStopTrackingTouch(seekBar: SeekBar?) {
-                    ModMenu.getInstance().updateMultiplierText()
-                }
-            }
-        )
-
-        customCSBar.setOnSeekBarChangeListener(
-            object : OnSeekBarChangeListener {
-                override fun onProgressChanged(
-                    seekBar: SeekBar?,
-                    progress: Int,
-                    fromUser: Boolean
-                ) {
-                    if (fromUser) ModMenu.getInstance().customCS = progress / 10f
-                    customCSText.text = "${progress / 10f}"
-                }
-
-                override fun onStartTrackingTouch(seekBar: SeekBar?) {}
-
-                override fun onStopTrackingTouch(seekBar: SeekBar?) {
-                    ModMenu.getInstance().updateMultiplierText()
-                }
-            }
-        )
-
-        customHPBar.setOnSeekBarChangeListener(
-            object : OnSeekBarChangeListener {
-                override fun onProgressChanged(
-                    seekBar: SeekBar?,
-                    progress: Int,
-                    fromUser: Boolean
-                ) {
-                    if (fromUser) ModMenu.getInstance().customHP = progress / 10f
-                    customHPText.text = "${progress / 10f}"
-                }
-
-                override fun onStartTrackingTouch(seekBar: SeekBar?) {}
-
-                override fun onStopTrackingTouch(seekBar: SeekBar?) {
-                    ModMenu.getInstance().updateMultiplierText()
-                }
-            }
-        )
+        initializeDifficultyAdjustView(customARToggle, customARBar, customARText) { ar = it }
+        initializeDifficultyAdjustView(customODToggle, customODBar, customODText) { od = it }
+        initializeDifficultyAdjustView(customCSToggle, customCSBar, customCSText) { cs = it }
+        initializeDifficultyAdjustView(customHPToggle, customHPBar, customHPText) { hp = it }
     }
 
     private fun updateDifficultyAdjustValues() {
@@ -409,31 +368,26 @@ class ModSettingsMenu : BaseFragment() {
 
         customDifficultySection.visibility = visibility
 
-        val customAR = ModMenu.getInstance().customAR
-        customARToggle.isChecked = customAR != null
-        customARBar.isEnabled = customAR != null
-        customARBar.progress = (((customAR ?: beatmapInfo?.approachRate) ?: 10f) * 10).toInt()
-        customARText.text = "${customARBar.progress / 10f}"
+        fun updateDifficultyAdjustValue(value: Float?, default: Float?, toggle: CheckBox, bar: SeekBar, text: TextView) {
+            toggle.isChecked = value != null
+            bar.isEnabled = value != null
+            bar.progress = ((value ?: default ?: 10f) * 10).toInt()
+            text.text = "${bar.progress / 10f}"
+        }
 
-        val customOD = ModMenu.getInstance().customOD
-        customODToggle.isChecked = customOD != null
-        customODBar.isEnabled = customOD != null
-        customODBar.progress = (((customOD ?: beatmapInfo?.overallDifficulty) ?: 10f) * 10).toInt()
-        customODText.text = "${customODBar.progress / 10f}"
+        val mods = ModMenu.getInstance().enabledMods
+        val difficultyAdjust = mods.ofType<ModDifficultyAdjust>()
 
-        val customCS = ModMenu.getInstance().customCS
-        customCSToggle.isChecked = customCS != null
-        customCSBar.isEnabled = customCS != null
-        customCSBar.progress = (((customCS ?: beatmapInfo?.circleSize) ?: 10f) * 10).toInt()
-        customCSText.text = "${customCSBar.progress / 10f}"
+        updateDifficultyAdjustValue(difficultyAdjust?.ar, beatmapInfo?.approachRate, customARToggle, customARBar, customARText)
+        updateDifficultyAdjustValue(difficultyAdjust?.od, beatmapInfo?.overallDifficulty, customODToggle, customODBar, customODText)
+        updateDifficultyAdjustValue(difficultyAdjust?.cs, beatmapInfo?.circleSize, customCSToggle, customCSBar, customCSText)
+        updateDifficultyAdjustValue(difficultyAdjust?.hp, beatmapInfo?.hpDrainRate, customHPToggle, customHPBar, customHPText)
 
-        val customHP = ModMenu.getInstance().customHP
-        customHPToggle.isChecked = customHP != null
-        customHPBar.isEnabled = customHP != null
-        customHPBar.progress = (((customHP ?: beatmapInfo?.hpDrainRate) ?: 10f) * 10).toInt()
-        customHPText.text = "${customHPBar.progress / 10f}"
+        if (difficultyAdjust != null && !difficultyAdjust.isRelevant) {
+            mods.remove(difficultyAdjust)
+        }
 
-        ModMenu.getInstance().updateMultiplierText()
+        ModMenu.getInstance().changeMultiplierText()
     }
 
     override fun dismiss() {
@@ -447,16 +401,24 @@ class ModSettingsMenu : BaseFragment() {
     }
 
     private fun updateVisibility() {
-        val flFollowDelay = ModMenu.getInstance().fLfollowDelay
-        followDelayRow.visibility =
-            if (ModMenu.getInstance().mod.contains(GameMod.MOD_FLASHLIGHT)) View.VISIBLE else View.GONE
-        followDelayBar.progress =
-            (flFollowDelay * 1000f / FlashLightEntity.defaultMoveDelayMS).toInt()
+        val mods = ModMenu.getInstance().enabledMods
+        val flashlight = mods.ofType<ModFlashlight>()
+        val flFollowDelay = flashlight?.followDelay ?: ModFlashlight.DEFAULT_FOLLOW_DELAY
+
+        followDelayRow.visibility = if (flashlight != null) View.VISIBLE else View.GONE
+        followDelayBar.progress = (flFollowDelay / ModFlashlight.DEFAULT_FOLLOW_DELAY).toInt()
         followDelayText.text = "${(flFollowDelay * 1000f).toInt()}ms"
 
         if (Multiplayer.isMultiplayer) {
             speedModifyRow.visibility = if (Multiplayer.isRoomHost) View.VISIBLE else View.GONE
         }
+
+        val customSpeed = mods.ofType<ModCustomSpeed>()
+
+        speedModifyToggle.isChecked = customSpeed != null && customSpeed.trackRateMultiplier != 1f
+        speedModifyToggle.isEnabled = speedModifyToggle.isChecked
+        speedModifyText.text = "%.2fx".format(Locale.getDefault(), customSpeed?.trackRateMultiplier ?: 1f)
+        speedModifyBar.progress = ((customSpeed?.trackRateMultiplier ?: 1f) * 20 - 10).toInt()
     }
 
     private fun toggleSettingPanel() {

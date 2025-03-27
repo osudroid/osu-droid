@@ -8,6 +8,8 @@ import androidx.room.Insert
 import androidx.room.OnConflictStrategy
 import androidx.room.PrimaryKey
 import androidx.room.Query
+import com.rian.osu.beatmap.sections.BeatmapDifficulty
+import com.rian.osu.utils.ModUtils
 import org.apache.commons.io.FilenameUtils
 import org.json.JSONObject
 import ru.nsu.ccfit.zuev.osu.Config
@@ -118,12 +120,13 @@ data class ScoreInfo @JvmOverloads constructor(
         get() = if (notesHit == 0) 1f else (hit300 * 6f + hit100 * 2f + hit50) / (6f * notesHit)
 
 
-    fun toStatisticV2() = StatisticV2().also {
+    @JvmOverloads
+    fun toStatisticV2(difficulty: BeatmapDifficulty? = null) = StatisticV2().also {
 
         it.playerName = playerName
         it.setBeatmapMD5(beatmapMD5)
         it.replayFilename = replayFilename
-        it.setModFromString(mods)
+        it.mod = ModUtils.convertModString(mods)
         it.setForcedScore(score)
         it.scoreMaxCombo = maxCombo
         it.mark = mark
@@ -134,6 +137,11 @@ data class ScoreInfo @JvmOverloads constructor(
         it.hit50 = hit50
         it.misses = misses
         it.time = time
+
+        if (difficulty != null) {
+            it.migrateLegacyMods(difficulty)
+            it.calculateModScoreMultiplier(difficulty)
+        }
 
     }
 

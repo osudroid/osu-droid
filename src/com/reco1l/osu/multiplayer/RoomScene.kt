@@ -24,6 +24,7 @@ import com.reco1l.osu.ui.entity.ComposedText
 import com.reco1l.osu.ui.SettingsFragment
 import com.reco1l.osu.updateThread
 import com.reco1l.toolkt.kotlin.runSafe
+import com.rian.osu.mods.ModScoreV2
 import org.anddev.andengine.engine.camera.SmoothCamera
 import org.anddev.andengine.entity.primitive.Rectangle
 import org.anddev.andengine.entity.scene.Scene
@@ -34,11 +35,9 @@ import org.anddev.andengine.input.touch.TouchEvent
 import org.anddev.andengine.util.MathUtils
 import org.json.JSONArray
 import ru.nsu.ccfit.zuev.osu.*
-import ru.nsu.ccfit.zuev.osu.game.mods.GameMod.MOD_SCOREV2
 import ru.nsu.ccfit.zuev.osu.helper.TextButton
 import ru.nsu.ccfit.zuev.osu.menu.LoadingScreen.LoadingScene
 import ru.nsu.ccfit.zuev.osu.online.OnlinePanel
-import ru.nsu.ccfit.zuev.osu.scoring.Replay
 import ru.nsu.ccfit.zuev.skins.OsuSkin
 import java.text.SimpleDateFormat
 import java.util.*
@@ -698,15 +697,7 @@ object RoomScene : Scene(), IRoomEventListener, IPlayerEventListener {
 
         isWaitingForModsChange = true
 
-        RoomAPI.setPlayerMods(
-            modsToString(ModMenu.getInstance().mod),
-            ModMenu.getInstance().changeSpeed,
-            ModMenu.getInstance().fLfollowDelay,
-            ModMenu.getInstance().customAR,
-            ModMenu.getInstance().customOD,
-            ModMenu.getInstance().customCS,
-            ModMenu.getInstance().customHP
-        )
+        RoomAPI.setPlayerMods(ModMenu.getInstance().enabledMods.toString())
 
         updateInformation()
         playerList!!.invalidate()
@@ -843,15 +834,7 @@ object RoomScene : Scene(), IRoomEventListener, IPlayerEventListener {
 
         isWaitingForModsChange = true
 
-        RoomAPI.setPlayerMods(
-            modsToString(ModMenu.getInstance().mod),
-            ModMenu.getInstance().changeSpeed,
-            ModMenu.getInstance().fLfollowDelay,
-            ModMenu.getInstance().customAR,
-            ModMenu.getInstance().customOD,
-            ModMenu.getInstance().customCS,
-            ModMenu.getInstance().customHP
-        )
+        RoomAPI.setPlayerMods(ModMenu.getInstance().enabledMods.toString())
 
         updateInformation()
     }
@@ -902,24 +885,16 @@ object RoomScene : Scene(), IRoomEventListener, IPlayerEventListener {
         if (isRoomHost) {
             isWaitingForModsChange = true
 
-            val roomMods = room!!.mods.set.apply {
+            // If win condition is Score V2 we add the mod.
+            val roomMods = room!!.mods.apply {
 
-                if (winCondition == ScoreV2) {
-                    add(MOD_SCOREV2)
-                } else {
-                    remove(MOD_SCOREV2)
-                }
+                if (winCondition == ScoreV2)
+                    put(ModScoreV2::class)
+                else
+                    remove(ModScoreV2::class)
             }
 
-            RoomAPI.setRoomMods(
-                modsToString(roomMods),
-                ModMenu.getInstance().changeSpeed,
-                ModMenu.getInstance().fLfollowDelay,
-                ModMenu.getInstance().customAR,
-                ModMenu.getInstance().customOD,
-                ModMenu.getInstance().customCS,
-                ModMenu.getInstance().customHP
-            )
+            RoomAPI.setRoomMods(roomMods.toString())
         }
 
         playerList!!.invalidate()
@@ -931,25 +906,17 @@ object RoomScene : Scene(), IRoomEventListener, IPlayerEventListener {
 
     override fun onRoomMatchPlay() {
 
-        if (player!!.status != MissingBeatmap && GlobalManager.getInstance().engine.scene != GlobalManager.getInstance().gameScene.scene) {
+        val global = GlobalManager.getInstance()
+
+        if (player!!.status != MissingBeatmap && global.engine.scene != global.gameScene.scene) {
 
             if (GlobalManager.getInstance().selectedBeatmap == null) {
                 Multiplayer.log("WARNING: Attempt to start match with null track.")
                 return
             }
 
-            GlobalManager.getInstance().songMenu.stopMusic()
-
-            Replay.oldMod = ModMenu.getInstance().mod
-            Replay.oldChangeSpeed = ModMenu.getInstance().changeSpeed
-            Replay.oldFLFollowDelay = ModMenu.getInstance().fLfollowDelay
-
-            Replay.oldCustomAR = ModMenu.getInstance().customAR
-            Replay.oldCustomOD = ModMenu.getInstance().customOD
-            Replay.oldCustomCS = ModMenu.getInstance().customCS
-            Replay.oldCustomHP = ModMenu.getInstance().customHP
-
-            GlobalManager.getInstance().gameScene.startGame(GlobalManager.getInstance().selectedBeatmap, null)
+            global.songMenu.stopMusic()
+            global.gameScene.startGame(global.selectedBeatmap, null, ModMenu.getInstance().enabledMods)
 
             mainThread {
                 playerList!!.menu.dismiss()

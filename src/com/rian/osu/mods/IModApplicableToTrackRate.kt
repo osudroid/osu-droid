@@ -5,12 +5,11 @@ package com.rian.osu.mods
  */
 interface IModApplicableToTrackRate {
     /**
-     * Returns the playback rate with this [IModApplicableToTrackRate] applied.
+     * Returns the playback rate at [time] after this [Mod] is applied.
      *
-     * @param rate The rate to apply this [IModApplicableToTrackRate] to.
-     * @param oldStatistics Whether to enforce old statistics. Some [IModApplicableToTrackRate]s behave differently
-     * with this flag. For example, [ModNightCore] will apply a 1.39 rate multiplier instead of 1.5 when this is `true`.
-     * **Never set this flag to `true` unless you know what you are doing.**
+     * @param time The time at which the playback rate is queried, in milliseconds.
+     * @param rate The playback rate before applying this [Mod].
+     * @return The playback rate after applying this [Mod].
      */
-    fun applyToRate(rate: Float, oldStatistics: Boolean = false): Float
+    fun applyToRate(time: Double, rate: Float = 1f): Float
 }

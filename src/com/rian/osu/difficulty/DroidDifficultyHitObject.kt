@@ -99,7 +99,7 @@ class DroidDifficultyHitObject(
 
     override fun next(forwardsIndex: Int) = if (index + forwardsIndex + 2 < difficultyHitObjects.size) difficultyHitObjects[index + forwardsIndex + 2] else null
 
-    override fun opacityAt(time: Double, mods: List<Mod>): Double {
+    override fun opacityAt(time: Double, mods: Iterable<Mod>): Double {
         // Traceable hides the primary piece of a hit circle (that is, its body), so consider it as fully invisible.
         if (obj is HitCircle && mods.any { it is ModTraceable }) {
             return 0.0

@@ -13,7 +13,15 @@ import com.rian.osu.GameMode;
 import com.rian.osu.beatmap.Beatmap;
 import com.rian.osu.beatmap.parser.BeatmapParser;
 import com.rian.osu.difficulty.BeatmapDifficultyCalculator;
+import com.rian.osu.difficulty.attributes.DroidDifficultyAttributes;
 import com.rian.osu.difficulty.attributes.DroidPerformanceAttributes;
+import com.rian.osu.mods.IModUserSelectable;
+import com.rian.osu.mods.ModAuto;
+import com.rian.osu.mods.ModCustomSpeed;
+import com.rian.osu.mods.ModDifficultyAdjust;
+import com.rian.osu.mods.ModFlashlight;
+import com.rian.osu.mods.ModNightCore;
+import com.rian.osu.mods.ModOldNightCore;
 import com.rian.osu.ui.SendingPanel;
 import org.anddev.andengine.engine.Engine;
 import org.anddev.andengine.entity.modifier.FadeInModifier;
@@ -37,14 +45,10 @@ import ru.nsu.ccfit.zuev.osu.DifficultyAlgorithm;
 import ru.nsu.ccfit.zuev.osu.GlobalManager;
 import ru.nsu.ccfit.zuev.osu.ResourceManager;
 import com.reco1l.osu.data.BeatmapInfo;
-import com.rian.osu.utils.ModUtils;
 
 import ru.nsu.ccfit.zuev.osu.ToastLogger;
 import ru.nsu.ccfit.zuev.osu.Utils;
 import ru.nsu.ccfit.zuev.osu.game.GameScene;
-import ru.nsu.ccfit.zuev.osu.game.cursor.flashlight.FlashLightEntity;
-import ru.nsu.ccfit.zuev.osu.game.mods.GameMod;
-import ru.nsu.ccfit.zuev.osu.menu.ModMenu;
 import ru.nsu.ccfit.zuev.osu.menu.SongMenu;
 import ru.nsu.ccfit.zuev.osu.online.OnlineManager;
 import ru.nsu.ccfit.zuev.osu.online.OnlineScoring;
@@ -251,7 +255,7 @@ public class ScoringScene {
                     if (pSceneTouchEvent.isActionUp()) {
                         ResourceManager.getInstance().getSound("applause").stop();
                         engine.setScene(menu.getScene());
-                        game.startGame(null, null);
+                        game.startGame(null, null, null);
                         scene = null;
                         stopMusic();
                         return true;
@@ -263,6 +267,7 @@ public class ScoringScene {
         }
 
         Sprite replayBtn = null;
+        var mods = stat.getMod();
 
         if (!Multiplayer.isMultiplayer)
         {
@@ -281,27 +286,7 @@ public class ScoringScene {
                         ResourceManager.getInstance().getSound("applause").stop();
                         SongMenu.stopMusicStatic();
                         engine.setScene(menu.getScene());
-
-                        Replay.oldMod = ModMenu.getInstance().getMod();
-                        Replay.oldChangeSpeed = ModMenu.getInstance().getChangeSpeed();
-
-                        Replay.oldCustomAR = ModMenu.getInstance().getCustomAR();
-                        Replay.oldCustomOD = ModMenu.getInstance().getCustomOD();
-                        Replay.oldCustomCS = ModMenu.getInstance().getCustomCS();
-                        Replay.oldCustomHP = ModMenu.getInstance().getCustomHP();
-
-                        Replay.oldFLFollowDelay = ModMenu.getInstance().getFLfollowDelay();
-
-                        ModMenu.getInstance().setMod(stat.getMod());
-                        ModMenu.getInstance().setChangeSpeed(stat.getChangeSpeed());
-                        ModMenu.getInstance().setFLfollowDelay(stat.getFLFollowDelay());
-
-                        ModMenu.getInstance().setCustomAR(stat.getCustomAR());
-                        ModMenu.getInstance().setCustomOD(stat.getCustomOD());
-                        ModMenu.getInstance().setCustomCS(stat.getCustomCS());
-                        ModMenu.getInstance().setCustomHP(stat.getCustomHP());
-
-                        game.startGame(beatmapToReplay, replayPath);
+                        game.startGame(beatmapToReplay, replayPath, mods);
 
                         scene = null;
                         stopMusic();
@@ -338,9 +323,13 @@ public class ScoringScene {
 
         var modX = mark.getX() - 30;
         var modY = mark.getY() + mark.getHeight() * 2 / 3;
-        for (GameMod mod : stat.getMod()) {
-            var modSprite = new Sprite(modX, modY, ResourceManager.getInstance().getTexture(GameMod.getTextureName(mod)));
-            modX -= Utils.toRes(30);
+        for (var mod : mods.values()) {
+            if (!(mod instanceof IModUserSelectable selectableMod)) {
+                continue;
+            }
+
+            var modSprite = new Sprite(modX, modY, ResourceManager.getInstance().getTexture(selectableMod.getTextureName()));
+            modX -= 30;
             scene.attachChild(modSprite);
         }
 
@@ -350,36 +339,45 @@ public class ScoringScene {
         String playerStr = "Played by " + stat.getPlayerName() + " on " +
                 new java.text.SimpleDateFormat("yyyy/MM/dd HH:mm:ss", Locale.getDefault()).format(new java.util.Date(stat.getTime()));
         playerStr += String.format("  %s(%s)", BuildConfig.VERSION_NAME, BuildConfig.BUILD_TYPE);
-        if (stat.getChangeSpeed() != 1 ||
-            stat.isCustomAR() ||
-            stat.isCustomOD() ||
-            stat.isCustomCS() ||
-            stat.isCustomHP() ||
-            stat.getFLFollowDelay() != FlashLightEntity.defaultMoveDelayS &&
-            stat.getMod().contains(GameMod.MOD_FLASHLIGHT)) {
+        if (mods.contains(ModCustomSpeed.class) ||
+            mods.contains(ModDifficultyAdjust.class) ||
+            (mods.contains(ModFlashlight.class) && mods.ofType(ModFlashlight.class).followDelay != ModFlashlight.DEFAULT_FOLLOW_DELAY)) {
+
+            var customSpeed = mods.ofType(ModCustomSpeed.class);
+            var difficultyAdjust = mods.ofType(ModDifficultyAdjust.class);
+            var flashlight = mods.ofType(ModFlashlight.class);
 
             mapperStr += " [";
-            if (stat.getChangeSpeed() != 1){
-                mapperStr += String.format(Locale.ENGLISH, "%.2fx,", stat.getChangeSpeed());
+            if (customSpeed != null && customSpeed.getTrackRateMultiplier() != 1f) {
+                mapperStr += String.format(Locale.ENGLISH, "%.2fx,", customSpeed.getTrackRateMultiplier());
             }
-            if (stat.isCustomAR()){
-                mapperStr += String.format(Locale.ENGLISH, "AR%.1f,", stat.getCustomAR());
+
+            if (difficultyAdjust != null) {
+                if (difficultyAdjust.ar != null) {
+                    mapperStr += String.format(Locale.ENGLISH, "AR%.1f,", difficultyAdjust.ar);
+                }
+
+                if (difficultyAdjust.od != null) {
+                    mapperStr += String.format(Locale.ENGLISH, "OD%.1f,", difficultyAdjust.od);
+                }
+
+                if (difficultyAdjust.cs != null) {
+                    mapperStr += String.format(Locale.ENGLISH, "CS%.1f,", difficultyAdjust.cs);
+                }
+
+                if (difficultyAdjust.hp != null) {
+                    mapperStr += String.format(Locale.ENGLISH, "HP%.1f,", difficultyAdjust.hp);
+                }
             }
-            if (stat.isCustomOD()){
-                mapperStr += String.format(Locale.ENGLISH, "OD%.1f,", stat.getCustomOD());
+
+            if (flashlight != null && flashlight.followDelay != ModFlashlight.DEFAULT_FOLLOW_DELAY) {
+                mapperStr += String.format(Locale.ENGLISH, "FLD%.2f,", flashlight.followDelay);
             }
-            if (stat.isCustomCS()){
-                mapperStr += String.format(Locale.ENGLISH, "CS%.1f,", stat.getCustomCS());
-            }
-            if (stat.isCustomHP()){
-                mapperStr += String.format(Locale.ENGLISH, "HP%.1f,", stat.getCustomHP());
-            }
-            if (stat.getFLFollowDelay() != FlashLightEntity.defaultMoveDelayS && stat.getMod().contains(GameMod.MOD_FLASHLIGHT)){
-                mapperStr += String.format(Locale.ENGLISH, "FLD%.2f,", stat.getFLFollowDelay());
-            }
+
             if (mapperStr.endsWith(",")){
                 mapperStr = mapperStr.substring(0, mapperStr.length() - 1);
             }
+
             mapperStr += "]";
         }
         Debug.i("playedtime " + stat.getTime());
@@ -405,20 +403,7 @@ public class ScoringScene {
             if (beatmapData != null) {
                 switch (Config.getDifficultyAlgorithm()) {
                     case droid -> {
-                        var playableBeatmap = beatmapData.createDroidPlayableBeatmap(
-                            ModUtils.convertLegacyMods(
-                                stat.getMod(),
-                                stat.isCustomCS() ? stat.getCustomCS() : null,
-                                stat.isCustomAR() ? stat.getCustomAR() : null,
-                                stat.isCustomOD() ? stat.getCustomOD() : null,
-                                stat.isCustomHP() ? stat.getCustomHP() : null
-                            ),
-                            stat.getChangeSpeed(),
-                            stat.isOldScore()
-                        );
-
-                        var difficultyAttributes = BeatmapDifficultyCalculator.calculateDroidDifficulty(playableBeatmap);
-
+                        DroidDifficultyAttributes difficultyAttributes;
                         DroidPerformanceAttributes performanceAttributes;
 
                         // Don't try to load online replay
@@ -428,13 +413,30 @@ public class ScoringScene {
                             replay.setBeatmap(beatmapToReplay.getFullBeatmapsetName(), beatmapToReplay.getFullBeatmapName(), mapMD5);
 
                             if (replay.load(replayPath, true)) {
+                                var copiedMods = mods;
+
+                                if (mods.contains(ModNightCore.class) && replay.replayVersion <= 3) {
+                                    copiedMods = mods.deepCopy();
+                                    copiedMods.removeOfType(ModNightCore.class);
+                                    copiedMods.put(ModOldNightCore.class);
+                                }
+
+                                var playableBeatmap = beatmapData.createDroidPlayableBeatmap(copiedMods.values());
+
+                                difficultyAttributes = BeatmapDifficultyCalculator.calculateDroidDifficulty(playableBeatmap);
                                 performanceAttributes = BeatmapDifficultyCalculator.calculateDroidPerformanceWithReplayStat(
                                     playableBeatmap, difficultyAttributes, replay.cursorMoves, replay.objectData, stat
                                 );
                             } else {
+                                var playableBeatmap = beatmapData.createDroidPlayableBeatmap(mods.values());
+
+                                difficultyAttributes = BeatmapDifficultyCalculator.calculateDroidDifficulty(playableBeatmap);
                                 performanceAttributes = BeatmapDifficultyCalculator.calculateDroidPerformance(difficultyAttributes, stat);
                             }
                         } else {
+                            var playableBeatmap = beatmapData.createDroidPlayableBeatmap(mods.values());
+
+                            difficultyAttributes = BeatmapDifficultyCalculator.calculateDroidDifficulty(playableBeatmap);
                             performanceAttributes = BeatmapDifficultyCalculator.calculateDroidPerformance(difficultyAttributes, stat);
                         }
 
@@ -443,7 +445,7 @@ public class ScoringScene {
                         ppinfo.append(String.format(Locale.ENGLISH, "%.2f★ | %.2f/%.2fdpp", difficultyAttributes.starRating, performanceAttributes.total, maxPerformanceAttributes.total));
                     }
                     case standard -> {
-                        var difficultyAttributes = BeatmapDifficultyCalculator.calculateStandardDifficulty(beatmapData, stat);
+                        var difficultyAttributes = BeatmapDifficultyCalculator.calculateStandardDifficulty(beatmapData, mods.values());
                         var performanceAttributes = BeatmapDifficultyCalculator.calculateStandardPerformance(difficultyAttributes, stat);
                         var maxPerformanceAttributes = BeatmapDifficultyCalculator.calculateStandardPerformance(difficultyAttributes);
 
@@ -482,7 +484,7 @@ public class ScoringScene {
             ResourceManager.getInstance().getSound("applause").play();
 
             // Save score
-            if (stat.getTotalScoreWithMultiplier() <= 0 || stat.getMod().contains(GameMod.MOD_AUTO) ||
+            if (stat.getTotalScoreWithMultiplier() <= 0 || mods.contains(ModAuto.class) ||
                     (Multiplayer.isMultiplayer &&
                         ((Multiplayer.room != null && Multiplayer.room.isTeamVersus()) || game.hasFailed))) {
                 return;
@@ -512,15 +514,9 @@ public class ScoringScene {
                 return;
             }
 
-            boolean hasUnrankedMod = SmartIterator.wrap(stat.getMod().iterator()).applyFilter(m -> m.unranked).hasNext();
+            boolean hasUnrankedMod = SmartIterator.wrap(mods.values().iterator()).applyFilter(m -> !m.isRanked()).hasNext();
 
-            if (hasUnrankedMod
-                || Config.isRemoveSliderLock()
-                || ModMenu.getInstance().isCustomAR()
-                || ModMenu.getInstance().isCustomOD()
-                || ModMenu.getInstance().isCustomCS()
-                || ModMenu.getInstance().isCustomHP()
-                || !ModMenu.getInstance().isDefaultFLFollowDelay()) {
+            if (hasUnrankedMod || Config.isRemoveSliderLock()) {
                 return;
             }
 
