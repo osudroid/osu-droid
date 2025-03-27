@@ -38,9 +38,7 @@ object BeatmapHitObjectsParser : BeatmapSectionParser() {
 
             val isNewCombo = tempType and HitObjectType.NewCombo.value != 0
 
-            val position =
-                if (beatmap.formatVersion >= FIRST_LAZER_VERSION) Vector2(parseFloat(it[0]), parseFloat(it[1]))
-                else Vector2(parseFloat(it[0]).toInt(), parseFloat(it[1]).toInt())
+            val position = parseCoordinates(beatmap.formatVersion, it[0], it[1])
 
             val soundType = parseInt(it[4])
             val bankInfo = SampleBankInfo()
@@ -107,7 +105,7 @@ object BeatmapHitObjectsParser : BeatmapSectionParser() {
                     scope?.ensureActive()
                     it.isEmpty()
                 }.let {
-                    val curvePointPosition = Vector2(parseFloat(it[0]), parseFloat(it[1]))
+                    val curvePointPosition = parseCoordinates(beatmap.formatVersion, it[0], it[1])
 
                     curvePoints.add(curvePointPosition - startPosition)
                 }
@@ -148,46 +146,34 @@ object BeatmapHitObjectsParser : BeatmapSectionParser() {
         // One node for each repeat + the start and end nodes
         val nodes = repeatCount + 2
 
-        val nodeBankInfo = mutableListOf<SampleBankInfo>().apply {
-            // Populate node sample bank info with the default hit object sample bank
-            for (i in 0 until nodes) {
-                add(bankInfo.copy())
-            }
+        val nodeBankInfo = MutableList(nodes) { bankInfo.copy() }
 
-            scope?.ensureActive()
+        scope?.ensureActive()
 
-            // Read any per-node sample banks
-            val sets = pars.getOrNull(9)?.split(pipePropertyRegex)
-            if (sets != null) {
-                for (i in 0 until min(sets.size, nodes)) {
-                    readCustomSampleBanks(this[i], sets[i])
-                }
+        // Read any per-node sample banks
+        val sets = pars.getOrNull(9)?.split(pipePropertyRegex)
+
+        if (sets != null) {
+            for (i in 0 until min(sets.size, nodes)) {
+                readCustomSampleBanks(nodeBankInfo[i], sets[i])
             }
         }
 
-        val nodeSoundTypes = mutableListOf<Int>().apply {
-            // Populate node sound types with the default hit object sound type
-            for (i in 0 until nodes) {
-                add(soundType)
-            }
+        val nodeSoundTypes = MutableList(nodes) { soundType }
 
-            scope?.ensureActive()
+        scope?.ensureActive()
 
-            // Read any per-node sound types
-            val adds = pars.getOrNull(8)?.split(pipePropertyRegex)
-            if (adds != null) {
-                for (i in 0 until min(adds.size, nodes)) {
-                    set(i, parseInt(adds[i]))
-                }
+        // Read any per-node sound types
+        val adds = pars.getOrNull(8)?.split(pipePropertyRegex)
+
+        if (adds != null) {
+            for (i in 0 until min(adds.size, nodes)) {
+                nodeSoundTypes[i] = parseInt(adds[i])
             }
         }
 
         // Generate the final per-node samples
-        val nodeSamples = mutableListOf<MutableList<HitSampleInfo>>().apply {
-            for (i in 0 until nodes) {
-                add(convertSoundType(nodeSoundTypes[i], nodeBankInfo[i]))
-            }
-        }
+        val nodeSamples = MutableList(nodes) { convertSoundType(nodeSoundTypes[it], nodeBankInfo[it]) }
 
         val difficultyControlPoint = beatmap.controlPoints.difficulty.controlPointAt(time)
 
@@ -292,6 +278,10 @@ object BeatmapHitObjectsParser : BeatmapSectionParser() {
             bankInfo.filename = s[4]
         }
     }
+
+    private fun parseCoordinates(formatVersion: Int, x: String, y: String) =
+        if (formatVersion >= FIRST_LAZER_VERSION) Vector2(parseFloat(x), parseFloat(y))
+        else Vector2(parseFloat(y).toInt(), parseFloat(y).toInt())
 }
 
 /**
