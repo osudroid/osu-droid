@@ -125,6 +125,19 @@ object ModUtils {
     }
 
     /**
+     * Calculates the playback rate for the track with the selected [IModApplicableToTrackRate]s at [time].
+     *
+     * @param mods The list of selected [IModApplicableToTrackRate]s.
+     * @param time The time at which the playback rate is queried, in milliseconds. Defaults to 0.
+     * @return The rate with [IModApplicableToTrackRate]s.
+     */
+    @JvmStatic
+    @JvmOverloads
+    fun calculateRateWithMods(mods: Iterable<IModApplicableToTrackRate>, time: Double = 0.0) = mods.fold(1f) {
+        rate, mod -> mod.applyToRate(time, rate)
+    }
+
+    /**
      * Applies the selected [Mod]s to a [BeatmapDifficulty].
      *
      * @param difficulty The [BeatmapDifficulty] to apply the [Mod]s to.
