@@ -157,7 +157,7 @@ object ModUtils {
         }
 
         // Apply rate adjustments
-        val trackRate = calculateRateWithMods(mods)
+        val trackRate = calculateRateWithMods(mods, Double.POSITIVE_INFINITY)
 
         val preempt = BeatmapDifficulty.difficultyRange(difficulty.ar.toDouble(), HitObject.PREEMPT_MAX, HitObject.PREEMPT_MID, HitObject.PREEMPT_MIN) / trackRate
         difficulty.ar = BeatmapDifficulty.inverseDifficultyRange(preempt, HitObject.PREEMPT_MAX, HitObject.PREEMPT_MID, HitObject.PREEMPT_MIN).toFloat()
@@ -188,13 +188,9 @@ object ModUtils {
 
                 s.startsWith("FLD") -> {
                     val followDelay = s.substring(3).toFloat()
-                    val flashlight = it.ofType<ModFlashlight>()
+                    val flashlight = it.ofType<ModFlashlight>() ?: ModFlashlight().also { m -> it.put(m) }
 
-                    if (flashlight != null) {
-                        flashlight.followDelay = followDelay
-                    } else {
-                        it.put(ModFlashlight().also { m -> m.followDelay = followDelay })
-                    }
+                    flashlight.followDelay = followDelay
                 }
             }
         }

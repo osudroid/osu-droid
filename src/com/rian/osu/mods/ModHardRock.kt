@@ -15,6 +15,7 @@ import ru.nsu.ccfit.zuev.osu.game.mods.GameMod
  */
 class ModHardRock : Mod(), IModUserSelectable, IModApplicableToDifficulty, IModApplicableToHitObject {
     override val encodeChar = 'r'
+    override val name = "Hard Rock"
     override val acronym = "HR"
     override val textureNameSuffix = "hardrock"
     override val enum = GameMod.MOD_HARDROCK

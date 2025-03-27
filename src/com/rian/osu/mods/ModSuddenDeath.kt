@@ -7,6 +7,7 @@ import ru.nsu.ccfit.zuev.osu.game.mods.GameMod
  */
 class ModSuddenDeath : Mod(), IModUserSelectable {
     override val encodeChar = 'u'
+    override val name = "Sudden Death"
     override val acronym = "SD"
     override val textureNameSuffix = "suddendeath"
     override val enum = GameMod.MOD_SUDDENDEATH

@@ -12,6 +12,7 @@ import ru.nsu.ccfit.zuev.osu.game.mods.GameMod
  */
 class ModPrecise : Mod(), IModUserSelectable, IModApplicableToHitObject {
     override val encodeChar = 's'
+    override val name = "Precise"
     override val acronym = "PR"
     override val textureNameSuffix = "precise"
     override val enum = GameMod.MOD_PRECISE

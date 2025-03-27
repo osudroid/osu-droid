@@ -10,6 +10,7 @@ import ru.nsu.ccfit.zuev.osu.game.mods.GameMod
  */
 class ModReallyEasy : Mod(), IModUserSelectable, IModApplicableToDifficultyWithSettings {
     override val encodeChar = 'l'
+    override val name = "Really Easy"
     override val acronym = "RE"
     override val textureNameSuffix = "reallyeasy"
     override val enum = GameMod.MOD_REALLYEASY

@@ -7,6 +7,7 @@ import ru.nsu.ccfit.zuev.osu.game.mods.GameMod
  */
 class ModScoreV2 : Mod(), IModUserSelectable {
     override val encodeChar = 'v'
+    override val name = "Score V2"
     override val acronym = "V2"
     override val textureNameSuffix = "scorev2"
     override val enum = GameMod.MOD_SCOREV2
