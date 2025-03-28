@@ -2,6 +2,7 @@
 
 package com.reco1l.osu.multiplayer
 
+import com.rian.osu.mods.LegacyModConverter
 import com.rian.osu.utils.ModUtils
 import org.json.JSONObject
 import ru.nsu.ccfit.zuev.osu.menu.ScoreBoardItem
@@ -30,7 +31,7 @@ fun jsonToStatistic(json: JSONObject) = StatisticV2().apply {
     playerName = json.getString("username")
     setForcedScore(json.getInt("score"))
     time = System.currentTimeMillis()
-    mod = ModUtils.convertModString(json.optString("modstring"))
+    mod = LegacyModConverter.convertModString(json.optString("modstring"))
     scoreMaxCombo = json.optInt("maxCombo")
     hit300k = json.optInt("geki")
     hit300 = json.optInt("perfect")
