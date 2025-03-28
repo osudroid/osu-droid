@@ -36,6 +36,10 @@ class ModDifficultyAdjust @JvmOverloads constructor(
     @JvmField
     var hp: Float? = null
 ) : Mod(), IModApplicableToDifficultyWithSettings, IModApplicableToHitObjectWithSettings {
+    override val name = "Difficulty Adjust"
+    override val acronym = "DA"
+    override val textureNameSuffix = "difficultyadjust"
+
     override val isRelevant
         get() = cs != null || ar != null || od != null || hp != null
 

@@ -1,7 +1,6 @@
 package com.reco1l.ibancho.data
 
 import com.reco1l.osu.multiplayer.Multiplayer
-import com.rian.osu.mods.IModUserSelectable
 import com.rian.osu.mods.ModCustomSpeed
 import com.rian.osu.mods.ModDifficultyAdjust
 import com.rian.osu.mods.ModDoubleTime
@@ -32,9 +31,7 @@ class RoomMods @JvmOverloads constructor(modString: String? = null) : ModHashMap
                         append("${m.acronym} ${(m.followDelay * 1000).toInt()}ms, ")
                 }
 
-                is IModUserSelectable -> append("${m.acronym}, ")
-
-                else -> Unit
+                else -> append("${m.acronym}, ")
             }
 
             if (customSpeed != null) {

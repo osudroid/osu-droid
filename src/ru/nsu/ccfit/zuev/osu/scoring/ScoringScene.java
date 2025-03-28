@@ -15,7 +15,6 @@ import com.rian.osu.beatmap.parser.BeatmapParser;
 import com.rian.osu.difficulty.BeatmapDifficultyCalculator;
 import com.rian.osu.difficulty.attributes.DroidDifficultyAttributes;
 import com.rian.osu.difficulty.attributes.DroidPerformanceAttributes;
-import com.rian.osu.mods.IModUserSelectable;
 import com.rian.osu.mods.ModAuto;
 import com.rian.osu.mods.ModCustomSpeed;
 import com.rian.osu.mods.ModDifficultyAdjust;
@@ -324,11 +323,7 @@ public class ScoringScene {
         var modX = mark.getX() - 30;
         var modY = mark.getY() + mark.getHeight() * 2 / 3;
         for (var mod : mods.values()) {
-            if (!(mod instanceof IModUserSelectable selectableMod)) {
-                continue;
-            }
-
-            var modSprite = new Sprite(modX, modY, ResourceManager.getInstance().getTexture(selectableMod.getTextureName()));
+            var modSprite = new Sprite(modX, modY, ResourceManager.getInstance().getTexture(mod.getTextureName()));
             modX -= 30;
             scene.attachChild(modSprite);
         }

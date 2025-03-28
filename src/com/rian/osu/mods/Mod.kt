@@ -6,7 +6,28 @@ import kotlin.reflect.KClass
 /**
  * Represents a mod.
  */
-abstract class Mod {
+sealed class Mod {
+    /**
+     * The name of this [Mod].
+     */
+    abstract val name: String
+
+    /**
+     * The acronym of this [Mod].
+     */
+    abstract val acronym: String
+
+    /**
+     * The suffix to append to the texture name of this [Mod].
+     */
+    abstract val textureNameSuffix: String
+
+    /**
+     * The texture name of this [Mod].
+     */
+    val textureName
+        get() = "selection-mod-${textureNameSuffix}"
+
     /**
      * Whether scores with this [Mod] active can be submitted online.
      */
@@ -59,17 +80,13 @@ abstract class Mod {
     override fun hashCode(): Int {
         var result = isRanked.hashCode()
 
+        result = 31 * result + name.hashCode()
+        result = 31 * result + acronym.hashCode()
+        result = 31 * result + textureNameSuffix.hashCode()
         result = 31 * result + isRelevant.hashCode()
         result = 31 * result + isValidForMultiplayer.hashCode()
         result = 31 * result + isValidForMultiplayerAsFreeMod.hashCode()
         result = 31 * result + incompatibleMods.contentHashCode()
-
-        if (this is IModUserSelectable) {
-            result = 31 * result + encodeChar.hashCode()
-            result = 31 * result + acronym.hashCode()
-            result = 31 * result + textureNameSuffix.hashCode()
-            result = 31 * result + enum.hashCode()
-        }
 
         return result
     }

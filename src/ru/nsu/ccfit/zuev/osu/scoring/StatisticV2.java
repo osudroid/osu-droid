@@ -11,7 +11,7 @@ import com.reco1l.ibancho.data.WinCondition;
 import com.reco1l.osu.data.ScoreInfo;
 import com.reco1l.osu.multiplayer.Multiplayer;
 import com.rian.osu.beatmap.sections.BeatmapDifficulty;
-import com.rian.osu.mods.ILegacyMod;
+import com.rian.osu.mods.IMigratableMod;
 import com.rian.osu.mods.ModFlashlight;
 import com.rian.osu.mods.ModHidden;
 import com.rian.osu.utils.ModHashMap;
@@ -599,9 +599,9 @@ public class StatisticV2 implements Serializable {
 
     public void migrateLegacyMods(final BeatmapDifficulty originalDifficulty) {
         for (var m : mod.values()) {
-            if (m instanceof ILegacyMod legacyMod) {
+            if (m instanceof IMigratableMod migratableMod) {
                 mod.remove(m);
-                mod.put(legacyMod.migrate(originalDifficulty));
+                mod.put(migratableMod.migrate(originalDifficulty));
             }
         }
     }

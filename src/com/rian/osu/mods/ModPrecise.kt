@@ -5,17 +5,14 @@ import com.rian.osu.beatmap.PreciseDroidHitWindow
 import com.rian.osu.beatmap.hitobject.HitObject
 import com.rian.osu.beatmap.hitobject.Slider
 import com.rian.osu.beatmap.sections.BeatmapDifficulty
-import ru.nsu.ccfit.zuev.osu.game.mods.GameMod
 
 /**
  * Represents the Precise mod.
  */
-class ModPrecise : Mod(), IModUserSelectable, IModApplicableToHitObject {
-    override val encodeChar = 's'
+class ModPrecise : Mod(), IModApplicableToHitObject {
     override val name = "Precise"
     override val acronym = "PR"
     override val textureNameSuffix = "precise"
-    override val enum = GameMod.MOD_PRECISE
     override val isRanked = true
 
     override fun calculateScoreMultiplier(difficulty: BeatmapDifficulty) = 1.06f

@@ -1,11 +1,14 @@
 package com.rian.osu.mods
 
 /**
- * Represents the Custom Speed mod. Serves as a container for custom speed multipliers.
+ * Represents the Custom Speed mod.
  *
  * @param trackRateMultiplier The multiplier to apply to the track's playback rate.
  */
-class ModCustomSpeed(trackRateMultiplier: Float) : ModRateAdjust(trackRateMultiplier) {
+class ModCustomSpeed @JvmOverloads constructor(trackRateMultiplier: Float = 1f) : ModRateAdjust(trackRateMultiplier) {
+    override val name = "Custom Speed"
+    override val acronym = "CS"
+    override val textureNameSuffix = "customspeed"
     override val isRanked = true
 
     override fun equals(other: Any?): Boolean {

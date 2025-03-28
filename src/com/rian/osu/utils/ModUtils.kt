@@ -1,3 +1,5 @@
+@file:Suppress("DEPRECATION")
+
 package com.rian.osu.utils
 
 import com.rian.osu.GameMode
@@ -14,6 +16,9 @@ import ru.nsu.ccfit.zuev.osu.game.mods.GameMod
  * A set of utilities to handle [Mod] combinations.
  */
 object ModUtils {
+    /**
+     * All [Mod]s that can be stored in the legacy mods format by their respective [GameMod].
+     */
     private val gameModMap = mutableMapOf<GameMod, KClass<out Mod>>().also {
         it[GameMod.MOD_AUTO] = ModAuto::class
         it[GameMod.MOD_AUTOPILOT] = ModAutopilot::class
@@ -36,37 +41,37 @@ object ModUtils {
     }
 
     /**
-     * All [Mod]s that are considered legacy.
+     * All [Mod]s that can be stored in the legacy mods format by their respective encode character.
      */
-    private val legacyMods = mutableMapOf<Char, ILegacyMod>().also {
-        val legacyMods = arrayOf<ILegacyMod>(ModSmallCircle())
-
-        for (mod in legacyMods) {
-            it[mod.encodeChar] = mod
-        }
+    // TODO: this should no longer be required after serialization is actually implemented
+    private val legacyStorableMods = mutableMapOf<Char, KClass<out Mod>>().also {
+        it['a'] = ModAuto::class
+        it['b'] = ModTraceable::class
+        it['c'] = ModNightCore::class
+        it['d'] = ModDoubleTime::class
+        it['e'] = ModEasy::class
+        it['f'] = ModPerfect::class
+        it['h'] = ModHidden::class
+        it['i'] = ModFlashlight::class
+        it['l'] = ModReallyEasy::class
+        it['m'] = ModSmallCircle::class
+        it['n'] = ModNoFail::class
+        it['p'] = ModAutopilot::class
+        it['r'] = ModHardRock::class
+        it['s'] = ModPrecise::class
+        it['t'] = ModHalfTime::class
+        it['u'] = ModSuddenDeath::class
+        it['v'] = ModScoreV2::class
+        it['x'] = ModRelax::class
     }
 
     /**
-     * All [Mod]s that can be selected by the user.
-     */
-    private val playableMods = mutableMapOf<Char, KClass<out Mod>>().also {
-        val playableMods = arrayOf<Mod>(
-            ModAuto(), ModAutopilot(), ModDoubleTime(), ModEasy(), ModFlashlight(), ModHalfTime(),
-            ModHardRock(), ModHidden(), ModNightCore(), ModNoFail(), ModPerfect(), ModPrecise(),
-            ModReallyEasy(), ModRelax(), ModScoreV2(), ModSuddenDeath(), ModTraceable()
-        )
-
-        for (mod in playableMods) {
-            it[(mod as IModUserSelectable).encodeChar] = mod::class
-        }
-    }
-
-    /**
-     * Converts "legacy" [GameMod]s to new [Mod]s.
+     * Converts legacy [GameMod]s to new [Mod]s.
      *
      * @param mods The [GameMod]s to convert.
      * @param extraModString The extra mod string to parse.
-     * @param difficulty The [BeatmapDifficulty] to use for [ILegacyMod] migrations. When `null`, [ILegacyMod]s will not be added and migrated.
+     * @param difficulty The [BeatmapDifficulty] to use for [IMigratableMod] migrations. When `null`,
+     * [IMigratableMod]s will not be added and migrated.
      * @return A [ModHashMap] containing the converted [Mod]s.
      */
     @JvmStatic
@@ -74,13 +79,13 @@ object ModUtils {
     fun convertLegacyMods(mods: Iterable<GameMod>, extraModString: String, difficulty: BeatmapDifficulty? = null) =
         ModHashMap().apply {
             mods.forEach {
-                val convertedMod = gameModMap[it] ?:
-                throw IllegalArgumentException("Cannot find respective mod class for $it.")
+                val mod = gameModMap[it]?.createInstance() ?:
+                    throw IllegalArgumentException("Cannot find respective Mod class for $it.")
 
-                val mod = convertedMod.createInstance()
-
-                if (mod is ILegacyMod && difficulty != null) {
-                    put(mod.migrate(difficulty))
+                if (mod is IMigratableMod) {
+                    if (difficulty != null) {
+                        put(mod.migrate(difficulty))
+                    }
                 } else {
                     put(mod)
                 }
@@ -93,7 +98,8 @@ object ModUtils {
      * Converts a mod string to a [ModHashMap].
      *
      * @param str The mod string to convert. A `null` would return an empty [ModHashMap].
-     * @param difficulty The [BeatmapDifficulty] to use for [ILegacyMod] migrations. When `null`, [ILegacyMod]s will not be added and migrated.
+     * @param difficulty The [BeatmapDifficulty] to use for [IMigratableMod] migrations. When `null`,
+     * [IMigratableMod]s will not be added and migrated.
      * @return A [ModHashMap] containing the [Mod]s.
      */
     @JvmStatic
@@ -103,9 +109,16 @@ object ModUtils {
 
         val data = str.split('|', limit = 2)
 
-        for (c in data.getOrNull(0) ?: return@also) when {
-            c in playableMods -> it.put(playableMods[c]!!.createInstance())
-            difficulty != null && c in legacyMods -> it.put(legacyMods[c]!!.migrate(difficulty))
+        for (c in data.getOrNull(0) ?: return@also) {
+            val mod = legacyStorableMods[c]?.createInstance() ?: continue
+
+            if (mod is IMigratableMod) {
+                if (difficulty != null) {
+                    it.put(mod.migrate(difficulty))
+                }
+            } else {
+                it.put(mod)
+            }
         }
 
         parseExtraModString(it, data.getOrNull(1) ?: "")
@@ -120,8 +133,8 @@ object ModUtils {
      */
     @JvmStatic
     @JvmOverloads
-    fun calculateRateWithMods(mods: Iterable<Mod>, time: Double = 0.0) = mods.fold(1f) {
-        rate, mod -> (mod as? IModApplicableToTrackRate)?.applyToRate(time, rate) ?: rate
+    fun calculateRateWithMods(mods: Iterable<Mod>, time: Double = 0.0) = mods.fold(1f) { rate, mod ->
+        (mod as? IModApplicableToTrackRate)?.applyToRate(time, rate) ?: rate
     }
 
     /**
@@ -134,9 +147,10 @@ object ModUtils {
     @JvmStatic
     @JvmOverloads
     @JvmName("calculateRateWithTrackRateMods")
-    fun calculateRateWithMods(mods: Iterable<IModApplicableToTrackRate>, time: Double = 0.0) = mods.fold(1f) {
-        rate, mod -> mod.applyToRate(time, rate)
-    }
+    fun calculateRateWithMods(mods: Iterable<IModApplicableToTrackRate>, time: Double = 0.0) =
+        mods.fold(1f) { rate, mod ->
+            mod.applyToRate(time, rate)
+        }
 
     /**
      * Applies the selected [Mod]s to a [BeatmapDifficulty].
@@ -173,8 +187,13 @@ object ModUtils {
         // Apply rate adjustments
         val trackRate = calculateRateWithMods(mods, Double.POSITIVE_INFINITY)
 
-        val preempt = BeatmapDifficulty.difficultyRange(difficulty.ar.toDouble(), HitObject.PREEMPT_MAX, HitObject.PREEMPT_MID, HitObject.PREEMPT_MIN) / trackRate
-        difficulty.ar = BeatmapDifficulty.inverseDifficultyRange(preempt, HitObject.PREEMPT_MAX, HitObject.PREEMPT_MID, HitObject.PREEMPT_MIN).toFloat()
+        val preempt = BeatmapDifficulty.difficultyRange(
+            difficulty.ar.toDouble(), HitObject.PREEMPT_MAX, HitObject.PREEMPT_MID, HitObject.PREEMPT_MIN
+        ) / trackRate
+
+        difficulty.ar = BeatmapDifficulty.inverseDifficultyRange(
+            preempt, HitObject.PREEMPT_MAX, HitObject.PREEMPT_MID, HitObject.PREEMPT_MIN
+        ).toFloat()
 
         val isPreciseMod = mods.any { it is ModPrecise }
         val hitWindow = if (isPreciseMod) PreciseDroidHitWindow(difficulty.od) else DroidHitWindow(difficulty.od)
