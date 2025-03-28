@@ -160,10 +160,6 @@ open class Container : ExtendedEntity() {
         return false
     }
 
-
-    override fun onUpdateVertexBuffer() {}
-    override fun onDrawBuffer(pGL: GL10, pCamera: Camera) {}
-
 }
 
 

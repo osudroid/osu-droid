@@ -44,6 +44,7 @@ public class RenderSurfaceView extends GLSurfaceView {
 		this.setOnTouchListener(pEngine);
 		this.mRenderer = new Renderer(pEngine);
 		this.setRenderer(this.mRenderer);
+		setDebugFlags(DEBUG_LOG_GL_CALLS | DEBUG_CHECK_GL_ERROR);
 	}
 
 	/**

@@ -1,13 +1,12 @@
 package com.reco1l.andengine.shape
 
 import androidx.annotation.*
-import androidx.annotation.IntRange
-import com.reco1l.andengine.*
+import com.reco1l.andengine.buffered.*
+import com.reco1l.andengine.buffered.VertexBuffer
+import com.reco1l.andengine.shape.Circle.*
 import com.reco1l.toolkt.*
-import org.anddev.andengine.engine.camera.*
-import org.anddev.andengine.opengl.util.*
-import org.anddev.andengine.opengl.vertex.*
 import javax.microedition.khronos.opengles.*
+import javax.microedition.khronos.opengles.GL11.*
 import kotlin.math.*
 
 
@@ -16,7 +15,7 @@ import kotlin.math.*
  *
  * @author Reco1l
  */
-open class Circle : ExtendedEntity() {
+open class Circle : BufferedEntity<CircleVertexBuffer>() {
 
     /**
      * The angle where the circle starts to draw in degrees. By default, it is -90 degrees.
@@ -25,7 +24,7 @@ open class Circle : ExtendedEntity() {
         set(@FloatRange(-360.0, 360.0) value) {
             if (field != value) {
                 field = value
-                updateVertexBuffer()
+                invalidateBuffer()
             }
         }
 
@@ -36,12 +35,11 @@ open class Circle : ExtendedEntity() {
         set(@FloatRange(-360.0, 360.0) value) {
             if (field != value) {
                 field = value
-                updateVertexBuffer()
+                invalidateBuffer()
             }
         }
 
-
-    private var shouldRebuildVertexBuffer = true
+    override var invalidationFlags = RebuildBufferOnSizeChanged or InvalidateDataOnSizeChanged
 
 
     /**
@@ -51,115 +49,58 @@ open class Circle : ExtendedEntity() {
      */
     fun setPortion(value: Float) {
         endAngle = startAngle + 360f * value.coerceIn(-1f, 1f)
+        invalidateBuffer()
     }
 
 
-    override fun setSize(newWidth: Float, newHeight: Float): Boolean {
-        if (super.setSize(newWidth, newHeight)) {
-            shouldRebuildVertexBuffer = true
-            return true
-        }
-        return false
-    }
-
-    override fun onContentSizeMeasured(): Boolean {
-        if (super.onContentSizeMeasured()) {
-            shouldRebuildVertexBuffer = true
-            return true
-        }
-        return false
-    }
-
-
-    override fun beginDraw(pGL: GL10) {
-        super.beginDraw(pGL)
-
-        GLHelper.disableCulling(pGL)
-        GLHelper.disableTextures(pGL)
-        GLHelper.disableTexCoordArray(pGL)
-    }
-
-    override fun onUpdateVertexBuffer() {
-
-        if (shouldRebuildVertexBuffer) {
-            shouldRebuildVertexBuffer = false
-
-            val segments = approximateSegments(drawWidth, drawHeight)
-            vertexBuffer = CircleVertexBuffer(segments)
-        }
-
-        val vertexBuffer = vertexBuffer
-        if (vertexBuffer is CircleVertexBuffer) {
-            vertexBuffer.update(drawWidth, drawHeight, startAngle, endAngle)
-        }
-    }
-
-    override fun onDrawBuffer(pGL: GL10, pCamera: Camera) {
-        val vertexBuffer = vertexBuffer
-        if (vertexBuffer is CircleVertexBuffer) {
-            vertexBuffer.draw(pGL)
-        }
+    override fun onRebuildBuffer(gl: GL10) {
+        val segments = approximateSegments(drawWidth, drawHeight)
+        buffer = CircleVertexBuffer(segments)
     }
 
 
     companion object {
 
         fun approximateSegments(width: Float, height: Float, maximumAngle: Float = 360f): Int {
-
             val averageRadius = (width + height) / 4f
             val minSegmentAngle = min(5f, 360f / averageRadius.toRadians())
-
             return max(3, (maximumAngle / minSegmentAngle).toInt())
         }
 
     }
 
-}
+    inner class CircleVertexBuffer(private val segments: Int) : VertexBuffer(
+        drawTopology = GL_TRIANGLE_FAN,
+        // Explanation: Segments + 2 because the first vertex that is the center of the circle is not included in the segment
+        // count and we add it twice so that the last vertex connects to the first one.
+        vertexCount = segments + 2,
+        vertexSize = VERTEX_2D,
+        bufferUsage = GL_STATIC_DRAW
+    ) {
 
+        override fun update(gl: GL10, entity: BufferedEntity<*>, vararg data: Any) {
 
-open class CircleVertexBuffer(@IntRange(from = 1) val segments: Int) : VertexBuffer(
+            putVertex(index = 0,
+                x = entity.drawWidth / 2f,
+                y = entity.drawHeight / 2f
+            )
 
-    // Explanation: Segments + 2 because the first vertex that is the center of the circle is not included in the segment
-    // count and we add it twice so that the last vertex connects to the first one.
-    (segments + 2) * 2,
+            val startRadians = startAngle.toRadians()
+            val endRadians = endAngle.toRadians()
+            val deltaAngle = (endRadians - startRadians) / segments
 
-    GL11.GL_STATIC_DRAW, false
-) {
+            // The first vertex is the center of the circle.
+            for (i in 1..segments + 1) {
 
+                val angle = startRadians + (i - 1) * deltaAngle
 
-    fun update(width: Float, height: Float, startAngle: Float, endAngle: Float) {
-
-        val buffer = floatBuffer
-
-        val centerX = width / 2f
-        val centerY = height / 2f
-
-        buffer.put(0, centerX)
-        buffer.put(1, centerY)
-
-        val startRadians = startAngle.toRadians()
-        val endRadians = endAngle.toRadians()
-
-        val deltaAngle = (endRadians - startRadians) / segments
-
-        // The first vertex is the center of the circle.
-        for (i in 1..segments + 1) {
-
-            val angle = startRadians + (i - 1) * deltaAngle
-
-            val x = centerX + centerX * cos(angle)
-            val y = centerY + centerY * sin(angle)
-
-            buffer.put(i * 2 + 0, x)
-            buffer.put(i * 2 + 1, y)
+                putVertex(index = i,
+                    x = entity.drawWidth / 2f + entity.drawWidth / 2f * cos(angle),
+                    y = entity.drawHeight / 2f + entity.drawHeight / 2f * sin(angle)
+                )
+            }
         }
 
-        setHardwareBufferNeedsUpdate()
     }
-
-    open fun draw(pGL: GL10) {
-        pGL.glDrawArrays(GL11.GL_TRIANGLE_FAN, 0, segments + 2)
-    }
-
 }
 

@@ -13,7 +13,6 @@ import org.anddev.andengine.entity.scene.Scene.*
 import org.anddev.andengine.entity.shape.Shape.*
 import org.anddev.andengine.input.touch.*
 import org.anddev.andengine.opengl.util.*
-import org.anddev.andengine.opengl.vertex.*
 import org.anddev.andengine.util.*
 import javax.microedition.khronos.opengles.*
 
@@ -23,19 +22,8 @@ import javax.microedition.khronos.opengles.*
  *
  * @author Reco1l
  */
-abstract class ExtendedEntity(
+abstract class ExtendedEntity : Entity(0f, 0f), ITouchArea, IModifierChain {
 
-    vertexBuffer: VertexBuffer? = null,
-
-) : Entity(0f, 0f), ITouchArea, IModifierChain {
-
-
-    open var vertexBuffer: VertexBuffer? = vertexBuffer
-        set(value) {
-            field?.unloadFromActiveBufferObjectManager()
-            field = value
-            updateVertexBuffer()
-        }
 
     /**
      * Determines which axes the entity should automatically adjust its size to.
@@ -320,10 +308,7 @@ abstract class ExtendedEntity(
 
             if (internalWidth != value) {
                 internalWidth = value
-
-                updateVertexBuffer()
-                invalidateTransformations()
-                (parent as? Container)?.onChildSizeChanged(this)
+                onSizeChanged()
             }
         }
 
@@ -336,10 +321,7 @@ abstract class ExtendedEntity(
 
             if (internalHeight != value) {
                 internalHeight = value
-
-                updateVertexBuffer()
-                invalidateTransformations()
-                (parent as? Container)?.onChildSizeChanged(this)
+                onSizeChanged()
             }
         }
 
@@ -370,28 +352,30 @@ abstract class ExtendedEntity(
 
     // Positions
 
+    open fun onPositionChanged() {
+        invalidateTransformations()
+        (parent as? Container)?.onChildPositionChanged(this)
+    }
+
     override fun setPosition(x: Float, y: Float) {
         if (mX != x || mY != y) {
             mX = x
             mY = y
-            invalidateTransformations()
-            (parent as? Container)?.onChildPositionChanged(this)
+            onPositionChanged()
         }
     }
 
     open fun setX(value: Float) {
         if (mX != value) {
             mX = value
-            invalidateTransformations()
-            (parent as? Container)?.onChildPositionChanged(this)
+            onPositionChanged()
         }
     }
 
     open fun setY(value: Float) {
         if (mY != value) {
             mY = value
-            invalidateTransformations()
-            (parent as? Container)?.onChildPositionChanged(this)
+            onPositionChanged()
         }
     }
 
@@ -565,11 +549,6 @@ abstract class ExtendedEntity(
 
     override fun onManagedDraw(gl: GL10, camera: Camera) {
 
-        if (isVertexBufferDirty) {
-            isVertexBufferDirty = false
-            onUpdateVertexBuffer()
-        }
-
         gl.glPushMatrix()
 
         onApplyTransformations(gl, camera)
@@ -586,11 +565,12 @@ abstract class ExtendedEntity(
         gl.glPopMatrix()
     }
 
-    open fun beginDraw(pGL: GL10) {
+    open fun beginDraw(gl: GL10) {
 
-        if (vertexBuffer != null) {
-            GLHelper.enableVertexArray(pGL)
-        }
+        // We haven't done any culling implementation so we disable it globally for all buffered entities.
+        GLHelper.disableCulling(gl)
+        GLHelper.disableTextures(gl)
+        GLHelper.disableTexCoordArray(gl)
 
         var clearMask = 0
 
@@ -599,39 +579,21 @@ abstract class ExtendedEntity(
         if (clearInfo.stencilBuffer) clearMask = clearMask or GL10.GL_STENCIL_BUFFER_BIT
 
         if (clearMask != 0) {
-            pGL.glClear(clearMask)
+            gl.glClear(clearMask)
         }
 
         if (depthInfo.test) {
-            pGL.glDepthFunc(depthInfo.function)
-            pGL.glDepthMask(depthInfo.mask)
+            gl.glDepthFunc(depthInfo.function)
+            gl.glDepthMask(depthInfo.mask)
 
-            GLHelper.enableDepthTest(pGL)
+            GLHelper.enableDepthTest(gl)
         } else {
-            GLHelper.disableDepthTest(pGL)
+            GLHelper.disableDepthTest(gl)
         }
     }
 
-    open fun onDeclarePointers(pGL: GL10) {
-        val vertexBuffer = vertexBuffer ?: return
-
-        if (GLHelper.EXTENSIONS_VERTEXBUFFEROBJECTS) {
-            pGL as GL11
-            vertexBuffer.selectOnHardware(pGL)
-            GLHelper.vertexZeroPointer(pGL)
-        } else {
-            GLHelper.vertexPointer(pGL, vertexBuffer.floatBuffer)
-        }
-    }
-
-    abstract fun onUpdateVertexBuffer()
-
-    abstract fun onDrawBuffer(pGL: GL10, pCamera: Camera)
-
-    override fun doDraw(pGL: GL10, pCamera: Camera) {
-        this.beginDraw(pGL)
-        this.onDeclarePointers(pGL)
-        this.onDrawBuffer(pGL, pCamera)
+    override fun doDraw(gl: GL10, camera: Camera) {
+        beginDraw(gl)
     }
 
 
@@ -650,29 +612,14 @@ abstract class ExtendedEntity(
         blendInfo = BlendInfo.Mixture
     }
 
-    open fun finalize() {
-        val vertexBuffer = vertexBuffer ?: return
-
-        if (vertexBuffer.isManaged) {
-            vertexBuffer.unloadFromActiveBufferObjectManager()
-        }
-    }
-
-
-    // Vertex buffer
-
-    open fun updateVertexBuffer() {
-        isVertexBufferDirty = true
-    }
-
-    fun updateVertexBufferNow() {
-        isVertexBufferDirty = false
-        onUpdateVertexBuffer()
-    }
-
-
 
     // Size
+
+    open fun onSizeChanged() {
+        invalidateTransformations()
+        (parent as? Container)?.onChildSizeChanged(this)
+    }
+
 
     /**
      * Called when the content size is measured.
@@ -702,11 +649,7 @@ abstract class ExtendedEntity(
                     internalHeight /= parent.getPaddedHeight()
                 }
             }
-
-            updateVertexBuffer()
-            invalidateTransformations()
-
-            (parent as? Container)?.onChildSizeChanged(this)
+            onSizeChanged()
             return true
         }
         return false
@@ -736,15 +679,7 @@ abstract class ExtendedEntity(
         if (internalWidth != newWidth || internalHeight != newHeight) {
             internalWidth = newWidth
             internalHeight = newHeight
-
-            updateVertexBuffer()
-            invalidateTransformations()
-
-            val parent = parent
-            if (parent is Container) {
-                parent.onChildSizeChanged(this)
-            }
-
+            onSizeChanged()
             return true
         }
         return false

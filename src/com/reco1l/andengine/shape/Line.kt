@@ -1,73 +1,74 @@
 package com.reco1l.andengine.shape
 
 import com.reco1l.andengine.*
+import com.reco1l.andengine.buffered.*
+import com.reco1l.andengine.shape.Line.*
 import com.reco1l.framework.math.Vec2
-import org.anddev.andengine.engine.camera.*
-import org.anddev.andengine.opengl.util.GLHelper
-import org.anddev.andengine.opengl.vertex.VertexBuffer
 import javax.microedition.khronos.opengles.*
-import javax.microedition.khronos.opengles.GL10.*
+import javax.microedition.khronos.opengles.GL11.*
 
 /**
  * A rectangle shape based on [ExtendedEntity].
  */
-open class Line : ExtendedEntity(vertexBuffer = LineVertexBuffer()) {
+class Line : BufferedEntity<LineVertexBuffer>(LineVertexBuffer()) {
 
     /**
      * The width of the line.
      */
     var lineWidth = 1f
 
+    /**
+     * The starting point of the line.
+     */
     var fromPoint = Vec2.Zero
         set(value) {
             if (field != value) {
                 field = value
-                updateVertexBuffer()
+                invalidateBuffer()
             }
         }
 
+    /**
+     * The ending point of the line.
+     */
     var toPoint = Vec2.Zero
         set(value) {
             if (field != value) {
                 field = value
-                updateVertexBuffer()
+                invalidateBuffer()
             }
         }
 
 
-    override fun beginDraw(pGL: GL10) {
-        super.beginDraw(pGL)
-
-        GLHelper.disableCulling(pGL)
-        GLHelper.disableTextures(pGL)
-        GLHelper.disableTexCoordArray(pGL)
-        pGL.glLineWidth(lineWidth)
+    override fun beginDraw(gl: GL10) {
+        super.beginDraw(gl)
+        gl.glLineWidth(lineWidth)
     }
 
 
-    override fun onUpdateVertexBuffer() {
-        (vertexBuffer as LineVertexBuffer).update(fromPoint, toPoint)
-    }
+    class LineVertexBuffer : VertexBuffer(
+        drawTopology = GL_LINES,
+        vertexCount = 2,
+        vertexSize = VERTEX_2D,
+        bufferUsage = GL_STATIC_DRAW
+    ) {
+        override fun update(gl: GL10, entity: BufferedEntity<*>, vararg data: Any) {
 
-    override fun onDrawBuffer(gl: GL10, camera: Camera) {
-        gl.glDrawArrays(GL_LINES, 0, 2)
-    }
+            entity as Line
+            val fromPoint = entity.fromPoint
+            val toPoint = entity.toPoint
 
-
-    class LineVertexBuffer : VertexBuffer(2 * 2, GL11.GL_STATIC_DRAW, true) {
-
-        fun update(fromPoint: Vec2, toPoint: Vec2) {
-            floatBuffer.apply {
-                position(0)
-                put(fromPoint.x)
-                put(fromPoint.y)
-                put(toPoint.x)
-                put(toPoint.y)
-                position(0)
-            }
-            setHardwareBufferNeedsUpdate()
+            putVertex(
+                index = 0,
+                x = fromPoint.x,
+                y = fromPoint.y
+            )
+            putVertex(
+                index = 1,
+                x = toPoint.x,
+                y = toPoint.y
+            )
         }
-
     }
 
 }

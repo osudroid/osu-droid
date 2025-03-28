@@ -105,23 +105,24 @@ open class ExtendedSprite(textureRegion: TextureRegion? = null) : Box() {
 
 
     override fun applyBlending(pGL: GL10) {
-        if (textureRegion?.texture?.textureOptions?.mPreMultipyAlpha == true) {
-            GLHelper.blendFunction(pGL, BLENDFUNCTION_SOURCE_PREMULTIPLYALPHA_DEFAULT, BLENDFUNCTION_DESTINATION_PREMULTIPLYALPHA_DEFAULT)
-        } else {
-            super.applyBlending(pGL)
-        }
+        blendInfo = if (textureRegion?.texture?.textureOptions?.mPreMultipyAlpha == true)
+            BlendInfo.PreMultiply
+        else
+            BlendInfo.Mixture
+
+        super.applyBlending(pGL)
     }
 
 
-    override fun beginDraw(pGL: GL10) {
-        super.beginDraw(pGL)
-        GLHelper.enableTextures(pGL)
-        GLHelper.enableTexCoordArray(pGL)
+    override fun beginDraw(gl: GL10) {
+        super.beginDraw(gl)
+        GLHelper.enableTextures(gl)
+        GLHelper.enableTexCoordArray(gl)
     }
 
-    override fun onDeclarePointers(pGL: GL10) {
-        super.onDeclarePointers(pGL)
-        textureRegion?.onApply(pGL)
+    override fun onDrawBuffer(gl: GL10) {
+        textureRegion?.onApply(gl)
+        super.onDrawBuffer(gl)
     }
 
 }

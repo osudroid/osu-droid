@@ -36,6 +36,11 @@ data class BlendInfo(
             GL10.GL_ONE,
         )
 
+        val PreMultiply = BlendInfo(
+            GL10.GL_ONE,
+            GL10.GL_ONE_MINUS_SRC_ALPHA
+        )
+
         val Inherit = BlendInfo(-1, -1)
 
     }
