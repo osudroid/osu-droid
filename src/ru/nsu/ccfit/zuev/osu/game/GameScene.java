@@ -1018,7 +1018,7 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
         }
 
         final float mSecPassed = elapsedTime * 1000;
-        float currentSpeedMultiplier = ModUtils.calculateRateWithMods(rateAdjustingMods, mSecPassed);
+        float currentSpeedMultiplier = ModUtils.calculateRateWithTrackRateMods(rateAdjustingMods, mSecPassed);
 
         if (currentSpeedMultiplier != GameHelper.getSpeedMultiplier()) {
             GameHelper.setSpeedMultiplier(currentSpeedMultiplier);

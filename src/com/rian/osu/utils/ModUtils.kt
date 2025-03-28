@@ -133,6 +133,7 @@ object ModUtils {
      */
     @JvmStatic
     @JvmOverloads
+    @JvmName("calculateRateWithTrackRateMods")
     fun calculateRateWithMods(mods: Iterable<IModApplicableToTrackRate>, time: Double = 0.0) = mods.fold(1f) {
         rate, mod -> mod.applyToRate(time, rate)
     }
