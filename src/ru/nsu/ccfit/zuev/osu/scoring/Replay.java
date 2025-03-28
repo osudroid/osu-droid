@@ -246,7 +246,7 @@ public class Replay {
                     extraModString = (String) os.readObject();
                 }
 
-                stat.setMod(LegacyModConverter.convertLegacyMods(mod, extraModString));
+                stat.setMod(LegacyModConverter.convert(mod, extraModString));
 
                 if (withGameplayData) {
                     int msize = os.readInt();

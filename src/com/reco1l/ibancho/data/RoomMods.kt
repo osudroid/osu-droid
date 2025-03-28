@@ -10,7 +10,7 @@ import com.rian.osu.mods.ModHalfTime
 import com.rian.osu.mods.ModNightCore
 import com.rian.osu.utils.ModHashMap
 
-class RoomMods @JvmOverloads constructor(modString: String? = null) : ModHashMap(LegacyModConverter.convertModString(modString)) {
+class RoomMods @JvmOverloads constructor(modString: String? = null) : ModHashMap(LegacyModConverter.convert(modString)) {
 
     /**
      * Converts this [RoomMods] to a [String] that can be displayed to the player.

@@ -126,7 +126,7 @@ data class ScoreInfo @JvmOverloads constructor(
         it.playerName = playerName
         it.setBeatmapMD5(beatmapMD5)
         it.replayFilename = replayFilename
-        it.mod = LegacyModConverter.convertModString(mods)
+        it.mod = LegacyModConverter.convert(mods)
         it.setForcedScore(score)
         it.scoreMaxCombo = maxCombo
         it.mark = mark

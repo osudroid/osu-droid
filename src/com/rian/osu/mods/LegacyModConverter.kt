@@ -73,7 +73,7 @@ object LegacyModConverter {
      */
     @JvmStatic
     @JvmOverloads
-    fun convertLegacyMods(mods: Iterable<GameMod>, extraModString: String, difficulty: BeatmapDifficulty? = null) =
+    fun convert(mods: Iterable<GameMod>, extraModString: String, difficulty: BeatmapDifficulty? = null) =
         ModHashMap().apply {
             mods.forEach {
                 val mod = gameModMap[it]?.createInstance() ?:
@@ -101,7 +101,7 @@ object LegacyModConverter {
      */
     @JvmStatic
     @JvmOverloads
-    fun convertModString(str: String?, difficulty: BeatmapDifficulty? = null) = ModHashMap().also {
+    fun convert(str: String?, difficulty: BeatmapDifficulty? = null) = ModHashMap().also {
         if (str.isNullOrEmpty()) return@also
 
         val data = str.split('|', limit = 2)

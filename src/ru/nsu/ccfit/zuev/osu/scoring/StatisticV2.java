@@ -16,7 +16,6 @@ import com.rian.osu.mods.LegacyModConverter;
 import com.rian.osu.mods.ModFlashlight;
 import com.rian.osu.mods.ModHidden;
 import com.rian.osu.utils.ModHashMap;
-import com.rian.osu.utils.ModUtils;
 
 import org.json.JSONObject;
 import ru.nsu.ccfit.zuev.osu.Config;
@@ -97,7 +96,7 @@ public class StatisticV2 implements Serializable {
         playerName = "";
         if (params.length < 6) return;
 
-        mod = LegacyModConverter.convertModString(params[0]);
+        mod = LegacyModConverter.convert(params[0]);
         isOldScore = !params[0].contains("|");
         setForcedScore(Integer.parseInt(params[1]));
         scoreMaxCombo = Integer.parseInt(params[2]);
