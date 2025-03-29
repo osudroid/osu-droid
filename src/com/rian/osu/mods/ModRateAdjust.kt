@@ -6,7 +6,7 @@ import kotlin.math.pow
 /**
  * Represents a [Mod] that adjusts the track's playback rate.
  */
-abstract class ModRateAdjust(
+sealed class ModRateAdjust(
     /**
      * The multiplier for the track's playback rate.
      */
