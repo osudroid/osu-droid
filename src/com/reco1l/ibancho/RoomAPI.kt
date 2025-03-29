@@ -398,7 +398,7 @@ object RoomAPI {
      * Change room mods.
      */
     @JvmStatic
-    fun setRoomMods(mods: String?) {
+    fun setRoomMods(mods: JSONArray) {
         socket?.emit("roomModsChanged", mods) ?: run {
 			Multiplayer.log("WARNING: Tried to emit event 'roomModsChanged' while socket is null.")
 			return
@@ -577,7 +577,7 @@ object RoomAPI {
      * Change player mods.
      */
     @JvmStatic
-    fun setPlayerMods(mods: String?) {
+    fun setPlayerMods(mods: JSONArray) {
         socket?.emit("playerModsChanged", mods) ?: run {
 			Multiplayer.log("WARNING: Tried to emit event 'playerModsChanged' while socket is null.")
 			return
