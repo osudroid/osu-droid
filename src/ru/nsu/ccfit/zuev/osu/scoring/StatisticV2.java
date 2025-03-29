@@ -541,7 +541,7 @@ public class StatisticV2 implements Serializable {
                 put("accuracy", getAccuracy());
                 put("score", getTotalScoreWithMultiplier());
                 put("username", playerName);
-                put("modstring", mod.toString());
+                put("mods", mod.serializeMods());
                 put("maxCombo", scoreMaxCombo);
                 put("geki", hit300k);
                 put("perfect", hit300);
