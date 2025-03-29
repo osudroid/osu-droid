@@ -142,9 +142,7 @@ public class Replay {
                     os.writeInt(stat.getTotalScoreWithMultiplier());
                     os.writeInt(stat.getScoreMaxCombo());
                     os.writeObject(stat.getPlayerName());
-                    os.writeObject(stat.getMod().toGameModSet());
-                    //Add in replay version 4
-                    os.writeObject(stat.getMod().getContainerModString());
+                    os.writeObject(stat.getMod().serializeMods().toString());
                 }
 
                 os.writeInt(cursorMoves.size());
