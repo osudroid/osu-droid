@@ -4,7 +4,6 @@ import com.rian.osu.beatmap.Beatmap
 import com.rian.osu.beatmap.hitobject.HitObject
 import com.rian.osu.beatmap.hitobject.Slider
 import com.rian.osu.beatmap.sections.BeatmapDifficulty
-import ru.nsu.ccfit.zuev.osu.game.mods.GameMod
 
 /**
  * Represents the Hidden mod.

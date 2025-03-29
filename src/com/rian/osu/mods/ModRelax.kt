@@ -1,7 +1,6 @@
 package com.rian.osu.mods
 
 import com.rian.osu.beatmap.sections.BeatmapDifficulty
-import ru.nsu.ccfit.zuev.osu.game.mods.GameMod
 
 /**
  * Represents the Relax mod.
