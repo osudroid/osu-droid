@@ -2,11 +2,9 @@ package com.rian.osu.utils
 
 import com.reco1l.toolkt.kotlin.fastForEach
 import com.rian.osu.mods.*
-import java.util.EnumSet
 import kotlin.reflect.KClass
 import kotlin.reflect.full.createInstance
 import org.json.JSONArray
-import ru.nsu.ccfit.zuev.osu.game.mods.GameMod
 
 /**
  * A [HashMap] of [Mod]s with additional functionalities.
@@ -166,20 +164,6 @@ open class ModHashMap : HashMap<Class<out Mod>, Mod> {
      * Serializes the [Mod]s in this [ModHashMap] to a [JSONArray].
      */
     fun serializeMods() = ModUtils.serializeMods(values)
-
-    /**
-     * Converts this [ModHashMap] to a [EnumSet] of [GameMod]s.
-     */
-    fun toGameModSet(): EnumSet<GameMod> = EnumSet.noneOf(GameMod::class.java).also {
-        for ((_, m) in this) {
-            for ((k, v) in LegacyModConverter.gameModMap) {
-                if (v.isInstance(m)) {
-                    it.add(k)
-                    break
-                }
-            }
-        }
-    }
 
     /**
      * Converts the container [Mod]s in this [ModHashMap] to their [String] representative.
