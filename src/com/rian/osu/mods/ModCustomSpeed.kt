@@ -1,5 +1,7 @@
 package com.rian.osu.mods
 
+import org.json.JSONObject
+
 /**
  * Represents the Custom Speed mod.
  *
@@ -10,6 +12,16 @@ class ModCustomSpeed @JvmOverloads constructor(trackRateMultiplier: Float = 1f) 
     override val acronym = "CS"
     override val textureNameSuffix = "customspeed"
     override val isRanked = true
+
+    override fun copySettings(settings: JSONObject) {
+        super.copySettings(settings)
+
+        trackRateMultiplier = settings.optDouble("rateMultiplier", trackRateMultiplier.toDouble()).toFloat()
+    }
+
+    override fun serializeSettings() = JSONObject().apply {
+        put("rateMultiplier", trackRateMultiplier)
+    }
 
     override fun equals(other: Any?): Boolean {
         if (other === this) {

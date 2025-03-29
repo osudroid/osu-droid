@@ -1,6 +1,7 @@
 package com.rian.osu.mods
 
 import com.rian.osu.beatmap.sections.BeatmapDifficulty
+import org.json.JSONObject
 
 /**
  * Represents the Flashlight mod.
@@ -20,6 +21,16 @@ class ModFlashlight : Mod() {
     var followDelay = DEFAULT_FOLLOW_DELAY
 
     override fun calculateScoreMultiplier(difficulty: BeatmapDifficulty) = 1.12f
+
+    override fun copySettings(settings: JSONObject) {
+        super.copySettings(settings)
+
+        followDelay = settings.optDouble("areaFollowDelay", followDelay.toDouble()).toFloat()
+    }
+
+    override fun serializeSettings() = JSONObject().apply {
+        put("areaFollowDelay", followDelay)
+    }
 
     override fun equals(other: Any?): Boolean {
         if (other === this) {

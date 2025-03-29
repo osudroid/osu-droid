@@ -2,6 +2,7 @@ package com.rian.osu.mods
 
 import com.rian.osu.beatmap.sections.BeatmapDifficulty
 import kotlin.reflect.KClass
+import org.json.JSONObject
 
 /**
  * Represents a mod.
@@ -64,6 +65,40 @@ sealed class Mod {
      * @return The score multiplier for this [Mod] with the given [BeatmapDifficulty].
      */
     open fun calculateScoreMultiplier(difficulty: BeatmapDifficulty) = 1f
+
+    /**
+     * Serializes this [Mod] into a [JSONObject].
+     *
+     * The [JSONObject] will contain the following fields:
+     *
+     * - `acronym`: The acronym of this [Mod].
+     * - `settings`: Settings specific to this [Mod] in a [JSONObject], if any.
+     *
+     * @return The serialized form of this [Mod] in a [JSONObject].
+     */
+    fun serialize() = JSONObject().apply {
+        put("acronym", acronym)
+
+        val settings = serializeSettings()
+
+        if (settings != null) {
+            put("settings", settings)
+        }
+    }
+
+    /**
+     * Copies the settings of this [Mod] from a [JSONObject].
+     *
+     * @param settings The [JSONObject] containing the settings to copy.
+     */
+    open fun copySettings(settings: JSONObject) {}
+
+    /**
+     * Serializes the settings of this [Mod] to a [JSONObject].
+     *
+     * @return The serialized settings of this [Mod], or `null` if this [Mod] has no settings.
+     */
+    protected open fun serializeSettings(): JSONObject? = null
 
     override fun equals(other: Any?): Boolean {
         if (other === this) {

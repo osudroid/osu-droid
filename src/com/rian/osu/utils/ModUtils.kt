@@ -6,11 +6,62 @@ import com.rian.osu.beatmap.PreciseDroidHitWindow
 import com.rian.osu.beatmap.hitobject.HitObject
 import com.rian.osu.beatmap.sections.BeatmapDifficulty
 import com.rian.osu.mods.*
+import kotlin.reflect.KClass
+import kotlin.reflect.full.createInstance
+import org.json.JSONArray
 
 /**
  * A set of utilities to handle [Mod] combinations.
  */
 object ModUtils {
+    private val allMods = mutableMapOf<String, KClass<out Mod>>().also {
+        val mods = arrayOf<Mod>(
+            ModAuto(), ModAutopilot(), ModCustomSpeed(), ModDifficultyAdjust(), ModDoubleTime(), ModEasy(),
+            ModFlashlight(), ModHalfTime(), ModHardRock(), ModHidden(), ModNightCore(), ModNoFail(), ModPerfect(),
+            ModPrecise(), ModReallyEasy(), ModRelax(), ModScoreV2(), ModSmallCircle(), ModSuddenDeath(), ModTraceable()
+        )
+
+        for (mod in mods) {
+            it[mod.acronym] = mod::class
+        }
+    }
+
+    /**
+     * Serializes a list of [Mod]s into a [JSONArray].
+     *
+     * The serialized [Mod]s can be deserialized using [deserializeMods].
+     *
+     * @param mods The list of [Mod]s to serialize.
+     * @return The serialized [Mod]s in a [JSONArray].
+     */
+    fun serializeMods(mods: Iterable<Mod>) = JSONArray().also {
+        for (mod in mods) {
+            it.put(mod.serialize())
+        }
+    }
+
+    /**
+     * Deserializes a list of [Mod]s from a [JSONArray] received from [serializeMods].
+     *
+     * @param json The [JSONArray] containing the serialized [Mod]s.
+     * @return The deserialized [Mod]s in a [ModHashMap].
+     */
+    fun deserializeMods(json: JSONArray) = ModHashMap().also {
+        for (i in 0 until json.length()) {
+            val obj = json.getJSONObject(i)
+            val acronym = obj.optString("acronym") ?: continue
+            val settings = obj.optJSONObject("settings")
+
+            val mod = allMods[acronym]?.createInstance() ?: continue
+
+            if (settings != null) {
+                mod.copySettings(settings)
+            }
+
+            it.put(mod)
+        }
+    }
+
     /**
      * Calculates the playback rate for the track with the selected [Mod]s at [time].
      *

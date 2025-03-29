@@ -7,6 +7,7 @@ import com.rian.osu.beatmap.sections.BeatmapDifficulty
 import com.rian.osu.utils.ModUtils
 import kotlin.math.exp
 import kotlin.math.pow
+import org.json.JSONObject
 
 /**
  * Represents the Difficulty Adjust mod. Serves as a container for forced difficulty statistics.
@@ -64,6 +65,39 @@ class ModDifficultyAdjust @JvmOverloads constructor(
         }
 
         return multiplier
+    }
+
+    override fun copySettings(settings: JSONObject) {
+        super.copySettings(settings)
+
+        cs = settings.optDouble("cs").toFloat().takeUnless { it.isNaN() }
+        ar = settings.optDouble("ar").toFloat().takeUnless { it.isNaN() }
+        od = settings.optDouble("od").toFloat().takeUnless { it.isNaN() }
+        hp = settings.optDouble("hp").toFloat().takeUnless { it.isNaN() }
+    }
+
+    override fun serializeSettings(): JSONObject? {
+        if (!isRelevant) {
+            return null
+        }
+
+        return JSONObject().apply {
+            if (cs != null) {
+                put("cs", cs)
+            }
+
+            if (ar != null) {
+                put("ar", ar)
+            }
+
+            if (od != null) {
+                put("od", od)
+            }
+
+            if (hp != null) {
+                put("hp", hp)
+            }
+        }
     }
 
     override fun applyToDifficulty(mode: GameMode, difficulty: BeatmapDifficulty, mods: Iterable<Mod>) =
