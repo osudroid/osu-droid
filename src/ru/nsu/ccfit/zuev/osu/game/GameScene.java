@@ -564,6 +564,11 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
         replay.setBeatmap(beatmapInfo.getFullBeatmapsetName(), beatmapInfo.getFullBeatmapName(), parsedBeatmap.getMd5());
 
         if (replayFilePath != null) {
+            // Replay decoding may be dependent on the used mods, so we must do this.
+            var replayStat = new StatisticV2();
+            replayStat.setMod(mods);
+            replay.setStat(replayStat);
+
             replaying = replay.load(replayFilePath, true);
             if (!replaying) {
                 ToastLogger.showText(com.osudroid.resources.R.string.replay_invalid, true);
