@@ -5,6 +5,7 @@ import com.rian.osu.mods.*
 import java.util.EnumSet
 import kotlin.reflect.KClass
 import kotlin.reflect.full.createInstance
+import org.json.JSONArray
 import ru.nsu.ccfit.zuev.osu.game.mods.GameMod
 
 /**
@@ -160,6 +161,11 @@ open class ModHashMap : HashMap<Class<out Mod>, Mod> {
     @JvmName("removeOfType")
     @Suppress("UNCHECKED_CAST")
     fun <T : Mod> remove(key: Class<out T>) = remove(key) as? T
+
+    /**
+     * Serializes the [Mod]s in this [ModHashMap] to a [JSONArray].
+     */
+    fun serializeMods() = ModUtils.serializeMods(values)
 
     /**
      * Converts this [ModHashMap] to a [EnumSet] of [GameMod]s.
