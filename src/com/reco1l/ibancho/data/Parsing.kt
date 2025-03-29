@@ -12,7 +12,7 @@ fun parsePlayer(o: JSONObject) = RoomPlayer(
     name = o.getString("username"),
     status = PlayerStatus[o.getInt("status")],
     team = if (o.isNull("team")) null else o.getInt("team").let { n -> RoomTeam[n] },
-    mods = RoomMods(o.getString("mods"))
+    mods = RoomMods(o.getJSONArray("mods"))
 )
 
 /**
