@@ -1,8 +1,6 @@
 package com.reco1l.osu.hud.elements
 
-import com.reco1l.andengine.Anchor
-import com.reco1l.andengine.Axes
-import com.reco1l.andengine.DepthInfo
+import com.reco1l.andengine.*
 import com.reco1l.andengine.shape.Box
 import com.reco1l.andengine.shape.Circle
 import com.reco1l.framework.ColorARGB
@@ -89,7 +87,8 @@ class HUDPieSongProgress : HUDSongProgress() {
             clear.anchor = Anchor.Center
             clear.origin = Anchor.Center
             clear.color = ColorARGB.Transparent
-            clear.depthInfo = DepthInfo.Clear
+            clear.clearInfo = ClearInfo.ClearDepthBuffer
+            clear.depthInfo = DepthInfo.Less
 
             attachChild(clear)
         }

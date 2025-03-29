@@ -94,11 +94,11 @@ class HUDElementOverlay(private val element: HUDElement) : ConstraintContainer()
      */
     fun updateOutline() {
         // We need to cancel scale center
-        outline.x = element.anchorOffsetX + element.x - (element.widthScaled * element.origin.x)
-        outline.y = element.anchorOffsetY + element.y - (element.heightScaled * element.origin.y)
+        outline.x = element.anchorOffsetX + element.x - (element.scaledWidth * element.origin.x)
+        outline.y = element.anchorOffsetY + element.y - (element.scaledHeight * element.origin.y)
 
-        outline.width = element.widthScaled
-        outline.height = element.heightScaled
+        outline.width = element.scaledWidth
+        outline.height = element.scaledHeight
     }
 
 
@@ -174,8 +174,8 @@ class HUDElementOverlay(private val element: HUDElement) : ConstraintContainer()
                     deltaY = -deltaY
                 }
 
-                val deltaScaleX = deltaX / element.widthScaled
-                val deltaScaleY = deltaY / element.heightScaled
+                val deltaScaleX = deltaX / element.scaledWidth
+                val deltaScaleY = deltaY / element.scaledHeight
 
                 val scaleX = (element.scaleX + deltaScaleX).coerceIn(0.5f, 5f)
                 val scaleY = (element.scaleY + deltaScaleY).coerceIn(0.5f, 5f)

@@ -3,6 +3,7 @@ package com.reco1l.andengine.sprite
 import android.util.*
 import com.reco1l.andengine.*
 import com.reco1l.andengine.shape.*
+import org.anddev.andengine.entity.shape.Shape.*
 import org.anddev.andengine.opengl.texture.region.*
 import org.anddev.andengine.opengl.util.*
 import javax.microedition.khronos.opengles.*
@@ -104,23 +105,24 @@ open class ExtendedSprite(textureRegion: TextureRegion? = null) : Box() {
 
 
     override fun applyBlending(pGL: GL10) {
-        if (textureRegion?.texture?.textureOptions?.mPreMultipyAlpha == true) {
-            GLHelper.blendFunction(pGL, BLENDFUNCTION_SOURCE_PREMULTIPLYALPHA_DEFAULT, BLENDFUNCTION_DESTINATION_PREMULTIPLYALPHA_DEFAULT)
-        } else {
-            super.applyBlending(pGL)
-        }
+        blendInfo = if (textureRegion?.texture?.textureOptions?.mPreMultipyAlpha == true)
+            BlendInfo.PreMultiply
+        else
+            BlendInfo.Mixture
+
+        super.applyBlending(pGL)
     }
 
 
-    override fun onInitDraw(pGL: GL10) {
-        super.onInitDraw(pGL)
-        GLHelper.enableTextures(pGL)
-        GLHelper.enableTexCoordArray(pGL)
+    override fun beginDraw(gl: GL10) {
+        super.beginDraw(gl)
+        GLHelper.enableTextures(gl)
+        GLHelper.enableTexCoordArray(gl)
     }
 
-    override fun onApplyVertices(pGL: GL10) {
-        super.onApplyVertices(pGL)
-        textureRegion?.onApply(pGL)
+    override fun onDrawBuffer(gl: GL10) {
+        textureRegion?.onApply(gl)
+        super.onDrawBuffer(gl)
     }
 
 }

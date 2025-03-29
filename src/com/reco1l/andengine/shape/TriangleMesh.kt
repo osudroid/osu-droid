@@ -7,7 +7,8 @@ import org.anddev.andengine.engine.camera.*
 import org.anddev.andengine.opengl.util.*
 import javax.microedition.khronos.opengles.*
 
-class TriangleMesh : ExtendedEntity(vertexBuffer = null) {
+// TODO: This class should be replaced with a more efficient BufferedEntity implementation.
+class TriangleMesh : ExtendedEntity() {
 
 
     /**
@@ -17,7 +18,6 @@ class TriangleMesh : ExtendedEntity(vertexBuffer = null) {
 
 
     init {
-        isCullingEnabled = false
         vertices.ary = FloatArray(0)
     }
 
@@ -32,28 +32,21 @@ class TriangleMesh : ExtendedEntity(vertexBuffer = null) {
     }
 
 
-    override fun onInitDraw(pGL: GL10) {
+    override fun beginDraw(pGL: GL10) {
 
-        super.onInitDraw(pGL)
+        super.beginDraw(pGL)
 
         GLHelper.disableCulling(pGL)
         GLHelper.disableTextures(pGL)
         GLHelper.disableTexCoordArray(pGL)
     }
 
+    override fun doDraw(gl: GL10, camera: Camera) {
+        super.doDraw(gl, camera)
 
-    override fun onUpdateVertexBuffer() {
-
-    }
-
-
-    override fun drawVertices(pGL: GL10, pCamera: Camera) {
-
-        if (vertices.length == 0) {
-            return
+        if (vertices.length != 0) {
+            TriangleRenderer.get().renderTriangles(vertices, gl)
         }
-
-        TriangleRenderer.get().renderTriangles(vertices, pGL)
     }
 
 }

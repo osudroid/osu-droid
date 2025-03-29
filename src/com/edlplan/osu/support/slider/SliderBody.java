@@ -2,6 +2,7 @@ package com.edlplan.osu.support.slider;
 
 import com.edlplan.andengine.TriangleBuilder;
 import com.edlplan.framework.math.line.LinePath;
+import com.reco1l.andengine.ClearInfo;
 import com.reco1l.andengine.DepthInfo;
 import com.reco1l.andengine.shape.TriangleMesh;
 import com.reco1l.andengine.container.Container;
@@ -39,7 +40,8 @@ public class SliderBody extends Container {
         if (allowHint) {
             hint = new TriangleMesh();
             hint.setVisible(false);
-            hint.setDepthInfo(DepthInfo.Clear);
+            hint.setClearInfo(ClearInfo.ClearDepthBuffer);
+            hint.setDepthInfo(DepthInfo.Less);
         } else {
             hint = null;
         }
@@ -90,9 +92,11 @@ public class SliderBody extends Container {
     public void setHintVisible(boolean visible) {
         if (hint != null) {
             hint.setVisible(visible);
-            background.setDepthInfo(visible ? DepthInfo.Default : DepthInfo.Clear);
+            background.setClearInfo(visible ? ClearInfo.None : ClearInfo.ClearDepthBuffer);
+            background.setDepthInfo(visible ? DepthInfo.Default : DepthInfo.Less);
         } else {
-            background.setDepthInfo(DepthInfo.Clear);
+            background.setClearInfo(ClearInfo.ClearDepthBuffer);
+            background.setDepthInfo(DepthInfo.Less);
         }
     }
 

@@ -45,7 +45,8 @@ class HUDHealthBar : HUDElement() {
 
         fillClear = Box()
         fillClear.origin = Anchor.TopRight
-        fillClear.depthInfo = DepthInfo.Clear
+        fillClear.clearInfo = ClearInfo.ClearDepthBuffer
+        fillClear.depthInfo = DepthInfo.Less
         fillClear.alpha = 0f
         attachChild(fillClear)
 

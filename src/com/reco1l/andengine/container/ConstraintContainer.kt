@@ -18,7 +18,7 @@ open class ConstraintContainer : Container() {
     var accountForScaleAxes = Axes.Both
 
 
-    private val constraints = mutableMapOf<ExtendedEntity, IShape>()
+    private val constraints = mutableMapOf<ExtendedEntity, ExtendedEntity>()
 
 
     override fun getChildDrawX(child: ExtendedEntity): Float {
@@ -87,7 +87,7 @@ open class ConstraintContainer : Container() {
     /**
      * Adds a constraint to a child.
      */
-    fun addConstraint(child: ExtendedEntity, target: IShape) {
+    fun addConstraint(child: ExtendedEntity, target: ExtendedEntity) {
 
         if (child == target) {
             throw IllegalArgumentException("Cannot constrain a child to itself.")

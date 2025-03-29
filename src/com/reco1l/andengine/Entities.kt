@@ -7,6 +7,20 @@ import org.anddev.andengine.entity.scene.CameraScene
 import org.anddev.andengine.entity.shape.IShape
 
 
+val ExtendedEntity.scaledWidth: Float
+    get() = internalWidth * scaleX
+
+val ExtendedEntity.scaledHeight: Float
+    get() = internalHeight * scaleY
+
+val ExtendedEntity.scaledSize: Vec2
+    get() = Vec2(scaledWidth, scaledHeight)
+
+
+val ExtendedEntity.contentSize: Vec2
+    get() = Vec2(contentWidth, contentHeight)
+
+
 fun IEntity?.getPadding() = when (this) {
     is ExtendedEntity -> padding
     else -> Vec4.Zero
@@ -34,7 +48,7 @@ fun IEntity?.getPaddedHeight() = when (this) {
  * When using the setter this will set the width and height to the same value.
  */
 var ExtendedEntity.size
-    get() = Vec2(width, height)
+    get() = Vec2(internalWidth, internalHeight)
     set(value) {
         setSize(value.x, value.y)
     }

@@ -64,7 +64,8 @@ class HUDHitErrorMeter : HUDElement() {
             setSize(WIDTH * (hitWindow.greatWindow / hitWindow.mehWindow), BAR_HEIGHT)
             color = greatColor
 
-            depthInfo = DepthInfo.Clear
+            clearInfo = ClearInfo.ClearDepthBuffer
+            depthInfo = DepthInfo.Less
         }
 
         attachChild(mehWindow)
