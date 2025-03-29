@@ -11,7 +11,7 @@ import kotlin.reflect.full.createInstance
 import ru.nsu.ccfit.zuev.osu.game.mods.GameMod
 
 /**
- * A set of utilities to handle convert legacy mods format to new mods format.
+ * A set of utilities to handle legacy mods storage conversion to the new storage format.
  */
 object LegacyModConverter {
     /**
