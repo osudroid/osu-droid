@@ -224,7 +224,7 @@ object DatabaseManager {
 }
 
 @Database(
-    version = 1,
+    version = 2,
     entities = [
         BeatmapInfo::class,
         BeatmapOptions::class,
