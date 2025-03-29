@@ -4,9 +4,9 @@ import android.graphics.PointF;
 
 import androidx.annotation.NonNull;
 
+import com.rian.osu.mods.LegacyModConverter;
 import com.rian.osu.mods.ModHardRock;
 import com.rian.osu.utils.ModHashMap;
-import com.rian.osu.utils.ModUtils;
 
 import org.anddev.andengine.util.Debug;
 
@@ -246,7 +246,7 @@ public class Replay {
                     extraModString = (String) os.readObject();
                 }
 
-                stat.setMod(ModUtils.convertLegacyMods(mod, extraModString));
+                stat.setMod(LegacyModConverter.convert(mod, extraModString));
 
                 if (withGameplayData) {
                     int msize = os.readInt();
