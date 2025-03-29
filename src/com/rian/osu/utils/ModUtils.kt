@@ -34,6 +34,7 @@ object ModUtils {
      * @param mods The list of [Mod]s to serialize.
      * @return The serialized [Mod]s in a [JSONArray].
      */
+    @JvmStatic
     fun serializeMods(mods: Iterable<Mod>) = JSONArray().also {
         for (mod in mods) {
             it.put(mod.serialize())
@@ -46,6 +47,7 @@ object ModUtils {
      * @param json The [JSONArray] containing the serialized [Mod]s.
      * @return The deserialized [Mod]s in a [ModHashMap].
      */
+    @JvmStatic
     fun deserializeMods(json: JSONArray) = ModHashMap().also {
         for (i in 0 until json.length()) {
             val obj = json.getJSONObject(i)
