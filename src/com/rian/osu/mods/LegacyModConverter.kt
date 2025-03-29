@@ -17,7 +17,7 @@ object LegacyModConverter {
     /**
      * All [Mod]s that can be stored in the legacy mods format by their respective [GameMod].
      */
-    private val gameModMap = mutableMapOf<GameMod, KClass<out Mod>>().also {
+    val gameModMap = mutableMapOf<GameMod, KClass<out Mod>>().also {
         it[GameMod.MOD_AUTO] = ModAuto::class
         it[GameMod.MOD_AUTOPILOT] = ModAutopilot::class
         it[GameMod.MOD_DOUBLETIME] = ModDoubleTime::class
@@ -41,7 +41,7 @@ object LegacyModConverter {
     /**
      * All [Mod]s that can be stored in the legacy mods format by their respective encode character.
      */
-    private val legacyStorableMods = mutableMapOf<Char, KClass<out Mod>>().also {
+    val legacyStorableMods = mutableMapOf<Char, KClass<out Mod>>().also {
         it['a'] = ModAuto::class
         it['b'] = ModTraceable::class
         it['c'] = ModNightCore::class

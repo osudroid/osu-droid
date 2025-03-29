@@ -166,8 +166,11 @@ open class ModHashMap : HashMap<Class<out Mod>, Mod> {
      */
     fun toGameModSet(): EnumSet<GameMod> = EnumSet.noneOf(GameMod::class.java).also {
         for ((_, m) in this) {
-            if (m is IModUserSelectable) {
-                it.add(m.enum)
+            for ((k, v) in LegacyModConverter.gameModMap) {
+                if (v.isInstance(m)) {
+                    it.add(k)
+                    break
+                }
             }
         }
     }
@@ -246,7 +249,12 @@ open class ModHashMap : HashMap<Class<out Mod>, Mod> {
     override fun toString() = buildString {
         modStringOrder.fastForEach {
             if (it::class in this@ModHashMap) {
-                append((it as IModUserSelectable).encodeChar)
+                for ((k, v) in LegacyModConverter.legacyStorableMods) {
+                    if (v.isInstance(this@ModHashMap[it::class])) {
+                        append(k)
+                        break
+                    }
+                }
             }
         }
 
