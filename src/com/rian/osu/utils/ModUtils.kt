@@ -48,7 +48,12 @@ object ModUtils {
      * @return The deserialized [Mod]s in a [ModHashMap].
      */
     @JvmStatic
-    fun deserializeMods(json: JSONArray) = ModHashMap().also {
+    @JvmOverloads
+    fun deserializeMods(json: JSONArray? = null) = ModHashMap().also {
+        if (json == null) {
+            return@also
+        }
+
         for (i in 0 until json.length()) {
             val obj = json.getJSONObject(i)
             val acronym = obj.optString("acronym") ?: continue
