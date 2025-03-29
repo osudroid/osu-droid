@@ -321,10 +321,11 @@ public class Replay {
         Version 4: Adds ExtraModString's save and load in save()/load()/loadInfo()
         Version 5: Changes coordinates to use the float primitive type
         Version 6: Removed accuracy and perfect, slider ends no longer give combo when not hit
+        Version 7: Reworked mod storage to not serialize GameMod
      */
     public static class ReplayVersion implements Serializable {
         private static final long serialVersionUID = 4643121693566795335L;
-        int version = 6;
+        int version = 7;
     }
 
     public static class ReplayObjectData {
