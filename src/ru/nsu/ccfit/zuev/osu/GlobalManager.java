@@ -28,7 +28,6 @@ public class GlobalManager {
     private SongService songService;
     private BeatmapInfo selectedBeatmap;
     private SaveServiceObject saveServiceObject;
-    private String skinNow;
 
     public static GlobalManager getInstance() {
         if (instance == null) {
@@ -54,8 +53,7 @@ public class GlobalManager {
         setMainScene(new MainScene());
         getMainScene().load(mainActivity);
         setInfo("Loading skin...");
-        skinNow = Config.getSkinPath();
-        ResourceManager.getInstance().loadSkin(skinNow);
+        ResourceManager.getInstance().loadSkin(Config.getSkinPath());
         setLoadingProgress(30);
         setGameScene(new GameScene(getEngine()));
         setSongMenu(new SongMenu());
@@ -78,14 +76,6 @@ public class GlobalManager {
 
     public void setEngine(Engine engine) {
         this.engine = engine;
-    }
-
-    public String getSkinNow() {
-        return skinNow;
-    }
-
-    public void setSkinNow(String skinNow) {
-        this.skinNow = skinNow;
     }
 
     public Camera getCamera() {
