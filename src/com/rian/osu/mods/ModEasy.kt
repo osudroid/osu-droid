@@ -3,17 +3,14 @@ package com.rian.osu.mods
 import com.rian.osu.GameMode
 import com.rian.osu.beatmap.sections.BeatmapDifficulty
 import com.rian.osu.utils.CircleSizeCalculator
-import ru.nsu.ccfit.zuev.osu.game.mods.GameMod
 
 /**
  * Represents the Easy mod.
  */
-class ModEasy : Mod(), IModUserSelectable, IModApplicableToDifficulty {
-    override val encodeChar = 'e'
+class ModEasy : Mod(), IModApplicableToDifficulty {
     override val name = "Easy"
     override val acronym = "EZ"
     override val textureNameSuffix = "easy"
-    override val enum = GameMod.MOD_EASY
     override val isRanked = true
     override val incompatibleMods = super.incompatibleMods + ModHardRock::class
 
