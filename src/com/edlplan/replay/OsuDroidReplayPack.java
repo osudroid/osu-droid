@@ -4,6 +4,7 @@ import static com.reco1l.osu.data.Scores.ScoreInfo;
 
 import com.reco1l.osu.data.BeatmapInfo;
 import com.reco1l.osu.data.ScoreInfo;
+import com.rian.osu.mods.LegacyModConverter;
 
 import org.apache.commons.io.FilenameUtils;
 import org.json.JSONException;
@@ -48,7 +49,7 @@ public class OsuDroidReplayPack {
             replayData.put("playername", scoreInfo.getPlayerName());
             replayData.put("replayfile", scoreInfo.getReplayFilename());
             replayData.put("beatmapMD5", scoreInfo.getBeatmapMD5());
-            replayData.put("mod", scoreInfo.getMods());
+            replayData.put("mods", scoreInfo.getMods());
             replayData.put("score", scoreInfo.getScore());
             replayData.put("combo", scoreInfo.getMaxCombo());
             replayData.put("mark", scoreInfo.getMark());
