@@ -5,6 +5,7 @@ import com.rian.osu.mods.*
 import java.util.EnumSet
 import kotlin.reflect.KClass
 import kotlin.reflect.full.createInstance
+import org.json.JSONArray
 import ru.nsu.ccfit.zuev.osu.game.mods.GameMod
 
 /**
@@ -162,12 +163,20 @@ open class ModHashMap : HashMap<Class<out Mod>, Mod> {
     fun <T : Mod> remove(key: Class<out T>) = remove(key) as? T
 
     /**
+     * Serializes the [Mod]s in this [ModHashMap] to a [JSONArray].
+     */
+    fun serializeMods() = ModUtils.serializeMods(values)
+
+    /**
      * Converts this [ModHashMap] to a [EnumSet] of [GameMod]s.
      */
     fun toGameModSet(): EnumSet<GameMod> = EnumSet.noneOf(GameMod::class.java).also {
         for ((_, m) in this) {
-            if (m is IModUserSelectable) {
-                it.add(m.enum)
+            for ((k, v) in LegacyModConverter.gameModMap) {
+                if (v.isInstance(m)) {
+                    it.add(k)
+                    break
+                }
             }
         }
     }
@@ -246,7 +255,12 @@ open class ModHashMap : HashMap<Class<out Mod>, Mod> {
     override fun toString() = buildString {
         modStringOrder.fastForEach {
             if (it::class in this@ModHashMap) {
-                append((it as IModUserSelectable).encodeChar)
+                for ((k, v) in LegacyModConverter.legacyStorableMods) {
+                    if (v.isInstance(this@ModHashMap[it::class])) {
+                        append(k)
+                        break
+                    }
+                }
             }
         }
 
