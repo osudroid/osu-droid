@@ -298,6 +298,9 @@ class SettingsFragment : com.edlplan.ui.fragment.SettingsFragment() {
                 async {
                     GlobalManager.getInstance().skinNow = Config.getSkinPath()
                     BeatmapSkinManager.getInstance().clearSkin()
+                    // Setting the skin now so that any setting that relies on skins (i.e., the HUD editor) receives
+                    // the correct skin path.
+                    Config.setSkinPath(newValue.toString())
                     ResourceManager.getInstance().loadSkin(newValue.toString())
                     GlobalManager.getInstance().engine.textureManager.reloadTextures()
 
