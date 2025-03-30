@@ -11,11 +11,11 @@ import com.reco1l.ibancho.data.WinCondition;
 import com.reco1l.osu.data.ScoreInfo;
 import com.reco1l.osu.multiplayer.Multiplayer;
 import com.rian.osu.beatmap.sections.BeatmapDifficulty;
-import com.rian.osu.mods.ILegacyMod;
+import com.rian.osu.mods.IMigratableMod;
+import com.rian.osu.mods.LegacyModConverter;
 import com.rian.osu.mods.ModFlashlight;
 import com.rian.osu.mods.ModHidden;
 import com.rian.osu.utils.ModHashMap;
-import com.rian.osu.utils.ModUtils;
 
 import org.json.JSONObject;
 import ru.nsu.ccfit.zuev.osu.Config;
@@ -96,7 +96,7 @@ public class StatisticV2 implements Serializable {
         playerName = "";
         if (params.length < 6) return;
 
-        mod = ModUtils.convertModString(params[0]);
+        mod = LegacyModConverter.convert(params[0]);
         isOldScore = !params[0].contains("|");
         setForcedScore(Integer.parseInt(params[1]));
         scoreMaxCombo = Integer.parseInt(params[2]);
@@ -599,9 +599,9 @@ public class StatisticV2 implements Serializable {
 
     public void migrateLegacyMods(final BeatmapDifficulty originalDifficulty) {
         for (var m : mod.values()) {
-            if (m instanceof ILegacyMod legacyMod) {
+            if (m instanceof IMigratableMod migratableMod) {
                 mod.remove(m);
-                mod.put(legacyMod.migrate(originalDifficulty));
+                mod.put(migratableMod.migrate(originalDifficulty));
             }
         }
     }
