@@ -119,6 +119,15 @@ public class OsuDroidReplayPack {
             }
         }
 
+        if (version < 3) {
+            // Exported replays older than v3 stores mods in the `mod` key.
+            // Additionally, it uses the legacy mods format and needs to be converted.
+            var oldMods = replayData.getString("mod");
+
+            replayData.put("mods", LegacyModConverter.convert(oldMods).serializeMods().toString());
+            replayData.remove("mod");
+        }
+
         entry.scoreInfo = ScoreInfo(replayData);
         entry.replayFile = replayFile;
 
