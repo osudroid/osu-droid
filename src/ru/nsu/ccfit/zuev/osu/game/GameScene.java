@@ -2080,8 +2080,10 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
             return false;
         }
 
-        int eventTime = GlobalManager.getInstance().getSongService().getPosition();
-        float offset = eventTime / 1000f - elapsedTime;
+        int eventTime = (int) (elapsedTime * 1000);
+        float offset = Config.isFixFrameOffset()
+                ? GlobalManager.getInstance().getSongService().getPosition() / 1000f - elapsedTime
+                : 0;
 
         var id = event.getPointerID();
         if (id < 0 || id >= CursorCount) {
