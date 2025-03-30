@@ -61,7 +61,7 @@ public class OsuDroidReplayPack {
             replayData.put("accuracy", scoreInfo.getAccuracy());
             replayData.put("time", scoreInfo.getTime());
 
-            entryJson.put("version", 2);
+            entryJson.put("version", 3);
             entryJson.put("replaydata", replayData);
 
             outputStream.write(entryJson.toString(2).getBytes());
