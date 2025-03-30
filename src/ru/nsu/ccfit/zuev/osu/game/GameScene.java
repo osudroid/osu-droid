@@ -2081,7 +2081,7 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
         }
 
         int eventTime = (int) (elapsedTime * 1000);
-        float offset = Config.isFixFrameOffset()
+        float offset = Config.isFixFrameOffset() && musicStarted
                 ? GlobalManager.getInstance().getSongService().getPosition() / 1000f - elapsedTime
                 : 0;
 
