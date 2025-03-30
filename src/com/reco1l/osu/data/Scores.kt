@@ -11,6 +11,7 @@ import androidx.room.Query
 import com.rian.osu.beatmap.sections.BeatmapDifficulty
 import com.rian.osu.utils.ModUtils
 import org.apache.commons.io.FilenameUtils
+import org.json.JSONArray
 import org.json.JSONObject
 import ru.nsu.ccfit.zuev.osu.Config
 import ru.nsu.ccfit.zuev.osu.scoring.StatisticV2
@@ -126,7 +127,7 @@ data class ScoreInfo @JvmOverloads constructor(
         it.playerName = playerName
         it.setBeatmapMD5(beatmapMD5)
         it.replayFilename = replayFilename
-        it.mod = ModUtils.convertModString(mods)
+        it.mod = ModUtils.deserializeMods(JSONArray(mods))
         it.setForcedScore(score)
         it.scoreMaxCombo = maxCombo
         it.mark = mark
@@ -157,7 +158,7 @@ fun ScoreInfo(json: JSONObject) =
         // The keys don't correspond to the table columns in order to keep compatibility with the old replays.
         id = json.optLong("id", 0),
         playerName = json.getString("playername"),
-        mods = json.getString("mod"),
+        mods = json.getString("mods"),
         score = json.getInt("score"),
         maxCombo = json.getInt("combo"),
         mark = json.getString("mark"),
