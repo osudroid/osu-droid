@@ -148,7 +148,7 @@ class GameplayHUD : Container(), IGameplayEvents {
 
         val data = getSkinData()
 
-        val jsonFile = File(GlobalManager.getInstance().skinNow, "skin.json")
+        val jsonFile = File(Config.getSkinPath(), "skin.json")
         val json: JSONObject
 
         if (jsonFile.exists()) {
