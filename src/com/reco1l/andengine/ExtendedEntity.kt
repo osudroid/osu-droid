@@ -283,8 +283,14 @@ abstract class ExtendedEntity : Entity(0f, 0f), ITouchArea, IModifierChain {
 
     //region Size
 
+    /**
+     * Called when the size of a child entity changes.
+     */
     open fun onChildSizeChanged(child: IEntity) {}
 
+    /**
+     * Called when the size of this entity changes.
+     */
     open fun onSizeChanged() {
         (parent as? ExtendedEntity)?.onChildSizeChanged(this)
     }
@@ -292,45 +298,43 @@ abstract class ExtendedEntity : Entity(0f, 0f), ITouchArea, IModifierChain {
     /**
      * Sets the size of the entity.
      */
-    open fun setSize(newWidth: Float, newHeight: Float) {
-        if (width != newWidth || height != newHeight) {
-            width = newWidth
-            height = newHeight
-            invalidate(InvalidationFlag.Size)
-        }
+    open fun setSize(x: Float, y: Float) {
+        width = x
+        height = y
     }
 
+    @Deprecated("Keeping this for the current usages.", ReplaceWith("transformedWidth"))
     fun getWidthScaled(): Float {
-        return transformedWidth
+        return width * scaleX
     }
 
+    @Deprecated("Keeping this for the current usages.", ReplaceWith("transformedHeight"))
     fun getHeightScaled(): Float {
-        return transformedHeight
+        return height * scaleY
     }
 
     //endregion
 
     //region Position
 
+    /**
+     * Called when the position of a child entity changes.
+     */
     open fun onChildPositionChanged(child: IEntity) {}
 
+    /**
+     * Called when the position of this entity changes.
+     */
     open fun onPositionChanged() {
         (parent as? ExtendedEntity)?.onChildPositionChanged(this)
     }
 
+    /**
+     * Sets the position of the entity.
+     */
     override fun setPosition(x: Float, y: Float) {
-        if (mX != x || mY != y) {
-            mX = x
-            mY = y
-            invalidate(InvalidationFlag.Position)
-        }
-    }
-
-    open fun setTranslation(x: Float, y: Float) {
-        if (translationX != x || translationY != y) {
-            translationX = x
-            translationY = y
-        }
+        setX(x)
+        setY(y)
     }
 
     //endregion
@@ -374,6 +378,10 @@ abstract class ExtendedEntity : Entity(0f, 0f), ITouchArea, IModifierChain {
     }
 
     override fun onDrawChildren(gl: GL10, camera: Camera) {
+
+        if (mChildren == null || !mChildrenVisible) {
+            return
+        }
 
         val hasPaddingApplicable = padding.left > 0f || padding.top > 0f
 
@@ -442,6 +450,7 @@ abstract class ExtendedEntity : Entity(0f, 0f), ITouchArea, IModifierChain {
                 onInvalidateInputBindings()
             }
 
+            // During the invalidation process the flags could be changed.
             if (this.invalidationFlags == invalidationFlags) {
                 this.invalidationFlags = 0
             }
@@ -659,6 +668,9 @@ abstract class ExtendedEntity : Entity(0f, 0f), ITouchArea, IModifierChain {
 
     //region Input
 
+    /**
+     * Called when input bindings are invalidated and needs to be removed.
+     */
     open fun onInvalidateInputBindings() {
         inputBindings.fill(null)
     }
