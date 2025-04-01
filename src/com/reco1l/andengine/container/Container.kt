@@ -58,8 +58,8 @@ open class Container : ExtendedEntity() {
 
                 val child = mChildren.getOrNull(i) ?: continue
 
-                val x = max(0f, child.absX)
-                val y = max(0f, child.absY)
+                val x = max(0f, child.absoluteX)
+                val y = max(0f, child.absoluteY)
 
                 contentWidth = max(contentWidth, x + child.getWidth())
                 contentHeight = max(contentHeight, y + child.getHeight())

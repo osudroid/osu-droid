@@ -23,7 +23,7 @@ class HUDElementOverlay(private val element: HUDElement) : ConstraintContainer()
      * The position of the outline box that represents the element.
      */
     val outlinePosition
-        get() = outline.absPosition
+        get() = outline.absolutePosition
 
 
     private val outline = OutlineBox().apply {

@@ -83,21 +83,21 @@ val IEntity?.innerHeight: Float
  * The absolute position of the entity in the parent coordinate system.
  * This takes into account the anchor and origin but not transformations.
  */
-val ExtendedEntity.absPosition: Vec2
-    get() = Vec2(absX, absY)
+val ExtendedEntity.absolutePosition: Vec2
+    get() = Vec2(absoluteX, absoluteY)
 
 /**
  * The absolute position of the X axis of the entity in the parent coordinate system.
  * This takes into account the anchor and origin.
  */
-val IEntity.absX: Float
+val IEntity.absoluteX: Float
     get() = if (this is ExtendedEntity) anchorPositionX - originPositionX + x + translationX else x
 
 /**
  * The absolute position of the Y axis of the entity in the parent coordinate system.
  * This takes into account the anchor and origin but not transformations.
  */
-val IEntity.absY: Float
+val IEntity.absoluteY: Float
     get() = if (this is ExtendedEntity) anchorPositionY - originPositionY + y + translationY else y
 
 /**

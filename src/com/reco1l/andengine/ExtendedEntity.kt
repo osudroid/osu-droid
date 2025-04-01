@@ -361,8 +361,8 @@ abstract class ExtendedEntity : Entity(0f, 0f), ITouchArea, IModifierChain {
 
     override fun onApplyTransformations(pGL: GL10, camera: Camera) {
 
-        val absX = absX
-        val absY = absY
+        val absX = absoluteX
+        val absY = absoluteY
 
         if (absX != 0f || absY != 0f) {
             pGL.glTranslatef(absX, absY, 0f)
@@ -622,7 +622,7 @@ abstract class ExtendedEntity : Entity(0f, 0f), ITouchArea, IModifierChain {
                 mLocalToParentTransformation.postTranslate(centerX, centerY)
             }
 
-            mLocalToParentTransformation.postTranslate(absX, absY)
+            mLocalToParentTransformation.postTranslate(absoluteX, absoluteY)
             mLocalToParentTransformationDirty = false
         }
 
@@ -637,7 +637,7 @@ abstract class ExtendedEntity : Entity(0f, 0f), ITouchArea, IModifierChain {
 
         if (mParentToLocalTransformationDirty) {
             mParentToLocalTransformation.setToIdentity()
-            mParentToLocalTransformation.postTranslate(-absX, -absY)
+            mParentToLocalTransformation.postTranslate(-absoluteX, -absoluteY)
 
             if (mRotation != 0f) {
                 val centerX = width * mRotationCenterX
@@ -690,7 +690,7 @@ abstract class ExtendedEntity : Entity(0f, 0f), ITouchArea, IModifierChain {
         val inputBinding = inputBindings.getOrNull(event.pointerID)
 
         if (inputBinding != null && inputBinding.parent == this) {
-            if (!inputBinding.onAreaTouched(event, localX - inputBinding.absX, localY - inputBinding.absY) || event.isActionUp) {
+            if (!inputBinding.onAreaTouched(event, localX - inputBinding.absoluteX, localY - inputBinding.absoluteY) || event.isActionUp) {
                 inputBindings[event.pointerID] = null
                 return false
             }
@@ -703,7 +703,7 @@ abstract class ExtendedEntity : Entity(0f, 0f), ITouchArea, IModifierChain {
             for (i in childCount - 1 downTo 0) {
                 val child = getChild(i)
                 if (child is ExtendedEntity && child.contains(localX, localY)) {
-                    if (child.onAreaTouched(event, localX - child.absX, localY - child.absY)) {
+                    if (child.onAreaTouched(event, localX - child.absoluteX, localY - child.absoluteY)) {
                         inputBindings[event.pointerID] = child
                         return true
                     }

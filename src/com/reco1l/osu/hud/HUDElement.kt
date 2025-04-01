@@ -209,8 +209,8 @@ abstract class HUDElement : Container(), IGameplayEvents {
         if (isInEditMode) {
             val hud = parent as GameplayHUD
 
-            val parentLocalX = absX + localX
-            val parentLocalY = absY + localY
+            val parentLocalX = absoluteX + localX
+            val parentLocalY = absoluteY + localY
 
             val deltaX = parentLocalX - initialX
             val deltaY = parentLocalY - initialY

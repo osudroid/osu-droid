@@ -30,8 +30,8 @@ open class ConstraintContainer : Container() {
                 return@fastForEach
             }
 
-            val targetX = target.absX
-            val targetY = target.absY
+            val targetX = target.absoluteX
+            val targetY = target.absoluteY
             val targetWidth = target.transformedWidth
             val targetHeight = target.transformedHeight
 
