@@ -1,3 +1,40 @@
+Version 1.8.3.1
+===============
+
+# Additions
+
+- Added support for osu!lazer's perfect curve sliders with more than 3 control points <span style="font-size: 0.75em">by [Rian8337](https://github.com/Rian8337)</span>
+  - Such sliders will be parsed as Bézier sliders.
+
+# Changes
+
+- Always show HUD back button regardless of hide gameplay UI setting <span style="font-size: 0.75em">by [Rian8337](https://github.com/Rian8337)</span>
+- Display leaderboard, unstable rate counter, average offset counter, and hit error meter in default HUD <span style="font-size: 0.75em">by [Rian8337](https://github.com/Rian8337)</span>
+
+# Bug Fixes
+
+- Fix Traceable mod being displayed as SU instead of TC <span style="font-size: 0.75em">by [Rian8337](https://github.com/Rian8337)</span>
+- Fix hide gameplay UI setting not working <span style="font-size: 0.75em">by [Rian8337](https://github.com/Rian8337)</span>
+- Fix "show scoreboard" setting in mod menu not working <span style="font-size: 0.75em">by [Rian8337](https://github.com/Rian8337)</span>
+- Fix presses in Autopilot mod not being counted towards taps per second counter <span style="font-size: 0.75em">by [Rian8337](https://github.com/Rian8337)</span>
+- Fix inherited blending not using the blending function of an entity's parent <span style="font-size: 0.75em">by [Reco1I](https://github.com/Reco1I)</span>
+- Fix gameplay music potentially starting one frame late <span style="font-size: 0.75em">by [Rian8337](https://github.com/Rian8337)</span>
+- Fix gameplay progression potentially going backwards when music has not started <span style="font-size: 0.75em">by [Rian8337](https://github.com/Rian8337)</span>
+- Fix team VS score potentially being saved and uploaded as solo score in multiplayer <span style="font-size: 0.75em">by [Rian8337](https://github.com/Rian8337)</span>
+- Fix slider path anchor coordinates being parsed into integer instead of decimal for osu!lazer exported beatmaps <span style="font-size: 0.75em">by [Rian8337](https://github.com/Rian8337)</span>
+  - osu!lazer exports these coordinates to decimals, so the current decoding logic will invalidate such sliders.
+  - I'm not sure if the coordinates are supposed to be exported in decimals, since osu!stable appears to decode such
+    beatmaps successfully but truncates the coordinates after import.
+- Fix hitobject position coordinates being parsed into integer instead of decimal for osu!lazer exported beatmaps <span style="font-size: 0.75em">by [Rian8337](https://github.com/Rian8337)</span>
+  - osu!lazer supports decimal coordinates, but truncates them when exporting for compatibility with osu!stable (`.osz`).
+    However, during import, it does not truncate the coordinates in v128 beatmaps or later. This change adds support for
+    such beatmaps.
+
+# Removals
+
+- Remove memory usage counter in gameplay <span style="font-size: 0.75em">by [Rian8337](https://github.com/Rian8337)</span>
+  - This only affects test clients.
+
 Version 1.8.3
 =============
 

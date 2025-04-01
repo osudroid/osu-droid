@@ -9,11 +9,9 @@ import com.rian.osu.mods.ModPrecise
  */
 class DroidPlayableBeatmap @JvmOverloads constructor(
     baseBeatmap: IBeatmap,
-    mods: Iterable<Mod>? = null,
-    customSpeedMultiplier: Float = 1f,
-    oldStatistics: Boolean = false
-) : PlayableBeatmap(baseBeatmap, GameMode.Droid, mods, customSpeedMultiplier, oldStatistics) {
+    mods: Iterable<Mod>? = null
+) : PlayableBeatmap(baseBeatmap, GameMode.Droid, mods) {
     override fun createHitWindow() =
-        if (mods?.any { it is ModPrecise } == true) PreciseDroidHitWindow(difficulty.od)
+        if (ModPrecise::class in mods) PreciseDroidHitWindow(difficulty.od)
         else DroidHitWindow(difficulty.od)
 }

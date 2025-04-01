@@ -1,10 +1,20 @@
 package com.rian.osu.mods
 
+import ru.nsu.ccfit.zuev.osu.game.mods.GameMod
+
 /**
  * Represents the Night Core mod.
  */
-class ModNightCore : Mod(), IModApplicableToTrackRate {
-    override val droidString = "c"
+open class ModNightCore : ModRateAdjust(1.5f), IModUserSelectable {
+    override val encodeChar = 'c'
+    override val name = "Nightcore"
+    override val acronym = "NC"
+    override val textureNameSuffix = "nightcore"
+    override val enum = GameMod.MOD_NIGHTCORE
+    override val isRanked = true
+    override val incompatibleMods = super.incompatibleMods + arrayOf(ModDoubleTime::class, ModHalfTime::class)
 
-    override fun applyToRate(rate: Float, oldStatistics: Boolean) = rate * if (oldStatistics) 1.39f else 1.5f
+    override fun equals(other: Any?) = other === this || other is ModNightCore
+    override fun hashCode() = super.hashCode()
+    override fun deepCopy() = ModNightCore()
 }

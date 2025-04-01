@@ -38,10 +38,7 @@ object BeatmapHitObjectsParser : BeatmapSectionParser() {
 
             val isNewCombo = tempType and HitObjectType.NewCombo.value != 0
 
-            val position = Vector2(
-                parseInt(it[0]).toFloat(),
-                parseInt(it[1]).toFloat()
-            )
+            val position = parseCoordinates(beatmap.formatVersion, it[0], it[1])
 
             val soundType = parseInt(it[4])
             val bankInfo = SampleBankInfo()
@@ -108,10 +105,7 @@ object BeatmapHitObjectsParser : BeatmapSectionParser() {
                     scope?.ensureActive()
                     it.isEmpty()
                 }.let {
-                    val curvePointPosition = Vector2(
-                        parseInt(it[0]).toFloat(),
-                        parseInt(it[1]).toFloat()
-                    )
+                    val curvePointPosition = parseCoordinates(beatmap.formatVersion, it[0], it[1])
 
                     curvePoints.add(curvePointPosition - startPosition)
                 }
@@ -124,18 +118,21 @@ object BeatmapHitObjectsParser : BeatmapSectionParser() {
                 it.removeFirst()
             }
 
-            // Edge-case rules (to match stable).
+            // Edge-case rules (to match osu!stable).
             if (sliderType === SliderPathType.PerfectCurve) {
-                if (it.size != 3) {
-                    sliderType = SliderPathType.Bezier
-                } else if (almostEquals(
+                if (beatmap.formatVersion < FIRST_LAZER_VERSION) {
+                    if (it.size != 3) {
+                        sliderType = SliderPathType.Bezier
+                    } else if (almostEquals(
                         0f,
-                        (it[1].y - it[0].y) * (it[2].x - it[0].x) -
-                                (it[1].x - it[0].x) * (it[2].y - it[0].y)
-                    )
-                ) {
-                    // osu-stable special-cased co-linear perfect curves to a linear path
-                    sliderType = SliderPathType.Linear
+                        (it[1].y - it[0].y) * (it[2].x - it[0].x) - (it[1].x - it[0].x) * (it[2].y - it[0].y)
+                    )) {
+                        // osu!stable special-cased co-linear perfect curves to a linear path
+                        sliderType = SliderPathType.Linear
+                    }
+                } else if (it.size > 3) {
+                    // osu!lazer supports perfect curves with less than 3 points and co-linear points
+                    sliderType = SliderPathType.Bezier
                 }
             }
         }
@@ -149,50 +146,45 @@ object BeatmapHitObjectsParser : BeatmapSectionParser() {
         // One node for each repeat + the start and end nodes
         val nodes = repeatCount + 2
 
-        val nodeBankInfo = mutableListOf<SampleBankInfo>().apply {
-            // Populate node sample bank info with the default hit object sample bank
-            for (i in 0 until nodes) {
-                add(bankInfo.copy())
-            }
-
+        val nodeBankInfo = MutableList(nodes) {
             scope?.ensureActive()
+            bankInfo.copy()
+        }
 
-            // Read any per-node sample banks
-            val sets = pars.getOrNull(9)?.split(pipePropertyRegex)
-            if (sets != null) {
-                for (i in 0 until min(sets.size, nodes)) {
-                    readCustomSampleBanks(this[i], sets[i])
-                }
+        // Read any per-node sample banks
+        val sets = pars.getOrNull(9)?.split(pipePropertyRegex)
+
+        if (sets != null) {
+            for (i in 0 until min(sets.size, nodes)) {
+                scope?.ensureActive()
+
+                readCustomSampleBanks(nodeBankInfo[i], sets[i])
             }
         }
 
-        val nodeSoundTypes = mutableListOf<Int>().apply {
-            // Populate node sound types with the default hit object sound type
-            for (i in 0 until nodes) {
-                add(soundType)
-            }
-
+        val nodeSoundTypes = MutableList(nodes) {
             scope?.ensureActive()
+            soundType
+        }
 
-            // Read any per-node sound types
-            val adds = pars.getOrNull(8)?.split(pipePropertyRegex)
-            if (adds != null) {
-                for (i in 0 until min(adds.size, nodes)) {
-                    set(i, parseInt(adds[i]))
-                }
+        // Read any per-node sound types
+        val adds = pars.getOrNull(8)?.split(pipePropertyRegex)
+
+        if (adds != null) {
+            for (i in 0 until min(adds.size, nodes)) {
+                scope?.ensureActive()
+                nodeSoundTypes[i] = parseInt(adds[i])
             }
         }
 
         // Generate the final per-node samples
-        val nodeSamples = mutableListOf<MutableList<HitSampleInfo>>().apply {
-            for (i in 0 until nodes) {
-                add(convertSoundType(nodeSoundTypes[i], nodeBankInfo[i]))
-            }
+        val nodeSamples = MutableList(nodes) {
+            scope?.ensureActive()
+
+            convertSoundType(nodeSoundTypes[it], nodeBankInfo[it])
         }
 
         val difficultyControlPoint = beatmap.controlPoints.difficulty.controlPointAt(time)
-
-        scope?.ensureActive()
 
         return Slider(
             time,
@@ -293,6 +285,10 @@ object BeatmapHitObjectsParser : BeatmapSectionParser() {
             bankInfo.filename = s[4]
         }
     }
+
+    private fun parseCoordinates(formatVersion: Int, x: String, y: String) =
+        if (formatVersion >= FIRST_LAZER_VERSION) Vector2(parseFloat(x), parseFloat(y))
+        else Vector2(parseFloat(x).toInt(), parseFloat(y).toInt())
 }
 
 /**

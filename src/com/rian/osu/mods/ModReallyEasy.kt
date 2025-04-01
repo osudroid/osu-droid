@@ -3,21 +3,22 @@ package com.rian.osu.mods
 import com.rian.osu.GameMode
 import com.rian.osu.beatmap.sections.BeatmapDifficulty
 import com.rian.osu.utils.CircleSizeCalculator
-import com.rian.osu.utils.ModUtils
+import ru.nsu.ccfit.zuev.osu.game.mods.GameMod
 
 /**
  * Represents the Really Easy mod.
  */
-class ModReallyEasy : Mod(), IModApplicableToDifficultyWithSettings {
-    override val droidString = "l"
+class ModReallyEasy : Mod(), IModUserSelectable, IModApplicableToDifficultyWithSettings {
+    override val encodeChar = 'l'
+    override val name = "Really Easy"
+    override val acronym = "RE"
+    override val textureNameSuffix = "reallyeasy"
+    override val enum = GameMod.MOD_REALLYEASY
 
-    override fun applyToDifficulty(
-        mode: GameMode,
-        difficulty: BeatmapDifficulty,
-        mods: Iterable<Mod>,
-        customSpeedMultiplier: Float,
-        oldStatistics: Boolean
-    ) = difficulty.run {
+    override fun calculateScoreMultiplier(difficulty: BeatmapDifficulty) = 0.5f
+
+    override fun applyToDifficulty(mode: GameMode, difficulty: BeatmapDifficulty, mods: Iterable<Mod>) =
+        difficulty.run {
             val difficultyAdjustMod = mods.find { it is ModDifficultyAdjust } as? ModDifficultyAdjust
 
             if (difficultyAdjustMod?.ar == null) {
@@ -26,10 +27,10 @@ class ModReallyEasy : Mod(), IModApplicableToDifficultyWithSettings {
                     ar -= 0.5f
                 }
 
-                val trackRate = ModUtils.calculateRateWithMods(mods) * customSpeedMultiplier
+                val customSpeedMultiplier = (mods.find { it is ModCustomSpeed } as? ModCustomSpeed)?.trackRateMultiplier ?: 1f
 
                 ar -= 0.5f
-                ar -= trackRate - 1
+                ar -= customSpeedMultiplier - 1
             }
 
             if (difficultyAdjustMod?.cs == null) {
@@ -62,6 +63,10 @@ class ModReallyEasy : Mod(), IModApplicableToDifficultyWithSettings {
                 hp *= ADJUST_RATIO
             }
         }
+
+    override fun equals(other: Any?) = other === this || other is ModReallyEasy
+    override fun hashCode() = super.hashCode()
+    override fun deepCopy() = ModReallyEasy()
 
     companion object {
         private const val ADJUST_RATIO = 0.5f

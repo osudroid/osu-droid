@@ -1,58 +1,68 @@
 package com.reco1l.ibancho.data
 
 import com.reco1l.osu.multiplayer.Multiplayer
-import com.reco1l.osu.multiplayer.modsToReadable
-import ru.nsu.ccfit.zuev.osu.game.mods.GameMod
-import ru.nsu.ccfit.zuev.osu.game.mods.GameMod.*
-import java.util.*
+import com.rian.osu.mods.IModUserSelectable
+import com.rian.osu.mods.ModCustomSpeed
+import com.rian.osu.mods.ModDifficultyAdjust
+import com.rian.osu.mods.ModDoubleTime
+import com.rian.osu.mods.ModFlashlight
+import com.rian.osu.mods.ModHalfTime
+import com.rian.osu.mods.ModNightCore
+import com.rian.osu.utils.ModHashMap
+import com.rian.osu.utils.ModUtils
 
-data class RoomMods(
-
-    /**
-     * The mods set.
-     */
-    var set: EnumSet<GameMod>,
-
-    /**
-     * The speed multiplier.
-     */
-    var speedMultiplier: Float,
+class RoomMods @JvmOverloads constructor(modString: String? = null) : ModHashMap(ModUtils.convertModString(modString)) {
 
     /**
-     * The flashlight follow delay time in seconds.
+     * Converts this [RoomMods] to a [String] that can be displayed to the player.
      */
-    var flFollowDelay: Float,
+    fun toReadable(): String {
+        if (isEmpty())
+            return "None"
 
-    /**
-     * The custom approach rate.
-     */
-    var customAR: Float?,
+        return buildString {
+            val difficultyAdjust = ofType<ModDifficultyAdjust>()
+            val customSpeed = ofType<ModCustomSpeed>()
 
-    /**
-     * The custom overall difficulty.
-     */
-    var customOD: Float?,
+            for ((_, m) in this@RoomMods) when (m) {
+                is ModFlashlight -> {
+                    if (m.followDelay == ModFlashlight.DEFAULT_FOLLOW_DELAY)
+                        append("${m.acronym}, ")
+                    else
+                        append("${m.acronym} ${(m.followDelay * 1000).toInt()}ms, ")
+                }
 
-    /**
-     * The custom circle size.
-     */
-    var customCS: Float?,
+                is IModUserSelectable -> append("${m.acronym}, ")
 
-    /**
-     * The custom health points.
-     */
-    var customHP: Float?
+                else -> Unit
+            }
 
-) {
+            if (customSpeed != null) {
+                append("%.2fx, ".format(customSpeed.trackRateMultiplier))
+            }
 
+            if (difficultyAdjust != null) {
+                if (difficultyAdjust.ar != null) {
+                    append("AR%.1f, ".format(difficultyAdjust.ar))
+                }
 
-    override fun toString(): String {
-        return modsToReadable(set, speedMultiplier, flFollowDelay, customAR, customOD, customCS, customHP)
+                if (difficultyAdjust.od != null) {
+                    append("OD%.1f, ".format(difficultyAdjust.od))
+                }
+
+                if (difficultyAdjust.cs != null) {
+                    append("CS%.1f, ".format(difficultyAdjust.cs))
+                }
+
+                if (difficultyAdjust.hp != null) {
+                    append("HP%.1f, ".format(difficultyAdjust.hp))
+                }
+            }
+        }.substringBeforeLast(',')
     }
 
     fun toString(room: Room): String {
-
-        if (set.isEmpty()) {
+        if (isEmpty()) {
             return buildString {
 
                 if (room.gameplaySettings.isFreeMod) {
@@ -70,16 +80,25 @@ data class RoomMods(
 
             append("Free mods, ")
 
-            if (MOD_DOUBLETIME in set || MOD_NIGHTCORE in set) {
-                append("DT, ")
+            val doubleTime = ofType<ModDoubleTime>()
+            val nightCore = ofType<ModNightCore>()
+            val halfTime = ofType<ModHalfTime>()
+            val customSpeed = ofType<ModCustomSpeed>()
+
+            if (doubleTime != null) {
+                append("${doubleTime.acronym}, ")
             }
 
-            if (MOD_HALFTIME in set) {
-                append("HT, ")
+            if (nightCore != null) {
+                append("${nightCore.acronym}, ")
             }
 
-            if (speedMultiplier != 1f) {
-                append("%.2fx, ".format(speedMultiplier))
+            if (halfTime != null) {
+                append("${halfTime.acronym}, ")
+            }
+
+            if (customSpeed != null) {
+                append("%.2fx, ".format(customSpeed.trackRateMultiplier))
             }
 
             if (room.gameplaySettings.allowForceDifficultyStatistics) {
@@ -100,35 +119,24 @@ data class RoomMods(
             return false
         }
 
-        val sameMods = Multiplayer.room?.gameplaySettings?.isFreeMod == true
+        val gameplaySettings = Multiplayer.room?.gameplaySettings
 
-            // DoubleTime and NightCore, comparing them as one.
-            && (MOD_DOUBLETIME in set || MOD_NIGHTCORE in set) == (MOD_DOUBLETIME in other.set || MOD_NIGHTCORE in other.set)
-            // HalfTime
-            && MOD_HALFTIME in set == MOD_HALFTIME in other.set
-            // ScoreV2
-            && MOD_SCOREV2 in set == MOD_SCOREV2 in other.set
+        if (gameplaySettings?.isFreeMod == true) {
+            // Under free mods, force difficulty statistics is still not allowed unless the setting is explicitly set.
+            if (!gameplaySettings.allowForceDifficultyStatistics &&
+                ofType<ModDifficultyAdjust>() != other.ofType<ModDifficultyAdjust>()) {
+                return false
+            }
 
-            || set == other.set
+            val requiredMods = filter { !it.value.isValidForMultiplayerAsFreeMod }
+            val otherRequiredMods = other.filter { !it.value.isValidForMultiplayerAsFreeMod }
 
-        return sameMods
-            && speedMultiplier == other.speedMultiplier
-            && flFollowDelay == other.flFollowDelay
-            && customAR == other.customAR
-            && customOD == other.customOD
-            && customCS == other.customCS
-            && customHP == other.customHP
+            return requiredMods.size == otherRequiredMods.size && requiredMods.values.containsAll(otherRequiredMods.values)
+        }
+
+        return super.equals(other)
     }
 
-    override fun hashCode(): Int {
-        var result = set.hashCode()
-        result = 31 * result + speedMultiplier.hashCode()
-        result = 31 * result + flFollowDelay.hashCode()
-        result = 31 * result + (customAR?.hashCode() ?: 0)
-        result = 31 * result + (customOD?.hashCode() ?: 0)
-        result = 31 * result + (customCS?.hashCode() ?: 0)
-        result = 31 * result + (customHP?.hashCode() ?: 0)
-        return result
-    }
-
+    // Auto-generated this will help to check instance equality aka ===
+    override fun hashCode() = super.hashCode()
 }
