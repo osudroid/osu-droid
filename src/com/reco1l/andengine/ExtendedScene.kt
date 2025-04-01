@@ -36,18 +36,18 @@ open class ExtendedScene : Scene(), IShape {
 
     //region Update
 
-    override fun onManagedUpdate(secElapsed: Float) {
-        super.onManagedUpdate(secElapsed * timeMultiplier)
+    override fun onManagedUpdate(deltaTimeSec: Float) {
+        super.onManagedUpdate(deltaTimeSec * timeMultiplier)
     }
 
     //endregion
 
     //region Drawing
 
-    override fun onManagedDrawChildren(pGL: GL10, pCamera: Camera) {
-        cameraWidth = pCamera.widthRaw
-        cameraHeight = pCamera.heightRaw
-        super.onManagedDrawChildren(pGL, pCamera)
+    override fun onManagedDrawChildren(gl: GL10, camera: Camera) {
+        cameraWidth = camera.widthRaw
+        cameraHeight = camera.heightRaw
+        super.onManagedDrawChildren(gl, camera)
     }
 
     //endregion
@@ -65,7 +65,6 @@ open class ExtendedScene : Scene(), IShape {
 
     override fun setTouchAreaBindingEnabled(pTouchAreaBindingEnabled: Boolean) {
         Log.w("ExtendedScene", "Touch area binding is always enabled for ExtendedScene.")
-        super.setTouchAreaBindingEnabled(true)
     }
 
     override fun onAreaTouched(event: TouchEvent, localX: Float, localY: Float): Boolean {
