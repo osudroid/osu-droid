@@ -155,6 +155,28 @@ abstract class ExtendedEntity : Entity(0f, 0f), ITouchArea, IModifierChain {
             }
         }
 
+    /**
+     * The translation in the X axis.
+     */
+    open var translationX = 0f
+        set(value) {
+            if (field != value) {
+                field = value
+                invalidate(InvalidationFlag.Position)
+            }
+        }
+
+    /**
+     * The translation in the Y axis.
+     */
+    open var translationY = 0f
+        set(value) {
+            if (field != value) {
+                field = value
+                invalidate(InvalidationFlag.Position)
+            }
+        }
+
     //endregion
 
     //region Cosmetic properties
