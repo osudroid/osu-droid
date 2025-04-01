@@ -52,7 +52,7 @@ class HUDHealthBar : HUDElement() {
 
         fill = AnimatedSprite("scorebar-colour", true, OsuSkin.get().animationFramerate)
         fill.depthInfo = DepthInfo.Default
-        fill.autoSizeAxes = Axes.None // Preserve the first frame width.
+        fill.width = fill.width // Preserve the first frame width.
         attachChild(fill)
 
         marker = ExtendedSprite()
@@ -87,8 +87,8 @@ class HUDHealthBar : HUDElement() {
         }
 
         fillClear.width = 0f
-        fillClear.height = fill.drawHeight
-        fillClear.setPosition(fill.x + fill.drawWidth, fill.y)
+        fillClear.height = fill.height
+        fillClear.setPosition(fill.x + fill.width, fill.y)
 
         onMeasureContentSize()
     }
@@ -97,10 +97,10 @@ class HUDHealthBar : HUDElement() {
     override fun onGameplayUpdate(game: GameScene, secondsElapsed: Float) {
         val hp = game.stat.hp
 
-        fillClear.width = Interpolation.floatAt(secondsElapsed.coerceIn(0f, 0.2f), fillClear.drawWidth, (1f - hp) * fill.drawWidth, 0f, 0.2f, Easing.OutQuint)
+        fillClear.width = Interpolation.floatAt(secondsElapsed.coerceIn(0f, 0.2f), fillClear.width, (1f - hp) * fill.width, 0f, 0.2f, Easing.OutQuint)
 
-        marker.x = fill.x + fill.drawWidth - fillClear.drawWidth
-        marker.y = fill.y + (if (isNewStyle) fill.drawHeight / 2 else 0f)
+        marker.x = fill.x + fill.width - fillClear.width
+        marker.y = fill.y + (if (isNewStyle) fill.height / 2 else 0f)
 
         explode.setPosition(marker)
 

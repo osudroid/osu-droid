@@ -59,7 +59,7 @@ class HUDLinearSongProgress : HUDSongProgress() {
             progressRect.setColor(1f, 1f, 150f / 255f)
         }
 
-        progressRect.width = drawWidth * progress
+        progressRect.width = width * progress
     }
 
 
@@ -71,14 +71,13 @@ class HUDLinearSongProgress : HUDSongProgress() {
 
 class HUDPieSongProgress : HUDSongProgress() {
 
-
-    override var autoSizeAxes = Axes.Both
-
-
     private val circularProgress: Circle
 
 
     init {
+        width = FitContent
+        height = FitContent
+
         // Reference: https://github.com/ppy/osu/blob/6455c0583b5e607baeca7f584410bc63515aa619/osu.Game/Skinning/LegacySongProgress.cs
 
         Circle().also { clear ->

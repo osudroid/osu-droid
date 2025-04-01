@@ -137,9 +137,9 @@ object LobbyScene : Scene() {
         }.also {
 
             if (OsuSkin.get().isUseNewLayout) {
-                layoutBackButton?.apply(it) ?: it.setPosition(0f, Config.getRES_HEIGHT() - it.scaledHeight)
+                layoutBackButton?.apply(it) ?: it.setPosition(0f, Config.getRES_HEIGHT() - it.transformedHeight)
             } else {
-                it.setPosition(0f, Config.getRES_HEIGHT() - it.scaledHeight)
+                it.setPosition(0f, Config.getRES_HEIGHT() - it.transformedHeight)
             }
 
             attachChild(it)

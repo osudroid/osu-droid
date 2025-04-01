@@ -39,7 +39,7 @@ open class Circle : BufferedEntity<CircleVertexBuffer>() {
             }
         }
 
-    override var invalidationFlags = RebuildBufferOnSizeChanged or InvalidateDataOnSizeChanged
+    override var bufferInvalidationFlags = RebuildBufferOnSizeChanged or InvalidateDataOnSizeChanged
 
 
     /**
@@ -54,7 +54,7 @@ open class Circle : BufferedEntity<CircleVertexBuffer>() {
 
 
     override fun onRebuildBuffer(gl: GL10) {
-        val segments = approximateSegments(drawWidth, drawHeight)
+        val segments = approximateSegments(width, height)
         buffer = CircleVertexBuffer(segments)
     }
 
@@ -80,9 +80,10 @@ open class Circle : BufferedEntity<CircleVertexBuffer>() {
 
         override fun update(gl: GL10, entity: BufferedEntity<*>, vararg data: Any) {
 
-            putVertex(index = 0,
-                x = entity.drawWidth / 2f,
-                y = entity.drawHeight / 2f
+            putVertex(
+                index = 0,
+                x = entity.width / 2f,
+                y = entity.height / 2f
             )
 
             val startRadians = startAngle.toRadians()
@@ -95,8 +96,8 @@ open class Circle : BufferedEntity<CircleVertexBuffer>() {
                 val angle = startRadians + (i - 1) * deltaAngle
 
                 putVertex(index = i,
-                    x = entity.drawWidth / 2f + entity.drawWidth / 2f * cos(angle),
-                    y = entity.drawHeight / 2f + entity.drawHeight / 2f * sin(angle)
+                    x = entity.width / 2f + entity.width / 2f * cos(angle),
+                    y = entity.height / 2f + entity.height / 2f * sin(angle)
                 )
             }
         }

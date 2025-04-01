@@ -6,6 +6,7 @@ import com.reco1l.andengine.shape.Circle
 import com.reco1l.andengine.sprite.ExtendedSprite
 import com.reco1l.framework.ColorARGB
 import com.reco1l.framework.Interpolation
+import com.reco1l.framework.math.*
 import com.reco1l.osu.hud.HUDElement
 import org.anddev.andengine.input.touch.TouchEvent
 import ru.nsu.ccfit.zuev.osu.Config
@@ -90,7 +91,7 @@ class HUDBackButton : HUDElement() {
                 if (holdDurationMs >= requiredPressTimeMs) {
                     isPressed = false
                     GlobalManager.getInstance().gameScene.pause()
-                    (parent as ExtendedEntity).invalidateInputBindings()
+                    (parent as ExtendedEntity).invalidate(InvalidationFlag.InputBindings)
                 }
             } else {
                 holdDurationMs -= realMsElapsed * 2
@@ -113,7 +114,7 @@ class HUDBackButton : HUDElement() {
 
         if (event.isActionMove) {
             if (isPressed) {
-                if (localX <= 0f || localY <= 0f || localX >= drawWidth || localY >= drawHeight) {
+                if (localX <= 0f || localY <= 0f || localX >= width || localY >= height) {
                     isPressed = false
                 }
                 return true

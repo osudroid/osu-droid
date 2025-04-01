@@ -2,6 +2,8 @@ package com.reco1l.andengine.buffered
 
 import com.reco1l.andengine.*
 import org.anddev.andengine.engine.camera.Camera
+import org.anddev.andengine.entity.shape.Shape.*
+import org.anddev.andengine.opengl.util.*
 import javax.microedition.khronos.opengles.GL10
 
 
@@ -21,10 +23,27 @@ abstract class BufferedEntity<T: IBuffer>(buffer: T? = null) : ExtendedEntity() 
             }
         }
 
+
+    /**
+     * The blend information of the entity.
+     */
+    open var blendInfo = BlendInfo.Mixture
+
+    /**
+     * The depth information of the entity.
+     */
+    open var depthInfo = DepthInfo.None
+
+    /**
+     * The clear information of the entity.
+     */
+    open var clearInfo = ClearInfo.None
+
+
     /**
      * Flags that determine when the buffer should be invalidated.
      */
-    open var invalidationFlags: Int = RebuildBufferOnSizeChanged or InvalidateDataOnSizeChanged
+    open var bufferInvalidationFlags: Int = RebuildBufferOnSizeChanged or InvalidateDataOnSizeChanged
 
 
     /**
@@ -54,14 +73,19 @@ abstract class BufferedEntity<T: IBuffer>(buffer: T? = null) : ExtendedEntity() 
     }
 
 
+    open fun setBlendFunction(source: Int, destination: Int) {
+        blendInfo = BlendInfo(source, destination)
+    }
+
+
     override fun onSizeChanged() {
         super.onSizeChanged()
 
-        if (invalidationFlags and InvalidateDataOnSizeChanged != 0) {
+        if (bufferInvalidationFlags and InvalidateDataOnSizeChanged != 0) {
             invalidateBuffer()
         }
 
-        if (invalidationFlags and RebuildBufferOnSizeChanged != 0) {
+        if (bufferInvalidationFlags and RebuildBufferOnSizeChanged != 0) {
             rebuildBuffer()
         }
     }
@@ -69,11 +93,11 @@ abstract class BufferedEntity<T: IBuffer>(buffer: T? = null) : ExtendedEntity() 
     override fun onPositionChanged() {
         super.onPositionChanged()
 
-        if (invalidationFlags and InvalidateDataOnPositionChanged != 0) {
+        if (bufferInvalidationFlags and InvalidateDataOnPositionChanged != 0) {
             invalidateBuffer()
         }
 
-        if (invalidationFlags and RebuildBufferOnPositionChanged != 0) {
+        if (bufferInvalidationFlags and RebuildBufferOnPositionChanged != 0) {
             rebuildBuffer()
         }
     }
@@ -122,6 +146,47 @@ abstract class BufferedEntity<T: IBuffer>(buffer: T? = null) : ExtendedEntity() 
 
     override fun beginDraw(gl: GL10) {
         super.beginDraw(gl)
+
+        // Clearing
+        var clearMask = 0
+
+        if (clearInfo.depthBuffer) clearMask = clearMask or GL10.GL_DEPTH_BUFFER_BIT
+        if (clearInfo.colorBuffer) clearMask = clearMask or GL10.GL_COLOR_BUFFER_BIT
+        if (clearInfo.stencilBuffer) clearMask = clearMask or GL10.GL_STENCIL_BUFFER_BIT
+
+        if (clearMask != 0) {
+            gl.glClear(clearMask)
+        }
+
+        // Depth testing
+        if (depthInfo.test) {
+            gl.glDepthFunc(depthInfo.function)
+            gl.glDepthMask(depthInfo.mask)
+
+            GLHelper.enableDepthTest(gl)
+        } else {
+            GLHelper.disableDepthTest(gl)
+        }
+
+        // Blending
+        var sourceFactor = BLENDFUNCTION_SOURCE_DEFAULT
+        var destinationFactor = BLENDFUNCTION_DESTINATION_DEFAULT
+
+        if (blendInfo == BlendInfo.Inherit) {
+            val parent = parent
+
+            if (parent is BufferedEntity<*>) {
+                sourceFactor = parent.blendInfo.sourceFactor
+                destinationFactor = parent.blendInfo.destinationFactor
+            }
+        } else {
+            sourceFactor = blendInfo.sourceFactor
+            destinationFactor = blendInfo.destinationFactor
+        }
+
+        GLHelper.enableBlend(gl)
+        GLHelper.blendFunction(gl, sourceFactor, destinationFactor)
+
         buffer?.beginDraw(gl)
     }
 
@@ -135,6 +200,11 @@ abstract class BufferedEntity<T: IBuffer>(buffer: T? = null) : ExtendedEntity() 
 
     //endregion
 
+
+    override fun reset() {
+        super.reset()
+        blendInfo = BlendInfo.Mixture
+    }
 
     fun finalize() {
         buffer?.finalize()

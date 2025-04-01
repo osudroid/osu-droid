@@ -23,7 +23,7 @@ class HUDElementOverlay(private val element: HUDElement) : ConstraintContainer()
      * The position of the outline box that represents the element.
      */
     val outlinePosition
-        get() = outline.drawPosition
+        get() = outline.absPosition
 
 
     private val outline = OutlineBox().apply {
@@ -94,11 +94,11 @@ class HUDElementOverlay(private val element: HUDElement) : ConstraintContainer()
      */
     fun updateOutline() {
         // We need to cancel scale center
-        outline.x = element.anchorOffsetX + element.x - (element.scaledWidth * element.origin.x)
-        outline.y = element.anchorOffsetY + element.y - (element.scaledHeight * element.origin.y)
+        outline.x = element.anchorPositionX + element.x - (element.transformedWidth * element.origin.x)
+        outline.y = element.anchorPositionY + element.y - (element.transformedHeight * element.origin.y)
 
-        outline.width = element.scaledWidth
-        outline.height = element.scaledHeight
+        outline.width = element.transformedWidth
+        outline.height = element.transformedHeight
     }
 
 
@@ -112,8 +112,8 @@ class HUDElementOverlay(private val element: HUDElement) : ConstraintContainer()
     override fun onManagedUpdate(pSecondsElapsed: Float) {
         updateOutline()
 
-        if (outline.y - toolbar.drawHeight < 0f) {
-            toolbar.y = -(outline.y - toolbar.drawHeight)
+        if (outline.y - toolbar.height < 0f) {
+            toolbar.y = -(outline.y - toolbar.height)
         } else {
             toolbar.y = 0f
         }
@@ -127,7 +127,6 @@ class HUDElementOverlay(private val element: HUDElement) : ConstraintContainer()
 
         super.onManagedUpdate(pSecondsElapsed)
     }
-
 
 
     /**
@@ -174,8 +173,8 @@ class HUDElementOverlay(private val element: HUDElement) : ConstraintContainer()
                     deltaY = -deltaY
                 }
 
-                val deltaScaleX = deltaX / element.scaledWidth
-                val deltaScaleY = deltaY / element.scaledHeight
+                val deltaScaleX = deltaX / element.transformedWidth
+                val deltaScaleY = deltaY / element.transformedHeight
 
                 val scaleX = (element.scaleX + deltaScaleX).coerceIn(0.5f, 5f)
                 val scaleY = (element.scaleY + deltaScaleY).coerceIn(0.5f, 5f)
@@ -187,7 +186,6 @@ class HUDElementOverlay(private val element: HUDElement) : ConstraintContainer()
             return false
         }
     }
-
 
 
     /**

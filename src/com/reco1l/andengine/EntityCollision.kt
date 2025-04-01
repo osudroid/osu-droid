@@ -14,8 +14,8 @@ object EntityCollision {
 
         val left = 0f
         val top = 0f
-        val right = entity.drawWidth
-        val bottom = entity.drawHeight
+        val right = entity.width
+        val bottom = entity.height
 
         vertices[0 + VERTEX_INDEX_X] = left
         vertices[0 + VERTEX_INDEX_Y] = top

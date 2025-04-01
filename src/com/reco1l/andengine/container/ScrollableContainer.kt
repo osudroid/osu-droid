@@ -3,6 +3,7 @@ package com.reco1l.andengine.container
 import com.reco1l.andengine.*
 import com.reco1l.andengine.shape.*
 import com.reco1l.framework.*
+import com.reco1l.toolkt.kotlin.*
 import com.rian.osu.math.Precision
 import org.anddev.andengine.engine.camera.*
 import org.anddev.andengine.input.touch.*
@@ -11,8 +12,6 @@ import javax.microedition.khronos.opengles.*
 import kotlin.math.*
 
 open class ScrollableContainer : Container() {
-
-    override var autoSizeAxes = Axes.None
 
     /**
      * Which axes the container can scroll on.
@@ -36,8 +35,7 @@ open class ScrollableContainer : Container() {
 
             indicatorX?.alpha = 0.5f
             field = value
-            invalidateTransformations()
-            invalidateInputBindings()
+            invalidate(InvalidationFlag.Transformations or InvalidationFlag.InputBindings)
         }
 
     /**
@@ -57,8 +55,7 @@ open class ScrollableContainer : Container() {
 
             indicatorY?.alpha = 0.5f
             field = value
-            invalidateTransformations()
-            invalidateInputBindings()
+            invalidate(InvalidationFlag.Transformations or InvalidationFlag.InputBindings)
         }
 
     /**
@@ -137,7 +134,7 @@ open class ScrollableContainer : Container() {
      * This does not take into account the overscroll.
      */
     val maxScrollX
-        get() = max(0f, scrollableContentWidth - drawWidth)
+        get() = max(0f, scrollableContentWidth - width)
 
     /**
      * The maximum scroll position on the y-axis.
@@ -145,21 +142,21 @@ open class ScrollableContainer : Container() {
      * This does not take into account the overscroll.
      */
     val maxScrollY
-        get() = max(0f, scrollableContentHeight - drawHeight)
+        get() = max(0f, scrollableContentHeight - height)
 
     /**
      * The width of the content that can be scrolled. That is [contentWidth] minus
      * the width of the vertical indicator.
      */
     val scrollableContentWidth
-        get() = max(0f, contentWidth - (indicatorY?.drawWidth ?: 0f))
+        get() = max(0f, contentWidth - (indicatorY?.width ?: 0f))
 
     /**
      * The height of the content that can be scrolled. That is [contentHeight] minus
      * the height of the horizontal indicator.
      */
     val scrollableContentHeight
-        get() = max(0f, contentHeight - (indicatorX?.drawHeight ?: 0f))
+        get() = max(0f, contentHeight - (indicatorX?.height ?: 0f))
 
 
     private var initialX = 0f
@@ -219,8 +216,8 @@ open class ScrollableContainer : Container() {
 
             indicator.isVisible = scrollAxes == Axes.Both || scrollAxes == Axes.Y
 
-            indicator.x = drawWidth - indicator.drawWidth
-            indicator.y = scrollY * (drawHeight / scrollableContentHeight)
+            indicator.x = width - indicator.width
+            indicator.y = scrollY * (height / scrollableContentHeight)
 
             if (indicator.alpha > 0f && velocityY == 0f) {
                 indicator.alpha = (indicator.alpha - deltaTimeSec * 0.5f).coerceAtLeast(0f)
@@ -235,8 +232,8 @@ open class ScrollableContainer : Container() {
 
             indicator.isVisible = scrollAxes == Axes.Both || scrollAxes == Axes.X
 
-            indicator.x = scrollX * (drawWidth / scrollableContentWidth)
-            indicator.y = drawHeight - indicator.drawHeight
+            indicator.x = scrollX * (width / scrollableContentWidth)
+            indicator.y = height - indicator.height
 
             if (indicator.alpha > 0f && velocityX == 0f) {
                 indicator.alpha = (indicator.alpha - deltaTimeSec * 0.5f).coerceAtLeast(0f)
@@ -248,6 +245,10 @@ open class ScrollableContainer : Container() {
         }
 
         elapsedTimeSec += deltaTimeSec
+
+        mChildren?.fastForEach {
+            it.setPosition(-scrollX, -scrollY)
+        }
     }
 
 
@@ -256,22 +257,22 @@ open class ScrollableContainer : Container() {
 
         indicatorY?.let { indicator ->
 
-            indicator.height = drawHeight * (drawHeight / scrollableContentHeight)
+            indicator.height = height * (height / scrollableContentHeight)
             indicator.x = contentWidth + 5f
 
-            contentWidth += indicator.drawWidth + 5f
+            contentWidth += indicator.width + 5f
         }
 
         indicatorX?.let { indicator ->
 
-            indicator.width = drawWidth * (drawWidth / scrollableContentWidth)
+            indicator.width = width * (width / scrollableContentWidth)
             indicator.y = contentHeight + 5f
 
-            contentHeight += indicator.drawHeight + 5f
+            contentHeight += indicator.height + 5f
         }
 
         if (indicatorX != null || indicatorY != null) {
-            onContentSizeMeasured()
+            invalidate(InvalidationFlag.ContentSize)
         }
     }
 
@@ -341,25 +342,6 @@ open class ScrollableContainer : Container() {
         }
 
         return true
-    }
-
-
-    override fun getChildDrawX(child: ExtendedEntity): Float {
-
-        if (child == indicatorX || child == indicatorY || !scrollAxes.isHorizontal) {
-            return super.getChildDrawX(child)
-        }
-
-        return -scrollX + child.x - child.originOffsetX + child.translationX
-    }
-
-    override fun getChildDrawY(child: ExtendedEntity): Float {
-
-        if (child == indicatorX || child == indicatorY || !scrollAxes.isVertical) {
-            return super.getChildDrawY(child)
-        }
-
-        return -scrollY + child.y - child.originOffsetY + child.translationY
     }
 
 

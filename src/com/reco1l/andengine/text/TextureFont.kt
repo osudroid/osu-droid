@@ -13,10 +13,6 @@ import kotlin.math.*
 
 open class TextureFont(val characters: MutableMap<Char, TextureRegion>) : BufferedEntity<TextureTextVertexBuffer>(TextureTextVertexBuffer()) {
 
-
-    override var autoSizeAxes = Axes.Both
-
-
     /**
      * The spacing between glyphs.
      */
@@ -63,6 +59,12 @@ open class TextureFont(val characters: MutableMap<Char, TextureRegion>) : Buffer
 
 
     private val textureRegions = mutableListOf<TextureRegion>()
+
+
+    init {
+        width = FitContent
+        height = FitContent
+    }
 
 
     fun setTextureScale(scale: Float) {

@@ -70,7 +70,6 @@ class GameplayHUD : Container(), IGameplayEvents {
         parent.registerTouchArea(this)
         parent.camera = GlobalManager.getInstance().engine.camera
 
-        autoSizeAxes = Axes.None
         setSize(Config.getRES_WIDTH().toFloat(), Config.getRES_HEIGHT().toFloat())
     }
 
@@ -211,10 +210,10 @@ class GameplayHUD : Container(), IGameplayEvents {
         val accuracyCounter = getFirstOf<HUDAccuracyCounter>()!!
         val pieSongProgress = getFirstOf<HUDPieSongProgress>()!!
 
-        accuracyCounter.y += scoreCounter.y + scoreCounter.drawHeight
+        accuracyCounter.y += scoreCounter.y + scoreCounter.height
 
-        pieSongProgress.y = accuracyCounter.y + accuracyCounter.scaledHeight / 2f
-        pieSongProgress.x = accuracyCounter.x - accuracyCounter.scaledWidth - 18f
+        pieSongProgress.y = accuracyCounter.y + accuracyCounter.transformedHeight / 2f
+        pieSongProgress.x = accuracyCounter.x - accuracyCounter.transformedWidth - 18f
 
         accuracyCounter.restoreData = accuracyCounter.getSkinData()
         pieSongProgress.restoreData = pieSongProgress.getSkinData()
@@ -312,7 +311,7 @@ class GameplayHUD : Container(), IGameplayEvents {
     override fun onAreaTouched(event: TouchEvent, localX: Float, localY: Float): Boolean {
 
         // Ignoring touches on the element selector area when expanded.
-        if (elementSelector?.isExpanded == true && localX <= elementSelector!!.drawWidth) {
+        if (elementSelector?.isExpanded == true && localX <= elementSelector!!.width) {
             return false
         }
 

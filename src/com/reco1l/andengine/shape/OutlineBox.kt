@@ -2,7 +2,6 @@ package com.reco1l.andengine.shape
 
 import com.reco1l.andengine.buffered.*
 import com.reco1l.andengine.shape.OutlineBox.*
-import org.anddev.andengine.opengl.util.*
 import javax.microedition.khronos.opengles.*
 import javax.microedition.khronos.opengles.GL11.*
 
@@ -24,9 +23,9 @@ open class OutlineBox : BufferedEntity<OutlineBoxVertexBuffer>(OutlineBoxVertexB
 
         override fun update(gl: GL10, entity: BufferedEntity<*>, vararg data: Any) {
             putVertex(0, 0f, 0f)
-            putVertex(1, entity.drawWidth, 0f)
-            putVertex(2, entity.drawWidth, entity.drawHeight)
-            putVertex(3, 0f, entity.drawHeight)
+            putVertex(1, entity.width, 0f)
+            putVertex(2, entity.width, entity.height)
+            putVertex(3, 0f, entity.height)
         }
 
         companion object {

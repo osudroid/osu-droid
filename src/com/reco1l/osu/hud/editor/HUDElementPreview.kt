@@ -1,9 +1,7 @@
 package com.reco1l.osu.hud.editor
 
-import com.reco1l.andengine.Anchor
+import com.reco1l.andengine.*
 import com.reco1l.andengine.container.Container
-import com.reco1l.andengine.getPaddedHeight
-import com.reco1l.andengine.getPaddedWidth
 import com.reco1l.andengine.shape.RoundedBox
 import com.reco1l.andengine.text.ExtendedText
 import com.reco1l.framework.ColorARGB
@@ -57,10 +55,10 @@ class HUDElementPreview(private val element: HUDElement, val hud: GameplayHUD): 
         // Scaling the element inside the box
         element.setScaleCenter(0f, 0f)
 
-        if (element.drawWidth > element.drawHeight) {
-            element.setScale(min(1f, getPaddedWidth() / element.drawWidth))
+        if (element.width > element.height) {
+            element.setScale(min(1f, innerWidth / element.width))
         } else {
-            element.setScale(min(1f, (getPaddedHeight() - label.drawHeight) / element.drawHeight))
+            element.setScale(min(1f, (innerHeight - label.height) / element.height))
         }
 
 

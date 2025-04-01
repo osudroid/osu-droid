@@ -17,6 +17,17 @@ class TriangleMesh : ExtendedEntity() {
     val vertices = FloatArraySlice()
 
 
+    /**
+     * The depth information of the entity.
+     */
+    var depthInfo = DepthInfo.None
+
+    /**
+     * The clear information of the entity.
+     */
+    var clearInfo = ClearInfo.None
+
+
     init {
         vertices.ary = FloatArray(0)
     }
@@ -28,17 +39,33 @@ class TriangleMesh : ExtendedEntity() {
     fun setContentSize(width: Float, height: Float) {
         contentWidth = width
         contentHeight = height
-        onContentSizeMeasured()
+        invalidate(InvalidationFlag.ContentSize)
     }
 
 
-    override fun beginDraw(pGL: GL10) {
+    override fun beginDraw(gl: GL10) {
+        super.beginDraw(gl)
 
-        super.beginDraw(pGL)
+        // Clearing
+        var clearMask = 0
 
-        GLHelper.disableCulling(pGL)
-        GLHelper.disableTextures(pGL)
-        GLHelper.disableTexCoordArray(pGL)
+        if (clearInfo.depthBuffer) clearMask = clearMask or GL10.GL_DEPTH_BUFFER_BIT
+        if (clearInfo.colorBuffer) clearMask = clearMask or GL10.GL_COLOR_BUFFER_BIT
+        if (clearInfo.stencilBuffer) clearMask = clearMask or GL10.GL_STENCIL_BUFFER_BIT
+
+        if (clearMask != 0) {
+            gl.glClear(clearMask)
+        }
+
+        // Depth testing
+        if (depthInfo.test) {
+            gl.glDepthFunc(depthInfo.function)
+            gl.glDepthMask(depthInfo.mask)
+
+            GLHelper.enableDepthTest(gl)
+        } else {
+            GLHelper.disableDepthTest(gl)
+        }
     }
 
     override fun doDraw(gl: GL10, camera: Camera) {

@@ -15,9 +15,9 @@ open class Box : BufferedEntity<BoxVertexBuffer>(BoxVertexBuffer()) {
 
         override fun update(gl: GL10, entity: BufferedEntity<*>, vararg data: Any) {
             putVertex(0, 0f, 0f)
-            putVertex(1, 0f, entity.drawHeight)
-            putVertex(2, entity.drawWidth, 0f)
-            putVertex(3, entity.drawWidth, entity.drawHeight)
+            putVertex(1, 0f, entity.height)
+            putVertex(2, entity.width, 0f)
+            putVertex(3, entity.width, entity.height)
         }
 
         companion object {

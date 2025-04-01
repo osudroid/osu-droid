@@ -1,7 +1,6 @@
 package com.reco1l.osu.hud.editor
 
-import com.reco1l.andengine.Anchor
-import com.reco1l.andengine.Axes
+import com.reco1l.andengine.*
 import com.reco1l.andengine.container.Container
 import com.reco1l.andengine.container.LinearContainer
 import com.reco1l.andengine.container.Orientation

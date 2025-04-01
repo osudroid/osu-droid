@@ -1,6 +1,6 @@
 package com.reco1l.andengine.text
 
-import com.reco1l.andengine.Axes
+import com.reco1l.andengine.*
 import com.reco1l.andengine.buffered.*
 import com.reco1l.andengine.buffered.VertexBuffer
 import com.reco1l.toolkt.kotlin.*
@@ -14,9 +14,6 @@ import javax.microedition.khronos.opengles.GL11.GL_STATIC_DRAW
  * A text entity that can be displayed on the screen.
  */
 open class ExtendedText : CompoundBufferedEntity() {
-
-    override var autoSizeAxes = Axes.Both
-
 
     /**
      * The text to be displayed
@@ -59,6 +56,12 @@ open class ExtendedText : CompoundBufferedEntity() {
 
 
     private var currentLength = 0
+
+
+    init {
+        width = FitContent
+        height = FitContent
+    }
 
 
     override fun onRebuildBuffer(gl: GL10) {

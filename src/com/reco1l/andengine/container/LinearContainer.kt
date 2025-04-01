@@ -2,16 +2,9 @@ package com.reco1l.andengine.container
 
 import com.reco1l.andengine.*
 import com.reco1l.andengine.container.Orientation.*
-import org.anddev.andengine.engine.camera.*
-import org.anddev.andengine.entity.shape.*
-import javax.microedition.khronos.opengles.*
 import kotlin.math.*
 
 open class LinearContainer : Container() {
-
-
-    override var autoSizeAxes = Axes.Both
-
 
     /**
      * The orientation of the container.
@@ -48,8 +41,8 @@ open class LinearContainer : Container() {
                 Horizontal -> {
                     child.x = contentWidth
 
-                    contentWidth += child.getDrawWidth()
-                    contentHeight = max(contentHeight, child.getDrawHeight())
+                    contentWidth += child.getWidth()
+                    contentHeight = max(contentHeight, child.getHeight())
 
                     if (i < childCount - 1) {
                         contentWidth += spacing
@@ -59,8 +52,8 @@ open class LinearContainer : Container() {
                 Vertical -> {
                     child.y = contentHeight
 
-                    contentWidth = max(contentWidth, child.getDrawWidth())
-                    contentHeight += child.getDrawHeight()
+                    contentWidth = max(contentWidth, child.getWidth())
+                    contentHeight += child.getHeight()
 
                     if (i < childCount - 1) {
                         contentHeight += spacing
@@ -69,34 +62,8 @@ open class LinearContainer : Container() {
             }
         }
 
-        onContentSizeMeasured()
+        invalidate(InvalidationFlag.ContentSize)
     }
-
-
-    override fun getChildDrawX(child: ExtendedEntity): Float {
-
-        val drawX = super.getChildDrawX(child)
-
-        if (orientation == Vertical) {
-            return drawX
-        }
-
-        // Subtract the anchor offset for the X axis because it should be ignored in this case.
-        return drawX - child.anchorOffsetX
-    }
-
-    override fun getChildDrawY(child: ExtendedEntity): Float {
-
-        val drawY = super.getChildDrawY(child)
-
-        if (orientation == Horizontal) {
-            return drawY
-        }
-
-        // Subtract the anchor offset for the Y axis because it should be ignored in this case.
-        return drawY - child.anchorOffsetY
-    }
-
 }
 
 /**

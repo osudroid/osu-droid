@@ -22,11 +22,11 @@ open class RoundedBox : BufferedEntity<RoundedBoxVertexBuffer>() {
         }
 
 
-    override var invalidationFlags = InvalidateDataOnSizeChanged or RebuildBufferOnSizeChanged
+    override var bufferInvalidationFlags = InvalidateDataOnSizeChanged or RebuildBufferOnSizeChanged
 
 
     override fun onRebuildBuffer(gl: GL10) {
-        val cornerRadius = cornerRadius.coerceIn(0f, min(drawWidth, drawHeight) / 2f)
+        val cornerRadius = cornerRadius.coerceIn(0f, min(width, height) / 2f)
         val segmentsPerArc = Circle.approximateSegments(cornerRadius, cornerRadius, 90f)
         buffer = RoundedBoxVertexBuffer(segmentsPerArc)
     }
@@ -42,11 +42,10 @@ open class RoundedBox : BufferedEntity<RoundedBoxVertexBuffer>() {
 
             entity as RoundedBox
 
-            val width = entity.drawWidth
-            val height = entity.drawHeight
+            val width = entity.width
+            val height = entity.height
             val cornerRadius = entity.cornerRadius.coerceIn(0f, min(width, height) / 2f)
 
-            var vertIndex = 0
             var position = 0
 
             fun addQuad(fromX: Float, fromY: Float, toX: Float, toY: Float) {

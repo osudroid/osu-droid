@@ -3,7 +3,6 @@ package com.reco1l.andengine.sprite
 import android.util.*
 import com.reco1l.andengine.*
 import com.reco1l.andengine.shape.*
-import org.anddev.andengine.entity.shape.Shape.*
 import org.anddev.andengine.opengl.texture.region.*
 import org.anddev.andengine.opengl.util.*
 import javax.microedition.khronos.opengles.*
@@ -12,9 +11,6 @@ import javax.microedition.khronos.opengles.*
  * Sprite that allows to change texture once created.
  */
 open class ExtendedSprite(textureRegion: TextureRegion? = null) : Box() {
-
-
-    override var autoSizeAxes = Axes.Both
 
     override var contentWidth: Float
         get() = textureRegion?.width?.toFloat() ?: 0f
@@ -67,7 +63,7 @@ open class ExtendedSprite(textureRegion: TextureRegion? = null) : Box() {
             value?.isFlippedVertical = flippedVertical
             value?.isFlippedHorizontal = flippedHorizontal
 
-            onContentSizeMeasured()
+            invalidate(InvalidationFlag.ContentSize)
         }
 
     /**
@@ -94,24 +90,25 @@ open class ExtendedSprite(textureRegion: TextureRegion? = null) : Box() {
 
 
     init {
+        width = FitContent
+        height = FitContent
+
         run {
             textureRegion?.setTexturePosition(textureX, textureY)
             textureRegion?.isFlippedVertical = flippedVertical
             textureRegion?.isFlippedHorizontal = flippedHorizontal
-
-            onContentSizeMeasured()
         }
     }
 
 
-    override fun applyBlending(pGL: GL10) {
+    /*override fun applyBlending(pGL: GL10) {
         blendInfo = if (textureRegion?.texture?.textureOptions?.mPreMultipyAlpha == true)
             BlendInfo.PreMultiply
         else
             BlendInfo.Mixture
 
         super.applyBlending(pGL)
-    }
+    }*/
 
 
     override fun beginDraw(gl: GL10) {
