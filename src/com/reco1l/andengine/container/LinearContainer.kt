@@ -24,10 +24,9 @@ open class LinearContainer : Container() {
 
 
     override fun onMeasureContentSize() {
-        shouldMeasureSize = false
 
-        contentWidth = 0f
-        contentHeight = 0f
+        var right = 0f
+        var bottom = 0f
 
         for (i in 0 until childCount) {
 
@@ -39,28 +38,31 @@ open class LinearContainer : Container() {
             when (orientation) {
 
                 Horizontal -> {
-                    child.x = contentWidth
+                    child.x = right
 
-                    contentWidth += child.getWidth()
-                    contentHeight = max(contentHeight, child.getHeight())
+                    right += child.getWidth()
+                    bottom = max(bottom, child.getHeight())
 
                     if (i < childCount - 1) {
-                        contentWidth += spacing
+                        right += spacing
                     }
                 }
 
                 Vertical -> {
-                    child.y = contentHeight
+                    child.y = bottom
 
-                    contentWidth = max(contentWidth, child.getWidth())
-                    contentHeight += child.getHeight()
+                    right = max(right, child.getWidth())
+                    bottom += child.getHeight()
 
                     if (i < childCount - 1) {
-                        contentHeight += spacing
+                        bottom += spacing
                     }
                 }
             }
         }
+
+        contentWidth = right
+        contentHeight = bottom
 
         invalidate(InvalidationFlag.ContentSize)
     }

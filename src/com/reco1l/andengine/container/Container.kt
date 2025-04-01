@@ -53,8 +53,8 @@ open class Container : ExtendedEntity() {
      */
     protected open fun onMeasureContentSize() {
 
-        contentWidth = 0f
-        contentHeight = 0f
+        var right = 0f
+        var bottom = 0f
 
         if (mChildren != null) {
             for (i in mChildren.indices) {
@@ -64,11 +64,13 @@ open class Container : ExtendedEntity() {
                 val x = max(0f, child.absoluteX)
                 val y = max(0f, child.absoluteY)
 
-                contentWidth = max(contentWidth, x + child.getWidth())
-                contentHeight = max(contentHeight, y + child.getHeight())
+                right = max(right, x + child.getWidth())
+                bottom = max(bottom, y + child.getHeight())
             }
         }
 
+        contentWidth = right
+        contentHeight = bottom
         invalidate(InvalidationFlag.ContentSize)
     }
 
