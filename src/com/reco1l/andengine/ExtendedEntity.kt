@@ -24,8 +24,30 @@ abstract class ExtendedEntity : Entity(0f, 0f), ITouchArea, IModifierChain {
 
     //region Axes properties
 
+    /**
+     * Determines which axes for the size of the entity are relative w.r.t the parent.
+     *
+     * * If the value is [Axes.None], the unit for both [width] and [height] will be absolute.
+     * * If the value is [Axes.X], the unit for [width] will be relative meanwhile [height] will remain as absolute.
+     * * If the value is [Axes.Y], the unit for [height] will be relative meanwhile [width] will remain as absolute.
+     * * If the value is [Axes.Both], both [width] and [height] will be relative.
+     *
+     * Relative values are calculated as a percentage of the parent's size minus its padding, that is, values passed
+     * to [width] or [height] will be treated as a percentage (values from 0 to 1).
+     */
     open var relativeSizeAxes = Axes.None
 
+    /**
+     * Determines which axes for the position of the entity are relative w.r.t the parent.
+     *
+     * * If the value is [Axes.None], the unit for both [x][setX] and [y][setY] will be absolute.
+     * * If the value is [Axes.X], the unit for [x][setX] will be relative meanwhile [y][setY] will remain as absolute.
+     * * If the value is [Axes.Y], the unit for [y][setY] will be relative meanwhile [x][setX] will remain as absolute.
+     * * If the value is [Axes.Both], both [x][setX] and [y][setY] will be relative.
+     *
+     * Relative values are calculated as a percentage of the parent's size minus its padding, that is, values passed
+     * to [x][setX] or [y][setY] will be treated as a percentage (values from 0 to 1).
+     */
     open var relativePositionAxes = Axes.None
 
     //endregion
