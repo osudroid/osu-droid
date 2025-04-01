@@ -6,6 +6,9 @@ import androidx.annotation.*
 @IntDef(value = [
     InvalidationFlag.Size,
     InvalidationFlag.Position,
+    InvalidationFlag.ContentSize,
+    InvalidationFlag.Transformations,
+    InvalidationFlag.InputBindings
 ])
 annotation class InvalidationFlag {
     companion object {

@@ -14,15 +14,11 @@ open class ExtendedSprite(textureRegion: TextureRegion? = null) : Box() {
 
     override var contentWidth: Float
         get() = textureRegion?.width?.toFloat() ?: 0f
-        set(_) {
-            Log.w("ExtendedSprite", "contentWidth is read-only for ExtendedSprite")
-        }
+        set(_) = Unit
 
     override var contentHeight: Float
         get() = textureRegion?.height?.toFloat() ?: 0f
-        set(_) {
-            Log.w("ExtendedSprite", "contentHeight is read-only for ExtendedSprite")
-        }
+        set(_) = Unit
 
 
     /**
@@ -30,10 +26,8 @@ open class ExtendedSprite(textureRegion: TextureRegion? = null) : Box() {
      */
     open var flippedHorizontal = false
         set(value) {
-            if (field != value) {
-                field = value
-                textureRegion?.isFlippedHorizontal = value
-            }
+            field = value
+            textureRegion?.isFlippedHorizontal = value
         }
 
     /**
@@ -41,29 +35,20 @@ open class ExtendedSprite(textureRegion: TextureRegion? = null) : Box() {
      */
     open var flippedVertical = false
         set(value) {
-            if (field != value) {
-                field = value
-                textureRegion?.isFlippedVertical = value
-            }
+            field = value
+            textureRegion?.isFlippedVertical = value
         }
 
     /**
      * The texture region of the sprite.
      */
-    open var textureRegion: TextureRegion? = textureRegion
+    open var textureRegion = textureRegion
         set(value) {
-
-            if (field == value) {
-                return
+            if (field != value) {
+                field = value
+                onTextureRegionChanged()
+                invalidate(InvalidationFlag.ContentSize)
             }
-
-            field = value
-
-            value?.setTexturePosition(textureX, textureY)
-            value?.isFlippedVertical = flippedVertical
-            value?.isFlippedHorizontal = flippedHorizontal
-
-            invalidate(InvalidationFlag.ContentSize)
         }
 
     /**
@@ -93,22 +78,21 @@ open class ExtendedSprite(textureRegion: TextureRegion? = null) : Box() {
         width = FitContent
         height = FitContent
 
-        run {
-            textureRegion?.setTexturePosition(textureX, textureY)
-            textureRegion?.isFlippedVertical = flippedVertical
-            textureRegion?.isFlippedHorizontal = flippedHorizontal
-        }
+        @Suppress("LeakingThis")
+        onTextureRegionChanged()
     }
 
 
-    /*override fun applyBlending(pGL: GL10) {
-        blendInfo = if (textureRegion?.texture?.textureOptions?.mPreMultipyAlpha == true)
-            BlendInfo.PreMultiply
-        else
-            BlendInfo.Mixture
+    open fun onTextureRegionChanged() {
 
-        super.applyBlending(pGL)
-    }*/
+        val textureRegion = textureRegion ?: return
+
+        textureRegion.setTexturePosition(textureX, textureY)
+        textureRegion.isFlippedVertical = flippedVertical
+        textureRegion.isFlippedHorizontal = flippedHorizontal
+
+        blendInfo = if (textureRegion.texture.textureOptions.mPreMultipyAlpha) BlendInfo.PreMultiply else BlendInfo.Mixture
+    }
 
 
     override fun beginDraw(gl: GL10) {
