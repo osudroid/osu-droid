@@ -51,37 +51,6 @@ interface IModifierChain {
         }
     }
 
-
-    // Translate
-
-    fun translateTo(valueX: Float, valueY: Float, durationSec: Float = 0f, easing: Easing = Easing.None): UniversalModifier {
-        return applyModifier {
-            type = TranslateXY
-            duration = durationSec
-            finalValues = floatArrayOf(valueX, valueY)
-            eased(easing)
-        }
-    }
-
-    fun translateToX(value: Float, durationSec: Float = 0f, easing: Easing = Easing.None): UniversalModifier {
-        return applyModifier {
-            type = TranslateX
-            duration = durationSec
-            finalValues = floatArrayOf(value)
-            eased(easing)
-        }
-    }
-
-    fun translateToY(value: Float, durationSec: Float = 0f, easing: Easing = Easing.None): UniversalModifier {
-        return applyModifier {
-            type = TranslateY
-            duration = durationSec
-            finalValues = floatArrayOf(value)
-            eased(easing)
-        }
-    }
-
-
     // Move
 
     fun moveTo(valueX: Float, valueY: Float, durationSec: Float = 0f, easing: Easing = Easing.None): UniversalModifier {

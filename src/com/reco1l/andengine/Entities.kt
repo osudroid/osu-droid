@@ -91,14 +91,14 @@ val ExtendedEntity.absolutePosition: Vec2
  * This takes into account the anchor and origin.
  */
 val IEntity.absoluteX: Float
-    get() = if (this is ExtendedEntity) anchorPositionX - originPositionX + x + translationX else x
+    get() = if (this is ExtendedEntity) anchorPositionX - originPositionX + x else x
 
 /**
  * The absolute position of the Y axis of the entity in the parent coordinate system.
  * This takes into account the anchor and origin but not transformations.
  */
 val IEntity.absoluteY: Float
-    get() = if (this is ExtendedEntity) anchorPositionY - originPositionY + y + translationY else y
+    get() = if (this is ExtendedEntity) anchorPositionY - originPositionY + y else y
 
 /**
  * The position of the entity. This does not take into account the anchor and origin.

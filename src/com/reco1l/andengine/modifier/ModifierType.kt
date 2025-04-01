@@ -50,27 +50,6 @@ enum class ModifierType {
     MoveXY,
 
     /**
-     * Modifies the entity's X translation.
-     *
-     * Note: This is only available for [ExtendedEntity] instances.
-     */
-    TranslateX,
-
-    /**
-     * Modifies the entity's Y translation.
-     *
-     * Note: This is only available for [ExtendedEntity] instances.
-     */
-    TranslateY,
-
-    /**
-     * Modifies the entity's X and Y translation.
-     *
-     * Note: This is only available for [ExtendedEntity] instances.
-     */
-    TranslateXY,
-
-    /**
      * Modifies the entity's rotation.
      */
     Rotation,
@@ -132,21 +111,6 @@ enum class ModifierType {
             floatArrayOf(entity.width, entity.height)
         }
 
-        TranslateX -> {
-            entity as? ExtendedEntity ?: throw IllegalArgumentException("TranslateX is only available for ExtendedEntity instances.")
-            floatArrayOf(entity.translationX)
-        }
-
-        TranslateY -> {
-            entity as? ExtendedEntity ?: throw IllegalArgumentException("TranslateX is only available for ExtendedEntity instances.")
-            floatArrayOf(entity.translationY)
-        }
-
-        TranslateXY -> {
-            entity as? ExtendedEntity ?: throw IllegalArgumentException("TranslateX is only available for ExtendedEntity instances.")
-            floatArrayOf(entity.translationX, entity.translationY)
-        }
-
         Rotation -> floatArrayOf(entity.rotation)
 
         else -> null
@@ -178,22 +142,6 @@ enum class ModifierType {
             MoveX -> entity.setPosition(valueAt(0), entity.y)
             MoveY -> entity.setPosition(entity.x, valueAt(0))
             MoveXY -> entity.setPosition(valueAt(0), valueAt(1))
-
-            TranslateX -> {
-                entity as? ExtendedEntity ?: throw IllegalArgumentException("TranslateX is only available for ExtendedEntity instances.")
-                entity.translationX = valueAt(0)
-            }
-
-            TranslateY -> {
-                entity as? ExtendedEntity ?: throw IllegalArgumentException("TranslateY is only available for ExtendedEntity instances.")
-                entity.translationY = valueAt(0)
-            }
-
-            TranslateXY -> {
-                entity as? ExtendedEntity ?: throw IllegalArgumentException("TranslateXY is only available for ExtendedEntity instances.")
-                entity.translationX = valueAt(0)
-                entity.translationY = valueAt(1)
-            }
 
             SizeX -> {
                 entity as? ExtendedEntity ?: throw IllegalArgumentException("SizeX is only available for ExtendedEntity instances.")
