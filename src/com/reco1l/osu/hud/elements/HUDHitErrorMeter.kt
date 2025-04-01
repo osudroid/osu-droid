@@ -1,6 +1,7 @@
 package com.reco1l.osu.hud.elements
 
 import com.reco1l.andengine.*
+import com.reco1l.andengine.info.*
 import com.reco1l.andengine.shape.Box
 import com.reco1l.andengine.shape.RoundedBox
 import com.reco1l.framework.ColorARGB
@@ -119,9 +120,9 @@ class HUDHitErrorMeter : HUDElement() {
         }
     }
 
-    override fun onManagedUpdate(pSecondsElapsed: Float) {
+    override fun onManagedUpdate(deltaTimeSec: Float) {
         activeIndicators.fastForEach(Indicator::update)
-        super.onManagedUpdate(pSecondsElapsed)
+        super.onManagedUpdate(deltaTimeSec)
     }
 
     //endregion

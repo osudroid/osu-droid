@@ -4,12 +4,18 @@ import org.anddev.andengine.collision.ShapeCollisionChecker
 import org.anddev.andengine.util.constants.Constants.VERTEX_INDEX_X
 import org.anddev.andengine.util.constants.Constants.VERTEX_INDEX_Y
 
-object EntityCollision {
+/**
+ * Checker for extended entity collisions.
+ */
+object EntityCollisionChecker {
 
 
     private val vertices = FloatArray(8)
 
 
+    /**
+     * Checks if the given entity contains the given point.
+     */
     fun contains(entity: ExtendedEntity, x: Float, y: Float, fromScene: Boolean): Boolean {
 
         val left = 0f
@@ -37,5 +43,4 @@ object EntityCollision {
 
         return ShapeCollisionChecker.checkContains(vertices, vertices.size, x, y)
     }
-
 }

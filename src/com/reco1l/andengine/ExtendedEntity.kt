@@ -17,7 +17,6 @@ import javax.microedition.khronos.opengles.*
 
 /**
  * Entity with extended features.
- *
  * @author Reco1l
  */
 @Suppress("MemberVisibilityCanBePrivate")
@@ -532,12 +531,12 @@ abstract class ExtendedEntity : Entity(0f, 0f), ITouchArea, IModifierChain {
 
     //region Update
 
-    override fun onManagedUpdate(pSecondsElapsed: Float) {
+    override fun onManagedUpdate(deltaTimeSec: Float) {
 
-        background?.onManagedUpdate(pSecondsElapsed)
-        foreground?.onManagedUpdate(pSecondsElapsed)
+        background?.onManagedUpdate(deltaTimeSec)
+        foreground?.onManagedUpdate(deltaTimeSec)
 
-        super.onManagedUpdate(pSecondsElapsed)
+        super.onManagedUpdate(deltaTimeSec)
     }
 
     //endregion
@@ -550,7 +549,7 @@ abstract class ExtendedEntity : Entity(0f, 0f), ITouchArea, IModifierChain {
             return false
         }
 
-        return EntityCollision.contains(this, x, y, parent is Scene)
+        return EntityCollisionChecker.contains(this, x, y, parent is Scene)
     }
 
     //endregion

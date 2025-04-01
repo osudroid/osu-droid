@@ -41,8 +41,8 @@ class GameplayLeaderboard : HUDElement() {
         contentHeight = contentHeight.coerceAtLeast(SPRITE_HEIGHT)
     }
 
-    override fun onManagedUpdate(pSecondsElapsed: Float) {
-        super.onManagedUpdate(pSecondsElapsed)
+    override fun onManagedUpdate(deltaTimeSec: Float) {
+        super.onManagedUpdate(deltaTimeSec)
 
         if (!isMultiplayer) {
             val items = GlobalManager.getInstance().songMenu.board

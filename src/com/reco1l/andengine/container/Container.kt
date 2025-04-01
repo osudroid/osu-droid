@@ -6,23 +6,26 @@ import kotlin.math.*
 
 open class Container : ExtendedEntity() {
 
+    /**
+     * Whether the size of the container should be measured.
+     */
+    protected var shouldMeasureSize = true
+
+
     init {
         width = FitContent
         height = FitContent
     }
 
 
-    protected var shouldMeasureSize = true
-
-
-    override fun onManagedUpdate(pSecondsElapsed: Float) {
+    override fun onManagedUpdate(deltaTimeSec: Float) {
 
         if (shouldMeasureSize) {
             shouldMeasureSize = false
             onMeasureContentSize()
         }
 
-        super.onManagedUpdate(pSecondsElapsed)
+        super.onManagedUpdate(deltaTimeSec)
     }
 
 

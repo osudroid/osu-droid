@@ -1,6 +1,7 @@
 package com.reco1l.osu.hud.elements
 
 import com.reco1l.andengine.*
+import com.reco1l.andengine.info.*
 import com.reco1l.andengine.shape.Box
 import com.reco1l.andengine.shape.Circle
 import com.reco1l.framework.ColorARGB

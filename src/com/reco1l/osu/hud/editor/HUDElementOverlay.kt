@@ -109,7 +109,7 @@ class HUDElementOverlay(private val element: HUDElement) : ConstraintContainer()
         return false
     }
 
-    override fun onManagedUpdate(pSecondsElapsed: Float) {
+    override fun onManagedUpdate(deltaTimeSec: Float) {
         updateOutline()
 
         if (outline.y - toolbar.height < 0f) {
@@ -125,7 +125,7 @@ class HUDElementOverlay(private val element: HUDElement) : ConstraintContainer()
             }
         }
 
-        super.onManagedUpdate(pSecondsElapsed)
+        super.onManagedUpdate(deltaTimeSec)
     }
 
 

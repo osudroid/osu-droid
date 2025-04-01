@@ -2,8 +2,8 @@ package com.edlplan.osu.support.slider;
 
 import com.edlplan.andengine.TriangleBuilder;
 import com.edlplan.framework.math.line.LinePath;
-import com.reco1l.andengine.ClearInfo;
-import com.reco1l.andengine.DepthInfo;
+import com.reco1l.andengine.info.ClearInfo;
+import com.reco1l.andengine.info.DepthInfo;
 import com.reco1l.andengine.shape.TriangleMesh;
 import com.reco1l.andengine.container.Container;
 import com.rian.osu.math.Vector2;
@@ -150,7 +150,7 @@ public class SliderBody extends Container {
 
 
     @Override
-    protected void onManagedUpdate(float pSecondsElapsed) {
+    protected void onManagedUpdate(float deltaTimeSec) {
 
         if (path != null && shouldRebuildVertices) {
             shouldRebuildVertices = false;
@@ -158,7 +158,7 @@ public class SliderBody extends Container {
             buildVertices(path.cutPath(startLength, endLength).fitToLinePath(buildCache.path));
         }
 
-        super.onManagedUpdate(pSecondsElapsed);
+        super.onManagedUpdate(deltaTimeSec);
     }
 
 

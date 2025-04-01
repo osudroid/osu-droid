@@ -1,7 +1,7 @@
 package com.reco1l.andengine.sprite
 
-import android.util.*
 import com.reco1l.andengine.*
+import com.reco1l.andengine.info.*
 import com.reco1l.andengine.shape.*
 import org.anddev.andengine.opengl.texture.region.*
 import org.anddev.andengine.opengl.util.*

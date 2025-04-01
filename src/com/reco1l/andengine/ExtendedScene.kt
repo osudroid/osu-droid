@@ -10,7 +10,9 @@ import javax.microedition.khronos.opengles.*
 
 /**
  * Scene with extended functionality.
+ * @author Reco1l
  */
+@Suppress("MemberVisibilityCanBePrivate")
 open class ExtendedScene : Scene(), IShape {
 
     /**
@@ -32,14 +34,15 @@ open class ExtendedScene : Scene(), IShape {
     }
 
 
-    // Update
+    //region Update
 
     override fun onManagedUpdate(secElapsed: Float) {
         super.onManagedUpdate(secElapsed * timeMultiplier)
     }
 
+    //endregion
 
-    // Drawing
+    //region Drawing
 
     override fun onManagedDrawChildren(pGL: GL10, pCamera: Camera) {
         cameraWidth = pCamera.widthRaw
@@ -47,8 +50,9 @@ open class ExtendedScene : Scene(), IShape {
         super.onManagedDrawChildren(pGL, pCamera)
     }
 
+    //endregion
 
-    // Input
+    //region Input
 
     override fun registerTouchArea(area: ITouchArea) {
 
@@ -69,8 +73,31 @@ open class ExtendedScene : Scene(), IShape {
         return true
     }
 
+    //endregion
 
-    // Unsupported methods
+    //region Delegation
+
+    override fun contains(pX: Float, pY: Float): Boolean = true
+
+    override fun getWidth(): Float = cameraWidth
+
+    override fun getHeight(): Float = cameraHeight
+
+    override fun collidesWith(shape: IShape): Boolean = false
+
+    override fun getBaseWidth(): Float = cameraWidth
+
+    override fun getBaseHeight(): Float = cameraHeight
+
+    override fun getWidthScaled(): Float = cameraWidth * scaleX
+
+    override fun getHeightScaled(): Float = cameraHeight * scaleY
+
+    override fun isCullingEnabled(): Boolean = false
+
+    //endregion
+
+    //region Unsupported methods
 
     override fun setColor(pRed: Float, pGreen: Float, pBlue: Float) {
         Log.w("ExtendedScene", "Color is not supported for scenes.")
@@ -84,42 +111,5 @@ open class ExtendedScene : Scene(), IShape {
         Log.w("ExtendedScene", "Blend functions are not supported for scenes.")
     }
 
-
-    // IShape interface
-
-    override fun contains(pX: Float, pY: Float): Boolean {
-        return true
-    }
-
-    override fun getWidth(): Float {
-        return cameraWidth
-    }
-
-    override fun getHeight(): Float {
-        return cameraHeight
-    }
-
-    override fun collidesWith(shape: IShape): Boolean {
-        return false
-    }
-
-    override fun getBaseWidth(): Float {
-        return cameraWidth
-    }
-
-    override fun getBaseHeight(): Float {
-        return cameraHeight
-    }
-
-    override fun getWidthScaled(): Float {
-        return cameraWidth * scaleX
-    }
-
-    override fun getHeightScaled(): Float {
-        return cameraHeight * scaleY
-    }
-
-    override fun isCullingEnabled(): Boolean {
-        return false
-    }
+    //endregion
 }

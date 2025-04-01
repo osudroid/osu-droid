@@ -1,8 +1,8 @@
 package com.reco1l.osu.hud.elements
 
 import com.edlplan.framework.easing.*
-import com.reco1l.andengine.*
 import com.reco1l.andengine.Anchor
+import com.reco1l.andengine.info.*
 import com.reco1l.andengine.shape.*
 import com.reco1l.andengine.sprite.*
 import com.reco1l.andengine.texture.*

@@ -25,7 +25,7 @@ sealed class HUDStatisticCounter(label: String) : HUDElement() {
         attachChild(valueText)
     }
 
-    override fun onManagedUpdate(pSecondsElapsed: Float) {
+    override fun onManagedUpdate(deltaTimeSec: Float) {
         valueText.y = labelText.height
 
         val innerAnchor = when (anchor.x) {
@@ -39,7 +39,7 @@ sealed class HUDStatisticCounter(label: String) : HUDElement() {
         valueText.anchor = innerAnchor
         valueText.origin = innerAnchor
 
-        super.onManagedUpdate(pSecondsElapsed)
+        super.onManagedUpdate(deltaTimeSec)
     }
 }
 

@@ -11,6 +11,7 @@ import org.anddev.andengine.input.touch.TouchEvent.*
 import javax.microedition.khronos.opengles.*
 import kotlin.math.*
 
+@Suppress("MemberVisibilityCanBePrivate")
 open class ScrollableContainer : Container() {
 
     /**

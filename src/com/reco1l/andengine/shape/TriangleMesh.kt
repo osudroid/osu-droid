@@ -3,6 +3,7 @@ package com.reco1l.andengine.shape
 import com.edlplan.andengine.TriangleRenderer
 import com.edlplan.framework.utils.*
 import com.reco1l.andengine.*
+import com.reco1l.andengine.info.*
 import org.anddev.andengine.engine.camera.*
 import org.anddev.andengine.opengl.util.*
 import javax.microedition.khronos.opengles.*

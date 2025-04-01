@@ -2,11 +2,11 @@ package com.reco1l.osu.hud.elements
 
 import com.edlplan.framework.easing.Easing
 import com.reco1l.andengine.*
+import com.reco1l.andengine.info.*
 import com.reco1l.andengine.shape.Circle
 import com.reco1l.andengine.sprite.ExtendedSprite
 import com.reco1l.framework.ColorARGB
 import com.reco1l.framework.Interpolation
-import com.reco1l.framework.math.*
 import com.reco1l.osu.hud.HUDElement
 import org.anddev.andengine.input.touch.TouchEvent
 import ru.nsu.ccfit.zuev.osu.Config
@@ -80,10 +80,10 @@ class HUDBackButton : HUDElement() {
     }
 
 
-    override fun onManagedUpdate(pSecondsElapsed: Float) {
+    override fun onManagedUpdate(deltaTimeSec: Float) {
 
         if (!isInEditMode) {
-            val realMsElapsed = pSecondsElapsed * 1000
+            val realMsElapsed = deltaTimeSec * 1000
 
             if (isPressed) {
                 holdDurationMs += realMsElapsed
@@ -98,7 +98,7 @@ class HUDBackButton : HUDElement() {
             }
         }
 
-        super.onManagedUpdate(pSecondsElapsed)
+        super.onManagedUpdate(deltaTimeSec)
     }
 
     override fun onAreaTouched(event: TouchEvent, localX: Float, localY: Float): Boolean {
