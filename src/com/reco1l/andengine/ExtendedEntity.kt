@@ -503,16 +503,19 @@ abstract class ExtendedEntity : Entity(0f, 0f), ITouchArea, IModifierChain {
         background?.setSize(width, height)
         background?.onDraw(gl, camera)
 
-        val hasPadding = padding.left > 0f || padding.top > 0f
-        if (hasPadding) {
-            gl.glTranslatef(padding.left, padding.top, 0f)
+        val offsetLeft = padding.left * (1f - anchor.x)
+        val offsetTop = padding.top * (1f - anchor.y)
+
+        val hasOffset = offsetLeft > 0f || offsetTop > 0f
+        if (hasOffset) {
+            gl.glTranslatef(offsetLeft, offsetTop, 0f)
         }
 
         doDraw(gl, camera)
         onDrawChildren(gl, camera)
 
-        if (hasPadding) {
-            gl.glTranslatef(-padding.right, -padding.top, 0f)
+        if (hasOffset) {
+            gl.glTranslatef(-offsetLeft, -offsetTop, 0f)
         }
 
         foreground?.setSize(width, height)

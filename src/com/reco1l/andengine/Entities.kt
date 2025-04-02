@@ -75,30 +75,6 @@ val IEntity?.innerWidth: Float
 val IEntity?.innerHeight: Float
     get() = if (this is ExtendedEntity) height - padding.vertical else getHeight()
 
-/**
- * The left padding of the entity.
- */
-val IEntity?.paddingLeft: Float
-    get() = if (this is ExtendedEntity) padding.left else 0f
-
-/**
- * The top padding of the entity.
- */
-val IEntity?.paddingRight: Float
-    get() = if (this is ExtendedEntity) padding.right else 0f
-
-/**
- * The right padding of the entity.
- */
-val IEntity?.paddingTop: Float
-    get() = if (this is ExtendedEntity) padding.top else 0f
-
-/**
- * The bottom padding of the entity.
- */
-val IEntity?.paddingBottom: Float
-    get() = if (this is ExtendedEntity) padding.bottom else 0f
-
 //endregion
 
 //region Position related properties
@@ -141,13 +117,13 @@ val ExtendedEntity.anchorPosition: Vec2
  * The anchor position of the entity in the X axis.
  */
 val ExtendedEntity.anchorPositionX: Float
-    get() = (parent.innerWidth - parent.paddingLeft) * anchor.x
+    get() = parent.innerWidth * anchor.x
 
 /**
  * The anchor position of the entity in the Y axis.
  */
 val ExtendedEntity.anchorPositionY: Float
-    get() = (parent.innerHeight - parent.paddingTop) * anchor.y
+    get() = parent.innerHeight * anchor.y
 
 
 /**
