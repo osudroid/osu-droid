@@ -59,9 +59,13 @@ abstract class ExtendedEntity : Entity(0f, 0f), ITouchArea, IModifierChain {
      */
     var width: Float = 0f
         get() = when (field) {
-            FitContent -> contentWidth
+            FitContent -> contentWidth + padding.horizontal
             FitParent -> parent.innerWidth
-            else -> field * if (relativeSizeAxes.isHorizontal) parent.innerWidth else 1f
+            else -> if (relativeSizeAxes.isHorizontal) {
+                field * parent.innerWidth
+            } else {
+                field + padding.horizontal
+            }
         }
         set(value) {
             if (field != value) {
@@ -75,9 +79,13 @@ abstract class ExtendedEntity : Entity(0f, 0f), ITouchArea, IModifierChain {
      */
     var height = 0f
         get() = when (field) {
-            FitContent -> contentHeight
+            FitContent -> contentHeight + padding.vertical
             FitParent -> parent.innerHeight
-            else -> field * if (relativeSizeAxes.isVertical) parent.innerHeight else 1f
+            else -> if (relativeSizeAxes.isVertical) {
+                field * parent.innerHeight
+            } else {
+                field + padding.vertical
+            }
         }
         set(value) {
             if (field != value) {
@@ -384,13 +392,12 @@ abstract class ExtendedEntity : Entity(0f, 0f), ITouchArea, IModifierChain {
 
     //region Drawing
 
-    override fun onApplyTransformations(pGL: GL10, camera: Camera) {
+    override fun onApplyTransformations(gl: GL10, camera: Camera) {
+        val x = absoluteX
+        val y = absoluteY
 
-        val absX = absoluteX
-        val absY = absoluteY
-
-        if (absX != 0f || absY != 0f) {
-            pGL.glTranslatef(absX, absY, 0f)
+        if (x != 0f || y != 0f) {
+            gl.glTranslatef(x, y, 0f)
         }
 
         if (mRotation != 0f) {
@@ -398,11 +405,11 @@ abstract class ExtendedEntity : Entity(0f, 0f), ITouchArea, IModifierChain {
             val centerY = height * mRotationCenterY
 
             if (centerX > 0f || centerY > 0f) {
-                pGL.glTranslatef(centerX, centerY, 0f)
-                pGL.glRotatef(mRotation, 0f, 0f, 1f)
-                pGL.glTranslatef(-centerX, -centerY, 0f)
+                gl.glTranslatef(centerX, centerY, 0f)
+                gl.glRotatef(mRotation, 0f, 0f, 1f)
+                gl.glTranslatef(-centerX, -centerY, 0f)
             } else {
-                pGL.glRotatef(mRotation, 0f, 0f, 1f)
+                gl.glRotatef(mRotation, 0f, 0f, 1f)
             }
         }
 
@@ -411,11 +418,11 @@ abstract class ExtendedEntity : Entity(0f, 0f), ITouchArea, IModifierChain {
             val centerY = height * mScaleCenterY
 
             if (centerX > 0f || centerY > 0f) {
-                pGL.glTranslatef(centerX, centerY, 0f)
-                pGL.glScalef(mScaleX, mScaleY, 1f)
-                pGL.glTranslatef(-centerX, -centerY, 0f)
+                gl.glTranslatef(centerX, centerY, 0f)
+                gl.glScalef(mScaleX, mScaleY, 1f)
+                gl.glTranslatef(-centerX, -centerY, 0f)
             } else {
-                pGL.glScalef(mScaleX, mScaleY, 1f)
+                gl.glScalef(mScaleX, mScaleY, 1f)
             }
         }
     }
@@ -424,12 +431,6 @@ abstract class ExtendedEntity : Entity(0f, 0f), ITouchArea, IModifierChain {
 
         if (mChildren == null || !mChildrenVisible) {
             return
-        }
-
-        val hasPaddingApplicable = padding.left > 0f || padding.top > 0f
-
-        if (hasPaddingApplicable) {
-            gl.glTranslatef(padding.left, padding.top, 0f)
         }
 
         if (clipChildren) {
@@ -464,10 +465,6 @@ abstract class ExtendedEntity : Entity(0f, 0f), ITouchArea, IModifierChain {
 
         if (clipChildren) {
             GLHelper.disableScissorTest(gl)
-        }
-
-        if (hasPaddingApplicable) {
-            gl.glTranslatef(-padding.right, -padding.top, 0f)
         }
     }
 
@@ -506,8 +503,17 @@ abstract class ExtendedEntity : Entity(0f, 0f), ITouchArea, IModifierChain {
         background?.setSize(width, height)
         background?.onDraw(gl, camera)
 
+        val hasPadding = padding.left > 0f || padding.top > 0f
+        if (hasPadding) {
+            gl.glTranslatef(padding.left, padding.top, 0f)
+        }
+
         doDraw(gl, camera)
         onDrawChildren(gl, camera)
+
+        if (hasPadding) {
+            gl.glTranslatef(-padding.right, -padding.top, 0f)
+        }
 
         foreground?.setSize(width, height)
         foreground?.onDraw(gl, camera)
