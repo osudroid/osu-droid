@@ -1,5 +1,6 @@
 package com.reco1l.andengine.text
 
+import com.reco1l.andengine.*
 import com.reco1l.andengine.buffered.*
 import com.reco1l.andengine.buffered.VertexBuffer
 import com.reco1l.toolkt.kotlin.*
