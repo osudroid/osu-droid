@@ -427,6 +427,31 @@ abstract class ExtendedEntity : Entity(0f, 0f), ITouchArea, IModifierChain {
         }
     }
 
+    open fun onApplyColor(gl: GL10) {
+        var red = mRed
+        var green = mGreen
+        var blue = mBlue
+        var alpha = mAlpha
+        var parent = parent
+
+        while (parent != null) {
+
+            red *= parent.red
+            green *= parent.green
+            blue *= parent.blue
+            alpha *= parent.alpha
+
+            // We'll assume at this point there's no need to keep multiplying.
+            if (red == 0f && green == 0f && blue == 0f && alpha == 0f) {
+                break
+            }
+
+            parent = parent.parent
+        }
+
+        GLHelper.setColor(gl, red, green, blue, alpha)
+    }
+
     override fun onDrawChildren(gl: GL10, camera: Camera) {
 
         if (mChildren == null || !mChildrenVisible) {
@@ -529,29 +554,7 @@ abstract class ExtendedEntity : Entity(0f, 0f), ITouchArea, IModifierChain {
         GLHelper.disableCulling(gl)
         GLHelper.disableTextures(gl)
         GLHelper.disableTexCoordArray(gl)
-
-        var red = mRed
-        var green = mGreen
-        var blue = mBlue
-        var alpha = mAlpha
-        var parent = parent
-
-        while (parent != null) {
-
-            red *= parent.red
-            green *= parent.green
-            blue *= parent.blue
-            alpha *= parent.alpha
-
-            // We'll assume at this point there's no need to keep multiplying.
-            if (red == 0f && green == 0f && blue == 0f && alpha == 0f) {
-                break
-            }
-
-            parent = parent.parent
-        }
-
-        GLHelper.setColor(gl, red, green, blue, alpha)
+        onApplyColor(gl)
     }
 
     override fun doDraw(gl: GL10, camera: Camera) {
