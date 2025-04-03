@@ -2,16 +2,9 @@ package com.reco1l.andengine.container
 
 import com.reco1l.andengine.*
 import com.reco1l.andengine.container.Orientation.*
-import org.anddev.andengine.engine.camera.*
-import org.anddev.andengine.entity.shape.*
-import javax.microedition.khronos.opengles.*
 import kotlin.math.*
 
 open class LinearContainer : Container() {
-
-
-    override var autoSizeAxes = Axes.Both
-
 
     /**
      * The orientation of the container.
@@ -31,10 +24,9 @@ open class LinearContainer : Container() {
 
 
     override fun onMeasureContentSize() {
-        shouldMeasureSize = false
 
-        contentWidth = 0f
-        contentHeight = 0f
+        var right = 0f
+        var bottom = 0f
 
         for (i in 0 until childCount) {
 
@@ -46,57 +38,34 @@ open class LinearContainer : Container() {
             when (orientation) {
 
                 Horizontal -> {
-                    child.x = contentWidth
+                    child.x = right
 
-                    contentWidth += child.getDrawWidth()
-                    contentHeight = max(contentHeight, child.getDrawHeight())
+                    right += child.getWidth()
+                    bottom = max(bottom, child.getHeight())
 
                     if (i < childCount - 1) {
-                        contentWidth += spacing
+                        right += spacing
                     }
                 }
 
                 Vertical -> {
-                    child.y = contentHeight
+                    child.y = bottom
 
-                    contentWidth = max(contentWidth, child.getDrawWidth())
-                    contentHeight += child.getDrawHeight()
+                    right = max(right, child.getWidth())
+                    bottom += child.getHeight()
 
                     if (i < childCount - 1) {
-                        contentHeight += spacing
+                        bottom += spacing
                     }
                 }
             }
         }
 
-        onContentSizeMeasured()
+        contentWidth = right
+        contentHeight = bottom
+
+        invalidate(InvalidationFlag.ContentSize)
     }
-
-
-    override fun getChildDrawX(child: ExtendedEntity): Float {
-
-        val drawX = super.getChildDrawX(child)
-
-        if (orientation == Vertical) {
-            return drawX
-        }
-
-        // Subtract the anchor offset for the X axis because it should be ignored in this case.
-        return drawX - child.anchorOffsetX
-    }
-
-    override fun getChildDrawY(child: ExtendedEntity): Float {
-
-        val drawY = super.getChildDrawY(child)
-
-        if (orientation == Horizontal) {
-            return drawY
-        }
-
-        // Subtract the anchor offset for the Y axis because it should be ignored in this case.
-        return drawY - child.anchorOffsetY
-    }
-
 }
 
 /**

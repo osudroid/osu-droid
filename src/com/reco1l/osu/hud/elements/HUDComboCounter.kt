@@ -83,14 +83,14 @@ class HUDComboCounter : HUDElement() {
         setCombo(game.stat.combo)
     }
 
-    override fun onManagedUpdate(pSecondsElapsed: Float) {
+    override fun onManagedUpdate(deltaTimeSec: Float) {
 
         popOutCount?.scaleCenterX = anchor.x
         popOutCount?.scaleCenterY = anchor.y
         displayedCountTextSprite.scaleCenterX = anchor.x
         displayedCountTextSprite.scaleCenterY = anchor.y
 
-        super.onManagedUpdate(pSecondsElapsed)
+        super.onManagedUpdate(deltaTimeSec)
     }
 
 

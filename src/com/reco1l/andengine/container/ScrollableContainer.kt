@@ -3,6 +3,8 @@ package com.reco1l.andengine.container
 import com.reco1l.andengine.*
 import com.reco1l.andengine.shape.*
 import com.reco1l.framework.*
+import com.reco1l.framework.math.*
+import com.reco1l.toolkt.kotlin.*
 import com.rian.osu.math.Precision
 import org.anddev.andengine.engine.camera.*
 import org.anddev.andengine.input.touch.*
@@ -10,14 +12,22 @@ import org.anddev.andengine.input.touch.TouchEvent.*
 import javax.microedition.khronos.opengles.*
 import kotlin.math.*
 
+@Suppress("MemberVisibilityCanBePrivate")
 open class ScrollableContainer : Container() {
-
-    override var autoSizeAxes = Axes.None
 
     /**
      * Which axes the container can scroll on.
      */
     open var scrollAxes: Axes = Axes.Both
+
+    /**
+     * The flag to indicate if the container is being dragged.
+     */
+    var isDragging = false
+        private set
+
+
+    //region Scrolling properties
 
     /**
      * The scroll position on the x-axis.
@@ -36,8 +46,7 @@ open class ScrollableContainer : Container() {
 
             indicatorX?.alpha = 0.5f
             field = value
-            invalidateTransformations()
-            invalidateInputBindings()
+            invalidate(InvalidationFlag.Transformations or InvalidationFlag.InputBindings)
         }
 
     /**
@@ -57,43 +66,40 @@ open class ScrollableContainer : Container() {
 
             indicatorY?.alpha = 0.5f
             field = value
-            invalidateTransformations()
-            invalidateInputBindings()
+            invalidate(InvalidationFlag.Transformations or InvalidationFlag.InputBindings)
         }
 
     /**
      * The deceleration factor for the scrollable container.
      */
-    var deceleration = DEFAULT_DECELERATION
+    var deceleration = Vec2(DEFAULT_DECELERATION, DEFAULT_DECELERATION)
 
     /**
-     * The flag to indicate if the container is being dragged.
+     * The minimum travel distance to start scrolling in px for both axes.
      */
-    var isDragging = false
-        private set
+    var minimumTravel = Vec2(DEFAULT_MINIMUM_TRAVEL, DEFAULT_MINIMUM_TRAVEL)
 
     /**
-     * The maximum velocity in px/s on the x-axis.
+     * The maximum velocity in px/s for both axes.
      */
-    var maxVelocityX = 5000f
-
-    /**
-     * The maximum velocity in px/s on the y-axis.
-     */
-    var maxVelocityY = 5000f
+    var maxVelocity = Vec2(5000f, 5000f)
 
     /**
      * The velocity in px/s on the x-axis.
      */
     var velocityX = 0f
         private set(value) {
-
-            if (Precision.almostEquals(value, 0f) || !scrollAxes.isHorizontal) {
+            if (!scrollAxes.isHorizontal) {
                 field = 0f
                 return
             }
 
-            field = value.coerceIn(-maxVelocityX, maxVelocityX)
+            val coercedValue = value.coerceIn(-maxVelocity.x, maxVelocity.x)
+
+            if (field != coercedValue) {
+                setHierarchyScrollPrevention(coercedValue != 0f)
+                field = if (Precision.almostEquals(coercedValue, 0f)) 0f else coercedValue
+            }
         }
 
     /**
@@ -101,14 +107,22 @@ open class ScrollableContainer : Container() {
      */
     var velocityY = 0f
         private set(value) {
-
-            if (Precision.almostEquals(value, 0f) || !scrollAxes.isVertical) {
+            if (!scrollAxes.isVertical) {
                 field = 0f
                 return
             }
 
-            field = value.coerceIn(-maxVelocityY, maxVelocityY)
+            val coercedValue = value.coerceIn(-maxVelocity.y, maxVelocity.y)
+
+            if (field != coercedValue) {
+                setHierarchyScrollPrevention(coercedValue != 0f)
+                field = if (Precision.almostEquals(coercedValue, 0f)) 0f else coercedValue
+            }
         }
+
+    //endregion
+
+    //region Indicators
 
     /**
      * The scroll indicator for the x-axis that shows the current scroll position.
@@ -130,6 +144,9 @@ open class ScrollableContainer : Container() {
         it.cornerRadius = 5f
     }
 
+    //endregion
+
+    //region Dimension properties
 
     /**
      * The maximum scroll position on the x-axis.
@@ -137,7 +154,7 @@ open class ScrollableContainer : Container() {
      * This does not take into account the overscroll.
      */
     val maxScrollX
-        get() = max(0f, scrollableContentWidth - drawWidth)
+        get() = max(0f, scrollableContentWidth - width)
 
     /**
      * The maximum scroll position on the y-axis.
@@ -145,30 +162,40 @@ open class ScrollableContainer : Container() {
      * This does not take into account the overscroll.
      */
     val maxScrollY
-        get() = max(0f, scrollableContentHeight - drawHeight)
+        get() = max(0f, scrollableContentHeight - height)
 
     /**
      * The width of the content that can be scrolled. That is [contentWidth] minus
      * the width of the vertical indicator.
      */
     val scrollableContentWidth
-        get() = max(0f, contentWidth - (indicatorY?.drawWidth ?: 0f))
+        get() = max(0f, contentWidth - (indicatorY?.width ?: 0f))
 
     /**
      * The height of the content that can be scrolled. That is [contentHeight] minus
      * the height of the horizontal indicator.
      */
     val scrollableContentHeight
-        get() = max(0f, contentHeight - (indicatorX?.drawHeight ?: 0f))
+        get() = max(0f, contentHeight - (indicatorX?.height ?: 0f))
+
+    //endregion
 
 
     private var initialX = 0f
-
     private var initialY = 0f
-
     private var elapsedTimeSec = 0f
-
     private var lastDragTimeSec = 0f
+
+    private var preventScrolling = false
+        set(value) {
+            if (field != value) {
+                field = value
+                if (value) {
+                    velocityX = 0f
+                    velocityY = 0f
+                }
+            }
+        }
 
 
     override fun onManagedUpdate(deltaTimeSec: Float) {
@@ -185,8 +212,8 @@ open class ScrollableContainer : Container() {
             scrollX -= velocityX * deltaTimeSec
             scrollY -= velocityY * deltaTimeSec
 
-            velocityX *= deceleration
-            velocityY *= deceleration
+            velocityX *= deceleration.x
+            velocityY *= deceleration.y
         }
 
         // Back smoothly to the max scroll position if the scroll position is out of bounds.
@@ -219,11 +246,11 @@ open class ScrollableContainer : Container() {
 
             indicator.isVisible = scrollAxes == Axes.Both || scrollAxes == Axes.Y
 
-            indicator.x = drawWidth - indicator.drawWidth
-            indicator.y = scrollY * (drawHeight / scrollableContentHeight)
+            indicator.x = width - indicator.width
+            indicator.y = scrollY * (height / scrollableContentHeight)
 
             if (indicator.alpha > 0f && velocityY == 0f) {
-                indicator.alpha = (indicator.alpha - deltaTimeSec * 0.5f).coerceAtLeast(0f)
+                indicator.alpha = (indicator.alpha - deltaTimeSec * 0.75f).coerceAtLeast(0f)
             }
 
             if (indicator.isVisible) {
@@ -235,11 +262,11 @@ open class ScrollableContainer : Container() {
 
             indicator.isVisible = scrollAxes == Axes.Both || scrollAxes == Axes.X
 
-            indicator.x = scrollX * (drawWidth / scrollableContentWidth)
-            indicator.y = drawHeight - indicator.drawHeight
+            indicator.x = scrollX * (width / scrollableContentWidth)
+            indicator.y = height - indicator.height
 
             if (indicator.alpha > 0f && velocityX == 0f) {
-                indicator.alpha = (indicator.alpha - deltaTimeSec * 0.5f).coerceAtLeast(0f)
+                indicator.alpha = (indicator.alpha - deltaTimeSec * 0.75f).coerceAtLeast(0f)
             }
 
             if (indicator.isVisible) {
@@ -248,30 +275,33 @@ open class ScrollableContainer : Container() {
         }
 
         elapsedTimeSec += deltaTimeSec
-    }
 
+        mChildren?.fastForEach {
+            it.setPosition(-scrollX, -scrollY)
+        }
+    }
 
     override fun onMeasureContentSize() {
         super.onMeasureContentSize()
 
         indicatorY?.let { indicator ->
 
-            indicator.height = drawHeight * (drawHeight / scrollableContentHeight)
+            indicator.height = height * (height / scrollableContentHeight)
             indicator.x = contentWidth + 5f
 
-            contentWidth += indicator.drawWidth + 5f
+            contentWidth += indicator.width + 5f
         }
 
         indicatorX?.let { indicator ->
 
-            indicator.width = drawWidth * (drawWidth / scrollableContentWidth)
+            indicator.width = width * (width / scrollableContentWidth)
             indicator.y = contentHeight + 5f
 
-            contentHeight += indicator.drawHeight + 5f
+            contentHeight += indicator.height + 5f
         }
 
         if (indicatorX != null || indicatorY != null) {
-            onContentSizeMeasured()
+            invalidate(InvalidationFlag.ContentSize)
         }
     }
 
@@ -284,6 +314,10 @@ open class ScrollableContainer : Container() {
 
     override fun onAreaTouched(event: TouchEvent, localX: Float, localY: Float): Boolean {
 
+        if (preventScrolling) {
+            return super.onAreaTouched(event, localX, localY)
+        }
+
         when (event.action) {
 
             ACTION_DOWN -> {
@@ -292,6 +326,7 @@ open class ScrollableContainer : Container() {
 
                 velocityX = 0f
                 velocityY = 0f
+                lastDragTimeSec = elapsedTimeSec
             }
 
             ACTION_MOVE -> {
@@ -299,7 +334,7 @@ open class ScrollableContainer : Container() {
                 var deltaX = if (scrollAxes.isHorizontal) localX - initialX else 0f
                 var deltaY = if (scrollAxes.isVertical) localY - initialY else 0f
 
-                isDragging = abs(deltaX) > 1f || abs(deltaY) > 1f
+                isDragging = abs(deltaX) > minimumTravel.x || abs(deltaY) > minimumTravel.y
 
                 if (isDragging) {
 
@@ -315,13 +350,13 @@ open class ScrollableContainer : Container() {
 
                     val dragTimeSec = elapsedTimeSec - lastDragTimeSec
 
-                    if (abs(deltaX) > 0.1f) {
+                    if (abs(deltaX) > minimumTravel.x) {
                         scrollX -= deltaX
                         velocityX = abs(deltaX / dragTimeSec) * sign(deltaX)
                         initialX = localX
                     }
 
-                    if (abs(deltaY) > 0.1f) {
+                    if (abs(deltaY) > minimumTravel.y) {
                         scrollY -= deltaY
                         velocityY = abs(deltaY / dragTimeSec) * sign(deltaY)
                         initialY = localY
@@ -344,28 +379,29 @@ open class ScrollableContainer : Container() {
     }
 
 
-    override fun getChildDrawX(child: ExtendedEntity): Float {
+    private fun setHierarchyScrollPrevention(value: Boolean) {
 
-        if (child == indicatorX || child == indicatorY || !scrollAxes.isHorizontal) {
-            return super.getChildDrawX(child)
+        var parent = parent
+        while (parent != null) {
+            if (parent is ScrollableContainer) {
+                parent.preventScrolling = value
+            }
+            parent = parent.parent
         }
 
-        return -scrollX + child.x - child.originOffsetX + child.translationX
-    }
-
-    override fun getChildDrawY(child: ExtendedEntity): Float {
-
-        if (child == indicatorX || child == indicatorY || !scrollAxes.isVertical) {
-            return super.getChildDrawY(child)
+        mChildren?.fastForEach {
+            if (it is ScrollableContainer) {
+                it.preventScrolling = value
+            }
         }
-
-        return -scrollY + child.y - child.originOffsetY + child.translationY
     }
 
 
     companion object {
 
         const val DEFAULT_DECELERATION = 0.98f
+
+        const val DEFAULT_MINIMUM_TRAVEL = 10f
 
     }
 }

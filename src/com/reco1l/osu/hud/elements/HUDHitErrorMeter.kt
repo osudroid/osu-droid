@@ -1,6 +1,7 @@
 package com.reco1l.osu.hud.elements
 
 import com.reco1l.andengine.*
+import com.reco1l.andengine.info.*
 import com.reco1l.andengine.shape.Box
 import com.reco1l.andengine.shape.RoundedBox
 import com.reco1l.framework.ColorARGB
@@ -64,7 +65,8 @@ class HUDHitErrorMeter : HUDElement() {
             setSize(WIDTH * (hitWindow.greatWindow / hitWindow.mehWindow), BAR_HEIGHT)
             color = greatColor
 
-            depthInfo = DepthInfo.Clear
+            clearInfo = ClearInfo.ClearDepthBuffer
+            depthInfo = DepthInfo.Less
         }
 
         attachChild(mehWindow)
@@ -118,9 +120,9 @@ class HUDHitErrorMeter : HUDElement() {
         }
     }
 
-    override fun onManagedUpdate(pSecondsElapsed: Float) {
+    override fun onManagedUpdate(deltaTimeSec: Float) {
         activeIndicators.fastForEach(Indicator::update)
-        super.onManagedUpdate(pSecondsElapsed)
+        super.onManagedUpdate(deltaTimeSec)
     }
 
     //endregion

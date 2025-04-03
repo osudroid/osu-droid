@@ -95,7 +95,7 @@ class BannerSprite(private val banners: List<Banner>) : ExtendedSprite() {
     }
 
 
-    override fun onManagedUpdate(pSecondsElapsed: Float) {
+    override fun onManagedUpdate(deltaTimeSec: Float) {
         if (banners.size > 1) {
 
             if (elapsedTimeSinceLastChange > BANNER_DURATION) {
@@ -111,9 +111,9 @@ class BannerSprite(private val banners: List<Banner>) : ExtendedSprite() {
                     fadeIn(0.5f)
                 }
             }
-            elapsedTimeSinceLastChange += pSecondsElapsed
+            elapsedTimeSinceLastChange += deltaTimeSec
         }
-        super.onManagedUpdate(pSecondsElapsed)
+        super.onManagedUpdate(deltaTimeSec)
     }
 
     override fun onAreaTouched(event: TouchEvent, localX: Float, localY: Float): Boolean {

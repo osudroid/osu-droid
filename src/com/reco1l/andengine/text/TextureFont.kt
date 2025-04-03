@@ -1,18 +1,16 @@
 package com.reco1l.andengine.text
 
-import com.reco1l.andengine.*
-import com.reco1l.andengine.shape.*
+import com.reco1l.andengine.buffered.*
+import com.reco1l.andengine.shape.Box.BoxVertexBuffer.Companion.BOX_VERTICES
+import com.reco1l.andengine.text.TextureFont.*
 import org.anddev.andengine.engine.camera.*
 import org.anddev.andengine.opengl.texture.region.*
 import org.anddev.andengine.opengl.util.GLHelper
 import javax.microedition.khronos.opengles.*
+import javax.microedition.khronos.opengles.GL11.*
 import kotlin.math.*
 
-open class TextureFont(val characters: MutableMap<Char, TextureRegion>) : Box() {
-
-
-    override var autoSizeAxes = Axes.Both
-
+open class TextureFont(val characters: MutableMap<Char, TextureRegion>) : BufferedEntity<TextureTextVertexBuffer>(TextureTextVertexBuffer()) {
 
     /**
      * The spacing between glyphs.
@@ -62,6 +60,12 @@ open class TextureFont(val characters: MutableMap<Char, TextureRegion>) : Box() 
     private val textureRegions = mutableListOf<TextureRegion>()
 
 
+    init {
+        width = FitContent
+        height = FitContent
+    }
+
+
     fun setTextureScale(scale: Float) {
         textureScaleX = scale
         textureScaleY = scale
@@ -70,8 +74,8 @@ open class TextureFont(val characters: MutableMap<Char, TextureRegion>) : Box() 
 
     private fun onUpdateText() {
 
-        contentWidth = 0f
-        contentHeight = 0f
+        var contentWidth = 0f
+        var contentHeight = 0f
 
         textureRegions.clear()
         for (i in text.indices) {
@@ -87,18 +91,20 @@ open class TextureFont(val characters: MutableMap<Char, TextureRegion>) : Box() 
         }
 
         contentWidth -= spacing
-        onContentSizeMeasured()
+
+        super.contentWidth = contentWidth
+        super.contentHeight = contentHeight
     }
 
-    override fun onInitDraw(pGL: GL10) {
-        super.onInitDraw(pGL)
+    override fun beginDraw(gl: GL10) {
+        super.beginDraw(gl)
 
-        GLHelper.enableTextures(pGL)
-        GLHelper.enableTexCoordArray(pGL)
+        GLHelper.enableTextures(gl)
+        GLHelper.enableTexCoordArray(gl)
     }
 
     override fun doDraw(gl: GL10, camera: Camera) {
-        onInitDraw(gl)
+        beginDraw(gl)
 
         var offsetX = 0f
 
@@ -111,25 +117,42 @@ open class TextureFont(val characters: MutableMap<Char, TextureRegion>) : Box() 
             gl.glPushMatrix()
             gl.glTranslatef(offsetX, 0f, 0f)
 
-            vertexBuffer.update(textureWidth, textureHeight)
+            onUpdateBuffer(gl, textureWidth, textureHeight)
             texture.onApply(gl)
 
-            onApplyVertices(gl)
-            drawVertices(gl, camera)
+            onDeclarePointers(gl)
+            onDrawBuffer(gl)
+
             gl.glPopMatrix()
 
             offsetX += textureWidth + spacing
         }
     }
 
-
-    override fun getVertexBuffer(): BoxVertexBuffer {
-        return super.getVertexBuffer() as BoxVertexBuffer
+    override fun onUpdateBuffer(gl: GL10, vararg data: Any) {
+        if (data.isEmpty()) {
+            super.onUpdateBuffer(gl, 0f, 0f)
+        } else {
+            super.onUpdateBuffer(gl, *data)
+        }
     }
 
 
-    override fun updateVertexBuffer() = Unit
+    class TextureTextVertexBuffer : VertexBuffer(
+        drawTopology = GL_TRIANGLE_STRIP,
+        vertexCount = BOX_VERTICES,
+        vertexSize = VERTEX_2D,
+        bufferUsage = GL_STATIC_DRAW
+    ) {
+        override fun update(gl: GL10, entity: BufferedEntity<*>, vararg data: Any) {
 
-    override fun onUpdateVertexBuffer() = Unit
+            val width = data[0] as Float
+            val height = data[1] as Float
 
+            putVertex(0, 0f, 0f)
+            putVertex(1, 0f, height)
+            putVertex(2, width, 0f)
+            putVertex(3, width, height)
+        }
+    }
 }

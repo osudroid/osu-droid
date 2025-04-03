@@ -6,35 +6,57 @@ data class Vec2(val x: Float, val y: Float) {
 
     constructor(value: Float = 0f) : this(value, value)
 
-    val total
-        get() = x + y
 
-    val vertical
-        get() = y
+    operator fun plus(other: Vec2) = Vec2(
+        x + other.x,
+        y + other.y
+    )
 
-    val horizontal
-        get() = x
+    operator fun minus(other: Vec2) = Vec2(
+        x - other.x,
+        y - other.y
+    )
 
+    operator fun times(other: Vec2) = Vec2(
+        x * other.x,
+        y * other.y
+    )
 
-    operator fun plus(other: Vec2) = Vec2(x + other.x, y + other.y)
-    operator fun minus(other: Vec2) = Vec2(x - other.x, y - other.y)
-    operator fun times(other: Vec2) = Vec2(x * other.x, y * other.y)
-    operator fun div(other: Vec2) = Vec2(x / other.x, y / other.y)
+    operator fun times(scalar: Float) = Vec2(
+        x * scalar,
+        y * scalar
+    )
 
-    operator fun times(scalar: Float) = Vec2(x * scalar, y * scalar)
-    operator fun div(scalar: Float) = Vec2(x / scalar, y / scalar)
+    operator fun div(other: Vec2) = Vec2(
+        x / other.x,
+        y / other.y
+    )
 
-    operator fun unaryMinus() = Vec2(-x, -y)
+    operator fun div(scalar: Float) = Vec2(
+        x / scalar,
+        y / scalar
+    )
+
+    operator fun unaryMinus() = Vec2(
+        -x,
+        -y
+    )
+
 
     fun distance(other: Vec2) = hypot(x - other.x, y - other.y)
-    fun absolute() = Vec2(x.absoluteValue, y.absoluteValue)
 
-    override fun equals(other: Any?): Boolean {
-        return this === other || other is Vec2 && x == other.x && y == other.y
-    }
+
+    override fun equals(other: Any?) = this === other || other is Vec2
+        && x == other.x
+        && y == other.y
+
+    override fun hashCode() = javaClass.hashCode()
+
 
     companion object {
+
         val Zero = Vec2()
-        val One = Vec2(1f, 1f)
+        val One = Vec2(1f)
+
     }
 }

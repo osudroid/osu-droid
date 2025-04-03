@@ -1,13 +1,11 @@
 package com.reco1l.andengine.shape
 
-import com.reco1l.andengine.*
-import org.anddev.andengine.engine.camera.*
-import org.anddev.andengine.opengl.util.*
-import org.anddev.andengine.opengl.vertex.*
+import com.reco1l.andengine.buffered.*
+import com.reco1l.andengine.shape.OutlineBox.*
 import javax.microedition.khronos.opengles.*
-import javax.microedition.khronos.opengles.GL10.*
+import javax.microedition.khronos.opengles.GL11.*
 
-open class OutlineBox : ExtendedEntity(vertexBuffer = OutlineBoxVertexBuffer()) {
+open class OutlineBox : BufferedEntity<OutlineBoxVertexBuffer>(OutlineBoxVertexBuffer()) {
 
     /**
      * The width of the line.
@@ -15,46 +13,23 @@ open class OutlineBox : ExtendedEntity(vertexBuffer = OutlineBoxVertexBuffer()) 
     var lineWidth = 1f
 
 
-    override fun onInitDraw(pGL: GL10) {
-        super.onInitDraw(pGL)
-
-        GLHelper.disableCulling(pGL)
-        GLHelper.disableTextures(pGL)
-        GLHelper.disableTexCoordArray(pGL)
-
-        pGL.glLineWidth(lineWidth)
+    override fun beginDraw(gl: GL10) {
+        super.beginDraw(gl)
+        gl.glLineWidth(lineWidth)
     }
 
 
-    override fun onUpdateVertexBuffer() {
-        (vertexBuffer as OutlineBoxVertexBuffer).update(drawWidth, drawHeight)
-    }
+    class OutlineBoxVertexBuffer : VertexBuffer(GL_LINE_LOOP, BOX_VERTICES, VERTEX_2D, GL_STATIC_DRAW) {
 
-    override fun drawVertices(gl: GL10, camera: Camera) {
-        gl.glDrawArrays(GL_LINE_LOOP, 0, 4)
-    }
-
-
-    class OutlineBoxVertexBuffer : VertexBuffer(4 * 2, GL11.GL_STATIC_DRAW, false) {
-
-        fun update(width: Float, height: Float) {
-            floatBuffer.apply {
-                put(0, 0f)
-                put(1, 0f)
-
-                put(2, width)
-                put(3, 0f)
-
-                put(4, width)
-                put(5, height)
-
-                put(6, 0f)
-                put(7, height)
-            }
-
-            setHardwareBufferNeedsUpdate()
+        override fun update(gl: GL10, entity: BufferedEntity<*>, vararg data: Any) {
+            putVertex(0, 0f, 0f)
+            putVertex(1, entity.width, 0f)
+            putVertex(2, entity.width, entity.height)
+            putVertex(3, 0f, entity.height)
         }
 
+        companion object {
+            const val BOX_VERTICES = 4
+        }
     }
-
 }

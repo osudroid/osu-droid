@@ -209,8 +209,8 @@ abstract class HUDElement : Container(), IGameplayEvents {
         if (isInEditMode) {
             val hud = parent as GameplayHUD
 
-            val parentLocalX = drawX + localX
-            val parentLocalY = drawY + localY
+            val parentLocalX = absoluteX + localX
+            val parentLocalY = absoluteY + localY
 
             val deltaX = parentLocalX - initialX
             val deltaY = parentLocalY - initialY
@@ -255,9 +255,9 @@ abstract class HUDElement : Container(), IGameplayEvents {
         return false
     }
 
-    override fun invalidateTransformations() {
-        super.invalidateTransformations()
-        editorOverlay?.invalidateTransformations()
+    override fun onInvalidateTransformations() {
+        super.onInvalidateTransformations()
+        editorOverlay?.onInvalidateTransformations()
     }
 
     //endregion
@@ -266,9 +266,9 @@ abstract class HUDElement : Container(), IGameplayEvents {
 
     private fun applyClosestAnchorOrigin() {
 
-        val drawSize = drawSize * scale
-        val drawPosition = anchorOffset + position - drawSize * origin
-        val parentDrawSize = (parent as ExtendedEntity).drawSize
+        val drawSize = size * scale
+        val drawPosition = anchorPosition + position - drawSize * origin
+        val parentDrawSize = (parent as ExtendedEntity).size
 
         val relativeTopLeft = drawPosition / parentDrawSize
         val relativeTopRight = (drawPosition + Vec2(drawSize.x, 0f)) / parentDrawSize
@@ -285,9 +285,9 @@ abstract class HUDElement : Container(), IGameplayEvents {
         }
 
         if (anchor != closest) {
-            val previousAnchorOffset = anchorOffset
+            val previousAnchorOffset = anchorPosition
             anchor = closest
-            position -= anchorOffset - previousAnchorOffset
+            position -= anchorPosition - previousAnchorOffset
         }
 
         if (origin != closest) {
@@ -309,8 +309,8 @@ abstract class HUDElement : Container(), IGameplayEvents {
             parent!!.attachChild(connectionLine!!)
         }
 
-        connectionLine!!.fromPoint = anchorOffset
-        connectionLine!!.toPoint = (editorOverlay?.outlinePosition ?: Vec2.Zero) + drawSize * scale * origin
+        connectionLine!!.fromPoint = anchorPosition
+        connectionLine!!.toPoint = (editorOverlay?.outlinePosition ?: Vec2.Zero) + size * scale * origin
     }
 
     override fun setScaleX(pScaleX: Float) {
