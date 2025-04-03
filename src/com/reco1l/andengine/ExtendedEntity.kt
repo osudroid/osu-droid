@@ -735,7 +735,11 @@ abstract class ExtendedEntity : Entity(0f, 0f), ITouchArea, IModifierChain {
         val inputBinding = inputBindings.getOrNull(event.pointerID)
 
         if (inputBinding != null && inputBinding.parent == this) {
-            if (!inputBinding.onAreaTouched(event, localX - inputBinding.absoluteX, localY - inputBinding.absoluteY) || event.isActionUp) {
+
+            val childLocalX = localX - inputBinding.absoluteX - padding.left
+            val childLocalY = localY - inputBinding.absoluteY - padding.top
+
+            if (!inputBinding.onAreaTouched(event, childLocalX, childLocalY) || event.isActionUp) {
                 inputBindings[event.pointerID] = null
                 return false
             }
@@ -748,7 +752,11 @@ abstract class ExtendedEntity : Entity(0f, 0f), ITouchArea, IModifierChain {
             for (i in childCount - 1 downTo 0) {
                 val child = getChild(i)
                 if (child is ExtendedEntity && child.contains(localX, localY)) {
-                    if (child.onAreaTouched(event, localX - child.absoluteX, localY - child.absoluteY)) {
+
+                    val childLocalX = localX - child.absoluteX - padding.left
+                    val childLocalY = localY - child.absoluteY - padding.top
+
+                    if (child.onAreaTouched(event, childLocalX, childLocalY)) {
                         inputBindings[event.pointerID] = child
                         return true
                     }
