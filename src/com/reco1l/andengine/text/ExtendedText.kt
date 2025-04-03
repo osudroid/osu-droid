@@ -4,7 +4,6 @@ import com.reco1l.andengine.buffered.*
 import com.reco1l.andengine.buffered.VertexBuffer
 import com.reco1l.toolkt.kotlin.*
 import org.anddev.andengine.opengl.font.*
-import org.anddev.andengine.util.HorizontalAlign.*
 import javax.microedition.khronos.opengles.*
 import javax.microedition.khronos.opengles.GL10.*
 import javax.microedition.khronos.opengles.GL11.GL_STATIC_DRAW
@@ -43,9 +42,9 @@ open class ExtendedText : CompoundBufferedEntity() {
         }
 
     /**
-     * The horizontal alignment of the text.
+     * The alignment of the text.
      */
-    var horizontalAlign = LEFT
+    var alignment = Anchor.TopLeft
         set(value) {
             if (field != value) {
                 field = value
@@ -106,17 +105,13 @@ open class ExtendedText : CompoundBufferedEntity() {
             val lines = data[1] as Array<String>
             val linesWidth = data[2] as IntArray
 
+            val lineHeight = font.lineHeight + font.lineGap
             var i = 0
 
             lines.fastForEachIndexed { lineIndex, line ->
 
-                var lineX = when (horizontalAlign) {
-                    RIGHT -> contentWidth.toInt() - linesWidth[lineIndex]
-                    CENTER -> (contentWidth.toInt() - linesWidth[lineIndex]) shr 1
-                    LEFT -> 0
-                }.toFloat()
-
-                val lineY = (lineIndex * (font.lineHeight + font.lineGap)).toFloat()
+                var lineX = innerWidth * alignment.x - linesWidth[lineIndex] * alignment.x
+                val lineY = innerHeight * alignment.y - (lines.size * lineHeight) * alignment.y + lineIndex * lineHeight
 
                 line.forEach { character ->
                     val letter = font.getLetter(character)
