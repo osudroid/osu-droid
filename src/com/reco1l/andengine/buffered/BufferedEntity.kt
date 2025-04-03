@@ -48,7 +48,7 @@ abstract class BufferedEntity<T: IBuffer>(buffer: T? = null) : ExtendedEntity() 
 
 
     /**
-     * Whether the buffer should be rebuilt. During initalization it will be true
+     * Whether the buffer should be rebuilt. During initialization, it will be true
      * if the constructor passed [IBuffer] is `null`.
      */
     protected var shouldRebuildBuffer = buffer == null
