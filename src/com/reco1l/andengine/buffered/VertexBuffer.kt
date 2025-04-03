@@ -9,7 +9,7 @@ abstract class VertexBuffer(
     val vertexCount: Int,
     val vertexSize: Int,
     bufferUsage: Int
-) : Buffer(vertexCount * vertexSize, bufferUsage), IBuffer {
+) : Buffer(vertexCount * vertexSize, bufferUsage) {
 
 
     //region Draw pipeline
