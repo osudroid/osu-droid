@@ -1,6 +1,5 @@
 package com.reco1l.andengine.text
 
-import com.reco1l.andengine.*
 import com.reco1l.andengine.buffered.*
 import com.reco1l.andengine.shape.Box.BoxVertexBuffer.Companion.BOX_VERTICES
 import com.reco1l.andengine.text.TextureFont.*
