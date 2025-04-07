@@ -171,6 +171,15 @@ interface IModifierChain {
         return fadeTo(0f, durationSec, easing)
     }
 
+
+    fun colorTo(color: Long, durationSec: Float = 0f, easing: Easing = Easing.None): UniversalModifier {
+        return colorTo(ColorARGB(color), durationSec, easing)
+    }
+
+    fun colorTo(color: ColorARGB, durationSec: Float = 0f, easing: Easing = Easing.None): UniversalModifier {
+        return colorTo(color.red, color.green, color.blue, durationSec, easing)
+    }
+
     fun colorTo(red: Float, green: Float, blue: Float, durationSec: Float = 0f, easing: Easing = Easing.None): UniversalModifier {
         return applyModifier {
             type = Color
