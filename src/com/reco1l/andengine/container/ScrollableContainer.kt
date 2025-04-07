@@ -46,7 +46,7 @@ open class ScrollableContainer : Container() {
      * Whether the container is scrolling or not.
      */
     val isScrolling
-        get() = velocityX != 0f || velocityY != 0f
+        get() = velocityX != 0f || velocityY != 0f || isUserScrolling
 
     //region Scrolling properties
 
@@ -113,12 +113,20 @@ open class ScrollableContainer : Container() {
     /**
      * The deceleration factor for the scrollable container.
      */
-    var deceleration = Vec2(DEFAULT_DECELERATION, DEFAULT_DECELERATION)
+    var deceleration = Vec2(DEFAULT_DECELERATION)
 
     /**
      * The maximum velocity in px/s for both axes.
      */
-    var maxVelocity = Vec2(5000f, 5000f)
+    var maxVelocity = Vec2(DEFAULT_MAX_VELOCITY)
+
+    /**
+     * The minimum travel distance in px for both axes.
+     *
+     * This is used to determine if the user has scrolled enough to start
+     * scrolling the container.
+     */
+    var minimumTravel = Vec2(DEFAULT_MINIMUM_TRAVEL)
 
     //endregion
 
@@ -215,7 +223,7 @@ open class ScrollableContainer : Container() {
             horizontalIndicator?.alpha = 0.5f
         }
 
-        invalidate(InvalidationFlag.Transformations or InvalidationFlag.InputBindings)
+        invalidate(InvalidationFlag.InputBindings)
     }
 
     //endregion
@@ -232,24 +240,28 @@ open class ScrollableContainer : Container() {
 
     private fun bounceBackIfOverflow() {
 
-        if (scrollY < 0) {
-            velocityY = 0f
-            scrollY += -scrollY * 0.1f
-        }
-
-        if (scrollX > maxScrollX) {
+        if (scrollX < 0f || scrollX > maxScrollX) {
             velocityX = 0f
-            scrollX -= (scrollX - maxScrollX) * 0.1f
+
+            val bounceBack = (if (scrollX < 0f) -scrollX else -(scrollX - maxScrollX)) * 0.2f
+
+            if (abs(bounceBack) < .5f) {
+                scrollX = if (scrollX < 0f) 0f else maxScrollX
+            } else {
+                scrollX += bounceBack
+            }
         }
 
-        if (scrollX < 0) {
-            velocityX = 0f
-            scrollX += -scrollX * 0.1f
-        }
-
-        if (scrollY > maxScrollY) {
+        if (scrollY < 0f || scrollY > maxScrollY) {
             velocityY = 0f
-            scrollY -= (scrollY - maxScrollY) * 0.1f
+
+            val bounceBack = (if (scrollY < 0f) -scrollY else -(scrollY - maxScrollY)) * 0.2f
+
+            if (abs(bounceBack) < .5f) {
+                scrollY = if (scrollY < 0f) 0f else maxScrollY
+            } else {
+                scrollY += bounceBack
+            }
         }
     }
 
@@ -336,16 +348,29 @@ open class ScrollableContainer : Container() {
 
     private fun handleUserScroll(deltaX: Float, deltaY: Float) {
 
-        val dragTimeSeconds = (System.currentTimeMillis() - dragStartTimeMillis) / 1000
+        val dragTimeSeconds = (System.currentTimeMillis() - dragStartTimeMillis) / 1000f
+        val length = hypot(deltaX, deltaY)
 
         if (scrollAxes.isHorizontal && !Precision.almostEquals(deltaX, 0f)) {
-            scrollX -= deltaX
-            velocityX = (abs(deltaX) / dragTimeSeconds) * sign(deltaX)
+
+            if (scrollX - deltaX in 0f..maxScrollX) {
+                velocityX = abs(deltaX) / dragTimeSeconds * sign(deltaX)
+                scrollX -= deltaX
+            } else {
+                velocityX = 0f
+                scrollX -= deltaX * if (length > 0) length.pow(0.7f) / length else 0f
+            }
         }
 
         if (scrollAxes.isVertical && !Precision.almostEquals(deltaY, 0f)) {
-            scrollY -= deltaY
-            velocityY = (abs(deltaY) / dragTimeSeconds) * sign(deltaY)
+
+            if (scrollY - deltaY in 0f..maxScrollY) {
+                velocityY = abs(deltaY) / dragTimeSeconds * sign(deltaY)
+                scrollY -= deltaY
+            } else {
+                velocityY = 0f
+                scrollY -= deltaY * if (length > 0) length.pow(0.7f) / length else 0f
+            }
         }
     }
     
@@ -370,8 +395,17 @@ open class ScrollableContainer : Container() {
                 val deltaX = localX - initialX
                 val deltaY = localY - initialY
 
-                if (abs(deltaX) > 0f || abs(deltaY) > 0f) {
-                    handleUserScroll(localX, localY)
+                val isScrollingHorizontal = scrollAxes.isHorizontal && abs(deltaX) > minimumTravel.x
+                val isScrollingVertical = scrollAxes.isVertical && abs(deltaY) > minimumTravel.y
+
+                if (isScrolling || isScrollingHorizontal || isScrollingVertical) {
+
+                    // If it was already scrolling we don't need to subtract the minimum travel.
+                    if (isScrolling) {
+                        handleUserScroll(deltaX, deltaY)
+                    } else {
+                        handleUserScroll(deltaX - minimumTravel.x, deltaY - minimumTravel.y)
+                    }
 
                     initialX = localX
                     initialY = localY
@@ -400,6 +434,7 @@ open class ScrollableContainer : Container() {
 
         const val DEFAULT_DECELERATION = 0.98f
         const val DEFAULT_MINIMUM_TRAVEL = 10f
+        const val DEFAULT_MAX_VELOCITY = 1000f
 
     }
 }
