@@ -73,9 +73,10 @@ class HUDComboCounter : HUDElement() {
 
         displayedCountTextSprite.setScale(1f)
 
-        displayedCountTextSprite
-            .scaleTo(1.1f, SMALL_POP_OUT_DURATION / 2f, Easing.In)
-            .scaleTo(1f, SMALL_POP_OUT_DURATION / 2f, Easing.Out)
+        displayedCountTextSprite.beginSequence {
+            scaleTo(1.1f, SMALL_POP_OUT_DURATION / 2f, Easing.In)
+            scaleTo(1f, SMALL_POP_OUT_DURATION / 2f, Easing.Out)
+        }
     }
 
 

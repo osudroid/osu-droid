@@ -217,7 +217,10 @@ class HUDElementOverlay(private val element: HUDElement) : ConstraintContainer()
             if (event.isActionUp) {
                 action()
                 clearEntityModifiers()
-                scaleTo(0.9f, 0.1f).scaleTo(1f, 0.1f)
+                beginSequence {
+                    scaleTo(0.9f, 0.1f)
+                    scaleTo(1f, 0.1f)
+                }
                 return true
             }
 

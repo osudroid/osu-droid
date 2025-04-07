@@ -1,6 +1,9 @@
 package com.reco1l.andengine.modifier
 
 import android.util.*
+import androidx.core.util.*
+import androidx.core.util.Pools.Pool
+import androidx.core.util.Pools.SynchronizedPool
 import com.edlplan.framework.easing.Easing
 import com.reco1l.andengine.modifier.ModifierType.*
 import com.reco1l.framework.*
@@ -46,8 +49,6 @@ class UniversalModifier @JvmOverloads constructor(private val pool: Pool<Univers
             var totalDuration = 0f
 
             value?.fastForEach {
-                it.parent = this
-
                 if (type == Sequence) {
                     totalDuration += it.duration
                 } else {
@@ -74,21 +75,9 @@ class UniversalModifier @JvmOverloads constructor(private val pool: Pool<Univers
      */
     var onFinished: OnModifierFinished? = null
 
-    /**
-     * Whether to allow nested modifiers.
-     *
-     * Used to prevent chained calls of modifiers from being
-     * applied to this compound modifier, only modifiers inside the block should be applied.
-     */
-    var allowNesting = true
-
-
-    private var parent: UniversalModifier? = null
 
     private var easing = Easing.None
-
     private var duration = 0f
-
     private var elapsedSec = -1f
 
 
@@ -193,7 +182,12 @@ class UniversalModifier @JvmOverloads constructor(private val pool: Pool<Univers
 
     override fun onUnregister() {
         setToDefault()
-        pool?.free(this)
+
+        try {
+            pool?.release(this)
+        } catch (e: IllegalStateException) {
+            Log.e("UniversalModifier", "Failed to release modifier to pool.", e)
+        }
     }
 
 
@@ -206,45 +200,18 @@ class UniversalModifier @JvmOverloads constructor(private val pool: Pool<Univers
     }
 
 
-    override fun applyModifier(block: UniversalModifier.() -> Unit): UniversalModifier {
+    override fun appendModifier(block: UniversalModifier.() -> Unit): UniversalModifier {
 
-        if (type.isCompoundModifier && allowNesting) {
-
-            val nested = pool?.obtain() ?: UniversalModifier()
-            nested.setToDefault()
-            nested.parent = this
-            nested.block()
-
-            modifiers = modifiers?.plus(nested) ?: arrayOf(nested)
-            return nested
+        if (!type.isCompoundModifier) {
+            throw IllegalStateException("Cannot apply modifier to a non-compound modifier.")
         }
 
-        if (parent?.type == Sequence) {
-            return parent!!.applyModifier(block)
-        }
+        val modifier = pool?.acquire() ?: UniversalModifier()
+        modifier.setToDefault()
+        modifier.block()
 
-        if (type != Sequence || !allowNesting) {
-
-            val copy = pool?.obtain() ?: UniversalModifier()
-            copy.setToDefault()
-            copy.parent = this
-
-            copy.type = type
-            copy.easing = easing
-            copy.duration = duration
-            copy.modifiers = modifiers
-            copy.onFinished = onFinished
-            copy.finalValues = finalValues
-            copy.initialValues = initialValues
-
-            modifiers = null // Preventing modifiers of the copy from being pooled.
-            setToDefault()
-
-            type = Sequence
-            modifiers = arrayOf(copy)
-        }
-
-        return applyModifier(block)
+        modifiers = modifiers?.plus(modifier) ?: arrayOf(modifier)
+        return modifier
     }
 
 
@@ -285,10 +252,8 @@ class UniversalModifier @JvmOverloads constructor(private val pool: Pool<Univers
 
         duration = 0f
 
-        parent = null
         onFinished = null
         finalValues = null
-        allowNesting = true
         initialValues = null
 
         clearNestedModifiers()
@@ -375,7 +340,9 @@ class UniversalModifier @JvmOverloads constructor(private val pool: Pool<Univers
          * The global pool for universal modifiers.
          */
         @JvmField
-        val GlobalPool = Pool { UniversalModifier(it) }
+        val GlobalPool = SynchronizedPool<UniversalModifier>(32).apply {
+            release(UniversalModifier(this))
+        }
 
     }
 

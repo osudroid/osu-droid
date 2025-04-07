@@ -1,6 +1,7 @@
 package com.reco1l.andengine
 
 import android.util.*
+import android.view.*
 import com.reco1l.andengine.modifier.*
 import com.reco1l.framework.*
 import com.reco1l.framework.math.*
@@ -264,6 +265,11 @@ abstract class ExtendedEntity : Entity(0f, 0f), ITouchArea, IModifierChain {
     //endregion
 
     //region State properties
+
+    /**
+     * The modifier pool used to manage the modifiers of this entity. By default [UniversalModifier.GlobalPool].
+     */
+    var modifierPool = UniversalModifier.GlobalPool
 
     /**
      * The current invalidation flags. Indicates which properties were updated and need to be handled.
@@ -703,7 +709,9 @@ abstract class ExtendedEntity : Entity(0f, 0f), ITouchArea, IModifierChain {
         unregisterEntityModifiers { it is UniversalModifier && it.type in type }
     }
 
-        val modifier = UniversalModifier.GlobalPool.obtain()
+    override fun appendModifier(block: UniversalModifier.() -> Unit): UniversalModifier {
+
+        val modifier = modifierPool.acquire() ?: UniversalModifier(modifierPool)
         modifier.setToDefault()
         modifier.block()
 
