@@ -40,6 +40,18 @@ val ExtendedEntity.contentSize: Vec2
     get() = Vec2(contentWidth, contentHeight)
 
 /**
+ * The position of the content in the x-axis of the entity.
+ */
+val IEntity?.contentX: Float
+    get() = if (this is ExtendedEntity) padding.left else 0f
+
+/**
+ * The position of the content in the y-axis of the entity.
+ */
+val IEntity?.contentY: Float
+    get() = if (this is ExtendedEntity) padding.top else 0f
+
+/**
  * The size with transformations applied.
  */
 val ExtendedEntity.transformedSize: Vec2
@@ -91,14 +103,14 @@ val ExtendedEntity.absolutePosition: Vec2
  * This takes into account the anchor and origin.
  */
 val IEntity.absoluteX: Float
-    get() = if (this is ExtendedEntity) anchorPositionX - originPositionX + x + translationX else x
+    get() = if (this is ExtendedEntity) parent.contentX + anchorPositionX - originPositionX + x + translationX else x
 
 /**
  * The absolute position of the Y axis of the entity in the parent coordinate system.
  * This takes into account the anchor and origin but not transformations.
  */
 val IEntity.absoluteY: Float
-    get() = if (this is ExtendedEntity) anchorPositionY - originPositionY + y + translationY else y
+    get() = if (this is ExtendedEntity) parent.contentY + anchorPositionY - originPositionY + y + translationY else y
 
 /**
  * The position of the entity. This does not take into account the anchor and origin.
