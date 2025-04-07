@@ -39,7 +39,7 @@ class HUDElementSelector(private val hud: GameplayHUD) : Container(), IGameplayE
         relativeSizeAxes = Axes.Y
         height = 1f
         width = SELECTOR_WIDTH
-        indicatorY!!.width = 4f
+        verticalIndicator!!.width = 4f
 
         background = Box().apply {
             color = ColorARGB(0xFF1E1E2E)
