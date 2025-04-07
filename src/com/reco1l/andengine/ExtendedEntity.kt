@@ -293,28 +293,6 @@ abstract class ExtendedEntity : Entity(0f, 0f), ITouchArea, IModifierChain {
      */
     fun invalidate(flag: Int) {
         invalidationFlags = invalidationFlags or flag
-
-        var recursiveInvalidationFlags = 0
-
-        if (flag and InvalidationFlag.Position != 0
-            || flag and InvalidationFlag.Size != 0
-            || flag and InvalidationFlag.ContentSize != 0) {
-
-            invalidationFlags = invalidationFlags or InvalidationFlag.Transformations
-            recursiveInvalidationFlags = InvalidationFlag.Transformations
-        }
-
-        if (flag and InvalidationFlag.InputBindings != 0) {
-            recursiveInvalidationFlags = recursiveInvalidationFlags or InvalidationFlag.InputBindings
-        }
-
-        if (recursiveInvalidationFlags != 0) {
-            runSafe {
-                mChildren?.fastForEach {
-                    (it as? ExtendedEntity)?.invalidate(recursiveInvalidationFlags)
-                }
-            }
-        }
     }
 
     //endregion
@@ -510,6 +488,8 @@ abstract class ExtendedEntity : Entity(0f, 0f), ITouchArea, IModifierChain {
 
         if (invalidationFlags != 0) {
 
+            var recursiveInvalidationFlags = 0
+
             if (invalidationFlags and InvalidationFlag.Position != 0) {
                 onPositionChanged()
             }
@@ -518,12 +498,23 @@ abstract class ExtendedEntity : Entity(0f, 0f), ITouchArea, IModifierChain {
                 onSizeChanged()
             }
 
-            if (invalidationFlags and InvalidationFlag.Transformations != 0) {
+            if (invalidationFlags and InvalidationFlag.Transformations != 0
+                || invalidationFlags and InvalidationFlag.Position != 0
+                || invalidationFlags and InvalidationFlag.Size != 0
+                || invalidationFlags and InvalidationFlag.ContentSize != 0) {
                 onInvalidateTransformations()
+                recursiveInvalidationFlags = InvalidationFlag.Transformations
             }
 
             if (invalidationFlags and InvalidationFlag.InputBindings != 0) {
                 onInvalidateInputBindings()
+                recursiveInvalidationFlags = recursiveInvalidationFlags or InvalidationFlag.InputBindings
+            }
+
+            mChildren?.fastForEach { child ->
+                if (child is ExtendedEntity) {
+                    child.invalidate(recursiveInvalidationFlags)
+                }
             }
 
             // During the invalidation process the flags could be changed.
