@@ -272,16 +272,16 @@ abstract class ExtendedEntity : Entity(0f, 0f), ITouchArea, IModifierChain {
     var modifierPool = UniversalModifier.GlobalPool
 
     /**
+     * The entity that is currently being decorated by this entity.
+     */
+    var decoratedEntity: ExtendedEntity? = null
+
+    /**
      * The current invalidation flags. Indicates which properties were updated and need to be handled.
      *
      * @see InvalidationFlag
      */
     protected var invalidationFlags = InvalidationFlag.Position or InvalidationFlag.Size
-
-    /**
-     * The entity that is currently being decorated by this entity.
-     */
-    protected var decoratedEntity: ExtendedEntity? = null
 
     /**
      * The input bindings of the entity. This is used to handle touch events.
