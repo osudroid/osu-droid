@@ -221,7 +221,9 @@ abstract class ExtendedEntity : Entity(0f, 0f), ITouchArea, IModifierChain {
                     Log.e("ExtendedEntity", "The background entity is already attached to another entity.")
                     return
                 }
+                field?.decoratedEntity = null
                 field = value
+                field?.decoratedEntity = this
             }
         }
 
@@ -236,7 +238,9 @@ abstract class ExtendedEntity : Entity(0f, 0f), ITouchArea, IModifierChain {
                     Log.e("ExtendedEntity", "The foreground entity is already attached to another entity.")
                     return
                 }
+                field?.decoratedEntity = null
                 field = value
+                field?.decoratedEntity = this
             }
         }
 
@@ -267,6 +271,11 @@ abstract class ExtendedEntity : Entity(0f, 0f), ITouchArea, IModifierChain {
      * @see InvalidationFlag
      */
     protected var invalidationFlags = InvalidationFlag.Position or InvalidationFlag.Size
+
+    /**
+     * The entity that is currently being decorated by this entity.
+     */
+    protected var decoratedEntity: ExtendedEntity? = null
 
     /**
      * The input bindings of the entity. This is used to handle touch events.
@@ -432,17 +441,21 @@ abstract class ExtendedEntity : Entity(0f, 0f), ITouchArea, IModifierChain {
     }
 
     open fun onApplyColor(gl: GL10) {
+
         var red = mRed
         var green = mGreen
         var blue = mBlue
         var alpha = mAlpha
-        var parent = parent
+        var parent = parent ?: decoratedEntity
 
         while (parent != null) {
 
-            red *= parent.red
-            green *= parent.green
-            blue *= parent.blue
+            // If this entity is a decoration we only multiply the alpha.
+            if (decoratedEntity == null) {
+                red *= parent.red
+                green *= parent.green
+                blue *= parent.blue
+            }
             alpha *= parent.alpha
 
             // We'll assume at this point there's no need to keep multiplying.
