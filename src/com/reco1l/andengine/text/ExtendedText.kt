@@ -111,8 +111,8 @@ open class ExtendedText : CompoundBufferedEntity() {
 
             lines.fastForEachIndexed { lineIndex, line ->
 
-                var lineX = innerWidth * alignment.x - linesWidth[lineIndex] * alignment.x
-                val lineY = innerHeight * alignment.y - (lines.size * lineHeight) * alignment.y + lineIndex * lineHeight
+                var lineX = width * alignment.x - linesWidth[lineIndex] * alignment.x
+                val lineY = height * alignment.y - (lines.size * lineHeight) * alignment.y + lineIndex * lineHeight
 
                 line.forEach { character ->
                     val letter = font.getLetter(character)
