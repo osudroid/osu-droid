@@ -716,9 +716,29 @@ abstract class ExtendedEntity : Entity(0f, 0f), ITouchArea, IModifierChain {
     //region Input
 
     /**
+     * Propagates a touch event to the entity.
+     */
+    protected fun propagateTouchEvent(action: Int, pointerIndex: Int = 0, localX: Float = 0f, localY: Float = 0f): Boolean {
+
+        val motionEvent = MotionEvent.obtain(0, 0, action, 0f, 0f, 0)
+        val touchEvent = TouchEvent.obtain(0f, 0f, action, pointerIndex, motionEvent)
+
+        val result = onAreaTouched(touchEvent, localX, localY)
+
+        touchEvent.recycle()
+        motionEvent.recycle()
+        return result
+    }
+
+    /**
      * Called when input bindings are invalidated and needs to be removed.
      */
     open fun onInvalidateInputBindings() {
+        inputBindings.fastForEachIndexed { index, binding ->
+            if (binding != null) {
+                propagateTouchEvent(MotionEvent.ACTION_CANCEL, index)
+            }
+        }
         inputBindings.fill(null)
     }
 
@@ -727,13 +747,10 @@ abstract class ExtendedEntity : Entity(0f, 0f), ITouchArea, IModifierChain {
         val inputBinding = inputBindings.getOrNull(event.pointerID)
 
         if (inputBinding != null && inputBinding.parent == this) {
+            inputBinding.onAreaTouched(event, localX - inputBinding.absoluteX, localY - inputBinding.absoluteY)
 
-            val childLocalX = localX - inputBinding.absoluteX - padding.left
-            val childLocalY = localY - inputBinding.absoluteY - padding.top
-
-            if (!inputBinding.onAreaTouched(event, childLocalX, childLocalY) || event.isActionUp) {
+            if (event.isActionUp) {
                 inputBindings[event.pointerID] = null
-                return false
             }
             return true
         } else {
@@ -744,11 +761,7 @@ abstract class ExtendedEntity : Entity(0f, 0f), ITouchArea, IModifierChain {
             for (i in childCount - 1 downTo 0) {
                 val child = getChild(i)
                 if (child is ExtendedEntity && child.contains(localX, localY)) {
-
-                    val childLocalX = localX - child.absoluteX - padding.left
-                    val childLocalY = localY - child.absoluteY - padding.top
-
-                    if (child.onAreaTouched(event, childLocalX, childLocalY)) {
+                    if (child.onAreaTouched(event, localX - child.absoluteX, localY - child.absoluteY)) {
                         inputBindings[event.pointerID] = child
                         return true
                     }
