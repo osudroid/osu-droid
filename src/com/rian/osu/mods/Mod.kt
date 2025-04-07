@@ -21,7 +21,7 @@ sealed class Mod {
     /**
      * The suffix to append to the texture name of this [Mod].
      */
-    abstract val textureNameSuffix: String
+    protected abstract val textureNameSuffix: String
 
     /**
      * The texture name of this [Mod].
