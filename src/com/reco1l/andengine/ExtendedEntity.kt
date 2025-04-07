@@ -465,22 +465,16 @@ abstract class ExtendedEntity : Entity(0f, 0f), ITouchArea, IModifierChain {
         if (clipChildren) {
             GLHelper.enableScissorTest(gl)
 
-            var (bottomLeftX, bottomLeftY) = camera.getScreenSpaceCoordinates(convertLocalToSceneCoordinates(0f, 0f))
-            var (topLeftX, topLeftY) = camera.getScreenSpaceCoordinates(convertLocalToSceneCoordinates(0f, innerHeight))
-            var (topRightX, topRightY) = camera.getScreenSpaceCoordinates(convertLocalToSceneCoordinates(innerWidth, innerHeight))
-            var (bottomRightX, bottomRightY) = camera.getScreenSpaceCoordinates(convertLocalToSceneCoordinates(innerWidth, 0f))
+            val (topLeftX, topLeftY) = camera.getScreenSpaceCoordinates(convertLocalToSceneCoordinates(0f, 0f))
+            val (topRightX, topRightY) = camera.getScreenSpaceCoordinates(convertLocalToSceneCoordinates(width, 0f))
+            val (bottomRightX, bottomRightY) = camera.getScreenSpaceCoordinates(convertLocalToSceneCoordinates(width, height))
+            val (bottomLeftX, bottomLeftY) = camera.getScreenSpaceCoordinates(convertLocalToSceneCoordinates(0f, height))
 
-            // Flip the Y axis to match the OpenGL coordinate system.
-            bottomLeftY = camera.surfaceHeight - bottomLeftY
-            topLeftY = camera.surfaceHeight - topLeftY
-            topRightY = camera.surfaceHeight - topRightY
-            bottomRightY = camera.surfaceHeight - bottomRightY
+            val minClippingX = minOf(topLeftX, bottomLeftX, bottomRightX, topRightX)
+            val minClippingY = minOf(topLeftY, bottomLeftY, bottomRightY, topRightY)
 
-            val minClippingX = minOf(bottomLeftX, topLeftX, topRightX, bottomRightX)
-            val minClippingY = minOf(bottomLeftY, topLeftY, topRightY, bottomRightY)
-
-            val maxClippingX = maxOf(bottomLeftX, topLeftX, topRightX, bottomRightX)
-            val maxClippingY = maxOf(bottomLeftY, topLeftY, topRightY, bottomRightY)
+            val maxClippingX = maxOf(topLeftX, bottomLeftX, bottomRightX, topRightX)
+            val maxClippingY = maxOf(topLeftY, bottomLeftY, bottomRightY, topRightY)
 
             gl.glScissor(
                 minClippingX.toInt(),
