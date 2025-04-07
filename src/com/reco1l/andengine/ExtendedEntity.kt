@@ -713,7 +713,9 @@ abstract class ExtendedEntity : Entity(0f, 0f), ITouchArea, IModifierChain {
 
     //region Modifiers
 
-    override fun applyModifier(block: UniversalModifier.() -> Unit): UniversalModifier {
+    fun clearModifiers(vararg type: ModifierType) {
+        unregisterEntityModifiers { it is UniversalModifier && it.type in type }
+    }
 
         val modifier = UniversalModifier.GlobalPool.obtain()
         modifier.setToDefault()
