@@ -313,11 +313,15 @@ abstract class ExtendedEntity : Entity(0f, 0f), ITouchArea, IModifierChain {
     //region Attachment
 
     override fun setParent(newParent: IEntity?) {
-        (parent as? Scene)?.unregisterTouchArea(this)
-        (parent as? ExtendedEntity)?.onChildDetached(this)
+        when (val parent = parent) {
+            is Scene -> parent.unregisterTouchArea(this)
+            is ExtendedEntity -> parent.onChildDetached(this)
+        }
         super.setParent(newParent)
-        (newParent as? ExtendedEntity)?.onChildAttached(this)
-        (newParent as? ExtendedScene)?.registerTouchArea(this)
+        when (newParent) {
+            is ExtendedScene -> newParent.registerTouchArea(this)
+            is ExtendedEntity -> newParent.onChildAttached(this)
+        }
     }
 
     /**
