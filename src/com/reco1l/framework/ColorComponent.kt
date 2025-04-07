@@ -75,3 +75,5 @@ value class ColorARGB(private val hex: Int) {
 
 
 fun Int.toColorARGB() = ColorARGB(this)
+
+fun Long.toColorARGB() = ColorARGB(this)
