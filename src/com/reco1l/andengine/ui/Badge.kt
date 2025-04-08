@@ -3,7 +3,6 @@
 package com.reco1l.andengine.ui
 
 import com.reco1l.andengine.*
-import com.reco1l.andengine.ExtendedEntity.Companion.FitParent
 import com.reco1l.andengine.container.*
 import com.reco1l.andengine.shape.*
 import com.reco1l.andengine.text.*
