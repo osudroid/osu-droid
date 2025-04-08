@@ -188,11 +188,11 @@ class ModMenuV2 : ExtendedScene() {
 
         modButtons.fastForEach { button ->
 
-            if (button.mod == mod) {
-                button.isSelected = true
-            } else if (button.mod::class in mod.incompatibleMods) {
-                button.isSelected = false
-                enabledMods.remove(button.mod)
+            val wasSelected = button.isSelected
+            button.isSelected = button.mod in enabledMods
+
+            // Handle incompatible mods with the selected mod.
+            if (wasSelected && !button.isSelected) {
                 customizationMenu.onModRemoved(button.mod)
             }
         }
