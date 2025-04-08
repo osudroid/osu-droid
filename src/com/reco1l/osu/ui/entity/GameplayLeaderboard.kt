@@ -32,18 +32,17 @@ class GameplayLeaderboard : HUDElement() {
     private val isGlobalLeaderboard = GlobalManager.getInstance().songMenu.isBoardOnline
 
 
-    override fun onContentSizeMeasured(): Boolean {
+    override fun onSizeChanged() {
+        super.onSizeChanged()
 
         // Setting a minimum size for the leaderboard, this is used to prevent the leaderboard
         // from being too small during HUD editor mode.
         contentWidth = contentWidth.coerceAtLeast(SPRITE_WIDTH)
         contentHeight = contentHeight.coerceAtLeast(SPRITE_HEIGHT)
-
-        return super.onContentSizeMeasured()
     }
 
-    override fun onManagedUpdate(pSecondsElapsed: Float) {
-        super.onManagedUpdate(pSecondsElapsed)
+    override fun onManagedUpdate(deltaTimeSec: Float) {
+        super.onManagedUpdate(deltaTimeSec)
 
         if (!isMultiplayer) {
             val items = GlobalManager.getInstance().songMenu.board

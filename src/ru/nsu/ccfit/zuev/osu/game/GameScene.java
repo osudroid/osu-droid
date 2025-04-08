@@ -552,7 +552,6 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
 
         FollowPointConnection.getPool().renew(16);
         SliderTickSprite.getPool().renew(16);
-        UniversalModifier.GlobalPool.renew(24);
 
         // TODO replay
         offsetSum = 0;

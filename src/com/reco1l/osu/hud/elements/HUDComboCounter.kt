@@ -73,9 +73,10 @@ class HUDComboCounter : HUDElement() {
 
         displayedCountTextSprite.setScale(1f)
 
-        displayedCountTextSprite
-            .scaleTo(1.1f, SMALL_POP_OUT_DURATION / 2f, Easing.In)
-            .scaleTo(1f, SMALL_POP_OUT_DURATION / 2f, Easing.Out)
+        displayedCountTextSprite.beginSequence {
+            scaleTo(1.1f, SMALL_POP_OUT_DURATION / 2f, Easing.In)
+            scaleTo(1f, SMALL_POP_OUT_DURATION / 2f, Easing.Out)
+        }
     }
 
 
@@ -83,14 +84,14 @@ class HUDComboCounter : HUDElement() {
         setCombo(game.stat.combo)
     }
 
-    override fun onManagedUpdate(pSecondsElapsed: Float) {
+    override fun onManagedUpdate(deltaTimeSec: Float) {
 
         popOutCount?.scaleCenterX = anchor.x
         popOutCount?.scaleCenterY = anchor.y
         displayedCountTextSprite.scaleCenterX = anchor.x
         displayedCountTextSprite.scaleCenterY = anchor.y
 
-        super.onManagedUpdate(pSecondsElapsed)
+        super.onManagedUpdate(deltaTimeSec)
     }
 
 

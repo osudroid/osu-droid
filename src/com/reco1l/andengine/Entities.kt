@@ -1,183 +1,185 @@
 package com.reco1l.andengine
 
 import com.reco1l.framework.math.Vec2
-import com.reco1l.framework.math.Vec4
 import org.anddev.andengine.entity.IEntity
 import org.anddev.andengine.entity.scene.CameraScene
+import org.anddev.andengine.entity.scene.Scene
 import org.anddev.andengine.entity.shape.IShape
+import ru.nsu.ccfit.zuev.osu.Config
 
+//region Size related properties
 
-fun IEntity?.getPadding() = when (this) {
-    is ExtendedEntity -> padding
-    else -> Vec4.Zero
-}
-
-fun IEntity?.getPaddedWidth() = when (this) {
-    is ExtendedEntity -> drawWidth - padding.horizontal
+fun IEntity?.getWidth() = when (this) {
+    is ExtendedEntity -> width
     is CameraScene -> camera.widthRaw
     is IShape -> width
+    is Scene -> Config.getRES_WIDTH().toFloat()
     else -> 0f
 }
 
-fun IEntity?.getPaddedHeight() = when (this) {
-    is ExtendedEntity -> drawHeight - padding.vertical
+fun IEntity?.getHeight() = when (this) {
+    is ExtendedEntity -> height
     is CameraScene -> camera.heightRaw
     is IShape -> height
+    is Scene -> Config.getRES_HEIGHT().toFloat()
     else -> 0f
 }
 
 
 /**
  * The size of the entity.
- *
- * When using the getter this will return the maximum value between the width and height or the same.
- * When using the setter this will set the width and height to the same value.
  */
-var ExtendedEntity.size
+var ExtendedEntity.size: Vec2
     get() = Vec2(width, height)
-    set(value) {
-        setSize(value.x, value.y)
-    }
+    set(value) = setSize(value.x, value.y)
 
 /**
- * The draw size of the entity.
+ * The content size of the entity.
  */
-val ExtendedEntity.drawSize
-    get() = Vec2(drawWidth, drawHeight)
+val ExtendedEntity.contentSize: Vec2
+    get() = Vec2(contentWidth, contentHeight)
 
 /**
- * The position of the entity.
+ * The position of the content in the x-axis of the entity.
+ */
+val IEntity?.contentX: Float
+    get() = if (this is ExtendedEntity) padding.left else 0f
+
+/**
+ * The position of the content in the y-axis of the entity.
+ */
+val IEntity?.contentY: Float
+    get() = if (this is ExtendedEntity) padding.top else 0f
+
+/**
+ * The size with transformations applied.
+ */
+val ExtendedEntity.transformedSize: Vec2
+    get() = Vec2(transformedWidth, transformedHeight)
+
+/**
+ * The width with transformations applied.
+ */
+val ExtendedEntity.transformedWidth: Float
+    get() = width * scaleX
+
+/**
+ * The height with transformations applied.
+ */
+val ExtendedEntity.transformedHeight: Float
+    get() = height * scaleY
+
+/**
+ * The size minus padding of the entity.
+ */
+val ExtendedEntity.innerSize: Vec2
+    get() = Vec2(innerWidth, innerHeight)
+
+/**
+ * The width minus padding of the entity.
+ */
+val IEntity?.innerWidth: Float
+    get() = if (this is ExtendedEntity) width - padding.horizontal else getWidth()
+
+/**
+ * The height minus padding of the entity.
+ */
+val IEntity?.innerHeight: Float
+    get() = if (this is ExtendedEntity) height - padding.vertical else getHeight()
+
+//endregion
+
+//region Position related properties
+
+/**
+ * The absolute position of the entity in the parent coordinate system.
+ * This takes into account the anchor and origin but not transformations.
+ */
+val ExtendedEntity.absolutePosition: Vec2
+    get() = Vec2(absoluteX, absoluteY)
+
+/**
+ * The absolute position of the X axis of the entity in the parent coordinate system.
+ * This takes into account the anchor and origin.
+ */
+val IEntity.absoluteX: Float
+    get() = if (this is ExtendedEntity) parent.contentX + anchorPositionX - originPositionX + x + translationX else x
+
+/**
+ * The absolute position of the Y axis of the entity in the parent coordinate system.
+ * This takes into account the anchor and origin but not transformations.
+ */
+val IEntity.absoluteY: Float
+    get() = if (this is ExtendedEntity) parent.contentY + anchorPositionY - originPositionY + y + translationY else y
+
+/**
+ * The position of the entity. This does not take into account the anchor and origin.
  */
 var ExtendedEntity.position
     get() = Vec2(x, y)
-    set(value) {
-        setPosition(value.x, value.y)
-    }
+    set(value) = setPosition(value.x, value.y)
 
 /**
- * The draw position of the entity.
+ * The anchor position of the entity.
  */
-val ExtendedEntity.drawPosition
-    get() = Vec2(drawX, drawY)
+val ExtendedEntity.anchorPosition: Vec2
+    get() = Vec2(anchorPositionX, anchorPositionY)
 
+/**
+ * The anchor position of the entity in the X axis.
+ */
+val ExtendedEntity.anchorPositionX: Float
+    get() = parent.innerWidth * anchor.x
+
+/**
+ * The anchor position of the entity in the Y axis.
+ */
+val ExtendedEntity.anchorPositionY: Float
+    get() = parent.innerHeight * anchor.y
+
+
+/**
+ * The origin position of the entity.
+ */
+val ExtendedEntity.originPosition: Vec2
+    get() = Vec2(originPositionX, originPositionY)
+
+/**
+ * The origin position of the entity in the X axis.
+ */
+val ExtendedEntity.originPositionX: Float
+    get() = width * origin.x
+
+/**
+ * The origin position of the entity in the Y axis.
+ */
+val ExtendedEntity.originPositionY: Float
+    get() = height * origin.y
+
+//endregion
+
+//region Transformation properties
 
 /**
  * The scale of the entity.
  */
-var ExtendedEntity.scale
+var IEntity.scale
     get() = Vec2(scaleX, scaleY)
-    set(value) {
-        setScale(value.x, value.y)
-    }
+    set(value) = setScale(value.x, value.y)
 
 /**
  * The center where the entity will scale from.
  */
-var ExtendedEntity.scaleCenter
+var IEntity.scaleCenter
     get() = Vec2(scaleCenterX, scaleCenterY)
-    set(value) {
-        setScaleCenter(value.x, value.y)
-    }
+    set(value) = setScaleCenter(value.x, value.y)
 
 /**
  * The center where the entity will rotate from.
  */
-var ExtendedEntity.rotationCenter
+var IEntity.rotationCenter
     get() = Vec2(rotationCenterX, rotationCenterY)
-    set(value) {
-        setRotationCenter(value.x, value.y)
-    }
+    set(value) = setRotationCenter(value.x, value.y)
 
+//endregion
 
-/**
- * The total offset applied to the entity.
- */
-val ExtendedEntity.totalOffset
-    get() = Vec2(totalOffsetX, totalOffsetY)
-
-/**
- * The total offset applied to the X axis.
- */
-val ExtendedEntity.totalOffsetX
-    get() = originOffsetX + anchorOffsetX + translationX
-
-/**
- * The total offset applied to the Y axis.
- */
-val ExtendedEntity.totalOffsetY
-    get() = originOffsetY + anchorOffsetY + translationY
-
-
-/**
- * The offset applied to the entity according to the anchor factor.
- */
-val ExtendedEntity.anchorOffset
-    get() = Vec2(anchorOffsetX, anchorOffsetY)
-
-/**
- * The offset applied to the X axis according to the anchor factor.
- */
-val ExtendedEntity.anchorOffsetX: Float
-    get() = parent.getPaddedWidth() * anchor.x
-
-/**
- * The offset applied to the Y axis according to the anchor factor.
- */
-val ExtendedEntity.anchorOffsetY: Float
-    get() = parent.getPaddedHeight() * anchor.y
-
-
-/**
- * The offset applied to the entity according to the origin factor.
- */
-val ExtendedEntity.originOffset
-    get() = Vec2(originOffsetX, originOffsetY)
-
-/**
- * The offset applied to the X axis according to the origin factor.
- */
-val ExtendedEntity.originOffsetX: Float
-    get() = -(drawWidth * origin.x)
-
-/**
- * The offset applied to the Y axis according to the origin factor.
- */
-val ExtendedEntity.originOffsetY: Float
-    get() = -(drawHeight * origin.y)
-
-
-/**
- * Returns the draw width of the entity.
- */
-fun IEntity?.getDrawWidth(): Float = when (this) {
-    is ExtendedEntity -> drawWidth
-    is IShape -> width
-    else -> 0f
-}
-
-/**
- * Returns the draw height of the entity.
- */
-fun IEntity?.getDrawHeight(): Float = when (this) {
-    is ExtendedEntity -> drawHeight
-    is IShape -> height
-    else -> 0f
-}
-
-/**
- * Returns the draw X position of the entity.
- */
-fun IEntity?.getDrawX(): Float = when (this) {
-    is ExtendedEntity -> drawX
-    is IShape -> x
-    else -> 0f
-}
-
-/**
- * Returns the draw Y position of the entity.
- */
-fun IEntity?.getDrawY(): Float = when (this) {
-    is ExtendedEntity -> drawY
-    is IShape -> y
-    else -> 0f
-}

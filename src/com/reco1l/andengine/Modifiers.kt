@@ -16,7 +16,7 @@ object Modifiers {
 
     @JvmStatic
     @JvmOverloads
-    fun alpha(duration: Float, from: Float, to: Float, listener: OnModifierFinished? = null, easing: Easing = Easing.None) = GlobalPool.obtain().also {
+    fun alpha(duration: Float, from: Float, to: Float, listener: OnModifierFinished? = null, easing: Easing = Easing.None) = (GlobalPool.acquire() ?: UniversalModifier(GlobalPool)).also {
         it.setToDefault()
         it.type = Alpha
         it.duration = duration
@@ -36,7 +36,7 @@ object Modifiers {
 
     @JvmStatic
     @JvmOverloads
-    fun scale(duration: Float, from: Float, to: Float, listener: OnModifierFinished? = null, easing: Easing = Easing.None) = GlobalPool.obtain().also {
+    fun scale(duration: Float, from: Float, to: Float, listener: OnModifierFinished? = null, easing: Easing = Easing.None) = (GlobalPool.acquire() ?: UniversalModifier(GlobalPool)).also {
         it.setToDefault()
         it.type = ScaleXY
         it.duration = duration
@@ -58,7 +58,7 @@ object Modifiers {
         toBlue: Float,
         listener: OnModifierFinished? = null,
         easing: Easing = Easing.None
-    ) = GlobalPool.obtain().also {
+    ) = (GlobalPool.acquire() ?: UniversalModifier(GlobalPool)).also {
         it.setToDefault()
         it.type = Color
         it.duration = duration
@@ -70,7 +70,7 @@ object Modifiers {
 
     @JvmStatic
     @JvmOverloads
-    fun sequence(listener: OnModifierFinished? = null, vararg modifiers: UniversalModifier) = GlobalPool.obtain().also {
+    fun sequence(listener: OnModifierFinished? = null, vararg modifiers: UniversalModifier) = (GlobalPool.acquire() ?: UniversalModifier(GlobalPool)).also {
         it.setToDefault()
         it.type = Sequence
         it.modifiers = arrayOf(*modifiers)
@@ -79,7 +79,7 @@ object Modifiers {
 
     @JvmStatic
     @JvmOverloads
-    fun parallel(listener: OnModifierFinished? = null, vararg modifiers: UniversalModifier) = GlobalPool.obtain().also {
+    fun parallel(listener: OnModifierFinished? = null, vararg modifiers: UniversalModifier) = (GlobalPool.acquire() ?: UniversalModifier(GlobalPool)).also {
         it.setToDefault()
         it.type = Parallel
         it.modifiers = arrayOf(*modifiers)
@@ -88,7 +88,7 @@ object Modifiers {
 
     @JvmStatic
     @JvmOverloads
-    fun delay(duration: Float, listener: OnModifierFinished? = null) = GlobalPool.obtain().also {
+    fun delay(duration: Float, listener: OnModifierFinished? = null) = (GlobalPool.acquire() ?: UniversalModifier(GlobalPool)).also {
         it.setToDefault()
         it.type = Delay
         it.duration = duration
@@ -97,7 +97,7 @@ object Modifiers {
 
     @JvmStatic
     @JvmOverloads
-    fun translateY(duration: Float, from: Float, to: Float, listener: OnModifierFinished? = null, easing: Easing = Easing.None) = GlobalPool.obtain().also {
+    fun translateY(duration: Float, from: Float, to: Float, listener: OnModifierFinished? = null, easing: Easing = Easing.None) = (GlobalPool.acquire() ?: UniversalModifier(GlobalPool)).also {
         it.setToDefault()
         it.type = TranslateY
         it.duration = duration
@@ -110,7 +110,7 @@ object Modifiers {
     @JvmStatic
     @JvmOverloads
     fun move(duration: Float, fromX: Float, toX: Float, fromY: Float, toY: Float, listener: OnModifierFinished? = null, easing: Easing = Easing.None) =
-        GlobalPool.obtain().also {
+        (GlobalPool.acquire() ?: UniversalModifier(GlobalPool)).also {
             it.setToDefault()
             it.type = MoveXY
             it.duration = duration
@@ -122,7 +122,7 @@ object Modifiers {
 
     @JvmStatic
     @JvmOverloads
-    fun rotation(duration: Float, from: Float, to: Float, listener: OnModifierFinished? = null, easing: Easing = Easing.None) = GlobalPool.obtain().also {
+    fun rotation(duration: Float, from: Float, to: Float, listener: OnModifierFinished? = null, easing: Easing = Easing.None) = (GlobalPool.acquire() ?: UniversalModifier(GlobalPool)).also {
         it.setToDefault()
         it.type = Rotation
         it.duration = duration
