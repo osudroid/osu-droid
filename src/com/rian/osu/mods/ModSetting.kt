@@ -11,7 +11,7 @@ import kotlin.reflect.*
 private val DEFAULT_FORMATTER: (Any?) -> String = { it.toString() }
 
 /**
- * Represents a mod specific setting.
+ * Represents a [Mod] specific setting.
  */
 sealed class ModSetting<T>(
 
@@ -21,12 +21,14 @@ sealed class ModSetting<T>(
     val name: String,
 
     /**
-     * The value formatter, this is used to format the value when displaying it.
+     * The value formatter of this [ModSetting].
+     *
+     * This is used to format the value of this [ModSetting] when displaying it.
      */
     val valueFormatter: ((T) -> String)?,
 
     /**
-     * The default value, this will be also the initial value.
+     * The default value of this [ModSetting], which is also the initial value of this [ModSetting].
      */
     var defaultValue: T
 
@@ -49,25 +51,25 @@ sealed class ModSetting<T>(
 }
 
 /**
- * Represents a mod specific setting that is restricted to a range of values.
+ * Represents a [Mod] specific setting whose value is constrained to a range of values.
  */
-sealed class RestrictedModSetting<T>(
+sealed class RangeConstrainedModSetting<T>(
     name: String,
     valueFormatter: (T) -> String = DEFAULT_FORMATTER,
     defaultValue: T,
 
     /**
-     * The minimum value.
+     * The minimum value of this [RangeConstrainedModSetting].
      */
     val min: T,
 
     /**
-     * The maximum value.
+     * The maximum value of this [RangeConstrainedModSetting].
      */
     val max: T,
 
     /**
-     * Defines the step size for the value. Default is 0 which means no step.
+     * The step size for the value of this [RangeConstrainedModSetting].
      */
     val step: T,
 
@@ -90,7 +92,7 @@ class FloatModSetting(
     min: Float = Float.MIN_VALUE,
     max: Float = Float.MAX_VALUE,
     step: Float = 0f
-) : RestrictedModSetting<Float>(name, valueFormatter, defaultValue, min, max, step) {
+) : RangeConstrainedModSetting<Float>(name, valueFormatter, defaultValue, min, max, step) {
     override fun processValue(value: Float) = when {
         value < min -> min
         value > max -> max
@@ -106,7 +108,7 @@ class NullableFloatModSetting(
     min: Float = Float.MIN_VALUE,
     max: Float = Float.MAX_VALUE,
     step: Float = 0f
-) : RestrictedModSetting<Float?>(name, valueFormatter, defaultValue, min, max, step) {
+) : RangeConstrainedModSetting<Float?>(name, valueFormatter, defaultValue, min, max, step) {
     override fun processValue(value: Float?) = when {
         value == null -> null
         value < min!! -> min
@@ -120,6 +122,3 @@ class BooleanModSetting(
     name: String,
     defaultValue: Boolean
 ) : ModSetting<Boolean>(name, null, defaultValue)
-
-
-
