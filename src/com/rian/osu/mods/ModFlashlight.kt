@@ -17,8 +17,14 @@ class ModFlashlight : Mod() {
     /**
      * The amount of seconds until the flashlight reaches the cursor.
      */
-    @JvmField
-    var followDelay = DEFAULT_FOLLOW_DELAY
+    var followDelay by FloatModSetting(
+        name = "Flashlight follow delay",
+        valueFormatter = { "${(it * 1000).toInt()}ms" },
+        defaultValue = DEFAULT_FOLLOW_DELAY,
+        min = DEFAULT_FOLLOW_DELAY,
+        max = DEFAULT_FOLLOW_DELAY * 10,
+        step = DEFAULT_FOLLOW_DELAY
+    )
 
     override fun calculateScoreMultiplier(difficulty: BeatmapDifficulty) = 1.12f
 

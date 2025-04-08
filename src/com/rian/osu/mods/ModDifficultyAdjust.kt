@@ -1,5 +1,6 @@
 package com.rian.osu.mods
 
+import com.reco1l.toolkt.*
 import com.rian.osu.GameMode
 import com.rian.osu.beatmap.hitobject.HitObject
 import com.rian.osu.beatmap.hitobject.Slider
@@ -13,30 +14,61 @@ import org.json.JSONObject
  * Represents the Difficulty Adjust mod. Serves as a container for forced difficulty statistics.
  */
 class ModDifficultyAdjust @JvmOverloads constructor(
+    cs: Float? = null,
+    ar: Float? = null,
+    od: Float? = null,
+    hp: Float? = null
+) : Mod(), IModApplicableToDifficultyWithSettings, IModApplicableToHitObjectWithSettings {
+
     /**
      * The circle size to enforce.
      */
-    @JvmField
-    var cs: Float? = null,
+    var cs by NullableFloatModSetting(
+        name = "Circle size",
+        valueFormatter = { it?.roundBy(1)?.toString() ?: "OFF" },
+        defaultValue = cs ?: 0f,
+        min = 0f,
+        max = 15f,
+        step = 0.5f
+    )
 
     /**
      * The approach rate to enforce.
      */
-    @JvmField
-    var ar: Float? = null,
+    var ar by NullableFloatModSetting(
+        name = "Approach rate",
+        valueFormatter = { it?.roundBy(1)?.toString() ?: "OFF" },
+        defaultValue = ar ?: 0f,
+        min = 0f,
+        max = 12.5f,
+        step = 0.5f
+    )
 
     /**
      * The overall difficulty to enforce.
      */
-    @JvmField
-    var od: Float? = null,
+    var od by NullableFloatModSetting(
+        name = "Overall difficulty",
+        valueFormatter = { it?.roundBy(1)?.toString() ?: "OFF" },
+        defaultValue = od ?: 0f,
+        min = 0f,
+        max = 11f,
+        step = 0.5f
+    )
 
     /**
      * The health drain rate to enforce.
      */
-    @JvmField
-    var hp: Float? = null
-) : Mod(), IModApplicableToDifficultyWithSettings, IModApplicableToHitObjectWithSettings {
+    var hp by NullableFloatModSetting(
+        name = "Health drain",
+        valueFormatter = { it?.roundBy(1)?.toString() ?: "OFF" },
+        defaultValue = hp ?: 0f,
+        min = 0f,
+        max = 11f,
+        step = 0.5f
+    )
+
+
     override val name = "Difficulty Adjust"
     override val acronym = "DA"
     override val textureNameSuffix = "difficultyadjust"
