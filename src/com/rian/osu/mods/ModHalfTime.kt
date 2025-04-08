@@ -3,7 +3,10 @@ package com.rian.osu.mods
 /**
  * Represents the Half Time mod.
  */
-class ModHalfTime : ModRateAdjust(0.75f) {
+class ModHalfTime : ModRateAdjust() {
+
+    override var trackRateMultiplier = 0.75f
+
     override val name = "Half Time"
     override val acronym = "HT"
     override val textureNameSuffix = "halftime"

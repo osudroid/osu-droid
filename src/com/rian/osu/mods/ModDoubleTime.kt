@@ -3,7 +3,10 @@ package com.rian.osu.mods
 /**
  * Represents the Double Time mod.
  */
-class ModDoubleTime : ModRateAdjust(1.5f) {
+class ModDoubleTime : ModRateAdjust() {
+
+    override var trackRateMultiplier = 1.5f
+
     override val name = "Double Time"
     override val acronym = "DT"
     override val textureNameSuffix = "doubletime"
