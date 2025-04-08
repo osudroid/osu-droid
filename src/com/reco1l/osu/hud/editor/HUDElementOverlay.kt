@@ -13,7 +13,6 @@ import com.reco1l.osu.hud.HUDElement
 import com.reco1l.osu.updateThread
 import com.reco1l.toolkt.kotlin.*
 import org.anddev.andengine.input.touch.TouchEvent
-import ru.nsu.ccfit.zuev.osu.Config
 import ru.nsu.ccfit.zuev.osu.ResourceManager
 
 class HUDElementOverlay(private val element: HUDElement) : ConstraintContainer() {
