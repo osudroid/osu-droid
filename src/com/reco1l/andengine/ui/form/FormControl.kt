@@ -88,6 +88,15 @@ abstract class FormControl<V : Any?, C: Control<V>>(initialValue: V): Container(
     }
 
 
+    override fun onManagedUpdate(deltaTimeSec: Float) {
+
+        // Copying alpha from the control preservee the fade effect when the control is disabled.
+        labelText.alpha = control.alpha
+        valueText?.alpha = control.alpha
+
+        super.onManagedUpdate(deltaTimeSec)
+    }
+
     override fun onAreaTouched(event: TouchEvent, localX: Float, localY: Float): Boolean {
 
         background?.clearModifiers(ModifierType.Alpha)
