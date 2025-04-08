@@ -21,8 +21,8 @@ class ModFlashlight : Mod() {
         name = "Flashlight follow delay",
         valueFormatter = { "${(it * 1000).toInt()}ms" },
         defaultValue = DEFAULT_FOLLOW_DELAY,
-        min = DEFAULT_FOLLOW_DELAY,
-        max = DEFAULT_FOLLOW_DELAY * 10,
+        minValue = DEFAULT_FOLLOW_DELAY,
+        maxValue = DEFAULT_FOLLOW_DELAY * 10,
         step = DEFAULT_FOLLOW_DELAY
     )
 

@@ -61,12 +61,12 @@ sealed class RangeConstrainedModSetting<T>(
     /**
      * The minimum value of this [RangeConstrainedModSetting].
      */
-    val min: T,
+    val minValue: T,
 
     /**
      * The maximum value of this [RangeConstrainedModSetting].
      */
-    val max: T,
+    val maxValue: T,
 
     /**
      * The step size for the value of this [RangeConstrainedModSetting].
@@ -89,15 +89,15 @@ class FloatModSetting(
     name: String,
     valueFormatter: (Float) -> String = DEFAULT_FORMATTER,
     defaultValue: Float,
-    min: Float = Float.MIN_VALUE,
-    max: Float = Float.MAX_VALUE,
+    minValue: Float = Float.MIN_VALUE,
+    maxValue: Float = Float.MAX_VALUE,
     step: Float = 0f
-) : RangeConstrainedModSetting<Float>(name, valueFormatter, defaultValue, min, max, step) {
+) : RangeConstrainedModSetting<Float>(name, valueFormatter, defaultValue, minValue, maxValue, step) {
     override fun processValue(value: Float) = when {
-        value < min -> min
-        value > max -> max
+        value < minValue -> minValue
+        value > maxValue -> maxValue
         step == 0f -> value
-        else -> ceil((value - min) / step) * step + min
+        else -> ceil((value - minValue) / step) * step + minValue
     }
 }
 
@@ -105,16 +105,16 @@ class NullableFloatModSetting(
     name: String,
     valueFormatter: (Float?) -> String = DEFAULT_FORMATTER,
     defaultValue: Float?,
-    min: Float = Float.MIN_VALUE,
-    max: Float = Float.MAX_VALUE,
+    minValue: Float = Float.MIN_VALUE,
+    maxValue: Float = Float.MAX_VALUE,
     step: Float = 0f
-) : RangeConstrainedModSetting<Float?>(name, valueFormatter, defaultValue, min, max, step) {
+) : RangeConstrainedModSetting<Float?>(name, valueFormatter, defaultValue, minValue, maxValue, step) {
     override fun processValue(value: Float?) = when {
         value == null -> null
-        value < min!! -> min
-        value > max!! -> max
+        value < minValue!! -> minValue
+        value > maxValue!! -> maxValue
         step == 0f -> value
-        else -> ceil((value - min) / step!!) * step + min
+        else -> ceil((value - minValue) / step!!) * step + minValue
     }
 }
 

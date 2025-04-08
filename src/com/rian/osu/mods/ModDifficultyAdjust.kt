@@ -27,8 +27,8 @@ class ModDifficultyAdjust @JvmOverloads constructor(
         name = "Circle size",
         valueFormatter = { it?.roundBy(1)?.toString() ?: "OFF" },
         defaultValue = cs,
-        min = 0f,
-        max = 15f,
+        minValue = 0f,
+        maxValue = 15f,
         step = 0.5f
     )
 
@@ -39,8 +39,8 @@ class ModDifficultyAdjust @JvmOverloads constructor(
         name = "Approach rate",
         valueFormatter = { it?.roundBy(1)?.toString() ?: "OFF" },
         defaultValue = ar,
-        min = 0f,
-        max = 12.5f,
+        minValue = 0f,
+        maxValue = 12.5f,
         step = 0.5f
     )
 
@@ -51,8 +51,8 @@ class ModDifficultyAdjust @JvmOverloads constructor(
         name = "Overall difficulty",
         valueFormatter = { it?.roundBy(1)?.toString() ?: "OFF" },
         defaultValue = od,
-        min = 0f,
-        max = 11f,
+        minValue = 0f,
+        maxValue = 11f,
         step = 0.5f
     )
 
@@ -63,8 +63,8 @@ class ModDifficultyAdjust @JvmOverloads constructor(
         name = "Health drain",
         valueFormatter = { it?.roundBy(1)?.toString() ?: "OFF" },
         defaultValue = hp,
-        min = 0f,
-        max = 11f,
+        minValue = 0f,
+        maxValue = 11f,
         step = 0.5f
     )
 
