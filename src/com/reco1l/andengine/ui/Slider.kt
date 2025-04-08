@@ -31,7 +31,7 @@ open class Slider : Control<Float>(0f), IWithTheme<SliderTheme> {
         get() = super.value
         set(value) {
             if (step > 0f) {
-                val stepCount = ((value - min) / step).roundToInt()
+                val stepCount = ceil((value - min) / step)
                 super.value = (min + step * stepCount).coerceIn(min, max)
             } else {
                 // If step is 0, just set the value directly
@@ -150,7 +150,7 @@ open class Slider : Control<Float>(0f), IWithTheme<SliderTheme> {
 
         val progressWidth = width * (value - min) / (max - min)
         progressBar.width = progressWidth
-        thumb.x = progressWidth.coerceIn(thumb.width / 2f, width - thumb.width / 2f)
+        thumb.x = progressWidth.coerceAtMost(width - thumb.width / 2f).coerceAtLeast(thumb.width / 2f)
     }
 
 
