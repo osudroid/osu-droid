@@ -16,9 +16,9 @@ sealed class ModRateAdjust(trackRateMultiplier: Float = 1f) : Mod(), IModApplica
         name = "Track rate multiplier",
         valueFormatter = { "${it.roundBy(2)}x" },
         defaultValue = trackRateMultiplier,
-        minValue = 0.1f,
+        minValue = 0.5f,
         maxValue = 2f,
-        step = 0.1f
+        step = 0.05f
     )
 
 
