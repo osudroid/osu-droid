@@ -1,6 +1,9 @@
+@file:Suppress("LeakingThis")
+
 package com.reco1l.andengine.ui
 
 import com.reco1l.andengine.*
+import com.reco1l.andengine.ExtendedEntity.Companion.FitParent
 import com.reco1l.andengine.container.*
 import com.reco1l.andengine.shape.*
 import com.reco1l.andengine.text.*
@@ -11,20 +14,16 @@ import ru.nsu.ccfit.zuev.osu.ResourceManager
 
 
 data class BadgeTheme(
-    val backgroundColor: Long = 0xFF222234,
+    val backgroundColor: Long = 0xFF1E1E2E,
     val textColor: Long = 0xFFFFFFFF,
-    val selectedBackgroundColor: Long = 0xFFF27272,
-    val selectedTextColor: Long = 0xFF222234,
     val withBezelEffect: Boolean = true,
-    val cornerRadius: Float = 14f,
-    val iconSize: Float = 28f,
     val textFont: Font = ResourceManager.getInstance().getFont("smallFont")
 ) : ITheme
 
-
-@Suppress("LeakingThis")
-open class Badge : LinearContainer(), IWithTheme<BadgeTheme> {
-
+/**
+ * A badge is a small piece of information that can be used to display a value or a status.
+ */
+open class Badge(content: String = "") : ExtendedText(), IWithTheme<BadgeTheme> {
 
     override var theme = DefaultTheme
         set(value) {
@@ -35,94 +34,79 @@ open class Badge : LinearContainer(), IWithTheme<BadgeTheme> {
         }
 
 
-    /**
-     * The text of the button.
-     */
-    var text
-        get() = labelEntity.text
-        set(value) { labelEntity.text = value }
-
-
-    //region Icons
-
-    /**
-     * The leading icon.
-     */
-    var leadingIcon: ExtendedEntity? = null
-        set(value) {
-            if (field != value) {
-                field?.detachSelf()
-                field = value
-
-                if (value != null) {
-                    onIconChange(value)
-                    attachChild(value, 0)
-                }
-            }
-        }
-
-    /**
-     * The trailing icon.
-     */
-    var trailingIcon: ExtendedEntity? = null
-        set(value) {
-            if (field != value) {
-                field?.detachSelf()
-                field = value
-
-                if (value != null) {
-                    onIconChange(value)
-                    attachChild(value)
-                }
-            }
-        }
-
-    //endregion
-
-
-    private val labelEntity = ExtendedText().apply {
-        alignment = Anchor.Center
-        anchor = Anchor.CenterLeft
-        origin = Anchor.CenterLeft
-    }
-
-
     init {
-        orientation = Orientation.Horizontal
-        height = 60f
-        padding = Vec4(16f, 0f, 18f, 0f)
-        spacing = 8f
-        scaleCenter = Anchor.Center
-
-        attachChild(labelEntity)
+        text = content
+        height = 48f
+        padding = Vec4(10f, 0f)
+        alignment = Anchor.Center
         onThemeChanged()
     }
 
 
     override fun onThemeChanged() {
-        foreground = if (theme.withBezelEffect) BezelOutline(theme.cornerRadius) else null
-        trailingIcon?.let(::onIconChange)
-        leadingIcon?.let(::onIconChange)
-        labelEntity.font = theme.textFont
-        labelEntity.color = ColorARGB(theme.textColor)
+        font = theme.textFont
+
+        background = RoundedBox().apply {
+            color = ColorARGB(0xFF1E1E2E)
+            cornerRadius = 14f
+        }
+
+        if (theme.withBezelEffect) {
+            foreground = BezelOutline(14f)
+        }
     }
 
-
-    //region Callbacks
-
-    /**
-     * Called when an icon is added or changed.
-     */
-    open fun onIconChange(icon: ExtendedEntity) {
-        icon.height = theme.iconSize
-        icon.width = theme.iconSize
-        icon.anchor = Anchor.CenterLeft
-        icon.origin = Anchor.CenterLeft
-    }
-
-    //endregion
 
     companion object {
         val DefaultTheme = BadgeTheme()
     }
 }
+
+/**
+ * An statistic badge is a badge that displays a value next to a label.
+ */
+open class StatisticBadge(label: String = "", value: String = "") : LinearContainer() {
+
+    private val labelText = Badge(label).apply {
+        height = FitParent
+        foreground = null
+    }
+
+    private val valueText = ExtendedText().apply {
+        height = FitParent
+        font = ResourceManager.getInstance().getFont("smallFont")
+        text = value
+        alignment = Anchor.Center
+        padding = Vec4(16f, 0f)
+    }
+
+
+    /**
+     * The label of the badge.
+     */
+    var label by labelText::text
+
+    /**
+     * The value of the badge.
+     */
+    var value by valueText::text
+
+
+    init {
+        height = 48f
+        orientation = Orientation.Horizontal
+
+        foreground = BezelOutline(14f)
+        background = RoundedBox().apply {
+            color = ColorARGB(0xFF222234)
+            cornerRadius = 14f
+        }
+
+        attachChild(labelText)
+        attachChild(valueText)
+    }
+
+}
+
+
+
