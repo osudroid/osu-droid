@@ -62,7 +62,7 @@ open class Badge(content: String = "") : ExtendedText(), IWithTheme<BadgeTheme> 
 }
 
 /**
- * An statistic badge is a badge that displays a value next to a label.
+ * A statistic badge is a badge that displays a value next to a label.
  */
 open class StatisticBadge(label: String = "", value: String = "") : LinearContainer() {
 

@@ -90,7 +90,7 @@ abstract class FormControl<V : Any?, C: Control<V>>(initialValue: V): Container(
 
     override fun onManagedUpdate(deltaTimeSec: Float) {
 
-        // Copying alpha from the control preservee the fade effect when the control is disabled.
+        // Copying alpha from the control to preserve the fade effect when the control is disabled.
         labelText.alpha = control.alpha
         valueText?.alpha = control.alpha
 
