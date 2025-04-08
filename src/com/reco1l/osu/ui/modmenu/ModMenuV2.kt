@@ -62,26 +62,26 @@ class ModMenuV2 : ExtendedScene() {
                 attachChild(Section("Difficulty Reduction", arrayOf(
                     ModEasy(),
                     ModNoFail(),
-                    ModReallyEasy(),
-                    ModHalfTime()
+                    ModHalfTime(),
+                    ModReallyEasy()
                 )))
 
                 attachChild(Section("Difficulty Increase", arrayOf(
-                    ModDoubleTime(),
-                    ModFlashlight(),
                     ModHardRock(),
-                    ModHidden(),
+                    ModDoubleTime(),
                     ModNightCore(),
-                    ModPerfect(),
-                    ModPrecise(),
+                    ModHidden(),
+                    ModTraceable(),
+                    ModFlashlight(),
                     ModSuddenDeath(),
-                    ModTraceable()
+                    ModPerfect(),
+                    ModPrecise()
                 )))
 
                 attachChild(Section("Automation", arrayOf(
-                    ModAuto(),
+                    ModRelax(),
                     ModAutopilot(),
-                    ModRelax()
+                    ModAuto()
                 )))
 
                 attachChild(Section("Conversion", arrayOf(
