@@ -30,7 +30,7 @@ sealed class ModSetting<T>(
     /**
      * The default value of this [ModSetting], which is also the initial value of this [ModSetting].
      */
-    var defaultValue: T
+    val defaultValue: T
 
 ) : ReadWriteProperty<Any?, T> {
 
