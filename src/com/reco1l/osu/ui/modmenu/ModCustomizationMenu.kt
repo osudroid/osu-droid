@@ -126,8 +126,8 @@ class ModCustomizationMenu : Modal() {
             label = setting.name
             value = setting.value
             defaultValue = setting.defaultValue
-            control.min = setting.min
-            control.max = setting.max
+            control.min = setting.minValue
+            control.max = setting.maxValue
             control.step = setting.step
             onValueChanged = { setting.value = it }
             valueFormatter = setting.valueFormatter!!
@@ -138,8 +138,8 @@ class ModCustomizationMenu : Modal() {
             value = setting.value ?: 0f
             defaultValue = setting.defaultValue ?: 0f
             control.isEnabled = setting.value != null
-            control.min = setting.min!!
-            control.max = setting.max!!
+            control.min = setting.minValue!!
+            control.max = setting.maxValue!!
             control.step = setting.step!!
             onValueChanged = {
                 setting.value = it
