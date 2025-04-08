@@ -2,7 +2,6 @@ package com.rian.osu.mods
 
 import com.reco1l.toolkt.*
 import com.rian.osu.beatmap.sections.BeatmapDifficulty
-import com.rian.osu.math.*
 import kotlin.math.pow
 
 /**
@@ -17,9 +16,9 @@ sealed class ModRateAdjust(trackRateMultiplier: Float = 1f) : Mod(), IModApplica
         name = "Track rate multiplier",
         valueFormatter = { "${it.roundBy(2)}x" },
         defaultValue = trackRateMultiplier,
-        min = 0.1f,
-        max = 2f,
-        step = 0.1f
+        minValue = 0.5f,
+        maxValue = 2f,
+        step = 0.05f
     )
 
 
