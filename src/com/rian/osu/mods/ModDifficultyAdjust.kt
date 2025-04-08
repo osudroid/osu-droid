@@ -1,5 +1,6 @@
 package com.rian.osu.mods
 
+import com.reco1l.toolkt.*
 import com.rian.osu.GameMode
 import com.rian.osu.beatmap.hitobject.HitObject
 import com.rian.osu.beatmap.hitobject.Slider
@@ -7,35 +8,71 @@ import com.rian.osu.beatmap.sections.BeatmapDifficulty
 import com.rian.osu.utils.ModUtils
 import kotlin.math.exp
 import kotlin.math.pow
+import org.json.JSONObject
 
 /**
  * Represents the Difficulty Adjust mod. Serves as a container for forced difficulty statistics.
  */
 class ModDifficultyAdjust @JvmOverloads constructor(
+    cs: Float? = null,
+    ar: Float? = null,
+    od: Float? = null,
+    hp: Float? = null
+) : Mod(), IModApplicableToDifficultyWithSettings, IModApplicableToHitObjectWithSettings {
+
     /**
      * The circle size to enforce.
      */
-    @JvmField
-    var cs: Float? = null,
+    var cs by NullableFloatModSetting(
+        name = "Circle size",
+        valueFormatter = { it?.roundBy(1)?.toString() ?: "OFF" },
+        defaultValue = cs,
+        minValue = 0f,
+        maxValue = 15f,
+        step = 0.5f
+    )
 
     /**
      * The approach rate to enforce.
      */
-    @JvmField
-    var ar: Float? = null,
+    var ar by NullableFloatModSetting(
+        name = "Approach rate",
+        valueFormatter = { it?.roundBy(1)?.toString() ?: "OFF" },
+        defaultValue = ar,
+        minValue = 0f,
+        maxValue = 12.5f,
+        step = 0.5f
+    )
 
     /**
      * The overall difficulty to enforce.
      */
-    @JvmField
-    var od: Float? = null,
+    var od by NullableFloatModSetting(
+        name = "Overall difficulty",
+        valueFormatter = { it?.roundBy(1)?.toString() ?: "OFF" },
+        defaultValue = od,
+        minValue = 0f,
+        maxValue = 11f,
+        step = 0.5f
+    )
 
     /**
      * The health drain rate to enforce.
      */
-    @JvmField
-    var hp: Float? = null
-) : Mod(), IModApplicableToDifficultyWithSettings, IModApplicableToHitObjectWithSettings {
+    var hp by NullableFloatModSetting(
+        name = "Health drain",
+        valueFormatter = { it?.roundBy(1)?.toString() ?: "OFF" },
+        defaultValue = hp,
+        minValue = 0f,
+        maxValue = 11f,
+        step = 0.5f
+    )
+
+
+    override val name = "Difficulty Adjust"
+    override val acronym = "DA"
+    override val textureNameSuffix = "difficultyadjust"
+
     override val isRelevant
         get() = cs != null || ar != null || od != null || hp != null
 
@@ -60,6 +97,39 @@ class ModDifficultyAdjust @JvmOverloads constructor(
         }
 
         return multiplier
+    }
+
+    override fun copySettings(settings: JSONObject) {
+        super.copySettings(settings)
+
+        cs = settings.optDouble("cs").toFloat().takeUnless { it.isNaN() }
+        ar = settings.optDouble("ar").toFloat().takeUnless { it.isNaN() }
+        od = settings.optDouble("od").toFloat().takeUnless { it.isNaN() }
+        hp = settings.optDouble("hp").toFloat().takeUnless { it.isNaN() }
+    }
+
+    override fun serializeSettings(): JSONObject? {
+        if (!isRelevant) {
+            return null
+        }
+
+        return JSONObject().apply {
+            if (cs != null) {
+                put("cs", cs)
+            }
+
+            if (ar != null) {
+                put("ar", ar)
+            }
+
+            if (od != null) {
+                put("od", od)
+            }
+
+            if (hp != null) {
+                put("hp", hp)
+            }
+        }
     }
 
     override fun applyToDifficulty(mode: GameMode, difficulty: BeatmapDifficulty, mods: Iterable<Mod>) =

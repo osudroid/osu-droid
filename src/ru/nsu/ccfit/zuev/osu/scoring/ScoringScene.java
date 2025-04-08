@@ -15,7 +15,6 @@ import com.rian.osu.beatmap.parser.BeatmapParser;
 import com.rian.osu.difficulty.BeatmapDifficultyCalculator;
 import com.rian.osu.difficulty.attributes.DroidDifficultyAttributes;
 import com.rian.osu.difficulty.attributes.DroidPerformanceAttributes;
-import com.rian.osu.mods.IModUserSelectable;
 import com.rian.osu.mods.ModAuto;
 import com.rian.osu.mods.ModCustomSpeed;
 import com.rian.osu.mods.ModDifficultyAdjust;
@@ -324,11 +323,7 @@ public class ScoringScene {
         var modX = mark.getX() - 30;
         var modY = mark.getY() + mark.getHeight() * 2 / 3;
         for (var mod : mods.values()) {
-            if (!(mod instanceof IModUserSelectable selectableMod)) {
-                continue;
-            }
-
-            var modSprite = new Sprite(modX, modY, ResourceManager.getInstance().getTexture(selectableMod.getTextureName()));
+            var modSprite = new Sprite(modX, modY, ResourceManager.getInstance().getTexture(mod.getTextureName()));
             modX -= 30;
             scene.attachChild(modSprite);
         }
@@ -341,7 +336,7 @@ public class ScoringScene {
         playerStr += String.format("  %s(%s)", BuildConfig.VERSION_NAME, BuildConfig.BUILD_TYPE);
         if (mods.contains(ModCustomSpeed.class) ||
             mods.contains(ModDifficultyAdjust.class) ||
-            (mods.contains(ModFlashlight.class) && mods.ofType(ModFlashlight.class).followDelay != ModFlashlight.DEFAULT_FOLLOW_DELAY)) {
+            (mods.contains(ModFlashlight.class) && mods.ofType(ModFlashlight.class).getFollowDelay() != ModFlashlight.DEFAULT_FOLLOW_DELAY)) {
 
             var customSpeed = mods.ofType(ModCustomSpeed.class);
             var difficultyAdjust = mods.ofType(ModDifficultyAdjust.class);
@@ -353,25 +348,25 @@ public class ScoringScene {
             }
 
             if (difficultyAdjust != null) {
-                if (difficultyAdjust.ar != null) {
-                    mapperStr += String.format(Locale.ENGLISH, "AR%.1f,", difficultyAdjust.ar);
+                if (difficultyAdjust.getAr() != null) {
+                    mapperStr += String.format(Locale.ENGLISH, "AR%.1f,", difficultyAdjust.getAr());
                 }
 
-                if (difficultyAdjust.od != null) {
-                    mapperStr += String.format(Locale.ENGLISH, "OD%.1f,", difficultyAdjust.od);
+                if (difficultyAdjust.getOd() != null) {
+                    mapperStr += String.format(Locale.ENGLISH, "OD%.1f,", difficultyAdjust.getOd());
                 }
 
-                if (difficultyAdjust.cs != null) {
-                    mapperStr += String.format(Locale.ENGLISH, "CS%.1f,", difficultyAdjust.cs);
+                if (difficultyAdjust.getCs() != null) {
+                    mapperStr += String.format(Locale.ENGLISH, "CS%.1f,", difficultyAdjust.getCs());
                 }
 
-                if (difficultyAdjust.hp != null) {
-                    mapperStr += String.format(Locale.ENGLISH, "HP%.1f,", difficultyAdjust.hp);
+                if (difficultyAdjust.getHp() != null) {
+                    mapperStr += String.format(Locale.ENGLISH, "HP%.1f,", difficultyAdjust.getHp());
                 }
             }
 
-            if (flashlight != null && flashlight.followDelay != ModFlashlight.DEFAULT_FOLLOW_DELAY) {
-                mapperStr += String.format(Locale.ENGLISH, "FLD%.2f,", flashlight.followDelay);
+            if (flashlight != null && flashlight.getFollowDelay() != ModFlashlight.DEFAULT_FOLLOW_DELAY) {
+                mapperStr += String.format(Locale.ENGLISH, "FLD%.2f,", flashlight.getFollowDelay());
             }
 
             if (mapperStr.endsWith(",")){
