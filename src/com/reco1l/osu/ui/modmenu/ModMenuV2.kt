@@ -13,6 +13,7 @@ import com.reco1l.framework.*
 import com.reco1l.framework.math.*
 import com.reco1l.toolkt.kotlin.*
 import com.rian.osu.mods.*
+import com.rian.osu.utils.ModHashMap
 import ru.nsu.ccfit.zuev.osu.ResourceManager
 
 class ModMenuV2 : ExtendedScene() {
@@ -21,7 +22,7 @@ class ModMenuV2 : ExtendedScene() {
     /**
      * List of currently enabled mods.
      */
-    val enabledMods = mutableSetOf<Mod>()
+    val enabledMods = ModHashMap()
 
 
     private val modButtons = mutableListOf<ModButton>()
@@ -131,7 +132,7 @@ class ModMenuV2 : ExtendedScene() {
                     )
 
                     onActionUp = {
-                        enabledMods.toList().fastForEach(::removeMod)
+                        enabledMods.toList().fastForEach { removeMod(it.second) }
                     }
                 })
             })
@@ -165,7 +166,7 @@ class ModMenuV2 : ExtendedScene() {
         rankedBadge.clearEntityModifiers()
         rankedBadge.background!!.clearEntityModifiers()
 
-        if (enabledMods.isEmpty() || enabledMods.none { !it.isRanked }) {
+        if (enabledMods.isEmpty() || enabledMods.none { !it.value.isRanked }) {
             rankedBadge.text = "Ranked"
             rankedBadge.colorTo(0xFF161622, 0.1f)
             rankedBadge.background!!.colorTo(0xFF83DF6B, 0.1f)
@@ -183,7 +184,7 @@ class ModMenuV2 : ExtendedScene() {
         if (mod in enabledMods) {
             return
         }
-        enabledMods.add(mod)
+        enabledMods.put(mod)
 
         modButtons.fastForEach { button ->
 
