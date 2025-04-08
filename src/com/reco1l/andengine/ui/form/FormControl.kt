@@ -6,7 +6,6 @@ import com.reco1l.andengine.shape.*
 import com.reco1l.andengine.text.*
 import com.reco1l.andengine.ui.*
 import com.reco1l.framework.*
-import com.reco1l.framework.math.*
 import org.anddev.andengine.input.touch.*
 
 @Suppress("LeakingThis")
