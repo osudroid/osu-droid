@@ -1,12 +1,36 @@
 package com.rian.osu.mods
 
 import com.rian.osu.beatmap.sections.BeatmapDifficulty
-import kotlin.reflect.KClass
+import org.json.JSONObject
+import kotlin.reflect.*
+import kotlin.reflect.full.*
+import kotlin.reflect.jvm.*
 
 /**
  * Represents a mod.
  */
-abstract class Mod {
+sealed class Mod {
+    /**
+     * The name of this [Mod].
+     */
+    abstract val name: String
+
+    /**
+     * The acronym of this [Mod].
+     */
+    abstract val acronym: String
+
+    /**
+     * The suffix to append to the texture name of this [Mod].
+     */
+    protected abstract val textureNameSuffix: String
+
+    /**
+     * The texture name of this [Mod].
+     */
+    val textureName
+        get() = "selection-mod-${textureNameSuffix}"
+
     /**
      * Whether scores with this [Mod] active can be submitted online.
      */
@@ -37,12 +61,57 @@ abstract class Mod {
     open val incompatibleMods = emptyArray<KClass<out Mod>>()
 
     /**
+     * The mod specific settings.
+     */
+    @Suppress("UNCHECKED_CAST")
+    open val settings
+        get() = this::class.memberProperties.mapNotNull { property ->
+            property as KProperty1<Mod, Any?>
+            property.isAccessible = true
+            property.getDelegate(this) as? ModSetting<Any?>
+        }
+
+    /**
      * Calculates the score multiplier for this [Mod] with the given [BeatmapDifficulty].
      *
      * @param difficulty The [BeatmapDifficulty] to calculate the score multiplier for.
      * @return The score multiplier for this [Mod] with the given [BeatmapDifficulty].
      */
     open fun calculateScoreMultiplier(difficulty: BeatmapDifficulty) = 1f
+
+    /**
+     * Serializes this [Mod] into a [JSONObject].
+     *
+     * The [JSONObject] will contain the following fields:
+     *
+     * - `acronym`: The acronym of this [Mod].
+     * - `settings`: Settings specific to this [Mod] in a [JSONObject], if any.
+     *
+     * @return The serialized form of this [Mod] in a [JSONObject].
+     */
+    fun serialize() = JSONObject().apply {
+        put("acronym", acronym)
+
+        val settings = serializeSettings()
+
+        if (settings != null) {
+            put("settings", settings)
+        }
+    }
+
+    /**
+     * Copies the settings of this [Mod] from a [JSONObject].
+     *
+     * @param settings The [JSONObject] containing the settings to copy.
+     */
+    open fun copySettings(settings: JSONObject) {}
+
+    /**
+     * Serializes the settings of this [Mod] to a [JSONObject].
+     *
+     * @return The serialized settings of this [Mod], or `null` if this [Mod] has no settings.
+     */
+    protected open fun serializeSettings(): JSONObject? = null
 
     override fun equals(other: Any?): Boolean {
         if (other === this) {
@@ -59,17 +128,13 @@ abstract class Mod {
     override fun hashCode(): Int {
         var result = isRanked.hashCode()
 
+        result = 31 * result + name.hashCode()
+        result = 31 * result + acronym.hashCode()
+        result = 31 * result + textureNameSuffix.hashCode()
         result = 31 * result + isRelevant.hashCode()
         result = 31 * result + isValidForMultiplayer.hashCode()
         result = 31 * result + isValidForMultiplayerAsFreeMod.hashCode()
         result = 31 * result + incompatibleMods.contentHashCode()
-
-        if (this is IModUserSelectable) {
-            result = 31 * result + encodeChar.hashCode()
-            result = 31 * result + acronym.hashCode()
-            result = 31 * result + textureNameSuffix.hashCode()
-            result = 31 * result + enum.hashCode()
-        }
 
         return result
     }

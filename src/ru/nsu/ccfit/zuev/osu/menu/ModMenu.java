@@ -148,11 +148,7 @@ public class ModMenu implements IModSwitcher {
     }
 
     private void addButton(int x, int y, Mod mod) {
-        if (!(mod instanceof IModUserSelectable selectableMod)) {
-            throw new IllegalArgumentException("Mod must implement IModUserSelectable");
-        }
-
-        var button = new ModButton(x, y, selectableMod, this);
+        var button = new ModButton(x, y, mod, this);
 
         button.setEnabled(this.enabledMods.contains(mod));
         scene.attachChild(button);
@@ -425,8 +421,7 @@ public class ModMenu implements IModSwitcher {
     }
 
     @Override
-    public boolean switchMod(IModUserSelectable selectableMod) {
-        var mod = (Mod) selectableMod;
+    public boolean switchMod(final Mod mod) {
         boolean returnValue = true;
 
         var checkOffSound = ResourceManager.getInstance().getSound("check-off");

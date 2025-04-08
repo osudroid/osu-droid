@@ -852,15 +852,11 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
             comboBurst.attachAll(bgScene);
         }
 
-            var position = new PointF(Config.getRES_WIDTH() - 130, 130);
-            float timeOffset = 0;
+        var position = new PointF(Config.getRES_WIDTH() - 130, 130);
+        float timeOffset = 0;
 
-            for (var mod : lastMods.values()) {
-                if (!(mod instanceof IModUserSelectable selectableMod)) {
-                    continue;
-                }
-
-                var effect = GameObjectPool.getInstance().getEffect(selectableMod.getTextureName());
+        for (var mod : lastMods.values()) {
+            var effect = GameObjectPool.getInstance().getEffect(mod.getTextureName());
 
             effect.init(fgScene, position, scale, Modifiers.sequence(
                 Modifiers.scale(0.25f, 1.2f, 1f),
@@ -887,7 +883,7 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
         if (GameHelper.isFlashLight()){
             var flashlight = lastMods.ofType(ModFlashlight.class);
 
-            flashlightSprite = new FlashLightEntity(Objects.requireNonNull(flashlight).followDelay);
+            flashlightSprite = new FlashLightEntity(Objects.requireNonNull(flashlight).getFollowDelay());
             fgScene.attachChild(flashlightSprite, 0);
         }
 

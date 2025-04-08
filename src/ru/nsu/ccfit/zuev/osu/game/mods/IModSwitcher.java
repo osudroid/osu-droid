@@ -1,7 +1,7 @@
 package ru.nsu.ccfit.zuev.osu.game.mods;
 
-import com.rian.osu.mods.IModUserSelectable;
+import com.rian.osu.mods.Mod;
 
 public interface IModSwitcher {
-    boolean switchMod(final IModUserSelectable selectableMod);
+    boolean switchMod(final Mod mod);
 }

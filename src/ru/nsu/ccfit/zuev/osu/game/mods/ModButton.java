@@ -1,6 +1,6 @@
 package ru.nsu.ccfit.zuev.osu.game.mods;
 
-import com.rian.osu.mods.IModUserSelectable;
+import com.rian.osu.mods.Mod;
 
 import org.anddev.andengine.entity.sprite.Sprite;
 import org.anddev.andengine.input.touch.TouchEvent;
@@ -14,10 +14,10 @@ public class ModButton extends Sprite {
     private static final float unselectedRotation = 0f;
     private static final float selectedRotation = 5f;
 
-    private final IModUserSelectable mod;
+    private final Mod mod;
     private final IModSwitcher switcher;
 
-    public ModButton(float pX, float pY, IModUserSelectable mod, IModSwitcher switcher) {
+    public ModButton(float pX, float pY, Mod mod, IModSwitcher switcher) {
         super(Utils.toRes(pX), Utils.toRes(pY), ResourceManager.getInstance().getTexture(mod.getTextureName()));
 
         this.mod = mod;

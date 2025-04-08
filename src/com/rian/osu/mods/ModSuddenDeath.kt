@@ -1,16 +1,12 @@
 package com.rian.osu.mods
 
-import ru.nsu.ccfit.zuev.osu.game.mods.GameMod
-
 /**
  * Represents the Sudden Death mod.
  */
-class ModSuddenDeath : Mod(), IModUserSelectable {
-    override val encodeChar = 'u'
+class ModSuddenDeath : Mod() {
     override val name = "Sudden Death"
     override val acronym = "SD"
     override val textureNameSuffix = "suddendeath"
-    override val enum = GameMod.MOD_SUDDENDEATH
     override val isRanked = true
     override val incompatibleMods = super.incompatibleMods + arrayOf(
         ModNoFail::class, ModPerfect::class, ModAuto::class
