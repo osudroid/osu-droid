@@ -68,28 +68,6 @@ class ModCustomizationMenu : Modal() {
     }
 
 
-    private fun EmptyAlert() = LinearContainer().apply {
-        orientation = Orientation.Vertical
-        width = FitParent
-        anchor = Anchor.Center
-        origin = Anchor.Center
-        spacing = 10f
-
-        attachChild(ExtendedSprite().apply {
-            textureRegion = ResourceManager.getInstance().getTexture("search")
-            anchor = Anchor.TopCenter
-            origin = Anchor.TopCenter
-        })
-
-        attachChild(ExtendedText().apply {
-            text = "Select one mod to customize"
-            font = ResourceManager.getInstance().getFont("smallFont")
-            anchor = Anchor.TopCenter
-            origin = Anchor.TopCenter
-        })
-    }
-
-
     fun onModAdded(mod: Mod) {
         val settings = mod.settings
 
@@ -205,5 +183,28 @@ class ModCustomizationMenu : Modal() {
             selectedBackgroundColor = 0xFF202036,
             selectedTextColor = 0xFFFFFFFF,
         )
+    }
+}
+
+private class EmptyAlert() : LinearContainer() {
+    init {
+        orientation = Orientation.Vertical
+        width = FitParent
+        anchor = Anchor.Center
+        origin = Anchor.Center
+        spacing = 10f
+
+        attachChild(ExtendedSprite().apply {
+            textureRegion = ResourceManager.getInstance().getTexture("search")
+            anchor = Anchor.TopCenter
+            origin = Anchor.TopCenter
+        })
+
+        attachChild(ExtendedText().apply {
+            text = "Select one mod to customize"
+            font = ResourceManager.getInstance().getFont("smallFont")
+            anchor = Anchor.TopCenter
+            origin = Anchor.TopCenter
+        })
     }
 }

@@ -216,46 +216,48 @@ class ModMenuV2 : ExtendedScene() {
 
     //region Components
 
-    private fun Section(name: String, mods: Array<Mod>) = ScrollableContainer().apply {
-        width = 340f
-        height = FitParent
-        scrollAxes = Axes.Y
-        clipChildren = true
+    private inner class Section(name: String, mods: Array<Mod>) : ScrollableContainer() {
+        init {
+            width = 340f
+            height = FitParent
+            scrollAxes = Axes.Y
+            clipChildren = true
 
-        background = RoundedBox().apply {
-            color = ColorARGB(0xFF13131E)
-            cornerRadius = 16f
-        }
-
-        attachChild(LinearContainer().apply {
-            width = FitParent
-            height = FitContent
-            orientation = Orientation.Vertical
-            padding = Vec4(12f)
-            spacing = 16f
-
-            attachChild(ExtendedText().apply {
-                width = FitParent
-                text = name.uppercase()
-                alignment = Anchor.CenterLeft
-                font = ResourceManager.getInstance().getFont("smallFont")
-                padding = Vec4(0f, 20f, 0f, 10f)
-                color = ColorARGB(0xFF8282A8)
-            })
-
-            mods.fastForEachIndexed { i, mod ->
-                attachChild(ModButton(mod).apply {
-
-                    beginSequence {
-                        translateToY(50f * (i + 1))
-                        delay(0.1f + 0.05f * i)
-                        translateToY(0f, 0.5f, Easing.OutExpo)
-                    }
-
-                    modButtons.add(this)
-                })
+            background = RoundedBox().apply {
+                color = ColorARGB(0xFF13131E)
+                cornerRadius = 16f
             }
-        })
+
+            attachChild(LinearContainer().apply {
+                width = FitParent
+                height = FitContent
+                orientation = Orientation.Vertical
+                padding = Vec4(12f)
+                spacing = 16f
+
+                attachChild(ExtendedText().apply {
+                    width = FitParent
+                    text = name.uppercase()
+                    alignment = Anchor.CenterLeft
+                    font = ResourceManager.getInstance().getFont("smallFont")
+                    padding = Vec4(0f, 20f, 0f, 10f)
+                    color = ColorARGB(0xFF8282A8)
+                })
+
+                mods.fastForEachIndexed { i, mod ->
+                    attachChild(ModButton(mod).apply {
+
+                        beginSequence {
+                            translateToY(50f * (i + 1))
+                            delay(0.1f + 0.05f * i)
+                            translateToY(0f, 0.5f, Easing.OutExpo)
+                        }
+
+                        modButtons.add(this)
+                    })
+                }
+            })
+        }
     }
 
     private inner class ModButton(val mod: Mod): Button() {
