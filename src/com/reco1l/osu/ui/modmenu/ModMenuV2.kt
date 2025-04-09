@@ -198,6 +198,10 @@ object ModMenuV2 : ExtendedScene() {
                     return@scope
                 }
 
+                enabledMods.values.filterIsInstance<IModRequiresOriginalBeatmap>().fastForEach { mod ->
+                    mod.applyFromBeatmap(beatmap)
+                }
+
                 // Copy the mods to avoid concurrent modification
                 val mods = enabledMods.deepCopy().values
 
