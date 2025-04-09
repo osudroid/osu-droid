@@ -1,6 +1,5 @@
 package com.reco1l.osu.ui.modmenu
 
-import com.edlplan.framework.easing.*
 import com.reco1l.andengine.*
 import com.reco1l.andengine.ExtendedEntity.Companion.FitContent
 import com.reco1l.andengine.ExtendedEntity.Companion.FitParent
@@ -11,13 +10,24 @@ import com.reco1l.andengine.text.*
 import com.reco1l.andengine.ui.*
 import com.reco1l.framework.*
 import com.reco1l.framework.math.*
+import com.reco1l.ibancho.RoomAPI.setPlayerMods
+import com.reco1l.ibancho.RoomAPI.setRoomMods
+import com.reco1l.ibancho.data.*
+import com.reco1l.osu.multiplayer.*
+import com.reco1l.osu.multiplayer.Multiplayer.isRoomHost
 import com.reco1l.toolkt.kotlin.*
+import com.rian.osu.*
+import com.rian.osu.beatmap.parser.*
+import com.rian.osu.difficulty.BeatmapDifficultyCalculator.calculateDroidDifficulty
+import com.rian.osu.difficulty.BeatmapDifficultyCalculator.calculateStandardDifficulty
 import com.rian.osu.mods.*
-import com.rian.osu.utils.ModHashMap
-import ru.nsu.ccfit.zuev.osu.GlobalManager
-import ru.nsu.ccfit.zuev.osu.ResourceManager
+import com.rian.osu.utils.*
+import kotlinx.coroutines.*
+import ru.nsu.ccfit.zuev.osu.*
+import ru.nsu.ccfit.zuev.osu.game.*
+import java.util.concurrent.CancellationException
 
-class ModMenuV2 : ExtendedScene() {
+object ModMenuV2 : ExtendedScene() {
 
 
     /**
@@ -25,10 +35,17 @@ class ModMenuV2 : ExtendedScene() {
      */
     val enabledMods = ModHashMap()
 
+    /**
+     * The job used to calculate the score multiplier.
+     */
+    var calculationJob: Job? = null
+        private set
+
 
     private val modButtons = mutableListOf<ModButton>()
 
     private val rankedBadge: Badge
+
     private val scoreMultiplierBadge: StatisticBadge
 
     private val customizeButton: Button
@@ -37,6 +54,8 @@ class ModMenuV2 : ExtendedScene() {
 
 
     init {
+        isBackgroundEnabled = false
+
         ResourceManager.getInstance().loadHighQualityAsset("back-arrow", "back-arrow.png")
         ResourceManager.getInstance().loadHighQualityAsset("tune", "tune.png")
         ResourceManager.getInstance().loadHighQualityAsset("backspace", "backspace.png")
@@ -51,7 +70,7 @@ class ModMenuV2 : ExtendedScene() {
             padding = Vec4(0f, 80f, 0f, 0f)
             background = Box().apply {
                 color = ColorARGB(0xFF161622)
-                alpha = 0.5f
+                alpha = 0.95f
             }
 
             attachChild(LinearContainer().apply {
@@ -110,6 +129,7 @@ class ModMenuV2 : ExtendedScene() {
                     leadingIcon = ExtendedSprite(ResourceManager.getInstance().getTexture("back-arrow"))
                     onActionUp = {
                         ResourceManager.getInstance().getSound("click-short-confirm")?.play()
+                        calculateStarRating()
                         back()
                     }
                     onActionCancel = { ResourceManager.getInstance().getSound("click-short")?.play() }
@@ -140,7 +160,7 @@ class ModMenuV2 : ExtendedScene() {
                     )
                     onActionUp = {
                         ResourceManager.getInstance().getSound("click-short-confirm")?.play()
-                        enabledMods.toList().fastForEach { removeMod(it.second) }
+                        clear()
                     }
                     onActionCancel = { ResourceManager.getInstance().getSound("click-short")?.play() }
                 })
@@ -170,7 +190,104 @@ class ModMenuV2 : ExtendedScene() {
     }
 
 
-    private fun onModsChanged() {
+    //region Calculation
+
+    fun cancelCalculationJob() {
+        calculationJob?.cancel(CancellationException("Difficulty calculation has been cancelled."))
+        calculationJob = null
+    }
+
+    fun calculateStarRating() {
+        cancelCalculationJob()
+
+        val selectedBeatmap = GlobalManager.getInstance().selectedBeatmap
+
+        calculationJob = async scope@{
+
+            if (selectedBeatmap == null) {
+                return@scope
+            }
+
+            val difficultyAlgorithm = Config.getDifficultyAlgorithm()
+
+            BeatmapParser(selectedBeatmap.path, this@scope).use { parser ->
+
+                val beatmap = parser.parse(
+                    withHitObjects = true,
+                    mode = if (difficultyAlgorithm == DifficultyAlgorithm.droid) GameMode.Droid else GameMode.Standard
+                )
+
+                if (beatmap == null) {
+                    GlobalManager.getInstance().songMenu.setStarsDisplay(0f)
+                    return@scope
+                }
+
+                // Copy the mods to avoid concurrent modification
+                val mods = enabledMods.deepCopy().values
+
+                when (difficultyAlgorithm) {
+
+                    DifficultyAlgorithm.droid -> {
+                        val attributes = calculateDroidDifficulty(beatmap, mods, this@scope)
+                        GlobalManager.getInstance().songMenu.setStarsDisplay(GameHelper.Round(attributes.starRating, 2))
+                    }
+
+                    DifficultyAlgorithm.standard -> {
+                        val attributes = calculateStandardDifficulty(beatmap, mods, this@scope)
+                        GlobalManager.getInstance().songMenu.setStarsDisplay(GameHelper.Round(attributes.starRating, 2))
+                    }
+                }
+            }
+        }
+    }
+
+    //endregion
+
+    //region Visibility
+
+    fun show() {
+        GlobalManager.getInstance().engine.scene.setChildScene(
+            this,
+            false,
+            true,
+            true
+        )
+    }
+
+    override fun back() {
+        back(true)
+    }
+
+    fun back(updatePlayerMods: Boolean) {
+
+        if (Multiplayer.isConnected) {
+            RoomScene.isWaitingForModsChange = true
+
+            val string = enabledMods.toString()
+
+            // The room mods are the same as the host mods
+            if (Multiplayer.isRoomHost) {
+                setRoomMods(string)
+            } else if (updatePlayerMods) {
+                setPlayerMods(string)
+            } else {
+                RoomScene.isWaitingForModsChange = false
+            }
+        }
+
+        super.back()
+    }
+
+    //endregion
+
+    //region Mods
+
+    fun clear() {
+        cancelCalculationJob()
+        enabledMods.toList().fastForEach { removeMod(it.second) }
+    }
+
+    fun onModsChanged(lastChangedMod: Mod) {
 
         rankedBadge.clearEntityModifiers()
         rankedBadge.background!!.clearEntityModifiers()
@@ -198,6 +315,10 @@ class ModMenuV2 : ExtendedScene() {
         }
 
         customizeButton.isEnabled = !customizationMenu.isSelectorEmpty()
+
+        if (lastChangedMod is ModRateAdjust) {
+            GlobalManager.getInstance().songMenu.updateMusicEffects()
+        }
     }
 
     private fun addMod(mod: Mod) {
@@ -219,7 +340,7 @@ class ModMenuV2 : ExtendedScene() {
         }
 
         customizationMenu.onModAdded(mod)
-        onModsChanged()
+        onModsChanged(mod)
     }
 
     private fun removeMod(mod: Mod) {
@@ -231,14 +352,15 @@ class ModMenuV2 : ExtendedScene() {
         modButtons.find { it.mod == mod }?.isSelected = false
 
         customizationMenu.onModRemoved(mod)
-
-        onModsChanged()
+        onModsChanged(mod)
     }
 
+    //endregion
 
     //region Components
 
-    private inner class Section(name: String, mods: Array<Mod>) : ScrollableContainer() {
+    private class Section(name: String, mods: Array<Mod>) : ScrollableContainer() {
+
         init {
             width = 340f
             height = FitParent
@@ -266,27 +388,23 @@ class ModMenuV2 : ExtendedScene() {
                     color = ColorARGB(0xFF8282A8)
                 })
 
-                mods.fastForEachIndexed { i, mod ->
-                    attachChild(ModButton(mod).apply {
-
-                        beginSequence {
-                            translateToY(50f * (i + 1))
-                            delay(0.1f + 0.05f * i)
-                            translateToY(0f, 0.5f, Easing.OutExpo)
-                        }
-
-                        modButtons.add(this)
-                    })
+                mods.fastForEach { mod ->
+                    val button = ModButton(mod)
+                    modButtons.add(button)
+                    attachChild(button)
                 }
             })
         }
     }
 
-    private inner class ModButton(val mod: Mod): Button() {
+    private class ModButton(val mod: Mod): Button() {
 
         init {
             width = FitParent
-            theme = MOD_BUTTON_THEME
+            theme = ButtonTheme(
+                iconSize = 40f,
+                backgroundColor = 0xFF1E1E2E
+            )
             text = mod.name
             leadingIcon = ModIcon(mod)
             padding = Vec4(20f, 8f)
@@ -294,18 +412,13 @@ class ModMenuV2 : ExtendedScene() {
             onActionUp = {
                 if (isSelected) {
                     removeMod(mod)
+                    ResourceManager.getInstance().getSound("check-off")?.play()
                 } else {
                     addMod(mod)
+                    ResourceManager.getInstance().getSound("check-on")?.play()
                 }
             }
         }
-    }
-
-    companion object {
-        private val MOD_BUTTON_THEME = ButtonTheme(
-            iconSize = 40f,
-            backgroundColor = 0xFF1E1E2E
-        )
     }
 
     //endregion

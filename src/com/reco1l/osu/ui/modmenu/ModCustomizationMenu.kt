@@ -98,7 +98,7 @@ class ModCustomizationMenu : Modal() {
         return modButtons.isEmpty()
     }
 
-    private fun createComponent(setting: ModSetting<*>) = when (setting) {
+    private fun createComponent(mod: Mod, setting: ModSetting<*>) = when (setting) {
 
         is FloatModSetting -> FormSlider().apply {
             label = setting.name
@@ -107,7 +107,10 @@ class ModCustomizationMenu : Modal() {
             control.min = setting.minValue
             control.max = setting.maxValue
             control.step = setting.step
-            onValueChanged = { setting.value = it }
+            onValueChanged = {
+                setting.value = it
+                ModMenuV2.onModsChanged(mod)
+            }
             valueFormatter = setting.valueFormatter!!
         }
 
@@ -122,6 +125,7 @@ class ModCustomizationMenu : Modal() {
             onValueChanged = {
                 setting.value = it
                 control.isEnabled = it != setting.defaultValue
+                ModMenuV2.onModsChanged(mod)
             }
             valueFormatter = setting.valueFormatter!!
         }
@@ -130,14 +134,17 @@ class ModCustomizationMenu : Modal() {
             label = setting.name
             value = setting.value
             defaultValue = setting.defaultValue
-            onValueChanged = { setting.value = it }
+            onValueChanged = {
+                setting.value = it
+                ModMenuV2.onModsChanged(mod)
+            }
         }
 
         else -> throw IllegalArgumentException("Unsupported setting type: ${setting::class}")
     }
 
 
-    fun onModSelected(settings: List<ModSetting<*>>) {
+    fun onModSelected(mod: Mod, settings: List<ModSetting<*>>) {
         modSettings.detachChildren()
         modSettings.attachChild(LinearContainer().apply {
             orientation = Orientation.Vertical
@@ -146,7 +153,7 @@ class ModCustomizationMenu : Modal() {
 
             fadeIn(0.2f)
 
-            settings.fastForEach { setting -> attachChild(createComponent(setting)) }
+            settings.fastForEach { setting -> attachChild(createComponent(mod, setting)) }
         })
     }
 
@@ -155,7 +162,13 @@ class ModCustomizationMenu : Modal() {
 
         init {
             width = FitParent
-            theme = MOD_BUTTON_THEME
+            theme = ButtonTheme(
+                iconSize = 40f,
+                withBezelEffect = false,
+                backgroundColor = 0xFF181828,
+                selectedBackgroundColor = 0xFF202036,
+                selectedTextColor = 0xFFFFFFFF,
+            )
             leadingIcon = ModIcon(mod)
             text = mod.name
 
@@ -168,25 +181,16 @@ class ModCustomizationMenu : Modal() {
                             button.isSelected = false
                         }
                     }
-                    onModSelected(settings)
+                    onModSelected(mod, settings)
                 }
             }
         }
 
     }
 
-    companion object {
-        private val MOD_BUTTON_THEME = ButtonTheme(
-            iconSize = 40f,
-            withBezelEffect = false,
-            backgroundColor = 0xFF181828,
-            selectedBackgroundColor = 0xFF202036,
-            selectedTextColor = 0xFFFFFFFF,
-        )
-    }
 }
 
-private class EmptyAlert() : LinearContainer() {
+private class EmptyAlert : LinearContainer() {
     init {
         orientation = Orientation.Vertical
         width = FitParent
