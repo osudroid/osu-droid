@@ -197,7 +197,7 @@ object ModMenuV2 : ExtendedScene() {
         calculationJob = null
     }
 
-    fun calculateStarRating() {
+    private fun calculateStarRating() {
         cancelCalculationJob()
 
         val selectedBeatmap = GlobalManager.getInstance().selectedBeatmap
