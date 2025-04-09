@@ -292,7 +292,7 @@ object ModMenuV2 : ExtendedScene() {
 
         customizeButton.isEnabled = !customizationMenu.isSelectorEmpty()
 
-        if (lastChangedMod is ModRateAdjust) {
+        if (lastChangedMod is IModApplicableToTrackRate) {
             GlobalManager.getInstance().songMenu.updateMusicEffects()
         }
     }
