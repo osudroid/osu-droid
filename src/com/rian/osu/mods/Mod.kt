@@ -21,6 +21,11 @@ sealed class Mod {
     abstract val acronym: String
 
     /**
+     * The type fo this [Mod].
+     */
+    abstract val type: ModType
+
+    /**
      * The suffix to append to the texture name of this [Mod].
      */
     protected abstract val textureNameSuffix: String

@@ -12,6 +12,7 @@ import com.rian.osu.beatmap.sections.BeatmapDifficulty
 class ModPrecise : Mod(), IModApplicableToHitObject {
     override val name = "Precise"
     override val acronym = "PR"
+    override val type = ModType.DifficultyIncrease
     override val textureNameSuffix = "precise"
     override val isRanked = true
 

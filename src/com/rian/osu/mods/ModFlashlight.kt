@@ -10,6 +10,7 @@ import org.json.JSONObject
 class ModFlashlight : Mod() {
     override val name = "Flashlight"
     override val acronym = "FL"
+    override val type = ModType.DifficultyIncrease
     override val textureNameSuffix = "flashlight"
 
     override val isRanked

@@ -6,6 +6,7 @@ package com.rian.osu.mods
 class ModSuddenDeath : Mod() {
     override val name = "Sudden Death"
     override val acronym = "SD"
+    override val type = ModType.DifficultyIncrease
     override val textureNameSuffix = "suddendeath"
     override val isRanked = true
     override val incompatibleMods = super.incompatibleMods + arrayOf(

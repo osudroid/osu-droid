@@ -9,6 +9,7 @@ class ModHalfTime : ModRateAdjust() {
 
     override val name = "Half Time"
     override val acronym = "HT"
+    override val type = ModType.DifficultyReduction
     override val textureNameSuffix = "halftime"
     override val isRanked = true
     override val incompatibleMods = super.incompatibleMods + arrayOf(ModDoubleTime::class, ModNightCore::class)

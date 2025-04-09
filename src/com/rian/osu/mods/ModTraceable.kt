@@ -8,6 +8,7 @@ import com.rian.osu.beatmap.sections.BeatmapDifficulty
 class ModTraceable : Mod() {
     override val name = "Traceable"
     override val acronym = "TC"
+    override val type = ModType.DifficultyIncrease
     override val textureNameSuffix = "traceable"
     override val incompatibleMods = super.incompatibleMods + ModHidden::class
 

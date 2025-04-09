@@ -71,6 +71,7 @@ class ModDifficultyAdjust @JvmOverloads constructor(
 
     override val name = "Difficulty Adjust"
     override val acronym = "DA"
+    override val type = ModType.Conversion
     override val textureNameSuffix = "difficultyadjust"
 
     override val isRelevant
