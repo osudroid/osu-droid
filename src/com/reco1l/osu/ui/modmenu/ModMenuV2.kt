@@ -108,6 +108,11 @@ class ModMenuV2 : ExtendedScene() {
                 attachChild(Button().apply {
                     text = "Back"
                     leadingIcon = ExtendedSprite(ResourceManager.getInstance().getTexture("back-arrow"))
+                    onActionUp = {
+                        ResourceManager.getInstance().getSound("click-short-confirm")?.play()
+                        back()
+                    }
+                    onActionCancel = { ResourceManager.getInstance().getSound("click-short")?.play() }
                 })
 
                 customizeButton = Button().apply {
@@ -115,12 +120,14 @@ class ModMenuV2 : ExtendedScene() {
                     isEnabled = false
                     leadingIcon = ExtendedSprite(ResourceManager.getInstance().getTexture("tune"))
                     onActionUp = {
+                        ResourceManager.getInstance().getSound("click-short-confirm")?.play()
                         if (customizationMenu.isVisible) {
                             customizationMenu.hide()
                         } else {
                             customizationMenu.show()
                         }
                     }
+                    onActionCancel = { ResourceManager.getInstance().getSound("click-short")?.play() }
                 }
                 attachChild(customizeButton)
 
@@ -131,10 +138,11 @@ class ModMenuV2 : ExtendedScene() {
                         backgroundColor = 0xFF342121,
                         textColor = 0xFFFFBFBF,
                     )
-
                     onActionUp = {
+                        ResourceManager.getInstance().getSound("click-short-confirm")?.play()
                         enabledMods.toList().fastForEach { removeMod(it.second) }
                     }
+                    onActionCancel = { ResourceManager.getInstance().getSound("click-short")?.play() }
                 })
             })
 
