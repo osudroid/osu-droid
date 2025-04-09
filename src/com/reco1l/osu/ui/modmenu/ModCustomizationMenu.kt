@@ -3,7 +3,6 @@ package com.reco1l.osu.ui.modmenu
 import com.reco1l.andengine.*
 import com.reco1l.andengine.container.*
 import com.reco1l.andengine.shape.*
-import com.reco1l.andengine.sprite.*
 import com.reco1l.andengine.text.*
 import com.reco1l.andengine.ui.*
 import com.reco1l.andengine.ui.form.*
@@ -13,90 +12,52 @@ import com.reco1l.toolkt.kotlin.*
 import com.rian.osu.mods.*
 import ru.nsu.ccfit.zuev.osu.ResourceManager
 
-class ModCustomizationMenu : Modal() {
+class ModCustomizationMenu : Modal(
 
-    private val modSelector = LinearContainer().apply {
-        orientation = Orientation.Vertical
-        width = FitParent
-        spacing = 8f
-        padding = Vec4(12f)
+    content = ScrollableContainer().apply {
+        scrollAxes = Axes.Y
+        relativeSizeAxes = Axes.Both
+        anchor = Anchor.TopLeft
+        origin = Anchor.TopLeft
+        scaleCenter = Anchor.Center
+        width = 0.60f
+        height = 0.75f
+        x = 60f
+        y = 90f
+        clipChildren = true
+
+        +LinearContainer().apply {
+            width = FitParent
+            orientation = Orientation.Vertical
+        }
     }
 
-    private val modSettings: Container
+) {
 
-    private val modButtons = mutableListOf<ModButton>()
+    private val modSettings: LinearContainer = content[0]
 
 
     init {
-        anchor = Anchor.TopCenter
-        origin = Anchor.TopCenter
-        relativeSizeAxes = Axes.Both
-        width = 0.9f
-        height = 0.75f
-        y = 90f
         theme = ModalTheme(backgroundColor = 0xFF181828)
-
-        attachChild(LinearContainer().apply {
-            height = FitParent
-            width = FitParent
-            orientation = Orientation.Horizontal
-
-            attachChild(ScrollableContainer().apply {
-                scrollAxes = Axes.Y
-                relativeSizeAxes = Axes.X
-                width = 0.25f
-                height = FitParent
-
-                attachChild(modSelector)
-            })
-
-            modSettings = ScrollableContainer().apply {
-                scrollAxes = Axes.Y
-                relativeSizeAxes = Axes.X
-                width = 0.75f
-                height = FitParent
-
-                background = RoundedBox().apply {
-                    color = ColorARGB(0xFF161622)
-                    cornerRadius = 16f
-                }
-
-                attachChild(EmptyAlert())
-            }
-            attachChild(modSettings)
-        })
     }
 
 
     fun onModAdded(mod: Mod) {
         val settings = mod.settings
 
-        if (settings.isNotEmpty() && modButtons.none { it.mod == mod }) {
-            val button = ModButton(mod, settings)
-            modButtons.add(button)
-            modSelector.attachChild(button)
+        if (settings.isNotEmpty()) {
+            modSettings.attachChild(ModSettingsSection(mod, settings))
         }
     }
 
     fun onModRemoved(mod: Mod) {
-
-        for (button in modButtons) {
-            if (button.mod == mod) {
-                if (button.isSelected) {
-                    modSettings.detachChildren()
-                    modSettings.attachChild(EmptyAlert())
-                }
-                modButtons.remove(button)
-                break
-            }
-        }
-
-        modSelector.detachChild { it is ModButton && it.mod == mod }
+        modSettings.detachChild { it is ModSettingsSection && it.mod == mod }
     }
 
     fun isSelectorEmpty(): Boolean {
-        return modButtons.isEmpty()
+        return modSettings.findChild { it is ModSettingsSection } == null
     }
+
 
     private fun createComponent(mod: Mod, setting: ModSetting<*>) = when (setting) {
 
@@ -144,71 +105,43 @@ class ModCustomizationMenu : Modal() {
     }
 
 
-    fun onModSelected(mod: Mod, settings: List<ModSetting<*>>) {
-        modSettings.detachChildren()
-        modSettings.attachChild(LinearContainer().apply {
-            orientation = Orientation.Vertical
-            width = FitParent
-            alpha = 0f
-
-            fadeIn(0.2f)
-
-            settings.fastForEach { setting -> attachChild(createComponent(mod, setting)) }
-        })
-    }
-
-
-    private inner class ModButton(val mod: Mod, val settings: List<ModSetting<*>>) : Button() {
+    private inner class ModSettingsSection(val mod: Mod, settings: List<ModSetting<*>>) : LinearContainer() {
 
         init {
+            orientation = Orientation.Vertical
             width = FitParent
-            theme = ButtonTheme(
-                iconSize = 40f,
-                withBezelEffect = false,
-                backgroundColor = 0xFF181828,
-                selectedBackgroundColor = 0xFF202036,
-                selectedTextColor = 0xFFFFFFFF,
-            )
-            leadingIcon = ModIcon(mod)
-            text = mod.name
 
-            onActionUp = {
-                if (!isSelected) {
-                    isSelected = true
-
-                    modButtons.fastForEach { button ->
-                        if (button != this) {
-                            button.isSelected = false
-                        }
-                    }
-                    onModSelected(mod, settings)
+            +LinearContainer().apply {
+                orientation = Orientation.Horizontal
+                width = FitParent
+                padding = Vec4(20f, 14f)
+                spacing = 12f
+                background = RoundedBox().apply {
+                    color = ColorARGB(0xFF1A1A2B)
+                    cornerRadius = 16f
                 }
+
+                +ModIcon(mod).apply {
+                    anchor = Anchor.CenterLeft
+                    origin = Anchor.CenterLeft
+                    width = 36f
+                    height = 36f
+                }
+
+                +ExtendedText().apply {
+                    anchor = Anchor.CenterLeft
+                    origin = Anchor.CenterLeft
+                    font = ResourceManager.getInstance().getFont("smallFont")
+                    text = mod.name.uppercase()
+                    color = ColorARGB(0xFF8282A8)
+                }
+            }
+
+            settings.fastForEach {
+                +createComponent(mod, it)
             }
         }
 
     }
 
-}
-
-private class EmptyAlert : LinearContainer() {
-    init {
-        orientation = Orientation.Vertical
-        width = FitParent
-        anchor = Anchor.Center
-        origin = Anchor.Center
-        spacing = 10f
-
-        attachChild(ExtendedSprite().apply {
-            textureRegion = ResourceManager.getInstance().getTexture("search")
-            anchor = Anchor.TopCenter
-            origin = Anchor.TopCenter
-        })
-
-        attachChild(ExtendedText().apply {
-            text = "Select one mod to customize"
-            font = ResourceManager.getInstance().getFont("smallFont")
-            anchor = Anchor.TopCenter
-            origin = Anchor.TopCenter
-        })
-    }
 }
