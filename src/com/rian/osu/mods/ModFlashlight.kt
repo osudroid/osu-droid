@@ -1,6 +1,7 @@
 package com.rian.osu.mods
 
 import com.rian.osu.beatmap.sections.BeatmapDifficulty
+import kotlin.math.ceil
 import org.json.JSONObject
 
 /**
@@ -9,6 +10,7 @@ import org.json.JSONObject
 class ModFlashlight : Mod() {
     override val name = "Flashlight"
     override val acronym = "FL"
+    override val type = ModType.DifficultyIncrease
     override val textureNameSuffix = "flashlight"
 
     override val isRanked
@@ -19,7 +21,7 @@ class ModFlashlight : Mod() {
      */
     var followDelay by FloatModSetting(
         name = "Flashlight follow delay",
-        valueFormatter = { "${(it * 1000).toInt()}ms" },
+        valueFormatter = { "${ceil(it * 1000).toInt()}ms" },
         defaultValue = DEFAULT_FOLLOW_DELAY,
         minValue = DEFAULT_FOLLOW_DELAY,
         maxValue = DEFAULT_FOLLOW_DELAY * 10,

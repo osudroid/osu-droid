@@ -10,6 +10,7 @@ import com.rian.osu.utils.CircleSizeCalculator
 class ModSmallCircle : Mod(), IModApplicableToDifficulty, IMigratableMod {
     override val name = "Small Circle"
     override val acronym = "SC"
+    override val type = ModType.DifficultyIncrease
     override val textureNameSuffix = "smallcircle"
 
     override fun migrate(difficulty: BeatmapDifficulty) = ModDifficultyAdjust(cs = difficulty.gameplayCS + 4)

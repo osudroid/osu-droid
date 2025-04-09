@@ -6,6 +6,7 @@ package com.rian.osu.mods
 class ModAuto : Mod() {
     override val name = "Auto"
     override val acronym = "AT"
+    override val type = ModType.Automation
     override val textureNameSuffix = "autoplay"
     override val isValidForMultiplayer = false
     override val isValidForMultiplayerAsFreeMod = false
