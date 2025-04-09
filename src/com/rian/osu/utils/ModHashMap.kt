@@ -71,10 +71,13 @@ open class ModHashMap : HashMap<Class<out Mod>, Mod> {
         }
 
         // Check if there are any mods that are incompatible with the new mod.
-        value.incompatibleMods.fastForEach {
-            for (mod in this) {
-                if (it.isInstance(mod.value)) {
-                    remove(mod.key)
+        val iterator = iterator()
+        while (iterator.hasNext()) {
+            val (_, mod) = iterator.next()
+
+            value.incompatibleMods.fastForEach {
+                if (it.isInstance(mod)) {
+                    iterator.remove()
                 }
             }
         }
