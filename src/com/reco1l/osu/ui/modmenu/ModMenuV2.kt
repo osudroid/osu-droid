@@ -14,6 +14,7 @@ import com.reco1l.framework.math.*
 import com.reco1l.toolkt.kotlin.*
 import com.rian.osu.mods.*
 import com.rian.osu.utils.ModHashMap
+import ru.nsu.ccfit.zuev.osu.GlobalManager
 import ru.nsu.ccfit.zuev.osu.ResourceManager
 
 class ModMenuV2 : ExtendedScene() {
@@ -174,6 +175,18 @@ class ModMenuV2 : ExtendedScene() {
             rankedBadge.text = "Unranked"
             rankedBadge.colorTo(0xFFFFFFFF, 0.1f)
             rankedBadge.background!!.colorTo(0xFF1E1E2E, 0.1f)
+        }
+
+        val difficulty = GlobalManager.getInstance().selectedBeatmap?.getBeatmapDifficulty()
+
+        if (difficulty != null) {
+            scoreMultiplierBadge.value = "%.2fx".format(
+                enabledMods.values.fold(1f) { acc, mod ->
+                    acc * mod.calculateScoreMultiplier(difficulty)
+                }
+            )
+        } else {
+            scoreMultiplierBadge.value = "1.00x"
         }
 
         customizeButton.isEnabled = !customizationMenu.isSelectorEmpty()
