@@ -96,18 +96,4 @@ abstract class FormControl<V : Any?, C: Control<V>>(initialValue: V): Container(
         super.onManagedUpdate(deltaTimeSec)
     }
 
-    override fun onAreaTouched(event: TouchEvent, localX: Float, localY: Float): Boolean {
-
-        background?.clearModifiers(ModifierType.Alpha)
-
-        if (event.isActionDown) {
-            background?.fadeTo(0.1f, 0.2f)
-        }
-        if ((event.isActionUp || event.isActionCancel) && background?.alpha != 0f) {
-            background?.fadeTo(0f, 0.2f)
-        }
-
-        return super.onAreaTouched(event, localX, localY)
-    }
-
 }
