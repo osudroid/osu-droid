@@ -3,4 +3,9 @@
 <!-- This file here is for new strings that will be temporary:-->
 <!-- Link to localizations pack: https://github.com/osudroid/language-pack-->
 
+    <string name="mod_section_difficulty_reduction">Difficulty Reduction</string>
+    <string name="mod_section_difficulty_increase">Difficulty Increase</string>
+    <string name="mod_section_difficulty_automation">Automation</string>
+    <string name="mod_section_difficulty_conversion">Conversion</string>
+
 </resources>
