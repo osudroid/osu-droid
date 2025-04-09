@@ -12,9 +12,7 @@ import com.reco1l.framework.*
 import com.reco1l.framework.math.*
 import com.reco1l.ibancho.RoomAPI.setPlayerMods
 import com.reco1l.ibancho.RoomAPI.setRoomMods
-import com.reco1l.ibancho.data.*
 import com.reco1l.osu.multiplayer.*
-import com.reco1l.osu.multiplayer.Multiplayer.isRoomHost
 import com.reco1l.toolkt.kotlin.*
 import com.rian.osu.*
 import com.rian.osu.beatmap.parser.*
@@ -25,6 +23,7 @@ import com.rian.osu.utils.*
 import kotlinx.coroutines.*
 import ru.nsu.ccfit.zuev.osu.*
 import ru.nsu.ccfit.zuev.osu.game.*
+import ru.nsu.ccfit.zuev.osu.helper.StringTable
 import java.util.concurrent.CancellationException
 
 object ModMenuV2 : ExtendedScene() {
@@ -80,36 +79,13 @@ object ModMenuV2 : ExtendedScene() {
                 spacing = 16f
                 padding = Vec4(60f, 20f)
 
-                attachChild(Section("Difficulty Reduction", arrayOf(
-                    ModEasy(),
-                    ModNoFail(),
-                    ModHalfTime(),
-                    ModReallyEasy()
-                )))
+                val mods = ModUtils.allModsInstances
 
-                attachChild(Section("Difficulty Increase", arrayOf(
-                    ModHardRock(),
-                    ModDoubleTime(),
-                    ModNightCore(),
-                    ModHidden(),
-                    ModTraceable(),
-                    ModFlashlight(),
-                    ModSuddenDeath(),
-                    ModPerfect(),
-                    ModPrecise()
-                )))
-
-                attachChild(Section("Automation", arrayOf(
-                    ModRelax(),
-                    ModAutopilot(),
-                    ModAuto()
-                )))
-
-                attachChild(Section("Conversion", arrayOf(
-                    ModCustomSpeed(),
-                    ModDifficultyAdjust(),
-                    ModScoreV2()
-                )))
+                ModType.entries.forEach { type ->
+                    val sectionName = StringTable.get(type.stringId)
+                    val sectionMods = mods.filter { it.type == type }
+                    attachChild(Section(sectionName, sectionMods))
+                }
             })
         })
 
@@ -359,7 +335,7 @@ object ModMenuV2 : ExtendedScene() {
 
     //region Components
 
-    private class Section(name: String, mods: Array<Mod>) : ScrollableContainer() {
+    private class Section(name: String, mods: List<Mod>) : ScrollableContainer() {
 
         init {
             width = 340f
