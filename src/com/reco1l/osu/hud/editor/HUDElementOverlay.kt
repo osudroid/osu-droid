@@ -13,7 +13,6 @@ import com.reco1l.osu.hud.HUDElement
 import com.reco1l.osu.updateThread
 import com.reco1l.toolkt.kotlin.*
 import org.anddev.andengine.input.touch.TouchEvent
-import ru.nsu.ccfit.zuev.osu.Config
 import ru.nsu.ccfit.zuev.osu.ResourceManager
 
 class HUDElementOverlay(private val element: HUDElement) : ConstraintContainer() {
@@ -23,7 +22,7 @@ class HUDElementOverlay(private val element: HUDElement) : ConstraintContainer()
      * The position of the outline box that represents the element.
      */
     val outlinePosition
-        get() = outline.drawPosition
+        get() = outline.absolutePosition
 
 
     private val outline = OutlineBox().apply {
@@ -63,7 +62,7 @@ class HUDElementOverlay(private val element: HUDElement) : ConstraintContainer()
 
     init {
         alpha = 0f
-        setSize(Config.getRES_WIDTH().toFloat(), Config.getRES_HEIGHT().toFloat())
+        setSize(FitParent, FitParent)
 
         attachChild(outline)
         attachChild(toolbar)
@@ -94,11 +93,11 @@ class HUDElementOverlay(private val element: HUDElement) : ConstraintContainer()
      */
     fun updateOutline() {
         // We need to cancel scale center
-        outline.x = element.anchorOffsetX + element.x - (element.widthScaled * element.origin.x)
-        outline.y = element.anchorOffsetY + element.y - (element.heightScaled * element.origin.y)
+        outline.x = element.anchorPositionX + element.x - (element.transformedWidth * element.origin.x)
+        outline.y = element.anchorPositionY + element.y - (element.transformedHeight * element.origin.y)
 
-        outline.width = element.widthScaled
-        outline.height = element.heightScaled
+        outline.width = element.transformedWidth
+        outline.height = element.transformedHeight
     }
 
 
@@ -109,11 +108,11 @@ class HUDElementOverlay(private val element: HUDElement) : ConstraintContainer()
         return false
     }
 
-    override fun onManagedUpdate(pSecondsElapsed: Float) {
+    override fun onManagedUpdate(deltaTimeSec: Float) {
         updateOutline()
 
-        if (outline.y - toolbar.drawHeight < 0f) {
-            toolbar.y = -(outline.y - toolbar.drawHeight)
+        if (outline.y - toolbar.height < 0f) {
+            toolbar.y = -(outline.y - toolbar.height)
         } else {
             toolbar.y = 0f
         }
@@ -125,9 +124,8 @@ class HUDElementOverlay(private val element: HUDElement) : ConstraintContainer()
             }
         }
 
-        super.onManagedUpdate(pSecondsElapsed)
+        super.onManagedUpdate(deltaTimeSec)
     }
-
 
 
     /**
@@ -174,8 +172,8 @@ class HUDElementOverlay(private val element: HUDElement) : ConstraintContainer()
                     deltaY = -deltaY
                 }
 
-                val deltaScaleX = deltaX / element.widthScaled
-                val deltaScaleY = deltaY / element.heightScaled
+                val deltaScaleX = deltaX / element.transformedWidth
+                val deltaScaleY = deltaY / element.transformedHeight
 
                 val scaleX = (element.scaleX + deltaScaleX).coerceIn(0.5f, 5f)
                 val scaleY = (element.scaleY + deltaScaleY).coerceIn(0.5f, 5f)
@@ -187,7 +185,6 @@ class HUDElementOverlay(private val element: HUDElement) : ConstraintContainer()
             return false
         }
     }
-
 
 
     /**
@@ -219,7 +216,10 @@ class HUDElementOverlay(private val element: HUDElement) : ConstraintContainer()
             if (event.isActionUp) {
                 action()
                 clearEntityModifiers()
-                scaleTo(0.9f, 0.1f).scaleTo(1f, 0.1f)
+                beginSequence {
+                    scaleTo(0.9f, 0.1f)
+                    scaleTo(1f, 0.1f)
+                }
                 return true
             }
 

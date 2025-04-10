@@ -15,7 +15,6 @@ import com.reco1l.osu.data.BeatmapSetInfo;
 import com.reco1l.osu.data.DatabaseManager;
 import com.reco1l.osu.Execution;
 import com.reco1l.andengine.sprite.AnimatedSprite;
-import com.reco1l.andengine.Axes;
 import com.reco1l.andengine.sprite.ExtendedSprite;
 import com.reco1l.osu.multiplayer.Multiplayer;
 import com.reco1l.osu.multiplayer.RoomScene;
@@ -347,7 +346,7 @@ public class SongMenu implements IUpdateHandler, MenuItemListener,
                     scaleWhenHold = layoutBackButton.property.optBoolean("scaleWhenHold", true);
                 }
 
-                setAutoSizeAxes(Axes.None);
+                setSize(getWidth(), getHeight());
             }
 
             @Override
@@ -399,7 +398,7 @@ public class SongMenu implements IUpdateHandler, MenuItemListener,
 
                 {
                     setTextureRegion(ResourceManager.getInstance().getTextureIfLoaded("selection-mods"));
-                    setAutoSizeAxes(Axes.None);
+                    setSize(getWidth(), getHeight());
                 }
 
                 @Override
@@ -452,7 +451,7 @@ public class SongMenu implements IUpdateHandler, MenuItemListener,
 
             {
                 setTextureRegion(ResourceManager.getInstance().getTextureIfLoaded("selection-options"));
-                setAutoSizeAxes(Axes.None);
+                setSize(getWidth(), getHeight());
             }
 
             @Override
@@ -508,7 +507,7 @@ public class SongMenu implements IUpdateHandler, MenuItemListener,
 
             {
                 setTextureRegion(ResourceManager.getInstance().getTextureIfLoaded("selection-random"));
-                setAutoSizeAxes(Axes.None);
+                setSize(getWidth(), getHeight());
             }
 
             @Override

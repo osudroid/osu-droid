@@ -2,11 +2,9 @@ package com.rian.osu.utils
 
 import com.reco1l.toolkt.kotlin.fastForEach
 import com.rian.osu.mods.*
-import java.util.EnumSet
 import kotlin.reflect.KClass
 import kotlin.reflect.full.createInstance
 import org.json.JSONArray
-import ru.nsu.ccfit.zuev.osu.game.mods.GameMod
 
 /**
  * A [HashMap] of [Mod]s with additional functionalities.
@@ -55,20 +53,19 @@ open class ModHashMap : HashMap<Class<out Mod>, Mod> {
             throw IllegalArgumentException("The key class must correspond to the value class.")
         }
 
-        // If all difficulty statistics are set, all other difficulty adjusting mods are irrelevant, so we remove them.
-        // This prevents potential abuse cases where score multipliers from non-affecting mods stack (i.e., forcing
-        // all difficulty statistics while using the Hard Rock mod).
-        val removeDifficultyAdjustmentMods =
-            value is ModDifficultyAdjust &&
-            value.cs != null &&
-            value.ar != null &&
-            value.od != null &&
-            value.hp != null
+        // Some mods become redundant when `ModDifficultyAdjust` is used. Ideally, this should be handled somewhere else,
+        // but for the time being it's done here for simplicity. This prevents potential abuse cases where score multipliers
+        // from non-affecting mods stack (i.e., forcing all difficulty statistics while using the Hard Rock mod).
+        if (value is ModDifficultyAdjust) {
+            if (value.cs != null) {
+                remove(ModSmallCircle::class)
+            }
 
-        if (removeDifficultyAdjustmentMods) {
-            remove(ModEasy::class)
-            remove(ModHardRock::class)
-            remove(ModReallyEasy::class)
+            if (value.cs != null && value.ar != null && value.od != null && value.hp != null) {
+                remove(ModEasy::class)
+                remove(ModHardRock::class)
+                remove(ModReallyEasy::class)
+            }
         }
 
         // Check if there are any mods that are incompatible with the new mod.
@@ -166,20 +163,6 @@ open class ModHashMap : HashMap<Class<out Mod>, Mod> {
      * Serializes the [Mod]s in this [ModHashMap] to a [JSONArray].
      */
     fun serializeMods() = ModUtils.serializeMods(values)
-
-    /**
-     * Converts this [ModHashMap] to a [EnumSet] of [GameMod]s.
-     */
-    fun toGameModSet(): EnumSet<GameMod> = EnumSet.noneOf(GameMod::class.java).also {
-        for ((_, m) in this) {
-            for ((k, v) in LegacyModConverter.gameModMap) {
-                if (v.isInstance(m)) {
-                    it.add(k)
-                    break
-                }
-            }
-        }
-    }
 
     /**
      * Converts the container [Mod]s in this [ModHashMap] to their [String] representative.

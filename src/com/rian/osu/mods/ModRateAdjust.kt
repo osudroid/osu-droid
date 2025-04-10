@@ -1,17 +1,27 @@
 package com.rian.osu.mods
 
+import com.reco1l.toolkt.*
 import com.rian.osu.beatmap.sections.BeatmapDifficulty
 import kotlin.math.pow
 
 /**
  * Represents a [Mod] that adjusts the track's playback rate.
  */
-sealed class ModRateAdjust(
+sealed class ModRateAdjust(trackRateMultiplier: Float = 1f) : Mod(), IModApplicableToTrackRate {
+
     /**
      * The multiplier for the track's playback rate.
      */
-    var trackRateMultiplier: Float
-) : Mod(), IModApplicableToTrackRate {
+    open var trackRateMultiplier by FloatModSetting(
+        name = "Track rate multiplier",
+        valueFormatter = { "${it.roundBy(2)}x" },
+        defaultValue = trackRateMultiplier,
+        minValue = 0.5f,
+        maxValue = 2f,
+        step = 0.05f
+    )
+
+
     final override val isRelevant
         get() = trackRateMultiplier != 1f
 

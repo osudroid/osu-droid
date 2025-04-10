@@ -10,6 +10,7 @@ import java.util.LinkedList
  * @param factory The factory to use to create new objects.
  * @author Reco1l
  */
+@Deprecated("This class is deprecated and will be removed in future versions.", ReplaceWith("SynchronizedPool"))
 class Pool<T : Any> @JvmOverloads constructor(
 
     private val maxSize: Int = -1,
