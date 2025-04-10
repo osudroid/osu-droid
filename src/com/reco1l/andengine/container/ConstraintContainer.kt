@@ -35,8 +35,8 @@ open class ConstraintContainer : Container() {
             val targetWidth = target.transformedWidth
             val targetHeight = target.transformedHeight
 
-            child.x = targetX - child.anchorPositionX + targetWidth * child.anchor.x
-            child.y = targetY - child.anchorPositionY + targetHeight * child.anchor.y
+            child.x = targetX - child.anchorPositionX + targetWidth * child.anchor.x - padding.left
+            child.y = targetY - child.anchorPositionY + targetHeight * child.anchor.y - padding.top
         }
 
         super.onManagedDrawChildren(pGL, pCamera)
