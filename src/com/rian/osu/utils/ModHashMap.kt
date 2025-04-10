@@ -53,20 +53,19 @@ open class ModHashMap : HashMap<Class<out Mod>, Mod> {
             throw IllegalArgumentException("The key class must correspond to the value class.")
         }
 
-        // If all difficulty statistics are set, all other difficulty adjusting mods are irrelevant, so we remove them.
-        // This prevents potential abuse cases where score multipliers from non-affecting mods stack (i.e., forcing
-        // all difficulty statistics while using the Hard Rock mod).
-        val removeDifficultyAdjustmentMods =
-            value is ModDifficultyAdjust &&
-            value.cs != null &&
-            value.ar != null &&
-            value.od != null &&
-            value.hp != null
+        // Some mods become redundant when `ModDifficultyAdjust` is used. Ideally, this should be handled somewhere else,
+        // but for the time being it's done here for simplicity. This prevents potential abuse cases where score multipliers
+        // from non-affecting mods stack (i.e., forcing all difficulty statistics while using the Hard Rock mod).
+        if (value is ModDifficultyAdjust) {
+            if (value.cs != null) {
+                remove(ModSmallCircle::class)
+            }
 
-        if (removeDifficultyAdjustmentMods) {
-            remove(ModEasy::class)
-            remove(ModHardRock::class)
-            remove(ModReallyEasy::class)
+            if (value.cs != null && value.ar != null && value.od != null && value.hp != null) {
+                remove(ModEasy::class)
+                remove(ModHardRock::class)
+                remove(ModReallyEasy::class)
+            }
         }
 
         // Check if there are any mods that are incompatible with the new mod.

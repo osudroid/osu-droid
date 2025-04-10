@@ -3,11 +3,13 @@ package com.reco1l.andengine.shape
 import com.edlplan.andengine.TriangleRenderer
 import com.edlplan.framework.utils.*
 import com.reco1l.andengine.*
+import com.reco1l.andengine.info.*
 import org.anddev.andengine.engine.camera.*
 import org.anddev.andengine.opengl.util.*
 import javax.microedition.khronos.opengles.*
 
-class TriangleMesh : ExtendedEntity(vertexBuffer = null) {
+// TODO: This class should be replaced with a more efficient BufferedEntity implementation.
+class TriangleMesh : ExtendedEntity() {
 
 
     /**
@@ -16,8 +18,18 @@ class TriangleMesh : ExtendedEntity(vertexBuffer = null) {
     val vertices = FloatArraySlice()
 
 
+    /**
+     * The depth information of the entity.
+     */
+    var depthInfo = DepthInfo.None
+
+    /**
+     * The clear information of the entity.
+     */
+    var clearInfo = ClearInfo.None
+
+
     init {
-        isCullingEnabled = false
         vertices.ary = FloatArray(0)
     }
 
@@ -28,32 +40,41 @@ class TriangleMesh : ExtendedEntity(vertexBuffer = null) {
     fun setContentSize(width: Float, height: Float) {
         contentWidth = width
         contentHeight = height
-        onContentSizeMeasured()
+        invalidate(InvalidationFlag.ContentSize)
     }
 
 
-    override fun onInitDraw(pGL: GL10) {
+    override fun beginDraw(gl: GL10) {
+        super.beginDraw(gl)
 
-        super.onInitDraw(pGL)
+        // Clearing
+        var clearMask = 0
 
-        GLHelper.disableCulling(pGL)
-        GLHelper.disableTextures(pGL)
-        GLHelper.disableTexCoordArray(pGL)
-    }
+        if (clearInfo.depthBuffer) clearMask = clearMask or GL10.GL_DEPTH_BUFFER_BIT
+        if (clearInfo.colorBuffer) clearMask = clearMask or GL10.GL_COLOR_BUFFER_BIT
+        if (clearInfo.stencilBuffer) clearMask = clearMask or GL10.GL_STENCIL_BUFFER_BIT
 
-
-    override fun onUpdateVertexBuffer() {
-
-    }
-
-
-    override fun drawVertices(pGL: GL10, pCamera: Camera) {
-
-        if (vertices.length == 0) {
-            return
+        if (clearMask != 0) {
+            gl.glClear(clearMask)
         }
 
-        TriangleRenderer.get().renderTriangles(vertices, pGL)
+        // Depth testing
+        if (depthInfo.test) {
+            gl.glDepthFunc(depthInfo.function)
+            gl.glDepthMask(depthInfo.mask)
+
+            GLHelper.enableDepthTest(gl)
+        } else {
+            GLHelper.disableDepthTest(gl)
+        }
+    }
+
+    override fun doDraw(gl: GL10, camera: Camera) {
+        super.doDraw(gl, camera)
+
+        if (vertices.length != 0) {
+            TriangleRenderer.get().renderTriangles(vertices, gl)
+        }
     }
 
 }

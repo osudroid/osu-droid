@@ -26,10 +26,6 @@ data class Vec4(
     val bottom: Float
         get() = w
 
-
-    val total
-        get() = x + y + z + w
-
     val vertical
         get() = y + w
 
@@ -72,12 +68,19 @@ data class Vec4(
         -w
     )
 
-    override fun toString() = "Vector4($x, $y, $z, $w)"
+    override fun equals(other: Any?) = this === other || other is Vec4
+        && x == other.x
+        && y == other.y
+        && z == other.z
+        && w == other.w
+
+    override fun hashCode() = javaClass.hashCode()
 
 
     companion object {
-        val Zero = Vec4()
-        val One = Vec4(1f, 1f, 1f, 1f)
-    }
 
+        val Zero = Vec4()
+        val One = Vec4(1f)
+
+    }
 }

@@ -2,6 +2,7 @@ package com.reco1l.osu.hud.elements
 
 import com.edlplan.framework.easing.Easing
 import com.reco1l.andengine.*
+import com.reco1l.andengine.info.*
 import com.reco1l.andengine.shape.Circle
 import com.reco1l.andengine.sprite.ExtendedSprite
 import com.reco1l.framework.ColorARGB
@@ -42,7 +43,8 @@ class HUDBackButton : HUDElement() {
         anchor = Anchor.Center
         origin = Anchor.Center
         color = ColorARGB(0xFF002626)
-        depthInfo = DepthInfo.Clear
+        clearInfo = ClearInfo.ClearDepthBuffer
+        depthInfo = DepthInfo.Less
 
         relativeSizeAxes = Axes.Both
         setSize(0.95f, 0.95f)
@@ -78,10 +80,10 @@ class HUDBackButton : HUDElement() {
     }
 
 
-    override fun onManagedUpdate(pSecondsElapsed: Float) {
+    override fun onManagedUpdate(deltaTimeSec: Float) {
 
         if (!isInEditMode) {
-            val realMsElapsed = pSecondsElapsed * 1000
+            val realMsElapsed = deltaTimeSec * 1000
 
             if (isPressed) {
                 holdDurationMs += realMsElapsed
@@ -89,14 +91,14 @@ class HUDBackButton : HUDElement() {
                 if (holdDurationMs >= requiredPressTimeMs) {
                     isPressed = false
                     GlobalManager.getInstance().gameScene.pause()
-                    (parent as ExtendedEntity).invalidateInputBindings()
+                    (parent as ExtendedEntity).invalidate(InvalidationFlag.InputBindings)
                 }
             } else {
                 holdDurationMs -= realMsElapsed * 2
             }
         }
 
-        super.onManagedUpdate(pSecondsElapsed)
+        super.onManagedUpdate(deltaTimeSec)
     }
 
     override fun onAreaTouched(event: TouchEvent, localX: Float, localY: Float): Boolean {
@@ -112,7 +114,7 @@ class HUDBackButton : HUDElement() {
 
         if (event.isActionMove) {
             if (isPressed) {
-                if (localX <= 0f || localY <= 0f || localX >= drawWidth || localY >= drawHeight) {
+                if (localX <= 0f || localY <= 0f || localX >= width || localY >= height) {
                     isPressed = false
                 }
                 return true

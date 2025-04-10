@@ -1,7 +1,7 @@
 package com.reco1l.andengine.sprite
 
-import android.util.*
 import com.reco1l.andengine.*
+import com.reco1l.andengine.info.*
 import com.reco1l.andengine.shape.*
 import org.anddev.andengine.opengl.texture.region.*
 import org.anddev.andengine.opengl.util.*
@@ -12,20 +12,13 @@ import javax.microedition.khronos.opengles.*
  */
 open class ExtendedSprite(textureRegion: TextureRegion? = null) : Box() {
 
-
-    override var autoSizeAxes = Axes.Both
-
     override var contentWidth: Float
         get() = textureRegion?.width?.toFloat() ?: 0f
-        set(_) {
-            Log.w("ExtendedSprite", "contentWidth is read-only for ExtendedSprite")
-        }
+        set(_) = Unit
 
     override var contentHeight: Float
         get() = textureRegion?.height?.toFloat() ?: 0f
-        set(_) {
-            Log.w("ExtendedSprite", "contentHeight is read-only for ExtendedSprite")
-        }
+        set(_) = Unit
 
 
     /**
@@ -33,10 +26,8 @@ open class ExtendedSprite(textureRegion: TextureRegion? = null) : Box() {
      */
     open var flippedHorizontal = false
         set(value) {
-            if (field != value) {
-                field = value
-                textureRegion?.isFlippedHorizontal = value
-            }
+            field = value
+            textureRegion?.isFlippedHorizontal = value
         }
 
     /**
@@ -44,29 +35,20 @@ open class ExtendedSprite(textureRegion: TextureRegion? = null) : Box() {
      */
     open var flippedVertical = false
         set(value) {
-            if (field != value) {
-                field = value
-                textureRegion?.isFlippedVertical = value
-            }
+            field = value
+            textureRegion?.isFlippedVertical = value
         }
 
     /**
      * The texture region of the sprite.
      */
-    open var textureRegion: TextureRegion? = textureRegion
+    open var textureRegion = textureRegion
         set(value) {
-
-            if (field == value) {
-                return
+            if (field != value) {
+                field = value
+                onTextureRegionChanged()
+                invalidate(InvalidationFlag.ContentSize)
             }
-
-            field = value
-
-            value?.setTexturePosition(textureX, textureY)
-            value?.isFlippedVertical = flippedVertical
-            value?.isFlippedHorizontal = flippedHorizontal
-
-            onContentSizeMeasured()
         }
 
     /**
@@ -93,34 +75,35 @@ open class ExtendedSprite(textureRegion: TextureRegion? = null) : Box() {
 
 
     init {
-        run {
-            textureRegion?.setTexturePosition(textureX, textureY)
-            textureRegion?.isFlippedVertical = flippedVertical
-            textureRegion?.isFlippedHorizontal = flippedHorizontal
+        width = FitContent
+        height = FitContent
 
-            onContentSizeMeasured()
-        }
+        @Suppress("LeakingThis")
+        onTextureRegionChanged()
     }
 
 
-    override fun applyBlending(pGL: GL10) {
-        if (textureRegion?.texture?.textureOptions?.mPreMultipyAlpha == true) {
-            GLHelper.blendFunction(pGL, BLENDFUNCTION_SOURCE_PREMULTIPLYALPHA_DEFAULT, BLENDFUNCTION_DESTINATION_PREMULTIPLYALPHA_DEFAULT)
-        } else {
-            super.applyBlending(pGL)
-        }
+    open fun onTextureRegionChanged() {
+
+        val textureRegion = textureRegion ?: return
+
+        textureRegion.setTexturePosition(textureX, textureY)
+        textureRegion.isFlippedVertical = flippedVertical
+        textureRegion.isFlippedHorizontal = flippedHorizontal
+
+        blendInfo = if (textureRegion.texture.textureOptions.mPreMultipyAlpha) BlendInfo.PreMultiply else BlendInfo.Mixture
     }
 
 
-    override fun onInitDraw(pGL: GL10) {
-        super.onInitDraw(pGL)
-        GLHelper.enableTextures(pGL)
-        GLHelper.enableTexCoordArray(pGL)
+    override fun beginDraw(gl: GL10) {
+        super.beginDraw(gl)
+        GLHelper.enableTextures(gl)
+        GLHelper.enableTexCoordArray(gl)
     }
 
-    override fun onApplyVertices(pGL: GL10) {
-        super.onApplyVertices(pGL)
-        textureRegion?.onApply(pGL)
+    override fun onDrawBuffer(gl: GL10) {
+        textureRegion?.onApply(gl)
+        super.onDrawBuffer(gl)
     }
 
 }
