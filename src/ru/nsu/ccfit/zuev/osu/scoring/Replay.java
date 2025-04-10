@@ -7,8 +7,10 @@ import androidx.annotation.NonNull;
 import com.rian.osu.mods.LegacyModConverter;
 import com.rian.osu.mods.ModHardRock;
 import com.rian.osu.utils.ModHashMap;
+import com.rian.osu.utils.ModUtils;
 
 import org.anddev.andengine.util.Debug;
+import org.json.JSONArray;
 
 import java.io.EOFException;
 import java.io.File;
@@ -142,9 +144,7 @@ public class Replay {
                     os.writeInt(stat.getTotalScoreWithMultiplier());
                     os.writeInt(stat.getScoreMaxCombo());
                     os.writeObject(stat.getPlayerName());
-                    os.writeObject(stat.getMod().toGameModSet());
-                    //Add in replay version 4
-                    os.writeObject(stat.getMod().getContainerModString());
+                    os.writeObject(stat.getMod().serializeMods().toString());
                 }
 
                 os.writeInt(cursorMoves.size());
@@ -213,9 +213,6 @@ public class Replay {
                 beatmapName = mBeatmapName;
                 md5 = mMD5;
 
-                EnumSet<GameMod> mod = EnumSet.noneOf(GameMod.class);
-                String extraModString = "";
-
                 if (version >= 3) {
                     stat = new StatisticV2();
                     stat.setReplayFilename(replayFilename);
@@ -239,14 +236,22 @@ public class Replay {
                     }
 
                     stat.setPlayerName((String) os.readObject());
-                    mod = (EnumSet<GameMod>) os.readObject();
-                }
 
-                if (version >= 4) {
-                    extraModString = (String) os.readObject();
-                }
+                    if (version >= 7) {
+                        var modJsonStr = (String) os.readObject();
+                        stat.setMod(ModUtils.deserializeMods(new JSONArray(modJsonStr)));
+                    } else {
+                        //noinspection unchecked
+                        var mod = (EnumSet<GameMod>) os.readObject();
+                        var extraModString = "";
 
-                stat.setMod(LegacyModConverter.convert(mod, extraModString));
+                        if (version >= 4) {
+                            extraModString = (String) os.readObject();
+                        }
+
+                        stat.setMod(LegacyModConverter.convert(mod, extraModString));
+                    }
+                }
 
                 if (withGameplayData) {
                     int msize = os.readInt();
@@ -321,10 +326,11 @@ public class Replay {
         Version 4: Adds ExtraModString's save and load in save()/load()/loadInfo()
         Version 5: Changes coordinates to use the float primitive type
         Version 6: Removed accuracy and perfect, slider ends no longer give combo when not hit
+        Version 7: Reworked mod storage to not serialize GameMod
      */
     public static class ReplayVersion implements Serializable {
         private static final long serialVersionUID = 4643121693566795335L;
-        int version = 6;
+        int version = 7;
     }
 
     public static class ReplayObjectData {
