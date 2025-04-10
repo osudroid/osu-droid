@@ -2,6 +2,7 @@ package com.reco1l.andengine.ui
 
 import com.reco1l.andengine.*
 import com.reco1l.andengine.container.*
+import com.reco1l.andengine.info.*
 import com.reco1l.andengine.shape.*
 import com.reco1l.framework.*
 import org.anddev.andengine.input.touch.*
@@ -17,25 +18,13 @@ data class SliderTheme(
 ) : ITheme
 
 @Suppress("LeakingThis")
-open class Slider : Control<Float>(0f), IWithTheme<SliderTheme> {
+open class Slider(initialValue: Float = 0f) : Control<Float>(initialValue), IWithTheme<SliderTheme> {
 
     override var theme = DefaultTheme
         set(value) {
             if (field != value) {
                 field = value
                 onThemeChanged()
-            }
-        }
-
-    override var value: Float
-        get() = super.value
-        set(value) {
-            if (step > 0f) {
-                val stepCount = ceil((value - min) / step)
-                super.value = (min + step * stepCount).coerceIn(min, max)
-            } else {
-                // If step is 0, just set the value directly
-                super.value = value.coerceIn(min, max)
             }
         }
 
@@ -51,7 +40,7 @@ open class Slider : Control<Float>(0f), IWithTheme<SliderTheme> {
 
             if (field != min) {
                 field = min
-                value = value
+                value = onProcessValue(value)
             }
         }
 
@@ -66,7 +55,7 @@ open class Slider : Control<Float>(0f), IWithTheme<SliderTheme> {
 
             if (field != max) {
                 field = max
-                value = value
+                value = onProcessValue(value)
             }
         }
 
@@ -104,11 +93,14 @@ open class Slider : Control<Float>(0f), IWithTheme<SliderTheme> {
     private val progressBar = RoundedBox().apply {
         anchor = Anchor.CenterLeft
         origin = Anchor.CenterLeft
+        depthInfo = DepthInfo.Default
     }
 
     private val thumb = RoundedBox().apply {
         anchor = Anchor.CenterLeft
         origin = Anchor.Center
+        depthInfo = DepthInfo.Less
+        clearInfo = ClearInfo.ClearDepthBuffer
     }
 
 
@@ -116,12 +108,21 @@ open class Slider : Control<Float>(0f), IWithTheme<SliderTheme> {
         width = FitParent
 
         attachChild(backgroundBar)
-        attachChild(progressBar)
         attachChild(thumb)
+        attachChild(progressBar)
 
         onThemeChanged()
     }
 
+
+    override fun onProcessValue(value: Float): Float {
+
+        if (step > 0f) {
+            return (min + step * ceil((value - min) / step)).coerceIn(min, max)
+        }
+
+        return value.coerceIn(min, max)
+    }
 
     override fun onThemeChanged() {
         backgroundBar.color = ColorARGB(theme.backgroundColor)
@@ -142,13 +143,18 @@ open class Slider : Control<Float>(0f), IWithTheme<SliderTheme> {
 
     override fun onSizeChanged() {
         super.onSizeChanged()
-        onValueChanged()
+        updateProgress()
     }
 
     override fun onValueChanged() {
         super.onValueChanged()
+        updateProgress()
+    }
 
+
+    private fun updateProgress() {
         val progressWidth = width * (value - min) / (max - min)
+
         progressBar.width = progressWidth
         thumb.x = progressWidth.coerceAtMost(width - thumb.width / 2f).coerceAtLeast(thumb.width / 2f)
     }

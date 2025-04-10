@@ -1,6 +1,7 @@
 package com.reco1l.andengine.ui
 
 import com.reco1l.andengine.*
+import com.reco1l.andengine.container.*
 import com.reco1l.andengine.modifier.*
 import com.reco1l.andengine.shape.*
 import com.reco1l.framework.*
@@ -12,7 +13,19 @@ data class ModalTheme(
 ) : ITheme
 
 @Suppress("LeakingThis")
-open class Modal : ExtendedEntity(), IWithTheme<ModalTheme> {
+open class Modal(
+
+    /**
+     * The content of the modal. This is where you should add your UI elements.
+     */
+    val content: Container = Container().apply {
+        anchor = Anchor.Center
+        origin = Anchor.Center
+        clipChildren = true
+        scaleCenter = Anchor.Center
+    }
+
+) : ExtendedEntity(), IWithTheme<ModalTheme> {
 
     override var theme = DefaultTheme
         set(value) {
@@ -23,40 +36,54 @@ open class Modal : ExtendedEntity(), IWithTheme<ModalTheme> {
         }
 
 
+    /**
+     * Whether the modal shouldn't hide when the user clicks outside of the content.
+     */
+    var staticBackdrop = false
+
+
     init {
-        anchor = Anchor.Center
-        origin = Anchor.Center
-        clipChildren = true
-        scaleCenter = Anchor.Center
+        width = FitParent
+        height = FitParent
 
         isVisible = false
-        scaleX = 0.9f
-        scaleY = 0.9f
         alpha = 0f
 
+        content.scaleX = 0.9f
+        content.scaleY = 0.9f
+
+        background = Box().apply {
+            color = ColorARGB.Black
+            alpha = 0.2f
+        }
+
+        attachChild(content)
         onThemeChanged()
     }
 
 
     override fun onThemeChanged() {
-        background = RoundedBox().apply {
+        content.background = RoundedBox().apply {
             color = ColorARGB(theme.backgroundColor)
             cornerRadius = theme.cornerRadius
         }
-        foreground = BezelOutline(theme.cornerRadius)
+        content.foreground = BezelOutline(theme.cornerRadius)
     }
 
 
     //region Input
 
     override fun onAreaTouched(event: TouchEvent, localX: Float, localY: Float): Boolean {
+
         if (!isVisible) {
             return false
         }
 
-        super.onAreaTouched(event, localX, localY)
-
-        // Prevent touch events from propagating to the entites below.
+        if (!super.onAreaTouched(event, localX, localY)) {
+            if (!staticBackdrop) {
+                hide()
+            }
+        }
         return true
     }
 
@@ -68,20 +95,16 @@ open class Modal : ExtendedEntity(), IWithTheme<ModalTheme> {
      * Creates the show animation for the modal.
      */
     open fun createShowAnimation(): () -> UniversalModifier = {
-        beginParallel {
-            fadeIn(0.2f)
-            scaleTo(1f, 0.2f)
-        }
+        content.scaleTo(1f, 0.2f)
+        fadeIn(0.2f)
     }
 
     /**
      * Creates the hide animation for the modal.
      */
     open fun createHideAnimation(): () -> UniversalModifier = {
-        beginParallel {
-            scaleTo(0.9f, 0.2f)
-            fadeOut(0.2f)
-        }
+        content.scaleTo(0.9f, 0.2f)
+        fadeOut(0.2f)
     }
 
 

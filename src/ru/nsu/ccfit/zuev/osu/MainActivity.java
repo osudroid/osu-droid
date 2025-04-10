@@ -51,6 +51,7 @@ import com.reco1l.osu.UpdateManager;
 import com.reco1l.osu.multiplayer.LobbyScene;
 import com.reco1l.osu.multiplayer.RoomScene;
 
+import com.reco1l.osu.ui.modmenu.ModMenuV2;
 import com.rian.osu.difficulty.BeatmapDifficultyCalculator;
 import net.lingala.zip4j.ZipFile;
 
@@ -766,8 +767,8 @@ public class MainActivity extends BaseGameActivity implements
                 GlobalManager.getInstance().getSongMenu().getSearchBar().hideMenu();
             }
 
-            if (GlobalManager.getInstance().getSongMenu().getScene().getChildScene() == ModMenu.getInstance().getScene()) {
-                ModMenu.getInstance().hide();
+            if (GlobalManager.getInstance().getSongMenu().getScene().getChildScene() == ModMenuV2.INSTANCE) {
+                ModMenuV2.INSTANCE.back();
             }
 
             return true;
