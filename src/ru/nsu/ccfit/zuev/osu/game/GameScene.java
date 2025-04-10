@@ -552,7 +552,6 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
 
         FollowPointConnection.getPool().renew(16);
         SliderTickSprite.getPool().renew(16);
-        UniversalModifier.GlobalPool.renew(24);
 
         // TODO replay
         offsetSum = 0;
@@ -564,6 +563,11 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
         replay.setBeatmap(beatmapInfo.getFullBeatmapsetName(), beatmapInfo.getFullBeatmapName(), parsedBeatmap.getMd5());
 
         if (replayFilePath != null) {
+            // Replay decoding may be dependent on the used mods, so we must do this.
+            var replayStat = new StatisticV2();
+            replayStat.setMod(mods);
+            replay.setStat(replayStat);
+
             replaying = replay.load(replayFilePath, true);
             if (!replaying) {
                 ToastLogger.showText(com.osudroid.resources.R.string.replay_invalid, true);
@@ -879,7 +883,7 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
         if (GameHelper.isFlashLight()){
             var flashlight = lastMods.ofType(ModFlashlight.class);
 
-            flashlightSprite = new FlashLightEntity(Objects.requireNonNull(flashlight).followDelay);
+            flashlightSprite = new FlashLightEntity(Objects.requireNonNull(flashlight).getFollowDelay());
             fgScene.attachChild(flashlightSprite, 0);
         }
 
@@ -2071,8 +2075,10 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
             return false;
         }
 
-        int eventTime = GlobalManager.getInstance().getSongService().getPosition();
-        float offset = eventTime / 1000f - elapsedTime;
+        int eventTime = (int) (elapsedTime * 1000);
+        float offset = Config.isFixFrameOffset() && musicStarted
+                ? GlobalManager.getInstance().getSongService().getPosition() / 1000f - elapsedTime
+                : 0;
 
         var id = event.getPointerID();
         if (id < 0 || id >= CursorCount) {

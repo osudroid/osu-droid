@@ -3,9 +3,13 @@ package com.rian.osu.mods
 /**
  * Represents the Night Core mod.
  */
-open class ModNightCore : ModRateAdjust(1.5f) {
+open class ModNightCore : ModRateAdjust() {
+
+    override var trackRateMultiplier = 1.5f
+
     override val name = "Nightcore"
     override val acronym = "NC"
+    override val type = ModType.DifficultyIncrease
     override val textureNameSuffix = "nightcore"
     override val isRanked = true
     override val incompatibleMods = super.incompatibleMods + arrayOf(ModDoubleTime::class, ModHalfTime::class)

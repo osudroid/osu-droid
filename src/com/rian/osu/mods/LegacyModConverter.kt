@@ -68,7 +68,7 @@ object LegacyModConverter {
      * @param mods The [GameMod]s to convert.
      * @param extraModString The extra mod string to parse.
      * @param difficulty The [BeatmapDifficulty] to use for [IMigratableMod] migrations. When `null`,
-     * [IMigratableMod]s will not be added and migrated.
+     * [IMigratableMod]s will not be migrated.
      * @return A [ModHashMap] containing the converted [Mod]s.
      */
     @JvmStatic
@@ -79,10 +79,8 @@ object LegacyModConverter {
                 val mod = gameModMap[it]?.createInstance() ?:
                 throw IllegalArgumentException("Cannot find respective Mod class for $it.")
 
-                if (mod is IMigratableMod) {
-                    if (difficulty != null) {
-                        put(mod.migrate(difficulty))
-                    }
+                if (mod is IMigratableMod && difficulty != null) {
+                    put(mod.migrate(difficulty))
                 } else {
                     put(mod)
                 }
@@ -96,7 +94,7 @@ object LegacyModConverter {
      *
      * @param str The mod string to convert. A `null` would return an empty [ModHashMap].
      * @param difficulty The [BeatmapDifficulty] to use for [IMigratableMod] migrations. When `null`,
-     * [IMigratableMod]s will not be added and migrated.
+     * [IMigratableMod]s will not be migrated.
      * @return A [ModHashMap] containing the [Mod]s.
      */
     @JvmStatic
@@ -109,10 +107,8 @@ object LegacyModConverter {
         for (c in data.getOrNull(0) ?: return@also) {
             val mod = legacyStorableMods[c]?.createInstance() ?: continue
 
-            if (mod is IMigratableMod) {
-                if (difficulty != null) {
-                    it.put(mod.migrate(difficulty))
-                }
+            if (mod is IMigratableMod && difficulty != null) {
+                it.put(mod.migrate(difficulty))
             } else {
                 it.put(mod)
             }
