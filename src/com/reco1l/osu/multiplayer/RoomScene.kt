@@ -698,7 +698,7 @@ object RoomScene : Scene(), IRoomEventListener, IPlayerEventListener {
 
         isWaitingForModsChange = true
 
-        RoomAPI.setPlayerMods(ModMenu.getInstance().enabledMods.toString())
+        RoomAPI.setPlayerMods(ModMenu.getInstance().enabledMods.serializeMods())
 
         updateInformation()
         playerList!!.invalidate()
@@ -835,7 +835,7 @@ object RoomScene : Scene(), IRoomEventListener, IPlayerEventListener {
 
         isWaitingForModsChange = true
 
-        RoomAPI.setPlayerMods(ModMenu.getInstance().enabledMods.toString())
+        RoomAPI.setPlayerMods(ModMenu.getInstance().enabledMods.serializeMods())
 
         updateInformation()
     }
@@ -895,7 +895,7 @@ object RoomScene : Scene(), IRoomEventListener, IPlayerEventListener {
                     remove(ModScoreV2::class)
             }
 
-            RoomAPI.setRoomMods(roomMods.toString())
+            RoomAPI.setRoomMods(roomMods.serializeMods())
         }
 
         playerList!!.invalidate()
