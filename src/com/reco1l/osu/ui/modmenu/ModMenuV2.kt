@@ -105,7 +105,7 @@ object ModMenuV2 : ExtendedScene() {
                     leadingIcon = ExtendedSprite(ResourceManager.getInstance().getTexture("back-arrow"))
                     onActionUp = {
                         ResourceManager.getInstance().getSound("click-short-confirm")?.play()
-                        calculateStarRating()
+                        parseBeatmap(true)
                         back()
                     }
                     onActionCancel = { ResourceManager.getInstance().getSound("click-short")?.play() }
@@ -173,7 +173,7 @@ object ModMenuV2 : ExtendedScene() {
         calculationJob = null
     }
 
-    private fun calculateStarRating() {
+    private fun parseBeatmap(calculateStarRating: Boolean) {
         cancelCalculationJob()
 
         val selectedBeatmap = GlobalManager.getInstance().selectedBeatmap
@@ -198,23 +198,26 @@ object ModMenuV2 : ExtendedScene() {
                     return@scope
                 }
 
-                enabledMods.values.filterIsInstance<IModRequiresOriginalBeatmap>().fastForEach { mod ->
+                modButtons.map { it.mod }.filterIsInstance<IModRequiresOriginalBeatmap>().fastForEach { mod ->
                     mod.applyFromBeatmap(beatmap)
                 }
+                customizationMenu.updateComponents()
 
-                // Copy the mods to avoid concurrent modification
-                val mods = enabledMods.deepCopy().values
+                if (calculateStarRating) {
+                    // Copy the mods to avoid concurrent modification
+                    val mods = enabledMods.deepCopy().values
 
-                when (difficultyAlgorithm) {
+                    when (difficultyAlgorithm) {
 
-                    DifficultyAlgorithm.droid -> {
-                        val attributes = calculateDroidDifficulty(beatmap, mods, this@scope)
-                        GlobalManager.getInstance().songMenu.setStarsDisplay(GameHelper.Round(attributes.starRating, 2))
-                    }
+                        DifficultyAlgorithm.droid -> {
+                            val attributes = calculateDroidDifficulty(beatmap, mods, this@scope)
+                            GlobalManager.getInstance().songMenu.setStarsDisplay(GameHelper.Round(attributes.starRating, 2))
+                        }
 
-                    DifficultyAlgorithm.standard -> {
-                        val attributes = calculateStandardDifficulty(beatmap, mods, this@scope)
-                        GlobalManager.getInstance().songMenu.setStarsDisplay(GameHelper.Round(attributes.starRating, 2))
+                        DifficultyAlgorithm.standard -> {
+                            val attributes = calculateStandardDifficulty(beatmap, mods, this@scope)
+                            GlobalManager.getInstance().songMenu.setStarsDisplay(GameHelper.Round(attributes.starRating, 2))
+                        }
                     }
                 }
             }
@@ -232,6 +235,9 @@ object ModMenuV2 : ExtendedScene() {
             true,
             true
         )
+
+        // Only parsing to update mod's specific settings defaults, specially those which rely on the original beatmap data.
+        parseBeatmap(false)
     }
 
     override fun back() {
@@ -294,7 +300,7 @@ object ModMenuV2 : ExtendedScene() {
             scoreMultiplierBadge.value = "1.00x"
         }
 
-        customizeButton.isEnabled = !customizationMenu.isSelectorEmpty()
+        customizeButton.isEnabled = !customizationMenu.isEmpty()
 
         if (lastChangedMod is IModApplicableToTrackRate) {
             GlobalManager.getInstance().songMenu.updateMusicEffects()

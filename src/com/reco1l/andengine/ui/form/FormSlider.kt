@@ -9,9 +9,10 @@ import com.reco1l.framework.*
 import com.reco1l.framework.math.*
 import ru.nsu.ccfit.zuev.osu.ResourceManager
 
-class FormSlider(defaultValue: Float = 0f) : FormControl<Float, Slider>(defaultValue) {
+@Suppress("LeakingThis")
+open class FormSlider(initialValue: Float = 0f) : FormControl<Float, Slider>(initialValue) {
 
-    override val control = Slider()
+    override val control = Slider(initialValue)
 
     override val labelText = ExtendedText().apply {
         font = ResourceManager.getInstance().getFont("smallFont")

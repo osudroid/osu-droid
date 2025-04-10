@@ -7,9 +7,10 @@ import com.reco1l.framework.math.*
 import org.anddev.andengine.input.touch.*
 import ru.nsu.ccfit.zuev.osu.*
 
-class FormCheckbox(defaultValue: Boolean = false) : FormControl<Boolean, Checkbox>(defaultValue) {
+@Suppress("LeakingThis")
+open class FormCheckbox(initialValue: Boolean = false) : FormControl<Boolean, Checkbox>(initialValue) {
 
-    override val control = Checkbox().apply {
+    override val control = Checkbox(initialValue).apply {
         anchor = Anchor.CenterRight
         origin = Anchor.CenterRight
     }
@@ -20,7 +21,7 @@ class FormCheckbox(defaultValue: Boolean = false) : FormControl<Boolean, Checkbo
         origin = Anchor.CenterLeft
     }
 
-    override val valueText: ExtendedText? = null
+    override val valueText = null
 
 
     init {

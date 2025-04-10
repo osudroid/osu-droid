@@ -8,24 +8,32 @@ import com.reco1l.andengine.ui.*
 import com.reco1l.framework.*
 import org.anddev.andengine.input.touch.*
 
-@Suppress("LeakingThis")
-abstract class FormControl<V : Any?, C: Control<V>>(initialValue: V): Container() {
+/**
+ * Represents a form control that is used to change the value of a property.
+ */
+@Suppress("LeakingThis", "MemberVisibilityCanBePrivate")
+abstract class FormControl<V : Any, C: Control<V>>(initialValue: V): Container() {
 
     /**
      * The control that is used to change the value.
      */
     abstract val control: C
 
+    /**
+     * The text that is displayed as the label of the control.
+     */
+    abstract val labelText: ExtendedText
 
     /**
-     * The callback that is called when the value of the control changes.
+     * The text that is displayed as the value of the control.
      */
-    var onValueChanged: ((V) -> Unit)? = null
+    abstract val valueText: ExtendedText?
+
 
     /**
      * The value of the control.
      */
-    var value: V
+    var value
         get() = control.value
         set(value) { control.value = value }
 
@@ -34,33 +42,34 @@ abstract class FormControl<V : Any?, C: Control<V>>(initialValue: V): Container(
      */
     var defaultValue = initialValue
 
+    /**
+     * The callback that is called when the value of the control changes.
+     */
+    var onValueChanged: ((V) -> Unit)? = null
 
     /**
-     * The text that is displayed as the label of the control.
+     * The label text.
      */
-    protected abstract val labelText: ExtendedText
+    var label
+        get() = labelText.text
+        set(value) { labelText.text = value }
 
     /**
-     * The text that is displayed as the value of the control.
+     * Whether the control is enabled or not. If disabled, the control will not process any
+     * touch events.
      */
-    protected abstract val valueText: ExtendedText?
-
-
-    /**
-     * The label.
-     */
-    var label = ""
+    var isEnabled = true
         set(value) {
             if (field != value) {
                 field = value
-                labelText.text = value
+                onEnableStateChange()
             }
         }
 
     /**
      * The formatter that is used to format the value of the control.
      */
-    var valueFormatter: (V) -> String = { it.toString() }
+    var valueFormatter: (value: V) -> String = Any::toString
         set(value) {
             if (field != value) {
                 field = value
@@ -78,22 +87,37 @@ abstract class FormControl<V : Any?, C: Control<V>>(initialValue: V): Container(
     }
 
 
+    //region Callbacks
+
     /**
      * Called when the value of the control changes.
      */
     open fun onControlValueChanged() {
         valueText?.text = valueFormatter(value)
-        onValueChanged?.invoke(value)
+        onValueChanged?.invoke(control.value)
     }
 
+    /**
+     * Called when the enable state of the button changes.
+     */
+    open fun onEnableStateChange() {
+        clearModifiers(ModifierType.Alpha)
 
-    override fun onManagedUpdate(deltaTimeSec: Float) {
+        if (isEnabled) {
+            fadeTo(1f, 0.2f)
+        } else {
+            fadeTo(0.25f, 0.2f)
+        }
+    }
 
-        // Copying alpha from the control to preserve the fade effect when the control is disabled.
-        labelText.alpha = control.alpha
-        valueText?.alpha = control.alpha
+    //endregion
 
-        super.onManagedUpdate(deltaTimeSec)
+
+    override fun onAreaTouched(event: TouchEvent, localX: Float, localY: Float): Boolean {
+        if (isEnabled) {
+            return super.onAreaTouched(event, localX, localY)
+        }
+        return true
     }
 
 }

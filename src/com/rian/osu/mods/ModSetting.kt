@@ -57,7 +57,7 @@ sealed class ModSetting<V>(
  */
 sealed class RangeConstrainedModSetting<V>(
     name: String,
-    valueFormatter: (V) -> String = { it?.toString() ?: "None" },
+    valueFormatter: (V) -> String = { it.toString() },
     defaultValue: V,
 
     /**
@@ -105,7 +105,7 @@ class FloatModSetting(
 
 class NullableFloatModSetting(
     name: String,
-    valueFormatter: (Float?) -> String = { it?.toString() ?: "None" },
+    valueFormatter: (Float?) -> String = { it.toString() },
     defaultValue: Float?,
     minValue: Float = Float.MIN_VALUE,
     maxValue: Float = Float.MAX_VALUE,
