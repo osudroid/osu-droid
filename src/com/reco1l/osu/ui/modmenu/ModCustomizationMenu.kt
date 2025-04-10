@@ -38,6 +38,8 @@ class ModCustomizationMenu : Modal(
 
 
     init {
+        ResourceManager.getInstance().loadHighQualityAsset("reset", "reset.png")
+
         theme = ModalTheme(backgroundColor = 0xFF181828)
     }
 
@@ -90,6 +92,7 @@ class ModCustomizationMenu : Modal(
         init {
             orientation = Orientation.Vertical
             width = FitParent
+            padding = Vec4(0f, 0f, 0f, 16f)
 
             +LinearContainer().apply {
                 orientation = Orientation.Horizontal

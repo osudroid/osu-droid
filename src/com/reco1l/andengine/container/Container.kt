@@ -69,8 +69,8 @@ open class Container : ExtendedEntity() {
             }
         }
 
-        contentWidth = right
-        contentHeight = bottom
+        contentWidth = right - padding.left
+        contentHeight = bottom - padding.top
         invalidate(InvalidationFlag.ContentSize)
     }
 
