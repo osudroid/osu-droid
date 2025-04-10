@@ -17,13 +17,11 @@ class ModCustomizationMenu : Modal(
     content = ScrollableContainer().apply {
         scrollAxes = Axes.Y
         relativeSizeAxes = Axes.Both
-        anchor = Anchor.TopLeft
-        origin = Anchor.TopLeft
-        scaleCenter = Anchor.Center
         width = 0.60f
         height = 0.75f
         x = 60f
         y = 90f
+        scaleCenter = Anchor.TopCenter
         clipChildren = true
 
         +LinearContainer().apply {
