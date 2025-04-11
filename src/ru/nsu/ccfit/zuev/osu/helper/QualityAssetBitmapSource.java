@@ -5,7 +5,7 @@ import android.graphics.Bitmap;
 import android.graphics.Bitmap.Config;
 import android.graphics.BitmapFactory;
 
-import com.reco1l.BuildUtils;
+import com.reco1l.BuildConfiguration;
 import com.reco1l.framework.Bitmaps;
 
 import org.anddev.andengine.opengl.texture.atlas.bitmap.source.IBitmapTextureAtlasSource;
@@ -114,12 +114,12 @@ public class QualityAssetBitmapSource extends BaseTextureAtlasSource implements
             final BitmapFactory.Options decodeOptions = new BitmapFactory.Options();
             decodeOptions.inPreferredConfig = pBitmapConfig;
             decodeOptions.inSampleSize = ru.nsu.ccfit.zuev.osu.Config.getTextureQuality();
-            decodeOptions.inMutable = BuildUtils.noTexturesMode;
+            decodeOptions.inMutable = BuildConfiguration.NO_TEXTURES_MODE;
 
             in = this.mContext.getAssets().open(this.mAssetPath);
             var bitmap = BitmapFactory.decodeStream(in, null, decodeOptions);
 
-            if (BuildUtils.noTexturesMode) {
+            if (BuildConfiguration.NO_TEXTURES_MODE) {
                 bitmap = Bitmaps.paintBitmap(bitmap);
             }
 
