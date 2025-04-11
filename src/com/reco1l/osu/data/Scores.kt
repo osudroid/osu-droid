@@ -9,8 +9,9 @@ import androidx.room.OnConflictStrategy
 import androidx.room.PrimaryKey
 import androidx.room.Query
 import com.rian.osu.beatmap.sections.BeatmapDifficulty
-import com.rian.osu.mods.LegacyModConverter
+import com.rian.osu.utils.ModUtils
 import org.apache.commons.io.FilenameUtils
+import org.json.JSONArray
 import org.json.JSONObject
 import ru.nsu.ccfit.zuev.osu.Config
 import ru.nsu.ccfit.zuev.osu.scoring.StatisticV2
@@ -126,7 +127,7 @@ data class ScoreInfo @JvmOverloads constructor(
         it.playerName = playerName
         it.setBeatmapMD5(beatmapMD5)
         it.replayFilename = replayFilename
-        it.mod = LegacyModConverter.convert(mods)
+        it.mod = ModUtils.deserializeMods(JSONArray(mods))
         it.setForcedScore(score)
         it.scoreMaxCombo = maxCombo
         it.mark = mark
