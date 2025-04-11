@@ -5,7 +5,7 @@ import com.rian.osu.math.Vector2
 import org.junit.Assert
 
 sealed class HitObjectTest {
-    protected fun testStackedPositions(
+    protected open fun testStackedPositions(
         obj: HitObject, mode: GameMode,
         positionGetter: HitObject.() -> Vector2,
         stackedPositionGetter: HitObject.() -> Vector2
