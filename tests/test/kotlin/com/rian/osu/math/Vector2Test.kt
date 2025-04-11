@@ -119,4 +119,39 @@ class Vector2Test {
         Assert.assertEquals(Vector2(10), Vector2(10))
         Assert.assertNotEquals(Vector2(10), Vector2(10, 15))
     }
+
+    @Test
+    fun testFloatToVector2Conversion() {
+        Assert.assertEquals(10f.toVector2(), Vector2(10))
+        Assert.assertEquals(20f.toVector2(), Vector2(20))
+        Assert.assertEquals(25f.toVector2(), Vector2(25))
+    }
+
+    @Test
+    fun testIntegerVectorMultiplication() {
+        Assert.assertEquals(2 * Vector2(2), Vector2(4))
+        Assert.assertEquals(3 * Vector2(3, 4), Vector2(9, 12))
+        Assert.assertEquals(4 * Vector2(2.5f, 10f), Vector2(10, 40))
+    }
+
+    @Test
+    fun testFloatVectorMultiplication() {
+        Assert.assertEquals(2.5f * Vector2(2), Vector2(5))
+        Assert.assertEquals(3.5f * Vector2(3, 4), Vector2(10.5f, 14f))
+        Assert.assertEquals(4.5f * Vector2(2.5f, 10f), Vector2(11.25f, 45f))
+    }
+
+    @Test
+    fun testDoubleVectorMultiplication() {
+        Assert.assertEquals(2.5 * Vector2(2), Vector2(5))
+        Assert.assertEquals(3.5 * Vector2(3, 4), Vector2(10.5f, 14f))
+        Assert.assertEquals(4.5 * Vector2(2.5f, 10f), Vector2(11.25f, 45f))
+    }
+
+    @Test
+    fun testPairToVector2Conversion() {
+        Assert.assertEquals((10f to 20f).toVector2(), Vector2(10, 20))
+        Assert.assertEquals((25f to 30f).toVector2(), Vector2(25, 30))
+        Assert.assertEquals((35f to 40f).toVector2(), Vector2(35, 40))
+    }
 }
