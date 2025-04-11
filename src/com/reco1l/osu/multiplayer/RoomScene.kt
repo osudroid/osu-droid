@@ -250,7 +250,7 @@ object RoomScene : Scene(), IRoomEventListener, IPlayerEventListener {
                         return true
                     }
 
-                    if (!fakeMultiplayerMode) {
+                    if (!BuildConfiguration.MOCK_MULTIPLAYER) {
                         if (room!!.teamMode == TeamVersus) {
                             val team = room!!.teamMap
 

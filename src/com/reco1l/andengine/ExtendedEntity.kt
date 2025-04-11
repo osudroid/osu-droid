@@ -542,6 +542,11 @@ abstract class ExtendedEntity : Entity(0f, 0f), ITouchArea, IModifierChain {
         foreground?.setSize(width, height)
         foreground?.onDraw(gl, camera)
 
+        if (BuildConfiguration.SHOW_ENTITY_BOUNDARIES) {
+            DEBUG_FOREGROUND.setSize(width, height)
+            DEBUG_FOREGROUND.onDraw(gl, camera)
+        }
+
         gl.glPopMatrix()
     }
 
