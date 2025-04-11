@@ -140,7 +140,7 @@ android {
             assets.srcDirs = ['assets']
             jniLibs.srcDirs = ['libs']
         }
-        androidTest.setRoot('tests')
+        androidTest.setRoot("$projectDir/tests/androidTest")
         androidTest.assets.srcDirs += files("$projectDir/schemas".toString())
     }
 
