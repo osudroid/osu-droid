@@ -235,7 +235,10 @@ open class ModHashMap : HashMap<Class<out Mod>, Mod> {
         return result
     }
 
-    override fun toString() = buildString {
+    /**
+     * Converts this [ModHashMap] to its legacy mod string representation.
+     */
+    fun toLegacyModString() = buildString {
         modStringOrder.fastForEach {
             if (it::class in this@ModHashMap) {
                 for ((k, v) in LegacyModConverter.legacyStorableMods) {

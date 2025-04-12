@@ -453,7 +453,7 @@ public class StatisticV2 implements Serializable {
 
     public String compile() {
         StringBuilder builder = new StringBuilder();
-        String mstring = mod.toString();
+        String mstring = mod.toLegacyModString();
         if (mstring.isEmpty())
             mstring = "-";
         builder.append(mstring);
