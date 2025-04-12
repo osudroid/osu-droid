@@ -702,15 +702,21 @@ public class Entity implements IEntity {
 		}
 
 		// BEGIN osu!droid modified
-		for (int i = this.mEntityModifiers.size() - 1; i >= 0; i--) {
-			IModifier<IEntity> modifier = this.mEntityModifiers.get(i);
+		boolean result = false;
+
+		Iterator<IModifier<IEntity>> iterator = this.mEntityModifiers.iterator();
+
+		while (iterator.hasNext()) {
+			IModifier<IEntity> modifier = iterator.next();
 			if (pEntityModifierMatcher.matches(modifier)) {
 				modifier.onUnregister();
+				iterator.remove();
+				result = true;
 			}
 		}
-		// END osu!droid modified
 
-		return this.mEntityModifiers.removeAll(pEntityModifierMatcher);
+		return result;
+		// END osu!droid modified
 	}
 
 	@Override

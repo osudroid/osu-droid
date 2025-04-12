@@ -14,9 +14,13 @@ val MIGRATION_1_2 = object : Migration(1, 2) {
                 val beatmapMD5 = cursor.getString(2)
 
                 val difficulty = db.query(
-                    "SELECT circleSize, approachRate, overallDifficulty, hpDrainRate FROM BeatmapInfo WHERE beatmapMD5 = ?",
+                    "SELECT circleSize, approachRate, overallDifficulty, hpDrainRate FROM BeatmapInfo WHERE md5 = ?",
                     arrayOf(beatmapMD5)
                 ).use { cursor ->
+                    if (cursor.count == 0) {
+                        return@use null
+                    }
+
                     cursor.moveToFirst()
                     BeatmapDifficulty(cursor.getFloat(0), cursor.getFloat(1), cursor.getFloat(2), cursor.getFloat(3))
                 }
