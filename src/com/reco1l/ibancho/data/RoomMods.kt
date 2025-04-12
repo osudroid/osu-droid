@@ -1,7 +1,6 @@
 package com.reco1l.ibancho.data
 
 import com.reco1l.osu.multiplayer.Multiplayer
-import com.rian.osu.mods.LegacyModConverter
 import com.rian.osu.mods.ModCustomSpeed
 import com.rian.osu.mods.ModDifficultyAdjust
 import com.rian.osu.mods.ModDoubleTime
@@ -9,8 +8,10 @@ import com.rian.osu.mods.ModFlashlight
 import com.rian.osu.mods.ModHalfTime
 import com.rian.osu.mods.ModNightCore
 import com.rian.osu.utils.ModHashMap
+import com.rian.osu.utils.ModUtils
+import org.json.JSONArray
 
-class RoomMods @JvmOverloads constructor(modString: String? = null) : ModHashMap(LegacyModConverter.convert(modString)) {
+class RoomMods @JvmOverloads constructor(json: JSONArray? = null) : ModHashMap(ModUtils.deserializeMods(json)) {
 
     /**
      * Converts this [RoomMods] to a [String] that can be displayed to the player.
