@@ -338,7 +338,7 @@ class BeatmapParserTest {
                 ).parse(true)!!
 
             nanBeatmap =
-                BeatmapParser(TestResourceManager.getBeatmapFile("nan-control-points.osu")!!).parse(true)!!
+                BeatmapParser(TestResourceManager.getBeatmapFile("nan-control-points")!!).parse(true)!!
         }
     }
 }
