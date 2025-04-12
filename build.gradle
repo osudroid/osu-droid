@@ -140,7 +140,12 @@ android {
             jniLibs.srcDirs = ['libs']
         }
         test.setRoot("$projectDir/tests/test")
-        androidTest.setRoot("$projectDir/tests/androidTest")
+
+        // We need to add the Room schemas not as a *test* resource, but as a build asset.
+        // See https://github.com/robolectric/robolectric/issues/3928#issuecomment-395309991 for more details.
+        debug.assets.srcDirs += files("$projectDir/schemas".toString())
+        release.assets.srcDirs += files("$projectDir/schemas".toString())
+        pre_release.assets.srcDirs += files("$projectDir/schemas".toString())
     }
 
     compileOptions {
@@ -213,4 +218,5 @@ dependencies {
     annotationProcessor "androidx.room:room-compiler:$room_version"
     ksp "androidx.room:room-compiler:$room_version"
     implementation "androidx.room:room-ktx:$room_version"
+    testImplementation "androidx.room:room-testing:$room_version"
 }
