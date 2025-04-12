@@ -222,6 +222,13 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
     // Timing
 
     /**
+     * The time at which the last frame was rendered with respect to {@link SystemClock#uptimeMillis()}.
+     * <br>
+     * If 0, a frame has not been rendered yet.
+     */
+    private long previousFrameTime;
+
+    /**
      * The start time of the first object in seconds.
      */
     public float firstObjectStartTime;
@@ -792,6 +799,7 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
 
         comboWas100 = false;
         comboWasMissed = false;
+        previousFrameTime = 0;
 
         hitWindow = playableBeatmap.getHitWindow();
         var firstObject = objects.peek();
@@ -1015,6 +1023,7 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
 
     private void update(final float dt) {
         elapsedTime += dt;
+        previousFrameTime = SystemClock.uptimeMillis();
 
         if (Multiplayer.isMultiplayer)
         {
@@ -2108,9 +2117,6 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
             return false;
         }
 
-        int eventTime = GlobalManager.getInstance().getSongService().getPosition();
-        float offset = eventTime / 1000f - elapsedTime;
-
         var id = event.getPointerID();
         if (id < 0 || id >= CursorCount) {
             return false;
@@ -2127,6 +2133,11 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
         if (sprite != null) {
             sprite.setPosition(cursor.mousePos.x, cursor.mousePos.y);
         }
+
+        float offset = previousFrameTime > 0
+                ? (event.getMotionEvent().getEventTime() - previousFrameTime) * GameHelper.getSpeedMultiplier()
+                : 0;
+        int eventTime = (int) (elapsedTime * 1000 + offset);
 
         if (event.isActionDown()) {
 
