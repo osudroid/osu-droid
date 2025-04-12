@@ -46,3 +46,12 @@ jobs:
       uses: gradle/actions/setup-gradle@v3
       with:
         arguments: testDebugUnitTest
+
+    - name: Upload test results
+      if: ${{ always() }}
+      uses: actions/upload-artifact@v4
+      with:
+        name: reports
+        path: |
+          **/build/reports/
+          **/build/test-results/
