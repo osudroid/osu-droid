@@ -158,7 +158,7 @@ fun ScoreInfo(json: JSONObject) =
         // The keys don't correspond to the table columns in order to keep compatibility with the old replays.
         id = json.optLong("id", 0),
         playerName = json.getString("playername"),
-        mods = json.getString("mod"),
+        mods = json.getString("mods"),
         score = json.getInt("score"),
         maxCombo = json.getInt("combo"),
         mark = json.getString("mark"),
