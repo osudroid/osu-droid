@@ -89,10 +89,11 @@ jobs:
     - name: Grant execute permission for gradlew
       run: chmod +x gradlew
 
+    - name: Setup Gradle
+      uses: gradle/actions/setup-gradle@v4
+
     - name: Run tests
-      uses: gradle/actions/setup-gradle@v3
-      with:
-        arguments: testDebugUnitTest
+      run: ./gradlew testDebugUnitTest
 
     - name: Upload test results
       if: ${{ always() }}
