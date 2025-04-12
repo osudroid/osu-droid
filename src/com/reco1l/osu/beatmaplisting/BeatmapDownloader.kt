@@ -39,8 +39,9 @@ object BeatmapDownloader : IFileRequestObserver {
         }
         isDownloading = true
 
-        // Slash is the only character that is not allowed for filenames in the Android filesystem (which is just a Linux filesystem).
-        currentFilename = suggestedFilename.replace('/', ' ')
+        // Remove illegal characters in FAT32 file system.
+        // We may extract the beatmap to an EXT4 file system, but that's the least to worry about.
+        currentFilename = suggestedFilename.replace("[\"*/:<>?\\\\|]".toRegex(), "_")
 
         val file = context.getExternalFilesDir(DIRECTORY_DOWNLOADS)!!.resolve("$currentFilename.osz")
 
