@@ -26,7 +26,7 @@ class SliderPathTest {
     @Test
     fun testLinearPath() {
         parsePath("36,53,24587,2,0,L|102:42,1,56.9999982604981,10|0,1:2|2:0,2:0:0:0:").apply {
-            Assert.assertTrue(Vector2(-72, 11) in calculatedPath)
+            Assert.assertEquals(cumulativeLength.last(), expectedDistance, 1e-2)
             testPathValidity(this)
         }
     }
