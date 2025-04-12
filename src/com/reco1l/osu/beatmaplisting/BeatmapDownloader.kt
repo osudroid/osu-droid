@@ -104,14 +104,14 @@ object BeatmapDownloader : IFileRequestObserver {
             }
         } catch (e: IOException) {
             ToastLogger.showText("Import failed:" + e.message, true)
+        } finally {
+            mainThread(fragment::dismiss)
+
+            if (Multiplayer.isConnected)
+                RoomScene.onRoomBeatmapChange(Multiplayer.room!!.beatmap)
+
+            isDownloading = false
         }
-
-        mainThread(fragment::dismiss)
-
-        if (Multiplayer.isConnected)
-            RoomScene.onRoomBeatmapChange(Multiplayer.room!!.beatmap)
-
-        isDownloading = false
     }
 
     override fun onDownloadCancel(downloader: FileRequest) {
