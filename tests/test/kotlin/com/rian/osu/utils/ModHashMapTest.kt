@@ -2,7 +2,9 @@ package com.rian.osu.utils
 
 import com.rian.osu.mods.ModCustomSpeed
 import com.rian.osu.mods.ModDifficultyAdjust
+import com.rian.osu.mods.ModDoubleTime
 import com.rian.osu.mods.ModHardRock
+import com.rian.osu.mods.ModHidden
 import com.rian.osu.mods.ModReallyEasy
 import org.junit.Assert
 import org.junit.Test
@@ -52,6 +54,17 @@ class ModHashMapTest {
             put(ModDifficultyAdjust(cs = 4f, ar = 8f))
 
             Assert.assertEquals(toLegacyModString(), "rl|x1.25|AR8.0|CS4.0")
+        }
+    }
+
+    @Test
+    fun testDisplayModStringConversion() {
+        ModHashMap().apply {
+            put(ModHidden())
+            put(ModHardRock())
+            put(ModDoubleTime())
+
+            Assert.assertEquals(toDisplayModString(), "HR,HD,DT")
         }
     }
 }
