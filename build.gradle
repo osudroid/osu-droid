@@ -139,7 +139,8 @@ android {
             assets.srcDirs = ['assets']
             jniLibs.srcDirs = ['libs']
         }
-        androidTest.setRoot('tests')
+        test.setRoot("$projectDir/tests/test")
+        androidTest.setRoot("$projectDir/tests/androidTest")
     }
 
     compileOptions {
@@ -157,6 +158,11 @@ android {
         buildConfig true
     }
 
+    testOptions {
+        unitTests {
+            includeAndroidResources true
+        }
+    }
 
     android.applicationVariants.configureEach { variant ->
         variant.outputs.configureEach { output ->
@@ -192,6 +198,8 @@ dependencies {
     // Tools
     implementation 'com.github.Reco1I:Toolkt:1.0.24'
     implementation 'commons-io:commons-io:2.18.0'
+    testImplementation 'junit:junit:4.13.2'
+    testImplementation 'org.robolectric:robolectric:4.14.1'
 
     // Multiplayer
     implementation 'org.jetbrains.kotlinx:kotlinx-coroutines-core:1.10.1'
