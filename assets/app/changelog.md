@@ -1,3 +1,20 @@
+Version 1.8.3.2
+===============
+
+# Changes
+
+- Prevent time progression from going too far in gameplay <span style="font-size: 0.75em">by [Rian8337](https://github.com/Rian8337)</span>
+  - This is a mitigation towards a bug in the game's audio engine, which has been confirmed by the maintainer.
+  - See [this](https://www.un4seen.com/forum/?topic=20482.0) (technical) thread for more information.
+- Revert to semi-frame based input time <span style="font-size: 0.75em">by [Rian8337](https://github.com/Rian8337)</span>
+  - This partially reverts the input time adjustment made in version 1.8.3, which was prone to the aforementioned bug. 
+
+# Fixes
+
+- Fix HUD data potentially being saved to the previously selected skin's `skin.json` <span style="font-size: 0.75em">by [Rian8337](https://github.com/Rian8337)</span> 
+- Fix beatmap download hard-locking if beatmapset extraction fails <span style="font-size: 0.75em">by [Rian8337](https://github.com/Rian8337)</span>
+- Fix illegal characters in filenames persisting when extracting beatmapset <span style="font-size: 0.75em">by [Rian8337](https://github.com/Rian8337)</span>
+
 Version 1.8.3.1
 ===============
 
