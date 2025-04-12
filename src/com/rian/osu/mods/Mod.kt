@@ -144,6 +144,10 @@ sealed class Mod {
         return result
     }
 
+    override fun toString(): String {
+        return acronym
+    }
+
     /**
      * Creates a deep copy of this [Mod].
      *

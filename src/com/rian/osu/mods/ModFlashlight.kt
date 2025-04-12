@@ -60,6 +60,14 @@ class ModFlashlight : Mod() {
         return result
     }
 
+    override fun toString(): String {
+        if (followDelay == DEFAULT_FOLLOW_DELAY) {
+            return super.toString()
+        }
+
+        return "${super.toString()} (%.2fs)".format(followDelay)
+    }
+
     override fun deepCopy() = ModFlashlight().also { it.followDelay = followDelay }
 
     companion object {
