@@ -140,6 +140,7 @@ android {
             assets.srcDirs = ['assets']
             jniLibs.srcDirs = ['libs']
         }
+        test.setRoot("$projectDir/tests/test")
         androidTest.setRoot("$projectDir/tests/androidTest")
         androidTest.assets.srcDirs += files("$projectDir/schemas".toString())
     }
@@ -159,6 +160,11 @@ android {
         buildConfig true
     }
 
+    testOptions {
+        unitTests {
+            includeAndroidResources true
+        }
+    }
 
     android.applicationVariants.configureEach { variant ->
         variant.outputs.configureEach { output ->
@@ -194,6 +200,8 @@ dependencies {
     // Tools
     implementation 'com.github.Reco1I:Toolkt:1.0.24'
     implementation 'commons-io:commons-io:2.18.0'
+    testImplementation 'junit:junit:4.13.2'
+    testImplementation 'org.robolectric:robolectric:4.14.1'
     androidTestImplementation 'androidx.test:runner:1.6.2'
     androidTestImplementation 'androidx.test.ext:junit:1.2.1'
 

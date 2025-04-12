@@ -1,4 +1,4 @@
-name: Android CI
+name: Android
 
 on:
   push:
@@ -7,10 +7,12 @@ on:
     branches: [ master ]
 
 jobs:
-  build:
+  assemble-debug:
+    name: Assemble Debug APK
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@v4
+    - name: Checkout
+      uses: actions/checkout@v4
 
     - name: Set up JDK 17
       uses: actions/setup-java@v4
@@ -21,7 +23,82 @@ jobs:
     - name: Grant execute permission for gradlew
       run: chmod +x gradlew
 
-    - name: Build apk
+    - name: Setup Gradle
+      uses: gradle/actions/setup-gradle@v4
+
+    - name: Assemble debug APK
+      run: ./gradlew assembleDebug
+
+  assemble-pre-release:
+    name: Assemble Pre-Release APK
+    runs-on: ubuntu-latest
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v4
+
+    - name: Set up JDK 17
+      uses: actions/setup-java@v4
+      with:
+        distribution: "temurin"
+        java-version: 17
+
+    - name: Grant execute permission for gradlew
+      run: chmod +x gradlew
+
+    - name: Setup Gradle
+      uses: gradle/actions/setup-gradle@v4
+
+    - name: Assemble pre-release APK
+      run: ./gradlew assemblePre_release
+
+  assemble-release:
+    name: Assemble Release APK
+    runs-on: ubuntu-latest
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v4
+
+    - name: Set up JDK 17
+      uses: actions/setup-java@v4
+      with:
+        distribution: "temurin"
+        java-version: 17
+
+    - name: Grant execute permission for gradlew
+      run: chmod +x gradlew
+
+    - name: Setup Gradle
+      uses: gradle/actions/setup-gradle@v4
+
+    - name: Assemble release APK
+      run: ./gradlew assembleRelease
+
+  unit-test:
+    name: Unit Tests
+    runs-on: ubuntu-latest
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v4
+
+    - name: Set up JDK 17
+      uses: actions/setup-java@v4
+      with:
+        distribution: "temurin"
+        java-version: 17
+
+    - name: Grant execute permission for gradlew
+      run: chmod +x gradlew
+
+    - name: Run tests
       uses: gradle/actions/setup-gradle@v3
       with:
-        arguments: build
+        arguments: testDebugUnitTest
+
+    - name: Upload test results
+      if: ${{ always() }}
+      uses: actions/upload-artifact@v4
+      with:
+        name: reports
+        path: |
+          **/build/reports/
+          **/build/test-results/
