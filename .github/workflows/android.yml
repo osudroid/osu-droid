@@ -26,7 +26,7 @@ jobs:
       with:
         arguments: build
 
-  test:
+  unit-test:
     name: Unit Tests
     runs-on: ubuntu-latest
     steps:
