@@ -141,8 +141,12 @@ android {
             jniLibs.srcDirs = ['libs']
         }
         test.setRoot("$projectDir/tests/test")
-        androidTest.setRoot("$projectDir/tests/androidTest")
-        androidTest.assets.srcDirs += files("$projectDir/schemas".toString())
+
+        // We need to add the Room schemas not as a *test* resource, but as a build asset.
+        // See https://github.com/robolectric/robolectric/issues/3928#issuecomment-395309991 for more details.
+        debug.assets.srcDirs += files("$projectDir/schemas".toString())
+        release.assets.srcDirs += files("$projectDir/schemas".toString())
+        pre_release.assets.srcDirs += files("$projectDir/schemas".toString())
     }
 
     compileOptions {
@@ -202,8 +206,6 @@ dependencies {
     implementation 'commons-io:commons-io:2.18.0'
     testImplementation 'junit:junit:4.13.2'
     testImplementation 'org.robolectric:robolectric:4.14.1'
-    androidTestImplementation 'androidx.test:runner:1.6.2'
-    androidTestImplementation 'androidx.test.ext:junit:1.2.1'
 
     // Multiplayer
     implementation 'org.jetbrains.kotlinx:kotlinx-coroutines-core:1.10.1'
@@ -217,5 +219,5 @@ dependencies {
     annotationProcessor "androidx.room:room-compiler:$room_version"
     ksp "androidx.room:room-compiler:$room_version"
     implementation "androidx.room:room-ktx:$room_version"
-    androidTestImplementation "androidx.room:room-testing:$room_version"
+    testImplementation "androidx.room:room-testing:$room_version"
 }

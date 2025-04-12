@@ -1,19 +1,17 @@
-package database
+package com.reco1l.osu.data
 
 import androidx.room.Room
 import androidx.room.testing.MigrationTestHelper
-import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.platform.app.InstrumentationRegistry
-import com.reco1l.osu.data.DroidDatabase
-import com.reco1l.osu.data.MIGRATION_1_2
 import com.rian.osu.beatmap.sections.BeatmapDifficulty
 import com.rian.osu.mods.LegacyModConverter
 import java.io.IOException
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
+import org.robolectric.RobolectricTestRunner
 
-@RunWith(AndroidJUnit4::class)
+@RunWith(RobolectricTestRunner::class)
 class MigrationTest {
     private val testDb = "migration-test"
     private val allMigrations = arrayOf(MIGRATION_1_2)
