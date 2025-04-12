@@ -2749,7 +2749,8 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
         return new ExtendedScene() {
             @Override
             protected void onManagedUpdate(float secElapsed) {
-                float dt = secElapsed * GameHelper.getSpeedMultiplier();
+                float maxDt = secElapsed * GameHelper.getSpeedMultiplier();
+                float dt = maxDt;
                 var songService = GlobalManager.getInstance().getSongService();
 
                 if (songService.getStatus() == Status.PLAYING) {
@@ -2762,10 +2763,11 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
                     dt = Math.min(elapsedTime + dt, totalOffset) - elapsedTime;
                 }
 
-                // BASS may report the wrong position. When that happens, `dt` will
-                // be negative. In that case, we should ignore the update.
+                // BASS may report the wrong position. When that happens, `dt` will either be negative or more than the
+                // actual progressed time. To prevent such situation from happening, we keep `dt` between 0 and the
+                // actual progressed time.
                 // See https://github.com/ppy/osu/issues/26879 for more information.
-                dt = Math.max(0, dt);
+                dt = FMath.clamp(dt, 0, maxDt);
 
                 update(dt);
                 super.onManagedUpdate(dt);
