@@ -249,13 +249,11 @@ object ModMenuV2 : ExtendedScene() {
         if (Multiplayer.isConnected) {
             RoomScene.isWaitingForModsChange = true
 
-            val string = enabledMods.toString()
-
             // The room mods are the same as the host mods
             if (Multiplayer.isRoomHost) {
-                setRoomMods(string)
+                setRoomMods(enabledMods.serializeMods())
             } else if (updatePlayerMods) {
-                setPlayerMods(string)
+                setPlayerMods(enabledMods.serializeMods())
             } else {
                 RoomScene.isWaitingForModsChange = false
             }
