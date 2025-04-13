@@ -222,5 +222,31 @@ class ModDifficultyAdjust @JvmOverloads constructor(
         return result
     }
 
+    override fun toString() = buildString {
+        append(super.toString())
+
+        val settings = mutableListOf<String>()
+
+        if (cs != null) {
+            settings += "CS%.1f".format(cs)
+        }
+
+        if (ar != null) {
+            settings += "AR%.1f".format(ar)
+        }
+
+        if (od != null) {
+            settings += "OD%.1f".format(od)
+        }
+
+        if (hp != null) {
+            settings += "HP%.1f".format(hp)
+        }
+
+        if (settings.isNotEmpty()) {
+            append(" (${settings.joinToString(", ")})")
+        }
+    }
+
     override fun deepCopy() = ModDifficultyAdjust(cs, ar, od, hp)
 }

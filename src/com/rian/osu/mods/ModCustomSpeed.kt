@@ -37,5 +37,11 @@ class ModCustomSpeed @JvmOverloads constructor(trackRateMultiplier: Float = 1f) 
     }
 
     override fun hashCode() = super.hashCode()
+
+    override fun toString() = buildString {
+        append(super.toString())
+        append(" (%.2fx)".format(trackRateMultiplier))
+    }
+
     override fun deepCopy() = ModCustomSpeed(trackRateMultiplier)
 }

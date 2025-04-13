@@ -60,7 +60,7 @@ object RoomAPI {
         Multiplayer.log("RECEIVED: playerModsChanged -> ${it.contentToString()}")
 
         val id = (it[0] as String).toLong()
-        val mods = it[1] as String
+        val mods = it[1] as JSONArray
 
         playerEventListener?.onPlayerModsChange(id, RoomMods(mods))
     }
@@ -68,7 +68,7 @@ object RoomAPI {
     private val roomModsChanged = Listener {
         Multiplayer.log("RECEIVED: roomModsChanged -> ${it.contentToString()}")
 
-        val mods = it[0] as String
+        val mods = it[0] as JSONArray
         roomEventListener?.onRoomModsChange(RoomMods(mods))
     }
 
@@ -160,7 +160,7 @@ object RoomAPI {
             name = json.getString("name"),
             isLocked = json.getBoolean("isLocked"),
             maxPlayers = json.getInt("maxPlayers"),
-            mods = RoomMods(json.getString("mods")),
+            mods = RoomMods(json.getJSONArray("mods")),
             gameplaySettings = parseGameplaySettings(json.getJSONObject("gameplaySettings")),
             teamMode = TeamMode[json.getInt("teamMode")],
             winCondition = WinCondition.from(json.getInt("winCondition")),
@@ -398,7 +398,7 @@ object RoomAPI {
      * Change room mods.
      */
     @JvmStatic
-    fun setRoomMods(mods: String?) {
+    fun setRoomMods(mods: JSONArray) {
         socket?.emit("roomModsChanged", mods) ?: run {
 			Multiplayer.log("WARNING: Tried to emit event 'roomModsChanged' while socket is null.")
 			return
@@ -577,7 +577,7 @@ object RoomAPI {
      * Change player mods.
      */
     @JvmStatic
-    fun setPlayerMods(mods: String?) {
+    fun setPlayerMods(mods: JSONArray) {
         socket?.emit("playerModsChanged", mods) ?: run {
 			Multiplayer.log("WARNING: Tried to emit event 'playerModsChanged' while socket is null.")
 			return

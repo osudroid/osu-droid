@@ -18,7 +18,6 @@ import com.edlplan.framework.math.line.LinePath;
 import com.edlplan.framework.support.ProxySprite;
 import com.edlplan.framework.support.osb.StoryboardSprite;
 import com.edlplan.framework.utils.functionality.SmartIterator;
-import com.reco1l.andengine.modifier.UniversalModifier;
 import com.reco1l.ibancho.RoomAPI;
 import com.reco1l.osu.DifficultyCalculationManager;
 import com.reco1l.osu.data.BeatmapInfo;
@@ -221,6 +220,13 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
 
 
     // Timing
+
+    /**
+     * The time at which the last frame was rendered with respect to {@link SystemClock#uptimeMillis()}.
+     * <br>
+     * If 0, a frame has not been rendered yet.
+     */
+    private long previousFrameTime;
 
     /**
      * The start time of the first object in seconds.
@@ -776,6 +782,7 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
 
         comboWas100 = false;
         comboWasMissed = false;
+        previousFrameTime = 0;
 
         hitWindow = playableBeatmap.getHitWindow();
         var firstObject = objects.peek();
@@ -992,6 +999,7 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
 
     private void update(final float dt) {
         elapsedTime += dt;
+        previousFrameTime = SystemClock.uptimeMillis();
 
         if (Multiplayer.isMultiplayer)
         {
@@ -2071,11 +2079,6 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
             return false;
         }
 
-        int eventTime = (int) (elapsedTime * 1000);
-        float offset = Config.isFixFrameOffset() && musicStarted
-                ? GlobalManager.getInstance().getSongService().getPosition() / 1000f - elapsedTime
-                : 0;
-
         var id = event.getPointerID();
         if (id < 0 || id >= CursorCount) {
             return false;
@@ -2092,6 +2095,11 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
         if (sprite != null) {
             sprite.setPosition(cursor.mousePos.x, cursor.mousePos.y);
         }
+
+        float offset = previousFrameTime > 0
+                ? (event.getMotionEvent().getEventTime() - previousFrameTime) * GameHelper.getSpeedMultiplier()
+                : 0;
+        int eventTime = (int) (elapsedTime * 1000 + offset);
 
         if (event.isActionDown()) {
 
@@ -2745,7 +2753,8 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
         return new ExtendedScene() {
             @Override
             protected void onManagedUpdate(float secElapsed) {
-                float dt = secElapsed * GameHelper.getSpeedMultiplier();
+                float maxDt = secElapsed * GameHelper.getSpeedMultiplier();
+                float dt = maxDt;
                 var songService = GlobalManager.getInstance().getSongService();
 
                 if (songService.getStatus() == Status.PLAYING) {
@@ -2758,10 +2767,11 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
                     dt = Math.min(elapsedTime + dt, totalOffset) - elapsedTime;
                 }
 
-                // BASS may report the wrong position. When that happens, `dt` will
-                // be negative. In that case, we should ignore the update.
+                // BASS may report the wrong position. When that happens, `dt` will either be negative or more than the
+                // actual progressed time. To prevent such situation from happening, we keep `dt` between 0 and the
+                // actual progressed time.
                 // See https://github.com/ppy/osu/issues/26879 for more information.
-                dt = Math.max(0, dt);
+                dt = FMath.clamp(dt, 0, maxDt);
 
                 update(dt);
                 super.onManagedUpdate(dt);

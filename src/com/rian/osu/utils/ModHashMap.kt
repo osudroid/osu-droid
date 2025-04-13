@@ -2,11 +2,9 @@ package com.rian.osu.utils
 
 import com.reco1l.toolkt.kotlin.fastForEach
 import com.rian.osu.mods.*
-import java.util.EnumSet
 import kotlin.reflect.KClass
 import kotlin.reflect.full.createInstance
 import org.json.JSONArray
-import ru.nsu.ccfit.zuev.osu.game.mods.GameMod
 
 /**
  * A [HashMap] of [Mod]s with additional functionalities.
@@ -170,20 +168,6 @@ open class ModHashMap : HashMap<Class<out Mod>, Mod> {
     fun serializeMods() = ModUtils.serializeMods(values)
 
     /**
-     * Converts this [ModHashMap] to a [EnumSet] of [GameMod]s.
-     */
-    fun toGameModSet(): EnumSet<GameMod> = EnumSet.noneOf(GameMod::class.java).also {
-        for ((_, m) in this) {
-            for ((k, v) in LegacyModConverter.gameModMap) {
-                if (v.isInstance(m)) {
-                    it.add(k)
-                    break
-                }
-            }
-        }
-    }
-
-    /**
      * Converts the container [Mod]s in this [ModHashMap] to their [String] representative.
      */
     fun getContainerModString() = buildString {
@@ -254,7 +238,10 @@ open class ModHashMap : HashMap<Class<out Mod>, Mod> {
         return result
     }
 
-    override fun toString() = buildString {
+    /**
+     * Converts this [ModHashMap] to its legacy mod string representation.
+     */
+    fun toLegacyModString() = buildString {
         modStringOrder.fastForEach {
             if (it::class in this@ModHashMap) {
                 for ((k, v) in LegacyModConverter.legacyStorableMods) {
@@ -268,6 +255,21 @@ open class ModHashMap : HashMap<Class<out Mod>, Mod> {
 
         append('|')
         append(getContainerModString())
+    }
+
+    /**
+     * Converts this [ModHashMap] to a string representation that can be used to display [Mod]s to the user.
+     */
+    fun toDisplayModString() = buildString {
+        modStringOrder.fastForEach {
+            if (it in this@ModHashMap) {
+                append(this@ModHashMap[it::class]!!.toString() + ",")
+            }
+        }
+
+        if (isNotEmpty()) {
+            deleteCharAt(length - 1)
+        }
     }
 
     /**

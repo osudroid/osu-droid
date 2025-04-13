@@ -453,7 +453,7 @@ public class StatisticV2 implements Serializable {
 
     public String compile() {
         StringBuilder builder = new StringBuilder();
-        String mstring = mod.toString();
+        String mstring = mod.toLegacyModString();
         if (mstring.isEmpty())
             mstring = "-";
         builder.append(mstring);
@@ -541,7 +541,7 @@ public class StatisticV2 implements Serializable {
                 put("accuracy", getAccuracy());
                 put("score", getTotalScoreWithMultiplier());
                 put("username", playerName);
-                put("modstring", mod.toString());
+                put("mods", mod.serializeMods());
                 put("maxCombo", scoreMaxCombo);
                 put("geki", hit300k);
                 put("perfect", hit300);
@@ -575,7 +575,7 @@ public class StatisticV2 implements Serializable {
             beatmapMD5,
             playerName,
             replayFilename,
-            mod.toString(),
+            mod.serializeMods().toString(),
             getTotalScoreWithMultiplier(),
             scoreMaxCombo,
             getMark(),
