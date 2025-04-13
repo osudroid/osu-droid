@@ -349,6 +349,12 @@ object ModMenuV2 : ExtendedScene() {
             width = 340f
             height = FitParent
             scrollAxes = Axes.Y
+            clipChildren = true
+
+            background = RoundedBox().apply {
+                color = ColorARGB(0xFF13131E)
+                cornerRadius = 16f
+            }
 
             attachChild(LinearContainer().apply {
                 width = FitParent
