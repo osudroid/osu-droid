@@ -11,6 +11,7 @@ import com.rian.osu.beatmap.sections.BeatmapDifficulty
 class ModHidden : Mod(), IModApplicableToBeatmap {
     override val name = "Hidden"
     override val acronym = "HD"
+    override val description = "Play with no approach circles and fading circles/sliders."
     override val type = ModType.DifficultyIncrease
     override val textureNameSuffix = "hidden"
     override val isRanked = true
