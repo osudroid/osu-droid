@@ -33,7 +33,7 @@ class ModIcon(mod: Mod) : Container() {
                 alignment = Anchor.Center
             })
         } else {
-            attachChild(ExtendedSprite(ResourceManager.getInstance().getTexture(mod.textureName)).apply {
+            attachChild(ExtendedSprite(texture).apply {
                 width = FitParent
                 height = FitParent
             })
