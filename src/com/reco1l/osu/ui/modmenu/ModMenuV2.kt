@@ -83,7 +83,7 @@ object ModMenuV2 : ExtendedScene() {
 
                 ModType.entries.forEach { type ->
                     val sectionName = StringTable.get(type.stringId)
-                    val sectionMods = mods.filter { it.type == type }
+                    val sectionMods = mods.filter { it !is IMigratableMod && it.type == type }
                     attachChild(Section(sectionName, sectionMods))
                 }
             })
