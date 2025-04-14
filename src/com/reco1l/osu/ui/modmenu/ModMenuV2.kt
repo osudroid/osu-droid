@@ -128,7 +128,7 @@ object ModMenuV2 : ExtendedScene() {
                 attachChild(customizeButton)
 
                 attachChild(Button().apply {
-                    text = "Clear all mods"
+                    text = "Clear"
                     leadingIcon = ExtendedSprite(ResourceManager.getInstance().getTexture("backspace"))
                     theme = ButtonTheme(
                         backgroundColor = 0xFF342121,
