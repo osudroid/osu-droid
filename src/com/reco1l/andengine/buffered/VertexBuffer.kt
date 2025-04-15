@@ -55,11 +55,13 @@ abstract class VertexBuffer(
         return i
     }
 
-    fun addTriangle(index: Int, x1: Float, y1: Float, x2: Float, y2: Float, x3: Float, y3: Float): Int {
+    fun addTriangle(index: Int, centerX: Float, centerY: Float, width: Float, height: Float): Int {
         var i = index
-        putVertex(i++, x1, y1)
-        putVertex(i++, x2, y2)
-        putVertex(i++, x3, y3)
+        val halfWidth = width / 2f
+        val halfHeight = height / 2f
+        putVertex(i++, centerX, centerY - halfHeight)
+        putVertex(i++, centerX - halfWidth, centerY + halfHeight)
+        putVertex(i++, centerX + halfWidth, centerY + halfHeight)
         return i
     }
 
