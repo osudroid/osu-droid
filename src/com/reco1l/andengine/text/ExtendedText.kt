@@ -12,7 +12,7 @@ import javax.microedition.khronos.opengles.GL11.GL_STATIC_DRAW
 /**
  * A text entity that can be displayed on the screen.
  */
-open class ExtendedText : CompoundBufferedEntity() {
+open class ExtendedText : BufferedEntity<CompoundBuffer>() {
 
     /**
      * The text to be displayed
@@ -24,9 +24,10 @@ open class ExtendedText : CompoundBufferedEntity() {
 
                 if (value.length > currentLength) {
                     currentLength = value.length
-                    rebuildBuffer()
+                    invalidateBuffer(BufferInvalidationFlag.Instance)
+                } else {
+                    invalidateBuffer(BufferInvalidationFlag.Data)
                 }
-                invalidateBuffer()
             }
         }
 
@@ -38,7 +39,7 @@ open class ExtendedText : CompoundBufferedEntity() {
         set(value) {
             if (field != value) {
                 field = value
-                invalidateBuffer()
+                invalidateBuffer(BufferInvalidationFlag.Data)
             }
         }
 
@@ -49,7 +50,7 @@ open class ExtendedText : CompoundBufferedEntity() {
         set(value) {
             if (field != value) {
                 field = value
-                invalidateBuffer()
+                invalidateBuffer(BufferInvalidationFlag.Data)
             }
         }
 
@@ -63,11 +64,11 @@ open class ExtendedText : CompoundBufferedEntity() {
     }
 
 
-    override fun onRebuildBuffer(gl: GL10) {
-        super.onRebuildBuffer(gl)
-
-        addBuffer(TextTextureBuffer())
-        addBuffer(TextVertexBuffer())
+    override fun onCreateBuffer(gl: GL10): CompoundBuffer {
+        return CompoundBuffer(
+            TextTextureBuffer(),
+            TextVertexBuffer()
+        )
     }
 
     override fun onUpdateBuffer(gl: GL10, vararg data: Any) {
