@@ -70,7 +70,7 @@ open class BezelOutline(cornerRadius: Float = 0f) : BufferedEntity<BezelOutlineV
     ) : VertexBuffer(
 
         // Segments * Arc count + Closing point
-        vertexCount = max(1, segments) * 2 + 1,
+        vertexCount = max(1, segments) * 2 + 2,
 
         vertexSize = VERTEX_2D,
         bufferUsage = GL_STATIC_DRAW,
@@ -95,10 +95,10 @@ open class BezelOutline(cornerRadius: Float = 0f) : BufferedEntity<BezelOutlineV
 
             val halfVertices = vertexCount / 2
 
-            GLHelper.setColor(gl, topColor.red, topColor.green, topColor.blue, mAlpha)
+            GLHelper.setColor(gl, topColor.red, topColor.green, topColor.blue, topColor.alpha)
             gl.glDrawArrays(drawTopology, 0, halfVertices)
 
-            GLHelper.setColor(gl, bottomColor.red, bottomColor.green, bottomColor.blue, mAlpha)
+            GLHelper.setColor(gl, bottomColor.red, bottomColor.green, bottomColor.blue, bottomColor.alpha)
             gl.glDrawArrays(drawTopology, halfVertices, halfVertices)
         }
     }
