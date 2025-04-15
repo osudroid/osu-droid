@@ -807,7 +807,12 @@ abstract class ExtendedEntity : Entity(0f, 0f), ITouchArea, IModifierChain {
         const val FitParent = -2f
 
 
-        private val DEBUG_FOREGROUND by lazy { OutlineBox().apply { color = ColorARGB.White } }
+        private val DEBUG_FOREGROUND by lazy {
+            Box().apply {
+                paintStyle = PaintStyle.Outline
+                color = ColorARGB.White
+            }
+        }
     }
 
 }

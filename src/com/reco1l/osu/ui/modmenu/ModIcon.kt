@@ -20,7 +20,7 @@ class ModIcon(mod: Mod) : Container() {
         val texture = ResourceManager.getInstance().getTexture(mod.textureName)
 
         if (texture is BlankTextureRegion || texture == null) {
-            background = RoundedBox().apply {
+            background = Box().apply {
                 cornerRadius = 14f
                 color = ColorARGB(0xFF222234)
             }

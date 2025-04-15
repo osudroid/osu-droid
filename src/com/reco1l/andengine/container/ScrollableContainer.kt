@@ -140,7 +140,7 @@ open class ScrollableContainer : Container() {
     /**
      * The scroll indicator for the x-axis that shows the current scroll position.
      */
-    var horizontalIndicator: ExtendedEntity? = RoundedBox().apply {
+    var horizontalIndicator: ExtendedEntity? = Box().apply {
         color = ColorARGB.White
         height = 6f
         alpha = 0.5f
@@ -157,7 +157,7 @@ open class ScrollableContainer : Container() {
     /**
      * The scroll indicator for the y-axis that shows the current scroll position.
      */
-    var verticalIndicator: ExtendedEntity? = RoundedBox().apply {
+    var verticalIndicator: ExtendedEntity? = Box().apply {
         color = ColorARGB.White
         width = 6f
         alpha = 0.5f

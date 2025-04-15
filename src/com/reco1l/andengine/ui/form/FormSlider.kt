@@ -25,7 +25,7 @@ open class FormSlider(initialValue: Float = 0f) : FormControl<Float, Slider>(ini
         padding = Vec4(6f, 0f)
         alignment = Anchor.Center
 
-        background = RoundedBox().apply {
+        background = Box().apply {
             color = ColorARGB.Black
             alpha = 0.1f
             cornerRadius = 8f

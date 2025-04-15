@@ -7,7 +7,7 @@ import android.util.Log;
 
 import com.acivev.VibratorManager;
 import com.reco1l.andengine.Anchor;
-import com.reco1l.andengine.shape.RoundedBox;
+import com.reco1l.andengine.shape.Box;
 import com.reco1l.andengine.sprite.ExtendedSprite;
 import com.reco1l.osu.BannerLoader;
 import com.reco1l.osu.BannerSprite;
@@ -176,7 +176,7 @@ public class MainScene implements IUpdateHandler {
 
         menu = new MainMenu(this);
 
-        RoundedBox box = new RoundedBox() {
+        Box box = new Box() {
 
             {
                 Text versionText = new Text(10f, 2f, ResourceManager.getInstance().getFont("smallFont"), "osu!droid " + BuildConfig.VERSION_NAME);
