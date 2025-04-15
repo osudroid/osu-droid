@@ -13,6 +13,11 @@ object BuildConfiguration {
     const val SHOW_ENTITY_BOUNDARIES = false
 
     /**
+     * Whether to show the entity browser or not.
+     */
+    const val ENTITY_INSPECTOR = false
+
+    /**
      * Whether to use fake multiplayer mode or not.
      */
     const val MOCK_MULTIPLAYER = false
