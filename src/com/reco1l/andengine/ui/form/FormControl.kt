@@ -46,7 +46,7 @@ abstract class FormControl<V : Any, C: Control<V>>(initialValue: V): ConstraintC
             anchor = Anchor.CenterRight
             origin = Anchor.CenterLeft
             foreground = BezelOutline(12f)
-            background = RoundedBox().apply {
+            background = Box().apply {
                 cornerRadius = 12f
                 color = ColorARGB(0xFF222234)
             }

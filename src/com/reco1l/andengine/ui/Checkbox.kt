@@ -29,7 +29,7 @@ class Checkbox(initialValue: Boolean = false) : Control<Boolean>(initialValue), 
 
 
     override fun onThemeChanged() {
-        background = RoundedBox().apply {
+        background = Box().apply {
             color = ColorARGB(if (value) theme.checkedColor else theme.uncheckedColor)
             cornerRadius = 12f
         }

@@ -45,7 +45,7 @@ open class Badge(content: String = "") : ExtendedText(), IWithTheme<BadgeTheme> 
     override fun onThemeChanged() {
         font = theme.textFont
 
-        background = RoundedBox().apply {
+        background = Box().apply {
             color = ColorARGB(0xFF1E1E2E)
             cornerRadius = 14f
         }
@@ -96,7 +96,7 @@ open class StatisticBadge(label: String = "", value: String = "") : LinearContai
         orientation = Orientation.Horizontal
 
         foreground = BezelOutline(14f)
-        background = RoundedBox().apply {
+        background = Box().apply {
             color = ColorARGB(0xFF222234)
             cornerRadius = 14f
         }

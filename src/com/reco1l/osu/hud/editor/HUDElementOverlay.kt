@@ -25,7 +25,8 @@ class HUDElementOverlay(private val element: HUDElement) : ConstraintContainer()
         get() = outline.absolutePosition
 
 
-    private val outline = OutlineBox().apply {
+    private val outline = Box().apply {
+        paintStyle = PaintStyle.Outline
         color = ColorARGB(0xFFF27272)
         lineWidth = 8f
     }
@@ -138,7 +139,7 @@ class HUDElementOverlay(private val element: HUDElement) : ConstraintContainer()
             setSize(TIP_SIZE, TIP_SIZE)
 
             // The tip container is bigger than the actual tip in order to make it easier to touch.
-            attachChild(RoundedBox().apply {
+            attachChild(Box().apply {
                 anchor = Anchor.Center
                 origin = Anchor.Center
                 color = ColorARGB(0xFFF27272)
@@ -196,7 +197,7 @@ class HUDElementOverlay(private val element: HUDElement) : ConstraintContainer()
             setSize(BUTTON_SIZE, BUTTON_SIZE)
             scaleCenter = Anchor.Center
 
-            attachChild(RoundedBox().apply {
+            attachChild(Box().apply {
                 cornerRadius = 12f
                 color = back
                 relativeSizeAxes = Axes.Both

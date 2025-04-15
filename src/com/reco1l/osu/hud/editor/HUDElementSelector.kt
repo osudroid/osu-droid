@@ -6,7 +6,6 @@ import com.reco1l.andengine.container.LinearContainer
 import com.reco1l.andengine.container.Orientation
 import com.reco1l.andengine.container.ScrollableContainer
 import com.reco1l.andengine.shape.Box
-import com.reco1l.andengine.shape.RoundedBox
 import com.reco1l.andengine.text.ExtendedText
 import com.reco1l.framework.ColorARGB
 import com.reco1l.framework.math.Vec4
@@ -66,7 +65,7 @@ class HUDElementSelector(private val hud: GameplayHUD) : Container(), IGameplayE
         attachChild(object : Container() {
 
             init {
-                background = RoundedBox().apply {
+                background = Box().apply {
                     cornerRadius = BUTTON_RADIUS
                     color = ColorARGB(0xFF181825)
                 }

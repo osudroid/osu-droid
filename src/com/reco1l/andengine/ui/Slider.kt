@@ -71,7 +71,7 @@ open class Slider(initialValue: Float = 0f) : Control<Float>(initialValue), IWit
         }
 
 
-    private val backgroundBar = object : RoundedBox() {
+    private val backgroundBar = object : Box() {
 
         init {
             width = FitParent
@@ -90,13 +90,13 @@ open class Slider(initialValue: Float = 0f) : Control<Float>(initialValue), IWit
         }
     }
 
-    private val progressBar = RoundedBox().apply {
+    private val progressBar = Box().apply {
         anchor = Anchor.CenterLeft
         origin = Anchor.CenterLeft
         depthInfo = DepthInfo.Default
     }
 
-    private val thumb = RoundedBox().apply {
+    private val thumb = Box().apply {
         anchor = Anchor.CenterLeft
         origin = Anchor.Center
         depthInfo = DepthInfo.Less

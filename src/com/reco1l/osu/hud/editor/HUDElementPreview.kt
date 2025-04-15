@@ -2,7 +2,7 @@ package com.reco1l.osu.hud.editor
 
 import com.reco1l.andengine.*
 import com.reco1l.andengine.container.Container
-import com.reco1l.andengine.shape.RoundedBox
+import com.reco1l.andengine.shape.*
 import com.reco1l.andengine.text.ExtendedText
 import com.reco1l.framework.ColorARGB
 import com.reco1l.framework.math.Vec4
@@ -34,7 +34,7 @@ class HUDElementPreview(private val element: HUDElement, val hud: GameplayHUD): 
         scaleCenterX = 0.5f
         scaleCenterY = 0.5f
 
-        background = RoundedBox().apply {
+        background = Box().apply {
             color = ColorARGB(0xFF363653)
             cornerRadius = 12f
         }
