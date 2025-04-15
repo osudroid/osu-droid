@@ -144,7 +144,7 @@ class BeatmapHitObjectsTest {
 
     private fun createCircle(startTime: Double = 1000.0) = HitCircle(startTime, Vector2(0), true, 0).apply {
         applyDefaults(controlPoints, difficulty, GameMode.Standard)
-        applySamples(controlPoints, null)
+        applySamples(controlPoints)
     }
 
     private fun createSlider(startTime: Double = 1000.0) = Slider(
@@ -161,11 +161,11 @@ class BeatmapHitObjectsTest {
         mutableListOf()
     ).apply {
         applyDefaults(controlPoints, difficulty, GameMode.Standard)
-        applySamples(controlPoints, null)
+        applySamples(controlPoints)
     }
 
     private fun createSpinner(startTime: Double = 1000.0) = Spinner(startTime, startTime + 100, true).apply {
         applyDefaults(controlPoints, difficulty, GameMode.Standard)
-        applySamples(controlPoints, null)
+        applySamples(controlPoints)
     }
 }

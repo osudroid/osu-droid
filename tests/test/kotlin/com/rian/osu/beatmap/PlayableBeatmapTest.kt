@@ -12,7 +12,7 @@ sealed class PlayableBeatmapTest {
 
         for (obj in hitObjects.objects) {
             obj.applyDefaults(controlPoints, difficulty, mode)
-            obj.applySamples(controlPoints, null)
+            obj.applySamples(controlPoints)
         }
     }
 }
