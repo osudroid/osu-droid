@@ -1,8 +1,10 @@
 package com.reco1l.andengine.buffered
 
+import com.reco1l.toolkt.*
 import org.anddev.andengine.opengl.util.GLHelper
 import javax.microedition.khronos.opengles.GL10
 import javax.microedition.khronos.opengles.GL11
+import kotlin.math.*
 
 abstract class VertexBuffer(
     val drawTopology: Int,
@@ -34,6 +36,57 @@ abstract class VertexBuffer(
 
     //endregion
 
+
+    //region Elements
+
+    fun addQuad(index: Int, fromX: Float, fromY: Float, toX: Float, toY: Float): Int {
+        var i = index
+        putVertex(i++, fromX, fromY)
+        putVertex(i++, fromX, toY)
+        putVertex(i++, toX, fromY)
+        putVertex(i++, toX, toY)
+        return i
+    }
+
+    fun addLine(index: Int, fromX: Float, fromY: Float, toX: Float, toY: Float): Int {
+        var i = index
+        putVertex(i++, fromX, fromY)
+        putVertex(i++, toX, toY)
+        return i
+    }
+
+    fun addTriangle(index: Int, x1: Float, y1: Float, x2: Float, y2: Float, x3: Float, y3: Float): Int {
+        var i = index
+        putVertex(i++, x1, y1)
+        putVertex(i++, x2, y2)
+        putVertex(i++, x3, y3)
+        return i
+    }
+
+    fun addArc(
+        index: Int,
+        centerX: Float,
+        centerY: Float,
+        startAngle: Float,
+        endAngle: Float,
+        width: Float,
+        segments: Int
+    ): Int {
+        var i = index
+
+        val startAngleRadians = startAngle.toRadians()
+        val deltaAngle = (endAngle.toRadians() - startAngleRadians) / segments
+
+        for (j in 0 ..< segments) {
+            val angle = startAngleRadians + j * deltaAngle
+            putVertex(i++, centerX + width * cos(angle), centerY + width * sin(angle))
+        }
+
+        return i
+    }
+
+
+    //endregion
 
     //region Utility functions
 
