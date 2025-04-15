@@ -1,7 +1,6 @@
 package com.reco1l.andengine.text
 
 import com.reco1l.andengine.buffered.*
-import com.reco1l.andengine.shape.Box.BoxVertexBuffer.Companion.BOX_VERTICES
 import com.reco1l.andengine.text.TextureFont.*
 import org.anddev.andengine.engine.camera.*
 import org.anddev.andengine.opengl.texture.region.*
@@ -10,7 +9,7 @@ import javax.microedition.khronos.opengles.*
 import javax.microedition.khronos.opengles.GL11.*
 import kotlin.math.*
 
-open class TextureFont(val characters: MutableMap<Char, TextureRegion>) : BufferedEntity<TextureTextVertexBuffer>(TextureTextVertexBuffer()) {
+open class TextureFont(val characters: MutableMap<Char, TextureRegion>) : BufferedEntity<TextureTextVertexBuffer>() {
 
     /**
      * The spacing between glyphs.
@@ -129,6 +128,10 @@ open class TextureFont(val characters: MutableMap<Char, TextureRegion>) : Buffer
         }
     }
 
+    override fun onCreateBuffer(gl: GL10): TextureTextVertexBuffer {
+        return TextureTextVertexBuffer()
+    }
+
     override fun onUpdateBuffer(gl: GL10, vararg data: Any) {
         if (data.isEmpty()) {
             super.onUpdateBuffer(gl, 0f, 0f)
@@ -138,21 +141,14 @@ open class TextureFont(val characters: MutableMap<Char, TextureRegion>) : Buffer
     }
 
 
-    class TextureTextVertexBuffer : VertexBuffer(
+    inner class TextureTextVertexBuffer : VertexBuffer(
         drawTopology = GL_TRIANGLE_STRIP,
-        vertexCount = BOX_VERTICES,
+        vertexCount = 4,
         vertexSize = VERTEX_2D,
         bufferUsage = GL_STATIC_DRAW
     ) {
         override fun update(gl: GL10, entity: BufferedEntity<*>, vararg data: Any) {
-
-            val width = data[0] as Float
-            val height = data[1] as Float
-
-            putVertex(0, 0f, 0f)
-            putVertex(1, 0f, height)
-            putVertex(2, width, 0f)
-            putVertex(3, width, height)
+            addQuad(0, 0f, 0f, data[0] as Float, data[1] as Float)
         }
     }
 }
