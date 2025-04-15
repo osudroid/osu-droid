@@ -9,8 +9,8 @@ import javax.microedition.khronos.opengles.GL10
 class CompoundBuffer(vararg val buffers: Buffer) : IBuffer {
 
 
-    inline fun <reified T : Buffer> getFirstOf(): Buffer {
-        return buffers.first { it is T }
+    inline fun <reified T : Buffer> getFirstOf(): T {
+        return buffers.first { it is T } as T
     }
 
 
