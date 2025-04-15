@@ -72,6 +72,7 @@ abstract class VertexBuffer(
         startAngle: Float,
         endAngle: Float,
         width: Float,
+        height: Float,
         segments: Int
     ): Int {
         var i = index
@@ -81,7 +82,7 @@ abstract class VertexBuffer(
 
         for (j in 0 ..< segments) {
             val angle = startAngleRadians + j * deltaAngle
-            putVertex(i++, centerX + width * cos(angle), centerY + width * sin(angle))
+            putVertex(i++, centerX + width * cos(angle), centerY + height * sin(angle))
         }
 
         return i
