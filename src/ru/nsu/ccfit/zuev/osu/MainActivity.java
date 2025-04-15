@@ -41,6 +41,8 @@ import androidx.preference.PreferenceManager;
 import com.edlplan.ui.ActivityOverlay;
 import com.google.firebase.analytics.FirebaseAnalytics;
 import com.google.firebase.crashlytics.FirebaseCrashlytics;
+import com.reco1l.andengine.ExtendedEngine;
+import com.reco1l.andengine.TestScene;
 import com.reco1l.ibancho.LobbyAPI;
 import com.reco1l.osu.AccessibilityDetector;
 import com.reco1l.osu.DifficultyCalculationManager;
@@ -158,7 +160,7 @@ public class MainActivity extends BaseGameActivity implements
         opt.setNeedsSound(true);
         opt.getRenderOptions().disableExtensionVertexBufferObjects();
         opt.getTouchOptions().enableRunOnUpdateThread();
-        final Engine engine = new Engine(opt);
+        final Engine engine = new ExtendedEngine(opt);
 
         if (!MultiTouch.isSupported(this)) {
             // Warning player that they will have to single tap forever.
