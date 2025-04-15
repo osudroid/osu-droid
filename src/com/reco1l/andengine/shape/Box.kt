@@ -48,7 +48,7 @@ open class Box : BufferedEntity<BoxVBO>() {
 
     override fun onSizeChanged() {
         super.onSizeChanged()
-        invalidateBuffer(BufferInvalidationFlag.Data)
+        invalidateBuffer(BufferInvalidationFlag.Instance)
     }
 
     override fun onCreateBuffer(gl: GL10): BoxVBO {
