@@ -46,7 +46,7 @@ object Anchor {
         )
     }
 
-    fun getName(anchor: Vec2): String {
+    fun getName(anchor: Vec2, throwIfUnknown: Boolean = true): String {
         return when (anchor) {
             TopLeft -> "TopLeft"
             TopCenter -> "TopCenter"
@@ -57,7 +57,7 @@ object Anchor {
             BottomLeft -> "BottomLeft"
             BottomCenter -> "BottomCenter"
             BottomRight -> "BottomRight"
-            else -> throw IllegalArgumentException("Unknown anchor point: $anchor")
+            else -> if (throwIfUnknown) throw IllegalArgumentException("Unknown anchor point: $anchor") else "${anchor.x},${anchor.y}"
         }
     }
 
