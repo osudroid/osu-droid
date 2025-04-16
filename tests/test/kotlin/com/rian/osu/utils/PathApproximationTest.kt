@@ -6,7 +6,7 @@ import org.junit.Test
 
 class PathApproximationTest {
     @Test
-    fun testLinearApproximation() {
+    fun `Test linear approximation`() {
         val controlPoints = listOf(Vector2(0), Vector2(100, 0), Vector2(200, 0))
 
         Assert.assertArrayEquals(
@@ -16,7 +16,7 @@ class PathApproximationTest {
     }
 
     @Test
-    fun testCatmullApproximation() {
+    fun `Test catmull approximation`() {
         val controlPoints = listOf(Vector2(0), Vector2(-29, -90), Vector2(96, -224))
         val approximatedControlPoints = PathApproximation.approximateCatmull(controlPoints)
 
@@ -28,7 +28,7 @@ class PathApproximationTest {
     }
 
     @Test
-    fun testPerfectCurveApproximationSmallSideTriangle() {
+    fun `Test perfect curve approximation with small side triangle`() {
         val controlPoints = listOf(Vector2(0), Vector2(1e-5f, 0f), Vector2(0f, 1e-5f))
         val approximatedControlPoints = PathApproximation.approximateCatmull(controlPoints)
 
@@ -36,7 +36,7 @@ class PathApproximationTest {
     }
 
     @Test
-    fun testPerfectCurveApproximationRadiusSmallerThanTolerance() {
+    fun `Test perfect curve approximation radius smaller than tolerance`() {
         val controlPoints = listOf(Vector2(0), Vector2(0.05f, 0f), Vector2(0f, 0.05f))
         val approximatedControlPoints = PathApproximation.approximateCatmull(controlPoints)
 
@@ -44,7 +44,7 @@ class PathApproximationTest {
     }
 
     @Test
-    fun testRegularPerfectCurveApproximation() {
+    fun `Test regular perfect curve approximation`() {
         val controlPoints = listOf(Vector2(0), Vector2(-25, 25), Vector2(58, 39))
         val approximatedControlPoints = PathApproximation.approximateCatmull(controlPoints)
 
@@ -52,7 +52,7 @@ class PathApproximationTest {
     }
 
     @Test
-    fun testBezierCurveApproximation() {
+    fun `Test bezier curve approximation`() {
         val controlPoints = listOf(Vector2(0), Vector2(-125, 44), Vector2(-88), Vector2(-234, -6))
         val approximatedControlPoints = PathApproximation.approximateBezier(controlPoints)
 

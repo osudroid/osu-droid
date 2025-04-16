@@ -9,31 +9,31 @@ class SpinnerTest : HitObjectTest() {
     private val center = Vector2(256, 192)
 
     @Test
-    fun testDuration() {
+    fun `Test duration`() {
         createSpinner(100.0).apply { Assert.assertEquals(duration, 100.0, 0.0) }
         createSpinner(200.0).apply { Assert.assertEquals(duration, 200.0, 0.0) }
         createSpinner(500.0).apply { Assert.assertEquals(duration, 500.0, 0.0) }
     }
 
     @Test
-    fun testEndTime() {
+    fun `Test end time`() {
         createSpinner(100.0).apply { Assert.assertEquals(endTime, 1100.0, 0.0) }
         createSpinner(200.0).apply { Assert.assertEquals(endTime, 1200.0, 0.0) }
         createSpinner(500.0).apply { Assert.assertEquals(endTime, 1500.0, 0.0) }
     }
 
     @Test
-    fun testPosition() {
+    fun `Test position`() {
         createSpinner().apply { Assert.assertEquals(center, position) }
     }
 
     @Test
-    fun testEndPosition() {
+    fun `Test end position`() {
         createSpinner().apply { Assert.assertEquals(center, endPosition) }
     }
 
     @Test
-    fun testStackedPositionWithoutHeight() {
+    fun `Test stacked position without stack height`() {
         createSpinner().apply {
             Assert.assertEquals(center, difficultyStackedPosition)
             Assert.assertEquals(center, difficultyStackedEndPosition)
@@ -41,7 +41,7 @@ class SpinnerTest : HitObjectTest() {
     }
 
     @Test
-    fun testStackedPositionWithHeight() {
+    fun `Test stacked position with stack height`() {
         testStackedPositions(createSpinner(), GameMode.Droid, { position }, { difficultyStackedPosition })
         testStackedPositions(createSpinner(), GameMode.Droid, { endPosition }, { difficultyStackedEndPosition })
 

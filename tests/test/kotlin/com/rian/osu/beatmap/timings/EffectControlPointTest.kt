@@ -5,7 +5,7 @@ import org.junit.Test
 
 class EffectControlPointTest {
     @Test
-    fun testRedundancy() {
+    fun `Test redundancy`() {
         val controlPoint = EffectControlPoint(1000.0, false)
 
         Assert.assertTrue(controlPoint.isRedundant(EffectControlPoint(1500.0, false)))

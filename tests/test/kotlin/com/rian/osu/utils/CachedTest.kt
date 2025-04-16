@@ -5,7 +5,7 @@ import org.junit.Test
 
 class CachedTest {
     @Test
-    fun testCacheInvalidation() {
+    fun `Test cache invalidation`() {
         val cached = Cached(0)
 
         Assert.assertTrue(cached.isValid)
@@ -16,7 +16,7 @@ class CachedTest {
     }
 
     @Test
-    fun testCacheAccessWhenInvalid() {
+    fun `Test cache access when invalid`() {
         val cached = Cached(0)
         cached.invalidate()
 

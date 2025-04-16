@@ -5,7 +5,7 @@ import org.junit.Test
 
 class PrecisionTest {
     @Test
-    fun testFloatPrecision() {
+    fun `Test float precision`() {
         Assert.assertFalse(Precision.almostEquals(1f, 2f))
         Assert.assertFalse(Precision.almostEquals(1f, 1.01f))
         Assert.assertFalse(Precision.almostEquals(1f, 1.001f))
@@ -14,7 +14,7 @@ class PrecisionTest {
     }
 
     @Test
-    fun testDoublePrecision() {
+    fun `Test double precision`() {
         Assert.assertFalse(Precision.almostEquals(1.0, 2.0))
         Assert.assertFalse(Precision.almostEquals(1.0, 1.0001))
         Assert.assertFalse(Precision.almostEquals(1.0, 1.000001))

@@ -15,7 +15,7 @@ class BeatmapHitObjectsTest {
     private val difficulty = BeatmapDifficulty()
 
     @Test
-    fun testAddHitObjectsWithoutExisting() {
+    fun `Test add hit objects without existing ones`() {
         BeatmapHitObjects().apply {
             add(createCircle())
 
@@ -24,7 +24,7 @@ class BeatmapHitObjectsTest {
     }
 
     @Test
-    fun testAddHitObjectsBefore2HitObjects() {
+    fun `Test add hit objects before 2 hit objects`() {
         BeatmapHitObjects().apply {
             add(listOf(createCircle(), createCircle(1500.0)))
             add(createCircle(500.0))
@@ -35,7 +35,7 @@ class BeatmapHitObjectsTest {
     }
 
     @Test
-    fun testAddHitObjectsBetween2HitObjects() {
+    fun `Test add hit objects between 2 hit objects`() {
         BeatmapHitObjects().apply {
             add(listOf(createCircle(500.0), createCircle(1500.0)))
             add(createCircle())
@@ -46,7 +46,7 @@ class BeatmapHitObjectsTest {
     }
 
     @Test
-    fun testAddHitObjectsAfter2HitObjects() {
+    fun `Test add hit objects after 2 hit objects`() {
         BeatmapHitObjects().apply {
             add(listOf(createCircle(500.0), createCircle(1000.0)))
             add(createCircle(1500.0))
@@ -57,7 +57,7 @@ class BeatmapHitObjectsTest {
     }
 
     @Test
-    fun testCircleCounter() {
+    fun `Test circle counter`() {
         BeatmapHitObjects().apply {
             add(createCircle())
             Assert.assertEquals(circleCount, 1)
@@ -72,7 +72,7 @@ class BeatmapHitObjectsTest {
     }
 
     @Test
-    fun testSliderCounter() {
+    fun `Test slider counter`() {
         BeatmapHitObjects().apply {
             add(createSlider())
             Assert.assertEquals(sliderCount, 1)
@@ -87,7 +87,7 @@ class BeatmapHitObjectsTest {
     }
 
     @Test
-    fun testSpinnerCounter() {
+    fun `Test spinner counter`() {
         BeatmapHitObjects().apply {
             add(createSpinner())
             Assert.assertEquals(spinnerCount, 1)
@@ -102,12 +102,12 @@ class BeatmapHitObjectsTest {
     }
 
     @Test
-    fun testRemoveHitObjectsWithoutExisting() {
+    fun `Test remove hit objects without existing ones`() {
         Assert.assertNull(BeatmapHitObjects().remove(0))
     }
 
     @Test
-    fun testRemoveCircle() {
+    fun `Test remove circle`() {
         BeatmapHitObjects().apply {
             add(createCircle())
             add(createSpinner(1500.0))
@@ -119,7 +119,7 @@ class BeatmapHitObjectsTest {
     }
 
     @Test
-    fun testRemoveSlider() {
+    fun `Test remove slider`() {
         BeatmapHitObjects().apply {
             add(createCircle())
             add(createSlider(1500.0))
@@ -131,7 +131,7 @@ class BeatmapHitObjectsTest {
     }
 
     @Test
-    fun testRemoveSpinner() {
+    fun `Test remove spinner`() {
         BeatmapHitObjects().apply {
             add(createCircle())
             add(createSpinner(1500.0))

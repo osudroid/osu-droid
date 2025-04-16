@@ -7,21 +7,21 @@ import org.junit.Test
 
 class HitCircleTest : HitObjectTest() {
     @Test
-    fun testStartAndEndTime() {
+    fun `Test start time and end time`() {
         createCircle().apply {
             Assert.assertEquals(startTime, endTime, 0.0)
         }
     }
 
     @Test
-    fun testEndPosition() {
+    fun `Test end position`() {
         createCircle().apply {
             Assert.assertEquals(position, endPosition)
         }
     }
 
     @Test
-    fun testStackedPositionWithoutHeight() {
+    fun `Test stacked position without stack height`() {
         createCircle().apply {
             Assert.assertEquals(position, difficultyStackedPosition)
             Assert.assertEquals(endPosition, difficultyStackedEndPosition)
@@ -29,7 +29,7 @@ class HitCircleTest : HitObjectTest() {
     }
 
     @Test
-    fun testStackedPositionWithHeight() {
+    fun `Test stacked position with stack height`() {
         testStackedPositions(createCircle(), GameMode.Droid, { position }, { difficultyStackedPosition })
         testStackedPositions(createCircle(), GameMode.Droid, { endPosition }, { difficultyStackedEndPosition })
 
@@ -38,7 +38,7 @@ class HitCircleTest : HitObjectTest() {
     }
 
     @Test
-    fun testRadius() {
+    fun `Test radius`() {
         createCircle().apply {
             difficultyScale = 1f
             Assert.assertEquals(difficultyRadius, HitObject.OBJECT_RADIUS.toDouble(), 0.0)

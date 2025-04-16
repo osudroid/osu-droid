@@ -11,7 +11,7 @@ import org.junit.Test
 
 class ModHashMapTest {
     @Test
-    fun testInsertModByType() {
+    fun `Test insert mod by type`() {
         val map = ModHashMap()
         map.put(ModReallyEasy::class)
 
@@ -19,7 +19,7 @@ class ModHashMapTest {
     }
 
     @Test
-    fun testInsertModByValue() {
+    fun `Test insert mod by value`() {
         val map = ModHashMap()
         map.put(ModReallyEasy())
 
@@ -27,7 +27,7 @@ class ModHashMapTest {
     }
 
     @Test
-    fun testIncompatibleModRemoval() {
+    fun `Test incompatible mod removal`() {
         val map = ModHashMap()
         map.put(ModReallyEasy())
         map.put(ModHardRock())
@@ -40,7 +40,7 @@ class ModHashMapTest {
     }
 
     @Test
-    fun testLegacyModStringConversion() {
+    fun `Test legacy mod string conversion`() {
         ModHashMap().apply {
             put(ModReallyEasy())
             put(ModHardRock())
@@ -58,7 +58,7 @@ class ModHashMapTest {
     }
 
     @Test
-    fun testDisplayModStringConversion() {
+    fun `Test display mod string conversion`() {
         ModHashMap().apply {
             put(ModHidden())
             put(ModHardRock())

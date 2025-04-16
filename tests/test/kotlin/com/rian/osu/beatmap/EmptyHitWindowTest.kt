@@ -4,7 +4,7 @@ import org.junit.Test
 
 class EmptyHitWindowTest : HitWindowTest() {
     @Test
-    fun testHitWindow() {
+    fun `Test hit window`() {
         testHitWindowValues(5f, 0f, 0f, 0f)
         testHitWindowValues(8f, 0f, 0f, 0f)
     }
