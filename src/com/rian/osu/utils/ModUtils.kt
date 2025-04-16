@@ -6,7 +6,6 @@ import com.rian.osu.beatmap.PreciseDroidHitWindow
 import com.rian.osu.beatmap.hitobject.HitObject
 import com.rian.osu.beatmap.sections.BeatmapDifficulty
 import com.rian.osu.mods.*
-import kotlin.reflect.KClass
 import kotlin.reflect.full.createInstance
 import org.json.JSONArray
 
@@ -14,17 +13,35 @@ import org.json.JSONArray
  * A set of utilities to handle [Mod] combinations.
  */
 object ModUtils {
-    private val allMods = mutableMapOf<String, KClass<out Mod>>().also {
-        val mods = arrayOf<Mod>(
-            ModAuto(), ModAutopilot(), ModCustomSpeed(), ModDifficultyAdjust(), ModDoubleTime(), ModEasy(),
-            ModFlashlight(), ModHalfTime(), ModHardRock(), ModHidden(), ModNightCore(), ModNoFail(), ModPerfect(),
-            ModPrecise(), ModReallyEasy(), ModRelax(), ModScoreV2(), ModSmallCircle(), ModSuddenDeath(), ModTraceable()
+
+    /**
+     * Returns a list of all available [Mod]s.
+     */
+    val allModsInstances
+        get() = arrayOf(
+            ModAuto(),
+            ModAutopilot(),
+            ModCustomSpeed(),
+            ModDifficultyAdjust(),
+            ModDoubleTime(),
+            ModEasy(),
+            ModFlashlight(),
+            ModHalfTime(),
+            ModHardRock(),
+            ModHidden(),
+            ModNightCore(),
+            ModNoFail(),
+            ModPerfect(),
+            ModPrecise(),
+            ModReallyEasy(),
+            ModRelax(),
+            ModScoreV2(),
+            ModSmallCircle(),
+            ModSuddenDeath(),
+            ModTraceable()
         )
 
-        for (mod in mods) {
-            it[mod.acronym] = mod::class
-        }
-    }
+    private val allModsClassesByAcronym = allModsInstances.associateBy({ it.acronym }, { it::class })
 
     /**
      * Serializes a list of [Mod]s into a [JSONArray].
@@ -59,7 +76,7 @@ object ModUtils {
             val acronym = obj.optString("acronym") ?: continue
             val settings = obj.optJSONObject("settings")
 
-            val mod = allMods[acronym]?.createInstance() ?: continue
+            val mod = allModsClassesByAcronym[acronym]?.createInstance() ?: continue
 
             if (settings != null) {
                 mod.copySettings(settings)

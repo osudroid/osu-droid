@@ -21,6 +21,11 @@ sealed class Mod {
     abstract val acronym: String
 
     /**
+     * The user readable description of this [Mod].
+     */
+    abstract val description: String
+
+    /**
      * The type fo this [Mod].
      */
     abstract val type: ModType

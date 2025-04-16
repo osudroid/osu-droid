@@ -9,20 +9,20 @@ import com.reco1l.framework.*
 import com.reco1l.framework.math.*
 import ru.nsu.ccfit.zuev.osu.ResourceManager
 
-class FormSlider(defaultValue: Float = 0f) : FormControl<Float, Slider>(defaultValue) {
+@Suppress("LeakingThis")
+open class FormSlider(initialValue: Float = 0f) : FormControl<Float, Slider>(initialValue) {
 
-    override val control = Slider()
-
-    override val labelText = ExtendedText().apply {
-        font = ResourceManager.getInstance().getFont("smallFont")
-        padding = Vec4(0f, 0f, 0f, 18f)
+    override val control = Slider(initialValue).apply {
+        anchor = Anchor.BottomLeft
+        origin = Anchor.TopLeft
+        translationY = 14f
     }
 
     override val valueText = ExtendedText().apply {
         font = ResourceManager.getInstance().getFont("smallFont")
         anchor = Anchor.TopRight
         origin = Anchor.TopRight
-        padding = Vec4(4f, 0f)
+        padding = Vec4(6f, 0f)
         alignment = Anchor.Center
 
         background = RoundedBox().apply {
@@ -34,18 +34,12 @@ class FormSlider(defaultValue: Float = 0f) : FormControl<Float, Slider>(defaultV
 
 
     init {
-        attachChild(LinearContainer().apply {
-            width = FitParent
-            padding = Vec4(24f)
-            orientation = Orientation.Vertical
+        +labelText
+        +valueText
+        +control
+        +resetButton
 
-            attachChild(Container().apply {
-                width = FitParent
-                attachChild(labelText)
-                attachChild(valueText)
-            })
-
-            attachChild(control)
-        })
+        addConstraint(control, labelText)
+        addConstraint(resetButton, labelText)
     }
 }

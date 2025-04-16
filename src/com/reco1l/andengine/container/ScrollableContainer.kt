@@ -352,24 +352,22 @@ open class ScrollableContainer : Container() {
         val length = hypot(deltaX, deltaY)
 
         if (scrollAxes.isHorizontal && !Precision.almostEquals(deltaX, 0f)) {
+            velocityX = abs(deltaX) / dragTimeSeconds * sign(deltaX)
 
-            if (scrollX - deltaX in 0f..maxScrollX) {
-                velocityX = abs(deltaX) / dragTimeSeconds * sign(deltaX)
-                scrollX -= deltaX
+            scrollX -= if (scrollX - deltaX in 0f..maxScrollX) {
+                deltaX
             } else {
-                velocityX = 0f
-                scrollX -= deltaX * if (length > 0) length.pow(0.7f) / length else 0f
+                deltaX * if (length > 0) length.pow(0.7f) / length else 0f
             }
         }
 
         if (scrollAxes.isVertical && !Precision.almostEquals(deltaY, 0f)) {
+            velocityY = abs(deltaY) / dragTimeSeconds * sign(deltaY)
 
-            if (scrollY - deltaY in 0f..maxScrollY) {
-                velocityY = abs(deltaY) / dragTimeSeconds * sign(deltaY)
-                scrollY -= deltaY
+            scrollY -= if (scrollY - deltaY in 0f..maxScrollY) {
+                deltaY
             } else {
-                velocityY = 0f
-                scrollY -= deltaY * if (length > 0) length.pow(0.7f) / length else 0f
+                deltaY * if (length > 0) length.pow(0.7f) / length else 0f
             }
         }
     }
@@ -433,8 +431,8 @@ open class ScrollableContainer : Container() {
     companion object {
 
         const val DEFAULT_DECELERATION = 0.98f
-        const val DEFAULT_MINIMUM_TRAVEL = 10f
-        const val DEFAULT_MAX_VELOCITY = 1000f
+        const val DEFAULT_MINIMUM_TRAVEL = 20f
+        const val DEFAULT_MAX_VELOCITY = 3000f
 
     }
 }

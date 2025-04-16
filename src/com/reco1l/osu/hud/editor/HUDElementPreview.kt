@@ -28,7 +28,7 @@ class HUDElementPreview(private val element: HUDElement, val hud: GameplayHUD): 
     }
 
     init {
-        width = HUDElementSelector.SELECTOR_WIDTH - 16f * 2
+        width = FitParent
         height = 120f
         padding = Vec4(12f)
         scaleCenterX = 0.5f

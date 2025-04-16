@@ -9,6 +9,7 @@ import com.rian.osu.mods.IModApplicableToDifficulty
 import com.rian.osu.mods.IModApplicableToDifficultyWithSettings
 import com.rian.osu.mods.IModApplicableToHitObject
 import com.rian.osu.mods.IModApplicableToHitObjectWithSettings
+import com.rian.osu.mods.IModRequiresOriginalBeatmap
 import com.rian.osu.mods.Mod
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.ensureActive
@@ -72,6 +73,11 @@ open class Beatmap(
         if (this.mode == mode && mods?.firstOrNull() == null) {
             // Beatmap is already playable as is.
             return this
+        }
+
+        mods?.filterIsInstance<IModRequiresOriginalBeatmap>()?.forEach {
+            scope?.ensureActive()
+            it.applyFromBeatmap(this)
         }
 
         val converter = BeatmapConverter(this, scope)

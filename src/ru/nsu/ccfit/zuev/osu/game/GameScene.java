@@ -1462,10 +1462,6 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
                 engine.setScene(scoringScene.getScene());
             } else {
                 engine.setScene(oldScene);
-
-                if (startedFromHUDEditor) {
-                    ModMenu.getInstance().getEnabledMods().clear();
-                }
             }
 
             // Resume difficulty calculation.

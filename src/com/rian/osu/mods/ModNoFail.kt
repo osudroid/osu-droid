@@ -8,6 +8,7 @@ import com.rian.osu.beatmap.sections.BeatmapDifficulty
 class ModNoFail : Mod() {
     override val name = "No Fail"
     override val acronym = "NF"
+    override val description = "You can't fail, no matter what."
     override val type = ModType.DifficultyReduction
     override val textureNameSuffix = "nofail"
     override val isRanked = true
