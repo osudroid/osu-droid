@@ -1,16 +1,18 @@
 package com.reco1l.andengine.sprite
 
 import com.reco1l.andengine.*
+import com.reco1l.andengine.buffered.*
 import com.reco1l.andengine.info.*
-import com.reco1l.andengine.shape.*
+import com.reco1l.andengine.sprite.ExtendedSprite.*
 import org.anddev.andengine.opengl.texture.region.*
 import org.anddev.andengine.opengl.util.*
 import javax.microedition.khronos.opengles.*
+import javax.microedition.khronos.opengles.GL11.*
 
 /**
  * Sprite that allows to change texture once created.
  */
-open class ExtendedSprite(textureRegion: TextureRegion? = null) : Box() {
+open class ExtendedSprite(textureRegion: TextureRegion? = null) : BufferedEntity<SpriteVBO>() {
 
     override var contentWidth: Float
         get() = textureRegion?.width?.toFloat() ?: 0f
@@ -95,6 +97,10 @@ open class ExtendedSprite(textureRegion: TextureRegion? = null) : Box() {
     }
 
 
+    override fun onCreateBuffer(gl: GL10): SpriteVBO {
+        return SpriteVBO()
+    }
+
     override fun beginDraw(gl: GL10) {
         super.beginDraw(gl)
         GLHelper.enableTextures(gl)
@@ -104,6 +110,18 @@ open class ExtendedSprite(textureRegion: TextureRegion? = null) : Box() {
     override fun onDrawBuffer(gl: GL10) {
         textureRegion?.onApply(gl)
         super.onDrawBuffer(gl)
+    }
+
+
+    inner class SpriteVBO : VertexBuffer(
+        drawTopology = GL_TRIANGLE_STRIP,
+        vertexCount = 4,
+        vertexSize = VERTEX_2D,
+        bufferUsage = GL_STATIC_DRAW
+    ) {
+        override fun update(gl: GL10, entity: BufferedEntity<*>, vararg data: Any) {
+            addQuad(0, 0f, 0f, width, height)
+        }
     }
 
 }

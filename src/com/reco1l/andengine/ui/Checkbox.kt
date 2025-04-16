@@ -10,7 +10,7 @@ data class CheckboxTheme(
     val checkedColor: Long = 0xFFF27272,
 ) : ITheme
 
-class Checkbox : Control<Boolean>(false), IWithTheme<CheckboxTheme> {
+class Checkbox(initialValue: Boolean = false) : Control<Boolean>(initialValue), IWithTheme<CheckboxTheme> {
 
     override var theme = DefaultTheme
         set(value) {
@@ -29,7 +29,7 @@ class Checkbox : Control<Boolean>(false), IWithTheme<CheckboxTheme> {
 
 
     override fun onThemeChanged() {
-        background = RoundedBox().apply {
+        background = Box().apply {
             color = ColorARGB(if (value) theme.checkedColor else theme.uncheckedColor)
             cornerRadius = 12f
         }
@@ -41,7 +41,6 @@ class Checkbox : Control<Boolean>(false), IWithTheme<CheckboxTheme> {
         background!!.clearModifiers(ModifierType.Color)
         background!!.colorTo(if (value) theme.checkedColor else theme.uncheckedColor, 0.1f)
     }
-
 
     override fun onAreaTouched(event: TouchEvent, localX: Float, localY: Float): Boolean {
         if (event.isActionUp) {

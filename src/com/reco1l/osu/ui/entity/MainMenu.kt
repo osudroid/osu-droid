@@ -125,7 +125,7 @@ class MainMenu(val main: MainScene) {
                     return true
                 }
 
-                if (!OnlineManager.getInstance().isStayOnline && !fakeMultiplayerMode) {
+                if (!OnlineManager.getInstance().isStayOnline && !BuildConfiguration.MOCK_MULTIPLAYER) {
                     ToastLogger.showText(StringTable.format(string.multiplayer_not_online), true)
                     return true
                 }

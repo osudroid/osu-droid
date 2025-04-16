@@ -609,7 +609,7 @@ class BeatmapSetViewHolder(itemView: View, private val mediaScope: CoroutineScop
 
         coverJob?.cancel()
 
-        if (beatmapSet.thumbnail != null && !noTexturesMode) {
+        if (beatmapSet.thumbnail != null && !BuildConfiguration.NO_TEXTURES_MODE) {
             coverJob = mediaScope.launch {
 
                 try {

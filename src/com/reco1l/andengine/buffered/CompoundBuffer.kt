@@ -6,24 +6,11 @@ import javax.microedition.khronos.opengles.GL10
 /**
  * A compound buffer is a buffer that contains multiple buffers.
  */
-class CompoundBuffer(val buffers: MutableList<Buffer>) : IBuffer {
+class CompoundBuffer(vararg val buffers: Buffer) : IBuffer {
 
 
-    inline fun <reified T : Buffer> getFirstOf(): Buffer {
-        return buffers.first { it is T }
-    }
-
-    inline fun <reified T: Buffer> removeBuffers() {
-        buffers.removeIf { it is T }
-    }
-
-
-    fun addBuffer(value: Buffer) {
-        buffers.add(value)
-    }
-
-    fun removeBuffer(value: Buffer) {
-        buffers.remove(value)
+    inline fun <reified T : Buffer> getFirstOf(): T {
+        return buffers.first { it is T } as T
     }
 
 
@@ -49,4 +36,9 @@ class CompoundBuffer(val buffers: MutableList<Buffer>) : IBuffer {
     }
 
     //endregion
+
+    override fun finalize() {
+        super.finalize()
+        buffers.fastForEach { it.finalize() }
+    }
 }

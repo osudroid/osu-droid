@@ -3,7 +3,6 @@ package com.reco1l.osu.hud.elements
 import com.reco1l.andengine.*
 import com.reco1l.andengine.info.*
 import com.reco1l.andengine.shape.Box
-import com.reco1l.andengine.shape.RoundedBox
 import com.reco1l.framework.ColorARGB
 import com.reco1l.framework.Pool
 import com.reco1l.osu.hud.HUDElement
@@ -40,7 +39,7 @@ class HUDHitErrorMeter : HUDElement() {
     init {
         setSize(WIDTH, INDICATOR_HEIGHT)
 
-        val mehWindow = RoundedBox().apply {
+        val mehWindow = Box().apply {
             anchor = Anchor.Center
             origin = Anchor.Center
             color = mehColor

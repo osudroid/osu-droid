@@ -1,6 +1,7 @@
 package com.reco1l.ibancho
 
 import com.reco1l.*
+import com.reco1l.debug.*
 import com.reco1l.framework.net.JsonArrayRequest
 import com.reco1l.framework.net.JsonObjectRequest
 import com.reco1l.ibancho.data.*
@@ -35,11 +36,11 @@ object LobbyAPI {
      */
     fun getRooms(query: String?, sign: String?): List<Room> {
 
-        if (fakeMultiplayerMode) {
+        if (BuildConfiguration.MOCK_MULTIPLAYER) {
             return listOf(
-                generateFakeRoom(),
-                generateFakeRoom(),
-                generateFakeRoom()
+                MockRoom(),
+                MockRoom(),
+                MockRoom()
             )
         }
 
@@ -85,7 +86,7 @@ object LobbyAPI {
      */
     fun createRoom(name: String, beatmap: RoomBeatmap?, hostUID: Long, hostUsername: String, sign: String?, password: String? = null, maxPlayers: Int = 8): Long {
 
-        if (fakeMultiplayerMode) {
+        if (BuildConfiguration.MOCK_MULTIPLAYER) {
             return 1
         }
 

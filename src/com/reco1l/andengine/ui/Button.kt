@@ -126,6 +126,11 @@ open class Button : LinearContainer(), IWithTheme<ButtonTheme> {
      */
     var onActionUp: (() -> Unit)? = null
 
+    /**
+     * The action to perform when the button is cancelled.
+     */
+    var onActionCancel: (() -> Unit)? = null
+
     //endregion
 
 
@@ -150,7 +155,7 @@ open class Button : LinearContainer(), IWithTheme<ButtonTheme> {
 
     override fun onThemeChanged() {
         foreground = if (theme.withBezelEffect) BezelOutline(theme.cornerRadius) else null
-        background = RoundedBox().apply {
+        background = Box().apply {
             color = ColorARGB(theme.backgroundColor)
             cornerRadius = theme.cornerRadius
         }
@@ -237,7 +242,14 @@ open class Button : LinearContainer(), IWithTheme<ButtonTheme> {
             event.isActionUp -> {
                 if (localX <= width && localY <= height && isPressed) {
                     onActionUp?.invoke()
+                } else {
+                    onActionCancel?.invoke()
                 }
+                isPressed = false
+            }
+
+            event.isActionOutside || event.isActionCancel -> {
+                onActionCancel?.invoke()
                 isPressed = false
             }
 

@@ -9,6 +9,7 @@ open class ModNightCore : ModRateAdjust() {
 
     override val name = "Nightcore"
     override val acronym = "NC"
+    override val description = "Uguuuuuuuu..."
     override val type = ModType.DifficultyIncrease
     override val textureNameSuffix = "nightcore"
     override val isRanked = true

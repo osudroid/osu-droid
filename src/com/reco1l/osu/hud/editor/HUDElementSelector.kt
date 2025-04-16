@@ -6,7 +6,6 @@ import com.reco1l.andengine.container.LinearContainer
 import com.reco1l.andengine.container.Orientation
 import com.reco1l.andengine.container.ScrollableContainer
 import com.reco1l.andengine.shape.Box
-import com.reco1l.andengine.shape.RoundedBox
 import com.reco1l.andengine.text.ExtendedText
 import com.reco1l.framework.ColorARGB
 import com.reco1l.framework.math.Vec4
@@ -36,18 +35,15 @@ class HUDElementSelector(private val hud: GameplayHUD) : Container(), IGameplayE
     private val elementList = ScrollableContainer().apply {
 
         scrollAxes = Axes.Y
-        relativeSizeAxes = Axes.Y
-        height = 1f
+        height = FitParent
         width = SELECTOR_WIDTH
-        verticalIndicator!!.width = 4f
 
         background = Box().apply {
             color = ColorARGB(0xFF1E1E2E)
         }
 
         attachChild(LinearContainer().apply {
-            relativeSizeAxes = Axes.X
-            width = 1f
+            width = FitParent
             padding = Vec4(16f)
             spacing = 12f
             orientation = Orientation.Vertical
@@ -61,8 +57,7 @@ class HUDElementSelector(private val hud: GameplayHUD) : Container(), IGameplayE
 
 
     init {
-        relativeSizeAxes = Axes.Y
-        height = 1f
+        height = FitParent
 
         x = -SELECTOR_WIDTH
 
@@ -70,7 +65,7 @@ class HUDElementSelector(private val hud: GameplayHUD) : Container(), IGameplayE
         attachChild(object : Container() {
 
             init {
-                background = RoundedBox().apply {
+                background = Box().apply {
                     cornerRadius = BUTTON_RADIUS
                     color = ColorARGB(0xFF181825)
                 }
@@ -167,7 +162,7 @@ class HUDElementSelector(private val hud: GameplayHUD) : Container(), IGameplayE
 
     companion object {
 
-        const val SELECTOR_WIDTH = 300f
+        const val SELECTOR_WIDTH = 340f
         const val BUTTON_WIDTH = 48f
         const val BUTTON_RADIUS = 12f
 

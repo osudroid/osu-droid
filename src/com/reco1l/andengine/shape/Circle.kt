@@ -18,13 +18,24 @@ import kotlin.math.*
 open class Circle : BufferedEntity<CircleVertexBuffer>() {
 
     /**
+     * The paint style of the circle.
+     */
+    var paintStyle = PaintStyle.Fill
+        set(value) {
+            if (field != value) {
+                field = value
+                invalidateBuffer(BufferInvalidationFlag.Instance)
+            }
+        }
+
+    /**
      * The angle where the circle starts to draw in degrees. By default, it is -90 degrees.
      */
     var startAngle = -90f
         set(@FloatRange(-360.0, 360.0) value) {
             if (field != value) {
                 field = value
-                invalidateBuffer()
+                invalidateBuffer(BufferInvalidationFlag.Data)
             }
         }
 
@@ -35,12 +46,9 @@ open class Circle : BufferedEntity<CircleVertexBuffer>() {
         set(@FloatRange(-360.0, 360.0) value) {
             if (field != value) {
                 field = value
-                invalidateBuffer()
+                invalidateBuffer(BufferInvalidationFlag.Data)
             }
         }
-
-    override var bufferInvalidationFlags = RebuildBufferOnSizeChanged or InvalidateDataOnSizeChanged
-
 
     /**
      * Sets the portion of the circle to be drawn starting from the start angle.
@@ -49,13 +57,46 @@ open class Circle : BufferedEntity<CircleVertexBuffer>() {
      */
     fun setPortion(value: Float) {
         endAngle = startAngle + 360f * value.coerceIn(-1f, 1f)
-        invalidateBuffer()
+        invalidateBuffer(BufferInvalidationFlag.Data)
     }
 
 
-    override fun onRebuildBuffer(gl: GL10) {
-        val segments = approximateSegments(width, height)
-        buffer = CircleVertexBuffer(segments)
+    override fun onSizeChanged() {
+        super.onSizeChanged()
+        invalidateBuffer(BufferInvalidationFlag.Instance)
+    }
+
+    override fun onCreateBuffer(gl: GL10): CircleVertexBuffer {
+        return CircleVertexBuffer(approximateSegments(width, height))
+    }
+
+
+    inner class CircleVertexBuffer(private val segments: Int) : VertexBuffer(
+
+        // Segments + Closing point + Center point
+        vertexCount = segments + if (paintStyle == PaintStyle.Fill) 2 else 1,
+
+        vertexSize = VERTEX_2D,
+        bufferUsage = GL_STATIC_DRAW,
+        drawTopology = if (paintStyle == PaintStyle.Fill) GL_TRIANGLE_FAN else GL_LINE_STRIP
+    ) {
+
+        override fun update(gl: GL10, entity: BufferedEntity<*>, vararg data: Any) {
+
+            var position = 0
+
+            val halfWidth = entity.width / 2f
+            val halfHeight = entity.height / 2f
+
+            if (paintStyle == PaintStyle.Fill) {
+                putVertex(position++, halfWidth, halfHeight)
+            }
+
+            position = addArc(position, halfWidth, halfHeight, startAngle, endAngle, halfWidth, halfHeight, segments)
+
+            val startAngleRadians = startAngle.toRadians()
+            putVertex(position, halfWidth + halfWidth * cos(startAngleRadians), halfHeight + halfHeight * sin(startAngleRadians))
+        }
     }
 
 
@@ -65,41 +106,6 @@ open class Circle : BufferedEntity<CircleVertexBuffer>() {
             val averageRadius = (width + height) / 4f
             val minSegmentAngle = min(5f, 360f / averageRadius.toRadians())
             return max(3, (maximumAngle / minSegmentAngle).toInt())
-        }
-
-    }
-
-    inner class CircleVertexBuffer(private val segments: Int) : VertexBuffer(
-        drawTopology = GL_TRIANGLE_FAN,
-        // Explanation: Segments + 2 because the first vertex that is the center of the circle is not included in the segment
-        // count and we add it twice so that the last vertex connects to the first one.
-        vertexCount = segments + 2,
-        vertexSize = VERTEX_2D,
-        bufferUsage = GL_STATIC_DRAW
-    ) {
-
-        override fun update(gl: GL10, entity: BufferedEntity<*>, vararg data: Any) {
-
-            putVertex(
-                index = 0,
-                x = entity.width / 2f,
-                y = entity.height / 2f
-            )
-
-            val startRadians = startAngle.toRadians()
-            val endRadians = endAngle.toRadians()
-            val deltaAngle = (endRadians - startRadians) / segments
-
-            // The first vertex is the center of the circle.
-            for (i in 1..segments + 1) {
-
-                val angle = startRadians + (i - 1) * deltaAngle
-
-                putVertex(index = i,
-                    x = entity.width / 2f + entity.width / 2f * cos(angle),
-                    y = entity.height / 2f + entity.height / 2f * sin(angle)
-                )
-            }
         }
 
     }

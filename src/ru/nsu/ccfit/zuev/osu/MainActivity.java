@@ -41,6 +41,7 @@ import androidx.preference.PreferenceManager;
 import com.edlplan.ui.ActivityOverlay;
 import com.google.firebase.analytics.FirebaseAnalytics;
 import com.google.firebase.crashlytics.FirebaseCrashlytics;
+import com.reco1l.andengine.ExtendedEngine;
 import com.reco1l.ibancho.LobbyAPI;
 import com.reco1l.osu.AccessibilityDetector;
 import com.reco1l.osu.DifficultyCalculationManager;
@@ -51,6 +52,7 @@ import com.reco1l.osu.UpdateManager;
 import com.reco1l.osu.multiplayer.LobbyScene;
 import com.reco1l.osu.multiplayer.RoomScene;
 
+import com.reco1l.osu.ui.modmenu.ModMenuV2;
 import com.rian.osu.difficulty.BeatmapDifficultyCalculator;
 import net.lingala.zip4j.ZipFile;
 
@@ -157,7 +159,7 @@ public class MainActivity extends BaseGameActivity implements
         opt.setNeedsSound(true);
         opt.getRenderOptions().disableExtensionVertexBufferObjects();
         opt.getTouchOptions().enableRunOnUpdateThread();
-        final Engine engine = new Engine(opt);
+        final Engine engine = new ExtendedEngine(opt);
 
         if (!MultiTouch.isSupported(this)) {
             // Warning player that they will have to single tap forever.
@@ -766,8 +768,8 @@ public class MainActivity extends BaseGameActivity implements
                 GlobalManager.getInstance().getSongMenu().getSearchBar().hideMenu();
             }
 
-            if (GlobalManager.getInstance().getSongMenu().getScene().getChildScene() == ModMenu.getInstance().getScene()) {
-                ModMenu.getInstance().hide();
+            if (GlobalManager.getInstance().getSongMenu().getScene().getChildScene() == ModMenuV2.INSTANCE) {
+                ModMenuV2.INSTANCE.back();
             }
 
             return true;
