@@ -64,7 +64,7 @@ abstract class ExtendedEntity : Entity(0f, 0f), ITouchArea, IModifierChain {
     var width: Float = 0f
         get() = when (field) {
             FitContent -> contentWidth + padding.horizontal
-            FitParent -> parent.innerWidth
+            FitParent -> parent.innerWidth - x
             else -> if (relativeSizeAxes.isHorizontal) {
                 field * parent.innerWidth
             } else {
@@ -84,7 +84,7 @@ abstract class ExtendedEntity : Entity(0f, 0f), ITouchArea, IModifierChain {
     var height = 0f
         get() = when (field) {
             FitContent -> contentHeight + padding.vertical
-            FitParent -> parent.innerHeight
+            FitParent -> parent.innerHeight - y
             else -> if (relativeSizeAxes.isVertical) {
                 field * parent.innerHeight
             } else {

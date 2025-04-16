@@ -343,41 +343,46 @@ object ModMenuV2 : ExtendedScene() {
 
     //region Components
 
-    private class Section(name: String, mods: List<Mod>) : ScrollableContainer() {
+    private class Section(name: String, mods: List<Mod>) : LinearContainer() {
 
         init {
+            orientation = Orientation.Vertical
             width = 340f
             height = FitParent
-            scrollAxes = Axes.Y
-            clipChildren = true
 
             background = RoundedBox().apply {
                 color = ColorARGB(0xFF13131E)
                 cornerRadius = 16f
             }
 
-            attachChild(LinearContainer().apply {
+            +ExtendedText().apply {
                 width = FitParent
-                height = FitContent
-                orientation = Orientation.Vertical
+                text = name
+                alignment = Anchor.Center
+                font = ResourceManager.getInstance().getFont("smallFont")
                 padding = Vec4(12f)
-                spacing = 16f
+                color = ColorARGB(0xFF8282A8)
+            }
 
-                attachChild(ExtendedText().apply {
+            +ScrollableContainer().apply {
+                scrollAxes = Axes.Y
+                width = FitParent
+                height = FitParent
+                clipChildren = true
+
+                +LinearContainer().apply {
                     width = FitParent
-                    text = name.uppercase()
-                    alignment = Anchor.CenterLeft
-                    font = ResourceManager.getInstance().getFont("smallFont")
-                    padding = Vec4(0f, 20f, 0f, 10f)
-                    color = ColorARGB(0xFF8282A8)
-                })
+                    orientation = Orientation.Vertical
+                    padding = Vec4(12f, 0f, 12f, 12f)
+                    spacing = 16f
 
-                mods.fastForEach { mod ->
-                    val button = ModButton(mod)
-                    modButtons.add(button)
-                    attachChild(button)
+                    mods.fastForEach { mod ->
+                        val button = ModButton(mod)
+                        modButtons.add(button)
+                        attachChild(button)
+                    }
                 }
-            })
+            }
         }
     }
 
