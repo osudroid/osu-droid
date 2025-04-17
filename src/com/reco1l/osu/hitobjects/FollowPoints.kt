@@ -32,13 +32,13 @@ object FollowPointConnection {
                     it?.applyFollowPointMaxSize()
                 }
 
-                sprite.onContentSizeMeasured()
+                sprite.invalidate(InvalidationFlag.ContentSize)
                 sprite.isLoop = false
             }
         } else {
             ExtendedSprite(ResourceManager.getInstance().getTexture("followpoint")).also {
                 it.textureRegion?.applyFollowPointMaxSize()
-                it.onContentSizeMeasured()
+                it.invalidate(InvalidationFlag.ContentSize)
             }
         }
     }

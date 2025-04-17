@@ -15,6 +15,7 @@ import kotlin.math.min
 class ModHardRock : Mod(), IModApplicableToDifficulty, IModApplicableToHitObject {
     override val name = "Hard Rock"
     override val acronym = "HR"
+    override val type = ModType.DifficultyIncrease
     override val textureNameSuffix = "hardrock"
     override val isRanked = true
     override val incompatibleMods = super.incompatibleMods + ModEasy::class

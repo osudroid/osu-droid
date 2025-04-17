@@ -2,6 +2,7 @@ package com.reco1l.andengine.modifier
 
 import com.edlplan.framework.easing.Easing
 import com.reco1l.andengine.modifier.ModifierType.*
+import com.reco1l.framework.*
 
 
 /**
@@ -21,20 +22,28 @@ interface IModifierChain {
      *
      * @param block The block of code to execute on the newly created modifier.
      */
-    fun applyModifier(block: UniversalModifier.() -> Unit): UniversalModifier
+    fun appendModifier(block: UniversalModifier.() -> Unit): UniversalModifier
 
 
-    // Nested chains
+    // Multiple
 
     /**
-     * Begins a parallel chain of modifiers.
+     * Begins a parallel block of modifiers.
      */
     fun beginParallel(block: UniversalModifier.() -> Unit): UniversalModifier {
-        return applyModifier {
+        return appendModifier {
             type = Parallel
-            allowNesting = true
             block()
-            allowNesting = false
+        }
+    }
+
+    /**
+     * Begins a sequential block of modifiers.
+     */
+    fun beginSequence(block: UniversalModifier.() -> Unit): UniversalModifier {
+        return appendModifier {
+            type = Sequence
+            block()
         }
     }
 
@@ -45,7 +54,7 @@ interface IModifierChain {
      * Delays the execution of the next modifier in the chain.
      */
     fun delay(durationSec: Float): UniversalModifier {
-        return applyModifier {
+        return appendModifier {
             type = Delay
             duration = durationSec
         }
@@ -55,7 +64,7 @@ interface IModifierChain {
     // Translate
 
     fun translateTo(valueX: Float, valueY: Float, durationSec: Float = 0f, easing: Easing = Easing.None): UniversalModifier {
-        return applyModifier {
+        return appendModifier {
             type = TranslateXY
             duration = durationSec
             finalValues = floatArrayOf(valueX, valueY)
@@ -64,7 +73,7 @@ interface IModifierChain {
     }
 
     fun translateToX(value: Float, durationSec: Float = 0f, easing: Easing = Easing.None): UniversalModifier {
-        return applyModifier {
+        return appendModifier {
             type = TranslateX
             duration = durationSec
             finalValues = floatArrayOf(value)
@@ -73,7 +82,7 @@ interface IModifierChain {
     }
 
     fun translateToY(value: Float, durationSec: Float = 0f, easing: Easing = Easing.None): UniversalModifier {
-        return applyModifier {
+        return appendModifier {
             type = TranslateY
             duration = durationSec
             finalValues = floatArrayOf(value)
@@ -85,7 +94,7 @@ interface IModifierChain {
     // Move
 
     fun moveTo(valueX: Float, valueY: Float, durationSec: Float = 0f, easing: Easing = Easing.None): UniversalModifier {
-        return applyModifier {
+        return appendModifier {
             type = MoveXY
             duration = durationSec
             finalValues = floatArrayOf(valueX, valueY)
@@ -94,7 +103,7 @@ interface IModifierChain {
     }
 
     fun moveToX(value: Float, durationSec: Float = 0f, easing: Easing = Easing.None): UniversalModifier {
-        return applyModifier {
+        return appendModifier {
             type = MoveX
             duration = durationSec
             finalValues = floatArrayOf(value)
@@ -103,7 +112,7 @@ interface IModifierChain {
     }
 
     fun moveToY(value: Float, durationSec: Float = 0f, easing: Easing = Easing.None): UniversalModifier {
-        return applyModifier {
+        return appendModifier {
             type = MoveY
             duration = durationSec
             finalValues = floatArrayOf(value)
@@ -115,7 +124,7 @@ interface IModifierChain {
     // Scale
 
     fun scaleTo(value: Float, durationSec: Float = 0f, easing: Easing = Easing.None): UniversalModifier {
-        return applyModifier {
+        return appendModifier {
             type = ScaleXY
             duration = durationSec
             finalValues = floatArrayOf(value, value)
@@ -124,7 +133,7 @@ interface IModifierChain {
     }
 
     fun scaleToX(value: Float, durationSec: Float = 0f, easing: Easing = Easing.None): UniversalModifier {
-        return applyModifier {
+        return appendModifier {
             type = ScaleX
             duration = durationSec
             finalValues = floatArrayOf(value)
@@ -133,7 +142,7 @@ interface IModifierChain {
     }
 
     fun scaleToY(value: Float, durationSec: Float = 0f, easing: Easing = Easing.None): UniversalModifier {
-        return applyModifier {
+        return appendModifier {
             type = ScaleY
             duration = durationSec
             finalValues = floatArrayOf(value)
@@ -145,7 +154,7 @@ interface IModifierChain {
     // Coloring
 
     fun fadeTo(value: Float, durationSec: Float = 0f, easing: Easing = Easing.None): UniversalModifier {
-        return applyModifier {
+        return appendModifier {
             type = Alpha
             duration = durationSec
             finalValues = floatArrayOf(value)
@@ -158,7 +167,7 @@ interface IModifierChain {
     }
 
     fun fadeInFromZero(durationSec: Float = 0f, easing: Easing = Easing.None): UniversalModifier {
-        return applyModifier {
+        return appendModifier {
             type = Alpha
             duration = durationSec
             initialValues = floatArrayOf(0f)
@@ -171,8 +180,17 @@ interface IModifierChain {
         return fadeTo(0f, durationSec, easing)
     }
 
+
+    fun colorTo(color: Long, durationSec: Float = 0f, easing: Easing = Easing.None): UniversalModifier {
+        return colorTo(ColorARGB(color), durationSec, easing)
+    }
+
+    fun colorTo(color: ColorARGB, durationSec: Float = 0f, easing: Easing = Easing.None): UniversalModifier {
+        return colorTo(color.red, color.green, color.blue, durationSec, easing)
+    }
+
     fun colorTo(red: Float, green: Float, blue: Float, durationSec: Float = 0f, easing: Easing = Easing.None): UniversalModifier {
-        return applyModifier {
+        return appendModifier {
             type = Color
             duration = durationSec
             finalValues = floatArrayOf(red, green, blue)
@@ -184,7 +202,7 @@ interface IModifierChain {
     // Rotation
 
     fun rotateTo(value: Float, durationSec: Float = 0f, easing: Easing = Easing.None): UniversalModifier {
-        return applyModifier {
+        return appendModifier {
             type = Rotation
             duration = durationSec
             finalValues = floatArrayOf(value)
@@ -195,7 +213,7 @@ interface IModifierChain {
 
     // Size
     fun sizeTo(width: Float, height: Float, durationSec: Float = 0f, easing: Easing = Easing.None): UniversalModifier {
-        return applyModifier {
+        return appendModifier {
             type = SizeXY
             duration = durationSec
             finalValues = floatArrayOf(width, height)
@@ -204,7 +222,7 @@ interface IModifierChain {
     }
 
     fun sizeToX(width: Float, durationSec: Float = 0f, easing: Easing = Easing.None): UniversalModifier {
-        return applyModifier {
+        return appendModifier {
             type = SizeX
             duration = durationSec
             finalValues = floatArrayOf(width)
@@ -213,7 +231,7 @@ interface IModifierChain {
     }
 
     fun sizeToY(height: Float, durationSec: Float = 0f, easing: Easing = Easing.None): UniversalModifier {
-        return applyModifier {
+        return appendModifier {
             type = SizeY
             duration = durationSec
             finalValues = floatArrayOf(height)

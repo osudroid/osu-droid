@@ -1,7 +1,5 @@
 package ru.nsu.ccfit.zuev.osu;
 
-import static com.acivev.ui.EffectKt.addSnowfall;
-
 import android.content.Context;
 import android.graphics.PointF;
 import android.os.PowerManager;

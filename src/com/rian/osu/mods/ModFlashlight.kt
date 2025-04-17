@@ -1,6 +1,7 @@
 package com.rian.osu.mods
 
 import com.rian.osu.beatmap.sections.BeatmapDifficulty
+import kotlin.math.ceil
 import org.json.JSONObject
 
 /**
@@ -9,6 +10,7 @@ import org.json.JSONObject
 class ModFlashlight : Mod() {
     override val name = "Flashlight"
     override val acronym = "FL"
+    override val type = ModType.DifficultyIncrease
     override val textureNameSuffix = "flashlight"
 
     override val isRanked
@@ -17,8 +19,14 @@ class ModFlashlight : Mod() {
     /**
      * The amount of seconds until the flashlight reaches the cursor.
      */
-    @JvmField
-    var followDelay = DEFAULT_FOLLOW_DELAY
+    var followDelay by FloatModSetting(
+        name = "Flashlight follow delay",
+        valueFormatter = { "${ceil(it * 1000).toInt()}ms" },
+        defaultValue = DEFAULT_FOLLOW_DELAY,
+        minValue = DEFAULT_FOLLOW_DELAY,
+        maxValue = DEFAULT_FOLLOW_DELAY * 10,
+        step = DEFAULT_FOLLOW_DELAY
+    )
 
     override fun calculateScoreMultiplier(difficulty: BeatmapDifficulty) = 1.12f
 
@@ -50,6 +58,14 @@ class ModFlashlight : Mod() {
         result = 31 * result + followDelay.hashCode()
 
         return result
+    }
+
+    override fun toString(): String {
+        if (followDelay == DEFAULT_FOLLOW_DELAY) {
+            return super.toString()
+        }
+
+        return "${super.toString()} (%.2fs)".format(followDelay)
     }
 
     override fun deepCopy() = ModFlashlight().also { it.followDelay = followDelay }

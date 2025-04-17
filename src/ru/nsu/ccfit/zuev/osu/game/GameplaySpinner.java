@@ -65,7 +65,7 @@ public class GameplaySpinner extends GameObject {
         background.setOrigin(Anchor.Center);
         background.setPosition(position.x, position.y);
         background.setTextureRegion(ResourceManager.getInstance().getTexture("spinner-background"));
-        background.setScale(Config.getRES_WIDTH() / background.getDrawWidth());
+        background.setScale(Config.getRES_WIDTH() / background.getWidth());
 
         circle = new ExtendedSprite();
         circle.setOrigin(Anchor.Center);

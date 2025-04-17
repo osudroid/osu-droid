@@ -304,7 +304,8 @@ object RoomScene : Scene(), IRoomEventListener, IPlayerEventListener {
 
 
             init {
-                autoSizeAxes = Axes.None
+                // Preserve original size.
+                size = size
             }
 
 
@@ -345,7 +346,7 @@ object RoomScene : Scene(), IRoomEventListener, IPlayerEventListener {
             if (isNewLayout && layoutBackButton != null) {
                 layoutBackButton.apply(it)
             } else {
-                it.setPosition(0f, Config.getRES_HEIGHT() - it.heightScaled)
+                it.setPosition(0f, Config.getRES_HEIGHT() - it.transformedHeight)
             }
 
             registerTouchArea(it)
@@ -361,7 +362,7 @@ object RoomScene : Scene(), IRoomEventListener, IPlayerEventListener {
 
             init {
                 textureRegion = ResourceManager.getInstance().getTextureIfLoaded("selection-mods")
-                autoSizeAxes = Axes.None
+                size = size
             }
 
 
@@ -409,7 +410,7 @@ object RoomScene : Scene(), IRoomEventListener, IPlayerEventListener {
             if (isNewLayout && layoutMods != null) {
                 layoutMods.apply(modsButton, backButton)
             } else {
-                modsButton.setPosition(backButton!!.x + backButton!!.widthScaled, Config.getRES_HEIGHT() - modsButton.heightScaled)
+                modsButton.setPosition(backButton!!.x + backButton!!.transformedWidth, Config.getRES_HEIGHT() - modsButton.transformedHeight)
             }
 
             registerTouchArea(modsButton)
@@ -697,7 +698,7 @@ object RoomScene : Scene(), IRoomEventListener, IPlayerEventListener {
 
         isWaitingForModsChange = true
 
-        RoomAPI.setPlayerMods(ModMenu.getInstance().enabledMods.toString())
+        RoomAPI.setPlayerMods(ModMenu.getInstance().enabledMods.serializeMods())
 
         updateInformation()
         playerList!!.invalidate()
@@ -834,7 +835,7 @@ object RoomScene : Scene(), IRoomEventListener, IPlayerEventListener {
 
         isWaitingForModsChange = true
 
-        RoomAPI.setPlayerMods(ModMenu.getInstance().enabledMods.toString())
+        RoomAPI.setPlayerMods(ModMenu.getInstance().enabledMods.serializeMods())
 
         updateInformation()
     }
@@ -894,7 +895,7 @@ object RoomScene : Scene(), IRoomEventListener, IPlayerEventListener {
                     remove(ModScoreV2::class)
             }
 
-            RoomAPI.setRoomMods(roomMods.toString())
+            RoomAPI.setRoomMods(roomMods.serializeMods())
         }
 
         playerList!!.invalidate()

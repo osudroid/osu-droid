@@ -10,6 +10,7 @@ import org.json.JSONObject
 class ModCustomSpeed @JvmOverloads constructor(trackRateMultiplier: Float = 1f) : ModRateAdjust(trackRateMultiplier) {
     override val name = "Custom Speed"
     override val acronym = "CS"
+    override val type = ModType.Conversion
     override val textureNameSuffix = "customspeed"
     override val isRanked = true
 
@@ -36,5 +37,11 @@ class ModCustomSpeed @JvmOverloads constructor(trackRateMultiplier: Float = 1f) 
     }
 
     override fun hashCode() = super.hashCode()
+
+    override fun toString() = buildString {
+        append(super.toString())
+        append(" (%.2fx)".format(trackRateMultiplier))
+    }
+
     override fun deepCopy() = ModCustomSpeed(trackRateMultiplier)
 }

@@ -1,8 +1,10 @@
 package com.rian.osu.mods
 
 import com.rian.osu.beatmap.sections.BeatmapDifficulty
-import kotlin.reflect.KClass
 import org.json.JSONObject
+import kotlin.reflect.*
+import kotlin.reflect.full.*
+import kotlin.reflect.jvm.*
 
 /**
  * Represents a mod.
@@ -19,9 +21,14 @@ sealed class Mod {
     abstract val acronym: String
 
     /**
+     * The type fo this [Mod].
+     */
+    abstract val type: ModType
+
+    /**
      * The suffix to append to the texture name of this [Mod].
      */
-    abstract val textureNameSuffix: String
+    protected abstract val textureNameSuffix: String
 
     /**
      * The texture name of this [Mod].
@@ -57,6 +64,17 @@ sealed class Mod {
      * The [Mod]s this [Mod] cannot be enabled with.
      */
     open val incompatibleMods = emptyArray<KClass<out Mod>>()
+
+    /**
+     * The mod specific settings.
+     */
+    @Suppress("UNCHECKED_CAST")
+    open val settings
+        get() = this::class.memberProperties.mapNotNull { property ->
+            property as KProperty1<Mod, Any?>
+            property.isAccessible = true
+            property.getDelegate(this) as? ModSetting<Any?>
+        }
 
     /**
      * Calculates the score multiplier for this [Mod] with the given [BeatmapDifficulty].
@@ -124,6 +142,10 @@ sealed class Mod {
         result = 31 * result + incompatibleMods.contentHashCode()
 
         return result
+    }
+
+    override fun toString(): String {
+        return acronym
     }
 
     /**

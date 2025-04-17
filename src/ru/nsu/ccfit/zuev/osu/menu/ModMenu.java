@@ -125,13 +125,11 @@ public class ModMenu implements IModSwitcher {
         {
             RoomScene.isWaitingForModsChange = true;
 
-            var string = enabledMods.toString();
-
             // The room mods are the same as the host mods
             if (Multiplayer.isRoomHost()) {
-                RoomAPI.setRoomMods(string);
+                RoomAPI.setRoomMods(enabledMods.serializeMods());
             } else if (updatePlayerMods) {
-                RoomAPI.setPlayerMods(string);
+                RoomAPI.setPlayerMods(enabledMods.serializeMods());
             } else {
                 RoomScene.isWaitingForModsChange = false;
             }

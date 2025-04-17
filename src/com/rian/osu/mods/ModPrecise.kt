@@ -4,6 +4,7 @@ import com.rian.osu.GameMode
 import com.rian.osu.beatmap.PreciseDroidHitWindow
 import com.rian.osu.beatmap.hitobject.HitObject
 import com.rian.osu.beatmap.hitobject.Slider
+import com.rian.osu.beatmap.hitobject.Spinner
 import com.rian.osu.beatmap.sections.BeatmapDifficulty
 
 /**
@@ -12,13 +13,14 @@ import com.rian.osu.beatmap.sections.BeatmapDifficulty
 class ModPrecise : Mod(), IModApplicableToHitObject {
     override val name = "Precise"
     override val acronym = "PR"
+    override val type = ModType.DifficultyIncrease
     override val textureNameSuffix = "precise"
     override val isRanked = true
 
     override fun calculateScoreMultiplier(difficulty: BeatmapDifficulty) = 1.06f
 
     override fun applyToHitObject(mode: GameMode, hitObject: HitObject) {
-        if (mode == GameMode.Standard) {
+        if (mode == GameMode.Standard || hitObject is Spinner) {
             return
         }
 

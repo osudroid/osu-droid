@@ -6,6 +6,7 @@ import com.reco1l.osu.data.BeatmapInfo;
 import com.reco1l.osu.Execution;
 import com.reco1l.osu.data.DatabaseManager;
 import com.reco1l.osu.multiplayer.Multiplayer;
+import com.rian.osu.utils.ModUtils;
 
 import org.anddev.andengine.entity.Entity;
 import org.anddev.andengine.entity.scene.Scene;
@@ -18,6 +19,9 @@ import org.anddev.andengine.input.touch.detector.SurfaceScrollDetector;
 import org.anddev.andengine.opengl.texture.region.TextureRegion;
 import org.anddev.andengine.util.MathUtils;
 import org.jetbrains.annotations.Nullable;
+import org.json.JSONArray;
+import org.json.JSONException;
+
 import ru.nsu.ccfit.zuev.osu.*;
 import ru.nsu.ccfit.zuev.osu.game.GameHelper;
 import ru.nsu.ccfit.zuev.osu.helper.StringTable;
@@ -367,7 +371,15 @@ public class ScoreBoard extends Entity implements ScrollDetector.IScrollDetector
                     }
 
                     sb.setLength(0);
-                    var modString = convertModString(sb, score.getMods());
+
+                    var modString = "";
+
+                    try {
+                        modString = ModUtils.deserializeMods(new JSONArray(score.getMods())).toDisplayModString();
+                    } catch (final JSONException e) {
+                        Log.e("ScoreBoard", "Failed to parse mods from local score.", e);
+                    }
+
                     var diffTotalScore = score.getScore() - nextTotalScore;
 
                     sb.setLength(0);

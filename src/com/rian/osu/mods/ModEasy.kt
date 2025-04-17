@@ -10,6 +10,7 @@ import com.rian.osu.utils.CircleSizeCalculator
 class ModEasy : Mod(), IModApplicableToDifficulty {
     override val name = "Easy"
     override val acronym = "EZ"
+    override val type = ModType.DifficultyReduction
     override val textureNameSuffix = "easy"
     override val isRanked = true
     override val incompatibleMods = super.incompatibleMods + ModHardRock::class
