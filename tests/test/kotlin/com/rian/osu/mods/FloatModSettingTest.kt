@@ -27,7 +27,7 @@ class FloatModSettingTest {
     }
 
     @Test
-    fun `Test float step without precision`() {
+    fun `Test step without precision`() {
         var setting by FloatModSetting(name = "Test", defaultValue = 0.12f, step = 0.12f)
         Assert.assertEquals(0.12f, setting, 1e-5f)
 
@@ -42,7 +42,7 @@ class FloatModSettingTest {
     }
 
     @Test
-    fun `Test float step with precision`() {
+    fun `Test step with precision`() {
         var setting by FloatModSetting(
             name = "Test",
             defaultValue = 0.12f,
@@ -64,7 +64,7 @@ class FloatModSettingTest {
     }
 
     @Test
-    fun `Test float value capping without precision`() {
+    fun `Test value cap without precision`() {
         var setting by FloatModSetting(
             name = "Test",
             defaultValue = 0.12f,
@@ -86,7 +86,7 @@ class FloatModSettingTest {
     }
 
     @Test
-    fun `Test float value capping with precision`() {
+    fun `Test value cap with precision`() {
         var setting by FloatModSetting(
             name = "Test",
             defaultValue = 0.12f,
