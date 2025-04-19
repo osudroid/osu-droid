@@ -34,22 +34,19 @@ object ModMenuV2 : ExtendedScene() {
      */
     val enabledMods = ModHashMap()
 
-    /**
-     * The job used to calculate the score multiplier.
-     */
-    var calculationJob: Job? = null
-        private set
-
 
     private val modButtons = mutableListOf<ModButton>()
 
     private val rankedBadge: Badge
 
-    private val scoreMultiplierBadge: StatisticBadge
+    private val scoreMultiplierBadge: LabeledBadge
 
     private val customizeButton: Button
 
     private val customizationMenu: ModCustomizationMenu
+
+
+    private var calculationJob: Job? = null
 
 
     init {
@@ -156,7 +153,7 @@ object ModMenuV2 : ExtendedScene() {
                 }
                 attachChild(rankedBadge)
 
-                scoreMultiplierBadge = StatisticBadge("Score multiplier", "1.00x")
+                scoreMultiplierBadge = LabeledBadge("Score multiplier", "1.00x")
                 attachChild(scoreMultiplierBadge)
             })
         })
@@ -388,7 +385,37 @@ object ModMenuV2 : ExtendedScene() {
 
     private class ModButton(val mod: Mod): Button() {
 
+        private val titleText = firstOf<ExtendedText>()!!
+        private val descriptionText = ExtendedText()
+
+
         init {
+            titleText.detachSelf()
+
+            +LinearContainer().apply {
+                width = FitParent
+                padding = Vec4(0f, 6f)
+                anchor = Anchor.CenterLeft
+                origin = Anchor.CenterLeft
+                orientation = Orientation.Vertical
+
+                +titleText.apply {
+                    height = FitContent
+                    font = ResourceManager.getInstance().getFont("smallFont")
+                    alignment = Anchor.TopLeft
+                    anchor = Anchor.TopLeft
+                    origin = Anchor.TopLeft
+                }
+
+                +descriptionText.apply {
+                    width = FitParent
+                    font = ResourceManager.getInstance().getFont("xs")
+                    text = mod.description
+                    clipChildren = true
+                    alpha = 0.75f
+                }
+            }
+
             width = FitParent
             theme = ButtonTheme(
                 iconSize = 40f,
@@ -407,6 +434,16 @@ object ModMenuV2 : ExtendedScene() {
                     ResourceManager.getInstance().getSound("check-on")?.play()
                 }
             }
+        }
+
+        override fun onManagedUpdate(deltaTimeSec: Float) {
+
+            // Match the description text color with the title text color during animations.
+            if (descriptionText.color != titleText.color) {
+                descriptionText.color = titleText.color.copy(alpha = descriptionText.alpha)
+            }
+
+            super.onManagedUpdate(deltaTimeSec)
         }
     }
 

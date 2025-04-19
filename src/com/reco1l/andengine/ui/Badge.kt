@@ -64,7 +64,7 @@ open class Badge(content: String = "") : ExtendedText(), IWithTheme<BadgeTheme> 
 /**
  * A statistic badge is a badge that displays a value next to a label.
  */
-open class StatisticBadge(label: String = "", value: String = "") : LinearContainer() {
+open class LabeledBadge(label: String = "", value: String = "") : LinearContainer() {
 
     private val labelText = Badge(label).apply {
         height = FitParent
