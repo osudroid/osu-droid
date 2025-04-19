@@ -11,6 +11,9 @@ class NumbersTest {
 
         Assert.assertThrows(IllegalArgumentException::class.java) { 0.1f.preciseRoundBy(-1) }
 
+        test(Float.NaN, Float.NaN, 0)
+        test(Float.POSITIVE_INFINITY, Float.MAX_VALUE, 0)
+        test(Float.NEGATIVE_INFINITY, -Float.MAX_VALUE, 0)
         test(0f, 0.123456789f, 0)
         test(0.1f, 0.123456789f, 1)
         test(0.12f, 0.123456789f, 2)
@@ -30,6 +33,9 @@ class NumbersTest {
 
         Assert.assertThrows(IllegalArgumentException::class.java) { 0.1.preciseRoundBy(-1) }
 
+        test(Double.NaN, Double.NaN, 0)
+        test(Double.POSITIVE_INFINITY, Double.MAX_VALUE, 0)
+        test(Double.NEGATIVE_INFINITY, -Double.MAX_VALUE, 0)
         test(0.0, 0.123456789, 0)
         test(0.1, 0.123456789, 1)
         test(0.12, 0.123456789, 2)
