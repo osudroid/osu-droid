@@ -37,11 +37,7 @@ open class DesplegablePanel : Container() {
     /**
      * The container that holds the content of the panel.
      */
-    val content = object : ScrollableContainer() {
-        override fun onAreaTouched(event: TouchEvent, localX: Float, localY: Float): Boolean {
-            return if (localY > TITLE_BAR_HEIGHT) super.onAreaTouched(event, localX, localY) else false
-        }
-    }
+    val content = ScrollableContainer()
 
 
     private val collapse = object : Triangle() {
@@ -64,12 +60,12 @@ open class DesplegablePanel : Container() {
             color = ColorARGB(0xFF383852)
             paintStyle = PaintStyle.Outline
         }
-        clipChildren = true
 
         +content.apply {
+            clipChildren = true
             scrollAxes = Axes.Both
             overflowAxes = Axes.Y
-            padding = Vec4(0f, TITLE_BAR_HEIGHT, 0f, 0f)
+            y = TITLE_BAR_HEIGHT
         }
         
         +object : Container() {
@@ -136,6 +132,6 @@ open class DesplegablePanel : Container() {
 
 
     companion object {
-        private const val TITLE_BAR_HEIGHT = 40f
+        const val TITLE_BAR_HEIGHT = 40f
     }
 }

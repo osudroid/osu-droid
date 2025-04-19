@@ -1,10 +1,12 @@
 package com.reco1l.debug
 
-import com.reco1l.andengine.*
 import com.reco1l.andengine.text.*
+import org.anddev.andengine.entity.Entity
+import org.anddev.andengine.entity.IEntity
 import ru.nsu.ccfit.zuev.osu.ResourceManager
+import kotlin.reflect.*
 import kotlin.reflect.full.*
-
+import kotlin.reflect.jvm.*
 
 class EntityDescriptor : DesplegablePanel() {
 
@@ -13,35 +15,37 @@ class EntityDescriptor : DesplegablePanel() {
         title.text = "Entity Descriptor"
 
         content.width = PANEL_WIDTH
-        content.height = PANEL_HEIGHT
+        content.height = PANEL_HEIGHT - TITLE_BAR_HEIGHT
         content.attachChild(ExtendedText().apply {
-            font = ResourceManager.getInstance().getFont("smallFont")
+            font = ResourceManager.getInstance().getFont("xs")
         })
     }
 
 
+    @Suppress("UNCHECKED_CAST")
     override fun onManagedUpdate(deltaTimeSec: Float) {
 
         val entity = EntityInspector.SELECTED_ENTITY
+
         if (entity != null) {
+            val clazz = entity::class
+            val superclass = clazz.superclasses.firstOrNull()
+
+            val readableMembers = clazz.memberProperties.joinToString("") { member ->
+                member as KProperty1<IEntity, Any?>
+                member.isAccessible = true
+
+                try {
+                    "${member.name}: ${member.getValue(entity, member)}\n"
+                } catch (_: Exception) {
+                    ""
+                }
+            }
+
             content.get<ExtendedText>(0).text = """
-                ${entity::class.simpleName ?: entity::class.superclasses.first().simpleName ?: "Unknown"}
-                superclass: ${entity::class.superclasses.firstOrNull()?.simpleName ?: ""}
-                isVisible: ${entity.isVisible}
-                x: ${entity.x}
-                y: ${entity.y}
-                width: ${entity.getWidth()}
-                height: ${entity.getHeight()}
-                scale: ${entity.scaleX},${entity.scaleY}
-                scaleCenter: ${entity.scaleCenterX},${entity.scaleCenterY}
-                rotation: ${entity.rotation}
-                rotationCenter: ${entity.rotationCenterX},${entity.rotationCenterY}
-                ${if (entity is ExtendedEntity) """
-                anchor: ${Anchor.getName(entity.anchor, false)}
-                origin: ${Anchor.getName(entity.origin, false)}
-                translation: ${entity.translationX},${entity.translationY}
-                """ else ""}
-            """.trimIndent()
+${clazz.simpleName ?: superclass?.simpleName ?: "Unknown"}
+$readableMembers
+            """
         }
 
         super.onManagedUpdate(deltaTimeSec)

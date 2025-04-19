@@ -38,7 +38,7 @@ class EntityInspector(val engine: Engine) : DesplegablePanel() {
         title.text = "Entity Inspector"
 
         content.width = PANEL_WIDTH
-        content.height = PANEL_HEIGHT
+        content.height = PANEL_HEIGHT - TITLE_BAR_HEIGHT
         content.attachChild(object : ExtendedEntity() {
 
             private var drawingIndex = 0
