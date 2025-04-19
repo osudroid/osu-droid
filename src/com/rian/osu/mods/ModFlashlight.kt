@@ -25,7 +25,8 @@ class ModFlashlight : Mod() {
         defaultValue = DEFAULT_FOLLOW_DELAY,
         minValue = DEFAULT_FOLLOW_DELAY,
         maxValue = DEFAULT_FOLLOW_DELAY * 10,
-        step = DEFAULT_FOLLOW_DELAY
+        step = DEFAULT_FOLLOW_DELAY,
+        precision = 2
     )
 
     override fun calculateScoreMultiplier(difficulty: BeatmapDifficulty) = 1.12f
