@@ -97,7 +97,7 @@ class FloatModSetting(
         value < minValue -> minValue
         value > maxValue -> maxValue
         step == 0f -> value
-        else -> ceil((value - minValue) / step) * step + minValue
+        else -> round((value - minValue) / step) * step + minValue
     }
 }
 
@@ -114,7 +114,7 @@ class NullableFloatModSetting(
         value < minValue!! -> minValue
         value > maxValue!! -> maxValue
         step == 0f -> value
-        else -> ceil((value - minValue) / step!!) * step + minValue
+        else -> round((value - minValue) / step!!) * step + minValue
     }
 }
 
