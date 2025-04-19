@@ -19,11 +19,11 @@ class ModDifficultyAdjustTest {
         BeatmapDifficulty().apply {
             ModDifficultyAdjust(cs = 4f, ar = 8f, od = 7f, hp = 6f).applyToDifficulty(GameMode.Droid, this, listOf())
 
-            Assert.assertEquals(4f, difficultyCS, 1e-2f)
-            Assert.assertEquals(4f, gameplayCS, 1e-2f)
-            Assert.assertEquals(8f, ar, 1e-2f)
-            Assert.assertEquals(7f, od, 1e-2f)
-            Assert.assertEquals(6f, hp, 1e-2f)
+            Assert.assertEquals(4f, difficultyCS)
+            Assert.assertEquals(4f, gameplayCS)
+            Assert.assertEquals(8f, ar)
+            Assert.assertEquals(7f, od)
+            Assert.assertEquals(6f, hp)
         }
     }
 
@@ -34,11 +34,11 @@ class ModDifficultyAdjustTest {
                 GameMode.Droid, this, listOf(ModHardRock(), ModReallyEasy())
             )
 
-            Assert.assertEquals(6f, difficultyCS, 1e-2f)
-            Assert.assertEquals(6f, gameplayCS, 1e-2f)
-            Assert.assertEquals(6f, ar, 1e-2f)
-            Assert.assertEquals(6f, od, 1e-2f)
-            Assert.assertEquals(6f, hp, 1e-2f)
+            Assert.assertEquals(6f, difficultyCS)
+            Assert.assertEquals(6f, gameplayCS)
+            Assert.assertEquals(6f, ar)
+            Assert.assertEquals(6f, od)
+            Assert.assertEquals(6f, hp)
         }
     }
 
@@ -47,7 +47,7 @@ class ModDifficultyAdjustTest {
         BeatmapDifficulty().apply {
             ModDifficultyAdjust(ar = 9f).applyToDifficulty(GameMode.Droid, this, listOf(ModDoubleTime()))
 
-            Assert.assertEquals(7f, ar, 1e-2f)
+            Assert.assertEquals(7f, ar)
         }
     }
 
