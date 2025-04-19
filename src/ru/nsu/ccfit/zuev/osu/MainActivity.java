@@ -277,6 +277,7 @@ public class MainActivity extends BaseGameActivity implements
         // ResourceManager.getInstance().loadHighQualityAsset("exit", "exit.png");
         ResourceManager.getInstance().loadFont("font", null, 28, Color.WHITE);
         ResourceManager.getInstance().loadFont("smallFont", null, 21, Color.WHITE);
+        ResourceManager.getInstance().loadFont("xs", null, 16, Color.WHITE);
         ResourceManager.getInstance().loadStrokeFont("strokeFont", null, 36, Color.BLACK, Color.WHITE);
 
         ResourceManager.getInstance().loadSound("heartbeat", "sfx/heartbeat.ogg", false);
