@@ -2,6 +2,7 @@
 
 package com.rian.osu.mods
 
+import com.rian.osu.math.preciseRoundBy
 import kotlin.math.*
 import kotlin.properties.*
 import kotlin.reflect.*
@@ -91,13 +92,33 @@ class FloatModSetting(
     defaultValue: Float,
     minValue: Float = Float.MIN_VALUE,
     maxValue: Float = Float.MAX_VALUE,
-    step: Float = 0f
-) : RangeConstrainedModSetting<Float>(name, valueFormatter, defaultValue, minValue, maxValue, step) {
+    step: Float = 0f,
+
+    /**
+     * The number of decimal places to round the value to.
+     *
+     * When set to `null`, the value will not be rounded.
+     */
+    val precision: Int? = null
+
+) : RangeConstrainedModSetting<Float>(
+    name,
+    valueFormatter,
+    if (precision != null) defaultValue.preciseRoundBy(precision) else defaultValue,
+    if (precision != null) minValue.preciseRoundBy(precision) else minValue,
+    if (precision != null) maxValue.preciseRoundBy(precision) else maxValue,
+    if (precision != null) step.preciseRoundBy(precision) else step
+) {
     override fun processValue(value: Float) = when {
         value < minValue -> minValue
         value > maxValue -> maxValue
         step == 0f -> value
-        else -> round((value - minValue) / step) * step + minValue
+
+        else -> {
+            val value = round((value - minValue) / step) * step + minValue
+
+            if (precision != null) value.preciseRoundBy(precision) else value
+        }
     }
 }
 
@@ -107,14 +128,34 @@ class NullableFloatModSetting(
     defaultValue: Float?,
     minValue: Float = Float.MIN_VALUE,
     maxValue: Float = Float.MAX_VALUE,
-    step: Float = 0f
-) : RangeConstrainedModSetting<Float?>(name, valueFormatter, defaultValue, minValue, maxValue, step) {
+    step: Float = 0f,
+
+    /**
+     * The number of decimal places to round the value to.
+     *
+     * When set to `null`, the value will not be rounded.
+     */
+    val precision: Int? = null
+
+) : RangeConstrainedModSetting<Float?>(
+    name,
+    valueFormatter,
+    if (precision != null) defaultValue?.preciseRoundBy(precision) else defaultValue,
+    if (precision != null) minValue.preciseRoundBy(precision) else minValue,
+    if (precision != null) maxValue.preciseRoundBy(precision) else maxValue,
+    if (precision != null) step.preciseRoundBy(precision) else step,
+) {
     override fun processValue(value: Float?) = when {
         value == null -> null
         value < minValue!! -> minValue
         value > maxValue!! -> maxValue
         step == 0f -> value
-        else -> round((value - minValue) / step!!) * step + minValue
+
+        else -> {
+            val value = round((value - minValue) / step!!) * step + minValue
+
+            if (precision != null) value.preciseRoundBy(precision) else value
+        }
     }
 }
 
