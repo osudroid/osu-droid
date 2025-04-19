@@ -29,7 +29,7 @@ class ModDifficultyAdjust @JvmOverloads constructor(
         defaultValue = cs,
         minValue = 0f,
         maxValue = 15f,
-        step = 0.5f
+        step = 0.1f
     )
 
     /**
@@ -41,7 +41,7 @@ class ModDifficultyAdjust @JvmOverloads constructor(
         defaultValue = ar,
         minValue = 0f,
         maxValue = 12.5f,
-        step = 0.5f
+        step = 0.1f
     )
 
     /**
@@ -53,7 +53,7 @@ class ModDifficultyAdjust @JvmOverloads constructor(
         defaultValue = od,
         minValue = 0f,
         maxValue = 11f,
-        step = 0.5f
+        step = 0.1f
     )
 
     /**
@@ -65,7 +65,7 @@ class ModDifficultyAdjust @JvmOverloads constructor(
         defaultValue = hp,
         minValue = 0f,
         maxValue = 11f,
-        step = 0.5f
+        step = 0.1f
     )
 
 
