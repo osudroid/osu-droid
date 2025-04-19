@@ -70,25 +70,20 @@ open class BezelOutline(cornerRadius: Float = 0f) : BufferedEntity<BezelOutlineV
     ) : VertexBuffer(
 
         // Segments * Arc count + Closing point
-        vertexCount = max(1, segments) * 2 + 2,
+        vertexCount = 4,
 
         vertexSize = VERTEX_2D,
         bufferUsage = GL_STATIC_DRAW,
-        drawTopology = GL_LINE_STRIP
+        drawTopology = GL_LINES
     ) {
         override fun update(gl: GL10, entity: BufferedEntity<*>, vararg data: Any) {
 
             val width = width
             val height = height
-            val segments = max(1, segments)
+            val halfLineWidth = 0.5f
 
-            var position = 0
-
-            position = addArc(position, radius, radius, -180f, -90f, radius, radius, segments)
-            putVertex(position++, width - radius, 0f)
-
-            position = addArc(position, width - radius, height - radius, 0f, 90f, radius, radius, segments)
-            putVertex(position, radius, height)
+            addLine(0, radius, halfLineWidth,width - radius, halfLineWidth)
+            addLine(2, radius, height - halfLineWidth, width - radius, height - halfLineWidth)
         }
 
         override fun draw(gl: GL10, entity: BufferedEntity<*>) {
