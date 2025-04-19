@@ -9,7 +9,10 @@ import com.rian.osu.beatmap.sections.BeatmapDifficulty
 import com.rian.osu.math.Vector2
 import org.junit.Assert
 import org.junit.Test
+import org.junit.runner.RunWith
+import org.robolectric.RobolectricTestRunner
 
+@RunWith(RobolectricTestRunner::class)
 class ModDifficultyAdjustTest {
     @Test
     fun `Test beatmap setting override without additional mods`() {
@@ -76,6 +79,35 @@ class ModDifficultyAdjustTest {
 
             Assert.assertEquals(tick.timePreempt, 1094.0, 1e-2)
             Assert.assertEquals(tick.timeFadeIn, 600.0, 1e-2)
+        }
+    }
+
+    @Test
+    fun `Test serialization`() {
+        ModDifficultyAdjust().apply {
+            serialize().apply {
+                Assert.assertNull(optJSONObject("settings"))
+            }
+
+            cs = 4f
+            ar = 9f
+
+            serialize().getJSONObject("settings").apply {
+                Assert.assertEquals(4f, getDouble("cs").toFloat(), 1e-5f)
+                Assert.assertEquals(9f, getDouble("ar").toFloat(), 1e-5f)
+                Assert.assertTrue(optDouble("od").isNaN())
+                Assert.assertTrue(optDouble("hp").isNaN())
+            }
+
+            od = 8f
+            hp = 6f
+
+            serialize().getJSONObject("settings").apply {
+                Assert.assertEquals(4f, getDouble("cs").toFloat(), 1e-5f)
+                Assert.assertEquals(9f, getDouble("ar").toFloat(), 1e-5f)
+                Assert.assertEquals(8f, getDouble("od").toFloat(), 1e-5f)
+                Assert.assertEquals(6f, getDouble("hp").toFloat(), 1e-5f)
+            }
         }
     }
 }
