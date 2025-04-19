@@ -11,13 +11,13 @@ class ModFlashlightTest {
     fun `Test serialization`() {
         ModFlashlight().apply {
             serialize().getJSONObject("settings").apply {
-                Assert.assertEquals(0.12f, getDouble("areaFollowDelay").toFloat(), 1e-5f)
+                Assert.assertEquals(0.12f, getDouble("areaFollowDelay").toFloat())
             }
 
             followDelay = 0.36f
 
             serialize().getJSONObject("settings").apply {
-                Assert.assertEquals(0.36f, getDouble("areaFollowDelay").toFloat(), 1e-5f)
+                Assert.assertEquals(0.36f, getDouble("areaFollowDelay").toFloat())
             }
         }
     }

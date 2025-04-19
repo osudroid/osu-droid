@@ -11,13 +11,13 @@ class ModCustomSpeedTest {
     fun `Test serialization`() {
         ModCustomSpeed().apply {
             serialize().getJSONObject("settings").apply {
-                Assert.assertEquals(1f, getDouble("rateMultiplier").toFloat(), 1e-5f)
+                Assert.assertEquals(1f, getDouble("rateMultiplier").toFloat())
             }
 
             trackRateMultiplier = 1.25f
 
             serialize().getJSONObject("settings").apply {
-                Assert.assertEquals(1.25f, getDouble("rateMultiplier").toFloat(), 1e-5f)
+                Assert.assertEquals(1.25f, getDouble("rateMultiplier").toFloat())
             }
         }
     }

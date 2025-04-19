@@ -93,8 +93,8 @@ class ModDifficultyAdjustTest {
             ar = 9f
 
             serialize().getJSONObject("settings").apply {
-                Assert.assertEquals(4f, getDouble("cs").toFloat(), 1e-5f)
-                Assert.assertEquals(9f, getDouble("ar").toFloat(), 1e-5f)
+                Assert.assertEquals(4f, getDouble("cs").toFloat())
+                Assert.assertEquals(9f, getDouble("ar").toFloat())
                 Assert.assertTrue(optDouble("od").isNaN())
                 Assert.assertTrue(optDouble("hp").isNaN())
             }
@@ -103,10 +103,10 @@ class ModDifficultyAdjustTest {
             hp = 6f
 
             serialize().getJSONObject("settings").apply {
-                Assert.assertEquals(4f, getDouble("cs").toFloat(), 1e-5f)
-                Assert.assertEquals(9f, getDouble("ar").toFloat(), 1e-5f)
-                Assert.assertEquals(8f, getDouble("od").toFloat(), 1e-5f)
-                Assert.assertEquals(6f, getDouble("hp").toFloat(), 1e-5f)
+                Assert.assertEquals(4f, getDouble("cs").toFloat())
+                Assert.assertEquals(9f, getDouble("ar").toFloat())
+                Assert.assertEquals(8f, getDouble("od").toFloat())
+                Assert.assertEquals(6f, getDouble("hp").toFloat())
             }
         }
     }
