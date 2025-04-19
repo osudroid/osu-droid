@@ -16,39 +16,39 @@ import org.robolectric.RobolectricTestRunner
 class ModDifficultyAdjustTest {
     @Test
     fun `Test beatmap setting override without additional mods`() {
-        val difficulty = BeatmapDifficulty()
+        BeatmapDifficulty().apply {
+            ModDifficultyAdjust(cs = 4f, ar = 8f, od = 7f, hp = 6f).applyToDifficulty(GameMode.Droid, this, listOf())
 
-        ModDifficultyAdjust(cs = 4f, ar = 8f, od = 7f, hp = 6f).applyToDifficulty(GameMode.Droid, difficulty, listOf())
-
-        Assert.assertEquals(4f, difficulty.difficultyCS, 1e-2f)
-        Assert.assertEquals(4f, difficulty.gameplayCS, 1e-2f)
-        Assert.assertEquals(8f, difficulty.ar, 1e-2f)
-        Assert.assertEquals(7f, difficulty.od, 1e-2f)
-        Assert.assertEquals(6f, difficulty.hp, 1e-2f)
+            Assert.assertEquals(4f, difficultyCS, 1e-2f)
+            Assert.assertEquals(4f, gameplayCS, 1e-2f)
+            Assert.assertEquals(8f, ar, 1e-2f)
+            Assert.assertEquals(7f, od, 1e-2f)
+            Assert.assertEquals(6f, hp, 1e-2f)
+        }
     }
 
     @Test
     fun `Test beatmap setting override with additional mods`() {
-        val difficulty = BeatmapDifficulty()
+        BeatmapDifficulty().apply {
+            ModDifficultyAdjust(cs = 6f, ar = 6f, od = 6f, hp = 6f).applyToDifficulty(
+                GameMode.Droid, this, listOf(ModHardRock(), ModReallyEasy())
+            )
 
-        ModDifficultyAdjust(cs = 6f, ar = 6f, od = 6f, hp = 6f).applyToDifficulty(
-            GameMode.Droid, difficulty, listOf(ModHardRock(), ModReallyEasy())
-        )
-
-        Assert.assertEquals(6f, difficulty.difficultyCS, 1e-2f)
-        Assert.assertEquals(6f, difficulty.gameplayCS, 1e-2f)
-        Assert.assertEquals(6f, difficulty.ar, 1e-2f)
-        Assert.assertEquals(6f, difficulty.od, 1e-2f)
-        Assert.assertEquals(6f, difficulty.hp, 1e-2f)
+            Assert.assertEquals(6f, difficultyCS, 1e-2f)
+            Assert.assertEquals(6f, gameplayCS, 1e-2f)
+            Assert.assertEquals(6f, ar, 1e-2f)
+            Assert.assertEquals(6f, od, 1e-2f)
+            Assert.assertEquals(6f, hp, 1e-2f)
+        }
     }
 
     @Test
     fun `Test AR override with non-1x speed multiplier`() {
-        val difficulty = BeatmapDifficulty()
+        BeatmapDifficulty().apply {
+            ModDifficultyAdjust(ar = 9f).applyToDifficulty(GameMode.Droid, this, listOf(ModDoubleTime()))
 
-        ModDifficultyAdjust(ar = 9f).applyToDifficulty(GameMode.Droid, difficulty, listOf(ModDoubleTime()))
-
-        Assert.assertEquals(7f, difficulty.ar, 1e-2f)
+            Assert.assertEquals(7f, ar, 1e-2f)
+        }
     }
 
     @Test
