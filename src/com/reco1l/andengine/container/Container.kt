@@ -77,6 +77,10 @@ open class Container : ExtendedEntity() {
 
     //region Operators
 
+    inline fun <reified T : IEntity>firstOf(): T? {
+        return findChild { it is T } as? T
+    }
+
     operator fun ExtendedEntity.unaryPlus() {
         this@Container.attachChild(this@unaryPlus)
     }
