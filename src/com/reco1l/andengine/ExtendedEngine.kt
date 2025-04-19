@@ -19,7 +19,9 @@ class ExtendedEngine(options: EngineOptions) : Engine(options) {
     init {
         runOnUpdateThread {
             if (BuildConfiguration.ENTITY_INSPECTOR) {
-                overlayEntities += EntityInspector(this)
+                overlayEntities += EntityInspector(this).apply {
+                    isExpanded = false
+                }
                 overlayEntities += EntityDescriptor().apply {
                     x = 400f
                     isExpanded = false
