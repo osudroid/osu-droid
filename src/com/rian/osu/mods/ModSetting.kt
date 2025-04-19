@@ -109,6 +109,16 @@ class FloatModSetting(
     if (precision != null) maxValue.preciseRoundBy(precision) else maxValue,
     if (precision != null) step.preciseRoundBy(precision) else step
 ) {
+    init {
+        require(this.minValue <= this.maxValue) { "minValue must be less than or equal to maxValue." }
+        require(this.step >= 0f) { "step must be greater than or equal to 0." }
+        require(precision == null || precision >= 0) { "precision must be greater than or equal to 0." }
+
+        require(this.defaultValue in this.minValue..this.maxValue) {
+            "defaultValue must be between minValue and maxValue."
+        }
+    }
+
     override fun processValue(value: Float) = when {
         value < minValue -> minValue
         value > maxValue -> maxValue
@@ -145,6 +155,16 @@ class NullableFloatModSetting(
     if (precision != null) maxValue.preciseRoundBy(precision) else maxValue,
     if (precision != null) step.preciseRoundBy(precision) else step,
 ) {
+    init {
+        require(this.minValue!! <= this.maxValue!!) { "minValue must be less than or equal to maxValue." }
+        require(this.step!! >= 0f) { "step must be greater than or equal to 0." }
+        require(precision == null || precision >= 0) { "precision must be greater than or equal to 0." }
+
+        require(this.defaultValue == null || this.defaultValue in this.minValue..this.maxValue) {
+            "defaultValue must be between minValue and maxValue."
+        }
+    }
+
     override fun processValue(value: Float?) = when {
         value == null -> null
         value < minValue!! -> minValue
