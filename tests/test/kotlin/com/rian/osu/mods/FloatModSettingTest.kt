@@ -5,6 +5,28 @@ import org.junit.Test
 
 class FloatModSettingTest {
     @Test
+    fun `Test boundaries`() {
+        fun test(action: () -> Unit) {
+            Assert.assertThrows(IllegalArgumentException::class.java, action)
+        }
+
+        // Test min > max
+        test { FloatModSetting(name = "Test", defaultValue = 0.12f, minValue = 0.12f, maxValue = 0.1f) }
+
+        // Test defaultValue > max
+        test { FloatModSetting(name = "Test", defaultValue = 0.24f, minValue = 0.1f, maxValue = 0.12f) }
+
+        // Test defaultValue < min
+        test { FloatModSetting(name = "Test", defaultValue = 0.1f, minValue = 0.12f, maxValue = 0.24f) }
+
+        // Test step < 0
+        test { FloatModSetting(name = "Test", defaultValue = 0.12f, step = -0.1f) }
+
+        // Test precision < 0
+        test { FloatModSetting(name = "Test", defaultValue = 0.12f, precision = -1) }
+    }
+
+    @Test
     fun `Test float step without precision`() {
         var setting by FloatModSetting(name = "Test", defaultValue = 0.12f, step = 0.12f)
         Assert.assertEquals(0.12f, setting, 1e-5f)
