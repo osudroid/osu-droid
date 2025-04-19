@@ -77,7 +77,7 @@ sealed class RangeConstrainedModSetting<T>(
 
     protected abstract fun processValue(value: T): T
 
-    override fun setValue(thisRef: Any?, property: KProperty<*>, value: T) {
+    final override fun setValue(thisRef: Any?, property: KProperty<*>, value: T) {
         super.setValue(thisRef, property, processValue(value))
     }
 }
