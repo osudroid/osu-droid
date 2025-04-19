@@ -52,6 +52,13 @@ value class ColorARGB(private val hex: Int) {
     )
 
 
+    fun copy(
+        red: Float = this.red,
+        green: Float = this.green,
+        blue: Float = this.blue,
+        alpha: Float = this.alpha
+    ) = ColorARGB(red, green, blue, alpha)
+
     fun toInt() = hex
 
 

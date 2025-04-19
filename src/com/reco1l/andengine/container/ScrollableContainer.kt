@@ -211,6 +211,8 @@ open class ScrollableContainer : Container() {
 
     private var initialX = 0f
     private var initialY = 0f
+    private var deltaX = 0f
+    private var deltaY = 0f
 
     private var dragStartTimeMillis = 0L
 
@@ -287,6 +289,8 @@ open class ScrollableContainer : Container() {
                 decelerateProgressively(deltaTimeSec)
             }
             handleOverflow()
+        } else {
+            handleUserScroll()
         }
 
         updateIndicators(deltaTimeSec)
@@ -359,7 +363,7 @@ open class ScrollableContainer : Container() {
 
     //region Input
 
-    private fun handleUserScroll(deltaX: Float, deltaY: Float) {
+    private fun handleUserScroll() {
 
         val dragTimeSeconds = (System.currentTimeMillis() - dragStartTimeMillis) / 1000f
         val length = hypot(deltaX, deltaY)
@@ -378,6 +382,8 @@ open class ScrollableContainer : Container() {
             if (!overflowAxes.isHorizontal) {
                 scrollX = scrollX.coerceIn(0f, maxScrollX)
             }
+        } else {
+            velocityX = 0f
         }
 
         if (scrollAxes.isVertical && !Precision.almostEquals(deltaY, 0f)) {
@@ -387,7 +393,12 @@ open class ScrollableContainer : Container() {
             if (!overflowAxes.isVertical) {
                 scrollY = scrollY.coerceIn(0f, maxScrollY)
             }
+        } else {
+            velocityY = 0f
         }
+
+        deltaX = 0f
+        deltaY = 0f
     }
     
     override fun onAreaTouched(event: TouchEvent, localX: Float, localY: Float): Boolean {
@@ -408,20 +419,23 @@ open class ScrollableContainer : Container() {
             }
 
             ACTION_MOVE -> {
-                val deltaX = localX - initialX
-                val deltaY = localY - initialY
+                val moveDeltaX = localX - initialX
+                val moveDeltaY = localY - initialY
 
-                val isScrollingHorizontal = scrollAxes.isHorizontal && abs(deltaX) > minimumTravel.x
-                val isScrollingVertical = scrollAxes.isVertical && abs(deltaY) > minimumTravel.y
+                val isScrollingHorizontal = scrollAxes.isHorizontal && abs(moveDeltaX) > minimumTravel.x
+                val isScrollingVertical = scrollAxes.isVertical && abs(moveDeltaY) > minimumTravel.y
 
                 if (isScrolling || isScrollingHorizontal || isScrollingVertical) {
 
                     // If it was already scrolling we don't need to subtract the minimum travel.
                     if (isScrolling) {
-                        handleUserScroll(deltaX, deltaY)
+                        deltaX = moveDeltaX
+                        deltaY = moveDeltaY
                     } else {
-                        handleUserScroll(deltaX - minimumTravel.x, deltaY - minimumTravel.y)
+                        deltaX = moveDeltaX - minimumTravel.x
+                        deltaY = moveDeltaY - minimumTravel.y
                     }
+                    handleUserScroll()
 
                     initialX = localX
                     initialY = localY

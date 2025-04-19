@@ -4,6 +4,7 @@ import com.reco1l.andengine.*
 import com.reco1l.andengine.buffered.*
 import com.reco1l.andengine.buffered.VertexBuffer
 import com.reco1l.toolkt.kotlin.*
+import org.anddev.andengine.engine.camera.*
 import org.anddev.andengine.opengl.font.*
 import javax.microedition.khronos.opengles.*
 import javax.microedition.khronos.opengles.GL10.*
@@ -58,8 +59,28 @@ open class ExtendedText : BufferedEntity<CompoundBuffer>() {
             }
         }
 
+    /**
+     * Which axes to scroll the text automatically when it overflows.
+     */
+    var autoScrollAxes = Axes.X
+
+    /**
+     * The speed of the auto scroll animation in pixels per second.
+     */
+    var autoScrollSpeed = 15f
+
+    /**
+     * The time to wait before re-starting the auto scroll animation in seconds
+     */
+    var autoScrollTimeout = 3f
+
 
     private var currentLength = 0
+
+    private var scrollX = 0f
+    private var scrollY = 0f
+    private var scrollXTimeoutElapsed = 0f
+    private var scrollYTimeoutElapsed = 0f
 
 
     init {
@@ -98,6 +119,61 @@ open class ExtendedText : BufferedEntity<CompoundBuffer>() {
     override fun onDeclarePointers(gl: GL10) {
         super.onDeclarePointers(gl)
         font?.texture?.bind(gl)
+    }
+
+    override fun onApplyTransformations(gl: GL10, camera: Camera) {
+
+        val scrollTranslationX = if (autoScrollAxes.isHorizontal) scrollX else 0f
+        val scrollTranslationY = if (autoScrollAxes.isVertical) scrollY else 0f
+
+        if (scrollTranslationX != 0f || scrollTranslationY != 0f) {
+            gl.glTranslatef(-scrollTranslationX, -scrollTranslationY, 0f)
+        }
+
+        super.onApplyTransformations(gl, camera)
+    }
+
+
+    override fun onManagedUpdate(deltaTimeSec: Float) {
+
+        if (autoScrollAxes != Axes.None) {
+
+            fun processAutoScroll(currentScroll: Float, maxScroll: Float, currentTimeout: Float) : Pair<Float, Float> {
+
+                if (currentScroll == 0f && currentTimeout < autoScrollTimeout) {
+                    return currentScroll to currentTimeout + deltaTimeSec
+                }
+
+                if (currentScroll >= maxScroll) {
+                    if (currentTimeout > autoScrollTimeout) {
+                        return 0f to 0f
+                    }
+                    return currentScroll to currentTimeout + deltaTimeSec
+                }
+
+                return min(currentScroll + autoScrollSpeed * deltaTimeSec, maxScroll) to 0f
+            }
+
+            val maxScrollX = contentWidth - width
+
+            if (autoScrollAxes.isHorizontal && maxScrollX > 0) {
+                val (x, timeout) = processAutoScroll(scrollX, maxScrollX, scrollXTimeoutElapsed)
+
+                scrollX = x
+                scrollXTimeoutElapsed = timeout
+            }
+
+            val maxScrollY = contentHeight - height
+
+            if (autoScrollAxes.isVertical && maxScrollY > 0) {
+                val (y, timeout) = processAutoScroll(scrollY, maxScrollY, scrollYTimeoutElapsed)
+
+                scrollY = y
+                scrollYTimeoutElapsed = timeout
+            }
+        }
+
+        super.onManagedUpdate(deltaTimeSec)
     }
 
 

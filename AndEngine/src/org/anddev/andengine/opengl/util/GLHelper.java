@@ -193,6 +193,12 @@ public class GLHelper {
 		}
 	}
 
+	// BEGIN osu!droid modified - Added scissor test state getter.
+	public static boolean isEnableScissorTest() {
+		return sEnableScissorTest;
+	}
+	// END osu!droid modified.
+
 	public static void enableScissorTest(final GL10 pGL) {
 		if(!GLHelper.sEnableScissorTest) {
 			GLHelper.sEnableScissorTest = true;
