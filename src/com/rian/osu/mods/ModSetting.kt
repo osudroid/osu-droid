@@ -162,7 +162,7 @@ class NullableFloatModSetting(
         require(this.step!! >= 0f) { "step must be greater than or equal to 0." }
         require(precision == null || precision >= 0) { "precision must be greater than or equal to 0." }
 
-        require(this.defaultValue == null || this.defaultValue in this.minValue..this.maxValue) {
+        require(this.defaultValue == null || this.defaultValue!! in this.minValue..this.maxValue) {
             "defaultValue must be between minValue and maxValue."
         }
     }
