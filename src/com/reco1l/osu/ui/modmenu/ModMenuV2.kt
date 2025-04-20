@@ -238,6 +238,7 @@ object ModMenuV2 : ExtendedScene() {
             }
 
             modButtons.map { it.mod }.filterIsInstance<IModRequiresOriginalBeatmap>().fastForEach { mod ->
+                ensureActive()
                 mod.applyFromBeatmap(beatmap)
             }
             customizationMenu.updateComponents()
@@ -248,6 +249,7 @@ object ModMenuV2 : ExtendedScene() {
 
             ModUtils.applyModsToBeatmapDifficulty(difficulty, gameMode, mods, true)
 
+            ensureActive()
             arBadge.value = "%.2f".format(difficulty.ar)
             odBadge.value = "%.2f".format(difficulty.od)
             csBadge.value = "%.2f".format(difficulty.difficultyCS)
@@ -259,8 +261,11 @@ object ModMenuV2 : ExtendedScene() {
                 standard -> calculateStandardDifficulty(beatmap, mods, this@scope)
             }
 
+            ensureActive()
             starRatingBadge.clearEntityModifiers()
+            ensureActive()
             starRatingBadge.background!!.clearEntityModifiers()
+            ensureActive()
 
             starRatingBadge.value = "%.2f".format(attributes.starRating)
             starRatingBadge.background!!.colorTo(OsuColors.getStarRatingColor(attributes.starRating), 0.1f)
