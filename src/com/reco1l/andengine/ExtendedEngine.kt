@@ -1,6 +1,6 @@
 package com.reco1l.andengine
 
-import com.osudroid.BuildConfiguration
+import com.osudroid.BuildSettings
 import com.osudroid.debug.EntityDescriptor
 import com.osudroid.debug.EntityInspector
 import com.reco1l.toolkt.kotlin.*
@@ -19,7 +19,7 @@ class ExtendedEngine(options: EngineOptions) : Engine(options) {
 
     init {
         runOnUpdateThread {
-            if (BuildConfiguration.ENTITY_INSPECTOR) {
+            if (BuildSettings.ENTITY_INSPECTOR) {
                 overlayEntities += EntityInspector(this).apply {
                     isExpanded = false
                 }

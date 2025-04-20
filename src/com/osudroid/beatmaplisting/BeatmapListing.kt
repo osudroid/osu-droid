@@ -31,7 +31,7 @@ import androidx.recyclerview.widget.RecyclerView
 import androidx.recyclerview.widget.RecyclerView.OnScrollListener
 import com.edlplan.ui.fragment.BaseFragment
 import com.google.android.material.progressindicator.CircularProgressIndicator
-import com.osudroid.BuildConfiguration
+import com.osudroid.BuildSettings
 import com.reco1l.framework.bass.URLBassStream
 import com.reco1l.framework.net.IFileRequestObserver
 import com.reco1l.framework.net.JsonArrayRequest
@@ -610,7 +610,7 @@ class BeatmapSetViewHolder(itemView: View, private val mediaScope: CoroutineScop
 
         coverJob?.cancel()
 
-        if (beatmapSet.thumbnail != null && !BuildConfiguration.NO_TEXTURES_MODE) {
+        if (beatmapSet.thumbnail != null && !BuildSettings.NO_TEXTURES_MODE) {
             coverJob = mediaScope.launch {
 
                 try {

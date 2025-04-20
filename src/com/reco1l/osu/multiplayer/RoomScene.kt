@@ -1,6 +1,6 @@
 package com.reco1l.osu.multiplayer
 
-import com.osudroid.BuildConfiguration
+import com.osudroid.BuildSettings
 import com.reco1l.andengine.*
 import com.reco1l.andengine.sprite.*
 import com.osudroid.ibancho.IPlayerEventListener
@@ -258,7 +258,7 @@ object RoomScene : Scene(), IRoomEventListener, IPlayerEventListener {
                         return true
                     }
 
-                    if (!BuildConfiguration.MOCK_MULTIPLAYER) {
+                    if (!BuildSettings.MOCK_MULTIPLAYER) {
                         if (room!!.teamMode == TeamVersus) {
                             val team = room!!.teamMap
 

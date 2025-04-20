@@ -2,7 +2,7 @@ package com.reco1l.andengine
 
 import android.util.*
 import android.view.*
-import com.osudroid.BuildConfiguration
+import com.osudroid.BuildSettings
 import com.osudroid.debug.EntityInspector
 import com.reco1l.andengine.modifier.*
 import com.reco1l.andengine.shape.*
@@ -543,7 +543,7 @@ abstract class ExtendedEntity : Entity(0f, 0f), ITouchArea, IModifierChain {
         foreground?.onDraw(gl, camera)
 
 
-        if ((BuildConfiguration.SHOW_ENTITY_BOUNDARIES || EntityInspector.SELECTED_ENTITY == this) && DEBUG_FOREGROUND != this) {
+        if ((BuildSettings.SHOW_ENTITY_BOUNDARIES || EntityInspector.SELECTED_ENTITY == this) && DEBUG_FOREGROUND != this) {
             DEBUG_FOREGROUND.color = if (EntityInspector.SELECTED_ENTITY == this) ColorARGB(0xFF00FF00) else ColorARGB.White
             DEBUG_FOREGROUND.lineWidth = if (EntityInspector.SELECTED_ENTITY == this) 3f else 1f
             DEBUG_FOREGROUND.setSize(width, height)

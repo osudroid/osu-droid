@@ -1,6 +1,6 @@
 package com.osudroid
 
-object BuildConfiguration {
+object BuildSettings {
 
     /**
      * Whether to use textures or not.

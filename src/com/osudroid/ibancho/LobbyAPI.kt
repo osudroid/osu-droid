@@ -1,6 +1,6 @@
 package com.osudroid.ibancho
 
-import com.osudroid.BuildConfiguration
+import com.osudroid.BuildSettings
 import com.osudroid.debug.MockRoom
 import com.osudroid.ibancho.data.Room
 import com.osudroid.ibancho.data.RoomBeatmap
@@ -42,7 +42,7 @@ object LobbyAPI {
      */
     fun getRooms(query: String?, sign: String?): List<Room> {
 
-        if (BuildConfiguration.MOCK_MULTIPLAYER) {
+        if (BuildSettings.MOCK_MULTIPLAYER) {
             return listOf(
                 MockRoom(),
                 MockRoom(),
@@ -92,7 +92,7 @@ object LobbyAPI {
      */
     fun createRoom(name: String, beatmap: RoomBeatmap?, hostUID: Long, hostUsername: String, sign: String?, password: String? = null, maxPlayers: Int = 8): Long {
 
-        if (BuildConfiguration.MOCK_MULTIPLAYER) {
+        if (BuildSettings.MOCK_MULTIPLAYER) {
             return 1
         }
 

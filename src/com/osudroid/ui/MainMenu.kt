@@ -1,6 +1,6 @@
 package com.osudroid.ui
 
-import com.osudroid.BuildConfiguration
+import com.osudroid.BuildSettings
 import com.osudroid.resources.R
 import com.osudroid.ui.v1.SettingsFragment
 import com.reco1l.andengine.sprite.ExtendedSprite
@@ -124,7 +124,7 @@ class MainMenu(val main: MainScene) {
                     return true
                 }
 
-                if (!OnlineManager.getInstance().isStayOnline && !BuildConfiguration.MOCK_MULTIPLAYER) {
+                if (!OnlineManager.getInstance().isStayOnline && !BuildSettings.MOCK_MULTIPLAYER) {
                     ToastLogger.showText(StringTable.format(R.string.multiplayer_not_online), true)
                     return true
                 }

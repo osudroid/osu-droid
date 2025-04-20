@@ -1,6 +1,6 @@
 package com.osudroid.ibancho
 
-import com.osudroid.BuildConfiguration
+import com.osudroid.BuildSettings
 import com.osudroid.debug.MockSocket
 import com.osudroid.ibancho.data.PlayerStatus
 import com.osudroid.ibancho.data.Room
@@ -311,7 +311,7 @@ object RoomAPI {
 
         Multiplayer.log("Starting connection -> $roomId, $userId, $username")
 
-        socket = if (BuildConfiguration.MOCK_MULTIPLAYER) MockSocket(userId, username) else IO.socket(url, IO.Options().also {
+        socket = if (BuildSettings.MOCK_MULTIPLAYER) MockSocket(userId, username) else IO.socket(url, IO.Options().also {
             it.auth = auth
 
             // Explicitly not allow the socket to reconnect as we are using our own
