@@ -12,19 +12,25 @@ import com.reco1l.framework.*
 import com.reco1l.framework.math.*
 import com.reco1l.ibancho.RoomAPI.setPlayerMods
 import com.reco1l.ibancho.RoomAPI.setRoomMods
+import com.reco1l.osu.*
 import com.reco1l.osu.multiplayer.*
 import com.reco1l.toolkt.kotlin.*
+import com.reco1l.toolkt.kotlin.async
 import com.rian.osu.*
 import com.rian.osu.beatmap.parser.*
 import com.rian.osu.difficulty.BeatmapDifficultyCalculator.calculateDroidDifficulty
 import com.rian.osu.difficulty.BeatmapDifficultyCalculator.calculateStandardDifficulty
+import com.rian.osu.difficulty.attributes.*
 import com.rian.osu.mods.*
 import com.rian.osu.utils.*
+import com.rian.osu.utils.ModUtils.calculateRateWithMods
 import kotlinx.coroutines.*
 import ru.nsu.ccfit.zuev.osu.*
+import ru.nsu.ccfit.zuev.osu.DifficultyAlgorithm.*
 import ru.nsu.ccfit.zuev.osu.game.*
-import ru.nsu.ccfit.zuev.osu.helper.StringTable
+import ru.nsu.ccfit.zuev.osu.helper.*
 import java.util.concurrent.CancellationException
+import kotlin.math.*
 
 object ModMenuV2 : ExtendedScene() {
 
@@ -37,13 +43,17 @@ object ModMenuV2 : ExtendedScene() {
 
     private val modButtons = mutableListOf<ModButton>()
 
-    private val rankedBadge: Badge
-
-    private val scoreMultiplierBadge: LabeledBadge
-
     private val customizeButton: Button
-
     private val customizationMenu: ModCustomizationMenu
+
+    private val rankedBadge: Badge
+    private val arBadge: LabeledBadge
+    private val odBadge: LabeledBadge
+    private val csBadge: LabeledBadge
+    private val hpBadge: LabeledBadge
+    private val bpmBadge: LabeledBadge
+    private val starRatingBadge: LabeledBadge
+    private val scoreMultiplierBadge: LabeledBadge
 
 
     private var calculationJob: Job? = null
@@ -59,104 +69,129 @@ object ModMenuV2 : ExtendedScene() {
 
         customizationMenu = ModCustomizationMenu()
 
-        attachChild(ScrollableContainer().apply {
+        attachChild(LinearContainer().apply {
             width = FitParent
             height = FitParent
-            scrollAxes = Axes.X
-            padding = Vec4(0f, 80f, 0f, 0f)
+            orientation = Orientation.Vertical
             background = Box().apply {
                 color = ColorARGB(0xFF161622)
                 alpha = 0.95f
             }
 
-            attachChild(LinearContainer().apply {
-                orientation = Orientation.Horizontal
-                width = FitContent
-                height = FitParent
-                spacing = 16f
+            attachChild(Container().apply {
+                width = FitParent
+                height = FitContent
                 padding = Vec4(60f, 20f)
 
-                val mods = ModUtils.allModsInstances
+                attachChild(LinearContainer().apply {
+                    orientation = Orientation.Horizontal
+                    anchor = Anchor.CenterLeft
+                    origin = Anchor.CenterLeft
+                    height = FitContent
+                    spacing = 10f
 
-                ModType.entries.forEach { type ->
-                    val sectionName = StringTable.get(type.stringId)
-                    val sectionMods = mods.filter { it !is IMigratableMod && it.type == type }
-                    attachChild(Section(sectionName, sectionMods))
-                }
-            })
-        })
+                    attachChild(Button().apply {
+                        text = "Back"
+                        leadingIcon = ExtendedSprite(ResourceManager.getInstance().getTexture("back-arrow"))
+                        onActionUp = {
+                            ResourceManager.getInstance().getSound("click-short-confirm")?.play()
+                            back()
+                        }
+                        onActionCancel = { ResourceManager.getInstance().getSound("click-short")?.play() }
+                    })
 
-
-        attachChild(Container().apply {
-            width = FitParent
-            height = 60f
-            padding = Vec4(60f, 20f, 60f, 0f)
-
-            attachChild(LinearContainer().apply {
-                orientation = Orientation.Horizontal
-                height = FitParent
-                spacing = 10f
-
-                attachChild(Button().apply {
-                    text = "Back"
-                    leadingIcon = ExtendedSprite(ResourceManager.getInstance().getTexture("back-arrow"))
-                    onActionUp = {
-                        ResourceManager.getInstance().getSound("click-short-confirm")?.play()
-                        parseBeatmap(true)
-                        back()
+                    customizeButton = Button().apply {
+                        text = "Customize"
+                        isEnabled = false
+                        leadingIcon = ExtendedSprite(ResourceManager.getInstance().getTexture("tune"))
+                        onActionUp = {
+                            ResourceManager.getInstance().getSound("click-short-confirm")?.play()
+                            if (customizationMenu.isVisible) {
+                                customizationMenu.hide()
+                            } else {
+                                customizationMenu.show()
+                            }
+                        }
+                        onActionCancel = { ResourceManager.getInstance().getSound("click-short")?.play() }
                     }
-                    onActionCancel = { ResourceManager.getInstance().getSound("click-short")?.play() }
+                    attachChild(customizeButton)
+
+                    attachChild(Button().apply {
+                        text = "Clear"
+                        leadingIcon = ExtendedSprite(ResourceManager.getInstance().getTexture("backspace"))
+                        theme = ButtonTheme(
+                            backgroundColor = 0xFF342121,
+                            textColor = 0xFFFFBFBF,
+                        )
+                        onActionUp = {
+                            ResourceManager.getInstance().getSound("click-short-confirm")?.play()
+                            clear()
+                        }
+                        onActionCancel = { ResourceManager.getInstance().getSound("click-short")?.play() }
+                    })
                 })
 
-                customizeButton = Button().apply {
-                    text = "Customize"
-                    isEnabled = false
-                    leadingIcon = ExtendedSprite(ResourceManager.getInstance().getTexture("tune"))
-                    onActionUp = {
-                        ResourceManager.getInstance().getSound("click-short-confirm")?.play()
-                        if (customizationMenu.isVisible) {
-                            customizationMenu.hide()
-                        } else {
-                            customizationMenu.show()
+                attachChild(LinearContainer().apply {
+                    orientation = Orientation.Vertical
+                    spacing = 10f
+                    anchor = Anchor.CenterRight
+                    origin = Anchor.CenterRight
+
+                    +LinearContainer().apply {
+                        orientation = Orientation.Horizontal
+                        anchor = Anchor.TopRight
+                        origin = Anchor.TopRight
+                        spacing = 10f
+
+                        +LabeledBadge("Score multiplier", "1.00x").apply { scoreMultiplierBadge = this }
+                        +LabeledBadge("Star rating", "0.0").apply { starRatingBadge = this }
+
+                        +Badge("Ranked").apply {
+                            background!!.color = ColorARGB(0xFF83DF6B)
+                            color = ColorARGB(0xFF161622)
+                            rankedBadge = this
                         }
                     }
-                    onActionCancel = { ResourceManager.getInstance().getSound("click-short")?.play() }
-                }
-                attachChild(customizeButton)
 
-                attachChild(Button().apply {
-                    text = "Clear"
-                    leadingIcon = ExtendedSprite(ResourceManager.getInstance().getTexture("backspace"))
-                    theme = ButtonTheme(
-                        backgroundColor = 0xFF342121,
-                        textColor = 0xFFFFBFBF,
-                    )
-                    onActionUp = {
-                        ResourceManager.getInstance().getSound("click-short-confirm")?.play()
-                        clear()
+                    +LinearContainer().apply {
+                        orientation = Orientation.Horizontal
+                        origin = Anchor.TopRight
+                        anchor = Anchor.TopRight
+                        spacing = 10f
+
+                        +LabeledBadge("AR", "0.00").apply { arBadge = this }
+                        +LabeledBadge("OD", "0.00").apply { odBadge = this }
+                        +LabeledBadge("CS", "0.00").apply { csBadge = this }
+                        +LabeledBadge("HP", "0.00").apply { hpBadge = this }
+                        +LabeledBadge("BPM", "0.0").apply { bpmBadge = this }
                     }
-                    onActionCancel = { ResourceManager.getInstance().getSound("click-short")?.play() }
                 })
             })
 
-            attachChild(LinearContainer().apply {
-                orientation = Orientation.Horizontal
+            attachChild(ScrollableContainer().apply {
+                width = FitParent
                 height = FitParent
-                spacing = 10f
-                anchor = Anchor.CenterRight
-                origin = Anchor.CenterRight
-                padding = Vec4(0f, 6f)
+                scrollAxes = Axes.X
 
-                rankedBadge = Badge("Ranked").apply {
-                    background!!.color = ColorARGB(0xFF83DF6B)
-                    color = ColorARGB(0xFF161622)
-                }
-                attachChild(rankedBadge)
+                attachChild(LinearContainer().apply {
+                    orientation = Orientation.Horizontal
+                    width = FitContent
+                    height = FitParent
+                    spacing = 16f
+                    padding = Vec4(60f, 0f)
 
-                scoreMultiplierBadge = LabeledBadge("Score multiplier", "1.00x")
-                attachChild(scoreMultiplierBadge)
+                    val mods = ModUtils.allModsInstances
+
+                    ModType.entries.forEach { type ->
+                        val sectionName = StringTable.get(type.stringId)
+                        val sectionMods = mods.filter { it !is IMigratableMod && it.type == type }
+                        attachChild(Section(sectionName, sectionMods))
+                    }
+                })
             })
+
         })
+
 
         // Customizations menu
         attachChild(customizationMenu)
@@ -170,7 +205,7 @@ object ModMenuV2 : ExtendedScene() {
         calculationJob = null
     }
 
-    private fun parseBeatmap(calculateStarRating: Boolean) {
+    private fun parseBeatmap() {
         cancelCalculationJob()
 
         val selectedBeatmap = GlobalManager.getInstance().selectedBeatmap
@@ -187,7 +222,7 @@ object ModMenuV2 : ExtendedScene() {
 
                 val beatmap = parser.parse(
                     withHitObjects = true,
-                    mode = if (difficultyAlgorithm == DifficultyAlgorithm.droid) GameMode.Droid else GameMode.Standard
+                    mode = if (difficultyAlgorithm == droid) GameMode.Droid else GameMode.Standard
                 )
 
                 if (beatmap == null) {
@@ -200,23 +235,35 @@ object ModMenuV2 : ExtendedScene() {
                 }
                 customizationMenu.updateComponents()
 
-                if (calculateStarRating) {
-                    // Copy the mods to avoid concurrent modification
-                    val mods = enabledMods.deepCopy().values
+                // Copy the mods to avoid concurrent modification
+                val mods = enabledMods.deepCopy().values
 
-                    when (difficultyAlgorithm) {
+                arBadge.value = "%.2f".format(beatmap.difficulty.ar)
+                odBadge.value = "%.2f".format(beatmap.difficulty.od)
+                csBadge.value = "%.2f".format(beatmap.difficulty.difficultyCS)
+                hpBadge.value = "%.2f".format(beatmap.difficulty.hp)
+                bpmBadge.value = (selectedBeatmap.mostCommonBPM * calculateRateWithMods(mods)).roundToInt().toString()
 
-                        DifficultyAlgorithm.droid -> {
-                            val attributes = calculateDroidDifficulty(beatmap, mods, this@scope)
-                            GlobalManager.getInstance().songMenu.setStarsDisplay(GameHelper.Round(attributes.starRating, 2))
-                        }
-
-                        DifficultyAlgorithm.standard -> {
-                            val attributes = calculateStandardDifficulty(beatmap, mods, this@scope)
-                            GlobalManager.getInstance().songMenu.setStarsDisplay(GameHelper.Round(attributes.starRating, 2))
-                        }
-                    }
+                val attributes: DifficultyAttributes = when (difficultyAlgorithm) {
+                    droid -> calculateDroidDifficulty(beatmap, mods, this@scope)
+                    standard -> calculateStandardDifficulty(beatmap, mods, this@scope)
                 }
+
+                starRatingBadge.clearEntityModifiers()
+                starRatingBadge.background!!.clearEntityModifiers()
+
+                starRatingBadge.value = "%.2f".format(attributes.starRating)
+                starRatingBadge.background!!.colorTo(OsuColors.getStarRatingColor(attributes.starRating), 0.1f)
+
+                if (attributes.starRating >= 6.5) {
+                    starRatingBadge.colorTo(ColorARGB(0xFFFFD966), 0.1f)
+                    starRatingBadge.fadeTo(1f, 0.1f)
+                } else {
+                    starRatingBadge.colorTo(ColorARGB.Black, 0.1f)
+                    starRatingBadge.fadeTo(0.75f, 0.1f)
+                }
+
+                GlobalManager.getInstance().songMenu.setStarsDisplay(GameHelper.Round(attributes.starRating, 2))
             }
         }
     }
@@ -234,7 +281,7 @@ object ModMenuV2 : ExtendedScene() {
         )
 
         // Only parsing to update mod's specific settings defaults, specially those which rely on the original beatmap data.
-        parseBeatmap(false)
+        parseBeatmap()
     }
 
     override fun back() {
@@ -283,7 +330,8 @@ object ModMenuV2 : ExtendedScene() {
             rankedBadge.background!!.colorTo(0xFF1E1E2E, 0.1f)
         }
 
-        val difficulty = GlobalManager.getInstance().selectedBeatmap?.getBeatmapDifficulty()
+        val beatmap = GlobalManager.getInstance().selectedBeatmap
+        val difficulty = beatmap?.getBeatmapDifficulty()
 
         if (difficulty != null) {
             scoreMultiplierBadge.value = "%.2fx".format(
@@ -300,6 +348,8 @@ object ModMenuV2 : ExtendedScene() {
         if (lastChangedMod is IModApplicableToTrackRate) {
             GlobalManager.getInstance().songMenu.updateMusicEffects()
         }
+
+        parseBeatmap()
     }
 
     private fun addMod(mod: Mod) {
@@ -439,7 +489,7 @@ object ModMenuV2 : ExtendedScene() {
         override fun onManagedUpdate(deltaTimeSec: Float) {
 
             // Match the description text color with the title text color during animations.
-            if (descriptionText.color != titleText.color) {
+            if (!descriptionText.color.colorEquals(titleText.color)) {
                 descriptionText.color = titleText.color.copy(alpha = descriptionText.alpha)
             }
 

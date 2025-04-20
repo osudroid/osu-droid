@@ -61,6 +61,8 @@ value class ColorARGB(private val hex: Int) {
 
     fun toInt() = hex
 
+    fun colorEquals(other: ColorARGB) = red == other.red && green == other.green && blue == other.blue
+
 
     companion object {
 

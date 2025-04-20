@@ -35,8 +35,8 @@ open class Badge(content: String = "") : ExtendedText(), IWithTheme<BadgeTheme> 
 
     init {
         text = content
-        height = 48f
-        padding = Vec4(10f, 0f)
+        height = 38f
+        padding = Vec4(12f, 0f)
         alignment = Anchor.Center
         onThemeChanged()
     }
@@ -47,11 +47,11 @@ open class Badge(content: String = "") : ExtendedText(), IWithTheme<BadgeTheme> 
 
         background = Box().apply {
             color = ColorARGB(0xFF1E1E2E)
-            cornerRadius = 14f
+            cornerRadius = 12f
         }
 
         if (theme.withBezelEffect) {
-            foreground = BezelOutline(14f)
+            foreground = BezelOutline(12f)
         }
     }
 
@@ -69,6 +69,8 @@ open class LabeledBadge(label: String = "", value: String = "") : LinearContaine
     private val labelText = Badge(label).apply {
         height = FitParent
         foreground = null
+        background!!.color = ColorARGB.Black
+        background!!.alpha = 0.1f
     }
 
     private val valueText = ExtendedText().apply {
@@ -76,7 +78,7 @@ open class LabeledBadge(label: String = "", value: String = "") : LinearContaine
         font = ResourceManager.getInstance().getFont("smallFont")
         text = value
         alignment = Anchor.Center
-        padding = Vec4(16f, 0f)
+        padding = Vec4(12f, 0f)
     }
 
 
@@ -92,13 +94,13 @@ open class LabeledBadge(label: String = "", value: String = "") : LinearContaine
 
 
     init {
-        height = 48f
+        height = 38f
         orientation = Orientation.Horizontal
 
-        foreground = BezelOutline(14f)
+        foreground = BezelOutline(12f)
         background = Box().apply {
             color = ColorARGB(0xFF222234)
-            cornerRadius = 14f
+            cornerRadius = 12f
         }
 
         attachChild(labelText)
