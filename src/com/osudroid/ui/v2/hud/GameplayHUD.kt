@@ -1,10 +1,12 @@
-package com.reco1l.osu.hud
+package com.osudroid.ui.v2.hud
 
 import com.osudroid.resources.R.string
+import com.osudroid.ui.v2.hud.elements.HUDAccuracyCounter
+import com.osudroid.ui.v2.hud.elements.HUDPieSongProgress
+import com.osudroid.ui.v2.hud.elements.HUDScoreCounter
 import com.reco1l.andengine.*
 import com.reco1l.andengine.container.Container
-import com.reco1l.osu.hud.editor.HUDElementSelector
-import com.reco1l.osu.hud.elements.*
+import com.osudroid.ui.v2.hud.editor.HUDElementSelector
 import com.reco1l.osu.ui.MessageDialog
 import com.reco1l.osu.updateThread
 import com.reco1l.toolkt.kotlin.*
@@ -129,7 +131,7 @@ class GameplayHUD : Container(), IGameplayEvents {
             .addButton(StringTable.get(string.hudEditor_modal_reset)) {
                 it.dismiss()
                 updateThread {
-                    setSkinData(HUDSkinData.Default)
+                    setSkinData(HUDSkinData.Companion.Default)
                     ToastLogger.showText(string.hudEditor_reset, true)
                 }
             }
@@ -159,7 +161,7 @@ class GameplayHUD : Container(), IGameplayEvents {
             json = SkinJsonReader.getReader().currentData
         }
 
-        json.put("HUD", HUDSkinData.writeToJSON(data))
+        json.put("HUD", HUDSkinData.Companion.writeToJSON(data))
         jsonFile.writeText(json.toString(4))
 
         SkinJsonReader.getReader().currentData = json
@@ -188,7 +190,7 @@ class GameplayHUD : Container(), IGameplayEvents {
         // applying default layout.
         layoutData.elements.forEach { data -> addElement(data) }
 
-        if (layoutData == HUDSkinData.Default) {
+        if (layoutData == HUDSkinData.Companion.Default) {
             applyDefaultLayout()
         }
     }

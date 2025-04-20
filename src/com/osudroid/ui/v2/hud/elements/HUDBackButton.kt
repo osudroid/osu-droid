@@ -1,4 +1,4 @@
-package com.reco1l.osu.hud.elements
+package com.osudroid.ui.v2.hud.elements
 
 import com.edlplan.framework.easing.Easing
 import com.reco1l.andengine.*
@@ -7,7 +7,7 @@ import com.reco1l.andengine.shape.Circle
 import com.reco1l.andengine.sprite.ExtendedSprite
 import com.reco1l.framework.ColorARGB
 import com.reco1l.framework.Interpolation
-import com.reco1l.osu.hud.HUDElement
+import com.osudroid.ui.v2.hud.HUDElement
 import org.anddev.andengine.input.touch.TouchEvent
 import ru.nsu.ccfit.zuev.osu.Config
 import ru.nsu.ccfit.zuev.osu.GlobalManager

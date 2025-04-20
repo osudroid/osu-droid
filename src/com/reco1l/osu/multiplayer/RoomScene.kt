@@ -30,7 +30,7 @@ import com.reco1l.osu.ui.MessageDialog
 import com.reco1l.osu.ui.entity.BeatmapButton
 import com.reco1l.osu.ui.entity.ComposedText
 import com.osudroid.ui.v1.SettingsFragment
-import com.reco1l.osu.ui.modmenu.ModMenu
+import com.osudroid.ui.v2.modmenu.ModMenu
 import com.reco1l.osu.updateThread
 import com.reco1l.toolkt.kotlin.runSafe
 import com.rian.osu.mods.ModScoreV2

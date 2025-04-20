@@ -1,4 +1,4 @@
-package com.reco1l.osu.ui.modmenu
+package com.osudroid.ui.v2.modmenu
 
 import com.reco1l.andengine.*
 import com.reco1l.andengine.ExtendedEntity.Companion.FitContent

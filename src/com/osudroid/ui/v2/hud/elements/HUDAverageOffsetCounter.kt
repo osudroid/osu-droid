@@ -1,7 +1,7 @@
-package com.reco1l.osu.hud.elements
+package com.osudroid.ui.v2.hud.elements
 
 import com.reco1l.andengine.text.ExtendedText
-import com.reco1l.osu.hud.HUDElement
+import com.osudroid.ui.v2.hud.HUDElement
 import ru.nsu.ccfit.zuev.osu.ResourceManager
 import ru.nsu.ccfit.zuev.osu.game.GameScene
 import kotlin.math.roundToInt

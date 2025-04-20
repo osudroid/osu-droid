@@ -52,7 +52,7 @@ import com.reco1l.osu.UpdateManager;
 import com.reco1l.osu.multiplayer.LobbyScene;
 import com.reco1l.osu.multiplayer.RoomScene;
 
-import com.reco1l.osu.ui.modmenu.ModMenu;
+import com.osudroid.ui.v2.modmenu.ModMenu;
 import com.rian.osu.difficulty.BeatmapDifficultyCalculator;
 import net.lingala.zip4j.ZipFile;
 

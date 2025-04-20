@@ -1,6 +1,6 @@
-package com.reco1l.osu.hud.elements
+package com.osudroid.ui.v2.hud.elements
 
-import com.reco1l.osu.hud.HUDElement
+import com.osudroid.ui.v2.hud.HUDElement
 import com.reco1l.osu.playfield.SpriteFont
 import ru.nsu.ccfit.zuev.osu.game.GameScene
 import ru.nsu.ccfit.zuev.skins.OsuSkin

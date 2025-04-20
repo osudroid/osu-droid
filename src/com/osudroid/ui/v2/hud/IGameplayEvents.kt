@@ -1,4 +1,4 @@
-package com.reco1l.osu.hud
+package com.osudroid.ui.v2.hud
 
 import android.view.MotionEvent
 import com.rian.osu.beatmap.hitobject.HitObject

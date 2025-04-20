@@ -1,4 +1,4 @@
-package com.reco1l.osu.hud.editor
+package com.osudroid.ui.v2.hud.editor
 
 import com.reco1l.andengine.*
 import com.reco1l.andengine.container.ConstraintContainer
@@ -9,7 +9,7 @@ import com.reco1l.andengine.shape.*
 import com.reco1l.andengine.sprite.ExtendedSprite
 import com.reco1l.andengine.text.*
 import com.reco1l.framework.ColorARGB
-import com.reco1l.osu.hud.HUDElement
+import com.osudroid.ui.v2.hud.HUDElement
 import com.reco1l.osu.updateThread
 import com.reco1l.toolkt.kotlin.*
 import org.anddev.andengine.input.touch.TouchEvent

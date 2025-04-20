@@ -19,7 +19,7 @@ import com.reco1l.andengine.sprite.ExtendedSprite;
 import com.reco1l.osu.multiplayer.Multiplayer;
 import com.reco1l.osu.multiplayer.RoomScene;
 
-import com.reco1l.osu.ui.modmenu.ModMenu;
+import com.osudroid.ui.v2.modmenu.ModMenu;
 import com.rian.osu.GameMode;
 import com.rian.osu.beatmap.DroidHitWindow;
 import com.rian.osu.beatmap.PreciseDroidHitWindow;

@@ -1,8 +1,8 @@
-package com.reco1l.osu.hud.elements
+package com.osudroid.ui.v2.hud.elements
 
 import com.edlplan.framework.easing.*
 import com.reco1l.andengine.modifier.OnModifierFinished
-import com.reco1l.osu.hud.HUDElement
+import com.osudroid.ui.v2.hud.HUDElement
 import com.reco1l.osu.playfield.SpriteFont
 import ru.nsu.ccfit.zuev.osu.*
 import ru.nsu.ccfit.zuev.osu.game.GameScene

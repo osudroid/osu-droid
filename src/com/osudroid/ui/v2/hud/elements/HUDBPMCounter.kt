@@ -1,4 +1,4 @@
-package com.reco1l.osu.hud.elements
+package com.osudroid.ui.v2.hud.elements
 
 import kotlin.math.roundToInt
 import ru.nsu.ccfit.zuev.osu.game.GameHelper

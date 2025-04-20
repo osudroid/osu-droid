@@ -1,8 +1,16 @@
-package com.reco1l.osu.hud
+package com.osudroid.ui.v2.hud
 
+import com.osudroid.ui.v2.hud.elements.HUDAccuracyCounter
+import com.osudroid.ui.v2.hud.elements.HUDAverageOffsetCounter
+import com.osudroid.ui.v2.hud.elements.HUDBackButton
+import com.osudroid.ui.v2.hud.elements.HUDComboCounter
+import com.osudroid.ui.v2.hud.elements.HUDHealthBar
+import com.osudroid.ui.v2.hud.elements.HUDHitErrorMeter
+import com.osudroid.ui.v2.hud.elements.HUDPieSongProgress
+import com.osudroid.ui.v2.hud.elements.HUDScoreCounter
+import com.osudroid.ui.v2.hud.elements.HUDUnstableRateCounter
 import com.reco1l.andengine.Anchor
 import com.reco1l.framework.math.Vec2
-import com.reco1l.osu.hud.elements.*
 import com.reco1l.osu.ui.entity.GameplayLeaderboard
 import com.reco1l.toolkt.data.putObject
 import org.json.JSONArray

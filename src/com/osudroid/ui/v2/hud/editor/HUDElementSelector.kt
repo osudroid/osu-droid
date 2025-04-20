@@ -1,4 +1,4 @@
-package com.reco1l.osu.hud.editor
+package com.osudroid.ui.v2.hud.editor
 
 import com.reco1l.andengine.*
 import com.reco1l.andengine.container.Container
@@ -9,9 +9,9 @@ import com.reco1l.andengine.shape.Box
 import com.reco1l.andengine.text.ExtendedText
 import com.reco1l.framework.ColorARGB
 import com.reco1l.framework.math.Vec4
-import com.reco1l.osu.hud.GameplayHUD
-import com.reco1l.osu.hud.HUDElements
-import com.reco1l.osu.hud.IGameplayEvents
+import com.osudroid.ui.v2.hud.GameplayHUD
+import com.osudroid.ui.v2.hud.HUDElements
+import com.osudroid.ui.v2.hud.IGameplayEvents
 import com.reco1l.toolkt.kotlin.fastForEach
 import com.rian.osu.beatmap.hitobject.HitObject
 import org.anddev.andengine.input.touch.TouchEvent
