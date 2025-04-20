@@ -544,11 +544,11 @@ object ModMenuV2 : ExtendedScene() {
 
         fun updateEnabledState() {
             // TODO: the button should be hidden when it is disabled after Container can observe child visibility.
-            if (Multiplayer.isMultiplayer && Multiplayer.room != null) {
-                isEnabled = mod.isValidForMultiplayer && (Multiplayer.isRoomHost ||
+            isEnabled = if (Multiplayer.isMultiplayer && Multiplayer.room != null) {
+                mod.isValidForMultiplayer && (Multiplayer.isRoomHost ||
                     (Multiplayer.room!!.gameplaySettings.isFreeMod && mod.isValidForMultiplayerAsFreeMod))
             } else {
-                isEnabled = true
+                true
             }
         }
 
