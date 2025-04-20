@@ -18,7 +18,10 @@ import ru.nsu.ccfit.zuev.osu.ResourceManager
 import ru.nsu.ccfit.zuev.osu.online.OnlineManager
 import java.io.File
 
-object BannerLoader {
+object BannerManager {
+
+    private const val BANNER_DURATION = 10f // Seconds
+
 
     @JvmStatic
     fun loadBannerSprite(): BannerSprite? {
@@ -73,79 +76,71 @@ object BannerLoader {
         return BannerSprite(banners)
     }
 
-}
 
-data class Banner(
-    val url: String,
-    val image: TextureRegion,
-)
+    data class Banner(
+        val url: String,
+        val image: TextureRegion,
+    )
 
-class BannerSprite(private val banners: List<Banner>) : ExtendedSprite() {
-
-
-    private var currentBannerIndex = 0
-
-    private var elapsedTimeSinceLastChange = 0f
+    class BannerSprite(private val banners: List<Banner>) : ExtendedSprite() {
 
 
-    init {
-        textureRegion = banners[currentBannerIndex].image
-        alpha = 0f
-        fadeIn(0.75f)
-    }
+        private var currentBannerIndex = 0
+
+        private var elapsedTimeSinceLastChange = 0f
 
 
-    override fun onManagedUpdate(deltaTimeSec: Float) {
-        if (banners.size > 1) {
+        init {
+            textureRegion = banners[currentBannerIndex].image
+            alpha = 0f
+            fadeIn(0.75f)
+        }
 
-            if (elapsedTimeSinceLastChange > BANNER_DURATION) {
-                elapsedTimeSinceLastChange %= BANNER_DURATION
 
-                currentBannerIndex++
-                currentBannerIndex %= banners.size
+        override fun onManagedUpdate(deltaTimeSec: Float) {
+            if (banners.size > 1) {
+
+                if (elapsedTimeSinceLastChange > BANNER_DURATION) {
+                    elapsedTimeSinceLastChange %= BANNER_DURATION
+
+                    currentBannerIndex++
+                    currentBannerIndex %= banners.size
+
+                    val banner = banners[currentBannerIndex]
+
+                    fadeOut(0.5f).then {
+                        textureRegion = banner.image
+                        fadeIn(0.5f)
+                    }
+                }
+                elapsedTimeSinceLastChange += deltaTimeSec
+            }
+            super.onManagedUpdate(deltaTimeSec)
+        }
+
+        override fun onAreaTouched(event: TouchEvent, localX: Float, localY: Float): Boolean {
+
+            elapsedTimeSinceLastChange = 0f
+
+            if (event.isActionDown) {
+                unregisterEntityModifiers { it is UniversalModifier && it.type == ModifierType.ScaleXY }
+                scaleTo(0.95f, 0.1f)
+            }
+
+            if (event.isActionUp || event.isActionCancel || event.isActionOutside) {
+                unregisterEntityModifiers { it is UniversalModifier && it.type == ModifierType.ScaleXY }
+                scaleTo(1f, 0.1f)
 
                 val banner = banners[currentBannerIndex]
 
-                fadeOut(0.5f).then {
-                    textureRegion = banner.image
-                    fadeIn(0.5f)
+                if (event.isActionUp && banner.url.isNotBlank()) {
+                    val uri = Uri.parse(banner.url)
+                    val intent = Intent(ACTION_VIEW, uri)
+                    GlobalManager.getInstance().mainActivity.startActivity(intent)
                 }
             }
-            elapsedTimeSinceLastChange += deltaTimeSec
+            return true
         }
-        super.onManagedUpdate(deltaTimeSec)
-    }
-
-    override fun onAreaTouched(event: TouchEvent, localX: Float, localY: Float): Boolean {
-
-        elapsedTimeSinceLastChange = 0f
-
-        if (event.isActionDown) {
-            unregisterEntityModifiers { it is UniversalModifier && it.type == ModifierType.ScaleXY }
-            scaleTo(0.95f, 0.1f)
-        }
-
-        if (event.isActionUp || event.isActionCancel || event.isActionOutside) {
-            unregisterEntityModifiers { it is UniversalModifier && it.type == ModifierType.ScaleXY }
-            scaleTo(1f, 0.1f)
-
-            val banner = banners[currentBannerIndex]
-
-            if (event.isActionUp && banner.url.isNotBlank()) {
-                val uri = Uri.parse(banner.url)
-                val intent = Intent(ACTION_VIEW, uri)
-                GlobalManager.getInstance().mainActivity.startActivity(intent)
-            }
-        }
-
-        return true
-    }
-
-
-    companion object {
-
-        private const val BANNER_DURATION = 10f // Seconds
-
     }
 
 }

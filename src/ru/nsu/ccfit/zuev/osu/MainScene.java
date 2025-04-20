@@ -9,8 +9,8 @@ import com.acivev.VibratorManager;
 import com.reco1l.andengine.Anchor;
 import com.reco1l.andengine.shape.Box;
 import com.reco1l.andengine.sprite.ExtendedSprite;
-import com.reco1l.osu.BannerLoader;
-import com.reco1l.osu.BannerSprite;
+import com.reco1l.osu.BannerManager;
+import com.reco1l.osu.BannerManager.BannerSprite;
 import com.reco1l.osu.data.BeatmapInfo;
 import com.reco1l.osu.Execution;
 import com.osudroid.ui.MainMenu;
@@ -494,7 +494,7 @@ public class MainScene implements IUpdateHandler {
             return;
         }
 
-        BannerSprite sprite = BannerLoader.loadBannerSprite();
+        BannerSprite sprite = BannerManager.loadBannerSprite();
         if (sprite != null) {
             sprite.setPosition(Config.getRES_WIDTH(), Config.getRES_HEIGHT());
             sprite.setOrigin(Anchor.BottomRight);
