@@ -12,6 +12,7 @@ import com.reco1l.framework.*
 import com.reco1l.framework.math.*
 import com.reco1l.ibancho.RoomAPI.setPlayerMods
 import com.reco1l.ibancho.RoomAPI.setRoomMods
+import com.reco1l.ibancho.data.RoomMods
 import com.reco1l.osu.*
 import com.reco1l.osu.multiplayer.*
 import com.reco1l.toolkt.kotlin.*
@@ -317,6 +318,49 @@ object ModMenuV2 : ExtendedScene() {
     //endregion
 
     //region Mods
+
+    fun setMods(mods: RoomMods, isFreeMod: Boolean) {
+        if (isFreeMod) {
+            for (mod in enabledMods.values) {
+                if (mod.isValidForMultiplayerAsFreeMod) {
+                    continue
+                }
+
+                if (mod !in mods) {
+                    removeMod(mod)
+                }
+            }
+        } else {
+            clear()
+        }
+
+        for (mod in mods.values) {
+            if (!mod.isValidForMultiplayer) {
+                continue
+            }
+
+            if (!isFreeMod || mod.isValidForMultiplayerAsFreeMod) {
+                addMod(mod)
+            }
+        }
+
+        if (!Multiplayer.isRoomHost) {
+            val doubleTime = enabledMods.ofType<ModDoubleTime>()
+            val nightCore = enabledMods.ofType<ModNightCore>()
+
+            if (Config.isUseNightcoreOnMultiplayer() && doubleTime != null) {
+                removeMod(doubleTime)
+                addMod(ModNightCore())
+            } else if (!Config.isUseNightcoreOnMultiplayer() && nightCore != null) {
+                removeMod(nightCore)
+                addMod(ModDoubleTime())
+            }
+        }
+
+        modButtons.fastForEach { button ->
+            button.isEnabled = !isFreeMod || button.mod.isValidForMultiplayerAsFreeMod
+        }
+    }
 
     fun clear() {
         cancelCalculationJob()
