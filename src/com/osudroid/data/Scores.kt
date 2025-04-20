@@ -1,5 +1,6 @@
 @file:JvmName("Scores")
-package com.reco1l.osu.data
+
+package com.osudroid.data
 
 import androidx.room.Dao
 import androidx.room.Entity

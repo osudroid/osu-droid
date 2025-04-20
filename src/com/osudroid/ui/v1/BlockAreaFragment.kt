@@ -9,8 +9,8 @@ import android.widget.ImageView
 import android.widget.LinearLayout
 import androidx.core.view.updateLayoutParams
 import com.edlplan.ui.fragment.BaseFragment
-import com.reco1l.osu.data.BlockArea
-import com.reco1l.osu.data.DatabaseManager
+import com.osudroid.data.BlockArea
+import com.osudroid.data.DatabaseManager
 import com.reco1l.osu.ui.MessageDialog
 import com.reco1l.toolkt.android.dp
 import com.reco1l.toolkt.android.removeSelf

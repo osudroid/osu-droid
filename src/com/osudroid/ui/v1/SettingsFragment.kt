@@ -34,7 +34,7 @@ import com.osudroid.multiplayer.api.data.TeamMode
 import com.osudroid.multiplayer.api.data.WinCondition
 import com.osudroid.UpdateManager
 import com.reco1l.osu.async
-import com.reco1l.osu.data.DatabaseManager
+import com.osudroid.data.DatabaseManager
 import com.reco1l.osu.mainThread
 import com.osudroid.multiplayer.Multiplayer
 import com.osudroid.multiplayer.RoomScene

@@ -4,7 +4,7 @@ import android.util.Log;
 
 import com.edlplan.framework.utils.functionality.SmartIterator;
 import com.reco1l.osu.Execution;
-import com.reco1l.osu.data.DatabaseManager;
+import com.osudroid.data.DatabaseManager;
 import com.osudroid.multiplayer.Multiplayer;
 import com.osudroid.multiplayer.RoomScene;
 import com.reco1l.osu.ui.entity.StatisticSelector;
@@ -43,7 +43,7 @@ import ru.nsu.ccfit.zuev.osu.Config;
 import ru.nsu.ccfit.zuev.osu.DifficultyAlgorithm;
 import ru.nsu.ccfit.zuev.osu.GlobalManager;
 import ru.nsu.ccfit.zuev.osu.ResourceManager;
-import com.reco1l.osu.data.BeatmapInfo;
+import com.osudroid.data.BeatmapInfo;
 
 import ru.nsu.ccfit.zuev.osu.ToastLogger;
 import ru.nsu.ccfit.zuev.osu.Utils;

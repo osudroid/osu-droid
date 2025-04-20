@@ -1,6 +1,6 @@
 package ru.nsu.ccfit.zuev.osu.menu;
 
-import com.reco1l.osu.data.BeatmapSetInfo;
+import com.osudroid.data.BeatmapSetInfo;
 import org.anddev.andengine.entity.Entity;
 import org.anddev.andengine.entity.scene.Scene;
 import org.anddev.andengine.entity.sprite.Sprite;
@@ -14,8 +14,8 @@ import java.util.regex.Pattern;
 import ru.nsu.ccfit.zuev.osu.Config;
 import ru.nsu.ccfit.zuev.osu.LibraryManager;
 import ru.nsu.ccfit.zuev.osu.ResourceManager;
-import com.reco1l.osu.data.BeatmapInfo;
-import com.reco1l.osu.data.DatabaseManager;
+import com.osudroid.data.BeatmapInfo;
+import com.osudroid.data.DatabaseManager;
 
 import ru.nsu.ccfit.zuev.osu.Utils;
 import ru.nsu.ccfit.zuev.osu.DifficultyAlgorithm;

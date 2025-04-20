@@ -1,4 +1,4 @@
-package com.reco1l.osu.data
+package com.osudroid.data
 
 import android.content.Context
 import android.util.Log

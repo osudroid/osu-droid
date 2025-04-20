@@ -45,7 +45,7 @@ import com.reco1l.andengine.ExtendedEngine;
 import com.osudroid.multiplayer.api.LobbyAPI;
 import com.osudroid.AccessibilityDetector;
 import com.osudroid.beatmaps.DifficultyCalculationManager;
-import com.reco1l.osu.data.BeatmapInfo;
+import com.osudroid.data.BeatmapInfo;
 import com.reco1l.osu.Execution;
 import com.osudroid.multiplayer.Multiplayer;
 import com.osudroid.UpdateManager;

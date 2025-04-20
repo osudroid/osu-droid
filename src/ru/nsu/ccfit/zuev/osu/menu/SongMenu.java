@@ -1,5 +1,7 @@
 package ru.nsu.ccfit.zuev.osu.menu;
 
+import static com.osudroid.data.BeatmapsKt.BeatmapInfo;
+
 import android.animation.ValueAnimator;
 import android.annotation.SuppressLint;
 import android.app.Activity;
@@ -10,9 +12,9 @@ import com.edlplan.ui.fragment.BeatmapPropertiesFragment;
 import com.edlplan.ui.fragment.ScoreMenuFragment;
 import com.reco1l.framework.EasingKt;
 import com.osudroid.multiplayer.api.RoomAPI;
-import com.reco1l.osu.data.BeatmapInfo;
-import com.reco1l.osu.data.BeatmapSetInfo;
-import com.reco1l.osu.data.DatabaseManager;
+import com.osudroid.data.BeatmapInfo;
+import com.osudroid.data.BeatmapSetInfo;
+import com.osudroid.data.DatabaseManager;
 import com.reco1l.osu.Execution;
 import com.reco1l.andengine.sprite.AnimatedSprite;
 import com.reco1l.andengine.sprite.ExtendedSprite;
@@ -78,8 +80,6 @@ import ru.nsu.ccfit.zuev.osu.scoring.ScoringScene;
 import ru.nsu.ccfit.zuev.osu.scoring.StatisticV2;
 import ru.nsu.ccfit.zuev.skins.OsuSkin;
 import ru.nsu.ccfit.zuev.skins.SkinLayout;
-
-import static com.reco1l.osu.data.BeatmapsKt.BeatmapInfo;
 
 public class SongMenu implements IUpdateHandler, MenuItemListener,
         IScrollBarListener {

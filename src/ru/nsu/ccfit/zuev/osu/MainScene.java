@@ -11,7 +11,7 @@ import com.reco1l.andengine.shape.Box;
 import com.reco1l.andengine.sprite.ExtendedSprite;
 import com.osudroid.ui.BannerManager;
 import com.osudroid.ui.BannerManager.BannerSprite;
-import com.reco1l.osu.data.BeatmapInfo;
+import com.osudroid.data.BeatmapInfo;
 import com.reco1l.osu.Execution;
 import com.osudroid.ui.MainMenu;
 
