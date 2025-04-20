@@ -6,8 +6,8 @@ import java.io.Serial;
 import java.io.Serializable;
 import java.util.Random;
 
-import com.reco1l.ibancho.data.RoomTeam;
-import com.reco1l.ibancho.data.WinCondition;
+import com.osudroid.ibancho.data.RoomTeam;
+import com.osudroid.ibancho.data.WinCondition;
 import com.reco1l.osu.data.ScoreInfo;
 import com.reco1l.osu.multiplayer.Multiplayer;
 import com.rian.osu.beatmap.sections.BeatmapDifficulty;

@@ -42,7 +42,7 @@ import com.edlplan.ui.ActivityOverlay;
 import com.google.firebase.analytics.FirebaseAnalytics;
 import com.google.firebase.crashlytics.FirebaseCrashlytics;
 import com.reco1l.andengine.ExtendedEngine;
-import com.reco1l.ibancho.LobbyAPI;
+import com.osudroid.ibancho.LobbyAPI;
 import com.reco1l.osu.AccessibilityDetector;
 import com.reco1l.osu.DifficultyCalculationManager;
 import com.reco1l.osu.data.BeatmapInfo;

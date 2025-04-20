@@ -1,8 +1,18 @@
-package com.reco1l.ibancho
+package com.osudroid.ibancho
 
 import com.osudroid.BuildConfiguration
 import com.osudroid.debug.MockSocket
-import com.reco1l.ibancho.data.*
+import com.osudroid.ibancho.data.PlayerStatus
+import com.osudroid.ibancho.data.Room
+import com.osudroid.ibancho.data.RoomMods
+import com.osudroid.ibancho.data.RoomStatus
+import com.osudroid.ibancho.data.RoomTeam
+import com.osudroid.ibancho.data.TeamMode
+import com.osudroid.ibancho.data.WinCondition
+import com.osudroid.ibancho.data.parseBeatmap
+import com.osudroid.ibancho.data.parseGameplaySettings
+import com.osudroid.ibancho.data.parsePlayer
+import com.osudroid.ibancho.data.parsePlayers
 import ru.nsu.ccfit.zuev.osu.SecurityUtils
 import com.reco1l.osu.multiplayer.*
 import io.socket.client.IO

@@ -1,4 +1,4 @@
-package com.reco1l.ibancho.data
+package com.osudroid.ibancho.data
 
 /**
  * Represents the team of a room player.

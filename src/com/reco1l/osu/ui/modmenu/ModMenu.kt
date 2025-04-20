@@ -10,9 +10,9 @@ import com.reco1l.andengine.text.*
 import com.reco1l.andengine.ui.*
 import com.reco1l.framework.*
 import com.reco1l.framework.math.*
-import com.reco1l.ibancho.RoomAPI.setPlayerMods
-import com.reco1l.ibancho.RoomAPI.setRoomMods
-import com.reco1l.ibancho.data.RoomMods
+import com.osudroid.ibancho.RoomAPI.setPlayerMods
+import com.osudroid.ibancho.RoomAPI.setRoomMods
+import com.osudroid.ibancho.data.RoomMods
 import com.reco1l.osu.*
 import com.reco1l.osu.multiplayer.*
 import com.reco1l.osu.ui.SettingsFragment

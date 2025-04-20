@@ -2,9 +2,9 @@ package com.reco1l.osu.multiplayer
 
 import android.text.format.DateFormat
 import android.util.Log
-import com.reco1l.ibancho.RoomAPI
-import com.reco1l.ibancho.data.Room
-import com.reco1l.ibancho.data.RoomPlayer
+import com.osudroid.ibancho.RoomAPI
+import com.osudroid.ibancho.data.Room
+import com.osudroid.ibancho.data.RoomPlayer
 import com.reco1l.osu.ui.entity.*
 import com.reco1l.toolkt.kotlin.formatTimeMilliseconds
 import com.reco1l.toolkt.kotlin.fromDate

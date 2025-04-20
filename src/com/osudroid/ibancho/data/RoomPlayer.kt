@@ -1,4 +1,4 @@
-package com.reco1l.ibancho.data
+package com.osudroid.ibancho.data
 
 data class RoomPlayer(
 

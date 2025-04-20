@@ -1,11 +1,11 @@
-package com.reco1l.ibancho
+package com.osudroid.ibancho
 
-import com.reco1l.ibancho.data.Room
-import com.reco1l.ibancho.data.RoomBeatmap
-import com.reco1l.ibancho.data.RoomGameplaySettings
-import com.reco1l.ibancho.data.RoomMods
-import com.reco1l.ibancho.data.TeamMode
-import com.reco1l.ibancho.data.WinCondition
+import com.osudroid.ibancho.data.Room
+import com.osudroid.ibancho.data.RoomBeatmap
+import com.osudroid.ibancho.data.RoomGameplaySettings
+import com.osudroid.ibancho.data.RoomMods
+import com.osudroid.ibancho.data.TeamMode
+import com.osudroid.ibancho.data.WinCondition
 import org.json.JSONArray
 
 interface IRoomEventListener {

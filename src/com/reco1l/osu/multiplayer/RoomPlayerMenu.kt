@@ -1,7 +1,6 @@
 package com.reco1l.osu.multiplayer
 
 import android.animation.Animator
-import android.app.AlertDialog
 import android.view.View
 import android.widget.Button
 import android.widget.TextView
@@ -10,8 +9,8 @@ import com.edlplan.ui.BaseAnimationListener
 import com.edlplan.ui.EasingHelper
 import com.edlplan.ui.fragment.BaseFragment
 import com.edlplan.ui.fragment.WebViewFragment
-import com.reco1l.ibancho.RoomAPI
-import com.reco1l.ibancho.data.RoomPlayer
+import com.osudroid.ibancho.RoomAPI
+import com.osudroid.ibancho.data.RoomPlayer
 import com.reco1l.osu.ui.MessageDialog
 import com.reco1l.toolkt.android.cornerRadius
 import com.reco1l.toolkt.android.dp

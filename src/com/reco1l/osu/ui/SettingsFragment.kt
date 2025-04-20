@@ -26,11 +26,11 @@ import com.acivev.VibratorManager
 import com.edlplan.ui.fragment.LoadingFragment
 import com.google.android.material.snackbar.Snackbar
 import com.osudroid.resources.R.string
-import com.reco1l.ibancho.LobbyAPI
-import com.reco1l.ibancho.RoomAPI
-import com.reco1l.ibancho.data.RoomTeam
-import com.reco1l.ibancho.data.TeamMode
-import com.reco1l.ibancho.data.WinCondition
+import com.osudroid.ibancho.LobbyAPI
+import com.osudroid.ibancho.RoomAPI
+import com.osudroid.ibancho.data.RoomTeam
+import com.osudroid.ibancho.data.TeamMode
+import com.osudroid.ibancho.data.WinCondition
 import com.reco1l.osu.UpdateManager
 import com.reco1l.osu.async
 import com.reco1l.osu.data.DatabaseManager

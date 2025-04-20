@@ -1,4 +1,4 @@
-package com.reco1l.ibancho.data
+package com.osudroid.ibancho.data
 
 import com.reco1l.osu.multiplayer.Multiplayer
 import com.rian.osu.mods.ModCustomSpeed
@@ -10,6 +10,7 @@ import com.rian.osu.mods.ModNightCore
 import com.rian.osu.utils.ModHashMap
 import com.rian.osu.utils.ModUtils
 import org.json.JSONArray
+import kotlin.collections.iterator
 
 class RoomMods @JvmOverloads constructor(json: JSONArray? = null) : ModHashMap(ModUtils.deserializeMods(json)) {
 

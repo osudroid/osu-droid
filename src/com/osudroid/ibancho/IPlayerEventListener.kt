@@ -1,9 +1,9 @@
-package com.reco1l.ibancho
+package com.osudroid.ibancho
 
-import com.reco1l.ibancho.data.PlayerStatus
-import com.reco1l.ibancho.data.RoomPlayer
-import com.reco1l.ibancho.data.RoomTeam
-import com.reco1l.ibancho.data.RoomMods
+import com.osudroid.ibancho.data.PlayerStatus
+import com.osudroid.ibancho.data.RoomPlayer
+import com.osudroid.ibancho.data.RoomTeam
+import com.osudroid.ibancho.data.RoomMods
 
 interface IPlayerEventListener {
 
