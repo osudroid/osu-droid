@@ -363,8 +363,6 @@ open class ScrollableContainer : Container() {
             } else {
                 deltaX * if (length > 0) length.pow(0.7f) / length else 0f
             }
-        } else {
-            velocityX = 0f
         }
 
         if (scrollAxes.isVertical && !Precision.almostEquals(deltaY, 0f)) {
@@ -375,8 +373,6 @@ open class ScrollableContainer : Container() {
             } else {
                 deltaY * if (length > 0) length.pow(0.7f) / length else 0f
             }
-        } else {
-            velocityY = 0f
         }
 
         deltaX = 0f
