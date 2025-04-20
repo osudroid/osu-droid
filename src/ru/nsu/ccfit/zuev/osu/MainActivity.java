@@ -44,7 +44,7 @@ import com.google.firebase.crashlytics.FirebaseCrashlytics;
 import com.reco1l.andengine.ExtendedEngine;
 import com.osudroid.ibancho.LobbyAPI;
 import com.osudroid.AccessibilityDetector;
-import com.osudroid.DifficultyCalculationManager;
+import com.osudroid.beatmaps.DifficultyCalculationManager;
 import com.reco1l.osu.data.BeatmapInfo;
 import com.reco1l.osu.Execution;
 import com.osudroid.multiplayer.Multiplayer;

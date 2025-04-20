@@ -19,7 +19,7 @@ import com.edlplan.framework.support.ProxySprite;
 import com.edlplan.framework.support.osb.StoryboardSprite;
 import com.edlplan.framework.utils.functionality.SmartIterator;
 import com.osudroid.ibancho.RoomAPI;
-import com.osudroid.DifficultyCalculationManager;
+import com.osudroid.beatmaps.DifficultyCalculationManager;
 import com.reco1l.osu.data.BeatmapInfo;
 import com.reco1l.osu.Execution;
 import com.reco1l.osu.data.DatabaseManager;

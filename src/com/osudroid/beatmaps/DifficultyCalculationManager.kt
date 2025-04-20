@@ -1,4 +1,4 @@
-package com.osudroid
+package com.osudroid.beatmaps
 
 import android.util.Log
 import androidx.preference.PreferenceManager

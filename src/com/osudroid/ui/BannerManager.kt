@@ -1,4 +1,4 @@
-package com.osudroid
+package com.osudroid.ui
 
 import android.content.Intent
 import android.net.Uri
