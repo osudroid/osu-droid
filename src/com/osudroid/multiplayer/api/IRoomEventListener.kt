@@ -1,11 +1,11 @@
-package com.osudroid.ibancho
+package com.osudroid.multiplayer.api
 
-import com.osudroid.ibancho.data.Room
-import com.osudroid.ibancho.data.RoomBeatmap
-import com.osudroid.ibancho.data.RoomGameplaySettings
-import com.osudroid.ibancho.data.RoomMods
-import com.osudroid.ibancho.data.TeamMode
-import com.osudroid.ibancho.data.WinCondition
+import com.osudroid.multiplayer.api.data.Room
+import com.osudroid.multiplayer.api.data.RoomBeatmap
+import com.osudroid.multiplayer.api.data.RoomGameplaySettings
+import com.osudroid.multiplayer.api.data.RoomMods
+import com.osudroid.multiplayer.api.data.TeamMode
+import com.osudroid.multiplayer.api.data.WinCondition
 import org.json.JSONArray
 
 interface IRoomEventListener {

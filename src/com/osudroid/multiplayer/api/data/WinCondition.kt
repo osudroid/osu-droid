@@ -1,4 +1,4 @@
-package com.osudroid.ibancho.data
+package com.osudroid.multiplayer.api.data
 
 import ru.nsu.ccfit.zuev.osu.game.mods.GameMod
 

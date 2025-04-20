@@ -27,11 +27,11 @@ import com.edlplan.ui.fragment.LoadingFragment
 import com.edlplan.ui.fragment.SettingsFragment
 import com.google.android.material.snackbar.Snackbar
 import com.osudroid.resources.R.string
-import com.osudroid.ibancho.LobbyAPI
-import com.osudroid.ibancho.RoomAPI
-import com.osudroid.ibancho.data.RoomTeam
-import com.osudroid.ibancho.data.TeamMode
-import com.osudroid.ibancho.data.WinCondition
+import com.osudroid.multiplayer.api.LobbyAPI
+import com.osudroid.multiplayer.api.RoomAPI
+import com.osudroid.multiplayer.api.data.RoomTeam
+import com.osudroid.multiplayer.api.data.TeamMode
+import com.osudroid.multiplayer.api.data.WinCondition
 import com.osudroid.UpdateManager
 import com.reco1l.osu.async
 import com.reco1l.osu.data.DatabaseManager

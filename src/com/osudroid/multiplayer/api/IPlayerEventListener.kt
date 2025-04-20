@@ -1,9 +1,9 @@
-package com.osudroid.ibancho
+package com.osudroid.multiplayer.api
 
-import com.osudroid.ibancho.data.PlayerStatus
-import com.osudroid.ibancho.data.RoomPlayer
-import com.osudroid.ibancho.data.RoomTeam
-import com.osudroid.ibancho.data.RoomMods
+import com.osudroid.multiplayer.api.data.PlayerStatus
+import com.osudroid.multiplayer.api.data.RoomPlayer
+import com.osudroid.multiplayer.api.data.RoomTeam
+import com.osudroid.multiplayer.api.data.RoomMods
 
 interface IPlayerEventListener {
 

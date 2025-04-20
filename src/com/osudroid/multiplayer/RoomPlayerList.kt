@@ -1,10 +1,10 @@
 package com.osudroid.multiplayer
 
-import com.osudroid.ibancho.data.PlayerStatus.*
-import com.osudroid.ibancho.data.Room
-import com.osudroid.ibancho.data.RoomPlayer
-import com.osudroid.ibancho.data.RoomTeam.*
-import com.osudroid.ibancho.data.TeamMode
+import com.osudroid.multiplayer.api.data.PlayerStatus.*
+import com.osudroid.multiplayer.api.data.Room
+import com.osudroid.multiplayer.api.data.RoomPlayer
+import com.osudroid.multiplayer.api.data.RoomTeam.*
+import com.osudroid.multiplayer.api.data.TeamMode
 import com.reco1l.osu.ui.entity.ScrollableList
 import org.anddev.andengine.entity.primitive.Rectangle
 import org.anddev.andengine.entity.sprite.Sprite

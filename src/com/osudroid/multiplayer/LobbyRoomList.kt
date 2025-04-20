@@ -1,12 +1,12 @@
 package com.osudroid.multiplayer
 
 import android.view.inputmethod.EditorInfo
-import com.osudroid.ibancho.RoomAPI
-import com.osudroid.ibancho.data.Room
-import com.osudroid.ibancho.data.RoomStatus.*
-import com.osudroid.ibancho.data.TeamMode.HeadToHead
-import com.osudroid.ibancho.data.TeamMode.TeamVersus
-import com.osudroid.ibancho.data.WinCondition.*
+import com.osudroid.multiplayer.api.RoomAPI
+import com.osudroid.multiplayer.api.data.Room
+import com.osudroid.multiplayer.api.data.RoomStatus.*
+import com.osudroid.multiplayer.api.data.TeamMode.HeadToHead
+import com.osudroid.multiplayer.api.data.TeamMode.TeamVersus
+import com.osudroid.multiplayer.api.data.WinCondition.*
 import com.reco1l.osu.mainThread
 import com.reco1l.osu.ui.PromptDialog
 import com.reco1l.osu.ui.entity.ScrollableList

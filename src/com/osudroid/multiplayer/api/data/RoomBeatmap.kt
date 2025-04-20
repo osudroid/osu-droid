@@ -1,4 +1,4 @@
-package com.osudroid.ibancho.data
+package com.osudroid.multiplayer.api.data
 
 /**
  * Represents a beatmap model in a multiplayer room.

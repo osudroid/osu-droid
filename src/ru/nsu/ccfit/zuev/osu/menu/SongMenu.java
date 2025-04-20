@@ -9,7 +9,7 @@ import com.edlplan.ui.fragment.SearchBarFragment;
 import com.edlplan.ui.fragment.BeatmapPropertiesFragment;
 import com.edlplan.ui.fragment.ScoreMenuFragment;
 import com.reco1l.framework.EasingKt;
-import com.osudroid.ibancho.RoomAPI;
+import com.osudroid.multiplayer.api.RoomAPI;
 import com.reco1l.osu.data.BeatmapInfo;
 import com.reco1l.osu.data.BeatmapSetInfo;
 import com.reco1l.osu.data.DatabaseManager;

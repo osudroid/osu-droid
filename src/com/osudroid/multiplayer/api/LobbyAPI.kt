@@ -1,14 +1,14 @@
-package com.osudroid.ibancho
+package com.osudroid.multiplayer.api
 
 import com.osudroid.BuildSettings
 import com.osudroid.debug.MockRoom
-import com.osudroid.ibancho.data.Room
-import com.osudroid.ibancho.data.RoomBeatmap
-import com.osudroid.ibancho.data.RoomMods
-import com.osudroid.ibancho.data.RoomStatus
-import com.osudroid.ibancho.data.TeamMode
-import com.osudroid.ibancho.data.WinCondition
-import com.osudroid.ibancho.data.parseGameplaySettings
+import com.osudroid.multiplayer.api.data.Room
+import com.osudroid.multiplayer.api.data.RoomBeatmap
+import com.osudroid.multiplayer.api.data.RoomMods
+import com.osudroid.multiplayer.api.data.RoomStatus
+import com.osudroid.multiplayer.api.data.TeamMode
+import com.osudroid.multiplayer.api.data.WinCondition
+import com.osudroid.multiplayer.api.data.parseGameplaySettings
 import com.reco1l.framework.net.JsonArrayRequest
 import com.reco1l.framework.net.JsonObjectRequest
 import com.reco1l.toolkt.data.putObject

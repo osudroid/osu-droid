@@ -1,8 +1,8 @@
 package com.reco1l.osu.ui.entity
 
-import com.osudroid.ibancho.RoomAPI
-import com.osudroid.ibancho.data.PlayerStatus.Ready
-import com.osudroid.ibancho.data.RoomBeatmap
+import com.osudroid.multiplayer.api.RoomAPI
+import com.osudroid.multiplayer.api.data.PlayerStatus.Ready
+import com.osudroid.multiplayer.api.data.RoomBeatmap
 import com.reco1l.osu.async
 import com.osudroid.multiplayer.Multiplayer
 import com.osudroid.beatmaplisting.BeatmapDownloader

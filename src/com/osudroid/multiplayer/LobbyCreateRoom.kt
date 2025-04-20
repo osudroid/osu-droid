@@ -11,9 +11,9 @@ import com.edlplan.framework.easing.Easing
 import com.edlplan.ui.BaseAnimationListener
 import com.edlplan.ui.EasingHelper
 import com.edlplan.ui.fragment.BaseFragment
-import com.osudroid.ibancho.LobbyAPI
-import com.osudroid.ibancho.RoomAPI
-import com.osudroid.ibancho.data.RoomBeatmap
+import com.osudroid.multiplayer.api.LobbyAPI
+import com.osudroid.multiplayer.api.RoomAPI
+import com.osudroid.multiplayer.api.data.RoomBeatmap
 import com.reco1l.osu.async
 import com.reco1l.osu.mainThread
 import com.reco1l.toolkt.android.cornerRadius

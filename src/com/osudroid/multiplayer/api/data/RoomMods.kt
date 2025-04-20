@@ -1,4 +1,4 @@
-package com.osudroid.ibancho.data
+package com.osudroid.multiplayer.api.data
 
 import com.osudroid.multiplayer.Multiplayer
 import com.rian.osu.mods.ModCustomSpeed

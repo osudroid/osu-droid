@@ -1,12 +1,12 @@
 package com.osudroid.debug
 
-import com.osudroid.ibancho.data.PlayerStatus
-import com.osudroid.ibancho.data.Room
-import com.osudroid.ibancho.data.RoomGameplaySettings
-import com.osudroid.ibancho.data.RoomMods
-import com.osudroid.ibancho.data.RoomStatus
-import com.osudroid.ibancho.data.TeamMode
-import com.osudroid.ibancho.data.WinCondition
+import com.osudroid.multiplayer.api.data.PlayerStatus
+import com.osudroid.multiplayer.api.data.Room
+import com.osudroid.multiplayer.api.data.RoomGameplaySettings
+import com.osudroid.multiplayer.api.data.RoomMods
+import com.osudroid.multiplayer.api.data.RoomStatus
+import com.osudroid.multiplayer.api.data.TeamMode
+import com.osudroid.multiplayer.api.data.WinCondition
 import com.osudroid.multiplayer.Multiplayer
 import com.reco1l.toolkt.data.*
 import com.reco1l.toolkt.kotlin.*

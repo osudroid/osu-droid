@@ -2,7 +2,7 @@ package ru.nsu.ccfit.zuev.osu.menu;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
-import com.osudroid.ibancho.data.WinCondition;
+import com.osudroid.multiplayer.api.data.WinCondition;
 import com.osudroid.multiplayer.Multiplayer;
 import org.json.JSONObject;
 

@@ -2,9 +2,9 @@ package com.osudroid.multiplayer
 
 import android.text.format.DateFormat
 import android.util.Log
-import com.osudroid.ibancho.RoomAPI
-import com.osudroid.ibancho.data.Room
-import com.osudroid.ibancho.data.RoomPlayer
+import com.osudroid.multiplayer.api.RoomAPI
+import com.osudroid.multiplayer.api.data.Room
+import com.osudroid.multiplayer.api.data.RoomPlayer
 import com.osudroid.ui.v2.hud.elements.HUDLeaderboard
 import com.reco1l.toolkt.kotlin.formatTimeMilliseconds
 import com.reco1l.toolkt.kotlin.fromDate

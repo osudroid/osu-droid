@@ -10,9 +10,9 @@ import com.reco1l.andengine.text.*
 import com.reco1l.andengine.ui.*
 import com.reco1l.framework.*
 import com.reco1l.framework.math.*
-import com.osudroid.ibancho.RoomAPI.setPlayerMods
-import com.osudroid.ibancho.RoomAPI.setRoomMods
-import com.osudroid.ibancho.data.RoomMods
+import com.osudroid.multiplayer.api.RoomAPI.setPlayerMods
+import com.osudroid.multiplayer.api.RoomAPI.setRoomMods
+import com.osudroid.multiplayer.api.data.RoomMods
 import com.osudroid.multiplayer.Multiplayer
 import com.osudroid.multiplayer.RoomScene
 import com.osudroid.ui.OsuColors

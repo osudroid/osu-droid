@@ -5,8 +5,8 @@ import android.util.Log
 import com.reco1l.andengine.*
 import com.reco1l.andengine.sprite.*
 import ru.nsu.ccfit.zuev.osu.SecurityUtils
-import com.osudroid.ibancho.LobbyAPI
-import com.osudroid.ibancho.RoomAPI
+import com.osudroid.multiplayer.api.LobbyAPI
+import com.osudroid.multiplayer.api.RoomAPI
 import com.reco1l.osu.updateThread
 import com.reco1l.toolkt.kotlin.async
 import org.anddev.andengine.entity.modifier.LoopEntityModifier
