@@ -32,7 +32,7 @@ import com.osudroid.ibancho.RoomAPI
 import com.osudroid.ibancho.data.RoomTeam
 import com.osudroid.ibancho.data.TeamMode
 import com.osudroid.ibancho.data.WinCondition
-import com.reco1l.osu.UpdateManager
+import com.osudroid.UpdateManager
 import com.reco1l.osu.async
 import com.reco1l.osu.data.DatabaseManager
 import com.reco1l.osu.mainThread

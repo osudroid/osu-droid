@@ -1,25 +1,24 @@
-package com.reco1l.osu
+package com.osudroid
 
 import android.content.Intent
-import android.content.Intent.*
 import android.util.Log
 import androidx.core.content.FileProvider
-import com.osudroid.resources.R
 import com.edlplan.ui.fragment.MarkdownFragment
+import com.osudroid.resources.R
 import com.reco1l.framework.net.FileRequest
 import com.reco1l.framework.net.IFileRequestObserver
 import com.reco1l.framework.net.JsonObjectRequest
+import com.reco1l.osu.async
+import com.reco1l.osu.mainThread
 import com.reco1l.osu.ui.MessageDialog
 import com.reco1l.osu.ui.ProgressDialog
 import ru.nsu.ccfit.zuev.osu.Config
 import ru.nsu.ccfit.zuev.osu.GlobalManager
 import ru.nsu.ccfit.zuev.osu.ToastLogger
 import ru.nsu.ccfit.zuev.osu.helper.StringTable
-import ru.nsu.ccfit.zuev.osu.online.OnlineManager.updateEndpoint
+import ru.nsu.ccfit.zuev.osu.online.OnlineManager
 import ru.nsu.ccfit.zuev.osuplus.BuildConfig
-import ru.nsu.ccfit.zuev.osuplus.BuildConfig.APPLICATION_ID
 import java.io.File
-
 
 object UpdateManager: IFileRequestObserver
 {
@@ -61,7 +60,7 @@ object UpdateManager: IFileRequestObserver
 
     /**
      * Check for new game updates.
-     * 
+     *
      * @param silently If `true`, no prompts will be shown unless there's new updates.
      */
     @JvmStatic
@@ -76,7 +75,7 @@ object UpdateManager: IFileRequestObserver
             apksDirectory.listFiles()?.forEach { it.delete() }
 
             try {
-                JsonObjectRequest(updateEndpoint).use { request ->
+                JsonObjectRequest(OnlineManager.updateEndpoint).use { request ->
 
                     val response = request.execute().json
 
@@ -145,11 +144,11 @@ object UpdateManager: IFileRequestObserver
         mainThread { progressDialog?.dismiss() }
 
         val activity = GlobalManager.getInstance().mainActivity
-        val uri = FileProvider.getUriForFile(activity, "$APPLICATION_ID.fileProvider", request.file)
+        val uri = FileProvider.getUriForFile(activity, "${BuildConfig.APPLICATION_ID}.fileProvider", request.file)
 
-        val intent = Intent(ACTION_VIEW)
+        val intent = Intent(Intent.ACTION_VIEW)
         intent.setDataAndType(uri, "application/vnd.android.package-archive")
-        intent.addFlags(FLAG_GRANT_READ_URI_PERMISSION)
+        intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
 
         activity.startActivity(intent)
     }

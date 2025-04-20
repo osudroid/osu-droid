@@ -1,9 +1,7 @@
-package com.reco1l.osu
+package com.osudroid
 
 import android.accessibilityservice.AccessibilityServiceInfo
-import android.accessibilityservice.AccessibilityServiceInfo.CAPABILITY_CAN_PERFORM_GESTURES
-import android.accessibilityservice.AccessibilityServiceInfo.FEEDBACK_ALL_MASK
-import android.content.Context.ACCESSIBILITY_SERVICE
+import android.content.Context
 import android.content.Intent
 import android.provider.Settings
 import android.view.accessibility.AccessibilityManager
@@ -31,12 +29,12 @@ object AccessibilityDetector {
     fun check(context: MainActivity) {
 
         // Getting the accessibility manager.
-        val manager = context.getSystemService(ACCESSIBILITY_SERVICE) as AccessibilityManager
+        val manager = context.getSystemService(Context.ACCESSIBILITY_SERVICE) as AccessibilityManager
 
         // Filtering services that can perform gestures.
-        val illegalServices = manager.getEnabledAccessibilityServiceList(FEEDBACK_ALL_MASK).filter {
+        val illegalServices = manager.getEnabledAccessibilityServiceList(AccessibilityServiceInfo.FEEDBACK_ALL_MASK).filter {
 
-            CAPABILITY_CAN_PERFORM_GESTURES and it.capabilities == CAPABILITY_CAN_PERFORM_GESTURES
+            AccessibilityServiceInfo.CAPABILITY_CAN_PERFORM_GESTURES and it.capabilities == AccessibilityServiceInfo.CAPABILITY_CAN_PERFORM_GESTURES
         }
 
         isIllegalServiceDetected = illegalServices.isNotEmpty()

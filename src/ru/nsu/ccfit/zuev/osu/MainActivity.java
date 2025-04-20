@@ -43,12 +43,12 @@ import com.google.firebase.analytics.FirebaseAnalytics;
 import com.google.firebase.crashlytics.FirebaseCrashlytics;
 import com.reco1l.andengine.ExtendedEngine;
 import com.osudroid.ibancho.LobbyAPI;
-import com.reco1l.osu.AccessibilityDetector;
+import com.osudroid.AccessibilityDetector;
 import com.reco1l.osu.DifficultyCalculationManager;
 import com.reco1l.osu.data.BeatmapInfo;
 import com.reco1l.osu.Execution;
 import com.reco1l.osu.multiplayer.Multiplayer;
-import com.reco1l.osu.UpdateManager;
+import com.osudroid.UpdateManager;
 import com.reco1l.osu.multiplayer.LobbyScene;
 import com.reco1l.osu.multiplayer.RoomScene;
 
