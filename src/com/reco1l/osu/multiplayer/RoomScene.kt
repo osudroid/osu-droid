@@ -835,6 +835,7 @@ object RoomScene : Scene(), IRoomEventListener, IPlayerEventListener {
     }
 
     override fun onRoomGameplaySettingsChange(settings: RoomGameplaySettings) {
+        val wasFreeMod = room!!.gameplaySettings.isFreeMod
 
         room!!.gameplaySettings = settings
 
@@ -844,7 +845,14 @@ object RoomScene : Scene(), IRoomEventListener, IPlayerEventListener {
 
         modsButton!!.isVisible = isRoomHost || settings.isFreeMod
 
-        ModMenuV2.back(false)
+        updateThread {
+            ModMenuV2.back(false)
+
+            if (wasFreeMod != settings.isFreeMod) {
+                ModMenuV2.updateModButtonEnabledState()
+            }
+        }
+
         invalidateStatus()
     }
 
