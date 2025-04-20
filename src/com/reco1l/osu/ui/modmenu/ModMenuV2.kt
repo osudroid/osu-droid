@@ -24,7 +24,7 @@ import com.rian.osu.difficulty.BeatmapDifficultyCalculator.calculateStandardDiff
 import com.rian.osu.difficulty.attributes.*
 import com.rian.osu.mods.*
 import com.rian.osu.utils.*
-import com.rian.osu.utils.ModUtils.calculateRateWithMods
+import com.rian.osu.utils.ModUtils
 import kotlinx.coroutines.*
 import ru.nsu.ccfit.zuev.osu.*
 import ru.nsu.ccfit.zuev.osu.DifficultyAlgorithm.*
@@ -243,12 +243,15 @@ object ModMenuV2 : ExtendedScene() {
 
             // Copy the mods to avoid concurrent modification
             val mods = enabledMods.deepCopy().values
+            val difficulty = beatmap.difficulty.clone()
 
-            arBadge.value = "%.2f".format(beatmap.difficulty.ar)
-            odBadge.value = "%.2f".format(beatmap.difficulty.od)
-            csBadge.value = "%.2f".format(beatmap.difficulty.difficultyCS)
-            hpBadge.value = "%.2f".format(beatmap.difficulty.hp)
-            bpmBadge.value = (selectedBeatmap.mostCommonBPM * calculateRateWithMods(mods)).roundToInt().toString()
+            ModUtils.applyModsToBeatmapDifficulty(difficulty, gameMode, mods, true)
+
+            arBadge.value = "%.2f".format(difficulty.ar)
+            odBadge.value = "%.2f".format(difficulty.od)
+            csBadge.value = "%.2f".format(difficulty.difficultyCS)
+            hpBadge.value = "%.2f".format(difficulty.hp)
+            bpmBadge.value = (selectedBeatmap.mostCommonBPM * ModUtils.calculateRateWithMods(mods)).roundToInt().toString()
 
             val attributes: DifficultyAttributes = when (difficultyAlgorithm) {
                 droid -> calculateDroidDifficulty(beatmap, mods, this@scope)
