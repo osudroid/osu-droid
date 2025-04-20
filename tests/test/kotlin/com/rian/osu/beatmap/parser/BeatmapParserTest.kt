@@ -16,18 +16,18 @@ import ru.nsu.ccfit.zuev.osu.RGBColor
 @RunWith(RobolectricTestRunner::class)
 class BeatmapParserTest {
     @Test
-    fun testFormatVersionHeader() {
+    fun `Test format version header`() {
         Assert.assertEquals(v3Beatmap.formatVersion, 3)
         Assert.assertEquals(v14Beatmap.formatVersion, 14)
     }
 
     @Test
-    fun testV3BeatmapColorsSection() {
+    fun `Test version 3 beatmap colors section`() {
         Assert.assertTrue(v3Beatmap.colors.comboColors.isEmpty())
     }
 
     @Test
-    fun testV14BeatmapColorsSection() {
+    fun `Test version 14 beatmap colors section`() {
         fun test(color: RGBColor, red: Float, green: Float, blue: Float) {
             Assert.assertEquals(color.r(), red, 0f)
             Assert.assertEquals(color.g(), green, 0f)
@@ -47,7 +47,7 @@ class BeatmapParserTest {
     }
 
     @Test
-    fun testV3BeatmapControlPointsSection() {
+    fun `Test version 3 beatmap control points section`() {
         v3Beatmap.controlPoints.apply {
             Assert.assertTrue(difficulty.controlPoints.isEmpty())
             Assert.assertTrue(effect.controlPoints.isEmpty())
@@ -57,7 +57,7 @@ class BeatmapParserTest {
     }
 
     @Test
-    fun testV14BeatmapControlPointsSection() {
+    fun `Test version 14 beatmap control points section`() {
         v14Beatmap.controlPoints.apply {
             Assert.assertEquals(difficulty.controlPoints.size, 14)
             Assert.assertEquals(effect.controlPoints.size, 14)
@@ -67,7 +67,7 @@ class BeatmapParserTest {
     }
 
     @Test
-    fun testV3BeatmapDifficultySection() {
+    fun `Test version 3 beatmap difficulty section`() {
         v3Beatmap.difficulty.apply {
             Assert.assertEquals(ar, 6f, 0f)
             Assert.assertEquals(difficultyCS, 4f, 0f)
@@ -80,7 +80,7 @@ class BeatmapParserTest {
     }
 
     @Test
-    fun testV14BeatmapDifficultySection() {
+    fun `Test version 14 beatmap difficulty section`() {
         v14Beatmap.difficulty.apply {
             Assert.assertEquals(ar, 9f, 0f)
             Assert.assertEquals(difficultyCS, 4f, 0f)
@@ -93,7 +93,7 @@ class BeatmapParserTest {
     }
 
     @Test
-    fun testV3BeatmapEventsSection() {
+    fun `Test version 3 beatmap events section`() {
         v3Beatmap.events.apply {
             Assert.assertEquals(backgroundFilename, "katamari2.jpg")
 
@@ -109,7 +109,7 @@ class BeatmapParserTest {
     }
 
     @Test
-    fun testV14BeatmapEventsSection() {
+    fun `Test version 14 beatmap events section`() {
         v14Beatmap.events.apply {
             Assert.assertEquals(backgroundFilename, "school.jpg")
             Assert.assertNull(backgroundColor)
@@ -120,7 +120,7 @@ class BeatmapParserTest {
     }
 
     @Test
-    fun testV3BeatmapGeneralSection() {
+    fun `Test version 3 beatmap general section`() {
         v3Beatmap.general.apply {
             Assert.assertEquals(audioFilename, "20.mp3")
             Assert.assertEquals(audioLeadIn, 0)
@@ -135,7 +135,7 @@ class BeatmapParserTest {
     }
 
     @Test
-    fun testV14BeatmapGeneralSection() {
+    fun `Test version 14 beatmap general section`() {
         v14Beatmap.general.apply {
             Assert.assertEquals(audioFilename, "audio.mp3")
             Assert.assertEquals(audioLeadIn, 0)
@@ -150,7 +150,7 @@ class BeatmapParserTest {
     }
 
     @Test
-    fun testV3BeatmapHitObjectCounters() {
+    fun `Test version 3 beatmap hit object counters`() {
         v3Beatmap.hitObjects.apply {
             Assert.assertEquals(objects.size, 194)
             Assert.assertEquals(circleCount, 160)
@@ -160,7 +160,7 @@ class BeatmapParserTest {
     }
 
     @Test
-    fun testV14BeatmapHitObjectCounters() {
+    fun `Test version 14 beatmap hit object counters`() {
         v14Beatmap.hitObjects.apply {
             Assert.assertEquals(objects.size, 592)
             Assert.assertEquals(circleCount, 198)
@@ -171,7 +171,7 @@ class BeatmapParserTest {
 
     @Suppress("UNCHECKED_CAST")
     @Test
-    fun testV3BeatmapHitObjectSamples() {
+    fun `Test version 3 beatmap hit object samples`() {
         val circle = v3Beatmap.hitObjects.objects[0] as HitCircle
         Assert.assertEquals(circle.samples.size, 2)
 
@@ -196,7 +196,7 @@ class BeatmapParserTest {
 
     @Suppress("UNCHECKED_CAST")
     @Test
-    fun testV14BeatmapHitObjectSamples() {
+    fun `Test version 14 beatmap hit object samples`() {
         val slider = v14Beatmap.hitObjects.objects[1] as Slider
         Assert.assertEquals(slider.samples.size, 2)
 
@@ -220,7 +220,7 @@ class BeatmapParserTest {
     }
 
     @Test
-    fun testV3BeatmapHitObjectNodeSamples() {
+    fun `Test version 3 beatmap hit object node samples`() {
         val slider = v3Beatmap.hitObjects.objects[19] as Slider
 
         for (nodeSample in slider.nodeSamples) {
@@ -236,7 +236,7 @@ class BeatmapParserTest {
 
     @Suppress("UNCHECKED_CAST")
     @Test
-    fun testV14BeatmapHitObjectNodeSamples() {
+    fun `Test version 14 beatmap hit object node samples`() {
         val slider = v14Beatmap.hitObjects.objects[1] as Slider
 
         for (nodeSample in slider.nodeSamples) {
@@ -261,7 +261,7 @@ class BeatmapParserTest {
     }
 
     @Test
-    fun testV3BeatmapMetadataSection() {
+    fun `Test version 3 beatmap metadata section`() {
         v3Beatmap.metadata.apply {
             Assert.assertEquals(artist, "Kenji Ninuma")
             Assert.assertTrue(artistUnicode.isEmpty())
@@ -277,7 +277,7 @@ class BeatmapParserTest {
     }
 
     @Test
-    fun testV14BeatmapMetadataSection() {
+    fun `Test version 14 beatmap metadata section`() {
         v14Beatmap.metadata.apply {
             Assert.assertEquals(artist, "YOASOBI")
             Assert.assertEquals(artistUnicode, "YOASOBI")
@@ -293,13 +293,13 @@ class BeatmapParserTest {
     }
 
     @Test
-    fun testMaxCombo() {
+    fun `Test max combo`() {
         Assert.assertEquals(v3Beatmap.maxCombo, 314)
         Assert.assertEquals(v14Beatmap.maxCombo, 1033)
     }
 
     @Test
-    fun testNaNControlPoints() {
+    fun `Test NaN control points`() {
         nanBeatmap.controlPoints.apply {
             Assert.assertEquals(timing.controlPoints.size, 1)
             Assert.assertEquals(difficulty.controlPoints.size, 2)

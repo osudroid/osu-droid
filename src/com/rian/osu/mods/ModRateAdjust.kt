@@ -18,7 +18,8 @@ sealed class ModRateAdjust(trackRateMultiplier: Float = 1f) : Mod(), IModApplica
         defaultValue = trackRateMultiplier,
         minValue = 0.5f,
         maxValue = 2f,
-        step = 0.05f
+        step = 0.05f,
+        precision = 2
     )
 
 

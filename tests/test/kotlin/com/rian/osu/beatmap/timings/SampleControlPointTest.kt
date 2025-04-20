@@ -6,7 +6,7 @@ import org.junit.Test
 
 class SampleControlPointTest {
     @Test
-    fun testRedundancy() {
+    fun `Test redundancy`() {
         val controlPoint = SampleControlPoint(1000.0, SampleBank.Normal, 0, 0)
 
         Assert.assertTrue(controlPoint.isRedundant(SampleControlPoint(1500.0, SampleBank.Normal, 0, 0)))

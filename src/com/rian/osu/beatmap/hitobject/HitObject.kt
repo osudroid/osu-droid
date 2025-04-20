@@ -366,7 +366,8 @@ abstract class HitObject(
      * @param controlPoints The control points.
      * @param scope The [CoroutineScope] to use for coroutines.
      */
-    open fun applySamples(controlPoints: BeatmapControlPoints, scope: CoroutineScope?) {
+    @JvmOverloads
+    open fun applySamples(controlPoints: BeatmapControlPoints, scope: CoroutineScope? = null) {
         val sampleControlPoint = controlPoints.sample.controlPointAt(endTime + CONTROL_POINT_LENIENCY)
 
         samples = samples.map {

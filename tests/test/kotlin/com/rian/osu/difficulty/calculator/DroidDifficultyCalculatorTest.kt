@@ -15,7 +15,7 @@ class DroidDifficultyCalculatorTest {
     private val calculator = DroidDifficultyCalculator()
 
     @Test
-    fun testDifficultyAdjustmentModRetention() {
+    fun `Test difficulty adjustment mod retention`() {
         val retainedMods = calculator.retainDifficultyAdjustmentMods(
             listOf(ModDoubleTime(), ModPrecise(), ModNoFail())
         )
@@ -26,7 +26,7 @@ class DroidDifficultyCalculatorTest {
     }
 
     @Test
-    fun testDifficultyCalculationSampleBeatmap() {
+    fun `Test difficulty calculation sample beatmap`() {
         val beatmap =
             BeatmapParser(
                 TestResourceManager.getBeatmapFile(

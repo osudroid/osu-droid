@@ -5,7 +5,7 @@ import org.junit.Test
 
 class LRUCacheTest {
     @Test
-    fun testLRUCache() {
+    fun `Test LRU cache`() {
         val cache = LRUCache<Int, Int>(3)
 
         cache.put(1, 1)

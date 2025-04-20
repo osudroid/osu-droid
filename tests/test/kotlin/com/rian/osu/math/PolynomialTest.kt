@@ -5,7 +5,7 @@ import org.junit.Test
 
 class PolynomialTest {
     @Test
-    fun testPolynomial() {
+    fun `Test polynomial`() {
         Assert.assertEquals(Polynomial.evaluate(0.0, doubleArrayOf()), 0.0, 0.0)
         Assert.assertEquals(Polynomial.evaluate(123.0, doubleArrayOf()), 0.0, 0.0)
         Assert.assertEquals(Polynomial.evaluate(0.0, doubleArrayOf(0.0)), 0.0, 0.0)

@@ -19,7 +19,7 @@ import org.robolectric.RobolectricTestRunner
 @RunWith(RobolectricTestRunner::class)
 class ModUtilsTest {
     @Test
-    fun testModSerialization() {
+    fun `Test mod serialization`() {
         val serializedMods = ModUtils.serializeMods(
             listOf(
                 ModAuto(),
@@ -42,7 +42,7 @@ class ModUtilsTest {
     }
 
     @Test
-    fun testModDeserialization() {
+    fun `Test mod deserialization`() {
         val serializedMods = ModUtils.serializeMods(
             listOf(
                 ModAuto(),
@@ -64,7 +64,7 @@ class ModUtilsTest {
     }
 
     @Test
-    fun testRateCalculationWithMods() {
+    fun `Test rate calculation with mods`() {
         fun test(expectedRate: Float, vararg mods: Mod) =
             Assert.assertEquals(expectedRate, ModUtils.calculateRateWithMods(mods.toList()), 0f)
 
@@ -76,7 +76,7 @@ class ModUtilsTest {
     }
 
     @Test
-    fun testApplyingModsToBeatmapDifficulty() {
+    fun `Test applying mods to beatmap difficulty`() {
         fun test(original: BeatmapDifficulty, expected: BeatmapDifficulty, mode: GameMode, vararg mods: Mod) {
             ModUtils.applyModsToBeatmapDifficulty(original, mode, mods.toList())
 
