@@ -1,4 +1,4 @@
-package com.reco1l.osu.ui
+package com.osudroid.ui.v1
 
 import android.annotation.SuppressLint
 import android.content.ClipData
@@ -24,6 +24,7 @@ import androidx.preference.Preference
 import androidx.preference.SeekBarPreference
 import com.acivev.VibratorManager
 import com.edlplan.ui.fragment.LoadingFragment
+import com.edlplan.ui.fragment.SettingsFragment
 import com.google.android.material.snackbar.Snackbar
 import com.osudroid.resources.R.string
 import com.osudroid.ibancho.LobbyAPI
@@ -37,6 +38,9 @@ import com.reco1l.osu.data.DatabaseManager
 import com.reco1l.osu.mainThread
 import com.reco1l.osu.multiplayer.Multiplayer
 import com.reco1l.osu.multiplayer.RoomScene
+import com.reco1l.osu.ui.InputPreference
+import com.reco1l.osu.ui.Option
+import com.reco1l.osu.ui.SelectPreference
 import com.reco1l.toolkt.android.bottomMargin
 import com.reco1l.toolkt.android.cornerRadius
 import com.reco1l.toolkt.android.dp
@@ -63,7 +67,7 @@ import kotlin.math.max
 
 
 
-class SettingsFragment : com.edlplan.ui.fragment.SettingsFragment() {
+class SettingsFragment : SettingsFragment() {
 
 
     private lateinit var sectionSelector: LinearLayout

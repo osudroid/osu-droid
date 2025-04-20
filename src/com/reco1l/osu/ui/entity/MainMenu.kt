@@ -9,7 +9,7 @@ import com.reco1l.osu.multiplayer.Multiplayer
 import com.reco1l.osu.beatmaplisting.BeatmapListing
 import com.reco1l.osu.mainThread
 import com.reco1l.osu.multiplayer.RoomScene
-import com.reco1l.osu.ui.SettingsFragment
+import com.osudroid.ui.v1.SettingsFragment
 import org.anddev.andengine.input.touch.TouchEvent
 import ru.nsu.ccfit.zuev.osu.GlobalManager
 import ru.nsu.ccfit.zuev.osu.LibraryManager

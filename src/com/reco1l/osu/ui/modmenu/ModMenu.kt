@@ -15,7 +15,7 @@ import com.osudroid.ibancho.RoomAPI.setRoomMods
 import com.osudroid.ibancho.data.RoomMods
 import com.reco1l.osu.*
 import com.reco1l.osu.multiplayer.*
-import com.reco1l.osu.ui.SettingsFragment
+import com.osudroid.ui.v1.SettingsFragment
 import com.reco1l.toolkt.kotlin.*
 import com.reco1l.toolkt.kotlin.async
 import com.rian.osu.*

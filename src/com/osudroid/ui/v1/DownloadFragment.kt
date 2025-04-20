@@ -1,4 +1,4 @@
-package com.reco1l.osu.ui
+package com.osudroid.ui.v1
 
 import android.text.TextUtils
 import android.view.View

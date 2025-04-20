@@ -1,4 +1,4 @@
-package com.reco1l.osu.ui
+package com.osudroid.ui.v1
 
 import android.view.LayoutInflater
 import android.view.MotionEvent.*
@@ -11,6 +11,7 @@ import androidx.core.view.updateLayoutParams
 import com.edlplan.ui.fragment.BaseFragment
 import com.reco1l.osu.data.BlockArea
 import com.reco1l.osu.data.DatabaseManager
+import com.reco1l.osu.ui.MessageDialog
 import com.reco1l.toolkt.android.dp
 import com.reco1l.toolkt.android.removeSelf
 import com.rian.osu.math.Vector2

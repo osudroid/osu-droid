@@ -8,7 +8,7 @@ import com.reco1l.framework.net.IFileRequestObserver
 import com.reco1l.osu.mainThread
 import com.reco1l.osu.multiplayer.Multiplayer
 import com.reco1l.osu.multiplayer.RoomScene
-import com.reco1l.osu.ui.DownloadFragment
+import com.osudroid.ui.v1.DownloadFragment
 import com.reco1l.toolkt.kotlin.async
 import net.lingala.zip4j.ZipFile
 import ru.nsu.ccfit.zuev.osu.Config
