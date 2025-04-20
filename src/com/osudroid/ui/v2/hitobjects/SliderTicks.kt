@@ -1,4 +1,4 @@
-package com.reco1l.osu.hitobjects
+package com.osudroid.ui.v2.hitobjects
 
 import com.edlplan.framework.easing.Easing
 import com.reco1l.andengine.Anchor

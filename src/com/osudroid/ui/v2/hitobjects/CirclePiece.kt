@@ -1,9 +1,9 @@
-package com.reco1l.osu.playfield
+package com.osudroid.ui.v2.hitobjects
 
 import com.reco1l.andengine.*
 import com.reco1l.andengine.container.*
 import com.reco1l.andengine.sprite.*
-import com.rian.osu.math.Vector2
+import com.osudroid.ui.v2.SpriteFont
 import ru.nsu.ccfit.zuev.osu.*
 import ru.nsu.ccfit.zuev.skins.*
 

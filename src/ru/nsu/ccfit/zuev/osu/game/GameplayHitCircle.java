@@ -3,7 +3,7 @@ package ru.nsu.ccfit.zuev.osu.game;
 import com.reco1l.andengine.sprite.ExtendedSprite;
 import com.reco1l.andengine.Modifiers;
 import com.reco1l.andengine.Anchor;
-import com.reco1l.osu.playfield.NumberedCirclePiece;
+import com.osudroid.ui.v2.hitobjects.NumberedCirclePiece;
 import com.rian.osu.beatmap.hitobject.HitCircle;
 import com.rian.osu.gameplay.GameplayHitSampleInfo;
 import com.rian.osu.mods.ModHidden;

@@ -3,7 +3,7 @@ package com.osudroid.ui.v2.hud.elements
 import com.edlplan.framework.easing.*
 import com.reco1l.andengine.modifier.OnModifierFinished
 import com.osudroid.ui.v2.hud.HUDElement
-import com.reco1l.osu.playfield.SpriteFont
+import com.osudroid.ui.v2.SpriteFont
 import ru.nsu.ccfit.zuev.osu.*
 import ru.nsu.ccfit.zuev.osu.game.GameScene
 import ru.nsu.ccfit.zuev.skins.*

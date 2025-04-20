@@ -1,7 +1,7 @@
 package com.osudroid.ui.v2.hud.elements
 
 import com.osudroid.ui.v2.hud.HUDElement
-import com.reco1l.osu.playfield.SpriteFont
+import com.osudroid.ui.v2.SpriteFont
 import ru.nsu.ccfit.zuev.osu.Config
 import ru.nsu.ccfit.zuev.osu.DifficultyAlgorithm
 import ru.nsu.ccfit.zuev.osu.game.GameScene

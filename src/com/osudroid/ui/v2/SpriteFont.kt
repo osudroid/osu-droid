@@ -1,10 +1,9 @@
-package com.reco1l.osu.playfield
+package com.osudroid.ui.v2
 
-import com.reco1l.andengine.text.*
-import org.anddev.andengine.opengl.texture.region.*
-import ru.nsu.ccfit.zuev.osu.*
-import ru.nsu.ccfit.zuev.skins.*
-
+import com.reco1l.andengine.text.TextureFont
+import org.anddev.andengine.opengl.texture.region.TextureRegion
+import ru.nsu.ccfit.zuev.osu.ResourceManager
+import ru.nsu.ccfit.zuev.skins.StringSkinData
 
 open class SpriteFont(private val texturePrefix: StringSkinData) : TextureFont(mutableMapOf<Char, TextureRegion>().also {
 

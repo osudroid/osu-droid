@@ -1,5 +1,6 @@
 package com.osudroid.ui.v2.hud.elements
 
+import com.osudroid.ui.v2.SpriteFont
 import com.reco1l.andengine.*
 import com.reco1l.andengine.text.*
 import com.reco1l.framework.*
