@@ -60,21 +60,7 @@ import java.io.File
 import kotlin.math.max
 
 
-enum class Section(@XmlRes val xml: Int) {
 
-    General(R.xml.settings_general),
-    Gameplay(R.xml.settings_gameplay),
-    Graphics(R.xml.settings_graphics),
-    Audio(R.xml.settings_audio),
-    Library(R.xml.settings_library),
-    Input(R.xml.settings_input),
-    Advanced(R.xml.settings_advanced),
-
-    // Multiplayer exclusive
-    Room(R.xml.multiplayer_room_settings),
-    Player(R.xml.multiplayer_player_settings)
-
-}
 
 
 class SettingsFragment : com.edlplan.ui.fragment.SettingsFragment() {
@@ -536,9 +522,24 @@ class SettingsFragment : com.edlplan.ui.fragment.SettingsFragment() {
     }
 
 
+    private enum class Section(@XmlRes val xml: Int) {
+
+        General(R.xml.settings_general),
+        Gameplay(R.xml.settings_gameplay),
+        Graphics(R.xml.settings_graphics),
+        Audio(R.xml.settings_audio),
+        Library(R.xml.settings_library),
+        Input(R.xml.settings_input),
+        Advanced(R.xml.settings_advanced),
+
+        // Multiplayer exclusive
+        Room(R.xml.multiplayer_room_settings),
+        Player(R.xml.multiplayer_player_settings)
+
+    }
+
+
     companion object {
-
         const val REGISTER_URL: String = "https://${OnlineManager.hostname}/user/?action=register"
-
     }
 }
