@@ -434,7 +434,11 @@ object ModMenuV2 : ExtendedScene() {
             return
         }
         enabledMods.remove(mod)
-        modButtons.find { it.mod == mod }?.isSelected = false
+
+        modButtons.find { it.mod::class == mod::class }?.apply {
+            isSelected = false
+            mod.settings.fastForEach { it.value = it.defaultValue }
+        }
 
         customizationMenu.onModRemoved(mod)
         onModsChanged(mod)
