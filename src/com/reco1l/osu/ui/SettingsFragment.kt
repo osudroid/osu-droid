@@ -507,15 +507,6 @@ class SettingsFragment : com.edlplan.ui.fragment.SettingsFragment() {
             }
         }
 
-        findPreference<CheckBoxPreference>("room_allowForceDifficultyStatistics")!!.apply {
-            isChecked = Multiplayer.room!!.gameplaySettings.allowForceDifficultyStatistics
-
-            setOnPreferenceChangeListener { _, newValue ->
-                RoomAPI.setRoomAllowForceDifficultyStatistics(newValue as Boolean)
-                true
-            }
-        }
-
         findPreference<SelectPreference>("room_versus_mode")!!.apply {
             value = Multiplayer.room!!.teamMode.ordinal.toString()
 

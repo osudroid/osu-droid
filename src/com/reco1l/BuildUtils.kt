@@ -37,11 +37,7 @@ fun generateFakeRoom() = Room(
     isLocked = false,
     maxPlayers = 8,
     mods = RoomMods(),
-    gameplaySettings = RoomGameplaySettings(
-        isFreeMod = true,
-        isRemoveSliderLock = false,
-        allowForceDifficultyStatistics = true
-    ),
+    gameplaySettings = RoomGameplaySettings(isFreeMod = true, isRemoveSliderLock = false),
     teamMode = TeamMode.HeadToHead,
     winCondition = WinCondition.ScoreV1,
     playerCount = 0,
@@ -81,7 +77,6 @@ class FakeSocket(private val uid: Long, private val username: String) : Socket(n
                 Multiplayer.room!!.gameplaySettings.also {
                     if (!has("isFreeMod")) put("isFreeMod", it.isFreeMod)
                     if (!has("isRemoveSliderLock")) put("isRemoveSliderLock", it.isRemoveSliderLock)
-                    if (!has("allowForceDifficultyStatistics")) put("allowForceDifficultyStatistics", it.allowForceDifficultyStatistics)
                 }
             })
 
@@ -126,7 +121,6 @@ class FakeSocket(private val uid: Long, private val username: String) : Socket(n
             putObject("gameplaySettings") {
                 put("isFreeMod", true)
                 put("isRemoveSliderLock", false)
-                put("allowForceDifficultyStatistics", true)
             }
 
             putArray("players") {
