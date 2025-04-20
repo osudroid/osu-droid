@@ -357,9 +357,11 @@ object ModMenuV2 : ExtendedScene() {
             }
         }
 
-        modButtons.fastForEach { button ->
-            button.isEnabled = !isFreeMod || button.mod.isValidForMultiplayerAsFreeMod
-        }
+        updateModButtonEnabledState()
+    }
+
+    fun updateModButtonEnabledState() {
+        modButtons.fastForEach { it.updateEnabledState() }
     }
 
     fun clear() {
@@ -535,6 +537,18 @@ object ModMenuV2 : ExtendedScene() {
                     addMod(mod)
                     ResourceManager.getInstance().getSound("check-on")?.play()
                 }
+            }
+
+            updateEnabledState()
+        }
+
+        fun updateEnabledState() {
+            // TODO: the button should be hidden when it is disabled after Container can observe child visibility.
+            if (Multiplayer.isMultiplayer && Multiplayer.room != null) {
+                isEnabled = mod.isValidForMultiplayer && (Multiplayer.isRoomHost ||
+                    (Multiplayer.room!!.gameplaySettings.isFreeMod && mod.isValidForMultiplayerAsFreeMod))
+            } else {
+                isEnabled = true
             }
         }
 
