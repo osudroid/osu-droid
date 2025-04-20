@@ -15,6 +15,7 @@ import com.reco1l.ibancho.RoomAPI.setRoomMods
 import com.reco1l.ibancho.data.RoomMods
 import com.reco1l.osu.*
 import com.reco1l.osu.multiplayer.*
+import com.reco1l.osu.ui.SettingsFragment
 import com.reco1l.toolkt.kotlin.*
 import com.reco1l.toolkt.kotlin.async
 import com.rian.osu.*
@@ -69,6 +70,7 @@ object ModMenu : ExtendedScene() {
         ResourceManager.getInstance().loadHighQualityAsset("tune", "tune.png")
         ResourceManager.getInstance().loadHighQualityAsset("backspace", "backspace.png")
         ResourceManager.getInstance().loadHighQualityAsset("search", "search.png")
+        ResourceManager.getInstance().loadHighQualityAsset("settings", "settings.png")
 
         customizationMenu = ModCustomizationMenu()
 
@@ -132,6 +134,16 @@ object ModMenu : ExtendedScene() {
                         }
                         onActionCancel = { ResourceManager.getInstance().getSound("click-short")?.play() }
                     })
+
+                    +Button().apply {
+                        leadingIcon = ExtendedSprite(ResourceManager.getInstance().getTexture("settings"))
+                        spacing = 0f
+                        onActionUp = {
+                            ResourceManager.getInstance().getSound("click-short-confirm")?.play()
+                            mainThread { SettingsFragment().show() }
+                        }
+                        onActionCancel = { ResourceManager.getInstance().getSound("click-short")?.play() }
+                    }
                 })
 
                 attachChild(LinearContainer().apply {
