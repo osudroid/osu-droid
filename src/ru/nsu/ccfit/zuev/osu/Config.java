@@ -8,6 +8,7 @@ import android.os.Environment;
 import android.util.DisplayMetrics;
 import android.util.Log;
 
+import androidx.annotation.NonNull;
 import androidx.preference.PreferenceManager;
 
 import com.edlplan.framework.math.FMath;
@@ -288,6 +289,7 @@ public class Config {
         return displayScoreStatistics;
     }
 
+    @NonNull
     public static DifficultyAlgorithm getDifficultyAlgorithm() {
         return Config.getString("difficultyAlgorithm", "0").equals("1")
                 ? DifficultyAlgorithm.standard
@@ -752,6 +754,10 @@ public class Config {
 
     public static boolean isForceMaxRefreshRate() {
         return forceMaxRefreshRate;
+    }
+
+    public static boolean isShiftPitchInRateChange() {
+        return getBoolean("shiftPitchInRateChange", false);
     }
 
 

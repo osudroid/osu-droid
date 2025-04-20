@@ -103,7 +103,6 @@ import ru.nsu.ccfit.zuev.osu.game.cursor.main.CursorEntity;
 import ru.nsu.ccfit.zuev.osu.helper.MD5Calculator;
 import ru.nsu.ccfit.zuev.osu.helper.StringTable;
 import ru.nsu.ccfit.zuev.osu.menu.LoadingScreen;
-import ru.nsu.ccfit.zuev.osu.menu.ModMenu;
 import ru.nsu.ccfit.zuev.osu.menu.PauseMenu;
 import ru.nsu.ccfit.zuev.osu.menu.ScoreBoardItem;
 import ru.nsu.ccfit.zuev.osu.online.OnlineFileOperator;
@@ -487,7 +486,7 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
 
         GlobalManager.getInstance().getSongService().preLoad(audioFilePath, GameHelper.getSpeedMultiplier(),
             GameHelper.getSpeedMultiplier() != 1f &&
-                (ModMenu.getInstance().isEnableNCWhenSpeedChange() || mods.contains(ModNightCore.class)));
+                (Config.isShiftPitchInRateChange() || mods.contains(ModNightCore.class)));
 
         if (scope != null) {
             JobKt.ensureActive(scope.getCoroutineContext());
@@ -1462,10 +1461,6 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
                 engine.setScene(scoringScene.getScene());
             } else {
                 engine.setScene(oldScene);
-
-                if (startedFromHUDEditor) {
-                    ModMenu.getInstance().getEnabledMods().clear();
-                }
             }
 
             // Resume difficulty calculation.

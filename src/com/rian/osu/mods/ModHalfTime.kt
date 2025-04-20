@@ -9,6 +9,7 @@ class ModHalfTime : ModRateAdjust() {
 
     override val name = "Half Time"
     override val acronym = "HT"
+    override val description = "Less zoom..."
     override val type = ModType.DifficultyReduction
     override val textureNameSuffix = "halftime"
     override val isRanked = true

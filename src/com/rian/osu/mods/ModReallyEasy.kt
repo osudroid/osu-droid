@@ -10,6 +10,7 @@ import com.rian.osu.utils.CircleSizeCalculator
 class ModReallyEasy : Mod(), IModApplicableToDifficultyWithSettings {
     override val name = "Really Easy"
     override val acronym = "RE"
+    override val description = "Everything just got easier..."
     override val type = ModType.DifficultyReduction
     override val textureNameSuffix = "reallyeasy"
 

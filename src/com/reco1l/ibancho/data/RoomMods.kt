@@ -61,17 +61,7 @@ class RoomMods @JvmOverloads constructor(json: JSONArray? = null) : ModHashMap(M
 
     fun toString(room: Room): String {
         if (isEmpty()) {
-            return buildString {
-
-                if (room.gameplaySettings.isFreeMod) {
-                    append("Free mods")
-
-                    if (room.gameplaySettings.allowForceDifficultyStatistics) {
-                        append(", Force diffstat")
-                    }
-                } else append("None")
-
-            }
+            return if (room.gameplaySettings.isFreeMod) "Free mods" else "None"
         }
 
         return if (room.gameplaySettings.isFreeMod) buildString {
@@ -99,10 +89,6 @@ class RoomMods @JvmOverloads constructor(json: JSONArray? = null) : ModHashMap(M
                 append("%.2fx, ".format(customSpeed.trackRateMultiplier))
             }
 
-            if (room.gameplaySettings.allowForceDifficultyStatistics) {
-                append("Force diffstat, ")
-            }
-
         }.substringBeforeLast(',') else toString()
     }
 
@@ -120,12 +106,6 @@ class RoomMods @JvmOverloads constructor(json: JSONArray? = null) : ModHashMap(M
         val gameplaySettings = Multiplayer.room?.gameplaySettings
 
         if (gameplaySettings?.isFreeMod == true) {
-            // Under free mods, force difficulty statistics is still not allowed unless the setting is explicitly set.
-            if (!gameplaySettings.allowForceDifficultyStatistics &&
-                ofType<ModDifficultyAdjust>() != other.ofType<ModDifficultyAdjust>()) {
-                return false
-            }
-
             val requiredMods = filter { !it.value.isValidForMultiplayerAsFreeMod }
             val otherRequiredMods = other.filter { !it.value.isValidForMultiplayerAsFreeMod }
 

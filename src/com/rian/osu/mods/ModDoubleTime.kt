@@ -9,6 +9,7 @@ class ModDoubleTime : ModRateAdjust() {
 
     override val name = "Double Time"
     override val acronym = "DT"
+    override val description = "Zoooooooooom..."
     override val type = ModType.DifficultyIncrease
     override val textureNameSuffix = "doubletime"
     override val isRanked = true

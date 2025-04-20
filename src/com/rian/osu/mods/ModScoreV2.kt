@@ -6,6 +6,7 @@ package com.rian.osu.mods
 class ModScoreV2 : Mod() {
     override val name = "Score V2"
     override val acronym = "V2"
+    override val description = "A different scoring mode from what you have known."
     override val type = ModType.Conversion
     override val textureNameSuffix = "scorev2"
     override val isValidForMultiplayerAsFreeMod = false

@@ -22,6 +22,7 @@ import com.reco1l.osu.ui.MessageDialog
 import com.reco1l.osu.ui.entity.BeatmapButton
 import com.reco1l.osu.ui.entity.ComposedText
 import com.reco1l.osu.ui.SettingsFragment
+import com.reco1l.osu.ui.modmenu.ModMenu
 import com.reco1l.osu.updateThread
 import com.reco1l.toolkt.kotlin.runSafe
 import com.rian.osu.mods.ModScoreV2
@@ -41,7 +42,6 @@ import ru.nsu.ccfit.zuev.osu.online.OnlinePanel
 import ru.nsu.ccfit.zuev.skins.OsuSkin
 import java.text.SimpleDateFormat
 import java.util.*
-import ru.nsu.ccfit.zuev.osu.menu.ModMenu
 import ru.nsu.ccfit.zuev.osu.online.OnlineManager
 
 object RoomScene : Scene(), IRoomEventListener, IPlayerEventListener {
@@ -386,7 +386,7 @@ object RoomScene : Scene(), IRoomEventListener, IPlayerEventListener {
 
                     if (!moved) {
                         ResourceManager.getInstance().getSound("click-short-confirm")?.play()
-                        ModMenu.getInstance().show(this@RoomScene, GlobalManager.getInstance().selectedBeatmap)
+                        ModMenu.show()
                     }
                     return true
                 }
@@ -601,7 +601,7 @@ object RoomScene : Scene(), IRoomEventListener, IPlayerEventListener {
             playerList?.menu?.dismiss()
 
             updateThread {
-                ModMenu.getInstance().hide()
+                ModMenu.back()
 
                 playerList?.detachSelf()
                 playerList = null
@@ -692,13 +692,11 @@ object RoomScene : Scene(), IRoomEventListener, IPlayerEventListener {
         attachChild(playerList, 1)
 
         clearChildScene()
-        ModMenu.getInstance().init()
-        ModMenu.getInstance().setMods(player!!.mods, false, true)
-        ModMenu.getInstance().setMods(newRoom.mods, newRoom.gameplaySettings.isFreeMod, newRoom.gameplaySettings.allowForceDifficultyStatistics)
+        ModMenu.setMods(newRoom.mods, newRoom.gameplaySettings.isFreeMod)
 
         isWaitingForModsChange = true
 
-        RoomAPI.setPlayerMods(ModMenu.getInstance().enabledMods.serializeMods())
+        RoomAPI.setPlayerMods(ModMenu.enabledMods.serializeMods())
 
         updateInformation()
         playerList!!.invalidate()
@@ -809,9 +807,8 @@ object RoomScene : Scene(), IRoomEventListener, IPlayerEventListener {
         chat.onSystemChatMessage("Player ${room!!.playersMap[uid]?.name} is now the room host.", "#459FFF")
 
         updateThread {
-            ModMenu.getInstance().hide(false)
-            ModMenu.getInstance().init()
-            ModMenu.getInstance().update()
+            ModMenu.back(false)
+            ModMenu.updateModButtonEnabledState()
         }
 
         playerList!!.invalidate()
@@ -828,19 +825,17 @@ object RoomScene : Scene(), IRoomEventListener, IPlayerEventListener {
 
         room!!.mods = mods
 
-        // If free mods is enabled it'll keep player mods and enforce speed changing mods and ScoreV2.
-        // If allow force difficulty statistics is enabled under free mod, the force difficulty statistics settings
-        // set by the player will not be overridden.
-        ModMenu.getInstance().setMods(mods, room!!.gameplaySettings.isFreeMod, room!!.gameplaySettings.allowForceDifficultyStatistics)
+        ModMenu.setMods(mods, room!!.gameplaySettings.isFreeMod)
 
         isWaitingForModsChange = true
 
-        RoomAPI.setPlayerMods(ModMenu.getInstance().enabledMods.serializeMods())
+        RoomAPI.setPlayerMods(ModMenu.enabledMods.serializeMods())
 
         updateInformation()
     }
 
     override fun onRoomGameplaySettingsChange(settings: RoomGameplaySettings) {
+        val wasFreeMod = room!!.gameplaySettings.isFreeMod
 
         room!!.gameplaySettings = settings
 
@@ -850,7 +845,14 @@ object RoomScene : Scene(), IRoomEventListener, IPlayerEventListener {
 
         modsButton!!.isVisible = isRoomHost || settings.isFreeMod
 
-        ModMenu.getInstance().hide(false)
+        updateThread {
+            ModMenu.back(false)
+
+            if (wasFreeMod != settings.isFreeMod) {
+                ModMenu.updateModButtonEnabledState()
+            }
+        }
+
         invalidateStatus()
     }
 
@@ -917,7 +919,7 @@ object RoomScene : Scene(), IRoomEventListener, IPlayerEventListener {
             }
 
             global.songMenu.stopMusic()
-            global.gameScene.startGame(global.selectedBeatmap, null, ModMenu.getInstance().enabledMods)
+            global.gameScene.startGame(global.selectedBeatmap, null, ModMenu.enabledMods)
 
             mainThread {
                 playerList!!.menu.dismiss()

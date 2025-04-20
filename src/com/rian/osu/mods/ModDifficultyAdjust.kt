@@ -2,12 +2,15 @@ package com.rian.osu.mods
 
 import com.reco1l.toolkt.*
 import com.rian.osu.GameMode
+import com.rian.osu.beatmap.Beatmap
 import com.rian.osu.beatmap.hitobject.HitObject
 import com.rian.osu.beatmap.hitobject.Slider
 import com.rian.osu.beatmap.sections.BeatmapDifficulty
 import com.rian.osu.utils.ModUtils
 import kotlin.math.exp
 import kotlin.math.pow
+import kotlin.reflect.KProperty0
+import kotlin.reflect.jvm.isAccessible
 import org.json.JSONObject
 
 /**
@@ -18,14 +21,14 @@ class ModDifficultyAdjust @JvmOverloads constructor(
     ar: Float? = null,
     od: Float? = null,
     hp: Float? = null
-) : Mod(), IModApplicableToDifficultyWithSettings, IModApplicableToHitObjectWithSettings {
+) : Mod(), IModApplicableToDifficultyWithSettings, IModApplicableToHitObjectWithSettings, IModRequiresOriginalBeatmap {
 
     /**
      * The circle size to enforce.
      */
     var cs by NullableFloatModSetting(
         name = "Circle size",
-        valueFormatter = { it?.roundBy(1)?.toString() ?: "OFF" },
+        valueFormatter = { it!!.roundBy(1).toString() },
         defaultValue = cs,
         minValue = 0f,
         maxValue = 15f,
@@ -37,7 +40,7 @@ class ModDifficultyAdjust @JvmOverloads constructor(
      */
     var ar by NullableFloatModSetting(
         name = "Approach rate",
-        valueFormatter = { it?.roundBy(1)?.toString() ?: "OFF" },
+        valueFormatter = { it!!.roundBy(1).toString() },
         defaultValue = ar,
         minValue = 0f,
         maxValue = 12.5f,
@@ -50,7 +53,7 @@ class ModDifficultyAdjust @JvmOverloads constructor(
      */
     var od by NullableFloatModSetting(
         name = "Overall difficulty",
-        valueFormatter = { it?.roundBy(1)?.toString() ?: "OFF" },
+        valueFormatter = { it!!.roundBy(1).toString() },
         defaultValue = od,
         minValue = 0f,
         maxValue = 11f,
@@ -63,7 +66,7 @@ class ModDifficultyAdjust @JvmOverloads constructor(
      */
     var hp by NullableFloatModSetting(
         name = "Health drain",
-        valueFormatter = { it?.roundBy(1)?.toString() ?: "OFF" },
+        valueFormatter = { it!!.roundBy(1).toString() },
         defaultValue = hp,
         minValue = 0f,
         maxValue = 11f,
@@ -74,6 +77,7 @@ class ModDifficultyAdjust @JvmOverloads constructor(
 
     override val name = "Difficulty Adjust"
     override val acronym = "DA"
+    override val description = "Override a beatmap's difficulty settings."
     override val type = ModType.Conversion
     override val textureNameSuffix = "difficultyadjust"
 
@@ -166,6 +170,24 @@ class ModDifficultyAdjust @JvmOverloads constructor(
         if (hitObject is Slider) {
             hitObject.nestedHitObjects.forEach { applyFadeAdjustment(it, mods) }
         }
+    }
+
+    override fun applyFromBeatmap(beatmap: Beatmap) {
+        val difficulty = beatmap.difficulty
+
+        updateDefaultValue(::cs, difficulty.gameplayCS)
+        updateDefaultValue(::ar, difficulty.ar)
+        updateDefaultValue(::od, difficulty.od)
+        updateDefaultValue(::hp, difficulty.hp)
+    }
+
+    private fun updateDefaultValue(property: KProperty0<*>, value: Float) {
+        property.isAccessible = true
+
+        val delegate = property.getDelegate() as NullableFloatModSetting
+        delegate.defaultValue = value
+
+        property.isAccessible = false
     }
 
     private fun applyFadeAdjustment(hitObject: HitObject, mods: Iterable<Mod>) {

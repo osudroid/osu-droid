@@ -61,7 +61,7 @@ abstract class ExtendedEntity : Entity(0f, 0f), ITouchArea, IModifierChain {
     var width: Float = 0f
         get() = when (field) {
             FitContent -> contentWidth + padding.horizontal
-            FitParent -> parent.innerWidth
+            FitParent -> parent.innerWidth - x
             else -> if (relativeSizeAxes.isHorizontal) {
                 field * parent.innerWidth
             } else {
@@ -81,7 +81,7 @@ abstract class ExtendedEntity : Entity(0f, 0f), ITouchArea, IModifierChain {
     var height = 0f
         get() = when (field) {
             FitContent -> contentHeight + padding.vertical
-            FitParent -> parent.innerHeight
+            FitParent -> parent.innerHeight - y
             else -> if (relativeSizeAxes.isVertical) {
                 field * parent.innerHeight
             } else {
@@ -453,38 +453,36 @@ abstract class ExtendedEntity : Entity(0f, 0f), ITouchArea, IModifierChain {
         GLHelper.setColor(gl, red, green, blue, alpha)
     }
 
-    override fun onDrawChildren(gl: GL10, camera: Camera) {
+    override fun onDraw(gl: GL10, camera: Camera) {
 
-        if (mChildren == null || !mChildrenVisible) {
+        if (!isVisible) {
             return
         }
 
         if (clipChildren) {
+            val wasScissorTestEnabled = GLHelper.isEnableScissorTest()
             GLHelper.enableScissorTest(gl)
 
+            // Entity coordinates in screen's space.
             val (topLeftX, topLeftY) = camera.getScreenSpaceCoordinates(convertLocalToSceneCoordinates(0f, 0f))
             val (topRightX, topRightY) = camera.getScreenSpaceCoordinates(convertLocalToSceneCoordinates(width, 0f))
             val (bottomRightX, bottomRightY) = camera.getScreenSpaceCoordinates(convertLocalToSceneCoordinates(width, height))
             val (bottomLeftX, bottomLeftY) = camera.getScreenSpaceCoordinates(convertLocalToSceneCoordinates(0f, height))
 
-            val minClippingX = minOf(topLeftX, bottomLeftX, bottomRightX, topRightX)
-            val minClippingY = minOf(topLeftY, bottomLeftY, bottomRightY, topRightY)
+            val minX = minOf(topLeftX, bottomLeftX, bottomRightX, topRightX)
+            val minY = minOf(topLeftY, bottomLeftY, bottomRightY, topRightY)
+            val maxX = maxOf(topLeftX, bottomLeftX, bottomRightX, topRightX)
+            val maxY = maxOf(topLeftY, bottomLeftY, bottomRightY, topRightY)
 
-            val maxClippingX = maxOf(topLeftX, bottomLeftX, bottomRightX, topRightX)
-            val maxClippingY = maxOf(topLeftY, bottomLeftY, bottomRightY, topRightY)
+            ScissorStack.pushScissor(minX, minY, maxX - minX, maxY - minY)
+            onManagedDraw(gl, camera)
+            ScissorStack.pop()
 
-            gl.glScissor(
-                minClippingX.toInt(),
-                minClippingY.toInt(),
-                (maxClippingX - minClippingX).toInt(),
-                (maxClippingY - minClippingY).toInt()
-            )
-        }
-
-        super.onDrawChildren(gl, camera)
-
-        if (clipChildren) {
-            GLHelper.disableScissorTest(gl)
+            if (!wasScissorTestEnabled) {
+                GLHelper.disableScissorTest(gl)
+            }
+        } else {
+            onManagedDraw(gl, camera)
         }
     }
 
@@ -530,7 +528,6 @@ abstract class ExtendedEntity : Entity(0f, 0f), ITouchArea, IModifierChain {
         }
 
         gl.glPushMatrix()
-
         onApplyTransformations(gl, camera)
 
         background?.setSize(width, height)

@@ -206,6 +206,8 @@ open class ScrollableContainer : Container() {
 
     private var initialX = 0f
     private var initialY = 0f
+    private var deltaX = 0f
+    private var deltaY = 0f
 
     private var dragStartTimeMillis = 0L
 
@@ -274,6 +276,8 @@ open class ScrollableContainer : Container() {
                 decelerateProgressively(deltaTimeSec)
             }
             bounceBackIfOverflow()
+        } else {
+            handleUserScroll()
         }
 
         updateIndicators(deltaTimeSec)
@@ -346,32 +350,33 @@ open class ScrollableContainer : Container() {
 
     //region Input
 
-    private fun handleUserScroll(deltaX: Float, deltaY: Float) {
+    private fun handleUserScroll() {
 
         val dragTimeSeconds = (System.currentTimeMillis() - dragStartTimeMillis) / 1000f
         val length = hypot(deltaX, deltaY)
 
         if (scrollAxes.isHorizontal && !Precision.almostEquals(deltaX, 0f)) {
+            velocityX = abs(deltaX) / dragTimeSeconds * sign(deltaX)
 
-            if (scrollX - deltaX in 0f..maxScrollX) {
-                velocityX = abs(deltaX) / dragTimeSeconds * sign(deltaX)
-                scrollX -= deltaX
+            scrollX -= if (scrollX - deltaX in 0f..maxScrollX) {
+                deltaX
             } else {
-                velocityX = 0f
-                scrollX -= deltaX * if (length > 0) length.pow(0.7f) / length else 0f
+                deltaX * if (length > 0) length.pow(0.7f) / length else 0f
             }
         }
 
         if (scrollAxes.isVertical && !Precision.almostEquals(deltaY, 0f)) {
+            velocityY = abs(deltaY) / dragTimeSeconds * sign(deltaY)
 
-            if (scrollY - deltaY in 0f..maxScrollY) {
-                velocityY = abs(deltaY) / dragTimeSeconds * sign(deltaY)
-                scrollY -= deltaY
+            scrollY -= if (scrollY - deltaY in 0f..maxScrollY) {
+                deltaY
             } else {
-                velocityY = 0f
-                scrollY -= deltaY * if (length > 0) length.pow(0.7f) / length else 0f
+                deltaY * if (length > 0) length.pow(0.7f) / length else 0f
             }
         }
+
+        deltaX = 0f
+        deltaY = 0f
     }
     
     override fun onAreaTouched(event: TouchEvent, localX: Float, localY: Float): Boolean {
@@ -392,20 +397,23 @@ open class ScrollableContainer : Container() {
             }
 
             ACTION_MOVE -> {
-                val deltaX = localX - initialX
-                val deltaY = localY - initialY
+                val moveDeltaX = localX - initialX
+                val moveDeltaY = localY - initialY
 
-                val isScrollingHorizontal = scrollAxes.isHorizontal && abs(deltaX) > minimumTravel.x
-                val isScrollingVertical = scrollAxes.isVertical && abs(deltaY) > minimumTravel.y
+                val isScrollingHorizontal = scrollAxes.isHorizontal && abs(moveDeltaX) > minimumTravel.x
+                val isScrollingVertical = scrollAxes.isVertical && abs(moveDeltaY) > minimumTravel.y
 
                 if (isScrolling || isScrollingHorizontal || isScrollingVertical) {
 
                     // If it was already scrolling we don't need to subtract the minimum travel.
                     if (isScrolling) {
-                        handleUserScroll(deltaX, deltaY)
+                        deltaX = moveDeltaX
+                        deltaY = moveDeltaY
                     } else {
-                        handleUserScroll(deltaX - minimumTravel.x, deltaY - minimumTravel.y)
+                        deltaX = moveDeltaX - minimumTravel.x
+                        deltaY = moveDeltaY - minimumTravel.y
                     }
+                    handleUserScroll()
 
                     initialX = localX
                     initialY = localY
@@ -433,8 +441,8 @@ open class ScrollableContainer : Container() {
     companion object {
 
         const val DEFAULT_DECELERATION = 0.98f
-        const val DEFAULT_MINIMUM_TRAVEL = 10f
-        const val DEFAULT_MAX_VELOCITY = 1000f
+        const val DEFAULT_MINIMUM_TRAVEL = 20f
+        const val DEFAULT_MAX_VELOCITY = 3000f
 
     }
 }

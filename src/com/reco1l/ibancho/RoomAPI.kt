@@ -437,21 +437,6 @@ object RoomAPI {
     }
 
     /**
-     * Change `allow force difficulty statistics` condition.
-     */
-    fun setRoomAllowForceDifficultyStatistics(value: Boolean) {
-        val json = JSONObject().apply {
-            put("allowForceDifficultyStatistics", value)
-        }
-
-        socket?.emit("roomGameplaySettingsChanged", json) ?: run {
-            Multiplayer.log("WARNING: Tried to emit event 'roomGameplaySettingsChanged' while socket is null.")
-            return
-        }
-        Multiplayer.log("EMITTED: roomGameplaySettingsChanged -> $json")
-    }
-
-    /**
      * Change room team mode.
      */
     fun setRoomTeamMode(mode: TeamMode) {

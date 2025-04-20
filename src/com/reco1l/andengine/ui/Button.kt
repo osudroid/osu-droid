@@ -126,6 +126,11 @@ open class Button : LinearContainer(), IWithTheme<ButtonTheme> {
      */
     var onActionUp: (() -> Unit)? = null
 
+    /**
+     * The action to perform when the button is cancelled.
+     */
+    var onActionCancel: (() -> Unit)? = null
+
     //endregion
 
 
@@ -139,7 +144,7 @@ open class Button : LinearContainer(), IWithTheme<ButtonTheme> {
 
     init {
         orientation = Orientation.Horizontal
-        padding = Vec4(16f, 0f, 18f, 0f)
+        padding = Vec4(16f, 0f)
         spacing = 8f
         scaleCenter = Anchor.Center
 
@@ -237,7 +242,14 @@ open class Button : LinearContainer(), IWithTheme<ButtonTheme> {
             event.isActionUp -> {
                 if (localX <= width && localY <= height && isPressed) {
                     onActionUp?.invoke()
+                } else {
+                    onActionCancel?.invoke()
                 }
+                isPressed = false
+            }
+
+            event.isActionOutside || event.isActionCancel -> {
+                onActionCancel?.invoke()
                 isPressed = false
             }
 

@@ -69,27 +69,44 @@ open class Container : ExtendedEntity() {
             }
         }
 
-        contentWidth = right
-        contentHeight = bottom
+        contentWidth = right - padding.left
+        contentHeight = bottom - padding.top
         invalidate(InvalidationFlag.ContentSize)
     }
 
+
+    //region Operators
+
+    inline fun <reified T : IEntity>firstOf(): T? {
+        return findChild { it is T } as? T
+    }
+
+    operator fun ExtendedEntity.unaryPlus() {
+        this@Container.attachChild(this@unaryPlus)
+    }
+
+    operator fun ExtendedEntity.unaryMinus() {
+        this@Container.detachChild(this@unaryMinus)
+    }
+
+    operator fun <T : IEntity> get(index: Int): T {
+        @Suppress("UNCHECKED_CAST")
+        return getChild(index) as T
+    }
+
+    operator fun set(index: Int, entity: IEntity) {
+        attachChild(entity, index)
+    }
+
+    operator fun plusAssign(entity: IEntity) {
+        attachChild(entity)
+    }
+
+    operator fun minusAssign(entity: IEntity) {
+        detachChild(entity)
+    }
+
+    //endregion
 }
 
 
-operator fun <T : IEntity> Container.get(index: Int): T {
-    @Suppress("UNCHECKED_CAST")
-    return getChild(index) as T
-}
-
-operator fun Container.set(index: Int, entity: IEntity) {
-    attachChild(entity, index)
-}
-
-operator fun Container.plusAssign(entity: IEntity) {
-    attachChild(entity)
-}
-
-operator fun Container.minusAssign(entity: IEntity) {
-    detachChild(entity)
-}

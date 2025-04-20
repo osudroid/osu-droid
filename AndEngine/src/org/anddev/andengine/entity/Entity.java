@@ -981,11 +981,13 @@ public class Entity implements IEntity {
 	}
 
 	@Override
-	public final void onDraw(final GL10 pGL, final Camera pCamera) {
+	// BEGIN osu!droid modified: Make this method overrideable.
+	public /*final*/ void onDraw(final GL10 pGL, final Camera pCamera) {
 		if(this.mVisible) {
 			this.onManagedDraw(pGL, pCamera);
 		}
 	}
+	// END osu!droid modified
 
 	@Override
 	public final void onUpdate(final float pSecondsElapsed) {
