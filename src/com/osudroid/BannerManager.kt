@@ -1,7 +1,6 @@
-package com.reco1l.osu
+package com.osudroid
 
 import android.content.Intent
-import android.content.Intent.ACTION_VIEW
 import android.net.Uri
 import android.util.Log
 import com.reco1l.andengine.modifier.ModifierType
@@ -135,7 +134,7 @@ object BannerManager {
 
                 if (event.isActionUp && banner.url.isNotBlank()) {
                     val uri = Uri.parse(banner.url)
-                    val intent = Intent(ACTION_VIEW, uri)
+                    val intent = Intent(Intent.ACTION_VIEW, uri)
                     GlobalManager.getInstance().mainActivity.startActivity(intent)
                 }
             }
