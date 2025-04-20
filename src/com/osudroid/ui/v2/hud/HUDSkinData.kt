@@ -11,7 +11,7 @@ import com.osudroid.ui.v2.hud.elements.HUDScoreCounter
 import com.osudroid.ui.v2.hud.elements.HUDUnstableRateCounter
 import com.reco1l.andengine.Anchor
 import com.reco1l.framework.math.Vec2
-import com.reco1l.osu.ui.entity.GameplayLeaderboard
+import com.osudroid.ui.v2.hud.elements.HUDLeaderboard
 import com.reco1l.toolkt.data.putObject
 import org.json.JSONArray
 import kotlin.reflect.KClass
@@ -40,7 +40,7 @@ data class HUDSkinData(val elements: List<HUDElementSkinData>) {
                     position = Vec2(-17f, 9f)
                 ),
                 HUDElementSkinData(
-                    type = GameplayLeaderboard::class,
+                    type = HUDLeaderboard::class,
                     anchor = Anchor.TopLeft,
                     origin = Anchor.TopLeft,
                     position = Vec2(0f, 83f)

@@ -24,7 +24,7 @@ import com.reco1l.andengine.shape.*
 import com.reco1l.framework.ColorARGB
 import com.reco1l.framework.math.Vec2
 import com.osudroid.ui.v2.hud.editor.HUDElementOverlay
-import com.reco1l.osu.ui.entity.GameplayLeaderboard
+import com.osudroid.ui.v2.hud.elements.HUDLeaderboard
 import com.reco1l.toolkt.kotlin.capitalize
 import com.rian.osu.beatmap.hitobject.HitObject
 import org.anddev.andengine.input.touch.TouchEvent
@@ -59,7 +59,7 @@ enum class HUDElements(val type: KClass<out HUDElement>) {
     notes_per_second_counter(HUDNotesPerSecondCounter::class),
     taps_per_second_counter(HUDTapsPerSecondCounter::class),
     back_button(HUDBackButton::class),
-    leaderboard(GameplayLeaderboard::class);
+    leaderboard(HUDLeaderboard::class);
 
     companion object {
         operator fun get(type: KClass<out HUDElement>) = entries.first { it.type == type }

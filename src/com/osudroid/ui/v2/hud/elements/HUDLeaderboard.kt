@@ -1,8 +1,8 @@
-package com.reco1l.osu.ui.entity
+package com.osudroid.ui.v2.hud.elements
 
 import android.opengl.GLES20
+import com.osudroid.multiplayer.Multiplayer
 import com.osudroid.ui.v2.hud.HUDElement
-import com.osudroid.multiplayer.Multiplayer.isMultiplayer
 import org.anddev.andengine.entity.sprite.Sprite
 import org.anddev.andengine.entity.text.ChangeableText
 import ru.nsu.ccfit.zuev.osu.Config
@@ -11,7 +11,7 @@ import ru.nsu.ccfit.zuev.osu.ResourceManager
 import ru.nsu.ccfit.zuev.osu.menu.ScoreBoardItem
 import ru.nsu.ccfit.zuev.osu.scoring.StatisticV2
 
-class GameplayLeaderboard : HUDElement() {
+class HUDLeaderboard : HUDElement() {
 
     override val shouldBeShown = super.shouldBeShown && Config.isShowScoreboard()
 
@@ -44,7 +44,7 @@ class GameplayLeaderboard : HUDElement() {
     override fun onManagedUpdate(deltaTimeSec: Float) {
         super.onManagedUpdate(deltaTimeSec)
 
-        if (!isMultiplayer) {
+        if (!Multiplayer.isMultiplayer) {
             val items = GlobalManager.getInstance().songMenu.board
 
             // We consider that if it's in replay mode the length should be the same, in case it's not then the
@@ -87,7 +87,7 @@ class GameplayLeaderboard : HUDElement() {
             }
 
             // Updating score data, we skip this on multiplayer because the data must be already updated at this point.
-            if (!isMultiplayer) {
+            if (!Multiplayer.isMultiplayer) {
                 data.apply {
 
                     // Updating info only if needed.
@@ -105,7 +105,7 @@ class GameplayLeaderboard : HUDElement() {
         val lastPlayerPosition = getChildIndex(player)
         var playerPosition = lastPlayerPosition
 
-        if (!isMultiplayer) {
+        if (!Multiplayer.isMultiplayer) {
 
             var i = lastPlayerPosition - 1
             while (i >= 0) {
@@ -220,7 +220,7 @@ class GameplayLeaderboard : HUDElement() {
             }
 
             // In multiplayer, we try to find the corresponding data according to the username.
-            isMultiplayer -> list.find { it.userName == stats.playerName }
+            Multiplayer.isMultiplayer -> list.find { it.userName == stats.playerName }
 
             // In solo we just append a new data.
             else -> {
@@ -283,7 +283,13 @@ class GameplayLeaderboard : HUDElement() {
             info.setScaleCenter(0f, 0f)
             info.setScale(0.65f)
 
-            rank = ChangeableText(10f, 15f, ResourceManager.getInstance().getFont("CaptionFont"), "", 5)
+            rank = ChangeableText(
+                10f,
+                15f,
+                ResourceManager.getInstance().getFont("CaptionFont"),
+                "",
+                5
+            )
             rank.setBlendFunction(GLES20.GL_SRC_ALPHA, GLES20.GL_ONE_MINUS_SRC_ALPHA)
             rank.setPosition(100 - rank.width, 30f)
             rank.setScaleCenter(0f, 0f)
@@ -313,8 +319,8 @@ class GameplayLeaderboard : HUDElement() {
             b = 0.5f
             a = 0.5f
 
-            if (data.isAlive || !isMultiplayer) {
-                val isOwnScore = !isMultiplayer && isGlobalLeaderboard && data.userName == stats.playerName
+            if (data.isAlive || !Multiplayer.isMultiplayer) {
+                val isOwnScore = !Multiplayer.isMultiplayer && isGlobalLeaderboard && data.userName == stats.playerName
 
                 info.setColor(0.9f, 0.9f, 0.9f)
                 rank.setColor(0.6f, 0.6f, 0.6f, 0.9f)

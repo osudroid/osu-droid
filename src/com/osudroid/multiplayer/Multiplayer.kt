@@ -5,7 +5,7 @@ import android.util.Log
 import com.osudroid.ibancho.RoomAPI
 import com.osudroid.ibancho.data.Room
 import com.osudroid.ibancho.data.RoomPlayer
-import com.reco1l.osu.ui.entity.*
+import com.osudroid.ui.v2.hud.elements.HUDLeaderboard
 import com.reco1l.toolkt.kotlin.formatTimeMilliseconds
 import com.reco1l.toolkt.kotlin.fromDate
 import kotlinx.coroutines.CoroutineScope
@@ -107,14 +107,14 @@ object Multiplayer {
 
         val hud = GlobalManager.getInstance().gameScene.hud ?: return
 
-        if (hud.hasElement(GameplayLeaderboard::class)) {
+        if (hud.hasElement(HUDLeaderboard::class)) {
 
             val itemsList = MutableList(array.length()) { i ->
                 jsonToScoreboardItem(array.getJSONObject(i)).apply { rank = i + 1 }
             }
 
             hud.forEachElement { element ->
-                if (element is GameplayLeaderboard) {
+                if (element is HUDLeaderboard) {
                     element.nextItems = itemsList
                 }
             }
