@@ -1,4 +1,4 @@
-package com.reco1l.osu.beatmaplisting
+package com.osudroid.beatmaplisting
 
 /**
  * Defines an action to be performed on a mirror API.

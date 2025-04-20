@@ -1,4 +1,4 @@
-package com.reco1l.osu.beatmaplisting
+package com.osudroid.beatmaplisting
 
 import ru.nsu.ccfit.zuev.osu.RankedStatus
 

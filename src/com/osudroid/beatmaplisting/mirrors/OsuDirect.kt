@@ -1,35 +1,21 @@
-package com.reco1l.osu.beatmaplisting.mirrors
+package com.osudroid.beatmaplisting.mirrors
 
-import com.reco1l.osu.beatmaplisting.BeatmapMirrorDownloadRequestModel
-import com.reco1l.osu.beatmaplisting.BeatmapMirrorPreviewRequestModel
-import com.reco1l.osu.beatmaplisting.BeatmapMirrorSearchRequestModel
-import com.reco1l.osu.beatmaplisting.BeatmapMirrorSearchRequestModel.*
-import com.reco1l.osu.beatmaplisting.BeatmapMirrorSearchRequestModel.OrderType.Ascending
-import com.reco1l.osu.beatmaplisting.BeatmapMirrorSearchRequestModel.OrderType.Descending
-import com.reco1l.osu.beatmaplisting.BeatmapMirrorSearchRequestModel.SortType.Artist
-import com.reco1l.osu.beatmaplisting.BeatmapMirrorSearchRequestModel.SortType.BPM
-import com.reco1l.osu.beatmaplisting.BeatmapMirrorSearchRequestModel.SortType.DifficultyRating
-import com.reco1l.osu.beatmaplisting.BeatmapMirrorSearchRequestModel.SortType.FavouriteCount
-import com.reco1l.osu.beatmaplisting.BeatmapMirrorSearchRequestModel.SortType.HitLength
-import com.reco1l.osu.beatmaplisting.BeatmapMirrorSearchRequestModel.SortType.LastUpdated
-import com.reco1l.osu.beatmaplisting.BeatmapMirrorSearchRequestModel.SortType.PassCount
-import com.reco1l.osu.beatmaplisting.BeatmapMirrorSearchRequestModel.SortType.PlayCount
-import com.reco1l.osu.beatmaplisting.BeatmapMirrorSearchRequestModel.SortType.RankedDate
-import com.reco1l.osu.beatmaplisting.BeatmapMirrorSearchRequestModel.SortType.SubmittedDate
-import com.reco1l.osu.beatmaplisting.BeatmapMirrorSearchRequestModel.SortType.Title
-import com.reco1l.osu.beatmaplisting.BeatmapMirrorSearchRequestModel.SortType.TotalLength
-import com.reco1l.osu.beatmaplisting.BeatmapMirrorSearchResponseModel
-import com.reco1l.osu.beatmaplisting.BeatmapModel
-import com.reco1l.osu.beatmaplisting.BeatmapSetModel
+import com.osudroid.beatmaplisting.BeatmapMirrorDownloadRequestModel
+import com.osudroid.beatmaplisting.BeatmapMirrorPreviewRequestModel
+import com.osudroid.beatmaplisting.BeatmapMirrorSearchRequestModel
+import com.osudroid.beatmaplisting.BeatmapMirrorSearchRequestModel.*
+import com.osudroid.beatmaplisting.BeatmapMirrorSearchRequestModel.OrderType.*
+import com.osudroid.beatmaplisting.BeatmapMirrorSearchRequestModel.SortType.*
+import com.osudroid.beatmaplisting.BeatmapMirrorSearchResponseModel
+import com.osudroid.beatmaplisting.BeatmapModel
+import com.osudroid.beatmaplisting.BeatmapSetModel
 import okhttp3.HttpUrl
 import okhttp3.HttpUrl.Companion.toHttpUrl
 import org.json.JSONArray
 import ru.nsu.ccfit.zuev.osu.RankedStatus
 
-// API reference: https://dev.catboy.best/docs
 
-
-class CatboySearchRequestModel : BeatmapMirrorSearchRequestModel {
+class OsuDirectSearchRequestModel : BeatmapMirrorSearchRequestModel {
 
     private fun SortType.parseToApi() = when (this) {
         Title -> "title"
@@ -53,7 +39,7 @@ class CatboySearchRequestModel : BeatmapMirrorSearchRequestModel {
 
     override fun invoke(query: String, offset: Int, limit: Int, sort: SortType, order: OrderType, status: RankedStatus?): HttpUrl {
 
-        return "https://catboy.best/api/v2/search".toHttpUrl()
+        return "https://osu.direct/api/v2/search".toHttpUrl()
             .newBuilder()
             .addQueryParameter("sort", "${sort.parseToApi()}:${order.parseToApi()}")
             .apply {
@@ -63,19 +49,18 @@ class CatboySearchRequestModel : BeatmapMirrorSearchRequestModel {
             }
             .addQueryParameter("mode", "0")
             .addQueryParameter("query", query)
-            .addQueryParameter("limit", limit.toString())
             .addQueryParameter("offset", offset.toString())
+            .addQueryParameter("amount", limit.toString())
             .build()
     }
 }
 
-
-class CatboySearchResponseModel : BeatmapMirrorSearchResponseModel {
+class OsuDirectSearchResponseModel : BeatmapMirrorSearchResponseModel {
     override fun invoke(response: Any): MutableList<BeatmapSetModel> {
         response as JSONArray
 
-        return MutableList(response.length()) { i ->
-            val json = response.getJSONObject(i)
+        return MutableList(response.length()) { index ->
+            val json = response.getJSONObject(index)
 
             BeatmapSetModel(
                 id = json.getLong("id"),
@@ -85,7 +70,7 @@ class CatboySearchResponseModel : BeatmapMirrorSearchResponseModel {
                 artistUnicode = json.getString("artist_unicode"),
                 status = RankedStatus.valueOf(json.getInt("ranked")),
                 creator = json.getString("creator"),
-                thumbnail = "https://assets.ppy.sh/beatmaps/${json.getLong("id")}/covers/card.jpg",
+                thumbnail = json.optJSONObject("covers")?.optString("card"),
                 beatmaps = json.getJSONArray("beatmaps").let {
 
                     MutableList(it.length()) { i ->
@@ -114,16 +99,14 @@ class CatboySearchResponseModel : BeatmapMirrorSearchResponseModel {
     }
 }
 
-
-class CatboyDownloadRequestModel : BeatmapMirrorDownloadRequestModel {
+class OsuDirectDownloadRequestModel : BeatmapMirrorDownloadRequestModel {
     override fun invoke(beatmapSetId: Long): HttpUrl {
-        return "https://catboy.best/d/$beatmapSetId".toHttpUrl()
+        return "https://osu.direct/api/d/$beatmapSetId".toHttpUrl()
     }
 }
 
-
-class CatboyPreviewRequestModel : BeatmapMirrorPreviewRequestModel {
+class OsuDirectPreviewRequestModel : BeatmapMirrorPreviewRequestModel {
     override fun invoke(beatmapId: Long): HttpUrl {
-        return "https://catboy.best/preview/audio/$beatmapId".toHttpUrl()
+        return "https://osu.direct/api/media/preview/$beatmapId".toHttpUrl()
     }
 }

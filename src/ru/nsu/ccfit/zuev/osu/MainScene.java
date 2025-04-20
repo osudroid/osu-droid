@@ -15,7 +15,7 @@ import com.reco1l.osu.data.BeatmapInfo;
 import com.reco1l.osu.Execution;
 import com.osudroid.ui.MainMenu;
 
-import com.reco1l.osu.beatmaplisting.BeatmapListing;
+import com.osudroid.beatmaplisting.BeatmapListing;
 import com.reco1l.osu.ui.MessageDialog;
 import com.rian.osu.beatmap.parser.BeatmapParser;
 import com.rian.osu.beatmap.timings.EffectControlPoint;

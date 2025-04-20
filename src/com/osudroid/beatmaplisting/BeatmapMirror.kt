@@ -1,14 +1,14 @@
-package com.reco1l.osu.beatmaplisting
+package com.osudroid.beatmaplisting
 
 import androidx.annotation.DrawableRes
-import com.reco1l.osu.beatmaplisting.mirrors.CatboyDownloadRequestModel
-import com.reco1l.osu.beatmaplisting.mirrors.CatboyPreviewRequestModel
-import com.reco1l.osu.beatmaplisting.mirrors.CatboySearchRequestModel
-import com.reco1l.osu.beatmaplisting.mirrors.CatboySearchResponseModel
-import com.reco1l.osu.beatmaplisting.mirrors.OsuDirectDownloadRequestModel
-import com.reco1l.osu.beatmaplisting.mirrors.OsuDirectPreviewRequestModel
-import com.reco1l.osu.beatmaplisting.mirrors.OsuDirectSearchRequestModel
-import com.reco1l.osu.beatmaplisting.mirrors.OsuDirectSearchResponseModel
+import com.osudroid.beatmaplisting.mirrors.CatboyDownloadRequestModel
+import com.osudroid.beatmaplisting.mirrors.CatboyPreviewRequestModel
+import com.osudroid.beatmaplisting.mirrors.CatboySearchRequestModel
+import com.osudroid.beatmaplisting.mirrors.CatboySearchResponseModel
+import com.osudroid.beatmaplisting.mirrors.OsuDirectDownloadRequestModel
+import com.osudroid.beatmaplisting.mirrors.OsuDirectPreviewRequestModel
+import com.osudroid.beatmaplisting.mirrors.OsuDirectSearchRequestModel
+import com.osudroid.beatmaplisting.mirrors.OsuDirectSearchResponseModel
 import ru.nsu.ccfit.zuev.osuplus.R
 
 /**

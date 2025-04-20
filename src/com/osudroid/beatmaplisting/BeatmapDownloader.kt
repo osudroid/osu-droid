@@ -1,4 +1,4 @@
-package com.reco1l.osu.beatmaplisting
+package com.osudroid.beatmaplisting
 
 import android.os.Environment.DIRECTORY_DOWNLOADS
 import android.view.View

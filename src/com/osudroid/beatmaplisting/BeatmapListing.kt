@@ -1,4 +1,4 @@
-package com.reco1l.osu.beatmaplisting
+package com.osudroid.beatmaplisting
 
 import android.graphics.BitmapFactory
 import android.graphics.Color
@@ -36,8 +36,8 @@ import com.reco1l.framework.bass.URLBassStream
 import com.reco1l.framework.net.IFileRequestObserver
 import com.reco1l.framework.net.JsonArrayRequest
 import com.reco1l.osu.*
-import com.reco1l.osu.beatmaplisting.BeatmapMirrorSearchRequestModel.OrderType
-import com.reco1l.osu.beatmaplisting.BeatmapMirrorSearchRequestModel.SortType
+import com.osudroid.beatmaplisting.BeatmapMirrorSearchRequestModel.OrderType
+import com.osudroid.beatmaplisting.BeatmapMirrorSearchRequestModel.SortType
 import com.reco1l.osu.ui.Option
 import com.reco1l.osu.ui.SelectDialog
 import com.reco1l.osu.ui.SelectDropdown
