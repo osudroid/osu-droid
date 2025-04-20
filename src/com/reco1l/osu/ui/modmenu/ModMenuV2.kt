@@ -17,6 +17,7 @@ import com.reco1l.osu.multiplayer.*
 import com.reco1l.toolkt.kotlin.*
 import com.reco1l.toolkt.kotlin.async
 import com.rian.osu.*
+import com.rian.osu.beatmap.Beatmap
 import com.rian.osu.beatmap.parser.*
 import com.rian.osu.difficulty.BeatmapDifficultyCalculator.calculateDroidDifficulty
 import com.rian.osu.difficulty.BeatmapDifficultyCalculator.calculateStandardDifficulty
@@ -40,6 +41,7 @@ object ModMenuV2 : ExtendedScene() {
      */
     val enabledMods = ModHashMap()
 
+    private var parsedBeatmap: Beatmap? = null
 
     private val modButtons = mutableListOf<ModButton>()
 
@@ -217,54 +219,57 @@ object ModMenuV2 : ExtendedScene() {
             }
 
             val difficultyAlgorithm = Config.getDifficultyAlgorithm()
+            val gameMode = if (difficultyAlgorithm == droid) GameMode.Droid else GameMode.Standard
+            val beatmap: Beatmap?
 
-            BeatmapParser(selectedBeatmap.path, this@scope).use { parser ->
-
-                val beatmap = parser.parse(
-                    withHitObjects = true,
-                    mode = if (difficultyAlgorithm == droid) GameMode.Droid else GameMode.Standard
-                )
-
-                if (beatmap == null) {
-                    GlobalManager.getInstance().songMenu.setStarsDisplay(0f)
-                    return@scope
-                }
-
-                modButtons.map { it.mod }.filterIsInstance<IModRequiresOriginalBeatmap>().fastForEach { mod ->
-                    mod.applyFromBeatmap(beatmap)
-                }
-                customizationMenu.updateComponents()
-
-                // Copy the mods to avoid concurrent modification
-                val mods = enabledMods.deepCopy().values
-
-                arBadge.value = "%.2f".format(beatmap.difficulty.ar)
-                odBadge.value = "%.2f".format(beatmap.difficulty.od)
-                csBadge.value = "%.2f".format(beatmap.difficulty.difficultyCS)
-                hpBadge.value = "%.2f".format(beatmap.difficulty.hp)
-                bpmBadge.value = (selectedBeatmap.mostCommonBPM * calculateRateWithMods(mods)).roundToInt().toString()
-
-                val attributes: DifficultyAttributes = when (difficultyAlgorithm) {
-                    droid -> calculateDroidDifficulty(beatmap, mods, this@scope)
-                    standard -> calculateStandardDifficulty(beatmap, mods, this@scope)
-                }
-
-                starRatingBadge.clearEntityModifiers()
-                starRatingBadge.background!!.clearEntityModifiers()
-
-                starRatingBadge.value = "%.2f".format(attributes.starRating)
-                starRatingBadge.background!!.colorTo(OsuColors.getStarRatingColor(attributes.starRating), 0.1f)
-
-                if (attributes.starRating >= 6.5) {
-                    starRatingBadge.colorTo(ColorARGB(0xFFFFD966), 0.1f)
-                    starRatingBadge.fadeTo(1f, 0.1f)
-                } else {
-                    starRatingBadge.colorTo(ColorARGB.Black, 0.1f)
-                    starRatingBadge.fadeTo(0.75f, 0.1f)
-                }
-
-                GlobalManager.getInstance().songMenu.setStarsDisplay(GameHelper.Round(attributes.starRating, 2))
+            if (parsedBeatmap?.md5 != selectedBeatmap.md5 || parsedBeatmap?.mode != gameMode) {
+                 BeatmapParser(selectedBeatmap.path, this@scope).use { parser ->
+                     beatmap = parser.parse(withHitObjects = true, mode = gameMode)
+                     parsedBeatmap = beatmap
+                 }
+            } else {
+                beatmap = parsedBeatmap
             }
+
+            if (beatmap == null) {
+                GlobalManager.getInstance().songMenu.setStarsDisplay(0f)
+                return@scope
+            }
+
+            modButtons.map { it.mod }.filterIsInstance<IModRequiresOriginalBeatmap>().fastForEach { mod ->
+                mod.applyFromBeatmap(beatmap)
+            }
+            customizationMenu.updateComponents()
+
+            // Copy the mods to avoid concurrent modification
+            val mods = enabledMods.deepCopy().values
+
+            arBadge.value = "%.2f".format(beatmap.difficulty.ar)
+            odBadge.value = "%.2f".format(beatmap.difficulty.od)
+            csBadge.value = "%.2f".format(beatmap.difficulty.difficultyCS)
+            hpBadge.value = "%.2f".format(beatmap.difficulty.hp)
+            bpmBadge.value = (selectedBeatmap.mostCommonBPM * calculateRateWithMods(mods)).roundToInt().toString()
+
+            val attributes: DifficultyAttributes = when (difficultyAlgorithm) {
+                droid -> calculateDroidDifficulty(beatmap, mods, this@scope)
+                standard -> calculateStandardDifficulty(beatmap, mods, this@scope)
+            }
+
+            starRatingBadge.clearEntityModifiers()
+            starRatingBadge.background!!.clearEntityModifiers()
+
+            starRatingBadge.value = "%.2f".format(attributes.starRating)
+            starRatingBadge.background!!.colorTo(OsuColors.getStarRatingColor(attributes.starRating), 0.1f)
+
+            if (attributes.starRating >= 6.5) {
+                starRatingBadge.colorTo(ColorARGB(0xFFFFD966), 0.1f)
+                starRatingBadge.fadeTo(1f, 0.1f)
+            } else {
+                starRatingBadge.colorTo(ColorARGB.Black, 0.1f)
+                starRatingBadge.fadeTo(0.75f, 0.1f)
+            }
+
+            GlobalManager.getInstance().songMenu.setStarsDisplay(GameHelper.Round(attributes.starRating, 2))
         }
     }
 
