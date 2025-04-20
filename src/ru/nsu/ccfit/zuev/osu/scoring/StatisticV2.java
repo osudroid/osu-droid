@@ -9,7 +9,7 @@ import java.util.Random;
 import com.osudroid.ibancho.data.RoomTeam;
 import com.osudroid.ibancho.data.WinCondition;
 import com.reco1l.osu.data.ScoreInfo;
-import com.reco1l.osu.multiplayer.Multiplayer;
+import com.osudroid.multiplayer.Multiplayer;
 import com.rian.osu.beatmap.sections.BeatmapDifficulty;
 import com.rian.osu.mods.IMigratableMod;
 import com.rian.osu.mods.LegacyModConverter;

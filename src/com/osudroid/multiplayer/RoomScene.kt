@@ -1,4 +1,4 @@
-package com.reco1l.osu.multiplayer
+package com.osudroid.multiplayer
 
 import com.osudroid.BuildSettings
 import com.reco1l.andengine.*
@@ -22,10 +22,10 @@ import com.osudroid.ibancho.data.TeamMode.TeamVersus
 import com.osudroid.ibancho.data.WinCondition
 import com.osudroid.ibancho.data.WinCondition.*
 import com.reco1l.osu.mainThread
-import com.reco1l.osu.multiplayer.Multiplayer.isConnected
-import com.reco1l.osu.multiplayer.Multiplayer.isRoomHost
-import com.reco1l.osu.multiplayer.Multiplayer.player
-import com.reco1l.osu.multiplayer.Multiplayer.room
+import com.osudroid.multiplayer.Multiplayer.isConnected
+import com.osudroid.multiplayer.Multiplayer.isRoomHost
+import com.osudroid.multiplayer.Multiplayer.player
+import com.osudroid.multiplayer.Multiplayer.room
 import com.reco1l.osu.ui.MessageDialog
 import com.reco1l.osu.ui.entity.BeatmapButton
 import com.reco1l.osu.ui.entity.ComposedText

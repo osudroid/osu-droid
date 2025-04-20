@@ -7,7 +7,7 @@ import com.osudroid.ibancho.data.RoomMods
 import com.osudroid.ibancho.data.RoomStatus
 import com.osudroid.ibancho.data.TeamMode
 import com.osudroid.ibancho.data.WinCondition
-import com.reco1l.osu.multiplayer.*
+import com.osudroid.multiplayer.Multiplayer
 import com.reco1l.toolkt.data.*
 import com.reco1l.toolkt.kotlin.*
 import io.socket.client.*

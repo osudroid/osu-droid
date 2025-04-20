@@ -3,7 +3,7 @@ package ru.nsu.ccfit.zuev.osu.menu;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import com.osudroid.ibancho.data.WinCondition;
-import com.reco1l.osu.multiplayer.Multiplayer;
+import com.osudroid.multiplayer.Multiplayer;
 import org.json.JSONObject;
 
 import java.text.NumberFormat;

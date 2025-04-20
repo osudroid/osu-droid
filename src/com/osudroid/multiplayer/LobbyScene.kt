@@ -1,4 +1,4 @@
-package com.reco1l.osu.multiplayer
+package com.osudroid.multiplayer
 
 import android.net.Uri
 import android.util.Log

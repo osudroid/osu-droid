@@ -1,6 +1,6 @@
 package com.osudroid.ibancho.data
 
-import com.reco1l.osu.multiplayer.Multiplayer
+import com.osudroid.multiplayer.Multiplayer
 
 data class Room(
 

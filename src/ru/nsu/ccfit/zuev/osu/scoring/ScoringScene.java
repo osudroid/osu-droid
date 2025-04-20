@@ -5,8 +5,8 @@ import android.util.Log;
 import com.edlplan.framework.utils.functionality.SmartIterator;
 import com.reco1l.osu.Execution;
 import com.reco1l.osu.data.DatabaseManager;
-import com.reco1l.osu.multiplayer.Multiplayer;
-import com.reco1l.osu.multiplayer.RoomScene;
+import com.osudroid.multiplayer.Multiplayer;
+import com.osudroid.multiplayer.RoomScene;
 import com.reco1l.osu.ui.entity.StatisticSelector;
 
 import com.rian.osu.GameMode;

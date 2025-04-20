@@ -4,10 +4,10 @@ import com.osudroid.ibancho.RoomAPI
 import com.osudroid.ibancho.data.PlayerStatus.Ready
 import com.osudroid.ibancho.data.RoomBeatmap
 import com.reco1l.osu.async
-import com.reco1l.osu.multiplayer.Multiplayer
+import com.osudroid.multiplayer.Multiplayer
 import com.osudroid.beatmaplisting.BeatmapDownloader
 import com.osudroid.beatmaplisting.BeatmapListing
-import com.reco1l.osu.multiplayer.RoomScene
+import com.osudroid.multiplayer.RoomScene
 import org.anddev.andengine.entity.sprite.Sprite
 import org.anddev.andengine.entity.text.ChangeableText
 import org.anddev.andengine.input.touch.TouchEvent

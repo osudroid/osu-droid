@@ -7,9 +7,9 @@ import com.reco1l.andengine.sprite.ExtendedSprite
 import com.reco1l.osu.async
 import com.osudroid.beatmaplisting.BeatmapListing
 import com.reco1l.osu.mainThread
-import com.reco1l.osu.multiplayer.LobbyScene
-import com.reco1l.osu.multiplayer.Multiplayer
-import com.reco1l.osu.multiplayer.RoomScene
+import com.osudroid.multiplayer.LobbyScene
+import com.osudroid.multiplayer.Multiplayer
+import com.osudroid.multiplayer.RoomScene
 import org.anddev.andengine.input.touch.TouchEvent
 import ru.nsu.ccfit.zuev.osu.GlobalManager
 import ru.nsu.ccfit.zuev.osu.LibraryManager

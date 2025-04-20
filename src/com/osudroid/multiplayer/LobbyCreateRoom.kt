@@ -1,4 +1,4 @@
-package com.reco1l.osu.multiplayer
+package com.osudroid.multiplayer
 
 import android.animation.Animator
 import android.view.View

@@ -36,8 +36,8 @@ import com.osudroid.UpdateManager
 import com.reco1l.osu.async
 import com.reco1l.osu.data.DatabaseManager
 import com.reco1l.osu.mainThread
-import com.reco1l.osu.multiplayer.Multiplayer
-import com.reco1l.osu.multiplayer.RoomScene
+import com.osudroid.multiplayer.Multiplayer
+import com.osudroid.multiplayer.RoomScene
 import com.reco1l.osu.ui.InputPreference
 import com.reco1l.osu.ui.Option
 import com.reco1l.osu.ui.SelectPreference

@@ -1,6 +1,6 @@
 @file:JvmName("MultiplayerConverter")
 
-package com.reco1l.osu.multiplayer
+package com.osudroid.multiplayer
 
 import com.rian.osu.mods.LegacyModConverter
 import org.json.JSONObject

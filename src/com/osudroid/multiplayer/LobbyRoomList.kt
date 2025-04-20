@@ -1,4 +1,4 @@
-package com.reco1l.osu.multiplayer
+package com.osudroid.multiplayer
 
 import android.view.inputmethod.EditorInfo
 import com.osudroid.ibancho.RoomAPI
@@ -27,7 +27,7 @@ class LobbyRoomList : ScrollableList() {
     fun setList(rooms: List<Room>) {
 
         for (i in 0 until childCount) {
-            LobbyScene.unregisterTouchArea(getChild(i) as Sprite)
+            unregisterTouchArea(getChild(i) as Sprite)
         }
 
         detachChildren()
@@ -188,7 +188,7 @@ class LobbyRoomList : ScrollableList() {
         }
 
         attachChild(sprite)
-        LobbyScene.registerTouchArea(sprite)
+        registerTouchArea(sprite)
 
         itemHeight = sprite.height
     }
@@ -197,7 +197,7 @@ class LobbyRoomList : ScrollableList() {
     override fun detachChildren() {
 
         for (i in 0 until childCount) {
-            LobbyScene.unregisterTouchArea(getChild(i) as Sprite)
+            unregisterTouchArea(getChild(i) as Sprite)
         }
 
         super.detachChildren()

@@ -5,7 +5,7 @@ import android.util.Log;
 import com.reco1l.osu.data.BeatmapInfo;
 import com.reco1l.osu.Execution;
 import com.reco1l.osu.data.DatabaseManager;
-import com.reco1l.osu.multiplayer.Multiplayer;
+import com.osudroid.multiplayer.Multiplayer;
 import com.rian.osu.utils.ModUtils;
 
 import org.anddev.andengine.entity.Entity;

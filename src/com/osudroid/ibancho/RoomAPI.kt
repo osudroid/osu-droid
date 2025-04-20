@@ -13,8 +13,8 @@ import com.osudroid.ibancho.data.parseBeatmap
 import com.osudroid.ibancho.data.parseGameplaySettings
 import com.osudroid.ibancho.data.parsePlayer
 import com.osudroid.ibancho.data.parsePlayers
+import com.osudroid.multiplayer.Multiplayer
 import ru.nsu.ccfit.zuev.osu.SecurityUtils
-import com.reco1l.osu.multiplayer.*
 import io.socket.client.IO
 import io.socket.client.Socket
 import io.socket.emitter.Emitter.Listener

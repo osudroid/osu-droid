@@ -16,8 +16,8 @@ import com.reco1l.osu.data.DatabaseManager;
 import com.reco1l.osu.Execution;
 import com.reco1l.andengine.sprite.AnimatedSprite;
 import com.reco1l.andengine.sprite.ExtendedSprite;
-import com.reco1l.osu.multiplayer.Multiplayer;
-import com.reco1l.osu.multiplayer.RoomScene;
+import com.osudroid.multiplayer.Multiplayer;
+import com.osudroid.multiplayer.RoomScene;
 
 import com.osudroid.ui.v2.modmenu.ModMenu;
 import com.rian.osu.GameMode;

@@ -1,4 +1,4 @@
-package com.reco1l.osu.multiplayer
+package com.osudroid.multiplayer
 
 import com.osudroid.ibancho.data.PlayerStatus.*
 import com.osudroid.ibancho.data.Room
@@ -36,10 +36,10 @@ class RoomPlayerList(val room: Room) : ScrollableList(), IScrollDetectorListener
     override fun detachSelf(): Boolean {
 
         for (i in 0 until childCount) {
-            RoomScene.unregisterTouchArea(getChild(i) as ITouchArea)
+            unregisterTouchArea(getChild(i) as ITouchArea)
         }
 
-        return RoomScene.detachChild(this)
+        return detachChild(this)
     }
 
 
@@ -50,14 +50,14 @@ class RoomPlayerList(val room: Room) : ScrollableList(), IScrollDetectorListener
             for (i in childCount - 1 downTo 0) {
                 val child = getChild(i)
 
-                RoomScene.unregisterTouchArea(child as ITouchArea)
+                unregisterTouchArea(child as ITouchArea)
                 detachChild(child)
             }
 
             for (i in 0 until room.maxPlayers) {
                 val item = PlayerItem()
                 attachChild(item)
-                RoomScene.registerTouchArea(item)
+                registerTouchArea(item)
 
                 itemHeight = item.height
 

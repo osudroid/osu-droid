@@ -44,13 +44,13 @@ import com.google.firebase.crashlytics.FirebaseCrashlytics;
 import com.reco1l.andengine.ExtendedEngine;
 import com.osudroid.ibancho.LobbyAPI;
 import com.osudroid.AccessibilityDetector;
-import com.reco1l.osu.DifficultyCalculationManager;
+import com.osudroid.DifficultyCalculationManager;
 import com.reco1l.osu.data.BeatmapInfo;
 import com.reco1l.osu.Execution;
-import com.reco1l.osu.multiplayer.Multiplayer;
+import com.osudroid.multiplayer.Multiplayer;
 import com.osudroid.UpdateManager;
-import com.reco1l.osu.multiplayer.LobbyScene;
-import com.reco1l.osu.multiplayer.RoomScene;
+import com.osudroid.multiplayer.LobbyScene;
+import com.osudroid.multiplayer.RoomScene;
 
 import com.osudroid.ui.v2.modmenu.ModMenu;
 import com.rian.osu.difficulty.BeatmapDifficultyCalculator;
