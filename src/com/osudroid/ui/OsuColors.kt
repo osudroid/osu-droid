@@ -1,10 +1,11 @@
-package com.reco1l.osu
+package com.osudroid.ui
 
-import android.graphics.*
-import com.reco1l.framework.*
-import com.reco1l.toolkt.*
-import kotlin.math.*
-
+import android.graphics.Color
+import com.reco1l.framework.ColorARGB
+import com.reco1l.framework.Colors
+import com.reco1l.framework.toColorARGB
+import com.reco1l.toolkt.roundBy
+import kotlin.math.ceil
 
 /**
  * A collection of colors used in osu!.
@@ -57,8 +58,3 @@ object OsuColors {
 
 
 }
-
-
-
-
-
