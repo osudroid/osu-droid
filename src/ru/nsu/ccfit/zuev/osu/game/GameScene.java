@@ -579,7 +579,7 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
                 return false;
             }
             GameHelper.setReplayVersion(replay.replayVersion);
-        } else if (mods.contains(ModAuto.class)) {
+        } else if (mods.contains(ModAutoplay.class)) {
             replay = null;
         }
 
@@ -743,7 +743,7 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
         stat.canFail = !stat.getMod().contains(ModNoFail.class)
                 && !stat.getMod().contains(ModRelax.class)
                 && !stat.getMod().contains(ModAutopilot.class)
-                && !stat.getMod().contains(ModAuto.class);
+                && !stat.getMod().contains(ModAutoplay.class);
 
         float difficultyScoreMultiplier = 1 + Math.min(parsedBeatmap.getDifficulty().od, 10) / 10f +
                 Math.min(parsedBeatmap.getDifficulty().hp, 10) / 10f;
@@ -764,7 +764,7 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
         GameHelper.setFlashLight(lastMods.contains(ModFlashlight.class));
         GameHelper.setRelaxMod(lastMods.contains(ModRelax.class));
         GameHelper.setAutopilotMod(lastMods.contains(ModAutopilot.class));
-        GameHelper.setAuto(lastMods.contains(ModAuto.class));
+        GameHelper.setAuto(lastMods.contains(ModAutoplay.class));
         GameHelper.setSuddenDeath(lastMods.contains(ModSuddenDeath.class));
         GameHelper.setPerfect(lastMods.contains(ModPerfect.class));
         GameHelper.setScoreV2(lastMods.contains(ModScoreV2.class));
@@ -909,7 +909,7 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
             hud.attachChild(replayText, 0);
         }
 
-        if (lastMods.contains(ModAuto.class) || replaying) {
+        if (lastMods.contains(ModAutoplay.class) || replaying) {
             var metadata = playableBeatmap.getMetadata();
             playname = replaying ? GlobalManager.getInstance().getScoring().getReplayStat().getPlayerName() : "osu!";
 
@@ -1442,7 +1442,7 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
                 if (replaying)
                     scoringScene.load(scoringScene.getReplayStat(), null, GlobalManager.getInstance().getSongService(), replayPath, null, lastBeatmapInfo);
                 else {
-                    if (stat.getMod().contains(ModAuto.class)) {
+                    if (stat.getMod().contains(ModAutoplay.class)) {
                         stat.setPlayerName("osu!");
                     }
 
@@ -2694,7 +2694,7 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
             replay.setStat(stat);
             replay.save(replayFilePath);
 
-            if (stat.getTotalScoreWithMultiplier() > 0 && !stat.getMod().contains(ModAuto.class)) {
+            if (stat.getTotalScoreWithMultiplier() > 0 && !stat.getMod().contains(ModAutoplay.class)) {
                 stat.setReplayFilename(odrFilename);
                 stat.setBeatmapMD5(lastBeatmapInfo.getMD5());
 

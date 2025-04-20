@@ -15,7 +15,7 @@ import com.rian.osu.beatmap.parser.BeatmapParser;
 import com.rian.osu.difficulty.BeatmapDifficultyCalculator;
 import com.rian.osu.difficulty.attributes.DroidDifficultyAttributes;
 import com.rian.osu.difficulty.attributes.DroidPerformanceAttributes;
-import com.rian.osu.mods.ModAuto;
+import com.rian.osu.mods.ModAutoplay;
 import com.rian.osu.mods.ModCustomSpeed;
 import com.rian.osu.mods.ModDifficultyAdjust;
 import com.rian.osu.mods.ModFlashlight;
@@ -479,7 +479,7 @@ public class ScoringScene {
             ResourceManager.getInstance().getSound("applause").play();
 
             // Save score
-            if (stat.getTotalScoreWithMultiplier() <= 0 || mods.contains(ModAuto.class) ||
+            if (stat.getTotalScoreWithMultiplier() <= 0 || mods.contains(ModAutoplay.class) ||
                     (Multiplayer.isMultiplayer &&
                         ((Multiplayer.room != null && Multiplayer.room.isTeamVersus()) || game.hasFailed))) {
                 return;

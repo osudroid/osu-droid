@@ -12,7 +12,7 @@ class ModAutopilot : Mod() {
     override val type = ModType.Automation
     override val textureNameSuffix = "relax2"
     override val incompatibleMods = super.incompatibleMods + arrayOf(
-        ModRelax::class, ModAuto::class, ModNoFail::class
+        ModRelax::class, ModAutoplay::class, ModNoFail::class
     )
 
     override fun calculateScoreMultiplier(difficulty: BeatmapDifficulty) = 1e-3f
