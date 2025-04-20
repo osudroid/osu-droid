@@ -489,7 +489,7 @@ object ModMenuV2 : ExtendedScene() {
         override fun onManagedUpdate(deltaTimeSec: Float) {
 
             // Match the description text color with the title text color during animations.
-            if (descriptionText.color != titleText.color) {
+            if (!descriptionText.color.colorEquals(titleText.color)) {
                 descriptionText.color = titleText.color.copy(alpha = descriptionText.alpha)
             }
 
