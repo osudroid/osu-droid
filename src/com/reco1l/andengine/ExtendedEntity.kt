@@ -2,10 +2,10 @@ package com.reco1l.andengine
 
 import android.util.*
 import android.view.*
-import com.reco1l.*
+import com.osudroid.BuildConfiguration
+import com.osudroid.debug.EntityInspector
 import com.reco1l.andengine.modifier.*
 import com.reco1l.andengine.shape.*
-import com.reco1l.debug.*
 import com.reco1l.framework.*
 import com.reco1l.framework.math.*
 import com.reco1l.toolkt.kotlin.*

@@ -4,7 +4,7 @@ import android.graphics.Bitmap;
 import android.graphics.Bitmap.Config;
 import android.graphics.BitmapFactory;
 
-import com.reco1l.BuildConfiguration;
+import com.osudroid.BuildConfiguration;
 import com.reco1l.framework.Bitmaps;
 
 import org.anddev.andengine.opengl.texture.atlas.bitmap.source.IBitmapTextureAtlasSource;

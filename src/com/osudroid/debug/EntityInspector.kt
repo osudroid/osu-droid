@@ -1,4 +1,4 @@
-package com.reco1l.debug
+package com.osudroid.debug
 
 import android.util.*
 import com.reco1l.andengine.*

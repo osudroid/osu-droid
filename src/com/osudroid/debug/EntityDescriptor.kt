@@ -1,7 +1,6 @@
-package com.reco1l.debug
+package com.osudroid.debug
 
 import com.reco1l.andengine.text.*
-import org.anddev.andengine.entity.Entity
 import org.anddev.andengine.entity.IEntity
 import ru.nsu.ccfit.zuev.osu.ResourceManager
 import kotlin.reflect.*

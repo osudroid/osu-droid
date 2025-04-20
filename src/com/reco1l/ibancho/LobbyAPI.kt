@@ -1,7 +1,7 @@
 package com.reco1l.ibancho
 
-import com.reco1l.*
-import com.reco1l.debug.*
+import com.osudroid.BuildConfiguration
+import com.osudroid.debug.MockRoom
 import com.reco1l.framework.net.JsonArrayRequest
 import com.reco1l.framework.net.JsonObjectRequest
 import com.reco1l.ibancho.data.*

@@ -1,4 +1,4 @@
-package com.reco1l.debug
+package com.osudroid.debug
 
 import com.reco1l.ibancho.data.*
 import com.reco1l.osu.multiplayer.*

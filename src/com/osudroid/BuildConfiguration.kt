@@ -1,4 +1,4 @@
-package com.reco1l
+package com.osudroid
 
 object BuildConfiguration {
 

@@ -1,6 +1,6 @@
 package com.reco1l.osu.multiplayer
 
-import com.reco1l.*
+import com.osudroid.BuildConfiguration
 import com.reco1l.andengine.*
 import com.reco1l.andengine.sprite.*
 import com.reco1l.ibancho.IPlayerEventListener

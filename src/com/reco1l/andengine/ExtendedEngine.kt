@@ -1,7 +1,8 @@
 package com.reco1l.andengine
 
-import com.reco1l.*
-import com.reco1l.debug.*
+import com.osudroid.BuildConfiguration
+import com.osudroid.debug.EntityDescriptor
+import com.osudroid.debug.EntityInspector
 import com.reco1l.toolkt.kotlin.*
 import org.anddev.andengine.engine.Engine
 import org.anddev.andengine.engine.camera.*

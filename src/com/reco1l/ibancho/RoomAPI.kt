@@ -1,7 +1,7 @@
 package com.reco1l.ibancho
 
-import com.reco1l.*
-import com.reco1l.debug.*
+import com.osudroid.BuildConfiguration
+import com.osudroid.debug.MockSocket
 import com.reco1l.ibancho.data.*
 import ru.nsu.ccfit.zuev.osu.SecurityUtils
 import com.reco1l.osu.multiplayer.*
