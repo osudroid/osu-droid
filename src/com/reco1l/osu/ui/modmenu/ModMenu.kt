@@ -34,7 +34,7 @@ import ru.nsu.ccfit.zuev.osu.helper.*
 import java.util.concurrent.CancellationException
 import kotlin.math.*
 
-object ModMenuV2 : ExtendedScene() {
+object ModMenu : ExtendedScene() {
 
 
     /**

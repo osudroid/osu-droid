@@ -151,7 +151,7 @@ private class ModSettingSlider(val mod: Mod, override val setting: ModSetting<Fl
         valueFormatter = setting.valueFormatter!!
         onValueChanged = {
             setting.value = it
-            ModMenuV2.onModsChanged(mod)
+            ModMenu.onModsChanged(mod)
         }
     }
 }
@@ -174,7 +174,7 @@ private class NullableModSettingSlider(val mod: Mod, override val setting: ModSe
         valueFormatter = setting.valueFormatter!!
         onValueChanged = { value ->
             setting.value = if (value == setting.defaultValue) null else value
-            ModMenuV2.onModsChanged(mod)
+            ModMenu.onModsChanged(mod)
         }
     }
 }
@@ -189,7 +189,7 @@ private class ModSettingCheckbox(val mod: Mod, override val setting: ModSetting<
         value = setting.value
         onValueChanged = {
             setting.value = it
-            ModMenuV2.onModsChanged(mod)
+            ModMenu.onModsChanged(mod)
         }
     }
 }
