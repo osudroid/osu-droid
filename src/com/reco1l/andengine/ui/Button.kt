@@ -144,7 +144,7 @@ open class Button : LinearContainer(), IWithTheme<ButtonTheme> {
 
     init {
         orientation = Orientation.Horizontal
-        padding = Vec4(16f, 0f, 18f, 0f)
+        padding = Vec4(16f, 0f)
         spacing = 8f
         scaleCenter = Anchor.Center
 

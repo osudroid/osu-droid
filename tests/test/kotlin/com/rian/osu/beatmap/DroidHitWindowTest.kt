@@ -5,7 +5,7 @@ import org.junit.Test
 
 class DroidHitWindowTest : HitWindowTest() {
     @Test
-    fun testHitWindow() {
+    fun `Test hit window`() {
         testHitWindowValues(10f, 50f, 100f, 200f)
         testHitWindowValues(8.2f, 59f, 118f, 218f)
         testHitWindowValues(6.5f, 67.5f, 135f, 235f)
@@ -14,7 +14,7 @@ class DroidHitWindowTest : HitWindowTest() {
     }
 
     @Test
-    fun testHitWindowToODConversion() {
+    fun `Test hit window to OD conversion`() {
         fun testConversion(od: Float, greatWindow: Float, okWindow: Float, mehWindow: Float) {
             Assert.assertEquals(DroidHitWindow.hitWindow300ToOverallDifficulty(greatWindow), od, 1e-2f)
             Assert.assertEquals(DroidHitWindow.hitWindow100ToOverallDifficulty(okWindow), od, 1e-2f)

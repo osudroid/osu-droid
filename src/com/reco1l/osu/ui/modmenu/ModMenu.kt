@@ -12,18 +12,21 @@ import com.reco1l.framework.*
 import com.reco1l.framework.math.*
 import com.reco1l.ibancho.RoomAPI.setPlayerMods
 import com.reco1l.ibancho.RoomAPI.setRoomMods
+import com.reco1l.ibancho.data.RoomMods
 import com.reco1l.osu.*
 import com.reco1l.osu.multiplayer.*
+import com.reco1l.osu.ui.SettingsFragment
 import com.reco1l.toolkt.kotlin.*
 import com.reco1l.toolkt.kotlin.async
 import com.rian.osu.*
+import com.rian.osu.beatmap.Beatmap
 import com.rian.osu.beatmap.parser.*
 import com.rian.osu.difficulty.BeatmapDifficultyCalculator.calculateDroidDifficulty
 import com.rian.osu.difficulty.BeatmapDifficultyCalculator.calculateStandardDifficulty
 import com.rian.osu.difficulty.attributes.*
 import com.rian.osu.mods.*
 import com.rian.osu.utils.*
-import com.rian.osu.utils.ModUtils.calculateRateWithMods
+import com.rian.osu.utils.ModUtils
 import kotlinx.coroutines.*
 import ru.nsu.ccfit.zuev.osu.*
 import ru.nsu.ccfit.zuev.osu.DifficultyAlgorithm.*
@@ -32,7 +35,7 @@ import ru.nsu.ccfit.zuev.osu.helper.*
 import java.util.concurrent.CancellationException
 import kotlin.math.*
 
-object ModMenuV2 : ExtendedScene() {
+object ModMenu : ExtendedScene() {
 
 
     /**
@@ -40,6 +43,7 @@ object ModMenuV2 : ExtendedScene() {
      */
     val enabledMods = ModHashMap()
 
+    private var parsedBeatmap: Beatmap? = null
 
     private val modButtons = mutableListOf<ModButton>()
 
@@ -66,6 +70,7 @@ object ModMenuV2 : ExtendedScene() {
         ResourceManager.getInstance().loadHighQualityAsset("tune", "tune.png")
         ResourceManager.getInstance().loadHighQualityAsset("backspace", "backspace.png")
         ResourceManager.getInstance().loadHighQualityAsset("search", "search.png")
+        ResourceManager.getInstance().loadHighQualityAsset("settings", "settings.png")
 
         customizationMenu = ModCustomizationMenu()
 
@@ -129,6 +134,16 @@ object ModMenuV2 : ExtendedScene() {
                         }
                         onActionCancel = { ResourceManager.getInstance().getSound("click-short")?.play() }
                     })
+
+                    +Button().apply {
+                        leadingIcon = ExtendedSprite(ResourceManager.getInstance().getTexture("settings"))
+                        spacing = 0f
+                        onActionUp = {
+                            ResourceManager.getInstance().getSound("click-short-confirm")?.play()
+                            mainThread { SettingsFragment().show() }
+                        }
+                        onActionCancel = { ResourceManager.getInstance().getSound("click-short")?.play() }
+                    }
                 })
 
                 attachChild(LinearContainer().apply {
@@ -217,54 +232,65 @@ object ModMenuV2 : ExtendedScene() {
             }
 
             val difficultyAlgorithm = Config.getDifficultyAlgorithm()
+            val gameMode = if (difficultyAlgorithm == droid) GameMode.Droid else GameMode.Standard
+            val beatmap: Beatmap?
 
-            BeatmapParser(selectedBeatmap.path, this@scope).use { parser ->
-
-                val beatmap = parser.parse(
-                    withHitObjects = true,
-                    mode = if (difficultyAlgorithm == droid) GameMode.Droid else GameMode.Standard
-                )
-
-                if (beatmap == null) {
-                    GlobalManager.getInstance().songMenu.setStarsDisplay(0f)
-                    return@scope
-                }
-
-                modButtons.map { it.mod }.filterIsInstance<IModRequiresOriginalBeatmap>().fastForEach { mod ->
-                    mod.applyFromBeatmap(beatmap)
-                }
-                customizationMenu.updateComponents()
-
-                // Copy the mods to avoid concurrent modification
-                val mods = enabledMods.deepCopy().values
-
-                arBadge.value = "%.2f".format(beatmap.difficulty.ar)
-                odBadge.value = "%.2f".format(beatmap.difficulty.od)
-                csBadge.value = "%.2f".format(beatmap.difficulty.difficultyCS)
-                hpBadge.value = "%.2f".format(beatmap.difficulty.hp)
-                bpmBadge.value = (selectedBeatmap.mostCommonBPM * calculateRateWithMods(mods)).roundToInt().toString()
-
-                val attributes: DifficultyAttributes = when (difficultyAlgorithm) {
-                    droid -> calculateDroidDifficulty(beatmap, mods, this@scope)
-                    standard -> calculateStandardDifficulty(beatmap, mods, this@scope)
-                }
-
-                starRatingBadge.clearEntityModifiers()
-                starRatingBadge.background!!.clearEntityModifiers()
-
-                starRatingBadge.value = "%.2f".format(attributes.starRating)
-                starRatingBadge.background!!.colorTo(OsuColors.getStarRatingColor(attributes.starRating), 0.1f)
-
-                if (attributes.starRating >= 6.5) {
-                    starRatingBadge.colorTo(ColorARGB(0xFFFFD966), 0.1f)
-                    starRatingBadge.fadeTo(1f, 0.1f)
-                } else {
-                    starRatingBadge.colorTo(ColorARGB.Black, 0.1f)
-                    starRatingBadge.fadeTo(0.75f, 0.1f)
-                }
-
-                GlobalManager.getInstance().songMenu.setStarsDisplay(GameHelper.Round(attributes.starRating, 2))
+            if (parsedBeatmap?.md5 != selectedBeatmap.md5 || parsedBeatmap?.mode != gameMode) {
+                 BeatmapParser(selectedBeatmap.path, this@scope).use { parser ->
+                     beatmap = parser.parse(withHitObjects = true, mode = gameMode)
+                     parsedBeatmap = beatmap
+                 }
+            } else {
+                beatmap = parsedBeatmap
             }
+
+            if (beatmap == null) {
+                GlobalManager.getInstance().songMenu.setStarsDisplay(0f)
+                return@scope
+            }
+
+            modButtons.map { it.mod }.filterIsInstance<IModRequiresOriginalBeatmap>().fastForEach { mod ->
+                ensureActive()
+                mod.applyFromBeatmap(beatmap)
+            }
+            customizationMenu.updateComponents()
+
+            // Copy the mods to avoid concurrent modification
+            val mods = enabledMods.deepCopy().values
+            val difficulty = beatmap.difficulty.clone()
+
+            ModUtils.applyModsToBeatmapDifficulty(difficulty, gameMode, mods, true)
+
+            ensureActive()
+            arBadge.value = "%.2f".format(difficulty.ar)
+            odBadge.value = "%.2f".format(difficulty.od)
+            csBadge.value = "%.2f".format(difficulty.difficultyCS)
+            hpBadge.value = "%.2f".format(difficulty.hp)
+            bpmBadge.value = (selectedBeatmap.mostCommonBPM * ModUtils.calculateRateWithMods(mods)).roundToInt().toString()
+
+            val attributes: DifficultyAttributes = when (difficultyAlgorithm) {
+                droid -> calculateDroidDifficulty(beatmap, mods, this@scope)
+                standard -> calculateStandardDifficulty(beatmap, mods, this@scope)
+            }
+
+            ensureActive()
+            starRatingBadge.clearEntityModifiers()
+            ensureActive()
+            starRatingBadge.background!!.clearEntityModifiers()
+            ensureActive()
+
+            starRatingBadge.value = "%.2f".format(attributes.starRating)
+            starRatingBadge.background!!.colorTo(OsuColors.getStarRatingColor(attributes.starRating), 0.1f)
+
+            if (attributes.starRating >= 6.5) {
+                starRatingBadge.colorTo(ColorARGB(0xFFFFD966), 0.1f)
+                starRatingBadge.fadeTo(1f, 0.1f)
+            } else {
+                starRatingBadge.colorTo(ColorARGB.Black, 0.1f)
+                starRatingBadge.fadeTo(0.75f, 0.1f)
+            }
+
+            GlobalManager.getInstance().songMenu.setStarsDisplay(GameHelper.Round(attributes.starRating, 2))
         }
     }
 
@@ -309,6 +335,51 @@ object ModMenuV2 : ExtendedScene() {
     //endregion
 
     //region Mods
+
+    fun setMods(mods: RoomMods, isFreeMod: Boolean) {
+        if (isFreeMod) {
+            for (mod in enabledMods.values) {
+                if (mod.isValidForMultiplayerAsFreeMod) {
+                    continue
+                }
+
+                if (mod !in mods) {
+                    removeMod(mod)
+                }
+            }
+        } else {
+            clear()
+        }
+
+        for (mod in mods.values) {
+            if (!mod.isValidForMultiplayer) {
+                continue
+            }
+
+            if (!isFreeMod || mod.isValidForMultiplayerAsFreeMod) {
+                addMod(mod)
+            }
+        }
+
+        if (!Multiplayer.isRoomHost) {
+            val doubleTime = enabledMods.ofType<ModDoubleTime>()
+            val nightCore = enabledMods.ofType<ModNightCore>()
+
+            if (Config.isUseNightcoreOnMultiplayer() && doubleTime != null) {
+                removeMod(doubleTime)
+                addMod(ModNightCore())
+            } else if (!Config.isUseNightcoreOnMultiplayer() && nightCore != null) {
+                removeMod(nightCore)
+                addMod(ModDoubleTime())
+            }
+        }
+
+        updateModButtonEnabledState()
+    }
+
+    fun updateModButtonEnabledState() {
+        modButtons.fastForEach { it.updateEnabledState() }
+    }
 
     fun clear() {
         cancelCalculationJob()
@@ -380,7 +451,11 @@ object ModMenuV2 : ExtendedScene() {
             return
         }
         enabledMods.remove(mod)
-        modButtons.find { it.mod == mod }?.isSelected = false
+
+        modButtons.find { it.mod::class == mod::class }?.apply {
+            isSelected = false
+            mod.settings.fastForEach { it.value = it.defaultValue }
+        }
 
         customizationMenu.onModRemoved(mod)
         onModsChanged(mod)
@@ -483,6 +558,18 @@ object ModMenuV2 : ExtendedScene() {
                     addMod(mod)
                     ResourceManager.getInstance().getSound("check-on")?.play()
                 }
+            }
+
+            updateEnabledState()
+        }
+
+        fun updateEnabledState() {
+            // TODO: the button should be hidden when it is disabled after Container can observe child visibility.
+            isEnabled = if (Multiplayer.isMultiplayer && Multiplayer.room != null) {
+                mod.isValidForMultiplayer && (Multiplayer.isRoomHost ||
+                    (Multiplayer.room!!.gameplaySettings.isFreeMod && mod.isValidForMultiplayerAsFreeMod))
+            } else {
+                true
             }
         }
 

@@ -9,7 +9,7 @@ import ru.nsu.ccfit.zuev.osu.game.mods.GameMod
 
 class LegacyModConverterTest {
     @Test
-    fun testGameModConversion() {
+    fun `Test GameMod conversion`() {
         val map =
             LegacyModConverter.convert(setOf(GameMod.MOD_DOUBLETIME, GameMod.MOD_TRACEABLE, GameMod.MOD_EASY), "")
 
@@ -20,7 +20,7 @@ class LegacyModConverterTest {
     }
 
     @Test
-    fun testGameModConversionWithExtraString() {
+    fun `Test GameMod conversion with extra string`() {
         val map =
             LegacyModConverter.convert(
                 setOf(GameMod.MOD_DOUBLETIME, GameMod.MOD_TRACEABLE, GameMod.MOD_NOFAIL),
@@ -49,7 +49,7 @@ class LegacyModConverterTest {
     }
 
     @Test
-    fun testModStringConversion() {
+    fun `Test mod string conversion`() {
         val map = LegacyModConverter.convert("rhd")
 
         Assert.assertTrue(map.size == 3)
@@ -59,7 +59,16 @@ class LegacyModConverterTest {
     }
 
     @Test
-    fun testModStringConversionWithoutMigration() {
+    fun `Test mod string with only extra mod string`() {
+        LegacyModConverter.convert("|x1.25").apply {
+            Assert.assertEquals(size, 1)
+            Assert.assertTrue(ModCustomSpeed::class in this)
+            Assert.assertEquals(ofType<ModCustomSpeed>()!!.trackRateMultiplier, 1.25f, 0f)
+        }
+    }
+
+    @Test
+    fun `Test mod string conversion without migration`() {
         val map = LegacyModConverter.convert("rhdm")
 
         Assert.assertTrue(map.size == 4)
@@ -70,7 +79,7 @@ class LegacyModConverterTest {
     }
 
     @Test
-    fun testModStringConversionWithMigration() {
+    fun `Test mod string conversion with migration`() {
         val difficulty = BeatmapDifficulty(cs = 4f)
         val map = LegacyModConverter.convert("hdm", difficulty)
 

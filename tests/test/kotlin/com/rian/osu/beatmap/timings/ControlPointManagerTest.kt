@@ -5,7 +5,7 @@ import org.junit.Test
 
 class ControlPointManagerTest {
     @Test
-    fun testAddControlPointsToEmptyManager() {
+    fun `Test add control points to empty manager`() {
         val manager = DifficultyControlPointManager()
 
         // Redundant control point
@@ -27,7 +27,7 @@ class ControlPointManagerTest {
     }
 
     @Test
-    fun testAddControlPointsToManagerWith1ControlPoint() {
+    fun `Test add control points to manager with 1 control point`() {
         val manager = DifficultyControlPointManager()
         manager.add(createControlPoint())
 
@@ -45,7 +45,7 @@ class ControlPointManagerTest {
     }
 
     @Test
-    fun testAddControlPointsToManagerWith2ControlPoints() {
+    fun `Test add control points to manager with 2 control points`() {
         val manager = DifficultyControlPointManager()
         manager.add(createControlPoint())
         manager.add(createControlPoint(1500.0, 0.75))
@@ -72,7 +72,7 @@ class ControlPointManagerTest {
     }
 
     @Test
-    fun testRemoveControlPoints() {
+    fun `Test remove control points`() {
         val manager = DifficultyControlPointManager()
 
         Assert.assertNull(manager.remove(0))
@@ -97,7 +97,7 @@ class ControlPointManagerTest {
     }
 
     @Test
-    fun testControlPointSearch() {
+    fun `Test control point search`() {
         val manager = DifficultyControlPointManager()
         manager.add(createControlPoint(speedMultiplier = 0.9))
 

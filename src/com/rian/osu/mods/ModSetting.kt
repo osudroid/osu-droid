@@ -2,6 +2,7 @@
 
 package com.rian.osu.mods
 
+import com.rian.osu.math.preciseRoundBy
 import kotlin.math.*
 import kotlin.properties.*
 import kotlin.reflect.*
@@ -79,7 +80,7 @@ sealed class RangeConstrainedModSetting<V>(
 
     protected abstract fun processValue(value: V): V
 
-    override fun setValue(thisRef: Any?, property: KProperty<*>, value: V) {
+    final override fun setValue(thisRef: Any?, property: KProperty<*>, value: V) {
         super.setValue(thisRef, property, processValue(value))
     }
 }
@@ -93,13 +94,43 @@ class FloatModSetting(
     defaultValue: Float,
     minValue: Float = Float.MIN_VALUE,
     maxValue: Float = Float.MAX_VALUE,
-    step: Float = 0f
-) : RangeConstrainedModSetting<Float>(name, valueFormatter, defaultValue, minValue, maxValue, step) {
+    step: Float = 0f,
+
+    /**
+     * The number of decimal places to round the value to.
+     *
+     * When set to `null`, the value will not be rounded.
+     */
+    val precision: Int? = null
+
+) : RangeConstrainedModSetting<Float>(
+    name,
+    valueFormatter,
+    if (precision != null) defaultValue.preciseRoundBy(precision) else defaultValue,
+    if (precision != null) minValue.preciseRoundBy(precision) else minValue,
+    if (precision != null) maxValue.preciseRoundBy(precision) else maxValue,
+    if (precision != null) step.preciseRoundBy(precision) else step
+) {
+    init {
+        require(this.minValue <= this.maxValue) { "minValue must be less than or equal to maxValue." }
+        require(this.step >= 0f) { "step must be greater than or equal to 0." }
+        require(precision == null || precision >= 0) { "precision must be greater than or equal to 0." }
+
+        require(this.defaultValue in this.minValue..this.maxValue) {
+            "defaultValue must be between minValue and maxValue."
+        }
+    }
+
     override fun processValue(value: Float) = when {
         value < minValue -> minValue
         value > maxValue -> maxValue
         step == 0f -> value
-        else -> ceil((value - minValue) / step) * step + minValue
+
+        else -> {
+            val value = round((value - minValue) / step) * step + minValue
+
+            if (precision != null) value.preciseRoundBy(precision) else value
+        }
     }
 }
 
@@ -109,14 +140,44 @@ class NullableFloatModSetting(
     defaultValue: Float?,
     minValue: Float = Float.MIN_VALUE,
     maxValue: Float = Float.MAX_VALUE,
-    step: Float = 0f
-) : RangeConstrainedModSetting<Float?>(name, valueFormatter, defaultValue, minValue, maxValue, step) {
+    step: Float = 0f,
+
+    /**
+     * The number of decimal places to round the value to.
+     *
+     * When set to `null`, the value will not be rounded.
+     */
+    val precision: Int? = null
+
+) : RangeConstrainedModSetting<Float?>(
+    name,
+    valueFormatter,
+    if (precision != null) defaultValue?.preciseRoundBy(precision) else defaultValue,
+    if (precision != null) minValue.preciseRoundBy(precision) else minValue,
+    if (precision != null) maxValue.preciseRoundBy(precision) else maxValue,
+    if (precision != null) step.preciseRoundBy(precision) else step,
+) {
+    init {
+        require(this.minValue!! <= this.maxValue!!) { "minValue must be less than or equal to maxValue." }
+        require(this.step!! >= 0f) { "step must be greater than or equal to 0." }
+        require(precision == null || precision >= 0) { "precision must be greater than or equal to 0." }
+
+        require(this.defaultValue == null || this.defaultValue!! in this.minValue..this.maxValue) {
+            "defaultValue must be between minValue and maxValue."
+        }
+    }
+
     override fun processValue(value: Float?) = when {
         value == null -> null
         value < minValue!! -> minValue
         value > maxValue!! -> maxValue
         step == 0f -> value
-        else -> ceil((value - minValue) / step!!) * step + minValue
+
+        else -> {
+            val value = round((value - minValue) / step!!) * step + minValue
+
+            if (precision != null) value.preciseRoundBy(precision) else value
+        }
     }
 }
 

@@ -52,7 +52,7 @@ import com.reco1l.osu.UpdateManager;
 import com.reco1l.osu.multiplayer.LobbyScene;
 import com.reco1l.osu.multiplayer.RoomScene;
 
-import com.reco1l.osu.ui.modmenu.ModMenuV2;
+import com.reco1l.osu.ui.modmenu.ModMenu;
 import com.rian.osu.difficulty.BeatmapDifficultyCalculator;
 import net.lingala.zip4j.ZipFile;
 
@@ -85,7 +85,6 @@ import ru.nsu.ccfit.zuev.audio.serviceAudio.SongService;
 import ru.nsu.ccfit.zuev.osu.helper.FileUtils;
 import ru.nsu.ccfit.zuev.osu.helper.StringTable;
 import ru.nsu.ccfit.zuev.osu.menu.LoadingScreen;
-import ru.nsu.ccfit.zuev.osu.menu.ModMenu;
 import ru.nsu.ccfit.zuev.osu.menu.SplashScene;
 import ru.nsu.ccfit.zuev.osu.online.OnlineManager;
 import ru.nsu.ccfit.zuev.osuplus.BuildConfig;
@@ -769,8 +768,8 @@ public class MainActivity extends BaseGameActivity implements
                 GlobalManager.getInstance().getSongMenu().getSearchBar().hideMenu();
             }
 
-            if (GlobalManager.getInstance().getSongMenu().getScene().getChildScene() == ModMenuV2.INSTANCE) {
-                ModMenuV2.INSTANCE.back();
+            if (GlobalManager.getInstance().getSongMenu().getScene().getChildScene() == ModMenu.INSTANCE) {
+                ModMenu.INSTANCE.back();
             }
 
             return true;
@@ -803,8 +802,8 @@ public class MainActivity extends BaseGameActivity implements
 
                     if (GlobalManager.getInstance().getEngine().getScene() == RoomScene.INSTANCE) {
 
-                        if (RoomScene.INSTANCE.hasChildScene() && RoomScene.INSTANCE.getChildScene() == ModMenu.getInstance().getScene()) {
-                            ModMenu.getInstance().hide();
+                        if (RoomScene.INSTANCE.hasChildScene() && RoomScene.INSTANCE.getChildScene() == ModMenu.INSTANCE) {
+                            ModMenu.INSTANCE.back();
                             return true;
                         }
                         runOnUiThread(RoomScene.INSTANCE.getLeaveDialog()::show);

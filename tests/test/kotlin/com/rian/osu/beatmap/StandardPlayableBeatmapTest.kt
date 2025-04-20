@@ -12,33 +12,36 @@ import org.junit.Test
 
 class StandardPlayableBeatmapTest : PlayableBeatmapTest() {
     @Test
-    fun testCreationWithoutMods() {
+    fun `Test creation without mods`() {
         createBasePlayableBeatmap(GameMode.Standard).createStandardPlayableBeatmap().apply {
             Assert.assertEquals(formatVersion, 14)
             Assert.assertEquals(hitObjects.objects.size, 3)
 
-            Assert.assertEquals(hitObjects.objects[0].startTime, 1000.0, 0.0)
-            Assert.assertEquals(hitObjects.objects[1].startTime, 2000.0, 0.0)
-            Assert.assertEquals(hitObjects.objects[2].startTime, 3000.0, 0.0)
+            hitObjects.objects[0].apply {
+                Assert.assertEquals(startTime, 1000.0, 0.0)
+                Assert.assertEquals(position, Vector2(256, 192))
+                Assert.assertEquals(difficultyScale, 0.500205f, 1e-2f)
+                Assert.assertEquals(timePreempt, 1200.0, 0.0)
+            }
 
-            Assert.assertEquals(hitObjects.objects[0].position, Vector2(256, 192))
-            Assert.assertEquals(hitObjects.objects[1].position, Vector2(320, 192))
-            Assert.assertEquals(hitObjects.objects[2].position, Vector2(384, 192))
+            hitObjects.objects[1].apply {
+                Assert.assertEquals(startTime, 2000.0, 0.0)
+                Assert.assertEquals(position, Vector2(320, 192))
+                Assert.assertEquals(difficultyScale, 0.500205f, 1e-2f)
+                Assert.assertEquals(timePreempt, 1200.0, 0.0)
+            }
+
+            hitObjects.objects[2].apply {
+                Assert.assertEquals(startTime, 3000.0, 0.0)
+                Assert.assertEquals(position, Vector2(384, 192))
+                Assert.assertEquals(difficultyScale, 0.500205f, 1e-2f)
+                Assert.assertEquals(timePreempt, 1200.0, 0.0)
+            }
         }
     }
 
     @Test
-    fun testCreationWithNoMod() {
-        createBasePlayableBeatmap(GameMode.Standard).createStandardPlayableBeatmap().apply {
-            val firstObject = hitObjects.objects[0]
-
-            Assert.assertEquals(firstObject.difficultyScale, 0.500205f, 1e-2f)
-            Assert.assertEquals(firstObject.timePreempt, 1200.0, 0.0)
-        }
-    }
-
-    @Test
-    fun testCreationWithHardRock() {
+    fun `Test creation with Hard Rock`() {
         createBasePlayableBeatmap(GameMode.Standard).createStandardPlayableBeatmap(listOf(ModHardRock())).apply {
             val firstObject = hitObjects.objects[0]
 
@@ -49,7 +52,7 @@ class StandardPlayableBeatmapTest : PlayableBeatmapTest() {
     }
 
     @Test
-    fun testCreationWithHidden() {
+    fun `Test creation with Hidden`() {
         createBasePlayableBeatmap(GameMode.Standard).createStandardPlayableBeatmap(listOf(ModHidden())).apply {
             val firstObject = hitObjects.objects[0]
 
@@ -59,7 +62,7 @@ class StandardPlayableBeatmapTest : PlayableBeatmapTest() {
     }
 
     @Test
-    fun testCreationWithCustomSpeed() {
+    fun `Test creation with Custom Speed`() {
         createBasePlayableBeatmap(GameMode.Standard).createStandardPlayableBeatmap(listOf(ModCustomSpeed(2f))).apply {
             val firstObject = hitObjects.objects[0]
 
@@ -69,7 +72,7 @@ class StandardPlayableBeatmapTest : PlayableBeatmapTest() {
     }
 
     @Test
-    fun testCreationWithReallyEasy() {
+    fun `Test creation with Really Easy`() {
         createBasePlayableBeatmap(GameMode.Standard).createStandardPlayableBeatmap(
             listOf(
                 ModReallyEasy(),
@@ -85,7 +88,7 @@ class StandardPlayableBeatmapTest : PlayableBeatmapTest() {
     }
 
     @Test
-    fun testCreationWithDifficultyAdjustNoOverride() {
+    fun `Test creation with Difficulty Adjust no override`() {
         createBasePlayableBeatmap(GameMode.Standard).createStandardPlayableBeatmap(
             listOf(
                 ModReallyEasy(),
@@ -102,7 +105,7 @@ class StandardPlayableBeatmapTest : PlayableBeatmapTest() {
     }
 
     @Test
-    fun testCreationWithDifficultyAdjustOverride() {
+    fun `Test creation with Difficulty Adjust override`() {
         createBasePlayableBeatmap(GameMode.Standard).createStandardPlayableBeatmap(
             listOf(
                 ModReallyEasy(),
@@ -120,7 +123,7 @@ class StandardPlayableBeatmapTest : PlayableBeatmapTest() {
     }
 
     @Test
-    fun testHitWindow() {
+    fun `Test hit window`() {
         createBasePlayableBeatmap(GameMode.Standard).createStandardPlayableBeatmap().apply {
             Assert.assertEquals(hitWindow.greatWindow, 50f, 0f)
             Assert.assertEquals(hitWindow.okWindow, 100f, 0f)

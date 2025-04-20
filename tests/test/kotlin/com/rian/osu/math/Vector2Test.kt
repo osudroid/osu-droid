@@ -6,7 +6,7 @@ import org.junit.Test
 
 class Vector2Test {
     @Test
-    fun testMultiplication() {
+    fun `Test multiplication`() {
         fun test(vec1: Vector2, vec2: Vector2, result: Vector2) {
             val finalVec = vec1 * vec2
 
@@ -20,7 +20,7 @@ class Vector2Test {
     }
 
     @Test
-    fun testDivision() {
+    fun `Test division`() {
         val vec = Vector2(10)
 
         Assert.assertThrows(ArithmeticException::class.java) { vec / 0 }
@@ -32,7 +32,7 @@ class Vector2Test {
     }
 
     @Test
-    fun testAddition() {
+    fun `Test addition`() {
         fun test(vec1: Vector2, vec2: Vector2, result: Vector2) {
             val finalVec = vec1 + vec2
 
@@ -46,7 +46,7 @@ class Vector2Test {
     }
 
     @Test
-    fun testSubtraction() {
+    fun `Test subtraction`() {
         fun test(vec1: Vector2, vec2: Vector2, result: Vector2) {
             val finalVec = vec1 - vec2
 
@@ -60,7 +60,7 @@ class Vector2Test {
     }
 
     @Test
-    fun testLength() {
+    fun `Test length`() {
         fun test(vec: Vector2, result: Float) = Assert.assertEquals(result, vec.length, 1e-2f)
 
         test(Vector2(1, 1), sqrt(2f))
@@ -71,7 +71,7 @@ class Vector2Test {
     }
 
     @Test
-    fun testDotMultiplication() {
+    fun `Test dot multiplication`() {
         fun test(vec1: Vector2, vec2: Vector2, result: Float) = Assert.assertEquals(result, vec1.dot(vec2), 1e-2f)
 
         test(Vector2(2), Vector2(4), 16f)
@@ -82,7 +82,7 @@ class Vector2Test {
     }
 
     @Test
-    fun testScaling() {
+    fun `Test scaling`() {
         val vec = Vector2(10)
 
         Assert.assertEquals(vec * 1, vec)
@@ -91,7 +91,7 @@ class Vector2Test {
     }
 
     @Test
-    fun testDistance() {
+    fun `Test distance`() {
         fun test(vec1: Vector2, vec2: Vector2, result: Float) =
             Assert.assertEquals(result, vec1.getDistance(vec2), 1e-2f)
 
@@ -101,7 +101,7 @@ class Vector2Test {
     }
 
     @Test
-    fun testNormalization() {
+    fun `Test normalization`() {
         fun test(vec: Vector2, result: Vector2) {
             vec.normalize()
 
@@ -115,41 +115,41 @@ class Vector2Test {
     }
 
     @Test
-    fun testEquality() {
+    fun `Test equality`() {
         Assert.assertEquals(Vector2(10), Vector2(10))
         Assert.assertNotEquals(Vector2(10), Vector2(10, 15))
     }
 
     @Test
-    fun testFloatToVector2Conversion() {
+    fun `Test float to Vector2 conversion`() {
         Assert.assertEquals(10f.toVector2(), Vector2(10))
         Assert.assertEquals(20f.toVector2(), Vector2(20))
         Assert.assertEquals(25f.toVector2(), Vector2(25))
     }
 
     @Test
-    fun testIntegerVectorMultiplication() {
+    fun `Test integer Vector2 multiplication`() {
         Assert.assertEquals(2 * Vector2(2), Vector2(4))
         Assert.assertEquals(3 * Vector2(3, 4), Vector2(9, 12))
         Assert.assertEquals(4 * Vector2(2.5f, 10f), Vector2(10, 40))
     }
 
     @Test
-    fun testFloatVectorMultiplication() {
+    fun `Test float Vector2 multiplication`() {
         Assert.assertEquals(2.5f * Vector2(2), Vector2(5))
         Assert.assertEquals(3.5f * Vector2(3, 4), Vector2(10.5f, 14f))
         Assert.assertEquals(4.5f * Vector2(2.5f, 10f), Vector2(11.25f, 45f))
     }
 
     @Test
-    fun testDoubleVectorMultiplication() {
+    fun `Test double Vector2 multiplication`() {
         Assert.assertEquals(2.5 * Vector2(2), Vector2(5))
         Assert.assertEquals(3.5 * Vector2(3, 4), Vector2(10.5f, 14f))
         Assert.assertEquals(4.5 * Vector2(2.5f, 10f), Vector2(11.25f, 45f))
     }
 
     @Test
-    fun testPairToVector2Conversion() {
+    fun `Test Pair to Vector2 conversion`() {
         Assert.assertEquals((10f to 20f).toVector2(), Vector2(10, 20))
         Assert.assertEquals((25f to 30f).toVector2(), Vector2(25, 30))
         Assert.assertEquals((35f to 40f).toVector2(), Vector2(35, 40))

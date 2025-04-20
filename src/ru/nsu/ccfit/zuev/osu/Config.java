@@ -756,6 +756,10 @@ public class Config {
         return forceMaxRefreshRate;
     }
 
+    public static boolean isShiftPitchInRateChange() {
+        return getBoolean("shiftPitchInRateChange", false);
+    }
+
 
     // Shared Preferences
     // It's preferred to use these methods to access shared preferences instead of adding new fields to this class.

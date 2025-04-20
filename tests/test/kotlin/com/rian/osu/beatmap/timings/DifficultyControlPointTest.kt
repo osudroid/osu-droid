@@ -5,7 +5,7 @@ import org.junit.Test
 
 class DifficultyControlPointTest {
     @Test
-    fun testRedundancy() {
+    fun `Test redundancy`() {
         val controlPoint = DifficultyControlPoint(1000.0, 1.0, true)
 
         Assert.assertTrue(controlPoint.isRedundant(DifficultyControlPoint(1500.0, 1.0, true)))

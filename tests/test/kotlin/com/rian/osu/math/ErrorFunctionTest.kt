@@ -5,7 +5,7 @@ import org.junit.Test
 
 class ErrorFunctionTest {
     @Test
-    fun testErrorFunction() {
+    fun `Test error function`() {
         fun assert(expected: Double, value: Double, delta: Double = 1e-10) {
             Assert.assertEquals(ErrorFunction.erf(expected), value, delta)
         }
@@ -32,7 +32,7 @@ class ErrorFunctionTest {
     }
 
     @Test
-    fun testComplementaryErrorFunction() {
+    fun `Test complementary error function`() {
         fun assert(expected: Double, value: Double, delta: Double = 1e-10) {
             Assert.assertEquals(ErrorFunction.erfc(expected), value, delta)
         }
@@ -64,7 +64,7 @@ class ErrorFunctionTest {
     }
 
     @Test
-    fun testInverseErrorFunction() {
+    fun `Test inverse error function`() {
         fun assert(expected: Double, value: Double, delta: Double = 1e-4) {
             Assert.assertEquals(ErrorFunction.erfInv(expected), value, delta)
         }
@@ -90,7 +90,7 @@ class ErrorFunctionTest {
     }
 
     @Test
-    fun testInverseComplementaryErrorFunction() {
+    fun `Test inverse complementary error function`() {
         fun assert(expected: Double, value: Double, delta: Double = 1e-7) {
             Assert.assertEquals(ErrorFunction.erfcInv(expected), value, delta)
         }

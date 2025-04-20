@@ -20,19 +20,19 @@ class DroidDifficultyHitObjectTest {
     private val traceable = listOf(ModTraceable())
 
     @Test
-    fun testPreviousIndex() {
+    fun `Test previous index`() {
         Assert.assertNull(objects[0].previous(0))
         Assert.assertNotNull(objects[1].previous(0))
     }
 
     @Test
-    fun testNextIndex() {
+    fun `Test next index`() {
         Assert.assertNotNull(objects[0].next(0))
         Assert.assertNull(objects[1].next(0))
     }
 
     @Test
-    fun testNoModOpacityBeforeHitTime() {
+    fun `Test No Mod opacity before hit time`() {
         objects[0].apply {
             Assert.assertEquals(opacityAt(400.0, listOf()), 0.0, 0.0)
             Assert.assertEquals(opacityAt(600.0, listOf()), 0.5, 1e-2)
@@ -42,7 +42,7 @@ class DroidDifficultyHitObjectTest {
     }
 
     @Test
-    fun testHiddenOpacityBeforeHitTime() {
+    fun `Test Hidden opacity before hit time`() {
         objects[0].apply {
             Assert.assertEquals(opacityAt(400.0, hidden), 0.0, 0.0)
             Assert.assertEquals(opacityAt(600.0, hidden), 0.5, 1e-2)
@@ -53,7 +53,7 @@ class DroidDifficultyHitObjectTest {
     }
 
     @Test
-    fun testTraceableOpacity() {
+    fun `Test Traceable opacity before hit time`() {
         objects[0].apply {
             Assert.assertEquals(opacityAt(400.0, traceable), 0.0, 0.0)
             Assert.assertEquals(opacityAt(700.0, traceable), 0.0, 0.0)
@@ -62,7 +62,7 @@ class DroidDifficultyHitObjectTest {
     }
 
     @Test
-    fun testOpacityAfterHitTime() {
+    fun `Test opacity after hit time`() {
         objects[0].apply {
             Assert.assertEquals(opacityAt(1100.0, listOf()), 0.0, 0.0)
             Assert.assertEquals(opacityAt(1100.0, hidden), 0.0, 0.0)

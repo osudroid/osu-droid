@@ -24,7 +24,7 @@ class MigrationTest {
 
     @Test
     @Throws(IOException::class)
-    fun migrateAll() {
+    fun `Test all migrations`() {
         helper.createDatabase(testDb, 1).apply {
             close()
         }
@@ -40,7 +40,7 @@ class MigrationTest {
 
     @Test
     @Throws(IOException::class)
-    fun migrate1To2() {
+    fun `Test migration from version 1 to 2`() {
         var db = helper.createDatabase(testDb, 1).apply {
             // Insert a fake beatmap.
             execSQL(

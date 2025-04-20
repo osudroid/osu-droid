@@ -19,7 +19,7 @@ import com.reco1l.andengine.sprite.ExtendedSprite;
 import com.reco1l.osu.multiplayer.Multiplayer;
 import com.reco1l.osu.multiplayer.RoomScene;
 
-import com.reco1l.osu.ui.modmenu.ModMenuV2;
+import com.reco1l.osu.ui.modmenu.ModMenu;
 import com.rian.osu.GameMode;
 import com.rian.osu.beatmap.DroidHitWindow;
 import com.rian.osu.beatmap.PreciseDroidHitWindow;
@@ -425,7 +425,7 @@ public class SongMenu implements IUpdateHandler, MenuItemListener,
                                 if (clickShortConfirmSound != null) {
                                     clickShortConfirmSound.play();
                                 }
-                                ModMenuV2.INSTANCE.show();
+                                ModMenu.INSTANCE.show();
                             }
                         }
                         return true;
@@ -693,7 +693,7 @@ public class SongMenu implements IUpdateHandler, MenuItemListener,
             frontLayer.attachChild(scoringSwitcher);
         }
 
-        ModMenuV2.INSTANCE.clear();
+        ModMenu.INSTANCE.clear();
     }
 
     public void loadFilterFragment() {
@@ -920,7 +920,7 @@ public class SongMenu implements IUpdateHandler, MenuItemListener,
             return;
         }
 
-        var mods = ModMenuV2.INSTANCE.getEnabledMods();
+        var mods = ModMenu.INSTANCE.getEnabledMods();
         boolean isPreciseMod = mods.contains(ModPrecise.class);
         float totalSpeedMultiplier = ModUtils.calculateRateWithMods(mods.values(), Double.POSITIVE_INFINITY);
 
@@ -1062,7 +1062,7 @@ public class SongMenu implements IUpdateHandler, MenuItemListener,
                 changeDimensionInfo(beatmapInfo);
 
                 // Copy the mods to avoid concurrent modification
-                var mods = ModMenuV2.INSTANCE.getEnabledMods().deepCopy().values();
+                var mods = ModMenu.INSTANCE.getEnabledMods().deepCopy().values();
 
                 switch (Config.getDifficultyAlgorithm()) {
                     case droid -> {
@@ -1114,13 +1114,13 @@ public class SongMenu implements IUpdateHandler, MenuItemListener,
             stopMusic();
 
             Execution.mainThread(() -> {
-                ModMenuV2.INSTANCE.back();
+                ModMenu.INSTANCE.back();
                 if (searchBar != null) {
                     searchBar.dismiss();
                 }
             });
 
-            game.startGame(beatmapInfo, null, ModMenuV2.INSTANCE.getEnabledMods());
+            game.startGame(beatmapInfo, null, ModMenu.INSTANCE.getEnabledMods());
             return;
         }
         selectedBeatmap = beatmapInfo;
@@ -1442,7 +1442,7 @@ public class SongMenu implements IUpdateHandler, MenuItemListener,
             return;
         }
 
-        var modMenu = ModMenuV2.INSTANCE;
+        var modMenu = ModMenu.INSTANCE;
         float speed = ModUtils.calculateRateWithMods(modMenu.getEnabledMods().values(), Double.POSITIVE_INFINITY);
         boolean adjustPitch = modMenu.getEnabledMods().contains(ModNightCore.class);
 
@@ -1596,7 +1596,7 @@ public class SongMenu implements IUpdateHandler, MenuItemListener,
             calculationJob.cancel(new CancellationException("Difficulty calculation has been cancelled."));
         }
 
-        ModMenuV2.INSTANCE.cancelCalculationJob();
+        ModMenu.INSTANCE.cancelCalculationJob();
     }
 
     private void cancelMapStatusLoadingJob() {

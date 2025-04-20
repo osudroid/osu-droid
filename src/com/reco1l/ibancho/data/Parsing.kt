@@ -51,6 +51,5 @@ fun parseBeatmap(o: JSONObject?): RoomBeatmap? {
  */
 fun parseGameplaySettings(o: JSONObject) = RoomGameplaySettings(
     isRemoveSliderLock = o.getBoolean("isRemoveSliderLock"),
-    isFreeMod = o.getBoolean("isFreeMod"),
-    allowForceDifficultyStatistics = o.getBoolean("allowForceDifficultyStatistics")
+    isFreeMod = o.getBoolean("isFreeMod")
 )

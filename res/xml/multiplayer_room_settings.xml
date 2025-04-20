@@ -34,11 +34,6 @@
             android:summary="@string/mp_room_free_mods_summary"
             android:title="@string/mp_room_free_mods_title" />
 
-        <CheckBoxPreference
-            android:key="room_allowForceDifficultyStatistics"
-            android:summary="@string/mp_room_allowForceDifficultyStatistics_summary"
-            android:title="@string/mp_room_allowForceDifficultyStatistics_title" />
-
         <com.reco1l.osu.ui.SelectPreference
             android:entries="@array/mp_team_versus_names"
             android:entryValues="@array/mp_team_versus_values"

@@ -13,7 +13,7 @@ import org.junit.Test
 
 class BeatmapTest {
     @Test
-    fun testTimeOffset() {
+    fun `Test beatmap version time offset`() {
         val beatmap = Beatmap(GameMode.Standard)
 
         beatmap.formatVersion = 3
@@ -27,7 +27,7 @@ class BeatmapTest {
     }
 
     @Test
-    fun testMaxComboGetter() {
+    fun `Test max combo getter`() {
         fun test(expectedMaxCombo: Int, vararg objects: HitObject) {
             val beatmap = Beatmap(GameMode.Standard)
 

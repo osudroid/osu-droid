@@ -382,8 +382,6 @@ open class ScrollableContainer : Container() {
             if (!overflowAxes.isHorizontal) {
                 scrollX = scrollX.coerceIn(0f, maxScrollX)
             }
-        } else {
-            velocityX = 0f
         }
 
         if (scrollAxes.isVertical && !Precision.almostEquals(deltaY, 0f)) {
@@ -393,8 +391,6 @@ open class ScrollableContainer : Container() {
             if (!overflowAxes.isVertical) {
                 scrollY = scrollY.coerceIn(0f, maxScrollY)
             }
-        } else {
-            velocityY = 0f
         }
 
         deltaX = 0f
