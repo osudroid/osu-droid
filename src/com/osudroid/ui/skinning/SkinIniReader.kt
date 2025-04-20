@@ -1,4 +1,4 @@
-package com.reco1l.osu.skinning
+package com.osudroid.ui.skinning
 
 import android.util.Log
 import okhttp3.internal.toImmutableMap
