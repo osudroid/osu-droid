@@ -1,20 +1,19 @@
-package com.reco1l.osu.ui.entity
+package com.osudroid.ui
 
 import com.osudroid.BuildConfiguration
-import com.osudroid.resources.R.*
-import com.reco1l.andengine.sprite.*
+import com.osudroid.resources.R
+import com.osudroid.ui.v1.SettingsFragment
+import com.reco1l.andengine.sprite.ExtendedSprite
 import com.reco1l.osu.async
-import com.reco1l.osu.multiplayer.LobbyScene
-import com.reco1l.osu.multiplayer.Multiplayer
 import com.reco1l.osu.beatmaplisting.BeatmapListing
 import com.reco1l.osu.mainThread
+import com.reco1l.osu.multiplayer.LobbyScene
+import com.reco1l.osu.multiplayer.Multiplayer
 import com.reco1l.osu.multiplayer.RoomScene
-import com.osudroid.ui.v1.SettingsFragment
 import org.anddev.andengine.input.touch.TouchEvent
 import ru.nsu.ccfit.zuev.osu.GlobalManager
 import ru.nsu.ccfit.zuev.osu.LibraryManager
 import ru.nsu.ccfit.zuev.osu.MainScene
-import ru.nsu.ccfit.zuev.osu.MainScene.MusicOption
 import ru.nsu.ccfit.zuev.osu.ResourceManager
 import ru.nsu.ccfit.zuev.osu.ToastLogger
 import ru.nsu.ccfit.zuev.osu.helper.StringTable
@@ -82,7 +81,7 @@ class MainMenu(val main: MainScene) {
 
                         BeatmapListing().show()
                     } else {
-                        main.musicControl(MusicOption.PLAY)
+                        main.musicControl(MainScene.MusicOption.PLAY)
 
                         GlobalManager.getInstance().songMenu.reload()
                         GlobalManager.getInstance().songMenu.show()
@@ -126,7 +125,7 @@ class MainMenu(val main: MainScene) {
                 }
 
                 if (!OnlineManager.getInstance().isStayOnline && !BuildConfiguration.MOCK_MULTIPLAYER) {
-                    ToastLogger.showText(StringTable.format(string.multiplayer_not_online), true)
+                    ToastLogger.showText(StringTable.format(R.string.multiplayer_not_online), true)
                     return true
                 }
 

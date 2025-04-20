@@ -1,4 +1,4 @@
-package com.osudroid.ui.v2.hitobjects
+package com.osudroid.ui.v2.game
 
 import com.edlplan.framework.easing.*
 import com.reco1l.andengine.*

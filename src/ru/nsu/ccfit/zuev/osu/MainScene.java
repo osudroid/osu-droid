@@ -13,7 +13,7 @@ import com.reco1l.osu.BannerLoader;
 import com.reco1l.osu.BannerSprite;
 import com.reco1l.osu.data.BeatmapInfo;
 import com.reco1l.osu.Execution;
-import com.reco1l.osu.ui.entity.MainMenu;
+import com.osudroid.ui.MainMenu;
 
 import com.reco1l.osu.beatmaplisting.BeatmapListing;
 import com.reco1l.osu.ui.MessageDialog;
