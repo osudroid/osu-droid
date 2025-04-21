@@ -1,14 +1,13 @@
 package com.reco1l.debug
 
 import com.reco1l.andengine.text.*
-import org.anddev.andengine.entity.Entity
 import org.anddev.andengine.entity.IEntity
 import ru.nsu.ccfit.zuev.osu.ResourceManager
 import kotlin.reflect.*
 import kotlin.reflect.full.*
 import kotlin.reflect.jvm.*
 
-class EntityDescriptor : DesplegablePanel() {
+class EntityDescriptor : CollapsiblePanel() {
 
 
     init {

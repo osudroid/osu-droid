@@ -23,7 +23,7 @@ private val IEntity.name: String
     get() = this::class.simpleName ?: this::class.superclasses.first().simpleName ?: "Unknown"
 
 
-class EntityInspector(val engine: Engine) : DesplegablePanel() {
+class EntityInspector(val engine: Engine) : CollapsiblePanel() {
 
 
     private val savedData = mutableListOf<EntityData>()

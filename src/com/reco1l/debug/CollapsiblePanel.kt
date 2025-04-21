@@ -10,7 +10,7 @@ import org.anddev.andengine.input.touch.*
 import ru.nsu.ccfit.zuev.osu.*
 
 @Suppress("LeakingThis")
-open class DesplegablePanel : Container() {
+open class CollapsiblePanel : Container() {
 
     /**
      * Whether the panel is expanded or collapsed.
