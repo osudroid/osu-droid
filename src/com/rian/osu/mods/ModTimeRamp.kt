@@ -20,6 +20,7 @@ abstract class ModTimeRamp : Mod(), IModApplicableToBeatmap, IModApplicableToTra
     abstract var finalRate: Float
 
     final override val isValidForMultiplayerAsFreeMod = false
+    override val incompatibleMods = super.incompatibleMods + ModTimeRamp::class
 
     private var initialRateTime = 0.0
     private var finalRateTime = 0.0
