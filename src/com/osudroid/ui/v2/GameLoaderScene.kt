@@ -143,11 +143,11 @@ class GameLoaderScene(private val gameScene: GameScene, beatmap: BeatmapInfo, mo
             anchor = Anchor.BottomLeft
             origin = Anchor.BottomLeft
             paintStyle = PaintStyle.Outline
-            lineWidth = 3f
+            lineWidth = 4f
             x = 60f
             y = -60f
 
-            setPortion(0.9f)
+            setPortion(0.6f)
         }
 
         override fun onManagedUpdate(deltaTimeSec: Float) {
@@ -225,7 +225,7 @@ class GameLoaderScene(private val gameScene: GameScene, beatmap: BeatmapInfo, mo
 
         companion object {
             const val FADE_TIMEOUT = 1000L
-            const val COLLAPSE_TIMEOUT = 3000L
+            const val COLLAPSE_TIMEOUT = 2000L
         }
     }
 
