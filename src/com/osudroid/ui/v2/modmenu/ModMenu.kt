@@ -269,11 +269,11 @@ object ModMenu : ExtendedScene() {
             ModUtils.applyModsToBeatmapDifficulty(difficulty, gameMode, mods, true)
 
             ensureActive()
-            arBadge.value = "%.2f".format(difficulty.ar)
-            odBadge.value = "%.2f".format(difficulty.od)
-            csBadge.value = "%.2f".format(difficulty.difficultyCS)
-            hpBadge.value = "%.2f".format(difficulty.hp)
-            bpmBadge.value = (selectedBeatmap.mostCommonBPM * ModUtils.calculateRateWithMods(mods, Double.POSITIVE_INFINITY)).roundToInt().toString()
+            arBadge.valueText.text = "%.2f".format(difficulty.ar)
+            odBadge.valueText.text = "%.2f".format(difficulty.od)
+            csBadge.valueText.text = "%.2f".format(difficulty.difficultyCS)
+            hpBadge.valueText.text = "%.2f".format(difficulty.hp)
+            bpmBadge.valueText.text = (selectedBeatmap.mostCommonBPM * ModUtils.calculateRateWithMods(mods, Double.POSITIVE_INFINITY)).roundToInt().toString()
 
             val attributes: DifficultyAttributes = when (difficultyAlgorithm) {
                 droid -> calculateDroidDifficulty(beatmap, mods, this@scope)
@@ -286,7 +286,7 @@ object ModMenu : ExtendedScene() {
             starRatingBadge.background!!.clearEntityModifiers()
             ensureActive()
 
-            starRatingBadge.value = "%.2f".format(attributes.starRating)
+            starRatingBadge.valueText.text = "%.2f".format(attributes.starRating)
             starRatingBadge.background!!.colorTo(OsuColors.getStarRatingColor(attributes.starRating), 0.1f)
 
             if (attributes.starRating >= 6.5) {
@@ -412,14 +412,10 @@ object ModMenu : ExtendedScene() {
         val beatmap = GlobalManager.getInstance().selectedBeatmap
         val difficulty = beatmap?.getBeatmapDifficulty()
 
-        if (difficulty != null) {
-            scoreMultiplierBadge.value = "%.2fx".format(
-                enabledMods.values.fold(1f) { acc, mod ->
-                    acc * mod.calculateScoreMultiplier(difficulty)
-                }
-            )
+        scoreMultiplierBadge.valueText.text = if (difficulty != null) {
+            "%.2fx".format(enabledMods.values.fold(1f) { acc, mod -> acc * mod.calculateScoreMultiplier(difficulty) })
         } else {
-            scoreMultiplierBadge.value = "1.00x"
+            "1.00x"
         }
 
         customizeButton.isEnabled = !customizationMenu.isEmpty()

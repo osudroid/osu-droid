@@ -73,7 +73,10 @@ open class LabeledBadge(label: String = "", value: String = "") : LinearContaine
         background!!.alpha = 0.1f
     }
 
-    private val valueText = ExtendedText().apply {
+    /**
+     * The value of the badge.
+     */
+    val valueText = ExtendedText().apply {
         height = FitParent
         font = ResourceManager.getInstance().getFont("smallFont")
         text = value
@@ -86,11 +89,6 @@ open class LabeledBadge(label: String = "", value: String = "") : LinearContaine
      * The label of the badge.
      */
     var label by labelText::text
-
-    /**
-     * The value of the badge.
-     */
-    var value by valueText::text
 
 
     init {
