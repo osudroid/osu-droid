@@ -30,6 +30,7 @@ import com.reco1l.osu.ui.MessageDialog
 import com.reco1l.osu.ui.entity.BeatmapButton
 import com.reco1l.osu.ui.entity.ComposedText
 import com.osudroid.ui.v1.SettingsFragment
+import com.osudroid.ui.v2.*
 import com.osudroid.ui.v2.modmenu.ModMenu
 import com.reco1l.osu.updateThread
 import com.reco1l.toolkt.kotlin.runSafe
@@ -45,7 +46,6 @@ import org.anddev.andengine.util.MathUtils
 import org.json.JSONArray
 import ru.nsu.ccfit.zuev.osu.*
 import ru.nsu.ccfit.zuev.osu.helper.TextButton
-import ru.nsu.ccfit.zuev.osu.menu.LoadingScreen.LoadingScene
 import ru.nsu.ccfit.zuev.osu.online.OnlinePanel
 import ru.nsu.ccfit.zuev.skins.OsuSkin
 import java.text.SimpleDateFormat
@@ -939,8 +939,8 @@ object RoomScene : Scene(), IRoomEventListener, IPlayerEventListener {
 
     override fun onRoomMatchStart() {
 
-        if (GlobalManager.getInstance().engine.scene is LoadingScene) {
-            GlobalManager.getInstance().gameScene.start()
+        if (GlobalManager.getInstance().engine.scene is GameLoaderScene) {
+            GlobalManager.getInstance().gameScene.isReadyToStart = true
         }
 
         playerList!!.invalidate()

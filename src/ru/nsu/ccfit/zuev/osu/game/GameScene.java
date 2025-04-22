@@ -21,6 +21,7 @@ import com.edlplan.framework.utils.functionality.SmartIterator;
 import com.osudroid.multiplayer.api.RoomAPI;
 import com.osudroid.beatmaps.DifficultyCalculationManager;
 import com.osudroid.data.BeatmapInfo;
+import com.osudroid.ui.v2.GameLoaderScene;
 import com.reco1l.osu.Execution;
 import com.osudroid.data.DatabaseManager;
 import com.reco1l.andengine.sprite.AnimatedSprite;
@@ -102,7 +103,6 @@ import ru.nsu.ccfit.zuev.osu.game.cursor.main.Cursor;
 import ru.nsu.ccfit.zuev.osu.game.cursor.main.CursorEntity;
 import ru.nsu.ccfit.zuev.osu.helper.MD5Calculator;
 import ru.nsu.ccfit.zuev.osu.helper.StringTable;
-import ru.nsu.ccfit.zuev.osu.menu.LoadingScreen;
 import ru.nsu.ccfit.zuev.osu.menu.PauseMenu;
 import ru.nsu.ccfit.zuev.osu.menu.ScoreBoardItem;
 import ru.nsu.ccfit.zuev.osu.online.OnlineFileOperator;
@@ -198,6 +198,11 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
      * The countdown animator.
      */
     public Countdown countdownAnimator;
+
+    /**
+     * Whether the game is ready to start.
+     */
+    public boolean isReadyToStart = false;
 
 
     // UI
@@ -651,6 +656,7 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
     }
 
     public void startGame(BeatmapInfo beatmapInfo, String replayFile, ModHashMap mods, boolean isHUDEditor) {
+        isReadyToStart = false;
         isHUDEditorMode = isHUDEditor;
         startedFromHUDEditor = isHUDEditor;
 
@@ -681,13 +687,15 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
         fgScene.setBackgroundEnabled(false);
         failcount = 0;
         mainCursorId = -1;
-        final LoadingScreen screen = new LoadingScreen();
-        engine.getCamera().setHUD(null);
-        engine.setScene(screen.getScene());
 
         final String rfile = beatmapInfo != null ? replayFile : this.replayFilePath;
-        // Clone the mods to avoid concurrent modification
-        final ModHashMap modsToUse = mods != null ? mods.deepCopy() : lastMods;
+
+        ModHashMap modsToUse = mods != null ? mods.deepCopy() : lastMods;
+        BeatmapInfo beatmapToUse = beatmapInfo != null ? beatmapInfo : lastBeatmapInfo;
+
+        GameLoaderScene scene = new GameLoaderScene(this, beatmapToUse, modsToUse);
+        engine.getCamera().setHUD(null);
+        engine.setScene(scene);
 
         cancelLoading();
 
@@ -697,7 +705,7 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
             boolean succeeded = false;
 
             try {
-                succeeded = loadGame(beatmapInfo != null ? beatmapInfo : lastBeatmapInfo, rfile, modsToUse, scope);
+                succeeded = loadGame(beatmapToUse, rfile, modsToUse, scope);
 
                 if (succeeded) {
                     prepareScene();
@@ -960,10 +968,10 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
             hud.attachChild(fpsCounter);
         }
 
-        if (!Multiplayer.isMultiplayer) {
-            start();
-        } else {
+        if (Multiplayer.isMultiplayer) {
             RoomAPI.INSTANCE.notifyBeatmapLoaded();
+        } else {
+            isReadyToStart = true;
         }
     }
 

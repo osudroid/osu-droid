@@ -41,6 +41,7 @@ import androidx.preference.PreferenceManager;
 import com.edlplan.ui.ActivityOverlay;
 import com.google.firebase.analytics.FirebaseAnalytics;
 import com.google.firebase.crashlytics.FirebaseCrashlytics;
+import com.osudroid.ui.v2.GameLoaderScene;
 import com.reco1l.andengine.ExtendedEngine;
 import com.osudroid.multiplayer.api.LobbyAPI;
 import com.osudroid.AccessibilityDetector;
@@ -733,6 +734,8 @@ public class MainActivity extends BaseGameActivity implements
             return super.onKeyDown(keyCode, event);
         }
 
+        Scene scene = GlobalManager.getInstance().getEngine().getScene();
+
         if (event.getAction() == TouchEvent.ACTION_DOWN && keyCode == KeyEvent.KEYCODE_BACK && ActivityOverlay.onBackPress()) {
             return true;
         }
@@ -745,7 +748,7 @@ public class MainActivity extends BaseGameActivity implements
                 return true;
             }
 
-            if (GlobalManager.getInstance().getEngine().getScene() == gameScene.getScene()) {
+            if (scene == gameScene.getScene()) {
                 if (gameScene.isPaused()) {
                     gameScene.resume();
                 } else {
@@ -755,14 +758,14 @@ public class MainActivity extends BaseGameActivity implements
             }
         }
         if (GlobalManager.getInstance().getScoring() != null && keyCode == KeyEvent.KEYCODE_BACK
-                && GlobalManager.getInstance().getEngine().getScene() == GlobalManager.getInstance().getScoring().getScene()) {
+                && scene == GlobalManager.getInstance().getScoring().getScene()) {
             GlobalManager.getInstance().getScoring().back();
             return true;
         }
         if ((keyCode == KeyEvent.KEYCODE_BACK || keyCode == KeyEvent.KEYCODE_ENTER)
                 && GlobalManager.getInstance().getEngine() != null
                 && GlobalManager.getInstance().getSongMenu() != null
-                && GlobalManager.getInstance().getEngine().getScene() == GlobalManager.getInstance().getSongMenu().getScene()
+                && scene == GlobalManager.getInstance().getSongMenu().getScene()
                 && GlobalManager.getInstance().getSongMenu().getScene().hasChildScene()) {
             if (GlobalManager.getInstance().getSongMenu().getScene().getChildScene() ==
                     GlobalManager.getInstance().getSongMenu().getSearchBar().getScene()) {
@@ -777,7 +780,7 @@ public class MainActivity extends BaseGameActivity implements
         }
         if (GlobalManager.getInstance().getSongMenu() != null && GlobalManager.getInstance().getEngine() != null
                 && keyCode == KeyEvent.KEYCODE_MENU
-                && GlobalManager.getInstance().getEngine().getScene() == GlobalManager.getInstance().getSongMenu().getScene()
+                && scene == GlobalManager.getInstance().getSongMenu().getScene()
                 && !GlobalManager.getInstance().getSongMenu().getScene().hasChildScene()) {
             GlobalManager.getInstance().getSongMenu().stopScroll(0);
             GlobalManager.getInstance().getSongMenu().showPropertiesMenu(null);
@@ -785,23 +788,23 @@ public class MainActivity extends BaseGameActivity implements
         }
         if (keyCode == KeyEvent.KEYCODE_BACK) {
             if (GlobalManager.getInstance().getEngine() != null && GlobalManager.getInstance().getSongMenu() != null &&
-                    GlobalManager.getInstance().getEngine().getScene() == GlobalManager.getInstance().getSongMenu().getScene()) {
+                    scene == GlobalManager.getInstance().getSongMenu().getScene()) {
 
                 //SongMenu 界面按返回按钮（系统按钮）
                 GlobalManager.getInstance().getSongMenu().back();
             } else {
 
-                if (GlobalManager.getInstance().getEngine().getScene() instanceof LoadingScreen.LoadingScene) {
+                if (scene instanceof LoadingScreen.LoadingScene || scene instanceof GameLoaderScene) {
                     return true;
                 }
 
                 if (Multiplayer.isMultiplayer) {
-                    if (GlobalManager.getInstance().getEngine().getScene() == LobbyScene.INSTANCE) {
+                    if (scene == LobbyScene.INSTANCE) {
                         LobbyScene.INSTANCE.back();
                         return true;
                     }
 
-                    if (GlobalManager.getInstance().getEngine().getScene() == RoomScene.INSTANCE) {
+                    if (scene == RoomScene.INSTANCE) {
 
                         if (RoomScene.INSTANCE.hasChildScene() && RoomScene.INSTANCE.getChildScene() == ModMenu.INSTANCE) {
                             ModMenu.INSTANCE.back();

@@ -1,0 +1,237 @@
+package com.osudroid.ui.v2
+
+import com.edlplan.framework.easing.*
+import com.osudroid.data.*
+import com.osudroid.multiplayer.*
+import com.reco1l.andengine.*
+import com.reco1l.andengine.ExtendedEntity.Companion.FitParent
+import com.reco1l.andengine.container.*
+import com.reco1l.andengine.shape.*
+import com.reco1l.andengine.sprite.*
+import com.reco1l.andengine.text.ExtendedText
+import com.reco1l.andengine.ui.*
+import com.reco1l.andengine.ui.form.*
+import com.reco1l.framework.*
+import com.reco1l.framework.math.*
+import com.rian.osu.utils.*
+import org.anddev.andengine.input.touch.*
+import ru.nsu.ccfit.zuev.osu.*
+import ru.nsu.ccfit.zuev.osu.game.GameScene
+import kotlin.math.*
+
+class GameLoaderScene(private val gameScene: GameScene, beatmap: BeatmapInfo, mods: ModHashMap) : ExtendedScene() {
+
+    private var timeoutStartTime = -1L
+
+    private var isStarting = false
+
+
+    private val dimBox = Box()
+
+    private val mainContainer = Container()
+
+
+    init {
+
+        // Background
+        attachChild(ExtendedSprite().apply {
+            width = FitParent
+            height = FitParent
+            scaleType = ScaleType.Crop
+            textureRegion = ResourceManager.getInstance().getTexture(if (Config.isSafeBeatmapBg()) "menu-background" else "::background")
+        })
+
+        // Dim
+        dimBox.apply {
+            width = FitParent
+            height = FitParent
+            color = ColorARGB.Black
+            alpha = 0.7f
+        }
+        attachChild(dimBox)
+
+        // Beatmap info
+        mainContainer.apply {
+            width = FitParent
+            height = FitParent
+            alpha = 0f
+            scaleX = 0.9f
+            scaleY = 0.9f
+            scaleCenter = Anchor.Center
+
+            fadeIn(0.2f, Easing.OutCubic)
+            scaleTo(1f, 0.2f, Easing.OutCubic)
+
+            +LinearContainer().apply {
+                orientation = Orientation.Vertical
+                spacing = 10f
+                anchor = Anchor.CenterLeft
+                origin = Anchor.CenterLeft
+                x = 60f
+
+                // Title
+                +ExtendedText().apply {
+                    font = ResourceManager.getInstance().getFont("font")
+                    text = beatmap.titleText
+                }
+
+                // Difficulty
+                +ExtendedText().apply {
+                    font = ResourceManager.getInstance().getFont("smallFont")
+                    text = beatmap.version
+                }
+
+                // Creator
+                +ExtendedText().apply {
+                    font = ResourceManager.getInstance().getFont("smallFont")
+                    text = "by ${beatmap.artistText}"
+                    color = ColorARGB(0xFF8282A8)
+                }
+
+                // Mods
+                if (mods.isNotEmpty()) {
+                    +ModsIndicator(mods).apply {
+                        isExpanded = false
+                    }
+                }
+            }
+
+            +LoadingCircle()
+            +SettingsCard()
+        }
+        attachChild(mainContainer)
+    }
+
+
+    override fun onSceneTouchEvent(event: TouchEvent): Boolean {
+        timeoutStartTime = System.currentTimeMillis()
+        return super.onSceneTouchEvent(event)
+    }
+
+    override fun onManagedUpdate(deltaTimeSec: Float) {
+
+        if (!isStarting) {
+
+            if (gameScene.isReadyToStart) {
+
+                // Multiplayer will skip the minimum timeout if it's ready to start.
+                if (System.currentTimeMillis() - timeoutStartTime > MINIMUM_TIMEOUT || Multiplayer.isMultiplayer) {
+                    isStarting = true
+
+                    val backgroundBrigthness = Config.getInt("bgbrightness", 25)
+
+                    mainContainer.fadeOut(0.1f, Easing.OutExpo)
+                    dimBox.fadeTo(1f - backgroundBrigthness / 100f, 0.2f).then {
+                        gameScene.start()
+                    }
+                }
+
+            } else {
+                timeoutStartTime = System.currentTimeMillis()
+            }
+        }
+
+        super.onManagedUpdate(deltaTimeSec)
+    }
+
+
+    private class LoadingCircle : Circle() {
+
+        init {
+            width = 32f
+            height = 32f
+            anchor = Anchor.BottomLeft
+            origin = Anchor.BottomLeft
+            paintStyle = PaintStyle.Outline
+            lineWidth = 3f
+            x = 60f
+            y = -60f
+
+            setPortion(0.9f)
+        }
+
+        override fun onManagedUpdate(deltaTimeSec: Float) {
+            startAngle += 10f
+            endAngle += 10f
+            super.onManagedUpdate(deltaTimeSec)
+        }
+    }
+
+    private class SettingsCard : Card() {
+
+        private var lastTimeTouched = System.currentTimeMillis()
+
+
+        init {
+            title = "Settings"
+            width = 400f
+            anchor = Anchor.CenterRight
+            origin = Anchor.CenterRight
+            x = -20f
+
+            content.apply {
+
+                +LinearContainer().apply {
+                    width = FitParent
+                    orientation = Orientation.Vertical
+
+                    +IntPreferenceSlider("bgbrightness").apply {
+                        label = "Background brightness"
+                        control.min = 0f
+                        control.max = 100f
+                        valueFormatter = { "${it.roundToInt()}%" }
+                        onValueChanged = {
+                            Config.setBackgroundBrightness(it / 100f)
+                        }
+                    }
+
+                    +PreferenceCheckbox("enableStoryboard").apply {
+                        label = "Enable storyboard"
+                    }
+
+                    +PreferenceCheckbox("enableVideo").apply {
+                        label = "Enable background video"
+                    }
+
+                    +PreferenceCheckbox("showscoreboard").apply {
+                        label = "Show scoreboard"
+                    }
+                }
+            }
+        }
+
+
+        override fun onAreaTouched(event: TouchEvent, localX: Float, localY: Float): Boolean {
+            alpha = 1f
+            lastTimeTouched = System.currentTimeMillis()
+            return super.onAreaTouched(event, localX, localY)
+        }
+
+        override fun onManagedUpdate(deltaTimeSec: Float) {
+
+            val elapsed = System.currentTimeMillis() - lastTimeTouched
+
+            if (alpha > 0.5f && elapsed > FADE_TIMEOUT) {
+                alpha -= deltaTimeSec * 1.5f
+            }
+
+            if (content.isVisible && elapsed > COLLAPSE_TIMEOUT) {
+                collapse()
+            }
+
+            super.onManagedUpdate(deltaTimeSec)
+        }
+
+
+        companion object {
+            const val FADE_TIMEOUT = 1000L
+            const val COLLAPSE_TIMEOUT = 3000L
+        }
+    }
+
+
+    companion object {
+        const val MINIMUM_TIMEOUT = 2000L
+    }
+
+}
