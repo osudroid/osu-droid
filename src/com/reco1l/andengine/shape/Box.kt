@@ -107,13 +107,13 @@ open class Box : BufferedEntity<BoxVBO>() {
             }
 
             // [1]
-            position = addArc(position, radius, radius, -180f, -90f, radius, radius, segments)
+            position = addArc(position, radius, radius, -90f, 0f, radius, radius, segments)
             // [2]
-            position = addArc(position, width - radius, radius, -90f, 0f, radius, radius, segments)
+            position = addArc(position, width - radius, radius, 0f, 90f, radius, radius, segments)
             // [3]
-            position = addArc(position, width - radius, height - radius, 0f, 90f, radius, radius, segments)
+            position = addArc(position, width - radius, height - radius, 90f, 180f, radius, radius, segments)
             // [4]
-            position = addArc(position, radius, height - radius, 90f, 180f, radius, radius, segments)
+            position = addArc(position, radius, height - radius, 180f, 270f, radius, radius, segments)
 
             // Closing point
             putVertex(position, 0f, radius)
