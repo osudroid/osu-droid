@@ -38,8 +38,6 @@ class ModCustomizationMenu : Modal(
 
 
     init {
-        ResourceManager.getInstance().loadHighQualityAsset("reset", "reset.png")
-
         theme = ModalTheme(backgroundColor = 0xFF181828)
     }
 
