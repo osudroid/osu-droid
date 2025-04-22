@@ -1,4 +1,4 @@
-package com.reco1l.osu.data
+package com.osudroid.data
 
 import androidx.room.Room
 import androidx.room.testing.MigrationTestHelper
