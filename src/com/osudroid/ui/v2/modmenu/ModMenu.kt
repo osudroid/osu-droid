@@ -249,8 +249,10 @@ object ModMenu : ExtendedScene() {
                 beatmap = parsedBeatmap
             }
 
+            val songMenu = GlobalManager.getInstance().songMenu
+
             if (beatmap == null) {
-                GlobalManager.getInstance().songMenu.setStarsDisplay(0f)
+                songMenu.setStarsDisplay(0f)
                 return@scope
             }
 
@@ -295,7 +297,8 @@ object ModMenu : ExtendedScene() {
                 starRatingBadge.fadeTo(0.75f, 0.1f)
             }
 
-            GlobalManager.getInstance().songMenu.setStarsDisplay(GameHelper.Round(attributes.starRating, 2))
+            songMenu.changeDimensionInfo(selectedBeatmap)
+            songMenu.setStarsDisplay(GameHelper.Round(attributes.starRating, 2))
         }
     }
 
