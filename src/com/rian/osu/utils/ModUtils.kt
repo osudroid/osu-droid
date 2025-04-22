@@ -38,7 +38,8 @@ object ModUtils {
             ModScoreV2(),
             ModSmallCircle(),
             ModSuddenDeath(),
-            ModTraceable()
+            ModTraceable(),
+            ModWindUp()
         )
 
     private val allModsClassesByAcronym = allModsInstances.associateBy({ it.acronym }, { it::class })

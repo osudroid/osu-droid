@@ -285,12 +285,12 @@ open class ModHashMap : HashMap<Class<out Mod>, Mod> {
         /**
          * The order in which mods should be displayed.
          *
-         * This is intentionally kept to keep the order consistent with what players are uModAutoplay
+         * This is intentionally kept to keep the order consistent with what players are used to.
          */
         private val modStringOrder = arrayOf<Mod>(
             ModAutoplay(), ModRelax(), ModAutopilot(), ModEasy(), ModNoFail(), ModHardRock(),
             ModHidden(), ModTraceable(), ModFlashlight(), ModDoubleTime(), ModNightCore(),
-            ModHalfTime(), ModPrecise(), ModReallyEasy(), ModPerfect(), ModSuddenDeath(),
+            ModHalfTime(), ModWindUp(), ModPrecise(), ModReallyEasy(), ModPerfect(), ModSuddenDeath(),
             ModScoreV2()
         )
     }
