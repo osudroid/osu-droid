@@ -13,11 +13,17 @@ import ru.nsu.ccfit.zuev.osu.*
 @Suppress("LeakingThis")
 open class Card(
 
+    /**
+     * The content of the card.
+     */
     val content: Container = Container().apply {
         width = FitParent
         clipChildren = true
     },
 
+    /**
+     * The title bar of the card.
+     */
     val titleBar: Container? = object : Container() {
 
         init {
