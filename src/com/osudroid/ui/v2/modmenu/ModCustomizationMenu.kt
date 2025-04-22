@@ -8,6 +8,7 @@ import com.reco1l.andengine.ui.*
 import com.reco1l.andengine.ui.form.*
 import com.reco1l.framework.*
 import com.reco1l.framework.math.*
+import com.reco1l.osu.updateThread
 import com.reco1l.toolkt.kotlin.*
 import com.rian.osu.mods.*
 import ru.nsu.ccfit.zuev.osu.ResourceManager
@@ -151,7 +152,7 @@ private class ModSettingSlider(val mod: Mod, override val setting: ModSetting<Fl
         valueFormatter = setting.valueFormatter!!
         onValueChanged = {
             setting.value = it
-            ModMenu.onModsChanged(mod)
+            updateThread { ModMenu.onModsChanged(mod) }
         }
     }
 }
@@ -174,7 +175,7 @@ private class NullableModSettingSlider(val mod: Mod, override val setting: ModSe
         valueFormatter = setting.valueFormatter!!
         onValueChanged = { value ->
             setting.value = if (value == setting.defaultValue) null else value
-            ModMenu.onModsChanged(mod)
+            updateThread { ModMenu.onModsChanged(mod) }
         }
     }
 }
@@ -189,7 +190,7 @@ private class ModSettingCheckbox(val mod: Mod, override val setting: ModSetting<
         value = setting.value
         onValueChanged = {
             setting.value = it
-            ModMenu.onModsChanged(mod)
+            updateThread { ModMenu.onModsChanged(mod) }
         }
     }
 }
