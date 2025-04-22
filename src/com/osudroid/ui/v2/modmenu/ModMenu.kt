@@ -271,7 +271,7 @@ object ModMenu : ExtendedScene() {
             odBadge.value = "%.2f".format(difficulty.od)
             csBadge.value = "%.2f".format(difficulty.difficultyCS)
             hpBadge.value = "%.2f".format(difficulty.hp)
-            bpmBadge.value = (selectedBeatmap.mostCommonBPM * ModUtils.calculateRateWithMods(mods)).roundToInt().toString()
+            bpmBadge.value = (selectedBeatmap.mostCommonBPM * ModUtils.calculateRateWithMods(mods, Double.POSITIVE_INFINITY)).roundToInt().toString()
 
             val attributes: DifficultyAttributes = when (difficultyAlgorithm) {
                 droid -> calculateDroidDifficulty(beatmap, mods, this@scope)
