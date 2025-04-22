@@ -693,7 +693,9 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
         ModHashMap modsToUse = mods != null ? mods.deepCopy() : lastMods;
         BeatmapInfo beatmapToUse = beatmapInfo != null ? beatmapInfo : lastBeatmapInfo;
 
-        GameLoaderScene scene = new GameLoaderScene(this, beatmapToUse, modsToUse);
+        boolean isRestart = beatmapInfo == null && replayFile == null && mods == null;
+
+        GameLoaderScene scene = new GameLoaderScene(this, beatmapToUse, modsToUse, isRestart);
         engine.getCamera().setHUD(null);
         engine.setScene(scene);
 

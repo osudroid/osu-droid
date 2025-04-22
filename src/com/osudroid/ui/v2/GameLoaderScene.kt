@@ -12,14 +12,13 @@ import com.reco1l.andengine.text.ExtendedText
 import com.reco1l.andengine.ui.*
 import com.reco1l.andengine.ui.form.*
 import com.reco1l.framework.*
-import com.reco1l.framework.math.*
 import com.rian.osu.utils.*
 import org.anddev.andengine.input.touch.*
 import ru.nsu.ccfit.zuev.osu.*
 import ru.nsu.ccfit.zuev.osu.game.GameScene
 import kotlin.math.*
 
-class GameLoaderScene(private val gameScene: GameScene, beatmap: BeatmapInfo, mods: ModHashMap) : ExtendedScene() {
+class GameLoaderScene(private val gameScene: GameScene, beatmap: BeatmapInfo, mods: ModHashMap, private val isRestart: Boolean) : ExtendedScene() {
 
     private var timeoutStartTime = -1L
 
@@ -97,7 +96,10 @@ class GameLoaderScene(private val gameScene: GameScene, beatmap: BeatmapInfo, mo
             }
 
             +LoadingCircle()
-            +SettingsCard()
+
+            if (!isRestart) {
+                +SettingsCard()
+            }
         }
         attachChild(mainContainer)
     }
@@ -115,7 +117,7 @@ class GameLoaderScene(private val gameScene: GameScene, beatmap: BeatmapInfo, mo
             if (gameScene.isReadyToStart) {
 
                 // Multiplayer will skip the minimum timeout if it's ready to start.
-                if (System.currentTimeMillis() - timeoutStartTime > MINIMUM_TIMEOUT || Multiplayer.isMultiplayer) {
+                if (System.currentTimeMillis() - timeoutStartTime > MINIMUM_TIMEOUT || Multiplayer.isMultiplayer || isRestart) {
                     isStarting = true
 
                     val backgroundBrigthness = Config.getInt("bgbrightness", 25)
