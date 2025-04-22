@@ -14,7 +14,7 @@ import kotlin.math.*
 /**
  * A text entity that can be displayed on the screen.
  */
-open class ExtendedText : CompoundBufferedEntity() {
+open class ExtendedText : BufferedEntity<CompoundBuffer>() {
 
     /**
      * The text to be displayed
@@ -24,11 +24,15 @@ open class ExtendedText : CompoundBufferedEntity() {
             if (field != value) {
                 field = value
 
-                if (value.length > currentLength) {
-                    currentLength = value.length
-                    rebuildBuffer()
+                val previousLength = currentLength
+                currentLength = value.length
+
+                if (currentLength > previousLength) {
+                    invalidateBuffer(BufferInvalidationFlag.Instance)
+                } else {
+                    invalidateBuffer(BufferInvalidationFlag.Data)
                 }
-                invalidateBuffer()
+
             }
         }
 
@@ -40,7 +44,7 @@ open class ExtendedText : CompoundBufferedEntity() {
         set(value) {
             if (field != value) {
                 field = value
-                invalidateBuffer()
+                invalidateBuffer(BufferInvalidationFlag.Data)
             }
         }
 
@@ -51,7 +55,7 @@ open class ExtendedText : CompoundBufferedEntity() {
         set(value) {
             if (field != value) {
                 field = value
-                invalidateBuffer()
+                invalidateBuffer(BufferInvalidationFlag.Data)
             }
         }
 
@@ -85,11 +89,17 @@ open class ExtendedText : CompoundBufferedEntity() {
     }
 
 
-    override fun onRebuildBuffer(gl: GL10) {
-        super.onRebuildBuffer(gl)
+    override fun onCreateBuffer(gl: GL10): CompoundBuffer {
+        val currentLength = currentLength
+        val currentBuffer = buffer?.getFirstOf<TextVertexBuffer>()
 
-        addBuffer(TextTextureBuffer())
-        addBuffer(TextVertexBuffer())
+        if (currentBuffer == null || currentLength > currentBuffer.length) {
+            return CompoundBuffer(
+                TextTextureBuffer(currentLength),
+                TextVertexBuffer(currentLength)
+            )
+        }
+        return buffer!!
     }
 
     override fun onUpdateBuffer(gl: GL10, vararg data: Any) {
@@ -169,9 +179,9 @@ open class ExtendedText : CompoundBufferedEntity() {
 
     //region Buffers
 
-    inner class TextVertexBuffer : VertexBuffer(
+    inner class TextVertexBuffer(val length: Int) : VertexBuffer(
         drawTopology = GL_TRIANGLES,
-        vertexCount = VERTICES_PER_CHARACTER * currentLength,
+        vertexCount = VERTICES_PER_CHARACTER * length,
         vertexSize = VERTEX_2D,
         bufferUsage = GL_STATIC_DRAW
     ) {
@@ -212,11 +222,15 @@ open class ExtendedText : CompoundBufferedEntity() {
                 }
             }
         }
+
+        override fun draw(gl: GL10, entity: BufferedEntity<*>) {
+            gl.glDrawArrays(drawTopology, 0, VERTICES_PER_CHARACTER * min(currentLength, length))
+        }
     }
 
 
-    inner class TextTextureBuffer : TextureCoordinatesBuffer(
-        vertexCount = VERTICES_PER_CHARACTER * currentLength,
+    inner class TextTextureBuffer(length: Int) : TextureCoordinatesBuffer(
+        vertexCount = VERTICES_PER_CHARACTER * length,
         vertexSize = VERTEX_2D,
         bufferUsage = GL_STATIC_DRAW
     ) {

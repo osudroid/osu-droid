@@ -63,7 +63,7 @@ open class Modal(
 
 
     override fun onThemeChanged() {
-        content.background = RoundedBox().apply {
+        content.background = Box().apply {
             color = ColorARGB(theme.backgroundColor)
             cornerRadius = theme.cornerRadius
         }

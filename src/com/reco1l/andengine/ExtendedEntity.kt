@@ -2,7 +2,10 @@ package com.reco1l.andengine
 
 import android.util.*
 import android.view.*
+import com.reco1l.*
 import com.reco1l.andengine.modifier.*
+import com.reco1l.andengine.shape.*
+import com.reco1l.debug.*
 import com.reco1l.framework.*
 import com.reco1l.framework.math.*
 import com.reco1l.toolkt.kotlin.*
@@ -539,6 +542,14 @@ abstract class ExtendedEntity : Entity(0f, 0f), ITouchArea, IModifierChain {
         foreground?.setSize(width, height)
         foreground?.onDraw(gl, camera)
 
+
+        if ((BuildConfiguration.SHOW_ENTITY_BOUNDARIES || EntityInspector.SELECTED_ENTITY == this) && DEBUG_FOREGROUND != this) {
+            DEBUG_FOREGROUND.color = if (EntityInspector.SELECTED_ENTITY == this) ColorARGB(0xFF00FF00) else ColorARGB.White
+            DEBUG_FOREGROUND.lineWidth = if (EntityInspector.SELECTED_ENTITY == this) 3f else 1f
+            DEBUG_FOREGROUND.setSize(width, height)
+            DEBUG_FOREGROUND.onDraw(gl, camera)
+        }
+
         gl.glPopMatrix()
     }
 
@@ -795,6 +806,13 @@ abstract class ExtendedEntity : Entity(0f, 0f), ITouchArea, IModifierChain {
          */
         const val FitParent = -2f
 
+
+        private val DEBUG_FOREGROUND by lazy {
+            Box().apply {
+                paintStyle = PaintStyle.Outline
+                color = ColorARGB.White
+            }
+        }
     }
 
 }

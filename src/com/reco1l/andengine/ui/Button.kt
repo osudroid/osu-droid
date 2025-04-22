@@ -155,7 +155,7 @@ open class Button : LinearContainer(), IWithTheme<ButtonTheme> {
 
     override fun onThemeChanged() {
         foreground = if (theme.withBezelEffect) BezelOutline(theme.cornerRadius) else null
-        background = RoundedBox().apply {
+        background = Box().apply {
             color = ColorARGB(theme.backgroundColor)
             cornerRadius = theme.cornerRadius
         }

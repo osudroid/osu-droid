@@ -99,7 +99,7 @@ class ModCustomizationMenu : Modal(
                 width = FitParent
                 padding = Vec4(20f, 14f)
                 spacing = 12f
-                background = RoundedBox().apply {
+                background = Box().apply {
                     color = ColorARGB(0xFF1A1A2B)
                     cornerRadius = 16f
                 }

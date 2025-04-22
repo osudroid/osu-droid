@@ -475,7 +475,7 @@ object ModMenu : ExtendedScene() {
             width = 340f
             height = FitParent
 
-            background = RoundedBox().apply {
+            background = Box().apply {
                 color = ColorARGB(0xFF13131E)
                 cornerRadius = 16f
             }

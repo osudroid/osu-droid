@@ -1,6 +1,7 @@
 package com.reco1l.ibancho
 
 import com.reco1l.*
+import com.reco1l.debug.*
 import com.reco1l.ibancho.data.*
 import ru.nsu.ccfit.zuev.osu.SecurityUtils
 import com.reco1l.osu.multiplayer.*
@@ -300,7 +301,7 @@ object RoomAPI {
 
         Multiplayer.log("Starting connection -> $roomId, $userId, $username")
 
-        socket = if (fakeMultiplayerMode) FakeSocket(userId, username) else IO.socket(url, IO.Options().also {
+        socket = if (BuildConfiguration.MOCK_MULTIPLAYER) MockSocket(userId, username) else IO.socket(url, IO.Options().also {
             it.auth = auth
 
             // Explicitly not allow the socket to reconnect as we are using our own

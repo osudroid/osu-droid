@@ -1,37 +1,17 @@
-@file:JvmName("BuildUtils")
-
-package com.reco1l
+package com.reco1l.debug
 
 import com.reco1l.ibancho.data.*
 import com.reco1l.osu.multiplayer.*
 import com.reco1l.toolkt.data.*
 import com.reco1l.toolkt.kotlin.*
-import io.socket.client.Socket
-import io.socket.emitter.Emitter
-import org.json.JSONArray
-import org.json.JSONObject
+import io.socket.client.*
+import io.socket.emitter.*
+import org.json.*
 
 /**
- * Whether to use textures or not.
+ * Creates a mock multiplayer room.
  */
-const val noTexturesMode = false
-
-/**
- * Whether to keep the shape of the textures if no texture mode is enabled.
- *
- * Note: This can increase texture loading time.
- */
-const val keepTexturesShapeInNoTexturesMode = false
-
-/**
- * Whether to use fake multiplayer mode or not.
- */
-const val fakeMultiplayerMode = false
-
-
-// Fake multiplayer mode
-
-fun generateFakeRoom() = Room(
+fun MockRoom() = Room(
     id = 1,
     name = "Test Room",
     isLocked = false,
@@ -45,7 +25,10 @@ fun generateFakeRoom() = Room(
     status = RoomStatus.Idle
 )
 
-class FakeSocket(private val uid: Long, private val username: String) : Socket(null, null, null) {
+/**
+ * Creates a mock multiplayer socket.
+ */
+class MockSocket(private val uid: Long, private val username: String) : Socket(null, null, null) {
 
     override fun emit(event: String?, vararg args: Any?): Emitter {
 
@@ -144,6 +127,5 @@ class FakeSocket(private val uid: Long, private val username: String) : Socket(n
         emit(EVENT_DISCONNECT, "io server disconnect")
         return this
     }
-
 
 }
