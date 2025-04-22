@@ -1,12 +1,12 @@
 package com.reco1l.andengine.ui.form
 
 import com.reco1l.andengine.*
-import com.reco1l.andengine.container.*
 import com.reco1l.andengine.shape.*
 import com.reco1l.andengine.text.*
 import com.reco1l.andengine.ui.*
 import com.reco1l.framework.*
 import com.reco1l.framework.math.*
+import ru.nsu.ccfit.zuev.osu.Config
 import ru.nsu.ccfit.zuev.osu.ResourceManager
 
 @Suppress("LeakingThis")
@@ -41,5 +41,19 @@ open class FormSlider(initialValue: Float = 0f) : FormControl<Float, Slider>(ini
 
         addConstraint(control, labelText)
         addConstraint(resetButton, labelText)
+    }
+}
+
+class FloatPreferenceSlider(private val preferenceKey: String, fallbackValue: Float = 0f) : FormSlider(Config.getFloat(preferenceKey, fallbackValue)) {
+    override fun onControlValueChanged() {
+        Config.setFloat(preferenceKey, control.value)
+        super.onControlValueChanged()
+    }
+}
+
+class IntPreferenceSlider(private val preferenceKey: String, fallbackValue: Int = 0) : FormSlider(Config.getInt(preferenceKey, fallbackValue).toFloat()) {
+    override fun onControlValueChanged() {
+        Config.setInt(preferenceKey, control.value.toInt())
+        super.onControlValueChanged()
     }
 }
