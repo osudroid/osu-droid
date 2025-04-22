@@ -14,7 +14,7 @@ class ExtendedEngine(options: EngineOptions) : Engine(options) {
 
     private val overlayEntities = mutableListOf<ExtendedEntity>()
 
-    private var bindedEntity: ExtendedEntity? = null
+    private var boundEntity: ExtendedEntity? = null
 
 
     init {
@@ -53,18 +53,18 @@ class ExtendedEngine(options: EngineOptions) : Engine(options) {
         if (overlayEntities.isNotEmpty()) {
             camera.convertSceneToCameraSceneTouchEvent(event)
 
-            if (bindedEntity != null) {
-                bindedEntity?.onAreaTouched(event, event.x - bindedEntity!!.absoluteX, event.y - bindedEntity!!.absoluteY)
+            if (boundEntity != null) {
+                boundEntity?.onAreaTouched(event, event.x - boundEntity!!.absoluteX, event.y - boundEntity!!.absoluteY)
 
                 if (event.isActionUp) {
-                    bindedEntity = null
+                    boundEntity = null
                 }
                 return true
             }
 
             for (entity in overlayEntities.reversed()) {
                 if (entity.contains(event.x, event.y) && entity.onAreaTouched(event, event.x - entity.absoluteX, event.y - entity.absoluteY)) {
-                    bindedEntity = entity
+                    boundEntity = entity
                     return true
                 }
             }

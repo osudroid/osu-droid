@@ -12,5 +12,6 @@
     <string name="mod_section_difficulty_increase">Difficulty Increase</string>
     <string name="mod_section_difficulty_automation">Automation</string>
     <string name="mod_section_difficulty_conversion">Conversion</string>
+    <string name="mod_section_fun">Fun</string>
 
 </resources>

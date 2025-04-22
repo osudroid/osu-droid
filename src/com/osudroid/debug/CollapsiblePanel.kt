@@ -10,7 +10,7 @@ import org.anddev.andengine.input.touch.*
 import ru.nsu.ccfit.zuev.osu.*
 
 @Suppress("LeakingThis")
-open class DesplegablePanel : Container() {
+open class CollapsiblePanel : Container() {
 
     /**
      * Whether the panel is expanded or collapsed.
@@ -120,8 +120,8 @@ open class DesplegablePanel : Container() {
             }
 
             if (event.isActionMove) {
-                x += (event.x - initialX)
-                y += (event.y - initialY)
+                x += event.x - initialX
+                y += event.y - initialY
 
                 initialX = event.x
                 initialY = event.y

@@ -47,7 +47,7 @@ import com.reco1l.toolkt.android.dp
 import com.reco1l.toolkt.android.drawableLeft
 import com.reco1l.toolkt.android.layoutWidth
 import com.reco1l.toolkt.android.topMargin
-import com.rian.osu.mods.ModAuto
+import com.rian.osu.mods.ModAutoplay
 import com.rian.osu.replay.ReplayImporter
 import com.rian.osu.utils.ModHashMap
 import ru.nsu.ccfit.zuev.osu.Config
@@ -317,7 +317,7 @@ class SettingsFragment : SettingsFragment() {
                     dismiss()
 
                     val modMap = ModHashMap().apply {
-                        put(ModAuto::class)
+                        put(ModAutoplay::class)
                     }
 
                     val global = GlobalManager.getInstance()

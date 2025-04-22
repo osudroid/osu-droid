@@ -23,7 +23,7 @@ private val IEntity.name: String
     get() = this::class.simpleName ?: this::class.superclasses.first().simpleName ?: "Unknown"
 
 
-class EntityInspector(val engine: Engine) : DesplegablePanel() {
+class EntityInspector(val engine: Engine) : CollapsiblePanel() {
 
 
     private val savedData = mutableListOf<EntityData>()
@@ -157,7 +157,7 @@ class EntityInspector(val engine: Engine) : DesplegablePanel() {
 
     override fun onManagedDraw(gl: GL10, camera: Camera) {
 
-        if ((System.currentTimeMillis() - lastUpdated) > UPDATE_TIME) {
+        if (System.currentTimeMillis() - lastUpdated > UPDATE_TIME) {
             lastUpdated = System.currentTimeMillis()
 
             val scene = engine.scene

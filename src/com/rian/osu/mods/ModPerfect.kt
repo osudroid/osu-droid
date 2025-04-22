@@ -11,7 +11,7 @@ class ModPerfect : Mod() {
     override val textureNameSuffix = "perfect"
     override val isRanked = true
     override val incompatibleMods = super.incompatibleMods + arrayOf(
-        ModNoFail::class, ModSuddenDeath::class, ModAuto::class
+        ModNoFail::class, ModSuddenDeath::class, ModAutoplay::class
     )
 
     override fun equals(other: Any?) = other === this || other is ModPerfect

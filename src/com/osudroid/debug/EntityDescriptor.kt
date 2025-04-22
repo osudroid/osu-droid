@@ -7,7 +7,7 @@ import kotlin.reflect.*
 import kotlin.reflect.full.*
 import kotlin.reflect.jvm.*
 
-class EntityDescriptor : DesplegablePanel() {
+class EntityDescriptor : CollapsiblePanel() {
 
 
     init {

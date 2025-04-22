@@ -19,7 +19,7 @@ object ModUtils {
      */
     val allModsInstances
         get() = arrayOf(
-            ModAuto(),
+            ModAutoplay(),
             ModAutopilot(),
             ModCustomSpeed(),
             ModDifficultyAdjust(),

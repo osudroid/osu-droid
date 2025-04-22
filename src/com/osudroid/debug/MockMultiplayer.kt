@@ -86,7 +86,7 @@ class MockSocket(private val uid: Long, private val username: String) : Socket(n
     override fun connect(): Socket {
         emit(EVENT_CONNECT)
 
-        // This event is emmited by the server when the client connects.
+        // This event is emitted by the server when the client connects.
         emit("initialConnection", JSONObject().apply {
 
             put("id", 1)
@@ -105,7 +105,7 @@ class MockSocket(private val uid: Long, private val username: String) : Socket(n
                 put("uid", uid)
             }
 
-            put("mods", "")
+            put("mods", JSONArray())
 
             putObject("gameplaySettings") {
                 put("isFreeMod", true)
@@ -119,7 +119,7 @@ class MockSocket(private val uid: Long, private val username: String) : Socket(n
                     put("username", username)
                     put("status", PlayerStatus.NotReady.ordinal)
                     put("team", null)
-                    put("mods", "")
+                    put("mods", JSONArray())
                 }
 
             }
