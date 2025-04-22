@@ -157,7 +157,7 @@ class EntityInspector(val engine: Engine) : CollapsiblePanel() {
 
     override fun onManagedDraw(gl: GL10, camera: Camera) {
 
-        if ((System.currentTimeMillis() - lastUpdated) > UPDATE_TIME) {
+        if (System.currentTimeMillis() - lastUpdated > UPDATE_TIME) {
             lastUpdated = System.currentTimeMillis()
 
             val scene = engine.scene

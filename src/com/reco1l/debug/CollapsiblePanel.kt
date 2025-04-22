@@ -120,8 +120,8 @@ open class CollapsiblePanel : Container() {
             }
 
             if (event.isActionMove) {
-                x += (event.x - initialX)
-                y += (event.y - initialY)
+                x += event.x - initialX
+                y += event.y - initialY
 
                 initialX = event.x
                 initialY = event.y
