@@ -1,7 +1,7 @@
 package com.rian.osu.replay
 
 import com.edlplan.replay.OsuDroidReplayPack
-import com.reco1l.osu.data.DatabaseManager.scoreInfoTable
+import com.osudroid.data.DatabaseManager.scoreInfoTable
 import java.io.File
 import java.util.zip.ZipEntry
 import java.util.zip.ZipInputStream

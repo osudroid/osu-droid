@@ -1,13 +1,13 @@
 package com.reco1l.osu.ui.entity
 
-import com.reco1l.ibancho.RoomAPI
-import com.reco1l.ibancho.data.PlayerStatus.Ready
-import com.reco1l.ibancho.data.RoomBeatmap
+import com.osudroid.multiplayer.api.RoomAPI
+import com.osudroid.multiplayer.api.data.PlayerStatus.Ready
+import com.osudroid.multiplayer.api.data.RoomBeatmap
 import com.reco1l.osu.async
-import com.reco1l.osu.multiplayer.Multiplayer
-import com.reco1l.osu.beatmaplisting.BeatmapDownloader
-import com.reco1l.osu.beatmaplisting.BeatmapListing
-import com.reco1l.osu.multiplayer.RoomScene
+import com.osudroid.multiplayer.Multiplayer
+import com.osudroid.beatmaplisting.BeatmapDownloader
+import com.osudroid.beatmaplisting.BeatmapListing
+import com.osudroid.multiplayer.RoomScene
 import org.anddev.andengine.entity.sprite.Sprite
 import org.anddev.andengine.entity.text.ChangeableText
 import org.anddev.andengine.input.touch.TouchEvent

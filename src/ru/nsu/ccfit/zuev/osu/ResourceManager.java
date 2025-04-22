@@ -9,8 +9,8 @@ import android.graphics.Color;
 import android.graphics.Typeface;
 import android.util.Log;
 
-import com.reco1l.osu.skinning.IniReader;
-import com.reco1l.osu.skinning.SkinConverter;
+import com.osudroid.ui.skinning.IniReader;
+import com.osudroid.ui.skinning.SkinConverter;
 import com.reco1l.andengine.texture.BlankTextureRegion;
 import org.anddev.andengine.engine.Engine;
 import org.anddev.andengine.opengl.font.Font;

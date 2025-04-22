@@ -1,5 +1,7 @@
 package ru.nsu.ccfit.zuev.osu.menu;
 
+import static com.osudroid.data.BeatmapsKt.BeatmapInfo;
+
 import android.animation.ValueAnimator;
 import android.annotation.SuppressLint;
 import android.app.Activity;
@@ -9,17 +11,17 @@ import com.edlplan.ui.fragment.SearchBarFragment;
 import com.edlplan.ui.fragment.BeatmapPropertiesFragment;
 import com.edlplan.ui.fragment.ScoreMenuFragment;
 import com.reco1l.framework.EasingKt;
-import com.reco1l.ibancho.RoomAPI;
-import com.reco1l.osu.data.BeatmapInfo;
-import com.reco1l.osu.data.BeatmapSetInfo;
-import com.reco1l.osu.data.DatabaseManager;
+import com.osudroid.multiplayer.api.RoomAPI;
+import com.osudroid.data.BeatmapInfo;
+import com.osudroid.data.BeatmapSetInfo;
+import com.osudroid.data.DatabaseManager;
 import com.reco1l.osu.Execution;
 import com.reco1l.andengine.sprite.AnimatedSprite;
 import com.reco1l.andengine.sprite.ExtendedSprite;
-import com.reco1l.osu.multiplayer.Multiplayer;
-import com.reco1l.osu.multiplayer.RoomScene;
+import com.osudroid.multiplayer.Multiplayer;
+import com.osudroid.multiplayer.RoomScene;
 
-import com.reco1l.osu.ui.modmenu.ModMenu;
+import com.osudroid.ui.v2.modmenu.ModMenu;
 import com.rian.osu.GameMode;
 import com.rian.osu.beatmap.DroidHitWindow;
 import com.rian.osu.beatmap.PreciseDroidHitWindow;
@@ -78,8 +80,6 @@ import ru.nsu.ccfit.zuev.osu.scoring.ScoringScene;
 import ru.nsu.ccfit.zuev.osu.scoring.StatisticV2;
 import ru.nsu.ccfit.zuev.skins.OsuSkin;
 import ru.nsu.ccfit.zuev.skins.SkinLayout;
-
-import static com.reco1l.osu.data.BeatmapsKt.BeatmapInfo;
 
 public class SongMenu implements IUpdateHandler, MenuItemListener,
         IScrollBarListener {

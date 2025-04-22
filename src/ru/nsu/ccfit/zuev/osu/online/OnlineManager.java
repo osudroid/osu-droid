@@ -6,7 +6,7 @@ import android.os.Bundle;
 
 import com.google.firebase.analytics.FirebaseAnalytics;
 
-import com.reco1l.osu.data.BeatmapInfo;
+import com.osudroid.data.BeatmapInfo;
 import okhttp3.MediaType;
 import okhttp3.OkHttpClient;
 

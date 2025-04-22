@@ -42,17 +42,17 @@ import com.edlplan.ui.ActivityOverlay;
 import com.google.firebase.analytics.FirebaseAnalytics;
 import com.google.firebase.crashlytics.FirebaseCrashlytics;
 import com.reco1l.andengine.ExtendedEngine;
-import com.reco1l.ibancho.LobbyAPI;
-import com.reco1l.osu.AccessibilityDetector;
-import com.reco1l.osu.DifficultyCalculationManager;
-import com.reco1l.osu.data.BeatmapInfo;
+import com.osudroid.multiplayer.api.LobbyAPI;
+import com.osudroid.AccessibilityDetector;
+import com.osudroid.beatmaps.DifficultyCalculationManager;
+import com.osudroid.data.BeatmapInfo;
 import com.reco1l.osu.Execution;
-import com.reco1l.osu.multiplayer.Multiplayer;
-import com.reco1l.osu.UpdateManager;
-import com.reco1l.osu.multiplayer.LobbyScene;
-import com.reco1l.osu.multiplayer.RoomScene;
+import com.osudroid.multiplayer.Multiplayer;
+import com.osudroid.UpdateManager;
+import com.osudroid.multiplayer.LobbyScene;
+import com.osudroid.multiplayer.RoomScene;
 
-import com.reco1l.osu.ui.modmenu.ModMenu;
+import com.osudroid.ui.v2.modmenu.ModMenu;
 import com.rian.osu.difficulty.BeatmapDifficultyCalculator;
 import net.lingala.zip4j.ZipFile;
 

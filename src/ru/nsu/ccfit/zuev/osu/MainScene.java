@@ -9,13 +9,13 @@ import com.acivev.VibratorManager;
 import com.reco1l.andengine.Anchor;
 import com.reco1l.andengine.shape.Box;
 import com.reco1l.andengine.sprite.ExtendedSprite;
-import com.reco1l.osu.BannerLoader;
-import com.reco1l.osu.BannerSprite;
-import com.reco1l.osu.data.BeatmapInfo;
+import com.osudroid.ui.BannerManager;
+import com.osudroid.ui.BannerManager.BannerSprite;
+import com.osudroid.data.BeatmapInfo;
 import com.reco1l.osu.Execution;
-import com.reco1l.osu.ui.entity.MainMenu;
+import com.osudroid.ui.MainMenu;
 
-import com.reco1l.osu.beatmaplisting.BeatmapListing;
+import com.osudroid.beatmaplisting.BeatmapListing;
 import com.reco1l.osu.ui.MessageDialog;
 import com.rian.osu.beatmap.parser.BeatmapParser;
 import com.rian.osu.beatmap.timings.EffectControlPoint;
@@ -494,7 +494,7 @@ public class MainScene implements IUpdateHandler {
             return;
         }
 
-        BannerSprite sprite = BannerLoader.loadBannerSprite();
+        BannerSprite sprite = BannerManager.loadBannerSprite();
         if (sprite != null) {
             sprite.setPosition(Config.getRES_WIDTH(), Config.getRES_HEIGHT());
             sprite.setOrigin(Anchor.BottomRight);
