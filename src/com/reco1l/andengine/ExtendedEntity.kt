@@ -330,6 +330,13 @@ abstract class ExtendedEntity : Entity(0f, 0f), ITouchArea, IModifierChain {
      */
     open fun onChildDetached(child: IEntity) {}
 
+    override fun setVisible(value: Boolean) {
+        if (mVisible != value) {
+            mVisible = value
+            invalidate(InvalidationFlag.ContentSize)
+        }
+    }
+
     //endregion
 
     //region Size
