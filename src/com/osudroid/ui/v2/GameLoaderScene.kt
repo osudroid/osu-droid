@@ -6,6 +6,7 @@ import com.osudroid.multiplayer.*
 import com.reco1l.andengine.*
 import com.reco1l.andengine.ExtendedEntity.Companion.FillParent
 import com.reco1l.andengine.container.*
+import com.reco1l.andengine.modifier.*
 import com.reco1l.andengine.shape.*
 import com.reco1l.andengine.sprite.*
 import com.reco1l.andengine.ui.form.*
@@ -126,6 +127,8 @@ class GameLoaderScene(private val gameScene: GameScene, beatmap: BeatmapInfo, mo
                     val backgroundBrigthness = Config.getInt("bgbrightness", 25)
 
                     mainContainer.fadeOut(0.1f, Easing.OutExpo)
+
+                    dimBox.clearModifiers(ModifierType.Alpha)
                     dimBox.fadeTo(1f - backgroundBrigthness / 100f, 0.2f).then {
                         gameScene.start()
                     }
@@ -174,7 +177,7 @@ class GameLoaderScene(private val gameScene: GameScene, beatmap: BeatmapInfo, mo
     }
 
 
-    private class QuickSettingsLayout : LinearContainer() {
+    private inner class QuickSettingsLayout : LinearContainer() {
 
         private var lastTimeTouched = System.currentTimeMillis()
 
@@ -232,9 +235,18 @@ class GameLoaderScene(private val gameScene: GameScene, beatmap: BeatmapInfo, mo
                         label = "Background brightness"
                         control.min = 0f
                         control.max = 100f
+                        control.onStopDragging = {
+                            if (!isStarting) {
+                                dimBox.fadeTo(0.7f, 0.1f)
+                            }
+                        }
                         valueFormatter = { "${it.roundToInt()}%" }
                         onValueChanged = {
                             Config.setBackgroundBrightness(it / 100f)
+
+                            if (!isStarting) {
+                                dimBox.alpha = 1f - it / 100f
+                            }
                         }
                     }
 

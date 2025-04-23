@@ -71,6 +71,16 @@ open class Slider(initialValue: Float = 0f) : Control<Float>(initialValue), IWit
             field = step
         }
 
+    /**
+     * Called when the user starts dragging the slider.
+     */
+    var onStartDragging: () -> Unit = {}
+
+    /**
+     * Called when the user stops dragging the slider.
+     */
+    var onStopDragging: () -> Unit = {}
+
 
     private val backgroundBar = object : Box() {
 
@@ -82,10 +92,14 @@ open class Slider(initialValue: Float = 0f) : Control<Float>(initialValue), IWit
 
         override fun onAreaTouched(event: TouchEvent, localX: Float, localY: Float): Boolean {
             if (event.isActionDown || event.isActionMove) {
-                setHierarchyScrollPrevention(true)
+                if (event.isActionDown) {
+                    setHierarchyScrollPrevention(true)
+                    onStartDragging()
+                }
                 value = (localX / width) * (max - min) + min
             } else {
                 setHierarchyScrollPrevention(false)
+                onStopDragging()
             }
             return true
         }
