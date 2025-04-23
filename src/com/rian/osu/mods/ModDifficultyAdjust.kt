@@ -79,7 +79,6 @@ class ModDifficultyAdjust @JvmOverloads constructor(
     override val acronym = "DA"
     override val description = "Override a beatmap's difficulty settings."
     override val type = ModType.Conversion
-    override val textureNameSuffix = "difficultyadjust"
 
     override val isRelevant
         get() = cs != null || ar != null || od != null || hp != null

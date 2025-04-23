@@ -15,9 +15,8 @@ class ModHardRock : Mod(), IModApplicableToDifficulty, IModApplicableToHitObject
     override val acronym = "HR"
     override val description = "Everything just got a bit harder..."
     override val type = ModType.DifficultyIncrease
-    override val textureNameSuffix = "hardrock"
     override val isRanked = true
-    override val incompatibleMods = super.incompatibleMods + ModEasy::class
+    override val incompatibleMods = super.incompatibleMods + arrayOf(ModEasy::class, ModMirror::class)
 
     override fun calculateScoreMultiplier(difficulty: BeatmapDifficulty) = 1.06f
 

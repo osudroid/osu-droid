@@ -8,7 +8,6 @@ class ModPerfect : Mod() {
     override val acronym = "PF"
     override val description = "SS or quit."
     override val type = ModType.DifficultyIncrease
-    override val textureNameSuffix = "perfect"
     override val isRanked = true
     override val incompatibleMods = super.incompatibleMods + arrayOf(
         ModNoFail::class, ModSuddenDeath::class, ModAutoplay::class

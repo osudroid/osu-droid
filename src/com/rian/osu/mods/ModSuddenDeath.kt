@@ -8,7 +8,6 @@ class ModSuddenDeath : Mod() {
     override val acronym = "SD"
     override val description = "Miss and fail."
     override val type = ModType.DifficultyIncrease
-    override val textureNameSuffix = "suddendeath"
     override val isRanked = true
     override val incompatibleMods = super.incompatibleMods + arrayOf(
         ModNoFail::class, ModPerfect::class, ModAutoplay::class

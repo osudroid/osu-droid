@@ -12,7 +12,6 @@ class ModFlashlight : Mod() {
     override val acronym = "FL"
     override val description = "Restricted view area."
     override val type = ModType.DifficultyIncrease
-    override val textureNameSuffix = "flashlight"
 
     override val isRanked
         get() = followDelay == DEFAULT_FOLLOW_DELAY

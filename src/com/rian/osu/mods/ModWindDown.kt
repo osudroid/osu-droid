@@ -9,7 +9,6 @@ class ModWindDown : ModTimeRamp() {
     override val acronym = "WD"
     override val description = "Sloooow doooown..."
     override val type = ModType.Fun
-    override val textureNameSuffix = "winddown"
 
     override var initialRate by object : FloatModSetting(
         name = "Initial rate",

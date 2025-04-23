@@ -11,7 +11,6 @@ class ModDoubleTime : ModRateAdjust() {
     override val acronym = "DT"
     override val description = "Zoooooooooom..."
     override val type = ModType.DifficultyIncrease
-    override val textureNameSuffix = "doubletime"
     override val isRanked = true
     override val incompatibleMods = super.incompatibleMods + arrayOf(ModNightCore::class, ModHalfTime::class)
 
