@@ -1004,14 +1004,16 @@ public class SongMenu implements IUpdateHandler, MenuItemListener,
 
         beatmapLengthText.setText(binfoStr);
 
-        String dimensionString =
+        String str = beatmapDifficultyText.getText();
+        String[] strs = str.split("Stars: ");
+
+        beatmapDifficultyText.setText(
             "AR: " + difficulty.getAr() + " " +
             "OD: " + difficulty.od + " " +
             "CS: " + difficulty.difficultyCS + " " +
             "HP: " + difficulty.hp + " " +
-            "Stars: " + GameHelper.Round(beatmapInfo.getStarRating(), 2);
-
-        beatmapDifficultyText.setText(dimensionString);
+            "Stars: " + (strs.length == 2 ? strs[1] : GameHelper.Round(beatmapInfo.getStarRating(), 2))
+        );
     }
 
     public void reloadCurrentSelection() {

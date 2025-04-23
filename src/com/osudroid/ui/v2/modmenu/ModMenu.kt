@@ -241,16 +241,18 @@ object ModMenu : ExtendedScene() {
             val beatmap: Beatmap?
 
             if (parsedBeatmap?.md5 != selectedBeatmap.md5 || parsedBeatmap?.mode != gameMode) {
-                 BeatmapParser(selectedBeatmap.path, this@scope).use { parser ->
-                     beatmap = parser.parse(withHitObjects = true, mode = gameMode)
-                     parsedBeatmap = beatmap
-                 }
+                BeatmapParser(selectedBeatmap.path, this@scope).use { parser ->
+                    beatmap = parser.parse(withHitObjects = true, mode = gameMode)
+                    parsedBeatmap = beatmap
+                }
             } else {
                 beatmap = parsedBeatmap
             }
 
+            val songMenu = GlobalManager.getInstance().songMenu
+
             if (beatmap == null) {
-                GlobalManager.getInstance().songMenu.setStarsDisplay(0f)
+                songMenu.setStarsDisplay(0f)
                 return@scope
             }
 
@@ -263,15 +265,25 @@ object ModMenu : ExtendedScene() {
             // Copy the mods to avoid concurrent modification
             val mods = enabledMods.deepCopy().values
             val difficulty = beatmap.difficulty.clone()
+            val rate = ModUtils.calculateRateWithMods(mods, Double.POSITIVE_INFINITY)
 
             ModUtils.applyModsToBeatmapDifficulty(difficulty, gameMode, mods, true)
 
             ensureActive()
-            arBadge.value = "%.2f".format(difficulty.ar)
-            odBadge.value = "%.2f".format(difficulty.od)
-            csBadge.value = "%.2f".format(difficulty.difficultyCS)
-            hpBadge.value = "%.2f".format(difficulty.hp)
-            bpmBadge.value = (selectedBeatmap.mostCommonBPM * ModUtils.calculateRateWithMods(mods)).roundToInt().toString()
+
+            updateThread {
+                arBadge.updateDifficultyBadge(selectedBeatmap.approachRate, difficulty.ar)
+                odBadge.updateDifficultyBadge(selectedBeatmap.overallDifficulty, difficulty.od)
+                csBadge.updateDifficultyBadge(selectedBeatmap.circleSize, difficulty.difficultyCS)
+                hpBadge.updateDifficultyBadge(selectedBeatmap.hpDrainRate, difficulty.hp)
+
+                bpmBadge.updateDifficultyBadge(
+                    selectedBeatmap.mostCommonBPM.roundToInt(),
+                    (selectedBeatmap.mostCommonBPM * rate).roundToInt()
+                )
+            }
+
+            ensureActive()
 
             val attributes: DifficultyAttributes = when (difficultyAlgorithm) {
                 droid -> calculateDroidDifficulty(beatmap, mods, this@scope)
@@ -284,7 +296,7 @@ object ModMenu : ExtendedScene() {
             starRatingBadge.background!!.clearEntityModifiers()
             ensureActive()
 
-            starRatingBadge.value = "%.2f".format(attributes.starRating)
+            starRatingBadge.valueText.text = "%.2f".format(attributes.starRating)
             starRatingBadge.background!!.colorTo(OsuColors.getStarRatingColor(attributes.starRating), 0.1f)
 
             if (attributes.starRating >= 6.5) {
@@ -295,7 +307,8 @@ object ModMenu : ExtendedScene() {
                 starRatingBadge.fadeTo(0.75f, 0.1f)
             }
 
-            GlobalManager.getInstance().songMenu.setStarsDisplay(GameHelper.Round(attributes.starRating, 2))
+            songMenu.changeDimensionInfo(selectedBeatmap)
+            songMenu.setStarsDisplay(GameHelper.Round(attributes.starRating, 2))
         }
     }
 
@@ -409,14 +422,10 @@ object ModMenu : ExtendedScene() {
         val beatmap = GlobalManager.getInstance().selectedBeatmap
         val difficulty = beatmap?.getBeatmapDifficulty()
 
-        if (difficulty != null) {
-            scoreMultiplierBadge.value = "%.2fx".format(
-                enabledMods.values.fold(1f) { acc, mod ->
-                    acc * mod.calculateScoreMultiplier(difficulty)
-                }
-            )
+        scoreMultiplierBadge.valueText.text = if (difficulty != null) {
+            "%.2fx".format(enabledMods.values.fold(1f) { acc, mod -> acc * mod.calculateScoreMultiplier(difficulty) })
         } else {
-            scoreMultiplierBadge.value = "1.00x"
+            "1.00x"
         }
 
         customizeButton.isEnabled = !customizationMenu.isEmpty()
@@ -572,7 +581,7 @@ object ModMenu : ExtendedScene() {
             // TODO: the button should be hidden when it is disabled after Container can observe child visibility.
             isEnabled = if (Multiplayer.isMultiplayer && Multiplayer.room != null) {
                 mod.isValidForMultiplayer && (Multiplayer.isRoomHost ||
-                    (Multiplayer.room!!.gameplaySettings.isFreeMod && mod.isValidForMultiplayerAsFreeMod))
+                        (Multiplayer.room!!.gameplaySettings.isFreeMod && mod.isValidForMultiplayerAsFreeMod))
             } else {
                 true
             }
@@ -587,6 +596,30 @@ object ModMenu : ExtendedScene() {
 
             super.onManagedUpdate(deltaTimeSec)
         }
+    }
+
+    private fun <T : Comparable<T>> LabeledBadge.updateDifficultyBadge(initialValue: T, finalValue: T) = valueText.run {
+        val newText =
+            if (finalValue is Float || finalValue is Double) "%.2f".format(finalValue) else finalValue.toString()
+
+        if (text == newText) {
+            return@run
+        }
+
+        text = newText
+
+        clearEntityModifiers()
+
+        colorTo(
+            ColorARGB(when {
+                initialValue < finalValue -> 0xFFF78383
+                initialValue > finalValue -> 0xFF40CF5D
+                else -> 0xFFFFFFFF
+            }),
+            0.1f
+        )
+
+        Unit
     }
 
     //endregion

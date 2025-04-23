@@ -21,4 +21,15 @@ class ModFlashlightTest {
             }
         }
     }
+
+    @Test
+    fun `Test toString`() {
+        ModFlashlight().apply {
+            Assert.assertEquals("FL", toString())
+
+            followDelay = 0.36f
+
+            Assert.assertEquals("FL (0.36s)", toString())
+        }
+    }
 }

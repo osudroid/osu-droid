@@ -15,7 +15,6 @@ class ModPrecise : Mod(), IModApplicableToHitObject {
     override val acronym = "PR"
     override val description = "Ultimate rhythm gamer timing."
     override val type = ModType.DifficultyIncrease
-    override val textureNameSuffix = "precise"
     override val isRanked = true
 
     override fun calculateScoreMultiplier(difficulty: BeatmapDifficulty) = 1.06f

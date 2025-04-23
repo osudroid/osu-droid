@@ -12,7 +12,6 @@ class ModSmallCircle : Mod(), IModApplicableToDifficulty, IMigratableMod {
     override val acronym = "SC"
     override val description = "Who put ants in my beatmaps?"
     override val type = ModType.DifficultyIncrease
-    override val textureNameSuffix = "smallcircle"
 
     override fun migrate(difficulty: BeatmapDifficulty) = ModDifficultyAdjust(cs = difficulty.gameplayCS + 4)
 

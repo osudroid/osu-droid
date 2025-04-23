@@ -12,7 +12,6 @@ class ModEasy : Mod(), IModApplicableToDifficulty {
     override val acronym = "EZ"
     override val description = "Larger circles, more forgiving HP drain, less accuracy required, and three lives!"
     override val type = ModType.DifficultyReduction
-    override val textureNameSuffix = "easy"
     override val isRanked = true
     override val incompatibleMods = super.incompatibleMods + ModHardRock::class
 

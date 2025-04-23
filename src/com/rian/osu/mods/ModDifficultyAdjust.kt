@@ -79,7 +79,6 @@ class ModDifficultyAdjust @JvmOverloads constructor(
     override val acronym = "DA"
     override val description = "Override a beatmap's difficulty settings."
     override val type = ModType.Conversion
-    override val textureNameSuffix = "difficultyadjust"
 
     override val isRelevant
         get() = cs != null || ar != null || od != null || hp != null
@@ -229,25 +228,25 @@ class ModDifficultyAdjust @JvmOverloads constructor(
     override fun toString() = buildString {
         append(super.toString())
 
-        val settings = mutableListOf<String>()
+        if (isRelevant) {
+            val settings = mutableListOf<String>()
 
-        if (cs != null) {
-            settings += "CS%.1f".format(cs)
-        }
+            if (cs != null) {
+                settings += "CS%.1f".format(cs)
+            }
 
-        if (ar != null) {
-            settings += "AR%.1f".format(ar)
-        }
+            if (ar != null) {
+                settings += "AR%.1f".format(ar)
+            }
 
-        if (od != null) {
-            settings += "OD%.1f".format(od)
-        }
+            if (od != null) {
+                settings += "OD%.1f".format(od)
+            }
 
-        if (hp != null) {
-            settings += "HP%.1f".format(hp)
-        }
+            if (hp != null) {
+                settings += "HP%.1f".format(hp)
+            }
 
-        if (settings.isNotEmpty()) {
             append(" (${settings.joinToString(", ")})")
         }
     }

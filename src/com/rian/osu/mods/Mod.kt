@@ -33,7 +33,8 @@ sealed class Mod {
     /**
      * The suffix to append to the texture name of this [Mod].
      */
-    protected abstract val textureNameSuffix: String
+    protected open val textureNameSuffix
+        get() = name.replace(" ", "").lowercase()
 
     /**
      * The texture name of this [Mod].

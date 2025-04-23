@@ -8,7 +8,6 @@ class ModAutoplay : Mod() {
     override val acronym = "AT"
     override val description = "Watch a perfect automated play through the song."
     override val type = ModType.Automation
-    override val textureNameSuffix = "autoplay"
     override val isValidForMultiplayer = false
     override val isValidForMultiplayerAsFreeMod = false
     override val incompatibleMods = super.incompatibleMods + arrayOf(

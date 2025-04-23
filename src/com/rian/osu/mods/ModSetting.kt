@@ -41,7 +41,7 @@ sealed class ModSetting<V>(
     /**
      * The value itself.
      */
-    var value = defaultValue
+    open var value = defaultValue
 
 
     override fun getValue(thisRef: Any?, property: KProperty<*>): V {
@@ -77,10 +77,15 @@ sealed class RangeConstrainedModSetting<V>(
     val step: V,
 
 ) : ModSetting<V>(name, valueFormatter, defaultValue) {
+    override var value
+        get() = super.value
+        set(value) {
+            super.value = processValue(value)
+        }
 
     protected abstract fun processValue(value: V): V
 
-    final override fun setValue(thisRef: Any?, property: KProperty<*>, value: V) {
+    override fun setValue(thisRef: Any?, property: KProperty<*>, value: V) {
         super.setValue(thisRef, property, processValue(value))
     }
 }
@@ -88,7 +93,7 @@ sealed class RangeConstrainedModSetting<V>(
 //endregion
 
 
-class FloatModSetting(
+open class FloatModSetting(
     name: String,
     valueFormatter: (Float) -> String = { it.toString() },
     defaultValue: Float,
@@ -134,7 +139,7 @@ class FloatModSetting(
     }
 }
 
-class NullableFloatModSetting(
+open class NullableFloatModSetting(
     name: String,
     valueFormatter: (Float?) -> String = { it.toString() },
     defaultValue: Float?,
@@ -181,7 +186,7 @@ class NullableFloatModSetting(
     }
 }
 
-class BooleanModSetting(
+open class BooleanModSetting(
     name: String,
     defaultValue: Boolean
 ) : ModSetting<Boolean>(name, null, defaultValue)

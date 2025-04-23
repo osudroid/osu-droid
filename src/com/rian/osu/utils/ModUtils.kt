@@ -29,6 +29,7 @@ object ModUtils {
             ModHalfTime(),
             ModHardRock(),
             ModHidden(),
+            ModMirror(),
             ModNightCore(),
             ModNoFail(),
             ModPerfect(),
@@ -38,7 +39,9 @@ object ModUtils {
             ModScoreV2(),
             ModSmallCircle(),
             ModSuddenDeath(),
-            ModTraceable()
+            ModTraceable(),
+            ModWindDown(),
+            ModWindUp()
         )
 
     private val allModsClassesByAcronym = allModsInstances.associateBy({ it.acronym }, { it::class })

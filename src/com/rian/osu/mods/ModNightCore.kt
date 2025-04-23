@@ -11,7 +11,6 @@ open class ModNightCore : ModRateAdjust() {
     override val acronym = "NC"
     override val description = "Uguuuuuuuu..."
     override val type = ModType.DifficultyIncrease
-    override val textureNameSuffix = "nightcore"
     override val isRanked = true
     override val incompatibleMods = super.incompatibleMods + arrayOf(ModDoubleTime::class, ModHalfTime::class)
 

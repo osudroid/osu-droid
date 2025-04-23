@@ -2,11 +2,9 @@ package com.rian.osu.mods
 
 import com.rian.osu.GameMode
 import com.rian.osu.beatmap.hitobject.HitObject
-import com.rian.osu.beatmap.hitobject.Slider
-import com.rian.osu.beatmap.hitobject.SliderPath
 import com.rian.osu.beatmap.sections.BeatmapDifficulty
-import com.rian.osu.math.Vector2
 import com.rian.osu.utils.CircleSizeCalculator
+import com.rian.osu.utils.HitObjectGenerationUtils
 import kotlin.math.min
 
 /**
@@ -17,9 +15,8 @@ class ModHardRock : Mod(), IModApplicableToDifficulty, IModApplicableToHitObject
     override val acronym = "HR"
     override val description = "Everything just got a bit harder..."
     override val type = ModType.DifficultyIncrease
-    override val textureNameSuffix = "hardrock"
     override val isRanked = true
-    override val incompatibleMods = super.incompatibleMods + ModEasy::class
+    override val incompatibleMods = super.incompatibleMods + arrayOf(ModEasy::class, ModMirror::class)
 
     override fun calculateScoreMultiplier(difficulty: BeatmapDifficulty) = 1.06f
 
@@ -52,26 +49,7 @@ class ModHardRock : Mod(), IModApplicableToDifficulty, IModApplicableToHitObject
     }
 
     override fun applyToHitObject(mode: GameMode, hitObject: HitObject) {
-        // Reflect the position of the hit object.
-        hitObject.position = reflectVector(hitObject.position)
-
-        if (hitObject !is Slider) {
-            return
-        }
-
-        // Reflect the control points of the slider. This will reflect the positions of head and tail circles.
-        hitObject.path = SliderPath(
-            hitObject.path.pathType,
-            hitObject.path.controlPoints.map { reflectControlPoint(it) },
-            hitObject.path.expectedDistance
-        )
-
-        // Reflect the position of slider ticks and repeats.
-        for (i in 1 until hitObject.nestedHitObjects.size - 1) {
-            val obj = hitObject.nestedHitObjects[i]
-
-            obj.position = reflectVector(obj.position)
-        }
+        HitObjectGenerationUtils.reflectVerticallyAlongPlayfield(hitObject)
     }
 
     private fun applySetting(value: Float, ratio: Float = ADJUST_RATIO) = min(value * ratio, 10f)
@@ -82,8 +60,5 @@ class ModHardRock : Mod(), IModApplicableToDifficulty, IModApplicableToHitObject
 
     companion object {
         private const val ADJUST_RATIO = 1.4f
-
-        private fun reflectVector(vector: Vector2) = Vector2(vector.x, 384 - vector.y)
-        private fun reflectControlPoint(vector: Vector2) = Vector2(vector.x, -vector.y)
     }
 }

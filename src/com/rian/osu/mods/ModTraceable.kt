@@ -10,7 +10,6 @@ class ModTraceable : Mod() {
     override val acronym = "TC"
     override val description = "Put your faith in the approach circles..."
     override val type = ModType.DifficultyIncrease
-    override val textureNameSuffix = "traceable"
     override val incompatibleMods = super.incompatibleMods + ModHidden::class
 
     override fun calculateScoreMultiplier(difficulty: BeatmapDifficulty) = 1.06f

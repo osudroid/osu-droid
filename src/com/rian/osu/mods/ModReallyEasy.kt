@@ -12,7 +12,6 @@ class ModReallyEasy : Mod(), IModApplicableToDifficultyWithSettings {
     override val acronym = "RE"
     override val description = "Everything just got easier..."
     override val type = ModType.DifficultyReduction
-    override val textureNameSuffix = "reallyeasy"
 
     override fun calculateScoreMultiplier(difficulty: BeatmapDifficulty) = 0.5f
 

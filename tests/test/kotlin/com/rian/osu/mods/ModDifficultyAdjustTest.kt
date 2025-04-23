@@ -110,4 +110,18 @@ class ModDifficultyAdjustTest {
             }
         }
     }
+
+    @Test
+    fun `Test toString`() {
+        ModDifficultyAdjust().apply {
+            Assert.assertEquals("DA", toString())
+
+            cs = 4f
+            ar = 9f
+            od = 8f
+            hp = 6f
+
+            Assert.assertEquals("DA (CS4.0, AR9.0, OD8.0, HP6.0)", toString())
+        }
+    }
 }
