@@ -29,6 +29,7 @@ object ModUtils {
             ModHalfTime(),
             ModHardRock(),
             ModHidden(),
+            ModMirror(),
             ModNightCore(),
             ModNoFail(),
             ModPerfect(),
