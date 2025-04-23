@@ -162,13 +162,13 @@ class GameLoaderScene(private val gameScene: GameScene, beatmap: BeatmapInfo, mo
                 width = FillParent
                 height = FillParent
                 rotationCenter = Anchor.Center
-                setPortion(0.2f)
+                setPortion(0.1f)
             }
 
         }
 
         override fun onManagedUpdate(deltaTimeSec: Float) {
-            rotatingCircle.rotation += 20f * deltaTimeSec
+            rotatingCircle.rotation += 360f * deltaTimeSec
             super.onManagedUpdate(deltaTimeSec)
         }
     }
