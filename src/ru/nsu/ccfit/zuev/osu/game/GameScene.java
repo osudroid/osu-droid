@@ -321,6 +321,8 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
         videoStarted = false;
         videoOffset = playableBeatmap.getEvents().videoStartTime / 1000f;
 
+        // This is used instead of getBackgroundBrightness to directly obtain the
+        // updated value from the brightness slider.
         float brightness = Config.getInt("bgbrightness", 25) / 100f;
 
         TextureRegion textureRegion = Config.isSafeBeatmapBg() || playableBeatmap.getEvents().backgroundFilename == null

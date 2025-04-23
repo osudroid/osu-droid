@@ -118,6 +118,8 @@ class GameLoaderScene(private val gameScene: GameScene, beatmap: BeatmapInfo, mo
                 if (System.currentTimeMillis() - lastTimeTouched > MINIMUM_TIMEOUT || Multiplayer.isMultiplayer || isRestart) {
                     isStarting = true
 
+                    // This is used instead of getBackgroundBrightness to directly obtain the
+                    // updated value from the brightness slider.
                     val backgroundBrightness = Config.getInt("bgbrightness", 25)
 
                     mainContainer.fadeOut(0.1f, Easing.OutExpo)
