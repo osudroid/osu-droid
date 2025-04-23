@@ -213,10 +213,10 @@ class GameLoaderScene(private val gameScene: GameScene, beatmap: BeatmapInfo, mo
                             }
                         }
 
-                        +StepButton(-10)
-                        +StepButton(-1)
-                        +StepButton(1)
-                        +StepButton(10)
+                        StepButton(-10)
+                        StepButton(-1)
+                        StepButton(1)
+                        StepButton(10)
                     }
                 }
             }
