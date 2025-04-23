@@ -20,7 +20,7 @@ import kotlin.math.*
 
 class GameLoaderScene(private val gameScene: GameScene, beatmap: BeatmapInfo, mods: ModHashMap, private val isRestart: Boolean) : ExtendedScene() {
 
-    private var timeoutStartTime = -1L
+    private var lastTimeTouched = System.currentTimeMillis()
     private var isStarting = false
 
     private val dimBox: Box
@@ -108,12 +108,6 @@ class GameLoaderScene(private val gameScene: GameScene, beatmap: BeatmapInfo, mo
         }
     }
 
-
-    override fun onSceneTouchEvent(event: TouchEvent): Boolean {
-        timeoutStartTime = System.currentTimeMillis()
-        return super.onSceneTouchEvent(event)
-    }
-
     override fun onManagedUpdate(deltaTimeSec: Float) {
 
         if (!isStarting) {
@@ -121,7 +115,7 @@ class GameLoaderScene(private val gameScene: GameScene, beatmap: BeatmapInfo, mo
             if (gameScene.isReadyToStart) {
 
                 // Multiplayer will skip the minimum timeout if it's ready to start.
-                if (System.currentTimeMillis() - timeoutStartTime > MINIMUM_TIMEOUT || Multiplayer.isMultiplayer || isRestart) {
+                if (System.currentTimeMillis() - lastTimeTouched > MINIMUM_TIMEOUT || Multiplayer.isMultiplayer || isRestart) {
                     isStarting = true
 
                     val backgroundBrigthness = Config.getInt("bgbrightness", 25)
@@ -135,7 +129,7 @@ class GameLoaderScene(private val gameScene: GameScene, beatmap: BeatmapInfo, mo
                 }
 
             } else {
-                timeoutStartTime = System.currentTimeMillis()
+                lastTimeTouched = System.currentTimeMillis()
             }
         }
 
@@ -178,9 +172,6 @@ class GameLoaderScene(private val gameScene: GameScene, beatmap: BeatmapInfo, mo
 
 
     private inner class QuickSettingsLayout : LinearContainer() {
-
-        private var lastTimeTouched = System.currentTimeMillis()
-
 
         init {
             width = FillParent
@@ -231,7 +222,7 @@ class GameLoaderScene(private val gameScene: GameScene, beatmap: BeatmapInfo, mo
 
                 content.apply {
 
-                    +IntPreferenceSlider("bgbrightness").apply {
+                    +IntPreferenceSlider("bgbrightness", 25).apply {
                         label = "Background brightness"
                         control.min = 0f
                         control.max = 100f
