@@ -14,6 +14,11 @@ class ModTimeRampTest {
             Assert.assertEquals(1.5f, getDouble("finalRate").toFloat())
         }
     }
+
+    @Test
+    fun `Test toString`() {
+        Assert.assertEquals("TS (1.00x - 1.50x)", TestModTimeRamp().toString())
+    }
 }
 
 private class TestModTimeRamp : ModTimeRamp() {
