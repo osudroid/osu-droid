@@ -5,6 +5,7 @@ import com.reco1l.andengine.container.*
 import com.reco1l.andengine.info.*
 import com.reco1l.andengine.shape.*
 import com.reco1l.framework.*
+import com.reco1l.framework.math.*
 import org.anddev.andengine.input.touch.*
 import kotlin.math.*
 
@@ -153,10 +154,14 @@ open class Slider(initialValue: Float = 0f) : Control<Float>(initialValue), IWit
 
 
     private fun updateProgress() {
-        val progressWidth = width * (value - min) / (max - min)
 
-        progressBar.width = progressWidth
-        thumb.x = progressWidth.coerceAtMost(width - thumb.width / 2f).coerceAtLeast(thumb.width / 2f)
+        val absoluteProgress = (value - min) / (max - min)
+        thumb.x = (width * absoluteProgress).coerceAtMost(width - thumb.width / 2f).coerceAtLeast(thumb.width / 2f)
+
+        val origin = (-min) / (max - min)
+        progressBar.anchor = Vec2(origin, 0.5f)
+        progressBar.origin = Vec2(if (value >= origin) 0f else 1f, 0.5f)
+        progressBar.width = abs((if (value >= origin) value / (max - min) else value / (min - max))) * width
     }
 
 
