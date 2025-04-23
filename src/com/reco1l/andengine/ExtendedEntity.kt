@@ -17,6 +17,7 @@ import org.anddev.andengine.input.touch.*
 import org.anddev.andengine.opengl.util.*
 import org.anddev.andengine.util.*
 import javax.microedition.khronos.opengles.*
+import kotlin.math.*
 
 
 /**
@@ -58,13 +59,29 @@ abstract class ExtendedEntity : Entity(0f, 0f), ITouchArea, IModifierChain {
 
     //region Size related properties
 
+    private fun isReservedSizeValue(value: Float): Boolean {
+        return value == MatchContent
+            || value == FillParent
+            || value == FitParent
+    }
+
+    private fun handleReservedSizeValue(value: Float, contentSize: Float, padding: Float, parentInnerSize: Float, position: Float): Float {
+        return when (value) {
+            MatchContent -> contentSize + padding
+            FillParent -> parentInnerSize - position
+            FitParent -> min(contentSize + padding, parentInnerSize - position)
+            else -> value
+        }
+    }
+
+
     /**
      * The width of the entity.
      */
     var width: Float = 0f
-        get() = when (field) {
-            FitContent -> contentWidth + padding.horizontal
-            FitParent -> parent.innerWidth - x
+        get() = when {
+            isReservedSizeValue(field) -> handleReservedSizeValue(field, contentWidth, padding.horizontal, parent.innerWidth, x)
+
             else -> if (relativeSizeAxes.isHorizontal) {
                 field * parent.innerWidth
             } else {
@@ -82,9 +99,9 @@ abstract class ExtendedEntity : Entity(0f, 0f), ITouchArea, IModifierChain {
      * The height of the entity.
      */
     var height = 0f
-        get() = when (field) {
-            FitContent -> contentHeight + padding.vertical
-            FitParent -> parent.innerHeight - y
+        get() = when {
+            isReservedSizeValue(field) -> handleReservedSizeValue(field, contentHeight, padding.vertical, parent.innerHeight, y)
+
             else -> if (relativeSizeAxes.isVertical) {
                 field * parent.innerHeight
             } else {
@@ -804,14 +821,19 @@ abstract class ExtendedEntity : Entity(0f, 0f), ITouchArea, IModifierChain {
     companion object {
 
         /**
-         * The width and height of the entity will be set to the content size.
+         * The width and height of the entity will match the content size without any constraints.
          */
-        const val FitContent = -1f
+        const val MatchContent = -1f
 
         /**
-         * The width and height of the entity will be set to the parent's size.
+         * The width and height of the entity will match the parent's inner size.
          */
-        const val FitParent = -2f
+        const val FillParent = -2f
+
+        /**
+         * The width and height of the entity will match the content size but will be constrained to the parent's inner size.
+         */
+        const val FitParent = -3f
 
 
         private val DEBUG_FOREGROUND by lazy {

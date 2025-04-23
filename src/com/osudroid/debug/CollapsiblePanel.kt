@@ -72,7 +72,7 @@ open class CollapsiblePanel : Container() {
 
             init {
                 background = Box().apply { color = ColorARGB(0xFF383852) }
-                width = FitParent
+                width = FillParent
                 height = TITLE_BAR_HEIGHT
 
                 +title.apply {
@@ -107,7 +107,7 @@ open class CollapsiblePanel : Container() {
 
 
     override fun onManagedUpdate(deltaTimeSec: Float) {
-        height = if (isExpanded) FitContent else TITLE_BAR_HEIGHT
+        height = if (isExpanded) MatchContent else TITLE_BAR_HEIGHT
         super.onManagedUpdate(deltaTimeSec)
     }
 

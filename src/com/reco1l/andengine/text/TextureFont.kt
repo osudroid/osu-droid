@@ -60,8 +60,8 @@ open class TextureFont(val characters: MutableMap<Char, TextureRegion>) : Buffer
 
 
     init {
-        width = FitContent
-        height = FitContent
+        width = MatchContent
+        height = MatchContent
     }
 
 

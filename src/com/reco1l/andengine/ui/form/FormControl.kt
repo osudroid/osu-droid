@@ -123,7 +123,7 @@ abstract class FormControl<V : Any, C: Control<V>>(initialValue: V): ConstraintC
 
 
     init {
-        width = FitParent
+        width = FillParent
         padding = Vec4(24f)
         background = Box().apply {
             color = ColorARGB.White

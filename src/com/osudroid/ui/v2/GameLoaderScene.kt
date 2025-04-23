@@ -4,7 +4,7 @@ import com.edlplan.framework.easing.*
 import com.osudroid.data.*
 import com.osudroid.multiplayer.*
 import com.reco1l.andengine.*
-import com.reco1l.andengine.ExtendedEntity.Companion.FitParent
+import com.reco1l.andengine.ExtendedEntity.Companion.FillParent
 import com.reco1l.andengine.container.*
 import com.reco1l.andengine.shape.*
 import com.reco1l.andengine.sprite.*
@@ -30,24 +30,24 @@ class GameLoaderScene(private val gameScene: GameScene, beatmap: BeatmapInfo, mo
 
         // Background
         sprite {
-            width = FitParent
-            height = FitParent
+            width = FillParent
+            height = FillParent
             scaleType = ScaleType.Crop
             textureRegion = ResourceManager.getInstance().getTexture(if (Config.isSafeBeatmapBg()) "menu-background" else "::background")
         }
 
         // Dim
         dimBox = box {
-            width = FitParent
-            height = FitParent
+            width = FillParent
+            height = FillParent
             color = ColorARGB.Black
             alpha = 0.7f
         }
 
         // Beatmap info
         mainContainer = container {
-            width = FitParent
-            height = FitParent
+            width = FillParent
+            height = FillParent
             alpha = 0f
             scaleX = 0.9f
             scaleY = 0.9f
@@ -97,7 +97,7 @@ class GameLoaderScene(private val gameScene: GameScene, beatmap: BeatmapInfo, mo
                     anchor = Anchor.CenterRight
                     origin = Anchor.CenterRight
                     width = 400f
-                    height = FitParent
+                    height = FillParent
                     x = -20f
                     scrollAxes = Axes.Y
 
@@ -153,14 +153,14 @@ class GameLoaderScene(private val gameScene: GameScene, beatmap: BeatmapInfo, mo
             y = -60f
 
             circle {
-                width = FitParent
-                height = FitParent
+                width = FillParent
+                height = FillParent
                 alpha = 0.3f
             }
 
             rotatingCircle = circle {
-                width = FitParent
-                height = FitParent
+                width = FillParent
+                height = FillParent
                 rotationCenter = Anchor.Center
                 setPortion(0.2f)
             }
@@ -180,14 +180,14 @@ class GameLoaderScene(private val gameScene: GameScene, beatmap: BeatmapInfo, mo
 
 
         init {
-            width = FitParent
+            width = FillParent
             spacing = 20f
             padding = Vec4(0f, 20f)
             orientation = Orientation.Vertical
             alpha = 0.5f
 
             collapsibleCard {
-                width = FitParent
+                width = FillParent
                 title = "Beatmap"
 
                 content.apply {
@@ -223,7 +223,7 @@ class GameLoaderScene(private val gameScene: GameScene, beatmap: BeatmapInfo, mo
             }
 
             collapsibleCard {
-                width = FitParent
+                width = FillParent
                 title = "Settings"
 
                 content.apply {

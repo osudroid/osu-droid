@@ -25,7 +25,7 @@ class ModCustomizationMenu : Modal(
         clipChildren = true
 
         +LinearContainer().apply {
-            width = FitParent
+            width = FillParent
             orientation = Orientation.Vertical
         }
     }
@@ -89,12 +89,12 @@ class ModCustomizationMenu : Modal(
 
         init {
             orientation = Orientation.Vertical
-            width = FitParent
+            width = FillParent
             padding = Vec4(0f, 0f, 0f, 16f)
 
             +LinearContainer().apply {
                 orientation = Orientation.Horizontal
-                width = FitParent
+                width = FillParent
                 padding = Vec4(20f, 14f)
                 spacing = 12f
                 background = Box().apply {

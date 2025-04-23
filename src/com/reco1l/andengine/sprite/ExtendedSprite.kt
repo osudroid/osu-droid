@@ -105,8 +105,8 @@ open class ExtendedSprite(textureRegion: TextureRegion? = null) : BufferedEntity
 
 
     init {
-        width = FitContent
-        height = FitContent
+        width = MatchContent
+        height = MatchContent
 
         onTextureRegionChanged()
     }

@@ -26,16 +26,16 @@ class ModIcon(mod: Mod) : Container() {
             }
 
             attachChild(ExtendedText().apply {
-                width = FitParent
-                height = FitParent
+                width = FillParent
+                height = FillParent
                 text = mod.acronym
                 font = ResourceManager.getInstance().getFont("smallFont")
                 alignment = Anchor.Center
             })
         } else {
             attachChild(ExtendedSprite(texture).apply {
-                width = FitParent
-                height = FitParent
+                width = FillParent
+                height = FillParent
             })
         }
     }

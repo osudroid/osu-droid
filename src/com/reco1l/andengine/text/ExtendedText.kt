@@ -84,8 +84,8 @@ open class ExtendedText : BufferedEntity<CompoundBuffer>() {
 
 
     init {
-        width = FitContent
-        height = FitContent
+        width = MatchContent
+        height = MatchContent
     }
 
 

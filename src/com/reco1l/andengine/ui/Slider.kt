@@ -75,7 +75,7 @@ open class Slider(initialValue: Float = 0f) : Control<Float>(initialValue), IWit
     private val backgroundBar = object : Box() {
 
         init {
-            width = FitParent
+            width = FillParent
             anchor = Anchor.Center
             origin = Anchor.Center
         }
@@ -106,7 +106,7 @@ open class Slider(initialValue: Float = 0f) : Control<Float>(initialValue), IWit
 
 
     init {
-        width = FitParent
+        width = FillParent
 
         attachChild(backgroundBar)
         attachChild(thumb)

@@ -35,7 +35,7 @@ class HUDElementSelector(private val hud: GameplayHUD) : Container(), IGameplayE
     private val elementList = ScrollableContainer().apply {
 
         scrollAxes = Axes.Y
-        height = FitParent
+        height = FillParent
         width = SELECTOR_WIDTH
 
         background = Box().apply {
@@ -43,7 +43,7 @@ class HUDElementSelector(private val hud: GameplayHUD) : Container(), IGameplayE
         }
 
         attachChild(LinearContainer().apply {
-            width = FitParent
+            width = FillParent
             padding = Vec4(16f)
             spacing = 12f
             orientation = Orientation.Vertical
@@ -57,7 +57,7 @@ class HUDElementSelector(private val hud: GameplayHUD) : Container(), IGameplayE
 
 
     init {
-        height = FitParent
+        height = FillParent
 
         x = -SELECTOR_WIDTH
 

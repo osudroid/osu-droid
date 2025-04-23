@@ -1,8 +1,8 @@
 package com.osudroid.ui.v2.modmenu
 
 import com.reco1l.andengine.*
-import com.reco1l.andengine.ExtendedEntity.Companion.FitContent
-import com.reco1l.andengine.ExtendedEntity.Companion.FitParent
+import com.reco1l.andengine.ExtendedEntity.Companion.MatchContent
+import com.reco1l.andengine.ExtendedEntity.Companion.FillParent
 import com.reco1l.andengine.container.*
 import com.reco1l.andengine.shape.*
 import com.reco1l.andengine.sprite.*
@@ -77,8 +77,8 @@ object ModMenu : ExtendedScene() {
         customizationMenu = ModCustomizationMenu()
 
         attachChild(LinearContainer().apply {
-            width = FitParent
-            height = FitParent
+            width = FillParent
+            height = FillParent
             orientation = Orientation.Vertical
             background = Box().apply {
                 color = ColorARGB(0xFF161622)
@@ -86,15 +86,15 @@ object ModMenu : ExtendedScene() {
             }
 
             attachChild(Container().apply {
-                width = FitParent
-                height = FitContent
+                width = FillParent
+                height = MatchContent
                 padding = Vec4(60f, 20f)
 
                 attachChild(LinearContainer().apply {
                     orientation = Orientation.Horizontal
                     anchor = Anchor.CenterLeft
                     origin = Anchor.CenterLeft
-                    height = FitContent
+                    height = MatchContent
                     spacing = 10f
 
                     attachChild(Button().apply {
@@ -186,14 +186,14 @@ object ModMenu : ExtendedScene() {
             })
 
             attachChild(ScrollableContainer().apply {
-                width = FitParent
-                height = FitParent
+                width = FillParent
+                height = FillParent
                 scrollAxes = Axes.X
 
                 attachChild(LinearContainer().apply {
                     orientation = Orientation.Horizontal
-                    width = FitContent
-                    height = FitParent
+                    width = MatchContent
+                    height = FillParent
                     spacing = 16f
                     padding = Vec4(60f, 0f)
 
@@ -475,7 +475,7 @@ object ModMenu : ExtendedScene() {
         init {
             orientation = Orientation.Vertical
             width = 340f
-            height = FitParent
+            height = FillParent
 
             background = Box().apply {
                 color = ColorARGB(0xFF13131E)
@@ -483,7 +483,7 @@ object ModMenu : ExtendedScene() {
             }
 
             +ExtendedText().apply {
-                width = FitParent
+                width = FillParent
                 text = name
                 alignment = Anchor.Center
                 font = ResourceManager.getInstance().getFont("smallFont")
@@ -493,12 +493,12 @@ object ModMenu : ExtendedScene() {
 
             +ScrollableContainer().apply {
                 scrollAxes = Axes.Y
-                width = FitParent
-                height = FitParent
+                width = FillParent
+                height = FillParent
                 clipChildren = true
 
                 +LinearContainer().apply {
-                    width = FitParent
+                    width = FillParent
                     orientation = Orientation.Vertical
                     padding = Vec4(12f, 0f, 12f, 12f)
                     spacing = 16f
@@ -523,14 +523,14 @@ object ModMenu : ExtendedScene() {
             titleText.detachSelf()
 
             +LinearContainer().apply {
-                width = FitParent
+                width = FillParent
                 padding = Vec4(0f, 6f)
                 anchor = Anchor.CenterLeft
                 origin = Anchor.CenterLeft
                 orientation = Orientation.Vertical
 
                 +titleText.apply {
-                    height = FitContent
+                    height = MatchContent
                     font = ResourceManager.getInstance().getFont("smallFont")
                     alignment = Anchor.TopLeft
                     anchor = Anchor.TopLeft
@@ -538,7 +538,7 @@ object ModMenu : ExtendedScene() {
                 }
 
                 +descriptionText.apply {
-                    width = FitParent
+                    width = FillParent
                     font = ResourceManager.getInstance().getFont("xs")
                     text = mod.description
                     clipChildren = true
@@ -546,7 +546,7 @@ object ModMenu : ExtendedScene() {
                 }
             }
 
-            width = FitParent
+            width = FillParent
             theme = ButtonTheme(
                 iconSize = 40f,
                 backgroundColor = 0xFF1E1E2E

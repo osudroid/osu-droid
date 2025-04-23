@@ -18,7 +18,7 @@ open class Card(
      */
     val content: Container = LinearContainer().apply {
         orientation = Orientation.Vertical
-        width = FitParent
+        width = FillParent
         clipChildren = true
     },
 
@@ -57,7 +57,7 @@ open class Card(
         }
 
         +titleBar.apply {
-            width = FitParent
+            width = FillParent
             padding = Vec4(12f, 16f)
 
             +ExtendedText().apply {
@@ -77,7 +77,7 @@ open class Card(
         }
 
         +Box().apply {
-            width = FitParent
+            width = FillParent
             height = 1f
             color = ColorARGB.White
             alpha = 0.025f
