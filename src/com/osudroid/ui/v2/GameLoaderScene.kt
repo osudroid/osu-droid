@@ -184,6 +184,7 @@ class GameLoaderScene(private val gameScene: GameScene, beatmap: BeatmapInfo, mo
             spacing = 20f
             padding = Vec4(0f, 20f)
             orientation = Orientation.Vertical
+            alpha = 0.5f
 
             collapsibleCard {
                 width = FitParent
