@@ -124,6 +124,17 @@ class GameLoaderScene(private val gameScene: GameScene, beatmap: BeatmapInfo, mo
 
                     dimBox.clearModifiers(ModifierType.Alpha)
                     dimBox.fadeTo(1f - backgroundBrigthness / 100f, 0.2f).then {
+
+                        gameScene.hud.apply {
+                            alpha = 0f
+                            scaleX = 0.9f
+                            scaleY = 0.9f
+                            scaleCenter = Anchor.Center
+
+                            scaleTo(1f, 0.2f, Easing.OutCubic)
+                            fadeIn(0.1f, Easing.OutExpo)
+                        }
+
                         gameScene.start()
                     }
                 }
