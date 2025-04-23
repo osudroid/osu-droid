@@ -21,4 +21,13 @@ class ModCustomSpeedTest {
             }
         }
     }
+
+    @Test
+    fun `Test toString`() {
+        ModCustomSpeed().apply {
+            trackRateMultiplier = 1.25f
+
+            Assert.assertEquals("CS (1.25x)", toString())
+        }
+    }
 }
