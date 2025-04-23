@@ -53,6 +53,11 @@ abstract class ModTimeRamp : Mod(), IModApplicableToBeatmap, IModApplicableToTra
         return rate * Interpolation.linear(initialRate, finalRate, amount.toFloat().coerceIn(0f, 1f))
     }
 
+    override fun toString() = buildString {
+        append(super.toString())
+        append(" (%.2fx - %.2fx)".format(initialRate, finalRate))
+    }
+
     companion object {
         /**
          * The point in the beatmap at which the final rate should be reached.
