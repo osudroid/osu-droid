@@ -118,12 +118,12 @@ class GameLoaderScene(private val gameScene: GameScene, beatmap: BeatmapInfo, mo
                 if (System.currentTimeMillis() - lastTimeTouched > MINIMUM_TIMEOUT || Multiplayer.isMultiplayer || isRestart) {
                     isStarting = true
 
-                    val backgroundBrigthness = Config.getInt("bgbrightness", 25)
+                    val backgroundBrightness = Config.getInt("bgbrightness", 25)
 
                     mainContainer.fadeOut(0.1f, Easing.OutExpo)
 
                     dimBox.clearModifiers(ModifierType.Alpha)
-                    dimBox.fadeTo(1f - backgroundBrigthness / 100f, 0.2f).then {
+                    dimBox.fadeTo(1f - backgroundBrightness / 100f, 0.2f).then {
 
                         gameScene.hud.apply {
                             alpha = 0f

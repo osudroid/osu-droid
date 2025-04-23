@@ -321,7 +321,7 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
         videoStarted = false;
         videoOffset = playableBeatmap.getEvents().videoStartTime / 1000f;
 
-        float brigthness = Config.getInt("bgbrightness", 25) / 100f;
+        float brightness = Config.getInt("bgbrightness", 25) / 100f;
 
         TextureRegion textureRegion = Config.isSafeBeatmapBg() || playableBeatmap.getEvents().backgroundFilename == null
                 ? ResourceManager.getInstance().getTexture("menu-background")
@@ -336,16 +336,16 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
             }
             backgroundColor.apply(rectangle);
 
-            applyBackground(rectangle, brigthness);
+            applyBackground(rectangle, brightness);
         } else {
-            applyBackground(new Sprite(0, 0, textureRegion.getWidth(), textureRegion.getHeight(), textureRegion), brigthness);
+            applyBackground(new Sprite(0, 0, textureRegion.getWidth(), textureRegion.getHeight(), textureRegion), brightness);
         }
 
         // Storyboard and video are loaded asynchronously.
         boolean isStoryboardEnabled = Config.getBoolean("enableStoryboard", false);
         boolean isVideoEnabled = Config.getBoolean("enableVideo", false) && playableBeatmap.getEvents().videoFilename != null;
 
-        if (brigthness > 0.02f && (isStoryboardEnabled || isVideoEnabled)) {
+        if (brightness > 0.02f && (isStoryboardEnabled || isVideoEnabled)) {
 
             if (backgroundLoadingJob != null) {
                 backgroundLoadingJob.cancel(new CancellationException("Background loading job cancelled"));
@@ -368,7 +368,7 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
                         video.setAlpha(0f);
 
                         ensureActive(scope.getCoroutineContext());
-                        applyBackground(video, brigthness);
+                        applyBackground(video, brightness);
 
                         videoLoaded = true;
                     } catch (Exception e) {
@@ -401,7 +401,7 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
                     }
 
                     storyboardSprite.setTransparentBackground(videoLoaded);
-                    storyboardSprite.setBrightness(brigthness);
+                    storyboardSprite.setBrightness(brightness);
                     storyboardSprite.loadStoryboard(beatmapInfo.getPath());
                     ensureActive(scope.getCoroutineContext());
 
