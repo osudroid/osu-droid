@@ -8,10 +8,9 @@ import com.reco1l.andengine.ExtendedEntity.Companion.FitParent
 import com.reco1l.andengine.container.*
 import com.reco1l.andengine.shape.*
 import com.reco1l.andengine.sprite.*
-import com.reco1l.andengine.text.ExtendedText
-import com.reco1l.andengine.ui.*
 import com.reco1l.andengine.ui.form.*
 import com.reco1l.framework.*
+import com.reco1l.framework.math.*
 import com.rian.osu.utils.*
 import org.anddev.andengine.input.touch.*
 import ru.nsu.ccfit.zuev.osu.*
@@ -21,36 +20,32 @@ import kotlin.math.*
 class GameLoaderScene(private val gameScene: GameScene, beatmap: BeatmapInfo, mods: ModHashMap, private val isRestart: Boolean) : ExtendedScene() {
 
     private var timeoutStartTime = -1L
-
     private var isStarting = false
 
-
-    private val dimBox = Box()
-
-    private val mainContainer = Container()
+    private val dimBox: Box
+    private val mainContainer: Container
 
 
     init {
 
         // Background
-        attachChild(ExtendedSprite().apply {
+        sprite {
             width = FitParent
             height = FitParent
             scaleType = ScaleType.Crop
             textureRegion = ResourceManager.getInstance().getTexture(if (Config.isSafeBeatmapBg()) "menu-background" else "::background")
-        })
+        }
 
         // Dim
-        dimBox.apply {
+        dimBox = box {
             width = FitParent
             height = FitParent
             color = ColorARGB.Black
             alpha = 0.7f
         }
-        attachChild(dimBox)
 
         // Beatmap info
-        mainContainer.apply {
+        mainContainer = container {
             width = FitParent
             height = FitParent
             alpha = 0f
@@ -61,7 +56,7 @@ class GameLoaderScene(private val gameScene: GameScene, beatmap: BeatmapInfo, mo
             fadeIn(0.2f, Easing.OutCubic)
             scaleTo(1f, 0.2f, Easing.OutCubic)
 
-            +LinearContainer().apply {
+            linearContainer {
                 orientation = Orientation.Vertical
                 spacing = 10f
                 anchor = Anchor.CenterLeft
@@ -69,19 +64,19 @@ class GameLoaderScene(private val gameScene: GameScene, beatmap: BeatmapInfo, mo
                 x = 60f
 
                 // Title
-                +ExtendedText().apply {
+                text {
                     font = ResourceManager.getInstance().getFont("font")
                     text = beatmap.titleText
                 }
 
                 // Difficulty
-                +ExtendedText().apply {
+                text {
                     font = ResourceManager.getInstance().getFont("smallFont")
                     text = beatmap.version
                 }
 
                 // Creator
-                +ExtendedText().apply {
+                text {
                     font = ResourceManager.getInstance().getFont("smallFont")
                     text = "by ${beatmap.artistText}"
                     color = ColorARGB(0xFF8282A8)
@@ -98,10 +93,18 @@ class GameLoaderScene(private val gameScene: GameScene, beatmap: BeatmapInfo, mo
             +LoadingCircle()
 
             if (!isRestart) {
-                +SettingsCard()
+                scrollableContainer {
+                    anchor = Anchor.CenterRight
+                    origin = Anchor.CenterRight
+                    width = 400f
+                    height = FitParent
+                    x = -20f
+                    scrollAxes = Axes.Y
+
+                    +QuickSettingsLayout()
+                }
             }
         }
-        attachChild(mainContainer)
     }
 
 
@@ -137,45 +140,92 @@ class GameLoaderScene(private val gameScene: GameScene, beatmap: BeatmapInfo, mo
     }
 
 
-    private class LoadingCircle : Circle() {
+    private class LoadingCircle : Container() {
+
+        private val rotatingCircle: Circle
 
         init {
             width = 32f
             height = 32f
             anchor = Anchor.BottomLeft
             origin = Anchor.BottomLeft
-            paintStyle = PaintStyle.Outline
-            lineWidth = 4f
             x = 60f
             y = -60f
 
-            setPortion(0.6f)
+            circle {
+                width = FitParent
+                height = FitParent
+                alpha = 0.3f
+            }
+
+            rotatingCircle = circle {
+                width = FitParent
+                height = FitParent
+                rotationCenter = Anchor.Center
+                setPortion(0.2f)
+            }
+
         }
 
         override fun onManagedUpdate(deltaTimeSec: Float) {
-            startAngle += 10f
-            endAngle += 10f
+            rotatingCircle.rotation += 20f * deltaTimeSec
             super.onManagedUpdate(deltaTimeSec)
         }
     }
 
-    private class SettingsCard : Card() {
+
+    private class QuickSettingsLayout : LinearContainer() {
 
         private var lastTimeTouched = System.currentTimeMillis()
 
 
         init {
-            title = "Settings"
-            width = 400f
-            anchor = Anchor.CenterRight
-            origin = Anchor.CenterRight
-            x = -20f
+            width = FitParent
+            spacing = 20f
+            padding = Vec4(0f, 20f)
+            orientation = Orientation.Vertical
 
-            content.apply {
+            collapsibleCard {
+                width = FitParent
+                title = "Beatmap"
 
-                +LinearContainer().apply {
-                    width = FitParent
-                    orientation = Orientation.Vertical
+                content.apply {
+
+                    val offsetSlider = FormSlider(0f).apply {
+                        label = "Offset"
+                        control.min = -250f
+                        control.max = 250f
+                        valueFormatter = { "${it.roundToInt()}ms" }
+                    }
+                    +offsetSlider
+
+                    linearContainer {
+                        spacing = 10f
+                        padding = Vec4(12f, 0f, 12f, 12f)
+                        anchor = Anchor.TopCenter
+                        origin = Anchor.TopCenter
+
+                        fun StepButton(step: Int) = button {
+                            width = 50f
+                            text = (if (step > 0) "+" else "") + step.toString()
+                            onActionUp = {
+                                offsetSlider.value += step.toFloat()
+                            }
+                        }
+
+                        +StepButton(-10)
+                        +StepButton(-1)
+                        +StepButton(1)
+                        +StepButton(10)
+                    }
+                }
+            }
+
+            collapsibleCard {
+                width = FitParent
+                title = "Settings"
+
+                content.apply {
 
                     +IntPreferenceSlider("bgbrightness").apply {
                         label = "Background brightness"
@@ -202,7 +252,6 @@ class GameLoaderScene(private val gameScene: GameScene, beatmap: BeatmapInfo, mo
             }
         }
 
-
         override fun onAreaTouched(event: TouchEvent, localX: Float, localY: Float): Boolean {
             alpha = 1f
             lastTimeTouched = System.currentTimeMillis()
@@ -217,22 +266,14 @@ class GameLoaderScene(private val gameScene: GameScene, beatmap: BeatmapInfo, mo
                 alpha -= deltaTimeSec * 1.5f
             }
 
-            if (content.isVisible && elapsed > COLLAPSE_TIMEOUT) {
-                collapse()
-            }
-
             super.onManagedUpdate(deltaTimeSec)
         }
 
-
-        companion object {
-            const val FADE_TIMEOUT = 1000L
-            const val COLLAPSE_TIMEOUT = 2000L
-        }
     }
 
 
     companion object {
+        const val FADE_TIMEOUT = 2000L
         const val MINIMUM_TIMEOUT = 2000L
     }
 
