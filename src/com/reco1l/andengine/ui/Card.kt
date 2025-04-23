@@ -16,17 +16,47 @@ open class Card(
     /**
      * The content of the card.
      */
-    val content: Container = Container().apply {
+    val content: Container = LinearContainer().apply {
+        orientation = Orientation.Vertical
         width = FitParent
         clipChildren = true
     },
 
-    /**
-     * The title bar of the card.
-     */
-    val titleBar: Container? = object : Container() {
+) : LinearContainer() {
 
-        init {
+    /**
+     * The title of the card.
+     */
+    var title
+        get() = titleBar.firstOf<ExtendedText>()?.text ?: ""
+        set(value) { titleBar.firstOf<ExtendedText>()?.text = value }
+
+
+    private val titleBar = object : Container() {
+        override fun onAreaTouched(event: TouchEvent, localX: Float, localY: Float): Boolean {
+            if (event.isActionUp) {
+                (parent as Card).apply {
+                    if (content.isVisible) {
+                        collapse()
+                    } else {
+                        expand()
+                    }
+                }
+            }
+            return true
+        }
+    }
+
+
+    init {
+        orientation = Orientation.Vertical
+        foreground = BezelOutline(14f)
+        background = Box().apply {
+            cornerRadius = 14f
+            color = ColorARGB(0xFF161622)
+        }
+
+        +titleBar.apply {
             width = FitParent
             padding = Vec4(12f, 16f)
 
@@ -46,43 +76,6 @@ open class Card(
             }
         }
 
-
-        override fun onAreaTouched(event: TouchEvent, localX: Float, localY: Float): Boolean {
-            if (event.isActionUp) {
-                (parent as Card).apply {
-                    if (content.isVisible) {
-                        collapse()
-                    } else {
-                        expand()
-                    }
-                }
-            }
-            return true
-        }
-    }
-
-) : LinearContainer() {
-
-    /**
-     * The title of the card.
-     */
-    var title
-        get() = titleBar?.firstOf<ExtendedText>()?.text ?: ""
-        set(value) { titleBar?.firstOf<ExtendedText>()?.text = value }
-
-
-    init {
-        orientation = Orientation.Vertical
-        foreground = BezelOutline(14f)
-        background = Box().apply {
-            cornerRadius = 14f
-            color = ColorARGB(0xFF161622)
-        }
-
-        if (titleBar != null) {
-            +titleBar
-        }
-
         +Box().apply {
             width = FitParent
             height = 1f
@@ -99,7 +92,7 @@ open class Card(
      */
     fun collapse() {
         if (content.isVisible) {
-            val triangle = titleBar?.firstOf<Triangle>()
+            val triangle = titleBar.firstOf<Triangle>()
             triangle?.clearModifiers(ModifierType.Rotation)
             triangle?.rotateTo(180f, 0.1f)
 
@@ -116,7 +109,7 @@ open class Card(
      */
     fun expand() {
         if (!content.isVisible) {
-            val triangle = titleBar?.firstOf<Triangle>()
+            val triangle = titleBar.firstOf<Triangle>()
             triangle?.clearModifiers(ModifierType.Rotation)
             triangle?.rotateTo(0f, 0.1f)
 
