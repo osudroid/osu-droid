@@ -53,7 +53,7 @@ open class Box : BufferedEntity<BoxVBO>() {
 
     override fun onCreateBuffer(gl: GL10): BoxVBO {
 
-        val radius = cornerRadius.coerceIn(0f, min(width, height) / 2f)
+        val radius = cornerRadius.coerceAtMost(min(width, height) / 2f).coerceAtLeast(0f)
         val segments = if (radius > 0f) Circle.approximateSegments(radius, radius, 90f) else 0
 
         val buffer = buffer
