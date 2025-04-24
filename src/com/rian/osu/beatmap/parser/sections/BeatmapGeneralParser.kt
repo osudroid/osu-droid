@@ -19,6 +19,7 @@ object BeatmapGeneralParser : BeatmapKeyValueSectionParser() {
             "SampleVolume" -> beatmap.general.sampleVolume = parseInt(it.second)
             "StackLeniency" -> beatmap.general.stackLeniency = parseFloat(it.second)
             "LetterboxInBreaks" -> beatmap.general.letterboxInBreaks = it.second == "1"
+            "EpilepsyWarning" -> beatmap.general.epilepsyWarning = it.second == "1"
             "Mode" -> beatmap.general.mode = parseInt(it.second)
             "SamplesMatchPlaybackRate" -> beatmap.general.samplesMatchPlaybackRate = it.second == "1"
         }

@@ -205,7 +205,12 @@ data class BeatmapInfo(
     /**
      * The max combo.
      */
-    var maxCombo: Int
+    var maxCombo: Int,
+
+    /**
+     * Whether the beatmap has a epilepsy warning.
+     */
+    var epilepsyWarning: Boolean,
 
 ) {
 
@@ -459,7 +464,8 @@ fun BeatmapInfo(data: Beatmap, lastModified: Long, calculateDifficulty: Boolean,
         hitCircleCount = data.hitObjects.circleCount,
         sliderCount = data.hitObjects.sliderCount,
         spinnerCount = data.hitObjects.spinnerCount,
-        maxCombo = data.maxCombo
+        maxCombo = data.maxCombo,
+        epilepsyWarning = data.general.epilepsyWarning
     )
 }
 
