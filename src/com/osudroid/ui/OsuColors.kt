@@ -6,6 +6,7 @@ import com.reco1l.framework.Colors
 import com.reco1l.framework.toColorARGB
 import com.reco1l.toolkt.roundBy
 import kotlin.math.ceil
+import ru.nsu.ccfit.zuev.osu.RGBColor
 
 /**
  * A collection of colors used in osu!.
@@ -66,3 +67,8 @@ object OsuColors {
     val yellowDark = ColorARGB(0xFFEEAA00)
     val yellowDarker = ColorARGB(0xFFCC6600)
 }
+
+/**
+ * Converts this [ColorARGB] to a [RGBColor].
+ */
+fun ColorARGB.toRGBColor() = RGBColor(red, green, blue)
