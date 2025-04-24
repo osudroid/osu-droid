@@ -44,8 +44,12 @@ fun IEntity.triangle(builder: Triangle.() -> Unit): Triangle {
     return Triangle().apply(builder).also(::attachChild)
 }
 
-fun IEntity.button(builder: Button.() -> Unit): Button {
-    return Button().apply(builder).also(::attachChild)
+fun IEntity.textButton(builder: TextButton.() -> Unit): TextButton {
+    return TextButton().apply(builder).also(::attachChild)
+}
+
+fun IEntity.iconButton(builder: IconButton.() -> Unit): IconButton {
+    return IconButton().apply(builder).also(::attachChild)
 }
 
 fun IEntity.collapsibleCard(builder: Card.() -> Unit): Card {

@@ -18,6 +18,7 @@ import com.osudroid.multiplayer.RoomScene
 import com.osudroid.ui.OsuColors
 import com.reco1l.osu.*
 import com.osudroid.ui.v1.SettingsFragment
+import com.reco1l.andengine.ui.TextButton
 import com.reco1l.toolkt.kotlin.*
 import com.reco1l.toolkt.kotlin.async
 import com.rian.osu.*
@@ -49,7 +50,7 @@ object ModMenu : ExtendedScene() {
 
     private val modButtons = mutableListOf<ModButton>()
 
-    private val customizeButton: Button
+    private val customizeButton: TextButton
     private val customizationMenu: ModCustomizationMenu
 
     private val rankedBadge: Badge
@@ -97,7 +98,7 @@ object ModMenu : ExtendedScene() {
                     height = MatchContent
                     spacing = 10f
 
-                    attachChild(Button().apply {
+                    attachChild(TextButton().apply {
                         text = "Back"
                         leadingIcon = ExtendedSprite(ResourceManager.getInstance().getTexture("back-arrow"))
                         onActionUp = {
@@ -107,7 +108,7 @@ object ModMenu : ExtendedScene() {
                         onActionCancel = { ResourceManager.getInstance().getSound("click-short")?.play() }
                     })
 
-                    customizeButton = Button().apply {
+                    customizeButton = TextButton().apply {
                         text = "Customize"
                         isEnabled = false
                         leadingIcon = ExtendedSprite(ResourceManager.getInstance().getTexture("tune"))
@@ -123,10 +124,10 @@ object ModMenu : ExtendedScene() {
                     }
                     attachChild(customizeButton)
 
-                    attachChild(Button().apply {
+                    attachChild(TextButton().apply {
                         text = "Clear"
                         leadingIcon = ExtendedSprite(ResourceManager.getInstance().getTexture("backspace"))
-                        theme = ButtonTheme(
+                        theme = TextButtonTheme(
                             backgroundColor = 0xFF342121,
                             textColor = 0xFFFFBFBF,
                         )
@@ -137,7 +138,7 @@ object ModMenu : ExtendedScene() {
                         onActionCancel = { ResourceManager.getInstance().getSound("click-short")?.play() }
                     })
 
-                    +Button().apply {
+                    +TextButton().apply {
                         leadingIcon = ExtendedSprite(ResourceManager.getInstance().getTexture("settings"))
                         spacing = 0f
                         onActionUp = {
@@ -522,7 +523,7 @@ object ModMenu : ExtendedScene() {
         }
     }
 
-    private class ModButton(val mod: Mod): Button() {
+    private class ModButton(val mod: Mod): TextButton() {
 
         private val titleText = firstOf<ExtendedText>()!!
         private val descriptionText = ExtendedText()
@@ -556,7 +557,7 @@ object ModMenu : ExtendedScene() {
             }
 
             width = FillParent
-            theme = ButtonTheme(
+            theme = TextButtonTheme(
                 iconSize = 40f,
                 backgroundColor = 0xFF1E1E2E
             )
