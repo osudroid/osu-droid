@@ -430,17 +430,16 @@ object ModMenu : ExtendedScene() {
 
     private fun onModsChanged() = synchronized(modChangeQueue) {
 
-        rankedBadge.clearEntityModifiers()
-        rankedBadge.background!!.clearEntityModifiers()
+        val isRanked = enabledMods.isEmpty() || enabledMods.none { !it.value.isRanked }
 
-        if (enabledMods.isEmpty() || enabledMods.none { !it.value.isRanked }) {
-            rankedBadge.text = "Ranked"
-            rankedBadge.colorTo(0xFF161622, 0.1f)
-            rankedBadge.background!!.colorTo(0xFF83DF6B, 0.1f)
-        } else {
-            rankedBadge.text = "Unranked"
-            rankedBadge.colorTo(0xFFFFFFFF, 0.1f)
-            rankedBadge.background!!.colorTo(0xFF1E1E2E, 0.1f)
+        rankedBadge.apply {
+            text = if (isRanked) "Ranked" else "Unranked"
+
+            clearEntityModifiers()
+            colorTo(if (isRanked) 0xFF161622 else 0xFFFFFFFF, 0.1f)
+
+            background!!.clearEntityModifiers()
+            background!!.colorTo(if (isRanked) 0xFF83DF6B else 0xFF1E1E2E, 0.1f)
         }
 
         val beatmap = GlobalManager.getInstance().selectedBeatmap
