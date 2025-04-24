@@ -141,16 +141,6 @@ object ModMenu : ExtendedScene() {
                         }
                         onActionCancel = { ResourceManager.getInstance().getSound("click-short")?.play() }
                     })
-
-                    +TextButton().apply {
-                        leadingIcon = ExtendedSprite(ResourceManager.getInstance().getTexture("settings"))
-                        spacing = 0f
-                        onActionUp = {
-                            ResourceManager.getInstance().getSound("click-short-confirm")?.play()
-                            mainThread { SettingsFragment().show() }
-                        }
-                        onActionCancel = { ResourceManager.getInstance().getSound("click-short")?.play() }
-                    }
                 })
 
                 attachChild(LinearContainer().apply {
