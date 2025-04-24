@@ -39,6 +39,7 @@ object ModUtils {
             ModScoreV2(),
             ModSmallCircle(),
             ModSuddenDeath(),
+            ModSynesthesia(),
             ModTraceable(),
             ModWindDown(),
             ModWindUp()
