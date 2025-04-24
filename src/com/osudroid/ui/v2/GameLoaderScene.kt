@@ -68,19 +68,19 @@ class GameLoaderScene(private val gameScene: GameScene, beatmapInfo: BeatmapInfo
 
                 // Title
                 text {
-                    font = ResourceManager.getInstance().getFont("font")
+                    font = ResourceManager.getInstance().getFont("bigFont")
                     text = beatmapInfo.titleText
                 }
 
                 // Difficulty
                 text {
-                    font = ResourceManager.getInstance().getFont("smallFont")
+                    font = ResourceManager.getInstance().getFont("middleFont")
                     text = beatmapInfo.version
                 }
 
                 // Creator
                 text {
-                    font = ResourceManager.getInstance().getFont("smallFont")
+                    font = ResourceManager.getInstance().getFont("middleFont")
                     text = "by ${beatmapInfo.artistText}"
                     color = ColorARGB(0xFF8282A8)
                 }
