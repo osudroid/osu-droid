@@ -59,6 +59,29 @@ class GameLoaderScene(private val gameScene: GameScene, beatmapInfo: BeatmapInfo
             fadeIn(0.2f, Easing.OutCubic)
             scaleTo(1f, 0.2f, Easing.OutCubic)
 
+            if (beatmapInfo.epilepsyWarning) {
+                ResourceManager.getInstance().loadHighQualityAsset("warning", "warning.png")
+
+                linearContainer {
+                    x = 60f
+                    y = 60f
+                    color = ColorARGB(0xFFFFA726)
+                    spacing = 6f
+
+                    sprite {
+                        width = 24f
+                        height = 24f
+                        y = 2f
+                        textureRegion = ResourceManager.getInstance().getTexture("warning")
+                    }
+
+                    text {
+                        font = ResourceManager.getInstance().getFont("smallFont")
+                        text = "This beatmap contains scenes with rapidly flashing colors.\nPlease take caution if you are affected by epilepsy."
+                    }
+                }
+            }
+
             linearContainer {
                 orientation = Orientation.Vertical
                 spacing = 10f
