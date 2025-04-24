@@ -63,7 +63,7 @@ open class Slider(initialValue: Float = 0f) : Control<Float>(initialValue), IWit
     /**
      * The step size of the slider. If set to 0, the slider will allow any value between min and max.
      */
-    var step = 0f
+    var step = 0.0f
         set(step) {
             if (step < 0f) {
                 throw IllegalArgumentException("step must be greater than or equal to 0")
@@ -169,13 +169,33 @@ open class Slider(initialValue: Float = 0f) : Control<Float>(initialValue), IWit
 
     private fun updateProgress() {
 
-        val absoluteProgress = (value - min) / (max - min)
-        thumb.x = (width * absoluteProgress).coerceAtMost(width - thumb.width / 2f).coerceAtLeast(thumb.width / 2f)
+        val progress = (value - min) / (max - min)
+        val progressWidth = width * progress
 
-        val origin = (-min) / (max - min)
-        progressBar.anchor = Vec2(origin, 0.5f)
-        progressBar.origin = Vec2(if (value >= origin) 0f else 1f, 0.5f)
-        progressBar.width = abs((if (value >= origin) value / (max - min) else value / (min - max))) * width
+        thumb.x = progressWidth.coerceAtMost(width - thumb.width / 2f).coerceAtLeast(thumb.width / 2f)
+
+        // The anchor will determine whether the progress bar should start.
+        // The zero will be in the corresponding position of the slider relative to the min and max values.
+        // If the min value is 0 or positive then the anchor will be 0 because there's no offset to apply
+        // due to non-negative values.
+        val anchor = if (min >= 0f) 0f else -min / (max - min)
+        val origin = if (value >= 0f) 0f else 1f
+
+        if (progressBar.anchor.x != anchor) {
+            progressBar.anchor = Vec2(anchor, 0.5f)
+        }
+
+        if (progressBar.origin.x != origin) {
+            progressBar.origin = Vec2(origin, 0.5f)
+        }
+
+        val leftSideWidth = if (anchor > 0f) width * anchor else 0f
+        val leftSideProgressWidth = (leftSideWidth - progressWidth).coerceAtMost(leftSideWidth).coerceAtLeast(0f)
+
+        val rightSideWidth = width - leftSideWidth
+        val rightSideProgressWidth = (progressWidth - leftSideWidth).coerceAtMost(rightSideWidth).coerceAtLeast(0f)
+
+        progressBar.width = if (value >= 0f) rightSideProgressWidth else leftSideProgressWidth
     }
 
 
