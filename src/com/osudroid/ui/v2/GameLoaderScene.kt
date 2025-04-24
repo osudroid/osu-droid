@@ -6,7 +6,6 @@ import com.osudroid.multiplayer.*
 import com.reco1l.andengine.*
 import com.reco1l.andengine.ExtendedEntity.Companion.FillParent
 import com.reco1l.andengine.container.*
-import com.reco1l.andengine.info.*
 import com.reco1l.andengine.modifier.*
 import com.reco1l.andengine.shape.*
 import com.reco1l.andengine.sprite.*
@@ -20,7 +19,7 @@ import ru.nsu.ccfit.zuev.osu.*
 import ru.nsu.ccfit.zuev.osu.game.GameScene
 import kotlin.math.*
 
-class GameLoaderScene(private val gameScene: GameScene, beatmap: BeatmapInfo, mods: ModHashMap, private val isRestart: Boolean) : ExtendedScene() {
+class GameLoaderScene(private val gameScene: GameScene, beatmapInfo: BeatmapInfo, mods: ModHashMap, private val isRestart: Boolean) : ExtendedScene() {
 
     private var lastTimeTouched = System.currentTimeMillis()
     private var isStarting = false
@@ -30,6 +29,7 @@ class GameLoaderScene(private val gameScene: GameScene, beatmap: BeatmapInfo, mo
 
 
     init {
+
 
         // Background
         sprite {
@@ -69,19 +69,19 @@ class GameLoaderScene(private val gameScene: GameScene, beatmap: BeatmapInfo, mo
                 // Title
                 text {
                     font = ResourceManager.getInstance().getFont("font")
-                    text = beatmap.titleText
+                    text = beatmapInfo.titleText
                 }
 
                 // Difficulty
                 text {
                     font = ResourceManager.getInstance().getFont("smallFont")
-                    text = beatmap.version
+                    text = beatmapInfo.version
                 }
 
                 // Creator
                 text {
                     font = ResourceManager.getInstance().getFont("smallFont")
-                    text = "by ${beatmap.artistText}"
+                    text = "by ${beatmapInfo.artistText}"
                     color = ColorARGB(0xFF8282A8)
                 }
 
@@ -93,7 +93,14 @@ class GameLoaderScene(private val gameScene: GameScene, beatmap: BeatmapInfo, mo
                 }
             }
 
-            +LoadingCircle()
+            +CircularProgressBar().apply {
+                width = 32f
+                height = 32f
+                anchor = Anchor.BottomLeft
+                origin = Anchor.BottomLeft
+                x = 60f
+                y = -60f
+            }
 
             if (!isRestart) {
                 scrollableContainer {
@@ -149,53 +156,6 @@ class GameLoaderScene(private val gameScene: GameScene, beatmap: BeatmapInfo, mo
         }
 
         super.onManagedUpdate(deltaTimeSec)
-    }
-
-
-    private class LoadingCircle : Container() {
-
-        private val rotatingCircle: Circle
-
-        init {
-            width = 32f
-            height = 32f
-            anchor = Anchor.BottomLeft
-            origin = Anchor.BottomLeft
-            x = 60f
-            y = -60f
-
-            rotatingCircle = circle {
-                width = FillParent
-                height = FillParent
-                rotationCenter = Anchor.Center
-                depthInfo = DepthInfo.Default
-                setPortion(0.25f)
-            }
-
-            circle {
-                width = FillParent
-                height = FillParent
-                alpha = 0.3f
-                depthInfo = DepthInfo.Default
-            }
-
-            circle {
-                anchor = Anchor.Center
-                origin = Anchor.Center
-                relativeSizeAxes = Axes.Both
-                width = 0.9f
-                height = 0.9f
-                color = ColorARGB.Transparent
-                clearInfo = ClearInfo.ClearDepthBuffer
-                depthInfo = DepthInfo.Less
-            }
-
-        }
-
-        override fun onManagedUpdate(deltaTimeSec: Float) {
-            rotatingCircle.rotation += 360f * deltaTimeSec
-            super.onManagedUpdate(deltaTimeSec)
-        }
     }
 
 
