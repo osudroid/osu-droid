@@ -82,11 +82,10 @@ class StandardDifficultyHitObjectTest {
             obj = StandardDifficultyHitObject(
                 hitObjects[1],
                 hitObjects[0],
-                null,
                 1.0,
                 arrayOf(),
                 0
-            )
+            ).also { it.computeProperties(1.0, hitObjects) }
         }
     }
 }

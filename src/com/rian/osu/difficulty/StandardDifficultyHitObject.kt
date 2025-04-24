@@ -19,11 +19,6 @@ class StandardDifficultyHitObject(
     lastObj: HitObject,
 
     /**
-     * The [HitObject] that occurs before [lastObj].
-     */
-    lastLastObj: HitObject?,
-
-    /**
      * The clock rate being calculated.
      */
     clockRate: Double,
@@ -39,7 +34,7 @@ class StandardDifficultyHitObject(
      * This is one less than the actual index of the hit object in the beatmap.
      */
     index: Int
-) : DifficultyHitObject(obj, lastObj, lastLastObj, clockRate, difficultyHitObjects, index) {
+) : DifficultyHitObject(obj, lastObj, clockRate, difficultyHitObjects, index) {
     override val mode = GameMode.Standard
 
     override val scalingFactor: Float

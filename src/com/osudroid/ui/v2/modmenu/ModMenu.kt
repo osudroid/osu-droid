@@ -273,12 +273,12 @@ object ModMenu : ExtendedScene() {
             ensureActive()
 
             updateThread {
-                arBadge.updateDifficultyBadge(selectedBeatmap.approachRate, difficulty.ar)
-                odBadge.updateDifficultyBadge(selectedBeatmap.overallDifficulty, difficulty.od)
-                csBadge.updateDifficultyBadge(selectedBeatmap.circleSize, difficulty.difficultyCS)
-                hpBadge.updateDifficultyBadge(selectedBeatmap.hpDrainRate, difficulty.hp)
+                arBadge.updateStatisticBadge(selectedBeatmap.approachRate, difficulty.ar)
+                odBadge.updateStatisticBadge(selectedBeatmap.overallDifficulty, difficulty.od)
+                csBadge.updateStatisticBadge(selectedBeatmap.circleSize, difficulty.difficultyCS)
+                hpBadge.updateStatisticBadge(selectedBeatmap.hpDrainRate, difficulty.hp)
 
-                bpmBadge.updateDifficultyBadge(
+                bpmBadge.updateStatisticBadge(
                     selectedBeatmap.mostCommonBPM.roundToInt(),
                     (selectedBeatmap.mostCommonBPM * rate).roundToInt()
                 )
@@ -423,11 +423,16 @@ object ModMenu : ExtendedScene() {
         val beatmap = GlobalManager.getInstance().selectedBeatmap
         val difficulty = beatmap?.getBeatmapDifficulty()
 
-        scoreMultiplierBadge.valueText.text = if (difficulty != null) {
-            "%.2fx".format(enabledMods.values.fold(1f) { acc, mod -> acc * mod.calculateScoreMultiplier(difficulty) })
-        } else {
-            "1.00x"
-        }
+        scoreMultiplierBadge.updateStatisticBadge(
+            "1.00x",
+            if (difficulty != null) {
+                "%.2fx".format(enabledMods.values.fold(1f) { acc, mod ->
+                    acc * mod.calculateScoreMultiplier(difficulty)
+                })
+            } else {
+                "1.00x"
+            }
+        )
 
         customizeButton.isEnabled = !customizationMenu.isEmpty()
 
@@ -599,29 +604,30 @@ object ModMenu : ExtendedScene() {
         }
     }
 
-    private fun <T : Comparable<T>> LabeledBadge.updateDifficultyBadge(initialValue: T, finalValue: T) = valueText.run {
-        val newText =
-            if (finalValue is Float || finalValue is Double) "%.2f".format(finalValue) else finalValue.toString()
+    private fun <T : Comparable<T>> LabeledBadge.updateStatisticBadge(initialValue: T, finalValue: T) =
+        valueText.run {
+            val newText =
+                if (finalValue is Float || finalValue is Double) "%.2f".format(finalValue) else finalValue.toString()
 
-        if (text == newText) {
-            return@run
+            if (text == newText) {
+                return@run
+            }
+
+            text = newText
+
+            clearEntityModifiers()
+
+            colorTo(
+                ColorARGB(when {
+                    initialValue < finalValue -> 0xFFF78383
+                    initialValue > finalValue -> 0xFF40CF5D
+                    else -> 0xFFFFFFFF
+                }),
+                0.1f
+            )
+
+            Unit
         }
-
-        text = newText
-
-        clearEntityModifiers()
-
-        colorTo(
-            ColorARGB(when {
-                initialValue < finalValue -> 0xFFF78383
-                initialValue > finalValue -> 0xFF40CF5D
-                else -> 0xFFFFFFFF
-            }),
-            0.1f
-        )
-
-        Unit
-    }
 
     //endregion
 

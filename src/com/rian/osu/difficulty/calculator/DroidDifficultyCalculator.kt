@@ -134,7 +134,6 @@ class DroidDifficultyCalculator : DifficultyCalculator<DroidPlayableBeatmap, Dro
             arr[i] = DroidDifficultyHitObject(
                 objects[i],
                 if (i > 0) objects[i - 1] else null,
-                if (i > 1) objects[i - 2] else null,
                 clockRate,
                 arr as Array<DroidDifficultyHitObject>,
                 i - 1

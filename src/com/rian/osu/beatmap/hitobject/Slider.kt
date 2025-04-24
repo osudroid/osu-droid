@@ -165,24 +165,6 @@ class Slider(
         private set
 
     /**
-     * The position of the cursor at the point of completion of this [Slider] if it was hit
-     * with as few movements as possible. This is set and used by difficulty calculation.
-     */
-    var lazyEndPosition: Vector2? = null
-
-    /**
-     * The distance travelled by the cursor upon completion of this [Slider] if it was hit
-     * with as few movements as possible. This is set and used by difficulty calculation.
-     */
-    var lazyTravelDistance = 0f
-
-    /**
-     * The time taken by the cursor upon completion of this [Slider] if it was hit with
-     * as few movements as possible. This is set and used by difficulty calculation.
-     */
-    var lazyTravelTime = 0.0
-
-    /**
      * The duration of one span of this [Slider] in milliseconds.
      */
     val spanDuration
