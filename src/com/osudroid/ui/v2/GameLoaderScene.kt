@@ -6,9 +6,11 @@ import com.osudroid.multiplayer.*
 import com.reco1l.andengine.*
 import com.reco1l.andengine.ExtendedEntity.Companion.FillParent
 import com.reco1l.andengine.container.*
+import com.reco1l.andengine.info.*
 import com.reco1l.andengine.modifier.*
 import com.reco1l.andengine.shape.*
 import com.reco1l.andengine.sprite.*
+import com.reco1l.andengine.ui.*
 import com.reco1l.andengine.ui.form.*
 import com.reco1l.framework.*
 import com.reco1l.framework.math.*
@@ -115,7 +117,7 @@ class GameLoaderScene(private val gameScene: GameScene, beatmap: BeatmapInfo, mo
             if (gameScene.isReadyToStart) {
 
                 // Multiplayer will skip the minimum timeout if it's ready to start.
-                if (System.currentTimeMillis() - lastTimeTouched > MINIMUM_TIMEOUT || Multiplayer.isMultiplayer || isRestart) {
+                if (0L - lastTimeTouched > MINIMUM_TIMEOUT || Multiplayer.isMultiplayer || isRestart) {
                     isStarting = true
 
                     // This is used instead of getBackgroundBrightness to directly obtain the
@@ -162,17 +164,30 @@ class GameLoaderScene(private val gameScene: GameScene, beatmap: BeatmapInfo, mo
             x = 60f
             y = -60f
 
-            circle {
-                width = FillParent
-                height = FillParent
-                alpha = 0.3f
-            }
-
             rotatingCircle = circle {
                 width = FillParent
                 height = FillParent
                 rotationCenter = Anchor.Center
-                setPortion(0.1f)
+                depthInfo = DepthInfo.Default
+                setPortion(0.25f)
+            }
+
+            circle {
+                width = FillParent
+                height = FillParent
+                alpha = 0.3f
+                depthInfo = DepthInfo.Default
+            }
+
+            circle {
+                anchor = Anchor.Center
+                origin = Anchor.Center
+                relativeSizeAxes = Axes.Both
+                width = 0.9f
+                height = 0.9f
+                color = ColorARGB.Transparent
+                clearInfo = ClearInfo.ClearDepthBuffer
+                depthInfo = DepthInfo.Less
             }
 
         }
@@ -213,18 +228,24 @@ class GameLoaderScene(private val gameScene: GameScene, beatmap: BeatmapInfo, mo
                         anchor = Anchor.TopCenter
                         origin = Anchor.TopCenter
 
-                        fun StepButton(step: Int) = button {
-                            width = 50f
-                            text = (if (step > 0) "+" else "") + step.toString()
+                        fun StepButton(step: Int) = textButton {
+                            text = abs(step).toString()
+                            height = 42f
+                            spacing = 2f
+                            padding = Vec4(12f, 0f, 24f, 0f)
+
+                            leadingIcon = ExtendedSprite(ResourceManager.getInstance().getTexture(if (step < 0) "minus" else "plus"))
+                            leadingIcon!!.height = 20f
+
                             onActionUp = {
-                                offsetSlider.value += step.toFloat()
+                                offsetSlider.value += step
                             }
                         }
 
-                        StepButton(-10)
+                        StepButton(-5)
                         StepButton(-1)
                         StepButton(1)
-                        StepButton(10)
+                        StepButton(5)
                     }
                 }
             }
@@ -290,8 +311,13 @@ class GameLoaderScene(private val gameScene: GameScene, beatmap: BeatmapInfo, mo
 
 
     companion object {
-        const val FADE_TIMEOUT = 2000L
-        const val MINIMUM_TIMEOUT = 2000L
+        private const val FADE_TIMEOUT = 2000L
+        private const val MINIMUM_TIMEOUT = 2000L
+
+        init {
+            ResourceManager.getInstance().loadHighQualityAsset("plus", "plus.png")
+            ResourceManager.getInstance().loadHighQualityAsset("minus", "minus.png")
+        }
     }
 
 }
