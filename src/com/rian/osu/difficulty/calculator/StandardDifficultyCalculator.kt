@@ -118,7 +118,6 @@ class StandardDifficultyCalculator : DifficultyCalculator<StandardPlayableBeatma
             arr[i - 1] = StandardDifficultyHitObject(
                 objects[i],
                 objects[i - 1],
-                if (i > 1) objects[i - 2] else null,
                 clockRate,
                 arr as Array<StandardDifficultyHitObject>,
                 i - 1

@@ -24,11 +24,6 @@ class DroidDifficultyHitObject(
     lastObj: HitObject?,
 
     /**
-     * The [HitObject] that occurs before [lastObj].
-     */
-    lastLastObj: HitObject?,
-
-    /**
      * The clock rate being calculated.
      */
     clockRate: Double,
@@ -44,7 +39,7 @@ class DroidDifficultyHitObject(
      * This is one less than the actual index of the hit object in the beatmap.
      */
     index: Int
-) : DifficultyHitObject(obj, lastObj, lastLastObj, clockRate, difficultyHitObjects, index) {
+) : DifficultyHitObject(obj, lastObj, clockRate, difficultyHitObjects, index) {
     override val mode = GameMode.Droid
     override val maximumSliderRadius = NORMALIZED_RADIUS * 2
 
@@ -137,10 +132,10 @@ class DroidDifficultyHitObject(
             val position = obj.difficultyStackedPosition
             var distance = previous.obj.difficultyStackedEndPosition.getDistance(position)
 
-            if (previous.obj is Slider && previous.obj.lazyEndPosition != null) {
+            if (previous.lazyEndPosition != null) {
                 distance = min(
                     distance,
-                    previous.obj.lazyEndPosition!!.getDistance(position)
+                    previous.lazyEndPosition!!.getDistance(position)
                 )
             }
 

@@ -106,7 +106,6 @@ class DroidDifficultyHitObjectTest {
                 objects[i] = DroidDifficultyHitObject(
                     hitObjects[i],
                     hitObjects.getOrNull(i - 1),
-                    hitObjects.getOrNull(i - 2),
                     1.0,
                     objects,
                     i - 1

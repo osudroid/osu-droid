@@ -89,7 +89,7 @@ object DroidVisualEvaluator {
             val scalingFactor = 50 / current.obj.difficultyRadius
 
             // Invert the scaling factor to determine the true travel distance independent of circle size.
-            val pixelTravelDistance = current.obj.lazyTravelDistance / scalingFactor
+            val pixelTravelDistance = current.lazyTravelDistance / scalingFactor
             val currentVelocity = pixelTravelDistance / current.travelTime
             val spanTravelDistance = pixelTravelDistance / current.obj.spanCount
 
@@ -116,7 +116,7 @@ object DroidVisualEvaluator {
                 }
 
                 // Invert the scaling factor to determine the true travel distance independent of circle size.
-                val lastPixelTravelDistance = last.obj.lazyTravelDistance / scalingFactor
+                val lastPixelTravelDistance = last.lazyTravelDistance / scalingFactor
                 val lastVelocity = lastPixelTravelDistance / last.travelTime
                 val lastSpanTravelDistance = lastPixelTravelDistance / last.obj.spanCount
 
