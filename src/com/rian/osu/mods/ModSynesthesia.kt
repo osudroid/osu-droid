@@ -1,7 +1,5 @@
 package com.rian.osu.mods
 
-import com.osudroid.ui.OsuColors
-import com.osudroid.ui.toRGBColor
 import com.rian.osu.beatmap.sections.BeatmapDifficulty
 import ru.nsu.ccfit.zuev.osu.RGBColor
 
@@ -32,13 +30,13 @@ class ModSynesthesia : Mod() {
 
         private val beatDivisorColors = mutableMapOf<Int, RGBColor>(
             1 to RGBColor(1f, 1f, 1f),
-            2 to OsuColors.red.toRGBColor(),
-            3 to OsuColors.purple.toRGBColor(),
-            4 to OsuColors.blue.toRGBColor(),
-            6 to OsuColors.yellowDark.toRGBColor(),
-            8 to OsuColors.yellow.toRGBColor(),
-            12 to OsuColors.yellowDarker.toRGBColor(),
-            16 to OsuColors.purpleDark.toRGBColor(),
+            2 to RGBColor.hex2Rgb("#ED1121"),
+            3 to RGBColor.hex2Rgb("#8866EE"),
+            4 to RGBColor.hex2Rgb("#66CCFF"),
+            6 to RGBColor.hex2Rgb("#EEAA00"),
+            8 to RGBColor.hex2Rgb("#FFCC22"),
+            12 to RGBColor.hex2Rgb("#CC6600"),
+            16 to RGBColor.hex2Rgb("#441188")
         )
 
         private val defaultDivisorColor = RGBColor.hex2Rgb("#ff0000")
