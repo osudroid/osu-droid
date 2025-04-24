@@ -16,12 +16,15 @@ import com.osudroid.ui.v2.game.CirclePiece;
 import com.osudroid.ui.v2.game.NumberedCirclePiece;
 import com.osudroid.ui.v2.game.SliderTickContainer;
 import com.rian.osu.beatmap.hitobject.BankHitSampleInfo;
+import com.rian.osu.beatmap.hitobject.HitObject;
 import com.rian.osu.beatmap.hitobject.Slider;
 import com.rian.osu.beatmap.hitobject.sliderobject.SliderTick;
+import com.rian.osu.beatmap.sections.BeatmapControlPoints;
 import com.rian.osu.gameplay.GameplayHitSampleInfo;
 import com.rian.osu.gameplay.GameplaySequenceHitSampleInfo;
 import com.rian.osu.math.Interpolation;
 import com.rian.osu.mods.ModHidden;
+import com.rian.osu.mods.ModSynesthesia;
 
 import org.anddev.andengine.entity.scene.Scene;
 import org.anddev.andengine.util.MathUtils;
@@ -40,6 +43,7 @@ public class GameplaySlider extends GameObject {
     private final ExtendedSprite approachCircle;
     private final ExtendedSprite startArrow, endArrow;
     private Slider beatmapSlider;
+    private BeatmapControlPoints controlPoints;
     private Scene scene;
     private GameObjectListener listener;
     private SliderPath path;
@@ -158,12 +162,13 @@ public class GameplaySlider extends GameObject {
         sliderWhistleSample = new GameplaySequenceHitSampleInfo();
     }
 
-    public void init(final GameObjectListener listener, final Scene scene,
-                     final Slider beatmapSlider, final float secPassed, final RGBColor comboColor,
+    public void init(final GameObjectListener listener, final Scene scene, final Slider beatmapSlider,
+                     final BeatmapControlPoints controlPoints, final float secPassed, final RGBColor comboColor,
                      final RGBColor borderColor, final SliderPath sliderPath, final LinePath renderPath) {
         this.listener = listener;
         this.scene = scene;
         this.beatmapSlider = beatmapSlider;
+        this.controlPoints = controlPoints;
 
         var stackedPosition = beatmapSlider.getGameplayStackedPosition();
         position.set(stackedPosition.x, stackedPosition.y);
@@ -226,8 +231,12 @@ public class GameplaySlider extends GameObject {
         // End circle
         pathEndPosition.set(getAbsolutePathPosition(path.anchorCount - 1));
 
+        var initialTailColor = GameHelper.isSynesthesia() ?
+            getSynesthesiaComboColor(beatmapSlider.startTime + beatmapSlider.getSpanDuration()) :
+            comboColor;
+
         tailCirclePiece.setScale(scale);
-        tailCirclePiece.setCircleColor(comboColor.r(), comboColor.g(), comboColor.b());
+        tailCirclePiece.setCircleColor(initialTailColor.r(), initialTailColor.g(), initialTailColor.b());
         tailCirclePiece.setAlpha(0);
         tailCirclePiece.setVisible(!GameHelper.isTraceable() || (Config.isShowFirstApproachCircle() && beatmapSlider.isFirstNote()));
 
@@ -610,6 +619,11 @@ public class GameplaySlider extends GameObject {
                 if (remainingSpans <= 2) {
                     endArrow.setAlpha(0);
                     tailCirclePiece.setAlpha(0);
+                } else if (GameHelper.isSynesthesia()) {
+                    var newColor =
+                        getSynesthesiaComboColor(beatmapSlider.getNestedHitObjects().get(currentNestedObjectIndex));
+
+                    tailCirclePiece.setColor(newColor.r(), newColor.g(), newColor.b());
                 }
 
                 if (remainingSpans > 1) {
@@ -618,6 +632,11 @@ public class GameplaySlider extends GameObject {
             } else if (remainingSpans <= 2) {
                 startArrow.setAlpha(0);
                 headCirclePiece.setAlpha(0);
+            } else if (GameHelper.isSynesthesia()) {
+                var newColor =
+                    getSynesthesiaComboColor(beatmapSlider.getNestedHitObjects().get(currentNestedObjectIndex));
+
+                headCirclePiece.setColor(newColor.r(), newColor.g(), newColor.b());
             }
 
             ((GameScene) listener).onSliderReverse(
@@ -1269,6 +1288,14 @@ public class GameplaySlider extends GameObject {
 
     private boolean isTracking() {
         return isInRadius && replayObjectData == null || replayObjectData != null && replayObjectData.tickSet.get(replayTickIndex);
+    }
+
+    private RGBColor getSynesthesiaComboColor(HitObject hitObject) {
+        return getSynesthesiaComboColor(hitObject.startTime);
+    }
+
+    private RGBColor getSynesthesiaComboColor(double time) {
+        return ModSynesthesia.getColorFor(controlPoints.getClosestBeatDivisor(time));
     }
 
     @Override

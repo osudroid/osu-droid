@@ -27,6 +27,7 @@ public class GameHelper {
     private static boolean autopilotMod = false;
     private static boolean suddenDeath = false;
     private static boolean perfect = false;
+    private static boolean synesthesia = false;
     private static boolean scoreV2;
     private static boolean isEasy;
     private static boolean isKiai = false;
@@ -224,6 +225,14 @@ public class GameHelper {
 
     public static void setPerfect(final boolean perfect) {
         GameHelper.perfect = perfect;
+    }
+
+    public static boolean isSynesthesia() {
+        return synesthesia;
+    }
+
+    public static void setSynesthesia(boolean synesthesia) {
+        GameHelper.synesthesia = synesthesia;
     }
 
     public static boolean isScoreV2() {

@@ -767,6 +767,7 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
         GameHelper.setAuto(lastMods.contains(ModAutoplay.class));
         GameHelper.setSuddenDeath(lastMods.contains(ModSuddenDeath.class));
         GameHelper.setPerfect(lastMods.contains(ModPerfect.class));
+        GameHelper.setSynesthesia(lastMods.contains(ModSynesthesia.class));
         GameHelper.setScoreV2(lastMods.contains(ModScoreV2.class));
         GameHelper.setEasy(lastMods.contains(ModEasy.class));
 
@@ -992,8 +993,14 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
         }
     }
 
-    public RGBColor getComboColor(int num) {
-        return comboColors.get(num % comboColors.size());
+    public RGBColor getComboColor(HitObject hitObject) {
+        if (GameHelper.isSynesthesia()) {
+            return ModSynesthesia.getColorFor(
+                playableBeatmap.getControlPoints().getClosestBeatDivisor(hitObject.startTime)
+            );
+        }
+
+        return comboColors.get(hitObject.getComboIndexWithOffsets() % comboColors.size());
     }
 
     private void update(final float dt) {
@@ -1322,7 +1329,7 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
 
             hud.onHitObjectLifetimeStart(obj);
 
-            final RGBColor comboColor = getComboColor(obj.getComboIndexWithOffsets());
+            final RGBColor comboColor = getComboColor(obj);
 
             if (obj instanceof HitCircle parsedCircle) {
                 final var gameplayCircle = GameObjectPool.getInstance().getCircle();
@@ -1359,7 +1366,7 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
             } else if (obj instanceof Slider parsedSlider) {
                 final var gameplaySlider = GameObjectPool.getInstance().getSlider();
 
-                gameplaySlider.init(this, mgScene, parsedSlider, elapsedTime,
+                gameplaySlider.init(this, mgScene, parsedSlider, playableBeatmap.getControlPoints(), elapsedTime,
                     comboColor, sliderBorderColor, getSliderPath(sliderIndex), getSliderRenderPath(sliderIndex));
 
                 ++sliderIndex;
