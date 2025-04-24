@@ -30,5 +30,7 @@ val MIGRATION_1_2 = object : Migration(1, 2) {
                 db.execSQL("UPDATE ScoreInfo SET mods = ? WHERE id = ?", arrayOf<Any>(newMods.serializeMods().toString(), id))
             }
         }
+
+        db.execSQL("UPDATE BeatmapInfo SET epilepsyWarning = 0")
     }
 }
