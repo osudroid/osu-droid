@@ -106,8 +106,8 @@ class ModCustomizationMenu : Modal(
                 +ModIcon(mod).apply {
                     anchor = Anchor.CenterLeft
                     origin = Anchor.CenterLeft
-                    width = 36f
-                    height = 36f
+                    width = 34f
+                    height = 34f
                 }
 
                 +ExtendedText().apply {

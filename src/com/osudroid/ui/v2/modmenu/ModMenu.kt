@@ -563,7 +563,7 @@ object ModMenu : ExtendedScene() {
 
             width = FillParent
             theme = TextButtonTheme(
-                iconSize = 40f,
+                iconSize = 38f,
                 backgroundColor = 0xFF1E1E2E
             )
             text = mod.name
