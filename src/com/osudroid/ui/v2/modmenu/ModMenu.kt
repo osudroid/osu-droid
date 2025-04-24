@@ -6,7 +6,6 @@ import com.reco1l.andengine.ExtendedEntity.Companion.FillParent
 import com.reco1l.andengine.container.*
 import com.reco1l.andengine.shape.*
 import com.reco1l.andengine.sprite.*
-import com.reco1l.andengine.text.*
 import com.reco1l.andengine.ui.*
 import com.reco1l.framework.*
 import com.reco1l.framework.math.*
@@ -35,6 +34,7 @@ import ru.nsu.ccfit.zuev.osu.*
 import ru.nsu.ccfit.zuev.osu.DifficultyAlgorithm.*
 import ru.nsu.ccfit.zuev.osu.game.*
 import ru.nsu.ccfit.zuev.osu.helper.*
+import java.util.LinkedList
 import java.util.concurrent.CancellationException
 import kotlin.math.*
 
@@ -46,9 +46,13 @@ object ModMenu : ExtendedScene() {
      */
     val enabledMods = ModHashMap()
 
-    private var parsedBeatmap: Beatmap? = null
+    /**
+     * List of all mod toggles.
+     */
+    val modToggles = mutableListOf<ModMenuToggle>()
 
-    private val modButtons = mutableListOf<ModButton>()
+
+    private val modChangeQueue = LinkedList<Mod>()
 
     private val customizeButton: TextButton
     private val customizationMenu: ModCustomizationMenu
@@ -62,7 +66,7 @@ object ModMenu : ExtendedScene() {
     private val starRatingBadge: LabeledBadge
     private val scoreMultiplierBadge: LabeledBadge
 
-
+    private var parsedBeatmap: Beatmap? = null
     private var calculationJob: Job? = null
 
 
@@ -205,7 +209,7 @@ object ModMenu : ExtendedScene() {
                         val sectionMods = mods.filter { it !is IMigratableMod && it.type == type }
 
                         if (sectionMods.isNotEmpty()) {
-                            +Section(sectionName, sectionMods)
+                            +ModMenuSection(sectionName, sectionMods)
                         }
                     }
                 })
@@ -257,7 +261,7 @@ object ModMenu : ExtendedScene() {
                 return@scope
             }
 
-            modButtons.map { it.mod }.filterIsInstance<IModRequiresOriginalBeatmap>().fastForEach { mod ->
+            modToggles.map { it.mod }.filterIsInstance<IModRequiresOriginalBeatmap>().fastForEach { mod ->
                 ensureActive()
                 mod.applyFromBeatmap(beatmap)
             }
@@ -397,7 +401,7 @@ object ModMenu : ExtendedScene() {
     }
 
     fun updateModButtonEnabledState() {
-        modButtons.fastForEach { it.updateEnabledState() }
+        modToggles.fastForEach { it.updateEnabledState() }
     }
 
     fun clear() {
@@ -405,7 +409,26 @@ object ModMenu : ExtendedScene() {
         enabledMods.toList().fastForEach { removeMod(it.second) }
     }
 
-    fun onModsChanged(lastChangedMod: Mod) {
+    fun queueModChange(mod: Mod) = synchronized(modChangeQueue) {
+        // Adding to first place in case it is already queued.
+        if (modChangeQueue.isEmpty() || modChangeQueue.first != mod) {
+            if (modChangeQueue.isNotEmpty()) {
+                modChangeQueue.remove(mod)
+            }
+            modChangeQueue.addFirst(mod)
+        }
+    }
+
+    override fun onManagedUpdate(deltaTimeSec: Float) {
+
+        if (modChangeQueue.isNotEmpty()) {
+            onModsChanged()
+        }
+
+        super.onManagedUpdate(deltaTimeSec)
+    }
+
+    private fun onModsChanged() = synchronized(modChangeQueue) {
 
         rankedBadge.clearEntityModifiers()
         rankedBadge.background!!.clearEntityModifiers()
@@ -436,21 +459,22 @@ object ModMenu : ExtendedScene() {
 
         customizeButton.isEnabled = !customizationMenu.isEmpty()
 
-        if (lastChangedMod is IModApplicableToTrackRate) {
+        if (modChangeQueue.any { it is IModApplicableToTrackRate }) {
             GlobalManager.getInstance().songMenu.updateMusicEffects()
         }
+        modChangeQueue.clear()
 
         parseBeatmap()
     }
 
-    private fun addMod(mod: Mod) {
+    fun addMod(mod: Mod) {
 
         if (mod in enabledMods) {
             return
         }
         enabledMods.put(mod)
 
-        modButtons.fastForEach { button ->
+        modToggles.fastForEach { button ->
 
             val wasSelected = button.isSelected
             button.isSelected = button.mod in enabledMods
@@ -462,172 +486,45 @@ object ModMenu : ExtendedScene() {
         }
 
         customizationMenu.onModAdded(mod)
-        onModsChanged(mod)
+        queueModChange(mod)
     }
 
-    private fun removeMod(mod: Mod) {
+    fun removeMod(mod: Mod) {
 
         if (mod !in enabledMods) {
             return
         }
         enabledMods.remove(mod)
 
-        modButtons.find { it.mod::class == mod::class }?.apply {
+        modToggles.find { it.mod::class == mod::class }?.apply {
             isSelected = false
             mod.settings.fastForEach { it.value = it.defaultValue }
         }
 
         customizationMenu.onModRemoved(mod)
-        onModsChanged(mod)
+        queueModChange(mod)
     }
 
     //endregion
 
     //region Components
 
-    private class Section(name: String, mods: List<Mod>) : LinearContainer() {
+    private fun <T : Comparable<T>> LabeledBadge.updateStatisticBadge(initialValue: T, finalValue: T) {
 
-        init {
-            orientation = Orientation.Vertical
-            width = 340f
-            height = FillParent
+        val newText = if (finalValue is Float || finalValue is Double) "%.2f".format(finalValue) else finalValue.toString()
 
-            background = Box().apply {
-                color = ColorARGB(0xFF13131E)
-                cornerRadius = 16f
-            }
-
-            +ExtendedText().apply {
-                width = FillParent
-                text = name
-                alignment = Anchor.Center
-                font = ResourceManager.getInstance().getFont("smallFont")
-                padding = Vec4(12f)
-                color = ColorARGB(0xFF8282A8)
-            }
-
-            +ScrollableContainer().apply {
-                scrollAxes = Axes.Y
-                width = FillParent
-                height = FillParent
-                clipChildren = true
-
-                +LinearContainer().apply {
-                    width = FillParent
-                    orientation = Orientation.Vertical
-                    padding = Vec4(12f, 0f, 12f, 12f)
-                    spacing = 16f
-
-                    mods.fastForEach { mod ->
-                        val button = ModButton(mod)
-                        modButtons.add(button)
-                        attachChild(button)
-                    }
-                }
-            }
+        if (valueText.text == newText) {
+            return
         }
+        valueText.text = newText
+
+        valueText.clearEntityModifiers()
+        valueText.colorTo(ColorARGB(when {
+            initialValue < finalValue -> 0xFFF78383
+            initialValue > finalValue -> 0xFF40CF5D
+            else -> 0xFFFFFFFF
+        }), 0.1f)
     }
-
-    private class ModButton(val mod: Mod): TextButton() {
-
-        private val titleText = firstOf<ExtendedText>()!!
-        private val descriptionText = ExtendedText()
-
-
-        init {
-            titleText.detachSelf()
-
-            +LinearContainer().apply {
-                width = FillParent
-                padding = Vec4(0f, 6f)
-                anchor = Anchor.CenterLeft
-                origin = Anchor.CenterLeft
-                orientation = Orientation.Vertical
-
-                +titleText.apply {
-                    height = MatchContent
-                    font = ResourceManager.getInstance().getFont("smallFont")
-                    alignment = Anchor.TopLeft
-                    anchor = Anchor.TopLeft
-                    origin = Anchor.TopLeft
-                }
-
-                +descriptionText.apply {
-                    width = FillParent
-                    font = ResourceManager.getInstance().getFont("xs")
-                    text = mod.description
-                    clipChildren = true
-                    alpha = 0.75f
-                }
-            }
-
-            width = FillParent
-            theme = TextButtonTheme(
-                iconSize = 38f,
-                backgroundColor = 0xFF1E1E2E
-            )
-            text = mod.name
-            leadingIcon = ModIcon(mod)
-            padding = Vec4(20f, 8f)
-
-            onActionUp = {
-                if (isSelected) {
-                    removeMod(mod)
-                    ResourceManager.getInstance().getSound("check-off")?.play()
-                } else {
-                    addMod(mod)
-                    ResourceManager.getInstance().getSound("check-on")?.play()
-                }
-            }
-
-            updateEnabledState()
-        }
-
-        fun updateEnabledState() {
-            // TODO: the button should be hidden when it is disabled after Container can observe child visibility.
-            isEnabled = if (Multiplayer.isMultiplayer && Multiplayer.room != null) {
-                mod.isValidForMultiplayer && (Multiplayer.isRoomHost ||
-                        (Multiplayer.room!!.gameplaySettings.isFreeMod && mod.isValidForMultiplayerAsFreeMod))
-            } else {
-                true
-            }
-        }
-
-        override fun onManagedUpdate(deltaTimeSec: Float) {
-
-            // Match the description text color with the title text color during animations.
-            if (!descriptionText.color.colorEquals(titleText.color)) {
-                descriptionText.color = titleText.color.copy(alpha = descriptionText.alpha)
-            }
-
-            super.onManagedUpdate(deltaTimeSec)
-        }
-    }
-
-    private fun <T : Comparable<T>> LabeledBadge.updateStatisticBadge(initialValue: T, finalValue: T) =
-        valueText.run {
-            val newText =
-                if (finalValue is Float || finalValue is Double) "%.2f".format(finalValue) else finalValue.toString()
-
-            if (text == newText) {
-                return@run
-            }
-
-            text = newText
-
-            clearEntityModifiers()
-
-            colorTo(
-                ColorARGB(when {
-                    initialValue < finalValue -> 0xFFF78383
-                    initialValue > finalValue -> 0xFF40CF5D
-                    else -> 0xFFFFFFFF
-                }),
-                0.1f
-            )
-
-            Unit
-        }
 
     //endregion
 
