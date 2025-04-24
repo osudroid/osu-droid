@@ -56,5 +56,13 @@ object OsuColors {
         return Color.BLACK.toColorARGB()
     }
 
+    val red = ColorARGB(0xFFED1121)
+    val blue = ColorARGB(0xFF66CCFF)
 
+    val purple = ColorARGB(0xFF8866EE)
+    val purpleDark = ColorARGB(0xFF441188)
+
+    val yellow = ColorARGB(0xFFFFCC22)
+    val yellowDark = ColorARGB(0xFFEEAA00)
+    val yellowDarker = ColorARGB(0xFFCC6600)
 }
