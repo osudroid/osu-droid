@@ -1091,13 +1091,16 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
         }
 
         final float mSecPassed = elapsedTime * 1000;
-        float currentSpeedMultiplier = ModUtils.calculateRateWithTrackRateMods(rateAdjustingMods, mSecPassed);
 
-        if (currentSpeedMultiplier != GameHelper.getSpeedMultiplier()) {
-            GameHelper.setSpeedMultiplier(currentSpeedMultiplier);
+        if (!isGameOver) {
+            float currentSpeedMultiplier = ModUtils.calculateRateWithTrackRateMods(rateAdjustingMods, mSecPassed);
 
-            if (musicStarted) {
-                GlobalManager.getInstance().getSongService().setSpeed(currentSpeedMultiplier);
+            if (currentSpeedMultiplier != GameHelper.getSpeedMultiplier()) {
+                GameHelper.setSpeedMultiplier(currentSpeedMultiplier);
+
+                if (musicStarted) {
+                    GlobalManager.getInstance().getSongService().setSpeed(currentSpeedMultiplier);
+                }
             }
         }
 
