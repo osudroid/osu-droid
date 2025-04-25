@@ -123,7 +123,7 @@ abstract class FormControl<V : Any, C: Control<V>>(initialValue: V): ConstraintC
 
 
     init {
-        width = FitParent
+        width = FillParent
         padding = Vec4(24f)
         background = Box().apply {
             color = ColorARGB.White
@@ -167,11 +167,13 @@ abstract class FormControl<V : Any, C: Control<V>>(initialValue: V): ConstraintC
 
     override fun onAreaTouched(event: TouchEvent, localX: Float, localY: Float): Boolean {
 
-        if (!isEnabled || super.onAreaTouched(event, localX, localY)) {
+        if (!isEnabled) {
             return true
         }
 
-        if (event.isActionUp) {
+        val consumed = super.onAreaTouched(event, localX, localY)
+
+        if (!consumed && event.isActionUp) {
             background!!.clearModifiers(ModifierType.Sequence)
             background!!.beginSequence {
                 fadeTo(0.2f)
@@ -179,7 +181,7 @@ abstract class FormControl<V : Any, C: Control<V>>(initialValue: V): ConstraintC
             }
         }
 
-        return true
+        return consumed
     }
 
 }

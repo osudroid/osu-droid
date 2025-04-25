@@ -4,6 +4,7 @@ import com.reco1l.andengine.*
 import com.reco1l.andengine.container.*
 import com.reco1l.andengine.modifier.*
 import com.reco1l.andengine.shape.*
+import com.reco1l.andengine.sprite.*
 import com.reco1l.andengine.text.*
 import com.reco1l.framework.*
 import com.reco1l.framework.math.*
@@ -11,39 +12,16 @@ import org.anddev.andengine.input.touch.TouchEvent
 import org.anddev.andengine.opengl.font.Font
 import ru.nsu.ccfit.zuev.osu.ResourceManager
 
-
-data class ButtonTheme(
-    val backgroundColor: Long = 0xFF222234,
-    val textColor: Long = 0xFFFFFFFF,
-    val selectedBackgroundColor: Long = 0xFFF27272,
-    val selectedTextColor: Long = 0xFF222234,
-    val withBezelEffect: Boolean = true,
-    val cornerRadius: Float = 14f,
-    val iconSize: Float = 28f,
-    val textFont: Font = ResourceManager.getInstance().getFont("smallFont")
+sealed class ButtonTheme(
+    open val backgroundColor: Long = 0xFF222234,
+    open val selectedBackgroundColor: Long = 0xFFF27272,
+    open val withBezelEffect: Boolean = true,
+    open val cornerRadius: Float = 14f,
 ) : ITheme
 
 
 @Suppress("LeakingThis")
-open class Button : LinearContainer(), IWithTheme<ButtonTheme> {
-
-
-    override var theme = DefaultTheme
-        set(value) {
-            if (field != value) {
-                field = value
-                onThemeChanged()
-            }
-        }
-
-
-    /**
-     * The text of the button.
-     */
-    var text
-        get() = textEntity.text
-        set(value) { textEntity.text = value }
-
+sealed class Button<T : ButtonTheme> : LinearContainer(), IWithTheme<T> {
 
     //region State
 
@@ -78,42 +56,6 @@ open class Button : LinearContainer(), IWithTheme<ButtonTheme> {
 
     //endregion
 
-    //region Icons
-
-    /**
-     * The leading icon.
-     */
-    var leadingIcon: ExtendedEntity? = null
-        set(value) {
-            if (field != value) {
-                field?.detachSelf()
-                field = value
-
-                if (value != null) {
-                    onIconChange(value)
-                    attachChild(value, 0)
-                }
-            }
-        }
-
-    /**
-     * The trailing icon.
-     */
-    var trailingIcon: ExtendedEntity? = null
-        set(value) {
-            if (field != value) {
-                field?.detachSelf()
-                field = value
-
-                if (value != null) {
-                    onIconChange(value)
-                    attachChild(value)
-                }
-            }
-        }
-
-    //endregion
-
     //region Actions
 
     /**
@@ -133,25 +75,14 @@ open class Button : LinearContainer(), IWithTheme<ButtonTheme> {
 
     //endregion
 
-
-    private val textEntity = ExtendedText().apply {
-        height = 60f
-        alignment = Anchor.Center
-        anchor = Anchor.CenterLeft
-        origin = Anchor.CenterLeft
-    }
-
-
     init {
         orientation = Orientation.Horizontal
         padding = Vec4(16f, 0f)
         spacing = 8f
         scaleCenter = Anchor.Center
-
-        attachChild(textEntity)
-        onThemeChanged()
     }
 
+    //region Callbacks
 
     override fun onThemeChanged() {
         foreground = if (theme.withBezelEffect) BezelOutline(theme.cornerRadius) else null
@@ -161,57 +92,26 @@ open class Button : LinearContainer(), IWithTheme<ButtonTheme> {
         }
         onSelectionChange()
         onEnableStateChange()
-        trailingIcon?.let(::onIconChange)
-        leadingIcon?.let(::onIconChange)
-        textEntity.font = theme.textFont
-        textEntity.color = ColorARGB(theme.textColor)
     }
-
-
-    //region Callbacks
 
     /**
      * Called when the enable state of the button changes.
      */
     open fun onEnableStateChange() {
         clearModifiers(ModifierType.Alpha)
-
-        if (isEnabled) {
-            fadeTo(1f, 0.2f)
-        } else {
-            fadeTo(0.25f, 0.2f)
-        }
+        fadeTo(if (isEnabled) 1f else 0.25f, 0.2f)
     }
 
     /**
      * Called when the selection state of the button changes.
      */
     open fun onSelectionChange() {
-
         background?.clearModifiers(ModifierType.Color)
-        textEntity.clearModifiers(ModifierType.Color)
-
-        if (isSelected) {
-            background?.colorTo(theme.selectedBackgroundColor, 0.2f)
-            textEntity.colorTo(theme.selectedTextColor, 0.2f)
-        } else {
-            background?.colorTo(theme.backgroundColor)
-            textEntity.colorTo(theme.textColor, 0.2f)
-        }
-    }
-
-    /**
-     * Called when an icon is added or changed.
-     */
-    open fun onIconChange(icon: ExtendedEntity) {
-        icon.height = theme.iconSize
-        icon.width = theme.iconSize
-        icon.anchor = Anchor.CenterLeft
-        icon.origin = Anchor.CenterLeft
-        icon.color = theme.textColor.toColorARGB()
+        background?.colorTo(if (isSelected) theme.selectedBackgroundColor else theme.backgroundColor, 0.2f)
     }
 
     //endregion
+
 
     open fun processTouchFeedback(event: TouchEvent) {
 
@@ -259,8 +159,189 @@ open class Button : LinearContainer(), IWithTheme<ButtonTheme> {
         return true
     }
 
+}
+
+
+//region TextButton
+
+data class TextButtonTheme(
+    override val backgroundColor: Long = 0xFF222234,
+    override val selectedBackgroundColor: Long = 0xFFF27272,
+    override val withBezelEffect: Boolean = true,
+    override val cornerRadius: Float = 14f,
+    val selectedTextColor: Long = 0xFF222234,
+    val textColor: Long = 0xFFFFFFFF,
+    val textFont: Font = ResourceManager.getInstance().getFont("smallFont"),
+    val iconSize: Float = 28f,
+) : ButtonTheme()
+
+@Suppress("LeakingThis")
+open class TextButton : Button<TextButtonTheme>() {
+
+    override var theme = DefaultTheme
+        set(value) {
+            if (field != value) {
+                field = value
+                onThemeChanged()
+            }
+        }
+
+    /**
+     * The text of the button.
+     */
+    var text
+        get() = textEntity.text
+        set(value) { textEntity.text = value }
+
+    //region Icons
+
+    /**
+     * The leading icon.
+     */
+    var leadingIcon: ExtendedEntity? = null
+        set(value) {
+            if (field != value) {
+                field?.detachSelf()
+                field = value
+
+                if (value != null) {
+                    onIconChange(value)
+                    attachChild(value, 0)
+                }
+            }
+        }
+
+    /**
+     * The trailing icon.
+     */
+    var trailingIcon: ExtendedEntity? = null
+        set(value) {
+            if (field != value) {
+                field?.detachSelf()
+                field = value
+
+                if (value != null) {
+                    onIconChange(value)
+                    attachChild(value)
+                }
+            }
+        }
+
+    //endregion
+
+    private val textEntity = ExtendedText().apply {
+        height = 60f
+        alignment = Anchor.Center
+        anchor = Anchor.CenterLeft
+        origin = Anchor.CenterLeft
+    }
+
+
+    init {
+        +textEntity
+        onThemeChanged()
+    }
+
+
+    //region Callbacks
+
+    override fun onThemeChanged() {
+        super.onThemeChanged()
+        trailingIcon?.let(::onIconChange)
+        leadingIcon?.let(::onIconChange)
+        textEntity.font = theme.textFont
+        textEntity.color = ColorARGB(if (isSelected) theme.selectedTextColor else theme.textColor)
+    }
+
+    override fun onSelectionChange() {
+        super.onSelectionChange()
+        textEntity.clearModifiers(ModifierType.Color)
+        textEntity.colorTo(if (isSelected) theme.selectedTextColor else theme.textColor, 0.2f)
+    }
+
+
+    /**
+     * Called when an icon is added or changed.
+     */
+    open fun onIconChange(icon: ExtendedEntity) {
+        icon.height = theme.iconSize
+        icon.width = theme.iconSize
+        icon.anchor = Anchor.CenterLeft
+        icon.origin = Anchor.CenterLeft
+        icon.color = theme.textColor.toColorARGB()
+    }
+
+    //endregion
 
     companion object {
-        val DefaultTheme = ButtonTheme()
+        val DefaultTheme = TextButtonTheme()
     }
 }
+
+//endregion
+
+//region IconButton
+
+data class IconButtonTheme(
+    override val backgroundColor: Long = 0xFF222234,
+    override val selectedBackgroundColor: Long = 0xFFF27272,
+    override val withBezelEffect: Boolean = true,
+    override val cornerRadius: Float = 14f,
+    val iconColor: Long = 0xFFFFFFFF,
+    val selectedIconColor: Long = 0xFF222234,
+    val iconSize: Float = 32f,
+) : ButtonTheme()
+
+@Suppress("LeakingThis")
+open class IconButton : Button<IconButtonTheme>() {
+
+    override var theme = DefaultTheme
+        set(value) {
+            if (field != value) {
+                field = value
+                onThemeChanged()
+            }
+        }
+
+    /**
+     * The icon of the button.
+     */
+    var icon
+        get() = image.textureRegion
+        set(value) { image.textureRegion = value }
+
+
+    private val image = sprite {
+        scaleType = ScaleType.Fit
+        anchor = Anchor.Center
+        origin = Anchor.Center
+    }
+
+
+    init {
+        onThemeChanged()
+    }
+
+
+    //region Callbacks
+
+    override fun onThemeChanged() {
+        super.onThemeChanged()
+        image.color = ColorARGB(if (isSelected) theme.selectedIconColor else theme.iconColor)
+        image.height = theme.iconSize
+        image.width = theme.iconSize
+    }
+
+    override fun onSelectionChange() {
+        super.onSelectionChange()
+        image.clearModifiers(ModifierType.Color)
+        image.colorTo(if (isSelected) theme.selectedIconColor else theme.iconColor, 0.2f)
+    }
+
+    //endregion
+
+    companion object {
+        val DefaultTheme = IconButtonTheme()
+    }
+}
+

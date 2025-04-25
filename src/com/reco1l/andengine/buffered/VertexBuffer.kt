@@ -77,8 +77,8 @@ abstract class VertexBuffer(
     ): Int {
         var i = index
 
-        val startAngleRadians = startAngle.toRadians()
-        val deltaAngle = (endAngle.toRadians() - startAngleRadians) / segments
+        val startAngleRadians = (startAngle - 90f).toRadians()
+        val deltaAngle = ((endAngle - 90f).toRadians() - startAngleRadians) / max(1, segments - 1)
 
         for (j in 0 ..< segments) {
             val angle = startAngleRadians + j * deltaAngle

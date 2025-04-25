@@ -76,8 +76,8 @@ class HUDPieSongProgress : HUDSongProgress() {
 
 
     init {
-        width = FitContent
-        height = FitContent
+        width = MatchContent
+        height = MatchContent
 
         // Reference: https://github.com/ppy/osu/blob/6455c0583b5e607baeca7f584410bc63515aa619/osu.Game/Skinning/LegacySongProgress.cs
 

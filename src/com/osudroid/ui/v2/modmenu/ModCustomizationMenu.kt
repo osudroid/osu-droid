@@ -26,7 +26,7 @@ class ModCustomizationMenu : Modal(
         clipChildren = true
 
         +LinearContainer().apply {
-            width = FitParent
+            width = FillParent
             orientation = Orientation.Vertical
         }
     }
@@ -39,8 +39,6 @@ class ModCustomizationMenu : Modal(
 
 
     init {
-        ResourceManager.getInstance().loadHighQualityAsset("reset", "reset.png")
-
         theme = ModalTheme(backgroundColor = 0xFF181828)
     }
 
@@ -92,12 +90,12 @@ class ModCustomizationMenu : Modal(
 
         init {
             orientation = Orientation.Vertical
-            width = FitParent
+            width = FillParent
             padding = Vec4(0f, 0f, 0f, 16f)
 
             +LinearContainer().apply {
                 orientation = Orientation.Horizontal
-                width = FitParent
+                width = FillParent
                 padding = Vec4(20f, 14f)
                 spacing = 12f
                 background = Box().apply {
@@ -108,8 +106,8 @@ class ModCustomizationMenu : Modal(
                 +ModIcon(mod).apply {
                     anchor = Anchor.CenterLeft
                     origin = Anchor.CenterLeft
-                    width = 36f
-                    height = 36f
+                    width = 34f
+                    height = 34f
                 }
 
                 +ExtendedText().apply {
@@ -152,7 +150,7 @@ private class ModSettingSlider(val mod: Mod, override val setting: ModSetting<Fl
         valueFormatter = setting.valueFormatter!!
         onValueChanged = {
             setting.value = it
-            updateThread { ModMenu.onModsChanged(mod) }
+            ModMenu.queueModChange(mod)
         }
     }
 }
@@ -175,7 +173,7 @@ private class NullableModSettingSlider(val mod: Mod, override val setting: ModSe
         valueFormatter = setting.valueFormatter!!
         onValueChanged = { value ->
             setting.value = if (value == setting.defaultValue) null else value
-            updateThread { ModMenu.onModsChanged(mod) }
+            ModMenu.queueModChange(mod)
         }
     }
 }
@@ -190,7 +188,7 @@ private class ModSettingCheckbox(val mod: Mod, override val setting: ModSetting<
         value = setting.value
         onValueChanged = {
             setting.value = it
-            updateThread { ModMenu.onModsChanged(mod) }
+            ModMenu.queueModChange(mod)
         }
     }
 }

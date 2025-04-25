@@ -13,8 +13,8 @@ open class Container : ExtendedEntity() {
 
 
     init {
-        width = FitContent
-        height = FitContent
+        width = MatchContent
+        height = MatchContent
     }
 
 

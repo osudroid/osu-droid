@@ -46,8 +46,8 @@ class EntityInspector(val engine: Engine) : CollapsiblePanel() {
 
             init {
                 mChildren = SmartList(0)
-                height = FitContent
-                width = FitContent
+                height = MatchContent
+                width = MatchContent
 
                 item.parent = this
             }

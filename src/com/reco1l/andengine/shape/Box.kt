@@ -53,7 +53,7 @@ open class Box : BufferedEntity<BoxVBO>() {
 
     override fun onCreateBuffer(gl: GL10): BoxVBO {
 
-        val radius = cornerRadius.coerceIn(0f, min(width, height) / 2f)
+        val radius = cornerRadius.coerceAtMost(min(width, height) / 2f).coerceAtLeast(0f)
         val segments = if (radius > 0f) Circle.approximateSegments(radius, radius, 90f) else 0
 
         val buffer = buffer
@@ -107,13 +107,13 @@ open class Box : BufferedEntity<BoxVBO>() {
             }
 
             // [1]
-            position = addArc(position, radius, radius, -180f, -90f, radius, radius, segments)
+            position = addArc(position, radius, radius, -90f, 0f, radius, radius, segments)
             // [2]
-            position = addArc(position, width - radius, radius, -90f, 0f, radius, radius, segments)
+            position = addArc(position, width - radius, radius, 0f, 90f, radius, radius, segments)
             // [3]
-            position = addArc(position, width - radius, height - radius, 0f, 90f, radius, radius, segments)
+            position = addArc(position, width - radius, height - radius, 90f, 180f, radius, radius, segments)
             // [4]
-            position = addArc(position, radius, height - radius, 90f, 180f, radius, radius, segments)
+            position = addArc(position, radius, height - radius, 180f, 270f, radius, radius, segments)
 
             // Closing point
             putVertex(position, 0f, radius)

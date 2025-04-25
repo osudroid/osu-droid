@@ -31,7 +31,7 @@ open class LinearContainer : Container() {
         for (i in 0 until childCount) {
 
             val child = getChild(i) ?: continue
-            if (child !is ExtendedEntity) {
+            if (child !is ExtendedEntity || !child.isVisible) {
                 continue
             }
 

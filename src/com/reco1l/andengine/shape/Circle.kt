@@ -1,10 +1,12 @@
 package com.reco1l.andengine.shape
 
 import androidx.annotation.*
+import com.reco1l.andengine.*
 import com.reco1l.andengine.buffered.*
 import com.reco1l.andengine.buffered.VertexBuffer
 import com.reco1l.andengine.shape.Circle.*
 import com.reco1l.toolkt.*
+import org.anddev.andengine.opengl.util.GLHelper
 import javax.microedition.khronos.opengles.*
 import javax.microedition.khronos.opengles.GL11.*
 import kotlin.math.*
@@ -29,9 +31,14 @@ open class Circle : BufferedEntity<CircleVertexBuffer>() {
         }
 
     /**
-     * The angle where the circle starts to draw in degrees. By default, it is -90 degrees.
+     * The line width if the paint style is [PaintStyle.Outline].
      */
-    var startAngle = -90f
+    var lineWidth = 1f
+
+    /**
+     * The angle where the circle starts to draw in degrees. By default, it is 0 degrees.
+     */
+    var startAngle = 0f
         set(@FloatRange(-360.0, 360.0) value) {
             if (field != value) {
                 field = value
@@ -40,9 +47,9 @@ open class Circle : BufferedEntity<CircleVertexBuffer>() {
         }
 
     /**
-     * The angle where the circle ends to draw in degrees. By default, it is 270 degrees.
+     * The angle where the circle ends to draw in degrees. By default, it is 360 degrees.
      */
-    var endAngle = 270f
+    var endAngle = 360f
         set(@FloatRange(-360.0, 360.0) value) {
             if (field != value) {
                 field = value
@@ -61,6 +68,11 @@ open class Circle : BufferedEntity<CircleVertexBuffer>() {
     }
 
 
+    override fun beginDraw(gl: GL10) {
+        super.beginDraw(gl)
+        GLHelper.lineWidth(gl, lineWidth)
+    }
+
     override fun onSizeChanged() {
         super.onSizeChanged()
         invalidateBuffer(BufferInvalidationFlag.Instance)
@@ -73,8 +85,8 @@ open class Circle : BufferedEntity<CircleVertexBuffer>() {
 
     inner class CircleVertexBuffer(private val segments: Int) : VertexBuffer(
 
-        // Segments + Closing point + Center point
-        vertexCount = segments + if (paintStyle == PaintStyle.Fill) 2 else 1,
+        // Segments + Center point
+        vertexCount = segments + if (paintStyle == PaintStyle.Fill) 1 else 0,
 
         vertexSize = VERTEX_2D,
         bufferUsage = GL_STATIC_DRAW,
@@ -83,19 +95,16 @@ open class Circle : BufferedEntity<CircleVertexBuffer>() {
 
         override fun update(gl: GL10, entity: BufferedEntity<*>, vararg data: Any) {
 
-            var position = 0
-
             val halfWidth = entity.width / 2f
             val halfHeight = entity.height / 2f
+
+            var position = 0
 
             if (paintStyle == PaintStyle.Fill) {
                 putVertex(position++, halfWidth, halfHeight)
             }
 
-            position = addArc(position, halfWidth, halfHeight, startAngle, endAngle, halfWidth, halfHeight, segments)
-
-            val startAngleRadians = startAngle.toRadians()
-            putVertex(position, halfWidth + halfWidth * cos(startAngleRadians), halfHeight + halfHeight * sin(startAngleRadians))
+            addArc(position, halfWidth, halfHeight, startAngle, endAngle, halfWidth, halfHeight, segments)
         }
     }
 

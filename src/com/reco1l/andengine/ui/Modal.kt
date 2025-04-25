@@ -43,8 +43,8 @@ open class Modal(
 
 
     init {
-        width = FitParent
-        height = FitParent
+        width = FillParent
+        height = FillParent
 
         isVisible = false
         alpha = 0f

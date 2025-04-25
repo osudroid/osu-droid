@@ -1,9 +1,7 @@
 package com.reco1l.andengine.ui.form
 
 import com.reco1l.andengine.*
-import com.reco1l.andengine.text.*
 import com.reco1l.andengine.ui.*
-import com.reco1l.framework.math.*
 import org.anddev.andengine.input.touch.*
 import ru.nsu.ccfit.zuev.osu.*
 
@@ -32,4 +30,11 @@ open class FormCheckbox(initialValue: Boolean = false) : FormControl<Boolean, Ch
         return true
     }
 
+}
+
+class PreferenceCheckbox(private val preferenceKey: String, fallback: Boolean = false) : FormCheckbox(Config.getBoolean(preferenceKey, fallback)) {
+    override fun onControlValueChanged() {
+        Config.setBoolean(preferenceKey, value)
+        super.onControlValueChanged()
+    }
 }

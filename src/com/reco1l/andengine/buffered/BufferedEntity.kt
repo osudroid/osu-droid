@@ -180,21 +180,4 @@ abstract class BufferedEntity<T: IBuffer> : ExtendedEntity() {
         buffer?.finalize()
     }
 
-
-    @Suppress("ConstPropertyName")
-    companion object {
-
-        /**
-         * The buffer's data will be invalidated when the size of the entity changes.
-         */
-        const val InvalidateDataOnSizeChanged = 1
-
-        /**
-         * The buffer will be rebuilded when the size of the entity changes, this
-         * invalidates the buffer's data as well.
-         */
-        const val RebuildBufferOnSizeChanged = 1 shl 1
-
-    }
-
 }

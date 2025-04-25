@@ -67,7 +67,7 @@ open class Badge(content: String = "") : ExtendedText(), IWithTheme<BadgeTheme> 
 open class LabeledBadge(label: String = "", value: String = "") : LinearContainer() {
 
     private val labelText = Badge(label).apply {
-        height = FitParent
+        height = FillParent
         foreground = null
         background!!.color = ColorARGB.Black
         background!!.alpha = 0.1f
@@ -77,7 +77,7 @@ open class LabeledBadge(label: String = "", value: String = "") : LinearContaine
      * The value of the badge.
      */
     val valueText = ExtendedText().apply {
-        height = FitParent
+        height = FillParent
         font = ResourceManager.getInstance().getFont("smallFont")
         text = value
         alignment = Anchor.Center
