@@ -147,6 +147,10 @@ sealed class Mod {
         result = 31 * result + isValidForMultiplayerAsFreeMod.hashCode()
         result = 31 * result + incompatibleMods.contentHashCode()
 
+        for (setting in settings) {
+            result = 31 * result + setting.value.hashCode()
+        }
+
         return result
     }
 

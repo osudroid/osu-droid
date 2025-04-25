@@ -62,8 +62,6 @@ class ModReallyEasy : Mod(), IModApplicableToDifficultyWithSettings {
             }
         }
 
-    override fun equals(other: Any?) = other === this || other is ModReallyEasy
-    override fun hashCode() = super.hashCode()
     override fun deepCopy() = ModReallyEasy()
 
     companion object {

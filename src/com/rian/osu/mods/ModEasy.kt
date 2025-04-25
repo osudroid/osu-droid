@@ -43,8 +43,6 @@ class ModEasy : Mod(), IModApplicableToDifficulty {
         hp *= ADJUST_RATIO
     }
 
-    override fun equals(other: Any?) = other === this || other is ModEasy
-    override fun hashCode() = super.hashCode()
     override fun deepCopy() = ModEasy()
 
     companion object {

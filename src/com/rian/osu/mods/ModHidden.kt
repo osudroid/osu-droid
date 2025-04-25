@@ -30,8 +30,6 @@ class ModHidden : Mod(), IModApplicableToBeatmap {
         beatmap.hitObjects.objects.forEach { applyFadeInAdjustment(it) }
     }
 
-    override fun equals(other: Any?) = other === this || other is ModHidden
-    override fun hashCode() = super.hashCode()
     override fun deepCopy() = ModHidden()
 
     companion object {

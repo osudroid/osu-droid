@@ -13,8 +13,5 @@ class ModTraceable : Mod() {
     override val incompatibleMods = super.incompatibleMods + ModHidden::class
 
     override fun calculateScoreMultiplier(difficulty: BeatmapDifficulty) = 1.06f
-
-    override fun equals(other: Any?) = other === this || other is ModTraceable
-    override fun hashCode() = super.hashCode()
     override fun deepCopy() = ModTraceable()
 }

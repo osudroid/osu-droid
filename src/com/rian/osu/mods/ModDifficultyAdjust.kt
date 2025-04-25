@@ -202,29 +202,6 @@ class ModDifficultyAdjust @JvmOverloads constructor(
 
     private fun getValue(value: Float?, fallback: Float) = value ?: fallback
 
-    override fun equals(other: Any?): Boolean {
-        if (other === this) {
-            return true
-        }
-
-        if (other !is ModDifficultyAdjust) {
-            return false
-        }
-
-        return super.equals(other)
-    }
-
-    override fun hashCode(): Int {
-        var result = super.hashCode()
-
-        result = 31 * result + cs.hashCode()
-        result = 31 * result + ar.hashCode()
-        result = 31 * result + od.hashCode()
-        result = 31 * result + hp.hashCode()
-
-        return result
-    }
-
     override fun toString() = buildString {
         append(super.toString())
 

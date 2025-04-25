@@ -30,7 +30,5 @@ class ModPrecise : Mod(), IModApplicableToHitObject {
         obj.hitWindow = PreciseDroidHitWindow(obj.hitWindow?.overallDifficulty)
     }
 
-    override fun equals(other: Any?) = other === this || other is ModPrecise
-    override fun hashCode() = super.hashCode()
     override fun deepCopy() = ModPrecise()
 }

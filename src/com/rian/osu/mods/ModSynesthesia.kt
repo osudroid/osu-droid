@@ -13,9 +13,6 @@ class ModSynesthesia : Mod() {
     override val type = ModType.Fun
 
     override fun calculateScoreMultiplier(difficulty: BeatmapDifficulty) = 0.8f
-
-    override fun equals(other: Any?) = other === this || other is ModSynesthesia
-    override fun hashCode() = super.hashCode()
     override fun deepCopy() = ModSynesthesia()
 
     companion object {

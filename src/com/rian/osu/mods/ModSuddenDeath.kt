@@ -13,7 +13,5 @@ class ModSuddenDeath : Mod() {
         ModNoFail::class, ModPerfect::class, ModAutoplay::class
     )
 
-    override fun equals(other: Any?) = other === this || other is ModSuddenDeath
-    override fun hashCode() = super.hashCode()
     override fun deepCopy() = ModSuddenDeath()
 }
