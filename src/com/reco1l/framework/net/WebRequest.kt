@@ -8,7 +8,6 @@ import okhttp3.RequestBody.Companion.toRequestBody
 import org.json.JSONObject
 import ru.nsu.ccfit.zuev.osuplus.BuildConfig
 import java.io.IOException
-import java.util.*
 
 open class WebRequest(private var url: HttpUrl) : AutoCloseable {
 

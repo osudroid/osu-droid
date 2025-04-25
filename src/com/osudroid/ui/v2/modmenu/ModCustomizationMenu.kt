@@ -8,7 +8,6 @@ import com.reco1l.andengine.ui.*
 import com.reco1l.andengine.ui.form.*
 import com.reco1l.framework.*
 import com.reco1l.framework.math.*
-import com.reco1l.osu.updateThread
 import com.reco1l.toolkt.kotlin.*
 import com.rian.osu.mods.*
 import ru.nsu.ccfit.zuev.osu.ResourceManager
