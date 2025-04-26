@@ -32,5 +32,13 @@ val MIGRATION_1_2 = object : Migration(1, 2) {
         }
 
         db.execSQL("ALTER TABLE BeatmapInfo ADD COLUMN epilepsyWarning INTEGER NOT NULL DEFAULT 0")
+
+        db.execSQL(
+            "CREATE TABLE ModPreset (" +
+                "id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, " +
+                "name TEXT NOT NULL, " +
+                "serializedMods TEXT NOT NULL" +
+            ")"
+        )
     }
 }
