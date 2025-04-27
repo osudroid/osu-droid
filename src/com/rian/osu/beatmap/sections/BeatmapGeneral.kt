@@ -71,7 +71,7 @@ data class BeatmapGeneral(
     var samplesMatchPlaybackRate: Boolean = false,
 
     /**
-     * Whether the beatmap has a epilepsy warning.
+     * Whether a warning about flashing colours should be shown at the beginning of the beatmap.
      */
     @JvmField
     var epilepsyWarning: Boolean = false
