@@ -368,6 +368,8 @@ abstract class ExtendedEntity : Entity(0f, 0f), ITouchArea, IModifierChain, IThe
     }
 
     override fun onAttached() {
+        background?.onAttached()
+        foreground?.onAttached()
         onThemeChange(Theme.current)
     }
 

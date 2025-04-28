@@ -65,7 +65,9 @@ class ExtendedEngine(val context: Activity, options: EngineOptions) : Engine(opt
                 getChild(i).updateTheme()
             }
 
-            if (this is IThemeable) {
+            if (this is ExtendedEntity) {
+                background?.onThemeChange(theme)
+                foreground?.onThemeChange(theme)
                 onThemeChange(theme)
             }
         }
