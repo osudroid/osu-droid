@@ -6,7 +6,7 @@ import androidx.annotation.*
 @IntDef(value = [
     InvalidationFlag.Size,
     InvalidationFlag.Position,
-    InvalidationFlag.ContentSize,
+    InvalidationFlag.Content,
     InvalidationFlag.Transformations,
     InvalidationFlag.InputBindings
 ])
@@ -19,9 +19,9 @@ annotation class InvalidationFlag {
         const val Size = 1
 
         /**
-         * The position of the entity has changed. Calls [ExtendedEntity.onSizeChanged].
+         * The content of the entity has changed. Calls [ExtendedEntity.onContentChanged].
          */
-        const val ContentSize = 1 shl 1
+        const val Content = 1 shl 1
 
         /**
          * The position of the entity has changed. Calls [ExtendedEntity.onPositionChanged].

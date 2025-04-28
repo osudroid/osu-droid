@@ -19,7 +19,7 @@ open class Card(
     val content: Container = LinearContainer().apply {
         orientation = Orientation.Vertical
         width = FillParent
-        clipChildren = true
+        clipToBounds = true
     },
 
 ) : LinearContainer() {
@@ -99,7 +99,7 @@ open class Card(
             content.clearModifiers(ModifierType.SizeY)
             content.sizeToY(0f, 0.1f).then {
                 it.isVisible = false
-                onMeasureContentSize()
+                onContentChanged()
             }
         }
     }

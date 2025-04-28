@@ -4,30 +4,19 @@ import com.reco1l.andengine.*
 import com.reco1l.andengine.container.*
 import com.reco1l.andengine.info.*
 import com.reco1l.andengine.shape.*
-import com.reco1l.framework.*
 import com.reco1l.framework.math.*
 import org.anddev.andengine.input.touch.*
 import kotlin.math.*
 
-data class SliderTheme(
-    val backgroundColor: Long = 0xFF222234,
-    val progressColor: Long = 0xFFF27272,
-    val thumbColor: Long = 0xFFFFFFFF,
-    val barHeight: Float = 12f,
-    val thumbHeight: Float = 24f,
-    val thumbWidth: Float = 32f,
-) : ITheme
-
 @Suppress("LeakingThis")
-open class Slider(initialValue: Float = 0f) : Control<Float>(initialValue), IWithTheme<SliderTheme> {
+open class Slider(initialValue: Float = 0f) : Control<Float>(initialValue) {
 
-    override var theme = DefaultTheme
-        set(value) {
-            if (field != value) {
-                field = value
-                onThemeChanged()
-            }
-        }
+    override var onThemeChange: ExtendedEntity.(Theme) -> Unit = { theme ->
+        backgroundBar.color = theme.accentColor * 0.25f
+        progressBar.color = theme.accentColor * 0.5f
+        progressBar.foreground!!.color = theme.accentColor
+        thumb.color = theme.accentColor
+    }
 
 
     /**
@@ -88,6 +77,8 @@ open class Slider(initialValue: Float = 0f) : Control<Float>(initialValue), IWit
             width = FillParent
             anchor = Anchor.Center
             origin = Anchor.Center
+            height = 48f
+            cornerRadius = 12f
         }
 
         override fun onAreaTouched(event: TouchEvent, localX: Float, localY: Float): Boolean {
@@ -108,14 +99,21 @@ open class Slider(initialValue: Float = 0f) : Control<Float>(initialValue), IWit
     private val progressBar = Box().apply {
         anchor = Anchor.CenterLeft
         origin = Anchor.CenterLeft
-        depthInfo = DepthInfo.Default
+        height = 48f
+        cornerRadius = 12f
+
+        foreground = Box().apply {
+            paintStyle = PaintStyle.Outline
+            cornerRadius = 12f
+        }
     }
 
     private val thumb = Box().apply {
         anchor = Anchor.CenterLeft
-        origin = Anchor.Center
-        depthInfo = DepthInfo.Less
-        clearInfo = ClearInfo.ClearDepthBuffer
+        origin = Anchor.CenterRight
+        width = 14f
+        height = 48f
+        cornerRadius = 12f
     }
 
 
@@ -123,38 +121,10 @@ open class Slider(initialValue: Float = 0f) : Control<Float>(initialValue), IWit
         width = FillParent
 
         attachChild(backgroundBar)
-        attachChild(thumb)
         attachChild(progressBar)
-
-        onThemeChanged()
+        attachChild(thumb)
     }
 
-
-    override fun onProcessValue(value: Float): Float {
-
-        if (step > 0f) {
-            return (min + step * ceil((value - min) / step)).coerceIn(min, max)
-        }
-
-        return value.coerceIn(min, max)
-    }
-
-    override fun onThemeChanged() {
-        backgroundBar.color = ColorARGB(theme.backgroundColor)
-        backgroundBar.height = theme.barHeight
-        backgroundBar.cornerRadius = theme.barHeight / 2f
-
-        progressBar.color = ColorARGB(theme.progressColor)
-        progressBar.height = theme.barHeight
-        progressBar.cornerRadius = theme.barHeight / 2f
-
-        thumb.color = ColorARGB(theme.thumbColor)
-        thumb.height = theme.thumbHeight
-        thumb.width = theme.thumbWidth
-        thumb.cornerRadius = min(theme.thumbHeight, thumb.width) / 2f
-        thumb.origin = Anchor.Center
-        thumb.foreground = BezelOutline(theme.thumbHeight / 2f)
-    }
 
     override fun onSizeChanged() {
         super.onSizeChanged()
@@ -166,13 +136,20 @@ open class Slider(initialValue: Float = 0f) : Control<Float>(initialValue), IWit
         updateProgress()
     }
 
+    override fun onProcessValue(value: Float): Float {
+        if (step > 0f) {
+            return (min + step * ceil((value - min) / step)).coerceIn(min, max)
+        }
+        return value.coerceIn(min, max)
+    }
+
 
     private fun updateProgress() {
 
         val progress = (value - min) / (max - min)
         val progressWidth = width * progress
 
-        thumb.x = progressWidth.coerceAtMost(width - thumb.width / 2f).coerceAtLeast(thumb.width / 2f)
+        thumb.x = progressWidth.coerceAtMost(width - thumb.width).coerceAtLeast(thumb.width)
 
         // The anchor will determine whether the progress bar should start.
         // The zero will be in the corresponding position of the slider relative to the min and max values.
@@ -195,12 +172,7 @@ open class Slider(initialValue: Float = 0f) : Control<Float>(initialValue), IWit
         val rightSideWidth = width - leftSideWidth
         val rightSideProgressWidth = (progressWidth - leftSideWidth).coerceAtMost(rightSideWidth).coerceAtLeast(0f)
 
-        progressBar.width = if (value >= 0f) rightSideProgressWidth else leftSideProgressWidth
-    }
-
-
-    companion object {
-        val DefaultTheme = SliderTheme()
+        progressBar.width = (if (value >= 0f) rightSideProgressWidth else leftSideProgressWidth).coerceAtLeast(thumb.width)
     }
 
 }

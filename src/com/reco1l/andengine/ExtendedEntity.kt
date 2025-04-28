@@ -6,6 +6,7 @@ import com.osudroid.BuildSettings
 import com.osudroid.debug.EntityInspector
 import com.reco1l.andengine.modifier.*
 import com.reco1l.andengine.shape.*
+import com.reco1l.andengine.ui.*
 import com.reco1l.framework.*
 import com.reco1l.framework.math.*
 import com.reco1l.toolkt.kotlin.*
@@ -25,7 +26,7 @@ import kotlin.math.*
  * @author Reco1l
  */
 @Suppress("MemberVisibilityCanBePrivate")
-abstract class ExtendedEntity : Entity(0f, 0f), ITouchArea, IModifierChain {
+abstract class ExtendedEntity : Entity(0f, 0f), ITouchArea, IModifierChain, IThemeable {
 
     //region Axes properties
 
@@ -122,7 +123,7 @@ abstract class ExtendedEntity : Entity(0f, 0f), ITouchArea, IModifierChain {
         protected set(value) {
             if (field != value) {
                 field = value
-                invalidate(InvalidationFlag.ContentSize)
+                invalidate(InvalidationFlag.Size)
             }
         }
 
@@ -133,7 +134,7 @@ abstract class ExtendedEntity : Entity(0f, 0f), ITouchArea, IModifierChain {
         protected set(value) {
             if (field != value) {
                 field = value
-                invalidate(InvalidationFlag.ContentSize)
+                invalidate(InvalidationFlag.Size)
             }
         }
 
@@ -144,7 +145,7 @@ abstract class ExtendedEntity : Entity(0f, 0f), ITouchArea, IModifierChain {
         set(value) {
             if (field != value) {
                 field = value
-                invalidate(InvalidationFlag.ContentSize)
+                invalidate(InvalidationFlag.Size)
             }
         }
 
@@ -231,6 +232,8 @@ abstract class ExtendedEntity : Entity(0f, 0f), ITouchArea, IModifierChain {
 
     //region Cosmetic properties
 
+    override var onThemeChange: ExtendedEntity.(theme: Theme) -> Unit = {}
+
     /**
      * The background entity. This entity will be drawn before the entity children and will not be
      * affected by padding.
@@ -278,9 +281,14 @@ abstract class ExtendedEntity : Entity(0f, 0f), ITouchArea, IModifierChain {
         }
 
     /**
+     * Whether the entity's color should be multiplied by the color of its ancestor entities.
+     */
+    open var inheritAncestorsColor = true
+
+    /**
      * Whether the entity should clip its children.
      */
-    open var clipChildren = false
+    open var clipToBounds = false
 
     //endregion
 
@@ -325,6 +333,11 @@ abstract class ExtendedEntity : Entity(0f, 0f), ITouchArea, IModifierChain {
 
     //region Attachment
 
+    /**
+     * Called when the content of the entity has changed. This usually is called when a child is added or removed.
+     */
+    protected open fun onContentChanged() {}
+
     override fun setParent(newParent: IEntity?) {
         when (val parent = parent) {
             is Scene -> parent.unregisterTouchArea(this)
@@ -350,8 +363,12 @@ abstract class ExtendedEntity : Entity(0f, 0f), ITouchArea, IModifierChain {
     override fun setVisible(value: Boolean) {
         if (mVisible != value) {
             mVisible = value
-            invalidate(InvalidationFlag.ContentSize)
+            invalidate(InvalidationFlag.Size)
         }
+    }
+
+    override fun onAttached() {
+        onThemeChange(Theme.current)
     }
 
     //endregion
@@ -458,11 +475,12 @@ abstract class ExtendedEntity : Entity(0f, 0f), ITouchArea, IModifierChain {
         var blue = mBlue
         var alpha = mAlpha
         var parent = parent ?: decoratedEntity
+        var multiplyColor = inheritAncestorsColor
 
         while (parent != null) {
 
             // If this entity is a decoration we only multiply the alpha.
-            if (decoratedEntity == null) {
+            if (decoratedEntity == null && multiplyColor) {
                 red *= parent.red
                 green *= parent.green
                 blue *= parent.blue
@@ -474,6 +492,10 @@ abstract class ExtendedEntity : Entity(0f, 0f), ITouchArea, IModifierChain {
                 break
             }
 
+            if (parent is ExtendedEntity && !parent.inheritAncestorsColor) {
+                multiplyColor = false
+            }
+
             parent = parent.parent
         }
 
@@ -483,10 +505,13 @@ abstract class ExtendedEntity : Entity(0f, 0f), ITouchArea, IModifierChain {
     override fun onDraw(gl: GL10, camera: Camera) {
 
         if (!isVisible) {
+            // We're going to still handle invalidations flags even if the entity is not visible
+            // because some of them like size-related flags might change the parent's layout.
+            handleInvalidation(true)
             return
         }
 
-        if (clipChildren) {
+        if (clipToBounds) {
             val wasScissorTestEnabled = GLHelper.isEnableScissorTest()
             GLHelper.enableScissorTest(gl)
 
@@ -513,8 +538,7 @@ abstract class ExtendedEntity : Entity(0f, 0f), ITouchArea, IModifierChain {
         }
     }
 
-    override fun onManagedDraw(gl: GL10, camera: Camera) {
-
+    fun handleInvalidation(handleRecursively: Boolean) {
         val invalidationFlags = invalidationFlags
 
         if (invalidationFlags != 0) {
@@ -525,14 +549,17 @@ abstract class ExtendedEntity : Entity(0f, 0f), ITouchArea, IModifierChain {
                 onPositionChanged()
             }
 
-            if (invalidationFlags and InvalidationFlag.Size != 0 || invalidationFlags and InvalidationFlag.ContentSize != 0) {
+            if (invalidationFlags and InvalidationFlag.Content != 0) {
+                onContentChanged()
+            }
+
+            if (invalidationFlags and InvalidationFlag.Size != 0) {
                 onSizeChanged()
             }
 
             if (invalidationFlags and InvalidationFlag.Transformations != 0
                 || invalidationFlags and InvalidationFlag.Position != 0
-                || invalidationFlags and InvalidationFlag.Size != 0
-                || invalidationFlags and InvalidationFlag.ContentSize != 0) {
+                || invalidationFlags and InvalidationFlag.Size != 0) {
                 onInvalidateTransformations()
                 recursiveInvalidationFlags = InvalidationFlag.Transformations
             }
@@ -553,6 +580,19 @@ abstract class ExtendedEntity : Entity(0f, 0f), ITouchArea, IModifierChain {
                 this.invalidationFlags = 0
             }
         }
+
+        if (handleRecursively) {
+            mChildren?.fastForEach { child ->
+                if (child is ExtendedEntity) {
+                    child.handleInvalidation(true)
+                }
+            }
+        }
+    }
+
+    override fun onManagedDraw(gl: GL10, camera: Camera) {
+
+        handleInvalidation(false)
 
         gl.glPushMatrix()
         onApplyTransformations(gl, camera)

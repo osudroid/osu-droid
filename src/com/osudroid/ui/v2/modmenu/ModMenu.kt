@@ -16,7 +16,6 @@ import com.osudroid.multiplayer.Multiplayer
 import com.osudroid.multiplayer.RoomScene
 import com.osudroid.ui.OsuColors
 import com.reco1l.osu.*
-import com.osudroid.ui.v1.SettingsFragment
 import com.reco1l.andengine.ui.TextButton
 import com.reco1l.toolkt.kotlin.*
 import com.reco1l.toolkt.kotlin.async
@@ -104,7 +103,11 @@ object ModMenu : ExtendedScene() {
 
                     attachChild(TextButton().apply {
                         text = "Back"
-                        leadingIcon = ExtendedSprite(ResourceManager.getInstance().getTexture("back-arrow"))
+                        leadingIcon = ExtendedSprite().apply {
+                            textureRegion = ResourceManager.getInstance().getTexture("back-arrow")
+                            width = 28f
+                            height = 28f
+                        }
                         onActionUp = {
                             ResourceManager.getInstance().getSound("click-short-confirm")?.play()
                             back()
@@ -115,7 +118,11 @@ object ModMenu : ExtendedScene() {
                     customizeButton = TextButton().apply {
                         text = "Customize"
                         isEnabled = false
-                        leadingIcon = ExtendedSprite(ResourceManager.getInstance().getTexture("tune"))
+                        leadingIcon = ExtendedSprite().apply {
+                            textureRegion = ResourceManager.getInstance().getTexture("tune")
+                            width = 28f
+                            height = 28f
+                        }
                         onActionUp = {
                             ResourceManager.getInstance().getSound("click-short-confirm")?.play()
                             if (customizationMenu.isVisible) {
@@ -130,14 +137,19 @@ object ModMenu : ExtendedScene() {
 
                     attachChild(TextButton().apply {
                         text = "Clear"
-                        leadingIcon = ExtendedSprite(ResourceManager.getInstance().getTexture("backspace"))
-                        theme = TextButtonTheme(
-                            backgroundColor = 0xFF342121,
-                            textColor = 0xFFFFBFBF,
-                        )
+                        color = ColorARGB(0xFFFFBFBF)
+                        background?.color = ColorARGB(0xFF342121)
+                        leadingIcon = ExtendedSprite().apply {
+                            textureRegion = ResourceManager.getInstance().getTexture("backspace")
+                            width = 28f
+                            height = 28f
+                        }
                         onActionUp = {
                             ResourceManager.getInstance().getSound("click-short-confirm")?.play()
                             clear()
+                            Theme.current = Theme(
+                                ColorARGB.White
+                            )
                         }
                         onActionCancel = { ResourceManager.getInstance().getSound("click-short")?.play() }
                     })
@@ -155,13 +167,20 @@ object ModMenu : ExtendedScene() {
                         origin = Anchor.TopRight
                         spacing = 10f
 
-                        +LabeledBadge("Score multiplier", "1.00x").apply { scoreMultiplierBadge = this }
-                        +LabeledBadge("Star rating", "0.0").apply { starRatingBadge = this }
+                        scoreMultiplierBadge = labeledBadge {
+                            label = "Score multiplier"
+                            value = "1.00x"
+                        }
 
-                        +Badge("Ranked").apply {
+                        starRatingBadge = labeledBadge {
+                            label = "Star rating"
+                            value = "0.00"
+                        }
+
+                        rankedBadge = badge {
+                            text = "Ranked"
                             background!!.color = ColorARGB(0xFF83DF6B)
                             color = ColorARGB(0xFF161622)
-                            rankedBadge = this
                         }
                     }
 
@@ -171,11 +190,26 @@ object ModMenu : ExtendedScene() {
                         anchor = Anchor.TopRight
                         spacing = 10f
 
-                        +LabeledBadge("AR", "0.00").apply { arBadge = this }
-                        +LabeledBadge("OD", "0.00").apply { odBadge = this }
-                        +LabeledBadge("CS", "0.00").apply { csBadge = this }
-                        +LabeledBadge("HP", "0.00").apply { hpBadge = this }
-                        +LabeledBadge("BPM", "0.0").apply { bpmBadge = this }
+                        arBadge = labeledBadge {
+                            label = "AR"
+                            value = "0.00"
+                        }
+                        odBadge = labeledBadge {
+                            label = "OD"
+                            value = "0.00"
+                        }
+                        csBadge = labeledBadge {
+                            label = "CS"
+                            value = "0.00"
+                        }
+                        hpBadge = labeledBadge {
+                            label = "HP"
+                            value = "0.00"
+                        }
+                        bpmBadge = labeledBadge {
+                            label = "BPM"
+                            value = "0.0"
+                        }
                     }
                 })
             })
@@ -291,7 +325,7 @@ object ModMenu : ExtendedScene() {
             starRatingBadge.background!!.clearEntityModifiers()
             ensureActive()
 
-            starRatingBadge.valueText.text = "%.2f".format(attributes.starRating)
+            starRatingBadge.valueEntity.text = "%.2f".format(attributes.starRating)
             starRatingBadge.background!!.colorTo(OsuColors.getStarRatingColor(attributes.starRating), 0.1f)
 
             if (attributes.starRating >= 6.5) {
@@ -302,8 +336,8 @@ object ModMenu : ExtendedScene() {
                 starRatingBadge.fadeTo(0.75f, 0.1f)
             }
 
-            songMenu.changeDimensionInfo(selectedBeatmap)
-            songMenu.setStarsDisplay(GameHelper.Round(attributes.starRating, 2))
+            //songMenu.changeDimensionInfo(selectedBeatmap)
+            //songMenu.setStarsDisplay(GameHelper.Round(attributes.starRating, 2))
         }
     }
 
@@ -502,13 +536,13 @@ object ModMenu : ExtendedScene() {
 
         val newText = if (finalValue is Float || finalValue is Double) "%.2f".format(finalValue) else finalValue.toString()
 
-        if (valueText.text == newText) {
+        if (valueEntity.text == newText) {
             return
         }
-        valueText.text = newText
+        valueEntity.text = newText
 
-        valueText.clearEntityModifiers()
-        valueText.colorTo(ColorARGB(when {
+        valueEntity.clearEntityModifiers()
+        valueEntity.colorTo(ColorARGB(when {
             initialValue < finalValue -> 0xFFF78383
             initialValue > finalValue -> 0xFF40CF5D
             else -> 0xFFFFFFFF

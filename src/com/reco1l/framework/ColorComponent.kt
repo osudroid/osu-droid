@@ -51,6 +51,13 @@ value class ColorARGB(private val hex: Int) {
         alpha = alpha * other.alpha
     )
 
+    operator fun times(scalar: Float) = ColorARGB(
+        red = red * scalar,
+        green = green * scalar,
+        blue = blue * scalar,
+        alpha = alpha
+    )
+
 
     fun copy(
         red: Float = this.red,
@@ -58,6 +65,7 @@ value class ColorARGB(private val hex: Int) {
         blue: Float = this.blue,
         alpha: Float = this.alpha
     ) = ColorARGB(red, green, blue, alpha)
+
 
     fun toInt() = hex
 

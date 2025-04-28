@@ -16,6 +16,7 @@ import ru.nsu.ccfit.zuev.osu.*
 class ModIcon(mod: Mod) : Container() {
 
     init {
+        inheritAncestorsColor = false
 
         val texture = ResourceManager.getInstance().getTexture(mod.textureName)
 

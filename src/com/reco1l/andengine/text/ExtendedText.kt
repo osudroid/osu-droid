@@ -3,9 +3,12 @@ package com.reco1l.andengine.text
 import com.reco1l.andengine.*
 import com.reco1l.andengine.buffered.*
 import com.reco1l.andengine.buffered.VertexBuffer
+import com.reco1l.andengine.container.*
+import com.reco1l.andengine.ui.*
 import com.reco1l.toolkt.kotlin.*
 import org.anddev.andengine.engine.camera.*
 import org.anddev.andengine.opengl.font.*
+import ru.nsu.ccfit.zuev.osu.*
 import javax.microedition.khronos.opengles.*
 import javax.microedition.khronos.opengles.GL10.*
 import javax.microedition.khronos.opengles.GL11.GL_STATIC_DRAW
@@ -270,9 +273,93 @@ open class ExtendedText : BufferedEntity<CompoundBuffer>() {
 
 
     companion object {
-
         private const val VERTICES_PER_CHARACTER = 6
+    }
 
+}
+
+
+/**
+ * A compound text entity that can be displayed with leading and trailing icons.
+ */
+open class CompoundText : LinearContainer() {
+
+    /**
+     * The text entity.
+     */
+    val textEntity = ExtendedText().apply {
+        font = ResourceManager.getInstance().getFont("smallFont")
+        anchor = Anchor.CenterLeft
+        origin = Anchor.CenterLeft
+    }
+
+
+    //region Shortcuts
+
+    /**
+     * The text to be displayed.
+     */
+    var text by textEntity::text
+
+    /**
+     * The text font.
+     */
+    var font by textEntity::font
+
+    /**
+     * The text alignment.
+     */
+    var alignment by textEntity::alignment
+
+    //endregion
+
+    //region Icons
+
+    /**
+     * The leading icon.
+     */
+    var leadingIcon: ExtendedEntity? = null
+        set(value) {
+            if (field != value) {
+                field?.detachSelf()
+                field = value
+
+                if (value != null) {
+                    onIconChange(value)
+                    attachChild(value, 0)
+                }
+            }
+        }
+
+    /**
+     * The trailing icon.
+     */
+    var trailingIcon: ExtendedEntity? = null
+        set(value) {
+            if (field != value) {
+                field?.detachSelf()
+                field = value
+
+                if (value != null) {
+                    onIconChange(value)
+                    attachChild(value)
+                }
+            }
+        }
+
+    /**
+     * Called when one of the icons changes.
+     */
+    open var onIconChange: (ExtendedEntity) -> Unit = { icon ->
+        icon.width = 28f
+        icon.height = 28f
+    }
+
+    //endregion
+
+
+    init {
+        +textEntity
     }
 
 }

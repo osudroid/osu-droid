@@ -8,7 +8,6 @@ import com.reco1l.andengine.ui.*
 import com.reco1l.andengine.ui.form.*
 import com.reco1l.framework.*
 import com.reco1l.framework.math.*
-import com.reco1l.osu.updateThread
 import com.reco1l.toolkt.kotlin.*
 import com.rian.osu.mods.*
 import ru.nsu.ccfit.zuev.osu.ResourceManager
@@ -23,7 +22,7 @@ class ModCustomizationMenu : Modal(
         x = 60f
         y = 90f
         scaleCenter = Anchor.TopCenter
-        clipChildren = true
+        clipToBounds = true
 
         +LinearContainer().apply {
             width = FillParent
@@ -34,13 +33,7 @@ class ModCustomizationMenu : Modal(
 ) {
 
     private val modSettings: LinearContainer = content[0]
-
     private val modSettingComponents = mutableListOf<IModSettingComponent<*>>()
-
-
-    init {
-        theme = ModalTheme(backgroundColor = 0xFF181828)
-    }
 
 
     //region Mods

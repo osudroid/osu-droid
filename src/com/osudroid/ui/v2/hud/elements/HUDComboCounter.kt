@@ -39,7 +39,7 @@ class HUDComboCounter : HUDElement() {
 
 
     init {
-        onMeasureContentSize()
+        onContentChanged()
     }
 
 

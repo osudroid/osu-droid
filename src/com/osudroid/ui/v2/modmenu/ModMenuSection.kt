@@ -35,7 +35,7 @@ class ModMenuSection(name: String, mods: List<Mod>) : LinearContainer() {
             scrollAxes = Axes.Y
             width = FillParent
             height = FillParent
-            clipChildren = true
+            clipToBounds = true
 
             +LinearContainer().apply {
                 width = FillParent

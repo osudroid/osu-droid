@@ -121,4 +121,3 @@ open class Box : BufferedEntity<BoxVBO>() {
     }
 
 }
-

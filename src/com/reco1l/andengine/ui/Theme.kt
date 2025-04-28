@@ -1,23 +1,39 @@
 package com.reco1l.andengine.ui
 
-/**
- * An interface for themes.
- */
-interface ITheme
+import com.reco1l.andengine.*
+import com.reco1l.framework.*
 
 /**
- * An interface for entities that have a theme.
+ * A theme is a set of colors and styles that can be applied to an entity.
  */
-interface IWithTheme<T : ITheme?> {
+data class Theme(
 
     /**
-     * The theme of the entity.
+     * The accent color of the theme.
      */
-    var theme: T
+    val accentColor: ColorARGB = ColorARGB(0xFFC2CAFF),
 
+) {
+    companion object {
+
+        /**
+         * The current theme. This is used to apply the theme to all entities that support theming.
+         */
+        var current = Theme()
+            set(value) {
+                if (field != value) {
+                    field = value
+                    ExtendedEngine.Current.onThemeChange(value)
+                }
+            }
+
+    }
+}
+
+interface IThemeable {
 
     /**
-     * Called when the theme changes.
+     * Called when the theme is changed. This is used to apply the theme to the entity.
      */
-    fun onThemeChanged()
+    var onThemeChange: ExtendedEntity.(theme: Theme) -> Unit
 }
