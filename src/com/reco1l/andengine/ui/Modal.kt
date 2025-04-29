@@ -23,7 +23,7 @@ open class Modal(
 ) : ExtendedEntity() {
 
     override var onThemeChange: ExtendedEntity.(Theme) -> Unit = { theme ->
-        content.background?.color = theme.accentColor * 0.1f
+        content.background?.color = theme.accentColor * 0.15f
     }
 
 
