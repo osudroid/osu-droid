@@ -144,23 +144,25 @@ class ExtendedEngine(val context: Activity, options: EngineOptions) : Engine(opt
     }
 
 
-    private fun IEntity.onKeyDown(keyCode: Int, event: KeyEvent): Boolean {
+    private fun IEntity.onKeyPress(keyCode: Int, event: KeyEvent): Boolean {
 
         for (i in 0 until childCount) {
-            if (getChild(i).onKeyDown(keyCode, event)) {
+            if (getChild(i).onKeyPress(keyCode, event)) {
                 return true
             }
         }
 
-        if (this is IListensKeyInput) {
-            return onKeyDown(keyCode, event)
+        if (this is ExtendedEntity) {
+            onKeyPress(keyCode, event)
         }
-
         return false
     }
 
-    fun onKeyDown(keyCode: Int, event: KeyEvent): Boolean {
-        return scene?.onKeyDown(keyCode, event) ?: false
+    /**
+     * Called when a key is pressed.
+     */
+    fun onKeyPress(keyCode: Int, event: KeyEvent): Boolean {
+        return scene?.onKeyPress(keyCode, event) ?: false
     }
 
 

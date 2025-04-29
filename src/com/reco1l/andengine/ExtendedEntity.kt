@@ -824,6 +824,13 @@ abstract class ExtendedEntity : Entity(0f, 0f), ITouchArea, IModifierChain, IThe
         inputBindings.fill(null)
     }
 
+    /**
+     * Called when a key is pressed.
+     */
+    open fun onKeyPress(keyCode: Int, event: KeyEvent): Boolean {
+        return false
+    }
+
     override fun onAreaTouched(event: TouchEvent, localX: Float, localY: Float): Boolean {
 
         val inputBinding = inputBindings.getOrNull(event.pointerID)
