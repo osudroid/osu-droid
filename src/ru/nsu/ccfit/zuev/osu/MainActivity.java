@@ -735,7 +735,7 @@ public class MainActivity extends BaseGameActivity implements
             return super.onKeyDown(keyCode, event);
         }
 
-        if (ExtendedEngine.getCurrent().onKeyDown(keyCode, event)) {
+        if (ExtendedEngine.getCurrent().onKeyPress(keyCode, event)) {
             return true;
         }
 
