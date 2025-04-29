@@ -11,7 +11,7 @@ import ru.nsu.ccfit.zuev.osu.*
 class Checkbox(initialValue: Boolean = false) : Control<Boolean>(initialValue) {
 
     override var onThemeChange: ExtendedEntity.(Theme) -> Unit = { theme ->
-        background?.color = if (value) theme.accentColor * 0.5f else theme.accentColor * 0.15f
+        background?.color = if (value) theme.accentColor * 0.5f else theme.accentColor * 0.25f
         foreground?.color = if (value) theme.accentColor else theme.accentColor * 0.2f
         checkSprite.color = theme.accentColor
     }
@@ -49,7 +49,7 @@ class Checkbox(initialValue: Boolean = false) : Control<Boolean>(initialValue) {
         super.onValueChanged()
 
         background!!.clearModifiers(ModifierType.Color)
-        background!!.colorTo(if (value) Theme.current.accentColor * 0.5f else Theme.current.accentColor * 0.15f, 0.1f)
+        background!!.colorTo(if (value) Theme.current.accentColor * 0.5f else Theme.current.accentColor * 0.25f, 0.1f)
 
         foreground!!.clearModifiers(ModifierType.Color)
         foreground!!.colorTo(if (value) Theme.current.accentColor else Theme.current.accentColor * 0.2f, 0.1f)
