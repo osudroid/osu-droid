@@ -2,6 +2,7 @@ package com.reco1l.andengine.ui
 
 import com.reco1l.andengine.*
 import com.reco1l.andengine.container.*
+import com.reco1l.andengine.info.*
 import com.reco1l.andengine.shape.*
 import com.reco1l.framework.math.*
 import org.anddev.andengine.input.touch.*
@@ -85,6 +86,8 @@ open class Slider(initialValue: Float = 0f) : Control<Float>(initialValue) {
         origin = Anchor.Center
         cornerRadius = 12f
         inheritAncestorsColor = false
+        depthInfo = DepthInfo.Less
+        clearInfo = ClearInfo.ClearDepthBuffer
     }
 
     private val progressBar = Box().apply {
@@ -96,7 +99,9 @@ open class Slider(initialValue: Float = 0f) : Control<Float>(initialValue) {
         foreground = Box().apply {
             paintStyle = PaintStyle.Outline
             cornerRadius = 12f
+            depthInfo = DepthInfo.Default
         }
+        depthInfo = DepthInfo.Default
     }
 
 
@@ -113,8 +118,8 @@ open class Slider(initialValue: Float = 0f) : Control<Float>(initialValue) {
             }
         }
 
-        attachChild(progressBar)
         attachChild(thumb)
+        attachChild(progressBar)
     }
 
 
