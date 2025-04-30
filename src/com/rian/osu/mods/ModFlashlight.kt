@@ -41,26 +41,6 @@ class ModFlashlight : Mod() {
         put("areaFollowDelay", followDelay)
     }
 
-    override fun equals(other: Any?): Boolean {
-        if (other === this) {
-            return true
-        }
-
-        if (other !is ModFlashlight) {
-            return false
-        }
-
-        return super.equals(other)
-    }
-
-    override fun hashCode(): Int {
-        var result = super.hashCode()
-
-        result = 31 * result + followDelay.hashCode()
-
-        return result
-    }
-
     override fun toString(): String {
         if (followDelay == DEFAULT_FOLLOW_DELAY) {
             return super.toString()

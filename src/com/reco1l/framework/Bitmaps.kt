@@ -3,11 +3,7 @@
 package com.reco1l.framework
 
 import android.graphics.*
-import com.reco1l.*
 import kotlin.random.*
-
-
-
 
 /**
  * Converts the bitmap to a safe for work version where the content is black and the bounds are red.

@@ -14,7 +14,5 @@ class ModAutoplay : Mod() {
         ModRelax::class, ModAutopilot::class, ModPerfect::class, ModSuddenDeath::class
     )
 
-    override fun equals(other: Any?) = other === this || other is ModAutoplay
-    override fun hashCode() = super.hashCode()
     override fun deepCopy() = ModAutoplay()
 }

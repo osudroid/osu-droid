@@ -54,8 +54,6 @@ class ModHardRock : Mod(), IModApplicableToDifficulty, IModApplicableToHitObject
 
     private fun applySetting(value: Float, ratio: Float = ADJUST_RATIO) = min(value * ratio, 10f)
 
-    override fun equals(other: Any?) = other === this || other is ModHardRock
-    override fun hashCode() = super.hashCode()
     override fun deepCopy() = ModHardRock()
 
     companion object {

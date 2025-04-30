@@ -10,7 +10,5 @@ class ModScoreV2 : Mod() {
     override val type = ModType.Conversion
     override val isValidForMultiplayerAsFreeMod = false
 
-    override fun equals(other: Any?) = other === this || other is ModScoreV2
-    override fun hashCode() = super.hashCode()
     override fun deepCopy() = ModScoreV2()
 }

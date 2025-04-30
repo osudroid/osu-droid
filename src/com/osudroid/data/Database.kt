@@ -57,6 +57,12 @@ object DatabaseManager {
     val blockAreaTable
         get() = database.getBlockAreaTable()
 
+    /**
+     * Get the mod preset table DAO.
+     */
+    @JvmStatic
+    val modPresetTable
+        get() = database.getModPresetTable()
 
     private lateinit var database: DroidDatabase
 
@@ -231,7 +237,8 @@ object DatabaseManager {
         ScoreInfo::class,
         BeatmapSetCollection::class,
         BeatmapSetCollection_BeatmapSetInfo::class,
-        BlockArea::class
+        BlockArea::class,
+        ModPreset::class
     ]
 )
 abstract class DroidDatabase : RoomDatabase() {
@@ -245,4 +252,6 @@ abstract class DroidDatabase : RoomDatabase() {
     abstract fun getScoreInfoTable(): IScoreInfoDAO
 
     abstract fun getBlockAreaTable(): IBlockAreaDAO
+
+    abstract fun getModPresetTable(): IModPresetDAO
 }

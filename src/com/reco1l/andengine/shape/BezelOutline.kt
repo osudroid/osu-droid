@@ -2,11 +2,8 @@ package com.reco1l.andengine.shape
 
 import com.reco1l.andengine.buffered.*
 import com.reco1l.andengine.shape.BezelOutline.*
-import com.reco1l.andengine.shape.PaintStyle.*
 import com.reco1l.framework.*
-import com.reco1l.toolkt.*
 import org.anddev.andengine.opengl.util.*
-import java.nio.*
 import javax.microedition.khronos.opengles.*
 import javax.microedition.khronos.opengles.GL10.*
 import javax.microedition.khronos.opengles.GL11.*

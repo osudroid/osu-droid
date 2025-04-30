@@ -24,7 +24,5 @@ class ModSmallCircle : Mod(), IModApplicableToDifficulty, IMigratableMod {
         }
     }
 
-    override fun equals(other: Any?) = other === this || other is ModSmallCircle
-    override fun hashCode() = super.hashCode()
     override fun deepCopy() = ModSmallCircle()
 }

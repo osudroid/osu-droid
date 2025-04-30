@@ -5,7 +5,6 @@ import android.content.Context
 import android.content.res.TypedArray
 import android.os.Parcel
 import android.os.Parcelable
-import android.text.TextUtils
 import android.util.AttributeSet
 import android.view.KeyEvent
 import android.view.inputmethod.EditorInfo.IME_ACTION_DONE

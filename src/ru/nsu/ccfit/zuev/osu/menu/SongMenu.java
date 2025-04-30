@@ -1041,6 +1041,7 @@ public class SongMenu implements IUpdateHandler, MenuItemListener,
         beatmapCreatorText.setText(mapperStr);
         beatmapHitObjectsText.setText(binfoStr2);
         changeDimensionInfo(beatmapInfo);
+        setStarsDisplay(beatmapInfo.getStarRating());
         cancelCalculationJobs();
 
         calculationJob = Execution.async(scope -> {
@@ -1066,23 +1067,12 @@ public class SongMenu implements IUpdateHandler, MenuItemListener,
                 // Copy the mods to avoid concurrent modification
                 var mods = ModMenu.INSTANCE.getEnabledMods().deepCopy().values();
 
-                switch (Config.getDifficultyAlgorithm()) {
-                    case droid -> {
-                        var attributes = BeatmapDifficultyCalculator.calculateDroidDifficulty(
-                            data, mods, scope
-                        );
+                var attributes = switch (Config.getDifficultyAlgorithm()) {
+                    case droid -> BeatmapDifficultyCalculator.calculateDroidDifficulty(data, mods, scope);
+                    case standard -> BeatmapDifficultyCalculator.calculateStandardDifficulty(data, mods, scope);
+                };
 
-                        setStarsDisplay(GameHelper.Round(attributes.starRating, 2));
-                    }
-
-                    case standard -> {
-                        var attributes = BeatmapDifficultyCalculator.calculateStandardDifficulty(
-                            data, mods, scope
-                        );
-
-                        setStarsDisplay(GameHelper.Round(attributes.starRating, 2));
-                    }
-                }
+                setStarsDisplay(GameHelper.Round(attributes.starRating, 2));
             }
         });
     }
