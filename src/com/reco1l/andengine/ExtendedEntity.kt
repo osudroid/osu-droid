@@ -10,6 +10,7 @@ import com.reco1l.andengine.ui.*
 import com.reco1l.framework.*
 import com.reco1l.framework.math.*
 import com.reco1l.toolkt.kotlin.*
+import org.anddev.andengine.collision.*
 import org.anddev.andengine.engine.camera.*
 import org.anddev.andengine.entity.*
 import org.anddev.andengine.entity.scene.*
@@ -17,6 +18,7 @@ import org.anddev.andengine.entity.scene.Scene.*
 import org.anddev.andengine.input.touch.*
 import org.anddev.andengine.opengl.util.*
 import org.anddev.andengine.util.*
+import org.anddev.andengine.util.constants.Constants.*
 import javax.microedition.khronos.opengles.*
 import kotlin.math.*
 
@@ -651,7 +653,25 @@ abstract class ExtendedEntity : Entity(0f, 0f), ITouchArea, IModifierChain, IThe
             return false
         }
 
-        return EntityCollisionChecker.contains(this, x, y, parent is Scene)
+        VERTICES_WRAPPER[0 + VERTEX_INDEX_X] = 0f
+        VERTICES_WRAPPER[0 + VERTEX_INDEX_Y] = 0f
+
+        VERTICES_WRAPPER[2 + VERTEX_INDEX_X] = width
+        VERTICES_WRAPPER[2 + VERTEX_INDEX_Y] = 0f
+
+        VERTICES_WRAPPER[4 + VERTEX_INDEX_X] = width
+        VERTICES_WRAPPER[4 + VERTEX_INDEX_Y] = height
+
+        VERTICES_WRAPPER[6 + VERTEX_INDEX_X] = 0f
+        VERTICES_WRAPPER[6 + VERTEX_INDEX_Y] = height
+
+        if (parent is Scene) {
+            localToSceneTransformation.transform(VERTICES_WRAPPER)
+        } else {
+            localToParentTransformation.transform(VERTICES_WRAPPER)
+        }
+
+        return ShapeCollisionChecker.checkContains(VERTICES_WRAPPER, VERTICES_WRAPPER.size, x, y)
     }
 
     //endregion
@@ -893,6 +913,8 @@ abstract class ExtendedEntity : Entity(0f, 0f), ITouchArea, IModifierChain, IThe
          */
         const val FitParent = -3f
 
+
+        private val VERTICES_WRAPPER = FloatArray(8)
 
         private val DEBUG_FOREGROUND by lazy {
             Box().apply {
