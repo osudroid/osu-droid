@@ -85,14 +85,16 @@ object ModMenu : ExtendedScene() {
             height = FillParent
             orientation = Orientation.Vertical
             background = Box().apply {
-                color = ColorARGB(0xFF161622)
-                alpha = 0.95f
+                onThemeChange = {
+                    color = it.accentColor * 0.1f
+                    alpha = 0.9f
+                }
             }
 
             attachChild(Container().apply {
                 width = FillParent
                 height = MatchContent
-                padding = Vec4(60f, 20f)
+                padding = Vec4(60f, 12f)
 
                 attachChild(LinearContainer().apply {
                     orientation = Orientation.Horizontal
@@ -137,6 +139,7 @@ object ModMenu : ExtendedScene() {
 
                     attachChild(TextButton().apply {
                         text = "Clear"
+                        onThemeChange = {}
                         color = ColorARGB(0xFFFFBFBF)
                         background?.color = ColorARGB(0xFF342121)
                         leadingIcon = ExtendedSprite().apply {
@@ -147,9 +150,6 @@ object ModMenu : ExtendedScene() {
                         onActionUp = {
                             ResourceManager.getInstance().getSound("click-short-confirm")?.play()
                             clear()
-                            Theme.current = Theme(
-                                ColorARGB.White
-                            )
                         }
                         onActionCancel = { ResourceManager.getInstance().getSound("click-short")?.play() }
                     })
@@ -181,6 +181,7 @@ object ModMenu : ExtendedScene() {
                             text = "Ranked"
                             background!!.color = ColorARGB(0xFF83DF6B)
                             color = ColorARGB(0xFF161622)
+                            onThemeChange = {}
                         }
                     }
 
@@ -336,8 +337,8 @@ object ModMenu : ExtendedScene() {
                 starRatingBadge.fadeTo(0.75f, 0.1f)
             }
 
-            //songMenu.changeDimensionInfo(selectedBeatmap)
-            //songMenu.setStarsDisplay(GameHelper.Round(attributes.starRating, 2))
+            songMenu.changeDimensionInfo(selectedBeatmap)
+            songMenu.setStarsDisplay(GameHelper.Round(attributes.starRating, 2))
         }
     }
 
@@ -460,10 +461,10 @@ object ModMenu : ExtendedScene() {
             text = if (isRanked) "Ranked" else "Unranked"
 
             clearEntityModifiers()
-            colorTo(if (isRanked) 0xFF161622 else 0xFFFFFFFF, 0.1f)
+            colorTo(if (isRanked) ColorARGB(0xFF161622) else Theme.current.accentColor, 0.1f)
 
             background!!.clearEntityModifiers()
-            background!!.colorTo(if (isRanked) 0xFF83DF6B else 0xFF1E1E2E, 0.1f)
+            background!!.colorTo(if (isRanked) ColorARGB(0xFF83DF6B) else Theme.current.accentColor * 0.15f, 0.1f)
         }
 
         val beatmap = GlobalManager.getInstance().selectedBeatmap

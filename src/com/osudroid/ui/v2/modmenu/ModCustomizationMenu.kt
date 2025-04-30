@@ -92,8 +92,9 @@ class ModCustomizationMenu : Modal(
                 padding = Vec4(20f, 14f)
                 spacing = 12f
                 background = Box().apply {
-                    color = ColorARGB(0xFF1A1A2B)
-                    cornerRadius = 16f
+                    color = ColorARGB.Black
+                    alpha = 0.05f
+                    cornerRadius = 12f
                 }
 
                 +ModIcon(mod).apply {
@@ -108,7 +109,10 @@ class ModCustomizationMenu : Modal(
                     origin = Anchor.CenterLeft
                     font = ResourceManager.getInstance().getFont("smallFont")
                     text = mod.name.uppercase()
-                    color = ColorARGB(0xFF8282A8)
+                    onThemeChange = {
+                        color = it.accentColor
+                        alpha = 0.9f
+                    }
                 }
             }
 
