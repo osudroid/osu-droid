@@ -4,6 +4,7 @@ import com.rian.osu.GameMode
 import com.rian.osu.beatmap.Beatmap
 import com.rian.osu.beatmap.hitobject.HitCircle
 import com.rian.osu.utils.CircleSizeCalculator
+import kotlin.collections.forEach
 import kotlin.math.pow
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.ensureActive
@@ -36,6 +37,14 @@ class ModReplayV6 : Mod(), IModApplicableToBeatmap {
             return
         }
 
+        // Reset stacking
+        objects.forEach {
+            scope?.ensureActive()
+
+            it.difficultyStackHeight = 0
+            it.gameplayStackHeight = 0
+        }
+
         val droidDifficultyScale =
             CircleSizeCalculator.standardScaleToDroidDifficultyScale(objects[0].difficultyScale, true)
 
@@ -53,13 +62,13 @@ class ModReplayV6 : Mod(), IModApplicableToBeatmap {
             if (current is HitCircle && next.startTime - current.startTime < maxDeltaTime) {
                 val distanceSquared = next.position.getDistance(current.position).pow(2)
 
-                next.difficultyStackHeight =
-                    if (distanceSquared < droidDifficultyScale) current.difficultyStackHeight + 1
-                    else 0
+                if (distanceSquared < droidDifficultyScale) {
+                    next.difficultyStackHeight = current.difficultyStackHeight + 1
+                }
 
-                next.gameplayStackHeight =
-                    if (distanceSquared < current.gameplayScale) current.gameplayStackHeight + 1
-                    else 0
+                if (distanceSquared < current.gameplayScale) {
+                    next.gameplayStackHeight = current.gameplayStackHeight + 1
+                }
             }
         }
     }
