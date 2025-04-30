@@ -353,6 +353,8 @@ open class CompoundText : LinearContainer() {
     open var onIconChange: (ExtendedEntity) -> Unit = { icon ->
         icon.width = 28f
         icon.height = 28f
+        icon.anchor = Anchor.CenterLeft
+        icon.origin = Anchor.CenterLeft
     }
 
     //endregion
