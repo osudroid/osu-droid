@@ -4,7 +4,6 @@ import com.reco1l.andengine.*
 import com.reco1l.andengine.buffered.*
 import com.reco1l.andengine.buffered.VertexBuffer
 import com.reco1l.andengine.container.*
-import com.reco1l.andengine.ui.*
 import com.reco1l.toolkt.kotlin.*
 import org.anddev.andengine.engine.camera.*
 import org.anddev.andengine.opengl.font.*
@@ -111,7 +110,9 @@ open class ExtendedText : BufferedEntity<CompoundBuffer>() {
         val font = font ?: return
 
         val lines = text.split('\n').toTypedArray()
-        val linesWidth = IntArray(lines.size) { font.getStringWidth(lines[it]) }
+        val linesWidth = IntArray(lines.size) { i ->
+            lines[i].sumOf { char -> font.getLetter(char).mAdvance } + 2 // +2 for the padding that is applied by the Font class.
+        }
 
         contentWidth = linesWidth.max().toFloat()
         contentHeight = (lines.size * font.lineHeight + (lines.size - 1) * font.lineGap).toFloat()
