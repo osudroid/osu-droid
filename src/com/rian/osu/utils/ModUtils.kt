@@ -36,6 +36,7 @@ object ModUtils {
             ModPrecise(),
             ModReallyEasy(),
             ModRelax(),
+            ModReplayV6(),
             ModScoreV2(),
             ModSmallCircle(),
             ModSuddenDeath(),

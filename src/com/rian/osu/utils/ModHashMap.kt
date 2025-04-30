@@ -308,7 +308,8 @@ open class ModHashMap : HashMap<Class<out Mod>, Mod> {
             ModPerfect(),
             ModSuddenDeath(),
             ModSynesthesia(),
-            ModScoreV2()
+            ModScoreV2(),
+            ModReplayV6()
         )
     }
 }
