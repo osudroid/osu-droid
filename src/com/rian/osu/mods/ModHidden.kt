@@ -4,6 +4,7 @@ import com.rian.osu.beatmap.Beatmap
 import com.rian.osu.beatmap.hitobject.HitObject
 import com.rian.osu.beatmap.hitobject.Slider
 import com.rian.osu.beatmap.sections.BeatmapDifficulty
+import org.json.JSONObject
 
 /**
  * Represents the Hidden mod.
@@ -13,10 +14,40 @@ class ModHidden : Mod(), IModApplicableToBeatmap {
     override val acronym = "HD"
     override val description = "Play with no approach circles and fading circles/sliders."
     override val type = ModType.DifficultyIncrease
-    override val isRanked = true
+
+    override val isRanked
+        get() = usesDefaultSettings
+
     override val incompatibleMods = super.incompatibleMods + ModTraceable::class
 
-    override fun calculateScoreMultiplier(difficulty: BeatmapDifficulty) = 1.06f
+    /**
+     * Whether to only fade approach circles.
+     *
+     * The main object body will not fade when enabled.
+     */
+    @get:JvmName("isOnlyFadeApproachCircles")
+    var onlyFadeApproachCircles by BooleanModSetting(
+        name = "Only fade approach circles",
+        defaultValue = false
+    )
+
+    override fun calculateScoreMultiplier(difficulty: BeatmapDifficulty) = if (usesDefaultSettings) 1.06f else 1f
+
+    override fun copySettings(settings: JSONObject) {
+        super.copySettings(settings)
+
+        onlyFadeApproachCircles = settings.optBoolean("onlyFadeApproachCircles", onlyFadeApproachCircles)
+    }
+
+    override fun serializeSettings(): JSONObject? {
+        if (usesDefaultSettings) {
+            return null
+        }
+
+        return JSONObject().apply {
+            put("onlyFadeApproachCircles", onlyFadeApproachCircles)
+        }
+    }
 
     override fun applyToBeatmap(beatmap: Beatmap) {
         fun applyFadeInAdjustment(hitObject: HitObject) {
@@ -30,7 +61,9 @@ class ModHidden : Mod(), IModApplicableToBeatmap {
         beatmap.hitObjects.objects.forEach { applyFadeInAdjustment(it) }
     }
 
-    override fun deepCopy() = ModHidden()
+    override fun deepCopy() = ModHidden().also {
+        it.onlyFadeApproachCircles = onlyFadeApproachCircles
+    }
 
     companion object {
         const val FADE_IN_DURATION_MULTIPLIER = 0.4
