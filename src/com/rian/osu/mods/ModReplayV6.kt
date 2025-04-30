@@ -13,7 +13,7 @@ import kotlinx.coroutines.ensureActive
  * Some behavior of beatmap parsing was changed in replay version 7. More specifically, stacking behavior now matches
  * osu!stable and osu!lazer.
  *
- * This mod is meant to reapply the stacking behavior prior to replay version 7 to a [Beatmap] that was played in
+ * This [Mod] is meant to reapply the stacking behavior prior to replay version 7 to a [Beatmap] that was played in
  * replays recorded in version 6 and older for replayability and difficulty calculation.
  */
 class ModReplayV6 : Mod(), IModApplicableToBeatmap {
@@ -41,6 +41,8 @@ class ModReplayV6 : Mod(), IModApplicableToBeatmap {
 
             val current = objects[i]
             val next = objects[i + 1]
+
+            next.stackOffsetMultiplier = 4f
 
             if (current is HitCircle && next.startTime - current.startTime < maxDeltaTime) {
                 val distanceSquared = next.position.getDistance(current.position).pow(2)

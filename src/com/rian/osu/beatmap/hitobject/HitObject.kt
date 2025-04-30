@@ -150,7 +150,7 @@ abstract class HitObject(
     /**
      * The multiplier used to calculate stack offset.
      */
-    open var stackOffsetMultiplier = 0f
+    open var stackOffsetMultiplier = -6.4f
         set(value) {
             field = value
 
@@ -336,11 +336,6 @@ abstract class HitObject(
         // Note that this doesn't exactly match the AR>10 visuals as they're classically known, but it feels good.
         // This adjustment is necessary for AR>10, otherwise timePreempt can become smaller leading to hit circles not fully fading in.
         timeFadeIn = 400 * min(1.0, timePreempt / PREEMPT_MIN)
-
-        stackOffsetMultiplier = when (mode) {
-            GameMode.Droid -> 4f
-            GameMode.Standard -> -6.4f
-        }
 
         difficultyScale = when (mode) {
             GameMode.Droid -> {
