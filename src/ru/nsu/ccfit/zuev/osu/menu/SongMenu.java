@@ -692,8 +692,6 @@ public class SongMenu implements IUpdateHandler, MenuItemListener,
             scene.registerTouchArea(scoringSwitcher);
             frontLayer.attachChild(scoringSwitcher);
         }
-
-        ModMenu.INSTANCE.clear();
     }
 
     public void loadFilterFragment() {
