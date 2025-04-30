@@ -6,6 +6,7 @@ import androidx.annotation.NonNull;
 
 import com.rian.osu.mods.LegacyModConverter;
 import com.rian.osu.mods.ModHardRock;
+import com.rian.osu.mods.ModReplayV6;
 import com.rian.osu.utils.ModHashMap;
 import com.rian.osu.utils.ModUtils;
 
@@ -250,6 +251,7 @@ public class Replay {
                         }
 
                         stat.setMod(LegacyModConverter.convert(mod, extraModString));
+                        stat.getMod().put(new ModReplayV6());
                     }
                 }
 
