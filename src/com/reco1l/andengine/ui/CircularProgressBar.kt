@@ -26,15 +26,6 @@ open class CircularProgressBar : Container() {
         }
 
 
-    private val rotatingCircle = circle {
-        width = FillParent
-        height = FillParent
-        rotationCenter = Anchor.Center
-        depthInfo = DepthInfo.Default
-        setPortion(0.25f)
-        color = Theme.current.accentColor
-    }
-
     private val maskingCircle = circle {
         anchor = Anchor.Center
         origin = Anchor.Center
@@ -52,6 +43,15 @@ open class CircularProgressBar : Container() {
         color = Theme.current.accentColor
         alpha = 0.3f
         depthInfo = DepthInfo.Default
+    }
+
+    private val rotatingCircle = circle {
+        width = FillParent
+        height = FillParent
+        rotationCenter = Anchor.Center
+        depthInfo = DepthInfo.Default
+        setPortion(0.25f)
+        color = Theme.current.accentColor
     }
 
 
