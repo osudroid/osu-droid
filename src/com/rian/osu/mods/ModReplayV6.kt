@@ -1,5 +1,6 @@
 package com.rian.osu.mods
 
+import com.rian.osu.GameMode
 import com.rian.osu.beatmap.Beatmap
 import com.rian.osu.beatmap.hitobject.HitCircle
 import com.rian.osu.utils.CircleSizeCalculator
@@ -25,6 +26,10 @@ class ModReplayV6 : Mod(), IModApplicableToBeatmap {
     override val isUserPlayable = false
 
     override fun applyToBeatmap(beatmap: Beatmap, scope: CoroutineScope?) {
+        if (beatmap.mode != GameMode.Droid) {
+            return
+        }
+
         val objects = beatmap.hitObjects.objects
 
         if (objects.isEmpty()) {
