@@ -11,8 +11,14 @@ import ru.nsu.ccfit.zuev.osu.*
 class Checkbox(initialValue: Boolean = false) : Control<Boolean>(initialValue) {
 
     override var onThemeChange: ExtendedEntity.(Theme) -> Unit = { theme ->
-        background?.color = if (value) theme.accentColor * 0.5f else theme.accentColor * 0.25f
-        foreground?.color = if (value) theme.accentColor else theme.accentColor * 0.2f
+        if (value) {
+            background?.color = theme.accentColor * 0.5f
+            foreground?.color = theme.accentColor
+        } else {
+            background?.color = theme.accentColor * 0.25f
+            foreground?.color = theme.accentColor * 0.4f
+        }
+
         checkSprite.color = theme.accentColor
     }
 
@@ -49,14 +55,20 @@ class Checkbox(initialValue: Boolean = false) : Control<Boolean>(initialValue) {
         super.onValueChanged()
 
         background!!.clearModifiers(ModifierType.Color)
-        background!!.colorTo(if (value) Theme.current.accentColor * 0.5f else Theme.current.accentColor * 0.25f, 0.1f)
-
         foreground!!.clearModifiers(ModifierType.Color)
-        foreground!!.colorTo(if (value) Theme.current.accentColor else Theme.current.accentColor * 0.2f, 0.1f)
-
         checkSprite.clearModifiers(ModifierType.Alpha, ModifierType.ScaleXY)
+
+        if (value) {
+            background!!.colorTo(Theme.current.accentColor * 0.5f, 0.1f)
+            foreground!!.colorTo(Theme.current.accentColor, 0.1f)
+            checkSprite.scaleTo(1f, 0.2f, Easing.OutBounce)
+        } else {
+            background!!.colorTo(Theme.current.accentColor * 0.25f, 0.1f)
+            foreground!!.colorTo(Theme.current.accentColor * 0.4f, 0.1f)
+            checkSprite.scaleTo(0f, 0.2f, Easing.OutBounce)
+        }
+
         checkSprite.fadeIn(0.2f)
-        checkSprite.scaleTo(if (value) 1f else 0f, 0.2f, Easing.OutBounce)
     }
 
     override fun onAreaTouched(event: TouchEvent, localX: Float, localY: Float): Boolean {

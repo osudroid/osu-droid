@@ -53,34 +53,40 @@ open class Card(
         foreground = BezelOutline(14f)
         background = Box().apply {
             cornerRadius = 14f
-            color = ColorARGB(0xFF161622)
+            onThemeChange = { color = it.accentColor * 0.15f }
         }
 
         +titleBar.apply {
             width = FillParent
-            padding = Vec4(12f, 16f)
+            padding = Vec4(12f, 8f)
 
             +ExtendedText().apply {
                 font = ResourceManager.getInstance().getFont("smallFont")
                 anchor = Anchor.CenterLeft
                 origin = Anchor.CenterLeft
+                onThemeChange = { color = it.accentColor }
             }
 
             +Triangle().apply {
                 anchor = Anchor.CenterRight
                 origin = Anchor.CenterRight
                 rotationCenter = Anchor.Center
-                alpha = 0.5f
                 width = 16f
                 height = 12f
+                onThemeChange = {
+                    color = it.accentColor
+                    alpha = 0.5f
+                }
             }
         }
 
         +Box().apply {
             width = FillParent
             height = 1f
-            color = ColorARGB.White
-            alpha = 0.025f
+            onThemeChange = {
+                color = it.accentColor
+                alpha = 0.025f
+            }
         }
 
         +content

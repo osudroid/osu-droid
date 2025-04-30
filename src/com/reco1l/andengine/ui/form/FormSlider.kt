@@ -23,6 +23,7 @@ open class FormSlider(initialValue: Float = 0f) : FormControl<Float, Slider>(ini
         origin = Anchor.CenterRight
         padding = Vec4(6f, 0f)
         alignment = Anchor.Center
+        onThemeChange = { color = it.accentColor }
 
         background = Box().apply {
             color = ColorARGB.Black

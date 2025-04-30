@@ -13,7 +13,7 @@ import org.anddev.andengine.input.touch.TouchEvent
 open class Button : LinearContainer() {
 
     override var onThemeChange: ExtendedEntity.(Theme) -> Unit = { theme ->
-        background?.color = if (isSelected) theme.accentColor else theme.accentColor * 0.2f
+        background?.color = if (isSelected) theme.accentColor else theme.accentColor * 0.17f
         color = if (isSelected) theme.accentColor * 0.1f else theme.accentColor
 
         onSelectionChange()
@@ -99,7 +99,7 @@ open class Button : LinearContainer() {
 
         background?.apply {
             clearModifiers(ModifierType.Color)
-            colorTo(if (isSelected) Theme.current.accentColor else Theme.current.accentColor * 0.2f)
+            colorTo(if (isSelected) Theme.current.accentColor else Theme.current.accentColor * 0.17f)
         }
     }
 
