@@ -17,6 +17,7 @@ public class GameHelper {
     private static float healthDrain = 0;
     private static float speedMultiplier = 0;
     private static boolean hidden = false;
+    private static boolean hiddenOnlyFadeApproachCircles = false;
     private static boolean traceable = false;
     private static boolean flashLight = false;
     private static boolean hardrock = false;
@@ -169,6 +170,14 @@ public class GameHelper {
 
     public static void setHidden(final boolean hidden) {
         GameHelper.hidden = hidden;
+    }
+
+    public static boolean isHiddenOnlyFadeApproachCircles() {
+        return hiddenOnlyFadeApproachCircles;
+    }
+
+    public static void setHiddenOnlyFadeApproachCircles(boolean hiddenOnlyFadeApproachCircles) {
+        GameHelper.hiddenOnlyFadeApproachCircles = hiddenOnlyFadeApproachCircles;
     }
 
     public static boolean isTraceable() {

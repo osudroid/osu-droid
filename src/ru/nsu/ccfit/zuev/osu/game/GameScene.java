@@ -817,6 +817,7 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
         GameHelper.setNightCore(lastMods.contains(ModNightCore.class));
         GameHelper.setHalfTime(lastMods.contains(ModHalfTime.class));
         GameHelper.setHidden(lastMods.contains(ModHidden.class));
+        GameHelper.setHiddenOnlyFadeApproachCircles(lastMods.contains(ModHidden.class) && lastMods.ofType(ModHidden.class).isOnlyFadeApproachCircles());
         GameHelper.setTraceable(lastMods.contains(ModTraceable.class));
         GameHelper.setFlashLight(lastMods.contains(ModFlashlight.class));
         GameHelper.setRelaxMod(lastMods.contains(ModRelax.class));
