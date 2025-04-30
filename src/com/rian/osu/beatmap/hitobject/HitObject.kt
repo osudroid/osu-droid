@@ -152,12 +152,14 @@ abstract class HitObject(
      */
     open var stackOffsetMultiplier = -6.4f
         set(value) {
-            field = value
+            if (field != value) {
+                field = value
 
-            difficultyStackOffsetCache.invalidate()
-            difficultyStackedPositionCache.invalidate()
-            gameplayStackOffsetCache.invalidate()
-            gameplayStackedPositionCache.invalidate()
+                difficultyStackOffsetCache.invalidate()
+                difficultyStackedPositionCache.invalidate()
+                gameplayStackOffsetCache.invalidate()
+                gameplayStackedPositionCache.invalidate()
+            }
         }
 
     // Difficulty calculation object positions
@@ -167,10 +169,12 @@ abstract class HitObject(
      */
     open var difficultyStackHeight = 0
         set(value) {
-            field = value
+            if (field != value) {
+                field = value
 
-            difficultyStackOffsetCache.invalidate()
-            difficultyStackedPositionCache.invalidate()
+                difficultyStackOffsetCache.invalidate()
+                difficultyStackedPositionCache.invalidate()
+            }
         }
 
     /**
@@ -232,10 +236,12 @@ abstract class HitObject(
      */
     open var gameplayStackHeight = 0
         set(value) {
-            field = value
+            if (field != value) {
+                field = value
 
-            gameplayStackOffsetCache.invalidate()
-            gameplayStackedPositionCache.invalidate()
+                gameplayStackOffsetCache.invalidate()
+                gameplayStackedPositionCache.invalidate()
+            }
         }
 
     /**
