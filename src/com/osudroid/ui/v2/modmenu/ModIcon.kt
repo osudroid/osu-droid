@@ -22,8 +22,8 @@ class ModIcon(mod: Mod) : Container() {
 
         if (texture is BlankTextureRegion || texture == null) {
             background = Box().apply {
-                cornerRadius = 14f
-                color = ColorARGB(0xFF222234)
+                cornerRadius = 12f
+                applyTheme = { color = it.accentColor * 0.1f }
             }
 
             attachChild(ExtendedText().apply {
@@ -32,6 +32,7 @@ class ModIcon(mod: Mod) : Container() {
                 text = mod.acronym
                 font = ResourceManager.getInstance().getFont("smallFont")
                 alignment = Anchor.Center
+                applyTheme = { color = it.accentColor }
             })
         } else {
             attachChild(ExtendedSprite(texture).apply {
