@@ -110,9 +110,7 @@ open class ExtendedText : BufferedEntity<CompoundBuffer>() {
         val font = font ?: return
 
         val lines = text.split('\n').toTypedArray()
-        val linesWidth = IntArray(lines.size) { i ->
-            lines[i].sumOf { char -> font.getLetter(char).mAdvance } + 2 // +2 for the padding that is applied by the Font class.
-        }
+        val linesWidth = IntArray(lines.size) { i -> lines[i].sumOf { char -> font.getLetter(char).mAdvance } }
 
         contentWidth = linesWidth.max().toFloat()
         contentHeight = (lines.size * font.lineHeight + (lines.size - 1) * font.lineGap).toFloat()
