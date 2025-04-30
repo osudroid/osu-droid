@@ -886,8 +886,8 @@ abstract class ExtendedEntity : Entity(0f, 0f), ITouchArea, IModifierChain, IThe
     //region Cosmetic functions
 
     open fun onThemeChanged(theme: Theme) {
-        background?.applyTheme(theme)
-        foreground?.applyTheme(theme)
+        background?.onThemeChanged(theme)
+        foreground?.onThemeChanged(theme)
 
         applyTheme(theme)
     }
