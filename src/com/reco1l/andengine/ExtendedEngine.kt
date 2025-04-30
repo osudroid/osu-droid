@@ -37,14 +37,10 @@ class ExtendedEngine(val context: Activity, options: EngineOptions) : Engine(opt
      * Sets the current theme for the engine's properties.
      */
     fun onThemeChange(theme: Theme) {
-
         val scene = scene ?: return
 
         fun IEntity.updateTheme() {
-
-            for (i in 0 until childCount) {
-                getChild(i).updateTheme()
-            }
+            callOnChildren { it.updateTheme() }
 
             if (this is ExtendedEntity) {
                 onThemeChanged(theme)
@@ -61,7 +57,7 @@ class ExtendedEngine(val context: Activity, options: EngineOptions) : Engine(opt
 
         fun IEntity.onKeyPress(keyCode: Int, event: KeyEvent): Boolean {
 
-            for (i in 0 until childCount) {
+            for (i in childCount - 1 downTo 0) {
                 if (getChild(i).onKeyPress(keyCode, event)) {
                     return true
                 }
@@ -70,7 +66,6 @@ class ExtendedEngine(val context: Activity, options: EngineOptions) : Engine(opt
             if (this is ExtendedEntity) {
                 onKeyPress(keyCode, event)
             }
-
             return false
         }
 
