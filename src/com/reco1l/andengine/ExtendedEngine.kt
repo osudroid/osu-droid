@@ -2,18 +2,12 @@ package com.reco1l.andengine
 
 import android.app.Activity
 import android.view.*
-import com.osudroid.BuildSettings
-import com.osudroid.debug.EntityDescriptor
-import com.osudroid.debug.EntityInspector
 import com.reco1l.andengine.ui.*
-import com.reco1l.toolkt.kotlin.*
 import org.anddev.andengine.engine.Engine
-import org.anddev.andengine.engine.camera.*
 import org.anddev.andengine.engine.options.EngineOptions
 import org.anddev.andengine.entity.IEntity
 import org.anddev.andengine.entity.scene.*
 import org.anddev.andengine.input.touch.*
-import javax.microedition.khronos.opengles.*
 
 class ExtendedEngine(val context: Activity, options: EngineOptions) : Engine(options) {
 
@@ -39,7 +33,10 @@ class ExtendedEngine(val context: Activity, options: EngineOptions) : Engine(opt
     }
 
 
-    fun setTheme(theme: Theme) {
+    /**
+     * Sets the current theme for the engine's properties.
+     */
+    fun onThemeChange(theme: Theme) {
 
         val scene = scene ?: return
 
@@ -57,6 +54,28 @@ class ExtendedEngine(val context: Activity, options: EngineOptions) : Engine(opt
         scene.updateTheme()
     }
 
+    /**
+     * Called when a key is pressed.
+     */
+    fun onKeyPress(keyCode: Int, event: KeyEvent): Boolean {
+
+        fun IEntity.onKeyPress(keyCode: Int, event: KeyEvent): Boolean {
+
+            for (i in 0 until childCount) {
+                if (getChild(i).onKeyPress(keyCode, event)) {
+                    return true
+                }
+            }
+
+            if (this is ExtendedEntity) {
+                onKeyPress(keyCode, event)
+            }
+
+            return false
+        }
+
+        return scene?.onKeyPress(keyCode, event) ?: false
+    }
 
     override fun onTouchScene(scene: Scene, event: TouchEvent): Boolean {
 
@@ -71,28 +90,6 @@ class ExtendedEngine(val context: Activity, options: EngineOptions) : Engine(opt
         }
 
         return super.onTouchScene(scene, event)
-    }
-
-
-    private fun IEntity.onKeyPress(keyCode: Int, event: KeyEvent): Boolean {
-
-        for (i in 0 until childCount) {
-            if (getChild(i).onKeyPress(keyCode, event)) {
-                return true
-            }
-        }
-
-        if (this is ExtendedEntity) {
-            onKeyPress(keyCode, event)
-        }
-        return false
-    }
-
-    /**
-     * Called when a key is pressed.
-     */
-    fun onKeyPress(keyCode: Int, event: KeyEvent): Boolean {
-        return scene?.onKeyPress(keyCode, event) ?: false
     }
 
 

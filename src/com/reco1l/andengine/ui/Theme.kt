@@ -23,7 +23,7 @@ data class Theme(
             set(value) {
                 if (field != value) {
                     field = value
-                    ExtendedEngine.Current.setTheme(value)
+                    ExtendedEngine.Current.onThemeChange(value)
                 }
             }
 
