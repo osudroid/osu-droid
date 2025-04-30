@@ -54,11 +54,17 @@ object ModUtils {
      * The serialized [Mod]s can be deserialized using [deserializeMods].
      *
      * @param mods The list of [Mod]s to serialize.
+     * @param includeNonUserPlayable Whether to serialize non-user-playable [Mod]s. Defaults to true.
      * @return The serialized [Mod]s in a [JSONArray].
      */
     @JvmStatic
-    fun serializeMods(mods: Iterable<Mod>) = JSONArray().also {
+    @JvmOverloads
+    fun serializeMods(mods: Iterable<Mod>, includeNonUserPlayable: Boolean = true) = JSONArray().also {
         for (mod in mods) {
+            if (!includeNonUserPlayable && !mod.isUserPlayable) {
+                continue
+            }
+
             it.put(mod.serialize())
         }
     }
