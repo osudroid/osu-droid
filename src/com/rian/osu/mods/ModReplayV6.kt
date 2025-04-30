@@ -11,8 +11,8 @@ import kotlinx.coroutines.ensureActive
 /**
  * Represents the Replay V6 mod.
  *
- * Some behavior of beatmap parsing was changed in replay version 7. More specifically, stacking behavior now matches
- * osu!stable and osu!lazer.
+ * Some behavior of beatmap parsing was changed in replay version 7. More specifically, object stacking behavior now
+ * matches osu!stable and osu!lazer.
  *
  * This [Mod] is meant to reapply the stacking behavior prior to replay version 7 to a [Beatmap] that was played in
  * replays recorded in version 6 and older for replayability and difficulty calculation.
@@ -20,7 +20,7 @@ import kotlinx.coroutines.ensureActive
 class ModReplayV6 : Mod(), IModApplicableToBeatmap {
     override val name = "Replay V6"
     override val acronym = "RV6"
-    override val description = "Applies the old behavior of stacking to a beatmap."
+    override val description = "Applies the old object stacking behavior to a beatmap."
     override val type = ModType.System
 
     override val isUserPlayable = false
