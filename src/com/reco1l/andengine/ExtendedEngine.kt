@@ -33,6 +33,21 @@ class ExtendedEngine(val context: Activity, options: EngineOptions) : Engine(opt
     }
 
 
+    fun onSkinChange() {
+        val scene = scene ?: return
+
+        fun IEntity.updateSkin() {
+            callOnChildren { it.updateSkin() }
+
+            if (this is ISkinnable) {
+                onSkinChanged()
+            }
+        }
+
+        scene.updateSkin()
+    }
+
+
     /**
      * Sets the current theme for the engine's properties.
      */
