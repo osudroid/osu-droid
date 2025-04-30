@@ -1,45 +1,34 @@
 package com.osudroid.ui.v2.modmenu
 
+import com.osudroid.ui.v2.*
 import com.reco1l.andengine.*
 import com.reco1l.andengine.container.*
 import com.reco1l.andengine.shape.*
 import com.reco1l.andengine.sprite.*
 import com.reco1l.andengine.text.*
 import com.reco1l.andengine.texture.*
+import com.reco1l.andengine.ui.*
 import com.reco1l.framework.*
+import com.reco1l.osu.*
 import com.rian.osu.mods.*
 import org.anddev.andengine.engine.camera.*
+import org.anddev.andengine.opengl.texture.region.*
 import ru.nsu.ccfit.zuev.osu.*
 import javax.microedition.khronos.opengles.*
 
 /**
  * The icon for a mod in the mod menu.
  */
-class ModIcon(mod: Mod) : Container() {
+class ModIcon(val mod: Mod) : Container(), ISkinnable {
 
     init {
         inheritAncestorsColor = false
+        onSkinChanged()
+    }
 
-        val texture = ResourceManager.getInstance().getTexture(mod.textureName)
 
-        if (texture is BlankTextureRegion || texture == null) {
-            background = Box().apply {
-                applyTheme = { color = it.accentColor * 0.1f }
-            }
-
-            attachChild(ExtendedText().apply {
-                anchor = Anchor.Center
-                origin = Anchor.Center
-                text = mod.acronym
-                font = ResourceManager.getInstance().getFont("smallFont")
-                applyTheme = { color = it.accentColor }
-            })
-        } else {
-            attachChild(ExtendedSprite(texture).apply {
-                width = FillParent
-                height = FillParent
-            })
-        }
+    private fun fetchTextureRegion(): TextureRegion? {
+        return ResourceManager.getInstance().getTexture(mod.textureName)?.takeUnless { it is BlankTextureRegion }
     }
 
 
@@ -53,6 +42,35 @@ class ModIcon(mod: Mod) : Container() {
         (background as? Box)?.cornerRadius = height * 0.2f
 
         super.onManagedDraw(gl, camera)
+    }
+
+    override fun onSkinChanged() = updateThread {
+        detachChildren()
+
+        val texture = fetchTextureRegion()
+
+        if (texture == null) {
+            background = Box().apply {
+                applyTheme = { color = it.accentColor * 0.1f }
+            }
+
+            attachChild(ExtendedText().apply {
+                anchor = Anchor.Center
+                origin = Anchor.Center
+                text = mod.acronym
+                font = ResourceManager.getInstance().getFont("smallFont")
+                applyTheme = { color = it.accentColor }
+            })
+
+            return@updateThread
+        }
+
+        background = null
+
+        attachChild(OsuSkinnableSprite(mod.textureName).apply {
+            width = FillParent
+            height = FillParent
+        })
     }
 
 }
