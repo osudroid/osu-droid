@@ -920,6 +920,10 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
         float timeOffset = 0;
 
         for (var mod : lastMods.values()) {
+            if (!mod.isUserPlayable()) {
+                continue;
+            }
+
             var effect = GameObjectPool.getInstance().getEffect(mod.getTextureName());
 
             effect.init(fgScene, position, scale, Modifiers.sequence(
