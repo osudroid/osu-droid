@@ -250,6 +250,7 @@ abstract class ExtendedEntity : Entity(0f, 0f), ITouchArea, IModifierChain, IThe
                 field?.decoratedEntity = null
                 field = value
                 field?.decoratedEntity = this
+                field?.onThemeChanged(Theme.current)
             }
         }
 
@@ -267,6 +268,7 @@ abstract class ExtendedEntity : Entity(0f, 0f), ITouchArea, IModifierChain, IThe
                 field?.decoratedEntity = null
                 field = value
                 field?.decoratedEntity = this
+                field?.onThemeChanged(Theme.current)
             }
         }
 
