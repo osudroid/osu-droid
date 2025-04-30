@@ -16,7 +16,7 @@ import ru.nsu.ccfit.zuev.osu.ResourceManager
  */
 open class Badge : CompoundText() {
 
-    override var onThemeChange: ExtendedEntity.(Theme) -> Unit = { theme ->
+    override var applyTheme: ExtendedEntity.(Theme) -> Unit = { theme ->
         color = theme.accentColor
         background?.color = theme.accentColor * 0.15f
     }
@@ -34,7 +34,7 @@ open class Badge : CompoundText() {
  */
 open class LabeledBadge : LinearContainer() {
 
-    override var onThemeChange: ExtendedEntity.(Theme) -> Unit = { theme ->
+    override var applyTheme: ExtendedEntity.(Theme) -> Unit = { theme ->
         color = theme.accentColor
         background?.color = theme.accentColor * 0.15f
     }

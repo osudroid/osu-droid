@@ -109,7 +109,7 @@ class ModCustomizationMenu : Modal(
                     origin = Anchor.CenterLeft
                     font = ResourceManager.getInstance().getFont("smallFont")
                     text = mod.name.uppercase()
-                    onThemeChange = {
+                    applyTheme = {
                         color = it.accentColor
                         alpha = 0.9f
                     }

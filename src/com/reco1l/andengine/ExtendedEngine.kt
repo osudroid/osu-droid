@@ -55,7 +55,7 @@ class ExtendedEngine(val context: Activity, options: EngineOptions) : Engine(opt
         }
     }
 
-    fun onThemeChange(theme: Theme) {
+    fun setTheme(theme: Theme) {
 
         val scene = scene ?: return
 
@@ -66,9 +66,7 @@ class ExtendedEngine(val context: Activity, options: EngineOptions) : Engine(opt
             }
 
             if (this is ExtendedEntity) {
-                background?.onThemeChange(theme)
-                foreground?.onThemeChange(theme)
-                onThemeChange(theme)
+                onThemeChanged(theme)
             }
         }
 

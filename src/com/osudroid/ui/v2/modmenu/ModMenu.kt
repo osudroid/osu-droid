@@ -85,7 +85,7 @@ object ModMenu : ExtendedScene() {
             height = FillParent
             orientation = Orientation.Vertical
             background = Box().apply {
-                onThemeChange = {
+                applyTheme = {
                     color = it.accentColor * 0.1f
                     alpha = 0.9f
                 }
@@ -139,7 +139,7 @@ object ModMenu : ExtendedScene() {
 
                     attachChild(TextButton().apply {
                         text = "Clear"
-                        onThemeChange = {}
+                        applyTheme = {}
                         color = ColorARGB(0xFFFFBFBF)
                         background?.color = ColorARGB(0xFF342121)
                         leadingIcon = ExtendedSprite().apply {
@@ -181,7 +181,7 @@ object ModMenu : ExtendedScene() {
                             text = "Ranked"
                             background!!.color = ColorARGB(0xFF83DF6B)
                             color = ColorARGB(0xFF161622)
-                            onThemeChange = {}
+                            applyTheme = {}
                         }
                     }
 

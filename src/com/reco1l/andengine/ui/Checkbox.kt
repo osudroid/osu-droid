@@ -10,7 +10,7 @@ import ru.nsu.ccfit.zuev.osu.*
 
 class Checkbox(initialValue: Boolean = false) : Control<Boolean>(initialValue) {
 
-    override var onThemeChange: ExtendedEntity.(Theme) -> Unit = { theme ->
+    override var applyTheme: ExtendedEntity.(Theme) -> Unit = { theme ->
         if (value) {
             background?.color = theme.accentColor * 0.5f
             foreground?.color = theme.accentColor

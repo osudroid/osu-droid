@@ -23,7 +23,7 @@ data class Theme(
             set(value) {
                 if (field != value) {
                     field = value
-                    ExtendedEngine.Current.onThemeChange(value)
+                    ExtendedEngine.Current.setTheme(value)
                 }
             }
 
@@ -35,5 +35,5 @@ interface IThemeable {
     /**
      * Called when the theme is changed. This is used to apply the theme to the entity.
      */
-    var onThemeChange: ExtendedEntity.(theme: Theme) -> Unit
+    var applyTheme: ExtendedEntity.(theme: Theme) -> Unit
 }

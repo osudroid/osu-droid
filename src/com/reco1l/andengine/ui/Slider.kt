@@ -10,7 +10,7 @@ import kotlin.math.*
 @Suppress("LeakingThis")
 open class Slider(initialValue: Float = 0f) : Control<Float>(initialValue) {
 
-    override var onThemeChange: ExtendedEntity.(Theme) -> Unit = { theme ->
+    override var applyTheme: ExtendedEntity.(Theme) -> Unit = { theme ->
 
         background?.apply {
             color = theme.accentColor * 0.25f

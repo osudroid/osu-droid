@@ -93,21 +93,21 @@ class GameLoaderScene(private val gameScene: GameScene, beatmapInfo: BeatmapInfo
                 text {
                     font = ResourceManager.getInstance().getFont("bigFont")
                     text = beatmapInfo.titleText
-                    onThemeChange = { color = it.accentColor }
+                    applyTheme = { color = it.accentColor }
                 }
 
                 // Difficulty
                 text {
                     font = ResourceManager.getInstance().getFont("middleFont")
                     text = beatmapInfo.version
-                    onThemeChange = { color = it.accentColor }
+                    applyTheme = { color = it.accentColor }
                 }
 
                 // Creator
                 text {
                     font = ResourceManager.getInstance().getFont("middleFont")
                     text = "by ${beatmapInfo.artistText}"
-                    onThemeChange = { color = it.accentColor * 0.9f }
+                    applyTheme = { color = it.accentColor * 0.9f }
                 }
 
                 // Mods

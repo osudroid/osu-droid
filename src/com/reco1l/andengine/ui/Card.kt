@@ -5,7 +5,6 @@ import com.reco1l.andengine.container.*
 import com.reco1l.andengine.modifier.*
 import com.reco1l.andengine.shape.*
 import com.reco1l.andengine.text.*
-import com.reco1l.framework.*
 import com.reco1l.framework.math.*
 import org.anddev.andengine.input.touch.*
 import ru.nsu.ccfit.zuev.osu.*
@@ -53,7 +52,7 @@ open class Card(
         foreground = BezelOutline(14f)
         background = Box().apply {
             cornerRadius = 14f
-            onThemeChange = { color = it.accentColor * 0.15f }
+            applyTheme = { color = it.accentColor * 0.15f }
         }
 
         +titleBar.apply {
@@ -64,7 +63,7 @@ open class Card(
                 font = ResourceManager.getInstance().getFont("smallFont")
                 anchor = Anchor.CenterLeft
                 origin = Anchor.CenterLeft
-                onThemeChange = { color = it.accentColor }
+                applyTheme = { color = it.accentColor }
             }
 
             +Triangle().apply {
@@ -73,7 +72,7 @@ open class Card(
                 rotationCenter = Anchor.Center
                 width = 16f
                 height = 12f
-                onThemeChange = {
+                applyTheme = {
                     color = it.accentColor
                     alpha = 0.5f
                 }
@@ -83,7 +82,7 @@ open class Card(
         +Box().apply {
             width = FillParent
             height = 1f
-            onThemeChange = {
+            applyTheme = {
                 color = it.accentColor
                 alpha = 0.025f
             }

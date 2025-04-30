@@ -232,7 +232,7 @@ abstract class ExtendedEntity : Entity(0f, 0f), ITouchArea, IModifierChain, IThe
 
     //region Cosmetic properties
 
-    override var onThemeChange: ExtendedEntity.(theme: Theme) -> Unit = {}
+    override var applyTheme: ExtendedEntity.(theme: Theme) -> Unit = {}
 
     /**
      * The background entity. This entity will be drawn before the entity children and will not be
@@ -368,9 +368,7 @@ abstract class ExtendedEntity : Entity(0f, 0f), ITouchArea, IModifierChain, IThe
     }
 
     override fun onAttached() {
-        background?.onAttached()
-        foreground?.onAttached()
-        onThemeChange(Theme.current)
+        onThemeChanged(Theme.current)
     }
 
     //endregion
@@ -861,6 +859,17 @@ abstract class ExtendedEntity : Entity(0f, 0f), ITouchArea, IModifierChain, IThe
         }
 
         return false
+    }
+
+    //endregion
+
+    //region Cosmetic functions
+
+    open fun onThemeChanged(theme: Theme) {
+        background?.applyTheme(theme)
+        foreground?.applyTheme(theme)
+
+        applyTheme(theme)
     }
 
     //endregion

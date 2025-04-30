@@ -36,7 +36,7 @@ abstract class FormControl<V : Any, C: Control<V>>(initialValue: V): LinearConta
         font = ResourceManager.getInstance().getFont("smallFont")
         anchor = Anchor.CenterLeft
         origin = Anchor.CenterLeft
-        onThemeChange = { color = it.accentColor }
+        applyTheme = { color = it.accentColor }
     }
 
     /**
