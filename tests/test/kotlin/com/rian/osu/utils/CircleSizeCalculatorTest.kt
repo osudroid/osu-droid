@@ -5,7 +5,7 @@ import org.junit.Test
 
 class CircleSizeCalculatorTest {
     @Test
-    fun `Test osu!droid circle size to osu!droid difficulty scale`() {
+    fun `Test osu!droid circle size to old osu!droid difficulty scale conversion`() {
         fun test(cs: Float, scale: Float) =
             Assert.assertEquals(CircleSizeCalculator.droidCSToOldDroidDifficultyScale(cs), scale, 1e-5f)
 
@@ -26,7 +26,7 @@ class CircleSizeCalculatorTest {
     }
 
     @Test
-    fun `Test osu!droid difficulty scale to osu!droid circle size`() {
+    fun `Test old osu!droid difficulty scale to osu!droid circle size conversion`() {
         fun test(scale: Float, cs: Float) =
             Assert.assertEquals(CircleSizeCalculator.droidOldDifficultyScaleToDroidCS(scale), cs, 1e-5f)
 
@@ -46,7 +46,7 @@ class CircleSizeCalculatorTest {
     }
 
     @Test
-    fun `Test osu!standard radius to osu!droid difficulty scale`() {
+    fun `Test osu!standard radius to old osu!droid difficulty scale conversion`() {
         fun test(radius: Double, scale: Float) =
             Assert.assertEquals(
                 CircleSizeCalculator.standardRadiusToOldDroidDifficultyScale(radius),
@@ -79,7 +79,7 @@ class CircleSizeCalculatorTest {
     }
 
     @Test
-    fun `Test osu!standard radius to osu!standard circle size with fudge`() {
+    fun `Test osu!standard radius to osu!standard circle size conversion with fudge`() {
         fun test(radius: Double, cs: Float) =
             Assert.assertEquals(
                 CircleSizeCalculator.standardRadiusToStandardCS(radius, true),
@@ -101,7 +101,7 @@ class CircleSizeCalculatorTest {
     }
 
     @Test
-    fun `Test osu!standard circle size to osu!standard scale with fudge`() {
+    fun `Test osu!standard circle size to osu!standard scale conversion with fudge`() {
         fun test(cs: Float, scale: Float) =
             Assert.assertEquals(
                 CircleSizeCalculator.standardCSToStandardScale(cs, true),
@@ -118,7 +118,7 @@ class CircleSizeCalculatorTest {
     }
 
     @Test
-    fun `Test osu!standard scale to osu!droid difficulty scale with fudge`() {
+    fun `Test osu!standard scale to old osu!droid difficulty scale conversion with fudge`() {
         fun test(standardScale: Float, droidScale: Float) =
             Assert.assertEquals(
                 CircleSizeCalculator.standardScaleToOldDroidDifficultyScale(standardScale, true),
