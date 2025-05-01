@@ -26,8 +26,8 @@ class Spinner(
     override val difficultyStackedPosition = position
     override val difficultyStackedEndPosition = position
 
-    override val gameplayStackedPosition = gameplayPosition
-    override val gameplayStackedEndPosition = gameplayPosition
+    override val gameplayStackedPosition = position
+    override val gameplayStackedEndPosition = position
 
     override fun applySamples(controlPoints: BeatmapControlPoints, scope: CoroutineScope?) {
         super.applySamples(controlPoints, scope)

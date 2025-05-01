@@ -68,7 +68,6 @@ abstract class HitObject(
             field = value
 
             difficultyStackedPositionCache.invalidate()
-            gameplayPositionCache.invalidate()
             gameplayStackedPositionCache.invalidate()
         }
 
@@ -255,28 +254,8 @@ abstract class HitObject(
             gameplayStackedPositionCache.invalidate()
         }
 
-    private val gameplayPositionCache = Cached(convertPositionToRealCoordinates(position))
-
     /**
-     * The position of this [HitObject] in gameplay, in pixels.
-     */
-    val gameplayPosition: Vector2
-        get() {
-            if (!gameplayPositionCache.isValid) {
-                gameplayPositionCache.value = convertPositionToRealCoordinates(position)
-            }
-
-            return gameplayPositionCache.value
-        }
-
-    /**
-     * The end position of this [HitObject] in gameplay, in pixels.
-     */
-    open val gameplayEndPosition
-        get() = gameplayPosition
-
-    /**
-     * The radius of this [HitObject] in gameplay, in pixels.
+     * The radius of this [HitObject] in gameplay, in osu!pixels.
      */
     val gameplayRadius
         get() = (OBJECT_RADIUS * gameplayScale).toDouble()
@@ -284,7 +263,7 @@ abstract class HitObject(
     private val gameplayStackOffsetCache = Cached(Vector2(0))
 
     /**
-     * The stack offset of this [HitObject] in gameplay, in pixels.
+     * The stack offset of this [HitObject] in gameplay, in osu!pixels.
      */
     val gameplayStackOffset: Vector2
         get() {
@@ -295,22 +274,22 @@ abstract class HitObject(
             return gameplayStackOffsetCache.value
         }
 
-    private val gameplayStackedPositionCache = Cached(gameplayPosition)
+    private val gameplayStackedPositionCache = Cached(position)
 
     /**
-     * The stacked position of this [HitObject] in gameplay, in pixels.
+     * The stacked position of this [HitObject] in gameplay, in osu!pixels.
      */
     open val gameplayStackedPosition: Vector2
         get() {
             if (!gameplayStackedPositionCache.isValid) {
-                gameplayStackedPositionCache.value = gameplayPosition + gameplayStackOffset
+                gameplayStackedPositionCache.value = position + gameplayStackOffset
             }
 
             return gameplayStackedPositionCache.value
         }
 
     /**
-     * The stacked end position of this [HitObject] in gameplay, in pixels.
+     * The stacked end position of this [HitObject] in gameplay, in osu!pixels.
      */
     open val gameplayStackedEndPosition
         get() = gameplayStackedPosition

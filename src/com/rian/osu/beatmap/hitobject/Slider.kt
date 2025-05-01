@@ -219,23 +219,12 @@ class Slider(
 
     // Gameplay object positions
 
-    private val gameplayEndPositionCache = Cached(gameplayPosition)
-
-    override val gameplayEndPosition: Vector2
-        get() {
-            if (!gameplayEndPositionCache.isValid) {
-                gameplayEndPositionCache.value = convertPositionToRealCoordinates(endPosition)
-            }
-
-            return gameplayEndPositionCache.value
-        }
-
-    private val gameplayStackedEndPositionCache = Cached(gameplayEndPosition)
+    private val gameplayStackedEndPositionCache = Cached(endPosition)
 
     override val gameplayStackedEndPosition: Vector2
         get() {
             if (!gameplayStackedEndPositionCache.isValid) {
-                gameplayStackedEndPositionCache.value = gameplayEndPosition + gameplayStackOffset
+                gameplayStackedEndPositionCache.value = endPosition + gameplayStackOffset
             }
 
             return gameplayStackedEndPositionCache.value
@@ -440,7 +429,6 @@ class Slider(
     private fun invalidateEndPositions() {
         endPositionCache.invalidate()
         difficultyStackedEndPositionCache.invalidate()
-        gameplayEndPositionCache.invalidate()
         gameplayStackedEndPositionCache.invalidate()
     }
 
