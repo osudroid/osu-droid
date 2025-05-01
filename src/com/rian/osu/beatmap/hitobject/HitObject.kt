@@ -244,7 +244,7 @@ abstract class HitObject(
         }
 
     /**
-     * The scale of this [HitObject] in gameplay.
+     * The scale of this [HitObject] in gameplay, in osu!pixels.
      */
     open var gameplayScale = 0f
         set(value) {
@@ -252,6 +252,7 @@ abstract class HitObject(
 
             gameplayStackOffsetCache.invalidate()
             gameplayStackedPositionCache.invalidate()
+            screenSpaceGameplayStackedPositionCache.invalidate()
         }
 
     /**
@@ -259,6 +260,18 @@ abstract class HitObject(
      */
     val gameplayRadius
         get() = (OBJECT_RADIUS * gameplayScale).toDouble()
+
+    /**
+     * The scale of this [HitObject] in gameplay, in real screen pixels.
+     */
+    val screenSpaceGameplayScale
+        get() = gameplayScale * Config.getRES_HEIGHT() / 480
+
+    /**
+     * The radius of this [HitObject] in gameplay, in real screen pixels.
+     */
+    val screenSpaceGameplayRadius
+        get() = (OBJECT_RADIUS * screenSpaceGameplayScale).toDouble()
 
     private val gameplayStackOffsetCache = Cached(Vector2(0))
 
@@ -293,6 +306,43 @@ abstract class HitObject(
      */
     open val gameplayStackedEndPosition
         get() = gameplayStackedPosition
+
+    private val screenSpaceGameplayPositionCache = Cached(convertPositionToRealCoordinates(position))
+
+    /**
+     * The position of this [HitObject] in gameplay, in real screen pixels.
+     */
+    open val screenSpaceGameplayPosition: Vector2
+        get() {
+            if (!screenSpaceGameplayPositionCache.isValid) {
+                screenSpaceGameplayPositionCache.value =
+                    convertPositionToRealCoordinates(position)
+            }
+
+            return screenSpaceGameplayPositionCache.value
+        }
+
+    private val screenSpaceGameplayStackedPositionCache =
+        Cached(convertPositionToRealCoordinates(gameplayStackedPosition))
+
+    /**
+     * The stacked position of this [HitObject] in gameplay, in real screen pixels.
+     */
+    open val screenSpaceGameplayStackedPosition: Vector2
+        get() {
+            if (!screenSpaceGameplayStackedPositionCache.isValid) {
+                screenSpaceGameplayStackedPositionCache.value =
+                    convertPositionToRealCoordinates(gameplayStackedPosition)
+            }
+
+            return screenSpaceGameplayStackedPositionCache.value
+        }
+
+    /**
+     * The stacked end position of this [HitObject] in gameplay, in real screen pixels.
+     */
+    open val screenSpaceGameplayStackedEndPosition
+        get() = screenSpaceGameplayStackedPosition
 
     /**
      * Applies defaults to this [HitObject].

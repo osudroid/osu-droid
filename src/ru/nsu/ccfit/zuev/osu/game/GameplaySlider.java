@@ -170,7 +170,7 @@ public class GameplaySlider extends GameObject {
         this.beatmapSlider = beatmapSlider;
         this.controlPoints = controlPoints;
 
-        var stackedPosition = beatmapSlider.getGameplayStackedPosition();
+        var stackedPosition = beatmapSlider.getScreenSpaceGameplayStackedPosition();
         position.set(stackedPosition.x, stackedPosition.y);
 
         hitTime = (float) beatmapSlider.startTime / 1000;
@@ -182,7 +182,7 @@ public class GameplaySlider extends GameObject {
 
         reloadHitSounds();
 
-        float scale = beatmapSlider.getGameplayScale();
+        float scale = beatmapSlider.getScreenSpaceGameplayScale();
 
         isOver = false;
         isFollowCircleAnimating = false;
@@ -739,7 +739,7 @@ public class GameplaySlider extends GameObject {
     }
 
     private boolean isHit() {
-        float radius = Utils.sqr((float) beatmapSlider.getGameplayRadius());
+        float radius = Utils.sqr((float) beatmapSlider.getScreenSpaceGameplayRadius());
         for (int i = 0, count = listener.getCursorsCount(); i < count; i++) {
 
             var inPosition = Utils.squaredDistance(position, listener.getMousePos(i)) <= radius;
@@ -765,7 +765,7 @@ public class GameplaySlider extends GameObject {
         // Hit judgement is done in the update thread, but inputs are received in the main thread,
         // the time when the player clicked in advance will affect judgement. This offset is used
         // to offset the hit from the previous update tick.
-        float radius = Utils.sqr((float) beatmapSlider.getGameplayRadius());
+        float radius = Utils.sqr((float) beatmapSlider.getScreenSpaceGameplayRadius());
         for (int i = 0, count = listener.getCursorsCount(); i < count; i++) {
 
             var inPosition = Utils.squaredDistance(position, listener.getMousePos(i)) <= radius;
@@ -869,7 +869,7 @@ public class GameplaySlider extends GameObject {
         sliderWhistleSample.update(dt);
         headCirclePiece.setAlpha(0f);
 
-        float scale = beatmapSlider.getGameplayScale();
+        float scale = beatmapSlider.getScreenSpaceGameplayScale();
 
         if (!ball.hasParent()) {
             approachCircle.clearEntityModifiers();
@@ -927,7 +927,7 @@ public class GameplaySlider extends GameObject {
     }
 
     private float getTrackingDistanceThresholdSquared(boolean isTracking) {
-        float radius = (float) beatmapSlider.getGameplayRadius();
+        float radius = (float) beatmapSlider.getScreenSpaceGameplayRadius();
         float distanceThresholdSquared = radius * radius;
 
         if (isTracking) {
@@ -1011,7 +1011,7 @@ public class GameplaySlider extends GameObject {
                 // When the first nested object that is further outside the follow area is reached,
                 // forcefully miss all other nested objects that would otherwise be valid to be hit.
                 // This covers a case of a slider overlapping itself that requires tracking to a tick on an outer edge.
-                var nestedPosition = nestedObject.getGameplayStackedPosition();
+                var nestedPosition = nestedObject.getScreenSpaceGameplayStackedPosition();
                 var distanceSquared = Utils.squaredDistance(nestedPosition.x, nestedPosition.y, ballPos.x, ballPos.y);
 
                 if (distanceSquared > distanceTrackingThresholdSquared) {
@@ -1033,7 +1033,7 @@ public class GameplaySlider extends GameObject {
                 break;
             }
 
-            var nestedPosition = nestedObject.getGameplayStackedPosition();
+            var nestedPosition = nestedObject.getScreenSpaceGameplayStackedPosition();
             tmpPoint.set(nestedPosition.x, nestedPosition.y);
 
             boolean isSliderTick = nestedObject instanceof SliderTick;
@@ -1090,7 +1090,7 @@ public class GameplaySlider extends GameObject {
     }
 
     private void updateTracking(boolean isTracking) {
-        float scale = beatmapSlider.getGameplayScale();
+        float scale = beatmapSlider.getScreenSpaceGameplayScale();
 
         if (Config.isAnimateFollowCircle()) {
             float remainTime = (float) (duration - elapsedSpanTime);
@@ -1150,7 +1150,7 @@ public class GameplaySlider extends GameObject {
             return;
         }
 
-        float scale = beatmapSlider.getGameplayScale();
+        float scale = beatmapSlider.getScreenSpaceGameplayScale();
 
         var nestedObjects = beatmapSlider.getNestedHitObjects();
         var nestedObjectToJudge = nestedObjects.get(currentNestedObjectIndex);
@@ -1175,7 +1175,7 @@ public class GameplaySlider extends GameObject {
                 tickSet.set(replayTickIndex++, false);
             }
 
-            var tickPosition = nestedObjectToJudge.getGameplayStackedPosition();
+            var tickPosition = nestedObjectToJudge.getScreenSpaceGameplayStackedPosition();
             tmpPoint.set(tickPosition.x, tickPosition.y);
 
             listener.onSliderHit(id, isTracking ? 10 : -1, tmpPoint, false, bodyColor, GameObjectListener.SLIDER_TICK, isTracking);

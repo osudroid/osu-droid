@@ -66,7 +66,7 @@ class ModReplayV6 : Mod(), IModApplicableToBeatmap {
                     next.difficultyStackHeight = current.difficultyStackHeight + 1
                 }
 
-                if (distanceSquared < current.gameplayScale) {
+                if (distanceSquared < current.screenSpaceGameplayScale) {
                     next.gameplayStackHeight = current.gameplayStackHeight + 1
                 }
             }

@@ -541,7 +541,7 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
         }
 
         var firstObject = playableBeatmap.getHitObjects().objects.get(0);
-        scale = firstObject.getGameplayScale();
+        scale = firstObject.getScreenSpaceGameplayScale();
 
         GameHelper.setOverallDifficulty(playableBeatmap.getDifficulty().od);
         GameHelper.setHealthDrain(playableBeatmap.getDifficulty().hp);

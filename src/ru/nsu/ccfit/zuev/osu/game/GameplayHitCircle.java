@@ -50,7 +50,7 @@ public class GameplayHitCircle extends GameObject {
         this.beatmapCircle = beatmapCircle;
         replayObjectData = null;
 
-        var stackedPosition = beatmapCircle.getGameplayStackedPosition();
+        var stackedPosition = beatmapCircle.getScreenSpaceGameplayStackedPosition();
         position.set(stackedPosition.x, stackedPosition.y);
 
         endsCombo = beatmapCircle.isLastInCombo();
@@ -65,8 +65,8 @@ public class GameplayHitCircle extends GameObject {
         this.comboColor.set(comboColor.r(), comboColor.g(), comboColor.b());
 
         // Calculating position of top/left corner for sprites and hit radius
-        final float scale = beatmapCircle.getGameplayScale();
-        radiusSquared = (float) beatmapCircle.getGameplayRadius();
+        final float scale = beatmapCircle.getScreenSpaceGameplayScale();
+        radiusSquared = (float) beatmapCircle.getScreenSpaceGameplayRadius();
         radiusSquared *= radiusSquared;
 
         float actualFadeInDuration = (float) beatmapCircle.timeFadeIn / 1000f;

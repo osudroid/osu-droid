@@ -230,6 +230,19 @@ class Slider(
             return gameplayStackedEndPositionCache.value
         }
 
+    private val screenSpaceGameplayStackedEndPositionCache =
+        Cached(convertPositionToRealCoordinates(gameplayStackedEndPosition))
+
+    override val screenSpaceGameplayStackedEndPosition: Vector2
+        get() {
+            if (!screenSpaceGameplayStackedEndPositionCache.isValid) {
+                screenSpaceGameplayStackedEndPositionCache.value =
+                    convertPositionToRealCoordinates(gameplayStackedEndPosition)
+            }
+
+            return screenSpaceGameplayStackedEndPositionCache.value
+        }
+
     override var gameplayStackHeight
         get() = super.gameplayStackHeight
         set(value) {

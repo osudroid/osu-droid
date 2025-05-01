@@ -73,11 +73,11 @@ object FollowPointConnection {
 
         // Reference: https://github.com/ppy/osu/blob/7bc8908ca9c026fed1d831eb6e58df7624a8d614/osu.Game.Rulesets.Osu/Objects/Drawables/Connections/FollowPointConnection.cs
 
-        val scale = start.gameplayScale
+        val scale = start.screenSpaceGameplayScale
         val startTime = (start.endTime / 1000f).toFloat()
 
-        val startPosition = start.gameplayStackedEndPosition
-        val endPosition = end.gameplayStackedPosition
+        val startPosition = start.screenSpaceGameplayStackedEndPosition
+        val endPosition = end.screenSpaceGameplayStackedPosition
 
         val distanceX = endPosition.x - startPosition.x
         val distanceY = endPosition.y - startPosition.y

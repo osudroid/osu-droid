@@ -20,14 +20,14 @@ class SliderTickContainer : Container() {
 
         detachChildren()
 
-        val position = beatmapSlider.gameplayStackedPosition
+        val position = beatmapSlider.screenSpaceGameplayStackedPosition
 
         setPosition(position.x, position.y)
 
         for (i in 1 until beatmapSlider.nestedHitObjects.size) {
 
             val tick = beatmapSlider.nestedHitObjects[i] as? SliderTick ?: break
-            val tickPosition = tick.gameplayStackedPosition
+            val tickPosition = tick.screenSpaceGameplayStackedPosition
 
             val sprite = SliderTickSprite.pool.obtain()
 
