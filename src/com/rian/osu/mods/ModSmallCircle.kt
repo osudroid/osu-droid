@@ -19,7 +19,7 @@ class ModSmallCircle : Mod(), IModApplicableToDifficulty, IMigratableMod {
         difficulty.gameplayCS += 4
 
         difficulty.difficultyCS = when (mode) {
-            GameMode.Droid -> CircleSizeCalculator.droidCSToDroidDifficultyScale(difficulty.gameplayCS)
+            GameMode.Droid -> CircleSizeCalculator.droidCSToOldDroidDifficultyScale(difficulty.gameplayCS)
             GameMode.Standard -> difficulty.difficultyCS + 4
         }
     }

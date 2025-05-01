@@ -34,9 +34,9 @@ class ModReallyEasy : Mod(), IModApplicableToDifficultyWithSettings {
             if (difficultyAdjustMod?.cs == null) {
                 difficultyCS = when (mode) {
                     GameMode.Droid -> {
-                        val scale = CircleSizeCalculator.droidCSToDroidDifficultyScale(difficultyCS)
+                        val scale = CircleSizeCalculator.droidCSToOldDroidDifficultyScale(difficultyCS)
 
-                        CircleSizeCalculator.droidDifficultyScaleToDroidCS(scale + 0.125f)
+                        CircleSizeCalculator.droidOldDifficultyScaleToDroidCS(scale + 0.125f)
                     }
 
                     GameMode.Standard -> difficultyCS * ADJUST_RATIO
@@ -44,9 +44,9 @@ class ModReallyEasy : Mod(), IModApplicableToDifficultyWithSettings {
 
                 gameplayCS = when (mode) {
                     GameMode.Droid -> {
-                        val scale = CircleSizeCalculator.droidCSToDroidGameplayScale(gameplayCS)
+                        val scale = CircleSizeCalculator.droidCSToOldDroidGameplayScale(gameplayCS)
 
-                        CircleSizeCalculator.droidGameplayScaleToDroidCS(scale + 0.125f)
+                        CircleSizeCalculator.droidOldGameplayScaleToDroidCS(scale + 0.125f)
                     }
 
                     GameMode.Standard -> gameplayCS * ADJUST_RATIO

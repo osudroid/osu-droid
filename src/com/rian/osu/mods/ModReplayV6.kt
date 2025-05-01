@@ -46,7 +46,7 @@ class ModReplayV6 : Mod(), IModApplicableToBeatmap {
         }
 
         val droidDifficultyScale =
-            CircleSizeCalculator.standardScaleToDroidDifficultyScale(objects[0].difficultyScale, true)
+            CircleSizeCalculator.standardScaleToOldDroidDifficultyScale(objects[0].difficultyScale, true)
 
         val maxDeltaTime = 2000 * beatmap.general.stackLeniency
 
