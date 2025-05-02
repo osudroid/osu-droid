@@ -4,11 +4,9 @@ import com.osudroid.ui.v2.*
 import com.reco1l.andengine.*
 import com.reco1l.andengine.container.*
 import com.reco1l.andengine.shape.*
-import com.reco1l.andengine.sprite.*
 import com.reco1l.andengine.text.*
 import com.reco1l.andengine.texture.*
 import com.reco1l.andengine.ui.*
-import com.reco1l.framework.*
 import com.reco1l.osu.*
 import com.rian.osu.mods.*
 import org.anddev.andengine.engine.camera.*
