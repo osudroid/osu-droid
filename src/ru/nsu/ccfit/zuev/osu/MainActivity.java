@@ -139,12 +139,6 @@ public class MainActivity extends BaseGameActivity implements
             }
         }
 
-/*        final double screenSize = Math.sqrt(Utils.sqr(dm.widthPixels / dm.xdpi)
-                + Utils.sqr(dm.heightPixels / dm.ydpi));*/
-        double screenInches = Math.sqrt(Math.pow(dm.heightPixels, 2) + Math.pow(dm.widthPixels, 2)) / (dm.density * 160.0f);
-        Debug.i("screen inches: " + screenInches);
-        Config.setScaleMultiplier((float) ((11 - 5.2450170716245195) / 5));
-
         final PowerManager manager = (PowerManager) getSystemService(Context.POWER_SERVICE);
         wakeLock = manager.newWakeLock(PowerManager.SCREEN_DIM_WAKE_LOCK,
                 "osudroid:osu");
