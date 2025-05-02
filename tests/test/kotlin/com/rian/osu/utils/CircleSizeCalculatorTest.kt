@@ -90,6 +90,54 @@ class CircleSizeCalculatorTest {
     }
 
     @Test
+    fun `Test old osu!droid difficulty scale screen pixels to osu! pixels conversion`() {
+        fun test(screenPixelsScale: Float, osuPixelsScale: Float) =
+            Assert.assertEquals(
+                osuPixelsScale,
+                CircleSizeCalculator.droidOldDifficultyScaleScreenPixelsToOsuPixels(screenPixelsScale),
+                1e-5f
+            )
+
+        test(1.7818792f, 1.2559501f)
+        test(1.5832541f, 1.11595f)
+        test(1.4342854f, 1.0109501f)
+        test(1.3846292f, 0.9759502f)
+        test(1.2853167f, 0.9059501f)
+        test(1.1860042f, 0.8359501f)
+        test(0.9873792f, 0.6959501f)
+        test(0.7887542f, 0.5559501f)
+        test(0.5901292f, 0.41595012f)
+        test(0.3915042f, 0.2759501f)
+        test(0.1928792f, 0.1359501f)
+        test(0.0935667f, 0.0659501f)
+        test(0.001f, 7.048458e-4f)
+    }
+
+    @Test
+    fun `Test old osu!droid difficulty scale osu! pixels to screen pixels conversion`() {
+        fun test(osuPixelsScale: Float, screenPixelsScale: Float) =
+            Assert.assertEquals(
+                screenPixelsScale,
+                CircleSizeCalculator.droidOldDifficultyScaleOsuPixelsToScreenPixels(osuPixelsScale),
+                1e-5f
+            )
+
+        test(1.2559501f, 1.7818792f)
+        test(1.11595f, 1.5832541f)
+        test(1.0109501f, 1.4342854f)
+        test(0.9759502f, 1.3846292f)
+        test(0.9059501f, 1.2853167f)
+        test(0.8359501f, 1.1860042f)
+        test(0.6959501f, 0.9873792f)
+        test(0.5559501f, 0.7887542f)
+        test(0.41595012f, 0.5901292f)
+        test(0.2759501f, 0.3915042f)
+        test(0.1359501f, 0.1928792f)
+        test(0.0659501f, 0.0935667f)
+        test(7.048458e-4f, 0.001f)
+    }
+
+    @Test
     fun `Test osu!standard radius to old osu!droid difficulty scale conversion`() {
         fun test(radius: Double, scale: Float) =
             Assert.assertEquals(
