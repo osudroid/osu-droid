@@ -3,6 +3,8 @@ package com.rian.osu.mods
 import com.rian.osu.GameMode
 import com.rian.osu.beatmap.Beatmap
 import com.rian.osu.beatmap.hitobject.HitCircle
+import com.rian.osu.beatmap.hitobject.HitObject
+import com.rian.osu.beatmap.sections.BeatmapDifficulty
 import com.rian.osu.utils.CircleSizeCalculator
 import kotlin.collections.forEach
 import kotlin.math.pow
@@ -45,9 +47,6 @@ class ModReplayV6 : Mod(), IModApplicableToBeatmap, IModFacilitatesAdjustment {
             it.gameplayStackHeight = 0
         }
 
-        val droidDifficultyScale =
-            CircleSizeCalculator.standardScaleToOldDroidDifficultyScale(objects[0].difficultyScale, true)
-
         val maxDeltaTime = 2000 * beatmap.general.stackLeniency
 
         for (i in 0 until objects.size - 1) {
@@ -56,8 +55,13 @@ class ModReplayV6 : Mod(), IModApplicableToBeatmap, IModFacilitatesAdjustment {
             val current = objects[i]
             val next = objects[i + 1]
 
+            revertObjectScale(current, beatmap.difficulty)
+            revertObjectScale(next, beatmap.difficulty)
+
             if (current is HitCircle && next.startTime - current.startTime < maxDeltaTime) {
                 val distanceSquared = next.position.getDistance(current.position).pow(2)
+                val droidDifficultyScale =
+                    CircleSizeCalculator.standardScaleToOldDroidDifficultyScale(current.difficultyScale, true)
 
                 if (distanceSquared < droidDifficultyScale) {
                     next.difficultyStackHeight = current.difficultyStackHeight + 1
@@ -68,6 +72,15 @@ class ModReplayV6 : Mod(), IModApplicableToBeatmap, IModFacilitatesAdjustment {
                 }
             }
         }
+    }
+
+    private fun revertObjectScale(hitObject: HitObject, difficulty: BeatmapDifficulty) {
+        val droidScale = CircleSizeCalculator.droidCSToOldDroidDifficultyScale(difficulty.difficultyCS)
+        val radius = CircleSizeCalculator.droidScaleToStandardRadius(droidScale)
+        val standardCS = CircleSizeCalculator.standardRadiusToStandardCS(radius, true)
+
+        hitObject.difficultyScale = CircleSizeCalculator.standardCSToStandardScale(standardCS, true)
+        hitObject.gameplayScale = CircleSizeCalculator.droidCSToOldDroidGameplayScale(difficulty.gameplayCS)
     }
 
     override fun deepCopy() = ModReplayV6()
