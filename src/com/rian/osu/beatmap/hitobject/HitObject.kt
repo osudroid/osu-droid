@@ -181,10 +181,12 @@ abstract class HitObject(
      */
     open var difficultyScale = 0f
         set(value) {
-            field = value
+            if (field != value) {
+                field = value
 
-            difficultyStackOffsetCache.invalidate()
-            difficultyStackedPositionCache.invalidate()
+                difficultyStackOffsetCache.invalidate()
+                difficultyStackedPositionCache.invalidate()
+            }
         }
 
     /**
@@ -248,11 +250,13 @@ abstract class HitObject(
      */
     open var gameplayScale = 0f
         set(value) {
-            field = value
+            if (field != value) {
+                field = value
 
-            gameplayStackOffsetCache.invalidate()
-            gameplayStackedPositionCache.invalidate()
-            screenSpaceGameplayStackedPositionCache.invalidate()
+                gameplayStackOffsetCache.invalidate()
+                gameplayStackedPositionCache.invalidate()
+                screenSpaceGameplayStackedPositionCache.invalidate()
+            }
         }
 
     /**

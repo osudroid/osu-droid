@@ -210,11 +210,14 @@ class Slider(
     override var difficultyScale
         get() = super.difficultyScale
         set(value) {
+            val wasEqual = super.difficultyScale == value
+
             super.difficultyScale = value
 
-            difficultyStackedEndPositionCache.invalidate()
-
-            nestedHitObjects.forEach { it.difficultyScale = value }
+            if (!wasEqual) {
+                difficultyStackedEndPositionCache.invalidate()
+                nestedHitObjects.forEach { it.difficultyScale = value }
+            }
         }
 
     // Gameplay object positions
@@ -259,12 +262,16 @@ class Slider(
     override var gameplayScale
         get() = super.gameplayScale
         set(value) {
+            val wasEqual = super.gameplayScale == value
+
             super.gameplayScale = value
 
-            gameplayStackedEndPositionCache.invalidate()
-            screenSpaceGameplayStackedEndPositionCache.invalidate()
+            if (!wasEqual) {
+                gameplayStackedEndPositionCache.invalidate()
+                screenSpaceGameplayStackedEndPositionCache.invalidate()
 
-            nestedHitObjects.forEach { it.gameplayScale = value }
+                nestedHitObjects.forEach { it.gameplayScale = value }
+            }
         }
 
     override fun applyDefaults(controlPoints: BeatmapControlPoints, difficulty: BeatmapDifficulty, mode: GameMode, scope: CoroutineScope?) {
