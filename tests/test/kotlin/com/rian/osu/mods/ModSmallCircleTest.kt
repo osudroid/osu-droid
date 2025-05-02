@@ -17,7 +17,7 @@ class ModSmallCircleTest {
     @Test
     fun `Test beatmap setting adjustment in osu!droid game mode`() {
         BeatmapDifficulty(cs = 3f).apply {
-            ModSmallCircle().applyToDifficulty(GameMode.Droid, this)
+            ModSmallCircle().applyToDifficulty(GameMode.Droid, this, listOf())
 
             Assert.assertEquals(7f, gameplayCS, 0f)
         }
@@ -26,7 +26,7 @@ class ModSmallCircleTest {
     @Test
     fun `Test beatmap setting adjustment in osu!standard game mode`() {
         BeatmapDifficulty(cs = 3f).apply {
-            ModSmallCircle().applyToDifficulty(GameMode.Standard, this)
+            ModSmallCircle().applyToDifficulty(GameMode.Standard, this, listOf())
 
             Assert.assertEquals(7f, difficultyCS, 0f)
             Assert.assertEquals(7f, gameplayCS, 0f)
