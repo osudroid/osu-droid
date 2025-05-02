@@ -262,6 +262,7 @@ class Slider(
             super.gameplayScale = value
 
             gameplayStackedEndPositionCache.invalidate()
+            screenSpaceGameplayStackedEndPositionCache.invalidate()
 
             nestedHitObjects.forEach { it.gameplayScale = value }
         }
