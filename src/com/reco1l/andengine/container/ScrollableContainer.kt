@@ -342,15 +342,11 @@ open class ScrollableContainer : Container() {
 
     //endregion
 
-    override fun onMeasureContentSize() {
-        super.onMeasureContentSize()
+    override fun onContentChanged() {
+        super.onContentChanged()
 
         verticalIndicator?.height = height * (height / scrollableContentHeight).coerceAtMost(1f)
         horizontalIndicator?.width = width * (width / scrollableContentWidth).coerceAtMost(1f)
-
-        if (horizontalIndicator != null || verticalIndicator != null) {
-            invalidate(InvalidationFlag.ContentSize)
-        }
     }
 
     override fun onManagedDrawChildren(pGL: GL10, pCamera: Camera) {

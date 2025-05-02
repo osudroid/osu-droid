@@ -1,6 +1,7 @@
 package com.reco1l.andengine.ui.form
 
 import com.reco1l.andengine.*
+import com.reco1l.andengine.container.*
 import com.reco1l.andengine.shape.*
 import com.reco1l.andengine.text.*
 import com.reco1l.andengine.ui.*
@@ -13,17 +14,16 @@ import ru.nsu.ccfit.zuev.osu.ResourceManager
 open class FormSlider(initialValue: Float = 0f) : FormControl<Float, Slider>(initialValue) {
 
     override val control = Slider(initialValue).apply {
-        anchor = Anchor.BottomLeft
-        origin = Anchor.TopLeft
-        translationY = 14f
+        width = FillParent
     }
 
     override val valueText = ExtendedText().apply {
         font = ResourceManager.getInstance().getFont("smallFont")
-        anchor = Anchor.TopRight
-        origin = Anchor.TopRight
+        anchor = Anchor.CenterRight
+        origin = Anchor.CenterRight
         padding = Vec4(6f, 0f)
         alignment = Anchor.Center
+        applyTheme = { color = it.accentColor }
 
         background = Box().apply {
             color = ColorARGB.Black
@@ -34,13 +34,22 @@ open class FormSlider(initialValue: Float = 0f) : FormControl<Float, Slider>(ini
 
 
     init {
-        +labelText
-        +valueText
-        +control
-        +resetButton
+        orientation = Orientation.Vertical
+        spacing = 12f
 
-        addConstraint(control, labelText)
-        addConstraint(resetButton, labelText)
+        linearContainer {
+            width = FillParent
+            padding = Vec4(0f, 12f)
+            spacing = 12f
+            +labelText
+            +resetButton
+
+            container {
+                width = FillParent
+                +valueText
+            }
+        }
+        +control
     }
 }
 

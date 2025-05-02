@@ -62,7 +62,7 @@ open class CollapsiblePanel : Container() {
         }
 
         +content.apply {
-            clipChildren = true
+            clipToBounds = true
             scrollAxes = Axes.Both
             overflowAxes = Axes.Y
             y = TITLE_BAR_HEIGHT

@@ -7,11 +7,6 @@ import com.reco1l.andengine.shape.*
 import com.reco1l.framework.*
 import org.anddev.andengine.input.touch.*
 
-data class ModalTheme(
-    val backgroundColor: Long = 0xFF161622,
-    val cornerRadius: Float = 16f,
-) : ITheme
-
 @Suppress("LeakingThis")
 open class Modal(
 
@@ -21,19 +16,15 @@ open class Modal(
     val content: Container = Container().apply {
         anchor = Anchor.Center
         origin = Anchor.Center
-        clipChildren = true
+        clipToBounds = true
         scaleCenter = Anchor.Center
     }
 
-) : ExtendedEntity(), IWithTheme<ModalTheme> {
+) : ExtendedEntity() {
 
-    override var theme = DefaultTheme
-        set(value) {
-            if (field != value) {
-                field = value
-                onThemeChanged()
-            }
-        }
+    override var applyTheme: ExtendedEntity.(Theme) -> Unit = { theme ->
+        content.background?.color = theme.accentColor * 0.15f
+    }
 
 
     /**
@@ -51,6 +42,8 @@ open class Modal(
 
         content.scaleX = 0.9f
         content.scaleY = 0.9f
+        content.background = Box().apply { cornerRadius = 16f }
+        content.foreground = BezelOutline(16f)
 
         background = Box().apply {
             color = ColorARGB.Black
@@ -58,16 +51,6 @@ open class Modal(
         }
 
         attachChild(content)
-        onThemeChanged()
-    }
-
-
-    override fun onThemeChanged() {
-        content.background = Box().apply {
-            color = ColorARGB(theme.backgroundColor)
-            cornerRadius = theme.cornerRadius
-        }
-        content.foreground = BezelOutline(theme.cornerRadius)
     }
 
 
@@ -161,8 +144,4 @@ open class Modal(
 
     //endregion
 
-
-    companion object {
-        val DefaultTheme = ModalTheme()
-    }
 }

@@ -17,7 +17,7 @@ class HUDPPCounter : HUDElement() {
     init {
         setValue(0.0)
         attachChild(sprite)
-        onMeasureContentSize()
+        onContentChanged()
     }
 
     fun setValue(value: Double) {

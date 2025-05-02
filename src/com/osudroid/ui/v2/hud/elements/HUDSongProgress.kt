@@ -125,7 +125,7 @@ class HUDPieSongProgress : HUDSongProgress() {
             attachChild(dot)
         }
 
-        onMeasureContentSize()
+        onContentChanged()
     }
 
 
