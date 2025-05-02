@@ -33,11 +33,15 @@ class ModHardRock : Mod(), IModApplicableToDifficulty, IModApplicableToHitObject
             val difficultyScale = CircleSizeCalculator.droidCSToOldDroidDifficultyScale(difficultyCS)
             val gameplayScale = CircleSizeCalculator.droidCSToOldDroidGameplayScale(gameplayCS)
 
-            difficultyCS = CircleSizeCalculator.droidOldDifficultyScaleToDroidCS(difficultyScale - 0.125f)
+            // The 0.125f scale that was added before replay version 7 was in screen pixels. We need it in osu! pixels.
+            val scaleAdjustment = 0.125f
 
-            // In gameplay, the 0.125f scale is in real screen pixels.
+            difficultyCS = CircleSizeCalculator.droidOldDifficultyScaleToDroidCS(
+                difficultyScale - CircleSizeCalculator.droidOldDifficultyScaleScreenPixelsToOsuPixels(scaleAdjustment)
+            )
+
             gameplayCS = CircleSizeCalculator.droidOldGameplayScaleToDroidCS(
-                gameplayScale - CircleSizeCalculator.droidOldScaleScreenPixelsToOsuPixels(0.125f)
+                gameplayScale - CircleSizeCalculator.droidOldGameplayScaleScreenPixelsToOsuPixels(scaleAdjustment)
             )
         }
 
