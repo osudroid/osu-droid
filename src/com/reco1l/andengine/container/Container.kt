@@ -6,53 +6,29 @@ import kotlin.math.*
 
 open class Container : ExtendedEntity() {
 
-    /**
-     * Whether the size of the container should be measured.
-     */
-    protected var shouldMeasureSize = true
-
-
     init {
         width = MatchContent
         height = MatchContent
     }
 
 
-    override fun onManagedUpdate(deltaTimeSec: Float) {
-
-        if (shouldMeasureSize) {
-            shouldMeasureSize = false
-            onMeasureContentSize()
-        }
-
-        super.onManagedUpdate(deltaTimeSec)
-    }
-
-
     override fun onChildDetached(child: IEntity) {
-        shouldMeasureSize = true
+        invalidate(InvalidationFlag.Content)
     }
 
     override fun onChildAttached(child: IEntity) {
-        shouldMeasureSize = true
+        invalidate(InvalidationFlag.Content)
     }
 
     override fun onChildPositionChanged(child: IEntity) {
-        shouldMeasureSize = true
+        invalidate(InvalidationFlag.Content)
     }
 
     override fun onChildSizeChanged(child: IEntity) {
-        shouldMeasureSize = true
+        invalidate(InvalidationFlag.Content)
     }
 
-    /**
-     * Called when the size of the container should be calculated.
-     *
-     * The default implementation of this method will take the farthest child's
-     * position and size as the width and height respectively.
-     */
-    protected open fun onMeasureContentSize() {
-
+    override fun onContentChanged() {
         var right = 0f
         var bottom = 0f
 
@@ -69,9 +45,8 @@ open class Container : ExtendedEntity() {
             }
         }
 
-        contentWidth = right - padding.left
-        contentHeight = bottom - padding.top
-        invalidate(InvalidationFlag.ContentSize)
+        contentWidth = right
+        contentHeight = bottom
     }
 
 

@@ -153,7 +153,7 @@ public class MainActivity extends BaseGameActivity implements
         opt.setNeedsSound(true);
         opt.getRenderOptions().disableExtensionVertexBufferObjects();
         opt.getTouchOptions().enableRunOnUpdateThread();
-        final Engine engine = new ExtendedEngine(opt);
+        final Engine engine = new ExtendedEngine(this, opt);
 
         if (!MultiTouch.isSupported(this)) {
             // Warning player that they will have to single tap forever.
@@ -264,6 +264,7 @@ public class MainActivity extends BaseGameActivity implements
         ResourceManager.getInstance().loadHighQualityAsset("songselect-top", "songselect-top.png");
         ResourceManager.getInstance().loadHighQualityAsset("back-arrow", "back-arrow.png");
         ResourceManager.getInstance().loadHighQualityAsset("reset", "reset.png");
+        ResourceManager.getInstance().loadHighQualityAsset("check", "check.png");
 
         File bg;
         if ((bg = new File(Config.getSkinPath() + "menu-background.png")).exists()
@@ -726,6 +727,10 @@ public class MainActivity extends BaseGameActivity implements
         }
         if (GlobalManager.getInstance().getEngine() == null) {
             return super.onKeyDown(keyCode, event);
+        }
+
+        if (ExtendedEngine.getCurrent().onKeyPress(keyCode, event)) {
+            return true;
         }
 
         Scene scene = GlobalManager.getInstance().getEngine().getScene();

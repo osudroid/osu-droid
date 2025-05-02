@@ -5,7 +5,6 @@ import com.reco1l.andengine.container.*
 import com.reco1l.andengine.modifier.*
 import com.reco1l.andengine.shape.*
 import com.reco1l.andengine.text.*
-import com.reco1l.framework.*
 import com.reco1l.framework.math.*
 import org.anddev.andengine.input.touch.*
 import ru.nsu.ccfit.zuev.osu.*
@@ -19,7 +18,7 @@ open class Card(
     val content: Container = LinearContainer().apply {
         orientation = Orientation.Vertical
         width = FillParent
-        clipChildren = true
+        clipToBounds = true
     },
 
 ) : LinearContainer() {
@@ -53,34 +52,40 @@ open class Card(
         foreground = BezelOutline(14f)
         background = Box().apply {
             cornerRadius = 14f
-            color = ColorARGB(0xFF161622)
+            applyTheme = { color = it.accentColor * 0.15f }
         }
 
         +titleBar.apply {
             width = FillParent
-            padding = Vec4(12f, 16f)
+            padding = Vec4(12f, 8f)
 
             +ExtendedText().apply {
                 font = ResourceManager.getInstance().getFont("smallFont")
                 anchor = Anchor.CenterLeft
                 origin = Anchor.CenterLeft
+                applyTheme = { color = it.accentColor }
             }
 
             +Triangle().apply {
                 anchor = Anchor.CenterRight
                 origin = Anchor.CenterRight
                 rotationCenter = Anchor.Center
-                alpha = 0.5f
                 width = 16f
                 height = 12f
+                applyTheme = {
+                    color = it.accentColor
+                    alpha = 0.5f
+                }
             }
         }
 
         +Box().apply {
             width = FillParent
             height = 1f
-            color = ColorARGB.White
-            alpha = 0.025f
+            applyTheme = {
+                color = it.accentColor
+                alpha = 0.025f
+            }
         }
 
         +content
@@ -99,7 +104,7 @@ open class Card(
             content.clearModifiers(ModifierType.SizeY)
             content.sizeToY(0f, 0.1f).then {
                 it.isVisible = false
-                onMeasureContentSize()
+                onContentChanged()
             }
         }
     }

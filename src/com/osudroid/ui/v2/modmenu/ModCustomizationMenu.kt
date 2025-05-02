@@ -22,7 +22,7 @@ class ModCustomizationMenu : Modal(
         x = 60f
         y = 90f
         scaleCenter = Anchor.TopCenter
-        clipChildren = true
+        clipToBounds = true
 
         +LinearContainer().apply {
             width = FillParent
@@ -33,13 +33,7 @@ class ModCustomizationMenu : Modal(
 ) {
 
     private val modSettings: LinearContainer = content[0]
-
     private val modSettingComponents = mutableListOf<IModSettingComponent<*>>()
-
-
-    init {
-        theme = ModalTheme(backgroundColor = 0xFF181828)
-    }
 
 
     //region Mods
@@ -98,8 +92,9 @@ class ModCustomizationMenu : Modal(
                 padding = Vec4(20f, 14f)
                 spacing = 12f
                 background = Box().apply {
-                    color = ColorARGB(0xFF1A1A2B)
-                    cornerRadius = 16f
+                    color = ColorARGB.Black
+                    alpha = 0.05f
+                    cornerRadius = 12f
                 }
 
                 +ModIcon(mod).apply {
@@ -114,7 +109,10 @@ class ModCustomizationMenu : Modal(
                     origin = Anchor.CenterLeft
                     font = ResourceManager.getInstance().getFont("smallFont")
                     text = mod.name.uppercase()
-                    color = ColorARGB(0xFF8282A8)
+                    applyTheme = {
+                        color = it.accentColor
+                        alpha = 0.9f
+                    }
                 }
             }
 

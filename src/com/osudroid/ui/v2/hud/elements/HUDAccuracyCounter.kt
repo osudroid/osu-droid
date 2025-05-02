@@ -16,7 +16,7 @@ class HUDAccuracyCounter : HUDElement() {
     init {
         sprite.text = "100.00%"
         attachChild(sprite)
-        onMeasureContentSize()
+        onContentChanged()
     }
 
     override fun onGameplayUpdate(gameScene: GameScene, secondsElapsed: Float) {

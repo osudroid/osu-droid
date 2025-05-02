@@ -90,7 +90,7 @@ class HUDHealthBar : HUDElement() {
         fillClear.height = fill.height
         fillClear.setPosition(fill.x + fill.width, fill.y)
 
-        onMeasureContentSize()
+        onContentChanged()
     }
 
 

@@ -3,24 +3,14 @@ package com.reco1l.andengine.ui
 import com.reco1l.andengine.*
 import com.reco1l.andengine.container.*
 import com.reco1l.andengine.info.*
-import com.reco1l.andengine.shape.*
 import com.reco1l.framework.*
 
-data class CircularProgressBarTheme(
-    val trackColor: ColorARGB = ColorARGB(0x4DFFFFFF),
-    val progressColor: ColorARGB = ColorARGB(0xFFFFFFFF),
-) : ITheme
+open class CircularProgressBar : Container() {
 
-@Suppress("JoinDeclarationAndAssignment")
-open class CircularProgressBar : Container(), IWithTheme<CircularProgressBarTheme> {
-
-    override var theme = DefaultTheme
-        set(value) {
-            if (field != value) {
-                field = value
-                onThemeChanged()
-            }
-        }
+    override var applyTheme: ExtendedEntity.(Theme) -> Unit = { theme ->
+        trackCircle.color = theme.accentColor.copy(alpha = trackCircle.alpha)
+        rotatingCircle.color = theme.accentColor
+    }
 
 
     /**
@@ -36,52 +26,41 @@ open class CircularProgressBar : Container(), IWithTheme<CircularProgressBarThem
         }
 
 
-    private val rotatingCircle: Circle
-    private val maskingCircle: Circle
-    private val trackCircle: Circle
+    private val maskingCircle = circle {
+        anchor = Anchor.Center
+        origin = Anchor.Center
+        relativeSizeAxes = Axes.Both
+        width = 0.9f
+        height = 0.9f
+        color = ColorARGB.Transparent
+        clearInfo = ClearInfo.ClearDepthBuffer
+        depthInfo = DepthInfo.Less
+    }
 
+    private val trackCircle = circle {
+        width = FillParent
+        height = FillParent
+        color = Theme.current.accentColor
+        alpha = 0.3f
+        depthInfo = DepthInfo.Default
+    }
 
-    init {
-        rotatingCircle = circle {
-            width = FillParent
-            height = FillParent
-            rotationCenter = Anchor.Center
-            depthInfo = DepthInfo.Default
-            setPortion(0.25f)
-        }
-
-        trackCircle = circle {
-            width = FillParent
-            height = FillParent
-            alpha = 0.3f
-            depthInfo = DepthInfo.Default
-        }
-
-        maskingCircle = circle {
-            anchor = Anchor.Center
-            origin = Anchor.Center
-            relativeSizeAxes = Axes.Both
-            width = 0.9f
-            height = 0.9f
-            color = ColorARGB.Transparent
-            clearInfo = ClearInfo.ClearDepthBuffer
-            depthInfo = DepthInfo.Less
-        }
+    private val rotatingCircle = circle {
+        width = FillParent
+        height = FillParent
+        rotationCenter = Anchor.Center
+        depthInfo = DepthInfo.Default
+        setPortion(0.25f)
+        color = Theme.current.accentColor
     }
 
 
-    open fun onProgressChange() {
+    protected open fun onProgressChange() {
         if (progress < 0f) {
             rotatingCircle.setPortion(0.25f)
         } else {
             rotatingCircle.setPortion(360f * progress)
         }
-    }
-
-
-    override fun onThemeChanged() {
-        trackCircle.color = theme.trackColor
-        rotatingCircle.color = theme.progressColor
     }
 
     override fun onManagedUpdate(deltaTimeSec: Float) {
@@ -91,8 +70,4 @@ open class CircularProgressBar : Container(), IWithTheme<CircularProgressBarThem
         super.onManagedUpdate(deltaTimeSec)
     }
 
-
-    companion object {
-        val DefaultTheme = CircularProgressBarTheme()
-    }
 }

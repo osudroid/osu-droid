@@ -18,7 +18,7 @@ class HUDScoreCounter : HUDElement() {
         sprite.text = format.format(0)
         attachChild(sprite)
 
-        onMeasureContentSize()
+        onContentChanged()
     }
 
     override fun onGameplayUpdate(game: GameScene, secondsElapsed: Float) {

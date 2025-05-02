@@ -93,19 +93,21 @@ class GameLoaderScene(private val gameScene: GameScene, beatmapInfo: BeatmapInfo
                 text {
                     font = ResourceManager.getInstance().getFont("bigFont")
                     text = beatmapInfo.titleText
+                    applyTheme = { color = it.accentColor }
                 }
 
                 // Difficulty
                 text {
                     font = ResourceManager.getInstance().getFont("middleFont")
                     text = beatmapInfo.version
+                    applyTheme = { color = it.accentColor }
                 }
 
                 // Creator
                 text {
                     font = ResourceManager.getInstance().getFont("middleFont")
                     text = "by ${beatmapInfo.artistText}"
-                    color = ColorARGB(0xFF8282A8)
+                    applyTheme = { color = it.accentColor * 0.9f }
                 }
 
                 // Mods
@@ -129,7 +131,7 @@ class GameLoaderScene(private val gameScene: GameScene, beatmapInfo: BeatmapInfo
                 scrollableContainer {
                     anchor = Anchor.CenterRight
                     origin = Anchor.CenterRight
-                    width = 400f
+                    width = 460f
                     height = FillParent
                     x = -20f
                     scrollAxes = Axes.Y

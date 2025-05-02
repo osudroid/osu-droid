@@ -53,7 +53,7 @@ open class ExtendedSprite(textureRegion: TextureRegion? = null) : BufferedEntity
             if (field != value) {
                 field = value
                 onTextureRegionChanged()
-                invalidate(InvalidationFlag.ContentSize)
+                invalidate(InvalidationFlag.Content)
             }
         }
 

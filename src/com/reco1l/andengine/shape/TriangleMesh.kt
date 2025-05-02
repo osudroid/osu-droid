@@ -40,7 +40,6 @@ class TriangleMesh : ExtendedEntity() {
     fun setContentSize(width: Float, height: Float) {
         contentWidth = width
         contentHeight = height
-        invalidate(InvalidationFlag.ContentSize)
     }
 
 

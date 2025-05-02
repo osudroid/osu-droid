@@ -206,6 +206,8 @@ public class GameplaySlider extends GameObject {
         circleColor.set(comboColor.r(), comboColor.g(), comboColor.b());
         currentNestedObjectIndex = 0;
 
+        boolean applyIncreasedVisibility = Config.isShowFirstApproachCircle() && beatmapSlider.isFirstNote();
+
         // Start circle piece
         headCirclePiece.setScale(scale);
         headCirclePiece.setCircleColor(comboColor.r(), comboColor.g(), comboColor.b());
@@ -217,16 +219,13 @@ public class GameplaySlider extends GameObject {
         }
         headCirclePiece.setNumberText(comboNum);
         headCirclePiece.setNumberScale(OsuSkin.get().getComboTextScale());
-        headCirclePiece.setVisible(!GameHelper.isTraceable() || (Config.isShowFirstApproachCircle() && beatmapSlider.isFirstNote()));
+        headCirclePiece.setVisible(!GameHelper.isTraceable() || applyIncreasedVisibility);
 
         approachCircle.setColor(comboColor.r(), comboColor.g(), comboColor.b());
         approachCircle.setScale(scale * 3);
         approachCircle.setAlpha(0);
         approachCircle.setPosition(this.position.x, this.position.y);
-
-        if (GameHelper.isHidden()) {
-            approachCircle.setVisible(Config.isShowFirstApproachCircle() && beatmapSlider.isFirstNote());
-        }
+        approachCircle.setVisible(!GameHelper.isHidden() || applyIncreasedVisibility);
 
         // End circle
         pathEndPosition.set(getAbsolutePathPosition(path.anchorCount - 1));
@@ -265,7 +264,7 @@ public class GameplaySlider extends GameObject {
         // When snaking in is enabled, the first repeat or tail needs to be delayed until the snaking completes.
         float fadeInDelay = Config.isSnakingInSliders() ? timePreempt / 3 : 0;
 
-        if (GameHelper.isHidden()) {
+        if (GameHelper.isHidden() && !GameHelper.isHiddenOnlyFadeApproachCircles()) {
             float fadeOutDuration = timePreempt * (float) ModHidden.FADE_OUT_DURATION_MULTIPLIER;
             float finalTailAlpha = (fadeInDuration - fadeInDelay) / fadeInDuration;
 
@@ -501,7 +500,7 @@ public class GameplaySlider extends GameObject {
             return;
         }
 
-        if (GameHelper.isHidden()) {
+        if (GameHelper.isHidden() && !GameHelper.isHiddenOnlyFadeApproachCircles()) {
             sliderBody.detachSelf();
 
             // If the animation is enabled, at this point it will be still animating.
@@ -720,7 +719,7 @@ public class GameplaySlider extends GameObject {
                     followCircle.detachSelf();
 
                     // When hidden mod is enabled, the follow circle is the last object to finish animating.
-                    if (GameHelper.isHidden()) {
+                    if (GameHelper.isHidden() && !GameHelper.isHiddenOnlyFadeApproachCircles()) {
                         poolObject();
                     }
                 });
@@ -1196,7 +1195,7 @@ public class GameplaySlider extends GameObject {
 
     private void applyBodyFadeAdjustments(float fadeInDuration) {
 
-        if (GameHelper.isHidden()) {
+        if (GameHelper.isHidden() && !GameHelper.isHiddenOnlyFadeApproachCircles()) {
             // New duration from completed fade in to end (before fading out)
             float fadeOutDuration = (float) duration + timePreempt - fadeInDuration;
 

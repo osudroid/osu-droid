@@ -9,17 +9,20 @@ import ru.nsu.ccfit.zuev.osu.*
 open class FormCheckbox(initialValue: Boolean = false) : FormControl<Boolean, Checkbox>(initialValue) {
 
     override val control = Checkbox(initialValue).apply {
-        anchor = Anchor.TopRight
-        origin = Anchor.TopRight
+        anchor = Anchor.CenterRight
+        origin = Anchor.CenterRight
     }
 
 
     init {
+        spacing = 12f
         +labelText
-        +control
         +resetButton
 
-        addConstraint(resetButton, labelText)
+        container {
+            width = FillParent
+            +control
+        }
     }
 
 

@@ -16,7 +16,7 @@ import ru.nsu.ccfit.zuev.osu.ResourceManager
  * Represents a form control that is used to change the value of a property.
  */
 @Suppress("LeakingThis", "MemberVisibilityCanBePrivate")
-abstract class FormControl<V : Any, C: Control<V>>(initialValue: V): ConstraintContainer() {
+abstract class FormControl<V : Any, C: Control<V>>(initialValue: V): LinearContainer() {
 
     /**
      * The control that is used to change the value.
@@ -34,43 +34,40 @@ abstract class FormControl<V : Any, C: Control<V>>(initialValue: V): ConstraintC
      */
     open val labelText = ExtendedText().apply {
         font = ResourceManager.getInstance().getFont("smallFont")
+        anchor = Anchor.CenterLeft
+        origin = Anchor.CenterLeft
+        applyTheme = { color = it.accentColor }
     }
 
     /**
      * The button that is used to reset the value of the control to its default value.
      */
-    open val resetButton = object : Container() {
-
-        init {
-            padding = Vec4(6f, 0f)
-            anchor = Anchor.CenterRight
-            origin = Anchor.CenterLeft
-            foreground = BezelOutline(12f)
-            background = Box().apply {
-                cornerRadius = 12f
-                color = ColorARGB(0xFF222234)
-            }
-            translationX = 12f
-
-            +ExtendedSprite().apply {
-                textureRegion = ResourceManager.getInstance().getTexture("reset")
-                width = 24f
-                height = 24f
-                anchor = Anchor.Center
-                origin = Anchor.Center
-            }
+    open val resetButton = TextButton().apply {
+        anchor = Anchor.CenterLeft
+        origin = Anchor.CenterLeft
+        scaleCenter = Anchor.Center
+        font = ResourceManager.getInstance().getFont("xs")
+        text = "Reset"
+        padding = Vec4(4f, 0f, 8f, 0f)
+        content.spacing = -2f
+        leadingIcon = ExtendedSprite().apply {
+            textureRegion = ResourceManager.getInstance().getTexture("reset")
+            width = 16f
+            height = 16f
         }
 
-        override fun onAreaTouched(event: TouchEvent, localX: Float, localY: Float): Boolean {
-            if (isVisible) {
-                if (event.isActionUp) {
-                    value = defaultValue
-                }
-                return true
-            }
-            return false
-        }
+        isVisible = false
+        alpha = 0f
+        translationX = -10f
 
+        // We want to have a highlitghted color.
+        isSelected = true
+
+        onActionUp = {
+            if (this@FormControl.isVisible) {
+                value = defaultValue
+            }
+        }
     }
 
 
@@ -124,7 +121,7 @@ abstract class FormControl<V : Any, C: Control<V>>(initialValue: V): ConstraintC
 
     init {
         width = FillParent
-        padding = Vec4(24f)
+        padding = Vec4(24f, 8f)
         background = Box().apply {
             color = ColorARGB.White
             alpha = 0f
@@ -160,7 +157,20 @@ abstract class FormControl<V : Any, C: Control<V>>(initialValue: V): ConstraintC
 
     override fun onManagedUpdate(deltaTimeSec: Float) {
 
-        resetButton.isVisible = value != defaultValue
+        resetButton.apply {
+            if (!isVisible && value != defaultValue) {
+                clearEntityModifiers()
+                isVisible = true
+                translateToX(0f, 0.1f)
+                fadeTo(1f, 0.1f)
+            } else if (isVisible && value == defaultValue) {
+                clearEntityModifiers()
+                translateToX(-10f, 0.1f)
+                fadeTo(0f, 0.1f).then {
+                    isVisible = false
+                }
+            }
+        }
 
         super.onManagedUpdate(deltaTimeSec)
     }
