@@ -135,7 +135,7 @@ open class Slider(initialValue: Float = 0f) : Control<Float>(initialValue) {
 
     override fun onProcessValue(value: Float): Float {
         if (step > 0f) {
-            return (min + step * ceil((value - min) / step)).coerceIn(min, max)
+            return (min + step * round((value - min) / step)).coerceIn(min, max)
         }
         return value.coerceIn(min, max)
     }
