@@ -33,11 +33,11 @@ class ModHardRock : Mod(), IModApplicableToDifficulty, IModApplicableToHitObject
             val difficultyScale = CircleSizeCalculator.droidCSToOldDroidDifficultyScale(difficultyCS)
             val gameplayScale = CircleSizeCalculator.droidCSToOldDroidGameplayScale(gameplayCS)
 
-            difficultyCS = CircleSizeCalculator.droidOldDifficultyScaleToDroidCS(difficultyScale + 0.125f)
+            difficultyCS = CircleSizeCalculator.droidOldDifficultyScaleToDroidCS(difficultyScale - 0.125f)
 
             // In gameplay, the 0.125f scale is in real screen pixels.
             gameplayCS = CircleSizeCalculator.droidOldGameplayScaleToDroidCS(
-                gameplayScale + CircleSizeCalculator.droidOldScaleScreenPixelsToOsuPixels(0.125f)
+                gameplayScale - CircleSizeCalculator.droidOldScaleScreenPixelsToOsuPixels(0.125f)
             )
         }
 
