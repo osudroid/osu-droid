@@ -92,13 +92,31 @@ object CircleSizeCalculator {
         (54.42f - (max(1e-3f, scale) - OLD_DROID_SCALE_MULTIPLIER * 480 / Config.getRES_HEIGHT()) * HitObject.OBJECT_RADIUS) / 4.48f
 
     /**
-     * Converts old osu!droid scale that is in **screen pixels** to **osu!pixels**.
+     * Converts old osu!droid difficulty scale that is in **screen pixels** to **osu!pixels**.
      *
      * @param scale The osu!droid scale to convert.
      * @return The converted scale.
      */
     @JvmStatic
-    fun droidOldScaleScreenPixelsToOsuPixels(scale: Float) = scale * 480 / Config.getRES_HEIGHT()
+    fun droidOldDifficultyScaleScreenPixelsToOsuPixels(scale: Float) = scale * 480 / OLD_ASSUMED_DROID_HEIGHT
+
+    /**
+     * Converts old osu!droid difficulty scale that is in **osu!pixels** to **screen pixels**.
+     *
+     * @param scale The osu!droid scale to convert.
+     * @return The converted scale.
+     */
+    @JvmStatic
+    fun droidOldDifficultyScaleOsuPixelsToScreenPixels(scale: Float) = scale * OLD_ASSUMED_DROID_HEIGHT / 480
+
+    /**
+     * Converts old osu!droid gameplay scale that is in **screen pixels** to **osu!pixels**.
+     *
+     * @param scale The osu!droid scale to convert.
+     * @return The converted scale.
+     */
+    @JvmStatic
+    fun droidOldGameplayScaleScreenPixelsToOsuPixels(scale: Float) = scale * 480 / max(1, Config.getRES_HEIGHT())
 
     /**
      * Converts old osu!droid scale that is in **osu!pixels** to **screen pixels**.
@@ -107,7 +125,7 @@ object CircleSizeCalculator {
      * @return The converted scale.
      */
     @JvmStatic
-    fun droidOldScaleOsuPixelsToScreenPixels(scale: Float) = scale * Config.getRES_HEIGHT() / 480
+    fun droidOldGameplayScaleOsuPixelsToScreenPixels(scale: Float) = scale * max(1, Config.getRES_HEIGHT()) / 480
 
     /**
      * Converts osu!droid scale to osu!standard radius.
