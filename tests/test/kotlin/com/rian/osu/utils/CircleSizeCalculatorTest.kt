@@ -5,9 +5,52 @@ import org.junit.Test
 
 class CircleSizeCalculatorTest {
     @Test
+    fun `Test osu!droid circle size to osu!droid scale conversion`() {
+        fun test(cs: Float, scale: Float) =
+            Assert.assertEquals(scale, CircleSizeCalculator.droidCSToDroidScale(cs), 1e-5f)
+
+        test(0f, 1.3304397f)
+        test(2f, 1.1903822f)
+        test(3.5f, 1.0853392f)
+        test(4f, 1.0503248f)
+        test(5f, 0.98029613f)
+        test(6f, 0.91026735f)
+        test(8f, 0.77020997f)
+        test(10f, 0.6301526f)
+        test(12f, 0.49009523f)
+        test(14f, 0.35003784f)
+        test(16f, 0.2099805f)
+        test(17f, 0.13995178f)
+        test(18f, 0.06992312f)
+        test(19f, 0.001f)
+        test(20f, 0.001f)
+    }
+
+    @Test
+    fun `Test osu!droid scale to osu!droid circle size conversion`() {
+        fun test(scale: Float, cs: Float) =
+            Assert.assertEquals(cs, CircleSizeCalculator.droidScaleToDroidCS(scale), 1e-5f)
+
+        test(1.3304397f, 0f)
+        test(1.1903822f, 2f)
+        test(1.0853392f, 3.5f)
+        test(1.0503248f, 4f)
+        test(0.98029613f, 5f)
+        test(0.91026735f, 6f)
+        test(0.77020997f, 8f)
+        test(0.6301526f, 10f)
+        test(0.49009523f, 12f)
+        test(0.35003784f, 14f)
+        test(0.2099805f, 16f)
+        test(0.13995178f, 17f)
+        test(0.06992312f, 18f)
+        test(0.001f, 18.984211f)
+    }
+
+    @Test
     fun `Test osu!droid circle size to old osu!droid difficulty scale conversion`() {
         fun test(cs: Float, scale: Float) =
-            Assert.assertEquals(CircleSizeCalculator.droidCSToOldDroidDifficultyScale(cs), scale, 1e-5f)
+            Assert.assertEquals(scale, CircleSizeCalculator.droidCSToOldDroidDifficultyScale(cs), 1e-5f)
 
         test(0f, 1.7818792f)
         test(2f, 1.5832541f)
@@ -22,6 +65,7 @@ class CircleSizeCalculatorTest {
         test(16f, 0.1928792f)
         test(17f, 0.0935667f)
         test(18f, 0.001f)
+        test(19f, 0.001f)
         test(20f, 0.001f)
     }
 

@@ -27,6 +27,22 @@ object CircleSizeCalculator {
     private const val BROKEN_GAMEFIELD_ROUNDING_ALLOWANCE = 1.00041f
 
     /**
+     * Converts osu!droid circle size to osu!droid scale.
+     *
+     * @param cs The circle size to convert.
+     * @return The calculated osu!droid scale.
+     */
+    @JvmStatic
+    fun droidCSToDroidScale(cs: Float) =
+        // 6.8556344386 was derived by converting the old osu!droid gameplay scale unit into osu!pixels (by dividing it
+        // with (height / 480)) and then fitting the function to the osu!standard scale function. The height in the old
+        // osu!droid gameplay scale function was set to 576, which was chosen after sampling the top 100 most used
+        // devices by players from Firebase. This is done to ensure that the new scale is as close to the old scale as
+        // possible for most players.
+        // The fitting of both functions can be found under the following graph: https://www.desmos.com/calculator/rjfxqc3yic
+        max(1e-3f, standardCSToStandardScale(cs - 6.8556344386f, true))
+
+    /**
      * Converts osu!droid circle size to osu!droid difficulty scale before replay version 7.
      *
      * @param cs The circle size to convert.
@@ -45,6 +61,15 @@ object CircleSizeCalculator {
     @JvmStatic
     fun droidCSToOldDroidGameplayScale(cs: Float) =
         max(1e-3f, (54.42f - cs * 4.48f) / HitObject.OBJECT_RADIUS + OLD_DROID_SCALE_MULTIPLIER * 480 / Config.getRES_HEIGHT())
+
+    /**
+     * Converts osu!droid scale to osu!droid circle size.
+     *
+     * @param scale The osu!droid scale to convert.
+     * @return The calculated osu!droid circle size.
+     */
+    @JvmStatic
+    fun droidScaleToDroidCS(scale: Float) = standardScaleToStandardCS(max(1e-3f, scale), true) + 6.8556344386f
 
     /**
      * Converts osu!droid difficulty scale before replay version 7 to osu!droid circle size.
@@ -107,6 +132,18 @@ object CircleSizeCalculator {
     @JvmOverloads
     fun standardCSToStandardScale(cs: Float, applyFudge: Boolean = false) =
         (1 - 0.7f * (cs - 5) / 5) / 2 * if (applyFudge) BROKEN_GAMEFIELD_ROUNDING_ALLOWANCE else 1f
+
+    /**
+     * Converts osu!standard scale to osu!standard circle size.
+     *
+     * @param scale The osu!standard scale to convert.
+     * @param applyFudge Whether to apply a fudge that was historically applied to osu!standard.
+     * @return The osu!standard circle size of the given osu!standard scale.
+     */
+    @JvmStatic
+    @JvmOverloads
+    fun standardScaleToStandardCS(scale: Float, applyFudge: Boolean = false) =
+        5 + 5 * (1 - 2 * scale / if (applyFudge) BROKEN_GAMEFIELD_ROUNDING_ALLOWANCE else 1f) / 0.7f
 
     /**
      * Converts osu!standard scale to osu!droid difficulty scale before replay version 7.
