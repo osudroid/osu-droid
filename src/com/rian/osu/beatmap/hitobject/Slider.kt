@@ -255,6 +255,8 @@ class Slider(
 
             if (!wasEqual) {
                 gameplayStackedEndPositionCache.invalidate()
+                screenSpaceGameplayStackedEndPositionCache.invalidate()
+
                 nestedHitObjects.forEach { it.gameplayStackHeight = value }
             }
         }
