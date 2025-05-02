@@ -231,7 +231,7 @@ object ModMenu : ExtendedScene() {
 
                     ModType.entries.forEach { type ->
                         val sectionName = StringTable.get(type.stringId)
-                        val sectionMods = mods.filter { it !is IMigratableMod && it.type == type }
+                        val sectionMods = mods.filter { it !is IMigratableMod && it.isUserPlayable && it.type == type }
 
                         if (sectionMods.isNotEmpty()) {
                             +ModMenuSection(sectionName, sectionMods)

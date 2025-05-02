@@ -323,6 +323,10 @@ public class ScoringScene {
         var modX = mark.getX() - 30;
         var modY = mark.getY() + mark.getHeight() * 2 / 3;
         for (var mod : mods.values()) {
+            if (!mod.isUserPlayable()) {
+                continue;
+            }
+
             var modSprite = new Sprite(modX, modY, ResourceManager.getInstance().getTexture(mod.getTextureName()));
             modX -= 30;
             scene.attachChild(modSprite);

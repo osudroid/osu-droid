@@ -164,8 +164,12 @@ open class ModHashMap : HashMap<Class<out Mod>, Mod> {
 
     /**
      * Serializes the [Mod]s in this [ModHashMap] to a [JSONArray].
+     *
+     * @param includeNonUserPlayable Whether to include non-user-playable [Mod]s in the serialization.
+     * Defaults to `true`.
      */
-    fun serializeMods() = ModUtils.serializeMods(values)
+    @JvmOverloads
+    fun serializeMods(includeNonUserPlayable: Boolean = true) = ModUtils.serializeMods(values, includeNonUserPlayable)
 
     /**
      * Converts the container [Mod]s in this [ModHashMap] to their [String] representative.
@@ -308,7 +312,8 @@ open class ModHashMap : HashMap<Class<out Mod>, Mod> {
             ModPerfect(),
             ModSuddenDeath(),
             ModSynesthesia(),
-            ModScoreV2()
+            ModScoreV2(),
+            ModReplayV6()
         )
     }
 }

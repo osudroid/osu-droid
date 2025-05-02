@@ -1,10 +1,7 @@
 package com.rian.osu.beatmap
 
-import com.rian.osu.GameMode
 import com.rian.osu.beatmap.hitobject.*
 import com.rian.osu.mods.Mod
-import com.rian.osu.utils.CircleSizeCalculator
-import kotlin.math.pow
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.ensureActive
 
@@ -69,41 +66,14 @@ class BeatmapProcessor @JvmOverloads constructor(
             it.gameplayStackHeight = 0
         }
 
-        when (beatmap.mode) {
-            GameMode.Droid -> applyDroidStacking()
-            GameMode.Standard -> if (beatmap.formatVersion >= 6) applyStandardStacking() else applyStandardStackingOld()
+        if (beatmap.formatVersion >= 6) {
+            applyStacking()
+        } else {
+            applyStackingOld()
         }
     }
 
-    private fun applyDroidStacking() = beatmap.hitObjects.objects.run {
-        if (isEmpty()) {
-            return@run
-        }
-
-        val droidDifficultyScale = CircleSizeCalculator.standardScaleToDroidDifficultyScale(this[0].difficultyScale, true)
-        val maxDeltaTime = 2000 * beatmap.general.stackLeniency
-
-        for (i in 0 until size - 1) {
-            scope?.ensureActive()
-
-            val current = this[i]
-            val next = this[i + 1]
-
-            if (current is HitCircle && next.startTime - current.startTime < maxDeltaTime) {
-                val distanceSquared = next.position.getDistance(current.position).pow(2)
-
-                if (distanceSquared < droidDifficultyScale) {
-                    next.difficultyStackHeight = current.difficultyStackHeight + 1
-                }
-
-                if (distanceSquared < current.gameplayScale) {
-                    next.gameplayStackHeight = current.gameplayStackHeight + 1
-                }
-            }
-        }
-    }
-
-    private fun applyStandardStacking() {
+    private fun applyStacking() {
         val objects = beatmap.hitObjects.objects
         val startIndex = 0
         val endIndex = objects.size - 1
@@ -261,7 +231,7 @@ class BeatmapProcessor @JvmOverloads constructor(
         }
     }
 
-    private fun applyStandardStackingOld() {
+    private fun applyStackingOld() {
         val objects = beatmap.hitObjects.objects
 
         for (i in objects.indices) {

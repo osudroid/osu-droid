@@ -3,6 +3,7 @@ package com.rian.osu.mods
 import com.rian.osu.beatmap.Beatmap
 import com.rian.osu.math.Interpolation
 import kotlin.math.max
+import kotlinx.coroutines.CoroutineScope
 import org.json.JSONObject
 
 /**
@@ -37,7 +38,7 @@ abstract class ModTimeRamp : Mod(), IModApplicableToBeatmap, IModApplicableToTra
         put("finalRate", finalRate)
     }
 
-    override fun applyToBeatmap(beatmap: Beatmap) {
+    override fun applyToBeatmap(beatmap: Beatmap, scope: CoroutineScope?) {
         initialRateTime = beatmap.hitObjects.objects.firstOrNull()?.startTime ?: 0.0
 
         finalRateTime = Interpolation.linear(

@@ -53,6 +53,13 @@ sealed class Mod {
     open val isRelevant = true
 
     /**
+     * Whether this [Mod] is playable by a real human user.
+     *
+     * Should be `false` for cases where the user is not meant to apply the [Mod] by themselves.
+     */
+    open val isUserPlayable = true
+
+    /**
      * Whether this [Mod] is valid for multiplayer matches.
      *
      * Should be `false` for [Mod]s that make gameplay duration different across players.

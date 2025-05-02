@@ -124,7 +124,7 @@ open class Beatmap(
 
         mods?.filterIsInstance<IModApplicableToBeatmap>()?.forEach {
             scope?.ensureActive()
-            it.applyToBeatmap(converted)
+            it.applyToBeatmap(converted, scope)
         }
 
         return converted

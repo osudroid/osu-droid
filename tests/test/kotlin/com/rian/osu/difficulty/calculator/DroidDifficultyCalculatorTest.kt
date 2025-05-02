@@ -36,12 +36,12 @@ class DroidDifficultyCalculatorTest {
 
         calculator.calculate(beatmap).apply {
             // These results are off by a margin from server-side results due to floating point differences.
-            Assert.assertEquals(aimDifficulty, 2.5694955103340424, 1e-5)
-            Assert.assertEquals(tapDifficulty, 1.4928164438079188, 1e-5)
-            Assert.assertEquals(rhythmDifficulty, 0.8031331688998974, 1e-5)
-            Assert.assertEquals(flashlightDifficulty, 0.0, 1e-5)
-            Assert.assertEquals(visualDifficulty, 0.7809831991279115, 1e-5)
-            Assert.assertEquals(starRating, 4.043497848534318, 1e-6)
+            Assert.assertEquals(2.5686593810525644, aimDifficulty, 1e-5)
+            Assert.assertEquals(1.4928164438079188, tapDifficulty, 1e-5)
+            Assert.assertEquals(0.8031331688998974, rhythmDifficulty, 1e-5)
+            Assert.assertEquals(0.0, flashlightDifficulty, 1e-5)
+            Assert.assertEquals(0.7809831991279115, visualDifficulty, 1e-5)
+            Assert.assertEquals(4.042875478100303, starRating, 1e-6)
         }
     }
 }

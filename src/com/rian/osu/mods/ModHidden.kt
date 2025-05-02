@@ -4,6 +4,7 @@ import com.rian.osu.beatmap.Beatmap
 import com.rian.osu.beatmap.hitobject.HitObject
 import com.rian.osu.beatmap.hitobject.Slider
 import com.rian.osu.beatmap.sections.BeatmapDifficulty
+import kotlinx.coroutines.CoroutineScope
 import org.json.JSONObject
 
 /**
@@ -49,7 +50,7 @@ class ModHidden : Mod(), IModApplicableToBeatmap {
         }
     }
 
-    override fun applyToBeatmap(beatmap: Beatmap) {
+    override fun applyToBeatmap(beatmap: Beatmap, scope: CoroutineScope?) {
         fun applyFadeInAdjustment(hitObject: HitObject) {
             hitObject.timeFadeIn = hitObject.timePreempt * FADE_IN_DURATION_MULTIPLIER
 

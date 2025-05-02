@@ -32,14 +32,14 @@ class StandardDifficultyCalculatorTest {
                 TestResourceManager.getBeatmapFile(
                     "YOASOBI - Love Letter (ohm002) [Please accept my overflowing emotions.]"
                 )!!
-            ).parse(true, GameMode.Droid)!!
+            ).parse(true, GameMode.Standard)!!
 
         calculator.calculate(beatmap).apply {
             // These results are off by a margin from server-side results due to floating point differences.
-            Assert.assertEquals(aimDifficulty, 2.4086917511345836, 1e-5)
-            Assert.assertEquals(speedDifficulty, 1.8083767275879148, 1e-5)
-            Assert.assertEquals(flashlightDifficulty, 0.0, 1e-5)
-            Assert.assertEquals(starRating, 4.521063460612202, 1e-6)
+            Assert.assertEquals(2.413839842506594, aimDifficulty, 1e-5)
+            Assert.assertEquals(1.808471044396375, speedDifficulty, 1e-5)
+            Assert.assertEquals(0.0, flashlightDifficulty, 1e-5)
+            Assert.assertEquals(4.528123418924582, starRating, 1e-6)
         }
     }
 }

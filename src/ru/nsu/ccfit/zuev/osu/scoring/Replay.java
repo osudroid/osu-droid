@@ -6,6 +6,7 @@ import androidx.annotation.NonNull;
 
 import com.rian.osu.mods.LegacyModConverter;
 import com.rian.osu.mods.ModHardRock;
+import com.rian.osu.mods.ModReplayV6;
 import com.rian.osu.utils.ModHashMap;
 import com.rian.osu.utils.ModUtils;
 
@@ -250,6 +251,7 @@ public class Replay {
                         }
 
                         stat.setMod(LegacyModConverter.convert(mod, extraModString));
+                        stat.getMod().put(new ModReplayV6());
                     }
                 }
 
@@ -326,7 +328,7 @@ public class Replay {
         Version 4: Adds ExtraModString's save and load in save()/load()/loadInfo()
         Version 5: Changes coordinates to use the float primitive type
         Version 6: Removed accuracy and perfect, slider ends no longer give combo when not hit
-        Version 7: Reworked mod storage to not serialize GameMod
+        Version 7: Reworked mod storage to not serialize GameMod, object stacking behavior overhaul
      */
     public static class ReplayVersion implements Serializable {
         private static final long serialVersionUID = 4643121693566795335L;

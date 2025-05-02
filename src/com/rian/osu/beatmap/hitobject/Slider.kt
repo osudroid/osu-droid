@@ -197,11 +197,14 @@ class Slider(
     override var difficultyStackHeight
         get() = super.difficultyStackHeight
         set(value) {
+            val wasEqual = super.difficultyStackHeight == value
+
             super.difficultyStackHeight = value
 
-            difficultyStackedEndPositionCache.invalidate()
-
-            nestedHitObjects.forEach { it.difficultyStackHeight = value }
+            if (!wasEqual) {
+                difficultyStackedEndPositionCache.invalidate()
+                nestedHitObjects.forEach { it.difficultyStackHeight = value }
+            }
         }
 
     override var difficultyScale
@@ -241,11 +244,14 @@ class Slider(
     override var gameplayStackHeight
         get() = super.gameplayStackHeight
         set(value) {
+            val wasEqual = super.gameplayStackHeight == value
+
             super.gameplayStackHeight = value
 
-            gameplayStackedEndPositionCache.invalidate()
-
-            nestedHitObjects.forEach { it.gameplayStackHeight = value }
+            if (!wasEqual) {
+                gameplayStackedEndPositionCache.invalidate()
+                nestedHitObjects.forEach { it.gameplayStackHeight = value }
+            }
         }
 
     override var gameplayScale
