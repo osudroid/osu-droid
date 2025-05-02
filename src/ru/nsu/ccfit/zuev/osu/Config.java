@@ -89,7 +89,6 @@ public class Config {
         bgmVolume,
         offset,
         backgroundBrightness,
-        scaleMultiplier,
         playfieldSize,
         cursorSize;
 
@@ -468,14 +467,6 @@ public class Config {
 
     public static void setShowCursor(final boolean showCursor) {
         Config.showCursor = showCursor;
-    }
-
-    public static float getScaleMultiplier() {
-        return scaleMultiplier;
-    }
-
-    public static void setScaleMultiplier(final float scaleMultiplier) {
-        Config.scaleMultiplier = scaleMultiplier;
     }
 
     public static String getOnlineUsername() {

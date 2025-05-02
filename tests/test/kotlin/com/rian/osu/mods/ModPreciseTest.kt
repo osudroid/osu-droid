@@ -19,7 +19,7 @@ class ModPreciseTest {
     fun `Test hit window application to circle`() {
         HitCircle(0.0, Vector2(0), true, 0).apply {
             applyDefaults(BeatmapControlPoints(), BeatmapDifficulty(), GameMode.Droid)
-            ModPrecise().applyToHitObject(GameMode.Droid, this)
+            ModPrecise().applyToHitObject(GameMode.Droid, this, listOf())
 
             Assert.assertTrue(hitWindow is PreciseDroidHitWindow)
             Assert.assertEquals(5f, hitWindow!!.overallDifficulty, 0f)
@@ -38,7 +38,7 @@ class ModPreciseTest {
             mutableListOf()
         ).apply {
             applyDefaults(BeatmapControlPoints(), BeatmapDifficulty(), GameMode.Droid)
-            ModPrecise().applyToHitObject(GameMode.Droid, this)
+            ModPrecise().applyToHitObject(GameMode.Droid, this, listOf())
 
             // Ensure that the hit window is not applied to the slider itself
             Assert.assertTrue(hitWindow is EmptyHitWindow)
@@ -51,7 +51,7 @@ class ModPreciseTest {
     fun `Test hit window application to spinner`() {
         Spinner(0.0, 1000.0, true).apply {
             applyDefaults(BeatmapControlPoints(), BeatmapDifficulty(), GameMode.Droid)
-            ModPrecise().applyToHitObject(GameMode.Droid, this)
+            ModPrecise().applyToHitObject(GameMode.Droid, this, listOf())
 
             Assert.assertTrue(hitWindow is EmptyHitWindow)
         }

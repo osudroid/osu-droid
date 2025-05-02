@@ -21,7 +21,7 @@ class ModDifficultyAdjust @JvmOverloads constructor(
     ar: Float? = null,
     od: Float? = null,
     hp: Float? = null
-) : Mod(), IModApplicableToDifficultyWithSettings, IModApplicableToHitObjectWithSettings, IModRequiresOriginalBeatmap {
+) : Mod(), IModApplicableToDifficultyWithMods, IModApplicableToHitObjectWithMods, IModRequiresOriginalBeatmap {
 
     /**
      * The circle size to enforce.

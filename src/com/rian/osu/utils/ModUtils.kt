@@ -141,14 +141,17 @@ object ModUtils {
         mods: Iterable<Mod>,
         withRateChange: Boolean = false
     ) {
+        @Suppress("UNCHECKED_CAST")
+        val adjustmentMods = mods.filter { it is IModFacilitatesAdjustment } as Iterable<IModFacilitatesAdjustment>
+
         for (mod in mods) {
             if (mod is IModApplicableToDifficulty) {
-                mod.applyToDifficulty(mode, difficulty)
+                mod.applyToDifficulty(mode, difficulty, adjustmentMods)
             }
         }
 
         for (mod in mods) {
-            if (mod is IModApplicableToDifficultyWithSettings) {
+            if (mod is IModApplicableToDifficultyWithMods) {
                 mod.applyToDifficulty(mode, difficulty, mods)
             }
         }

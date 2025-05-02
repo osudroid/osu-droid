@@ -210,35 +210,40 @@ class Slider(
     override var difficultyScale
         get() = super.difficultyScale
         set(value) {
+            val wasEqual = super.difficultyScale == value
+
             super.difficultyScale = value
 
-            difficultyStackedEndPositionCache.invalidate()
-
-            nestedHitObjects.forEach { it.difficultyScale = value }
+            if (!wasEqual) {
+                difficultyStackedEndPositionCache.invalidate()
+                nestedHitObjects.forEach { it.difficultyScale = value }
+            }
         }
 
     // Gameplay object positions
 
-    private val gameplayEndPositionCache = Cached(gameplayPosition)
-
-    override val gameplayEndPosition: Vector2
-        get() {
-            if (!gameplayEndPositionCache.isValid) {
-                gameplayEndPositionCache.value = convertPositionToRealCoordinates(endPosition)
-            }
-
-            return gameplayEndPositionCache.value
-        }
-
-    private val gameplayStackedEndPositionCache = Cached(gameplayEndPosition)
+    private val gameplayStackedEndPositionCache = Cached(endPosition)
 
     override val gameplayStackedEndPosition: Vector2
         get() {
             if (!gameplayStackedEndPositionCache.isValid) {
-                gameplayStackedEndPositionCache.value = gameplayEndPosition + gameplayStackOffset
+                gameplayStackedEndPositionCache.value = endPosition + gameplayStackOffset
             }
 
             return gameplayStackedEndPositionCache.value
+        }
+
+    private val screenSpaceGameplayStackedEndPositionCache =
+        Cached(convertPositionToRealCoordinates(gameplayStackedEndPosition))
+
+    override val screenSpaceGameplayStackedEndPosition: Vector2
+        get() {
+            if (!screenSpaceGameplayStackedEndPositionCache.isValid) {
+                screenSpaceGameplayStackedEndPositionCache.value =
+                    convertPositionToRealCoordinates(gameplayStackedEndPosition)
+            }
+
+            return screenSpaceGameplayStackedEndPositionCache.value
         }
 
     override var gameplayStackHeight
@@ -250,6 +255,8 @@ class Slider(
 
             if (!wasEqual) {
                 gameplayStackedEndPositionCache.invalidate()
+                screenSpaceGameplayStackedEndPositionCache.invalidate()
+
                 nestedHitObjects.forEach { it.gameplayStackHeight = value }
             }
         }
@@ -257,11 +264,16 @@ class Slider(
     override var gameplayScale
         get() = super.gameplayScale
         set(value) {
+            val wasEqual = super.gameplayScale == value
+
             super.gameplayScale = value
 
-            gameplayStackedEndPositionCache.invalidate()
+            if (!wasEqual) {
+                gameplayStackedEndPositionCache.invalidate()
+                screenSpaceGameplayStackedEndPositionCache.invalidate()
 
-            nestedHitObjects.forEach { it.gameplayScale = value }
+                nestedHitObjects.forEach { it.gameplayScale = value }
+            }
         }
 
     override fun applyDefaults(controlPoints: BeatmapControlPoints, difficulty: BeatmapDifficulty, mode: GameMode, scope: CoroutineScope?) {
@@ -440,7 +452,6 @@ class Slider(
     private fun invalidateEndPositions() {
         endPositionCache.invalidate()
         difficultyStackedEndPositionCache.invalidate()
-        gameplayEndPositionCache.invalidate()
         gameplayStackedEndPositionCache.invalidate()
     }
 

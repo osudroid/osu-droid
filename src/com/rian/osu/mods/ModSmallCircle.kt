@@ -15,13 +15,16 @@ class ModSmallCircle : Mod(), IModApplicableToDifficulty, IMigratableMod {
 
     override fun migrate(difficulty: BeatmapDifficulty) = ModDifficultyAdjust(cs = difficulty.gameplayCS + 4)
 
-    override fun applyToDifficulty(mode: GameMode, difficulty: BeatmapDifficulty) {
+    override fun applyToDifficulty(
+        mode: GameMode,
+        difficulty: BeatmapDifficulty,
+        adjustmentMods: Iterable<IModFacilitatesAdjustment>
+    ) {
         difficulty.gameplayCS += 4
 
-        difficulty.difficultyCS = when (mode) {
-            GameMode.Droid -> CircleSizeCalculator.droidCSToDroidDifficultyScale(difficulty.gameplayCS)
-            GameMode.Standard -> difficulty.difficultyCS + 4
-        }
+        difficulty.difficultyCS =
+            if (mode == GameMode.Standard || adjustmentMods.none { it is ModReplayV6 }) difficulty.difficultyCS + 4
+            else CircleSizeCalculator.droidCSToOldDroidDifficultyScale(difficulty.gameplayCS)
     }
 
     override fun deepCopy() = ModSmallCircle()

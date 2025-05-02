@@ -20,27 +20,29 @@ class ModHardRock : Mod(), IModApplicableToDifficulty, IModApplicableToHitObject
 
     override fun calculateScoreMultiplier(difficulty: BeatmapDifficulty) = 1.06f
 
-    override fun applyToDifficulty(mode: GameMode, difficulty: BeatmapDifficulty) = difficulty.run {
-        difficultyCS = when (mode) {
-            GameMode.Droid -> {
-                val scale = CircleSizeCalculator.droidCSToDroidDifficultyScale(difficultyCS)
-
-                CircleSizeCalculator.droidDifficultyScaleToDroidCS(scale - 0.125f)
-            }
-
+    override fun applyToDifficulty(
+        mode: GameMode,
+        difficulty: BeatmapDifficulty,
+        adjustmentMods: Iterable<IModFacilitatesAdjustment>
+    ) = difficulty.run {
+        if (mode == GameMode.Standard || adjustmentMods.none { it is ModReplayV6 }) {
             // CS uses a custom 1.3 ratio.
-            GameMode.Standard -> applySetting(difficultyCS, 1.3f)
-        }
+            difficultyCS = applySetting(difficultyCS, 1.3f)
+            gameplayCS = applySetting(gameplayCS, 1.3f)
+        } else {
+            val difficultyScale = CircleSizeCalculator.droidCSToOldDroidDifficultyScale(difficultyCS)
+            val gameplayScale = CircleSizeCalculator.droidCSToOldDroidGameplayScale(gameplayCS)
 
-        gameplayCS = when (mode) {
-            GameMode.Droid -> {
-                val scale = CircleSizeCalculator.droidCSToDroidGameplayScale(gameplayCS)
+            // The 0.125f scale that was added before replay version 7 was in screen pixels. We need it in osu! pixels.
+            val scaleAdjustment = 0.125f
 
-                CircleSizeCalculator.droidGameplayScaleToDroidCS(scale - 0.125f)
-            }
+            difficultyCS = CircleSizeCalculator.droidOldDifficultyScaleToDroidCS(
+                difficultyScale - CircleSizeCalculator.droidOldDifficultyScaleScreenPixelsToOsuPixels(scaleAdjustment)
+            )
 
-            // CS uses a custom 1.3 ratio.
-            GameMode.Standard -> applySetting(gameplayCS, 1.3f)
+            gameplayCS = CircleSizeCalculator.droidOldGameplayScaleToDroidCS(
+                gameplayScale - CircleSizeCalculator.droidOldGameplayScaleScreenPixelsToOsuPixels(scaleAdjustment)
+            )
         }
 
         ar = applySetting(ar)
@@ -48,7 +50,11 @@ class ModHardRock : Mod(), IModApplicableToDifficulty, IModApplicableToHitObject
         hp = applySetting(hp)
     }
 
-    override fun applyToHitObject(mode: GameMode, hitObject: HitObject) {
+    override fun applyToHitObject(
+        mode: GameMode,
+        hitObject: HitObject,
+        adjustmentMods: Iterable<IModFacilitatesAdjustment>
+    ) {
         HitObjectGenerationUtils.reflectVerticallyAlongPlayfield(hitObject)
     }
 

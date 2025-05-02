@@ -52,16 +52,22 @@ class ModMirror : Mod(), IModApplicableToHitObject {
         }
 
         return JSONObject().apply {
-            put("flippedAxes", when {
-                flipHorizontally && flipVertically -> 2
-                flipHorizontally -> 0
-                flipVertically -> 1
-                else -> null
-            })
+            put(
+                "flippedAxes", when {
+                    flipHorizontally && flipVertically -> 2
+                    flipHorizontally -> 0
+                    flipVertically -> 1
+                    else -> null
+                }
+            )
         }
     }
 
-    override fun applyToHitObject(mode: GameMode, hitObject: HitObject) {
+    override fun applyToHitObject(
+        mode: GameMode,
+        hitObject: HitObject,
+        adjustmentMods: Iterable<IModFacilitatesAdjustment>
+    ) {
         if (flipHorizontally) {
             HitObjectGenerationUtils.reflectHorizontallyAlongPlayfield(hitObject)
         }

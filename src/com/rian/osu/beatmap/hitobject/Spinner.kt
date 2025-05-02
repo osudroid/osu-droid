@@ -23,11 +23,23 @@ class Spinner(
      */
     isNewCombo: Boolean,
 ) : HitObject(startTime, Vector2(256f, 192f), isNewCombo, 0) {
-    override val difficultyStackedPosition = position
-    override val difficultyStackedEndPosition = position
+    override val difficultyStackedPosition
+        get() = position
 
-    override val gameplayStackedPosition = gameplayPosition
-    override val gameplayStackedEndPosition = gameplayPosition
+    override val difficultyStackedEndPosition
+        get() = position
+
+    override val gameplayStackedPosition
+        get() = position
+
+    override val gameplayStackedEndPosition
+        get() = position
+
+    override val screenSpaceGameplayStackedPosition
+        get() = screenSpaceGameplayPosition
+
+    override val screenSpaceGameplayStackedEndPosition
+        get() = screenSpaceGameplayPosition
 
     override fun applySamples(controlPoints: BeatmapControlPoints, scope: CoroutineScope?) {
         super.applySamples(controlPoints, scope)
