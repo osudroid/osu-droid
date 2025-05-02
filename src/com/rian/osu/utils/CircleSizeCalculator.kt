@@ -9,8 +9,9 @@ import ru.nsu.ccfit.zuev.osu.Config
  * A utility for converting circle sizes across [GameMode]s.
  */
 object CircleSizeCalculator {
-    // Before replay version 7, this is not the real height that is used in the game, but rather an assumption so that
-    // we can treat circle sizes similarly across all devices. This is used in difficulty calculation.
+    // These constants are used for scale calculations of replay version 6 and below.
+    // This was not the real height that is used in the game, but rather an assumption so that we can treat circle sizes
+    // similarly across all devices. This is used in difficulty calculation.
     private const val OLD_ASSUMED_DROID_HEIGHT = 681f
     private const val OLD_DROID_SCALE_MULTIPLIER = (0.5 * (11 - 5.2450170716245195) / 5).toFloat()
 
