@@ -43,6 +43,11 @@ sealed class ModSetting<V>(
      */
     open var value = defaultValue
 
+    /**
+     * Whether this [ModSetting] is set to its default value.
+     */
+    val isDefault
+        get() = value == defaultValue
 
     override fun getValue(thisRef: Any?, property: KProperty<*>): V {
         return value

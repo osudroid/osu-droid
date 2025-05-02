@@ -817,6 +817,7 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
         GameHelper.setNightCore(lastMods.contains(ModNightCore.class));
         GameHelper.setHalfTime(lastMods.contains(ModHalfTime.class));
         GameHelper.setHidden(lastMods.contains(ModHidden.class));
+        GameHelper.setHiddenOnlyFadeApproachCircles(lastMods.contains(ModHidden.class) && lastMods.ofType(ModHidden.class).isOnlyFadeApproachCircles());
         GameHelper.setTraceable(lastMods.contains(ModTraceable.class));
         GameHelper.setFlashLight(lastMods.contains(ModFlashlight.class));
         GameHelper.setRelaxMod(lastMods.contains(ModRelax.class));
@@ -2584,7 +2585,9 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
     }
 
     private void createBurstEffect(final PointF pos, final RGBColor color) {
-        if (!Config.isBurstEffects() || GameHelper.isHidden() || GameHelper.isTraceable())
+        if (!Config.isBurstEffects() ||
+                (GameHelper.isHidden() && !GameHelper.isHiddenOnlyFadeApproachCircles()) ||
+                GameHelper.isTraceable())
             return;
 
         final GameEffect burst1 = GameObjectPool.getInstance().getEffect("hitcircle");
@@ -2596,7 +2599,9 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
     }
 
     private void createBurstEffectSliderStart(final PointF pos, final RGBColor color) {
-        if (!Config.isBurstEffects() || GameHelper.isHidden() || GameHelper.isTraceable())
+        if (!Config.isBurstEffects() ||
+                (GameHelper.isHidden() && !GameHelper.isHiddenOnlyFadeApproachCircles()) ||
+                GameHelper.isTraceable())
             return;
 
         final GameEffect burst1 = GameObjectPool.getInstance().getEffect("sliderstartcircle");
@@ -2608,7 +2613,9 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
     }
 
     private void createBurstEffectSliderEnd(final PointF pos, final RGBColor color) {
-        if (!Config.isBurstEffects() || GameHelper.isHidden() || GameHelper.isTraceable())
+        if (!Config.isBurstEffects() ||
+                (GameHelper.isHidden() && !GameHelper.isHiddenOnlyFadeApproachCircles()) ||
+                GameHelper.isTraceable())
             return;
 
         final GameEffect burst1 = GameObjectPool.getInstance().getEffect("sliderendcircle");
@@ -2620,7 +2627,9 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
     }
 
     private void createBurstEffectSliderReverse(final PointF pos, float ang, final RGBColor color) {
-        if (!Config.isBurstEffects() || GameHelper.isHidden() || GameHelper.isTraceable())
+        if (!Config.isBurstEffects() ||
+                (GameHelper.isHidden() && !GameHelper.isHiddenOnlyFadeApproachCircles()) ||
+                GameHelper.isTraceable())
             return;
 
         final GameEffect burst1 = GameObjectPool.getInstance().getEffect("reversearrow");
