@@ -97,7 +97,7 @@ object FollowPointConnection {
         val osuPixelsStartPosition = start.difficultyStackedEndPosition
         val osuPixelsEndPosition = end.difficultyStackedPosition
 
-        val osuPixelsDistance = hypot(osuPixelsEndPosition.x - osuPixelsStartPosition.x, osuPixelsEndPosition.y - osuPixelsStartPosition.y).toInt()
+        val osuPixelsDistance = osuPixelsEndPosition.getDistance(osuPixelsStartPosition).toInt()
 
         var d = (SPACING * 1.5f).toInt()
         while (d < osuPixelsDistance - SPACING) {
