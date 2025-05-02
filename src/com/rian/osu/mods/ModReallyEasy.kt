@@ -25,31 +25,27 @@ class ModReallyEasy : Mod(), IModApplicableToDifficultyWithMods {
                     ar -= 0.5f
                 }
 
-                val customSpeedMultiplier = (mods.find { it is ModCustomSpeed } as? ModCustomSpeed)?.trackRateMultiplier ?: 1f
+                val customSpeedMultiplier =
+                    (mods.find { it is ModCustomSpeed } as? ModCustomSpeed)?.trackRateMultiplier ?: 1f
 
                 ar -= 0.5f
                 ar -= customSpeedMultiplier - 1
             }
 
             if (difficultyAdjustMod?.cs == null) {
-                difficultyCS = when (mode) {
-                    GameMode.Droid -> {
-                        val scale = CircleSizeCalculator.droidCSToOldDroidDifficultyScale(difficultyCS)
+                if (mode == GameMode.Standard || mods.none { it is ModReplayV6 }) {
+                    difficultyCS *= ADJUST_RATIO
+                    gameplayCS *= ADJUST_RATIO
+                } else {
+                    val difficultyScale = CircleSizeCalculator.droidCSToOldDroidDifficultyScale(difficultyCS)
+                    val gameplayScale = CircleSizeCalculator.droidCSToOldDroidGameplayScale(gameplayCS)
 
-                        CircleSizeCalculator.droidOldDifficultyScaleToDroidCS(scale + 0.125f)
-                    }
+                    difficultyCS = CircleSizeCalculator.droidOldDifficultyScaleToDroidCS(difficultyScale + 0.125f)
 
-                    GameMode.Standard -> difficultyCS * ADJUST_RATIO
-                }
-
-                gameplayCS = when (mode) {
-                    GameMode.Droid -> {
-                        val scale = CircleSizeCalculator.droidCSToOldDroidGameplayScale(gameplayCS)
-
-                        CircleSizeCalculator.droidOldGameplayScaleToDroidCS(scale + 0.125f)
-                    }
-
-                    GameMode.Standard -> gameplayCS * ADJUST_RATIO
+                    // In gameplay, the 0.125f scale is in real screen pixels.
+                    gameplayCS = CircleSizeCalculator.droidOldGameplayScaleToDroidCS(
+                        gameplayScale + CircleSizeCalculator.droidOldScaleScreenPixelsToOsuPixels(0.125f)
+                    )
                 }
             }
 
