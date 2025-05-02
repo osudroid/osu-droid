@@ -266,13 +266,13 @@ abstract class HitObject(
         get() = (OBJECT_RADIUS * gameplayScale).toDouble()
 
     /**
-     * The scale of this [HitObject] in gameplay, in real screen pixels.
+     * The scale of this [HitObject] in gameplay, in screen pixels.
      */
     val screenSpaceGameplayScale
         get() = gameplayScale * Config.getRES_HEIGHT() / 480
 
     /**
-     * The radius of this [HitObject] in gameplay, in real screen pixels.
+     * The radius of this [HitObject] in gameplay, in screen pixels.
      */
     val screenSpaceGameplayRadius
         get() = (OBJECT_RADIUS * screenSpaceGameplayScale).toDouble()
@@ -314,7 +314,7 @@ abstract class HitObject(
     private val screenSpaceGameplayPositionCache = Cached(convertPositionToRealCoordinates(position))
 
     /**
-     * The position of this [HitObject] in gameplay, in real screen pixels.
+     * The position of this [HitObject] in gameplay, in screen pixels.
      */
     open val screenSpaceGameplayPosition: Vector2
         get() {
@@ -330,7 +330,7 @@ abstract class HitObject(
         Cached(convertPositionToRealCoordinates(gameplayStackedPosition))
 
     /**
-     * The stacked position of this [HitObject] in gameplay, in real screen pixels.
+     * The stacked position of this [HitObject] in gameplay, in screen pixels.
      */
     open val screenSpaceGameplayStackedPosition: Vector2
         get() {
@@ -343,7 +343,7 @@ abstract class HitObject(
         }
 
     /**
-     * The stacked end position of this [HitObject] in gameplay, in real screen pixels.
+     * The stacked end position of this [HitObject] in gameplay, in screen pixels.
      */
     open val screenSpaceGameplayStackedEndPosition
         get() = screenSpaceGameplayStackedPosition
