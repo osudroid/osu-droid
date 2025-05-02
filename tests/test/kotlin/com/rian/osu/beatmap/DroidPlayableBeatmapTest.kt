@@ -20,21 +20,24 @@ class DroidPlayableBeatmapTest : PlayableBeatmapTest() {
             hitObjects.objects[0].apply {
                 Assert.assertEquals(startTime, 1000.0, 0.0)
                 Assert.assertEquals(position, Vector2(256, 192))
-                Assert.assertEquals(difficultyScale, 0.852658f, 1e-2f)
+                Assert.assertEquals(0.98029613f, difficultyScale, 1e-2f)
+                Assert.assertEquals(0.98029613f, gameplayScale, 1e-2f)
                 Assert.assertEquals(timePreempt, 1200.0, 0.0)
             }
 
             hitObjects.objects[1].apply {
                 Assert.assertEquals(startTime, 2000.0, 0.0)
                 Assert.assertEquals(position, Vector2(320, 192))
-                Assert.assertEquals(difficultyScale, 0.852658f, 1e-2f)
+                Assert.assertEquals(0.98029613f, difficultyScale, 1e-2f)
+                Assert.assertEquals(0.98029613f, gameplayScale, 1e-2f)
                 Assert.assertEquals(timePreempt, 1200.0, 0.0)
             }
 
             hitObjects.objects[2].apply {
                 Assert.assertEquals(startTime, 3000.0, 0.0)
                 Assert.assertEquals(position, Vector2(384, 192))
-                Assert.assertEquals(difficultyScale, 0.852658f, 1e-2f)
+                Assert.assertEquals(0.98029613f, difficultyScale, 1e-2f)
+                Assert.assertEquals(0.98029613f, gameplayScale, 1e-2f)
                 Assert.assertEquals(timePreempt, 1200.0, 0.0)
             }
         }
@@ -46,7 +49,8 @@ class DroidPlayableBeatmapTest : PlayableBeatmapTest() {
             val firstObject = hitObjects.objects[0]
 
             Assert.assertEquals(firstObject.position.y, 192f, 0f)
-            Assert.assertEquals(firstObject.difficultyScale, 0.769736f, 1e-2f)
+            Assert.assertEquals(0.8752531f, firstObject.difficultyScale, 1e-2f)
+            Assert.assertEquals(0.8752531f, firstObject.gameplayScale, 1e-2f)
             Assert.assertEquals(firstObject.timePreempt, 900.0, 0.0)
         }
     }
@@ -82,7 +86,8 @@ class DroidPlayableBeatmapTest : PlayableBeatmapTest() {
             val firstObject = hitObjects.objects[0]
 
             Assert.assertEquals(firstObject.startTime, 1000.0, 1e-2)
-            Assert.assertEquals(firstObject.difficultyScale, 0.935198f, 1e-2f)
+            Assert.assertEquals(1.0684379f, firstObject.difficultyScale, 1e-2f)
+            Assert.assertEquals(1.0684379f, firstObject.gameplayScale, 1e-2f)
             Assert.assertEquals(firstObject.timePreempt, 1290.0, 1e-2)
         }
     }
@@ -99,7 +104,8 @@ class DroidPlayableBeatmapTest : PlayableBeatmapTest() {
             val firstObject = hitObjects.objects[0]
 
             Assert.assertEquals(firstObject.startTime, 1000.0, 1e-2)
-            Assert.assertEquals(firstObject.difficultyScale, 0.935198f, 1e-2f)
+            Assert.assertEquals(1.0684379f, firstObject.difficultyScale, 1e-2f)
+            Assert.assertEquals(1.0684379f, firstObject.gameplayScale, 1e-2f)
             Assert.assertEquals(firstObject.timePreempt, 1290.0, 1e-2)
         }
     }
@@ -117,7 +123,8 @@ class DroidPlayableBeatmapTest : PlayableBeatmapTest() {
             val firstObject = hitObjects.objects[0]
 
             Assert.assertEquals(firstObject.startTime, 1000.0, 1e-2)
-            Assert.assertEquals(firstObject.difficultyScale, 0.918165f, 1e-2f)
+            Assert.assertEquals(1.0503248f, firstObject.difficultyScale, 1e-2f)
+            Assert.assertEquals(1.0503248f, firstObject.gameplayScale, 1e-2f)
             Assert.assertEquals(firstObject.timePreempt, 1012.5, 1e-2)
         }
     }
