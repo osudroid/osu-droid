@@ -56,9 +56,6 @@ class ModReplayV6 : Mod(), IModApplicableToBeatmap {
             val current = objects[i]
             val next = objects[i + 1]
 
-            current.stackOffsetMultiplier = 4f
-            next.stackOffsetMultiplier = 4f
-
             if (current is HitCircle && next.startTime - current.startTime < maxDeltaTime) {
                 val distanceSquared = next.position.getDistance(current.position).pow(2)
 

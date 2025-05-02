@@ -18,11 +18,9 @@ class ModReplayV6Test {
         val playableBeatmap = beatmap.createDroidPlayableBeatmap(listOf(ModReplayV6()))
         val objects = playableBeatmap.hitObjects.objects
 
-        Assert.assertEquals(4f, objects[0].stackOffsetMultiplier, 1e-5f)
         Assert.assertEquals(0, objects[0].difficultyStackHeight)
         Assert.assertEquals(0, objects[0].gameplayStackHeight)
 
-        Assert.assertEquals(4f, objects[1].stackOffsetMultiplier, 1e-5f)
         Assert.assertEquals(1, objects[1].difficultyStackHeight)
         Assert.assertEquals(1, objects[1].gameplayStackHeight)
     }
