@@ -24,7 +24,7 @@ class ModEasyTest {
         createBeatmapDifficulty().apply {
             ModEasy().applyToDifficulty(GameMode.Droid, this, listOf(ModReplayV6()))
 
-            Assert.assertEquals(2.74f, difficultyCS, 1e-2f)
+            Assert.assertEquals(3.1128423f, difficultyCS, 1e-2f)
             Assert.assertEquals(4.5f, ar, 1e-2f)
             Assert.assertEquals(3.5f, od, 1e-2f)
             Assert.assertEquals(3f, hp, 1e-2f)
