@@ -84,7 +84,7 @@ class ExtendedEngine(val context: Activity, options: EngineOptions) : Engine(opt
             return false
         }
 
-        return scene?.onKeyPress(keyCode, event) ?: false
+        return scene?.onKeyPress(keyCode, event) == true
     }
 
     override fun onTouchScene(scene: Scene, event: TouchEvent): Boolean {
