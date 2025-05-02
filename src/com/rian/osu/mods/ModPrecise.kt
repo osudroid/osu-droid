@@ -19,7 +19,11 @@ class ModPrecise : Mod(), IModApplicableToHitObject {
 
     override fun calculateScoreMultiplier(difficulty: BeatmapDifficulty) = 1.06f
 
-    override fun applyToHitObject(mode: GameMode, hitObject: HitObject) {
+    override fun applyToHitObject(
+        mode: GameMode,
+        hitObject: HitObject,
+        adjustmentMods: Iterable<IModFacilitatesAdjustment>
+    ) {
         if (mode == GameMode.Standard || hitObject is Spinner) {
             return
         }

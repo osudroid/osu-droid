@@ -15,7 +15,11 @@ class ModSmallCircle : Mod(), IModApplicableToDifficulty, IMigratableMod {
 
     override fun migrate(difficulty: BeatmapDifficulty) = ModDifficultyAdjust(cs = difficulty.gameplayCS + 4)
 
-    override fun applyToDifficulty(mode: GameMode, difficulty: BeatmapDifficulty) {
+    override fun applyToDifficulty(
+        mode: GameMode,
+        difficulty: BeatmapDifficulty,
+        adjustmentMods: Iterable<IModFacilitatesAdjustment>
+    ) {
         difficulty.gameplayCS += 4
 
         difficulty.difficultyCS = when (mode) {

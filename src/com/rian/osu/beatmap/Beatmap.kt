@@ -9,6 +9,7 @@ import com.rian.osu.mods.IModApplicableToDifficulty
 import com.rian.osu.mods.IModApplicableToDifficultyWithMods
 import com.rian.osu.mods.IModApplicableToHitObject
 import com.rian.osu.mods.IModApplicableToHitObjectWithMods
+import com.rian.osu.mods.IModFacilitatesAdjustment
 import com.rian.osu.mods.IModRequiresOriginalBeatmap
 import com.rian.osu.mods.Mod
 import kotlinx.coroutines.CoroutineScope
@@ -75,6 +76,11 @@ open class Beatmap(
             return this
         }
 
+
+        @Suppress("UNCHECKED_CAST")
+        val adjustmentMods =
+            (mods?.filter { it is IModFacilitatesAdjustment } ?: emptyList()) as Iterable<IModFacilitatesAdjustment>
+
         mods?.filterIsInstance<IModRequiresOriginalBeatmap>()?.forEach {
             scope?.ensureActive()
             it.applyFromBeatmap(this)
@@ -88,7 +94,7 @@ open class Beatmap(
         // Apply difficulty mods
         mods?.filterIsInstance<IModApplicableToDifficulty>()?.forEach {
             scope?.ensureActive()
-            it.applyToDifficulty(mode, converted.difficulty)
+            it.applyToDifficulty(mode, converted.difficulty, adjustmentMods)
         }
 
         mods?.filterIsInstance<IModApplicableToDifficultyWithMods>()?.forEach {
@@ -109,7 +115,7 @@ open class Beatmap(
         mods?.filterIsInstance<IModApplicableToHitObject>()?.forEach {
             for (obj in converted.hitObjects.objects) {
                 scope?.ensureActive()
-                it.applyToHitObject(mode, obj)
+                it.applyToHitObject(mode, obj, adjustmentMods)
             }
         }
 

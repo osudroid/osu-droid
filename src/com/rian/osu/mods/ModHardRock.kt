@@ -20,7 +20,11 @@ class ModHardRock : Mod(), IModApplicableToDifficulty, IModApplicableToHitObject
 
     override fun calculateScoreMultiplier(difficulty: BeatmapDifficulty) = 1.06f
 
-    override fun applyToDifficulty(mode: GameMode, difficulty: BeatmapDifficulty) = difficulty.run {
+    override fun applyToDifficulty(
+        mode: GameMode,
+        difficulty: BeatmapDifficulty,
+        adjustmentMods: Iterable<IModFacilitatesAdjustment>
+    ) = difficulty.run {
         difficultyCS = when (mode) {
             GameMode.Droid -> {
                 val scale = CircleSizeCalculator.droidCSToOldDroidDifficultyScale(difficultyCS)
@@ -48,7 +52,11 @@ class ModHardRock : Mod(), IModApplicableToDifficulty, IModApplicableToHitObject
         hp = applySetting(hp)
     }
 
-    override fun applyToHitObject(mode: GameMode, hitObject: HitObject) {
+    override fun applyToHitObject(
+        mode: GameMode,
+        hitObject: HitObject,
+        adjustmentMods: Iterable<IModFacilitatesAdjustment>
+    ) {
         HitObjectGenerationUtils.reflectVerticallyAlongPlayfield(hitObject)
     }
 

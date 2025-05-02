@@ -12,6 +12,7 @@ interface IModApplicableToHitObject {
      *
      * @param mode The [GameMode] to apply for.
      * @param hitObject The [HitObject] to apply to.
+     * @param adjustmentMods [Mod]s that apply [IModFacilitatesAdjustment].
      */
-    fun applyToHitObject(mode: GameMode, hitObject: HitObject)
+    fun applyToHitObject(mode: GameMode, hitObject: HitObject, adjustmentMods: Iterable<IModFacilitatesAdjustment>)
 }

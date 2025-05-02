@@ -17,7 +17,11 @@ class ModEasy : Mod(), IModApplicableToDifficulty {
 
     override fun calculateScoreMultiplier(difficulty: BeatmapDifficulty) = 0.5f
 
-    override fun applyToDifficulty(mode: GameMode, difficulty: BeatmapDifficulty) = difficulty.run {
+    override fun applyToDifficulty(
+        mode: GameMode,
+        difficulty: BeatmapDifficulty,
+        adjustmentMods: Iterable<IModFacilitatesAdjustment>
+    ) = difficulty.run {
         difficultyCS = when (mode) {
             GameMode.Droid -> {
                 val scale = CircleSizeCalculator.droidCSToOldDroidDifficultyScale(difficultyCS)
