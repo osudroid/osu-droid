@@ -12,9 +12,9 @@ import com.rian.osu.beatmap.sections.BeatmapDifficulty
  * [Mod]s marked by this interface will have their adjustments applied after
  * [IModApplicableToDifficulty] [Mod]s have been applied.
  */
-interface IModApplicableToDifficultyWithSettings {
+interface IModApplicableToDifficultyWithMods {
     /**
-     * Applies this [IModApplicableToDifficultyWithSettings] to a [BeatmapDifficulty].
+     * Applies this [IModApplicableToDifficultyWithMods] to a [BeatmapDifficulty].
      *
      * This is typically called post beatmap conversion.
      *

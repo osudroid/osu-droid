@@ -7,7 +7,7 @@ import com.rian.osu.utils.CircleSizeCalculator
 /**
  * Represents the Really Easy mod.
  */
-class ModReallyEasy : Mod(), IModApplicableToDifficultyWithSettings {
+class ModReallyEasy : Mod(), IModApplicableToDifficultyWithMods {
     override val name = "Really Easy"
     override val acronym = "RE"
     override val description = "Everything just got easier..."

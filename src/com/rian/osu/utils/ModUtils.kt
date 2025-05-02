@@ -148,7 +148,7 @@ object ModUtils {
         }
 
         for (mod in mods) {
-            if (mod is IModApplicableToDifficultyWithSettings) {
+            if (mod is IModApplicableToDifficultyWithMods) {
                 mod.applyToDifficulty(mode, difficulty, mods)
             }
         }

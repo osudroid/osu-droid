@@ -12,9 +12,9 @@ import com.rian.osu.beatmap.hitobject.HitObject
  * [Mod]s marked by this interface will have their adjustments applied after
  * [IModApplicableToHitObject] [Mod]s have been applied.
  */
-interface IModApplicableToHitObjectWithSettings {
+interface IModApplicableToHitObjectWithMods {
     /**
-     * Applies this [IModApplicableToHitObjectWithSettings] to a [HitObject].
+     * Applies this [IModApplicableToHitObjectWithMods] to a [HitObject].
      *
      * This is typically called post beatmap conversion.
      *
