@@ -149,7 +149,7 @@ abstract class HitObject(
     /**
      * The multiplier used to calculate stack offset.
      */
-    open var stackOffsetMultiplier = -6.4f
+    open var stackOffsetMultiplier = 0f
         set(value) {
             if (field != value) {
                 field = value
@@ -373,21 +373,11 @@ abstract class HitObject(
         timeFadeIn = 400 * min(1.0, timePreempt / PREEMPT_MIN)
 
         difficultyScale = when (mode) {
-            GameMode.Droid -> {
-                val droidScale = CircleSizeCalculator.droidCSToOldDroidDifficultyScale(difficulty.difficultyCS)
-                val radius = CircleSizeCalculator.droidScaleToStandardRadius(droidScale)
-                val standardCS = CircleSizeCalculator.standardRadiusToStandardCS(radius, true)
-
-                CircleSizeCalculator.standardCSToStandardScale(standardCS, true)
-            }
-
+            GameMode.Droid -> CircleSizeCalculator.droidCSToDroidScale(difficulty.difficultyCS)
             GameMode.Standard -> CircleSizeCalculator.standardCSToStandardScale(difficulty.gameplayCS, true)
         }
 
-        gameplayScale = when (mode) {
-            GameMode.Droid -> CircleSizeCalculator.droidCSToOldDroidGameplayScale(difficulty.gameplayCS)
-            GameMode.Standard -> difficultyScale
-        }
+        gameplayScale = difficultyScale
     }
 
     /**

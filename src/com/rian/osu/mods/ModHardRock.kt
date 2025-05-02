@@ -25,26 +25,20 @@ class ModHardRock : Mod(), IModApplicableToDifficulty, IModApplicableToHitObject
         difficulty: BeatmapDifficulty,
         adjustmentMods: Iterable<IModFacilitatesAdjustment>
     ) = difficulty.run {
-        difficultyCS = when (mode) {
-            GameMode.Droid -> {
-                val scale = CircleSizeCalculator.droidCSToOldDroidDifficultyScale(difficultyCS)
-
-                CircleSizeCalculator.droidOldDifficultyScaleToDroidCS(scale - 0.125f)
-            }
-
+        if (mode == GameMode.Standard || adjustmentMods.none { it is ModReplayV6 }) {
             // CS uses a custom 1.3 ratio.
-            GameMode.Standard -> applySetting(difficultyCS, 1.3f)
-        }
+            difficultyCS = applySetting(difficultyCS, 1.3f)
+            gameplayCS = applySetting(gameplayCS, 1.3f)
+        } else {
+            val difficultyScale = CircleSizeCalculator.droidCSToOldDroidDifficultyScale(difficultyCS)
+            val gameplayScale = CircleSizeCalculator.droidCSToOldDroidGameplayScale(gameplayCS)
 
-        gameplayCS = when (mode) {
-            GameMode.Droid -> {
-                val scale = CircleSizeCalculator.droidCSToOldDroidGameplayScale(gameplayCS)
+            difficultyCS = CircleSizeCalculator.droidOldDifficultyScaleToDroidCS(difficultyScale + 0.125f)
 
-                CircleSizeCalculator.droidOldGameplayScaleToDroidCS(scale - 0.125f)
-            }
-
-            // CS uses a custom 1.3 ratio.
-            GameMode.Standard -> applySetting(gameplayCS, 1.3f)
+            // In gameplay, the 0.125f scale is in real screen pixels.
+            gameplayCS = CircleSizeCalculator.droidOldGameplayScaleToDroidCS(
+                gameplayScale + CircleSizeCalculator.droidOldScaleScreenPixelsToOsuPixels(0.125f)
+            )
         }
 
         ar = applySetting(ar)

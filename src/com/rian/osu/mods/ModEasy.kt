@@ -22,24 +22,19 @@ class ModEasy : Mod(), IModApplicableToDifficulty {
         difficulty: BeatmapDifficulty,
         adjustmentMods: Iterable<IModFacilitatesAdjustment>
     ) = difficulty.run {
-        difficultyCS = when (mode) {
-            GameMode.Droid -> {
-                val scale = CircleSizeCalculator.droidCSToOldDroidDifficultyScale(difficultyCS)
+        if (mode == GameMode.Standard || adjustmentMods.none { it is ModReplayV6 }) {
+            difficultyCS *= ADJUST_RATIO
+            gameplayCS *= ADJUST_RATIO
+        } else {
+            val difficultyScale = CircleSizeCalculator.droidCSToOldDroidDifficultyScale(difficultyCS)
+            val gameplayScale = CircleSizeCalculator.droidCSToOldDroidGameplayScale(gameplayCS)
 
-                CircleSizeCalculator.droidOldDifficultyScaleToDroidCS(scale + 0.125f)
-            }
+            difficultyCS = CircleSizeCalculator.droidOldDifficultyScaleToDroidCS(difficultyScale + 0.125f)
 
-            GameMode.Standard -> difficultyCS * ADJUST_RATIO
-        }
-
-        gameplayCS = when (mode) {
-            GameMode.Droid -> {
-                val scale = CircleSizeCalculator.droidCSToOldDroidGameplayScale(gameplayCS)
-
-                CircleSizeCalculator.droidOldGameplayScaleToDroidCS(scale + 0.125f)
-            }
-
-            GameMode.Standard -> gameplayCS * ADJUST_RATIO
+            // In gameplay, the 0.125f scale is in real screen pixels.
+            gameplayCS = CircleSizeCalculator.droidOldGameplayScaleToDroidCS(
+                gameplayScale + CircleSizeCalculator.droidOldScaleScreenPixelsToOsuPixels(0.125f)
+            )
         }
 
         ar *= ADJUST_RATIO

@@ -18,7 +18,7 @@ import kotlinx.coroutines.ensureActive
  * This [Mod] is meant to reapply the stacking behavior prior to replay version 7 to a [Beatmap] that was played in
  * replays recorded in version 6 and older for replayability and difficulty calculation.
  */
-class ModReplayV6 : Mod(), IModApplicableToBeatmap {
+class ModReplayV6 : Mod(), IModApplicableToBeatmap, IModFacilitatesAdjustment {
     override val name = "Replay V6"
     override val acronym = "RV6"
     override val description = "Applies the old object stacking behavior to a beatmap."
