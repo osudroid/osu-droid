@@ -372,6 +372,11 @@ abstract class HitObject(
         // This adjustment is necessary for AR>10, otherwise timePreempt can become smaller leading to hit circles not fully fading in.
         timeFadeIn = 400 * min(1.0, timePreempt / PREEMPT_MIN)
 
+        stackOffsetMultiplier = when (mode) {
+            GameMode.Droid -> -4f
+            GameMode.Standard -> -6.4f
+        }
+
         difficultyScale = when (mode) {
             GameMode.Droid -> CircleSizeCalculator.droidCSToDroidScale(difficulty.difficultyCS)
             GameMode.Standard -> CircleSizeCalculator.standardCSToStandardScale(difficulty.gameplayCS, true)
