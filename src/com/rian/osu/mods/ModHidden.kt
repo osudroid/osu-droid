@@ -62,6 +62,14 @@ class ModHidden : Mod(), IModApplicableToBeatmap {
         beatmap.hitObjects.objects.forEach { applyFadeInAdjustment(it) }
     }
 
+    override fun toString() = buildString {
+        append(super.toString())
+
+        if (onlyFadeApproachCircles) {
+            append(" (approach circles only)")
+        }
+    }
+
     override fun deepCopy() = ModHidden().also {
         it.onlyFadeApproachCircles = onlyFadeApproachCircles
     }
