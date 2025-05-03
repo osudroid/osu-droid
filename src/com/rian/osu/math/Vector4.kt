@@ -75,4 +75,16 @@ data class Vector4(
      */
     val bottomRight
         get() = Vector2(right, bottom)
+
+    /**
+     * The width of the rectangle defined by this [Vector4].
+     */
+    val width
+        get() = right - left
+
+    /**
+     * The height of the rectangle defined by this [Vector4].
+     */
+    val height
+        get() = bottom - top
 }
