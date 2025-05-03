@@ -721,6 +721,7 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
         scene = createMainScene();
         bgScene = new ExtendedScene();
         mgScene = new ExtendedScene();
+        mgScene.setClipToBounds(true);
         fgScene = new ExtendedScene();
         scene.attachChild(bgScene);
         scene.attachChild(mgScene);
