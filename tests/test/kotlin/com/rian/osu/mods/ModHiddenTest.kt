@@ -6,7 +6,10 @@ import com.rian.osu.beatmap.hitobject.HitCircle
 import com.rian.osu.math.Vector2
 import org.junit.Assert
 import org.junit.Test
+import org.junit.runner.RunWith
+import org.robolectric.RobolectricTestRunner
 
+@RunWith(RobolectricTestRunner::class)
 class ModHiddenTest {
     @Test
     fun `Test object fade in adjustment`() {
@@ -24,5 +27,21 @@ class ModHiddenTest {
         ModHidden().applyToBeatmap(beatmap)
 
         Assert.assertEquals(hitCircle.timeFadeIn, 480.0, 1e-5)
+    }
+
+    @Test
+    fun `Test serialization`() {
+        ModHidden().apply {
+            serialize().apply {
+                Assert.assertEquals(getString("acronym"), "HD")
+                Assert.assertFalse(has("settings"))
+            }
+
+            onlyFadeApproachCircles = true
+
+            serialize().getJSONObject("settings").apply {
+                Assert.assertTrue(getBoolean("onlyFadeApproachCircles"))
+            }
+        }
     }
 }
