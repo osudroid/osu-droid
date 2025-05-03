@@ -497,6 +497,9 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
             return false;
         }
 
+        // Ensure that only relevant mods are applied.
+        mods.values().removeIf(m -> !m.isRelevant());
+
         playableBeatmap = parsedBeatmap.createDroidPlayableBeatmap(mods.values());
 
         rateAdjustingMods.clear();
