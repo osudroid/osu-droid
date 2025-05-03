@@ -1,10 +1,6 @@
 package com.osudroid.multiplayer.api.data
 
 import com.osudroid.multiplayer.Multiplayer
-import com.rian.osu.mods.ModCustomSpeed
-import com.rian.osu.mods.ModDoubleTime
-import com.rian.osu.mods.ModHalfTime
-import com.rian.osu.mods.ModNightCore
 import com.rian.osu.utils.ModHashMap
 import com.rian.osu.utils.ModUtils
 import org.json.JSONArray
@@ -20,25 +16,10 @@ class RoomMods @JvmOverloads constructor(json: JSONArray? = null) : ModHashMap(M
 
             append("Free mods, ")
 
-            val doubleTime = ofType<ModDoubleTime>()
-            val nightCore = ofType<ModNightCore>()
-            val halfTime = ofType<ModHalfTime>()
-            val customSpeed = ofType<ModCustomSpeed>()
-
-            if (doubleTime != null) {
-                append("${doubleTime.acronym}, ")
-            }
-
-            if (nightCore != null) {
-                append("${nightCore.acronym}, ")
-            }
-
-            if (halfTime != null) {
-                append("${halfTime.acronym}, ")
-            }
-
-            if (customSpeed != null) {
-                append("%.2fx, ".format(customSpeed.trackRateMultiplier))
+            for (mod in values) {
+                if (!mod.isValidForMultiplayerAsFreeMod) {
+                    append("$mod, ")
+                }
             }
 
         }.substringBeforeLast(',') else toString()
