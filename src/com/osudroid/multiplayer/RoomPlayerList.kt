@@ -125,7 +125,7 @@ class RoomPlayerList(val room: Room) : ScrollableList(), IScrollDetectorListener
 
             playerStatusRect.isVisible = true
             playerInfoText.isVisible = true
-            playerInfoText.text = "${player!!.name}\n${player!!.mods.toReadable()}"
+            playerInfoText.text = "${player!!.name}\n${player!!.mods.toDisplayModString()}"
 
             if (room!!.teamMode == TeamMode.TeamVersus) {
                 when (player!!.team) {
