@@ -264,15 +264,21 @@ open class ModHashMap : HashMap<Class<out Mod>, Mod> {
     /**
      * Converts this [ModHashMap] to a string representation that can be used to display [Mod]s to the user.
      */
-    fun toDisplayModString() = buildString {
-        modStringOrder.fastForEach {
-            if (it in this@ModHashMap) {
-                append(this@ModHashMap[it::class]!!.toString() + ",")
-            }
+    fun toDisplayModString(): String {
+        if (isEmpty()) {
+            return "-"
         }
 
-        if (isNotEmpty()) {
-            deleteCharAt(length - 1)
+        return buildString {
+            modStringOrder.fastForEach {
+                if (it in this@ModHashMap) {
+                    append(this@ModHashMap[it::class]!!.toString() + ",")
+                }
+            }
+
+            if (isNotEmpty()) {
+                deleteCharAt(length - 1)
+            }
         }
     }
 
