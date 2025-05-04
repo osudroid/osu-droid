@@ -8,6 +8,7 @@ import com.rian.osu.beatmap.hitobject.SliderPath
 import com.rian.osu.beatmap.hitobject.Spinner
 import com.rian.osu.beatmap.hitobject.sliderobject.SliderHitObject
 import com.rian.osu.math.Precision
+import com.rian.osu.math.Random
 import com.rian.osu.math.Vector2
 import com.rian.osu.math.Vector4
 import kotlin.math.abs
@@ -18,7 +19,6 @@ import kotlin.math.max
 import kotlin.math.min
 import kotlin.math.sin
 import kotlin.math.sqrt
-import kotlin.random.Random
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.ensureActive
 

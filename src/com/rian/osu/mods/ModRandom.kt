@@ -4,10 +4,10 @@ import com.reco1l.toolkt.roundBy
 import com.rian.osu.beatmap.Beatmap
 import com.rian.osu.beatmap.hitobject.HitObject
 import com.rian.osu.beatmap.hitobject.Slider
+import com.rian.osu.math.Random
 import com.rian.osu.utils.HitObjectGenerationUtils
 import kotlin.math.exp
 import kotlin.math.max
-import kotlin.random.Random
 import kotlin.reflect.jvm.isAccessible
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.ensureActive
