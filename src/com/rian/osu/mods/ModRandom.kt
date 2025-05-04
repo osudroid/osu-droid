@@ -102,8 +102,8 @@ class ModRandom : Mod(), IModApplicableToBeatmap {
                 val totalOffset =
                     // sectionOffset and oneTimeOffset should mainly affect patterns with large spacing.
                     (sectionOffset + oneTimeOffset) * positionInfo.distanceFromPrevious +
-                            // flowChangeOffset should mainly affect streams.
-                            flowChangeOffset * (playfieldDiagonal - positionInfo.distanceFromPrevious)
+                    // flowChangeOffset should mainly affect streams.
+                    flowChangeOffset * (playfieldDiagonal - positionInfo.distanceFromPrevious)
 
                 positionInfo.relativeAngle =
                     getRelativeTargetAngle(positionInfo.distanceFromPrevious, totalOffset, flowDirection)
@@ -129,7 +129,7 @@ class ModRandom : Mod(), IModApplicableToBeatmap {
         // Higher angle sharpness -> lower multiplier
         val customMultiplier =
             (1.5f * angleSharpness.maxValue - angleSharpness.value) /
-                    (1.5f * angleSharpness.maxValue - angleSharpness.defaultValue)
+            (1.5f * angleSharpness.maxValue - angleSharpness.defaultValue)
 
         return HitObjectGenerationUtils.randomGaussian(random!!, 0f, stdDev * customMultiplier)
     }
@@ -157,7 +157,7 @@ class ModRandom : Mod(), IModApplicableToBeatmap {
 
         val angle =
             (2.16 / (1 + 200 * exp(0.036 * (targetDistance + customOffsetX * 2 - 310))) + 0.5).toFloat() +
-                    offset + customOffsetY
+            offset + customOffsetY
 
         val relativeAngle = Math.PI.toFloat() - angle
 
