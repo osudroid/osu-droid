@@ -5,12 +5,6 @@ package com.rian.osu.math
  */
 data class Vector4(
     /**
-     * The W component of this [Vector4].
-     */
-    @JvmField
-    val w: Float,
-
-    /**
      * The X component of this [Vector4].
      */
     @JvmField
@@ -27,6 +21,12 @@ data class Vector4(
      */
     @JvmField
     val z: Float,
+
+    /**
+     * The W component of this [Vector4].
+     */
+    @JvmField
+    val w: Float,
 ) {
     /**
      * The Y coordinate of the top edge of this [Vector4].
