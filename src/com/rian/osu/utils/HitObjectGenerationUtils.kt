@@ -558,7 +558,7 @@ object HitObjectGenerationUtils {
         val top = -minY
         val bottom = playfieldSize.y - maxY
 
-        return Vector4(left, top, right - left, bottom - top)
+        return Vector4(left, top, right, bottom)
     }
 
     /**
