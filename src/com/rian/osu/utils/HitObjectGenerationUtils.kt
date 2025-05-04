@@ -354,7 +354,7 @@ object HitObjectGenerationUtils {
     private fun getSliderRotation(slider: Slider): Float {
         val pathEndPosition = slider.path.positionAt(1.0)
 
-        return atan2(pathEndPosition.y, pathEndPosition.x).toFloat()
+        return atan2(pathEndPosition.y, pathEndPosition.x)
     }
 
     /**
