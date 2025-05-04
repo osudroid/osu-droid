@@ -239,9 +239,7 @@ object HitObjectGenerationUtils {
 
                 for (j in i - 1 downTo max(i - PRECEDING_OBJECTS_TO_SHIFT, 0)) {
                     // Only shift hit circles
-                    if (workingObjects[j].hitObject is HitCircle) {
-                        toBeShifted.add(workingObjects[j].hitObject)
-                    }
+                    toBeShifted.add(workingObjects[j].hitObject as? HitCircle ?: break)
                 }
 
                 applyDecreasingShift(toBeShifted, shift)
