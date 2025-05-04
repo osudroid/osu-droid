@@ -23,7 +23,7 @@ class Random(seed: Int) {
         var ii = 0
         for (i in 1 until 55) {
             // The range [1..55] is special (Knuth) and so we're wasting the 0'th position.
-            ii = (21 * i) % 55
+            ii = 21 * i % 55
             seedArray[ii] = mk
             mk = mj - mk
 
@@ -34,7 +34,7 @@ class Random(seed: Int) {
             mj = seedArray[ii]
         }
 
-        (1 until 5).forEach { k ->
+        for (k in 1 until 5) {
             for (i in 1 until 56) {
                 val n = (i + 30) % 55
 
