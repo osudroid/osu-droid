@@ -388,16 +388,15 @@ object HitObjectGenerationUtils {
      * @param workingObject The [WorkingObject] that represents the [HitCircle].
      * @return The deviation from the original modified position in order to fit within the playfield.
      */
-    private fun clampHitCircleToPlayfield(workingObject: WorkingObject): Vector2 {
-        val previousPosition = workingObject.positionModified
+    private fun clampHitCircleToPlayfield(workingObject: WorkingObject) = workingObject.run {
+        val previousPosition = positionModified
 
-        workingObject.endPositionModified = workingObject.positionModified + clampToPlayfield(
-            workingObject.positionModified, workingObject.hitObject.gameplayRadius.toFloat()
-        )
+        positionModified = clampToPlayfield(positionModified, hitObject.gameplayRadius.toFloat())
 
-        workingObject.hitObject.position = workingObject.positionModified
+        endPositionModified = positionModified
+        hitObject.position = positionModified
 
-        return workingObject.positionModified - previousPosition
+        positionModified - previousPosition
     }
 
     /**
