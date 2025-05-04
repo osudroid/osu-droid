@@ -38,7 +38,7 @@ object HitObjectGenerationUtils {
     private const val PRECEDING_OBJECTS_TO_SHIFT = 10
 
     val playfieldSize = Vector2(512, 384)
-    val playfieldMiddle = playfieldSize / 2
+    val playfieldCenter = playfieldSize / 2
 
     private val borderDistance = playfieldSize * PLAYFIELD_EDGE_RATIO
 
@@ -61,12 +61,12 @@ object HitObjectGenerationUtils {
         rotationRatio: Float = 0.5f
     ): Vector2 {
         val relativeRotationDistance = maxOf(
-            if (previousObjectPosition.x < playfieldMiddle.x) {
+            if (previousObjectPosition.x < playfieldCenter.x) {
                 (borderDistance.x - previousObjectPosition.x) / borderDistance.x
             } else {
                 (previousObjectPosition.x - (playfieldSize.x - borderDistance.x)) / borderDistance.x
             },
-            if (previousObjectPosition.y < playfieldMiddle.y) {
+            if (previousObjectPosition.y < playfieldCenter.y) {
                 (borderDistance.y - previousObjectPosition.y) / borderDistance.y
             } else {
                 (previousObjectPosition.y - (playfieldSize.y - borderDistance.y)) / borderDistance.y
@@ -76,7 +76,7 @@ object HitObjectGenerationUtils {
 
         return rotateVectorTowardsVector(
             positionRelativeToPrevious,
-            playfieldMiddle - previousObjectPosition,
+            playfieldCenter - previousObjectPosition,
             min(1f, relativeRotationDistance * rotationRatio)
         )
     }
@@ -375,7 +375,7 @@ object HitObjectGenerationUtils {
             if (previous.hitObject is Slider) {
                 previousAbsoluteAngle = getSliderRotation(previous.hitObject as Slider)
             } else {
-                val earliestPosition = beforePrevious?.hitObject?.endPosition ?: playfieldMiddle
+                val earliestPosition = beforePrevious?.hitObject?.endPosition ?: playfieldCenter
                 val relativePosition = previous.hitObject.position - earliestPosition
                 previousAbsoluteAngle = atan2(relativePosition.y, relativePosition.x)
             }
@@ -388,7 +388,7 @@ object HitObjectGenerationUtils {
             current.positionInfo.distanceFromPrevious * sin(absoluteAngle)
         )
 
-        val lastEndPosition = previous?.endPositionModified ?: playfieldMiddle
+        val lastEndPosition = previous?.endPositionModified ?: playfieldCenter
 
         positionRelativeToPrevious = rotateAwayFromEdge(lastEndPosition, positionRelativeToPrevious)
 

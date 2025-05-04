@@ -85,7 +85,7 @@ class ModRandom : Mod(), IModApplicableToBeatmap {
 
             if (i == 0) {
                 positionInfo.distanceFromPrevious =
-                    (random!!.nextDouble() * HitObjectGenerationUtils.playfieldMiddle.y).toFloat()
+                    (random!!.nextDouble() * HitObjectGenerationUtils.playfieldCenter.y).toFloat()
 
                 positionInfo.relativeAngle = (random!!.nextDouble() * 2 * Math.PI - Math.PI).toFloat()
             } else {
