@@ -447,12 +447,23 @@ class Slider(
 
         head.position = position
         tail.position = endPosition
+
+        for (i in 1 until nestedHitObjects.size - 1) {
+            val nestedHitObject = nestedHitObjects[i]
+            val reversed = nestedHitObject.spanIndex % 2 == 1
+
+            val timeProgress = (nestedHitObject.startTime - startTime) % spanDuration
+            val pathProgress = timeProgress / spanDuration
+
+            nestedHitObject.position = position + path.positionAt(if (reversed) 1 - pathProgress else pathProgress)
+        }
     }
 
     private fun invalidateEndPositions() {
         endPositionCache.invalidate()
         difficultyStackedEndPositionCache.invalidate()
         gameplayStackedEndPositionCache.invalidate()
+        screenSpaceGameplayStackedEndPositionCache.invalidate()
     }
 
     private fun createSlidingSamples(controlPoints: BeatmapControlPoints, scope: CoroutineScope?) {

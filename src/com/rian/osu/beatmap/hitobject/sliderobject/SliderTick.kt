@@ -24,13 +24,13 @@ class SliderTick(
     /**
      * The index of the span at which this [SliderTick] lies.
      */
-    private val spanIndex: Int,
+    spanIndex: Int,
 
     /**
      * The start time of the span at which this [SliderTick] lies, in milliseconds.
      */
     private val spanStartTime: Double
-) : SliderHitObject(startTime, position) {
+) : SliderHitObject(startTime, position, spanIndex) {
     override fun applyDefaults(
         controlPoints: BeatmapControlPoints,
         difficulty: BeatmapDifficulty,

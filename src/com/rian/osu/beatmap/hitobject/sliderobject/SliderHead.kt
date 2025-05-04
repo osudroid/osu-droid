@@ -16,4 +16,4 @@ class SliderHead(
      * The position of this [SliderHead] relative to the play field.
      */
     position: Vector2
-) : SliderHitObject(startTime, position)
+) : SliderHitObject(startTime, position, 0)

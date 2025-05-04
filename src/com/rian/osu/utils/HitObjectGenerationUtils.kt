@@ -118,21 +118,10 @@ object HitObjectGenerationUtils {
      * @param hitObject The [HitObject] to reflect.
      */
     fun reflectHorizontallyAlongPlayfield(hitObject: HitObject) {
-        // Reflect the position of the hit object.
         hitObject.position = reflectVectorHorizontallyAlongPlayfield(hitObject.position)
 
-        if (hitObject !is Slider) {
-            return
-        }
-
-        // Reflect the control points of the slider. This will reflect the positions of head and tail circles.
-        modifySlider(hitObject) { Vector2(-x, y) }
-
-        // Reflect the position of slider ticks and repeats.
-        for (i in 1 until hitObject.nestedHitObjects.size - 1) {
-            val obj = hitObject.nestedHitObjects[i]
-
-            obj.position = reflectVectorHorizontallyAlongPlayfield(obj.position)
+        if (hitObject is Slider) {
+            modifySlider(hitObject) { Vector2(-x, y) }
         }
     }
 
@@ -142,21 +131,10 @@ object HitObjectGenerationUtils {
      * @param hitObject The [HitObject] to reflect.
      */
     fun reflectVerticallyAlongPlayfield(hitObject: HitObject) {
-        // Reflect the position of the hit object.
         hitObject.position = reflectVectorVerticallyAlongPlayfield(hitObject.position)
 
-        if (hitObject !is Slider) {
-            return
-        }
-
-        // Reflect the control points of the slider. This will reflect the positions of head and tail circles.
-        modifySlider(hitObject) { Vector2(x, -y) }
-
-        // Reflect the position of slider ticks and repeats.
-        for (i in 1 until hitObject.nestedHitObjects.size - 1) {
-            val obj = hitObject.nestedHitObjects[i]
-
-            obj.position = reflectVectorVerticallyAlongPlayfield(obj.position)
+        if (hitObject is Slider) {
+            modifySlider(hitObject) { Vector2(x, -y) }
         }
     }
 
@@ -166,15 +144,7 @@ object HitObjectGenerationUtils {
      * @param slider The [Slider] to be flipped.
      */
     fun flipSliderInPlaceHorizontally(slider: Slider) {
-        // Flip the control points of the slider. This will flip the positions of head and tail circles.
         modifySlider(slider) { Vector2(-x, y) }
-
-        // Flip the position of slider ticks and repeats.
-        for (i in 1 until slider.nestedHitObjects.size - 1) {
-            val obj = slider.nestedHitObjects[i]
-
-            obj.position = Vector2(obj.position.x - 2 * (obj.position.x - slider.position.x), obj.position.y)
-        }
     }
 
     private fun modifySlider(slider: Slider, modifyControlPoint: Vector2.() -> Vector2) {
