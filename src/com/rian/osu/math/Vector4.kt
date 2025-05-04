@@ -29,7 +29,7 @@ data class Vector4(
     val w: Float,
 ) {
     /**
-     * The Y coordinate of the top edge of this [Vector4].
+     * The X coordinate of the left edge of this [Vector4].
      */
     val left
         get() = x
