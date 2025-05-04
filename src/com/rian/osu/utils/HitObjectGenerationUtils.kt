@@ -244,9 +244,7 @@ object HitObjectGenerationUtils {
                     }
                 }
 
-                if (toBeShifted.isNotEmpty()) {
-                    applyDecreasingShift(toBeShifted, shift)
-                }
+                applyDecreasingShift(toBeShifted, shift)
             }
 
             previous = current
