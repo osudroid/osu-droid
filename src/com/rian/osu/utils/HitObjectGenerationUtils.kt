@@ -172,7 +172,7 @@ object HitObjectGenerationUtils {
      */
     fun generatePositionInfos(hitObjects: Iterable<HitObject>): List<HitObjectPositionInfo> {
         val positionInfos = mutableListOf<HitObjectPositionInfo>()
-        var previousPosition = playfieldSize / 2
+        var previousPosition = playfieldCenter
         var previousAngle = 0f
 
         for (obj in hitObjects) {
