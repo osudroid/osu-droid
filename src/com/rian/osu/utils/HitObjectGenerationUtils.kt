@@ -267,7 +267,7 @@ object HitObjectGenerationUtils {
             if (shift.x != 0f || shift.y != 0f) {
                 val toBeShifted = mutableListOf<HitObject>()
 
-                for (j in i - 1 until max(i - PRECEDING_OBJECTS_TO_SHIFT, 0)) {
+                for (j in i - 1 downTo max(i - PRECEDING_OBJECTS_TO_SHIFT, 0)) {
                     // Only shift hit circles
                     if (workingObjects[j].hitObject is HitCircle) {
                         toBeShifted.add(workingObjects[j].hitObject)
