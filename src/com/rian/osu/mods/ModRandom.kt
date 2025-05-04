@@ -51,7 +51,7 @@ class ModRandom : Mod(), IModApplicableToBeatmap {
     }
 
     override fun serializeSettings() = JSONObject().apply {
-        put("seed", seed ?: JSONObject.NULL)
+        put("seed", seed)
         put("angleSharpness", angleSharpness)
     }
 
