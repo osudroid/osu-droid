@@ -394,30 +394,23 @@ object HitObjectGenerationUtils {
 
         current.positionModified = lastEndPosition + positionRelativeToPrevious
 
-        if (current.hitObject !is Slider) {
-            return
-        }
-
+        val slider = current.hitObject as? Slider ?: return
         absoluteAngle = atan2(positionRelativeToPrevious.y, positionRelativeToPrevious.x)
 
-        val centerOfMassOriginal = calculateCenterOfMass(current.hitObject as Slider)
-
+        val centerOfMassOriginal = calculateCenterOfMass(slider)
         val centerOfMassModified = rotateAwayFromEdge(
             current.positionModified,
             rotateVector(
                 centerOfMassOriginal,
-                current.positionInfo.rotation + absoluteAngle - getSliderRotation(current.hitObject as Slider)
+                current.positionInfo.rotation + absoluteAngle - getSliderRotation(slider)
             )
         )
 
         val relativeRotation =
-            atan2(centerOfMassModified.y, centerOfMassModified.x) - atan2(
-                centerOfMassOriginal.y,
-                centerOfMassOriginal.x
-            )
+            atan2(centerOfMassModified.y, centerOfMassModified.x) - atan2(centerOfMassOriginal.y, centerOfMassOriginal.x)
 
         if (!Precision.almostEquals(relativeRotation, 0f)) {
-            rotateSlider(current.hitObject as Slider, relativeRotation)
+            rotateSlider(slider, relativeRotation)
         }
     }
 
