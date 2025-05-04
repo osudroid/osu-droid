@@ -222,6 +222,8 @@ object HitObjectGenerationUtils {
 
             previousPosition = obj.endPosition
             previousAngle = absoluteAngle
+
+            positionInfos.add(positionInfo)
         }
 
         return positionInfos
