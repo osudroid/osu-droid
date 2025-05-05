@@ -118,6 +118,12 @@ abstract class FormControl<V : Any, C: Control<V>>(initialValue: V): LinearConta
             }
         }
 
+    /**
+     * Whether to show the reset button or not. If true, the reset button will be shown when the
+     * value of the control is not equal to the default value.
+     */
+    var showResetButton = true
+
 
     init {
         width = FillParent
@@ -157,19 +163,23 @@ abstract class FormControl<V : Any, C: Control<V>>(initialValue: V): LinearConta
 
     override fun onManagedUpdate(deltaTimeSec: Float) {
 
-        resetButton.apply {
-            if (!isVisible && value != defaultValue) {
-                clearEntityModifiers()
-                isVisible = true
-                translateToX(0f, 0.1f)
-                fadeTo(1f, 0.1f)
-            } else if (isVisible && value == defaultValue) {
-                clearEntityModifiers()
-                translateToX(-10f, 0.1f)
-                fadeTo(0f, 0.1f).then {
-                    isVisible = false
+        if (showResetButton) {
+            resetButton.apply {
+                if (!isVisible && value != defaultValue) {
+                    clearEntityModifiers()
+                    isVisible = true
+                    translateToX(0f, 0.1f)
+                    fadeTo(1f, 0.1f)
+                } else if (isVisible && value == defaultValue) {
+                    clearEntityModifiers()
+                    translateToX(-10f, 0.1f)
+                    fadeTo(0f, 0.1f).then {
+                        isVisible = false
+                    }
                 }
             }
+        } else {
+            resetButton.isVisible = false
         }
 
         super.onManagedUpdate(deltaTimeSec)
