@@ -16,5 +16,5 @@ abstract class SliderHitObject(
     /**
      * The position of this [SliderHitObject] relative to the play field.
      */
-    position: Vector2,
+    position: Vector2
 ) : HitObject(startTime, position, false, 0)
