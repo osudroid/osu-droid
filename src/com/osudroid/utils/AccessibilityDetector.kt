@@ -24,6 +24,11 @@ object AccessibilityDetector {
      */
     private var alert: MessageDialog? = null
 
+    private val excludedServices = setOf(
+        "com.android.systemui",
+        "com.miui.voiceassist",
+    )
+
 
     @JvmStatic
     fun check(context: MainActivity) {
@@ -34,7 +39,8 @@ object AccessibilityDetector {
         // Filtering services that can perform gestures.
         val illegalServices = manager.getEnabledAccessibilityServiceList(AccessibilityServiceInfo.FEEDBACK_ALL_MASK).filter {
 
-            AccessibilityServiceInfo.CAPABILITY_CAN_PERFORM_GESTURES and it.capabilities == AccessibilityServiceInfo.CAPABILITY_CAN_PERFORM_GESTURES
+            (AccessibilityServiceInfo.CAPABILITY_CAN_PERFORM_GESTURES and it.capabilities == AccessibilityServiceInfo.CAPABILITY_CAN_PERFORM_GESTURES) &&
+            !excludedServices.contains(it.resolveInfo.serviceInfo.packageName)
         }
 
         isIllegalServiceDetected = illegalServices.isNotEmpty()
