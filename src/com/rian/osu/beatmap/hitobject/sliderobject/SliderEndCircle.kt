@@ -19,11 +19,10 @@ abstract class SliderEndCircle(
     /**
      * The index of the span at which this [SliderEndCircle] lies.
      */
-    spanIndex: Int
+    val spanIndex: Int
 ) : SliderHitObject(
     slider.startTime + slider.spanDuration * (spanIndex + 1),
-    if (spanIndex % 2 == 0) slider.endPosition else slider.position,
-    spanIndex
+    if (spanIndex % 2 == 0) slider.endPosition else slider.position
 ) {
     override fun applyDefaults(
         controlPoints: BeatmapControlPoints,

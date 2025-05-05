@@ -450,12 +450,9 @@ class Slider(
 
         for (i in 1 until nestedHitObjects.size - 1) {
             val nestedHitObject = nestedHitObjects[i]
-            val reversed = nestedHitObject.spanIndex % 2 == 1
+            val progress = (nestedHitObject.startTime - startTime) / duration
 
-            val timeProgress = (nestedHitObject.startTime - startTime) % spanDuration
-            val pathProgress = timeProgress / spanDuration
-
-            nestedHitObject.position = position + path.positionAt(if (reversed) 1 - pathProgress else pathProgress)
+            nestedHitObject.position = position + curvePositionAt(progress)
         }
     }
 
