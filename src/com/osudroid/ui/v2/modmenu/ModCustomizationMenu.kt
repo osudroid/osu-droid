@@ -14,7 +14,7 @@ import ru.nsu.ccfit.zuev.osu.ResourceManager
 
 class ModCustomizationMenu : Modal(
 
-    content = ScrollableContainer().apply {
+    card = ScrollableContainer().apply {
         scrollAxes = Axes.Y
         relativeSizeAxes = Axes.Both
         width = 0.475f
@@ -32,7 +32,7 @@ class ModCustomizationMenu : Modal(
 
 ) {
 
-    private val modSettings: LinearContainer = content[0]
+    private val modSettings: LinearContainer = card[0]
     private val modSettingComponents = mutableListOf<IModSettingComponent<*>>()
 
 

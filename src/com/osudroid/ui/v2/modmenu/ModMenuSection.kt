@@ -8,9 +8,10 @@ import com.reco1l.andengine.ui.*
 import com.reco1l.framework.math.*
 import ru.nsu.ccfit.zuev.osu.*
 
-class ModMenuSection(name: String, toggles: List<Button> = listOf()) : LinearContainer() {
+@Suppress("LeakingThis")
+open class ModMenuSection(name: String, toggles: List<Button> = listOf()) : LinearContainer() {
 
-    private val toggleContainer: LinearContainer
+    protected val toggleContainer: LinearContainer
 
 
     init {
@@ -51,15 +52,6 @@ class ModMenuSection(name: String, toggles: List<Button> = listOf()) : LinearCon
                 toggles.forEach { +it }
             }
         }
-    }
-
-
-    fun addToggle(button: Button) {
-        toggleContainer += button
-    }
-
-    fun removeToggles() {
-        toggleContainer.detachChildren()
     }
 
 }

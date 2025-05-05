@@ -1,6 +1,5 @@
 package com.osudroid.ui.v2.modmenu
 
-import com.osudroid.data.*
 import com.reco1l.andengine.*
 import com.reco1l.andengine.ExtendedEntity.Companion.MatchContent
 import com.reco1l.andengine.ExtendedEntity.Companion.FillParent
@@ -30,7 +29,6 @@ import com.rian.osu.mods.*
 import com.rian.osu.utils.*
 import com.rian.osu.utils.ModUtils
 import kotlinx.coroutines.*
-import org.json.*
 import ru.nsu.ccfit.zuev.osu.*
 import ru.nsu.ccfit.zuev.osu.DifficultyAlgorithm.*
 import ru.nsu.ccfit.zuev.osu.game.*
@@ -54,7 +52,7 @@ object ModMenu : ExtendedScene() {
 
 
     private val modChangeQueue = LinkedList<Mod>()
-    private val modPresetsSection: ModMenuSection
+    private val modPresetsSection: ModMenuPresetsSection
 
     private val customizeButton: TextButton
     private val customizationMenu: ModCustomizationMenu
@@ -70,8 +68,6 @@ object ModMenu : ExtendedScene() {
 
     private var parsedBeatmap: Beatmap? = null
     private var calculationJob: Job? = null
-
-    private var modPresetAddButton: TextButton? = null
 
 
     init {
@@ -232,10 +228,8 @@ object ModMenu : ExtendedScene() {
                     spacing = 16f
                     padding = Vec4(60f, 0f)
 
-                    +ModMenuSection("Presets").apply {
-                        width = 300f
-                        modPresetsSection = this
-                    }
+                    modPresetsSection = ModMenuPresetsSection()
+                    +modPresetsSection
 
                     val mods = ModUtils.allModsInstances
 
@@ -258,7 +252,7 @@ object ModMenu : ExtendedScene() {
         // Customizations menu
         attachChild(customizationMenu)
 
-        loadModPresets()
+        modPresetsSection.loadPresets()
     }
 
 
@@ -396,60 +390,6 @@ object ModMenu : ExtendedScene() {
 
     //endregion
 
-    //region Mod presets
-
-    fun saveModPreset(name: String) {
-
-        if (name.isEmpty()) {
-            return
-        }
-
-        val modPreset = ModPreset(
-            name = name,
-            serializedMods = enabledMods.serializeMods().toString()
-        )
-
-        DatabaseManager.modPresetTable.insert(modPreset)
-        loadModPresets()
-    }
-
-    private fun loadModPresets() = updateThread {
-
-        modPresetsSection.removeToggles()
-
-        modPresetsSection.addToggle(TextButton().apply {
-            width = FillParent
-            text = "Add preset"
-            leadingIcon = ExtendedSprite(ResourceManager.getInstance().getTexture("plus"))
-            onActionUp = {
-                this@ModMenu.attachChild(ModPresetsForm())
-            }
-            modPresetAddButton = this
-        })
-
-        for (preset in DatabaseManager.modPresetTable.getAll()) {
-
-            val modHashMap = ModUtils.deserializeMods(JSONArray(preset.serializedMods))
-
-            modPresetsSection.addToggle(TextButton().apply {
-                width = FillParent
-                text = preset.name
-                onActionUp = {
-                    modToggles.fastForEach { toggle ->
-                        if (toggle.mod in modHashMap) {
-                            addMod(toggle.mod)
-                        } else {
-                            removeMod(toggle.mod)
-                        }
-                    }
-                }
-            })
-        }
-
-    }
-
-    //endregion
-
     //region Mods
 
     fun setMods(mods: RoomMods, isFreeMod: Boolean) {
@@ -518,8 +458,6 @@ object ModMenu : ExtendedScene() {
             onModsChanged()
         }
 
-        modPresetAddButton?.isEnabled = enabledMods.isNotEmpty()
-
         super.onManagedUpdate(deltaTimeSec)
     }
 
@@ -559,6 +497,8 @@ object ModMenu : ExtendedScene() {
         modChangeQueue.clear()
 
         parseBeatmap()
+
+        modPresetsSection.onModsChanged()
     }
 
     fun addMod(mod: Mod) {

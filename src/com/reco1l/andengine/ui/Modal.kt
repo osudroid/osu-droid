@@ -4,8 +4,11 @@ import com.reco1l.andengine.*
 import com.reco1l.andengine.container.*
 import com.reco1l.andengine.modifier.*
 import com.reco1l.andengine.shape.*
+import com.reco1l.andengine.text.*
 import com.reco1l.framework.*
+import com.reco1l.framework.math.*
 import org.anddev.andengine.input.touch.*
+import ru.nsu.ccfit.zuev.osu.*
 
 @Suppress("LeakingThis")
 open class Modal(
@@ -13,7 +16,7 @@ open class Modal(
     /**
      * The content of the modal. This is where you should add your UI elements.
      */
-    val content: Container = Container().apply {
+    val card: Container = Container().apply {
         anchor = Anchor.Center
         origin = Anchor.Center
         clipToBounds = true
@@ -23,7 +26,7 @@ open class Modal(
 ) : ExtendedEntity() {
 
     override var applyTheme: ExtendedEntity.(Theme) -> Unit = { theme ->
-        content.background?.color = theme.accentColor * 0.15f
+        card.background?.color = theme.accentColor * 0.15f
     }
 
 
@@ -45,17 +48,17 @@ open class Modal(
         isVisible = false
         alpha = 0f
 
-        content.scaleX = 0.9f
-        content.scaleY = 0.9f
-        content.background = Box().apply { cornerRadius = 16f }
-        content.foreground = BezelOutline(16f)
+        card.scaleX = 0.9f
+        card.scaleY = 0.9f
+        card.background = Box().apply { cornerRadius = 16f }
+        card.foreground = BezelOutline(16f)
 
         background = Box().apply {
             color = ColorARGB.Black
             alpha = 0.2f
         }
 
-        attachChild(content)
+        attachChild(card)
     }
 
 
@@ -67,7 +70,7 @@ open class Modal(
             return false
         }
 
-        if (!super.onAreaTouched(event, localX, localY) && !content.contains(localX, localY)) {
+        if (!super.onAreaTouched(event, localX, localY) && !card.contains(localX, localY)) {
             if (!staticBackdrop) {
                 hide()
             }
@@ -83,7 +86,7 @@ open class Modal(
      * Creates the show animation for the modal.
      */
     open fun createShowAnimation(): () -> UniversalModifier = {
-        content.scaleTo(1f, 0.2f)
+        card.scaleTo(1f, 0.2f)
         fadeIn(0.2f)
     }
 
@@ -91,7 +94,7 @@ open class Modal(
      * Creates the hide animation for the modal.
      */
     open fun createHideAnimation(): () -> UniversalModifier = {
-        content.scaleTo(0.9f, 0.2f)
+        card.scaleTo(0.9f, 0.2f)
         fadeOut(0.2f)
     }
 
@@ -152,5 +155,79 @@ open class Modal(
     }
 
     //endregion
+
+}
+
+
+abstract class Dialog<T : ExtendedEntity>(val innerContent: T) : Modal(card = LinearContainer().apply {
+    orientation = Orientation.Vertical
+}) {
+
+    val titleEntity = ExtendedText().apply {
+        width = FillParent
+        font = ResourceManager.getInstance().getFont("smallFont")
+        alignment = Anchor.Center
+        padding = Vec4(0f, 12f)
+    }
+
+    val buttonLayout: LinearContainer
+
+
+    /**
+     * The title of the dialog.
+     */
+    var title by titleEntity::text
+
+
+    init {
+        detachOnHide = true
+
+        card.apply {
+            relativeSizeAxes = Axes.X
+            width = 0.5f
+            anchor = Anchor.Center
+            origin = Anchor.Center
+
+            +titleEntity
+
+            box {
+                width = FillParent
+                height = 1f
+                applyTheme = {
+                    color = it.accentColor
+                    alpha = 0.1f
+                }
+            }
+
+            +innerContent
+
+            buttonLayout = linearContainer {
+                anchor = Anchor.TopRight
+                origin = Anchor.TopRight
+                padding = Vec4(24f)
+                spacing = 12f
+            }
+        }
+    }
+
+
+    fun addButton(button: Button) {
+        buttonLayout += button
+    }
+}
+
+open class MessageDialog : Dialog<ExtendedText>(
+    innerContent = ExtendedText().apply {
+        width = FillParent
+        font = ResourceManager.getInstance().getFont("smallFont")
+        alignment = Anchor.Center
+        padding = Vec4(24f)
+    }
+) {
+
+    /**
+     * The text of the dialog.
+     */
+    var text by innerContent::text
 
 }
