@@ -35,10 +35,10 @@ import com.osudroid.BuildSettings
 import com.reco1l.framework.bass.URLBassStream
 import com.reco1l.framework.net.IFileRequestObserver
 import com.reco1l.framework.net.JsonArrayRequest
-import com.reco1l.osu.*
 import com.osudroid.beatmaplisting.BeatmapMirrorSearchRequestModel.OrderType
 import com.osudroid.beatmaplisting.BeatmapMirrorSearchRequestModel.SortType
 import com.osudroid.ui.OsuColors
+import com.osudroid.utils.mainThread
 import com.reco1l.osu.ui.Option
 import com.reco1l.osu.ui.SelectDialog
 import com.reco1l.osu.ui.SelectDropdown
@@ -694,7 +694,12 @@ class BeatmapSetViewHolder(itemView: View, private val mediaScope: CoroutineScop
 
                 mainThread {
                     previewButton.setCompoundDrawablesWithIntrinsicBounds(R.drawable.pause_24px, 0, 0, 0)
-                    detailsFragment?.previewButton?.setCompoundDrawablesWithIntrinsicBounds(R.drawable.pause_24px, 0, 0, 0)
+                    detailsFragment?.previewButton?.setCompoundDrawablesWithIntrinsicBounds(
+                        R.drawable.pause_24px,
+                        0,
+                        0,
+                        0
+                    )
                 }
 
             } catch (e: Exception) {

@@ -3,10 +3,10 @@ package com.osudroid.beatmaps
 import android.util.Log
 import androidx.preference.PreferenceManager
 import com.osudroid.ui.v1.LoadingBadgeFragment
-import com.reco1l.osu.async
+import com.osudroid.utils.async
 import com.osudroid.data.BeatmapInfo
 import com.osudroid.data.DatabaseManager
-import com.reco1l.osu.mainThread
+import com.osudroid.utils.mainThread
 import com.reco1l.toolkt.kotlin.fastForEach
 import com.rian.osu.beatmap.parser.BeatmapParser
 import com.rian.osu.difficulty.calculator.DifficultyCalculator

@@ -1,6 +1,6 @@
 package com.osudroid.ui.v2.hud.elements
 
-import com.reco1l.osu.updateThread
+import com.osudroid.utils.updateThread
 import ru.nsu.ccfit.zuev.osu.game.GameHelper
 import ru.nsu.ccfit.zuev.osu.game.GameScene
 

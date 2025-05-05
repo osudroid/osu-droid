@@ -21,7 +21,7 @@ import com.osudroid.multiplayer.api.data.TeamMode.HeadToHead
 import com.osudroid.multiplayer.api.data.TeamMode.TeamVersus
 import com.osudroid.multiplayer.api.data.WinCondition
 import com.osudroid.multiplayer.api.data.WinCondition.*
-import com.reco1l.osu.mainThread
+import com.osudroid.utils.mainThread
 import com.osudroid.multiplayer.Multiplayer.isConnected
 import com.osudroid.multiplayer.Multiplayer.isRoomHost
 import com.osudroid.multiplayer.Multiplayer.player
@@ -32,7 +32,7 @@ import com.reco1l.osu.ui.entity.ComposedText
 import com.osudroid.ui.v1.SettingsFragment
 import com.osudroid.ui.v2.*
 import com.osudroid.ui.v2.modmenu.ModMenu
-import com.reco1l.osu.updateThread
+import com.osudroid.utils.updateThread
 import com.reco1l.toolkt.kotlin.runSafe
 import com.rian.osu.mods.ModScoreV2
 import org.anddev.andengine.engine.camera.SmoothCamera

@@ -3,7 +3,7 @@ package com.reco1l.osu.ui.entity
 import com.osudroid.multiplayer.api.RoomAPI
 import com.osudroid.multiplayer.api.data.PlayerStatus.Ready
 import com.osudroid.multiplayer.api.data.RoomBeatmap
-import com.reco1l.osu.async
+import com.osudroid.utils.async
 import com.osudroid.multiplayer.Multiplayer
 import com.osudroid.beatmaplisting.BeatmapDownloader
 import com.osudroid.beatmaplisting.BeatmapListing

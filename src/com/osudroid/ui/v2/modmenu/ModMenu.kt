@@ -15,7 +15,7 @@ import com.osudroid.multiplayer.api.data.RoomMods
 import com.osudroid.multiplayer.Multiplayer
 import com.osudroid.multiplayer.RoomScene
 import com.osudroid.ui.OsuColors
-import com.reco1l.osu.*
+import com.osudroid.utils.updateThread
 import com.reco1l.andengine.ui.TextButton
 import com.reco1l.toolkt.kotlin.*
 import com.reco1l.toolkt.kotlin.async

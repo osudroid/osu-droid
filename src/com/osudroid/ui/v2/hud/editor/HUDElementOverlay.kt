@@ -10,7 +10,7 @@ import com.reco1l.andengine.sprite.ExtendedSprite
 import com.reco1l.andengine.text.*
 import com.reco1l.framework.ColorARGB
 import com.osudroid.ui.v2.hud.HUDElement
-import com.reco1l.osu.updateThread
+import com.osudroid.utils.updateThread
 import com.reco1l.toolkt.kotlin.*
 import org.anddev.andengine.input.touch.TouchEvent
 import ru.nsu.ccfit.zuev.osu.ResourceManager

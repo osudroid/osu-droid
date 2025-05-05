@@ -1,6 +1,6 @@
 @file:JvmName("Execution")
 
-package com.reco1l.osu
+package com.osudroid.utils
 
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Runnable

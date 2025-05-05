@@ -18,7 +18,7 @@ import com.edlplan.framework.support.util.Updater
 import com.osudroid.resources.R.*
 import com.edlplan.ui.BaseAnimationListener
 import com.edlplan.ui.EasingHelper
-import com.reco1l.osu.mainThread
+import com.osudroid.utils.mainThread
 import com.reco1l.toolkt.android.cornerRadius
 import com.reco1l.toolkt.android.dp
 import org.anddev.andengine.entity.scene.Scene

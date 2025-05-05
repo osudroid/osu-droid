@@ -25,7 +25,7 @@ import com.edlplan.ui.EasingHelper
 import com.edlplan.ui.fragment.BaseFragment
 import com.osudroid.multiplayer.api.RoomAPI
 import com.osudroid.multiplayer.api.data.RoomPlayer
-import com.reco1l.osu.mainThread
+import com.osudroid.utils.mainThread
 import com.reco1l.toolkt.android.*
 import com.reco1l.toolkt.kotlin.async
 import java.text.SimpleDateFormat

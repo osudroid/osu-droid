@@ -1,4 +1,4 @@
-package com.osudroid
+package com.osudroid.utils
 
 import android.accessibilityservice.AccessibilityServiceInfo
 import android.content.Context

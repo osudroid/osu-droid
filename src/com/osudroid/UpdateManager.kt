@@ -8,8 +8,8 @@ import com.osudroid.resources.R
 import com.reco1l.framework.net.FileRequest
 import com.reco1l.framework.net.IFileRequestObserver
 import com.reco1l.framework.net.JsonObjectRequest
-import com.reco1l.osu.async
-import com.reco1l.osu.mainThread
+import com.osudroid.utils.async
+import com.osudroid.utils.mainThread
 import com.reco1l.osu.ui.MessageDialog
 import com.reco1l.osu.ui.ProgressDialog
 import ru.nsu.ccfit.zuev.osu.Config

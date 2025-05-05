@@ -3,9 +3,9 @@ package ru.nsu.ccfit.zuev.osu.menu;
 import android.util.Log;
 
 import com.osudroid.data.BeatmapInfo;
-import com.reco1l.osu.Execution;
 import com.osudroid.data.DatabaseManager;
 import com.osudroid.multiplayer.Multiplayer;
+import com.osudroid.utils.Execution;
 import com.rian.osu.utils.ModUtils;
 
 import org.anddev.andengine.entity.Entity;

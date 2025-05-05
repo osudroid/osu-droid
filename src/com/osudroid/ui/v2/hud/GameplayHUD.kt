@@ -8,7 +8,7 @@ import com.reco1l.andengine.*
 import com.reco1l.andengine.container.Container
 import com.osudroid.ui.v2.hud.editor.HUDElementSelector
 import com.reco1l.osu.ui.MessageDialog
-import com.reco1l.osu.updateThread
+import com.osudroid.utils.updateThread
 import com.reco1l.toolkt.kotlin.*
 import com.rian.osu.beatmap.hitobject.HitObject
 import org.anddev.andengine.engine.camera.hud.*

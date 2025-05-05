@@ -6,7 +6,7 @@ import com.reco1l.andengine.shape.Box
 import com.reco1l.framework.ColorARGB
 import com.reco1l.framework.Pool
 import com.osudroid.ui.v2.hud.HUDElement
-import com.reco1l.osu.updateThread
+import com.osudroid.utils.updateThread
 import com.reco1l.toolkt.kotlin.*
 import org.anddev.andengine.engine.camera.*
 import ru.nsu.ccfit.zuev.osu.GlobalManager

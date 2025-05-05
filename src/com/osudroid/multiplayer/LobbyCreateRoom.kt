@@ -14,8 +14,8 @@ import com.edlplan.ui.fragment.BaseFragment
 import com.osudroid.multiplayer.api.LobbyAPI
 import com.osudroid.multiplayer.api.RoomAPI
 import com.osudroid.multiplayer.api.data.RoomBeatmap
-import com.reco1l.osu.async
-import com.reco1l.osu.mainThread
+import com.osudroid.utils.async
+import com.osudroid.utils.mainThread
 import com.reco1l.toolkt.android.cornerRadius
 import com.reco1l.toolkt.android.dp
 import ru.nsu.ccfit.zuev.osu.GlobalManager

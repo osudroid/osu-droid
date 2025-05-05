@@ -6,13 +6,13 @@ import android.os.PowerManager;
 import android.util.Log;
 
 import com.acivev.VibratorManager;
+import com.osudroid.utils.Execution;
 import com.reco1l.andengine.Anchor;
 import com.reco1l.andengine.shape.Box;
 import com.reco1l.andengine.sprite.ExtendedSprite;
 import com.osudroid.ui.BannerManager;
 import com.osudroid.ui.BannerManager.BannerSprite;
 import com.osudroid.data.BeatmapInfo;
-import com.reco1l.osu.Execution;
 import com.osudroid.ui.MainMenu;
 
 import com.osudroid.beatmaplisting.BeatmapListing;

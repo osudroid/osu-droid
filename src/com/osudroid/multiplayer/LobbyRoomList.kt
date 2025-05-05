@@ -7,7 +7,7 @@ import com.osudroid.multiplayer.api.data.RoomStatus.*
 import com.osudroid.multiplayer.api.data.TeamMode.HeadToHead
 import com.osudroid.multiplayer.api.data.TeamMode.TeamVersus
 import com.osudroid.multiplayer.api.data.WinCondition.*
-import com.reco1l.osu.mainThread
+import com.osudroid.utils.mainThread
 import com.reco1l.osu.ui.PromptDialog
 import com.reco1l.osu.ui.entity.ScrollableList
 import com.reco1l.toolkt.kotlin.async

@@ -3,10 +3,10 @@ package ru.nsu.ccfit.zuev.osu.scoring;
 import android.util.Log;
 
 import com.edlplan.framework.utils.functionality.SmartIterator;
-import com.reco1l.osu.Execution;
 import com.osudroid.data.DatabaseManager;
 import com.osudroid.multiplayer.Multiplayer;
 import com.osudroid.multiplayer.RoomScene;
+import com.osudroid.utils.Execution;
 import com.reco1l.osu.ui.entity.StatisticSelector;
 
 import com.rian.osu.GameMode;

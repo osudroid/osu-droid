@@ -4,9 +4,9 @@ import com.osudroid.BuildSettings
 import com.osudroid.resources.R
 import com.osudroid.ui.v1.SettingsFragment
 import com.reco1l.andengine.sprite.ExtendedSprite
-import com.reco1l.osu.async
+import com.osudroid.utils.async
 import com.osudroid.beatmaplisting.BeatmapListing
-import com.reco1l.osu.mainThread
+import com.osudroid.utils.mainThread
 import com.osudroid.multiplayer.LobbyScene
 import com.osudroid.multiplayer.Multiplayer
 import com.osudroid.multiplayer.RoomScene

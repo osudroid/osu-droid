@@ -6,7 +6,7 @@ import com.edlplan.framework.easing.Easing;
 import com.edlplan.framework.math.FMath;
 import com.edlplan.framework.math.line.LinePath;
 import com.edlplan.osu.support.slider.SliderBody;
-import com.reco1l.osu.Execution;
+import com.osudroid.utils.Execution;
 import com.reco1l.andengine.sprite.AnimatedSprite;
 import com.reco1l.andengine.sprite.ExtendedSprite;
 import com.reco1l.andengine.Modifiers;
