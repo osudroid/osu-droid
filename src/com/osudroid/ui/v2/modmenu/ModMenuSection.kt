@@ -4,12 +4,14 @@ import com.reco1l.andengine.*
 import com.reco1l.andengine.container.*
 import com.reco1l.andengine.shape.*
 import com.reco1l.andengine.text.*
+import com.reco1l.andengine.ui.*
 import com.reco1l.framework.math.*
-import com.reco1l.toolkt.kotlin.*
-import com.rian.osu.mods.*
 import ru.nsu.ccfit.zuev.osu.*
 
-class ModMenuSection(name: String, mods: List<Mod>) : LinearContainer() {
+class ModMenuSection(name: String, toggles: List<Button> = listOf()) : LinearContainer() {
+
+    private val toggleContainer: LinearContainer
+
 
     init {
         orientation = Orientation.Vertical
@@ -44,11 +46,20 @@ class ModMenuSection(name: String, mods: List<Mod>) : LinearContainer() {
                 orientation = Orientation.Vertical
                 padding = Vec4(12f, 0f, 12f, 12f)
                 spacing = 16f
+                toggleContainer = this
 
-                mods.fastForEach { mod ->
-                    +ModMenuToggle(mod).apply { ModMenu.modToggles.add(this) }
-                }
+                toggles.forEach { +it }
             }
         }
     }
+
+
+    fun addToggle(button: Button) {
+        toggleContainer += button
+    }
+
+    fun removeToggles() {
+        toggleContainer.detachChildren()
+    }
+
 }

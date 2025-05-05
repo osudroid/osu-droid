@@ -32,6 +32,11 @@ open class Modal(
      */
     var staticBackdrop = false
 
+    /**
+     * Whether the modal should be detached from the scene when hidden.
+     */
+    var detachOnHide = false
+
 
     init {
         width = FillParent
@@ -62,7 +67,7 @@ open class Modal(
             return false
         }
 
-        if (!super.onAreaTouched(event, localX, localY)) {
+        if (!super.onAreaTouched(event, localX, localY) && !content.contains(localX, localY)) {
             if (!staticBackdrop) {
                 hide()
             }
@@ -109,7 +114,11 @@ open class Modal(
     /**
      * Called after all hide animations are finished.
      */
-    protected open fun onHidden() = Unit
+    protected open fun onHidden() {
+        if (detachOnHide) {
+            detachSelf()
+        }
+    }
 
 
     /**

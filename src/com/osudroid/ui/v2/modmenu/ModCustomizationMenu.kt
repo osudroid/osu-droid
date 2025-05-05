@@ -17,7 +17,7 @@ class ModCustomizationMenu : Modal(
     content = ScrollableContainer().apply {
         scrollAxes = Axes.Y
         relativeSizeAxes = Axes.Both
-        width = 0.60f
+        width = 0.475f
         height = 0.75f
         x = 60f
         y = 90f

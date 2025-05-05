@@ -265,6 +265,8 @@ public class MainActivity extends BaseGameActivity implements
         ResourceManager.getInstance().loadHighQualityAsset("back-arrow", "back-arrow.png");
         ResourceManager.getInstance().loadHighQualityAsset("reset", "reset.png");
         ResourceManager.getInstance().loadHighQualityAsset("check", "check.png");
+        ResourceManager.getInstance().loadHighQualityAsset("plus", "plus.png");
+        ResourceManager.getInstance().loadHighQualityAsset("minus", "minus.png");
 
         File bg;
         if ((bg = new File(Config.getSkinPath() + "menu-background.png")).exists()
