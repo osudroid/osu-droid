@@ -722,15 +722,16 @@ public class MainActivity extends BaseGameActivity implements
         if (AccessibilityDetector.isIllegalServiceDetected())
             return false;
 
-        if (event.getAction() != KeyEvent.ACTION_DOWN) {
-            return super.onKeyDown(keyCode, event);
-        }
         if (GlobalManager.getInstance().getEngine() == null) {
             return super.onKeyDown(keyCode, event);
         }
 
         if (ExtendedEngine.getCurrent().onKeyPress(keyCode, event)) {
             return true;
+        }
+
+        if (event.getAction() != KeyEvent.ACTION_DOWN) {
+            return super.onKeyDown(keyCode, event);
         }
 
         Scene scene = GlobalManager.getInstance().getEngine().getScene();
