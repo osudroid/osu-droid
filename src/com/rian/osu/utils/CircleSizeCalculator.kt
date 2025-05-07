@@ -95,7 +95,8 @@ object CircleSizeCalculator {
      * @return The converted scale.
      */
     @JvmStatic
-    fun droidOldDifficultyScaleScreenPixelsToOsuPixels(scale: Float) = scale * 480 / OLD_ASSUMED_DROID_HEIGHT
+    fun droidOldDifficultyScaleScreenPixelsToOsuPixels(scale: Float) =
+        scaleScreenPixelsToOsuPixels(scale, OLD_ASSUMED_DROID_HEIGHT)
 
     /**
      * Converts old osu!droid difficulty scale that is in **osu!pixels** to **screen pixels**.
@@ -104,7 +105,8 @@ object CircleSizeCalculator {
      * @return The converted scale.
      */
     @JvmStatic
-    fun droidOldDifficultyScaleOsuPixelsToScreenPixels(scale: Float) = scale * OLD_ASSUMED_DROID_HEIGHT / 480
+    fun droidOldDifficultyScaleOsuPixelsToScreenPixels(scale: Float) =
+        scaleOsuPixelsToScreenPixels(scale, OLD_ASSUMED_DROID_HEIGHT)
 
     /**
      * Converts old osu!droid gameplay scale that is in **screen pixels** to **osu!pixels**.
@@ -113,7 +115,8 @@ object CircleSizeCalculator {
      * @return The converted scale.
      */
     @JvmStatic
-    fun droidOldGameplayScaleScreenPixelsToOsuPixels(scale: Float) = scale * 480 / max(1, Config.getRES_HEIGHT())
+    fun droidOldGameplayScaleScreenPixelsToOsuPixels(scale: Float) =
+        scaleScreenPixelsToOsuPixels(scale, Config.getRES_HEIGHT().toFloat())
 
     /**
      * Converts old osu!droid scale that is in **osu!pixels** to **screen pixels**.
@@ -122,7 +125,8 @@ object CircleSizeCalculator {
      * @return The converted scale.
      */
     @JvmStatic
-    fun droidOldGameplayScaleOsuPixelsToScreenPixels(scale: Float) = scale * max(1, Config.getRES_HEIGHT()) / 480
+    fun droidOldGameplayScaleOsuPixelsToScreenPixels(scale: Float) =
+        scaleOsuPixelsToScreenPixels(scale, Config.getRES_HEIGHT().toFloat())
 
     /**
      * Converts osu!droid scale to osu!standard radius.
@@ -196,4 +200,8 @@ object CircleSizeCalculator {
 
     private fun oldDroidScaleToDroidCS(scale: Float, height: Float) =
         (54.42f - (max(1e-3f, scale) - OLD_DROID_SCALE_MULTIPLIER * 480 / max(1f, height)) * HitObject.OBJECT_RADIUS) / 4.48f
+
+    private fun scaleScreenPixelsToOsuPixels(scale: Float, height: Float) = scale * 480 / max(1f, height)
+
+    private fun scaleOsuPixelsToScreenPixels(scale: Float, height: Float) = scale * max(1f, height) / 480
 }
