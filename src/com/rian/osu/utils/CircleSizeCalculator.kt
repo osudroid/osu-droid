@@ -50,8 +50,7 @@ object CircleSizeCalculator {
      * @return The calculated osu!droid difficulty scale in osu!pixels.
      */
     @JvmStatic
-    fun droidCSToOldDroidDifficultyScale(cs: Float) =
-        max(1e-3f, OLD_ASSUMED_DROID_HEIGHT / 480 * (54.42f - cs * 4.48f) / HitObject.OBJECT_RADIUS + OLD_DROID_SCALE_MULTIPLIER)
+    fun droidCSToOldDroidDifficultyScale(cs: Float) = droidCSToOldDroidScale(cs, OLD_ASSUMED_DROID_HEIGHT)
 
     /**
      * Converts osu!droid circle size to osu!droid gameplay scale before replay version 7.
@@ -60,8 +59,7 @@ object CircleSizeCalculator {
      * @return The calculated osu!droid gameplay scale in osu!pixels.
      */
     @JvmStatic
-    fun droidCSToOldDroidGameplayScale(cs: Float) =
-        max(1e-3f, (54.42f - cs * 4.48f) / HitObject.OBJECT_RADIUS + OLD_DROID_SCALE_MULTIPLIER * 480 / max(1, Config.getRES_HEIGHT()))
+    fun droidCSToOldDroidGameplayScale(cs: Float) = droidCSToOldDroidScale(cs, Config.getRES_HEIGHT().toFloat())
 
     /**
      * Converts osu!droid scale to osu!droid circle size.
@@ -79,8 +77,7 @@ object CircleSizeCalculator {
      * @return The calculated osu!droid circle size.
      */
     @JvmStatic
-    fun droidOldDifficultyScaleToDroidCS(scale: Float) =
-        (54.42f - (max(1e-3f, scale) - OLD_DROID_SCALE_MULTIPLIER) * HitObject.OBJECT_RADIUS * 480 / OLD_ASSUMED_DROID_HEIGHT) / 4.48f
+    fun droidOldDifficultyScaleToDroidCS(scale: Float) = oldDroidScaleToDroidCS(scale, OLD_ASSUMED_DROID_HEIGHT)
 
     /**
      * Converts osu!droid gameplay scale before replay version 7 to osu!droid circle size.
@@ -89,8 +86,7 @@ object CircleSizeCalculator {
      * @return The calculated osu!droid circle size.
      */
     @JvmStatic
-    fun droidOldGameplayScaleToDroidCS(scale: Float) =
-        (54.42f - (max(1e-3f, scale) - OLD_DROID_SCALE_MULTIPLIER * 480 / max(1, Config.getRES_HEIGHT())) * HitObject.OBJECT_RADIUS) / 4.48f
+    fun droidOldGameplayScaleToDroidCS(scale: Float) = oldDroidScaleToDroidCS(scale, Config.getRES_HEIGHT().toFloat())
 
     /**
      * Converts old osu!droid difficulty scale that is in **screen pixels** to **osu!pixels**.
@@ -194,4 +190,10 @@ object CircleSizeCalculator {
     fun standardScaleToOldDroidDifficultyScale(scale: Float, applyFudge: Boolean = false) =
         standardRadiusToOldDroidDifficultyScale(HitObject.OBJECT_RADIUS.toDouble() * scale /
                 if (applyFudge) BROKEN_GAMEFIELD_ROUNDING_ALLOWANCE else 1f)
+
+    private fun droidCSToOldDroidScale(cs: Float, height: Float) =
+        max(1e-3f, (54.42f - cs * 4.48f) / HitObject.OBJECT_RADIUS + OLD_DROID_SCALE_MULTIPLIER * 480 / max(1f, height))
+
+    private fun oldDroidScaleToDroidCS(scale: Float, height: Float) =
+        (54.42f - (max(1e-3f, scale) - OLD_DROID_SCALE_MULTIPLIER * 480 / max(1f, height)) * HitObject.OBJECT_RADIUS) / 4.48f
 }
