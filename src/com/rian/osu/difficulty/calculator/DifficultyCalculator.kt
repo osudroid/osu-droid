@@ -199,7 +199,7 @@ abstract class DifficultyCalculator<TBeatmap : PlayableBeatmap, TObject : Diffic
         /**
          * The epoch time of the last change to the difficulty calculator, in milliseconds.
          */
-        const val VERSION = 1741359220000
+        const val VERSION = 1746800175000
     }
 }
 
