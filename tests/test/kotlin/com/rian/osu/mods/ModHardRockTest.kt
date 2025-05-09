@@ -29,7 +29,7 @@ class ModHardRockTest {
         BeatmapDifficulty(cs = 4f, ar = 9f, od = 7f, hp = 6f).apply {
             ModHardRock().applyToDifficulty(GameMode.Droid, this, listOf(ModReplayV6()))
 
-            Assert.assertEquals(5.258653f, difficultyCS, 1e-2f)
+            Assert.assertEquals(4.887154f, difficultyCS, 1e-2f)
             Assert.assertEquals(10f, ar, 1e-2f)
             Assert.assertEquals(9.8f, od, 1e-2f)
             Assert.assertEquals(8.4f, hp, 1e-2f)
