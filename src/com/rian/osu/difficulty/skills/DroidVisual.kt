@@ -24,7 +24,7 @@ class DroidVisual(
 
     private var currentStrain = 0.0
     private var currentRhythm = 0.0
-    private val skillMultiplier = 10
+    private val skillMultiplier = 11.2
     private val strainDecayBase = 0.1
 
     override fun strainValueAt(current: DroidDifficultyHitObject): Double {
