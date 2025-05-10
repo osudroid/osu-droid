@@ -85,7 +85,7 @@ class SearchBarFragment : BaseFragment(), IFilterMenu {
         mainThread(this::reloadViewData)
     }
 
-    override fun getScene(): Scene = scene!!
+    override fun getScene() = scene
 
     override fun hideMenu() {
         updateUpdater()
