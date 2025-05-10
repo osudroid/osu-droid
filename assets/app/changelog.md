@@ -8,18 +8,23 @@ Version 1.8.4
 - Add Wind Down mod <span style="font-size: 0.75em">by [Rian8337](https://github.com/Rian8337)</span>
   - Slows the game down as gameplay progresses.
   - Initial and final speed can be configured in the mod menu.
+  - Mod icon is skinnable with `selection-mod-winddown`.
 - Add Wind Up mod <span style="font-size: 0.75em">by [Rian8337](https://github.com/Rian8337)</span>
   - Speeds the game up as gameplay progresses.
   - Initial and final speed can be configured in the mod menu.
+  - Mod icon is skinnable with `selection-mod-windup`.
 - Add Mirror mod <span style="font-size: 0.75em">by [Rian8337](https://github.com/Rian8337)</span>
   - Flips hit objects vertically or horizontally.
   - Can be configured in the mod menu. 
+  - Mod icon is skinnable with `selection-mod-mirror`.
 - Add Synesthesia mod <span style="font-size: 0.75em">by [Rian8337](https://github.com/Rian8337)</span>
   - Colors hit objects based on their rhythm.
+  - Mod icon is skinnable with `selection-mod-synesthesia`.
 - Add Random mod <span style="font-size: 0.75em">by [Rian8337](https://github.com/Rian8337)</span>
   - Randomizes the position of hit objects.
   - A custom seed can be provided in the mod menu to ensure the same randomization in the same beatmap.
   - Angle sharpness of jumps can be configured in the mod menu.
+  - Mod icon is skinnable with `selection-mod-random`.
 - Add "only fade approach circles" setting to Hidden mod <span style="font-size: 0.75em">by [Rian8337](https://github.com/Rian8337)</span>
   - This setting only fades the approach circles of hit objects and nothing else.
   - Enabling this setting will mark the mod as unranked.
