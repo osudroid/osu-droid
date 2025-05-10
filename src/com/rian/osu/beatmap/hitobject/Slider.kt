@@ -165,24 +165,6 @@ class Slider(
         private set
 
     /**
-     * The position of the cursor at the point of completion of this [Slider] if it was hit
-     * with as few movements as possible. This is set and used by difficulty calculation.
-     */
-    var lazyEndPosition: Vector2? = null
-
-    /**
-     * The distance travelled by the cursor upon completion of this [Slider] if it was hit
-     * with as few movements as possible. This is set and used by difficulty calculation.
-     */
-    var lazyTravelDistance = 0f
-
-    /**
-     * The time taken by the cursor upon completion of this [Slider] if it was hit with
-     * as few movements as possible. This is set and used by difficulty calculation.
-     */
-    var lazyTravelTime = 0.0
-
-    /**
      * The duration of one span of this [Slider] in milliseconds.
      */
     val spanDuration
@@ -215,65 +197,83 @@ class Slider(
     override var difficultyStackHeight
         get() = super.difficultyStackHeight
         set(value) {
+            val wasEqual = super.difficultyStackHeight == value
+
             super.difficultyStackHeight = value
 
-            difficultyStackedEndPositionCache.invalidate()
-
-            nestedHitObjects.forEach { it.difficultyStackHeight = value }
+            if (!wasEqual) {
+                difficultyStackedEndPositionCache.invalidate()
+                nestedHitObjects.forEach { it.difficultyStackHeight = value }
+            }
         }
 
     override var difficultyScale
         get() = super.difficultyScale
         set(value) {
+            val wasEqual = super.difficultyScale == value
+
             super.difficultyScale = value
 
-            difficultyStackedEndPositionCache.invalidate()
-
-            nestedHitObjects.forEach { it.difficultyScale = value }
+            if (!wasEqual) {
+                difficultyStackedEndPositionCache.invalidate()
+                nestedHitObjects.forEach { it.difficultyScale = value }
+            }
         }
 
     // Gameplay object positions
 
-    private val gameplayEndPositionCache = Cached(gameplayPosition)
-
-    override val gameplayEndPosition: Vector2
-        get() {
-            if (!gameplayEndPositionCache.isValid) {
-                gameplayEndPositionCache.value = convertPositionToRealCoordinates(endPosition)
-            }
-
-            return gameplayEndPositionCache.value
-        }
-
-    private val gameplayStackedEndPositionCache = Cached(gameplayEndPosition)
+    private val gameplayStackedEndPositionCache = Cached(endPosition)
 
     override val gameplayStackedEndPosition: Vector2
         get() {
             if (!gameplayStackedEndPositionCache.isValid) {
-                gameplayStackedEndPositionCache.value = gameplayEndPosition + gameplayStackOffset
+                gameplayStackedEndPositionCache.value = endPosition + gameplayStackOffset
             }
 
             return gameplayStackedEndPositionCache.value
         }
 
+    private val screenSpaceGameplayStackedEndPositionCache =
+        Cached(convertPositionToRealCoordinates(gameplayStackedEndPosition))
+
+    override val screenSpaceGameplayStackedEndPosition: Vector2
+        get() {
+            if (!screenSpaceGameplayStackedEndPositionCache.isValid) {
+                screenSpaceGameplayStackedEndPositionCache.value =
+                    convertPositionToRealCoordinates(gameplayStackedEndPosition)
+            }
+
+            return screenSpaceGameplayStackedEndPositionCache.value
+        }
+
     override var gameplayStackHeight
         get() = super.gameplayStackHeight
         set(value) {
+            val wasEqual = super.gameplayStackHeight == value
+
             super.gameplayStackHeight = value
 
-            gameplayStackedEndPositionCache.invalidate()
+            if (!wasEqual) {
+                gameplayStackedEndPositionCache.invalidate()
+                screenSpaceGameplayStackedEndPositionCache.invalidate()
 
-            nestedHitObjects.forEach { it.gameplayStackHeight = value }
+                nestedHitObjects.forEach { it.gameplayStackHeight = value }
+            }
         }
 
     override var gameplayScale
         get() = super.gameplayScale
         set(value) {
+            val wasEqual = super.gameplayScale == value
+
             super.gameplayScale = value
 
-            gameplayStackedEndPositionCache.invalidate()
+            if (!wasEqual) {
+                gameplayStackedEndPositionCache.invalidate()
+                screenSpaceGameplayStackedEndPositionCache.invalidate()
 
-            nestedHitObjects.forEach { it.gameplayScale = value }
+                nestedHitObjects.forEach { it.gameplayScale = value }
+            }
         }
 
     override fun applyDefaults(controlPoints: BeatmapControlPoints, difficulty: BeatmapDifficulty, mode: GameMode, scope: CoroutineScope?) {
@@ -452,7 +452,6 @@ class Slider(
     private fun invalidateEndPositions() {
         endPositionCache.invalidate()
         difficultyStackedEndPositionCache.invalidate()
-        gameplayEndPositionCache.invalidate()
         gameplayStackedEndPositionCache.invalidate()
     }
 

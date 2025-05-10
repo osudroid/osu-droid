@@ -1,7 +1,7 @@
 package ru.nsu.ccfit.zuev.osu.menu;
 
-import com.reco1l.osu.data.BeatmapInfo;
-import com.reco1l.osu.data.DatabaseManager;
+import com.osudroid.data.BeatmapInfo;
+import com.osudroid.data.DatabaseManager;
 
 import org.anddev.andengine.entity.sprite.Sprite;
 import org.anddev.andengine.entity.text.ChangeableText;

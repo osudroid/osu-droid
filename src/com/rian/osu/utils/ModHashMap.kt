@@ -69,10 +69,13 @@ open class ModHashMap : HashMap<Class<out Mod>, Mod> {
         }
 
         // Check if there are any mods that are incompatible with the new mod.
-        value.incompatibleMods.fastForEach {
-            for (mod in this) {
-                if (it.isInstance(mod.value)) {
-                    remove(mod.key)
+        val iterator = iterator()
+        while (iterator.hasNext()) {
+            val (_, mod) = iterator.next()
+
+            value.incompatibleMods.fastForEach {
+                if (it.isInstance(mod)) {
+                    iterator.remove()
                 }
             }
         }
@@ -161,8 +164,12 @@ open class ModHashMap : HashMap<Class<out Mod>, Mod> {
 
     /**
      * Serializes the [Mod]s in this [ModHashMap] to a [JSONArray].
+     *
+     * @param includeNonUserPlayable Whether to include non-user-playable [Mod]s in the serialization.
+     * Defaults to `true`.
      */
-    fun serializeMods() = ModUtils.serializeMods(values)
+    @JvmOverloads
+    fun serializeMods(includeNonUserPlayable: Boolean = true) = ModUtils.serializeMods(values, includeNonUserPlayable)
 
     /**
      * Converts the container [Mod]s in this [ModHashMap] to their [String] representative.
@@ -257,15 +264,21 @@ open class ModHashMap : HashMap<Class<out Mod>, Mod> {
     /**
      * Converts this [ModHashMap] to a string representation that can be used to display [Mod]s to the user.
      */
-    fun toDisplayModString() = buildString {
-        modStringOrder.fastForEach {
-            if (it in this@ModHashMap) {
-                append(this@ModHashMap[it::class]!!.toString() + ",")
-            }
+    fun toDisplayModString(): String {
+        if (isEmpty()) {
+            return "-"
         }
 
-        if (isNotEmpty()) {
-            deleteCharAt(length - 1)
+        return buildString {
+            modStringOrder.fastForEach {
+                if (it in this@ModHashMap) {
+                    append(this@ModHashMap[it::class]!!.toString() + ",")
+                }
+            }
+
+            if (isNotEmpty()) {
+                deleteCharAt(length - 1)
+            }
         }
     }
 
@@ -285,10 +298,28 @@ open class ModHashMap : HashMap<Class<out Mod>, Mod> {
          * This is intentionally kept to keep the order consistent with what players are used to.
          */
         private val modStringOrder = arrayOf<Mod>(
-            ModAuto(), ModRelax(), ModAutopilot(), ModEasy(), ModNoFail(), ModHardRock(),
-            ModHidden(), ModTraceable(), ModFlashlight(), ModDoubleTime(), ModNightCore(),
-            ModHalfTime(), ModPrecise(), ModReallyEasy(), ModPerfect(), ModSuddenDeath(),
-            ModScoreV2()
+            ModAutoplay(),
+            ModRelax(),
+            ModAutopilot(),
+            ModEasy(),
+            ModNoFail(),
+            ModHardRock(),
+            ModMirror(),
+            ModHidden(),
+            ModTraceable(),
+            ModFlashlight(),
+            ModDoubleTime(),
+            ModNightCore(),
+            ModHalfTime(),
+            ModWindDown(),
+            ModWindUp(),
+            ModPrecise(),
+            ModReallyEasy(),
+            ModPerfect(),
+            ModSuddenDeath(),
+            ModSynesthesia(),
+            ModScoreV2(),
+            ModReplayV6()
         )
     }
 }

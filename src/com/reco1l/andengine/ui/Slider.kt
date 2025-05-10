@@ -2,42 +2,29 @@ package com.reco1l.andengine.ui
 
 import com.reco1l.andengine.*
 import com.reco1l.andengine.container.*
+import com.reco1l.andengine.info.*
 import com.reco1l.andengine.shape.*
-import com.reco1l.framework.*
+import com.reco1l.framework.math.*
 import org.anddev.andengine.input.touch.*
 import kotlin.math.*
 
-data class SliderTheme(
-    val backgroundColor: Long = 0xFF222234,
-    val progressColor: Long = 0xFFF27272,
-    val thumbColor: Long = 0xFFFFFFFF,
-    val barHeight: Float = 12f,
-    val thumbHeight: Float = 24f,
-    val thumbWidth: Float = 32f,
-) : ITheme
-
 @Suppress("LeakingThis")
-open class Slider : Control<Float>(0f), IWithTheme<SliderTheme> {
+open class Slider(initialValue: Float = 0f) : Control<Float>(initialValue) {
 
-    override var theme = DefaultTheme
-        set(value) {
-            if (field != value) {
-                field = value
-                onThemeChanged()
-            }
+    override var applyTheme: ExtendedEntity.(Theme) -> Unit = { theme ->
+
+        background?.apply {
+            color = theme.accentColor * 0.25f
+            foreground?.color = theme.accentColor * 0.4f
         }
 
-    override var value: Float
-        get() = super.value
-        set(value) {
-            if (step > 0f) {
-                val stepCount = ceil((value - min) / step)
-                super.value = (min + step * stepCount).coerceIn(min, max)
-            } else {
-                // If step is 0, just set the value directly
-                super.value = value.coerceIn(min, max)
-            }
+        progressBar.apply {
+            color = theme.accentColor * 0.5f
+            foreground?.color = theme.accentColor
         }
+
+        thumb.color = theme.accentColor
+    }
 
 
     /**
@@ -51,7 +38,7 @@ open class Slider : Control<Float>(0f), IWithTheme<SliderTheme> {
 
             if (field != min) {
                 field = min
-                value = value
+                value = onProcessValue(value)
             }
         }
 
@@ -66,14 +53,14 @@ open class Slider : Control<Float>(0f), IWithTheme<SliderTheme> {
 
             if (field != max) {
                 field = max
-                value = value
+                value = onProcessValue(value)
             }
         }
 
     /**
      * The step size of the slider. If set to 0, the slider will allow any value between min and max.
      */
-    var step = 0f
+    var step = 0.0f
         set(step) {
             if (step < 0f) {
                 throw IllegalArgumentException("step must be greater than or equal to 0")
@@ -81,81 +68,123 @@ open class Slider : Control<Float>(0f), IWithTheme<SliderTheme> {
             field = step
         }
 
+    /**
+     * Called when the user starts dragging the slider.
+     */
+    var onStartDragging: () -> Unit = {}
 
-    private val backgroundBar = object : RoundedBox() {
+    /**
+     * Called when the user stops dragging the slider.
+     */
+    var onStopDragging: () -> Unit = {}
 
-        init {
-            width = FitParent
-            anchor = Anchor.Center
-            origin = Anchor.Center
-        }
 
-        override fun onAreaTouched(event: TouchEvent, localX: Float, localY: Float): Boolean {
-            if (event.isActionDown || event.isActionMove) {
-                setHierarchyScrollPrevention(true)
-                value = (localX / width) * (max - min) + min
-            } else {
-                setHierarchyScrollPrevention(false)
-            }
-            return true
-        }
-    }
-
-    private val progressBar = RoundedBox().apply {
-        anchor = Anchor.CenterLeft
-        origin = Anchor.CenterLeft
-    }
-
-    private val thumb = RoundedBox().apply {
+    private val thumb = Box().apply {
+        width = 24f
+        height = FillParent
         anchor = Anchor.CenterLeft
         origin = Anchor.Center
+        cornerRadius = 12f
+        inheritAncestorsColor = false
+        depthInfo = DepthInfo.Less
+        clearInfo = ClearInfo.ClearDepthBuffer
+    }
+
+    private val progressBar = Box().apply {
+        width = 24f
+        height = FillParent
+        anchor = Anchor.CenterLeft
+        origin = Anchor.CenterLeft
+        cornerRadius = 12f
+        foreground = Box().apply {
+            paintStyle = PaintStyle.Outline
+            cornerRadius = 12f
+            depthInfo = DepthInfo.Default
+        }
+        depthInfo = DepthInfo.Default
     }
 
 
     init {
-        width = FitParent
+        width = FillParent
+        height = 48f
 
-        attachChild(backgroundBar)
-        attachChild(progressBar)
+        background = Box().apply {
+            cornerRadius = 12f
+
+            foreground = Box().apply {
+                cornerRadius = 12f
+                paintStyle = PaintStyle.Outline
+            }
+        }
+
         attachChild(thumb)
-
-        onThemeChanged()
+        attachChild(progressBar)
     }
 
-
-    override fun onThemeChanged() {
-        backgroundBar.color = ColorARGB(theme.backgroundColor)
-        backgroundBar.height = theme.barHeight
-        backgroundBar.cornerRadius = theme.barHeight / 2f
-
-        progressBar.color = ColorARGB(theme.progressColor)
-        progressBar.height = theme.barHeight
-        progressBar.cornerRadius = theme.barHeight / 2f
-
-        thumb.color = ColorARGB(theme.thumbColor)
-        thumb.height = theme.thumbHeight
-        thumb.width = theme.thumbWidth
-        thumb.cornerRadius = min(theme.thumbHeight, thumb.width) / 2f
-        thumb.origin = Anchor.Center
-        thumb.foreground = BezelOutline(theme.thumbHeight / 2f)
-    }
 
     override fun onSizeChanged() {
         super.onSizeChanged()
-        onValueChanged()
+        updateProgress()
     }
 
     override fun onValueChanged() {
         super.onValueChanged()
+        updateProgress()
+    }
 
-        val progressWidth = width * (value - min) / (max - min)
-        progressBar.width = progressWidth
-        thumb.x = progressWidth.coerceAtMost(width - thumb.width / 2f).coerceAtLeast(thumb.width / 2f)
+    override fun onProcessValue(value: Float): Float {
+        if (step > 0f) {
+            return (min + step * round((value - min) / step)).coerceIn(min, max)
+        }
+        return value.coerceIn(min, max)
     }
 
 
-    companion object {
-        val DefaultTheme = SliderTheme()
+    private fun updateProgress() {
+
+        val absoluteProgress = (value - min) / (max - min)
+
+        thumb.x = (width * absoluteProgress).coerceAtLeast(thumb.width / 2f).coerceAtMost(width - thumb.width / 2f)
+
+        if (min >= 0f) {
+            progressBar.anchor = Anchor.CenterLeft
+            progressBar.origin = Anchor.CenterLeft
+            progressBar.width = (width * absoluteProgress + thumb.width / 2f).coerceAtLeast(thumb.width).coerceAtMost(width)
+            return
+        }
+
+        val barCenter = -min / (max - min)
+
+        if (progressBar.anchor.x != barCenter) {
+            progressBar.anchor = Vec2(barCenter, 0.5f)
+        }
+
+        val partitionWidth = width * if (value < min) barCenter else 1f - barCenter
+
+        progressBar.width = partitionWidth * abs(value / max)
+
+        val innerCenterX = if (value < 0f) 1f else 0f
+
+        if (progressBar.origin.x != innerCenterX) {
+            progressBar.origin = Vec2(innerCenterX, 0.5f)
+        }
+
+    }
+
+
+    override fun onAreaTouched(event: TouchEvent, localX: Float, localY: Float): Boolean {
+        if (event.isActionDown || event.isActionMove) {
+            if (event.isActionDown) {
+                setHierarchyScrollPrevention(true)
+                onStartDragging()
+            }
+            value = (localX / width) * (max - min) + min
+        } else {
+            setHierarchyScrollPrevention(false)
+            onStopDragging()
+        }
+        return true
     }
 
 }

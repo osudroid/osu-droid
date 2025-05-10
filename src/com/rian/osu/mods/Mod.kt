@@ -21,6 +21,11 @@ sealed class Mod {
     abstract val acronym: String
 
     /**
+     * The user readable description of this [Mod].
+     */
+    abstract val description: String
+
+    /**
      * The type fo this [Mod].
      */
     abstract val type: ModType
@@ -28,7 +33,8 @@ sealed class Mod {
     /**
      * The suffix to append to the texture name of this [Mod].
      */
-    protected abstract val textureNameSuffix: String
+    protected open val textureNameSuffix
+        get() = name.replace(" ", "").lowercase()
 
     /**
      * The texture name of this [Mod].
@@ -45,6 +51,13 @@ sealed class Mod {
      * Whether adding this [Mod] will affect gameplay.
      */
     open val isRelevant = true
+
+    /**
+     * Whether this [Mod] is playable by a real human user.
+     *
+     * Should be `false` for cases where the user is not meant to apply the [Mod] by themselves.
+     */
+    open val isUserPlayable = true
 
     /**
      * Whether this [Mod] is valid for multiplayer matches.
@@ -75,6 +88,12 @@ sealed class Mod {
             property.isAccessible = true
             property.getDelegate(this) as? ModSetting<Any?>
         }
+
+    /**
+     * Whether all [ModSetting]s in this [Mod] are set to their default values.
+     */
+    open val usesDefaultSettings
+        get() = settings.all { it.isDefault }
 
     /**
      * Calculates the score multiplier for this [Mod] with the given [BeatmapDifficulty].
@@ -140,6 +159,10 @@ sealed class Mod {
         result = 31 * result + isValidForMultiplayer.hashCode()
         result = 31 * result + isValidForMultiplayerAsFreeMod.hashCode()
         result = 31 * result + incompatibleMods.contentHashCode()
+
+        for (setting in settings) {
+            result = 31 * result + setting.value.hashCode()
+        }
 
         return result
     }

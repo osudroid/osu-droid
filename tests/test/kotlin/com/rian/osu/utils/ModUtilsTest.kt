@@ -3,7 +3,7 @@ package com.rian.osu.utils
 import com.rian.osu.GameMode
 import com.rian.osu.beatmap.sections.BeatmapDifficulty
 import com.rian.osu.mods.Mod
-import com.rian.osu.mods.ModAuto
+import com.rian.osu.mods.ModAutoplay
 import com.rian.osu.mods.ModCustomSpeed
 import com.rian.osu.mods.ModDoubleTime
 import com.rian.osu.mods.ModHardRock
@@ -11,6 +11,7 @@ import com.rian.osu.mods.ModHidden
 import com.rian.osu.mods.ModNightCore
 import com.rian.osu.mods.ModOldNightCore
 import com.rian.osu.mods.ModPrecise
+import com.rian.osu.mods.ModReplayV6
 import org.junit.Assert
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -19,33 +20,45 @@ import org.robolectric.RobolectricTestRunner
 @RunWith(RobolectricTestRunner::class)
 class ModUtilsTest {
     @Test
-    fun `Test mod serialization`() {
-        val serializedMods = ModUtils.serializeMods(
-            listOf(
-                ModAuto(),
-                ModCustomSpeed(1.25f),
-                ModHidden()
+    fun `Test mod serialization with non-user playable mods`() {
+        ModUtils.serializeMods(listOf(ModAutoplay(), ModCustomSpeed(1.25f), ModHidden(), ModReplayV6())).apply {
+            Assert.assertEquals(length(), 4)
+            Assert.assertEquals(getJSONObject(0).getString("acronym"), "AT")
+            Assert.assertEquals(getJSONObject(1).getString("acronym"), "CS")
+
+            Assert.assertEquals(
+                getJSONObject(1).getJSONObject("settings").getDouble("rateMultiplier").toFloat(),
+                1.25f,
+                0.01f
             )
-        )
 
-        Assert.assertEquals(serializedMods.length(), 3)
-        Assert.assertEquals(serializedMods.getJSONObject(0).getString("acronym"), "AT")
-        Assert.assertEquals(serializedMods.getJSONObject(1).getString("acronym"), "CS")
+            Assert.assertEquals(getJSONObject(2).getString("acronym"), "HD")
+            Assert.assertEquals(getJSONObject(3).getString("acronym"), "RV6")
+        }
+    }
 
-        Assert.assertEquals(
-            serializedMods.getJSONObject(1).getJSONObject("settings").getDouble("rateMultiplier").toFloat(),
-            1.25f,
-            0.01f
-        )
+    @Test
+    fun `Test mod serialization without non-user playable mods`() {
+        ModUtils.serializeMods(listOf(ModAutoplay(), ModCustomSpeed(1.25f), ModHidden(), ModReplayV6()), false).apply {
+            Assert.assertEquals(length(), 3)
+            Assert.assertEquals(getJSONObject(0).getString("acronym"), "AT")
+            Assert.assertEquals(getJSONObject(1).getString("acronym"), "CS")
 
-        Assert.assertEquals(serializedMods.getJSONObject(2).getString("acronym"), "HD")
+            Assert.assertEquals(
+                getJSONObject(1).getJSONObject("settings").getDouble("rateMultiplier").toFloat(),
+                1.25f,
+                0.01f
+            )
+
+            Assert.assertEquals(getJSONObject(2).getString("acronym"), "HD")
+        }
     }
 
     @Test
     fun `Test mod deserialization`() {
         val serializedMods = ModUtils.serializeMods(
             listOf(
-                ModAuto(),
+                ModAutoplay(),
                 ModCustomSpeed(1.25f),
                 ModHidden()
             )
@@ -54,7 +67,7 @@ class ModUtilsTest {
         val deserializedMods = ModUtils.deserializeMods(serializedMods)
 
         Assert.assertEquals(deserializedMods.size, 3)
-        Assert.assertTrue(ModAuto::class in deserializedMods)
+        Assert.assertTrue(ModAutoplay::class in deserializedMods)
         Assert.assertTrue(ModCustomSpeed::class in deserializedMods)
         Assert.assertTrue(ModHidden::class in deserializedMods)
 
@@ -87,7 +100,7 @@ class ModUtilsTest {
             Assert.assertEquals(original.hp, expected.hp, 1e-2f)
         }
 
-        test(BeatmapDifficulty(cs = 5f), BeatmapDifficulty(cs = 5f), GameMode.Standard, ModAuto())
+        test(BeatmapDifficulty(cs = 5f), BeatmapDifficulty(cs = 5f), GameMode.Standard, ModAutoplay())
 
         test(
             BeatmapDifficulty(ar = 9f),

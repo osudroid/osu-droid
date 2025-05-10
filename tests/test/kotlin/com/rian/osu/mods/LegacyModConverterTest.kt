@@ -59,6 +59,15 @@ class LegacyModConverterTest {
     }
 
     @Test
+    fun `Test mod string with only extra mod string`() {
+        LegacyModConverter.convert("|x1.25").apply {
+            Assert.assertEquals(size, 1)
+            Assert.assertTrue(ModCustomSpeed::class in this)
+            Assert.assertEquals(ofType<ModCustomSpeed>()!!.trackRateMultiplier, 1.25f, 0f)
+        }
+    }
+
+    @Test
     fun `Test mod string conversion without migration`() {
         val map = LegacyModConverter.convert("rhdm")
 

@@ -2,10 +2,15 @@ package com.reco1l.andengine
 
 import android.util.*
 import android.view.*
+import com.osudroid.BuildSettings
+import com.osudroid.debug.EntityInspector
 import com.reco1l.andengine.modifier.*
+import com.reco1l.andengine.shape.*
+import com.reco1l.andengine.ui.*
 import com.reco1l.framework.*
 import com.reco1l.framework.math.*
 import com.reco1l.toolkt.kotlin.*
+import org.anddev.andengine.collision.*
 import org.anddev.andengine.engine.camera.*
 import org.anddev.andengine.entity.*
 import org.anddev.andengine.entity.scene.*
@@ -13,7 +18,9 @@ import org.anddev.andengine.entity.scene.Scene.*
 import org.anddev.andengine.input.touch.*
 import org.anddev.andengine.opengl.util.*
 import org.anddev.andengine.util.*
+import org.anddev.andengine.util.constants.Constants.*
 import javax.microedition.khronos.opengles.*
+import kotlin.math.*
 
 
 /**
@@ -21,7 +28,7 @@ import javax.microedition.khronos.opengles.*
  * @author Reco1l
  */
 @Suppress("MemberVisibilityCanBePrivate")
-abstract class ExtendedEntity : Entity(0f, 0f), ITouchArea, IModifierChain {
+abstract class ExtendedEntity : Entity(0f, 0f), ITouchArea, IModifierChain, IThemeable {
 
     //region Axes properties
 
@@ -55,13 +62,29 @@ abstract class ExtendedEntity : Entity(0f, 0f), ITouchArea, IModifierChain {
 
     //region Size related properties
 
+    private fun isReservedSizeValue(value: Float): Boolean {
+        return value == MatchContent
+            || value == FillParent
+            || value == FitParent
+    }
+
+    private fun handleReservedSizeValue(value: Float, contentSize: Float, padding: Float, parentInnerSize: Float, position: Float): Float {
+        return when (value) {
+            MatchContent -> contentSize + padding
+            FillParent -> parentInnerSize - position
+            FitParent -> min(contentSize + padding, parentInnerSize - position)
+            else -> value
+        }
+    }
+
+
     /**
      * The width of the entity.
      */
     var width: Float = 0f
-        get() = when (field) {
-            FitContent -> contentWidth + padding.horizontal
-            FitParent -> parent.innerWidth
+        get() = when {
+            isReservedSizeValue(field) -> handleReservedSizeValue(field, contentWidth, padding.horizontal, parent.innerWidth, x)
+
             else -> if (relativeSizeAxes.isHorizontal) {
                 field * parent.innerWidth
             } else {
@@ -79,9 +102,9 @@ abstract class ExtendedEntity : Entity(0f, 0f), ITouchArea, IModifierChain {
      * The height of the entity.
      */
     var height = 0f
-        get() = when (field) {
-            FitContent -> contentHeight + padding.vertical
-            FitParent -> parent.innerHeight
+        get() = when {
+            isReservedSizeValue(field) -> handleReservedSizeValue(field, contentHeight, padding.vertical, parent.innerHeight, y)
+
             else -> if (relativeSizeAxes.isVertical) {
                 field * parent.innerHeight
             } else {
@@ -102,7 +125,7 @@ abstract class ExtendedEntity : Entity(0f, 0f), ITouchArea, IModifierChain {
         protected set(value) {
             if (field != value) {
                 field = value
-                invalidate(InvalidationFlag.ContentSize)
+                invalidate(InvalidationFlag.Size)
             }
         }
 
@@ -113,7 +136,7 @@ abstract class ExtendedEntity : Entity(0f, 0f), ITouchArea, IModifierChain {
         protected set(value) {
             if (field != value) {
                 field = value
-                invalidate(InvalidationFlag.ContentSize)
+                invalidate(InvalidationFlag.Size)
             }
         }
 
@@ -124,7 +147,7 @@ abstract class ExtendedEntity : Entity(0f, 0f), ITouchArea, IModifierChain {
         set(value) {
             if (field != value) {
                 field = value
-                invalidate(InvalidationFlag.ContentSize)
+                invalidate(InvalidationFlag.Size)
             }
         }
 
@@ -211,6 +234,8 @@ abstract class ExtendedEntity : Entity(0f, 0f), ITouchArea, IModifierChain {
 
     //region Cosmetic properties
 
+    override var applyTheme: ExtendedEntity.(theme: Theme) -> Unit = {}
+
     /**
      * The background entity. This entity will be drawn before the entity children and will not be
      * affected by padding.
@@ -225,6 +250,7 @@ abstract class ExtendedEntity : Entity(0f, 0f), ITouchArea, IModifierChain {
                 field?.decoratedEntity = null
                 field = value
                 field?.decoratedEntity = this
+                field?.onThemeChanged(Theme.current)
             }
         }
 
@@ -242,6 +268,7 @@ abstract class ExtendedEntity : Entity(0f, 0f), ITouchArea, IModifierChain {
                 field?.decoratedEntity = null
                 field = value
                 field?.decoratedEntity = this
+                field?.onThemeChanged(Theme.current)
             }
         }
 
@@ -258,9 +285,14 @@ abstract class ExtendedEntity : Entity(0f, 0f), ITouchArea, IModifierChain {
         }
 
     /**
+     * Whether the entity's color should be multiplied by the color of its ancestor entities.
+     */
+    open var inheritAncestorsColor = true
+
+    /**
      * Whether the entity should clip its children.
      */
-    open var clipChildren = false
+    open var clipToBounds = false
 
     //endregion
 
@@ -305,6 +337,11 @@ abstract class ExtendedEntity : Entity(0f, 0f), ITouchArea, IModifierChain {
 
     //region Attachment
 
+    /**
+     * Called when the content of the entity has changed. This usually is called when a child is added or removed.
+     */
+    protected open fun onContentChanged() {}
+
     override fun setParent(newParent: IEntity?) {
         when (val parent = parent) {
             is Scene -> parent.unregisterTouchArea(this)
@@ -326,6 +363,17 @@ abstract class ExtendedEntity : Entity(0f, 0f), ITouchArea, IModifierChain {
      * Called when a child is detached from this entity.
      */
     open fun onChildDetached(child: IEntity) {}
+
+    override fun setVisible(value: Boolean) {
+        if (mVisible != value) {
+            mVisible = value
+            invalidate(InvalidationFlag.Size)
+        }
+    }
+
+    override fun onAttached() {
+        onThemeChanged(Theme.current)
+    }
 
     //endregion
 
@@ -431,11 +479,12 @@ abstract class ExtendedEntity : Entity(0f, 0f), ITouchArea, IModifierChain {
         var blue = mBlue
         var alpha = mAlpha
         var parent = parent ?: decoratedEntity
+        var multiplyColor = inheritAncestorsColor
 
         while (parent != null) {
 
             // If this entity is a decoration we only multiply the alpha.
-            if (decoratedEntity == null) {
+            if (decoratedEntity == null && multiplyColor) {
                 red *= parent.red
                 green *= parent.green
                 blue *= parent.blue
@@ -447,49 +496,53 @@ abstract class ExtendedEntity : Entity(0f, 0f), ITouchArea, IModifierChain {
                 break
             }
 
+            if (parent is ExtendedEntity && !parent.inheritAncestorsColor) {
+                multiplyColor = false
+            }
+
             parent = parent.parent
         }
 
         GLHelper.setColor(gl, red, green, blue, alpha)
     }
 
-    override fun onDrawChildren(gl: GL10, camera: Camera) {
+    override fun onDraw(gl: GL10, camera: Camera) {
 
-        if (mChildren == null || !mChildrenVisible) {
+        if (!isVisible) {
+            // We're going to still handle invalidations flags even if the entity is not visible
+            // because some of them like size-related flags might change the parent's layout.
+            handleInvalidation(true)
             return
         }
 
-        if (clipChildren) {
+        if (clipToBounds) {
+            val wasScissorTestEnabled = GLHelper.isEnableScissorTest()
             GLHelper.enableScissorTest(gl)
 
+            // Entity coordinates in screen's space.
             val (topLeftX, topLeftY) = camera.getScreenSpaceCoordinates(convertLocalToSceneCoordinates(0f, 0f))
             val (topRightX, topRightY) = camera.getScreenSpaceCoordinates(convertLocalToSceneCoordinates(width, 0f))
             val (bottomRightX, bottomRightY) = camera.getScreenSpaceCoordinates(convertLocalToSceneCoordinates(width, height))
             val (bottomLeftX, bottomLeftY) = camera.getScreenSpaceCoordinates(convertLocalToSceneCoordinates(0f, height))
 
-            val minClippingX = minOf(topLeftX, bottomLeftX, bottomRightX, topRightX)
-            val minClippingY = minOf(topLeftY, bottomLeftY, bottomRightY, topRightY)
+            val minX = minOf(topLeftX, bottomLeftX, bottomRightX, topRightX)
+            val minY = minOf(topLeftY, bottomLeftY, bottomRightY, topRightY)
+            val maxX = maxOf(topLeftX, bottomLeftX, bottomRightX, topRightX)
+            val maxY = maxOf(topLeftY, bottomLeftY, bottomRightY, topRightY)
 
-            val maxClippingX = maxOf(topLeftX, bottomLeftX, bottomRightX, topRightX)
-            val maxClippingY = maxOf(topLeftY, bottomLeftY, bottomRightY, topRightY)
+            ScissorStack.pushScissor(minX, minY, maxX - minX, maxY - minY)
+            onManagedDraw(gl, camera)
+            ScissorStack.pop()
 
-            gl.glScissor(
-                minClippingX.toInt(),
-                minClippingY.toInt(),
-                (maxClippingX - minClippingX).toInt(),
-                (maxClippingY - minClippingY).toInt()
-            )
-        }
-
-        super.onDrawChildren(gl, camera)
-
-        if (clipChildren) {
-            GLHelper.disableScissorTest(gl)
+            if (!wasScissorTestEnabled) {
+                GLHelper.disableScissorTest(gl)
+            }
+        } else {
+            onManagedDraw(gl, camera)
         }
     }
 
-    override fun onManagedDraw(gl: GL10, camera: Camera) {
-
+    fun handleInvalidation(handleRecursively: Boolean) {
         val invalidationFlags = invalidationFlags
 
         if (invalidationFlags != 0) {
@@ -500,14 +553,17 @@ abstract class ExtendedEntity : Entity(0f, 0f), ITouchArea, IModifierChain {
                 onPositionChanged()
             }
 
-            if (invalidationFlags and InvalidationFlag.Size != 0 || invalidationFlags and InvalidationFlag.ContentSize != 0) {
+            if (invalidationFlags and InvalidationFlag.Content != 0) {
+                onContentChanged()
+            }
+
+            if (invalidationFlags and InvalidationFlag.Size != 0) {
                 onSizeChanged()
             }
 
             if (invalidationFlags and InvalidationFlag.Transformations != 0
                 || invalidationFlags and InvalidationFlag.Position != 0
-                || invalidationFlags and InvalidationFlag.Size != 0
-                || invalidationFlags and InvalidationFlag.ContentSize != 0) {
+                || invalidationFlags and InvalidationFlag.Size != 0) {
                 onInvalidateTransformations()
                 recursiveInvalidationFlags = InvalidationFlag.Transformations
             }
@@ -529,8 +585,20 @@ abstract class ExtendedEntity : Entity(0f, 0f), ITouchArea, IModifierChain {
             }
         }
 
-        gl.glPushMatrix()
+        if (handleRecursively) {
+            mChildren?.fastForEach { child ->
+                if (child is ExtendedEntity) {
+                    child.handleInvalidation(true)
+                }
+            }
+        }
+    }
 
+    override fun onManagedDraw(gl: GL10, camera: Camera) {
+
+        handleInvalidation(false)
+
+        gl.glPushMatrix()
         onApplyTransformations(gl, camera)
 
         background?.setSize(width, height)
@@ -541,6 +609,14 @@ abstract class ExtendedEntity : Entity(0f, 0f), ITouchArea, IModifierChain {
 
         foreground?.setSize(width, height)
         foreground?.onDraw(gl, camera)
+
+
+        if ((BuildSettings.SHOW_ENTITY_BOUNDARIES || EntityInspector.SELECTED_ENTITY == this) && DEBUG_FOREGROUND != this) {
+            DEBUG_FOREGROUND.color = if (EntityInspector.SELECTED_ENTITY == this) ColorARGB(0xFF00FF00) else ColorARGB.White
+            DEBUG_FOREGROUND.lineWidth = if (EntityInspector.SELECTED_ENTITY == this) 3f else 1f
+            DEBUG_FOREGROUND.setSize(width, height)
+            DEBUG_FOREGROUND.onDraw(gl, camera)
+        }
 
         gl.glPopMatrix()
     }
@@ -579,7 +655,25 @@ abstract class ExtendedEntity : Entity(0f, 0f), ITouchArea, IModifierChain {
             return false
         }
 
-        return EntityCollisionChecker.contains(this, x, y, parent is Scene)
+        VERTICES_WRAPPER[0 + VERTEX_INDEX_X] = 0f
+        VERTICES_WRAPPER[0 + VERTEX_INDEX_Y] = 0f
+
+        VERTICES_WRAPPER[2 + VERTEX_INDEX_X] = width
+        VERTICES_WRAPPER[2 + VERTEX_INDEX_Y] = 0f
+
+        VERTICES_WRAPPER[4 + VERTEX_INDEX_X] = width
+        VERTICES_WRAPPER[4 + VERTEX_INDEX_Y] = height
+
+        VERTICES_WRAPPER[6 + VERTEX_INDEX_X] = 0f
+        VERTICES_WRAPPER[6 + VERTEX_INDEX_Y] = height
+
+        if (parent is Scene) {
+            localToSceneTransformation.transform(VERTICES_WRAPPER)
+        } else {
+            localToParentTransformation.transform(VERTICES_WRAPPER)
+        }
+
+        return ShapeCollisionChecker.checkContains(VERTICES_WRAPPER, VERTICES_WRAPPER.size, x, y)
     }
 
     //endregion
@@ -750,6 +844,13 @@ abstract class ExtendedEntity : Entity(0f, 0f), ITouchArea, IModifierChain {
         inputBindings.fill(null)
     }
 
+    /**
+     * Called when a key is pressed.
+     */
+    open fun onKeyPress(keyCode: Int, event: KeyEvent): Boolean {
+        return false
+    }
+
     override fun onAreaTouched(event: TouchEvent, localX: Float, localY: Float): Boolean {
 
         val inputBinding = inputBindings.getOrNull(event.pointerID)
@@ -784,20 +885,45 @@ abstract class ExtendedEntity : Entity(0f, 0f), ITouchArea, IModifierChain {
 
     //endregion
 
+    //region Cosmetic functions
+
+    open fun onThemeChanged(theme: Theme) {
+        background?.onThemeChanged(theme)
+        foreground?.onThemeChanged(theme)
+
+        applyTheme(theme)
+    }
+
+    //endregion
+
 
     @Suppress("ConstPropertyName")
     companion object {
 
         /**
-         * The width and height of the entity will be set to the content size.
+         * The width and height of the entity will match the content size without any constraints.
          */
-        const val FitContent = -1f
+        const val MatchContent = -1f
 
         /**
-         * The width and height of the entity will be set to the parent's size.
+         * The width and height of the entity will match the parent's inner size.
          */
-        const val FitParent = -2f
+        const val FillParent = -2f
 
+        /**
+         * The width and height of the entity will match the content size but will be constrained to the parent's inner size.
+         */
+        const val FitParent = -3f
+
+
+        private val VERTICES_WRAPPER = FloatArray(8)
+
+        private val DEBUG_FOREGROUND by lazy {
+            Box().apply {
+                paintStyle = PaintStyle.Outline
+                color = ColorARGB.White
+            }
+        }
     }
 
 }

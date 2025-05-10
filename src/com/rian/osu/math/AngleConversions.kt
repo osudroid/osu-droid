@@ -2,41 +2,41 @@
 package com.rian.osu.math
 
 /**
- * Converts a value from degrees to radians.
+ * Converts this [Double] from degrees to radians.
  */
 fun Double.toRadians() = this * Math.PI / 180
 
 /**
- * Converts a value from radians to degrees.
+ * Converts this [Float] from degrees to radians.
  */
 fun Float.toRadians() = this * Math.PI.toFloat() / 180
 
 /**
- * Converts a value from degrees to radians.
+ * Converts this [Long] from degrees to radians.
  */
 fun Long.toRadians() = this.toDouble().toRadians()
 
 /**
- * Converts a value from degrees to radians.
+ * Converts this [Int] from degrees to radians.
  */
 fun Int.toRadians() = this.toFloat().toRadians()
 
 /**
- * Converts a value from radians to degrees.
+ * Converts this [Double] from radians to degrees.
  */
 fun Double.toDegrees() = this * 180 / Math.PI
 
 /**
- * Converts a value from degrees to radians.
+ * Converts this [Float] from radians to degrees.
  */
 fun Float.toDegrees() = this * 180 / Math.PI.toFloat()
 
 /**
- * Converts a value from degrees to radians.
+ * Converts this [Long] from radians to degrees.
  */
 fun Long.toDegrees() = this.toDouble().toDegrees()
 
 /**
- * Converts a value from degrees to radians.
+ * Converts this [Int] from radians to degrees.
  */
 fun Int.toDegrees() = this.toFloat().toDegrees()

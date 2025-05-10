@@ -17,7 +17,7 @@ import android.util.Log;
 import android.util.TypedValue;
 import android.widget.TextView;
 
-import com.reco1l.osu.multiplayer.Multiplayer;
+import com.osudroid.multiplayer.Multiplayer;
 import org.apache.http.HttpException;
 import org.json.JSONException;
 import org.json.JSONObject;

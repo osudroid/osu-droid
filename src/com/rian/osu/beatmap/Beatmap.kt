@@ -6,9 +6,11 @@ import com.rian.osu.beatmap.hitobject.Slider
 import com.rian.osu.beatmap.sections.*
 import com.rian.osu.mods.IModApplicableToBeatmap
 import com.rian.osu.mods.IModApplicableToDifficulty
-import com.rian.osu.mods.IModApplicableToDifficultyWithSettings
+import com.rian.osu.mods.IModApplicableToDifficultyWithMods
 import com.rian.osu.mods.IModApplicableToHitObject
-import com.rian.osu.mods.IModApplicableToHitObjectWithSettings
+import com.rian.osu.mods.IModApplicableToHitObjectWithMods
+import com.rian.osu.mods.IModFacilitatesAdjustment
+import com.rian.osu.mods.IModRequiresOriginalBeatmap
 import com.rian.osu.mods.Mod
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.ensureActive
@@ -74,6 +76,16 @@ open class Beatmap(
             return this
         }
 
+
+        @Suppress("UNCHECKED_CAST")
+        val adjustmentMods =
+            (mods?.filter { it is IModFacilitatesAdjustment } ?: emptyList()) as Iterable<IModFacilitatesAdjustment>
+
+        mods?.filterIsInstance<IModRequiresOriginalBeatmap>()?.forEach {
+            scope?.ensureActive()
+            it.applyFromBeatmap(this)
+        }
+
         val converter = BeatmapConverter(this, scope)
 
         // Convert
@@ -82,10 +94,10 @@ open class Beatmap(
         // Apply difficulty mods
         mods?.filterIsInstance<IModApplicableToDifficulty>()?.forEach {
             scope?.ensureActive()
-            it.applyToDifficulty(mode, converted.difficulty)
+            it.applyToDifficulty(mode, converted.difficulty, adjustmentMods)
         }
 
-        mods?.filterIsInstance<IModApplicableToDifficultyWithSettings>()?.forEach {
+        mods?.filterIsInstance<IModApplicableToDifficultyWithMods>()?.forEach {
             scope?.ensureActive()
             it.applyToDifficulty(mode, converted.difficulty, mods)
         }
@@ -103,11 +115,11 @@ open class Beatmap(
         mods?.filterIsInstance<IModApplicableToHitObject>()?.forEach {
             for (obj in converted.hitObjects.objects) {
                 scope?.ensureActive()
-                it.applyToHitObject(mode, obj)
+                it.applyToHitObject(mode, obj, adjustmentMods)
             }
         }
 
-        mods?.filterIsInstance<IModApplicableToHitObjectWithSettings>()?.forEach {
+        mods?.filterIsInstance<IModApplicableToHitObjectWithMods>()?.forEach {
             for (obj in converted.hitObjects.objects) {
                 scope?.ensureActive()
                 it.applyToHitObject(mode, obj, mods)
@@ -118,7 +130,7 @@ open class Beatmap(
 
         mods?.filterIsInstance<IModApplicableToBeatmap>()?.forEach {
             scope?.ensureActive()
-            it.applyToBeatmap(converted)
+            it.applyToBeatmap(converted, scope)
         }
 
         return converted

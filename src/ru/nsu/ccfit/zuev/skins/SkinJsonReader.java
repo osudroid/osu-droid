@@ -3,7 +3,7 @@ package ru.nsu.ccfit.zuev.skins;
 import androidx.annotation.NonNull;
 
 import com.edlplan.framework.utils.interfaces.Consumer;
-import com.reco1l.osu.hud.HUDSkinData;
+import com.osudroid.ui.v2.hud.HUDSkinData;
 
 import org.jetbrains.annotations.Nullable;
 import org.json.JSONArray;

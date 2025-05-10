@@ -17,6 +17,7 @@ public class GameHelper {
     private static float healthDrain = 0;
     private static float speedMultiplier = 0;
     private static boolean hidden = false;
+    private static boolean hiddenOnlyFadeApproachCircles = false;
     private static boolean traceable = false;
     private static boolean flashLight = false;
     private static boolean hardrock = false;
@@ -27,6 +28,7 @@ public class GameHelper {
     private static boolean autopilotMod = false;
     private static boolean suddenDeath = false;
     private static boolean perfect = false;
+    private static boolean synesthesia = false;
     private static boolean scoreV2;
     private static boolean isEasy;
     private static boolean isKiai = false;
@@ -170,6 +172,14 @@ public class GameHelper {
         GameHelper.hidden = hidden;
     }
 
+    public static boolean isHiddenOnlyFadeApproachCircles() {
+        return hiddenOnlyFadeApproachCircles;
+    }
+
+    public static void setHiddenOnlyFadeApproachCircles(boolean hiddenOnlyFadeApproachCircles) {
+        GameHelper.hiddenOnlyFadeApproachCircles = hiddenOnlyFadeApproachCircles;
+    }
+
     public static boolean isTraceable() {
         return traceable;
     }
@@ -224,6 +234,14 @@ public class GameHelper {
 
     public static void setPerfect(final boolean perfect) {
         GameHelper.perfect = perfect;
+    }
+
+    public static boolean isSynesthesia() {
+        return synesthesia;
+    }
+
+    public static void setSynesthesia(boolean synesthesia) {
+        GameHelper.synesthesia = synesthesia;
     }
 
     public static boolean isScoreV2() {

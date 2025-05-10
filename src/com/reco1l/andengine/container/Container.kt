@@ -6,53 +6,29 @@ import kotlin.math.*
 
 open class Container : ExtendedEntity() {
 
-    /**
-     * Whether the size of the container should be measured.
-     */
-    protected var shouldMeasureSize = true
-
-
     init {
-        width = FitContent
-        height = FitContent
-    }
-
-
-    override fun onManagedUpdate(deltaTimeSec: Float) {
-
-        if (shouldMeasureSize) {
-            shouldMeasureSize = false
-            onMeasureContentSize()
-        }
-
-        super.onManagedUpdate(deltaTimeSec)
+        width = MatchContent
+        height = MatchContent
     }
 
 
     override fun onChildDetached(child: IEntity) {
-        shouldMeasureSize = true
+        invalidate(InvalidationFlag.Content)
     }
 
     override fun onChildAttached(child: IEntity) {
-        shouldMeasureSize = true
+        invalidate(InvalidationFlag.Content)
     }
 
     override fun onChildPositionChanged(child: IEntity) {
-        shouldMeasureSize = true
+        invalidate(InvalidationFlag.Content)
     }
 
     override fun onChildSizeChanged(child: IEntity) {
-        shouldMeasureSize = true
+        invalidate(InvalidationFlag.Content)
     }
 
-    /**
-     * Called when the size of the container should be calculated.
-     *
-     * The default implementation of this method will take the farthest child's
-     * position and size as the width and height respectively.
-     */
-    protected open fun onMeasureContentSize() {
-
+    override fun onContentChanged() {
         var right = 0f
         var bottom = 0f
 
@@ -71,25 +47,41 @@ open class Container : ExtendedEntity() {
 
         contentWidth = right
         contentHeight = bottom
-        invalidate(InvalidationFlag.ContentSize)
     }
 
+
+    //region Operators
+
+    inline fun <reified T : IEntity>firstOf(): T? {
+        return findChild { it is T } as? T
+    }
+
+    operator fun ExtendedEntity.unaryPlus() {
+        this@Container.attachChild(this@unaryPlus)
+    }
+
+    operator fun ExtendedEntity.unaryMinus() {
+        this@Container.detachChild(this@unaryMinus)
+    }
+
+    operator fun <T : IEntity> get(index: Int): T? {
+        @Suppress("UNCHECKED_CAST")
+        return getChild(index) as? T
+    }
+
+    operator fun set(index: Int, entity: IEntity) {
+        attachChild(entity, index)
+    }
+
+    operator fun plusAssign(entity: IEntity) {
+        attachChild(entity)
+    }
+
+    operator fun minusAssign(entity: IEntity) {
+        detachChild(entity)
+    }
+
+    //endregion
 }
 
 
-operator fun <T : IEntity> Container.get(index: Int): T {
-    @Suppress("UNCHECKED_CAST")
-    return getChild(index) as T
-}
-
-operator fun Container.set(index: Int, entity: IEntity) {
-    attachChild(entity, index)
-}
-
-operator fun Container.plusAssign(entity: IEntity) {
-    attachChild(entity)
-}
-
-operator fun Container.minusAssign(entity: IEntity) {
-    detachChild(entity)
-}

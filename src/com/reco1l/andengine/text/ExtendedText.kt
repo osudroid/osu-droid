@@ -3,16 +3,20 @@ package com.reco1l.andengine.text
 import com.reco1l.andengine.*
 import com.reco1l.andengine.buffered.*
 import com.reco1l.andengine.buffered.VertexBuffer
+import com.reco1l.andengine.container.*
 import com.reco1l.toolkt.kotlin.*
+import org.anddev.andengine.engine.camera.*
 import org.anddev.andengine.opengl.font.*
+import ru.nsu.ccfit.zuev.osu.*
 import javax.microedition.khronos.opengles.*
 import javax.microedition.khronos.opengles.GL10.*
 import javax.microedition.khronos.opengles.GL11.GL_STATIC_DRAW
+import kotlin.math.*
 
 /**
  * A text entity that can be displayed on the screen.
  */
-open class ExtendedText : CompoundBufferedEntity() {
+open class ExtendedText : BufferedEntity<CompoundBuffer>() {
 
     /**
      * The text to be displayed
@@ -22,11 +26,15 @@ open class ExtendedText : CompoundBufferedEntity() {
             if (field != value) {
                 field = value
 
-                if (value.length > currentLength) {
-                    currentLength = value.length
-                    rebuildBuffer()
+                val previousLength = currentLength
+                currentLength = value.length
+
+                if (currentLength > previousLength) {
+                    invalidateBuffer(BufferInvalidationFlag.Instance)
+                } else {
+                    invalidateBuffer(BufferInvalidationFlag.Data)
                 }
-                invalidateBuffer()
+
             }
         }
 
@@ -38,7 +46,7 @@ open class ExtendedText : CompoundBufferedEntity() {
         set(value) {
             if (field != value) {
                 field = value
-                invalidateBuffer()
+                invalidateBuffer(BufferInvalidationFlag.Data)
             }
         }
 
@@ -49,25 +57,51 @@ open class ExtendedText : CompoundBufferedEntity() {
         set(value) {
             if (field != value) {
                 field = value
-                invalidateBuffer()
+                invalidateBuffer(BufferInvalidationFlag.Data)
             }
         }
+
+    /**
+     * Which axes to scroll the text automatically when it overflows.
+     */
+    var autoScrollAxes = Axes.X
+
+    /**
+     * The speed of the auto scroll animation in pixels per second.
+     */
+    var autoScrollSpeed = 15f
+
+    /**
+     * The time to wait before re-starting the auto scroll animation in seconds
+     */
+    var autoScrollTimeout = 3f
 
 
     private var currentLength = 0
 
+    private var scrollX = 0f
+    private var scrollY = 0f
+    private var scrollXTimeoutElapsed = 0f
+    private var scrollYTimeoutElapsed = 0f
+
 
     init {
-        width = FitContent
-        height = FitContent
+        width = MatchContent
+        height = MatchContent
     }
 
 
-    override fun onRebuildBuffer(gl: GL10) {
-        super.onRebuildBuffer(gl)
+    override fun onCreateBuffer(gl: GL10): CompoundBuffer {
+        val currentLength = currentLength
+        val currentBuffer = buffer?.getFirstOf<TextVertexBuffer>()
 
-        addBuffer(TextTextureBuffer())
-        addBuffer(TextVertexBuffer())
+        if (currentBuffer == null || currentLength > currentBuffer.length) {
+            return CompoundBuffer(
+                TextTextureBuffer(currentLength),
+                TextVertexBuffer(currentLength)
+            )
+        }
+        return buffer!!
     }
 
     override fun onUpdateBuffer(gl: GL10, vararg data: Any) {
@@ -76,7 +110,7 @@ open class ExtendedText : CompoundBufferedEntity() {
         val font = font ?: return
 
         val lines = text.split('\n').toTypedArray()
-        val linesWidth = IntArray(lines.size) { font.getStringWidth(lines[it]) }
+        val linesWidth = IntArray(lines.size) { i -> lines[i].sumOf { char -> font.getLetter(char).mAdvance } }
 
         contentWidth = linesWidth.max().toFloat()
         contentHeight = (lines.size * font.lineHeight + (lines.size - 1) * font.lineGap).toFloat()
@@ -89,12 +123,67 @@ open class ExtendedText : CompoundBufferedEntity() {
         font?.texture?.bind(gl)
     }
 
+    override fun onApplyTransformations(gl: GL10, camera: Camera) {
+
+        val scrollTranslationX = if (autoScrollAxes.isHorizontal) scrollX else 0f
+        val scrollTranslationY = if (autoScrollAxes.isVertical) scrollY else 0f
+
+        if (scrollTranslationX != 0f || scrollTranslationY != 0f) {
+            gl.glTranslatef(-scrollTranslationX, -scrollTranslationY, 0f)
+        }
+
+        super.onApplyTransformations(gl, camera)
+    }
+
+
+    override fun onManagedUpdate(deltaTimeSec: Float) {
+
+        if (autoScrollAxes != Axes.None) {
+
+            fun processAutoScroll(currentScroll: Float, maxScroll: Float, currentTimeout: Float) : Pair<Float, Float> {
+
+                if (currentScroll == 0f && currentTimeout < autoScrollTimeout) {
+                    return currentScroll to currentTimeout + deltaTimeSec
+                }
+
+                if (currentScroll >= maxScroll) {
+                    if (currentTimeout > autoScrollTimeout) {
+                        return 0f to 0f
+                    }
+                    return currentScroll to currentTimeout + deltaTimeSec
+                }
+
+                return min(currentScroll + autoScrollSpeed * deltaTimeSec, maxScroll) to 0f
+            }
+
+            val maxScrollX = contentWidth - width
+
+            if (autoScrollAxes.isHorizontal && maxScrollX > 0) {
+                val (x, timeout) = processAutoScroll(scrollX, maxScrollX, scrollXTimeoutElapsed)
+
+                scrollX = x
+                scrollXTimeoutElapsed = timeout
+            }
+
+            val maxScrollY = contentHeight - height
+
+            if (autoScrollAxes.isVertical && maxScrollY > 0) {
+                val (y, timeout) = processAutoScroll(scrollY, maxScrollY, scrollYTimeoutElapsed)
+
+                scrollY = y
+                scrollYTimeoutElapsed = timeout
+            }
+        }
+
+        super.onManagedUpdate(deltaTimeSec)
+    }
+
 
     //region Buffers
 
-    inner class TextVertexBuffer : VertexBuffer(
+    inner class TextVertexBuffer(val length: Int) : VertexBuffer(
         drawTopology = GL_TRIANGLES,
-        vertexCount = VERTICES_PER_CHARACTER * currentLength,
+        vertexCount = VERTICES_PER_CHARACTER * length,
         vertexSize = VERTEX_2D,
         bufferUsage = GL_STATIC_DRAW
     ) {
@@ -135,11 +224,15 @@ open class ExtendedText : CompoundBufferedEntity() {
                 }
             }
         }
+
+        override fun draw(gl: GL10, entity: BufferedEntity<*>) {
+            gl.glDrawArrays(drawTopology, 0, VERTICES_PER_CHARACTER * min(currentLength, length))
+        }
     }
 
 
-    inner class TextTextureBuffer : TextureCoordinatesBuffer(
-        vertexCount = VERTICES_PER_CHARACTER * currentLength,
+    inner class TextTextureBuffer(length: Int) : TextureCoordinatesBuffer(
+        vertexCount = VERTICES_PER_CHARACTER * length,
         vertexSize = VERTEX_2D,
         bufferUsage = GL_STATIC_DRAW
     ) {
@@ -179,9 +272,95 @@ open class ExtendedText : CompoundBufferedEntity() {
 
 
     companion object {
-
         private const val VERTICES_PER_CHARACTER = 6
+    }
 
+}
+
+
+/**
+ * A compound text entity that can be displayed with leading and trailing icons.
+ */
+open class CompoundText : LinearContainer() {
+
+    /**
+     * The text entity.
+     */
+    val textEntity = ExtendedText().apply {
+        font = ResourceManager.getInstance().getFont("smallFont")
+        anchor = Anchor.CenterLeft
+        origin = Anchor.CenterLeft
+    }
+
+
+    //region Shortcuts
+
+    /**
+     * The text to be displayed.
+     */
+    var text by textEntity::text
+
+    /**
+     * The text font.
+     */
+    var font by textEntity::font
+
+    /**
+     * The text alignment.
+     */
+    var alignment by textEntity::alignment
+
+    //endregion
+
+    //region Icons
+
+    /**
+     * The leading icon.
+     */
+    var leadingIcon: ExtendedEntity? = null
+        set(value) {
+            if (field != value) {
+                field?.detachSelf()
+                field = value
+
+                if (value != null) {
+                    onIconChange(value)
+                    attachChild(value, 0)
+                }
+            }
+        }
+
+    /**
+     * The trailing icon.
+     */
+    var trailingIcon: ExtendedEntity? = null
+        set(value) {
+            if (field != value) {
+                field?.detachSelf()
+                field = value
+
+                if (value != null) {
+                    onIconChange(value)
+                    attachChild(value)
+                }
+            }
+        }
+
+    /**
+     * Called when one of the icons changes.
+     */
+    open var onIconChange: (ExtendedEntity) -> Unit = { icon ->
+        icon.width = 28f
+        icon.height = 28f
+        icon.anchor = Anchor.CenterLeft
+        icon.origin = Anchor.CenterLeft
+    }
+
+    //endregion
+
+
+    init {
+        +textEntity
     }
 
 }

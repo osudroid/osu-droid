@@ -88,7 +88,7 @@ object StandardFlashlightEvaluator {
         var sliderBonus = 0.0
         if (current.obj is Slider) {
             // Invert the scaling factor to determine the true travel distance independent of circle size.
-            val pixelTravelDistance = current.obj.lazyTravelDistance / scalingFactor
+            val pixelTravelDistance = current.lazyTravelDistance / scalingFactor
 
             // Reward sliders based on velocity.
             val minVelocity = 0.5

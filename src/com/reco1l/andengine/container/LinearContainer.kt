@@ -18,20 +18,21 @@ open class LinearContainer : Container() {
         set(value) {
             if (field != value) {
                 field = value
-                shouldMeasureSize = true
+                invalidate(InvalidationFlag.Content)
             }
         }
 
 
-    override fun onMeasureContentSize() {
+    override fun onContentChanged() {
 
         var right = 0f
         var bottom = 0f
 
         for (i in 0 until childCount) {
 
-            val child = getChild(i) ?: continue
-            if (child !is ExtendedEntity) {
+            val child = getChild(i) as? ExtendedEntity ?: continue
+
+            if (!child.isVisible) {
                 continue
             }
 
@@ -63,8 +64,6 @@ open class LinearContainer : Container() {
 
         contentWidth = right
         contentHeight = bottom
-
-        invalidate(InvalidationFlag.ContentSize)
     }
 }
 

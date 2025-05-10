@@ -1,5 +1,7 @@
 package ru.nsu.ccfit.zuev.osu.menu;
 
+import static com.osudroid.data.BeatmapsKt.BeatmapInfo;
+
 import android.animation.ValueAnimator;
 import android.annotation.SuppressLint;
 import android.app.Activity;
@@ -8,17 +10,18 @@ import com.edlplan.framework.easing.Easing;
 import com.edlplan.ui.fragment.SearchBarFragment;
 import com.edlplan.ui.fragment.BeatmapPropertiesFragment;
 import com.edlplan.ui.fragment.ScoreMenuFragment;
+import com.osudroid.utils.Execution;
 import com.reco1l.framework.EasingKt;
-import com.reco1l.ibancho.RoomAPI;
-import com.reco1l.osu.data.BeatmapInfo;
-import com.reco1l.osu.data.BeatmapSetInfo;
-import com.reco1l.osu.data.DatabaseManager;
-import com.reco1l.osu.Execution;
+import com.osudroid.multiplayer.api.RoomAPI;
+import com.osudroid.data.BeatmapInfo;
+import com.osudroid.data.BeatmapSetInfo;
+import com.osudroid.data.DatabaseManager;
 import com.reco1l.andengine.sprite.AnimatedSprite;
 import com.reco1l.andengine.sprite.ExtendedSprite;
-import com.reco1l.osu.multiplayer.Multiplayer;
-import com.reco1l.osu.multiplayer.RoomScene;
+import com.osudroid.multiplayer.Multiplayer;
+import com.osudroid.multiplayer.RoomScene;
 
+import com.osudroid.ui.v2.modmenu.ModMenu;
 import com.rian.osu.GameMode;
 import com.rian.osu.beatmap.DroidHitWindow;
 import com.rian.osu.beatmap.PreciseDroidHitWindow;
@@ -77,8 +80,6 @@ import ru.nsu.ccfit.zuev.osu.scoring.ScoringScene;
 import ru.nsu.ccfit.zuev.osu.scoring.StatisticV2;
 import ru.nsu.ccfit.zuev.skins.OsuSkin;
 import ru.nsu.ccfit.zuev.skins.SkinLayout;
-
-import static com.reco1l.osu.data.BeatmapsKt.BeatmapInfo;
 
 public class SongMenu implements IUpdateHandler, MenuItemListener,
         IScrollBarListener {
@@ -424,7 +425,7 @@ public class SongMenu implements IUpdateHandler, MenuItemListener,
                                 if (clickShortConfirmSound != null) {
                                     clickShortConfirmSound.play();
                                 }
-                                ModMenu.getInstance().show(scene, selectedBeatmap);
+                                ModMenu.INSTANCE.show();
                             }
                         }
                         return true;
@@ -691,8 +692,6 @@ public class SongMenu implements IUpdateHandler, MenuItemListener,
             scene.registerTouchArea(scoringSwitcher);
             frontLayer.attachChild(scoringSwitcher);
         }
-
-        ModMenu.getInstance().init();
     }
 
     public void loadFilterFragment() {
@@ -919,7 +918,7 @@ public class SongMenu implements IUpdateHandler, MenuItemListener,
             return;
         }
 
-        var mods = ModMenu.getInstance().getEnabledMods();
+        var mods = ModMenu.INSTANCE.getEnabledMods();
         boolean isPreciseMod = mods.contains(ModPrecise.class);
         float totalSpeedMultiplier = ModUtils.calculateRateWithMods(mods.values(), Double.POSITIVE_INFINITY);
 
@@ -1003,14 +1002,16 @@ public class SongMenu implements IUpdateHandler, MenuItemListener,
 
         beatmapLengthText.setText(binfoStr);
 
-        String dimensionString =
+        String str = beatmapDifficultyText.getText();
+        String[] strs = str.split("Stars: ");
+
+        beatmapDifficultyText.setText(
             "AR: " + difficulty.getAr() + " " +
             "OD: " + difficulty.od + " " +
             "CS: " + difficulty.difficultyCS + " " +
             "HP: " + difficulty.hp + " " +
-            "Stars: " + GameHelper.Round(beatmapInfo.getStarRating(), 2);
-
-        beatmapDifficultyText.setText(dimensionString);
+            "Stars: " + (strs.length == 2 ? strs[1] : GameHelper.Round(beatmapInfo.getStarRating(), 2))
+        );
     }
 
     public void reloadCurrentSelection() {
@@ -1038,6 +1039,7 @@ public class SongMenu implements IUpdateHandler, MenuItemListener,
         beatmapCreatorText.setText(mapperStr);
         beatmapHitObjectsText.setText(binfoStr2);
         changeDimensionInfo(beatmapInfo);
+        setStarsDisplay(beatmapInfo.getStarRating());
         cancelCalculationJobs();
 
         calculationJob = Execution.async(scope -> {
@@ -1061,25 +1063,14 @@ public class SongMenu implements IUpdateHandler, MenuItemListener,
                 changeDimensionInfo(beatmapInfo);
 
                 // Copy the mods to avoid concurrent modification
-                var mods = ModMenu.getInstance().getEnabledMods().deepCopy().values();
+                var mods = ModMenu.INSTANCE.getEnabledMods().deepCopy().values();
 
-                switch (Config.getDifficultyAlgorithm()) {
-                    case droid -> {
-                        var attributes = BeatmapDifficultyCalculator.calculateDroidDifficulty(
-                            data, mods, scope
-                        );
+                var attributes = switch (Config.getDifficultyAlgorithm()) {
+                    case droid -> BeatmapDifficultyCalculator.calculateDroidDifficulty(data, mods, scope);
+                    case standard -> BeatmapDifficultyCalculator.calculateStandardDifficulty(data, mods, scope);
+                };
 
-                        setStarsDisplay(GameHelper.Round(attributes.starRating, 2));
-                    }
-
-                    case standard -> {
-                        var attributes = BeatmapDifficultyCalculator.calculateStandardDifficulty(
-                            data, mods, scope
-                        );
-
-                        setStarsDisplay(GameHelper.Round(attributes.starRating, 2));
-                    }
-                }
+                setStarsDisplay(GameHelper.Round(attributes.starRating, 2));
             }
         });
     }
@@ -1113,13 +1104,13 @@ public class SongMenu implements IUpdateHandler, MenuItemListener,
             stopMusic();
 
             Execution.mainThread(() -> {
-                ModMenu.getInstance().hide();
+                ModMenu.INSTANCE.back();
                 if (searchBar != null) {
                     searchBar.dismiss();
                 }
             });
 
-            game.startGame(beatmapInfo, null, ModMenu.getInstance().getEnabledMods());
+            game.startGame(beatmapInfo, null, ModMenu.INSTANCE.getEnabledMods());
             return;
         }
         selectedBeatmap = beatmapInfo;
@@ -1441,9 +1432,9 @@ public class SongMenu implements IUpdateHandler, MenuItemListener,
             return;
         }
 
-        var modMenu = ModMenu.getInstance();
+        var modMenu = ModMenu.INSTANCE;
         float speed = ModUtils.calculateRateWithMods(modMenu.getEnabledMods().values(), Double.POSITIVE_INFINITY);
-        boolean adjustPitch = modMenu.isEnableNCWhenSpeedChange() || modMenu.getEnabledMods().contains(ModNightCore.class);
+        boolean adjustPitch = modMenu.getEnabledMods().contains(ModNightCore.class);
 
         songService.setSpeed(speed);
         songService.setAdjustPitch(adjustPitch);
@@ -1595,7 +1586,7 @@ public class SongMenu implements IUpdateHandler, MenuItemListener,
             calculationJob.cancel(new CancellationException("Difficulty calculation has been cancelled."));
         }
 
-        ModMenu.getInstance().cancelCalculationJob();
+        ModMenu.INSTANCE.cancelCalculationJob();
     }
 
     private void cancelMapStatusLoadingJob() {

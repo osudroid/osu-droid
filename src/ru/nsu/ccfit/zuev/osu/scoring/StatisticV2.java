@@ -6,10 +6,10 @@ import java.io.Serial;
 import java.io.Serializable;
 import java.util.Random;
 
-import com.reco1l.ibancho.data.RoomTeam;
-import com.reco1l.ibancho.data.WinCondition;
-import com.reco1l.osu.data.ScoreInfo;
-import com.reco1l.osu.multiplayer.Multiplayer;
+import com.osudroid.multiplayer.api.data.RoomTeam;
+import com.osudroid.multiplayer.api.data.WinCondition;
+import com.osudroid.data.ScoreInfo;
+import com.osudroid.multiplayer.Multiplayer;
 import com.rian.osu.beatmap.sections.BeatmapDifficulty;
 import com.rian.osu.mods.IMigratableMod;
 import com.rian.osu.mods.LegacyModConverter;
@@ -572,7 +572,7 @@ public class StatisticV2 implements Serializable {
             beatmapMD5,
             playerName,
             replayFilename,
-            mod.serializeMods().toString(),
+            mod.serializeMods(false).toString(),
             getTotalScoreWithMultiplier(),
             scoreMaxCombo,
             getMark(),

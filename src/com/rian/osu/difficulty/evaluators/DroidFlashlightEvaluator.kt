@@ -109,7 +109,7 @@ object DroidFlashlightEvaluator {
 
         if (current.obj is Slider && withSliders) {
             // Invert the scaling factor to determine the true travel distance independent of circle size.
-            val pixelTravelDistance = current.obj.lazyTravelDistance / scalingFactor
+            val pixelTravelDistance = current.lazyTravelDistance / scalingFactor
 
             // Reward sliders based on velocity.
             sliderBonus = max(0.0, pixelTravelDistance / current.travelTime - MIN_VELOCITY).pow(0.5)

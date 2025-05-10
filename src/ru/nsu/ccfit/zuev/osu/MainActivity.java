@@ -41,16 +41,19 @@ import androidx.preference.PreferenceManager;
 import com.edlplan.ui.ActivityOverlay;
 import com.google.firebase.analytics.FirebaseAnalytics;
 import com.google.firebase.crashlytics.FirebaseCrashlytics;
-import com.reco1l.ibancho.LobbyAPI;
-import com.reco1l.osu.AccessibilityDetector;
-import com.reco1l.osu.DifficultyCalculationManager;
-import com.reco1l.osu.data.BeatmapInfo;
-import com.reco1l.osu.Execution;
-import com.reco1l.osu.multiplayer.Multiplayer;
-import com.reco1l.osu.UpdateManager;
-import com.reco1l.osu.multiplayer.LobbyScene;
-import com.reco1l.osu.multiplayer.RoomScene;
+import com.osudroid.ui.v2.GameLoaderScene;
+import com.osudroid.utils.Execution;
+import com.reco1l.andengine.ExtendedEngine;
+import com.osudroid.multiplayer.api.LobbyAPI;
+import com.osudroid.utils.AccessibilityDetector;
+import com.osudroid.beatmaps.DifficultyCalculationManager;
+import com.osudroid.data.BeatmapInfo;
+import com.osudroid.multiplayer.Multiplayer;
+import com.osudroid.UpdateManager;
+import com.osudroid.multiplayer.LobbyScene;
+import com.osudroid.multiplayer.RoomScene;
 
+import com.osudroid.ui.v2.modmenu.ModMenu;
 import com.rian.osu.difficulty.BeatmapDifficultyCalculator;
 import net.lingala.zip4j.ZipFile;
 
@@ -83,7 +86,6 @@ import ru.nsu.ccfit.zuev.audio.serviceAudio.SongService;
 import ru.nsu.ccfit.zuev.osu.helper.FileUtils;
 import ru.nsu.ccfit.zuev.osu.helper.StringTable;
 import ru.nsu.ccfit.zuev.osu.menu.LoadingScreen;
-import ru.nsu.ccfit.zuev.osu.menu.ModMenu;
 import ru.nsu.ccfit.zuev.osu.menu.SplashScene;
 import ru.nsu.ccfit.zuev.osu.online.OnlineManager;
 import ru.nsu.ccfit.zuev.osuplus.BuildConfig;
@@ -137,12 +139,6 @@ public class MainActivity extends BaseGameActivity implements
             }
         }
 
-/*        final double screenSize = Math.sqrt(Utils.sqr(dm.widthPixels / dm.xdpi)
-                + Utils.sqr(dm.heightPixels / dm.ydpi));*/
-        double screenInches = Math.sqrt(Math.pow(dm.heightPixels, 2) + Math.pow(dm.widthPixels, 2)) / (dm.density * 160.0f);
-        Debug.i("screen inches: " + screenInches);
-        Config.setScaleMultiplier((float) ((11 - 5.2450170716245195) / 5));
-
         final PowerManager manager = (PowerManager) getSystemService(Context.POWER_SERVICE);
         wakeLock = manager.newWakeLock(PowerManager.SCREEN_DIM_WAKE_LOCK,
                 "osudroid:osu");
@@ -157,7 +153,7 @@ public class MainActivity extends BaseGameActivity implements
         opt.setNeedsSound(true);
         opt.getRenderOptions().disableExtensionVertexBufferObjects();
         opt.getTouchOptions().enableRunOnUpdateThread();
-        final Engine engine = new Engine(opt);
+        final Engine engine = new ExtendedEngine(this, opt);
 
         if (!MultiTouch.isSupported(this)) {
             // Warning player that they will have to single tap forever.
@@ -267,6 +263,8 @@ public class MainActivity extends BaseGameActivity implements
         ResourceManager.getInstance().loadHighQualityAsset("music_np", "music_np.png");
         ResourceManager.getInstance().loadHighQualityAsset("songselect-top", "songselect-top.png");
         ResourceManager.getInstance().loadHighQualityAsset("back-arrow", "back-arrow.png");
+        ResourceManager.getInstance().loadHighQualityAsset("reset", "reset.png");
+        ResourceManager.getInstance().loadHighQualityAsset("check", "check.png");
 
         File bg;
         if ((bg = new File(Config.getSkinPath() + "menu-background.png")).exists()
@@ -276,6 +274,7 @@ public class MainActivity extends BaseGameActivity implements
         // ResourceManager.getInstance().loadHighQualityAsset("exit", "exit.png");
         ResourceManager.getInstance().loadFont("font", null, 28, Color.WHITE);
         ResourceManager.getInstance().loadFont("smallFont", null, 21, Color.WHITE);
+        ResourceManager.getInstance().loadFont("xs", null, 16, Color.WHITE);
         ResourceManager.getInstance().loadStrokeFont("strokeFont", null, 36, Color.BLACK, Color.WHITE);
 
         ResourceManager.getInstance().loadSound("heartbeat", "sfx/heartbeat.ogg", false);
@@ -730,83 +729,89 @@ public class MainActivity extends BaseGameActivity implements
             return super.onKeyDown(keyCode, event);
         }
 
+        if (ExtendedEngine.getCurrent().onKeyPress(keyCode, event)) {
+            return true;
+        }
+
+        Scene scene = GlobalManager.getInstance().getEngine().getScene();
+
         if (event.getAction() == TouchEvent.ACTION_DOWN && keyCode == KeyEvent.KEYCODE_BACK && ActivityOverlay.onBackPress()) {
             return true;
         }
 
         var gameScene = GlobalManager.getInstance().getGameScene();
 
-        if (gameScene != null && (keyCode == KeyEvent.KEYCODE_BACK || keyCode == KeyEvent.KEYCODE_MENU)) {
-            if (gameScene.isLoading()) {
-                gameScene.cancelLoading();
-                return true;
+        if (gameScene != null && scene == gameScene.getScene() &&
+                (keyCode == KeyEvent.KEYCODE_BACK || keyCode == KeyEvent.KEYCODE_MENU)) {
+            if (gameScene.isPaused()) {
+                gameScene.resume();
+            } else {
+                gameScene.pause();
             }
-
-            if (GlobalManager.getInstance().getEngine().getScene() == gameScene.getScene()) {
-                if (gameScene.isPaused()) {
-                    gameScene.resume();
-                } else {
-                    gameScene.pause();
-                }
-                return true;
-            }
+            return true;
         }
         if (GlobalManager.getInstance().getScoring() != null && keyCode == KeyEvent.KEYCODE_BACK
-                && GlobalManager.getInstance().getEngine().getScene() == GlobalManager.getInstance().getScoring().getScene()) {
+                && scene == GlobalManager.getInstance().getScoring().getScene()) {
             GlobalManager.getInstance().getScoring().back();
             return true;
         }
         if ((keyCode == KeyEvent.KEYCODE_BACK || keyCode == KeyEvent.KEYCODE_ENTER)
                 && GlobalManager.getInstance().getEngine() != null
                 && GlobalManager.getInstance().getSongMenu() != null
-                && GlobalManager.getInstance().getEngine().getScene() == GlobalManager.getInstance().getSongMenu().getScene()
+                && scene == GlobalManager.getInstance().getSongMenu().getScene()
                 && GlobalManager.getInstance().getSongMenu().getScene().hasChildScene()) {
             if (GlobalManager.getInstance().getSongMenu().getScene().getChildScene() ==
                     GlobalManager.getInstance().getSongMenu().getSearchBar().getScene()) {
                 GlobalManager.getInstance().getSongMenu().getSearchBar().hideMenu();
             }
 
-            if (GlobalManager.getInstance().getSongMenu().getScene().getChildScene() == ModMenu.getInstance().getScene()) {
-                ModMenu.getInstance().hide();
+            if (GlobalManager.getInstance().getSongMenu().getScene().getChildScene() == ModMenu.INSTANCE) {
+                ModMenu.INSTANCE.back();
             }
 
             return true;
         }
         if (GlobalManager.getInstance().getSongMenu() != null && GlobalManager.getInstance().getEngine() != null
                 && keyCode == KeyEvent.KEYCODE_MENU
-                && GlobalManager.getInstance().getEngine().getScene() == GlobalManager.getInstance().getSongMenu().getScene()
+                && scene == GlobalManager.getInstance().getSongMenu().getScene()
                 && !GlobalManager.getInstance().getSongMenu().getScene().hasChildScene()) {
             GlobalManager.getInstance().getSongMenu().stopScroll(0);
             GlobalManager.getInstance().getSongMenu().showPropertiesMenu(null);
             return true;
         }
         if (keyCode == KeyEvent.KEYCODE_BACK) {
-            if (GlobalManager.getInstance().getEngine() != null && GlobalManager.getInstance().getSongMenu() != null &&
-                    GlobalManager.getInstance().getEngine().getScene() == GlobalManager.getInstance().getSongMenu().getScene()) {
+            if (getEngine() != null && GlobalManager.getInstance().getSongMenu() != null &&
+                    scene == GlobalManager.getInstance().getSongMenu().getScene()) {
 
                 //SongMenu 界面按返回按钮（系统按钮）
                 GlobalManager.getInstance().getSongMenu().back();
             } else {
-
-                if (GlobalManager.getInstance().getEngine().getScene() instanceof LoadingScreen.LoadingScene) {
+                if (scene instanceof LoadingScreen.LoadingScene) {
                     return true;
                 }
 
                 if (Multiplayer.isMultiplayer) {
-                    if (GlobalManager.getInstance().getEngine().getScene() == LobbyScene.INSTANCE) {
+                    if (scene == LobbyScene.INSTANCE) {
                         LobbyScene.INSTANCE.back();
                         return true;
                     }
 
-                    if (GlobalManager.getInstance().getEngine().getScene() == RoomScene.INSTANCE) {
+                    if (scene == RoomScene.INSTANCE) {
 
-                        if (RoomScene.INSTANCE.hasChildScene() && RoomScene.INSTANCE.getChildScene() == ModMenu.getInstance().getScene()) {
-                            ModMenu.getInstance().hide();
+                        if (RoomScene.INSTANCE.hasChildScene() && RoomScene.INSTANCE.getChildScene() == ModMenu.INSTANCE) {
+                            ModMenu.INSTANCE.back();
                             return true;
                         }
                         runOnUiThread(RoomScene.INSTANCE.getLeaveDialog()::show);
                         return true;
                     }
+                } else if (scene instanceof GameLoaderScene) {
+                    if (gameScene != null) {
+                        gameScene.cancelLoading();
+                    }
+
+                    getEngine().setScene(GlobalManager.getInstance().getSongMenu().getScene());
+                    return true;
                 }
 
                 GlobalManager.getInstance().getMainScene().showExitDialog();

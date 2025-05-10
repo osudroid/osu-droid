@@ -3,4 +3,16 @@
 <!-- This file here is for new strings that will be temporary:-->
 <!-- Link to localizations pack: https://github.com/osudroid/language-pack-->
 
+    <string name="opt_category_effect">Effect</string>
+
+    <string name="opt_shiftPitchInRateChange_title">Shift pitch in rate-changing mods</string>
+    <string name="opt_shiftPitchInRateChange_summary">Shifts the pitch of the music when using rate-changing mods</string>
+
+    <string name="mod_section_difficulty_reduction">Difficulty Reduction</string>
+    <string name="mod_section_difficulty_increase">Difficulty Increase</string>
+    <string name="mod_section_difficulty_automation">Automation</string>
+    <string name="mod_section_difficulty_conversion">Conversion</string>
+    <string name="mod_section_fun">Fun</string>
+    <string name="mod_section_system">System</string>
+
 </resources>

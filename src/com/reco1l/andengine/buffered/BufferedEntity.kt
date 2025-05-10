@@ -11,12 +11,12 @@ import javax.microedition.khronos.opengles.GL10
 /**
  * An entity that uses a buffer to draw itself.
  */
-abstract class BufferedEntity<T: IBuffer>(buffer: T? = null) : ExtendedEntity() {
+abstract class BufferedEntity<T: IBuffer> : ExtendedEntity() {
 
     /**
      * The buffer itself.
      */
-    open var buffer = buffer
+    open var buffer: T? = null
         set(value) {
             if (field != value) {
                 field?.finalize()
@@ -44,33 +44,14 @@ abstract class BufferedEntity<T: IBuffer>(buffer: T? = null) : ExtendedEntity() 
     /**
      * Flags that determine when the buffer should be invalidated.
      */
-    open var bufferInvalidationFlags: Int = RebuildBufferOnSizeChanged or InvalidateDataOnSizeChanged
-
-
-    /**
-     * Whether the buffer should be rebuilt. During initialization, it will be true
-     * if the constructor passed [IBuffer] is `null`.
-     */
-    protected var shouldRebuildBuffer = buffer == null
-
-    /**
-     * Whether the buffer data should be updated.
-     */
-    protected var shouldUpdateBuffer = true
+    open var bufferInvalidationFlags = BufferInvalidationFlag.Data or BufferInvalidationFlag.Instance
 
 
     /**
      * Marks the buffer's data as invalid to be updated in the next frame.
      */
-    fun invalidateBuffer() {
-        shouldUpdateBuffer = true
-    }
-
-    /**
-     * Marks the buffer's instance as invalid to be recreated in the next frame.
-     */
-    fun rebuildBuffer() {
-        shouldRebuildBuffer = true
+    fun invalidateBuffer(@BufferInvalidationFlag flag: Int) {
+        bufferInvalidationFlags = bufferInvalidationFlags or flag
     }
 
 
@@ -79,35 +60,16 @@ abstract class BufferedEntity<T: IBuffer>(buffer: T? = null) : ExtendedEntity() 
     }
 
 
-    override fun onSizeChanged() {
-        super.onSizeChanged()
-
-        if (bufferInvalidationFlags and InvalidateDataOnSizeChanged != 0) {
-            invalidateBuffer()
-        }
-
-        if (bufferInvalidationFlags and RebuildBufferOnSizeChanged != 0) {
-            rebuildBuffer()
-        }
-    }
-
-    override fun onPositionChanged() {
-        super.onPositionChanged()
-
-        if (bufferInvalidationFlags and InvalidateDataOnPositionChanged != 0) {
-            invalidateBuffer()
-        }
-
-        if (bufferInvalidationFlags and RebuildBufferOnPositionChanged != 0) {
-            rebuildBuffer()
-        }
-    }
-
-
     //region Buffer lifecycle
 
-    protected open fun onRebuildBuffer(gl: GL10) = Unit
+    /**
+     * Called when the buffer needs to be built.
+     */
+    protected abstract fun onCreateBuffer(gl: GL10): T?
 
+    /**
+     * Called when the buffer needs to be updated.
+     */
     protected open fun onUpdateBuffer(gl: GL10, vararg data: Any) {
         val buffer = buffer
 
@@ -126,14 +88,21 @@ abstract class BufferedEntity<T: IBuffer>(buffer: T? = null) : ExtendedEntity() 
 
     override fun onManagedDraw(gl: GL10, camera: Camera) {
 
-        if (shouldRebuildBuffer) {
-            shouldRebuildBuffer = false
-            onRebuildBuffer(gl)
-        }
+        val invalidationFlags = bufferInvalidationFlags
 
-        if (shouldUpdateBuffer) {
-            shouldUpdateBuffer = false
-            onUpdateBuffer(gl)
+        if (invalidationFlags != 0) {
+
+            if (invalidationFlags and BufferInvalidationFlag.Instance != 0) {
+                buffer = onCreateBuffer(gl)
+            }
+
+            if (invalidationFlags and BufferInvalidationFlag.Instance != 0 || invalidationFlags and BufferInvalidationFlag.Data != 0) {
+                onUpdateBuffer(gl)
+            }
+
+            if (invalidationFlags == bufferInvalidationFlags) {
+                bufferInvalidationFlags = 0
+            }
         }
 
         super.onManagedDraw(gl, camera)
@@ -209,34 +178,6 @@ abstract class BufferedEntity<T: IBuffer>(buffer: T? = null) : ExtendedEntity() 
 
     fun finalize() {
         buffer?.finalize()
-    }
-
-
-    @Suppress("ConstPropertyName")
-    companion object {
-
-        /**
-         * The buffer's data will be invalidated when the size of the entity changes.
-         */
-        const val InvalidateDataOnSizeChanged = 1
-
-        /**
-         * The buffer will be rebuilded when the size of the entity changes, this
-         * invalidates the buffer's data as well.
-         */
-        const val RebuildBufferOnSizeChanged = 1 shl 1
-
-        /**
-         * The buffer's data will be invalidated when the position of the entity changes.
-         */
-        const val InvalidateDataOnPositionChanged = 1 shl 2
-
-        /**
-         * The buffer will be rebuilded when the position of the entity changes, this
-         * invalidates the buffer's data as well.
-         */
-        const val RebuildBufferOnPositionChanged = 1 shl 3
-
     }
 
 }

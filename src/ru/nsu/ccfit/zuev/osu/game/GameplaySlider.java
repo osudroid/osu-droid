@@ -6,22 +6,25 @@ import com.edlplan.framework.easing.Easing;
 import com.edlplan.framework.math.FMath;
 import com.edlplan.framework.math.line.LinePath;
 import com.edlplan.osu.support.slider.SliderBody;
-import com.reco1l.osu.Execution;
+import com.osudroid.utils.Execution;
 import com.reco1l.andengine.sprite.AnimatedSprite;
 import com.reco1l.andengine.sprite.ExtendedSprite;
 import com.reco1l.andengine.Modifiers;
 import com.reco1l.andengine.Anchor;
-import com.reco1l.osu.hitobjects.SliderTickSprite;
-import com.reco1l.osu.playfield.CirclePiece;
-import com.reco1l.osu.playfield.NumberedCirclePiece;
-import com.reco1l.osu.hitobjects.SliderTickContainer;
+import com.osudroid.ui.v2.game.SliderTickSprite;
+import com.osudroid.ui.v2.game.CirclePiece;
+import com.osudroid.ui.v2.game.NumberedCirclePiece;
+import com.osudroid.ui.v2.game.SliderTickContainer;
 import com.rian.osu.beatmap.hitobject.BankHitSampleInfo;
+import com.rian.osu.beatmap.hitobject.HitObject;
 import com.rian.osu.beatmap.hitobject.Slider;
 import com.rian.osu.beatmap.hitobject.sliderobject.SliderTick;
+import com.rian.osu.beatmap.sections.BeatmapControlPoints;
 import com.rian.osu.gameplay.GameplayHitSampleInfo;
 import com.rian.osu.gameplay.GameplaySequenceHitSampleInfo;
 import com.rian.osu.math.Interpolation;
 import com.rian.osu.mods.ModHidden;
+import com.rian.osu.mods.ModSynesthesia;
 
 import org.anddev.andengine.entity.scene.Scene;
 import org.anddev.andengine.util.MathUtils;
@@ -40,6 +43,7 @@ public class GameplaySlider extends GameObject {
     private final ExtendedSprite approachCircle;
     private final ExtendedSprite startArrow, endArrow;
     private Slider beatmapSlider;
+    private BeatmapControlPoints controlPoints;
     private Scene scene;
     private GameObjectListener listener;
     private SliderPath path;
@@ -158,14 +162,15 @@ public class GameplaySlider extends GameObject {
         sliderWhistleSample = new GameplaySequenceHitSampleInfo();
     }
 
-    public void init(final GameObjectListener listener, final Scene scene,
-                     final Slider beatmapSlider, final float secPassed, final RGBColor comboColor,
+    public void init(final GameObjectListener listener, final Scene scene, final Slider beatmapSlider,
+                     final BeatmapControlPoints controlPoints, final float secPassed, final RGBColor comboColor,
                      final RGBColor borderColor, final SliderPath sliderPath, final LinePath renderPath) {
         this.listener = listener;
         this.scene = scene;
         this.beatmapSlider = beatmapSlider;
+        this.controlPoints = controlPoints;
 
-        var stackedPosition = beatmapSlider.getGameplayStackedPosition();
+        var stackedPosition = beatmapSlider.getScreenSpaceGameplayStackedPosition();
         position.set(stackedPosition.x, stackedPosition.y);
 
         hitTime = (float) beatmapSlider.startTime / 1000;
@@ -177,7 +182,7 @@ public class GameplaySlider extends GameObject {
 
         reloadHitSounds();
 
-        float scale = beatmapSlider.getGameplayScale();
+        float scale = beatmapSlider.getScreenSpaceGameplayScale();
 
         isOver = false;
         isFollowCircleAnimating = false;
@@ -201,6 +206,8 @@ public class GameplaySlider extends GameObject {
         circleColor.set(comboColor.r(), comboColor.g(), comboColor.b());
         currentNestedObjectIndex = 0;
 
+        boolean applyIncreasedVisibility = Config.isShowFirstApproachCircle() && beatmapSlider.isFirstNote();
+
         // Start circle piece
         headCirclePiece.setScale(scale);
         headCirclePiece.setCircleColor(comboColor.r(), comboColor.g(), comboColor.b());
@@ -212,22 +219,23 @@ public class GameplaySlider extends GameObject {
         }
         headCirclePiece.setNumberText(comboNum);
         headCirclePiece.setNumberScale(OsuSkin.get().getComboTextScale());
-        headCirclePiece.setVisible(!GameHelper.isTraceable() || (Config.isShowFirstApproachCircle() && beatmapSlider.isFirstNote()));
+        headCirclePiece.setVisible(!GameHelper.isTraceable() || applyIncreasedVisibility);
 
         approachCircle.setColor(comboColor.r(), comboColor.g(), comboColor.b());
         approachCircle.setScale(scale * 3);
         approachCircle.setAlpha(0);
         approachCircle.setPosition(this.position.x, this.position.y);
-
-        if (GameHelper.isHidden()) {
-            approachCircle.setVisible(Config.isShowFirstApproachCircle() && beatmapSlider.isFirstNote());
-        }
+        approachCircle.setVisible(!GameHelper.isHidden() || applyIncreasedVisibility);
 
         // End circle
         pathEndPosition.set(getAbsolutePathPosition(path.anchorCount - 1));
 
+        var initialTailColor = GameHelper.isSynesthesia() ?
+            getSynesthesiaComboColor(beatmapSlider.startTime + beatmapSlider.getSpanDuration()) :
+            comboColor;
+
         tailCirclePiece.setScale(scale);
-        tailCirclePiece.setCircleColor(comboColor.r(), comboColor.g(), comboColor.b());
+        tailCirclePiece.setCircleColor(initialTailColor.r(), initialTailColor.g(), initialTailColor.b());
         tailCirclePiece.setAlpha(0);
         tailCirclePiece.setVisible(!GameHelper.isTraceable() || (Config.isShowFirstApproachCircle() && beatmapSlider.isFirstNote()));
 
@@ -256,7 +264,7 @@ public class GameplaySlider extends GameObject {
         // When snaking in is enabled, the first repeat or tail needs to be delayed until the snaking completes.
         float fadeInDelay = Config.isSnakingInSliders() ? timePreempt / 3 : 0;
 
-        if (GameHelper.isHidden()) {
+        if (GameHelper.isHidden() && !GameHelper.isHiddenOnlyFadeApproachCircles()) {
             float fadeOutDuration = timePreempt * (float) ModHidden.FADE_OUT_DURATION_MULTIPLIER;
             float finalTailAlpha = (fadeInDuration - fadeInDelay) / fadeInDuration;
 
@@ -492,7 +500,7 @@ public class GameplaySlider extends GameObject {
             return;
         }
 
-        if (GameHelper.isHidden()) {
+        if (GameHelper.isHidden() && !GameHelper.isHiddenOnlyFadeApproachCircles()) {
             sliderBody.detachSelf();
 
             // If the animation is enabled, at this point it will be still animating.
@@ -610,6 +618,11 @@ public class GameplaySlider extends GameObject {
                 if (remainingSpans <= 2) {
                     endArrow.setAlpha(0);
                     tailCirclePiece.setAlpha(0);
+                } else if (GameHelper.isSynesthesia()) {
+                    var newColor =
+                        getSynesthesiaComboColor(beatmapSlider.getNestedHitObjects().get(currentNestedObjectIndex));
+
+                    tailCirclePiece.setColor(newColor.r(), newColor.g(), newColor.b());
                 }
 
                 if (remainingSpans > 1) {
@@ -618,6 +631,11 @@ public class GameplaySlider extends GameObject {
             } else if (remainingSpans <= 2) {
                 startArrow.setAlpha(0);
                 headCirclePiece.setAlpha(0);
+            } else if (GameHelper.isSynesthesia()) {
+                var newColor =
+                    getSynesthesiaComboColor(beatmapSlider.getNestedHitObjects().get(currentNestedObjectIndex));
+
+                headCirclePiece.setColor(newColor.r(), newColor.g(), newColor.b());
             }
 
             ((GameScene) listener).onSliderReverse(
@@ -701,7 +719,7 @@ public class GameplaySlider extends GameObject {
                     followCircle.detachSelf();
 
                     // When hidden mod is enabled, the follow circle is the last object to finish animating.
-                    if (GameHelper.isHidden()) {
+                    if (GameHelper.isHidden() && !GameHelper.isHiddenOnlyFadeApproachCircles()) {
                         poolObject();
                     }
                 });
@@ -720,7 +738,7 @@ public class GameplaySlider extends GameObject {
     }
 
     private boolean isHit() {
-        float radius = Utils.sqr((float) beatmapSlider.getGameplayRadius());
+        float radius = Utils.sqr((float) beatmapSlider.getScreenSpaceGameplayRadius());
         for (int i = 0, count = listener.getCursorsCount(); i < count; i++) {
 
             var inPosition = Utils.squaredDistance(position, listener.getMousePos(i)) <= radius;
@@ -746,7 +764,7 @@ public class GameplaySlider extends GameObject {
         // Hit judgement is done in the update thread, but inputs are received in the main thread,
         // the time when the player clicked in advance will affect judgement. This offset is used
         // to offset the hit from the previous update tick.
-        float radius = Utils.sqr((float) beatmapSlider.getGameplayRadius());
+        float radius = Utils.sqr((float) beatmapSlider.getScreenSpaceGameplayRadius());
         for (int i = 0, count = listener.getCursorsCount(); i < count; i++) {
 
             var inPosition = Utils.squaredDistance(position, listener.getMousePos(i)) <= radius;
@@ -850,7 +868,7 @@ public class GameplaySlider extends GameObject {
         sliderWhistleSample.update(dt);
         headCirclePiece.setAlpha(0f);
 
-        float scale = beatmapSlider.getGameplayScale();
+        float scale = beatmapSlider.getScreenSpaceGameplayScale();
 
         if (!ball.hasParent()) {
             approachCircle.clearEntityModifiers();
@@ -908,7 +926,7 @@ public class GameplaySlider extends GameObject {
     }
 
     private float getTrackingDistanceThresholdSquared(boolean isTracking) {
-        float radius = (float) beatmapSlider.getGameplayRadius();
+        float radius = (float) beatmapSlider.getScreenSpaceGameplayRadius();
         float distanceThresholdSquared = radius * radius;
 
         if (isTracking) {
@@ -992,7 +1010,7 @@ public class GameplaySlider extends GameObject {
                 // When the first nested object that is further outside the follow area is reached,
                 // forcefully miss all other nested objects that would otherwise be valid to be hit.
                 // This covers a case of a slider overlapping itself that requires tracking to a tick on an outer edge.
-                var nestedPosition = nestedObject.getGameplayStackedPosition();
+                var nestedPosition = nestedObject.getScreenSpaceGameplayStackedPosition();
                 var distanceSquared = Utils.squaredDistance(nestedPosition.x, nestedPosition.y, ballPos.x, ballPos.y);
 
                 if (distanceSquared > distanceTrackingThresholdSquared) {
@@ -1014,7 +1032,7 @@ public class GameplaySlider extends GameObject {
                 break;
             }
 
-            var nestedPosition = nestedObject.getGameplayStackedPosition();
+            var nestedPosition = nestedObject.getScreenSpaceGameplayStackedPosition();
             tmpPoint.set(nestedPosition.x, nestedPosition.y);
 
             boolean isSliderTick = nestedObject instanceof SliderTick;
@@ -1071,7 +1089,7 @@ public class GameplaySlider extends GameObject {
     }
 
     private void updateTracking(boolean isTracking) {
-        float scale = beatmapSlider.getGameplayScale();
+        float scale = beatmapSlider.getScreenSpaceGameplayScale();
 
         if (Config.isAnimateFollowCircle()) {
             float remainTime = (float) (duration - elapsedSpanTime);
@@ -1131,7 +1149,7 @@ public class GameplaySlider extends GameObject {
             return;
         }
 
-        float scale = beatmapSlider.getGameplayScale();
+        float scale = beatmapSlider.getScreenSpaceGameplayScale();
 
         var nestedObjects = beatmapSlider.getNestedHitObjects();
         var nestedObjectToJudge = nestedObjects.get(currentNestedObjectIndex);
@@ -1156,7 +1174,7 @@ public class GameplaySlider extends GameObject {
                 tickSet.set(replayTickIndex++, false);
             }
 
-            var tickPosition = nestedObjectToJudge.getGameplayStackedPosition();
+            var tickPosition = nestedObjectToJudge.getScreenSpaceGameplayStackedPosition();
             tmpPoint.set(tickPosition.x, tickPosition.y);
 
             listener.onSliderHit(id, isTracking ? 10 : -1, tmpPoint, false, bodyColor, GameObjectListener.SLIDER_TICK, isTracking);
@@ -1177,7 +1195,7 @@ public class GameplaySlider extends GameObject {
 
     private void applyBodyFadeAdjustments(float fadeInDuration) {
 
-        if (GameHelper.isHidden()) {
+        if (GameHelper.isHidden() && !GameHelper.isHiddenOnlyFadeApproachCircles()) {
             // New duration from completed fade in to end (before fading out)
             float fadeOutDuration = (float) duration + timePreempt - fadeInDuration;
 
@@ -1269,6 +1287,14 @@ public class GameplaySlider extends GameObject {
 
     private boolean isTracking() {
         return isInRadius && replayObjectData == null || replayObjectData != null && replayObjectData.tickSet.get(replayTickIndex);
+    }
+
+    private RGBColor getSynesthesiaComboColor(HitObject hitObject) {
+        return getSynesthesiaComboColor(hitObject.startTime);
+    }
+
+    private RGBColor getSynesthesiaComboColor(double time) {
+        return ModSynesthesia.getColorFor(controlPoints.getClosestBeatDivisor(time));
     }
 
     @Override

@@ -28,7 +28,7 @@ class DroidAim(
     private val sliderStrains = mutableListOf<Double>()
 
     private var currentStrain = 0.0
-    private val skillMultiplier = 25.6
+    private val skillMultiplier = 26.5
     private val strainDecayBase = 0.15
 
     /**

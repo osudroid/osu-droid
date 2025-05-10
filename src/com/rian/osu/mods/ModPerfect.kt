@@ -6,14 +6,12 @@ package com.rian.osu.mods
 class ModPerfect : Mod() {
     override val name = "Perfect"
     override val acronym = "PF"
+    override val description = "SS or quit."
     override val type = ModType.DifficultyIncrease
-    override val textureNameSuffix = "perfect"
     override val isRanked = true
     override val incompatibleMods = super.incompatibleMods + arrayOf(
-        ModNoFail::class, ModSuddenDeath::class, ModAuto::class
+        ModNoFail::class, ModSuddenDeath::class, ModAutoplay::class
     )
 
-    override fun equals(other: Any?) = other === this || other is ModPerfect
-    override fun hashCode() = super.hashCode()
     override fun deepCopy() = ModPerfect()
 }

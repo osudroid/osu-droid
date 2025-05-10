@@ -4,6 +4,8 @@ import com.rian.osu.beatmap.Beatmap
 import com.rian.osu.beatmap.hitobject.HitObject
 import com.rian.osu.beatmap.hitobject.Slider
 import com.rian.osu.beatmap.sections.BeatmapDifficulty
+import kotlinx.coroutines.CoroutineScope
+import org.json.JSONObject
 
 /**
  * Represents the Hidden mod.
@@ -11,14 +13,44 @@ import com.rian.osu.beatmap.sections.BeatmapDifficulty
 class ModHidden : Mod(), IModApplicableToBeatmap {
     override val name = "Hidden"
     override val acronym = "HD"
+    override val description = "Play with no approach circles and fading circles/sliders."
     override val type = ModType.DifficultyIncrease
-    override val textureNameSuffix = "hidden"
-    override val isRanked = true
+
+    override val isRanked
+        get() = usesDefaultSettings
+
     override val incompatibleMods = super.incompatibleMods + ModTraceable::class
 
-    override fun calculateScoreMultiplier(difficulty: BeatmapDifficulty) = 1.06f
+    /**
+     * Whether to only fade approach circles.
+     *
+     * The main object body will not fade when enabled.
+     */
+    @get:JvmName("isOnlyFadeApproachCircles")
+    var onlyFadeApproachCircles by BooleanModSetting(
+        name = "Only fade approach circles",
+        defaultValue = false
+    )
 
-    override fun applyToBeatmap(beatmap: Beatmap) {
+    override fun calculateScoreMultiplier(difficulty: BeatmapDifficulty) = if (usesDefaultSettings) 1.06f else 1f
+
+    override fun copySettings(settings: JSONObject) {
+        super.copySettings(settings)
+
+        onlyFadeApproachCircles = settings.optBoolean("onlyFadeApproachCircles", onlyFadeApproachCircles)
+    }
+
+    override fun serializeSettings(): JSONObject? {
+        if (usesDefaultSettings) {
+            return null
+        }
+
+        return JSONObject().apply {
+            put("onlyFadeApproachCircles", onlyFadeApproachCircles)
+        }
+    }
+
+    override fun applyToBeatmap(beatmap: Beatmap, scope: CoroutineScope?) {
         fun applyFadeInAdjustment(hitObject: HitObject) {
             hitObject.timeFadeIn = hitObject.timePreempt * FADE_IN_DURATION_MULTIPLIER
 
@@ -30,9 +62,17 @@ class ModHidden : Mod(), IModApplicableToBeatmap {
         beatmap.hitObjects.objects.forEach { applyFadeInAdjustment(it) }
     }
 
-    override fun equals(other: Any?) = other === this || other is ModHidden
-    override fun hashCode() = super.hashCode()
-    override fun deepCopy() = ModHidden()
+    override fun toString() = buildString {
+        append(super.toString())
+
+        if (onlyFadeApproachCircles) {
+            append(" (approach circles only)")
+        }
+    }
+
+    override fun deepCopy() = ModHidden().also {
+        it.onlyFadeApproachCircles = onlyFadeApproachCircles
+    }
 
     companion object {
         const val FADE_IN_DURATION_MULTIPLIER = 0.4

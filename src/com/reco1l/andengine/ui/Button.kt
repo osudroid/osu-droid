@@ -4,45 +4,21 @@ import com.reco1l.andengine.*
 import com.reco1l.andengine.container.*
 import com.reco1l.andengine.modifier.*
 import com.reco1l.andengine.shape.*
+import com.reco1l.andengine.sprite.*
 import com.reco1l.andengine.text.*
-import com.reco1l.framework.*
 import com.reco1l.framework.math.*
 import org.anddev.andengine.input.touch.TouchEvent
-import org.anddev.andengine.opengl.font.Font
-import ru.nsu.ccfit.zuev.osu.ResourceManager
-
-
-data class ButtonTheme(
-    val backgroundColor: Long = 0xFF222234,
-    val textColor: Long = 0xFFFFFFFF,
-    val selectedBackgroundColor: Long = 0xFFF27272,
-    val selectedTextColor: Long = 0xFF222234,
-    val withBezelEffect: Boolean = true,
-    val cornerRadius: Float = 14f,
-    val iconSize: Float = 28f,
-    val textFont: Font = ResourceManager.getInstance().getFont("smallFont")
-) : ITheme
-
 
 @Suppress("LeakingThis")
-open class Button : LinearContainer(), IWithTheme<ButtonTheme> {
+open class Button : LinearContainer() {
 
+    override var applyTheme: ExtendedEntity.(Theme) -> Unit = { theme ->
+        background?.color = if (isSelected) theme.accentColor else theme.accentColor * 0.175f
+        color = if (isSelected) theme.accentColor * 0.1f else theme.accentColor
 
-    override var theme = DefaultTheme
-        set(value) {
-            if (field != value) {
-                field = value
-                onThemeChanged()
-            }
-        }
-
-
-    /**
-     * The text of the button.
-     */
-    var text
-        get() = textEntity.text
-        set(value) { textEntity.text = value }
+        onSelectionChange()
+        onEnableStateChange()
+    }
 
 
     //region State
@@ -78,42 +54,6 @@ open class Button : LinearContainer(), IWithTheme<ButtonTheme> {
 
     //endregion
 
-    //region Icons
-
-    /**
-     * The leading icon.
-     */
-    var leadingIcon: ExtendedEntity? = null
-        set(value) {
-            if (field != value) {
-                field?.detachSelf()
-                field = value
-
-                if (value != null) {
-                    onIconChange(value)
-                    attachChild(value, 0)
-                }
-            }
-        }
-
-    /**
-     * The trailing icon.
-     */
-    var trailingIcon: ExtendedEntity? = null
-        set(value) {
-            if (field != value) {
-                field?.detachSelf()
-                field = value
-
-                if (value != null) {
-                    onIconChange(value)
-                    attachChild(value)
-                }
-            }
-        }
-
-    //endregion
-
     //region Actions
 
     /**
@@ -126,42 +66,19 @@ open class Button : LinearContainer(), IWithTheme<ButtonTheme> {
      */
     var onActionUp: (() -> Unit)? = null
 
+    /**
+     * The action to perform when the button is cancelled.
+     */
+    var onActionCancel: (() -> Unit)? = null
+
     //endregion
 
-
-    private val textEntity = ExtendedText().apply {
-        height = 60f
-        alignment = Anchor.Center
-        anchor = Anchor.CenterLeft
-        origin = Anchor.CenterLeft
-    }
-
-
     init {
-        orientation = Orientation.Horizontal
-        padding = Vec4(16f, 0f, 18f, 0f)
-        spacing = 8f
+        padding = Vec4(12f, 16f)
         scaleCenter = Anchor.Center
-
-        attachChild(textEntity)
-        onThemeChanged()
+        foreground = BezelOutline(12f)
+        background = Box().apply { cornerRadius = 12f }
     }
-
-
-    override fun onThemeChanged() {
-        foreground = if (theme.withBezelEffect) BezelOutline(theme.cornerRadius) else null
-        background = RoundedBox().apply {
-            color = ColorARGB(theme.backgroundColor)
-            cornerRadius = theme.cornerRadius
-        }
-        onSelectionChange()
-        onEnableStateChange()
-        trailingIcon?.let(::onIconChange)
-        leadingIcon?.let(::onIconChange)
-        textEntity.font = theme.textFont
-        textEntity.color = ColorARGB(theme.textColor)
-    }
-
 
     //region Callbacks
 
@@ -170,52 +87,32 @@ open class Button : LinearContainer(), IWithTheme<ButtonTheme> {
      */
     open fun onEnableStateChange() {
         clearModifiers(ModifierType.Alpha)
-
-        if (isEnabled) {
-            fadeTo(1f, 0.2f)
-        } else {
-            fadeTo(0.25f, 0.2f)
-        }
+        fadeTo(if (isEnabled) 1f else 0.25f, 0.2f)
     }
 
     /**
      * Called when the selection state of the button changes.
      */
     open fun onSelectionChange() {
+        clearModifiers(ModifierType.Color)
+        colorTo(if (isSelected) Theme.current.accentColor * 0.1f else Theme.current.accentColor, 0.2f)
 
-        background?.clearModifiers(ModifierType.Color)
-        textEntity.clearModifiers(ModifierType.Color)
-
-        if (isSelected) {
-            background?.colorTo(theme.selectedBackgroundColor, 0.2f)
-            textEntity.colorTo(theme.selectedTextColor, 0.2f)
-        } else {
-            background?.colorTo(theme.backgroundColor)
-            textEntity.colorTo(theme.textColor, 0.2f)
+        background?.apply {
+            clearModifiers(ModifierType.Color)
+            colorTo(if (isSelected) Theme.current.accentColor else Theme.current.accentColor * 0.175f)
         }
-    }
-
-    /**
-     * Called when an icon is added or changed.
-     */
-    open fun onIconChange(icon: ExtendedEntity) {
-        icon.height = theme.iconSize
-        icon.width = theme.iconSize
-        icon.anchor = Anchor.CenterLeft
-        icon.origin = Anchor.CenterLeft
-        icon.color = theme.textColor.toColorARGB()
     }
 
     //endregion
 
     open fun processTouchFeedback(event: TouchEvent) {
-
         if (event.isActionDown) {
             clearModifiers(ModifierType.ScaleXY)
             scaleTo(0.9f, 0.2f)
         }
 
         if ((event.isActionUp || event.isActionCancel) && scaleX != 1f) {
+
             clearModifiers(ModifierType.ScaleXY)
             scaleTo(1f, 0.2f)
         }
@@ -237,7 +134,14 @@ open class Button : LinearContainer(), IWithTheme<ButtonTheme> {
             event.isActionUp -> {
                 if (localX <= width && localY <= height && isPressed) {
                     onActionUp?.invoke()
+                } else {
+                    onActionCancel?.invoke()
                 }
+                isPressed = false
+            }
+
+            event.isActionOutside || event.isActionCancel -> {
+                onActionCancel?.invoke()
                 isPressed = false
             }
 
@@ -247,8 +151,68 @@ open class Button : LinearContainer(), IWithTheme<ButtonTheme> {
         return true
     }
 
-
-    companion object {
-        val DefaultTheme = ButtonTheme()
-    }
 }
+
+
+/**
+ * A button that displays a text.
+ */
+open class TextButton : Button() {
+
+    /**
+     * The compound text of the button.
+     */
+    val content = CompoundText().apply {
+        anchor = Anchor.CenterLeft
+        origin = Anchor.CenterLeft
+        spacing = 8f
+    }
+
+
+    /**
+     * The text of the button.
+     */
+    var text by content::text
+
+    /**
+     * The font of the button.
+     */
+    var font by content::font
+
+    /**
+     * The leading icon.
+     */
+    var leadingIcon by content::leadingIcon
+
+    /**
+     * The trailing icon.
+     */
+    var trailingIcon by content::trailingIcon
+
+    /**
+     * The icon change callback.
+     */
+    var onIconChange by content::onIconChange
+
+
+    init {
+        +content
+    }
+
+}
+
+open class IconButton : Button() {
+
+    protected val sprite = sprite {
+        scaleType = ScaleType.Fit
+        anchor = Anchor.Center
+        origin = Anchor.Center
+    }
+
+    /**
+     * The icon to be displayed on the button.
+     */
+    var icon by sprite::textureRegion
+
+}
+

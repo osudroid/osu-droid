@@ -1,11 +1,12 @@
 package com.reco1l.andengine
 
-import android.util.*
-import org.anddev.andengine.engine.camera.*
-import org.anddev.andengine.entity.scene.*
+import android.util.Log
+import javax.microedition.khronos.opengles.GL10
+import org.anddev.andengine.engine.camera.Camera
+import org.anddev.andengine.entity.scene.Scene
 import org.anddev.andengine.entity.shape.IShape
-import org.anddev.andengine.input.touch.*
-import javax.microedition.khronos.opengles.*
+import org.anddev.andengine.input.touch.TouchEvent
+import org.anddev.andengine.opengl.util.GLHelper
 
 
 /**
@@ -21,6 +22,11 @@ open class ExtendedScene : Scene(), IShape {
      * Setting this will affect the speed of every entity attached to this scene.
      */
     var timeMultiplier = 1f
+
+    /**
+     * Whether this [ExtendedScene] should clip its children.
+     */
+    open var clipToBounds = false
 
 
     private var cameraWidth = 0f
@@ -43,6 +49,38 @@ open class ExtendedScene : Scene(), IShape {
     //endregion
 
     //region Drawing
+
+    override fun onDraw(gl: GL10, camera: Camera) {
+        if (!isVisible) {
+            return
+        }
+
+        if (clipToBounds) {
+            val wasScissorTestEnabled = GLHelper.isEnableScissorTest()
+            GLHelper.enableScissorTest(gl)
+
+            // Entity coordinates in screen's space.
+            val (topLeftX, topLeftY) = camera.getScreenSpaceCoordinates(convertLocalToSceneCoordinates(0f, 0f))
+            val (topRightX, topRightY) = camera.getScreenSpaceCoordinates(convertLocalToSceneCoordinates(width, 0f))
+            val (bottomRightX, bottomRightY) = camera.getScreenSpaceCoordinates(convertLocalToSceneCoordinates(width, height))
+            val (bottomLeftX, bottomLeftY) = camera.getScreenSpaceCoordinates(convertLocalToSceneCoordinates(0f, height))
+
+            val minX = minOf(topLeftX, bottomLeftX, bottomRightX, topRightX)
+            val minY = minOf(topLeftY, bottomLeftY, bottomRightY, topRightY)
+            val maxX = maxOf(topLeftX, bottomLeftX, bottomRightX, topRightX)
+            val maxY = maxOf(topLeftY, bottomLeftY, bottomRightY, topRightY)
+
+            ScissorStack.pushScissor(minX, minY, maxX - minX, maxY - minY)
+            onManagedDraw(gl, camera)
+            ScissorStack.pop()
+
+            if (!wasScissorTestEnabled) {
+                GLHelper.disableScissorTest(gl)
+            }
+        } else {
+            onManagedDraw(gl, camera)
+        }
+    }
 
     override fun onManagedDrawChildren(gl: GL10, camera: Camera) {
         cameraWidth = camera.widthRaw

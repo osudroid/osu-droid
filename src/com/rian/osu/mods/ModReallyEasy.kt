@@ -7,11 +7,11 @@ import com.rian.osu.utils.CircleSizeCalculator
 /**
  * Represents the Really Easy mod.
  */
-class ModReallyEasy : Mod(), IModApplicableToDifficultyWithSettings {
+class ModReallyEasy : Mod(), IModApplicableToDifficultyWithMods {
     override val name = "Really Easy"
     override val acronym = "RE"
+    override val description = "Everything just got easier..."
     override val type = ModType.DifficultyReduction
-    override val textureNameSuffix = "reallyeasy"
 
     override fun calculateScoreMultiplier(difficulty: BeatmapDifficulty) = 0.5f
 
@@ -25,31 +25,36 @@ class ModReallyEasy : Mod(), IModApplicableToDifficultyWithSettings {
                     ar -= 0.5f
                 }
 
-                val customSpeedMultiplier = (mods.find { it is ModCustomSpeed } as? ModCustomSpeed)?.trackRateMultiplier ?: 1f
+                val customSpeedMultiplier =
+                    (mods.find { it is ModCustomSpeed } as? ModCustomSpeed)?.trackRateMultiplier ?: 1f
 
                 ar -= 0.5f
                 ar -= customSpeedMultiplier - 1
             }
 
             if (difficultyAdjustMod?.cs == null) {
-                difficultyCS = when (mode) {
-                    GameMode.Droid -> {
-                        val scale = CircleSizeCalculator.droidCSToDroidDifficultyScale(difficultyCS)
+                if (mode == GameMode.Standard || mods.none { it is ModReplayV6 }) {
+                    difficultyCS *= ADJUST_RATIO
+                    gameplayCS *= ADJUST_RATIO
+                } else {
+                    val difficultyScale = CircleSizeCalculator.droidCSToOldDroidDifficultyScale(difficultyCS)
+                    val gameplayScale = CircleSizeCalculator.droidCSToOldDroidGameplayScale(gameplayCS)
 
-                        CircleSizeCalculator.droidDifficultyScaleToDroidCS(scale + 0.125f)
-                    }
+                    // The 0.125f scale that was added before replay version 7 was in screen pixels.
+                    // We need it in osu! pixels.
+                    val scaleAdjustment = 0.125f
 
-                    GameMode.Standard -> difficultyCS * ADJUST_RATIO
-                }
+                    difficultyCS = CircleSizeCalculator.droidOldDifficultyScaleToDroidCS(
+                        difficultyScale + CircleSizeCalculator.droidOldDifficultyScaleScreenPixelsToOsuPixels(
+                            scaleAdjustment
+                        )
+                    )
 
-                gameplayCS = when (mode) {
-                    GameMode.Droid -> {
-                        val scale = CircleSizeCalculator.droidCSToDroidGameplayScale(gameplayCS)
-
-                        CircleSizeCalculator.droidGameplayScaleToDroidCS(scale + 0.125f)
-                    }
-
-                    GameMode.Standard -> gameplayCS * ADJUST_RATIO
+                    gameplayCS = CircleSizeCalculator.droidOldGameplayScaleToDroidCS(
+                        gameplayScale + CircleSizeCalculator.droidOldGameplayScaleScreenPixelsToOsuPixels(
+                            scaleAdjustment
+                        )
+                    )
                 }
             }
 
@@ -62,8 +67,6 @@ class ModReallyEasy : Mod(), IModApplicableToDifficultyWithSettings {
             }
         }
 
-    override fun equals(other: Any?) = other === this || other is ModReallyEasy
-    override fun hashCode() = super.hashCode()
     override fun deepCopy() = ModReallyEasy()
 
     companion object {

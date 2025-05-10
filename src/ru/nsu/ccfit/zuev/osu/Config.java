@@ -8,6 +8,7 @@ import android.os.Environment;
 import android.util.DisplayMetrics;
 import android.util.Log;
 
+import androidx.annotation.NonNull;
 import androidx.preference.PreferenceManager;
 
 import com.edlplan.framework.math.FMath;
@@ -18,7 +19,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
 
-import com.reco1l.osu.multiplayer.Multiplayer;
+import com.osudroid.multiplayer.Multiplayer;
 
 import net.margaritov.preference.colorpicker.ColorPickerPreference;
 
@@ -88,7 +89,6 @@ public class Config {
         bgmVolume,
         offset,
         backgroundBrightness,
-        scaleMultiplier,
         playfieldSize,
         cursorSize;
 
@@ -288,6 +288,7 @@ public class Config {
         return displayScoreStatistics;
     }
 
+    @NonNull
     public static DifficultyAlgorithm getDifficultyAlgorithm() {
         return Config.getString("difficultyAlgorithm", "0").equals("1")
                 ? DifficultyAlgorithm.standard
@@ -466,14 +467,6 @@ public class Config {
 
     public static void setShowCursor(final boolean showCursor) {
         Config.showCursor = showCursor;
-    }
-
-    public static float getScaleMultiplier() {
-        return scaleMultiplier;
-    }
-
-    public static void setScaleMultiplier(final float scaleMultiplier) {
-        Config.scaleMultiplier = scaleMultiplier;
     }
 
     public static String getOnlineUsername() {
@@ -752,6 +745,10 @@ public class Config {
 
     public static boolean isForceMaxRefreshRate() {
         return forceMaxRefreshRate;
+    }
+
+    public static boolean isShiftPitchInRateChange() {
+        return getBoolean("shiftPitchInRateChange", false);
     }
 
 

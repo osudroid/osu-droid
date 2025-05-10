@@ -1,9 +1,9 @@
 package com.edlplan.replay;
 
-import static com.reco1l.osu.data.Scores.ScoreInfo;
+import static com.osudroid.data.Scores.ScoreInfo;
 
-import com.reco1l.osu.data.BeatmapInfo;
-import com.reco1l.osu.data.ScoreInfo;
+import com.osudroid.data.BeatmapInfo;
+import com.osudroid.data.ScoreInfo;
 import com.rian.osu.mods.LegacyModConverter;
 
 import org.apache.commons.io.FilenameUtils;
@@ -124,7 +124,7 @@ public class OsuDroidReplayPack {
             // Additionally, it uses the legacy mods format and needs to be converted.
             var oldMods = replayData.getString("mod");
 
-            replayData.put("mods", LegacyModConverter.convert(oldMods).serializeMods().toString());
+            replayData.put("mods", LegacyModConverter.convert(oldMods).serializeMods(false).toString());
             replayData.remove("mod");
         }
 

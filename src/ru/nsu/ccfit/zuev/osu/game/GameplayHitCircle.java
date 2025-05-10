@@ -3,7 +3,7 @@ package ru.nsu.ccfit.zuev.osu.game;
 import com.reco1l.andengine.sprite.ExtendedSprite;
 import com.reco1l.andengine.Modifiers;
 import com.reco1l.andengine.Anchor;
-import com.reco1l.osu.playfield.NumberedCirclePiece;
+import com.osudroid.ui.v2.game.NumberedCirclePiece;
 import com.rian.osu.beatmap.hitobject.HitCircle;
 import com.rian.osu.gameplay.GameplayHitSampleInfo;
 import com.rian.osu.mods.ModHidden;
@@ -50,7 +50,7 @@ public class GameplayHitCircle extends GameObject {
         this.beatmapCircle = beatmapCircle;
         replayObjectData = null;
 
-        var stackedPosition = beatmapCircle.getGameplayStackedPosition();
+        var stackedPosition = beatmapCircle.getScreenSpaceGameplayStackedPosition();
         position.set(stackedPosition.x, stackedPosition.y);
 
         endsCombo = beatmapCircle.isLastInCombo();
@@ -65,8 +65,8 @@ public class GameplayHitCircle extends GameObject {
         this.comboColor.set(comboColor.r(), comboColor.g(), comboColor.b());
 
         // Calculating position of top/left corner for sprites and hit radius
-        final float scale = beatmapCircle.getGameplayScale();
-        radiusSquared = (float) beatmapCircle.getGameplayRadius();
+        final float scale = beatmapCircle.getScreenSpaceGameplayScale();
+        radiusSquared = (float) beatmapCircle.getScreenSpaceGameplayRadius();
         radiusSquared *= radiusSquared;
 
         float actualFadeInDuration = (float) beatmapCircle.timeFadeIn / 1000f;
@@ -83,18 +83,20 @@ public class GameplayHitCircle extends GameObject {
         if (OsuSkin.get().isLimitComboTextLength()) {
             comboNum %= 10;
         }
+
+        boolean applyIncreasedVisibility = Config.isShowFirstApproachCircle() && beatmapCircle.isFirstNote();
+
         circlePiece.setNumberText(comboNum);
         circlePiece.setNumberScale(OsuSkin.get().getComboTextScale());
-        circlePiece.setVisible(!GameHelper.isTraceable() || (Config.isShowFirstApproachCircle() && beatmapCircle.isFirstNote()));
+        circlePiece.setVisible(!GameHelper.isTraceable() || applyIncreasedVisibility);
 
         approachCircle.setColor(comboColor.r(), comboColor.g(), comboColor.b());
         approachCircle.setScale(scale * (3 - 2 * fadeInProgress));
         approachCircle.setAlpha(0.9f * fadeInProgress);
         approachCircle.setPosition(this.position.x, this.position.y);
+        approachCircle.setVisible(!GameHelper.isHidden() || applyIncreasedVisibility);
 
-        if (GameHelper.isHidden()) {
-            approachCircle.setVisible(Config.isShowFirstApproachCircle() && beatmapCircle.isFirstNote());
-
+        if (GameHelper.isHidden() && !GameHelper.isHiddenOnlyFadeApproachCircles()) {
             float actualFadeOutDuration = timePreempt * (float) ModHidden.FADE_OUT_DURATION_MULTIPLIER;
             float remainingFadeOutDuration = Math.min(
                 actualFadeOutDuration,

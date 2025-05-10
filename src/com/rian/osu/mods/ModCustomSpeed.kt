@@ -10,8 +10,8 @@ import org.json.JSONObject
 class ModCustomSpeed @JvmOverloads constructor(trackRateMultiplier: Float = 1f) : ModRateAdjust(trackRateMultiplier) {
     override val name = "Custom Speed"
     override val acronym = "CS"
+    override val description = "Play at any speed you want - slow or fast."
     override val type = ModType.Conversion
-    override val textureNameSuffix = "customspeed"
     override val isRanked = true
 
     override fun copySettings(settings: JSONObject) {
@@ -23,20 +23,6 @@ class ModCustomSpeed @JvmOverloads constructor(trackRateMultiplier: Float = 1f) 
     override fun serializeSettings() = JSONObject().apply {
         put("rateMultiplier", trackRateMultiplier)
     }
-
-    override fun equals(other: Any?): Boolean {
-        if (other === this) {
-            return true
-        }
-
-        if (other !is ModCustomSpeed) {
-            return false
-        }
-
-        return super.equals(other)
-    }
-
-    override fun hashCode() = super.hashCode()
 
     override fun toString() = buildString {
         append(super.toString())

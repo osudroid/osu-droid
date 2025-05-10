@@ -5,9 +5,52 @@ import org.junit.Test
 
 class CircleSizeCalculatorTest {
     @Test
-    fun `Test osu!droid circle size to osu!droid difficulty scale`() {
+    fun `Test osu!droid circle size to osu!droid scale conversion`() {
         fun test(cs: Float, scale: Float) =
-            Assert.assertEquals(CircleSizeCalculator.droidCSToDroidDifficultyScale(cs), scale, 1e-5f)
+            Assert.assertEquals(scale, CircleSizeCalculator.droidCSToDroidScale(cs), 1e-5f)
+
+        test(0f, 1.3304397f)
+        test(2f, 1.1903822f)
+        test(3.5f, 1.0853392f)
+        test(4f, 1.0503248f)
+        test(5f, 0.98029613f)
+        test(6f, 0.91026735f)
+        test(8f, 0.77020997f)
+        test(10f, 0.6301526f)
+        test(12f, 0.49009523f)
+        test(14f, 0.35003784f)
+        test(16f, 0.2099805f)
+        test(17f, 0.13995178f)
+        test(18f, 0.06992312f)
+        test(19f, 0.001f)
+        test(20f, 0.001f)
+    }
+
+    @Test
+    fun `Test osu!droid scale to osu!droid circle size conversion`() {
+        fun test(scale: Float, cs: Float) =
+            Assert.assertEquals(cs, CircleSizeCalculator.droidScaleToDroidCS(scale), 1e-5f)
+
+        test(1.3304397f, 0f)
+        test(1.1903822f, 2f)
+        test(1.0853392f, 3.5f)
+        test(1.0503248f, 4f)
+        test(0.98029613f, 5f)
+        test(0.91026735f, 6f)
+        test(0.77020997f, 8f)
+        test(0.6301526f, 10f)
+        test(0.49009523f, 12f)
+        test(0.35003784f, 14f)
+        test(0.2099805f, 16f)
+        test(0.13995178f, 17f)
+        test(0.06992312f, 18f)
+        test(0.001f, 18.984211f)
+    }
+
+    @Test
+    fun `Test osu!droid circle size to old osu!droid difficulty scale conversion`() {
+        fun test(cs: Float, scale: Float) =
+            Assert.assertEquals(scale, CircleSizeCalculator.droidCSToOldDroidDifficultyScale(cs), 1e-5f)
 
         test(0f, 1.7818792f)
         test(2f, 1.5832541f)
@@ -22,13 +65,14 @@ class CircleSizeCalculatorTest {
         test(16f, 0.1928792f)
         test(17f, 0.0935667f)
         test(18f, 0.001f)
+        test(19f, 0.001f)
         test(20f, 0.001f)
     }
 
     @Test
-    fun `Test osu!droid difficulty scale to osu!droid circle size`() {
+    fun `Test old osu!droid difficulty scale to osu!droid circle size conversion`() {
         fun test(scale: Float, cs: Float) =
-            Assert.assertEquals(CircleSizeCalculator.droidDifficultyScaleToDroidCS(scale), cs, 1e-5f)
+            Assert.assertEquals(CircleSizeCalculator.droidOldDifficultyScaleToDroidCS(scale), cs, 1e-5f)
 
         test(1.7818792f, 0f)
         test(1.5832541f, 2f)
@@ -46,43 +90,58 @@ class CircleSizeCalculatorTest {
     }
 
     @Test
-    fun `Test osu!droid scale to osu!standard radius`() {
-        fun test(scale: Float, radius: Double) =
+    fun `Test old osu!droid difficulty scale screen pixels to osu! pixels conversion`() {
+        fun test(screenPixelsScale: Float, osuPixelsScale: Float) =
             Assert.assertEquals(
-                CircleSizeCalculator.droidScaleToStandardRadius(scale),
-                radius,
-                1e-7
+                osuPixelsScale,
+                CircleSizeCalculator.droidOldDifficultyScaleScreenPixelsToOsuPixels(screenPixelsScale),
+                1e-5f
             )
 
-        // CS 0 osu!droid
-        test(1.7818792f, 75.65252291720653)
-        // CS 2 osu!droid
-        test(1.5832541f, 67.21957801567763)
-        // CS 4 osu!droid
-        test(1.3846292f, 58.78664323658978)
-        // CS 6 osu!droid
-        test(1.1860042f, 50.35369833506089)
-        // CS 8 osu!droid
-        test(0.9873792f, 41.920758494752526)
-        // CS 10 osu!droid
-        test(0.7887542f, 33.487818654444155)
-        // CS 12 osu!droid
-        test(0.5901292f, 25.054876283525523)
-        // CS 14 osu!droid
-        test(0.3915042f, 16.62193517791202)
-        // CS 16 osu!droid
-        test(0.1928792f, 8.188994072298522)
-        // CS 17 osu!droid
-        test(0.0935667f, 3.972523519491772)
-        // Beyond CS 17.62 osu!droid
-        test(0.001f, 0.042456594972790876)
+        test(1.7818792f, 1.2559501f)
+        test(1.5832541f, 1.11595f)
+        test(1.4342854f, 1.0109501f)
+        test(1.3846292f, 0.9759502f)
+        test(1.2853167f, 0.9059501f)
+        test(1.1860042f, 0.8359501f)
+        test(0.9873792f, 0.6959501f)
+        test(0.7887542f, 0.5559501f)
+        test(0.5901292f, 0.41595012f)
+        test(0.3915042f, 0.2759501f)
+        test(0.1928792f, 0.1359501f)
+        test(0.0935667f, 0.0659501f)
+        test(0.001f, 7.048458e-4f)
     }
 
     @Test
-    fun `Test osu!standard radius to osu!droid difficulty scale`() {
+    fun `Test old osu!droid difficulty scale osu! pixels to screen pixels conversion`() {
+        fun test(osuPixelsScale: Float, screenPixelsScale: Float) =
+            Assert.assertEquals(
+                screenPixelsScale,
+                CircleSizeCalculator.droidOldDifficultyScaleOsuPixelsToScreenPixels(osuPixelsScale),
+                1e-5f
+            )
+
+        test(1.2559501f, 1.7818792f)
+        test(1.11595f, 1.5832541f)
+        test(1.0109501f, 1.4342854f)
+        test(0.9759502f, 1.3846292f)
+        test(0.9059501f, 1.2853167f)
+        test(0.8359501f, 1.1860042f)
+        test(0.6959501f, 0.9873792f)
+        test(0.5559501f, 0.7887542f)
+        test(0.41595012f, 0.5901292f)
+        test(0.2759501f, 0.3915042f)
+        test(0.1359501f, 0.1928792f)
+        test(0.0659501f, 0.0935667f)
+        test(7.048458e-4f, 0.001f)
+    }
+
+    @Test
+    fun `Test osu!standard radius to old osu!droid difficulty scale conversion`() {
         fun test(radius: Double, scale: Float) =
             Assert.assertEquals(
-                CircleSizeCalculator.standardRadiusToDroidDifficultyScale(radius),
+                CircleSizeCalculator.standardRadiusToOldDroidDifficultyScale(radius),
                 scale,
                 1e-5f
             )
@@ -112,7 +171,7 @@ class CircleSizeCalculatorTest {
     }
 
     @Test
-    fun `Test osu!standard radius to osu!standard circle size with fudge`() {
+    fun `Test osu!standard radius to osu!standard circle size conversion with fudge`() {
         fun test(radius: Double, cs: Float) =
             Assert.assertEquals(
                 CircleSizeCalculator.standardRadiusToStandardCS(radius, true),
@@ -134,7 +193,7 @@ class CircleSizeCalculatorTest {
     }
 
     @Test
-    fun `Test osu!standard circle size to osu!standard scale with fudge`() {
+    fun `Test osu!standard circle size to osu!standard scale conversion with fudge`() {
         fun test(cs: Float, scale: Float) =
             Assert.assertEquals(
                 CircleSizeCalculator.standardCSToStandardScale(cs, true),
@@ -151,10 +210,10 @@ class CircleSizeCalculatorTest {
     }
 
     @Test
-    fun `Test osu!standard scale to osu!droid difficulty scale with fudge`() {
+    fun `Test osu!standard scale to old osu!droid difficulty scale conversion with fudge`() {
         fun test(standardScale: Float, droidScale: Float) =
             Assert.assertEquals(
-                CircleSizeCalculator.standardScaleToDroidDifficultyScale(standardScale, true),
+                CircleSizeCalculator.standardScaleToOldDroidDifficultyScale(standardScale, true),
                 droidScale,
                 1e-5f
             )

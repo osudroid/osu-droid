@@ -9,43 +9,46 @@ import com.rian.osu.beatmap.sections.BeatmapDifficulty
 import com.rian.osu.math.Vector2
 import org.junit.Assert
 import org.junit.Test
+import org.junit.runner.RunWith
+import org.robolectric.RobolectricTestRunner
 
+@RunWith(RobolectricTestRunner::class)
 class ModDifficultyAdjustTest {
     @Test
     fun `Test beatmap setting override without additional mods`() {
-        val difficulty = BeatmapDifficulty()
+        BeatmapDifficulty().apply {
+            ModDifficultyAdjust(cs = 4f, ar = 8f, od = 7f, hp = 6f).applyToDifficulty(GameMode.Droid, this, listOf())
 
-        ModDifficultyAdjust(cs = 4f, ar = 8f, od = 7f, hp = 6f).applyToDifficulty(GameMode.Droid, difficulty, listOf())
-
-        Assert.assertEquals(4f, difficulty.difficultyCS, 1e-2f)
-        Assert.assertEquals(4f, difficulty.gameplayCS, 1e-2f)
-        Assert.assertEquals(8f, difficulty.ar, 1e-2f)
-        Assert.assertEquals(7f, difficulty.od, 1e-2f)
-        Assert.assertEquals(6f, difficulty.hp, 1e-2f)
+            Assert.assertEquals(4f, difficultyCS)
+            Assert.assertEquals(4f, gameplayCS)
+            Assert.assertEquals(8f, ar)
+            Assert.assertEquals(7f, od)
+            Assert.assertEquals(6f, hp)
+        }
     }
 
     @Test
     fun `Test beatmap setting override with additional mods`() {
-        val difficulty = BeatmapDifficulty()
+        BeatmapDifficulty().apply {
+            ModDifficultyAdjust(cs = 6f, ar = 6f, od = 6f, hp = 6f).applyToDifficulty(
+                GameMode.Droid, this, listOf(ModHardRock(), ModReallyEasy())
+            )
 
-        ModDifficultyAdjust(cs = 6f, ar = 6f, od = 6f, hp = 6f).applyToDifficulty(
-            GameMode.Droid, difficulty, listOf(ModHardRock(), ModReallyEasy())
-        )
-
-        Assert.assertEquals(6f, difficulty.difficultyCS, 1e-2f)
-        Assert.assertEquals(6f, difficulty.gameplayCS, 1e-2f)
-        Assert.assertEquals(6f, difficulty.ar, 1e-2f)
-        Assert.assertEquals(6f, difficulty.od, 1e-2f)
-        Assert.assertEquals(6f, difficulty.hp, 1e-2f)
+            Assert.assertEquals(6f, difficultyCS)
+            Assert.assertEquals(6f, gameplayCS)
+            Assert.assertEquals(6f, ar)
+            Assert.assertEquals(6f, od)
+            Assert.assertEquals(6f, hp)
+        }
     }
 
     @Test
     fun `Test AR override with non-1x speed multiplier`() {
-        val difficulty = BeatmapDifficulty()
+        BeatmapDifficulty().apply {
+            ModDifficultyAdjust(ar = 9f).applyToDifficulty(GameMode.Droid, this, listOf(ModDoubleTime()))
 
-        ModDifficultyAdjust(ar = 9f).applyToDifficulty(GameMode.Droid, difficulty, listOf(ModDoubleTime()))
-
-        Assert.assertEquals(7f, difficulty.ar, 1e-2f)
+            Assert.assertEquals(7f, ar)
+        }
     }
 
     @Test
@@ -76,6 +79,49 @@ class ModDifficultyAdjustTest {
 
             Assert.assertEquals(tick.timePreempt, 1094.0, 1e-2)
             Assert.assertEquals(tick.timeFadeIn, 600.0, 1e-2)
+        }
+    }
+
+    @Test
+    fun `Test serialization`() {
+        ModDifficultyAdjust().apply {
+            serialize().apply {
+                Assert.assertNull(optJSONObject("settings"))
+            }
+
+            cs = 4f
+            ar = 9f
+
+            serialize().getJSONObject("settings").apply {
+                Assert.assertEquals(4f, getDouble("cs").toFloat())
+                Assert.assertEquals(9f, getDouble("ar").toFloat())
+                Assert.assertTrue(optDouble("od").isNaN())
+                Assert.assertTrue(optDouble("hp").isNaN())
+            }
+
+            od = 8f
+            hp = 6f
+
+            serialize().getJSONObject("settings").apply {
+                Assert.assertEquals(4f, getDouble("cs").toFloat())
+                Assert.assertEquals(9f, getDouble("ar").toFloat())
+                Assert.assertEquals(8f, getDouble("od").toFloat())
+                Assert.assertEquals(6f, getDouble("hp").toFloat())
+            }
+        }
+    }
+
+    @Test
+    fun `Test toString`() {
+        ModDifficultyAdjust().apply {
+            Assert.assertEquals("DA", toString())
+
+            cs = 4f
+            ar = 9f
+            od = 8f
+            hp = 6f
+
+            Assert.assertEquals("DA (CS4.0, AR9.0, OD8.0, HP6.0)", toString())
         }
     }
 }

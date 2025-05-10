@@ -7,25 +7,25 @@ import com.reco1l.andengine.text.*
 import com.reco1l.andengine.ui.*
 import com.reco1l.framework.*
 import com.reco1l.framework.math.*
+import ru.nsu.ccfit.zuev.osu.Config
 import ru.nsu.ccfit.zuev.osu.ResourceManager
 
-class FormSlider(defaultValue: Float = 0f) : FormControl<Float, Slider>(defaultValue) {
+@Suppress("LeakingThis")
+open class FormSlider(initialValue: Float = 0f) : FormControl<Float, Slider>(initialValue) {
 
-    override val control = Slider()
-
-    override val labelText = ExtendedText().apply {
-        font = ResourceManager.getInstance().getFont("smallFont")
-        padding = Vec4(0f, 0f, 0f, 18f)
+    override val control = Slider(initialValue).apply {
+        width = FillParent
     }
 
     override val valueText = ExtendedText().apply {
         font = ResourceManager.getInstance().getFont("smallFont")
-        anchor = Anchor.TopRight
-        origin = Anchor.TopRight
-        padding = Vec4(4f, 0f)
+        anchor = Anchor.CenterRight
+        origin = Anchor.CenterRight
+        padding = Vec4(6f, 0f)
         alignment = Anchor.Center
+        applyTheme = { color = it.accentColor }
 
-        background = RoundedBox().apply {
+        background = Box().apply {
             color = ColorARGB.Black
             alpha = 0.1f
             cornerRadius = 8f
@@ -34,18 +34,35 @@ class FormSlider(defaultValue: Float = 0f) : FormControl<Float, Slider>(defaultV
 
 
     init {
-        attachChild(LinearContainer().apply {
-            width = FitParent
-            padding = Vec4(24f)
-            orientation = Orientation.Vertical
+        orientation = Orientation.Vertical
+        spacing = 12f
 
-            attachChild(Container().apply {
-                width = FitParent
-                attachChild(labelText)
-                attachChild(valueText)
-            })
+        linearContainer {
+            width = FillParent
+            padding = Vec4(0f, 12f)
+            spacing = 12f
+            +labelText
+            +resetButton
 
-            attachChild(control)
-        })
+            container {
+                width = FillParent
+                +valueText
+            }
+        }
+        +control
+    }
+}
+
+class FloatPreferenceSlider(private val preferenceKey: String, fallbackValue: Float = 0f) : FormSlider(Config.getFloat(preferenceKey, fallbackValue)) {
+    override fun onControlValueChanged() {
+        Config.setFloat(preferenceKey, control.value)
+        super.onControlValueChanged()
+    }
+}
+
+class IntPreferenceSlider(private val preferenceKey: String, fallbackValue: Int = 0) : FormSlider(Config.getInt(preferenceKey, fallbackValue).toFloat()) {
+    override fun onControlValueChanged() {
+        Config.setInt(preferenceKey, control.value.toInt())
+        super.onControlValueChanged()
     }
 }
