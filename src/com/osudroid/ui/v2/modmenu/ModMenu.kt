@@ -52,6 +52,7 @@ object ModMenu : ExtendedScene() {
 
 
     private val modChangeQueue = LinkedList<Mod>()
+    private val modPresetsSection: ModMenuPresetsSection
 
     private val customizeButton: TextButton
     private val customizationMenu: ModCustomizationMenu
@@ -227,14 +228,19 @@ object ModMenu : ExtendedScene() {
                     spacing = 16f
                     padding = Vec4(60f, 0f)
 
+                    modPresetsSection = ModMenuPresetsSection()
+                    +modPresetsSection
+
                     val mods = ModUtils.allModsInstances
 
                     ModType.entries.forEach { type ->
                         val sectionName = StringTable.get(type.stringId)
-                        val sectionMods = mods.filter { it !is IMigratableMod && it.isUserPlayable && it.type == type }
+                        val sectionToggles = mods.filter { it !is IMigratableMod && it.isUserPlayable && it.type == type }.map { ModMenuToggle(it) }
 
-                        if (sectionMods.isNotEmpty()) {
-                            +ModMenuSection(sectionName, sectionMods)
+                        modToggles.addAll(sectionToggles)
+
+                        if (sectionToggles.isNotEmpty()) {
+                            +ModMenuSection(sectionName, sectionToggles)
                         }
                     }
                 })
@@ -245,6 +251,8 @@ object ModMenu : ExtendedScene() {
 
         // Customizations menu
         attachChild(customizationMenu)
+
+        modPresetsSection.loadPresets()
     }
 
 
@@ -489,6 +497,8 @@ object ModMenu : ExtendedScene() {
         modChangeQueue.clear()
 
         parseBeatmap()
+
+        modPresetsSection.onModsChanged()
     }
 
     fun addMod(mod: Mod) {

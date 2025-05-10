@@ -36,17 +36,15 @@ class ExtendedEngine(val context: Activity, options: EngineOptions) : Engine(opt
     fun onSkinChange() {
         val scene = scene ?: return
 
-        fun IEntity.updateSkin() {
-            callOnChildren { it.updateSkin() }
-
+        fun IEntity.propagateSkinChange() {
+            callOnChildren { it.propagateSkinChange() }
             if (this is ISkinnable) {
                 onSkinChanged()
             }
         }
 
-        scene.updateSkin()
+        scene.propagateSkinChange()
     }
-
 
     /**
      * Sets the current theme for the engine's properties.
@@ -54,15 +52,14 @@ class ExtendedEngine(val context: Activity, options: EngineOptions) : Engine(opt
     fun onThemeChange(theme: Theme) {
         val scene = scene ?: return
 
-        fun IEntity.updateTheme() {
-            callOnChildren { it.updateTheme() }
-
+        fun IEntity.propagateThemeChange() {
+            callOnChildren { it.propagateThemeChange() }
             if (this is ExtendedEntity) {
                 onThemeChanged(theme)
             }
         }
 
-        scene.updateTheme()
+        scene.propagateThemeChange()
     }
 
     /**
@@ -70,21 +67,27 @@ class ExtendedEngine(val context: Activity, options: EngineOptions) : Engine(opt
      */
     fun onKeyPress(keyCode: Int, event: KeyEvent): Boolean {
 
-        fun IEntity.onKeyPress(keyCode: Int, event: KeyEvent): Boolean {
+        fun IEntity.propagateKeyPress(keyCode: Int, event: KeyEvent): Boolean {
 
-            for (i in childCount - 1 downTo 0) {
-                if (getChild(i).onKeyPress(keyCode, event)) {
-                    return true
-                }
+            if (this is ExtendedEntity && onKeyPress(keyCode, event)) {
+                return true
             }
 
-            if (this is ExtendedEntity) {
-                onKeyPress(keyCode, event)
+            for (i in childCount - 1 downTo 0) {
+                if (getChild(i).propagateKeyPress(keyCode, event)) {
+                    return true
+                }
             }
             return false
         }
 
-        return scene?.onKeyPress(keyCode, event) == true
+        val scene = scene ?: return false
+
+        if (scene.childScene?.propagateKeyPress(keyCode, event) == true) {
+            return true
+        }
+
+        return scene.propagateKeyPress(keyCode, event)
     }
 
     override fun onTouchScene(scene: Scene, event: TouchEvent): Boolean {

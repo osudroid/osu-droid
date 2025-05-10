@@ -209,7 +209,7 @@ class GameLoaderScene(private val gameScene: GameScene, beatmapInfo: BeatmapInfo
 
                     linearContainer {
                         spacing = 10f
-                        padding = Vec4(12f, 0f, 12f, 12f)
+                        padding = Vec4(0f, 16f)
                         anchor = Anchor.TopCenter
                         origin = Anchor.TopCenter
 
@@ -298,11 +298,6 @@ class GameLoaderScene(private val gameScene: GameScene, beatmapInfo: BeatmapInfo
     companion object {
         private const val FADE_TIMEOUT = 2000L
         private const val MINIMUM_TIMEOUT = 2000L
-
-        init {
-            ResourceManager.getInstance().loadHighQualityAsset("plus", "plus.png")
-            ResourceManager.getInstance().loadHighQualityAsset("minus", "minus.png")
-        }
     }
 
 }

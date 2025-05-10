@@ -265,6 +265,8 @@ public class MainActivity extends BaseGameActivity implements
         ResourceManager.getInstance().loadHighQualityAsset("back-arrow", "back-arrow.png");
         ResourceManager.getInstance().loadHighQualityAsset("reset", "reset.png");
         ResourceManager.getInstance().loadHighQualityAsset("check", "check.png");
+        ResourceManager.getInstance().loadHighQualityAsset("plus", "plus.png");
+        ResourceManager.getInstance().loadHighQualityAsset("minus", "minus.png");
 
         File bg;
         if ((bg = new File(Config.getSkinPath() + "menu-background.png")).exists()
@@ -722,15 +724,16 @@ public class MainActivity extends BaseGameActivity implements
         if (AccessibilityDetector.isIllegalServiceDetected())
             return false;
 
-        if (event.getAction() != KeyEvent.ACTION_DOWN) {
-            return super.onKeyDown(keyCode, event);
-        }
         if (GlobalManager.getInstance().getEngine() == null) {
             return super.onKeyDown(keyCode, event);
         }
 
         if (ExtendedEngine.getCurrent().onKeyPress(keyCode, event)) {
             return true;
+        }
+
+        if (event.getAction() != KeyEvent.ACTION_DOWN) {
+            return super.onKeyDown(keyCode, event);
         }
 
         Scene scene = GlobalManager.getInstance().getEngine().getScene();
