@@ -24,6 +24,7 @@ import com.osudroid.beatmaps.DifficultyCalculationManager;
 import com.osudroid.data.BeatmapInfo;
 import com.osudroid.ui.v2.GameLoaderScene;
 import com.osudroid.data.DatabaseManager;
+import com.osudroid.ui.v2.modmenu.ModIcon;
 import com.osudroid.utils.Execution;
 import com.reco1l.andengine.sprite.AnimatedSprite;
 import com.reco1l.andengine.sprite.ExtendedSprite;
@@ -929,9 +930,13 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
                 continue;
             }
 
-            var effect = GameObjectPool.getInstance().getEffect(mod.getTextureName());
-
-            effect.init(fgScene, position, scale, Modifiers.sequence(
+            var icon = new ModIcon(mod);
+            icon.setPosition(position.x, position.y);
+            icon.setOrigin(Anchor.Center);
+            icon.setSize(68, 66);
+            icon.setScale(scale);
+            icon.registerEntityModifier(Modifiers.sequence(
+                IEntity::detachSelf,
                 Modifiers.scale(0.25f, 1.2f, 1f),
                 Modifiers.delay(2f - timeOffset),
                 Modifiers.parallel(
@@ -939,6 +944,8 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
                     Modifiers.scale(0.5f, 1f, 1.5f)
                 )
             ));
+
+            fgScene.attachChild(icon);
 
             position.x -= 25f;
             timeOffset += 0.25f;
