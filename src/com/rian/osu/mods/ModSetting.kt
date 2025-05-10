@@ -98,6 +98,31 @@ sealed class RangeConstrainedModSetting<V>(
 //endregion
 
 
+open class IntegerModSetting(
+    name: String,
+    valueFormatter: (Int) -> String = { it.toString() },
+    defaultValue: Int,
+    minValue: Int = Int.MIN_VALUE,
+    maxValue: Int = Int.MAX_VALUE,
+    step: Int = 1
+) : RangeConstrainedModSetting<Int>(name, valueFormatter, defaultValue, minValue, maxValue, step) {
+    init {
+        require(this.minValue <= this.maxValue) { "minValue must be less than or equal to maxValue." }
+        require(this.step >= 0) { "step must be greater than or equal to 0." }
+
+        require(this.defaultValue in this.minValue..this.maxValue) {
+            "defaultValue must be between minValue and maxValue."
+        }
+    }
+
+    override fun processValue(value: Int) = when {
+        value < minValue -> minValue
+        value > maxValue -> maxValue
+        step == 0 -> value
+        else -> (round((value - minValue) / step.toFloat()) * step + minValue).roundToInt()
+    }
+}
+
 open class FloatModSetting(
     name: String,
     valueFormatter: (Float) -> String = { it.toString() },
