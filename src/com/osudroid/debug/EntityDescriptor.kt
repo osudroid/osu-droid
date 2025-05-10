@@ -41,7 +41,7 @@ class EntityDescriptor : CollapsiblePanel() {
                 }
             }
 
-            content.get<ExtendedText>(0).text = """
+            content.get<ExtendedText>(0)?.text = """
 ${clazz.simpleName ?: superclass?.simpleName ?: "Unknown"}
 $readableMembers
             """
