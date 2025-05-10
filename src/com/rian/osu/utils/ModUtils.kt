@@ -34,6 +34,7 @@ object ModUtils {
             ModNoFail(),
             ModPerfect(),
             ModPrecise(),
+            ModRandom(),
             ModReallyEasy(),
             ModRelax(),
             ModReplayV6(),
