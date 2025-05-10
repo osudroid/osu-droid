@@ -202,8 +202,6 @@ class ModRandom : Mod(), IModApplicableToBeatmap {
         return previousObjectStartedCombo && random!!.nextDouble() < 0.6
     }
 
-    override fun toString() = "${super.toString()} (seed: $seed, angle sharpness: $angleSharpness)"
-
     override fun deepCopy() = ModRandom().also {
         it.seed = seed
         it.angleSharpness = angleSharpness

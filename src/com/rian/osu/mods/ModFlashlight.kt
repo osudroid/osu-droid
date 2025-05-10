@@ -41,13 +41,8 @@ class ModFlashlight : Mod() {
         put("areaFollowDelay", followDelay)
     }
 
-    override fun toString(): String {
-        if (followDelay == DEFAULT_FOLLOW_DELAY) {
-            return super.toString()
-        }
-
-        return "${super.toString()} (%.2fs)".format(followDelay)
-    }
+    override val extraInformation
+        get() = "%.2fs".format(followDelay)
 
     override fun deepCopy() = ModFlashlight().also { it.followDelay = followDelay }
 

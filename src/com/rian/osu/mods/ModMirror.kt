@@ -77,10 +77,8 @@ class ModMirror : Mod(), IModApplicableToHitObject {
         }
     }
 
-    override fun toString() = buildString {
-        append(super.toString())
-
-        if (isRelevant) {
+    override val extraInformation: String
+        get() {
             val settings = mutableListOf<Char>()
 
             if (flipHorizontally) {
@@ -91,9 +89,8 @@ class ModMirror : Mod(), IModApplicableToHitObject {
                 settings.add('↕')
             }
 
-            append(" (${settings.joinToString(", ")})")
+            return settings.joinToString(", ")
         }
-    }
 
     override fun deepCopy() = ModMirror().also {
         it.flipHorizontally = flipHorizontally
