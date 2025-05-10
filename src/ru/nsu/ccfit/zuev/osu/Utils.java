@@ -77,7 +77,7 @@ public class Utils {
         final PointF pos = scaleToRealC(coords);
         pos.y += (Config.getRES_HEIGHT() - toRes(Constants.MAP_ACTUAL_HEIGHT)) / 2f;
         pos.x += (Config.getRES_WIDTH() - toRes(Constants.MAP_ACTUAL_WIDTH)) / 2f;
-        if (GameHelper.isHardrock()) {
+        if (GameHelper.isHardRock()) {
             pos.y -= (float) Config.getRES_HEIGHT() / 2;
             pos.y *= -1;
             pos.y += (float) Config.getRES_HEIGHT() / 2;
@@ -90,7 +90,7 @@ public class Utils {
 
     public static PointF realToTrackCoords(final PointF coords, float width, float height, boolean isOld) {
         final PointF pos = new PointF(coords.x, coords.y);
-        if (GameHelper.isHardrock()) {
+        if (GameHelper.isHardRock()) {
             pos.y -= height / 2;
             pos.y *= -1;
             pos.y += height / 2;

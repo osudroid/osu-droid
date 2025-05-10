@@ -817,22 +817,21 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
         stat.setBeatmapNoteCount(lastBeatmapInfo.getTotalHitObjectCount());
         stat.setBeatmapMaxCombo(lastBeatmapInfo.getMaxCombo());
 
-        GameHelper.setHardrock(lastMods.contains(ModHardRock.class));
-        GameHelper.setDoubleTime(lastMods.contains(ModDoubleTime.class));
-        GameHelper.setNightCore(lastMods.contains(ModNightCore.class));
-        GameHelper.setHalfTime(lastMods.contains(ModHalfTime.class));
-        GameHelper.setHidden(lastMods.contains(ModHidden.class));
-        GameHelper.setHiddenOnlyFadeApproachCircles(lastMods.contains(ModHidden.class) && lastMods.ofType(ModHidden.class).isOnlyFadeApproachCircles());
-        GameHelper.setTraceable(lastMods.contains(ModTraceable.class));
-        GameHelper.setFlashLight(lastMods.contains(ModFlashlight.class));
-        GameHelper.setRelaxMod(lastMods.contains(ModRelax.class));
-        GameHelper.setAutopilotMod(lastMods.contains(ModAutopilot.class));
-        GameHelper.setAuto(lastMods.contains(ModAutoplay.class));
-        GameHelper.setSuddenDeath(lastMods.contains(ModSuddenDeath.class));
-        GameHelper.setPerfect(lastMods.contains(ModPerfect.class));
-        GameHelper.setSynesthesia(lastMods.contains(ModSynesthesia.class));
-        GameHelper.setScoreV2(lastMods.contains(ModScoreV2.class));
-        GameHelper.setEasy(lastMods.contains(ModEasy.class));
+        GameHelper.setHardRock(lastMods.ofType(ModHardRock.class));
+        GameHelper.setDoubleTime(lastMods.ofType(ModDoubleTime.class));
+        GameHelper.setNightCore(lastMods.ofType(ModNightCore.class));
+        GameHelper.setHalfTime(lastMods.ofType(ModHalfTime.class));
+        GameHelper.setHidden(lastMods.ofType(ModHidden.class));
+        GameHelper.setTraceable(lastMods.ofType(ModTraceable.class));
+        GameHelper.setFlashlight(lastMods.ofType(ModFlashlight.class));
+        GameHelper.setRelax(lastMods.ofType(ModRelax.class));
+        GameHelper.setAutopilot(lastMods.ofType(ModAutopilot.class));
+        GameHelper.setAutoplay(lastMods.ofType(ModAutoplay.class));
+        GameHelper.setSuddenDeath(lastMods.ofType(ModSuddenDeath.class));
+        GameHelper.setPerfect(lastMods.ofType(ModPerfect.class));
+        GameHelper.setSynesthesia(lastMods.ofType(ModSynesthesia.class));
+        GameHelper.setScoreV2(lastMods.ofType(ModScoreV2.class));
+        GameHelper.setEasy(lastMods.ofType(ModEasy.class));
 
         for (int i = 0; i < CursorCount; i++) {
             cursors[i] = new Cursor();
@@ -882,7 +881,7 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
         distToNextObject = 0;
 
         // TODO passive objects
-        if ((replaying || Config.isShowCursor()) && !GameHelper.isAuto() && !GameHelper.isAutopilotMod()) {
+        if ((replaying || Config.isShowCursor()) && !GameHelper.isAutoplay() && !GameHelper.isAutopilot()) {
             cursorSprites = new CursorEntity[CursorCount];
             for (int i = 0; i < CursorCount; i++) {
                 cursorSprites[i] = new CursorEntity();
@@ -892,7 +891,7 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
             cursorSprites = null;
         }
 
-        if (GameHelper.isAuto() || GameHelper.isAutopilotMod()) {
+        if (GameHelper.isAutoplay() || GameHelper.isAutopilot()) {
             autoCursor = new AutoCursor();
             autoCursor.attachToScene(fgScene);
         }
@@ -960,7 +959,7 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
             fgScene.attachChild(unrankedSprite);
         }
 
-        if (GameHelper.isFlashLight()){
+        if (GameHelper.isFlashlight()){
             var flashlight = lastMods.ofType(ModFlashlight.class);
 
             flashlightSprite = new FlashLightEntity(Objects.requireNonNull(flashlight).getFollowDelay());
@@ -1174,7 +1173,7 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
             }
         }
 
-        if (GameHelper.isAuto() || GameHelper.isAutopilotMod()) {
+        if (GameHelper.isAutoplay() || GameHelper.isAutopilot()) {
             autoCursor.update(dt);
         } else if (cursorSprites != null) {
             for (int i = 0; i < CursorCount; i++) {
@@ -1199,8 +1198,8 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
                 c.mousePressed = false;
             }
         }
-        if(GameHelper.isFlashLight()){
-            if (!GameHelper.isAuto() && !GameHelper.isAutopilotMod()) {
+        if(GameHelper.isFlashlight()){
+            if (!GameHelper.isAutoplay() && !GameHelper.isAutopilot()) {
                 if (mainCursorId < 0){
                     int i = 0;
                     for (final Cursor c : cursors) {
@@ -1240,7 +1239,7 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
                 if (!breakAnimator.isBreak() && breakPeriods.peek().getStart() <= elapsedTime) {
                     gameStarted = false;
                     breakAnimator.init(breakPeriods.peek().getLength());
-                    if(GameHelper.isFlashLight()){
+                    if(GameHelper.isFlashlight()){
                         flashlightSprite.onBreak(true);
                     }
 
@@ -1260,13 +1259,13 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
                 gameStarted = true;
                 hud.onBreakStateChange(false);
 
-                if(GameHelper.isFlashLight()){
+                if(GameHelper.isFlashlight()){
                     flashlightSprite.onBreak(false);
                 }
             }
         }
 
-        if (objects.isEmpty() && activeObjects.isEmpty() && GameHelper.isFlashLight()) {
+        if (objects.isEmpty() && activeObjects.isEmpty() && GameHelper.isFlashlight()) {
             flashlightSprite.onBreak(true);
         }
 
@@ -1315,7 +1314,7 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
         }
         updateActiveObjects(dt);
 
-        if (GameHelper.isAuto() || GameHelper.isAutopilotMod()) {
+        if (GameHelper.isAutoplay() || GameHelper.isAutopilot()) {
             autoCursor.moveToObject(activeObjects.peek(), elapsedTime, this);
         }
 
@@ -1415,7 +1414,7 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
                 gameplayCircle.init(this, mgScene, parsedCircle, elapsedTime, comboColor);
                 addObject(gameplayCircle);
 
-                if (GameHelper.isAuto()) {
+                if (GameHelper.isAutoplay()) {
                     gameplayCircle.setAutoPlay();
                 }
 
@@ -1432,7 +1431,7 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
                 gameplaySpinner.init(this, bgScene, parsedSpinner, rps, stat);
                 addObject(gameplaySpinner);
 
-                if (GameHelper.isAuto() || GameHelper.isAutopilotMod()) {
+                if (GameHelper.isAutoplay() || GameHelper.isAutopilot()) {
                     gameplaySpinner.setAutoPlay();
                 }
 
@@ -1450,7 +1449,7 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
                 ++sliderIndex;
                 addObject(gameplaySlider);
 
-                if (GameHelper.isAuto()) {
+                if (GameHelper.isAutoplay()) {
                     gameplaySlider.setAutoPlay();
                 }
 
@@ -1887,7 +1886,7 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
 
     public void onCircleHit(int id, final float acc, final PointF pos,
                             final boolean endCombo, byte forcedScore, RGBColor color) {
-        if (GameHelper.isAuto()) {
+        if (GameHelper.isAutoplay()) {
             autoCursor.click();
             hud.onGameplayTouchDown((float) parsedBeatmap.getHitObjects().objects.get(id).startTime / 1000);
         }
@@ -1898,7 +1897,7 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
             short sacc = (short) (acc * 1000);
             replay.addObjectResult(id, sacc, null);
         }
-        if(GameHelper.isFlashLight() && !GameHelper.isAuto() && !GameHelper.isAutopilotMod()){
+        if(GameHelper.isFlashlight() && !GameHelper.isAutoplay() && !GameHelper.isAutopilot()){
            int nearestCursorId = getNearestCursorId(pos.x, pos.y);
            if (nearestCursorId >= 0) {
                mainCursorId = nearestCursorId;
@@ -1939,7 +1938,7 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
 
     public void onSliderHit(int id, final int score, final PointF judgementPos, final boolean endCombo,
                             RGBColor color, int type, boolean incrementCombo) {
-        if (GameHelper.isFlashLight() && !GameHelper.isAuto() && !GameHelper.isAutopilotMod()) {
+        if (GameHelper.isFlashlight() && !GameHelper.isAutoplay() && !GameHelper.isAutopilot()) {
             int nearestCursorId = getNearestCursorId(judgementPos.x, judgementPos.y);
             if (nearestCursorId >= 0) {
                 mainCursorId = nearestCursorId;
@@ -1996,7 +1995,7 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
             switch (type) {
                 case GameObjectListener.SLIDER_START:
                     createBurstEffectSliderStart(judgementPos, color);
-                    if (GameHelper.isAuto()) {
+                    if (GameHelper.isAutoplay()) {
                         hud.onGameplayTouchDown((float) parsedBeatmap.getHitObjects().objects.get(id).startTime / 1000);
                     }
                     break;
@@ -2017,7 +2016,7 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
 
     @Override
     public void onSpinnerStart(int id) {
-        if (GameHelper.isAuto()) {
+        if (GameHelper.isAutoplay()) {
             autoCursor.click();
             hud.onGameplayTouchDown((float) parsedBeatmap.getHitObjects().objects.get(id).startTime / 1000);
         }
@@ -2106,7 +2105,7 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
 
     public boolean isMousePressed(final GameObject object, final int index) {
         // EnumSet.contains() internally uses an iterator, and it can be expensive to use everytime we want to use this method.
-        if (GameHelper.isAuto()) {
+        if (GameHelper.isAutoplay()) {
             return false;
         }
         if (Config.isRemoveSliderLock()){
@@ -2141,7 +2140,7 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
         var width = Config.getRES_WIDTH();
         var height = Config.getRES_HEIGHT();
 
-        if (GameHelper.isHardrock()) {
+        if (GameHelper.isHardRock()) {
             rawY -= height / 2f;
             rawY *= -1;
             rawY += height / 2f;
@@ -2169,7 +2168,7 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
         }
 
         var cursor = cursors[id];
-        var sprite = !GameHelper.isAuto() && !GameHelper.isAutopilotMod() && cursorSprites != null
+        var sprite = !GameHelper.isAutoplay() && !GameHelper.isAutopilot() && cursorSprites != null
                 ? cursorSprites[id]
                 : null;
 
@@ -2191,7 +2190,7 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
                 sprite.setShowing(true);
             }
 
-            if (!GameHelper.isAuto()) {
+            if (!GameHelper.isAutoplay()) {
                 hud.onGameplayTouchDown(eventTime / 1000f);
             }
 
@@ -2297,7 +2296,7 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
 
         Execution.updateThread(this::stopLoopingSamples);
 
-        if (!GameHelper.isAuto() && !GameHelper.isAutopilotMod() && !replaying) {
+        if (!GameHelper.isAutoplay() && !GameHelper.isAutopilot() && !replaying) {
             removeAllCursors();
         }
 
@@ -2597,7 +2596,7 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
 
     private void createBurstEffect(final PointF pos, final RGBColor color) {
         if (!Config.isBurstEffects() ||
-                (GameHelper.isHidden() && !GameHelper.isHiddenOnlyFadeApproachCircles()) ||
+                (GameHelper.getHidden() != null && !GameHelper.getHidden().isOnlyFadeApproachCircles()) ||
                 GameHelper.isTraceable())
             return;
 
@@ -2611,7 +2610,7 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
 
     private void createBurstEffectSliderStart(final PointF pos, final RGBColor color) {
         if (!Config.isBurstEffects() ||
-                (GameHelper.isHidden() && !GameHelper.isHiddenOnlyFadeApproachCircles()) ||
+                (GameHelper.getHidden() != null && !GameHelper.getHidden().isOnlyFadeApproachCircles()) ||
                 GameHelper.isTraceable())
             return;
 
@@ -2625,7 +2624,7 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
 
     private void createBurstEffectSliderEnd(final PointF pos, final RGBColor color) {
         if (!Config.isBurstEffects() ||
-                (GameHelper.isHidden() && !GameHelper.isHiddenOnlyFadeApproachCircles()) ||
+                (GameHelper.getHidden() != null && !GameHelper.getHidden().isOnlyFadeApproachCircles()) ||
                 GameHelper.isTraceable())
             return;
 
@@ -2639,7 +2638,7 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
 
     private void createBurstEffectSliderReverse(final PointF pos, float ang, final RGBColor color) {
         if (!Config.isBurstEffects() ||
-                (GameHelper.isHidden() && !GameHelper.isHiddenOnlyFadeApproachCircles()) ||
+                (GameHelper.getHidden() != null && !GameHelper.getHidden().isOnlyFadeApproachCircles()) ||
                 GameHelper.isTraceable())
             return;
 
@@ -2669,7 +2668,7 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
 
     public void onSliderEnd(int id, int accuracy, BitSet tickSet) {
         onTrackingSliders(false);
-        if (GameHelper.isAuto()) {
+        if (GameHelper.isAutoplay()) {
             autoCursor.onSliderEnd();
         }
         if (replay != null && !replaying) {
@@ -2679,22 +2678,22 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
     }
 
     public void onTrackingSliders(boolean isTrackingSliders) {
-        if (GameHelper.isAuto()) {
+        if (GameHelper.isAutoplay()) {
             autoCursor.onSliderTracking();
         }
-        if (GameHelper.isFlashLight()) {
+        if (GameHelper.isFlashlight()) {
             flashlightSprite.onTrackingSliders(isTrackingSliders);
         }
     }
 
     public void onUpdatedAutoCursor(float pX, float pY) {
-        if (GameHelper.isFlashLight()) {
+        if (GameHelper.isFlashlight()) {
             flashlightSprite.onMouseMove(pX, pY);
         }
     }
 
     public void updateAutoBasedPos(float pX, float pY) {
-        if (GameHelper.isAuto() || GameHelper.isAutopilotMod()) {
+        if (GameHelper.isAutoplay() || GameHelper.isAutopilot()) {
             autoCursor.setPosition(pX, pY, this);
         }
     }

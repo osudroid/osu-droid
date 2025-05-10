@@ -264,7 +264,7 @@ public class GameplaySlider extends GameObject {
         // When snaking in is enabled, the first repeat or tail needs to be delayed until the snaking completes.
         float fadeInDelay = Config.isSnakingInSliders() ? timePreempt / 3 : 0;
 
-        if (GameHelper.isHidden() && !GameHelper.isHiddenOnlyFadeApproachCircles()) {
+        if (GameHelper.getHidden() != null && !GameHelper.getHidden().isOnlyFadeApproachCircles()) {
             float fadeOutDuration = timePreempt * (float) ModHidden.FADE_OUT_DURATION_MULTIPLIER;
             float finalTailAlpha = (fadeInDuration - fadeInDelay) / fadeInDuration;
 
@@ -500,7 +500,7 @@ public class GameplaySlider extends GameObject {
             return;
         }
 
-        if (GameHelper.isHidden() && !GameHelper.isHiddenOnlyFadeApproachCircles()) {
+        if (GameHelper.getHidden() != null && !GameHelper.getHidden().isOnlyFadeApproachCircles()) {
             sliderBody.detachSelf();
 
             // If the animation is enabled, at this point it will be still animating.
@@ -719,7 +719,7 @@ public class GameplaySlider extends GameObject {
                     followCircle.detachSelf();
 
                     // When hidden mod is enabled, the follow circle is the last object to finish animating.
-                    if (GameHelper.isHidden() && !GameHelper.isHiddenOnlyFadeApproachCircles()) {
+                    if (GameHelper.getHidden() != null && !GameHelper.getHidden().isOnlyFadeApproachCircles()) {
                         poolObject();
                     }
                 });
@@ -742,14 +742,14 @@ public class GameplaySlider extends GameObject {
         for (int i = 0, count = listener.getCursorsCount(); i < count; i++) {
 
             var inPosition = Utils.squaredDistance(position, listener.getMousePos(i)) <= radius;
-            if (GameHelper.isRelaxMod() && elapsedSpanTime >= 0 && inPosition) {
+            if (GameHelper.isRelax() && elapsedSpanTime >= 0 && inPosition) {
                 return true;
             }
 
             var isPressed = listener.isMousePressed(this, i);
             if (isPressed && inPosition) {
                 return true;
-            } else if (GameHelper.isAutopilotMod() && isPressed) {
+            } else if (GameHelper.isAutopilot() && isPressed) {
                 return true;
             }
         }
@@ -768,14 +768,14 @@ public class GameplaySlider extends GameObject {
         for (int i = 0, count = listener.getCursorsCount(); i < count; i++) {
 
             var inPosition = Utils.squaredDistance(position, listener.getMousePos(i)) <= radius;
-            if (GameHelper.isRelaxMod() && elapsedSpanTime >= 0 && inPosition) {
+            if (GameHelper.isRelax() && elapsedSpanTime >= 0 && inPosition) {
                 return 0;
             }
 
             var isPressed = listener.isMousePressed(this, i);
             if (isPressed && inPosition) {
                 return listener.downFrameOffset(i);
-            } else if (GameHelper.isAutopilotMod() && isPressed) {
+            } else if (GameHelper.isAutopilot() && isPressed) {
                 return 0;
             }
         }
@@ -915,7 +915,7 @@ public class GameplaySlider extends GameObject {
         ball.setPosition(ballPos.x, ballPos.y);
         ball.setRotation(ballAngle);
 
-        if (GameHelper.isAuto() || GameHelper.isAutopilotMod()) {
+        if (GameHelper.isAutoplay() || GameHelper.isAutopilot()) {
             listener.updateAutoBasedPos(ballPos.x, ballPos.y);
         }
 
@@ -1074,7 +1074,7 @@ public class GameplaySlider extends GameObject {
         for (int i = 0, cursorCount = listener.getCursorsCount(); i < cursorCount; i++) {
             var isPressed = listener.isMouseDown(i);
 
-            if (GameHelper.isAutopilotMod() && isPressed) {
+            if (GameHelper.isAutopilot() && isPressed) {
                 return true;
             }
 
@@ -1195,7 +1195,7 @@ public class GameplaySlider extends GameObject {
 
     private void applyBodyFadeAdjustments(float fadeInDuration) {
 
-        if (GameHelper.isHidden() && !GameHelper.isHiddenOnlyFadeApproachCircles()) {
+        if (GameHelper.getHidden() != null && !GameHelper.getHidden().isOnlyFadeApproachCircles()) {
             // New duration from completed fade in to end (before fading out)
             float fadeOutDuration = (float) duration + timePreempt - fadeInDuration;
 

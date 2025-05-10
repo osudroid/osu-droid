@@ -184,7 +184,7 @@ public class GameplayModernSpinner extends GameplaySpinner {
             degree = (rotations + dFill / 4f) * 360;
             top.setRotation(degree);
             //auto时，FL光圈绕中心旋转
-            if (GameHelper.isAutopilotMod() || GameHelper.isAuto()) {
+            if (GameHelper.isAutopilot() || GameHelper.isAutoplay()) {
                 float pX = position.x + 50 * (float) Math.sin(degree);
                 float pY = position.y + 50 * (float) Math.cos(degree);
                 listener.updateAutoBasedPos(pX, pY);

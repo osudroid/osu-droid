@@ -96,7 +96,7 @@ public class GameplayHitCircle extends GameObject {
         approachCircle.setPosition(this.position.x, this.position.y);
         approachCircle.setVisible(!GameHelper.isHidden() || applyIncreasedVisibility);
 
-        if (GameHelper.isHidden() && !GameHelper.isHiddenOnlyFadeApproachCircles()) {
+        if (GameHelper.getHidden() != null && !GameHelper.getHidden().isOnlyFadeApproachCircles()) {
             float actualFadeOutDuration = timePreempt * (float) ModHidden.FADE_OUT_DURATION_MULTIPLIER;
             float remainingFadeOutDuration = Math.min(
                 actualFadeOutDuration,
@@ -197,14 +197,14 @@ public class GameplayHitCircle extends GameObject {
         for (int i = 0, count = listener.getCursorsCount(); i < count; i++) {
 
             var inPosition = Utils.squaredDistance(position, listener.getMousePos(i)) <= radiusSquared;
-            if (GameHelper.isRelaxMod() && passedTime - timePreempt >= 0 && inPosition) {
+            if (GameHelper.isRelax() && passedTime - timePreempt >= 0 && inPosition) {
                 return true;
             }
 
             var isPressed = listener.isMousePressed(this, i);
             if (isPressed && inPosition) {
                 return true;
-            } else if (GameHelper.isAutopilotMod() && isPressed) {
+            } else if (GameHelper.isAutopilot() && isPressed) {
                 return true;
             }
         }
@@ -220,14 +220,14 @@ public class GameplayHitCircle extends GameObject {
         for (int i = 0, count = listener.getCursorsCount(); i < count; i++) {
 
             var inPosition = Utils.squaredDistance(position, listener.getMousePos(i)) <= radiusSquared;
-            if (GameHelper.isRelaxMod() && passedTime - timePreempt >= 0 && inPosition) {
+            if (GameHelper.isRelax() && passedTime - timePreempt >= 0 && inPosition) {
                 return 0;
             }
 
             var isPressed = listener.isMousePressed(this, i);
             if (isPressed && inPosition) {
                 return listener.downFrameOffset(i);
-            } else if (GameHelper.isAutopilotMod() && isPressed) {
+            } else if (GameHelper.isAutopilot() && isPressed) {
                 return 0;
             }
         }
