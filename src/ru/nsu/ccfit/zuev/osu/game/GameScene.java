@@ -779,7 +779,11 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
 
     public void cancelLoading() {
         // Do not cancel loading in multiplayer.
-        if (!Multiplayer.isMultiplayer && loadingJob != null) {
+        if (Multiplayer.isMultiplayer) {
+            return;
+        }
+
+        if (loadingJob != null) {
             loadingJob.cancel(new CancellationException("Loading job cancelled"));
         }
 
