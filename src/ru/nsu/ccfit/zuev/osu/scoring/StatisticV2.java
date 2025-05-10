@@ -453,10 +453,7 @@ public class StatisticV2 implements Serializable {
 
     public String compile() {
         StringBuilder builder = new StringBuilder();
-        String mstring = mod.toLegacyModString();
-        if (mstring.isEmpty())
-            mstring = "-";
-        builder.append(mstring);
+        builder.append(mod.serializeMods(false));
         builder.append(' ');
         builder.append(getTotalScoreWithMultiplier());
         builder.append(' ');
