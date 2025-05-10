@@ -741,20 +741,14 @@ public class MainActivity extends BaseGameActivity implements
 
         var gameScene = GlobalManager.getInstance().getGameScene();
 
-        if (gameScene != null && (keyCode == KeyEvent.KEYCODE_BACK || keyCode == KeyEvent.KEYCODE_MENU)) {
-            if (gameScene.isLoading()) {
-                gameScene.cancelLoading();
-                return true;
+        if (gameScene != null && scene == gameScene.getScene() &&
+                (keyCode == KeyEvent.KEYCODE_BACK || keyCode == KeyEvent.KEYCODE_MENU)) {
+            if (gameScene.isPaused()) {
+                gameScene.resume();
+            } else {
+                gameScene.pause();
             }
-
-            if (scene == gameScene.getScene()) {
-                if (gameScene.isPaused()) {
-                    gameScene.resume();
-                } else {
-                    gameScene.pause();
-                }
-                return true;
-            }
+            return true;
         }
         if (GlobalManager.getInstance().getScoring() != null && keyCode == KeyEvent.KEYCODE_BACK
                 && scene == GlobalManager.getInstance().getScoring().getScene()) {
@@ -786,14 +780,13 @@ public class MainActivity extends BaseGameActivity implements
             return true;
         }
         if (keyCode == KeyEvent.KEYCODE_BACK) {
-            if (GlobalManager.getInstance().getEngine() != null && GlobalManager.getInstance().getSongMenu() != null &&
+            if (getEngine() != null && GlobalManager.getInstance().getSongMenu() != null &&
                     scene == GlobalManager.getInstance().getSongMenu().getScene()) {
 
                 //SongMenu 界面按返回按钮（系统按钮）
                 GlobalManager.getInstance().getSongMenu().back();
             } else {
-
-                if (scene instanceof LoadingScreen.LoadingScene || scene instanceof GameLoaderScene) {
+                if (scene instanceof LoadingScreen.LoadingScene) {
                     return true;
                 }
 
@@ -812,6 +805,13 @@ public class MainActivity extends BaseGameActivity implements
                         runOnUiThread(RoomScene.INSTANCE.getLeaveDialog()::show);
                         return true;
                     }
+                } else if (scene instanceof GameLoaderScene) {
+                    if (gameScene != null) {
+                        gameScene.cancelLoading();
+                    }
+
+                    getEngine().setScene(GlobalManager.getInstance().getSongMenu().getScene());
+                    return true;
                 }
 
                 GlobalManager.getInstance().getMainScene().showExitDialog();

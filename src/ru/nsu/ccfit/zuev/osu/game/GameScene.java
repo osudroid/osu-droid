@@ -773,10 +773,6 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
         ResourceManager.getInstance().getSound("failsound").stop();
     }
 
-    public boolean isLoading() {
-        return loadingJob != null && !loadingJob.isCancelled();
-    }
-
     public void cancelLoading() {
         // Do not cancel loading in multiplayer.
         if (Multiplayer.isMultiplayer) {
