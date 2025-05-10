@@ -42,7 +42,7 @@ class ModFlashlight : Mod() {
     }
 
     override val extraInformation
-        get() = "%.2fs".format(followDelay)
+        get() = if (followDelay == DEFAULT_FOLLOW_DELAY) super.extraInformation else "%.2fs".format(followDelay)
 
     override fun deepCopy() = ModFlashlight().also { it.followDelay = followDelay }
 
