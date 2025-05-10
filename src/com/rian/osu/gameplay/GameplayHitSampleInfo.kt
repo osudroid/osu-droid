@@ -26,6 +26,13 @@ class GameplayHitSampleInfo : IGameplayHitSampleInfo {
             soundProvider?.setLooping(value)
         }
 
+    override var volume = 1f
+        set(value) {
+            field = value
+
+            soundProvider?.setVolume(value)
+        }
+
     private var sampleInfo: HitSampleInfo? = null
     private var soundProvider: BassSoundProvider? = null
 
@@ -58,7 +65,7 @@ class GameplayHitSampleInfo : IGameplayHitSampleInfo {
             return
         }
 
-        soundProvider?.play(max(0.05f, sampleInfo!!.volume / 100f))
+        soundProvider?.play(volume * max(0.05f, sampleInfo!!.volume / 100f))
     }
 
     override fun stop() {

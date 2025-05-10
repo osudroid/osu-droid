@@ -23,6 +23,13 @@ class GameplaySequenceHitSampleInfo : IGameplayHitSampleInfo {
             samples?.fastForEach { it.second.isLooping = value }
         }
 
+    override var volume = 1f
+        set(value) {
+            field = value
+
+            samples?.fastForEach { it.second.volume = value }
+        }
+
     private var index = 0
     private var samples: Array<Pair<Double, GameplayHitSampleInfo>>? = null
     private var elapsedTime = 0f
