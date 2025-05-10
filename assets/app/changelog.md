@@ -5,6 +5,7 @@ Version 1.8.4
 
 - Add mod preset <span style="font-size: 0.75em">by [Reco1I](https://github.com/Reco1I)</span>
   - Can be used to save and quickly switch between different mod configurations.
+- Add ability to customize redesigned user interfaces' theme via `skin.json` <span style="font-size: 0.75em">by [Reco1I](https://github.com/Reco1I)</span>
 - Add Wind Down mod <span style="font-size: 0.75em">by [Rian8337](https://github.com/Rian8337)</span>
   - Slows the game down as gameplay progresses.
   - Initial and final speed can be configured in the mod menu.
@@ -37,6 +38,10 @@ Version 1.8.4
 - Redesign mod menu user interface <span style="font-size: 0.75em">by [Reco1I](https://github.com/Reco1I) and [Rian8337](https://github.com/Rian8337)</span>
   - With the addition of many more mods, the current mod menu became too cluttered and could not handle them. As such,
     it has been redesigned to also account for the overall theme of other interfaces.
+- Replace speed modify with Custom Speed mod <span style="font-size: 0.75em">by [Rian8337](https://github.com/Rian8337)</span>
+  - As a part of the mod storage system rework, speed modify is now considered an actual mod.
+- Replace forced difficulty statistics with Difficulty Adjust mod <span style="font-size: 0.75em">by [Rian8337](https://github.com/Rian8337)</span>
+  - As a part of the mod storage system rework, forced difficulty statistics are now considered an actual mod.
 - Redesign gameplay loading screen <span style="font-size: 0.75em">by [Reco1I](https://github.com/Reco1I)</span>
   - Now displays epilepsy warning. 
   - Now includes settings that were removed from the current mod menu, plus additional ones such as beatmap-specific
