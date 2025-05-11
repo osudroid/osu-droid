@@ -4,6 +4,7 @@ import android.view.*
 import android.view.KeyEvent.*
 import android.view.inputmethod.InputMethodManager
 import androidx.core.content.*
+import androidx.core.view.*
 import com.reco1l.andengine.*
 import com.reco1l.andengine.modifier.*
 import com.reco1l.andengine.shape.*
@@ -14,7 +15,7 @@ import ru.nsu.ccfit.zuev.osu.*
 import kotlin.math.*
 import kotlin.synchronized
 
-class TextInput(initialValue: String) : Control<String>(initialValue), IFocusable {
+class TextInput(initialValue: String) : Control<String>(initialValue), IFocusable, OnApplyWindowInsetsListener {
 
     override var applyTheme: ExtendedEntity.(Theme) -> Unit = { theme ->
         background?.color = theme.accentColor * 0.25f
@@ -48,6 +49,11 @@ class TextInput(initialValue: String) : Control<String>(initialValue), IFocusabl
     var maxCharacters = 0
 
     /**
+     * The entity that will be used to translate the text input field when the keyboard overlaps it.
+     */
+    var translateTarget: ExtendedEntity = this
+
+    /**
      * The font used to render the text.
      */
     var font by textEntity::font
@@ -76,13 +82,14 @@ class TextInput(initialValue: String) : Control<String>(initialValue), IFocusabl
         }
     }
 
-
     override fun onFocus() {
         setKeyboardVisibilty(true)
         caret.isVisible = true
 
         foreground?.clearModifiers(ModifierType.Color)
         foreground?.colorTo(Theme.current.accentColor, 0.1f)
+
+        ViewCompat.setOnApplyWindowInsetsListener(ExtendedEngine.Current.context.window.decorView, this)
     }
 
     override fun onBlur() {
@@ -98,6 +105,14 @@ class TextInput(initialValue: String) : Control<String>(initialValue), IFocusabl
 
         val imm = ExtendedEngine.Current.context.getSystemService<InputMethodManager>()
             ?: throw NullPointerException("InputMethodManager is null")
+
+        val windowInsets = ViewCompat.getRootWindowInsets(ExtendedEngine.Current.context.window.decorView)
+        val keyboardHeight = windowInsets!!.getInsets(WindowInsetsCompat.Type.ime()).bottom
+
+        // Tricky prevention from openning the keyboard while it should be closed and vice versa.
+        if (value == (keyboardHeight > 0) || !value == (keyboardHeight == 0)) {
+            return
+        }
 
         imm.toggleSoftInput(if (value) InputMethodManager.SHOW_FORCED else InputMethodManager.HIDE_IMPLICIT_ONLY, 0)
     }
@@ -183,8 +198,10 @@ class TextInput(initialValue: String) : Control<String>(initialValue), IFocusabl
 
     override fun onKeyPress(keyCode: Int, event: KeyEvent): Boolean = synchronized(value) {
 
-        if (event.action == ACTION_UP && keyCode == KEYCODE_BACK && isFocused) {
-            blur()
+        if (keyCode == KEYCODE_BACK && isFocused) {
+            if (event.action == ACTION_UP) {
+                blur()
+            }
             return true
         }
 
@@ -219,5 +236,22 @@ class TextInput(initialValue: String) : Control<String>(initialValue), IFocusabl
         }
 
         return true
+    }
+
+    override fun onApplyWindowInsets(v: View, insets: WindowInsetsCompat): WindowInsetsCompat {
+
+        if (isFocused) {
+            val keyboardHeight = insets.getInsets(WindowInsetsCompat.Type.ime()).bottom
+
+            val (_, sceneY) = convertLocalToSceneCoordinates(0f, height)
+            val (_, screenY) = ExtendedEngine.Current.camera.getScreenSpaceCoordinates(0f, sceneY)
+
+            translateTarget.translationY = if (screenY < keyboardHeight) -(keyboardHeight - screenY) else 0f
+        } else {
+            translateTarget.translationY = 0f
+            ViewCompat.setOnApplyWindowInsetsListener(ExtendedEngine.Current.context.window.decorView, null)
+        }
+
+        return insets
     }
 }

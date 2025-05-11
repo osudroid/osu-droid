@@ -18,6 +18,7 @@ class ModPresetsForm(section: ModMenuPresetsSection) : Dialog<LinearContainer>(i
         val nameInput = FormInput().apply {
             label = "Name"
             width = FillParent
+            control.translateTarget = card
             showResetButton = false
         }
 
