@@ -81,7 +81,7 @@ class ModMenuPresetsSection : ModMenuSection("Presets") {
     }
 
 
-    class ModPresetToggle(val preset: ModPreset) : Button() {
+    inner class ModPresetToggle(val preset: ModPreset) : Button() {
 
         init {
             orientation = Orientation.Vertical
@@ -108,7 +108,7 @@ class ModMenuPresetsSection : ModMenuSection("Presets") {
                         onActionUp = {
                             hide()
                             DatabaseManager.modPresetTable.delete(preset)
-                            ModMenuPresetsSection().loadPresets()
+                            loadPresets()
                         }
                     })
 
