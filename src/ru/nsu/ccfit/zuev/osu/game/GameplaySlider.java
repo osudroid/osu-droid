@@ -326,8 +326,9 @@ public class GameplaySlider extends GameObject {
         // Slider track
         superPath = renderPath;
         sliderBody.init(superPath, Config.isSnakingInSliders(), stackedPosition);
-        sliderBody.setBackgroundWidth(OsuSkin.get().getSliderBodyWidth() * scale);
-        sliderBody.setBorderWidth(OsuSkin.get().getSliderBorderWidth() * scale);
+        sliderBody.setScale(scale);
+        sliderBody.setBackgroundWidth(OsuSkin.get().getSliderBodyWidth());
+        sliderBody.setBorderWidth(OsuSkin.get().getSliderBorderWidth());
         sliderBody.setBorderColor(borderColor.r(), borderColor.g(), borderColor.b());
 
         // Head circle not being visible means Traceable is applied to this slider
@@ -339,7 +340,7 @@ public class GameplaySlider extends GameObject {
 
         if (OsuSkin.get().isSliderHintEnable() && beatmapSlider.getDistance() > OsuSkin.get().getSliderHintShowMinLength()) {
             sliderBody.setHintVisible(true);
-            sliderBody.setHintWidth(OsuSkin.get().getSliderHintWidth() * scale);
+            sliderBody.setHintWidth(OsuSkin.get().getSliderHintWidth());
 
             RGBColor hintColor = OsuSkin.get().getSliderHintColor();
             if (hintColor != null) {
