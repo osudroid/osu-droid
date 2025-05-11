@@ -1414,7 +1414,7 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
             if (obj instanceof HitCircle parsedCircle) {
                 final var gameplayCircle = GameObjectPool.getInstance().getCircle();
 
-                gameplayCircle.init(this, mgScene, stat, parsedCircle, elapsedTime, comboColor);
+                gameplayCircle.init(this, mgScene, parsedCircle, elapsedTime, comboColor);
                 addObject(gameplayCircle);
 
                 if (GameHelper.isAutoplay()) {
