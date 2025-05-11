@@ -32,7 +32,7 @@ class ModCustomizationMenu : Modal(
 
 ) {
 
-    private val modSettings: LinearContainer = card[0]
+    private val modSettings: LinearContainer = card[0]!!
     private val modSettingComponents = mutableListOf<IModSettingComponent<*>>()
 
 
