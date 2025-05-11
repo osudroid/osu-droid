@@ -77,7 +77,7 @@ class ModMuted : Mod() {
      * @return The volume at [combo], where 0 is muted and 1 is full volume.
      */
     fun volumeAt(combo: Int): Float {
-        var volume = (combo / max(1f, muteComboCount.toFloat())).coerceIn(0f, 1f)
+        val volume = (combo / max(1f, muteComboCount.toFloat())).coerceIn(0f, 1f)
 
         return if (inverseMuting) volume else 1 - volume
     }
