@@ -15,7 +15,7 @@ import ru.nsu.ccfit.zuev.osu.*
 import kotlin.math.*
 import kotlin.synchronized
 
-class TextInput(initialValue: String) : Control<String>(initialValue), IFocusable, OnApplyWindowInsetsListener {
+class TextInput(initialValue: String) : Control<String>(initialValue), IFocusable {
 
     override var applyTheme: ExtendedEntity.(Theme) -> Unit = { theme ->
         background?.color = theme.accentColor * 0.25f
@@ -89,7 +89,6 @@ class TextInput(initialValue: String) : Control<String>(initialValue), IFocusabl
         foreground?.clearModifiers(ModifierType.Color)
         foreground?.colorTo(Theme.current.accentColor, 0.1f)
 
-        ViewCompat.setOnApplyWindowInsetsListener(ExtendedEngine.Current.context.window.decorView, this)
     }
 
     override fun onBlur() {
@@ -98,6 +97,8 @@ class TextInput(initialValue: String) : Control<String>(initialValue), IFocusabl
 
         foreground?.clearModifiers(ModifierType.Color)
         foreground?.colorTo(Theme.current.accentColor * 0.4f, 0.1f)
+
+        ViewCompat.setOnApplyWindowInsetsListener(ExtendedEngine.Current.context.window.decorView, null)
     }
 
     @Suppress("DEPRECATION")
@@ -134,6 +135,19 @@ class TextInput(initialValue: String) : Control<String>(initialValue), IFocusabl
             caret.alpha = if (caretFading) 1f - alphaFactor else alphaFactor
 
             elapsedTimeSec += deltaTimeSec
+        }
+
+        val keyboardHeight = ExtendedEngine.Current.keyboardHeight
+
+        if (isFocused) {
+            val (_, sceneY) = convertLocalToSceneCoordinates(0f, height)
+            val (_, screenY) = ExtendedEngine.Current.camera.getScreenSpaceCoordinates(0f, sceneY)
+
+            if (screenY < keyboardHeight) {
+                translateTarget.translationY = -(keyboardHeight - screenY)
+            }
+        } else {
+            translateTarget.translationY = 0f
         }
 
         super.onManagedUpdate(deltaTimeSec)
@@ -238,20 +252,4 @@ class TextInput(initialValue: String) : Control<String>(initialValue), IFocusabl
         return true
     }
 
-    override fun onApplyWindowInsets(v: View, insets: WindowInsetsCompat): WindowInsetsCompat {
-
-        if (isFocused) {
-            val keyboardHeight = insets.getInsets(WindowInsetsCompat.Type.ime()).bottom
-
-            val (_, sceneY) = convertLocalToSceneCoordinates(0f, height)
-            val (_, screenY) = ExtendedEngine.Current.camera.getScreenSpaceCoordinates(0f, sceneY)
-
-            translateTarget.translationY = if (screenY < keyboardHeight) -(keyboardHeight - screenY) else 0f
-        } else {
-            translateTarget.translationY = 0f
-            ViewCompat.setOnApplyWindowInsetsListener(ExtendedEngine.Current.context.window.decorView, null)
-        }
-
-        return insets
-    }
 }

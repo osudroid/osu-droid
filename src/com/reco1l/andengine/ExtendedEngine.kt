@@ -2,6 +2,9 @@ package com.reco1l.andengine
 
 import android.app.Activity
 import android.view.*
+import androidx.core.view.OnApplyWindowInsetsListener
+import androidx.core.view.ViewCompat
+import androidx.core.view.WindowInsetsCompat
 import com.reco1l.andengine.ui.*
 import org.anddev.andengine.engine.Engine
 import org.anddev.andengine.engine.options.EngineOptions
@@ -9,7 +12,7 @@ import org.anddev.andengine.entity.IEntity
 import org.anddev.andengine.entity.scene.*
 import org.anddev.andengine.input.touch.*
 
-class ExtendedEngine(val context: Activity, options: EngineOptions) : Engine(options) {
+class ExtendedEngine(val context: Activity, options: EngineOptions) : Engine(options), OnApplyWindowInsetsListener {
 
     /**
      * The current focused entity.
@@ -27,9 +30,17 @@ class ExtendedEngine(val context: Activity, options: EngineOptions) : Engine(opt
             }
         }
 
+    /**
+     * The height of the virtual keyboard.
+     */
+    var keyboardHeight = 0
+        private set
+
 
     init {
         Current = this
+
+        ViewCompat.setOnApplyWindowInsetsListener(context.window.decorView, this)
     }
 
 
@@ -107,6 +118,11 @@ class ExtendedEngine(val context: Activity, options: EngineOptions) : Engine(opt
         }
 
         return super.onTouchScene(scene, event)
+    }
+
+    override fun onApplyWindowInsets(v: View, insets: WindowInsetsCompat): WindowInsetsCompat {
+        keyboardHeight = insets.getInsets(WindowInsetsCompat.Type.ime()).bottom
+        return insets
     }
 
 
