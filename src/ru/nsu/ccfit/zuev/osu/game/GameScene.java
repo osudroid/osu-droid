@@ -875,6 +875,7 @@ public class GameScene implements GameObjectListener, IOnSceneTouchListener {
 
         metronome = null;
         if ((Config.getMetronomeSwitch() == 1 && GameHelper.isNightCore())
+                || (GameHelper.isMuted() && GameHelper.getMuted().isEnableMetronome())
                 || Config.getMetronomeSwitch() == 2) {
             metronome = new Metronome();
         }
